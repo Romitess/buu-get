@@ -8,14 +8,18 @@
       <div class="row items-center q-gutter-x-md">
         <AppStatusBadge :label="statusLabel" :type="statusType" />
         <slot name="status-append">
-          <div v-if="deadline" class="deadline-text row items-center text-negative">
-            <q-icon name="report_problem" size="18px" class="q-mr-xs" />
-            กำหนดชำระภายใน {{ deadline }}
+          <div
+            v-if="deadline"
+            class="deadline-text row items-center"
+            style="color: var(--badge-error-dot)"
+          >
+            <q-icon name="warning_amber" size="18px" class="q-mr-xs" />
+            {{ $t('exam.history.paymentDeadline') }} {{ deadline }}
           </div>
         </slot>
       </div>
       <div class="text-right" v-if="fee !== undefined">
-        <div class="fee-label">ค่าธรรมเนียม</div>
+        <div class="fee-label">{{ $t('exam.history.fee') }}</div>
         <div class="fee-value">{{ fee.toLocaleString() }} ฿</div>
       </div>
     </div>
@@ -27,7 +31,7 @@
 
     <!-- Bottom Row: Info & Buttons -->
     <div class="row items-end justify-between full-width q-mt-auto">
-      <div class="row items-center q-gutter-x-lg text-grey-9">
+      <div class="row items-center q-gutter-x-lg">
         <div class="info-item row items-center">
           <q-icon name="event" size="22px" class="q-mr-sm" />
           {{ date }}
@@ -50,7 +54,7 @@
             id="btn-cancel-exam"
             outline
             color="grey-8"
-            label="ยกเลิกการสมัคร"
+            :label="$t('exam.history.cancel')"
             class="action-btn"
             @click="$emit('cancel')"
           />
@@ -59,7 +63,7 @@
             v-if="showPay"
             id="btn-pay-exam"
             icon="payments"
-            label="ชำระเงิน"
+            :label="$t('exam.history.pay')"
             class="action-btn pay-btn"
             @click="$emit('pay')"
           />
@@ -68,7 +72,7 @@
             v-if="showDownload"
             id="btn-download-receipt"
             icon="receipt_long"
-            label="ดาวน์โหลดใบเสร็จ"
+            :label="$t('exam.history.downloadReceipt')"
             class="action-btn download-btn"
             @click="$emit('download')"
           />
@@ -146,17 +150,19 @@ defineEmits(['cancel', 'pay', 'download']);
 .exam-title {
   font-size: var(--exam-card-title-size);
   color: var(--text-primary);
+  font-weight: 800; // Bold and intense as requested
   line-height: 1.2;
   margin-top: 10px;
   display: -webkit-box;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 .info-item {
   font-size: var(--exam-card-info-size);
-  font-weight: 600;
+  font-weight: 700; // Bold for maximum clarity
   color: var(--text-primary);
 }
 
@@ -166,12 +172,18 @@ defineEmits(['cancel', 'pay', 'download']);
   border-radius: var(--radius-sm);
   font-weight: 700;
 
-  &.pay-btn :deep(.q-icon) {
+  &.pay-btn {
     color: var(--text-on-primary) !important;
+    :deep(.q-icon) {
+      color: var(--text-on-primary) !important;
+    }
   }
 
-  &.download-btn :deep(.q-icon) {
+  &.download-btn {
     color: var(--text-on-primary) !important;
+    :deep(.q-icon) {
+      color: var(--text-on-primary) !important;
+    }
   }
 }
 
