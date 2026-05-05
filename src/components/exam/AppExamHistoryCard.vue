@@ -111,86 +111,93 @@ defineEmits(['cancel', 'pay', 'download']);
 </script>
 
 <style scoped lang="scss">
-// We consume the global container style from app.scss
 .app-exam-history-card-container {
+  // Always use primary blue for the brand bar as seen in Figma
   border-left: 6px solid var(--primary);
+  position: relative;
+  overflow: hidden;
+  min-height: 160px;
+  background: var(--surface-card);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 
-  &.status-info {
-    border-left-color: var(--text-muted);
-  }
-  &.status-success {
-    border-left-color: var(--badge-success-dot);
-  }
-  &.status-warning {
-    border-left-color: var(--badge-warning-dot);
-  }
-  &.status-error {
-    border-left-color: var(--badge-error-dot);
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
   }
 }
 
 .deadline-text {
   font-size: 14px;
   font-weight: 700;
+  display: flex;
+  align-items: center;
 }
 
 .fee-label {
   font-size: 12px;
   color: var(--text-muted);
   font-weight: 500;
-  margin-bottom: -4px;
+  margin-bottom: -2px;
 }
 
 .fee-value {
-  font-size: var(--exam-card-title-size);
+  font-size: 18px;
   font-weight: 800;
   color: var(--text-primary);
 }
 
 .exam-title {
-  font-size: var(--exam-card-title-size);
+  font-size: 18px;
   color: var(--text-primary);
-  font-weight: 800; // Bold and intense as requested
-  line-height: 1.2;
-  margin-top: 10px;
+  font-weight: 800; // Extra bold as per premium design
+  line-height: 1.3;
+  margin-top: 12px;
+  margin-bottom: 8px;
   display: -webkit-box;
-  -webkit-line-clamp: 1;
-  line-clamp: 1;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 .info-item {
-  font-size: var(--exam-card-info-size);
+  font-size: 14px;
   font-weight: 700; // Bold for maximum clarity
   color: var(--text-primary);
+  display: flex;
+  align-items: center;
+
+  :deep(.q-icon) {
+    color: var(--text-primary);
+    margin-right: 8px;
+  }
 }
 
 .action-btn {
-  min-width: 140px;
-  height: 44px;
+  min-width: 130px;
+  height: 40px;
   border-radius: var(--radius-sm);
   font-weight: 700;
 
   &.pay-btn {
-    color: var(--text-on-primary) !important;
-    :deep(.q-icon) {
-      color: var(--text-on-primary) !important;
-    }
+    background-color: var(--primary) !important;
+    color: white !important;
   }
 
   &.download-btn {
-    color: var(--text-on-primary) !important;
-    :deep(.q-icon) {
-      color: var(--text-on-primary) !important;
-    }
+    background-color: var(--primary) !important;
+    color: white !important;
   }
 }
 
+// Icon consistency
 :deep(.q-icon) {
   color: var(--text-primary);
 }
 
+// Special case for deadline icon to match text color
 .deadline-text :deep(.q-icon) {
   color: inherit;
 }

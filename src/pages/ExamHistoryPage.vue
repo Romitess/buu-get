@@ -178,7 +178,7 @@
         <!-- Card 9: ถูกยกเลิก -->
         <AppExamHistoryCard
           :status-label="$t('exam.status.cancelled')"
-          status-type="info"
+          status-type="primary"
           title="การสอบวัดระดับภาษาอังกฤษ สำหรับบุคคลทั่วไป BUU-GET"
           date="15 เมษายน 2569"
           time="08:00-10:00"
