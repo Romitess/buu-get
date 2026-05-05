@@ -11,6 +11,11 @@ const routes: RouteRecordRaw[] = [
         name: 'exam-schedule',
         component: () => import('pages/ExamSchedulePage.vue'),
       },
+      {
+        path: ' ',
+        name: 'exam-history',
+        component: () => import('pages/ExamHistoryPage.vue'),
+      },
     ],
   },
 

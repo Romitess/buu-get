@@ -1,15 +1,20 @@
 <template>
-  <div class="app-exam-history-card-container">
+  <div
+    class="buu-card q-pa-lg column app-exam-history-card-container"
+    :class="[`status-${statusType}`]"
+  >
     <!-- Top Row: Status & Fee -->
     <div class="row items-start justify-between full-width">
       <div class="row items-center q-gutter-x-md">
         <AppStatusBadge :label="statusLabel" :type="statusType" />
-        <div v-if="deadline" class="deadline-text row items-center text-negative">
-          <q-icon name="report_problem" size="18px" class="q-mr-xs" />
-          กำหนดชำระภายใน {{ deadline }}
-        </div>
+        <slot name="status-append">
+          <div v-if="deadline" class="deadline-text row items-center text-negative">
+            <q-icon name="report_problem" size="18px" class="q-mr-xs" />
+            กำหนดชำระภายใน {{ deadline }}
+          </div>
+        </slot>
       </div>
-      <div class="text-right">
+      <div class="text-right" v-if="fee !== undefined">
         <div class="fee-label">ค่าธรรมเนียม</div>
         <div class="fee-value">{{ fee.toLocaleString() }} ฿</div>
       </div>
@@ -36,8 +41,9 @@
           {{ location }}
         </div>
       </div>
-      
-        <div class="row q-gutter-x-md">
+
+      <div class="row q-gutter-x-md">
+        <slot name="actions">
           <!-- Optional Cancel Button -->
           <AppButton
             v-if="showCancel"
@@ -66,7 +72,8 @@
             class="action-btn download-btn"
             @click="$emit('download')"
           />
-        </div>
+        </slot>
+      </div>
     </div>
   </div>
 </template>
@@ -82,7 +89,7 @@ interface Props {
   date: string;
   time: string;
   location: string;
-  fee: number;
+  fee?: number | undefined;
   deadline?: string | undefined;
   showCancel?: boolean | undefined;
   showPay?: boolean | undefined;
@@ -101,6 +108,23 @@ defineEmits(['cancel', 'pay', 'download']);
 
 <style scoped lang="scss">
 // We consume the global container style from app.scss
+.app-exam-history-card-container {
+  border-left: 6px solid var(--primary);
+
+  &.status-info {
+    border-left-color: var(--text-muted);
+  }
+  &.status-success {
+    border-left-color: var(--badge-success-dot);
+  }
+  &.status-warning {
+    border-left-color: var(--badge-warning-dot);
+  }
+  &.status-error {
+    border-left-color: var(--badge-error-dot);
+  }
+}
+
 .deadline-text {
   font-size: 14px;
   font-weight: 700;
@@ -145,7 +169,7 @@ defineEmits(['cancel', 'pay', 'download']);
   &.pay-btn :deep(.q-icon) {
     color: var(--text-on-primary) !important;
   }
-  
+
   &.download-btn :deep(.q-icon) {
     color: var(--text-on-primary) !important;
   }
