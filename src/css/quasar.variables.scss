@@ -12,14 +12,17 @@
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
 
-$primary   : #1976D2;
-$secondary : #26A69A;
-$accent    : #9C27B0;
+// === Brand Colors ===
+$primary: #0d47a1;
+$secondary: #1e89e5;
+$accent: #01a0f4;
 
-$dark      : #1D1D1D;
-$dark-page : #121212;
+// === Dark Theme ===
+$dark: #2c2c2c;
+$dark-page: #1a1a1a;
 
-$positive  : #21BA45;
-$negative  : #C10015;
-$info      : #31CCEC;
-$warning   : #F2C037;
+// === Semantic Colors ===
+$positive: #388e39;
+$negative: #e53934;
+$info: #31ccec;
+$warning: #f2c037;
