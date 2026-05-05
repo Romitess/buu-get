@@ -1,14 +1,22 @@
 <template>
-  <q-card
-    class="exam-card cursor-pointer"
-    bordered
-    @click="$emit('select', exam)"
-  >
+  <q-card class="exam-card cursor-pointer" bordered @click="$emit('select', exam)">
     <!-- ชื่อการสอบ, ประเภท และ ค่าธรรมเนียม -->
     <q-card-section class="q-pa-md">
       <div class="row items-start justify-between no-wrap">
         <div class="col">
-          <div class="text-subtitle1 text-weight-bold" style="line-height: 1.3; min-height: 3.9em; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">
+          <div
+            class="text-subtitle1 text-weight-bold"
+            style="
+              line-height: 1.3;
+              min-height: 3.9em;
+              display: -webkit-box;
+              -webkit-line-clamp: 3;
+              line-clamp: 3;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              word-break: break-word;
+            "
+          >
             {{ exam.name }}
           </div>
           <div class="text-subtitle1 text-primary text-weight-bolder q-mt-xs">
@@ -45,7 +53,10 @@
           class="col q-mr-sm"
         />
         <span class="text-caption">
-          <span :class="exam.availableSeats > 0 ? 'text-positive' : 'text-negative'" class="text-weight-bold">
+          <span
+            :class="exam.availableSeats > 0 ? 'text-positive' : 'text-negative'"
+            class="text-weight-bold"
+          >
             {{ exam.availableSeats }}
           </span>
           / {{ exam.totalSeats }}
@@ -92,9 +103,7 @@
         <q-icon name="payment" color="primary" size="xs" class="q-mr-xs" />
         <span class="text-caption text-weight-bold">กำหนดการชำระเงิน</span>
       </div>
-      <div class="text-caption">
-        ชำระภายใน {{ formatDate(exam.payment.deadline) }}
-      </div>
+      <div class="text-caption">ชำระภายใน {{ formatDate(exam.payment.deadline) }}</div>
     </q-card-section>
 
     <!-- ปุ่มลงทะเบียน (Center Bottom) -->
@@ -112,57 +121,57 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { Exam } from './models'
-import AppButton from './base/AppButton.vue'
+import { computed } from 'vue';
+import type { Exam } from './models';
+import AppButton from './base/AppButton.vue';
 
 // Props
 interface Props {
-  exam: Exam
+  exam: Exam;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 // Emits
 defineEmits<{
-  select: [exam: Exam]
-  register: [exam: Exam]
-}>()
+  select: [exam: Exam];
+  register: [exam: Exam];
+}>();
 
 // ================== Computed ==================
 const seatRatio = computed(() => {
-  if (props.exam.totalSeats === 0) return 0
-  return (props.exam.totalSeats - props.exam.availableSeats) / props.exam.totalSeats
-})
+  if (props.exam.totalSeats === 0) return 0;
+  return (props.exam.totalSeats - props.exam.availableSeats) / props.exam.totalSeats;
+});
 
 // ================== Helpers ==================
 const getTypeColor = (type: string): string => {
   const colors: Record<string, string> = {
-    'กสพ': 'blue',
-    'ความถนัด': 'green',
-    'ภาษา': 'orange',
-    'สมรรถนะ': 'purple',
-    'อื่นๆ': 'grey'
-  }
-  return colors[type] || 'grey'
-}
+    กสพ: 'blue',
+    ความถนัด: 'green',
+    ภาษา: 'orange',
+    สมรรถนะ: 'purple',
+    อื่นๆ: 'grey',
+  };
+  return colors[type] || 'grey';
+};
 
 const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('th-TH', {
     style: 'currency',
     currency: 'THB',
-    maximumFractionDigits: 0
-  }).format(amount)
-}
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
 
 const formatDate = (dateStr: string): string => {
-  const date = new Date(dateStr)
+  const date = new Date(dateStr);
   return date.toLocaleDateString('th-TH', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
-  })
-}
+    day: 'numeric',
+  });
+};
 </script>
 
 <style scoped lang="scss">

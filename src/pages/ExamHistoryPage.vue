@@ -224,7 +224,7 @@ import AppButton from 'src/components/base/AppButton.vue';
   .page-subtitle {
     font-family: 'Sarabun', sans-serif;
     font-size: 15px;
-    color: var(--text-primary); // Changed to primary (black) for more intensity
+    color: var(--text-secondary);
     font-weight: 800;
     max-width: 900px;
     line-height: 24px;
