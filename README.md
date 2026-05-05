@@ -1,20 +1,60 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# BUU GET Front
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+Frontend application for BUU GET, built with Quasar Framework, Vue 3, TypeScript, and Pinia.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+## Requirements
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+- Node.js `>=22.12.0`
+- npm `>=11.0.0`
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+## Setup
+
+```bash
+npm install
+cp .env.example .env.local
+```
+
+Update `.env.local` when the backend API URL is different from the default:
+
+```bash
+API_BASE_URL=http://localhost:3000
+```
+
+## Development
+
+```bash
+npm run dev
+```
+
+## Build
+
+```bash
+npm run build
+```
+
+## Code Quality
+
+```bash
+npm run lint
+npm run format
+```
+
+This project uses Husky, lint-staged, and commitlint. After `npm install`, Git hooks are prepared automatically.
+
+Commit messages must follow Conventional Commits, for example:
+
+```bash
+git commit -m "feat(frontend): initialize quasar app"
+```
+
+## Project Structure
+
+- `src/boot` - client-side initialization such as Axios
+- `src/components` - reusable UI components
+- `src/composables` - shared Composition API logic
+- `src/layouts` - page layout templates
+- `src/pages` - route pages
+- `src/router` - route definitions
+- `src/stores` - Pinia stores for shared or persisted state
+- `src/types` - TypeScript interfaces and types
+- `src/utils` - helper functions
