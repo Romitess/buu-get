@@ -50,6 +50,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('pages/RegisterPage.vue'),
     meta: { requiresAuth: false },
   },
+  {
+    path: '/create-exam',
+    name: 'create-exam',
+    component: () => import('pages/create-exam-round-page.vue'),
+  },
 
   // Always leave this as last one,
   // but you can also remove it
