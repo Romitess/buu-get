@@ -3,21 +3,21 @@
     <!-- Toggle Buttons -->
     <div class="user-type-toggle q-mb-lg">
       <div class="toggle-btn" :class="{ active: userType === 'thai' }" @click="userType = 'thai'">
-        คนไทย
+        {{ $t('profile.userTypeThai') }}
       </div>
       <div
         class="toggle-btn"
         :class="{ active: userType === 'foreigner' }"
         @click="userType = 'foreigner'"
       >
-        Foreigner
+        {{ $t('profile.userTypeForeigner') }}
       </div>
     </div>
 
     <!-- Title -->
     <div class="text-center q-mb-lg">
       <div class="text-h5 text-weight-bold">
-        {{ userType === 'thai' ? 'สมัครสมาชิก' : 'Sign Up' }}
+        {{ $t('profile.register') }}
       </div>
     </div>
 
@@ -26,13 +26,13 @@
       <!-- Email -->
       <div class="q-mb-md">
         <div class="text-body2 text-weight-medium q-mb-xs">
-          {{ userType === 'thai' ? 'อีเมล (กำหนดเป็นชื่อผู้ใช้งาน)' : 'Email (Set as username)' }}
+          {{ $t('profile.emailUsername') }}
         </div>
         <q-input
           v-model="email"
           outlined
           dense
-          placeholder="example@email.com"
+          :placeholder="$t('profile.emailPlaceholder')"
           class="custom-input"
         />
       </div>
@@ -40,11 +40,7 @@
       <!-- Password -->
       <div class="q-mb-md">
         <div class="text-body2 text-weight-medium q-mb-xs">
-          {{
-            userType === 'thai'
-              ? 'รหัสผ่าน (ตัวอักษรหรือตัวเลข 8 ตำแหน่งขึ้นไป)'
-              : 'Password (8 characters or more)'
-          }}
+          {{ $t('profile.passwordFormat') }}
         </div>
         <q-input
           v-model="password"
@@ -68,7 +64,7 @@
       <!-- Confirm Password -->
       <div class="q-mb-lg">
         <div class="text-body2 text-weight-medium q-mb-xs">
-          {{ userType === 'thai' ? 'ยืนยันรหัสผ่าน' : 'Confirm Password' }}
+          {{ $t('profile.confirmPassword') }}
         </div>
         <q-input
           v-model="confirmPassword"
@@ -94,7 +90,7 @@
         type="submit"
         color="primary"
         class="full-width q-mb-md submit-btn"
-        :label="userType === 'thai' ? 'สมัครสมาชิก' : 'Sign Up'"
+        :label="$t('profile.register')"
         no-caps
         unelevated
       />
@@ -104,14 +100,16 @@
         <!-- Divider -->
         <div class="row items-center q-mb-md">
           <q-separator class="col" color="grey-4" />
-          <div class="q-px-sm text-grey-6 text-body2 font-weight-medium">หรือ</div>
+          <div class="q-px-sm text-grey-6 text-body2 font-weight-medium">
+            {{ $t('profile.or') }}
+          </div>
           <q-separator class="col" color="grey-4" />
         </div>
 
         <!-- ThaID Button -->
         <q-btn class="full-width thaid-btn" no-caps unelevated :disable="userType !== 'thai'">
           <q-icon name="fingerprint" size="xs" class="q-mr-sm" />
-          สมัครสมาชิกด้วย ThaID
+          {{ $t('profile.thaidRegister') }}
         </q-btn>
       </div>
     </q-form>
@@ -119,20 +117,44 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+export interface RegisterCredentials {
+  email: string;
+  password: string;
+  userType: 'thai' | 'foreigner';
+}
+
+const emit = defineEmits<{
+  register: [payload: RegisterCredentials];
+}>();
+
+const { locale } = useI18n();
 
 const userType = ref<'thai' | 'foreigner'>('thai');
+
+// Watch userType and change locale dynamically
+watch(userType, (newVal) => {
+  locale.value = newVal === 'thai' ? 'th' : 'en-US';
+});
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
-const onSubmit = () => {
-  console.log('Register attempt', {
-    type: userType.value,
+const onSubmit = (): void => {
+  if (!email.value || !password.value || !confirmPassword.value) {
+    return;
+  }
+  if (password.value !== confirmPassword.value) {
+    return;
+  }
+  emit('register', {
     email: email.value,
     password: password.value,
+    userType: userType.value,
   });
 };
 </script>

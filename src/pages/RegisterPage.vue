@@ -5,7 +5,6 @@
       <q-toolbar class="q-px-xl q-py-sm flex justify-between items-center">
         <!-- Logo -->
         <div class="row items-center cursor-pointer" @click="$router.push('/')">
-          <!-- Text logo matching the image -->
           <div class="text-h6 text-weight-bold" style="color: #e53935; line-height: 1.1">
             BUU-GET
             <div class="text-caption text-weight-medium" style="font-size: 10px; color: #d32f2f">
@@ -49,18 +48,31 @@
 
     <q-page-container>
       <q-page class="register-page-bg flex flex-center">
-        <!-- Centered Container with equal side margins -->
-        <div class="register-container row no-wrap items-stretch">
-          <!-- Left Side (Logo) - Blue Panel -->
-          <div class="logo-panel flex flex-center">
-            <img src="~assets/img/BUU-GET LOGO.png" alt="BUU-GET Logo" class="large-logo" />
-          </div>
+        <!-- ─── Step 1: Registration Card (Email + Password) ─── -->
+        <template v-if="currentStep === 'credentials'">
+          <div class="register-container row no-wrap items-stretch">
+            <!-- Left Side (Logo) - Blue Panel -->
+            <div class="logo-panel flex flex-center">
+              <img src="~assets/img/BUU-GET LOGO.png" alt="BUU-GET Logo" class="large-logo" />
+            </div>
 
-          <!-- Right Side (Register Form) - White Panel -->
-          <div class="form-panel flex flex-center">
-            <RegisterCard />
+            <!-- Right Side (Register Form) - White Panel -->
+            <div class="form-panel flex flex-center">
+              <RegisterCard @register="handleRegister" />
+            </div>
           </div>
-        </div>
+        </template>
+
+        <!-- ─── Step 2: Profile Form (Identity + Contact Info) ─── -->
+        <template v-if="currentStep === 'profile'">
+          <RegisterAndEditProfile
+            :initial-edit-mode="false"
+            :is-thai="isThai"
+            :credentials="credentials"
+            @close="goBackToCredentials"
+            @save="handleSave"
+          />
+        </template>
       </q-page>
     </q-page-container>
 
@@ -72,11 +84,43 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import RegisterCard from 'src/components/RegisterCard.vue';
+import type { RegisterCredentials } from 'src/components/RegisterCard.vue';
+import type { RegisterFormData } from 'src/types/register';
+import RegisterAndEditProfile from 'src/components/register-and-edit-profile.vue';
 import FooterCredits from 'src/components/footer/FooterCredits.vue';
 
-// หมายเหตุ: โลจิกเดิมสำหรับการ Validate และการเรียกใช้ UserStore
-// สามารถนำไปประยุกต์ใส่ใน RegisterCard.vue ได้ในภายหลังเมื่อต้องการต่อ API ครับ
+type Step = 'credentials' | 'profile';
+
+const currentStep = ref<Step>('credentials');
+const isThai = ref<boolean>(true);
+const credentials = ref<RegisterCredentials>({
+  email: '',
+  password: '',
+  userType: 'thai',
+});
+
+/** Step 1 → Step 2: ผู้ใช้กรอกอีเมล+รหัสผ่านแล้ว กดสมัคร */
+const handleRegister = (payload: RegisterCredentials): void => {
+  credentials.value = payload;
+  isThai.value = payload.userType === 'thai';
+  currentStep.value = 'profile';
+};
+
+/** Step 2 → Step 1: ผู้ใช้กดยกเลิกในหน้ากรอกข้อมูล */
+const goBackToCredentials = (): void => {
+  currentStep.value = 'credentials';
+};
+
+/** Step 2 complete: ผู้ใช้กดบันทึกข้อมูล */
+const handleSave = (formData: RegisterFormData): void => {
+  // TODO: เรียก API สมัครสมาชิก โดยรวม credentials + formData
+  console.log('Final registration data:', {
+    ...credentials.value,
+    ...formData,
+  });
+};
 </script>
 
 <style scoped>
@@ -91,7 +135,7 @@ import FooterCredits from 'src/components/footer/FooterCredits.vue';
 
 .register-container {
   width: 94%;
-  max-width: 1100px; /* ปรับลดความกว้างลงจาก 1400px เพื่อไม่ให้ดูกว้างเกินไป (อ้วนไป) */
+  max-width: 1100px;
   margin: 0 auto;
   min-height: 580px;
   border-radius: 24px;
@@ -118,14 +162,14 @@ import FooterCredits from 'src/components/footer/FooterCredits.vue';
   max-width: 52%;
   background-color: #ffffff;
   padding: 2.5rem 3rem;
-  z-index: 2; /* ให้อยู่เหนือ panel สีน้ำเงิน */
+  z-index: 2;
   border-top-left-radius: 36px;
   border-bottom-left-radius: 36px;
-  margin-left: -32px; /* ดึงกล่องสีขาวให้ซ้อนทับกล่องสีน้ำเงิน */
-  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.25); /* เงาเข้มขึ้น พาดไปทางซ้ายทับสีน้ำเงินให้ดูเหมือนซ้อนทับกันชัดเจน */
+  margin-left: -32px;
+  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.25);
 }
 
-/* ซ่อนโลโก้ด้านซ้ายในหน้าจอมือถือ (ให้โชว์เฉพาะฟอร์มสมัครสมาชิก) */
+/* ซ่อนโลโก้ด้านซ้ายในหน้าจอมือถือ */
 @media (max-width: 1023px) {
   .logo-panel {
     display: none;
