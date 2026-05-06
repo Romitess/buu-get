@@ -268,11 +268,11 @@ const handleDaySelect = (dateString: string) => {
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   position: absolute;
-  bottom: 4px;
+  bottom: 6px;
 }
 .dot-red {
   background-color: #c12a32;
