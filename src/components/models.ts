@@ -8,57 +8,57 @@ export interface Meta {
 }
 
 // ================== Exam Types ==================
-export type ExamType = 'กสพ' | 'ความถนัด' | 'ภาษา' | 'สมรรถนะ' | 'อื่นๆ'
+export type ExamType = 'กสพ' | 'ความถนัด' | 'ภาษา' | 'สมรรถนะ' | 'อื่นๆ';
 
 export interface ExamRegistration {
-  startDate: string
-  endDate: string
+  startDate: string;
+  endDate: string;
 }
 
 export interface ExamSchedule {
-  examDate: string
-  startTime: string
-  endTime: string
-  venue: string
+  examDate: string;
+  startTime: string;
+  endTime: string;
+  venue: string;
 }
 
 export interface ExamPayment {
-  deadline: string
-  amount: number
+  deadline: string;
+  amount: number;
 }
 
 export interface Exam {
-  id: number
-  name: string
-  type: ExamType
-  fee: number
-  totalSeats: number
-  availableSeats: number
-  registration: ExamRegistration
-  schedule: ExamSchedule
-  payment: ExamPayment
-  isRegistrationOpen: boolean
+  id: number;
+  name: string;
+  type: ExamType;
+  fee: number;
+  totalSeats: number;
+  availableSeats: number;
+  registration: ExamRegistration;
+  schedule: ExamSchedule;
+  payment: ExamPayment;
+  isRegistrationOpen: boolean;
 }
 
 export interface User {
-  id?: string
-  role?: 'admin' | 'staff' | 'user'
-  nationalId: string
-  titleTH: string
-  titleEN: string
-  fullName: string
-  englishName: string
-  birthdate: string
-  educationLevel: string
-  faculty: string
-  institution: string
-  address: string
-  province: string
-  zipCode: string
-  country: string        // ✅ เพิ่มใหม่: รหัสประเทศ เช่น 'TH', 'US', 'JP'
-  phone: string
-  email: string
-  password?: string
+  id?: string;
+  role?: 'admin' | 'staff' | 'user';
+  nationalId: string;
+  titleTH: string;
+  titleEN: string;
+  fullName: string;
+  englishName: string;
+  birthdate: string;
+  educationLevel: string;
+  faculty: string;
+  institution: string;
+  address: string;
+  province: string;
+  zipCode: string;
+  country: string; // ✅ เพิ่มใหม่: รหัสประเทศ เช่น 'TH', 'US', 'JP'
+  phone: string;
+  email: string;
+  password?: string;
 }
 
 export interface VoucherData {
@@ -122,4 +122,17 @@ export interface ExamInfo {
   locationText: string;
   /** ค่าธรรมเนียม เช่น 'Fee : 500 ฿' */
   feeText: string;
+}
+export interface ReceiptData {
+  receiptNo: string;
+  transactionDate: string;
+  fullName: string;
+  nationalId: string;
+  address?: string;
+  examName: string;
+  examDate: string;
+  location: string;
+  amount: number;
+  paymentMethod: string;
+  status: 'SUCCESS' | 'PENDING' | 'FAILED';
 }
