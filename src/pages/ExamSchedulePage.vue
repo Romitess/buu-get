@@ -37,7 +37,9 @@
           <!-- รายการรอบสอบ -->
           <div
             class="rounds-list"
-            :style="{ overflowY: selectedDateRounds.length > 3 ? 'auto' : 'hidden' }"
+            :style="{
+              overflowY: $q.screen.lt.md || selectedDateRounds.length > 3 ? 'auto' : 'hidden',
+            }"
           >
             <template v-if="selectedDateRounds.length > 0">
               <RoundExam
@@ -244,16 +246,6 @@ const onMonthChange = (month: number, year: number): void => {
   }
 }
 
-@media (max-width: 1024px) {
-  .schedule-content {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .rounds-section {
-    height: 500px; /* ล็อกความสูงบนมือถือเพื่อให้ Scroll ได้ในตัว */
-  }
-}
-
 .rounds-empty {
   flex: 1;
   display: flex;
@@ -271,7 +263,29 @@ const onMonthChange = (month: number, year: number): void => {
     align-items: stretch;
   }
   .rounds-section {
-    height: 500px; /* Fixed height on mobile so it doesn't scroll the whole page */
+    max-height: 500px; /* ยึดความสูงสูงสุดไว้เพื่อให้เลื่อนดูรอบสอบภายในได้สะดวก */
+  }
+}
+
+@media (max-width: 600px) {
+  .page-container {
+    padding: 12px 16px;
+  }
+
+  .rounds-section {
+    padding: 16px;
+    max-height: 480px;
+  }
+
+  .rounds-header {
+    margin-bottom: 16px;
+    &__title {
+      font-size: 1.1rem;
+    }
+    &__subtitle {
+      font-size: 0.8rem;
+      padding-left: 28px;
+    }
   }
 }
 </style>

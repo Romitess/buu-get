@@ -179,4 +179,49 @@ defineEmits<{
   color: var(--text-muted) !important;
   border: 1.5px solid #aecdf5 !important;
 }
+
+@media (max-width: 600px) {
+  .dialog-confirm-card {
+    border-radius: 16px;
+  }
+
+  .q-card__section.q-px-xl {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  .q-card__actions.q-px-xl {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    padding-bottom: 24px !important;
+  }
+
+  .text-title {
+    font-size: 1.25rem;
+  }
+
+  .text-subtitle {
+    font-size: 0.85rem;
+    padding: 0 10px;
+  }
+
+  .info-box {
+    padding: 16px;
+  }
+
+  .info-row {
+    .label-text {
+      font-size: 0.85rem;
+    }
+    .value-text {
+      font-size: 0.95rem;
+    }
+  }
+
+  .btn-confirm,
+  .btn-cancel {
+    height: 44px;
+    font-size: 0.9rem;
+  }
+}
 </style>
