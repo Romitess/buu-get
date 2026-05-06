@@ -4,21 +4,27 @@
     :class="[`status-${statusType}`]"
   >
     <!-- Top Row: Status & Fee -->
-    <div class="row items-start justify-between full-width">
-      <div class="row items-center q-gutter-x-md">
+    <!-- Top Row: Status & Fee -->
+    <div class="row items-center justify-start full-width card-top-row">
+      <!-- Left side: Status indicators -->
+      <div class="row items-center q-gutter-x-md status-group">
         <AppStatusBadge :label="statusLabel" :type="statusType" />
         <slot name="status-append">
           <div
-            v-if="deadline"
+            v-if="displayDeadline"
             class="deadline-text row items-center"
             style="color: var(--badge-error-dot)"
           >
             <q-icon name="warning_amber" size="18px" class="q-mr-xs" />
-            {{ $t('exam.history.paymentDeadline') }} {{ deadline }}
+            {{ $t('exam.history.paymentDeadline') }} {{ displayDeadline }}
           </div>
         </slot>
       </div>
-      <div class="text-right" v-if="fee !== undefined">
+
+      <q-space />
+
+      <!-- Right side: Fee -->
+      <div class="fee-group text-right" v-if="fee !== undefined">
         <div class="fee-label">{{ $t('exam.history.fee') }}</div>
         <div class="fee-value">{{ fee.toLocaleString() }} ฿</div>
       </div>
@@ -83,6 +89,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import AppStatusBadge from '../base/AppStatusBadge.vue';
 import AppButton from '../base/AppButton.vue';
 
@@ -100,14 +107,77 @@ interface Props {
   showDownload?: boolean | undefined;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   statusType: 'primary',
   showCancel: false,
   showPay: false,
   showDownload: false,
 });
 
-defineEmits(['cancel', 'pay', 'download']);
+const emit = defineEmits(['cancel', 'pay', 'download', 'timeout']);
+
+// === Timer Logic ===
+const displayDeadline = ref(props.deadline);
+let timerInterval: ReturnType<typeof setInterval> | null = null;
+
+const startTimer = () => {
+  const deadlineStr = props.deadline;
+  if (!deadlineStr) return;
+
+  let targetTime: number;
+
+  // รองรับทั้งแบบ Mock (MM:SS) และแบบใช้งานจริงกับ Backend (ISO Date String)
+  if (deadlineStr.includes(':') && deadlineStr.length <= 5) {
+    const parts = deadlineStr.split(':');
+    const minutes = parseInt(parts[0] || '0', 10);
+    const seconds = parseInt(parts[1] || '0', 10);
+    if (isNaN(minutes) || isNaN(seconds)) return;
+    targetTime = Date.now() + (minutes * 60 + seconds) * 1000;
+  } else {
+    const parsedDate = new Date(deadlineStr);
+    if (isNaN(parsedDate.getTime())) return;
+    targetTime = parsedDate.getTime();
+  }
+
+  const updateDisplay = () => {
+    const now = Date.now();
+    const diff = targetTime - now;
+
+    if (diff <= 0) {
+      if (timerInterval) clearInterval(timerInterval);
+      displayDeadline.value = '00:00';
+      emit('timeout');
+      return;
+    }
+
+    const totalSeconds = Math.floor(diff / 1000);
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+
+    displayDeadline.value = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  updateDisplay(); // อัปเดตทันทีที่เริ่ม
+  timerInterval = setInterval(updateDisplay, 1000);
+};
+
+onMounted(() => {
+  startTimer();
+});
+
+onUnmounted(() => {
+  if (timerInterval) clearInterval(timerInterval);
+});
+
+// Restart timer if deadline prop changes externally
+watch(
+  () => props.deadline,
+  (newVal) => {
+    if (timerInterval) clearInterval(timerInterval);
+    displayDeadline.value = newVal;
+    startTimer();
+  },
+);
 </script>
 
 <style scoped lang="scss">
@@ -117,7 +187,7 @@ defineEmits(['cancel', 'pay', 'download']);
   border-radius: var(--radius-md); // 12px
   position: relative;
   overflow: hidden;
-  height: 180px;
+  min-height: 180px;
   width: 100%;
   max-width: 1300px;
   background: var(--surface-card);
@@ -204,5 +274,69 @@ defineEmits(['cancel', 'pay', 'download']);
 // Special case for deadline icon to match text color
 .deadline-text :deep(.q-icon) {
   color: inherit;
+}
+.card-top-row {
+  justify-content: flex-start !important;
+
+  .status-group {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px;
+
+    .fee-group {
+      text-align: left !important;
+      order: 2;
+    }
+    .status-group {
+      order: 1;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .app-exam-history-card-container {
+    padding: 16px !important;
+    min-height: 150px;
+    border-left-width: 6px;
+  }
+
+  .exam-title {
+    font-size: 16px;
+    margin-top: 8px;
+  }
+
+  .info-item {
+    font-size: 13px;
+    margin-bottom: 4px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .fee-value {
+    font-size: 16px;
+  }
+
+  // Stack info and buttons on mobile
+  .row.items-end.justify-between.full-width.q-mt-auto {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px;
+  }
+
+  .row.q-gutter-x-md {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 8px;
+    .action-btn {
+      flex: 1;
+      min-width: 0;
+    }
+  }
 }
 </style>

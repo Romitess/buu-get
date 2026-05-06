@@ -29,6 +29,7 @@
           :location="exam.location"
           :fee="exam.fee"
           :deadline="exam.deadline"
+          @timeout="handleTimeout(exam)"
         >
           <template #actions>
             <AppButton
@@ -69,16 +70,10 @@
           :location="exam.location"
         >
           <template v-if="exam.customStatus" #status-append>
-            <div
-              :class="[
-                'custom-status',
-                `${exam.customStatus.type}-status`,
-                'row items-center q-ml-md',
-              ]"
-            >
+            <div :class="['custom-status', `${exam.customStatus.type}-status`, 'row items-center']">
               <q-icon
                 :name="exam.customStatus.icon"
-                size="24px"
+                size="20px"
                 :style="{
                   color: `var(--badge-${exam.customStatus.type}-dot)`,
                 }"
@@ -218,6 +213,10 @@ const historyExams = computed<ExamHistoryRecord[]>(() =>
 );
 
 // === Methods ===
+const handleTimeout = (exam: ExamHistoryRecord) => {
+  examStore.cancelRegistration(exam.id);
+};
+
 const handlePay = (exam: ExamHistoryRecord) => {
   selectedExam.value = exam;
   showPaymentDialog.value = true;
@@ -298,7 +297,7 @@ const handleConfirmCancel = () => {
 }
 
 .custom-status {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
 
   &.success-status {
@@ -311,6 +310,44 @@ const handleConfirmCancel = () => {
 
   &.warning-status {
     color: var(--badge-warning-dot);
+  }
+
+  @media (max-width: 600px) {
+    font-size: 12px;
+    :deep(.q-icon) {
+      font-size: 18px !important;
+    }
+  }
+}
+@media (max-width: 600px) {
+  .exam-history-page {
+    padding: 16px !important;
+  }
+
+  .page-header {
+    margin-bottom: 32px !important;
+
+    .page-title {
+      font-size: 24px;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      line-height: 22px;
+    }
+  }
+
+  .section-title {
+    padding-bottom: 8px;
+    .text-subtitle1 {
+      font-size: 16px;
+    }
+  }
+
+  .action-btn {
+    min-width: 120px;
+    height: 40px;
+    font-size: 13px;
   }
 }
 </style>
