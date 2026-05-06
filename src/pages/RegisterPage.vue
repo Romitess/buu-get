@@ -5,19 +5,16 @@
       <q-toolbar class="q-px-xl q-py-sm flex justify-between items-center">
         <!-- Logo -->
         <div class="row items-center cursor-pointer" @click="$router.push('/')">
-          <div class="text-h6 text-weight-bold" style="color: #e53935; line-height: 1.1">
+          <div class="text-h6 text-weight-bold text-negative brand-logo-text">
             BUU-GET
-            <div class="text-caption text-weight-medium" style="font-size: 10px; color: #d32f2f">
+            <div class="text-caption text-weight-medium text-red-8 brand-logo-sub">
               BURAPHA UNIVERSITY
             </div>
           </div>
         </div>
 
         <!-- Desktop Menu -->
-        <div
-          class="row items-center q-gutter-xl text-weight-medium text-body1 gt-sm"
-          style="color: #424242"
-        >
+        <div class="row items-center q-gutter-xl text-weight-medium text-body1 gt-sm text-grey-9">
           <div class="cursor-pointer" @click="$router.push('/')">หน้าหลัก</div>
           <div class="cursor-pointer row items-center">
             รายการสอบ <q-icon name="keyboard_arrow_down" size="sm" class="q-ml-xs" />
@@ -27,8 +24,7 @@
         <!-- Auth Buttons -->
         <div class="row items-center q-gutter-lg">
           <div
-            class="cursor-pointer text-weight-medium text-body1"
-            style="color: #424242"
+            class="cursor-pointer text-weight-medium text-body1 text-grey-9"
             @click="$router.push('/login')"
           >
             เข้าสู่ระบบ
@@ -38,8 +34,7 @@
             label="สมัครสมาชิก"
             no-caps
             unelevated
-            class="text-weight-bold"
-            style="border-radius: 8px; padding: 6px 24px"
+            class="text-weight-bold btn-register"
             @click="$router.push('/register')"
           />
         </div>
@@ -52,12 +47,12 @@
         <template v-if="currentStep === 'credentials'">
           <div class="register-container row no-wrap items-stretch">
             <!-- Left Side (Logo) - Blue Panel -->
-            <div class="logo-panel flex flex-center">
+            <div class="logo-panel flex flex-center bg-primary">
               <img src="~assets/img/BUU-GET LOGO.png" alt="BUU-GET Logo" class="large-logo" />
             </div>
 
             <!-- Right Side (Register Form) - White Panel -->
-            <div class="form-panel flex flex-center">
+            <div class="form-panel flex flex-center bg-white">
               <RegisterCard @register="handleRegister" />
             </div>
           </div>
@@ -128,8 +123,21 @@ const handleSave = (formData: RegisterFormData): void => {
   position: relative;
 }
 
+.brand-logo-text {
+  line-height: 1.1;
+}
+
+.brand-logo-sub {
+  font-size: 10px;
+}
+
+.btn-register {
+  border-radius: var(--radius-sm);
+  padding: 6px 24px;
+}
+
 .register-page-bg {
-  background-color: #eef1f6;
+  background-color: var(--surface-page);
   min-height: 100vh;
 }
 
@@ -140,13 +148,12 @@ const handleSave = (formData: RegisterFormData): void => {
   min-height: 580px;
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-lg);
 }
 
 /* Panel สีน้ำเงินฝั่งซ้าย (โลโก้) */
 .logo-panel {
   flex: 1;
-  background-color: #0d47a1;
   padding: 2rem;
 }
 
@@ -160,13 +167,12 @@ const handleSave = (formData: RegisterFormData): void => {
 .form-panel {
   flex: 0 0 52%;
   max-width: 52%;
-  background-color: #ffffff;
   padding: 2.5rem 3rem;
   z-index: 2;
   border-top-left-radius: 36px;
   border-bottom-left-radius: 36px;
   margin-left: -32px;
-  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.25);
+  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.15);
 }
 
 /* ซ่อนโลโก้ด้านซ้ายในหน้าจอมือถือ */
@@ -177,6 +183,8 @@ const handleSave = (formData: RegisterFormData): void => {
   .form-panel {
     flex: 0 0 100%;
     max-width: 100%;
+    border-radius: 24px;
+    margin-left: 0;
   }
   .register-container {
     width: 95%;
