@@ -45,10 +45,9 @@
       </q-input>
 
       <!-- Confirm Button -->
-      <q-btn
+      <AppButton
         :label="confirmBtnText"
-        class="full-width q-mb-md confirm-btn text-white"
-        unelevated
+        class="full-width q-mb-md confirm-btn"
         @click="confirmPasscode"
       />
 
@@ -63,6 +62,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import AppButton from 'src/components/base/AppButton.vue';
 
 interface Props {
   title?: string;
@@ -164,11 +164,9 @@ defineExpose({
 }
 
 .confirm-btn {
-  border-radius: 8px;
   height: 52px;
   font-weight: 500;
   font-size: 16px;
-  background-color: #154ba6 !important; /* Matches the deep blue from the design */
 }
 
 .footer-text {

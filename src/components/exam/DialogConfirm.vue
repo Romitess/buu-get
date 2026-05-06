@@ -53,14 +53,14 @@
           <AppButton
             outline
             :label="cancelBtnText"
-            class="full-width btn-cancel"
+            class="full-width dialog-btn"
             @click="$emit('update:modelValue', false)"
           />
         </div>
         <div class="col-6">
           <AppButton
             :label="confirmBtnText"
-            class="full-width btn-confirm"
+            class="full-width dialog-btn"
             @click="$emit('confirm')"
           />
         </div>
@@ -170,23 +170,8 @@ defineEmits<{
   }
 }
 
-.btn-confirm {
+.dialog-btn {
   height: 48px;
-  border-radius: 12px;
-  font-weight: 600;
-  box-shadow: 0 6px 12px rgba(13, 71, 161, 0.3);
-  transition: transform 0.2s;
-  &:active {
-    transform: scale(0.98);
-  }
-}
-
-.btn-cancel {
-  height: 48px;
-  border-radius: 12px;
-  font-weight: 500;
-  color: var(--text-muted) !important;
-  border: 1.5px solid #aecdf5 !important;
 }
 
 @media (max-width: 600px) {
@@ -230,8 +215,7 @@ defineEmits<{
     }
   }
 
-  .btn-confirm,
-  .btn-cancel {
+  .dialog-btn {
     height: 40px;
     font-size: 0.85rem;
   }

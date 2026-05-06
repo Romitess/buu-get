@@ -52,20 +52,17 @@
       <!-- Actions (Figma Spacing & Shadow) -->
       <q-card-actions class="row q-px-xl q-pb-xl q-col-gutter-md">
         <div class="col-6">
-          <q-btn
-            flat
+          <AppButton
+            outline
             :label="cancelBtnText"
-            no-caps
-            class="full-width btn-close"
+            class="full-width dialog-btn"
             @click="$emit('update:modelValue', false)"
           />
         </div>
         <div class="col-6">
-          <q-btn
-            unelevated
+          <AppButton
             :label="confirmBtnText"
-            no-caps
-            class="full-width btn-confirm-cancel"
+            class="full-width dialog-btn"
             @click="$emit('confirm')"
           />
         </div>
@@ -75,6 +72,8 @@
 </template>
 
 <script setup lang="ts">
+import AppButton from 'src/components/base/AppButton.vue';
+
 /**
  * DialogCancel
  * Component สำหรับยืนยันยกเลิกการสมัครสอบ ตาม Figma UI 100%
@@ -172,26 +171,8 @@ defineEmits<{
   }
 }
 
-.btn-confirm-cancel {
-  background-color: #0d47a1 !important;
-  color: white !important;
+.dialog-btn {
   height: 48px;
-  border-radius: 12px;
-  font-weight: 600;
-  box-shadow: 0 6px 12px rgba(13, 71, 161, 0.3);
-  transition: transform 0.2s;
-  &:active {
-    transform: scale(0.98);
-  }
-}
-
-.btn-close {
-  color: #888 !important;
-  border: 1.5px solid #aecdf5 !important;
-  height: 48px;
-  border-radius: 12px;
-  font-weight: 500;
-  background-color: white;
 }
 
 @media (max-width: 600px) {
@@ -235,8 +216,7 @@ defineEmits<{
     }
   }
 
-  .btn-confirm-cancel,
-  .btn-close {
+  .dialog-btn {
     height: 40px;
     font-size: 0.85rem;
   }
