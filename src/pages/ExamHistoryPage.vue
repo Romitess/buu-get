@@ -147,7 +147,28 @@ import AppButton from 'src/components/base/AppButton.vue';
 import AppPaymentDialog from 'src/components/exam/AppPaymentDialog.vue';
 import DialogCancel from 'src/components/exam/DialogCancel.vue';
 import { useExamStore } from 'src/stores/exam.store';
-import type { ExamHistoryItem } from 'src/components/models';
+
+/** สถานะเพิ่มเติม เช่น ผ่าน/ไม่ผ่าน หรือ หมดเวลาชำระเงิน */
+interface CustomStatus {
+  label: string;
+  type: 'success' | 'error';
+  icon: string;
+}
+
+/** รายการสอบแต่ละรายการในประวัติการสอบ */
+interface ExamHistoryRecord {
+  id: number;
+  title: string;
+  status: string;
+  statusType: 'primary' | 'success' | 'warning' | 'error' | 'info';
+  date: string;
+  time: string;
+  location: string;
+  fee?: number;
+  deadline?: string;
+  customStatus?: CustomStatus;
+  actions?: string[];
+}
 
 const { t } = useI18n();
 const examStore = useExamStore();
@@ -157,17 +178,17 @@ const { pendingRegistrations, historyRecords } = storeToRefs(examStore);
 
 // === UI-only State ===
 const showPaymentDialog = ref(false);
-const selectedExam = ref<ExamHistoryItem | null>(null);
+const selectedExam = ref<ExamHistoryRecord | null>(null);
 
 const showCancelDialog = ref(false);
-const selectedExamForCancel = ref<ExamHistoryItem | null>(null);
+const selectedExamForCancel = ref<ExamHistoryRecord | null>(null);
 
 // === Computed: แปลง i18n keys เป็นข้อความจริง ===
 /**
  * Store เก็บ status เป็น translation key (เช่น 'exam.status.pending')
  * ที่นี่เราแปลงเป็นข้อความจริงก่อนส่งให้ Template
  */
-const pendingExams = computed<ExamHistoryItem[]>(() =>
+const pendingExams = computed<ExamHistoryRecord[]>(() =>
   pendingRegistrations.value.map((item) => ({
     ...item,
     title: t('exam.history.defaultExamTitle'),
@@ -175,9 +196,9 @@ const pendingExams = computed<ExamHistoryItem[]>(() =>
   })),
 );
 
-const historyExams = computed<ExamHistoryItem[]>(() =>
+const historyExams = computed<ExamHistoryRecord[]>(() =>
   historyRecords.value.map((item) => {
-    const translated: ExamHistoryItem = {
+    const translated: ExamHistoryRecord = {
       ...item,
       title: t('exam.history.defaultExamTitle'),
       status: t(item.status),
@@ -197,7 +218,7 @@ const historyExams = computed<ExamHistoryItem[]>(() =>
 );
 
 // === Methods ===
-const handlePay = (exam: ExamHistoryItem) => {
+const handlePay = (exam: ExamHistoryRecord) => {
   selectedExam.value = exam;
   showPaymentDialog.value = true;
 };
@@ -207,7 +228,7 @@ const handleSaveQR = () => {
   console.log('Saving QR Code...');
 };
 
-const handleCancel = (exam: ExamHistoryItem) => {
+const handleCancel = (exam: ExamHistoryRecord) => {
   selectedExamForCancel.value = exam;
   showCancelDialog.value = true;
 };
