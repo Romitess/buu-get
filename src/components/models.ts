@@ -41,24 +41,34 @@ export interface Exam {
 }
 
 export interface User {
-  id?: string;
-  role?: 'admin' | 'staff' | 'user';
+  // USER
+  id?: number;
   nationalId: string;
-  titleTH: string;
-  titleEN: string;
-  fullName: string;
-  englishName: string;
-  birthdate: string;
-  educationLevel: string;
-  faculty: string;
-  institution: string;
-  address: string;
-  province: string;
-  zipCode: string;
-  country: string; // ✅ เพิ่มใหม่: รหัสประเทศ เช่น 'TH', 'US', 'JP'
-  phone: string;
+  passportNo: string;
   email: string;
   password?: string;
+  status: string;
+
+  // USER_PROFILE
+  profileId?: number;
+  titleTH: string;
+  fullNameTH: string;
+  titleEN: string;
+  fullNameEN: string;
+  birthdate: string;
+  phone: string;
+  educationLevel: string;
+  country: string;
+  province: string;
+  address: string;
+  zipCode?: string;
+  faculty?: string;
+  institution?: string;
+  taxId: string;
+  thaidSynced: boolean;
+
+  // ROLES
+  role?: string;
 }
 
 export interface VoucherData {

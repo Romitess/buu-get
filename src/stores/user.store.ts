@@ -12,44 +12,48 @@ export const useUserStore = defineStore('user', () => {
   // === Mock Data ===
   const mockUsers = ref<User[]>([
     {
-      id: 'u-001',
+      id: 1,
       nationalId: '1234567890123',
-      fullName: 'นที บุญญานนท์',
-      titleTH: 'นาย',
-      titleEN: 'Mr.',
-      englishName: 'Natee Boonyanon',
+      passportNo: '',
       email: '67160426@go.buu.ac.th',
+      password: '1234',
+      status: 'ACTIVE',
+      profileId: 1,
+      titleTH: 'นาย',
+      fullNameTH: 'นที บุญญานนท์',
+      titleEN: 'Mr.',
+      fullNameEN: 'Natee Boonyanon',
       birthdate: '2005-05-23',
       phone: '0984343014',
       educationLevel: 'ปริญญาตรี',
-      faculty: 'วิทยาการสารสนเทศ สาขา วิทยาการคอมพิวเตอร์',
-      institution: 'มหาวิทยาลัยบูรพา',
-      address: '104/13 ถ.มาบมะยมใต้ ต.แสนสุข',
+      country: 'TH',
       province: 'ชลบุรี',
-      zipCode: '20130',
-      country: 'TH', // ✅ เพิ่มใหม่
+      address: '104/13 ถ.มาบมะยมใต้ ต.แสนสุข',
+      taxId: '1234567890123',
+      thaidSynced: true,
       role: 'user',
-      password: '1234',
     },
     {
-      id: 'u-002',
+      id: 2,
       nationalId: '1111111111111',
-      fullName: 'เจ้าหน้าที่ ทดสอบ',
-      titleTH: 'นาย',
-      titleEN: 'Mr.',
-      englishName: 'Staff Test',
+      passportNo: '',
       email: 'staff@buu.ac.th',
+      password: '1234',
+      status: 'ACTIVE',
+      profileId: 2,
+      titleTH: 'นาย',
+      fullNameTH: 'เจ้าหน้าที่ ทดสอบ',
+      titleEN: 'Mr.',
+      fullNameEN: 'Staff Test',
       birthdate: '1990-01-01',
       phone: '0812345678',
       educationLevel: 'ปริญญาโท',
-      faculty: 'กองคลัง',
-      institution: 'มหาวิทยาลัยบูรพา',
-      address: 'อาคารสำนักงานอธิการบดี',
+      country: 'TH',
       province: 'ชลบุรี',
-      zipCode: '20131',
-      country: 'TH', // ✅ เพิ่มใหม่
+      address: 'อาคารสำนักงานอธิการบดี',
+      taxId: '1111111111111',
+      thaidSynced: true,
       role: 'staff',
-      password: '1234',
     },
   ]);
 
@@ -62,18 +66,21 @@ export const useUserStore = defineStore('user', () => {
     const u = currentUser.value;
     return [
       { label: 'เลขประจำตัวประชาชน', value: u.nationalId },
-      { label: 'ประเทศ', value: u.country }, // ✅ เพิ่มใหม่
-      { label: 'ชื่อ - นามสกุล', value: u.fullName },
-      { label: 'ชื่อภาษาอังกฤษ', value: u.englishName },
-      { label: 'วันเกิด', value: u.birthdate },
-      { label: 'ระดับการศึกษาสูงสุด', value: u.educationLevel },
-      { label: 'คณะ/สาขาวิชา', value: u.faculty },
-      { label: 'ชื่อสถานศึกษา', value: u.institution },
-      { label: 'ที่อยู่สำหรับจัดส่งเอกสาร', value: u.address },
-      { label: 'จังหวัด', value: u.province },
-      { label: 'รหัสไปรษณีย์', value: u.zipCode },
-      { label: 'เบอร์โทรศัพท์', value: u.phone },
+      { label: 'หนังสือเดินทาง', value: u.passportNo || '-' },
       { label: 'อีเมล', value: u.email },
+      { label: 'สถานะผู้ใช้งาน', value: u.status },
+      { label: 'คำนำหน้า (TH)', value: u.titleTH },
+      { label: 'ชื่อ - นามสกุล (TH)', value: u.fullNameTH },
+      { label: 'คำนำหน้า (EN)', value: u.titleEN },
+      { label: 'ชื่อ - นามสกุล (EN)', value: u.fullNameEN },
+      { label: 'วันเกิด', value: u.birthdate },
+      { label: 'เบอร์โทรศัพท์', value: u.phone },
+      { label: 'ระดับการศึกษาสูงสุด', value: u.educationLevel },
+      { label: 'ประเทศ', value: u.country },
+      { label: 'จังหวัด', value: u.province },
+      { label: 'ที่อยู่', value: u.address },
+      { label: 'เลขประจำตัวผู้เสียภาษี', value: u.taxId },
+      { label: 'ซิงค์กับ ThaiD', value: u.thaidSynced ? 'ใช่' : 'ไม่ใช่' },
     ];
   });
 
@@ -87,7 +94,9 @@ export const useUserStore = defineStore('user', () => {
     const status = localStorage.getItem('isLoggedIn');
 
     if (savedId && status === 'true') {
-      const found = mockUsers.value.find((u) => u.id === savedId || u.nationalId === savedId);
+      const found = mockUsers.value.find(
+        (u) => String(u.id) === savedId || u.nationalId === savedId,
+      );
       if (found) {
         currentUser.value = found;
         isLoggedIn.value = true;
@@ -100,7 +109,7 @@ export const useUserStore = defineStore('user', () => {
    */
   function checkUserExists(inputID: string): boolean {
     const foundUser = mockUsers.value.find(
-      (user) => user.nationalId === inputID || user.id === inputID,
+      (user) => user.nationalId === inputID || String(user.id) === inputID,
     );
     return !!foundUser;
   }
@@ -110,14 +119,14 @@ export const useUserStore = defineStore('user', () => {
    */
   function login(inputID: string, password?: string): boolean {
     const foundUser = mockUsers.value.find(
-      (user) => user.nationalId === inputID || user.id === inputID,
+      (user) => user.nationalId === inputID || String(user.id) === inputID,
     );
 
     if (foundUser && foundUser.password === password) {
       currentUser.value = foundUser;
       isLoggedIn.value = true;
       localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('user_id', foundUser.id || foundUser.nationalId);
+      localStorage.setItem('user_id', String(foundUser.id || foundUser.nationalId));
       return true;
     }
     return false;
