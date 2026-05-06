@@ -42,6 +42,12 @@
             @click="handleDaySelect(day.dateString)"
           >
             {{ day.value }}
+            <!-- จุดสีสำหรับสถานะรอบสอบ -->
+            <div
+              v-if="availability?.[day.dateString]"
+              class="dot"
+              :class="availability[day.dateString] === 'available' ? 'dot-green' : 'dot-red'"
+            ></div>
           </div>
         </div>
       </q-card>

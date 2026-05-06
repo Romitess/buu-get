@@ -141,40 +141,60 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { storeToRefs } from 'pinia';
 import AppExamHistoryCard from 'src/components/exam/AppExamHistoryCard.vue';
 import AppButton from 'src/components/base/AppButton.vue';
 import AppPaymentDialog from 'src/components/exam/AppPaymentDialog.vue';
 import DialogCancel from 'src/components/exam/DialogCancel.vue';
+import { useExamStore } from 'src/stores/exam.store';
+import type { ExamHistoryItem } from 'src/components/models';
 
 const { t } = useI18n();
+const examStore = useExamStore();
 
-// === State ===
+// === State จาก Store ===
+const { pendingRegistrations, historyRecords } = storeToRefs(examStore);
+
+// === UI-only State ===
 const showPaymentDialog = ref(false);
 const selectedExam = ref<ExamHistoryItem | null>(null);
 
 const showCancelDialog = ref(false);
 const selectedExamForCancel = ref<ExamHistoryItem | null>(null);
 
-// === Interfaces ===
-interface CustomStatus {
-  label: string;
-  type: 'success' | 'error';
-  icon: string;
-}
+// === Computed: แปลง i18n keys เป็นข้อความจริง ===
+/**
+ * Store เก็บ status เป็น translation key (เช่น 'exam.status.pending')
+ * ที่นี่เราแปลงเป็นข้อความจริงก่อนส่งให้ Template
+ */
+const pendingExams = computed<ExamHistoryItem[]>(() =>
+  pendingRegistrations.value.map((item) => ({
+    ...item,
+    title: t('exam.history.defaultExamTitle'),
+    status: t(item.status),
+  })),
+);
 
-interface ExamHistoryItem {
-  id: number;
-  title: string;
-  status: string;
-  statusType: 'primary' | 'success' | 'warning' | 'error' | 'info';
-  date: string;
-  time: string;
-  location: string;
-  fee?: number;
-  deadline?: string;
-  customStatus?: CustomStatus;
-  actions?: string[];
-}
+const historyExams = computed<ExamHistoryItem[]>(() =>
+  historyRecords.value.map((item) => {
+    const translated: ExamHistoryItem = {
+      ...item,
+      title: t('exam.history.defaultExamTitle'),
+      status: t(item.status),
+    };
+    if (item.customStatus) {
+      translated.customStatus = {
+        ...item.customStatus,
+        label: item.customStatus.label.includes('PLACEHOLDER_PASSED')
+          ? `${t('exam.statusLabel')} : ${t('exam.status.passed')}`
+          : item.customStatus.label.includes('PLACEHOLDER_FAILED')
+            ? `${t('exam.statusLabel')} : ${t('exam.status.failed')}`
+            : t(item.customStatus.label),
+      };
+    }
+    return translated;
+  }),
+);
 
 // === Methods ===
 const handlePay = (exam: ExamHistoryItem) => {
@@ -193,101 +213,11 @@ const handleCancel = (exam: ExamHistoryItem) => {
 };
 
 const handleConfirmCancel = () => {
-  // Logic to call API for cancellation
-  console.log('Cancelling exam registration for:', selectedExamForCancel.value?.id);
+  if (selectedExamForCancel.value) {
+    examStore.cancelRegistration(selectedExamForCancel.value.id);
+  }
   showCancelDialog.value = false;
 };
-
-// === Mock Data (To be replaced by API/Store logic later) ===
-const pendingExams = computed<ExamHistoryItem[]>(() => [
-  {
-    id: 1,
-    title: t('exam.history.defaultExamTitle'),
-    status: t('exam.status.pending'),
-    statusType: 'primary',
-    date: '15 พฤษภาคม 2569',
-    time: '08:00-10:00',
-    location: 'Computer Center, BUU (L201)',
-    fee: 500,
-    deadline: '29:30',
-    actions: ['cancel', 'pay'],
-  },
-]);
-
-const historyExams = computed<ExamHistoryItem[]>(() => [
-  {
-    id: 2,
-    title: t('exam.history.defaultExamTitle'),
-    status: t('exam.status.verifying'),
-    statusType: 'primary',
-    date: '15 พฤษภาคม 2569',
-    time: '08:00-10:00',
-    location: 'Computer Center, BUU (L201)',
-  },
-  {
-    id: 3,
-    title: t('exam.history.defaultExamTitle'),
-    status: t('exam.status.verified'),
-    statusType: 'primary',
-    date: '15 พฤษภาคม 2569',
-    time: '08:00-10:00',
-    location: 'Computer Center, BUU (L201)',
-    actions: ['candidateCard', 'downloadReceipt'],
-  },
-  {
-    id: 4,
-    title: t('exam.history.defaultExamTitle'),
-    status: t('exam.status.evaluating'),
-    statusType: 'primary',
-    date: '15 พฤษภาคม 2569',
-    time: '08:00-10:00',
-    location: 'Computer Center, BUU (L201)',
-  },
-  {
-    id: 5,
-    title: t('exam.history.defaultExamTitle'),
-    status: t('exam.status.completed'),
-    statusType: 'primary',
-    date: '15 เมษายน 2569',
-    time: '08:00-10:00',
-    location: 'Computer Center, BUU (L201)',
-    customStatus: {
-      label: `${t('exam.statusLabel')} : ${t('exam.status.passed')}`,
-      type: 'success',
-      icon: 'check',
-    },
-    actions: ['scoreDetails', 'certificate'],
-  },
-  {
-    id: 6,
-    title: t('exam.history.defaultExamTitle'),
-    status: t('exam.status.completed'),
-    statusType: 'primary',
-    date: '15 เมษายน 2569',
-    time: '08:00-10:00',
-    location: 'Computer Center, BUU (L201)',
-    customStatus: {
-      label: `${t('exam.statusLabel')} : ${t('exam.status.failed')}`,
-      type: 'error',
-      icon: 'warning_amber',
-    },
-    actions: ['scoreDetails'],
-  },
-  {
-    id: 7,
-    title: t('exam.history.defaultExamTitle'),
-    status: t('exam.status.cancelled'),
-    statusType: 'primary',
-    date: '15 เมษายน 2569',
-    time: '08:00-10:00',
-    location: 'Computer Center, BUU (L201)',
-    customStatus: {
-      label: t('exam.status.paymentTimeout'),
-      type: 'error',
-      icon: 'warning_amber',
-    },
-  },
-]);
 </script>
 
 <style scoped lang="scss">

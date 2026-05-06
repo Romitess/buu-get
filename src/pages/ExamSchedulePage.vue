@@ -75,263 +75,43 @@
 /**
  * ExamSchedulePage
  * จัดการข้อมูลรอบสอบและปฏิทินแบบ Real-time พร้อมระบบแจ้งเตือน
+ * ข้อมูลทั้งหมดดึงจาก useExamStore (Pinia)
  */
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useQuasar } from 'quasar';
+import { storeToRefs } from 'pinia';
 import ExamDetail from 'src/components/ExamDetail.vue';
 import ExamCalendar from 'src/components/ExamCalendar.vue';
 import RoundExam from 'src/components/exam/RoundExam.vue';
 import DialogConfirm from 'src/components/exam/DialogConfirm.vue';
 import ExamPasscodeInputDialog from 'src/components/exam-passcode-input-dialog.vue';
-import type { ExamRound, ExamInfo } from 'src/components/models';
+import { useExamStore } from 'src/stores/exam.store';
+import type { ExamRound } from 'src/components/models';
 
 const $q = useQuasar();
+const examStore = useExamStore();
 
 // ============================================================================
-// 1. STATE & REALISTIC MOCKUP DATA
+// 1. STATE จาก Store (Reactive ผ่าน storeToRefs)
 // ============================================================================
 
-interface DayData {
-  rounds: ExamRound[];
-  location: string;
-  fee: string;
-}
+const {
+  examInfo,
+  selectedDate,
+  selectedDateRounds,
+  currentDayDetails,
+  dynamicBadgeText,
+  calendarAvailability,
+  formattedSelectedDate,
+} = storeToRefs(examStore);
 
-const examInfo = ref<ExamInfo>({
-  badgeText: 'รอบทั่วไป',
-  title: 'การสอบวัดระดับภาษาอังกฤษ สำหรับบุคคลทั่วไป BUU-GET',
-  subtitle: 'เลือกวันที่และเวลาที่สะดวกในการมาทดสอบ โดยตรวจสอบจำนวนที่นั่งว่างในแต่ละช่วงเวลา',
-  locationText: 'Computer Center , BUU (201)',
-  feeText: 'Fee : 500 ฿',
-});
-
-/** วันที่เลือก (Default เป็นวันนี้) */
-const selectedDate = ref<string>(new Date().toISOString().split('T')[0] || '');
-
-/**
- * Mockup ข้อมูลรายวัน (สถาบันภาษา ม.บูรพา)
- * แบ่งตามสถานที่สอบและประเภทการสอบที่สมจริง
- */
-const mockupData = ref<Record<string, DayData>>({
-  // --- รอบทั่วไป: อาคารสำนักคอมพิวเตอร์ (Computer Center) ---
-  '2026-05-06': {
-    location: 'Computer Center , BUU (อาคารสำนักคอมพิวเตอร์ ชั้น 2)',
-    fee: 'Fee : 500 ฿',
-    rounds: [
-      {
-        id: 101,
-        title: 'BUU - GET (General)',
-        timeRange: '08:00 - 10:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 15,
-        totalSeats: 30,
-      },
-      {
-        id: 102,
-        title: 'BUU - GET (General)',
-        timeRange: '10:00 - 12:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 5,
-        totalSeats: 30,
-      },
-      {
-        id: 103,
-        title: 'BUU - GET (General)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 22,
-        totalSeats: 30,
-      },
-    ],
-  },
-  '2026-05-13': {
-    location: 'Computer Center , BUU (อาคารสำนักคอมพิวเตอร์ ชั้น 2)',
-    fee: 'Fee : 500 ฿',
-    rounds: [
-      {
-        id: 201,
-        title: 'BUU - GET (General)',
-        timeRange: '09:00 - 11:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 28,
-        totalSeats: 30,
-      },
-      {
-        id: 202,
-        title: 'BUU - GET (General)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 10,
-        totalSeats: 30,
-      },
-    ],
-  },
-
-  // --- รอบพิเศษ: อาคารปฏิบัติการรวม (Building 600) ---
-  '2026-05-11': {
-    location: 'Building 600 (อาคารปฏิบัติการรวม คณะวิทยาศาสตร์)',
-    fee: 'Fee : 800 ฿',
-    rounds: [
-      {
-        id: 501,
-        title: 'BUU - GET (Special)',
-        timeRange: '08:30 - 10:30',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 5,
-        totalSeats: 20,
-      },
-      {
-        id: 502,
-        title: 'BUU - GET (Special)',
-        timeRange: '13:30 - 15:30',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 12,
-        totalSeats: 20,
-      },
-    ],
-  },
-  '2026-05-18': {
-    location: 'Building 600 (อาคารปฏิบัติการรวม คณะวิทยาศาสตร์)',
-    fee: 'Fee : 800 ฿',
-    rounds: [
-      {
-        id: 601,
-        title: 'BUU - GET (Special)',
-        timeRange: '10:00 - 12:00',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 2,
-        totalSeats: 15,
-      },
-    ],
-  },
-
-  // --- รอบทั่วไป: อาคารเฉลิมพระเกียรติ (QS Building) ---
-  '2026-05-20': {
-    location: 'QS Building (อาคารเฉลิมพระเกียรติ คณะศึกษาศาสตร์)',
-    fee: 'Fee : 500 ฿',
-    rounds: [
-      {
-        id: 301,
-        title: 'BUU - GET (General)',
-        timeRange: '08:00 - 10:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 12,
-        totalSeats: 30,
-      },
-      {
-        id: 302,
-        title: 'BUU - GET (General)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 30,
-        totalSeats: 30,
-      },
-    ],
-  },
-
-  // --- วันที่เต็มแล้ว (Fully Booked) ---
-  '2026-05-08': {
-    location: 'Computer Center , BUU (อาคารสำนักคอมพิวเตอร์)',
-    fee: 'Fee : 500 ฿',
-    rounds: [
-      {
-        id: 801,
-        title: 'BUU - GET (General)',
-        timeRange: '08:00 - 10:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 0,
-        totalSeats: 30,
-      },
-      {
-        id: 802,
-        title: 'BUU - GET (General)',
-        timeRange: '10:00 - 12:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 0,
-        totalSeats: 30,
-      },
-    ],
-  },
-  '2026-05-15': {
-    location: 'Building 600 (อาคารปฏิบัติการรวม คณะวิทยาศาสตร์)',
-    fee: 'Fee : 800 ฿',
-    rounds: [
-      {
-        id: 901,
-        title: 'BUU - GET (Special)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 0,
-        totalSeats: 20,
-      },
-    ],
-  },
-});
-
-// --- Dialog State ---
+// --- Dialog State (UI-only, ไม่ต้องอยู่ใน Store) ---
 const showConfirmDialog = ref(false);
 const passcodeDialogRef = ref<InstanceType<typeof ExamPasscodeInputDialog> | null>(null);
 const selectedRound = ref<ExamRound | null>(null);
 
 // ============================================================================
-// 2. COMPUTED (Real-time Reactivity)
-// ============================================================================
-
-/** กรองรอบสอบตามวันที่เลือก */
-const selectedDateRounds = computed((): ExamRound[] => {
-  return mockupData.value[selectedDate.value]?.rounds || [];
-});
-
-/** ข้อมูลสถานที่และค่าธรรมเนียมตามวันที่เลือก */
-const currentDayDetails = computed(() => {
-  return (
-    mockupData.value[selectedDate.value] || {
-      location: 'กรุณาเลือกวันที่เพื่อดูสถานที่สอบ',
-      fee: 'Fee : - ฿',
-    }
-  );
-});
-
-/** Badge Text เปลี่ยนตามข้อมูลรอบสอบในวันที่เลือก */
-const dynamicBadgeText = computed((): string => {
-  const rounds = selectedDateRounds.value;
-  return rounds[0]?.roundTypeLabel ?? 'ไม่มีรอบสอบ';
-});
-
-/** คำนวณสถานะจุดในปฏิทิน */
-const calendarAvailability = computed((): Record<string, 'available' | 'full' | null> => {
-  const result: Record<string, 'available' | 'full' | null> = {};
-  Object.entries(mockupData.value).forEach(([date, data]) => {
-    const hasAvailable = data.rounds.some((r) => r.availableSeats > 0);
-    result[date] = hasAvailable ? 'available' : 'full';
-  });
-  return result;
-});
-
-/** แปลง selectedDate เป็นรูปแบบไทย */
-const formattedSelectedDate = computed((): string => {
-  if (!selectedDate.value) return '';
-  const monthNamesTH = [
-    'มกราคม',
-    'กุมภาพันธ์',
-    'มีนาคม',
-    'เมษายน',
-    'พฤษภาคม',
-    'มิถุนายน',
-    'กรกฎาคม',
-    'สิงหาคม',
-    'กันยายน',
-    'ตุลาคม',
-    'พฤศจิกายน',
-    'ธันวาคม',
-  ];
-  const date = new Date(selectedDate.value);
-  const buddhistYear = date.getFullYear() + 543;
-  return `${date.getDate()} ${monthNamesTH[date.getMonth()]} ${buddhistYear}`;
-});
-
-// ============================================================================
-// 3. METHODS
+// 2. METHODS
 // ============================================================================
 
 const handleRegister = (round: ExamRound): void => {
@@ -358,24 +138,33 @@ const handleRegister = (round: ExamRound): void => {
 
 const onConfirmRegistration = (): void => {
   showConfirmDialog.value = false;
-  // Placeholder สำหรับการต่อยอด Payment API ในอนาคต
-  console.log('✅ ยืนยันการสมัครรอบทั่วไป:', selectedRound.value?.id);
+  if (selectedRound.value) {
+    examStore.confirmRegistration(selectedRound.value);
+    $q.notify({
+      type: 'positive',
+      message: 'ลงทะเบียนสอบสำเร็จ กรุณาชำระเงินภายในเวลาที่กำหนด',
+      icon: 'check_circle',
+      position: 'top',
+      timeout: 3000,
+    });
+  }
 };
 
 const onPasscodeConfirm = (passcode: string): void => {
-  console.log('🔑 ยืนยันรหัสผ่านรอบพิเศษ:', passcode, 'สำหรับรอบ:', selectedRound.value?.id);
-  // ตรวจสอบความถูกต้องของ Passcode ที่นี่ในอนาคต
-  $q.notify({
-    type: 'positive',
-    message: 'ตรวจสอบรหัสผ่านสำเร็จ กำลังดำเนินการต่อ...',
-    position: 'top',
-    timeout: 2000,
-  });
+  if (selectedRound.value) {
+    examStore.confirmSpecialRegistration(selectedRound.value, passcode);
+    $q.notify({
+      type: 'positive',
+      message: 'ตรวจสอบรหัสผ่านสำเร็จ ลงทะเบียนสอบเรียบร้อย',
+      position: 'top',
+      timeout: 2000,
+    });
+  }
 };
 
 const onMonthChange = (month: number, year: number): void => {
   console.log(`📅 เปลี่ยนเดือนเป็น: ${month}/${year}`);
-  // ในอนาคต: ดึงข้อมูล mockupData ใหม่ของเดือนนั้นๆ จาก API
+  // ในอนาคต: ดึงข้อมูล scheduleData ใหม่ของเดือนนั้นๆ จาก API
 };
 </script>
 
