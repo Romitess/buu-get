@@ -37,7 +37,9 @@
           <!-- รายการรอบสอบ -->
           <div
             class="rounds-list"
-            :style="{ overflowY: selectedDateRounds.length > 3 ? 'auto' : 'hidden' }"
+            :style="{
+              overflowY: $q.screen.lt.md || selectedDateRounds.length > 3 ? 'auto' : 'hidden',
+            }"
           >
             <template v-if="selectedDateRounds.length > 0">
               <RoundExam

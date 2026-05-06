@@ -158,4 +158,30 @@ defineExpose({
   font-size: 14px;
   color: #999;
 }
+
+@media (max-width: 600px) {
+  .passcode-card {
+    padding: 24px;
+    border-radius: 12px;
+  }
+
+  .text-dark-title {
+    font-size: 18px;
+  }
+
+  .subtitle-text {
+    font-size: 13px;
+  }
+
+  .lock-icon-container {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+  }
+
+  .confirm-btn,
+  .passcode-input :deep(.q-field__control) {
+    height: 44px;
+  }
+}
 </style>
