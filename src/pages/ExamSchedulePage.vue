@@ -23,9 +23,7 @@
           <div class="rounds-header">
             <div class="rounds-header__title-row">
               <q-icon name="calendar_today" size="20px" color="dark" class="q-mr-sm" />
-              <h3 class="rounds-header__title">
-                รอบสอบวันที่ {{ formattedSelectedDate }}
-              </h3>
+              <h3 class="rounds-header__title">รอบสอบวันที่ {{ formattedSelectedDate }}</h3>
             </div>
             <p class="rounds-header__subtitle text-grey-7">
               กรุณาเลือกรอบเวลาที่ท่านต้องการลงทะเบียน
@@ -56,6 +54,14 @@
         </div>
       </div>
     </div>
+
+    <!-- ==================== Dialogs ==================== -->
+    <DialogConfirm
+      v-model="showConfirmDialog"
+      :exam-date="formattedSelectedDate"
+      :exam-time="selectedRound?.timeRange || ''"
+      @confirm="onConfirmRegistration"
+    />
   </div>
 </template>
 
@@ -69,6 +75,7 @@ import { ref, computed } from 'vue';
 import ExamDetail from 'src/components/ExamDetail.vue';
 import ExamCalendar from 'src/components/ExamCalendar.vue';
 import RoundExam from 'src/components/exam/RoundExam.vue';
+import DialogConfirm from 'src/components/exam/DialogConfirm.vue';
 import type { ExamRound, ExamInfo } from 'src/components/models';
 
 // ============================================================================
@@ -124,6 +131,12 @@ const examRounds = ref<ExamRound[]>([
   },
 ]);
 
+// --- Dialog State ---
+/** ควบคุมการแสดง Dialog ยืนยัน */
+const showConfirmDialog = ref(false);
+/** รอบที่ผู้ใช้เลือกกดลงทะเบียน */
+const selectedRound = ref<ExamRound | null>(null);
+
 // ============================================================================
 // 2. COMPUTED
 // ============================================================================
@@ -133,9 +146,18 @@ const formattedSelectedDate = computed((): string => {
   if (!selectedDate.value) return '';
 
   const monthNamesTH = [
-    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน',
-    'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม',
-    'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
   ];
 
   const date = new Date(selectedDate.value);
@@ -158,8 +180,15 @@ const selectedDateRounds = computed((): ExamRound[] => {
 
 /** จัดการเมื่อผู้ใช้กดลงทะเบียนรอบสอบ */
 const handleRegister = (round: ExamRound): void => {
-  // TODO: เชื่อมต่อ flow ลงทะเบียน — เปิด dialog หรือ navigate ไปหน้าลงทะเบียน
-  console.log('📝 Register for round:', round.id, round.timeRange);
+  selectedRound.value = round;
+  showConfirmDialog.value = true;
+};
+
+/** จัดการเมื่อกดยืนยันใน Dialog */
+const onConfirmRegistration = (): void => {
+  showConfirmDialog.value = false;
+  console.log('✅ ยืนยันการสมัครสอบรอบ:', selectedRound.value?.id, selectedRound.value?.timeRange);
+  // ในอนาคตสามารถเพิ่ม Logic นำทางไปหน้าชำระเงิน หรือเรียก API ที่นี่
 };
 </script>
 
