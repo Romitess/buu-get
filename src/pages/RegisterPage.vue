@@ -1,0 +1,142 @@
+<template>
+  <q-layout view="lHh Lpr lFf" class="register-layout">
+    <!-- Public Header -->
+    <q-header class="bg-white text-black shadow-1">
+      <q-toolbar class="q-px-xl q-py-sm flex justify-between items-center">
+        <!-- Logo -->
+        <div class="row items-center cursor-pointer" @click="$router.push('/')">
+          <!-- Text logo matching the image -->
+          <div class="text-h6 text-weight-bold" style="color: #e53935; line-height: 1.1">
+            BUU-GET
+            <div class="text-caption text-weight-medium" style="font-size: 10px; color: #d32f2f">
+              BURAPHA UNIVERSITY
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop Menu -->
+        <div
+          class="row items-center q-gutter-xl text-weight-medium text-body1 gt-sm"
+          style="color: #424242"
+        >
+          <div class="cursor-pointer" @click="$router.push('/')">หน้าหลัก</div>
+          <div class="cursor-pointer row items-center">
+            รายการสอบ <q-icon name="keyboard_arrow_down" size="sm" class="q-ml-xs" />
+          </div>
+        </div>
+
+        <!-- Auth Buttons -->
+        <div class="row items-center q-gutter-lg">
+          <div
+            class="cursor-pointer text-weight-medium text-body1"
+            style="color: #424242"
+            @click="$router.push('/login')"
+          >
+            เข้าสู่ระบบ
+          </div>
+          <q-btn
+            color="primary"
+            label="สมัครสมาชิก"
+            no-caps
+            unelevated
+            class="text-weight-bold"
+            style="border-radius: 8px; padding: 6px 24px"
+            @click="$router.push('/register')"
+          />
+        </div>
+      </q-toolbar>
+    </q-header>
+
+    <q-page-container>
+      <q-page class="register-page-bg flex flex-center">
+        <!-- Centered Container with equal side margins -->
+        <div class="register-container row no-wrap items-stretch">
+          <!-- Left Side (Logo) - Blue Panel -->
+          <div class="logo-panel flex flex-center">
+            <img src="~assets/img/BUU-GET LOGO.png" alt="BUU-GET Logo" class="large-logo" />
+          </div>
+
+          <!-- Right Side (Register Form) - White Panel -->
+          <div class="form-panel flex flex-center">
+            <RegisterCard />
+          </div>
+        </div>
+      </q-page>
+    </q-page-container>
+
+    <!-- Footer -->
+    <q-footer class="bg-white text-black">
+      <FooterCredits variant="white" />
+    </q-footer>
+  </q-layout>
+</template>
+
+<script setup lang="ts">
+import RegisterCard from 'src/components/RegisterCard.vue';
+import FooterCredits from 'src/components/footer/FooterCredits.vue';
+
+// หมายเหตุ: โลจิกเดิมสำหรับการ Validate และการเรียกใช้ UserStore
+// สามารถนำไปประยุกต์ใส่ใน RegisterCard.vue ได้ในภายหลังเมื่อต้องการต่อ API ครับ
+</script>
+
+<style scoped>
+.register-layout {
+  position: relative;
+}
+
+.register-page-bg {
+  background-color: #eef1f6;
+  min-height: 100vh;
+}
+
+.register-container {
+  width: 94%;
+  max-width: 1100px; /* ปรับลดความกว้างลงจาก 1400px เพื่อไม่ให้ดูกว้างเกินไป (อ้วนไป) */
+  margin: 0 auto;
+  min-height: 580px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Panel สีน้ำเงินฝั่งซ้าย (โลโก้) */
+.logo-panel {
+  flex: 1;
+  background-color: #0d47a1;
+  padding: 2rem;
+}
+
+.large-logo {
+  max-width: 80%;
+  max-height: 60vh;
+  object-fit: contain;
+}
+
+/* Panel สีขาวฝั่งขวา (ฟอร์ม) */
+.form-panel {
+  flex: 0 0 52%;
+  max-width: 52%;
+  background-color: #ffffff;
+  padding: 2.5rem 3rem;
+  z-index: 2; /* ให้อยู่เหนือ panel สีน้ำเงิน */
+  border-top-left-radius: 36px;
+  border-bottom-left-radius: 36px;
+  margin-left: -32px; /* ดึงกล่องสีขาวให้ซ้อนทับกล่องสีน้ำเงิน */
+  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.25); /* เงาเข้มขึ้น พาดไปทางซ้ายทับสีน้ำเงินให้ดูเหมือนซ้อนทับกันชัดเจน */
+}
+
+/* ซ่อนโลโก้ด้านซ้ายในหน้าจอมือถือ (ให้โชว์เฉพาะฟอร์มสมัครสมาชิก) */
+@media (max-width: 1023px) {
+  .logo-panel {
+    display: none;
+  }
+  .form-panel {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  .register-container {
+    width: 95%;
+    max-width: 480px;
+  }
+}
+</style>
