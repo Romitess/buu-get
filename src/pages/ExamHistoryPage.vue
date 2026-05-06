@@ -36,12 +36,14 @@
               outline
               :label="$t('exam.history.cancel')"
               class="action-btn btn-cancel"
+              @click="handleCancel(exam)"
             />
             <AppButton
               v-if="exam.actions?.includes('pay')"
               icon="payments"
               :label="$t('exam.history.pay')"
               class="action-btn pay-btn"
+              @click="handlePay(exam)"
             />
           </template>
         </AppExamHistoryCard>
@@ -117,16 +119,41 @@
         </AppExamHistoryCard>
       </div>
     </div>
+
+    <!-- Payment Dialog -->
+    <AppPaymentDialog
+      v-model="showPaymentDialog"
+      :amount="selectedExam?.fee || 500"
+      :countdown="'29 : 50'"
+      @save="handleSaveQR"
+    />
+
+    <!-- Cancel Dialog -->
+    <DialogCancel
+      v-model="showCancelDialog"
+      :exam-date="selectedExamForCancel?.date || ''"
+      :exam-time="selectedExamForCancel?.time || ''"
+      @confirm="handleConfirmCancel"
+    />
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AppExamHistoryCard from 'src/components/exam/AppExamHistoryCard.vue';
 import AppButton from 'src/components/base/AppButton.vue';
+import AppPaymentDialog from 'src/components/exam/AppPaymentDialog.vue';
+import DialogCancel from 'src/components/exam/DialogCancel.vue';
 
 const { t } = useI18n();
+
+// === State ===
+const showPaymentDialog = ref(false);
+const selectedExam = ref<ExamHistoryItem | null>(null);
+
+const showCancelDialog = ref(false);
+const selectedExamForCancel = ref<ExamHistoryItem | null>(null);
 
 // === Interfaces ===
 interface CustomStatus {
@@ -148,6 +175,28 @@ interface ExamHistoryItem {
   customStatus?: CustomStatus;
   actions?: string[];
 }
+
+// === Methods ===
+const handlePay = (exam: ExamHistoryItem) => {
+  selectedExam.value = exam;
+  showPaymentDialog.value = true;
+};
+
+const handleSaveQR = () => {
+  // Logic to save/download QR image
+  console.log('Saving QR Code...');
+};
+
+const handleCancel = (exam: ExamHistoryItem) => {
+  selectedExamForCancel.value = exam;
+  showCancelDialog.value = true;
+};
+
+const handleConfirmCancel = () => {
+  // Logic to call API for cancellation
+  console.log('Cancelling exam registration for:', selectedExamForCancel.value?.id);
+  showCancelDialog.value = false;
+};
 
 // === Mock Data (To be replaced by API/Store logic later) ===
 const pendingExams = computed<ExamHistoryItem[]>(() => [
