@@ -1,79 +1,22 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="register-layout">
-    <!-- Public Header -->
-    <q-header class="bg-white text-black shadow-1">
-      <q-toolbar class="q-px-xl q-py-sm flex justify-between items-center">
-        <!-- Logo -->
-        <div class="row items-center cursor-pointer" @click="$router.push('/')">
-          <!-- Text logo matching the image -->
-          <div class="text-h6 text-weight-bold" style="color: #e53935; line-height: 1.1">
-            BUU-GET
-            <div class="text-caption text-weight-medium" style="font-size: 10px; color: #d32f2f">
-              BURAPHA UNIVERSITY
-            </div>
-          </div>
-        </div>
+  <q-page class="register-page-bg flex flex-center">
+    <!-- Centered Container with equal side margins -->
+    <div class="register-container row no-wrap items-stretch">
+      <!-- Left Side (Logo) - Blue Panel -->
+      <div class="logo-panel flex flex-center">
+        <img src="~assets/img/BUU-GET LOGO.png" alt="BUU-GET Logo" class="large-logo" />
+      </div>
 
-        <!-- Desktop Menu -->
-        <div
-          class="row items-center q-gutter-xl text-weight-medium text-body1 gt-sm"
-          style="color: #424242"
-        >
-          <div class="cursor-pointer" @click="$router.push('/')">หน้าหลัก</div>
-          <div class="cursor-pointer row items-center">
-            รายการสอบ <q-icon name="keyboard_arrow_down" size="sm" class="q-ml-xs" />
-          </div>
-        </div>
-
-        <!-- Auth Buttons -->
-        <div class="row items-center q-gutter-lg">
-          <div
-            class="cursor-pointer text-weight-medium text-body1"
-            style="color: #424242"
-            @click="$router.push('/login')"
-          >
-            เข้าสู่ระบบ
-          </div>
-          <q-btn
-            color="primary"
-            label="สมัครสมาชิก"
-            no-caps
-            unelevated
-            class="text-weight-bold"
-            style="border-radius: 8px; padding: 6px 24px"
-            @click="$router.push('/register')"
-          />
-        </div>
-      </q-toolbar>
-    </q-header>
-
-    <q-page-container>
-      <q-page class="register-page-bg flex flex-center">
-        <!-- Centered Container with equal side margins -->
-        <div class="register-container row no-wrap items-stretch">
-          <!-- Left Side (Logo) - Blue Panel -->
-          <div class="logo-panel flex flex-center">
-            <img src="~assets/img/BUU-GET LOGO.png" alt="BUU-GET Logo" class="large-logo" />
-          </div>
-
-          <!-- Right Side (Register Form) - White Panel -->
-          <div class="form-panel flex flex-center">
-            <RegisterCard />
-          </div>
-        </div>
-      </q-page>
-    </q-page-container>
-
-    <!-- Footer -->
-    <q-footer class="bg-white text-black">
-      <FooterCredits variant="white" />
-    </q-footer>
-  </q-layout>
+      <!-- Right Side (Register Form) - White Panel -->
+      <div class="form-panel flex flex-center">
+        <RegisterCard />
+      </div>
+    </div>
+  </q-page>
 </template>
 
 <script setup lang="ts">
 import RegisterCard from 'src/components/RegisterCard.vue';
-import FooterCredits from 'src/components/footer/FooterCredits.vue';
 
 // หมายเหตุ: โลจิกเดิมสำหรับการ Validate และการเรียกใช้ UserStore
 // สามารถนำไปประยุกต์ใส่ใน RegisterCard.vue ได้ในภายหลังเมื่อต้องการต่อ API ครับ

@@ -36,13 +36,6 @@
       <div class="form-center">
         <LoginCard />
       </div>
-
-      <!-- Footer moved into right panel for better visibility on mobile -->
-      <footer class="login-footer">
-        <span>© 2024 Burapha University Language Institute (BUULI)</span>
-        <span class="footer-sep">·</span>
-        <span>All rights reserved.</span>
-      </footer>
     </div>
   </div>
 </template>

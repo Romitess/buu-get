@@ -35,7 +35,10 @@
           </div>
 
           <!-- รายการรอบสอบ -->
-          <div class="rounds-list">
+          <div
+            class="rounds-list"
+            :style="{ overflowY: selectedDateRounds.length > 3 ? 'auto' : 'hidden' }"
+          >
             <template v-if="selectedDateRounds.length > 0">
               <RoundExam
                 v-for="round in selectedDateRounds"
@@ -172,14 +175,29 @@ const onMonthChange = (month: number, year: number): void => {
 .page-container {
   max-width: var(--page-max-width);
   margin: 0 auto;
-  padding: 24px;
+  padding: 16px 24px;
+}
+
+.schedule-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
 }
 
 .rounds-section {
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  height: fit-content;
+  max-height: 536px;
+  overflow: hidden;
 }
 
 .rounds-header {
+  flex: 0 0 auto;
   margin-bottom: 20px;
   &__title-row {
     display: flex;
@@ -187,7 +205,7 @@ const onMonthChange = (month: number, year: number): void => {
     margin-bottom: 4px;
   }
   &__title {
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--text-primary);
     margin: 0;
@@ -200,12 +218,48 @@ const onMonthChange = (month: number, year: number): void => {
 }
 
 .rounds-list {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  overflow-y: auto;
+  padding-right: 8px;
+  min-height: 0;
+  scrollbar-gutter: stable; /* เพิ่มเพื่อให้ขนาดบล็อกนิ่งขึ้นเมื่อมี Scrollbar */
+
+  /* Custom Scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+    &:hover {
+      background: #999;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .schedule-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .rounds-section {
+    height: 500px; /* ล็อกความสูงบนมือถือเพื่อให้ Scroll ได้ในตัว */
+  }
 }
 
 .rounds-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   border: 2px dashed var(--border-color);
   border-radius: var(--radius-md);
   background: #fafafa;
@@ -214,6 +268,10 @@ const onMonthChange = (month: number, year: number): void => {
 @media (max-width: 1024px) {
   .schedule-content {
     flex-direction: column;
+    align-items: stretch;
+  }
+  .rounds-section {
+    height: 500px; /* Fixed height on mobile so it doesn't scroll the whole page */
   }
 }
 </style>
