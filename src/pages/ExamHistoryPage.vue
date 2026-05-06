@@ -29,6 +29,7 @@
           :location="exam.location"
           :fee="exam.fee"
           :deadline="exam.deadline"
+          @timeout="handleTimeout(exam)"
         >
           <template #actions>
             <AppButton
@@ -36,12 +37,14 @@
               outline
               :label="$t('exam.history.cancel')"
               class="action-btn btn-cancel"
+              @click="handleCancel(exam)"
             />
             <AppButton
               v-if="exam.actions?.includes('pay')"
               icon="payments"
               :label="$t('exam.history.pay')"
               class="action-btn pay-btn"
+              @click="handlePay(exam)"
             />
           </template>
         </AppExamHistoryCard>
@@ -67,16 +70,10 @@
           :location="exam.location"
         >
           <template v-if="exam.customStatus" #status-append>
-            <div
-              :class="[
-                'custom-status',
-                `${exam.customStatus.type}-status`,
-                'row items-center q-ml-md',
-              ]"
-            >
+            <div :class="['custom-status', `${exam.customStatus.type}-status`, 'row items-center']">
               <q-icon
                 :name="exam.customStatus.icon"
-                size="24px"
+                size="20px"
                 :style="{
                   color: `var(--badge-${exam.customStatus.type}-dot)`,
                 }"
@@ -117,25 +114,44 @@
         </AppExamHistoryCard>
       </div>
     </div>
+
+    <!-- Payment Dialog -->
+    <AppPaymentDialog
+      v-model="showPaymentDialog"
+      :amount="selectedExam?.fee || 500"
+      :countdown="'29 : 50'"
+      @save="handleSaveQR"
+    />
+
+    <!-- Cancel Dialog -->
+    <DialogCancel
+      v-model="showCancelDialog"
+      :exam-date="selectedExamForCancel?.date || ''"
+      :exam-time="selectedExamForCancel?.time || ''"
+      @confirm="handleConfirmCancel"
+    />
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { storeToRefs } from 'pinia';
 import AppExamHistoryCard from 'src/components/exam/AppExamHistoryCard.vue';
 import AppButton from 'src/components/base/AppButton.vue';
+import AppPaymentDialog from 'src/components/exam/AppPaymentDialog.vue';
+import DialogCancel from 'src/components/exam/DialogCancel.vue';
+import { useExamStore } from 'src/stores/exam.store';
 
-const { t } = useI18n();
-
-// === Interfaces ===
+/** สถานะเพิ่มเติม เช่น ผ่าน/ไม่ผ่าน หรือ หมดเวลาชำระเงิน */
 interface CustomStatus {
   label: string;
   type: 'success' | 'error';
   icon: string;
 }
 
-interface ExamHistoryItem {
+/** รายการสอบแต่ละรายการในประวัติการสอบ */
+interface ExamHistoryRecord {
   id: number;
   title: string;
   status: string;
@@ -149,96 +165,79 @@ interface ExamHistoryItem {
   actions?: string[];
 }
 
-// === Mock Data (To be replaced by API/Store logic later) ===
-const pendingExams = computed<ExamHistoryItem[]>(() => [
-  {
-    id: 1,
-    title: t('exam.history.defaultExamTitle'),
-    status: t('exam.status.pending'),
-    statusType: 'primary',
-    date: '15 พฤษภาคม 2569',
-    time: '08:00-10:00',
-    location: 'Computer Center, BUU (L201)',
-    fee: 500,
-    deadline: '29:30',
-    actions: ['cancel', 'pay'],
-  },
-]);
+const { t } = useI18n();
+const examStore = useExamStore();
 
-const historyExams = computed<ExamHistoryItem[]>(() => [
-  {
-    id: 2,
+// === State จาก Store ===
+const { pendingRegistrations, historyRecords } = storeToRefs(examStore);
+
+// === UI-only State ===
+const showPaymentDialog = ref(false);
+const selectedExam = ref<ExamHistoryRecord | null>(null);
+
+const showCancelDialog = ref(false);
+const selectedExamForCancel = ref<ExamHistoryRecord | null>(null);
+
+// === Computed: แปลง i18n keys เป็นข้อความจริง ===
+/**
+ * Store เก็บ status เป็น translation key (เช่น 'exam.status.pending')
+ * ที่นี่เราแปลงเป็นข้อความจริงก่อนส่งให้ Template
+ */
+const pendingExams = computed<ExamHistoryRecord[]>(() =>
+  pendingRegistrations.value.map((item) => ({
+    ...item,
     title: t('exam.history.defaultExamTitle'),
-    status: t('exam.status.verifying'),
-    statusType: 'primary',
-    date: '15 พฤษภาคม 2569',
-    time: '08:00-10:00',
-    location: 'Computer Center, BUU (L201)',
-  },
-  {
-    id: 3,
-    title: t('exam.history.defaultExamTitle'),
-    status: t('exam.status.verified'),
-    statusType: 'primary',
-    date: '15 พฤษภาคม 2569',
-    time: '08:00-10:00',
-    location: 'Computer Center, BUU (L201)',
-    actions: ['candidateCard', 'downloadReceipt'],
-  },
-  {
-    id: 4,
-    title: t('exam.history.defaultExamTitle'),
-    status: t('exam.status.evaluating'),
-    statusType: 'primary',
-    date: '15 พฤษภาคม 2569',
-    time: '08:00-10:00',
-    location: 'Computer Center, BUU (L201)',
-  },
-  {
-    id: 5,
-    title: t('exam.history.defaultExamTitle'),
-    status: t('exam.status.completed'),
-    statusType: 'primary',
-    date: '15 เมษายน 2569',
-    time: '08:00-10:00',
-    location: 'Computer Center, BUU (L201)',
-    customStatus: {
-      label: `${t('exam.statusLabel')} : ${t('exam.status.passed')}`,
-      type: 'success',
-      icon: 'check',
-    },
-    actions: ['scoreDetails', 'certificate'],
-  },
-  {
-    id: 6,
-    title: t('exam.history.defaultExamTitle'),
-    status: t('exam.status.completed'),
-    statusType: 'primary',
-    date: '15 เมษายน 2569',
-    time: '08:00-10:00',
-    location: 'Computer Center, BUU (L201)',
-    customStatus: {
-      label: `${t('exam.statusLabel')} : ${t('exam.status.failed')}`,
-      type: 'error',
-      icon: 'warning_amber',
-    },
-    actions: ['scoreDetails'],
-  },
-  {
-    id: 7,
-    title: t('exam.history.defaultExamTitle'),
-    status: t('exam.status.cancelled'),
-    statusType: 'primary',
-    date: '15 เมษายน 2569',
-    time: '08:00-10:00',
-    location: 'Computer Center, BUU (L201)',
-    customStatus: {
-      label: t('exam.status.paymentTimeout'),
-      type: 'error',
-      icon: 'warning_amber',
-    },
-  },
-]);
+    status: t(item.status),
+  })),
+);
+
+const historyExams = computed<ExamHistoryRecord[]>(() =>
+  historyRecords.value.map((item) => {
+    const translated: ExamHistoryRecord = {
+      ...item,
+      title: t('exam.history.defaultExamTitle'),
+      status: t(item.status),
+    };
+    if (item.customStatus) {
+      translated.customStatus = {
+        ...item.customStatus,
+        label: item.customStatus.label.includes('PLACEHOLDER_PASSED')
+          ? `${t('exam.statusLabel')} : ${t('exam.status.passed')}`
+          : item.customStatus.label.includes('PLACEHOLDER_FAILED')
+            ? `${t('exam.statusLabel')} : ${t('exam.status.failed')}`
+            : t(item.customStatus.label),
+      };
+    }
+    return translated;
+  }),
+);
+
+// === Methods ===
+const handleTimeout = (exam: ExamHistoryRecord) => {
+  examStore.cancelRegistration(exam.id);
+};
+
+const handlePay = (exam: ExamHistoryRecord) => {
+  selectedExam.value = exam;
+  showPaymentDialog.value = true;
+};
+
+const handleSaveQR = () => {
+  // Logic to save/download QR image
+  console.log('Saving QR Code...');
+};
+
+const handleCancel = (exam: ExamHistoryRecord) => {
+  selectedExamForCancel.value = exam;
+  showCancelDialog.value = true;
+};
+
+const handleConfirmCancel = () => {
+  if (selectedExamForCancel.value) {
+    examStore.cancelRegistration(selectedExamForCancel.value.id);
+  }
+  showCancelDialog.value = false;
+};
 </script>
 
 <style scoped lang="scss">
@@ -259,7 +258,7 @@ const historyExams = computed<ExamHistoryItem[]>(() => [
   .page-subtitle {
     font-family: 'Sarabun', sans-serif;
     font-size: 15px;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     font-weight: 800;
     max-width: 900px;
     line-height: 24px;
@@ -298,7 +297,7 @@ const historyExams = computed<ExamHistoryItem[]>(() => [
 }
 
 .custom-status {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
 
   &.success-status {
@@ -311,6 +310,44 @@ const historyExams = computed<ExamHistoryItem[]>(() => [
 
   &.warning-status {
     color: var(--badge-warning-dot);
+  }
+
+  @media (max-width: 600px) {
+    font-size: 12px;
+    :deep(.q-icon) {
+      font-size: 18px !important;
+    }
+  }
+}
+@media (max-width: 600px) {
+  .exam-history-page {
+    padding: 16px !important;
+  }
+
+  .page-header {
+    margin-bottom: 32px !important;
+
+    .page-title {
+      font-size: 24px;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      line-height: 22px;
+    }
+  }
+
+  .section-title {
+    padding-bottom: 8px;
+    .text-subtitle1 {
+      font-size: 16px;
+    }
+  }
+
+  .action-btn {
+    min-width: 120px;
+    height: 40px;
+    font-size: 13px;
   }
 }
 </style>

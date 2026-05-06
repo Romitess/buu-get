@@ -30,12 +30,17 @@
               <h3 class="rounds-header__title">รอบสอบวันที่ {{ formattedSelectedDate }}</h3>
             </div>
             <p class="rounds-header__subtitle text-grey-7">
-              กรุณาเลือกรอบเวลาที่ท่านต้องการลงทะเบียน
+              {{ UI_TEXT.SUBTITLE }}
             </p>
           </div>
 
           <!-- รายการรอบสอบ -->
-          <div class="rounds-list">
+          <div
+            class="rounds-list"
+            :style="{
+              overflowY: $q.screen.lt.md || selectedDateRounds.length > 3 ? 'auto' : 'hidden',
+            }"
+          >
             <template v-if="selectedDateRounds.length > 0">
               <RoundExam
                 v-for="round in selectedDateRounds"
@@ -52,7 +57,7 @@
             <!-- กรณีไม่มีรอบสอบในวันที่เลือก -->
             <div v-else class="rounds-empty text-center q-pa-xl">
               <q-icon name="event_busy" size="48px" color="grey-4" />
-              <p class="text-grey-6 q-mt-md">ไม่มีรอบสอบในวันที่เลือก</p>
+              <p class="text-grey-6 q-mt-md">{{ UI_TEXT.EMPTY_ROUNDS }}</p>
             </div>
           </div>
         </div>
@@ -66,6 +71,8 @@
       :exam-time="selectedRound?.timeRange || ''"
       @confirm="onConfirmRegistration"
     />
+
+    <ExamPasscodeInputDialog ref="passcodeDialogRef" @confirm="onPasscodeConfirm" />
   </div>
 </template>
 
@@ -73,268 +80,70 @@
 /**
  * ExamSchedulePage
  * จัดการข้อมูลรอบสอบและปฏิทินแบบ Real-time พร้อมระบบแจ้งเตือน
+ * ข้อมูลทั้งหมดดึงจาก useExamStore (Pinia)
  */
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { storeToRefs } from 'pinia';
 import ExamDetail from 'src/components/ExamDetail.vue';
 import ExamCalendar from 'src/components/ExamCalendar.vue';
 import RoundExam from 'src/components/exam/RoundExam.vue';
 import DialogConfirm from 'src/components/exam/DialogConfirm.vue';
-import type { ExamRound, ExamInfo } from 'src/components/models';
+import ExamPasscodeInputDialog from 'src/components/exam-passcode-input-dialog.vue';
+import { useExamStore } from 'src/stores/exam.store';
+import type { ExamRound } from 'src/components/models';
 
 const $q = useQuasar();
+const router = useRouter();
+const examStore = useExamStore();
 
 // ============================================================================
-// 1. STATE & REALISTIC MOCKUP DATA
+// CONSTANTS (Prepared for i18n or backend config)
+// ============================================================================
+const UI_TEXT = {
+  SUBTITLE: 'กรุณาเลือกรอบเวลาที่ท่านต้องการลงทะเบียน',
+  EMPTY_ROUNDS: 'ไม่มีรอบสอบในวันที่เลือก',
+};
+
+const NOTIFICATIONS = {
+  ROUND_FULL: 'ขออภัย รอบสอบนี้ไม่มีที่ว่างแล้ว (เต็ม)',
+  REGISTRATION_SUCCESS: 'ลงทะเบียนสอบสำเร็จ กรุณาชำระเงินภายในเวลาที่กำหนด',
+  PASSCODE_SUCCESS: 'ตรวจสอบรหัสผ่านสำเร็จ ลงทะเบียนสอบเรียบร้อย',
+};
+
+const ROUTES = {
+  HISTORY: '/exam-history',
+};
+
+// ============================================================================
+// 1. STATE จาก Store (Reactive ผ่าน storeToRefs)
 // ============================================================================
 
-interface DayData {
-  rounds: ExamRound[];
-  location: string;
-  fee: string;
-}
+const {
+  examInfo,
+  selectedDate,
+  selectedDateRounds,
+  currentDayDetails,
+  dynamicBadgeText,
+  calendarAvailability,
+  formattedSelectedDate,
+} = storeToRefs(examStore);
 
-const examInfo = ref<ExamInfo>({
-  badgeText: 'รอบทั่วไป',
-  title: 'การสอบวัดระดับภาษาอังกฤษ สำหรับบุคคลทั่วไป BUU-GET',
-  subtitle: 'เลือกวันที่และเวลาที่สะดวกในการมาทดสอบ โดยตรวจสอบจำนวนที่นั่งว่างในแต่ละช่วงเวลา',
-  locationText: 'Computer Center , BUU (201)',
-  feeText: 'Fee : 500 ฿',
-});
-
-/** วันที่เลือก (Default เป็นวันนี้) */
-const selectedDate = ref<string>(new Date().toISOString().split('T')[0] || '');
-
-/**
- * Mockup ข้อมูลรายวัน (สถาบันภาษา ม.บูรพา)
- * แบ่งตามสถานที่สอบและประเภทการสอบที่สมจริง
- */
-const mockupData = ref<Record<string, DayData>>({
-  // --- รอบทั่วไป: อาคารสำนักคอมพิวเตอร์ (Computer Center) ---
-  '2026-05-06': {
-    location: 'Computer Center , BUU (อาคารสำนักคอมพิวเตอร์ ชั้น 2)',
-    fee: 'Fee : 500 ฿',
-    rounds: [
-      {
-        id: 101,
-        title: 'BUU - GET (General)',
-        timeRange: '08:00 - 10:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 15,
-        totalSeats: 30,
-      },
-      {
-        id: 102,
-        title: 'BUU - GET (General)',
-        timeRange: '10:00 - 12:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 5,
-        totalSeats: 30,
-      },
-      {
-        id: 103,
-        title: 'BUU - GET (General)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 22,
-        totalSeats: 30,
-      },
-    ],
-  },
-  '2026-05-13': {
-    location: 'Computer Center , BUU (อาคารสำนักคอมพิวเตอร์ ชั้น 2)',
-    fee: 'Fee : 500 ฿',
-    rounds: [
-      {
-        id: 201,
-        title: 'BUU - GET (General)',
-        timeRange: '09:00 - 11:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 28,
-        totalSeats: 30,
-      },
-      {
-        id: 202,
-        title: 'BUU - GET (General)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 10,
-        totalSeats: 30,
-      },
-    ],
-  },
-
-  // --- รอบพิเศษ: อาคารปฏิบัติการรวม (Building 600) ---
-  '2026-05-11': {
-    location: 'Building 600 (อาคารปฏิบัติการรวม คณะวิทยาศาสตร์)',
-    fee: 'Fee : 800 ฿',
-    rounds: [
-      {
-        id: 501,
-        title: 'BUU - GET (Special)',
-        timeRange: '08:30 - 10:30',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 5,
-        totalSeats: 20,
-      },
-      {
-        id: 502,
-        title: 'BUU - GET (Special)',
-        timeRange: '13:30 - 15:30',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 12,
-        totalSeats: 20,
-      },
-    ],
-  },
-  '2026-05-18': {
-    location: 'Building 600 (อาคารปฏิบัติการรวม คณะวิทยาศาสตร์)',
-    fee: 'Fee : 800 ฿',
-    rounds: [
-      {
-        id: 601,
-        title: 'BUU - GET (Special)',
-        timeRange: '10:00 - 12:00',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 2,
-        totalSeats: 15,
-      },
-    ],
-  },
-
-  // --- รอบทั่วไป: อาคารเฉลิมพระเกียรติ (QS Building) ---
-  '2026-05-20': {
-    location: 'QS Building (อาคารเฉลิมพระเกียรติ คณะศึกษาศาสตร์)',
-    fee: 'Fee : 500 ฿',
-    rounds: [
-      {
-        id: 301,
-        title: 'BUU - GET (General)',
-        timeRange: '08:00 - 10:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 12,
-        totalSeats: 30,
-      },
-      {
-        id: 302,
-        title: 'BUU - GET (General)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 30,
-        totalSeats: 30,
-      },
-    ],
-  },
-
-  // --- วันที่เต็มแล้ว (Fully Booked) ---
-  '2026-05-08': {
-    location: 'Computer Center , BUU (อาคารสำนักคอมพิวเตอร์)',
-    fee: 'Fee : 500 ฿',
-    rounds: [
-      {
-        id: 801,
-        title: 'BUU - GET (General)',
-        timeRange: '08:00 - 10:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 0,
-        totalSeats: 30,
-      },
-      {
-        id: 802,
-        title: 'BUU - GET (General)',
-        timeRange: '10:00 - 12:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 0,
-        totalSeats: 30,
-      },
-    ],
-  },
-  '2026-05-15': {
-    location: 'Building 600 (อาคารปฏิบัติการรวม คณะวิทยาศาสตร์)',
-    fee: 'Fee : 800 ฿',
-    rounds: [
-      {
-        id: 901,
-        title: 'BUU - GET (Special)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 0,
-        totalSeats: 20,
-      },
-    ],
-  },
-});
-
-// --- Dialog State ---
+// --- Dialog State (UI-only, ไม่ต้องอยู่ใน Store) ---
 const showConfirmDialog = ref(false);
+const passcodeDialogRef = ref<InstanceType<typeof ExamPasscodeInputDialog> | null>(null);
 const selectedRound = ref<ExamRound | null>(null);
 
 // ============================================================================
-// 2. COMPUTED (Real-time Reactivity)
-// ============================================================================
-
-/** กรองรอบสอบตามวันที่เลือก */
-const selectedDateRounds = computed((): ExamRound[] => {
-  return mockupData.value[selectedDate.value]?.rounds || [];
-});
-
-/** ข้อมูลสถานที่และค่าธรรมเนียมตามวันที่เลือก */
-const currentDayDetails = computed(() => {
-  return (
-    mockupData.value[selectedDate.value] || {
-      location: 'กรุณาเลือกวันที่เพื่อดูสถานที่สอบ',
-      fee: 'Fee : - ฿',
-    }
-  );
-});
-
-/** Badge Text เปลี่ยนตามข้อมูลรอบสอบในวันที่เลือก */
-const dynamicBadgeText = computed((): string => {
-  const rounds = selectedDateRounds.value;
-  return rounds[0]?.roundTypeLabel ?? 'ไม่มีรอบสอบ';
-});
-
-/** คำนวณสถานะจุดในปฏิทิน */
-const calendarAvailability = computed((): Record<string, 'available' | 'full' | null> => {
-  const result: Record<string, 'available' | 'full' | null> = {};
-  Object.entries(mockupData.value).forEach(([date, data]) => {
-    const hasAvailable = data.rounds.some((r) => r.availableSeats > 0);
-    result[date] = hasAvailable ? 'available' : 'full';
-  });
-  return result;
-});
-
-/** แปลง selectedDate เป็นรูปแบบไทย */
-const formattedSelectedDate = computed((): string => {
-  if (!selectedDate.value) return '';
-  const monthNamesTH = [
-    'มกราคม',
-    'กุมภาพันธ์',
-    'มีนาคม',
-    'เมษายน',
-    'พฤษภาคม',
-    'มิถุนายน',
-    'กรกฎาคม',
-    'สิงหาคม',
-    'กันยายน',
-    'ตุลาคม',
-    'พฤศจิกายน',
-    'ธันวาคม',
-  ];
-  const date = new Date(selectedDate.value);
-  const buddhistYear = date.getFullYear() + 543;
-  return `${date.getDate()} ${monthNamesTH[date.getMonth()]} ${buddhistYear}`;
-});
-
-// ============================================================================
-// 3. METHODS
+// 2. METHODS
 // ============================================================================
 
 const handleRegister = (round: ExamRound): void => {
   if (round.availableSeats === 0) {
     $q.notify({
       type: 'negative',
-      message: 'ขออภัย รอบสอบนี้ไม่มีที่ว่างแล้ว (เต็ม)',
+      message: NOTIFICATIONS.ROUND_FULL,
       icon: 'report_problem',
       position: 'top',
       timeout: 2500,
@@ -343,18 +152,46 @@ const handleRegister = (round: ExamRound): void => {
     return;
   }
   selectedRound.value = round;
-  showConfirmDialog.value = true;
+
+  // ตรวจสอบประเภทรอบสอบเพื่อเลือก Dialog ที่เหมาะสม
+  if (round.roundTypeLabel === 'รอบพิเศษ') {
+    passcodeDialogRef.value?.openDialog();
+  } else {
+    showConfirmDialog.value = true;
+  }
 };
 
-const onConfirmRegistration = (): void => {
+const onConfirmRegistration = async (): Promise<void> => {
   showConfirmDialog.value = false;
-  // Placeholder สำหรับการต่อยอด Payment API ในอนาคต
-  console.log('✅ ยืนยันการสมัคร:', selectedRound.value?.id);
+  if (selectedRound.value) {
+    examStore.confirmRegistration(selectedRound.value);
+    $q.notify({
+      type: 'positive',
+      message: NOTIFICATIONS.REGISTRATION_SUCCESS,
+      icon: 'check_circle',
+      position: 'top',
+      timeout: 3000,
+    });
+    await router.push(ROUTES.HISTORY);
+  }
+};
+
+const onPasscodeConfirm = async (passcode: string): Promise<void> => {
+  if (selectedRound.value) {
+    examStore.confirmSpecialRegistration(selectedRound.value, passcode);
+    $q.notify({
+      type: 'positive',
+      message: NOTIFICATIONS.PASSCODE_SUCCESS,
+      position: 'top',
+      timeout: 2000,
+    });
+    await router.push(ROUTES.HISTORY);
+  }
 };
 
 const onMonthChange = (month: number, year: number): void => {
-  console.log(`📅 เปลี่ยนเดือนเป็น: ${month}/${year}`);
-  // ในอนาคต: ดึงข้อมูล mockupData ใหม่ของเดือนนั้นๆ จาก API
+  console.log(`เปลี่ยนเดือนเป็น: ${month}/${year}`);
+  // ในอนาคต: ดึงข้อมูล scheduleData ใหม่ของเดือนนั้นๆ จาก API
 };
 </script>
 
@@ -362,14 +199,29 @@ const onMonthChange = (month: number, year: number): void => {
 .page-container {
   max-width: var(--page-max-width);
   margin: 0 auto;
-  padding: 24px;
+  padding: 16px 24px;
+}
+
+.schedule-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
 }
 
 .rounds-section {
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  height: fit-content;
+  max-height: 536px;
+  overflow: hidden;
 }
 
 .rounds-header {
+  flex: 0 0 auto;
   margin-bottom: 20px;
   &__title-row {
     display: flex;
@@ -377,7 +229,7 @@ const onMonthChange = (month: number, year: number): void => {
     margin-bottom: 4px;
   }
   &__title {
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--text-primary);
     margin: 0;
@@ -390,12 +242,37 @@ const onMonthChange = (month: number, year: number): void => {
 }
 
 .rounds-list {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  overflow-y: auto;
+  padding-right: 8px;
+  min-height: 0;
+  scrollbar-gutter: stable;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+    &:hover {
+      background: #999;
+    }
+  }
 }
 
 .rounds-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   border: 2px dashed var(--border-color);
   border-radius: var(--radius-md);
   background: #fafafa;
@@ -404,6 +281,32 @@ const onMonthChange = (month: number, year: number): void => {
 @media (max-width: 1024px) {
   .schedule-content {
     flex-direction: column;
+    align-items: stretch;
+  }
+  .rounds-section {
+    max-height: 500px;
+  }
+}
+
+@media (max-width: 600px) {
+  .page-container {
+    padding: 12px 16px;
+  }
+
+  .rounds-section {
+    padding: 16px;
+    max-height: 480px;
+  }
+
+  .rounds-header {
+    margin-bottom: 16px;
+    &__title {
+      font-size: 1.1rem;
+    }
+    &__subtitle {
+      font-size: 0.8rem;
+      padding-left: 28px;
+    }
   }
 }
 </style>

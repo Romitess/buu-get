@@ -146,3 +146,54 @@ export interface ReceiptData {
   paymentMethod: string;
   status: 'SUCCESS' | 'PENDING' | 'FAILED';
 }
+
+// ================== Exam History Types ==================
+// ใช้สำหรับหน้าประวัติการสอบ (ExamHistoryPage) — แสดงรายการสอบที่ลงทะเบียนแล้ว
+
+/** สถานะเพิ่มเติม เช่น ผ่าน/ไม่ผ่าน หรือ หมดเวลาชำระเงิน */
+export interface CustomStatus {
+  /** ข้อความแสดงสถานะ */
+  label: string;
+  /** ประเภทสถานะ (กำหนดสี) */
+  type: 'success' | 'error';
+  /** ชื่อ icon (Material Icons) */
+  icon: string;
+}
+
+/** รายการสอบแต่ละรายการในประวัติการสอบ */
+export interface ExamHistoryItem {
+  /** รหัสรายการ */
+  id: number;
+  /** ชื่อการสอบ */
+  title: string;
+  /** ข้อความสถานะหลัก เช่น 'รอชำระเงิน', 'ชำระเงินแล้ว' */
+  status: string;
+  /** ประเภทสถานะ (กำหนด badge สี) */
+  statusType: 'primary' | 'success' | 'warning' | 'error' | 'info';
+  /** วันที่สอบ (แสดงในรูปแบบไทย) */
+  date: string;
+  /** ช่วงเวลาสอบ */
+  time: string;
+  /** สถานที่สอบ */
+  location: string;
+  /** ค่าธรรมเนียม */
+  fee?: number;
+  /** เวลาที่เหลือในการชำระเงิน */
+  deadline?: string;
+  /** สถานะเพิ่มเติม (เช่น ผ่าน/ไม่ผ่าน) */
+  customStatus?: CustomStatus;
+  /** ปุ่ม action ที่แสดง */
+  actions?: string[];
+}
+
+// ================== Exam Schedule Data Types ==================
+
+/** ข้อมูลรอบสอบรายวัน (ใช้ใน ExamSchedulePage) */
+export interface DayData {
+  /** รอบสอบทั้งหมดของวัน */
+  rounds: ExamRound[];
+  /** สถานที่สอบ */
+  location: string;
+  /** ค่าธรรมเนียม (เช่น 'Fee : 500 ฿') */
+  fee: string;
+}

@@ -99,4 +99,16 @@ withDefaults(defineProps<Props>(), {
     }
   }
 }
+@media (max-width: 600px) {
+  .app-status-badge {
+    height: 22px;
+    padding: 0 8px;
+    font-size: 12px;
+    gap: 4px;
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+    }
+  }
+}
 </style>

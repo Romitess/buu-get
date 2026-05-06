@@ -8,13 +8,7 @@
     <!-- Exam Info -->
     <div class="round-exam__info">
       <h3 class="round-exam__title">{{ title }}</h3>
-      <AppButton
-        :label="roundTypeLabel"
-        color="secondary"
-        pill
-        dense
-        class="round-exam__tag"
-      />
+      <AppButton :label="roundTypeLabel" color="secondary" pill dense class="round-exam__tag" />
     </div>
 
     <!-- Spacer for flex layout -->
@@ -25,13 +19,17 @@
       <div class="round-exam__status" :class="isFull ? 'text-negative' : 'text-positive'">
         <q-icon name="groups" size="xs" />
         <span class="round-exam__seats">
-          {{ isFull ? 'ไม่มีที่ว่าง' : `ว่าง ${availableSeats} ที่นั่ง` }}
+          {{
+            isFull
+              ? fullStatusText
+              : `${availableStatusTextPrefix}${availableSeats}${availableStatusTextSuffix}`
+          }}
           <span class="text-muted">({{ totalSeats - availableSeats }}/{{ totalSeats }})</span>
         </span>
       </div>
-      
+
       <AppButton
-        :label="isFull ? 'เต็ม (Full)' : 'ลงทะเบียนสอบ'"
+        :label="isFull ? fullBtnText : registerBtnText"
         :color="isFull ? 'full' : 'primary'"
         class="round-exam__btn"
         @click="$emit('register')"
@@ -60,10 +58,26 @@ interface Props {
   totalSeats: number;
   /** Label for the round type (e.g., 'รอบทั่วไป') */
   roundTypeLabel?: string;
+
+  /** Text shown when round is full */
+  fullStatusText?: string;
+  /** Prefix text for available seats */
+  availableStatusTextPrefix?: string;
+  /** Suffix text for available seats */
+  availableStatusTextSuffix?: string;
+  /** Button text when full */
+  fullBtnText?: string;
+  /** Button text when available */
+  registerBtnText?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  roundTypeLabel: 'รอบทั่วไป'
+  roundTypeLabel: 'รอบทั่วไป',
+  fullStatusText: 'ไม่มีที่ว่าง',
+  availableStatusTextPrefix: 'ว่าง ',
+  availableStatusTextSuffix: ' ที่นั่ง',
+  fullBtnText: 'เต็ม (Full)',
+  registerBtnText: 'ลงทะเบียนสอบ',
 });
 
 defineEmits<{
@@ -95,7 +109,7 @@ const isFull = computed(() => props.availableSeats <= 0);
   &--full {
     background-color: #fafafa;
     border-color: #eee;
-    
+
     &:hover {
       transform: none;
       box-shadow: none;
@@ -180,13 +194,25 @@ const isFull = computed(() => props.availableSeats <= 0);
 
 @media (max-width: 600px) {
   .round-exam {
+    padding: 16px;
     &__title {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
     }
-    
+
     &__action-group {
       flex-direction: column;
-      align-items: flex-end;
+      align-items: stretch;
+      gap: 16px;
+    }
+
+    &__status {
+      justify-content: center;
+      width: 100%;
+    }
+
+    &__btn {
+      width: 100%;
+      min-width: unset;
     }
   }
 }

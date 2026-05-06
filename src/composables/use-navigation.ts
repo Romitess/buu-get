@@ -30,16 +30,6 @@ export function useNavigation() {
       caption: 'View your past exams',
       icon: 'history',
       link: '/exam-history',
-      requiresAuth: true,
-      roles: ['user', 'staff'],
-    },
-    {
-      title: 'Staff Dashboard',
-      caption: 'Manage system',
-      icon: 'admin_panel_settings',
-      link: '/staff-dashboard',
-      requiresAuth: true,
-      roles: ['staff'],
     },
     {
       title: 'Login',

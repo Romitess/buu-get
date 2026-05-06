@@ -20,9 +20,9 @@
       </div>
 
       <!-- Title & Subtitle -->
-      <div class="text-h6 text-weight-bold q-mb-sm text-dark-title">Enter Passcode</div>
+      <div class="text-h6 text-weight-bold q-mb-sm text-dark-title">{{ title }}</div>
       <div class="text-caption q-mb-lg subtitle-text">
-        กรุณากรอกรหัสผ่าน Passcode เพื่อทำการลงทะเบียนสอบ
+        {{ subtitle }}
       </div>
 
       <!-- Passcode Input -->
@@ -32,7 +32,7 @@
         dense
         :type="isPasswordVisible ? 'text' : 'password'"
         class="q-mb-lg passcode-input"
-        placeholder="•••••••••••••••••"
+        :placeholder="placeholderText"
       >
         <template v-slot:append>
           <q-icon
@@ -45,17 +45,16 @@
       </q-input>
 
       <!-- Confirm Button -->
-      <q-btn
-        label="ยืนยัน"
-        class="full-width q-mb-md confirm-btn text-white"
-        unelevated
+      <AppButton
+        :label="confirmBtnText"
+        class="full-width q-mb-md confirm-btn"
         @click="confirmPasscode"
       />
 
       <!-- Footer Support Text -->
       <div class="footer-text flex flex-center">
         <q-icon name="help_outline" size="16px" class="q-mr-xs" />
-        พบปัญหา โปรดติดต่อพนักงาน
+        {{ footerSupportText }}
       </div>
     </q-card>
   </q-dialog>
@@ -63,6 +62,23 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import AppButton from 'src/components/base/AppButton.vue';
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+  placeholderText?: string;
+  confirmBtnText?: string;
+  footerSupportText?: string;
+}
+
+withDefaults(defineProps<Props>(), {
+  title: 'Enter Passcode',
+  subtitle: 'กรุณากรอกรหัสผ่าน Passcode เพื่อทำการลงทะเบียนสอบ',
+  placeholderText: '•••••••••••••••••',
+  confirmBtnText: 'ยืนยัน',
+  footerSupportText: 'พบปัญหา โปรดติดต่อพนักงาน',
+});
 
 const isOpen = ref<boolean>(false);
 const passcode = ref<string>('');
@@ -126,6 +142,7 @@ defineExpose({
 .subtitle-text {
   font-size: 15px;
   color: #888;
+  white-space: nowrap;
 }
 
 .passcode-input :deep(.q-field__control) {
@@ -134,26 +151,55 @@ defineExpose({
 }
 
 .passcode-input :deep(.q-field__append) {
-  padding-right: 8px;
+  padding-right: 12px;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .passcode-input :deep(input::placeholder) {
   letter-spacing: 3px;
   color: #b0b0b0;
   font-size: 20px;
-  transform: translateY(2px);
 }
 
 .confirm-btn {
-  border-radius: 8px;
   height: 52px;
   font-weight: 500;
   font-size: 16px;
-  background-color: #154ba6 !important; /* Matches the deep blue from the design */
 }
 
 .footer-text {
   font-size: 14px;
   color: #999;
+}
+
+@media (max-width: 600px) {
+  .passcode-card {
+    padding: 16px 12px;
+    border-radius: 12px;
+    width: 95vw;
+  }
+
+  .text-dark-title {
+    font-size: 16px;
+  }
+
+  .subtitle-text {
+    font-size: 11px;
+    white-space: nowrap;
+    letter-spacing: -0.02em;
+  }
+
+  .lock-icon-container {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .confirm-btn,
+  .passcode-input :deep(.q-field__control) {
+    height: 40px;
+  }
 }
 </style>

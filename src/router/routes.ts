@@ -22,33 +22,53 @@ const routes: RouteRecordRaw[] = [
         path: 'exam-schedule',
         name: 'exam-schedule',
         component: () => import('pages/ExamSchedulePage.vue'),
-        meta: { requiresAuth: false }, // Public page
+        meta: { requiresAuth: false },
       },
       {
         path: 'exam-history',
         name: 'exam-history',
         component: () => import('pages/ExamHistoryPage.vue'),
-        meta: { requiresAuth: false }, // Protected
+        meta: { requiresAuth: false },
       },
       {
         path: 'staff-dashboard',
         name: 'staff-dashboard',
         component: () => import('pages/staff-dashboard-page.vue'),
-        meta: { requiresAuth: false }, // Staff only
+        meta: { requiresAuth: false },
+      },
+      {
+        path: 'login',
+        name: 'login',
+        component: () => import('pages/LoginPage.vue'),
+        meta: {
+          requiresAuth: false,
+          hideHeader: true,
+          hideDrawer: true,
+          footerVariant: 'white',
+        },
+      },
+      {
+        path: 'register',
+        name: 'register',
+        component: () => import('pages/RegisterPage.vue'),
+        meta: {
+          requiresAuth: false,
+          hideHeader: true,
+          hideDrawer: true,
+          footerVariant: 'white',
+        },
+      },
+      {
+        path: 'create-exam',
+        name: 'create-exam',
+        component: () => import('pages/create-exam-round-page.vue'),
+        meta: {
+          hideHeader: true,
+          hideDrawer: true,
+          footerVariant: 'white',
+        },
       },
     ],
-  },
-  {
-    path: '/login',
-    name: 'login',
-    component: () => import('pages/LoginPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/register',
-    name: 'register',
-    component: () => import('pages/RegisterPage.vue'),
-    meta: { requiresAuth: false },
   },
 
   // Always leave this as last one,

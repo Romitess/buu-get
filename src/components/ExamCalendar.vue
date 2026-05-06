@@ -42,19 +42,25 @@
             @click="handleDaySelect(day.dateString)"
           >
             {{ day.value }}
+            <!-- จุดสีสำหรับสถานะรอบสอบ -->
+            <div
+              v-if="availability?.[day.dateString]"
+              class="dot"
+              :class="availability[day.dateString] === 'available' ? 'dot-green' : 'dot-red'"
+            ></div>
           </div>
         </div>
       </q-card>
 
       <!-- Legend -->
-      <q-card class="status-footer q-mt-sm" flat>
+      <q-card class="status-footer q-mt-lg" flat>
         <div class="status-item">
           <div class="status-dot dot-green"></div>
-          <span>มีที่นั่งว่าง</span>
+          <span>{{ CALENDAR_TEXT.LEGEND_AVAILABLE }}</span>
         </div>
         <div class="status-item">
           <div class="status-dot dot-red"></div>
-          <span>รอบเต็มแล้ว</span>
+          <span>{{ CALENDAR_TEXT.LEGEND_FULL }}</span>
         </div>
       </q-card>
     </div>
@@ -104,6 +110,11 @@ const monthNamesTH = [
   'พฤศจิกายน',
   'ธันวาคม',
 ];
+
+const CALENDAR_TEXT = {
+  LEGEND_AVAILABLE: 'มีที่นั่งว่าง',
+  LEGEND_FULL: 'รอบเต็มแล้ว',
+};
 const monthNamesEN = [
   'January',
   'February',
@@ -178,17 +189,18 @@ const handleDaySelect = (dateString: string) => {
 <style scoped lang="scss">
 .calendar-card {
   border-radius: 16px;
-  padding: 20px 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  padding: 16px 20px;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25) !important;
+  background-color: #ffffff;
 }
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .calendar-nav-btn {
-  font-size: 16px;
+  font-size: 15px;
   color: #ccc;
   transition: color 0.2s;
   &:hover {
@@ -199,13 +211,13 @@ const handleDaySelect = (dateString: string) => {
   text-align: center;
   h2 {
     margin: 0;
-    font-size: 18px;
-    font-weight: 500;
-    line-height: 1.2;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.1;
   }
   p {
     margin: 0;
-    font-size: 14px;
+    font-size: 13px;
     color: #6b7280;
     font-weight: 300;
   }
@@ -214,7 +226,7 @@ const handleDaySelect = (dateString: string) => {
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  row-gap: 8px;
+  row-gap: 6px;
   column-gap: 4px;
   text-align: center;
 }
@@ -222,7 +234,7 @@ const handleDaySelect = (dateString: string) => {
   font-size: 11px;
   font-weight: 400;
   color: #888;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .day-cell {
@@ -261,11 +273,11 @@ const handleDaySelect = (dateString: string) => {
 }
 
 .dot {
-  width: 4px;
-  height: 4px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   position: absolute;
-  bottom: 4px;
+  bottom: 6px;
 }
 .dot-red {
   background-color: #c12a32;
@@ -276,22 +288,70 @@ const handleDaySelect = (dateString: string) => {
 
 .status-footer {
   border-radius: 12px;
-  padding: 12px 16px;
+  padding: 12px 14px;
   display: flex;
   justify-content: center;
-  gap: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  gap: 18px;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25) !important;
+  background-color: #ffffff;
 }
 .status-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   font-size: 13px;
   color: #6b7280;
 }
 .status-dot {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
+}
+
+@media (max-width: 600px) {
+  .calendar-card {
+    padding: 12px 16px;
+    border-radius: 12px;
+  }
+
+  .calendar-title h2 {
+    font-size: 15px;
+  }
+
+  .calendar-title p {
+    font-size: 11px;
+  }
+
+  .calendar-grid {
+    row-gap: 4px;
+    column-gap: 2px;
+  }
+
+  .day-cell {
+    font-size: 13px;
+    border-radius: 6px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    bottom: 3px;
+  }
+
+  .status-footer {
+    padding: 10px;
+    gap: 12px;
+    margin-top: 12px !important;
+  }
+
+  .status-item {
+    font-size: 12px;
+    gap: 5px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+  }
 }
 </style>

@@ -16,8 +16,8 @@
         </div>
 
         <!-- Title & Subtitle -->
-        <div class="text-title q-mt-md">ยืนยันการสมัครสอบ</div>
-        <div class="text-subtitle q-mt-sm">คุณต้องการยืนยันการสมัครสอบในรอบที่เลือกใช่หรือไม่?</div>
+        <div class="text-title q-mt-md">{{ title }}</div>
+        <div class="text-subtitle q-mt-sm">{{ subtitle }}</div>
       </q-card-section>
 
       <!-- Info Box (Figma Style: Underlined Rows) -->
@@ -50,20 +50,17 @@
       <!-- Actions (Figma Spacing & Shadow) -->
       <q-card-actions class="row q-px-xl q-pb-xl q-col-gutter-md">
         <div class="col-6">
-          <q-btn
-            flat
-            label="ยกเลิก"
-            no-caps
-            class="full-width btn-cancel"
+          <AppButton
+            outline
+            :label="cancelBtnText"
+            class="full-width dialog-btn"
             @click="$emit('update:modelValue', false)"
           />
         </div>
         <div class="col-6">
-          <q-btn
-            unelevated
-            label="ยืนยันการสมัคร"
-            no-caps
-            class="full-width btn-confirm"
+          <AppButton
+            :label="confirmBtnText"
+            class="full-width dialog-btn"
             @click="$emit('confirm')"
           />
         </div>
@@ -73,6 +70,8 @@
 </template>
 
 <script setup lang="ts">
+import AppButton from 'src/components/base/AppButton.vue';
+
 /**
  * DialogConfirm
  * Component สำหรับยืนยันการสมัครสอบ ตาม Figma UI 100%
@@ -82,9 +81,18 @@ interface Props {
   modelValue: boolean;
   examDate: string;
   examTime: string;
+  title?: string;
+  subtitle?: string;
+  cancelBtnText?: string;
+  confirmBtnText?: string;
 }
 
-defineProps<Props>();
+withDefaults(defineProps<Props>(), {
+  title: 'ยืนยันการสมัครสอบ',
+  subtitle: 'คุณต้องการยืนยันการสมัครสอบในรอบที่เลือกใช่หรือไม่?',
+  cancelBtnText: 'ยกเลิก',
+  confirmBtnText: 'ยืนยันการสมัคร',
+});
 
 defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
@@ -97,7 +105,8 @@ defineEmits<{
   width: 100%;
   max-width: 460px;
   border-radius: 24px;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-lg);
   overflow: visible;
 }
 
@@ -109,7 +118,7 @@ defineEmits<{
   width: 72px;
   height: 72px;
   background: linear-gradient(135deg, #bbdefb 0%, #e3f2fd 100%);
-  color: #0d47a1;
+  color: var(--primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -120,13 +129,13 @@ defineEmits<{
 .text-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text-primary);
   letter-spacing: -0.01em;
 }
 
 .text-subtitle {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-secondary);
   text-align: center;
   line-height: 1.5;
   max-width: 400px;
@@ -135,51 +144,80 @@ defineEmits<{
 }
 
 .info-box {
-  border: 1.5px solid #aecdf5;
+  border: 1px solid #aecdf5;
   border-radius: 16px;
   padding: 20px 24px;
-  background-color: white;
+  background-color: var(--surface-card);
 }
 
 .info-row {
   .label-text {
     font-size: 0.95rem;
     font-weight: 500;
-    color: #555;
+    color: var(--text-secondary);
   }
   .value-text {
     font-size: 1.05rem;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--text-primary);
   }
   .underline {
-    height: 1.5px;
-    background-color: #0d47a1;
+    height: 1px;
+    background-color: var(--primary);
     opacity: 0.5;
     width: 100%;
     margin-top: 4px;
   }
 }
 
-.btn-confirm {
-  background-color: #0d47a1 !important;
-  color: white !important;
+.dialog-btn {
   height: 48px;
-  border-radius: 12px;
-  font-weight: 600;
-  box-shadow: 0 6px 12px rgba(13, 71, 161, 0.3);
-  transition: transform 0.2s;
-  &:active {
-    transform: scale(0.98);
-  }
 }
 
-.btn-cancel {
-  color: #888 !important;
-  border: 1.5px solid #aecdf5 !important;
-  height: 48px;
-  border-radius: 12px;
-  font-weight: 500;
-  background-color: white;
+@media (max-width: 600px) {
+  .dialog-confirm-card {
+    border-radius: 16px;
+    width: 95vw;
+  }
+
+  .q-card__section.q-px-xl {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .q-card__actions.q-px-xl {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    padding-bottom: 24px !important;
+  }
+
+  .text-title {
+    font-size: 1.1rem;
+  }
+
+  .text-subtitle {
+    font-size: 11px;
+    padding: 0;
+    white-space: nowrap;
+    letter-spacing: -0.02em;
+  }
+
+  .info-box {
+    padding: 12px;
+  }
+
+  .info-row {
+    .label-text {
+      font-size: 0.8rem;
+    }
+    .value-text {
+      font-size: 0.9rem;
+    }
+  }
+
+  .dialog-btn {
+    height: 40px;
+    font-size: 0.85rem;
+  }
 }
 </style>

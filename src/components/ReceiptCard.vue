@@ -114,12 +114,12 @@
       <div class="col-3 flex column items-end">
         <div class="signature-box flex flex-center q-mb-sm text-grey-7">ภาพลายมือชื่อ</div>
         <div class="text-center q-mb-sm" style="width: 140px">
-          ( &nbsp;&nbsp;&nbsp;&nbsp;ชื่อ - สกุล&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+          ( &nbsp;&nbsp;{{ receipt.fullName }} &nbsp;&nbsp;)<br />
           ผู้รับเงิน (Collector)
         </div>
         <q-img
           v-if="showQr"
-          src="/qrReciept.png"
+          src="/receipt-qr.png"
           style="width: 90px; height: 90px"
           fit="contain"
           class="q-mt-sm"
@@ -168,18 +168,24 @@ const numberToThaiText = (amount: number) => {
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap');
 
 .receipt-container {
-  max-width: 850px;
-  width: 100%;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 20px auto;
   background-color: #ffffff;
-  padding: 50px 60px;
+  padding: 20mm;
   font-family: 'Sarabun', sans-serif;
   color: #333;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Soft shadow for web view, prints without it */
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Table Styles */
 .receipt-table-wrapper {
   width: 100%;
+  flex-grow: 1; /* Allow table section to take up available space */
 }
 
 .receipt-table {
@@ -191,7 +197,7 @@ const numberToThaiText = (amount: number) => {
 
 .receipt-table th,
 .receipt-table td {
-  border: 1px solid #777; /* Softer black border like the image */
+  border: 1px solid #777;
   padding: 10px 15px;
 }
 
@@ -200,6 +206,7 @@ const numberToThaiText = (amount: number) => {
   font-weight: 500;
   color: #555;
   padding: 15px 10px;
+  background-color: #fafafa;
 }
 
 .receipt-table tbody td {
@@ -209,21 +216,21 @@ const numberToThaiText = (amount: number) => {
 }
 
 .spacer-row td {
-  height: 250px; /* Forces table to have a fixed height for items */
+  height: 400px; /* Increased height to fill A4 space better */
 }
 
 .receipt-table tfoot td {
   border-top: 1px solid #777;
-  font-weight: 500;
+  font-weight: 600;
   padding: 15px;
 }
 
 .col-no {
-  width: 12%;
+  width: 10%;
 }
 
 .col-desc {
-  width: 68%;
+  width: 70%;
 }
 
 .col-amount {
@@ -237,16 +244,30 @@ const numberToThaiText = (amount: number) => {
 
 .signature-box {
   width: 140px;
-  height: 50px;
+  height: 60px;
   border: 1px solid #999;
   font-size: 12px;
 }
 
 /* Print specific styles */
 @media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  body {
+    margin: 0;
+    -webkit-print-color-adjust: exact;
+  }
+
   .receipt-container {
+    width: 210mm;
+    height: 297mm;
+    padding: 20mm;
+    margin: 0;
     box-shadow: none;
-    padding: 20px;
+    border: none;
   }
 }
 </style>
