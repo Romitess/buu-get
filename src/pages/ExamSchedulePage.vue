@@ -66,6 +66,8 @@
       :exam-time="selectedRound?.timeRange || ''"
       @confirm="onConfirmRegistration"
     />
+
+    <ExamPasscodeInputDialog ref="passcodeDialogRef" @confirm="onPasscodeConfirm" />
   </div>
 </template>
 
@@ -80,6 +82,7 @@ import ExamDetail from 'src/components/ExamDetail.vue';
 import ExamCalendar from 'src/components/ExamCalendar.vue';
 import RoundExam from 'src/components/exam/RoundExam.vue';
 import DialogConfirm from 'src/components/exam/DialogConfirm.vue';
+import ExamPasscodeInputDialog from 'src/components/exam-passcode-input-dialog.vue';
 import type { ExamRound, ExamInfo } from 'src/components/models';
 
 const $q = useQuasar();
@@ -267,6 +270,7 @@ const mockupData = ref<Record<string, DayData>>({
 
 // --- Dialog State ---
 const showConfirmDialog = ref(false);
+const passcodeDialogRef = ref<InstanceType<typeof ExamPasscodeInputDialog> | null>(null);
 const selectedRound = ref<ExamRound | null>(null);
 
 // ============================================================================
@@ -343,13 +347,30 @@ const handleRegister = (round: ExamRound): void => {
     return;
   }
   selectedRound.value = round;
-  showConfirmDialog.value = true;
+
+  // ตรวจสอบประเภทรอบสอบเพื่อเลือก Dialog ที่เหมาะสม
+  if (round.roundTypeLabel === 'รอบพิเศษ') {
+    passcodeDialogRef.value?.openDialog();
+  } else {
+    showConfirmDialog.value = true;
+  }
 };
 
 const onConfirmRegistration = (): void => {
   showConfirmDialog.value = false;
   // Placeholder สำหรับการต่อยอด Payment API ในอนาคต
-  console.log('✅ ยืนยันการสมัคร:', selectedRound.value?.id);
+  console.log('✅ ยืนยันการสมัครรอบทั่วไป:', selectedRound.value?.id);
+};
+
+const onPasscodeConfirm = (passcode: string): void => {
+  console.log('🔑 ยืนยันรหัสผ่านรอบพิเศษ:', passcode, 'สำหรับรอบ:', selectedRound.value?.id);
+  // ตรวจสอบความถูกต้องของ Passcode ที่นี่ในอนาคต
+  $q.notify({
+    type: 'positive',
+    message: 'ตรวจสอบรหัสผ่านสำเร็จ กำลังดำเนินการต่อ...',
+    position: 'top',
+    timeout: 2000,
+  });
 };
 
 const onMonthChange = (month: number, year: number): void => {

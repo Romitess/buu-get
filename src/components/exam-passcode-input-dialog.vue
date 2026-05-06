@@ -134,14 +134,16 @@ defineExpose({
 }
 
 .passcode-input :deep(.q-field__append) {
-  padding-right: 8px;
+  padding-right: 12px;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .passcode-input :deep(input::placeholder) {
   letter-spacing: 3px;
   color: #b0b0b0;
   font-size: 20px;
-  transform: translateY(2px);
 }
 
 .confirm-btn {
