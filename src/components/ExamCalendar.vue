@@ -56,11 +56,11 @@
       <q-card class="status-footer q-mt-lg" flat>
         <div class="status-item">
           <div class="status-dot dot-green"></div>
-          <span>มีที่นั่งว่าง</span>
+          <span>{{ CALENDAR_TEXT.LEGEND_AVAILABLE }}</span>
         </div>
         <div class="status-item">
           <div class="status-dot dot-red"></div>
-          <span>รอบเต็มแล้ว</span>
+          <span>{{ CALENDAR_TEXT.LEGEND_FULL }}</span>
         </div>
       </q-card>
     </div>
@@ -110,6 +110,11 @@ const monthNamesTH = [
   'พฤศจิกายน',
   'ธันวาคม',
 ];
+
+const CALENDAR_TEXT = {
+  LEGEND_AVAILABLE: 'มีที่นั่งว่าง',
+  LEGEND_FULL: 'รอบเต็มแล้ว',
+};
 const monthNamesEN = [
   'January',
   'February',

@@ -83,6 +83,7 @@
  * ข้อมูลทั้งหมดดึงจาก useExamStore (Pinia)
  */
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import ExamDetail from 'src/components/ExamDetail.vue';
@@ -94,6 +95,7 @@ import { useExamStore } from 'src/stores/exam.store';
 import type { ExamRound } from 'src/components/models';
 
 const $q = useQuasar();
+const router = useRouter();
 const examStore = useExamStore();
 
 // ============================================================================
@@ -108,6 +110,10 @@ const NOTIFICATIONS = {
   ROUND_FULL: 'ขออภัย รอบสอบนี้ไม่มีที่ว่างแล้ว (เต็ม)',
   REGISTRATION_SUCCESS: 'ลงทะเบียนสอบสำเร็จ กรุณาชำระเงินภายในเวลาที่กำหนด',
   PASSCODE_SUCCESS: 'ตรวจสอบรหัสผ่านสำเร็จ ลงทะเบียนสอบเรียบร้อย',
+};
+
+const ROUTES = {
+  HISTORY: '/exam-history',
 };
 
 // ============================================================================
@@ -155,7 +161,7 @@ const handleRegister = (round: ExamRound): void => {
   }
 };
 
-const onConfirmRegistration = (): void => {
+const onConfirmRegistration = async (): Promise<void> => {
   showConfirmDialog.value = false;
   if (selectedRound.value) {
     examStore.confirmRegistration(selectedRound.value);
@@ -166,10 +172,11 @@ const onConfirmRegistration = (): void => {
       position: 'top',
       timeout: 3000,
     });
+    await router.push(ROUTES.HISTORY);
   }
 };
 
-const onPasscodeConfirm = (passcode: string): void => {
+const onPasscodeConfirm = async (passcode: string): Promise<void> => {
   if (selectedRound.value) {
     examStore.confirmSpecialRegistration(selectedRound.value, passcode);
     $q.notify({
@@ -178,6 +185,7 @@ const onPasscodeConfirm = (passcode: string): void => {
       position: 'top',
       timeout: 2000,
     });
+    await router.push(ROUTES.HISTORY);
   }
 };
 
