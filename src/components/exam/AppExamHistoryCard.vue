@@ -113,11 +113,15 @@ defineEmits(['cancel', 'pay', 'download']);
 <style scoped lang="scss">
 .app-exam-history-card-container {
   // Always use primary blue for the brand bar as seen in Figma
-  border-left: 6px solid var(--primary);
+  border-left: 8px solid var(--primary);
+  border-radius: var(--radius-md); // 12px
   position: relative;
   overflow: hidden;
-  min-height: 160px;
+  height: 180px;
+  width: 100%;
+  max-width: 1300px;
   background: var(--surface-card);
+  box-shadow: 0px 4px 4px 0px #00000040;
   transition:
     transform var(--transition-fast),
     box-shadow var(--transition-fast);

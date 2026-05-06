@@ -259,7 +259,7 @@ const handleConfirmCancel = () => {
   .page-subtitle {
     font-family: 'Sarabun', sans-serif;
     font-size: 15px;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     font-weight: 800;
     max-width: 900px;
     line-height: 24px;
