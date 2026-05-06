@@ -30,7 +30,7 @@
               <h3 class="rounds-header__title">รอบสอบวันที่ {{ formattedSelectedDate }}</h3>
             </div>
             <p class="rounds-header__subtitle text-grey-7">
-              กรุณาเลือกรอบเวลาที่ท่านต้องการลงทะเบียน
+              {{ UI_TEXT.SUBTITLE }}
             </p>
           </div>
 
@@ -57,7 +57,7 @@
             <!-- กรณีไม่มีรอบสอบในวันที่เลือก -->
             <div v-else class="rounds-empty text-center q-pa-xl">
               <q-icon name="event_busy" size="48px" color="grey-4" />
-              <p class="text-grey-6 q-mt-md">ไม่มีรอบสอบในวันที่เลือก</p>
+              <p class="text-grey-6 q-mt-md">{{ UI_TEXT.EMPTY_ROUNDS }}</p>
             </div>
           </div>
         </div>
@@ -97,6 +97,20 @@ const $q = useQuasar();
 const examStore = useExamStore();
 
 // ============================================================================
+// CONSTANTS (Prepared for i18n or backend config)
+// ============================================================================
+const UI_TEXT = {
+  SUBTITLE: 'กรุณาเลือกรอบเวลาที่ท่านต้องการลงทะเบียน',
+  EMPTY_ROUNDS: 'ไม่มีรอบสอบในวันที่เลือก',
+};
+
+const NOTIFICATIONS = {
+  ROUND_FULL: 'ขออภัย รอบสอบนี้ไม่มีที่ว่างแล้ว (เต็ม)',
+  REGISTRATION_SUCCESS: 'ลงทะเบียนสอบสำเร็จ กรุณาชำระเงินภายในเวลาที่กำหนด',
+  PASSCODE_SUCCESS: 'ตรวจสอบรหัสผ่านสำเร็จ ลงทะเบียนสอบเรียบร้อย',
+};
+
+// ============================================================================
 // 1. STATE จาก Store (Reactive ผ่าน storeToRefs)
 // ============================================================================
 
@@ -123,7 +137,7 @@ const handleRegister = (round: ExamRound): void => {
   if (round.availableSeats === 0) {
     $q.notify({
       type: 'negative',
-      message: 'ขออภัย รอบสอบนี้ไม่มีที่ว่างแล้ว (เต็ม)',
+      message: NOTIFICATIONS.ROUND_FULL,
       icon: 'report_problem',
       position: 'top',
       timeout: 2500,
@@ -147,7 +161,7 @@ const onConfirmRegistration = (): void => {
     examStore.confirmRegistration(selectedRound.value);
     $q.notify({
       type: 'positive',
-      message: 'ลงทะเบียนสอบสำเร็จ กรุณาชำระเงินภายในเวลาที่กำหนด',
+      message: NOTIFICATIONS.REGISTRATION_SUCCESS,
       icon: 'check_circle',
       position: 'top',
       timeout: 3000,
@@ -160,7 +174,7 @@ const onPasscodeConfirm = (passcode: string): void => {
     examStore.confirmSpecialRegistration(selectedRound.value, passcode);
     $q.notify({
       type: 'positive',
-      message: 'ตรวจสอบรหัสผ่านสำเร็จ ลงทะเบียนสอบเรียบร้อย',
+      message: NOTIFICATIONS.PASSCODE_SUCCESS,
       position: 'top',
       timeout: 2000,
     });
@@ -168,7 +182,7 @@ const onPasscodeConfirm = (passcode: string): void => {
 };
 
 const onMonthChange = (month: number, year: number): void => {
-  console.log(`📅 เปลี่ยนเดือนเป็น: ${month}/${year}`);
+  console.log(`เปลี่ยนเดือนเป็น: ${month}/${year}`);
   // ในอนาคต: ดึงข้อมูล scheduleData ใหม่ของเดือนนั้นๆ จาก API
 };
 </script>
@@ -227,9 +241,8 @@ const onMonthChange = (month: number, year: number): void => {
   overflow-y: auto;
   padding-right: 8px;
   min-height: 0;
-  scrollbar-gutter: stable; /* เพิ่มเพื่อให้ขนาดบล็อกนิ่งขึ้นเมื่อมี Scrollbar */
+  scrollbar-gutter: stable;
 
-  /* Custom Scrollbar */
   &::-webkit-scrollbar {
     width: 6px;
   }
@@ -263,7 +276,7 @@ const onMonthChange = (month: number, year: number): void => {
     align-items: stretch;
   }
   .rounds-section {
-    max-height: 500px; /* ยึดความสูงสูงสุดไว้เพื่อให้เลื่อนดูรอบสอบภายในได้สะดวก */
+    max-height: 500px;
   }
 }
 

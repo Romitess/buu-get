@@ -16,8 +16,8 @@
         </div>
 
         <!-- Title & Subtitle -->
-        <div class="text-title q-mt-md">ยืนยันการสมัครสอบ</div>
-        <div class="text-subtitle q-mt-sm">คุณต้องการยืนยันการสมัครสอบในรอบที่เลือกใช่หรือไม่?</div>
+        <div class="text-title q-mt-md">{{ title }}</div>
+        <div class="text-subtitle q-mt-sm">{{ subtitle }}</div>
       </q-card-section>
 
       <!-- Info Box (Figma Style: Underlined Rows) -->
@@ -52,14 +52,14 @@
         <div class="col-6">
           <AppButton
             outline
-            label="ยกเลิก"
+            :label="cancelBtnText"
             class="full-width btn-cancel"
             @click="$emit('update:modelValue', false)"
           />
         </div>
         <div class="col-6">
           <AppButton
-            label="ยืนยันการสมัคร"
+            :label="confirmBtnText"
             class="full-width btn-confirm"
             @click="$emit('confirm')"
           />
@@ -81,9 +81,18 @@ interface Props {
   modelValue: boolean;
   examDate: string;
   examTime: string;
+  title?: string;
+  subtitle?: string;
+  cancelBtnText?: string;
+  confirmBtnText?: string;
 }
 
-defineProps<Props>();
+withDefaults(defineProps<Props>(), {
+  title: 'ยืนยันการสมัครสอบ',
+  subtitle: 'คุณต้องการยืนยันการสมัครสอบในรอบที่เลือกใช่หรือไม่?',
+  cancelBtnText: 'ยกเลิก',
+  confirmBtnText: 'ยืนยันการสมัคร',
+});
 
 defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
@@ -135,7 +144,7 @@ defineEmits<{
 }
 
 .info-box {
-  border: 1.5px solid #aecdf5;
+  border: 1px solid #aecdf5;
   border-radius: 16px;
   padding: 20px 24px;
   background-color: var(--surface-card);
@@ -153,7 +162,7 @@ defineEmits<{
     color: var(--text-primary);
   }
   .underline {
-    height: 1.5px;
+    height: 1px;
     background-color: var(--primary);
     opacity: 0.5;
     width: 100%;
@@ -183,45 +192,48 @@ defineEmits<{
 @media (max-width: 600px) {
   .dialog-confirm-card {
     border-radius: 16px;
+    width: 95vw;
   }
 
   .q-card__section.q-px-xl {
-    padding-left: 20px !important;
-    padding-right: 20px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
   }
 
   .q-card__actions.q-px-xl {
-    padding-left: 20px !important;
-    padding-right: 20px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
     padding-bottom: 24px !important;
   }
 
   .text-title {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
   }
 
   .text-subtitle {
-    font-size: 0.85rem;
-    padding: 0 10px;
+    font-size: 11px;
+    padding: 0;
+    white-space: nowrap;
+    letter-spacing: -0.02em;
   }
 
   .info-box {
-    padding: 16px;
+    padding: 12px;
   }
 
   .info-row {
     .label-text {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
     }
     .value-text {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
   }
 
   .btn-confirm,
   .btn-cancel {
-    height: 44px;
-    font-size: 0.9rem;
+    height: 40px;
+    font-size: 0.85rem;
   }
 }
 </style>

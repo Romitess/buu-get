@@ -19,13 +19,17 @@
       <div class="round-exam__status" :class="isFull ? 'text-negative' : 'text-positive'">
         <q-icon name="groups" size="xs" />
         <span class="round-exam__seats">
-          {{ isFull ? 'ไม่มีที่ว่าง' : `ว่าง ${availableSeats} ที่นั่ง` }}
+          {{
+            isFull
+              ? fullStatusText
+              : `${availableStatusTextPrefix}${availableSeats}${availableStatusTextSuffix}`
+          }}
           <span class="text-muted">({{ totalSeats - availableSeats }}/{{ totalSeats }})</span>
         </span>
       </div>
 
       <AppButton
-        :label="isFull ? 'เต็ม (Full)' : 'ลงทะเบียนสอบ'"
+        :label="isFull ? fullBtnText : registerBtnText"
         :color="isFull ? 'full' : 'primary'"
         class="round-exam__btn"
         @click="$emit('register')"
@@ -54,10 +58,26 @@ interface Props {
   totalSeats: number;
   /** Label for the round type (e.g., 'รอบทั่วไป') */
   roundTypeLabel?: string;
+
+  /** Text shown when round is full */
+  fullStatusText?: string;
+  /** Prefix text for available seats */
+  availableStatusTextPrefix?: string;
+  /** Suffix text for available seats */
+  availableStatusTextSuffix?: string;
+  /** Button text when full */
+  fullBtnText?: string;
+  /** Button text when available */
+  registerBtnText?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   roundTypeLabel: 'รอบทั่วไป',
+  fullStatusText: 'ไม่มีที่ว่าง',
+  availableStatusTextPrefix: 'ว่าง ',
+  availableStatusTextSuffix: ' ที่นั่ง',
+  fullBtnText: 'เต็ม (Full)',
+  registerBtnText: 'ลงทะเบียนสอบ',
 });
 
 defineEmits<{
