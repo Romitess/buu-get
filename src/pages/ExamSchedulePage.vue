@@ -10,7 +10,7 @@
     />
 
     <!-- ==================== ส่วนล่าง: Calendar (ซ้าย) + Rounds (ขวา) ==================== -->
-    <div class="schedule-content row q-col-gutter-lg q-mt-md">
+    <div class="schedule-content row q-col-gutter-lg q-mt-sm">
       <!-- ฝั่งซ้าย: ปฏิทิน -->
       <div class="col-12 col-md-5">
         <ExamCalendar />
