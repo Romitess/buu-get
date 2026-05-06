@@ -40,7 +40,11 @@
       <!-- Password -->
       <div class="q-mb-md">
         <div class="text-body2 text-weight-medium q-mb-xs">
-          {{ userType === 'thai' ? 'รหัสผ่าน (ตัวอักษรหรือตัวเลข 8 ตำแหน่งขึ้นไป)' : 'Password (8 characters or more)' }}
+          {{
+            userType === 'thai'
+              ? 'รหัสผ่าน (ตัวอักษรหรือตัวเลข 8 ตำแหน่งขึ้นไป)'
+              : 'Password (8 characters or more)'
+          }}
         </div>
         <q-input
           v-model="password"
@@ -95,20 +99,21 @@
         unelevated
       />
 
-      <!-- Divider -->
-      <div v-if="userType === 'thai'" class="row items-center q-mb-md">
-        <q-separator class="col" color="grey-4" />
-        <div class="q-px-sm text-grey-6 text-body2 font-weight-medium">
-          หรือ
+      <!-- Extra options container to maintain fixed card height without jumping -->
+      <div :style="{ visibility: userType === 'thai' ? 'visible' : 'hidden' }">
+        <!-- Divider -->
+        <div class="row items-center q-mb-md">
+          <q-separator class="col" color="grey-4" />
+          <div class="q-px-sm text-grey-6 text-body2 font-weight-medium">หรือ</div>
+          <q-separator class="col" color="grey-4" />
         </div>
-        <q-separator class="col" color="grey-4" />
-      </div>
 
-      <!-- ThaID Button -->
-      <q-btn v-if="userType === 'thai'" class="full-width thaid-btn" no-caps unelevated>
-        <q-icon name="fingerprint" size="xs" class="q-mr-sm" />
-        สมัครสมาชิกด้วย ThaID
-      </q-btn>
+        <!-- ThaID Button -->
+        <q-btn class="full-width thaid-btn" no-caps unelevated :disable="userType !== 'thai'">
+          <q-icon name="fingerprint" size="xs" class="q-mr-sm" />
+          สมัครสมาชิกด้วย ThaID
+        </q-btn>
+      </div>
     </q-form>
   </q-card>
 </template>
