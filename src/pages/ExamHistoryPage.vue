@@ -8,192 +8,111 @@
       </p>
     </div>
 
+    <!-- Pending Payment Section -->
+    <div v-if="pendingExams.length > 0" class="history-section q-mb-xl">
+      <div class="section-title row items-center q-mb-md">
+        <q-icon name="schedule" size="24px" style="color: var(--badge-error-dot)" class="q-mr-sm" />
+        <span class="text-weight-bold text-subtitle1">{{
+          $t('exam.history.pendingSectionTitle')
+        }}</span>
+      </div>
+
+      <div class="q-gutter-y-md">
+        <AppExamHistoryCard
+          v-for="exam in pendingExams"
+          :key="exam.id"
+          :status-label="exam.status"
+          :status-type="exam.statusType"
+          :title="exam.title"
+          :date="exam.date"
+          :time="exam.time"
+          :location="exam.location"
+          :fee="exam.fee"
+          :deadline="exam.deadline"
+        >
+          <template #actions>
+            <AppButton
+              v-if="exam.actions?.includes('cancel')"
+              outline
+              :label="$t('exam.history.cancel')"
+              class="action-btn btn-cancel"
+            />
+            <AppButton
+              v-if="exam.actions?.includes('pay')"
+              icon="payments"
+              :label="$t('exam.history.pay')"
+              class="action-btn pay-btn"
+            />
+          </template>
+        </AppExamHistoryCard>
+      </div>
+    </div>
+
     <!-- History Section -->
-    <div class="history-section">
+    <div v-if="historyExams.length > 0" class="history-section">
       <div class="section-title row items-center q-mb-md">
         <q-icon name="schedule" size="24px" style="color: var(--badge-error-dot)" class="q-mr-sm" />
         <span class="text-weight-bold text-subtitle1">{{ $t('exam.history.sectionTitle') }}</span>
       </div>
 
       <div class="q-gutter-y-md">
-        <!-- Card 1: รอการชำระเงิน -->
         <AppExamHistoryCard
-          :status-label="$t('exam.status.pending')"
-          status-type="primary"
-          title="การสอบวัดระดับภาษาอังกฤษ สำหรับบุคคลทั่วไป BUU-GET"
-          date="15 พฤษภาคม 2569"
-          time="08:00-10:00"
-          location="Computer Center, BUU (L201)"
-          :fee="500"
+          v-for="exam in historyExams"
+          :key="exam.id"
+          :status-label="exam.status"
+          :status-type="exam.statusType"
+          :title="exam.title"
+          :date="exam.date"
+          :time="exam.time"
+          :location="exam.location"
         >
-          <template #actions>
-            <AppButton outline :label="$t('exam.history.cancel')" class="action-btn btn-cancel" />
-            <AppButton icon="payments" :label="$t('exam.history.pay')" class="action-btn pay-btn" />
+          <template v-if="exam.customStatus" #status-append>
+            <div
+              :class="[
+                'custom-status',
+                `${exam.customStatus.type}-status`,
+                'row items-center q-ml-md',
+              ]"
+            >
+              <q-icon
+                :name="exam.customStatus.icon"
+                size="24px"
+                :style="{
+                  color: `var(--badge-${exam.customStatus.type}-dot)`,
+                }"
+                class="q-mr-xs"
+              />
+              <span :class="{ 'text-weight-bold': exam.customStatus.type === 'error' }">
+                {{ exam.customStatus.label }}
+              </span>
+            </div>
           </template>
-        </AppExamHistoryCard>
 
-        <!-- Card 2: รอการชำระเงิน (มีเวลานับถอยหลัง) -->
-        <AppExamHistoryCard
-          :status-label="$t('exam.status.pending')"
-          status-type="primary"
-          title="การสอบวัดระดับภาษาอังกฤษ สำหรับบุคคลทั่วไป BUU-GET"
-          date="15 พฤษภาคม 2569"
-          time="08:00-10:00"
-          location="Computer Center, BUU (L201)"
-          :fee="500"
-          deadline="29:30"
-        >
-          <template #actions>
-            <AppButton outline :label="$t('exam.history.cancel')" class="action-btn btn-cancel" />
-            <AppButton icon="payments" :label="$t('exam.history.pay')" class="action-btn pay-btn" />
-          </template>
-        </AppExamHistoryCard>
-
-        <!-- Card 3: กำลังตรวจสอบ -->
-        <AppExamHistoryCard
-          :status-label="$t('exam.status.verifying')"
-          status-type="primary"
-          title="การสอบวัดระดับภาษาอังกฤษ สำหรับบุคคลทั่วไป BUU-GET"
-          date="15 พฤษภาคม 2569"
-          time="08:00-10:00"
-          location="Computer Center, BUU (L201)"
-        >
-        </AppExamHistoryCard>
-
-        <!-- Card 4: ตรวจสอบเสร็จสิ้น (แค่ใบเสร็จ) -->
-        <AppExamHistoryCard
-          :status-label="$t('exam.status.verified')"
-          status-type="primary"
-          title="การสอบวัดระดับภาษาอังกฤษ สำหรับบุคคลทั่วไป BUU-GET"
-          date="15 พฤษภาคม 2569"
-          time="08:00-10:00"
-          location="Computer Center, BUU (L201)"
-        >
           <template #actions>
             <AppButton
-              icon="receipt_long"
-              :label="$t('exam.history.downloadReceipt')"
+              v-if="exam.actions?.includes('scoreDetails')"
+              outline
+              :label="$t('exam.history.scoreDetails')"
+              class="action-btn btn-cancel"
+            />
+            <AppButton
+              v-if="exam.actions?.includes('certificate')"
+              icon="file_download"
+              :label="$t('exam.history.certificate')"
               class="action-btn pay-btn"
             />
-          </template>
-        </AppExamHistoryCard>
-
-        <!-- Card 5: ตรวจสอบเสร็จสิ้น (มีบัตรสอบ) -->
-        <AppExamHistoryCard
-          :status-label="$t('exam.status.verified')"
-          status-type="primary"
-          title="การสอบวัดระดับภาษาอังกฤษ สำหรับบุคคลทั่วไป BUU-GET"
-          date="15 พฤษภาคม 2569"
-          time="08:00-10:00"
-          location="Computer Center, BUU (L201)"
-        >
-          <template #actions>
             <AppButton
+              v-if="exam.actions?.includes('candidateCard')"
               icon="file_download"
               :label="$t('exam.history.candidateCard')"
               class="action-btn pay-btn"
             />
             <AppButton
+              v-if="exam.actions?.includes('downloadReceipt')"
               icon="receipt_long"
               :label="$t('exam.history.downloadReceipt')"
               class="action-btn pay-btn"
             />
-          </template>
-        </AppExamHistoryCard>
-
-        <!-- Card 6: รอการประเมินผล -->
-        <AppExamHistoryCard
-          :status-label="$t('exam.status.evaluating')"
-          status-type="primary"
-          title="การสอบวัดระดับภาษาอังกฤษ สำหรับบุคคลทั่วไป BUU-GET"
-          date="15 พฤษภาคม 2569"
-          time="08:00-10:00"
-          location="Computer Center, BUU (L201)"
-        >
-        </AppExamHistoryCard>
-
-        <!-- Card 7: เสร็จสิ้นการสอบ (ผ่าน) -->
-        <AppExamHistoryCard
-          :status-label="$t('exam.status.completed')"
-          status-type="primary"
-          title="การสอบวัดระดับภาษาอังกฤษ สำหรับบุคคลทั่วไป BUU-GET"
-          date="15 พฤษภาคม 2569"
-          time="08:00-10:00"
-          location="Computer Center, BUU (L201)"
-        >
-          <template #status-append>
-            <div class="custom-status success-status row items-center q-ml-md">
-              <q-icon
-                name="check"
-                size="24px"
-                style="color: var(--badge-success-dot)"
-                class="q-mr-xs"
-              />
-              <span>สถานะ : {{ $t('exam.status.passed') }}</span>
-            </div>
-          </template>
-          <template #actions>
-            <AppButton
-              outline
-              :label="$t('exam.history.scoreDetails')"
-              class="action-btn btn-cancel"
-            />
-            <AppButton
-              icon="file_download"
-              :label="$t('exam.history.certificate')"
-              class="action-btn pay-btn"
-            />
-          </template>
-        </AppExamHistoryCard>
-
-        <!-- Card 8: เสร็จสิ้นการสอบ (ไม่ผ่าน) -->
-        <AppExamHistoryCard
-          :status-label="$t('exam.status.completed')"
-          status-type="primary"
-          title="การสอบวัดระดับภาษาอังกฤษ สำหรับบุคคลทั่วไป BUU-GET"
-          date="15 พฤษภาคม 2569"
-          time="08:00-10:00"
-          location="Computer Center, BUU (L201)"
-        >
-          <template #status-append>
-            <div class="custom-status error-status row items-center q-ml-md">
-              <q-icon
-                name="warning_amber"
-                size="24px"
-                style="color: var(--badge-error-dot)"
-                class="q-mr-xs"
-              />
-              <span>สถานะ : {{ $t('exam.status.failed') }}</span>
-            </div>
-          </template>
-          <template #actions>
-            <AppButton
-              outline
-              :label="$t('exam.history.scoreDetails')"
-              class="action-btn btn-cancel"
-            />
-          </template>
-        </AppExamHistoryCard>
-
-        <!-- Card 9: ถูกยกเลิก -->
-        <AppExamHistoryCard
-          :status-label="$t('exam.status.cancelled')"
-          status-type="primary"
-          title="การสอบวัดระดับภาษาอังกฤษ สำหรับบุคคลทั่วไป BUU-GET"
-          date="15 เมษายน 2569"
-          time="08:00-10:00"
-          location="Computer Center, BUU (L201)"
-        >
-          <template #status-append>
-            <div class="custom-status error-status row items-center q-ml-md">
-              <q-icon
-                name="warning_amber"
-                size="24px"
-                style="color: var(--badge-error-dot)"
-                class="q-mr-xs"
-              />
-              <span class="text-weight-bold">{{ $t('exam.status.paymentTimeout') }}</span>
-            </div>
           </template>
         </AppExamHistoryCard>
       </div>
@@ -202,8 +121,124 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppExamHistoryCard from 'src/components/exam/AppExamHistoryCard.vue';
 import AppButton from 'src/components/base/AppButton.vue';
+
+const { t } = useI18n();
+
+// === Interfaces ===
+interface CustomStatus {
+  label: string;
+  type: 'success' | 'error';
+  icon: string;
+}
+
+interface ExamHistoryItem {
+  id: number;
+  title: string;
+  status: string;
+  statusType: 'primary' | 'success' | 'warning' | 'error' | 'info';
+  date: string;
+  time: string;
+  location: string;
+  fee?: number;
+  deadline?: string;
+  customStatus?: CustomStatus;
+  actions?: string[];
+}
+
+// === Mock Data (To be replaced by API/Store logic later) ===
+const pendingExams = computed<ExamHistoryItem[]>(() => [
+  {
+    id: 1,
+    title: t('exam.history.defaultExamTitle'),
+    status: t('exam.status.pending'),
+    statusType: 'primary',
+    date: '15 พฤษภาคม 2569',
+    time: '08:00-10:00',
+    location: 'Computer Center, BUU (L201)',
+    fee: 500,
+    deadline: '29:30',
+    actions: ['cancel', 'pay'],
+  },
+]);
+
+const historyExams = computed<ExamHistoryItem[]>(() => [
+  {
+    id: 2,
+    title: t('exam.history.defaultExamTitle'),
+    status: t('exam.status.verifying'),
+    statusType: 'primary',
+    date: '15 พฤษภาคม 2569',
+    time: '08:00-10:00',
+    location: 'Computer Center, BUU (L201)',
+  },
+  {
+    id: 3,
+    title: t('exam.history.defaultExamTitle'),
+    status: t('exam.status.verified'),
+    statusType: 'primary',
+    date: '15 พฤษภาคม 2569',
+    time: '08:00-10:00',
+    location: 'Computer Center, BUU (L201)',
+    actions: ['candidateCard', 'downloadReceipt'],
+  },
+  {
+    id: 4,
+    title: t('exam.history.defaultExamTitle'),
+    status: t('exam.status.evaluating'),
+    statusType: 'primary',
+    date: '15 พฤษภาคม 2569',
+    time: '08:00-10:00',
+    location: 'Computer Center, BUU (L201)',
+  },
+  {
+    id: 5,
+    title: t('exam.history.defaultExamTitle'),
+    status: t('exam.status.completed'),
+    statusType: 'primary',
+    date: '15 เมษายน 2569',
+    time: '08:00-10:00',
+    location: 'Computer Center, BUU (L201)',
+    customStatus: {
+      label: `${t('exam.statusLabel')} : ${t('exam.status.passed')}`,
+      type: 'success',
+      icon: 'check',
+    },
+    actions: ['scoreDetails', 'certificate'],
+  },
+  {
+    id: 6,
+    title: t('exam.history.defaultExamTitle'),
+    status: t('exam.status.completed'),
+    statusType: 'primary',
+    date: '15 เมษายน 2569',
+    time: '08:00-10:00',
+    location: 'Computer Center, BUU (L201)',
+    customStatus: {
+      label: `${t('exam.statusLabel')} : ${t('exam.status.failed')}`,
+      type: 'error',
+      icon: 'warning_amber',
+    },
+    actions: ['scoreDetails'],
+  },
+  {
+    id: 7,
+    title: t('exam.history.defaultExamTitle'),
+    status: t('exam.status.cancelled'),
+    statusType: 'primary',
+    date: '15 เมษายน 2569',
+    time: '08:00-10:00',
+    location: 'Computer Center, BUU (L201)',
+    customStatus: {
+      label: t('exam.status.paymentTimeout'),
+      type: 'error',
+      icon: 'warning_amber',
+    },
+  },
+]);
 </script>
 
 <style scoped lang="scss">
