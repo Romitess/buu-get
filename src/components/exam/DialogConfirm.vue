@@ -50,19 +50,16 @@
       <!-- Actions (Figma Spacing & Shadow) -->
       <q-card-actions class="row q-px-xl q-pb-xl q-col-gutter-md">
         <div class="col-6">
-          <q-btn
-            flat
+          <AppButton
+            outline
             label="ยกเลิก"
-            no-caps
             class="full-width btn-cancel"
             @click="$emit('update:modelValue', false)"
           />
         </div>
         <div class="col-6">
-          <q-btn
-            unelevated
+          <AppButton
             label="ยืนยันการสมัคร"
-            no-caps
             class="full-width btn-confirm"
             @click="$emit('confirm')"
           />
@@ -73,6 +70,8 @@
 </template>
 
 <script setup lang="ts">
+import AppButton from 'src/components/base/AppButton.vue';
+
 /**
  * DialogConfirm
  * Component สำหรับยืนยันการสมัครสอบ ตาม Figma UI 100%
@@ -97,7 +96,8 @@ defineEmits<{
   width: 100%;
   max-width: 460px;
   border-radius: 24px;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-lg);
   overflow: visible;
 }
 
@@ -109,7 +109,7 @@ defineEmits<{
   width: 72px;
   height: 72px;
   background: linear-gradient(135deg, #bbdefb 0%, #e3f2fd 100%);
-  color: #0d47a1;
+  color: var(--primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -120,13 +120,13 @@ defineEmits<{
 .text-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text-primary);
   letter-spacing: -0.01em;
 }
 
 .text-subtitle {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-secondary);
   text-align: center;
   line-height: 1.5;
   max-width: 400px;
@@ -138,23 +138,23 @@ defineEmits<{
   border: 1.5px solid #aecdf5;
   border-radius: 16px;
   padding: 20px 24px;
-  background-color: white;
+  background-color: var(--surface-card);
 }
 
 .info-row {
   .label-text {
     font-size: 0.95rem;
     font-weight: 500;
-    color: #555;
+    color: var(--text-secondary);
   }
   .value-text {
     font-size: 1.05rem;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--text-primary);
   }
   .underline {
     height: 1.5px;
-    background-color: #0d47a1;
+    background-color: var(--primary);
     opacity: 0.5;
     width: 100%;
     margin-top: 4px;
@@ -162,8 +162,6 @@ defineEmits<{
 }
 
 .btn-confirm {
-  background-color: #0d47a1 !important;
-  color: white !important;
   height: 48px;
   border-radius: 12px;
   font-weight: 600;
@@ -175,11 +173,10 @@ defineEmits<{
 }
 
 .btn-cancel {
-  color: #888 !important;
-  border: 1.5px solid #aecdf5 !important;
   height: 48px;
   border-radius: 12px;
   font-weight: 500;
-  background-color: white;
+  color: var(--text-muted) !important;
+  border: 1.5px solid #aecdf5 !important;
 }
 </style>
