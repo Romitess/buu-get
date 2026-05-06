@@ -8,13 +8,7 @@
     <!-- Exam Info -->
     <div class="round-exam__info">
       <h3 class="round-exam__title">{{ title }}</h3>
-      <AppButton
-        :label="roundTypeLabel"
-        color="secondary"
-        pill
-        dense
-        class="round-exam__tag"
-      />
+      <AppButton :label="roundTypeLabel" color="secondary" pill dense class="round-exam__tag" />
     </div>
 
     <!-- Spacer for flex layout -->
@@ -29,7 +23,7 @@
           <span class="text-muted">({{ totalSeats - availableSeats }}/{{ totalSeats }})</span>
         </span>
       </div>
-      
+
       <AppButton
         :label="isFull ? 'เต็ม (Full)' : 'ลงทะเบียนสอบ'"
         :color="isFull ? 'full' : 'primary'"
@@ -63,7 +57,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  roundTypeLabel: 'รอบทั่วไป'
+  roundTypeLabel: 'รอบทั่วไป',
 });
 
 defineEmits<{
@@ -95,7 +89,7 @@ const isFull = computed(() => props.availableSeats <= 0);
   &--full {
     background-color: #fafafa;
     border-color: #eee;
-    
+
     &:hover {
       transform: none;
       box-shadow: none;
@@ -180,13 +174,25 @@ const isFull = computed(() => props.availableSeats <= 0);
 
 @media (max-width: 600px) {
   .round-exam {
+    padding: 16px;
     &__title {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
     }
-    
+
     &__action-group {
       flex-direction: column;
-      align-items: flex-end;
+      align-items: stretch;
+      gap: 16px;
+    }
+
+    &__status {
+      justify-content: center;
+      width: 100%;
+    }
+
+    &__btn {
+      width: 100%;
+      min-width: unset;
     }
   }
 }

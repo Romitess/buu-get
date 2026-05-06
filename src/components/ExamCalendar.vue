@@ -302,4 +302,51 @@ const handleDaySelect = (dateString: string) => {
   height: 10px;
   border-radius: 50%;
 }
+
+@media (max-width: 600px) {
+  .calendar-card {
+    padding: 12px 16px;
+    border-radius: 12px;
+  }
+
+  .calendar-title h2 {
+    font-size: 15px;
+  }
+
+  .calendar-title p {
+    font-size: 11px;
+  }
+
+  .calendar-grid {
+    row-gap: 4px;
+    column-gap: 2px;
+  }
+
+  .day-cell {
+    font-size: 13px;
+    border-radius: 6px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    bottom: 3px;
+  }
+
+  .status-footer {
+    padding: 10px;
+    gap: 12px;
+    margin-top: 12px !important;
+  }
+
+  .status-item {
+    font-size: 12px;
+    gap: 5px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+  }
+}
 </style>

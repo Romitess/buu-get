@@ -93,4 +93,31 @@ defineProps<Props>();
   font-size: 15px;
   font-weight: 500;
 }
+
+// Responsive adjustments
+@media (max-width: 600px) {
+  .exam-detail-card {
+    border-radius: 12px;
+  }
+
+  .q-card__section {
+    padding: 16px !important;
+  }
+
+  .text-h6 {
+    font-size: 1.15rem !important;
+    line-height: 1.3;
+  }
+
+  .row.items-center.q-gutter-x-lg {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .detail-text {
+    font-size: 14px;
+  }
+}
 </style>
