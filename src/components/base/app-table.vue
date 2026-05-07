@@ -1,12 +1,5 @@
 <template>
-  <q-table
-    v-bind="$attrs"
-    :rows="rows"
-    :columns="columns"
-    flat
-    bordered
-    class="app-table"
-  >
+  <q-table v-bind="$attrs" :rows="rows" :columns="columns" flat bordered class="app-table">
     <!-- Pass all slots to the parent with explicit slot handling -->
     <template v-for="(_, slotName) in slots" v-slot:[slotName]="slotProps">
       <slot :name="slotName" v-bind="slotProps || {}" />

@@ -66,7 +66,9 @@
                   <q-icon name="event_seat" size="18px" color="blue-grey-5" />
                   <div>
                     <div class="info-label">หมายเลขที่นั่ง</div>
-                    <div class="info-value text-weight-bold text-amber-9">{{ voucherData.seatNo }}</div>
+                    <div class="info-value text-weight-bold text-amber-9">
+                      {{ voucherData.seatNo }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -95,10 +97,17 @@
             <q-icon name="menu_book" color="amber-8" size="24px" />
             <div>
               <div class="text-caption text-blue-grey-5">รอบสอบ</div>
-              <div class="text-subtitle1 text-weight-bold text-dark">{{ voucherData.examName }}</div>
+              <div class="text-subtitle1 text-weight-bold text-dark">
+                {{ voucherData.examName }}
+              </div>
             </div>
             <q-space />
-            <q-badge color="amber-8" text-color="black" class="q-pa-sm text-weight-bold" style="border-radius: 8px;">
+            <q-badge
+              color="amber-8"
+              text-color="black"
+              class="q-pa-sm text-weight-bold"
+              style="border-radius: 8px"
+            >
               {{ voucherData.examType }}
             </q-badge>
           </div>
@@ -110,7 +119,9 @@
         <div class="tear-line-dashes"></div>
         <div class="tear-label">
           <q-icon name="content_cut" size="16px" color="blue-grey-4" class="q-mr-xs" />
-          <span class="text-caption text-blue-grey-4">ตัดตามเส้นประ — ส่วนนี้ใช้สำหรับเข้าห้องสอบ</span>
+          <span class="text-caption text-blue-grey-4"
+            >ตัดตามเส้นประ — ส่วนนี้ใช้สำหรับเข้าห้องสอบ</span
+          >
         </div>
         <div class="tear-line-dashes"></div>
       </div>
@@ -147,7 +158,6 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -176,7 +186,6 @@ const mockData: VoucherData = {
 };
 
 const voucherData = computed<VoucherData>(() => props.data ?? mockData);
-
 </script>
 
 <style scoped>
@@ -314,8 +323,6 @@ const voucherData = computed<VoucherData>(() => props.data ?? mockData);
   border-radius: 8px;
   border: 1px solid #eceff1;
 }
-
-
 
 /* ===== Responsive ===== */
 @media (max-width: 599px) {

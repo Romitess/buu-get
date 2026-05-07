@@ -14,7 +14,7 @@
       'app-button--dark': color === 'buu-gray-dark',
       'app-button--flat': flat,
       'app-button--round': round,
-      'app-button--pill': pill
+      'app-button--pill': pill,
     }"
     :icon="icon"
     :label="label"
@@ -54,7 +54,7 @@ withDefaults(defineProps<Props>(), {
   flat: false,
   outline: false,
   round: false,
-  pill: false
+  pill: false,
 });
 </script>
 
@@ -80,7 +80,7 @@ withDefaults(defineProps<Props>(), {
     padding: 6px 18px;
     font-size: 0.85rem;
   }
-  
+
   // Brand Variant (Primary Dark Blue - #0D47A1)
   &--brand {
     background-color: var(--primary) !important;
@@ -112,7 +112,7 @@ withDefaults(defineProps<Props>(), {
     background-color: #ffebeb !important;
     color: #f44336 !important;
     border: none;
-    
+
     &:hover {
       background-color: #ffdada !important;
     }
@@ -122,7 +122,7 @@ withDefaults(defineProps<Props>(), {
   &--dark {
     background-color: var(--surface-sidebar) !important;
     color: white !important;
-    
+
     &:hover {
       filter: brightness(1.2);
       transform: translateY(-1px);

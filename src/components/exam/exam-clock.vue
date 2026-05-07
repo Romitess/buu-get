@@ -55,11 +55,11 @@ defineProps<Props>();
   .exam-clock {
     padding: 8px 16px;
     min-width: 100px;
-    
+
     &__icon {
       font-size: 20px;
     }
-    
+
     &__time {
       font-size: 0.9rem;
     }

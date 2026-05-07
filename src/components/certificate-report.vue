@@ -9,15 +9,29 @@
         <!-- Header -->
         <div class="certificate-header">
           <div class="column items-center justify-center text-center">
-            <img src="~assets/img/logobuu.png" style="width: 64px; height: auto" alt="BUU Logo" class="q-mb-sm" />
+            <img
+              src="~assets/img/logobuu.png"
+              style="width: 64px; height: auto"
+              alt="BUU Logo"
+              class="q-mb-sm"
+            />
             <div>
-              <div class="text-overline text-blue-grey-5" style="letter-spacing: 3px; font-size: 13px; line-height: 1;">
+              <div
+                class="text-overline text-blue-grey-5"
+                style="letter-spacing: 3px; font-size: 13px; line-height: 1"
+              >
                 BURAPHA UNIVERSITY
               </div>
-              <div class="text-h5 text-weight-bold text-dark q-my-xs" style="letter-spacing: -0.5px">
+              <div
+                class="text-h5 text-weight-bold text-dark q-my-xs"
+                style="letter-spacing: -0.5px"
+              >
                 วุฒิบัตร
               </div>
-              <div class="text-subtitle2 text-blue-grey-5" style="letter-spacing: 2px; font-size: 12px;">
+              <div
+                class="text-subtitle2 text-blue-grey-5"
+                style="letter-spacing: 2px; font-size: 12px"
+              >
                 CERTIFICATE OF ACHIEVEMENT
               </div>
             </div>
@@ -89,16 +103,14 @@
             <!-- Signature Right -->
             <div class="text-center" style="min-width: 220px">
               <div class="signature-line"></div>
-              <div class="text-body2 text-blue-grey-8 text-weight-medium">
-                คณบดีคณะมนุษยศาสตร์
-              </div>
+              <div class="text-body2 text-blue-grey-8 text-weight-medium">คณบดีคณะมนุษยศาสตร์</div>
               <div class="text-caption text-blue-grey-5">มหาวิทยาลัยบูรพา</div>
             </div>
           </div>
 
           <!-- Issued Date -->
           <div class="text-center">
-            <div class="text-caption text-blue-grey-5" style="font-size: 11px;">
+            <div class="text-caption text-blue-grey-5" style="font-size: 11px">
               ออกให้ ณ วันที่ {{ certData.issuedDate }}
             </div>
           </div>
@@ -223,7 +235,6 @@ const certData = computed<CertificateData>(() => props.data ?? mockData);
   background: linear-gradient(90deg, transparent 0%, #ffce00 50%, transparent 100%);
   margin: 12px auto 0;
 }
-
 
 /* ===== Signature ===== */
 .signature-line {
