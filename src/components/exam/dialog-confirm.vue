@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import AppButton from 'src/components/base/AppButton.vue';
+import AppButton from 'src/components/base/app-button.vue';
 
 /**
  * DialogConfirm

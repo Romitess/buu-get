@@ -97,7 +97,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { User } from 'src/components/models';
 import type { RegisterFormData } from 'src/types/register';
-import type { RegisterCredentials } from 'src/components/RegisterCard.vue';
+import type { RegisterCredentials } from 'src/components/register-card.vue';
 import { useRegisterForm } from 'src/composables/use-register-form';
 
 import IdentityColumn from 'src/components/register/identity-column.vue';

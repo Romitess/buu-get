@@ -123,7 +123,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { Exam } from './models';
-import AppButton from './base/AppButton.vue';
+import AppButton from './base/app-button.vue';
 
 // Props
 interface Props {

@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import AppButton from 'src/components/base/AppButton.vue';
+import AppButton from 'src/components/base/app-button.vue';
 
 interface Props {
   title?: string;

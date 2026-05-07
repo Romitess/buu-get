@@ -90,8 +90,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import AppStatusBadge from '../base/AppStatusBadge.vue';
-import AppButton from '../base/AppButton.vue';
+import AppStatusBadge from '../base/app-status-badge.vue';
+import AppButton from '../base/app-button.vue';
 
 interface Props {
   title: string;

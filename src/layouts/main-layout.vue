@@ -31,8 +31,8 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-import EssentialLink from 'components/EssentialLink.vue';
-import FooterCredits from 'src/components/footer/FooterCredits.vue';
+import EssentialLink from 'components/essential-link.vue';
+import FooterCredits from 'src/components/footer/footer-credits.vue';
 import { useNavigation } from 'src/composables/use-navigation';
 
 const route = useRoute();

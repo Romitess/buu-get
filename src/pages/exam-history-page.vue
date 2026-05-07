@@ -137,10 +137,10 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
-import AppExamHistoryCard from 'src/components/exam/AppExamHistoryCard.vue';
-import AppButton from 'src/components/base/AppButton.vue';
-import AppPaymentDialog from 'src/components/exam/AppPaymentDialog.vue';
-import DialogCancel from 'src/components/exam/DialogCancel.vue';
+import AppExamHistoryCard from 'src/components/exam/app-exam-history-card.vue';
+import AppButton from 'src/components/base/app-button.vue';
+import AppPaymentDialog from 'src/components/exam/app-payment-dialog.vue';
+import DialogCancel from 'src/components/exam/dialog-cancel.vue';
 import { useExamStore } from 'src/stores/exam.store';
 
 /** สถานะเพิ่มเติม เช่น ผ่าน/ไม่ผ่าน หรือ หมดเวลาชำระเงิน */

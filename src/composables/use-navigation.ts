@@ -1,7 +1,7 @@
 import { computed, ref, type ComputedRef, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from 'src/stores/user.store';
-import type { EssentialLinkProps } from 'components/EssentialLink.vue';
+import type { EssentialLinkProps } from 'components/essential-link.vue';
 
 export interface AppLink extends EssentialLinkProps {
   requiresAuth?: boolean;

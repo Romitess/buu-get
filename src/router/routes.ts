@@ -11,23 +11,23 @@ declare module 'vue-router' {
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    component: () => import('layouts/MainLayout.vue'),
+    component: () => import('layouts/main-layout.vue'),
     children: [
       {
         path: '',
-        component: () => import('pages/IndexPage.vue'),
+        component: () => import('pages/index-page.vue'),
         meta: { requiresAuth: false },
       },
       {
         path: 'exam-schedule',
         name: 'exam-schedule',
-        component: () => import('pages/ExamSchedulePage.vue'),
+        component: () => import('pages/exam-schedule-page.vue'),
         meta: { requiresAuth: false },
       },
       {
         path: 'exam-history',
         name: 'exam-history',
-        component: () => import('pages/ExamHistoryPage.vue'),
+        component: () => import('pages/exam-history-page.vue'),
         meta: { requiresAuth: false },
       },
       {
@@ -39,7 +39,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'login',
         name: 'login',
-        component: () => import('pages/LoginPage.vue'),
+        component: () => import('pages/login-page.vue'),
         meta: {
           requiresAuth: false,
           hideHeader: true,
@@ -50,7 +50,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'register',
         name: 'register',
-        component: () => import('pages/RegisterPage.vue'),
+        component: () => import('pages/register-page.vue'),
         meta: {
           requiresAuth: false,
           hideHeader: true,
@@ -75,7 +75,7 @@ const routes: RouteRecordRaw[] = [
   // but you can also remove it
   {
     path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue'),
+    component: () => import('pages/error-not-found.vue'),
   },
 ];
 

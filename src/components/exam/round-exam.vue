@@ -40,8 +40,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import ExamClock from './ExamClock.vue';
-import AppButton from '../base/AppButton.vue';
+import ExamClock from './exam-clock.vue';
+import AppButton from '../base/app-button.vue';
 
 /**
  * RoundExam Component

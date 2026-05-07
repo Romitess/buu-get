@@ -80,11 +80,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import RegisterCard from 'src/components/RegisterCard.vue';
-import type { RegisterCredentials } from 'src/components/RegisterCard.vue';
+import RegisterCard from 'src/components/register-card.vue';
+import type { RegisterCredentials } from 'src/components/register-card.vue';
 import type { RegisterFormData } from 'src/types/register';
 import RegisterAndEditProfile from 'src/components/register-and-edit-profile.vue';
-import FooterCredits from 'src/components/footer/FooterCredits.vue';
+import FooterCredits from 'src/components/footer/footer-credits.vue';
 
 type Step = 'credentials' | 'profile';
 
