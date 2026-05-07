@@ -16,6 +16,7 @@
         hide-bottom-space
         class="custom-input"
         :class="inputClass"
+        v-bind="$attrs"
       />
     </template>
 
@@ -23,23 +24,34 @@
       <q-input
         :model-value="modelValue"
         @update:model-value="$emit('update:model-value', $event)"
-        :type="type"
+        :type="type === 'date' ? 'text' : type"
         :placeholder="placeholder"
         outlined
         dense
         :stack-label="type === 'date'"
-        :readonly="readonly"
+        :readonly="readonly || type === 'date'"
         :rules="rules ? [...rules] : undefined"
         hide-bottom-space
         :rows="type === 'textarea' ? 5 : undefined"
         class="custom-input"
         :class="inputClass"
-      />
+        v-bind="$attrs"
+      >
+        <template v-if="type === 'date'" v-slot:append>
+          <q-icon name="event" class="cursor-pointer">
+            <slot name="append-inner"></slot>
+          </q-icon>
+        </template>
+      </q-input>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
+defineOptions({
+  inheritAttrs: false,
+});
+
 type ValidationRule = (
   val: string | number | null | undefined,
 ) => boolean | string | Promise<boolean | string>;

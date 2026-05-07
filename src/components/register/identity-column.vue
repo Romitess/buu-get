@@ -69,12 +69,32 @@
     />
 
     <!-- ─── วันเกิด / Date of Birth ─── -->
-    <AppFormField
-      v-model="birthdate"
-      type="date"
-      :label="t('profile.birthdate')"
-      :rules="[(val) => !!val || t('profile.requiredBirthdate')]"
-    />
+    <div class="relative-position">
+      <AppFormField
+        v-model="birthdate"
+        type="date"
+        :label="t('profile.birthdate')"
+        :rules="[(val) => !!val || t('profile.requiredBirthdate')]"
+        @dblclick="showCalendar = true"
+      >
+        <!-- ไอคอนปฏิทินเรียกปฏิทินใหม่ -->
+        <template #append-inner>
+          <q-menu
+            v-model="showCalendar"
+            anchor="top left"
+            self="bottom left"
+            class="shadow-5"
+            style="border-radius: 16px; overflow: hidden"
+          >
+            <AppCalendar
+              :model-value="birthdate"
+              @update:model-value="(val) => (birthdate = val)"
+              @click-date="showCalendar = false"
+            />
+          </q-menu>
+        </template>
+      </AppFormField>
+    </div>
 
     <!-- ─── ระดับการศึกษา / Highest Education ─── -->
     <AppFormField
@@ -88,12 +108,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { TITLE_TH_OPTIONS, TITLE_EN_OPTIONS } from 'src/utils/form-options';
 import AppFormField from 'src/components/base/app-form-field.vue';
+import AppCalendar from 'src/components/app-calendar.vue';
 
 const { t } = useI18n();
+const showCalendar = ref(false);
 
 defineProps<{
   isThai: boolean;
