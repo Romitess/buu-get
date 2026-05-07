@@ -8,60 +8,60 @@
   >
     <q-card class="dialog-cancel-card">
       <q-card-section class="column items-center q-pt-xl q-pb-lg">
-        <!-- Icon Header (Figma 100%) -->
         <div class="icon-container-wrapper">
-          <div class="icon-container">
+          <q-avatar class="icon-container">
             <q-icon name="calendar_today" size="28px" />
-          </div>
+          </q-avatar>
         </div>
 
-        <!-- Title & Subtitle -->
-        <div class="text-title q-mt-md">{{ title }}</div>
+        <div class="text-title q-mt-md">{{ title || t('examSchedule.dialogCancel.title') }}</div>
         <div class="text-subtitle q-mt-sm">
-          {{ subtitle }}
+          {{ subtitle || t('examSchedule.dialogCancel.subtitle') }}
         </div>
       </q-card-section>
 
-      <!-- Info Box (Figma Style: Underlined Rows) -->
       <q-card-section class="q-px-xl q-pb-lg">
-        <div class="info-box">
-          <div class="info-row">
-            <div class="row justify-between items-end q-pb-xs">
-              <div class="row items-center label-text">
-                <q-icon name="event" size="18px" class="q-mr-sm" />
-                <span>Date</span>
+        <q-list class="info-box q-pa-none">
+          <q-item class="info-row q-pa-none" dense style="min-height: unset">
+            <q-item-section class="q-pa-none">
+              <div class="row justify-between items-end q-pb-xs">
+                <div class="row items-center label-text">
+                  <q-icon name="event" size="18px" class="q-mr-sm" />
+                  <span>{{ t('examSchedule.dialogCancel.date') }}</span>
+                </div>
+                <div class="value-text">{{ examDate }}</div>
               </div>
-              <div class="value-text">{{ examDate }}</div>
-            </div>
-            <div class="underline"></div>
-          </div>
+              <div class="underline"></div>
+            </q-item-section>
+          </q-item>
 
-          <div class="info-row q-mt-md">
-            <div class="row justify-between items-end q-pb-xs">
-              <div class="row items-center label-text">
-                <q-icon name="schedule" size="18px" class="q-mr-sm" />
-                <span>Time</span>
+          <q-item class="info-row q-mt-md q-pa-none" dense style="min-height: unset">
+            <q-item-section class="q-pa-none">
+              <div class="row justify-between items-end q-pb-xs">
+                <div class="row items-center label-text">
+                  <q-icon name="schedule" size="18px" class="q-mr-sm" />
+                  <span>{{ t('examSchedule.dialogCancel.time') }}</span>
+                </div>
+                <div class="value-text">{{ examTime }}</div>
               </div>
-              <div class="value-text">{{ examTime }}</div>
-            </div>
-            <div class="underline"></div>
-          </div>
-        </div>
+              <div class="underline"></div>
+            </q-item-section>
+          </q-item>
+        </q-list>
       </q-card-section>
 
-      <!-- Actions (Figma Spacing & Shadow) -->
       <q-card-actions class="row q-px-xl q-pb-xl q-col-gutter-md">
         <div class="col-6">
           <AppButton
             outline
-            :label="cancelBtnText"
+            :label="cancelBtnText || t('examSchedule.dialogCancel.cancel')"
             class="full-width dialog-btn"
             @click="$emit('update:modelValue', false)"
           />
         </div>
         <div class="col-6">
           <AppButton
-            :label="confirmBtnText"
+            :label="confirmBtnText || t('examSchedule.dialogCancel.confirm')"
             class="full-width dialog-btn"
             @click="$emit('confirm')"
           />
@@ -72,34 +72,23 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
+import type { DialogCancelProps } from 'src/types/exam';
 
 /**
  * DialogCancel
  * Component สำหรับยืนยันยกเลิกการสมัครสอบ ตาม Figma UI 100%
  */
 
-interface Props {
-  modelValue: boolean;
-  examDate: string;
-  examTime: string;
-  title?: string;
-  subtitle?: string;
-  cancelBtnText?: string;
-  confirmBtnText?: string;
-}
-
-withDefaults(defineProps<Props>(), {
-  title: 'ยืนยันยกเลิกการสมัครสอบ',
-  subtitle: 'คุณต้องการยืนยันยกเลิกการสมัครสอบในรอบที่เลือกใช่หรือไม่?',
-  cancelBtnText: 'ยกเลิก',
-  confirmBtnText: 'ยืนยันการยกเลิก',
-});
+defineProps<DialogCancelProps>();
 
 defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
   (e: 'confirm'): void;
 }>();
+
+const { t } = useI18n();
 </script>
 
 <style scoped lang="scss">

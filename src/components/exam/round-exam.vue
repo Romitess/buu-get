@@ -1,90 +1,62 @@
 <template>
-  <div class="round-exam" :class="{ 'round-exam--full': isFull }">
-    <!-- Time Slot -->
-    <div class="round-exam__time">
+  <q-card class="round-exam" :class="{ 'round-exam--full': isFull }">
+    <q-card-section class="round-exam__time q-pa-none">
       <ExamClock :time-range="timeRange" />
-    </div>
+    </q-card-section>
 
-    <!-- Exam Info -->
-    <div class="round-exam__info">
+    <q-card-section class="round-exam__info q-pa-none">
       <h3 class="round-exam__title">{{ title }}</h3>
-      <AppButton :label="roundTypeLabel" color="secondary" pill dense class="round-exam__tag" />
-    </div>
+      <AppButton
+        :label="roundTypeLabel || t('examSchedule.roundTypeLabel')"
+        color="secondary"
+        pill
+        dense
+        class="round-exam__tag"
+      />
+    </q-card-section>
+    <q-space />
 
-    <!-- Spacer for flex layout -->
-    <div class="q-space" />
-
-    <!-- Status and Action -->
-    <div class="round-exam__action-group">
+    <q-card-actions class="round-exam__action-group q-pa-none">
       <div class="round-exam__status" :class="isFull ? 'text-negative' : 'text-positive'">
         <q-icon name="groups" size="xs" />
         <span class="round-exam__seats">
           {{
             isFull
-              ? fullStatusText
-              : `${availableStatusTextPrefix}${availableSeats}${availableStatusTextSuffix}`
+              ? fullStatusText || t('examSchedule.fullStatusText')
+              : `${availableStatusTextPrefix || t('examSchedule.availableStatusTextPrefix')}${availableSeats}${availableStatusTextSuffix || t('examSchedule.availableStatusTextSuffix')}`
           }}
           <span class="text-muted">({{ totalSeats - availableSeats }}/{{ totalSeats }})</span>
         </span>
       </div>
 
       <AppButton
-        :label="isFull ? fullBtnText : registerBtnText"
+        :label="
+          isFull
+            ? fullBtnText || t('examSchedule.fullBtnText')
+            : registerBtnText || t('examSchedule.registerBtnText')
+        "
         :color="isFull ? 'full' : 'primary'"
         class="round-exam__btn"
         @click="$emit('register')"
       />
-    </div>
-  </div>
+    </q-card-actions>
+  </q-card>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { RoundExamProps } from 'src/types/exam';
 import ExamClock from './exam-clock.vue';
 import AppButton from '../base/app-button.vue';
 
-/**
- * RoundExam Component
- * A card representing an exam round with time, title, status, and action.
- */
-interface Props {
-  /** Exam title (e.g., 'BUU - GET (General)') */
-  title: string;
-  /** Time range (e.g., '10:30 - 11:30') */
-  timeRange: string;
-  /** Number of available seats */
-  availableSeats: number;
-  /** Total number of seats */
-  totalSeats: number;
-  /** Label for the round type (e.g., 'รอบทั่วไป') */
-  roundTypeLabel?: string;
-
-  /** Text shown when round is full */
-  fullStatusText?: string;
-  /** Prefix text for available seats */
-  availableStatusTextPrefix?: string;
-  /** Suffix text for available seats */
-  availableStatusTextSuffix?: string;
-  /** Button text when full */
-  fullBtnText?: string;
-  /** Button text when available */
-  registerBtnText?: string;
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  roundTypeLabel: 'รอบทั่วไป',
-  fullStatusText: 'ไม่มีที่ว่าง',
-  availableStatusTextPrefix: 'ว่าง ',
-  availableStatusTextSuffix: ' ที่นั่ง',
-  fullBtnText: 'เต็ม (Full)',
-  registerBtnText: 'ลงทะเบียนสอบ',
-});
+const props = defineProps<RoundExamProps>();
 
 defineEmits<{
   (e: 'register'): void;
 }>();
 
-/** Computed property to determine if the round is full */
+const { t } = useI18n();
 const isFull = computed(() => props.availableSeats <= 0);
 </script>
 
@@ -97,18 +69,20 @@ const isFull = computed(() => props.availableSeats <= 0);
   border-radius: 16px;
   border: 1px solid #e8e8e8;
   margin-bottom: 12px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25) !important;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
   gap: 16px;
 
-  &--full {
-    background-color: #fafafa;
-    border-color: #eee;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
 
-    &:hover {
-      transform: none;
-      box-shadow: none;
-    }
+  &--full {
+    background-color: #ffffff;
+    border-color: #e8e8e8;
   }
 
   &__time {
@@ -161,7 +135,6 @@ const isFull = computed(() => props.availableSeats <= 0);
   }
 }
 
-// Responsive layout
 @media (max-width: 900px) {
   .round-exam {
     flex-wrap: wrap;

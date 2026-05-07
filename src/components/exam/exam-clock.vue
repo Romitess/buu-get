@@ -1,21 +1,14 @@
 <template>
-  <div class="exam-clock">
+  <q-card class="exam-clock" flat bordered>
     <q-icon name="access_time" class="exam-clock__icon" />
     <span class="exam-clock__time">{{ timeRange }}</span>
-  </div>
+  </q-card>
 </template>
 
 <script setup lang="ts">
-/**
- * Clock Component
- * Displays the exam time slot with an icon.
- */
-interface Props {
-  /** Time range string (e.g., '10:30 - 11:30') */
-  timeRange: string;
-}
+import type { ExamClockProps } from 'src/types/exam';
 
-defineProps<Props>();
+defineProps<ExamClockProps>();
 </script>
 
 <style scoped lang="scss">
@@ -50,7 +43,6 @@ defineProps<Props>();
   }
 }
 
-// Responsive adjustments
 @media (max-width: 600px) {
   .exam-clock {
     padding: 8px 16px;
