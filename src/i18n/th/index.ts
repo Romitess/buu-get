@@ -91,6 +91,7 @@ export default {
     requiredFullNameEn: 'กรุณากรอกชื่อ-นามสกุลภาษาอังกฤษ',
     requiredBirthdate: 'กรุณาระบุวันเกิด',
     requiredEducation: 'กรุณาเลือกระดับการศึกษา',
+    requiredPhone: 'กรุณากรอกเบอร์โทรศัพท์',
     eduHighSchool: 'มัธยมศึกษา',
     eduBachelor: 'ปริญญาตรี',
     eduMaster: 'ปริญญาโท',
