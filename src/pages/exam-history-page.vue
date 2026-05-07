@@ -11,7 +11,7 @@
     <!-- Pending Payment Section -->
     <div v-if="pendingExams.length > 0" class="history-section q-mb-xl">
       <div class="section-title row items-center q-mb-md">
-        <q-icon name="schedule" size="24px" style="color: var(--badge-error-dot)" class="q-mr-sm" />
+        <q-icon name="schedule" size="var(--space-lg)" class="section-icon q-mr-sm" />
         <span class="text-weight-bold text-subtitle1">{{
           $t('exam.history.pendingSectionTitle')
         }}</span>
@@ -36,14 +36,14 @@
               v-if="exam.actions?.includes('cancel')"
               outline
               :label="$t('exam.history.cancel')"
-              class="action-btn btn-cancel"
+              class="action-btn btn-action-outline"
               @click="handleCancel(exam)"
             />
             <AppButton
               v-if="exam.actions?.includes('pay')"
               icon="payments"
               :label="$t('exam.history.pay')"
-              class="action-btn pay-btn"
+              class="action-btn btn-action-filled"
               @click="handlePay(exam)"
             />
           </template>
@@ -54,7 +54,7 @@
     <!-- History Section -->
     <div v-if="historyExams.length > 0" class="history-section">
       <div class="section-title row items-center q-mb-md">
-        <q-icon name="schedule" size="24px" style="color: var(--badge-error-dot)" class="q-mr-sm" />
+        <q-icon name="schedule" size="var(--space-lg)" class="section-icon q-mr-sm" />
         <span class="text-weight-bold text-subtitle1">{{ $t('exam.history.sectionTitle') }}</span>
       </div>
 
@@ -73,10 +73,7 @@
             <div :class="['custom-status', `${exam.customStatus.type}-status`, 'row items-center']">
               <q-icon
                 :name="exam.customStatus.icon"
-                size="20px"
-                :style="{
-                  color: `var(--badge-${exam.customStatus.type}-dot)`,
-                }"
+                size="calc(var(--space-unit) * 5)"
                 class="q-mr-xs"
               />
               <span :class="{ 'text-weight-bold': exam.customStatus.type === 'error' }">
@@ -90,25 +87,25 @@
               v-if="exam.actions?.includes('scoreDetails')"
               outline
               :label="$t('exam.history.scoreDetails')"
-              class="action-btn btn-cancel"
+              class="action-btn btn-action-outline"
             />
             <AppButton
               v-if="exam.actions?.includes('certificate')"
               icon="file_download"
               :label="$t('exam.history.certificate')"
-              class="action-btn pay-btn"
+              class="action-btn btn-action-filled"
             />
             <AppButton
               v-if="exam.actions?.includes('candidateCard')"
               icon="file_download"
               :label="$t('exam.history.candidateCard')"
-              class="action-btn pay-btn"
+              class="action-btn btn-action-filled"
             />
             <AppButton
               v-if="exam.actions?.includes('downloadReceipt')"
               icon="receipt_long"
               :label="$t('exam.history.downloadReceipt')"
-              class="action-btn pay-btn"
+              class="action-btn btn-action-filled"
             />
           </template>
         </AppExamHistoryCard>
@@ -143,28 +140,7 @@ import AppPaymentDialog from 'src/components/exam/app-payment-dialog.vue';
 import DialogCancel from 'src/components/exam/dialog-cancel.vue';
 import { useExamStore } from 'src/stores/exam.store';
 import { DEFAULT_EXAM_FEE_THB, PAYMENT_DIALOG_COUNTDOWN_DEFAULT } from 'src/constants/exam';
-
-/** สถานะเพิ่มเติม เช่น ผ่าน/ไม่ผ่าน หรือ หมดเวลาชำระเงิน */
-interface CustomStatus {
-  label: string;
-  type: 'success' | 'error';
-  icon: string;
-}
-
-/** รายการสอบแต่ละรายการในประวัติการสอบ */
-interface ExamHistoryRecord {
-  id: number;
-  title: string;
-  status: string;
-  statusType: 'primary' | 'success' | 'warning' | 'error' | 'info';
-  date: string;
-  time: string;
-  location: string;
-  fee?: number;
-  deadline?: string;
-  customStatus?: CustomStatus;
-  actions?: string[];
-}
+import type { ExamHistoryItem } from 'src/types/exam';
 
 const { t } = useI18n();
 const examStore = useExamStore();
@@ -174,17 +150,17 @@ const { pendingRegistrations, historyRecords } = storeToRefs(examStore);
 
 // === UI-only State ===
 const showPaymentDialog = ref(false);
-const selectedExam = ref<ExamHistoryRecord | null>(null);
+const selectedExam = ref<ExamHistoryItem | null>(null);
 
 const showCancelDialog = ref(false);
-const selectedExamForCancel = ref<ExamHistoryRecord | null>(null);
+const selectedExamForCancel = ref<ExamHistoryItem | null>(null);
 
 // === Computed: แปลง i18n keys เป็นข้อความจริง ===
 /**
  * Store เก็บ status เป็น translation key (เช่น 'exam.status.pending')
  * ที่นี่เราแปลงเป็นข้อความจริงก่อนส่งให้ Template
  */
-const pendingExams = computed<ExamHistoryRecord[]>(() =>
+const pendingExams = computed<ExamHistoryItem[]>(() =>
   pendingRegistrations.value.map((item) => ({
     ...item,
     title: t('exam.history.defaultExamTitle'),
@@ -192,9 +168,9 @@ const pendingExams = computed<ExamHistoryRecord[]>(() =>
   })),
 );
 
-const historyExams = computed<ExamHistoryRecord[]>(() =>
+const historyExams = computed<ExamHistoryItem[]>(() =>
   historyRecords.value.map((item) => {
-    const translated: ExamHistoryRecord = {
+    const translated: ExamHistoryItem = {
       ...item,
       title: t('exam.history.defaultExamTitle'),
       status: t(item.status),
@@ -214,21 +190,20 @@ const historyExams = computed<ExamHistoryRecord[]>(() =>
 );
 
 // === Methods ===
-const handleTimeout = (exam: ExamHistoryRecord) => {
+const handleTimeout = (exam: ExamHistoryItem) => {
   examStore.cancelRegistration(exam.id);
 };
 
-const handlePay = (exam: ExamHistoryRecord) => {
+const handlePay = (exam: ExamHistoryItem) => {
   selectedExam.value = exam;
   showPaymentDialog.value = true;
 };
 
 const handleSaveQR = () => {
-  // Logic to save/download QR image
-  console.log('Saving QR Code...');
+  // TODO: Logic to save/download QR image
 };
 
-const handleCancel = (exam: ExamHistoryRecord) => {
+const handleCancel = (exam: ExamHistoryItem) => {
   selectedExamForCancel.value = exam;
   showCancelDialog.value = true;
 };
@@ -277,7 +252,7 @@ const handleConfirmCancel = () => {
 .action-btn {
   // Let AppButton handle its own sizing — only define color variants here
 
-  &.btn-cancel {
+  &.btn-action-outline {
     color: var(--text-primary) !important;
     border-color: var(--border-color) !important;
     &:hover {
@@ -285,13 +260,17 @@ const handleConfirmCancel = () => {
     }
   }
 
-  &.pay-btn {
+  &.btn-action-filled {
     background-color: var(--primary) !important;
     color: var(--text-on-primary) !important;
     :deep(.q-icon) {
       color: var(--text-on-primary) !important;
     }
   }
+}
+
+.section-icon {
+  color: var(--badge-error-dot);
 }
 
 .custom-status {
@@ -308,6 +287,11 @@ const handleConfirmCancel = () => {
 
   &.warning-status {
     color: var(--badge-warning-dot);
+  }
+
+  // Icon inherits color from parent status class
+  :deep(.q-icon) {
+    color: inherit;
   }
 
   @media (max-width: 600px) {

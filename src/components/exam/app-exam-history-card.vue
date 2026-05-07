@@ -9,12 +9,8 @@
       <div class="row items-center q-gutter-x-md status-group">
         <AppStatusBadge :label="statusLabel" :type="statusType" />
         <slot name="status-append">
-          <div
-            v-if="displayDeadline"
-            class="deadline-text row items-center"
-            style="color: var(--badge-error-dot)"
-          >
-            <q-icon name="warning_amber" size="18px" class="q-mr-xs" />
+          <div v-if="displayDeadline" class="deadline-text row items-center">
+            <q-icon name="warning_amber" size="calc(var(--space-unit) * 4.5)" class="q-mr-xs" />
             {{ $t('exam.history.paymentDeadline') }} {{ displayDeadline }}
           </div>
         </slot>
@@ -86,22 +82,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
-import AppStatusBadge from '../base/app-status-badge.vue';
-import AppButton from '../base/app-button.vue';
+import { toRef } from 'vue';
+import AppStatusBadge from 'src/components/base/app-status-badge.vue';
+import AppButton from 'src/components/base/app-button.vue';
+import { useCountdown } from 'src/composables/use-countdown';
 
 interface Props {
   title: string;
   statusLabel: string;
-  statusType?: 'primary' | 'success' | 'warning' | 'error' | 'info' | undefined;
+  statusType?: 'primary' | 'success' | 'warning' | 'error' | 'info';
   date: string;
   time: string;
   location: string;
   fee?: number | undefined;
   deadline?: string | undefined;
-  showCancel?: boolean | undefined;
-  showPay?: boolean | undefined;
-  showDownload?: boolean | undefined;
+  showCancel?: boolean;
+  showPay?: boolean;
+  showDownload?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -113,68 +110,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits(['cancel', 'pay', 'download', 'timeout']);
 
-// === Timer Logic ===
-const displayDeadline = ref(props.deadline);
-let timerInterval: ReturnType<typeof setInterval> | null = null;
-
-const startTimer = () => {
-  const deadlineStr = props.deadline;
-  if (!deadlineStr) return;
-
-  let targetTime: number;
-
-  // รองรับทั้งแบบ Mock (MM:SS) และแบบใช้งานจริงกับ Backend (ISO Date String)
-  if (deadlineStr.includes(':') && deadlineStr.length <= 5) {
-    const parts = deadlineStr.split(':');
-    const minutes = parseInt(parts[0] || '0', 10);
-    const seconds = parseInt(parts[1] || '0', 10);
-    if (isNaN(minutes) || isNaN(seconds)) return;
-    targetTime = Date.now() + (minutes * 60 + seconds) * 1000;
-  } else {
-    const parsedDate = new Date(deadlineStr);
-    if (isNaN(parsedDate.getTime())) return;
-    targetTime = parsedDate.getTime();
-  }
-
-  const updateDisplay = () => {
-    const now = Date.now();
-    const diff = targetTime - now;
-
-    if (diff <= 0) {
-      if (timerInterval) clearInterval(timerInterval);
-      displayDeadline.value = '00:00';
-      emit('timeout');
-      return;
-    }
-
-    const totalSeconds = Math.floor(diff / 1000);
-    const m = Math.floor(totalSeconds / 60);
-    const s = totalSeconds % 60;
-
-    displayDeadline.value = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
-
-  updateDisplay(); // อัปเดตทันทีที่เริ่ม
-  timerInterval = setInterval(updateDisplay, 1000);
-};
-
-onMounted(() => {
-  startTimer();
-});
-
-onUnmounted(() => {
-  if (timerInterval) clearInterval(timerInterval);
-});
-
-// Restart timer if deadline prop changes externally
-watch(
-  () => props.deadline,
-  (newVal) => {
-    if (timerInterval) clearInterval(timerInterval);
-    displayDeadline.value = newVal;
-    startTimer();
-  },
-);
+// === Timer Logic (Composable) ===
+const { displayDeadline } = useCountdown(toRef(props, 'deadline'), () => emit('timeout'));
 </script>
 
 <style scoped lang="scss">
@@ -203,6 +140,7 @@ watch(
 .deadline-text {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
+  color: var(--badge-error-dot);
   display: flex;
   align-items: center;
 }
