@@ -116,7 +116,7 @@ const isEditMode = ref<boolean>(props.initialEditMode);
 const isThailand = computed<boolean>(() => props.isThai);
 
 const submitButtonText = computed<string>(() =>
-  isEditMode.value ? t('profile.saveEdit') : t('profile.register'),
+  isEditMode.value ? t('profile.saveEdit') : t('profile.save'),
 );
 
 const { formData, dialog, initFormData, handleTitleTHChange, submitForm, onDialogClose } =
