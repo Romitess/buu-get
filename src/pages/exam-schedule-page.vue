@@ -17,12 +17,13 @@
           v-model="selectedDate"
           :availability="calendarAvailability"
           @change-month="onMonthChange"
+          @main-card-resize="onCalendarResize"
         />
       </div>
 
       <!-- ฝั่งขวา: รอบสอบ -->
       <div class="col-12 col-md-7">
-        <div class="rounds-section">
+        <div class="rounds-section" :style="roundsSectionStyle">
           <!-- หัวข้อรอบสอบ -->
           <div class="rounds-header">
             <div class="rounds-header__title-row">
@@ -82,7 +83,7 @@
  * จัดการข้อมูลรอบสอบและปฏิทินแบบ Real-time พร้อมระบบแจ้งเตือน
  * ข้อมูลทั้งหมดดึงจาก useExamStore (Pinia)
  */
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
@@ -136,8 +137,27 @@ const passcodeDialogRef = ref<InstanceType<typeof ExamPasscodeInputDialog> | nul
 const selectedRound = ref<ExamRound | null>(null);
 
 // ============================================================================
-// 2. METHODS
+// 2. METHODS & DYNAMIC LAYOUT
 // ============================================================================
+
+// --- จัดการ Layout ฝั่งขวา (ให้สูงเท่าฝั่งซ้ายแบบ Dynamic) ---
+const calendarHeight = ref<number>(0);
+
+const onCalendarResize = (size: { width: number; height: number }) => {
+  calendarHeight.value = size.height;
+};
+
+const roundsSectionStyle = computed(() => {
+  // หากหน้าจอขนาด md ขึ้นไป (PC)
+  if ($q.screen.gt.sm && calendarHeight.value > 0) {
+    // ให้ขึ้น scrollbar แค่กรณี มีรอบสอบมากกว่า 3 (โดยการคุมความสูงไว้)
+    if (selectedDateRounds.value.length > 3) {
+      return { maxHeight: `${calendarHeight.value}px` };
+    }
+  }
+  // กรณี 1-3 รอบ ปล่อยให้ยืดตามจริง จะได้ไม่มี scrollbar
+  return {};
+});
 
 const handleRegister = (round: ExamRound): void => {
   if (round.availableSeats === 0) {
@@ -215,8 +235,6 @@ const onMonthChange = (month: number, year: number): void => {
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-  height: fit-content;
-  max-height: 536px;
   overflow: hidden;
 }
 

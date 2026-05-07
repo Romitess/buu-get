@@ -2,6 +2,7 @@
   <div class="exam-calendar-component">
     <div class="calendar-container">
       <q-card class="calendar-card" flat>
+        <q-resize-observer @resize="(size) => $emit('main-card-resize', size)" />
         <!-- Header -->
         <div class="calendar-header">
           <q-btn
@@ -89,6 +90,7 @@ withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void;
   (e: 'change-month', month: number, year: number): void;
+  (e: 'main-card-resize', size: { width: number; height: number }): void;
 }>();
 
 // ============================================================================
