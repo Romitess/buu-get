@@ -4,7 +4,6 @@
     :class="[`status-${statusType}`]"
   >
     <!-- Top Row: Status & Fee -->
-    <!-- Top Row: Status & Fee -->
     <div class="row items-center justify-start full-width card-top-row">
       <!-- Left side: Status indicators -->
       <div class="row items-center q-gutter-x-md status-group">
@@ -31,59 +30,57 @@
     </div>
 
     <!-- Middle Row: Title -->
-    <div class="exam-title text-weight-bold q-mt-sm">
+    <div class="exam-title q-mt-sm">
       {{ title }}
     </div>
 
-    <!-- Bottom Row: Info & Buttons -->
-    <div class="row items-end justify-between full-width q-mt-auto">
+    <!-- Bottom Row: Info -->
+    <div class="row items-center full-width card-bottom-row q-mt-md">
       <div class="row items-center q-gutter-x-lg">
         <div class="info-item row items-center">
-          <q-icon name="event" size="22px" class="q-mr-sm" />
+          <q-icon name="event" size="calc(var(--space-unit) * 5)" class="q-mr-sm" />
           {{ date }}
         </div>
         <div class="info-item row items-center">
-          <q-icon name="schedule" size="22px" class="q-mr-sm" />
+          <q-icon name="schedule" size="calc(var(--space-unit) * 5)" class="q-mr-sm" />
           {{ time }}
         </div>
         <div class="info-item row items-center">
-          <q-icon name="place" size="22px" class="q-mr-sm" />
+          <q-icon name="place" size="calc(var(--space-unit) * 5)" class="q-mr-sm" />
           {{ location }}
         </div>
       </div>
+    </div>
 
-      <div class="row q-gutter-x-md">
-        <slot name="actions">
-          <!-- Optional Cancel Button -->
-          <AppButton
-            v-if="showCancel"
-            id="btn-cancel-exam"
-            outline
-            color="grey-8"
-            :label="$t('exam.history.cancel')"
-            class="action-btn"
-            @click="$emit('cancel')"
-          />
-          <!-- Optional Pay Button -->
-          <AppButton
-            v-if="showPay"
-            id="btn-pay-exam"
-            icon="payments"
-            :label="$t('exam.history.pay')"
-            class="action-btn pay-btn"
-            @click="$emit('pay')"
-          />
-          <!-- Optional Download Button -->
-          <AppButton
-            v-if="showDownload"
-            id="btn-download-receipt"
-            icon="receipt_long"
-            :label="$t('exam.history.downloadReceipt')"
-            class="action-btn download-btn"
-            @click="$emit('download')"
-          />
-        </slot>
-      </div>
+    <!-- Action Buttons: absolutely positioned so they don't affect card height -->
+    <div class="card-actions row q-gutter-x-md">
+      <slot name="actions">
+        <AppButton
+          v-if="showCancel"
+          id="btn-cancel-exam"
+          outline
+          color="grey-8"
+          :label="$t('exam.history.cancel')"
+          class="action-btn"
+          @click="$emit('cancel')"
+        />
+        <AppButton
+          v-if="showPay"
+          id="btn-pay-exam"
+          icon="payments"
+          :label="$t('exam.history.pay')"
+          class="action-btn pay-btn"
+          @click="$emit('pay')"
+        />
+        <AppButton
+          v-if="showDownload"
+          id="btn-download-receipt"
+          icon="receipt_long"
+          :label="$t('exam.history.downloadReceipt')"
+          class="action-btn download-btn"
+          @click="$emit('download')"
+        />
+      </slot>
     </div>
   </div>
 </template>
@@ -183,15 +180,16 @@ watch(
 <style scoped lang="scss">
 .app-exam-history-card-container {
   // Always use primary blue for the brand bar as seen in Figma
-  border-left: 8px solid var(--primary);
-  border-radius: var(--radius-md); // 12px
+  border-left: var(--space-sm) solid var(--primary);
+  border-radius: var(--radius-md);
   position: relative;
-  overflow: hidden;
-  min-height: 180px;
+  // Fixed min-height ensures ALL cards are identical height
+  // Accounts for: padding (48) + top-row with fee (40) + title (44) + bottom-row (36) ≈ 168px
+  min-height: calc(var(--space-unit) * 42);
   width: 100%;
   max-width: 1300px;
   background: var(--surface-card);
-  box-shadow: 0px 4px 4px 0px #00000040;
+  box-shadow: var(--shadow-card);
   transition:
     transform var(--transition-fast),
     box-shadow var(--transition-fast);
@@ -203,32 +201,34 @@ watch(
 }
 
 .deadline-text {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   display: flex;
   align-items: center;
 }
 
 .fee-label {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
-  font-weight: 500;
-  margin-bottom: -2px;
+  font-weight: var(--font-weight-medium);
+  margin-bottom: calc(var(--space-xs) * -0.5);
 }
 
 .fee-value {
-  font-size: 18px;
-  font-weight: 800;
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-black);
   color: var(--text-primary);
 }
 
 .exam-title {
-  font-size: 18px;
+  font-family: 'Sarabun', sans-serif;
+  font-size: var(--font-size-h3);
   color: var(--text-primary);
-  font-weight: 800; // Extra bold as per premium design
-  line-height: 1.3;
-  margin-top: 12px;
-  margin-bottom: 8px;
+  font-weight: var(--font-weight-black);
+  line-height: 1.4;
+  margin-top: var(--space-sm);
+  margin-bottom: var(--space-sm);
+  letter-spacing: -0.01em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -237,32 +237,41 @@ watch(
 }
 
 .info-item {
-  font-size: 14px;
-  font-weight: 700; // Bold for maximum clarity
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
   color: var(--text-primary);
   display: flex;
   align-items: center;
 
   :deep(.q-icon) {
     color: var(--text-primary);
-    margin-right: 8px;
+    margin-right: var(--space-sm);
   }
 }
 
+.card-bottom-row {
+  margin-top: var(--space-md);
+}
+
+.card-actions {
+  position: absolute;
+  right: var(--space-lg);
+  bottom: var(--space-lg);
+  display: flex;
+  align-items: center;
+}
+
 .action-btn {
-  min-width: 130px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  font-weight: 700;
+  // Let AppButton handle its own sizing — only define color variants here
 
   &.pay-btn {
     background-color: var(--primary) !important;
-    color: white !important;
+    color: var(--text-on-primary) !important;
   }
 
   &.download-btn {
     background-color: var(--primary) !important;
-    color: white !important;
+    color: var(--text-on-primary) !important;
   }
 }
 
@@ -279,60 +288,74 @@ watch(
   justify-content: flex-start !important;
 
   .status-group {
-    margin-left: 0 !important;
+    // Shifting badge left so its text content aligns perfectly with the title text below
+    // Offset = padding-left (var(--space-sm)) + dot size (8px) + gap (var(--space-xs))
+    margin-left: calc(
+      (var(--space-sm) + (var(--space-unit) * 2) + var(--space-xs)) * -1
+    ) !important;
     margin-right: auto !important;
   }
+}
 
-  @media (max-width: 600px) {
+// === Mobile Responsive ===
+@media (max-width: 600px) {
+  .app-exam-history-card-container {
+    padding: var(--space-md) !important;
+    min-height: auto; // Let card grow naturally on mobile
+    border-left-width: calc(var(--space-unit) * 1.5);
+  }
+
+  // Stack status and fee vertically
+  .card-top-row {
     flex-direction: column !important;
     align-items: flex-start !important;
-    gap: 12px;
+    gap: var(--space-sm);
 
     .fee-group {
       text-align: left !important;
       order: 2;
     }
+
     .status-group {
       order: 1;
+      // Reset badge alignment offset for smaller padding
+      margin-left: calc(
+        (var(--space-sm) + (var(--space-unit) * 2) + var(--space-xs)) * -1
+      ) !important;
     }
-  }
-}
-
-@media (max-width: 600px) {
-  .app-exam-history-card-container {
-    padding: 16px !important;
-    min-height: 150px;
-    border-left-width: 6px;
   }
 
   .exam-title {
-    font-size: 16px;
-    margin-top: 8px;
+    font-size: var(--font-size-body);
+    margin-top: var(--space-sm);
   }
 
-  .info-item {
-    font-size: 13px;
-    margin-bottom: 4px;
-    &:last-child {
-      margin-bottom: 0;
+  // Stack info items vertically
+  .card-bottom-row {
+    .row.items-center.q-gutter-x-lg {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-xs);
     }
   }
 
+  .info-item {
+    font-size: var(--font-size-xs);
+  }
+
   .fee-value {
-    font-size: 16px;
+    font-size: var(--font-size-body);
   }
 
-  // Stack info and buttons on mobile
-  .row.items-end.justify-between.full-width.q-mt-auto {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 16px;
-  }
-
-  .row.q-gutter-x-md {
+  // Switch buttons from absolute to static, stacking below content
+  .card-actions {
+    position: static;
+    margin-top: var(--space-md);
     width: 100%;
-    justify-content: flex-end;
-    gap: 8px;
+    justify-content: stretch;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+
     .action-btn {
       flex: 1;
       min-width: 0;

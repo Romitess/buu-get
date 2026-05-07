@@ -248,37 +248,34 @@ const handleConfirmCancel = () => {
 }
 
 .page-header {
-  margin-top: 20px;
+  margin-top: var(--space-lg);
   .page-title {
-    font-size: 28px;
-    font-weight: 800;
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-black);
     line-height: 1.4;
     color: var(--text-primary);
-    margin: 0 0 8px 0;
+    margin: 0 0 var(--space-sm) 0;
   }
   .page-subtitle {
     font-family: 'Sarabun', sans-serif;
-    font-size: 15px;
+    font-size: var(--font-size-body);
     color: var(--text-primary);
-    font-weight: 800;
+    font-weight: var(--font-weight-black);
     max-width: 900px;
-    line-height: 24px;
+    line-height: 1.6;
     margin: 0;
-    letter-spacing: 0px;
+    letter-spacing: 0;
   }
 }
 
 .section-title {
   color: var(--text-primary);
   border-bottom: 1px solid var(--border-color);
-  padding-bottom: 12px;
+  padding-bottom: var(--space-sm);
 }
 
 .action-btn {
-  min-width: 140px;
-  height: 44px;
-  border-radius: var(--radius-sm);
-  font-weight: 700;
+  // Let AppButton handle its own sizing — only define color variants here
 
   &.btn-cancel {
     color: var(--text-primary) !important;
@@ -298,8 +295,8 @@ const handleConfirmCancel = () => {
 }
 
 .custom-status {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
 
   &.success-status {
     color: var(--badge-success-dot);
@@ -314,41 +311,35 @@ const handleConfirmCancel = () => {
   }
 
   @media (max-width: 600px) {
-    font-size: 12px;
+    font-size: var(--font-size-xs);
     :deep(.q-icon) {
-      font-size: 18px !important;
+      font-size: var(--font-size-body) !important;
     }
   }
 }
 @media (max-width: 600px) {
   .exam-history-page {
-    padding: 16px !important;
+    padding: var(--space-md) !important;
   }
 
   .page-header {
-    margin-bottom: 32px !important;
+    margin-bottom: var(--space-xl) !important;
 
     .page-title {
-      font-size: 24px;
+      font-size: var(--font-size-h2);
     }
 
     .page-subtitle {
-      font-size: 14px;
-      line-height: 22px;
+      font-size: var(--font-size-sm);
+      line-height: 1.5;
     }
   }
 
   .section-title {
-    padding-bottom: 8px;
+    padding-bottom: var(--space-sm);
     .text-subtitle1 {
-      font-size: 16px;
+      font-size: var(--font-size-body);
     }
-  }
-
-  .action-btn {
-    min-width: 120px;
-    height: 40px;
-    font-size: 13px;
   }
 }
 </style>
