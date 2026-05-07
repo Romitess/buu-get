@@ -131,7 +131,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { ReceiptData } from './models';
+import type { ReceiptData } from 'src/types/receipt';
 
 interface Props {
   receipt: ReceiptData;

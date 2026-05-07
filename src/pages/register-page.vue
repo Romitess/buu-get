@@ -48,7 +48,7 @@
           <div class="register-container row no-wrap items-stretch">
             <!-- Left Side (Logo) - Blue Panel -->
             <div class="logo-panel flex flex-center bg-primary">
-              <img src="~assets/img/BUU-GET LOGO.png" alt="BUU-GET Logo" class="large-logo" />
+              <img src="~assets/img/buu-get-logo.png" alt="BUU-GET Logo" class="large-logo" />
             </div>
 
             <!-- Right Side (Register Form) - White Panel -->

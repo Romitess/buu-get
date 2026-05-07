@@ -2,7 +2,7 @@
   <div class="login-card">
     <!-- Header -->
     <div class="card-header">
-      <img src="~assets/img/logobuu.png" alt="BUU Logo" class="crest-img" />
+      <img src="~assets/img/buu-logo.png" alt="BUU Logo" class="crest-img" />
       <div class="logo-wordmark"></div>
       <h2>{{ userType === 'thai' ? 'ยินดีต้อนรับ' : 'Welcome Back' }}</h2>
       <p>{{ userType === 'thai' ? 'เข้าสู่ระบบเพื่อใช้งาน' : 'Sign in to continue' }}</p>

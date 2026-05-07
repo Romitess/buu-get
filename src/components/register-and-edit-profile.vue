@@ -95,7 +95,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { User } from 'src/components/models';
+import type { User } from 'src/types/user';
 import type { RegisterFormData } from 'src/types/register';
 import type { RegisterCredentials } from 'src/components/register-card.vue';
 import { useRegisterForm } from 'src/composables/use-register-form';

@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type { User } from 'src/components/models';
+import type { User } from 'src/types/user';
 import type { RegisterFormData, DialogState } from 'src/types/register';
 import { useCountries } from 'src/composables/use-countries';
 

@@ -22,7 +22,7 @@
 
         <!-- BUU-GET main logo image -->
         <div class="brand-logo-wrap">
-          <img src="~assets/img/BUU-GET LOGO.png" alt="BUU-GET Logo" class="brand-logo-img" />
+          <img src="~assets/img/buu-get-logo.png" alt="BUU-GET Logo" class="brand-logo-img" />
         </div>
 
         <div class="brand-headline">

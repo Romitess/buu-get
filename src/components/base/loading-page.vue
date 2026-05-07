@@ -3,7 +3,7 @@
     <div v-if="userStore.isLoadingGlobal" class="loading-overlay">
       <div class="loading-content">
         <div class="loading-logo-wrap">
-          <img src="~assets/img/logobuu.png" alt="BUU Logo" class="loading-logo" />
+          <img src="~assets/img/buu-logo.png" alt="BUU Logo" class="loading-logo" />
         </div>
         <div class="loading-spinner" />
         <p class="loading-text">{{ userStore.loadingText }}</p>

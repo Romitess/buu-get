@@ -10,7 +10,7 @@
         <div class="certificate-header">
           <div class="column items-center justify-center text-center">
             <img
-              src="~assets/img/logobuu.png"
+              src="~assets/img/buu-logo.png"
               style="width: 64px; height: auto"
               alt="BUU Logo"
               class="q-mb-sm"
@@ -125,7 +125,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { CertificateData } from './models';
+import type { CertificateData } from 'src/types/certificate';
 
 // ===== Props =====
 const props = defineProps<{

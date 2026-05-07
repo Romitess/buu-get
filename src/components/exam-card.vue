@@ -122,7 +122,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { Exam } from './models';
+import type { Exam } from 'src/types/exam';
 import AppButton from './base/app-button.vue';
 
 // Props

@@ -92,7 +92,7 @@ import RoundExam from 'src/components/exam/round-exam.vue';
 import DialogConfirm from 'src/components/exam/dialog-confirm.vue';
 import ExamPasscodeInputDialog from 'src/components/exam-passcode-input-dialog.vue';
 import { useExamStore } from 'src/stores/exam.store';
-import type { ExamRound } from 'src/components/models';
+import type { ExamRound } from 'src/types/exam';
 
 const $q = useQuasar();
 const router = useRouter();

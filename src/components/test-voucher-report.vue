@@ -7,7 +7,7 @@
         <!-- Header Band -->
         <div class="voucher-header">
           <div class="row items-center q-gutter-sm">
-            <img src="~assets/img/logobuu.png" style="width: 36px; height: auto" alt="BUU Logo" />
+            <img src="~assets/img/buu-logo.png" style="width: 36px; height: auto" alt="BUU Logo" />
             <div>
               <div class="text-h6 text-weight-bold" style="letter-spacing: -0.5px">BUU-GET</div>
               <div class="text-caption text-amber-2">Burapha University General English Test</div>
@@ -131,7 +131,11 @@
         <div class="row items-center q-gutter-md">
           <div class="col">
             <div class="row items-center q-gutter-sm q-mb-sm">
-              <img src="~assets/img/logobuu.png" style="width: 24px; height: auto" alt="BUU Logo" />
+              <img
+                src="~assets/img/buu-logo.png"
+                style="width: 24px; height: auto"
+                alt="BUU Logo"
+              />
               <span class="text-subtitle2 text-weight-bold text-dark">BUU-GET</span>
             </div>
             <div class="stub-info-row">
@@ -163,7 +167,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { VoucherData } from './models';
+import type { VoucherData } from 'src/types/voucher';
 
 // ===== Props & Interface =====
 const props = defineProps<{
