@@ -275,8 +275,8 @@ const handleDaySelect = (dateString: string) => {
 }
 
 .dot {
-  width: 10px;
-  height: 10px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   position: absolute;
   bottom: 6px;
@@ -305,8 +305,8 @@ const handleDaySelect = (dateString: string) => {
   color: var(--neutral-500);
 }
 .status-dot {
-  width: 10px;
-  height: 10px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
 }
 
