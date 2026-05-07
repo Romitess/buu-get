@@ -8,8 +8,15 @@ declare module 'vue' {
   }
 }
 
+const apiBaseURL = process.env.API_BASE_URL;
+if (!apiBaseURL) {
+  throw new Error(
+    'API_BASE_URL is not defined. Set it in .env (see .env.example) before starting the app.',
+  );
+}
+
 const api = axios.create({
-  baseURL: process.env.API_BASE_URL ?? 'http://localhost:3000',
+  baseURL: apiBaseURL,
 });
 
 export default boot(({ app }) => {

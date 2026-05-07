@@ -191,7 +191,7 @@ const handleDaySelect = (dateString: string) => {
   border-radius: 16px;
   padding: 16px 20px;
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25) !important;
-  background-color: #ffffff;
+  background-color: var(--surface-card);
 }
 .calendar-header {
   display: flex;
@@ -201,10 +201,10 @@ const handleDaySelect = (dateString: string) => {
 }
 .calendar-nav-btn {
   font-size: 15px;
-  color: #ccc;
+  color: var(--neutral-400);
   transition: color 0.2s;
   &:hover {
-    color: #000;
+    color: var(--text-primary);
   }
 }
 .calendar-title {
@@ -218,7 +218,7 @@ const handleDaySelect = (dateString: string) => {
   p {
     margin: 0;
     font-size: 13px;
-    color: #6b7280;
+    color: var(--neutral-500);
     font-weight: 300;
   }
 }
@@ -233,7 +233,7 @@ const handleDaySelect = (dateString: string) => {
 .weekday {
   font-size: 11px;
   font-weight: 400;
-  color: #888;
+  color: var(--text-muted);
   margin-bottom: 2px;
 }
 
@@ -251,20 +251,20 @@ const handleDaySelect = (dateString: string) => {
   transition: all 0.2s ease;
   user-select: none;
   &:not(.empty):hover {
-    background-color: #3b82f6;
-    color: #fff;
+    background-color: var(--calendar-hover-bg);
+    color: var(--text-on-primary);
   }
   &.active {
-    background-color: #1d4ed8;
-    color: #fff;
+    background-color: var(--calendar-active-bg);
+    color: var(--text-on-primary);
   }
   &.today {
-    background-color: #f3f4f6;
+    background-color: var(--calendar-today-bg);
   }
   &.today.active,
   &.today:hover {
-    background-color: #1d4ed8;
-    color: #fff;
+    background-color: var(--calendar-active-bg);
+    color: var(--text-on-primary);
   }
   &.empty {
     cursor: default;
@@ -280,10 +280,10 @@ const handleDaySelect = (dateString: string) => {
   bottom: 6px;
 }
 .dot-red {
-  background-color: #c12a32;
+  background-color: var(--calendar-dot-full);
 }
 .dot-green {
-  background-color: #27ae60;
+  background-color: var(--calendar-dot-available);
 }
 
 .status-footer {
@@ -293,14 +293,14 @@ const handleDaySelect = (dateString: string) => {
   justify-content: center;
   gap: 18px;
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25) !important;
-  background-color: #ffffff;
+  background-color: var(--surface-card);
 }
 .status-item {
   display: flex;
   align-items: center;
   gap: 7px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--neutral-500);
 }
 .status-dot {
   width: 10px;

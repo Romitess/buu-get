@@ -10,13 +10,13 @@
           class="q-mr-md"
         />
         <div>
-          <div class="text-subtitle1 text-weight-bold" style="letter-spacing: 0.5px">
-            มหาวิทยาลัยบูรพา BURAPHA UNIVERSITY
+          <div class="text-subtitle1 text-weight-bold receipt-org-title">
+            {{ buuInfo.nameTH }} {{ buuInfo.nameEN }}
           </div>
-          <div class="text-caption text-grey-8" style="line-height: 1.3; font-size: 11px">
-            169 ถนนลงหาดบางแสน ตำบลแสนสุข อำเภอเมือง จังหวัดชลบุรี 20131<br />
-            169 Longhad Bangsaen Road, Saensuk mueang, ChonBuri 20130<br />
-            เลขประจำตัวผู้เสียภาษีอากร (Tax ID) 0994000033100
+          <div class="text-caption text-grey-8 receipt-org-meta">
+            {{ buuInfo.addressTH }}<br />
+            {{ buuInfo.addressEN }}<br />
+            เลขประจำตัวผู้เสียภาษีอากร (Tax ID) {{ buuInfo.taxId }}
           </div>
         </div>
       </div>
@@ -91,7 +91,7 @@
     >
       <div class="col-9">
         <div>URL ตรวจสอบใบเสร็จอิเล็กทรอนิกส์ E-receipt verification URL</div>
-        <div class="q-mb-md">https://e-sign.buu.ac.th/verify</div>
+        <div class="q-mb-md">{{ buuInfo.receiptVerifyUrl }}</div>
         <div>หมายเหตุ :</div>
         <div class="q-pl-lg q-mb-sm">
           1. ใบเสร็จรับเงินนี้ได้ดำเนินการด้วยวิธีการทางอิเล็กทรอนิกส์ และผู้ชำระเงินสามารถสแกน QR
@@ -132,6 +132,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { ReceiptData } from 'src/types/receipt';
+import { buuInfo } from 'src/services/university.service';
+import { numberToThaiText } from 'src/utils/thai-currency';
 
 interface Props {
   receipt: ReceiptData;
@@ -155,13 +157,6 @@ const formatCurrency = (amount: number) => {
     maximumFractionDigits: 2,
   }).format(amount);
 };
-
-// Simple Thai Baht Text Converter (Mocked for simplicity, can be expanded)
-const numberToThaiText = (amount: number) => {
-  if (amount === 500) return 'ห้าร้อยบาทถ้วน';
-  if (amount === 1000) return 'หนึ่งพันบาทถ้วน';
-  return `${formatCurrency(amount)} บาทถ้วน`; // Fallback
-};
 </script>
 
 <style scoped>
@@ -171,7 +166,7 @@ const numberToThaiText = (amount: number) => {
   width: 210mm;
   min-height: 297mm;
   margin: 20px auto;
-  background-color: #ffffff;
+  background-color: var(--surface-card);
   padding: 20mm;
   font-family: 'Sarabun', sans-serif;
   color: #333;
@@ -180,6 +175,15 @@ const numberToThaiText = (amount: number) => {
   position: relative;
   display: flex;
   flex-direction: column;
+}
+
+.receipt-org-title {
+  letter-spacing: 0.5px;
+}
+
+.receipt-org-meta {
+  line-height: 1.3;
+  font-size: 11px;
 }
 
 /* Table Styles */

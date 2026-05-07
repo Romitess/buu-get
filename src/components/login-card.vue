@@ -129,7 +129,7 @@ const onSubmit = () => {
 .login-card {
   width: 100%;
   max-width: 420px;
-  background: #ffffff;
+  background: var(--surface-card);
   border-radius: 28px;
   padding: 40px 36px 36px;
   box-shadow:
@@ -189,21 +189,21 @@ const onSubmit = () => {
     .wordmark-buu {
       font-size: 2rem;
       font-weight: 900;
-      color: #0d47a1;
+      color: var(--primary);
       letter-spacing: -0.02em;
     }
 
     .wordmark-dash {
       font-size: 2rem;
       font-weight: 300;
-      color: #94a3b8;
+      color: var(--neutral-400);
       margin: 0 1px;
     }
 
     .wordmark-get {
       font-size: 2rem;
       font-weight: 900;
-      background: linear-gradient(135deg, #1e89e5, #4dabf5);
+      background: linear-gradient(135deg, var(--primary-light), var(--secondary-light));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -214,14 +214,14 @@ const onSubmit = () => {
   h2 {
     font-size: 1.35rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--neutral-900);
     margin: 0 0 6px;
     letter-spacing: -0.01em;
   }
 
   p {
     font-size: 0.875rem;
-    color: #64748b;
+    color: var(--neutral-500);
     margin: 0;
   }
 }
@@ -232,7 +232,7 @@ const onSubmit = () => {
 .type-toggle {
   position: relative;
   display: flex;
-  background: #f1f5f9;
+  background: var(--neutral-100);
   border-radius: 12px;
   padding: 4px;
   margin-bottom: 24px;
@@ -243,7 +243,7 @@ const onSubmit = () => {
     left: 4px;
     width: calc(50% - 4px);
     height: calc(100% - 8px);
-    background: #ffffff;
+    background: var(--surface-card);
     border-radius: 9px;
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
     transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
@@ -262,13 +262,13 @@ const onSubmit = () => {
     background: transparent;
     font-size: 0.875rem;
     font-weight: 600;
-    color: #94a3b8;
+    color: var(--neutral-400);
     cursor: pointer;
     transition: color 0.25s;
     border-radius: 9px;
 
     &.active {
-      color: #0d47a1;
+      color: var(--primary);
     }
   }
 }
@@ -283,8 +283,8 @@ const onSubmit = () => {
 .thaid-btn {
   width: 100%;
   height: 50px;
-  background: #00006e !important;
-  color: #ffffff !important;
+  background: var(--thaid-bg) !important;
+  color: var(--text-on-primary) !important;
   border-radius: 12px !important;
   font-size: 0.95rem;
   font-weight: 700;
@@ -294,7 +294,7 @@ const onSubmit = () => {
   &:hover {
     filter: brightness(1.12);
     transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(0, 0, 110, 0.3) !important;
+    box-shadow: 0 8px 20px rgba(var(--thaid-bg-rgb), 0.3) !important;
   }
 }
 
@@ -309,12 +309,12 @@ const onSubmit = () => {
     content: '';
     flex: 1;
     height: 1px;
-    background: #e2e8f0;
+    background: var(--neutral-200);
   }
 
   span {
     font-size: 0.78rem;
-    color: #94a3b8;
+    color: var(--neutral-400);
     white-space: nowrap;
     font-weight: 500;
   }
@@ -334,7 +334,7 @@ const onSubmit = () => {
     display: block;
     font-size: 0.82rem;
     font-weight: 600;
-    color: #334155;
+    color: var(--neutral-600);
     margin-bottom: 6px;
   }
 }
@@ -349,7 +349,7 @@ const onSubmit = () => {
 .forgot-link {
   font-size: 0.78rem;
   font-weight: 600;
-  color: #1e89e5;
+  color: var(--primary-light);
   text-decoration: none;
 
   &:hover {
@@ -361,21 +361,21 @@ const onSubmit = () => {
   :deep(.q-field__control) {
     background: #f8fafc;
     border-radius: 10px;
-    border-color: #e2e8f0;
+    border-color: var(--neutral-200);
     transition: all 0.2s;
   }
 
   :deep(.q-field__control:hover::before) {
-    border-color: #94a3b8;
+    border-color: var(--neutral-400);
   }
 
   :deep(.q-field--focused .q-field__control::before) {
-    border-color: #0d47a1;
+    border-color: var(--primary);
     border-width: 1.5px;
   }
 
   :deep(.q-field__prepend) {
-    color: #94a3b8;
+    color: var(--neutral-400);
   }
 }
 
@@ -386,8 +386,8 @@ const onSubmit = () => {
   width: 100%;
   height: 52px;
   margin-top: 4px;
-  background: linear-gradient(135deg, #0d47a1 0%, #1e89e5 100%) !important;
-  color: #ffffff !important;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%) !important;
+  color: var(--text-on-primary) !important;
   border-radius: 12px !important;
   font-size: 1rem;
   font-weight: 700;
@@ -424,12 +424,12 @@ const onSubmit = () => {
   text-align: center;
   margin-top: 22px;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--neutral-500);
 
   a {
     margin-left: 6px;
     font-weight: 700;
-    color: #0d47a1;
+    color: var(--primary);
     text-decoration: none;
 
     &:hover {

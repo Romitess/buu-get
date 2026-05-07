@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { User } from 'src/types/user';
 import { mockUsers as initialMockUsers } from 'src/services/user.service';
+import { AUTH_LOADING_DURATION_MS, DEFAULT_LOADING_DURATION_MS } from 'src/constants/timing';
 
 export const useUserStore = defineStore('user', () => {
   // === State ===
@@ -112,20 +113,22 @@ export const useUserStore = defineStore('user', () => {
     loadingText.value = 'กำลังออกจากระบบ...';
     isLoadingGlobal.value = true;
 
-    // หน่วงเวลา 1.5 วินาทีเท่า Login
     setTimeout(() => {
       currentUser.value = null;
       isLoggedIn.value = false;
       localStorage.removeItem('isLoggedIn');
       localStorage.removeItem('user_id');
       isLoadingGlobal.value = false;
-    }, 1500);
+    }, AUTH_LOADING_DURATION_MS);
   }
 
   /**
    * ฟังก์ชันจำลองการโหลดสำหรับหน้าทั่วไป (ใช้เวลาสั้นลง)
    */
-  function triggerLoading(text = 'กำลังโหลดข้อมูล...', duration = 500): void {
+  function triggerLoading(
+    text = 'กำลังโหลดข้อมูล...',
+    duration = DEFAULT_LOADING_DURATION_MS,
+  ): void {
     loadingText.value = text;
     isLoadingGlobal.value = true;
     setTimeout(() => {

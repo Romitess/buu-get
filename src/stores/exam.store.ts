@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { ExamRound, ExamInfo, ExamHistoryItem, DayData } from 'src/types/exam';
 import { defaultExamInfo, mockScheduleData, mockHistoryRecords } from 'src/services/exam.service';
+import { DEFAULT_EXAM_FEE_THB, PAYMENT_COUNTDOWN_DEFAULT } from 'src/constants/exam';
 
 /**
  * useExamStore
@@ -124,8 +125,8 @@ export const useExamStore = defineStore('exam', () => {
       date: formattedSelectedDate.value,
       time: round.timeRange,
       location: dayData?.location || examInfo.value.locationText,
-      fee: feeAmount ? Number(feeAmount) : 500,
-      deadline: '29:30',
+      fee: feeAmount ? Number(feeAmount) : DEFAULT_EXAM_FEE_THB,
+      deadline: PAYMENT_COUNTDOWN_DEFAULT,
       actions: ['cancel', 'pay'],
     });
   }

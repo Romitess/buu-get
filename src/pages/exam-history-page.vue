@@ -118,8 +118,8 @@
     <!-- Payment Dialog -->
     <AppPaymentDialog
       v-model="showPaymentDialog"
-      :amount="selectedExam?.fee || 500"
-      :countdown="'29 : 50'"
+      :amount="selectedExam?.fee || DEFAULT_EXAM_FEE_THB"
+      :countdown="PAYMENT_DIALOG_COUNTDOWN_DEFAULT"
       @save="handleSaveQR"
     />
 
@@ -142,6 +142,7 @@ import AppButton from 'src/components/base/app-button.vue';
 import AppPaymentDialog from 'src/components/exam/app-payment-dialog.vue';
 import DialogCancel from 'src/components/exam/dialog-cancel.vue';
 import { useExamStore } from 'src/stores/exam.store';
+import { DEFAULT_EXAM_FEE_THB, PAYMENT_DIALOG_COUNTDOWN_DEFAULT } from 'src/constants/exam';
 
 /** สถานะเพิ่มเติม เช่น ผ่าน/ไม่ผ่าน หรือ หมดเวลาชำระเงิน */
 interface CustomStatus {

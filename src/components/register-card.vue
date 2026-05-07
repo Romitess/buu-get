@@ -171,7 +171,7 @@ const onSubmit = (): void => {
 /* User Type Toggle */
 .user-type-toggle {
   display: flex;
-  background-color: #f5f6f8;
+  background-color: var(--neutral-100);
   border-radius: 10px;
   padding: 4px;
 }
@@ -180,22 +180,22 @@ const onSubmit = (): void => {
   text-align: center;
   padding: 10px 0;
   border-radius: 8px;
-  color: #6b7280;
+  color: var(--neutral-500);
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 .toggle-btn.active {
-  background-color: white;
-  color: #0d47a1; /* Primary Blue */
+  background-color: var(--surface-card);
+  color: var(--primary);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 /* ThaID Button */
 .thaid-btn {
-  background-color: #000066; /* Deep Navy Blue */
-  color: white;
+  background-color: var(--thaid-bg);
+  color: var(--text-on-primary);
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
@@ -205,7 +205,7 @@ const onSubmit = (): void => {
 /* Form Inputs */
 .custom-input :deep(.q-field__control) {
   border-radius: 8px;
-  border-color: #e5e7eb;
+  border-color: var(--neutral-200);
 }
 
 /* Submit Button */

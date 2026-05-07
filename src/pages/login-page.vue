@@ -53,7 +53,12 @@ import LoginCard from 'src/components/login-card.vue';
   min-height: 100dvh;
   overflow: hidden;
   font-family: 'Inter', 'Noto Sans Thai', sans-serif;
-  background: linear-gradient(145deg, #0a2468 0%, #0d47a1 55%, #1565c0 100%);
+  background: linear-gradient(
+    145deg,
+    var(--primary-dark) 0%,
+    var(--primary) 55%,
+    var(--secondary-dark) 100%
+  );
   position: relative;
 }
 

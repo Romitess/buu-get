@@ -147,7 +147,7 @@ const contactSupport = () => {
 .lock-icon-container {
   width: 56px;
   height: 56px;
-  background-color: #e8e8e8;
+  background-color: var(--border-color);
   border-radius: 14px;
 }
 
@@ -158,22 +158,22 @@ const contactSupport = () => {
 .passcode-box {
   width: 48px;
   height: 56px;
-  border: 1px solid #dcdcdc;
+  border: 1px solid var(--neutral-200);
   border-radius: 8px;
   outline: none;
   transition: all 0.2s ease;
-  background-color: white;
-  color: #333;
+  background-color: var(--surface-card);
+  color: var(--text-primary);
 
   &:focus {
-    border-color: var(--primary, #0d47a1);
-    box-shadow: 0 0 0 1px var(--primary, #0d47a1);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
   }
 }
 
 .confirm-btn {
-  background-color: var(--primary, #0d47a1) !important;
-  color: white !important;
+  background-color: var(--primary) !important;
+  color: var(--text-on-primary) !important;
   font-size: 16px;
   height: 48px;
   text-transform: none;
@@ -188,7 +188,7 @@ const contactSupport = () => {
   text-decoration: none;
 
   &:hover {
-    color: var(--primary, #0d47a1) !important;
+    color: var(--primary) !important;
   }
 }
 

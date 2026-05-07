@@ -145,15 +145,18 @@ const seatRatio = computed(() => {
 });
 
 // ================== Helpers ==================
+/** Quasar color name สำหรับแต่ละประเภทการสอบ */
+const EXAM_TYPE_COLORS: Record<string, string> = {
+  กสพ: 'blue',
+  ความถนัด: 'green',
+  ภาษา: 'orange',
+  สมรรถนะ: 'purple',
+  อื่นๆ: 'grey',
+};
+const FALLBACK_TYPE_COLOR = 'grey';
+
 const getTypeColor = (type: string): string => {
-  const colors: Record<string, string> = {
-    กสพ: 'blue',
-    ความถนัด: 'green',
-    ภาษา: 'orange',
-    สมรรถนะ: 'purple',
-    อื่นๆ: 'grey',
-  };
-  return colors[type] || 'grey';
+  return EXAM_TYPE_COLORS[type] || FALLBACK_TYPE_COLOR;
 };
 
 const formatCurrency = (amount: number): string => {
