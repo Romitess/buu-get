@@ -63,9 +63,11 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-card: 0px 4px 4px 0px rgba(0, 0, 0, 0.25); // The specific shadow from Figma
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
+  --radius-pill: 100px;
   --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -95,6 +97,31 @@
   --badge-info-bg: #f5f5f5;
   --badge-info-text: #424242;
   --badge-info-dot: #9e9e9e;
+
+  // Typography Scale
+  --font-size-h1: 1.75rem;     // 28px
+  --font-size-h2: 1.5rem;      // 24px
+  --font-size-h3: 1.25rem;     // 20px
+  --font-size-card-title: 1.125rem; // 18px
+  --font-size-body: 0.9375rem; // 15px
+  --font-size-sm: 0.875rem;    // 14px
+  --font-size-xs: 0.8125rem;   // 13px
+
+  // Font Weights
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 800;
+
+  // Spacing Scale
+  --space-unit: 4px;
+  --space-xs: calc(var(--space-unit) * 1); // 4px
+  --space-sm: calc(var(--space-unit) * 2); // 8px
+  --space-md: calc(var(--space-unit) * 4); // 16px
+  --space-lg: calc(var(--space-unit) * 6); // 24px
+  --space-xl: calc(var(--space-unit) * 8); // 32px
+  --space-2xl: calc(var(--space-unit) * 12); // 48px
 }
 
 // === Base Reset & Typography ===

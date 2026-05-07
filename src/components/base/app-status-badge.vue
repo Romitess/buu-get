@@ -41,31 +41,36 @@ withDefaults(defineProps<Props>(), {
 .app-status-badge {
   display: inline-flex;
   align-items: center;
-  height: 24px;
-  padding: 0 10px;
-  border-radius: 30px; // Pill shape as per design spec
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 700; // Bold for intensity as requested
+  height: var(--space-lg);
+  padding: 0 var(--space-sm); // More compact padding to align better with title
+  border-radius: var(--radius-pill);
+  gap: var(--space-xs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   white-space: nowrap;
   width: fit-content;
-  color: var(--text-primary); // Ensure text is black/dark for all variants
+  color: inherit;
+  font-family: 'Sarabun', sans-serif;
 
   .badge-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
+    width: calc(var(--space-unit) * 2);
+    height: calc(var(--space-unit) * 2);
+    border-radius: var(--radius-pill);
     flex-shrink: 0;
   }
 
   .badge-label {
-    line-height: 1;
+    line-height: normal; // Better for Thai font vertical centering
     color: inherit;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
   }
 
   // Variants using Global Design Tokens from app.scss
   &.badge--primary {
     background-color: var(--badge-primary-bg);
+    color: var(--text-primary);
     .badge-dot {
       background-color: var(--badge-primary-text);
     }
@@ -73,6 +78,7 @@ withDefaults(defineProps<Props>(), {
 
   &.badge--success {
     background-color: var(--badge-success-bg);
+    color: var(--text-primary);
     .badge-dot {
       background-color: var(--badge-success-text);
     }
@@ -80,6 +86,7 @@ withDefaults(defineProps<Props>(), {
 
   &.badge--warning {
     background-color: var(--badge-warning-bg);
+    color: var(--text-primary);
     .badge-dot {
       background-color: var(--badge-warning-text);
     }
@@ -87,6 +94,7 @@ withDefaults(defineProps<Props>(), {
 
   &.badge--error {
     background-color: var(--badge-error-bg);
+    color: var(--text-primary);
     .badge-dot {
       background-color: var(--badge-error-text);
     }
@@ -94,6 +102,7 @@ withDefaults(defineProps<Props>(), {
 
   &.badge--info {
     background-color: var(--badge-info-bg);
+    color: var(--text-primary);
     .badge-dot {
       background-color: var(--badge-info-text);
     }
@@ -101,13 +110,13 @@ withDefaults(defineProps<Props>(), {
 }
 @media (max-width: 600px) {
   .app-status-badge {
-    height: 22px;
-    padding: 0 8px;
-    font-size: 12px;
-    gap: 4px;
+    height: calc(var(--space-unit) * 5.5);
+    padding: 0 var(--space-sm);
+    font-size: var(--font-size-xs);
+    gap: calc(var(--space-unit) * 1);
     .badge-dot {
-      width: 6px;
-      height: 6px;
+      width: calc(var(--space-unit) * 1.5);
+      height: calc(var(--space-unit) * 1.5);
     }
   }
 }
