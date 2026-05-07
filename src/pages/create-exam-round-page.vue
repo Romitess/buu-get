@@ -1,20 +1,17 @@
 <template>
-  <q-page
-    class="q-px-xl q-pt-md q-pb-sm flex column items-center page-bg"
-    style="min-height: 0 !important"
-  >
+  <q-page class="q-px-xl q-pt-md q-pb-sm flex column items-center" style="min-height: 0 !important">
     <div class="form-container full-width" style="max-width: 1100px">
       <!-- Page Title -->
-      <div class="text-h5 text-weight-bold q-mb-sm text-dark">สร้างรอบสอบ</div>
+      <div class="page-title q-mb-md">สร้างรอบสอบ</div>
 
       <!-- Card 1: รายละเอียดการสอบ -->
-      <q-card class="q-pa-md q-mb-sm card-style">
-        <div class="row items-center q-mb-sm">
-          <q-icon name="article" size="sm" class="q-mr-xs" color="dark" />
-          <div class="text-subtitle1 text-weight-bold text-dark">รายละเอียดการสอบ</div>
+      <q-card flat class="q-pa-lg q-mb-md buu-card">
+        <div class="row items-center q-mb-md section-header">
+          <q-icon name="article" size="20px" class="q-mr-xs" color="dark" />
+          <div class="section-title">รายละเอียดการสอบ</div>
         </div>
 
-        <div class="row q-col-gutter-sm">
+        <div class="row q-col-gutter-md">
           <!-- Row 1: ชื่อการสอบ (50%) | สถานที่สอบ (50%) -->
           <div class="col-12 col-md-6">
             <div class="field-label">ชื่อการสอบ</div>
@@ -74,10 +71,7 @@
             <div class="field-label">ค่าธรรมเนียม</div>
             <q-input v-model="form.fee" outlined dense placeholder="0.00" class="custom-input">
               <template v-slot:append>
-                <div
-                  class="row items-center text-body2 cursor-pointer text-grey-8"
-                  style="font-size: 13px"
-                >
+                <div class="row items-center text-grey-7" style="font-size: 13px">
                   THB
                   <q-icon name="unfold_more" size="xs" />
                 </div>
@@ -106,9 +100,9 @@
           </div>
           <div class="col-12 col-md-6">
             <!-- Invisible label to align vertically -->
-            <div class="field-label text-transparent select-none">&nbsp;</div>
+            <div class="field-label select-none" style="visibility: hidden">&nbsp;</div>
             <div class="toggle-row">
-              <div class="text-weight-medium text-grey-9" style="font-size: 14px">สถานะเผยแพร่</div>
+              <div class="toggle-label">สถานะเผยแพร่</div>
               <q-toggle v-model="form.isPublished" color="primary" dense />
             </div>
           </div>
@@ -116,20 +110,17 @@
       </q-card>
 
       <!-- Card 2: กำหนดการสอบ -->
-      <q-card class="q-pa-md card-style">
-        <div class="row items-center q-mb-sm">
-          <q-icon name="calendar_today" size="sm" class="q-mr-xs" color="dark" />
-          <div class="text-subtitle1 text-weight-bold text-dark">กำหนดการสอบ</div>
+      <q-card flat class="q-pa-lg buu-card">
+        <div class="row items-center q-mb-md section-header">
+          <q-icon name="calendar_today" size="20px" class="q-mr-xs" color="dark" />
+          <div class="section-title">กำหนดการสอบ</div>
         </div>
 
-        <div class="row q-col-gutter-md">
+        <div class="row q-col-gutter-lg">
           <!-- Left side: ช่วงเวลาการจัดสอบ -->
           <div class="col-12 col-md-5">
             <div class="schedule-box">
-              <div
-                class="text-weight-bold q-mb-sm row items-center text-dark"
-                style="font-size: 14px"
-              >
+              <div class="schedule-box-title q-mb-sm">
                 <span class="bullet-dot">•</span> ช่วงเวลาการจัดสอบ
               </div>
 
@@ -138,7 +129,7 @@
                 v-model="form.examDate"
                 outlined
                 dense
-                class="custom-input q-mb-sm bg-white"
+                class="custom-input q-mb-md bg-white"
                 readonly
               >
                 <template v-slot:append>
@@ -155,7 +146,7 @@
               </q-input>
 
               <div class="field-label-bold">เวลาสอบ</div>
-              <div class="row items-center q-mb-xs q-col-gutter-sm">
+              <div class="row items-center q-mb-sm q-col-gutter-sm">
                 <div class="col">
                   <q-input
                     v-model="form.startTime1"
@@ -165,12 +156,7 @@
                     placeholder="08 : 00"
                   />
                 </div>
-                <div
-                  class="col-auto text-grey-7 text-weight-medium q-px-xs"
-                  style="font-size: 13px"
-                >
-                  ถึง
-                </div>
+                <div class="col-auto time-separator">ถึง</div>
                 <div class="col">
                   <q-input
                     v-model="form.endTime1"
@@ -195,12 +181,7 @@
                     placeholder="10 : 00"
                   />
                 </div>
-                <div
-                  class="col-auto text-grey-7 text-weight-medium q-px-xs"
-                  style="font-size: 13px"
-                >
-                  ถึง
-                </div>
+                <div class="col-auto time-separator">ถึง</div>
                 <div class="col">
                   <q-input
                     v-model="form.endTime2"
@@ -220,10 +201,8 @@
           <!-- Right side: ช่วงเวลาลงทะเบียน & ชำระเงิน -->
           <div class="col-12 col-md-7">
             <!-- ช่วงเวลาการลงทะเบียน -->
-            <div class="text-weight-bold q-mb-xs text-dark" style="font-size: 14px">
-              ช่วงเวลาการลงทะเบียน
-            </div>
-            <div class="row q-col-gutter-sm q-mb-md">
+            <div class="right-section-title q-mb-xs">ช่วงเวลาการลงทะเบียน</div>
+            <div class="row q-col-gutter-sm q-mb-lg">
               <div class="col-6">
                 <div class="field-label-bold">วันที่เริ่มต้น</div>
                 <q-input v-model="form.regStartDate" outlined dense class="custom-input" readonly>
@@ -259,9 +238,7 @@
             </div>
 
             <!-- ช่วงเวลาการชำระค่าธรรมเนียม -->
-            <div class="text-weight-bold q-mb-xs text-dark" style="font-size: 14px">
-              ช่วงเวลาการชำระค่าธรรมเนียม
-            </div>
+            <div class="right-section-title q-mb-xs">ช่วงเวลาการชำระค่าธรรมเนียม</div>
             <div class="row q-col-gutter-sm">
               <div class="col-6">
                 <div class="field-label-bold">วันที่เริ่มต้น</div>
@@ -301,8 +278,8 @@
       </q-card>
 
       <!-- Action Buttons -->
-      <div class="row justify-end q-mt-md q-gutter-md q-mb-sm">
-        <q-btn label="ยกเลิก" unelevated class="action-btn bg-grey-4 text-dark text-weight-bold" />
+      <div class="row justify-end q-mt-lg q-gutter-md q-mb-md">
+        <q-btn label="ยกเลิก" unelevated class="action-btn cancel-btn text-weight-bold" />
         <q-btn label="บันทึก" unelevated class="action-btn save-btn text-white text-weight-bold" />
       </div>
     </div>
@@ -337,54 +314,68 @@ const form = ref({
 </script>
 
 <style scoped>
-/* Page background */
-.page-bg {
-  background-color: #f7f9fc !important;
+/* Section header row */
+.section-header {
+  gap: 2px;
+}
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
-/* Header toolbar height */
-.toolbar-height {
-  min-height: 48px;
-}
-
-/* Card styling */
-.card-style {
-  border-radius: 12px;
-  box-shadow: none;
-  border: 1px solid #e2e4e8;
-}
-
-/* Field labels */
+/* Field labels — normal weight */
 .field-label {
   font-size: 13px;
-  font-weight: 500;
-  color: #444;
-  margin-bottom: 2px;
+  font-weight: 600;
+  color: var(--neutral-700);
+  margin-bottom: 6px;
 }
+
+/* Field labels — bold (inside schedule box & date sections) */
 .field-label-bold {
   font-size: 13px;
   font-weight: 600;
-  color: #444;
-  margin-bottom: 2px;
+  color: var(--neutral-700);
+  margin-bottom: 4px;
+}
+
+/* Right-side section titles (bold, navy blue) */
+.right-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 /* Toggle row (สถานะเผยแพร่) */
 .toggle-row {
   height: 40px;
   padding: 0 12px;
-  border-radius: 6px;
-  border: 1px solid #e2e4e8;
-  background-color: #fff;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--neutral-200);
+  background-color: var(--surface-card);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
+.toggle-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--neutral-700);
+}
 
 /* Schedule grey box */
 .schedule-box {
-  background-color: #f5f6f8;
-  padding: 16px;
-  border-radius: 8px;
+  background-color: var(--neutral-100);
+  padding: 20px;
+  border-radius: var(--radius-sm);
+}
+.schedule-box-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
 }
 .bullet-dot {
   font-size: 24px;
@@ -392,32 +383,44 @@ const form = ref({
   margin-right: 8px;
 }
 
+/* Time separator text */
+.time-separator {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--neutral-500);
+  padding: 0 4px;
+}
+
 /* Custom Input Styling */
 .custom-input :deep(.q-field__control) {
-  border-radius: 6px;
-  background-color: #ffffff;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-card);
 }
 .custom-input :deep(.q-field__control::before) {
-  border-color: #e2e4e8;
+  border-color: var(--neutral-200);
 }
 .custom-input :deep(input::placeholder) {
-  color: #b0b0b0;
+  color: var(--neutral-400);
 }
 
 /* Action Buttons */
 .action-btn {
-  width: 140px;
-  border-radius: 6px;
-  font-size: 16px;
-  padding: 10px 0;
+  min-width: 140px;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  padding: 10px 28px;
+}
+.cancel-btn {
+  background-color: var(--neutral-200) !important;
+  color: var(--text-primary) !important;
 }
 .save-btn {
-  background-color: #154ba6 !important;
+  background-color: var(--primary) !important;
 }
 
 /* Footer border */
 .border-top {
-  border-top: 1px solid #e2e4e8;
+  border-top: 1px solid var(--border-color);
 }
 
 .select-none {

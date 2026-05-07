@@ -1,5 +1,5 @@
 <template>
-  <q-card class="register-card shadow-1 q-pa-lg">
+  <div class="register-card q-pa-lg">
     <!-- Toggle Buttons -->
     <div class="user-type-toggle q-mb-lg">
       <div class="toggle-btn" :class="{ active: userType === 'thai' }" @click="userType = 'thai'">
@@ -113,7 +113,7 @@
         </q-btn>
       </div>
     </q-form>
-  </q-card>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -163,8 +163,6 @@ const onSubmit = (): void => {
 .register-card {
   width: 100%;
   max-width: 420px;
-  border-radius: 20px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08) !important;
   margin: 0 auto;
 }
 
