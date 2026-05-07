@@ -39,7 +39,7 @@
           <div
             class="rounds-list"
             :style="{
-              overflowY: $q.screen.lt.md || selectedDateRounds.length > 3 ? 'auto' : 'hidden',
+              overflowY: $q.screen.lt.md || selectedDateRounds.length >= 3 ? 'auto' : 'hidden',
             }"
           >
             <template v-if="selectedDateRounds.length > 0">
@@ -150,12 +150,14 @@ const onCalendarResize = (size: { width: number; height: number }) => {
 const roundsSectionStyle = computed(() => {
   // หากหน้าจอขนาด md ขึ้นไป (PC)
   if ($q.screen.gt.sm && calendarHeight.value > 0) {
-    // ให้ขึ้น scrollbar แค่กรณี มีรอบสอบมากกว่า 3 (โดยการคุมความสูงไว้)
-    if (selectedDateRounds.value.length > 3) {
-      return { maxHeight: `${calendarHeight.value}px` };
+    if (selectedDateRounds.value.length >= 3) {
+      // 3 รอบขึ้นไป: บังคับให้สูงเท่ากับปฏิทินเป๊ะๆ เพื่อความสมดุล
+      return { height: `${calendarHeight.value}px` };
     }
+    // 1-2 รอบ: ปรับขนาดตามจริง (Realtime) แต่ไม่เกินปฏิทิน
+    return { maxHeight: `${calendarHeight.value}px` };
   }
-  // กรณี 1-3 รอบ ปล่อยให้ยืดตามจริง จะได้ไม่มี scrollbar
+  // ในมือถือ ปล่อยให้ความสูงเป็นไปตาม CSS (stack ตามปกติ)
   return {};
 });
 
