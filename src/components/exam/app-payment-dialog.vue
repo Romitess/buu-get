@@ -4,59 +4,50 @@
     @update:model-value="$emit('update:modelValue', $event)"
     persistent
   >
-    <q-card class="payment-dialog-card column no-wrap items-center q-pa-lg">
+    <q-card class="payment-dialog-card column no-wrap items-center">
       <!-- Close Button -->
-      <q-btn
-        icon="close"
-        flat
-        round
-        dense
-        v-close-popup
-        class="absolute-top-right q-ma-sm close-btn"
-      />
+      <q-btn icon="close" flat round dense v-close-popup class="absolute-top-right close-btn" />
 
       <!-- Title -->
-      <div class="text-h6 text-weight-bold q-mt-sm full-width text-left q-px-md">
-        ยืนยันการชำระเงิน
-      </div>
+      <div class="dialog-title">ยืนยันการชำระเงิน</div>
 
       <!-- Amount Details Card -->
-      <div class="amount-card q-mt-md column items-center justify-center">
+      <q-card flat class="amount-card">
         <div class="amount-label">รายละเอียดการชำระเงิน</div>
-        <div class="amount-value q-mt-xs">{{ amount }} THB</div>
-      </div>
+        <div class="amount-value">{{ amount.toLocaleString() }} THB</div>
+      </q-card>
 
       <!-- QR Code -->
-      <div class="qr-container q-mt-lg">
-        <q-img src="/qr test.png" width="240px" height="240px" fit="contain" class="qr-image" />
+      <div class="qr-container">
+        <q-img src="/qr test.png" class="qr-image" />
       </div>
 
-      <!-- Countdown -->
-      <div class="countdown-badge q-mt-lg row items-center justify-center">
-        <q-icon name="schedule" size="20px" class="q-mr-xs" />
-        <span>ชำระเงินภายใน {{ countdown }}</span>
-      </div>
+      <!-- Countdown Badge -->
+      <AppStatusBadge type="error" :dot="false" class="countdown-badge">
+        <q-icon name="schedule" class="q-mr-xs" />
+        ชำระเงินภายใน {{ countdown }}
+      </AppStatusBadge>
 
       <!-- Instruction -->
-      <div class="instruction-text q-mt-lg text-center">
-        กรุณาสแกน QR Code ด้วยแอปพลิเคชัน Mobile Banking เพื่อเสร็จสิ้นการลงทะเบียน
+      <div class="instruction-text">
+        กรุณาสแกน QR Code ด้วยแอปพลิเคชัน Mobile Banking<br />
+        เพื่อเสร็จสิ้นการลงทะเบียน
       </div>
 
       <!-- Save Button -->
-      <div class="q-mt-xl">
-        <AppButton
-          icon="file_download"
-          label="บันทึก QR Code ชำระเงิน"
-          class="save-btn"
-          @click="$emit('save')"
-        />
-      </div>
+      <AppButton
+        icon="file_download"
+        label="บันทึก QR Code ชำระเงิน"
+        class="save-btn"
+        @click="$emit('save')"
+      />
     </q-card>
   </q-dialog>
 </template>
 
 <script setup lang="ts">
 import AppButton from 'src/components/base/app-button.vue';
+import AppStatusBadge from 'src/components/base/app-status-badge.vue';
 
 interface Props {
   modelValue: boolean;
@@ -71,69 +62,89 @@ defineEmits(['update:modelValue', 'save']);
 
 <style scoped lang="scss">
 .payment-dialog-card {
-  width: 400px;
-  height: 692px;
-  border-radius: 8px;
+  width: calc(var(--space-unit) * 100);
+  max-width: 100%;
+  border-radius: var(--radius-sm);
   background: var(--surface-card);
   box-shadow: var(--shadow-lg);
-  overflow: hidden;
+  padding: var(--space-lg);
 }
 
 .close-btn {
   color: var(--text-muted);
+  margin: var(--space-sm);
+}
+
+.dialog-title {
+  width: 100%;
+  text-align: left;
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
 }
 
 .amount-card {
-  width: 350px;
-  height: 96px;
-  background: var(--surface-card);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 10px;
+  width: 100%;
+  margin-top: var(--space-md);
+  border: 1px solid var(--neutral-400) !important;
+  border-radius: var(--radius-sm) !important;
+  padding: var(--space-md) var(--space-lg);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  box-shadow: none !important;
 
   .amount-label {
-    font-size: 16px;
-    color: var(--text-primary);
-    font-weight: 500;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--space-xs);
   }
 
   .amount-value {
-    font-size: 24px;
-    font-weight: 800;
+    font-size: var(--font-size-h3);
+    font-weight: var(--font-weight-bold);
     color: var(--text-primary);
   }
 }
 
 .qr-container {
-  padding: 10px;
-  background: var(--surface-card);
+  margin-top: var(--space-md);
+}
+
+.qr-image {
+  width: calc(var(--space-unit) * 55);
+  height: calc(var(--space-unit) * 55);
+  object-fit: contain;
 }
 
 .countdown-badge {
-  background: var(--badge-error-bg);
-  color: var(--badge-error-dot);
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 14px;
+  margin-top: var(--space-md);
+  color: var(--badge-error-text) !important;
+  border-radius: 16px !important;
+
+  :deep(.badge-label),
+  :deep(.q-icon) {
+    color: var(--badge-error-text);
+  }
 }
 
 .instruction-text {
-  font-size: 14px;
+  margin-top: var(--space-sm);
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
-  line-height: 1.5;
-  max-width: 300px;
+  line-height: 1.6;
+  text-align: center;
 }
 
 .save-btn {
-  width: 300px;
-  height: 45px;
-  border-radius: 12px !important; // override AppButton default if needed
-  padding: 10px;
-  font-size: 16px;
-
-  :deep(.q-btn__content) {
-    gap: 10px;
-  }
+  width: 100%;
+  margin-top: var(--space-md);
+  padding: var(--space-sm) 0;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-body);
 }
 </style>
