@@ -270,7 +270,46 @@ body {
     padding: 16px;
   }
 
-  .page-title {
-    font-size: 1.35rem;
+}
+
+// === Custom Form Input Styles ===
+.custom-input {
+  border-radius: 8px;
+
+  .q-field__control {
+    border-radius: 8px;
+
+    &:before {
+      border-color: var(--border-color);
+      transition: border-color var(--transition-fast);
+    }
+
+    &:hover:before {
+      border-color: var(--primary-light);
+    }
   }
+
+  &.q-field--focused .q-field__control:after {
+    border-color: var(--primary);
+  }
+}
+
+// === Profile Form Styles ===
+.profile-card {
+  width: 95%;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin: 0 auto;
+}
+
+
+
+.profile-action-btn {
+  width: 160px;
+  border-radius: 8px;
+  padding: 10px 0;
+}
+
+.profile-dialog-card {
+  min-width: 350px;
 }

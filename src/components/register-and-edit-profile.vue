@@ -4,9 +4,9 @@
     <q-card class="q-pa-xl shadow-0 profile-card">
       <q-form @submit.prevent="submitForm">
         <!-- ─── 2-Column Layout ─── -->
-        <div class="row justify-center q-col-gutter-x-xl q-col-gutter-y-md">
+        <div class="row justify-center q-gutter-y-md">
           <!-- คอลัมน์ซ้าย: ข้อมูลตัวตน -->
-          <div class="col-12 col-sm-6 profile-col">
+          <div class="col-12 col-md-6 q-px-xl">
             <IdentityColumn
               :is-thai="isThailand"
               :is-edit-mode="isEditMode"
@@ -23,7 +23,7 @@
           </div>
 
           <!-- คอลัมน์ขวา: ข้อมูลสถาบัน/ที่อยู่ -->
-          <div class="col-12 col-sm-6 profile-col">
+          <div class="col-12 col-md-6 q-px-xl">
             <ContactColumn
               v-model:faculty="formData.faculty"
               v-model:institution="formData.institution"
@@ -134,27 +134,3 @@ onMounted(() => {
   }
 });
 </script>
-
-<style scoped lang="scss">
-.profile-card {
-  max-width: 1000px;
-  width: 100%;
-  border: 1px solid var(--q-grey-3);
-  border-radius: 12px;
-  margin: 0 auto;
-}
-
-.profile-col {
-  max-width: 420px;
-}
-
-.profile-action-btn {
-  width: 160px;
-  border-radius: 8px;
-  padding: 10px 0;
-}
-
-.profile-dialog-card {
-  min-width: 350px;
-}
-</style>

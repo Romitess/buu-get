@@ -1,133 +1,89 @@
 <template>
-  <div class="q-gutter-y-md">
+  <div class="q-gutter-y-sm">
     <!-- ─── Thai: เลขบัตรประจำตัวประชาชน / Foreigner: Passport Number ─── -->
-    <template v-if="isThai">
-      <div>
-        <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.nationalId') }}</div>
-        <q-input
-          v-model="nationalId"
-          :placeholder="t('profile.nationalIdPlaceholder')"
-          outlined
-          dense
-          :readonly="isEditMode"
-          :rules="[(val) => !!val || t('profile.requiredNationalId')]"
-          class="custom-input"
-        />
-      </div>
-    </template>
-    <template v-else>
-      <div>
-        <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.passportNo') }}</div>
-        <q-input
-          v-model="nationalId"
-          :placeholder="t('profile.passportPlaceholder')"
-          outlined
-          dense
-          :readonly="isEditMode"
-          :rules="[(val) => !!val || t('profile.requiredNationalId')]"
-          class="custom-input"
-        />
-      </div>
-    </template>
+    <AppFormField
+      v-if="isThai"
+      v-model="nationalId"
+      :label="t('profile.nationalId')"
+      :placeholder="t('profile.nationalIdPlaceholder')"
+      :readonly="isEditMode"
+      :rules="[(val) => !!val || t('profile.requiredNationalId')]"
+    />
+    <AppFormField
+      v-else
+      v-model="nationalId"
+      :label="t('profile.passportNo')"
+      :placeholder="t('profile.passportPlaceholder')"
+      :readonly="isEditMode"
+      :rules="[(val) => !!val || t('profile.requiredNationalId')]"
+    />
 
     <!-- ─── Thai: คำนำหน้า (ไทย) / Foreigner: Nationality ─── -->
-    <template v-if="isThai">
-      <div>
-        <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.prefix') }}</div>
-        <q-select
-          v-model="titleTH"
-          :options="TITLE_TH_OPTIONS"
-          emit-value
-          map-options
-          outlined
-          dense
-          @update:model-value="onTitleTHChange"
-          :rules="[(val) => !!val || t('profile.requiredPrefix')]"
-          class="custom-input"
-        />
-      </div>
-    </template>
-    <template v-else>
-      <div>
-        <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.nationality') }}</div>
-        <q-input v-model="country" outlined dense placeholder="American" class="custom-input" />
-      </div>
-    </template>
+    <AppFormField
+      v-if="isThai"
+      v-model="titleTH"
+      type="select"
+      :label="t('profile.prefix')"
+      :options="TITLE_TH_OPTIONS"
+      @update:model-value="onTitleTHChange"
+      :rules="[(val) => !!val || t('profile.requiredPrefix')]"
+    />
+    <AppFormField
+      v-else
+      v-model="country"
+      :label="t('profile.nationality')"
+      placeholder="American"
+    />
 
     <!-- ─── Thai: ชื่อ-นามสกุล (ไทย) — ซ่อนสำหรับต่างชาติ ─── -->
-    <div v-if="isThai">
-      <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.fullName') }}</div>
-      <q-input
-        v-model="fullName"
-        outlined
-        dense
-        :rules="[(val) => !!val || t('profile.requiredFullName')]"
-        class="custom-input"
-      />
-    </div>
+    <AppFormField
+      v-if="isThai"
+      v-model="fullName"
+      :label="t('profile.fullName')"
+      :rules="[(val) => !!val || t('profile.requiredFullName')]"
+    />
 
     <!-- ─── Prefixes (EN) ─── -->
-    <template v-if="isThai">
-      <div>
-        <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.prefixEn') }}</div>
-        <q-input v-model="titleEN" outlined dense readonly class="custom-input bg-grey-2" />
-      </div>
-    </template>
-    <template v-else>
-      <div>
-        <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.prefixEn') }}</div>
-        <q-select
-          v-model="titleEN"
-          :options="TITLE_EN_OPTIONS"
-          outlined
-          dense
-          :rules="[(val) => !!val || t('profile.requiredPrefixEn')]"
-          class="custom-input"
-        />
-      </div>
-    </template>
+    <AppFormField
+      v-if="isThai"
+      v-model="titleEN"
+      :label="t('profile.prefixEn')"
+      readonly
+      input-class="bg-grey-2"
+    />
+    <AppFormField
+      v-else
+      v-model="titleEN"
+      type="select"
+      :label="t('profile.prefixEn')"
+      :options="TITLE_EN_OPTIONS"
+      :rules="[(val) => !!val || t('profile.requiredPrefixEn')]"
+    />
 
     <!-- ─── Full Name (EN) ─── -->
-    <div>
-      <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.fullNameEn') }}</div>
-      <q-input
-        v-model="englishName"
-        :placeholder="t('profile.fullNameEnPlaceholder')"
-        outlined
-        dense
-        :rules="[(val) => !!val || t('profile.requiredFullNameEn')]"
-        class="custom-input"
-      />
-    </div>
+    <AppFormField
+      v-model="englishName"
+      :label="t('profile.fullNameEn')"
+      :placeholder="t('profile.fullNameEnPlaceholder')"
+      :rules="[(val) => !!val || t('profile.requiredFullNameEn')]"
+    />
 
     <!-- ─── วันเกิด / Date of Birth ─── -->
-    <div>
-      <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.birthdate') }}</div>
-      <q-input
-        v-model="birthdate"
-        type="date"
-        outlined
-        dense
-        stack-label
-        :rules="[(val) => !!val || t('profile.requiredBirthdate')]"
-        class="custom-input"
-      />
-    </div>
+    <AppFormField
+      v-model="birthdate"
+      type="date"
+      :label="t('profile.birthdate')"
+      :rules="[(val) => !!val || t('profile.requiredBirthdate')]"
+    />
 
     <!-- ─── ระดับการศึกษา / Highest Education ─── -->
-    <div>
-      <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.education') }}</div>
-      <q-select
-        v-model="educationLevel"
-        :options="educationOptions"
-        emit-value
-        map-options
-        outlined
-        dense
-        :rules="[(val) => !!val || t('profile.requiredEducation')]"
-        class="custom-input"
-      />
-    </div>
+    <AppFormField
+      v-model="educationLevel"
+      type="select"
+      :label="t('profile.education')"
+      :options="educationOptions"
+      :rules="[(val) => !!val || t('profile.requiredEducation')]"
+    />
   </div>
 </template>
 
@@ -135,6 +91,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { TITLE_TH_OPTIONS, TITLE_EN_OPTIONS } from 'src/utils/form-options';
+import AppFormField from 'src/components/base/app-form-field.vue';
 
 const { t } = useI18n();
 

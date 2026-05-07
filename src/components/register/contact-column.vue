@@ -1,85 +1,55 @@
 <template>
-  <div class="q-gutter-y-md">
+  <div class="q-gutter-y-sm">
     <!-- ─── คณะ/สาขาวิชา ─── -->
-    <div>
-      <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.faculty') }}</div>
-      <q-input
-        v-model="faculty"
-        :placeholder="t('profile.facultyPlaceholder')"
-        outlined
-        dense
-        class="custom-input"
-      />
-    </div>
+    <AppFormField
+      v-model="faculty"
+      :label="t('profile.faculty')"
+      :placeholder="t('profile.facultyPlaceholder')"
+    />
 
     <!-- ─── ชื่อสถานศึกษา ─── -->
-    <div>
-      <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.institution') }}</div>
-      <q-input
-        v-model="institution"
-        :placeholder="t('profile.institutionPlaceholder')"
-        outlined
-        dense
-        class="custom-input"
-      />
-    </div>
+    <AppFormField
+      v-model="institution"
+      :label="t('profile.institution')"
+      :placeholder="t('profile.institutionPlaceholder')"
+    />
 
     <!-- ─── ที่อยู่สำหรับจัดส่งเอกสาร ─── -->
-    <div>
-      <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.address') }}</div>
-      <q-input
-        v-model="address"
-        type="textarea"
-        :placeholder="t('profile.addressPlaceholder')"
-        outlined
-        dense
-        rows="3"
-        class="custom-input"
-      />
-    </div>
+    <AppFormField
+      v-model="address"
+      type="textarea"
+      :label="t('profile.address')"
+      :placeholder="t('profile.addressPlaceholder')"
+    />
 
     <!-- ─── จังหวัด ─── -->
-    <div>
-      <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.province') }}</div>
-      <q-input
-        v-model="province"
-        :placeholder="t('profile.provincePlaceholder')"
-        outlined
-        dense
-        class="custom-input"
-      />
-    </div>
+    <AppFormField
+      v-model="province"
+      :label="t('profile.province')"
+      :placeholder="t('profile.provincePlaceholder')"
+    />
 
     <!-- ─── รหัสไปรษณีย์ ─── -->
-    <div>
-      <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.zipCode') }}</div>
-      <q-input
-        v-model="zipCode"
-        :placeholder="t('profile.zipCodePlaceholder')"
-        outlined
-        dense
-        class="custom-input"
-      />
-    </div>
+    <AppFormField
+      v-model="zipCode"
+      :label="t('profile.zipCode')"
+      :placeholder="t('profile.zipCodePlaceholder')"
+    />
 
     <!-- ─── เบอร์โทรศัพท์ ─── -->
-    <div>
-      <div class="text-body2 text-weight-medium q-mb-xs">{{ t('profile.phone') }}</div>
-      <q-input
-        v-model="phone"
-        type="tel"
-        :placeholder="t('profile.phonePlaceholder')"
-        outlined
-        dense
-        :rules="[(val) => !!val || t('profile.requiredPhone')]"
-        class="custom-input"
-      />
-    </div>
+    <AppFormField
+      v-model="phone"
+      type="tel"
+      :label="t('profile.phone')"
+      :placeholder="t('profile.phonePlaceholder')"
+      :rules="[(val) => !!val || t('profile.requiredPhone')]"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import AppFormField from 'src/components/base/app-form-field.vue';
 
 const { t } = useI18n();
 
