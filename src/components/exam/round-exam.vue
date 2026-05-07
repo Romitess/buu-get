@@ -92,14 +92,14 @@ const isFull = computed(() => props.availableSeats <= 0);
 .round-exam {
   display: flex;
   align-items: center;
-  padding: 16px 24px;
+  padding: 12px 20px;
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid #e8e8e8;
   margin-bottom: 12px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-  gap: 24px;
+  gap: 16px;
 
   &--full {
     background-color: #fafafa;
@@ -123,7 +123,7 @@ const isFull = computed(() => props.availableSeats <= 0);
   }
 
   &__title {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 800;
     color: #1a1a1a;
     margin: 0;
@@ -132,6 +132,7 @@ const isFull = computed(() => props.availableSeats <= 0);
 
   &__tag {
     font-weight: 700 !important;
+    font-size: 0.75rem;
   }
 
   &__action-group {
@@ -156,7 +157,7 @@ const isFull = computed(() => props.availableSeats <= 0);
   }
 
   &__btn {
-    min-width: 140px;
+    min-width: 130px;
   }
 }
 

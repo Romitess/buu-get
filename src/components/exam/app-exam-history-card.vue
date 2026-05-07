@@ -288,12 +288,12 @@ watch(
   justify-content: flex-start !important;
 
   .status-group {
-    // Shifting badge left so its text content aligns perfectly with the title text below
-    // Offset = padding-left (var(--space-sm)) + dot size (8px) + gap (var(--space-xs))
-    margin-left: calc(
-      (var(--space-sm) + (var(--space-unit) * 2) + var(--space-xs)) * -1
-    ) !important;
     margin-right: auto !important;
+    // Use grid to fix status-append alignment without stretching the badge
+    display: grid !important;
+    grid-template-columns: calc(var(--space-unit) * 26) auto; // 120px fixed slot for badge
+    align-items: center;
+    gap: var(--space-md);
   }
 }
 
@@ -318,10 +318,6 @@ watch(
 
     .status-group {
       order: 1;
-      // Reset badge alignment offset for smaller padding
-      margin-left: calc(
-        (var(--space-sm) + (var(--space-unit) * 2) + var(--space-xs)) * -1
-      ) !important;
     }
   }
 
