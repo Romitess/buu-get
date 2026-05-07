@@ -109,3 +109,11 @@ export interface DialogCancelProps {
   cancelBtnText?: string;
   confirmBtnText?: string;
 }
+
+export interface ExamDetailProps {
+  badgeText?: string;
+  title: string;
+  subtitle?: string;
+  locationText?: string;
+  feeText?: string;
+}

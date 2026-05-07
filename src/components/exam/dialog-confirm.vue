@@ -76,11 +76,6 @@ import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
 import type { DialogConfirmProps } from 'src/types/exam';
 
-/**
- * DialogConfirm
- * Component สำหรับยืนยันการสมัครสอบ ตาม Figma UI 100%
- */
-
 defineProps<DialogConfirmProps>();
 
 defineEmits<{
@@ -102,19 +97,19 @@ const { t } = useI18n();
 }
 
 .icon-container-wrapper {
-  filter: drop-shadow(0 4px 12px rgba(13, 71, 161, 0.25));
+  filter: drop-shadow(var(--dialog-icon-shadow));
 }
 
 .icon-container {
   width: 72px;
   height: 72px;
-  background: linear-gradient(135deg, #bbdefb 0%, #e3f2fd 100%);
+  background: var(--dialog-icon-gradient);
   color: var(--primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid white;
+  border: 3px solid var(--surface-card);
 }
 
 .text-title {
@@ -135,7 +130,7 @@ const { t } = useI18n();
 }
 
 .info-box {
-  border: 1px solid #aecdf5;
+  border: 1px solid var(--dialog-info-border);
   border-radius: 16px;
   padding: 20px 24px;
   background-color: var(--surface-card);

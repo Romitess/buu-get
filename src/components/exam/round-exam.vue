@@ -9,7 +9,6 @@
       <AppButton
         :label="roundTypeLabel || t('examSchedule.roundTypeLabel')"
         color="secondary"
-        pill
         dense
         class="round-exam__tag"
       />
@@ -64,25 +63,25 @@ const isFull = computed(() => props.availableSeats <= 0);
 .round-exam {
   display: flex;
   align-items: center;
-  padding: 12px 20px;
-  background: #ffffff;
+  padding: 10px 18px;
+  background: var(--surface-card);
   border-radius: 16px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid var(--border-color);
   margin-bottom: 12px;
-  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: var(--shadow-card) !important;
   transition:
     transform var(--transition-fast),
     box-shadow var(--transition-fast);
-  gap: 16px;
+  gap: 14px;
+
+  &--full {
+    background-color: var(--surface-card);
+    border-color: var(--border-color);
+  }
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-
-  &--full {
-    background-color: #ffffff;
-    border-color: #e8e8e8;
+    box-shadow: var(--round-exam-hover-shadow) !important;
   }
 
   &__time {
@@ -99,14 +98,16 @@ const isFull = computed(() => props.availableSeats <= 0);
   &__title {
     font-size: 1.1rem;
     font-weight: 800;
-    color: #1a1a1a;
+    color: var(--text-primary);
     margin: 0;
     line-height: 1.2;
   }
 
   &__tag {
-    font-weight: 700 !important;
-    font-size: 0.75rem;
+    font-weight: 500 !important;
+    font-size: 0.7rem; // เล็กลงนิดนึง
+    border-radius: 10px !important;
+    padding: 2px 8px; // เล็กลงนิดนึง
   }
 
   &__action-group {
@@ -120,11 +121,11 @@ const isFull = computed(() => props.availableSeats <= 0);
     display: flex;
     align-items: center;
     gap: 6px;
-    font-weight: 600;
+    font-weight: 500; // ไม่เป็นตัวหนา
     font-size: 0.8rem;
 
     .text-muted {
-      color: #9e9e9e;
+      color: var(--text-muted);
       font-weight: 400;
       margin-left: 2px;
     }
@@ -155,7 +156,7 @@ const isFull = computed(() => props.availableSeats <= 0);
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
-      border-top: 1px solid #f5f5f5;
+      border-top: 1px solid var(--round-exam-divider);
       padding-top: 16px;
     }
   }

@@ -17,8 +17,11 @@
               @click="handlePrevMonth"
             />
             <div class="calendar-title cursor-pointer" @click="showPicker = true">
-              <h2>{{ currentMonthYearTH }} <q-icon name="arrow_drop_down" /></h2>
-              <p>{{ currentMonthYearEN }}</p>
+              <h2 class="month-title">
+                <span>{{ currentMonthYearTH }}</span>
+                <q-icon name="arrow_drop_down" class="dropdown-icon" />
+              </h2>
+              <p class="month-subtitle">{{ currentMonthYearEN }}</p>
             </div>
             <q-btn
               flat
@@ -260,8 +263,8 @@ const handleDaySelect = (dateString: string) => {
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25) !important;
   background-color: var(--surface-card);
   position: relative;
-  width: 320px; /* ล็อคความกว้างคงที่ */
-  height: 380px; /* ล็อคความสูงคงที่ */
+  width: 320px;
+  height: 380px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -281,7 +284,7 @@ const handleDaySelect = (dateString: string) => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
-  height: 44px; /* ล็อคความสูง Header */
+  height: 44px;
 }
 .calendar-nav-btn {
   font-size: 15px;
@@ -302,28 +305,40 @@ const handleDaySelect = (dateString: string) => {
     background-color: rgba(0, 0, 0, 0.05);
   }
 
-  h2 {
+  h2.month-title {
     margin: 0;
     font-size: 17px;
-    font-weight: 600;
-    line-height: 1.1;
+    font-weight: 700;
+    line-height: 1.2;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    position: relative;
+    color: #000000;
+
+    span {
+      display: inline-block;
+    }
+
+    .dropdown-icon {
+      position: absolute;
+      right: -20px;
+      font-size: 20px;
+    }
   }
-  p {
+
+  p.month-subtitle {
     margin: 0;
     font-size: 13px;
     color: var(--neutral-500);
-    font-weight: 300;
+    font-weight: 400;
+    line-height: 1.2;
   }
 }
 
-/* ─── Picker View (Overlay Styles) ─── */
 .year-selector {
-  flex: 0 1 auto; /* ให้ขยายตามพื้นที่แต่ไม่เกินที่กำหนด */
-  max-height: 180px; /* จำกัดความสูงไว้ไม่ให้ล้นยาว */
+  flex: 0 1 auto;
+  max-height: 180px;
   overflow-y: auto;
   border-bottom: 1px solid #f0f0f0;
 }
@@ -370,12 +385,11 @@ const handleDaySelect = (dateString: string) => {
   }
 }
 
-/* ─── Grid View Styles ─── */
 .calendar-grid {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-template-rows: auto repeat(6, 1fr); /* ล็อค 6 แถววัน */
+  grid-template-rows: auto repeat(6, 1fr);
   row-gap: 4px;
   column-gap: 4px;
   text-align: center;
@@ -428,7 +442,7 @@ const handleDaySelect = (dateString: string) => {
 .scroll-column {
   overflow-y: auto;
   &::-webkit-scrollbar {
-    width: 8px; /* เพิ่มความหนาให้เห็นชัด */
+    width: 8px;
   }
   &::-webkit-scrollbar-track {
     background: #f9f9f9;

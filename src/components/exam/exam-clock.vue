@@ -17,29 +17,30 @@ defineProps<ExamClockProps>();
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 12px 20px;
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
+  padding: 10px 20px;
+  background: var(--clock-bg);
+  border: 1.5px solid var(--clock-border) !important;
   border-radius: 12px;
   min-width: 120px;
   transition: all 0.3s ease;
+  box-shadow: var(--clock-shadow) !important;
 
   &__icon {
-    font-size: 24px;
-    color: #424242;
+    font-size: 22px;
+    color: var(--clock-icon);
     margin-bottom: 4px;
   }
 
   &__time {
     font-size: 1rem;
     font-weight: 700;
-    color: #212121;
+    color: var(--clock-text);
     white-space: nowrap;
   }
 
   &:hover {
     border-color: var(--primary-light);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--clock-shadow-hover);
   }
 }
 

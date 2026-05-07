@@ -2,7 +2,6 @@
   <q-card class="exam-detail-card buu-card" flat>
     <div class="accent-bar"></div>
     <q-card-section class="q-pa-md q-pl-lg">
-      <!-- Badge Section -->
       <div class="q-mb-sm" v-if="badgeText">
         <div class="exam-badge">
           <div class="exam-dot bg-primary"></div>
@@ -10,17 +9,14 @@
         </div>
       </div>
 
-      <!-- Title -->
       <div class="text-h6 text-weight-bold q-mb-xs text-dark">
         {{ title }}
       </div>
 
-      <!-- Subtitle -->
       <div class="text-caption text-grey-7 q-mb-md" v-if="subtitle">
         {{ subtitle }}
       </div>
 
-      <!-- Details Row -->
       <div class="row items-center q-gutter-x-lg">
         <div class="row items-center" v-if="locationText">
           <q-icon name="location_on" color="primary" size="20px" class="q-mr-xs" />
@@ -36,28 +32,28 @@
 </template>
 
 <script setup lang="ts">
-/**
- * ExamDetail Component
- * Displays the core information of an exam including title, type, location, and fee.
- */
-interface Props {
-  badgeText?: string;
-  title: string;
-  subtitle?: string;
-  locationText?: string;
-  feeText?: string;
-}
+import type { ExamDetailProps } from 'src/types/exam';
 
-defineProps<Props>();
+defineProps<ExamDetailProps>();
 </script>
 
 <style scoped lang="scss">
 .exam-detail-card {
-  border-radius: var(--radius-md);
+  border-radius: 16px;
   border: 1px solid var(--border-color);
   position: relative;
   overflow: hidden;
-  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: var(--shadow-card) !important;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--detail-card-hover-shadow) !important;
+    background-color: var(--detail-card-hover-bg);
+  }
 }
 
 .accent-bar {
@@ -65,14 +61,15 @@ defineProps<Props>();
   left: 0;
   top: 0;
   bottom: 0;
-  width: 5px;
+  width: 6px;
   background-color: var(--primary);
+  z-index: 1;
 }
 
 .exam-badge {
   display: inline-flex;
   align-items: center;
-  background-color: #e8f0fe;
+  background-color: var(--detail-card-badge-bg);
   padding: 4px 12px;
   border-radius: 16px;
   gap: 8px;

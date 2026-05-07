@@ -76,11 +76,6 @@ import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
 import type { DialogCancelProps } from 'src/types/exam';
 
-/**
- * DialogCancel
- * Component สำหรับยืนยันยกเลิกการสมัครสอบ ตาม Figma UI 100%
- */
-
 defineProps<DialogCancelProps>();
 
 defineEmits<{
@@ -96,36 +91,36 @@ const { t } = useI18n();
   width: 100%;
   max-width: 460px;
   border-radius: 24px;
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--dialog-shadow);
   overflow: visible;
 }
 
 .icon-container-wrapper {
-  filter: drop-shadow(0 4px 12px rgba(13, 71, 161, 0.25));
+  filter: drop-shadow(var(--dialog-icon-shadow));
 }
 
 .icon-container {
   width: 72px;
   height: 72px;
-  background: linear-gradient(135deg, #bbdefb 0%, #e3f2fd 100%);
-  color: #0d47a1;
+  background: var(--dialog-icon-gradient);
+  color: var(--primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid white;
+  border: 3px solid var(--surface-card);
 }
 
 .text-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text-primary);
   letter-spacing: -0.01em;
 }
 
 .text-subtitle {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-secondary);
   text-align: center;
   line-height: 1.5;
   max-width: 400px;
@@ -134,26 +129,26 @@ const { t } = useI18n();
 }
 
 .info-box {
-  border: 1px solid #aecdf5;
+  border: 1px solid var(--dialog-info-border);
   border-radius: 16px;
   padding: 20px 24px;
-  background-color: white;
+  background-color: var(--surface-card);
 }
 
 .info-row {
   .label-text {
     font-size: 0.95rem;
     font-weight: 500;
-    color: #555;
+    color: var(--text-secondary);
   }
   .value-text {
     font-size: 1.05rem;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--text-primary);
   }
   .underline {
     height: 1px;
-    background-color: #0d47a1;
+    background-color: var(--primary);
     opacity: 0.5;
     width: 100%;
     margin-top: 4px;

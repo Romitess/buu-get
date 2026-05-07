@@ -122,6 +122,25 @@
   --space-lg: calc(var(--space-unit) * 6); // 24px
   --space-xl: calc(var(--space-unit) * 8); // 32px
   --space-2xl: calc(var(--space-unit) * 12); // 48px
+
+  // exam Dialog & Component 
+  --dialog-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  --dialog-icon-shadow: 0 4px 12px rgba(13, 71, 161, 0.25);
+  --dialog-icon-gradient: linear-gradient(135deg, #bbdefb 0%, #e3f2fd 100%);
+  --dialog-info-border: #aecdf5;
+  
+  --clock-bg: #ffffff;
+  --clock-icon: #424242;
+  --clock-border: #e0e0e0;
+  --clock-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --clock-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+  --round-exam-hover-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+  --round-exam-divider: #f5f5f5;
+  
+  --detail-card-badge-bg: #e8f0fe;
+  --detail-card-hover-bg: #f9fbff;
+  --detail-card-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 // === Base Reset & Typography ===
@@ -354,17 +373,62 @@ body {
     }
   }
 
-  /* Fix ขนาดปฏิทินจาก Global */
   .calendar-card {
     width: 100% !important;
     height: auto !important;
     min-height: 440px;
+
+    @media (min-width: 1024px) {
+      min-height: 500px !important;
+      padding: 24px !important;
+    }
+  }
+
+  .calendar-title {
+    @media (min-width: 1024px) {
+      h2.month-title {
+        font-size: 19px !important;
+      }
+      p.month-subtitle {
+        font-size: 14px !important;
+      }
+    }
+  }
+
+  .calendar-grid {
+    @media (min-width: 1024px) {
+      row-gap: 6px !important;
+
+      .day-cell {
+        height: 52px !important;
+        font-size: 15px !important;
+        border-radius: 10px !important;
+      }
+
+      .dot {
+        width: 8px !important;
+        height: 8px !important;
+        bottom: 6px !important;
+      }
+    }
+  }
+
+  .status-footer {
+    @media (min-width: 1024px) {
+      margin-top: 24px !important;
+      padding: 16px !important;
+    }
   }
 
   &__content {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
+
+    @media (min-width: 1024px) {
+      margin-top: 16px !important;
+      padding-bottom: 32px;
+    }
 
     @media (max-width: 1024px) {
       flex-direction: column;
@@ -382,6 +446,10 @@ body {
     overflow: hidden;
     border: none;
 
+    @media (min-width: 1024px) {
+      padding: 24px !important;
+    }
+
     @media (max-width: 1024px) {
       max-height: 500px;
       margin-top: 24px;
@@ -395,10 +463,14 @@ body {
 
   &__rounds-header {
     flex: 0 0 auto;
-    margin-bottom: 20px;
+    margin-bottom: 12px; 
+
+    @media (min-width: 1024px) {
+      margin-bottom: 16px !important; 
+    }
 
     @media (max-width: 600px) {
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
   }
 
@@ -414,6 +486,10 @@ body {
     color: var(--text-primary);
     margin: 0;
 
+    @media (min-width: 1024px) {
+      font-size: 1.3rem !important;
+    }
+
     @media (max-width: 600px) {
       font-size: 1.1rem;
     }
@@ -424,6 +500,11 @@ body {
     margin: 0;
     padding-left: 28px;
     color: var(--text-secondary);
+
+    @media (min-width: 1024px) {
+      font-size: 0.9rem !important;
+      padding-left: 30px !important;
+    }
 
     @media (max-width: 600px) {
       font-size: 0.8rem;
@@ -436,9 +517,14 @@ body {
     flex-direction: column;
     gap: 12px;
     overflow-y: auto;
-    padding: 0 8px 0 0;
+    padding: 8px 8px 8px 0; 
     min-height: 0;
     scrollbar-gutter: stable;
+
+    @media (min-width: 1024px) {
+      gap: 12px !important;
+      padding: 10px 8px 10px 0 !important;
+    }
 
     &::-webkit-scrollbar {
       width: 6px;
@@ -452,6 +538,28 @@ body {
       border-radius: 10px;
       &:hover {
         background: var(--neutral-500);
+      }
+    }
+  }
+
+  .round-exam {
+    @media (min-width: 1024px) {
+      padding: 16px 20px !important;
+      gap: 20px !important;
+      border-radius: 16px !important;
+
+      &__title {
+        font-size: 1.15rem !important;
+      }
+
+      &__btn {
+        padding: 8px 20px !important;
+        font-size: 0.95rem !important;
+        min-width: 140px !important;
+      }
+
+      &__status {
+        font-size: 0.9rem !important;
       }
     }
   }
