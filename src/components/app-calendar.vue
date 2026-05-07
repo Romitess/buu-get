@@ -322,7 +322,8 @@ const handleDaySelect = (dateString: string) => {
 
 /* ─── Picker View (Overlay Styles) ─── */
 .year-selector {
-  flex: 1; /* ให้ขยายเต็มพื้นที่ที่เหลือ */
+  flex: 0 1 auto; /* ให้ขยายตามพื้นที่แต่ไม่เกินที่กำหนด */
+  max-height: 180px; /* จำกัดความสูงไว้ไม่ให้ล้นยาว */
   overflow-y: auto;
   border-bottom: 1px solid #f0f0f0;
 }
@@ -425,13 +426,19 @@ const handleDaySelect = (dateString: string) => {
 }
 
 .scroll-column {
-  scrollbar-width: thin;
+  overflow-y: auto;
   &::-webkit-scrollbar {
-    width: 4px;
+    width: 8px; /* เพิ่มความหนาให้เห็นชัด */
+  }
+  &::-webkit-scrollbar-track {
+    background: #f9f9f9;
   }
   &::-webkit-scrollbar-thumb {
-    background: #e0e0e0;
+    background: #c1c1c1;
     border-radius: 4px;
+    &:hover {
+      background: #a8a8a8;
+    }
   }
 }
 
