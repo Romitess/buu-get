@@ -189,6 +189,67 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
+  /**
+   * เพิ่มรอบสอบใหม่ (จากหน้า Create Exam)
+   */
+  function addExamRound(payload: {
+    examName: string;
+    location: string;
+    examType: string;
+    fee: string | number;
+    seats: number;
+    examDate: string; // Format: DD/MM/YYYY (Buddhist)
+    timeRanges: string[];
+  }): void {
+    const [dd, mm, yyyy] = payload.examDate.split('/');
+    if (!dd || !mm || !yyyy) return;
+
+    const gregorianYear = parseInt(yyyy) - 543;
+    const dateKey = `${gregorianYear}-${mm}-${dd}`;
+
+    let formattedFee = `Fee : ${payload.fee} ฿`;
+    if (payload.fee === '0.00' || !payload.fee) {
+      formattedFee = 'Fee : 500 ฿'; // fallback
+    }
+
+    if (!scheduleData.value[dateKey]) {
+      scheduleData.value[dateKey] = {
+        location: payload.location || 'Computer Center, BUU',
+        fee: formattedFee,
+        rounds: [],
+      };
+    } else {
+      if (payload.location) scheduleData.value[dateKey].location = payload.location;
+      if (payload.fee && payload.fee !== '0.00') scheduleData.value[dateKey].fee = formattedFee;
+    }
+
+    const day = scheduleData.value[dateKey];
+    if (!day) return;
+
+    payload.timeRanges.forEach((timeRange) => {
+      let maxId = 0;
+      Object.values(scheduleData.value).forEach((d) => {
+        d.rounds.forEach((r) => {
+          if (r.id > maxId) maxId = r.id;
+        });
+      });
+
+      day.rounds.push({
+        id: maxId + 1,
+        title:
+          payload.examName ||
+          `BUU - GET (${payload.examType === 'รอบทั่วไป' ? 'General' : 'Special'})`,
+        timeRange,
+        roundTypeLabel: payload.examType,
+        availableSeats: payload.seats,
+        totalSeats: payload.seats,
+      });
+    });
+
+    // Automatically select the newly created date
+    selectedDate.value = dateKey;
+  }
+
   return {
     // Schedule State
     examInfo,
@@ -211,5 +272,6 @@ export const useExamStore = defineStore('exam', () => {
     confirmSpecialRegistration,
     cancelRegistration,
     confirmPayment,
+    addExamRound,
   };
 });

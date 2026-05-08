@@ -279,8 +279,18 @@
 
       <!-- Action Buttons -->
       <div class="row justify-end q-mt-lg q-gutter-md q-mb-md">
-        <q-btn label="ยกเลิก" unelevated class="action-btn cancel-btn text-weight-bold" />
-        <q-btn label="บันทึก" unelevated class="action-btn save-btn text-white text-weight-bold" />
+        <q-btn
+          label="ยกเลิก"
+          @click="handleCancel"
+          unelevated
+          class="action-btn cancel-btn text-weight-bold"
+        />
+        <q-btn
+          label="บันทึก"
+          @click="handleSave"
+          unelevated
+          class="action-btn save-btn text-white text-weight-bold"
+        />
       </div>
     </div>
   </q-page>
@@ -288,8 +298,15 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useQuasar } from 'quasar';
+import { useExamStore } from 'src/stores/exam.store';
 
-const examTypeOptions: string[] = ['รอบทั่วไป'];
+const router = useRouter();
+const $q = useQuasar();
+const examStore = useExamStore();
+
+const examTypeOptions: string[] = ['รอบทั่วไป', 'รอบพิเศษ'];
 const examFormatOptions: string[] = ['แบบกระดาษ'];
 
 const form = ref({
@@ -311,6 +328,54 @@ const form = ref({
   payStartDate: '02/05/2569',
   payEndDate: '02/05/2569',
 });
+
+const handleCancel = () => {
+  void router.push('/exam-schedule');
+};
+
+const handleSave = () => {
+  const timeRanges = [];
+
+  if (form.value.startTime1 && form.value.endTime1) {
+    timeRanges.push(
+      `${form.value.startTime1.replace(/\s/g, '')} - ${form.value.endTime1.replace(/\s/g, '')}`,
+    );
+  }
+
+  if (form.value.startTime2 && form.value.endTime2) {
+    timeRanges.push(
+      `${form.value.startTime2.replace(/\s/g, '')} - ${form.value.endTime2.replace(/\s/g, '')}`,
+    );
+  }
+
+  if (timeRanges.length === 0) {
+    $q.notify({
+      type: 'warning',
+      message: 'กรุณาระบุเวลาสอบอย่างน้อย 1 ช่วงเวลา',
+      position: 'top',
+    });
+    return;
+  }
+
+  examStore.addExamRound({
+    examName: form.value.examName,
+    location: form.value.location,
+    examType: form.value.examType,
+    fee: form.value.fee,
+    seats: form.value.seats,
+    examDate: form.value.examDate,
+    timeRanges,
+  });
+
+  $q.notify({
+    type: 'positive',
+    message: 'สร้างรอบสอบสำเร็จ',
+    position: 'top',
+    timeout: 2000,
+  });
+
+  void router.push('/exam-schedule');
+};
 </script>
 
 <style scoped>
