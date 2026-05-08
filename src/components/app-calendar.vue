@@ -35,7 +35,7 @@
 
           <!-- Grid -->
           <div class="calendar-grid">
-            <div class="weekday" v-for="day in weekdays" :key="day">{{ day }}</div>
+            <div class="weekday" v-for="day in WEEKDAYS" :key="day">{{ day }}</div>
             <div class="day-cell empty" v-for="n in emptyDaysCount" :key="'empty-' + n"></div>
 
             <div
@@ -76,8 +76,8 @@
               v-for="y in yearOptions"
               :key="y"
               class="year-item"
-              :class="{ active: currentDate.getFullYear() === y - 543 }"
-              @click="handleYearSelect(y - 543)"
+              :class="{ active: currentDate.getFullYear() === y - THAI_YEAR_OFFSET }"
+              @click="handleYearSelect(y - THAI_YEAR_OFFSET)"
             >
               {{ y }}
             </div>
@@ -88,7 +88,7 @@
           <!-- ส่วนล่าง: เลือกเดือน (Grid 4x3) -->
           <div class="month-grid q-pa-sm">
             <div
-              v-for="(m, index) in shortMonthNamesEN"
+              v-for="(m, index) in SHORT_MONTH_NAMES_EN"
               :key="m"
               class="month-item"
               :class="{ active: currentDate.getMonth() === index }"
@@ -112,28 +112,15 @@
  * คอมโพเนนต์ปฏิทินพื้นฐานที่รองรับการปรับแต่งผ่าน Slots
  */
 import { ref, computed } from 'vue';
+import type { AppCalendarProps } from '../types/common';
 
-interface Props {
-  /** วันที่เลือกอยู่ (YYYY-MM-DD) */
-  modelValue: string;
-}
+const THAI_YEAR_OFFSET = 543;
+const PAST_YEARS_RANGE = 100;
+const TOTAL_YEARS_RANGE = 111;
+const CALENDAR_TOTAL_SLOTS = 42;
 
-defineProps<Props>();
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void;
-  (e: 'change-month', month: number, year: number): void;
-  (e: 'click-date', value: string): void;
-  (e: 'main-card-resize', size: { width: number; height: number }): void;
-}>();
-
-// ============================================================================
-// LOGIC
-// ============================================================================
-const showPicker = ref(false);
-const currentDate = ref(new Date());
-const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const monthNamesTH = [
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const MONTH_NAMES_TH = [
   'มกราคม',
   'กุมภาพันธ์',
   'มีนาคม',
@@ -147,7 +134,7 @@ const monthNamesTH = [
   'พฤศจิกายน',
   'ธันวาคม',
 ];
-const monthNamesEN = [
+const MONTH_NAMES_EN = [
   'January',
   'February',
   'March',
@@ -161,7 +148,7 @@ const monthNamesEN = [
   'November',
   'December',
 ];
-const shortMonthNamesEN = [
+const SHORT_MONTH_NAMES_EN = [
   'Jan',
   'Feb',
   'Mar',
@@ -176,17 +163,36 @@ const shortMonthNamesEN = [
   'Dec',
 ];
 
+defineProps<AppCalendarProps>();
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void;
+  (e: 'change-month', month: number, year: number): void;
+  (e: 'click-date', value: string): void;
+  (e: 'main-card-resize', size: { width: number; height: number }): void;
+}>();
+
+// ============================================================================
+// LOGIC
+// ============================================================================
+const showPicker = ref(false);
+const currentDate = ref(new Date());
+
 const currentMonthYearTH = computed(
-  () => `${monthNamesTH[currentDate.value.getMonth()]} ${currentDate.value.getFullYear() + 543}`,
+  () =>
+    `${MONTH_NAMES_TH[currentDate.value.getMonth()]} ${currentDate.value.getFullYear() + THAI_YEAR_OFFSET}`,
 );
 const currentMonthYearEN = computed(
-  () => `${monthNamesEN[currentDate.value.getMonth()]} ${currentDate.value.getFullYear()}`,
+  () => `${MONTH_NAMES_EN[currentDate.value.getMonth()]} ${currentDate.value.getFullYear()}`,
 );
 
 // สร้างรายการปี พ.ศ. (ย้อนหลัง 100 ปี ถึง อนาคต 10 ปี)
 const yearOptions = computed(() => {
-  const currentYear = new Date().getFullYear() + 543;
-  return Array.from({ length: 111 }, (_, i) => currentYear - 100 + i).reverse();
+  const currentYear = new Date().getFullYear() + THAI_YEAR_OFFSET;
+  return Array.from(
+    { length: TOTAL_YEARS_RANGE },
+    (_, i) => currentYear - PAST_YEARS_RANGE + i,
+  ).reverse();
 });
 
 const emptyDaysCount = computed(() => {
@@ -200,9 +206,8 @@ const emptyDaysCount = computed(() => {
 
 // จำนวนช่องว่างส่วนท้ายเพื่อให้ครบ 6 แถว (42 ช่อง) เสมอ
 const trailingEmptyDaysCount = computed(() => {
-  const totalSlots = 42; // 6 แถว x 7 วัน
   const occupiedSlots = emptyDaysCount.value + daysInMonth.value.length;
-  return totalSlots - occupiedSlots;
+  return CALENDAR_TOTAL_SLOTS - occupiedSlots;
 });
 
 const daysInMonth = computed(() => {
@@ -242,7 +247,7 @@ const handleNextMonth = () => {
 const handleMonthSelect = (monthIndex: number) => {
   currentDate.value = new Date(currentDate.value.getFullYear(), monthIndex, 1);
   emit('change-month', monthIndex + 1, currentDate.value.getFullYear());
-  showPicker.value = false; // เลือกแล้วกลับไปหน้าปฏิทิน
+  showPicker.value = false;
 };
 
 const handleYearSelect = (year: number) => {
@@ -260,7 +265,7 @@ const handleDaySelect = (dateString: string) => {
 .calendar-card {
   border-radius: 16px;
   padding: 16px 20px;
-  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: var(--shadow-card) !important;
   background-color: var(--surface-card);
   position: relative;
   width: 320px;
@@ -289,7 +294,7 @@ const handleDaySelect = (dateString: string) => {
 .calendar-nav-btn {
   font-size: 15px;
   color: var(--neutral-400);
-  transition: color 0.2s;
+  transition: color var(--transition-fast);
   &:hover {
     color: var(--text-primary);
   }
@@ -299,10 +304,10 @@ const handleDaySelect = (dateString: string) => {
   text-align: center;
   padding: 4px 12px;
   border-radius: 8px;
-  transition: background-color 0.2s;
+  transition: background-color var(--transition-fast);
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: var(--calendar-hover-bg-light);
   }
 
   h2.month-title {
@@ -314,7 +319,7 @@ const handleDaySelect = (dateString: string) => {
     align-items: center;
     justify-content: center;
     position: relative;
-    color: #000000;
+    color: var(--text-primary);
 
     span {
       display: inline-block;
@@ -340,7 +345,7 @@ const handleDaySelect = (dateString: string) => {
   flex: 0 1 auto;
   max-height: 180px;
   overflow-y: auto;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--calendar-month-year-picker-border);
 }
 
 .year-item {
@@ -348,13 +353,13 @@ const handleDaySelect = (dateString: string) => {
   text-align: center;
   cursor: pointer;
   font-size: 15px;
-  border-bottom: 1px solid #fafafa;
+  border-bottom: 1px solid var(--calendar-year-item-border);
   &:hover {
-    background-color: #f5f5f5;
+    background-color: var(--calendar-year-item-hover);
   }
   &.active {
     background-color: var(--calendar-active-bg);
-    color: white;
+    color: var(--text-on-primary);
     font-weight: bold;
   }
 }
@@ -375,8 +380,8 @@ const handleDaySelect = (dateString: string) => {
   font-size: 14px;
   border: 1px solid transparent;
   &:hover {
-    background-color: #f5f5f5;
-    border-color: #e0e0e0;
+    background-color: var(--calendar-month-item-hover);
+    border-color: var(--calendar-month-item-border-hover);
   }
   &.active {
     border-color: var(--calendar-active-bg);
@@ -415,7 +420,7 @@ const handleDaySelect = (dateString: string) => {
   border-radius: 8px;
   cursor: pointer;
   position: relative;
-  transition: all 0.1s ease;
+  transition: all var(--transition-fast);
   user-select: none;
   &:not(.empty):hover {
     background-color: var(--calendar-hover-bg);
@@ -445,13 +450,13 @@ const handleDaySelect = (dateString: string) => {
     width: 8px;
   }
   &::-webkit-scrollbar-track {
-    background: #f9f9f9;
+    background: var(--calendar-scrollbar-track);
   }
   &::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
+    background: var(--calendar-scrollbar-thumb);
     border-radius: 4px;
     &:hover {
-      background: #a8a8a8;
+      background: var(--calendar-scrollbar-thumb-hover);
     }
   }
 }

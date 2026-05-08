@@ -11,3 +11,7 @@ export interface ReceiptData {
   paymentMethod: string;
   status: 'SUCCESS' | 'PENDING' | 'FAILED';
 }
+export interface ReceiptCardProps {
+  receipt: ReceiptData;
+  showQr?: boolean;
+}

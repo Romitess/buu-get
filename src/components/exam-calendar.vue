@@ -6,7 +6,6 @@
       @change-month="(m, y) => $emit('change-month', m, y)"
       @main-card-resize="(size) => $emit('main-card-resize', size)"
     >
-      <!-- ใส่จุดสีสำหรับสถานะรอบสอบผ่าน Scoped Slot -->
       <template #day-content="{ day }">
         <div
           v-if="availability?.[day.dateString]"
@@ -15,7 +14,6 @@
         ></div>
       </template>
 
-      <!-- ใส่ Legend ด้านล่างผ่าน Footer Slot -->
       <template #footer>
         <q-card class="status-footer q-mt-lg" flat>
           <div class="status-item">
@@ -33,20 +31,15 @@
 </template>
 
 <script setup lang="ts">
-/**
- * ExamCalendar
- * คอมโพเนนต์สำหรับแสดงปฏิทินสอบ โดยใช้ AppCalendar เป็นฐาน
- */
 import AppCalendar from './app-calendar.vue';
+import type { ExamCalendarProps } from '../types/common';
 
-interface Props {
-  /** วันที่เลือกอยู่ (YYYY-MM-DD) */
-  modelValue: string;
-  /** สถานะจุดในแต่ละวัน (Map: dateString -> status) */
-  availability?: Record<string, 'available' | 'full' | null>;
-}
+const CALENDAR_TEXT = {
+  LEGEND_AVAILABLE: 'มีที่นั่งว่าง',
+  LEGEND_FULL: 'รอบเต็มแล้ว',
+};
 
-withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<ExamCalendarProps>(), {
   availability: () => ({}),
 });
 
@@ -55,15 +48,9 @@ defineEmits<{
   (e: 'change-month', month: number, year: number): void;
   (e: 'main-card-resize', size: { width: number; height: number }): void;
 }>();
-
-const CALENDAR_TEXT = {
-  LEGEND_AVAILABLE: 'มีที่นั่งว่าง',
-  LEGEND_FULL: 'รอบเต็มแล้ว',
-};
 </script>
 
 <style scoped lang="scss">
-/* สไตล์เฉพาะสำหรับจุดสีและส่วนท้ายของ ExamCalendar */
 .dot {
   width: 7px;
   height: 7px;
@@ -84,7 +71,7 @@ const CALENDAR_TEXT = {
   display: flex;
   justify-content: center;
   gap: 18px;
-  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: var(--shadow-card) !important;
   background-color: var(--surface-card);
 }
 .status-item {

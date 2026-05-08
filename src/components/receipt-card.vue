@@ -131,16 +131,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { ReceiptData } from 'src/types/receipt';
+import type { ReceiptCardProps } from 'src/types/receipt';
 import { buuInfo } from 'src/services/university.service';
 import { numberToThaiText } from 'src/utils/thai-currency';
 
-interface Props {
-  receipt: ReceiptData;
-  showQr?: boolean;
-}
-
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<ReceiptCardProps>(), {
   showQr: true,
 });
 
@@ -169,8 +164,8 @@ const formatCurrency = (amount: number) => {
   background-color: var(--surface-card);
   padding: 20mm;
   font-family: 'Sarabun', sans-serif;
-  color: #333;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+  color: var(--receipt-text);
+  box-shadow: var(--receipt-shadow);
   box-sizing: border-box;
   position: relative;
   display: flex;
@@ -201,16 +196,16 @@ const formatCurrency = (amount: number) => {
 
 .receipt-table th,
 .receipt-table td {
-  border: 1px solid #777;
+  border: 1px solid var(--receipt-border);
   padding: 10px 15px;
 }
 
 .receipt-table th {
   text-align: center;
   font-weight: 500;
-  color: #555;
+  color: var(--receipt-text-light);
   padding: 15px 10px;
-  background-color: #fafafa;
+  background-color: var(--receipt-header-bg);
 }
 
 .receipt-table tbody td {
@@ -224,7 +219,7 @@ const formatCurrency = (amount: number) => {
 }
 
 .receipt-table tfoot td {
-  border-top: 1px solid #777;
+  border-top: 1px solid var(--receipt-border);
   font-weight: 600;
   padding: 15px;
 }
@@ -249,7 +244,7 @@ const formatCurrency = (amount: number) => {
 .signature-box {
   width: 140px;
   height: 60px;
-  border: 1px solid #999;
+  border: 1px solid var(--receipt-signature-border);
   font-size: 12px;
 }
 
@@ -263,6 +258,7 @@ const formatCurrency = (amount: number) => {
   body {
     margin: 0;
     -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .receipt-container {

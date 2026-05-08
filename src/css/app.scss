@@ -55,8 +55,25 @@
   --calendar-today-bg: #f3f4f6;
   --calendar-active-bg: #1d4ed8;
   --calendar-hover-bg: #3b82f6;
+  --calendar-hover-bg-light: rgba(0, 0, 0, 0.05);
+  --calendar-month-year-picker-border: #f0f0f0;
+  --calendar-year-item-border: #fafafa;
+  --calendar-year-item-hover: #f5f5f5;
+  --calendar-month-item-hover: #f5f5f5;
+  --calendar-month-item-border-hover: #e0e0e0;
+  --calendar-scrollbar-track: #f9f9f9;
+  --calendar-scrollbar-thumb: #c1c1c1;
+  --calendar-scrollbar-thumb-hover: #a8a8a8;
   --calendar-dot-available: #27ae60;
   --calendar-dot-full: #c12a32;
+
+  // Receipt Styles
+  --receipt-text: #333333;
+  --receipt-text-light: #555555;
+  --receipt-border: #777777;
+  --receipt-header-bg: #fafafa;
+  --receipt-signature-border: #999999;
+  --receipt-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
 
   // Misc
   --border-color: #e8e8e8;
