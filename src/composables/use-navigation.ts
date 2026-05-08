@@ -32,6 +32,12 @@ export function useNavigation() {
       link: '/exam-history',
     },
     {
+      title: 'Create Exam',
+      caption: 'Create a new exam round',
+      icon: 'add_circle',
+      link: '/create-exam',
+    },
+    {
       title: 'Login',
       icon: 'login',
       link: '/login',

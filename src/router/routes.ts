@@ -63,8 +63,7 @@ const routes: RouteRecordRaw[] = [
         name: 'create-exam',
         component: () => import('pages/create-exam-round-page.vue'),
         meta: {
-          hideHeader: true,
-          hideDrawer: true,
+          requiresAuth: false, // Adding this for consistency
           footerVariant: 'white',
         },
       },
