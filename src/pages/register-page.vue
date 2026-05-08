@@ -85,8 +85,15 @@ import type { RegisterCredentials } from 'src/components/register-card.vue';
 import type { RegisterFormData } from 'src/types/register';
 import RegisterAndEditProfile from 'src/components/register-and-edit-profile.vue';
 import FooterCredits from 'src/components/footer/footer-credits.vue';
+import { useAuth } from 'src/composables/useAuth';
+import { useQuasar } from 'quasar';
+import { useRouter } from 'vue-router';
 
 type Step = 'credentials' | 'profile';
+
+const $q = useQuasar();
+const router = useRouter();
+const { register } = useAuth();
 
 const currentStep = ref<Step>('credentials');
 const isThai = ref<boolean>(true);
@@ -109,12 +116,30 @@ const goBackToCredentials = (): void => {
 };
 
 /** Step 2 complete: ผู้ใช้กดบันทึกข้อมูล */
-const handleSave = (formData: RegisterFormData): void => {
-  // TODO: เรียก API สมัครสมาชิก โดยรวม credentials + formData
-  console.log('Final registration data:', {
+const handleSave = async (formData: RegisterFormData): Promise<void> => {
+  const finalData = {
     ...credentials.value,
     ...formData,
-  });
+  };
+
+  $q.loading.show();
+  const response = await register(finalData);
+  $q.loading.hide();
+
+  if (response.success) {
+    $q.notify({
+      type: 'positive',
+      message: 'สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ',
+      position: 'top',
+    });
+    await router.push('/login');
+  } else {
+    $q.notify({
+      type: 'negative',
+      message: response.message || 'เกิดข้อผิดพลาดในการสมัครสมาชิก',
+      position: 'top',
+    });
+  }
 };
 </script>
 
