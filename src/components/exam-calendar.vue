@@ -10,7 +10,10 @@
         <div
           v-if="availability?.[day.dateString]"
           class="dot"
-          :class="availability[day.dateString] === 'available' ? 'dot-green' : 'dot-red'"
+          :class="{
+            'dot-green': availability[day.dateString] === 'available',
+            'dot-red': availability[day.dateString] === 'full',
+          }"
         ></div>
       </template>
 
@@ -18,11 +21,11 @@
         <q-card class="status-footer q-mt-lg" flat>
           <div class="status-item">
             <div class="status-dot dot-green"></div>
-            <span>{{ CALENDAR_TEXT.LEGEND_AVAILABLE }}</span>
+            <span>{{ t('exam.calendar.legendAvailable', 'มีที่นั่งว่าง') }}</span>
           </div>
           <div class="status-item">
             <div class="status-dot dot-red"></div>
-            <span>{{ CALENDAR_TEXT.LEGEND_FULL }}</span>
+            <span>{{ t('exam.calendar.legendFull', 'รอบเต็มแล้ว') }}</span>
           </div>
         </q-card>
       </template>
@@ -31,13 +34,11 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import AppCalendar from './app-calendar.vue';
 import type { ExamCalendarProps } from '../types/common';
 
-const CALENDAR_TEXT = {
-  LEGEND_AVAILABLE: 'มีที่นั่งว่าง',
-  LEGEND_FULL: 'รอบเต็มแล้ว',
-};
+const { t } = useI18n();
 
 withDefaults(defineProps<ExamCalendarProps>(), {
   availability: () => ({}),
