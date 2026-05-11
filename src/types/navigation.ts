@@ -1,3 +1,5 @@
+import type { UserRole } from './user';
+
 /**
  * Navigation Item — ใช้สำหรับ Sidebar Menu
  * แต่ละ item มี route path, icon, label, และ badge (optional)
@@ -18,7 +20,7 @@ export interface NavigationItem {
   /** รายการเมนูย่อย (Dropdown) */
   children?: NavigationItem[];
   /** Roles ที่มีสิทธิ์เห็นเมนูนี้ (ถ้าไม่กำหนด = ทุก role เห็น) */
-  requiredRoles?: ('admin' | 'staff' | 'user')[];
+  requiredRoles?: UserRole[];
 }
 
 /**

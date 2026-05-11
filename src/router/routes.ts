@@ -1,10 +1,14 @@
 import type { RouteRecordRaw } from 'vue-router';
+import { ROLES } from 'src/constants/roles';
 
 // Module augmentation for vue-router meta types
 declare module 'vue-router' {
   interface RouteMeta {
     requiresAuth?: boolean;
-    roles?: string[]; // e.g. ['user', 'staff']
+    roles?: string[];
+    hideHeader?: boolean;
+    hideDrawer?: boolean;
+    footerVariant?: 'primary' | 'white';
   }
 }
 
@@ -13,33 +17,19 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('layouts/main-layout.vue'),
     children: [
+      // === Public Routes ===
       {
         path: '',
+        name: 'home',
         component: () => import('pages/index-page.vue'),
         meta: { requiresAuth: false },
       },
-      {
-        path: 'exam-schedule',
-        name: 'exam-schedule',
-        component: () => import('pages/exam-schedule-page.vue'),
-        meta: { requiresAuth: false },
-      },
-      {
-        path: 'exam-history',
-        name: 'exam-history',
-        component: () => import('pages/exam-history-page.vue'),
-        meta: { requiresAuth: false },
-      },
-      {
-        path: 'staff-dashboard',
-        name: 'staff-dashboard',
-        component: () => import('pages/staff-dashboard-page.vue'),
-        meta: { requiresAuth: false },
-      },
+
+      // === Auth Routes ===
       {
         path: 'login',
         name: 'login',
-        component: () => import('pages/login-page.vue'),
+        component: () => import('pages/auth/login-page.vue'),
         meta: {
           requiresAuth: false,
           hideHeader: true,
@@ -50,7 +40,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'register',
         name: 'register',
-        component: () => import('pages/register-page.vue'),
+        component: () => import('pages/auth/register-page.vue'),
         meta: {
           requiresAuth: false,
           hideHeader: true,
@@ -58,20 +48,46 @@ const routes: RouteRecordRaw[] = [
           footerVariant: 'white',
         },
       },
+
+      // === Candidate (User) Routes ===
       {
-        path: 'create-exam',
-        name: 'create-exam',
-        component: () => import('pages/create-exam-round-page.vue'),
-        meta: {
-          requiresAuth: false, // Adding this for consistency
-          footerVariant: 'white',
-        },
+        path: 'user',
+        meta: { requiresAuth: true, roles: [ROLES.CANDIDATE] },
+        children: [
+          {
+            path: 'exam-schedule',
+            name: 'exam-schedule',
+            component: () => import('pages/user/exam-schedule-page.vue'),
+          },
+          {
+            path: 'exam-history',
+            name: 'exam-history',
+            component: () => import('pages/user/exam-history-page.vue'),
+          },
+        ],
+      },
+
+      // === Staff (Admin) Routes ===
+      {
+        path: 'admin',
+        meta: { requiresAuth: true, roles: [ROLES.STAFF, ROLES.ADMIN] },
+        children: [
+          {
+            path: 'dashboard',
+            name: 'admin-dashboard',
+            component: () => import('pages/admin/dashboard-page.vue'),
+          },
+          {
+            path: 'create-exam',
+            name: 'admin-create-exam',
+            component: () => import('pages/admin/create-exam-page.vue'),
+          },
+        ],
       },
     ],
   },
 
   // Always leave this as last one,
-  // but you can also remove it
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/error-not-found.vue'),

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { User } from 'src/types/user';
-import { mockUsers as initialMockUsers } from 'src/services/user.service';
+import type { User, UserRole } from 'src/types/user';
+import * as userService from 'src/services/user.service';
 import { AUTH_LOADING_DURATION_MS, DEFAULT_LOADING_DURATION_MS } from 'src/constants/timing';
 
 export const useUserStore = defineStore('user', () => {
@@ -9,15 +9,11 @@ export const useUserStore = defineStore('user', () => {
   const currentUser = ref<User | null>(null);
   const isLoggedIn = ref<boolean>(false);
   const isLoadingGlobal = ref<boolean>(false);
-  const loadingText = ref<string>('กำลังเข้าสู่ระบบ...');
-
-  // === Mock Data ===
-  const mockUsers = ref<User[]>([...initialMockUsers]);
+  const loadingText = ref<string>('กำลังโหลดข้อมูล...');
 
   // === Computed ===
-  const userRole = computed(() => currentUser.value?.role || null);
+  const userRole = computed<UserRole | null>(() => (currentUser.value?.role as UserRole) || null);
 
-  // แปลงข้อมูล currentUser เป็น Array สำหรับแสดงในหน้า Profile
   const profileItems = computed(() => {
     if (!currentUser.value) return [];
     const u = currentUser.value;
@@ -46,14 +42,12 @@ export const useUserStore = defineStore('user', () => {
   /**
    * ฟังก์ชันโหลดข้อมูลผู้ใช้เริ่มต้น (Check LocalStorage)
    */
-  function initialize(): void {
+  async function initialize(): Promise<void> {
     const savedId = localStorage.getItem('user_id');
     const status = localStorage.getItem('isLoggedIn');
 
     if (savedId && status === 'true') {
-      const found = mockUsers.value.find(
-        (u) => String(u.id) === savedId || u.nationalId === savedId,
-      );
+      const found = await userService.findUserByIdentifier(savedId);
       if (found) {
         currentUser.value = found;
         isLoggedIn.value = true;
@@ -64,29 +58,35 @@ export const useUserStore = defineStore('user', () => {
   /**
    * ฟังก์ชันตรวจสอบว่ามีผู้ใช้นี้ในระบบหรือไม่
    */
-  function checkUserExists(inputID: string): boolean {
-    const foundUser = mockUsers.value.find(
-      (user) => user.nationalId === inputID || String(user.id) === inputID,
-    );
+  async function checkUserExists(inputID: string): Promise<boolean> {
+    const foundUser = await userService.findUserByIdentifier(inputID);
     return !!foundUser;
   }
 
   /**
-   * ฟังก์ชัน Login แบบ 2 ขั้นตอน (ตรวจรหัสผ่านด้วย)
+   * ฟังก์ชัน Login แบบ Async
    */
-  function login(inputID: string, password?: string): boolean {
-    const foundUser = mockUsers.value.find(
-      (user) => user.nationalId === inputID || String(user.id) === inputID,
-    );
+  async function login(inputID: string, password?: string): Promise<boolean> {
+    loadingText.value = 'กำลังเข้าสู่ระบบ...';
+    isLoadingGlobal.value = true;
 
-    if (foundUser && foundUser.password === password) {
-      currentUser.value = foundUser;
-      isLoggedIn.value = true;
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('user_id', String(foundUser.id || foundUser.nationalId));
-      return true;
+    try {
+      const foundUser = await userService.authenticateUser(inputID, password);
+
+      if (foundUser) {
+        currentUser.value = foundUser;
+        isLoggedIn.value = true;
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('user_id', String(foundUser.id || foundUser.nationalId));
+        return true;
+      }
+      return false;
+    } finally {
+      // หน่วงเวลาเล็กน้อยให้ UI ดูลื่นไหล
+      setTimeout(() => {
+        isLoadingGlobal.value = false;
+      }, 500);
     }
-    return false;
   }
 
   /**
@@ -95,35 +95,28 @@ export const useUserStore = defineStore('user', () => {
   function updateProfile(newData: Partial<User>): void {
     if (currentUser.value) {
       currentUser.value = { ...currentUser.value, ...newData };
-      const index = mockUsers.value.findIndex(
-        (u) =>
-          (u.id && u.id === currentUser.value?.id) ||
-          u.nationalId === currentUser.value?.nationalId,
-      );
-      if (index !== -1) {
-        mockUsers.value[index] = { ...currentUser.value };
-      }
     }
   }
 
   /**
-   * ฟังก์ชัน Logout พร้อม Loading
+   * ฟังก์ชัน Logout
    */
   function logout(): void {
+    // ล้างข้อมูลทันทีเพื่อให้ Route Guard ทำงานถูกต้อง
+    currentUser.value = null;
+    isLoggedIn.value = false;
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('user_id');
+
     loadingText.value = 'กำลังออกจากระบบ...';
     isLoadingGlobal.value = true;
-
     setTimeout(() => {
-      currentUser.value = null;
-      isLoggedIn.value = false;
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('user_id');
       isLoadingGlobal.value = false;
     }, AUTH_LOADING_DURATION_MS);
   }
 
   /**
-   * ฟังก์ชันจำลองการโหลดสำหรับหน้าทั่วไป (ใช้เวลาสั้นลง)
+   * ฟังก์ชันจำลองการโหลด
    */
   function triggerLoading(
     text = 'กำลังโหลดข้อมูล...',

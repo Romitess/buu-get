@@ -1,3 +1,5 @@
+export type UserRole = 'admin' | 'staff' | 'finance' | 'executive' | 'user';
+
 export interface User {
   // USER
   id?: number;
@@ -26,5 +28,5 @@ export interface User {
   thaidSynced: boolean;
 
   // ROLES
-  role?: string;
+  role?: UserRole;
 }

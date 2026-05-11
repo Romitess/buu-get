@@ -107,6 +107,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useUserStore } from 'src/stores/user.store';
+import { ROLES } from 'src/constants/roles';
+
+const userStore = useUserStore();
+const router = useRouter();
 
 const userType = ref<'thai' | 'foreigner'>('thai');
 const email = ref('');
@@ -114,11 +120,30 @@ const password = ref('');
 const showPwd = ref(false);
 const loading = ref(false);
 
-const onSubmit = () => {
-  console.log('Login:', { type: userType.value, email: email.value });
-  setTimeout(() => {
+const onSubmit = async () => {
+  loading.value = true;
+
+  try {
+    const success = await userStore.login(email.value, password.value);
+
+    if (success) {
+      // เมื่อ Login สำเร็จ ให้เช็ค Role แล้วพาไปหน้าที่ถูกต้อง
+      if (userStore.userRole === ROLES.CANDIDATE) {
+        await router.push({ name: 'exam-schedule' });
+      } else {
+        await router.push({ name: 'admin-dashboard' });
+      }
+    } else {
+      alert(
+        userType.value === 'thai' ? 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' : 'Invalid email or password',
+      );
+    }
+  } catch (error) {
+    console.error('Login Error:', error);
+    alert('เกิดข้อผิดพลาดในการเชื่อมต่อระบบ');
+  } finally {
     loading.value = false;
-  }, 1500);
+  }
 };
 </script>
 

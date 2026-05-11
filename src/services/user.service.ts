@@ -47,12 +47,20 @@ export const mockUsers: User[] = [
   },
 ];
 
-export function findUser(users: User[], inputID: string): User | undefined {
-  return users.find((u) => u.nationalId === inputID || String(u.id) === inputID);
+export async function findUserByIdentifier(inputID: string): Promise<User | undefined> {
+  // Simulate API delay
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const found = mockUsers.find(
+        (u) => u.nationalId === inputID || String(u.id) === inputID || u.email === inputID,
+      );
+      resolve(found);
+    }, 300);
+  });
 }
 
-export function authenticateUser(users: User[], inputID: string, password?: string): User | null {
-  const found = findUser(users, inputID);
+export async function authenticateUser(inputID: string, password?: string): Promise<User | null> {
+  const found = await findUserByIdentifier(inputID);
   if (found && found.password === password) {
     return found;
   }
