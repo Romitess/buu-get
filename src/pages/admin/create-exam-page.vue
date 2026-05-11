@@ -297,11 +297,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useExamStore } from 'src/stores/exam.store';
-import type { CreateExamPayload } from 'src/services/exam.service';
+import type { CreateExamPayload, ExamLocationOption } from 'src/services/exam.service';
+import { fetchExamLocations } from 'src/services/exam.service';
 
 const router = useRouter();
 const $q = useQuasar();
@@ -309,6 +310,17 @@ const examStore = useExamStore();
 
 const examTypeOptions: string[] = ['รอบทั่วไป', 'รอบพิเศษ'];
 const examFormatOptions: string[] = ['แบบกระดาษ'];
+const locationOptions = ref<ExamLocationOption[]>([]);
+const isLoadingLocations = ref(false);
+
+onMounted(async () => {
+  isLoadingLocations.value = true;
+  try {
+    locationOptions.value = await fetchExamLocations();
+  } finally {
+    isLoadingLocations.value = false;
+  }
+});
 
 const form = ref({
   examName: '',
@@ -362,9 +374,13 @@ const handleSave = async () => {
 
   try {
     const parsedFundSourceId = Number(form.value.fundingCode);
+    const matchedLocation = locationOptions.value.find(
+      (opt) => opt.label.toLowerCase() === form.value.location.toLowerCase(),
+    );
+
     const payload: CreateExamPayload = {
       examName: form.value.examName,
-      location: form.value.location,
+      locationId: matchedLocation?.value || 1, // Default to 1 if no match found
       examType: form.value.examType,
       examFormat: form.value.examFormat,
       fee: form.value.fee,
@@ -391,7 +407,7 @@ const handleSave = async () => {
       timeout: 2000,
     });
 
-    void router.push('/exam-schedule');
+    void router.push('/user/exam-schedule');
   } catch {
     $q.notify({
       type: 'negative',

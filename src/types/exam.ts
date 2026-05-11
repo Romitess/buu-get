@@ -128,12 +128,19 @@ export interface BackendEnrollment {
   DELETED_AT: string | null;
 }
 
+export interface BackendLocation {
+  LOCATION_ID: number;
+  LOCATION_NAME: string;
+  LOCATION_ROOM_NO: string;
+}
+
 export interface BackendSession {
   SS_ID: number;
   SS_START_TIME: string;
   SS_END_TIME: string;
   SS_CAPACITY: number;
-  LOCATION_NAME: string;
+  LOCATION_ID: number;
+  LOCATION?: BackendLocation;
   ENROLLMENTS?: BackendEnrollment[];
 }
 

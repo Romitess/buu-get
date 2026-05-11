@@ -1,11 +1,18 @@
 import { api } from 'src/boot/axios';
-import type { ExamHistoryItem, DayData, ExamRound, BackendExam, ExamInfo } from 'src/types/exam';
+import type {
+  ExamHistoryItem,
+  DayData,
+  ExamRound,
+  BackendExam,
+  ExamInfo,
+  BackendLocation,
+} from 'src/types/exam';
 import { BUDDHIST_YEAR_OFFSET, SESSION_STATUS_OPEN, DEFAULT_EXAM_INFO } from 'src/constants/exam';
 
 /** Payload for creating a new exam round (Frontend form structure) */
 export interface CreateExamPayload {
   examName: string;
-  location: string;
+  locationId: number;
   examType: string;
   examFormat: string;
   fee: string | number;
@@ -27,6 +34,13 @@ export interface FundSource {
   FS_ACCOUNT_CODE: string;
 }
 
+/** Interface for ExamLocation option used in dropdowns */
+export interface ExamLocationOption {
+  label: string;
+  value: number;
+  raw: BackendLocation;
+}
+
 export const defaultExamInfo: ExamInfo = DEFAULT_EXAM_INFO;
 
 export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
@@ -43,8 +57,13 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
       );
 
       if (!schedule[date]) {
+        const firstLocation = sortedSessions[0]?.LOCATION;
+        const locationLabel = firstLocation
+          ? `${firstLocation.LOCATION_NAME}${firstLocation.LOCATION_ROOM_NO ? ` (${firstLocation.LOCATION_ROOM_NO})` : ''}`
+          : 'TBA';
+
         schedule[date] = {
-          location: sortedSessions[0]?.LOCATION_NAME || 'TBA',
+          location: locationLabel,
           fee: `Fee : ${exam.EXAM_FEE} ฿`,
           rounds: [],
         };
@@ -117,7 +136,7 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<void>
     const sessionPromises = payload.timeRanges.map((range) => {
       return api.post('/exam-sessions', {
         EXAM_ID: examId,
-        LOCATION_NAME: payload.location,
+        LOCATION_ID: payload.locationId,
         SS_START_TIME: range.startTime.replace(/\s/g, ''),
         SS_END_TIME: range.endTime.replace(/\s/g, ''),
         SS_CAPACITY: payload.seats,
@@ -141,6 +160,23 @@ export const fetchFundSources = async (): Promise<FundSource[]> => {
     return response.data;
   } catch (error) {
     console.error('Error fetching fund sources:', error);
+    return [];
+  }
+};
+
+/**
+ * Fetches all exam locations from the backend
+ */
+export const fetchExamLocations = async (): Promise<ExamLocationOption[]> => {
+  try {
+    const response = await api.get<BackendLocation[]>('/exam-locations');
+    return response.data.map((loc) => ({
+      label: `${loc.LOCATION_NAME}${loc.LOCATION_ROOM_NO ? ` (${loc.LOCATION_ROOM_NO})` : ''}`,
+      value: loc.LOCATION_ID,
+      raw: loc,
+    }));
+  } catch (error) {
+    console.error('Error fetching exam locations:', error);
     return [];
   }
 };
