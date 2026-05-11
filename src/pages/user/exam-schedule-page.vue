@@ -97,7 +97,7 @@ const router = useRouter();
 const examStore = useExamStore();
 const { t } = useI18n();
 const ROUTES = {
-  HISTORY: '/exam-history',
+  HISTORY: '/user/exam-history',
 };
 
 const {
