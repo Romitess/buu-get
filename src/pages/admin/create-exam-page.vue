@@ -301,6 +301,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useExamStore } from 'src/stores/exam.store';
+import type { CreateExamPayload } from 'src/services/exam.service';
 
 const router = useRouter();
 const $q = useQuasar();
@@ -333,19 +334,21 @@ const handleCancel = () => {
   void router.push('/exam-schedule');
 };
 
-const handleSave = () => {
-  const timeRanges = [];
+const handleSave = async () => {
+  const timeRanges: { startTime: string; endTime: string }[] = [];
 
   if (form.value.startTime1 && form.value.endTime1) {
-    timeRanges.push(
-      `${form.value.startTime1.replace(/\s/g, '')} - ${form.value.endTime1.replace(/\s/g, '')}`,
-    );
+    timeRanges.push({
+      startTime: form.value.startTime1,
+      endTime: form.value.endTime1,
+    });
   }
 
   if (form.value.startTime2 && form.value.endTime2) {
-    timeRanges.push(
-      `${form.value.startTime2.replace(/\s/g, '')} - ${form.value.endTime2.replace(/\s/g, '')}`,
-    );
+    timeRanges.push({
+      startTime: form.value.startTime2,
+      endTime: form.value.endTime2,
+    });
   }
 
   if (timeRanges.length === 0) {
@@ -357,24 +360,45 @@ const handleSave = () => {
     return;
   }
 
-  examStore.addExamRound({
-    examName: form.value.examName,
-    location: form.value.location,
-    examType: form.value.examType,
-    fee: form.value.fee,
-    seats: form.value.seats,
-    examDate: form.value.examDate,
-    timeRanges,
-  });
+  try {
+    const parsedFundSourceId = Number(form.value.fundingCode);
+    const payload: CreateExamPayload = {
+      examName: form.value.examName,
+      location: form.value.location,
+      examType: form.value.examType,
+      examFormat: form.value.examFormat,
+      fee: form.value.fee,
+      seats: form.value.seats,
+      isPublished: form.value.isPublished,
+      examDate: form.value.examDate,
+      regStartDate: form.value.regStartDate,
+      regEndDate: form.value.regEndDate,
+      payStartDate: form.value.payStartDate,
+      payEndDate: form.value.payEndDate,
+      timeRanges,
+    };
 
-  $q.notify({
-    type: 'positive',
-    message: 'สร้างรอบสอบสำเร็จ',
-    position: 'top',
-    timeout: 2000,
-  });
+    if (parsedFundSourceId) {
+      payload.fundSourceId = parsedFundSourceId;
+    }
 
-  void router.push('/exam-schedule');
+    await examStore.addExamRound(payload);
+
+    $q.notify({
+      type: 'positive',
+      message: 'สร้างรอบสอบสำเร็จ',
+      position: 'top',
+      timeout: 2000,
+    });
+
+    void router.push('/exam-schedule');
+  } catch {
+    $q.notify({
+      type: 'negative',
+      message: 'เกิดข้อผิดพลาดในการสร้างรอบสอบ',
+      position: 'top',
+    });
+  }
 };
 </script>
 

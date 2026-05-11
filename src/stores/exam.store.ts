@@ -1,26 +1,26 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { ExamRound, ExamInfo, ExamHistoryItem, DayData } from 'src/types/exam';
-import { mockScheduleData, mockHistoryRecords, fetchScheduleData } from 'src/services/exam.service';
-import { DEFAULT_EXAM_FEE_THB, PAYMENT_COUNTDOWN_DEFAULT } from 'src/constants/exam';
+import {
+  defaultExamInfo,
+  mockScheduleData,
+  mockHistoryRecords,
+  fetchScheduleData,
+  createExamRound,
+  type CreateExamPayload,
+} from 'src/services/exam.service';
+import {
+  DEFAULT_EXAM_FEE_THB,
+  PAYMENT_COUNTDOWN_DEFAULT,
+  BUDDHIST_YEAR_OFFSET,
+} from 'src/constants/exam';
 
 export const useExamStore = defineStore('exam', () => {
-  const examInfo = ref<ExamInfo>({
-    badgeText: '',
-    title: '',
-    subtitle: '',
-    locationText: '',
-    feeText: '',
-  });
-
+  const examInfo = ref<ExamInfo>({ ...defaultExamInfo });
   const selectedDate = ref<string>(new Date().toISOString().split('T')[0] || '');
-
   const scheduleData = ref<Record<string, DayData>>(structuredClone(mockScheduleData));
-
   const nextHistoryId = ref(100);
-
   const pendingRegistrations = ref<ExamHistoryItem[]>([]);
-
   const historyRecords = ref<ExamHistoryItem[]>(structuredClone(mockHistoryRecords));
 
   const selectedDateRounds = computed((): ExamRound[] => {
@@ -67,7 +67,7 @@ export const useExamStore = defineStore('exam', () => {
       'ธันวาคม',
     ];
     const date = new Date(selectedDate.value);
-    const buddhistYear = date.getFullYear() + 543;
+    const buddhistYear = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
     return `${date.getDate()} ${monthNamesTH[date.getMonth()]} ${buddhistYear}`;
   });
 
@@ -75,24 +75,6 @@ export const useExamStore = defineStore('exam', () => {
     try {
       const data = await fetchScheduleData();
       scheduleData.value = data;
-
-      const firstDate = Object.keys(data).sort()[0];
-      if (firstDate) {
-        const firstExam = data[firstDate];
-        if (firstExam && firstExam.rounds.length > 0) {
-          const round = firstExam.rounds[0];
-          if (round) {
-            examInfo.value = {
-              ...examInfo.value,
-              title: round.title,
-              locationText: firstExam.location,
-              feeText: firstExam.fee,
-              badgeText: round.roundTypeLabel,
-            };
-            selectedDate.value = firstDate;
-          }
-        }
-      }
     } catch (error) {
       console.error('Failed to load schedule:', error);
     }
@@ -125,7 +107,7 @@ export const useExamStore = defineStore('exam', () => {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  function confirmSpecialRegistration(round: ExamRound, _passcode: string): void {
+  function confirmSpecialRegistration(round: ExamRound, passcode: string): void {
     confirmRegistration(round);
   }
 
@@ -170,64 +152,16 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
-  function addExamRound(payload: {
-    examName: string;
-    location: string;
-    examType: string;
-    fee: string | number;
-    seats: number;
-    examDate: string;
-    timeRanges: string[];
-  }): void {
+  async function addExamRound(payload: CreateExamPayload): Promise<void> {
+    await createExamRound(payload);
+
+    await initSchedule();
+
     const [dd, mm, yyyy] = payload.examDate.split('/');
-    if (!dd || !mm || !yyyy) return;
-
-    const gregorianYear = parseInt(yyyy) - 543;
-    const dateKey = `${gregorianYear}-${mm}-${dd}`;
-
-    let formattedFee = `Fee : ${payload.fee} ฿`;
-    if (payload.fee === '0.00' || !payload.fee) {
-      formattedFee = 'Fee : 500 ฿';
+    if (dd && mm && yyyy) {
+      const gregorianYear = parseInt(yyyy) - BUDDHIST_YEAR_OFFSET;
+      selectedDate.value = `${gregorianYear}-${mm}-${dd}`;
     }
-
-    if (!scheduleData.value[dateKey]) {
-      scheduleData.value[dateKey] = {
-        location: payload.location || 'Computer Center, BUU',
-        fee: formattedFee,
-        rounds: [],
-      };
-    } else {
-      const day = scheduleData.value[dateKey];
-      if (day) {
-        if (payload.location) day.location = payload.location;
-        if (payload.fee && payload.fee !== '0.00') day.fee = formattedFee;
-      }
-    }
-
-    const day = scheduleData.value[dateKey];
-    if (!day) return;
-
-    payload.timeRanges.forEach((timeRange: string) => {
-      let maxId = 0;
-      Object.values(scheduleData.value).forEach((d: DayData) => {
-        d.rounds.forEach((r: ExamRound) => {
-          if (r.id > maxId) maxId = r.id;
-        });
-      });
-
-      day.rounds.push({
-        id: maxId + 1,
-        title:
-          payload.examName ||
-          `BUU - GET (${payload.examType === 'รอบทั่วไป' ? 'General' : 'Special'})`,
-        timeRange,
-        roundTypeLabel: payload.examType,
-        availableSeats: payload.seats,
-        totalSeats: payload.seats,
-      });
-    });
-
-    selectedDate.value = dateKey;
   }
 
   return {
