@@ -117,3 +117,31 @@ export interface ExamDetailProps {
   locationText?: string;
   feeText?: string;
 }
+export interface BackendEnrollment {
+  ERM_ID: number;
+  USER_ID: number;
+  SESSION_ID: number;
+  ERM_STATUS: number;
+  ERM_VERIFY_STATUS: number;
+  CREATED_AT: string;
+  UPDATED_AT: string;
+  DELETED_AT: string | null;
+}
+
+export interface BackendSession {
+  SS_ID: number;
+  SS_START_TIME: string;
+  SS_END_TIME: string;
+  SS_CAPACITY: number;
+  LOCATION_NAME: string;
+  ENROLLMENTS?: BackendEnrollment[];
+}
+
+export interface BackendExam {
+  EXAM_ID: number;
+  EXAM_NAME: string;
+  EXAM_TYPE: string;
+  EXAM_FEE: number;
+  EXAM_DATE: string;
+  SESSIONS: BackendSession[];
+}

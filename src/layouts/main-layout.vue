@@ -15,7 +15,7 @@
       <q-list>
         <q-item-label header> Menu </q-item-label>
 
-        <EssentialLink v-for="link in computedLinks" :key="link.title" v-bind="link" />
+        <EssentialLink v-for="link in computedLinks" :key="link.name" v-bind="link" />
       </q-list>
     </q-drawer>
 

@@ -1,70 +1,67 @@
 import { computed, ref, type ComputedRef, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from 'src/stores/user.store';
-import type { EssentialLinkProps } from 'components/essential-link.vue';
-
-export interface AppLink extends EssentialLinkProps {
-  requiresAuth?: boolean;
-  roles?: string[];
-  hideIfLoggedIn?: boolean;
-}
+import { ROLES } from 'src/constants/roles';
+import type { NavigationItem } from 'src/types/navigation';
 
 export function useNavigation() {
   const userStore = useUserStore();
   const router = useRouter();
 
-  const allLinks: AppLink[] = [
+  const allLinks: NavigationItem[] = [
     {
-      title: 'Home',
+      name: 'home',
+      label: 'หน้าหลัก',
       icon: 'home',
-      link: '/',
+      path: '/',
     },
+    // === Candidate Menus ===
     {
-      title: 'Exam Schedule',
-      caption: 'View upcoming exams',
+      name: 'exam-schedule',
+      label: 'ตารางสอบ',
       icon: 'event',
-      link: '/exam-schedule',
+      path: '/user/exam-schedule',
+      requiredRoles: [ROLES.CANDIDATE],
     },
     {
-      title: 'Exam History',
-      caption: 'View your past exams',
+      name: 'exam-history',
+      label: 'ประวัติการสอบ',
       icon: 'history',
-      link: '/exam-history',
+      path: '/user/exam-history',
+      requiredRoles: [ROLES.CANDIDATE],
     },
+    // === Staff Menus ===
+    // {
+    //   name: 'admin-dashboard',
+    //   label: 'Dashboard',
+    //   icon: 'dashboard',
+    //   path: '/admin/dashboard',
+    //   requiredRoles: [ROLES.STAFF, ROLES.ADMIN],
+    // },
     {
-      title: 'Create Exam',
-      caption: 'Create a new exam round',
+      name: 'admin-create-exam',
+      label: 'สร้างรอบสอบ',
       icon: 'add_circle',
-      link: '/create-exam',
-    },
-    {
-      title: 'Login',
-      icon: 'login',
-      link: '/login',
-      hideIfLoggedIn: true,
+      path: '/admin/create-exam',
+      requiredRoles: [ROLES.STAFF, ROLES.ADMIN],
     },
   ];
 
-  const computedLinks: ComputedRef<AppLink[]> = computed(() => {
+  const computedLinks: ComputedRef<NavigationItem[]> = computed(() => {
     return allLinks.filter((link) => {
-      // Hide if it's supposed to be hidden when logged in (like Login link)
-      if (link.hideIfLoggedIn && userStore.isLoggedIn) {
+      // ถ้าไม่มีการกำหนด Role หรือเป็น Public -> ให้ผ่าน
+      if (!link.requiredRoles || link.requiredRoles.length === 0) {
+        return true;
+      }
+
+      // ถ้าต้องใช้ Role แต่ยังไม่ได้ Login -> ซ่อน
+      if (!userStore.isLoggedIn) {
         return false;
       }
 
-      // If it requires auth but user is not logged in, hide it
-      if (link.requiresAuth && !userStore.isLoggedIn) {
-        return false;
-      }
-
-      // If it requires specific roles, check if the user has one of them
-      if (link.roles && link.roles.length > 0) {
-        if (!userStore.userRole || !link.roles.includes(userStore.userRole)) {
-          return false;
-        }
-      }
-
-      return true;
+      // ตรวจสอบสิทธิ์ (Role)
+      if (!userStore.userRole) return false;
+      return link.requiredRoles.includes(userStore.userRole);
     });
   });
 
@@ -74,9 +71,9 @@ export function useNavigation() {
     leftDrawerOpen.value = !leftDrawerOpen.value;
   };
 
-  const logout = (): void => {
+  const logout = async (): Promise<void> => {
     userStore.logout();
-    void router.push('/login');
+    await router.push({ name: 'login' });
   };
 
   return {

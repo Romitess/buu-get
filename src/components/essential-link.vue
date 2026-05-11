@@ -3,15 +3,15 @@
     clickable
     :tag="isExternal ? 'a' : undefined"
     :target="isExternal ? '_blank' : undefined"
-    :href="isExternal ? link : undefined"
-    :to="!isExternal ? link : undefined"
+    :href="isExternal ? path || link : undefined"
+    :to="!isExternal ? path || link : undefined"
   >
     <q-item-section v-if="icon" avatar>
       <q-icon :name="icon" />
     </q-item-section>
 
     <q-item-section>
-      <q-item-label>{{ title }}</q-item-label>
+      <q-item-label>{{ label || title }}</q-item-label>
       <q-item-label caption v-if="caption">{{ caption }}</q-item-label>
     </q-item-section>
   </q-item>
@@ -21,17 +21,25 @@
 import { computed } from 'vue';
 
 export interface EssentialLinkProps {
-  title: string;
+  label?: string; // New standard
+  title?: string; // Legacy support
   caption?: string;
-  link?: string;
+  path?: string; // New standard
+  link?: string; // Legacy support
   icon?: string;
 }
 
 const props = withDefaults(defineProps<EssentialLinkProps>(), {
+  label: '',
+  title: '',
   caption: '',
-  link: '#',
+  path: '',
+  link: '',
   icon: '',
 });
 
-const isExternal = computed<boolean>(() => !!props.link?.startsWith('http'));
+const isExternal = computed<boolean>(() => {
+  const target = props.path || props.link || '';
+  return !!target.startsWith('http');
+});
 </script>
