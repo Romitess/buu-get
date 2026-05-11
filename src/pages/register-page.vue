@@ -129,7 +129,7 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
   if (response.success) {
     $q.notify({
       type: 'positive',
-      message: 'สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ',
+      message: 'สมัครสมาชิกสำเร็จ! โปรดเข้าสู่ระบบ',
       position: 'top',
     });
     await router.push('/login');

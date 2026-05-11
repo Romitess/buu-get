@@ -84,14 +84,6 @@ export function useRegisterForm(isEditMode: boolean, onSave: (payload: RegisterF
         message: t('profile.dialogUpdateSuccess'),
       };
     } else {
-      if (formData.value.password !== formData.value.confirmPassword) {
-        dialog.value = {
-          show: true,
-          type: 'error',
-          message: t('profile.dialogPasswordMismatch'),
-        };
-        return;
-      }
       onSave({ ...formData.value });
       dialog.value = {
         show: true,
@@ -104,7 +96,7 @@ export function useRegisterForm(isEditMode: boolean, onSave: (payload: RegisterF
   const onDialogClose = (): void => {
     dialog.value.show = false;
     if (!isEditMode && dialog.value.type === 'success') {
-      void router.push('/accounts');
+      void router.push('/exam-history');
     }
   };
 
