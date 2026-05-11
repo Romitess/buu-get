@@ -34,12 +34,12 @@ export default defineRouter((/* { store, ssrContext } */) => {
   });
 
   // --- ระบบดักหน้าประตู (Route Guard) ---
-  Router.beforeEach((to) => {
+  Router.beforeEach(async (to) => {
     const userStore = useUserStore();
 
     // โหลดข้อมูลผู้ใช้เริ่มต้นถ้ายังไม่มี
     if (localStorage.getItem('isLoggedIn') === 'true' && !userStore.isLoggedIn) {
-      userStore.initialize();
+      await userStore.initialize();
     }
 
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);

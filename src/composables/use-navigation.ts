@@ -18,26 +18,26 @@ export function useNavigation() {
     // === Candidate Menus ===
     {
       name: 'exam-schedule',
-      label: 'ตารางสอบ',
+      label: 'ตารางสอบ (Candidate)',
       icon: 'event',
       path: '/user/exam-schedule',
       requiredRoles: [ROLES.CANDIDATE],
     },
     {
       name: 'exam-history',
-      label: 'ประวัติการสอบ',
+      label: 'ประวัติการสอบ (Candidate)',
       icon: 'history',
       path: '/user/exam-history',
       requiredRoles: [ROLES.CANDIDATE],
     },
     // === Staff Menus ===
-    // {
-    //   name: 'admin-dashboard',
-    //   label: 'Dashboard',
-    //   icon: 'dashboard',
-    //   path: '/admin/dashboard',
-    //   requiredRoles: [ROLES.STAFF, ROLES.ADMIN],
-    // },
+    {
+      name: 'admin-dashboard',
+      label: 'Dashboard (Exam Opening Officer)',
+      icon: 'dashboard',
+      path: '/admin/dashboard',
+      requiredRoles: [ROLES.STAFF, ROLES.ADMIN],
+    },
     {
       name: 'admin-create-exam',
       label: 'สร้างรอบสอบ',
