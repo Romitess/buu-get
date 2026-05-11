@@ -1,4 +1,65 @@
-import type { ExamInfo, ExamHistoryItem, DayData } from 'src/types/exam';
+import { api } from 'src/boot/axios';
+import type { ExamInfo, ExamHistoryItem, DayData, ExamRound } from 'src/types/exam';
+
+/** Backend Exam interface matching the DTO/Entity */
+interface BackendExam {
+  EXAM_ID: number;
+  EXAM_NAME: string;
+  EXAM_TYPE: string;
+  EXAM_FEE: number;
+  EXAM_DATE: string;
+  SESSIONS: {
+    SS_ID: number;
+    SS_START_TIME: string;
+    SS_END_TIME: string;
+    SS_CAPACITY: number;
+    LOCATION_NAME: string;
+  }[];
+}
+
+export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
+  try {
+    const response = await api.get<BackendExam[]>('/exam');
+    const exams = response.data;
+    const schedule: Record<string, DayData> = {};
+
+    exams.forEach((exam) => {
+      const date = exam.EXAM_DATE; // Format YYYY-MM-DD
+      if (!schedule[date]) {
+        schedule[date] = {
+          location: exam.SESSIONS[0]?.LOCATION_NAME || 'TBA',
+          fee: `Fee : ${exam.EXAM_FEE} ฿`,
+          rounds: [],
+        };
+      }
+
+      const dayData = schedule[date];
+      if (!dayData) return;
+
+      exam.SESSIONS?.forEach((session) => {
+        // Map backend session to frontend ExamRound
+        const startTime = session.SS_START_TIME ? session.SS_START_TIME.substring(0, 5) : '00:00';
+        const endTime = session.SS_END_TIME ? session.SS_END_TIME.substring(0, 5) : '00:00';
+
+        const round: ExamRound = {
+          id: session.SS_ID,
+          title: exam.EXAM_NAME || 'BUU - GET',
+          // Format time from HH:MM:SS to HH:MM
+          timeRange: `${startTime} - ${endTime}`,
+          roundTypeLabel: exam.EXAM_TYPE || 'รอบทั่วไป',
+          availableSeats: session.SS_CAPACITY || 0,
+          totalSeats: session.SS_CAPACITY || 0,
+        };
+        dayData.rounds.push(round);
+      });
+    });
+
+    return schedule;
+  } catch (error) {
+    console.error('Error fetching schedule data:', error);
+    throw error;
+  }
+};
 
 /** ข้อมูลหลักของการสอบ (แสดงใน ExamDetail) */
 export const defaultExamInfo: ExamInfo = {
@@ -10,308 +71,9 @@ export const defaultExamInfo: ExamInfo = {
 };
 
 /**
- * Mockup ข้อมูลรายวัน (สถาบันภาษา ม.บูรพา)
- * แบ่งตามสถานที่สอบและประเภทการสอบที่สมจริง
+ * ข้อมูลรายวัน (สถาบันภาษา ม.บูรพา) — ว่างไว้เพื่อให้ระบบโหลดจาก API เสมอ
  */
-export const mockScheduleData: Record<string, DayData> = {
-  // --- รอบทั่วไป: อาคารสำนักคอมพิวเตอร์ (Computer Center) ---
-  '2026-05-06': {
-    location: 'Computer Center , BUU (อาคารสำนักคอมพิวเตอร์ ชั้น 2)',
-    fee: 'Fee : 500 ฿',
-    rounds: [
-      {
-        id: 101,
-        title: 'BUU - GET (General)',
-        timeRange: '08:00 - 10:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 15,
-        totalSeats: 30,
-      },
-      {
-        id: 102,
-        title: 'BUU - GET (General)',
-        timeRange: '10:00 - 12:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 5,
-        totalSeats: 30,
-      },
-      {
-        id: 103,
-        title: 'BUU - GET (General)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 22,
-        totalSeats: 30,
-      },
-    ],
-  },
-  '2026-05-13': {
-    location: 'Computer Center , BUU (อาคารสำนักคอมพิวเตอร์ ชั้น 2)',
-    fee: 'Fee : 500 ฿',
-    rounds: [
-      {
-        id: 201,
-        title: 'BUU - GET (General)',
-        timeRange: '09:00 - 11:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 28,
-        totalSeats: 30,
-      },
-      {
-        id: 202,
-        title: 'BUU - GET (General)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 10,
-        totalSeats: 30,
-      },
-      {
-        id: 203,
-        title: 'BUU - GET (General)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 10,
-        totalSeats: 30,
-      },
-    ],
-  },
-
-  // --- รอบพิเศษ: อาคารปฏิบัติการรวม (Building 600) ---
-  '2026-05-11': {
-    location: 'Building 600 (อาคารปฏิบัติการรวม คณะวิทยาศาสตร์)',
-    fee: 'Fee : 800 ฿',
-    rounds: [
-      {
-        id: 501,
-        title: 'BUU - GET (Special)',
-        timeRange: '08:30 - 10:30',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 5,
-        totalSeats: 20,
-      },
-      {
-        id: 502,
-        title: 'BUU - GET (Special)',
-        timeRange: '13:30 - 15:30',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 12,
-        totalSeats: 20,
-      },
-    ],
-  },
-  '2026-05-18': {
-    location: 'Building 600 (อาคารปฏิบัติการรวม คณะวิทยาศาสตร์)',
-    fee: 'Fee : 800 ฿',
-    rounds: [
-      {
-        id: 601,
-        title: 'BUU - GET (Special)',
-        timeRange: '10:00 - 12:00',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 2,
-        totalSeats: 15,
-      },
-    ],
-  },
-  '2026-05-14': {
-    location: 'Building 600 (อาคารปฏิบัติการรวม คณะวิทยาศาสตร์)',
-    fee: 'Fee : 800 ฿',
-    rounds: [
-      {
-        id: 701,
-        title: 'BUU - GET (Special)',
-        timeRange: '08:00 - 10:00',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 10,
-        totalSeats: 20,
-      },
-      {
-        id: 702,
-        title: 'BUU - GET (Special)',
-        timeRange: '10:30 - 12:30',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 5,
-        totalSeats: 20,
-      },
-      {
-        id: 703,
-        title: 'BUU - GET (Special)',
-        timeRange: '13:30 - 15:30',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 0,
-        totalSeats: 20,
-      },
-      {
-        id: 704,
-        title: 'BUU - GET (Special)',
-        timeRange: '16:00 - 18:00',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 8,
-        totalSeats: 20,
-      },
-    ],
-  },
-  '2026-05-15': {
-    location: 'Computer Center , BUU (อาคารสำนักคอมพิวเตอร์ ชั้น 2)',
-    fee: 'Fee : 500 ฿',
-    rounds: [
-      {
-        id: 801,
-        title: 'BUU - GET (General)',
-        timeRange: '09:00 - 11:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 15,
-        totalSeats: 30,
-      },
-      {
-        id: 802,
-        title: 'BUU - GET (General)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 22,
-        totalSeats: 30,
-      },
-      {
-        id: 803,
-        title: 'BUU - GET (General)',
-        timeRange: '15:30 - 17:30',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 10,
-        totalSeats: 30,
-      },
-    ],
-  },
-
-  // --- รอบทั่วไป: อาคารเฉลิมพระเกียรติ (QS Building) ---
-  '2026-05-20': {
-    location: 'QS Building (อาคารเฉลิมพระเกียรติ คณะศึกษาศาสตร์)',
-    fee: 'Fee : 500 ฿',
-    rounds: [
-      {
-        id: 301,
-        title: 'BUU - GET (General)',
-        timeRange: '08:00 - 10:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 12,
-        totalSeats: 30,
-      },
-      {
-        id: 302,
-        title: 'BUU - GET (General)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 5,
-        totalSeats: 30,
-      },
-    ],
-  },
-  '2026-05-21': {
-    location: 'QS Building (อาคารเฉลิมพระเกียรติ คณะศึกษาศาสตร์)',
-    fee: 'Fee : 500 ฿',
-    rounds: [
-      {
-        id: 901,
-        title: 'BUU - GET (General)',
-        timeRange: '08:00 - 10:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 10,
-        totalSeats: 30,
-      },
-      {
-        id: 902,
-        title: 'BUU - GET (General)',
-        timeRange: '10:00 - 12:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 5,
-        totalSeats: 30,
-      },
-      {
-        id: 903,
-        title: 'BUU - GET (General)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 0,
-        totalSeats: 30,
-      },
-      {
-        id: 904,
-        title: 'BUU - GET (General)',
-        timeRange: '15:00 - 17:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 12,
-        totalSeats: 30,
-      },
-      {
-        id: 905,
-        title: 'BUU - GET (General)',
-        timeRange: '17:00 - 19:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 30,
-        totalSeats: 30,
-      },
-    ],
-  },
-  '2026-05-25': {
-    location: 'Building 600 (อาคารปฏิบัติการรวม คณะวิทยาศาสตร์)',
-    fee: 'Fee : 800 ฿',
-    rounds: [
-      {
-        id: 1001,
-        title: 'BUU - GET (Special)',
-        timeRange: '09:00 - 11:00',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 8,
-        totalSeats: 25,
-      },
-      {
-        id: 1002,
-        title: 'BUU - GET (Special)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 15,
-        totalSeats: 25,
-      },
-    ],
-  },
-
-  // --- วันที่เต็มแล้ว (Fully Booked) ---
-  '2026-05-08': {
-    location: 'Computer Center , BUU (อาคารสำนักคอมพิวเตอร์)',
-    fee: 'Fee : 500 ฿',
-    rounds: [
-      {
-        id: 801,
-        title: 'BUU - GET (General)',
-        timeRange: '08:00 - 10:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 0,
-        totalSeats: 30,
-      },
-      {
-        id: 802,
-        title: 'BUU - GET (General)',
-        timeRange: '10:00 - 12:00',
-        roundTypeLabel: 'รอบทั่วไป',
-        availableSeats: 0,
-        totalSeats: 30,
-      },
-    ],
-  },
-  '2026-05-22': {
-    location: 'Building 600 (อาคารปฏิบัติการรวม คณะวิทยาศาสตร์)',
-    fee: 'Fee : 800 ฿',
-    rounds: [
-      {
-        id: 901,
-        title: 'BUU - GET (Special)',
-        timeRange: '13:00 - 15:00',
-        roundTypeLabel: 'รอบพิเศษ',
-        availableSeats: 0,
-        totalSeats: 20,
-      },
-    ],
-  },
-};
+export const mockScheduleData: Record<string, DayData> = {};
 
 /** รายการสอบที่ผ่านมาแล้ว (mock — ชำระเงินแล้ว / ยกเลิก / สอบเสร็จ) */
 export const mockHistoryRecords: ExamHistoryItem[] = [

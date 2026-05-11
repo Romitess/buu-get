@@ -2,7 +2,9 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
 import { defineConfig } from '#q-app/wrappers';
-import 'dotenv/config';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export default defineConfig((/* ctx */) => {
   return {

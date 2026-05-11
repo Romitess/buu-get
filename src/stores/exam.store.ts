@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { ExamRound, ExamInfo, ExamHistoryItem, DayData } from 'src/types/exam';
-import { defaultExamInfo, mockScheduleData, mockHistoryRecords } from 'src/services/exam.service';
+import {
+  defaultExamInfo,
+  mockScheduleData,
+  mockHistoryRecords,
+  fetchScheduleData,
+} from 'src/services/exam.service';
 import { DEFAULT_EXAM_FEE_THB, PAYMENT_COUNTDOWN_DEFAULT } from 'src/constants/exam';
 
 /**
@@ -97,6 +102,18 @@ export const useExamStore = defineStore('exam', () => {
   // ============================================================================
   // 4. ACTIONS
   // ============================================================================
+
+  /**
+   * โหลดข้อมูลตารางสอบจาก API
+   */
+  async function initSchedule(): Promise<void> {
+    try {
+      const data = await fetchScheduleData();
+      scheduleData.value = data;
+    } catch (error) {
+      console.error('Failed to load schedule:', error);
+    }
+  }
 
   /**
    * ยืนยันการลงทะเบียนสอบ (รอบทั่วไป)
@@ -273,5 +290,6 @@ export const useExamStore = defineStore('exam', () => {
     cancelRegistration,
     confirmPayment,
     addExamRound,
+    initSchedule,
   };
 });

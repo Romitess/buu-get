@@ -79,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
@@ -114,6 +114,10 @@ const showConfirmDialog = ref(false);
 const passcodeDialogRef = ref<InstanceType<typeof ExamPasscodeInputDialog> | null>(null);
 const selectedRound = ref<ExamRound | null>(null);
 const calendarHeight = ref<number>(0);
+
+onMounted(async () => {
+  await examStore.initSchedule();
+});
 
 const onCalendarResize = (size: { width: number; height: number }) => {
   calendarHeight.value = size.height;
