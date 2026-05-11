@@ -1,15 +1,24 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { User, UserRole } from 'src/types/user';
-import * as userService from 'src/services/user.service';
-import { AUTH_LOADING_DURATION_MS, DEFAULT_LOADING_DURATION_MS } from 'src/constants/timing';
+import type { User } from '../types/user';
+import { getUsersFromApi } from '../services/user.service';
+import { AUTH_LOADING_DURATION_MS, DEFAULT_LOADING_DURATION_MS } from '../constants/timing';
+
+/**
+ * ย้ายมาประกาศที่นี่เพื่อลดปัญหา Circular Dependency และ Error Type
+ */
+export type UserRole = 'admin' | 'staff' | 'finance' | 'executive' | 'user';
 
 export const useUserStore = defineStore('user', () => {
   // === State ===
   const currentUser = ref<User | null>(null);
   const isLoggedIn = ref<boolean>(false);
   const isLoadingGlobal = ref<boolean>(false);
-  const loadingText = ref<string>('กำลังโหลดข้อมูล...');
+  const loadingText = ref<string>('กำลังเข้าสู่ระบบ...');
+  const error = ref<string | null>(null);
+
+  // === Data from Backend ===
+  const users = ref<User[]>([]);
 
   // === Computed ===
   const userRole = computed<UserRole | null>(() => (currentUser.value?.role as UserRole) || null);
@@ -40,14 +49,32 @@ export const useUserStore = defineStore('user', () => {
   // === Actions ===
 
   /**
+   * ฟังก์ชันโหลดข้อมูลผู้ใช้จาก Backend
+   */
+  async function fetchUsers(): Promise<void> {
+    isLoadingGlobal.value = true;
+    error.value = null;
+    try {
+      users.value = await getUsersFromApi();
+    } catch {
+      error.value = 'ไม่สามารถโหลดข้อมูลผู้ใช้งานได้';
+      console.error('Store: Failed to fetch users');
+    } finally {
+      isLoadingGlobal.value = false;
+    }
+  }
+
+  /**
    * ฟังก์ชันโหลดข้อมูลผู้ใช้เริ่มต้น (Check LocalStorage)
    */
-  async function initialize(): Promise<void> {
+  function initialize(): void {
     const savedId = localStorage.getItem('user_id');
     const status = localStorage.getItem('isLoggedIn');
 
     if (savedId && status === 'true') {
-      const found = await userService.findUserByIdentifier(savedId);
+      // ตรวจสอบเฉพาะใน Real Data
+      const found = users.value.find((u) => String(u.id) === savedId || u.nationalId === savedId);
+
       if (found) {
         currentUser.value = found;
         isLoggedIn.value = true;
@@ -58,9 +85,12 @@ export const useUserStore = defineStore('user', () => {
   /**
    * ฟังก์ชันตรวจสอบว่ามีผู้ใช้นี้ในระบบหรือไม่
    */
-  async function checkUserExists(inputID: string): Promise<boolean> {
-    const foundUser = await userService.findUserByIdentifier(inputID);
-    return !!foundUser;
+  function checkUserExists(inputID: string): boolean {
+    // ตรวจสอบเฉพาะใน Real Data
+    const found = users.value.find(
+      (user) => user.nationalId === inputID || String(user.id) === inputID,
+    );
+    return !!found;
   }
 
   /**
@@ -69,9 +99,18 @@ export const useUserStore = defineStore('user', () => {
   async function login(inputID: string, password?: string): Promise<boolean> {
     loadingText.value = 'กำลังเข้าสู่ระบบ...';
     isLoadingGlobal.value = true;
+    error.value = null;
 
     try {
-      const foundUser = await userService.authenticateUser(inputID, password);
+      // ขั้นแรก: ลองดึงข้อมูลจาก API มาเก็บไว้ใน users state ก่อน (ถ้ายังไม่มี)
+      if (users.value.length === 0) {
+        await fetchUsers();
+      }
+
+      // ตรวจสอบสิทธิ์จากข้อมูลจริงใน Store (หรืออนาคตเรียก API ตรงๆ)
+      const foundUser = users.value.find(
+        (u) => (u.nationalId === inputID || String(u.id) === inputID) && u.password === password,
+      );
 
       if (foundUser) {
         currentUser.value = foundUser;
@@ -80,6 +119,10 @@ export const useUserStore = defineStore('user', () => {
         localStorage.setItem('user_id', String(foundUser.id || foundUser.nationalId));
         return true;
       }
+      error.value = 'รหัสประจำตัวหรือรหัสผ่านไม่ถูกต้อง';
+      return false;
+    } catch {
+      error.value = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
       return false;
     } finally {
       // หน่วงเวลาเล็กน้อยให้ UI ดูลื่นไหล
@@ -95,6 +138,16 @@ export const useUserStore = defineStore('user', () => {
   function updateProfile(newData: Partial<User>): void {
     if (currentUser.value) {
       currentUser.value = { ...currentUser.value, ...newData };
+
+      // อัปเดตใน Real Users (Local only)
+      const realIndex = users.value.findIndex(
+        (u) =>
+          (u.id && u.id === currentUser.value?.id) ||
+          u.nationalId === currentUser.value?.nationalId,
+      );
+      if (realIndex !== -1) {
+        users.value[realIndex] = { ...currentUser.value };
+      }
     }
   }
 
@@ -103,14 +156,14 @@ export const useUserStore = defineStore('user', () => {
    */
   function logout(): void {
     // ล้างข้อมูลทันทีเพื่อให้ Route Guard ทำงานถูกต้อง
-    currentUser.value = null;
-    isLoggedIn.value = false;
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('user_id');
 
     loadingText.value = 'กำลังออกจากระบบ...';
     isLoadingGlobal.value = true;
     setTimeout(() => {
+      currentUser.value = null;
+      isLoggedIn.value = false;
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('user_id');
       isLoadingGlobal.value = false;
     }, AUTH_LOADING_DURATION_MS);
   }
@@ -134,8 +187,12 @@ export const useUserStore = defineStore('user', () => {
     isLoggedIn,
     isLoadingGlobal,
     loadingText,
+    error,
+    users,
+    // mockUsers,
     userRole,
     profileItems,
+    fetchUsers,
     initialize,
     checkUserExists,
     login,

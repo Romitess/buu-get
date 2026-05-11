@@ -85,7 +85,7 @@ import type { RegisterCredentials } from 'src/components/register-card.vue';
 import type { RegisterFormData } from 'src/types/register';
 import RegisterAndEditProfile from 'src/components/register-and-edit-profile.vue';
 import FooterCredits from 'src/components/footer/footer-credits.vue';
-import { useAuth } from 'src/composables/useAuth';
+import { useAuthStore } from 'src/stores/auth.store';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 
@@ -93,7 +93,7 @@ type Step = 'credentials' | 'profile';
 
 const $q = useQuasar();
 const router = useRouter();
-const { register } = useAuth();
+const authStore = useAuthStore();
 
 const currentStep = ref<Step>('credentials');
 const isThai = ref<boolean>(true);
@@ -123,22 +123,32 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
   };
 
   $q.loading.show();
-  const response = await register(finalData);
-  $q.loading.hide();
 
-  if (response.success) {
-    $q.notify({
-      type: 'positive',
-      message: 'สมัครสมาชิกสำเร็จ! โปรดเข้าสู่ระบบ',
-      position: 'top',
-    });
-    await router.push('/login');
-  } else {
+  try {
+    const response = await authStore.register(finalData);
+
+    if (response.success) {
+      $q.notify({
+        type: 'positive',
+        message: 'สมัครสมาชิกสำเร็จ! โปรดเข้าสู่ระบบ',
+        position: 'top',
+      });
+      await router.push('/login');
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: response.message || 'เกิดข้อผิดพลาดในการสมัครสมาชิก',
+        position: 'top',
+      });
+    }
+  } catch {
     $q.notify({
       type: 'negative',
-      message: response.message || 'เกิดข้อผิดพลาดในการสมัครสมาชิก',
+      message: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
       position: 'top',
     });
+  } finally {
+    $q.loading.hide();
   }
 };
 </script>

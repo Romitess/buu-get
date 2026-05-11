@@ -76,20 +76,17 @@ export function useRegisterForm(isEditMode: boolean, onSave: (payload: RegisterF
   };
 
   const submitForm = (): void => {
-    if (isEditMode) {
+    try {
       onSave({ ...formData.value });
-      dialog.value = {
-        show: true,
-        type: 'success',
-        message: t('profile.dialogUpdateSuccess'),
-      };
-    } else {
-      onSave({ ...formData.value });
-      dialog.value = {
-        show: true,
-        type: 'success',
-        message: t('profile.dialogRegisterSuccess'),
-      };
+      if (isEditMode) {
+        dialog.value = {
+          show: true,
+          type: 'success',
+          message: t('profile.dialogUpdateSuccess'),
+        };
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 

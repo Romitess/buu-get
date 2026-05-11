@@ -11,8 +11,8 @@ import routes from './routes';
  * If not building with SSR mode, you can
  * directly export the Router instantiation;
  *
- * The function below can be async too; either use
- * async/await or return a Promise which resolves
+ * The function below can be direct; either use
+ * synchronous code or return a Promise which resolves
  * with the Router instance.
  */
 
@@ -34,12 +34,12 @@ export default defineRouter((/* { store, ssrContext } */) => {
   });
 
   // --- ระบบดักหน้าประตู (Route Guard) ---
-  Router.beforeEach(async (to) => {
+  Router.beforeEach((to) => {
     const userStore = useUserStore();
 
     // โหลดข้อมูลผู้ใช้เริ่มต้นถ้ายังไม่มี
     if (localStorage.getItem('isLoggedIn') === 'true' && !userStore.isLoggedIn) {
-      await userStore.initialize();
+      userStore.initialize();
     }
 
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
