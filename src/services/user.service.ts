@@ -1,3 +1,4 @@
+import { api } from 'src/boot/axios';
 import type { User } from 'src/types/user';
 
 export const mockUsers: User[] = [
@@ -46,6 +47,59 @@ export const mockUsers: User[] = [
     role: 'staff',
   },
 ];
+
+/**
+ * Interface สำหรับข้อมูล User ที่ได้รับจาก Backend (NestJS)
+ */
+export interface BackendUserResponse {
+  USER_ID: number;
+  USER_NATIONAL_ID: string | null;
+  USER_PASSPORT_NO: string | null;
+  USER_EMAIL: string;
+  USER_STATUS: string;
+  CREATED_AT: string;
+  UPDATED_AT: string;
+}
+
+/**
+ * ฟังก์ชันแปลงข้อมูลจาก Backend เป็น Frontend User Type
+ */
+export function mapBackendUserToFrontendUser(backendUser: BackendUserResponse): User {
+  return {
+    id: backendUser.USER_ID,
+    nationalId: backendUser.USER_NATIONAL_ID || '',
+    passportNo: backendUser.USER_PASSPORT_NO || '',
+    email: backendUser.USER_EMAIL,
+    status: backendUser.USER_STATUS,
+    // ฟิลด์ Profile จะเป็นค่าว่างไปก่อนเนื่องจาก Backend ยังไม่ได้ Join ข้อมูลมา
+    titleTH: '',
+    fullNameTH: '',
+    titleEN: '',
+    fullNameEN: '',
+    birthdate: '',
+    phone: '',
+    educationLevel: '',
+    country: '',
+    province: '',
+    address: '',
+    taxId: '',
+    thaidSynced: false,
+    role: 'user', // Default role
+  };
+}
+
+/**
+ * ฟังก์ชันดึงข้อมูล User ทั้งหมดจาก API
+ */
+export async function getUsersFromApi(): Promise<User[]> {
+  try {
+    const response = await api.get<BackendUserResponse[]>('/users');
+    return response.data.map(mapBackendUserToFrontendUser);
+  } catch (error) {
+    console.error('Failed to fetch users from API:', error);
+    throw error;
+  }
+}
 
 export function findUser(users: User[], inputID: string): User | undefined {
   return users.find((u) => u.nationalId === inputID || String(u.id) === inputID);

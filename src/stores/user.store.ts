@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { User } from 'src/types/user';
-import { mockUsers as initialMockUsers } from 'src/services/user.service';
+import { mockUsers as initialMockUsers, getUsersFromApi } from 'src/services/user.service';
 import { AUTH_LOADING_DURATION_MS, DEFAULT_LOADING_DURATION_MS } from 'src/constants/timing';
 
 export const useUserStore = defineStore('user', () => {
@@ -10,6 +10,9 @@ export const useUserStore = defineStore('user', () => {
   const isLoggedIn = ref<boolean>(false);
   const isLoadingGlobal = ref<boolean>(false);
   const loadingText = ref<string>('กำลังเข้าสู่ระบบ...');
+
+  // === Data from Backend ===
+  const users = ref<User[]>([]);
 
   // === Mock Data ===
   const mockUsers = ref<User[]>([...initialMockUsers]);
@@ -44,6 +47,17 @@ export const useUserStore = defineStore('user', () => {
   // === Actions ===
 
   /**
+   * ฟังก์ชันโหลดข้อมูลผู้ใช้จาก Backend
+   */
+  async function fetchUsers(): Promise<void> {
+    try {
+      users.value = await getUsersFromApi();
+    } catch (error) {
+      console.error('Store: Failed to fetch users:', error);
+    }
+  }
+
+  /**
    * ฟังก์ชันโหลดข้อมูลผู้ใช้เริ่มต้น (Check LocalStorage)
    */
   function initialize(): void {
@@ -51,9 +65,15 @@ export const useUserStore = defineStore('user', () => {
     const status = localStorage.getItem('isLoggedIn');
 
     if (savedId && status === 'true') {
-      const found = mockUsers.value.find(
+      // ตรวจสอบทั้งใน Mock และ Real Data (ถ้ามี)
+      const foundInMock = mockUsers.value.find(
         (u) => String(u.id) === savedId || u.nationalId === savedId,
       );
+      const foundInReal = users.value.find(
+        (u) => String(u.id) === savedId || u.nationalId === savedId,
+      );
+
+      const found = foundInMock || foundInReal;
       if (found) {
         currentUser.value = found;
         isLoggedIn.value = true;
@@ -65,19 +85,23 @@ export const useUserStore = defineStore('user', () => {
    * ฟังก์ชันตรวจสอบว่ามีผู้ใช้นี้ในระบบหรือไม่
    */
   function checkUserExists(inputID: string): boolean {
-    const foundUser = mockUsers.value.find(
+    const foundInMock = mockUsers.value.find(
       (user) => user.nationalId === inputID || String(user.id) === inputID,
     );
-    return !!foundUser;
+    const foundInReal = users.value.find(
+      (user) => user.nationalId === inputID || String(user.id) === inputID,
+    );
+    return !!(foundInMock || foundInReal);
   }
 
   /**
    * ฟังก์ชัน Login แบบ 2 ขั้นตอน (ตรวจรหัสผ่านด้วย)
    */
   function login(inputID: string, password?: string): boolean {
-    const foundUser = mockUsers.value.find(
-      (user) => user.nationalId === inputID || String(user.id) === inputID,
-    );
+    // ตรวจสอบทั้งใน Mock และ Real Data
+    const foundUser =
+      mockUsers.value.find((user) => user.nationalId === inputID || String(user.id) === inputID) ||
+      users.value.find((user) => user.nationalId === inputID || String(user.id) === inputID);
 
     if (foundUser && foundUser.password === password) {
       currentUser.value = foundUser;
@@ -95,13 +119,25 @@ export const useUserStore = defineStore('user', () => {
   function updateProfile(newData: Partial<User>): void {
     if (currentUser.value) {
       currentUser.value = { ...currentUser.value, ...newData };
-      const index = mockUsers.value.findIndex(
+
+      // อัปเดตใน Mock Users
+      const mockIndex = mockUsers.value.findIndex(
         (u) =>
           (u.id && u.id === currentUser.value?.id) ||
           u.nationalId === currentUser.value?.nationalId,
       );
-      if (index !== -1) {
-        mockUsers.value[index] = { ...currentUser.value };
+      if (mockIndex !== -1) {
+        mockUsers.value[mockIndex] = { ...currentUser.value };
+      }
+
+      // อัปเดตใน Real Users (Local only)
+      const realIndex = users.value.findIndex(
+        (u) =>
+          (u.id && u.id === currentUser.value?.id) ||
+          u.nationalId === currentUser.value?.nationalId,
+      );
+      if (realIndex !== -1) {
+        users.value[realIndex] = { ...currentUser.value };
       }
     }
   }
@@ -141,8 +177,11 @@ export const useUserStore = defineStore('user', () => {
     isLoggedIn,
     isLoadingGlobal,
     loadingText,
+    users,
+    mockUsers,
     userRole,
     profileItems,
+    fetchUsers,
     initialize,
     checkUserExists,
     login,
