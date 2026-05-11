@@ -108,11 +108,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useUserStore } from 'src/stores/user.store';
-import { ROLES } from 'src/constants/roles';
+import { useAuthStore } from 'src/stores/auth.store';
+import { useQuasar } from 'quasar';
 
-const userStore = useUserStore();
 const router = useRouter();
+const authStore = useAuthStore();
+const $q = useQuasar();
 
 const userType = ref<'thai' | 'foreigner'>('thai');
 const email = ref('');
@@ -121,26 +122,38 @@ const showPwd = ref(false);
 const loading = ref(false);
 
 const onSubmit = async () => {
+  if (!email.value || !password.value) {
+    $q.notify({
+      type: 'warning',
+      message: 'กรุณากรอกอีเมลและรหัสผ่าน',
+    });
+    return;
+  }
+
   loading.value = true;
-
   try {
-    const success = await userStore.login(email.value, password.value);
+    const result = await authStore.login({
+      email: email.value,
+      password: password.value,
+    });
 
-    if (success) {
-      // เมื่อ Login สำเร็จ ให้เช็ค Role แล้วพาไปหน้าที่ถูกต้อง
-      if (userStore.userRole === ROLES.CANDIDATE) {
-        await router.push({ name: 'exam-schedule' });
-      } else {
-        await router.push({ name: 'admin-dashboard' });
-      }
+    if (result.success) {
+      $q.notify({
+        type: 'positive',
+        message: 'เข้าสู่ระบบสำเร็จ',
+      });
+      await router.push('/exam-history');
     } else {
-      alert(
-        userType.value === 'thai' ? 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' : 'Invalid email or password',
-      );
+      $q.notify({
+        type: 'negative',
+        message: result.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+      });
     }
-  } catch (error) {
-    console.error('Login Error:', error);
-    alert('เกิดข้อผิดพลาดในการเชื่อมต่อระบบ');
+  } catch {
+    $q.notify({
+      type: 'negative',
+      message: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+    });
   } finally {
     loading.value = false;
   }
