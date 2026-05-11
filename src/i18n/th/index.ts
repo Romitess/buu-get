@@ -98,7 +98,7 @@ export default {
     eduDoctor: 'ปริญญาเอก',
     // Account fields
     email: 'อีเมล',
-    emailPlaceholder: 'example@email.com',
+    emailPlaceholder: "example{'@'}email.com",
     password: 'รหัสผ่าน',
     passwordPlaceholder: 'กำหนดรหัสผ่าน',
     confirmPassword: 'ยืนยันรหัสผ่าน',

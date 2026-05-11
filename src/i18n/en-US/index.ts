@@ -99,7 +99,7 @@ export default {
     eduDoctor: 'Doctorate',
     // Account fields
     email: 'Email',
-    emailPlaceholder: 'example@email.com',
+    emailPlaceholder: "example{'@'}email.com",
     password: 'Password',
     passwordPlaceholder: 'Enter password',
     confirmPassword: 'Confirm Password',
