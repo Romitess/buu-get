@@ -1,33 +1,22 @@
 import { api } from 'src/boot/axios';
-import type { ExamInfo, ExamHistoryItem, DayData, ExamRound } from 'src/types/exam';
-
-/** Backend Exam interface matching the DTO/Entity */
-interface BackendExam {
-  EXAM_ID: number;
-  EXAM_NAME: string;
-  EXAM_TYPE: string;
-  EXAM_FEE: number;
-  EXAM_DATE: string;
-  SESSIONS: {
-    SS_ID: number;
-    SS_START_TIME: string;
-    SS_END_TIME: string;
-    SS_CAPACITY: number;
-    LOCATION_NAME: string;
-  }[];
-}
+import type { ExamHistoryItem, DayData, ExamRound, BackendExam } from 'src/types/exam';
 
 export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
   try {
     const response = await api.get<BackendExam[]>('/exam');
-    const exams = response.data;
+    const exams: BackendExam[] = response.data;
     const schedule: Record<string, DayData> = {};
 
-    exams.forEach((exam) => {
-      const date = exam.EXAM_DATE; // Format YYYY-MM-DD
+    exams.forEach((exam: BackendExam) => {
+      const date = exam.EXAM_DATE;
+
+      const sortedSessions = [...(exam.SESSIONS || [])].sort((a, b) =>
+        (a.SS_START_TIME || '').localeCompare(b.SS_START_TIME || ''),
+      );
+
       if (!schedule[date]) {
         schedule[date] = {
-          location: exam.SESSIONS[0]?.LOCATION_NAME || 'TBA',
+          location: sortedSessions[0]?.LOCATION_NAME || 'TBA',
           fee: `Fee : ${exam.EXAM_FEE} ฿`,
           rounds: [],
         };
@@ -36,22 +25,24 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
       const dayData = schedule[date];
       if (!dayData) return;
 
-      exam.SESSIONS?.forEach((session) => {
-        // Map backend session to frontend ExamRound
+      sortedSessions.forEach((session) => {
         const startTime = session.SS_START_TIME ? session.SS_START_TIME.substring(0, 5) : '00:00';
         const endTime = session.SS_END_TIME ? session.SS_END_TIME.substring(0, 5) : '00:00';
 
         const round: ExamRound = {
           id: session.SS_ID,
           title: exam.EXAM_NAME || 'BUU - GET',
-          // Format time from HH:MM:SS to HH:MM
           timeRange: `${startTime} - ${endTime}`,
           roundTypeLabel: exam.EXAM_TYPE || 'รอบทั่วไป',
-          availableSeats: session.SS_CAPACITY || 0,
+          availableSeats: (session.SS_CAPACITY || 0) - (session.ENROLLMENTS?.length || 0),
           totalSeats: session.SS_CAPACITY || 0,
         };
         dayData.rounds.push(round);
       });
+    });
+
+    Object.values(schedule).forEach((day: DayData) => {
+      day.rounds.sort((a, b) => a.timeRange.localeCompare(b.timeRange));
     });
 
     return schedule;
@@ -61,19 +52,6 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
   }
 };
 
-/** ข้อมูลหลักของการสอบ (แสดงใน ExamDetail) */
-export const defaultExamInfo: ExamInfo = {
-  badgeText: 'รอบทั่วไป',
-  title: 'การสอบวัดระดับภาษาอังกฤษ สำหรับบุคคลทั่วไป BUU-GET',
-  subtitle: 'เลือกวันที่และเวลาที่สะดวกในการมาทดสอบ โดยตรวจสอบจำนวนที่นั่งว่างในแต่ละช่วงเวลา',
-  locationText: 'Computer Center , BUU (201)',
-  feeText: 'Fee : 500 ฿',
-};
-
-/**
- * ข้อมูลรายวัน (สถาบันภาษา ม.บูรพา) — ว่างไว้เพื่อให้ระบบโหลดจาก API เสมอ
- */
 export const mockScheduleData: Record<string, DayData> = {};
 
-/** รายการสอบที่ผ่านมาแล้ว (ว่างไว้เพื่อให้ระบบโหลดจาก API เสมอ) */
 export const mockHistoryRecords: ExamHistoryItem[] = [];
