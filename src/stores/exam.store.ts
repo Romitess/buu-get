@@ -110,6 +110,26 @@ export const useExamStore = defineStore('exam', () => {
     try {
       const data = await fetchScheduleData();
       scheduleData.value = data;
+
+      // อัปเดตข้อมูลหน้าปก (ExamDetail) จากรอบสอบแรกที่ดึงมาได้
+      const firstDate = Object.keys(data).sort()[0];
+      if (firstDate) {
+        const firstExam = data[firstDate];
+        if (firstExam && firstExam.rounds.length > 0) {
+          const round = firstExam.rounds[0];
+          if (round) {
+            examInfo.value = {
+              ...examInfo.value,
+              title: round.title,
+              locationText: firstExam.location,
+              feeText: firstExam.fee,
+              badgeText: round.roundTypeLabel,
+            };
+            // ตั้งค่าวันที่เลือกเริ่มต้นเป็นวันที่ของรอบแรก
+            selectedDate.value = firstDate;
+          }
+        }
+      }
     } catch (error) {
       console.error('Failed to load schedule:', error);
     }
