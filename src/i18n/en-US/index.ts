@@ -186,6 +186,17 @@ export default {
     },
     examRules: {
       title: 'Exam Day Rules',
+      items: {
+        rule1: 'Candidates are not allowed to enter the room 30 minutes after the exam starts.',
+        rule2: 'Must present Admission Voucher and original National ID card.',
+        rule3: 'Must sit in the assigned seat and room only.',
+        rule4: 'Allowed to leave the exam room 1 hour after the exam starts.',
+        rule5: 'Polite attire required. No sandals, shorts, sleeveless shirts, or jeans.',
+        rule6: 'Cheating or any suspicious behavior is strictly prohibited.',
+        rule7: 'Please prepare 2B pencils, eraser, and pen by yourself.',
+        rule8: 'Bags, communication devices, food, and drinks are strictly prohibited.',
+      },
+      errorBanner: 'If you cannot present the Admission Voucher, please notify via email: {email}',
     },
   },
 };

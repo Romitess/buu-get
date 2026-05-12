@@ -87,7 +87,9 @@
         <q-space />
       </div>
       <q-separator class="q-mb-xl" />
-      <!-- Rules content could go here -->
+
+      <HomeGuidelineSection />
+      <HomeVoucherError />
     </div>
   </div>
 </template>
@@ -95,6 +97,8 @@
 <script setup lang="ts">
 import HomeCard from './home-card.vue';
 import HomeStep from './home-step.vue';
+import HomeGuidelineSection from './home-guideline-section.vue';
+import HomeVoucherError from './home-voucher-error.vue';
 </script>
 
 <style scoped>
