@@ -139,7 +139,7 @@ const onSubmit = async () => {
         type: 'positive',
         message: 'เข้าสู่ระบบสำเร็จ',
       });
-      await router.push('/exam-schedule');
+      await router.push('/user/exam-schedule');
     } else {
       $q.notify({
         type: 'negative',
