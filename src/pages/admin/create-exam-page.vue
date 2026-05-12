@@ -25,12 +25,18 @@
           </div>
           <div class="col-12 col-md-6">
             <div class="field-label">สถานที่สอบ</div>
-            <q-input
-              v-model="form.location"
+            <q-select
+              v-model="form.locationId"
+              :options="locationOptions"
+              option-label="label"
+              option-value="value"
+              emit-value
+              map-options
               outlined
               dense
-              placeholder="Computer Center, BUU (L201)"
+              placeholder="เลือกสถานที่สอบ"
               class="custom-input"
+              :loading="isLoadingData"
             />
           </div>
 
@@ -47,12 +53,18 @@
           </div>
           <div class="col-12 col-md-3">
             <div class="field-label">รหัสผังแหล่งเงิน</div>
-            <q-input
-              v-model="form.fundingCode"
+            <q-select
+              v-model="form.fundSourceId"
+              :options="fundSourceOptions"
+              option-label="label"
+              option-value="value"
+              emit-value
+              map-options
               outlined
               dense
-              placeholder="XXXXXXXXXX"
+              placeholder="เลือกแหล่งเงิน"
               class="custom-input"
+              :loading="isLoadingData"
             />
           </div>
           <div class="col-12 col-md-6">
@@ -279,16 +291,14 @@
 
       <!-- Action Buttons -->
       <div class="row justify-end q-mt-lg q-gutter-md q-mb-md">
-        <q-btn
+        <app-button
           label="ยกเลิก"
           @click="handleCancel"
-          unelevated
           class="action-btn cancel-btn text-weight-bold"
         />
-        <q-btn
+        <app-button
           label="บันทึก"
           @click="handleSave"
-          unelevated
           class="action-btn save-btn text-white text-weight-bold"
         />
       </div>
@@ -301,8 +311,9 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useExamStore } from 'src/stores/exam.store';
-import type { CreateExamPayload, ExamLocationOption } from 'src/services/exam.service';
-import { fetchExamLocations } from 'src/services/exam.service';
+import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
+import { fetchExamLocations, fetchFundSources } from 'src/services/exam.service';
+import AppButton from 'src/components/base/app-button.vue';
 
 const router = useRouter();
 const $q = useQuasar();
@@ -311,22 +322,28 @@ const examStore = useExamStore();
 const examTypeOptions: string[] = ['รอบทั่วไป', 'รอบพิเศษ'];
 const examFormatOptions: string[] = ['แบบกระดาษ'];
 const locationOptions = ref<ExamLocationOption[]>([]);
-const isLoadingLocations = ref(false);
+const fundSourceOptions = ref<{ label: string; value: number }[]>([]);
+const isLoadingData = ref(false);
 
 onMounted(async () => {
-  isLoadingLocations.value = true;
+  isLoadingData.value = true;
   try {
-    locationOptions.value = await fetchExamLocations();
+    const [locations, fundSources] = await Promise.all([fetchExamLocations(), fetchFundSources()]);
+    locationOptions.value = locations;
+    fundSourceOptions.value = fundSources.map((fs: FundSource) => ({
+      label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
+      value: fs.FS_ID,
+    }));
   } finally {
-    isLoadingLocations.value = false;
+    isLoadingData.value = false;
   }
 });
 
 const form = ref({
   examName: '',
-  location: '',
+  locationId: null as number | null,
   examType: 'รอบทั่วไป',
-  fundingCode: '',
+  fundSourceId: null as number | null,
   examFormat: 'แบบกระดาษ',
   fee: '0.00',
   seats: 1,
@@ -372,15 +389,28 @@ const handleSave = async () => {
     return;
   }
 
-  try {
-    const parsedFundSourceId = Number(form.value.fundingCode);
-    const matchedLocation = locationOptions.value.find(
-      (opt) => opt.label.toLowerCase() === form.value.location.toLowerCase(),
-    );
+  if (!form.value.locationId) {
+    $q.notify({
+      type: 'warning',
+      message: 'กรุณาเลือกสถานที่สอบ',
+      position: 'top',
+    });
+    return;
+  }
 
+  if (!form.value.fundSourceId) {
+    $q.notify({
+      type: 'warning',
+      message: 'กรุณาเลือกแหล่งเงิน',
+      position: 'top',
+    });
+    return;
+  }
+
+  try {
     const payload: CreateExamPayload = {
       examName: form.value.examName,
-      locationId: matchedLocation?.value || 1, // Default to 1 if no match found
+      locationId: form.value.locationId,
       examType: form.value.examType,
       examFormat: form.value.examFormat,
       fee: form.value.fee,
@@ -392,11 +422,8 @@ const handleSave = async () => {
       payStartDate: form.value.payStartDate,
       payEndDate: form.value.payEndDate,
       timeRanges,
+      fundSourceId: form.value.fundSourceId,
     };
-
-    if (parsedFundSourceId) {
-      payload.fundSourceId = parsedFundSourceId;
-    }
 
     await examStore.addExamRound(payload);
 
@@ -408,7 +435,8 @@ const handleSave = async () => {
     });
 
     void router.push('/user/exam-schedule');
-  } catch {
+  } catch (error) {
+    console.error('Save error:', error);
     $q.notify({
       type: 'negative',
       message: 'เกิดข้อผิดพลาดในการสร้างรอบสอบ',
