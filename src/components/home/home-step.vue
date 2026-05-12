@@ -4,7 +4,7 @@
       <div class="text-h3 text-weight-bolder text-primary q-mr-md line-height-1">
         {{ number }}
       </div>
-      <div class="step-line bg-grey-4 full-width" style="height: 2px"></div>
+      <div class="step-line bg-grey-4 full-width"></div>
     </div>
     <div class="text-subtitle1 text-weight-bolder text-dark q-mb-xs">
       {{ title }}
@@ -24,6 +24,9 @@ defineProps<{
 </script>
 
 <style scoped>
+.step-line {
+  height: 2px;
+}
 .line-height-1 {
   line-height: 1;
 }

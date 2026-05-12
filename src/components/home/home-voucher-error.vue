@@ -13,10 +13,12 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import { SUPPORT_CONTACT } from 'src/constants/support';
+
 const { t } = useI18n();
 
 const translatedText = computed(() => {
-  return t('home.examRules.errorBanner', { email: 'li@go.buu.ac.th' });
+  return t('home.examRules.errorBanner', { email: SUPPORT_CONTACT.EMAIL });
 });
 </script>
 

@@ -1,7 +1,7 @@
 <template>
   <q-item class="q-pa-sm block">
     <q-item-section>
-      <q-separator color="dark" style="width: 24px; height: 2px" class="q-mb-sm" />
+      <q-separator color="dark" class="stat-line q-mb-sm" />
       <q-item-label overline class="text-grey-7 text-weight-bold">
         {{ label }}
       </q-item-label>
@@ -24,6 +24,10 @@ defineProps<{
 </script>
 
 <style scoped>
+.stat-line {
+  width: 24px;
+  height: 2px;
+}
 .stat-item {
   min-width: 140px;
 }
