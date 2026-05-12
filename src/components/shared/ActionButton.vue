@@ -3,7 +3,7 @@
     :icon="icon"
     unelevated
     dense
-    class="action-btn"
+    :class="['action-btn', color ? `text-${color}` : '']"
     :disable="disable"
     @click="$emit('click')"
   >

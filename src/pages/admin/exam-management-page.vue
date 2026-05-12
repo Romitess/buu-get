@@ -59,12 +59,14 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useQuasar } from 'quasar';
+import { useRouter } from 'vue-router';
 import ExamManagementTable from 'src/components/exam/exam-management-table.vue';
 import SearchBar from 'src/components/shared/SearchBar.vue';
 import { useExamStore } from 'src/stores/exam.store';
 import type { Role, PaginationModel, TableRequestProps } from 'src/types/exam.types';
 
 const $q = useQuasar();
+const router = useRouter();
 const examStore = useExamStore();
 
 // State
@@ -132,7 +134,7 @@ const handleDelete = async (id: string) => {
 };
 
 const handleManageRegistrants = (id: string) => {
-  $q.notify({ type: 'info', message: `จัดการผู้สมัครสอบ ID: ${id}`, position: 'top' });
+  void router.push({ name: 'admin-exam-registrants', params: { examId: id } });
 };
 
 const handlePrintAdmitCard = (id: string) => {
