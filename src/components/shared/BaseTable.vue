@@ -138,7 +138,7 @@ const onRequest = (props: TableRequestProps) => {
   overflow: hidden;
 
   :deep(thead tr th) {
-    background-color: #0d47a1 !important;
+    background-color: var(--primary) !important;
     color: white !important;
     font-weight: 600;
     font-size: 14px;
@@ -148,8 +148,8 @@ const onRequest = (props: TableRequestProps) => {
 
   :deep(tbody tr td) {
     font-size: 14px;
-    color: #333;
-    border-color: #e0e0e0;
+    color: var(--text-primary);
+    border-color: var(--border-color);
     white-space: normal !important; // Allow wrapping
     word-break: break-word; // Break long words
     line-height: 1.4;

@@ -2,11 +2,20 @@
   <q-page class="q-px-xl q-pt-md q-pb-lg flex column items-center" style="min-height: 0 !important">
     <div class="full-width" style="max-width: 1200px">
       <!-- Header Section -->
-      <div class="row justify-between items-center q-mb-lg">
-        <div>
-          <div class="text-h5 text-weight-bold text-primary">จัดการการสอบ</div>
-          <div class="text-subtitle2 text-grey-7">ระบบจัดการตารางสอบและผู้สมัคร</div>
+      <div class="q-mb-md">
+        <div class="text-h5 text-weight-bold" style="color: var(--primary-dark)">จัดการรอบสอบ</div>
+        <div class="text-subtitle2 text-grey-7">
+          จัดการข้อมูลรอบสอบ ตรวจสอบกำหนดการ และติดตามสถานะการเปิดรับสมัคร
         </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="q-mb-lg">
+        <SearchBar v-model="searchQuery" />
+      </div>
+
+      <!-- Filters & Role Switcher (For Demo purposes) -->
+      <div class="row justify-between items-center q-mb-md">
         <q-btn
           color="primary"
           icon="add"
@@ -16,10 +25,6 @@
           style="border-radius: 8px"
           @click="$router.push('/admin/create-exam')"
         />
-      </div>
-
-      <!-- Filters & Role Switcher (For Demo purposes) -->
-      <div class="row justify-end q-mb-md">
         <q-btn-toggle
           v-model="currentRole"
           flat
@@ -55,6 +60,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import ExamManagementTable from 'src/components/exam/exam-management-table.vue';
+import SearchBar from 'src/components/shared/SearchBar.vue';
 import { useExamStore } from 'src/stores/exam.store';
 import type { Role, PaginationModel, TableRequestProps } from 'src/types/exam.types';
 
@@ -64,8 +70,17 @@ const examStore = useExamStore();
 // State
 const isLoading = ref(false);
 const currentRole = ref<Role>('staff');
+const searchQuery = ref('');
 
-const exams = computed(() => examStore.managementSchedules);
+const exams = computed(() => {
+  const allExams = examStore.managementSchedules;
+  if (!searchQuery.value) return allExams;
+
+  const query = searchQuery.value.toLowerCase();
+  return allExams.filter(
+    (e) => e.examName.toLowerCase().includes(query) || e.examLocation.toLowerCase().includes(query),
+  );
+});
 
 // Pagination State (Client-side initially since API returns all)
 const pagination = ref<PaginationModel>({
@@ -140,6 +155,6 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .text-primary {
-  color: #1a3c6e !important;
+  color: var(--primary) !important;
 }
 </style>

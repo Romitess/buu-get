@@ -13,14 +13,14 @@
 
 <style scoped lang="scss">
 .action-btn {
-  background-color: #bbdefb; // Light blue background
-  color: #333; // Dark icon color
+  background-color: var(--badge-primary-bg); // Use token from app.scss
+  color: var(--badge-primary-text); // Use token from app.scss
   width: 32px;
   height: 32px;
   border-radius: 6px;
 
   &:hover {
-    background-color: #90caf9;
+    background-color: var(--dialog-info-border);
   }
 }
 </style>
