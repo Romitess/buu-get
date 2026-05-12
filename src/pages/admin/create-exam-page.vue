@@ -158,54 +158,55 @@
               </q-input>
 
               <div class="field-label-bold">เวลาสอบ</div>
-              <div class="row items-center q-mb-sm q-col-gutter-sm">
-                <div class="col">
-                  <q-input
-                    v-model="form.startTime1"
-                    outlined
-                    dense
-                    class="custom-input bg-white"
-                    placeholder="08 : 00"
-                  />
-                </div>
-                <div class="col-auto time-separator">ถึง</div>
-                <div class="col">
-                  <q-input
-                    v-model="form.endTime1"
-                    outlined
-                    dense
-                    class="custom-input bg-white"
-                    placeholder="10 : 00"
-                  />
-                </div>
-                <div class="col-auto">
-                  <q-icon name="delete" class="cursor-pointer" size="sm" color="grey-8" />
+              <div class="time-slots-container q-pr-sm">
+                <div
+                  v-for="(slot, index) in form.timeSlots"
+                  :key="index"
+                  class="row items-center q-mb-sm q-col-gutter-sm"
+                >
+                  <div class="col">
+                    <q-input
+                      v-model="slot.startTime"
+                      outlined
+                      dense
+                      class="custom-input bg-white"
+                      placeholder="00 : 00"
+                    />
+                  </div>
+                  <div class="col-auto time-separator">ถึง</div>
+                  <div class="col">
+                    <q-input
+                      v-model="slot.endTime"
+                      outlined
+                      dense
+                      class="custom-input bg-white"
+                      placeholder="00 : 00"
+                    />
+                  </div>
+                  <div class="col-auto">
+                    <q-icon
+                      name="delete"
+                      class="cursor-pointer"
+                      size="sm"
+                      color="grey-8"
+                      @click="removeTimeSlot(index)"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div class="row items-center q-col-gutter-sm">
-                <div class="col">
-                  <q-input
-                    v-model="form.startTime2"
-                    outlined
-                    dense
-                    class="custom-input bg-white"
-                    placeholder="10 : 00"
-                  />
-                </div>
-                <div class="col-auto time-separator">ถึง</div>
-                <div class="col">
-                  <q-input
-                    v-model="form.endTime2"
-                    outlined
-                    dense
-                    class="custom-input bg-white"
-                    placeholder="12 : 00"
-                  />
-                </div>
-                <div class="col-auto">
-                  <q-icon name="delete" class="cursor-pointer" size="sm" color="grey-8" />
-                </div>
+              <!-- Add Session Button -->
+              <div class="row justify-end q-mt-sm">
+                <q-btn
+                  label="เพิ่มรอบเวลาสอบ"
+                  color="primary"
+                  unelevated
+                  dense
+                  class="q-px-md"
+                  style="border-radius: 8px; font-size: 13px"
+                  :disabled="form.timeSlots.length >= 4"
+                  @click="addTimeSlot"
+                />
               </div>
             </div>
           </div>
@@ -313,14 +314,23 @@ import { useQuasar } from 'quasar';
 import { useExamStore } from 'src/stores/exam.store';
 import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
 import { fetchExamLocations, fetchFundSources } from 'src/services/exam.service';
+import { BUDDHIST_YEAR_OFFSET } from 'src/constants/exam';
 import AppButton from 'src/components/base/app-button.vue';
 
 const router = useRouter();
 const $q = useQuasar();
 const examStore = useExamStore();
 
+const today = (() => {
+  const now = new Date();
+  const d = String(now.getDate()).padStart(2, '0');
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const y = now.getFullYear() + BUDDHIST_YEAR_OFFSET;
+  return `${d}/${m}/${y}`;
+})();
+
 const examTypeOptions: string[] = ['รอบทั่วไป', 'รอบพิเศษ'];
-const examFormatOptions: string[] = ['แบบกระดาษ'];
+const examFormatOptions: string[] = ['แบบกระดาษ', 'แบบคอมพิวเตอร์'];
 const locationOptions = ref<ExamLocationOption[]>([]);
 const fundSourceOptions = ref<{ label: string; value: number }[]>([]);
 const isLoadingData = ref(false);
@@ -348,37 +358,55 @@ const form = ref({
   fee: '0.00',
   seats: 1,
   isPublished: true,
-  examDate: '02/05/2569',
-  startTime1: '08 : 00',
-  endTime1: '10 : 00',
-  startTime2: '10 : 00',
-  endTime2: '12 : 00',
-  regStartDate: '02/05/2569',
-  regEndDate: '02/05/2569',
-  payStartDate: '02/05/2569',
-  payEndDate: '02/05/2569',
+  examDate: today,
+  timeSlots: [
+    { startTime: '08 : 00', endTime: '10 : 00' },
+    { startTime: '10 : 00', endTime: '12 : 00' },
+  ],
+  regStartDate: today,
+  regEndDate: today,
+  payStartDate: today,
+  payEndDate: today,
 });
+
+const addTimeSlot = () => {
+  if (form.value.timeSlots.length < 4) {
+    form.value.timeSlots.push({
+      startTime: '',
+      endTime: '',
+    });
+  } else {
+    $q.notify({
+      type: 'warning',
+      message: 'สามารถเพิ่มรอบเวลาสอบได้สูงสุด 4 รอบ',
+      position: 'top',
+    });
+  }
+};
+
+const removeTimeSlot = (index: number) => {
+  if (form.value.timeSlots.length > 1) {
+    form.value.timeSlots.splice(index, 1);
+  } else {
+    $q.notify({
+      type: 'warning',
+      message: 'ต้องมีช่วงเวลาสอบอย่างน้อย 1 ช่วงเวลา',
+      position: 'top',
+    });
+  }
+};
 
 const handleCancel = () => {
   void router.push('/exam-schedule');
 };
 
 const handleSave = async () => {
-  const timeRanges: { startTime: string; endTime: string }[] = [];
-
-  if (form.value.startTime1 && form.value.endTime1) {
-    timeRanges.push({
-      startTime: form.value.startTime1,
-      endTime: form.value.endTime1,
-    });
-  }
-
-  if (form.value.startTime2 && form.value.endTime2) {
-    timeRanges.push({
-      startTime: form.value.startTime2,
-      endTime: form.value.endTime2,
-    });
-  }
+  const timeRanges = form.value.timeSlots
+    .filter((slot) => slot.startTime && slot.endTime)
+    .map((slot) => ({
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+    }));
 
   if (timeRanges.length === 0) {
     $q.notify({
@@ -499,9 +527,12 @@ const handleSave = async () => {
 
 /* Schedule grey box */
 .schedule-box {
-  background-color: var(--neutral-100);
+  background-color: #f3f3f3;
   padding: 20px;
   border-radius: var(--radius-sm);
+  height: 280px;
+  display: flex;
+  flex-direction: column;
 }
 .schedule-box-title {
   font-size: 14px;
@@ -522,6 +553,30 @@ const handleSave = async () => {
   font-weight: 500;
   color: var(--neutral-500);
   padding: 0 4px;
+}
+
+/* Time slots scrollable container */
+.time-slots-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar for premium look */
+.time-slots-container::-webkit-scrollbar {
+  width: 5px;
+}
+.time-slots-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+.time-slots-container::-webkit-scrollbar-thumb {
+  background: var(--neutral-400);
+  border-radius: 10px;
+}
+.time-slots-container::-webkit-scrollbar-thumb:hover {
+  background: var(--neutral-500);
 }
 
 /* Custom Input Styling */
