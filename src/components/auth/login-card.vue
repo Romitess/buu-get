@@ -142,7 +142,7 @@ const onSubmit = async () => {
         type: 'positive',
         message: 'เข้าสู่ระบบสำเร็จ',
       });
-      await router.push('/exam-history');
+      await router.push('/exam-schedule');
     } else {
       $q.notify({
         type: 'negative',

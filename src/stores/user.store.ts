@@ -1,13 +1,10 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { User } from '../types/user';
+import type { User, UserRole } from '../types/user';
 import { getUsersFromApi } from '../services/user.service';
 import { AUTH_LOADING_DURATION_MS, DEFAULT_LOADING_DURATION_MS } from '../constants/timing';
 
-/**
- * ย้ายมาประกาศที่นี่เพื่อลดปัญหา Circular Dependency และ Error Type
- */
-export type UserRole = 'admin' | 'staff' | 'finance' | 'executive' | 'user';
+// (UserRole is now imported from src/types/user.ts)
 
 export const useUserStore = defineStore('user', () => {
   // === State ===

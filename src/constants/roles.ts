@@ -3,5 +3,7 @@ export const ROLES = {
   STAFF: 'staff',
   FINANCE: 'finance',
   EXECUTIVE: 'executive',
-  CANDIDATE: 'user',
+  CANDIDATE: 'candidate',
 } as const;
+
+export type RolesType = typeof ROLES;

@@ -1,4 +1,6 @@
-export type UserRole = 'admin' | 'staff' | 'finance' | 'executive' | 'user';
+import type { RolesType } from '../constants/roles';
+
+export type UserRole = RolesType[keyof RolesType];
 
 export interface User {
   // USER

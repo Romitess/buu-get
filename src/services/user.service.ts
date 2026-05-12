@@ -1,3 +1,4 @@
+import { ROLES } from 'src/constants/roles';
 import { api } from '../boot/axios';
 import type { User } from '../types/user';
 
@@ -84,7 +85,7 @@ export function mapBackendUserToFrontendUser(backendUser: BackendUserResponse): 
     address: '',
     taxId: '',
     thaidSynced: false,
-    role: 'user', // Default role
+    role: ROLES.CANDIDATE, // Default role
   };
 }
 
