@@ -145,4 +145,47 @@ export default {
       },
     },
   },
+  home: {
+    testFormat: {
+      title: 'Test Format',
+      cards: {
+        time: {
+          title: '2 Hours Duration',
+          subtitle: 'Total 70 items, consisting of 2 main sections. Full score 100 points.',
+        },
+        part1: {
+          title: 'Part 1: Grammar & Vocab',
+          subtitle: 'Tests advanced vocabulary and grammar structure. 30 items.',
+        },
+        part2: {
+          title: 'Part 2: Reading',
+          subtitle: 'Tests reading comprehension and academic analysis skills. 40 items.',
+        },
+      },
+    },
+    registrationSteps: {
+      title: 'Registration Steps',
+      steps: {
+        s1: {
+          title: 'Login',
+          description: 'Login to BUULI Member system with correct credentials.',
+        },
+        s2: {
+          title: 'Select Date',
+          description: 'Check the schedule and choose a convenient exam session.',
+        },
+        s3: {
+          title: 'Payment',
+          description: 'Scan QR Code within 30 minutes, otherwise the system will cancel.',
+        },
+        s4: {
+          title: 'Check Status',
+          description: 'Check and print Admission Voucher for the exam day.',
+        },
+      },
+    },
+    examRules: {
+      title: 'Exam Day Rules',
+    },
+  },
 };
