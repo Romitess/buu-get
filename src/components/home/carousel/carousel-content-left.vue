@@ -1,16 +1,16 @@
 <template>
-  <q-card-section class="column justify-center full-height q-pa-xl">
-    <div class="text-overline text-primary text-weight-bolder q-mb-sm">
+  <q-card-section class="branding-section column justify-center full-height q-pa-lg q-pa-md-xl">
+    <div class="text-overline text-primary text-weight-bolder q-mb-xs">
       {{ $t('carousel.branding.overline') }}
     </div>
-    <div class="text-h3 text-weight-bolder text-dark line-height-1">
+    <div class="text-h4 text-md-h3 text-weight-bolder text-dark line-height-1">
       {{ $t('carousel.branding.university') }}
     </div>
-    <div class="text-h4 text-weight-bolder text-primary q-mb-lg">
+    <div class="text-h5 text-md-h4 text-weight-bolder text-primary q-mb-lg">
       {{ $t('carousel.branding.examName') }}
     </div>
 
-    <q-card-section class="q-pa-none q-pl-md border-left-primary q-mb-xl">
+    <q-card-section class="q-pa-none q-pl-md border-left-primary q-mb-lg q-mb-md-xl">
       <div class="text-body1 text-grey-9">
         {{ $t('carousel.branding.description1') }}
       </div>
@@ -46,6 +46,9 @@
 </template>
 
 <style scoped>
+.branding-section {
+  min-height: 400px;
+}
 .border-left-primary {
   border-left: 3px solid var(--q-primary);
 }

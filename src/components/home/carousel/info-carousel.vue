@@ -1,6 +1,6 @@
 <template>
-  <q-card flat bordered class="carousel-container overflow-hidden">
-    <div class="row full-height">
+  <q-card flat class="info-carousel overflow-hidden border-radius-lg shadow-2">
+    <div class="row">
       <!-- Left Section -->
       <div class="col-12 col-md-7">
         <CarouselContentLeft />

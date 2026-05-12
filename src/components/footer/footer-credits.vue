@@ -1,14 +1,20 @@
 <template>
   <div
-    class="footer-credits row justify-between items-center q-pa-md"
+    class="footer-credits row justify-between items-center q-pa-md text-center text-sm-left"
     :class="`footer-credits--${variant}`"
   >
-    <div class="text-weight-medium">Crafted by the computer center of Burapha University</div>
-    <div class="text-caption opacity-80">&copy; 2026 Copyright All Right Reserved.</div>
+    <div class="col-12 col-sm-auto text-weight-medium q-mb-xs q-mb-sm-none">
+      Crafted by the computer center of Burapha University
+    </div>
+    <div class="col-12 col-sm-auto text-caption opacity-80">
+      &copy; {{ currentYear }} Copyright All Right Reserved.
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+
 withDefaults(
   defineProps<{
     variant?: 'primary' | 'white';
@@ -17,6 +23,8 @@ withDefaults(
     variant: 'primary',
   },
 );
+
+const currentYear = computed(() => new Date().getFullYear());
 </script>
 
 <style scoped lang="scss">
