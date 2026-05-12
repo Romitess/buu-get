@@ -152,3 +152,14 @@ export interface BackendExam {
   EXAM_DATE: string;
   SESSIONS: BackendSession[];
 }
+
+export interface ExamManagementItem {
+  id: string | number;
+  examName: string;
+  examType: 'general' | 'special';
+  examDate: Date | string;
+  examLocation: string;
+  registeredCount: number;
+  capacity: number;
+  status: 'published' | 'unpublished';
+}

@@ -78,6 +78,11 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/admin/dashboard-page.vue'),
           },
           {
+            path: 'exam-management',
+            name: 'admin-exam-management',
+            component: () => import('pages/admin/exam-management-page.vue'),
+          },
+          {
             path: 'create-exam',
             name: 'admin-create-exam',
             component: () => import('pages/admin/create-exam-page.vue'),

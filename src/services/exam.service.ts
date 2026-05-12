@@ -7,6 +7,7 @@ import type {
   ExamInfo,
   BackendLocation,
 } from 'src/types/exam';
+import type { ExamSchedule } from 'src/types/exam.types';
 import { BUDDHIST_YEAR_OFFSET, SESSION_STATUS_OPEN, DEFAULT_EXAM_INFO } from 'src/constants/exam';
 
 /** Payload for creating a new exam round (Frontend form structure) */
@@ -95,6 +96,55 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
     return schedule;
   } catch (error) {
     console.error('Error fetching schedule data:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches all exams and maps them to the ExamSchedule interface for the management table.
+ */
+export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
+  try {
+    const response = await api.get<BackendExam[]>('/exam');
+    const exams = response.data;
+
+    return exams.map((exam) => {
+      // Calculate total capacity and registered count across all sessions
+      let capacity = 0;
+      let registeredCount = 0;
+      let locationName = 'TBA';
+
+      if (exam.SESSIONS && exam.SESSIONS.length > 0) {
+        exam.SESSIONS.forEach((session) => {
+          capacity += session.SS_CAPACITY || 0;
+          registeredCount += session.ENROLLMENTS?.length || 0;
+        });
+
+        const firstLoc = exam.SESSIONS[0]?.LOCATION;
+        if (firstLoc) {
+          locationName = `${firstLoc.LOCATION_NAME}${firstLoc.LOCATION_ROOM_NO ? ` (${firstLoc.LOCATION_ROOM_NO})` : ''}`;
+        }
+      }
+
+      return {
+        id: String(exam.EXAM_ID),
+        examName: exam.EXAM_NAME || 'BUU - GET',
+        examType:
+          exam.EXAM_TYPE === 'รอบทั่วไป' || exam.EXAM_TYPE === 'general' ? 'general' : 'special',
+        examDate: exam.EXAM_DATE, // assuming it's in YYYY-MM-DD or ISO format from backend
+        examLocation: locationName,
+        registeredCount,
+        capacity,
+        // Since backend doesn't seem to return EXAM_PUBLISHED in the default GET /exam sometimes,
+        // we'll default to 'published' or map from EXAM_PUBLISHED if available.
+        status:
+          (exam as BackendExam & { EXAM_PUBLISHED?: boolean }).EXAM_PUBLISHED === false
+            ? 'unpublished'
+            : 'published',
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching exam schedules:', error);
     throw error;
   }
 };

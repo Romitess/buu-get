@@ -13,7 +13,7 @@ export const ROLE_LABELS = {
   [ROLES.FINANCE]: 'Finance Officer',
   [ROLES.EXECUTIVE]: 'Executive',
   [ROLES.CANDIDATE]: 'Candidate',
-  [ROLES.PROCTOR]: 'Exam Operations Officer',
+  [ROLES.PROCTOR]: 'Exam Proctor',
 } as const;
 
 export type RolesType = typeof ROLES;
