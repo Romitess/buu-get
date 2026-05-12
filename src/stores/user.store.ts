@@ -1,21 +1,18 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { User, UserRole } from '../types/user';
-import { getUsersFromApi } from '../services/user.service';
-import { AUTH_LOADING_DURATION_MS, DEFAULT_LOADING_DURATION_MS } from '../constants/timing';
-
-// (UserRole is now imported from src/types/user.ts)
+import type { User, UserRole } from 'src/types/user';
+import * as userService from 'src/services/user.service';
+// import { ROLES } from 'src/constants/roles';
+import { AUTH_LOADING_DURATION_MS, DEFAULT_LOADING_DURATION_MS } from 'src/constants/timing';
 
 export const useUserStore = defineStore('user', () => {
   // === State ===
   const currentUser = ref<User | null>(null);
   const isLoggedIn = ref<boolean>(false);
   const isLoadingGlobal = ref<boolean>(false);
-  const loadingText = ref<string>('กำลังเข้าสู่ระบบ...');
+  const loadingText = ref<string>('กำลังโหลดข้อมูล...');
+  const accessToken = ref<string | null>(localStorage.getItem('access_token'));
   const error = ref<string | null>(null);
-
-  // === Data from Backend ===
-  const users = ref<User[]>([]);
 
   // === Computed ===
   const userRole = computed<UserRole | null>(() => (currentUser.value?.role as UserRole) || null);
@@ -46,83 +43,65 @@ export const useUserStore = defineStore('user', () => {
   // === Actions ===
 
   /**
-   * ฟังก์ชันโหลดข้อมูลผู้ใช้จาก Backend
+   * ฟังก์ชันโหลดข้อมูลผู้ใช้เริ่มต้น (Check LocalStorage + Token)
    */
-  async function fetchUsers(): Promise<void> {
-    isLoadingGlobal.value = true;
-    error.value = null;
-    try {
-      users.value = await getUsersFromApi();
-    } catch {
-      error.value = 'ไม่สามารถโหลดข้อมูลผู้ใช้งานได้';
-      console.error('Store: Failed to fetch users');
-    } finally {
-      isLoadingGlobal.value = false;
-    }
-  }
-
-  /**
-   * ฟังก์ชันโหลดข้อมูลผู้ใช้เริ่มต้น (Check LocalStorage)
-   */
-  function initialize(): void {
-    const savedId = localStorage.getItem('user_id');
+  async function initialize(): Promise<void> {
+    const token = localStorage.getItem('access_token');
     const status = localStorage.getItem('isLoggedIn');
 
-    if (savedId && status === 'true') {
-      // ตรวจสอบเฉพาะใน Real Data
-      const found = users.value.find((u) => String(u.id) === savedId || u.nationalId === savedId);
-
-      if (found) {
-        currentUser.value = found;
-        isLoggedIn.value = true;
+    if (token && status === 'true') {
+      try {
+        const profile = await userService.getProfile(token);
+        if (profile) {
+          currentUser.value = {
+            ...profile,
+            role: profile.role as UserRole,
+          };
+          isLoggedIn.value = true;
+          accessToken.value = token;
+        } else {
+          logout();
+        }
+      } catch (err) {
+        console.error('Initialize failed:', err);
+        logout();
       }
     }
   }
 
   /**
-   * ฟังก์ชันตรวจสอบว่ามีผู้ใช้นี้ในระบบหรือไม่
+   * ฟังก์ชัน Login แบบ Async ต่อ Backend จริง
    */
-  function checkUserExists(inputID: string): boolean {
-    // ตรวจสอบเฉพาะใน Real Data
-    const found = users.value.find(
-      (user) => user.nationalId === inputID || String(user.id) === inputID,
-    );
-    return !!found;
-  }
-
-  /**
-   * ฟังก์ชัน Login แบบ Async
-   */
-  async function login(inputID: string, password?: string): Promise<boolean> {
+  async function login(email: string, password?: string): Promise<boolean> {
     loadingText.value = 'กำลังเข้าสู่ระบบ...';
     isLoadingGlobal.value = true;
     error.value = null;
 
     try {
-      // ขั้นแรก: ลองดึงข้อมูลจาก API มาเก็บไว้ใน users state ก่อน (ถ้ายังไม่มี)
-      if (users.value.length === 0) {
-        await fetchUsers();
-      }
+      const result = await userService.authenticateUser(email, password);
 
-      // ตรวจสอบสิทธิ์จากข้อมูลจริงใน Store (หรืออนาคตเรียก API ตรงๆ)
-      const foundUser = users.value.find(
-        (u) => (u.nationalId === inputID || String(u.id) === inputID) && u.password === password,
-      );
-
-      if (foundUser) {
-        currentUser.value = foundUser;
-        isLoggedIn.value = true;
+      if (result) {
+        localStorage.setItem('access_token', result.accessToken);
         localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('user_id', String(foundUser.id || foundUser.nationalId));
+        accessToken.value = result.accessToken;
+
+        currentUser.value = {
+          email: result.user.email,
+          role: result.user.role as UserRole,
+          id: result.user.id,
+        } as User;
+
+        isLoggedIn.value = true;
+        await initialize();
         return true;
       }
-      error.value = 'รหัสประจำตัวหรือรหัสผ่านไม่ถูกต้อง';
+      error.value = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
       return false;
-    } catch {
-      error.value = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
+    } catch (err) {
+      console.error('Login Error:', err);
+      error.value = 'เกิดข้อผิดพลาดในการเชื่อมต่อระบบ';
       return false;
     } finally {
-      // หน่วงเวลาเล็กน้อยให้ UI ดูลื่นไหล
       setTimeout(() => {
         isLoadingGlobal.value = false;
       }, 500);
@@ -130,37 +109,18 @@ export const useUserStore = defineStore('user', () => {
   }
 
   /**
-   * ฟังก์ชันอัปเดตข้อมูลส่วนตัว
-   */
-  function updateProfile(newData: Partial<User>): void {
-    if (currentUser.value) {
-      currentUser.value = { ...currentUser.value, ...newData };
-
-      // อัปเดตใน Real Users (Local only)
-      const realIndex = users.value.findIndex(
-        (u) =>
-          (u.id && u.id === currentUser.value?.id) ||
-          u.nationalId === currentUser.value?.nationalId,
-      );
-      if (realIndex !== -1) {
-        users.value[realIndex] = { ...currentUser.value };
-      }
-    }
-  }
-
-  /**
    * ฟังก์ชัน Logout
    */
   function logout(): void {
-    // ล้างข้อมูลทันทีเพื่อให้ Route Guard ทำงานถูกต้อง
+    currentUser.value = null;
+    isLoggedIn.value = false;
+    accessToken.value = null;
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('access_token');
 
     loadingText.value = 'กำลังออกจากระบบ...';
     isLoadingGlobal.value = true;
     setTimeout(() => {
-      currentUser.value = null;
-      isLoggedIn.value = false;
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('user_id');
       isLoadingGlobal.value = false;
     }, AUTH_LOADING_DURATION_MS);
   }
@@ -184,17 +144,13 @@ export const useUserStore = defineStore('user', () => {
     isLoggedIn,
     isLoadingGlobal,
     loadingText,
+    accessToken,
     error,
-    users,
-    // mockUsers,
     userRole,
     profileItems,
-    fetchUsers,
     initialize,
-    checkUserExists,
     login,
     logout,
-    updateProfile,
     triggerLoading,
   };
 });

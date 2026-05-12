@@ -1,7 +1,15 @@
 import { ROLES } from 'src/constants/roles';
 import { api } from '../boot/axios';
-import type { User } from '../types/user';
+import type { User } from 'src/types/user';
 
+export interface LoginResponse {
+  accessToken: string;
+  user: {
+    id: number;
+    email: string;
+    role: string;
+  };
+}
 // export const mockUsers: User[] = [
 //   {
 //     id: 1,
@@ -63,8 +71,11 @@ export interface BackendUserResponse {
 }
 
 /**
- * ฟังก์ชันแปลงข้อมูลจาก Backend เป็น Frontend User Type
+ * ฟังก์ชันสำหรับค้นหาผู้ใช้ (ยังไม่เปิดใช้งานในเวอร์ชันนี้)
  */
+export function findUserByIdentifier(): Promise<User | undefined> {
+  return Promise.resolve(undefined);
+}
 export function mapBackendUserToFrontendUser(backendUser: BackendUserResponse): User {
   return {
     id: backendUser.USER_ID,
@@ -90,8 +101,24 @@ export function mapBackendUserToFrontendUser(backendUser: BackendUserResponse): 
 }
 
 /**
- * ฟังก์ชันดึงข้อมูล User ทั้งหมดจาก API
+ * ฟังก์ชันล็อกอินเชื่อมต่อกับ Backend จริง
  */
+export async function authenticateUser(
+  email: string,
+  password?: string,
+): Promise<LoginResponse | null> {
+  try {
+    const response = await api.post<LoginResponse>('/auth/login', {
+      email,
+      password,
+    });
+    return response.data;
+  } catch (err) {
+    console.error('Authentication failed:', err);
+    return null;
+  }
+}
+
 export async function getUsersFromApi(): Promise<User[]> {
   try {
     // โครงสร้างที่ Backend ส่งมาคือ { value: User[], Count: number }
@@ -106,26 +133,19 @@ export async function getUsersFromApi(): Promise<User[]> {
 export function findUser(users: User[], inputID: string): User | undefined {
   return users.find((u) => u.nationalId === inputID || String(u.id) === inputID);
 }
-
 /**
- * ค้นหาผู้ใช้จาก ID หรือ National ID (เลิกใช้ Mock และเตรียมเชื่อมต่อ API ในอนาคต)
+ * ฟังก์ชันสำหรับดึงข้อมูล Profile ของผู้ใช้ที่ล็อกอินอยู่
  */
-export function findUserByIdentifier(inputID: string): Promise<User | undefined> {
-  // เลิกใช้ mockUsers และส่ง undefined ออกไปเพื่อให้ระบบเรียกจาก API หรือ Store แทน
-  // ในอนาคตจุดนี้ควรเป็นการเรียก API รายคน (GET /users/:id)
-  console.warn(
-    `findUserByIdentifier: Mock is disabled for ${inputID}, please ensure users are fetched in store`,
-  );
-  return Promise.resolve(undefined);
-}
-
-/**
- * ตรวจสอบสิทธิ์ผู้ใช้งาน (Authentication)
- */
-export async function authenticateUser(inputID: string, password?: string): Promise<User | null> {
-  const found = await findUserByIdentifier(inputID);
-  if (found && found.password === password) {
-    return found;
+export async function getProfile(token: string): Promise<User | null> {
+  try {
+    const response = await api.get('/auth/me', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (err) {
+    console.error('Failed to fetch profile:', err);
+    return null;
   }
-  return null;
 }

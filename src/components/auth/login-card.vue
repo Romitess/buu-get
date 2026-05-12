@@ -108,11 +108,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from 'src/stores/auth.store';
+import { useUserStore } from 'src/stores/user.store';
 import { useQuasar } from 'quasar';
 
 const router = useRouter();
-const authStore = useAuthStore();
+const userStore = useUserStore();
 const $q = useQuasar();
 
 const userType = ref<'thai' | 'foreigner'>('thai');
@@ -132,12 +132,9 @@ const onSubmit = async () => {
 
   loading.value = true;
   try {
-    const result = await authStore.login({
-      email: email.value,
-      password: password.value,
-    });
+    const success = await userStore.login(email.value, password.value);
 
-    if (result.success) {
+    if (success) {
       $q.notify({
         type: 'positive',
         message: 'เข้าสู่ระบบสำเร็จ',
@@ -146,10 +143,11 @@ const onSubmit = async () => {
     } else {
       $q.notify({
         type: 'negative',
-        message: result.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+        message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
       });
     }
-  } catch {
+  } catch (error) {
+    console.error('Login Error:', error);
     $q.notify({
       type: 'negative',
       message: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',

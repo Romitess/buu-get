@@ -25,12 +25,18 @@
           </div>
           <div class="col-12 col-md-6">
             <div class="field-label">สถานที่สอบ</div>
-            <q-input
-              v-model="form.location"
+            <q-select
+              v-model="form.locationId"
+              :options="locationOptions"
+              option-label="label"
+              option-value="value"
+              emit-value
+              map-options
               outlined
               dense
-              placeholder="Computer Center, BUU (L201)"
+              placeholder="เลือกสถานที่สอบ"
               class="custom-input"
+              :loading="isLoadingData"
             />
           </div>
 
@@ -47,12 +53,18 @@
           </div>
           <div class="col-12 col-md-3">
             <div class="field-label">รหัสผังแหล่งเงิน</div>
-            <q-input
-              v-model="form.fundingCode"
+            <q-select
+              v-model="form.fundSourceId"
+              :options="fundSourceOptions"
+              option-label="label"
+              option-value="value"
+              emit-value
+              map-options
               outlined
               dense
-              placeholder="XXXXXXXXXX"
+              placeholder="เลือกแหล่งเงิน"
               class="custom-input"
+              :loading="isLoadingData"
             />
           </div>
           <div class="col-12 col-md-6">
@@ -279,16 +291,14 @@
 
       <!-- Action Buttons -->
       <div class="row justify-end q-mt-lg q-gutter-md q-mb-md">
-        <q-btn
+        <app-button
           label="ยกเลิก"
           @click="handleCancel"
-          unelevated
           class="action-btn cancel-btn text-weight-bold"
         />
-        <q-btn
+        <app-button
           label="บันทึก"
           @click="handleSave"
-          unelevated
           class="action-btn save-btn text-white text-weight-bold"
         />
       </div>
@@ -297,10 +307,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useExamStore } from 'src/stores/exam.store';
+import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
+import { fetchExamLocations, fetchFundSources } from 'src/services/exam.service';
+import AppButton from 'src/components/base/app-button.vue';
 
 const router = useRouter();
 const $q = useQuasar();
@@ -308,12 +321,29 @@ const examStore = useExamStore();
 
 const examTypeOptions: string[] = ['รอบทั่วไป', 'รอบพิเศษ'];
 const examFormatOptions: string[] = ['แบบกระดาษ'];
+const locationOptions = ref<ExamLocationOption[]>([]);
+const fundSourceOptions = ref<{ label: string; value: number }[]>([]);
+const isLoadingData = ref(false);
+
+onMounted(async () => {
+  isLoadingData.value = true;
+  try {
+    const [locations, fundSources] = await Promise.all([fetchExamLocations(), fetchFundSources()]);
+    locationOptions.value = locations;
+    fundSourceOptions.value = fundSources.map((fs: FundSource) => ({
+      label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
+      value: fs.FS_ID,
+    }));
+  } finally {
+    isLoadingData.value = false;
+  }
+});
 
 const form = ref({
   examName: '',
-  location: '',
+  locationId: null as number | null,
   examType: 'รอบทั่วไป',
-  fundingCode: '',
+  fundSourceId: null as number | null,
   examFormat: 'แบบกระดาษ',
   fee: '0.00',
   seats: 1,
@@ -333,19 +363,21 @@ const handleCancel = () => {
   void router.push('/exam-schedule');
 };
 
-const handleSave = () => {
-  const timeRanges = [];
+const handleSave = async () => {
+  const timeRanges: { startTime: string; endTime: string }[] = [];
 
   if (form.value.startTime1 && form.value.endTime1) {
-    timeRanges.push(
-      `${form.value.startTime1.replace(/\s/g, '')} - ${form.value.endTime1.replace(/\s/g, '')}`,
-    );
+    timeRanges.push({
+      startTime: form.value.startTime1,
+      endTime: form.value.endTime1,
+    });
   }
 
   if (form.value.startTime2 && form.value.endTime2) {
-    timeRanges.push(
-      `${form.value.startTime2.replace(/\s/g, '')} - ${form.value.endTime2.replace(/\s/g, '')}`,
-    );
+    timeRanges.push({
+      startTime: form.value.startTime2,
+      endTime: form.value.endTime2,
+    });
   }
 
   if (timeRanges.length === 0) {
@@ -357,24 +389,60 @@ const handleSave = () => {
     return;
   }
 
-  examStore.addExamRound({
-    examName: form.value.examName,
-    location: form.value.location,
-    examType: form.value.examType,
-    fee: form.value.fee,
-    seats: form.value.seats,
-    examDate: form.value.examDate,
-    timeRanges,
-  });
+  if (!form.value.locationId) {
+    $q.notify({
+      type: 'warning',
+      message: 'กรุณาเลือกสถานที่สอบ',
+      position: 'top',
+    });
+    return;
+  }
 
-  $q.notify({
-    type: 'positive',
-    message: 'สร้างรอบสอบสำเร็จ',
-    position: 'top',
-    timeout: 2000,
-  });
+  if (!form.value.fundSourceId) {
+    $q.notify({
+      type: 'warning',
+      message: 'กรุณาเลือกแหล่งเงิน',
+      position: 'top',
+    });
+    return;
+  }
 
-  void router.push('/exam-schedule');
+  try {
+    const payload: CreateExamPayload = {
+      examName: form.value.examName,
+      locationId: form.value.locationId,
+      examType: form.value.examType,
+      examFormat: form.value.examFormat,
+      fee: form.value.fee,
+      seats: form.value.seats,
+      isPublished: form.value.isPublished,
+      examDate: form.value.examDate,
+      regStartDate: form.value.regStartDate,
+      regEndDate: form.value.regEndDate,
+      payStartDate: form.value.payStartDate,
+      payEndDate: form.value.payEndDate,
+      timeRanges,
+      fundSourceId: form.value.fundSourceId,
+    };
+
+    await examStore.addExamRound(payload);
+
+    $q.notify({
+      type: 'positive',
+      message: 'สร้างรอบสอบสำเร็จ',
+      position: 'top',
+      timeout: 2000,
+    });
+
+    void router.push('/user/exam-schedule');
+  } catch (error) {
+    console.error('Save error:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'เกิดข้อผิดพลาดในการสร้างรอบสอบ',
+      position: 'top',
+    });
+  }
 };
 </script>
 
