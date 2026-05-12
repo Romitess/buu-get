@@ -143,4 +143,37 @@ export default {
     },
     clockHourSuffix: 'น.',
   },
+  carousel: {
+    branding: {
+      overline: 'BUU-GET',
+      university: 'BURAPHA UNIVERSITY',
+      examName: 'GRADUATE ENGLISH TEST',
+      description1: 'แบบทดสอบวัดความสามารถทางภาษาอังกฤษเทียบเคียงมาตรฐาน CEFR',
+      description2: 'เพื่อการศึกษาต่อและการทำงานวิชาการ พัฒนาโดยสถาบันภาษา มหาวิทยาลัยบูรพา',
+      institute: 'สถาบันภาษา ม.บูรพา',
+      standard: 'มาตรฐาน CEFR',
+    },
+    stats: {
+      duration: {
+        label: 'Duration',
+        value: '2 ชั่วโมง',
+        description: 'เวลาทำข้อสอบทั้งหมด',
+      },
+      questions: {
+        label: 'Questions',
+        value: '70 ข้อ',
+        description: 'Vocab 30 + Reading 40',
+      },
+      score: {
+        label: 'Score',
+        value: '100 คะแนน',
+        description: 'เต็มคะแนนแบบทดสอบ',
+      },
+      frequency: {
+        label: 'Frequency',
+        value: 'ทุก 8 สัปดาห์',
+        description: 'รอบสอบเปิดตามกำหนดการ',
+      },
+    },
+  },
 };

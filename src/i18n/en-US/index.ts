@@ -111,4 +111,38 @@ export default {
     thaidRegister: 'Sign up with ThaID',
     or: 'or',
   },
+  carousel: {
+    branding: {
+      overline: 'BUU-GET',
+      university: 'BURAPHA UNIVERSITY',
+      examName: 'GRADUATE ENGLISH TEST',
+      description1: 'English proficiency test comparable to CEFR standards',
+      description2:
+        'For further education and academic work. Developed by Language Institute, Burapha University',
+      institute: 'BUU Language Institute',
+      standard: 'CEFR Standard',
+    },
+    stats: {
+      duration: {
+        label: 'Duration',
+        value: '2 Hours',
+        description: 'Total exam time',
+      },
+      questions: {
+        label: 'Questions',
+        value: '70 Items',
+        description: 'Vocab 30 + Reading 40',
+      },
+      score: {
+        label: 'Score',
+        value: '100 Points',
+        description: 'Total exam score',
+      },
+      frequency: {
+        label: 'Frequency',
+        value: 'Every 8 Weeks',
+        description: 'Exam rounds open as scheduled',
+      },
+    },
+  },
 };
