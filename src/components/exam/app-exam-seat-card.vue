@@ -14,10 +14,10 @@
         <div class="text-h6 text-weight-bold line-height-tight q-mb-xs">
           {{ studentName }}
         </div>
-        <div class="row q-gutter-x-lg text-body2 info-details">
-          <div>รหัส: {{ studentId }}</div>
-          <div v-if="hasSeat">เลขที่นั่งสอบ: {{ seatNumber }}</div>
-          <div v-else>ยังไม่มีที่นั่ง</div>
+        <div class="row no-wrap q-gutter-x-lg text-body2 info-details text-grey-8">
+          <div class="text-no-wrap">รหัส: {{ studentId }}</div>
+          <div v-if="hasSeat" class="text-no-wrap">เลขที่นั่งสอบ: {{ seatNumber }}</div>
+          <div v-else class="text-no-wrap">ยังไม่มีที่นั่ง</div>
         </div>
       </div>
 
@@ -59,14 +59,15 @@ const hasSeat = computed(() => {
   transition: all 0.3s ease;
 
   &.seat-assigned {
-    background-color: #ffffff;
-    color: #000000;
+    background-color: var(--surface-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
   }
 
   &.seat-unassigned {
-    /* Dim background color as requested when there is no seat */
-    background-color: #31648c; /* Matched from typical slate blue visuals */
-    color: #000000; /* Keeping text dark as per the image */
+    background-color: var(--badge-primary-bg); /* Using standardized light blue */
+    border: 1px solid var(--primary-light);
+    color: var(--text-primary);
   }
 }
 
@@ -95,6 +96,6 @@ const hasSeat = computed(() => {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #9d9d9d; /* Requested color for dots */
+  background: var(--text-muted); /* Standardized muted color */
 }
 </style>

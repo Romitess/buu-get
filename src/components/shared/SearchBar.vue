@@ -7,6 +7,7 @@
     placeholder="ค้นหา"
     bg-color="grey-1"
     class="search-bar"
+    :class="{ 'full-width': fullWidth }"
     @update:model-value="$emit('search', $event)"
   >
     <template v-slot:append>
@@ -16,6 +17,10 @@
 </template>
 
 <script setup lang="ts">
+defineProps<{
+  fullWidth?: boolean;
+}>();
+
 const model = defineModel<string>();
 
 defineEmits<{
@@ -28,12 +33,18 @@ defineEmits<{
   width: 100%;
   max-width: 450px;
 
+  &.full-width {
+    max-width: none !important;
+  }
+
   :deep(.q-field__control) {
     background-color: var(--surface-page) !important;
     border: 1px solid var(--neutral-gray-light);
+    border-radius: var(--radius-10) !important;
 
     &:before {
       border: none;
+      border-radius: var(--radius-10) !important;
     }
   }
 
