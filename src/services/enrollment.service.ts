@@ -1,9 +1,6 @@
 import { api } from 'src/boot/axios';
 import type { BackendEnrollmentDetail, EnrollmentTableRow } from 'src/types/enrollment.types';
 
-/**
- * Fetches all enrollments for a specific exam and maps them to table rows.
- */
 export const fetchEnrollmentsByExamId = async (examId: number): Promise<EnrollmentTableRow[]> => {
   const response = await api.get<BackendEnrollmentDetail[]>(`/exam-enrollments/exam/${examId}`);
 
@@ -20,12 +17,22 @@ export const fetchEnrollmentsByExamId = async (examId: number): Promise<Enrollme
   );
 };
 
-/**
- * Fetches the raw enrollment data (with session/exam info) for header display.
- */
 export const fetchRawEnrollmentsByExamId = async (
   examId: number,
 ): Promise<BackendEnrollmentDetail[]> => {
   const response = await api.get<BackendEnrollmentDetail[]>(`/exam-enrollments/exam/${examId}`);
+  return response.data;
+};
+
+export const fetchEnrollmentById = async (id: number): Promise<BackendEnrollmentDetail> => {
+  const response = await api.get<BackendEnrollmentDetail>(`/exam-enrollments/${id}`);
+  return response.data;
+};
+
+export const updateEnrollmentStatus = async (
+  id: number,
+  data: Partial<BackendEnrollmentDetail>,
+): Promise<BackendEnrollmentDetail> => {
+  const response = await api.patch<BackendEnrollmentDetail>(`/exam-enrollments/${id}`, data);
   return response.data;
 };

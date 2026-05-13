@@ -1,4 +1,3 @@
-/** Backend UserProfile shape (nested inside User) */
 export interface BackendUserProfile {
   userProfileId: number;
   userId: number;
@@ -6,9 +5,13 @@ export interface BackendUserProfile {
   userFullnameTh: string | null;
   userTitleEn: string | null;
   userFullnameEn: string | null;
+  userDateOfBirth: string | null;
+  userPhone: string | null;
+  userEducation: string | null;
+  userFaculty: string | null;
+  userAddress: string | null;
 }
 
-/** Backend User shape (nested inside Enrollment) */
 export interface BackendUser {
   USER_ID: number;
   USER_NATIONAL_ID: string | null;
@@ -17,7 +20,6 @@ export interface BackendUser {
   PROFILE?: BackendUserProfile | null;
 }
 
-/** Backend Session shape (nested inside Enrollment) */
 export interface BackendSessionDetail {
   SS_ID: number;
   EXAM_ID: number;
@@ -36,7 +38,6 @@ export interface BackendSessionDetail {
   };
 }
 
-/** Full enrollment response from GET /exam-enrollments/exam/:examId */
 export interface BackendEnrollmentDetail {
   ERM_ID: number;
   USER_ID: number;
@@ -52,7 +53,6 @@ export interface BackendEnrollmentDetail {
   SESSION: BackendSessionDetail;
 }
 
-/** Row data for the registrants table */
 export interface EnrollmentTableRow {
   index: number;
   ermId: number;
@@ -63,7 +63,6 @@ export interface EnrollmentTableRow {
   verifyStatus: number;
 }
 
-/** Enrollment status enum (mirrors backend) */
 export enum EnrollmentStatus {
   UNPAID = 0,
   PAID = 1,
@@ -72,7 +71,6 @@ export enum EnrollmentStatus {
   CANCELLED = 4,
 }
 
-/** Verify status enum (mirrors backend) */
 export enum VerifyStatus {
   UNCHECKED = 0,
   PASS = 1,
@@ -80,7 +78,6 @@ export enum VerifyStatus {
   CANCELLED = 3,
 }
 
-/** Label mapping for payment status */
 export const PAYMENT_STATUS_LABELS: Record<number, string> = {
   [EnrollmentStatus.UNPAID]: 'ค้างชำระ',
   [EnrollmentStatus.PAID]: 'ชำระเงินแล้ว',
@@ -89,7 +86,6 @@ export const PAYMENT_STATUS_LABELS: Record<number, string> = {
   [EnrollmentStatus.CANCELLED]: 'ยกเลิก',
 };
 
-/** Label mapping for verify status */
 export const VERIFY_STATUS_LABELS: Record<number, string> = {
   [VerifyStatus.UNCHECKED]: 'รอการตรวจสอบ',
   [VerifyStatus.PASS]: 'ผ่าน',

@@ -1,7 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router';
 import { ROLES } from 'src/constants/roles';
-
-// Module augmentation for vue-router meta types
 declare module 'vue-router' {
   interface RouteMeta {
     requiresAuth?: boolean;
@@ -96,6 +94,11 @@ const routes: RouteRecordRaw[] = [
             path: 'exam-seat-management',
             name: 'admin-exam-seat-management',
             component: () => import('pages/admin/exam-seat-management-page.vue'),
+          },
+          {
+            path: 'exam-management/registrants/:ermId',
+            name: 'admin-exam-registrant-detail',
+            component: () => import('pages/admin/exam-registrant-detail-page.vue'),
           },
         ],
       },
