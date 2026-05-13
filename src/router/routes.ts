@@ -92,6 +92,11 @@ const routes: RouteRecordRaw[] = [
             name: 'admin-exam-registrants',
             component: () => import('pages/admin/exam-registrants-page.vue'),
           },
+          {
+            path: 'exam-seat-management',
+            name: 'admin-exam-seat-management',
+            component: () => import('pages/admin/exam-seat-management-page.vue'),
+          },
         ],
       },
     ],
