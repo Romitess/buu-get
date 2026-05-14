@@ -38,6 +38,19 @@ export interface BackendSessionDetail {
   };
 }
 
+export enum ExamAttendStatus {
+  MISSING = 0,
+  INTIME = 1,
+  LATE = 2,
+}
+
+export interface BackendAttendance {
+  ATTEND_ID: number;
+  ERM_ID: number;
+  ATTEND_CHECK_IN_TIME: string | null;
+  ATTEND_STATUS: ExamAttendStatus;
+}
+
 export interface BackendEnrollmentDetail {
   ERM_ID: number;
   USER_ID: number;
@@ -51,6 +64,7 @@ export interface BackendEnrollmentDetail {
   DELETED_AT: string | null;
   USER: BackendUser;
   SESSION: BackendSessionDetail;
+  ATTENDANCES?: BackendAttendance[];
 }
 
 export interface EnrollmentTableRow {
@@ -61,6 +75,18 @@ export interface EnrollmentTableRow {
   fullnameTh: string;
   paymentStatus: number;
   verifyStatus: number;
+  sessionId: number;
+}
+
+export interface AttendanceTableRow {
+  index: number;
+  ermId: number;
+  nationalId: string;
+  titleTh: string;
+  fullnameTh: string;
+  seatNumber: string;
+  attendanceStatus: ExamAttendStatus;
+  checkInTime: string | null;
   sessionId: number;
 }
 
