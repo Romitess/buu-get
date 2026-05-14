@@ -1,9 +1,9 @@
 <template>
-  <q-page class="q-px-xl q-pt-md q-pb-lg flex column items-center" style="min-height: 0 !important">
-    <div class="full-width" style="max-width: 1200px">
+  <q-page class="exam-management-page q-px-lg q-px-sm-xl q-py-lg">
+    <div class="full-width">
       <!-- Standardized Reusable Page Header -->
-      <app-page-header
-        :breadcrumbs="[{ label: 'หน้าหลัก', icon: 'home', to: '/' }, { label: 'จัดการรอบสอบ' }]"
+      <AppBreadcrumbs />
+      <AppPageHeader
         title="จัดการรอบสอบ"
         subtitle="จัดการข้อมูลรอบสอบ ตรวจสอบกำหนดการ และติดตามสถานะการเปิดรับสมัคร"
       />
@@ -51,6 +51,7 @@ import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
+import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import ExamManagementTable from 'src/components/exam/exam-management-table.vue';
 import SearchBar from 'src/components/shared/SearchBar.vue';
 import { useExamStore } from 'src/stores/exam.store';

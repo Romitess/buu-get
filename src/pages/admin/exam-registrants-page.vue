@@ -1,8 +1,8 @@
 <template>
   <q-page class="registrants-page q-px-lg q-px-sm-xl q-py-lg">
     <div class="full-width">
+      <AppBreadcrumbs />
       <AppPageHeader
-        :breadcrumbs="breadcrumbs"
         :title="$t('admin.registrantManagement.pageTitle')"
         :subtitle="$t('admin.registrantManagement.pageSubtitle')"
       />
@@ -96,14 +96,15 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import BaseTable from 'src/components/shared/BaseTable.vue';
+import BaseTable from 'src/components/shared/base-table.vue';
 import ActionButton from 'src/components/shared/ActionButton.vue';
-import EnrollmentStatusBadge from 'src/components/shared/EnrollmentStatusBadge.vue';
+import EnrollmentStatusBadge from 'src/components/shared/enrollment-status-badge.vue';
 import SearchBar from 'src/components/shared/SearchBar.vue';
 import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
 import AppExamSessionTabs from 'src/components/exam/app-exam-session-time.vue';
-import AppPageHeader, { type BreadcrumbItem } from 'src/components/shared/app-page-header.vue';
+import AppPageHeader from 'src/components/shared/app-page-header.vue';
+import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import { useExamRegistrants } from 'src/composables/use-exam-registrants';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollment.types';
@@ -111,20 +112,6 @@ import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollmen
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-
-const breadcrumbs: BreadcrumbItem[] = [
-  {
-    label: t('profile.backToLogin').replace('กลับสู่หน้าล็อกอิน', 'หน้าหลัก'),
-    icon: 'home',
-    to: { name: 'admin-dashboard' },
-  },
-  {
-    label: t('admin.examManagement.table.columns.tools').replace('เครื่องมือ', 'จัดการการสอบ'),
-    icon: 'star',
-    to: { name: 'admin-exam-management' },
-  },
-  { label: t('admin.registrantManagement.pageTitle'), icon: 'star' },
-];
 
 const {
   isLoading,

@@ -52,7 +52,7 @@
               :class="{
                 active: modelValue === day.dateString,
                 today: day.isToday,
-                disabled: disablePastDates && day.isPast,
+                disabled: props.disablePastDates && day.isPast,
               }"
               role="button"
               tabindex="0"
@@ -73,7 +73,7 @@
           </div>
 
           <!-- Legend / Status Indicators (Integrated inside card) -->
-          <div v-if="showLegend" class="calendar-footer-legend">
+          <div v-if="props.showLegend" class="calendar-footer-legend">
             <div class="legend-item">
               <div class="legend-dot dot-available"></div>
               <span>{{ t('exam.calendar.legendAvailable', 'มีที่นั่งว่าง') }}</span>

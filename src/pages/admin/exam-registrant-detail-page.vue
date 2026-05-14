@@ -1,8 +1,8 @@
 <template>
   <q-page class="registrant-detail-page q-px-lg q-px-sm-xl q-py-lg">
     <div class="full-width">
+      <AppBreadcrumbs />
       <AppPageHeader
-        :breadcrumbs="breadcrumbs"
         :title="$t('admin.registrantManagement.detail.pageTitle')"
         :subtitle="$t('admin.registrantManagement.detail.pageSubtitle')"
       />
@@ -68,44 +68,24 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar, date } from 'quasar';
-import { useI18n } from 'vue-i18n';
+
 import AppButton from 'src/components/base/app-button.vue';
 import RegistrantPersonalDetail from 'src/components/registrant-personal-detail.vue';
 import RequestFixDialog from 'src/components/request-fix-dialog.vue';
-import AppPageHeader, { type BreadcrumbItem } from 'src/components/shared/app-page-header.vue';
+import AppPageHeader from 'src/components/shared/app-page-header.vue';
+import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import { fetchEnrollmentById, updateEnrollmentStatus } from 'src/services/enrollment.service';
 import { VerifyStatus } from 'src/types/enrollment.types';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
+
 const $q = useQuasar();
 
 const enrollment = ref<BackendEnrollmentDetail | null>(null);
 const isLoading = ref(true);
 const showFixDialog = ref(false);
-
-const breadcrumbs = computed<BreadcrumbItem[]>(() => [
-  {
-    label: t('profile.backToLogin').replace('กลับสู่หน้าล็อกอิน', 'หน้าหลัก'),
-    icon: 'home',
-    to: { name: 'admin-dashboard' },
-  },
-  {
-    label: t('admin.examManagement.table.columns.tools').replace('เครื่องมือ', 'จัดการการสอบ'),
-    icon: 'star',
-    to: { name: 'admin-exam-management' },
-  },
-  {
-    label: t('admin.registrantManagement.pageTitle'),
-    icon: 'star',
-    to: enrollment.value
-      ? { name: 'admin-exam-registrants', params: { examId: enrollment.value.SESSION.EXAM_ID } }
-      : undefined,
-  },
-  { label: t('admin.registrantManagement.detail.pageTitle'), icon: 'star' },
-]);
 
 const registrantName = computed(
   () => enrollment.value?.USER?.PROFILE?.userFullnameTh || 'ไม่ทราบชื่อ',

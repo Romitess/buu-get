@@ -62,7 +62,7 @@ import { computed } from 'vue';
 import type { QTableColumn } from 'quasar';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import BaseTable from '../shared/BaseTable.vue';
+import BaseTable from '../shared/base-table.vue';
 import ActionButton from '../shared/ActionButton.vue';
 import { useThaiDate } from 'src/composables/useThaiDate';
 import {
