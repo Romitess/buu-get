@@ -2,8 +2,8 @@
   <q-page class="q-pa-lg" style="background-color: var(--surface-page)">
     <div class="max-width-container">
       <!-- Header -->
+      <AppBreadcrumbs />
       <AppPageHeader
-        :breadcrumbs="breadcrumbs"
         title="จัดการที่นั่งสอบ"
         subtitle="วางผังและจัดการที่นั่งสอบ เพื่อรองรับผู้เข้าสอบได้อย่างเหมาะสมและสะดวก"
       />
@@ -23,6 +23,7 @@
           :applicant-count="applicantCount"
           :paid-count="paidCount"
           :total-capacity="sessionTotalCapacity"
+          hide-paid
           is-admin
         />
       </section>
@@ -40,7 +41,7 @@
               <q-badge
                 color="primary"
                 rounded
-                label="35"
+                :label="paidCount"
                 class="q-px-md q-py-xs"
                 style="border-radius: 100px; font-size: 14px"
               />
@@ -168,6 +169,7 @@ import { useQuasar } from 'quasar';
 import AppButton from 'src/components/base/app-button.vue';
 import AppExamSeatCard from 'src/components/exam/app-exam-seat-card.vue';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
+import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import SearchBar from 'src/components/shared/SearchBar.vue';
 import AppExamSeatSquare from 'src/components/exam/app-exam-seat-square.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
@@ -175,6 +177,7 @@ import AppExamSessionTime from 'src/components/exam/app-exam-session-time.vue';
 import type { BackendSession } from 'src/types/exam';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 import { fetchExamById } from 'src/services/exam.service';
+import type { BackendExam } from 'src/types/exam';
 import {
   fetchRawEnrollmentsByExamId,
   updateEnrollmentStatus,
@@ -184,20 +187,22 @@ const route = useRoute();
 const $q = useQuasar();
 const examId = Number(route.params.examId);
 
-const breadcrumbs = [
-  { label: 'หน้าหลัก', icon: 'home', to: '/' },
-  { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
-  { label: 'จัดการที่นั่งสอบ', icon: 'star' },
-];
+// Status Constants
+const STATUS_PAID = 1;
+const STATUS_SEAT_ASSIGNED = 2;
 
 const activeSessionId = ref<number | null>(null);
 const sessions = ref<BackendSession[]>([]);
 
-import type { BackendExam } from 'src/types/exam';
-
 const examData = ref<BackendExam | null>(null);
 
-const examTitle = computed(() => examData.value?.EXAM_NAME || 'BUU - GET');
+const examTitle = computed(() => {
+  const baseTitle = examData.value?.EXAM_NAME || 'BUU - GET';
+  if (activeSession.value?.SS_NAME) {
+    return `${baseTitle} (${activeSession.value.SS_NAME})`;
+  }
+  return baseTitle;
+});
 
 const examDate = computed(() => {
   if (!examData.value?.EXAM_DATE) return '-';
@@ -237,8 +242,16 @@ const sessionEnrollments = computed(() => {
   return allEnrollments.value.filter((e) => e.SESSION_ID === activeSessionId.value);
 });
 
-const applicantCount = computed(() => sessionEnrollments.value.length);
-const paidCount = computed(() => sessionEnrollments.value.filter((e) => e.ERM_STATUS >= 1).length);
+// Total applicants who have PAID (PAID or SEAT_ASSIGNED)
+const applicantCount = computed(
+  () =>
+    sessionEnrollments.value.filter(
+      (e) => Number(e.ERM_STATUS) === STATUS_PAID || Number(e.ERM_STATUS) === STATUS_SEAT_ASSIGNED,
+    ).length,
+);
+
+// Paid applicants count (same as above for this view)
+const paidCount = computed(() => applicantCount.value);
 const searchQuery = ref('');
 
 interface StudentSeatInfo {
@@ -290,8 +303,10 @@ const filterStudentsBySession = () => {
     return;
   }
 
-  // Only include students who have paid or beyond (ERM_STATUS >= 1)
-  const eligibleEnrollments = sessionEnrollments.value.filter((e) => e.ERM_STATUS >= 1);
+  // Only show students who have status PAID (1) or SEAT_ASSIGNED (2)
+  const eligibleEnrollments = sessionEnrollments.value.filter(
+    (e) => Number(e.ERM_STATUS) === STATUS_PAID || Number(e.ERM_STATUS) === STATUS_SEAT_ASSIGNED,
+  );
 
   students.value = eligibleEnrollments.map((e) => ({
     ermId: e.ERM_ID,
@@ -441,7 +456,7 @@ const handleSave = async () => {
   try {
     $q.loading.show({ message: 'กำลังบันทึกข้อมูลผังที่นั่ง...' });
 
-    // Create an array of update promises for all students in this session
+    // Save each student individually (Business Logic check is in the backend Service)
     const promises = students.value.map((student) => {
       return updateEnrollmentStatus(student.ermId, {
         ERM_SEAT_NUMBER: student.seat,
@@ -460,9 +475,17 @@ const handleSave = async () => {
       message: 'บันทึกผังที่นั่งสำเร็จ',
       icon: 'check_circle',
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Failed to save seats', error);
-    $q.notify({ type: 'negative', message: 'ไม่สามารถบันทึกข้อมูลได้' });
+    let message = 'ไม่สามารถบันทึกข้อมูลได้';
+
+    // Type-safe error handling for Axios/API errors
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as { response: { data: { message?: string } } };
+      message = axiosError.response?.data?.message || message;
+    }
+
+    $q.notify({ type: 'negative', message });
   } finally {
     $q.loading.hide();
   }

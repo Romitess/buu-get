@@ -24,13 +24,13 @@
 
       <section class="col-auto row no-wrap items-center stats-section" v-if="isAdmin">
         <div class="text-center q-px-lg">
-          <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่ลงทะเบียน</div>
+          <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่สมัคร</div>
           <div class="applicant-value text-h4 text-weight-medium text-dark">
             {{ applicantCount }}
           </div>
         </div>
-        <q-separator vertical class="stat-divider q-mx-sm" />
-        <div class="text-center q-px-lg">
+        <q-separator vertical class="stat-divider q-mx-sm" v-if="!hidePaid" />
+        <div class="text-center q-px-lg" v-if="!hidePaid">
           <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่ชำระเงิน</div>
           <div class="applicant-value text-h4 text-weight-medium text-dark">
             {{ paidCount }}/{{ totalCapacity }}
@@ -55,10 +55,12 @@ interface Props {
   isAdmin?: boolean;
   paidCount?: number | string;
   totalCapacity?: number | string;
+  hidePaid?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
   isAdmin: false,
+  hidePaid: false,
 });
 </script>
 
