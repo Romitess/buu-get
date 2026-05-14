@@ -1,5 +1,12 @@
 <template>
-  <div class="page-container exam-schedule">
+  <div class="page-container exam-schedule q-pa-lg">
+    <AppBreadcrumbs />
+    <AppPageHeader
+      title="เลือกวันและรอบการสอบ"
+      subtitle="กรุณาเลือกวันที่และรอบเวลาที่คุณต้องการสมัครเข้าทดสอบ BUU-GET"
+    />
+
+    <!-- ส่วนบน examdetail -->
     <ExamDetail
       :badge-text="examInfo.badgeText"
       :title="examInfo.title"
@@ -79,6 +86,8 @@ import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
+import AppPageHeader from 'src/components/shared/app-page-header.vue';
+import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import ExamDetail from 'src/components/exam-detail.vue';
 import ExamCalendar from 'src/components/exam-calendar.vue';
 import RoundExam from 'src/components/exam/round-exam.vue';

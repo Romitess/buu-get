@@ -321,7 +321,7 @@ export default {
           manageRegistrants: 'จัดการผู้ลงทะเบียน',
           manageSeats: 'จัดการที่นั่งสอบ',
           printAdmitCard: 'พิมพ์บัตรเข้าสอบ',
-          viewCandidates: 'รายชื่อผู้สมัคร',
+          viewCandidates: 'ประวัติการเข้าสอบ',
           exportReport: 'ส่งออกรายงาน',
         },
       },

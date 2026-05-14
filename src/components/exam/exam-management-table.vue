@@ -63,6 +63,7 @@
           :icon="btn.icon"
           :color="btn.color"
           :tooltip="btn.tooltip"
+          :disable="isActionDisabled(btn.emit, row)"
           @click="handleAction(btn.emit, row.id)"
         />
       </div>
@@ -266,6 +267,27 @@ const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
     },
   ],
 }));
+
+/**
+ * Logic to disable specific actions based on business rules
+ */
+const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
+  if (emitName === 'viewCandidates') {
+    if (!row.examDate) return true;
+
+    // Convert YYYY-MM-DD or ISO to Date object
+    const examDate = new Date(row.examDate);
+    const today = new Date();
+
+    // Set both to midnight to compare only dates
+    examDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    // Disable if today is before exam date
+    return today < examDate;
+  }
+  return false;
+};
 
 const handleAction = (emitName: string, id: string) => {
   if (emitName === 'delete') {

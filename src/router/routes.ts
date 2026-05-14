@@ -64,6 +64,12 @@ const routes: RouteRecordRaw[] = [
             path: 'exam-schedule',
             name: 'exam-schedule',
             component: () => import('pages/user/exam-schedule-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'เลือกวันและรอบการสอบ', icon: 'event' },
+              ],
+            },
           },
           {
             path: 'exam-history',
@@ -199,8 +205,8 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
-                { label: 'ประวัติการเข้าสอบ', icon: 'star' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
+                { label: 'ประวัติการเข้าสอบ', icon: 'format_list_bulleted' },
               ],
             },
           },
