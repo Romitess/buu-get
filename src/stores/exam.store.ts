@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { ExamRound, ExamInfo, ExamHistoryItem, DayData } from 'src/types/exam';
+import type { ExamSchedule } from 'src/types/exam.types';
 import {
   defaultExamInfo,
   mockScheduleData,
   mockHistoryRecords,
   fetchScheduleData,
+  fetchExamSchedules,
   createExamRound,
   type CreateExamPayload,
 } from 'src/services/exam.service';
@@ -22,6 +24,8 @@ export const useExamStore = defineStore('exam', () => {
   const nextHistoryId = ref(100);
   const pendingRegistrations = ref<ExamHistoryItem[]>([]);
   const historyRecords = ref<ExamHistoryItem[]>(structuredClone(mockHistoryRecords));
+  // For admin management table
+  const managementSchedules = ref<ExamSchedule[]>([]);
 
   const selectedDateRounds = computed((): ExamRound[] => {
     return scheduleData.value[selectedDate.value]?.rounds || [];
@@ -77,6 +81,14 @@ export const useExamStore = defineStore('exam', () => {
       scheduleData.value = data;
     } catch (error) {
       console.error('Failed to load schedule:', error);
+    }
+  }
+
+  async function loadManagementSchedules(): Promise<void> {
+    try {
+      managementSchedules.value = await fetchExamSchedules();
+    } catch (error) {
+      console.error('Failed to load management schedules:', error);
     }
   }
 
@@ -175,11 +187,13 @@ export const useExamStore = defineStore('exam', () => {
     formattedSelectedDate,
     pendingRegistrations,
     historyRecords,
+    managementSchedules,
     confirmRegistration,
     confirmSpecialRegistration,
     cancelRegistration,
     confirmPayment,
     addExamRound,
     initSchedule,
+    loadManagementSchedules,
   };
 });

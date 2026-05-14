@@ -79,8 +79,6 @@ src/
 
 ```
 
-  
-
 ---
 
 ## 2. 🔤 Naming Conventions (มาตรฐานการตั้งชื่อ)
@@ -101,7 +99,6 @@ src/
 
 - **Common Columns:** ทุก Table ควรมี `id`, `created_at`, `updated_at` และ `deleted_at` (สำหรับ Soft Delete)
 
-  
 ---
 
 ## 4. 📝 Coding Standards & Quality
@@ -128,12 +125,12 @@ const getUser = async (id: number): Promise<UserResponseDto> => { ... }
 
 แต่ละ Layer มีหน้าที่ที่แน่นอน ห้ามปนกัน:
 
-|Layer|หน้าที่|ห้าม|
-|---|---|---|
-|**Controller**|รับ Request, Validate Input, เรียก Service, ส่ง Response|เขียน Business Logic|
-|**Service**|Business Logic ทั้งหมด, เรียก Repository/ORM|เรียก Controller อื่น, เข้าถึง HTTP Request โดยตรง|
-|**Entity**|กำหนด Schema ของ Database|ใส่ Business Logic|
-|**DTO**|กำหนดรูปแบบ Input/Output และ Validation|ใส่ Logic หรือ Method|
+| Layer          | หน้าที่                                                  | ห้าม                                               |
+| -------------- | -------------------------------------------------------- | -------------------------------------------------- |
+| **Controller** | รับ Request, Validate Input, เรียก Service, ส่ง Response | เขียน Business Logic                               |
+| **Service**    | Business Logic ทั้งหมด, เรียก Repository/ORM             | เรียก Controller อื่น, เข้าถึง HTTP Request โดยตรง |
+| **Entity**     | กำหนด Schema ของ Database                                | ใส่ Business Logic                                 |
+| **DTO**        | กำหนดรูปแบบ Input/Output และ Validation                  | ใส่ Logic หรือ Method                              |
 
 **ตัวอย่างที่ถูกต้อง:**
 
@@ -192,16 +189,16 @@ async create(dto: CreateUserDto): Promise<UserResponseDto> {
 
 #### เกณฑ์ตัดสินใจ (ฉบับรวดเร็ว)
 
-|เงื่อนไข|แนะนำ|
-|---|---|
-|ข้อมูล User ที่ Login อยู่ (ใช้ทั้งแอป)|✅ Store|
-|Cart / ตะกร้าสินค้า (ใช้หลาย Page)|✅ Store|
-|การตั้งค่า Theme / Locale (Global)|✅ Store|
-|List ข้อมูลที่ต้อง sync กันหลาย Component|✅ Store|
-|Fetch ข้อมูลเพื่อแสดงใน Page เดียว|❌ ไม่ต้องทำ Store|
-|Form ที่ Submit แล้วจบ|❌ ไม่ต้องทำ Store|
-|Modal / Dialog ที่ manage state ภายใน|❌ ไม่ต้องทำ Store|
-|Dropdown options ที่ใช้เฉพาะ Component เดียว|❌ ไม่ต้องทำ Store|
+| เงื่อนไข                                     | แนะนำ              |
+| -------------------------------------------- | ------------------ |
+| ข้อมูล User ที่ Login อยู่ (ใช้ทั้งแอป)      | ✅ Store           |
+| Cart / ตะกร้าสินค้า (ใช้หลาย Page)           | ✅ Store           |
+| การตั้งค่า Theme / Locale (Global)           | ✅ Store           |
+| List ข้อมูลที่ต้อง sync กันหลาย Component    | ✅ Store           |
+| Fetch ข้อมูลเพื่อแสดงใน Page เดียว           | ❌ ไม่ต้องทำ Store |
+| Form ที่ Submit แล้วจบ                       | ❌ ไม่ต้องทำ Store |
+| Modal / Dialog ที่ manage state ภายใน        | ❌ ไม่ต้องทำ Store |
+| Dropdown options ที่ใช้เฉพาะ Component เดียว | ❌ ไม่ต้องทำ Store |
 
 #### ตัวอย่าง: ❌ ไม่ควรสร้าง Store (ใช้ Composable แทน)
 
@@ -312,21 +309,20 @@ export function useFeatureName() {
 - **ก่อน Commit ทุกครั้ง** ต้องรัน `npm run lint` เพื่อตรวจสอบความถูกต้อง
 - ห้าม Commit โค้ดที่มี Lint Error เด็ดขาด
 
-  
-
 ---
+
 ## 5. 🌿 Git Workflow
 
 ### 5.1 Conventional Commits
 
 เราใช้รูปแบบการ Commit เพื่อให้ง่ายต่อการทำ Changelog:
 
-|Prefix|การใช้งาน|ตัวอย่าง|
-|---|---|---|
-|`feat(scope):`|เพิ่มฟีเจอร์ใหม่|`feat(users): add create user endpoint`|
-|`fix(scope):`|แก้ Bug|`fix(auth): fix token expiration issue`|
-|`refactor(scope):`|ปรับปรุงโค้ดโดยไม่เปลี่ยนความสามารถเดิม|`refactor(orders): extract order validation to service`|
-|`docs(scope):`|งานเอกสาร|`docs(readme): update setup instructions`|
+| Prefix             | การใช้งาน                               | ตัวอย่าง                                                |
+| ------------------ | --------------------------------------- | ------------------------------------------------------- |
+| `feat(scope):`     | เพิ่มฟีเจอร์ใหม่                        | `feat(users): add create user endpoint`                 |
+| `fix(scope):`      | แก้ Bug                                 | `fix(auth): fix token expiration issue`                 |
+| `refactor(scope):` | ปรับปรุงโค้ดโดยไม่เปลี่ยนความสามารถเดิม | `refactor(orders): extract order validation to service` |
+| `docs(scope):`     | งานเอกสาร                               | `docs(readme): update setup instructions`               |
 
 ---
 
@@ -370,10 +366,7 @@ json
 ```json
 {
   "lint-staged": {
-    "src/**/*.ts": [
-      "eslint --fix",
-      "prettier --write"
-    ]
+    "src/**/*.ts": ["eslint --fix", "prettier --write"]
   }
 }
 ```
@@ -385,10 +378,7 @@ json
 ```json
 {
   "lint-staged": {
-    "src/**/*.{ts,vue}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
+    "src/**/*.{ts,vue}": ["eslint --fix", "prettier --write"]
   }
 }
 ```
@@ -447,7 +437,9 @@ git commit -m "feat(users): add create user endpoint"
         ▼                              ▼
   Commit สำเร็จ         Commit ถูกยกเลิก — แก้ Error ก่อน
 ```
+
 ---
+
 ## 6. 🔌 API Documentation
 
 ระบบ Backend จะ Generate **Swagger UI** อัตโนมัติ

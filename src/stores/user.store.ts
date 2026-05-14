@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { User, UserRole } from 'src/types/user';
 import * as userService from 'src/services/user.service';
-// import { ROLES } from 'src/constants/roles';
+import { ROLES } from 'src/constants/roles';
 import { AUTH_LOADING_DURATION_MS, DEFAULT_LOADING_DURATION_MS } from 'src/constants/timing';
 
 export const useUserStore = defineStore('user', () => {
@@ -55,7 +55,7 @@ export const useUserStore = defineStore('user', () => {
         if (profile) {
           currentUser.value = {
             ...profile,
-            role: profile.role as UserRole,
+            role: (profile.role?.toLowerCase().replace(/\s+/g, '_') as UserRole) || ROLES.CANDIDATE,
           };
           isLoggedIn.value = true;
           accessToken.value = token;
@@ -87,7 +87,8 @@ export const useUserStore = defineStore('user', () => {
 
         currentUser.value = {
           email: result.user.email,
-          role: result.user.role as UserRole,
+          role:
+            (result.user.role?.toLowerCase().replace(/\s+/g, '_') as UserRole) || ROLES.CANDIDATE,
           id: result.user.id,
         } as User;
 

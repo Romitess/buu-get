@@ -1,7 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router';
 import { ROLES } from 'src/constants/roles';
-
-// Module augmentation for vue-router meta types
 declare module 'vue-router' {
   interface RouteMeta {
     requiresAuth?: boolean;
@@ -70,7 +68,17 @@ const routes: RouteRecordRaw[] = [
       // === Staff (Admin) Routes ===
       {
         path: 'admin',
-        meta: { requiresAuth: true, roles: [ROLES.STAFF, ROLES.ADMIN] },
+        meta: {
+          requiresAuth: true,
+          roles: [
+            ROLES.ADMIN,
+            ROLES.STAFF,
+            ROLES.REGISTRATION_OFFICER,
+            ROLES.FINANCE,
+            ROLES.EXECUTIVE,
+            ROLES.PROCTOR,
+          ],
+        },
         children: [
           {
             path: 'dashboard',
@@ -78,9 +86,29 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/admin/dashboard-page.vue'),
           },
           {
+            path: 'exam-management',
+            name: 'admin-exam-management',
+            component: () => import('pages/admin/exam-management-page.vue'),
+          },
+          {
             path: 'create-exam',
             name: 'admin-create-exam',
             component: () => import('pages/admin/create-exam-page.vue'),
+          },
+          {
+            path: 'exam-management/:examId/registrants',
+            name: 'admin-exam-registrants',
+            component: () => import('pages/admin/exam-registrants-page.vue'),
+          },
+          {
+            path: 'exam-seat-management',
+            name: 'admin-exam-seat-management',
+            component: () => import('pages/admin/exam-seat-management-page.vue'),
+          },
+          {
+            path: 'exam-management/registrants/:ermId',
+            name: 'admin-exam-registrant-detail',
+            component: () => import('pages/admin/exam-registrant-detail-page.vue'),
           },
         ],
       },
