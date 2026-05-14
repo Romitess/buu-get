@@ -50,7 +50,7 @@ export function useNavigation() {
       label: 'จัดการรอบสอบ',
       icon: 'edit_document',
       path: '/admin/exam-management',
-      requiredRoles: [ROLES.STAFF, ROLES.ADMIN, ROLES.PROCTOR],
+      requiredRoles: [ROLES.STAFF, ROLES.ADMIN, ROLES.REGISTRATION_OFFICER],
     },
   ];
 

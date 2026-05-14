@@ -134,25 +134,30 @@ const onRequest = (props: TableRequestProps) => {
 
 <style scoped lang="scss">
 .base-table {
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
 
   :deep(thead tr th) {
     background-color: var(--primary) !important;
     color: white !important;
     font-weight: 600;
-    font-size: 14px;
-    padding: 12px 16px;
-    text-align: center !important; // Center all headers
+    font-size: var(--font-size-xs); // 13px — compact header
+    padding: 10px 12px;
+    text-align: center !important;
   }
 
   :deep(tbody tr td) {
-    font-size: 14px;
+    font-size: var(--font-size-xs); // 13px — compact body
     color: var(--text-primary);
     border-color: var(--border-color);
-    white-space: normal !important; // Allow wrapping
-    word-break: break-word; // Break long words
+    white-space: normal !important;
+    word-break: break-word;
     line-height: 1.4;
+    padding: 8px 12px;
+  }
+
+  :deep(tbody tr) {
+    height: auto;
   }
 }
 

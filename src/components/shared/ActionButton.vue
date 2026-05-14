@@ -3,7 +3,8 @@
     :icon="icon"
     unelevated
     dense
-    :class="['action-btn', color ? `text-${color}` : '']"
+    class="action-btn"
+    :class="{ 'btn-danger': icon === 'delete' }"
     :disable="disable"
     @click="$emit('click')"
   >
@@ -21,6 +22,15 @@
 
   &:hover {
     background-color: var(--dialog-info-border);
+  }
+
+  &.btn-danger {
+    background-color: var(--badge-error-dot);
+    color: var(--text-on-primary);
+
+    &:hover {
+      background-color: var(--badge-error-text);
+    }
   }
 }
 </style>

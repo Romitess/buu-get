@@ -8,7 +8,7 @@
   >
     <!-- Type Column -->
     <template v-slot:body-cell-examType="{ row }">
-      <div class="text-center">{{ EXAM_TYPE_LABELS[row.examType] || row.examType }}</div>
+      <div class="text-center">{{ $t(`admin.examManagement.types.${row.examType}`) }}</div>
     </template>
 
     <!-- Date Column -->
@@ -25,7 +25,7 @@
           :value="getRatio(row)"
           :color="getProgressColor(row)"
           track-color="grey-3"
-          style="width: 80px"
+          style="width: 120px"
           class="q-mr-sm"
         />
         <span class="text-caption text-weight-medium" style="min-width: 50px; text-align: left">
@@ -37,7 +37,7 @@
     <!-- Status Column -->
     <template v-slot:body-cell-status="{ row }">
       <div class="text-center text-body2">
-        {{ EXAM_STATUS_LABELS[row.status] || row.status }}
+        {{ $t(`admin.examManagement.status.${row.status}`) }}
       </div>
     </template>
 
@@ -58,14 +58,14 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { QTableColumn } from 'quasar';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import BaseTable from '../shared/BaseTable.vue';
 import ActionButton from '../shared/ActionButton.vue';
 import { useThaiDate } from 'src/composables/useThaiDate';
 import {
-  EXAM_TYPE_LABELS,
-  EXAM_STATUS_LABELS,
   type ExamSchedule,
   type PaginationModel,
   type Role,
@@ -93,16 +93,59 @@ const emit = defineEmits<{
 }>();
 
 const { formatThaiDate } = useThaiDate();
+const { t } = useI18n();
 const $q = useQuasar();
 
 const columns: QTableColumn[] = [
-  { name: 'examName', label: 'ชื่อการสอบ', field: 'examName', align: 'left' },
-  { name: 'examType', label: 'ประเภท', field: 'examType', align: 'center' },
-  { name: 'examDate', label: 'วันที่สอบ', field: 'examDate', align: 'center' },
-  { name: 'examLocation', label: 'สถานที่สอบ', field: 'examLocation', align: 'left' },
-  { name: 'registration', label: 'จำนวนการลงทะเบียน', field: 'registeredCount', align: 'center' },
-  { name: 'status', label: 'สถานะ', field: 'status', align: 'center' },
-  { name: 'tools', label: 'เครื่องมือ', field: 'tools', align: 'center' },
+  {
+    name: 'examName',
+    label: t('admin.examManagement.table.columns.examName'),
+    field: 'examName',
+    align: 'left',
+    style: 'width: 20%',
+  },
+  {
+    name: 'examType',
+    label: t('admin.examManagement.table.columns.examType'),
+    field: 'examType',
+    align: 'center',
+    style: 'width: 8%',
+  },
+  {
+    name: 'examDate',
+    label: t('admin.examManagement.table.columns.examDate'),
+    field: 'examDate',
+    align: 'center',
+    style: 'width: 10%',
+  },
+  {
+    name: 'examLocation',
+    label: t('admin.examManagement.table.columns.examLocation'),
+    field: 'examLocation',
+    align: 'left',
+    style: 'width: 22%',
+  },
+  {
+    name: 'registration',
+    label: t('admin.examManagement.table.columns.registration'),
+    field: 'registeredCount',
+    align: 'center',
+    style: 'width: 18%',
+  },
+  {
+    name: 'status',
+    label: t('admin.examManagement.table.columns.status'),
+    field: 'status',
+    align: 'center',
+    style: 'width: 10%',
+  },
+  {
+    name: 'tools',
+    label: t('admin.examManagement.table.columns.tools'),
+    field: 'tools',
+    align: 'center',
+    style: 'width: 12%',
+  },
 ];
 
 const getRatio = (row: ExamSchedule) => {
@@ -117,29 +160,92 @@ const getProgressColor = (row: ExamSchedule) => {
   return 'blue-3';
 };
 
-const TOOL_BUTTONS: Record<Role, ToolButtonConfig[]> = {
-  staff: [
-    { icon: 'edit', color: 'blue-6', tooltip: 'แก้ไข', emit: 'edit' },
-    { icon: 'delete', color: 'red-6', tooltip: 'ลบ', emit: 'delete' },
+const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
+  ['staff']: [
+    {
+      icon: 'edit',
+      color: 'blue-6',
+      tooltip: t('admin.examManagement.table.tooltips.edit'),
+      emit: 'edit',
+    },
+    {
+      icon: 'delete',
+      color: 'red-6',
+      tooltip: t('admin.examManagement.table.tooltips.delete'),
+      emit: 'delete',
+    },
   ],
-  exam_operations_officer: [
-    { icon: 'group', color: 'blue-6', tooltip: 'จัดการผู้ลงทะเบียน', emit: 'manageRegistrants' },
-    { icon: 'event_seat', color: 'blue-6', tooltip: 'พิมพ์บัตรเข้าสอบ', emit: 'printAdmitCard' },
+  ['registration_officer']: [
+    {
+      icon: 'group',
+      color: 'blue-6',
+      tooltip: t('admin.examManagement.table.tooltips.manageRegistrants'),
+      emit: 'manageRegistrants',
+    },
+    {
+      icon: 'event_seat',
+      color: 'blue-6',
+      tooltip: t('admin.examManagement.table.tooltips.printAdmitCard'),
+      emit: 'printAdmitCard',
+    },
     {
       icon: 'format_list_bulleted',
       color: 'blue-6',
-      tooltip: 'รายชื่อผู้สมัคร',
+      tooltip: t('admin.examManagement.table.tooltips.viewCandidates'),
       emit: 'viewCandidates',
     },
-    { icon: 'description', color: 'blue-6', tooltip: 'ส่งออกรายงาน', emit: 'exportReport' },
+    {
+      icon: 'description',
+      color: 'blue-6',
+      tooltip: t('admin.examManagement.table.tooltips.exportReport'),
+      emit: 'exportReport',
+    },
   ],
-};
+  ['admin']: [
+    {
+      icon: 'edit',
+      color: 'blue-6',
+      tooltip: t('admin.examManagement.table.tooltips.edit'),
+      emit: 'edit',
+    },
+    {
+      icon: 'delete',
+      color: 'red-6',
+      tooltip: t('admin.examManagement.table.tooltips.delete'),
+      emit: 'delete',
+    },
+    {
+      icon: 'group',
+      color: 'blue-6',
+      tooltip: t('admin.examManagement.table.tooltips.manageRegistrants'),
+      emit: 'manageRegistrants',
+    },
+    {
+      icon: 'event_seat',
+      color: 'blue-6',
+      tooltip: t('admin.examManagement.table.tooltips.printAdmitCard'),
+      emit: 'printAdmitCard',
+    },
+    {
+      icon: 'format_list_bulleted',
+      color: 'blue-6',
+      tooltip: t('admin.examManagement.table.tooltips.viewCandidates'),
+      emit: 'viewCandidates',
+    },
+    {
+      icon: 'description',
+      color: 'blue-6',
+      tooltip: t('admin.examManagement.table.tooltips.exportReport'),
+      emit: 'exportReport',
+    },
+  ],
+}));
 
 const handleAction = (emitName: string, id: string) => {
   if (emitName === 'delete') {
     $q.dialog({
-      title: 'ยืนยันการลบ',
-      message: 'คุณแน่ใจหรือไม่ว่าต้องการลบการสอบนี้?',
+      title: t('admin.examManagement.dialogs.delete.title'),
+      message: t('admin.examManagement.dialogs.delete.message'),
       cancel: true,
       persistent: true,
     }).onOk(() => {

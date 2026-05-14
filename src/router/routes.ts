@@ -68,7 +68,17 @@ const routes: RouteRecordRaw[] = [
       // === Staff (Admin) Routes ===
       {
         path: 'admin',
-        meta: { requiresAuth: true, roles: [ROLES.STAFF, ROLES.ADMIN] },
+        meta: {
+          requiresAuth: true,
+          roles: [
+            ROLES.ADMIN,
+            ROLES.STAFF,
+            ROLES.REGISTRATION_OFFICER,
+            ROLES.FINANCE,
+            ROLES.EXECUTIVE,
+            ROLES.PROCTOR,
+          ],
+        },
         children: [
           {
             path: 'dashboard',

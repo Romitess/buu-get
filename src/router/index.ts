@@ -6,6 +6,8 @@ import {
   createWebHistory,
 } from 'vue-router';
 import routes from './routes';
+import { useUserStore } from 'src/stores/user.store';
+import { ROLES } from 'src/constants/roles';
 
 /*
  * If not building with SSR mode, you can
@@ -16,7 +18,7 @@ import routes from './routes';
  * with the Router instance.
  */
 
-export default defineRouter((/* { store, ssrContext } */) => {
+export default defineRouter(({ store }) => {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
     : process.env.VUE_ROUTER_MODE === 'history'
@@ -35,7 +37,7 @@ export default defineRouter((/* { store, ssrContext } */) => {
 
   // --- ระบบดักหน้าประตู (Route Guard) ---
   Router.beforeEach(async (to) => {
-    const userStore = useUserStore();
+    const userStore = useUserStore(store);
 
     // โหลดข้อมูลผู้ใช้เริ่มต้นถ้ายังไม่มี
     if (localStorage.getItem('isLoggedIn') === 'true' && !userStore.isLoggedIn) {
@@ -56,9 +58,19 @@ export default defineRouter((/* { store, ssrContext } */) => {
 
       if (!hasPermission) {
         // ถ้าไม่มีสิทธิ์ -> ส่งไปหน้า Dashboard ตาม Role ตัวเอง
-        return userStore.userRole === ROLES.CANDIDATE
-          ? { name: 'exam-schedule' }
-          : { name: 'admin-dashboard' };
+        const redirectRoute =
+          userStore.userRole === ROLES.CANDIDATE
+            ? { name: 'exam-schedule' }
+            : { name: 'admin-dashboard' };
+
+        // ป้องกัน Infinite Loop: ถ้าหน้าที่กำลังจะไป (to) เป็นหน้าเดียวกับที่จะ Redirect ไป
+        // แสดงว่าแม้แต่หน้า Dashboard ตัวเองก็ยังไม่มีสิทธิ์เข้า
+        if (to.name === redirectRoute.name) {
+          console.warn('Access denied even to default dashboard. Redirecting to login.');
+          return { name: 'login' };
+        }
+
+        return redirectRoute;
       }
     }
 
@@ -74,7 +86,3 @@ export default defineRouter((/* { store, ssrContext } */) => {
 
   return Router;
 });
-
-// นำเข้าข้อมูลที่จำเป็นสำหรับ Guard
-import { useUserStore } from 'src/stores/user.store';
-import { ROLES } from 'src/constants/roles';

@@ -13,27 +13,16 @@
         <SearchBar v-model="searchQuery" />
       </div>
 
-      <!-- Filters & Role Switcher (For Demo purposes) -->
+      <!-- Filters Section -->
       <div class="row justify-between items-center q-mb-md">
         <q-btn
           color="primary"
           icon="add"
-          label="สร้างรอบสอบ"
+          :label="$t('admin.examManagement.createExam')"
           unelevated
           class="text-weight-bold"
           style="border-radius: 8px"
           @click="$router.push('/admin/create-exam')"
-        />
-        <q-btn-toggle
-          v-model="currentRole"
-          flat
-          dense
-          rounded
-          toggle-color="primary"
-          :options="[
-            { label: 'สิทธิ์: เจ้าหน้าที่', value: 'staff' },
-            { label: 'สิทธิ์: กรรมการคุมสอบ', value: 'exam_operations_officer' },
-          ]"
         />
       </div>
 
@@ -59,20 +48,32 @@
 import { ref, onMounted, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import ExamManagementTable from 'src/components/exam/exam-management-table.vue';
 import SearchBar from 'src/components/shared/SearchBar.vue';
 import { useExamStore } from 'src/stores/exam.store';
-import type { Role, PaginationModel, TableRequestProps } from 'src/types/exam.types';
+import { useUserStore } from 'src/stores/user.store';
+import { ROLES } from 'src/constants/roles';
+import type { Role, PaginationModel, TableRequestProps, ExamSchedule } from 'src/types/exam.types';
 
 const $q = useQuasar();
 const router = useRouter();
+const { t } = useI18n();
 const examStore = useExamStore();
+const userStore = useUserStore();
 
 // State
 const isLoading = ref(false);
-const currentRole = ref<Role>('staff');
 const searchQuery = ref('');
+
+// Derived Role for Table Tools
+const currentRole = computed<Role>(() => {
+  const role = userStore.userRole;
+  if (role === ROLES.ADMIN) return ROLES.ADMIN;
+  if (role === ROLES.REGISTRATION_OFFICER) return ROLES.REGISTRATION_OFFICER;
+  return ROLES.STAFF;
+});
 
 const exams = computed(() => {
   const allExams = examStore.managementSchedules;
@@ -80,7 +81,8 @@ const exams = computed(() => {
 
   const query = searchQuery.value.toLowerCase();
   return allExams.filter(
-    (e) => e.examName.toLowerCase().includes(query) || e.examLocation.toLowerCase().includes(query),
+    (e: ExamSchedule) =>
+      e.examName.toLowerCase().includes(query) || e.examLocation.toLowerCase().includes(query),
   );
 });
 
@@ -98,7 +100,11 @@ const fetchData = async () => {
     await examStore.loadManagementSchedules();
     pagination.value.rowsNumber = exams.value.length;
   } catch {
-    $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการโหลดข้อมูล', position: 'top' });
+    $q.notify({
+      type: 'negative',
+      message: t('admin.examManagement.notifications.loadError'),
+      position: 'top',
+    });
   } finally {
     isLoading.value = false;
   }
@@ -112,7 +118,11 @@ const onRequest = (props: TableRequestProps) => {
 
 // Actions Handlers
 const handleEdit = (id: string) => {
-  $q.notify({ type: 'info', message: `กำลังไปหน้าแก้ไขการสอบ ID: ${id}`, position: 'top' });
+  $q.notify({
+    type: 'info',
+    message: `${t('admin.examManagement.notifications.editNav')} ID: ${id}`,
+    position: 'top',
+  });
 };
 
 const handleDelete = async (id: string) => {
@@ -121,7 +131,11 @@ const handleDelete = async (id: string) => {
     $q.notify({ type: 'positive', message: `ลบการสอบ ID: ${id} สำเร็จ`, position: 'top' });
     await fetchData();
   } catch {
-    $q.notify({ type: 'negative', message: `ลบการสอบไม่สำเร็จ`, position: 'top' });
+    $q.notify({
+      type: 'negative',
+      message: t('admin.examManagement.notifications.deleteError'),
+      position: 'top',
+    });
   } finally {
     isLoading.value = false;
   }
@@ -132,15 +146,27 @@ const handleManageRegistrants = (id: string) => {
 };
 
 const handlePrintAdmitCard = (id: string) => {
-  $q.notify({ type: 'info', message: `พิมพ์บัตรประจำตัวสอบ ID: ${id}`, position: 'top' });
+  $q.notify({
+    type: 'info',
+    message: `${t('admin.examManagement.notifications.printAdmitCard')} ID: ${id}`,
+    position: 'top',
+  });
 };
 
 const handleViewCandidates = (id: string) => {
-  $q.notify({ type: 'info', message: `ดูรายชื่อผู้เข้าสอบ ID: ${id}`, position: 'top' });
+  $q.notify({
+    type: 'info',
+    message: `${t('admin.examManagement.notifications.viewCandidates')} ID: ${id}`,
+    position: 'top',
+  });
 };
 
 const handleExportReport = (id: string) => {
-  $q.notify({ type: 'info', message: `ส่งออกรายงานการสอบ ID: ${id}`, position: 'top' });
+  $q.notify({
+    type: 'info',
+    message: `${t('admin.examManagement.notifications.exportReport')} ID: ${id}`,
+    position: 'top',
+  });
 };
 
 // Initial load

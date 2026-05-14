@@ -4,8 +4,8 @@
     <div class="card-header">
       <img src="~assets/img/buu-logo.png" alt="BUU Logo" class="crest-img" />
       <div class="logo-wordmark"></div>
-      <h2>{{ userType === 'thai' ? 'ยินดีต้อนรับ' : 'Welcome Back' }}</h2>
-      <p>{{ userType === 'thai' ? 'เข้าสู่ระบบเพื่อใช้งาน' : 'Sign in to continue' }}</p>
+      <h2>{{ $t('auth.welcome') }}</h2>
+      <p>{{ $t('auth.signInToContinue') }}</p>
     </div>
 
     <!-- Type Toggle -->
@@ -13,16 +13,16 @@
       <button
         class="toggle-btn"
         :class="{ active: userType === 'thai' }"
-        @click="userType = 'thai'"
+        @click="toggleUserType('thai')"
       >
-        คนไทย
+        {{ $t('auth.thaiPerson') }}
       </button>
       <button
         class="toggle-btn"
         :class="{ active: userType === 'foreigner' }"
-        @click="userType = 'foreigner'"
+        @click="toggleUserType('foreigner')"
       >
-        Foreigner
+        {{ $t('auth.foreigner') }}
       </button>
       <div class="toggle-slider" :class="{ right: userType === 'foreigner' }"></div>
     </div>
@@ -32,10 +32,10 @@
       <div v-if="userType === 'thai'" class="thaid-section">
         <q-btn class="thaid-btn" unelevated no-caps>
           <q-icon name="fingerprint" size="22px" class="q-mr-sm" />
-          เข้าสู่ระบบด้วย ThaID
+          {{ $t('auth.loginThaID') }}
         </q-btn>
         <div class="or-divider">
-          <span>{{ userType === 'thai' ? 'หรือใช้อีเมล' : 'or use email' }}</span>
+          <span>{{ $t('auth.orUseEmail') }}</span>
         </div>
       </div>
     </Transition>
@@ -44,8 +44,14 @@
     <q-form @submit.prevent="onSubmit" class="login-form">
       <!-- Email -->
       <div class="field-block">
-        <label>{{ userType === 'thai' ? 'อีเมล' : 'Email' }}</label>
-        <q-input v-model="email" outlined dense placeholder="name@buu.ac.th" class="field-input">
+        <label>{{ $t('auth.email') }}</label>
+        <q-input
+          v-model="email"
+          outlined
+          dense
+          :placeholder="$t('auth.emailPlaceholder')"
+          class="field-input"
+        >
           <template v-slot:prepend>
             <q-icon name="mail" size="18px" />
           </template>
@@ -55,9 +61,9 @@
       <!-- Password -->
       <div class="field-block">
         <div class="field-label-row">
-          <label>{{ userType === 'thai' ? 'รหัสผ่าน' : 'Password' }}</label>
+          <label>{{ $t('auth.password') }}</label>
           <a href="#" class="forgot-link">
-            {{ userType === 'thai' ? 'ลืมรหัสผ่าน?' : 'Forgot?' }}
+            {{ $t('auth.forgotPassword') }}
           </a>
         </div>
         <q-input
@@ -65,7 +71,7 @@
           :type="showPwd ? 'text' : 'password'"
           outlined
           dense
-          placeholder="••••••••"
+          :placeholder="$t('auth.passwordPlaceholder')"
           class="field-input"
         >
           <template v-slot:prepend>
@@ -83,15 +89,8 @@
       </div>
 
       <!-- Submit -->
-      <q-btn
-        type="submit"
-        class="submit-btn"
-        unelevated
-        no-caps
-        :loading="loading"
-        @click="loading = true"
-      >
-        {{ userType === 'thai' ? 'เข้าสู่ระบบ' : 'Sign In' }}
+      <q-btn type="submit" class="submit-btn" unelevated no-caps :loading="loading">
+        {{ $t('auth.login') }}
         <span class="btn-arrow">→</span>
       </q-btn>
     </q-form>
@@ -99,7 +98,7 @@
     <!-- Register -->
     <div class="register-row">
       <router-link to="/register" class="text-primary text-decoration-none text-body2">
-        {{ userType === 'thai' ? 'สร้างบัญชีตอนนี้ ?' : 'Create an account now?' }}
+        {{ $t('auth.createAccount') }}
       </router-link>
     </div>
   </div>
@@ -110,10 +109,14 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from 'src/stores/user.store';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
+import { ROLES } from 'src/constants/roles';
 
 const router = useRouter();
 const userStore = useUserStore();
 const $q = useQuasar();
+
+const { t, locale } = useI18n();
 
 const userType = ref<'thai' | 'foreigner'>('thai');
 const email = ref('');
@@ -121,11 +124,16 @@ const password = ref('');
 const showPwd = ref(false);
 const loading = ref(false);
 
+const toggleUserType = (type: 'thai' | 'foreigner') => {
+  userType.value = type;
+  locale.value = type === 'thai' ? 'th' : 'en-US';
+};
+
 const onSubmit = async () => {
   if (!email.value || !password.value) {
     $q.notify({
       type: 'warning',
-      message: 'กรุณากรอกอีเมลและรหัสผ่าน',
+      message: t('auth.notify.required'),
     });
     return;
   }
@@ -137,20 +145,37 @@ const onSubmit = async () => {
     if (success) {
       $q.notify({
         type: 'positive',
-        message: 'เข้าสู่ระบบสำเร็จ',
+        message: t('auth.notify.success'),
       });
-      await router.push('/user/exam-schedule');
+
+      // Role-based redirection
+      const role = userStore.userRole?.toLowerCase();
+      console.log('Login successful. User Role:', role);
+
+      if (role === ROLES.CANDIDATE) {
+        await router.push({ name: 'exam-schedule' });
+      } else if (
+        role === ROLES.ADMIN ||
+        role === ROLES.STAFF ||
+        role === ROLES.REGISTRATION_OFFICER
+      ) {
+        // ทุกบทบาทที่เป็น Admin/Staff/Registration ให้ไปหน้าจัดการสอบ
+        await router.push({ name: 'admin-exam-management' });
+      } else {
+        // บทบาทอื่นๆ (Finance, Executive, etc.) ให้ไป Dashboard กลาง
+        await router.push({ name: 'admin-dashboard' });
+      }
     } else {
       $q.notify({
         type: 'negative',
-        message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+        message: t('auth.notify.failed'),
       });
     }
   } catch (error) {
     console.error('Login Error:', error);
     $q.notify({
       type: 'negative',
-      message: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+      message: t('auth.notify.error'),
     });
   } finally {
     loading.value = false;
@@ -395,7 +420,7 @@ const onSubmit = async () => {
 
 .field-input {
   :deep(.q-field__control) {
-    background: #f8fafc;
+    background: var(--neutral-50);
     border-radius: 10px;
     border-color: var(--neutral-200);
     transition: all 0.2s;
