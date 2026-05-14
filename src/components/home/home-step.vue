@@ -4,13 +4,13 @@
       <div class="text-h4 text-weight-bolder text-primary line-height-1">
         {{ number }}
       </div>
-      <div v-if="!isLast" class="step-line bg-grey-4 q-mx-md full-width"></div>
+      <div class="step-line bg-grey-6 col"></div>
     </div>
     <div class="step-content">
-      <div class="text-subtitle1 text-weight-bolder text-dark q-mb-xs">
+      <div class="text-subtitle1 text-weight-bold text-dark q-mb-xs">
         {{ title }}
       </div>
-      <div class="text-caption text-grey-8 line-height-1-4">
+      <div class="text-caption text-grey-8 line-height-1-4 text-weight-regular">
         {{ description }}
       </div>
     </div>
@@ -28,7 +28,9 @@ defineProps<{
 
 <style scoped>
 .step-line {
-  height: 2px;
+  height: 1px;
+  margin-left: 20px;
+  margin-right: 20px;
 }
 .line-height-1 {
   line-height: 1;
@@ -38,5 +40,7 @@ defineProps<{
 }
 .home-step {
   height: 100%;
+  max-width: 220px;
+  margin: 0 auto;
 }
 </style>

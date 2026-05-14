@@ -1,6 +1,6 @@
 <template>
   <div class="guideline-section">
-    <div class="row q-col-gutter-md">
+    <div class="row q-col-gutter-y-lg justify-center">
       <div v-for="(rule, index) in rules" :key="index" class="col-12 col-md-6">
         <HomeGuidelineCard :icon="rule.icon" :text="rule.text" />
       </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="home-main-content q-py-xl">
+  <div class="home-main-content q-pb-xl q-pt-none">
     <!-- Section 1: Test Format -->
     <div class="q-mb-xl">
       <div class="row items-center q-mb-md">
@@ -10,8 +10,7 @@
           {{ $t('home.testFormat.title') }}
         </div>
       </div>
-      <q-separator class="q-mb-xl" />
-
+      <q-separator color="grey-6" class="q-mb-md" />
       <div class="row q-col-gutter-lg">
         <div class="col-12 col-md-4">
           <HomeCard
@@ -45,9 +44,8 @@
           {{ $t('home.registrationSteps.title') }}
         </div>
       </div>
-      <q-separator class="q-mb-xl" />
-
-      <div class="row q-col-gutter-xl">
+      <q-separator color="grey-6" class="q-mb-md" />
+      <div class="row q-col-gutter-lg">
         <div class="col-12 col-sm-6 col-md-3">
           <HomeStep
             number="01"
@@ -90,8 +88,7 @@
           {{ $t('home.examRules.title') }}
         </div>
       </div>
-      <q-separator class="q-mb-xl" />
-
+      <q-separator color="grey-6" class="q-mb-md" />
       <HomeGuidelineSection />
       <HomeVoucherError />
     </div>
@@ -108,7 +105,8 @@ import HomeVoucherError from './home-voucher-error.vue';
 <style scoped>
 .home-main-content {
   max-width: 1300px;
-  margin: 0 auto;
+  margin: 15px auto 0;
+  padding: 0 10px;
 }
 .section-icon {
   background: var(--q-primary);

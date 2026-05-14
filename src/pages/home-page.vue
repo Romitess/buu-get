@@ -1,12 +1,11 @@
 <template>
   <q-page class="home-page q-pb-xl">
     <!-- Top Carousel Branding -->
-    <div class="q-py-lg">
+    <div class="q-pt-lg q-pb-none">
       <div class="container">
         <InfoCarousel />
       </div>
     </div>
-
     <!-- Main Informational Content -->
     <div class="container">
       <HomeMainContent />
