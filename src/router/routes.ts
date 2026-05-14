@@ -106,7 +106,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document' },
               ],
             },
           },
@@ -117,7 +117,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
                 { label: 'สร้างรอบสอบ', icon: 'add_circle' },
               ],
             },
@@ -141,7 +141,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
                 { label: 'จัดการที่นั่งสอบ', icon: 'event_seat' },
               ],
             },
@@ -170,8 +170,8 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
-                { label: 'การจัดการรายชื่อผู้เข้าสอบ', icon: 'star' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
+                { label: 'การจัดการรายชื่อผู้เข้าสอบ', icon: 'group' },
               ],
             },
           },
@@ -182,10 +182,10 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
                 {
                   label: 'การจัดการรายชื่อผู้เข้าสอบ',
-                  icon: 'star',
+                  icon: 'group',
                   to: '/admin/exam-management/:examId/registrants',
                 },
                 { label: 'รายละเอียดผู้เข้าสอบ', icon: 'person' },
