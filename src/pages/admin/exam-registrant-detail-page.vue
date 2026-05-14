@@ -1,12 +1,11 @@
 <template>
   <q-page class="registrant-detail-page q-px-lg q-px-sm-xl q-py-lg">
     <div class="full-width">
-      <header class="q-mb-md">
-        <h1 class="text-h5 text-weight-bold header-title">ตรวจสอบข้อมูลการสมัครสอบ</h1>
-        <p class="text-subtitle2 text-grey-7 q-mt-xs">
-          ตรวจสอบข้อมูลผู้สมัครสอบเพื่ออนุมัติหรือแจ้งแก้ไขก่อนพิมพ์บัตรสอบ
-        </p>
-      </header>
+      <AppPageHeader
+        :breadcrumbs="breadcrumbs"
+        title="ตรวจสอบข้อมูลการสมัครสอบ"
+        subtitle="ตรวจสอบข้อมูลผู้สมัครสอบเพื่ออนุมัติหรือแจ้งแก้ไขก่อนพิมพ์บัตรสอบ"
+      />
 
       <div v-if="isLoading" class="flex flex-center q-pa-xl">
         <q-spinner-dots color="primary" size="40px" />
@@ -65,6 +64,7 @@ import { useQuasar, date } from 'quasar';
 import AppButton from 'src/components/base/app-button.vue';
 import RegistrantPersonalDetail from 'src/components/registrant-personal-detail.vue';
 import RequestFixDialog from 'src/components/request-fix-dialog.vue';
+import AppPageHeader, { type BreadcrumbItem } from 'src/components/shared/app-page-header.vue';
 import { fetchEnrollmentById, updateEnrollmentStatus } from 'src/services/enrollment.service';
 import { VerifyStatus } from 'src/types/enrollment.types';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
@@ -76,6 +76,19 @@ const $q = useQuasar();
 const enrollment = ref<BackendEnrollmentDetail | null>(null);
 const isLoading = ref(true);
 const showFixDialog = ref(false);
+
+const breadcrumbs = computed<BreadcrumbItem[]>(() => [
+  { label: 'หน้าหลัก', icon: 'home', to: { name: 'admin-dashboard' } },
+  { label: 'จัดการการสอบ', icon: 'star', to: { name: 'admin-exam-management' } },
+  {
+    label: 'จัดการรายชื่อผู้เข้าสอบ',
+    icon: 'star',
+    to: enrollment.value
+      ? { name: 'admin-exam-registrants', params: { examId: enrollment.value.SESSION.EXAM_ID } }
+      : undefined,
+  },
+  { label: 'ตรวจสอบข้อมูลการสมัครสอบ', icon: 'star' },
+]);
 
 const registrantName = computed(
   () => enrollment.value?.USER?.PROFILE?.userFullnameTh || 'ไม่ทราบชื่อ',
@@ -171,11 +184,6 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.header-title {
-  color: var(--dashboard-header-text);
-  margin: 0;
-}
-
 .action-btn {
   min-width: 150px;
   height: 52px;

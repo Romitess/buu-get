@@ -1,9 +1,9 @@
 <template>
   <div class="q-mb-lg page-header">
     <!-- Breadcrumbs -->
-    <q-breadcrumbs class="text-grey-6 q-mb-sm" active-color="dark" style="font-size: 13px">
+    <q-breadcrumbs class="text-grey-6 q-mb-sm" active-color="black" style="font-size: 14px">
       <template v-slot:separator>
-        <q-icon size="1.2em" name="chevron_right" color="grey-5" />
+        <q-icon size="1.2em" name="chevron_right" color="grey-4" />
       </template>
       <q-breadcrumbs-el
         v-for="(item, index) in breadcrumbs"
@@ -11,7 +11,7 @@
         :icon="item.icon"
         :label="item.label"
         :to="item.to"
-        :class="{ 'text-weight-bold': index === breadcrumbs.length - 1 }"
+        :class="[index === breadcrumbs.length - 1 ? 'text-black' : 'text-grey-6', 'items-center']"
       />
     </q-breadcrumbs>
 
@@ -27,10 +27,10 @@
 /**
  * Interface for breadcrumb items.
  */
-interface BreadcrumbItem {
+export interface BreadcrumbItem {
   label: string;
-  icon?: string;
-  to?: string | object;
+  icon?: string | undefined;
+  to?: string | object | undefined;
 }
 
 /**
@@ -45,9 +45,3 @@ defineProps<{
   subtitle?: string;
 }>();
 </script>
-
-<style scoped>
-.page-header {
-  /* You can add specific header styling here if needed */
-}
-</style>

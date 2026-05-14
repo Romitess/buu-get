@@ -1,12 +1,11 @@
 <template>
   <q-page class="registrants-page q-px-lg q-px-sm-xl q-py-lg">
     <div class="full-width">
-      <header class="q-mb-md">
-        <h1 class="text-h5 text-weight-bold header-title">จัดการรายชื่อผู้เข้าสอบ</h1>
-        <p class="text-subtitle2 text-grey-7">
-          จัดการรายชื่อผู้เข้าสอบ พร้อมตรวจสอบข้อมูล การสมัคร และสถานะการเข้าสอบ
-        </p>
-      </header>
+      <AppPageHeader
+        :breadcrumbs="breadcrumbs"
+        title="จัดการรายชื่อผู้เข้าสอบ"
+        subtitle="จัดการรายชื่อผู้เข้าสอบ พร้อมตรวจสอบข้อมูล การสมัคร และสถานะการเข้าสอบ"
+      />
 
       <AppExamSessionTabs v-model="selectedSessionId" :sessions="exam?.SESSIONS" />
 
@@ -99,12 +98,19 @@ import SearchBar from 'src/components/shared/SearchBar.vue';
 import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
 import AppExamSessionTabs from 'src/components/exam/app-exam-session-time.vue';
+import AppPageHeader, { type BreadcrumbItem } from 'src/components/shared/app-page-header.vue';
 import { useExamRegistrants } from 'src/composables/use-exam-registrants';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollment.types';
 
 const route = useRoute();
 const router = useRouter();
+
+const breadcrumbs: BreadcrumbItem[] = [
+  { label: 'หน้าหลัก', icon: 'home', to: { name: 'admin-dashboard' } },
+  { label: 'จัดการการสอบ', icon: 'star', to: { name: 'admin-exam-management' } },
+  { label: 'จัดการรายชื่อผู้เข้าสอบ', icon: 'star' },
+];
 
 const {
   isLoading,
@@ -231,11 +237,6 @@ onMounted(() => {
 <style scoped lang="scss">
 .registrants-page {
   min-height: 0 !important;
-}
-
-.header-title {
-  color: var(--dashboard-header-text);
-  margin: 0;
 }
 
 .search-bar {

@@ -613,13 +613,14 @@ body {
 .buu-input-muted {
   &.q-field--outlined .q-field__control {
     border: 1px solid var(--neutral-200) !important; // เปลี่ยนกลับเป็นสีเทาอ่อนสุดๆ (หม่นๆ ละมุนๆ ตามต้นฉบับ)
-    border-radius: 8px !important; 
+    border-radius: 8px !important;
     background-color: var(--surface-card);
     box-shadow: none !important; // ลบเงาทิ้งให้แบนราบตามรูป 2
     transition: border-color var(--transition-smooth);
 
     // รวบโค้ดที่ซ้ำซ้อน
-    &:before, &:after {
+    &:before,
+    &:after {
       border: none !important;
     }
     &:hover {
@@ -671,14 +672,17 @@ body {
   .q-toggle__thumb {
     width: 18px !important;
     height: 18px !important;
-    top: 3px !important;  // เว้นขอบบน 3px
+    top: 3px !important; // เว้นขอบบน 3px
     left: 3px !important; // เว้นขอบซ้าย 3px
     margin: 0 !important; // เคลียร์ margin ติดลบของ Quasar ทิ้ง!
     border-radius: var(--radius-pill) !important;
     box-shadow: none !important; // ลบเงาทิ้งให้ปุ่มดูแบนราบ (Flat Design)
-    
+
     // ซ่อน element ภายในและเอฟเฟกต์ของ Quasar เดิมทิ้งทั้งหมด
-    &::before, &::after, .q-toggle__dot, svg {
+    &::before,
+    &::after,
+    .q-toggle__dot,
+    svg {
       display: none !important;
     }
   }
@@ -690,20 +694,20 @@ body {
       border: 1px solid var(--border-color) !important;
     }
     .q-toggle__thumb {
-      background: var(--text-muted) !important; 
-      transform: translate3d(0, 0, 0) !important; 
+      background: var(--text-muted) !important;
+      transform: translate3d(0, 0, 0) !important;
     }
   }
 
   // --- สถานะตอนเปิด (ON) ---
   &[aria-checked='true'] {
     .q-toggle__track {
-      background: var(--primary) !important; 
-      border: none !important; 
+      background: var(--primary) !important;
+      border: none !important;
     }
     .q-toggle__thumb {
-      background: var(--text-on-primary) !important; 
-      transform: translate3d(20px, 0, 0) !important; 
+      background: var(--text-on-primary) !important;
+      transform: translate3d(20px, 0, 0) !important;
     }
   }
 }

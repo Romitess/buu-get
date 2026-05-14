@@ -116,8 +116,8 @@ const displayData = computed(() => {
 }
 
 .registrant-content {
-  padding-top: 100px;
-  padding-bottom: 100px;
+  padding-top: 70px;
+  padding-bottom: 70px;
 }
 
 .photo-container {
