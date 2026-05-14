@@ -24,6 +24,7 @@
           :paid-count="paidCount"
           :total-capacity="sessionTotalCapacity"
           hide-paid
+          hide-main-separator
           is-admin
         />
       </section>
