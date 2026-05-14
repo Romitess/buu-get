@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue';
 import type { EnrollmentTableRow } from 'src/types/enrollment.types';
+import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollment.types';
 import type { BackendExam } from 'src/types/exam';
 import { fetchEnrollmentsByExamId } from 'src/services/enrollment.service';
 import { fetchExamById } from 'src/services/exam.service';
@@ -21,12 +22,18 @@ export function useExamRegistrants() {
 
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase();
-      list = list.filter(
-        (row: EnrollmentTableRow) =>
+      list = list.filter((row: EnrollmentTableRow) => {
+        const paymentLabel = (PAYMENT_STATUS_LABELS[row.paymentStatus] || '').toLowerCase();
+        const verifyLabel = (VERIFY_STATUS_LABELS[row.verifyStatus] || '').toLowerCase();
+
+        return (
           row.nationalId.toLowerCase().includes(query) ||
           row.fullnameTh.toLowerCase().includes(query) ||
-          row.titleTh.toLowerCase().includes(query),
-      );
+          row.titleTh.toLowerCase().includes(query) ||
+          paymentLabel.includes(query) ||
+          verifyLabel.includes(query)
+        );
+      });
     }
 
     return list;
