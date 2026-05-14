@@ -2,12 +2,13 @@
   <div class="home-main-content q-py-xl">
     <!-- Section 1: Test Format -->
     <div class="q-mb-xl">
-      <div class="row items-center q-mb-lg no-wrap">
-        <q-icon name="menu_book" color="primary" size="sm" class="q-mr-sm" />
+      <div class="row items-center q-mb-md">
+        <div class="section-icon q-mr-sm">
+          <q-icon name="bookmark" color="white" size="18px" />
+        </div>
         <div class="text-h6 text-weight-bolder text-dark">
           {{ $t('home.testFormat.title') }}
         </div>
-        <q-space />
       </div>
       <q-separator class="q-mb-xl" />
 
@@ -36,12 +37,13 @@
 
     <!-- Section 2: Registration Steps -->
     <div class="q-mb-xl">
-      <div class="row items-center q-mb-lg no-wrap">
-        <q-icon name="fact_check" color="primary" size="sm" class="q-mr-sm" />
+      <div class="row items-center q-mb-md">
+        <div class="section-icon q-mr-sm">
+          <q-icon name="fact_check" color="white" size="18px" />
+        </div>
         <div class="text-h6 text-weight-bolder text-dark">
           {{ $t('home.registrationSteps.title') }}
         </div>
-        <q-space />
       </div>
       <q-separator class="q-mb-xl" />
 
@@ -70,6 +72,7 @@
         <div class="col-12 col-sm-6 col-md-3">
           <HomeStep
             number="04"
+            :is-last="true"
             :title="$t('home.registrationSteps.steps.s4.title')"
             :description="$t('home.registrationSteps.steps.s4.description')"
           />
@@ -78,13 +81,14 @@
     </div>
 
     <!-- Section 3: Exam Rules -->
-    <div>
-      <div class="row items-center q-mb-lg no-wrap">
-        <q-icon name="gavel" color="primary" size="sm" class="q-mr-sm" />
+    <div class="q-mb-xl">
+      <div class="row items-center q-mb-md">
+        <div class="section-icon q-mr-sm">
+          <q-icon name="gavel" color="white" size="18px" />
+        </div>
         <div class="text-h6 text-weight-bolder text-dark">
           {{ $t('home.examRules.title') }}
         </div>
-        <q-space />
       </div>
       <q-separator class="q-mb-xl" />
 
@@ -103,7 +107,16 @@ import HomeVoucherError from './home-voucher-error.vue';
 
 <style scoped>
 .home-main-content {
-  max-width: 1200px;
+  max-width: 1300px;
   margin: 0 auto;
+}
+.section-icon {
+  background: var(--q-primary);
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

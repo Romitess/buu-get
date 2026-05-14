@@ -26,6 +26,10 @@ const translatedText = computed(() => {
 .voucher-error-banner {
   background: var(--q-negative);
   border-radius: 12px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 4px 10px rgba(var(--q-negative), 0.2);
 }
 .voucher-error-banner :deep(a) {
   color: white;

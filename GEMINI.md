@@ -299,7 +299,14 @@ export function useFeatureName() {
 
 ---
 
-### 4.5 Linting & Formatting
+### 4.5 Frontend — Styling Guidelines
+
+- **ห้ามทำ Style inline (Inline Styles):** ห้ามใช้ `style="..."` ใน template ให้ใช้ CSS Classes หรือ Utility Classes ของ Quasar แทน
+- **ใช้ Quasar Variables ก่อนเสมอ:** พยายามใช้ CSS Variables หรือ Utility Classes ของ Quasar (เช่น `text-primary`, `bg-secondary`, `q-pa-md`) ก่อนที่จะเขียน Custom CSS ของตัวเอง
+
+---
+
+### 4.6 Linting & Formatting
 
 - ใช้ **ESLint** และ **Prettier** ตามที่โปรเจกต์กำหนด
 - **ก่อน Commit ทุกครั้ง** ต้องรัน `npm run lint` เพื่อตรวจสอบความถูกต้อง

@@ -1,16 +1,18 @@
 <template>
-  <div class="home-step">
-    <div class="row items-center q-mb-md no-wrap">
-      <div class="text-h3 text-weight-bolder text-primary q-mr-md line-height-1">
+  <div class="home-step column">
+    <div class="row items-center no-wrap q-mb-md">
+      <div class="text-h4 text-weight-bolder text-primary line-height-1">
         {{ number }}
       </div>
-      <div class="step-line bg-grey-4 full-width"></div>
+      <div v-if="!isLast" class="step-line bg-grey-4 q-mx-md full-width"></div>
     </div>
-    <div class="text-subtitle1 text-weight-bolder text-dark q-mb-xs">
-      {{ title }}
-    </div>
-    <div class="text-caption text-grey-7 line-height-1-4">
-      {{ description }}
+    <div class="step-content">
+      <div class="text-subtitle1 text-weight-bolder text-dark q-mb-xs">
+        {{ title }}
+      </div>
+      <div class="text-caption text-grey-8 line-height-1-4">
+        {{ description }}
+      </div>
     </div>
   </div>
 </template>
@@ -20,6 +22,7 @@ defineProps<{
   number: string;
   title: string;
   description: string;
+  isLast?: boolean;
 }>();
 </script>
 
@@ -32,5 +35,8 @@ defineProps<{
 }
 .line-height-1-4 {
   line-height: 1.4;
+}
+.home-step {
+  height: 100%;
 }
 </style>

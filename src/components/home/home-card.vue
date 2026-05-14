@@ -1,11 +1,13 @@
 <template>
-  <q-card flat bordered class="home-card full-height q-pa-lg text-center">
+  <q-card class="home-card full-height q-py-md q-pr-md q-pl-lg text-left q-mx-auto">
     <q-card-section class="q-pa-none">
-      <div v-if="icon" class="q-mb-sm">
-        <q-icon :name="icon" color="primary" size="md" />
-      </div>
-      <div class="text-h6 text-weight-bolder text-primary q-mb-sm">
-        {{ title }}
+      <div class="row items-center no-wrap">
+        <div v-if="icon" class="q-mb-sm q-mr-md col-auto">
+          <q-icon :name="icon" color="primary" size="md" />
+        </div>
+        <div class="text-h6 text-weight-bolder text-primary q-mb-sm col">
+          {{ title }}
+        </div>
       </div>
       <div class="text-body2 text-grey-8 line-height-1-5">
         {{ subtitle }}
@@ -24,15 +26,16 @@ defineProps<{
 
 <style scoped>
 .home-card {
+  width: 80%;
   border-radius: 12px;
+  box-shadow: 0 8px 12px -4px rgba(0, 0, 0, 0.3) !important;
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
 }
 .home-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 12px 16px -4px rgba(0, 0, 0, 0.4) !important;
 }
 .line-height-1-5 {
   line-height: 1.5;

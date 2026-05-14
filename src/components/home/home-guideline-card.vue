@@ -1,5 +1,5 @@
 <template>
-  <q-card flat bordered class="guideline-card full-height">
+  <q-card flat bordered class="guideline-card full-height shadow-1">
     <q-card-section class="row items-center no-wrap q-pa-md">
       <q-avatar
         size="40px"
@@ -27,11 +27,13 @@ defineProps<{
 .guideline-card {
   border-radius: 8px;
   background: white;
+  border-color: rgba(var(--q-primary), 0.3) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
   transition: all 0.3s ease;
 }
 .guideline-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
-  border-color: var(--q-primary);
+  border-color: var(--q-primary) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08) !important;
 }
 .line-height-1-4 {
   line-height: 1.4;
