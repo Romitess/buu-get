@@ -3,8 +3,8 @@
     <div class="full-width">
       <AppPageHeader
         :breadcrumbs="breadcrumbs"
-        title="จัดการรายชื่อผู้เข้าสอบ"
-        subtitle="จัดการรายชื่อผู้เข้าสอบ พร้อมตรวจสอบข้อมูล การสมัคร และสถานะการเข้าสอบ"
+        :title="$t('admin.registrantManagement.pageTitle')"
+        :subtitle="$t('admin.registrantManagement.pageSubtitle')"
       />
 
       <AppExamSessionTabs v-model="selectedSessionId" :sessions="exam?.SESSIONS" />
@@ -23,7 +23,11 @@
       />
 
       <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
-        <SearchBar v-model="searchQuery" class="search-bar col-12 col-sm-auto" />
+        <SearchBar
+          v-model="searchQuery"
+          :placeholder="$t('admin.registrantManagement.searchPlaceholder')"
+          class="search-bar col-12 col-sm-auto"
+        />
         <q-space class="gt-xs" />
         <ExportCsvButton
           :columns="columns"
@@ -55,7 +59,7 @@
           </template>
 
           <template v-slot:body-cell-fullnameTh="{ row }">
-            <div>{{ row.fullnameTh }}</div>
+            <div class="text-center">{{ row.fullnameTh }}</div>
           </template>
 
           <template v-slot:body-cell-paymentStatus="{ row }">
@@ -74,7 +78,7 @@
             <div class="row justify-center q-gutter-x-sm no-wrap">
               <ActionButton
                 icon="visibility"
-                tooltip="ดูรายละเอียด"
+                :tooltip="$t('admin.registrantManagement.table.tooltips.viewDetail')"
                 :disable="false"
                 color="black"
                 @click="handleView(row.ermId)"
@@ -91,6 +95,7 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { QTableColumn } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import BaseTable from 'src/components/shared/BaseTable.vue';
 import ActionButton from 'src/components/shared/ActionButton.vue';
 import EnrollmentStatusBadge from 'src/components/shared/EnrollmentStatusBadge.vue';
@@ -105,11 +110,20 @@ import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollmen
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { label: 'หน้าหลัก', icon: 'home', to: { name: 'admin-dashboard' } },
-  { label: 'จัดการการสอบ', icon: 'star', to: { name: 'admin-exam-management' } },
-  { label: 'จัดการรายชื่อผู้เข้าสอบ', icon: 'star' },
+  {
+    label: t('profile.backToLogin').replace('กลับสู่หน้าล็อกอิน', 'หน้าหลัก'),
+    icon: 'home',
+    to: { name: 'admin-dashboard' },
+  },
+  {
+    label: t('admin.examManagement.table.columns.tools').replace('เครื่องมือ', 'จัดการการสอบ'),
+    icon: 'star',
+    to: { name: 'admin-exam-management' },
+  },
+  { label: t('admin.registrantManagement.pageTitle'), icon: 'star' },
 ];
 
 const {
@@ -183,25 +197,52 @@ const pagination = ref<PaginationModel>({
 });
 
 const columns: QTableColumn[] = [
-  { name: 'index', label: 'ลำดับ', field: 'index', align: 'center', style: 'width: 60px' },
-  { name: 'nationalId', label: 'เลขประจำตัว', field: 'nationalId', align: 'center' },
-  { name: 'titleTh', label: 'คำนำหน้า', field: 'titleTh', align: 'center' },
-  { name: 'fullnameTh', label: 'ชื่อ-นามสกุล', field: 'fullnameTh', align: 'left' },
+  {
+    name: 'index',
+    label: t('admin.registrantManagement.table.columns.index'),
+    field: 'index',
+    align: 'center',
+    style: 'width: 60px',
+  },
+  {
+    name: 'nationalId',
+    label: t('admin.registrantManagement.table.columns.nationalId'),
+    field: 'nationalId',
+    align: 'center',
+  },
+  {
+    name: 'titleTh',
+    label: t('admin.registrantManagement.table.columns.prefix'),
+    field: 'titleTh',
+    align: 'center',
+  },
+  {
+    name: 'fullnameTh',
+    label: t('admin.registrantManagement.table.columns.fullName'),
+    field: 'fullnameTh',
+    align: 'center',
+  },
   {
     name: 'paymentStatus',
-    label: 'สถานะ',
+    label: t('admin.registrantManagement.table.columns.paymentStatus'),
     field: 'paymentStatus',
     align: 'center',
     format: (val: number) => PAYMENT_STATUS_LABELS[val] || '-',
   },
   {
     name: 'verifyStatus',
-    label: 'สถานะความถูกต้อง',
+    label: t('admin.registrantManagement.table.columns.verifyStatus'),
     field: 'verifyStatus',
     align: 'center',
     format: (val: number) => VERIFY_STATUS_LABELS[val] || '-',
   },
-  { name: 'tools', label: 'เครื่องมือ', field: 'tools', align: 'center', style: 'width: 80px' },
+  {
+    name: 'tools',
+    label: t('admin.registrantManagement.table.columns.tools'),
+    field: 'tools',
+    align: 'center',
+    style: 'width: 80px',
+  },
 ];
 
 const onRequest = (props: TableRequestProps): void => {

@@ -124,13 +124,18 @@ const handleEdit = (id: string) => {
     message: `${t('admin.examManagement.notifications.editNav')} ID: ${id}`,
     position: 'top',
   });
+  void router.push({ name: 'admin-edit-exam', params: { examId: id } });
 };
 
 const handleDelete = async (id: string) => {
   try {
     isLoading.value = true;
-    $q.notify({ type: 'positive', message: `ลบการสอบ ID: ${id} สำเร็จ`, position: 'top' });
-    await fetchData();
+    await examStore.deleteExamRound(id);
+    $q.notify({
+      type: 'positive',
+      message: t('admin.examManagement.notifications.deleteSuccess') || 'ลบการสอบสำเร็จ',
+      position: 'top',
+    });
   } catch {
     $q.notify({
       type: 'negative',
