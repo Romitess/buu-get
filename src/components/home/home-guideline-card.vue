@@ -1,14 +1,7 @@
 <template>
   <q-card flat class="guideline-card full-height shadow-2">
     <q-card-section class="row items-center no-wrap q-pa-md">
-      <q-avatar
-        size="40px"
-        font-size="20px"
-        color="blue-1"
-        text-color="primary"
-        :icon="icon"
-        class="q-mr-md"
-      />
+      <q-icon :name="icon" color="primary" size="24px" class="q-mr-md" />
       <div class="text-body2 text-grey-9 text-weight-medium line-height-1-4">
         {{ text }}
       </div>
@@ -25,7 +18,10 @@ defineProps<{
 
 <style scoped>
 .guideline-card {
-  max-width: 570px;
+  max-width: 580px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
   margin: 0 auto;
   border-radius: 8px;
   background: white;
