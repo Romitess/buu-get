@@ -4,8 +4,9 @@ import type {
   DayData,
   ExamRound,
   BackendExam,
-  ExamInfo,
   BackendLocation,
+  ExamInfo,
+  AdmissionVoucherData,
 } from 'src/types/exam';
 import type { ExamSchedule } from 'src/types/exam.types';
 import {
@@ -345,6 +346,22 @@ export const deleteExam = async (id: number | string): Promise<void> => {
     await api.delete(`/exam/${id}`);
   } catch (error) {
     console.error('Error deleting exam:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches admission voucher data for a specific enrollment.
+ * @param enrollmentId - The ID of the enrollment record
+ */
+export const fetchAdmissionVoucher = async (
+  enrollmentId: number | string,
+): Promise<AdmissionVoucherData> => {
+  try {
+    const response = await api.get<AdmissionVoucherData>(`/enrollments/${enrollmentId}/voucher`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching admission voucher for enrollment ${enrollmentId}:`, error);
     throw error;
   }
 };
