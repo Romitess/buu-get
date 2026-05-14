@@ -165,11 +165,7 @@ const handlePrintAdmitCard = (id: string) => {
 };
 
 const handleViewCandidates = (id: string) => {
-  $q.notify({
-    type: 'info',
-    message: `${t('admin.examManagement.notifications.viewCandidates')} ID: ${id}`,
-    position: 'top',
-  });
+  void router.push({ name: 'admin-exam-attendance', params: { examId: id } });
 };
 
 const handleExportReport = (id: string) => {

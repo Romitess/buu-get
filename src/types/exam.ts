@@ -176,3 +176,15 @@ export interface ExamManagementItem {
   capacity: number;
   status: 'published' | 'unpublished';
 }
+export interface AdmissionVoucherData {
+  profileImage?: string;
+  testTakerId: string;
+  nameSurname: string;
+  citizenId: string;
+  testSession: string;
+  testDate: string;
+  timeRange: string;
+  venue: string;
+  seatNumber: string;
+  barcodeValue: string;
+}

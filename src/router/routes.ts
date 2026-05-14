@@ -163,6 +163,18 @@ const routes: RouteRecordRaw[] = [
               ],
             },
           },
+          {
+            path: 'exam-management/:examId/attendance',
+            name: 'admin-exam-attendance',
+            component: () => import('pages/admin/exam-attendance-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'ประวัติการเข้าสอบ', icon: 'star' },
+              ],
+            },
+          },
         ],
       },
     ],

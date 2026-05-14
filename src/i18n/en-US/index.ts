@@ -31,6 +31,20 @@ export default {
       certificate: 'Certificate',
       paymentDeadline: 'Payment deadline',
     },
+    voucher: {
+      title: "BUU-GET : Burapha University's Graduate English Test",
+      subtitle: 'ADMISSION VOUCHER',
+      fields: {
+        testTakerId: 'Test Taker ID:',
+        nameSurname: 'Name Surname:',
+        citizenId: 'Citizen ID:',
+        testSession: 'Test Session:',
+        testDate: 'Test Date:',
+        time: 'Time:',
+        venue: 'Venue:',
+        seatNumber: 'Seat Number:',
+      },
+    },
   },
   profile: {
     pageTitle: 'Personal Information',

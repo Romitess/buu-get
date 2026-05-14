@@ -22,7 +22,11 @@
         </section>
       </header>
 
-      <section class="col-auto row no-wrap items-center stats-section" v-if="isAdmin">
+      <section
+        class="col-auto row no-wrap items-center stats-section"
+        v-if="isAdmin && !isAttendance"
+      >
+        <q-separator vertical class="stat-divider q-mr-md gt-xs" />
         <div class="text-center q-px-lg">
           <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่สมัคร</div>
           <div class="applicant-value text-h4 text-weight-medium text-dark">
@@ -34,6 +38,18 @@
           <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่ชำระเงิน</div>
           <div class="applicant-value text-h4 text-weight-medium text-dark">
             {{ paidCount }}/{{ totalCapacity }}
+          </div>
+        </div>
+      </section>
+      <section
+        class="col-auto row no-wrap items-center stats-section"
+        v-else-if="isAdmin && isAttendance"
+      >
+        <q-separator vertical class="stat-divider q-mr-md gt-xs" />
+        <div class="text-center q-px-lg">
+          <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่มาแล้ว</div>
+          <div class="applicant-value text-h4 text-weight-medium text-dark">
+            {{ applicantCount }}/{{ totalCapacity }}
           </div>
         </div>
       </section>
@@ -53,6 +69,7 @@ interface Props {
   location: string;
   applicantCount?: number | string;
   isAdmin?: boolean;
+  isAttendance?: boolean;
   paidCount?: number | string;
   totalCapacity?: number | string;
   hidePaid?: boolean;
@@ -61,6 +78,7 @@ interface Props {
 withDefaults(defineProps<Props>(), {
   isAdmin: false,
   hidePaid: false,
+  isAttendance: false,
 });
 </script>
 
