@@ -8,7 +8,7 @@
     <div class="text-h4 text-md-h2 text-weight-bolder text-dark line-height-1">
       {{ title }}
     </div>
-    <div class="text-h4 text-md-h3 text-weight-bolder text-primary q-mb-md line-height-1">
+    <div class="text-h4 text-md-h3 text-weight-bold text-primary q-mb-md line-height-1">
       {{ subtitle }}
     </div>
 
