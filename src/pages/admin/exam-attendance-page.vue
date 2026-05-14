@@ -59,7 +59,7 @@
           </template>
 
           <template v-slot:body-cell-fullnameTh="{ row }">
-            <div class="text-left">{{ row.fullnameTh }}</div>
+            <div class="text-center">{{ row.fullnameTh }}</div>
           </template>
 
           <template v-slot:body-cell-seatNumber="{ row }">
@@ -189,7 +189,7 @@ const columns: QTableColumn[] = [
     name: 'fullnameTh',
     label: 'ชื่อ-นามสกุล',
     field: 'fullnameTh',
-    align: 'left',
+    align: 'center',
   },
   {
     name: 'seatNumber',
