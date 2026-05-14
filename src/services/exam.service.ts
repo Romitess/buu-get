@@ -167,12 +167,15 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
 /**
  * Fetches a single exam by its ID.
  */
+/**
+ * Fetches a single exam by ID with all relations (sessions, locations, fund source)
+ */
 export const fetchExamById = async (examId: number): Promise<BackendExam> => {
   try {
     const response = await api.get<BackendExam>(`/exam/${examId}`);
     return response.data;
   } catch (error) {
-    // Fallback: If /exam/:id fails, try fetching all and filtering (useful if single GET is not implemented)
+    // Fallback: If /exam/:id fails, try fetching all and filtering
     const response = await api.get<BackendExam[]>('/exam');
     const found = response.data.find((e) => e.EXAM_ID === examId);
     if (found) return found;
@@ -264,26 +267,6 @@ export const fetchExamLocations = async (): Promise<ExamLocationOption[]> => {
 export const mockScheduleData: Record<string, DayData> = {};
 
 export const mockHistoryRecords: ExamHistoryItem[] = [];
-
-/** Interface for the full Backend Exam response (with relations for edit) */
-export interface BackendExamFull extends BackendExam {
-  EXAM_FORMAT?: string;
-  EXAM_REG_START_DATE?: string;
-  EXAM_REG_END_DATE?: string;
-  EXAM_PAY_START_DATE?: string;
-  EXAM_PAY_END_DATE?: string;
-  EXAM_PUBLISHED?: boolean;
-  FUND_SOURCE_ID?: number;
-  FUND_SOURCE?: FundSource;
-}
-
-/**
- * Fetches a single exam by ID with all relations (sessions, locations, fund source)
- */
-export const fetchExamById = async (id: number): Promise<BackendExamFull> => {
-  const response = await api.get<BackendExamFull>(`/exam/${id}`);
-  return response.data;
-};
 
 /** Payload for updating an existing exam round */
 export interface UpdateExamPayload extends CreateExamPayload {
