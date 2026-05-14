@@ -170,7 +170,7 @@ import AppButton from 'src/components/base/app-button.vue';
 import AppExamSeatCard from 'src/components/exam/app-exam-seat-card.vue';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
-import SearchBar from 'src/components/shared/SearchBar.vue';
+import SearchBar from 'src/components/shared/search-bar.vue';
 import AppExamSeatSquare from 'src/components/exam/app-exam-seat-square.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppExamSessionTime from 'src/components/exam/app-exam-session-time.vue';

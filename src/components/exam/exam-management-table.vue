@@ -63,7 +63,7 @@ import type { QTableColumn } from 'quasar';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import BaseTable from '../shared/base-table.vue';
-import ActionButton from '../shared/ActionButton.vue';
+import ActionButton from '../shared/action-button.vue';
 import { useThaiDate } from 'src/composables/useThaiDate';
 import {
   type ExamSchedule,

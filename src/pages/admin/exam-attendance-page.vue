@@ -87,7 +87,7 @@ import { useRoute } from 'vue-router';
 import type { QTableColumn } from 'quasar';
 import BaseTable from 'src/components/shared/base-table.vue';
 import AttendanceStatusBadge from 'src/components/shared/attendance-status-badge.vue';
-import SearchBar from 'src/components/shared/SearchBar.vue';
+import SearchBar from 'src/components/shared/search-bar.vue';
 import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
 import AppExamSessionTabs from 'src/components/exam/app-exam-session-time.vue';

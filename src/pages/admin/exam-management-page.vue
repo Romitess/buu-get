@@ -53,7 +53,7 @@ import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import ExamManagementTable from 'src/components/exam/exam-management-table.vue';
-import SearchBar from 'src/components/shared/SearchBar.vue';
+import SearchBar from 'src/components/shared/search-bar.vue';
 import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
 import { ROLES } from 'src/constants/roles';
