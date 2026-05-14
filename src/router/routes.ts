@@ -135,6 +135,23 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'exam-management/:examId/seats/candidates',
+            name: 'admin-exam-seat-candidates',
+            component: () => import('pages/admin/exam-seat-candidates-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                {
+                  label: 'จัดการที่นั่งสอบ',
+                  icon: 'event_seat',
+                  to: '/admin/exam-management/:examId/seats',
+                },
+                { label: 'รายชื่อและที่นั่งผู้เข้าสอบ', icon: 'star' },
+              ],
+            },
+          },
+          {
             path: 'exam-management/:examId/registrants',
             name: 'admin-exam-registrants',
             component: () => import('pages/admin/exam-registrants-page.vue'),

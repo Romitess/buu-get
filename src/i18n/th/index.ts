@@ -370,6 +370,38 @@ export default {
         },
       },
     },
+    seatManagement: {
+      pageTitle: 'จัดการที่นั่งสอบ',
+      pageSubtitle: 'วางผังและจัดการที่นั่งสอบ เพื่อรองรับผู้เข้าสอบได้อย่างเหมาะสมและสะดวก',
+      studentListTitle: 'รายชื่อผู้สมัครและที่นั่ง',
+      emptyStudentList: 'ไม่พบรายชื่อผู้เข้าสอบ',
+      seatLayoutTitle: 'แผนผังที่นั่งสอบ',
+      availableSeat: 'ที่นั่งว่าง',
+      assignedSeat: 'จัดที่นั่งแล้ว',
+      cancelButton: 'ยกเลิกการจัดที่นั่ง',
+      saveButton: 'ยืนยันการจัดที่นั่ง',
+      savingData: 'กำลังบันทึกข้อมูลผังที่นั่ง...',
+      noName: 'ไม่มีชื่อ',
+      notifications: {
+        saveSuccess: 'บันทึกการจัดที่นั่งเรียบร้อยแล้ว',
+        saveError: 'ไม่สามารถบันทึกข้อมูลได้',
+        loadError: 'ไม่สามารถโหลดข้อมูลการสอบได้',
+      },
+    },
+    seatCandidates: {
+      pageTitle: 'จัดการที่นั่งสอบ',
+      pageSubtitle: 'วางผังและจัดการที่นั่งสอบ เพื่อรองรับผู้เข้าสอบได้อย่างเหมาะสมและสะดวก',
+      printVoucher: 'ออกใบเข้าห้องสอบ',
+      table: {
+        columns: {
+          index: 'ลำดับ',
+          nationalId: 'รหัสประจำตัว',
+          prefix: 'คำนำหน้า',
+          fullName: 'ชื่อ-นามสกุล',
+          seatNumber: 'เลขที่นั่งสอบ',
+        },
+      },
+    },
   },
   auth: {
     welcome: 'ยินดีต้อนรับ',
