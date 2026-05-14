@@ -20,7 +20,7 @@ const DEFAULT_EXAM_TITLE = 'BUU - GET';
 const DEFAULT_LOCATION_TEXT = 'TBA';
 
 /** Helper to clean and format time strings to HH:mm */
-const formatTime = (timeStr: string | null | undefined): string => {
+export const formatTime = (timeStr: string | null | undefined): string => {
   if (!timeStr) return '00:00';
   return timeStr.replace(/\s/g, '').substring(0, 5);
 };
@@ -152,10 +152,7 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
         examLocation: locationName,
         registeredCount,
         capacity,
-        status:
-          (exam as BackendExam & { EXAM_PUBLISHED?: boolean }).EXAM_PUBLISHED === false
-            ? 'unpublished'
-            : 'published',
+        status: exam.EXAM_PUBLISHED === false ? 'unpublished' : 'published',
       };
     });
   } catch (error) {
@@ -165,21 +162,18 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
 };
 
 /**
- * Fetches a single exam by its ID.
- */
-/**
  * Fetches a single exam by ID with all relations (sessions, locations, fund source)
  */
-export const fetchExamById = async (examId: number): Promise<BackendExam> => {
+export const fetchExamById = async (id: number): Promise<BackendExam> => {
   try {
-    const response = await api.get<BackendExam>(`/exam/${examId}`);
+    const response = await api.get<BackendExam>(`/exam/${id}`);
     return response.data;
   } catch (error) {
     // Fallback: If /exam/:id fails, try fetching all and filtering
     const response = await api.get<BackendExam[]>('/exam');
-    const found = response.data.find((e) => e.EXAM_ID === examId);
+    const found = response.data.find((e) => e.EXAM_ID === id);
     if (found) return found;
-    console.error(`Error fetching exam ${examId}:`, error);
+    console.error(`Error fetching exam ${id}:`, error);
     throw error;
   }
 };

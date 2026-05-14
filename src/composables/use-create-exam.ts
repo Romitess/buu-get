@@ -7,6 +7,8 @@ import {
   EXAM_TYPE_GENERAL,
   EXAM_TYPE_SPECIAL,
   EXAM_FORMAT_COMPUTER,
+  MAX_EXAM_SESSIONS,
+  MIN_EXAM_SESSIONS,
 } from 'src/constants/exam';
 import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
 import {
@@ -14,6 +16,7 @@ import {
   fetchFundSources,
   fetchExamById,
   updateExamRound,
+  formatTime,
 } from 'src/services/exam.service';
 
 export interface TimeSlot {
@@ -182,7 +185,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
   const addTimeSlot = () => {
     if (isScheduleLocked.value) return;
-    if (form.value.timeSlots.length < 4) {
+    if (form.value.timeSlots.length < MAX_EXAM_SESSIONS) {
       form.value.timeSlots.push({
         startTime: '',
         endTime: '',
@@ -190,7 +193,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     } else {
       $q.notify({
         type: 'warning',
-        message: 'สามารถเพิ่มรอบเวลาสอบได้สูงสุด 4 รอบ',
+        message: `สามารถเพิ่มรอบเวลาสอบได้สูงสุด ${MAX_EXAM_SESSIONS} รอบ`,
         position: 'top',
       });
     }
@@ -198,12 +201,12 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
   const removeTimeSlot = (index: number) => {
     if (isScheduleLocked.value) return;
-    if (form.value.timeSlots.length > 1) {
+    if (form.value.timeSlots.length > MIN_EXAM_SESSIONS) {
       form.value.timeSlots.splice(index, 1);
     } else {
       $q.notify({
         type: 'warning',
-        message: 'ต้องมีช่วงเวลาสอบอย่างน้อย 1 ช่วงเวลา',
+        message: `ต้องมีช่วงเวลาสอบอย่างน้อย ${MIN_EXAM_SESSIONS} ช่วงเวลา`,
         position: 'top',
       });
     }
@@ -220,18 +223,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const handleSave = async (): Promise<boolean> => {
     const timeRanges = form.value.timeSlots
       .filter((slot) => slot.startTime && slot.endTime)
-      .map((slot) => {
-        // Ensure format is HH:mm (no seconds) as per DTO examples
-        const formatTime = (t: string) => {
-          const cleaned = t.replace(/\s/g, '');
-          // If it has seconds (08:00:00), trim them to 08:00
-          return cleaned.length > 5 ? cleaned.substring(0, 5) : cleaned;
-        };
-        return {
-          startTime: formatTime(slot.startTime),
-          endTime: formatTime(slot.endTime),
-        };
-      });
+      .map((slot) => ({
+        startTime: formatTime(slot.startTime),
+        endTime: formatTime(slot.endTime),
+      }));
 
     if (timeRanges.length === 0) {
       $q.notify({
