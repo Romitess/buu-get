@@ -1,48 +1,73 @@
 import { ref, computed } from 'vue';
 import type { EnrollmentTableRow } from 'src/types/enrollment.types';
+import type { BackendExam } from 'src/types/exam';
 import { fetchEnrollmentsByExamId } from 'src/services/enrollment.service';
+import { fetchExamById } from 'src/services/exam.service';
 
-/**
- * Composable for managing exam registrants data.
- * Used only in exam-registrants-page — no Pinia store needed (per CONTRIBUTING.md guidelines).
- */
 export function useExamRegistrants() {
-  // State
   const enrollments = ref<EnrollmentTableRow[]>([]);
+  const exam = ref<BackendExam | null>(null);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
   const searchQuery = ref('');
+  const selectedSessionId = ref<number | null>(null);
 
-  // Computed
   const filteredEnrollments = computed((): EnrollmentTableRow[] => {
-    if (!searchQuery.value) return enrollments.value;
+    let list = enrollments.value;
 
-    const query = searchQuery.value.toLowerCase();
-    return enrollments.value.filter(
-      (row: EnrollmentTableRow) =>
-        row.nationalId.toLowerCase().includes(query) ||
-        row.fullnameTh.toLowerCase().includes(query) ||
-        row.titleTh.toLowerCase().includes(query),
-    );
+    if (selectedSessionId.value) {
+      list = list.filter((e) => e.sessionId === selectedSessionId.value);
+    }
+
+    if (searchQuery.value) {
+      const query = searchQuery.value.toLowerCase();
+      list = list.filter(
+        (row: EnrollmentTableRow) =>
+          row.nationalId.toLowerCase().includes(query) ||
+          row.fullnameTh.toLowerCase().includes(query) ||
+          row.titleTh.toLowerCase().includes(query),
+      );
+    }
+
+    return list;
   });
 
-  const totalCount = computed((): number => enrollments.value.length);
-
-  const paidCount = computed((): number => {
-    // ERM_STATUS >= 1 means PAID or higher (PAID, SEAT_ASSIGNED, ATTENDED)
-    return enrollments.value.filter(
-      (row: EnrollmentTableRow) => row.paymentStatus >= 1 && row.paymentStatus !== 4,
-    ).length;
+  const sessionTotalCount = computed((): number => {
+    if (!selectedSessionId.value) return enrollments.value.length;
+    return enrollments.value.filter((e) => e.sessionId === selectedSessionId.value).length;
   });
 
-  // Methods
+  const sessionPaidCount = computed((): number => {
+    const list = selectedSessionId.value
+      ? enrollments.value.filter((e) => e.sessionId === selectedSessionId.value)
+      : enrollments.value;
+    return list.filter((e) => e.paymentStatus >= 1 && e.paymentStatus !== 4).length;
+  });
+
   const fetchEnrollments = async (examId: number): Promise<void> => {
     isLoading.value = true;
     error.value = null;
     try {
-      enrollments.value = await fetchEnrollmentsByExamId(examId);
-    } catch {
-      error.value = 'เกิดข้อผิดพลาดในการโหลดข้อมูลผู้สมัครสอบ';
+      const enrollmentTask = fetchEnrollmentsByExamId(examId).catch((err) => {
+        console.error('Failed to fetch enrollments:', err);
+        return [];
+      });
+      const examTask = fetchExamById(examId).catch((err) => {
+        console.error('Failed to fetch exam details:', err);
+        return null;
+      });
+
+      const [enrollmentData, examData] = await Promise.all([enrollmentTask, examTask]);
+
+      enrollments.value = enrollmentData;
+      exam.value = examData;
+
+      if (enrollmentData.length === 0 && !examData) {
+        error.value = 'ไม่พบข้อมูลการสอบหรือรายชื่อผู้สมัคร';
+      }
+    } catch (err) {
+      console.error('Critical error in fetchEnrollments:', err);
+      error.value = 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
     } finally {
       isLoading.value = false;
     }
@@ -50,12 +75,14 @@ export function useExamRegistrants() {
 
   return {
     enrollments,
+    exam,
     isLoading,
     error,
     searchQuery,
+    selectedSessionId,
     filteredEnrollments,
-    totalCount,
-    paidCount,
+    sessionTotalCount,
+    sessionPaidCount,
     fetchEnrollments,
   };
 }

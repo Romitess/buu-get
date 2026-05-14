@@ -61,6 +61,7 @@ export interface EnrollmentTableRow {
   fullnameTh: string;
   paymentStatus: number;
   verifyStatus: number;
+  sessionId: number;
 }
 
 export enum EnrollmentStatus {

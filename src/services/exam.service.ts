@@ -150,8 +150,21 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
 };
 
 /**
- * Converts DD/MM/YYYY (Buddhist) to YYYY-MM-DD (Gregorian)
+ * Fetches a single exam by its ID.
  */
+export const fetchExamById = async (examId: number): Promise<BackendExam> => {
+  try {
+    const response = await api.get<BackendExam>(`/exam/${examId}`);
+    return response.data;
+  } catch (error) {
+    // Fallback: If /exam/:id fails, try fetching all and filtering (useful if single GET is not implemented)
+    const response = await api.get<BackendExam[]>('/exam');
+    const found = response.data.find((e) => e.EXAM_ID === examId);
+    if (found) return found;
+    console.error(`Error fetching exam ${examId}:`, error);
+    throw error;
+  }
+};
 const buddhistToGregorian = (dateStr: string): string => {
   if (!dateStr) return '';
   const [d, m, y] = dateStr.split('/');

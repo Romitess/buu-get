@@ -1,76 +1,95 @@
 <template>
-  <q-page class="q-px-xl q-pt-md q-pb-lg flex column items-center" style="min-height: 0 !important">
-    <div class="full-width" style="max-width: 1200px">
-      <div class="q-mb-md">
-        <div class="text-h5 text-weight-bold text-dark">จัดการรายชื่อผู้เข้าสอบ</div>
-        <div class="text-subtitle2 text-grey-7">
+  <q-page class="registrants-page q-px-lg q-px-sm-xl q-py-lg">
+    <div class="full-width">
+      <header class="q-mb-md">
+        <h1 class="text-h5 text-weight-bold header-title">จัดการรายชื่อผู้เข้าสอบ</h1>
+        <p class="text-subtitle2 text-grey-7">
           จัดการรายชื่อผู้เข้าสอบ พร้อมตรวจสอบข้อมูล การสมัคร และสถานะการเข้าสอบ
-        </div>
-      </div>
+        </p>
+      </header>
 
-      <div class="row items-center q-mb-md q-gutter-x-md">
-        <SearchBar v-model="searchQuery" />
-        <q-space />
+      <AppExamSessionTabs v-model="selectedSessionId" :sessions="exam?.SESSIONS" />
+
+      <AppExamInfoCard
+        v-if="exam"
+        class="q-mb-md"
+        :title="exam.EXAM_NAME"
+        :date="formatThaiDate(exam.EXAM_DATE)"
+        :time="selectedSessionTime"
+        :location="selectedSessionLocation"
+        :applicant-count="sessionTotalCount"
+        :paid-count="sessionPaidCount"
+        :total-capacity="selectedSessionCapacity"
+        is-admin
+      />
+
+      <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
+        <SearchBar v-model="searchQuery" class="search-bar col-12 col-sm-auto" />
+        <q-space class="gt-xs" />
         <ExportCsvButton
           :columns="columns"
           :rows="filteredEnrollments"
           file-name-prefix="exam-registrants"
+          class="export-btn col-12 col-sm-auto"
         />
-      </div>
+      </nav>
 
-      <BaseTable
-        :columns="columns"
-        :rows="filteredEnrollments"
-        :loading="isLoading"
-        :pagination="pagination"
-        @request="onRequest"
-      >
-        <template v-slot:body-cell-index="{ row }">
-          <div class="text-center">{{ row.index }}</div>
-        </template>
+      <main>
+        <BaseTable
+          :columns="columns"
+          :rows="filteredEnrollments"
+          :loading="isLoading"
+          :pagination="pagination"
+          class="registrants-table"
+          @request="onRequest"
+        >
+          <template v-slot:body-cell-index="{ row }">
+            <div class="text-center">{{ row.index }}</div>
+          </template>
 
-        <template v-slot:body-cell-nationalId="{ row }">
-          <div class="text-center">{{ row.nationalId }}</div>
-        </template>
+          <template v-slot:body-cell-nationalId="{ row }">
+            <div class="text-center">{{ row.nationalId }}</div>
+          </template>
 
-        <template v-slot:body-cell-titleTh="{ row }">
-          <div class="text-center">{{ row.titleTh }}</div>
-        </template>
+          <template v-slot:body-cell-titleTh="{ row }">
+            <div class="text-center">{{ row.titleTh }}</div>
+          </template>
 
-        <template v-slot:body-cell-fullnameTh="{ row }">
-          <div>{{ row.fullnameTh }}</div>
-        </template>
+          <template v-slot:body-cell-fullnameTh="{ row }">
+            <div>{{ row.fullnameTh }}</div>
+          </template>
 
-        <template v-slot:body-cell-paymentStatus="{ row }">
-          <div class="text-center">
-            <EnrollmentStatusBadge :status="row.paymentStatus" type="payment" />
-          </div>
-        </template>
+          <template v-slot:body-cell-paymentStatus="{ row }">
+            <div class="text-center">
+              <EnrollmentStatusBadge :status="row.paymentStatus" type="payment" />
+            </div>
+          </template>
 
-        <template v-slot:body-cell-verifyStatus="{ row }">
-          <div class="text-center">
-            <EnrollmentStatusBadge :status="row.verifyStatus" type="verify" />
-          </div>
-        </template>
+          <template v-slot:body-cell-verifyStatus="{ row }">
+            <div class="text-center">
+              <EnrollmentStatusBadge :status="row.verifyStatus" type="verify" />
+            </div>
+          </template>
 
-        <template v-slot:body-cell-tools="{ row }">
-          <div class="row justify-center q-gutter-x-sm no-wrap">
-            <ActionButton
-              icon="visibility"
-              tooltip="ดูรายละเอียด"
-              :disable="false"
-              color="black"
-              @click="handleView(row.ermId)"
-            />
-          </div>
-        </template>
-      </BaseTable>
+          <template v-slot:body-cell-tools="{ row }">
+            <div class="row justify-center q-gutter-x-sm no-wrap">
+              <ActionButton
+                icon="visibility"
+                tooltip="ดูรายละเอียด"
+                :disable="false"
+                color="black"
+                @click="handleView(row.ermId)"
+              />
+            </div>
+          </template>
+        </BaseTable>
+      </main>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { QTableColumn } from 'quasar';
 import BaseTable from 'src/components/shared/BaseTable.vue';
@@ -78,6 +97,8 @@ import ActionButton from 'src/components/shared/ActionButton.vue';
 import EnrollmentStatusBadge from 'src/components/shared/EnrollmentStatusBadge.vue';
 import SearchBar from 'src/components/shared/SearchBar.vue';
 import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
+import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
+import AppExamSessionTabs from 'src/components/exam/app-exam-session-time.vue';
 import { useExamRegistrants } from 'src/composables/use-exam-registrants';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollment.types';
@@ -85,7 +106,69 @@ import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollmen
 const route = useRoute();
 const router = useRouter();
 
-const { isLoading, searchQuery, filteredEnrollments, fetchEnrollments } = useExamRegistrants();
+const {
+  isLoading,
+  exam,
+  searchQuery,
+  selectedSessionId,
+  filteredEnrollments,
+  sessionTotalCount,
+  sessionPaidCount,
+  fetchEnrollments,
+} = useExamRegistrants();
+
+const selectedSession = computed(() => {
+  return exam.value?.SESSIONS?.find((s) => s.SS_ID === selectedSessionId.value) || null;
+});
+
+const selectedSessionTime = computed(() => {
+  if (!selectedSession.value) return '-';
+  const start = (selectedSession.value.SS_START_TIME || '').substring(0, 5);
+  const end = (selectedSession.value.SS_END_TIME || '').substring(0, 5);
+  return `${start}-${end}`;
+});
+
+const selectedSessionLocation = computed(() => {
+  if (!selectedSession.value?.LOCATION) return '-';
+  const loc = selectedSession.value.LOCATION;
+  return `${loc.LOCATION_NAME}${loc.LOCATION_ROOM_NO ? ` (${loc.LOCATION_ROOM_NO})` : ''}`;
+});
+
+const selectedSessionCapacity = computed(() => {
+  return selectedSession.value?.SS_CAPACITY || 0;
+});
+
+const formatThaiDate = (dateStr: string): string => {
+  if (!dateStr) return '-';
+  const date = new Date(dateStr);
+  const months = [
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
+  ];
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = date.getFullYear() + 543;
+  return `${day} ${month} ${year}`;
+};
+
+watch(exam, (newExam) => {
+  if (newExam && newExam.SESSIONS && newExam.SESSIONS.length > 0 && !selectedSessionId.value) {
+    const firstSession = newExam.SESSIONS[0];
+    if (firstSession) {
+      selectedSessionId.value = firstSession.SS_ID;
+    }
+  }
+});
 
 const pagination = ref<PaginationModel>({
   page: 1,
@@ -146,7 +229,32 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.text-dark {
-  color: #212121 !important;
+.registrants-page {
+  min-height: 0 !important;
+}
+
+.header-title {
+  color: var(--dashboard-header-text);
+  margin: 0;
+}
+
+.search-bar {
+  min-width: 300px;
+  @media (max-width: $breakpoint-xs-max) {
+    min-width: 100%;
+  }
+}
+
+.export-btn {
+  @media (max-width: $breakpoint-xs-max) {
+    width: 100%;
+  }
+}
+
+.registrants-table {
+  :deep(.q-table__container) {
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
 }
 </style>

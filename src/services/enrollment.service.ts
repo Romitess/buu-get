@@ -13,6 +13,7 @@ export const fetchEnrollmentsByExamId = async (examId: number): Promise<Enrollme
       fullnameTh: enrollment.USER?.PROFILE?.userFullnameTh || '-',
       paymentStatus: enrollment.ERM_STATUS,
       verifyStatus: enrollment.ERM_VERIFY_STATUS,
+      sessionId: enrollment.SESSION_ID,
     }),
   );
 };

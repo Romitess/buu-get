@@ -1,51 +1,51 @@
 <template>
-  <q-page class="q-px-xl q-pt-xl q-pb-xl flex column items-center">
-    <div class="full-width" style="max-width: 1200px">
-      <div class="q-mb-xl">
-        <div class="text-h5 text-weight-bold" style="color: #212121">ตรวจสอบข้อมูลการสมัครสอบ</div>
-        <div class="text-subtitle2 text-grey-7 q-mt-xs">
+  <q-page class="registrant-detail-page q-px-lg q-px-sm-xl q-py-lg">
+    <div class="full-width">
+      <header class="q-mb-md">
+        <h1 class="text-h5 text-weight-bold header-title">ตรวจสอบข้อมูลการสมัครสอบ</h1>
+        <p class="text-subtitle2 text-grey-7 q-mt-xs">
           ตรวจสอบข้อมูลผู้สมัครสอบเพื่ออนุมัติหรือแจ้งแก้ไขก่อนพิมพ์บัตรสอบ
-        </div>
-      </div>
+        </p>
+      </header>
 
       <div v-if="isLoading" class="flex flex-center q-pa-xl">
         <q-spinner-dots color="primary" size="40px" />
       </div>
 
-      <div v-else-if="enrollment">
+      <main v-else-if="enrollment">
         <RegistrantPersonalDetail :enrollment="enrollment" />
 
-        <div class="row justify-end q-mt-xl q-gutter-md">
+        <div class="action-container row justify-end q-mt-sm q-gutter-sm q-gutter-md-md">
           <AppButton
             label="ยกเลิก"
             color="grey-3"
             text-color="dark"
             unelevated
-            style="min-width: 150px; height: 52px; border-radius: 10px; font-weight: 700"
+            class="action-btn col-12 col-sm-auto"
             @click="goBack"
           />
           <AppButton
             label="แจ้งข้อมูลให้แก้ไข"
             color="negative"
             unelevated
-            style="min-width: 150px; height: 52px; border-radius: 10px; font-weight: 700"
+            class="action-btn col-12 col-sm-auto"
             @click="showFixDialog = true"
           />
           <AppButton
             label="ยืนยันการตรวจสอบ"
             color="primary"
             unelevated
-            style="min-width: 150px; height: 52px; border-radius: 10px; font-weight: 700"
+            class="action-btn col-12 col-sm-auto"
             @click="handleVerify"
           />
         </div>
-      </div>
+      </main>
 
-      <div v-else class="text-center q-pa-xl">
+      <section v-else class="text-center q-pa-xl">
         <q-icon name="error_outline" size="64px" color="negative" />
-        <div class="text-h6 q-mt-md">ไม่พบข้อมูลการสมัครสอบ</div>
+        <h2 class="text-h6 q-mt-md">ไม่พบข้อมูลการสมัครสอบ</h2>
         <AppButton label="กลับไปหน้าหลัก" color="primary" class="q-mt-lg" @click="goBack" />
-      </div>
+      </section>
     </div>
 
     <RequestFixDialog
@@ -113,15 +113,8 @@ const goBack = (): void => {
   router.back();
 };
 
-interface RequestFixFormData {
-  fixDeadline: string;
-  reasons: string[];
-  notes: string;
-}
-
-const handleFixSubmit = async (_formData: RequestFixFormData): Promise<void> => {
+const handleFixSubmit = async (): Promise<void> => {
   if (!enrollment.value) return;
-  console.log('[Fix Request Data]', _formData);
 
   try {
     await updateEnrollmentStatus(enrollment.value.ERM_ID, {
@@ -177,4 +170,37 @@ onMounted(() => {
 });
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.header-title {
+  color: var(--dashboard-header-text);
+  margin: 0;
+}
+
+.action-btn {
+  min-width: 150px;
+  height: 52px;
+  border-radius: 10px;
+  font-weight: 700;
+
+  @media (max-width: $breakpoint-xs-max) {
+    min-width: 100%;
+    order: -1;
+  }
+}
+
+@media (max-width: $breakpoint-xs-max) {
+  .action-container {
+    flex-direction: column;
+
+    .action-btn:nth-child(3) {
+      order: 1;
+    }
+    .action-btn:nth-child(2) {
+      order: 2;
+    }
+    .action-btn:nth-child(1) {
+      order: 3;
+    }
+  }
+}
+</style>

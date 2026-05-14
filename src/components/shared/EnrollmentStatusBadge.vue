@@ -98,21 +98,18 @@ const badgeClass = computed((): string => {
   border: 1.5px solid #4caf50;
 }
 
-// Verify: รอการแก้ไข — orange/red border/text
 .badge--wait-fixed {
   color: #c62828;
   background-color: transparent;
   border: 1.5px solid #ef5350;
 }
 
-// Verify: รอการตรวจสอบ — grey border/text
 .badge--unchecked {
-  color: #424242;
+  color: #1565c0;
   background-color: transparent;
-  border: 1.5px solid #9e9e9e;
+  border: 1.5px solid #1976d2;
 }
 
-// Cancelled — grey
 .badge--cancelled {
   color: #757575;
   background-color: transparent;

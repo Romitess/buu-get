@@ -1,25 +1,28 @@
 <template>
   <q-card flat bordered class="registrant-card">
-    <div class="row items-center q-px-lg q-py-md">
+    <header class="row items-center q-px-lg q-py-md">
       <q-icon name="person_outline" size="24px" color="dark" class="q-mr-sm" />
-      <span class="text-h6 text-weight-bold">ข้อมูลส่วนตัว</span>
-    </div>
+      <h2 class="text-h6 text-weight-bold q-ma-none">ข้อมูลส่วนตัว</h2>
+    </header>
 
     <q-separator />
 
-    <div class="row q-px-lg q-py-xl q-col-gutter-x-xl">
-      <div class="col-12 col-md-3 flex column items-center">
-        <div class="photo-container">
-          <q-img
-            src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-            class="profile-img"
-            fit="cover"
-          />
-        </div>
-        <div class="text-center q-mt-md">
-          <div class="text-subtitle2 text-weight-bold">user_photo.jpg</div>
-          <div class="text-caption text-grey-6">1.2 MB · อัปโหลด 15 ม.ค. 2569</div>
-        </div>
+    <section class="registrant-content row q-px-lg q-col-gutter-x-xl">
+      <div class="col-12 col-md-3">
+        <figure class="flex column items-center q-ma-none">
+          <div class="photo-container">
+            <q-img
+              src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+              class="profile-img"
+              fit="cover"
+              alt="รูปโปรไฟล์ผู้สมัคร"
+            />
+          </div>
+          <figcaption class="text-center q-mt-md">
+            <div class="text-subtitle2 text-weight-bold">user_photo.jpg</div>
+            <div class="text-caption text-grey-6">1.2 MB · อัปโหลด 15 ม.ค. 2569</div>
+          </figcaption>
+        </figure>
       </div>
 
       <div class="col-12 col-md-9">
@@ -65,7 +68,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </section>
   </q-card>
 </template>
 
@@ -105,12 +108,16 @@ const displayData = computed(() => {
 <style scoped lang="scss">
 .registrant-card {
   border-radius: 16px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--dashboard-border-color);
   background-color: #ffffff;
-  box-shadow:
-    0 4px 6px rgba(0, 0, 0, 0.02),
-    0 15px 30px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: var(--dashboard-card-shadow) !important;
   overflow: hidden;
+  min-height: 600px;
+}
+
+.registrant-content {
+  padding-top: 100px;
+  padding-bottom: 100px;
 }
 
 .photo-container {

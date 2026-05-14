@@ -52,6 +52,14 @@
   --thaid-bg: #00006e;
   --thaid-bg-rgb: 0, 0, 110;
 
+  // Registrant Dashboard Specific
+  --dashboard-card-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  --dashboard-border-color: #e0e0e0;
+  --dashboard-header-text: #212121;
+  --dashboard-tab-border: #e2e2e28a;
+  --dashboard-info-item-icon: #424242;
+  --dashboard-divider-color: #e2e8f0;
+
   // Calendar / Status accents
   --calendar-today-bg: #f3f4f6;
   --calendar-active-bg: #1d4ed8;
@@ -147,12 +155,12 @@
   --space-xl: calc(var(--space-unit) * 8); // 32px
   --space-2xl: calc(var(--space-unit) * 12); // 48px
 
-  // exam Dialog & Component 
+  // exam Dialog & Component
   --dialog-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
   --dialog-icon-shadow: 0 4px 12px rgba(13, 71, 161, 0.25);
   --dialog-icon-gradient: linear-gradient(135deg, #bbdefb 0%, #e3f2fd 100%);
   --dialog-info-border: #aecdf5;
-  
+
   --clock-bg: #ffffff;
   --clock-icon: #424242;
   --clock-border: #e0e0e0;
@@ -161,7 +169,7 @@
 
   --round-exam-hover-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
   --round-exam-divider: #f5f5f5;
-  
+
   --detail-card-badge-bg: #e8f0fe;
   --detail-card-hover-bg: #f9fbff;
   --detail-card-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -484,10 +492,10 @@ body {
 
   &__rounds-header {
     flex: 0 0 auto;
-    margin-bottom: 12px; 
+    margin-bottom: 12px;
 
     @media (min-width: 1024px) {
-      margin-bottom: 16px !important; 
+      margin-bottom: 16px !important;
     }
 
     @media (max-width: 600px) {
@@ -538,7 +546,7 @@ body {
     flex-direction: column;
     gap: 12px;
     overflow-y: auto;
-    padding: 8px 8px 8px 0; 
+    padding: 8px 8px 8px 0;
     min-height: 0;
     scrollbar-gutter: stable;
 

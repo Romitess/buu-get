@@ -1,34 +1,48 @@
 <template>
-  <q-dialog v-model="internalValue" persistent>
-    <q-card class="request-fix-dialog" style="width: 480px; max-width: 95vw; border-radius: 16px">
-      <q-card-section class="q-px-lg q-pt-lg q-pb-md">
-        <div class="text-h5 text-weight-bold" style="color: #212121">
+  <q-dialog v-model="internalValue" :maximized="$q.screen.xs" persistent>
+    <q-card class="request-fix-dialog">
+      <header class="q-px-lg q-pt-lg q-pb-md relative-position">
+        <h2 class="text-h5 text-weight-bold dashboard-header q-ma-none">
           แจ้งให้ผู้สมัครแก้ไขข้อมูล
-        </div>
-        <div class="text-subtitle2 text-grey-7 q-mt-xs">
+        </h2>
+        <p class="text-subtitle2 text-grey-7 q-mt-xs q-ma-none">
           กรอกรายละเอียดเพื่อส่งคำขอแก้ไขไปยังผู้สมัคร
-        </div>
-      </q-card-section>
+        </p>
+        <q-btn
+          v-if="$q.screen.xs"
+          icon="close"
+          flat
+          round
+          dense
+          v-close-popup
+          class="absolute-top-right q-mt-md q-mr-md text-grey-7"
+        />
+      </header>
 
-      <q-separator style="height: 1.2px" color="grey-3" />
+      <q-separator class="dashboard-divider" />
 
-      <q-card-section class="q-px-lg q-pt-lg q-pb-none">
-        <div class="profile-info-block row items-center q-pa-md q-mb-lg">
-          <q-avatar color="primary" text-color="white" size="48px" class="q-mr-md text-weight-bold">
+      <section class="dialog-content q-px-lg q-pt-lg q-pb-none scroll">
+        <div class="profile-info-block row items-center q-pa-md q-mb-lg no-wrap-sm">
+          <q-avatar
+            color="primary"
+            text-color="white"
+            size="48px"
+            class="q-mr-md text-weight-bold flex-shrink-0"
+          >
             {{ initials }}
           </q-avatar>
-          <div class="column">
-            <div class="text-subtitle1 text-weight-bold text-dark">{{ fullName }}</div>
-            <div class="text-caption text-grey-7">
+          <div class="column overflow-hidden">
+            <div class="text-subtitle1 text-weight-bold text-dark ellipsis">{{ fullName }}</div>
+            <div class="text-caption text-grey-7 ellipsis">
               เลขที่สมัคร: {{ regId }} · สอบวันที่ {{ examDate }}
             </div>
           </div>
         </div>
 
         <div class="q-mb-md">
-          <label class="field-label q-mb-xs block"
-            >กำหนดแก้ไขภายใน <span class="text-negative">*</span></label
-          >
+          <label class="field-label q-mb-xs block">
+            กำหนดแก้ไขภายใน <span class="text-negative">*</span>
+          </label>
           <AppLabeledInput
             v-model="form.fixDeadline"
             readonly
@@ -46,39 +60,25 @@
               </q-date>
             </q-popup-proxy>
           </AppLabeledInput>
-          <div class="text-caption text-grey-5 q-mt-xs">
+          <p class="text-caption text-grey-5 q-mt-xs q-ma-none">
             ผู้สมัครต้องแก้ไขภายในวันและเวลาที่กำหนด มิฉะนั้นถือว่าสละสิทธิ์
-          </div>
+          </p>
         </div>
 
         <div class="column q-gutter-y-sm q-mb-md">
           <q-checkbox
+            v-for="option in reasonOptions"
+            :key="option.val"
             v-model="form.reasons"
-            val="photo"
-            label="รูปถ่ายไม่ถูกต้อง"
-            class="custom-checkbox"
-            dense
-            size="32px"
-          />
-          <q-checkbox
-            v-model="form.reasons"
-            val="info"
-            label="กรอกข้อมูลไม่ถูกต้อง"
-            class="custom-checkbox"
-            dense
-            size="32px"
-          />
-          <q-checkbox
-            v-model="form.reasons"
-            val="other"
-            label="อื่น ๆ (ระบุในหมายเหตุ)"
+            :val="option.val"
+            :label="option.label"
             class="custom-checkbox"
             dense
             size="32px"
           />
         </div>
 
-        <div class="q-mb-none">
+        <div class="q-mb-lg">
           <label class="field-label q-mb-xs block">
             หมายเหตุถึงผู้สมัคร <span class="text-weight-light text-grey-5">(ไม่บังคับ)</span>
           </label>
@@ -96,23 +96,27 @@
             <div class="text-caption text-grey-5">{{ form.notes.length }} / 300</div>
           </div>
         </div>
-      </q-card-section>
+      </section>
 
-      <q-card-actions align="right" class="q-px-lg q-pb-lg q-pt-md q-gutter-md">
+      <q-separator v-if="$q.screen.xs" class="dashboard-divider" />
+
+      <q-card-actions
+        :align="$q.screen.xs ? 'center' : 'right'"
+        class="action-section q-px-lg q-pb-lg q-pt-md"
+      >
         <AppButton
           label="ยกเลิก"
           outline
           color="grey-4"
           text-color="grey-7"
-          class="bg-white border-grey"
-          style="min-width: 100px; border: 1px solid #e0e0e0"
+          class="bg-white border-grey action-btn"
           @click="internalValue = false"
         />
         <AppButton
           label="ส่งคืนเพื่อแก้ไข"
           color="primary"
           icon="send"
-          style="min-width: 160px"
+          class="action-btn"
           @click="handleSubmit"
         />
       </q-card-actions>
@@ -134,9 +138,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-
 const emit = defineEmits(['update:modelValue', 'submit']);
-
 const $q = useQuasar();
 
 const internalValue = ref(props.modelValue);
@@ -152,6 +154,12 @@ const form = ref({
   reasons: [] as string[],
   notes: '',
 });
+
+const reasonOptions = [
+  { val: 'photo', label: 'รูปถ่ายไม่ถูกต้อง' },
+  { val: 'info', label: 'กรอกข้อมูลไม่ถูกต้อง' },
+  { val: 'other', label: 'อื่น ๆ (ระบุในหมายเหตุ)' },
+];
 
 watch(
   () => props.modelValue,
@@ -199,12 +207,41 @@ const handleSubmit = (): void => {
 <style scoped lang="scss">
 .request-fix-dialog {
   background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  width: 500px;
+  max-width: 95vw;
+  border-radius: 16px;
+
+  @media (max-width: $breakpoint-xs-max) {
+    width: 100%;
+    max-width: 100vw;
+    border-radius: 0;
+    height: 100%;
+  }
+}
+
+.dashboard-header {
+  color: var(--dashboard-header-text);
+}
+
+.dashboard-divider {
+  height: 1.2px;
+  background-color: var(--dashboard-divider-color);
+}
+
+.dialog-content {
+  @media (max-width: $breakpoint-xs-max) {
+    max-height: none;
+    flex-grow: 1;
+  }
 }
 
 .profile-info-block {
   background: #f0f7ff;
   border: 1.5px solid #bbdefb;
   border-radius: 12px;
+  flex-wrap: nowrap;
 }
 
 .field-label {
@@ -255,7 +292,31 @@ const handleSubmit = (): void => {
   :deep(.q-checkbox__label) {
     font-weight: 500;
     color: #424242;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+  }
+}
+
+.action-section {
+  gap: 12px;
+}
+
+.action-btn {
+  min-width: 140px;
+  height: 48px;
+  font-weight: 700;
+  border-radius: 10px;
+
+  @media (max-width: $breakpoint-xs-max) {
+    width: 100%;
+    min-width: 100%;
+    margin-left: 0 !important;
+
+    &:nth-child(2) {
+      order: 1;
+    }
+    &:nth-child(1) {
+      order: 2;
+    }
   }
 }
 
@@ -265,5 +326,9 @@ const handleSubmit = (): void => {
 
 .text-dark {
   color: #212121 !important;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
 }
 </style>

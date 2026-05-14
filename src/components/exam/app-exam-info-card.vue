@@ -1,14 +1,12 @@
 <template>
   <div class="app-exam-info-card buu-card q-pa-lg">
     <div class="card-content row items-start no-wrap">
-      <div class="col">
-        <!-- Title -->
-        <div class="exam-title text-h5 text-weight-bold text-dark q-mb-sm">
+      <header class="col">
+        <h2 class="exam-title text-h5 text-weight-bold q-mb-md q-ma-none">
           {{ title }}
-        </div>
+        </h2>
 
-        <!-- Details Row -->
-        <div class="row items-center q-gutter-x-xl details-row">
+        <section class="row items-center q-gutter-x-xl details-row">
           <div class="info-item row items-center">
             <q-icon name="event" size="20px" class="q-mr-sm" />
             <span>{{ date }}</span>
@@ -21,14 +19,28 @@
             <q-icon name="location_on" size="20px" class="q-mr-sm" />
             <span>{{ location }}</span>
           </div>
-        </div>
-      </div>
+        </section>
+      </header>
 
-      <!-- Right Side: Applicant Count -->
-      <div class="col-auto text-right self-start" v-if="applicantCount !== undefined">
+      <section class="col-auto row no-wrap items-center stats-section" v-if="isAdmin">
+        <div class="text-center q-px-lg">
+          <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่ลงทะเบียน</div>
+          <div class="applicant-value text-h4 text-weight-medium text-dark">
+            {{ applicantCount }}
+          </div>
+        </div>
+        <q-separator vertical class="stat-divider q-mx-sm" />
+        <div class="text-center q-px-lg">
+          <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่ชำระเงิน</div>
+          <div class="applicant-value text-h4 text-weight-medium text-dark">
+            {{ paidCount }}/{{ totalCapacity }}
+          </div>
+        </div>
+      </section>
+      <section class="col-auto text-right self-start" v-else-if="applicantCount !== undefined">
         <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่สมัคร</div>
         <div class="applicant-value text-h4 text-weight-bold text-dark">{{ applicantCount }}</div>
-      </div>
+      </section>
     </div>
   </div>
 </template>
@@ -40,9 +52,14 @@ interface Props {
   time: string;
   location: string;
   applicantCount?: number | string;
+  isAdmin?: boolean;
+  paidCount?: number | string;
+  totalCapacity?: number | string;
 }
 
-defineProps<Props>();
+withDefaults(defineProps<Props>(), {
+  isAdmin: false,
+});
 </script>
 
 <style scoped lang="scss">
@@ -85,6 +102,7 @@ defineProps<Props>();
 }
 
 .exam-title {
+  color: var(--dashboard-header-text);
   line-height: 1.3;
 }
 
@@ -94,8 +112,13 @@ defineProps<Props>();
   color: var(--text-primary);
 
   :deep(.q-icon) {
-    color: var(--text-primary);
+    color: var(--dashboard-info-item-icon);
   }
+}
+
+.stat-divider {
+  height: 70px;
+  background-color: var(--dashboard-divider-color);
 }
 
 .applicant-label {
@@ -106,7 +129,6 @@ defineProps<Props>();
   line-height: 1;
 }
 
-/* Responsive */
 @media (max-width: 800px) {
   .details-row {
     flex-direction: column;
@@ -116,6 +138,12 @@ defineProps<Props>();
 
   .card-content {
     flex-direction: column;
+  }
+
+  .stats-section {
+    margin-top: 16px;
+    width: 100%;
+    justify-content: space-around;
   }
 
   .text-right {
