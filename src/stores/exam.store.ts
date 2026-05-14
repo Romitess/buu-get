@@ -9,6 +9,7 @@ import {
   fetchScheduleData,
   fetchExamSchedules,
   createExamRound,
+  deleteExam,
   type CreateExamPayload,
 } from 'src/services/exam.service';
 import {
@@ -176,6 +177,12 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
+  async function deleteExamRound(id: number | string): Promise<void> {
+    await deleteExam(id);
+    await loadManagementSchedules();
+    await initSchedule();
+  }
+
   return {
     examInfo,
     selectedDate,
@@ -193,6 +200,7 @@ export const useExamStore = defineStore('exam', () => {
     cancelRegistration,
     confirmPayment,
     addExamRound,
+    deleteExamRound,
     initSchedule,
     loadManagementSchedules,
   };

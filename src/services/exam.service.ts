@@ -8,7 +8,22 @@ import type {
   BackendLocation,
 } from 'src/types/exam';
 import type { ExamSchedule } from 'src/types/exam.types';
-import { BUDDHIST_YEAR_OFFSET, SESSION_STATUS_OPEN, DEFAULT_EXAM_INFO } from 'src/constants/exam';
+import {
+  BUDDHIST_YEAR_OFFSET,
+  SESSION_STATUS_OPEN,
+  DEFAULT_EXAM_INFO,
+  EXAM_TYPE_GENERAL,
+} from 'src/constants/exam';
+
+/** Constants to prevent hard-coding */
+const DEFAULT_EXAM_TITLE = 'BUU - GET';
+const DEFAULT_LOCATION_TEXT = 'TBA';
+
+/** Helper to clean and format time strings to HH:mm */
+const formatTime = (timeStr: string | null | undefined): string => {
+  if (!timeStr) return '00:00';
+  return timeStr.replace(/\s/g, '').substring(0, 5);
+};
 
 /** Payload for creating a new exam round (Frontend form structure) */
 export interface CreateExamPayload {
@@ -61,7 +76,7 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
         const firstLocation = sortedSessions[0]?.LOCATION;
         const locationLabel = firstLocation
           ? `${firstLocation.LOCATION_NAME}${firstLocation.LOCATION_ROOM_NO ? ` (${firstLocation.LOCATION_ROOM_NO})` : ''}`
-          : 'TBA';
+          : DEFAULT_LOCATION_TEXT;
 
         schedule[date] = {
           location: locationLabel,
@@ -74,14 +89,14 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
       if (!dayData) return;
 
       sortedSessions.forEach((session) => {
-        const startTime = session.SS_START_TIME ? session.SS_START_TIME.substring(0, 5) : '00:00';
-        const endTime = session.SS_END_TIME ? session.SS_END_TIME.substring(0, 5) : '00:00';
+        const startTime = formatTime(session.SS_START_TIME);
+        const endTime = formatTime(session.SS_END_TIME);
 
         const round: ExamRound = {
           id: session.SS_ID,
-          title: exam.EXAM_NAME || 'BUU - GET',
+          title: exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
           timeRange: `${startTime} - ${endTime}`,
-          roundTypeLabel: exam.EXAM_TYPE || 'รอบทั่วไป',
+          roundTypeLabel: exam.EXAM_TYPE || EXAM_TYPE_GENERAL,
           availableSeats: (session.SS_CAPACITY || 0) - (session.ENROLLMENTS?.length || 0),
           totalSeats: session.SS_CAPACITY || 0,
         };
@@ -112,7 +127,7 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
       // Calculate total capacity and registered count across all sessions
       let capacity = 0;
       let registeredCount = 0;
-      let locationName = 'TBA';
+      let locationName = DEFAULT_LOCATION_TEXT;
 
       if (exam.SESSIONS && exam.SESSIONS.length > 0) {
         exam.SESSIONS.forEach((session) => {
@@ -128,15 +143,15 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
 
       return {
         id: String(exam.EXAM_ID),
-        examName: exam.EXAM_NAME || 'BUU - GET',
+        examName: exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
         examType:
-          exam.EXAM_TYPE === 'รอบทั่วไป' || exam.EXAM_TYPE === 'general' ? 'general' : 'special',
+          exam.EXAM_TYPE === EXAM_TYPE_GENERAL || exam.EXAM_TYPE === 'general'
+            ? 'general'
+            : 'special',
         examDate: exam.EXAM_DATE, // assuming it's in YYYY-MM-DD or ISO format from backend
         examLocation: locationName,
         registeredCount,
         capacity,
-        // Since backend doesn't seem to return EXAM_PUBLISHED in the default GET /exam sometimes,
-        // we'll default to 'published' or map from EXAM_PUBLISHED if available.
         status:
           (exam as BackendExam & { EXAM_PUBLISHED?: boolean }).EXAM_PUBLISHED === false
             ? 'unpublished'
@@ -165,11 +180,13 @@ export const fetchExamById = async (examId: number): Promise<BackendExam> => {
     throw error;
   }
 };
+
 const buddhistToGregorian = (dateStr: string): string => {
-  if (!dateStr) return '';
-  const [d, m, y] = dateStr.split('/');
-  if (!d || !m || !y) return '';
-  const gregorianYear = parseInt(y) - BUDDHIST_YEAR_OFFSET;
+  if (!dateStr || !dateStr.includes('/')) return '';
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) return '';
+  const [d, m, y] = parts;
+  const gregorianYear = parseInt(y as string) - BUDDHIST_YEAR_OFFSET;
   return `${gregorianYear}-${m}-${d}`;
 };
 
@@ -190,7 +207,7 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<void>
       EXAM_PAY_START_DATE: buddhistToGregorian(payload.payStartDate),
       EXAM_PAY_END_DATE: buddhistToGregorian(payload.payEndDate),
       EXAM_PUBLISHED: payload.isPublished,
-      FUND_SOURCE_ID: payload.fundSourceId,
+      FUND_SOURCE_ID: Number(payload.fundSourceId),
     });
 
     const examId = examResponse.data.EXAM_ID;
@@ -198,11 +215,11 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<void>
     // 2. Create Sessions for each time range
     const sessionPromises = payload.timeRanges.map((range) => {
       return api.post('/exam-sessions', {
-        EXAM_ID: examId,
-        LOCATION_ID: payload.locationId,
-        SS_START_TIME: range.startTime.replace(/\s/g, ''),
-        SS_END_TIME: range.endTime.replace(/\s/g, ''),
-        SS_CAPACITY: payload.seats,
+        EXAM_ID: Number(examId),
+        LOCATION_ID: Number(payload.locationId),
+        SS_START_TIME: formatTime(range.startTime),
+        SS_END_TIME: formatTime(range.endTime),
+        SS_CAPACITY: Number(payload.seats),
         SS_SESSION_STATUS: SESSION_STATUS_OPEN,
       });
     });
@@ -247,3 +264,110 @@ export const fetchExamLocations = async (): Promise<ExamLocationOption[]> => {
 export const mockScheduleData: Record<string, DayData> = {};
 
 export const mockHistoryRecords: ExamHistoryItem[] = [];
+
+/** Interface for the full Backend Exam response (with relations for edit) */
+export interface BackendExamFull extends BackendExam {
+  EXAM_FORMAT?: string;
+  EXAM_REG_START_DATE?: string;
+  EXAM_REG_END_DATE?: string;
+  EXAM_PAY_START_DATE?: string;
+  EXAM_PAY_END_DATE?: string;
+  EXAM_PUBLISHED?: boolean;
+  FUND_SOURCE_ID?: number;
+  FUND_SOURCE?: FundSource;
+}
+
+/**
+ * Fetches a single exam by ID with all relations (sessions, locations, fund source)
+ */
+export const fetchExamById = async (id: number): Promise<BackendExamFull> => {
+  const response = await api.get<BackendExamFull>(`/exam/${id}`);
+  return response.data;
+};
+
+/** Payload for updating an existing exam round */
+export interface UpdateExamPayload extends CreateExamPayload {
+  examId: number;
+  /** Existing session IDs to keep/update */
+  existingSessionIds?: number[];
+}
+
+/**
+ * Updates an existing Exam and synchronizes its Sessions.
+ * - Updates core exam data via PATCH /exam/:id
+ * - Deletes sessions that were removed
+ * - Updates existing sessions
+ * - Creates new sessions
+ */
+export const updateExamRound = async (payload: UpdateExamPayload): Promise<void> => {
+  try {
+    // 1. Update the Exam core data
+    await api.patch(`/exam/${payload.examId}`, {
+      EXAM_NAME: payload.examName,
+      EXAM_TYPE: payload.examType,
+      EXAM_FORMAT: payload.examFormat,
+      EXAM_FEE: Number(payload.fee),
+      EXAM_DATE: buddhistToGregorian(payload.examDate),
+      EXAM_REG_START_DATE: buddhistToGregorian(payload.regStartDate),
+      EXAM_REG_END_DATE: buddhistToGregorian(payload.regEndDate),
+      EXAM_PAY_START_DATE: buddhistToGregorian(payload.payStartDate),
+      EXAM_PAY_END_DATE: buddhistToGregorian(payload.payEndDate),
+      EXAM_PUBLISHED: payload.isPublished,
+      FUND_SOURCE_ID: Number(payload.fundSourceId),
+    });
+
+    // 2. Synchronize sessions ONLY if timeRanges are provided (not locked)
+    if (payload.timeRanges && payload.timeRanges.length > 0) {
+      // Fetch current sessions to diff
+      const currentExam = await fetchExamById(payload.examId);
+      const currentSessionIds = (currentExam.SESSIONS || []).map((s) => s.SS_ID);
+      const keepIds = payload.existingSessionIds || [];
+
+      // 3. Delete sessions that were removed by the user
+      const deleteIds = currentSessionIds.filter((id) => !keepIds.includes(id));
+      const deletePromises = deleteIds.map((id) => api.delete(`/exam-sessions/${id}`));
+      await Promise.all(deletePromises);
+
+      // 4. Update existing sessions & Create new ones
+      const sessionPromises = payload.timeRanges.map((range, index) => {
+        const existingId = keepIds[index];
+        const sessionPayload = {
+          LOCATION_ID: Number(payload.locationId),
+          SS_START_TIME: formatTime(range.startTime),
+          SS_END_TIME: formatTime(range.endTime),
+          SS_CAPACITY: Number(payload.seats),
+        };
+
+        if (existingId) {
+          // Update existing session
+          return api.patch(`/exam-sessions/${existingId}`, sessionPayload);
+        } else {
+          // Create new session
+          return api.post('/exam-sessions', {
+            ...sessionPayload,
+            EXAM_ID: Number(payload.examId),
+            SS_SESSION_STATUS: SESSION_STATUS_OPEN,
+          });
+        }
+      });
+
+      await Promise.all(sessionPromises);
+    }
+  } catch (error) {
+    console.error('Error updating exam round:', error);
+    throw error;
+  }
+};
+
+/**
+ * Deletes an exam round by ID.
+ * @param id - The ID of the exam to delete
+ */
+export const deleteExam = async (id: number | string): Promise<void> => {
+  try {
+    await api.delete(`/exam/${id}`);
+  } catch (error) {
+    console.error('Error deleting exam:', error);
+    throw error;
+  }
+};

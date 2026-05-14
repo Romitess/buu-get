@@ -87,14 +87,15 @@
               />
             </div>
             <div class="col-6">
-              <div class="buu-label-muted q-mb-xs">จำนวนที่นั่ง</div>
+              <div class="buu-label-muted q-mb-xs">จำนวนที่นั่ง (ต่อรอบเวลา)</div>
               <q-input
-                v-model="form.seats"
+                v-model.number="form.seats"
                 type="number"
                 outlined
                 dense
                 bg-color="white"
                 class="buu-input-muted"
+                placeholder="0"
               />
             </div>
           </div>
