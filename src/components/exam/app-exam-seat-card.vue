@@ -11,10 +11,10 @@
 
       <!-- Information Section -->
       <div class="info-section col">
-        <div class="text-h6 text-weight-bold line-height-tight q-mb-xs">
+        <div class="text-h6 text-weight-bold line-height-tight q-mb-xs text-black">
           {{ studentName }}
         </div>
-        <div class="row no-wrap q-gutter-x-lg text-body2 info-details text-grey-8">
+        <div class="row no-wrap q-gutter-x-lg text-body2 info-details text-black">
           <div class="text-no-wrap">รหัส: {{ studentId }}</div>
           <div v-if="hasSeat" class="text-no-wrap">เลขที่นั่งสอบ: {{ seatNumber }}</div>
           <div v-else class="text-no-wrap">ยังไม่มีที่นั่ง</div>
@@ -60,13 +60,13 @@ const hasSeat = computed(() => {
 
   &.seat-assigned {
     background-color: var(--surface-card);
-    border: 1px solid var(--border-color);
+    border: 1px solid #000000;
     color: var(--text-primary);
   }
 
   &.seat-unassigned {
-    background-color: var(--badge-primary-bg); /* Using standardized light blue */
-    border: 1px solid var(--primary-light);
+    background-color: #8fbceb; /* Rich blue matching the mockup precisely */
+    border: 1px solid #000000;
     color: var(--text-primary);
   }
 }

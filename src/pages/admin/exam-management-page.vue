@@ -36,6 +36,7 @@
         @edit="handleEdit"
         @delete="handleDelete"
         @manageRegistrants="handleManageRegistrants"
+        @manageSeats="handleManageSeats"
         @printAdmitCard="handlePrintAdmitCard"
         @viewCandidates="handleViewCandidates"
         @exportReport="handleExportReport"
@@ -143,6 +144,10 @@ const handleDelete = async (id: string) => {
 
 const handleManageRegistrants = (id: string) => {
   void router.push({ name: 'admin-exam-registrants', params: { examId: id } });
+};
+
+const handleManageSeats = (id: string) => {
+  void router.push({ name: 'admin-exam-seat-management', params: { examId: id } });
 };
 
 const handlePrintAdmitCard = (id: string) => {
