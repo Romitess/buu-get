@@ -27,8 +27,8 @@
           <q-select
             v-model="form.locationId"
             :options="locationOptions"
-            option-label="LOC_NAME"
-            option-value="LOC_ID"
+            option-label="label"
+            option-value="value"
             emit-value
             map-options
             outlined
