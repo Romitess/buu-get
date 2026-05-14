@@ -7,6 +7,11 @@ declare module 'vue-router' {
     hideHeader?: boolean;
     hideDrawer?: boolean;
     footerVariant?: 'primary' | 'white';
+    breadcrumb?: {
+      label: string;
+      icon?: string;
+      to?: string;
+    }[];
   }
 }
 
@@ -20,7 +25,10 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'home',
         component: () => import('pages/home-page.vue'),
-        meta: { requiresAuth: false },
+        meta: {
+          requiresAuth: false,
+          breadcrumb: [{ label: 'หน้าหลัก', icon: 'home' }],
+        },
       },
 
       // === Auth Routes ===
@@ -84,36 +92,76 @@ const routes: RouteRecordRaw[] = [
             path: 'dashboard',
             name: 'admin-dashboard',
             component: () => import('pages/admin/dashboard-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'แดชบอร์ด', icon: 'dashboard' },
+              ],
+            },
           },
           {
             path: 'exam-management',
             name: 'admin-exam-management',
             component: () => import('pages/admin/exam-management-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'จัดการรอบสอบ', icon: 'star' },
+              ],
+            },
           },
           {
             path: 'create-exam',
             name: 'admin-create-exam',
             component: () => import('pages/admin/create-exam-page.vue'),
-          },
-          {
-            path: 'edit-exam/:examId',
-            name: 'admin-edit-exam',
-            component: () => import('pages/admin/edit-exam-page.vue'),
-          },
-          {
-            path: 'exam-management/:examId/registrants',
-            name: 'admin-exam-registrants',
-            component: () => import('pages/admin/exam-registrants-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'สร้างรอบสอบ', icon: 'add_circle' },
+              ],
+            },
           },
           {
             path: 'exam-management/:examId/seats',
             name: 'admin-exam-seat-management',
             component: () => import('pages/admin/exam-seat-management-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'จัดการที่นั่งสอบ', icon: 'event_seat' },
+              ],
+            },
+          },
+          {
+            path: 'exam-management/:examId/registrants',
+            name: 'admin-exam-registrants',
+            component: () => import('pages/admin/exam-registrants-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'การจัดการรายชื่อผู้เข้าสอบ', icon: 'star' },
+              ],
+            },
           },
           {
             path: 'exam-management/registrants/:ermId',
             name: 'admin-exam-registrant-detail',
             component: () => import('pages/admin/exam-registrant-detail-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                {
+                  label: 'การจัดการรายชื่อผู้เข้าสอบ',
+                  icon: 'star',
+                  to: '/admin/exam-management/:examId/registrants',
+                },
+                { label: 'รายละเอียดผู้เข้าสอบ', icon: 'person' },
+              ],
+            },
           },
         ],
       },
