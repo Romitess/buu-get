@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useExamStore } from 'src/stores/exam.store';
@@ -32,7 +32,11 @@ export interface CreateExamForm {
   payEndDate: string;
 }
 
-export function useCreateExam() {
+/**
+ * Composable for managing exam creation/editing logic.
+ * @param externalForm - Optional external form ref (useful for injecting initial data or v-model syncing)
+ */
+export function useCreateExam(externalForm?: Ref<CreateExamForm>) {
   const router = useRouter();
   const $q = useQuasar();
   const examStore = useExamStore();
@@ -50,24 +54,27 @@ export function useCreateExam() {
   const fundSourceOptions = ref<{ label: string; value: number }[]>([]);
   const isLoadingData = ref(false);
 
-  const form = ref<CreateExamForm>({
-    examName: '',
-    locationId: null,
-    examType: EXAM_TYPE_GENERAL,
-    fundSourceId: null,
-    fee: '0.00',
-    seats: 1,
-    isPublished: true,
-    examDate: today,
-    timeSlots: [
-      { startTime: '08 : 00', endTime: '10 : 00' },
-      { startTime: '10 : 00', endTime: '12 : 00' },
-    ],
-    regStartDate: today,
-    regEndDate: today,
-    payStartDate: today,
-    payEndDate: today,
-  });
+  // Use external form if provided, otherwise create a new one
+  const form =
+    externalForm ||
+    ref<CreateExamForm>({
+      examName: '',
+      locationId: null,
+      examType: EXAM_TYPE_GENERAL,
+      fundSourceId: null,
+      fee: '0.00',
+      seats: 1,
+      isPublished: true,
+      examDate: today,
+      timeSlots: [
+        { startTime: '08 : 00', endTime: '10 : 00' },
+        { startTime: '10 : 00', endTime: '12 : 00' },
+      ],
+      regStartDate: today,
+      regEndDate: today,
+      payStartDate: today,
+      payEndDate: today,
+    });
 
   const loadInitialData = async () => {
     isLoadingData.value = true;
@@ -116,10 +123,14 @@ export function useCreateExam() {
   };
 
   const handleCancel = () => {
-    void router.push('/user/exam-schedule');
+    void router.push('/admin/exam-management');
   };
 
-  const handleSave = async () => {
+  /**
+   * Saves the exam round.
+   * @returns Promise<boolean> - true if saved successfully, false otherwise
+   */
+  const handleSave = async (): Promise<boolean> => {
     const timeRanges = form.value.timeSlots
       .filter((slot) => slot.startTime && slot.endTime)
       .map((slot) => ({
@@ -133,7 +144,7 @@ export function useCreateExam() {
         message: 'กรุณาระบุเวลาสอบอย่างน้อย 1 ช่วงเวลา',
         position: 'top',
       });
-      return;
+      return false;
     }
 
     if (!form.value.locationId) {
@@ -142,7 +153,7 @@ export function useCreateExam() {
         message: 'กรุณาเลือกสถานที่สอบ',
         position: 'top',
       });
-      return;
+      return false;
     }
 
     if (!form.value.fundSourceId) {
@@ -151,7 +162,7 @@ export function useCreateExam() {
         message: 'กรุณาเลือกแหล่งเงิน',
         position: 'top',
       });
-      return;
+      return false;
     }
 
     try {
@@ -181,7 +192,8 @@ export function useCreateExam() {
         timeout: 2000,
       });
 
-      void router.push('/user/exam-schedule');
+      void router.push('/admin/exam-management');
+      return true;
     } catch (error) {
       console.error('Save error:', error);
       $q.notify({
@@ -189,6 +201,7 @@ export function useCreateExam() {
         message: 'เกิดข้อผิดพลาดในการสร้างรอบสอบ',
         position: 'top',
       });
+      return false;
     }
   };
 

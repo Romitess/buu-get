@@ -1,13 +1,12 @@
 <template>
   <q-page class="q-px-xl q-pt-md q-pb-lg flex column items-center" style="min-height: 0 !important">
     <div class="full-width" style="max-width: 1200px">
-      <!-- Header Section -->
-      <div class="q-mb-md">
-        <div class="text-h5 text-weight-bold" style="color: var(--primary-dark)">จัดการรอบสอบ</div>
-        <div class="text-subtitle2 text-grey-7">
-          จัดการข้อมูลรอบสอบ ตรวจสอบกำหนดการ และติดตามสถานะการเปิดรับสมัคร
-        </div>
-      </div>
+      <!-- Standardized Reusable Page Header -->
+      <app-page-header
+        :breadcrumbs="[{ label: 'หน้าหลัก', icon: 'home', to: '/' }, { label: 'จัดการรอบสอบ' }]"
+        title="จัดการรอบสอบ"
+        subtitle="จัดการข้อมูลรอบสอบ ตรวจสอบกำหนดการ และติดตามสถานะการเปิดรับสมัคร"
+      />
 
       <!-- Search Bar -->
       <div class="q-mb-lg">
@@ -60,6 +59,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
+import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import ExamManagementTable from 'src/components/exam/exam-management-table.vue';
 import SearchBar from 'src/components/shared/SearchBar.vue';
 import { useExamStore } from 'src/stores/exam.store';
@@ -108,9 +108,6 @@ const onRequest = (props: TableRequestProps) => {
   const { page, rowsPerPage } = props.pagination;
   pagination.value.page = page;
   pagination.value.rowsPerPage = rowsPerPage;
-  // If API supported server-side pagination, we would pass these params
-  // and fetch again. Since we fetch all, Quasar handles client-side slicing
-  // if we sync the pagination object back.
 };
 
 // Actions Handlers
@@ -119,13 +116,10 @@ const handleEdit = (id: string) => {
 };
 
 const handleDelete = async (id: string) => {
-  // Since the dialog is now handled inside ExamManagementTable, we just execute deletion here
   try {
     isLoading.value = true;
-    // Mock deletion for now as we don't have delete API in service yet
-    // await examStore.deleteExamRound(id);
     $q.notify({ type: 'positive', message: `ลบการสอบ ID: ${id} สำเร็จ`, position: 'top' });
-    await fetchData(); // Refresh data
+    await fetchData();
   } catch {
     $q.notify({ type: 'negative', message: `ลบการสอบไม่สำเร็จ`, position: 'top' });
   } finally {
