@@ -9,6 +9,8 @@ export interface Meta {
 
 export interface AppCalendarProps {
   modelValue: string;
+  showLegend?: boolean;
+  disablePastDates?: boolean;
 }
 
 export interface ExamCalendarProps {

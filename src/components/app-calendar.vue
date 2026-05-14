@@ -52,12 +52,13 @@
               :class="{
                 active: modelValue === day.dateString,
                 today: day.isToday,
+                disabled: disablePastDates && day.isPast,
               }"
               role="button"
               tabindex="0"
               :aria-label="`Select date ${day.dateString}`"
-              @click="handleDaySelect(day.dateString)"
-              @keydown.enter="handleDaySelect(day.dateString)"
+              @click="handleDaySelect(day)"
+              @keydown.enter="handleDaySelect(day)"
             >
               {{ day.value }}
               <slot name="day-content" :day="day"></slot>
@@ -69,6 +70,18 @@
               :key="'trailing-' + n"
               class="day-cell empty"
             ></div>
+          </div>
+
+          <!-- Legend / Status Indicators (Integrated inside card) -->
+          <div v-if="showLegend" class="calendar-footer-legend">
+            <div class="legend-item">
+              <div class="legend-dot dot-available"></div>
+              <span>{{ t('exam.calendar.legendAvailable', 'มีที่นั่งว่าง') }}</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot dot-full"></div>
+              <span>{{ t('exam.calendar.legendFull', 'รอบเต็มแล้ว') }}</span>
+            </div>
           </div>
         </div>
 
@@ -119,7 +132,7 @@
         </div>
       </q-card>
 
-      <!-- Slot สำหรับส่วนท้ายของปฏิทิน เช่น Legend (แสดงเฉพาะหน้าปฏิทินวัน) -->
+      <!-- Slot สำหรับส่วนท้ายของปฏิทินเพิ่มเติม (ถ้ามี) -->
       <slot v-if="!showPicker" name="footer"></slot>
     </div>
   </div>
@@ -131,6 +144,7 @@
  * คอมโพเนนต์ปฏิทินพื้นฐานที่รองรับการปรับแต่งผ่าน Slots
  */
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { AppCalendarProps } from '../types/common';
 
 const THAI_YEAR_OFFSET = 543;
@@ -152,7 +166,12 @@ const SHORT_MONTH_NAMES_EN = Array.from({ length: 12 }, (_, i) =>
   new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date(2000, i, 1)),
 );
 
-defineProps<AppCalendarProps>();
+const props = withDefaults(defineProps<AppCalendarProps>(), {
+  showLegend: false,
+  disablePastDates: false,
+});
+
+const { t } = useI18n();
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void;
@@ -234,7 +253,8 @@ const daysInMonth = computed(() => {
     const day = i + 1;
     const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     const isToday = dateString === currentTodayStr;
-    return { value: day, isToday, dateString };
+    const isPast = dateString < currentTodayStr;
+    return { value: day, isToday, isPast, dateString };
   });
 });
 
@@ -267,9 +287,10 @@ const handleYearSelect = (year: number) => {
   emit('change-month', currentDate.value.getMonth() + 1, year);
 };
 
-const handleDaySelect = (dateString: string) => {
-  emit('update:modelValue', dateString);
-  emit('click-date', dateString);
+const handleDaySelect = (day: { dateString: string; isPast: boolean }) => {
+  if (props.disablePastDates && day.isPast) return;
+  emit('update:modelValue', day.dateString);
+  emit('click-date', day.dateString);
 };
 </script>
 
@@ -281,7 +302,7 @@ const handleDaySelect = (dateString: string) => {
   background-color: var(--surface-card);
   position: relative;
   width: 320px;
-  height: 380px;
+  height: 420px; // Increased height to accommodate legend without squeezing the grid
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -450,6 +471,16 @@ const handleDaySelect = (dateString: string) => {
     background-color: var(--calendar-active-bg);
     color: var(--text-on-primary);
   }
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+    background-color: transparent !important;
+    color: var(--text-muted) !important;
+    &:hover {
+      background-color: transparent !important;
+      color: var(--text-muted) !important;
+    }
+  }
   &.empty {
     cursor: default;
     background-color: transparent;
@@ -487,6 +518,52 @@ const handleDaySelect = (dateString: string) => {
   }
   .day-cell {
     font-size: 13px;
+  }
+}
+
+// Legend Styles
+.calendar-footer-legend {
+  padding: 12px 0 0 0;
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  border-top: 1px solid var(--calendar-month-year-picker-border);
+  background-color: transparent;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--neutral-600);
+}
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  &.dot-available {
+    background-color: var(--calendar-dot-available);
+  }
+  &.dot-full {
+    background-color: var(--calendar-dot-full);
+  }
+}
+
+@media (max-width: 600px) {
+  .calendar-card {
+    height: auto;
+    min-height: 400px;
+  }
+  .calendar-footer-legend {
+    gap: 14px;
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+  .legend-item {
+    font-size: 13px;
+    gap: 6px;
   }
 }
 </style>
