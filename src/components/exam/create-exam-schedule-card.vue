@@ -20,10 +20,17 @@
             dense
             class="custom-input q-mb-md bg-white"
             readonly
+            :disable="locked"
             hide-bottom-space
           >
             <template v-slot:append>
-              <q-icon name="calendar_today" class="cursor-pointer" size="xs" color="grey-8">
+              <q-icon
+                v-if="!locked"
+                name="calendar_today"
+                class="cursor-pointer"
+                size="xs"
+                color="grey-8"
+              >
                 <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                   <q-date v-model="form.examDate" mask="DD/MM/YYYY">
                     <div class="row items-center justify-end">
@@ -32,6 +39,7 @@
                   </q-date>
                 </q-popup-proxy>
               </q-icon>
+              <q-icon v-else name="lock" size="xs" color="grey-5" />
             </template>
           </q-input>
 
@@ -50,6 +58,7 @@
                   class="custom-input bg-white"
                   placeholder="00 : 00"
                   hide-bottom-space
+                  :disable="locked"
                 />
               </div>
               <div class="col-auto time-separator">ถึง</div>
@@ -61,9 +70,10 @@
                   class="custom-input bg-white"
                   placeholder="00 : 00"
                   hide-bottom-space
+                  :disable="locked"
                 />
               </div>
-              <div class="col-auto">
+              <div v-if="!locked" class="col-auto">
                 <q-icon
                   name="delete"
                   class="cursor-pointer"
@@ -78,6 +88,7 @@
           <!-- Add Session Button -->
           <div class="row justify-end q-mt-sm">
             <q-btn
+              v-if="!locked"
               label="เพิ่มรอบเวลาสอบ"
               color="primary"
               unelevated
@@ -201,6 +212,11 @@
 
 <script setup lang="ts">
 import type { CreateExamForm } from 'src/composables/use-create-exam';
+
+defineProps<{
+  /** When true, disables all schedule editing (for published exams) */
+  locked?: boolean;
+}>();
 
 const form = defineModel<CreateExamForm>('form', { required: true });
 

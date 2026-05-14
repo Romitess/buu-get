@@ -12,15 +12,47 @@
     <!-- Card 2: กำหนดการสอบ -->
     <create-exam-schedule-card
       v-model:form="form"
+      :locked="isScheduleLocked"
       @add-time-slot="addTimeSlot"
       @remove-time-slot="removeTimeSlot"
     />
+
+    <!-- Schedule Lock Notice -->
+    <div v-if="isScheduleLocked">
+      <!-- Case 1: Locked by Enrollments (Permanent) -->
+      <q-banner
+        v-if="isLockedByEnrollment"
+        dense
+        class="bg-red-1 text-red-9 rounded-borders q-mb-md"
+      >
+        <template v-slot:avatar>
+          <q-icon name="error_outline" size="sm" />
+        </template>
+        <div class="text-weight-medium">
+          ไม่สามารถแก้ไขกำหนดการสอบได้ เนื่องจากมีผู้สมัครสอบแล้ว
+        </div>
+        <div class="text-caption">
+          เพื่อความปลอดภัยของข้อมูลผู้สมัคร ระบบไม่อนุญาตให้แก้ไขวัน/เวลาสอบ
+        </div>
+      </q-banner>
+
+      <!-- Case 2: Locked by Publication (Temporary) -->
+      <q-banner v-else dense class="bg-amber-1 text-amber-9 rounded-borders q-mb-md">
+        <template v-slot:avatar>
+          <q-icon name="lock" size="sm" />
+        </template>
+        <div class="text-weight-medium">รอบสอบนี้เผยแพร่แล้ว ไม่สามารถแก้ไขกำหนดการสอบได้</div>
+        <div class="text-caption">
+          หากต้องการแก้ไขวัน/เวลาสอบ กรุณาปิดสถานะ "เผยแพร่" ด้านบนก่อน
+        </div>
+      </q-banner>
+    </div>
 
     <!-- Action Buttons -->
     <div class="row justify-end q-mt-md q-gutter-md action-container">
       <app-button label="ยกเลิก" @click="onCancel" class="action-btn cancel-btn text-weight-bold" />
       <app-button
-        label="บันทึก"
+        :label="isEditMode ? 'บันทึกการแก้ไข' : 'บันทึก'"
         @click="onSave"
         class="action-btn save-btn text-white text-weight-bold"
       />
@@ -35,6 +67,11 @@ import AppButton from 'src/components/base/app-button.vue';
 import CreateExamDetailsCard from 'src/components/exam/create-exam-details-card.vue';
 import CreateExamScheduleCard from 'src/components/exam/create-exam-schedule-card.vue';
 
+const props = defineProps<{
+  /** Exam ID for edit mode. If not provided, the form operates in create mode. */
+  examId?: number;
+}>();
+
 // Define model for the form to allow two-way binding with parent
 const form = defineModel<CreateExamForm>('form', { required: true });
 
@@ -44,12 +81,15 @@ const {
   locationOptions,
   fundSourceOptions,
   isLoadingData,
+  isEditMode,
+  isScheduleLocked,
+  isLockedByEnrollment,
   loadInitialData,
   addTimeSlot,
   removeTimeSlot,
   handleCancel,
   handleSave,
-} = useCreateExam(form);
+} = useCreateExam(form, { examId: props.examId });
 
 const emit = defineEmits(['save', 'cancel']);
 
@@ -85,5 +125,15 @@ onMounted(loadInitialData);
 }
 .save-btn {
   background-color: var(--primary) !important;
+}
+.lock-notice {
+  display: flex;
+  align-items: center;
+  color: var(--neutral-600);
+  font-size: 13px;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 10px 16px;
 }
 </style>

@@ -141,13 +141,13 @@ const onRequest = (props: TableRequestProps) => {
     background-color: var(--primary) !important;
     color: white !important;
     font-weight: 600;
-    font-size: var(--font-size-xs); // 13px — compact header
+    font-size: var(--font-size-xs);
     padding: 10px 12px;
     text-align: center !important;
   }
 
   :deep(tbody tr td) {
-    font-size: var(--font-size-xs); // 13px — compact body
+    font-size: var(--font-size-xs);
     color: var(--text-primary);
     border-color: var(--border-color);
     white-space: normal !important;

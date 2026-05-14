@@ -87,7 +87,7 @@ const emit = defineEmits<{
   (e: 'edit', id: string): void;
   (e: 'delete', id: string): void;
   (e: 'manageRegistrants', id: string): void;
-  (e: 'printAdmitCard', id: string): void;
+  (e: 'manageSeats', id: string): void;
   (e: 'viewCandidates', id: string): void;
   (e: 'exportReport', id: string): void;
 }>();
@@ -185,8 +185,8 @@ const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
     {
       icon: 'event_seat',
       color: 'blue-6',
-      tooltip: t('admin.examManagement.table.tooltips.printAdmitCard'),
-      emit: 'printAdmitCard',
+      tooltip: t('admin.examManagement.table.tooltips.manageSeats'),
+      emit: 'manageSeats',
     },
     {
       icon: 'format_list_bulleted',
@@ -223,8 +223,8 @@ const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
     {
       icon: 'event_seat',
       color: 'blue-6',
-      tooltip: t('admin.examManagement.table.tooltips.printAdmitCard'),
-      emit: 'printAdmitCard',
+      tooltip: t('admin.examManagement.table.tooltips.manageSeats'),
+      emit: 'manageSeats',
     },
     {
       icon: 'format_list_bulleted',
@@ -259,8 +259,8 @@ const handleAction = (emitName: string, id: string) => {
       case 'manageRegistrants':
         emit('manageRegistrants', id);
         break;
-      case 'printAdmitCard':
-        emit('printAdmitCard', id);
+      case 'manageSeats':
+        emit('manageSeats', id);
         break;
       case 'viewCandidates':
         emit('viewCandidates', id);

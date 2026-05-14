@@ -280,6 +280,7 @@ export default {
         deleteError: 'ลบการสอบไม่สำเร็จ',
         editNav: 'กำลังไปหน้าแก้ไขการสอบ',
         manageRegistrants: 'จัดการผู้สมัครสอบ',
+        manageSeats: 'จัดการที่นั่งสอบ',
         printAdmitCard: 'พิมพ์บัตรประจำตัวสอบ',
         viewCandidates: 'ดูรายชื่อผู้เข้าสอบ',
         exportReport: 'ส่งออกรายงานการสอบ',
@@ -298,6 +299,7 @@ export default {
           edit: 'แก้ไข',
           delete: 'ลบ',
           manageRegistrants: 'จัดการผู้ลงทะเบียน',
+          manageSeats: 'จัดการที่นั่งสอบ',
           printAdmitCard: 'พิมพ์บัตรเข้าสอบ',
           viewCandidates: 'รายชื่อผู้สมัคร',
           exportReport: 'ส่งออกรายงาน',
@@ -316,6 +318,42 @@ export default {
       status: {
         published: 'เผยแพร่แล้ว',
         unpublished: 'ยังไม่เผยแพร่',
+      },
+    },
+    registrantManagement: {
+      pageTitle: 'จัดการรายชื่อผู้เข้าสอบ',
+      pageSubtitle: 'จัดการรายชื่อผู้เข้าสอบ พร้อมตรวจสอบข้อมูล การสมัคร และสถานะการเข้าสอบ',
+      searchPlaceholder: 'ค้นหา',
+      exportCsv: 'ส่งออก CSV',
+      table: {
+        columns: {
+          index: 'ลำดับ',
+          nationalId: 'เลขประจำตัว',
+          prefix: 'คำนำหน้า',
+          fullName: 'ชื่อ-นามสกุล',
+          paymentStatus: 'สถานะ',
+          verifyStatus: 'สถานะความถูกต้อง',
+          tools: 'เครื่องมือ',
+        },
+        tooltips: {
+          viewDetail: 'ดูรายละเอียด',
+        },
+      },
+      detail: {
+        pageTitle: 'ตรวจสอบข้อมูลการสมัครสอบ',
+        pageSubtitle: 'ตรวจสอบข้อมูลผู้สมัครสอบเพื่ออนุมัติหรือแจ้งแก้ไขก่อนพิมพ์บัตรสอบ',
+        personalInfo: 'ข้อมูลส่วนตัว',
+        photoAlt: 'รูปโปรไฟล์ผู้สมัคร',
+        uploadDate: 'อัปโหลด',
+        actions: {
+          cancel: 'ยกเลิก',
+          requestFix: 'แจ้งข้อมูลให้แก้ไข',
+          confirmVerify: 'ยืนยันการตรวจสอบ',
+          backToMain: 'กลับไปหน้าหลัก',
+        },
+        errors: {
+          notFound: 'ไม่พบข้อมูลการสมัครสอบ',
+        },
       },
     },
   },

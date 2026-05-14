@@ -29,14 +29,20 @@ defineEmits<{
 .seat-square {
   width: 100%;
   aspect-ratio: 1;
-  border-radius: var(--radius-sm);
+  border-radius: 8px; /* Slightly reduced since the square is smaller */
   border: 1.5px solid var(--primary-light);
   user-select: none;
-  font-size: var(--font-size-sm);
+  font-size: clamp(10px, 1vw, 15px); /* Fluid font size prevents overflow when zoomed in */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 4px;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -50,7 +56,7 @@ defineEmits<{
 
 .available-bg {
   background-color: var(--surface-card);
-  border-color: var(--neutral-400);
+  border-color: var(--primary-light);
 }
 
 .border-assigned {

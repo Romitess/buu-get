@@ -29,3 +29,10 @@ export const DEFAULT_EXAM_INFO = {
 
 /** สถานะตั้งต้นของ Session (1 = OPEN) */
 export const SESSION_STATUS_OPEN = 1;
+
+/** จำนวนรอบสอบสูงสุดและต่ำสุดที่อนุญาต */
+export const MAX_EXAM_SESSIONS = 4;
+export const MIN_EXAM_SESSIONS = 1;
+
+/** ข้อความแสดงผลเมื่อไม่พบข้อมูลสถานที่ */
+export const DEFAULT_LOCATION_TEXT = 'TBA';

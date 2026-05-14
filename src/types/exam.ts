@@ -148,8 +148,20 @@ export interface BackendExam {
   EXAM_ID: number;
   EXAM_NAME: string;
   EXAM_TYPE: string;
+  EXAM_FORMAT: string;
   EXAM_FEE: number;
   EXAM_DATE: string;
+  EXAM_REG_START_DATE: string;
+  EXAM_REG_END_DATE: string;
+  EXAM_PAY_START_DATE: string;
+  EXAM_PAY_END_DATE: string;
+  EXAM_PUBLISHED: boolean;
+  FUND_SOURCE_ID: number;
+  FUND_SOURCE?: {
+    FS_ID: number;
+    FS_NAME: string;
+    FS_ACCOUNT_CODE: string;
+  };
   SESSIONS: BackendSession[];
 }
 

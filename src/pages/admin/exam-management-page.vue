@@ -36,6 +36,7 @@
         @edit="handleEdit"
         @delete="handleDelete"
         @manageRegistrants="handleManageRegistrants"
+        @manageSeats="handleManageSeats"
         @printAdmitCard="handlePrintAdmitCard"
         @viewCandidates="handleViewCandidates"
         @exportReport="handleExportReport"
@@ -123,13 +124,18 @@ const handleEdit = (id: string) => {
     message: `${t('admin.examManagement.notifications.editNav')} ID: ${id}`,
     position: 'top',
   });
+  void router.push({ name: 'admin-edit-exam', params: { examId: id } });
 };
 
 const handleDelete = async (id: string) => {
   try {
     isLoading.value = true;
-    $q.notify({ type: 'positive', message: `ลบการสอบ ID: ${id} สำเร็จ`, position: 'top' });
-    await fetchData();
+    await examStore.deleteExamRound(id);
+    $q.notify({
+      type: 'positive',
+      message: t('admin.examManagement.notifications.deleteSuccess') || 'ลบการสอบสำเร็จ',
+      position: 'top',
+    });
   } catch {
     $q.notify({
       type: 'negative',
@@ -143,6 +149,10 @@ const handleDelete = async (id: string) => {
 
 const handleManageRegistrants = (id: string) => {
   void router.push({ name: 'admin-exam-registrants', params: { examId: id } });
+};
+
+const handleManageSeats = (id: string) => {
+  void router.push({ name: 'admin-exam-seat-management', params: { examId: id } });
 };
 
 const handlePrintAdmitCard = (id: string) => {

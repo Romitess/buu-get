@@ -2,7 +2,9 @@
   <q-card flat bordered class="registrant-card">
     <header class="row items-center q-px-lg q-py-md">
       <q-icon name="person_outline" size="24px" color="dark" class="q-mr-sm" />
-      <h2 class="text-h6 text-weight-bold q-ma-none">ข้อมูลส่วนตัว</h2>
+      <h2 class="text-h6 text-weight-bold q-ma-none">
+        {{ $t('admin.registrantManagement.detail.personalInfo') }}
+      </h2>
     </header>
 
     <q-separator />
@@ -15,7 +17,7 @@
               src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
               class="profile-img"
               fit="cover"
-              alt="รูปโปรไฟล์ผู้สมัคร"
+              :alt="$t('admin.registrantManagement.detail.photoAlt')"
             />
           </div>
           <figcaption class="text-center q-mt-md">
@@ -28,42 +30,62 @@
       <div class="col-12 col-md-9">
         <div class="row q-col-gutter-md">
           <div class="col-12 col-md-6">
-            <div class="column q-gutter-y-md">
+            <div class="column q-gutter-y-sm">
               <AppLabeledInput
-                label="เลขบัตรประจำตัวประชาชน"
+                :label="$t('profile.nationalId')"
                 :model-value="displayData.nationalId"
                 readonly
               />
-              <AppLabeledInput label="คำนำหน้า" :model-value="displayData.titleTh" readonly />
               <AppLabeledInput
-                label="ชื่อ-นามสกุล"
+                :label="$t('profile.prefix')"
+                :model-value="displayData.titleTh"
+                readonly
+              />
+              <AppLabeledInput
+                :label="$t('profile.fullName')"
                 :model-value="displayData.fullnameTh"
                 readonly
               />
-              <AppLabeledInput label="Full Name" :model-value="displayData.fullnameEn" readonly />
-              <AppLabeledInput label="วันเกิด" :model-value="displayData.birthDate" readonly />
+              <AppLabeledInput
+                :label="$t('profile.fullNameEn')"
+                :model-value="displayData.fullnameEn"
+                readonly
+              />
+              <AppLabeledInput
+                :label="$t('profile.birthdate')"
+                :model-value="displayData.birthDate"
+                readonly
+              />
             </div>
           </div>
 
           <div class="col-12 col-md-6">
-            <div class="column q-gutter-y-md">
+            <div class="column q-gutter-y-sm">
               <AppLabeledInput
-                label="ระดับการศึกษาสูงสุดของท่าน"
+                :label="$t('profile.education')"
                 :model-value="displayData.education"
                 readonly
               />
-              <AppLabeledInput label="คณะ/สาขาวิชา" :model-value="displayData.faculty" readonly />
               <AppLabeledInput
-                label="ชื่อสถานศึกษา"
+                :label="$t('profile.faculty')"
+                :model-value="displayData.faculty"
+                readonly
+              />
+              <AppLabeledInput
+                :label="$t('profile.institution')"
                 :model-value="displayData.institution"
                 readonly
               />
               <AppLabeledInput
-                label="ที่อยู่สำหรับจัดส่งเอกสาร"
+                :label="$t('profile.address')"
                 :model-value="displayData.address"
                 readonly
               />
-              <AppLabeledInput label="เบอร์โทรศัพท์" :model-value="displayData.phone" readonly />
+              <AppLabeledInput
+                :label="$t('profile.phone')"
+                :model-value="displayData.phone"
+                readonly
+              />
             </div>
           </div>
         </div>
