@@ -147,7 +147,7 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'exam-management/registrants/:ermId',
+            path: 'exam-management/:examId/registrants/:ermId',
             name: 'admin-exam-registrant-detail',
             component: () => import('pages/admin/exam-registrant-detail-page.vue'),
             meta: {

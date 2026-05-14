@@ -241,7 +241,10 @@ const onRequest = (props: TableRequestProps): void => {
 const handleView = (ermId: number): void => {
   void router.push({
     name: 'admin-exam-registrant-detail',
-    params: { ermId },
+    params: {
+      examId: route.params.examId,
+      ermId: String(ermId),
+    },
   });
 };
 
