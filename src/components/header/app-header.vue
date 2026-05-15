@@ -47,70 +47,7 @@
       <div class="app-header__actions">
         <!-- Logged In State -->
         <template v-if="userStore.isLoggedIn">
-          <div class="app-header__user-info row items-center no-wrap">
-            <div class="app-header__user-text text-right q-mr-sm">
-              <div class="app-header__user-name">
-                {{ displayName }}
-              </div>
-              <div class="app-header__user-role">
-                {{ displayRole }}
-              </div>
-            </div>
-            <q-avatar size="36px" class="app-header__avatar">
-              <q-icon name="account_circle" size="36px" color="grey-5" />
-            </q-avatar>
-
-            <!-- Profile Dropdown Card -->
-            <q-menu anchor="bottom end" self="top end" :offset="[0, 8]" class="profile-dropdown">
-              <div class="profile-card">
-                <!-- Profile Header: Centered Avatar + Name + Role -->
-                <div class="profile-card__header">
-                  <q-avatar size="72px" class="profile-card__avatar">
-                    <q-icon name="account_circle" size="72px" color="grey-4" />
-                  </q-avatar>
-                  <div class="profile-card__name">{{ displayName }}</div>
-                  <div class="profile-card__role">{{ displayRole }}</div>
-                </div>
-
-                <q-separator />
-
-                <!-- Actions -->
-                <q-list class="profile-card__actions">
-                  <q-item
-                    clickable
-                    v-close-popup
-                    class="profile-card__action-item"
-                    @click="goToEditProfile"
-                  >
-                    <q-item-section avatar>
-                      <q-icon name="edit" size="20px" class="profile-card__action-icon" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label class="profile-card__action-label">{{
-                        $t('profile.pageTitleEdit')
-                      }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-
-                  <q-item
-                    clickable
-                    v-close-popup
-                    class="profile-card__action-item profile-card__action-item--logout"
-                    @click="logout"
-                  >
-                    <q-item-section avatar>
-                      <q-icon name="logout" size="20px" class="profile-card__logout-icon" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label class="profile-card__logout-label">{{
-                        $t('navigation.logout')
-                      }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </div>
-            </q-menu>
-          </div>
+          <AppHeaderProfile />
         </template>
 
         <!-- Not Logged In State -->
@@ -225,9 +162,12 @@ import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from 'src/stores/user.store';
-import { ROLES, ROLE_LABELS } from 'src/constants/roles';
+import { ROLES } from 'src/constants/roles';
 import type { NavigationItem } from 'src/types/navigation';
 import headerLogo from 'src/assets/img/header-buu-get-logo.png';
+
+// Components
+import AppHeaderProfile from './app-header-profile.vue';
 
 const userStore = useUserStore();
 const route = useRoute();
@@ -264,20 +204,12 @@ const navLinks = computed<NavigationItem[]>(() => {
         label: t('navigation.examSchedule'),
         icon: 'quiz',
         path: '/user/exam-schedule',
-        children: [
-          {
-            name: 'exam-schedule',
-            label: t('navigation.selectSession'),
-            icon: 'event',
-            path: '/user/exam-schedule',
-          },
-          {
-            name: 'exam-history',
-            label: t('navigation.examHistory'),
-            icon: 'history',
-            path: '/user/exam-history',
-          },
-        ],
+      });
+      links.push({
+        name: 'exam-history',
+        label: t('navigation.examHistory'),
+        icon: 'history',
+        path: '/user/exam-history',
       });
     }
 
@@ -320,41 +252,6 @@ const navLinks = computed<NavigationItem[]>(() => {
 
   return links;
 });
-
-/**
- * Display name — use Thai full name if available, else use username from email
- */
-const displayName = computed(() => {
-  const user = userStore.currentUser;
-  if (!user) return '';
-
-  if (user.fullNameTH) return user.fullNameTH;
-  if (user.fullNameEN) return user.fullNameEN;
-
-  if (user.email) {
-    // Show just the username part instead of the full email
-    return user.email.split('@')[0];
-  }
-
-  return '';
-});
-
-/**
- * Display role — translate role key to Thai label
- */
-const displayRole = computed(() => {
-  const role = userStore.userRole;
-  if (!role) return '';
-  return ROLE_LABELS[role] || role;
-});
-
-/**
- * Navigate to edit profile page (placeholder — not connected yet)
- */
-const goToEditProfile = () => {
-  // TODO: Connect to actual edit profile route later
-  console.log('Navigate to edit profile — not connected yet');
-};
 
 /**
  * Check if a nav link is currently active
@@ -462,40 +359,6 @@ const logout = async () => {
   flex-shrink: 0;
 }
 
-// --- Logged-in User Info ---
-.app-header__user-info {
-  cursor: pointer;
-  padding: 6px 8px;
-  border-radius: var(--radius-sm);
-  transition: background-color var(--transition-fast);
-
-  &:hover {
-    background-color: var(--neutral-50);
-  }
-}
-
-.app-header__user-name {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  line-height: 1.3;
-  max-width: 160px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.app-header__user-role {
-  font-size: 11px;
-  font-weight: var(--font-weight-regular);
-  color: var(--text-muted);
-  line-height: 1.3;
-}
-
-.app-header__avatar {
-  border: 2px solid var(--neutral-200);
-}
-
 // --- Not Logged-in ---
 .app-header__login-link {
   font-size: var(--font-size-sm);
@@ -544,103 +407,5 @@ const logout = async () => {
   .app-header__logo {
     height: 28px;
   }
-
-  .app-header__user-text {
-    display: none;
-  }
-}
-</style>
-
-<!-- Unscoped styles for q-menu portal content (rendered outside component DOM) -->
-<style lang="scss">
-// ============================================================
-// Profile Dropdown Card (Unscoped — q-menu renders in portal)
-// ============================================================
-.profile-dropdown {
-  border-radius: var(--radius-md) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
-  border: 1px solid var(--neutral-200);
-  overflow: hidden;
-}
-
-.profile-card {
-  width: 280px;
-  background: var(--surface-card);
-  overflow: hidden;
-}
-
-.profile-card__header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px 20px 20px;
-  background: var(--surface-card);
-}
-
-.profile-card__avatar {
-  border: 3px solid var(--neutral-200);
-  background: #ffffff;
-  margin-bottom: 12px;
-}
-
-.profile-card__name {
-  font-size: 16px;
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  line-height: 1.3;
-  text-align: center;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.profile-card__role {
-  font-size: 13px;
-  font-weight: var(--font-weight-regular);
-  color: var(--text-secondary);
-  margin-top: 2px;
-  text-align: center;
-}
-
-// --- Actions Section ---
-.profile-card__actions {
-  padding: 4px 8px 8px;
-}
-
-.profile-card__action-item {
-  border-radius: var(--radius-sm);
-  min-height: 46px;
-  transition: background-color var(--transition-fast);
-
-  &:hover {
-    background-color: var(--neutral-50);
-  }
-}
-
-.profile-card__action-icon {
-  color: var(--neutral-600);
-}
-
-.profile-card__action-label {
-  font-size: 14px;
-  font-weight: var(--font-weight-medium);
-  color: var(--text-primary);
-}
-
-.profile-card__action-item--logout {
-  &:hover {
-    background-color: #fef2f2;
-  }
-}
-
-.profile-card__logout-icon {
-  color: #ef4444;
-}
-
-.profile-card__logout-label {
-  font-size: 14px;
-  font-weight: var(--font-weight-medium);
-  color: #ef4444;
 }
 </style>

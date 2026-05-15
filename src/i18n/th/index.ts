@@ -188,6 +188,9 @@ export default {
       time: 'Time',
     },
     clockHourSuffix: 'น.',
+    registrationTitle: 'การสมัครสอบ',
+    registrationSubtitle: 'กรุณาเลือกวันที่และรอบเวลาที่คุณต้องการสมัครเข้าทดสอบ BUU-GET',
+    dateLabel: 'วันที่',
   },
   carousel: {
     page1: {

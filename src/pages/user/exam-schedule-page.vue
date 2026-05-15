@@ -2,8 +2,8 @@
   <div class="page-container exam-schedule q-pa-lg">
     <AppBreadcrumbs />
     <AppPageHeader
-      title="เลือกวันและรอบการสอบ"
-      subtitle="กรุณาเลือกวันที่และรอบเวลาที่คุณต้องการสมัครเข้าทดสอบ BUU-GET"
+      :title="t('examSchedule.registrationTitle')"
+      :subtitle="t('examSchedule.registrationSubtitle')"
     />
 
     <!-- ส่วนบน examdetail -->
@@ -31,7 +31,8 @@
             <div class="exam-schedule__rounds-title-row">
               <q-icon name="calendar_today" size="20px" color="dark" class="q-mr-sm" />
               <h3 class="exam-schedule__rounds-title">
-                {{ t('examSchedule.title') }}วันที่ {{ formattedSelectedDate }}
+                {{ t('examSchedule.title') }} {{ t('examSchedule.dateLabel') }}
+                {{ formattedSelectedDate }}
               </h3>
             </div>
             <p class="exam-schedule__rounds-subtitle text-grey-7">

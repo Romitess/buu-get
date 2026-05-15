@@ -84,6 +84,10 @@ export default {
       time: 'Time',
     },
     clockHourSuffix: '',
+    registrationTitle: 'Exam Registration',
+    registrationSubtitle:
+      'Please select the date and session time you wish to register for the BUU-GET test.',
+    dateLabel: 'Date',
   },
   profile: {
     pageTitle: 'Personal Information',
