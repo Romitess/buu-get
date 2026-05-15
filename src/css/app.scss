@@ -34,9 +34,11 @@
   // Text
   --text-primary: #1a1a1a;
   --text-secondary: #6c6c6c;
+  --text-input: #1a1a1a; // สีตัวอักษรในช่อง Input
   --text-muted: #9a9a9a;
   --text-on-dark: #e0e0e0;
   --text-on-primary: #ffffff;
+  --label-color: #000000; // สีของ Label หัวข้อฟิลด์
 
   // Neutral scale (used in form fields, dividers, secondary text)
   --neutral-50: #f8fafc;
@@ -54,22 +56,22 @@
 
   // Registrant Dashboard Specific
   --dashboard-card-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-  --dashboard-border-color: #e0e0e0;
-  --dashboard-header-text: #212121;
+  --dashboard-border-color: var(--neutral-200);
+  --dashboard-header-text: var(--text-primary);
   --dashboard-tab-border: #e2e2e28a;
   --dashboard-info-item-icon: #424242;
-  --dashboard-divider-color: #e2e8f0;
+  --dashboard-divider-color: var(--neutral-200);
 
   // Calendar / Status accents
   --calendar-today-bg: #f3f4f6;
   --calendar-active-bg: #1d4ed8;
   --calendar-hover-bg: #3b82f6;
   --calendar-hover-bg-light: rgba(0, 0, 0, 0.05);
-  --calendar-month-year-picker-border: #f0f0f0;
-  --calendar-year-item-border: #fafafa;
-  --calendar-year-item-hover: #f5f5f5;
-  --calendar-month-item-hover: #f5f5f5;
-  --calendar-month-item-border-hover: #e0e0e0;
+  --calendar-month-year-picker-border: var(--neutral-100);
+  --calendar-year-item-border: var(--neutral-50);
+  --calendar-year-item-hover: var(--neutral-100);
+  --calendar-month-item-hover: var(--neutral-100);
+  --calendar-month-item-border-hover: var(--neutral-200);
   --calendar-scrollbar-track: #f9f9f9;
   --calendar-scrollbar-thumb: #c1c1c1;
   --calendar-scrollbar-thumb-hover: #a8a8a8;
@@ -634,7 +636,7 @@ body {
   .q-field__suffix,
   .q-placeholder,
   .q-select__dropdown-icon {
-    color: var(--text-secondary) !important;
+    color: var(--text-input) !important;
   }
 }
 
@@ -714,8 +716,8 @@ body {
 
 // 4. Label หัวข้อฟิลด์
 .buu-label-muted {
-  color: var(--text-primary); // เปลี่ยนเป็นสีดำเทาเข้ม ตามรูป 2
-  font-weight: 500;
+  color: var(--label-color); 
+  font-weight: 600;
   font-size: 0.875rem; // 14px (ใหญ่ขึ้นนิดนึงให้อ่านง่าย)
 }
 

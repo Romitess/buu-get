@@ -1,5 +1,5 @@
 <template>
-  <q-card class="q-mb-md exam-card buu-premium-card">
+  <q-card class="q-mb-xl exam-card buu-premium-card">
     <q-card-section>
       <!-- Header Section -->
       <div class="row items-center q-mb-md">
@@ -8,7 +8,7 @@
       </div>
 
       <!-- Form Grid -->
-      <div class="row q-col-gutter-md">
+      <div class="row q-col-gutter-lg">
         <!-- Row 1: Exam Name (6) | Location (6) -->
         <div class="col-12 col-md-6">
           <div class="buu-label-muted q-mb-xs">ชื่อการสอบ</div>
@@ -70,6 +70,7 @@
             bg-color="white"
             :loading="isLoadingData"
             placeholder="เลือกแหล่งเงิน"
+            dropdown-icon="keyboard_arrow_down"
             class="buu-input-muted"
             :disable="isLocked"
           />
@@ -167,8 +168,8 @@ const form = defineModel<CreateExamForm>('form', { required: true });
 
 <style scoped>
 .exam-card {
-  border-radius: 12px;
-  background-color: #ffffff;
-  border: 1px solid #eef0f2;
+  border-radius: var(--radius-md);
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-color);
 }
 </style>
