@@ -12,12 +12,7 @@ import {
   deleteExam,
   type CreateExamPayload,
 } from 'src/services/exam.service';
-import {
-  DEFAULT_EXAM_FEE_THB,
-  PAYMENT_COUNTDOWN_DEFAULT,
-  BUDDHIST_YEAR_OFFSET,
-  EMPTY_DETAILS,
-} from 'src/constants/exam';
+import { DEFAULT_EXAM_FEE_THB, BUDDHIST_YEAR_OFFSET, EMPTY_DETAILS } from 'src/constants/exam';
 
 export const useExamStore = defineStore('exam', () => {
   const selectedDate = ref<string>(new Date().toISOString().split('T')[0] || '');
@@ -124,6 +119,10 @@ export const useExamStore = defineStore('exam', () => {
     const newId = nextHistoryId.value++;
     const feeAmount = dayData?.fee.match(/\d+/)?.[0];
 
+    // Calculate an absolute deadline (Current time + 29m 30s)
+    const expiry = new Date();
+    expiry.setSeconds(expiry.getSeconds() + 1770); // 29 * 60 + 30 = 1770 seconds
+
     pendingRegistrations.value.push({
       id: newId,
       title: `${round.title} (${round.roundTypeLabel})`,
@@ -133,7 +132,7 @@ export const useExamStore = defineStore('exam', () => {
       time: round.timeRange,
       location: dayData?.location || examInfo.value.locationText,
       fee: feeAmount ? Number(feeAmount) : DEFAULT_EXAM_FEE_THB,
-      deadline: PAYMENT_COUNTDOWN_DEFAULT,
+      deadline: expiry.toISOString(),
       actions: ['cancel', 'pay'],
     });
   }

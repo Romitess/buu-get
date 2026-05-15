@@ -154,6 +154,16 @@ export default {
     personalInfo: 'ข้อมูลส่วนตัว',
     or: 'หรือ',
   },
+  payment: {
+    dialog: {
+      title: 'ยืนยันการชำระเงิน',
+      detailsLabel: 'รายละเอียดการชำระเงิน',
+      payWithin: 'ชำระเงินภายใน {time}',
+      instruction:
+        'กรุณาสแกน QR Code ด้วยแอปพลิเคชัน Mobile Banking<br />เพื่อเสร็จสิ้นการลงทะเบียน',
+      saveQr: 'บันทึก QR Code ชำระเงิน',
+    },
+  },
   examSchedule: {
     title: 'ตารางสอบ',
     subtitle: 'กรุณาเลือกรอบเวลาที่ท่านต้องการลงทะเบียน',

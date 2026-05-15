@@ -11,10 +11,10 @@ import type { Ref } from 'vue';
  * @returns displayDeadline - ข้อความแสดงเวลาที่เหลือ (MM:SS)
  */
 export function useCountdown(
-  deadline: Ref<string | undefined>,
+  deadline: Ref<string | Date | undefined>,
   onTimeout?: () => void,
 ): { displayDeadline: Ref<string | undefined> } {
-  const displayDeadline = ref<string | undefined>(deadline.value);
+  const displayDeadline = ref<string | undefined>(undefined);
   let timerInterval: ReturnType<typeof setInterval> | null = null;
 
   const clearTimer = (): void => {
@@ -28,20 +28,12 @@ export function useCountdown(
     const deadlineStr = deadline.value;
     if (!deadlineStr) return;
 
-    let targetTime: number;
-
-    // รองรับทั้งแบบ Mock (MM:SS) และแบบใช้งานจริงกับ Backend (ISO Date String)
-    if (deadlineStr.includes(':') && deadlineStr.length <= 5) {
-      const parts = deadlineStr.split(':');
-      const minutes = parseInt(parts[0] || '0', 10);
-      const seconds = parseInt(parts[1] || '0', 10);
-      if (isNaN(minutes) || isNaN(seconds)) return;
-      targetTime = Date.now() + (minutes * 60 + seconds) * 1000;
-    } else {
-      const parsedDate = new Date(deadlineStr);
-      if (isNaN(parsedDate.getTime())) return;
-      targetTime = parsedDate.getTime();
+    const parsedDate = new Date(deadlineStr);
+    if (isNaN(parsedDate.getTime())) {
+      displayDeadline.value = '00:00';
+      return;
     }
+    const targetTime = parsedDate.getTime();
 
     const updateDisplay = (): void => {
       const now = Date.now();
@@ -74,9 +66,8 @@ export function useCountdown(
   });
 
   // Restart timer if deadline changes externally
-  watch(deadline, (newVal) => {
+  watch(deadline, () => {
     clearTimer();
-    displayDeadline.value = newVal;
     startTimer();
   });
 
