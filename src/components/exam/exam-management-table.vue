@@ -114,7 +114,7 @@ const duplicateDates = computed(() => {
     if (!exam.examDate) return;
     counts[exam.examDate] = (counts[exam.examDate] || 0) + 1;
   });
-  return Object.keys(counts).filter((date) => counts[date] > 1);
+  return Object.keys(counts).filter((date) => (counts[date] ?? 0) > 1);
 });
 
 const isDuplicate = (date: string) => duplicateDates.value.includes(date);
