@@ -141,7 +141,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
                 { label: 'แก้ไขรอบสอบ', icon: 'edit' },
               ],
             },

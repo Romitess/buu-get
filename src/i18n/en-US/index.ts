@@ -332,4 +332,15 @@ export default {
       error: 'Connection error',
     },
   },
+  navigation: {
+    home: 'Home',
+    examSchedule: 'Exam Schedule',
+    selectSession: 'Select Session',
+    examHistory: 'Exam History',
+    manageExams: 'Manage Exams',
+    dashboard: 'Dashboard',
+    viewSchedule: 'View Schedule',
+    logout: 'Logout',
+    menu: 'Menu',
+  },
 };

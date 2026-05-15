@@ -1,5 +1,5 @@
 <template>
-  <q-page class="exam-history-page q-pa-lg">
+  <div class="page-container exam-history-page q-pa-lg">
     <AppBreadcrumbs />
     <AppPageHeader
       :title="$t('exam.history.pageTitle')"
@@ -125,7 +125,7 @@
       :exam-time="selectedExamForCancel?.time || ''"
       @confirm="handleConfirmCancel"
     />
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -217,30 +217,9 @@ const handleConfirmCancel = () => {
 </script>
 
 <style scoped lang="scss">
-.exam-history-page {
-  // Full width
-}
-
-.page-header {
-  margin-top: var(--space-lg);
-  .page-title {
-    font-size: var(--font-size-h1);
-    font-weight: var(--font-weight-black);
-    line-height: 1.4;
-    color: var(--text-primary);
-    margin: 0 0 var(--space-sm) 0;
-  }
-  .page-subtitle {
-    font-family: 'Sarabun', sans-serif;
-    font-size: var(--font-size-body);
-    color: var(--text-primary);
-    font-weight: var(--font-weight-black);
-    max-width: 900px;
-    line-height: 1.6;
-    margin: 0;
-    letter-spacing: 0;
-  }
-}
+// .exam-history-page {
+//   // Full width
+// }
 
 .section-title {
   color: var(--text-primary);

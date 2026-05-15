@@ -471,4 +471,15 @@ export default {
       error: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
     },
   },
+  navigation: {
+    home: 'หน้าหลัก',
+    examSchedule: 'รายการสอบ',
+    selectSession: 'เลือกวันและรอบการสอบ',
+    examHistory: 'ประวัติการสมัครและสอบ',
+    manageExams: 'จัดการรอบสอบ',
+    dashboard: 'แดชบอร์ด',
+    viewSchedule: 'ดูตารางสอบ',
+    logout: 'ออกจากระบบ',
+    menu: 'เมนู',
+  },
 };

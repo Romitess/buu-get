@@ -79,6 +79,7 @@ import { useI18n } from 'vue-i18n';
 import BaseTable from '../shared/base-table.vue';
 import ActionButton from '../shared/action-button.vue';
 import { useThaiDate } from 'src/composables/useThaiDate';
+import { ROLES } from 'src/constants/roles';
 import { NOTIFY_MSG } from 'src/constants/exam';
 import {
   type ExamSchedule,
@@ -106,6 +107,15 @@ const emit = defineEmits<{
   (e: 'viewCandidates', id: string): void;
   (e: 'exportReport', id: string): void;
 }>();
+
+const TABLE_ACTIONS = {
+  EDIT: 'edit',
+  DELETE: 'delete',
+  MANAGE_REGISTRANTS: 'manageRegistrants',
+  MANAGE_SEATS: 'manageSeats',
+  VIEW_CANDIDATES: 'viewCandidates',
+  EXPORT_REPORT: 'exportReport',
+} as const;
 
 // Logic to detect duplicate dates in the current table data
 const duplicateDates = computed(() => {
@@ -182,88 +192,88 @@ const getRatio = (row: ExamSchedule) => {
 
 const getProgressColor = (row: ExamSchedule) => {
   const ratio = getRatio(row);
-  if (ratio >= 0.9) return 'blue-9';
-  if (ratio >= 0.5) return 'blue-6';
+  if (ratio >= 0.9) return 'primary';
+  if (ratio >= 0.5) return 'secondary';
   return 'blue-3';
 };
 
 const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
-  ['staff']: [
+  [ROLES.STAFF]: [
     {
       icon: 'edit',
-      color: 'blue-6',
+      color: 'secondary',
       tooltip: t('admin.examManagement.table.tooltips.edit'),
-      emit: 'edit',
+      emit: TABLE_ACTIONS.EDIT,
     },
     {
       icon: 'delete',
-      color: 'red-6',
+      color: 'negative',
       tooltip: t('admin.examManagement.table.tooltips.delete'),
-      emit: 'delete',
+      emit: TABLE_ACTIONS.DELETE,
     },
   ],
-  ['registration_officer']: [
+  [ROLES.REGISTRATION_OFFICER]: [
     {
       icon: 'group',
-      color: 'blue-6',
+      color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.manageRegistrants'),
-      emit: 'manageRegistrants',
+      emit: TABLE_ACTIONS.MANAGE_REGISTRANTS,
     },
     {
       icon: 'event_seat',
-      color: 'blue-6',
+      color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.manageSeats'),
-      emit: 'manageSeats',
+      emit: TABLE_ACTIONS.MANAGE_SEATS,
     },
     {
       icon: 'format_list_bulleted',
-      color: 'blue-6',
+      color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.viewCandidates'),
-      emit: 'viewCandidates',
+      emit: TABLE_ACTIONS.VIEW_CANDIDATES,
     },
     {
       icon: 'description',
-      color: 'blue-6',
+      color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.exportReport'),
-      emit: 'exportReport',
+      emit: TABLE_ACTIONS.EXPORT_REPORT,
     },
   ],
-  ['admin']: [
+  [ROLES.ADMIN]: [
     {
       icon: 'edit',
-      color: 'blue-6',
+      color: 'secondary',
       tooltip: t('admin.examManagement.table.tooltips.edit'),
-      emit: 'edit',
+      emit: TABLE_ACTIONS.EDIT,
     },
     {
       icon: 'delete',
-      color: 'red-6',
+      color: 'negative',
       tooltip: t('admin.examManagement.table.tooltips.delete'),
-      emit: 'delete',
+      emit: TABLE_ACTIONS.DELETE,
     },
     {
       icon: 'group',
-      color: 'blue-6',
+      color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.manageRegistrants'),
-      emit: 'manageRegistrants',
+      emit: TABLE_ACTIONS.MANAGE_REGISTRANTS,
     },
     {
       icon: 'event_seat',
-      color: 'blue-6',
+      color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.manageSeats'),
-      emit: 'manageSeats',
+      emit: TABLE_ACTIONS.MANAGE_SEATS,
     },
     {
       icon: 'format_list_bulleted',
-      color: 'blue-6',
+      color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.viewCandidates'),
-      emit: 'viewCandidates',
+      emit: TABLE_ACTIONS.VIEW_CANDIDATES,
     },
     {
       icon: 'description',
-      color: 'blue-6',
+      color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.exportReport'),
-      emit: 'exportReport',
+      emit: TABLE_ACTIONS.EXPORT_REPORT,
     },
   ],
 }));
@@ -272,7 +282,7 @@ const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
  * Logic to disable specific actions based on business rules
  */
 const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
-  if (emitName === 'viewCandidates') {
+  if (emitName === TABLE_ACTIONS.VIEW_CANDIDATES) {
     if (!row.examDate) return true;
 
     // Convert YYYY-MM-DD or ISO to Date object
@@ -290,31 +300,31 @@ const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
 };
 
 const handleAction = (emitName: string, id: string) => {
-  if (emitName === 'delete') {
+  if (emitName === TABLE_ACTIONS.DELETE) {
     $q.dialog({
       title: t('admin.examManagement.dialogs.delete.title'),
       message: t('admin.examManagement.dialogs.delete.message'),
       cancel: true,
       persistent: true,
     }).onOk(() => {
-      emit('delete', id);
+      emit(TABLE_ACTIONS.DELETE, id);
     });
   } else {
     switch (emitName) {
-      case 'edit':
-        emit('edit', id);
+      case TABLE_ACTIONS.EDIT:
+        emit(TABLE_ACTIONS.EDIT, id);
         break;
-      case 'manageRegistrants':
-        emit('manageRegistrants', id);
+      case TABLE_ACTIONS.MANAGE_REGISTRANTS:
+        emit(TABLE_ACTIONS.MANAGE_REGISTRANTS, id);
         break;
-      case 'manageSeats':
-        emit('manageSeats', id);
+      case TABLE_ACTIONS.MANAGE_SEATS:
+        emit(TABLE_ACTIONS.MANAGE_SEATS, id);
         break;
-      case 'viewCandidates':
-        emit('viewCandidates', id);
+      case TABLE_ACTIONS.VIEW_CANDIDATES:
+        emit(TABLE_ACTIONS.VIEW_CANDIDATES, id);
         break;
-      case 'exportReport':
-        emit('exportReport', id);
+      case TABLE_ACTIONS.EXPORT_REPORT:
+        emit(TABLE_ACTIONS.EXPORT_REPORT, id);
         break;
     }
   }
