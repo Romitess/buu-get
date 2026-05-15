@@ -9,6 +9,7 @@ export interface BackendUserProfile {
   userPhone: string | null;
   userEducation: string | null;
   userFaculty: string | null;
+  userInstitution: string | null;
   userAddress: string | null;
 }
 
