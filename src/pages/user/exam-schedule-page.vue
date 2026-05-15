@@ -2,11 +2,11 @@
   <div class="page-container exam-schedule">
     <!-- ส่วนบน examdetail -->
     <ExamDetail
-      :badge-text="dynamicBadgeText"
+      :badge-text="examInfo.badgeText"
       :title="examInfo.title"
       :subtitle="examInfo.subtitle"
-      :location-text="currentDayDetails.location"
-      :fee-text="currentDayDetails.fee"
+      :location-text="examInfo.locationText"
+      :fee-text="examInfo.feeText"
     />
 
     <!-- ส่วนล่าง calendar + roundexam -->

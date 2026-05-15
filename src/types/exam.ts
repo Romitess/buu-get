@@ -68,9 +68,12 @@ export interface ExamHistoryItem {
 }
 
 export interface DayData {
+  examId?: number;
   rounds: ExamRound[];
   location: string;
   fee: string;
+  title: string;
+  subtitle: string;
 }
 
 export interface RoundExamProps {

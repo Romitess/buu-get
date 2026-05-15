@@ -123,6 +123,18 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'edit-exam/:examId',
+            name: 'admin-edit-exam',
+            component: () => import('pages/admin/edit-exam-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'แก้ไขรอบสอบ', icon: 'edit' },
+              ],
+            },
+          },
+          {
             path: 'exam-management/:examId/seats',
             name: 'admin-exam-seat-management',
             component: () => import('pages/admin/exam-seat-management-page.vue'),

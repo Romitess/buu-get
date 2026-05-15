@@ -120,11 +120,6 @@ const onRequest = (props: TableRequestProps) => {
 
 // Actions Handlers
 const handleEdit = (id: string) => {
-  $q.notify({
-    type: 'info',
-    message: `${t('admin.examManagement.notifications.editNav')} ID: ${id}`,
-    position: 'top',
-  });
   void router.push({ name: 'admin-edit-exam', params: { examId: id } });
 };
 

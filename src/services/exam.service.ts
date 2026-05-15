@@ -14,11 +14,17 @@ import {
   SESSION_STATUS_OPEN,
   DEFAULT_EXAM_INFO,
   EXAM_TYPE_GENERAL,
+  DEFAULT_EXAM_TITLE,
+  DEFAULT_LOCATION_TEXT,
+  formatFee,
+  formatLocationWithRoom,
+  INTERNAL_EXAM_TYPE_GENERAL,
+  INTERNAL_EXAM_TYPE_SPECIAL,
+  EXAM_STATUS_PUBLISHED,
+  EXAM_STATUS_UNPUBLISHED,
 } from 'src/constants/exam';
 
-/** Constants to prevent hard-coding */
-const DEFAULT_EXAM_TITLE = 'BUU - GET';
-const DEFAULT_LOCATION_TEXT = 'TBA';
+
 
 /** Helper to clean and format time strings to HH:mm */
 export const formatTime = (timeStr: string | null | undefined): string => {
@@ -63,7 +69,7 @@ export const defaultExamInfo: ExamInfo = DEFAULT_EXAM_INFO;
 export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
   try {
     const response = await api.get<BackendExam[]>('/exam');
-    const exams: BackendExam[] = response.data;
+    const exams: BackendExam[] = response.data.filter((e) => e.EXAM_PUBLISHED === true);
     const schedule: Record<string, DayData> = {};
 
     exams.forEach((exam: BackendExam) => {
@@ -80,14 +86,18 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
           : DEFAULT_LOCATION_TEXT;
 
         schedule[date] = {
+          examId: exam.EXAM_ID,
+          title: exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
+          subtitle: firstLocation?.LOCATION_NAME || '',
           location: locationLabel,
-          fee: `Fee : ${exam.EXAM_FEE} ฿`,
+          fee: formatFee(exam.EXAM_FEE),
           rounds: [],
         };
       }
 
       const dayData = schedule[date];
-      if (!dayData) return;
+      // Safety Filter: Only allow sessions from the same exam that initialized this date
+      if (!dayData || dayData.examId !== exam.EXAM_ID) return;
 
       sortedSessions.forEach((session) => {
         const startTime = formatTime(session.SS_START_TIME);
@@ -136,9 +146,8 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
           registeredCount += session.ENROLLMENTS?.length || 0;
         });
 
-        const firstLoc = exam.SESSIONS[0]?.LOCATION;
         if (firstLoc) {
-          locationName = `${firstLoc.LOCATION_NAME}${firstLoc.LOCATION_ROOM_NO ? ` (${firstLoc.LOCATION_ROOM_NO})` : ''}`;
+          locationName = formatLocationWithRoom(firstLoc.LOCATION_NAME, firstLoc.LOCATION_ROOM_NO);
         }
       }
 
@@ -146,14 +155,14 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
         id: String(exam.EXAM_ID),
         examName: exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
         examType:
-          exam.EXAM_TYPE === EXAM_TYPE_GENERAL || exam.EXAM_TYPE === 'general'
-            ? 'general'
-            : 'special',
+          exam.EXAM_TYPE === EXAM_TYPE_GENERAL || exam.EXAM_TYPE === INTERNAL_EXAM_TYPE_GENERAL
+            ? INTERNAL_EXAM_TYPE_GENERAL
+            : INTERNAL_EXAM_TYPE_SPECIAL,
         examDate: exam.EXAM_DATE, // assuming it's in YYYY-MM-DD or ISO format from backend
         examLocation: locationName,
         registeredCount,
         capacity,
-        status: exam.EXAM_PUBLISHED === false ? 'unpublished' : 'published',
+        status: exam.EXAM_PUBLISHED === false ? EXAM_STATUS_UNPUBLISHED : EXAM_STATUS_PUBLISHED,
       };
     });
   } catch (error) {
@@ -179,7 +188,7 @@ export const fetchExamById = async (id: number): Promise<BackendExam> => {
   }
 };
 
-const buddhistToGregorian = (dateStr: string): string => {
+export const buddhistToGregorian = (dateStr: string): string => {
   if (!dateStr || !dateStr.includes('/')) return '';
   const parts = dateStr.split('/');
   if (parts.length !== 3) return '';
@@ -249,7 +258,7 @@ export const fetchExamLocations = async (): Promise<ExamLocationOption[]> => {
   try {
     const response = await api.get<BackendLocation[]>('/exam-locations');
     return response.data.map((loc) => ({
-      label: `${loc.LOCATION_NAME}${loc.LOCATION_ROOM_NO ? ` (${loc.LOCATION_ROOM_NO})` : ''}`,
+      label: formatLocationWithRoom(loc.LOCATION_NAME, loc.LOCATION_ROOM_NO),
       value: loc.LOCATION_ID,
       raw: loc,
     }));
