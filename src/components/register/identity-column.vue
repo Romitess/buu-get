@@ -1,5 +1,43 @@
 <template>
   <div class="q-gutter-y-sm">
+    <!-- ─── Photo Upload Section ─── -->
+    <div class="row q-col-gutter-sm q-mb-sm">
+      <!-- Upload Box -->
+      <div class="col-12 col-sm-4">
+        <div class="photo-upload-box bg-grey-3 flex flex-center rounded-borders cursor-pointer">
+          <q-icon name="add_photo_alternate" size="48px" color="grey-8" />
+        </div>
+      </div>
+      <!-- Requirements Box -->
+      <div class="col-12 col-sm-8">
+        <div class="requirements-card border rounded-borders q-pa-sm full-height bg-white">
+          <div class="text-center text-weight-medium q-mb-xs text-subtitle2">
+            {{ t('profile.photoRequirementsTitle') }}
+          </div>
+          <div class="row items-center">
+            <div class="col-8">
+              <ul class="requirements-list q-my-none text-caption">
+                <li>{{ t('profile.photoReq1') }}</li>
+                <li>{{ t('profile.photoReq2') }}</li>
+                <li>{{ t('profile.photoReq3') }}</li>
+                <li>{{ t('profile.photoReq4') }}</li>
+                <li>{{ t('profile.photoReq5') }}</li>
+                <li>{{ t('profile.photoReq6') }}</li>
+              </ul>
+            </div>
+            <div class="col-4 flex column flex-center">
+              <div class="sample-photo-container">
+                <img src="/sample-img.png" alt="Sample Photo" class="sample-photo-img" />
+              </div>
+              <div class="sample-photo-text text-caption q-mt-xs">
+                {{ t('profile.samplePhoto') }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ─── Thai: เลขบัตรประจำตัวประชาชน / Foreigner: Passport Number ─── -->
     <AppFormField
       v-if="isThai"
@@ -67,55 +105,15 @@
       :placeholder="t('profile.fullNameEnPlaceholder')"
       :rules="[(val) => !!val || t('profile.requiredFullNameEn')]"
     />
-
-    <!-- ─── วันเกิด / Date of Birth ─── -->
-    <div class="relative-position">
-      <AppFormField
-        v-model="birthdate"
-        type="date"
-        :label="t('profile.birthdate')"
-        :rules="[(val) => !!val || t('profile.requiredBirthdate')]"
-        @dblclick="showCalendar = true"
-      >
-        <!-- ไอคอนปฏิทินเรียกปฏิทินใหม่ -->
-        <template #append-inner>
-          <q-menu
-            v-model="showCalendar"
-            anchor="top left"
-            self="bottom left"
-            class="shadow-5"
-            style="border-radius: 16px; overflow: hidden"
-          >
-            <AppCalendar
-              :model-value="birthdate"
-              @update:model-value="(val) => (birthdate = val)"
-              @click-date="showCalendar = false"
-            />
-          </q-menu>
-        </template>
-      </AppFormField>
-    </div>
-
-    <!-- ─── ระดับการศึกษา / Highest Education ─── -->
-    <AppFormField
-      v-model="educationLevel"
-      type="select"
-      :label="t('profile.education')"
-      :options="educationOptions"
-      :rules="[(val) => !!val || t('profile.requiredEducation')]"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { TITLE_TH_OPTIONS, TITLE_EN_OPTIONS } from 'src/utils/form-options';
 import AppFormField from 'src/components/base/app-form-field.vue';
-import AppCalendar from 'src/components/app-calendar.vue';
 
 const { t } = useI18n();
-const showCalendar = ref(false);
 
 defineProps<{
   isThai: boolean;
@@ -130,17 +128,45 @@ const titleTH = defineModel<string>('titleTH', { required: true });
 const fullName = defineModel<string>('fullName', { required: true });
 const titleEN = defineModel<string>('titleEN', { required: true });
 const englishName = defineModel<string>('englishName', { required: true });
-const birthdate = defineModel<string>('birthdate', { required: true });
-const educationLevel = defineModel<string>('educationLevel', { required: true });
 
 const onTitleTHChange = (): void => {
   emit('title-th-change');
 };
-
-const educationOptions = computed(() => [
-  { label: t('profile.eduHighSchool'), value: 'มัธยมศึกษา' },
-  { label: t('profile.eduBachelor'), value: 'ปริญญาตรี' },
-  { label: t('profile.eduMaster'), value: 'ปริญญาโท' },
-  { label: t('profile.eduDoctor'), value: 'ปริญญาเอก' },
-]);
 </script>
+
+<style scoped lang="scss">
+.photo-upload-box {
+  aspect-ratio: 0.9/ 1;
+  border-radius: 8px;
+}
+
+.requirements-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.requirements-list {
+  line-height: 1.5;
+  list-style-type: none;
+  padding-left: 0;
+  font-size: 14.5px;
+}
+
+.sample-photo-text {
+  font-size: 10px;
+}
+
+.sample-photo-container {
+  width: 90px;
+  aspect-ratio: 0.9 / 1;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+}
+
+.sample-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+</style>

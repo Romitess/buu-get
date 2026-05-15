@@ -1,5 +1,41 @@
 <template>
   <div class="q-gutter-y-sm">
+    <!-- ─── วันเกิด / Date of Birth ─── -->
+    <div class="relative-position">
+      <AppFormField
+        v-model="birthdate"
+        type="date"
+        :label="t('profile.birthdate')"
+        :rules="[(val) => !!val || t('profile.requiredBirthdate')]"
+        @dblclick="showCalendar = true"
+      >
+        <!-- ไอคอนปฏิทินเรียกปฏิทินใหม่ -->
+        <template #append-inner>
+          <q-menu
+            v-model="showCalendar"
+            anchor="top left"
+            self="bottom left"
+            class="shadow-5 calendar-menu"
+          >
+            <AppCalendar
+              :model-value="birthdate"
+              @update:model-value="(val) => (birthdate = val)"
+              @click-date="showCalendar = false"
+            />
+          </q-menu>
+        </template>
+      </AppFormField>
+    </div>
+
+    <!-- ─── ระดับการศึกษา / Highest Education ─── -->
+    <AppFormField
+      v-model="educationLevel"
+      type="select"
+      :label="t('profile.education')"
+      :options="educationOptions"
+      :rules="[(val) => !!val || t('profile.requiredEducation')]"
+    />
+
     <!-- ─── คณะ/สาขาวิชา ─── -->
     <AppFormField
       v-model="faculty"
@@ -22,20 +58,6 @@
       :placeholder="t('profile.addressPlaceholder')"
     />
 
-    <!-- ─── จังหวัด ─── -->
-    <AppFormField
-      v-model="province"
-      :label="t('profile.province')"
-      :placeholder="t('profile.provincePlaceholder')"
-    />
-
-    <!-- ─── รหัสไปรษณีย์ ─── -->
-    <AppFormField
-      v-model="zipCode"
-      :label="t('profile.zipCode')"
-      :placeholder="t('profile.zipCodePlaceholder')"
-    />
-
     <!-- ─── เบอร์โทรศัพท์ ─── -->
     <AppFormField
       v-model="phone"
@@ -48,15 +70,32 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AppFormField from 'src/components/base/app-form-field.vue';
+import AppCalendar from 'src/components/app-calendar.vue';
 
 const { t } = useI18n();
+const showCalendar = ref(false);
 
+const birthdate = defineModel<string>('birthdate', { required: true });
+const educationLevel = defineModel<string>('educationLevel', { required: true });
 const faculty = defineModel<string>('faculty', { required: true });
 const institution = defineModel<string>('institution', { required: true });
 const address = defineModel<string>('address', { required: true });
-const province = defineModel<string>('province', { required: true });
-const zipCode = defineModel<string>('zipCode', { required: true });
 const phone = defineModel<string>('phone', { required: true });
+
+const educationOptions = computed(() => [
+  { label: t('profile.eduHighSchool'), value: 'มัธยมศึกษา' },
+  { label: t('profile.eduBachelor'), value: 'ปริญญาตรี' },
+  { label: t('profile.eduMaster'), value: 'ปริญญาโท' },
+  { label: t('profile.eduDoctor'), value: 'ปริญญาเอก' },
+]);
 </script>
+
+<style scoped lang="scss">
+.calendar-menu {
+  border-radius: 16px;
+  overflow: hidden;
+}
+</style>

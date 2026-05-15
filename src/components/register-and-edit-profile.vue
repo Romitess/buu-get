@@ -3,6 +3,12 @@
     <!-- Match mockup styling: no heavy shadow, soft border, rounded corners -->
     <q-card class="q-pa-xl shadow-0 profile-card">
       <q-form @submit.prevent="submitForm">
+        <!-- ─── Title ─── -->
+        <div class="row items-center q-gutter-x-sm q-mb-lg q-px-xl">
+          <q-icon name="people" size="28px" color="primary" />
+          <div class="text-h6 text-weight-medium">{{ t('profile.personalInfo') }}</div>
+        </div>
+
         <!-- ─── 2-Column Layout ─── -->
         <div class="row justify-center q-gutter-y-md">
           <!-- คอลัมน์ซ้าย: ข้อมูลตัวตน -->
@@ -16,8 +22,6 @@
               v-model:full-name="formData.fullName"
               v-model:title-e-n="formData.titleEN"
               v-model:english-name="formData.englishName"
-              v-model:birthdate="formData.birthdate"
-              v-model:education-level="formData.educationLevel"
               @title-th-change="handleTitleTHChange"
             />
           </div>
@@ -25,11 +29,11 @@
           <!-- คอลัมน์ขวา: ข้อมูลสถาบัน/ที่อยู่ -->
           <div class="col-12 col-md-6 q-px-xl">
             <ContactColumn
+              v-model:birthdate="formData.birthdate"
+              v-model:education-level="formData.educationLevel"
               v-model:faculty="formData.faculty"
               v-model:institution="formData.institution"
               v-model:address="formData.address"
-              v-model:province="formData.province"
-              v-model:zip-code="formData.zipCode"
               v-model:phone="formData.phone"
             />
           </div>
@@ -37,11 +41,11 @@
 
         <!-- ─── Buttons ─── -->
         <!-- Center-aligned buttons to match mockup -->
-        <div class="row justify-center q-gutter-x-md q-mt-xl">
+        <div class="row justify-end q-gutter-x-md q-mt-xl q-px-xl">
           <q-btn
             unelevated
             class="bg-grey-4 text-black text-weight-bold profile-action-btn"
-            :label="t('profile.cancel')"
+            :label="t('profile.back')"
             @click="emit('close')"
           />
           <q-btn
