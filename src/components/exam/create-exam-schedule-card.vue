@@ -116,6 +116,7 @@
               class="custom-input"
               readonly
               hide-bottom-space
+              :disable="locked"
             >
               <template v-slot:append>
                 <q-icon name="calendar_today" class="cursor-pointer" size="xs" color="grey-8">
@@ -139,6 +140,7 @@
               class="custom-input"
               readonly
               hide-bottom-space
+              :disable="locked"
             >
               <template v-slot:append>
                 <q-icon name="calendar_today" class="cursor-pointer" size="xs" color="grey-8">
@@ -167,6 +169,7 @@
               class="custom-input"
               readonly
               hide-bottom-space
+              :disable="locked"
             >
               <template v-slot:append>
                 <q-icon name="calendar_today" class="cursor-pointer" size="xs" color="grey-8">
@@ -190,6 +193,7 @@
               class="custom-input"
               readonly
               hide-bottom-space
+              :disable="locked"
             >
               <template v-slot:append>
                 <q-icon name="calendar_today" class="cursor-pointer" size="xs" color="grey-8">

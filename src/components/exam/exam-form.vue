@@ -7,6 +7,7 @@
       :exam-type-options="examTypeOptions"
       :fund-source-options="fundSourceOptions"
       :is-loading-data="isLoadingData"
+      :is-locked="wasOriginallyPublished"
     />
 
     <!-- Card 2: กำหนดการสอบ -->
@@ -36,22 +37,28 @@
         </div>
       </q-banner>
 
-      <!-- Case 2: Locked by Publication (Temporary) -->
-      <q-banner v-else dense class="bg-amber-1 text-amber-9 rounded-borders q-mb-md">
+      <!-- Warning Banner for Published/Locked Exams -->
+      <q-banner
+        v-if="isScheduleLocked && !isLockedByEnrollment"
+        dense
+        class="bg-amber-1 text-amber-9 q-mb-md rounded-borders"
+      >
         <template v-slot:avatar>
-          <q-icon name="lock" size="sm" />
+          <q-icon name="visibility" color="amber-9" />
         </template>
-        <div class="text-weight-medium">รอบสอบนี้เผยแพร่แล้ว ไม่สามารถแก้ไขกำหนดการสอบได้</div>
-        <div class="text-caption">
-          หากต้องการแก้ไขวัน/เวลาสอบ กรุณาปิดสถานะ "เผยแพร่" ด้านบนก่อน
-        </div>
+        รอบสอบนี้เคยผ่านการเผยแพร่แล้ว ระบบจึงแสดงผลใน <b>"โหมดดูข้อมูลเท่านั้น (View Only)"</b> ไม่สามารถบันทึกหรือแก้ไขข้อมูลใดๆ ได้
       </q-banner>
     </div>
 
     <!-- Action Buttons -->
     <div class="row justify-end q-mt-md q-gutter-md action-container">
-      <app-button label="ยกเลิก" @click="onCancel" class="action-btn cancel-btn text-weight-bold" />
+      <app-button 
+        :label="wasOriginallyPublished ? 'กลับสู่หน้าจัดการ' : 'ยกเลิก'" 
+        @click="onCancel" 
+        class="action-btn cancel-btn text-weight-bold" 
+      />
       <app-button
+        v-if="!wasOriginallyPublished"
         :label="isEditMode ? 'บันทึกการแก้ไข' : 'บันทึก'"
         @click="onSave"
         class="action-btn save-btn text-white text-weight-bold"
@@ -84,6 +91,7 @@ const {
   isEditMode,
   isScheduleLocked,
   isLockedByEnrollment,
+  wasOriginallyPublished,
   loadInitialData,
   addTimeSlot,
   removeTimeSlot,

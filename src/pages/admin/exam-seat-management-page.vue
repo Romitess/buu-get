@@ -1,11 +1,11 @@
 <template>
-  <q-page class="q-pa-lg" style="background-color: var(--surface-page)">
+  <q-page class="q-pa-lg surface-page-bg">
     <div class="max-width-container">
       <!-- Header -->
       <AppBreadcrumbs />
       <AppPageHeader
-        title="จัดการที่นั่งสอบ"
-        subtitle="วางผังและจัดการที่นั่งสอบ เพื่อรองรับผู้เข้าสอบได้อย่างเหมาะสมและสะดวก"
+        :title="$t('admin.seatManagement.pageTitle')"
+        :subtitle="$t('admin.seatManagement.pageSubtitle')"
       />
 
       <!-- Time Tabs -->
@@ -32,19 +32,19 @@
       <!-- Main Layout -->
       <div class="row q-col-gutter-lg items-stretch">
         <!-- Left Panel: Student List (Back to left) -->
-        <div class="col-12 col-md-4 flex column" style="min-width: 0">
+        <div class="col-12 col-md-4 flex column min-width-0">
           <div
-            class="bg-white q-pa-lg border-radius-lg student-list-card custom-scroll-container full-height"
-            style="width: 100%; min-width: 0; overflow: hidden"
+            class="bg-white q-pa-lg border-radius-lg student-list-card custom-scroll-container full-height full-width min-width-0 overflow-hidden"
           >
             <div class="row items-center justify-between q-mb-md">
-              <div class="text-subtitle1 text-weight-bold text-dark">รายชื่อผู้สมัครและที่นั่ง</div>
+              <div class="text-subtitle1 text-weight-bold text-dark">
+                {{ $t('admin.seatManagement.studentListTitle') }}
+              </div>
               <q-badge
                 color="primary"
                 rounded
                 :label="paidCount"
-                class="q-px-md q-py-xs"
-                style="border-radius: 100px; font-size: 14px"
+                class="q-px-md q-py-xs badge-seat-count"
               />
             </div>
 
@@ -76,7 +76,9 @@
                   class="column items-center q-pa-xl text-grey-6"
                 >
                   <q-icon name="person_search" size="48px" />
-                  <div class="text-body1 q-mt-sm">ไม่พบรายชื่อผู้เข้าสอบ</div>
+                  <div class="text-body1 q-mt-sm">
+                    {{ $t('admin.seatManagement.emptyStudentList') }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -84,22 +86,27 @@
         </div>
 
         <!-- Right Panel: Seat Layout (Back to right) -->
-        <div class="col-12 col-md-8" style="min-width: 0">
+        <div class="col-12 col-md-8 min-width-0">
           <!-- Main Content Box with Border -->
           <div
-            class="bg-white q-pt-md q-px-xl q-pb-xl border-radius-lg main-seat-grid-box"
-            style="width: 100%; min-width: 0"
+            class="bg-white q-pt-md q-px-xl q-pb-xl border-radius-lg main-seat-grid-box full-width min-width-0"
           >
             <div class="row items-center justify-between q-mb-md">
-              <div class="text-h6 text-weight-bold text-dark">แผนผังที่นั่งสอบ</div>
+              <div class="text-h6 text-weight-bold text-dark">
+                {{ $t('admin.seatManagement.seatLayoutTitle') }}
+              </div>
               <div class="row items-center q-gutter-x-lg">
                 <div class="row items-center">
                   <div class="legend-dot available q-mr-sm"></div>
-                  <span class="text-body2 text-dark font-weight-medium">ที่นั่งว่าง</span>
+                  <span class="text-body2 text-dark font-weight-medium">{{
+                    $t('admin.seatManagement.availableSeat')
+                  }}</span>
                 </div>
                 <div class="row items-center">
                   <div class="legend-dot assigned q-mr-sm"></div>
-                  <span class="text-body2 text-dark font-weight-medium">จัดที่นั่งแล้ว</span>
+                  <span class="text-body2 text-dark font-weight-medium">{{
+                    $t('admin.seatManagement.assignedSeat')
+                  }}</span>
                 </div>
               </div>
             </div>
@@ -126,12 +133,16 @@
           <!-- Action Buttons (Closer together as requested) -->
           <div class="row justify-end q-mt-sm q-gutter-sm">
             <AppButton
-              label="ยกเลิกการจัดที่นั่ง"
+              :label="$t('admin.seatManagement.cancelButton')"
               class="btn-cancel-seat"
               flat
               @click="handleCancel"
             />
-            <AppButton label="ยืนยันการจัดที่นั่ง" class="btn-confirm-seat" @click="handleSave" />
+            <AppButton
+              :label="$t('admin.seatManagement.saveButton')"
+              class="btn-confirm-seat"
+              @click="handleSave"
+            />
           </div>
         </div>
       </div>
@@ -156,17 +167,15 @@
     </div>
 
     <!-- Hidden native ghost to bypass browser fading -->
-    <div
-      id="hidden-drag-ghost"
-      style="position: absolute; top: -1000px; left: -1000px; width: 1px; height: 1px; opacity: 0"
-    ></div>
+    <div id="hidden-drag-ghost" class="hidden-drag-ghost-box"></div>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
 import AppExamSeatCard from 'src/components/exam/app-exam-seat-card.vue';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
@@ -185,7 +194,9 @@ import {
 } from 'src/services/enrollment.service';
 
 const route = useRoute();
+const router = useRouter();
 const $q = useQuasar();
+const { t } = useI18n();
 const examId = Number(route.params.examId);
 
 // Status Constants
@@ -292,7 +303,7 @@ const loadExamData = async () => {
     filterStudentsBySession();
   } catch (error) {
     console.error('Failed to load exam data', error);
-    $q.notify({ type: 'negative', message: 'ไม่สามารถโหลดข้อมูลการสอบได้' });
+    $q.notify({ type: 'negative', message: t('admin.seatManagement.notifications.loadError') });
   } finally {
     $q.loading.hide();
   }
@@ -312,7 +323,7 @@ const filterStudentsBySession = () => {
   students.value = eligibleEnrollments.map((e) => ({
     ermId: e.ERM_ID,
     id: e.USER?.USER_NATIONAL_ID || String(e.USER_ID),
-    name: e.USER?.PROFILE?.userFullnameTh || e.USER?.USER_EMAIL || 'ไม่มีชื่อ',
+    name: e.USER?.PROFILE?.userFullnameTh || e.USER?.USER_EMAIL || t('admin.seatManagement.noName'),
     seat: e.ERM_SEAT_NUMBER,
     avatar: null,
   }));
@@ -455,7 +466,7 @@ const handleCancel = () => {
 const handleSave = async () => {
   if (!activeSessionId.value) return;
   try {
-    $q.loading.show({ message: 'กำลังบันทึกข้อมูลผังที่นั่ง...' });
+    $q.loading.show({ message: t('admin.seatManagement.savingData') });
 
     // Save each student individually (Business Logic check is in the backend Service)
     const promises = students.value.map((student) => {
@@ -473,12 +484,18 @@ const handleSave = async () => {
     $q.notify({
       color: 'positive',
       position: 'top',
-      message: 'บันทึกผังที่นั่งสำเร็จ',
+      message: t('admin.seatManagement.notifications.saveSuccess'),
       icon: 'check_circle',
+    });
+
+    // Navigate to the candidates list page after successful save
+    void router.push({
+      name: 'admin-exam-seat-candidates',
+      params: { examId: String(examId) },
     });
   } catch (error: unknown) {
     console.error('Failed to save seats', error);
-    let message = 'ไม่สามารถบันทึกข้อมูลได้';
+    let message = t('admin.seatManagement.notifications.saveError');
 
     // Type-safe error handling for Axios/API errors
     if (error && typeof error === 'object' && 'response' in error) {
@@ -494,6 +511,29 @@ const handleSave = async () => {
 </script>
 
 <style scoped lang="scss">
+.surface-page-bg {
+  background-color: var(--surface-page);
+}
+
+.min-width-0 {
+  min-width: 0;
+}
+
+.badge-seat-count {
+  border-radius: 100px;
+  font-size: 14px;
+}
+
+.hidden-drag-ghost-box {
+  position: absolute;
+  top: -1000px;
+  left: -1000px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+/* Base Layout & Containers */
 .max-width-container {
   width: 100%;
   max-width: 100%; /* Fully responsive full screen */

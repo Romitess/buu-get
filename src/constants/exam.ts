@@ -36,3 +36,49 @@ export const MIN_EXAM_SESSIONS = 1;
 
 /** ข้อความแสดงผลเมื่อไม่พบข้อมูลสถานที่ */
 export const DEFAULT_LOCATION_TEXT = 'TBA';
+
+/** ชื่อการสอบเริ่มต้น */
+export const DEFAULT_EXAM_TITLE = 'BUU - GET';
+
+/** ข้อความแจ้งเตือนต่างๆ */
+export const NOTIFY_MSG = {
+  CONFLICT_DATE: (date: string) =>
+    `ไม่สามารถจัดสอบได้ เนื่องจากวันที่ ${date} มีการจัดสอบอยู่แล้ว (1 วันสามารถจัดได้เพียง 1 วิชาเท่านั้น หากต้องการเพิ่มรอบสอบ กรุณาแก้ไขวิชาเดิมเพื่อเพิ่มเวลา)`,
+  SELECT_FUND: 'กรุณาเลือกแหล่งเงิน',
+  LOAD_ERROR: 'ไม่สามารถโหลดข้อมูลได้',
+  MAX_SESSIONS: (max: number) => `สามารถเพิ่มรอบเวลาสอบได้สูงสุด ${max} รอบ`,
+  MIN_SESSIONS: (min: number) => `ต้องมีช่วงเวลาสอบอย่างน้อย ${min} ช่วงเวลา`,
+  PROVIDE_TIME: 'กรุณาระบุเวลาสอบอย่างน้อย 1 ช่วงเวลา',
+  SELECT_LOCATION: 'กรุณาเลือกสถานที่สอบ',
+  UPDATE_SUCCESS: 'แก้ไขรอบสอบสำเร็จ',
+  CREATE_SUCCESS: 'สร้างรอบสอบสำเร็จ',
+  UPDATE_ERROR: 'เกิดข้อผิดพลาดในการแก้ไขรอบสอบ',
+  CREATE_ERROR: 'เกิดข้อผิดพลาดในการสร้างรอบสอบ',
+  DUPLICATE_DATE: 'วันที่นี้มีการจัดสอบซ้ำซ้อน (Duplicate) กรุณาลบรายการที่ไม่ต้องการออก',
+};
+
+/** ข้อความแสดงผลเมื่อยังไม่เลือกข้อมูล */
+export const EMPTY_DETAILS = {
+  LOCATION: 'กรุณาเลือกวันที่เพื่อดูสถานที่สอบ',
+  FEE: 'Fee : - ฿',
+};
+
+/** Labels and Units */
+export const CURRENCY_SYMBOL = '฿';
+export const FEE_LABEL = 'Fee :';
+
+/** Exam Status Constants */
+export const EXAM_STATUS_PUBLISHED = 'published';
+export const EXAM_STATUS_UNPUBLISHED = 'unpublished';
+
+/** Internal Exam Type mapping (English for backend/logic compatibility) */
+export const INTERNAL_EXAM_TYPE_GENERAL = 'general';
+export const INTERNAL_EXAM_TYPE_SPECIAL = 'special';
+
+/** Helper to format fee string */
+export const formatFee = (amount: number | string) =>
+  `${FEE_LABEL} ${Number(amount).toLocaleString()} ${CURRENCY_SYMBOL}`;
+
+/** Helper to format location with room */
+export const formatLocationWithRoom = (name: string, room?: string | null) =>
+  `${name}${room ? ` (${room})` : ''}`;

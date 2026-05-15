@@ -16,12 +16,26 @@ import {
   DEFAULT_EXAM_FEE_THB,
   PAYMENT_COUNTDOWN_DEFAULT,
   BUDDHIST_YEAR_OFFSET,
+  EMPTY_DETAILS,
 } from 'src/constants/exam';
 
 export const useExamStore = defineStore('exam', () => {
-  const examInfo = ref<ExamInfo>({ ...defaultExamInfo });
   const selectedDate = ref<string>(new Date().toISOString().split('T')[0] || '');
   const scheduleData = ref<Record<string, DayData>>(structuredClone(mockScheduleData));
+
+  const examInfo = computed((): ExamInfo => {
+    const dayData = scheduleData.value[selectedDate.value];
+    if (dayData) {
+      return {
+        badgeText: dynamicBadgeText.value,
+        title: dayData.title,
+        subtitle: dayData.subtitle,
+        locationText: dayData.location,
+        feeText: dayData.fee,
+      };
+    }
+    return { ...defaultExamInfo };
+  });
   const nextHistoryId = ref(100);
   const pendingRegistrations = ref<ExamHistoryItem[]>([]);
   const historyRecords = ref<ExamHistoryItem[]>(structuredClone(mockHistoryRecords));
@@ -33,12 +47,17 @@ export const useExamStore = defineStore('exam', () => {
   });
 
   const currentDayDetails = computed(() => {
-    return (
-      scheduleData.value[selectedDate.value] || {
-        location: 'กรุณาเลือกวันที่เพื่อดูสถานที่สอบ',
-        fee: 'Fee : - ฿',
-      }
-    );
+    const dayData = scheduleData.value[selectedDate.value];
+    if (dayData) {
+      return {
+        location: dayData.location,
+        fee: dayData.fee,
+      };
+    }
+    return {
+      location: EMPTY_DETAILS.LOCATION,
+      fee: EMPTY_DETAILS.FEE,
+    };
   });
 
   const dynamicBadgeText = computed((): string => {

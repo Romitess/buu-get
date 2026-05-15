@@ -13,7 +13,20 @@
 
     <!-- Date Column -->
     <template v-slot:body-cell-examDate="{ row }">
-      <div class="text-center">{{ formatThaiDate(row.examDate) }}</div>
+      <div class="text-center row items-center justify-center no-wrap">
+        <span>{{ formatThaiDate(row.examDate) }}</span>
+        <q-icon
+          v-if="isDuplicate(row.examDate)"
+          name="warning"
+          color="negative"
+          size="18px"
+          class="q-ml-xs cursor-pointer"
+        >
+          <q-tooltip class="bg-negative text-white text-body2">
+            {{ NOTIFY_MSG.DUPLICATE_DATE }}
+          </q-tooltip>
+        </q-icon>
+      </div>
     </template>
 
     <!-- Registration Progress Column -->
@@ -50,6 +63,7 @@
           :icon="btn.icon"
           :color="btn.color"
           :tooltip="btn.tooltip"
+          :disable="isActionDisabled(btn.emit, row)"
           @click="handleAction(btn.emit, row.id)"
         />
       </div>
@@ -65,6 +79,7 @@ import { useI18n } from 'vue-i18n';
 import BaseTable from '../shared/base-table.vue';
 import ActionButton from '../shared/action-button.vue';
 import { useThaiDate } from 'src/composables/useThaiDate';
+import { NOTIFY_MSG } from 'src/constants/exam';
 import {
   type ExamSchedule,
   type PaginationModel,
@@ -80,7 +95,7 @@ interface Props {
   pagination?: PaginationModel;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
   (e: 'request', req: TableRequestProps): void;
@@ -91,6 +106,18 @@ const emit = defineEmits<{
   (e: 'viewCandidates', id: string): void;
   (e: 'exportReport', id: string): void;
 }>();
+
+// Logic to detect duplicate dates in the current table data
+const duplicateDates = computed(() => {
+  const counts: Record<string, number> = {};
+  props.exams.forEach((exam) => {
+    if (!exam.examDate) return;
+    counts[exam.examDate] = (counts[exam.examDate] || 0) + 1;
+  });
+  return Object.keys(counts).filter((date) => counts[date] > 1);
+});
+
+const isDuplicate = (date: string) => duplicateDates.value.includes(date);
 
 const { formatThaiDate } = useThaiDate();
 const { t } = useI18n();
@@ -240,6 +267,27 @@ const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
     },
   ],
 }));
+
+/**
+ * Logic to disable specific actions based on business rules
+ */
+const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
+  if (emitName === 'viewCandidates') {
+    if (!row.examDate) return true;
+
+    // Convert YYYY-MM-DD or ISO to Date object
+    const examDate = new Date(row.examDate);
+    const today = new Date();
+
+    // Set both to midnight to compare only dates
+    examDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    // Disable if today is before exam date
+    return today < examDate;
+  }
+  return false;
+};
 
 const handleAction = (emitName: string, id: string) => {
   if (emitName === 'delete') {

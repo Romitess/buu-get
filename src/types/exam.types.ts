@@ -1,9 +1,4 @@
-import type { ROLES } from 'src/constants/roles';
-
-export type Role =
-  | (typeof ROLES)['STAFF']
-  | (typeof ROLES)['REGISTRATION_OFFICER']
-  | (typeof ROLES)['ADMIN'];
+import type { RolesType } from 'src/constants/roles';
 
 export interface ExamSchedule {
   id: string;
@@ -22,12 +17,24 @@ export interface PaginationModel {
   rowsNumber: number;
 }
 
+export type Role = RolesType['ADMIN'] | RolesType['STAFF'] | RolesType['REGISTRATION_OFFICER'];
+
 export interface ToolButtonConfig {
   icon: string;
   color: string;
   tooltip: string;
   emit: string;
 }
+
+export const EXAM_TYPE_LABELS: Record<string, string> = {
+  general: 'ทั่วไป',
+  special: 'พิเศษ',
+};
+
+export const EXAM_STATUS_LABELS: Record<string, string> = {
+  published: 'เผยแพร่แล้ว',
+  unpublished: 'ยังไม่เผยแพร่',
+};
 
 export interface TableRequestProps {
   pagination: {

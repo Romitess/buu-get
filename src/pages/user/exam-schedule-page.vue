@@ -1,17 +1,21 @@
 <template>
-  <div class="page-container exam-schedule">
-    <!-- ส่วนบน examdetail -->
-    <ExamDetail
-      :badge-text="dynamicBadgeText"
-      :title="examInfo.title"
-      :subtitle="examInfo.subtitle"
-      :location-text="currentDayDetails.location"
-      :fee-text="currentDayDetails.fee"
+  <div class="page-container exam-schedule q-pa-lg">
+    <AppBreadcrumbs />
+    <AppPageHeader
+      title="เลือกวันและรอบการสอบ"
+      subtitle="กรุณาเลือกวันที่และรอบเวลาที่คุณต้องการสมัครเข้าทดสอบ BUU-GET"
     />
 
-    <!-- ส่วนล่าง calendar + roundexam -->
+    <!-- ส่วนบน examdetail -->
+    <ExamDetail
+      :badge-text="examInfo.badgeText"
+      :title="examInfo.title"
+      :subtitle="examInfo.subtitle"
+      :location-text="examInfo.locationText"
+      :fee-text="examInfo.feeText"
+    />
+
     <div class="exam-schedule__content row q-col-gutter-lg q-mt-sm">
-      <!-- ฝั่งซ้าย ปฏิทิน -->
       <div class="col-12 col-md-5">
         <ExamCalendar
           v-model="selectedDate"
@@ -21,10 +25,8 @@
         />
       </div>
 
-      <!-- ฝั่งขวา รอบสอบ -->
       <div class="col-12 col-md-7">
         <q-card class="exam-schedule__rounds-section" :style="roundsSectionStyle">
-          <!-- หัวข้อรอบสอบ -->
           <q-card-section class="exam-schedule__rounds-header q-pa-none">
             <div class="exam-schedule__rounds-title-row">
               <q-icon name="calendar_today" size="20px" color="dark" class="q-mr-sm" />
@@ -37,7 +39,6 @@
             </p>
           </q-card-section>
 
-          <!-- รายการรอบสอบ -->
           <div
             class="exam-schedule__rounds-list"
             :style="{
@@ -53,11 +54,12 @@
                 :available-seats="round.availableSeats"
                 :total-seats="round.totalSeats"
                 :round-type-label="round.roundTypeLabel"
+                :reg-end-date="round.regEndDate"
+                :exam-date="round.examDate"
                 @register="handleRegister(round)"
               />
             </template>
 
-            <!-- กรณีไม่มีรอบสอบในวันที่เลือก -->
             <q-card-section v-else class="exam-schedule__rounds-empty text-center q-pa-xl">
               <q-icon name="event_busy" size="48px" color="grey-4" />
               <p class="text-grey-6 q-mt-md">{{ t('examSchedule.emptyRounds') }}</p>
@@ -84,12 +86,15 @@ import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
+import AppPageHeader from 'src/components/shared/app-page-header.vue';
+import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import ExamDetail from 'src/components/exam-detail.vue';
 import ExamCalendar from 'src/components/exam-calendar.vue';
 import RoundExam from 'src/components/exam/round-exam.vue';
 import DialogConfirm from 'src/components/exam/dialog-confirm.vue';
 import ExamPasscodeInputDialog from 'src/components/exam-passcode-input-dialog.vue';
 import { useExamStore } from 'src/stores/exam.store';
+import { EXAM_TYPE_SPECIAL } from 'src/constants/exam';
 import type { ExamRound } from 'src/types/exam';
 
 const $q = useQuasar();
@@ -100,15 +105,8 @@ const ROUTES = {
   HISTORY: '/user/exam-history',
 };
 
-const {
-  examInfo,
-  selectedDate,
-  selectedDateRounds,
-  currentDayDetails,
-  dynamicBadgeText,
-  calendarAvailability,
-  formattedSelectedDate,
-} = storeToRefs(examStore);
+const { examInfo, selectedDate, selectedDateRounds, calendarAvailability, formattedSelectedDate } =
+  storeToRefs(examStore);
 
 const showConfirmDialog = ref(false);
 const passcodeDialogRef = ref<InstanceType<typeof ExamPasscodeInputDialog> | null>(null);
@@ -143,7 +141,7 @@ const handleRegister = (round: ExamRound): void => {
     return;
   }
   selectedRound.value = round;
-  if (round.roundTypeLabel === 'รอบพิเศษ') {
+  if (round.roundTypeLabel === EXAM_TYPE_SPECIAL) {
     passcodeDialogRef.value?.openDialog();
   } else {
     showConfirmDialog.value = true;

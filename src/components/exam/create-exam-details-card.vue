@@ -20,6 +20,7 @@
             bg-color="white"
             dropdown-icon="keyboard_arrow_down"
             class="buu-input-muted"
+            :disable="isLocked"
           />
         </div>
         <div class="col-12 col-md-6">
@@ -37,6 +38,7 @@
             placeholder="เลือกสถานที่สอบ"
             dropdown-icon="keyboard_arrow_down"
             class="buu-input-muted"
+            :disable="isLocked"
           />
         </div>
 
@@ -51,6 +53,7 @@
             bg-color="white"
             dropdown-icon="keyboard_arrow_down"
             class="buu-input-muted"
+            :disable="isLocked"
           />
         </div>
         <div class="col-12 col-md-6">
@@ -68,6 +71,7 @@
             :loading="isLoadingData"
             placeholder="เลือกแหล่งเงิน"
             class="buu-input-muted"
+            :disable="isLocked"
           />
         </div>
 
@@ -84,6 +88,7 @@
                 dense
                 bg-color="white"
                 class="buu-input-muted"
+                :disable="isLocked"
               />
             </div>
             <div class="col-6">
@@ -96,6 +101,7 @@
                 bg-color="white"
                 class="buu-input-muted"
                 placeholder="0"
+                :disable="isLocked"
               />
             </div>
           </div>
@@ -106,7 +112,16 @@
             <template v-slot:control>
               <div class="full-width row items-center justify-between no-wrap">
                 <span class="text-body2 text-grey-7">สถานะเผยแพร่</span>
-                <q-toggle v-model="form.isPublished" color="primary" class="buu-toggle-muted" />
+                <q-toggle
+                  v-model="form.isPublished"
+                  color="primary"
+                  class="buu-toggle-muted"
+                  :disable="isLocked"
+                >
+                  <q-tooltip v-if="isLocked" class="bg-amber-9 text-body2">
+                    ไม่สามารถปิดสถานะเผยแพร่ได้เนื่องจากมีการเผยแพร่ไปแล้ว
+                  </q-tooltip>
+                </q-toggle>
               </div>
             </template>
           </q-field>
@@ -140,6 +155,8 @@ defineProps<{
   fundSourceOptions: FundSourceOption[];
   /** Loading state for fund source data. */
   isLoadingData: boolean;
+  /** Whether the entire details card should be locked (e.g. once published) */
+  isLocked?: boolean;
 }>();
 
 /**

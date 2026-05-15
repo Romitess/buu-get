@@ -9,6 +9,7 @@ import {
   EXAM_FORMAT_COMPUTER,
   MAX_EXAM_SESSIONS,
   MIN_EXAM_SESSIONS,
+  NOTIFY_MSG,
 } from 'src/constants/exam';
 import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
 import {
@@ -17,6 +18,7 @@ import {
   fetchExamById,
   updateExamRound,
   formatTime,
+  buddhistToGregorian,
 } from 'src/services/exam.service';
 
 export interface TimeSlot {
@@ -63,11 +65,14 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const examId = options?.examId;
   const isEditMode = computed(() => !!examId);
 
+  const wasOriginallyPublished = ref(false);
+
   /** Whether the schedule section should be locked (published exam or has enrollments) */
   const isScheduleLocked = computed(() => {
     if (!isEditMode.value) return false;
     const hasEnrollments = form.value.timeSlots.some((slot) => (slot.enrollmentCount || 0) > 0);
-    return form.value.isPublished || hasEnrollments;
+    // Lock permanently if it was originally published, is currently published, or has enrollments
+    return wasOriginallyPublished.value || form.value.isPublished || hasEnrollments;
   });
 
   /** Checks if the schedule is locked specifically due to existing enrollments */
@@ -144,6 +149,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         form.value.examType = exam.EXAM_TYPE || EXAM_TYPE_GENERAL;
         form.value.fee = exam.EXAM_FEE ?? '0.00';
         form.value.isPublished = exam.EXAM_PUBLISHED ?? false;
+        wasOriginallyPublished.value = exam.EXAM_PUBLISHED ?? false;
         form.value.examDate = gregorianToBuddhistDisplay(exam.EXAM_DATE);
         form.value.regStartDate = gregorianToBuddhistDisplay(exam.EXAM_REG_START_DATE);
         form.value.regEndDate = gregorianToBuddhistDisplay(exam.EXAM_REG_END_DATE);
@@ -175,7 +181,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       console.error('Failed to load initial data:', error);
       $q.notify({
         type: 'negative',
-        message: 'ไม่สามารถโหลดข้อมูลได้',
+        message: NOTIFY_MSG.LOAD_ERROR,
         position: 'top',
       });
     } finally {
@@ -193,7 +199,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     } else {
       $q.notify({
         type: 'warning',
-        message: `สามารถเพิ่มรอบเวลาสอบได้สูงสุด ${MAX_EXAM_SESSIONS} รอบ`,
+        message: NOTIFY_MSG.MAX_SESSIONS(MAX_EXAM_SESSIONS),
         position: 'top',
       });
     }
@@ -206,7 +212,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     } else {
       $q.notify({
         type: 'warning',
-        message: `ต้องมีช่วงเวลาสอบอย่างน้อย ${MIN_EXAM_SESSIONS} ช่วงเวลา`,
+        message: NOTIFY_MSG.MIN_SESSIONS(MIN_EXAM_SESSIONS),
         position: 'top',
       });
     }
@@ -231,7 +237,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (timeRanges.length === 0) {
       $q.notify({
         type: 'warning',
-        message: 'กรุณาระบุเวลาสอบอย่างน้อย 1 ช่วงเวลา',
+        message: NOTIFY_MSG.PROVIDE_TIME,
         position: 'top',
       });
       return false;
@@ -240,7 +246,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (!form.value.locationId || form.value.locationId === null) {
       $q.notify({
         type: 'warning',
-        message: 'กรุณาเลือกสถานที่สอบ',
+        message: NOTIFY_MSG.SELECT_LOCATION,
         position: 'top',
       });
       return false;
@@ -249,8 +255,33 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (!form.value.fundSourceId) {
       $q.notify({
         type: 'warning',
-        message: 'กรุณาเลือกแหล่งเงิน',
+        message: NOTIFY_MSG.SELECT_FUND,
         position: 'top',
+      });
+      return false;
+    }
+
+    // === BUSINESS RULE VALIDATION: Strictly 1 Exam Per Day ===
+    const targetDateGregorian = buddhistToGregorian(form.value.examDate);
+
+    // Make sure we have the latest schedules to check against
+    await examStore.loadManagementSchedules();
+    
+    const hasConflict = examStore.managementSchedules.some((exam) => {
+      // Skip checking against itself if in edit mode
+      if (isEditMode.value && String(exam.id) === String(examId)) return false;
+      
+      // Match date - ANY exam on the same date is a conflict!
+      return exam.examDate === targetDateGregorian;
+    });
+
+    if (hasConflict) {
+      $q.notify({
+        type: 'negative',
+        message: NOTIFY_MSG.CONFLICT_DATE(form.value.examDate),
+        position: 'top',
+        timeout: 5000,
+        actions: [{ icon: 'close', color: 'white' }]
       });
       return false;
     }
@@ -286,7 +317,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
         $q.notify({
           type: 'positive',
-          message: 'แก้ไขรอบสอบสำเร็จ',
+          message: NOTIFY_MSG.UPDATE_SUCCESS,
           position: 'top',
           timeout: 2000,
         });
@@ -315,7 +346,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
         $q.notify({
           type: 'positive',
-          message: 'สร้างรอบสอบสำเร็จ',
+          message: NOTIFY_MSG.CREATE_SUCCESS,
           position: 'top',
           timeout: 2000,
         });
@@ -328,8 +359,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       $q.notify({
         type: 'negative',
         message: isEditMode.value
-          ? 'เกิดข้อผิดพลาดในการแก้ไขรอบสอบ'
-          : 'เกิดข้อผิดพลาดในการสร้างรอบสอบ',
+          ? NOTIFY_MSG.UPDATE_ERROR
+          : NOTIFY_MSG.CREATE_ERROR,
         position: 'top',
       });
       return false;
@@ -345,6 +376,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     isEditMode,
     isScheduleLocked,
     isLockedByEnrollment,
+    wasOriginallyPublished,
     loadInitialData,
     addTimeSlot,
     removeTimeSlot,

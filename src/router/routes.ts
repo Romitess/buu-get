@@ -64,11 +64,23 @@ const routes: RouteRecordRaw[] = [
             path: 'exam-schedule',
             name: 'exam-schedule',
             component: () => import('pages/user/exam-schedule-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'เลือกวันและรอบการสอบ', icon: 'event' },
+              ],
+            },
           },
           {
             path: 'exam-history',
             name: 'exam-history',
             component: () => import('pages/user/exam-history-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'ประวัติการสมัครและสอบ', icon: 'history' },
+              ],
+            },
           },
         ],
       },
@@ -106,7 +118,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document' },
               ],
             },
           },
@@ -117,8 +129,20 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
                 { label: 'สร้างรอบสอบ', icon: 'add_circle' },
+              ],
+            },
+          },
+          {
+            path: 'edit-exam/:examId',
+            name: 'admin-edit-exam',
+            component: () => import('pages/admin/edit-exam-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'แก้ไขรอบสอบ', icon: 'edit' },
               ],
             },
           },
@@ -129,8 +153,25 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
                 { label: 'จัดการที่นั่งสอบ', icon: 'event_seat' },
+              ],
+            },
+          },
+          {
+            path: 'exam-management/:examId/seats/candidates',
+            name: 'admin-exam-seat-candidates',
+            component: () => import('pages/admin/exam-seat-candidates-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                {
+                  label: 'จัดการที่นั่งสอบ',
+                  icon: 'event_seat',
+                  to: '/admin/exam-management/:examId/seats',
+                },
+                { label: 'รายชื่อและที่นั่งผู้เข้าสอบ', icon: 'star' },
               ],
             },
           },
@@ -141,8 +182,8 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
-                { label: 'การจัดการรายชื่อผู้เข้าสอบ', icon: 'star' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
+                { label: 'การจัดการรายชื่อผู้เข้าสอบ', icon: 'group' },
               ],
             },
           },
@@ -153,10 +194,10 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
                 {
                   label: 'การจัดการรายชื่อผู้เข้าสอบ',
-                  icon: 'star',
+                  icon: 'group',
                   to: '/admin/exam-management/:examId/registrants',
                 },
                 { label: 'รายละเอียดผู้เข้าสอบ', icon: 'person' },
@@ -170,8 +211,8 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
-                { label: 'ประวัติการเข้าสอบ', icon: 'star' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
+                { label: 'ประวัติการเข้าสอบ', icon: 'format_list_bulleted' },
               ],
             },
           },

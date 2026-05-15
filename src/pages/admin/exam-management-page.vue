@@ -8,20 +8,18 @@
         subtitle="จัดการข้อมูลรอบสอบ ตรวจสอบกำหนดการ และติดตามสถานะการเปิดรับสมัคร"
       />
 
-      <!-- Search Bar -->
-      <div class="q-mb-lg">
-        <SearchBar v-model="searchQuery" />
-      </div>
-
-      <!-- Filters Section -->
-      <div class="row justify-between items-center q-mb-md">
+      <!-- Search and Action Bar -->
+      <div class="row items-center q-mb-lg q-gutter-x-md">
+        <div class="col">
+          <SearchBar v-model="searchQuery" />
+        </div>
         <q-btn
           color="primary"
           icon="add"
-          :label="$t('admin.examManagement.createExam')"
+          label="สร้างรอบสอบ"
           unelevated
           class="text-weight-bold"
-          style="border-radius: 8px"
+          style="border-radius: 8px; height: 52px; padding: 0 24px"
           @click="$router.push('/admin/create-exam')"
         />
       </div>
@@ -120,11 +118,6 @@ const onRequest = (props: TableRequestProps) => {
 
 // Actions Handlers
 const handleEdit = (id: string) => {
-  $q.notify({
-    type: 'info',
-    message: `${t('admin.examManagement.notifications.editNav')} ID: ${id}`,
-    position: 'top',
-  });
   void router.push({ name: 'admin-edit-exam', params: { examId: id } });
 };
 
