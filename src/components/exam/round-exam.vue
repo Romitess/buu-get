@@ -16,47 +16,162 @@
     <q-space />
 
     <q-card-actions class="round-exam__action-group q-pa-none">
-      <div class="round-exam__status" :class="isFull ? 'text-negative' : 'text-positive'">
-        <q-icon name="groups" size="xs" />
+      <div class="round-exam__status" :class="isDisabled ? 'text-negative' : 'text-positive'">
+        <q-icon :name="isExpired ? 'history_toggle_off' : 'groups'" size="xs" />
         <span class="round-exam__seats">
           {{
-            isFull
-              ? fullStatusText || t('examSchedule.fullStatusText')
-              : `${availableStatusTextPrefix || t('examSchedule.availableStatusTextPrefix')}${availableSeats}${availableStatusTextSuffix || t('examSchedule.availableStatusTextSuffix')}`
+            isExpired
+              ? t('examSchedule.expiredStatusText')
+              : isFull
+                ? fullStatusText || t('examSchedule.fullStatusText')
+                : `${availableStatusTextPrefix || t('examSchedule.availableStatusTextPrefix')}${availableSeats}${availableStatusTextSuffix || t('examSchedule.availableStatusTextSuffix')}`
           }}
-          <span class="text-muted">({{ totalSeats - availableSeats }}/{{ totalSeats }})</span>
+          <span v-if="!isExpired" class="text-muted">
+            ({{ totalSeats - availableSeats }}/{{ totalSeats }})
+          </span>
         </span>
       </div>
 
       <AppButton
         :label="
-          isFull
-            ? fullBtnText || t('examSchedule.fullBtnText')
-            : registerBtnText || t('examSchedule.registerBtnText')
+          isExpired
+            ? t('examSchedule.expiredBtnText')
+            : isFull
+              ? fullBtnText || t('examSchedule.fullBtnText')
+              : registerBtnText || t('examSchedule.registerBtnText')
         "
-        :color="isFull ? 'full' : 'primary'"
+        :color="isDisabled ? 'full' : 'primary'"
+        :disable="isDisabled"
         class="round-exam__btn"
-        @click="$emit('register')"
+        @click="handleRegister"
       />
     </q-card-actions>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { api } from 'src/boot/axios';
 import type { RoundExamProps } from 'src/types/exam';
 import ExamClock from './exam-clock.vue';
 import AppButton from '../base/app-button.vue';
 
 const props = defineProps<RoundExamProps>();
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'register'): void;
 }>();
 
 const { t } = useI18n();
 const isFull = computed(() => props.availableSeats <= 0);
+
+const now = ref(new Date());
+const serverOffset = ref(0);
+let timer: ReturnType<typeof setInterval> | null = null;
+let resyncTimer: ReturnType<typeof setInterval> | null = null;
+
+async function syncTime(): Promise<void> {
+  try {
+    const start = Date.now();
+    const response = await api.get<{ serverTime: string }>('/exam/time', { params: { _t: start } });
+    if (response.data && response.data.serverTime) {
+      const serverTime = new Date(response.data.serverTime).getTime();
+      const end = Date.now();
+      const latency = (end - start) / 2;
+      serverOffset.value = serverTime + latency - end;
+      now.value = getThaiTime();
+      return;
+    }
+  } catch {
+    try {
+      const start = Date.now();
+      const response = await api.get('/exam', { params: { _t: start } });
+      const serverDate = response.headers['date'];
+      if (serverDate) {
+        const serverTime = new Date(serverDate).getTime();
+        const end = Date.now();
+        const latency = (end - start) / 2;
+        serverOffset.value = serverTime + latency - end;
+        now.value = getThaiTime();
+        return;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  try {
+    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Bangkok');
+    const data = await response.json();
+    if (data && data.datetime) {
+      serverOffset.value = new Date(data.datetime).getTime() - Date.now();
+    }
+  } catch {
+    try {
+      const resp = await fetch('https://timeapi.io/api/Time/current/zone?timeZone=Asia/Bangkok');
+      const data = await resp.json();
+      if (data && data.dateTime) {
+        serverOffset.value = new Date(data.dateTime).getTime() - Date.now();
+      }
+    } catch (err) {
+      console.error('[TimeSync] Failed to sync time', err);
+    }
+  }
+  now.value = getThaiTime();
+}
+
+function getThaiTime(): Date {
+  const d = new Date(Date.now() + serverOffset.value);
+  const utc = d.getTime() + d.getTimezoneOffset() * 60000;
+  return new Date(utc + 3600000 * 7);
+}
+
+onMounted(async () => {
+  await syncTime();
+
+  timer = setInterval(() => {
+    now.value = getThaiTime();
+  }, 1000);
+
+  resyncTimer = setInterval(() => {
+    void syncTime();
+  }, 60000);
+});
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer);
+  if (resyncTimer) clearInterval(resyncTimer);
+});
+
+const isExpired = computed((): boolean => {
+  if (!props.examDate || !props.timeRange) return false;
+
+  try {
+    if (props.regEndDate) {
+      const regEnd = new Date(`${props.regEndDate}T23:59:59+07:00`);
+      if (now.value > regEnd) return true;
+    }
+
+    const endTimeStr = props.timeRange.split('-')[1]?.trim();
+    if (endTimeStr) {
+      const roundEnd = new Date(`${props.examDate}T${endTimeStr}:00+07:00`);
+      if (now.value >= roundEnd) return true;
+    }
+  } catch (e) {
+    console.error('Error calculating expiration:', e);
+  }
+
+  return false;
+});
+
+const isDisabled = computed((): boolean => isFull.value || isExpired.value);
+
+const handleRegister = (): void => {
+  if (!isDisabled.value) {
+    emit('register');
+  }
+};
 </script>
 
 <style scoped lang="scss">

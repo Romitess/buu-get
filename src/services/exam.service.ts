@@ -24,15 +24,12 @@ import {
   EXAM_STATUS_UNPUBLISHED,
 } from 'src/constants/exam';
 
-
-
 /** Helper to clean and format time strings to HH:mm */
 export const formatTime = (timeStr: string | null | undefined): string => {
   if (!timeStr) return '00:00';
   return timeStr.replace(/\s/g, '').substring(0, 5);
 };
 
-/** Payload for creating a new exam round (Frontend form structure) */
 export interface CreateExamPayload {
   examName: string;
   locationId: number;
@@ -50,14 +47,12 @@ export interface CreateExamPayload {
   fundSourceId?: number;
 }
 
-/** Interface for FundSource from Backend */
 export interface FundSource {
   FS_ID: number;
   FS_NAME: string;
   FS_ACCOUNT_CODE: string;
 }
 
-/** Interface for ExamLocation option used in dropdowns */
 export interface ExamLocationOption {
   label: string;
   value: number;
@@ -110,6 +105,8 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
           roundTypeLabel: exam.EXAM_TYPE || EXAM_TYPE_GENERAL,
           availableSeats: (session.SS_CAPACITY || 0) - (session.ENROLLMENTS?.length || 0),
           totalSeats: session.SS_CAPACITY || 0,
+          regEndDate: exam.EXAM_REG_END_DATE,
+          examDate: exam.EXAM_DATE,
         };
         dayData.rounds.push(round);
       });
@@ -126,9 +123,6 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
   }
 };
 
-/**
- * Fetches all exams and maps them to the ExamSchedule interface for the management table.
- */
 export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
   try {
     const response = await api.get<BackendExam[]>('/exam');
@@ -146,6 +140,7 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
           registeredCount += session.ENROLLMENTS?.length || 0;
         });
 
+        const firstLoc = exam.SESSIONS[0]?.LOCATION;
         if (firstLoc) {
           locationName = formatLocationWithRoom(firstLoc.LOCATION_NAME, firstLoc.LOCATION_ROOM_NO);
         }
@@ -171,9 +166,6 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
   }
 };
 
-/**
- * Fetches a single exam by ID with all relations (sessions, locations, fund source)
- */
 export const fetchExamById = async (id: number): Promise<BackendExam> => {
   try {
     const response = await api.get<BackendExam>(`/exam/${id}`);
@@ -197,9 +189,6 @@ export const buddhistToGregorian = (dateStr: string): string => {
   return `${gregorianYear}-${m}-${d}`;
 };
 
-/**
- * Creates a new Exam and its corresponding Sessions
- */
 export const createExamRound = async (payload: CreateExamPayload): Promise<void> => {
   try {
     // 1. Create the Exam
@@ -238,9 +227,6 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<void>
   }
 };
 
-/**
- * Fetches all fund sources from the backend
- */
 export const fetchFundSources = async (): Promise<FundSource[]> => {
   try {
     const response = await api.get<FundSource[]>('/fund-sources');
@@ -251,9 +237,6 @@ export const fetchFundSources = async (): Promise<FundSource[]> => {
   }
 };
 
-/**
- * Fetches all exam locations from the backend
- */
 export const fetchExamLocations = async (): Promise<ExamLocationOption[]> => {
   try {
     const response = await api.get<BackendLocation[]>('/exam-locations');
@@ -279,13 +262,6 @@ export interface UpdateExamPayload extends CreateExamPayload {
   existingSessionIds?: number[];
 }
 
-/**
- * Updates an existing Exam and synchronizes its Sessions.
- * - Updates core exam data via PATCH /exam/:id
- * - Deletes sessions that were removed
- * - Updates existing sessions
- * - Creates new sessions
- */
 export const updateExamRound = async (payload: UpdateExamPayload): Promise<void> => {
   try {
     // 1. Update the Exam core data
@@ -346,10 +322,6 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
   }
 };
 
-/**
- * Deletes an exam round by ID.
- * @param id - The ID of the exam to delete
- */
 export const deleteExam = async (id: number | string): Promise<void> => {
   try {
     await api.delete(`/exam/${id}`);
@@ -359,10 +331,6 @@ export const deleteExam = async (id: number | string): Promise<void> => {
   }
 };
 
-/**
- * Fetches admission voucher data for a specific enrollment.
- * @param enrollmentId - The ID of the enrollment record
- */
 export const fetchAdmissionVoucher = async (
   enrollmentId: number | string,
 ): Promise<AdmissionVoucherData> => {

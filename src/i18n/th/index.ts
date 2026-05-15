@@ -44,6 +44,10 @@ export default {
         seatNumber: 'เลขที่นั่งสอบ:',
       },
     },
+    calendar: {
+      legendAvailable: 'มีรอบสอบ (ว่าง)',
+      legendFull: 'รอบสอบเต็ม',
+    },
   },
   profile: {
     pageTitle: 'กรอกข้อมูลส่วนตัว',
@@ -130,10 +134,12 @@ export default {
     emptyRounds: 'ไม่มีรอบสอบในวันที่เลือก',
     roundTypeLabel: 'รอบทั่วไป',
     fullStatusText: 'ไม่มีที่ว่าง',
+    expiredStatusText: 'หมดเขตสมัครแล้ว',
     availableStatusTextPrefix: 'ว่าง ',
     availableStatusTextSuffix: ' ที่นั่ง',
     fullBtnText: 'เต็ม (Full)',
     registerBtnText: 'ลงทะเบียนสอบ',
+    expiredBtnText: 'หมดเขตลงทะเบียน',
     notifications: {
       roundFull: 'ขออภัย รอบสอบนี้ไม่มีที่ว่างแล้ว (เต็ม)',
       registrationSuccess: 'ลงทะเบียนสอบสำเร็จ กรุณาชำระเงินภายในเวลาที่กำหนด',

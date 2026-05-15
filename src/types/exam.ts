@@ -37,6 +37,8 @@ export interface ExamRound {
   roundTypeLabel: string;
   availableSeats: number;
   totalSeats: number;
+  regEndDate: string;
+  examDate: string;
 }
 
 export interface ExamInfo {
@@ -82,6 +84,8 @@ export interface RoundExamProps {
   availableSeats: number;
   totalSeats: number;
   roundTypeLabel?: string;
+  regEndDate?: string;
+  examDate?: string;
   fullStatusText?: string;
   availableStatusTextPrefix?: string;
   availableStatusTextSuffix?: string;
