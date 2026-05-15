@@ -1,12 +1,10 @@
 <template>
   <q-page class="exam-history-page q-pa-lg">
-    <!-- Page Header -->
-    <div class="page-header q-mb-xl">
-      <h1 class="page-title">{{ $t('exam.history.pageTitle') }}</h1>
-      <p class="page-subtitle">
-        {{ $t('exam.history.pageDescription') }}
-      </p>
-    </div>
+    <AppBreadcrumbs />
+    <AppPageHeader
+      :title="$t('exam.history.pageTitle')"
+      :subtitle="$t('exam.history.pageDescription')"
+    />
 
     <!-- Pending Payment Section -->
     <div v-if="pendingExams.length > 0" class="history-section q-mb-xl">
@@ -134,6 +132,8 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
+import AppPageHeader from 'src/components/shared/app-page-header.vue';
+import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppExamHistoryCard from 'src/components/exam/app-exam-history-card.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import AppPaymentDialog from 'src/components/exam/app-payment-dialog.vue';
@@ -218,8 +218,7 @@ const handleConfirmCancel = () => {
 
 <style scoped lang="scss">
 .exam-history-page {
-  max-width: 1200px;
-  margin: 0 auto;
+  // Full width
 }
 
 .page-header {

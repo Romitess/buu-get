@@ -75,6 +75,12 @@ const routes: RouteRecordRaw[] = [
             path: 'exam-history',
             name: 'exam-history',
             component: () => import('pages/user/exam-history-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'ประวัติการสมัครและสอบ', icon: 'history' },
+              ],
+            },
           },
         ],
       },
