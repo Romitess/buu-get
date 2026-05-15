@@ -279,10 +279,21 @@ const students = ref<StudentSeatInfo[]>([]);
 
 const filteredStudents = computed(() => {
   const query = searchQuery.value.toLowerCase().trim();
-  if (!query) return students.value;
-  return students.value.filter(
-    (s) => s.name.toLowerCase().includes(query) || s.id.toLowerCase().includes(query),
-  );
+  const list = query
+    ? students.value.filter(
+        (s) => s.name.toLowerCase().includes(query) || s.id.toLowerCase().includes(query),
+      )
+    : [...students.value];
+
+  // Sort: null seats (unassigned) first, then by seat number/id
+  return list.sort((a, b) => {
+    // 1. Unassigned first
+    if (!a.seat && b.seat) return -1;
+    if (a.seat && !b.seat) return 1;
+
+    // 2. If both unassigned or both assigned, sort by name or ID
+    return a.name.localeCompare(b.name, 'th');
+  });
 });
 
 const loadExamData = async () => {
