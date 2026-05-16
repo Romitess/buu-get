@@ -216,6 +216,17 @@ const routes: RouteRecordRaw[] = [
               ],
             },
           },
+          {
+            path: 'payment-import',
+            name: 'admin-payment-import',
+            component: () => import('pages/admin/payment-import-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'นำเข้าไฟล์การชำระเงิน', icon: 'star' },
+              ],
+            },
+          },
         ],
       },
     ],

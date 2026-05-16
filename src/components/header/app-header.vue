@@ -232,6 +232,16 @@ const navLinks = computed<NavigationItem[]>(() => {
         path: '/admin/dashboard',
       });
     }
+
+    // === Finance-specific: Payment Import ===
+    if (role === ROLES.ADMIN || role === ROLES.FINANCE) {
+      links.push({
+        name: 'admin-payment-import',
+        label: t('navigation.paymentImport'),
+        icon: 'payments',
+        path: '/admin/payment-import',
+      });
+    }
   } else {
     // === Guest Navigation ===
     links.push({
