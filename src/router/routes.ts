@@ -235,7 +235,23 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'นำเข้าไฟล์การชำระเงิน', icon: 'star' },
+                { label: 'นำเข้าไฟล์การชำระเงิน', icon: 'upload_file' },
+              ],
+            },
+          },
+          {
+            path: 'fin-check-transcript',
+            name: 'admin-fin-check-transcript',
+            component: () => import('pages/admin/fin-check-transcript-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                {
+                  label: 'นำเข้าไฟล์การชำระเงิน',
+                  icon: 'upload_file',
+                  to: '/admin/payment-import',
+                },
+                { label: 'ตรวจสอบข้อมูลการชำระเงิน', icon: 'fact_check' },
               ],
             },
           },

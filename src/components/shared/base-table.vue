@@ -11,6 +11,10 @@
     @request="onRequest"
     class="base-table"
   >
+    <template v-if="$slots.header" v-slot:header="props">
+      <slot name="header" v-bind="props" />
+    </template>
+
     <template v-slot:body="props">
       <slot name="body" v-bind="props">
         <q-tr :props="props">
