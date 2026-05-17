@@ -266,11 +266,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
     // Make sure we have the latest schedules to check against
     await examStore.loadManagementSchedules();
-    
+
     const hasConflict = examStore.managementSchedules.some((exam) => {
       // Skip checking against itself if in edit mode
       if (isEditMode.value && String(exam.id) === String(examId)) return false;
-      
+
       // Match date - ANY exam on the same date is a conflict!
       return exam.examDate === targetDateGregorian;
     });
@@ -281,7 +281,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         message: NOTIFY_MSG.CONFLICT_DATE(form.value.examDate),
         position: 'top',
         timeout: 5000,
-        actions: [{ icon: 'close', color: 'white' }]
+        actions: [{ icon: 'close', color: 'white' }],
       });
       return false;
     }
@@ -358,9 +358,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       console.error('Save error:', error);
       $q.notify({
         type: 'negative',
-        message: isEditMode.value
-          ? NOTIFY_MSG.UPDATE_ERROR
-          : NOTIFY_MSG.CREATE_ERROR,
+        message: isEditMode.value ? NOTIFY_MSG.UPDATE_ERROR : NOTIFY_MSG.CREATE_ERROR,
         position: 'top',
       });
       return false;

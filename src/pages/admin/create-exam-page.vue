@@ -3,10 +3,7 @@
     <div class="full-width">
       <!-- Standardized Reusable Page Header -->
       <AppBreadcrumbs />
-      <AppPageHeader
-        title="สร้างรอบสอบ"
-        subtitle="ดำเนินการสร้างรอบสอบและกำหนดรายละเอียดการสอบ"
-      />
+      <AppPageHeader title="สร้างรอบสอบ" subtitle="ดำเนินการสร้างรอบสอบและกำหนดรายละเอียดการสอบ" />
 
       <!-- Consistently reusable Exam Form component -->
       <exam-form v-model:form="form" />

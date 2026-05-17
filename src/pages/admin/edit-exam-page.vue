@@ -1,25 +1,18 @@
 <template>
-  <q-page class="q-px-xl q-pt-md q-pb-xl flex column items-center">
-    <div class="form-container full-width" style="max-width: 1100px">
+  <q-page class="edit-exam-page q-px-lg q-px-sm-xl q-py-lg">
+    <div class="full-width">
       <!-- Standardized Reusable Page Header -->
-      <app-page-header
-        :breadcrumbs="[
-          { label: 'หน้าหลัก', icon: 'home', to: '/' },
-          { label: 'จัดการรอบสอบ', to: '/admin/exam-management' },
-          { label: 'แก้ไขรอบสอบ' },
-        ]"
-        title="แก้ไขรอบสอบ"
-        subtitle="แก้ไขรายละเอียดและกำหนดการของรอบสอบที่เลือก"
-      />
+      <AppBreadcrumbs />
+      <AppPageHeader title="แก้ไขรอบสอบ" subtitle="แก้ไขรายละเอียดและกำหนดการของรอบสอบที่เลือก" />
 
-      <!-- Loading State -->
-      <div v-if="!examId" class="text-center q-pa-xl">
+      <!-- Reusable Exam Form component (in edit mode) -->
+      <exam-form v-if="examId" v-model:form="form" :exam-id="examId" />
+
+      <!-- Error State -->
+      <div v-else class="text-center q-pa-xl">
         <q-icon name="error_outline" size="48px" color="negative" />
         <div class="text-h6 q-mt-md">ไม่พบรหัสรอบสอบ</div>
       </div>
-
-      <!-- Reusable Exam Form component (in edit mode) -->
-      <exam-form v-else v-model:form="form" :exam-id="examId" />
     </div>
   </q-page>
 </template>
@@ -28,6 +21,7 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
+import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import ExamForm from 'src/components/exam/exam-form.vue';
 import { useCreateExam } from 'src/composables/use-create-exam';
 
@@ -43,7 +37,7 @@ const examId = computed(() => {
   return undefined;
 });
 
-// Initialize form with default values — the composable will populate it from the API
+// Initialize form with default values — the composable in ExamForm will populate it from the API
 const { form } = useCreateExam();
 </script>
 

@@ -9,35 +9,32 @@
       <q-btn icon="close" flat round dense v-close-popup class="absolute-top-right close-btn" />
 
       <!-- Title -->
-      <div class="dialog-title">ยืนยันการชำระเงิน</div>
+      <div class="dialog-title">{{ $t('payment.dialog.title') }}</div>
 
       <!-- Amount Details Card -->
       <q-card flat class="amount-card">
-        <div class="amount-label">รายละเอียดการชำระเงิน</div>
+        <div class="amount-label">{{ $t('payment.dialog.detailsLabel') }}</div>
         <div class="amount-value">{{ amount.toLocaleString() }} THB</div>
       </q-card>
 
       <!-- QR Code -->
       <div class="qr-container">
-        <q-img src="/qr test.png" class="qr-image" />
+        <q-img :src="qrCodeUrl || '/qr test.png'" class="qr-image" />
       </div>
 
       <!-- Countdown Badge -->
       <AppStatusBadge type="error" :dot="false" class="countdown-badge">
         <q-icon name="schedule" class="q-mr-xs" />
-        ชำระเงินภายใน {{ countdown }}
+        {{ $t('payment.dialog.payWithin', { time: displayDeadline }) }}
       </AppStatusBadge>
 
       <!-- Instruction -->
-      <div class="instruction-text">
-        กรุณาสแกน QR Code ด้วยแอปพลิเคชัน Mobile Banking<br />
-        เพื่อเสร็จสิ้นการลงทะเบียน
-      </div>
+      <div class="instruction-text" v-html="$t('payment.dialog.instruction')"></div>
 
       <!-- Save Button -->
       <AppButton
         icon="file_download"
-        label="บันทึก QR Code ชำระเงิน"
+        :label="$t('payment.dialog.saveQr')"
         class="save-btn"
         @click="$emit('save')"
       />
@@ -46,18 +43,26 @@
 </template>
 
 <script setup lang="ts">
+import { toRef } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
 import AppStatusBadge from 'src/components/base/app-status-badge.vue';
+import { useCountdown } from 'src/composables/use-countdown';
 
 interface Props {
   modelValue: boolean;
   amount: number;
   qrCodeUrl?: string;
-  countdown: string;
+  expiryTime: string | Date; // ISO String or Date object
 }
 
-defineProps<Props>();
-defineEmits(['update:modelValue', 'save']);
+const props = defineProps<Props>();
+const emit = defineEmits(['update:modelValue', 'save', 'timeout']);
+
+useI18n();
+
+// Use the same shared logic as the card on the page
+const { displayDeadline } = useCountdown(toRef(props, 'expiryTime'), () => emit('timeout'));
 </script>
 
 <style scoped lang="scss">

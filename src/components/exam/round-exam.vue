@@ -220,9 +220,9 @@ const handleRegister = (): void => {
 
   &__tag {
     font-weight: 500 !important;
-    font-size: 0.7rem; // เล็กลงนิดนึง
+    font-size: 0.7rem;
     border-radius: 10px !important;
-    padding: 2px 8px; // เล็กลงนิดนึง
+    padding: 2px 8px;
   }
 
   &__action-group {
@@ -236,7 +236,7 @@ const handleRegister = (): void => {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-weight: 500; // ไม่เป็นตัวหนา
+    font-weight: 500;
     font-size: 0.8rem;
 
     .text-muted {
@@ -248,6 +248,8 @@ const handleRegister = (): void => {
 
   &__btn {
     min-width: 130px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 }
 

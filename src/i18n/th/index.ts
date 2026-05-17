@@ -1,6 +1,22 @@
 export default {
   failed: 'การดำเนินการล้มเหลว',
   success: 'การดำเนินการสำเร็จ',
+  common: {
+    months: [
+      'มกราคม',
+      'กุมภาพันธ์',
+      'มีนาคม',
+      'เมษายน',
+      'พฤษภาคม',
+      'มิถุนายน',
+      'กรกฎาคม',
+      'สิงหาคม',
+      'กันยายน',
+      'ตุลาคม',
+      'พฤศจิกายน',
+      'ธันวาคม',
+    ],
+  },
   exam: {
     statusLabel: 'สถานะ',
     status: {
@@ -138,6 +154,16 @@ export default {
     personalInfo: 'ข้อมูลส่วนตัว',
     or: 'หรือ',
   },
+  payment: {
+    dialog: {
+      title: 'ยืนยันการชำระเงิน',
+      detailsLabel: 'รายละเอียดการชำระเงิน',
+      payWithin: 'ชำระเงินภายใน {time}',
+      instruction:
+        'กรุณาสแกน QR Code ด้วยแอปพลิเคชัน Mobile Banking<br />เพื่อเสร็จสิ้นการลงทะเบียน',
+      saveQr: 'บันทึก QR Code ชำระเงิน',
+    },
+  },
   examSchedule: {
     title: 'ตารางสอบ',
     subtitle: 'กรุณาเลือกรอบเวลาที่ท่านต้องการลงทะเบียน',
@@ -172,6 +198,9 @@ export default {
       time: 'Time',
     },
     clockHourSuffix: 'น.',
+    registrationTitle: 'การสมัครสอบ',
+    registrationSubtitle: 'กรุณาเลือกวันที่และรอบเวลาที่คุณต้องการสมัครเข้าทดสอบ BUU-GET',
+    dateLabel: 'วันที่',
   },
   carousel: {
     page1: {
@@ -398,6 +427,7 @@ export default {
       cancelButton: 'ยกเลิกการจัดที่นั่ง',
       saveButton: 'ยืนยันการจัดที่นั่ง',
       savingData: 'กำลังบันทึกข้อมูลผังที่นั่ง...',
+      loadingData: 'กำลังโหลดข้อมูล...',
       noName: 'ไม่มีชื่อ',
       notifications: {
         saveSuccess: 'บันทึกการจัดที่นั่งเรียบร้อยแล้ว',
@@ -409,6 +439,21 @@ export default {
       pageTitle: 'จัดการที่นั่งสอบ',
       pageSubtitle: 'วางผังและจัดการที่นั่งสอบ เพื่อรองรับผู้เข้าสอบได้อย่างเหมาะสมและสะดวก',
       printVoucher: 'ออกใบเข้าห้องสอบ',
+      issueTicketDialog: {
+        title: 'ออกใบเข้าห้องสอบ',
+        subtitle: 'กรุณาตรวจสอบข้อมูลก่อนยืนยัน',
+        warningAlert:
+          'ระบบจะส่งข้อมูลให้แก่ผู้เข้าสอบผ่าน Email กรุณาตรวจสอบความถูกต้องก่อนดำเนินการ',
+        examInfoTitle: 'ข้อมูลการสอบ',
+        roundName: 'รอบการสอบ',
+        date: 'วันที่สอบ',
+        time: 'เวลา',
+        room: 'ห้องสอบ',
+        studentCount: 'จำนวนนักศึกษา',
+        studentCountSuffix: 'คน',
+        cancel: 'ยกเลิก',
+        confirm: 'ยืนยันออกใบเข้าห้องสอบ',
+      },
       table: {
         columns: {
           index: 'ลำดับ',
@@ -417,6 +462,36 @@ export default {
           fullName: 'ชื่อ-นามสกุล',
           seatNumber: 'เลขที่นั่งสอบ',
         },
+      },
+    },
+    paymentImport: {
+      pageTitle: 'นำเข้าไฟล์การชำระเงิน',
+      pageSubtitle: 'ดำเนินการสมัครบัญชีของคุณให้เสร็จสมบูรณ์',
+      departmentLabel: 'คณะ/ส่วนงาน:',
+      uploadLabel: 'อัปโหลดไฟล์การชำระเงิน',
+      uploadHint: 'รองรับไฟล์ .csv, .xlsx (ขนาดไม่เกิน 10MB)',
+      clearAll: 'ลบข้อมูลไฟล์ทั้งหมด',
+      verifyData: 'ตรวจสอบข้อมูล',
+      emptyTable: 'No data available in table',
+      cancel: 'ยกเลิก',
+      confirmClearTitle: 'ยืนยันการลบข้อมูล',
+      confirmClearMessage: 'คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลไฟล์ทั้งหมด?',
+      confirmClear: 'ยืนยันลบ',
+      table: {
+        index: 'ลำดับ',
+        applicantId: 'รหัสประจำตัวผู้สมัคร (Ref 1)',
+        referenceNo: 'เลขอ้างอิงการสมัคร (Ref 2)',
+        payerName: 'ผู้ชำระเงิน',
+        paymentDate: 'วันที่จ่ายเงิน',
+        paymentTime: 'เวลาจ่ายเงิน',
+        amount: 'จำนวนเงิน',
+        importedAt: 'วันที่นำเข้าข้อมูล',
+        importedBy: 'ผู้นำเข้าข้อมูล',
+      },
+      notifications: {
+        clearSuccess: 'ลบข้อมูลไฟล์ทั้งหมดเรียบร้อยแล้ว',
+        verifySuccess: 'ตรวจสอบข้อมูลเรียบร้อยแล้ว',
+        uploadError: 'เกิดข้อผิดพลาดในการอัปโหลดไฟล์',
       },
     },
     scoreManagement: {
@@ -477,5 +552,17 @@ export default {
       failed: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
       error: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
     },
+  },
+  navigation: {
+    home: 'หน้าหลัก',
+    examSchedule: 'รายการสอบ',
+    selectSession: 'เลือกวันและรอบการสอบ',
+    examHistory: 'ประวัติการสมัครและสอบ',
+    manageExams: 'จัดการรอบสอบ',
+    dashboard: 'แดชบอร์ด',
+    viewSchedule: 'ดูตารางสอบ',
+    paymentImport: 'นำเข้าไฟล์การชำระเงิน',
+    logout: 'ออกจากระบบ',
+    menu: 'เมนู',
   },
 };

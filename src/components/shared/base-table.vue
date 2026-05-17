@@ -7,6 +7,7 @@
     :loading="loading"
     :pagination="pagination"
     :no-data-label="emptyLabel"
+    always-paginated
     @request="onRequest"
     class="base-table"
   >
@@ -25,7 +26,13 @@
       </slot>
     </template>
 
-    <template v-slot:pagination="scope">
+    <template v-slot:no-data>
+      <div class="full-width text-center text-grey-8" style="font-size: 13px">
+        No data available in table
+      </div>
+    </template>
+
+    <template v-slot:bottom="scope">
       <div
         class="row items-center justify-end full-width q-gutter-x-md text-grey-8"
         style="font-size: 12px"
@@ -47,14 +54,20 @@
         </div>
 
         <div>
-          แสดงข้อมูล {{ scope.pagination.rowsPerPage * (scope.pagination.page - 1) + 1 }} ถึง
+          แสดงข้อมูล
+          {{
+            (scope.pagination.rowsNumber || 0) === 0
+              ? 0
+              : scope.pagination.rowsPerPage * (scope.pagination.page - 1) + 1
+          }}
+          ถึง
           {{
             Math.min(
               scope.pagination.rowsPerPage * scope.pagination.page,
               scope.pagination.rowsNumber || 0,
             )
           }}
-          จาก {{ scope.pagination.rowsNumber || 0 }} รายการ
+          ของ {{ scope.pagination.rowsNumber || 0 }} รายการ
         </div>
 
         <div class="row items-center no-wrap">
@@ -104,6 +117,34 @@
       </q-inner-loading>
     </template>
   </q-table>
+
+  <!-- Custom Bottom Bar for Empty State (forces rendering when table is empty) -->
+  <div
+    v-if="!loading && (!rows || rows.length === 0)"
+    class="custom-empty-bottom row items-center justify-end full-width q-gutter-x-md text-grey-8"
+  >
+    <div class="row items-center q-gutter-x-sm">
+      <span>จำนวนต่อหน้า</span>
+      <q-select
+        :model-value="pagination?.rowsPerPage || 10"
+        :options="[10, 25, 50]"
+        dense
+        outlined
+        options-dense
+        class="pagination-select"
+        @update:model-value="onRowsPerPageChange"
+      />
+    </div>
+
+    <div>แสดงข้อมูล 0 ถึง 0 ของ 0 รายการ</div>
+
+    <div class="row items-center no-wrap">
+      <q-btn icon="first_page" round dense flat disable size="sm" />
+      <q-btn icon="chevron_left" round dense flat disable size="sm" />
+      <q-btn icon="chevron_right" round dense flat disable size="sm" />
+      <q-btn icon="last_page" round dense flat disable size="sm" />
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts" generic="T">
@@ -119,7 +160,7 @@ interface Props {
   emptyLabel?: string | undefined;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   emptyLabel: 'ไม่พบข้อมูล',
 });
 
@@ -129,6 +170,17 @@ const emit = defineEmits<{
 
 const onRequest = (props: TableRequestProps) => {
   emit('request', props);
+};
+
+const onRowsPerPageChange = (val: number) => {
+  emit('request', {
+    pagination: {
+      page: 1,
+      rowsPerPage: val,
+      rowsNumber: props.pagination?.rowsNumber || 0,
+    },
+    filter: undefined,
+  });
 };
 </script>
 
@@ -156,21 +208,58 @@ const onRequest = (props: TableRequestProps) => {
     padding: 8px 12px;
   }
 
+  :deep(tr.q-table__bottom-item td) {
+    background-color: var(--surface-page) !important;
+    padding: 12px !important;
+  }
+
   :deep(tbody tr) {
     height: auto;
+  }
+
+  :deep(.q-table__empty),
+  :deep(.q-table__empty td),
+  :deep(tr.q-table__empty),
+  :deep(tr.q-table__empty td) {
+    background-color: var(--surface-page) !important;
+    padding: 32px 16px !important;
+    text-align: center !important;
   }
 }
 
 .pagination-select {
-  width: 60px;
+  width: 65px;
   :deep(.q-field__control) {
     height: 28px;
     min-height: 28px;
     padding: 0 8px;
+    display: flex !important;
+    align-items: center !important;
   }
-  :deep(.q-field__native),
+  :deep(.q-field__native) {
+    min-height: 28px !important;
+    height: 28px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+  }
   :deep(.q-field__append) {
-    min-height: 28px;
+    min-height: 28px !important;
+    height: 28px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
   }
+}
+
+.custom-empty-bottom {
+  border: 1px solid var(--border-color);
+  border-top: none;
+  background-color: var(--surface-card, #ffffff);
+  padding: 12px 16px;
+  min-height: 48px;
+  font-size: 12px;
+  border-bottom-left-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
 }
 </style>

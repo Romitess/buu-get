@@ -124,7 +124,6 @@ const { displayDeadline } = useCountdown(toRef(props, 'deadline'), () => emit('t
   // Accounts for: padding (48) + top-row with fee (40) + title (44) + bottom-row (36) ≈ 168px
   min-height: calc(var(--space-unit) * 42);
   width: 100%;
-  max-width: 1300px;
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
   transition:

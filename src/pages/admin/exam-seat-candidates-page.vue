@@ -39,6 +39,7 @@
             :label="$t('admin.seatCandidates.printVoucher')"
             color="primary"
             class="action-btn"
+            @click="handlePrintVoucher"
           />
           <ExportCsvButton
             :columns="columns"
@@ -89,6 +90,9 @@ import { ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
+import DialogIssueTicket from 'src/components/exam/dialog-issue-ticket.vue';
+
 import BaseTable from 'src/components/shared/base-table.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
 import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
@@ -98,12 +102,11 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import { useExamSeatCandidates } from 'src/composables/use-exam-seat-candidates';
-import { useThaiDate } from 'src/composables/useThaiDate';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 
 const route = useRoute();
-const { t } = useI18n();
-const { formatThaiDate } = useThaiDate();
+const i18n = useI18n();
+const $q = useQuasar();
 
 const {
   exam,
@@ -118,6 +121,26 @@ const {
   fetchData,
 } = useExamSeatCandidates();
 
+const handlePrintVoucher = () => {
+  const currentSession = sessions.value.find((s) => s.SS_ID === selectedSessionId.value);
+
+  $q.dialog({
+    component: DialogIssueTicket,
+    componentProps: {
+      sessionDetails: {
+        roundName: currentSession?.SS_NAME || 'รอบทั่วไป',
+        date: exam.value ? formatThaiDate(exam.value.EXAM_DATE) : '-',
+        time: sessionTime.value,
+        room: sessionLocation.value,
+        studentCount: candidateCount.value,
+      },
+    },
+  }).onOk(() => {
+    // Implement ticket generation logic here if needed
+    console.log('Generate tickets for session:', selectedSessionId.value);
+  });
+};
+
 const pagination = ref<PaginationModel>({
   page: 1,
   rowsPerPage: 10,
@@ -127,36 +150,46 @@ const pagination = ref<PaginationModel>({
 const columns: QTableColumn[] = [
   {
     name: 'index',
-    label: t('admin.seatCandidates.table.columns.index'),
+    label: i18n.t('admin.seatCandidates.table.columns.index'),
     field: 'index',
     align: 'center',
     style: 'width: 80px',
   },
   {
     name: 'nationalId',
-    label: t('admin.seatCandidates.table.columns.nationalId'),
+    label: i18n.t('admin.seatCandidates.table.columns.nationalId'),
     field: 'nationalId',
     align: 'center',
   },
   {
     name: 'titleTh',
-    label: t('admin.seatCandidates.table.columns.prefix'),
+    label: i18n.t('admin.seatCandidates.table.columns.prefix'),
     field: 'titleTh',
     align: 'center',
   },
   {
     name: 'fullnameTh',
-    label: t('admin.seatCandidates.table.columns.fullName'),
+    label: i18n.t('admin.seatCandidates.table.columns.fullName'),
     field: 'fullnameTh',
     align: 'center',
   },
   {
     name: 'seatNumber',
-    label: t('admin.seatCandidates.table.columns.seatNumber'),
+    label: i18n.t('admin.seatCandidates.table.columns.seatNumber'),
     field: 'seatNumber',
     align: 'center',
   },
 ];
+
+const formatThaiDate = (dateStr: string): string => {
+  if (!dateStr) return '-';
+  const date = new Date(dateStr);
+  const monthNames = i18n.tm('common.months');
+  const day = date.getDate();
+  const month = (monthNames as unknown as string[])[date.getMonth()];
+  const year = date.getFullYear() + 543;
+  return `${day} ${month} ${year}`;
+};
 
 const onRequest = (props: TableRequestProps): void => {
   const { page, rowsPerPage } = props.pagination;

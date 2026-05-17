@@ -172,10 +172,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useQuasar } from 'quasar';
-import { useI18n } from 'vue-i18n';
+import { onMounted } from 'vue';
 import AppButton from 'src/components/base/app-button.vue';
 import AppExamSeatCard from 'src/components/exam/app-exam-seat-card.vue';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
@@ -184,329 +181,45 @@ import SearchBar from 'src/components/shared/search-bar.vue';
 import AppExamSeatSquare from 'src/components/exam/app-exam-seat-square.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppExamSessionTime from 'src/components/exam/app-exam-session-time.vue';
-import type { BackendSession } from 'src/types/exam';
-import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
-import { fetchExamById } from 'src/services/exam.service';
-import type { BackendExam } from 'src/types/exam';
-import {
-  fetchRawEnrollmentsByExamId,
-  updateEnrollmentStatus,
-} from 'src/services/enrollment.service';
+import { useExamSeatManagement } from 'src/composables/use-exam-seat-management';
 
-const route = useRoute();
-const router = useRouter();
-const $q = useQuasar();
-const { t } = useI18n();
-const examId = Number(route.params.examId);
-
-// Status Constants
-const STATUS_PAID = 1;
-const STATUS_SEAT_ASSIGNED = 2;
-
-const activeSessionId = ref<number | null>(null);
-const sessions = ref<BackendSession[]>([]);
-
-const examData = ref<BackendExam | null>(null);
-
-const examTitle = computed(() => {
-  const baseTitle = examData.value?.EXAM_NAME || 'BUU - GET';
-  if (activeSession.value?.SS_NAME) {
-    return `${baseTitle} (${activeSession.value.SS_NAME})`;
-  }
-  return baseTitle;
-});
-
-const examDate = computed(() => {
-  if (!examData.value?.EXAM_DATE) return '-';
-  return new Date(examData.value.EXAM_DATE).toLocaleDateString('th-TH', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-});
-
-const activeSession = computed(() => {
-  return sessions.value.find((s) => s.SS_ID === activeSessionId.value) || null;
-});
-
-const sessionTime = computed(() => {
-  if (!activeSession.value) return '-';
-  const extractTime = (timeStr: string | null | undefined): string => {
-    if (!timeStr) return '';
-    const str = String(timeStr).trim();
-    const match = str.match(/(\d{2}:\d{2})/);
-    return match && match[1] ? match[1] : str.substring(0, 5);
-  };
-  const startTime = extractTime(activeSession.value.SS_START_TIME) || '00:00';
-  const endTime = extractTime(activeSession.value.SS_END_TIME) || '00:00';
-  return `${startTime}-${endTime}`;
-});
-
-const sessionLocation = computed(() => {
-  if (!activeSession.value?.LOCATION) return '-';
-  const loc = activeSession.value.LOCATION;
-  return `${loc.LOCATION_NAME} ${loc.LOCATION_ROOM_NO ? `(${loc.LOCATION_ROOM_NO})` : ''}`;
-});
-
-const sessionTotalCapacity = computed(() => activeSession.value?.SS_CAPACITY || 0);
-
-const sessionEnrollments = computed(() => {
-  return allEnrollments.value.filter((e) => e.SESSION_ID === activeSessionId.value);
-});
-
-// Total applicants who have PAID (PAID or SEAT_ASSIGNED)
-const applicantCount = computed(
-  () =>
-    sessionEnrollments.value.filter(
-      (e) => Number(e.ERM_STATUS) === STATUS_PAID || Number(e.ERM_STATUS) === STATUS_SEAT_ASSIGNED,
-    ).length,
-);
-
-// Paid applicants count (same as above for this view)
-const paidCount = computed(() => applicantCount.value);
-const searchQuery = ref('');
-
-interface StudentSeatInfo {
-  ermId: number;
-  id: string;
-  name: string;
-  seat: string | null;
-  avatar: string | null;
-}
-
-const allEnrollments = ref<BackendEnrollmentDetail[]>([]);
-const students = ref<StudentSeatInfo[]>([]);
-
-const filteredStudents = computed(() => {
-  const query = searchQuery.value.toLowerCase().trim();
-  if (!query) return students.value;
-  return students.value.filter(
-    (s) => s.name.toLowerCase().includes(query) || s.id.toLowerCase().includes(query),
-  );
-});
-
-const loadExamData = async () => {
-  if (!examId) return;
-  try {
-    $q.loading.show({ message: 'กำลังโหลดข้อมูล...' });
-    examData.value = await fetchExamById(examId);
-
-    sessions.value = examData.value.SESSIONS || [];
-    const firstSession = sessions.value[0];
-    if (firstSession) {
-      activeSessionId.value = firstSession.SS_ID;
-    }
-
-    allEnrollments.value = await fetchRawEnrollmentsByExamId(examId);
-
-    // Explicitly trigger the filter to update UI with session details immediately
-    filterStudentsBySession();
-  } catch (error) {
-    console.error('Failed to load exam data', error);
-    $q.notify({ type: 'negative', message: t('admin.seatManagement.notifications.loadError') });
-  } finally {
-    $q.loading.hide();
-  }
-};
-
-const filterStudentsBySession = () => {
-  if (!activeSessionId.value) {
-    students.value = [];
-    return;
-  }
-
-  // Only show students who have status PAID (1) or SEAT_ASSIGNED (2)
-  const eligibleEnrollments = sessionEnrollments.value.filter(
-    (e) => Number(e.ERM_STATUS) === STATUS_PAID || Number(e.ERM_STATUS) === STATUS_SEAT_ASSIGNED,
-  );
-
-  students.value = eligibleEnrollments.map((e) => ({
-    ermId: e.ERM_ID,
-    id: e.USER?.USER_NATIONAL_ID || String(e.USER_ID),
-    name: e.USER?.PROFILE?.userFullnameTh || e.USER?.USER_EMAIL || t('admin.seatManagement.noName'),
-    seat: e.ERM_SEAT_NUMBER,
-    avatar: null,
-  }));
-
-  updateSeatStatuses();
-};
-
-watch(activeSessionId, () => {
-  filterStudentsBySession();
-});
+const {
+  activeSessionId,
+  sessions,
+  searchQuery,
+  allSeats,
+  examTitle,
+  examDate,
+  sessionTime,
+  sessionLocation,
+  sessionTotalCapacity,
+  applicantCount,
+  paidCount,
+  filteredStudents,
+  draggedStudentId,
+  draggedOverSeatId,
+  dragX,
+  dragY,
+  dragOffsetX,
+  dragOffsetY,
+  dragWidth,
+  draggedStudentInfo,
+  loadExamData,
+  onMouseDown,
+  onSeatEnter,
+  onSeatLeave,
+  onSeatDrop,
+  handleSeatClick,
+  handleCancel,
+  handleSave,
+} = useExamSeatManagement();
 
 onMounted(() => {
   void loadExamData();
 });
 
-const handleSearch = (val: string | number | null) => {
+const handleSearch = (val: string | number | null): void => {
   searchQuery.value = String(val || '');
-};
-
-// Mock Data for Seats (A1-A10, B1-B10, C1-C10, D1-D10)
-const allSeats = ref<{ id: string; status: 'available' | 'assigned' }[]>([]);
-
-// Drag and Drop State
-const draggedStudentId = ref<string | null>(null);
-const draggedOverSeatId = ref<string | null>(null);
-const dragX = ref(0);
-const dragY = ref(0);
-
-const draggedStudentInfo = computed(() => {
-  return students.value.find((s) => s.id === draggedStudentId.value);
-});
-
-// Sync seat visual status with student data
-const updateSeatStatuses = () => {
-  allSeats.value.forEach((seat) => {
-    const isOccupied = students.value.some((s) => s.seat === seat.id);
-    seat.status = isOccupied ? 'assigned' : 'available';
-  });
-};
-
-// Initialize seats dynamically
-const initializeSeats = () => {
-  const rows = ['A', 'B', 'C', 'D'];
-  for (const row of rows) {
-    for (let i = 1; i <= 10; i++) {
-      allSeats.value.push({ id: `${row}${i}`, status: 'available' });
-    }
-  }
-  updateSeatStatuses();
-};
-initializeSeats();
-
-// --- Custom Drag and Drop Handlers ---
-const isDragging = ref(false);
-const dragOffsetX = ref(0);
-const dragOffsetY = ref(0);
-const dragWidth = ref(320);
-
-const onMouseDown = (e: MouseEvent, studentId: string) => {
-  if (e.button !== 0) return; // Only trigger on left mouse button
-
-  // Calculate exact position so the card doesn't "jump" to the mouse center
-  const targetElement = e.currentTarget as HTMLElement;
-  if (targetElement) {
-    const rect = targetElement.getBoundingClientRect();
-    dragOffsetX.value = e.clientX - rect.left;
-    dragOffsetY.value = e.clientY - rect.top;
-    dragWidth.value = rect.width;
-  }
-
-  isDragging.value = true;
-  draggedStudentId.value = studentId;
-  dragX.value = e.clientX;
-  dragY.value = e.clientY;
-
-  // Track global mouse movement for the ghost
-  window.addEventListener('mousemove', onMouseMove);
-  window.addEventListener('mouseup', onGlobalMouseUp);
-};
-
-const onMouseMove = (e: MouseEvent) => {
-  if (!isDragging.value) return;
-  dragX.value = e.clientX;
-  dragY.value = e.clientY;
-};
-
-const onSeatEnter = (seatId: string) => {
-  if (isDragging.value) {
-    draggedOverSeatId.value = seatId;
-  }
-};
-
-const onSeatLeave = (seatId: string) => {
-  if (draggedOverSeatId.value === seatId) {
-    draggedOverSeatId.value = null;
-  }
-};
-
-const onSeatDrop = (seatId: string) => {
-  if (!isDragging.value || !draggedStudentId.value) return;
-
-  const student = students.value.find((s) => s.id === draggedStudentId.value);
-  if (student) {
-    // Unassign anyone currently in this seat
-    const existingOccupant = students.value.find((s) => s.seat === seatId && s.id !== student.id);
-    if (existingOccupant) {
-      existingOccupant.seat = null;
-    }
-
-    // Assign new seat to the dragged student
-    student.seat = seatId;
-    updateSeatStatuses();
-  }
-};
-
-const onGlobalMouseUp = () => {
-  if (isDragging.value) {
-    isDragging.value = false;
-    draggedStudentId.value = null;
-    draggedOverSeatId.value = null;
-
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', onGlobalMouseUp);
-  }
-};
-
-// Handle clicks to remove a student from a seat easily
-const handleSeatClick = (seat: { id: string; status: 'available' | 'assigned' }) => {
-  const occupant = students.value.find((s) => s.seat === seat.id);
-  if (occupant) {
-    occupant.seat = null; // Unassign seat
-    updateSeatStatuses();
-  }
-};
-
-const handleCancel = () => {
-  console.log('Cancel assigning seats...');
-};
-
-const handleSave = async () => {
-  if (!activeSessionId.value) return;
-  try {
-    $q.loading.show({ message: t('admin.seatManagement.savingData') });
-
-    // Save each student individually (Business Logic check is in the backend Service)
-    const promises = students.value.map((student) => {
-      return updateEnrollmentStatus(student.ermId, {
-        ERM_SEAT_NUMBER: student.seat,
-      });
-    });
-
-    await Promise.all(promises);
-
-    // Refresh data to ensure sync with backend
-    allEnrollments.value = await fetchRawEnrollmentsByExamId(examId);
-    filterStudentsBySession();
-
-    $q.notify({
-      color: 'positive',
-      position: 'top',
-      message: t('admin.seatManagement.notifications.saveSuccess'),
-      icon: 'check_circle',
-    });
-
-    // Navigate to the candidates list page after successful save
-    void router.push({
-      name: 'admin-exam-seat-candidates',
-      params: { examId: String(examId) },
-    });
-  } catch (error: unknown) {
-    console.error('Failed to save seats', error);
-    let message = t('admin.seatManagement.notifications.saveError');
-
-    // Type-safe error handling for Axios/API errors
-    if (error && typeof error === 'object' && 'response' in error) {
-      const axiosError = error as { response: { data: { message?: string } } };
-      message = axiosError.response?.data?.message || message;
-    }
-
-    $q.notify({ type: 'negative', message });
-  } finally {
-    $q.loading.hide();
-  }
 };
 </script>
 
@@ -551,8 +264,8 @@ h1 {
 }
 
 .main-seat-grid-box {
-  border: 1px solid #757575 !important; /* Restored darker "black" border as requested */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--seat-grid-border) !important; /* Restored darker "black" border as requested */
+  box-shadow: var(--seat-grid-box-shadow);
   overflow: hidden;
   min-height: 400px;
   display: block;
@@ -587,14 +300,14 @@ h1 {
     width: 6px;
   }
   &::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--seat-scrollbar-track);
     border-radius: 10px;
   }
   &::-webkit-scrollbar-thumb {
-    background: #ccc;
+    background: var(--seat-scrollbar-thumb);
     border-radius: 10px;
     &:hover {
-      background: #aaa;
+      background: var(--seat-scrollbar-thumb-hover);
     }
   }
 }
@@ -605,8 +318,8 @@ h1 {
   border-radius: 6px;
 
   &.available {
-    background-color: #ffffff;
-    border: 1px solid #757575;
+    background-color: var(--surface-card);
+    border: 1px solid var(--seat-grid-border);
   }
 
   &.assigned {
@@ -628,11 +341,11 @@ h1 {
     height: 8px;
   }
   &::-webkit-scrollbar-thumb {
-    background: #bdbdbd;
+    background: var(--seat-grid-scrollbar-thumb);
     border-radius: 10px;
 
     &:hover {
-      background: #9e9e9e;
+      background: var(--seat-grid-scrollbar-thumb-hover);
     }
   }
 }
@@ -656,14 +369,14 @@ h1 {
 
 .drag-over-effect {
   /* Prevent bleeding out of scroll container by avoiding scale/box-shadow */
-  background-color: #e3f2fd !important; /* Very light blue */
+  background-color: var(--seat-drag-over-bg) !important; /* Very light blue */
   border: 2px solid var(--primary) !important;
   opacity: 0.9;
 }
 
 .btn-cancel-seat {
-  background-color: #e0e0e0 !important;
-  color: #1a1a1a !important;
+  background-color: var(--neutral-gray-light) !important;
+  color: var(--text-primary) !important;
   border-radius: 8px !important;
   padding: 10px 32px !important;
   font-weight: 600;
@@ -671,7 +384,7 @@ h1 {
 
 .btn-confirm-seat {
   background-color: var(--primary) !important;
-  color: white !important;
+  color: var(--text-on-primary) !important;
   border-radius: 8px !important;
   padding: 10px 32px !important;
   font-weight: 600;
@@ -683,9 +396,9 @@ h1 {
   z-index: 9999;
   opacity: 1 !important;
   /* Removed transform to allow precise offset positioning */
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--seat-ghost-shadow);
   border-radius: 8px;
-  background: white;
+  background: var(--surface-card);
 }
 
 .font-weight-medium {

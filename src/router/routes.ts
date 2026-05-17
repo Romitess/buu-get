@@ -141,7 +141,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               breadcrumb: [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
                 { label: 'แก้ไขรอบสอบ', icon: 'edit' },
               ],
             },
@@ -225,6 +225,17 @@ const routes: RouteRecordRaw[] = [
                 { label: 'หน้าหลัก', icon: 'home', to: '/' },
                 { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
                 { label: 'ประวัติการเข้าสอบ', icon: 'format_list_bulleted' },
+              ],
+            },
+          },
+          {
+            path: 'payment-import',
+            name: 'admin-payment-import',
+            component: () => import('pages/admin/payment-import-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'นำเข้าไฟล์การชำระเงิน', icon: 'star' },
               ],
             },
           },

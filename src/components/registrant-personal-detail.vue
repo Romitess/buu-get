@@ -120,7 +120,7 @@ const displayData = computed(() => {
       : '-',
     education: profile?.userEducation || '-',
     faculty: profile?.userFaculty || '-',
-    institution: '-',
+    institution: profile?.userInstitution || '-',
     address: profile?.userAddress || '-',
     phone: profile?.userPhone || '-',
   };

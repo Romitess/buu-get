@@ -7,6 +7,9 @@ export const PAYMENT_COUNTDOWN_DEFAULT = '29:30';
 /** ระยะเวลานับถอยหลังในหน้าประวัติการสอบ (สำหรับแสดงผลใน Dialog) */
 export const PAYMENT_DIALOG_COUNTDOWN_DEFAULT = '29 : 50';
 
+/** ระยะเวลาชำระเงินเริ่มต้นในหน่วยวินาที (29 นาที 50 วินาที) */
+export const PAYMENT_DURATION_SECONDS_DEFAULT = 1790;
+
 /** ส่วนต่างปี พ.ศ. และ ค.ศ. */
 export const BUDDHIST_YEAR_OFFSET = 543;
 

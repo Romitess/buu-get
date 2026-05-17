@@ -1,5 +1,5 @@
 <template>
-  <q-page class="exam-history-page q-pa-lg">
+  <div class="page-container exam-history-page q-pa-lg">
     <AppBreadcrumbs />
     <AppPageHeader
       :title="$t('exam.history.pageTitle')"
@@ -114,7 +114,7 @@
     <AppPaymentDialog
       v-model="showPaymentDialog"
       :amount="selectedExam?.fee || DEFAULT_EXAM_FEE_THB"
-      :countdown="PAYMENT_DIALOG_COUNTDOWN_DEFAULT"
+      :expiry-time="paymentExpiryTime"
       @save="handleSaveQR"
     />
 
@@ -125,7 +125,7 @@
       :exam-time="selectedExamForCancel?.time || ''"
       @confirm="handleConfirmCancel"
     />
-  </q-page>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -139,7 +139,7 @@ import AppButton from 'src/components/base/app-button.vue';
 import AppPaymentDialog from 'src/components/exam/app-payment-dialog.vue';
 import DialogCancel from 'src/components/exam/dialog-cancel.vue';
 import { useExamStore } from 'src/stores/exam.store';
-import { DEFAULT_EXAM_FEE_THB, PAYMENT_DIALOG_COUNTDOWN_DEFAULT } from 'src/constants/exam';
+import { DEFAULT_EXAM_FEE_THB, PAYMENT_DURATION_SECONDS_DEFAULT } from 'src/constants/exam';
 import type { ExamHistoryItem } from 'src/types/exam';
 
 const { t } = useI18n();
@@ -151,6 +151,7 @@ const { pendingRegistrations, historyRecords } = storeToRefs(examStore);
 // === UI-only State ===
 const showPaymentDialog = ref(false);
 const selectedExam = ref<ExamHistoryItem | null>(null);
+const paymentExpiryTime = ref<string>(new Date().toISOString());
 
 const showCancelDialog = ref(false);
 const selectedExamForCancel = ref<ExamHistoryItem | null>(null);
@@ -196,6 +197,17 @@ const handleTimeout = (exam: ExamHistoryItem) => {
 
 const handlePay = (exam: ExamHistoryItem) => {
   selectedExam.value = exam;
+
+  // Use the existing deadline from the exam object to stay in sync with the page
+  if (exam.deadline) {
+    paymentExpiryTime.value = exam.deadline;
+  } else {
+    // Fallback only if deadline is missing
+    const now = new Date();
+    const expiry = new Date(now.getTime() + PAYMENT_DURATION_SECONDS_DEFAULT * 1000);
+    paymentExpiryTime.value = expiry.toISOString();
+  }
+
   showPaymentDialog.value = true;
 };
 
@@ -217,30 +229,9 @@ const handleConfirmCancel = () => {
 </script>
 
 <style scoped lang="scss">
-.exam-history-page {
-  // Full width
-}
-
-.page-header {
-  margin-top: var(--space-lg);
-  .page-title {
-    font-size: var(--font-size-h1);
-    font-weight: var(--font-weight-black);
-    line-height: 1.4;
-    color: var(--text-primary);
-    margin: 0 0 var(--space-sm) 0;
-  }
-  .page-subtitle {
-    font-family: 'Sarabun', sans-serif;
-    font-size: var(--font-size-body);
-    color: var(--text-primary);
-    font-weight: var(--font-weight-black);
-    max-width: 900px;
-    line-height: 1.6;
-    margin: 0;
-    letter-spacing: 0;
-  }
-}
+// .exam-history-page {
+//   // Full width
+// }
 
 .section-title {
   color: var(--text-primary);

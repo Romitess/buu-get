@@ -9,13 +9,13 @@ export const ROLES = {
 } as const;
 
 export const ROLE_LABELS = {
-  [ROLES.ADMIN]: 'System Administrator',
-  [ROLES.STAFF]: 'Exam Operations Officer',
-  [ROLES.FINANCE]: 'Finance Officer',
-  [ROLES.EXECUTIVE]: 'Executive',
-  [ROLES.CANDIDATE]: 'Candidate',
-  [ROLES.PROCTOR]: 'Exam Proctor',
-  [ROLES.REGISTRATION_OFFICER]: 'Registration Officer',
+  [ROLES.ADMIN]: 'ผู้ดูแลระบบ',
+  [ROLES.STAFF]: 'เจ้าหน้าที่ดำเนินการสอบ',
+  [ROLES.FINANCE]: 'เจ้าหน้าที่การเงิน',
+  [ROLES.EXECUTIVE]: 'ผู้บริหาร',
+  [ROLES.CANDIDATE]: 'ผู้สมัครสอบ',
+  [ROLES.PROCTOR]: 'กรรมการคุมสอบ',
+  [ROLES.REGISTRATION_OFFICER]: 'เจ้าหน้าที่ลงทะเบียน',
 } as const;
 
 export type RolesType = typeof ROLES;

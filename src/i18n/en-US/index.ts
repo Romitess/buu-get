@@ -84,6 +84,10 @@ export default {
       time: 'Time',
     },
     clockHourSuffix: '',
+    registrationTitle: 'Exam Registration',
+    registrationSubtitle:
+      'Please select the date and session time you wish to register for the BUU-GET test.',
+    dateLabel: 'Date',
   },
   profile: {
     pageTitle: 'Personal Information',
@@ -384,5 +388,16 @@ export default {
       failed: 'Incorrect email or password',
       error: 'Connection error',
     },
+  },
+  navigation: {
+    home: 'Home',
+    examSchedule: 'Exam Schedule',
+    selectSession: 'Select Session',
+    examHistory: 'Exam History',
+    manageExams: 'Manage Exams',
+    dashboard: 'Dashboard',
+    viewSchedule: 'View Schedule',
+    logout: 'Logout',
+    menu: 'Menu',
   },
 };
