@@ -38,10 +38,9 @@
           :value="getRatio(row)"
           :color="getProgressColor(row)"
           track-color="grey-3"
-          style="width: 120px"
-          class="q-mr-sm"
+          class="q-mr-sm registration-progress"
         />
-        <span class="text-caption text-weight-medium" style="min-width: 50px; text-align: left">
+        <span class="text-caption text-weight-medium registration-text">
           {{ row.registeredCount }}/{{ row.capacity }}
         </span>
       </div>
@@ -105,6 +104,7 @@ const emit = defineEmits<{
   (e: 'manageSeats', id: string): void;
   (e: 'viewCandidates', id: string): void;
   (e: 'exportReport', id: string): void;
+  (e: 'manageScores', id: string): void;
 }>();
 
 // Logic to detect duplicate dates in the current table data
@@ -114,7 +114,7 @@ const duplicateDates = computed(() => {
     if (!exam.examDate) return;
     counts[exam.examDate] = (counts[exam.examDate] || 0) + 1;
   });
-  return Object.keys(counts).filter((date) => counts[date] > 1);
+  return Object.keys(counts).filter((date) => (counts[date] ?? 0) > 1);
 });
 
 const isDuplicate = (date: string) => duplicateDates.value.includes(date);
@@ -227,6 +227,12 @@ const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
       tooltip: t('admin.examManagement.table.tooltips.exportReport'),
       emit: 'exportReport',
     },
+    {
+      icon: 'grade',
+      color: 'blue-6',
+      tooltip: t('admin.examManagement.table.tooltips.manageScores'),
+      emit: 'manageScores',
+    },
   ],
   ['admin']: [
     {
@@ -264,6 +270,12 @@ const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
       color: 'blue-6',
       tooltip: t('admin.examManagement.table.tooltips.exportReport'),
       emit: 'exportReport',
+    },
+    {
+      icon: 'grade',
+      color: 'blue-6',
+      tooltip: t('admin.examManagement.table.tooltips.manageScores'),
+      emit: 'manageScores',
     },
   ],
 }));
@@ -316,6 +328,9 @@ const handleAction = (emitName: string, id: string) => {
       case 'exportReport':
         emit('exportReport', id);
         break;
+      case 'manageScores':
+        emit('manageScores', id);
+        break;
     }
   }
 };
@@ -324,3 +339,14 @@ const onRequest = (req: TableRequestProps) => {
   emit('request', req);
 };
 </script>
+
+<style scoped lang="scss">
+.registration-progress {
+  width: 120px;
+}
+
+.registration-text {
+  min-width: 50px;
+  text-align: left;
+}
+</style>

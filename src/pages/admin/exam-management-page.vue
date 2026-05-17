@@ -18,8 +18,7 @@
           icon="add"
           label="สร้างรอบสอบ"
           unelevated
-          class="text-weight-bold"
-          style="border-radius: 8px; height: 52px; padding: 0 24px"
+          class="create-exam-btn text-weight-bold"
           @click="$router.push('/admin/create-exam')"
         />
       </div>
@@ -38,6 +37,7 @@
         @printAdmitCard="handlePrintAdmitCard"
         @viewCandidates="handleViewCandidates"
         @exportReport="handleExportReport"
+        @manageScores="handleManageScores"
       />
     </div>
   </q-page>
@@ -169,6 +169,10 @@ const handleExportReport = (id: string) => {
   });
 };
 
+const handleManageScores = (id: string) => {
+  void router.push({ name: 'admin-exam-scores', params: { examId: id } });
+};
+
 // Initial load
 onMounted(() => {
   void fetchData();
@@ -176,6 +180,12 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+.create-exam-btn {
+  border-radius: var(--radius-sm);
+  height: 52px;
+  padding: 0 24px;
+}
+
 .text-primary {
   color: var(--primary) !important;
 }

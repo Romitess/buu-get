@@ -311,6 +311,59 @@ export default {
       errorBanner: 'If you cannot present the Admission Voucher, please notify via email: {email}',
     },
   },
+  admin: {
+    examManagement: {
+      table: {
+        tooltips: {
+          edit: 'Edit',
+          delete: 'Delete',
+          manageRegistrants: 'Manage Registrants',
+          manageSeats: 'Manage Seats',
+          printAdmitCard: 'Print Admit Card',
+          viewCandidates: 'View Candidates',
+          exportReport: 'Export Report',
+          manageScores: 'Manage Scores',
+        },
+      },
+    },
+    scoreManagement: {
+      pageTitle: 'Manage Test Scores',
+      pageSubtitle: 'Manage test scores, verify results, and monitor evaluation data',
+      importButton: 'IMPORT',
+      exportCsv: 'EXPORT TO CSV',
+      table: {
+        columns: {
+          index: 'Index',
+          nationalId: 'National ID',
+          prefix: 'Prefix',
+          fullName: 'Full Name',
+          scoreGrammar: 'Grammar & Vocab',
+          scoreReading: 'Reading',
+          scoreTotal: 'Total',
+          band: 'Band',
+        },
+      },
+      importDialog: {
+        title: 'Choose Import Method',
+        csvOption: {
+          title: 'Import from CSV',
+          description: 'For uploading custom score files. Supports .csv and .xlsx files.',
+        },
+        moodleOption: {
+          title: 'Import from MOODLE',
+          description: 'For pulling score data directly from the MOODLE system.',
+        },
+      },
+      uploadDialog: {
+        title: 'Upload CSV',
+        dragDropText: 'Drag and drop CSV file here or click to select file',
+        supportedFiles: 'Supports only .csv / .xlsx files (Max size 10MB)',
+        orUrlText: 'Or import from URL',
+        urlPlaceholder: 'Add File URL',
+        uploadBtn: 'Upload',
+      },
+    },
+  },
   auth: {
     welcome: 'Welcome Back',
     signInToContinue: 'Sign in to continue',

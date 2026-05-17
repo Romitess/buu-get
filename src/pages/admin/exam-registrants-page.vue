@@ -106,12 +106,14 @@ import AppExamSessionTabs from 'src/components/exam/app-exam-session-time.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import { useExamRegistrants } from 'src/composables/use-exam-registrants';
+import { useThaiDate } from 'src/composables/useThaiDate';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollment.types';
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
+const { formatThaiDate } = useThaiDate();
 
 const {
   isLoading,
@@ -144,29 +146,6 @@ const selectedSessionLocation = computed(() => {
 const selectedSessionCapacity = computed(() => {
   return selectedSession.value?.SS_CAPACITY || 0;
 });
-
-const formatThaiDate = (dateStr: string): string => {
-  if (!dateStr) return '-';
-  const date = new Date(dateStr);
-  const months = [
-    'มกราคม',
-    'กุมภาพันธ์',
-    'มีนาคม',
-    'เมษายน',
-    'พฤษภาคม',
-    'มิถุนายน',
-    'กรกฎาคม',
-    'สิงหาคม',
-    'กันยายน',
-    'ตุลาคม',
-    'พฤศจิกายน',
-    'ธันวาคม',
-  ];
-  const day = date.getDate();
-  const month = months[date.getMonth()];
-  const year = date.getFullYear() + 543;
-  return `${day} ${month} ${year}`;
-};
 
 watch(exam, (newExam) => {
   if (newExam && newExam.SESSIONS && newExam.SESSIONS.length > 0 && !selectedSessionId.value) {
@@ -285,8 +264,8 @@ onMounted(() => {
 
 .registrants-table {
   :deep(.q-table__container) {
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
   }
 }
 </style>

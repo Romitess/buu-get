@@ -136,13 +136,13 @@ const onTitleTHChange = (): void => {
 
 <style scoped lang="scss">
 .photo-upload-box {
-  aspect-ratio: 0.9/ 1;
-  border-radius: 8px;
+  aspect-ratio: 0.9 / 1;
+  border-radius: var(--radius-sm);
 }
 
 .requirements-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
 }
 
 .requirements-list {
@@ -159,9 +159,9 @@ const onTitleTHChange = (): void => {
 .sample-photo-container {
   width: 90px;
   aspect-ratio: 0.9 / 1;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   overflow: hidden;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-color);
 }
 
 .sample-photo-img {

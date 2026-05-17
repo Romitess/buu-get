@@ -24,7 +24,7 @@
 
       <section
         class="col-auto row no-wrap items-center stats-section"
-        v-if="isAdmin && !isAttendance"
+        v-if="isAdmin && !isAttendance && !isScore"
       >
         <q-separator vertical class="stat-divider q-mr-md gt-xs" v-if="!hideMainSeparator" />
         <div class="text-center q-px-lg">
@@ -38,6 +38,18 @@
           <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่ชำระเงิน</div>
           <div class="applicant-value text-h4 text-weight-medium text-dark">
             {{ paidCount }}/{{ totalCapacity }}
+          </div>
+        </div>
+      </section>
+      <section
+        class="col-auto row no-wrap items-center stats-section"
+        v-else-if="isAdmin && isScore"
+      >
+        <q-separator vertical class="stat-divider q-mr-md gt-xs" v-if="!hideMainSeparator" />
+        <div class="text-center q-px-lg">
+          <div class="applicant-label text-grey-7 text-caption">จำนวนคนเข้าสอบ</div>
+          <div class="applicant-value text-h4 text-weight-medium text-dark">
+            {{ applicantCount }}
           </div>
         </div>
       </section>
@@ -70,6 +82,7 @@ interface Props {
   applicantCount?: number | string;
   isAdmin?: boolean;
   isAttendance?: boolean;
+  isScore?: boolean;
   paidCount?: number | string;
   totalCapacity?: number | string;
   hidePaid?: boolean;
@@ -80,6 +93,7 @@ withDefaults(defineProps<Props>(), {
   isAdmin: false,
   hidePaid: false,
   isAttendance: false,
+  isScore: false,
   hideMainSeparator: false,
 });
 </script>
@@ -87,7 +101,7 @@ withDefaults(defineProps<Props>(), {
 <style scoped lang="scss">
 .app-exam-info-card {
   border-left: 8px solid var(--primary);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card) !important;
   position: relative;
@@ -106,7 +120,7 @@ withDefaults(defineProps<Props>(), {
   align-items: center;
   background-color: var(--detail-card-badge-bg);
   padding: 4px 12px;
-  border-radius: 100px;
+  border-radius: var(--radius-pill);
   gap: 8px;
 }
 

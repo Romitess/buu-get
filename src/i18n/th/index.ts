@@ -333,6 +333,7 @@ export default {
           printAdmitCard: 'พิมพ์บัตรเข้าสอบ',
           viewCandidates: 'ประวัติการเข้าสอบ',
           exportReport: 'ส่งออกรายงาน',
+          manageScores: 'จัดการคะแนนสอบ',
         },
       },
       dialogs: {
@@ -416,6 +417,43 @@ export default {
           fullName: 'ชื่อ-นามสกุล',
           seatNumber: 'เลขที่นั่งสอบ',
         },
+      },
+    },
+    scoreManagement: {
+      pageTitle: 'จัดการคะแนนสอบ',
+      pageSubtitle: 'จัดการคะแนนสอบ ตรวจสอบผลคะแนน และติดตามข้อมูลการประเมิน',
+      importButton: 'IMPORT',
+      exportCsv: 'EXPORT TO CSV',
+      table: {
+        columns: {
+          index: 'ลำดับ',
+          nationalId: 'เลขประจำตัว',
+          prefix: 'คำนำหน้า',
+          fullName: 'ชื่อ-นามสกุล',
+          scoreGrammar: 'คำศัพท์และไวยากรณ์',
+          scoreReading: 'ทักษะการอ่าน',
+          scoreTotal: 'คะแนนรวม',
+          band: 'Band',
+        },
+      },
+      importDialog: {
+        title: 'เลือกช่องทางการนำเข้าคะแนน',
+        csvOption: {
+          title: 'นำเข้าจากไฟล์ CSV',
+          description: 'สำหรับการอัปโหลดไฟล์คะแนนแบบกำหนดเอง รองรับไฟล์ .csv และ .xlsx',
+        },
+        moodleOption: {
+          title: 'นำเข้าจาก MOODLE',
+          description: 'สำหรับดึงข้อมูลคะแนนโดยตรงจาก ระบบ MOODLE',
+        },
+      },
+      uploadDialog: {
+        title: 'Upload CSV',
+        dragDropText: 'ลากและวางไฟล์ CSV ที่นี่ หรือคลิกเพื่อเลือกไฟล์',
+        supportedFiles: 'รองรับเฉพาะไฟล์รูปแบบ .csv / .xlsx (ขนาดสูงสุด 10MB)',
+        orUrlText: 'หรือนำเข้าจาก URL',
+        urlPlaceholder: 'Add File URL',
+        uploadBtn: 'Upload',
       },
     },
   },

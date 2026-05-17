@@ -188,6 +188,18 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'exam-management/:examId/scores',
+            name: 'admin-exam-scores',
+            component: () => import('pages/admin/exam-scores-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
+                { label: 'จัดการคะแนนสอบ', icon: 'star' },
+              ],
+            },
+          },
+          {
             path: 'exam-management/:examId/registrants/:ermId',
             name: 'admin-exam-registrant-detail',
             component: () => import('pages/admin/exam-registrant-detail-page.vue'),

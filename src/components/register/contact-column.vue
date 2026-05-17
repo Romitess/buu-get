@@ -95,7 +95,7 @@ const educationOptions = computed(() => [
 
 <style scoped lang="scss">
 .calendar-menu {
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 </style>
