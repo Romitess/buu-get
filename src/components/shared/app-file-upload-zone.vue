@@ -3,25 +3,14 @@
     class="upload-zone"
     :class="{
       'upload-zone--dragover': isDragOver,
-      'upload-zone--has-file': !!fileName,
     }"
     @dragover.prevent="isDragOver = true"
     @dragleave.prevent="isDragOver = false"
     @drop.prevent="onDrop"
   >
-    <!-- Uploaded File Display -->
-    <div v-if="fileName" class="uploaded-file column items-center q-gutter-y-sm">
-      <q-icon name="description" size="48px" color="positive" />
-      <div class="text-weight-medium text-dark file-name">{{ fileName }}</div>
-      <div class="text-caption text-grey-6">{{ fileSizeLabel }}</div>
-      <q-btn flat dense icon="close" color="negative" class="remove-btn" @click.stop="handleRemove">
-        <q-tooltip>{{ removeLabel }}</q-tooltip>
-      </q-btn>
-    </div>
-
-    <!-- Empty Drop Zone -->
-    <label v-else class="drop-label column items-center q-gutter-y-xs">
-      <q-icon name="download" size="48px" color="primary" />
+    <!-- Empty Drop Zone (Always Displayed) -->
+    <label class="drop-label column items-center q-gutter-y-xs">
+      <q-icon name="save_alt" size="48px" color="primary" />
       <span class="text-weight-medium text-grey-8">{{ label }}</span>
       <span v-if="hint" class="text-caption text-grey-5">{{ hint }}</span>
       <input
@@ -36,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 
 interface Props {
   /** Label text displayed inside the upload zone */
@@ -67,15 +56,7 @@ const emit = defineEmits<{
 
 const isDragOver = ref(false);
 const fileName = ref<string | null>(null);
-const fileSize = ref(0);
 const fileInputRef = ref<HTMLInputElement | null>(null);
-
-const fileSizeLabel = computed((): string => {
-  if (fileSize.value === 0) return '';
-  const kb = fileSize.value / 1024;
-  if (kb < 1024) return `${kb.toFixed(1)} KB`;
-  return `${(kb / 1024).toFixed(2)} MB`;
-});
 
 const processFile = (file: File): void => {
   if (file.size > props.maxSizeBytes) {
@@ -83,7 +64,6 @@ const processFile = (file: File): void => {
     return;
   }
   fileName.value = file.name;
-  fileSize.value = file.size;
   emit('file-selected', file);
 };
 
@@ -101,7 +81,6 @@ const onDrop = (event: DragEvent): void => {
 
 const handleRemove = (): void => {
   fileName.value = null;
-  fileSize.value = 0;
   if (fileInputRef.value) fileInputRef.value.value = '';
   emit('file-removed');
 };
@@ -113,7 +92,7 @@ defineExpose({ reset: handleRemove });
 <style scoped lang="scss">
 .upload-zone {
   position: relative;
-  border: 2px dashed var(--neutral-gray-light, #ccc);
+  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23cccccc' stroke-width='2' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
   border-radius: var(--radius-md, 12px);
   background-color: var(--surface-page, #fafbfc);
   min-height: 180px;
@@ -124,19 +103,18 @@ defineExpose({ reset: handleRemove });
   cursor: pointer;
 
   &--dragover {
-    border-color: var(--primary);
+    background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%230D47A1' stroke-width='2' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
     background-color: rgba(13, 71, 161, 0.04);
   }
 
   &--has-file {
-    border-style: solid;
-    border-color: var(--positive, #21ba45);
+    background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%2321ba45' stroke-width='2' stroke-dasharray='0' stroke-linecap='square'/%3e%3c/svg%3e");
     background-color: rgba(33, 186, 69, 0.03);
     cursor: default;
   }
 
   &:hover:not(.upload-zone--has-file) {
-    border-color: var(--primary);
+    background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%230D47A1' stroke-width='2' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
     background-color: rgba(13, 71, 161, 0.02);
   }
 }

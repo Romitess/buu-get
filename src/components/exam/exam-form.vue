@@ -46,16 +46,17 @@
         <template v-slot:avatar>
           <q-icon name="visibility" color="amber-9" />
         </template>
-        รอบสอบนี้เคยผ่านการเผยแพร่แล้ว ระบบจึงแสดงผลใน <b>"โหมดดูข้อมูลเท่านั้น (View Only)"</b> ไม่สามารถบันทึกหรือแก้ไขข้อมูลใดๆ ได้
+        รอบสอบนี้เคยผ่านการเผยแพร่แล้ว ระบบจึงแสดงผลใน
+        <b>"โหมดดูข้อมูลเท่านั้น (View Only)"</b> ไม่สามารถบันทึกหรือแก้ไขข้อมูลใดๆ ได้
       </q-banner>
     </div>
 
     <!-- Action Buttons -->
     <div class="row justify-end q-mt-md q-gutter-md action-container">
-      <app-button 
-        :label="wasOriginallyPublished ? 'กลับสู่หน้าจัดการ' : 'ยกเลิก'" 
-        @click="onCancel" 
-        class="action-btn cancel-btn text-weight-bold" 
+      <app-button
+        :label="wasOriginallyPublished ? 'กลับสู่หน้าจัดการ' : 'ยกเลิก'"
+        @click="onCancel"
+        class="action-btn cancel-btn text-weight-bold"
       />
       <app-button
         v-if="!wasOriginallyPublished"

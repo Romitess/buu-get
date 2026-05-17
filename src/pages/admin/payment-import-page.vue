@@ -12,18 +12,18 @@
 
       <!-- Upload Card -->
       <q-card flat bordered class="upload-card q-mb-lg">
-        <q-card-section>
-          <!-- Department Label -->
-          <div class="text-weight-medium text-dark q-mb-md department-label">
-            {{ $t('admin.paymentImport.departmentLabel') }}
-            {{ departmentLabel }}
-          </div>
+        <!-- Department Label -->
+        <div class="text-weight-medium text-dark q-mt-xs q-ml-xs department-label">
+          {{ $t('admin.paymentImport.departmentLabel') }}
+          {{ departmentLabel }}
+        </div>
 
+        <q-card-section class="q-pt-none">
           <!-- File Upload Zone -->
           <AppFileUploadZone
             ref="uploadZoneRef"
             :label="$t('admin.paymentImport.uploadLabel')"
-            :hint="$t('admin.paymentImport.uploadHint')"
+            hint=""
             accept=".csv,.xlsx,.xls"
             @file-selected="onFileSelected"
             @file-removed="onFileRemoved"
@@ -40,19 +40,15 @@
 
         <div class="row q-gutter-sm col-12 col-sm-auto justify-end">
           <AppButton
-            icon="delete_sweep"
             :label="$t('admin.paymentImport.clearAll')"
             color="negative"
             class="action-btn"
-            :disable="totalCount === 0"
             @click="handleClearAll"
           />
           <AppButton
-            icon="fact_check"
             :label="$t('admin.paymentImport.verifyData')"
             color="primary"
             class="action-btn"
-            :disable="totalCount === 0"
             @click="handleVerify"
           />
         </div>
@@ -106,6 +102,9 @@
           </template>
         </BaseTable>
       </main>
+
+      <!-- Custom Confirmation Dialog for Clear All -->
+      <AppConfirmDialog v-model="showClearConfirm" @confirm="confirmClearAll" />
     </div>
   </q-page>
 </template>
@@ -118,6 +117,7 @@ import { useQuasar } from 'quasar';
 
 import BaseTable from 'src/components/shared/base-table.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
+import AppConfirmDialog from 'src/components/shared/app-confirm-dialog.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
@@ -135,7 +135,6 @@ const {
   isLoading,
   searchQuery,
   departmentLabel,
-  totalCount,
   parseFile,
   clearAllData,
   verifyData,
@@ -154,20 +153,19 @@ const onUploadError = (message: string): void => {
   $q.notify({ type: 'negative', message });
 };
 
+const showClearConfirm = ref(false);
+
 const handleClearAll = (): void => {
-  $q.dialog({
-    title: i18n.t('admin.paymentImport.confirmClearTitle'),
-    message: i18n.t('admin.paymentImport.confirmClearMessage'),
-    cancel: { flat: true, label: i18n.t('admin.paymentImport.cancel') },
-    ok: { color: 'negative', label: i18n.t('admin.paymentImport.confirmClear') },
-    persistent: true,
-  }).onOk(() => {
-    clearAllData();
-    uploadZoneRef.value?.reset();
-    $q.notify({
-      type: 'positive',
-      message: i18n.t('admin.paymentImport.notifications.clearSuccess'),
-    });
+  showClearConfirm.value = true;
+};
+
+const confirmClearAll = (): void => {
+  showClearConfirm.value = false;
+  clearAllData();
+  uploadZoneRef.value?.reset();
+  $q.notify({
+    type: 'positive',
+    message: i18n.t('admin.paymentImport.notifications.clearSuccess'),
   });
 };
 
@@ -257,9 +255,17 @@ const columns: QTableColumn[] = [
 </script>
 
 <style scoped lang="scss">
+.payment-import-page {
+  background-color: #fafbfc;
+  min-height: 100vh;
+}
+
 .upload-card {
-  border-radius: var(--radius-md, 12px);
-  border-color: var(--border-color, #e0e0e0);
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #eef2f6;
+  box-shadow: 0px 4px 4px 0px #00000040 !important;
+  padding: 8px;
 }
 
 .department-label {
@@ -272,6 +278,54 @@ const columns: QTableColumn[] = [
 
   @media (max-width: $breakpoint-xs-max) {
     width: 100%;
+  }
+}
+
+:deep(.upload-zone) {
+  max-width: 420px;
+  width: 100%;
+  margin: 16px auto !important;
+  border-radius: 16px !important;
+  background-color: #ffffff !important;
+  min-height: 130px !important; /* Sleek height matching mockup */
+  box-shadow: none !important;
+  transition: all 0.25s ease !important;
+
+  /* Standard state: bright blue dashed border with wide gaps (inset SVG to prevent clipping) */
+  border: none !important;
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 420 130' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M 1.5 16.5 A 15 15 0 0 1 16.5 1.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 403.5 1.5 A 15 15 0 0 1 418.5 16.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 418.5 113.5 A 15 15 0 0 1 403.5 128.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 16.5 128.5 A 15 15 0 0 1 1.5 113.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 16.5 1.5 L 403.5 1.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3cpath d='M 418.5 16.5 L 418.5 113.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3cpath d='M 403.5 128.5 L 16.5 128.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3cpath d='M 1.5 113.5 L 1.5 16.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 100% 100% !important;
+
+  .q-icon {
+    font-size: 56px !important;
+    color: var(--primary-light, #1e89e5) !important;
+    transition: color 0.25s ease !important;
+  }
+
+  .text-weight-medium {
+    font-size: 15px !important;
+    margin-top: 12px !important;
+    color: #000000 !important;
+    font-weight: 500 !important;
+    transition: color 0.25s ease !important;
+  }
+
+  /* Hover/Hold state: solid bright blue background with white icon and white text */
+  &:hover:not(.upload-zone--has-file),
+  &.upload-zone--dragover {
+    background-image: none !important;
+    background-color: var(--primary-light, #1e89e5) !important;
+    border-color: var(--primary-light, #1e89e5) !important;
+
+    .q-icon {
+      color: #ffffff !important;
+    }
+
+    .text-weight-medium {
+      color: #ffffff !important;
+    }
   }
 }
 

@@ -29,7 +29,7 @@ export function usePaymentImport() {
   const selectedFile = ref<File | null>(null);
 
   // ดึงข้อมูลจาก userStore แทนการ Hardcode
-  const departmentLabel = ref(userStore.currentUser?.faculty || 'ไม่ระบุหน่วยงาน');
+  const departmentLabel = ref(userStore.currentUser?.faculty || 'สำนักคอมพิวเตอร์ (82994)');
   const currentUserName = computed(() => {
     const user = userStore.currentUser;
     if (!user) return 'ไม่ระบุชื่อ';

@@ -44,4 +44,5 @@ export interface TableRequestProps {
     descending?: boolean;
     rowsNumber?: number;
   };
+  filter?: string | Record<string, unknown> | null | undefined;
 }
