@@ -426,6 +426,7 @@ export default {
       cancelButton: 'ยกเลิกการจัดที่นั่ง',
       saveButton: 'ยืนยันการจัดที่นั่ง',
       savingData: 'กำลังบันทึกข้อมูลผังที่นั่ง...',
+      loadingData: 'กำลังโหลดข้อมูล...',
       noName: 'ไม่มีชื่อ',
       notifications: {
         saveSuccess: 'บันทึกการจัดที่นั่งเรียบร้อยแล้ว',

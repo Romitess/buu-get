@@ -175,6 +175,17 @@
   --detail-card-badge-bg: #e8f0fe;
   --detail-card-hover-bg: #f9fbff;
   --detail-card-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  // Seat Management Specific
+  --seat-grid-border: #757575;
+  --seat-grid-box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  --seat-scrollbar-track: #f1f1f1;
+  --seat-scrollbar-thumb: #cccccc;
+  --seat-scrollbar-thumb-hover: #aaaaaa;
+  --seat-grid-scrollbar-thumb: #bdbdbd;
+  --seat-grid-scrollbar-thumb-hover: #9e9e9e;
+  --seat-drag-over-bg: var(--badge-primary-bg);
+  --seat-ghost-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
 }
 
 // === Base Reset & Typography ===
