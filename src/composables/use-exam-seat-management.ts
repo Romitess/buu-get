@@ -10,6 +10,7 @@ import {
   updateEnrollmentStatus,
 } from 'src/services/enrollment.service';
 import { DEFAULT_EXAM_TITLE } from 'src/constants/exam';
+import { formatThaiLongDate } from 'src/utils/thai-date';
 
 /** Enrollment status codes shared with the backend */
 const STATUS_PAID = 1;
@@ -68,13 +69,12 @@ export function useExamSeatManagement() {
     return baseTitle;
   });
 
+  // Resolves a localized month name by 0-based index from i18n (type-safe, no cast)
+  const getMonthName = (monthIndex: number): string => t(`common.months[${monthIndex}]`);
+
   const examDate = computed((): string => {
     if (!examData.value?.EXAM_DATE) return '-';
-    return new Date(examData.value.EXAM_DATE).toLocaleDateString('th-TH', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    return formatThaiLongDate(examData.value.EXAM_DATE, getMonthName);
   });
 
   const sessionTime = computed((): string => {

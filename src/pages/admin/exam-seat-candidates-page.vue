@@ -18,7 +18,7 @@
         v-if="exam"
         class="q-mb-md"
         :title="exam.EXAM_NAME"
-        :date="formatThaiDate(exam.EXAM_DATE)"
+        :date="examDateLabel"
         :time="sessionTime"
         :location="sessionLocation"
         :applicant-count="candidateCount"
@@ -86,7 +86,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
@@ -103,6 +103,8 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import { useExamSeatCandidates } from 'src/composables/use-exam-seat-candidates';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
+import { formatThaiLongDate } from 'src/utils/thai-date';
+import { EXAM_TYPE_GENERAL } from 'src/constants/exam';
 
 const route = useRoute();
 const i18n = useI18n();
@@ -121,23 +123,30 @@ const {
   fetchData,
 } = useExamSeatCandidates();
 
-const handlePrintVoucher = () => {
+// Resolves a localized month name by 0-based index from i18n (type-safe, no cast)
+const getMonthName = (monthIndex: number): string => i18n.t(`common.months[${monthIndex}]`);
+
+const examDateLabel = computed((): string =>
+  exam.value ? formatThaiLongDate(exam.value.EXAM_DATE, getMonthName) : '-',
+);
+
+const handlePrintVoucher = (): void => {
   const currentSession = sessions.value.find((s) => s.SS_ID === selectedSessionId.value);
 
   $q.dialog({
     component: DialogIssueTicket,
     componentProps: {
       sessionDetails: {
-        roundName: currentSession?.SS_NAME || 'รอบทั่วไป',
-        date: exam.value ? formatThaiDate(exam.value.EXAM_DATE) : '-',
+        roundName: currentSession?.SS_NAME || EXAM_TYPE_GENERAL,
+        date: examDateLabel.value,
         time: sessionTime.value,
         room: sessionLocation.value,
         studentCount: candidateCount.value,
       },
     },
   }).onOk(() => {
-    // Implement ticket generation logic here if needed
-    console.log('Generate tickets for session:', selectedSessionId.value);
+    // TODO: trigger backend ticket generation for selectedSessionId.value
+    // once the endpoint is available.
   });
 };
 
@@ -180,16 +189,6 @@ const columns: QTableColumn[] = [
     align: 'center',
   },
 ];
-
-const formatThaiDate = (dateStr: string): string => {
-  if (!dateStr) return '-';
-  const date = new Date(dateStr);
-  const monthNames = i18n.tm('common.months');
-  const day = date.getDate();
-  const month = (monthNames as unknown as string[])[date.getMonth()];
-  const year = date.getFullYear() + 543;
-  return `${day} ${month} ${year}`;
-};
 
 const onRequest = (props: TableRequestProps): void => {
   const { page, rowsPerPage } = props.pagination;
