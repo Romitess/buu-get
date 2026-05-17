@@ -61,7 +61,7 @@
           :key="btn.emit"
           :icon="btn.icon"
           :color="btn.color"
-          :tooltip="btn.tooltip"
+          :tooltip="getActionTooltip(btn, row)"
           :disable="isActionDisabled(btn.emit, row)"
           @click="handleAction(btn.emit, row.id)"
         />
@@ -294,6 +294,12 @@ const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
  * Logic to disable specific actions based on business rules
  */
 const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
+  if (emitName === TABLE_ACTIONS.MANAGE_SEATS) {
+    if ('isAllVerifyPassed' in row && row.isAllVerifyPassed === false) {
+      return true;
+    }
+  }
+
   if (emitName === TABLE_ACTIONS.VIEW_CANDIDATES) {
     if (!row.examDate) return true;
 
@@ -309,6 +315,17 @@ const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
     return today < examDate;
   }
   return false;
+};
+
+const getActionTooltip = (btn: ToolButtonConfig, row: ExamSchedule): string => {
+  if (
+    btn.emit === TABLE_ACTIONS.MANAGE_SEATS &&
+    'isAllVerifyPassed' in row &&
+    row.isAllVerifyPassed === false
+  ) {
+    return 'ไม่สามารถจัดการที่นั่งสอบได้ เนื่องจากผู้สมัครยังผ่านการตรวจสอบความถูกต้องไม่ครบทุกคน';
+  }
+  return btn.tooltip;
 };
 
 const handleAction = (emitName: string, id: string) => {
