@@ -15,6 +15,9 @@
           class="full-width"
         />
       </div>
+      <div class="col-auto">
+        <search-user />
+      </div>
     </div>
 
     <!-- Table Card -->
@@ -88,6 +91,93 @@
         </base-table>
       </q-card-section>
     </q-card>
+
+    <!-- Action Bar below Table -->
+    <div class="row justify-center q-mt-md">
+      <div class="col-12 col-sm-4">
+        <fin-save-transcription :disabled="hasUnresolvedRows" />
+      </div>
+    </div>
+
+    <!-- Edit Dialog -->
+    <q-dialog v-model="isDialogOpened" persistent>
+      <q-card class="edit-dialog-card">
+        <!-- Close Button & Title -->
+        <div class="row items-center justify-between q-mb-lg">
+          <div class="text-h6 text-weight-bold dialog-title">แก้ไขไฟล์จ่ายเงิน</div>
+          <q-btn icon="close" flat round dense v-close-popup class="text-grey-6" />
+        </div>
+
+        <!-- Info fields -->
+        <div class="q-gutter-y-md dialog-fields">
+          <div class="row items-center field-row">
+            <div class="col-5 text-right q-pr-lg field-label">ผู้ชำระเงิน</div>
+            <div class="col-7 text-weight-bold field-value">{{ selectedRow?.file_payer }}</div>
+          </div>
+
+          <div class="row items-center field-row">
+            <div class="col-5 text-right q-pr-lg field-label">วันที่จ่ายเงิน</div>
+            <div class="col-7 field-value">{{ selectedRow?.file_payment_date }}</div>
+          </div>
+
+          <div class="row items-center field-row">
+            <div class="col-5 text-right q-pr-lg field-label">เวลาที่จ่ายเงิน</div>
+            <div class="col-7 field-value">{{ selectedRow?.file_payment_time }}</div>
+          </div>
+
+          <div class="row items-center field-row">
+            <div class="col-5 text-right q-pr-lg field-label">จำนวนเงิน</div>
+            <div class="col-7 field-value">{{ selectedRow?.file_amount }}</div>
+          </div>
+
+          <!-- Ref 1 Input -->
+          <div class="row items-center field-row">
+            <div class="col-5 text-right q-pr-lg field-label">รหัสประจำตัวผู้สมัคร (Ref1)</div>
+            <div class="col-7">
+              <q-input
+                v-model="editForm.ref1"
+                outlined
+                dense
+                bg-color="white"
+                class="input-rounded"
+                placeholder="กรอกรหัสประจำตัวผู้สมัคร (Ref1)"
+              />
+            </div>
+          </div>
+
+          <!-- Ref 2 Input -->
+          <div class="row items-center field-row">
+            <div class="col-5 text-right q-pr-lg field-label">เลขอ้างอิงการสมัคร (Ref2)</div>
+            <div class="col-7">
+              <q-input
+                v-model="editForm.ref2"
+                outlined
+                dense
+                bg-color="white"
+                class="input-rounded"
+                placeholder="กรอกเลขอ้างอิงการสมัคร (Ref2)"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row justify-center q-gutter-x-md q-mt-xl">
+          <q-btn
+            label="ยกเลิก"
+            unelevated
+            v-close-popup
+            class="btn-dialog-cancel font-weight-bold"
+          />
+          <q-btn
+            label="บันทึก"
+            unelevated
+            @click="handleSave"
+            class="btn-dialog-save font-weight-bold"
+          />
+        </div>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -99,6 +189,8 @@ import ActionButton from 'src/components/shared/action-button.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
+import SearchUser from 'src/components/shared/search-user.vue';
+import FinSaveTranscription from 'src/components/shared/fin-save-transcription.vue';
 
 interface PaymentRow {
   id: number;
@@ -227,6 +319,10 @@ const filteredRows = computed(() => {
   });
 });
 
+const hasUnresolvedRows = computed(() => {
+  return mockRows.value.some((row) => !row.db_ref);
+});
+
 const columns: QTableColumn[] = [
   { name: 'id', field: 'id', label: 'ลำดับ', align: 'center' },
   {
@@ -247,11 +343,98 @@ const columns: QTableColumn[] = [
   { name: 'actions', field: 'actions', label: 'เครื่องมือ', align: 'center' },
 ];
 
+const isDialogOpened = ref(false);
+const selectedRow = ref<PaymentRow | null>(null);
+const editForm = ref({
+  ref1: '',
+  ref2: '',
+});
+
 const handleEdit = (row: PaymentRow) => {
-  console.log('Edit action triggered for row:', row);
+  selectedRow.value = row;
+  editForm.value.ref1 = row.file_ref || '';
+  editForm.value.ref2 = row.file_ref2 || '';
+  isDialogOpened.value = true;
+};
+
+const handleSave = () => {
+  if (selectedRow.value) {
+    const row = mockRows.value.find((r) => r.id === selectedRow.value?.id);
+    if (row) {
+      row.file_ref = editForm.value.ref1;
+      row.file_ref2 = editForm.value.ref2;
+    }
+  }
+  isDialogOpened.value = false;
 };
 </script>
 
 <style scoped lang="scss">
-/* Table design matches the sleek visual style guidelines */
+.edit-dialog-card {
+  width: 600px;
+  max-width: 95vw;
+  border-radius: 16px;
+  padding: 32px 40px;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.dialog-title {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+}
+
+.dialog-fields {
+  font-size: 0.95rem;
+}
+
+.field-row {
+  margin-bottom: 16px;
+}
+
+.field-label {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.field-value {
+  color: var(--text-primary);
+}
+
+.input-rounded {
+  :deep(.q-field__control) {
+    border-radius: 10px !important;
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+
+    &:before {
+      border: none !important;
+    }
+
+    &:after {
+      border: none !important;
+    }
+  }
+}
+
+.btn-dialog-cancel {
+  background-color: #e2e8f0 !important;
+  color: #4a5568 !important;
+  width: 140px;
+  height: 44px;
+  border-radius: 8px;
+  text-transform: none;
+}
+
+.btn-dialog-save {
+  background-color: #0e49b5 !important; // Sleek deep blue to match premium UI
+  color: white !important;
+  width: 140px;
+  height: 44px;
+  border-radius: 8px;
+  text-transform: none;
+
+  &:hover {
+    background-color: #0b3c95 !important;
+  }
+}
 </style>
