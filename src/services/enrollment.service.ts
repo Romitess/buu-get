@@ -1,6 +1,11 @@
 import { api } from 'src/boot/axios';
 import type { BackendEnrollmentDetail, EnrollmentTableRow } from 'src/types/enrollment.types';
 
+export const fetchAllEnrollments = async (): Promise<BackendEnrollmentDetail[]> => {
+  const response = await api.get<BackendEnrollmentDetail[]>('/exam-enrollments');
+  return response.data;
+};
+
 export const fetchEnrollmentsByExamId = async (examId: number): Promise<EnrollmentTableRow[]> => {
   const response = await api.get<BackendEnrollmentDetail[]>(`/exam-enrollments/exam/${examId}`);
 

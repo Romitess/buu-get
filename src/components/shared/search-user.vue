@@ -2,9 +2,9 @@
   <div>
     <!-- Button Trigger -->
     <q-btn
-      label="ค้นหาข้อมูลผู้สมัคร"
+      :label="t('admin.searchUser.triggerLabel')"
       unelevated
-      class="btn-search-trigger text-weight-bold"
+      class="btn-search-trigger"
       @click="openDialog"
     />
 
@@ -13,7 +13,9 @@
       <q-card class="search-user-dialog-card">
         <!-- Close Button & Title -->
         <div class="row items-center justify-between q-mb-md">
-          <div class="text-h6 text-weight-bold dialog-title">ค้นหาผู้สมัคร</div>
+          <div class="text-h6 text-weight-bold dialog-title">
+            {{ t('admin.searchUser.dialogTitle') }}
+          </div>
           <q-btn icon="close" flat round dense v-close-popup class="text-grey-6" />
         </div>
 
@@ -21,7 +23,9 @@
         <div class="q-gutter-y-sm q-mb-md dialog-fields">
           <!-- Ref 1 -->
           <div class="row items-center field-row">
-            <div class="col-4 text-right q-pr-lg field-label">รหัสประจำตัวผู้สมัคร (Ref1)</div>
+            <div class="col-4 text-right q-pr-lg field-label">
+              {{ t('admin.paymentImport.table.applicantId') }}
+            </div>
             <div class="col-8">
               <q-input
                 v-model="searchForm.ref1"
@@ -29,7 +33,7 @@
                 dense
                 bg-color="white"
                 class="input-rounded"
-                placeholder="กรอกรหัสประจำตัวผู้สมัคร (Ref1)"
+                :placeholder="t('admin.searchUser.placeholderRef1')"
                 @keyup.enter="handleSearch"
               />
             </div>
@@ -37,7 +41,9 @@
 
           <!-- Ref 2 -->
           <div class="row items-center field-row">
-            <div class="col-4 text-right q-pr-lg field-label">เลขอ้างอิงการสมัคร (Ref2)</div>
+            <div class="col-4 text-right q-pr-lg field-label">
+              {{ t('admin.paymentImport.table.referenceNo') }}
+            </div>
             <div class="col-8">
               <q-input
                 v-model="searchForm.ref2"
@@ -45,7 +51,7 @@
                 dense
                 bg-color="white"
                 class="input-rounded"
-                placeholder="กรอกเลขอ้างอิงการสมัคร (Ref2)"
+                :placeholder="t('admin.searchUser.placeholderRef2')"
                 @keyup.enter="handleSearch"
               />
             </div>
@@ -53,7 +59,9 @@
 
           <!-- Applicant Name -->
           <div class="row items-center field-row">
-            <div class="col-4 text-right q-pr-lg field-label">ชื่อผู้สมัคร</div>
+            <div class="col-4 text-right q-pr-lg field-label">
+              {{ t('admin.registrantManagement.table.columns.fullName') }}
+            </div>
             <div class="col-8">
               <q-input
                 v-model="searchForm.name"
@@ -61,7 +69,7 @@
                 dense
                 bg-color="white"
                 class="input-rounded"
-                placeholder="กรอกชื่อผู้สมัคร"
+                :placeholder="t('admin.searchUser.placeholderName')"
                 @keyup.enter="handleSearch"
               />
             </div>
@@ -71,10 +79,11 @@
         <!-- Search Action Button -->
         <div class="row justify-end q-mb-lg">
           <q-btn
-            label="ค้นหา"
+            :label="t('admin.searchUser.searchBtn')"
             unelevated
             class="btn-dialog-search text-weight-bold"
             @click="handleSearch"
+            :loading="isLoading"
           />
         </div>
 
@@ -94,19 +103,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { QTableColumn } from 'quasar';
 import BaseTable from 'src/components/shared/base-table.vue';
+import { fetchAllEnrollments } from 'src/services/enrollment.service';
+import { PAYMENT_STATUS_LABELS } from 'src/types/enrollment.types';
+import type { SearchRow } from 'src/types/exam.types';
 
-interface SearchRow {
-  id: number;
-  ref1: string;
-  ref2: string;
-  name: string;
-  amount: string;
-  exam_name: string;
-  payment_status: string;
-}
+const { t } = useI18n();
 
 const isDialogOpen = ref(false);
 const isLoading = ref(false);
@@ -125,103 +130,86 @@ const openDialog = () => {
   rows.value = [];
 };
 
-// Dummy dataset to simulate search query
-const dummyDataSet: SearchRow[] = [
-  {
-    id: 1,
-    ref1: '66100002',
-    ref2: '6751300100002',
-    name: 'นาย สมทบ ใจดี',
-    amount: '500.00',
-    exam_name: 'BUU GET ครั้งที่ 1/2569',
-    payment_status: 'ชำระเงินเสร็จสิ้น',
-  },
-  {
-    id: 2,
-    ref1: '66100003',
-    ref2: '6751300100003',
-    name: 'นาย สมวิว ใจดี',
-    amount: '500.00',
-    exam_name: 'BUU GET ครั้งที่ 1/2569',
-    payment_status: 'ชำระเงินเสร็จสิ้น',
-  },
-  {
-    id: 3,
-    ref1: '66100004',
-    ref2: '6751300100004',
-    name: 'น.ส. สมอั้น ใจดี',
-    amount: '500.00',
-    exam_name: 'BUU GET ครั้งที่ 1/2569',
-    payment_status: 'ชำระเงินเสร็จสิ้น',
-  },
-  {
-    id: 4,
-    ref1: '66100005',
-    ref2: '6751300100005',
-    name: 'น.ส. สมหยก ใจดี',
-    amount: '500.00',
-    exam_name: 'BUU GET ครั้งที่ 1/2569',
-    payment_status: 'ชำระเงินเสร็จสิ้น',
-  },
-];
-
-const handleSearch = () => {
+const handleSearch = async () => {
   isLoading.value = true;
-
-  // Simulate API delay
-  setTimeout(() => {
+  try {
     const ref1Query = searchForm.value.ref1.trim();
     const ref2Query = searchForm.value.ref2.trim();
     const nameQuery = searchForm.value.name.trim().toLowerCase();
 
-    // If all fields are empty, show all results for demo convenience
-    if (!ref1Query && !ref2Query && !nameQuery) {
-      rows.value = dummyDataSet;
-    } else {
-      rows.value = dummyDataSet.filter((item) => {
-        const matchesRef1 = ref1Query ? item.ref1.includes(ref1Query) : true;
-        const matchesRef2 = ref2Query ? item.ref2.includes(ref2Query) : true;
-        const matchesName = nameQuery ? item.name.toLowerCase().includes(nameQuery) : true;
-        return matchesRef1 && matchesRef2 && matchesName;
-      });
-    }
+    const enrollments = await fetchAllEnrollments();
 
+    const filtered = enrollments.filter((e) => {
+      const matchesRef1 = ref1Query
+        ? e.USER?.USER_NATIONAL_ID?.includes(ref1Query) || String(e.ERM_ID).includes(ref1Query)
+        : true;
+      const matchesRef2 = ref2Query ? String(e.ERM_ID).includes(ref2Query) : true;
+      const matchesName = nameQuery
+        ? e.USER?.PROFILE?.userFullnameTh?.toLowerCase().includes(nameQuery) ||
+          e.USER?.PROFILE?.userFullnameEn?.toLowerCase().includes(nameQuery)
+        : true;
+
+      return matchesRef1 && matchesRef2 && matchesName;
+    });
+
+    rows.value = filtered.map((e, index) => ({
+      id: index + 1,
+      ref1: e.USER?.USER_NATIONAL_ID || String(e.ERM_ID),
+      ref2: String(e.ERM_ID),
+      name: e.USER?.PROFILE?.userFullnameTh || e.USER?.PROFILE?.userFullnameEn || '-',
+      amount: e.SESSION?.EXAM?.EXAM_FEE ? String(e.SESSION.EXAM.EXAM_FEE) : '500.00',
+      exam_name: e.SESSION?.EXAM?.EXAM_NAME || '-',
+      payment_status: PAYMENT_STATUS_LABELS[e.ERM_STATUS] || 'ไม่ระบุ',
+    }));
+  } catch (err) {
+    console.error('Failed to search users:', err);
+  } finally {
     isLoading.value = false;
-  }, 400);
+  }
 };
 
-const columns: QTableColumn[] = [
-  { name: 'id', field: 'id', label: 'ลำดับ', align: 'center' },
-  { name: 'ref1', field: 'ref1', label: 'รหัสประจำตัวผู้สมัคร (Ref1)', align: 'center' },
-  { name: 'ref2', field: 'ref2', label: 'เลขอ้างอิงการสมัคร (Ref2)', align: 'center' },
-  { name: 'name', field: 'name', label: 'ชื่อผู้สมัคร', align: 'left' },
-  { name: 'amount', field: 'amount', label: 'จำนวนเงิน', align: 'center' },
-  { name: 'exam_name', field: 'exam_name', label: 'ชื่อการสอบ', align: 'left' },
-  { name: 'payment_status', field: 'payment_status', label: 'สถานะการชำระเงิน', align: 'center' },
-];
+const columns = computed<QTableColumn[]>(() => [
+  { name: 'id', field: 'id', label: t('admin.searchUser.table.index'), align: 'center' },
+  { name: 'ref1', field: 'ref1', label: t('admin.searchUser.table.applicantId'), align: 'center' },
+  { name: 'ref2', field: 'ref2', label: t('admin.searchUser.table.referenceNo'), align: 'center' },
+  { name: 'name', field: 'name', label: t('admin.searchUser.table.fullName'), align: 'left' },
+  { name: 'amount', field: 'amount', label: t('admin.searchUser.table.amount'), align: 'center' },
+  {
+    name: 'exam_name',
+    field: 'exam_name',
+    label: t('admin.searchUser.table.examName'),
+    align: 'left',
+  },
+  {
+    name: 'payment_status',
+    field: 'payment_status',
+    label: t('admin.searchUser.table.status'),
+    align: 'center',
+  },
+]);
 </script>
 
 <style scoped lang="scss">
 .btn-search-trigger {
-  background-color: #0e49b5 !important;
+  background-color: var(--primary) !important;
   color: white !important;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   height: 40px;
   padding: 0 20px;
   text-transform: none;
   font-size: 0.95rem;
 
   &:hover {
-    background-color: #0b3c95 !important;
+    background-color: var(--primary-dark) !important;
   }
 }
 
 .search-user-dialog-card {
   width: 900px;
   max-width: 95vw;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 32px 40px;
-  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-lg);
   overflow-x: hidden;
 }
 
@@ -245,9 +233,9 @@ const columns: QTableColumn[] = [
 
 .input-rounded {
   :deep(.q-field__control) {
-    border-radius: 10px !important;
+    border-radius: var(--radius-10) !important;
     background-color: #fff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--neutral-200) !important;
 
     &:before {
       border: none !important;
@@ -260,22 +248,22 @@ const columns: QTableColumn[] = [
 }
 
 .btn-dialog-search {
-  background-color: #0e49b5 !important;
+  background-color: var(--primary) !important;
   color: white !important;
   width: 180px;
   height: 44px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   text-transform: none;
   font-size: 1rem;
 
   &:hover {
-    background-color: #0b3c95 !important;
+    background-color: var(--primary-dark) !important;
   }
 }
 
 .table-container {
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--neutral-200);
 }
 </style>

@@ -13,6 +13,9 @@ export interface PaymentImportRow {
   importedAt: string;
   importedBy: string;
 }
+// Global State
+export const globalImportedRows = ref<PaymentImportRow[]>([]);
+export const globalSelectedFile = ref<File | null>(null);
 
 /**
  * Composable for the "นำเข้าไฟล์การชำระเงิน" page.
@@ -21,12 +24,13 @@ export interface PaymentImportRow {
 export function usePaymentImport() {
   const userStore = useUserStore();
 
-  // State
-  const importedRows = ref<PaymentImportRow[]>([]);
+  // Reference the global state so existing code works
+  const importedRows = globalImportedRows;
+  const selectedFile = globalSelectedFile;
+
   const isLoading = ref(false);
   const error = ref<string | null>(null);
   const searchQuery = ref('');
-  const selectedFile = ref<File | null>(null);
 
   // ดึงข้อมูลจาก userStore แทนการ Hardcode
   const departmentLabel = ref(userStore.currentUser?.faculty || 'สำนักคอมพิวเตอร์ (82994)');
