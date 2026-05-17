@@ -49,10 +49,19 @@ export interface ExamInfo {
   feeText: string;
 }
 
+/** Pass/fail outcome of an exam, used to render a composed result label */
+export type ExamResult = 'passed' | 'failed';
+
 export interface CustomStatus {
+  /** i18n key, used as-is when `result` is not set */
   label: string;
   type: 'success' | 'error';
   icon: string;
+  /**
+   * When set, the UI renders a composed label "<statusLabel> : <result>"
+   * instead of translating `label` directly.
+   */
+  result?: ExamResult;
 }
 
 export interface ExamHistoryItem {

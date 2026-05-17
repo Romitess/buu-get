@@ -186,6 +186,15 @@
   --seat-grid-scrollbar-thumb-hover: #9e9e9e;
   --seat-drag-over-bg: var(--badge-primary-bg);
   --seat-ghost-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+
+  // Payment Import Specific
+  --payment-import-bg: #fafbfc;
+  --payment-import-card-border: #eef2f6;
+  --payment-import-table-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  // Dashed upload-zone border; stroke color is kept inline because CSS
+  // custom properties cannot be interpolated inside a data: URI.
+  // The stroke %231e89e5 intentionally matches --primary-light (#1e89e5).
+  --upload-zone-dashed-border: url("data:image/svg+xml,%3csvg viewBox='0 0 420 130' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M 1.5 16.5 A 15 15 0 0 1 16.5 1.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 403.5 1.5 A 15 15 0 0 1 418.5 16.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 418.5 113.5 A 15 15 0 0 1 403.5 128.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 16.5 128.5 A 15 15 0 0 1 1.5 113.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 16.5 1.5 L 403.5 1.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3cpath d='M 418.5 16.5 L 418.5 113.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3cpath d='M 403.5 128.5 L 16.5 128.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3cpath d='M 1.5 113.5 L 1.5 16.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3c/svg%3e");
 }
 
 // === Base Reset & Typography ===

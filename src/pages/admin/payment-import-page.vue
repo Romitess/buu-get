@@ -256,15 +256,15 @@ const columns: QTableColumn[] = [
 
 <style scoped lang="scss">
 .payment-import-page {
-  background-color: #fafbfc;
+  background-color: var(--payment-import-bg);
   min-height: 100vh;
 }
 
 .upload-card {
-  background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid #eef2f6;
-  box-shadow: 0px 4px 4px 0px #00000040 !important;
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--payment-import-card-border);
+  box-shadow: var(--shadow-card) !important;
   padding: 8px;
 }
 
@@ -285,29 +285,29 @@ const columns: QTableColumn[] = [
   max-width: 420px;
   width: 100%;
   margin: 16px auto !important;
-  border-radius: 16px !important;
-  background-color: #ffffff !important;
+  border-radius: var(--radius-lg) !important;
+  background-color: var(--surface-card) !important;
   min-height: 130px !important; /* Sleek height matching mockup */
   box-shadow: none !important;
   transition: all 0.25s ease !important;
 
   /* Standard state: bright blue dashed border with wide gaps (inset SVG to prevent clipping) */
   border: none !important;
-  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 420 130' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M 1.5 16.5 A 15 15 0 0 1 16.5 1.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 403.5 1.5 A 15 15 0 0 1 418.5 16.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 418.5 113.5 A 15 15 0 0 1 403.5 128.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 16.5 128.5 A 15 15 0 0 1 1.5 113.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 16.5 1.5 L 403.5 1.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3cpath d='M 418.5 16.5 L 418.5 113.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3cpath d='M 403.5 128.5 L 16.5 128.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3cpath d='M 1.5 113.5 L 1.5 16.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3c/svg%3e") !important;
+  background-image: var(--upload-zone-dashed-border) !important;
   background-repeat: no-repeat !important;
   background-position: center !important;
   background-size: 100% 100% !important;
 
   .q-icon {
     font-size: 56px !important;
-    color: var(--primary-light, #1e89e5) !important;
+    color: var(--primary-light) !important;
     transition: color 0.25s ease !important;
   }
 
   .text-weight-medium {
     font-size: 15px !important;
     margin-top: 12px !important;
-    color: #000000 !important;
+    color: var(--label-color) !important;
     font-weight: 500 !important;
     transition: color 0.25s ease !important;
   }
@@ -316,23 +316,23 @@ const columns: QTableColumn[] = [
   &:hover:not(.upload-zone--has-file),
   &.upload-zone--dragover {
     background-image: none !important;
-    background-color: var(--primary-light, #1e89e5) !important;
-    border-color: var(--primary-light, #1e89e5) !important;
+    background-color: var(--primary-light) !important;
+    border-color: var(--primary-light) !important;
 
     .q-icon {
-      color: #ffffff !important;
+      color: var(--text-on-primary) !important;
     }
 
     .text-weight-medium {
-      color: #ffffff !important;
+      color: var(--text-on-primary) !important;
     }
   }
 }
 
 .payment-import-table {
   :deep(.q-table__container) {
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border-radius: var(--radius-md);
+    box-shadow: var(--payment-import-table-shadow);
   }
 }
 </style>

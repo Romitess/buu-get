@@ -177,13 +177,12 @@ const historyExams = computed<ExamHistoryItem[]>(() =>
       status: t(item.status),
     };
     if (item.customStatus) {
+      const { result } = item.customStatus;
       translated.customStatus = {
         ...item.customStatus,
-        label: item.customStatus.label.includes('PLACEHOLDER_PASSED')
-          ? `${t('exam.statusLabel')} : ${t('exam.status.passed')}`
-          : item.customStatus.label.includes('PLACEHOLDER_FAILED')
-            ? `${t('exam.statusLabel')} : ${t('exam.status.failed')}`
-            : t(item.customStatus.label),
+        label: result
+          ? `${t('exam.statusLabel')} : ${t(`exam.status.${result}`)}`
+          : t(item.customStatus.label),
       };
     }
     return translated;
@@ -191,11 +190,11 @@ const historyExams = computed<ExamHistoryItem[]>(() =>
 );
 
 // === Methods ===
-const handleTimeout = (exam: ExamHistoryItem) => {
+const handleTimeout = (exam: ExamHistoryItem): void => {
   examStore.cancelRegistration(exam.id);
 };
 
-const handlePay = (exam: ExamHistoryItem) => {
+const handlePay = (exam: ExamHistoryItem): void => {
   selectedExam.value = exam;
 
   // Use the existing deadline from the exam object to stay in sync with the page
@@ -211,16 +210,17 @@ const handlePay = (exam: ExamHistoryItem) => {
   showPaymentDialog.value = true;
 };
 
-const handleSaveQR = () => {
-  // TODO: Logic to save/download QR image
+const handleSaveQR = (): void => {
+  // TODO: download the payment QR once the backend exposes its image URL
+  // (AppPaymentDialog currently renders a static placeholder QR).
 };
 
-const handleCancel = (exam: ExamHistoryItem) => {
+const handleCancel = (exam: ExamHistoryItem): void => {
   selectedExamForCancel.value = exam;
   showCancelDialog.value = true;
 };
 
-const handleConfirmCancel = () => {
+const handleConfirmCancel = (): void => {
   if (selectedExamForCancel.value) {
     examStore.cancelRegistration(selectedExamForCancel.value.id);
   }
@@ -229,10 +229,6 @@ const handleConfirmCancel = () => {
 </script>
 
 <style scoped lang="scss">
-// .exam-history-page {
-//   // Full width
-// }
-
 .section-title {
   color: var(--text-primary);
   border-bottom: 1px solid var(--border-color);
