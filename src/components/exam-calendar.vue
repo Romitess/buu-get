@@ -10,7 +10,7 @@
     >
       <template #day-content="{ day }">
         <div
-          v-if="availability?.[day.dateString] && !day.isPast"
+          v-if="availability?.[day.dateString] && !day.isPast && !day.isToday"
           class="dot"
           :class="{
             'dot-green': availability[day.dateString] === 'available',
