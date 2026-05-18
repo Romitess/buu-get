@@ -20,7 +20,6 @@
               v-model:country="formData.country"
               v-model:title-t-h="formData.titleTH"
               v-model:full-name="formData.fullName"
-              v-model:title-e-n="formData.titleEN"
               v-model:english-name="formData.englishName"
               @title-th-change="handleTitleTHChange"
             />
@@ -138,3 +137,23 @@ onMounted(() => {
   }
 });
 </script>
+
+<style scoped lang="scss">
+.profile-card {
+  width: 96%;
+  max-width: 1600px;
+  border: 1px solid var(--q-grey-3);
+  border-radius: 12px;
+  margin: 0 auto;
+}
+
+.profile-action-btn {
+  width: 160px;
+  border-radius: 8px;
+  padding: 10px 0;
+}
+
+.profile-dialog-card {
+  min-width: 350px;
+}
+</style>
