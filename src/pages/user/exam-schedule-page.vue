@@ -55,9 +55,10 @@
                 :available-seats="round.availableSeats"
                 :total-seats="round.totalSeats"
                 :round-type-label="round.roundTypeLabel"
+                :reg-start-date="round.regStartDate"
                 :reg-end-date="round.regEndDate"
                 :exam-date="round.examDate"
-                @register="(isExpired) => handleRegister(round, isExpired)"
+                @register="(isExpiredOrNotOpen) => handleRegister(round, isExpiredOrNotOpen)"
               />
             </template>
 
@@ -131,11 +132,26 @@ const roundsSectionStyle = computed(() => {
   return {};
 });
 
-const handleRegister = async (round: ExamRound, isExpired = false): Promise<void> => {
-  if (isExpired) {
+const handleRegister = async (
+  round: ExamRound,
+  status: 'expired' | 'notOpen' | '' = '',
+): Promise<void> => {
+  if (status === 'expired') {
     $q.notify({
       type: 'negative',
       message: t('examSchedule.notifications.expired'),
+      icon: 'report_problem',
+      position: 'top',
+      timeout: 2500,
+      actions: [{ icon: 'close', color: 'white' }],
+    });
+    return;
+  }
+
+  if (status === 'notOpen') {
+    $q.notify({
+      type: 'negative',
+      message: t('examSchedule.notifications.notOpen'),
       icon: 'report_problem',
       position: 'top',
       timeout: 2500,

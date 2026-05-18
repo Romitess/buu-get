@@ -17,16 +17,21 @@
 
     <q-card-actions class="round-exam__action-group q-pa-none">
       <div class="round-exam__status" :class="isDisabled ? 'text-negative' : 'text-positive'">
-        <q-icon :name="isExpired ? 'history_toggle_off' : 'groups'" size="xs" />
+        <q-icon
+          :name="isExpired ? 'history_toggle_off' : isNotOpenYet ? 'pending_actions' : 'groups'"
+          size="xs"
+        />
         <span class="round-exam__seats">
           {{
             isExpired
               ? t('examSchedule.expiredStatusText')
-              : isFull
-                ? fullStatusText || t('examSchedule.fullStatusText')
-                : `${availableStatusTextPrefix || t('examSchedule.availableStatusTextPrefix')}${availableSeats}${availableStatusTextSuffix || t('examSchedule.availableStatusTextSuffix')}`
+              : isNotOpenYet
+                ? t('examSchedule.notOpenStatusText')
+                : isFull
+                  ? fullStatusText || t('examSchedule.fullStatusText')
+                  : `${availableStatusTextPrefix || t('examSchedule.availableStatusTextPrefix')}${availableSeats}${availableStatusTextSuffix || t('examSchedule.availableStatusTextSuffix')}`
           }}
-          <span v-if="!isExpired" class="text-muted">
+          <span v-if="!isExpired && !isNotOpenYet" class="text-muted">
             ({{ totalSeats - availableSeats }}/{{ totalSeats }})
           </span>
         </span>
@@ -36,9 +41,11 @@
         :label="
           isExpired
             ? t('examSchedule.expiredBtnText')
-            : isFull
-              ? fullBtnText || t('examSchedule.fullBtnText')
-              : registerBtnText || t('examSchedule.registerBtnText')
+            : isNotOpenYet
+              ? t('examSchedule.notOpenBtnText')
+              : isFull
+                ? fullBtnText || t('examSchedule.fullBtnText')
+                : registerBtnText || t('examSchedule.registerBtnText')
         "
         :color="isDisabled ? 'full' : 'primary'"
         class="round-exam__btn"
@@ -59,7 +66,7 @@ import AppButton from '../base/app-button.vue';
 const props = defineProps<RoundExamProps>();
 
 const emit = defineEmits<{
-  (e: 'register', isExpired: boolean): void;
+  (e: 'register', status: 'expired' | 'notOpen' | ''): void;
 }>();
 
 const { t } = useI18n();
@@ -144,30 +151,32 @@ onUnmounted(() => {
 });
 
 const isExpired = computed((): boolean => {
-  if (!props.examDate || !props.timeRange) return false;
-
+  if (!props.regEndDate) return false;
   try {
-    if (props.regEndDate) {
-      const regEnd = new Date(`${props.regEndDate}T23:59:59+07:00`);
-      if (now.value > regEnd) return true;
-    }
-
-    const endTimeStr = props.timeRange.split('-')[1]?.trim();
-    if (endTimeStr) {
-      const roundEnd = new Date(`${props.examDate}T${endTimeStr}:00+07:00`);
-      if (now.value >= roundEnd) return true;
-    }
+    const regEnd = new Date(props.regEndDate);
+    return now.value > regEnd;
   } catch (e) {
     console.error('Error calculating expiration:', e);
+    return false;
   }
-
-  return false;
 });
 
-const isDisabled = computed((): boolean => isFull.value || isExpired.value);
+const isNotOpenYet = computed((): boolean => {
+  if (!props.regStartDate) return false;
+  try {
+    const regStart = new Date(props.regStartDate);
+    return now.value < regStart;
+  } catch (e) {
+    console.error('Error calculating not-open status:', e);
+    return false;
+  }
+});
+
+const isDisabled = computed((): boolean => isFull.value || isExpired.value || isNotOpenYet.value);
 
 const handleRegister = (): void => {
-  emit('register', isExpired.value);
+  const status = isExpired.value ? 'expired' : isNotOpenYet.value ? 'notOpen' : '';
+  emit('register', status);
 };
 </script>
 

@@ -37,6 +37,7 @@ export interface ExamRound {
   roundTypeLabel: string;
   availableSeats: number;
   totalSeats: number;
+  regStartDate?: string | undefined;
   regEndDate: string;
   examDate: string;
 }
@@ -92,14 +93,15 @@ export interface RoundExamProps {
   timeRange: string;
   availableSeats: number;
   totalSeats: number;
-  roundTypeLabel?: string;
-  regEndDate?: string;
-  examDate?: string;
-  fullStatusText?: string;
-  availableStatusTextPrefix?: string;
-  availableStatusTextSuffix?: string;
-  fullBtnText?: string;
-  registerBtnText?: string;
+  roundTypeLabel?: string | undefined;
+  regStartDate?: string | undefined;
+  regEndDate?: string | undefined;
+  examDate?: string | undefined;
+  fullStatusText?: string | undefined;
+  availableStatusTextPrefix?: string | undefined;
+  availableStatusTextSuffix?: string | undefined;
+  fullBtnText?: string | undefined;
+  registerBtnText?: string | undefined;
 }
 
 export interface ExamClockProps {

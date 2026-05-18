@@ -70,9 +70,7 @@ export function useRegisterForm(isEditMode: boolean, onSave: (payload: RegisterF
   };
 
   const handleTitleTHChange = (): void => {
-    if (isThailand.value) {
-      formData.value.titleEN = titleMap[formData.value.titleTH] || '';
-    }
+    formData.value.titleEN = titleMap[formData.value.titleTH] || '';
   };
 
   const submitForm = (): void => {

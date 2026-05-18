@@ -47,3 +47,27 @@ export interface TableRequestProps {
   };
   filter?: string | Record<string, unknown> | null | undefined;
 }
+
+export interface PaymentRow {
+  id: number;
+  file_payment_date: string;
+  file_payment_time: string;
+  file_ref: string;
+  file_ref2: string;
+  file_payer: string;
+  file_amount: string;
+  db_ref: string;
+  db_ref2: string;
+  db_name: string;
+  db_amount: string;
+}
+
+export interface SearchRow {
+  id: number;
+  ref1: string;
+  ref2: string;
+  name: string;
+  amount: string;
+  exam_name: string;
+  payment_status: string;
+}

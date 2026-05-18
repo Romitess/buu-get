@@ -223,7 +223,6 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
   }
   .register-container {
     width: 95%;
-    max-width: 480px;
   }
 }
 </style>

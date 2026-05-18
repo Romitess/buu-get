@@ -56,18 +56,24 @@
       :rules="[(val) => !!val || t('profile.requiredNationalId')]"
     />
 
-    <!-- ─── Thai: คำนำหน้า (ไทย) / Foreigner: Nationality ─── -->
+    <!-- ─── Prefix (คำนำหน้า) ─── -->
     <AppFormField
-      v-if="isThai"
       v-model="titleTH"
       type="select"
       :label="t('profile.prefix')"
-      :options="TITLE_TH_OPTIONS"
+      :options="
+        TITLE_TH_OPTIONS.map((opt) => ({
+          label: t(`profile.prefixes.${opt.i18nKey}`),
+          value: opt.value,
+        }))
+      "
       @update:model-value="onTitleTHChange"
       :rules="[(val) => !!val || t('profile.requiredPrefix')]"
     />
+
+    <!-- ─── Nationality (Foreigner Only) ─── -->
     <AppFormField
-      v-else
+      v-if="!isThai"
       v-model="country"
       :label="t('profile.nationality')"
       placeholder="American"
@@ -79,23 +85,6 @@
       v-model="fullName"
       :label="t('profile.fullName')"
       :rules="[(val) => !!val || t('profile.requiredFullName')]"
-    />
-
-    <!-- ─── Prefixes (EN) ─── -->
-    <AppFormField
-      v-if="isThai"
-      v-model="titleEN"
-      :label="t('profile.prefixEn')"
-      readonly
-      input-class="bg-grey-2"
-    />
-    <AppFormField
-      v-else
-      v-model="titleEN"
-      type="select"
-      :label="t('profile.prefixEn')"
-      :options="TITLE_EN_OPTIONS"
-      :rules="[(val) => !!val || t('profile.requiredPrefixEn')]"
     />
 
     <!-- ─── Full Name (EN) ─── -->
@@ -110,7 +99,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { TITLE_TH_OPTIONS, TITLE_EN_OPTIONS } from 'src/utils/form-options';
+import { TITLE_TH_OPTIONS } from 'src/utils/form-options';
 import AppFormField from 'src/components/base/app-form-field.vue';
 
 const { t } = useI18n();
@@ -126,7 +115,6 @@ const nationalId = defineModel<string>('nationalId', { required: true });
 const country = defineModel<string>('country', { required: true });
 const titleTH = defineModel<string>('titleTH', { required: true });
 const fullName = defineModel<string>('fullName', { required: true });
-const titleEN = defineModel<string>('titleEN', { required: true });
 const englishName = defineModel<string>('englishName', { required: true });
 
 const onTitleTHChange = (): void => {
