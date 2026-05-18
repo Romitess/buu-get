@@ -45,6 +45,9 @@
 
       <!-- Right: Auth Actions -->
       <div class="app-header__actions">
+        <!-- Desktop Language Switcher -->
+        <LanguageSwitcher v-if="!$q.screen.lt.md" />
+
         <!-- Logged In State -->
         <template v-if="userStore.isLoggedIn">
           <AppHeaderProfile />
@@ -127,6 +130,23 @@
 
         <q-separator class="q-my-sm" />
 
+        <!-- Mobile Language Selector -->
+        <q-item clickable @click="toggleLanguage">
+          <q-item-section avatar>
+            <q-icon name="language" />
+          </q-item-section>
+          <q-item-section>
+            <div class="row items-center justify-between">
+              <span>{{ locale === 'th' ? 'ภาษา' : 'Language' }}</span>
+              <q-badge outline color="primary" class="q-ml-sm text-weight-bold">
+                {{ locale === 'th' ? 'TH' : 'EN' }}
+              </q-badge>
+            </div>
+          </q-item-section>
+        </q-item>
+
+        <q-separator class="q-my-sm" />
+
         <!-- Mobile Auth -->
         <template v-if="userStore.isLoggedIn">
           <q-item clickable @click="logout">
@@ -168,11 +188,20 @@ import headerLogo from 'src/assets/img/header-buu-get-logo.png';
 
 // Components
 import AppHeaderProfile from './app-header-profile.vue';
+import LanguageSwitcher from './language-switcher.vue';
 
 const userStore = useUserStore();
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
+const { t, locale } = useI18n();
+
+const toggleLanguage = (): void => {
+  const nextLocale = locale.value === 'th' ? 'en-US' : 'th';
+  locale.value = nextLocale;
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('user-locale', nextLocale);
+  }
+};
 
 // Logo source — dynamic import, no hardcoding
 const logoSrc = headerLogo;
