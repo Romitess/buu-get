@@ -95,12 +95,14 @@ import RoundExam from 'src/components/exam/round-exam.vue';
 import DialogConfirm from 'src/components/exam/dialog-confirm.vue';
 import ExamPasscodeInputDialog from 'src/components/exam-passcode-input-dialog.vue';
 import { useExamStore } from 'src/stores/exam.store';
+import { useUserStore } from 'src/stores/user.store';
 import { EXAM_TYPE_SPECIAL } from 'src/constants/exam';
 import type { ExamRound } from 'src/types/exam';
 
 const $q = useQuasar();
 const router = useRouter();
 const examStore = useExamStore();
+const userStore = useUserStore();
 const { t } = useI18n();
 const ROUTES = {
   HISTORY: '/user/exam-history',
@@ -118,7 +120,7 @@ onMounted(async () => {
   await examStore.initSchedule();
 });
 
-const onCalendarResize = (size: { width: number; height: number }) => {
+const onCalendarResize = (size: { width: number; height: number }): void => {
   calendarHeight.value = size.height;
 };
 
@@ -129,7 +131,7 @@ const roundsSectionStyle = computed(() => {
   return {};
 });
 
-const handleRegister = (round: ExamRound, isExpired = false): void => {
+const handleRegister = async (round: ExamRound, isExpired = false): Promise<void> => {
   if (isExpired) {
     $q.notify({
       type: 'negative',
@@ -141,6 +143,19 @@ const handleRegister = (round: ExamRound, isExpired = false): void => {
     });
     return;
   }
+
+  if (!userStore.isLoggedIn) {
+    $q.notify({
+      type: 'warning',
+      message: t('examSchedule.notifications.pleaseLogin'),
+      icon: 'login',
+      position: 'top',
+      timeout: 2500,
+    });
+    await router.push({ name: 'login' });
+    return;
+  }
+
   if (round.availableSeats === 0) {
     $q.notify({
       type: 'negative',
@@ -188,8 +203,8 @@ const onPasscodeConfirm = async (passcode: string): Promise<void> => {
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const onMonthChange = (month: number, year: number): void => {
-  console.log(`เปลี่ยนเดือนเป็น: ${month}/${year}`);
   // ในอนาคต: ดึงข้อมูล scheduleData ใหม่ของเดือนนั้นๆ จาก API
 };
 </script>

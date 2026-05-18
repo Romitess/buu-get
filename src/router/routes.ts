@@ -27,7 +27,19 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/home-page.vue'),
         meta: {
           requiresAuth: false,
-          breadcrumb: [{ label: 'หน้าหลัก', icon: 'home' }],
+          breadcrumb: [{ label: 'navigation.home', icon: 'home' }],
+        },
+      },
+      {
+        path: 'user/exam-schedule',
+        name: 'exam-schedule',
+        component: () => import('pages/user/exam-schedule-page.vue'),
+        meta: {
+          requiresAuth: false,
+          breadcrumb: [
+            { label: 'navigation.home', icon: 'home', to: '/' },
+            { label: 'navigation.selectSession', icon: 'event' },
+          ],
         },
       },
 
@@ -61,24 +73,13 @@ const routes: RouteRecordRaw[] = [
         meta: { requiresAuth: true, roles: [ROLES.CANDIDATE] },
         children: [
           {
-            path: 'exam-schedule',
-            name: 'exam-schedule',
-            component: () => import('pages/user/exam-schedule-page.vue'),
-            meta: {
-              breadcrumb: [
-                { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'เลือกวันและรอบการสอบ', icon: 'event' },
-              ],
-            },
-          },
-          {
             path: 'exam-history',
             name: 'exam-history',
             component: () => import('pages/user/exam-history-page.vue'),
             meta: {
               breadcrumb: [
-                { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'ประวัติการสมัครและสอบ', icon: 'history' },
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.examHistory', icon: 'history' },
               ],
             },
           },
@@ -106,8 +107,8 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/admin/dashboard-page.vue'),
             meta: {
               breadcrumb: [
-                { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'แดชบอร์ด', icon: 'dashboard' },
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.dashboard', icon: 'dashboard' },
               ],
             },
           },
@@ -117,8 +118,8 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/admin/exam-management-page.vue'),
             meta: {
               breadcrumb: [
-                { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'edit_document' },
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.manageExams', icon: 'edit_document' },
               ],
             },
           },
@@ -128,9 +129,13 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/admin/create-exam-page.vue'),
             meta: {
               breadcrumb: [
-                { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
-                { label: 'สร้างรอบสอบ', icon: 'add_circle' },
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                { label: 'navigation.createExam', icon: 'add_circle' },
               ],
             },
           },
@@ -140,9 +145,13 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/admin/edit-exam-page.vue'),
             meta: {
               breadcrumb: [
-                { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
-                { label: 'แก้ไขรอบสอบ', icon: 'edit' },
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                { label: 'navigation.editExam', icon: 'edit' },
               ],
             },
           },
@@ -152,9 +161,13 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/admin/exam-seat-management-page.vue'),
             meta: {
               breadcrumb: [
-                { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
-                { label: 'จัดการที่นั่งสอบ', icon: 'event_seat' },
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                { label: 'navigation.manageSeats', icon: 'event_seat' },
               ],
             },
           },
@@ -164,14 +177,14 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/admin/exam-seat-candidates-page.vue'),
             meta: {
               breadcrumb: [
-                { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'star', to: '/admin/exam-management' },
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.manageExams', icon: 'star', to: '/admin/exam-management' },
                 {
-                  label: 'จัดการที่นั่งสอบ',
+                  label: 'navigation.manageSeats',
                   icon: 'event_seat',
                   to: '/admin/exam-management/:examId/seats',
                 },
-                { label: 'รายชื่อและที่นั่งผู้เข้าสอบ', icon: 'star' },
+                { label: 'navigation.seatCandidates', icon: 'star' },
               ],
             },
           },
@@ -181,9 +194,13 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/admin/exam-registrants-page.vue'),
             meta: {
               breadcrumb: [
-                { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
-                { label: 'การจัดการรายชื่อผู้เข้าสอบ', icon: 'group' },
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                { label: 'navigation.manageRegistrants', icon: 'group' },
               ],
             },
           },
@@ -193,9 +210,13 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/admin/exam-scores-page.vue'),
             meta: {
               breadcrumb: [
-                { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
-                { label: 'จัดการคะแนนสอบ', icon: 'star' },
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                { label: 'navigation.manageScores', icon: 'star' },
               ],
             },
           },
@@ -205,14 +226,18 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/admin/exam-registrant-detail-page.vue'),
             meta: {
               breadcrumb: [
-                { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
+                { label: 'navigation.home', icon: 'home', to: '/' },
                 {
-                  label: 'การจัดการรายชื่อผู้เข้าสอบ',
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                {
+                  label: 'navigation.manageRegistrants',
                   icon: 'group',
                   to: '/admin/exam-management/:examId/registrants',
                 },
-                { label: 'รายละเอียดผู้เข้าสอบ', icon: 'person' },
+                { label: 'navigation.registrantDetail', icon: 'person' },
               ],
             },
           },
@@ -222,9 +247,13 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/admin/exam-attendance-page.vue'),
             meta: {
               breadcrumb: [
-                { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'จัดการรอบสอบ', icon: 'edit_document', to: '/admin/exam-management' },
-                { label: 'ประวัติการเข้าสอบ', icon: 'format_list_bulleted' },
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                { label: 'navigation.examAttendance', icon: 'format_list_bulleted' },
               ],
             },
           },
@@ -234,8 +263,8 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/admin/payment-import-page.vue'),
             meta: {
               breadcrumb: [
-                { label: 'หน้าหลัก', icon: 'home', to: '/' },
-                { label: 'นำเข้าไฟล์การชำระเงิน', icon: 'upload_file' },
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.paymentImport', icon: 'upload_file' },
               ],
             },
           },
@@ -245,13 +274,13 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/admin/fin-check-transcript-page.vue'),
             meta: {
               breadcrumb: [
-                { label: 'หน้าหลัก', icon: 'home', to: '/' },
+                { label: 'navigation.home', icon: 'home', to: '/' },
                 {
-                  label: 'นำเข้าไฟล์การชำระเงิน',
+                  label: 'navigation.paymentImport',
                   icon: 'upload_file',
                   to: '/admin/payment-import',
                 },
-                { label: 'ตรวจสอบข้อมูลการชำระเงิน', icon: 'fact_check' },
+                { label: 'navigation.checkPayment', icon: 'fact_check' },
               ],
             },
           },

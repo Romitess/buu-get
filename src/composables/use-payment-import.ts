@@ -13,6 +13,9 @@ export interface PaymentImportRow {
   importedAt: string;
   importedBy: string;
 }
+// Global State
+export const globalImportedRows = ref<PaymentImportRow[]>([]);
+export const globalSelectedFile = ref<File | null>(null);
 
 /**
  * Composable for the "นำเข้าไฟล์การชำระเงิน" page.
@@ -21,12 +24,13 @@ export interface PaymentImportRow {
 export function usePaymentImport() {
   const userStore = useUserStore();
 
-  // State
-  const importedRows = ref<PaymentImportRow[]>([]);
+  // Reference the global state so existing code works
+  const importedRows = globalImportedRows;
+  const selectedFile = globalSelectedFile;
+
   const isLoading = ref(false);
   const error = ref<string | null>(null);
   const searchQuery = ref('');
-  const selectedFile = ref<File | null>(null);
 
   // ดึงข้อมูลจาก userStore แทนการ Hardcode
   const departmentLabel = ref(userStore.currentUser?.faculty || 'สำนักคอมพิวเตอร์ (82994)');
@@ -74,7 +78,7 @@ export function usePaymentImport() {
       const now = new Date();
       const importTimestamp = formatImportDate(now);
 
-      importedRows.value = dataLines.map((line, idx): PaymentImportRow => {
+      const parsed = dataLines.map((line, idx): PaymentImportRow => {
         const cols = line.split(',').map((c) => c.trim().replace(/^"|"$/g, ''));
         return {
           index: idx + 1,
@@ -88,10 +92,27 @@ export function usePaymentImport() {
           importedBy: currentUserName.value,
         };
       });
+
+      for (const row of parsed) {
+        if (row.applicantId.length > 20) {
+          throw new Error(
+            `Ref 1 (รหัสผู้สมัคร) "${row.applicantId}" ในแถวที่ ${row.index} มีความยาวเกิน 20 ตัวอักษร (สูงสุด 20 ตัวอักษร)`,
+          );
+        }
+        if (row.referenceNo.length > 20) {
+          throw new Error(
+            `Ref 2 (เลขที่อ้างอิง) "${row.referenceNo}" ในแถวที่ ${row.index} มีความยาวเกิน 20 ตัวอักษร (สูงสุด 20 ตัวอักษร)`,
+          );
+        }
+      }
+
+      importedRows.value = parsed;
     } catch (err) {
       console.error('Failed to parse payment file:', err);
-      error.value = 'ไม่สามารถอ่านไฟล์ได้ กรุณาตรวจสอบรูปแบบไฟล์';
+      error.value =
+        err instanceof Error ? err.message : 'ไม่สามารถอ่านไฟล์ได้ กรุณาตรวจสอบรูปแบบไฟล์';
       importedRows.value = [];
+      selectedFile.value = null;
     } finally {
       isLoading.value = false;
     }

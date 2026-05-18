@@ -114,6 +114,7 @@ import { ref, watch } from 'vue';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
+import { useRouter } from 'vue-router';
 
 import BaseTable from 'src/components/shared/base-table.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
@@ -127,18 +128,31 @@ import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 
 const i18n = useI18n();
 const $q = useQuasar();
+const router = useRouter();
 
 const uploadZoneRef = ref<InstanceType<typeof AppFileUploadZone> | null>(null);
 
 const {
   filteredRows,
   isLoading,
+  error,
   searchQuery,
   departmentLabel,
   parseFile,
   clearAllData,
   verifyData,
 } = usePaymentImport();
+
+watch(error, (newVal) => {
+  if (newVal) {
+    $q.notify({
+      type: 'negative',
+      message: newVal,
+      position: 'top',
+    });
+    uploadZoneRef.value?.reset();
+  }
+});
 
 // ── Event Handlers ────────────────────────────────────────
 const onFileSelected = (file: File): void => {
@@ -173,8 +187,9 @@ const handleVerify = (): void => {
   verifyData();
   $q.notify({
     type: 'positive',
-    message: i18n.t('admin.paymentImport.notifications.verifySuccess'),
+    message: i18n.t('admin.paymentImport.notifications.verifySuccess') || 'ตรวจสอบสำเร็จ',
   });
+  void router.push({ name: 'admin-fin-check-transcript' });
 };
 
 // ── Pagination ────────────────────────────────────────────
