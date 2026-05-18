@@ -211,7 +211,7 @@ import FinSaveTranscription from 'src/components/shared/fin-save-transcription.v
 import { globalImportedRows } from 'src/composables/use-payment-import';
 import { fetchMatchedEnrollments } from 'src/services/enrollment.service';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
-import type { PaymentRow } from 'src/types/exam.types';
+import type { PaymentRow } from '../../types/exam.types';
 
 const { t } = useI18n();
 
