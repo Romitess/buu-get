@@ -57,16 +57,19 @@ export default {
     roundTypeLabel: 'General Round',
     fullStatusText: 'No Seats Available',
     expiredStatusText: 'Registration Closed',
+    notOpenStatusText: 'Registration Not Open',
     availableStatusTextPrefix: 'Available ',
     availableStatusTextSuffix: ' Seats',
     fullBtnText: 'Full',
     registerBtnText: 'Register',
     expiredBtnText: 'Registration Closed',
+    notOpenBtnText: 'Not Open Yet',
     notifications: {
       roundFull: 'Sorry, this round is full.',
       registrationSuccess: 'Registration successful. Please pay within the time limit.',
       passcodeSuccess: 'Passcode verified. Registration successful.',
       expired: 'Sorry, this round is closed for registration.',
+      notOpen: 'Sorry, registration for this round has not started yet.',
       pleaseLogin: 'Please log in before registering for the exam.',
     },
     dialogConfirm: {
@@ -189,6 +192,7 @@ export default {
     thaidRegister: 'Sign up with ThaID',
     personalInfo: 'Personal Information',
     or: 'or',
+    next: 'Next',
   },
   carousel: {
     page1: {
@@ -436,6 +440,9 @@ export default {
       success: 'Login successful',
       failed: 'Incorrect email or password',
       error: 'Connection error',
+      registerSuccess: 'Registration successful! Please login',
+      registerFailed: 'An error occurred during registration',
+      connectionError: 'Connection error occurred',
     },
   },
   navigation: {

@@ -163,6 +163,7 @@ export default {
     thaidRegister: 'สมัครสมาชิกด้วย ThaID',
     personalInfo: 'ข้อมูลส่วนตัว',
     or: 'หรือ',
+    next: 'ถัดไป',
   },
   payment: {
     dialog: {
@@ -181,16 +182,19 @@ export default {
     roundTypeLabel: 'รอบทั่วไป',
     fullStatusText: 'ไม่มีที่ว่าง',
     expiredStatusText: 'หมดเขตสมัครแล้ว',
+    notOpenStatusText: 'ยังไม่เปิดรับสมัคร',
     availableStatusTextPrefix: 'ว่าง ',
     availableStatusTextSuffix: ' ที่นั่ง',
     fullBtnText: 'เต็ม (Full)',
     registerBtnText: 'ลงทะเบียนสอบ',
     expiredBtnText: 'หมดเขตลงทะเบียน',
+    notOpenBtnText: 'ยังไม่เปิดรับสมัคร',
     notifications: {
       roundFull: 'ขออภัย รอบสอบนี้ไม่มีที่ว่างแล้ว (เต็ม)',
       registrationSuccess: 'ลงทะเบียนสอบสำเร็จ กรุณาชำระเงินภายในเวลาที่กำหนด',
       passcodeSuccess: 'ตรวจสอบรหัสผ่านสำเร็จ ลงทะเบียนสอบเรียบร้อย',
       expired: 'ขออภัย หมดเขตลงทะเบียนแล้ว (เกินระยะเวลาการเปิดรับสมัคร)',
+      notOpen: 'ขออภัย ยังไม่เปิดรับสมัครสอบรอบนี้ (อยู่นอกช่วงเวลาการเปิดรับสมัคร)',
       pleaseLogin: 'กรุณาเข้าสู่ระบบก่อนสมัครสอบ',
     },
     dialogConfirm: {
@@ -600,6 +604,9 @@ export default {
       success: 'เข้าสู่ระบบสำเร็จ',
       failed: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
       error: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+      registerSuccess: 'สมัครสมาชิกสำเร็จ! โปรดเข้าสู่ระบบ',
+      registerFailed: 'เกิดข้อผิดพลาดในการสมัครสมาชิก',
+      connectionError: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
     },
   },
   navigation: {

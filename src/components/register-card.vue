@@ -12,33 +12,50 @@
       </div>
     </div>
 
+    <!-- User Type Toggle -->
+    <div class="type-toggle q-mb-lg">
+      <button
+        type="button"
+        class="toggle-btn"
+        :class="{ active: userType === 'thai' }"
+        @click="userType = 'thai'"
+      >
+        {{ $t('auth.thaiPerson') }}
+      </button>
+      <button
+        type="button"
+        class="toggle-btn"
+        :class="{ active: userType === 'foreigner' }"
+        @click="userType = 'foreigner'"
+      >
+        {{ $t('auth.foreigner') }}
+      </button>
+      <div class="toggle-slider" :class="{ right: userType === 'foreigner' }"></div>
+    </div>
+
     <!-- Form -->
-    <q-form @submit.prevent="onSubmit">
+    <q-form @submit.prevent="onSubmit" class="register-form">
       <!-- Email -->
-      <div class="q-mb-md">
-        <div class="text-body2 text-weight-medium q-mb-xs">
-          {{ $t('profile.emailUsername') }}
-        </div>
+      <div class="field-block">
+        <label>{{ $t('profile.emailUsername') }}</label>
         <q-input
           v-model="email"
           outlined
           dense
           :placeholder="$t('profile.emailPlaceholder')"
-          class="custom-input"
+          class="field-input"
         />
       </div>
 
       <!-- Password -->
-      <div class="q-mb-md">
-        <div class="text-body2 text-weight-medium q-mb-xs">
-          {{ $t('profile.passwordFormat') }}
-        </div>
+      <div class="field-block">
+        <label>{{ $t('profile.passwordFormat') }}</label>
         <q-input
           v-model="password"
           :type="showPassword ? 'text' : 'password'"
           outlined
           dense
-          class="custom-input"
+          class="field-input"
         >
           <template v-slot:append>
             <q-icon
@@ -46,23 +63,21 @@
               class="cursor-pointer"
               @click="showPassword = !showPassword"
               color="grey-6"
-              size="20px"
+              size="18px"
             />
           </template>
         </q-input>
       </div>
 
       <!-- Confirm Password -->
-      <div class="q-mb-lg">
-        <div class="text-body2 text-weight-medium q-mb-xs">
-          {{ $t('profile.confirmPassword') }}
-        </div>
+      <div class="field-block">
+        <label>{{ $t('profile.confirmPassword') }}</label>
         <q-input
           v-model="confirmPassword"
           :type="showConfirmPassword ? 'text' : 'password'"
           outlined
           dense
-          class="custom-input"
+          class="field-input"
         >
           <template v-slot:append>
             <q-icon
@@ -70,38 +85,36 @@
               class="cursor-pointer"
               @click="showConfirmPassword = !showConfirmPassword"
               color="grey-6"
-              size="20px"
+              size="18px"
             />
           </template>
         </q-input>
       </div>
 
-      <!-- Divider -->
-      <div class="row items-center q-mb-md">
-        <q-separator class="col" color="grey-4" />
-        <div class="q-px-sm text-grey-6 text-body2 font-weight-medium">
-          {{ $t('profile.or') }}
+      <Transition name="expand">
+        <div v-if="userType === 'thai'" class="thaid-section">
+          <div class="or-divider">
+            <span>{{ $t('profile.or') }}</span>
+          </div>
+          <q-btn class="full-width thaid-btn q-mb-lg" unelevated no-caps>
+            <q-icon name="fingerprint" size="xs" class="q-mr-sm" />
+            {{ $t('profile.thaidRegister') }}
+          </q-btn>
         </div>
-        <q-separator class="col" color="grey-4" />
-      </div>
-
-      <!-- ThaID Button -->
-      <q-btn class="full-width thaid-btn q-mb-lg" no-caps unelevated>
-        <q-icon name="fingerprint" size="xs" class="q-mr-sm" />
-        {{ $t('profile.thaidRegister') }}
-      </q-btn>
+      </Transition>
 
       <!-- Bottom Action Buttons: Cancel and Next -->
       <div class="row q-col-gutter-md">
         <div class="col-6">
           <q-btn
+            type="button"
             color="grey-3"
             text-color="black"
             class="full-width submit-btn btn-cancel"
             :label="$t('profile.cancel')"
             no-caps
             unelevated
-            @click="goToLogin"
+            @click="onCancel"
           />
         </div>
         <div class="col-6">
@@ -138,18 +151,18 @@ const { locale } = useI18n();
 const router = useRouter();
 
 const userType = ref<'thai' | 'foreigner'>('thai');
-
-// Watch userType and change locale dynamically
-watch(userType, (newVal) => {
-  locale.value = newVal === 'thai' ? 'th' : 'en-US';
-});
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
-const goToLogin = (): void => {
+// Watch userType and change locale dynamically
+watch(userType, (newVal) => {
+  locale.value = newVal === 'thai' ? 'th' : 'en-US';
+});
+
+const onCancel = (): void => {
   void router.push('/login');
 };
 
@@ -168,7 +181,10 @@ const onSubmit = (): void => {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+// ============================================================
+// Card Shell
+// ============================================================
 .register-card {
   width: 100%;
   max-width: 480px;
@@ -182,57 +198,253 @@ const onSubmit = (): void => {
   object-fit: contain;
 }
 
-/* User Type Toggle (hidden in template but kept just in case) */
-.user-type-toggle {
+/* User Type Toggle */
+.type-toggle {
+  position: relative;
   display: flex;
   background-color: var(--neutral-100);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 4px;
-}
-.toggle-btn {
-  flex: 1;
-  text-align: center;
-  padding: 10px 0;
-  border-radius: 8px;
-  color: var(--neutral-500);
-  font-weight: 600;
-  font-size: 15px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-.toggle-btn.active {
-  background-color: var(--surface-card);
-  color: var(--primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
 }
 
-/* ThaID Button - Premium Deep Navy */
+.toggle-slider {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: var(--surface-card);
+  border-radius: 9px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-slider.right {
+  transform: translateX(100%);
+}
+
+.toggle-btn {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--neutral-500);
+  cursor: pointer;
+  transition: color 0.25s;
+  border-radius: 9px;
+}
+
+.toggle-btn.active {
+  color: var(--primary);
+}
+
+// ============================================================
+// Header
+// ============================================================
+.card-header {
+  text-align: center;
+  margin-bottom: 16px;
+
+  .crest-img {
+    display: block;
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    margin: 0 auto 12px;
+    filter: drop-shadow(0 2px 8px rgba(13, 71, 161, 0.12));
+  }
+
+  h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--neutral-900);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+}
+
+// ============================================================
+// Type Toggle
+// ============================================================
+.type-toggle {
+  position: relative;
+  display: flex;
+  background: var(--neutral-100);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 16px;
+
+  .toggle-slider {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    height: calc(100% - 8px);
+    background: var(--surface-card);
+    border-radius: 9px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.right {
+      transform: translateX(100%);
+    }
+  }
+
+  .toggle-btn {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    padding: 10px 0;
+    border: none;
+    background: transparent;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--neutral-400);
+    cursor: pointer;
+    transition: color 0.25s;
+    border-radius: 9px;
+
+    &.active {
+      color: var(--primary);
+    }
+  }
+}
+
+// ============================================================
+// Form & Fields
+// ============================================================
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field-block {
+  label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--neutral-900);
+    margin-bottom: 6px;
+  }
+}
+
+.field-input {
+  :deep(.q-field__control) {
+    background: var(--neutral-50);
+    border-radius: 10px;
+    border-color: var(--neutral-200);
+    transition: all 0.2s;
+  }
+
+  :deep(.q-field__control:hover::before) {
+    border-color: var(--neutral-400);
+  }
+
+  :deep(.q-field--focused .q-field__control::before) {
+    border-color: var(--primary);
+    border-width: 1.5px;
+  }
+}
+
+// ============================================================
+// ThaID Section
+// ============================================================
+.thaid-section {
+  overflow: hidden;
+}
+
 .thaid-btn {
+  width: 100%;
   background-color: var(--thaid-bg) !important;
   color: var(--text-on-primary) !important;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 12px;
+  font-size: 1rem;
   font-weight: 600;
   padding: 12px 0;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
+
 .thaid-btn:hover {
   filter: brightness(1.12);
   box-shadow: 0 8px 20px rgba(var(--thaid-bg-rgb), 0.2) !important;
 }
+.or-divider {
+  display: flex;
+  align-items: center;
+  margin: 10px 0 14px;
+  gap: 12px;
 
-/* Form Inputs */
-.custom-input :deep(.q-field__control) {
-  border-radius: 8px;
-  border-color: var(--neutral-200);
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--neutral-200);
+  }
+
+  span {
+    font-size: 0.78rem;
+    color: var(--neutral-400);
+    white-space: nowrap;
+    font-weight: 500;
+  }
 }
 
-/* Submit Button & Cancel Button */
+// ============================================================
+// Action Buttons Row
+// ============================================================
+.cancel-btn {
+  width: 100%;
+  height: 52px;
+  background: var(--neutral-100) !important;
+  color: var(--neutral-700) !important;
+  border-radius: 12px !important;
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition: all 0.25s;
+
+  &:hover {
+    background: var(--neutral-200) !important;
+    transform: translateY(-1px);
+  }
+}
+
 .submit-btn {
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  padding: 12px 0;
+  width: 100%;
+  height: 52px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%) !important;
+  color: var(--text-on-primary) !important;
+  border-radius: 12px !important;
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(13, 71, 161, 0.2) !important;
+  transition: all 0.25s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 28px rgba(13, 71, 161, 0.3) !important;
+  }
+}
+
+// ============================================================
+// Transitions
+// ============================================================
+.expand-enter-active,
+.expand-leave-active {
+  transition: all 0.3s ease;
+  max-height: 200px;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
 }
 
 .btn-cancel {

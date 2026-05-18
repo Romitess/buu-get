@@ -1,92 +1,50 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="register-layout">
-    <!-- Public Header -->
-    <q-header class="bg-white text-black shadow-1">
-      <q-toolbar class="q-px-xl q-py-sm flex justify-between items-center">
-        <!-- Logo -->
-        <div class="row items-center cursor-pointer" @click="$router.push('/')">
-          <div class="text-h6 text-weight-bold text-negative brand-logo-text">
-            BUU-GET
-            <div class="text-caption text-weight-medium text-red-8 brand-logo-sub">
-              BURAPHA UNIVERSITY
-            </div>
-          </div>
-        </div>
+  <q-page class="register-page flex flex-center">
+    <!-- ===== Global Background Decorations ===== -->
+    <div class="geo geo-1"></div>
+    <div class="geo geo-2"></div>
+    <div class="geo geo-3"></div>
+    <div class="geo geo-4"></div>
+    <div class="geo geo-5"></div>
+    <div class="geo geo-6"></div>
+    <div class="grid-lines"></div>
 
-        <!-- Desktop Menu -->
-        <div class="row items-center q-gutter-xl text-weight-medium text-body1 gt-sm text-grey-9">
-          <div class="cursor-pointer" @click="$router.push('/')">หน้าหลัก</div>
-          <div class="cursor-pointer row items-center">
-            รายการสอบ <q-icon name="keyboard_arrow_down" size="sm" class="q-ml-xs" />
-          </div>
-        </div>
+    <!-- ─── Step 1: Registration Card (Email + Password) ─── -->
+    <template v-if="currentStep === 'credentials'">
+      <div class="form-center">
+        <RegisterCard @register="handleRegister" />
+      </div>
+    </template>
 
-        <!-- Auth Buttons -->
-        <div class="row items-center q-gutter-lg">
-          <div
-            class="cursor-pointer text-weight-medium text-body1 text-grey-9"
-            @click="$router.push('/login')"
-          >
-            เข้าสู่ระบบ
-          </div>
-          <q-btn
-            color="primary"
-            label="สมัครสมาชิก"
-            no-caps
-            unelevated
-            class="text-weight-bold btn-register"
-            @click="$router.push('/register')"
-          />
-        </div>
-      </q-toolbar>
-    </q-header>
-
-    <q-page-container>
-      <q-page class="register-page-bg flex flex-center q-py-xl">
-        <div
-          class="register-container row no-wrap items-stretch"
-          :class="{ 'step-profile': currentStep === 'profile' }"
-        >
-          <div class="form-panel flex flex-center bg-white">
-            <transition name="fade" mode="out-in">
-              <div v-if="currentStep === 'credentials'" key="credentials" class="full-width">
-                <RegisterCard @register="handleRegister" />
-              </div>
-              <div v-else key="profile" class="full-width">
-                <RegisterAndEditProfile
-                  :initial-edit-mode="false"
-                  :is-thai="isThai"
-                  :credentials="credentials"
-                  @close="goBackToCredentials"
-                  @save="handleSave"
-                />
-              </div>
-            </transition>
-          </div>
-        </div>
-      </q-page>
-    </q-page-container>
-
-    <!-- Footer -->
-    <q-footer class="bg-white text-black">
-      <FooterCredits variant="white" />
-    </q-footer>
-  </q-layout>
+    <!-- ─── Step 2: Profile Form (Identity + Contact Info) ─── -->
+    <template v-if="currentStep === 'profile'">
+      <div class="profile-form-container">
+        <RegisterAndEditProfile
+          :initial-edit-mode="false"
+          :is-thai="isThai"
+          :credentials="credentials"
+          @close="goBackToCredentials"
+          @save="handleSave"
+        />
+      </div>
+    </template>
+  </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import RegisterCard from 'src/components/register-card.vue';
 import type { RegisterCredentials } from 'src/components/register-card.vue';
 import type { RegisterFormData } from 'src/types/register';
 import RegisterAndEditProfile from 'src/components/register-and-edit-profile.vue';
-import FooterCredits from 'src/components/footer/footer-credits.vue';
 import { useAuthStore } from 'src/stores/auth.store';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 
 type Step = 'credentials' | 'profile';
 
+const { t } = useI18n();
 const $q = useQuasar();
 const router = useRouter();
 const authStore = useAuthStore();
@@ -126,21 +84,21 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
     if (response.success) {
       $q.notify({
         type: 'positive',
-        message: 'สมัครสมาชิกสำเร็จ! โปรดเข้าสู่ระบบ',
+        message: t('auth.notify.registerSuccess'),
         position: 'top',
       });
       await router.push('/login');
     } else {
       $q.notify({
         type: 'negative',
-        message: response.message || 'เกิดข้อผิดพลาดในการสมัครสมาชิก',
+        message: response.message || t('auth.notify.registerFailed'),
         position: 'top',
       });
     }
   } catch {
     $q.notify({
       type: 'negative',
-      message: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+      message: t('auth.notify.connectionError'),
       position: 'top',
     });
   } finally {
@@ -149,126 +107,72 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 };
 </script>
 
-<style scoped>
-.register-layout {
-  position: relative;
-}
-
-.brand-logo-text {
-  line-height: 1.1;
-}
-
-.brand-logo-sub {
-  font-size: 10px;
-}
-
-.btn-register {
-  border-radius: var(--radius-sm);
-  padding: 6px 24px;
-}
-
-.register-page-bg {
+<style scoped lang="scss">
+// ============================================================
+// Page Shell
+// ============================================================
+.register-page {
+  min-height: calc(100vh - var(--header-height));
+  font-family: 'Inter', 'Noto Sans Thai', sans-serif;
   background: linear-gradient(
     145deg,
     var(--primary-dark) 0%,
     var(--primary) 55%,
     var(--secondary-dark) 100%
   );
-  min-height: 100vh;
-}
-
-.register-container {
-  width: 94%;
-  max-width: 600px; /* Centered card width in Step 1 */
-  margin: 0 auto;
-  min-height: 740px; /* Height of Step 1 */
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.register-container.step-profile {
-  max-width: 1400px; /* Stretches wide in Step 2 */
-  min-height: 780px; /* Height of Step 2 */
-}
-
-/* Panel สีขาวฝั่งขวา (ฟอร์ม) */
-.form-panel {
-  flex: 0 0 100%;
-  max-width: 100%;
-  padding: 2.5rem 3rem;
-  z-index: 2;
   position: relative;
-  border-radius: 12px;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 40px 16px 80px;
 }
 
-.register-container.step-profile .form-panel {
-  flex: 0 0 100%;
-  max-width: 100%;
-  margin-left: 0;
-  border-radius: 12px;
-  box-shadow: none;
+.form-center {
+  width: 100%;
+  max-width: 540px;
+  position: relative;
+  z-index: 1;
+  animation: fadeIn 0.7s ease-out;
 }
 
-/* Strip profile card styling inside register container step 2 */
-.register-container .profile-card {
-  border: none !important;
-  background: transparent !important;
-  padding: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  box-shadow: none !important;
-}
-
-/* Let the inputs and grid columns fully expand and fill the white panel */
-.register-container .profile-card .q-px-xl {
-  padding-left: 12px !important;
-  padding-right: 12px !important;
-}
-
-.register-container .profile-card .q-pa-xl {
-  padding: 0 !important;
-}
-
-.register-container .profile-card .q-mb-lg {
-  margin-bottom: 20px !important;
-}
-
-.register-container .profile-card .q-mt-xl {
-  margin-top: 24px !important;
-}
-
-/* Premium Slide-Fade Transition */
-.fade-enter-active,
-.fade-leave-active {
-  transition:
-    opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.fade-leave-active {
-  position: absolute;
-  left: 3rem;
-  right: 3rem;
-  top: 2.5rem;
-}
-.fade-enter-from {
-  opacity: 0;
-  transform: translateX(40px);
-}
-.fade-leave-to {
-  opacity: 0;
-  transform: translateX(-40px);
-}
-
-/* Mobile Responsive */
-@media (max-width: 1023px) {
-  .form-panel {
-    padding: 2rem 1.5rem;
+    <!-- ─── Step 2: Profile Form (Identity + Contact Info) ─── -->
+    <template v-if="currentStep === 'profile'">
+      <div class="profile-form-container">
+        <RegisterAndEditProfile
+          :initial-edit-mode="false"
+          :is-thai="isThai"
+          :credentials="credentials"
+          @close="goBackToCredentials"
+          @save="handleSave"
+        />
+      </div>
+    </template>
+  </q-page>
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.12;
   }
-  .register-container {
-    width: 95%;
+  50% {
+    transform: scale(1.1);
+    opacity: 0.18;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: rotate(45deg) translateY(0);
+  }
+  50% {
+    transform: rotate(45deg) translateY(-14px);
   }
 }
 </style>

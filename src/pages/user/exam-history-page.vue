@@ -210,9 +210,8 @@ const handlePay = (exam: ExamHistoryItem): void => {
   showPaymentDialog.value = true;
 };
 
-const handleSaveQR = (): void => {
-  // TODO: download the payment QR once the backend exposes its image URL
-  // (AppPaymentDialog currently renders a static placeholder QR).
+const handleSaveQR = () => {
+  // TODO: Logic to save/download QR image
 };
 
 const handleCancel = (exam: ExamHistoryItem): void => {
@@ -229,6 +228,27 @@ const handleConfirmCancel = (): void => {
 </script>
 
 <style scoped lang="scss">
+.page-header {
+  margin-top: var(--space-lg);
+  .page-title {
+    font-size: var(--font-size-h1);
+    font-weight: var(--font-weight-black);
+    line-height: 1.4;
+    color: var(--text-primary);
+    margin: 0 0 var(--space-sm) 0;
+  }
+  .page-subtitle {
+    font-family: 'Sarabun', sans-serif;
+    font-size: var(--font-size-body);
+    color: var(--text-primary);
+    font-weight: var(--font-weight-black);
+    max-width: 900px;
+    line-height: 1.6;
+    margin: 0;
+    letter-spacing: 0;
+  }
+}
+
 .section-title {
   color: var(--text-primary);
   border-bottom: 1px solid var(--border-color);

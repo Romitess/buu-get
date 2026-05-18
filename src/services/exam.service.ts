@@ -55,6 +55,7 @@ export interface FundSource {
   FS_ID: number;
   FS_NAME: string;
   FS_ACCOUNT_CODE: string;
+  FS_FACULTY?: string;
 }
 
 export interface ExamLocationOption {
@@ -108,6 +109,7 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
           roundTypeLabel: exam.EXAM_TYPE || EXAM_TYPE_GENERAL,
           availableSeats: (session.SS_CAPACITY || 0) - (session.ENROLLMENTS?.length || 0),
           totalSeats: session.SS_CAPACITY || 0,
+          regStartDate: exam.EXAM_REG_START_DATE,
           regEndDate: exam.EXAM_REG_END_DATE,
           examDate: formatBackendDate(exam.EXAM_DATE),
         };
