@@ -147,6 +147,7 @@ export function useExamSeatCandidates() {
     sessionTime,
     sessionLocation,
     sessionCapacity,
+    sessionEnrollments,
     fetchData,
   };
 }

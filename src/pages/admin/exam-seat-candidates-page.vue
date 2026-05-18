@@ -82,17 +82,27 @@
           </template>
         </BaseTable>
       </main>
+
+      <!-- Hidden container for capturing voucher image -->
+      <div style="position: absolute; left: -9999px; top: -9999px; overflow: hidden; width: 800px">
+        <div id="capture-voucher-target">
+          <TestVoucherReport v-if="renderingVoucherData" :data="renderingVoucherData" />
+        </div>
+      </div>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import DialogIssueTicket from 'src/components/exam/dialog-issue-ticket.vue';
+import TestVoucherReport from 'src/components/test-voucher-report.vue';
 
 import BaseTable from 'src/components/shared/base-table.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
@@ -104,8 +114,10 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import { useExamSeatCandidates } from 'src/composables/use-exam-seat-candidates';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
+import type { VoucherData } from 'src/types/voucher';
+import { createVoucherFromEnrollment, sendVoucherEmail } from 'src/services/voucher.service';
 import { formatThaiLongDate } from 'src/utils/thai-date';
-import { EXAM_TYPE_GENERAL } from 'src/constants/exam';
+import { EXAM_TYPE_GENERAL, INTERNAL_EXAM_TYPE_GENERAL } from 'src/constants/exam';
 
 const route = useRoute();
 const i18n = useI18n();
@@ -122,8 +134,11 @@ const {
   sessionTime,
   sessionLocation,
   sessionCapacity,
+  sessionEnrollments,
   fetchData,
 } = useExamSeatCandidates();
+
+const renderingVoucherData = ref<VoucherData | null>(null);
 
 // Resolves a localized month name by 0-based index from i18n (type-safe, no cast)
 const getMonthName = (monthIndex: number): string => i18n.t(`common.months[${monthIndex}]`);
@@ -131,6 +146,124 @@ const getMonthName = (monthIndex: number): string => i18n.t(`common.months[${mon
 const examDateLabel = computed((): string =>
   exam.value ? formatThaiLongDate(exam.value.EXAM_DATE, getMonthName) : '-',
 );
+
+const startIssuingTickets = async (): Promise<void> => {
+  if (!sessionEnrollments.value || sessionEnrollments.value.length === 0) {
+    $q.notify({
+      type: 'warning',
+      message: 'ไม่พบรายชื่อผู้เข้าสอบในรอบนี้',
+      position: 'top',
+      timeout: 2500,
+    });
+    return;
+  }
+
+  $q.loading.show({
+    message: 'กำลังเริ่มต้นออกบัตรประจำตัวสอบและจัดส่งอีเมล...',
+  });
+
+  try {
+    for (let i = 0; i < sessionEnrollments.value.length; i++) {
+      const enrollment = sessionEnrollments.value[i];
+      if (!enrollment) continue;
+
+      const prefix = enrollment.USER?.PROFILE?.userTitleTh || '';
+      const fullname = enrollment.USER?.PROFILE?.userFullnameTh || '';
+      const fullName = `${prefix}${fullname}`.trim() || 'ผู้สมัครสอบ';
+
+      $q.loading.show({
+        message: `กำลังออกบัตรประจำตัวสอบของ ${fullName} (${i + 1}/${sessionEnrollments.value.length})...`,
+      });
+
+      const voucher = await createVoucherFromEnrollment(enrollment.ERM_ID);
+      const voucherNo = voucher.VC_CODE;
+
+      const studentId =
+        enrollment.USER?.PROFILE?.userEducation || enrollment.USER?.USER_NATIONAL_ID || '-';
+
+      const examName = exam.value?.EXAM_NAME || 'BUU-GET Exam';
+      const examDate = examDateLabel.value;
+      const examTime = sessionTime.value;
+
+      const rawType = exam.value?.EXAM_TYPE;
+      const examType = rawType === INTERNAL_EXAM_TYPE_GENERAL ? 'ทั่วไป' : 'พิเศษ';
+
+      const location = sessionLocation.value;
+      const seatNo = enrollment.ERM_SEAT_NUMBER || '-';
+
+      renderingVoucherData.value = {
+        id: enrollment.ERM_ID,
+        fullName,
+        studentId,
+        examName,
+        examDate,
+        examTime,
+        examType,
+        location,
+        seatNo,
+        voucherNo,
+      };
+
+      await nextTick();
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      const element = document.getElementById('capture-voucher-target');
+      if (!element) {
+        throw new Error('Capture target element not found');
+      }
+
+      const canvas = await html2canvas(element, {
+        useCORS: true,
+        scale: 2,
+        backgroundColor: '#ffffff',
+      });
+      const imageDataUrl = canvas.toDataURL('image/png');
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height],
+      });
+      pdf.addImage(imageDataUrl, 'PNG', 0, 0, canvas.width, canvas.height);
+      const pdfDataUrl = pdf.output('datauristring');
+
+      $q.loading.show({
+        message: `กำลังจัดส่งอีเมลบัตรประจำตัวสอบไปยัง ${enrollment.USER.USER_EMAIL}...`,
+      });
+
+      await sendVoucherEmail({
+        email: enrollment.USER.USER_EMAIL,
+        fullName,
+        examName,
+        seatNo,
+        voucherNo,
+        imageDataUrl: pdfDataUrl,
+      });
+    }
+
+    $q.notify({
+      type: 'positive',
+      message: 'ออกบัตรประจำตัวและส่งอีเมลหาผู้เข้าสอบทุกคนสำเร็จเรียบร้อยแล้ว!',
+      icon: 'check_circle',
+      position: 'top',
+      timeout: 3000,
+      actions: [{ icon: 'close', color: 'white' }],
+    });
+  } catch (error) {
+    console.error('Failed to issue tickets:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'เกิดข้อผิดพลาดในการออกบัตรหรือส่งอีเมล กรุณาลองใหม่อีกครั้ง',
+      icon: 'report_problem',
+      position: 'top',
+      timeout: 3500,
+      actions: [{ icon: 'close', color: 'white' }],
+    });
+  } finally {
+    renderingVoucherData.value = null;
+    $q.loading.hide();
+  }
+};
 
 const handlePrintVoucher = (): void => {
   const currentSession = sessions.value.find((s) => s.SS_ID === selectedSessionId.value);
@@ -147,8 +280,7 @@ const handlePrintVoucher = (): void => {
       },
     },
   }).onOk(() => {
-    // TODO: trigger backend ticket generation for selectedSessionId.value
-    // once the endpoint is available.
+    void startIssuingTickets();
   });
 };
 
