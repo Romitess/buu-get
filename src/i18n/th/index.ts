@@ -113,6 +113,7 @@ export default {
     phonePlaceholder: 'XXX-XXX-XXXX',
     back: 'ย้อนกลับ',
     cancel: 'ยกเลิก',
+    next: 'ถัดไป',
     save: 'บันทึก',
     backToLogin: 'กลับสู่หน้าล็อกอิน',
     saveEdit: 'บันทึกข้อมูลส่วนตัว',

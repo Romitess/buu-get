@@ -42,32 +42,28 @@
     </q-header>
 
     <q-page-container>
-      <q-page class="register-page-bg flex flex-center">
-        <!-- ─── Step 1: Registration Card (Email + Password) ─── -->
-        <template v-if="currentStep === 'credentials'">
-          <div class="register-container row no-wrap items-stretch">
-            <!-- Left Side (Logo) - Blue Panel -->
-            <div class="logo-panel flex flex-center bg-primary">
-              <img src="~assets/img/buu-get-logo.png" alt="BUU-GET Logo" class="large-logo" />
-            </div>
-
-            <!-- Right Side (Register Form) - White Panel -->
-            <div class="form-panel flex flex-center bg-white">
-              <RegisterCard @register="handleRegister" />
-            </div>
+      <q-page class="register-page-bg flex flex-center q-py-xl">
+        <div
+          class="register-container row no-wrap items-stretch"
+          :class="{ 'step-profile': currentStep === 'profile' }"
+        >
+          <div class="form-panel flex flex-center bg-white">
+            <transition name="fade" mode="out-in">
+              <div v-if="currentStep === 'credentials'" key="credentials" class="full-width">
+                <RegisterCard @register="handleRegister" />
+              </div>
+              <div v-else key="profile" class="full-width">
+                <RegisterAndEditProfile
+                  :initial-edit-mode="false"
+                  :is-thai="isThai"
+                  :credentials="credentials"
+                  @close="goBackToCredentials"
+                  @save="handleSave"
+                />
+              </div>
+            </transition>
           </div>
-        </template>
-
-        <!-- ─── Step 2: Profile Form (Identity + Contact Info) ─── -->
-        <template v-if="currentStep === 'profile'">
-          <RegisterAndEditProfile
-            :initial-edit-mode="false"
-            :is-thai="isThai"
-            :credentials="credentials"
-            @close="goBackToCredentials"
-            @save="handleSave"
-          />
-        </template>
+        </div>
       </q-page>
     </q-page-container>
 
@@ -172,54 +168,104 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 }
 
 .register-page-bg {
-  background-color: var(--surface-page);
+  background: linear-gradient(
+    145deg,
+    var(--primary-dark) 0%,
+    var(--primary) 55%,
+    var(--secondary-dark) 100%
+  );
   min-height: 100vh;
 }
 
 .register-container {
   width: 94%;
-  max-width: 1100px;
+  max-width: 600px; /* Centered card width in Step 1 */
   margin: 0 auto;
-  min-height: 580px;
-  border-radius: 24px;
+  min-height: 740px; /* Height of Step 1 */
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: var(--shadow-lg);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Panel สีน้ำเงินฝั่งซ้าย (โลโก้) */
-.logo-panel {
-  flex: 1;
-  padding: 2rem;
-}
-
-.large-logo {
-  max-width: 80%;
-  max-height: 60vh;
-  object-fit: contain;
+.register-container.step-profile {
+  max-width: 1400px; /* Stretches wide in Step 2 */
+  min-height: 780px; /* Height of Step 2 */
 }
 
 /* Panel สีขาวฝั่งขวา (ฟอร์ม) */
 .form-panel {
-  flex: 0 0 52%;
-  max-width: 52%;
+  flex: 0 0 100%;
+  max-width: 100%;
   padding: 2.5rem 3rem;
   z-index: 2;
-  border-top-left-radius: 36px;
-  border-bottom-left-radius: 36px;
-  margin-left: -32px;
-  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.15);
+  position: relative;
+  border-radius: 12px;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ซ่อนโลโก้ด้านซ้ายในหน้าจอมือถือ */
+.register-container.step-profile .form-panel {
+  flex: 0 0 100%;
+  max-width: 100%;
+  margin-left: 0;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+/* Strip profile card styling inside register container step 2 */
+.register-container .profile-card {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-shadow: none !important;
+}
+
+/* Let the inputs and grid columns fully expand and fill the white panel */
+.register-container .profile-card .q-px-xl {
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+.register-container .profile-card .q-pa-xl {
+  padding: 0 !important;
+}
+
+.register-container .profile-card .q-mb-lg {
+  margin-bottom: 20px !important;
+}
+
+.register-container .profile-card .q-mt-xl {
+  margin-top: 24px !important;
+}
+
+/* Premium Slide-Fade Transition */
+.fade-enter-active,
+.fade-leave-active {
+  transition:
+    opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fade-leave-active {
+  position: absolute;
+  left: 3rem;
+  right: 3rem;
+  top: 2.5rem;
+}
+.fade-enter-from {
+  opacity: 0;
+  transform: translateX(40px);
+}
+.fade-leave-to {
+  opacity: 0;
+  transform: translateX(-40px);
+}
+
+/* Mobile Responsive */
 @media (max-width: 1023px) {
-  .logo-panel {
-    display: none;
-  }
   .form-panel {
-    flex: 0 0 100%;
-    max-width: 100%;
-    border-radius: 24px;
-    margin-left: 0;
+    padding: 2rem 1.5rem;
   }
   .register-container {
     width: 95%;

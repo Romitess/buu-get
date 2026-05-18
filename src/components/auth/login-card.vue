@@ -191,7 +191,7 @@ const onSubmit = async () => {
   width: 100%;
   max-width: 420px;
   background: var(--surface-card);
-  border-radius: 28px;
+  border-radius: 12px;
   padding: 40px 36px 36px;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.08),

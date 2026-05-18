@@ -9,47 +9,281 @@
     <div class="geo geo-6"></div>
     <div class="grid-lines"></div>
 
-    <!-- ===== LEFT PANEL: Brand & Visual ===== -->
-    <div class="left-panel">
+    <!-- ===== LEFT PANEL: Brand & Visual (always in place) ===== -->
+    <div class="left-panel" :class="{ hidden: panelPhase === 'center' }">
       <div class="left-content">
-        <!-- BUU-GET wordmark pill (text only) -->
         <div class="brand-pill">
           <div class="pill-wordmark">
             <span class="pill-buu">BUU</span><span class="pill-dash">-</span
             ><span class="pill-get">GET</span>
           </div>
         </div>
-
-        <!-- BUU-GET main logo image -->
         <div class="brand-logo-wrap">
           <img src="~assets/img/buu-get-logo.png" alt="BUU-GET Logo" class="brand-logo-img" />
         </div>
-
         <div class="brand-headline">
           <p>ระบบทดสอบวัดความสามารถทางภาษาอังกฤษ</p>
         </div>
       </div>
     </div>
 
-    <!-- ===== RIGHT PANEL: Login Form ===== -->
-    <div class="right-panel">
-      <div class="form-center">
-        <LoginCard />
-      </div>
+    <!-- ===== CARD: Positioned absolutely, animated via transform ===== -->
+    <div
+      ref="cardWrapperRef"
+      class="card-wrapper"
+      :class="cardWrapperClasses"
+      :style="cardWrapperStyle"
+    >
+      <transition name="fade" mode="out-in">
+        <div v-if="showForm" :key="formKey">
+          <div v-if="formKey === 'login'">
+            <LoginCard />
+          </div>
+          <div v-else-if="formKey === 'credentials'">
+            <div class="register-card-shell">
+              <RegisterCard @register="handleRegister" />
+            </div>
+          </div>
+          <div v-else-if="formKey === 'profile'">
+            <div class="register-profile-shell">
+              <RegisterAndEditProfile
+                :initial-edit-mode="false"
+                :is-thai="isThai"
+                :credentials="credentials"
+                @close="goBackToCredentials"
+                @save="handleSave"
+              />
+            </div>
+          </div>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useQuasar } from 'quasar';
+import { useAuthStore } from 'src/stores/auth.store';
 import LoginCard from 'src/components/auth/login-card.vue';
+import RegisterCard from 'src/components/register-card.vue';
+import type { RegisterCredentials } from 'src/components/register-card.vue';
+import type { RegisterFormData } from 'src/types/register';
+import RegisterAndEditProfile from 'src/components/register-and-edit-profile.vue';
+
+const route = useRoute();
+const router = useRouter();
+const $q = useQuasar();
+const authStore = useAuthStore();
+
+const isRegisterMode = computed(() => route.path.includes('register'));
+const currentStep = ref<'credentials' | 'profile'>('credentials');
+const isThai = ref<boolean>(true);
+const credentials = ref<RegisterCredentials>({
+  email: '',
+  password: '',
+  userType: 'thai',
+});
+
+// ============================================================
+// Animation state
+// ============================================================
+type CardPosition = 'right' | 'center';
+type CardSize = 'login' | 'credentials' | 'profile';
+
+const panelPhase = ref<CardPosition>('right');
+const cardSize = ref<CardSize>('login');
+const showForm = ref(false);
+const formKey = ref<'login' | 'credentials' | 'profile'>('login');
+const animating = ref(false);
+const lockedHeight = ref<number | null>(null);
+
+const cardWrapperRef = ref<HTMLElement | null>(null);
+
+const cardWrapperClasses = computed(() => ({
+  'pos-right': panelPhase.value === 'right',
+  'pos-center': panelPhase.value === 'center',
+  'size-login': cardSize.value === 'login',
+  'size-credentials': cardSize.value === 'credentials',
+  'size-profile': cardSize.value === 'profile',
+  animating: animating.value,
+}));
+
+const cardWrapperStyle = computed(() => {
+  if (lockedHeight.value !== null) {
+    return { minHeight: `${lockedHeight.value}px` };
+  }
+  return {};
+});
+
+/** Capture the current card height and lock it so card doesn't collapse when content is removed */
+const lockHeight = (): void => {
+  if (cardWrapperRef.value) {
+    lockedHeight.value = cardWrapperRef.value.offsetHeight;
+  }
+};
+
+const unlockHeight = (): void => {
+  lockedHeight.value = null;
+};
+
+// ============================================================
+// Initialization
+// ============================================================
+onMounted(() => {
+  if (isRegisterMode.value) {
+    panelPhase.value = 'center';
+    cardSize.value = currentStep.value === 'profile' ? 'profile' : 'credentials';
+    formKey.value = currentStep.value === 'profile' ? 'profile' : 'credentials';
+  } else {
+    panelPhase.value = 'right';
+    cardSize.value = 'login';
+    formKey.value = 'login';
+  }
+  showForm.value = true;
+});
+
+// ============================================================
+// Login <-> Register transition
+// ============================================================
+watch(isRegisterMode, (goingToRegister) => {
+  if (animating.value) return;
+  animating.value = true;
+
+  // Lock current height so card doesn't collapse
+  lockHeight();
+
+  // Phase 1: Fade out current form content (0.3s)
+  showForm.value = false;
+
+  if (goingToRegister) {
+    // LOGIN -> REGISTER
+    // Phase 2: After content fades out, slide card to center (keep login size)
+    setTimeout(() => {
+      panelPhase.value = 'center';
+    }, 350);
+
+    // Phase 3: After slide completes, expand card to register size
+    setTimeout(() => {
+      cardSize.value = 'credentials';
+    }, 1350); // 350 + 1000ms slide
+
+    // Phase 4: After expand completes, show register form
+    setTimeout(() => {
+      formKey.value = 'credentials';
+      unlockHeight();
+      void nextTick(() => {
+        showForm.value = true;
+        animating.value = false;
+      });
+    }, 1800); // 1350 + 450ms expand
+  } else {
+    // REGISTER -> LOGIN
+    // Phase 2: After content fades out, shrink card back to login size
+    setTimeout(() => {
+      cardSize.value = 'login';
+    }, 350);
+
+    // Phase 3: After shrink completes, slide card back to right
+    setTimeout(() => {
+      panelPhase.value = 'right';
+    }, 800); // 350 + 450ms shrink
+
+    // Phase 4: After slide completes, show login form
+    setTimeout(() => {
+      formKey.value = 'login';
+      unlockHeight();
+      void nextTick(() => {
+        showForm.value = true;
+        animating.value = false;
+      });
+    }, 1800); // 800 + 1000ms slide
+  }
+});
+
+// ============================================================
+// Step 1 <-> Step 2 within register
+// ============================================================
+watch(currentStep, (newStep) => {
+  if (animating.value) return;
+  animating.value = true;
+
+  lockHeight();
+  showForm.value = false;
+
+  setTimeout(() => {
+    cardSize.value = newStep === 'profile' ? 'profile' : 'credentials';
+    formKey.value = newStep === 'profile' ? 'profile' : 'credentials';
+  }, 350);
+
+  setTimeout(() => {
+    unlockHeight();
+    void nextTick(() => {
+      showForm.value = true;
+      animating.value = false;
+    });
+  }, 800);
+});
+
+/** Step 1 → Step 2 */
+const handleRegister = (payload: RegisterCredentials): void => {
+  credentials.value = payload;
+  isThai.value = payload.userType === 'thai';
+  currentStep.value = 'profile';
+};
+
+/** Step 2 → Step 1 */
+const goBackToCredentials = (): void => {
+  currentStep.value = 'credentials';
+};
+
+/** Step 2 complete */
+const handleSave = async (formData: RegisterFormData): Promise<void> => {
+  const finalData = {
+    ...credentials.value,
+    ...formData,
+  };
+
+  $q.loading.show();
+
+  try {
+    const response = await authStore.register(finalData);
+
+    if (response.success) {
+      $q.notify({
+        type: 'positive',
+        message: 'สมัครสมาชิกสำเร็จ! โปรดเข้าสู่ระบบ',
+        position: 'top',
+      });
+      currentStep.value = 'credentials';
+      void router.push('/login');
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: response.message || 'เกิดข้อผิดพลาดในการสมัครสมาชิก',
+        position: 'top',
+      });
+    }
+  } catch {
+    $q.notify({
+      type: 'negative',
+      message: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+      position: 'top',
+    });
+  } finally {
+    $q.loading.hide();
+  }
+};
 </script>
 
 <style scoped lang="scss">
 // ============================================================
-// Root
+// Root — full viewport, no flexbox layout shifts
 // ============================================================
 .login-root {
-  display: flex;
+  position: relative;
+  width: 100%;
   min-height: 100dvh;
   overflow: hidden;
   font-family: 'Inter', 'Noto Sans Thai', sans-serif;
@@ -59,36 +293,147 @@ import LoginCard from 'src/components/auth/login-card.vue';
     var(--primary) 55%,
     var(--secondary-dark) 100%
   );
-  position: relative;
 }
 
 // ============================================================
-// PANELS
+// Left Panel — absolute positioned, fades in/out
 // ============================================================
 .left-panel {
-  position: relative;
-  flex: 1.1;
-  background: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 52%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  pointer-events: auto;
+
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
 
   @media (max-width: 1024px) {
     display: none;
   }
 }
 
-.right-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  padding: 40px 32px 32px;
-  position: relative;
-  z-index: 1;
+// ============================================================
+// Card Wrapper — positioned absolutely, uses transform for movement
+// ============================================================
+.card-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  background: var(--surface-card);
+  border-radius: 12px;
+  padding: 40px 36px 36px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    0 32px 64px rgba(0, 0, 0, 0.25),
+    0 0 120px rgba(30, 137, 229, 0.12);
+
+  // GPU-accelerated smooth transitions
+  will-change: transform, width, max-width;
+  transition:
+    transform 1s cubic-bezier(0.25, 1, 0.5, 1),
+    width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+    max-width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+    padding 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+// Position: right side (login)
+.card-wrapper.pos-right {
+  // Center within the right 48% of the screen:
+  // right panel starts at 52%, is 48% wide
+  // so card center = 52% + 24% = 76% from left
+  // since left is fixed at 50%, we shift by +26vw to align the center
+  transform: translate(calc(26vw - 50%), -50%);
+
+  @media (max-width: 1024px) {
+    transform: translate(-50%, -50%);
+  }
+}
+
+// Position: center (register)
+.card-wrapper.pos-center {
+  transform: translate(-50%, -50%);
+}
+
+// Size: login card
+.card-wrapper.size-login {
+  width: 420px;
+  max-width: 420px;
+}
+
+// Size: register credentials
+.card-wrapper.size-credentials {
+  width: 600px;
+  max-width: 600px;
+}
+
+// Size: register profile
+.card-wrapper.size-profile {
+  width: 1400px;
+  max-width: calc(100vw - 80px);
+  padding: 2.5rem 3rem;
+}
+
+// ============================================================
+// Internal card style overrides — make children transparent
+// ============================================================
+.card-wrapper :deep(.login-card) {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  max-width: 100% !important;
+  animation: none !important;
+  transform: none !important;
+
+  &:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+.register-card-shell,
+.register-profile-shell {
+  width: 100%;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.register-profile-shell :deep(.profile-card) {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-shadow: none !important;
+}
+
+.register-profile-shell :deep(.profile-card) .q-px-xl {
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+.register-profile-shell :deep(.profile-card) .q-pa-xl {
+  padding: 0 !important;
+}
+
+.register-profile-shell :deep(.profile-card) .q-mb-lg {
+  margin-bottom: 20px !important;
+}
+
+.register-profile-shell :deep(.profile-card) .q-mt-xl {
+  margin-top: 24px !important;
 }
 
 // ============================================================
@@ -254,33 +599,26 @@ import LoginCard from 'src/components/auth/login-card.vue';
 }
 
 // ============================================================
-// Right Content Styles
+// Fade transition for form content
 // ============================================================
-.form-center {
+.fade-leave-active {
+  transition: opacity 0.3s ease-out;
+  position: absolute;
   width: 100%;
-  max-width: 420px;
-  animation: fadeIn 0.7s ease-out;
+}
+.fade-leave-to {
+  opacity: 0;
 }
 
-.login-footer {
-  width: 100%;
-  text-align: center;
-  padding-top: 20px;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
-
-  .footer-sep {
-    color: rgba(255, 255, 255, 0.2);
-  }
+.fade-enter-active {
+  transition: opacity 0.4s ease-out;
+}
+.fade-enter-from {
+  opacity: 0;
 }
 
 // ============================================================
-// Animations
+// Animations keyframes
 // ============================================================
 @keyframes fadeInDown {
   from {
@@ -301,15 +639,6 @@ import LoginCard from 'src/components/auth/login-card.vue';
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
   }
 }
 

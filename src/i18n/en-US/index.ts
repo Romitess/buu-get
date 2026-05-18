@@ -139,6 +139,7 @@ export default {
     phonePlaceholder: 'XXX-XXX-XXXX',
     back: 'Back',
     cancel: 'Cancel',
+    next: 'Next',
     save: 'Save',
     backToLogin: 'Back to Login',
     saveEdit: 'Save Changes',
