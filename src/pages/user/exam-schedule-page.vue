@@ -57,7 +57,7 @@
                 :round-type-label="round.roundTypeLabel"
                 :reg-end-date="round.regEndDate"
                 :exam-date="round.examDate"
-                @register="handleRegister(round)"
+                @register="(isExpired) => handleRegister(round, isExpired)"
               />
             </template>
 
@@ -129,7 +129,18 @@ const roundsSectionStyle = computed(() => {
   return {};
 });
 
-const handleRegister = (round: ExamRound): void => {
+const handleRegister = (round: ExamRound, isExpired = false): void => {
+  if (isExpired) {
+    $q.notify({
+      type: 'negative',
+      message: t('examSchedule.notifications.expired'),
+      icon: 'report_problem',
+      position: 'top',
+      timeout: 2500,
+      actions: [{ icon: 'close', color: 'white' }],
+    });
+    return;
+  }
   if (round.availableSeats === 0) {
     $q.notify({
       type: 'negative',

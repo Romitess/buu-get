@@ -41,7 +41,6 @@
               : registerBtnText || t('examSchedule.registerBtnText')
         "
         :color="isDisabled ? 'full' : 'primary'"
-        :disable="isDisabled"
         class="round-exam__btn"
         @click="handleRegister"
       />
@@ -60,7 +59,7 @@ import AppButton from '../base/app-button.vue';
 const props = defineProps<RoundExamProps>();
 
 const emit = defineEmits<{
-  (e: 'register'): void;
+  (e: 'register', isExpired: boolean): void;
 }>();
 
 const { t } = useI18n();
@@ -168,9 +167,7 @@ const isExpired = computed((): boolean => {
 const isDisabled = computed((): boolean => isFull.value || isExpired.value);
 
 const handleRegister = (): void => {
-  if (!isDisabled.value) {
-    emit('register');
-  }
+  emit('register', isExpired.value);
 };
 </script>
 

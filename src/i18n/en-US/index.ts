@@ -66,6 +66,7 @@ export default {
       roundFull: 'Sorry, this round is full.',
       registrationSuccess: 'Registration successful. Please pay within the time limit.',
       passcodeSuccess: 'Passcode verified. Registration successful.',
+      expired: 'Sorry, this round is closed for registration.',
     },
     dialogConfirm: {
       title: 'Confirm Registration',
