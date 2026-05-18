@@ -5,32 +5,14 @@
       <img src="~assets/img/buu-logo.png" alt="BUU Logo" class="buu-logo-img" />
     </div>
 
-    <!-- Title -->
+    <!-- Title & Subtitle -->
     <div class="text-center q-mb-lg">
-      <div class="text-h5 text-weight-bold">
+      <div class="text-h5 text-weight-bold text-primary">
         {{ $t('profile.register') }}
       </div>
-    </div>
-
-    <!-- User Type Toggle -->
-    <div class="type-toggle q-mb-lg">
-      <button
-        type="button"
-        class="toggle-btn"
-        :class="{ active: userType === 'thai' }"
-        @click="userType = 'thai'"
-      >
-        {{ $t('auth.thaiPerson') }}
-      </button>
-      <button
-        type="button"
-        class="toggle-btn"
-        :class="{ active: userType === 'foreigner' }"
-        @click="userType = 'foreigner'"
-      >
-        {{ $t('auth.foreigner') }}
-      </button>
-      <div class="toggle-slider" :class="{ right: userType === 'foreigner' }"></div>
+      <div class="text-subtitle2 text-grey-7 q-mt-xs">
+        {{ $t('profile.registerSubtitle') }}
+      </div>
     </div>
 
     <!-- Form -->
@@ -60,10 +42,8 @@
           <template v-slot:append>
             <q-icon
               :name="showPassword ? 'visibility_off' : 'visibility'"
-              class="cursor-pointer"
+              class="cursor-pointer field-icon"
               @click="showPassword = !showPassword"
-              color="grey-6"
-              size="18px"
             />
           </template>
         </q-input>
@@ -82,10 +62,8 @@
           <template v-slot:append>
             <q-icon
               :name="showConfirmPassword ? 'visibility_off' : 'visibility'"
-              class="cursor-pointer"
+              class="cursor-pointer field-icon"
               @click="showConfirmPassword = !showConfirmPassword"
-              color="grey-6"
-              size="18px"
             />
           </template>
         </q-input>
@@ -108,9 +86,7 @@
         <div class="col-6">
           <q-btn
             type="button"
-            color="grey-3"
-            text-color="black"
-            class="full-width submit-btn btn-cancel"
+            class="full-width cancel-btn"
             :label="$t('profile.cancel')"
             no-caps
             unelevated
@@ -120,7 +96,6 @@
         <div class="col-6">
           <q-btn
             type="submit"
-            color="primary"
             class="full-width submit-btn"
             :label="$t('profile.next')"
             no-caps
@@ -133,15 +108,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-
-export interface RegisterCredentials {
-  email: string;
-  password: string;
-  userType: 'thai' | 'foreigner';
-}
+import { useI18n } from 'vue-i18n';
+import type { RegisterCredentials } from 'src/types/register';
 
 const emit = defineEmits<{
   register: [payload: RegisterCredentials];
@@ -150,6 +120,7 @@ const emit = defineEmits<{
 const { locale } = useI18n();
 const router = useRouter();
 
+// State
 const userType = ref<'thai' | 'foreigner'>('thai');
 const email = ref('');
 const password = ref('');
@@ -157,11 +128,12 @@ const confirmPassword = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
-// Watch userType and change locale dynamically
-watch(userType, (newVal) => {
-  locale.value = newVal === 'thai' ? 'th' : 'en-US';
+// Lifecycle
+onMounted(() => {
+  userType.value = locale.value === 'th' ? 'thai' : 'foreigner';
 });
 
+// Methods
 const onCancel = (): void => {
   void router.push('/login');
 };
@@ -191,128 +163,10 @@ const onSubmit = (): void => {
   margin: 0 auto;
 }
 
-/* BUU Logo */
 .buu-logo-img {
   width: 100px;
   height: 100px;
   object-fit: contain;
-}
-
-/* User Type Toggle */
-.type-toggle {
-  position: relative;
-  display: flex;
-  background-color: var(--neutral-100);
-  border-radius: 12px;
-  padding: 4px;
-  margin-bottom: 16px;
-}
-
-.toggle-slider {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  width: calc(50% - 4px);
-  height: calc(100% - 8px);
-  background: var(--surface-card);
-  border-radius: 9px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
-  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.toggle-slider.right {
-  transform: translateX(100%);
-}
-
-.toggle-btn {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  padding: 10px 0;
-  border: none;
-  background: transparent;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--neutral-500);
-  cursor: pointer;
-  transition: color 0.25s;
-  border-radius: 9px;
-}
-
-.toggle-btn.active {
-  color: var(--primary);
-}
-
-// ============================================================
-// Header
-// ============================================================
-.card-header {
-  text-align: center;
-  margin-bottom: 16px;
-
-  .crest-img {
-    display: block;
-    width: 64px;
-    height: 64px;
-    object-fit: contain;
-    margin: 0 auto 12px;
-    filter: drop-shadow(0 2px 8px rgba(13, 71, 161, 0.12));
-  }
-
-  h2 {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: var(--neutral-900);
-    margin: 0;
-    letter-spacing: -0.01em;
-  }
-}
-
-// ============================================================
-// Type Toggle
-// ============================================================
-.type-toggle {
-  position: relative;
-  display: flex;
-  background: var(--neutral-100);
-  border-radius: 12px;
-  padding: 4px;
-  margin-bottom: 16px;
-
-  .toggle-slider {
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    width: calc(50% - 4px);
-    height: calc(100% - 8px);
-    background: var(--surface-card);
-    border-radius: 9px;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
-    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &.right {
-      transform: translateX(100%);
-    }
-  }
-
-  .toggle-btn {
-    position: relative;
-    z-index: 1;
-    flex: 1;
-    padding: 10px 0;
-    border: none;
-    background: transparent;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--neutral-400);
-    cursor: pointer;
-    transition: color 0.25s;
-    border-radius: 9px;
-
-    &.active {
-      color: var(--primary);
-    }
-  }
 }
 
 // ============================================================
@@ -352,6 +206,11 @@ const onSubmit = (): void => {
   }
 }
 
+.field-icon {
+  color: var(--neutral-400);
+  font-size: 18px;
+}
+
 // ============================================================
 // ThaID Section
 // ============================================================
@@ -368,12 +227,13 @@ const onSubmit = (): void => {
   font-weight: 600;
   padding: 12px 0;
   transition: all 0.2s ease;
+
+  &:hover {
+    filter: brightness(1.12);
+    box-shadow: 0 8px 20px rgba(var(--thaid-bg-rgb), 0.2) !important;
+  }
 }
 
-.thaid-btn:hover {
-  filter: brightness(1.12);
-  box-shadow: 0 8px 20px rgba(var(--thaid-bg-rgb), 0.2) !important;
-}
 .or-divider {
   display: flex;
   align-items: center;
@@ -402,7 +262,7 @@ const onSubmit = (): void => {
 .cancel-btn {
   width: 100%;
   height: 52px;
-  background: var(--neutral-100) !important;
+  background: var(--neutral-200) !important;
   color: var(--neutral-700) !important;
   border-radius: 12px !important;
   font-size: 0.95rem;
@@ -410,7 +270,7 @@ const onSubmit = (): void => {
   transition: all 0.25s;
 
   &:hover {
-    background: var(--neutral-200) !important;
+    filter: brightness(0.92);
     transform: translateY(-1px);
   }
 }
@@ -418,17 +278,16 @@ const onSubmit = (): void => {
 .submit-btn {
   width: 100%;
   height: 52px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%) !important;
+  background: var(--primary) !important;
   color: var(--text-on-primary) !important;
   border-radius: 12px !important;
   font-size: 0.95rem;
   font-weight: 700;
-  box-shadow: 0 6px 18px rgba(13, 71, 161, 0.2) !important;
   transition: all 0.25s;
 
   &:hover {
+    filter: brightness(0.9);
     transform: translateY(-1px);
-    box-shadow: 0 10px 28px rgba(13, 71, 161, 0.3) !important;
   }
 }
 
@@ -445,14 +304,5 @@ const onSubmit = (): void => {
 .expand-leave-to {
   max-height: 0;
   opacity: 0;
-}
-
-.btn-cancel {
-  background-color: var(--neutral-200) !important;
-  color: var(--neutral-700) !important;
-  transition: all 0.3s ease;
-}
-.btn-cancel:hover {
-  filter: brightness(0.95);
 }
 </style>

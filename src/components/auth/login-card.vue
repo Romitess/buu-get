@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from 'src/stores/user.store';
 import { useQuasar } from 'quasar';
@@ -123,6 +123,10 @@ const email = ref('');
 const password = ref('');
 const showPwd = ref(false);
 const loading = ref(false);
+
+onMounted(() => {
+  userType.value = locale.value === 'th' ? 'thai' : 'foreigner';
+});
 
 const toggleUserType = (type: 'thai' | 'foreigner') => {
   userType.value = type;

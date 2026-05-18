@@ -147,6 +147,7 @@ export default {
     backToLogin: 'Back to Login',
     saveEdit: 'Save Changes',
     register: 'Register',
+    registerSubtitle: 'Create an account to use the BUU-GET system',
     notRequiredLabel: '(Not required)',
     bannerNonThai:
       'Since you selected a non-Thai country, Thai name and Thai prefix are not required — English only is sufficient.',

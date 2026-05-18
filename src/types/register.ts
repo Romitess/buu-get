@@ -1,3 +1,10 @@
+/** ข้อมูล Credentials ขั้นตอนแรกของการสมัครสมาชิก (Email + Password) */
+export interface RegisterCredentials {
+  email: string;
+  password: string;
+  userType: 'thai' | 'foreigner';
+}
+
 /** ข้อมูลฟอร์มสมัครสมาชิก / แก้ไขข้อมูลส่วนตัว */
 export interface RegisterFormData {
   nationalId: string;

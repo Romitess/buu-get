@@ -68,7 +68,7 @@ import { useQuasar } from 'quasar';
 import { useAuthStore } from 'src/stores/auth.store';
 import LoginCard from 'src/components/auth/login-card.vue';
 import RegisterCard from 'src/components/register-card.vue';
-import type { RegisterCredentials } from 'src/components/register-card.vue';
+import type { RegisterCredentials } from 'src/types/register';
 import type { RegisterFormData } from 'src/types/register';
 import RegisterAndEditProfile from 'src/components/register-and-edit-profile.vue';
 
