@@ -81,26 +81,16 @@
         </template>
       </BaseTable>
     </main>
-
-    <!-- Hidden container for capturing voucher image -->
-    <div style="position: absolute; left: -9999px; top: -9999px; overflow: hidden; width: 800px">
-      <div id="capture-voucher-target">
-        <TestVoucherReport v-if="renderingVoucherData" :data="renderingVoucherData" />
-      </div>
-    </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 import DialogIssueTicket from 'src/components/exam/dialog-issue-ticket.vue';
-import TestVoucherReport from 'src/components/test-voucher-report.vue';
 
 import BaseTable from 'src/components/shared/base-table.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
@@ -112,12 +102,12 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import { useExamSeatCandidates } from 'src/composables/use-exam-seat-candidates';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
-import type { VoucherData } from 'src/types/voucher';
 import { createVoucherFromEnrollment, sendVoucherEmail } from 'src/services/voucher.service';
 import { formatThaiLongDate } from 'src/utils/thai-date';
-import { EXAM_TYPE_GENERAL, INTERNAL_EXAM_TYPE_GENERAL } from 'src/constants/exam';
+import { EXAM_TYPE_GENERAL } from 'src/constants/exam';
 
 const route = useRoute();
+const router = useRouter();
 const i18n = useI18n();
 const $q = useQuasar();
 
@@ -135,8 +125,6 @@ const {
   sessionEnrollments,
   fetchData,
 } = useExamSeatCandidates();
-
-const renderingVoucherData = ref<VoucherData | null>(null);
 
 // Resolves a localized month name by 0-based index from i18n (type-safe, no cast)
 const getMonthName = (monthIndex: number): string => i18n.t(`common.months[${monthIndex}]`);
@@ -161,82 +149,46 @@ const startIssuingTickets = async (): Promise<void> => {
   });
 
   try {
-    for (let i = 0; i < sessionEnrollments.value.length; i++) {
-      const enrollment = sessionEnrollments.value[i];
-      if (!enrollment) continue;
+    const total = sessionEnrollments.value.length;
+    // ดึงค่า Batch Size จาก Environment Variable (ถ้าไม่มีให้ใช้ 10) เพื่อลด Hardcode ตามมาตรฐานองค์กร
+    const batchSize = Number(import.meta.env.VITE_MAIL_BATCH_SIZE) || 10;
 
-      const prefix = enrollment.USER?.PROFILE?.userTitleTh || '';
-      const fullname = enrollment.USER?.PROFILE?.userFullnameTh || '';
-      const fullName = `${prefix}${fullname}`.trim() || 'ผู้สมัครสอบ';
+    // Resolve the exact absolute URL correctly using Vue Router (handles Hash mode / History mode automatically)
+    const resolvedRoute = router.resolve({ name: 'exam-history' });
+    const historyUrl = new URL(
+      resolvedRoute.href,
+      import.meta.env.VITE_APP_URL || window.location.origin,
+    ).href;
 
-      $q.loading.show({
-        message: `กำลังออกบัตรประจำตัวสอบของ ${fullName} (${i + 1}/${sessionEnrollments.value.length})...`,
-      });
-
-      const voucher = await createVoucherFromEnrollment(enrollment.ERM_ID);
-      const voucherNo = voucher.VC_CODE;
-
-      const studentId =
-        enrollment.USER?.PROFILE?.userEducation || enrollment.USER?.USER_NATIONAL_ID || '-';
-
-      const examName = exam.value?.EXAM_NAME || 'BUU-GET Exam';
-      const examDate = examDateLabel.value;
-      const examTime = sessionTime.value;
-
-      const rawType = exam.value?.EXAM_TYPE;
-      const examType = rawType === INTERNAL_EXAM_TYPE_GENERAL ? 'ทั่วไป' : 'พิเศษ';
-
-      const location = sessionLocation.value;
-      const seatNo = enrollment.ERM_SEAT_NUMBER || '-';
-
-      renderingVoucherData.value = {
-        id: enrollment.ERM_ID,
-        fullName,
-        studentId,
-        examName,
-        examDate,
-        examTime,
-        examType,
-        location,
-        seatNo,
-        voucherNo,
-      };
-
-      await nextTick();
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      const element = document.getElementById('capture-voucher-target');
-      if (!element) {
-        throw new Error('Capture target element not found');
-      }
-
-      const canvas = await html2canvas(element, {
-        useCORS: true,
-        scale: 2,
-        backgroundColor: '#ffffff',
-      });
-      const imageDataUrl = canvas.toDataURL('image/png');
-
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: [canvas.width, canvas.height],
-      });
-      pdf.addImage(imageDataUrl, 'PNG', 0, 0, canvas.width, canvas.height);
-      const pdfDataUrl = pdf.output('datauristring');
+    for (let i = 0; i < total; i += batchSize) {
+      const batch = sessionEnrollments.value.slice(i, i + batchSize);
 
       $q.loading.show({
-        message: `กำลังจัดส่งอีเมลบัตรประจำตัวสอบไปยัง ${enrollment.USER.USER_EMAIL}...`,
+        message: `กำลังดำเนินการและจัดส่งอีเมลแจ้งเตือน (${Math.min(i + batchSize, total)}/${total})...`,
       });
 
-      await sendVoucherEmail({
-        email: enrollment.USER.USER_EMAIL,
-        fullName,
-        examName,
-        seatNo,
-        voucherNo,
-        imageDataUrl: pdfDataUrl,
-      });
+      await Promise.all(
+        batch.map(async (enrollment) => {
+          if (!enrollment) return;
+
+          const prefix = enrollment.USER?.PROFILE?.userTitleTh || '';
+          const fullname = enrollment.USER?.PROFILE?.userFullnameTh || '';
+          const fullName = `${prefix}${fullname}`.trim() || 'ผู้สมัครสอบ';
+
+          // 1. Create voucher
+          await createVoucherFromEnrollment(enrollment.ERM_ID);
+
+          const examName = exam.value?.EXAM_NAME || 'BUU-GET Exam';
+
+          // 2. Send email notification
+          await sendVoucherEmail({
+            email: enrollment.USER.USER_EMAIL,
+            fullName,
+            examName,
+            historyUrl,
+          });
+        }),
+      );
     }
 
     $q.notify({
@@ -258,7 +210,6 @@ const startIssuingTickets = async (): Promise<void> => {
       actions: [{ icon: 'close', color: 'white' }],
     });
   } finally {
-    renderingVoucherData.value = null;
     $q.loading.hide();
   }
 };

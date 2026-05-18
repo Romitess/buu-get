@@ -4,9 +4,7 @@ export interface SendVoucherEmailPayload {
   email: string;
   fullName: string;
   examName: string;
-  seatNo: string;
-  voucherNo: string;
-  imageDataUrl: string;
+  historyUrl: string;
 }
 
 export interface BackendVoucher {

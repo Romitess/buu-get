@@ -106,13 +106,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from 'src/stores/user.store';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { ROLES } from 'src/constants/roles';
 
 const router = useRouter();
+const route = useRoute();
 const userStore = useUserStore();
 const $q = useQuasar();
 
@@ -151,6 +152,12 @@ const onSubmit = async () => {
         type: 'positive',
         message: t('auth.notify.success'),
       });
+
+      // Deep Linking Redirect: ถ้ามี redirect parameter (เช่นมาจากอีเมล) ให้ไปหน้านั้นเลย
+      if (route.query.redirect) {
+        await router.push({ path: route.query.redirect as string });
+        return;
+      }
 
       // Role-based redirection
       const role = userStore.userRole?.toLowerCase();

@@ -47,9 +47,9 @@ export default defineRouter(({ store }) => {
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
     const allowedRoles = to.matched.find((record) => record.meta.roles)?.meta.roles;
 
-    // 1. ถ้าต้อง Login แต่ยังไม่ได้ Login -> ไปหน้า Login
+    // 1. ถ้าต้อง Login แต่ยังไม่ได้ Login -> ไปหน้า Login พร้อมจำ path ที่ต้องการเข้า
     if (requiresAuth && !userStore.isLoggedIn) {
-      return { name: 'login' };
+      return { name: 'login', query: { redirect: to.fullPath } };
     }
 
     // 2. ถ้า Login แล้ว แต่กำลังจะเข้าหน้าที่จำกัดสิทธิ์ (Roles)
@@ -74,8 +74,11 @@ export default defineRouter(({ store }) => {
       }
     }
 
-    // 3. ถ้า Login อยู่แล้ว และพยายามเข้าหน้า Login/Register -> ส่งไปหน้าหลักของตัวเอง
+    // 3. ถ้า Login อยู่แล้ว และพยายามเข้าหน้า Login/Register -> ส่งไปหน้าหลักของตัวเอง หรือหน้า redirect
     if (userStore.isLoggedIn && (to.name === 'login' || to.name === 'register')) {
+      if (to.query.redirect) {
+        return { path: to.query.redirect as string };
+      }
       return userStore.userRole === ROLES.CANDIDATE
         ? { name: 'exam-schedule' }
         : { name: 'admin-dashboard' };
