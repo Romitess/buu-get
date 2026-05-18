@@ -22,6 +22,7 @@
         :time="sessionTime"
         :location="sessionLocation"
         :applicant-count="candidateCount"
+        :total-capacity="sessionCapacity"
         hide-paid
         hide-main-separator
         is-admin
@@ -120,6 +121,7 @@ const {
   candidateCount,
   sessionTime,
   sessionLocation,
+  sessionCapacity,
   fetchData,
 } = useExamSeatCandidates();
 
@@ -209,11 +211,16 @@ watch(exam, (newExam) => {
   }
 });
 
-onMounted(() => {
+const loadData = async (): Promise<void> => {
   const examId = Number(route.params.examId);
   if (!isNaN(examId) && examId > 0) {
-    void fetchData(examId);
+    await fetchData(examId);
+    pagination.value.rowsNumber = filteredRows.value.length;
   }
+};
+
+onMounted(() => {
+  void loadData();
 });
 </script>
 
