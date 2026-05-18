@@ -1,53 +1,55 @@
 <template>
-  <div class="register-card q-pa-lg">
-    <!-- Toggle Buttons -->
-    <div class="user-type-toggle q-mb-lg">
-      <div class="toggle-btn" :class="{ active: userType === 'thai' }" @click="userType = 'thai'">
-        {{ $t('profile.userTypeThai') }}
-      </div>
-      <div
+  <div class="register-card">
+    <!-- Header -->
+    <div class="card-header">
+      <img src="~assets/img/buu-logo.png" alt="BUU Logo" class="crest-img" />
+      <h2>{{ $t('profile.register') }}</h2>
+    </div>
+
+    <!-- Type Toggle -->
+    <div class="type-toggle">
+      <button
+        type="button"
+        class="toggle-btn"
+        :class="{ active: userType === 'thai' }"
+        @click="userType = 'thai'"
+      >
+        {{ $t('auth.thaiPerson') }}
+      </button>
+      <button
+        type="button"
         class="toggle-btn"
         :class="{ active: userType === 'foreigner' }"
         @click="userType = 'foreigner'"
       >
-        {{ $t('profile.userTypeForeigner') }}
-      </div>
-    </div>
-
-    <!-- Title -->
-    <div class="text-center q-mb-lg">
-      <div class="text-h5 text-weight-bold">
-        {{ $t('profile.register') }}
-      </div>
+        {{ $t('auth.foreigner') }}
+      </button>
+      <div class="toggle-slider" :class="{ right: userType === 'foreigner' }"></div>
     </div>
 
     <!-- Form -->
-    <q-form @submit.prevent="onSubmit">
+    <q-form @submit.prevent="onSubmit" class="register-form">
       <!-- Email -->
-      <div class="q-mb-md">
-        <div class="text-body2 text-weight-medium q-mb-xs">
-          {{ $t('profile.emailUsername') }}
-        </div>
+      <div class="field-block">
+        <label>{{ $t('profile.emailUsername') }}</label>
         <q-input
           v-model="email"
           outlined
           dense
           :placeholder="$t('profile.emailPlaceholder')"
-          class="custom-input"
+          class="field-input"
         />
       </div>
 
       <!-- Password -->
-      <div class="q-mb-md">
-        <div class="text-body2 text-weight-medium q-mb-xs">
-          {{ $t('profile.passwordFormat') }}
-        </div>
+      <div class="field-block">
+        <label>{{ $t('profile.passwordFormat') }}</label>
         <q-input
           v-model="password"
           :type="showPassword ? 'text' : 'password'"
           outlined
           dense
-          class="custom-input"
+          class="field-input"
         >
           <template v-slot:append>
             <q-icon
@@ -55,23 +57,21 @@
               class="cursor-pointer"
               @click="showPassword = !showPassword"
               color="grey-6"
-              size="20px"
+              size="18px"
             />
           </template>
         </q-input>
       </div>
 
       <!-- Confirm Password -->
-      <div class="q-mb-lg">
-        <div class="text-body2 text-weight-medium q-mb-xs">
-          {{ $t('profile.confirmPassword') }}
-        </div>
+      <div class="field-block">
+        <label>{{ $t('profile.confirmPassword') }}</label>
         <q-input
           v-model="confirmPassword"
           :type="showConfirmPassword ? 'text' : 'password'"
           outlined
           dense
-          class="custom-input"
+          class="field-input"
         >
           <template v-slot:append>
             <q-icon
@@ -79,38 +79,49 @@
               class="cursor-pointer"
               @click="showConfirmPassword = !showConfirmPassword"
               color="grey-6"
-              size="20px"
+              size="18px"
             />
           </template>
         </q-input>
       </div>
 
-      <!-- Submit Button -->
-      <q-btn
-        type="submit"
-        color="primary"
-        class="full-width q-mb-md submit-btn"
-        :label="$t('profile.register')"
-        no-caps
-        unelevated
-      />
-
-      <!-- Extra options container to maintain fixed card height without jumping -->
-      <div :style="{ visibility: userType === 'thai' ? 'visible' : 'hidden' }">
-        <!-- Divider -->
-        <div class="row items-center q-mb-md">
-          <q-separator class="col" color="grey-4" />
-          <div class="q-px-sm text-grey-6 text-body2 font-weight-medium">
-            {{ $t('profile.or') }}
+      <!-- ThaID Section (Thai only) -->
+      <Transition name="expand">
+        <div v-if="userType === 'thai'" class="thaid-section">
+          <div class="or-divider">
+            <span>{{ $t('profile.or') }}</span>
           </div>
-          <q-separator class="col" color="grey-4" />
+          <q-btn class="thaid-btn" unelevated no-caps>
+            <q-icon name="fingerprint" size="22px" class="q-mr-sm" />
+            {{ $t('profile.thaidRegister') }}
+          </q-btn>
         </div>
+      </Transition>
 
-        <!-- ThaID Button -->
-        <q-btn class="full-width thaid-btn" no-caps unelevated :disable="userType !== 'thai'">
-          <q-icon name="fingerprint" size="xs" class="q-mr-sm" />
-          {{ $t('profile.thaidRegister') }}
-        </q-btn>
+      <!-- Action Buttons Row -->
+      <div class="row q-col-gutter-x-md q-mt-md">
+        <div class="col-6">
+          <q-btn
+            type="button"
+            color="grey-4"
+            text-color="black"
+            :label="$t('profile.cancel')"
+            class="cancel-btn"
+            no-caps
+            unelevated
+            @click="onCancel"
+          />
+        </div>
+        <div class="col-6">
+          <q-btn
+            type="submit"
+            color="primary"
+            :label="$t('profile.next')"
+            class="submit-btn"
+            no-caps
+            unelevated
+          />
+        </div>
       </div>
     </q-form>
   </div>
@@ -119,6 +130,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 export interface RegisterCredentials {
   email: string;
@@ -131,18 +143,23 @@ const emit = defineEmits<{
 }>();
 
 const { locale } = useI18n();
+const router = useRouter();
 
 const userType = ref<'thai' | 'foreigner'>('thai');
-
-// Watch userType and change locale dynamically
-watch(userType, (newVal) => {
-  locale.value = newVal === 'thai' ? 'th' : 'en-US';
-});
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
+
+// Watch userType and change locale dynamically
+watch(userType, (newVal) => {
+  locale.value = newVal === 'thai' ? 'th' : 'en-US';
+});
+
+const onCancel = (): void => {
+  void router.push('/login');
+};
 
 const onSubmit = (): void => {
   if (!email.value || !password.value || !confirmPassword.value) {
@@ -159,58 +176,242 @@ const onSubmit = (): void => {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+// ============================================================
+// Card Shell
+// ============================================================
 .register-card {
-  width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
+  width: clamp(320px, 90vw, 540px);
+  background: var(--surface-card);
+  border-radius: 8px;
+  padding: 28px 40px 28px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  animation: floatIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
 }
 
-/* User Type Toggle */
-.user-type-toggle {
-  display: flex;
-  background-color: var(--neutral-100);
-  border-radius: 10px;
-  padding: 4px;
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
-.toggle-btn {
-  flex: 1;
+
+// ============================================================
+// Header
+// ============================================================
+.card-header {
   text-align: center;
-  padding: 10px 0;
-  border-radius: 8px;
-  color: var(--neutral-500);
-  font-weight: 600;
-  font-size: 15px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-.toggle-btn.active {
-  background-color: var(--surface-card);
-  color: var(--primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+
+  .crest-img {
+    display: block;
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    margin: 0 auto 12px;
+    filter: drop-shadow(0 2px 8px rgba(13, 71, 161, 0.12));
+  }
+
+  h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--neutral-900);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
 }
 
-/* ThaID Button */
+// ============================================================
+// Type Toggle
+// ============================================================
+.type-toggle {
+  position: relative;
+  display: flex;
+  background: var(--neutral-100);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 16px;
+
+  .toggle-slider {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    height: calc(100% - 8px);
+    background: var(--surface-card);
+    border-radius: 9px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.right {
+      transform: translateX(100%);
+    }
+  }
+
+  .toggle-btn {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    padding: 10px 0;
+    border: none;
+    background: transparent;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--neutral-400);
+    cursor: pointer;
+    transition: color 0.25s;
+    border-radius: 9px;
+
+    &.active {
+      color: var(--primary);
+    }
+  }
+}
+
+// ============================================================
+// Form & Fields
+// ============================================================
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field-block {
+  label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--neutral-900);
+    margin-bottom: 6px;
+  }
+}
+
+.field-input {
+  :deep(.q-field__control) {
+    background: var(--neutral-50);
+    border-radius: 10px;
+    border-color: var(--neutral-200);
+    transition: all 0.2s;
+  }
+
+  :deep(.q-field__control:hover::before) {
+    border-color: var(--neutral-400);
+  }
+
+  :deep(.q-field--focused .q-field__control::before) {
+    border-color: var(--primary);
+    border-width: 1.5px;
+  }
+}
+
+// ============================================================
+// ThaID Section
+// ============================================================
+.thaid-section {
+  overflow: hidden;
+}
+
 .thaid-btn {
-  background-color: var(--thaid-bg);
-  color: var(--text-on-primary);
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  padding: 12px 0;
+  width: 100%;
+  height: 50px;
+  background: var(--thaid-bg) !important;
+  color: var(--text-on-primary) !important;
+  border-radius: 12px !important;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: all 0.2s;
+
+  &:hover {
+    filter: brightness(1.12);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(var(--thaid-bg-rgb), 0.3) !important;
+  }
 }
 
-/* Form Inputs */
-.custom-input :deep(.q-field__control) {
-  border-radius: 8px;
-  border-color: var(--neutral-200);
+.or-divider {
+  display: flex;
+  align-items: center;
+  margin: 10px 0 14px;
+  gap: 12px;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--neutral-200);
+  }
+
+  span {
+    font-size: 0.78rem;
+    color: var(--neutral-400);
+    white-space: nowrap;
+    font-weight: 500;
+  }
 }
 
-/* Submit Button */
+// ============================================================
+// Action Buttons Row
+// ============================================================
+.cancel-btn {
+  width: 100%;
+  height: 52px;
+  background: var(--neutral-100) !important;
+  color: var(--neutral-700) !important;
+  border-radius: 12px !important;
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition: all 0.25s;
+
+  &:hover {
+    background: var(--neutral-200) !important;
+    transform: translateY(-1px);
+  }
+}
+
 .submit-btn {
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  padding: 12px 0;
+  width: 100%;
+  height: 52px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%) !important;
+  color: var(--text-on-primary) !important;
+  border-radius: 12px !important;
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(13, 71, 161, 0.2) !important;
+  transition: all 0.25s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 28px rgba(13, 71, 161, 0.3) !important;
+  }
+}
+
+// ============================================================
+// Transitions
+// ============================================================
+.expand-enter-active,
+.expand-leave-active {
+  transition: all 0.3s ease;
+  max-height: 200px;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
 }
 </style>

@@ -162,6 +162,7 @@ export default {
     thaidRegister: 'สมัครสมาชิกด้วย ThaID',
     personalInfo: 'ข้อมูลส่วนตัว',
     or: 'หรือ',
+    next: 'ถัดไป',
   },
   payment: {
     dialog: {
@@ -602,6 +603,9 @@ export default {
       success: 'เข้าสู่ระบบสำเร็จ',
       failed: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
       error: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+      registerSuccess: 'สมัครสมาชิกสำเร็จ! โปรดเข้าสู่ระบบ',
+      registerFailed: 'เกิดข้อผิดพลาดในการสมัครสมาชิก',
+      connectionError: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
     },
   },
   navigation: {

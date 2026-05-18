@@ -191,6 +191,7 @@ export default {
     thaidRegister: 'Sign up with ThaID',
     personalInfo: 'Personal Information',
     or: 'or',
+    next: 'Next',
   },
   carousel: {
     page1: {
@@ -438,6 +439,9 @@ export default {
       success: 'Login successful',
       failed: 'Incorrect email or password',
       error: 'Connection error',
+      registerSuccess: 'Registration successful! Please login',
+      registerFailed: 'An error occurred during registration',
+      connectionError: 'Connection error occurred',
     },
   },
   navigation: {

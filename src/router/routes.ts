@@ -61,7 +61,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/auth/register-page.vue'),
         meta: {
           requiresAuth: false,
-          hideHeader: true,
+          hideHeader: false,
           hideDrawer: true,
           footerVariant: 'white',
         },
