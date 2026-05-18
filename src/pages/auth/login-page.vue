@@ -22,7 +22,7 @@
           <img src="~assets/img/buu-get-logo.png" alt="BUU-GET Logo" class="brand-logo-img" />
         </div>
         <div class="brand-headline">
-          <p>ระบบทดสอบวัดความสามารถทางภาษาอังกฤษ</p>
+          <p>{{ $t('auth.systemDescription', 'ระบบทดสอบวัดความสามารถทางภาษาอังกฤษ') }}</p>
         </div>
       </div>
     </div>
@@ -65,6 +65,7 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from 'src/stores/auth.store';
 import LoginCard from 'src/components/auth/login-card.vue';
 import RegisterCard from 'src/components/register-card.vue';
@@ -75,6 +76,7 @@ import RegisterAndEditProfile from 'src/components/register-and-edit-profile.vue
 const route = useRoute();
 const router = useRouter();
 const $q = useQuasar();
+const { t } = useI18n();
 const authStore = useAuthStore();
 
 const isRegisterMode = computed(() => route.path.includes('register'));
@@ -206,6 +208,11 @@ watch(isRegisterMode, (goingToRegister) => {
 // Step 1 <-> Step 2 within register
 // ============================================================
 watch(currentStep, (newStep) => {
+  if (!isRegisterMode.value) {
+    cardSize.value = newStep === 'profile' ? 'profile' : 'credentials';
+    formKey.value = newStep === 'profile' ? 'profile' : 'credentials';
+    return;
+  }
   if (animating.value) return;
   animating.value = true;
 
@@ -253,22 +260,23 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
     if (response.success) {
       $q.notify({
         type: 'positive',
-        message: 'สมัครสมาชิกสำเร็จ! โปรดเข้าสู่ระบบ',
+        message: t('auth.notify.registerSuccess', 'สมัครสมาชิกสำเร็จ! โปรดเข้าสู่ระบบ'),
         position: 'top',
       });
+      await router.push('/login');
       currentStep.value = 'credentials';
-      void router.push('/login');
     } else {
       $q.notify({
         type: 'negative',
-        message: response.message || 'เกิดข้อผิดพลาดในการสมัครสมาชิก',
+        message:
+          response.message || t('auth.notify.registerFailed', 'เกิดข้อผิดพลาดในการสมัครสมาชิก'),
         position: 'top',
       });
     }
   } catch {
     $q.notify({
       type: 'negative',
-      message: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+      message: t('auth.notify.connectionError', 'เกิดข้อผิดพลาดในการเชื่อมต่อ'),
       position: 'top',
     });
   } finally {

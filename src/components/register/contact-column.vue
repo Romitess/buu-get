@@ -65,6 +65,7 @@
       :label="t('profile.phone')"
       :placeholder="t('profile.phonePlaceholder')"
       :rules="[(val) => !!val || t('profile.requiredPhone')]"
+      maxlength="10"
     />
   </div>
 </template>

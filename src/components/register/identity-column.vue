@@ -46,6 +46,7 @@
       :placeholder="t('profile.nationalIdPlaceholder')"
       :readonly="isEditMode"
       :rules="[(val) => !!val || t('profile.requiredNationalId')]"
+      maxlength="13"
     />
     <AppFormField
       v-else

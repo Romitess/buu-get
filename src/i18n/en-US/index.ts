@@ -422,6 +422,7 @@ export default {
     },
   },
   auth: {
+    systemDescription: 'English proficiency test comparable to CEFR standards',
     welcome: 'Welcome Back',
     signInToContinue: 'Sign in to continue',
     thaiPerson: 'Thai',

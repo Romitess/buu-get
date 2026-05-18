@@ -586,6 +586,7 @@ export default {
     },
   },
   auth: {
+    systemDescription: 'ระบบทดสอบวัดความสามารถทางภาษาอังกฤษ',
     welcome: 'ยินดีต้อนรับ',
     signInToContinue: 'เข้าสู่ระบบเพื่อใช้งาน',
     thaiPerson: 'คนไทย',
