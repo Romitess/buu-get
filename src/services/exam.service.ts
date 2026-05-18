@@ -24,10 +24,14 @@ import {
   EXAM_STATUS_UNPUBLISHED,
 } from 'src/constants/exam';
 
-/** Helper to clean and format time strings to HH:mm */
 export const formatTime = (timeStr: string | null | undefined): string => {
   if (!timeStr) return '00:00';
   return timeStr.replace(/\s/g, '').substring(0, 5);
+};
+
+export const formatBackendDate = (dateStr: string | null | undefined): string => {
+  if (!dateStr) return '';
+  return dateStr.includes('T') ? (dateStr.split('T')[0] ?? '') : dateStr;
 };
 
 export interface CreateExamPayload {
@@ -38,11 +42,11 @@ export interface CreateExamPayload {
   fee: string | number;
   seats: number;
   isPublished: boolean;
-  examDate: string; // DD/MM/YYYY (Buddhist)
-  regStartDate: string; // DD/MM/YYYY (Buddhist)
-  regEndDate: string; // DD/MM/YYYY (Buddhist)
-  payStartDate: string; // DD/MM/YYYY (Buddhist)
-  payEndDate: string; // DD/MM/YYYY (Buddhist)
+  examDate: string;
+  regStartDate: string;
+  regEndDate: string;
+  payStartDate: string;
+  payEndDate: string;
   timeRanges: { startTime: string; endTime: string }[];
   fundSourceId?: number;
 }
@@ -68,7 +72,7 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
     const schedule: Record<string, DayData> = {};
 
     exams.forEach((exam: BackendExam) => {
-      const date = exam.EXAM_DATE;
+      const date = formatBackendDate(exam.EXAM_DATE);
 
       const sortedSessions = [...(exam.SESSIONS || [])].sort((a, b) =>
         (a.SS_START_TIME || '').localeCompare(b.SS_START_TIME || ''),
@@ -91,7 +95,6 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
       }
 
       const dayData = schedule[date];
-      // Safety Filter: Only allow sessions from the same exam that initialized this date
       if (!dayData || dayData.examId !== exam.EXAM_ID) return;
 
       sortedSessions.forEach((session) => {
@@ -106,7 +109,7 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
           availableSeats: (session.SS_CAPACITY || 0) - (session.ENROLLMENTS?.length || 0),
           totalSeats: session.SS_CAPACITY || 0,
           regEndDate: exam.EXAM_REG_END_DATE,
-          examDate: exam.EXAM_DATE,
+          examDate: formatBackendDate(exam.EXAM_DATE),
         };
         dayData.rounds.push(round);
       });
@@ -129,7 +132,6 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
     const exams = response.data;
 
     return exams.map((exam) => {
-      // Calculate total capacity and registered count across all sessions
       let capacity = 0;
       let registeredCount = 0;
       let locationName = DEFAULT_LOCATION_TEXT;
@@ -153,7 +155,7 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
           exam.EXAM_TYPE === EXAM_TYPE_GENERAL || exam.EXAM_TYPE === INTERNAL_EXAM_TYPE_GENERAL
             ? INTERNAL_EXAM_TYPE_GENERAL
             : INTERNAL_EXAM_TYPE_SPECIAL,
-        examDate: exam.EXAM_DATE, // assuming it's in YYYY-MM-DD or ISO format from backend
+        examDate: formatBackendDate(exam.EXAM_DATE),
         examLocation: locationName,
         registeredCount,
         capacity,
@@ -171,7 +173,6 @@ export const fetchExamById = async (id: number): Promise<BackendExam> => {
     const response = await api.get<BackendExam>(`/exam/${id}`);
     return response.data;
   } catch (error) {
-    // Fallback: If /exam/:id fails, try fetching all and filtering
     const response = await api.get<BackendExam[]>('/exam');
     const found = response.data.find((e) => e.EXAM_ID === id);
     if (found) return found;
