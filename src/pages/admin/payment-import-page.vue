@@ -133,12 +133,24 @@ const uploadZoneRef = ref<InstanceType<typeof AppFileUploadZone> | null>(null);
 const {
   filteredRows,
   isLoading,
+  error,
   searchQuery,
   departmentLabel,
   parseFile,
   clearAllData,
   verifyData,
 } = usePaymentImport();
+
+watch(error, (newVal) => {
+  if (newVal) {
+    $q.notify({
+      type: 'negative',
+      message: newVal,
+      position: 'top',
+    });
+    uploadZoneRef.value?.reset();
+  }
+});
 
 // ── Event Handlers ────────────────────────────────────────
 const onFileSelected = (file: File): void => {

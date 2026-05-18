@@ -74,7 +74,7 @@ export function usePaymentImport() {
       const now = new Date();
       const importTimestamp = formatImportDate(now);
 
-      importedRows.value = dataLines.map((line, idx): PaymentImportRow => {
+      const parsed = dataLines.map((line, idx): PaymentImportRow => {
         const cols = line.split(',').map((c) => c.trim().replace(/^"|"$/g, ''));
         return {
           index: idx + 1,
@@ -88,10 +88,27 @@ export function usePaymentImport() {
           importedBy: currentUserName.value,
         };
       });
+
+      for (const row of parsed) {
+        if (row.applicantId.length > 20) {
+          throw new Error(
+            `Ref 1 (รหัสผู้สมัคร) "${row.applicantId}" ในแถวที่ ${row.index} มีความยาวเกิน 20 ตัวอักษร (สูงสุด 20 ตัวอักษร)`,
+          );
+        }
+        if (row.referenceNo.length > 20) {
+          throw new Error(
+            `Ref 2 (เลขที่อ้างอิง) "${row.referenceNo}" ในแถวที่ ${row.index} มีความยาวเกิน 20 ตัวอักษร (สูงสุด 20 ตัวอักษร)`,
+          );
+        }
+      }
+
+      importedRows.value = parsed;
     } catch (err) {
       console.error('Failed to parse payment file:', err);
-      error.value = 'ไม่สามารถอ่านไฟล์ได้ กรุณาตรวจสอบรูปแบบไฟล์';
+      error.value =
+        err instanceof Error ? err.message : 'ไม่สามารถอ่านไฟล์ได้ กรุณาตรวจสอบรูปแบบไฟล์';
       importedRows.value = [];
+      selectedFile.value = null;
     } finally {
       isLoading.value = false;
     }
