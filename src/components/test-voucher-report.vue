@@ -1,163 +1,235 @@
 <template>
-  <div>
+  <div class="q-pa-md page-container-test">
+    <!-- Action Bar (Hidden when printing) -->
+    <div class="row justify-end q-mb-md no-print">
+      <q-btn
+        color="primary"
+        icon="print"
+        label="พิมพ์ใบเข้าห้องสอบ (Print)"
+        class="print-btn shadow-2 text-weight-bold"
+        @click="windowPrint"
+      />
+    </div>
+
     <!-- Preview / Printable Area -->
     <div ref="voucherRef" class="voucher-wrapper">
-      <!-- ===== ส่วนบน: บัตรประจำตัวผู้เข้าสอบ ===== -->
       <div class="voucher-card">
-        <!-- Header Band -->
-        <div class="voucher-header">
-          <div class="row items-center q-gutter-sm">
-            <img src="~assets/img/buu-logo.png" style="width: 36px; height: auto" alt="BUU Logo" />
-            <div>
-              <div class="text-h6 text-weight-bold" style="letter-spacing: -0.5px">BUU-GET</div>
-              <div class="text-caption text-amber-2">Burapha University General English Test</div>
-            </div>
+        <!-- ===== Header Section ===== -->
+        <div class="voucher-header row items-center no-wrap">
+          <!-- Logo container -->
+          <div class="col-auto">
+            <img src="icons/logo-vocher.png" class="header-logo" alt="BUULI Logo" />
           </div>
-          <div class="text-right">
-            <div class="text-caption text-amber-2">เลขที่บัตร</div>
-            <div class="text-h6 text-weight-bold text-amber-3">{{ voucherData.voucherNo }}</div>
+
+          <!-- Titles -->
+          <div class="col text-center">
+            <h1 class="header-title">BUU-GET : Burapha University's Graduate English Test</h1>
+            <h2 class="header-subtitle">ADMISSION VOUCHER</h2>
           </div>
         </div>
 
-        <!-- Body -->
-        <div class="voucher-body">
-          <div class="row q-col-gutter-lg">
-            <!-- Left: Student Info -->
-            <div class="col-12 col-sm-8">
-              <div class="text-overline text-amber-9 q-mb-sm">ข้อมูลผู้เข้าสอบ</div>
+        <!-- ===== Body Section ===== -->
+        <div class="voucher-body relative-position">
+          <!-- Subtle Watermark Background -->
+          <div class="watermark-bg no-pointer-events">GET</div>
 
-              <div class="info-grid">
-                <div class="info-item">
-                  <q-icon name="person" size="18px" color="blue-grey-5" />
-                  <div>
-                    <div class="info-label">ชื่อ - นามสกุล</div>
-                    <div class="info-value">{{ voucherData.fullName }}</div>
-                  </div>
-                </div>
-                <div class="info-item">
-                  <q-icon name="badge" size="18px" color="blue-grey-5" />
-                  <div>
-                    <div class="info-label">รหัสนิสิต</div>
+          <div class="row q-col-gutter-lg items-stretch content-container">
+            <!-- Left: Profile Photo Column -->
+            <div class="col-12 col-sm-4 flex flex-center column">
+              <div class="profile-photo-wrapper shadow-1">
+                <template v-if="voucherData.profileImage">
+                  <q-img
+                    :src="voucherData.profileImage"
+                    class="full-height full-width profile-photo-img"
+                    fit="cover"
+                  />
+                </template>
+                <template v-else>
+                  <!-- SVG Vector Avatar -->
+                  <svg class="avatar-svg" viewBox="0 0 160 200" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100%" height="100%" fill="#1e89e5" />
+                    <path
+                      d="M 10 200 C 10 160, 40 145, 80 145 C 120 145, 150 160, 150 200 Z"
+                      fill="#8d5c4c"
+                    />
+                    <polygon points="80,145 60,170 100,170" fill="#ffffff" />
+                    <rect x="70" y="115" width="20" height="32" fill="#ffd1b3" />
+                    <path
+                      d="M 70 128 C 75 133, 85 133, 90 128 L 90 145 L 70 145 Z"
+                      fill="#e0b196"
+                    />
+                    <rect x="48" y="45" width="64" height="78" rx="32" fill="#ffd1b3" />
+                    <path
+                      d="M 44 50
+                         C 34 32, 54 10, 80 15
+                         C 106 10, 126 32, 116 50
+                         C 126 44, 126 34, 120 28
+                         C 114 22, 108 18, 92 24
+                         C 76 18, 54 22, 48 34 Z"
+                      fill="#1a1a1a"
+                    />
+                    <path d="M 45 45 C 43 55, 46 65, 49 70 L 49 50 Z" fill="#1a1a1a" />
+                    <path d="M 115 45 C 117 55, 114 65, 111 70 L 111 50 Z" fill="#1a1a1a" />
+                    <path
+                      d="M 54 68 Q 64 61 74 69"
+                      stroke="#1a1a1a"
+                      stroke-width="3"
+                      fill="none"
+                      stroke-linecap="round"
+                    />
+                    <path
+                      d="M 106 68 Q 96 61 86 69"
+                      stroke="#1a1a1a"
+                      stroke-width="3"
+                      fill="none"
+                      stroke-linecap="round"
+                    />
+                    <circle cx="64" cy="78" r="4.5" fill="#1a1a1a" />
+                    <circle cx="96" cy="78" r="4.5" fill="#1a1a1a" />
+                    <path
+                      d="M 80 75 L 80 92 L 75 92"
+                      stroke="#e0a080"
+                      stroke-width="2.5"
+                      fill="none"
+                      stroke-linecap="round"
+                    />
+                    <path
+                      d="M 64 104 Q 80 96 96 104 Q 80 110 64 104"
+                      fill="#1a1a1a"
+                      stroke="#1a1a1a"
+                      stroke-width="1"
+                    />
+                    <path
+                      d="M 72 114 Q 80 118 88 114"
+                      stroke="#e06060"
+                      stroke-width="2.5"
+                      fill="none"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </template>
+              </div>
+              <div class="photo-divider"></div>
+            </div>
+
+            <!-- Right: Details Grid -->
+            <div class="col-12 col-sm-8 detail-grid-column">
+              <div class="row q-col-gutter-y-lg full-height items-center">
+                <!-- Column 1 (Left details) -->
+                <div class="col-12 col-sm-6 detail-group">
+                  <div class="info-group">
+                    <label class="info-label">Test Taker ID:</label>
                     <div class="info-value">{{ voucherData.studentId }}</div>
                   </div>
+                  <div class="info-group">
+                    <label class="info-label">Name Surname:</label>
+                    <div class="info-value">{{ voucherData.fullName }}</div>
+                  </div>
+                  <div class="info-group">
+                    <label class="info-label">Citizen ID:</label>
+                    <div class="info-value">{{ voucherData.citizenId || '-' }}</div>
+                  </div>
+                  <div class="info-group">
+                    <label class="info-label">Test Session:</label>
+                    <div class="info-value">{{ voucherData.testSession || '-' }}</div>
+                  </div>
                 </div>
-                <div class="info-item">
-                  <q-icon name="event" size="18px" color="blue-grey-5" />
-                  <div>
-                    <div class="info-label">วันที่สอบ</div>
+
+                <!-- Column 2 (Right details) -->
+                <div class="col-12 col-sm-6 detail-group">
+                  <div class="info-group">
+                    <label class="info-label">Test Date:</label>
                     <div class="info-value">{{ voucherData.examDate }}</div>
                   </div>
-                </div>
-                <div class="info-item">
-                  <q-icon name="schedule" size="18px" color="blue-grey-5" />
-                  <div>
-                    <div class="info-label">เวลาสอบ</div>
+                  <div class="info-group">
+                    <label class="info-label">Time:</label>
                     <div class="info-value">{{ voucherData.examTime }}</div>
                   </div>
-                </div>
-                <div class="info-item">
-                  <q-icon name="place" size="18px" color="blue-grey-5" />
-                  <div>
-                    <div class="info-label">สถานที่สอบ</div>
+                  <div class="info-group">
+                    <label class="info-label">Venue:</label>
                     <div class="info-value">{{ voucherData.location }}</div>
                   </div>
-                </div>
-                <div class="info-item">
-                  <q-icon name="event_seat" size="18px" color="blue-grey-5" />
-                  <div>
-                    <div class="info-label">หมายเลขที่นั่ง</div>
-                    <div class="info-value text-weight-bold text-amber-9">
-                      {{ voucherData.seatNo }}
-                    </div>
+                  <div class="info-group">
+                    <label class="info-label">Seat Number:</label>
+                    <div class="info-value highlight-value">{{ voucherData.seatNo }}</div>
                   </div>
                 </div>
               </div>
             </div>
-
-            <!-- Right: Photo + QR -->
-            <div class="col-12 col-sm-4">
-              <div class="column items-center q-gutter-md">
-                <!-- Photo Placeholder -->
-                <div class="photo-frame">
-                  <q-icon name="account_circle" size="80px" color="blue-grey-2" />
-                  <div class="text-caption text-blue-grey-4 q-mt-xs">รูปถ่ายผู้เข้าสอบ</div>
-                </div>
-                <!-- QR Code Placeholder -->
-                <div class="qr-frame">
-                  <q-icon name="qr_code_2" size="72px" color="blue-grey-8" />
-                  <div class="text-caption text-blue-grey-5 q-mt-xs">สแกนเพื่อเช็คอิน</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Exam Round Info -->
-          <q-separator class="q-my-md" color="blue-grey-2" />
-          <div class="row items-center q-gutter-sm">
-            <q-icon name="menu_book" color="amber-8" size="24px" />
-            <div>
-              <div class="text-caption text-blue-grey-5">รอบสอบ</div>
-              <div class="text-subtitle1 text-weight-bold text-dark">
-                {{ voucherData.examName }}
-              </div>
-            </div>
-            <q-space />
-            <q-badge
-              color="amber-8"
-              text-color="black"
-              class="q-pa-sm text-weight-bold"
-              style="border-radius: 8px"
-            >
-              {{ voucherData.examType }}
-            </q-badge>
           </div>
         </div>
-      </div>
 
-      <!-- ===== เส้นประสำหรับตัดออก ===== -->
-      <div class="tear-line">
-        <div class="tear-line-dashes"></div>
-        <div class="tear-label">
-          <q-icon name="content_cut" size="16px" color="blue-grey-4" class="q-mr-xs" />
-          <span class="text-caption text-blue-grey-4"
-            >ตัดตามเส้นประ — ส่วนนี้ใช้สำหรับเข้าห้องสอบ</span
-          >
-        </div>
-        <div class="tear-line-dashes"></div>
-      </div>
-
-      <!-- ===== ส่วนล่าง: ส่วนที่ต้องตัดออก (Stub) ===== -->
-      <div class="voucher-stub">
-        <div class="row items-center q-gutter-md">
-          <div class="col">
-            <div class="row items-center q-gutter-sm q-mb-sm">
-              <img
-                src="~assets/img/buu-logo.png"
-                style="width: 24px; height: auto"
-                alt="BUU Logo"
-              />
-              <span class="text-subtitle2 text-weight-bold text-dark">BUU-GET</span>
+        <!-- ===== Barcode Footer Section ===== -->
+        <div class="voucher-footer flex flex-center column">
+          <div class="barcode-wrapper flex flex-center column bg-white q-pa-sm">
+            <!-- SVG Vector Barcode -->
+            <svg class="barcode-svg" viewBox="0 0 360 48" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" y="0" width="3" height="48" fill="#000" />
+              <rect x="6" y="0" width="1" height="48" fill="#000" />
+              <rect x="10" y="0" width="4" height="48" fill="#000" />
+              <rect x="18" y="0" width="2" height="48" fill="#000" />
+              <rect x="22" y="0" width="1" height="48" fill="#000" />
+              <rect x="26" y="0" width="3" height="48" fill="#000" />
+              <rect x="34" y="0" width="2" height="48" fill="#000" />
+              <rect x="40" y="0" width="1" height="48" fill="#000" />
+              <rect x="44" y="0" width="4" height="48" fill="#000" />
+              <rect x="52" y="0" width="2" height="48" fill="#000" />
+              <rect x="58" y="0" width="3" height="48" fill="#000" />
+              <rect x="64" y="0" width="1" height="48" fill="#000" />
+              <rect x="68" y="0" width="2" height="48" fill="#000" />
+              <rect x="74" y="0" width="4" height="48" fill="#000" />
+              <rect x="80" y="0" width="1" height="48" fill="#000" />
+              <rect x="84" y="0" width="3" height="48" fill="#000" />
+              <rect x="92" y="0" width="2" height="48" fill="#000" />
+              <rect x="98" y="0" width="1" height="48" fill="#000" />
+              <rect x="102" y="0" width="4" height="48" fill="#000" />
+              <rect x="110" y="0" width="2" height="48" fill="#000" />
+              <rect x="116" y="0" width="3" height="48" fill="#000" />
+              <rect x="122" y="0" width="1" height="48" fill="#000" />
+              <rect x="126" y="0" width="2" height="48" fill="#000" />
+              <rect x="132" y="0" width="4" height="48" fill="#000" />
+              <rect x="138" y="0" width="1" height="48" fill="#000" />
+              <rect x="142" y="0" width="3" height="48" fill="#000" />
+              <rect x="150" y="0" width="2" height="48" fill="#000" />
+              <rect x="156" y="0" width="1" height="48" fill="#000" />
+              <rect x="160" y="0" width="4" height="48" fill="#000" />
+              <rect x="168" y="0" width="2" height="48" fill="#000" />
+              <rect x="174" y="0" width="3" height="48" fill="#000" />
+              <rect x="180" y="0" width="1" height="48" fill="#000" />
+              <rect x="184" y="0" width="2" height="48" fill="#000" />
+              <rect x="190" y="0" width="4" height="48" fill="#000" />
+              <rect x="196" y="0" width="1" height="48" fill="#000" />
+              <rect x="200" y="0" width="3" height="48" fill="#000" />
+              <rect x="208" y="0" width="2" height="48" fill="#000" />
+              <rect x="214" y="0" width="1" height="48" fill="#000" />
+              <rect x="218" y="0" width="4" height="48" fill="#000" />
+              <rect x="226" y="0" width="2" height="48" fill="#000" />
+              <rect x="232" y="0" width="3" height="48" fill="#000" />
+              <rect x="238" y="0" width="1" height="48" fill="#000" />
+              <rect x="242" y="0" width="2" height="48" fill="#000" />
+              <rect x="248" y="0" width="4" height="48" fill="#000" />
+              <rect x="254" y="0" width="1" height="48" fill="#000" />
+              <rect x="258" y="0" width="3" height="48" fill="#000" />
+              <rect x="266" y="0" width="2" height="48" fill="#000" />
+              <rect x="272" y="0" width="1" height="48" fill="#000" />
+              <rect x="276" y="0" width="4" height="48" fill="#000" />
+              <rect x="284" y="0" width="2" height="48" fill="#000" />
+              <rect x="290" y="0" width="3" height="48" fill="#000" />
+              <rect x="296" y="0" width="1" height="48" fill="#000" />
+              <rect x="300" y="0" width="2" height="48" fill="#000" />
+              <rect x="306" y="0" width="4" height="48" fill="#000" />
+              <rect x="312" y="0" width="1" height="48" fill="#000" />
+              <rect x="316" y="0" width="3" height="48" fill="#000" />
+              <rect x="324" y="0" width="2" height="48" fill="#000" />
+              <rect x="330" y="0" width="1" height="48" fill="#000" />
+              <rect x="334" y="0" width="4" height="48" fill="#000" />
+              <rect x="342" y="0" width="2" height="48" fill="#000" />
+              <rect x="348" y="0" width="3" height="48" fill="#000" />
+              <rect x="354" y="0" width="1" height="48" fill="#000" />
+            </svg>
+            <div class="barcode-value text-weight-bold text-uppercase">
+              {{ voucherData.barcodeValue || voucherData.voucherNo }}
             </div>
-            <div class="stub-info-row">
-              <span class="stub-label">ชื่อ:</span>
-              <span class="stub-value">{{ voucherData.fullName }}</span>
-            </div>
-            <div class="stub-info-row">
-              <span class="stub-label">รหัสนิสิต:</span>
-              <span class="stub-value">{{ voucherData.studentId }}</span>
-            </div>
-            <div class="stub-info-row">
-              <span class="stub-label">ที่นั่ง:</span>
-              <span class="stub-value text-weight-bold text-amber-9">{{ voucherData.seatNo }}</span>
-            </div>
-          </div>
-          <div class="stub-qr">
-            <q-icon name="qr_code_2" size="56px" color="blue-grey-7" />
-          </div>
-          <div class="text-right">
-            <div class="text-caption text-blue-grey-5">เลขที่บัตร</div>
-            <div class="text-subtitle1 text-weight-bold text-dark">{{ voucherData.voucherNo }}</div>
-            <div class="text-caption text-blue-grey-5 q-mt-xs">{{ voucherData.examDate }}</div>
           </div>
         </div>
       </div>
@@ -169,185 +241,283 @@
 import { computed } from 'vue';
 import type { VoucherData } from 'src/types/voucher';
 
-// ===== Props & Interface =====
+// ===== Props =====
 const props = defineProps<{
-  /** ข้อมูลบัตรประจำตัว — ถ้าไม่ส่งจะใช้ Mock Data */
+  /** ข้อมูลบัตรประจำตัว — ถ้าไม่ส่งจะใช้ Mock Data ตามรูปภาพ */
   data?: VoucherData | undefined;
 }>();
 
-// ===== Mock Data (ใช้เมื่อไม่มี props.data) =====
+// ===== Mock Data (ตรงตามรูปภาพ) =====
 const mockData: VoucherData = {
   id: 1,
-  fullName: 'นายสมชาย รักดี',
-  studentId: '66160062',
-  examName: 'BUU-GET รอบที่ 1/2569',
-  examDate: '30 พ.ค. 2569',
-  examTime: '09:00 - 12:00 น.',
+  fullName: 'Mr. Somdream Jaidee',
+  studentId: '66100001',
+  examName: 'BUU-GET : Burapha University\u2019s Graduate English Test',
+  examDate: '15 May 2026',
+  examTime: '08.00 AM - 10.00 AM',
   examType: 'ทั่วไป',
-  location: 'ตึก QS2 ชั้น 3 ห้อง 301 มหาวิทยาลัยบูรพา',
-  seatNo: 'A-042',
-  voucherNo: 'VCH-2569-00142',
+  location: 'QS1, Burapha University',
+  seatNo: 'A1',
+  voucherNo: 'ENG2026-001',
+  citizenId: '1-1234-12345-12-1',
+  testSession: 'X/XXXX',
 };
 
 const voucherData = computed<VoucherData>(() => props.data ?? mockData);
+
+// ===== Action: Window Print =====
+const windowPrint = (): void => {
+  window.print();
+};
 </script>
 
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap');
+<style scoped lang="scss">
+// Import fonts matching app design system
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@100;200;300;400;500;600;700;800&display=swap');
+
+.page-container-test {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--surface-page);
+  min-height: 100%;
+  padding: 24px 16px;
+}
+
+.print-btn {
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-family: 'Sarabun', sans-serif;
+  letter-spacing: 0.5px;
+}
 
 .voucher-wrapper {
-  font-family: 'Noto Sans Thai', sans-serif;
+  width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  color: #263238;
+  font-family: 'Outfit', 'Sarabun', 'Inter', sans-serif;
 }
 
-/* ===== Header Band ===== */
+.voucher-card {
+  width: 100%;
+  background-color: var(--surface-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+/* ===== Header Area ===== */
 .voucher-header {
-  background: linear-gradient(135deg, #263238 0%, #37474f 100%);
-  color: white;
   padding: 20px 28px;
-  border-radius: 12px 12px 0 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background-color: var(--surface-card);
+  border-bottom: 2px solid #cbd5e1 !important;
+
+  .header-logo {
+    height: 56px;
+    object-fit: contain;
+  }
+
+  .header-title {
+    font-family: 'Sarabun', sans-serif !important;
+    font-weight: 500 !important;
+    font-style: normal !important;
+    font-size: 20px !important;
+    line-height: 100% !important;
+    letter-spacing: 0% !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    color: var(--primary) !important;
+    margin: 0 0 6px 0 !important;
+  }
+
+  .header-subtitle {
+    font-family: 'Sarabun', sans-serif !important;
+    font-weight: 500 !important;
+    font-style: normal !important;
+    font-size: 20px !important;
+    line-height: 100% !important;
+    letter-spacing: 0% !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    color: #475569 !important;
+    margin: 0 !important;
+  }
 }
 
-/* ===== Body ===== */
+/* ===== Body Area ===== */
 .voucher-body {
-  background: #ffffff;
-  padding: 28px;
-  border-left: 1px solid #e0e0e0;
-  border-right: 1px solid #e0e0e0;
+  padding: 32px;
+  background-color: #f8fbff;
+  min-height: 280px;
+
+  .content-container {
+    position: relative;
+    z-index: 1;
+  }
 }
 
-/* ===== Info Grid ===== */
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
+/* ===== Watermark ===== */
+.watermark-bg {
+  position: absolute;
+  top: 50%;
+  left: 65%;
+  transform: translate(-50%, -50%);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-style: normal;
+  font-size: 240px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+  color: rgba(30, 137, 229, 0.07);
+  z-index: 0;
+  user-select: none;
+  pointer-events: none;
 }
 
-.info-item {
+/* ===== Profile Photo ===== */
+.profile-photo-wrapper {
+  width: 156px;
+  height: 196px;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+  overflow: hidden;
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.info-label {
-  font-size: 0.7rem;
-  color: #78909c;
-  font-weight: 500;
-  margin-bottom: 2px;
-}
-
-.info-value {
-  font-size: 0.9rem;
-  color: #263238;
-  font-weight: 500;
-}
-
-/* ===== Photo & QR ===== */
-.photo-frame {
-  width: 120px;
-  height: 140px;
-  border: 2px dashed #b0bec5;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: #fafafa;
+  border: 3px solid #ffffff;
+
+  .profile-photo-img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .avatar-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
 }
 
-.qr-frame {
-  width: 120px;
-  height: 110px;
-  border: 1px solid #cfd8dc;
-  border-radius: 10px;
+.photo-divider {
+  width: 156px;
+  height: 2px;
+  background-color: #94a3b8;
+  margin-top: 14px;
+  border-radius: 1px;
+}
+
+/* ===== Detail Grid ===== */
+.detail-grid-column {
+  padding-left: 20px !important;
+}
+
+.detail-group {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: #fafafa;
+  gap: 16px;
 }
 
-/* ===== Tear Line ===== */
-.tear-line {
+.info-group {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-  background: #ffffff;
-  border-left: 1px solid #e0e0e0;
-  border-right: 1px solid #e0e0e0;
+  flex-direction: column;
+
+  .info-label {
+    font-family: 'Sarabun', sans-serif !important;
+    font-size: 14px !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    margin-bottom: 2px;
+  }
+
+  .info-value {
+    font-family: 'Sarabun', sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 500 !important;
+    color: var(--primary) !important;
+    line-height: 1.3;
+    letter-spacing: 0px !important;
+
+    &.highlight-value {
+      font-weight: 600 !important;
+    }
+  }
 }
 
-.tear-line-dashes {
-  flex: 1;
-  border-top: 2px dashed #b0bec5;
-}
-
-.tear-label {
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-  padding: 0 8px;
-}
-
-/* ===== Stub (ส่วนตัดออก) ===== */
-.voucher-stub {
-  background: #f5f5f5;
-  padding: 20px 28px;
-  border: 1px solid #e0e0e0;
+/* ===== Barcode Footer Area ===== */
+.voucher-footer {
+  padding: 16px 24px 28px 24px;
+  background-color: #f8fbff; /* Seamlessly matches card body background */
   border-top: none;
-  border-radius: 0 0 12px 12px;
+
+  .barcode-wrapper {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+
+    .barcode-svg {
+      width: 320px;
+      height: 48px;
+    }
+
+    .barcode-value {
+      font-family: 'Inter', sans-serif !important;
+      font-weight: 700 !important;
+      font-style: normal !important;
+      font-size: 13.46px !important;
+      line-height: 100% !important;
+      letter-spacing: 0% !important;
+      text-align: center !important;
+      color: #1a1a1a !important;
+      margin-top: 6px !important;
+    }
+  }
 }
 
-.stub-info-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 4px;
-  font-size: 0.85rem;
-}
-
-.stub-label {
-  color: #78909c;
-  font-weight: 500;
-  min-width: 70px;
-}
-
-.stub-value {
-  color: #263238;
-}
-
-.stub-qr {
-  padding: 8px;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #eceff1;
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 599px) {
-  .info-grid {
-    grid-template-columns: 1fr;
+/* ===== Responsive Adaptability ===== */
+@media (max-width: 768px) {
+  .detail-grid-column {
+    padding-left: 0 !important;
+    margin-top: 20px;
   }
   .voucher-header {
     flex-direction: column;
-    gap: 12px;
+    padding: 20px;
+    gap: 16px;
     text-align: center;
+  }
+  .voucher-body {
+    padding: 20px;
+  }
+  .watermark-bg {
+    font-size: 10rem;
+    left: 50%;
   }
 }
 
-/* ===== Print Styles ===== */
+/* ===== Print Optimization ===== */
 @media print {
+  body {
+    background-color: #ffffff !important;
+  }
   .no-print {
     display: none !important;
   }
+  .page-container-test {
+    padding: 0 !important;
+    background-color: transparent !important;
+  }
   .voucher-wrapper {
-    box-shadow: none;
-    max-width: 100%;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+  .voucher-card {
+    border: none !important;
+    box-shadow: none !important;
   }
 }
 </style>
