@@ -105,6 +105,7 @@ const emit = defineEmits<{
   (e: 'manageSeats', id: string): void;
   (e: 'viewCandidates', id: string): void;
   (e: 'manageScores', id: string): void;
+  (e: 'printAdmitCard', id: string): void;
 }>();
 
 const TABLE_ACTIONS = {
