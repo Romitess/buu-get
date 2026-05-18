@@ -192,7 +192,6 @@ export default {
     thaidRegister: 'Sign up with ThaID',
     personalInfo: 'Personal Information',
     or: 'or',
-    next: 'Next',
   },
   carousel: {
     page1: {

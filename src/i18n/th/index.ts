@@ -163,7 +163,6 @@ export default {
     thaidRegister: 'สมัครสมาชิกด้วย ThaID',
     personalInfo: 'ข้อมูลส่วนตัว',
     or: 'หรือ',
-    next: 'ถัดไป',
   },
   payment: {
     dialog: {
