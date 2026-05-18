@@ -6,6 +6,15 @@ export const fetchAllEnrollments = async (): Promise<BackendEnrollmentDetail[]> 
   return response.data;
 };
 
+export const fetchMatchedEnrollments = async (
+  refs: string[],
+): Promise<BackendEnrollmentDetail[]> => {
+  const response = await api.post<BackendEnrollmentDetail[]>('/exam-enrollments/match-import', {
+    refs,
+  });
+  return response.data;
+};
+
 export const fetchEnrollmentsByExamId = async (examId: number): Promise<EnrollmentTableRow[]> => {
   const response = await api.get<BackendEnrollmentDetail[]>(`/exam-enrollments/exam/${examId}`);
 

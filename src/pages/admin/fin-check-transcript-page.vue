@@ -41,7 +41,7 @@
               <q-th>{{ t('admin.paymentImport.table.amount') }}</q-th>
               <q-th>{{ t('admin.paymentImport.table.applicantId') }}</q-th>
               <q-th>{{ t('admin.paymentImport.table.referenceNo') }}</q-th>
-              <q-th>{{ t('admin.registrantManagement.table.columns.fullName') }}</q-th>
+              <q-th>{{ t('admin.paymentImport.table.payerName') }}</q-th>
               <q-th>{{ t('admin.paymentImport.table.amount') }}</q-th>
             </q-tr>
           </template>
@@ -209,7 +209,7 @@ import SearchBar from 'src/components/shared/search-bar.vue';
 import SearchUser from 'src/components/shared/search-user.vue';
 import FinSaveTranscription from 'src/components/shared/fin-save-transcription.vue';
 import { globalImportedRows } from 'src/composables/use-payment-import';
-import { fetchAllEnrollments } from 'src/services/enrollment.service';
+import { fetchMatchedEnrollments } from 'src/services/enrollment.service';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 import type { PaymentRow } from 'src/types/exam.types';
 
@@ -221,18 +221,41 @@ const transcriptRows = ref<PaymentRow[]>([]);
 const isLoading = ref(false);
 const allEnrollments = ref<BackendEnrollmentDetail[]>([]);
 
+const formatCurrency = (amount: string | number): string => {
+  if (!amount) return '-';
+  const num = typeof amount === 'string' ? parseFloat(amount.replace(/,/g, '')) : amount;
+  if (isNaN(num)) return String(amount);
+  return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
+const findMatchingEnrollment = (ref1: string, ref2: string) => {
+  return allEnrollments.value.find(
+    (e) =>
+      e.USER?.USER_NATIONAL_ID === ref1 || String(e.ERM_ID) === ref1 || String(e.ERM_ID) === ref2,
+  );
+};
+
 const loadData = async () => {
   isLoading.value = true;
   try {
-    allEnrollments.value = await fetchAllEnrollments();
+    // Extract unique references from imported rows
+    const uniqueRefs = new Set<string>();
+    globalImportedRows.value.forEach((row) => {
+      if (row.applicantId && row.applicantId !== '-') uniqueRefs.add(row.applicantId);
+      if (row.referenceNo && row.referenceNo !== '-') uniqueRefs.add(row.referenceNo);
+    });
+
+    const refsArray = Array.from(uniqueRefs);
+
+    // Call the new optimized API endpoint to fetch only matched records
+    if (refsArray.length > 0) {
+      allEnrollments.value = await fetchMatchedEnrollments(refsArray);
+    } else {
+      allEnrollments.value = [];
+    }
 
     transcriptRows.value = globalImportedRows.value.map((imported) => {
-      const matched = allEnrollments.value.find(
-        (e) =>
-          e.USER?.USER_NATIONAL_ID === imported.applicantId ||
-          String(e.ERM_ID) === imported.applicantId ||
-          String(e.ERM_ID) === imported.referenceNo,
-      );
+      const matched = findMatchingEnrollment(imported.applicantId, imported.referenceNo);
 
       return {
         id: imported.index,
@@ -241,11 +264,13 @@ const loadData = async () => {
         file_ref: imported.applicantId,
         file_ref2: imported.referenceNo,
         file_payer: imported.payerName,
-        file_amount: imported.amount,
+        file_amount: formatCurrency(imported.amount),
         db_ref: matched ? matched.USER?.USER_NATIONAL_ID || String(matched.ERM_ID) : '',
         db_ref2: matched ? String(matched.ERM_ID) : '',
         db_name: matched ? matched.USER?.PROFILE?.userFullnameTh || '-' : '',
-        db_amount: matched?.SESSION?.EXAM?.EXAM_FEE ? String(matched.SESSION.EXAM.EXAM_FEE) : '',
+        db_amount: matched?.SESSION?.EXAM?.EXAM_FEE
+          ? formatCurrency(matched.SESSION.EXAM.EXAM_FEE)
+          : '',
       };
     });
   } catch (err) {
@@ -365,24 +390,19 @@ const handleEdit = (row: PaymentRow) => {
 
 const handleSave = () => {
   if (selectedRow.value) {
-    const row = transcriptRows.value.find((r) => r.id === selectedRow.value?.id);
-    if (row) {
-      row.file_ref = editForm.value.ref1;
-      row.file_ref2 = editForm.value.ref2;
+    const row = selectedRow.value;
+    row.file_ref = editForm.value.ref1;
+    row.file_ref2 = editForm.value.ref2;
 
-      // Re-match against the modified refs
-      const matched = allEnrollments.value.find(
-        (e) =>
-          e.USER?.USER_NATIONAL_ID === row.file_ref ||
-          String(e.ERM_ID) === row.file_ref ||
-          String(e.ERM_ID) === row.file_ref2,
-      );
+    // Re-match against the modified refs
+    const matched = findMatchingEnrollment(row.file_ref, row.file_ref2);
 
-      row.db_ref = matched ? matched.USER?.USER_NATIONAL_ID || String(matched.ERM_ID) : '';
-      row.db_ref2 = matched ? String(matched.ERM_ID) : '';
-      row.db_name = matched ? matched.USER?.PROFILE?.userFullnameTh || '-' : '';
-      row.db_amount = matched?.SESSION?.EXAM?.EXAM_FEE ? String(matched.SESSION.EXAM.EXAM_FEE) : '';
-    }
+    row.db_ref = matched ? matched.USER?.USER_NATIONAL_ID || String(matched.ERM_ID) : '';
+    row.db_ref2 = matched ? String(matched.ERM_ID) : '';
+    row.db_name = matched ? matched.USER?.PROFILE?.userFullnameTh || '-' : '';
+    row.db_amount = matched?.SESSION?.EXAM?.EXAM_FEE
+      ? formatCurrency(matched.SESSION.EXAM.EXAM_FEE)
+      : '';
   }
   isDialogOpened.value = false;
 };
