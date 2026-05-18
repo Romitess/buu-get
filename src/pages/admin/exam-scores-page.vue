@@ -1,236 +1,234 @@
 <template>
-  <q-page class="scores-page q-px-lg q-px-sm-xl q-py-lg">
-    <div class="full-width">
-      <AppBreadcrumbs />
-      <AppPageHeader
-        :title="$t('admin.scoreManagement.pageTitle')"
-        :subtitle="$t('admin.scoreManagement.pageSubtitle')"
+  <q-page class="page-container scores-page">
+    <AppBreadcrumbs />
+    <AppPageHeader
+      :title="$t('admin.scoreManagement.pageTitle')"
+      :subtitle="$t('admin.scoreManagement.pageSubtitle')"
+    />
+
+    <AppExamSessionTabs v-model="selectedSessionId" :sessions="exam?.SESSIONS" />
+
+    <AppExamInfoCard
+      v-if="exam"
+      class="q-mb-md"
+      :title="exam.EXAM_NAME"
+      :date="formatThaiDate(exam.EXAM_DATE)"
+      :time="selectedSessionTime"
+      :location="selectedSessionLocation"
+      :applicant-count="sessionTotalCount"
+      is-admin
+      is-score
+    />
+
+    <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
+      <SearchBar
+        v-model="searchQuery"
+        :placeholder="$t('admin.registrantManagement.searchPlaceholder')"
+        class="search-bar col-12 col-md-auto"
       />
-
-      <AppExamSessionTabs v-model="selectedSessionId" :sessions="exam?.SESSIONS" />
-
-      <AppExamInfoCard
-        v-if="exam"
-        class="q-mb-md"
-        :title="exam.EXAM_NAME"
-        :date="formatThaiDate(exam.EXAM_DATE)"
-        :time="selectedSessionTime"
-        :location="selectedSessionLocation"
-        :applicant-count="sessionTotalCount"
-        is-admin
-        is-score
-      />
-
-      <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
-        <SearchBar
-          v-model="searchQuery"
-          :placeholder="$t('admin.registrantManagement.searchPlaceholder')"
-          class="search-bar col-12 col-md-auto"
+      <q-space class="gt-sm" />
+      <div class="row q-gutter-sm col-12 col-md-auto justify-end">
+        <input
+          type="file"
+          ref="fileInput"
+          accept=".csv"
+          style="display: none"
+          @change="handleFileSelect"
         />
-        <q-space class="gt-sm" />
-        <div class="row q-gutter-sm col-12 col-md-auto justify-end">
-          <input
-            type="file"
-            ref="fileInput"
-            accept=".csv"
-            style="display: none"
-            @change="handleFileSelect"
-          />
-          <q-btn
-            color="primary"
-            class="action-btn text-weight-bold br-sm"
-            unelevated
-            icon="file_upload"
-            :label="$t('admin.scoreManagement.importButton')"
-            @click="showImportDialog = true"
-          />
-          <ExportCsvButton
-            :columns="columns"
-            :rows="scoreRows"
-            file-name-prefix="exam-scores"
-            class="export-btn text-weight-bold br-sm"
-            color="primary"
-            unelevated
-            icon="file_download"
-            :label="$t('admin.scoreManagement.exportCsv')"
-          />
-        </div>
-      </nav>
-
-      <main>
-        <BaseTable
+        <q-btn
+          color="primary"
+          class="action-btn text-weight-bold br-sm"
+          unelevated
+          icon="file_upload"
+          :label="$t('admin.scoreManagement.importButton')"
+          @click="showImportDialog = true"
+        />
+        <ExportCsvButton
           :columns="columns"
           :rows="scoreRows"
-          :loading="isLoading"
-          :pagination="pagination"
-          class="scores-table"
-          @request="onRequest"
-        >
-          <template v-slot:body-cell-index="{ row }">
-            <div class="text-center">{{ row.index }}</div>
-          </template>
+          file-name-prefix="exam-scores"
+          class="export-btn text-weight-bold br-sm"
+          color="primary"
+          unelevated
+          icon="file_download"
+          :label="$t('admin.scoreManagement.exportCsv')"
+        />
+      </div>
+    </nav>
 
-          <template v-slot:body-cell-nationalId="{ row }">
-            <div class="text-center">{{ row.nationalId }}</div>
-          </template>
+    <main>
+      <BaseTable
+        :columns="columns"
+        :rows="scoreRows"
+        :loading="isLoading"
+        :pagination="pagination"
+        class="scores-table"
+        @request="onRequest"
+      >
+        <template v-slot:body-cell-index="{ row }">
+          <div class="text-center">{{ row.index }}</div>
+        </template>
 
-          <template v-slot:body-cell-titleTh="{ row }">
-            <div class="text-center">{{ row.titleTh }}</div>
-          </template>
+        <template v-slot:body-cell-nationalId="{ row }">
+          <div class="text-center">{{ row.nationalId }}</div>
+        </template>
 
-          <template v-slot:body-cell-fullnameTh="{ row }">
-            <div class="text-left q-pl-md">{{ row.fullnameTh }}</div>
-          </template>
+        <template v-slot:body-cell-titleTh="{ row }">
+          <div class="text-center">{{ row.titleTh }}</div>
+        </template>
 
-          <template v-slot:body-cell-scoreGrammar="{ row }">
-            <div class="flex flex-center">
+        <template v-slot:body-cell-fullnameTh="{ row }">
+          <div class="text-left q-pl-md">{{ row.fullnameTh }}</div>
+        </template>
+
+        <template v-slot:body-cell-scoreGrammar="{ row }">
+          <div class="flex flex-center">
+            <q-input
+              v-model.number="row.scoreGrammar"
+              dense
+              outlined
+              type="number"
+              class="score-input"
+              input-class="text-center"
+              @update:model-value="calculateTotal(row)"
+            />
+          </div>
+        </template>
+
+        <template v-slot:body-cell-scoreReading="{ row }">
+          <div class="flex flex-center">
+            <q-input
+              v-model.number="row.scoreReading"
+              dense
+              outlined
+              type="number"
+              class="score-input"
+              input-class="text-center"
+              @update:model-value="calculateTotal(row)"
+            />
+          </div>
+        </template>
+
+        <template v-slot:body-cell-scoreTotal="{ row }">
+          <div class="text-center text-weight-bold text-primary">
+            {{ row.scoreTotal }}
+          </div>
+        </template>
+
+        <template v-slot:body-cell-band="{ row }">
+          <div class="text-center text-weight-bold">
+            {{ row.band }}
+          </div>
+        </template>
+      </BaseTable>
+    </main>
+
+    <!-- Import Dialog -->
+    <q-dialog v-model="showImportDialog">
+      <q-card class="import-dialog-card q-pa-sm">
+        <q-card-section>
+          <div class="text-h6 text-weight-bold q-mb-lg">
+            {{ $t('admin.scoreManagement.importDialog.title') }}
+          </div>
+          <div class="row q-col-gutter-md">
+            <!-- CSV Option -->
+            <div class="col-12 col-sm-6">
+              <q-card
+                flat
+                bordered
+                class="import-option-card full-height column flex-center q-pa-xl text-center cursor-pointer"
+                v-ripple
+                @click="handleCsvOptionClick"
+              >
+                <q-icon name="description" size="56px" color="primary" class="q-mb-md" />
+                <div class="text-subtitle1 text-weight-bold text-dark q-mb-sm">
+                  {{ $t('admin.scoreManagement.importDialog.csvOption.title') }}
+                </div>
+                <div class="text-caption text-grey-7 wrap-text">
+                  {{ $t('admin.scoreManagement.importDialog.csvOption.description') }}
+                </div>
+              </q-card>
+            </div>
+
+            <!-- MOODLE Option -->
+            <div class="col-12 col-sm-6">
+              <q-card
+                flat
+                bordered
+                class="import-option-card full-height column flex-center q-pa-xl text-center cursor-pointer"
+                v-ripple
+              >
+                <q-icon name="menu_book" size="56px" color="primary" class="q-mb-md" />
+                <div class="text-subtitle1 text-weight-bold text-dark q-mb-sm">
+                  {{ $t('admin.scoreManagement.importDialog.moodleOption.title') }}
+                </div>
+                <div class="text-caption text-grey-7 wrap-text">
+                  {{ $t('admin.scoreManagement.importDialog.moodleOption.description') }}
+                </div>
+              </q-card>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <!-- Upload Dialog -->
+    <q-dialog v-model="showUploadDialog">
+      <q-card class="upload-dialog-card q-pa-md">
+        <q-card-section class="row items-center justify-between q-pb-none">
+          <div class="text-h6 text-weight-bold">
+            {{ $t('admin.scoreManagement.uploadDialog.title') }}
+          </div>
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <!-- Drag and Drop Zone -->
+          <div
+            class="drop-zone column flex-center q-pa-xl cursor-pointer"
+            :class="{ 'drop-zone--active': isDragging }"
+            @click="triggerImport"
+            @dragover.prevent="isDragging = true"
+            @dragenter.prevent="isDragging = true"
+            @dragleave.prevent="isDragging = false"
+            @drop.prevent="handleDrop"
+          >
+            <q-icon name="cloud_upload" size="80px" color="dark" class="q-mb-md" />
+            <div class="text-subtitle1 text-weight-bold text-dark text-center">
+              {{ $t('admin.scoreManagement.uploadDialog.dragDropText') }}
+            </div>
+            <div class="text-caption text-grey-7 text-center q-mt-sm">
+              {{ $t('admin.scoreManagement.uploadDialog.supportedFiles') }}
+            </div>
+          </div>
+
+          <!-- URL Input Section -->
+          <div class="q-mt-lg">
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">
+              {{ $t('admin.scoreManagement.uploadDialog.orUrlText') }}
+            </div>
+            <div class="row q-gutter-sm items-center">
               <q-input
-                v-model.number="row.scoreGrammar"
-                dense
+                v-model="fileUrl"
                 outlined
-                type="number"
-                class="score-input"
-                input-class="text-center"
-                @update:model-value="calculateTotal(row)"
+                dense
+                class="col"
+                :placeholder="$t('admin.scoreManagement.uploadDialog.urlPlaceholder')"
+              />
+              <q-btn
+                color="grey-3"
+                text-color="dark"
+                unelevated
+                class="text-weight-bold br-sm q-px-md"
+                style="height: 40px"
+                :label="$t('admin.scoreManagement.uploadDialog.uploadBtn')"
+                @click="handleUrlUpload"
               />
             </div>
-          </template>
-
-          <template v-slot:body-cell-scoreReading="{ row }">
-            <div class="flex flex-center">
-              <q-input
-                v-model.number="row.scoreReading"
-                dense
-                outlined
-                type="number"
-                class="score-input"
-                input-class="text-center"
-                @update:model-value="calculateTotal(row)"
-              />
-            </div>
-          </template>
-
-          <template v-slot:body-cell-scoreTotal="{ row }">
-            <div class="text-center text-weight-bold text-primary">
-              {{ row.scoreTotal }}
-            </div>
-          </template>
-
-          <template v-slot:body-cell-band="{ row }">
-            <div class="text-center text-weight-bold">
-              {{ row.band }}
-            </div>
-          </template>
-        </BaseTable>
-      </main>
-
-      <!-- Import Dialog -->
-      <q-dialog v-model="showImportDialog">
-        <q-card class="import-dialog-card q-pa-sm">
-          <q-card-section>
-            <div class="text-h6 text-weight-bold q-mb-lg">
-              {{ $t('admin.scoreManagement.importDialog.title') }}
-            </div>
-            <div class="row q-col-gutter-md">
-              <!-- CSV Option -->
-              <div class="col-12 col-sm-6">
-                <q-card
-                  flat
-                  bordered
-                  class="import-option-card full-height column flex-center q-pa-xl text-center cursor-pointer"
-                  v-ripple
-                  @click="handleCsvOptionClick"
-                >
-                  <q-icon name="description" size="56px" color="primary" class="q-mb-md" />
-                  <div class="text-subtitle1 text-weight-bold text-dark q-mb-sm">
-                    {{ $t('admin.scoreManagement.importDialog.csvOption.title') }}
-                  </div>
-                  <div class="text-caption text-grey-7 wrap-text">
-                    {{ $t('admin.scoreManagement.importDialog.csvOption.description') }}
-                  </div>
-                </q-card>
-              </div>
-
-              <!-- MOODLE Option -->
-              <div class="col-12 col-sm-6">
-                <q-card
-                  flat
-                  bordered
-                  class="import-option-card full-height column flex-center q-pa-xl text-center cursor-pointer"
-                  v-ripple
-                >
-                  <q-icon name="menu_book" size="56px" color="primary" class="q-mb-md" />
-                  <div class="text-subtitle1 text-weight-bold text-dark q-mb-sm">
-                    {{ $t('admin.scoreManagement.importDialog.moodleOption.title') }}
-                  </div>
-                  <div class="text-caption text-grey-7 wrap-text">
-                    {{ $t('admin.scoreManagement.importDialog.moodleOption.description') }}
-                  </div>
-                </q-card>
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </q-dialog>
-
-      <!-- Upload Dialog -->
-      <q-dialog v-model="showUploadDialog">
-        <q-card class="upload-dialog-card q-pa-md">
-          <q-card-section class="row items-center justify-between q-pb-none">
-            <div class="text-h6 text-weight-bold">
-              {{ $t('admin.scoreManagement.uploadDialog.title') }}
-            </div>
-            <q-btn icon="close" flat round dense v-close-popup />
-          </q-card-section>
-
-          <q-card-section>
-            <!-- Drag and Drop Zone -->
-            <div
-              class="drop-zone column flex-center q-pa-xl cursor-pointer"
-              :class="{ 'drop-zone--active': isDragging }"
-              @click="triggerImport"
-              @dragover.prevent="isDragging = true"
-              @dragenter.prevent="isDragging = true"
-              @dragleave.prevent="isDragging = false"
-              @drop.prevent="handleDrop"
-            >
-              <q-icon name="cloud_upload" size="80px" color="dark" class="q-mb-md" />
-              <div class="text-subtitle1 text-weight-bold text-dark text-center">
-                {{ $t('admin.scoreManagement.uploadDialog.dragDropText') }}
-              </div>
-              <div class="text-caption text-grey-7 text-center q-mt-sm">
-                {{ $t('admin.scoreManagement.uploadDialog.supportedFiles') }}
-              </div>
-            </div>
-
-            <!-- URL Input Section -->
-            <div class="q-mt-lg">
-              <div class="text-subtitle2 text-weight-bold q-mb-sm">
-                {{ $t('admin.scoreManagement.uploadDialog.orUrlText') }}
-              </div>
-              <div class="row q-gutter-sm items-center">
-                <q-input
-                  v-model="fileUrl"
-                  outlined
-                  dense
-                  class="col"
-                  :placeholder="$t('admin.scoreManagement.uploadDialog.urlPlaceholder')"
-                />
-                <q-btn
-                  color="grey-3"
-                  text-color="dark"
-                  unelevated
-                  class="text-weight-bold br-sm q-px-md"
-                  style="height: 40px"
-                  :label="$t('admin.scoreManagement.uploadDialog.uploadBtn')"
-                  @click="handleUrlUpload"
-                />
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
-      </q-dialog>
-    </div>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 

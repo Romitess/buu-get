@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="page-container fin-check-transcript-page">
     <!-- Breadcrumbs -->
     <app-breadcrumbs />
 

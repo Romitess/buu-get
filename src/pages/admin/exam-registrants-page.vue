@@ -1,93 +1,95 @@
 <template>
-  <q-page class="registrants-page q-px-lg q-px-sm-xl q-py-lg">
-    <div class="full-width">
-      <AppBreadcrumbs />
-      <AppPageHeader
-        :title="$t('admin.registrantManagement.pageTitle')"
-        :subtitle="$t('admin.registrantManagement.pageSubtitle')"
+  <q-page class="page-container registrants-page">
+    <AppBreadcrumbs />
+    <AppPageHeader
+      :title="$t('admin.registrantManagement.pageTitle')"
+      :subtitle="$t('admin.registrantManagement.pageSubtitle')"
+    />
+
+    <AppExamSessionTabs v-model="selectedSessionId" :sessions="exam?.SESSIONS" />
+
+    <AppExamInfoCard
+      v-if="exam"
+      class="q-mb-md"
+      :title="exam.EXAM_NAME"
+      :date="formatThaiDate(exam.EXAM_DATE)"
+      :time="selectedSessionTime"
+      :location="selectedSessionLocation"
+      :applicant-count="sessionTotalCount"
+      :paid-count="sessionPaidCount"
+      :total-capacity="selectedSessionCapacity"
+      is-admin
+    />
+
+    <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
+      <SearchBar
+        v-model="searchQuery"
+        :placeholder="$t('admin.registrantManagement.searchPlaceholder')"
+        class="search-bar col-12 col-sm-auto"
       />
-
-      <AppExamSessionTabs v-model="selectedSessionId" :sessions="exam?.SESSIONS" />
-
-      <AppExamInfoCard
-        v-if="exam"
-        class="q-mb-md"
-        :title="exam.EXAM_NAME"
-        :date="formatThaiDate(exam.EXAM_DATE)"
-        :time="selectedSessionTime"
-        :location="selectedSessionLocation"
-        :applicant-count="sessionTotalCount"
-        :paid-count="sessionPaidCount"
-        :total-capacity="selectedSessionCapacity"
-        is-admin
+      <q-space class="gt-xs" />
+      <ExportCsvButton
+        :columns="columns"
+        :rows="filteredEnrollments"
+        file-name-prefix="exam-registrants"
+        class="export-btn col-12 col-sm-auto"
       />
+    </nav>
 
-      <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
-        <SearchBar
-          v-model="searchQuery"
-          :placeholder="$t('admin.registrantManagement.searchPlaceholder')"
-          class="search-bar col-12 col-sm-auto"
-        />
-        <q-space class="gt-xs" />
-        <ExportCsvButton
-          :columns="columns"
-          :rows="filteredEnrollments"
-          file-name-prefix="exam-registrants"
-          class="export-btn col-12 col-sm-auto"
-        />
-      </nav>
+    <main>
+      <BaseTable
+        :columns="columns"
+        :rows="filteredEnrollments"
+        :loading="isLoading"
+        :pagination="pagination"
+        class="registrants-table"
+        @request="onRequest"
+      >
+        <template v-slot:body-cell-index="{ row }">
+          <div class="text-center">{{ row.index }}</div>
+        </template>
 
-      <main>
-        <BaseTable
-          :columns="columns"
-          :rows="filteredEnrollments"
-          :loading="isLoading"
-          :pagination="pagination"
-          class="registrants-table"
-          @request="onRequest"
-        >
-          <template v-slot:body-cell-index="{ row }">
-            <div class="text-center">{{ row.index }}</div>
-          </template>
+        <template v-slot:body-cell-nationalId="{ row }">
+          <div class="text-center">{{ row.nationalId }}</div>
+        </template>
 
-          <template v-slot:body-cell-nationalId="{ row }">
-            <div class="text-center">{{ row.nationalId }}</div>
-          </template>
+        <template v-slot:body-cell-titleTh="{ row }">
+          <div class="text-center">{{ row.titleTh }}</div>
+        </template>
 
-          <template v-slot:body-cell-titleTh="{ row }">
-            <div class="text-center">{{ row.titleTh }}</div>
-          </template>
+        <template v-slot:body-cell-fullnameTh="{ row }">
+          <div class="text-center">{{ row.fullnameTh }}</div>
+        </template>
 
-          <template v-slot:body-cell-fullnameTh="{ row }">
-            <div class="text-center">{{ row.fullnameTh }}</div>
-          </template>
+        <template v-slot:body-cell-paymentStatus="{ row }">
+          <div class="text-center">
+            <EnrollmentStatusBadge :status="row.paymentStatus" type="payment" />
+          </div>
+        </template>
 
-          <template v-slot:body-cell-paymentStatus="{ row }">
-            <div class="text-center">
-              <EnrollmentStatusBadge :status="row.paymentStatus" type="payment" />
-            </div>
-          </template>
+        <template v-slot:body-cell-verifyStatus="{ row }">
+          <div class="text-center">
+            <EnrollmentStatusBadge :status="row.verifyStatus" type="verify" />
+          </div>
+        </template>
 
-          <template v-slot:body-cell-verifyStatus="{ row }">
-            <div class="text-center">
-              <EnrollmentStatusBadge :status="row.verifyStatus" type="verify" />
-            </div>
-          </template>
-
-          <template v-slot:body-cell-tools="{ row }">
-            <div class="row justify-center q-gutter-x-sm no-wrap">
-              <ActionButton
-                icon="visibility"
-                :tooltip="$t('admin.registrantManagement.table.tooltips.viewDetail')"
-                :disable="false"
-                color="black"
-                @click="handleView(row.ermId)"
-              />
-            </div>
-          </template>
-        </BaseTable>
-      </main>
-    </div>
+        <template v-slot:body-cell-tools="{ row }">
+          <div class="row justify-center q-gutter-x-sm no-wrap">
+            <ActionButton
+              icon="visibility"
+              :tooltip="
+                row.verifyStatus === VerifyStatus.PASS
+                  ? 'ผ่านการตรวจสอบความถูกต้องแล้ว'
+                  : $t('admin.registrantManagement.table.tooltips.viewDetail')
+              "
+              :disable="row.verifyStatus === VerifyStatus.PASS"
+              color="black"
+              @click="handleView(row.ermId)"
+            />
+          </div>
+        </template>
+      </BaseTable>
+    </main>
   </q-page>
 </template>
 
@@ -108,7 +110,11 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import { useExamRegistrants } from 'src/composables/use-exam-registrants';
 import { useThaiDate } from 'src/composables/useThaiDate';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
-import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollment.types';
+import {
+  VerifyStatus,
+  PAYMENT_STATUS_LABELS,
+  VERIFY_STATUS_LABELS,
+} from 'src/types/enrollment.types';
 
 const route = useRoute();
 const router = useRouter();

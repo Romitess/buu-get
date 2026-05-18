@@ -1,83 +1,77 @@
 <template>
-  <q-page class="attendance-page q-px-lg q-px-sm-xl q-py-lg">
-    <div class="full-width">
-      <AppBreadcrumbs />
-      <AppPageHeader
-        title="ประวัติการเข้าสอบ"
-        subtitle="ตรวจสอบประวัติการเข้าสอบ พร้อมดูรายละเอียดข้อมูลย้อนหลัง"
+  <q-page class="page-container attendance-page">
+    <AppBreadcrumbs />
+    <AppPageHeader
+      title="ประวัติการเข้าสอบ"
+      subtitle="ตรวจสอบประวัติการเข้าสอบ พร้อมดูรายละเอียดข้อมูลย้อนหลัง"
+    />
+
+    <AppExamSessionTabs v-model="selectedSessionId" :sessions="exam?.SESSIONS" />
+
+    <AppExamInfoCard
+      v-if="exam"
+      class="q-mb-md"
+      :title="exam.EXAM_NAME"
+      :date="formatThaiDate(exam.EXAM_DATE)"
+      :time="selectedSessionTime"
+      :location="selectedSessionLocation"
+      :applicant-count="sessionAttendedCount"
+      :total-capacity="sessionTotalCount"
+      is-admin
+      is-attendance
+    />
+
+    <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
+      <SearchBar v-model="searchQuery" placeholder="ค้นหา" class="search-bar col-12 col-sm-auto" />
+      <q-space class="gt-xs" />
+      <ExportCsvButton
+        :columns="columns"
+        :rows="filteredAttendances"
+        file-name-prefix="exam-attendances"
+        class="export-btn col-12 col-sm-auto"
       />
+    </nav>
 
-      <AppExamSessionTabs v-model="selectedSessionId" :sessions="exam?.SESSIONS" />
+    <main>
+      <BaseTable
+        :columns="columns"
+        :rows="filteredAttendances"
+        :loading="isLoading"
+        :pagination="pagination"
+        class="attendance-table"
+        @request="onRequest"
+      >
+        <template v-slot:body-cell-index="{ row }">
+          <div class="text-center">{{ row.index }}</div>
+        </template>
 
-      <AppExamInfoCard
-        v-if="exam"
-        class="q-mb-md"
-        :title="exam.EXAM_NAME"
-        :date="formatThaiDate(exam.EXAM_DATE)"
-        :time="selectedSessionTime"
-        :location="selectedSessionLocation"
-        :applicant-count="sessionAttendedCount"
-        :total-capacity="sessionTotalCount"
-        is-admin
-        is-attendance
-      />
+        <template v-slot:body-cell-nationalId="{ row }">
+          <div class="text-center">{{ row.nationalId }}</div>
+        </template>
 
-      <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
-        <SearchBar
-          v-model="searchQuery"
-          placeholder="ค้นหา"
-          class="search-bar col-12 col-sm-auto"
-        />
-        <q-space class="gt-xs" />
-        <ExportCsvButton
-          :columns="columns"
-          :rows="filteredAttendances"
-          file-name-prefix="exam-attendances"
-          class="export-btn col-12 col-sm-auto"
-        />
-      </nav>
+        <template v-slot:body-cell-titleTh="{ row }">
+          <div class="text-center">{{ row.titleTh }}</div>
+        </template>
 
-      <main>
-        <BaseTable
-          :columns="columns"
-          :rows="filteredAttendances"
-          :loading="isLoading"
-          :pagination="pagination"
-          class="attendance-table"
-          @request="onRequest"
-        >
-          <template v-slot:body-cell-index="{ row }">
-            <div class="text-center">{{ row.index }}</div>
-          </template>
+        <template v-slot:body-cell-fullnameTh="{ row }">
+          <div class="text-center">{{ row.fullnameTh }}</div>
+        </template>
 
-          <template v-slot:body-cell-nationalId="{ row }">
-            <div class="text-center">{{ row.nationalId }}</div>
-          </template>
+        <template v-slot:body-cell-seatNumber="{ row }">
+          <div class="text-center">{{ row.seatNumber }}</div>
+        </template>
 
-          <template v-slot:body-cell-titleTh="{ row }">
-            <div class="text-center">{{ row.titleTh }}</div>
-          </template>
+        <template v-slot:body-cell-attendanceStatus="{ row }">
+          <div class="text-center">
+            <AttendanceStatusBadge :status="row.attendanceStatus" />
+          </div>
+        </template>
 
-          <template v-slot:body-cell-fullnameTh="{ row }">
-            <div class="text-center">{{ row.fullnameTh }}</div>
-          </template>
-
-          <template v-slot:body-cell-seatNumber="{ row }">
-            <div class="text-center">{{ row.seatNumber }}</div>
-          </template>
-
-          <template v-slot:body-cell-attendanceStatus="{ row }">
-            <div class="text-center">
-              <AttendanceStatusBadge :status="row.attendanceStatus" />
-            </div>
-          </template>
-
-          <template v-slot:body-cell-checkInTime="{ row }">
-            <div class="text-center">{{ row.checkInTime || '' }}</div>
-          </template>
-        </BaseTable>
-      </main>
-    </div>
+        <template v-slot:body-cell-checkInTime="{ row }">
+          <div class="text-center">{{ row.checkInTime || '' }}</div>
+        </template>
+      </BaseTable>
+    </main>
   </q-page>
 </template>
 

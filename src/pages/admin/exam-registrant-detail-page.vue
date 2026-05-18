@@ -1,58 +1,56 @@
 <template>
-  <q-page class="registrant-detail-page q-px-lg q-px-sm-xl q-py-lg">
-    <div class="full-width">
-      <AppBreadcrumbs />
-      <AppPageHeader
-        :title="$t('admin.registrantManagement.detail.pageTitle')"
-        :subtitle="$t('admin.registrantManagement.detail.pageSubtitle')"
-      />
+  <q-page class="page-container registrant-detail-page">
+    <AppBreadcrumbs />
+    <AppPageHeader
+      :title="$t('admin.registrantManagement.detail.pageTitle')"
+      :subtitle="$t('admin.registrantManagement.detail.pageSubtitle')"
+    />
 
-      <div v-if="isLoading" class="flex flex-center q-pa-xl">
-        <q-spinner-dots color="primary" size="40px" />
-      </div>
+    <div v-if="isLoading" class="flex flex-center q-pa-xl">
+      <q-spinner-dots color="primary" size="40px" />
+    </div>
 
-      <main v-else-if="enrollment">
-        <RegistrantPersonalDetail :enrollment="enrollment" />
+    <main v-else-if="enrollment">
+      <RegistrantPersonalDetail :enrollment="enrollment" />
 
-        <div class="action-container row justify-end q-mt-sm q-gutter-sm q-gutter-md-md">
-          <AppButton
-            :label="$t('admin.registrantManagement.detail.actions.cancel')"
-            color="grey-3"
-            text-color="dark"
-            unelevated
-            class="action-btn col-12 col-sm-auto"
-            @click="goBack"
-          />
-          <AppButton
-            :label="$t('admin.registrantManagement.detail.actions.requestFix')"
-            color="negative"
-            unelevated
-            class="action-btn col-12 col-sm-auto"
-            @click="showFixDialog = true"
-          />
-          <AppButton
-            :label="$t('admin.registrantManagement.detail.actions.confirmVerify')"
-            color="primary"
-            unelevated
-            class="action-btn col-12 col-sm-auto"
-            @click="handleVerify"
-          />
-        </div>
-      </main>
-
-      <section v-else class="text-center q-pa-xl">
-        <q-icon name="error_outline" size="64px" color="negative" />
-        <h2 class="text-h6 q-mt-md">
-          {{ $t('admin.registrantManagement.detail.errors.notFound') }}
-        </h2>
+      <div class="action-container row justify-end q-mt-sm q-gutter-sm q-gutter-md-md">
         <AppButton
-          :label="$t('admin.registrantManagement.detail.actions.backToMain')"
-          color="primary"
-          class="q-mt-lg"
+          :label="$t('admin.registrantManagement.detail.actions.cancel')"
+          color="grey-3"
+          text-color="dark"
+          unelevated
+          class="action-btn col-12 col-sm-auto"
           @click="goBack"
         />
-      </section>
-    </div>
+        <AppButton
+          :label="$t('admin.registrantManagement.detail.actions.requestFix')"
+          color="negative"
+          unelevated
+          class="action-btn col-12 col-sm-auto"
+          @click="showFixDialog = true"
+        />
+        <AppButton
+          :label="$t('admin.registrantManagement.detail.actions.confirmVerify')"
+          color="primary"
+          unelevated
+          class="action-btn col-12 col-sm-auto"
+          @click="handleVerify"
+        />
+      </div>
+    </main>
+
+    <section v-else class="text-center q-pa-xl">
+      <q-icon name="error_outline" size="64px" color="negative" />
+      <h2 class="text-h6 q-mt-md">
+        {{ $t('admin.registrantManagement.detail.errors.notFound') }}
+      </h2>
+      <AppButton
+        :label="$t('admin.registrantManagement.detail.actions.backToMain')"
+        color="primary"
+        class="q-mt-lg"
+        @click="goBack"
+      />
+    </section>
 
     <RequestFixDialog
       v-model="showFixDialog"

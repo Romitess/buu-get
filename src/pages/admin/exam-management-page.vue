@@ -1,45 +1,43 @@
 <template>
-  <q-page class="exam-management-page q-px-lg q-px-sm-xl q-py-lg">
-    <div class="full-width">
-      <!-- Standardized Reusable Page Header -->
-      <AppBreadcrumbs />
-      <AppPageHeader
-        title="จัดการรอบสอบ"
-        subtitle="จัดการข้อมูลรอบสอบ ตรวจสอบกำหนดการ และติดตามสถานะการเปิดรับสมัคร"
-      />
+  <q-page class="page-container exam-management-page">
+    <!-- Standardized Reusable Page Header -->
+    <AppBreadcrumbs />
+    <AppPageHeader
+      title="จัดการรอบสอบ"
+      subtitle="จัดการข้อมูลรอบสอบ ตรวจสอบกำหนดการ และติดตามสถานะการเปิดรับสมัคร"
+    />
 
-      <!-- Search and Action Bar -->
-      <div class="row items-center q-mb-lg q-gutter-x-md">
-        <div class="col">
-          <SearchBar v-model="searchQuery" />
-        </div>
-        <q-btn
-          color="primary"
-          icon="add"
-          label="สร้างรอบสอบ"
-          unelevated
-          class="create-exam-btn text-weight-bold"
-          @click="$router.push('/admin/create-exam')"
-        />
+    <!-- Search and Action Bar -->
+    <div class="row items-center q-mb-lg q-gutter-x-md">
+      <div class="col">
+        <SearchBar v-model="searchQuery" />
       </div>
-
-      <!-- Main Content / Table -->
-      <ExamManagementTable
-        :exams="exams"
-        :role="currentRole"
-        :loading="isLoading"
-        :pagination="pagination"
-        @request="onRequest"
-        @edit="handleEdit"
-        @delete="handleDelete"
-        @manageRegistrants="handleManageRegistrants"
-        @manageSeats="handleManageSeats"
-        @printAdmitCard="handlePrintAdmitCard"
-        @viewCandidates="handleViewCandidates"
-        @exportReport="handleExportReport"
-        @manageScores="handleManageScores"
+      <q-btn
+        v-if="currentRole !== ROLES.REGISTRATION_OFFICER"
+        color="primary"
+        icon="add"
+        label="สร้างรอบสอบ"
+        unelevated
+        class="create-exam-btn text-weight-bold"
+        @click="$router.push('/admin/create-exam')"
       />
     </div>
+
+    <!-- Main Content / Table -->
+    <ExamManagementTable
+      :exams="exams"
+      :role="currentRole"
+      :loading="isLoading"
+      :pagination="pagination"
+      @request="onRequest"
+      @edit="handleEdit"
+      @delete="handleDelete"
+      @manageRegistrants="handleManageRegistrants"
+      @manageSeats="handleManageSeats"
+      @printAdmitCard="handlePrintAdmitCard"
+      @viewCandidates="handleViewCandidates"
+      @manageScores="handleManageScores"
+    />
   </q-page>
 </template>
 
@@ -188,14 +186,6 @@ const handleViewCandidates = (id: string) => {
   void router.push({ name: 'admin-exam-attendance', params: { examId: id } });
 };
 
-const handleExportReport = (id: string) => {
-  $q.notify({
-    type: 'info',
-    message: `${t('admin.examManagement.notifications.exportReport')} ID: ${id}`,
-    position: 'top',
-  });
-};
-
 const handleManageScores = (id: string) => {
   void router.push({ name: 'admin-exam-scores', params: { examId: id } });
 };
@@ -208,8 +198,8 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .create-exam-btn {
-  border-radius: var(--radius-sm);
-  height: 52px;
+  border-radius: var(--radius-10) !important;
+  height: 40px;
   padding: 0 24px;
 }
 

@@ -1,111 +1,109 @@
 <template>
-  <q-page class="payment-import-page q-px-lg q-px-sm-xl q-py-lg">
-    <div class="full-width">
-      <!-- Breadcrumbs -->
-      <AppBreadcrumbs />
+  <q-page class="page-container payment-import-page">
+    <!-- Breadcrumbs -->
+    <AppBreadcrumbs />
 
-      <!-- Page Header -->
-      <AppPageHeader
-        :title="$t('admin.paymentImport.pageTitle')"
-        :subtitle="$t('admin.paymentImport.pageSubtitle')"
-      />
+    <!-- Page Header -->
+    <AppPageHeader
+      :title="$t('admin.paymentImport.pageTitle')"
+      :subtitle="$t('admin.paymentImport.pageSubtitle')"
+    />
 
-      <!-- Upload Card -->
-      <q-card flat bordered class="upload-card q-mb-lg">
-        <!-- Department Label -->
-        <div class="text-weight-medium text-dark q-mt-xs q-ml-xs department-label">
-          {{ $t('admin.paymentImport.departmentLabel') }}
-          {{ departmentLabel }}
-        </div>
+    <!-- Upload Card -->
+    <q-card flat bordered class="upload-card q-mb-lg">
+      <!-- Department Label -->
+      <div class="text-weight-medium text-dark q-mt-xs q-ml-xs department-label">
+        {{ $t('admin.paymentImport.departmentLabel') }}
+        {{ departmentLabel }}
+      </div>
 
-        <q-card-section class="q-pt-none">
-          <!-- File Upload Zone -->
-          <AppFileUploadZone
-            ref="uploadZoneRef"
-            :label="$t('admin.paymentImport.uploadLabel')"
-            hint=""
-            accept=".csv,.xlsx,.xls"
-            @file-selected="onFileSelected"
-            @file-removed="onFileRemoved"
-            @error="onUploadError"
-          />
-        </q-card-section>
-      </q-card>
+      <q-card-section class="q-pt-none">
+        <!-- File Upload Zone -->
+        <AppFileUploadZone
+          ref="uploadZoneRef"
+          :label="$t('admin.paymentImport.uploadLabel')"
+          hint=""
+          accept=".csv,.xlsx,.xls"
+          @file-selected="onFileSelected"
+          @file-removed="onFileRemoved"
+          @error="onUploadError"
+        />
+      </q-card-section>
+    </q-card>
 
-      <!-- Toolbar: Search + Action Buttons -->
-      <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
-        <SearchBar v-model="searchQuery" class="col-12 col-sm-auto" />
+    <!-- Toolbar: Search + Action Buttons -->
+    <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
+      <SearchBar v-model="searchQuery" class="col-12 col-sm-auto" />
 
-        <q-space class="gt-xs" />
+      <q-space class="gt-xs" />
 
-        <div class="row q-gutter-sm col-12 col-sm-auto justify-end">
-          <AppButton
-            :label="$t('admin.paymentImport.clearAll')"
-            color="negative"
-            class="action-btn"
-            @click="handleClearAll"
-          />
-          <AppButton
-            :label="$t('admin.paymentImport.verifyData')"
-            color="primary"
-            class="action-btn"
-            @click="handleVerify"
-          />
-        </div>
-      </nav>
+      <div class="row q-gutter-sm col-12 col-sm-auto justify-end">
+        <AppButton
+          :label="$t('admin.paymentImport.clearAll')"
+          color="negative"
+          class="action-btn"
+          @click="handleClearAll"
+        />
+        <AppButton
+          :label="$t('admin.paymentImport.verifyData')"
+          color="primary"
+          class="action-btn"
+          @click="handleVerify"
+        />
+      </div>
+    </nav>
 
-      <!-- Table -->
-      <main>
-        <BaseTable
-          :columns="columns"
-          :rows="filteredRows"
-          :loading="isLoading"
-          :pagination="pagination"
-          :empty-label="$t('admin.paymentImport.emptyTable')"
-          class="payment-import-table"
-          @request="onRequest"
-        >
-          <template v-slot:body-cell-index="{ row }">
-            <div class="text-center">{{ row.index }}</div>
-          </template>
+    <!-- Table -->
+    <main>
+      <BaseTable
+        :columns="columns"
+        :rows="filteredRows"
+        :loading="isLoading"
+        :pagination="pagination"
+        :empty-label="$t('admin.paymentImport.emptyTable')"
+        class="payment-import-table"
+        @request="onRequest"
+      >
+        <template v-slot:body-cell-index="{ row }">
+          <div class="text-center">{{ row.index }}</div>
+        </template>
 
-          <template v-slot:body-cell-applicantId="{ row }">
-            <div class="text-center">{{ row.applicantId }}</div>
-          </template>
+        <template v-slot:body-cell-applicantId="{ row }">
+          <div class="text-center">{{ row.applicantId }}</div>
+        </template>
 
-          <template v-slot:body-cell-referenceNo="{ row }">
-            <div class="text-center">{{ row.referenceNo }}</div>
-          </template>
+        <template v-slot:body-cell-referenceNo="{ row }">
+          <div class="text-center">{{ row.referenceNo }}</div>
+        </template>
 
-          <template v-slot:body-cell-payerName="{ row }">
-            <div class="text-center">{{ row.payerName }}</div>
-          </template>
+        <template v-slot:body-cell-payerName="{ row }">
+          <div class="text-center">{{ row.payerName }}</div>
+        </template>
 
-          <template v-slot:body-cell-paymentDate="{ row }">
-            <div class="text-center">{{ row.paymentDate }}</div>
-          </template>
+        <template v-slot:body-cell-paymentDate="{ row }">
+          <div class="text-center">{{ row.paymentDate }}</div>
+        </template>
 
-          <template v-slot:body-cell-paymentTime="{ row }">
-            <div class="text-center">{{ row.paymentTime }}</div>
-          </template>
+        <template v-slot:body-cell-paymentTime="{ row }">
+          <div class="text-center">{{ row.paymentTime }}</div>
+        </template>
 
-          <template v-slot:body-cell-amount="{ row }">
-            <div class="text-center text-weight-medium">{{ row.amount }}</div>
-          </template>
+        <template v-slot:body-cell-amount="{ row }">
+          <div class="text-center text-weight-medium">{{ row.amount }}</div>
+        </template>
 
-          <template v-slot:body-cell-importedAt="{ row }">
-            <div class="text-center">{{ row.importedAt }}</div>
-          </template>
+        <template v-slot:body-cell-importedAt="{ row }">
+          <div class="text-center">{{ row.importedAt }}</div>
+        </template>
 
-          <template v-slot:body-cell-importedBy="{ row }">
-            <div class="text-center">{{ row.importedBy }}</div>
-          </template>
-        </BaseTable>
-      </main>
+        <template v-slot:body-cell-importedBy="{ row }">
+          <div class="text-center">{{ row.importedBy }}</div>
+        </template>
+      </BaseTable>
+    </main>
 
-      <!-- Custom Confirmation Dialog for Clear All -->
-      <AppConfirmDialog v-model="showClearConfirm" @confirm="confirmClearAll" />
-    </div>
+    <!-- Custom Confirmation Dialog for Clear All -->
+    <AppConfirmDialog v-model="showClearConfirm" @confirm="confirmClearAll" />
   </q-page>
 </template>
 

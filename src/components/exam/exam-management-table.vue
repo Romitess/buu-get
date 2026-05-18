@@ -104,7 +104,6 @@ const emit = defineEmits<{
   (e: 'manageRegistrants', id: string): void;
   (e: 'manageSeats', id: string): void;
   (e: 'viewCandidates', id: string): void;
-  (e: 'exportReport', id: string): void;
   (e: 'manageScores', id: string): void;
 }>();
 
@@ -114,7 +113,6 @@ const TABLE_ACTIONS = {
   MANAGE_REGISTRANTS: 'manageRegistrants',
   MANAGE_SEATS: 'manageSeats',
   VIEW_CANDIDATES: 'viewCandidates',
-  EXPORT_REPORT: 'exportReport',
 } as const;
 
 // Logic to detect duplicate dates in the current table data
@@ -232,13 +230,7 @@ const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
       emit: TABLE_ACTIONS.VIEW_CANDIDATES,
     },
     {
-      icon: 'description',
-      color: 'primary',
-      tooltip: t('admin.examManagement.table.tooltips.exportReport'),
-      emit: TABLE_ACTIONS.EXPORT_REPORT,
-    },
-    {
-      icon: 'grade',
+      icon: 'leaderboard',
       color: 'blue-6',
       tooltip: t('admin.examManagement.table.tooltips.manageScores'),
       emit: 'manageScores',
@@ -276,13 +268,7 @@ const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
       emit: TABLE_ACTIONS.VIEW_CANDIDATES,
     },
     {
-      icon: 'description',
-      color: 'primary',
-      tooltip: t('admin.examManagement.table.tooltips.exportReport'),
-      emit: TABLE_ACTIONS.EXPORT_REPORT,
-    },
-    {
-      icon: 'grade',
+      icon: 'leaderboard',
       color: 'blue-6',
       tooltip: t('admin.examManagement.table.tooltips.manageScores'),
       emit: 'manageScores',
@@ -300,7 +286,7 @@ const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
     }
   }
 
-  if (emitName === TABLE_ACTIONS.VIEW_CANDIDATES) {
+  if (emitName === TABLE_ACTIONS.VIEW_CANDIDATES || emitName === 'manageScores') {
     if (!row.examDate) return true;
 
     // Convert YYYY-MM-DD or ISO to Date object
@@ -325,6 +311,22 @@ const getActionTooltip = (btn: ToolButtonConfig, row: ExamSchedule): string => {
   ) {
     return 'ไม่สามารถจัดการที่นั่งสอบได้ เนื่องจากผู้สมัครยังผ่านการตรวจสอบความถูกต้องไม่ครบทุกคน';
   }
+
+  if (btn.emit === 'manageScores' || btn.emit === TABLE_ACTIONS.VIEW_CANDIDATES) {
+    if (row.examDate) {
+      const examDate = new Date(row.examDate);
+      const today = new Date();
+      examDate.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+
+      if (today < examDate) {
+        return btn.emit === 'manageScores'
+          ? 'ไม่สามารถจัดการคะแนนสอบได้ เนื่องจากยังไม่ถึงวันสอบ'
+          : 'ไม่สามารถพิมพ์บัญชีรายชื่อผู้เข้าสอบได้ เนื่องจากยังไม่ถึงวันสอบ';
+      }
+    }
+  }
+
   return btn.tooltip;
 };
 
@@ -351,9 +353,6 @@ const handleAction = (emitName: string, id: string) => {
         break;
       case TABLE_ACTIONS.VIEW_CANDIDATES:
         emit(TABLE_ACTIONS.VIEW_CANDIDATES, id);
-        break;
-      case TABLE_ACTIONS.EXPORT_REPORT:
-        emit(TABLE_ACTIONS.EXPORT_REPORT, id);
         break;
       case 'manageScores':
         emit('manageScores', id);

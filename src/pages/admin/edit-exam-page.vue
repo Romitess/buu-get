@@ -1,18 +1,16 @@
 <template>
-  <q-page class="edit-exam-page q-px-lg q-px-sm-xl q-py-lg">
-    <div class="full-width">
-      <!-- Standardized Reusable Page Header -->
-      <AppBreadcrumbs />
-      <AppPageHeader title="แก้ไขรอบสอบ" subtitle="แก้ไขรายละเอียดและกำหนดการของรอบสอบที่เลือก" />
+  <q-page class="page-container edit-exam-page">
+    <!-- Standardized Reusable Page Header -->
+    <AppBreadcrumbs />
+    <AppPageHeader title="แก้ไขรอบสอบ" subtitle="แก้ไขรายละเอียดและกำหนดการของรอบสอบที่เลือก" />
 
-      <!-- Reusable Exam Form component (in edit mode) -->
-      <exam-form v-if="examId" v-model:form="form" :exam-id="examId" />
+    <!-- Reusable Exam Form component (in edit mode) -->
+    <exam-form v-if="examId" v-model:form="form" :exam-id="examId" />
 
-      <!-- Error State -->
-      <div v-else class="text-center q-pa-xl">
-        <q-icon name="error_outline" size="48px" color="negative" />
-        <div class="text-h6 q-mt-md">ไม่พบรหัสรอบสอบ</div>
-      </div>
+    <!-- Error State -->
+    <div v-else class="text-center q-pa-xl">
+      <q-icon name="error_outline" size="48px" color="negative" />
+      <div class="text-h6 q-mt-md">ไม่พบรหัสรอบสอบ</div>
     </div>
   </q-page>
 </template>

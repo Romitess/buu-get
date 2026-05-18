@@ -1,93 +1,91 @@
 <template>
-  <q-page class="seat-candidates-page q-px-lg q-px-sm-xl q-py-lg">
-    <div class="full-width">
-      <!-- Breadcrumbs -->
-      <AppBreadcrumbs />
+  <q-page class="page-container seat-candidates-page">
+    <!-- Breadcrumbs -->
+    <AppBreadcrumbs />
 
-      <!-- Page Header -->
-      <AppPageHeader
-        :title="$t('admin.seatCandidates.pageTitle')"
-        :subtitle="$t('admin.seatCandidates.pageSubtitle')"
-      />
+    <!-- Page Header -->
+    <AppPageHeader
+      :title="$t('admin.seatCandidates.pageTitle')"
+      :subtitle="$t('admin.seatCandidates.pageSubtitle')"
+    />
 
-      <!-- Session Time Tabs -->
-      <AppExamSessionTabs v-model="selectedSessionId" :sessions="sessions" />
+    <!-- Session Time Tabs -->
+    <AppExamSessionTabs v-model="selectedSessionId" :sessions="sessions" />
 
-      <!-- Exam Info Card -->
-      <AppExamInfoCard
-        v-if="exam"
-        class="q-mb-md"
-        :title="exam.EXAM_NAME"
-        :date="examDateLabel"
-        :time="sessionTime"
-        :location="sessionLocation"
-        :applicant-count="candidateCount"
-        :total-capacity="sessionCapacity"
-        hide-paid
-        hide-main-separator
-        is-admin
-      />
+    <!-- Exam Info Card -->
+    <AppExamInfoCard
+      v-if="exam"
+      class="q-mb-md"
+      :title="exam.EXAM_NAME"
+      :date="examDateLabel"
+      :time="sessionTime"
+      :location="sessionLocation"
+      :applicant-count="candidateCount"
+      :total-capacity="sessionCapacity"
+      hide-paid
+      hide-main-separator
+      is-admin
+    />
 
-      <!-- Toolbar: Search + Action Buttons -->
-      <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
-        <SearchBar v-model="searchQuery" class="col-12 col-sm-auto" />
+    <!-- Toolbar: Search + Action Buttons -->
+    <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
+      <SearchBar v-model="searchQuery" class="col-12 col-sm-auto" />
 
-        <q-space class="gt-xs" />
+      <q-space class="gt-xs" />
 
-        <div class="row q-gutter-sm col-12 col-sm-auto justify-end">
-          <AppButton
-            icon="badge"
-            :label="$t('admin.seatCandidates.printVoucher')"
-            color="primary"
-            class="action-btn"
-            @click="handlePrintVoucher"
-          />
-          <ExportCsvButton
-            :columns="columns"
-            :rows="filteredRows"
-            file-name-prefix="seat-candidates"
-            class="action-btn"
-          />
-        </div>
-      </nav>
-
-      <!-- Table -->
-      <main>
-        <BaseTable
+      <div class="row q-gutter-sm col-12 col-sm-auto justify-end">
+        <AppButton
+          icon="badge"
+          :label="$t('admin.seatCandidates.printVoucher')"
+          color="primary"
+          class="action-btn"
+          @click="handlePrintVoucher"
+        />
+        <ExportCsvButton
           :columns="columns"
           :rows="filteredRows"
-          :loading="isLoading"
-          :pagination="pagination"
-          class="seat-candidates-table"
-          @request="onRequest"
-        >
-          <template v-slot:body-cell-index="{ row }">
-            <div class="text-center">{{ row.index }}</div>
-          </template>
+          file-name-prefix="seat-candidates"
+          class="action-btn"
+        />
+      </div>
+    </nav>
 
-          <template v-slot:body-cell-nationalId="{ row }">
-            <div class="text-center">{{ row.nationalId }}</div>
-          </template>
+    <!-- Table -->
+    <main>
+      <BaseTable
+        :columns="columns"
+        :rows="filteredRows"
+        :loading="isLoading"
+        :pagination="pagination"
+        class="seat-candidates-table"
+        @request="onRequest"
+      >
+        <template v-slot:body-cell-index="{ row }">
+          <div class="text-center">{{ row.index }}</div>
+        </template>
 
-          <template v-slot:body-cell-titleTh="{ row }">
-            <div class="text-center">{{ row.titleTh }}</div>
-          </template>
+        <template v-slot:body-cell-nationalId="{ row }">
+          <div class="text-center">{{ row.nationalId }}</div>
+        </template>
 
-          <template v-slot:body-cell-fullnameTh="{ row }">
-            <div class="text-center">{{ row.fullnameTh }}</div>
-          </template>
+        <template v-slot:body-cell-titleTh="{ row }">
+          <div class="text-center">{{ row.titleTh }}</div>
+        </template>
 
-          <template v-slot:body-cell-seatNumber="{ row }">
-            <div class="text-center text-weight-bold">{{ row.seatNumber }}</div>
-          </template>
-        </BaseTable>
-      </main>
+        <template v-slot:body-cell-fullnameTh="{ row }">
+          <div class="text-center">{{ row.fullnameTh }}</div>
+        </template>
 
-      <!-- Hidden container for capturing voucher image -->
-      <div style="position: absolute; left: -9999px; top: -9999px; overflow: hidden; width: 800px">
-        <div id="capture-voucher-target">
-          <TestVoucherReport v-if="renderingVoucherData" :data="renderingVoucherData" />
-        </div>
+        <template v-slot:body-cell-seatNumber="{ row }">
+          <div class="text-center text-weight-bold">{{ row.seatNumber }}</div>
+        </template>
+      </BaseTable>
+    </main>
+
+    <!-- Hidden container for capturing voucher image -->
+    <div style="position: absolute; left: -9999px; top: -9999px; overflow: hidden; width: 800px">
+      <div id="capture-voucher-target">
+        <TestVoucherReport v-if="renderingVoucherData" :data="renderingVoucherData" />
       </div>
     </div>
   </q-page>
