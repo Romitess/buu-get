@@ -181,6 +181,7 @@ export default {
       registrationSuccess: 'ลงทะเบียนสอบสำเร็จ กรุณาชำระเงินภายในเวลาที่กำหนด',
       passcodeSuccess: 'ตรวจสอบรหัสผ่านสำเร็จ ลงทะเบียนสอบเรียบร้อย',
       expired: 'ขออภัย หมดเขตลงทะเบียนแล้ว (เกินระยะเวลาการเปิดรับสมัคร)',
+      pleaseLogin: 'กรุณาเข้าสู่ระบบก่อนสมัครสอบ',
     },
     dialogConfirm: {
       title: 'ยืนยันการสมัครสอบ',
@@ -565,5 +566,14 @@ export default {
     paymentImport: 'นำเข้าไฟล์การชำระเงิน',
     logout: 'ออกจากระบบ',
     menu: 'เมนู',
+    createExam: 'สร้างรอบสอบ',
+    editExam: 'แก้ไขรอบสอบ',
+    manageSeats: 'จัดการที่นั่งสอบ',
+    seatCandidates: 'รายชื่อและที่นั่งผู้เข้าสอบ',
+    manageRegistrants: 'การจัดการรายชื่อผู้เข้าสอบ',
+    registrantDetail: 'รายละเอียดผู้เข้าสอบ',
+    manageScores: 'จัดการคะแนนสอบ',
+    examAttendance: 'ประวัติการเข้าสอบ',
+    checkPayment: 'ตรวจสอบข้อมูลการชำระเงิน',
   },
 };

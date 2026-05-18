@@ -67,6 +67,7 @@ export default {
       registrationSuccess: 'Registration successful. Please pay within the time limit.',
       passcodeSuccess: 'Passcode verified. Registration successful.',
       expired: 'Sorry, this round is closed for registration.',
+      pleaseLogin: 'Please log in before registering for the exam.',
     },
     dialogConfirm: {
       title: 'Confirm Registration',
@@ -400,5 +401,15 @@ export default {
     viewSchedule: 'View Schedule',
     logout: 'Logout',
     menu: 'Menu',
+    createExam: 'Create Exam',
+    editExam: 'Edit Exam',
+    manageSeats: 'Manage Seats',
+    seatCandidates: 'Seat Candidates',
+    manageRegistrants: 'Manage Registrants',
+    registrantDetail: 'Registrant Detail',
+    manageScores: 'Manage Scores',
+    examAttendance: 'Exam Attendance',
+    paymentImport: 'Payment Import',
+    checkPayment: 'Check Payment',
   },
 };

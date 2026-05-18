@@ -15,7 +15,7 @@
         :class="{ 'active-item': index === breadcrumbs.length - 1 }"
       >
         <q-icon v-if="item.icon" :name="item.icon" size="18px" class="q-mr-sm" />
-        <span class="breadcrumb-label">{{ item.label }}</span>
+        <span class="breadcrumb-label">{{ $te(item.label) ? $t(item.label) : item.label }}</span>
       </div>
     </q-breadcrumbs-el>
   </q-breadcrumbs>
