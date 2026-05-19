@@ -132,19 +132,6 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
   animation: fadeIn 0.7s ease-out;
 }
 
-    <!-- ─── Step 2: Profile Form (Identity + Contact Info) ─── -->
-    <template v-if="currentStep === 'profile'">
-      <div class="profile-form-container">
-        <RegisterAndEditProfile
-          :initial-edit-mode="false"
-          :is-thai="isThai"
-          :credentials="credentials"
-          @close="goBackToCredentials"
-          @save="handleSave"
-        />
-      </div>
-    </template>
-  </q-page>
 @keyframes pulse {
   0%,
   100% {
