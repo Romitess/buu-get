@@ -1,6 +1,15 @@
 export default {
   failed: 'การดำเนินการล้มเหลว',
   success: 'การดำเนินการสำเร็จ',
+  roles: {
+    admin: 'ผู้ดูแลระบบ',
+    staff: 'เจ้าหน้าที่ดำเนินการสอบ',
+    finance: 'เจ้าหน้าที่การเงิน',
+    executive: 'ผู้บริหาร',
+    candidate: 'ผู้สมัครสอบ',
+    proctor: 'กรรมการคุมสอบ',
+    registration_officer: 'เจ้าหน้าที่ลงทะเบียน',
+  },
   common: {
     months: [
       'มกราคม',

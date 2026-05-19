@@ -71,11 +71,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useUserStore } from 'src/stores/user.store';
 import { ROLE_LABELS } from 'src/constants/roles';
 
 const userStore = useUserStore();
 const router = useRouter();
+const { t } = useI18n();
 
 /**
  * Display name — use Thai full name if available, else use username from email
@@ -95,12 +97,12 @@ const displayName = computed(() => {
 });
 
 /**
- * Display role — translate role key to Thai label
+ * Display role — translate role key dynamically using active locale
  */
 const displayRole = computed(() => {
   const role = userStore.userRole;
   if (!role) return '';
-  return ROLE_LABELS[role] || role;
+  return t(`roles.${role}`) || ROLE_LABELS[role] || role;
 });
 
 /**

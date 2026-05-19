@@ -1,7 +1,15 @@
-// This is just an example, can be any-nested-object
 export default {
   failed: 'Action failed',
   success: 'Action was successful',
+  roles: {
+    admin: 'Admin',
+    staff: 'Staff',
+    finance: 'Finance Officer',
+    executive: 'Executive',
+    candidate: 'Candidate',
+    proctor: 'Proctor',
+    registration_officer: 'Registration Officer',
+  },
   exam: {
     statusLabel: 'Status',
     status: {
