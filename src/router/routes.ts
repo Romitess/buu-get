@@ -67,6 +67,20 @@ const routes: RouteRecordRaw[] = [
         },
       },
 
+      // === Common Authenticated Routes ===
+      {
+        path: 'user/profile',
+        name: 'user-profile',
+        component: () => import('pages/user/profile-page.vue'),
+        meta: {
+          requiresAuth: true,
+          breadcrumb: [
+            { label: 'navigation.home', icon: 'home', to: '/' },
+            { label: 'profile.pageTitleEdit', icon: 'person' },
+          ],
+        },
+      },
+
       // === Candidate (User) Routes ===
       {
         path: 'user',

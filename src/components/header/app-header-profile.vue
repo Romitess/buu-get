@@ -108,15 +108,14 @@ const displayRole = computed(() => {
 /**
  * Navigate to edit profile page
  */
-const goToEditProfile = () => {
-  // TODO: Connect to actual edit profile route later
-  console.log('Navigate to edit profile — not connected yet');
+const goToEditProfile = async (): Promise<void> => {
+  await router.push({ name: 'user-profile' });
 };
 
 /**
  * Logout handler
  */
-const onLogout = async () => {
+const onLogout = async (): Promise<void> => {
   userStore.logout();
   await router.push({ name: 'login' });
 };
