@@ -1,11 +1,16 @@
 import { ref, computed } from 'vue';
 import type { EnrollmentTableRow } from 'src/types/enrollment.types';
-import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollment.types';
+import {
+  PAYMENT_STATUS_LABELS,
+  VERIFY_STATUS_LABELS,
+  EnrollmentStatus,
+} from 'src/types/enrollment.types';
 import type { BackendExam } from 'src/types/exam';
 import { fetchEnrollmentsByExamId } from 'src/services/enrollment.service';
 import { fetchExamById } from 'src/services/exam.service';
 
 export function useExamRegistrants() {
+  const CANCELLED_STATUS: number = EnrollmentStatus.CANCELLED;
   const enrollments = ref<EnrollmentTableRow[]>([]);
   const exam = ref<BackendExam | null>(null);
   const isLoading = ref(false);
@@ -14,7 +19,8 @@ export function useExamRegistrants() {
   const selectedSessionId = ref<number | null>(null);
 
   const filteredEnrollments = computed((): EnrollmentTableRow[] => {
-    let list = enrollments.value;
+    // Filter out cancelled enrollments
+    let list = enrollments.value.filter((e) => e.paymentStatus !== CANCELLED_STATUS);
 
     if (selectedSessionId.value) {
       list = list.filter((e) => e.sessionId === selectedSessionId.value);
@@ -36,19 +42,24 @@ export function useExamRegistrants() {
       });
     }
 
-    return list;
+    // Re-index sequentially for clean UI presentation
+    return list.map((item, index) => ({
+      ...item,
+      index: index + 1,
+    }));
   });
 
   const sessionTotalCount = computed((): number => {
-    if (!selectedSessionId.value) return enrollments.value.length;
-    return enrollments.value.filter((e) => e.sessionId === selectedSessionId.value).length;
+    const activeEnrollments = enrollments.value.filter((e) => e.paymentStatus !== CANCELLED_STATUS);
+    if (!selectedSessionId.value) return activeEnrollments.length;
+    return activeEnrollments.filter((e) => e.sessionId === selectedSessionId.value).length;
   });
 
   const sessionPaidCount = computed((): number => {
     const list = selectedSessionId.value
       ? enrollments.value.filter((e) => e.sessionId === selectedSessionId.value)
       : enrollments.value;
-    return list.filter((e) => e.paymentStatus >= 1 && e.paymentStatus !== 4).length;
+    return list.filter((e) => e.paymentStatus >= 1 && e.paymentStatus !== CANCELLED_STATUS).length;
   });
 
   const fetchEnrollments = async (examId: number): Promise<void> => {
