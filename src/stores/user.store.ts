@@ -59,6 +59,9 @@ export const useUserStore = defineStore('user', () => {
           };
           isLoggedIn.value = true;
           accessToken.value = token;
+          if (profile.id) {
+            localStorage.setItem('user_id', String(profile.id));
+          }
         } else {
           logout();
         }
@@ -83,6 +86,9 @@ export const useUserStore = defineStore('user', () => {
       if (result) {
         localStorage.setItem('access_token', result.accessToken);
         localStorage.setItem('isLoggedIn', 'true');
+        if (result.user?.id) {
+          localStorage.setItem('user_id', String(result.user.id));
+        }
         accessToken.value = result.accessToken;
 
         currentUser.value = {
@@ -118,6 +124,7 @@ export const useUserStore = defineStore('user', () => {
     accessToken.value = null;
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('access_token');
+    localStorage.removeItem('user_id');
 
     loadingText.value = 'กำลังออกจากระบบ...';
     isLoadingGlobal.value = true;

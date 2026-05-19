@@ -16,6 +16,7 @@ export default {
       pending: 'Pending Payment',
       verifying: 'Verifying',
       verified: 'Verified',
+      paymentCompleted: 'Payment Completed',
       evaluating: 'Awaiting Evaluation',
       completed: 'Completed',
       cancelled: 'Cancelled',

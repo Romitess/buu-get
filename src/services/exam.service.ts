@@ -7,6 +7,7 @@ import type {
   BackendLocation,
   ExamInfo,
   AdmissionVoucherData,
+  ExamEnrollment,
 } from 'src/types/exam';
 import type { ExamSchedule } from 'src/types/exam.types';
 import {
@@ -102,12 +103,14 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
         const startTime = formatTime(session.SS_START_TIME);
         const endTime = formatTime(session.SS_END_TIME);
 
+        const activeEnrollments = (session.ENROLLMENTS || []).filter((e) => e.ERM_STATUS !== 4);
+
         const round: ExamRound = {
           id: session.SS_ID,
           title: exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
           timeRange: `${startTime} - ${endTime}`,
           roundTypeLabel: exam.EXAM_TYPE || EXAM_TYPE_GENERAL,
-          availableSeats: (session.SS_CAPACITY || 0) - (session.ENROLLMENTS?.length || 0),
+          availableSeats: (session.SS_CAPACITY || 0) - activeEnrollments.length,
           totalSeats: session.SS_CAPACITY || 0,
           regStartDate: exam.EXAM_REG_START_DATE,
           regEndDate: exam.EXAM_REG_END_DATE,
@@ -141,7 +144,8 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
       if (exam.SESSIONS && exam.SESSIONS.length > 0) {
         exam.SESSIONS.forEach((session) => {
           capacity += session.SS_CAPACITY || 0;
-          registeredCount += session.ENROLLMENTS?.length || 0;
+          const activeEnrollments = (session.ENROLLMENTS || []).filter((e) => e.ERM_STATUS !== 4);
+          registeredCount += activeEnrollments.length;
         });
 
         const firstLoc = exam.SESSIONS[0]?.LOCATION;
@@ -342,6 +346,47 @@ export const fetchAdmissionVoucher = async (
     return response.data;
   } catch (error) {
     console.error(`Error fetching admission voucher for enrollment ${enrollmentId}:`, error);
+    throw error;
+  }
+};
+
+export const createEnrollment = async (
+  userId: number,
+  sessionId: number,
+): Promise<ExamEnrollment> => {
+  try {
+    const response = await api.post<ExamEnrollment>('/exam-enrollments', {
+      USER_ID: userId,
+      SESSION_ID: sessionId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating enrollment:', error);
+    throw error;
+  }
+};
+
+export const fetchUserEnrollments = async (userId: number): Promise<ExamEnrollment[]> => {
+  try {
+    const response = await api.get<ExamEnrollment[]>(`/exam-enrollments/user/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching enrollments for user ${userId}:`, error);
+    throw error;
+  }
+};
+
+export const updateEnrollmentStatus = async (
+  enrollmentId: number,
+  status: number,
+): Promise<ExamEnrollment> => {
+  try {
+    const response = await api.patch<ExamEnrollment>(`/exam-enrollments/${enrollmentId}`, {
+      ERM_STATUS: status,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating enrollment ${enrollmentId}:`, error);
     throw error;
   }
 };

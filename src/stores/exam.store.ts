@@ -11,9 +11,17 @@ import {
   fetchExamSchedules,
   createExamRound,
   deleteExam,
+  createEnrollment,
+  fetchUserEnrollments,
+  updateEnrollmentStatus,
   type CreateExamPayload,
 } from 'src/services/exam.service';
-import { DEFAULT_EXAM_FEE_THB, BUDDHIST_YEAR_OFFSET, EMPTY_DETAILS } from 'src/constants/exam';
+import {
+  DEFAULT_EXAM_FEE_THB,
+  BUDDHIST_YEAR_OFFSET,
+  EMPTY_DETAILS,
+  DEFAULT_LOCATION_TEXT,
+} from 'src/constants/exam';
 
 export const useExamStore = defineStore('exam', () => {
   const { locale } = useI18n();
@@ -33,7 +41,6 @@ export const useExamStore = defineStore('exam', () => {
     }
     return { ...defaultExamInfo };
   });
-  const nextHistoryId = ref(100);
   const pendingRegistrations = ref<ExamHistoryItem[]>([]);
   const historyRecords = ref<ExamHistoryItem[]>(structuredClone(mockHistoryRecords));
   // For admin management table
@@ -127,79 +134,137 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
-  function confirmRegistration(round: ExamRound): void {
-    const dayData = scheduleData.value[selectedDate.value];
-    if (dayData) {
-      const targetRound = dayData.rounds.find((r) => r.id === round.id);
-      if (targetRound && targetRound.availableSeats > 0) {
-        targetRound.availableSeats -= 1;
-      }
+  async function fetchHistory(): Promise<void> {
+    const userIdStr = localStorage.getItem('user_id');
+    if (!userIdStr) return;
+    const userId = parseInt(userIdStr, 10);
+    if (isNaN(userId)) return;
+
+    try {
+      const enrollments = await fetchUserEnrollments(userId);
+      const newPending: ExamHistoryItem[] = [];
+      const newHistory: ExamHistoryItem[] = [];
+
+      enrollments.forEach((enrollment) => {
+        const session = enrollment.SESSION;
+        if (!session) return;
+        const exam = session.EXAM;
+        const location = session.LOCATION;
+
+        const date = exam?.EXAM_DATE ? new Date(exam.EXAM_DATE) : new Date();
+        const monthNamesTH = [
+          'มกราคม',
+          'กุมภาพันธ์',
+          'มีนาคม',
+          'เมษายน',
+          'พฤษภาคม',
+          'มิถุนายน',
+          'กรกฎาคม',
+          'สิงหาคม',
+          'กันยายน',
+          'ตุลาคม',
+          'พฤศจิกายน',
+          'ธันวาคม',
+        ];
+        const buddhistYear = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
+        const formattedDate = `${date.getDate()} ${monthNamesTH[date.getMonth()]} ${buddhistYear}`;
+
+        const locationText = location
+          ? `${location.LOCATION_NAME}${location.LOCATION_ROOM_NO ? ` (${location.LOCATION_ROOM_NO})` : ''}`
+          : DEFAULT_LOCATION_TEXT;
+
+        // ERM_STATUS: 0=UNPAID, 1=PAID, 2=SEAT_ASSIGNED, 3=ATTENDED, 4=CANCELLED
+        const item: ExamHistoryItem = {
+          id: enrollment.ERM_ID,
+          title: exam?.EXAM_NAME || 'การทดสอบวัดความสามารถทางภาษาอังกฤษ',
+          status: '',
+          statusType: 'primary',
+          date: formattedDate,
+          time: `${session.SS_START_TIME?.substring(0, 5) || '00:00'} - ${session.SS_END_TIME?.substring(0, 5) || '00:00'}`,
+          location: locationText,
+          fee: exam?.EXAM_FEE || DEFAULT_EXAM_FEE_THB,
+        };
+
+        if (enrollment.ERM_STATUS === 0) {
+          item.status = 'exam.status.pending';
+          item.statusType = 'primary';
+          item.actions = ['cancel', 'pay'];
+          newPending.push(item);
+        } else if (enrollment.ERM_STATUS === 1) {
+          item.status = 'exam.status.paymentCompleted';
+          item.statusType = 'primary';
+          item.actions = [];
+          newHistory.push(item);
+        } else if (enrollment.ERM_STATUS === 2) {
+          item.status = 'exam.status.verified';
+          item.statusType = 'primary';
+          item.actions = ['downloadReceipt', 'candidateCard'];
+          newHistory.push(item);
+        } else if (enrollment.ERM_STATUS === 3) {
+          item.status = 'exam.status.completed';
+          item.statusType = 'success';
+          item.actions = ['scoreDetails'];
+          newHistory.push(item);
+        } else if (enrollment.ERM_STATUS === 4) {
+          item.status = 'exam.status.cancelled';
+          item.statusType = 'error';
+          item.customStatus = {
+            label: 'exam.status.cancelled',
+            type: 'error',
+            icon: 'warning_amber',
+          };
+          newHistory.push(item);
+        }
+      });
+
+      pendingRegistrations.value = newPending;
+      historyRecords.value = newHistory;
+    } catch (error) {
+      console.error('Failed to fetch user history:', error);
+    }
+  }
+
+  async function confirmRegistration(round: ExamRound): Promise<void> {
+    const userIdStr = localStorage.getItem('user_id');
+    if (!userIdStr) throw new Error('User not logged in');
+    const userId = parseInt(userIdStr, 10);
+    if (isNaN(userId)) {
+      throw new Error(
+        'ข้อมูลผู้ใช้งานไม่ถูกต้อง (Invalid User ID) กรุณาออกจากระบบแล้วเข้าสู่ระบบใหม่',
+      );
     }
 
-    const newId = nextHistoryId.value++;
-    const feeAmount = dayData?.fee.match(/\d+/)?.[0];
+    // Call backend API
+    await createEnrollment(userId, round.id);
 
-    // Calculate an absolute deadline (Current time + 29m 30s)
-    const expiry = new Date();
-    expiry.setSeconds(expiry.getSeconds() + 1770); // 29 * 60 + 30 = 1770 seconds
-
-    pendingRegistrations.value.push({
-      id: newId,
-      title: `${round.title} (${round.roundTypeLabel})`,
-      status: 'exam.status.pending',
-      statusType: 'primary',
-      date: formattedSelectedDate.value,
-      time: round.timeRange,
-      location: dayData?.location || examInfo.value.locationText,
-      fee: feeAmount ? Number(feeAmount) : DEFAULT_EXAM_FEE_THB,
-      deadline: expiry.toISOString(),
-      actions: ['cancel', 'pay'],
-    });
+    // Refresh history & schedule
+    await fetchHistory();
+    await initSchedule();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  function confirmSpecialRegistration(round: ExamRound, passcode: string): void {
-    confirmRegistration(round);
+  async function confirmSpecialRegistration(round: ExamRound, passcode: string): Promise<void> {
+    await confirmRegistration(round);
   }
 
-  function cancelRegistration(examId: number): void {
-    const index = pendingRegistrations.value.findIndex((e) => e.id === examId);
-    if (index !== -1) {
-      const cancelled = pendingRegistrations.value.splice(index, 1)[0];
-      if (cancelled) {
-        historyRecords.value.unshift({
-          id: cancelled.id,
-          title: cancelled.title,
-          status: 'exam.status.cancelled',
-          statusType: cancelled.statusType,
-          date: cancelled.date,
-          time: cancelled.time,
-          location: cancelled.location,
-          customStatus: {
-            label: 'exam.status.paymentTimeout',
-            type: 'error',
-            icon: 'warning_amber',
-          },
-        });
-      }
+  async function cancelRegistration(enrollmentId: number): Promise<void> {
+    try {
+      await updateEnrollmentStatus(enrollmentId, 4); // 4 = CANCELLED
+      await fetchHistory(); // รีเฟรชข้อมูลประวัติ
+      await initSchedule(); // รีเฟรชตารางสอบเพื่อคืนที่นั่ง
+    } catch (error) {
+      console.error('Failed to cancel registration:', error);
+      throw error;
     }
   }
 
-  function confirmPayment(examId: number): void {
-    const index = pendingRegistrations.value.findIndex((e) => e.id === examId);
-    if (index !== -1) {
-      const paid = pendingRegistrations.value.splice(index, 1)[0];
-      if (paid) {
-        historyRecords.value.unshift({
-          id: paid.id,
-          title: paid.title,
-          status: 'exam.status.verifying',
-          statusType: paid.statusType,
-          date: paid.date,
-          time: paid.time,
-          location: paid.location,
-        });
-      }
+  async function confirmPayment(enrollmentId: number): Promise<void> {
+    try {
+      await updateEnrollmentStatus(enrollmentId, 1); // 1 = PAID
+      await fetchHistory(); // รีเฟรชข้อมูลประวัติเพื่อแสดงสถานะชำระเงินแล้ว
+    } catch (error) {
+      console.error('Failed to confirm payment:', error);
+      throw error;
     }
   }
 
@@ -241,5 +306,6 @@ export const useExamStore = defineStore('exam', () => {
     deleteExamRound,
     initSchedule,
     loadManagementSchedules,
+    fetchHistory,
   };
 });

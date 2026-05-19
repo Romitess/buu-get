@@ -129,9 +129,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
+import { useQuasar } from 'quasar';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppExamHistoryCard from 'src/components/exam/app-exam-history-card.vue';
@@ -142,11 +143,16 @@ import { useExamStore } from 'src/stores/exam.store';
 import { DEFAULT_EXAM_FEE_THB, PAYMENT_DURATION_SECONDS_DEFAULT } from 'src/constants/exam';
 import type { ExamHistoryItem } from 'src/types/exam';
 
+const $q = useQuasar();
 const { t } = useI18n();
 const examStore = useExamStore();
 
 // === State จาก Store ===
 const { pendingRegistrations, historyRecords } = storeToRefs(examStore);
+
+onMounted(async () => {
+  await examStore.fetchHistory();
+});
 
 // === UI-only State ===
 const showPaymentDialog = ref(false);
@@ -191,7 +197,7 @@ const historyExams = computed<ExamHistoryItem[]>(() =>
 
 // === Methods ===
 const handleTimeout = (exam: ExamHistoryItem): void => {
-  examStore.cancelRegistration(exam.id);
+  void examStore.cancelRegistration(exam.id);
 };
 
 const handlePay = (exam: ExamHistoryItem): void => {
@@ -210,8 +216,24 @@ const handlePay = (exam: ExamHistoryItem): void => {
   showPaymentDialog.value = true;
 };
 
-const handleSaveQR = () => {
-  // TODO: Logic to save/download QR image
+const handleSaveQR = async (): Promise<void> => {
+  if (selectedExam.value) {
+    try {
+      await examStore.confirmPayment(selectedExam.value.id);
+      $q.notify({
+        type: 'positive',
+        message: t('success'),
+        position: 'top',
+      });
+    } catch {
+      $q.notify({
+        type: 'negative',
+        message: 'เกิดข้อผิดพลาดในการบันทึกการชำระเงิน',
+        position: 'top',
+      });
+    }
+  }
+  showPaymentDialog.value = false;
 };
 
 const handleCancel = (exam: ExamHistoryItem): void => {
@@ -219,9 +241,24 @@ const handleCancel = (exam: ExamHistoryItem): void => {
   showCancelDialog.value = true;
 };
 
-const handleConfirmCancel = (): void => {
+const handleConfirmCancel = async (): Promise<void> => {
   if (selectedExamForCancel.value) {
-    examStore.cancelRegistration(selectedExamForCancel.value.id);
+    try {
+      await examStore.cancelRegistration(selectedExamForCancel.value.id);
+      $q.notify({
+        type: 'positive',
+        message: 'ยกเลิกการสมัครสอบเรียบร้อยแล้ว',
+        position: 'top',
+        timeout: 2000,
+      });
+    } catch {
+      $q.notify({
+        type: 'negative',
+        message: 'เกิดข้อผิดพลาดในการยกเลิกการสมัคร',
+        position: 'top',
+        timeout: 2000,
+      });
+    }
   }
   showCancelDialog.value = false;
 };

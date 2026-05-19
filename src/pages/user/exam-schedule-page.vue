@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
@@ -117,8 +117,20 @@ const passcodeDialogRef = ref<InstanceType<typeof ExamPasscodeInputDialog> | nul
 const selectedRound = ref<ExamRound | null>(null);
 const calendarHeight = ref<number>(0);
 
+let scheduleInterval: ReturnType<typeof setInterval>;
+
 onMounted(async () => {
   await examStore.initSchedule();
+  // Real-time polling every 5 seconds
+  scheduleInterval = setInterval(() => {
+    void examStore.initSchedule();
+  }, 5000);
+});
+
+onUnmounted(() => {
+  if (scheduleInterval) {
+    clearInterval(scheduleInterval);
+  }
 });
 
 const onCalendarResize = (size: { width: number; height: number }): void => {
@@ -172,17 +184,6 @@ const handleRegister = async (
     return;
   }
 
-  if (round.availableSeats === 0) {
-    $q.notify({
-      type: 'negative',
-      message: t('examSchedule.notifications.roundFull'),
-      icon: 'report_problem',
-      position: 'top',
-      timeout: 2500,
-      actions: [{ icon: 'close', color: 'white' }],
-    });
-    return;
-  }
   selectedRound.value = round;
   if (round.roundTypeLabel === EXAM_TYPE_SPECIAL) {
     passcodeDialogRef.value?.openDialog();
@@ -194,28 +195,93 @@ const handleRegister = async (
 const onConfirmRegistration = async (): Promise<void> => {
   showConfirmDialog.value = false;
   if (selectedRound.value) {
-    examStore.confirmRegistration(selectedRound.value);
-    $q.notify({
-      type: 'positive',
-      message: t('examSchedule.notifications.registrationSuccess'),
-      icon: 'check_circle',
-      position: 'top',
-      timeout: 3000,
-    });
-    await router.push(ROUTES.HISTORY);
+    try {
+      await examStore.confirmRegistration(selectedRound.value);
+      $q.notify({
+        type: 'positive',
+        message: t('examSchedule.notifications.registrationSuccess'),
+        icon: 'check_circle',
+        position: 'top',
+        timeout: 3000,
+      });
+      await router.push(ROUTES.HISTORY);
+    } catch (err: unknown) {
+      const error = err as {
+        response?: {
+          status?: number;
+          data?: {
+            message?: string | string[];
+          };
+        };
+        message?: string;
+      };
+      const status = error?.response?.status;
+      const resMsg = error?.response?.data?.message;
+      let msg = `เกิดข้อผิดพลาด: ${Array.isArray(resMsg) ? resMsg.join(', ') : resMsg || error.message || 'Unknown'}`;
+
+      if (status === 409) {
+        msg = t('examSchedule.notifications.alreadyRegistered');
+      } else if (status === 400 && resMsg === 'FULL') {
+        msg = t('examSchedule.notifications.roundFull');
+      } else if (status === 404) {
+        msg = 'ไม่พบข้อมูลรอบสอบ (อาจถูกลบไปแล้ว)';
+      } else if (status && status >= 500) {
+        msg = 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์ (อาจเกิดจากการลบข้อมูล กรุณาลองเข้าสู่ระบบใหม่)';
+      }
+
+      $q.notify({
+        type: 'negative',
+        message: msg,
+        icon: 'report_problem',
+        position: 'top',
+        timeout: 3000,
+      });
+    }
   }
 };
 
 const onPasscodeConfirm = async (passcode: string): Promise<void> => {
   if (selectedRound.value) {
-    examStore.confirmSpecialRegistration(selectedRound.value, passcode);
-    $q.notify({
-      type: 'positive',
-      message: t('examSchedule.notifications.passcodeSuccess'),
-      position: 'top',
-      timeout: 2000,
-    });
-    await router.push(ROUTES.HISTORY);
+    try {
+      await examStore.confirmSpecialRegistration(selectedRound.value, passcode);
+      $q.notify({
+        type: 'positive',
+        message: t('examSchedule.notifications.passcodeSuccess'),
+        position: 'top',
+        timeout: 2000,
+      });
+      await router.push(ROUTES.HISTORY);
+    } catch (err: unknown) {
+      const error = err as {
+        response?: {
+          status?: number;
+          data?: {
+            message?: string | string[];
+          };
+        };
+        message?: string;
+      };
+      const status = error?.response?.status;
+      const resMsg = error?.response?.data?.message;
+      let msg = `เกิดข้อผิดพลาด: ${Array.isArray(resMsg) ? resMsg.join(', ') : resMsg || error.message || 'Unknown'}`;
+
+      if (status === 409) {
+        msg = t('examSchedule.notifications.alreadyRegistered');
+      } else if (status === 400 && resMsg === 'FULL') {
+        msg = t('examSchedule.notifications.roundFull');
+      } else if (status === 404) {
+        msg = 'ไม่พบข้อมูลรอบสอบ (อาจถูกลบไปแล้ว)';
+      } else if (status && status >= 500) {
+        msg = 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์ (อาจเกิดจากการลบข้อมูล กรุณาลองเข้าสู่ระบบใหม่)';
+      }
+
+      $q.notify({
+        type: 'negative',
+        message: msg,
+        position: 'top',
+        timeout: 3000,
+      });
+    }
   }
 };
 

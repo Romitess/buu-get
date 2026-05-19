@@ -146,6 +146,17 @@ export interface BackendEnrollment {
   DELETED_AT: string | null;
 }
 
+export interface ExamEnrollment {
+  ERM_ID: number;
+  USER_ID: number;
+  SESSION_ID: number;
+  ERM_SEAT_NUMBER: string | null;
+  ERM_STATUS: number;
+  ERM_VERIFY_STATUS: number;
+  CREATED_AT: string;
+  SESSION?: BackendSession;
+}
+
 export interface BackendLocation {
   LOCATION_ID: number;
   LOCATION_NAME: string;
@@ -161,6 +172,8 @@ export interface BackendSession {
   LOCATION_ID: number;
   LOCATION?: BackendLocation;
   ENROLLMENTS?: BackendEnrollment[];
+  EXAM_ID?: number;
+  EXAM?: BackendExam;
 }
 
 export interface BackendExam {
