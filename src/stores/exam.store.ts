@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { ExamRound, ExamInfo, ExamHistoryItem, DayData } from 'src/types/exam';
 import type { ExamSchedule } from 'src/types/exam.types';
 import {
@@ -15,6 +16,7 @@ import {
 import { DEFAULT_EXAM_FEE_THB, BUDDHIST_YEAR_OFFSET, EMPTY_DETAILS } from 'src/constants/exam';
 
 export const useExamStore = defineStore('exam', () => {
+  const { locale } = useI18n();
   const selectedDate = ref<string>(new Date().toISOString().split('T')[0] || '');
   const scheduleData = ref<Record<string, DayData>>(structuredClone(mockScheduleData));
 
@@ -71,23 +73,41 @@ export const useExamStore = defineStore('exam', () => {
 
   const formattedSelectedDate = computed((): string => {
     if (!selectedDate.value) return '';
-    const monthNamesTH = [
-      'มกราคม',
-      'กุมภาพันธ์',
-      'มีนาคม',
-      'เมษายน',
-      'พฤษภาคม',
-      'มิถุนายน',
-      'กรกฎาคม',
-      'สิงหาคม',
-      'กันยายน',
-      'ตุลาคม',
-      'พฤศจิกายน',
-      'ธันวาคม',
-    ];
     const date = new Date(selectedDate.value);
-    const buddhistYear = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
-    return `${date.getDate()} ${monthNamesTH[date.getMonth()]} ${buddhistYear}`;
+    if (locale.value && locale.value.startsWith('en')) {
+      const monthNamesEN = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+      return `${date.getDate()} ${monthNamesEN[date.getMonth()]} ${date.getFullYear()}`;
+    } else {
+      const monthNamesTH = [
+        'มกราคม',
+        'กุมภาพันธ์',
+        'มีนาคม',
+        'เมษายน',
+        'พฤษภาคม',
+        'มิถุนายน',
+        'กรกฎาคม',
+        'สิงหาคม',
+        'กันยายน',
+        'ตุลาคม',
+        'พฤศจิกายน',
+        'ธันวาคม',
+      ];
+      const buddhistYear = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
+      return `${date.getDate()} ${monthNamesTH[date.getMonth()]} ${buddhistYear}`;
+    }
   });
 
   async function initSchedule(): Promise<void> {
