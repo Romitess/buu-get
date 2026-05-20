@@ -90,6 +90,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import type { PaymentRow } from 'src/types/exam.types';
 import { updateEnrollmentStatus } from 'src/services/enrollment.service';
+import { updateTransactionByErmId } from 'src/services/transaction.service';
 
 const props = defineProps<{
   disabled?: boolean;
@@ -106,12 +107,15 @@ const onConfirm = async () => {
   isLoading.value = true;
   try {
     if (props.rows) {
-      // Process all matched rows to update enrollment status to PAID (1)
+      // Process all matched rows to update enrollment status to PAID (1) and transaction match status to APPROVED (1)
       const promises = props.rows
         .filter((row) => row.db_ref2)
-        .map((row) => {
+        .flatMap((row) => {
           const ermId = Number(row.db_ref2);
-          return updateEnrollmentStatus(ermId, { ERM_STATUS: 1 });
+          return [
+            updateEnrollmentStatus(ermId, { ERM_STATUS: 1 }),
+            updateTransactionByErmId(ermId, { TRANX_MATCH_STATUS: 1 }),
+          ];
         });
 
       await Promise.all(promises);
