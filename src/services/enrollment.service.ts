@@ -51,3 +51,21 @@ export const updateEnrollmentStatus = async (
   const response = await api.patch<BackendEnrollmentDetail>(`/exam-enrollments/${id}`, data);
   return response.data;
 };
+
+export interface RequestFixPayload {
+  fixDeadline: string;
+  reasons: string[];
+  notes?: string | undefined;
+  profileUrl: string;
+}
+
+export const requestEnrollmentFix = async (
+  id: number,
+  payload: RequestFixPayload,
+): Promise<{ success: boolean }> => {
+  const response = await api.post<{ success: boolean }>(
+    `/exam-enrollments/${id}/request-fix`,
+    payload,
+  );
+  return response.data;
+};

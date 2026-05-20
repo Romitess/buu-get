@@ -66,34 +66,43 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar, date } from 'quasar';
+import { useI18n } from 'vue-i18n';
 
 import AppButton from 'src/components/base/app-button.vue';
 import RegistrantPersonalDetail from 'src/components/registrant-personal-detail.vue';
 import RequestFixDialog from 'src/components/request-fix-dialog.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
-import { fetchEnrollmentById, updateEnrollmentStatus } from 'src/services/enrollment.service';
+import {
+  fetchEnrollmentById,
+  updateEnrollmentStatus,
+  requestEnrollmentFix,
+} from 'src/services/enrollment.service';
 import { VerifyStatus } from 'src/types/enrollment.types';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 
 const route = useRoute();
 const router = useRouter();
-
 const $q = useQuasar();
+const { t } = useI18n();
 
 const enrollment = ref<BackendEnrollmentDetail | null>(null);
 const isLoading = ref(true);
 const showFixDialog = ref(false);
 
 const registrantName = computed(
-  () => enrollment.value?.USER?.PROFILE?.userFullnameTh || 'ไม่ทราบชื่อ',
+  () =>
+    enrollment.value?.USER?.PROFILE?.userFullnameTh ||
+    t('admin.registrantManagement.detail.errors.unknownName'),
 );
 const registrantRegId = computed(
   () => `EX-2025-${String(enrollment.value?.ERM_ID || 0).padStart(5, '0')}`,
 );
 const examDateFormatted = computed(() => {
   const examDate = enrollment.value?.SESSION?.EXAM?.EXAM_DATE;
-  return examDate ? date.formatDate(examDate, 'DD MMM YYYY') : 'ไม่ระบุวันสอบ';
+  return examDate
+    ? date.formatDate(examDate, 'DD MMM YYYY')
+    : t('admin.registrantManagement.detail.errors.unspecifiedDate');
 });
 
 const loadData = async (): Promise<void> => {
@@ -110,7 +119,7 @@ const loadData = async (): Promise<void> => {
     console.error('Error fetching enrollment:', error);
     $q.notify({
       type: 'negative',
-      message: 'ไม่สามารถดึงข้อมูลได้',
+      message: t('admin.registrantManagement.detail.errors.cannotFetch'),
     });
   } finally {
     isLoading.value = false;
@@ -121,17 +130,37 @@ const goBack = (): void => {
   router.back();
 };
 
-const handleFixSubmit = async (): Promise<void> => {
+const handleFixSubmit = async (payload: {
+  fixDeadline: string;
+  reasons: string[];
+  notes: string;
+}): Promise<void> => {
   if (!enrollment.value) return;
 
+  $q.loading.show({
+    message: t('admin.registrantManagement.detail.notifications.sending'),
+  });
+
   try {
-    await updateEnrollmentStatus(enrollment.value.ERM_ID, {
-      ERM_VERIFY_STATUS: VerifyStatus.WAIT_FIXED,
+    const resolvedRoute = router.resolve({
+      name: 'user-profile',
+      query: { from: 'email' },
+    });
+    const profileUrl = new URL(
+      resolvedRoute.href,
+      import.meta.env.VITE_APP_URL || window.location.origin,
+    ).href;
+
+    await requestEnrollmentFix(enrollment.value.ERM_ID, {
+      fixDeadline: payload.fixDeadline,
+      reasons: payload.reasons,
+      notes: payload.notes || undefined,
+      profileUrl,
     });
 
     $q.notify({
       type: 'positive',
-      message: 'ส่งคืนเพื่อแก้ไขเรียบร้อยแล้ว',
+      message: t('admin.registrantManagement.detail.notifications.sendSuccess'),
     });
 
     void router.push({
@@ -139,11 +168,13 @@ const handleFixSubmit = async (): Promise<void> => {
       params: { examId: enrollment.value.SESSION.EXAM_ID },
     });
   } catch (error) {
-    console.error('Error updating status:', error);
+    console.error('Error requesting profile fix:', error);
     $q.notify({
       type: 'negative',
-      message: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล',
+      message: t('admin.registrantManagement.detail.notifications.sendError'),
     });
+  } finally {
+    $q.loading.hide();
   }
 };
 
@@ -157,7 +188,7 @@ const handleVerify = async (): Promise<void> => {
 
     $q.notify({
       type: 'positive',
-      message: 'ยืนยันการตรวจสอบสำเร็จ',
+      message: t('admin.registrantManagement.detail.notifications.verifySuccess'),
     });
 
     void router.push({
@@ -168,7 +199,7 @@ const handleVerify = async (): Promise<void> => {
     console.error('Error updating status:', error);
     $q.notify({
       type: 'negative',
-      message: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล',
+      message: t('admin.registrantManagement.detail.notifications.verifyError'),
     });
   }
 };

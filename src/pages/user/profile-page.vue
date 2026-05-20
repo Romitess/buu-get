@@ -3,8 +3,26 @@
     <AppBreadcrumbs />
     <AppPageHeader
       :title="$t('profile.pageTitleEdit')"
-      :subtitle="$t('profile.pageSubtitleEdit', 'จัดการและแก้ไขข้อมูลส่วนตัวของผู้ใช้งาน')"
+      :subtitle="$t('profile.pageSubtitleEdit')"
     />
+
+    <!-- Warning banner if navigated from email -->
+    <Transition name="fade">
+      <div
+        v-if="isFromEmail"
+        class="q-mb-md q-pa-md row no-wrap items-center fix-alert-banner shadow-sm"
+      >
+        <q-icon name="report_problem" color="warning" size="md" class="q-mr-md" />
+        <div>
+          <div class="text-weight-bold text-subtitle1 text-warning q-mb-xs">
+            {{ $t('profile.fixAlertTitle') }}
+          </div>
+          <div class="text-body2 text-grey-8">
+            {{ $t('profile.fixAlertDesc') }}
+          </div>
+        </div>
+      </div>
+    </Transition>
 
     <!-- Card 1: Identity Info -->
     <q-card class="user-profile-card q-pa-lg q-mb-md" flat bordered>
@@ -26,7 +44,7 @@
             />
           </div>
           <div class="text-weight-medium text-body1">
-            {{ $t('profile.testTakerId', 'รหัสประจำตัว') }}:
+            {{ $t('profile.testTakerId') }}:
             {{ userStore.currentUser?.nationalId || '66100001' }}
           </div>
         </div>
@@ -46,7 +64,7 @@
                   class="text-primary text-caption text-weight-medium no-wrap"
                   style="text-decoration: none"
                 >
-                  {{ $t('profile.pageTitleEditPassword', 'แก้ไขรหัสผ่าน') }}
+                  {{ $t('profile.pageTitleEditPassword') }}
                 </a>
               </div>
               <q-input v-model="formData.email" outlined dense bg-color="white" />
@@ -213,7 +231,7 @@
       <q-card style="min-width: 400px; border-radius: 16px; padding: 12px">
         <q-card-section class="row items-center q-pb-none justify-between">
           <div class="text-h6 text-weight-bold">
-            {{ $t('profile.pageTitleEditPassword', 'แก้ไขรหัสผ่าน') }}
+            {{ $t('profile.pageTitleEditPassword') }}
           </div>
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
@@ -221,8 +239,7 @@
         <q-card-section class="q-py-md">
           <div class="q-mb-md">
             <label class="form-label"
-              >{{ $t('profile.currentPassword', 'รหัสผ่านปัจจุบัน') }}
-              <span class="text-negative">*</span></label
+              >{{ $t('profile.currentPassword') }} <span class="text-negative">*</span></label
             >
             <q-input
               v-model="currentPassword"
@@ -235,8 +252,7 @@
           </div>
           <div class="q-mb-md">
             <label class="form-label"
-              >{{ $t('profile.newPassword', 'รหัสผ่านใหม่') }}
-              <span class="text-negative">*</span></label
+              >{{ $t('profile.newPassword') }} <span class="text-negative">*</span></label
             >
             <q-input
               v-model="newPassword"
@@ -261,7 +277,7 @@
           />
           <q-btn
             unelevated
-            :label="$t('examSchedule.dialogConfirm.confirm', 'ยืนยัน')"
+            :label="$t('examSchedule.dialogConfirm.confirm')"
             color="primary"
             style="border-radius: 8px; width: 120px"
             class="text-weight-bold"
@@ -275,7 +291,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from 'src/stores/user.store';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
@@ -285,9 +301,12 @@ import AppCalendar from 'src/components/app-calendar.vue';
 import { TITLE_TH_OPTIONS } from 'src/utils/form-options';
 
 const router = useRouter();
+const route = useRoute();
 const userStore = useUserStore();
 const $q = useQuasar();
 const { t } = useI18n();
+
+const isFromEmail = computed(() => route.query.from === 'email');
 
 const showPasswordDialog = ref(false);
 const currentPassword = ref('');
@@ -360,7 +379,7 @@ const onCancel = (): void => {
 const onSave = (): void => {
   $q.notify({
     type: 'positive',
-    message: t('profile.dialogUpdateSuccess', 'อัปเดตข้อมูลส่วนตัวเรียบร้อยแล้ว'),
+    message: t('profile.dialogUpdateSuccess'),
     position: 'top',
   });
   // TODO: Call API to save data
@@ -370,7 +389,7 @@ const onSavePassword = (): void => {
   if (!currentPassword.value || !newPassword.value) {
     $q.notify({
       type: 'negative',
-      message: t('profile.required', 'กรุณากรอกข้อมูลให้ครบถ้วน'),
+      message: t('profile.required'),
       position: 'top',
     });
     return;
@@ -378,7 +397,7 @@ const onSavePassword = (): void => {
 
   $q.notify({
     type: 'positive',
-    message: t('profile.dialogUpdateSuccess', 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว'),
+    message: t('profile.dialogUpdateSuccess'),
     position: 'top',
   });
 
@@ -437,5 +456,22 @@ const onSavePassword = (): void => {
 .calendar-menu {
   border-radius: var(--radius-lg);
   overflow: hidden;
+}
+
+.fix-alert-banner {
+  background: linear-gradient(135deg, #fffaf0 0%, #fff8e1 100%);
+  border: 1px solid #ffe082;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(255, 179, 0, 0.05);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
