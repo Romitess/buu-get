@@ -173,7 +173,7 @@ const startIssuingTickets = async (): Promise<void> => {
 
           const prefix = enrollment.USER?.PROFILE?.userTitleTh || '';
           const fullname = enrollment.USER?.PROFILE?.userFullnameTh || '';
-          const fullName = `${prefix}${fullname}`.trim() || 'ผู้สมัครสอบ';
+          const fullName = `${prefix} ${fullname}`.trim() || 'ผู้สมัครสอบ';
 
           // 1. Create voucher
           await createVoucherFromEnrollment(enrollment.ERM_ID);
