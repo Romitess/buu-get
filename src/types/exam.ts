@@ -159,6 +159,14 @@ export interface ExamEnrollment {
   TRANSACTION?: {
     TRANX_ID: number;
     TRANX_MATCH_STATUS?: number;
+    TRANX_REF1?: string;
+    TRANX_PAID_AT?: string | Date;
+    TRANX_CREATED_AT?: string | Date;
+    TRANX_RECEIPT_NAME?: string;
+    TRANX_TAX_ID?: string;
+    TRANX_RECEIPT_ADDRESS?: string;
+    TRANX_AMOUNT?: number;
+    TRANX_CHANNEL?: string;
     BANK_RECONCILES?: { BR_ID: number; TRANX_ID: number | null }[];
   };
 }
