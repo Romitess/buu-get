@@ -183,6 +183,7 @@ export const useExamStore = defineStore('exam', () => {
           time: `${session.SS_START_TIME?.substring(0, 5) || '00:00'} - ${session.SS_END_TIME?.substring(0, 5) || '00:00'}`,
           location: locationText,
           fee: exam?.EXAM_FEE || DEFAULT_EXAM_FEE_THB,
+          rawEnrollment: enrollment,
         };
 
         if (enrollment.ERM_STATUS === 0) {
@@ -196,7 +197,7 @@ export const useExamStore = defineStore('exam', () => {
           item.status = 'exam.status.paymentCompleted';
           item.statusType = 'primary';
           const isVerified = enrollment.ERM_VERIFY_STATUS === 1; // PASS
-          const hasBankMatch = (enrollment.TRANSACTION?.BANK_RECONCILES?.length ?? 0) > 0;
+          const hasBankMatch = enrollment.TRANSACTION?.TRANX_MATCH_STATUS === 1; // MATCH
           item.actions = isVerified && hasBankMatch ? ['downloadReceipt'] : [];
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === 2) {

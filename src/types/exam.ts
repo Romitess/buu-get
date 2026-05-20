@@ -77,6 +77,7 @@ export interface ExamHistoryItem {
   deadline?: string;
   customStatus?: CustomStatus;
   actions?: string[];
+  rawEnrollment?: ExamEnrollment;
 }
 
 export interface DayData {
@@ -157,6 +158,7 @@ export interface ExamEnrollment {
   SESSION?: BackendSession;
   TRANSACTION?: {
     TRANX_ID: number;
+    TRANX_MATCH_STATUS?: number;
     BANK_RECONCILES?: { BR_ID: number; TRANX_ID: number | null }[];
   };
 }
