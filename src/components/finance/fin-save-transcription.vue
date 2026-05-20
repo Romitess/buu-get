@@ -5,7 +5,7 @@
       :label="t('admin.finSaveTranscription.btnLabel')"
       unelevated
       :disable="disabled"
-      class="btn-save-trigger text-weight-bold full-width"
+      class="btn-save-trigger full-width"
       :class="{ 'btn-disabled': disabled }"
       @click="showConfirm = true"
     />

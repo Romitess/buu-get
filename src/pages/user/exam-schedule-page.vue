@@ -91,7 +91,7 @@ import { storeToRefs } from 'pinia';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import ExamDetail from 'src/components/exam-detail.vue';
-import ExamCalendar from 'src/components/exam-calendar.vue';
+import ExamCalendar from 'src/components/exam/exam-calendar.vue';
 import RoundExam from 'src/components/exam/round-exam.vue';
 import DialogConfirm from 'src/components/exam/dialog-confirm.vue';
 import ExamPasscodeInputDialog from 'src/components/exam-passcode-input-dialog.vue';

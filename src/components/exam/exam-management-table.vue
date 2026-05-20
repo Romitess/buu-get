@@ -277,9 +277,6 @@ const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
   ],
 }));
 
-/**
- * Logic to disable specific actions based on business rules
- */
 const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
   if (emitName === TABLE_ACTIONS.MANAGE_SEATS) {
     if ('isAllVerifyPassed' in row && row.isAllVerifyPassed === false) {

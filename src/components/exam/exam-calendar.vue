@@ -4,9 +4,9 @@
       :model-value="modelValue"
       show-legend
       disable-past-dates
-      @update:model-value="(val) => $emit('update:modelValue', val)"
-      @change-month="(m, y) => $emit('change-month', m, y)"
-      @main-card-resize="(size) => $emit('main-card-resize', size)"
+      @update:model-value="onUpdateModelValue"
+      @change-month="onChangeMonth"
+      @main-card-resize="onMainCardResize"
     >
       <template #day-content="{ day }">
         <div
@@ -23,18 +23,30 @@
 </template>
 
 <script setup lang="ts">
-import AppCalendar from './app-calendar.vue';
-import type { ExamCalendarProps } from '../types/common';
+import AppCalendar from '../shared/app-calendar.vue';
+import type { ExamCalendarProps } from '../../types/common';
 
 withDefaults(defineProps<ExamCalendarProps>(), {
   availability: () => ({}),
 });
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void;
   (e: 'change-month', month: number, year: number): void;
   (e: 'main-card-resize', size: { width: number; height: number }): void;
 }>();
+
+const onUpdateModelValue = (val: string) => {
+  emit('update:modelValue', val);
+};
+
+const onChangeMonth = (m: number, y: number) => {
+  emit('change-month', m, y);
+};
+
+const onMainCardResize = (size: { width: number; height: number }) => {
+  emit('main-card-resize', size);
+};
 </script>
 
 <style scoped lang="scss">
