@@ -77,7 +77,7 @@ export default {
   },
   profile: {
     pageTitle: 'กรอกข้อมูลส่วนตัว',
-    pageTitleEdit: 'แก้ไขข้อมูลส่วนตัว',
+    pageTitleEdit: 'จัดการข้อมูลส่วนตัว',
     pageSubtitleEdit: 'จัดการและแก้ไขข้อมูลส่วนตัวของผู้ใช้งาน',
     pageTitleEditPassword: 'แก้ไขรหัสผ่าน',
     currentPassword: 'รหัสผ่านปัจจุบัน',

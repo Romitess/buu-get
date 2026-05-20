@@ -25,10 +25,10 @@
     </Transition>
 
     <!-- Card 1: Identity Info -->
-    <q-card class="user-profile-card q-pa-lg q-mb-md" flat bordered>
+    <q-card class="user-profile-card q-pa-lg q-mb-md" flat>
       <div class="row q-col-gutter-xl">
         <!-- Left: Avatar -->
-        <div class="col-12 col-md-4 flex column flex-center">
+        <div class="col-12 col-md-3 flex column flex-center">
           <div class="avatar-container q-mb-md">
             <q-avatar size="160px" class="profile-avatar">
               <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Somdream" alt="Avatar" />
@@ -50,7 +50,7 @@
         </div>
 
         <!-- Right: Form Fields -->
-        <div class="col-12 col-md-8">
+        <div class="col-12 col-md-9">
           <div class="row q-col-gutter-md">
             <!-- Row 1 -->
             <div class="col-12 col-md-6">
@@ -112,7 +112,7 @@
                 >{{ $t('profile.birthdate') }} <span class="text-negative">*</span></label
               >
               <q-input
-                v-model="formData.birthdate"
+                v-model="birthdateDisplay"
                 outlined
                 dense
                 bg-color="white"
@@ -154,9 +154,9 @@
     </q-card>
 
     <!-- Card 2: Contact & Education Info -->
-    <q-card class="user-profile-card q-pa-lg q-mb-xl" flat bordered>
-      <!-- Row 1: Education, Faculty on left | Address on right -->
-      <div class="row q-col-gutter-xl q-mb-md">
+    <q-card class="user-profile-card q-pa-lg q-mb-md" flat>
+      <div class="row q-col-gutter-xl">
+        <!-- Left Column: Education, Faculty, Institution -->
         <div class="col-12 col-md-6">
           <div class="q-mb-md">
             <label class="form-label">{{ $t('profile.education') }}</label>
@@ -171,38 +171,38 @@
               map-options
             />
           </div>
-          <div>
+          <div class="q-mb-md">
             <label class="form-label">{{ $t('profile.faculty') }}</label>
             <q-input v-model="formData.faculty" outlined dense bg-color="white" />
           </div>
+          <div>
+            <label class="form-label">{{ $t('profile.institution') }}</label>
+            <q-input v-model="formData.institution" outlined dense bg-color="white" />
+          </div>
         </div>
 
+        <!-- Right Column: Address, Phone -->
         <div class="col-12 col-md-6">
-          <label class="form-label"
-            >{{ $t('profile.address') }} <span class="text-negative">*</span></label
-          >
-          <q-input
-            v-model="formData.address"
-            type="textarea"
-            outlined
-            dense
-            bg-color="white"
-            input-style="resize: none; height: 114px;"
-          />
-        </div>
-      </div>
-
-      <!-- Row 2: Institution on left | Phone on right -->
-      <div class="row q-col-gutter-xl">
-        <div class="col-12 col-md-6">
-          <label class="form-label">{{ $t('profile.institution') }}</label>
-          <q-input v-model="formData.institution" outlined dense bg-color="white" />
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="form-label"
-            >{{ $t('profile.phone') }} <span class="text-negative">*</span></label
-          >
-          <q-input v-model="formData.phone" outlined dense bg-color="white" />
+          <div class="q-mb-md">
+            <label class="form-label"
+              >{{ $t('profile.address') }} <span class="text-negative">*</span></label
+            >
+            <q-input
+              v-model="formData.address"
+              type="textarea"
+              outlined
+              dense
+              bg-color="white"
+              class="address-textarea"
+              input-style="resize: none;"
+            />
+          </div>
+          <div>
+            <label class="form-label"
+              >{{ $t('profile.phone') }} <span class="text-negative">*</span></label
+            >
+            <q-input v-model="formData.phone" outlined dense bg-color="white" mask="###-###-####" />
+          </div>
         </div>
       </div>
     </q-card>
@@ -353,6 +353,46 @@ const educationOptions = computed(() => [
   { label: t('profile.eduDoctor'), value: 'ปริญญาเอก' },
 ]);
 
+const birthdateDisplay = computed({
+  get() {
+    if (!formData.value.birthdate) return '';
+    const parts = formData.value.birthdate.split('-');
+    if (parts.length === 3) {
+      const yearStr = parts[0];
+      const month = parts[1];
+      const day = parts[2];
+      if (yearStr && month && day) {
+        const year = parseInt(yearStr, 10);
+        const beYear = year + 543;
+        return `${day}/${month}/${beYear}`;
+      }
+    }
+    if (formData.value.birthdate.includes('/')) {
+      return formData.value.birthdate;
+    }
+    return formData.value.birthdate;
+  },
+  set(val) {
+    if (!val) {
+      formData.value.birthdate = '';
+      return;
+    }
+    const parts = val.split('/');
+    if (parts.length === 3) {
+      const day = parts[0];
+      const month = parts[1];
+      const yearStr = parts[2];
+      if (day && month && yearStr) {
+        const beYear = parseInt(yearStr, 10);
+        const ceYear = beYear - 543;
+        formData.value.birthdate = `${ceYear}-${month}-${day}`;
+      }
+    } else {
+      formData.value.birthdate = val;
+    }
+  },
+});
+
 onMounted((): void => {
   const user = userStore.currentUser;
   if (user) {
@@ -409,13 +449,13 @@ const onSavePassword = (): void => {
 
 <style scoped lang="scss">
 .profile-page {
-  background-color: #f9f9f9;
 }
 
 .user-profile-card {
-  border-radius: 12px;
-  border-color: #e0e0e0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+  border-radius: 16px !important;
+  border: 1px solid #e0e0e0 !important;
+  box-shadow: none !important;
+  background-color: var(--surface-card) !important;
 }
 
 :deep(.q-field--outlined .q-field__control) {
@@ -430,7 +470,7 @@ const onSavePassword = (): void => {
 .profile-avatar {
   background-color: #2196f3;
   border: 4px solid white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: none !important;
 }
 
 .avatar-edit-btn {
@@ -438,7 +478,7 @@ const onSavePassword = (): void => {
   bottom: 0;
   right: 12px;
   border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: none !important;
 }
 
 .form-label {
@@ -473,5 +513,10 @@ const onSavePassword = (): void => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+:deep(.address-textarea .q-field__control) {
+  height: 118px !important;
+  min-height: 118px !important;
 }
 </style>
