@@ -31,7 +31,10 @@
         <div class="col-12 col-md-3 flex column flex-center">
           <div class="avatar-container q-mb-md">
             <q-avatar size="160px" class="profile-avatar">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Somdream" alt="Avatar" />
+              <img
+                :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${userStore.currentUser?.fullNameEN || 'Somdream'}`"
+                alt="Avatar"
+              />
             </q-avatar>
             <q-btn
               round
@@ -135,7 +138,7 @@
                   >
                     <AppCalendar
                       :model-value="formData.birthdate"
-                      @update:model-value="(val) => (formData.birthdate = val)"
+                      @update:model-value="(val: string) => (formData.birthdate = val)"
                       @click-date="showCalendar = false"
                     />
                   </q-menu>
@@ -291,14 +294,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
+import type { ComputedRef, WritableComputedRef } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from 'src/stores/user.store';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
-import AppCalendar from 'src/components/app-calendar.vue';
-import { TITLE_TH_OPTIONS } from 'src/utils/form-options';
+import AppCalendar from 'src/components/shared/app-calendar.vue';
+import { TITLE_TH_OPTIONS, EDUCATION_LEVEL_OPTIONS } from 'src/utils/form-options';
 
 const router = useRouter();
 const route = useRoute();
@@ -306,7 +310,7 @@ const userStore = useUserStore();
 const $q = useQuasar();
 const { t } = useI18n();
 
-const isFromEmail = computed(() => route.query.from === 'email');
+const isFromEmail: ComputedRef<boolean> = computed<boolean>(() => route.query.from === 'email');
 
 const showPasswordDialog = ref(false);
 const currentPassword = ref('');
@@ -329,32 +333,38 @@ interface ProfileFormData {
 
 const formData = ref<ProfileFormData>({
   email: '',
-  title: 'นาย',
+  title: TITLE_TH_OPTIONS[0].value,
   nationalId: '',
   fullNameTH: '',
   birthdate: '',
   fullNameEN: '',
-  educationLevel: 'ปริญญาตรี',
+  educationLevel: EDUCATION_LEVEL_OPTIONS[1],
   faculty: '',
   institution: '',
   address: '',
   phone: '',
 });
 
-const titleOptions = TITLE_TH_OPTIONS.map((opt) => ({
-  label: opt.label,
-  value: opt.value,
-}));
+const titleOptions: ComputedRef<{ label: string; value: string }[]> = computed<
+  { label: string; value: string }[]
+>(() =>
+  TITLE_TH_OPTIONS.map((opt) => ({
+    label: t(`profile.prefixes.${opt.i18nKey}`),
+    value: opt.value,
+  })),
+);
 
-const educationOptions = computed(() => [
-  { label: t('profile.eduHighSchool'), value: 'มัธยมศึกษา' },
-  { label: t('profile.eduBachelor'), value: 'ปริญญาตรี' },
-  { label: t('profile.eduMaster'), value: 'ปริญญาโท' },
-  { label: t('profile.eduDoctor'), value: 'ปริญญาเอก' },
+const educationOptions: ComputedRef<{ label: string; value: string }[]> = computed<
+  { label: string; value: string }[]
+>(() => [
+  { label: t('profile.eduHighSchool'), value: EDUCATION_LEVEL_OPTIONS[0] },
+  { label: t('profile.eduBachelor'), value: EDUCATION_LEVEL_OPTIONS[1] },
+  { label: t('profile.eduMaster'), value: EDUCATION_LEVEL_OPTIONS[2] },
+  { label: t('profile.eduDoctor'), value: EDUCATION_LEVEL_OPTIONS[3] },
 ]);
 
-const birthdateDisplay = computed({
-  get() {
+const birthdateDisplay: WritableComputedRef<string> = computed<string>({
+  get(): string {
     if (!formData.value.birthdate) return '';
     const parts = formData.value.birthdate.split('-');
     if (parts.length === 3) {
@@ -372,7 +382,7 @@ const birthdateDisplay = computed({
     }
     return formData.value.birthdate;
   },
-  set(val) {
+  set(val: string): void {
     if (!val) {
       formData.value.birthdate = '';
       return;
@@ -398,12 +408,12 @@ onMounted((): void => {
   if (user) {
     formData.value = {
       email: user.email || '',
-      title: user.titleTH || 'นาย',
+      title: user.titleTH || TITLE_TH_OPTIONS[0].value,
       nationalId: user.nationalId || '',
       fullNameTH: user.fullNameTH || '',
       birthdate: user.birthdate || '',
       fullNameEN: user.fullNameEN || '',
-      educationLevel: user.educationLevel || 'ปริญญาตรี',
+      educationLevel: user.educationLevel || EDUCATION_LEVEL_OPTIONS[1],
       faculty: user.faculty || '',
       institution: user.institution || '',
       address: user.address || '',
