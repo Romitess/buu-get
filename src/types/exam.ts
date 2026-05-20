@@ -155,6 +155,10 @@ export interface ExamEnrollment {
   ERM_VERIFY_STATUS: number;
   CREATED_AT: string;
   SESSION?: BackendSession;
+  TRANSACTION?: {
+    TRANX_ID: number;
+    BANK_RECONCILES?: { BR_ID: number; TRANX_ID: number | null }[];
+  };
 }
 
 export interface BackendLocation {

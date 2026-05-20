@@ -191,18 +191,24 @@ export const useExamStore = defineStore('exam', () => {
           item.actions = ['cancel', 'pay'];
           newPending.push(item);
         } else if (enrollment.ERM_STATUS === 1) {
+          // PAID: ชำระเงินเสร็จสิ้น — no buttons by default
+          // Show downloadReceipt only when ERM_VERIFY_STATUS === PASS AND bank reconcile matched
           item.status = 'exam.status.paymentCompleted';
           item.statusType = 'primary';
-          item.actions = [];
+          const isVerified = enrollment.ERM_VERIFY_STATUS === 1; // PASS
+          const hasBankMatch = (enrollment.TRANSACTION?.BANK_RECONCILES?.length ?? 0) > 0;
+          item.actions = isVerified && hasBankMatch ? ['downloadReceipt'] : [];
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === 2) {
+          // SEAT_ASSIGNED: Show downloadReceipt + candidateCard only when ERM_VERIFY_STATUS === PASS
           item.status = 'exam.status.verified';
           item.statusType = 'primary';
-          item.actions = ['downloadReceipt', 'candidateCard'];
+          const isVerified = enrollment.ERM_VERIFY_STATUS === 1; // PASS
+          item.actions = isVerified ? ['downloadReceipt', 'candidateCard'] : [];
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === 3) {
           item.status = 'exam.status.completed';
-          item.statusType = 'success';
+          item.statusType = 'primary';
           item.actions = ['scoreDetails'];
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === 4) {
