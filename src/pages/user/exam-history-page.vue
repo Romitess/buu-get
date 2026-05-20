@@ -105,6 +105,7 @@
               icon="receipt_long"
               :label="$t('exam.history.downloadReceipt')"
               class="action-btn btn-action-filled"
+              @click="handlePrintReceipt(exam)"
             />
           </template>
         </AppExamHistoryCard>
@@ -142,6 +143,24 @@
     >
       <TestVoucherReport :data="selectedVoucherData" />
     </div>
+
+    <!-- Hidden container for Receipt PDF generation -->
+    <div
+      v-if="isDownloadingReceipt"
+      id="receipt-render-container"
+      style="
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        width: 210mm;
+        height: 297mm;
+        z-index: -1000;
+        pointer-events: none;
+        background-color: #ffffff;
+      "
+    >
+      <ReceiptCard :receipt="selectedReceiptData" />
+    </div>
   </div>
 </template>
 
@@ -159,11 +178,13 @@ import AppButton from 'src/components/base/app-button.vue';
 import AppPaymentDialog from 'src/components/exam/app-payment-dialog.vue';
 import DialogCancel from 'src/components/exam/dialog-cancel.vue';
 import TestVoucherReport from 'src/components/test-voucher-report.vue';
+import ReceiptCard from 'src/components/receipt-card.vue';
 import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
 import { DEFAULT_EXAM_FEE_THB, PAYMENT_DURATION_SECONDS_DEFAULT } from 'src/constants/exam';
 import type { ExamHistoryItem } from 'src/types/exam';
 import type { VoucherData } from 'src/types/voucher';
+import type { ReceiptData } from 'src/types/receipt';
 
 const $q = useQuasar();
 const { t } = useI18n();
@@ -187,6 +208,20 @@ const selectedExamForCancel = ref<ExamHistoryItem | null>(null);
 
 const isDownloadingVoucher = ref(false);
 const selectedVoucherData = ref<VoucherData | undefined>(undefined);
+
+const isDownloadingReceipt = ref(false);
+const selectedReceiptData = ref<ReceiptData>({
+  receiptNo: '',
+  transactionDate: '',
+  fullName: '',
+  nationalId: '',
+  examName: '',
+  examDate: '',
+  location: '',
+  amount: 0,
+  paymentMethod: '',
+  status: 'PENDING',
+});
 
 // === Computed: แปลง i18n keys เป็นข้อความจริง ===
 /**
@@ -422,6 +457,134 @@ const handlePrintVoucher = async (exam: ExamHistoryItem): Promise<void> => {
       $q.loading.hide();
       isDownloadingVoucher.value = false;
       selectedVoucherData.value = undefined;
+    }
+  }
+};
+
+const handlePrintReceipt = async (exam: ExamHistoryItem): Promise<void> => {
+  const enrollment = exam.rawEnrollment;
+  const user = userStore.currentUser;
+
+  if (enrollment && enrollment.SESSION) {
+    const session = enrollment.SESSION;
+    const examObj = session.EXAM;
+    const locationObj = session.LOCATION;
+
+    // Format date nicely to match "15 May 2026"
+    let dateStr = '15 May 2026';
+    if (examObj?.EXAM_DATE) {
+      const d = new Date(examObj.EXAM_DATE);
+      const months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+      dateStr = `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
+    const locationText = locationObj
+      ? `${locationObj.LOCATION_NAME}${locationObj.LOCATION_ROOM_NO ? ` (${locationObj.LOCATION_ROOM_NO})` : ''}`
+      : 'QS1, Burapha University';
+
+    const transaction = enrollment.TRANSACTION;
+
+    selectedReceiptData.value = {
+      receiptNo: transaction?.TRANX_REF1 || `RC2026-${String(enrollment.ERM_ID).padStart(5, '0')}`,
+      transactionDate: transaction?.TRANX_PAID_AT
+        ? new Date(transaction.TRANX_PAID_AT).toISOString()
+        : transaction?.TRANX_CREATED_AT
+          ? new Date(transaction.TRANX_CREATED_AT).toISOString()
+          : new Date().toISOString(),
+      fullName:
+        transaction?.TRANX_RECEIPT_NAME ||
+        (user
+          ? `${user.titleEN || ''} ${user.fullNameEN || user.fullNameTH || ''}`.trim()
+          : 'Mr. Somdream Jaidee'),
+      nationalId: transaction?.TRANX_TAX_ID || user?.nationalId || '1-1234-12345-12-1',
+      address:
+        transaction?.TRANX_RECEIPT_ADDRESS || '169 Longhad Bangsaen Rd, Saen Suk, Chon Buri 20131',
+      examName: examObj?.EXAM_NAME || "BUU-GET : Burapha University's Graduate English Test",
+      examDate: dateStr,
+      location: locationText,
+      amount: transaction?.TRANX_AMOUNT || examObj?.EXAM_FEE || 1500,
+      paymentMethod: transaction?.TRANX_CHANNEL || 'Mobile Banking',
+      status: 'SUCCESS',
+    };
+
+    $q.loading.show({
+      message: 'กำลังเตรียมใบเสร็จรับเงินเพื่อดาวน์โหลด (Generating Electronic Receipt)...',
+    });
+
+    isDownloadingReceipt.value = true;
+
+    // Wait for DOM to mount offscreen container
+    await nextTick();
+    // Brief sleep to allow elements/watermarks to render fully
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
+    try {
+      const container = document.getElementById('receipt-render-container');
+      const receiptElement = container?.querySelector('.receipt-container') as HTMLElement | null;
+
+      if (receiptElement) {
+        const canvas = await html2canvas(receiptElement, {
+          scale: 3, // very high-quality rendering (600 DPI feel)
+          useCORS: true,
+          allowTaint: true,
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+
+        // Standard A4 dimensions in PDF: 210mm x 297mm
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+        });
+
+        // Fill the entire PDF page with the image with no margins
+        pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+        pdf.save(`BUU-GET_Receipt_${enrollment.ERM_ID}.pdf`);
+
+        $q.notify({
+          type: 'positive',
+          message: 'ดาวน์โหลดใบเสร็จรับเงินเรียบร้อยแล้ว (PDF)',
+          position: 'top',
+        });
+      } else {
+        throw new Error('Receipt element not found');
+      }
+    } catch (err) {
+      console.error(err);
+      $q.notify({
+        type: 'negative',
+        message: 'เกิดข้อผิดพลาดในการสร้างใบเสร็จ กรุณาลองใหม่อีกครั้ง',
+        position: 'top',
+      });
+    } finally {
+      $q.loading.hide();
+      isDownloadingReceipt.value = false;
+      selectedReceiptData.value = {
+        receiptNo: '',
+        transactionDate: '',
+        fullName: '',
+        nationalId: '',
+        examName: '',
+        examDate: '',
+        location: '',
+        amount: 0,
+        paymentMethod: '',
+        status: 'PENDING',
+      };
     }
   }
 };
