@@ -24,6 +24,7 @@ import {
   VERIFY_STATUS,
   TRANSACTION_MATCH_STATUS,
   formatLocationWithRoom,
+  PAYMENT_DURATION_SECONDS_DEFAULT,
 } from 'src/constants/exam';
 
 export const useExamStore = defineStore('exam', () => {
@@ -34,7 +35,7 @@ export const useExamStore = defineStore('exam', () => {
   const getMonthNames = (): string[] => {
     const raw = i18n.tm('common.months');
     if (!Array.isArray(raw)) return [];
-    return raw.map((item) => String(item));
+    return raw.map((item) => item);
   };
 
   const examInfo = computed((): ExamInfo => {
@@ -161,6 +162,13 @@ export const useExamStore = defineStore('exam', () => {
           item.status = 'exam.status.pending';
           item.statusType = 'primary';
           item.actions = ['cancel', 'pay'];
+          if (enrollment.CREATED_AT) {
+            const createdAtDate = new Date(enrollment.CREATED_AT);
+            const deadlineDate = new Date(
+              createdAtDate.getTime() + PAYMENT_DURATION_SECONDS_DEFAULT * 1000,
+            );
+            item.deadline = deadlineDate.toISOString();
+          }
           newPending.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.PAID) {
           item.status = 'exam.status.paymentCompleted';
@@ -174,7 +182,17 @@ export const useExamStore = defineStore('exam', () => {
           item.status = 'exam.status.verified';
           item.statusType = 'primary';
           const isVerified = enrollment.ERM_VERIFY_STATUS === VERIFY_STATUS.PASS;
-          item.actions = isVerified ? ['downloadReceipt', 'candidateCard'] : [];
+          const hasBankMatch =
+            enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
+
+          const actions: string[] = [];
+          if (isVerified) {
+            actions.push('candidateCard');
+            if (hasBankMatch) {
+              actions.push('downloadReceipt');
+            }
+          }
+          item.actions = actions;
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.ATTENDED) {
           item.status = 'exam.status.completed';
