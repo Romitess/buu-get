@@ -352,6 +352,7 @@ export default {
     examManagement: {
       table: {
         tooltips: {
+          moodle: 'Manage Moodle Data',
           edit: 'Edit',
           delete: 'Delete',
           manageRegistrants: 'Manage Registrants',
@@ -360,6 +361,11 @@ export default {
           viewCandidates: 'View Candidates',
           exportReport: 'Export Report',
           manageScores: 'Manage Scores',
+          manageSeatsDisabled:
+            'Cannot manage seats because not all candidates have passed verification.',
+          manageScoresDisabled: 'Cannot manage scores because the exam date has not yet arrived.',
+          viewCandidatesDisabled:
+            'Cannot print candidate list because the exam date has not yet arrived.',
         },
       },
     },

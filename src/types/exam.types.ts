@@ -21,7 +21,8 @@ export interface PaginationModel {
 export type Role = RolesType['ADMIN'] | RolesType['STAFF'] | RolesType['REGISTRATION_OFFICER'];
 
 export interface ToolButtonConfig {
-  icon: string;
+  icon?: string | undefined;
+  image?: string | undefined;
   color: string;
   tooltip: string;
   emit: string;

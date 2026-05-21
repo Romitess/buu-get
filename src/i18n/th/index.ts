@@ -390,6 +390,7 @@ export default {
           tools: 'เครื่องมือ',
         },
         tooltips: {
+          moodle: 'จัดการข้อมูลในระบบ Moodle',
           edit: 'แก้ไข',
           delete: 'ลบ',
           manageRegistrants: 'จัดการผู้ลงทะเบียน',
@@ -398,6 +399,11 @@ export default {
           viewCandidates: 'ประวัติการเข้าสอบ',
           exportReport: 'ส่งออกรายงาน',
           manageScores: 'จัดการคะแนนสอบ',
+          manageSeatsDisabled:
+            'ไม่สามารถจัดการที่นั่งสอบได้ เนื่องจากผู้สมัครยังผ่านการตรวจสอบความถูกต้องไม่ครบทุกคน',
+          manageScoresDisabled: 'ไม่สามารถจัดการคะแนนสอบได้ เนื่องจากยังไม่ถึงวันสอบ',
+          viewCandidatesDisabled:
+            'ไม่สามารถพิมพ์บัญชีรายชื่อผู้เข้าสอบได้ เนื่องจากยังไม่ถึงวันสอบ',
         },
       },
       dialogs: {
