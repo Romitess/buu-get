@@ -184,6 +184,21 @@ export const useExamStore = defineStore('exam', () => {
           const isVerified = enrollment.ERM_VERIFY_STATUS === VERIFY_STATUS.PASS;
           const hasBankMatch =
             enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
+
+          const actions: string[] = [];
+          if (isVerified) {
+            if (hasBankMatch) {
+              actions.push('downloadReceipt');
+            }
+          }
+          item.actions = actions;
+          newHistory.push(item);
+        } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_PUBLISHED) {
+          item.status = 'exam.status.verified';
+          item.statusType = 'primary';
+          const isVerified = enrollment.ERM_VERIFY_STATUS === VERIFY_STATUS.PASS;
+          const hasBankMatch =
+            enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
           const hasVoucher = !!(enrollment.VOUCHERS && enrollment.VOUCHERS.length > 0);
 
           const actions: string[] = [];

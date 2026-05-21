@@ -97,8 +97,9 @@ export const ENROLLMENT_STATUS = {
   UNPAID: 0,
   PAID: 1,
   SEAT_ASSIGNED: 2,
-  ATTENDED: 3,
-  CANCELLED: 4,
+  SEAT_PUBLISHED: 3,
+  ATTENDED: 4,
+  CANCELLED: 5,
 } as const;
 
 export const VERIFY_STATUS = {

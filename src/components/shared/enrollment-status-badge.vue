@@ -35,6 +35,7 @@ const badgeClass = computed((): string => {
     switch (status) {
       case EnrollmentStatus.PAID:
       case EnrollmentStatus.SEAT_ASSIGNED:
+      case EnrollmentStatus.SEAT_PUBLISHED:
       case EnrollmentStatus.ATTENDED:
         return 'badge--paid';
       case EnrollmentStatus.UNPAID:
