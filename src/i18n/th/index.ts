@@ -215,6 +215,9 @@ export default {
       notOpen: 'ขออภัย ยังไม่เปิดรับสมัครสอบรอบนี้ (อยู่นอกช่วงเวลาการเปิดรับสมัคร)',
       pleaseLogin: 'กรุณาเข้าสู่ระบบก่อนสมัครสอบ',
       alreadyRegistered: 'คุณได้ลงทะเบียนสอบในรอบนี้ไปแล้ว (ลงทะเบียนซ้ำไม่ได้)',
+      notFound: 'ไม่พบข้อมูลรอบสอบ (อาจถูกลบไปแล้ว)',
+      serverError: 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์ (อาจเกิดจากการลบข้อมูล กรุณาลองเข้าสู่ระบบใหม่)',
+      unknownError: 'เกิดข้อผิดพลาด: {message}',
     },
     dialogConfirm: {
       title: 'ยืนยันการสมัครสอบ',
@@ -236,6 +239,10 @@ export default {
     registrationTitle: 'การสมัครสอบ',
     registrationSubtitle: 'กรุณาเลือกวันที่และรอบเวลาที่คุณต้องการสมัครเข้าทดสอบ BUU-GET',
     dateLabel: 'วันที่',
+    noBadgeRounds: 'ไม่มีรอบสอบ',
+    defaultEnrollmentTitle: 'การทดสอบวัดความสามารถทางภาษาอังกฤษ',
+    invalidUserId: 'ข้อมูลผู้ใช้งานไม่ถูกต้อง (Invalid User ID) กรุณาออกจากระบบแล้วเข้าสู่ระบบใหม่',
+    userNotLoggedIn: 'กรุณาเข้าสู่ระบบก่อน',
   },
   carousel: {
     page1: {

@@ -10,6 +10,22 @@ export default {
     proctor: 'Proctor',
     registration_officer: 'Registration Officer',
   },
+  common: {
+    months: [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ],
+  },
   exam: {
     statusLabel: 'Status',
     status: {
@@ -80,6 +96,10 @@ export default {
       expired: 'Sorry, this round is closed for registration.',
       notOpen: 'Sorry, registration for this round has not started yet.',
       pleaseLogin: 'Please log in before registering for the exam.',
+      alreadyRegistered: 'You have already registered for this round.',
+      notFound: 'Exam round not found (it may have been deleted).',
+      serverError: 'A server error occurred. Please try logging in again.',
+      unknownError: 'An error occurred: {message}',
     },
     dialogConfirm: {
       title: 'Confirm Registration',
@@ -102,6 +122,10 @@ export default {
     registrationSubtitle:
       'Please select the date and session time you wish to register for the BUU-GET test.',
     dateLabel: 'Date',
+    noBadgeRounds: 'No exam rounds',
+    defaultEnrollmentTitle: 'English Proficiency Test',
+    invalidUserId: 'Invalid User ID. Please log out and log in again.',
+    userNotLoggedIn: 'Please log in first',
   },
   profile: {
     pageTitle: 'Personal Information',

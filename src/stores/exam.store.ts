@@ -4,9 +4,6 @@ import { useI18n } from 'vue-i18n';
 import type { ExamRound, ExamInfo, ExamHistoryItem, DayData } from 'src/types/exam';
 import type { ExamSchedule } from 'src/types/exam.types';
 import {
-  defaultExamInfo,
-  mockScheduleData,
-  mockHistoryRecords,
   fetchScheduleData,
   fetchExamSchedules,
   createExamRound,
@@ -14,6 +11,7 @@ import {
   createEnrollment,
   fetchUserEnrollments,
   updateEnrollmentStatus,
+  formatTime,
   type CreateExamPayload,
 } from 'src/services/exam.service';
 import {
@@ -21,12 +19,23 @@ import {
   BUDDHIST_YEAR_OFFSET,
   EMPTY_DETAILS,
   DEFAULT_LOCATION_TEXT,
+  DEFAULT_EXAM_INFO,
+  ENROLLMENT_STATUS,
+  VERIFY_STATUS,
+  TRANSACTION_MATCH_STATUS,
+  formatLocationWithRoom,
 } from 'src/constants/exam';
 
 export const useExamStore = defineStore('exam', () => {
-  const { locale } = useI18n();
+  const i18n = useI18n();
   const selectedDate = ref<string>(new Date().toISOString().split('T')[0] || '');
-  const scheduleData = ref<Record<string, DayData>>(structuredClone(mockScheduleData));
+  const scheduleData = ref<Record<string, DayData>>({});
+
+  const getMonthNames = (): string[] => {
+    const raw = i18n.tm('common.months');
+    if (!Array.isArray(raw)) return [];
+    return raw.map((item) => String(item));
+  };
 
   const examInfo = computed((): ExamInfo => {
     const dayData = scheduleData.value[selectedDate.value];
@@ -39,11 +48,10 @@ export const useExamStore = defineStore('exam', () => {
         feeText: dayData.fee,
       };
     }
-    return { ...defaultExamInfo };
+    return { ...DEFAULT_EXAM_INFO };
   });
   const pendingRegistrations = ref<ExamHistoryItem[]>([]);
-  const historyRecords = ref<ExamHistoryItem[]>(structuredClone(mockHistoryRecords));
-  // For admin management table
+  const historyRecords = ref<ExamHistoryItem[]>([]);
   const managementSchedules = ref<ExamSchedule[]>([]);
 
   const selectedDateRounds = computed((): ExamRound[] => {
@@ -66,7 +74,7 @@ export const useExamStore = defineStore('exam', () => {
 
   const dynamicBadgeText = computed((): string => {
     const rounds = selectedDateRounds.value;
-    return rounds[0]?.roundTypeLabel ?? 'ไม่มีรอบสอบ';
+    return rounds[0]?.roundTypeLabel ?? i18n.t('examSchedule.noBadgeRounds');
   });
 
   const calendarAvailability = computed((): Record<string, 'available' | 'full' | null> => {
@@ -81,40 +89,14 @@ export const useExamStore = defineStore('exam', () => {
   const formattedSelectedDate = computed((): string => {
     if (!selectedDate.value) return '';
     const date = new Date(selectedDate.value);
-    if (locale.value && locale.value.startsWith('en')) {
-      const monthNamesEN = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-      ];
-      return `${date.getDate()} ${monthNamesEN[date.getMonth()]} ${date.getFullYear()}`;
-    } else {
-      const monthNamesTH = [
-        'มกราคม',
-        'กุมภาพันธ์',
-        'มีนาคม',
-        'เมษายน',
-        'พฤษภาคม',
-        'มิถุนายน',
-        'กรกฎาคม',
-        'สิงหาคม',
-        'กันยายน',
-        'ตุลาคม',
-        'พฤศจิกายน',
-        'ธันวาคม',
-      ];
-      const buddhistYear = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
-      return `${date.getDate()} ${monthNamesTH[date.getMonth()]} ${buddhistYear}`;
+    const months = getMonthNames();
+    const monthName = months[date.getMonth()] || '';
+
+    if (i18n.locale.value?.startsWith('en')) {
+      return `${date.getDate()} ${monthName} ${date.getFullYear()}`;
     }
+    const buddhistYear = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
+    return `${date.getDate()} ${monthName} ${buddhistYear}`;
   });
 
   async function initSchedule(): Promise<void> {
@@ -152,67 +134,54 @@ export const useExamStore = defineStore('exam', () => {
         const location = session.LOCATION;
 
         const date = exam?.EXAM_DATE ? new Date(exam.EXAM_DATE) : new Date();
-        const monthNamesTH = [
-          'มกราคม',
-          'กุมภาพันธ์',
-          'มีนาคม',
-          'เมษายน',
-          'พฤษภาคม',
-          'มิถุนายน',
-          'กรกฎาคม',
-          'สิงหาคม',
-          'กันยายน',
-          'ตุลาคม',
-          'พฤศจิกายน',
-          'ธันวาคม',
-        ];
-        const buddhistYear = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
-        const formattedDate = `${date.getDate()} ${monthNamesTH[date.getMonth()]} ${buddhistYear}`;
+        const months = getMonthNames();
+        const monthName = months[date.getMonth()] || '';
+        const year = i18n.locale.value?.startsWith('en')
+          ? date.getFullYear()
+          : date.getFullYear() + BUDDHIST_YEAR_OFFSET;
+        const formattedDate = `${date.getDate()} ${monthName} ${year}`;
 
         const locationText = location
-          ? `${location.LOCATION_NAME}${location.LOCATION_ROOM_NO ? ` (${location.LOCATION_ROOM_NO})` : ''}`
+          ? formatLocationWithRoom(location.LOCATION_NAME, location.LOCATION_ROOM_NO)
           : DEFAULT_LOCATION_TEXT;
 
-        // ERM_STATUS: 0=UNPAID, 1=PAID, 2=SEAT_ASSIGNED, 3=ATTENDED, 4=CANCELLED
         const item: ExamHistoryItem = {
           id: enrollment.ERM_ID,
-          title: exam?.EXAM_NAME || 'การทดสอบวัดความสามารถทางภาษาอังกฤษ',
+          title: exam?.EXAM_NAME || i18n.t('examSchedule.defaultEnrollmentTitle'),
           status: '',
           statusType: 'primary',
           date: formattedDate,
-          time: `${session.SS_START_TIME?.substring(0, 5) || '00:00'} - ${session.SS_END_TIME?.substring(0, 5) || '00:00'}`,
+          time: `${formatTime(session.SS_START_TIME)} - ${formatTime(session.SS_END_TIME)}`,
           location: locationText,
           fee: exam?.EXAM_FEE || DEFAULT_EXAM_FEE_THB,
           rawEnrollment: enrollment,
         };
 
-        if (enrollment.ERM_STATUS === 0) {
+        if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.UNPAID) {
           item.status = 'exam.status.pending';
           item.statusType = 'primary';
           item.actions = ['cancel', 'pay'];
           newPending.push(item);
-        } else if (enrollment.ERM_STATUS === 1) {
-          // PAID: ชำระเงินเสร็จสิ้น — no buttons by default
-          // Show downloadReceipt only when ERM_VERIFY_STATUS === PASS AND bank reconcile matched
+        } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.PAID) {
           item.status = 'exam.status.paymentCompleted';
           item.statusType = 'primary';
-          const isVerified = enrollment.ERM_VERIFY_STATUS === 1; // PASS
-          const hasBankMatch = enrollment.TRANSACTION?.TRANX_MATCH_STATUS === 1; // MATCH
+          const isVerified = enrollment.ERM_VERIFY_STATUS === VERIFY_STATUS.PASS;
+          const hasBankMatch =
+            enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
           item.actions = isVerified && hasBankMatch ? ['downloadReceipt'] : [];
           newHistory.push(item);
-        } else if (enrollment.ERM_STATUS === 2) {
-          // SEAT_ASSIGNED: Show downloadReceipt + candidateCard only when ERM_VERIFY_STATUS === PASS
+        } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_ASSIGNED) {
           item.status = 'exam.status.verified';
           item.statusType = 'primary';
-          const isVerified = enrollment.ERM_VERIFY_STATUS === 1; // PASS
+          const isVerified = enrollment.ERM_VERIFY_STATUS === VERIFY_STATUS.PASS;
           item.actions = isVerified ? ['downloadReceipt', 'candidateCard'] : [];
           newHistory.push(item);
-        } else if (enrollment.ERM_STATUS === 3) {
+        } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.ATTENDED) {
           item.status = 'exam.status.completed';
           item.statusType = 'primary';
           item.actions = ['scoreDetails'];
           newHistory.push(item);
-        } else if (enrollment.ERM_STATUS === 4) {
+        } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.CANCELLED) {
           item.status = 'exam.status.cancelled';
           item.statusType = 'error';
           item.customStatus = {
@@ -226,40 +195,34 @@ export const useExamStore = defineStore('exam', () => {
 
       pendingRegistrations.value = newPending;
       historyRecords.value = newHistory;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to fetch user history:', error);
     }
   }
 
   async function confirmRegistration(round: ExamRound): Promise<void> {
     const userIdStr = localStorage.getItem('user_id');
-    if (!userIdStr) throw new Error('User not logged in');
+    if (!userIdStr) throw new Error(i18n.t('examSchedule.userNotLoggedIn'));
     const userId = parseInt(userIdStr, 10);
     if (isNaN(userId)) {
-      throw new Error(
-        'ข้อมูลผู้ใช้งานไม่ถูกต้อง (Invalid User ID) กรุณาออกจากระบบแล้วเข้าสู่ระบบใหม่',
-      );
+      throw new Error(i18n.t('examSchedule.invalidUserId'));
     }
 
-    // Call backend API
     await createEnrollment(userId, round.id);
-
-    // Refresh history & schedule
     await fetchHistory();
     await initSchedule();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async function confirmSpecialRegistration(round: ExamRound, passcode: string): Promise<void> {
+  async function confirmSpecialRegistration(round: ExamRound): Promise<void> {
     await confirmRegistration(round);
   }
 
   async function cancelRegistration(enrollmentId: number): Promise<void> {
     try {
-      await updateEnrollmentStatus(enrollmentId, 4); // 4 = CANCELLED
-      await fetchHistory(); // รีเฟรชข้อมูลประวัติ
-      await initSchedule(); // รีเฟรชตารางสอบเพื่อคืนที่นั่ง
-    } catch (error) {
+      await updateEnrollmentStatus(enrollmentId, ENROLLMENT_STATUS.CANCELLED);
+      await fetchHistory();
+      await initSchedule();
+    } catch (error: unknown) {
       console.error('Failed to cancel registration:', error);
       throw error;
     }
@@ -267,9 +230,9 @@ export const useExamStore = defineStore('exam', () => {
 
   async function confirmPayment(enrollmentId: number): Promise<void> {
     try {
-      await updateEnrollmentStatus(enrollmentId, 1); // 1 = PAID
-      await fetchHistory(); // รีเฟรชข้อมูลประวัติเพื่อแสดงสถานะชำระเงินแล้ว
-    } catch (error) {
+      await updateEnrollmentStatus(enrollmentId, ENROLLMENT_STATUS.PAID);
+      await fetchHistory();
+    } catch (error: unknown) {
       console.error('Failed to confirm payment:', error);
       throw error;
     }

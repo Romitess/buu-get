@@ -1,11 +1,9 @@
 import { api } from 'src/boot/axios';
 import type {
-  ExamHistoryItem,
   DayData,
   ExamRound,
   BackendExam,
   BackendLocation,
-  ExamInfo,
   AdmissionVoucherData,
   ExamEnrollment,
 } from 'src/types/exam';
@@ -13,7 +11,6 @@ import type { ExamSchedule } from 'src/types/exam.types';
 import {
   BUDDHIST_YEAR_OFFSET,
   SESSION_STATUS_OPEN,
-  DEFAULT_EXAM_INFO,
   EXAM_TYPE_GENERAL,
   DEFAULT_EXAM_TITLE,
   DEFAULT_LOCATION_TEXT,
@@ -64,8 +61,6 @@ export interface ExamLocationOption {
   value: number;
   raw: BackendLocation;
 }
-
-export const defaultExamInfo: ExamInfo = DEFAULT_EXAM_INFO;
 
 export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
   try {
@@ -258,11 +253,6 @@ export const fetchExamLocations = async (): Promise<ExamLocationOption[]> => {
   }
 };
 
-export const mockScheduleData: Record<string, DayData> = {};
-
-export const mockHistoryRecords: ExamHistoryItem[] = [];
-
-/** Payload for updating an existing exam round */
 export interface UpdateExamPayload extends CreateExamPayload {
   examId: number;
   /** Existing session IDs to keep/update */
