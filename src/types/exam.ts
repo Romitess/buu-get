@@ -147,6 +147,21 @@ export interface BackendEnrollment {
   DELETED_AT: string | null;
 }
 
+export interface BackendScore {
+  SCORES_ID: number;
+  ERM_ID: number;
+  SC_LANG_USE_SCORE?: number;
+  SC_READING_SCORE?: number;
+  SC_TOTAL_SCORE?: number;
+  SC_BAND_LEVEL?: number;
+  CERTIFICATES?: {
+    CERT_ID: number;
+    SCORES_ID: number;
+    CERT_CODE: string;
+    CERT_ISSUED_AT: string;
+  }[];
+}
+
 export interface ExamEnrollment {
   ERM_ID: number;
   USER_ID: number;
@@ -169,6 +184,13 @@ export interface ExamEnrollment {
     TRANX_CHANNEL?: string;
     BANK_RECONCILES?: { BR_ID: number; TRANX_ID: number | null }[];
   };
+  VOUCHERS?: {
+    VC_ID: number;
+    ERM_ID: number;
+    VC_CODE: string;
+    CREATED_AT: string;
+  }[];
+  SCORE?: BackendScore;
 }
 
 export interface BackendLocation {

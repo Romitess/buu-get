@@ -184,10 +184,13 @@ export const useExamStore = defineStore('exam', () => {
           const isVerified = enrollment.ERM_VERIFY_STATUS === VERIFY_STATUS.PASS;
           const hasBankMatch =
             enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
+          const hasVoucher = !!(enrollment.VOUCHERS && enrollment.VOUCHERS.length > 0);
 
           const actions: string[] = [];
           if (isVerified) {
-            actions.push('candidateCard');
+            if (hasVoucher) {
+              actions.push('candidateCard');
+            }
             if (hasBankMatch) {
               actions.push('downloadReceipt');
             }
@@ -195,9 +198,22 @@ export const useExamStore = defineStore('exam', () => {
           item.actions = actions;
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.ATTENDED) {
-          item.status = 'exam.status.completed';
+          const hasScore = !!enrollment.SCORE;
+          const hasCertificate = !!(
+            enrollment.SCORE?.CERTIFICATES && enrollment.SCORE.CERTIFICATES.length > 0
+          );
+
+          const actions: string[] = [];
+          if (hasScore) {
+            actions.push('scoreDetails');
+          }
+          if (hasCertificate) {
+            actions.push('certificate');
+          }
+
+          item.status = hasScore ? 'exam.status.completed' : 'exam.status.evaluating';
           item.statusType = 'primary';
-          item.actions = ['scoreDetails'];
+          item.actions = actions;
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.CANCELLED) {
           item.status = 'exam.status.cancelled';
