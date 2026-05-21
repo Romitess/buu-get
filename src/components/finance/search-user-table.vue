@@ -39,22 +39,61 @@ withDefaults(defineProps<Props>(), {
 const { t } = useI18n();
 
 const columns = computed<QTableColumn[]>(() => [
-  { name: 'id', field: 'id', label: t('admin.searchUser.table.index'), align: 'center' },
-  { name: 'ref1', field: 'ref1', label: t('admin.searchUser.table.applicantId'), align: 'center' },
-  { name: 'ref2', field: 'ref2', label: t('admin.searchUser.table.referenceNo'), align: 'center' },
-  { name: 'name', field: 'name', label: t('admin.searchUser.table.fullName'), align: 'left' },
-  { name: 'amount', field: 'amount', label: t('admin.searchUser.table.amount'), align: 'center' },
+  {
+    name: 'id',
+    field: 'id',
+    label: t('admin.searchUser.table.index'),
+    align: 'center',
+    style: 'width: 5%',
+    headerStyle: 'width: 5%',
+  },
+  {
+    name: 'ref1',
+    field: 'ref1',
+    label: t('admin.searchUser.table.applicantId'),
+    align: 'center',
+    style: 'width: 13%; white-space: normal !important;',
+    headerStyle: 'width: 13%; white-space: normal !important; line-height: 1.3;',
+  },
+  {
+    name: 'ref2',
+    field: 'ref2',
+    label: t('admin.searchUser.table.referenceNo'),
+    align: 'center',
+    style: 'width: 13%; white-space: normal !important;',
+    headerStyle: 'width: 13%; white-space: normal !important; line-height: 1.3;',
+  },
+  {
+    name: 'name',
+    field: 'name',
+    label: t('admin.searchUser.table.fullName'),
+    align: 'left',
+    style: 'width: 28%; white-space: normal !important;',
+    headerStyle: 'width: 28%; white-space: normal !important;',
+  },
+  {
+    name: 'amount',
+    field: 'amount',
+    label: t('admin.searchUser.table.amount'),
+    align: 'center',
+    style: 'width: 8%',
+    headerStyle: 'width: 8%',
+  },
   {
     name: 'exam_name',
     field: 'exam_name',
     label: t('admin.searchUser.table.examName'),
     align: 'left',
+    style: 'width: 20%; white-space: normal !important;',
+    headerStyle: 'width: 20%; white-space: normal !important;',
   },
   {
     name: 'payment_status',
     field: 'payment_status',
     label: t('admin.searchUser.table.status'),
     align: 'center',
+    style: 'width: 13%',
+    headerStyle: 'width: 13%',
   },
 ]);
 

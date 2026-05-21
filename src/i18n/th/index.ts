@@ -620,6 +620,10 @@ export default {
         examName: 'ชื่อการสอบ',
         status: 'สถานะการชำระเงิน',
       },
+      validation: {
+        required: 'กรุณากรอกข้อมูลให้ครบ',
+        notFound: 'ไม่พบข้อมูลผู้สมัครสอบ โปรตรวจสอบความถูกต้องอีกครั้ง',
+      },
     },
     finSaveTranscription: {
       btnLabel: 'บันทึกข้อมูลการชำระเงินลงทะเบียน',

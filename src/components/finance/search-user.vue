@@ -20,7 +20,7 @@
         </div>
 
         <!-- Filter Fields -->
-        <div class="q-gutter-y-md q-mb-md dialog-fields">
+        <div class="dialog-fields">
           <!-- Ref 1 -->
           <div class="row items-center field-row">
             <div class="col-4 text-left field-label">
@@ -35,6 +35,11 @@
                 class="input-rounded"
                 :placeholder="t('admin.searchUser.placeholderRef1')"
                 @keyup.enter="handleSearch"
+                :error="errors.ref1"
+                :error-message="t('profile.required')"
+                no-error-icon
+                hide-bottom-space
+                @update:model-value="errors.ref1 = false"
               />
             </div>
           </div>
@@ -53,6 +58,11 @@
                 class="input-rounded"
                 :placeholder="t('admin.searchUser.placeholderRef2')"
                 @keyup.enter="handleSearch"
+                :error="errors.ref2"
+                :error-message="t('profile.required')"
+                no-error-icon
+                hide-bottom-space
+                @update:model-value="errors.ref2 = false"
               />
             </div>
           </div>
@@ -71,13 +81,18 @@
                 class="input-rounded"
                 :placeholder="t('admin.searchUser.placeholderName')"
                 @keyup.enter="handleSearch"
+                :error="errors.name"
+                :error-message="t('profile.required')"
+                no-error-icon
+                hide-bottom-space
+                @update:model-value="errors.name = false"
               />
             </div>
           </div>
         </div>
 
         <!-- Search Action Button -->
-        <div class="row justify-end q-mb-xl button-row">
+        <div class="row justify-end button-row">
           <div class="col-8 row justify-end">
             <q-btn
               :label="t('admin.searchUser.searchBtn')"
@@ -99,12 +114,14 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
 import SearchUserTable from './search-user-table.vue';
 import { fetchAllEnrollments } from 'src/services/enrollment.service';
 import { PAYMENT_STATUS_LABELS } from 'src/types/enrollment.types';
 import type { SearchRow } from 'src/types/exam.types';
 
 const { t } = useI18n();
+const $q = useQuasar();
 
 const isDialogOpen = ref(false);
 const isLoading = ref(false);
@@ -116,20 +133,40 @@ const searchForm = ref({
   name: '',
 });
 
+const errors = ref({
+  ref1: false,
+  ref2: false,
+  name: false,
+});
+
 const openDialog = () => {
   isDialogOpen.value = true;
-  // Reset form and rows on open
+  // Reset form, rows, and errors on open
   searchForm.value = { ref1: '', ref2: '', name: '' };
   rows.value = [];
+  errors.value = { ref1: false, ref2: false, name: false };
 };
 
 const handleSearch = async () => {
+  const ref1Query = searchForm.value.ref1.trim();
+  const ref2Query = searchForm.value.ref2.trim();
+  const nameQuery = searchForm.value.name.trim();
+
+  // Reset errors
+  errors.value = { ref1: false, ref2: false, name: false };
+
+  if (!ref1Query && !ref2Query && !nameQuery) {
+    errors.value = {
+      ref1: true,
+      ref2: true,
+      name: true,
+    };
+    return;
+  }
+
   isLoading.value = true;
   try {
-    const ref1Query = searchForm.value.ref1.trim();
-    const ref2Query = searchForm.value.ref2.trim();
-    const nameQuery = searchForm.value.name.trim().toLowerCase();
-
+    const nameQueryLower = nameQuery.toLowerCase();
     const enrollments = await fetchAllEnrollments();
 
     const filtered = enrollments.filter((e) => {
@@ -137,13 +174,28 @@ const handleSearch = async () => {
         ? e.USER?.USER_NATIONAL_ID?.includes(ref1Query) || String(e.ERM_ID).includes(ref1Query)
         : true;
       const matchesRef2 = ref2Query ? String(e.ERM_ID).includes(ref2Query) : true;
-      const matchesName = nameQuery
-        ? e.USER?.PROFILE?.userFullnameTh?.toLowerCase().includes(nameQuery) ||
-          e.USER?.PROFILE?.userFullnameEn?.toLowerCase().includes(nameQuery)
+      const matchesName = nameQueryLower
+        ? e.USER?.PROFILE?.userFullnameTh?.toLowerCase().includes(nameQueryLower) ||
+          e.USER?.PROFILE?.userFullnameEn?.toLowerCase().includes(nameQueryLower)
         : true;
 
       return matchesRef1 && matchesRef2 && matchesName;
     });
+
+    if (filtered.length === 0) {
+      $q.dialog({
+        title: t('admin.searchUser.dialogTitle'),
+        message: t('admin.searchUser.validation.notFound'),
+        persistent: true,
+        ok: {
+          label: t('profile.dialogClose') || 'ตกลง',
+          color: 'primary',
+          unelevated: true,
+        },
+      });
+      rows.value = [];
+      return;
+    }
 
     rows.value = filtered.map((e, index) => ({
       id: index + 1,
@@ -184,7 +236,7 @@ const handleSearch = async () => {
   padding: 40px 48px;
   box-shadow: var(--shadow-lg);
   overflow-x: hidden;
-  background-color: #ffffff;
+  background-color: var(--surface-card);
 }
 
 .header-row {
@@ -192,13 +244,13 @@ const handleSearch = async () => {
 }
 
 .dialog-title {
-  color: #000000;
+  color: var(--label-color);
   font-size: 24px;
   font-weight: 600;
 }
 
 .close-btn {
-  color: #b0b0b0;
+  color: var(--neutral-400);
   font-size: 1.25rem;
 }
 
@@ -207,11 +259,11 @@ const handleSearch = async () => {
 }
 
 .field-row {
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .field-label {
-  color: #000000;
+  color: var(--label-color);
   font-size: 16px;
   font-weight: 500;
 }
@@ -219,8 +271,8 @@ const handleSearch = async () => {
 .input-rounded {
   :deep(.q-field__control) {
     border-radius: 16px !important;
-    background-color: #fff;
-    border: 1px solid #dcdcdc !important;
+    background-color: var(--surface-card);
+    border: 1px solid var(--neutral-200) !important;
     height: 48px;
     min-height: 48px;
     transition:
@@ -236,7 +288,17 @@ const handleSearch = async () => {
     }
 
     &:hover {
-      border-color: #0b4396 !important;
+      border-color: var(--primary) !important;
+    }
+  }
+
+  &.q-field--error {
+    :deep(.q-field__control) {
+      border-color: var(--negative) !important;
+
+      &:hover {
+        border-color: var(--negative) !important;
+      }
     }
   }
 
@@ -252,11 +314,12 @@ const handleSearch = async () => {
 }
 
 .button-row {
-  margin-top: 16px;
+  margin-top: 0;
+  margin-bottom: 20px;
 }
 
 .btn-dialog-search {
-  background-color: #0b4396 !important;
+  background-color: var(--primary) !important;
   color: white !important;
   width: 200px;
   height: 52px;
@@ -266,7 +329,7 @@ const handleSearch = async () => {
   font-weight: 600;
 
   &:hover {
-    background-color: #083375 !important;
+    background-color: var(--primary-dark) !important;
   }
 }
 </style>

@@ -492,6 +492,10 @@ export default {
         examName: 'Exam Name',
         status: 'Payment Status',
       },
+      validation: {
+        required: 'Please fill in all information',
+        notFound: 'Applicant data not found, please check accuracy again',
+      },
     },
     finSaveTranscription: {
       btnLabel: 'Save Registration Payment Data',
