@@ -150,6 +150,9 @@ export default {
     dialogUpdateSuccess: 'อัปเดตข้อมูลส่วนตัวเรียบร้อยแล้ว',
     dialogRegisterSuccess: 'สมัครสมาชิกเรียบร้อยแล้ว กำลังพาไปหน้าข้อมูลส่วนตัว...',
     dialogPasswordMismatch: 'รหัสผ่านไม่ตรงกัน',
+    requireLogin: 'กรุณาเข้าสู่ระบบก่อนดำเนินการ',
+    savingData: 'กำลังบันทึกข้อมูล...',
+    saveError: 'เกิดข้อผิดพลาดในการบันทึกข้อมูลส่วนตัว',
     // Validation messages
     required: 'กรุณากรอกข้อมูล',
     requiredNationalId: 'กรุณากรอกเลขประจำตัวประชาชน',

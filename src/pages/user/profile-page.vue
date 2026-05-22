@@ -303,6 +303,7 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
 import { TITLE_TH_OPTIONS, EDUCATION_LEVEL_OPTIONS } from 'src/utils/form-options';
+import * as userService from 'src/services/user.service';
 
 const router = useRouter();
 const route = useRoute();
@@ -426,13 +427,51 @@ const onCancel = (): void => {
   void router.push('/');
 };
 
-const onSave = (): void => {
-  $q.notify({
-    type: 'positive',
-    message: t('profile.dialogUpdateSuccess'),
-    position: 'top',
-  });
-  // TODO: Call API to save data
+const onSave = async (): Promise<void> => {
+  const token = userStore.accessToken || localStorage.getItem('access_token');
+  if (!token) {
+    $q.notify({
+      type: 'negative',
+      message: t('profile.requireLogin'),
+      position: 'top',
+    });
+    return;
+  }
+
+  try {
+    userStore.isLoadingGlobal = true;
+    userStore.loadingText = t('profile.savingData');
+
+    await userService.updateProfile(token, {
+      userTitleTh: formData.value.title,
+      userFullnameTh: formData.value.fullNameTH,
+      userFullnameEn: formData.value.fullNameEN,
+      userDateOfBirth: formData.value.birthdate || undefined,
+      userPhone: formData.value.phone,
+      userEducation: formData.value.educationLevel,
+      userFaculty: formData.value.faculty,
+      userInstitution: formData.value.institution,
+      userAddress: formData.value.address,
+    });
+
+    // Refresh user profile in store so header name updates immediately
+    await userStore.initialize();
+
+    $q.notify({
+      type: 'positive',
+      message: t('profile.dialogUpdateSuccess'),
+      position: 'top',
+    });
+  } catch (err) {
+    console.error('Save profile failed:', err);
+    $q.notify({
+      type: 'negative',
+      message: t('profile.saveError'),
+      position: 'top',
+    });
+  } finally {
+    userStore.isLoadingGlobal = false;
+  }
 };
 
 const onSavePassword = (): void => {
