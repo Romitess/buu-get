@@ -280,7 +280,7 @@
           />
           <q-btn
             unelevated
-            :label="$t('examSchedule.dialogConfirm.confirm')"
+            :label="$t('profile.confirm')"
             color="primary"
             style="border-radius: 8px; width: 120px"
             class="text-weight-bold"

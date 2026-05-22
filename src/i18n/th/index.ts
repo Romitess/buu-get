@@ -131,6 +131,7 @@ export default {
     phonePlaceholder: 'XXX-XXX-XXXX',
     back: 'ย้อนกลับ',
     cancel: 'ยกเลิก',
+    confirm: 'ยืนยัน',
     next: 'ถัดไป',
     save: 'บันทึก',
     backToLogin: 'กลับสู่หน้าล็อกอิน',

@@ -183,6 +183,7 @@ export default {
     phonePlaceholder: 'XXX-XXX-XXXX',
     back: 'Back',
     cancel: 'Cancel',
+    confirm: 'Confirm',
     next: 'Next',
     save: 'Save',
     backToLogin: 'Back to Login',
