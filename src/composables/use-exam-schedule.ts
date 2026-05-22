@@ -101,7 +101,7 @@ export function useExamSchedule() {
         type: 'negative',
         message: t('examSchedule.notifications.expired'),
         icon: 'report_problem',
-        position: 'top',
+        position: 'bottom',
         timeout: NOTIFY_TIMEOUT_DEFAULT,
         actions: [{ icon: 'close', color: 'white' }],
       });
@@ -113,7 +113,7 @@ export function useExamSchedule() {
         type: 'negative',
         message: t('examSchedule.notifications.notOpen'),
         icon: 'report_problem',
-        position: 'top',
+        position: 'bottom',
         timeout: NOTIFY_TIMEOUT_DEFAULT,
         actions: [{ icon: 'close', color: 'white' }],
       });
@@ -125,7 +125,7 @@ export function useExamSchedule() {
         type: 'negative',
         message: t('examSchedule.notifications.roundFull'),
         icon: 'report_problem',
-        position: 'top',
+        position: 'bottom',
         timeout: NOTIFY_TIMEOUT_DEFAULT,
         actions: [{ icon: 'close', color: 'white' }],
       });
@@ -137,7 +137,7 @@ export function useExamSchedule() {
         type: 'warning',
         message: t('examSchedule.notifications.pleaseLogin'),
         icon: 'login',
-        position: 'top',
+        position: 'bottom',
         timeout: NOTIFY_TIMEOUT_DEFAULT,
       });
       await router.push({ name: ROUTE_NAMES.LOGIN });
@@ -163,7 +163,7 @@ export function useExamSchedule() {
       $q.notify({
         type: 'positive',
         message: t(successKey),
-        position: 'top',
+        position: 'bottom',
         timeout: successTimeout,
         ...(successIcon ? { icon: successIcon } : {}),
       });
@@ -173,7 +173,7 @@ export function useExamSchedule() {
         type: 'negative',
         message: getRegistrationErrorMessage(err),
         icon: 'report_problem',
-        position: 'top',
+        position: 'bottom',
         timeout: NOTIFY_TIMEOUT_LONG,
       });
     }

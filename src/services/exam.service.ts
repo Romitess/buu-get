@@ -20,6 +20,7 @@ import {
   INTERNAL_EXAM_TYPE_SPECIAL,
   EXAM_STATUS_PUBLISHED,
   EXAM_STATUS_UNPUBLISHED,
+  ENROLLMENT_STATUS,
 } from 'src/constants/exam';
 
 export const formatTime = (timeStr: string | null | undefined): string => {
@@ -98,7 +99,11 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
         const startTime = formatTime(session.SS_START_TIME);
         const endTime = formatTime(session.SS_END_TIME);
 
-        const activeEnrollments = (session.ENROLLMENTS || []).filter((e) => e.ERM_STATUS !== 4);
+        const activeEnrollments = (session.ENROLLMENTS || []).filter(
+          (e) =>
+            e.ERM_STATUS !== ENROLLMENT_STATUS.UNPAID &&
+            e.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED,
+        );
 
         const round: ExamRound = {
           id: session.SS_ID,
@@ -139,7 +144,11 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
       if (exam.SESSIONS && exam.SESSIONS.length > 0) {
         exam.SESSIONS.forEach((session) => {
           capacity += session.SS_CAPACITY || 0;
-          const activeEnrollments = (session.ENROLLMENTS || []).filter((e) => e.ERM_STATUS !== 4);
+          const activeEnrollments = (session.ENROLLMENTS || []).filter(
+            (e) =>
+              e.ERM_STATUS !== ENROLLMENT_STATUS.UNPAID &&
+              e.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED,
+          );
           registeredCount += activeEnrollments.length;
         });
 

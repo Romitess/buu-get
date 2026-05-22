@@ -272,13 +272,13 @@ const handleSaveQR = async (): Promise<void> => {
       $q.notify({
         type: 'positive',
         message: t('success'),
-        position: 'top',
+        position: 'bottom',
       });
     } catch {
       $q.notify({
         type: 'negative',
         message: 'เกิดข้อผิดพลาดในการบันทึกการชำระเงิน',
-        position: 'top',
+        position: 'bottom',
       });
     }
   }
@@ -297,14 +297,14 @@ const handleConfirmCancel = async (): Promise<void> => {
       $q.notify({
         type: 'positive',
         message: 'ยกเลิกการสมัครสอบเรียบร้อยแล้ว',
-        position: 'top',
+        position: 'bottom',
         timeout: 2000,
       });
     } catch {
       $q.notify({
         type: 'negative',
         message: 'เกิดข้อผิดพลาดในการยกเลิกการสมัคร',
-        position: 'top',
+        position: 'bottom',
         timeout: 2000,
       });
     }
