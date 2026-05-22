@@ -21,12 +21,17 @@ export interface PaginationModel {
 export type Role = RolesType['ADMIN'] | RolesType['STAFF'] | RolesType['REGISTRATION_OFFICER'];
 
 export interface ToolButtonConfig {
-  icon?: string | undefined;
-  image?: string | undefined;
+  icon?: string;
+  image?: string;
   color: string;
   tooltip: string;
   emit: string;
 }
+
+export type ToolButtonExtended = Omit<ToolButtonConfig, 'icon'> & {
+  icon?: string;
+  image?: string;
+};
 
 export const EXAM_TYPE_LABELS: Record<string, string> = {
   general: 'ทั่วไป',

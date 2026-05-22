@@ -17,28 +17,6 @@
           :class="{ 'app-header__nav-link--active': isActiveRoute(link) }"
         >
           {{ link.label }}
-          <!-- Dropdown arrow for items with children -->
-          <q-icon
-            v-if="link.children && link.children.length > 0"
-            name="expand_more"
-            size="18px"
-            class="q-ml-xs"
-          />
-
-          <!-- Dropdown menu for items with children -->
-          <q-menu v-if="link.children && link.children.length > 0" auto-close>
-            <q-list style="min-width: 200px">
-              <q-item
-                v-for="child in link.children"
-                :key="child.name"
-                clickable
-                :to="child.path"
-                class="app-header__dropdown-item"
-              >
-                <q-item-section>{{ child.label }}</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
         </router-link>
       </nav>
       <q-space />

@@ -102,7 +102,7 @@ const emit = defineEmits<{
   (e: 'manageRegistrants', id: string): void;
   (e: 'manageSeats', id: string): void;
   (e: 'viewCandidates', id: string): void;
-  (e: 'manageScores', id: string): void;
+  (e: 'viewScore', id: string): void;
   (e: 'printAdmitCard', id: string): void;
   (e: 'moodle', id: string): void;
 }>();
@@ -114,6 +114,7 @@ const TABLE_ACTIONS = {
   MANAGE_REGISTRANTS: 'manageRegistrants',
   MANAGE_SEATS: 'manageSeats',
   VIEW_CANDIDATES: 'viewCandidates',
+  VEIW_SCORE: 'viewScore',
 } as const;
 
 // 🛠️ สร้าง Interface ใหม่เพื่อตัดปัญหา Property คัดค้านกันเอง
@@ -246,10 +247,10 @@ const TOOL_BUTTONS = computed<Record<Role, CustomToolButton[]>>(() => ({
       emit: TABLE_ACTIONS.VIEW_CANDIDATES,
     },
     {
-      icon: 'leaderboard',
-      color: 'blue-6',
+      icon: 'description',
+      color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.manageScores'),
-      emit: 'manageScores',
+      emit: TABLE_ACTIONS.VEIW_SCORE,
     },
   ],
   [ROLES.ADMIN]: [
@@ -284,10 +285,10 @@ const TOOL_BUTTONS = computed<Record<Role, CustomToolButton[]>>(() => ({
       emit: TABLE_ACTIONS.VIEW_CANDIDATES,
     },
     {
-      icon: 'leaderboard',
-      color: 'blue-6',
+      icon: 'docs',
+      color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.manageScores'),
-      emit: 'manageScores',
+      emit: TABLE_ACTIONS.VEIW_SCORE,
     },
   ],
 }));
@@ -313,7 +314,7 @@ const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
     }
   }
 
-  if (emitName === TABLE_ACTIONS.VIEW_CANDIDATES || emitName === 'manageScores') {
+  if (emitName === TABLE_ACTIONS.VIEW_CANDIDATES || emitName === TABLE_ACTIONS.VEIW_SCORE) {
     if (!row.examDate) return true;
 
     const examDate = new Date(row.examDate);
@@ -324,6 +325,7 @@ const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
 
     return today < examDate;
   }
+
   return false;
 };
 
@@ -336,7 +338,7 @@ const getActionTooltip = (btn: CustomToolButton, row: ExamSchedule): string => {
     return t('admin.examManagement.table.tooltips.manageSeatsDisabled');
   }
 
-  if (btn.emit === 'manageScores' || btn.emit === TABLE_ACTIONS.VIEW_CANDIDATES) {
+  if (btn.emit === TABLE_ACTIONS.VEIW_SCORE || btn.emit === TABLE_ACTIONS.VIEW_CANDIDATES) {
     if (row.examDate) {
       const examDate = new Date(row.examDate);
       const today = new Date();
@@ -344,7 +346,7 @@ const getActionTooltip = (btn: CustomToolButton, row: ExamSchedule): string => {
       today.setHours(0, 0, 0, 0);
 
       if (today < examDate) {
-        return btn.emit === 'manageScores'
+        return btn.emit === TABLE_ACTIONS.VEIW_SCORE
           ? t('admin.examManagement.table.tooltips.manageScoresDisabled')
           : t('admin.examManagement.table.tooltips.viewCandidatesDisabled');
       }
@@ -381,8 +383,8 @@ const handleAction = (emitName: string, id: string) => {
       case TABLE_ACTIONS.VIEW_CANDIDATES:
         emit(TABLE_ACTIONS.VIEW_CANDIDATES, id);
         break;
-      case 'manageScores':
-        emit('manageScores', id);
+      case TABLE_ACTIONS.VEIW_SCORE:
+        emit(TABLE_ACTIONS.VEIW_SCORE, id);
         break;
     }
   }
