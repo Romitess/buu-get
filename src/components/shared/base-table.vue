@@ -8,6 +8,7 @@
       :loading="loading"
       :pagination="pagination"
       :no-data-label="emptyLabel"
+      :hide-bottom="hidePagination"
       always-paginated
       @request="onRequest"
       class="base-table"
@@ -125,7 +126,7 @@
 
     <!-- Custom Bottom Bar for Empty State (forces rendering when table is empty) -->
     <div
-      v-if="!loading && (!rows || rows.length === 0)"
+      v-if="!hidePagination && !loading && (!rows || rows.length === 0)"
       class="custom-empty-bottom row items-center justify-end full-width q-gutter-x-md text-grey-8"
     >
       <div class="row items-center q-gutter-x-sm">
@@ -164,6 +165,7 @@ interface Props {
   loading?: boolean | undefined;
   pagination?: PaginationModel | undefined;
   emptyLabel?: string | undefined;
+  hidePagination?: boolean | undefined;
 }
 
 const props = withDefaults(defineProps<Props>(), {

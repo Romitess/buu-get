@@ -10,6 +10,8 @@ export interface ExamSchedule {
   capacity: number;
   status: 'published' | 'unpublished';
   isAllVerifyPassed?: boolean;
+  regStartDate?: string;
+  regEndDate?: string;
 }
 
 export interface PaginationModel {

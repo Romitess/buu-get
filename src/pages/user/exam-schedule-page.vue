@@ -84,7 +84,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
@@ -102,6 +102,7 @@ import type { ExamRound } from 'src/types/exam';
 
 const $q = useQuasar();
 const router = useRouter();
+const route = useRoute();
 const examStore = useExamStore();
 const userStore = useUserStore();
 const { t } = useI18n();
@@ -120,6 +121,10 @@ const calendarHeight = ref<number>(0);
 let scheduleInterval: ReturnType<typeof setInterval>;
 
 onMounted(async () => {
+  if (route.query.date) {
+    examStore.selectedDate = route.query.date as string;
+  }
+
   await examStore.initSchedule();
   // Real-time polling every 5 seconds
   scheduleInterval = setInterval(() => {

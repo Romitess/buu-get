@@ -300,6 +300,17 @@ export default {
     },
   },
   home: {
+    availableRounds: {
+      table: {
+        columns: {
+          round: 'รอบที่',
+          date: 'วันที่สอบ',
+          regPeriod: 'เปิดรับสมัคร',
+          regDuration: 'ระยะเวลาสมัคร',
+          action: '',
+        },
+      },
+    },
     testFormat: {
       title: 'รูปแบบการทดสอบ',
       cards: {

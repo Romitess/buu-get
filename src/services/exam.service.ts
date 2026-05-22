@@ -162,6 +162,8 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
             ? INTERNAL_EXAM_TYPE_GENERAL
             : INTERNAL_EXAM_TYPE_SPECIAL,
         examDate: formatBackendDate(exam.EXAM_DATE),
+        regStartDate: formatBackendDate(exam.EXAM_REG_START_DATE),
+        regEndDate: formatBackendDate(exam.EXAM_REG_END_DATE),
         examLocation: locationName,
         registeredCount,
         capacity,

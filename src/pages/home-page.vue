@@ -6,6 +6,10 @@
         <InfoCarousel />
       </div>
     </div>
+    <!-- Available Exam Rounds Table -->
+    <div class="container">
+      <AvailableExamRoundsTable @select="handleExamSelect" />
+    </div>
     <!-- Main Informational Content -->
     <div class="container">
       <HomeMainContent />
@@ -16,6 +20,12 @@
 <script setup lang="ts">
 import InfoCarousel from 'src/components/home/carousel/info-carousel.vue';
 import HomeMainContent from 'src/components/home/home-main-content.vue';
+import AvailableExamRoundsTable from 'src/components/home/available-exam-rounds-table.vue';
+
+const handleExamSelect = (): void => {
+  // Event emitted when user selects an exam round
+  // Navigation is handled by the AvailableExamRoundsTable component
+};
 </script>
 
 <style scoped>

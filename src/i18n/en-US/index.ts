@@ -203,90 +203,18 @@ export default {
     personalInfo: 'Personal Information',
     or: 'or',
   },
-  carousel: {
-    page1: {
-      overline: 'BUU-GET',
-      title: 'BURAPHA UNIVERSITY',
-      subtitle: 'GRADUATE ENGLISH TEST',
-      description1: 'English proficiency test comparable to CEFR standards',
-      description2: 'For further education and academic work. Developed by Language Institute',
-      info1: 'BUU Language Institute',
-      info1Icon: 'account_balance',
-      info2: 'CEFR Standard',
-      info2Icon: 'language',
-      stats: [
-        { label: 'Duration', value: '2 Hours', description: 'Total exam time' },
-        { label: 'Questions', value: '70 Items', description: 'Vocab 30 + Reading 40' },
-        { label: 'Score', value: '100 Points', description: 'Total exam score' },
-        {
-          label: 'Frequency',
-          value: 'Every 8 Weeks',
-          description: 'Exam rounds open as scheduled',
-        },
-      ],
-    },
-    page2: {
-      overline: 'Format',
-      title: 'TEST STRUCTURE',
-      subtitle: '2 HOURS • 70 QUESTIONS',
-      description1:
-        'Exam structure divided into Vocabulary & Grammar 30 items and Reading 40 items',
-      description2: 'Total 70 items within 2 hours',
-      info1: '2 Hours',
-      info1Icon: 'access_time',
-      info2: '70 Total items',
-      info2Icon: 'list',
-      stats: [
-        { label: 'Grammar & Vocab', value: '50 Points', description: 'Vocabulary and Grammar' },
-        { label: 'Reading', value: '50 Points', description: 'Reading analysis skills' },
-        { label: 'Band 2 (CEFR A2)', value: '50 - 59', description: 'Basic score level' },
-        { label: 'Band 5 (CEFR B2)', value: '80 - 100', description: 'Proficient score level' },
-      ],
-    },
-    page3: {
-      overline: 'Evaluation',
-      title: 'SCORE',
-      subtitle: '100 POINTS',
-      description1: 'BUU-GET manual specifies score comparison with CEFR and band examples',
-      description2: 'used in official documents',
-      info1: 'CEFR reference',
-      info1Icon: 'settings',
-      info2: 'Band mapping',
-      info2Icon: 'bar_chart',
-      stats: [
-        { label: 'Band 1', value: '40-49 = A2', description: 'Beginner level' },
-        { label: 'Band 4', value: '70-79 = B1', description: 'Intermediate level' },
-        { label: 'Band 5', value: '80-100 = B2', description: 'Advanced level' },
-        { label: 'Total', value: '100 Points', description: 'Full exam score' },
-      ],
-    },
-    page4: {
-      overline: 'Requirements',
-      title: 'GRADUATION',
-      subtitle: 'THRESHOLDS',
-      description1: 'English proficiency test comparable to CEFR standards',
-      description2: 'for further education and academic work. Developed by Language Institute.',
-      info1: 'Graduate School policy',
-      info1Icon: 'edit',
-      info2: 'GRD-ENG 2 required',
-      info2Icon: 'check_circle',
-      stats: [
-        { label: 'BUU-GET 30-39', value: 'GRD-ENG 1', description: 'Level comparison condition' },
-        { label: 'BUU-GET 40-49', value: 'GRD-ENG 2', description: 'Passed English' },
-        {
-          label: 'Requirement',
-          value: 'GRD-ENG 2',
-          description: 'Use for graduation according to policy',
-        },
-        {
-          label: 'Reference',
-          value: 'Graduate School',
-          description: 'Specific policy for Graduate School',
-        },
-      ],
-    },
-  },
   home: {
+    availableRounds: {
+      table: {
+        columns: {
+          round: 'Round',
+          date: 'Exam Date',
+          regPeriod: 'Registration Period',
+          regDuration: 'Duration',
+          action: '',
+        },
+      },
+    },
     testFormat: {
       title: 'Test Format',
       cards: {
