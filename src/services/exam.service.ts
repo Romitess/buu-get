@@ -25,6 +25,42 @@ import {
   EXAM_STATUS_UNPUBLISHED,
 } from 'src/constants/exam';
 
+// Retry configuration
+const RETRY_ATTEMPTS = 3;
+const RETRY_DELAY_MS = 1000;
+
+/**
+ * Retry helper function - retries a function with exponential backoff
+ */
+const retryAsync = async <T>(
+  fn: () => Promise<T>,
+  maxAttempts: number = RETRY_ATTEMPTS,
+  delayMs: number = RETRY_DELAY_MS,
+): Promise<T> => {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error as Error;
+      const isLastAttempt = attempt === maxAttempts - 1;
+
+      if (!isLastAttempt) {
+        // Exponential backoff: delay increases with each retry
+        const delay = delayMs * Math.pow(2, attempt);
+        console.warn(
+          `Attempt ${attempt + 1}/${maxAttempts} failed. Retrying in ${delay}ms...`,
+          error,
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  throw lastError || new Error('Max retry attempts reached');
+};
+
 export const formatTime = (timeStr: string | null | undefined): string => {
   if (!timeStr) return '00:00';
   return timeStr.replace(/\s/g, '').substring(0, 5);
@@ -68,7 +104,7 @@ export interface ExamLocationOption {
 export const defaultExamInfo: ExamInfo = DEFAULT_EXAM_INFO;
 
 export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
-  try {
+  return retryAsync(async () => {
     const response = await api.get<BackendExam[]>('/exam');
     const exams: BackendExam[] = response.data.filter((e) => e.EXAM_PUBLISHED === true);
     const schedule: Record<string, DayData> = {};
@@ -125,14 +161,11 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
     });
 
     return schedule;
-  } catch (error) {
-    console.error('Error fetching schedule data:', error);
-    throw error;
-  }
+  });
 };
 
 export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
-  try {
+  return retryAsync(async () => {
     const response = await api.get<BackendExam[]>('/exam');
     const exams = response.data;
 
@@ -170,23 +203,14 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
         status: exam.EXAM_PUBLISHED === false ? EXAM_STATUS_UNPUBLISHED : EXAM_STATUS_PUBLISHED,
       };
     });
-  } catch (error) {
-    console.error('Error fetching exam schedules:', error);
-    throw error;
-  }
+  });
 };
 
 export const fetchExamById = async (id: number): Promise<BackendExam> => {
-  try {
+  return retryAsync(async () => {
     const response = await api.get<BackendExam>(`/exam/${id}`);
     return response.data;
-  } catch (error) {
-    const response = await api.get<BackendExam[]>('/exam');
-    const found = response.data.find((e) => e.EXAM_ID === id);
-    if (found) return found;
-    console.error(`Error fetching exam ${id}:`, error);
-    throw error;
-  }
+  });
 };
 
 export const buddhistToGregorian = (dateStr: string): string => {

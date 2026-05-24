@@ -18,7 +18,7 @@
       :rows="filteredRounds"
       :loading="isLoading"
       :pagination="pagination"
-      :empty-label="props.emptyLabel"
+      :empty-label="filteredRounds.length === 0 && !error ? props.emptyLabel : ''"
       hide-pagination
       @request="onTableRequest"
     >
@@ -108,7 +108,7 @@ const emit = defineEmits<{
 const router = useRouter();
 const { t } = useI18n();
 const { formatThaiDateShort, formatThaiDateRange, calcDaysDiff } = useThaiDate();
-const { filteredRounds, isLoading, fetchAvailableRounds } = useAvailableExamRounds();
+const { filteredRounds, isLoading, error, fetchAvailableRounds } = useAvailableExamRounds();
 
 // Pagination state
 const pagination = computed(() => ({
