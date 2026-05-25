@@ -1,4 +1,4 @@
-import type { RolesType } from 'src/constants/roles';
+import type { UserRole } from 'src/types/user';
 
 export interface ExamSchedule {
   id: string;
@@ -20,7 +20,7 @@ export interface PaginationModel {
   rowsNumber: number;
 }
 
-export type Role = RolesType['ADMIN'] | RolesType['STAFF'] | RolesType['REGISTRATION_OFFICER'];
+export type Role = UserRole;
 
 export interface ToolButtonConfig {
   icon?: string;

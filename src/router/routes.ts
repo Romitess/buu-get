@@ -112,6 +112,7 @@ const routes: RouteRecordRaw[] = [
             ROLES.FINANCE,
             ROLES.EXECUTIVE,
             ROLES.PROCTOR,
+            ROLES.EXAM_OPERATIONS_OFFICER,
           ],
         },
         children: [
@@ -123,6 +124,33 @@ const routes: RouteRecordRaw[] = [
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
                 { label: 'navigation.dashboard', icon: 'dashboard' },
+              ],
+            },
+          },
+          {
+            path: 'location-management',
+            name: 'admin-location-management',
+            component: () => import('pages/admin/location-management-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.manageLocations', icon: 'room' },
+              ],
+            },
+          },
+          {
+            path: 'create-location',
+            name: 'admin-create-location',
+            component: () => import('pages/admin/location-create-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageLocations',
+                  icon: 'room',
+                  to: '/admin/location-management',
+                },
+                { label: 'สร้างห้องสอบ', icon: 'add_circle' }, // Using Thai since specific label may not be in i18n
               ],
             },
           },

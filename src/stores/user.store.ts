@@ -55,7 +55,7 @@ export const useUserStore = defineStore('user', () => {
         if (profile) {
           currentUser.value = {
             ...profile,
-            role: (profile.role?.toLowerCase().replace(/\s+/g, '_') as UserRole) || ROLES.CANDIDATE,
+            role: profile.role?.toLowerCase().replace(/\s+/g, '_') || ROLES.CANDIDATE,
           };
           isLoggedIn.value = true;
           accessToken.value = token;
@@ -93,8 +93,7 @@ export const useUserStore = defineStore('user', () => {
 
         currentUser.value = {
           email: result.user.email,
-          role:
-            (result.user.role?.toLowerCase().replace(/\s+/g, '_') as UserRole) || ROLES.CANDIDATE,
+          role: result.user.role?.toLowerCase().replace(/\s+/g, '_') || ROLES.CANDIDATE,
           id: result.user.id,
         } as User;
 

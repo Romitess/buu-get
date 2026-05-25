@@ -18,8 +18,8 @@ export const EXAM_TYPE_GENERAL = 'รอบทั่วไป';
 export const EXAM_TYPE_SPECIAL = 'รอบพิเศษ';
 
 /** รูปแบบการสอบ */
-export const EXAM_FORMAT_COMPUTER = 'แบบคอมพิวเตอร์';
-export const EXAM_FORMAT_PAPER = 'แบบกระดาษ';
+export const EXAM_FORMAT_COMPUTER = 'คอมพิวเตอร์';
+export const EXAM_FORMAT_PAPER = 'กระดาษ';
 
 /** ค่าเริ่มต้นของข้อมูลการสอบ */
 export const DEFAULT_EXAM_INFO = {

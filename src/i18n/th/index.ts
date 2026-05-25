@@ -9,6 +9,7 @@ export default {
     candidate: 'ผู้สมัครสอบ',
     proctor: 'กรรมการคุมสอบ',
     registration_officer: 'เจ้าหน้าที่ลงทะเบียน',
+    exam_operations_officer: 'เจ้าหน้าที่จัดการสอบ',
   },
   common: {
     months: [
@@ -383,6 +384,47 @@ export default {
     },
   },
   admin: {
+    locationManagement: {
+      pageTitle: 'จัดการห้องสอบ',
+      pageDescription: 'จัดการข้อมูลห้องสอบ กำหนดรายละเอียด ความจุ และรองรับการจัดสอบ',
+      createLocation: 'สร้างห้องสอบ',
+      table: {
+        columns: {
+          index: 'ลำดับ',
+          roomName: 'ชื่อห้องสอบ',
+          floor: 'ชั้น',
+          locationName: 'สถานที่สอบ',
+          capacity: 'ความจุ',
+          tools: 'เครื่องมือ',
+        },
+        tooltips: {
+          edit: 'แก้ไข',
+          delete: 'ลบ',
+        },
+      },
+      dialogs: {
+        createTitle: 'สร้างห้องสอบใหม่',
+        editTitle: 'แก้ไขข้อมูลห้องสอบ',
+        editSubtitle: 'แก้ไขรายละเอียดของห้องสอบและสถานที่',
+        deleteTitle: 'ยืนยันการลบห้องสอบ',
+        deleteMessage: 'คุณแน่ใจหรือไม่ว่าต้องการลบห้องสอบนี้?',
+        roomNameLabel: 'ชื่อห้องสอบ (เช่น QS1-2001)',
+        locationNameLabel: 'สถานที่สอบ / อาคาร (เช่น อาคาร 60 พรรษา มหาราชินี 1 มหาวิทยาลัยบูรพา)',
+        capacityLabel: 'ความจุ (ที่นั่ง)',
+        floorLabel: 'ชั้น',
+        roomDetails: 'รายละเอียดห้องสอบ',
+        seatsValue: '{capacity} ที่นั่ง',
+      },
+      notifications: {
+        loadError: 'เกิดข้อผิดพลาดในการโหลดข้อมูลห้องสอบ',
+        createSuccess: 'สร้างห้องสอบสำเร็จ',
+        createError: 'ไม่สามารถสร้างห้องสอบได้',
+        updateSuccess: 'แก้ไขห้องสอบสำเร็จ',
+        updateError: 'ไม่สามารถแก้ไขห้องสอบได้',
+        deleteSuccess: 'ลบห้องสอบสำเร็จ',
+        deleteError: 'ไม่สามารถลบห้องสอบได้',
+      },
+    },
     examManagement: {
       pageTitle: 'จัดการรอบสอบ',
       pageDescription: 'แสดงรายการรอบสอบทั้งหมดเพื่อตรวจสอบและแก้ไขให้เหมาะสม',
@@ -691,6 +733,7 @@ export default {
     examSchedule: 'รายการสอบ',
     selectSession: 'เลือกวันและรอบการสอบ',
     examHistory: 'ประวัติการสมัครและสอบ',
+    manageLocations: 'จัดการห้องสอบ',
     manageExams: 'จัดการรอบสอบ',
     dashboard: 'แดชบอร์ด',
     viewSchedule: 'ดูตารางสอบ',

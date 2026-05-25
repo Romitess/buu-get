@@ -9,6 +9,7 @@ export default {
     candidate: 'Candidate',
     proctor: 'Proctor',
     registration_officer: 'Registration Officer',
+    exam_operations_officer: 'Exam Operations Officer',
   },
   common: {
     months: [
@@ -300,6 +301,48 @@ export default {
     },
   },
   admin: {
+    locationManagement: {
+      pageTitle: 'Manage Exam Locations',
+      pageDescription: 'Manage exam room information, set capacity, and arrange exam locations',
+      createLocation: 'Create Room',
+      table: {
+        columns: {
+          index: 'No.',
+          roomName: 'Room Name',
+          floor: 'Floor',
+          locationName: 'Location',
+          capacity: 'Capacity',
+          tools: 'Tools',
+        },
+        tooltips: {
+          edit: 'Edit',
+          delete: 'Delete',
+        },
+      },
+      dialogs: {
+        createTitle: 'Create New Room',
+        editTitle: 'Edit Room Info',
+        editSubtitle: 'Edit details of the exam room and location',
+        deleteTitle: 'Confirm Room Deletion',
+        deleteMessage: 'Are you sure you want to delete this exam room?',
+        roomNameLabel: 'Room Name (e.g., QS1-2001)',
+        locationNameLabel:
+          'Location / Building (e.g., 60th Anniversary Building, Burapha University)',
+        capacityLabel: 'Capacity (seats)',
+        floorLabel: 'Floor',
+        roomDetails: 'Exam Room Details',
+        seatsValue: '{capacity} seats',
+      },
+      notifications: {
+        loadError: 'Failed to load exam room data',
+        createSuccess: 'Exam room created successfully',
+        createError: 'Failed to create exam room',
+        updateSuccess: 'Exam room updated successfully',
+        updateError: 'Failed to update exam room',
+        deleteSuccess: 'Exam room deleted successfully',
+        deleteError: 'Failed to delete exam room',
+      },
+    },
     examManagement: {
       pageTitle: 'Manage Exam Rounds',
       pageDescription: 'View all exam rounds for review and editing',

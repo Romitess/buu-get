@@ -9,15 +9,6 @@ import routes from './routes';
 import { useUserStore } from 'src/stores/user.store';
 import { ROLES } from 'src/constants/roles';
 
-/*
- * If not building with SSR mode, you can
- * directly export the Router instantiation;
- *
- * The function below can be direct; either use
- * synchronous code or return a Promise which resolves
- * with the Router instance.
- */
-
 export default defineRouter(({ store }) => {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
@@ -28,43 +19,33 @@ export default defineRouter(({ store }) => {
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
     routes,
-
-    // Leave this as is and make changes in quasar.conf.js instead!
-    // quasar.conf.js -> build -> vueRouterMode
-    // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
-  // --- ระบบดักหน้าประตู (Route Guard) ---
   Router.beforeEach(async (to) => {
     const userStore = useUserStore(store);
-
-    // โหลดข้อมูลผู้ใช้เริ่มต้นถ้ายังไม่มี
     if (localStorage.getItem('isLoggedIn') === 'true' && !userStore.isLoggedIn) {
       await userStore.initialize();
     }
 
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
-    const allowedRoles = to.matched.find((record) => record.meta.roles)?.meta.roles;
-
-    // 1. ถ้าต้อง Login แต่ยังไม่ได้ Login -> ไปหน้า Login พร้อมจำ path ที่ต้องการเข้า
+    const matchedRecord = to.matched.find((record) => record.meta.roles);
+    const allowedRoles = matchedRecord
+      ? (matchedRecord.meta as { roles?: string[] }).roles
+      : undefined;
     if (requiresAuth && !userStore.isLoggedIn) {
       return { name: 'login', query: { redirect: to.fullPath } };
     }
-
-    // 2. ถ้า Login แล้ว แต่กำลังจะเข้าหน้าที่จำกัดสิทธิ์ (Roles)
     if (userStore.isLoggedIn && allowedRoles) {
       const hasPermission = allowedRoles.includes(userStore.userRole || '');
 
       if (!hasPermission) {
-        // ถ้าไม่มีสิทธิ์ -> ส่งไปหน้า Dashboard ตาม Role ตัวเอง
         const redirectRoute =
           userStore.userRole === ROLES.CANDIDATE
             ? { name: 'exam-schedule' }
-            : { name: 'admin-dashboard' };
-
-        // ป้องกัน Infinite Loop: ถ้าหน้าที่กำลังจะไป (to) เป็นหน้าเดียวกับที่จะ Redirect ไป
-        // แสดงว่าแม้แต่หน้า Dashboard ตัวเองก็ยังไม่มีสิทธิ์เข้า
+            : userStore.userRole === ROLES.EXAM_OPERATIONS_OFFICER
+              ? { name: 'admin-location-management' }
+              : { name: 'admin-dashboard' };
         if (to.name === redirectRoute.name) {
           console.warn('Access denied even to default dashboard. Redirecting to login.');
           return { name: 'login' };
@@ -73,18 +54,18 @@ export default defineRouter(({ store }) => {
         return redirectRoute;
       }
     }
-
-    // 3. ถ้า Login อยู่แล้ว และพยายามเข้าหน้า Login/Register -> ส่งไปหน้าหลักของตัวเอง หรือหน้า redirect
     if (userStore.isLoggedIn && (to.name === 'login' || to.name === 'register')) {
       if (to.query.redirect) {
         return { path: to.query.redirect as string };
       }
       return userStore.userRole === ROLES.CANDIDATE
         ? { name: 'exam-schedule' }
-        : { name: 'admin-dashboard' };
+        : userStore.userRole === ROLES.EXAM_OPERATIONS_OFFICER
+          ? { name: 'admin-location-management' }
+          : { name: 'admin-dashboard' };
     }
 
-    return true; // อนุญาตให้ผ่าน
+    return true;
   });
 
   return Router;

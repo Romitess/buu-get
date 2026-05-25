@@ -56,7 +56,7 @@ defineEmits<{
 
 .available-bg {
   background-color: var(--surface-card);
-  border-color: var(--primary-light);
+  border-color: var(--seat-available-border);
 }
 
 .border-assigned {
