@@ -347,13 +347,19 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           // Assume format: nationalId,fullName
           // Skip header
           for (let i = 1; i < lines.length; i++) {
-            const cols = lines[i].split(',');
+            const line = lines[i];
+            if (!line) continue;
+            const cols = line.split(',');
             if (cols.length >= 2) {
-              candidates.push({
-                nationalId: cols[0].trim(),
-                fullName: cols[1].trim(),
-                passcode: '',
-              });
+              const nationalId = cols[0];
+              const fullName = cols[1];
+              if (nationalId !== undefined && fullName !== undefined) {
+                candidates.push({
+                  nationalId: nationalId.trim(),
+                  fullName: fullName.trim(),
+                  passcode: '',
+                });
+              }
             }
           }
 

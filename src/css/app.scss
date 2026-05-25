@@ -132,6 +132,7 @@
   // Specific Accents
   --primary-light-alpha-50: rgba(30, 137, 229, 0.5);
   --primary-light-alpha-20: rgba(30, 137, 229, 0.2);
+  --white-alpha-20: rgba(255, 255, 255, 0.2);
 
   // Typography Scale
   --font-size-h1: 1.75rem; // 28px
@@ -163,6 +164,8 @@
   --dialog-icon-shadow: 0 4px 12px rgba(13, 71, 161, 0.25);
   --dialog-icon-gradient: linear-gradient(135deg, #bbdefb 0%, #e3f2fd 100%);
   --dialog-info-border: #aecdf5;
+  --location-preview-bg: #f4f8fd;
+  --location-preview-border: #e1eefc;
 
   --clock-bg: #ffffff;
   --clock-icon: #424242;

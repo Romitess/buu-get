@@ -112,7 +112,10 @@ const triggerFileInput = () => {
 const onFileSelected = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target.files && target.files.length > 0) {
-    emit('import-candidates', target.files[0]);
+    const file = target.files[0];
+    if (file) {
+      emit('import-candidates', file);
+    }
     target.value = ''; // Reset for consecutive uploads
   }
 };

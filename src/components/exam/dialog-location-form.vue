@@ -186,7 +186,7 @@ function onCancelClick() {
 }
 
 .header-avatar {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--white-alpha-20);
 }
 
 .custom-input {
@@ -196,9 +196,9 @@ function onCancelClick() {
 }
 
 .preview-container {
-  background-color: #f4f8fd;
+  background-color: var(--location-preview-bg);
   border-radius: 8px;
-  border: 1px solid #e1eefc;
+  border: 1px solid var(--location-preview-border);
 
   .preview-label {
     font-size: 11px;
