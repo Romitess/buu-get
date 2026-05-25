@@ -37,7 +37,7 @@
           size="6px"
           :value="getRatio(row)"
           :color="getProgressColor(row)"
-          track-color="grey-3"
+          track-color="grey-5"
           class="q-mr-sm registration-progress"
         />
         <span class="text-caption text-weight-medium registration-text">
@@ -84,6 +84,7 @@ import {
   type PaginationModel,
   type Role,
   type TableRequestProps,
+  TABLE_ACTIONS,
 } from 'src/types/exam.types';
 
 interface Props {
@@ -107,17 +108,6 @@ const emit = defineEmits<{
   (e: 'moodle', id: string): void;
 }>();
 
-const TABLE_ACTIONS = {
-  MOODLE: 'moodle',
-  EDIT: 'edit',
-  DELETE: 'delete',
-  MANAGE_REGISTRANTS: 'manageRegistrants',
-  MANAGE_SEATS: 'manageSeats',
-  VIEW_CANDIDATES: 'viewCandidates',
-  VEIW_SCORE: 'viewScore',
-} as const;
-
-// 🛠️ สร้าง Interface ใหม่เพื่อตัดปัญหา Property คัดค้านกันเอง
 interface CustomToolButton {
   icon?: string;
   image?: string;
@@ -126,7 +116,6 @@ interface CustomToolButton {
   emit: string;
 }
 
-// Logic to detect duplicate dates in the current table data
 const duplicateDates = computed(() => {
   const counts: Record<string, number> = {};
   props.exams.forEach((exam) => {
@@ -250,7 +239,7 @@ const TOOL_BUTTONS = computed<Record<Role, CustomToolButton[]>>(() => ({
       icon: 'description',
       color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.manageScores'),
-      emit: TABLE_ACTIONS.VEIW_SCORE,
+      emit: TABLE_ACTIONS.VIEW_SCORE,
     },
   ],
   [ROLES.ADMIN]: [
@@ -288,7 +277,7 @@ const TOOL_BUTTONS = computed<Record<Role, CustomToolButton[]>>(() => ({
       icon: 'docs',
       color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.manageScores'),
-      emit: TABLE_ACTIONS.VEIW_SCORE,
+      emit: TABLE_ACTIONS.VIEW_SCORE,
     },
   ],
 }));
@@ -314,7 +303,7 @@ const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
     }
   }
 
-  if (emitName === TABLE_ACTIONS.VIEW_CANDIDATES || emitName === TABLE_ACTIONS.VEIW_SCORE) {
+  if (emitName === TABLE_ACTIONS.VIEW_CANDIDATES || emitName === TABLE_ACTIONS.VIEW_SCORE) {
     if (!row.examDate) return true;
 
     const examDate = new Date(row.examDate);
@@ -338,7 +327,7 @@ const getActionTooltip = (btn: CustomToolButton, row: ExamSchedule): string => {
     return t('admin.examManagement.table.tooltips.manageSeatsDisabled');
   }
 
-  if (btn.emit === TABLE_ACTIONS.VEIW_SCORE || btn.emit === TABLE_ACTIONS.VIEW_CANDIDATES) {
+  if (btn.emit === TABLE_ACTIONS.VIEW_SCORE || btn.emit === TABLE_ACTIONS.VIEW_CANDIDATES) {
     if (row.examDate) {
       const examDate = new Date(row.examDate);
       const today = new Date();
@@ -346,7 +335,7 @@ const getActionTooltip = (btn: CustomToolButton, row: ExamSchedule): string => {
       today.setHours(0, 0, 0, 0);
 
       if (today < examDate) {
-        return btn.emit === TABLE_ACTIONS.VEIW_SCORE
+        return btn.emit === TABLE_ACTIONS.VIEW_SCORE
           ? t('admin.examManagement.table.tooltips.manageScoresDisabled')
           : t('admin.examManagement.table.tooltips.viewCandidatesDisabled');
       }
@@ -383,8 +372,8 @@ const handleAction = (emitName: string, id: string) => {
       case TABLE_ACTIONS.VIEW_CANDIDATES:
         emit(TABLE_ACTIONS.VIEW_CANDIDATES, id);
         break;
-      case TABLE_ACTIONS.VEIW_SCORE:
-        emit(TABLE_ACTIONS.VEIW_SCORE, id);
+      case TABLE_ACTIONS.VIEW_SCORE:
+        emit(TABLE_ACTIONS.VIEW_SCORE, id);
         break;
     }
   }

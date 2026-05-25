@@ -33,6 +33,18 @@ export type ToolButtonExtended = Omit<ToolButtonConfig, 'icon'> & {
   image?: string;
 };
 
+export const TABLE_ACTIONS = {
+  MOODLE: 'moodle',
+  EDIT: 'edit',
+  DELETE: 'delete',
+  MANAGE_REGISTRANTS: 'manageRegistrants',
+  MANAGE_SEATS: 'manageSeats',
+  VIEW_CANDIDATES: 'viewCandidates',
+  VIEW_SCORE: 'viewScore',
+} as const;
+
+export type TableAction = (typeof TABLE_ACTIONS)[keyof typeof TABLE_ACTIONS];
+
 export const EXAM_TYPE_LABELS: Record<string, string> = {
   general: 'ทั่วไป',
   special: 'พิเศษ',
