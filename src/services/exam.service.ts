@@ -83,8 +83,14 @@ export interface CreateExamPayload {
   regEndDate: string;
   payStartDate: string;
   payEndDate: string;
-  timeRanges: { startTime: string; endTime: string }[];
-  fundSourceId?: number;
+  timeRanges: {
+    startTime: string;
+    endTime: string;
+    locationId?: number;
+    seats?: number;
+    proctorName?: string;
+  }[];
+  fundSourceId?: number | null;
 }
 
 export interface FundSource {
@@ -246,14 +252,15 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<void>
 
     const examId = examResponse.data.EXAM_ID;
 
-    // 2. Create Sessions for each time range
+    // 2. Create Sessions for each time range (each range may represent a room)
     const sessionPromises = payload.timeRanges.map((range) => {
       return api.post('/exam-sessions', {
         EXAM_ID: Number(examId),
-        LOCATION_ID: Number(payload.locationId),
+        LOCATION_ID: Number(range.locationId || payload.locationId),
         SS_START_TIME: formatTime(range.startTime),
         SS_END_TIME: formatTime(range.endTime),
-        SS_CAPACITY: Number(payload.seats),
+        SS_CAPACITY: Number(range.seats || payload.seats),
+        SS_NAME: range.proctorName || '',
         SS_SESSION_STATUS: SESSION_STATUS_OPEN,
       });
     });
@@ -328,10 +335,11 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
       const sessionPromises = payload.timeRanges.map((range, index) => {
         const existingId = keepIds[index];
         const sessionPayload = {
-          LOCATION_ID: Number(payload.locationId),
+          LOCATION_ID: Number(range.locationId || payload.locationId),
           SS_START_TIME: formatTime(range.startTime),
           SS_END_TIME: formatTime(range.endTime),
-          SS_CAPACITY: Number(payload.seats),
+          SS_CAPACITY: Number(range.seats || payload.seats),
+          SS_NAME: range.proctorName || '',
         };
 
         if (existingId) {

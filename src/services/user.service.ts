@@ -119,14 +119,15 @@ export async function authenticateUser(
   }
 }
 
-export async function getUsersFromApi(): Promise<User[]> {
+export async function getUsersFromApi(role?: string): Promise<User[]> {
   try {
     // โครงสร้างที่ Backend ส่งมาคือ { value: User[], Count: number }
-    const response = await api.get<{ value: BackendUserResponse[]; Count: number }>('/users');
+    const url = role ? `/users?role=${role}` : '/users';
+    const response = await api.get<{ value: BackendUserResponse[]; Count: number }>(url);
     return response.data.value.map(mapBackendUserToFrontendUser);
   } catch {
     console.error('Failed to fetch users from API');
-    throw new Error('Could not fetch users');
+    return []; // Return empty array on failure instead of throwing
   }
 }
 
