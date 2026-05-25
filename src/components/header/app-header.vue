@@ -221,7 +221,20 @@ const navLinks = computed<NavigationItem[]>(() => {
     }
 
     // === Admin / Staff / Registration Officer Navigation ===
-    if (role === ROLES.ADMIN || role === ROLES.STAFF || role === ROLES.REGISTRATION_OFFICER) {
+    if (
+      role === ROLES.ADMIN ||
+      role === ROLES.STAFF ||
+      role === ROLES.REGISTRATION_OFFICER ||
+      role === ROLES.EXAM_OPERATIONS_OFFICER
+    ) {
+      if (role === ROLES.EXAM_OPERATIONS_OFFICER || role === ROLES.ADMIN) {
+        links.push({
+          name: 'admin-location-management',
+          label: t('navigation.manageLocations'),
+          icon: 'room',
+          path: '/admin/location-management',
+        });
+      }
       links.push({
         name: 'admin-exam-management',
         label: t('navigation.manageExams'),

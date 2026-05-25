@@ -112,6 +112,7 @@ const routes: RouteRecordRaw[] = [
             ROLES.FINANCE,
             ROLES.EXECUTIVE,
             ROLES.PROCTOR,
+            ROLES.EXAM_OPERATIONS_OFFICER,
           ],
         },
         children: [
@@ -123,6 +124,17 @@ const routes: RouteRecordRaw[] = [
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
                 { label: 'navigation.dashboard', icon: 'dashboard' },
+              ],
+            },
+          },
+          {
+            path: 'location-management',
+            name: 'admin-location-management',
+            component: () => import('pages/admin/location-management-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.manageLocations', icon: 'room' },
               ],
             },
           },
