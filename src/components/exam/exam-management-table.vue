@@ -290,10 +290,7 @@ const getBtnProps = (btn: CustomToolButton) => {
 };
 
 const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
-  if (
-    row.status === 'published' &&
-    (emitName === TABLE_ACTIONS.EDIT || emitName === TABLE_ACTIONS.DELETE)
-  ) {
+  if (row.status === 'published' && emitName === TABLE_ACTIONS.DELETE) {
     return true;
   }
 
