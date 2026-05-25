@@ -95,15 +95,17 @@
             />
             <AppButton
               v-if="exam.actions?.includes('candidateCard')"
-              icon="file_download"
+              icon="badge"
               :label="$t('exam.history.candidateCard')"
               class="action-btn btn-action-filled"
+              @click="handlePrintVoucher(exam)"
             />
             <AppButton
               v-if="exam.actions?.includes('downloadReceipt')"
               icon="receipt_long"
               :label="$t('exam.history.downloadReceipt')"
               class="action-btn btn-action-filled"
+              @click="handlePrintReceipt(exam)"
             />
           </template>
         </AppExamHistoryCard>
@@ -125,6 +127,40 @@
       :exam-time="selectedExamForCancel?.time || ''"
       @confirm="handleConfirmCancel"
     />
+
+    <!-- Hidden container for PDF generation -->
+    <div
+      v-if="isDownloadingVoucher"
+      id="pdf-render-container"
+      style="
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        width: 800px;
+        z-index: -1000;
+        pointer-events: none;
+      "
+    >
+      <TestVoucherReport :data="selectedVoucherData" />
+    </div>
+
+    <!-- Hidden container for Receipt PDF generation -->
+    <div
+      v-if="isDownloadingReceipt"
+      id="receipt-render-container"
+      style="
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        width: 210mm;
+        height: 297mm;
+        z-index: -1000;
+        pointer-events: none;
+        background-color: #ffffff;
+      "
+    >
+      <ReceiptCard :receipt="selectedReceiptData" />
+    </div>
   </div>
 </template>
 
@@ -139,7 +175,10 @@ import AppExamHistoryCard from 'src/components/exam/app-exam-history-card.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import AppPaymentDialog from 'src/components/exam/app-payment-dialog.vue';
 import DialogCancel from 'src/components/exam/dialog-cancel.vue';
+import TestVoucherReport from 'src/components/test-voucher-report.vue';
+import ReceiptCard from 'src/components/receipt-card.vue';
 import { useExamStore } from 'src/stores/exam.store';
+import { useExamDocuments } from 'src/composables/use-exam-documents';
 import { DEFAULT_EXAM_FEE_THB, PAYMENT_DURATION_SECONDS_DEFAULT } from 'src/constants/exam';
 import type { ExamHistoryItem } from 'src/types/exam';
 
@@ -161,6 +200,16 @@ const paymentExpiryTime = ref<string>(new Date().toISOString());
 
 const showCancelDialog = ref(false);
 const selectedExamForCancel = ref<ExamHistoryItem | null>(null);
+
+// === Composable: PDF Documents Handling ===
+const {
+  isDownloadingVoucher,
+  selectedVoucherData,
+  isDownloadingReceipt,
+  selectedReceiptData,
+  printVoucher,
+  printReceipt,
+} = useExamDocuments();
 
 // === Computed: แปลง i18n keys เป็นข้อความจริง ===
 /**
@@ -223,13 +272,13 @@ const handleSaveQR = async (): Promise<void> => {
       $q.notify({
         type: 'positive',
         message: t('success'),
-        position: 'top',
+        position: 'bottom',
       });
     } catch {
       $q.notify({
         type: 'negative',
         message: 'เกิดข้อผิดพลาดในการบันทึกการชำระเงิน',
-        position: 'top',
+        position: 'bottom',
       });
     }
   }
@@ -248,19 +297,27 @@ const handleConfirmCancel = async (): Promise<void> => {
       $q.notify({
         type: 'positive',
         message: 'ยกเลิกการสมัครสอบเรียบร้อยแล้ว',
-        position: 'top',
+        position: 'bottom',
         timeout: 2000,
       });
     } catch {
       $q.notify({
         type: 'negative',
         message: 'เกิดข้อผิดพลาดในการยกเลิกการสมัคร',
-        position: 'top',
+        position: 'bottom',
         timeout: 2000,
       });
     }
   }
   showCancelDialog.value = false;
+};
+
+const handlePrintVoucher = (exam: ExamHistoryItem): void => {
+  void printVoucher(exam);
+};
+
+const handlePrintReceipt = (exam: ExamHistoryItem): void => {
+  void printReceipt(exam);
 };
 </script>
 
@@ -367,6 +424,51 @@ const handleConfirmCancel = async (): Promise<void> => {
     .text-subtitle1 {
       font-size: var(--font-size-body);
     }
+  }
+}
+
+// Print Styles for Admission Voucher Modal
+@media print {
+  // Hide all general page structures completely
+  body,
+  html {
+    background-color: #ffffff !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  .q-dialog__backdrop,
+  .q-header,
+  .q-footer,
+  .q-drawer,
+  .page-container:not(.voucher-print-dialog),
+  .q-dialog-plugin,
+  .no-print {
+    display: none !important;
+  }
+
+  // Ensure Quasar dialog displays inline/fully block for printing
+  .q-dialog {
+    position: relative !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+  }
+
+  .q-dialog__inner {
+    padding: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+    position: relative !important;
+    box-shadow: none !important;
+  }
+
+  .q-dialog__inner > div {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+    overflow: visible !important;
   }
 }
 </style>

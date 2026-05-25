@@ -3,10 +3,10 @@
     <q-card class="request-fix-dialog">
       <header class="q-px-lg q-pt-lg q-pb-md relative-position">
         <h2 class="text-h5 text-weight-bold dashboard-header q-ma-none">
-          แจ้งให้ผู้สมัครแก้ไขข้อมูล
+          {{ $t('admin.registrantManagement.detail.requestFixDialog.title') }}
         </h2>
         <p class="text-subtitle2 text-grey-7 q-mt-xs q-ma-none">
-          กรอกรายละเอียดเพื่อส่งคำขอแก้ไขไปยังผู้สมัคร
+          {{ $t('admin.registrantManagement.detail.requestFixDialog.subtitle') }}
         </p>
         <q-btn
           v-if="$q.screen.xs"
@@ -34,14 +34,20 @@
           <div class="column overflow-hidden">
             <div class="text-subtitle1 text-weight-bold text-dark ellipsis">{{ fullName }}</div>
             <div class="text-caption text-grey-7 ellipsis">
-              เลขที่สมัคร: {{ regId }} · สอบวันที่ {{ examDate }}
+              {{
+                $t('admin.registrantManagement.detail.requestFixDialog.regInfo', {
+                  regId,
+                  examDate,
+                })
+              }}
             </div>
           </div>
         </div>
 
         <div class="q-mb-md">
           <label class="field-label q-mb-xs block">
-            กำหนดแก้ไขภายใน <span class="text-negative">*</span>
+            {{ $t('admin.registrantManagement.detail.requestFixDialog.deadlineLabel') }}
+            <span class="text-negative">*</span>
           </label>
           <AppLabeledInput
             v-model="form.fixDeadline"
@@ -61,7 +67,7 @@
             </q-popup-proxy>
           </AppLabeledInput>
           <p class="text-caption text-grey-5 q-mt-xs q-ma-none">
-            ผู้สมัครต้องแก้ไขภายในวันและเวลาที่กำหนด มิฉะนั้นถือว่าสละสิทธิ์
+            {{ $t('admin.registrantManagement.detail.requestFixDialog.deadlineNote') }}
           </p>
         </div>
 
@@ -80,7 +86,10 @@
 
         <div class="q-mb-lg">
           <label class="field-label q-mb-xs block">
-            หมายเหตุถึงผู้สมัคร <span class="text-weight-light text-grey-5">(ไม่บังคับ)</span>
+            {{ $t('admin.registrantManagement.detail.requestFixDialog.notesLabel') }}
+            <span class="text-weight-light text-grey-5">{{
+              $t('admin.registrantManagement.detail.requestFixDialog.optionalLabel')
+            }}</span>
           </label>
           <q-input
             v-model="form.notes"
@@ -88,7 +97,7 @@
             outlined
             dense
             autogrow
-            placeholder="เช่น กรุณากรอกข้อมูลรหัสบัตรประชาชนให้ถูกต้อง"
+            :placeholder="t('admin.registrantManagement.detail.requestFixDialog.notesPlaceholder')"
             class="custom-input"
             maxlength="300"
           />
@@ -105,7 +114,7 @@
         class="action-section q-px-lg q-pb-lg q-pt-md"
       >
         <AppButton
-          label="ยกเลิก"
+          :label="$t('admin.registrantManagement.detail.actions.cancel')"
           outline
           color="grey-4"
           text-color="grey-7"
@@ -113,7 +122,7 @@
           @click="internalValue = false"
         />
         <AppButton
-          label="ส่งคืนเพื่อแก้ไข"
+          :label="$t('admin.registrantManagement.detail.requestFixDialog.submit')"
           color="primary"
           icon="send"
           class="action-btn"
@@ -127,6 +136,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
 import AppLabeledInput from 'src/components/base/app-labeled-input.vue';
 
@@ -140,6 +150,7 @@ interface Props {
 const props = defineProps<Props>();
 const emit = defineEmits(['update:modelValue', 'submit']);
 const $q = useQuasar();
+const { t } = useI18n();
 
 const internalValue = ref(props.modelValue);
 
@@ -155,16 +166,23 @@ const form = ref({
   notes: '',
 });
 
-const reasonOptions = [
-  { val: 'photo', label: 'รูปถ่ายไม่ถูกต้อง' },
-  { val: 'info', label: 'กรอกข้อมูลไม่ถูกต้อง' },
-  { val: 'other', label: 'อื่น ๆ (ระบุในหมายเหตุ)' },
-];
+const reasonOptions = computed(() => [
+  { val: 'photo', label: t('admin.registrantManagement.detail.requestFixDialog.reasons.photo') },
+  { val: 'info', label: t('admin.registrantManagement.detail.requestFixDialog.reasons.info') },
+  { val: 'other', label: t('admin.registrantManagement.detail.requestFixDialog.reasons.other') },
+]);
 
 watch(
   () => props.modelValue,
   (val) => {
     internalValue.value = val;
+    if (val) {
+      form.value = {
+        fixDeadline: props.examDate || '',
+        reasons: [],
+        notes: '',
+      };
+    }
   },
 );
 
@@ -173,7 +191,9 @@ watch(internalValue, (val) => {
 });
 
 const initials = computed(() => {
-  if (!props.fullName || props.fullName === 'ไม่ทราบชื่อ') return '??';
+  const unknownName = t('admin.registrantManagement.detail.errors.unknownName');
+  if (!props.fullName || props.fullName === unknownName || props.fullName === 'ไม่ทราบชื่อ')
+    return '??';
   const parts = props.fullName.trim().split(/\s+/);
   if (parts.length >= 2) {
     const firstPart = parts[0];
@@ -193,7 +213,7 @@ const handleSubmit = (): void => {
   if (!isFormValid.value) {
     $q.notify({
       type: 'warning',
-      message: 'กรุณาเลือกระบุเหตุผลอย่างน้อย 1 ข้อ',
+      message: t('admin.registrantManagement.detail.requestFixDialog.validationError'),
       position: 'top',
     });
     return;

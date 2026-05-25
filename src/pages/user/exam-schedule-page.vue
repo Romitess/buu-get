@@ -6,7 +6,6 @@
       :subtitle="t('examSchedule.registrationSubtitle')"
     />
 
-    <!-- ส่วนบน examdetail -->
     <ExamDetail
       :badge-text="examInfo.badgeText"
       :title="examInfo.title"
@@ -43,7 +42,7 @@
           <div
             class="exam-schedule__rounds-list"
             :style="{
-              overflowY: $q.screen.lt.md || selectedDateRounds.length >= 3 ? 'auto' : 'hidden',
+              overflowY: roundsListOverflow,
             }"
           >
             <template v-if="selectedDateRounds.length > 0">
@@ -84,14 +83,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import ExamDetail from 'src/components/exam-detail.vue';
-import ExamCalendar from 'src/components/exam-calendar.vue';
+import ExamCalendar from 'src/components/exam/exam-calendar.vue';
 import RoundExam from 'src/components/exam/round-exam.vue';
 import DialogConfirm from 'src/components/exam/dialog-confirm.vue';
 import ExamPasscodeInputDialog from 'src/components/exam-passcode-input-dialog.vue';
@@ -102,7 +101,6 @@ import type { ExamRound } from 'src/types/exam';
 
 const $q = useQuasar();
 const router = useRouter();
-const route = useRoute();
 const examStore = useExamStore();
 const userStore = useUserStore();
 const { t } = useI18n();
@@ -118,13 +116,11 @@ const passcodeDialogRef = ref<InstanceType<typeof ExamPasscodeInputDialog> | nul
 const selectedRound = ref<ExamRound | null>(null);
 const calendarHeight = ref<number>(0);
 
+const roundsListOverflow = computed(() => ($q.screen.gt.sm ? 'auto' : 'visible'));
+
 let scheduleInterval: ReturnType<typeof setInterval>;
 
 onMounted(async () => {
-  if (route.query.date) {
-    examStore.selectedDate = route.query.date as string;
-  }
-
   await examStore.initSchedule();
   // Real-time polling every 5 seconds
   scheduleInterval = setInterval(() => {

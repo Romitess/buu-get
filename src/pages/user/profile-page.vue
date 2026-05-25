@@ -3,17 +3,38 @@
     <AppBreadcrumbs />
     <AppPageHeader
       :title="$t('profile.pageTitleEdit')"
-      :subtitle="$t('profile.pageSubtitleEdit', 'จัดการและแก้ไขข้อมูลส่วนตัวของผู้ใช้งาน')"
+      :subtitle="$t('profile.pageSubtitleEdit')"
     />
 
+    <!-- Warning banner if navigated from email -->
+    <Transition name="fade">
+      <div
+        v-if="isFromEmail"
+        class="q-mb-md q-pa-md row no-wrap items-center fix-alert-banner shadow-sm"
+      >
+        <q-icon name="report_problem" color="warning" size="md" class="q-mr-md" />
+        <div>
+          <div class="text-weight-bold text-subtitle1 text-warning q-mb-xs">
+            {{ $t('profile.fixAlertTitle') }}
+          </div>
+          <div class="text-body2 text-grey-8">
+            {{ $t('profile.fixAlertDesc') }}
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Card 1: Identity Info -->
-    <q-card class="user-profile-card q-pa-lg q-mb-md" flat bordered>
+    <q-card class="user-profile-card q-pa-lg q-mb-md" flat>
       <div class="row q-col-gutter-xl">
         <!-- Left: Avatar -->
-        <div class="col-12 col-md-4 flex column flex-center">
+        <div class="col-12 col-md-3 flex column flex-center">
           <div class="avatar-container q-mb-md">
             <q-avatar size="160px" class="profile-avatar">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Somdream" alt="Avatar" />
+              <img
+                :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${userStore.currentUser?.fullNameEN || 'Somdream'}`"
+                alt="Avatar"
+              />
             </q-avatar>
             <q-btn
               round
@@ -26,13 +47,13 @@
             />
           </div>
           <div class="text-weight-medium text-body1">
-            {{ $t('profile.testTakerId', 'รหัสประจำตัว') }}:
+            {{ $t('profile.testTakerId') }}:
             {{ userStore.currentUser?.nationalId || '66100001' }}
           </div>
         </div>
 
         <!-- Right: Form Fields -->
-        <div class="col-12 col-md-8">
+        <div class="col-12 col-md-9">
           <div class="row q-col-gutter-md">
             <!-- Row 1 -->
             <div class="col-12 col-md-6">
@@ -46,7 +67,7 @@
                   class="text-primary text-caption text-weight-medium no-wrap"
                   style="text-decoration: none"
                 >
-                  {{ $t('profile.pageTitleEditPassword', 'แก้ไขรหัสผ่าน') }}
+                  {{ $t('profile.pageTitleEditPassword') }}
                 </a>
               </div>
               <q-input v-model="formData.email" outlined dense bg-color="white" />
@@ -94,7 +115,7 @@
                 >{{ $t('profile.birthdate') }} <span class="text-negative">*</span></label
               >
               <q-input
-                v-model="formData.birthdate"
+                v-model="birthdateDisplay"
                 outlined
                 dense
                 bg-color="white"
@@ -117,7 +138,7 @@
                   >
                     <AppCalendar
                       :model-value="formData.birthdate"
-                      @update:model-value="(val) => (formData.birthdate = val)"
+                      @update:model-value="(val: string) => (formData.birthdate = val)"
                       @click-date="showCalendar = false"
                     />
                   </q-menu>
@@ -136,9 +157,9 @@
     </q-card>
 
     <!-- Card 2: Contact & Education Info -->
-    <q-card class="user-profile-card q-pa-lg q-mb-xl" flat bordered>
-      <!-- Row 1: Education, Faculty on left | Address on right -->
-      <div class="row q-col-gutter-xl q-mb-md">
+    <q-card class="user-profile-card q-pa-lg q-mb-md" flat>
+      <div class="row q-col-gutter-xl">
+        <!-- Left Column: Education, Faculty, Institution -->
         <div class="col-12 col-md-6">
           <div class="q-mb-md">
             <label class="form-label">{{ $t('profile.education') }}</label>
@@ -153,38 +174,38 @@
               map-options
             />
           </div>
-          <div>
+          <div class="q-mb-md">
             <label class="form-label">{{ $t('profile.faculty') }}</label>
             <q-input v-model="formData.faculty" outlined dense bg-color="white" />
           </div>
+          <div>
+            <label class="form-label">{{ $t('profile.institution') }}</label>
+            <q-input v-model="formData.institution" outlined dense bg-color="white" />
+          </div>
         </div>
 
+        <!-- Right Column: Address, Phone -->
         <div class="col-12 col-md-6">
-          <label class="form-label"
-            >{{ $t('profile.address') }} <span class="text-negative">*</span></label
-          >
-          <q-input
-            v-model="formData.address"
-            type="textarea"
-            outlined
-            dense
-            bg-color="white"
-            input-style="resize: none; height: 114px;"
-          />
-        </div>
-      </div>
-
-      <!-- Row 2: Institution on left | Phone on right -->
-      <div class="row q-col-gutter-xl">
-        <div class="col-12 col-md-6">
-          <label class="form-label">{{ $t('profile.institution') }}</label>
-          <q-input v-model="formData.institution" outlined dense bg-color="white" />
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="form-label"
-            >{{ $t('profile.phone') }} <span class="text-negative">*</span></label
-          >
-          <q-input v-model="formData.phone" outlined dense bg-color="white" />
+          <div class="q-mb-md">
+            <label class="form-label"
+              >{{ $t('profile.address') }} <span class="text-negative">*</span></label
+            >
+            <q-input
+              v-model="formData.address"
+              type="textarea"
+              outlined
+              dense
+              bg-color="white"
+              class="address-textarea"
+              input-style="resize: none;"
+            />
+          </div>
+          <div>
+            <label class="form-label"
+              >{{ $t('profile.phone') }} <span class="text-negative">*</span></label
+            >
+            <q-input v-model="formData.phone" outlined dense bg-color="white" mask="###-###-####" />
+          </div>
         </div>
       </div>
     </q-card>
@@ -213,7 +234,7 @@
       <q-card style="min-width: 400px; border-radius: 16px; padding: 12px">
         <q-card-section class="row items-center q-pb-none justify-between">
           <div class="text-h6 text-weight-bold">
-            {{ $t('profile.pageTitleEditPassword', 'แก้ไขรหัสผ่าน') }}
+            {{ $t('profile.pageTitleEditPassword') }}
           </div>
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
@@ -221,8 +242,7 @@
         <q-card-section class="q-py-md">
           <div class="q-mb-md">
             <label class="form-label"
-              >{{ $t('profile.currentPassword', 'รหัสผ่านปัจจุบัน') }}
-              <span class="text-negative">*</span></label
+              >{{ $t('profile.currentPassword') }} <span class="text-negative">*</span></label
             >
             <q-input
               v-model="currentPassword"
@@ -235,8 +255,7 @@
           </div>
           <div class="q-mb-md">
             <label class="form-label"
-              >{{ $t('profile.newPassword', 'รหัสผ่านใหม่') }}
-              <span class="text-negative">*</span></label
+              >{{ $t('profile.newPassword') }} <span class="text-negative">*</span></label
             >
             <q-input
               v-model="newPassword"
@@ -261,7 +280,7 @@
           />
           <q-btn
             unelevated
-            :label="$t('examSchedule.dialogConfirm.confirm', 'ยืนยัน')"
+            :label="$t('profile.confirm')"
             color="primary"
             style="border-radius: 8px; width: 120px"
             class="text-weight-bold"
@@ -275,19 +294,24 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import type { ComputedRef, WritableComputedRef } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from 'src/stores/user.store';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
-import AppCalendar from 'src/components/app-calendar.vue';
-import { TITLE_TH_OPTIONS } from 'src/utils/form-options';
+import AppCalendar from 'src/components/shared/app-calendar.vue';
+import { TITLE_TH_OPTIONS, EDUCATION_LEVEL_OPTIONS } from 'src/utils/form-options';
+import * as userService from 'src/services/user.service';
 
 const router = useRouter();
+const route = useRoute();
 const userStore = useUserStore();
 const $q = useQuasar();
 const { t } = useI18n();
+
+const isFromEmail: ComputedRef<boolean> = computed<boolean>(() => route.query.from === 'email');
 
 const showPasswordDialog = ref(false);
 const currentPassword = ref('');
@@ -310,41 +334,87 @@ interface ProfileFormData {
 
 const formData = ref<ProfileFormData>({
   email: '',
-  title: 'นาย',
+  title: TITLE_TH_OPTIONS[0].value,
   nationalId: '',
   fullNameTH: '',
   birthdate: '',
   fullNameEN: '',
-  educationLevel: 'ปริญญาตรี',
+  educationLevel: EDUCATION_LEVEL_OPTIONS[1],
   faculty: '',
   institution: '',
   address: '',
   phone: '',
 });
 
-const titleOptions = TITLE_TH_OPTIONS.map((opt) => ({
-  label: opt.label,
-  value: opt.value,
-}));
+const titleOptions: ComputedRef<{ label: string; value: string }[]> = computed<
+  { label: string; value: string }[]
+>(() =>
+  TITLE_TH_OPTIONS.map((opt) => ({
+    label: t(`profile.prefixes.${opt.i18nKey}`),
+    value: opt.value,
+  })),
+);
 
-const educationOptions = computed(() => [
-  { label: t('profile.eduHighSchool'), value: 'มัธยมศึกษา' },
-  { label: t('profile.eduBachelor'), value: 'ปริญญาตรี' },
-  { label: t('profile.eduMaster'), value: 'ปริญญาโท' },
-  { label: t('profile.eduDoctor'), value: 'ปริญญาเอก' },
+const educationOptions: ComputedRef<{ label: string; value: string }[]> = computed<
+  { label: string; value: string }[]
+>(() => [
+  { label: t('profile.eduHighSchool'), value: EDUCATION_LEVEL_OPTIONS[0] },
+  { label: t('profile.eduBachelor'), value: EDUCATION_LEVEL_OPTIONS[1] },
+  { label: t('profile.eduMaster'), value: EDUCATION_LEVEL_OPTIONS[2] },
+  { label: t('profile.eduDoctor'), value: EDUCATION_LEVEL_OPTIONS[3] },
 ]);
+
+const birthdateDisplay: WritableComputedRef<string> = computed<string>({
+  get(): string {
+    if (!formData.value.birthdate) return '';
+    const parts = formData.value.birthdate.split('-');
+    if (parts.length === 3) {
+      const yearStr = parts[0];
+      const month = parts[1];
+      const day = parts[2];
+      if (yearStr && month && day) {
+        const year = parseInt(yearStr, 10);
+        const beYear = year + 543;
+        return `${day}/${month}/${beYear}`;
+      }
+    }
+    if (formData.value.birthdate.includes('/')) {
+      return formData.value.birthdate;
+    }
+    return formData.value.birthdate;
+  },
+  set(val: string): void {
+    if (!val) {
+      formData.value.birthdate = '';
+      return;
+    }
+    const parts = val.split('/');
+    if (parts.length === 3) {
+      const day = parts[0];
+      const month = parts[1];
+      const yearStr = parts[2];
+      if (day && month && yearStr) {
+        const beYear = parseInt(yearStr, 10);
+        const ceYear = beYear - 543;
+        formData.value.birthdate = `${ceYear}-${month}-${day}`;
+      }
+    } else {
+      formData.value.birthdate = val;
+    }
+  },
+});
 
 onMounted((): void => {
   const user = userStore.currentUser;
   if (user) {
     formData.value = {
       email: user.email || '',
-      title: user.titleTH || 'นาย',
+      title: user.titleTH || TITLE_TH_OPTIONS[0].value,
       nationalId: user.nationalId || '',
       fullNameTH: user.fullNameTH || '',
       birthdate: user.birthdate || '',
       fullNameEN: user.fullNameEN || '',
-      educationLevel: user.educationLevel || 'ปริญญาตรี',
+      educationLevel: user.educationLevel || EDUCATION_LEVEL_OPTIONS[1],
       faculty: user.faculty || '',
       institution: user.institution || '',
       address: user.address || '',
@@ -357,20 +427,58 @@ const onCancel = (): void => {
   void router.push('/');
 };
 
-const onSave = (): void => {
-  $q.notify({
-    type: 'positive',
-    message: t('profile.dialogUpdateSuccess', 'อัปเดตข้อมูลส่วนตัวเรียบร้อยแล้ว'),
-    position: 'top',
-  });
-  // TODO: Call API to save data
+const onSave = async (): Promise<void> => {
+  const token = userStore.accessToken || localStorage.getItem('access_token');
+  if (!token) {
+    $q.notify({
+      type: 'negative',
+      message: t('profile.requireLogin'),
+      position: 'top',
+    });
+    return;
+  }
+
+  try {
+    userStore.isLoadingGlobal = true;
+    userStore.loadingText = t('profile.savingData');
+
+    await userService.updateProfile(token, {
+      userTitleTh: formData.value.title,
+      userFullnameTh: formData.value.fullNameTH,
+      userFullnameEn: formData.value.fullNameEN,
+      userDateOfBirth: formData.value.birthdate || undefined,
+      userPhone: formData.value.phone,
+      userEducation: formData.value.educationLevel,
+      userFaculty: formData.value.faculty,
+      userInstitution: formData.value.institution,
+      userAddress: formData.value.address,
+    });
+
+    // Refresh user profile in store so header name updates immediately
+    await userStore.initialize();
+
+    $q.notify({
+      type: 'positive',
+      message: t('profile.dialogUpdateSuccess'),
+      position: 'top',
+    });
+  } catch (err) {
+    console.error('Save profile failed:', err);
+    $q.notify({
+      type: 'negative',
+      message: t('profile.saveError'),
+      position: 'top',
+    });
+  } finally {
+    userStore.isLoadingGlobal = false;
+  }
 };
 
 const onSavePassword = (): void => {
   if (!currentPassword.value || !newPassword.value) {
     $q.notify({
       type: 'negative',
-      message: t('profile.required', 'กรุณากรอกข้อมูลให้ครบถ้วน'),
+      message: t('profile.required'),
       position: 'top',
     });
     return;
@@ -378,7 +486,7 @@ const onSavePassword = (): void => {
 
   $q.notify({
     type: 'positive',
-    message: t('profile.dialogUpdateSuccess', 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว'),
+    message: t('profile.dialogUpdateSuccess'),
     position: 'top',
   });
 
@@ -390,13 +498,13 @@ const onSavePassword = (): void => {
 
 <style scoped lang="scss">
 .profile-page {
-  background-color: #f9f9f9;
 }
 
 .user-profile-card {
-  border-radius: 12px;
-  border-color: #e0e0e0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+  border-radius: 16px !important;
+  border: 1px solid #e0e0e0 !important;
+  box-shadow: none !important;
+  background-color: var(--surface-card) !important;
 }
 
 :deep(.q-field--outlined .q-field__control) {
@@ -411,7 +519,7 @@ const onSavePassword = (): void => {
 .profile-avatar {
   background-color: #2196f3;
   border: 4px solid white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: none !important;
 }
 
 .avatar-edit-btn {
@@ -419,7 +527,7 @@ const onSavePassword = (): void => {
   bottom: 0;
   right: 12px;
   border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: none !important;
 }
 
 .form-label {
@@ -437,5 +545,27 @@ const onSavePassword = (): void => {
 .calendar-menu {
   border-radius: var(--radius-lg);
   overflow: hidden;
+}
+
+.fix-alert-banner {
+  background: linear-gradient(135deg, #fffaf0 0%, #fff8e1 100%);
+  border: 1px solid #ffe082;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(255, 179, 0, 0.05);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+:deep(.address-textarea .q-field__control) {
+  height: 118px !important;
+  min-height: 118px !important;
 }
 </style>

@@ -10,6 +10,22 @@ export default {
     proctor: 'Proctor',
     registration_officer: 'Registration Officer',
   },
+  common: {
+    months: [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ],
+  },
   exam: {
     statusLabel: 'Status',
     status: {
@@ -80,6 +96,10 @@ export default {
       expired: 'Sorry, this round is closed for registration.',
       notOpen: 'Sorry, registration for this round has not started yet.',
       pleaseLogin: 'Please log in before registering for the exam.',
+      alreadyRegistered: 'You have already registered for this round.',
+      notFound: 'Exam round not found (it may have been deleted).',
+      serverError: 'A server error occurred. Please try logging in again.',
+      unknownError: 'An error occurred: {message}',
     },
     dialogConfirm: {
       title: 'Confirm Registration',
@@ -102,10 +122,22 @@ export default {
     registrationSubtitle:
       'Please select the date and session time you wish to register for the BUU-GET test.',
     dateLabel: 'Date',
+    noBadgeRounds: 'No exam rounds',
+    defaultEnrollmentTitle: 'English Proficiency Test',
+    invalidUserId: 'Invalid User ID. Please log out and log in again.',
+    userNotLoggedIn: 'Please log in first',
   },
   profile: {
     pageTitle: 'Personal Information',
     pageTitleEdit: 'Edit Personal Information',
+    pageSubtitleEdit: 'Manage and edit user personal information',
+    pageTitleEditPassword: 'Change Password',
+    currentPassword: 'Current Password',
+    newPassword: 'New Password',
+    testTakerId: 'Candidate ID',
+    fixAlertTitle: 'Correction Required Notification',
+    fixAlertDesc:
+      'Your registration requires profile corrections. Please check the details sent to your email, update the corresponding information/documents below, and click "Save" to resubmit for verification.',
     pageTitleRegister: 'Register New Account',
     nationalId: 'National ID',
     nationalIdPlaceholder: 'X-XXXX-XXXXX-XX-X',
@@ -151,6 +183,7 @@ export default {
     phonePlaceholder: 'XXX-XXX-XXXX',
     back: 'Back',
     cancel: 'Cancel',
+    confirm: 'Confirm',
     next: 'Next',
     save: 'Save',
     backToLogin: 'Back to Login',
@@ -272,6 +305,7 @@ export default {
     examManagement: {
       table: {
         tooltips: {
+          moodle: 'Manage Moodle Data',
           edit: 'Edit',
           delete: 'Delete',
           manageRegistrants: 'Manage Registrants',
@@ -280,6 +314,76 @@ export default {
           viewCandidates: 'View Candidates',
           exportReport: 'Export Report',
           manageScores: 'Manage Scores',
+          manageSeatsDisabled:
+            'Cannot manage seats because not all candidates have passed verification.',
+          manageScoresDisabled: 'Cannot manage scores because the exam date has not yet arrived.',
+          viewCandidatesDisabled:
+            'Cannot print candidate list because the exam date has not yet arrived.',
+        },
+      },
+    },
+    registrantManagement: {
+      pageTitle: 'Manage Exam Registrants',
+      pageSubtitle: 'Manage exam candidates, verify registration profiles and attendance status',
+      searchPlaceholder: 'Search',
+      exportCsv: 'Export CSV',
+      table: {
+        columns: {
+          index: 'No.',
+          nationalId: 'National ID',
+          prefix: 'Prefix',
+          fullName: 'Full Name',
+          paymentStatus: 'Payment Status',
+          verifyStatus: 'Verification Status',
+          tools: 'Tools',
+        },
+        tooltips: {
+          viewDetail: 'View Detail',
+        },
+      },
+      detail: {
+        pageTitle: 'Verify Registration Profile',
+        pageSubtitle:
+          'Verify candidate registration profiles to approve or request fixes before printing admission cards',
+        personalInfo: 'Personal Info',
+        photoAlt: 'Candidate Profile Photo',
+        uploadDate: 'Uploaded',
+        actions: {
+          cancel: 'Cancel',
+          requestFix: 'Request Correction',
+          confirmVerify: 'Approve Profile',
+          backToMain: 'Back to Main',
+        },
+        errors: {
+          notFound: 'Candidate registration info not found',
+          unknownName: 'Unknown Name',
+          unspecifiedDate: 'Unspecified Exam Date',
+          cannotFetch: 'Unable to fetch registration details',
+        },
+        notifications: {
+          sending: 'Sending correction request and email notification...',
+          sendSuccess: 'Correction request submitted and email successfully sent to candidate.',
+          sendError: 'Error occurred while saving profile correction and sending email.',
+          verifySuccess: 'Verification approved successfully',
+          verifyError: 'Error occurred while saving verification status',
+        },
+        requestFixDialog: {
+          title: 'Request Candidate Profile Correction',
+          subtitle: 'Fill in details to send a correction request to the candidate',
+          regInfo: 'Reg ID: {regId} · Exam Date: {examDate}',
+          deadlineLabel: 'Correction Deadline',
+          deadlineNote:
+            'The candidate must correct details within the specified deadline, otherwise it is considered a waiver.',
+          notesLabel: 'Notes to Candidate',
+          optionalLabel: '(Optional)',
+          notesPlaceholder: 'e.g., Please enter a valid National ID card number',
+          submit: 'Request Correction',
+          validationError: 'Please select at least one reason',
+          reasons: {
+            photo: 'Invalid profile photo',
+            info: 'Incorrect profile information',
+            other: 'Others (specify in notes)',
+          },
         },
       },
     },
@@ -346,6 +450,10 @@ export default {
         amount: 'Amount',
         examName: 'Exam Name',
         status: 'Payment Status',
+      },
+      validation: {
+        required: 'Please fill in all information',
+        notFound: 'Applicant data not found, please check accuracy again',
       },
     },
     finSaveTranscription: {

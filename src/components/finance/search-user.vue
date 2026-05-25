@@ -9,22 +9,22 @@
     />
 
     <!-- Dialog -->
-    <q-dialog v-model="isDialogOpen" persistent max-width="90vw">
+    <q-dialog v-model="isDialogOpen" persistent>
       <q-card class="search-user-dialog-card">
         <!-- Close Button & Title -->
-        <div class="row items-center justify-between q-mb-md">
-          <div class="text-h6 text-weight-bold dialog-title">
+        <div class="row items-center justify-between q-mb-lg header-row">
+          <div class="dialog-title">
             {{ t('admin.searchUser.dialogTitle') }}
           </div>
-          <q-btn icon="close" flat round dense v-close-popup class="text-grey-6" />
+          <q-btn icon="close" flat round dense v-close-popup class="close-btn" />
         </div>
 
         <!-- Filter Fields -->
-        <div class="q-gutter-y-sm q-mb-md dialog-fields">
+        <div class="dialog-fields">
           <!-- Ref 1 -->
           <div class="row items-center field-row">
-            <div class="col-4 text-right q-pr-lg field-label">
-              {{ t('admin.paymentImport.table.applicantId') }}
+            <div class="col-4 text-left field-label">
+              {{ t('admin.searchUser.table.applicantId') }}
             </div>
             <div class="col-8">
               <q-input
@@ -35,14 +35,19 @@
                 class="input-rounded"
                 :placeholder="t('admin.searchUser.placeholderRef1')"
                 @keyup.enter="handleSearch"
+                :error="errors.ref1"
+                :error-message="t('profile.required')"
+                no-error-icon
+                hide-bottom-space
+                @update:model-value="errors.ref1 = false"
               />
             </div>
           </div>
 
           <!-- Ref 2 -->
           <div class="row items-center field-row">
-            <div class="col-4 text-right q-pr-lg field-label">
-              {{ t('admin.paymentImport.table.referenceNo') }}
+            <div class="col-4 text-left field-label">
+              {{ t('admin.searchUser.table.referenceNo') }}
             </div>
             <div class="col-8">
               <q-input
@@ -53,14 +58,19 @@
                 class="input-rounded"
                 :placeholder="t('admin.searchUser.placeholderRef2')"
                 @keyup.enter="handleSearch"
+                :error="errors.ref2"
+                :error-message="t('profile.required')"
+                no-error-icon
+                hide-bottom-space
+                @update:model-value="errors.ref2 = false"
               />
             </div>
           </div>
 
           <!-- Applicant Name -->
           <div class="row items-center field-row">
-            <div class="col-4 text-right q-pr-lg field-label">
-              {{ t('admin.registrantManagement.table.columns.fullName') }}
+            <div class="col-4 text-left field-label">
+              {{ t('admin.searchUser.table.fullName') }}
             </div>
             <div class="col-8">
               <q-input
@@ -71,47 +81,47 @@
                 class="input-rounded"
                 :placeholder="t('admin.searchUser.placeholderName')"
                 @keyup.enter="handleSearch"
+                :error="errors.name"
+                :error-message="t('profile.required')"
+                no-error-icon
+                hide-bottom-space
+                @update:model-value="errors.name = false"
               />
             </div>
           </div>
         </div>
 
         <!-- Search Action Button -->
-        <div class="row justify-end q-mb-lg">
-          <q-btn
-            :label="t('admin.searchUser.searchBtn')"
-            unelevated
-            class="btn-dialog-search text-weight-bold"
-            @click="handleSearch"
-            :loading="isLoading"
-          />
+        <div class="row justify-end button-row">
+          <div class="col-8 row justify-end">
+            <q-btn
+              :label="t('admin.searchUser.searchBtn')"
+              unelevated
+              class="btn-dialog-search text-weight-bold"
+              @click="handleSearch"
+              :loading="isLoading"
+            />
+          </div>
         </div>
 
         <!-- Table Area -->
-        <div class="table-container">
-          <base-table
-            :rows="rows"
-            :columns="columns"
-            :loading="isLoading"
-            empty-label="No data available in table"
-            row-key="id"
-          />
-        </div>
+        <SearchUserTable :rows="rows" :loading="isLoading" />
       </q-card>
     </q-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { QTableColumn } from 'quasar';
-import BaseTable from 'src/components/shared/base-table.vue';
+import { useQuasar } from 'quasar';
+import SearchUserTable from './search-user-table.vue';
 import { fetchAllEnrollments } from 'src/services/enrollment.service';
 import { PAYMENT_STATUS_LABELS } from 'src/types/enrollment.types';
 import type { SearchRow } from 'src/types/exam.types';
 
 const { t } = useI18n();
+const $q = useQuasar();
 
 const isDialogOpen = ref(false);
 const isLoading = ref(false);
@@ -123,20 +133,40 @@ const searchForm = ref({
   name: '',
 });
 
+const errors = ref({
+  ref1: false,
+  ref2: false,
+  name: false,
+});
+
 const openDialog = () => {
   isDialogOpen.value = true;
-  // Reset form and rows on open
+  // Reset form, rows, and errors on open
   searchForm.value = { ref1: '', ref2: '', name: '' };
   rows.value = [];
+  errors.value = { ref1: false, ref2: false, name: false };
 };
 
 const handleSearch = async () => {
+  const ref1Query = searchForm.value.ref1.trim();
+  const ref2Query = searchForm.value.ref2.trim();
+  const nameQuery = searchForm.value.name.trim();
+
+  // Reset errors
+  errors.value = { ref1: false, ref2: false, name: false };
+
+  if (!ref1Query && !ref2Query && !nameQuery) {
+    errors.value = {
+      ref1: true,
+      ref2: true,
+      name: true,
+    };
+    return;
+  }
+
   isLoading.value = true;
   try {
-    const ref1Query = searchForm.value.ref1.trim();
-    const ref2Query = searchForm.value.ref2.trim();
-    const nameQuery = searchForm.value.name.trim().toLowerCase();
-
+    const nameQueryLower = nameQuery.toLowerCase();
     const enrollments = await fetchAllEnrollments();
 
     const filtered = enrollments.filter((e) => {
@@ -144,13 +174,28 @@ const handleSearch = async () => {
         ? e.USER?.USER_NATIONAL_ID?.includes(ref1Query) || String(e.ERM_ID).includes(ref1Query)
         : true;
       const matchesRef2 = ref2Query ? String(e.ERM_ID).includes(ref2Query) : true;
-      const matchesName = nameQuery
-        ? e.USER?.PROFILE?.userFullnameTh?.toLowerCase().includes(nameQuery) ||
-          e.USER?.PROFILE?.userFullnameEn?.toLowerCase().includes(nameQuery)
+      const matchesName = nameQueryLower
+        ? e.USER?.PROFILE?.userFullnameTh?.toLowerCase().includes(nameQueryLower) ||
+          e.USER?.PROFILE?.userFullnameEn?.toLowerCase().includes(nameQueryLower)
         : true;
 
       return matchesRef1 && matchesRef2 && matchesName;
     });
+
+    if (filtered.length === 0) {
+      $q.dialog({
+        title: t('admin.searchUser.dialogTitle'),
+        message: t('admin.searchUser.validation.notFound'),
+        persistent: true,
+        ok: {
+          label: t('profile.dialogClose') || 'ตกลง',
+          color: 'primary',
+          unelevated: true,
+        },
+      });
+      rows.value = [];
+      return;
+    }
 
     rows.value = filtered.map((e, index) => ({
       id: index + 1,
@@ -167,26 +212,6 @@ const handleSearch = async () => {
     isLoading.value = false;
   }
 };
-
-const columns = computed<QTableColumn[]>(() => [
-  { name: 'id', field: 'id', label: t('admin.searchUser.table.index'), align: 'center' },
-  { name: 'ref1', field: 'ref1', label: t('admin.searchUser.table.applicantId'), align: 'center' },
-  { name: 'ref2', field: 'ref2', label: t('admin.searchUser.table.referenceNo'), align: 'center' },
-  { name: 'name', field: 'name', label: t('admin.searchUser.table.fullName'), align: 'left' },
-  { name: 'amount', field: 'amount', label: t('admin.searchUser.table.amount'), align: 'center' },
-  {
-    name: 'exam_name',
-    field: 'exam_name',
-    label: t('admin.searchUser.table.examName'),
-    align: 'left',
-  },
-  {
-    name: 'payment_status',
-    field: 'payment_status',
-    label: t('admin.searchUser.table.status'),
-    align: 'center',
-  },
-]);
 </script>
 
 <style scoped lang="scss">
@@ -205,16 +230,27 @@ const columns = computed<QTableColumn[]>(() => [
 }
 
 .search-user-dialog-card {
-  width: 900px;
+  width: 960px;
   max-width: 95vw;
-  border-radius: var(--radius-lg);
-  padding: 32px 40px;
+  border-radius: 20px;
+  padding: 40px 48px;
   box-shadow: var(--shadow-lg);
   overflow-x: hidden;
+  background-color: var(--surface-card);
+}
+
+.header-row {
+  margin-bottom: 24px;
 }
 
 .dialog-title {
-  color: var(--text-primary);
+  color: var(--label-color);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.close-btn {
+  color: var(--neutral-400);
   font-size: 1.25rem;
 }
 
@@ -223,19 +259,25 @@ const columns = computed<QTableColumn[]>(() => [
 }
 
 .field-row {
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
 
 .field-label {
-  color: var(--text-primary);
+  color: var(--label-color);
+  font-size: 16px;
   font-weight: 500;
 }
 
 .input-rounded {
   :deep(.q-field__control) {
-    border-radius: var(--radius-10) !important;
-    background-color: #fff;
+    border-radius: 16px !important;
+    background-color: var(--surface-card);
     border: 1px solid var(--neutral-200) !important;
+    height: 48px;
+    min-height: 48px;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
 
     &:before {
       border: none !important;
@@ -244,26 +286,50 @@ const columns = computed<QTableColumn[]>(() => [
     &:after {
       border: none !important;
     }
+
+    &:hover {
+      border-color: var(--primary) !important;
+    }
   }
+
+  &.q-field--error {
+    :deep(.q-field__control) {
+      border-color: var(--negative) !important;
+
+      &:hover {
+        border-color: var(--negative) !important;
+      }
+    }
+  }
+
+  :deep(.q-field__control-container) {
+    padding-top: 0 !important;
+  }
+
+  :deep(.q-field__native) {
+    padding: 0 16px;
+    font-size: 15px;
+    align-items: center;
+  }
+}
+
+.button-row {
+  margin-top: 0;
+  margin-bottom: 20px;
 }
 
 .btn-dialog-search {
   background-color: var(--primary) !important;
   color: white !important;
-  width: 180px;
-  height: 44px;
-  border-radius: var(--radius-sm);
+  width: 200px;
+  height: 52px;
+  border-radius: 8px !important;
   text-transform: none;
-  font-size: 1rem;
+  font-size: 18px;
+  font-weight: 600;
 
   &:hover {
     background-color: var(--primary-dark) !important;
   }
-}
-
-.table-container {
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  border: 1px solid var(--neutral-200);
 }
 </style>

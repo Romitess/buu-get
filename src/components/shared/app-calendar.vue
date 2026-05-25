@@ -145,7 +145,7 @@
  */
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { AppCalendarProps } from '../types/common';
+import type { AppCalendarProps } from '../../types/common';
 
 const THAI_YEAR_OFFSET = 543;
 const PAST_YEARS_RANGE = 100;
@@ -359,9 +359,8 @@ const handleDaySelect = (day: { dateString: string; isPast: boolean }) => {
     }
 
     .dropdown-icon {
-      position: absolute;
-      right: -20px;
       font-size: 20px;
+      margin-left: 4px;
     }
   }
 

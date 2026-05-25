@@ -77,7 +77,15 @@ export default {
   },
   profile: {
     pageTitle: 'กรอกข้อมูลส่วนตัว',
-    pageTitleEdit: 'แก้ไขข้อมูลส่วนตัว',
+    pageTitleEdit: 'จัดการข้อมูลส่วนตัว',
+    pageSubtitleEdit: 'จัดการและแก้ไขข้อมูลส่วนตัวของผู้ใช้งาน',
+    pageTitleEditPassword: 'แก้ไขรหัสผ่าน',
+    currentPassword: 'รหัสผ่านปัจจุบัน',
+    newPassword: 'รหัสผ่านใหม่',
+    testTakerId: 'รหัสประจำตัว',
+    fixAlertTitle: 'แจ้งเตือนแก้ไขข้อมูลส่วนตัว',
+    fixAlertDesc:
+      'ใบสมัครของท่านต้องการการแก้ไข กรุณาตรวจสอบรายละเอียดที่ได้รับแจ้งในอีเมลและดำเนินการปรับปรุงข้อมูล/เอกสารด้านล่างนี้ให้ถูกต้อง จากนั้นกดปุ่ม "บันทึก" เพื่อส่งข้อมูลให้เจ้าหน้าที่ตรวจสอบอีกครั้ง',
     pageTitleRegister: 'สมัครสมาชิกใหม่',
     nationalId: 'เลขบัตรประจำตัวประชาชน',
     nationalIdPlaceholder: 'X-XXXX-XXXXX-XX-X',
@@ -123,6 +131,7 @@ export default {
     phonePlaceholder: 'XXX-XXX-XXXX',
     back: 'ย้อนกลับ',
     cancel: 'ยกเลิก',
+    confirm: 'ยืนยัน',
     next: 'ถัดไป',
     save: 'บันทึก',
     backToLogin: 'กลับสู่หน้าล็อกอิน',
@@ -141,6 +150,9 @@ export default {
     dialogUpdateSuccess: 'อัปเดตข้อมูลส่วนตัวเรียบร้อยแล้ว',
     dialogRegisterSuccess: 'สมัครสมาชิกเรียบร้อยแล้ว กำลังพาไปหน้าข้อมูลส่วนตัว...',
     dialogPasswordMismatch: 'รหัสผ่านไม่ตรงกัน',
+    requireLogin: 'กรุณาเข้าสู่ระบบก่อนดำเนินการ',
+    savingData: 'กำลังบันทึกข้อมูล...',
+    saveError: 'เกิดข้อผิดพลาดในการบันทึกข้อมูลส่วนตัว',
     // Validation messages
     required: 'กรุณากรอกข้อมูล',
     requiredNationalId: 'กรุณากรอกเลขประจำตัวประชาชน',
@@ -206,7 +218,10 @@ export default {
       expired: 'ขออภัย หมดเขตลงทะเบียนแล้ว (เกินระยะเวลาการเปิดรับสมัคร)',
       notOpen: 'ขออภัย ยังไม่เปิดรับสมัครสอบรอบนี้ (อยู่นอกช่วงเวลาการเปิดรับสมัคร)',
       pleaseLogin: 'กรุณาเข้าสู่ระบบก่อนสมัครสอบ',
-      alreadyRegistered: 'คุณได้ลงทะเบียนสอบในรอบนี้ไปแล้ว (ลงทะเบียนซ้ำไม่ได้)',
+      alreadyRegistered: 'คุณได้ทำการลงทะเบียนสอบแล้ว (ไม่สามารถลงทะเบียนซ้ำได้)',
+      notFound: 'ไม่พบข้อมูลรอบสอบ (อาจถูกลบไปแล้ว)',
+      serverError: 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์ (อาจเกิดจากการลบข้อมูล กรุณาลองเข้าสู่ระบบใหม่)',
+      unknownError: 'เกิดข้อผิดพลาด: {message}',
     },
     dialogConfirm: {
       title: 'ยืนยันการสมัครสอบ',
@@ -228,6 +243,10 @@ export default {
     registrationTitle: 'การสมัครสอบ',
     registrationSubtitle: 'กรุณาเลือกวันที่และรอบเวลาที่คุณต้องการสมัครเข้าทดสอบ BUU-GET',
     dateLabel: 'วันที่',
+    noBadgeRounds: 'ไม่มีรอบสอบ',
+    defaultEnrollmentTitle: 'การทดสอบวัดความสามารถทางภาษาอังกฤษ',
+    invalidUserId: 'ข้อมูลผู้ใช้งานไม่ถูกต้อง (Invalid User ID) กรุณาออกจากระบบแล้วเข้าสู่ระบบใหม่',
+    userNotLoggedIn: 'กรุณาเข้าสู่ระบบก่อน',
   },
   carousel: {
     page1: {
@@ -393,6 +412,7 @@ export default {
           tools: 'เครื่องมือ',
         },
         tooltips: {
+          moodle: 'จัดการข้อมูลในระบบ Moodle',
           edit: 'แก้ไข',
           delete: 'ลบ',
           manageRegistrants: 'จัดการผู้ลงทะเบียน',
@@ -401,6 +421,11 @@ export default {
           viewCandidates: 'ประวัติการเข้าสอบ',
           exportReport: 'ส่งออกรายงาน',
           manageScores: 'จัดการคะแนนสอบ',
+          manageSeatsDisabled:
+            'ไม่สามารถจัดการที่นั่งสอบได้ เนื่องจากผู้สมัครยังผ่านการตรวจสอบความถูกต้องไม่ครบทุกคน',
+          manageScoresDisabled: 'ไม่สามารถจัดการคะแนนสอบได้ เนื่องจากยังไม่ถึงวันสอบ',
+          viewCandidatesDisabled:
+            'ไม่สามารถพิมพ์บัญชีรายชื่อผู้เข้าสอบได้ เนื่องจากยังไม่ถึงวันสอบ',
         },
       },
       dialogs: {
@@ -451,6 +476,33 @@ export default {
         },
         errors: {
           notFound: 'ไม่พบข้อมูลการสมัครสอบ',
+          unknownName: 'ไม่ทราบชื่อ',
+          unspecifiedDate: 'ไม่ระบุวันสอบ',
+          cannotFetch: 'ไม่สามารถดึงข้อมูลได้',
+        },
+        notifications: {
+          sending: 'กำลังส่งข้อมูลแจ้งให้แก้ไขและส่งอีเมลแจ้งเตือน...',
+          sendSuccess: 'ส่งคืนเพื่อแก้ไขและส่งอีเมลหาผู้เข้าสอบเรียบร้อยแล้ว',
+          sendError: 'เกิดข้อผิดพลาดในการบันทึกข้อมูลและส่งอีเมล',
+          verifySuccess: 'ยืนยันการตรวจสอบสำเร็จ',
+          verifyError: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล',
+        },
+        requestFixDialog: {
+          title: 'แจ้งให้ผู้สมัครแก้ไขข้อมูล',
+          subtitle: 'กรอกรายละเอียดเพื่อส่งคำขอแก้ไขไปยังผู้สมัคร',
+          regInfo: 'เลขที่สมัคร: {regId} · สอบวันที่ {examDate}',
+          deadlineLabel: 'กำหนดแก้ไขภายใน',
+          deadlineNote: 'ผู้สมัครต้องแก้ไขภายในวันและเวลาที่กำหนด มิฉะนั้นถือว่าสละสิทธิ์',
+          notesLabel: 'หมายเหตุถึงผู้สมัคร',
+          optionalLabel: '(ไม่บังคับ)',
+          notesPlaceholder: 'เช่น กรุณากรอกข้อมูลรหัสบัตรประชาชนให้ถูกต้อง',
+          submit: 'ส่งคืนเพื่อแก้ไข',
+          validationError: 'กรุณาเลือกระบุเหตุผลอย่างน้อย 1 ข้อ',
+          reasons: {
+            photo: 'รูปถ่ายไม่ถูกต้อง',
+            info: 'กรอกข้อมูลไม่ถูกต้อง',
+            other: 'อื่น ๆ (ระบุในหมายเหตุ)',
+          },
         },
       },
     },
@@ -595,6 +647,10 @@ export default {
         amount: 'จำนวนเงิน',
         examName: 'ชื่อการสอบ',
         status: 'สถานะการชำระเงิน',
+      },
+      validation: {
+        required: 'กรุณากรอกข้อมูลให้ครบ',
+        notFound: 'ไม่พบข้อมูลผู้สมัครสอบ โปรตรวจสอบความถูกต้องอีกครั้ง',
       },
     },
     finSaveTranscription: {

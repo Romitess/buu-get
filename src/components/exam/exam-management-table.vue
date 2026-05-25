@@ -59,8 +59,7 @@
         <ActionButton
           v-for="btn in TOOL_BUTTONS[role]"
           :key="btn.emit"
-          :icon="btn.icon"
-          :color="btn.color"
+          v-bind="getBtnProps(btn)"
           :tooltip="getActionTooltip(btn, row)"
           :disable="isActionDisabled(btn.emit, row)"
           @click="handleAction(btn.emit, row.id)"
@@ -84,7 +83,6 @@ import {
   type ExamSchedule,
   type PaginationModel,
   type Role,
-  type ToolButtonConfig,
   type TableRequestProps,
 } from 'src/types/exam.types';
 
@@ -104,17 +102,29 @@ const emit = defineEmits<{
   (e: 'manageRegistrants', id: string): void;
   (e: 'manageSeats', id: string): void;
   (e: 'viewCandidates', id: string): void;
-  (e: 'manageScores', id: string): void;
+  (e: 'viewScore', id: string): void;
   (e: 'printAdmitCard', id: string): void;
+  (e: 'moodle', id: string): void;
 }>();
 
 const TABLE_ACTIONS = {
+  MOODLE: 'moodle',
   EDIT: 'edit',
   DELETE: 'delete',
   MANAGE_REGISTRANTS: 'manageRegistrants',
   MANAGE_SEATS: 'manageSeats',
   VIEW_CANDIDATES: 'viewCandidates',
+  VEIW_SCORE: 'viewScore',
 } as const;
+
+// 🛠️ สร้าง Interface ใหม่เพื่อตัดปัญหา Property คัดค้านกันเอง
+interface CustomToolButton {
+  icon?: string;
+  image?: string;
+  color: string;
+  tooltip: string;
+  emit: string;
+}
 
 // Logic to detect duplicate dates in the current table data
 const duplicateDates = computed(() => {
@@ -196,8 +206,14 @@ const getProgressColor = (row: ExamSchedule) => {
   return 'blue-3';
 };
 
-const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
+const TOOL_BUTTONS = computed<Record<Role, CustomToolButton[]>>(() => ({
   [ROLES.STAFF]: [
+    {
+      image: '/moodle-icon.png',
+      color: 'primary',
+      tooltip: t('admin.examManagement.table.tooltips.moodle'),
+      emit: TABLE_ACTIONS.MOODLE,
+    },
     {
       icon: 'edit',
       color: 'secondary',
@@ -231,10 +247,10 @@ const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
       emit: TABLE_ACTIONS.VIEW_CANDIDATES,
     },
     {
-      icon: 'leaderboard',
-      color: 'blue-6',
+      icon: 'description',
+      color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.manageScores'),
-      emit: 'manageScores',
+      emit: TABLE_ACTIONS.VEIW_SCORE,
     },
   ],
   [ROLES.ADMIN]: [
@@ -269,51 +285,60 @@ const TOOL_BUTTONS = computed<Record<Role, ToolButtonConfig[]>>(() => ({
       emit: TABLE_ACTIONS.VIEW_CANDIDATES,
     },
     {
-      icon: 'leaderboard',
-      color: 'blue-6',
+      icon: 'docs',
+      color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.manageScores'),
-      emit: 'manageScores',
+      emit: TABLE_ACTIONS.VEIW_SCORE,
     },
   ],
 }));
 
-/**
- * Logic to disable specific actions based on business rules
- */
+const getBtnProps = (btn: CustomToolButton) => {
+  const propsObj: Record<string, string> = { color: btn.color };
+  if (btn.icon) propsObj.icon = btn.icon;
+  if (btn.image) propsObj.image = btn.image;
+  return propsObj;
+};
+
 const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
+  if (
+    row.status === 'published' &&
+    (emitName === TABLE_ACTIONS.EDIT || emitName === TABLE_ACTIONS.DELETE)
+  ) {
+    return true;
+  }
+
   if (emitName === TABLE_ACTIONS.MANAGE_SEATS) {
     if ('isAllVerifyPassed' in row && row.isAllVerifyPassed === false) {
       return true;
     }
   }
 
-  if (emitName === TABLE_ACTIONS.VIEW_CANDIDATES || emitName === 'manageScores') {
+  if (emitName === TABLE_ACTIONS.VIEW_CANDIDATES || emitName === TABLE_ACTIONS.VEIW_SCORE) {
     if (!row.examDate) return true;
 
-    // Convert YYYY-MM-DD or ISO to Date object
     const examDate = new Date(row.examDate);
     const today = new Date();
 
-    // Set both to midnight to compare only dates
     examDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
 
-    // Disable if today is before exam date
     return today < examDate;
   }
+
   return false;
 };
 
-const getActionTooltip = (btn: ToolButtonConfig, row: ExamSchedule): string => {
+const getActionTooltip = (btn: CustomToolButton, row: ExamSchedule): string => {
   if (
     btn.emit === TABLE_ACTIONS.MANAGE_SEATS &&
     'isAllVerifyPassed' in row &&
     row.isAllVerifyPassed === false
   ) {
-    return 'ไม่สามารถจัดการที่นั่งสอบได้ เนื่องจากผู้สมัครยังผ่านการตรวจสอบความถูกต้องไม่ครบทุกคน';
+    return t('admin.examManagement.table.tooltips.manageSeatsDisabled');
   }
 
-  if (btn.emit === 'manageScores' || btn.emit === TABLE_ACTIONS.VIEW_CANDIDATES) {
+  if (btn.emit === TABLE_ACTIONS.VEIW_SCORE || btn.emit === TABLE_ACTIONS.VIEW_CANDIDATES) {
     if (row.examDate) {
       const examDate = new Date(row.examDate);
       const today = new Date();
@@ -321,9 +346,9 @@ const getActionTooltip = (btn: ToolButtonConfig, row: ExamSchedule): string => {
       today.setHours(0, 0, 0, 0);
 
       if (today < examDate) {
-        return btn.emit === 'manageScores'
-          ? 'ไม่สามารถจัดการคะแนนสอบได้ เนื่องจากยังไม่ถึงวันสอบ'
-          : 'ไม่สามารถพิมพ์บัญชีรายชื่อผู้เข้าสอบได้ เนื่องจากยังไม่ถึงวันสอบ';
+        return btn.emit === TABLE_ACTIONS.VEIW_SCORE
+          ? t('admin.examManagement.table.tooltips.manageScoresDisabled')
+          : t('admin.examManagement.table.tooltips.viewCandidatesDisabled');
       }
     }
   }
@@ -343,6 +368,9 @@ const handleAction = (emitName: string, id: string) => {
     });
   } else {
     switch (emitName) {
+      case TABLE_ACTIONS.MOODLE:
+        emit(TABLE_ACTIONS.MOODLE, id);
+        break;
       case TABLE_ACTIONS.EDIT:
         emit(TABLE_ACTIONS.EDIT, id);
         break;
@@ -355,8 +383,8 @@ const handleAction = (emitName: string, id: string) => {
       case TABLE_ACTIONS.VIEW_CANDIDATES:
         emit(TABLE_ACTIONS.VIEW_CANDIDATES, id);
         break;
-      case 'manageScores':
-        emit('manageScores', id);
+      case TABLE_ACTIONS.VEIW_SCORE:
+        emit(TABLE_ACTIONS.VEIW_SCORE, id);
         break;
     }
   }

@@ -38,6 +38,7 @@ export function useExamSeatCandidates() {
 
   // Enrollments filtered to the active session that have a seat assignment (status SEAT_ASSIGNED = 2)
   const STATUS_SEAT_ASSIGNED = 2;
+  const STATUS_CANCELLED = 5;
 
   const sessionEnrollments = computed((): BackendEnrollmentDetail[] => {
     if (!selectedSessionId.value) return [];
@@ -45,6 +46,7 @@ export function useExamSeatCandidates() {
       (e) =>
         e.SESSION_ID === selectedSessionId.value &&
         Number(e.ERM_STATUS) >= STATUS_SEAT_ASSIGNED &&
+        Number(e.ERM_STATUS) !== STATUS_CANCELLED &&
         e.ERM_SEAT_NUMBER,
     );
   });

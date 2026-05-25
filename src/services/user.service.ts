@@ -149,3 +149,35 @@ export async function getProfile(token: string): Promise<User | null> {
     return null;
   }
 }
+
+/**
+ * ฟังก์ชันสำหรับอัปเดตข้อมูล Profile ของผู้ใช้ที่ล็อกอินอยู่
+ */
+export async function updateProfile(
+  token: string,
+  payload: {
+    userTitleTh?: string;
+    userFullnameTh?: string;
+    userTitleEn?: string;
+    userFullnameEn?: string;
+    userDateOfBirth?: string | undefined;
+    userPhone?: string;
+    userEducation?: string;
+    userFaculty?: string;
+    userInstitution?: string;
+    userCountry?: string;
+    userAddress?: string;
+  },
+): Promise<User> {
+  try {
+    const response = await api.patch('/user-profile/me', payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (err) {
+    console.error('Failed to update profile:', err);
+    throw err;
+  }
+}

@@ -96,8 +96,9 @@ export enum EnrollmentStatus {
   UNPAID = 0,
   PAID = 1,
   SEAT_ASSIGNED = 2,
-  ATTENDED = 3,
-  CANCELLED = 4,
+  SEAT_PUBLISHED = 3,
+  ATTENDED = 4,
+  CANCELLED = 5,
 }
 
 export enum VerifyStatus {
@@ -111,6 +112,7 @@ export const PAYMENT_STATUS_LABELS: Record<number, string> = {
   [EnrollmentStatus.UNPAID]: 'ค้างชำระ',
   [EnrollmentStatus.PAID]: 'ชำระเงินแล้ว',
   [EnrollmentStatus.SEAT_ASSIGNED]: 'ชำระเงินแล้ว',
+  [EnrollmentStatus.SEAT_PUBLISHED]: 'ชำระเงินแล้ว',
   [EnrollmentStatus.ATTENDED]: 'ชำระเงินแล้ว',
   [EnrollmentStatus.CANCELLED]: 'ยกเลิก',
 };

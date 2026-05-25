@@ -17,11 +17,7 @@
             self="bottom left"
             class="shadow-5 calendar-menu"
           >
-            <AppCalendar
-              :model-value="birthdate"
-              @update:model-value="(val) => (birthdate = val)"
-              @click-date="showCalendar = false"
-            />
+            <AppCalendar v-model="birthdate" @click-date="showCalendar = false" />
           </q-menu>
         </template>
       </AppFormField>
@@ -74,7 +70,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AppFormField from 'src/components/base/app-form-field.vue';
-import AppCalendar from 'src/components/app-calendar.vue';
+import AppCalendar from 'src/components/shared/app-calendar.vue';
 
 const { t } = useI18n();
 const showCalendar = ref(false);

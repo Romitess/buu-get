@@ -77,6 +77,7 @@ export interface ExamHistoryItem {
   deadline?: string;
   customStatus?: CustomStatus;
   actions?: string[];
+  rawEnrollment?: ExamEnrollment;
 }
 
 export interface DayData {
@@ -146,6 +147,21 @@ export interface BackendEnrollment {
   DELETED_AT: string | null;
 }
 
+export interface BackendScore {
+  SCORES_ID: number;
+  ERM_ID: number;
+  SC_LANG_USE_SCORE?: number;
+  SC_READING_SCORE?: number;
+  SC_TOTAL_SCORE?: number;
+  SC_BAND_LEVEL?: number;
+  CERTIFICATES?: {
+    CERT_ID: number;
+    SCORES_ID: number;
+    CERT_CODE: string;
+    CERT_ISSUED_AT: string;
+  }[];
+}
+
 export interface ExamEnrollment {
   ERM_ID: number;
   USER_ID: number;
@@ -155,6 +171,26 @@ export interface ExamEnrollment {
   ERM_VERIFY_STATUS: number;
   CREATED_AT: string;
   SESSION?: BackendSession;
+  TRANSACTION?: {
+    TRANX_ID: number;
+    TRANX_MATCH_STATUS?: number;
+    TRANX_REF1?: string;
+    TRANX_PAID_AT?: string | Date;
+    TRANX_CREATED_AT?: string | Date;
+    TRANX_RECEIPT_NAME?: string;
+    TRANX_TAX_ID?: string;
+    TRANX_RECEIPT_ADDRESS?: string;
+    TRANX_AMOUNT?: number;
+    TRANX_CHANNEL?: string;
+    BANK_RECONCILES?: { BR_ID: number; TRANX_ID: number | null }[];
+  };
+  VOUCHERS?: {
+    VC_ID: number;
+    ERM_ID: number;
+    VC_CODE: string;
+    CREATED_AT: string;
+  }[];
+  SCORE?: BackendScore;
 }
 
 export interface BackendLocation {

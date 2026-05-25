@@ -15,6 +15,7 @@ import { formatThaiLongDate } from 'src/utils/thai-date';
 /** Enrollment status codes shared with the backend */
 const STATUS_PAID = 1;
 const STATUS_SEAT_ASSIGNED = 2;
+const STATUS_SEAT_PUBLISHED = 3;
 
 /** Width of the custom drag ghost (px) used before the first real measurement */
 const DEFAULT_DRAG_WIDTH = 320;
@@ -104,12 +105,14 @@ export function useExamSeatManagement() {
     return allEnrollments.value.filter((e) => e.SESSION_ID === activeSessionId.value);
   });
 
-  // Total applicants who have PAID (PAID or SEAT_ASSIGNED)
+  // Total applicants who have PAID (PAID, SEAT_ASSIGNED, or SEAT_PUBLISHED)
   const applicantCount = computed(
     (): number =>
       sessionEnrollments.value.filter(
         (e) =>
-          Number(e.ERM_STATUS) === STATUS_PAID || Number(e.ERM_STATUS) === STATUS_SEAT_ASSIGNED,
+          Number(e.ERM_STATUS) === STATUS_PAID ||
+          Number(e.ERM_STATUS) === STATUS_SEAT_ASSIGNED ||
+          Number(e.ERM_STATUS) === STATUS_SEAT_PUBLISHED,
       ).length,
   );
 
@@ -158,9 +161,12 @@ export function useExamSeatManagement() {
       return;
     }
 
-    // Only show students who have status PAID (1) or SEAT_ASSIGNED (2)
+    // Only show students who have status PAID (1), SEAT_ASSIGNED (2), or SEAT_PUBLISHED (3)
     const eligibleEnrollments = sessionEnrollments.value.filter(
-      (e) => Number(e.ERM_STATUS) === STATUS_PAID || Number(e.ERM_STATUS) === STATUS_SEAT_ASSIGNED,
+      (e) =>
+        Number(e.ERM_STATUS) === STATUS_PAID ||
+        Number(e.ERM_STATUS) === STATUS_SEAT_ASSIGNED ||
+        Number(e.ERM_STATUS) === STATUS_SEAT_PUBLISHED,
     );
 
     students.value = eligibleEnrollments.map((e) => ({

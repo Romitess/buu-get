@@ -82,6 +82,40 @@ export const INTERNAL_EXAM_TYPE_SPECIAL = 'special';
 export const formatFee = (amount: number | string) =>
   `${FEE_LABEL} ${Number(amount).toLocaleString()} ${CURRENCY_SYMBOL}`;
 
-/** Helper to format location with room */
 export const formatLocationWithRoom = (name: string, room?: string | null) =>
   `${name}${room ? ` (${room})` : ''}`;
+
+export const POLLING_INTERVAL_MS = 5000;
+
+export const NOTIFY_TIMEOUT_SHORT = 2000;
+export const NOTIFY_TIMEOUT_DEFAULT = 2500;
+export const NOTIFY_TIMEOUT_LONG = 3000;
+
+export const ROUNDS_SCROLL_THRESHOLD = 3;
+
+export const ENROLLMENT_STATUS = {
+  UNPAID: 0,
+  PAID: 1,
+  SEAT_ASSIGNED: 2,
+  SEAT_PUBLISHED: 3,
+  ATTENDED: 4,
+  CANCELLED: 5,
+} as const;
+
+export const VERIFY_STATUS = {
+  UNCHECKED: 0,
+  PASS: 1,
+  WAIT_FIXED: 2,
+  CANCELLED: 3,
+} as const;
+
+export const TRANSACTION_MATCH_STATUS = {
+  MATCH: 1,
+} as const;
+
+export const HTTP_STATUS = {
+  BAD_REQUEST: 400,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  INTERNAL_SERVER_ERROR: 500,
+} as const;

@@ -1,11 +1,9 @@
 import { api } from 'src/boot/axios';
 import type {
-  ExamHistoryItem,
   DayData,
   ExamRound,
   BackendExam,
   BackendLocation,
-  ExamInfo,
   AdmissionVoucherData,
   ExamEnrollment,
 } from 'src/types/exam';
@@ -13,7 +11,6 @@ import type { ExamSchedule } from 'src/types/exam.types';
 import {
   BUDDHIST_YEAR_OFFSET,
   SESSION_STATUS_OPEN,
-  DEFAULT_EXAM_INFO,
   EXAM_TYPE_GENERAL,
   DEFAULT_EXAM_TITLE,
   DEFAULT_LOCATION_TEXT,
@@ -23,6 +20,7 @@ import {
   INTERNAL_EXAM_TYPE_SPECIAL,
   EXAM_STATUS_PUBLISHED,
   EXAM_STATUS_UNPUBLISHED,
+  ENROLLMENT_STATUS,
 } from 'src/constants/exam';
 
 // Retry configuration
@@ -102,8 +100,6 @@ export interface ExamLocationOption {
   raw: BackendLocation;
 }
 
-export const defaultExamInfo: ExamInfo = DEFAULT_EXAM_INFO;
-
 export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
   return retryAsync(async () => {
     const response = await api.get<BackendExam[]>('/exam');
@@ -140,7 +136,11 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
         const startTime = formatTime(session.SS_START_TIME);
         const endTime = formatTime(session.SS_END_TIME);
 
-        const activeEnrollments = (session.ENROLLMENTS || []).filter((e) => e.ERM_STATUS !== 4);
+        const activeEnrollments = (session.ENROLLMENTS || []).filter(
+          (e) =>
+            e.ERM_STATUS !== ENROLLMENT_STATUS.UNPAID &&
+            e.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED,
+        );
 
         const round: ExamRound = {
           id: session.SS_ID,
@@ -178,7 +178,11 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
       if (exam.SESSIONS && exam.SESSIONS.length > 0) {
         exam.SESSIONS.forEach((session) => {
           capacity += session.SS_CAPACITY || 0;
-          const activeEnrollments = (session.ENROLLMENTS || []).filter((e) => e.ERM_STATUS !== 4);
+          const activeEnrollments = (session.ENROLLMENTS || []).filter(
+            (e) =>
+              e.ERM_STATUS !== ENROLLMENT_STATUS.UNPAID &&
+              e.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED,
+          );
           registeredCount += activeEnrollments.length;
         });
 
@@ -285,11 +289,6 @@ export const fetchExamLocations = async (): Promise<ExamLocationOption[]> => {
   }
 };
 
-export const mockScheduleData: Record<string, DayData> = {};
-
-export const mockHistoryRecords: ExamHistoryItem[] = [];
-
-/** Payload for updating an existing exam round */
 export interface UpdateExamPayload extends CreateExamPayload {
   examId: number;
   /** Existing session IDs to keep/update */
@@ -380,11 +379,13 @@ export const fetchAdmissionVoucher = async (
 export const createEnrollment = async (
   userId: number,
   sessionId: number,
+  passcode?: string,
 ): Promise<ExamEnrollment> => {
   try {
     const response = await api.post<ExamEnrollment>('/exam-enrollments', {
       USER_ID: userId,
       SESSION_ID: sessionId,
+      PASSCODE: passcode,
     });
     return response.data;
   } catch (error) {

@@ -2,7 +2,7 @@
   <AppButton :icon="icon" :label="label" v-bind="$attrs" @click="exportTable" />
 </template>
 
-<script setup lang="ts" generic="T extends Record<string, unknown>">
+<script setup lang="ts" generic="T extends object">
 import { exportFile, date, useQuasar } from 'quasar';
 import type { QTableColumn } from 'quasar';
 import AppButton from 'src/components/base/app-button.vue';
@@ -63,7 +63,7 @@ const exportTable = (): void => {
         if (typeof col.field === 'function') {
           val = col.field(row);
         } else if (typeof col.field === 'string') {
-          val = row[col.field];
+          val = (row as Record<string, unknown>)[col.field];
         }
 
         if (col.format) {
