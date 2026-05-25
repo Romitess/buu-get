@@ -6,39 +6,63 @@
     </div>
 
     <!-- Divider -->
-    <div class="teacher-desk-divider row items-center q-mb-md">
-      <q-separator class="col" color="red-2" size="4px" />
-      <div class="text-grey-7 q-px-md bg-grey-2 rounded-borders">
+    <div class="teacher-desk-divider row items-center justify-center q-mb-lg">
+      <div class="teacher-line"></div>
+      <div class="q-px-md bg-grey-2 rounded-borders text-weight-medium teacher-desk-label">
         Teacher's Desk & Projector Screen
       </div>
-      <q-separator class="col" color="red-2" size="4px" />
+      <div class="teacher-line"></div>
     </div>
 
     <!-- Seat Preview Container -->
     <div class="seat-preview-content">
-      <div v-if="totalSeats > 0" class="seat-grid-wrapper">
+      <div v-if="totalSeats > 0" class="seat-grid-wrapper" :style="{ gap: seatStyle.rowGap }">
         <!-- Render each row separately to lock position -->
-        <div v-for="(rowSeats, rowIndex) in seatsByRow" :key="rowIndex" class="seat-row">
+        <div
+          v-for="(rowSeats, rowIndex) in seatsByRow"
+          :key="rowIndex"
+          class="seat-row"
+          :style="{ gap: seatStyle.colGap }"
+        >
           <div v-for="seat in rowSeats" :key="seat.id" class="seat-item">
-            <div class="seat-box" :style="seatSize">{{ seat.id }}</div>
+            <div
+              class="seat-box"
+              :class="{ 'is-broken': brokenSeats.has(seat.id) }"
+              :style="{
+                width: seatStyle.width,
+                height: seatStyle.height,
+                fontSize: seatStyle.fontSize,
+              }"
+              @click="handleSeatClick(seat.id)"
+            >
+              <span v-if="!brokenSeats.has(seat.id)" class="seat-label">{{ seat.id }}</span>
+              <div v-if="brokenSeats.has(seat.id)" class="broken-overlay">
+                <q-icon name="block" class="broken-icon" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div v-else class="empty-preview column flex-center">
-        <q-icon name="event_seat" size="48px" color="grey-6" />
-        <div class="text-body2 text-grey-6 q-mt-md">{{ placeholderText }}</div>
-      </div>
+      <div v-else class="empty-preview"></div>
     </div>
+
+    <!-- Broken Seat Dialog -->
+    <AppSeatBrokenDialog
+      v-model="isDialogOpen"
+      :seat-id="selectedSeatId"
+      @confirm="confirmBrokenSeat"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import AppSeatLegend from './app-seat-legend.vue';
+import AppSeatBrokenDialog from './app-seat-broken-dialog.vue';
 
 interface Props {
-  rows?: number;
-  cols?: number;
+  rows?: number | null;
+  cols?: number | null;
   placeholderText?: string;
 }
 
@@ -50,21 +74,42 @@ const props = withDefaults(defineProps<Props>(), {
 
 const MAX_SEATS = Infinity;
 
+const rowCount = computed(() => props.rows ?? 0);
+const colCount = computed(() => props.cols ?? 0);
+
 const legendItems = [
   { label: 'ที่นั่งว่าง', dotClass: 'available' },
   { label: 'ชำรุด', dotClass: 'broken' },
 ];
 
 const totalSeats = computed(() => {
-  const total = (props.rows || 0) * (props.cols || 0);
+  const total = rowCount.value * colCount.value;
   return Math.min(total, MAX_SEATS);
 });
+
+const isDialogOpen = ref(false);
+const selectedSeatId = ref('');
+const brokenSeats = ref<Set<string>>(new Set());
+
+const handleSeatClick = (seatId: string) => {
+  if (!brokenSeats.value.has(seatId)) {
+    selectedSeatId.value = seatId;
+    isDialogOpen.value = true;
+  } else {
+    // Un-break if already broken
+    brokenSeats.value.delete(seatId);
+  }
+};
+
+const confirmBrokenSeat = (seatId: string) => {
+  brokenSeats.value.add(seatId);
+};
 
 const seatsByRow = computed(() => {
   const rows: Array<Array<{ id: string }>> = [];
   const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-  const numRows = props.rows || 0;
-  const numCols = props.cols || 0;
+  const numRows = rowCount.value;
+  const numCols = colCount.value;
 
   for (let row = 0; row < numRows; row++) {
     const rowSeats = [];
@@ -79,38 +124,33 @@ const seatsByRow = computed(() => {
   return rows;
 });
 
-const seatSize = computed(() => {
-  const total = (props.rows || 0) * (props.cols || 0);
-  const cols = props.cols || 1;
+const seatStyle = computed(() => {
+  const total = rowCount.value * colCount.value;
+  const cols = colCount.value || 1;
+  const rows = rowCount.value || 1;
 
-  // ถ้า <= 40 แสดงเต็มปกติ
   if (total <= 40) {
+    const rGap = rows <= 4 ? 56 : rows <= 6 ? 36 : 24;
     return {
-      width: '48px',
-      height: '48px',
-      fontSize: '14px',
-      padding: '8px',
-      gap: '6px',
+      width: '64px',
+      height: '64px',
+      fontSize: '16px',
+      rowGap: `${rGap}px`,
+      colGap: '24px',
     };
   }
 
-  // ถ้า > 40 ให้ zoom out โดยคำนวณให้พอดีกรอบ
-  // กรอบกว้างประมาณ 1150px (100% - padding)
-  // ต้องพอดี cols ที่นั่ง
-  const containerWidth = 1150;
-  const gapSize = 4;
-  const totalGapWidth = gapSize * (cols - 1);
-  const availableWidth = containerWidth - totalGapWidth;
-  const seatWidth = availableWidth / cols;
-
-  const scale = Math.max(32, Math.min(48, seatWidth));
+  const containerWidth = 850;
+  const scale = Math.max(32, Math.min(64, containerWidth / cols - 12));
+  const colGap = Math.max(8, Math.min(24, scale * 0.3));
+  const rowGap = Math.max(8, Math.min(56, (500 - rows * scale) / (rows - 1 || 1)));
 
   return {
-    width: scale + 'px',
-    height: scale + 'px',
-    fontSize: Math.round(scale * 0.25) + 'px',
-    padding: Math.round(scale * 0.15) + 'px',
-    gap: '4px',
+    width: `${scale}px`,
+    height: `${scale}px`,
+    fontSize: `${Math.max(12, scale * 0.35)}px`,
+    rowGap: `${rowGap}px`,
+    colGap: `${colGap}px`,
   };
 });
 </script>
@@ -126,35 +166,34 @@ const seatSize = computed(() => {
   }
 }
 
+.teacher-desk-label {
+  color: var(--buu-brown);
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.teacher-line {
+  width: 180px;
+  height: 4px;
+  background: var(--teacher-desk-line);
+}
+
 .seat-preview-content {
   background: transparent;
-  border: none;
-  border-radius: 0;
-  padding: 0;
   width: 100%;
-  height: 300px;
   display: flex;
   align-items: flex-start;
-  justify-content: flex-start;
-  box-shadow: none;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  justify-content: center;
+  overflow: visible;
+  padding-top: 16px;
+  padding-bottom: 32px;
 }
 
 .seat-grid-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 4px;
   width: fit-content;
-  min-width: fit-content;
-  justify-content: flex-start;
-  align-items: flex-start;
-  padding: 24px;
+  align-items: center;
 }
 
 .seat-row {
@@ -170,27 +209,57 @@ const seatSize = computed(() => {
 }
 
 .seat-box {
-  background-color: #ffffff;
-  border: 1px solid var(--secondary, #1e89e5);
-  border-radius: 6px;
+  background-color: var(--surface-card);
+  border: 1px solid var(--secondary);
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  color: var(--secondary, #1e89e5);
-  cursor: default;
-  transition: all 0.2s ease;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
 
   &:hover {
-    background-color: #f5f5f5;
+    background-color: var(--surface-page);
   }
+
+  &.is-broken {
+    background-color: var(--seat-broken-bg);
+    border-color: var(--seat-broken-bg);
+    cursor: pointer;
+  }
+}
+
+.seat-label {
+  position: relative;
+  z-index: 1;
+}
+
+.broken-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.broken-icon {
+  font-size: 28px;
+  color: var(--text-on-primary);
 }
 
 .empty-preview {
   width: 100%;
   height: 100%;
   min-height: 300px;
-  color: #999999;
+  color: var(--text-muted);
 }
 </style>

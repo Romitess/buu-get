@@ -39,7 +39,8 @@
   --text-muted: #9a9a9a;
   --text-on-dark: #e0e0e0;
   --text-on-primary: #ffffff;
-  --label-color: #000000; // สีของ Label หัวข้อฟิลด์
+  --buu-brown: #5D3F3D;
+  --label-color: var(--buu-brown); // สีของ Label หัวข้อฟิลด์
 
   // Neutral scale (used in form fields, dividers, secondary text)
   --neutral-50: #f8fafc;
@@ -164,8 +165,14 @@
   --dialog-icon-shadow: 0 4px 12px rgba(13, 71, 161, 0.25);
   --dialog-icon-gradient: linear-gradient(135deg, #bbdefb 0%, #e3f2fd 100%);
   --dialog-info-border: #aecdf5;
+  --primary-light-alpha-40: #1e89e566;
+  --dialog-icon-inner-surface: #323232;
+  --dialog-broken-icon-outer-bg: var(--primary-light-alpha-40);
+  --dialog-broken-icon-inner-bg: var(--dialog-icon-inner-surface);
   --location-preview-bg: #f4f8fd;
   --location-preview-border: #e1eefc;
+  --location-total-seats-bg: #d6e8fa;
+  --teacher-desk-line: var(--buu-brown);
 
   --clock-bg: #ffffff;
   --clock-icon: #424242;
@@ -183,6 +190,7 @@
   // Seat Management Specific
   --seat-grid-border: #757575;
   --seat-available-border: #000000;
+  --seat-broken-bg: #676767;
   --seat-grid-box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   --seat-scrollbar-track: #f1f1f1;
   --seat-scrollbar-thumb: #cccccc;
@@ -639,13 +647,15 @@ body {
 // 1. ช่อง Input และ Select แบบหม่น (Flat & Rounded)
 .buu-input-muted {
   &.q-field--outlined .q-field__control {
-    border: 1px solid var(--neutral-200) !important; // เปลี่ยนกลับเป็นสีเทาอ่อนสุดๆ (หม่นๆ ละมุนๆ ตามต้นฉบับ)
-    border-radius: 8px !important;
+    border: 1px solid var(--neutral-200) !important;
+    border-radius: 12px !important;
+    height: 39px !important;
+    min-height: 39px !important;
+    max-width: 350px;
     background-color: var(--surface-card);
-    box-shadow: none !important; // ลบเงาทิ้งให้แบนราบตามรูป 2
+    box-shadow: none !important;
     transition: border-color var(--transition-smooth);
 
-    // รวบโค้ดที่ซ้ำซ้อน
     &:before,
     &:after {
       border: none !important;
@@ -655,13 +665,17 @@ body {
     }
   }
 
-  // ปรับสีตัวอักษร, Placeholder และไอคอนลูกศร ให้หม่นลง
-  .q-field__native,
+  .q-field__native {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+  }
   .q-field__prefix,
   .q-field__suffix,
-  .q-placeholder,
   .q-select__dropdown-icon {
     color: var(--text-input) !important;
+  }
+  .q-placeholder {
+    color: #b0b0b0 !important;
   }
 }
 
@@ -752,4 +766,9 @@ body {
   border-radius: var(--radius-sm) !important; // 8px
   box-shadow: var(--shadow-card) !important; // ใช้เงา 0px 4px 4px 0px rgba(0, 0, 0, 0.25)
   background-color: var(--surface-card) !important;
+}
+
+// 6. เส้นคั่นสีน้ำตาล
+.buu-divider-brown {
+  background-color: var(--buu-brown) !important;
 }

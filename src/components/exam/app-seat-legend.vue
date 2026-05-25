@@ -46,7 +46,7 @@ defineProps<{
   }
 
   &.broken {
-    background-color: #9e9e9e; // Grey color for broken
+    background-color: var(--seat-broken-bg); // Grey color for broken
   }
 }
 .font-weight-medium {
