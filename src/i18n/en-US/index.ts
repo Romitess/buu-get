@@ -375,7 +375,31 @@ export default {
   },
   admin: {
     examManagement: {
+      pageTitle: 'Manage Exam Rounds',
+      pageDescription: 'View all exam rounds for review and editing',
+      createExam: 'Create Exam Round',
+      rolePrefix: 'Role',
+      notifications: {
+        loadError: 'An error occurred while loading data',
+        deleteSuccess: 'Exam deleted successfully',
+        deleteError: 'Failed to delete exam',
+        editNav: 'Navigating to exam edit page',
+        manageRegistrants: 'Manage exam registrants',
+        manageSeats: 'Manage exam seats',
+        printAdmitCard: 'Print admit card',
+        viewCandidates: 'View candidate list',
+        exportReport: 'Export exam report',
+      },
       table: {
+        columns: {
+          examName: 'Exam Name',
+          examType: 'Type',
+          examDate: 'Exam Date',
+          examLocation: 'Exam Location',
+          registration: 'Registration Count',
+          status: 'Status',
+          tools: 'Tools',
+        },
         tooltips: {
           moodle: 'Manage Moodle Data',
           edit: 'Edit',
@@ -392,6 +416,20 @@ export default {
           viewCandidatesDisabled:
             'Cannot print candidate list because the exam date has not yet arrived.',
         },
+      },
+      dialogs: {
+        delete: {
+          title: 'Confirm Deletion',
+          message: 'Are you sure you want to delete this exam?',
+        },
+      },
+      types: {
+        general: 'General',
+        special: 'Special',
+      },
+      status: {
+        published: 'Published',
+        unpublished: 'Unpublished',
       },
     },
     registrantManagement: {

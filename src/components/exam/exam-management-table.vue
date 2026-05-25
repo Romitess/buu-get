@@ -142,7 +142,7 @@ const { formatThaiDate } = useThaiDate();
 const { t } = useI18n();
 const $q = useQuasar();
 
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   {
     name: 'examName',
     label: t('admin.examManagement.table.columns.examName'),
@@ -192,7 +192,7 @@ const columns: QTableColumn[] = [
     align: 'center',
     style: 'width: 12%',
   },
-];
+]);
 
 const getRatio = (row: ExamSchedule) => {
   if (!row.capacity || row.capacity === 0) return 0;
