@@ -1,6 +1,9 @@
 <template>
   <div>
-    <div class="text-body2 text-weight-medium q-mb-xs">{{ label }}</div>
+    <div class="text-body2 text-weight-medium q-mb-xs">
+      {{ label }}
+      <span v-if="required" class="text-negative">*</span>
+    </div>
 
     <template v-if="type === 'select'">
       <q-select
@@ -67,6 +70,7 @@ interface Props {
   placeholder?: string;
   options?: readonly SelectOption[];
   readonly?: boolean;
+  required?: boolean;
   rules?: readonly ValidationRule[];
   inputClass?: string;
 }
@@ -74,6 +78,7 @@ interface Props {
 withDefaults(defineProps<Props>(), {
   type: 'text',
   readonly: false,
+  required: false,
 });
 
 defineEmits(['update:model-value']);

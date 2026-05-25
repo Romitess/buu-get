@@ -9,8 +9,8 @@ export interface VoucherData {
   location: string;
   seatNo: string;
   voucherNo: string;
-  citizenId?: string;
-  testSession?: string;
-  profileImage?: string;
-  barcodeValue?: string;
+  citizenId?: string | undefined;
+  testSession?: string | undefined;
+  profileImage?: string | undefined;
+  barcodeValue?: string | undefined;
 }

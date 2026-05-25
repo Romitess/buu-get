@@ -37,11 +37,8 @@
         <!-- Profile Picture -->
         <div class="col-12 col-md-4 flex justify-center">
           <div class="profile-photo-container shadow-2">
-            <q-img
-              :src="profileImage || 'https://cdn.quasar.dev/img/avatar.png'"
-              class="full-height"
-              fit="cover"
-            />
+            <q-img v-if="profileImage" :src="profileImage" class="full-height" fit="cover" />
+            <q-icon v-else name="person" size="120px" color="grey-4" class="absolute-center" />
           </div>
         </div>
 

@@ -13,16 +13,20 @@
       <div class="col-12 col-md-3">
         <figure class="flex column items-center q-ma-none">
           <div class="photo-container">
-            <q-img
-              src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+            <ImageDisplay
+              :image-path="displayData.profileImagePath"
               class="profile-img"
               fit="cover"
               :alt="$t('admin.registrantManagement.detail.photoAlt')"
             />
           </div>
           <figcaption class="text-center q-mt-md">
-            <div class="text-subtitle2 text-weight-bold">user_photo.jpg</div>
-            <div class="text-caption text-grey-6">1.2 MB · อัปโหลด 15 ม.ค. 2569</div>
+            <div class="text-subtitle2 text-weight-bold">
+              {{ displayData.profileImagePath ? 'candidate_photo.jpg' : 'No Photo' }}
+            </div>
+            <div class="text-caption text-grey-6">
+              {{ displayData.profileImagePath ? 'Uploaded' : 'Not Uploaded' }}
+            </div>
           </figcaption>
         </figure>
       </div>
@@ -99,6 +103,7 @@ import { computed } from 'vue';
 import { date } from 'quasar';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 import AppLabeledInput from 'src/components/base/app-labeled-input.vue';
+import ImageDisplay from 'src/components/base/image-display.vue';
 
 interface Props {
   enrollment: BackendEnrollmentDetail | null;
@@ -123,6 +128,7 @@ const displayData = computed(() => {
     institution: profile?.userInstitution || '-',
     address: profile?.userAddress || '-',
     phone: profile?.userPhone || '-',
+    profileImagePath: user?.USER_IMAGE || null,
   };
 });
 </script>

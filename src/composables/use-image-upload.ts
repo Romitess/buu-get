@@ -30,6 +30,24 @@ export function useImageUpload(options?: UseImageUploadOptions) {
     uploadError.value = null;
     uploadedPath.value = null;
 
+    // Validation: JPG only
+    const allowedExtensions = ['image/jpeg', 'image/jpg'];
+    if (!allowedExtensions.includes(file.type)) {
+      const errorMsg = 'นามสกุลไฟล์ต้องเป็น JPG เท่านั้น';
+      uploadError.value = errorMsg;
+      isUploading.value = false;
+      return null;
+    }
+
+    // Validation: Min size 40KB
+    const minSize = 40 * 1024; // 40 KB
+    if (file.size < minSize) {
+      const errorMsg = 'ขนาดไฟล์ต้องไม่ต่ำกว่า 40 KB';
+      uploadError.value = errorMsg;
+      isUploading.value = false;
+      return null;
+    }
+
     try {
       const request: ImageUploadRequest = folder ? { file, folder } : { file };
       const imagePath = await uploadImage(request);

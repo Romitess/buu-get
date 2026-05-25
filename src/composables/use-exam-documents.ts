@@ -3,6 +3,7 @@ import { useQuasar } from 'quasar';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { useUserStore } from 'src/stores/user.store';
+import { getImageUrl } from 'src/services/image.service';
 import type { ExamHistoryItem } from 'src/types/exam';
 import type { VoucherData } from 'src/types/voucher';
 import type { ReceiptData } from 'src/types/receipt';
@@ -96,6 +97,7 @@ export function useExamDocuments() {
         voucherNo: `ENG2026-${String(enrollment.ERM_ID).padStart(3, '0')}`,
         citizenId: user?.nationalId || '1-1234-12345-12-1',
         testSession: session.SS_NAME || '1/2569',
+        profileImage: user?.userImagePath ? getImageUrl(user.userImagePath) : undefined,
         barcodeValue: `ENG2026${String(enrollment.ERM_ID).padStart(5, '0')}`,
       };
 

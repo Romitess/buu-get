@@ -66,6 +66,7 @@ export interface BackendUserResponse {
   USER_PASSPORT_NO: string | null;
   USER_EMAIL: string;
   USER_STATUS: string;
+  USER_IMAGE: string | null;
   CREATED_AT: string;
   UPDATED_AT: string;
 }
@@ -83,6 +84,7 @@ export function mapBackendUserToFrontendUser(backendUser: BackendUserResponse): 
     passportNo: backendUser.USER_PASSPORT_NO || '',
     email: backendUser.USER_EMAIL,
     status: backendUser.USER_STATUS,
+    userImagePath: backendUser.USER_IMAGE || '',
     // ฟิลด์ Profile จะเป็นค่าว่างไปก่อนเนื่องจาก Backend ยังไม่ได้ Join ข้อมูลมา
     titleTH: '',
     fullNameTH: '',
@@ -156,17 +158,18 @@ export async function getProfile(token: string): Promise<User | null> {
 export async function updateProfile(
   token: string,
   payload: {
-    userTitleTh?: string;
-    userFullnameTh?: string;
-    userTitleEn?: string;
-    userFullnameEn?: string;
+    userTitleTh?: string | undefined;
+    userFullnameTh?: string | undefined;
+    userTitleEn?: string | undefined;
+    userFullnameEn?: string | undefined;
     userDateOfBirth?: string | undefined;
-    userPhone?: string;
-    userEducation?: string;
-    userFaculty?: string;
-    userInstitution?: string;
-    userCountry?: string;
-    userAddress?: string;
+    userPhone?: string | undefined;
+    userEducation?: string | undefined;
+    userFaculty?: string | undefined;
+    userInstitution?: string | undefined;
+    userCountry?: string | undefined;
+    userAddress?: string | undefined;
+    userImagePath?: string | null | undefined;
   },
 ): Promise<User> {
   try {

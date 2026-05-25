@@ -28,6 +28,7 @@ export interface User {
   institution?: string;
   taxId: string;
   thaidSynced: boolean;
+  userImagePath?: string;
 
   // ROLES
   role?: UserRole;

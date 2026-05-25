@@ -24,6 +24,7 @@ export interface RegisterFormData {
   address: string;
   province: string;
   zipCode: string;
+  userImagePath?: string | undefined;
 }
 
 /** สถานะของ Dialog (ใช้ใน form confirmation) */

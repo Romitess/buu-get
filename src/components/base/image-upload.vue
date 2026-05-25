@@ -35,7 +35,7 @@
         ref="fileInputRef"
         v-model="selectedFile"
         @update:model-value="handleFileSelected"
-        accept=".jpg,.jpeg,.png,.webp"
+        accept=".jpg,.jpeg"
         max-file-size="5242880"
         dense
         filled
@@ -43,9 +43,7 @@
       />
 
       <div class="upload-zone-content" @click="triggerFileInput">
-        <q-icon name="cloud_upload" size="48px" color="primary" />
-        <p class="text-subtitle2 q-mt-md">{{ uploadPromptText }}</p>
-        <p class="text-caption text-grey-6">{{ uploadHintText }}</p>
+        <q-icon name="add" size="32px" color="white" />
       </div>
     </div>
 
@@ -76,6 +74,12 @@ interface Props {
   folder?: string;
   /** alt text สำหรับรูป */
   alt?: string;
+  /** width ของ component */
+  width?: string;
+  /** height ของ component */
+  height?: string;
+  /** border-radius */
+  borderRadius?: string;
 }
 
 interface Emits {
@@ -103,10 +107,6 @@ const { isUploading, uploadError, handleImageUpload } = useImageUpload({
 
 const { displayUrl } = useImageUrl(props.modelValue);
 
-const uploadPromptText = computed(
-  () => t('image.upload.prompt') ?? 'Click to upload or drag and drop',
-);
-const uploadHintText = computed(() => t('image.upload.hint') ?? 'PNG, JPG, WebP up to 5MB');
 const uploadingText = computed(() => t('image.upload.uploading') ?? 'Uploading...');
 
 const triggerFileInput = (): void => {

@@ -11,21 +11,22 @@ export interface RegisterPayload {
   email: string;
   password: string;
   userType: 'thai' | 'foreigner';
-  nationalId?: string;
-  country?: string;
-  titleTH?: string;
-  titleEN?: string;
-  fullName?: string;
-  englishName?: string;
-  phone?: string;
-  birthdate?: string;
-  educationLevel?: string;
-  faculty?: string;
-  institution?: string;
-  address?: string;
-  province?: string;
-  zipCode?: string;
-  confirmPassword?: string;
+  nationalId?: string | undefined;
+  country?: string | undefined;
+  titleTH?: string | undefined;
+  titleEN?: string | undefined;
+  fullName?: string | undefined;
+  englishName?: string | undefined;
+  phone?: string | undefined;
+  birthdate?: string | undefined;
+  educationLevel?: string | undefined;
+  faculty?: string | undefined;
+  institution?: string | undefined;
+  address?: string | undefined;
+  province?: string | undefined;
+  zipCode?: string | undefined;
+  profileImagePath?: string | undefined;
+  confirmPassword?: string | undefined;
   [key: string]: unknown;
 }
 

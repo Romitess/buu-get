@@ -1,11 +1,13 @@
 <template>
-  <div class="q-gutter-y-sm">
-    <!-- ─── วันเกิด / Date of Birth ─── -->
+  <div class="q-gutter-y-md">
+    <!-- 1. วันเดือนปีเกิด -->
     <div class="relative-position">
       <AppFormField
         v-model="birthdate"
         type="date"
         :label="t('profile.birthdate')"
+        :placeholder="t('profile.birthdatePlaceholder')"
+        :required="true"
         :rules="[(val) => !!val || t('profile.requiredBirthdate')]"
         @dblclick="showCalendar = true"
       >
@@ -29,6 +31,8 @@
       type="select"
       :label="t('profile.education')"
       :options="educationOptions"
+      :placeholder="t('profile.education')"
+      :required="true"
       :rules="[(val) => !!val || t('profile.requiredEducation')]"
     />
 
@@ -52,6 +56,7 @@
       type="textarea"
       :label="t('profile.address')"
       :placeholder="t('profile.addressPlaceholder')"
+      :rows="4"
     />
 
     <!-- ─── เบอร์โทรศัพท์ ─── -->

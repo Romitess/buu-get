@@ -49,6 +49,19 @@
           <div class="text-center">{{ row.index }}</div>
         </template>
 
+        <template v-slot:body-cell-photo="{ row }">
+          <div class="row justify-center">
+            <q-avatar size="40px">
+              <ImageDisplay
+                :image-path="row.userImagePath"
+                width="40px"
+                height="40px"
+                border-radius="50%"
+              />
+            </q-avatar>
+          </div>
+        </template>
+
         <template v-slot:body-cell-nationalId="{ row }">
           <div class="text-center">{{ row.nationalId }}</div>
         </template>
@@ -107,6 +120,7 @@ import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
 import AppExamSessionTabs from 'src/components/exam/app-exam-session-time.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
+import ImageDisplay from 'src/components/base/image-display.vue';
 import { useExamRegistrants } from 'src/composables/use-exam-registrants';
 import { useThaiDate } from 'src/composables/useThaiDate';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
@@ -173,6 +187,13 @@ const columns: QTableColumn[] = [
     name: 'index',
     label: t('admin.registrantManagement.table.columns.index'),
     field: 'index',
+    align: 'center',
+    style: 'width: 60px',
+  },
+  {
+    name: 'photo',
+    label: '',
+    field: 'userImagePath',
     align: 'center',
     style: 'width: 60px',
   },

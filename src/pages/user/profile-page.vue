@@ -330,6 +330,7 @@ interface ProfileFormData {
   institution: string;
   address: string;
   phone: string;
+  userImagePath?: string | undefined;
 }
 
 const formData = ref<ProfileFormData>({
@@ -344,6 +345,7 @@ const formData = ref<ProfileFormData>({
   institution: '',
   address: '',
   phone: '',
+  userImagePath: undefined,
 });
 
 const titleOptions: ComputedRef<{ label: string; value: string }[]> = computed<
@@ -452,6 +454,7 @@ const onSave = async (): Promise<void> => {
       userFaculty: formData.value.faculty,
       userInstitution: formData.value.institution,
       userAddress: formData.value.address,
+      userImagePath: formData.value.userImagePath || undefined,
     });
 
     // Refresh user profile in store so header name updates immediately

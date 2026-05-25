@@ -59,6 +59,7 @@ export function useRegisterForm(isEditMode: boolean, onSave: (payload: RegisterF
         address: userData.address,
         province: userData.province,
         zipCode: userData.zipCode ?? '',
+        userImagePath: userData.userImagePath || undefined,
       };
     }
   };
