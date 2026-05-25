@@ -15,6 +15,7 @@
         :label="$t('admin.locationManagement.createLocation')"
         color="primary"
         class="create-location-btn text-weight-bold"
+        @click="$router.push({ name: 'admin-create-location' })"
       />
     </div>
 

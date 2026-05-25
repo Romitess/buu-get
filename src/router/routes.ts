@@ -139,6 +139,22 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'create-location',
+            name: 'admin-create-location',
+            component: () => import('pages/admin/location-create-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageLocations',
+                  icon: 'room',
+                  to: '/admin/location-management',
+                },
+                { label: 'สร้างห้องสอบ', icon: 'add_circle' }, // Using Thai since specific label may not be in i18n
+              ],
+            },
+          },
+          {
             path: 'exam-management',
             name: 'admin-exam-management',
             component: () => import('pages/admin/exam-management-page.vue'),

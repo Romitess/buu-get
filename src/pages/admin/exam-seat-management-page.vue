@@ -94,20 +94,7 @@
             <div class="text-h6 text-weight-bold text-dark">
               {{ $t('admin.seatManagement.seatLayoutTitle') }}
             </div>
-            <div class="row items-center q-gutter-x-lg">
-              <div class="row items-center">
-                <div class="legend-dot available q-mr-sm"></div>
-                <span class="text-body2 text-dark font-weight-medium">{{
-                  $t('admin.seatManagement.availableSeat')
-                }}</span>
-              </div>
-              <div class="row items-center">
-                <div class="legend-dot assigned q-mr-sm"></div>
-                <span class="text-body2 text-dark font-weight-medium">{{
-                  $t('admin.seatManagement.assignedSeat')
-                }}</span>
-              </div>
-            </div>
+            <AppSeatLegend :items="legendItems" />
           </div>
 
           <!-- Seat Grid Container with Overflow handling -->
@@ -179,7 +166,17 @@ import SearchBar from 'src/components/shared/search-bar.vue';
 import AppExamSeatSquare from 'src/components/exam/app-exam-seat-square.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppExamSessionTime from 'src/components/exam/app-exam-session-time.vue';
+import AppSeatLegend from 'src/components/exam/app-seat-legend.vue';
 import { useExamSeatManagement } from 'src/composables/use-exam-seat-management';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
+const legendItems = computed(() => [
+  { label: t('admin.seatManagement.availableSeat'), dotClass: 'available' },
+  { label: t('admin.seatManagement.assignedSeat'), dotClass: 'assigned' },
+]);
 
 const {
   activeSessionId,
@@ -307,21 +304,6 @@ h1 {
     &:hover {
       background: var(--seat-scrollbar-thumb-hover);
     }
-  }
-}
-
-.legend-dot {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-
-  &.available {
-    background-color: var(--surface-card);
-    border: 1px solid var(--seat-grid-border);
-  }
-
-  &.assigned {
-    background-color: var(--primary-light);
   }
 }
 
