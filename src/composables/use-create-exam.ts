@@ -92,6 +92,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const locationOptions = ref<ExamLocationOption[]>([]);
   const fundSourceOptions = ref<{ label: string; value: number }[]>([]);
   const isLoadingData = ref(false);
+  const error = ref<string | null>(null);
 
   // Use external form if provided, otherwise create a new one
   const form =
@@ -130,6 +131,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
   const loadInitialData = async () => {
     isLoadingData.value = true;
+    error.value = null;
     try {
       const [locations, fundSources] = await Promise.all([
         fetchExamLocations(),
@@ -177,11 +179,13 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         // The schedule lock is now handled by the computed property 'isScheduleLocked'
         // based on exam.EXAM_PUBLISHED and session enrollment counts.
       }
-    } catch (error) {
-      console.error('Failed to load initial data:', error);
+    } catch (err) {
+      console.error('Failed to load initial data:', err);
+      const msg = NOTIFY_MSG.LOAD_ERROR;
+      error.value = msg;
       $q.notify({
         type: 'negative',
-        message: NOTIFY_MSG.LOAD_ERROR,
+        message: msg,
         position: 'top',
       });
     } finally {
@@ -354,11 +358,13 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
       void router.push('/admin/exam-management');
       return true;
-    } catch (error) {
-      console.error('Save error:', error);
+    } catch (err) {
+      console.error('Save error:', err);
+      const msg = isEditMode.value ? NOTIFY_MSG.UPDATE_ERROR : NOTIFY_MSG.CREATE_ERROR;
+      error.value = msg;
       $q.notify({
         type: 'negative',
-        message: isEditMode.value ? NOTIFY_MSG.UPDATE_ERROR : NOTIFY_MSG.CREATE_ERROR,
+        message: msg,
         position: 'top',
       });
       return false;
@@ -371,6 +377,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     locationOptions,
     fundSourceOptions,
     isLoadingData,
+    error,
     isEditMode,
     isScheduleLocked,
     isLockedByEnrollment,

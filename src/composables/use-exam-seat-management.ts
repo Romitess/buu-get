@@ -48,6 +48,8 @@ export function useExamSeatManagement() {
   const examId = Number(route.params.examId);
 
   // ── State ────────────────────────────────────────────────
+  const isLoading = ref(false);
+  const error = ref<string | null>(null);
   const activeSessionId = ref<number | null>(null);
   const sessions = ref<BackendSession[]>([]);
   const examData = ref<BackendExam | null>(null);
@@ -176,6 +178,8 @@ export function useExamSeatManagement() {
   // ── Data loading ─────────────────────────────────────────
   const loadExamData = async (): Promise<void> => {
     if (!examId) return;
+    isLoading.value = true;
+    error.value = null;
     try {
       $q.loading.show({ message: t('admin.seatManagement.loadingData') });
       examData.value = await fetchExamById(examId);
@@ -190,11 +194,14 @@ export function useExamSeatManagement() {
 
       // Explicitly trigger the filter to update UI with session details immediately
       filterStudentsBySession();
-    } catch (error) {
-      console.error('Failed to load exam data', error);
-      $q.notify({ type: 'negative', message: t('admin.seatManagement.notifications.loadError') });
+    } catch (err) {
+      console.error('Failed to load exam data', err);
+      const msg = t('admin.seatManagement.notifications.loadError');
+      error.value = msg;
+      $q.notify({ type: 'negative', message: msg });
     } finally {
       $q.loading.hide();
+      isLoading.value = false;
     }
   };
 
@@ -299,6 +306,8 @@ export function useExamSeatManagement() {
 
   const handleSave = async (): Promise<void> => {
     if (!activeSessionId.value) return;
+    isLoading.value = true;
+    error.value = null;
     try {
       $q.loading.show({ message: t('admin.seatManagement.savingData') });
 
@@ -327,19 +336,21 @@ export function useExamSeatManagement() {
         name: 'admin-exam-seat-candidates',
         params: { examId: String(examId) },
       });
-    } catch (error: unknown) {
-      console.error('Failed to save seats', error);
+    } catch (err: unknown) {
+      console.error('Failed to save seats', err);
       let message = t('admin.seatManagement.notifications.saveError');
 
       // Type-safe error handling for Axios/API errors
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response: { data: { message?: string } } };
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response: { data: { message?: string } } };
         message = axiosError.response?.data?.message || message;
       }
 
+      error.value = message;
       $q.notify({ type: 'negative', message });
     } finally {
       $q.loading.hide();
+      isLoading.value = false;
     }
   };
 
@@ -353,6 +364,8 @@ export function useExamSeatManagement() {
 
   return {
     // State
+    isLoading,
+    error,
     activeSessionId,
     sessions,
     searchQuery,

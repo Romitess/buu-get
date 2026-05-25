@@ -653,4 +653,14 @@ export default {
     examAttendance: 'ประวัติการเข้าสอบ',
     checkPayment: 'ตรวจสอบข้อมูลการชำระเงิน',
   },
+  image: {
+    upload: {
+      prompt: 'คลิกเพื่ออัปโหลดหรือลากเพื่อวางรูป',
+      hint: 'PNG, JPG, WebP ขนาดไม่เกิน 5MB',
+      uploading: 'กำลังอัปโหลด...',
+    },
+    display: {
+      placeholder: 'ไม่มีรูปภาพ',
+    },
+  },
 };

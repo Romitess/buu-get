@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { api } from 'boot/axios';
+import { api } from 'src/boot/axios';
 import type { AxiosError } from 'axios';
 
 // ============================================================================

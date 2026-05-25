@@ -31,8 +31,9 @@ const RETRY_DELAY_MS = 1000;
 
 /**
  * Retry helper function - retries a function with exponential backoff
+ * Use only for GET requests (idempotent operations)
  */
-const retryAsync = async <T>(
+export const retryAsync = async <T>(
   fn: () => Promise<T>,
   maxAttempts: number = RETRY_ATTEMPTS,
   delayMs: number = RETRY_DELAY_MS,

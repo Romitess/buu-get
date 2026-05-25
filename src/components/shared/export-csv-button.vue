@@ -2,7 +2,7 @@
   <AppButton :icon="icon" :label="label" v-bind="$attrs" @click="exportTable" />
 </template>
 
-<script setup lang="ts" generic="T extends Record<string, any>">
+<script setup lang="ts" generic="T extends Record<string, unknown>">
 import { exportFile, date, useQuasar } from 'quasar';
 import type { QTableColumn } from 'quasar';
 import AppButton from 'src/components/base/app-button.vue';
