@@ -16,6 +16,7 @@
             <IdentityColumn
               :is-thai="isThailand"
               :is-edit-mode="isEditMode"
+              v-model:profile-image="formData.profileImage"
               v-model:national-id="formData.nationalId"
               v-model:country="formData.country"
               v-model:title-t-h="formData.titleTH"

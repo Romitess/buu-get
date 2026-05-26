@@ -4,9 +4,11 @@
     <div class="row q-col-gutter-sm q-mb-sm">
       <!-- Upload Box -->
       <div class="col-12 col-sm-4">
-        <div class="photo-upload-box bg-grey-3 flex flex-center rounded-borders cursor-pointer">
-          <q-icon name="add_photo_alternate" size="48px" color="grey-8" />
-        </div>
+        <ImageUpload
+          v-model="profileImage"
+          folder="/user_images"
+          :alt="t('profile.photoRequirementsTitle')"
+        />
       </div>
       <!-- Requirements Box -->
       <div class="col-12 col-sm-8">
@@ -102,6 +104,7 @@
 import { useI18n } from 'vue-i18n';
 import { TITLE_TH_OPTIONS } from 'src/utils/form-options';
 import AppFormField from 'src/components/base/app-form-field.vue';
+import ImageUpload from 'src/components/base/image-upload.vue';
 
 const { t } = useI18n();
 
@@ -112,6 +115,7 @@ defineProps<{
 
 const emit = defineEmits(['title-th-change']);
 
+const profileImage = defineModel<string>('profileImage', { required: true });
 const nationalId = defineModel<string>('nationalId', { required: true });
 const country = defineModel<string>('country', { required: true });
 const titleTH = defineModel<string>('titleTH', { required: true });

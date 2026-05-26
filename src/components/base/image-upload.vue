@@ -30,7 +30,7 @@
     </div>
 
     <!-- Upload Zone (เมื่อยังไม่มีรูป) -->
-    <div v-else class="upload-zone">
+    <div v-else class="upload-zone" @click="triggerFileInput">
       <q-file
         ref="fileInputRef"
         v-model="selectedFile"
@@ -105,12 +105,12 @@ const { isUploading, uploadError, handleImageUpload } = useImageUpload({
   },
 });
 
-const { displayUrl } = useImageUrl(props.modelValue);
+const { displayUrl } = useImageUrl(() => props.modelValue);
 
 const uploadingText = computed(() => t('image.upload.uploading') ?? 'Uploading...');
 
 const triggerFileInput = (): void => {
-  fileInputRef.value?.$el.querySelector('input[type="file"]')?.click();
+  fileInputRef.value?.pickFiles();
 };
 
 const handleFileSelected = async (file: File | null): Promise<void> => {

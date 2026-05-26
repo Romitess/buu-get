@@ -19,8 +19,10 @@ export const uploadImage = async (request: ImageUploadRequest): Promise<string> 
   const formData = new FormData();
   formData.append('file', request.file);
 
+  // Backend UploadFileDto ใช้ field 'path' สำหรับกำหนด folder ปลายทาง
+  // ถ้าไม่ระบุ Backend จะ default เป็น '/uploaded_files'
   if (request.folder) {
-    formData.append('folder', request.folder);
+    formData.append('path', request.folder);
   }
 
   try {
@@ -30,11 +32,15 @@ export const uploadImage = async (request: ImageUploadRequest): Promise<string> 
       },
     });
 
-    if (!response.data.path) {
-      throw new Error('No path returned from upload response');
+    console.log('Upload response data:', response.data);
+
+    // Backend/University API ส่ง fileName หรือ path กลับมาใน result, filename หรือ path
+    const fileName = response.data.result || response.data.filename || response.data.path;
+    if (!fileName) {
+      throw new Error('No file path returned from upload response');
     }
 
-    return response.data.path;
+    return fileName;
   } catch (error) {
     console.error('Image upload failed:', error);
     throw new Error('Failed to upload image. Please try again.');
@@ -56,8 +62,18 @@ export const getImageUrl = (imagePath: string | null | undefined): string => {
     return imagePath;
   }
 
-  // สร้าง URL โดยใช้ platform-gateway + path
-  return `${PLATFORM_GATEWAY.BASE_PATH}${imagePath}`;
+  // ใช้ API_BASE_URL จาก environment แทนการ hardcode '/api' เพื่อให้ดึงรูปข้ามเครื่องได้ถูกต้องในระหว่างพัฒนา
+  const baseUrl = process.env.API_BASE_URL || PLATFORM_GATEWAY.BASE_PATH;
+  const sanitizedPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  const cleanBaseUrl = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+
+  // เนื่องจาก PlatformGatewayController ใช้ @Controller('api') ร่วมกับ Global Prefix 'api'
+  // พาร์ทที่เข้าถึงจึงต้องเป็น /api/api/... เสมอ
+  if (baseUrl.includes('http://') || baseUrl.includes('https://')) {
+    return `${cleanBaseUrl}/api${sanitizedPath}`;
+  } else {
+    return `/api/api${sanitizedPath}`;
+  }
 };
 
 /**

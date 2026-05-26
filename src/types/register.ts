@@ -7,6 +7,7 @@ export interface RegisterCredentials {
 
 /** ข้อมูลฟอร์มสมัครสมาชิก / แก้ไขข้อมูลส่วนตัว */
 export interface RegisterFormData {
+  profileImage: string;
   nationalId: string;
   email: string;
   password?: string;

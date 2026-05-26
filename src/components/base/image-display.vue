@@ -47,7 +47,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const { t } = useI18n();
 
-const { displayUrl, isImageAvailable } = useImageUrl(props.imagePath);
+const { displayUrl, isImageAvailable } = useImageUrl(() => props.imagePath);
 
 const placeholderText = computed(() => t('image.display.placeholder') ?? 'No image available');
 

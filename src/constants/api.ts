@@ -11,10 +11,10 @@
 export const PLATFORM_GATEWAY = {
   /** Base path สำหรับ platform gateway */
   BASE_PATH: '/api',
-  /** Endpoint สำหรับ upload รูป */
-  UPLOAD_IMAGE: '/api/images/upload',
-  /** Endpoint สำหรับดาวน์โหลด/display รูป */
-  GET_IMAGE: '/api/images',
+  /** Endpoint สำหรับ upload รูป (ตรงกับ Backend POST /api/uploadFile) */
+  UPLOAD_IMAGE: '/api/uploadFile',
+  /** Endpoint สำหรับดึง public file URL */
+  GET_PUBLIC_FILE: '/api/getPublicFile',
 } as const;
 
 /**

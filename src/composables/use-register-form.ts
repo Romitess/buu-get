@@ -11,6 +11,7 @@ export function useRegisterForm(isEditMode: boolean, onSave: (payload: RegisterF
   const { titleMap } = useCountries();
 
   const defaultData: RegisterFormData = {
+    profileImage: '',
     nationalId: '',
     email: '',
     password: '',

@@ -12,6 +12,8 @@ export interface ImageUploadResponse {
   size: number;
   /** MIME type */
   mimeType: string;
+  /** path ของไฟล์รูปที่ได้จาก minio */
+  result?: string;
 }
 
 export interface ImageUploadRequest {
