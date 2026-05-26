@@ -201,10 +201,13 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
         value: fs.FS_ID,
       }));
-      proctorOptions.value = proctors.map((u) => ({
-        label: u.email || 'ไม่ระบุชื่อ',
-        value: u.email || '',
-      }));
+      proctorOptions.value = proctors.map((u) => {
+        const displayName = u.fullNameTH ? `${u.titleTH || ''} ${u.fullNameTH}`.trim() : u.email;
+        return {
+          label: displayName || 'ไม่ระบุชื่อ',
+          value: u.email || '',
+        };
+      });
 
       // If in edit mode, load the existing exam data into the form
       if (examId) {
