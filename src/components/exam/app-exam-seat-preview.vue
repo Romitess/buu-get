@@ -24,23 +24,36 @@
           class="seat-row"
           :style="{ gap: seatStyle.colGap }"
         >
-          <div v-for="seat in rowSeats" :key="seat.id" class="seat-item">
+          <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
+            <!-- Aisle Gap between left/right halves -->
             <div
-              class="seat-box"
-              :class="{ 'is-broken': brokenSeats.has(seat.id) }"
-              :style="{
-                width: seatStyle.width,
-                height: seatStyle.height,
-                fontSize: seatStyle.fontSize,
-              }"
-              @click="handleSeatClick(seat.id)"
-            >
-              <span v-if="!brokenSeats.has(seat.id)" class="seat-label">{{ seat.id }}</span>
-              <div v-if="brokenSeats.has(seat.id)" class="broken-overlay">
-                <q-icon name="block" class="broken-icon" />
+              v-if="
+                props.splitLeftRight &&
+                colIndex === Math.ceil(rowSeats.length / 2) &&
+                rowSeats.length > 1
+              "
+              class="aisle-gap"
+              :style="{ width: seatStyle.aisleWidth, height: seatStyle.height }"
+            ></div>
+
+            <div class="seat-item">
+              <div
+                class="seat-box"
+                :class="{ 'is-broken': brokenSeats.has(seat.id) }"
+                :style="{
+                  width: seatStyle.width,
+                  height: seatStyle.height,
+                  fontSize: seatStyle.fontSize,
+                }"
+                @click="handleSeatClick(seat.id)"
+              >
+                <span v-if="!brokenSeats.has(seat.id)" class="seat-label">{{ seat.id }}</span>
+                <div v-if="brokenSeats.has(seat.id)" class="broken-overlay">
+                  <q-icon name="block" class="broken-icon" />
+                </div>
               </div>
             </div>
-          </div>
+          </template>
         </div>
       </div>
       <div v-else class="empty-preview"></div>
@@ -64,12 +77,14 @@ interface Props {
   rows?: number | null;
   cols?: number | null;
   placeholderText?: string;
+  splitLeftRight?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   rows: 0,
   cols: 0,
   placeholderText: 'จำนวนที่นั่งทั้งหมด',
+  splitLeftRight: false,
 });
 
 const MAX_SEATS = Infinity;
@@ -128,6 +143,7 @@ const seatStyle = computed(() => {
   const total = rowCount.value * colCount.value;
   const cols = colCount.value || 1;
   const rows = rowCount.value || 1;
+  const aisleWidth = props.splitLeftRight ? 48 : 0;
 
   if (total <= 40) {
     const rGap = rows <= 4 ? 56 : rows <= 6 ? 36 : 24;
@@ -137,11 +153,12 @@ const seatStyle = computed(() => {
       fontSize: '16px',
       rowGap: `${rGap}px`,
       colGap: '24px',
+      aisleWidth: `${aisleWidth}px`,
     };
   }
 
   const containerWidth = 850;
-  const scale = Math.max(32, Math.min(64, containerWidth / cols - 12));
+  const scale = Math.max(32, Math.min(64, (containerWidth - aisleWidth) / cols - 12));
   const colGap = Math.max(8, Math.min(24, scale * 0.3));
   const rowGap = Math.max(8, Math.min(56, (500 - rows * scale) / (rows - 1 || 1)));
 
@@ -151,6 +168,7 @@ const seatStyle = computed(() => {
     fontSize: `${Math.max(12, scale * 0.35)}px`,
     rowGap: `${rowGap}px`,
     colGap: `${colGap}px`,
+    aisleWidth: `${aisleWidth}px`,
   };
 });
 </script>
@@ -206,6 +224,24 @@ const seatStyle = computed(() => {
 
 .seat-item {
   flex-shrink: 0;
+}
+
+.aisle-gap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    width: 2px;
+    border-left: 2px dashed var(--q-primary, #1976d2);
+    opacity: 0.35;
+  }
 }
 
 .seat-box {

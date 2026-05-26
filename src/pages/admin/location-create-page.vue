@@ -116,7 +116,7 @@
       <div class="col-12 col-md-8">
         <div class="buu-premium-card q-pa-md full-height column">
           <!-- Seat Preview Component -->
-          <AppExamSeatPreview :rows="rows" :cols="cols" />
+          <AppExamSeatPreview :rows="rows" :cols="cols" :split-left-right="splitLeftRight" />
         </div>
 
         <!-- Save Button -->
