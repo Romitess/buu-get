@@ -30,7 +30,7 @@ defineEmits<{
   width: 100%;
   aspect-ratio: 1;
   border-radius: 8px; /* Slightly reduced since the square is smaller */
-  border: 1.5px solid var(--primary-light);
+  border: 1px solid var(--secondary, #1e89e5);
   user-select: none;
   font-size: clamp(10px, 1vw, 15px); /* Fluid font size prevents overflow when zoomed in */
   display: flex;
