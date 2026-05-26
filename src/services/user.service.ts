@@ -69,6 +69,12 @@ export interface BackendUserResponse {
   USER_IMAGE: string | null;
   CREATED_AT: string;
   UPDATED_AT: string;
+  PROFILE?: {
+    userTitleTh?: string | null;
+    userFullnameTh?: string | null;
+    userTitleEn?: string | null;
+    userFullnameEn?: string | null;
+  };
 }
 
 /**
@@ -84,12 +90,10 @@ export function mapBackendUserToFrontendUser(backendUser: BackendUserResponse): 
     passportNo: backendUser.USER_PASSPORT_NO || '',
     email: backendUser.USER_EMAIL,
     status: backendUser.USER_STATUS,
-    userImagePath: backendUser.USER_IMAGE || '',
-    // ฟิลด์ Profile จะเป็นค่าว่างไปก่อนเนื่องจาก Backend ยังไม่ได้ Join ข้อมูลมา
-    titleTH: '',
-    fullNameTH: '',
-    titleEN: '',
-    fullNameEN: '',
+    titleTH: backendUser.PROFILE?.userTitleTh || '',
+    fullNameTH: backendUser.PROFILE?.userFullnameTh || '',
+    titleEN: backendUser.PROFILE?.userTitleEn || '',
+    fullNameEN: backendUser.PROFILE?.userFullnameEn || '',
     birthdate: '',
     phone: '',
     educationLevel: '',
@@ -123,12 +127,21 @@ export async function authenticateUser(
 
 export async function getUsersFromApi(role?: string): Promise<User[]> {
   try {
-    // โครงสร้างที่ Backend ส่งมาคือ { value: User[], Count: number }
     const url = role ? `/users?role=${role}` : '/users';
-    const response = await api.get<{ value: BackendUserResponse[]; Count: number }>(url);
-    return response.data.value.map(mapBackendUserToFrontendUser);
-  } catch {
-    console.error('Failed to fetch users from API');
+    const response = await api.get<BackendUserResponse[] | { value: BackendUserResponse[] }>(url);
+
+    let usersData: BackendUserResponse[] = [];
+    if (response && response.data) {
+      if (Array.isArray(response.data)) {
+        usersData = response.data;
+      } else if ('value' in response.data && Array.isArray(response.data.value)) {
+        usersData = response.data.value;
+      }
+    }
+
+    return usersData.map(mapBackendUserToFrontendUser);
+  } catch (err) {
+    console.error('Failed to fetch users from API:', err);
     return []; // Return empty array on failure instead of throwing
   }
 }
