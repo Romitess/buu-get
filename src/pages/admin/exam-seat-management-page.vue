@@ -100,21 +100,51 @@
           <!-- Seat Grid Container with Overflow handling -->
           <div class="seat-grid-scroll-container">
             <div
-              class="seat-grid"
-              :style="{ gridTemplateColumns: `repeat(${gridCols}, minmax(28px, 1fr))` }"
+              v-if="seatsByRow && seatsByRow.length > 0"
+              class="seat-grid-wrapper"
+              :style="{ gap: seatStyle.rowGap }"
             >
-              <AppExamSeatSquare
-                v-for="seat in allSeats"
-                :key="seat.id"
-                :seat-number="seat.label"
-                :status="seat.status"
-                class="seat-item"
-                :class="{ 'drag-over-effect': draggedOverSeatId === seat.id }"
-                @click="handleSeatClick(seat)"
-                @mouseenter="onSeatEnter(seat.id)"
-                @mouseleave="onSeatLeave(seat.id)"
-                @mouseup="onSeatDrop(seat.id)"
-              />
+              <!-- Render each row separately to lock position -->
+              <div
+                v-for="(rowSeats, rowIndex) in seatsByRow"
+                :key="rowIndex"
+                class="seat-row"
+                :style="{ gap: seatStyle.colGap }"
+              >
+                <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
+                  <!-- Aisle Gap between left/right halves -->
+                  <div
+                    v-if="
+                      splitLeftRight &&
+                      colIndex === Math.ceil(rowSeats.length / 2) &&
+                      rowSeats.length > 1
+                    "
+                    class="aisle-gap"
+                    :style="{ width: seatStyle.aisleWidth, height: seatStyle.height }"
+                  ></div>
+
+                  <div
+                    class="seat-item"
+                    :style="{ width: seatStyle.width, height: seatStyle.height }"
+                  >
+                    <AppExamSeatSquare
+                      :seat-number="seat.label"
+                      :status="seat.status"
+                      :style="{ width: '100%', height: '100%' }"
+                      :class="{ 'drag-over-effect': draggedOverSeatId === seat.id }"
+                      @click="handleSeatClick(seat)"
+                      @mouseenter="onSeatEnter(seat.id)"
+                      @mouseleave="onSeatLeave(seat.id)"
+                      @mouseup="onSeatDrop(seat.id)"
+                    />
+                  </div>
+                </template>
+              </div>
+            </div>
+            <!-- Empty State -->
+            <div v-else class="column items-center q-pa-xl text-grey-6">
+              <q-icon name="grid_off" size="48px" />
+              <div class="text-body1 q-mt-sm">ไม่มีข้อมูลผังที่นั่ง</div>
             </div>
           </div>
         </div>
@@ -179,14 +209,16 @@ const { t } = useI18n();
 const legendItems = computed(() => [
   { label: t('admin.seatManagement.availableSeat'), dotClass: 'available' },
   { label: t('admin.seatManagement.assignedSeat'), dotClass: 'assigned' },
+  { label: 'ชำรุด', dotClass: 'broken' },
 ]);
 
 const {
   activeSessionId,
   sessions,
   searchQuery,
-  allSeats,
-  gridCols,
+  splitLeftRight,
+  seatsByRow,
+  seatStyle,
   examTitle,
   examDate,
   sessionTime,
@@ -334,18 +366,41 @@ h1 {
   }
 }
 
-.seat-grid {
-  display: grid;
-  /* grid-template-columns is now dynamic via inline styles */
-  column-gap: clamp(8px, 1vw, 16px); /* A1 and A2 stay close together */
-  row-gap: clamp(16px, 2vw, 28px); /* Vertical distance proportional */
-  min-width: 0;
-  width: 100%; /* Force grid to touch both left and right edges */
+.seat-grid-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.seat-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  width: fit-content;
 }
 
 .seat-item {
-  width: 100%;
-  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+
+.aisle-gap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    width: 2px;
+    border-left: 2px dashed var(--q-primary, #1976d2);
+    opacity: 0.35;
+  }
 }
 
 .drag-over-effect {
