@@ -93,7 +93,7 @@ export function useExamDocuments() {
         examTime: timeRange,
         examType: examObj?.EXAM_TYPE || 'ทั่วไป',
         location: locationText,
-        seatNo: enrollment.ERM_SEAT_NUMBER || 'A1',
+        seatNo: enrollment.LOCATION_SEAT?.LS_SEAT_LABEL || 'A1',
         voucherNo: `ENG2026-${String(enrollment.ERM_ID).padStart(3, '0')}`,
         citizenId: user?.nationalId || '1-1234-12345-12-1',
         testSession: session.SS_NAME || '1/2569',

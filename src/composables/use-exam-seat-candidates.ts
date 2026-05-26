@@ -47,7 +47,7 @@ export function useExamSeatCandidates() {
         e.SESSION_ID === selectedSessionId.value &&
         Number(e.ERM_STATUS) >= STATUS_SEAT_ASSIGNED &&
         Number(e.ERM_STATUS) !== STATUS_CANCELLED &&
-        e.ERM_SEAT_NUMBER,
+        e.LS_ID,
     );
   });
 
@@ -60,7 +60,7 @@ export function useExamSeatCandidates() {
         nationalId: e.USER?.USER_NATIONAL_ID || '-',
         titleTh: e.USER?.PROFILE?.userTitleTh || '-',
         fullnameTh: e.USER?.PROFILE?.userFullnameTh || '-',
-        seatNumber: e.ERM_SEAT_NUMBER || '-',
+        seatNumber: e.LOCATION_SEAT?.LS_SEAT_LABEL || '-',
         sessionId: e.SESSION_ID,
       }),
     );

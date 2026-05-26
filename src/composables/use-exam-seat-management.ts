@@ -24,6 +24,7 @@ export type SeatStatus = 'available' | 'assigned';
 
 export interface SeatCell {
   id: string;
+  label: string;
   status: SeatStatus;
 }
 
@@ -144,14 +145,19 @@ export function useExamSeatManagement() {
     });
   };
 
-  // Mock seat layout (A1-A10, B1-B10, C1-C10, D1-D10) — replace once backend provides layout
+  // Pull seats from backend location
   const initializeSeats = (): void => {
-    const rows = ['A', 'B', 'C', 'D'];
-    for (const row of rows) {
-      for (let i = 1; i <= 10; i++) {
-        allSeats.value.push({ id: `${row}${i}`, status: 'available' });
-      }
-    }
+    allSeats.value = [];
+    if (!activeSession.value?.LOCATION?.SEATS) return;
+
+    const seats = activeSession.value.LOCATION.SEATS;
+    seats.forEach((seat) => {
+      allSeats.value.push({
+        id: String(seat.LS_ID),
+        label: seat.LS_SEAT_LABEL || '',
+        status: 'available',
+      });
+    });
     updateSeatStatuses();
   };
 
@@ -174,7 +180,7 @@ export function useExamSeatManagement() {
       id: e.USER?.USER_NATIONAL_ID || String(e.USER_ID),
       name:
         e.USER?.PROFILE?.userFullnameTh || e.USER?.USER_EMAIL || t('admin.seatManagement.noName'),
-      seat: e.ERM_SEAT_NUMBER,
+      seat: e.LS_ID ? String(e.LS_ID) : null,
       avatar: null,
     }));
 
@@ -212,6 +218,7 @@ export function useExamSeatManagement() {
   };
 
   watch(activeSessionId, () => {
+    initializeSeats();
     filterStudentsBySession();
   });
 
@@ -320,7 +327,7 @@ export function useExamSeatManagement() {
       // Save each student individually (Business Logic check is in the backend Service)
       const promises = students.value.map((student) => {
         return updateEnrollmentStatus(student.ermId, {
-          ERM_SEAT_NUMBER: student.seat,
+          LS_ID: student.seat ? Number(student.seat) : null,
         });
       });
 
@@ -360,8 +367,14 @@ export function useExamSeatManagement() {
     }
   };
 
-  // Build the (mock) grid up front so the layout renders before data arrives
-  initializeSeats();
+  // Build the grid if we already have data
+  if (activeSession.value) {
+    initializeSeats();
+  }
+
+  const gridCols = computed(() => {
+    return activeSession.value?.LOCATION?.LOCATION_TOTAL_COLS || 10;
+  });
 
   onBeforeUnmount(() => {
     window.removeEventListener('mousemove', onMouseMove);
@@ -376,6 +389,7 @@ export function useExamSeatManagement() {
     sessions,
     searchQuery,
     allSeats,
+    gridCols,
     // Exam / session info
     examTitle,
     examDate,

@@ -102,7 +102,7 @@ export function useExamAttendances() {
             nationalId: enrollment.USER?.USER_NATIONAL_ID || '-',
             titleTh: enrollment.USER?.PROFILE?.userTitleTh || '-',
             fullnameTh: enrollment.USER?.PROFILE?.userFullnameTh || '-',
-            seatNumber: enrollment.ERM_SEAT_NUMBER || '-',
+            seatNumber: enrollment.LOCATION_SEAT?.LS_SEAT_LABEL || '-',
             attendanceStatus: status,
             checkInTime: formatCheckInTime(checkInTime),
             sessionId: enrollment.SESSION_ID,

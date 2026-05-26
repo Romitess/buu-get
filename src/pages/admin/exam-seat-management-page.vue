@@ -99,11 +99,14 @@
 
           <!-- Seat Grid Container with Overflow handling -->
           <div class="seat-grid-scroll-container">
-            <div class="seat-grid">
+            <div
+              class="seat-grid"
+              :style="{ gridTemplateColumns: `repeat(${gridCols}, minmax(28px, 1fr))` }"
+            >
               <AppExamSeatSquare
                 v-for="seat in allSeats"
                 :key="seat.id"
-                :seat-number="seat.id"
+                :seat-number="seat.label"
                 :status="seat.status"
                 class="seat-item"
                 :class="{ 'drag-over-effect': draggedOverSeatId === seat.id }"
@@ -183,6 +186,7 @@ const {
   sessions,
   searchQuery,
   allSeats,
+  gridCols,
   examTitle,
   examDate,
   sessionTime,
@@ -332,10 +336,7 @@ h1 {
 
 .seat-grid {
   display: grid;
-  grid-template-columns: repeat(
-    10,
-    minmax(28px, 1fr)
-  ); /* Boxes grow to fill space, allowing the grid to touch both edges */
+  /* grid-template-columns is now dynamic via inline styles */
   column-gap: clamp(8px, 1vw, 16px); /* A1 and A2 stay close together */
   row-gap: clamp(16px, 2vw, 28px); /* Vertical distance proportional */
   min-width: 0;

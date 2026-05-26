@@ -38,6 +38,16 @@ export interface BackendSessionDetail {
     LOCATION_ID: number;
     LOCATION_NAME: string;
     LOCATION_ROOM_NO: string;
+    LOCATION_TOTAL_ROWS?: number;
+    LOCATION_TOTAL_COLS?: number;
+    LOCATION_IS_SPLIT?: number;
+    SEATS?: {
+      LS_ID: number;
+      LS_ROW_NO: number;
+      LS_COL_NO: number;
+      LS_SEAT_LABEL: string | null;
+      LS_SEAT_STATUS: number;
+    }[];
   };
 }
 
@@ -58,7 +68,7 @@ export interface BackendEnrollmentDetail {
   ERM_ID: number;
   USER_ID: number;
   SESSION_ID: number;
-  ERM_SEAT_NUMBER: string | null;
+  LS_ID: number | null;
   ERM_STATUS: number;
   ERM_VERIFY_STATUS: number;
   ERM_AT: string | null;
@@ -68,6 +78,12 @@ export interface BackendEnrollmentDetail {
   USER: BackendUser;
   SESSION: BackendSessionDetail;
   ATTENDANCES?: BackendAttendance[];
+  LOCATION_SEAT?: {
+    LS_ID: number;
+    LS_SEAT_LABEL: string | null;
+    LS_ROW_NO?: number;
+    LS_COL_NO?: number;
+  } | null;
 }
 
 export interface EnrollmentTableRow {
