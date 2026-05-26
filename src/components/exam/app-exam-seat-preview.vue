@@ -36,22 +36,19 @@
               :style="{ width: seatStyle.aisleWidth, height: seatStyle.height }"
             ></div>
 
-            <div class="seat-item">
-              <div
-                class="seat-box"
-                :class="{ 'is-broken': brokenSeats.has(seat.id) }"
-                :style="{
-                  width: seatStyle.width,
-                  height: seatStyle.height,
-                  fontSize: seatStyle.fontSize,
-                }"
-                @click="handleSeatClick(seat.id)"
-              >
-                <span v-if="!brokenSeats.has(seat.id)" class="seat-label">{{ seat.id }}</span>
-                <div v-if="brokenSeats.has(seat.id)" class="broken-overlay">
-                  <q-icon name="block" class="broken-icon" />
-                </div>
-              </div>
+            <div
+              class="seat-item"
+              :style="{
+                width: seatStyle.width,
+                height: seatStyle.height,
+                fontSize: seatStyle.fontSize,
+              }"
+            >
+              <AppExamSeatSquare
+                :seat-number="seat.id"
+                :status="brokenSeats.has(seat.id) ? 'broken' : 'available'"
+                @click="handleSeatClick"
+              />
             </div>
           </template>
         </div>
@@ -72,6 +69,7 @@
 import { ref, computed } from 'vue';
 import AppSeatLegend from './app-seat-legend.vue';
 import AppSeatBrokenDialog from './app-seat-broken-dialog.vue';
+import AppExamSeatSquare from './app-exam-seat-square.vue';
 
 interface Props {
   rows?: number | null;
@@ -224,6 +222,7 @@ const seatStyle = computed(() => {
 
 .seat-item {
   flex-shrink: 0;
+  font-weight: var(--font-weight-semibold);
 }
 
 .aisle-gap {
@@ -242,54 +241,6 @@ const seatStyle = computed(() => {
     border-left: 2px dashed var(--q-primary, #1976d2);
     opacity: 0.35;
   }
-}
-
-.seat-box {
-  background-color: var(--surface-card);
-  border: 1px solid var(--secondary);
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  flex-shrink: 0;
-  position: relative;
-  overflow: hidden;
-
-  &:hover {
-    background-color: var(--surface-page);
-  }
-
-  &.is-broken {
-    background-color: var(--seat-broken-bg);
-    border-color: var(--seat-broken-bg);
-    cursor: pointer;
-  }
-}
-
-.seat-label {
-  position: relative;
-  z-index: 1;
-}
-
-.broken-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-}
-
-.broken-icon {
-  font-size: 28px;
-  color: var(--text-on-primary);
 }
 
 .empty-preview {

@@ -2,9 +2,9 @@
   <div
     class="seat-square cursor-pointer flex items-center justify-center text-subtitle2 text-weight-bold transition-fast"
     :class="[
-      status === 'assigned' ? 'text-white assigned-bg border-assigned' : '',
-      status === 'broken' ? 'text-white broken-bg border-broken' : '',
-      status === 'blocked' ? 'text-white blocked-bg border-blocked' : '',
+      status === 'assigned' ? 'assigned-bg border-assigned' : '',
+      status === 'broken' ? 'broken-bg border-broken' : '',
+      status === 'blocked' ? 'blocked-bg border-blocked' : '',
       status === 'available' ? 'available-bg text-dark' : '',
     ]"
     @click="$emit('click', seatNumber)"
@@ -32,11 +32,12 @@ defineEmits<{
 <style scoped lang="scss">
 .seat-square {
   width: 100%;
+  height: 100%;
   aspect-ratio: 1;
-  border-radius: 8px;
-  border: 1px solid var(--secondary, #1e89e5);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--secondary);
   user-select: none;
-  font-size: clamp(10px, 1vw, 15px);
+  font-size: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,33 +61,41 @@ defineEmits<{
 
 .available-bg {
   background-color: var(--surface-card);
-  border-color: var(--seat-available-border);
+  border-color: var(--secondary);
 }
 
 .border-assigned {
   border-color: var(--primary-light);
 }
 
+.broken-bg,
+.blocked-bg {
+  &:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
 .broken-bg {
-  background-color: var(--seat-broken-bg, #ef9a9a) !important;
-  cursor: not-allowed !important;
+  background-color: var(--seat-broken-bg);
+  cursor: not-allowed;
 }
 
 .border-broken {
-  border-color: var(--seat-broken-bg, #ef9a9a) !important;
+  border-color: var(--seat-broken-bg);
 }
 
 .blocked-bg {
-  background-color: #e0e0e0 !important;
-  cursor: not-allowed !important;
+  background-color: var(--neutral-gray-light);
+  cursor: not-allowed;
 }
 
 .border-blocked {
-  border-color: #bdbdbd !important;
+  border-color: var(--text-muted);
 }
 
 .broken-icon {
-  font-size: 18px;
-  color: #757575;
+  font-size: clamp(16px, 2vw, 28px);
+  color: var(--text-on-primary);
 }
 </style>
