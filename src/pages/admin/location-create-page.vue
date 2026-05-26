@@ -126,6 +126,8 @@
             color="primary"
             class="text-weight-bold q-px-xl"
             style="border-radius: 8px; min-width: 140px"
+            :loading="isSaving"
+            :disable="isSaving"
             @click="handleSave"
           />
         </div>
@@ -142,6 +144,7 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import AppExamSeatPreview from 'src/components/exam/app-exam-seat-preview.vue';
+import { createLocationWithSeats } from 'src/services/location.service';
 
 const router = useRouter();
 const $q = useQuasar();
@@ -152,18 +155,62 @@ const building = ref('');
 const rows = ref<number | null>(null);
 const cols = ref<number | null>(null);
 const splitLeftRight = ref(false);
+const isSaving = ref(false);
 
 const totalSeats = computed(() => {
   return (rows.value || 0) * (cols.value || 0);
 });
 
-const handleSave = () => {
-  $q.notify({
-    type: 'positive',
-    message: 'บันทึกข้อมูลห้องสอบเรียบร้อยแล้ว',
-    position: 'top',
-  });
-  void router.push({ name: 'admin-location-management' });
+const handleSave = async (): Promise<void> => {
+  // Validation
+  if (!roomName.value.trim()) {
+    $q.notify({
+      type: 'warning',
+      message: 'กรุณากรอกชื่อห้องสอบ',
+      position: 'top',
+    });
+    return;
+  }
+
+  if (!rows.value || rows.value < 1 || !cols.value || cols.value < 1) {
+    $q.notify({
+      type: 'warning',
+      message: 'กรุณากรอกจำนวนแถวและคอลัมน์',
+      position: 'top',
+    });
+    return;
+  }
+
+  isSaving.value = true;
+
+  try {
+    await createLocationWithSeats({
+      LOCATION_NAME: roomName.value.trim(),
+      LOCATION_ROOM_NO: building.value.trim() || undefined,
+      LOCATION_FLOOR_NO: floor.value ? Number(floor.value) : undefined,
+      LOCATION_TOTAL_ROWS: Number(rows.value),
+      LOCATION_TOTAL_COLS: Number(cols.value),
+      LOCATION_SEAT_CAPACITY: Number(totalSeats.value),
+      SEAT_LABEL_FORMAT: 'ROW_COL',
+      LOCATION_IS_SPLIT: splitLeftRight.value ? 1 : 0,
+    });
+
+    $q.notify({
+      type: 'positive',
+      message: 'บันทึกข้อมูลห้องสอบเรียบร้อยแล้ว',
+      position: 'top',
+    });
+    void router.push({ name: 'admin-location-management' });
+  } catch (error) {
+    console.error('Error creating location:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง',
+      position: 'top',
+    });
+  } finally {
+    isSaving.value = false;
+  }
 };
 </script>
 
