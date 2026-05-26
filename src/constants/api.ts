@@ -14,7 +14,7 @@ export const PLATFORM_GATEWAY = {
   /** Endpoint สำหรับ upload รูป (ตรงกับ Backend POST /api/uploadFile) */
   UPLOAD_IMAGE: '/api/uploadFile',
   /** Endpoint สำหรับดึง public file URL */
-  GET_PUBLIC_FILE: '/api/getPublicFile',
+  GET_PUBLIC_FILE: '/api/uploadFile',
 } as const;
 
 /**
@@ -36,7 +36,7 @@ export const IMAGE_CONFIG = {
   /** Maximum file size (bytes) - 5MB */
   MAX_FILE_SIZE: 5 * 1024 * 1024,
   /** Allowed MIME types */
-  ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/webp'] as const,
+  ALLOWED_TYPES: ['image/jpeg', 'image/png'] as const,
   /** Allowed file extensions */
-  ALLOWED_EXTENSIONS: ['.jpg', '.jpeg', '.png', '.webp'] as const,
+  ALLOWED_EXTENSIONS: ['.jpg', '.jpeg'] as const,
 } as const;
