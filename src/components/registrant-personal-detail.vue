@@ -16,7 +16,7 @@
             <ImageDisplay
               :image-path="displayData.profileImagePath"
               class="profile-img"
-              object-fit="contain"
+              object-fit="cover"
               height="100%"
               :alt="$t('admin.registrantManagement.detail.photoAlt')"
             />
