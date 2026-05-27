@@ -288,8 +288,8 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
-  async function addExamRound(payload: CreateExamPayload): Promise<void> {
-    await createExamRound(payload);
+  async function addExamRound(payload: CreateExamPayload): Promise<number> {
+    const examId = await createExamRound(payload);
 
     await initSchedule();
 
@@ -298,6 +298,8 @@ export const useExamStore = defineStore('exam', () => {
       const gregorianYear = parseInt(yyyy) - BUDDHIST_YEAR_OFFSET;
       selectedDate.value = `${gregorianYear}-${mm}-${dd}`;
     }
+
+    return examId;
   }
 
   async function deleteExamRound(id: number | string): Promise<void> {

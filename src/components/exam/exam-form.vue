@@ -40,8 +40,10 @@
       v-if="isSpecialRound"
       v-model:search-query="candidateSearch"
       :filtered-candidates="filteredCandidates"
+      :locked="isScheduleLocked"
       @import-candidates="importCandidates"
-      @generate-passcodes="generatePasscodes"
+      @passcode-type-selected="generatePasscodes"
+      @export-candidates="exportCandidates"
     />
 
     <!-- Schedule Lock Notice -->
@@ -134,6 +136,7 @@ const {
   removeRoom,
   importCandidates,
   generatePasscodes,
+  exportCandidates,
   handleCancel,
   handleSave,
   sortTimeSlots,

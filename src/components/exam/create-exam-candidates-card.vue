@@ -27,31 +27,35 @@
         <q-space />
         <div class="col-auto">
           <q-btn
+            v-if="!locked"
             label="สร้าง Passcode"
             unelevated
             dense
             icon="vpn_key"
             class="q-px-md action-btn passcode-btn"
-            @click="$emit('generate-passcodes')"
+            @click="showPasscodeTypeDialog = true"
+          />
+          <q-btn
+            v-if="locked"
+            label="ส่งออก (Export)"
+            color="secondary"
+            unelevated
+            dense
+            icon="download"
+            class="q-px-md action-btn"
+            @click="$emit('export-candidates')"
           />
         </div>
         <div class="col-12 col-md-auto row q-gutter-sm justify-end">
-          <input
-            type="file"
-            ref="fileInput"
-            class="hidden"
-            accept=".csv"
-            style="display: none"
-            @change="onFileSelected"
-          />
           <q-btn
+            v-if="!locked"
             label="นำเข้าไฟล์รายชื่อ"
             color="primary"
             unelevated
             dense
             icon="upload"
             class="q-px-md action-btn"
-            @click="triggerFileInput"
+            @click="showCsvImportDialog = true"
           />
         </div>
       </div>
@@ -83,41 +87,83 @@
         </template>
       </q-table>
     </q-card-section>
+
+    <!-- CSV Import Dialog -->
+    <DialogCsvImport
+      v-model="showCsvImportDialog"
+      @file-selected="onCsvFileSelected"
+      @url-submitted="onUrlSubmitted"
+      @download-sample="onDownloadSample"
+    />
+
+    <!-- Passcode Type Selection Dialog -->
+    <DialogPasscodeType v-model="showPasscodeTypeDialog" @select="onPasscodeTypeSelected" />
   </q-card>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { exportFile } from 'quasar';
 import type { EligibleCandidate } from 'src/composables/use-create-exam';
 import type { QTableColumn } from 'quasar';
+import type { PasscodeType } from 'src/types/exam';
+import DialogCsvImport from 'src/components/exam/dialog-csv-import.vue';
+import DialogPasscodeType from 'src/components/exam/dialog-passcode-type.vue';
 
 defineProps<{
   /** Filtered candidates to display */
   filteredCandidates: EligibleCandidate[];
+  locked?: boolean;
 }>();
 
 const searchQuery = defineModel<string>('searchQuery', { required: true });
 
 const emit = defineEmits<{
   (e: 'import-candidates', file: File): void;
-  (e: 'generate-passcodes'): void;
+  (e: 'passcode-type-selected', type: PasscodeType): void;
+  (e: 'url-submitted', url: string): void;
+  (e: 'export-candidates'): void;
 }>();
 
-const fileInput = ref<HTMLInputElement | null>(null);
+/** Dialog visibility state */
+const showCsvImportDialog = ref(false);
+const showPasscodeTypeDialog = ref(false);
 
-const triggerFileInput = () => {
-  fileInput.value?.click();
+/** CSV dialog: file selected */
+const onCsvFileSelected = (file: File): void => {
+  emit('import-candidates', file);
 };
 
-const onFileSelected = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  if (target.files && target.files.length > 0) {
-    const file = target.files[0];
-    if (file) {
-      emit('import-candidates', file);
-    }
-    target.value = ''; // Reset for consecutive uploads
+/** CSV dialog: URL submitted */
+const onUrlSubmitted = (url: string): void => {
+  emit('url-submitted', url);
+};
+
+/**
+ * Download a sample CSV file with UTF-8 BOM encoding.
+ * The file contains exactly 2 columns: รหัสประจำตัว, ชื่อ-นามสกุล
+ * This ensures the imported file will be parsed correctly by the system.
+ */
+const onDownloadSample = (): void => {
+  const BOM = '\ufeff';
+  const header = '"รหัสประชาชน","ชื่อ-นามสกุล"';
+  const sampleRows = [
+    '"1100000000000","สมชาย ใจดี"',
+    '"1100000000001","สมหญิง ใจงาม"',
+    '"1100000000002","สมศักดิ์ ใจเย็น"',
+  ];
+  const content = BOM + [header, ...sampleRows].join('\r\n');
+
+  const status = exportFile('ตัวอย่างไฟล์รายชื่อ.csv', content, 'text/csv;charset=utf-8');
+
+  if (status !== true) {
+    console.error('Browser blocked the file download');
   }
+};
+
+/** Passcode type dialog: type selected */
+const onPasscodeTypeSelected = (type: PasscodeType): void => {
+  emit('passcode-type-selected', type);
 };
 
 const columns: QTableColumn[] = [
@@ -130,7 +176,7 @@ const columns: QTableColumn[] = [
   },
   {
     name: 'nationalId',
-    label: 'รหัสประจำตัว',
+    label: 'รหัสประชาชน',
     field: 'nationalId',
     align: 'center',
   },
@@ -160,7 +206,7 @@ const columns: QTableColumn[] = [
   min-height: 36px;
 }
 .passcode-btn {
-  background-color: #bdbdbd !important;
+  background-color: var(--primary) !important;
   color: white !important;
 }
 

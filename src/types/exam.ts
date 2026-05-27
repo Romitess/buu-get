@@ -251,6 +251,15 @@ export interface BackendExam {
     FS_ACCOUNT_CODE: string;
   };
   SESSIONS: BackendSession[];
+  PASSCODES?: BackendPasscode[];
+}
+
+export interface BackendPasscode {
+  PASSCODE_ID: number;
+  EXAM_ID: number;
+  NATIONAL_ID: string;
+  FULL_NAME: string;
+  PASSCODE: string;
 }
 
 export interface ExamManagementItem {
@@ -275,3 +284,6 @@ export interface AdmissionVoucherData {
   seatNumber: string;
   barcodeValue: string;
 }
+
+/** Passcode generation mode: single shared or individual per candidate */
+export type PasscodeType = 'single' | 'individual';

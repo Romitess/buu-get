@@ -13,6 +13,7 @@ import {
   NOTIFY_MSG,
 } from 'src/constants/exam';
 import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
+import type { PasscodeType } from 'src/types/exam';
 import {
   fetchExamLocations,
   fetchFundSources,
@@ -20,6 +21,7 @@ import {
   updateExamRound,
   formatTime,
   buddhistToGregorian,
+  createExamPasscodes,
 } from 'src/services/exam.service';
 import { getUsersFromApi } from 'src/services/user.service';
 import { ROLES } from 'src/constants/roles';
@@ -322,6 +324,16 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           sortTimeSlots();
         }
 
+        // Load passcodes into eligibleCandidates for special rounds
+        if (exam.PASSCODES && exam.PASSCODES.length > 0) {
+          form.value.eligibleCandidates = exam.PASSCODES.map((p, idx) => ({
+            index: idx + 1,
+            nationalId: p.NATIONAL_ID,
+            fullName: p.FULL_NAME,
+            passcode: p.PASSCODE,
+          }));
+        }
+
         // The schedule lock is now handled by the computed property 'isScheduleLocked'
         // based on exam.EXAM_PUBLISHED and session enrollment counts.
       }
@@ -438,7 +450,54 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     }
   };
 
-  /** Import mock candidates for special rounds */
+  /**
+   * Strip UTF-8 BOM (byte order mark) from the start of text.
+   * BOM character is \uFEFF and appears when files are saved as "UTF-8 with BOM".
+   */
+  const stripBom = (text: string): string => {
+    return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+  };
+
+  /**
+   * Parse a single CSV line, handling quoted values that may contain commas.
+   */
+  const parseCsvLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i++; // skip escaped quote
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  /**
+   * Find column index by matching header text against known keywords.
+   * Returns -1 if no match is found.
+   */
+  const findColumnIndex = (headers: string[], keywords: string[]): number => {
+    return headers.findIndex((h) => {
+      const normalized = h.replace(/["\s]/g, '').toLowerCase();
+      return keywords.some((kw) => normalized.includes(kw));
+    });
+  };
+
+  /** Import candidates from CSV file for special rounds */
   const importCandidates = (file?: File): void => {
     try {
       if (!file) return;
@@ -447,27 +506,80 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
-          const text = e.target?.result as string;
-          const lines = text.split('\n').filter((l) => l.trim().length > 0);
+          const rawText = e.target?.result as string;
+          const text = stripBom(rawText);
+          const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+
+          if (lines.length < 2) {
+            $q.notify({
+              type: 'warning',
+              message: 'ไฟล์ไม่มีข้อมูล (ต้องมีอย่างน้อย header + 1 แถว)',
+            });
+            $q.loading.hide();
+            return;
+          }
+
+          // ── Header detection ──
+          const headerCols = parseCsvLine(lines[0] ?? '');
+
+          // Keywords for matching columns
+          const idKeywords = [
+            'รหัสประชาชน',
+            'รหัสประจำตัว',
+            'รหัส',
+            'nationalid',
+            'studentid',
+            'id',
+          ];
+          const nameKeywords = ['ชื่อ-นามสกุล', 'ชื่อนามสกุล', 'ชื่อ', 'fullname', 'name'];
+
+          let idColIndex = findColumnIndex(headerCols, idKeywords);
+          let nameColIndex = findColumnIndex(headerCols, nameKeywords);
+
+          // Fallback: if header detection fails, assume positional mapping
+          if (idColIndex === -1 || nameColIndex === -1) {
+            if (headerCols.length === 2) {
+              // 2 columns → [รหัสประจำตัว, ชื่อ-นามสกุล]
+              idColIndex = 0;
+              nameColIndex = 1;
+            } else if (headerCols.length >= 3) {
+              // 3+ columns → assume [ลำดับ, รหัสประจำตัว, ชื่อ-นามสกุล, ...]
+              idColIndex = 1;
+              nameColIndex = 2;
+            } else {
+              $q.notify({
+                type: 'negative',
+                message: 'ไฟล์ต้องมีอย่างน้อย 2 คอลัมน์ (รหัสประจำตัว, ชื่อ-นามสกุล)',
+              });
+              $q.loading.hide();
+              return;
+            }
+          }
+
+          // ── Parse data rows ──
           const candidates: EligibleCandidate[] = [];
 
-          // Assume format: nationalId,fullName
-          // Skip header
           for (let i = 1; i < lines.length; i++) {
             const line = lines[i];
             if (!line) continue;
-            const cols = line.split(',');
-            if (cols.length >= 2) {
-              const nationalId = cols[0];
-              const fullName = cols[1];
-              if (nationalId !== undefined && fullName !== undefined) {
-                candidates.push({
-                  nationalId: nationalId.trim(),
-                  fullName: fullName.trim(),
-                  passcode: '',
-                });
-              }
+            const cols = parseCsvLine(line);
+
+            const nationalId = cols[idColIndex];
+            const fullName = cols[nameColIndex];
+
+            if (nationalId && fullName && nationalId.trim().length > 0) {
+              candidates.push({
+                nationalId: nationalId.trim(),
+                fullName: fullName.trim(),
+                passcode: '',
+              });
             }
+          }
+
+          if (candidates.length === 0) {
+            $q.notify({ type: 'warning', message: 'ไม่พบข้อมูลรายชื่อในไฟล์' });
+            $q.loading.hide();
+            return;
           }
 
           form.value.eligibleCandidates = candidates;
@@ -481,15 +593,49 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           $q.loading.hide();
         }
       };
-      reader.readAsText(file);
+      reader.readAsText(file, 'UTF-8');
     } catch {
       $q.loading.hide();
       $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล' });
     }
   };
 
+  /** Export candidates to CSV */
+  const exportCandidates = (): void => {
+    if (form.value.eligibleCandidates.length === 0) {
+      $q.notify({
+        type: 'warning',
+        message: 'ไม่มีข้อมูลให้ส่งออก',
+        position: 'top',
+      });
+      return;
+    }
+
+    const BOM = '\ufeff';
+    const header = '"ลำดับ","รหัสประชาชน","ชื่อ-นามสกุล","Passcode"';
+    const rows = form.value.eligibleCandidates.map((c, idx) => {
+      const index = idx + 1;
+      const id = `"${c.nationalId || ''}"`;
+      const name = `"${c.fullName || ''}"`;
+      const code = `"${c.passcode || ''}"`;
+      return `${index},${id},${name},${code}`;
+    });
+
+    const content = BOM + [header, ...rows].join('\r\n');
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', `passcodes_${examId || 'new'}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   /** Generate random 6-digit passcodes for all eligible candidates */
-  const generatePasscodes = (): void => {
+  const generatePasscodes = (type: PasscodeType = 'individual'): void => {
     if (form.value.eligibleCandidates.length === 0) {
       $q.notify({
         type: 'warning',
@@ -498,10 +644,20 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       });
       return;
     }
-    form.value.eligibleCandidates = form.value.eligibleCandidates.map((c) => ({
-      ...c,
-      passcode: String(Math.floor(100000 + Math.random() * 900000)),
-    }));
+
+    if (type === 'single') {
+      const singlePasscode = String(Math.floor(100000 + Math.random() * 900000));
+      form.value.eligibleCandidates = form.value.eligibleCandidates.map((c) => ({
+        ...c,
+        passcode: singlePasscode,
+      }));
+    } else {
+      form.value.eligibleCandidates = form.value.eligibleCandidates.map((c) => ({
+        ...c,
+        passcode: String(Math.floor(100000 + Math.random() * 900000)),
+      }));
+    }
+
     $q.notify({
       type: 'positive',
       message: `สร้าง Passcode สำเร็จ ${form.value.eligibleCandidates.length} รายการ`,
@@ -703,6 +859,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     }));
 
     try {
+      let targetExamId = isEditMode.value ? examId : null;
+
       if (isEditMode.value && examId) {
         // === EDIT MODE ===
         const existingSessionIds = flatRooms
@@ -756,7 +914,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           fundSourceId: form.value.fundSourceId,
         };
 
-        await examStore.addExamRound(payload);
+        targetExamId = await examStore.addExamRound(payload);
         // Refresh the management schedules in the store after successful creation
         await examStore.loadManagementSchedules();
 
@@ -766,6 +924,19 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           position: 'top',
           timeout: 2000,
         });
+      }
+
+      if (
+        targetExamId &&
+        form.value.examType === EXAM_TYPE_SPECIAL &&
+        form.value.eligibleCandidates.length > 0
+      ) {
+        const passcodesPayload = form.value.eligibleCandidates.map((c) => ({
+          nationalId: c.nationalId,
+          fullName: c.fullName,
+          passcode: c.passcode,
+        }));
+        await createExamPasscodes(targetExamId, passcodesPayload);
       }
 
       void router.push('/admin/exam-management');
@@ -823,6 +994,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     removeRoom,
     importCandidates,
     generatePasscodes,
+    exportCandidates,
     handleCancel,
     handleSave,
     autoFormatTime,

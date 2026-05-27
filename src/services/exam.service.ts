@@ -237,7 +237,7 @@ export const buddhistToGregorian = (dateStr: string): string => {
   return `${gregorianYear}-${m}-${day}`;
 };
 
-export const createExamRound = async (payload: CreateExamPayload): Promise<void> => {
+export const createExamRound = async (payload: CreateExamPayload): Promise<number> => {
   try {
     // 1. Create the Exam
     const examResponse = await api.post<BackendExam>('/exam', {
@@ -251,7 +251,7 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<void>
       EXAM_PAY_START_DATE: buddhistToGregorian(payload.payStartDate),
       EXAM_PAY_END_DATE: buddhistToGregorian(payload.payEndDate),
       EXAM_PUBLISHED: payload.isPublished,
-      FUND_SOURCE_ID: Number(payload.fundSourceId),
+      FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
     });
 
     const examId = examResponse.data.EXAM_ID;
@@ -270,6 +270,7 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<void>
     });
 
     await Promise.all(sessionPromises);
+    return examId;
   } catch (error) {
     console.error('Error creating exam round:', error);
     throw error;
@@ -320,7 +321,7 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
       EXAM_PAY_START_DATE: buddhistToGregorian(payload.payStartDate),
       EXAM_PAY_END_DATE: buddhistToGregorian(payload.payEndDate),
       EXAM_PUBLISHED: payload.isPublished,
-      FUND_SOURCE_ID: Number(payload.fundSourceId),
+      FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
     });
 
     // 2. Synchronize sessions ONLY if timeRanges are provided (not locked)
@@ -427,6 +428,26 @@ export const updateEnrollmentStatus = async (
     return response.data;
   } catch (error) {
     console.error(`Error updating enrollment ${enrollmentId}:`, error);
+    throw error;
+  }
+};
+
+export interface CreatePasscodeItemDto {
+  nationalId: string;
+  fullName: string;
+  passcode: string;
+}
+
+export const createExamPasscodes = async (
+  examId: number,
+  passcodes: CreatePasscodeItemDto[],
+): Promise<void> => {
+  try {
+    await api.post(`/exam/${examId}/passcodes`, {
+      passcodes,
+    });
+  } catch (error) {
+    console.error(`Error creating passcodes for exam ${examId}:`, error);
     throw error;
   }
 };
