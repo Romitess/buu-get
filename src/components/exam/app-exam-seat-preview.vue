@@ -173,7 +173,8 @@ const seatStyle = computed(() => {
 
 <style scoped lang="scss">
 .exam-seat-preview {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
 }
 
 .teacher-desk-divider {
@@ -199,17 +200,17 @@ const seatStyle = computed(() => {
   width: 100%;
   display: flex;
   align-items: flex-start;
-  justify-content: center;
-  overflow: visible;
-  padding-top: 16px;
-  padding-bottom: 32px;
+  justify-content: flex-start;
+  padding-top: var(--space-md);
+  padding-bottom: var(--space-md);
 }
 
 .seat-grid-wrapper {
   display: flex;
   flex-direction: column;
   width: fit-content;
-  align-items: center;
+  margin-inline: auto;
+  align-items: flex-start;
 }
 
 .seat-row {

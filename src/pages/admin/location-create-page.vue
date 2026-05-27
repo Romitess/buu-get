@@ -7,7 +7,7 @@
       subtitle="จัดการข้อมูลห้องสอบ เพื่อรองรับการจัดสอบได้อย่างเป็นระบบและมีประสิทธิภาพ"
     />
 
-    <div class="row q-col-gutter-md" style="margin-top: -12px">
+    <div class="row q-col-gutter-md location-create-layout items-stretch">
       <!-- Left Panel: Form Settings -->
       <div class="col-12 col-md-4">
         <div class="form-card">
@@ -113,14 +113,15 @@
       </div>
 
       <!-- Right Panel: Preview & Save -->
-      <div class="col-12 col-md-8">
-        <div class="buu-premium-card q-pa-md full-height column">
-          <!-- Seat Preview Component -->
-          <AppExamSeatPreview :rows="rows" :cols="cols" :split-left-right="splitLeftRight" />
+      <div class="col-12 col-md-8 preview-panel">
+        <div class="buu-premium-card preview-card q-pa-md">
+          <div class="preview-scroll">
+            <AppExamSeatPreview :rows="rows" :cols="cols" :split-left-right="splitLeftRight" />
+          </div>
         </div>
 
         <!-- Save Button -->
-        <div class="row justify-end q-mt-md">
+        <div class="row justify-end preview-actions">
           <AppButton
             label="บันทึก"
             color="primary"
@@ -218,21 +219,80 @@ const handleSave = async (): Promise<void> => {
 .surface-page-bg {
   background-color: var(--surface-page);
 }
+
+.location-create-layout {
+  margin-top: calc(var(--space-sm) * -1);
+}
+
 .total-seats-box {
   background-color: var(--location-total-seats-bg);
 }
-.form-card {
+
+.form-card,
+.preview-card {
   width: 100%;
-  max-width: 400px;
   height: 669px;
-  border-radius: 8px;
-  padding: 24px;
+  max-height: 669px;
+  border-radius: var(--radius-sm);
   background: var(--surface-card);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-card);
+}
+
+.form-card {
+  max-width: 400px;
+  padding: var(--space-lg);
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-lg);
   justify-content: flex-start;
+}
+
+.preview-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.preview-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.preview-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-xs);
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--seat-scrollbar-thumb);
+    border-radius: var(--radius-pill);
+
+    &:hover {
+      background: var(--seat-scrollbar-thumb-hover);
+    }
+  }
+
+  :deep(.seat-preview-content) {
+    padding-bottom: var(--space-md);
+  }
+
+  :deep(.empty-preview) {
+    min-height: 240px;
+  }
+}
+
+.preview-actions {
+  flex-shrink: 0;
+  margin-top: var(--space-md);
+  padding-bottom: var(--space-xs);
 }
 </style>

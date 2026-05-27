@@ -9,7 +9,13 @@
     ]"
     @click="$emit('click', seatNumber)"
   >
-    <q-icon v-if="status === 'broken' || status === 'blocked'" name="block" class="broken-icon" />
+    <img
+      v-if="status === 'broken' || status === 'blocked'"
+      src="/icons/seat-broken.svg"
+      class="broken-icon"
+      alt=""
+      aria-hidden="true"
+    />
     <span v-else>{{ seatNumber }}</span>
   </div>
 </template>
@@ -95,7 +101,8 @@ defineEmits<{
 }
 
 .broken-icon {
-  font-size: clamp(16px, 2vw, 28px);
+  width: clamp(17px, 52%, 24px);
+  height: clamp(17px, 52%, 24px);
   color: var(--text-on-primary);
 }
 </style>
