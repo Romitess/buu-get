@@ -74,6 +74,14 @@ export interface BackendUserResponse {
     userFullnameTh?: string | null;
     userTitleEn?: string | null;
     userFullnameEn?: string | null;
+    userDateOfBirth?: string | null;
+    userPhone?: string | null;
+    userEducation?: string | null;
+    userFaculty?: string | null;
+    userInstitution?: string | null;
+    userAddress?: string | null;
+    userProvince?: string | null;
+    userCountry?: string | null;
   };
 }
 
@@ -94,15 +102,17 @@ export function mapBackendUserToFrontendUser(backendUser: BackendUserResponse): 
     fullNameTH: backendUser.PROFILE?.userFullnameTh || '',
     titleEN: backendUser.PROFILE?.userTitleEn || '',
     fullNameEN: backendUser.PROFILE?.userFullnameEn || '',
-    birthdate: '',
-    phone: '',
-    educationLevel: '',
-    country: '',
-    province: '',
-    address: '',
+    birthdate: backendUser.PROFILE?.userDateOfBirth || '',
+    phone: backendUser.PROFILE?.userPhone || '',
+    educationLevel: backendUser.PROFILE?.userEducation || '',
+    country: backendUser.PROFILE?.userCountry || '',
+    province: backendUser.PROFILE?.userProvince || '',
+    address: backendUser.PROFILE?.userAddress || '',
+    faculty: backendUser.PROFILE?.userFaculty || '',
+    institution: backendUser.PROFILE?.userInstitution || '',
     taxId: '',
     thaidSynced: false,
-    role: ROLES.CANDIDATE, // Default role
+    role: ROLES.CANDIDATE,
   };
 }
 
