@@ -12,6 +12,7 @@
       :subtitle="examInfo.subtitle"
       :location-text="examInfo.locationText"
       :fee-text="examInfo.feeText"
+      :format-text="examInfo.formatText"
     />
 
     <div class="exam-schedule__content row q-col-gutter-lg q-mt-sm">

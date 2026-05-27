@@ -28,6 +28,7 @@ export const DEFAULT_EXAM_INFO = {
   subtitle: 'Computer Center, BUU (L201)',
   locationText: 'Computer Center, BUU (L201)',
   feeText: 'Fee : 0 ฿',
+  formatText: '',
 };
 
 /** สถานะตั้งต้นของ Session (1 = OPEN) */

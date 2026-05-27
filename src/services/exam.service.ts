@@ -131,6 +131,7 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
           subtitle: firstLocation?.LOCATION_NAME || '',
           location: locationLabel,
           fee: formatFee(exam.EXAM_FEE),
+          formatText: exam.EXAM_FORMAT || '',
           rounds: [],
         };
       }
