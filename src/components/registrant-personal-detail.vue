@@ -16,7 +16,8 @@
             <ImageDisplay
               :image-path="displayData.profileImagePath"
               class="profile-img"
-              fit="cover"
+              object-fit="contain"
+              height="100%"
               :alt="$t('admin.registrantManagement.detail.photoAlt')"
             />
           </div>
@@ -128,7 +129,7 @@ const displayData = computed(() => {
     institution: profile?.userInstitution || '-',
     address: profile?.userAddress || '-',
     phone: profile?.userPhone || '-',
-    profileImagePath: user?.USER_IMAGE || null,
+    profileImagePath: user?.IMAGE?.USER_IMAGE_URL || null,
   };
 });
 </script>
