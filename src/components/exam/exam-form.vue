@@ -18,11 +18,13 @@
       :location-options="locationOptions"
       :proctor-options="proctorOptions"
       :active-slot-index="activeSlotIndex"
+      :date-errors="dateErrors"
       @add-time-slot="addTimeSlot"
       @remove-time-slot="removeTimeSlot"
       @add-room="addRoom"
       @remove-room="removeRoom"
       @update:active-slot-index="activeSlotIndex = $event"
+      @sort-time-slots="sortTimeSlots"
     />
 
     <!-- Card 3: กำหนดการลงทะเบียนและชำระเงิน -->
@@ -30,6 +32,7 @@
       v-model:form="form"
       :locked="isScheduleLocked"
       :is-special-round="isSpecialRound"
+      :date-errors="dateErrors"
     />
 
     <!-- Card 4: รายชื่อผู้มีสิทธิ์สอบ (เฉพาะรอบพิเศษ) -->
@@ -133,6 +136,8 @@ const {
   generatePasscodes,
   handleCancel,
   handleSave,
+  sortTimeSlots,
+  dateErrors,
 } = useCreateExam(form, { examId: props.examId });
 
 const emit = defineEmits(['save', 'cancel']);

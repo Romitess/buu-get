@@ -264,6 +264,7 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<void>
         SS_START_TIME: formatTime(range.startTime),
         SS_END_TIME: formatTime(range.endTime),
         SS_CAPACITY: Number(range.seats || payload.seats),
+        SS_NAME: range.proctorName || '',
         SS_SESSION_STATUS: SESSION_STATUS_OPEN,
       });
     });
@@ -342,6 +343,7 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
           SS_START_TIME: formatTime(range.startTime),
           SS_END_TIME: formatTime(range.endTime),
           SS_CAPACITY: Number(range.seats || payload.seats),
+          SS_NAME: range.proctorName || '',
         };
 
         if (existingId) {

@@ -11,6 +11,7 @@ export interface AppCalendarProps {
   modelValue: string;
   showLegend?: boolean;
   disablePastDates?: boolean;
+  minDate?: string;
 }
 
 export interface ExamCalendarProps {

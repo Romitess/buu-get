@@ -147,8 +147,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       examDate: today,
       timeSlots: [
         {
-          startTime: '08 : 00',
-          endTime: '10 : 00',
+          startTime: '08:00',
+          endTime: '10:00',
           rooms: [{ locationId: null, proctorName: '', seats: 40 }],
         },
       ],
@@ -172,6 +172,71 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         c.fullName.toLowerCase().includes(q) ||
         c.passcode.toLowerCase().includes(q),
     );
+  });
+
+  // Helper to convert DD/MM/YYYY to numeric value for comparison
+  const dateToCompareValue = (dateStr: string): number => {
+    if (!dateStr || !dateStr.includes('/')) return 0;
+    const parts = dateStr.split('/');
+    if (parts.length !== 3) return 0;
+    const d = parts[0];
+    const m = parts[1];
+    const y = parts[2];
+    if (!d || !m || !y) return 0;
+    return parseInt(y, 10) * 10000 + parseInt(m, 10) * 100 + parseInt(d, 10);
+  };
+
+  const dateErrors = computed(() => {
+    const errors = {
+      regStartDate: '',
+      regEndDate: '',
+      payStartDate: '',
+      payEndDate: '',
+      examDate: '',
+    };
+
+    const todayVal = dateToCompareValue(today);
+    const regStartVal = dateToCompareValue(form.value.regStartDate);
+    const regEndVal = dateToCompareValue(form.value.regEndDate);
+    const payStartVal = dateToCompareValue(form.value.payStartDate);
+    const payEndVal = dateToCompareValue(form.value.payEndDate);
+    const examVal = dateToCompareValue(form.value.examDate);
+
+    // 1. วันที่เริ่มต้นลงทะเบียนต้องไม่เป็นวันที่ผ่านไปแล้ว (เฉพาะสร้างใหม่)
+    if (!isEditMode.value && regStartVal > 0 && regStartVal < todayVal) {
+      errors.regStartDate = 'วันที่เริ่มต้นลงทะเบียนต้องไม่เป็นวันที่ผ่านไปแล้ว';
+    }
+
+    // 2. วันที่สิ้นสุดการลงทะเบียนต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน
+    if (regEndVal > 0 && regStartVal > 0 && regEndVal < regStartVal) {
+      errors.regEndDate = 'วันที่สิ้นสุดการลงทะเบียนต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน';
+    }
+
+    // 3. วันที่เริ่มต้นชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน (เว้นแต่เป็นรอบพิเศษ)
+    if (!isSpecialRound.value && payStartVal > 0 && regStartVal > 0 && payStartVal < regStartVal) {
+      errors.payStartDate = 'วันที่เริ่มต้นชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน';
+    }
+
+    // 4. วันที่สิ้นสุดการชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นชำระเงิน
+    if (!isSpecialRound.value && payEndVal > 0 && payStartVal > 0 && payEndVal < payStartVal) {
+      errors.payEndDate = 'วันที่สิ้นสุดการชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นชำระเงิน';
+    }
+
+    // 5. วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการลงทะเบียน
+    if (examVal > 0 && regEndVal > 0 && examVal < regEndVal) {
+      errors.examDate = 'วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการลงทะเบียน';
+    }
+
+    // 6. วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการชำระเงิน (รอบทั่วไป)
+    if (!isSpecialRound.value && examVal > 0 && payEndVal > 0 && examVal < payEndVal) {
+      if (errors.examDate) {
+        errors.examDate += ' และต้องไม่มาก่อนวันที่สิ้นสุดการชำระเงิน';
+      } else {
+        errors.examDate = 'วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการชำระเงิน';
+      }
+    }
+
+    return errors;
   });
 
   /**
@@ -254,6 +319,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           });
 
           form.value.timeSlots = Array.from(slotMap.values());
+          sortTimeSlots();
         }
 
         // The schedule lock is now handled by the computed property 'isScheduleLocked'
@@ -273,6 +339,42 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     }
   };
 
+  const sortTimeSlots = (): void => {
+    if (form.value.timeSlots.length <= 1) return;
+
+    const currentActiveSlot = form.value.timeSlots[activeSlotIndex.value];
+
+    const timeToMinutes = (timeStr: string | undefined): number => {
+      if (!timeStr) return 9999;
+      const cleaned = timeStr.replace(/\s/g, '');
+      if (!cleaned) return 9999;
+      const parts = cleaned.split(':');
+      const hours = parseInt(parts[0] || '0', 10);
+      const minutes = parseInt(parts[1] || '0', 10);
+      return hours * 60 + minutes;
+    };
+
+    form.value.timeSlots.sort((a, b) => {
+      const aStart = timeToMinutes(a.startTime);
+      const bStart = timeToMinutes(b.startTime);
+
+      if (aStart !== bStart) {
+        return aStart - bStart;
+      }
+
+      const aEnd = timeToMinutes(a.endTime);
+      const bEnd = timeToMinutes(b.endTime);
+      return aEnd - bEnd;
+    });
+
+    if (currentActiveSlot) {
+      const newIndex = form.value.timeSlots.indexOf(currentActiveSlot);
+      if (newIndex !== -1) {
+        activeSlotIndex.value = newIndex;
+      }
+    }
+  };
+
   const addTimeSlot = (): void => {
     if (isScheduleLocked.value) return;
     if (form.value.timeSlots.length < MAX_EXAM_SESSIONS) {
@@ -281,6 +383,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         endTime: '',
         rooms: [{ locationId: null, proctorName: '', seats: 40 }],
       });
+      sortTimeSlots();
       // Switch to the newly added tab
       activeSlotIndex.value = form.value.timeSlots.length - 1;
     } else {
@@ -300,6 +403,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       if (activeSlotIndex.value >= form.value.timeSlots.length) {
         activeSlotIndex.value = form.value.timeSlots.length - 1;
       }
+      sortTimeSlots();
     } else {
       $q.notify({
         type: 'warning',
@@ -494,6 +598,76 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       return false;
     }
 
+    // === DATE LOGICAL VALIDATION ===
+    const todayVal = dateToCompareValue(today);
+    const regStartVal = dateToCompareValue(form.value.regStartDate);
+    const regEndVal = dateToCompareValue(form.value.regEndDate);
+    const payStartVal = dateToCompareValue(form.value.payStartDate);
+    const payEndVal = dateToCompareValue(form.value.payEndDate);
+    const examVal = dateToCompareValue(form.value.examDate);
+
+    // 1. วันที่เริ่มต้นลงทะเบียนต้องไม่เป็นวันที่ผ่านไปแล้ว (เฉพาะกรณีสร้างใหม่)
+    if (!isEditMode.value && regStartVal < todayVal) {
+      $q.notify({
+        type: 'warning',
+        message: 'วันที่เริ่มต้นลงทะเบียนต้องไม่เป็นวันที่ผ่านไปแล้ว',
+        position: 'top',
+      });
+      return false;
+    }
+
+    // 2. วันที่สิ้นสุดการลงทะเบียนต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน
+    if (regEndVal < regStartVal) {
+      $q.notify({
+        type: 'warning',
+        message: 'วันที่สิ้นสุดการลงทะเบียนต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน',
+        position: 'top',
+      });
+      return false;
+    }
+
+    // 3. วันที่เริ่มต้นชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน (เว้นแต่เป็นรอบพิเศษที่ไม่มีชำระเงิน)
+    if (!isSpecialRound.value) {
+      if (payStartVal < regStartVal) {
+        $q.notify({
+          type: 'warning',
+          message: 'วันที่เริ่มต้นชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน',
+          position: 'top',
+        });
+        return false;
+      }
+
+      // 4. วันที่สิ้นสุดการชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นชำระเงิน
+      if (payEndVal < payStartVal) {
+        $q.notify({
+          type: 'warning',
+          message: 'วันที่สิ้นสุดการชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นชำระเงิน',
+          position: 'top',
+        });
+        return false;
+      }
+    }
+
+    // 5. วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการลงทะเบียน
+    if (examVal < regEndVal) {
+      $q.notify({
+        type: 'warning',
+        message: 'วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการลงทะเบียน',
+        position: 'top',
+      });
+      return false;
+    }
+
+    // 6. วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการชำระเงิน (รอบทั่วไป)
+    if (!isSpecialRound.value && examVal < payEndVal) {
+      $q.notify({
+        type: 'warning',
+        message: 'วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการชำระเงิน',
+        position: 'top',
+      });
+      return false;
+    }
+
     // === BUSINESS RULE VALIDATION: Strictly 1 Exam Per Day ===
     const targetDateGregorian = buddhistToGregorian(form.value.examDate);
 
@@ -598,7 +772,23 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       return true;
     } catch (err) {
       console.error('Save error:', err);
-      const msg = isEditMode.value ? NOTIFY_MSG.UPDATE_ERROR : NOTIFY_MSG.CREATE_ERROR;
+      const errorObj = err as {
+        response?: {
+          data?: {
+            message?: string | string[];
+          };
+        };
+        message?: string;
+      };
+      const backendMsg = errorObj.response?.data?.message;
+      const detailedMsg = Array.isArray(backendMsg)
+        ? backendMsg.join(', ')
+        : backendMsg || errorObj.message;
+      const msg = detailedMsg
+        ? `${isEditMode.value ? NOTIFY_MSG.UPDATE_ERROR : NOTIFY_MSG.CREATE_ERROR}: ${detailedMsg}`
+        : isEditMode.value
+          ? NOTIFY_MSG.UPDATE_ERROR
+          : NOTIFY_MSG.CREATE_ERROR;
       error.value = msg;
       $q.notify({
         type: 'negative',
@@ -636,5 +826,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     handleCancel,
     handleSave,
     autoFormatTime,
+    sortTimeSlots,
+    dateErrors,
   };
 }

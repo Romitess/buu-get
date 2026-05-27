@@ -15,7 +15,7 @@
           dense
           icon="add_circle"
           class="q-px-md add-slot-btn"
-          :disabled="form.timeSlots.length >= 4"
+          :disabled="form.timeSlots.length >= MAX_EXAM_SESSIONS"
           @click="$emit('add-time-slot')"
         />
       </div>
@@ -52,30 +52,44 @@
               v-model="form.examDate"
               outlined
               dense
-              class="custom-input bg-white"
+              class="custom-input bg-white cursor-pointer"
               readonly
               :disable="locked"
               hide-bottom-space
+              @click="!locked && (showExamDate = true)"
             >
               <template v-slot:append>
-                <q-icon
-                  v-if="!locked"
-                  name="calendar_today"
-                  class="cursor-pointer"
-                  size="xs"
-                  color="grey-8"
-                >
-                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                    <q-date v-model="form.examDate" mask="DD/MM/YYYY">
-                      <div class="row items-center justify-end">
-                        <q-btn v-close-popup label="ปิด" color="primary" flat />
-                      </div>
-                    </q-date>
-                  </q-popup-proxy>
-                </q-icon>
+                <template v-if="!locked">
+                  <q-icon
+                    name="calendar_today"
+                    class="cursor-pointer"
+                    size="xs"
+                    color="grey-8"
+                    @click.stop="showExamDate = true"
+                  />
+                  <q-menu
+                    v-model="showExamDate"
+                    anchor="bottom left"
+                    self="top left"
+                    class="shadow-5 calendar-menu"
+                  >
+                    <AppCalendar
+                      :model-value="beToCeString(form.examDate)"
+                      @update:model-value="(val: string) => (form.examDate = ceToBeString(val))"
+                      @click-date="showExamDate = false"
+                    />
+                  </q-menu>
+                </template>
                 <q-icon v-else name="lock" size="xs" color="grey-5" />
               </template>
             </q-input>
+            <div
+              v-if="dateErrors?.examDate"
+              class="text-caption text-negative q-mt-xs row items-center no-wrap"
+            >
+              <q-icon name="error" size="14px" class="q-mr-xs" />
+              {{ dateErrors.examDate }}
+            </div>
           </div>
           <div class="col-6 col-md-3">
             <div class="field-label-bold">เวลาเริ่ม</div>
@@ -88,7 +102,7 @@
               mask="##:##"
               hide-bottom-space
               :disable="locked"
-              @blur="activeSlot.startTime = autoFormatTime(activeSlot.startTime)"
+              @blur="onTimeBlur('startTime')"
             />
           </div>
           <div class="col-6 col-md-3">
@@ -102,7 +116,7 @@
               mask="##:##"
               hide-bottom-space
               :disable="locked"
-              @blur="activeSlot.endTime = autoFormatTime(activeSlot.endTime)"
+              @blur="onTimeBlur('endTime')"
             />
           </div>
         </div>
@@ -209,9 +223,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import type { CreateExamForm, TimeSlot } from 'src/composables/use-create-exam';
 import type { ExamLocationOption } from 'src/services/exam.service';
+import AppCalendar from 'src/components/shared/app-calendar.vue';
+import { beToCeString, ceToBeString } from 'src/utils/thai-date';
+import { MAX_EXAM_SESSIONS } from 'src/constants/exam';
 
 const props = defineProps<{
   /** When true, disables all schedule editing (for published exams) */
@@ -222,19 +239,31 @@ const props = defineProps<{
   proctorOptions: { label: string; value: string }[];
   /** Currently active slot tab index */
   activeSlotIndex: number;
+  /** Date validation errors */
+  dateErrors?: Record<string, string>;
 }>();
 
 const form = defineModel<CreateExamForm>('form', { required: true });
 
-defineEmits([
+const emit = defineEmits([
   'add-time-slot',
   'remove-time-slot',
   'add-room',
   'remove-room',
   'update:activeSlotIndex',
+  'sort-time-slots',
 ]);
 
+const showExamDate = ref(false);
+
 const activeSlot = computed(() => form.value.timeSlots[props.activeSlotIndex]);
+
+const onTimeBlur = (field: 'startTime' | 'endTime') => {
+  if (activeSlot.value) {
+    activeSlot.value[field] = autoFormatTime(activeSlot.value[field]);
+    emit('sort-time-slots');
+  }
+};
 
 const getSlotLabel = (slot: TimeSlot, index: number): string => {
   const start = slot.startTime?.trim();
@@ -356,5 +385,9 @@ const autoFormatTime = (time: string): string => {
 }
 .custom-input :deep(.q-field__control::before) {
   border-color: var(--neutral-200);
+}
+.calendar-menu {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 </style>

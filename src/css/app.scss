@@ -39,7 +39,7 @@
   --text-muted: #9a9a9a;
   --text-on-dark: #e0e0e0;
   --text-on-primary: #ffffff;
-  --buu-brown: #5D3F3D;
+  --buu-brown: #5d3f3d;
   --label-color: var(--buu-brown); // สีของ Label หัวข้อฟิลด์
 
   // Neutral scale (used in form fields, dividers, secondary text)
@@ -189,7 +189,7 @@
 
   // Seat Management Specific
   --seat-grid-border: #757575;
-  --seat-available-border: var(--secondary, #1E89E5);
+  --seat-available-border: var(--secondary, #1e89e5);
   --seat-broken-bg: #676767;
   --seat-grid-box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   --seat-scrollbar-track: #f1f1f1;
@@ -651,7 +651,6 @@ body {
     border-radius: 12px !important;
     height: 39px !important;
     min-height: 39px !important;
-    max-width: 350px;
     background-color: var(--surface-card);
     box-shadow: none !important;
     transition: border-color var(--transition-smooth);

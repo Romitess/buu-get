@@ -52,7 +52,9 @@
               :class="{
                 active: modelValue === day.dateString,
                 today: day.isToday,
-                disabled: props.disablePastDates && day.isPast,
+                disabled:
+                  (props.disablePastDates && day.isPast) ||
+                  (props.minDate && day.dateString < props.minDate),
               }"
               role="button"
               tabindex="0"
@@ -289,6 +291,7 @@ const handleYearSelect = (year: number) => {
 
 const handleDaySelect = (day: { dateString: string; isPast: boolean }) => {
   if (props.disablePastDates && day.isPast) return;
+  if (props.minDate && day.dateString < props.minDate) return;
   emit('update:modelValue', day.dateString);
   emit('click-date', day.dateString);
 };

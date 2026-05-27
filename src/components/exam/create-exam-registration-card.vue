@@ -20,10 +20,11 @@
                 v-model="form.regStartDate"
                 outlined
                 dense
-                class="custom-input"
+                class="custom-input cursor-pointer"
                 readonly
                 hide-bottom-space
                 :disable="locked"
+                @click="!locked && (showRegStart = true)"
               >
                 <template v-slot:append>
                   <q-icon
@@ -32,17 +33,29 @@
                     class="cursor-pointer"
                     size="xs"
                     color="grey-8"
+                    @click.stop="showRegStart = true"
+                  />
+                  <q-menu
+                    v-model="showRegStart"
+                    anchor="bottom left"
+                    self="top left"
+                    class="shadow-5 calendar-menu"
                   >
-                    <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                      <q-date v-model="form.regStartDate" mask="DD/MM/YYYY">
-                        <div class="row items-center justify-end">
-                          <q-btn v-close-popup label="ปิด" color="primary" flat />
-                        </div>
-                      </q-date>
-                    </q-popup-proxy>
-                  </q-icon>
+                    <AppCalendar
+                      :model-value="beToCeString(form.regStartDate)"
+                      @update:model-value="(val: string) => (form.regStartDate = ceToBeString(val))"
+                      @click-date="showRegStart = false"
+                    />
+                  </q-menu>
                 </template>
               </q-input>
+              <div
+                v-if="dateErrors?.regStartDate"
+                class="text-caption text-negative q-mt-xs row items-center no-wrap"
+              >
+                <q-icon name="error" size="14px" class="q-mr-xs animate-bounce" />
+                {{ dateErrors.regStartDate }}
+              </div>
             </div>
 
             <div class="col-12" :class="isSpecialRound ? 'col-md-6' : ''">
@@ -51,10 +64,11 @@
                 v-model="form.regEndDate"
                 outlined
                 dense
-                class="custom-input"
+                class="custom-input cursor-pointer"
                 readonly
                 hide-bottom-space
                 :disable="locked"
+                @click="!locked && (showRegEnd = true)"
               >
                 <template v-slot:append>
                   <q-icon
@@ -63,17 +77,29 @@
                     class="cursor-pointer"
                     size="xs"
                     color="grey-8"
+                    @click.stop="showRegEnd = true"
+                  />
+                  <q-menu
+                    v-model="showRegEnd"
+                    anchor="bottom left"
+                    self="top left"
+                    class="shadow-5 calendar-menu"
                   >
-                    <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                      <q-date v-model="form.regEndDate" mask="DD/MM/YYYY">
-                        <div class="row items-center justify-end">
-                          <q-btn v-close-popup label="ปิด" color="primary" flat />
-                        </div>
-                      </q-date>
-                    </q-popup-proxy>
-                  </q-icon>
+                    <AppCalendar
+                      :model-value="beToCeString(form.regEndDate)"
+                      @update:model-value="(val: string) => (form.regEndDate = ceToBeString(val))"
+                      @click-date="showRegEnd = false"
+                    />
+                  </q-menu>
                 </template>
               </q-input>
+              <div
+                v-if="dateErrors?.regEndDate"
+                class="text-caption text-negative q-mt-xs row items-center no-wrap"
+              >
+                <q-icon name="error" size="14px" class="q-mr-xs" />
+                {{ dateErrors.regEndDate }}
+              </div>
             </div>
           </div>
         </div>
@@ -89,10 +115,11 @@
                 v-model="form.payStartDate"
                 outlined
                 dense
-                class="custom-input"
+                class="custom-input cursor-pointer"
                 readonly
                 hide-bottom-space
                 :disable="locked"
+                @click="!locked && (showPayStart = true)"
               >
                 <template v-slot:append>
                   <q-icon
@@ -101,17 +128,29 @@
                     class="cursor-pointer"
                     size="xs"
                     color="grey-8"
+                    @click.stop="showPayStart = true"
+                  />
+                  <q-menu
+                    v-model="showPayStart"
+                    anchor="bottom left"
+                    self="top left"
+                    class="shadow-5 calendar-menu"
                   >
-                    <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                      <q-date v-model="form.payStartDate" mask="DD/MM/YYYY">
-                        <div class="row items-center justify-end">
-                          <q-btn v-close-popup label="ปิด" color="primary" flat />
-                        </div>
-                      </q-date>
-                    </q-popup-proxy>
-                  </q-icon>
+                    <AppCalendar
+                      :model-value="beToCeString(form.payStartDate)"
+                      @update:model-value="(val: string) => (form.payStartDate = ceToBeString(val))"
+                      @click-date="showPayStart = false"
+                    />
+                  </q-menu>
                 </template>
               </q-input>
+              <div
+                v-if="dateErrors?.payStartDate"
+                class="text-caption text-negative q-mt-xs row items-center no-wrap"
+              >
+                <q-icon name="error" size="14px" class="q-mr-xs" />
+                {{ dateErrors.payStartDate }}
+              </div>
             </div>
 
             <div class="col-12">
@@ -120,10 +159,11 @@
                 v-model="form.payEndDate"
                 outlined
                 dense
-                class="custom-input"
+                class="custom-input cursor-pointer"
                 readonly
                 hide-bottom-space
                 :disable="locked"
+                @click="!locked && (showPayEnd = true)"
               >
                 <template v-slot:append>
                   <q-icon
@@ -132,17 +172,29 @@
                     class="cursor-pointer"
                     size="xs"
                     color="grey-8"
+                    @click.stop="showPayEnd = true"
+                  />
+                  <q-menu
+                    v-model="showPayEnd"
+                    anchor="bottom left"
+                    self="top left"
+                    class="shadow-5 calendar-menu"
                   >
-                    <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                      <q-date v-model="form.payEndDate" mask="DD/MM/YYYY">
-                        <div class="row items-center justify-end">
-                          <q-btn v-close-popup label="ปิด" color="primary" flat />
-                        </div>
-                      </q-date>
-                    </q-popup-proxy>
-                  </q-icon>
+                    <AppCalendar
+                      :model-value="beToCeString(form.payEndDate)"
+                      @update:model-value="(val: string) => (form.payEndDate = ceToBeString(val))"
+                      @click-date="showPayEnd = false"
+                    />
+                  </q-menu>
                 </template>
               </q-input>
+              <div
+                v-if="dateErrors?.payEndDate"
+                class="text-caption text-negative q-mt-xs row items-center no-wrap"
+              >
+                <q-icon name="error" size="14px" class="q-mr-xs" />
+                {{ dateErrors.payEndDate }}
+              </div>
             </div>
           </div>
         </div>
@@ -152,16 +204,26 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import type { CreateExamForm } from 'src/composables/use-create-exam';
+import AppCalendar from 'src/components/shared/app-calendar.vue';
+import { beToCeString, ceToBeString } from 'src/utils/thai-date';
 
 defineProps<{
   /** When true, disables all editing */
   locked?: boolean;
   /** When true, hides payment section */
   isSpecialRound?: boolean;
+  /** Date validation errors */
+  dateErrors?: Record<string, string>;
 }>();
 
 const form = defineModel<CreateExamForm>('form', { required: true });
+
+const showRegStart = ref(false);
+const showRegEnd = ref(false);
+const showPayStart = ref(false);
+const showPayEnd = ref(false);
 </script>
 
 <style scoped>
@@ -182,5 +244,9 @@ const form = defineModel<CreateExamForm>('form', { required: true });
 }
 .custom-input :deep(.q-field__control::before) {
   border-color: var(--neutral-200);
+}
+.calendar-menu {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 </style>
