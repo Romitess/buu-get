@@ -43,9 +43,7 @@
       />
 
       <div class="upload-zone-content">
-        <q-icon name="cloud_upload" size="48px" color="primary" />
-        <p class="text-subtitle2 q-mt-md">{{ uploadPromptText }}</p>
-        <p class="text-caption text-grey-6">{{ uploadHintText }}</p>
+        <q-icon name="add_photo_alternate" size="48px" color="black" />
       </div>
     </div>
 
@@ -103,10 +101,6 @@ const { isUploading, uploadError, handleImageUpload } = useImageUpload({
 
 const { displayUrl } = useImageUrl(() => props.modelValue);
 
-const uploadPromptText = computed(
-  () => t('image.upload.prompt') ?? 'Click to upload or drag and drop',
-);
-const uploadHintText = computed(() => t('image.upload.hint') ?? 'PNG, JPG, WebP up to 5MB');
 const uploadingText = computed(() => t('image.upload.uploading') ?? 'Uploading...');
 
 const triggerFileInput = (): void => {
@@ -131,6 +125,8 @@ const handleDelete = (): void => {
 <style scoped lang="scss">
 .image-upload-container {
   width: 100%;
+  height: 100%;
+  aspect-ratio: 0.9 / 1;
 }
 
 .hidden-file-input {
@@ -141,15 +137,14 @@ const handleDelete = (): void => {
 .preview-wrapper {
   position: relative;
   width: 100%;
-  max-width: 300px;
-  margin: 0 auto;
+  height: 100%;
 }
 
 .preview-image-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 1;
-  border-radius: 8px;
+  height: 100%;
+  border-radius: inherit;
   overflow: hidden;
   background-color: #f5f5f5;
 
@@ -181,24 +176,25 @@ const handleDelete = (): void => {
 
 // Upload Zone
 .upload-zone {
-  border: 2px dashed var(--q-primary);
-  border-radius: 8px;
-  padding: 32px 16px;
-  text-align: center;
+  width: 100%;
+  height: 100%;
+  background-color: #e0e0e0;
+  border-radius: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  background-color: rgba(var(--q-primary-rgb), 0.05);
 
   &:hover {
-    background-color: rgba(var(--q-primary-rgb), 0.1);
-    border-color: var(--q-primary-light);
+    background-color: #d5d5d5;
   }
 }
 
 .upload-zone-content {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
   pointer-events: none;
 }
 

@@ -8,6 +8,7 @@
           v-model="profileImage"
           folder="/user_images"
           :alt="t('profile.photoRequirementsTitle')"
+          class="photo-upload-box"
         />
       </div>
       <!-- Requirements Box -->
@@ -29,7 +30,11 @@
             </div>
             <div class="col-4 flex column flex-center">
               <div class="sample-photo-container">
-                <img src="/sample-img.png" alt="Sample Photo" class="sample-photo-img" />
+                <img
+                  src="/sample-img.png"
+                  :alt="t('profile.samplePhotoAlt')"
+                  class="sample-photo-img"
+                />
               </div>
               <div class="sample-photo-text text-caption q-mt-xs">
                 {{ t('profile.samplePhoto') }}
@@ -59,6 +64,14 @@
       :rules="[(val) => !!val || t('profile.requiredNationalId')]"
     />
 
+    <!-- ─── Nationality (Foreigner Only) ─── -->
+    <AppFormField
+      v-if="!isThai"
+      v-model="country"
+      :label="t('profile.nationality')"
+      :placeholder="t('profile.nationalityPlaceholder')"
+    />
+
     <!-- ─── Prefix (คำนำหน้า) ─── -->
     <AppFormField
       v-model="titleTH"
@@ -72,14 +85,6 @@
       "
       @update:model-value="onTitleTHChange"
       :rules="[(val) => !!val || t('profile.requiredPrefix')]"
-    />
-
-    <!-- ─── Nationality (Foreigner Only) ─── -->
-    <AppFormField
-      v-if="!isThai"
-      v-model="country"
-      :label="t('profile.nationality')"
-      placeholder="American"
     />
 
     <!-- ─── Thai: ชื่อ-นามสกุล (ไทย) — ซ่อนสำหรับต่างชาติ ─── -->
@@ -139,10 +144,10 @@ const onTitleTHChange = (): void => {
 }
 
 .requirements-list {
-  line-height: 1.5;
+  line-height: 1.35;
   list-style-type: none;
   padding-left: 0;
-  font-size: 14.5px;
+  font-size: 13.5px;
 }
 
 .sample-photo-text {
@@ -150,8 +155,8 @@ const onTitleTHChange = (): void => {
 }
 
 .sample-photo-container {
-  width: 90px;
-  aspect-ratio: 0.9 / 1;
+  width: 82px;
+  aspect-ratio: 4 / 5;
   border-radius: var(--radius-xs);
   overflow: hidden;
   border: 1px solid var(--border-color);

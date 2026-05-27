@@ -145,6 +145,8 @@ export default {
     passportNo: 'Passport Number',
     passportPlaceholder: 'XXXXXXXXX',
     nationality: 'Nationality',
+    nationalityPlaceholder: 'American',
+    buuLogoAlt: 'BUU Logo',
     prefix: 'Prefixes',
     prefixes: {
       mr: 'Mr.',
@@ -167,6 +169,7 @@ export default {
     photoReq5: '5. Minimum file size: 40 KB',
     photoReq6: '6. JPG format only',
     samplePhoto: 'Sample Photo',
+    samplePhotoAlt: 'Sample Photo',
     birthdate: 'Date of Birth',
     birthdatePlaceholder: 'DD/MM/YYYY',
     education: 'Highest education',

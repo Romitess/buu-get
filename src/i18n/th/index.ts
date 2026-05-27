@@ -93,6 +93,8 @@ export default {
     passportNo: 'หมายเลขหนังสือเดินทาง',
     passportPlaceholder: 'XXXXXXXXX',
     nationality: 'สัญชาติ',
+    nationalityPlaceholder: 'อเมริกัน',
+    buuLogoAlt: 'โลโก้ มหาวิทยาลัยบูรพา',
     prefix: 'คำนำหน้า',
     prefixes: {
       mr: 'นาย',
@@ -115,6 +117,7 @@ export default {
     photoReq5: '5. ขนาดไฟล์ขั้นต่ำ 40 KB',
     photoReq6: '6. นามสกุล JPG เท่านั้น',
     samplePhoto: 'รูปตัวอย่าง',
+    samplePhotoAlt: 'ภาพตัวอย่าง',
     birthdate: 'วันเกิด',
     birthdatePlaceholder: 'วว/ดด/ปปปป',
     education: 'ระดับการศึกษาสูงสุดของท่าน',

@@ -2,7 +2,7 @@
   <div class="register-card q-pa-lg">
     <!-- BUU Circular Logo -->
     <div class="row justify-center q-mb-md">
-      <img src="~assets/img/buu-logo.png" alt="BUU Logo" class="buu-logo-img" />
+      <img src="~assets/img/buu-logo.png" :alt="$t('profile.buuLogoAlt')" class="buu-logo-img" />
     </div>
 
     <!-- Title & Subtitle -->
@@ -26,6 +26,11 @@
           dense
           :placeholder="$t('profile.emailPlaceholder')"
           class="field-input"
+          :rules="[
+            (val) => !!val || $t('profile.requiredEmail'),
+            (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || 'รูปแบบอีเมลไม่ถูกต้อง',
+          ]"
+          lazy-rules
         />
       </div>
 
@@ -38,6 +43,11 @@
           outlined
           dense
           class="field-input"
+          :rules="[
+            (val) => !!val || $t('profile.requiredPassword'),
+            (val) => val.length >= 8 || $t('profile.passwordFormat'),
+          ]"
+          lazy-rules
         >
           <template v-slot:append>
             <q-icon
@@ -58,6 +68,11 @@
           outlined
           dense
           class="field-input"
+          :rules="[
+            (val) => !!val || $t('profile.requiredConfirmPassword'),
+            (val) => val === password || $t('profile.passwordMismatch'),
+          ]"
+          lazy-rules
         >
           <template v-slot:append>
             <q-icon
@@ -139,12 +154,6 @@ const onCancel = (): void => {
 };
 
 const onSubmit = (): void => {
-  if (!email.value || !password.value || !confirmPassword.value) {
-    return;
-  }
-  if (password.value !== confirmPassword.value) {
-    return;
-  }
   emit('register', {
     email: email.value,
     password: password.value,
@@ -218,10 +227,10 @@ const onSubmit = (): void => {
   overflow: hidden;
 }
 
-.thaid-btn {
+.q-btn.thaid-btn {
   width: 100%;
-  background-color: var(--thaid-bg) !important;
-  color: var(--text-on-primary) !important;
+  background-color: var(--thaid-bg);
+  color: var(--text-on-primary);
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
@@ -230,7 +239,7 @@ const onSubmit = (): void => {
 
   &:hover {
     filter: brightness(1.12);
-    box-shadow: 0 8px 20px rgba(var(--thaid-bg-rgb), 0.2) !important;
+    box-shadow: 0 8px 20px rgba(var(--thaid-bg-rgb), 0.2);
   }
 }
 
@@ -259,12 +268,12 @@ const onSubmit = (): void => {
 // ============================================================
 // Action Buttons Row
 // ============================================================
-.cancel-btn {
+.q-btn.cancel-btn {
   width: 100%;
   height: 52px;
-  background: var(--neutral-200) !important;
-  color: var(--neutral-700) !important;
-  border-radius: 12px !important;
+  background: var(--neutral-200);
+  color: var(--neutral-700);
+  border-radius: 12px;
   font-size: 0.95rem;
   font-weight: 700;
   transition: all 0.25s;
@@ -275,12 +284,12 @@ const onSubmit = (): void => {
   }
 }
 
-.submit-btn {
+.q-btn.submit-btn {
   width: 100%;
   height: 52px;
-  background: var(--primary) !important;
-  color: var(--text-on-primary) !important;
-  border-radius: 12px !important;
+  background: var(--primary);
+  color: var(--text-on-primary);
+  border-radius: 12px;
   font-size: 0.95rem;
   font-weight: 700;
   transition: all 0.25s;
