@@ -230,8 +230,11 @@ export const buddhistToGregorian = (dateStr: string): string => {
   const parts = dateStr.split('/');
   if (parts.length !== 3) return '';
   const [d, m, y] = parts;
-  const gregorianYear = parseInt(y as string) - BUDDHIST_YEAR_OFFSET;
-  return `${gregorianYear}-${m}-${d}`;
+  if (d === undefined || m === undefined || y === undefined) return '';
+  const rawYear = parseInt(y.trim().split(' ')[0] || y);
+  const gregorianYear = rawYear >= 2400 ? rawYear - BUDDHIST_YEAR_OFFSET : rawYear;
+  const day = d.trim().split(' ')[0] || d;
+  return `${gregorianYear}-${m}-${day}`;
 };
 
 export const createExamRound = async (payload: CreateExamPayload): Promise<void> => {
@@ -261,7 +264,6 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<void>
         SS_START_TIME: formatTime(range.startTime),
         SS_END_TIME: formatTime(range.endTime),
         SS_CAPACITY: Number(range.seats || payload.seats),
-        SS_NAME: range.proctorName || '',
         SS_SESSION_STATUS: SESSION_STATUS_OPEN,
       });
     });
@@ -340,7 +342,6 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
           SS_START_TIME: formatTime(range.startTime),
           SS_END_TIME: formatTime(range.endTime),
           SS_CAPACITY: Number(range.seats || payload.seats),
-          SS_NAME: range.proctorName || '',
         };
 
         if (existingId) {

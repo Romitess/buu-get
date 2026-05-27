@@ -159,7 +159,7 @@ const locationsWithComputedData = computed(() => {
   return locations.value.map((loc, idx) => ({
     ...loc,
     index: idx + 1,
-    floor: parseFloor(loc.LOCATION_ROOM_NO),
+    floor: loc.LOCATION_FLOOR_NO ?? parseFloor(loc.LOCATION_ROOM_NO),
     capacity: parseCapacity(loc.LOCATION_ROOM_NO),
   }));
 });

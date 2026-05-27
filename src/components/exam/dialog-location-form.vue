@@ -149,6 +149,7 @@ function onFormSubmit() {
   onDialogOK({
     LOCATION_NAME: form.value.LOCATION_NAME,
     LOCATION_ROOM_NO: form.value.LOCATION_ROOM_NO,
+    LOCATION_FLOOR_NO: computedFloor.value,
   });
 }
 

@@ -245,7 +245,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
             const slot = slotMap.get(key)!;
             slot.rooms.push({
-              locationId: session.LOCATION_ID ?? null,
+              locationId: session.LOCATION?.LOCATION_ID ?? session.LOCATION_ID ?? null,
               proctorName: session.SS_NAME || '',
               seats: session.SS_CAPACITY ?? 40,
               sessionId: session.SS_ID,

@@ -88,6 +88,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from 'src/stores/user.store';
 import { ROLE_LABELS } from 'src/constants/roles';
+import ImageDisplay from 'src/components/base/image-display.vue';
 
 const userStore = useUserStore();
 const router = useRouter();

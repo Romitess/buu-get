@@ -206,6 +206,7 @@ export interface BackendLocation {
   LOCATION_ID: number;
   LOCATION_NAME: string;
   LOCATION_ROOM_NO: string;
+  LOCATION_FLOOR_NO?: number | null;
   LOCATION_TOTAL_ROWS?: number;
   LOCATION_TOTAL_COLS?: number;
   LOCATION_IS_SPLIT?: number;
@@ -224,7 +225,7 @@ export interface BackendSession {
   SS_START_TIME: string;
   SS_END_TIME: string;
   SS_CAPACITY: number;
-  LOCATION_ID: number;
+  LOCATION_ID?: number | null;
   LOCATION?: BackendLocation;
   ENROLLMENTS?: BackendEnrollment[];
   EXAM_ID?: number;

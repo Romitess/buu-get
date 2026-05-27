@@ -186,9 +186,10 @@ const handleSave = async (): Promise<void> => {
 
   try {
     await createLocationWithSeats({
-      LOCATION_NAME: roomName.value.trim(),
-      LOCATION_ROOM_NO: building.value.trim() || undefined,
-      LOCATION_FLOOR_NO: floor.value ? Number(floor.value) : undefined,
+      LOCATION_NAME: building.value.trim(),
+      LOCATION_ROOM_NO: roomName.value.trim() || undefined,
+      LOCATION_FLOOR_NO:
+        floor.value !== null && String(floor.value).trim() !== '' ? Number(floor.value) : undefined,
       LOCATION_TOTAL_ROWS: Number(rows.value),
       LOCATION_TOTAL_COLS: Number(cols.value),
       LOCATION_SEAT_CAPACITY: Number(totalSeats.value),
