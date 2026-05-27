@@ -48,6 +48,7 @@ export interface ExamInfo {
   subtitle: string;
   locationText: string;
   feeText: string;
+  formatText?: string | undefined;
 }
 
 /** Pass/fail outcome of an exam, used to render a composed result label */
@@ -87,6 +88,7 @@ export interface DayData {
   fee: string;
   title: string;
   subtitle: string;
+  formatText?: string | undefined;
 }
 
 export interface RoundExamProps {
@@ -135,6 +137,7 @@ export interface ExamDetailProps {
   subtitle?: string;
   locationText?: string;
   feeText?: string;
+  formatText?: string | undefined;
 }
 export interface BackendEnrollment {
   ERM_ID: number;

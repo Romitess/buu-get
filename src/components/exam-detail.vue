@@ -26,15 +26,28 @@
           <q-icon name="payments" color="positive" size="20px" class="q-mr-xs" />
           <span class="detail-text text-dark">{{ feeText }}</span>
         </div>
+        <div class="row items-center" v-if="formatText">
+          <q-icon :name="formatIcon" color="dark" size="20px" class="q-mr-xs" />
+          <span class="detail-text text-dark">{{ formatText }}</span>
+        </div>
       </div>
     </q-card-section>
   </q-card>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { ExamDetailProps } from 'src/types/exam';
 
-defineProps<ExamDetailProps>();
+const props = defineProps<ExamDetailProps>();
+
+const formatIcon = computed((): string => {
+  const format = props.formatText?.toLowerCase() || '';
+  if (format.includes('กระดาษ') || format.includes('paper')) {
+    return 'description';
+  }
+  return 'computer';
+});
 </script>
 
 <style scoped lang="scss">

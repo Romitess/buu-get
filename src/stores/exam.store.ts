@@ -47,6 +47,7 @@ export const useExamStore = defineStore('exam', () => {
         subtitle: dayData.subtitle,
         locationText: dayData.location,
         feeText: dayData.fee,
+        formatText: dayData.formatText || '',
       };
     }
     return { ...DEFAULT_EXAM_INFO };
