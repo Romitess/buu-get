@@ -58,13 +58,14 @@
               <div
                 v-for="student in filteredStudents"
                 :key="student.id"
-                class="cursor-pointer"
+                class="cursor-pointer student-drag-source"
+                :class="{ 'is-dragging': draggedStudentId === student.id }"
                 @mousedown.prevent="onMouseDown($event, student.id)"
               >
                 <AppExamSeatCard
                   :student-name="student.name"
                   :student-id="student.id"
-                  :seat-number="student.seat"
+                  :seat-number="getSeatLabel(student.seat)"
                   :avatar-url="student.avatar"
                 />
               </div>
@@ -160,29 +161,32 @@
           <AppButton
             :label="$t('admin.seatManagement.saveButton')"
             class="btn-confirm-seat"
+            :disable="!isSeatAssignmentComplete"
             @click="handleSave"
           />
         </div>
       </div>
     </div>
 
-    <!-- Custom Opaque Drag Ghost -->
-    <div
-      v-if="draggedStudentId && draggedStudentInfo"
-      class="custom-drag-ghost"
-      :style="{
-        left: dragX - dragOffsetX + 'px',
-        top: dragY - dragOffsetY + 'px',
-        width: dragWidth + 'px',
-      }"
-    >
-      <AppExamSeatCard
-        :student-name="draggedStudentInfo.name"
-        :student-id="draggedStudentInfo.id"
-        :seat-number="draggedStudentInfo.seat"
-        :avatar-url="draggedStudentInfo.avatar"
-      />
-    </div>
+    <!-- Custom Opaque Drag Ghost Teleported to body to ensure perfect fixed coordinate alignment without parent offsets -->
+    <teleport to="body">
+      <div
+        v-if="draggedStudentId && draggedStudentInfo"
+        class="custom-drag-ghost"
+        :style="{
+          left: dragX - dragOffsetX + 'px',
+          top: dragY - dragOffsetY + 'px',
+          width: dragWidth + 'px',
+        }"
+      >
+        <AppExamSeatCard
+          :student-name="draggedStudentInfo.name"
+          :student-id="draggedStudentInfo.id"
+          :seat-number="getSeatLabel(draggedStudentInfo.seat)"
+          :avatar-url="draggedStudentInfo.avatar"
+        />
+      </div>
+    </teleport>
 
     <!-- Hidden native ghost to bypass browser fading -->
     <div id="hidden-drag-ghost" class="hidden-drag-ghost-box"></div>
@@ -227,6 +231,7 @@ const {
   applicantCount,
   paidCount,
   filteredStudents,
+  isSeatAssignmentComplete,
   draggedStudentId,
   draggedOverSeatId,
   dragX,
@@ -236,6 +241,7 @@ const {
   dragWidth,
   draggedStudentInfo,
   loadExamData,
+  getSeatLabel,
   onMouseDown,
   onSeatEnter,
   onSeatLeave,
@@ -430,14 +436,40 @@ h1 {
   position: fixed;
   pointer-events: none;
   z-index: 9999;
-  opacity: 1 !important;
-  /* Removed transform to allow precise offset positioning */
-  box-shadow: var(--seat-ghost-shadow);
+  opacity: 0.95 !important; /* Premium slight transparency */
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2) !important; /* Premium lift shadow */
   border-radius: 8px;
   background: var(--surface-card);
+  transition: none !important; /* Zero lag positioning */
+  transform: scale(1.03); /* Interactive tactile physical lift without rotation */
+  transform-origin: center center;
+}
+
+.custom-drag-ghost :deep(.exam-seat-card) {
+  transition: none !important; /* Prevent child internal animations from lagging position */
+}
+
+.student-drag-source {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+
+  &.is-dragging {
+    opacity: 0.3;
+    transform: scale(0.96);
+  }
 }
 
 .font-weight-medium {
   font-weight: 500;
+}
+</style>
+
+<!-- Global helper styles for drag locking and cursor feedback -->
+<style lang="scss">
+body.is-dragging-active,
+body.is-dragging-active * {
+  cursor: grabbing !important;
+  user-select: none !important;
 }
 </style>
