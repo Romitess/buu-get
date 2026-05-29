@@ -17,6 +17,7 @@
       aria-hidden="true"
     />
     <span v-else>{{ seatNumber }}</span>
+    <slot />
   </div>
 </template>
 

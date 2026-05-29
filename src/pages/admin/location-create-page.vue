@@ -77,6 +77,8 @@
                   class="buu-input-muted"
                   hide-bottom-space
                   min="1"
+                  :max="MAX_SEAT_LAYOUT_SIZE"
+                  @update:model-value="(val) => (rows = clampSeatLayoutValue(val))"
                 />
               </div>
               <div class="col-6">
@@ -90,6 +92,8 @@
                   class="buu-input-muted"
                   hide-bottom-space
                   min="1"
+                  :max="MAX_SEAT_LAYOUT_SIZE"
+                  @update:model-value="(val) => (cols = clampSeatLayoutValue(val))"
                 />
               </div>
             </div>
@@ -147,6 +151,8 @@ import AppButton from 'src/components/base/app-button.vue';
 import AppExamSeatPreview from 'src/components/exam/app-exam-seat-preview.vue';
 import { createLocationWithSeats } from 'src/services/location.service';
 
+const MAX_SEAT_LAYOUT_SIZE = 25;
+
 const router = useRouter();
 const $q = useQuasar();
 
@@ -161,6 +167,15 @@ const isSaving = ref(false);
 const totalSeats = computed(() => {
   return (rows.value || 0) * (cols.value || 0);
 });
+
+const clampSeatLayoutValue = (value: unknown): number | null => {
+  if (value === '' || value === null || value === undefined) return null;
+
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return null;
+
+  return Math.min(MAX_SEAT_LAYOUT_SIZE, Math.max(1, Math.floor(numericValue)));
+};
 
 const handleSave = async (): Promise<void> => {
   // Validation
@@ -177,6 +192,15 @@ const handleSave = async (): Promise<void> => {
     $q.notify({
       type: 'warning',
       message: 'กรุณากรอกจำนวนแถวและคอลัมน์',
+      position: 'top',
+    });
+    return;
+  }
+
+  if (rows.value > MAX_SEAT_LAYOUT_SIZE || cols.value > MAX_SEAT_LAYOUT_SIZE) {
+    $q.notify({
+      type: 'warning',
+      message: `จำนวนแถวและคอลัมน์ต้องไม่เกิน ${MAX_SEAT_LAYOUT_SIZE}`,
       position: 'top',
     });
     return;

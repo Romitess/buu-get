@@ -308,6 +308,10 @@ export default {
       pageTitle: 'Manage Exam Locations',
       pageDescription: 'Manage exam room information, set capacity, and arrange exam locations',
       createLocation: 'Create Room',
+      seatTooltip: {
+        markBroken: 'Click to mark this seat as unavailable',
+        markAvailable: 'Click to restore this seat',
+      },
       table: {
         columns: {
           index: 'No.',

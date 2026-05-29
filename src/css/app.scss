@@ -36,6 +36,7 @@
   --text-primary: #1a1a1a;
   --text-secondary: #6c6c6c;
   --text-input: #1a1a1a; // สีตัวอักษรในช่อง Input
+  --text-placeholder: #c0c0c0;
   --text-muted: #9a9a9a;
   --text-on-dark: #e0e0e0;
   --text-on-primary: #ffffff;
@@ -674,7 +675,8 @@ body {
     color: var(--text-input) !important;
   }
   .q-placeholder {
-    color: #b0b0b0 !important;
+    color: var(--text-placeholder) !important;
+    opacity: 1 !important;
   }
 }
 

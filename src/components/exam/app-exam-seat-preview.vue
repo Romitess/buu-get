@@ -48,7 +48,15 @@
                 :seat-number="seat.id"
                 :status="brokenSeats.has(seat.id) ? 'broken' : 'available'"
                 @click="handleSeatClick"
-              />
+              >
+                <q-tooltip anchor="top middle" self="bottom middle" class="text-body2">
+                  {{
+                    brokenSeats.has(seat.id)
+                      ? t('admin.locationManagement.seatTooltip.markAvailable')
+                      : t('admin.locationManagement.seatTooltip.markBroken')
+                  }}
+                </q-tooltip>
+              </AppExamSeatSquare>
             </div>
           </template>
         </div>
@@ -67,6 +75,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppSeatLegend from './app-seat-legend.vue';
 import AppSeatBrokenDialog from './app-seat-broken-dialog.vue';
 import AppExamSeatSquare from './app-exam-seat-square.vue';
@@ -86,6 +95,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const MAX_SEATS = Infinity;
+const { t } = useI18n();
 
 const rowCount = computed(() => props.rows ?? 0);
 const colCount = computed(() => props.cols ?? 0);

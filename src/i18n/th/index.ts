@@ -391,6 +391,10 @@ export default {
       pageTitle: 'จัดการห้องสอบ',
       pageDescription: 'จัดการข้อมูลห้องสอบ กำหนดรายละเอียด ความจุ และรองรับการจัดสอบ',
       createLocation: 'สร้างห้องสอบ',
+      seatTooltip: {
+        markBroken: 'คลิกเพื่อทำเครื่องหมายว่าที่นั่งนี้ชำรุด',
+        markAvailable: 'คลิกเพื่อเปลี่ยนกลับเป็นที่นั่งปกติ',
+      },
       table: {
         columns: {
           index: 'ลำดับ',
