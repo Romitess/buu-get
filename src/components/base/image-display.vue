@@ -1,26 +1,19 @@
 <template>
-  <div class="image-display-container">
+  <div class="image-display-container" :style="{ ...imageSizeStyle }">
     <!-- Image -->
     <img
-      v-if="isImageAvailable"
-      :src="displayUrl"
+      :src="isImageAvailable ? displayUrl : defaultUserImage"
       :alt="alt"
       class="image"
-      :style="{ ...imageSizeStyle }"
+      :class="{ 'default-user-avatar': !isImageAvailable }"
     />
-
-    <!-- Placeholder (ไม่มีรูป) -->
-    <div v-else class="image-placeholder" :style="{ ...imageSizeStyle }">
-      <q-icon name="image" size="48px" color="grey-6" />
-      <p class="text-caption text-grey-6">{{ placeholderText }}</p>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useImageUrl } from 'src/composables/use-image-url';
+import defaultUserImage from 'src/assets/img/user-image.jpg';
 
 interface Props {
   /** imagePath ที่เก็บใน database */
@@ -45,11 +38,7 @@ const props = withDefaults(defineProps<Props>(), {
   borderRadius: '8px',
 });
 
-const { t } = useI18n();
-
 const { displayUrl, isImageAvailable } = useImageUrl(() => props.imagePath);
-
-const placeholderText = computed(() => t('image.display.placeholder') ?? 'No image available');
 
 const imageSizeStyle = computed(() => ({
   width: props.width,
@@ -60,20 +49,20 @@ const imageSizeStyle = computed(() => ({
 
 <style scoped lang="scss">
 .image-display-container {
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .image {
+  width: 100%;
+  height: 100%;
   object-fit: v-bind(objectFit);
   display: block;
-}
 
-.image-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #f5f5f5;
-  border: 1px solid #e0e0e0;
+  &.default-user-avatar {
+    transform: scale(1.25); /* Zoom and crop the default user image to remove white padding */
+  }
 }
 </style>
