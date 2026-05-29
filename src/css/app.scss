@@ -773,3 +773,71 @@ body {
 .buu-divider-brown {
   background-color: var(--buu-brown) !important;
 }
+
+// ─────────────────────────────────────────────
+// 7. Form Validation — Shake & Bounce Animation
+// ─────────────────────────────────────────────
+
+// Shake animation for invalid fields
+@keyframes buu-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 50%, 90% { transform: translateX(-4px); }
+  30%, 70% { transform: translateX(4px); }
+}
+
+// Bounce-in for error messages
+@keyframes buu-bounce-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(2px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// Pulse glow for the error icon
+@keyframes buu-pulse-glow {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+// Error field wrapper — applies shake + red border
+.buu-field-error {
+  animation: buu-shake 0.5s ease-in-out;
+
+  &.q-field--outlined .q-field__control,
+  .q-field--outlined .q-field__control {
+    border-color: var(--negative, #e53934) !important;
+    box-shadow: 0 0 0 2px rgba(229, 57, 52, 0.15) !important;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  // Also override the buu-input-muted border
+  &.buu-input-muted.q-field--outlined .q-field__control {
+    border: 1px solid var(--negative, #e53934) !important;
+    box-shadow: 0 0 0 2px rgba(229, 57, 52, 0.15) !important;
+  }
+}
+
+// Error message text with bounce animation
+.buu-error-msg {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--negative, #e53934);
+  animation: buu-bounce-in 0.4s ease-out;
+
+  .buu-error-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+}
