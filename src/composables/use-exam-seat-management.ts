@@ -122,12 +122,28 @@ export function useExamSeatManagement() {
   // Paid applicants count (same as above for this view)
   const paidCount = computed((): number => applicantCount.value);
 
+  const getSeatLabel = (seatId: string | null | undefined): string | null => {
+    if (!seatId) return null;
+
+    const seat = activeSession.value?.LOCATION?.SEATS?.find((s) => String(s.LS_ID) === seatId);
+    return seat?.LS_SEAT_LABEL || seatId;
+  };
+
+  const isSeatAssignmentComplete = computed((): boolean => {
+    return students.value.length > 0 && students.value.every((student) => Boolean(student.seat));
+  });
+
   const filteredStudents = computed((): StudentSeatInfo[] => {
     const query = searchQuery.value.toLowerCase().trim();
     const list = query
-      ? students.value.filter(
-          (s) => s.name.toLowerCase().includes(query) || s.id.toLowerCase().includes(query),
-        )
+      ? students.value.filter((s) => {
+          const seatLabel = getSeatLabel(s.seat)?.toLowerCase() || '';
+          return (
+            s.name.toLowerCase().includes(query) ||
+            s.id.toLowerCase().includes(query) ||
+            seatLabel.includes(query)
+          );
+        })
       : [...students.value];
 
     // Sort: null seats (unassigned) first, then by name
@@ -269,6 +285,8 @@ export function useExamSeatManagement() {
       draggedStudentId.value = null;
       draggedOverSeatId.value = null;
 
+      document.body.classList.remove('is-dragging-active');
+
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onGlobalMouseUp);
     }
@@ -290,6 +308,8 @@ export function useExamSeatManagement() {
     draggedStudentId.value = studentId;
     dragX.value = e.clientX;
     dragY.value = e.clientY;
+
+    document.body.classList.add('is-dragging-active');
 
     // Track global mouse movement for the ghost
     window.addEventListener('mousemove', onMouseMove);
@@ -351,6 +371,8 @@ export function useExamSeatManagement() {
 
   const handleSave = async (): Promise<void> => {
     if (!activeSessionId.value) return;
+    if (!isSeatAssignmentComplete.value) return;
+
     isLoading.value = true;
     error.value = null;
     try {
@@ -489,6 +511,7 @@ export function useExamSeatManagement() {
   });
 
   onBeforeUnmount(() => {
+    document.body.classList.remove('is-dragging-active');
     window.removeEventListener('mousemove', onMouseMove);
     window.removeEventListener('mouseup', onGlobalMouseUp);
   });
@@ -514,6 +537,7 @@ export function useExamSeatManagement() {
     applicantCount,
     paidCount,
     filteredStudents,
+    isSeatAssignmentComplete,
     // Drag state
     draggedStudentId,
     draggedOverSeatId,
@@ -525,6 +549,7 @@ export function useExamSeatManagement() {
     draggedStudentInfo,
     // Methods
     loadExamData,
+    getSeatLabel,
     onMouseDown,
     onSeatEnter,
     onSeatLeave,
