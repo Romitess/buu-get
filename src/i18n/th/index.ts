@@ -391,6 +391,38 @@ export default {
       pageTitle: 'จัดการห้องสอบ',
       pageDescription: 'จัดการข้อมูลห้องสอบ กำหนดรายละเอียด ความจุ และรองรับการจัดสอบ',
       createLocation: 'สร้างห้องสอบ',
+      createPage: {
+        title: 'สร้างห้องสอบ',
+        subtitle: 'จัดการข้อมูลห้องสอบ เพื่อรองรับการจัดสอบได้อย่างเป็นระบบและมีประสิทธิภาพ',
+        sections: {
+          roomInfo: 'ข้อมูลห้องสอบ',
+          seatLayout: 'ตั้งค่าผังที่นั่ง',
+        },
+        fields: {
+          roomName: 'ชื่อห้องสอบ',
+          floor: 'ชั้นที่สอบ',
+          building: 'สถานที่/อาคาร',
+          rows: 'แถว (Rows)',
+          cols: 'คอลัมน์ (Cols)',
+          splitLeftRight: 'แบ่งซ้าย-ขวา',
+        },
+        placeholders: {
+          roomName: 'QS1-1001',
+          floor: '1',
+          building: 'อาคาร 60 พรรษา',
+          rows: '1',
+          cols: '1',
+        },
+        totalSeats: 'จำนวนที่นั่งทั้งหมด',
+        actions: {
+          save: 'บันทึก',
+        },
+        validation: {
+          roomNameRequired: 'กรุณากรอกชื่อห้องสอบ',
+          layoutRequired: 'กรุณากรอกจำนวนแถวและคอลัมน์',
+          layoutLimit: 'จำนวนแถวและคอลัมน์ต้องไม่เกิน {max}',
+        },
+      },
       seatTooltip: {
         markBroken: 'คลิกเพื่อทำเครื่องหมายว่าที่นั่งนี้ชำรุด',
         markAvailable: 'คลิกเพื่อเปลี่ยนกลับเป็นที่นั่งปกติ',

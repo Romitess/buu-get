@@ -308,6 +308,38 @@ export default {
       pageTitle: 'Manage Exam Locations',
       pageDescription: 'Manage exam room information, set capacity, and arrange exam locations',
       createLocation: 'Create Room',
+      createPage: {
+        title: 'Create Exam Room',
+        subtitle: 'Manage exam room information for organized and efficient exam operations',
+        sections: {
+          roomInfo: 'Exam Room Information',
+          seatLayout: 'Seat Layout Settings',
+        },
+        fields: {
+          roomName: 'Room Name',
+          floor: 'Exam Floor',
+          building: 'Location/Building',
+          rows: 'Rows',
+          cols: 'Columns',
+          splitLeftRight: 'Split left-right',
+        },
+        placeholders: {
+          roomName: 'QS1-1001',
+          floor: '1',
+          building: '60th Anniversary Building',
+          rows: '1',
+          cols: '1',
+        },
+        totalSeats: 'Total seats',
+        actions: {
+          save: 'Save',
+        },
+        validation: {
+          roomNameRequired: 'Please enter the room name',
+          layoutRequired: 'Please enter the number of rows and columns',
+          layoutLimit: 'Rows and columns must not exceed {max}',
+        },
+      },
       seatTooltip: {
         markBroken: 'Click to mark this seat as unavailable',
         markAvailable: 'Click to restore this seat',

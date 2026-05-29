@@ -36,7 +36,7 @@
   --text-primary: #1a1a1a;
   --text-secondary: #6c6c6c;
   --text-input: #1a1a1a; // สีตัวอักษรในช่อง Input
-  --text-placeholder: #c0c0c0;
+  --text-placeholder: #9ca3af;
   --text-muted: #9a9a9a;
   --text-on-dark: #e0e0e0;
   --text-on-primary: #ffffff;
@@ -667,6 +667,7 @@ body {
 
   .q-field__native {
     color: #000000 !important;
+    opacity: 1 !important;
     -webkit-text-fill-color: #000000 !important;
   }
   .q-field__prefix,
@@ -676,7 +677,12 @@ body {
   }
   .q-placeholder {
     color: var(--text-placeholder) !important;
-    opacity: 1 !important;
+    opacity: 0.65 !important;
+  }
+  .q-field__native::placeholder,
+  .q-field__input::placeholder {
+    color: var(--text-placeholder) !important;
+    opacity: 0.65 !important;
   }
 }
 
