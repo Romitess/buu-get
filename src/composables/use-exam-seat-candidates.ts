@@ -51,6 +51,22 @@ export function useExamSeatCandidates() {
     );
   });
 
+  const getSeatLabel = (enrollment: BackendEnrollmentDetail): string => {
+    const seat = activeSession.value?.LOCATION?.SEATS?.find((s) => s.LS_ID === enrollment.LS_ID);
+    if (seat?.LS_SEAT_LABEL) {
+      return seat.LS_SEAT_LABEL;
+    }
+
+    if (
+      enrollment.LOCATION_SEAT?.LS_ID === enrollment.LS_ID &&
+      enrollment.LOCATION_SEAT.LS_SEAT_LABEL
+    ) {
+      return enrollment.LOCATION_SEAT.LS_SEAT_LABEL;
+    }
+
+    return '-';
+  };
+
   // Map raw enrollment data to table rows
   const tableRows = computed((): SeatCandidateRow[] => {
     return sessionEnrollments.value.map(
@@ -60,7 +76,7 @@ export function useExamSeatCandidates() {
         nationalId: e.USER?.USER_NATIONAL_ID || '-',
         titleTh: e.USER?.PROFILE?.userTitleTh || '-',
         fullnameTh: e.USER?.PROFILE?.userFullnameTh || '-',
-        seatNumber: e.LOCATION_SEAT?.LS_SEAT_LABEL || '-',
+        seatNumber: getSeatLabel(e),
         sessionId: e.SESSION_ID,
       }),
     );
