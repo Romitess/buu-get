@@ -102,7 +102,7 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import { useExamSeatCandidates } from 'src/composables/use-exam-seat-candidates';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
-import { createVoucherFromEnrollment, sendVoucherEmail } from 'src/services/voucher.service';
+import { bulkIssueVouchers } from 'src/services/voucher.service';
 import { formatThaiLongDate } from 'src/utils/thai-date';
 import { EXAM_TYPE_GENERAL } from 'src/constants/exam';
 
@@ -145,14 +145,10 @@ const startIssuingTickets = async (): Promise<void> => {
   }
 
   $q.loading.show({
-    message: 'กำลังเริ่มต้นออกบัตรประจำตัวสอบและจัดส่งอีเมล...',
+    message: 'กำลังออกบัตรประจำตัวสอบและจัดส่งอีเมลแจ้งเตือนผู้เข้าสอบทั้งหมด...',
   });
 
   try {
-    const total = sessionEnrollments.value.length;
-    // ดึงค่า Batch Size จาก Environment Variable (ถ้าไม่มีให้ใช้ 10) เพื่อลด Hardcode ตามมาตรฐานองค์กร
-    const batchSize = Number(import.meta.env.VITE_MAIL_BATCH_SIZE) || 10;
-
     // Resolve the exact absolute URL correctly using Vue Router (handles Hash mode / History mode automatically)
     const resolvedRoute = router.resolve({ name: 'exam-history' });
     const historyUrl = new URL(
@@ -160,36 +156,18 @@ const startIssuingTickets = async (): Promise<void> => {
       import.meta.env.VITE_APP_URL || window.location.origin,
     ).href;
 
-    for (let i = 0; i < total; i += batchSize) {
-      const batch = sessionEnrollments.value.slice(i, i + batchSize);
+    const ermIds = sessionEnrollments.value
+      .filter((enrollment) => enrollment && enrollment.ERM_ID)
+      .map((enrollment) => enrollment.ERM_ID);
 
-      $q.loading.show({
-        message: `กำลังดำเนินการและจัดส่งอีเมลแจ้งเตือน (${Math.min(i + batchSize, total)}/${total})...`,
-      });
+    const examName = exam.value?.EXAM_NAME || 'BUU-GET Exam';
 
-      await Promise.all(
-        batch.map(async (enrollment) => {
-          if (!enrollment) return;
-
-          const prefix = enrollment.USER?.PROFILE?.userTitleTh || '';
-          const fullname = enrollment.USER?.PROFILE?.userFullnameTh || '';
-          const fullName = `${prefix} ${fullname}`.trim() || 'ผู้สมัครสอบ';
-
-          // 1. Create voucher
-          await createVoucherFromEnrollment(enrollment.ERM_ID);
-
-          const examName = exam.value?.EXAM_NAME || 'BUU-GET Exam';
-
-          // 2. Send email notification
-          await sendVoucherEmail({
-            email: enrollment.USER.USER_EMAIL,
-            fullName,
-            examName,
-            historyUrl,
-          });
-        }),
-      );
-    }
+    // Perform bulk voucher issuance and bulk email dispatch in a single optimized request
+    await bulkIssueVouchers({
+      ermIds,
+      examName,
+      historyUrl,
+    });
 
     $q.notify({
       type: 'positive',

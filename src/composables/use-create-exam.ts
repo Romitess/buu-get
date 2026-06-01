@@ -1,4 +1,4 @@
-import { ref, computed, type Ref } from 'vue';
+import { ref, computed, nextTick, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useExamStore } from 'src/stores/exam.store';
@@ -11,6 +11,7 @@ import {
   MAX_EXAM_SESSIONS,
   MIN_EXAM_SESSIONS,
   NOTIFY_MSG,
+  VALIDATION_MSG,
 } from 'src/constants/exam';
 import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
 import type { PasscodeType } from 'src/types/exam';
@@ -240,6 +241,117 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
     return errors;
   });
+
+  // ── Field-level validation (required fields) ──
+  /** Reactive object holding per-field validation error messages */
+  const fieldErrors = ref<Record<string, string>>({});
+
+  /** Counter to re-trigger shake animation (increment to re-animate) */
+  const shakeKey = ref(0);
+
+  /**
+   * Validate required fields and populate fieldErrors.
+   * @returns true if all required fields are filled, false otherwise.
+   */
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    // ── Card 1: ข้อมูลพื้นฐาน ──
+    if (!form.value.examName || !form.value.examName.trim()) {
+      errors.examName = VALIDATION_MSG.EXAM_NAME;
+    }
+    if (!form.value.examType) {
+      errors.examType = VALIDATION_MSG.EXAM_TYPE;
+    }
+    if (!form.value.examFormat) {
+      errors.examFormat = VALIDATION_MSG.EXAM_FORMAT;
+    }
+    if (!isSpecialRound.value && !form.value.fundSourceId) {
+      errors.fundSourceId = VALIDATION_MSG.FUND_SOURCE;
+    }
+
+    // ── Card 2: กำหนดการสอบ ──
+    if (!form.value.examDate || !form.value.examDate.trim()) {
+      errors.examDate = VALIDATION_MSG.EXAM_DATE;
+    }
+    // Validate time slots
+    form.value.timeSlots.forEach((slot, slotIdx) => {
+      if (!slot.startTime || !slot.startTime.trim()) {
+        errors[`startTime_${slotIdx}`] = VALIDATION_MSG.START_TIME;
+      }
+      if (!slot.endTime || !slot.endTime.trim()) {
+        errors[`endTime_${slotIdx}`] = VALIDATION_MSG.END_TIME;
+      }
+      slot.rooms.forEach((room, roomIdx) => {
+        if (!room.locationId) {
+          errors[`locationId_${slotIdx}_${roomIdx}`] = VALIDATION_MSG.LOCATION;
+        }
+        if (!room.seats || room.seats <= 0) {
+          errors[`seats_${slotIdx}_${roomIdx}`] = VALIDATION_MSG.SEATS;
+        }
+      });
+    });
+
+    // ── Card 3: กำหนดการลงทะเบียน ──
+    if (!form.value.regStartDate || !form.value.regStartDate.trim()) {
+      errors.regStartDate = VALIDATION_MSG.REG_START_DATE;
+    }
+    if (!form.value.regEndDate || !form.value.regEndDate.trim()) {
+      errors.regEndDate = VALIDATION_MSG.REG_END_DATE;
+    }
+    if (!isSpecialRound.value) {
+      if (!form.value.payStartDate || !form.value.payStartDate.trim()) {
+        errors.payStartDate = VALIDATION_MSG.PAY_START_DATE;
+      }
+      if (!form.value.payEndDate || !form.value.payEndDate.trim()) {
+        errors.payEndDate = VALIDATION_MSG.PAY_END_DATE;
+      }
+    }
+
+    fieldErrors.value = errors;
+    return Object.keys(errors).length === 0;
+  };
+
+  /**
+   * Re-trigger the shake animation by incrementing shakeKey.
+   * Used to replay the animation even if the same fields are still invalid.
+   */
+  const triggerShake = (): void => {
+    shakeKey.value++;
+  };
+
+  /**
+   * Clear a specific field error when the user fills in the field.
+   */
+  const clearFieldError = (fieldName: string): void => {
+    if (fieldErrors.value[fieldName]) {
+      const newErrors = { ...fieldErrors.value };
+      delete newErrors[fieldName];
+      fieldErrors.value = newErrors;
+    }
+  };
+
+  /**
+   * Scroll smoothly to the first field with a validation error.
+   * Uses data-field attribute to find the DOM element.
+   */
+  const scrollToFirstError = async (): Promise<void> => {
+    await nextTick();
+
+    const firstErrorKey = Object.keys(fieldErrors.value)[0];
+    if (!firstErrorKey) return;
+
+    const el = document.querySelector(`[data-field="${firstErrorKey}"]`) as HTMLElement;
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Focus the input inside if possible
+      await nextTick();
+      const input = el.querySelector('input, select, .q-field__native') as HTMLElement;
+      if (input && typeof input.focus === 'function') {
+        input.focus();
+      }
+    }
+  };
 
   /**
    * Converts a backend date (YYYY-MM-DD or ISO) to DD/MM/YYYY Buddhist Era.
@@ -722,6 +834,14 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    * @returns Promise<boolean> - true if saved successfully, false otherwise
    */
   const handleSave = async (): Promise<boolean> => {
+    // ── Step 0: Required-field validation with scroll-to-error ──
+    const isValid = validateForm();
+    if (!isValid) {
+      triggerShake();
+      await scrollToFirstError();
+      return false;
+    }
+
     const flatRooms = flattenRoomsToTimeRanges();
 
     if (flatRooms.length === 0) {
@@ -987,6 +1107,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     activeSlotIndex,
     candidateSearch,
     filteredCandidates,
+    fieldErrors,
+    shakeKey,
     loadInitialData,
     addTimeSlot,
     removeTimeSlot,
@@ -1000,5 +1122,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     autoFormatTime,
     sortTimeSlots,
     dateErrors,
+    clearFieldError,
   };
 }

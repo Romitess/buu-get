@@ -29,12 +29,13 @@
       <div class="row q-col-gutter-xl">
         <!-- Left: Avatar -->
         <div class="col-12 col-md-3 flex column flex-center">
-          <div class="avatar-container q-mb-md">
+          <div class="avatar-container q-mb-md cursor-pointer" @click="triggerFileInput">
             <q-avatar size="160px" class="profile-avatar">
-              <img
-                :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${userStore.currentUser?.fullNameEN || 'Somdream'}`"
-                alt="Avatar"
-              />
+              <!-- ใช้ img โดยตรงแทน ImageDisplay เพื่อหลีกเลี่ยงการซ้อนกันของ wrapper div -->
+              <img :src="avatarSrc" alt="Avatar" class="profile-avatar-img" />
+              <q-inner-loading :showing="isUploading">
+                <q-spinner-gears size="50px" color="primary" />
+              </q-inner-loading>
             </q-avatar>
             <q-btn
               round
@@ -44,6 +45,17 @@
               size="sm"
               class="avatar-edit-btn"
               unelevated
+              :loading="isUploading"
+              @click.stop="triggerFileInput"
+            />
+            <!-- Hidden File Input inside avatar container -->
+            <q-file
+              ref="fileInputRef"
+              v-model="selectedFile"
+              @update:model-value="handleFileSelected"
+              accept=".jpg,.jpeg"
+              max-file-size="5242880"
+              style="display: none"
             />
           </div>
           <div class="text-weight-medium text-body1">
@@ -304,6 +316,10 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
 import { TITLE_TH_OPTIONS, EDUCATION_LEVEL_OPTIONS } from 'src/utils/form-options';
 import * as userService from 'src/services/user.service';
+import { useImageUpload } from 'src/composables/use-image-upload';
+import defaultUserImage from 'src/assets/img/user-image.jpg';
+import { getImageUrl } from 'src/services/image.service';
+import { api } from 'src/boot/axios';
 
 const router = useRouter();
 const route = useRoute();
@@ -317,6 +333,50 @@ const showPasswordDialog = ref(false);
 const currentPassword = ref('');
 const newPassword = ref('');
 const showCalendar = ref(false);
+
+const fileInputRef = ref();
+const selectedFile = ref<File | null>(null);
+
+/** URL ภาพสำหรับแสดงบน avatar - ใช้ computed ป้องกันซ้อนกัน */
+const avatarSrc = computed<string>(() => {
+  const path = formData.value.userImagePath;
+  if (path) {
+    return getImageUrl(path);
+  }
+  return defaultUserImage;
+});
+
+const { isUploading, handleImageUpload } = useImageUpload({
+  onSuccess: (imagePath: string) => {
+    formData.value.userImagePath = imagePath;
+    selectedFile.value = null;
+    $q.notify({
+      type: 'positive',
+      message: t('success') || 'อัปโหลดรูปภาพสำเร็จ',
+      position: 'top',
+    });
+  },
+  onError: (err) => {
+    $q.notify({
+      type: 'negative',
+      message: err.message || 'อัปโหลดรูปภาพล้มเหลว',
+      position: 'top',
+    });
+  },
+});
+
+const triggerFileInput = (): void => {
+  fileInputRef.value?.pickFiles();
+};
+
+const handleFileSelected = async (file: File | null): Promise<void> => {
+  if (!file) return;
+  try {
+    await handleImageUpload(file, '/user_images');
+  } catch (error) {
+    console.error('Error uploading image:', error);
+  }
+};
 
 interface ProfileFormData {
   email: string;
@@ -421,6 +481,7 @@ onMounted((): void => {
       institution: user.institution || '',
       address: user.address || '',
       phone: user.phone || '',
+      userImagePath: user.userImagePath || undefined,
     };
   }
 });
@@ -454,8 +515,26 @@ const onSave = async (): Promise<void> => {
       userFaculty: formData.value.faculty,
       userInstitution: formData.value.institution,
       userAddress: formData.value.address,
-      userImagePath: formData.value.userImagePath || undefined,
     });
+
+    // บันทึกรูปภาพแยกใน UserImage entity ถ้ามีการเปลี่ยนรูป
+    if (
+      formData.value.userImagePath &&
+      formData.value.userImagePath !== userStore.currentUser?.userImagePath
+    ) {
+      try {
+        await api.patch(
+          '/user-image/me',
+          { userImageUrl: formData.value.userImagePath },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+      } catch (imgErr) {
+        console.warn(
+          'ไม่สามารถบันทึกรูปภาพผ่าน /user-image/me ได้ (endpoint อาจยังไม่มี):',
+          imgErr,
+        );
+      }
+    }
 
     // Refresh user profile in store so header name updates immediately
     await userStore.initialize();
@@ -520,9 +599,17 @@ const onSavePassword = (): void => {
 }
 
 .profile-avatar {
-  background-color: #2196f3;
   border: 4px solid white;
   box-shadow: none !important;
+  background-color: transparent !important;
+  overflow: hidden;
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .avatar-edit-btn {

@@ -46,13 +46,14 @@
       <div v-if="activeSlot" class="active-slot-content">
         <!-- Date and Time Row -->
         <div class="row q-col-gutter-md q-mb-lg">
-          <div class="col-12 col-md-6">
+          <div class="col-12 col-md-6" data-field="examDate">
             <div class="field-label-bold">วันที่สอบ</div>
             <q-input
               v-model="form.examDate"
               outlined
               dense
               class="custom-input bg-white cursor-pointer"
+              :class="{ 'buu-field-error': hasError('examDate') }"
               readonly
               :disable="locked"
               hide-bottom-space
@@ -75,7 +76,12 @@
                   >
                     <AppCalendar
                       :model-value="beToCeString(form.examDate)"
-                      @update:model-value="(val: string) => (form.examDate = ceToBeString(val))"
+                      @update:model-value="
+                        (val: string) => {
+                          form.examDate = ceToBeString(val);
+                          emit('clearFieldError', 'examDate');
+                        }
+                      "
                       @click-date="showExamDate = false"
                     />
                   </q-menu>
@@ -83,6 +89,10 @@
                 <q-icon v-else name="lock" size="xs" color="grey-5" />
               </template>
             </q-input>
+            <div v-if="hasError('examDate')" :key="`examDate-${shakeKey}`" class="buu-error-msg">
+              <q-icon name="error" class="buu-error-icon" />
+              {{ fieldErrors!.examDate }}
+            </div>
             <div
               v-if="dateErrors?.examDate"
               class="text-caption text-negative q-mt-xs row items-center no-wrap"
@@ -91,33 +101,53 @@
               {{ dateErrors.examDate }}
             </div>
           </div>
-          <div class="col-6 col-md-3">
+          <div class="col-6 col-md-3" :data-field="`startTime_${activeSlotIndex}`">
             <div class="field-label-bold">เวลาเริ่ม</div>
             <q-input
               v-model="activeSlot.startTime"
               outlined
               dense
               class="custom-input bg-white"
+              :class="{ 'buu-field-error': hasError(`startTime_${activeSlotIndex}`) }"
               placeholder="08:00"
               mask="##:##"
               hide-bottom-space
               :disable="locked"
               @blur="onTimeBlur('startTime')"
+              @update:model-value="emit('clearFieldError', `startTime_${activeSlotIndex}`)"
             />
+            <div
+              v-if="hasError(`startTime_${activeSlotIndex}`)"
+              :key="`startTime-${shakeKey}`"
+              class="buu-error-msg"
+            >
+              <q-icon name="error" class="buu-error-icon" />
+              {{ fieldErrors![`startTime_${activeSlotIndex}`] }}
+            </div>
           </div>
-          <div class="col-6 col-md-3">
+          <div class="col-6 col-md-3" :data-field="`endTime_${activeSlotIndex}`">
             <div class="field-label-bold">เวลาสิ้นสุด</div>
             <q-input
               v-model="activeSlot.endTime"
               outlined
               dense
               class="custom-input bg-white"
+              :class="{ 'buu-field-error': hasError(`endTime_${activeSlotIndex}`) }"
               placeholder="10:00"
               mask="##:##"
               hide-bottom-space
               :disable="locked"
               @blur="onTimeBlur('endTime')"
+              @update:model-value="emit('clearFieldError', `endTime_${activeSlotIndex}`)"
             />
+            <div
+              v-if="hasError(`endTime_${activeSlotIndex}`)"
+              :key="`endTime-${shakeKey}`"
+              class="buu-error-msg"
+            >
+              <q-icon name="error" class="buu-error-icon" />
+              {{ fieldErrors![`endTime_${activeSlotIndex}`] }}
+            </div>
           </div>
         </div>
 
@@ -153,9 +183,9 @@
           <div
             v-for="(room, rIdx) in activeSlot.rooms"
             :key="rIdx"
-            class="row items-center q-col-gutter-sm q-mb-sm"
+            class="row items-start q-col-gutter-sm q-mb-sm"
           >
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-6" :data-field="`locationId_${activeSlotIndex}_${rIdx}`">
               <q-select
                 v-model="room.locationId"
                 :options="locationOptions"
@@ -169,8 +199,20 @@
                 placeholder="เลือกสถานที่สอบ"
                 dropdown-icon="keyboard_arrow_down"
                 class="custom-input"
+                :class="{ 'buu-field-error': hasError(`locationId_${activeSlotIndex}_${rIdx}`) }"
                 :disable="locked"
+                @update:model-value="
+                  emit('clearFieldError', `locationId_${activeSlotIndex}_${rIdx}`)
+                "
               />
+              <div
+                v-if="hasError(`locationId_${activeSlotIndex}_${rIdx}`)"
+                :key="`loc-${rIdx}-${shakeKey}`"
+                class="buu-error-msg"
+              >
+                <q-icon name="error" class="buu-error-icon" />
+                {{ fieldErrors![`locationId_${activeSlotIndex}_${rIdx}`] }}
+              </div>
             </div>
             <div class="col-12 col-md-3">
               <q-select
@@ -189,7 +231,7 @@
                 :disable="locked"
               />
             </div>
-            <div class="col-12 col-md-3">
+            <div class="col-12 col-md-3" :data-field="`seats_${activeSlotIndex}_${rIdx}`">
               <div class="row no-wrap items-center">
                 <div class="col">
                   <q-input
@@ -199,8 +241,12 @@
                     dense
                     bg-color="white"
                     class="custom-input"
+                    :class="{ 'buu-field-error': hasError(`seats_${activeSlotIndex}_${rIdx}`) }"
                     placeholder="40"
                     :disable="locked"
+                    @update:model-value="
+                      emit('clearFieldError', `seats_${activeSlotIndex}_${rIdx}`)
+                    "
                   />
                 </div>
                 <div class="col-auto q-ml-sm" style="width: 24px">
@@ -213,6 +259,14 @@
                     @click="$emit('remove-room', activeSlotIndex, rIdx)"
                   />
                 </div>
+              </div>
+              <div
+                v-if="hasError(`seats_${activeSlotIndex}_${rIdx}`)"
+                :key="`seats-${rIdx}-${shakeKey}`"
+                class="buu-error-msg"
+              >
+                <q-icon name="error" class="buu-error-icon" />
+                {{ fieldErrors![`seats_${activeSlotIndex}_${rIdx}`] }}
               </div>
             </div>
           </div>
@@ -241,6 +295,10 @@ const props = defineProps<{
   activeSlotIndex: number;
   /** Date validation errors */
   dateErrors?: Record<string, string>;
+  /** Field-level validation errors */
+  fieldErrors?: Record<string, string>;
+  /** Key to re-trigger shake animation */
+  shakeKey?: number;
 }>();
 
 const form = defineModel<CreateExamForm>('form', { required: true });
@@ -252,11 +310,17 @@ const emit = defineEmits([
   'remove-room',
   'update:activeSlotIndex',
   'sort-time-slots',
+  'clearFieldError',
 ]);
 
 const showExamDate = ref(false);
 
 const activeSlot = computed(() => form.value.timeSlots[props.activeSlotIndex]);
+
+/** Check if a field has an error */
+const hasError = (field: string): boolean => {
+  return !!(props.fieldErrors && props.fieldErrors[field]);
+};
 
 const onTimeBlur = (field: 'startTime' | 'endTime') => {
   if (activeSlot.value) {

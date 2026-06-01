@@ -12,13 +12,11 @@
       </div>
       <q-avatar size="36px" class="app-header-profile__avatar">
         <ImageDisplay
-          v-if="userStore.currentUser?.userImagePath"
-          :image-path="userStore.currentUser.userImagePath"
-          width="36px"
-          height="36px"
+          :image-path="userStore.currentUser?.userImagePath"
+          width="100%"
+          height="100%"
           border-radius="50%"
         />
-        <q-icon v-else name="account_circle" size="36px" color="grey-5" />
       </q-avatar>
 
       <!-- Profile Dropdown Card -->
@@ -28,13 +26,11 @@
           <div class="profile-card__header">
             <q-avatar size="72px" class="profile-card__avatar">
               <ImageDisplay
-                v-if="userStore.currentUser?.userImagePath"
-                :image-path="userStore.currentUser.userImagePath"
-                width="72px"
-                height="72px"
+                :image-path="userStore.currentUser?.userImagePath"
+                width="100%"
+                height="100%"
                 border-radius="50%"
               />
-              <q-icon v-else name="account_circle" size="72px" color="grey-4" />
             </q-avatar>
             <div class="profile-card__name">{{ displayName }}</div>
             <div class="profile-card__role">{{ displayRole }}</div>

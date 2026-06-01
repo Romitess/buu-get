@@ -3,8 +3,8 @@
     <!-- Header -->
     <AppBreadcrumbs />
     <AppPageHeader
-      title="สร้างห้องสอบ"
-      subtitle="จัดการข้อมูลห้องสอบ เพื่อรองรับการจัดสอบได้อย่างเป็นระบบและมีประสิทธิภาพ"
+      :title="$t('admin.locationManagement.createPage.title')"
+      :subtitle="$t('admin.locationManagement.createPage.subtitle')"
     />
 
     <div class="row q-col-gutter-md location-create-layout items-stretch">
@@ -14,43 +14,51 @@
           <div class="form-section">
             <div class="row items-center q-mb-sm">
               <q-icon name="info_outline" color="primary" size="sm" class="q-mr-sm" />
-              <div class="text-h6 text-weight-bold text-black">ข้อมูลห้องสอบ</div>
+              <div class="text-h6 text-weight-bold text-black">
+                {{ $t('admin.locationManagement.createPage.sections.roomInfo') }}
+              </div>
             </div>
             <q-separator class="q-mb-md" color="grey-4" />
 
             <div class="q-gutter-y-md q-mb-md q-pt-sm">
               <div>
-                <div class="buu-label-muted q-mb-xs">ชื่อห้องสอบ</div>
+                <div class="buu-label-muted q-mb-xs">
+                  {{ $t('admin.locationManagement.createPage.fields.roomName') }}
+                </div>
                 <q-input
                   v-model="roomName"
                   outlined
                   dense
-                  placeholder="QS1-1001"
+                  :placeholder="$t('admin.locationManagement.createPage.placeholders.roomName')"
                   class="buu-input-muted"
                   hide-bottom-space
                 />
               </div>
 
               <div>
-                <div class="buu-label-muted q-mb-xs">ชั้นที่สอบ</div>
+                <div class="buu-label-muted q-mb-xs">
+                  {{ $t('admin.locationManagement.createPage.fields.floor') }}
+                </div>
                 <q-input
                   v-model="floor"
                   type="number"
                   outlined
                   dense
-                  placeholder="1"
+                  :placeholder="$t('admin.locationManagement.createPage.placeholders.floor')"
                   class="buu-input-muted"
                   hide-bottom-space
                 />
               </div>
 
               <div>
-                <div class="buu-label-muted q-mb-xs">สถานที่/อาคาร</div>
+                <div class="buu-label-muted q-mb-xs">
+                  {{ $t('admin.locationManagement.createPage.fields.building') }}
+                </div>
                 <q-input
                   v-model="building"
                   outlined
                   dense
-                  placeholder="อาคาร 60 พรรษา"
+                  :placeholder="$t('admin.locationManagement.createPage.placeholders.building')"
                   class="buu-input-muted"
                   hide-bottom-space
                 />
@@ -61,19 +69,23 @@
           <div class="form-section">
             <div class="row items-center q-mb-xs">
               <q-icon name="grid_view" color="primary" size="sm" class="q-mr-sm" />
-              <div class="text-h6 text-weight-bold text-black">ตั้งค่าผังที่นั่ง</div>
+              <div class="text-h6 text-weight-bold text-black">
+                {{ $t('admin.locationManagement.createPage.sections.seatLayout') }}
+              </div>
             </div>
             <q-separator class="q-mb-md" color="grey-4" />
 
             <div class="row q-col-gutter-sm q-mb-md">
               <div class="col-6">
-                <div class="buu-label-muted q-mb-xs">แถว (Rows)</div>
+                <div class="buu-label-muted q-mb-xs">
+                  {{ $t('admin.locationManagement.createPage.fields.rows') }}
+                </div>
                 <q-input
                   v-model.number="rows"
                   type="number"
                   outlined
                   dense
-                  placeholder="1"
+                  :placeholder="$t('admin.locationManagement.createPage.placeholders.rows')"
                   class="buu-input-muted"
                   hide-bottom-space
                   min="1"
@@ -82,13 +94,15 @@
                 />
               </div>
               <div class="col-6">
-                <div class="buu-label-muted q-mb-xs">คอลัมน์ (Cols)</div>
+                <div class="buu-label-muted q-mb-xs">
+                  {{ $t('admin.locationManagement.createPage.fields.cols') }}
+                </div>
                 <q-input
                   v-model.number="cols"
                   type="number"
                   outlined
                   dense
-                  placeholder="1"
+                  :placeholder="$t('admin.locationManagement.createPage.placeholders.cols')"
                   class="buu-input-muted"
                   hide-bottom-space
                   min="1"
@@ -103,14 +117,18 @@
               class="bg-grey-2 rounded-borders q-mb-md row items-center justify-between"
               style="padding: 12px 16px"
             >
-              <span class="text-body2 text-dark font-weight-medium">แบ่งซ้าย-ขวา</span>
+              <span class="text-body2 text-dark font-weight-medium">
+                {{ $t('admin.locationManagement.createPage.fields.splitLeftRight') }}
+              </span>
               <q-toggle v-model="splitLeftRight" class="buu-toggle-muted" color="primary" />
             </div>
 
             <!-- Total Seats Box -->
             <div class="total-seats-box column flex-center rounded-borders" style="padding: 16px">
               <div class="text-primary text-h4 text-weight-bold">{{ totalSeats }}</div>
-              <div class="text-caption text-grey-8">จำนวนที่นั่งทั้งหมด</div>
+              <div class="text-caption text-grey-8">
+                {{ $t('admin.locationManagement.createPage.totalSeats') }}
+              </div>
             </div>
           </div>
         </div>
@@ -127,7 +145,7 @@
         <!-- Save Button -->
         <div class="row justify-end preview-actions">
           <AppButton
-            label="บันทึก"
+            :label="$t('admin.locationManagement.createPage.actions.save')"
             color="primary"
             class="text-weight-bold q-px-xl"
             style="border-radius: 8px; min-width: 140px"
@@ -144,6 +162,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
@@ -155,6 +174,7 @@ const MAX_SEAT_LAYOUT_SIZE = 25;
 
 const router = useRouter();
 const $q = useQuasar();
+const { t } = useI18n();
 
 const roomName = ref('');
 const floor = ref<number | null>(null);
@@ -178,11 +198,10 @@ const clampSeatLayoutValue = (value: unknown): number | null => {
 };
 
 const handleSave = async (): Promise<void> => {
-  // Validation
   if (!roomName.value.trim()) {
     $q.notify({
       type: 'warning',
-      message: 'กรุณากรอกชื่อห้องสอบ',
+      message: t('admin.locationManagement.createPage.validation.roomNameRequired'),
       position: 'top',
     });
     return;
@@ -191,7 +210,7 @@ const handleSave = async (): Promise<void> => {
   if (!rows.value || rows.value < 1 || !cols.value || cols.value < 1) {
     $q.notify({
       type: 'warning',
-      message: 'กรุณากรอกจำนวนแถวและคอลัมน์',
+      message: t('admin.locationManagement.createPage.validation.layoutRequired'),
       position: 'top',
     });
     return;
@@ -200,7 +219,9 @@ const handleSave = async (): Promise<void> => {
   if (rows.value > MAX_SEAT_LAYOUT_SIZE || cols.value > MAX_SEAT_LAYOUT_SIZE) {
     $q.notify({
       type: 'warning',
-      message: `จำนวนแถวและคอลัมน์ต้องไม่เกิน ${MAX_SEAT_LAYOUT_SIZE}`,
+      message: t('admin.locationManagement.createPage.validation.layoutLimit', {
+        max: MAX_SEAT_LAYOUT_SIZE,
+      }),
       position: 'top',
     });
     return;
@@ -223,7 +244,7 @@ const handleSave = async (): Promise<void> => {
 
     $q.notify({
       type: 'positive',
-      message: 'บันทึกข้อมูลห้องสอบเรียบร้อยแล้ว',
+      message: t('admin.locationManagement.notifications.createSuccess'),
       position: 'top',
     });
     void router.push({ name: 'admin-location-management' });
@@ -231,7 +252,7 @@ const handleSave = async (): Promise<void> => {
     console.error('Error creating location:', error);
     $q.notify({
       type: 'negative',
-      message: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง',
+      message: t('admin.locationManagement.notifications.createError'),
       position: 'top',
     });
   } finally {

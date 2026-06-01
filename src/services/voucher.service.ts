@@ -7,6 +7,12 @@ export interface SendVoucherEmailPayload {
   historyUrl: string;
 }
 
+export interface BulkIssueVouchersPayload {
+  ermIds: number[];
+  examName: string;
+  historyUrl: string;
+}
+
 export interface BackendVoucher {
   VC_ID: number;
   ERM_ID: number;
@@ -22,10 +28,14 @@ export const createVoucherFromEnrollment = async (ermId: number): Promise<Backen
 
 export const sendVoucherEmail = async (
   payload: SendVoucherEmailPayload,
-): Promise<{ success: boolean; previewUrl?: string }> => {
-  const response = await api.post<{ success: boolean; previewUrl?: string }>(
-    '/exam-vouchers/send-ticket',
-    payload,
-  );
+): Promise<{ success: boolean }> => {
+  const response = await api.post<{ success: boolean }>('/exam-vouchers/send-ticket', payload);
+  return response.data;
+};
+
+export const bulkIssueVouchers = async (
+  payload: BulkIssueVouchersPayload,
+): Promise<{ success: boolean }> => {
+  const response = await api.post<{ success: boolean }>('/exam-vouchers/bulk-issue', payload);
   return response.data;
 };

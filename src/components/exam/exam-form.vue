@@ -9,6 +9,9 @@
       :is-loading-data="isLoadingData"
       :is-locked="wasOriginallyPublished"
       :is-special-round="isSpecialRound"
+      :field-errors="fieldErrors"
+      :shake-key="shakeKey"
+      @clear-field-error="clearFieldError"
     />
 
     <!-- Card 2: กำหนดการสอบ -->
@@ -19,12 +22,15 @@
       :proctor-options="proctorOptions"
       :active-slot-index="activeSlotIndex"
       :date-errors="dateErrors"
+      :field-errors="fieldErrors"
+      :shake-key="shakeKey"
       @add-time-slot="addTimeSlot"
       @remove-time-slot="removeTimeSlot"
       @add-room="addRoom"
       @remove-room="removeRoom"
       @update:active-slot-index="activeSlotIndex = $event"
       @sort-time-slots="sortTimeSlots"
+      @clear-field-error="clearFieldError"
     />
 
     <!-- Card 3: กำหนดการลงทะเบียนและชำระเงิน -->
@@ -33,6 +39,9 @@
       :locked="isScheduleLocked"
       :is-special-round="isSpecialRound"
       :date-errors="dateErrors"
+      :field-errors="fieldErrors"
+      :shake-key="shakeKey"
+      @clear-field-error="clearFieldError"
     />
 
     <!-- Card 4: รายชื่อผู้มีสิทธิ์สอบ (เฉพาะรอบพิเศษ) -->
@@ -129,6 +138,8 @@ const {
   activeSlotIndex,
   candidateSearch,
   filteredCandidates,
+  fieldErrors,
+  shakeKey,
   loadInitialData,
   addTimeSlot,
   removeTimeSlot,
@@ -141,6 +152,7 @@ const {
   handleSave,
   sortTimeSlots,
   dateErrors,
+  clearFieldError,
 } = useCreateExam(form, { examId: props.examId });
 
 const emit = defineEmits(['save', 'cancel']);

@@ -54,8 +54,8 @@
             <q-avatar size="40px">
               <ImageDisplay
                 :image-path="row.userImagePath"
-                width="40px"
-                height="40px"
+                width="100%"
+                height="100%"
                 border-radius="50%"
               />
             </q-avatar>
