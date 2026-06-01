@@ -15,7 +15,7 @@
         </div>
       </q-card-section>
 
-      <q-form @submit.prevent="onFormSubmit">
+      <q-form ref="formRef" @submit.prevent="onFormSubmit">
         <q-card-section class="q-pt-lg q-px-lg q-pb-md q-gutter-y-md">
           <q-input
             v-model="form.LOCATION_ROOM_NO"
@@ -96,7 +96,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useDialogPluginComponent } from 'quasar';
+import type { QForm } from 'quasar';
 import AppButton from 'src/components/base/app-button.vue';
+import { useFocusFirstInvalidField } from 'src/composables/use-focus-first-invalid-field';
 
 const props = defineProps({
   initialData: {
@@ -115,6 +117,9 @@ const props = defineProps({
 defineEmits([...useDialogPluginComponent.emits]);
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
+
+const formRef = ref<QForm | null>(null);
+const { validateAndFocusFirstInvalid } = useFocusFirstInvalidField(formRef);
 
 const form = ref({
   LOCATION_NAME: props.initialData?.LOCATION_NAME || '',
@@ -145,7 +150,12 @@ const parseCapacity = (roomNo: string | undefined | null): number => {
 const computedFloor = computed(() => parseFloor(form.value.LOCATION_ROOM_NO));
 const computedCapacity = computed(() => parseCapacity(form.value.LOCATION_ROOM_NO));
 
-function onFormSubmit() {
+async function onFormSubmit(): Promise<void> {
+  const isValid = await validateAndFocusFirstInvalid();
+  if (!isValid) {
+    return;
+  }
+
   onDialogOK({
     LOCATION_NAME: form.value.LOCATION_NAME,
     LOCATION_ROOM_NO: form.value.LOCATION_ROOM_NO,

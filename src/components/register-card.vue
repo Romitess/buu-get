@@ -16,7 +16,7 @@
     </div>
 
     <!-- Form -->
-    <q-form @submit.prevent="onSubmit" class="register-form">
+    <q-form ref="formRef" @submit.prevent="onSubmit" class="register-form">
       <!-- Email -->
       <div class="field-block">
         <label>{{ $t('profile.emailUsername') }}</label>
@@ -126,7 +126,9 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import type { QForm } from 'quasar';
 import type { RegisterCredentials } from 'src/types/register';
+import { useFocusFirstInvalidField } from 'src/composables/use-focus-first-invalid-field';
 
 const emit = defineEmits<{
   register: [payload: RegisterCredentials];
@@ -137,11 +139,13 @@ const router = useRouter();
 
 // State
 const userType = ref<'thai' | 'foreigner'>('thai');
+const formRef = ref<QForm | null>(null);
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
+const { validateAndFocusFirstInvalid } = useFocusFirstInvalidField(formRef);
 
 // Lifecycle
 onMounted(() => {
@@ -153,7 +157,12 @@ const onCancel = (): void => {
   void router.push('/login');
 };
 
-const onSubmit = (): void => {
+const onSubmit = async (): Promise<void> => {
+  const isValid = await validateAndFocusFirstInvalid();
+  if (!isValid) {
+    return;
+  }
+
   emit('register', {
     email: email.value,
     password: password.value,

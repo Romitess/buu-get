@@ -2,7 +2,7 @@
   <div class="row justify-center q-pa-md full-width">
     <!-- Match mockup styling: no heavy shadow, soft border, rounded corners -->
     <q-card class="q-pa-xl shadow-0 profile-card">
-      <q-form @submit.prevent="submitForm">
+      <q-form ref="formRef" @submit.prevent="onSubmit">
         <!-- ─── Title ─── -->
         <div class="row items-center q-gutter-x-sm q-mb-lg q-px-xl">
           <q-icon name="people" size="28px" color="primary" />
@@ -88,10 +88,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import type { QForm } from 'quasar';
 import type { User } from 'src/types/user';
 import type { RegisterFormData } from 'src/types/register';
 import type { RegisterCredentials } from 'src/types/register';
 import { useRegisterForm } from 'src/composables/use-register-form';
+import { useFocusFirstInvalidField } from 'src/composables/use-focus-first-invalid-field';
 
 import IdentityColumn from 'src/components/register/identity-column.vue';
 import ContactColumn from 'src/components/register/contact-column.vue';
@@ -115,6 +117,8 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const isEditMode = ref<boolean>(props.initialEditMode);
+const formRef = ref<QForm | null>(null);
+const { validateAndFocusFirstInvalid } = useFocusFirstInvalidField(formRef);
 
 /** isThai มาจาก prop ที่ parent ส่งมา (ตาม userType ใน step 1) */
 const isThailand = computed<boolean>(() => props.isThai);
@@ -127,6 +131,15 @@ const { formData, dialog, initFormData, handleTitleTHChange, submitForm, onDialo
   useRegisterForm(isEditMode.value, (payload) => {
     emit('save', payload);
   });
+
+const onSubmit = async (): Promise<void> => {
+  const isValid = await validateAndFocusFirstInvalid();
+  if (!isValid) {
+    return;
+  }
+
+  submitForm();
+};
 
 onMounted(() => {
   initFormData(props.userData);
