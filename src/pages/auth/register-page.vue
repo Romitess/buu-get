@@ -132,6 +132,13 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
   animation: fadeIn 0.7s ease-out;
 }
 
+.profile-form-container {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  animation: fadeIn 0.7s ease-out;
+}
+
 @keyframes pulse {
   0%,
   100% {

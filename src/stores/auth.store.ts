@@ -48,6 +48,11 @@ export interface LoginResponse {
   message?: string;
 }
 
+export interface OtpResponse {
+  success: boolean;
+  message?: string;
+}
+
 // ============================================================================
 // Store
 // ============================================================================
@@ -110,6 +115,40 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function sendOtp(email: string): Promise<OtpResponse> {
+    isLoading.value = true;
+    error.value = null;
+
+    try {
+      await api.post('/auth/send-otp', { email });
+      return { success: true };
+    } catch (err: unknown) {
+      const axiosError = err as AxiosError<{ message?: string }>;
+      const msg = axiosError.response?.data?.message || 'Failed to send OTP';
+      error.value = msg;
+      return { success: false, message: msg };
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function verifyOtp(email: string, otp: string): Promise<OtpResponse> {
+    isLoading.value = true;
+    error.value = null;
+
+    try {
+      await api.post('/auth/verify-otp', { email, otp });
+      return { success: true };
+    } catch (err: unknown) {
+      const axiosError = err as AxiosError<{ message?: string }>;
+      const msg = axiosError.response?.data?.message || 'Invalid OTP';
+      error.value = msg;
+      return { success: false, message: msg };
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   /**
    * ออกจากระบบ — ล้าง Token และ State
    */
@@ -136,6 +175,8 @@ export const useAuthStore = defineStore('auth', () => {
     // Actions
     register,
     login,
+    sendOtp,
+    verifyOtp,
     logout,
     clearError,
   };

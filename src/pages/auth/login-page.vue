@@ -388,9 +388,18 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 
 // Size: register profile
 .card-wrapper.size-profile {
-  width: 1400px;
-  max-width: calc(100vw - 80px);
-  padding: 2.5rem 3rem;
+  width: calc(100vw - 96px);
+  max-width: 1720px;
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  padding: 28px 44px 22px;
+}
+
+@media (max-width: 1024px) {
+  .card-wrapper.size-profile {
+    width: calc(100vw - 24px);
+    padding: 28px 24px 22px;
+  }
 }
 
 // ============================================================
@@ -425,23 +434,6 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
   width: 100% !important;
   max-width: 100% !important;
   box-shadow: none !important;
-}
-
-.register-profile-shell :deep(.profile-card) .q-px-xl {
-  padding-left: 12px !important;
-  padding-right: 12px !important;
-}
-
-.register-profile-shell :deep(.profile-card) .q-pa-xl {
-  padding: 0 !important;
-}
-
-.register-profile-shell :deep(.profile-card) .q-mb-lg {
-  margin-bottom: 20px !important;
-}
-
-.register-profile-shell :deep(.profile-card) .q-mt-xl {
-  margin-top: 24px !important;
 }
 
 // ============================================================

@@ -16,7 +16,7 @@
         dense
         :readonly="readonly"
         :rules="rules ? [...rules] : undefined"
-        hide-bottom-space
+        :hide-bottom-space="!reserveBottomSpace"
         class="custom-input"
         :class="inputClass"
         v-bind="$attrs"
@@ -34,7 +34,7 @@
         :stack-label="type === 'date'"
         :readonly="readonly || type === 'date'"
         :rules="rules ? [...rules] : undefined"
-        hide-bottom-space
+        :hide-bottom-space="!reserveBottomSpace"
         :rows="type === 'textarea' ? 5 : undefined"
         class="custom-input"
         :class="inputClass"
@@ -73,12 +73,14 @@ interface Props {
   required?: boolean;
   rules?: readonly ValidationRule[];
   inputClass?: string;
+  reserveBottomSpace?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
   type: 'text',
   readonly: false,
   required: false,
+  reserveBottomSpace: false,
 });
 
 defineEmits(['update:model-value']);

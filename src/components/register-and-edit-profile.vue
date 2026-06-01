@@ -1,18 +1,18 @@
 <template>
-  <div class="row justify-center q-pa-md full-width">
+  <div class="register-profile-form">
     <!-- Match mockup styling: no heavy shadow, soft border, rounded corners -->
-    <q-card class="q-pa-xl shadow-0 profile-card">
+    <q-card class="shadow-0 profile-card">
       <q-form ref="formRef" @submit.prevent="onSubmit">
         <!-- ─── Title ─── -->
-        <div class="row items-center q-gutter-x-sm q-mb-lg q-px-xl">
-          <q-icon name="people" size="28px" color="primary" />
+        <div class="profile-form-title">
+          <q-icon name="people" size="20px" color="dark" />
           <div class="text-h6 text-weight-medium">{{ t('profile.personalInfo') }}</div>
         </div>
 
         <!-- ─── 2-Column Layout ─── -->
-        <div class="row justify-center q-gutter-y-md">
+        <div class="profile-form-grid">
           <!-- คอลัมน์ซ้าย: ข้อมูลตัวตน -->
-          <div class="col-12 col-md-6 q-px-xl">
+          <div class="profile-form-column">
             <IdentityColumn
               :is-thai="isThailand"
               :is-edit-mode="isEditMode"
@@ -27,8 +27,9 @@
           </div>
 
           <!-- คอลัมน์ขวา: ข้อมูลสถาบัน/ที่อยู่ -->
-          <div class="col-12 col-md-6 q-px-xl">
+          <div class="profile-form-column">
             <ContactColumn
+              :email="formData.email"
               v-model:birthdate="formData.birthdate"
               v-model:education-level="formData.educationLevel"
               v-model:faculty="formData.faculty"
@@ -41,7 +42,7 @@
 
         <!-- ─── Buttons ─── -->
         <!-- Center-aligned buttons to match mockup -->
-        <div class="row justify-end q-gutter-x-md q-mt-xl q-px-xl">
+        <div class="profile-actions">
           <q-btn
             unelevated
             class="bg-grey-4 text-black text-weight-bold profile-action-btn"
@@ -53,11 +54,20 @@
             color="primary"
             class="text-weight-bold profile-action-btn"
             :label="submitButtonText"
+            :loading="isSendingOtp"
             unelevated
           />
         </div>
       </q-form>
     </q-card>
+
+    <OtpVerificationDialog
+      v-model="showOtpDialog"
+      :is-sending="isSendingOtp"
+      :is-verifying="isVerifyingOtp"
+      @verify="handleVerifyOtp"
+      @resend="handleResendOtp"
+    />
 
     <!-- ─── Dialog ─── -->
     <q-dialog v-model="dialog.show" persistent>
@@ -94,9 +104,12 @@ import type { RegisterFormData } from 'src/types/register';
 import type { RegisterCredentials } from 'src/types/register';
 import { useRegisterForm } from 'src/composables/use-register-form';
 import { useFocusFirstInvalidField } from 'src/composables/use-focus-first-invalid-field';
+import { useAuthStore } from 'src/stores/auth.store';
+import { useQuasar } from 'quasar';
 
 import IdentityColumn from 'src/components/register/identity-column.vue';
 import ContactColumn from 'src/components/register/contact-column.vue';
+import OtpVerificationDialog from 'src/components/register/otp-verification-dialog.vue';
 
 interface Props {
   initialEditMode: boolean;
@@ -114,17 +127,24 @@ const emit = defineEmits<{
   save: [payload: RegisterFormData];
 }>();
 
-const { t } = useI18n();
+const i18n = useI18n();
+const { t } = i18n;
+const $q = useQuasar();
+const authStore = useAuthStore();
+const tr = (key: string, fallback: string): string => (i18n.te(key) ? t(key) : fallback);
 
 const isEditMode = ref<boolean>(props.initialEditMode);
 const formRef = ref<QForm | null>(null);
+const showOtpDialog = ref(false);
+const isSendingOtp = ref(false);
+const isVerifyingOtp = ref(false);
 const { validateAndFocusFirstInvalid } = useFocusFirstInvalidField(formRef);
 
 /** isThai มาจาก prop ที่ parent ส่งมา (ตาม userType ใน step 1) */
 const isThailand = computed<boolean>(() => props.isThai);
 
 const submitButtonText = computed<string>(() =>
-  isEditMode.value ? t('profile.saveEdit') : t('profile.save'),
+  isEditMode.value ? t('profile.saveEdit') : tr('profile.sendOtp', 'ส่งรหัส OTP'),
 );
 
 const { formData, dialog, initFormData, handleTitleTHChange, submitForm, onDialogClose } =
@@ -132,13 +152,71 @@ const { formData, dialog, initFormData, handleTitleTHChange, submitForm, onDialo
     emit('save', payload);
   });
 
+const sendOtp = async (): Promise<boolean> => {
+  isSendingOtp.value = true;
+
+  try {
+    const response = await authStore.sendOtp(formData.value.email);
+    if (!response.success) {
+      $q.notify({
+        type: 'negative',
+        message: response.message || tr('profile.otpSendError', 'ไม่สามารถส่งรหัส OTP ได้'),
+        position: 'top',
+      });
+      return false;
+    }
+
+    $q.notify({
+      type: 'positive',
+      message: tr('profile.otpSendSuccess', 'ส่งรหัส OTP ไปยังอีเมลของคุณแล้ว'),
+      position: 'top',
+    });
+    return true;
+  } finally {
+    isSendingOtp.value = false;
+  }
+};
+
 const onSubmit = async (): Promise<void> => {
   const isValid = await validateAndFocusFirstInvalid();
   if (!isValid) {
     return;
   }
 
-  submitForm();
+  if (isEditMode.value) {
+    submitForm();
+    return;
+  }
+
+  const isSent = await sendOtp();
+  if (isSent) {
+    showOtpDialog.value = true;
+  }
+};
+
+const handleResendOtp = async (): Promise<void> => {
+  await sendOtp();
+};
+
+const handleVerifyOtp = async (otp: string): Promise<void> => {
+  isVerifyingOtp.value = true;
+
+  try {
+    const response = await authStore.verifyOtp(formData.value.email, otp);
+    if (!response.success) {
+      $q.notify({
+        type: 'negative',
+        message: response.message || tr('profile.otpVerifyError', 'ไม่สามารถยืนยันรหัส OTP ได้'),
+        position: 'top',
+      });
+      return;
+    }
+
+    showOtpDialog.value = false;
+    submitForm();
+  } finally {
+    isVerifyingOtp.value = false;
+  }
 };
 
 onMounted(() => {
@@ -153,21 +231,92 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+.register-profile-form {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 .profile-card {
-  width: 96%;
-  max-width: 1600px;
+  width: min(100%, 1720px);
   border: 1px solid var(--q-grey-3);
   border-radius: 12px;
   margin: 0 auto;
+  padding: 44px 84px 36px;
+  background: var(--surface-card);
+}
+
+.profile-form-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.profile-form-title .text-h6 {
+  font-size: 28px;
+  line-height: 1.3;
+}
+
+.profile-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 48px;
+}
+
+.profile-form-column {
+  min-width: 0;
+}
+
+.profile-card :deep(.custom-input .q-field__control) {
+  min-height: 48px;
+}
+
+.profile-card :deep(.custom-input .q-field__native),
+.profile-card :deep(.custom-input .q-field__input),
+.profile-card :deep(.custom-input .q-field__append) {
+  min-height: 48px;
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 18px;
+  margin-top: 28px;
 }
 
 .profile-action-btn {
-  width: 160px;
+  width: 214px;
+  min-height: 64px;
   border-radius: 8px;
-  padding: 10px 0;
+  font-size: 18px;
 }
 
 .profile-dialog-card {
   min-width: 350px;
+}
+
+@media (max-width: 900px) {
+  .profile-card {
+    padding: 28px 24px;
+  }
+
+  .profile-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-card {
+    padding: 22px 14px;
+  }
+
+  .profile-actions {
+    flex-direction: column-reverse;
+  }
+
+  .profile-action-btn {
+    width: 100%;
+  }
 }
 </style>
