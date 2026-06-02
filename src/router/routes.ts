@@ -247,6 +247,27 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'exam-management/:examId/registrants/:ermId/history',
+            name: 'admin-exam-registrant-history',
+            component: () => import('pages/admin/exam-registrant-history-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                {
+                  label: 'navigation.manageRegistrants',
+                  icon: 'group',
+                  to: '/admin/exam-management/:examId/registrants',
+                },
+                { label: 'profileEditHistory.pageTitle', icon: 'history' },
+              ],
+            },
+          },
+          {
             path: 'exam-management/:examId/scores',
             name: 'admin-exam-scores',
             component: () => import('pages/admin/exam-scores-page.vue'),

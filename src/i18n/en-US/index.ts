@@ -461,6 +461,7 @@ export default {
           nationalId: 'National ID',
           prefix: 'Prefix',
           fullName: 'Full Name',
+          remark: 'Remarks',
           paymentStatus: 'Payment Status',
           verifyStatus: 'Verification Status',
           tools: 'Tools',
@@ -639,5 +640,28 @@ export default {
     examAttendance: 'Exam Attendance',
     paymentImport: 'Payment Import',
     checkPayment: 'Check Payment',
+  },
+  profileEditHistory: {
+    pageTitle: 'Candidate Profile Edit History',
+    pageSubtitle:
+      'Displays candidate profile edit history including changes, date/time, and who performed the edits.',
+    table: {
+      columns: {
+        index: 'No.',
+        modifierName: 'Modifier',
+        modifierRole: 'Modifier Role',
+        modifiedFields: 'Modified Fields',
+        modifiedDate: 'Date Modified',
+        modifiedTime: 'Time Modified',
+        tools: 'Tools',
+      },
+    },
+    dialog: {
+      title: 'Profile Change Details',
+      fieldName: 'Field',
+      oldValue: 'Old Value',
+      newValue: 'New Value',
+      noChanges: 'No changes recorded',
+    },
   },
 };

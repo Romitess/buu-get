@@ -56,7 +56,7 @@ export default defineRouter(({ store }) => {
     }
     if (userStore.isLoggedIn && (to.name === 'login' || to.name === 'register')) {
       if (to.query.redirect) {
-        return { path: to.query.redirect as string };
+        return to.query.redirect as string;
       }
       return userStore.userRole === ROLES.CANDIDATE
         ? { name: 'exam-schedule' }

@@ -453,6 +453,8 @@ const processCsvFile = (file: File): void => {
         paymentStatus: 1,
         verifyStatus: 1,
         sessionId: selectedSessionId.value || 0,
+        userProfileId: 0,
+        remark: '',
         scoreGrammar: grammar,
         scoreReading: reading,
         scoreTotal: total,

@@ -28,7 +28,7 @@
       >
         <q-separator vertical class="stat-divider q-mr-md gt-xs" v-if="!hideMainSeparator" />
         <div class="text-center q-px-lg">
-          <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่สมัคร</div>
+          <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่ลงทะเบียน</div>
           <div class="applicant-value text-h4 text-weight-medium text-dark">
             {{ applicantCount }}
           </div>

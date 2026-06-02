@@ -543,6 +543,7 @@ export default {
           nationalId: 'เลขประจำตัว',
           prefix: 'คำนำหน้า',
           fullName: 'ชื่อ-นามสกุล',
+          remark: 'หมายเหตุ',
           paymentStatus: 'สถานะ',
           verifyStatus: 'สถานะความถูกต้อง',
           tools: 'เครื่องมือ',
@@ -807,6 +808,29 @@ export default {
     },
     display: {
       placeholder: 'ไม่มีรูปภาพ',
+    },
+  },
+  profileEditHistory: {
+    pageTitle: 'ประวัติการแก้ไขข้อมูลผู้สมัครสอบ',
+    pageSubtitle:
+      'แสดงประวัติการแก้ไขข้อมูลผู้สมัครสอบ รวมถึงรายละเอียดการเปลี่ยนแปลง วันเวลา และผู้ดำเนินการแก้ไขข้อมูลภายในระบบ',
+    table: {
+      columns: {
+        index: 'ลำดับ',
+        modifierName: 'ผู้แก้ไข',
+        modifierRole: 'สถานะผู้แก้ไข',
+        modifiedFields: 'ส่วนที่แก้ไข',
+        modifiedDate: 'วันที่แก้ไข',
+        modifiedTime: 'เวลาที่แก้ไข',
+        tools: 'เครื่องมือ',
+      },
+    },
+    dialog: {
+      title: 'รายละเอียดการเปลี่ยนแปลงข้อมูล',
+      fieldName: 'ข้อมูล',
+      oldValue: 'ข้อมูลเดิม',
+      newValue: 'ข้อมูลใหม่',
+      noChanges: 'ไม่มีการเปลี่ยนแปลง',
     },
   },
 };

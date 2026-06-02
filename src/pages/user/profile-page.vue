@@ -9,7 +9,7 @@
     <!-- Warning banner if navigated from email -->
     <Transition name="fade">
       <div
-        v-if="isFromEmail"
+        v-if="isFromEmail || userStore.currentUser?.remark"
         class="q-mb-md q-pa-md row no-wrap items-center fix-alert-banner shadow-sm"
       >
         <q-icon name="report_problem" color="warning" size="md" class="q-mr-md" />
@@ -18,7 +18,11 @@
             {{ $t('profile.fixAlertTitle') }}
           </div>
           <div class="text-body2 text-grey-8">
-            {{ $t('profile.fixAlertDesc') }}
+            {{
+              userStore.currentUser?.remark
+                ? `เหตุผลที่ต้องแก้ไข: ${userStore.currentUser.remark}`
+                : $t('profile.fixAlertDesc')
+            }}
           </div>
         </div>
       </div>
@@ -28,7 +32,7 @@
     <q-card class="user-profile-card q-pa-lg q-mb-md" flat>
       <div class="row q-col-gutter-xl">
         <!-- Left: Avatar -->
-        <div class="col-12 col-md-3 flex column flex-center">
+        <div class="col-12 col-md-3 flex column flex-center relative-position">
           <div class="avatar-container q-mb-md cursor-pointer" @click="triggerFileInput">
             <q-avatar size="160px" class="profile-avatar">
               <!-- ใช้ img โดยตรงแทน ImageDisplay เพื่อหลีกเลี่ยงการซ้อนกันของ wrapper div -->
@@ -84,11 +88,12 @@
               </div>
               <q-input v-model="formData.email" outlined dense bg-color="white" />
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-6 relative-position">
               <label class="form-label"
                 >{{ $t('profile.prefix') }} <span class="text-negative">*</span></label
               >
               <q-select
+                ref="titleSelectRef"
                 v-model="formData.title"
                 :options="titleOptions"
                 outlined
@@ -101,11 +106,12 @@
             </div>
 
             <!-- Row 2 -->
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-6 relative-position">
               <label class="form-label"
                 >{{ $t('profile.nationalId') }} <span class="text-negative">*</span></label
               >
               <q-input
+                ref="nationalIdInputRef"
                 v-model="formData.nationalId"
                 outlined
                 dense
@@ -114,11 +120,17 @@
                 unmasked-value
               />
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-6 relative-position">
               <label class="form-label"
                 >{{ $t('profile.fullName') }} <span class="text-negative">*</span></label
               >
-              <q-input v-model="formData.fullNameTH" outlined dense bg-color="white" />
+              <q-input
+                ref="fullNameTHInputRef"
+                v-model="formData.fullNameTH"
+                outlined
+                dense
+                bg-color="white"
+              />
             </div>
 
             <!-- Row 3 -->
@@ -127,6 +139,7 @@
                 >{{ $t('profile.birthdate') }} <span class="text-negative">*</span></label
               >
               <q-input
+                ref="birthdateInputRef"
                 v-model="birthdateDisplay"
                 outlined
                 dense
@@ -157,11 +170,17 @@
                 </template>
               </q-input>
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-6 relative-position">
               <label class="form-label"
                 >{{ $t('profile.fullNameEn') }} <span class="text-negative">*</span></label
               >
-              <q-input v-model="formData.fullNameEN" outlined dense bg-color="white" />
+              <q-input
+                ref="fullNameENInputRef"
+                v-model="formData.fullNameEN"
+                outlined
+                dense
+                bg-color="white"
+              />
             </div>
           </div>
         </div>
@@ -173,9 +192,10 @@
       <div class="row q-col-gutter-xl">
         <!-- Left Column: Education, Faculty, Institution -->
         <div class="col-12 col-md-6">
-          <div class="q-mb-md">
+          <div class="q-mb-md relative-position">
             <label class="form-label">{{ $t('profile.education') }}</label>
             <q-select
+              ref="educationLevelSelectRef"
               v-model="formData.educationLevel"
               :options="educationOptions"
               outlined
@@ -186,23 +206,36 @@
               map-options
             />
           </div>
-          <div class="q-mb-md">
+          <div class="q-mb-md relative-position">
             <label class="form-label">{{ $t('profile.faculty') }}</label>
-            <q-input v-model="formData.faculty" outlined dense bg-color="white" />
+            <q-input
+              ref="facultyInputRef"
+              v-model="formData.faculty"
+              outlined
+              dense
+              bg-color="white"
+            />
           </div>
-          <div>
+          <div class="relative-position">
             <label class="form-label">{{ $t('profile.institution') }}</label>
-            <q-input v-model="formData.institution" outlined dense bg-color="white" />
+            <q-input
+              ref="institutionInputRef"
+              v-model="formData.institution"
+              outlined
+              dense
+              bg-color="white"
+            />
           </div>
         </div>
 
         <!-- Right Column: Address, Phone -->
         <div class="col-12 col-md-6">
-          <div class="q-mb-md">
+          <div class="q-mb-md relative-position">
             <label class="form-label"
               >{{ $t('profile.address') }} <span class="text-negative">*</span></label
             >
             <q-input
+              ref="addressInputRef"
               v-model="formData.address"
               type="textarea"
               outlined
@@ -212,11 +245,39 @@
               input-style="resize: none;"
             />
           </div>
-          <div>
+          <div class="relative-position">
             <label class="form-label"
               >{{ $t('profile.phone') }} <span class="text-negative">*</span></label
             >
-            <q-input v-model="formData.phone" outlined dense bg-color="white" mask="###-###-####" />
+            <q-input
+              ref="phoneInputRef"
+              v-model="formData.phone"
+              outlined
+              dense
+              bg-color="white"
+              mask="###-###-####"
+            />
+          </div>
+          <div class="q-mt-md relative-position">
+            <label class="form-label">หมายเหตุ</label>
+            <q-select
+              v-model="formData.physicalStatus"
+              :options="physicalStatusOptions"
+              outlined
+              dense
+              bg-color="white"
+              dropdown-icon="expand_more"
+            />
+          </div>
+          <div v-if="formData.physicalStatus === 'อื่น ๆ'" class="q-mt-md relative-position">
+            <label class="form-label">โปรดระบุรายละเอียดเพิ่มเติม</label>
+            <q-input
+              v-model="formData.physicalStatusCustom"
+              outlined
+              dense
+              bg-color="white"
+              placeholder="ระบุสถานะพิเศษของคุณ"
+            />
           </div>
         </div>
       </div>
@@ -337,6 +398,19 @@ const showCalendar = ref(false);
 const fileInputRef = ref();
 const selectedFile = ref<File | null>(null);
 
+const titleSelectRef = ref();
+const nationalIdInputRef = ref();
+const fullNameTHInputRef = ref();
+const birthdateInputRef = ref();
+const fullNameENInputRef = ref();
+const educationLevelSelectRef = ref();
+const facultyInputRef = ref();
+const institutionInputRef = ref();
+const addressInputRef = ref();
+const phoneInputRef = ref();
+
+const physicalStatusOptions = ['ทั่วไป', 'พระสงฆ์', 'ตั้งครรภ์', 'อื่น ๆ'];
+
 /** URL ภาพสำหรับแสดงบน avatar - ใช้ computed ป้องกันซ้อนกัน */
 const avatarSrc = computed<string>(() => {
   const path = formData.value.userImagePath;
@@ -391,6 +465,8 @@ interface ProfileFormData {
   address: string;
   phone: string;
   userImagePath?: string | undefined;
+  physicalStatus: string;
+  physicalStatusCustom: string;
 }
 
 const formData = ref<ProfileFormData>({
@@ -406,6 +482,8 @@ const formData = ref<ProfileFormData>({
   address: '',
   phone: '',
   userImagePath: undefined,
+  physicalStatus: 'ทั่วไป',
+  physicalStatusCustom: '',
 });
 
 const titleOptions: ComputedRef<{ label: string; value: string }[]> = computed<
@@ -469,6 +547,9 @@ const birthdateDisplay: WritableComputedRef<string> = computed<string>({
 onMounted((): void => {
   const user = userStore.currentUser;
   if (user) {
+    const isPreset = ['ทั่วไป', 'พระสงฆ์', 'ตั้งครรภ์', '', null, undefined].includes(
+      user.userPhysicalStatus,
+    );
     formData.value = {
       email: user.email || '',
       title: user.titleTH || TITLE_TH_OPTIONS[0].value,
@@ -482,6 +563,8 @@ onMounted((): void => {
       address: user.address || '',
       phone: user.phone || '',
       userImagePath: user.userImagePath || undefined,
+      physicalStatus: isPreset ? user.userPhysicalStatus || 'ทั่วไป' : 'อื่น ๆ',
+      physicalStatusCustom: isPreset ? '' : user.userPhysicalStatus || '',
     };
   }
 });
@@ -505,6 +588,13 @@ const onSave = async (): Promise<void> => {
     userStore.isLoadingGlobal = true;
     userStore.loadingText = t('profile.savingData');
 
+    const physicalStatusValue =
+      formData.value.physicalStatus === 'อื่น ๆ'
+        ? formData.value.physicalStatusCustom
+        : formData.value.physicalStatus === 'ทั่วไป'
+          ? ''
+          : formData.value.physicalStatus;
+
     await userService.updateProfile(token, {
       userTitleTh: formData.value.title,
       userFullnameTh: formData.value.fullNameTH,
@@ -515,6 +605,8 @@ const onSave = async (): Promise<void> => {
       userFaculty: formData.value.faculty,
       userInstitution: formData.value.institution,
       userAddress: formData.value.address,
+      userPhysicalStatus: physicalStatusValue,
+      isFromEmail: isFromEmail.value,
     });
 
     // บันทึกรูปภาพแยกใน UserImage entity ถ้ามีการเปลี่ยนรูป
@@ -536,7 +628,6 @@ const onSave = async (): Promise<void> => {
       }
     }
 
-    // Refresh user profile in store so header name updates immediately
     await userStore.initialize();
 
     $q.notify({
@@ -544,6 +635,8 @@ const onSave = async (): Promise<void> => {
       message: t('profile.dialogUpdateSuccess'),
       position: 'top',
     });
+
+    void router.push('/user/exam-history');
   } catch (err) {
     console.error('Save profile failed:', err);
     $q.notify({
@@ -657,5 +750,85 @@ const onSavePassword = (): void => {
 :deep(.address-textarea .q-field__control) {
   height: 118px !important;
   min-height: 118px !important;
+}
+
+@keyframes border-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.3);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(211, 47, 47, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0);
+  }
+}
+
+:deep(.highlighted-field .q-field__control) {
+  border: 2px solid var(--q-negative, #d32f2f) !important;
+  background-color: rgba(211, 47, 47, 0.015) !important;
+  box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.2) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: border-pulse 2.5s infinite;
+}
+
+:deep(.highlighted-field.q-field--focused .q-field__control) {
+  border-color: var(--q-negative, #d32f2f) !important;
+  box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.15) !important;
+  background-color: rgba(211, 47, 47, 0.03) !important;
+  animation: none !important;
+}
+
+.avatar-container.highlighted-field {
+  .profile-avatar {
+    border: 4px solid var(--q-negative, #d32f2f) !important;
+    box-shadow: 0 0 16px rgba(211, 47, 47, 0.3) !important;
+  }
+}
+
+.floating-tip-badge {
+  position: absolute;
+  top: 0;
+  right: 8px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  background-color: #ffebee;
+  color: #c62828;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #ffcdd2;
+  box-shadow: 0 4px 10px rgba(198, 40, 40, 0.15);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: float-pulse 2s infinite;
+
+  &:hover {
+    background-color: #ffcdd2;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 6px 14px rgba(198, 40, 40, 0.25);
+  }
+
+  &:active {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes float-pulse {
+  0% {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(198, 40, 40, 0.15);
+  }
+  50% {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(198, 40, 40, 0.25);
+  }
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(198, 40, 40, 0.15);
+  }
 }
 </style>

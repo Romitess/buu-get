@@ -91,6 +91,11 @@
                 :model-value="displayData.phone"
                 readonly
               />
+              <AppLabeledInput
+                label="หมายเหตุ"
+                :model-value="displayData.physicalStatus"
+                readonly
+              />
             </div>
           </div>
         </div>
@@ -130,6 +135,7 @@ const displayData = computed(() => {
     address: profile?.userAddress || '-',
     phone: profile?.userPhone || '-',
     profileImagePath: user?.IMAGE?.USER_IMAGE_URL || null,
+    physicalStatus: profile?.userPhysicalStatus || '-',
   };
 });
 </script>

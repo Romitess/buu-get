@@ -49,29 +49,16 @@
           <div class="text-center">{{ row.index }}</div>
         </template>
 
-        <template v-slot:body-cell-photo="{ row }">
-          <div class="row justify-center">
-            <q-avatar size="40px">
-              <ImageDisplay
-                :image-path="row.userImagePath"
-                width="100%"
-                height="100%"
-                border-radius="50%"
-              />
-            </q-avatar>
-          </div>
-        </template>
-
-        <template v-slot:body-cell-nationalId="{ row }">
-          <div class="text-center">{{ row.nationalId }}</div>
-        </template>
-
         <template v-slot:body-cell-titleTh="{ row }">
           <div class="text-center">{{ row.titleTh }}</div>
         </template>
 
         <template v-slot:body-cell-fullnameTh="{ row }">
           <div class="text-center">{{ row.fullnameTh }}</div>
+        </template>
+
+        <template v-slot:body-cell-remark="{ row }">
+          <div class="text-center">{{ row.remark || '-' }}</div>
         </template>
 
         <template v-slot:body-cell-paymentStatus="{ row }">
@@ -90,14 +77,15 @@
           <div class="row justify-center q-gutter-x-sm no-wrap">
             <ActionButton
               icon="visibility"
-              :tooltip="
-                row.verifyStatus === VerifyStatus.PASS
-                  ? 'ผ่านการตรวจสอบความถูกต้องแล้ว'
-                  : $t('admin.registrantManagement.table.tooltips.viewDetail')
-              "
-              :disable="row.verifyStatus === VerifyStatus.PASS"
+              :tooltip="$t('admin.registrantManagement.table.tooltips.viewDetail')"
               color="black"
               @click="handleView(row.ermId)"
+            />
+            <ActionButton
+              icon="update"
+              :tooltip="$t('profileEditHistory.pageTitle')"
+              color="black"
+              @click="handleHistory(row.ermId)"
             />
           </div>
         </template>
@@ -120,15 +108,10 @@ import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
 import AppExamSessionTabs from 'src/components/exam/app-exam-session-time.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
-import ImageDisplay from 'src/components/base/image-display.vue';
 import { useExamRegistrants } from 'src/composables/use-exam-registrants';
 import { useThaiDate } from 'src/composables/useThaiDate';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
-import {
-  VerifyStatus,
-  PAYMENT_STATUS_LABELS,
-  VERIFY_STATUS_LABELS,
-} from 'src/types/enrollment.types';
+import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollment.types';
 
 const route = useRoute();
 const router = useRouter();
@@ -191,19 +174,6 @@ const columns: QTableColumn[] = [
     style: 'width: 60px',
   },
   {
-    name: 'photo',
-    label: '',
-    field: 'userImagePath',
-    align: 'center',
-    style: 'width: 60px',
-  },
-  {
-    name: 'nationalId',
-    label: t('admin.registrantManagement.table.columns.nationalId'),
-    field: 'nationalId',
-    align: 'center',
-  },
-  {
     name: 'titleTh',
     label: t('admin.registrantManagement.table.columns.prefix'),
     field: 'titleTh',
@@ -213,6 +183,12 @@ const columns: QTableColumn[] = [
     name: 'fullnameTh',
     label: t('admin.registrantManagement.table.columns.fullName'),
     field: 'fullnameTh',
+    align: 'center',
+  },
+  {
+    name: 'remark',
+    label: t('admin.registrantManagement.table.columns.remark'),
+    field: 'remark',
     align: 'center',
   },
   {
@@ -234,7 +210,7 @@ const columns: QTableColumn[] = [
     label: t('admin.registrantManagement.table.columns.tools'),
     field: 'tools',
     align: 'center',
-    style: 'width: 80px',
+    style: 'width: 120px',
   },
 ];
 
@@ -247,6 +223,16 @@ const onRequest = (props: TableRequestProps): void => {
 const handleView = (ermId: number): void => {
   void router.push({
     name: 'admin-exam-registrant-detail',
+    params: {
+      examId: route.params.examId,
+      ermId: String(ermId),
+    },
+  });
+};
+
+const handleHistory = (ermId: number): void => {
+  void router.push({
+    name: 'admin-exam-registrant-history',
     params: {
       examId: route.params.examId,
       ermId: String(ermId),

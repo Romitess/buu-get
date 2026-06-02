@@ -155,7 +155,7 @@ const onSubmit = async () => {
 
       // Deep Linking Redirect: ถ้ามี redirect parameter (เช่นมาจากอีเมล) ให้ไปหน้านั้นเลย
       if (route.query.redirect) {
-        await router.push({ path: route.query.redirect as string });
+        await router.push(route.query.redirect as string);
         return;
       }
 
@@ -164,7 +164,11 @@ const onSubmit = async () => {
       console.log('Login successful. User Role:', role);
 
       if (role === ROLES.CANDIDATE) {
-        await router.push({ name: 'exam-schedule' });
+        if (userStore.currentUser?.remark) {
+          await router.push({ name: 'user-profile', query: { from: 'email' } });
+        } else {
+          await router.push({ name: 'exam-schedule' });
+        }
       } else if (role === ROLES.EXAM_OPERATIONS_OFFICER) {
         await router.push({ name: 'admin-location-management' });
       } else if (

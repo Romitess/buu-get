@@ -82,12 +82,11 @@ export interface BackendUserResponse {
     userAddress?: string | null;
     userProvince?: string | null;
     userCountry?: string | null;
+    userRemark?: string | null;
+    userPhysicalStatus?: string | null;
   };
 }
 
-/**
- * ฟังก์ชันสำหรับค้นหาผู้ใช้ (ยังไม่เปิดใช้งานในเวอร์ชันนี้)
- */
 export function findUserByIdentifier(): Promise<User | undefined> {
   return Promise.resolve(undefined);
 }
@@ -113,6 +112,8 @@ export function mapBackendUserToFrontendUser(backendUser: BackendUserResponse): 
     taxId: '',
     thaidSynced: false,
     role: ROLES.CANDIDATE,
+    remark: backendUser.PROFILE?.userRemark || '',
+    userPhysicalStatus: backendUser.PROFILE?.userPhysicalStatus || '',
   };
 }
 
@@ -194,6 +195,8 @@ export async function updateProfile(
     userCountry?: string | undefined;
     userAddress?: string | undefined;
     userImagePath?: string | null | undefined;
+    userPhysicalStatus?: string | undefined;
+    isFromEmail?: boolean | undefined;
   },
 ): Promise<User> {
   try {

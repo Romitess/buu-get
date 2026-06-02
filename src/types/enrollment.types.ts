@@ -11,6 +11,10 @@ export interface BackendUserProfile {
   userFaculty: string | null;
   userInstitution: string | null;
   userAddress: string | null;
+  userProvince: string | null;
+  userZipCode: string | null;
+  userRemark: string | null;
+  userPhysicalStatus: string | null;
 }
 
 export interface BackendUser {
@@ -95,6 +99,8 @@ export interface EnrollmentTableRow {
   paymentStatus: number;
   verifyStatus: number;
   sessionId: number;
+  userProfileId: number;
+  remark: string;
 }
 
 export interface AttendanceTableRow {

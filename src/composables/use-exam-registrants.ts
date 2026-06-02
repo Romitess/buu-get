@@ -31,13 +31,15 @@ export function useExamRegistrants() {
       list = list.filter((row: EnrollmentTableRow) => {
         const paymentLabel = (PAYMENT_STATUS_LABELS[row.paymentStatus] || '').toLowerCase();
         const verifyLabel = (VERIFY_STATUS_LABELS[row.verifyStatus] || '').toLowerCase();
+        const remarkLabel = (row.remark || '').toLowerCase();
 
         return (
           row.nationalId.toLowerCase().includes(query) ||
           row.fullnameTh.toLowerCase().includes(query) ||
           row.titleTh.toLowerCase().includes(query) ||
           paymentLabel.includes(query) ||
-          verifyLabel.includes(query)
+          verifyLabel.includes(query) ||
+          remarkLabel.includes(query)
         );
       });
     }

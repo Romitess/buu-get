@@ -24,6 +24,7 @@
           @main-card-resize="onCalendarResize"
         />
       </div>
+      4k
 
       <div class="col-12 col-md-7">
         <q-card class="exam-schedule__rounds-section" :style="roundsSectionStyle">
