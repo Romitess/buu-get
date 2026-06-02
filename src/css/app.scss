@@ -387,14 +387,19 @@ body {
 
 // === Custom Form Input Styles ===
 .custom-input {
-  border-radius: 8px;
-
+  // We can leave this or remove it, but the crucial part is .q-field__control
+  
   .q-field__control {
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
 
     &:before {
       border-color: var(--border-color);
       transition: border-color var(--transition-fast);
+      border-radius: inherit;
+    }
+
+    &:after {
+      border-radius: inherit;
     }
 
     &:hover:before {
@@ -402,6 +407,18 @@ body {
     }
   }
 
+  &.q-field--focused .q-field__control:after,
+  &.q-field--error .q-field__control:after {
+    border-width: 1px !important;
+    border-style: solid !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 100% !important;
+    transform: none !important;
+  }
+  
   &.q-field--focused .q-field__control:after {
     border-color: var(--primary);
   }
@@ -786,9 +803,19 @@ body {
 
 // Shake animation for invalid fields
 @keyframes buu-shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 50%, 90% { transform: translateX(-4px); }
-  30%, 70% { transform: translateX(4px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  50%,
+  90% {
+    transform: translateX(-4px);
+  }
+  30%,
+  70% {
+    transform: translateX(4px);
+  }
 }
 
 // Bounce-in for error messages
@@ -809,8 +836,15 @@ body {
 
 // Pulse glow for the error icon
 @keyframes buu-pulse-glow {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.8; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
 }
 
 // Error field wrapper — applies shake + red border
@@ -821,7 +855,9 @@ body {
   .q-field--outlined .q-field__control {
     border-color: var(--negative, #e53934) !important;
     box-shadow: 0 0 0 2px rgba(229, 57, 52, 0.15) !important;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    transition:
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
   }
 
   // Also override the buu-input-muted border
