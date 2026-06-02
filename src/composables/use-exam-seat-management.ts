@@ -3,7 +3,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import type { BackendExam, BackendSession } from 'src/types/exam';
-import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
+import { EnrollmentStatus, type BackendEnrollmentDetail } from 'src/types/enrollment.types';
 import { fetchExamById } from 'src/services/exam.service';
 import {
   fetchRawEnrollmentsByExamId,
@@ -378,17 +378,51 @@ export function useExamSeatManagement() {
     try {
       $q.loading.show({ message: t('admin.seatManagement.savingData') });
 
-      // Save each student individually (Business Logic check is in the backend Service)
-      const promises = students.value.map((student) => {
-        return updateEnrollmentStatus(student.ermId, {
-          LS_ID: student.seat ? Number(student.seat) : null,
-        });
-      });
+      const expectedSeatByEnrollmentId = new Map<number, number | null>(
+        students.value.map((student) => [
+          student.ermId,
+          student.seat ? Number(student.seat) : null,
+        ]),
+      );
 
-      await Promise.all(promises);
+      // 1-Phase sequential update to prevent backend race conditions and duplicate check bugs
+      for (const student of students.value) {
+        const currentEnrollment = allEnrollments.value.find((e) => e.ERM_ID === student.ermId);
+
+        // Always assign the seat directly
+        const assignedStatus = Number(EnrollmentStatus.SEAT_ASSIGNED);
+        const currentStatus = Number(currentEnrollment?.ERM_STATUS);
+        const nextStatus = currentStatus >= assignedStatus ? currentStatus : assignedStatus;
+
+        await updateEnrollmentStatus(student.ermId, {
+          LS_ID: student.seat ? Number(student.seat) : null,
+          ERM_STATUS: nextStatus,
+        });
+      }
 
       // Refresh data to ensure sync with backend
       allEnrollments.value = await fetchRawEnrollmentsByExamId(examId);
+
+      const savedSessionEnrollments = allEnrollments.value.filter(
+        (enrollment) => enrollment.SESSION_ID === activeSessionId.value,
+      );
+      const hasUnsavedSeat = savedSessionEnrollments.some((enrollment) => {
+        if (!expectedSeatByEnrollmentId.has(enrollment.ERM_ID)) return false;
+        const actualSeatId = enrollment.LS_ID === null ? null : Number(enrollment.LS_ID);
+        const expectedSeatId = expectedSeatByEnrollmentId.get(enrollment.ERM_ID);
+        if (actualSeatId !== expectedSeatId) {
+          console.error(
+            `[DEBUG] Mismatch for ERM_ID ${enrollment.ERM_ID}: expected ${expectedSeatId}, got ${actualSeatId}`,
+          );
+          return true;
+        }
+        return false;
+      });
+
+      if (hasUnsavedSeat) {
+        throw new Error(t('admin.seatManagement.notifications.saveError'));
+      }
+
       filterStudentsBySession();
 
       $q.notify({
@@ -402,6 +436,7 @@ export function useExamSeatManagement() {
       void router.push({
         name: 'admin-exam-seat-candidates',
         params: { examId: String(examId) },
+        query: { sessionId: String(activeSessionId.value) },
       });
     } catch (err: unknown) {
       console.error('Failed to save seats', err);

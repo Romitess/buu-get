@@ -102,7 +102,9 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import { useExamSeatCandidates } from 'src/composables/use-exam-seat-candidates';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
+import { EnrollmentStatus } from 'src/types/enrollment.types';
 import { bulkIssueVouchers } from 'src/services/voucher.service';
+import { updateEnrollmentStatus } from 'src/services/enrollment.service';
 import { formatThaiLongDate } from 'src/utils/thai-date';
 import { EXAM_TYPE_GENERAL } from 'src/constants/exam';
 
@@ -168,6 +170,19 @@ const startIssuingTickets = async (): Promise<void> => {
       examName,
       historyUrl,
     });
+
+    await Promise.all(
+      sessionEnrollments.value.map((enrollment) =>
+        updateEnrollmentStatus(enrollment.ERM_ID, {
+          ERM_STATUS: EnrollmentStatus.SEAT_PUBLISHED,
+        }),
+      ),
+    );
+
+    const examId = Number(route.params.examId);
+    if (!isNaN(examId) && examId > 0) {
+      await fetchData(examId);
+    }
 
     $q.notify({
       type: 'positive',
@@ -274,6 +289,13 @@ const loadData = async (): Promise<void> => {
   const examId = Number(route.params.examId);
   if (!isNaN(examId) && examId > 0) {
     await fetchData(examId);
+    const routeSessionId = Number(route.query.sessionId);
+    if (
+      !isNaN(routeSessionId) &&
+      sessions.value.some((session) => session.SS_ID === routeSessionId)
+    ) {
+      selectedSessionId.value = routeSessionId;
+    }
     pagination.value.rowsNumber = filteredRows.value.length;
   }
 };
