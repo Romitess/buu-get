@@ -124,9 +124,11 @@ const handleSeatClick = (seatId: string) => {
   }
 };
 
-const confirmBrokenSeat = (seatId: string) => {
+const confirmBrokenSeat = (seatId: string): void => {
   brokenSeats.value.add(seatId);
 };
+
+defineExpose({ brokenSeats });
 
 const seatsByRow = computed(() => {
   const rows: Array<Array<{ id: string }>> = [];

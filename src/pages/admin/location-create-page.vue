@@ -138,7 +138,12 @@
       <div class="col-12 col-md-8 preview-panel">
         <div class="buu-premium-card preview-card q-pa-md">
           <div class="preview-scroll">
-            <AppExamSeatPreview :rows="rows" :cols="cols" :split-left-right="splitLeftRight" />
+            <AppExamSeatPreview
+              ref="seatPreviewRef"
+              :rows="rows"
+              :cols="cols"
+              :split-left-right="splitLeftRight"
+            />
           </div>
         </div>
 
@@ -168,7 +173,7 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import AppExamSeatPreview from 'src/components/exam/app-exam-seat-preview.vue';
-import { createLocationWithSeats } from 'src/services/location.service';
+import { createLocationWithSeats, updateSeatStatus } from 'src/services/location.service';
 
 const MAX_SEAT_LAYOUT_SIZE = 25;
 
@@ -183,6 +188,7 @@ const rows = ref<number | null>(null);
 const cols = ref<number | null>(null);
 const splitLeftRight = ref(false);
 const isSaving = ref(false);
+const seatPreviewRef = ref<InstanceType<typeof AppExamSeatPreview> | null>(null);
 
 const totalSeats = computed(() => {
   return (rows.value || 0) * (cols.value || 0);
@@ -230,7 +236,7 @@ const handleSave = async (): Promise<void> => {
   isSaving.value = true;
 
   try {
-    await createLocationWithSeats({
+    const { seats } = await createLocationWithSeats({
       LOCATION_NAME: building.value.trim(),
       LOCATION_ROOM_NO: roomName.value.trim() || undefined,
       LOCATION_FLOOR_NO:
@@ -241,6 +247,15 @@ const handleSave = async (): Promise<void> => {
       SEAT_LABEL_FORMAT: 'ROW_COL',
       LOCATION_IS_SPLIT: splitLeftRight.value ? 1 : 0,
     });
+
+    const brokenSeatLabels = seatPreviewRef.value?.brokenSeats ?? new Set<string>();
+    if (brokenSeatLabels.size > 0) {
+      const brokenSeatIds = seats
+        .filter((seat) => seat.LS_SEAT_LABEL !== null && brokenSeatLabels.has(seat.LS_SEAT_LABEL))
+        .map((seat) => seat.LS_ID);
+
+      await Promise.all(brokenSeatIds.map((id) => updateSeatStatus(id, 1)));
+    }
 
     $q.notify({
       type: 'positive',

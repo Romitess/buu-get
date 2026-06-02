@@ -59,6 +59,16 @@ export const updateLocation = async (
   return response.data;
 };
 
+export const updateSeatStatus = async (
+  seatId: number,
+  status: number,
+): Promise<BackendLocationSeat> => {
+  const response = await api.patch<BackendLocationSeat>(`/exam-location-seats/${seatId}`, {
+    LS_SEAT_STATUS: status,
+  });
+  return response.data;
+};
+
 export const deleteLocation = async (id: number | string): Promise<void> => {
   await api.delete(`/exam-locations/${id}`);
 };
