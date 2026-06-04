@@ -361,9 +361,7 @@ const onLocationChange = (room: ExamRoom, slotIdx: number, roomIdx: number) => {
 
   const maxSeats = getLocationMaxSeats(room.locationId);
   if (maxSeats > 0 && maxSeats !== 9999) {
-    if (!room.seats || room.seats > maxSeats) {
-      room.seats = maxSeats;
-    }
+    room.seats = maxSeats;
   }
 };
 
