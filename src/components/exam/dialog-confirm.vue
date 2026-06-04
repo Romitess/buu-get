@@ -6,204 +6,149 @@
     transition-show="scale"
     transition-hide="scale"
   >
-    <q-card class="dialog-confirm-card">
-      <q-card-section class="column items-center q-pt-xl q-pb-lg">
-        <div class="icon-container-wrapper">
-          <q-avatar class="icon-container">
-            <q-icon name="calendar_today" size="28px" />
-          </q-avatar>
-        </div>
+    <q-card
+      class="dialog-confirm-card relative-position q-pa-lg"
+      :style="{
+        width: '100%',
+        maxWidth: currentStep === 1 ? '720px' : '1080px',
+        borderRadius: '16px',
+      }"
+    >
+      <q-btn
+        icon="close"
+        flat
+        round
+        dense
+        class="absolute-top-right q-ma-md text-grey-5 close-btn"
+        @click="$emit('update:modelValue', false)"
+      />
 
-        <div class="text-title q-mt-md">{{ title || t('examSchedule.dialogConfirm.title') }}</div>
-        <div class="text-subtitle q-mt-sm">
-          {{ subtitle || t('examSchedule.dialogConfirm.subtitle') }}
-        </div>
-      </q-card-section>
+      <ConvenienceStep
+        v-if="currentStep === 1"
+        v-model="selectedStatus"
+        @cancel="$emit('update:modelValue', false)"
+        @next="goToStep2"
+      />
 
-      <q-card-section class="q-px-xl q-pb-lg">
-        <q-list class="info-box q-pa-none">
-          <q-item class="info-row q-pa-none" dense style="min-height: unset">
-            <q-item-section class="q-pa-none">
-              <div class="row justify-between items-end q-pb-xs">
-                <div class="row items-center label-text">
-                  <q-icon name="event" size="18px" class="q-mr-sm" />
-                  <span>{{ t('examSchedule.dialogConfirm.date') }}</span>
-                </div>
-                <div class="value-text">{{ examDate }}</div>
-              </div>
-              <div class="underline"></div>
-            </q-item-section>
-          </q-item>
-
-          <q-item class="info-row q-mt-md q-pa-none" dense style="min-height: unset">
-            <q-item-section class="q-pa-none">
-              <div class="row justify-between items-end q-pb-xs">
-                <div class="row items-center label-text">
-                  <q-icon name="schedule" size="18px" class="q-mr-sm" />
-                  <span>{{ t('examSchedule.dialogConfirm.time') }}</span>
-                </div>
-                <div class="value-text">{{ examTime }}</div>
-              </div>
-              <div class="underline"></div>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
-
-      <q-card-actions class="row q-px-xl q-pb-xl q-col-gutter-md">
-        <div class="col-6">
-          <AppButton
-            outline
-            :label="cancelBtnText || t('examSchedule.dialogConfirm.cancel')"
-            class="full-width dialog-btn"
-            @click="$emit('update:modelValue', false)"
-          />
-        </div>
-        <div class="col-6">
-          <AppButton
-            :label="confirmBtnText || t('examSchedule.dialogConfirm.confirm')"
-            class="full-width dialog-btn"
-            @click="$emit('confirm')"
-          />
-        </div>
-      </q-card-actions>
+      <ConfirmStep
+        v-else
+        :exam-date="examDate"
+        :exam-time="examTime"
+        :exam-fee="examFee || 500"
+        :enrollment="dummyEnrollment"
+        @back="currentStep = 1"
+        @confirm="onConfirm"
+      />
     </q-card>
   </q-dialog>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-import AppButton from 'src/components/base/app-button.vue';
-import type { DialogConfirmProps } from 'src/types/exam';
+import { ref, computed, watch } from 'vue';
+import { useUserStore } from 'src/stores/user.store';
+import ConvenienceStep from './convenience-step.vue';
+import ConfirmStep from './confirm-step.vue';
 
-defineProps<DialogConfirmProps>();
-
-defineEmits<{
-  (e: 'update:modelValue', value: boolean): void;
-  (e: 'confirm'): void;
+const props = defineProps<{
+  modelValue: boolean;
+  examDate: string;
+  examTime: string;
+  examFee?: string | number;
 }>();
 
-const { t } = useI18n();
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: boolean): void;
+  (e: 'confirm', physicalStatus: string): void;
+}>();
+
+const userStore = useUserStore();
+const currentStep = ref<number>(1);
+const selectedStatus = ref<string>('ไม่มีข้อมูลข้างต้น');
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (val) {
+      currentStep.value = 1;
+      selectedStatus.value = 'ไม่มีข้อมูลข้างต้น';
+    }
+  },
+);
+
+const goToStep2 = (): void => {
+  currentStep.value = 2;
+};
+
+const dummyEnrollment = computed(() => {
+  const u = userStore.currentUser;
+  if (!u) return null;
+  return {
+    ERM_ID: 0,
+    USER_ID: u.id || 0,
+    SESSION_ID: 0,
+    LS_ID: null,
+    ERM_STATUS: 0,
+    ERM_VERIFY_STATUS: 0,
+    ERM_AT: null,
+    CREATED_AT: new Date().toISOString(),
+    UPDATED_AT: new Date().toISOString(),
+    DELETED_AT: null,
+    USER: {
+      USER_ID: u.id || 0,
+      USER_NATIONAL_ID: u.nationalId,
+      USER_PASSPORT_NO: u.passportNo,
+      USER_EMAIL: u.email,
+      IMAGE: u.userImagePath ? { USER_IMAGE_URL: u.userImagePath } : null,
+      PROFILE: {
+        userProfileId: u.profileId || 0,
+        userId: u.id || 0,
+        userTitleTh: u.titleTH,
+        userFullnameTh: u.fullNameTH,
+        userTitleEn: u.titleEN,
+        userFullnameEn: u.fullNameEN,
+        userDateOfBirth: u.birthdate,
+        userPhone: u.phone,
+        userEducation: u.educationLevel,
+        userFaculty: u.faculty || '-',
+        userInstitution: u.institution || '-',
+        userAddress: u.address,
+        userProvince: u.province || '-',
+        userZipCode: u.zipCode || '-',
+        userRemark: u.remark || null,
+        userPhysicalStatus:
+          selectedStatus.value === 'ไม่มีข้อมูลข้างต้น' ? 'ทั่วไป' : selectedStatus.value,
+      },
+    },
+    SESSION: {
+      SS_ID: 0,
+      EXAM_ID: 0,
+      SS_START_TIME: '',
+      SS_END_TIME: '',
+      SS_CAPACITY: 0,
+    },
+  };
+});
+
+const onConfirm = (): void => {
+  emit('confirm', selectedStatus.value);
+};
 </script>
 
 <style scoped lang="scss">
 .dialog-confirm-card {
-  width: 100%;
-  max-width: 460px;
-  border-radius: 24px;
   background: var(--surface-card);
   box-shadow: var(--shadow-lg);
-  overflow: visible;
-}
+  overflow-y: auto;
+  max-height: 90vh;
+  transition: max-width var(--transition-smooth);
 
-.icon-container-wrapper {
-  filter: drop-shadow(var(--dialog-icon-shadow));
-}
-
-.icon-container {
-  width: 72px;
-  height: 72px;
-  background: var(--dialog-icon-gradient);
-  color: var(--primary);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 3px solid var(--surface-card);
-}
-
-.text-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-
-.text-subtitle {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  text-align: center;
-  line-height: 1.5;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.info-box {
-  border: 1px solid var(--dialog-info-border);
-  border-radius: 16px;
-  padding: 20px 24px;
-  background-color: var(--surface-card);
-}
-
-.info-row {
-  .label-text {
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-  }
-  .value-text {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--text-primary);
-  }
-  .underline {
-    height: 1px;
-    background-color: var(--primary);
-    opacity: 0.5;
-    width: 100%;
-    margin-top: 4px;
+  @media (max-width: 599px) {
+    padding: 16px !important;
+    max-height: 95vh;
   }
 }
 
-.dialog-btn {
-  height: 48px;
-}
-
-@media (max-width: 600px) {
-  .dialog-confirm-card {
-    border-radius: 16px;
-    width: 95vw;
-  }
-
-  .q-card__section.q-px-xl {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
-
-  .q-card__actions.q-px-xl {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-    padding-bottom: 24px !important;
-  }
-
-  .text-title {
-    font-size: 1.1rem;
-  }
-
-  .text-subtitle {
-    font-size: 11px;
-    padding: 0;
-    white-space: nowrap;
-    letter-spacing: -0.02em;
-  }
-
-  .info-box {
-    padding: 12px;
-  }
-
-  .info-row {
-    .label-text {
-      font-size: 0.8rem;
-    }
-    .value-text {
-      font-size: 0.9rem;
-    }
-  }
-
-  .dialog-btn {
-    height: 40px;
-    font-size: 0.85rem;
-  }
+.close-btn {
+  z-index: 10;
 }
 </style>

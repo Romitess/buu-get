@@ -250,7 +250,11 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
-  async function confirmRegistration(round: ExamRound, passcode?: string): Promise<void> {
+  async function confirmRegistration(
+    round: ExamRound,
+    passcode?: string,
+    physicalStatus?: string,
+  ): Promise<void> {
     const userIdStr = localStorage.getItem('user_id');
     if (!userIdStr) throw new Error(i18n.t('examSchedule.userNotLoggedIn'));
     const userId = parseInt(userIdStr, 10);
@@ -258,13 +262,17 @@ export const useExamStore = defineStore('exam', () => {
       throw new Error(i18n.t('examSchedule.invalidUserId'));
     }
 
-    await createEnrollment(userId, round.id, passcode);
+    await createEnrollment(userId, round.id, passcode, physicalStatus);
     await fetchHistory();
     await initSchedule();
   }
 
-  async function confirmSpecialRegistration(round: ExamRound, passcode: string): Promise<void> {
-    await confirmRegistration(round, passcode);
+  async function confirmSpecialRegistration(
+    round: ExamRound,
+    passcode: string,
+    physicalStatus?: string,
+  ): Promise<void> {
+    await confirmRegistration(round, passcode, physicalStatus);
   }
 
   async function cancelRegistration(enrollmentId: number): Promise<void> {

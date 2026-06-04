@@ -1,16 +1,16 @@
 <template>
   <q-card flat bordered class="registrant-card">
     <header class="row items-center q-px-lg q-py-md">
-      <q-icon name="person_outline" size="24px" color="dark" class="q-mr-sm" />
-      <h2 class="text-h6 text-weight-bold q-ma-none">
+      <q-icon name="person_outline" size="24px" color="black" class="q-mr-sm" />
+      <h2 class="text-subtitle1 text-weight-bold text-black q-ma-none">
         {{ $t('admin.registrantManagement.detail.personalInfo') }}
       </h2>
     </header>
 
     <q-separator />
 
-    <section class="registrant-content row q-px-lg q-col-gutter-x-xl">
-      <div class="col-12 col-md-3">
+    <section class="registrant-content row q-px-lg q-col-gutter-x-xl q-col-gutter-y-lg">
+      <div class="col-12 col-sm-4 col-md-3">
         <figure class="flex column items-center q-ma-none">
           <div class="photo-container">
             <ImageDisplay
@@ -22,80 +22,69 @@
             />
           </div>
           <figcaption class="text-center q-mt-md">
-            <div class="text-subtitle2 text-weight-bold">
-              {{ displayData.profileImagePath ? 'candidate_photo.jpg' : 'No Photo' }}
+            <div class="text-subtitle2 text-weight-bold text-black">
+              {{ displayData.profileImagePath ? 'user_photo.jpg' : 'No Photo' }}
             </div>
             <div class="text-caption text-grey-6">
-              {{ displayData.profileImagePath ? 'Uploaded' : 'Not Uploaded' }}
+              {{
+                displayData.profileImagePath
+                  ? `1.2 MB · อัปโหลด ${uploadDateFormatted}`
+                  : 'Not Uploaded'
+              }}
             </div>
           </figcaption>
         </figure>
       </div>
 
-      <div class="col-12 col-md-9">
-        <div class="row q-col-gutter-md">
-          <div class="col-12 col-md-6">
-            <div class="column q-gutter-y-sm">
-              <AppLabeledInput
-                :label="$t('profile.nationalId')"
-                :model-value="displayData.nationalId"
-                readonly
-              />
-              <AppLabeledInput
-                :label="$t('profile.prefix')"
-                :model-value="displayData.titleTh"
-                readonly
-              />
-              <AppLabeledInput
-                :label="$t('profile.fullName')"
-                :model-value="displayData.fullnameTh"
-                readonly
-              />
-              <AppLabeledInput
-                :label="$t('profile.fullNameEn')"
-                :model-value="displayData.fullnameEn"
-                readonly
-              />
-              <AppLabeledInput
-                :label="$t('profile.birthdate')"
-                :model-value="displayData.birthDate"
-                readonly
-              />
+      <div class="col-12 col-sm-8 col-md-9">
+        <div class="row q-col-gutter-x-lg q-col-gutter-y-md">
+          <div class="col-12 col-sm-6">
+            <div class="column q-gutter-y-md">
+              <div class="info-field">
+                <span class="info-label">{{ $t('profile.nationalId') }}</span>
+                <span class="info-value">{{ displayData.nationalId }}</span>
+              </div>
+              <div class="info-field">
+                <span class="info-label">{{ $t('profile.prefix') }}</span>
+                <span class="info-value">{{ displayData.titleTh }}</span>
+              </div>
+              <div class="info-field">
+                <span class="info-label">{{ $t('profile.fullName') }}</span>
+                <span class="info-value">{{ displayData.fullnameTh }}</span>
+              </div>
+              <div class="info-field">
+                <span class="info-label">{{ $t('profile.fullNameEn') }}</span>
+                <span class="info-value">{{ displayData.fullnameEn }}</span>
+              </div>
+              <div class="info-field">
+                <span class="info-label">{{ $t('profile.birthdate') }}</span>
+                <span class="info-value">{{ displayData.birthDate }}</span>
+              </div>
             </div>
           </div>
 
-          <div class="col-12 col-md-6">
-            <div class="column q-gutter-y-sm">
-              <AppLabeledInput
-                :label="$t('profile.education')"
-                :model-value="displayData.education"
-                readonly
-              />
-              <AppLabeledInput
-                :label="$t('profile.faculty')"
-                :model-value="displayData.faculty"
-                readonly
-              />
-              <AppLabeledInput
-                :label="$t('profile.institution')"
-                :model-value="displayData.institution"
-                readonly
-              />
-              <AppLabeledInput
-                :label="$t('profile.address')"
-                :model-value="displayData.address"
-                readonly
-              />
-              <AppLabeledInput
-                :label="$t('profile.phone')"
-                :model-value="displayData.phone"
-                readonly
-              />
-              <AppLabeledInput
-                label="หมายเหตุ"
-                :model-value="displayData.physicalStatus"
-                readonly
-              />
+          <div class="col-12 col-sm-6">
+            <div class="column q-gutter-y-md">
+              <div class="info-field">
+                <span class="info-label">{{ $t('profile.education') }}</span>
+                <span class="info-value">{{ displayData.education }}</span>
+              </div>
+              <div class="info-field">
+                <span class="info-label">{{ $t('profile.faculty') }}</span>
+                <span class="info-value">{{ displayData.faculty }}</span>
+              </div>
+              <div class="info-field">
+                <span class="info-label">{{ $t('profile.institution') }}</span>
+                <span class="info-value">{{ displayData.institution }}</span>
+              </div>
+              <div class="info-field">
+                <span class="info-label">{{ $t('profile.address') }}</span>
+                <span class="info-value">{{ displayData.address }}</span>
+              </div>
+              <div class="info-field">
+                <span class="info-label">{{ $t('profile.phone') }}</span>
+                <span class="info-value">{{ displayData.phone }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -108,7 +97,6 @@
 import { computed } from 'vue';
 import { date } from 'quasar';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
-import AppLabeledInput from 'src/components/base/app-labeled-input.vue';
 import ImageDisplay from 'src/components/base/image-display.vue';
 
 interface Props {
@@ -138,21 +126,35 @@ const displayData = computed(() => {
     physicalStatus: profile?.userPhysicalStatus || '-',
   };
 });
+
+const uploadDateFormatted = computed(() => {
+  const createdAt = props.enrollment?.CREATED_AT;
+  if (!createdAt) return '';
+  const dateObj = new Date(createdAt);
+  return dateObj.toLocaleDateString('th-TH', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+});
 </script>
 
 <style scoped lang="scss">
 .registrant-card {
-  border-radius: 16px;
-  border: 1px solid var(--dashboard-border-color);
+  border-radius: 12px;
+  border: 1px solid var(--neutral-200);
   background-color: #ffffff;
-  box-shadow: var(--dashboard-card-shadow) !important;
   overflow: hidden;
-  min-height: 600px;
 }
 
 .registrant-content {
-  padding-top: 70px;
-  padding-bottom: 70px;
+  padding-top: 24px;
+  padding-bottom: 24px;
+
+  @media (max-width: 599px) {
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
 }
 
 .photo-container {
@@ -167,5 +169,26 @@ const displayData = computed(() => {
 .profile-img {
   width: 100%;
   height: 100%;
+}
+
+.info-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+  line-height: 1.25rem;
+}
+
+.info-value {
+  font-size: 1rem;
+  color: #000000;
+  font-weight: 500;
+  line-height: 1.5rem;
+  word-break: break-word;
 }
 </style>

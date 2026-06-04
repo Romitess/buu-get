@@ -393,12 +393,14 @@ export const createEnrollment = async (
   userId: number,
   sessionId: number,
   passcode?: string,
+  physicalStatus?: string,
 ): Promise<ExamEnrollment> => {
   try {
     const response = await api.post<ExamEnrollment>('/exam-enrollments', {
       USER_ID: userId,
       SESSION_ID: sessionId,
       PASSCODE: passcode,
+      PHYSICAL_STATUS: physicalStatus,
     });
     return response.data;
   } catch (error) {
