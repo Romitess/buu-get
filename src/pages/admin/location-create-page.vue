@@ -173,7 +173,7 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import AppExamSeatPreview from 'src/components/exam/app-exam-seat-preview.vue';
-import { createLocationWithSeats, updateSeatStatus } from 'src/services/location.service';
+import { createLocationWithSeats } from 'src/services/location.service';
 
 const MAX_SEAT_LAYOUT_SIZE = 25;
 
@@ -236,26 +236,24 @@ const handleSave = async (): Promise<void> => {
   isSaving.value = true;
 
   try {
-    const { seats } = await createLocationWithSeats({
-      LOCATION_NAME: building.value.trim(),
-      LOCATION_ROOM_NO: roomName.value.trim() || undefined,
-      LOCATION_FLOOR_NO:
-        floor.value !== null && String(floor.value).trim() !== '' ? Number(floor.value) : undefined,
-      LOCATION_TOTAL_ROWS: Number(rows.value),
-      LOCATION_TOTAL_COLS: Number(cols.value),
-      LOCATION_SEAT_CAPACITY: Number(totalSeats.value),
-      SEAT_LABEL_FORMAT: 'ROW_COL',
-      LOCATION_IS_SPLIT: splitLeftRight.value ? 1 : 0,
-    });
+    const brokenSeatLabels = Array.from(seatPreviewRef.value?.brokenSeats ?? new Set<string>());
 
-    const brokenSeatLabels = seatPreviewRef.value?.brokenSeats ?? new Set<string>();
-    if (brokenSeatLabels.size > 0) {
-      const brokenSeatIds = seats
-        .filter((seat) => seat.LS_SEAT_LABEL !== null && brokenSeatLabels.has(seat.LS_SEAT_LABEL))
-        .map((seat) => seat.LS_ID);
-
-      await Promise.all(brokenSeatIds.map((id) => updateSeatStatus(id, 1)));
-    }
+    await createLocationWithSeats(
+      {
+        LOCATION_NAME: building.value.trim(),
+        LOCATION_ROOM_NO: roomName.value.trim() || undefined,
+        LOCATION_FLOOR_NO:
+          floor.value !== null && String(floor.value).trim() !== ''
+            ? Number(floor.value)
+            : undefined,
+        LOCATION_TOTAL_ROWS: Number(rows.value),
+        LOCATION_TOTAL_COLS: Number(cols.value),
+        LOCATION_SEAT_CAPACITY: Number(totalSeats.value),
+        SEAT_LABEL_FORMAT: 'ROW_COL',
+        LOCATION_IS_SPLIT: splitLeftRight.value ? 1 : 0,
+      },
+      brokenSeatLabels,
+    );
 
     $q.notify({
       type: 'positive',

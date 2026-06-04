@@ -39,13 +39,17 @@ export const createLocation = async (payload: LocationPayload): Promise<BackendL
  */
 export const createLocationWithSeats = async (
   payload: LocationPayload,
+  brokenSeats?: string[],
 ): Promise<{ location: BackendLocation; seats: BackendLocationSeat[] }> => {
   // Step 1: สร้างห้องสอบ
   const location = await createLocation(payload);
 
   // Step 2: Auto-generate ที่นั่งจาก LOCATION_TOTAL_ROWS × LOCATION_TOTAL_COLS
+  // เพิ่ม timeout เป็น 120 วินาที เนื่องจากกรณีสร้างที่นั่งจำนวนมาก (เช่น 625 ที่) อาจใช้เวลาในการบันทึกลงฐานข้อมูลนานกว่าปกติ
   const seatsResponse = await api.post<BackendLocationSeat[]>(
     `/exam-location-seats/generate/${location.LOCATION_ID}`,
+    { brokenSeats },
+    { timeout: 120000 },
   );
 
   return { location, seats: seatsResponse.data };
