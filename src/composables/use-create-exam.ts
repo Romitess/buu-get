@@ -254,6 +254,21 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     return errors;
   });
 
+  const getLocationMaxSeats = (locationId: number | null): number => {
+    if (!locationId) return 9999;
+    const option = locationOptions.value.find((opt) => opt.value === locationId);
+    if (!option || !option.raw) return 9999;
+    if (
+      option.raw.LOCATION_SEAT_CAPACITY !== undefined &&
+      option.raw.LOCATION_SEAT_CAPACITY !== null
+    ) {
+      return option.raw.LOCATION_SEAT_CAPACITY;
+    }
+    const seats = option.raw.SEATS;
+    if (!seats) return 0;
+    return seats.filter((s) => s.LS_SEAT_STATUS !== 1).length;
+  };
+
   // ── Field-level validation (required fields) ──
   /** Reactive object holding per-field validation error messages */
   const fieldErrors = ref<Record<string, string>>({});
@@ -300,6 +315,12 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         }
         if (!room.seats || room.seats <= 0) {
           errors[`seats_${slotIdx}_${roomIdx}`] = VALIDATION_MSG.SEATS;
+        } else if (room.locationId) {
+          const maxSeats = getLocationMaxSeats(room.locationId);
+          if (room.seats > maxSeats) {
+            errors[`seats_${slotIdx}_${roomIdx}`] =
+              `เกินขอบเขตความจุที่นั่งของห้องสอบ มีที่นั่งได้ไม่เกิน ${maxSeats} ที่นั่ง ในสถานที่นี้`;
+          }
         }
       });
     });

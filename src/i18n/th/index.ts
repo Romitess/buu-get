@@ -8,8 +8,8 @@ export default {
     executive: 'ผู้บริหาร',
     candidate: 'ผู้สมัครสอบ',
     proctor: 'กรรมการคุมสอบ',
-    registration_officer: 'เจ้าหน้าที่ลงทะเบียน',
-    exam_operations_officer: 'เจ้าหน้าที่จัดการสอบ',
+    registration_officer: 'เจ้าหน้าที่จัดสอบ',
+    exam_operations_officer: 'เจ้าหน้าที่เปิดรับสมัคร',
   },
   common: {
     months: [

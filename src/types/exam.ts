@@ -210,6 +210,7 @@ export interface BackendLocation {
   LOCATION_TOTAL_ROWS?: number;
   LOCATION_TOTAL_COLS?: number;
   LOCATION_IS_SPLIT?: number;
+  LOCATION_SEAT_CAPACITY?: number;
   SEATS?: {
     LS_ID: number;
     LS_ROW_NO: number;

@@ -237,7 +237,11 @@
                     outlined
                     dense
                     class="custom-input"
-                    :class="{ 'buu-field-error': hasError(`seats_${activeSlotIndex}_${rIdx}`) }"
+                    :class="{
+                      'buu-field-error':
+                        hasError(`seats_${activeSlotIndex}_${rIdx}`) ||
+                        (room.locationId && room.seats > getLocationMaxSeats(room.locationId)),
+                    }"
                     :placeholder="
                       room.locationId ? String(getLocationMaxSeats(room.locationId)) : '40'
                     "
@@ -248,10 +252,6 @@
                     @update:model-value="
                       (val: string | number | null) => {
                         emit('clearFieldError', `seats_${activeSlotIndex}_${rIdx}`);
-                        const maxVal = getLocationMaxSeats(room.locationId);
-                        if (val !== null && Number(val) > maxVal) {
-                          room.seats = maxVal;
-                        }
                       }
                     "
                   >
@@ -273,7 +273,15 @@
                 </div>
               </div>
               <div
-                v-if="hasError(`seats_${activeSlotIndex}_${rIdx}`)"
+                v-if="room.locationId && room.seats > getLocationMaxSeats(room.locationId)"
+                class="buu-error-msg"
+              >
+                <q-icon name="error" class="buu-error-icon" />
+                เกินขอบเขตความจุที่นั่งของห้องสอบ มีที่นั่งได้ไม่เกิน
+                {{ getLocationMaxSeats(room.locationId) }} ที่นั่ง ในสถานที่นี้
+              </div>
+              <div
+                v-else-if="hasError(`seats_${activeSlotIndex}_${rIdx}`)"
                 :key="`seats-${rIdx}-${shakeKey}`"
                 class="buu-error-msg"
               >
@@ -337,6 +345,12 @@ const getLocationMaxSeats = (locationId: number | null): number => {
   if (!locationId) return 9999;
   const option = props.locationOptions.find((opt) => opt.value === locationId);
   if (!option || !option.raw) return 9999;
+  if (
+    option.raw.LOCATION_SEAT_CAPACITY !== undefined &&
+    option.raw.LOCATION_SEAT_CAPACITY !== null
+  ) {
+    return option.raw.LOCATION_SEAT_CAPACITY;
+  }
   const seats = option.raw.SEATS;
   if (!seats) return 0;
   return seats.filter((s) => s.LS_SEAT_STATUS !== 1).length;
