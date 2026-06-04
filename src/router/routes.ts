@@ -155,6 +155,22 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'edit-location/:locationId',
+            name: 'admin-edit-location',
+            component: () => import('pages/admin/location-edit-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageLocations',
+                  icon: 'room',
+                  to: '/admin/location-management',
+                },
+                { label: 'แก้ไขห้องสอบ', icon: 'edit' },
+              ],
+            },
+          },
+          {
             path: 'exam-management',
             name: 'admin-exam-management',
             component: () => import('pages/admin/exam-management-page.vue'),

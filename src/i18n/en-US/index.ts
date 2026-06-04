@@ -480,6 +480,7 @@ export default {
         actions: {
           cancel: 'Cancel',
           requestFix: 'Request Correction',
+          editByStaff: 'Edit by Staff',
           confirmVerify: 'Approve Profile',
           backToMain: 'Back to Main',
         },
@@ -658,6 +659,7 @@ export default {
     },
     dialog: {
       title: 'Profile Change Details',
+      diffTitle: 'Detailed Profile Changes',
       fieldName: 'Field',
       oldValue: 'Old Value',
       newValue: 'New Value',

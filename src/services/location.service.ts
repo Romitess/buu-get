@@ -76,3 +76,16 @@ export const updateSeatStatus = async (
 export const deleteLocation = async (id: number | string): Promise<void> => {
   await api.delete(`/exam-locations/${id}`);
 };
+
+export const fetchLocationById = async (
+  id: number | string,
+): Promise<BackendLocation & { SEATS: BackendLocationSeat[] }> => {
+  const response = await api.get<BackendLocation & { SEATS: BackendLocationSeat[] }>(
+    `/exam-locations/${id}`,
+  );
+  return response.data;
+};
+
+export const deleteLocationSeat = async (id: number | string): Promise<void> => {
+  await api.delete(`/exam-location-seats/${id}`);
+};

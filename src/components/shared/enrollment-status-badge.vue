@@ -69,12 +69,12 @@ const badgeClass = computed((): string => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 16px;
+  padding: 4px 12px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
-  min-width: 100px;
+  min-width: 120px;
   text-align: center;
 }
 

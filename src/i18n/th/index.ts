@@ -560,7 +560,8 @@ export default {
         uploadDate: 'อัปโหลด',
         actions: {
           cancel: 'ยกเลิก',
-          requestFix: 'แจ้งข้อมูลให้แก้ไข',
+          requestFix: 'แจ้งให้ผู้สมัครแก้ไข',
+          editByStaff: 'แก้ไขด้วยตนเอง',
           confirmVerify: 'ยืนยันการตรวจสอบ',
           backToMain: 'กลับไปหน้าหลัก',
         },
@@ -827,6 +828,7 @@ export default {
     },
     dialog: {
       title: 'รายละเอียดการเปลี่ยนแปลงข้อมูล',
+      diffTitle: 'รายละเอียดข้อมูลส่วนที่ถูกแก้ไข',
       fieldName: 'ข้อมูล',
       oldValue: 'ข้อมูลเดิม',
       newValue: 'ข้อมูลใหม่',

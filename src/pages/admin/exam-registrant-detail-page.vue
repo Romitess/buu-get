@@ -15,19 +15,19 @@
 
       <div class="action-container row justify-end q-mt-sm q-gutter-sm q-gutter-md-md">
         <AppButton
-          :label="$t('admin.registrantManagement.detail.actions.cancel')"
-          color="grey-3"
-          text-color="dark"
-          unelevated
-          class="action-btn col-12 col-sm-auto"
-          @click="goBack"
-        />
-        <AppButton
           :label="$t('admin.registrantManagement.detail.actions.requestFix')"
           color="negative"
           unelevated
           class="action-btn col-12 col-sm-auto"
           @click="showFixDialog = true"
+        />
+        <AppButton
+          :label="$t('admin.registrantManagement.detail.actions.editByStaff')"
+          color="grey-3"
+          text-color="dark"
+          unelevated
+          class="action-btn col-12 col-sm-auto"
+          @click="showEditDialog = true"
         />
         <AppButton
           :label="$t('admin.registrantManagement.detail.actions.confirmVerify')"
@@ -59,6 +59,12 @@
       :exam-date="examDateFormatted"
       @submit="handleFixSubmit"
     />
+
+    <RegistrantEditDialog
+      v-model="showEditDialog"
+      :enrollment="enrollment"
+      @save="handleEditSave"
+    />
   </q-page>
 </template>
 
@@ -71,6 +77,7 @@ import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
 import RegistrantPersonalDetail from 'src/components/registrant-personal-detail.vue';
 import RequestFixDialog from 'src/components/request-fix-dialog.vue';
+import RegistrantEditDialog from 'src/components/registrant-edit-dialog.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import {
@@ -78,6 +85,8 @@ import {
   updateEnrollmentStatus,
   requestEnrollmentFix,
 } from 'src/services/enrollment.service';
+import { updateUserProfileByAdmin } from 'src/services/user.service';
+import { useUserStore } from 'src/stores/user.store';
 import { VerifyStatus } from 'src/types/enrollment.types';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 
@@ -85,10 +94,12 @@ const route = useRoute();
 const router = useRouter();
 const $q = useQuasar();
 const { t } = useI18n();
+const userStore = useUserStore();
 
 const enrollment = ref<BackendEnrollmentDetail | null>(null);
 const isLoading = ref(true);
 const showFixDialog = ref(false);
+const showEditDialog = ref(false);
 
 const registrantName = computed(
   () =>
@@ -128,6 +139,34 @@ const loadData = async (): Promise<void> => {
 
 const goBack = (): void => {
   router.back();
+};
+
+const handleEditSave = async (payload: Record<string, unknown>): Promise<void> => {
+  if (!enrollment.value?.USER?.PROFILE?.userProfileId) return;
+
+  $q.loading.show({
+    message: 'กำลังบันทึกข้อมูลการแก้ไข...',
+  });
+
+  try {
+    const token = userStore.accessToken || localStorage.getItem('access_token') || '';
+    await updateUserProfileByAdmin(token, enrollment.value.USER.PROFILE.userProfileId, payload);
+
+    $q.notify({
+      type: 'positive',
+      message: 'บันทึกการแก้ไขข้อมูลผู้สมัครสำเร็จ',
+    });
+
+    await loadData();
+  } catch (error) {
+    console.error('Error updating profile by staff:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'เกิดข้อผิดพลาดในการบันทึกข้อมูลการแก้ไข',
+    });
+  } finally {
+    $q.loading.hide();
+  }
 };
 
 const handleFixSubmit = async (payload: {
@@ -210,6 +249,16 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+.registrant-detail-page {
+  padding-top: 16px;
+  padding-bottom: 16px;
+
+  @media (min-height: 900px) {
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+}
+
 .action-btn {
   min-width: 150px;
   height: 52px;

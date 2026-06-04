@@ -607,6 +607,7 @@ const onSave = async (): Promise<void> => {
       userAddress: formData.value.address,
       userPhysicalStatus: physicalStatusValue,
       isFromEmail: isFromEmail.value,
+      userImagePath: formData.value.userImagePath,
     });
 
     // บันทึกรูปภาพแยกใน UserImage entity ถ้ามีการเปลี่ยนรูป

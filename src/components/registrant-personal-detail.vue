@@ -1,6 +1,6 @@
 <template>
   <q-card flat bordered class="registrant-card">
-    <header class="row items-center q-px-lg q-py-md">
+    <header class="row items-center q-px-xl q-py-lg">
       <q-icon name="person_outline" size="24px" color="black" class="q-mr-sm" />
       <h2 class="text-subtitle1 text-weight-bold text-black q-ma-none">
         {{ $t('admin.registrantManagement.detail.personalInfo') }}
@@ -9,7 +9,7 @@
 
     <q-separator />
 
-    <section class="registrant-content row q-px-lg q-col-gutter-x-xl q-col-gutter-y-lg">
+    <section class="registrant-content row q-px-xl q-col-gutter-x-xl q-col-gutter-y-lg">
       <div class="col-12 col-sm-4 col-md-3">
         <figure class="flex column items-center q-ma-none">
           <div class="photo-container">
@@ -95,7 +95,6 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { date } from 'quasar';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 import ImageDisplay from 'src/components/base/image-display.vue';
 
@@ -105,23 +104,49 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const formatNationalId = (nid: string): string => {
+  if (!nid || nid === '-') return '-';
+  const clean = nid.replace(/-/g, '');
+  if (clean.length === 13) {
+    return `${clean[0]}-${clean.substring(1, 5)}-${clean.substring(5, 10)}-${clean.substring(10, 12)}-${clean[12]}`;
+  }
+  return nid;
+};
+
+const formatPhone = (phoneNum: string): string => {
+  if (!phoneNum || phoneNum === '-') return '-';
+  const clean = phoneNum.replace(/-/g, '');
+  if (clean.length === 10) {
+    return `${clean.substring(0, 3)}-${clean.substring(3, 6)}-${clean.substring(6, 10)}`;
+  }
+  return phoneNum;
+};
+
+const formatBirthDateBE = (dateStr: string | null | undefined): string => {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '-';
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const beYear = d.getFullYear() + 543;
+  return `${day}/${month}/${beYear}`;
+};
+
 const displayData = computed(() => {
   const profile = props.enrollment?.USER?.PROFILE;
   const user = props.enrollment?.USER;
 
   return {
-    nationalId: user?.USER_NATIONAL_ID || '-',
+    nationalId: formatNationalId(user?.USER_NATIONAL_ID || ''),
     titleTh: profile?.userTitleTh || '-',
     fullnameTh: profile?.userFullnameTh || '-',
     fullnameEn: profile?.userFullnameEn || '-',
-    birthDate: profile?.userDateOfBirth
-      ? date.formatDate(profile.userDateOfBirth, 'DD/MM/YYYY')
-      : '-',
+    birthDate: formatBirthDateBE(profile?.userDateOfBirth),
     education: profile?.userEducation || '-',
     faculty: profile?.userFaculty || '-',
     institution: profile?.userInstitution || '-',
     address: profile?.userAddress || '-',
-    phone: profile?.userPhone || '-',
+    phone: formatPhone(profile?.userPhone || ''),
     profileImagePath: user?.IMAGE?.USER_IMAGE_URL || null,
     physicalStatus: profile?.userPhysicalStatus || '-',
   };
@@ -144,26 +169,43 @@ const uploadDateFormatted = computed(() => {
   border-radius: 12px;
   border: 1px solid var(--neutral-200);
   background-color: #ffffff;
+  box-shadow: 0px 4px 4px 0px #00000040 !important;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  margin-top: 16px;
+
+  @media (min-width: 1024px) {
+    min-height: 360px;
+  }
 }
 
 .registrant-content {
-  padding-top: 24px;
-  padding-bottom: 24px;
+  flex: 1;
+  align-items: center;
+  padding-top: 20px;
+  padding-bottom: 20px;
 
   @media (max-width: 599px) {
-    padding-top: 16px;
-    padding-bottom: 16px;
+    padding-top: 12px;
+    padding-bottom: 12px;
   }
 }
 
 .photo-container {
-  width: 180px;
-  height: 220px;
+  width: 100%;
+  max-width: 160px;
+  aspect-ratio: 180 / 220;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid #f0f0f0;
   background-color: #e3f2fd;
+  transition: all 0.3s ease;
+
+  @media (max-width: 599px) {
+    max-width: 130px;
+  }
 }
 
 .profile-img {
@@ -174,19 +216,19 @@ const uploadDateFormatted = computed(() => {
 .info-field {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .info-label {
-  font-size: 0.875rem;
-  color: #64748b;
-  font-weight: 500;
+  font-size: 0.8125rem;
+  color: #8c8c8c;
+  font-weight: 400;
   line-height: 1.25rem;
 }
 
 .info-value {
-  font-size: 1rem;
-  color: #000000;
+  font-size: 0.9375rem;
+  color: #1a1a1a;
   font-weight: 500;
   line-height: 1.5rem;
   word-break: break-word;

@@ -116,47 +116,273 @@
     </div>
 
     <q-dialog v-model="showDetailsDialog" persistent>
-      <q-card style="min-width: 600px; border-radius: 16px">
-        <q-card-section class="row items-center q-pb-none justify-between">
-          <div class="text-h6 text-weight-bold">
-            {{ $t('profileEditHistory.dialog.title') }}
+      <q-card style="width: 1000px; max-width: 95vw; border-radius: 16px">
+        <q-card-section
+          class="row items-center justify-between q-px-md q-px-sm-xl q-pt-lg q-pb-none"
+        >
+          <div class="text-h6 text-weight-bold text-black">
+            {{ $t('profileEditHistory.dialog.diffTitle') }}
           </div>
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
 
-        <q-card-section class="q-pa-md">
-          <q-table
-            flat
-            bordered
-            :rows="detailsRows"
-            :columns="detailsColumns"
-            row-key="field"
-            :pagination="{ rowsPerPage: 0 }"
-            hide-bottom
-          >
-            <template v-slot:body-cell-oldValue="props">
-              <q-td :props="props" class="text-red-8 text-weight-medium">
-                {{ props.row.oldValue || '-' }}
-              </q-td>
-            </template>
-            <template v-slot:body-cell-newValue="props">
-              <q-td :props="props" class="text-green-8 text-weight-medium">
-                {{ props.row.newValue || '-' }}
-              </q-td>
-            </template>
-          </q-table>
-        </q-card-section>
+        <q-card-section class="q-px-md q-px-sm-xl q-pt-md q-pb-xl scroll" style="max-height: 75vh">
+          <q-card flat bordered class="registrant-card q-mb-md">
+            <header class="row items-center q-px-md q-px-sm-lg q-py-md">
+              <q-icon name="person" size="24px" color="black" class="q-mr-sm" />
+              <h2 class="text-subtitle1 text-weight-bold text-black q-ma-none">ข้อมูลใหม่</h2>
+            </header>
+            <q-separator />
+            <section
+              class="registrant-content row q-px-md q-px-sm-lg q-col-gutter-x-lg q-col-gutter-y-md"
+            >
+              <div class="col-12 col-sm-4 col-md-3">
+                <figure
+                  class="flex column items-center q-ma-none photo-figure-wrapper"
+                  :class="{ 'highlight-new': isFieldChanged('userImagePath') }"
+                >
+                  <div class="photo-container">
+                    <img
+                      :src="avatarSrcNew"
+                      class="profile-img"
+                      style="object-fit: cover; width: 100%; height: 100%"
+                      alt="New Photo"
+                    />
+                  </div>
+                  <figcaption class="text-center q-mt-md">
+                    <div class="text-subtitle2 text-weight-bold text-black">
+                      {{ displayProfileNew.imagePath ? 'user_photo.jpg' : 'No Photo' }}
+                    </div>
+                    <div class="text-caption text-grey-6">
+                      {{
+                        displayProfileNew.imagePath
+                          ? `1.2 MB · อัปโหลด ${uploadDateFormatted}`
+                          : 'Not Uploaded'
+                      }}
+                    </div>
+                  </figcaption>
+                </figure>
+              </div>
 
-        <q-card-actions align="right" class="q-px-md q-pb-md">
-          <q-btn
-            unelevated
-            label="ปิด"
-            color="primary"
-            style="border-radius: 8px; min-width: 100px"
-            class="text-weight-bold"
-            v-close-popup
-          />
-        </q-card-actions>
+              <div class="col-12 col-sm-8 col-md-9">
+                <div class="row q-col-gutter-x-lg q-col-gutter-y-md">
+                  <div class="col-12 col-sm-6">
+                    <div class="column q-gutter-y-sm">
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-new': isFieldChanged('userNationalId') }"
+                      >
+                        <span class="info-label">{{ $t('profile.nationalId') }}</span>
+                        <span class="info-value">{{ displayProfileNew.nationalId }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-new': isFieldChanged('userTitleTh') }"
+                      >
+                        <span class="info-label">{{ $t('profile.prefix') }}</span>
+                        <span class="info-value">{{ displayProfileNew.titleTh }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-new': isFieldChanged('userFullnameTh') }"
+                      >
+                        <span class="info-label">{{ $t('profile.fullName') }}</span>
+                        <span class="info-value">{{ displayProfileNew.fullnameTh }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-new': isFieldChanged('userFullnameEn') }"
+                      >
+                        <span class="info-label">{{ $t('profile.fullNameEn') }}</span>
+                        <span class="info-value">{{ displayProfileNew.fullnameEn }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-new': isFieldChanged('userDateOfBirth') }"
+                      >
+                        <span class="info-label">{{ $t('profile.birthdate') }}</span>
+                        <span class="info-value">{{ displayProfileNew.birthDate }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-sm-6">
+                    <div class="column q-gutter-y-sm">
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-new': isFieldChanged('userEducation') }"
+                      >
+                        <span class="info-label">{{ $t('profile.education') }}</span>
+                        <span class="info-value">{{ displayProfileNew.education }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-new': isFieldChanged('userFaculty') }"
+                      >
+                        <span class="info-label">{{ $t('profile.faculty') }}</span>
+                        <span class="info-value">{{ displayProfileNew.faculty }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-new': isFieldChanged('userInstitution') }"
+                      >
+                        <span class="info-label">{{ $t('profile.institution') }}</span>
+                        <span class="info-value">{{ displayProfileNew.institution }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{
+                          'highlight-new':
+                            isFieldChanged('userAddress') ||
+                            isFieldChanged('userProvince') ||
+                            isFieldChanged('userZipCode'),
+                        }"
+                      >
+                        <span class="info-label">{{ $t('profile.address') }}</span>
+                        <span class="info-value">{{ displayProfileNew.address }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-new': isFieldChanged('userPhone') }"
+                      >
+                        <span class="info-label">{{ $t('profile.phone') }}</span>
+                        <span class="info-value">{{ displayProfileNew.phone }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </q-card>
+
+          <q-card flat bordered class="registrant-card">
+            <header class="row items-center q-px-md q-px-sm-lg q-py-md">
+              <q-icon name="person" size="24px" color="black" class="q-mr-sm" />
+              <h2 class="text-subtitle1 text-weight-bold text-black q-ma-none">ข้อมูลเก่า</h2>
+            </header>
+            <q-separator />
+            <section
+              class="registrant-content row q-px-md q-px-sm-lg q-col-gutter-x-lg q-col-gutter-y-md"
+            >
+              <div class="col-12 col-sm-4 col-md-3">
+                <figure
+                  class="flex column items-center q-ma-none photo-figure-wrapper"
+                  :class="{ 'highlight-old': isFieldChanged('userImagePath') }"
+                >
+                  <div class="photo-container">
+                    <img
+                      :src="avatarSrcOld"
+                      class="profile-img"
+                      style="object-fit: cover; width: 100%; height: 100%"
+                      alt="Old Photo"
+                    />
+                  </div>
+                  <figcaption class="text-center q-mt-md">
+                    <div class="text-subtitle2 text-weight-bold text-black">
+                      {{ displayProfileOld.imagePath ? 'user_photo.jpg' : 'No Photo' }}
+                    </div>
+                    <div class="text-caption text-grey-6">
+                      {{
+                        displayProfileOld.imagePath
+                          ? `1.2 MB · อัปโหลด ${uploadDateFormatted}`
+                          : 'Not Uploaded'
+                      }}
+                    </div>
+                  </figcaption>
+                </figure>
+              </div>
+
+              <div class="col-12 col-sm-8 col-md-9">
+                <div class="row q-col-gutter-x-lg q-col-gutter-y-md">
+                  <div class="col-12 col-sm-6">
+                    <div class="column q-gutter-y-sm">
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-old': isFieldChanged('userNationalId') }"
+                      >
+                        <span class="info-label">{{ $t('profile.nationalId') }}</span>
+                        <span class="info-value">{{ displayProfileOld.nationalId }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-old': isFieldChanged('userTitleTh') }"
+                      >
+                        <span class="info-label">{{ $t('profile.prefix') }}</span>
+                        <span class="info-value">{{ displayProfileOld.titleTh }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-old': isFieldChanged('userFullnameTh') }"
+                      >
+                        <span class="info-label">{{ $t('profile.fullName') }}</span>
+                        <span class="info-value">{{ displayProfileOld.fullnameTh }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-old': isFieldChanged('userFullnameEn') }"
+                      >
+                        <span class="info-label">{{ $t('profile.fullNameEn') }}</span>
+                        <span class="info-value">{{ displayProfileOld.fullnameEn }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-old': isFieldChanged('userDateOfBirth') }"
+                      >
+                        <span class="info-label">{{ $t('profile.birthdate') }}</span>
+                        <span class="info-value">{{ displayProfileOld.birthDate }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-12 col-sm-6">
+                    <div class="column q-gutter-y-sm">
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-old': isFieldChanged('userEducation') }"
+                      >
+                        <span class="info-label">{{ $t('profile.education') }}</span>
+                        <span class="info-value">{{ displayProfileOld.education }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-old': isFieldChanged('userFaculty') }"
+                      >
+                        <span class="info-label">{{ $t('profile.faculty') }}</span>
+                        <span class="info-value">{{ displayProfileOld.faculty }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-old': isFieldChanged('userInstitution') }"
+                      >
+                        <span class="info-label">{{ $t('profile.institution') }}</span>
+                        <span class="info-value">{{ displayProfileOld.institution }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{
+                          'highlight-old':
+                            isFieldChanged('userAddress') ||
+                            isFieldChanged('userProvince') ||
+                            isFieldChanged('userZipCode'),
+                        }"
+                      >
+                        <span class="info-label">{{ $t('profile.address') }}</span>
+                        <span class="info-value">{{ displayProfileOld.address }}</span>
+                      </div>
+                      <div
+                        class="info-field"
+                        :class="{ 'highlight-old': isFieldChanged('userPhone') }"
+                      >
+                        <span class="info-label">{{ $t('profile.phone') }}</span>
+                        <span class="info-value">{{ displayProfileOld.phone }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </q-card>
+        </q-card-section>
       </q-card>
     </q-dialog>
   </q-page>
@@ -311,93 +537,113 @@ const historyRows = computed(() => {
   });
 });
 
-const detailsColumns = computed<QTableColumn[]>(() => [
-  {
-    name: 'field',
-    label: t('profileEditHistory.dialog.fieldName'),
-    field: 'field',
-    align: 'left',
-  },
-  {
-    name: 'oldValue',
-    label: t('profileEditHistory.dialog.oldValue'),
-    field: 'oldValue',
-    align: 'left',
-  },
-  {
-    name: 'newValue',
-    label: t('profileEditHistory.dialog.newValue'),
-    field: 'newValue',
-    align: 'left',
-  },
-]);
+const parseJson = (val: unknown): Record<string, unknown> => {
+  if (!val) return {};
+  if (typeof val === 'object') return val as Record<string, unknown>;
+  try {
+    return JSON.parse(val as string) as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+};
 
-const detailsRows = computed(() => {
-  if (!selectedLog.value) return [];
-  const log = selectedLog.value;
+const getProfileValue = (key: string, isNew: boolean): string | null => {
+  if (!selectedLog.value) return '';
+  const oldObj = parseJson(selectedLog.value.oldValues);
+  const newObj = parseJson(selectedLog.value.newValues);
 
-  const parseJson = (val: unknown): Record<string, unknown> => {
-    if (!val) return {};
-    if (typeof val === 'object') return val as Record<string, unknown>;
-    try {
-      return JSON.parse(val as string) as Record<string, unknown>;
-    } catch {
-      return {};
-    }
-  };
-
-  const oldObj = parseJson(log.oldValues);
-  const newObj = parseJson(log.newValues);
-
-  const fieldTranslationMap: Record<string, string> = {
-    userTitleTh: 'คำนำหน้าภาษาไทย',
-    userFullnameTh: 'ชื่อ-นามสกุล ภาษาไทย',
-    userTitleEn: 'คำนำหน้าภาษาอังกฤษ',
-    userFullnameEn: 'ชื่อ-นามสกุล ภาษาอังกฤษ',
-    userDateOfBirth: 'วันเกิด',
-    userPhone: 'เบอร์โทรศัพท์',
-    userEducation: 'ระดับการศึกษา',
-    userFaculty: 'คณะ',
-    userInstitution: 'ชื่อสถานศึกษา',
-    userAddress: 'ที่อยู่สำหรับจัดส่งเอกสาร',
-    userProvince: 'จังหวัด',
-    userZipCode: 'รหัสไปรษณีย์',
-    userRemark: 'หมายเหตุถึงผู้สมัคร',
-    userPhysicalStatus: 'ข้อมูลทางกายภาพ/สถานะพิเศษ',
-  };
-
-  const formatValue = (val: unknown): string => {
-    if (val === null || val === undefined) return '-';
-    if (typeof val === 'string') return val;
-    if (typeof val === 'number' || typeof val === 'boolean') return String(val);
-    return JSON.stringify(val);
-  };
-
-  const rows: { field: string; oldValue: string; newValue: string }[] = [];
-
-  for (const key of Object.keys(newObj)) {
-    let oldVal = oldObj[key] !== undefined && oldObj[key] !== null ? oldObj[key] : '-';
-    let newVal = newObj[key] !== undefined && newObj[key] !== null ? newObj[key] : '-';
-
-    if (key === 'userDateOfBirth') {
-      if (oldVal && oldVal !== '-') {
-        const d = new Date(oldVal as string | number | Date);
-        oldVal = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear() + 543}`;
-      }
-      if (newVal && newVal !== '-') {
-        const d = new Date(newVal as string | number | Date);
-        newVal = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear() + 543}`;
-      }
-    }
-
-    rows.push({
-      field: fieldTranslationMap[key] || key,
-      oldValue: formatValue(oldVal),
-      newValue: formatValue(newVal),
-    });
+  const obj = isNew ? newObj : oldObj;
+  if (obj[key] !== undefined) {
+    return (obj[key] as string) || '';
   }
 
-  return rows;
+  const profile = enrollment.value?.USER?.PROFILE;
+  const user = enrollment.value?.USER;
+
+  if (key === 'userNationalId') return user?.USER_NATIONAL_ID || '';
+  if (key === 'userImagePath') return user?.IMAGE?.USER_IMAGE_URL || null;
+  return (profile?.[key as keyof typeof profile] as string) || '';
+};
+
+const isFieldChanged = (key: string): boolean => {
+  if (!selectedLog.value) return false;
+  const newObj = parseJson(selectedLog.value.newValues);
+  return newObj[key] !== undefined;
+};
+
+const formatBirthDate = (dateVal: unknown): string => {
+  if (!dateVal) return '-';
+  const d = new Date(dateVal as string | number | Date);
+  if (isNaN(d.getTime())) return '-';
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const beYear = d.getFullYear() + 543;
+  return `${day}/${month}/${beYear}`;
+};
+
+const formatNationalId = (nid: string): string => {
+  if (!nid) return '-';
+  if (nid.length === 13) {
+    return `${nid[0]}-${nid.substring(1, 5)}-${nid.substring(5, 10)}-${nid.substring(10, 12)}-${nid[12]}`;
+  }
+  return nid;
+};
+
+const getDisplayProfile = (isNew: boolean) => {
+  const nationalIdRaw = getProfileValue('userNationalId', isNew);
+  const birthDateRaw = getProfileValue('userDateOfBirth', isNew);
+  const titleTh = getProfileValue('userTitleTh', isNew);
+  const fullnameTh = getProfileValue('userFullnameTh', isNew);
+  const fullnameEn = getProfileValue('userFullnameEn', isNew);
+  const education = getProfileValue('userEducation', isNew);
+  const faculty = getProfileValue('userFaculty', isNew);
+  const institution = getProfileValue('userInstitution', isNew);
+  const address = getProfileValue('userAddress', isNew);
+  const province = getProfileValue('userProvince', isNew);
+  const zipCode = getProfileValue('userZipCode', isNew);
+  const phone = getProfileValue('userPhone', isNew);
+  const imagePath = getProfileValue('userImagePath', isNew);
+
+  const fullAddress =
+    `${address || ''} ${province ? `จ.${province}` : ''} ${zipCode || ''}`.trim() || '-';
+
+  return {
+    nationalId: formatNationalId(nationalIdRaw || ''),
+    titleTh: titleTh || '-',
+    fullnameTh: fullnameTh || '-',
+    fullnameEn: fullnameEn || '-',
+    birthDate: formatBirthDate(birthDateRaw),
+    education: education || '-',
+    faculty: faculty || '-',
+    institution: institution || '-',
+    address: fullAddress,
+    phone: phone || '-',
+    imagePath,
+  };
+};
+
+const displayProfileNew = computed(() => getDisplayProfile(true));
+const displayProfileOld = computed(() => getDisplayProfile(false));
+
+const uploadDateFormatted = computed(() => {
+  const createdAt = enrollment.value?.CREATED_AT;
+  if (!createdAt) return '';
+  const dateObj = new Date(createdAt);
+  return dateObj.toLocaleDateString('th-TH', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+});
+
+const avatarSrcNew = computed(() => {
+  const path = displayProfileNew.value.imagePath;
+  return path ? getImageUrl(path) : defaultUserImage;
+});
+
+const avatarSrcOld = computed(() => {
+  const path = displayProfileOld.value.imagePath;
+  return path ? getImageUrl(path) : defaultUserImage;
 });
 
 const loadData = async (): Promise<void> => {
@@ -505,7 +751,7 @@ onMounted(() => {
   font-size: 15px;
   color: #000000;
   font-weight: 400;
-  margin-left: 4px;
+  margin-left: 8px;
 }
 
 .address-value {
@@ -522,6 +768,93 @@ onMounted(() => {
   :deep(.q-table__container) {
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
+  }
+}
+
+.registrant-card {
+  border-radius: 12px;
+  border: 1px solid var(--neutral-200, #e0e0e0);
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.registrant-content {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.photo-container {
+  width: 100%;
+  max-width: 160px;
+  aspect-ratio: 180 / 220;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+  background-color: #e3f2fd;
+  transition: all 0.3s ease;
+
+  @media (max-width: 599px) {
+    max-width: 130px;
+  }
+}
+
+.profile-img {
+  width: 100%;
+  height: 100%;
+}
+
+.info-field {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background-color: transparent;
+
+  .info-label {
+    font-size: 0.75rem;
+    color: #8c8c8c;
+    font-weight: 400;
+    line-height: 1.25rem;
+  }
+
+  .info-value {
+    font-size: 0.875rem;
+    color: #1a1a1a;
+    font-weight: 500;
+    line-height: 1.5rem;
+    word-break: break-word;
+    margin-left: 0;
+  }
+}
+
+.info-field.highlight-new {
+  background-color: rgba(46, 125, 50, 0.12) !important;
+}
+
+.info-field.highlight-old {
+  background-color: rgba(198, 40, 40, 0.12) !important;
+}
+
+.photo-figure-wrapper {
+  padding: 12px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background-color: transparent;
+  width: fit-content;
+  margin: 0 auto;
+
+  @media (min-width: 600px) {
+    margin: 0;
+  }
+
+  &.highlight-new {
+    background-color: rgba(46, 125, 50, 0.12) !important;
+  }
+
+  &.highlight-old {
+    background-color: rgba(198, 40, 40, 0.12) !important;
   }
 }
 </style>

@@ -79,6 +79,7 @@
               icon="visibility"
               :tooltip="$t('admin.registrantManagement.table.tooltips.viewDetail')"
               color="black"
+              :disable="isPassedAndPaid(row)"
               @click="handleView(row.ermId)"
             />
             <ActionButton
@@ -112,6 +113,7 @@ import { useExamRegistrants } from 'src/composables/use-exam-registrants';
 import { useThaiDate } from 'src/composables/useThaiDate';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollment.types';
+import type { EnrollmentTableRow } from 'src/types/enrollment.types';
 
 const route = useRoute();
 const router = useRouter();
@@ -238,6 +240,12 @@ const handleHistory = (ermId: number): void => {
       ermId: String(ermId),
     },
   });
+};
+
+const isPassedAndPaid = (row: EnrollmentTableRow): boolean => {
+  const isPaid = [1, 2, 3, 4].includes(row.paymentStatus);
+  const isPassed = row.verifyStatus === 1;
+  return isPaid && isPassed;
 };
 
 const loadData = async (): Promise<void> => {

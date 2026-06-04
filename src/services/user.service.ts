@@ -211,3 +211,35 @@ export async function updateProfile(
     throw err;
   }
 }
+
+export async function updateUserProfileByAdmin(
+  token: string,
+  userProfileId: number,
+  payload: {
+    userTitleTh?: string;
+    userFullnameTh?: string;
+    userTitleEn?: string;
+    userFullnameEn?: string;
+    userDateOfBirth?: string;
+    userPhone?: string;
+    userEducation?: string;
+    userFaculty?: string;
+    userInstitution?: string;
+    userAddress?: string;
+    userPhysicalStatus?: string;
+    userNationalId?: string;
+    userImagePath?: string;
+  },
+): Promise<unknown> {
+  try {
+    const response = await api.patch(`/user-profile/${userProfileId}`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (err) {
+    console.error('Failed to update user profile by admin:', err);
+    throw err;
+  }
+}
