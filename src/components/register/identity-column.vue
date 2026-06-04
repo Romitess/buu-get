@@ -1,43 +1,45 @@
 <template>
   <div class="identity-column">
-    <!-- ─── Photo Upload Section ─── -->
-    <div class="photo-section">
-      <!-- Upload Box -->
-      <div class="photo-upload-cell">
-        <ImageUpload
-          v-model="profileImage"
-          folder="/user_images"
-          :alt="t('profile.photoRequirementsTitle')"
-          class="photo-upload-box"
-        />
-      </div>
-      <!-- Requirements Box -->
-      <div class="requirements-cell">
-        <div class="requirements-card bg-white">
-          <div class="requirements-title">
-            {{ t('profile.photoRequirementsTitle') }}
-          </div>
-          <div class="requirements-content">
-            <div class="requirements-copy">
-              <ul class="requirements-list">
-                <li>{{ t('profile.photoReq1') }}</li>
-                <li>{{ t('profile.photoReq2') }}</li>
-                <li>{{ t('profile.photoReq3') }}</li>
-                <li>{{ t('profile.photoReq4') }}</li>
-                <li>{{ t('profile.photoReq5') }}</li>
-                <li>{{ t('profile.photoReq6') }}</li>
-              </ul>
+    <!-- ─── Photo Section (Top) ─── -->
+    <div class="identity-top-group">
+      <div class="photo-section">
+        <!-- Upload Box -->
+        <div class="photo-upload-cell">
+          <ImageUpload
+            v-model="profileImage"
+            folder="/user_images"
+            :alt="t('profile.photoRequirementsTitle')"
+            class="photo-upload-box"
+          />
+        </div>
+        <!-- Requirements Box -->
+        <div class="requirements-cell">
+          <div class="requirements-card bg-white">
+            <div class="requirements-title">
+              {{ t('profile.photoRequirementsTitle') }}
             </div>
-            <div class="requirements-sample">
-              <div class="sample-photo-container">
-                <img
-                  src="/sample-img.png"
-                  :alt="t('profile.samplePhotoAlt')"
-                  class="sample-photo-img"
-                />
+            <div class="requirements-content">
+              <div class="requirements-copy">
+                <ul class="requirements-list">
+                  <li>{{ t('profile.photoReq1') }}</li>
+                  <li>{{ t('profile.photoReq2') }}</li>
+                  <li>{{ t('profile.photoReq3') }}</li>
+                  <li>{{ t('profile.photoReq4') }}</li>
+                  <li>{{ t('profile.photoReq5') }}</li>
+                  <li>{{ t('profile.photoReq6') }}</li>
+                </ul>
               </div>
-              <div class="sample-photo-text">
-                {{ t('profile.samplePhoto') }}
+              <div class="requirements-sample">
+                <div class="sample-photo-container">
+                  <img
+                    src="/sample-img.png"
+                    :alt="t('profile.samplePhotoAlt')"
+                    class="sample-photo-img"
+                  />
+                </div>
+                <div class="sample-photo-text">
+                  {{ t('profile.samplePhoto') }}
+                </div>
               </div>
             </div>
           </div>
@@ -45,75 +47,78 @@
       </div>
     </div>
 
-    <!-- ─── Thai: เลขบัตรประจำตัวประชาชน / Foreigner: Passport Number ─── -->
-    <AppFormField
-      v-if="isThai"
-      v-model="nationalId"
-      :label="t('profile.nationalId')"
-      :placeholder="t('profile.nationalIdPlaceholder')"
-      :readonly="isEditMode"
-      :required="true"
-      :rules="[(val) => !!val || t('profile.requiredNationalId')]"
-      reserve-bottom-space
-      maxlength="13"
-    />
-    <AppFormField
-      v-else
-      v-model="nationalId"
-      :label="t('profile.passportNo')"
-      :placeholder="t('profile.passportPlaceholder')"
-      :readonly="isEditMode"
-      :required="true"
-      :rules="[(val) => !!val || t('profile.requiredNationalId')]"
-      reserve-bottom-space
-    />
+    <!-- ─── Identity Fields (Bottom 4) ─── -->
+    <div class="identity-bottom-group">
+      <!-- ─── Thai: เลขบัตรประจำตัวประชาชน / Foreigner: Passport Number ─── -->
+      <AppFormField
+        v-if="isThai"
+        v-model="nationalId"
+        :label="t('profile.nationalId')"
+        :placeholder="t('profile.nationalIdPlaceholder')"
+        :readonly="isEditMode"
+        :required="true"
+        :rules="[(val) => !!val || t('profile.requiredNationalId')]"
+        reserve-bottom-space
+      />
+      <AppFormField
+        v-else
+        v-model="nationalId"
+        :label="t('profile.passportNo')"
+        :placeholder="t('profile.passportPlaceholder')"
+        :readonly="isEditMode"
+        :required="true"
+        :rules="[(val) => !!val || t('profile.requiredNationalId')]"
+        reserve-bottom-space
+      />
 
-    <!-- ─── Nationality (Foreigner Only) ─── -->
-    <AppFormField
-      v-if="!isThai"
-      v-model="country"
-      :label="t('profile.nationality')"
-      :placeholder="t('profile.nationalityPlaceholder')"
-      :required="true"
-      reserve-bottom-space
-    />
+      <!-- ─── Nationality (Foreigner Only) ─── -->
+      <AppFormField
+        v-if="!isThai"
+        v-model="country"
+        :label="t('profile.nationality')"
+        :placeholder="t('profile.nationalityPlaceholder')"
+        :required="true"
+        :rules="[(val) => !!val || t('profile.required')]"
+        reserve-bottom-space
+      />
 
-    <!-- ─── Prefix (คำนำหน้า) ─── -->
-    <AppFormField
-      v-model="titleTH"
-      type="select"
-      :label="t('profile.prefix')"
-      :options="
-        TITLE_TH_OPTIONS.map((opt) => ({
-          label: t(`profile.prefixes.${opt.i18nKey}`),
-          value: opt.value,
-        }))
-      "
-      @update:model-value="onTitleTHChange"
-      :required="true"
-      :rules="[(val) => !!val || t('profile.requiredPrefix')]"
-      reserve-bottom-space
-    />
+      <!-- ─── Prefix (คำนำหน้า) ─── -->
+      <AppFormField
+        v-model="titleTH"
+        type="select"
+        :label="t('profile.prefix')"
+        :options="
+          TITLE_TH_OPTIONS.map((opt) => ({
+            label: t(`profile.prefixes.${opt.i18nKey}`),
+            value: opt.value,
+          }))
+        "
+        @update:model-value="onTitleTHChange"
+        :required="true"
+        :rules="[(val) => !!val || t('profile.requiredPrefix')]"
+        reserve-bottom-space
+      />
 
-    <!-- ─── Thai: ชื่อ-นามสกุล (ไทย) — ซ่อนสำหรับต่างชาติ ─── -->
-    <AppFormField
-      v-if="isThai"
-      v-model="fullName"
-      :label="t('profile.fullName')"
-      :required="true"
-      :rules="[(val) => !!val || t('profile.requiredFullName')]"
-      reserve-bottom-space
-    />
+      <!-- ─── Thai: ชื่อ-นามสกุล (ไทย) — ซ่อนสำหรับต่างชาติ ─── -->
+      <AppFormField
+        v-if="isThai"
+        v-model="fullName"
+        :label="t('profile.fullName')"
+        :required="true"
+        :rules="[(val) => !!val || t('profile.requiredFullName')]"
+        reserve-bottom-space
+      />
 
-    <!-- ─── Full Name (EN) ─── -->
-    <AppFormField
-      v-model="englishName"
-      :label="t('profile.fullNameEn')"
-      :placeholder="t('profile.fullNameEnPlaceholder')"
-      :required="true"
-      :rules="[(val) => !!val || t('profile.requiredFullNameEn')]"
-      reserve-bottom-space
-    />
+      <!-- ─── Full Name (EN) ─── -->
+      <AppFormField
+        v-model="englishName"
+        :label="t('profile.fullNameEn')"
+        :placeholder="t('profile.fullNameEnPlaceholder')"
+        :required="true"
+        :rules="[(val) => !!val || t('profile.requiredFullNameEn')]"
+        reserve-bottom-space
+      />
+    </div>
   </div>
 </template>
 
@@ -151,11 +156,23 @@ const onTitleTHChange = (): void => {
   gap: 12px;
 }
 
+.identity-bottom-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// Deep select AppFormField labels to ensure perfect symmetry
+:deep(.identity-bottom-group > div > .text-body2) {
+  min-height: 32px;
+  display: flex;
+  align-items: flex-end;
+}
+
 .photo-section {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
   gap: 18px;
-  margin-bottom: 6px;
 }
 
 .photo-upload-cell,
@@ -255,6 +272,20 @@ const onTitleTHChange = (): void => {
 
   .sample-photo-container {
     width: 96px;
+  }
+}
+
+@media (max-width: 900px) {
+  .identity-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .identity-top-group,
+  .identity-bottom-group {
+    grid-column: auto;
+    grid-row: auto;
   }
 }
 

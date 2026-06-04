@@ -180,6 +180,11 @@ const sendOtp = async (): Promise<boolean> => {
 const onSubmit = async (): Promise<void> => {
   const isValid = await validateAndFocusFirstInvalid();
   if (!isValid) {
+    $q.notify({
+      type: 'warning',
+      message: t('profile.validationError', 'กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง'),
+      position: 'top',
+    });
     return;
   }
 
@@ -262,10 +267,13 @@ onMounted(() => {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 48px;
+  align-items: flex-start; // Prevent columns from stretching each other
 }
 
 .profile-form-column {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .profile-card :deep(.custom-input .q-field__control) {

@@ -1,64 +1,69 @@
 <template>
   <div class="contact-column">
-    <!-- 1. วันเดือนปีเกิด -->
-    <div class="relative-position">
+    <!-- กลุ่มบน: ข้อมูลการศึกษา -->
+    <div class="contact-top-group">
+      <!-- 1. วันเดือนปีเกิด -->
+      <div class="relative-position">
+        <AppFormField
+          v-model="birthdate"
+          type="date"
+          :label="t('profile.birthdate')"
+          :placeholder="t('profile.birthdatePlaceholder')"
+          :required="true"
+          :rules="[(val) => !!val || t('profile.requiredBirthdate')]"
+          reserve-bottom-space
+          @dblclick="showCalendar = true"
+        >
+          <!-- ไอคอนปฏิทินเรียกปฏิทินใหม่ -->
+          <template #append-inner>
+            <q-menu
+              v-model="showCalendar"
+              anchor="top left"
+              self="bottom left"
+              class="shadow-5 calendar-menu"
+            >
+              <AppCalendar v-model="birthdate" @click-date="showCalendar = false" />
+            </q-menu>
+          </template>
+        </AppFormField>
+      </div>
+
+      <!-- ─── ระดับการศึกษา / Highest Education ─── -->
       <AppFormField
-        v-model="birthdate"
-        type="date"
-        :label="t('profile.birthdate')"
-        :placeholder="t('profile.birthdatePlaceholder')"
+        v-model="educationLevel"
+        type="select"
+        :label="t('profile.education')"
+        :options="educationOptions"
+        :placeholder="t('profile.education')"
         :required="true"
-        :rules="[(val) => !!val || t('profile.requiredBirthdate')]"
+        :rules="[(val) => !!val || t('profile.requiredEducation')]"
         reserve-bottom-space
-        @dblclick="showCalendar = true"
-      >
-        <!-- ไอคอนปฏิทินเรียกปฏิทินใหม่ -->
-        <template #append-inner>
-          <q-menu
-            v-model="showCalendar"
-            anchor="top left"
-            self="bottom left"
-            class="shadow-5 calendar-menu"
-          >
-            <AppCalendar v-model="birthdate" @click-date="showCalendar = false" />
-          </q-menu>
-        </template>
-      </AppFormField>
+      />
+
+      <!-- ─── คณะ/สาขาวิชา ─── -->
+      <AppFormField
+        v-model="faculty"
+        :label="t('profile.faculty')"
+        :placeholder="t('profile.facultyPlaceholder')"
+        reserve-bottom-space
+      />
     </div>
 
-    <!-- ─── ระดับการศึกษา / Highest Education ─── -->
-    <AppFormField
-      v-model="educationLevel"
-      type="select"
-      :label="t('profile.education')"
-      :options="educationOptions"
-      :placeholder="t('profile.education')"
-      :required="true"
-      :rules="[(val) => !!val || t('profile.requiredEducation')]"
-      reserve-bottom-space
-    />
-
-    <!-- ─── คณะ/สาขาวิชา ─── -->
-    <AppFormField
-      v-model="faculty"
-      :label="t('profile.faculty')"
-      :placeholder="t('profile.facultyPlaceholder')"
-      reserve-bottom-space
-    />
-
-    <div class="contact-lower-group">
+    <!-- กลุ่มล่าง: 4 ฟิลด์ที่จะตรงกับกลุ่ม Identity ของฝั่งซ้าย -->
+    <div class="contact-bottom-group">
       <!-- ─── ชื่อสถานศึกษา ─── -->
       <AppFormField
         v-model="institution"
         :label="t('profile.institution')"
         :placeholder="t('profile.institutionPlaceholder')"
+        :rules="[(val) => true]"
         reserve-bottom-space
       />
 
       <!-- ─── ที่อยู่สำหรับจัดส่งเอกสาร ─── -->
-      <div class="address-field">
-        <div class="field-label-row">
-          <div class="text-body2 text-weight-medium">
+      <div class="manual-field-wrapper">
+        <div class="field-label-row text-body2 text-weight-medium q-mb-xs">
+          <div>
             {{ t('profile.address') }}
             <span class="text-negative">*</span>
           </div>
@@ -84,23 +89,22 @@
       <!-- ─── เบอร์โทรศัพท์ ─── -->
       <AppFormField
         v-model="phone"
-        class="phone-field"
         type="tel"
         :label="t('profile.phone')"
         :placeholder="t('profile.phonePlaceholder')"
         :required="true"
         :rules="[(val) => !!val || t('profile.requiredPhone')]"
         reserve-bottom-space
-        maxlength="10"
       />
 
-      <div>
-        <div class="field-label-row">
-          <div class="text-body2 text-weight-medium">
+      <!-- ─── อีเมล ─── -->
+      <div class="manual-field-wrapper">
+        <div class="field-label-row text-body2 text-weight-medium q-mb-xs">
+          <div>
             {{ t('profile.email') }}
             <span class="text-negative">*</span>
           </div>
-          <div class="email-helper">
+          <div class="email-helper text-caption text-weight-regular">
             {{ tr('profile.emailOtpHelper', 'ระบบจะส่งรหัส OTP ไปยังอีเมลของคุณเพื่อยืนยันตัวตน') }}
           </div>
         </div>
@@ -154,45 +158,49 @@ const educationOptions = computed(() => [
 .contact-column {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+}
+
+.contact-top-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contact-bottom-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .field-label-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end; // Baseline the text to the input box
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 4px;
+  min-height: 32px;
+}
+
+// Deep select AppFormField labels to ensure perfect symmetry
+:deep(.contact-bottom-group > div > .text-body2) {
+  min-height: 32px;
+  display: flex;
+  align-items: flex-end;
 }
 
 .id-card-address-checkbox {
+  margin-top: -2px; // Align checkbox baseline with label text
   color: #777;
   font-size: 13px;
   white-space: nowrap;
 }
 
-.phone-field {
-  margin-top: 14px;
-  margin-bottom: -10px;
-}
-
 .email-helper {
+  margin-top: 2px; // Align helper baseline with label text
   color: #666;
   font-size: 13px;
   line-height: 1.3;
   text-align: right;
-}
-
-.address-field {
-  margin-top: 14px;
-  margin-bottom: -6px;
-}
-
-.contact-lower-group {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  margin-top: 15px;
 }
 
 .calendar-menu {
@@ -200,18 +208,21 @@ const educationOptions = computed(() => [
   overflow: hidden;
 }
 
-@media (max-width: 1200px) {
-  .contact-lower-group {
-    gap: 14px;
-    margin-top: 11px;
+@media (max-width: 900px) {
+  .contact-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .contact-top-group,
+  .contact-bottom-group {
+    grid-column: auto;
+    grid-row: auto;
   }
 }
 
 @media (max-width: 600px) {
-  .contact-lower-group {
-    margin-top: 0;
-  }
-
   .field-label-row {
     align-items: flex-start;
     flex-direction: column;
