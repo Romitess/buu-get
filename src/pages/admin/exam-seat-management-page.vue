@@ -8,12 +8,12 @@
     />
 
     <!-- Time Tabs -->
-    <div class="q-mb-md">
+    <div class="q-mb-xs">
       <AppExamSessionTime v-model="activeSessionId" :sessions="sessions" />
     </div>
 
     <!-- Exam Detail Header -->
-    <section class="q-mb-lg">
+    <section class="q-mb-sm">
       <AppExamInfoCard
         :title="examTitle"
         :date="examDate"
@@ -29,7 +29,7 @@
     </section>
 
     <!-- Main Layout -->
-    <div class="row q-col-gutter-lg items-stretch">
+    <div class="row q-col-gutter-md items-stretch">
       <!-- Left Panel: Student List (Back to left) -->
       <div class="col-12 col-md-4 flex column min-width-0">
         <div
@@ -67,6 +67,8 @@
                   :student-id="student.id"
                   :seat-number="getSeatLabel(student.seat)"
                   :avatar-url="student.avatar"
+                  :remark="student.remark"
+                  :is-foreigner="student.isForeigner"
                 />
               </div>
 
@@ -188,6 +190,8 @@
           :student-id="draggedStudentInfo.id"
           :seat-number="getSeatLabel(draggedStudentInfo.seat)"
           :avatar-url="draggedStudentInfo.avatar"
+          :remark="draggedStudentInfo.remark"
+          :is-foreigner="draggedStudentInfo.isForeigner"
         />
       </div>
     </teleport>

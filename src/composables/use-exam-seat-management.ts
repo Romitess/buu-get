@@ -11,6 +11,7 @@ import {
 } from 'src/services/enrollment.service';
 import { DEFAULT_EXAM_TITLE } from 'src/constants/exam';
 import { formatThaiLongDate } from 'src/utils/thai-date';
+import { getImageUrl } from 'src/services/image.service';
 
 /** Enrollment status codes shared with the backend */
 const STATUS_PAID = 1;
@@ -36,6 +37,9 @@ export interface StudentSeatInfo {
   name: string;
   seat: string | null;
   avatar: string | null;
+  remark: string;
+  isForeigner: boolean;
+  titleEn: string | null;
 }
 
 /**
@@ -212,14 +216,41 @@ export function useExamSeatManagement() {
         Number(e.ERM_STATUS) === STATUS_SEAT_PUBLISHED,
     );
 
-    students.value = eligibleEnrollments.map((e) => ({
-      ermId: e.ERM_ID,
-      id: e.USER?.USER_NATIONAL_ID || String(e.USER_ID),
-      name:
-        e.USER?.PROFILE?.userFullnameTh || e.USER?.USER_EMAIL || t('admin.seatManagement.noName'),
-      seat: e.LS_ID ? String(e.LS_ID) : null,
-      avatar: null,
-    }));
+    students.value = eligibleEnrollments.map((e) => {
+      const profile = e.USER?.PROFILE;
+      const physicalStatus = profile?.userPhysicalStatus || '';
+      const isForeigner = !!e.USER?.USER_PASSPORT_NO;
+      const imagePath = e.USER?.IMAGE?.USER_IMAGE_URL || null;
+
+      // Build English display name: "Mr. Somaun Jaidee"
+      const titleEn = profile?.userTitleEn || null;
+      const fullnameEn = profile?.userFullnameEn || null;
+      const displayName =
+        titleEn && fullnameEn
+          ? `${titleEn} ${fullnameEn}`
+          : profile?.userFullnameTh || e.USER?.USER_EMAIL || t('admin.seatManagement.noName');
+
+      // Determine remark text
+      let remark = '';
+      if (isForeigner) {
+        remark = 'ชาวต่างชาติ';
+      } else if (physicalStatus && physicalStatus !== 'ทั่วไป') {
+        remark = physicalStatus;
+      } else {
+        remark = 'ชาวไทย';
+      }
+
+      return {
+        ermId: e.ERM_ID,
+        id: e.USER?.USER_NATIONAL_ID || String(e.USER_ID),
+        name: displayName,
+        seat: e.LS_ID ? String(e.LS_ID) : null,
+        avatar: imagePath ? getImageUrl(imagePath) : null,
+        remark,
+        isForeigner,
+        titleEn,
+      };
+    });
 
     updateSeatStatuses();
   };
