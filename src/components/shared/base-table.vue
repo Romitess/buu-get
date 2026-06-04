@@ -2,7 +2,6 @@
   <div class="base-table-wrapper full-width">
     <q-table
       flat
-      bordered
       :rows="rows"
       :columns="columns"
       :loading="loading"
@@ -176,11 +175,11 @@ const emit = defineEmits<{
   (e: 'request', requestProps: TableRequestProps): void;
 }>();
 
-const onRequest = (props: TableRequestProps) => {
+const onRequest = (props: TableRequestProps): void => {
   emit('request', props);
 };
 
-const onRowsPerPageChange = (val: number) => {
+const onRowsPerPageChange = (val: number): void => {
   emit('request', {
     pagination: {
       page: 1,
@@ -193,13 +192,16 @@ const onRowsPerPageChange = (val: number) => {
 </script>
 
 <style scoped lang="scss">
-.base-table {
+.base-table-wrapper {
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   overflow: hidden;
+}
 
+.base-table {
   :deep(thead tr th) {
     background-color: var(--primary) !important;
-    color: white !important;
+    color: var(--text-on-primary) !important;
     font-weight: 600;
     font-size: var(--font-size-xs);
     padding: 10px 12px;
@@ -232,6 +234,7 @@ const onRowsPerPageChange = (val: number) => {
     background-color: var(--surface-page) !important;
     padding: 32px 16px !important;
     text-align: center !important;
+    border-bottom: none !important;
   }
 }
 
@@ -261,13 +264,10 @@ const onRowsPerPageChange = (val: number) => {
 }
 
 .custom-empty-bottom {
-  border: 1px solid var(--border-color);
-  border-top: none;
-  background-color: var(--surface-card, #ffffff);
+  border-top: 1px solid var(--border-color);
+  background-color: var(--surface-card);
   padding: 12px 16px;
   min-height: 48px;
   font-size: 12px;
-  border-bottom-left-radius: var(--radius-sm);
-  border-bottom-right-radius: var(--radius-sm);
 }
 </style>

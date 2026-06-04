@@ -61,16 +61,17 @@
       <q-banner
         v-if="isLockedByEnrollment"
         dense
-        class="bg-red-1 text-red-9 rounded-borders q-mb-md"
+        class="alert-banner-error rounded-borders q-mb-md"
       >
         <template v-slot:avatar>
           <q-icon name="error_outline" size="sm" />
         </template>
         <div class="text-weight-medium">
-          ไม่สามารถแก้ไขกำหนดการสอบได้ เนื่องจากมีผู้สมัครสอบแล้ว
+          ไม่สามารถแก้ไขวัน/เวลาสอบ หรือสถานที่ได้ เนื่องจากมีผู้สมัครสอบแล้ว
         </div>
         <div class="text-caption">
-          เพื่อความปลอดภัยของข้อมูลผู้สมัคร ระบบไม่อนุญาตให้แก้ไขวัน/เวลาสอบ
+          เพื่อความปลอดภัยของข้อมูลผู้สมัคร ระบบไม่อนุญาตให้แก้ไขรายละเอียดหลัก
+          (แต่คุณยังสามารถแก้ไขรายชื่อผู้คุมสอบได้)
         </div>
       </q-banner>
 
@@ -78,13 +79,13 @@
       <q-banner
         v-if="isScheduleLocked && !isLockedByEnrollment"
         dense
-        class="bg-amber-1 text-amber-9 q-mb-md rounded-borders"
+        class="alert-banner-warning q-mb-md rounded-borders"
       >
         <template v-slot:avatar>
-          <q-icon name="visibility" color="amber-9" />
+          <q-icon name="info" class="alert-icon-warning" />
         </template>
-        รอบสอบนี้เคยผ่านการเผยแพร่แล้ว ระบบจึงแสดงผลใน
-        <b>"โหมดดูข้อมูลเท่านั้น (View Only)"</b> ไม่สามารถบันทึกหรือแก้ไขข้อมูลใดๆ ได้
+        รอบสอบนี้เคยผ่านการเผยแพร่แล้ว ระบบจึงจำกัดการแก้ไขข้อมูล
+        (อนุญาตให้แก้ไขเฉพาะข้อมูลผู้คุมสอบได้เท่านั้น)
       </q-banner>
     </div>
 
@@ -96,7 +97,6 @@
         class="action-btn cancel-btn text-weight-bold"
       />
       <app-button
-        v-if="!wasOriginallyPublished"
         :label="isEditMode ? 'บันทึกการแก้ไข' : 'บันทึก'"
         @click="onSave"
         class="action-btn save-btn text-white text-weight-bold"
@@ -190,14 +190,15 @@ onMounted(loadInitialData);
 .save-btn {
   background-color: var(--primary) !important;
 }
-.lock-notice {
-  display: flex;
-  align-items: center;
-  color: var(--neutral-600);
-  font-size: 13px;
-  background-color: #fff3cd;
-  border: 1px solid #ffc107;
-  border-radius: 8px;
-  padding: 10px 16px;
+.alert-banner-error {
+  background-color: var(--badge-error-bg) !important;
+  color: var(--badge-error-text) !important;
+}
+.alert-banner-warning {
+  background-color: var(--badge-warning-bg) !important;
+  color: var(--badge-warning-text) !important;
+}
+.alert-icon-warning {
+  color: var(--badge-warning-dot) !important;
 }
 </style>

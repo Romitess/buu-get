@@ -41,7 +41,7 @@
   --text-on-dark: #e0e0e0;
   --text-on-primary: #ffffff;
   --buu-brown: #5d3f3d;
-  --label-color: var(--buu-brown); // สีของ Label หัวข้อฟิลด์
+  --label-color: var(--text-primary); // สีของ Label หัวข้อฟิลด์
 
   // Neutral scale (used in form fields, dividers, secondary text)
   --neutral-50: #f8fafc;
@@ -135,6 +135,7 @@
   --primary-light-alpha-50: rgba(30, 137, 229, 0.5);
   --primary-light-alpha-20: rgba(30, 137, 229, 0.2);
   --white-alpha-20: rgba(255, 255, 255, 0.2);
+  --negative-alpha-15: rgba(229, 57, 52, 0.15);
 
   // Typography Scale
   --font-size-h1: 1.75rem; // 28px
@@ -391,6 +392,7 @@ body {
   
   .q-field__control {
     border-radius: var(--radius-sm);
+    overflow: hidden !important;
 
     &:before {
       border-color: var(--border-color);
@@ -667,6 +669,7 @@ body {
   &.q-field--outlined .q-field__control {
     border: 1px solid var(--neutral-200) !important;
     border-radius: 12px !important;
+    overflow: hidden !important;
     height: 39px !important;
     min-height: 39px !important;
     background-color: var(--surface-card);
@@ -682,17 +685,20 @@ body {
     }
   }
 
-  .q-field__native {
-    color: #000000 !important;
+  .q-field__native,
+  .q-field__input {
+    color: var(--text-input) !important;
+    font-weight: 500 !important;
     opacity: 1 !important;
-    -webkit-text-fill-color: #000000 !important;
+    -webkit-text-fill-color: var(--text-input) !important;
   }
   .q-field__prefix,
   .q-field__suffix,
   .q-select__dropdown-icon {
     color: var(--text-input) !important;
+    font-weight: 500 !important;
   }
-  .q-placeholder {
+  .q-placeholder:not(input):not(textarea) {
     color: var(--text-placeholder) !important;
     opacity: 0.65 !important;
   }
@@ -853,8 +859,8 @@ body {
 
   &.q-field--outlined .q-field__control,
   .q-field--outlined .q-field__control {
-    border-color: var(--negative, #e53934) !important;
-    box-shadow: 0 0 0 2px rgba(229, 57, 52, 0.15) !important;
+    border-color: var(--negative) !important;
+    box-shadow: 0 0 0 2px var(--negative-alpha-15) !important;
     transition:
       border-color 0.3s ease,
       box-shadow 0.3s ease;
@@ -862,8 +868,8 @@ body {
 
   // Also override the buu-input-muted border
   &.buu-input-muted.q-field--outlined .q-field__control {
-    border: 1px solid var(--negative, #e53934) !important;
-    box-shadow: 0 0 0 2px rgba(229, 57, 52, 0.15) !important;
+    border: 1px solid var(--negative) !important;
+    box-shadow: 0 0 0 2px var(--negative-alpha-15) !important;
   }
 }
 
@@ -875,7 +881,7 @@ body {
   margin-top: 4px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--negative, #e53934);
+  color: var(--negative);
   animation: buu-bounce-in 0.4s ease-out;
 
   .buu-error-icon {
