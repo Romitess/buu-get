@@ -37,77 +37,15 @@
             <!-- Left: Profile Photo Column -->
             <div class="col-12 col-sm-4 flex flex-center column">
               <div class="profile-photo-wrapper shadow-1">
-                <template v-if="voucherData.profileImage">
-                  <q-img
-                    :src="voucherData.profileImage"
-                    class="full-height full-width profile-photo-img"
-                    fit="cover"
-                  />
-                </template>
-                <template v-else>
-                  <!-- SVG Vector Avatar -->
-                  <svg class="avatar-svg" viewBox="0 0 160 200" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="100%" height="100%" fill="#1e89e5" />
-                    <path
-                      d="M 10 200 C 10 160, 40 145, 80 145 C 120 145, 150 160, 150 200 Z"
-                      fill="#8d5c4c"
-                    />
-                    <polygon points="80,145 60,170 100,170" fill="#ffffff" />
-                    <rect x="70" y="115" width="20" height="32" fill="#ffd1b3" />
-                    <path
-                      d="M 70 128 C 75 133, 85 133, 90 128 L 90 145 L 70 145 Z"
-                      fill="#e0b196"
-                    />
-                    <rect x="48" y="45" width="64" height="78" rx="32" fill="#ffd1b3" />
-                    <path
-                      d="M 44 50
-                         C 34 32, 54 10, 80 15
-                         C 106 10, 126 32, 116 50
-                         C 126 44, 126 34, 120 28
-                         C 114 22, 108 18, 92 24
-                         C 76 18, 54 22, 48 34 Z"
-                      fill="#1a1a1a"
-                    />
-                    <path d="M 45 45 C 43 55, 46 65, 49 70 L 49 50 Z" fill="#1a1a1a" />
-                    <path d="M 115 45 C 117 55, 114 65, 111 70 L 111 50 Z" fill="#1a1a1a" />
-                    <path
-                      d="M 54 68 Q 64 61 74 69"
-                      stroke="#1a1a1a"
-                      stroke-width="3"
-                      fill="none"
-                      stroke-linecap="round"
-                    />
-                    <path
-                      d="M 106 68 Q 96 61 86 69"
-                      stroke="#1a1a1a"
-                      stroke-width="3"
-                      fill="none"
-                      stroke-linecap="round"
-                    />
-                    <circle cx="64" cy="78" r="4.5" fill="#1a1a1a" />
-                    <circle cx="96" cy="78" r="4.5" fill="#1a1a1a" />
-                    <path
-                      d="M 80 75 L 80 92 L 75 92"
-                      stroke="#e0a080"
-                      stroke-width="2.5"
-                      fill="none"
-                      stroke-linecap="round"
-                    />
-                    <path
-                      d="M 64 104 Q 80 96 96 104 Q 80 110 64 104"
-                      fill="#1a1a1a"
-                      stroke="#1a1a1a"
-                      stroke-width="1"
-                    />
-                    <path
-                      d="M 72 114 Q 80 118 88 114"
-                      stroke="#e06060"
-                      stroke-width="2.5"
-                      fill="none"
-                      stroke-linecap="round"
-                    />
-                  </svg>
-                </template>
+                <ImageDisplay
+                  :image-path="voucherData.profileImage"
+                  class="profile-photo-img"
+                  width="100%"
+                  height="100%"
+                  object-fit="cover"
+                  border-radius="0px"
+                  alt="Profile Photo"
+                />
               </div>
               <div class="photo-divider"></div>
             </div>
@@ -240,6 +178,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { VoucherData } from 'src/types/voucher';
+import ImageDisplay from 'src/components/base/image-display.vue';
 
 // ===== Props =====
 const props = defineProps<{
