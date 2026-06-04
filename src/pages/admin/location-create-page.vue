@@ -325,22 +325,8 @@ const handleSave = async (): Promise<void> => {
 .preview-scroll {
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
   padding: var(--space-xs);
-
-  &::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--seat-scrollbar-thumb);
-    border-radius: var(--radius-pill);
-
-    &:hover {
-      background: var(--seat-scrollbar-thumb-hover);
-    }
-  }
 
   :deep(.seat-preview-content) {
     padding-bottom: var(--space-md);

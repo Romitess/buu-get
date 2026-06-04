@@ -521,24 +521,24 @@ export function useExamSeatManagement() {
     if (total <= 40) {
       const rGap = rows <= 4 ? 56 : rows <= 6 ? 36 : 24;
       return {
-        width: '64px',
-        height: '64px',
-        fontSize: '16px',
+        width: '92px',
+        height: '92px',
+        fontSize: '22px',
         rowGap: `${rGap}px`,
         colGap: '24px',
         aisleWidth: `${aisleWidth}px`,
       };
     }
 
-    const containerWidth = 850;
-    const scale = Math.max(32, Math.min(64, (containerWidth - aisleWidth) / cols - 12));
-    const colGap = Math.max(8, Math.min(24, scale * 0.3));
-    const rowGap = Math.max(8, Math.min(56, (500 - rows * scale) / (rows - 1 || 1)));
+    const containerWidth = 1000;
+    const scale = Math.max(60, Math.min(100, (containerWidth - aisleWidth) / cols - 6));
+    const colGap = Math.max(10, Math.min(28, scale * 0.25));
+    const rowGap = Math.max(10, Math.min(56, (650 - rows * scale) / (rows - 1 || 1)));
 
     return {
       width: `${scale}px`,
       height: `${scale}px`,
-      fontSize: `${Math.max(12, scale * 0.35)}px`,
+      fontSize: `${Math.max(16, scale * 0.35)}px`,
       rowGap: `${rowGap}px`,
       colGap: `${colGap}px`,
       aisleWidth: `${aisleWidth}px`,

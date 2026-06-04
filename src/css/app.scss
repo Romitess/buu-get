@@ -389,7 +389,7 @@ body {
 // === Custom Form Input Styles ===
 .custom-input {
   // We can leave this or remove it, but the crucial part is .q-field__control
-  
+
   .q-field__control {
     border-radius: var(--radius-sm);
     overflow: hidden !important;
@@ -420,7 +420,7 @@ body {
     height: 100% !important;
     transform: none !important;
   }
-  
+
   &.q-field--focused .q-field__control:after {
     border-color: var(--primary);
   }

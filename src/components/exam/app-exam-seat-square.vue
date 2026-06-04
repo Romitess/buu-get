@@ -50,7 +50,7 @@ defineEmits<{
   justify-content: center;
   overflow: hidden;
   white-space: nowrap;
-  padding: 4px;
+  padding: 2px;
 
   &:hover {
     transform: translateY(-2px);
