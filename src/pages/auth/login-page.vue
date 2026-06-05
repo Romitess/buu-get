@@ -150,73 +150,61 @@ onMounted(() => {
 // ============================================================
 // Login <-> Register transition
 // ============================================================
-watch(isRegisterMode, (goingToRegister) => {
-  if (animating.value) return;
+const targetMode = ref<boolean | null>(null);
+
+const runModeAnimation = (goingToRegister: boolean) => {
   animating.value = true;
-
-  // Lock current height so card doesn't collapse
   lockHeight();
-
-  // Phase 1: Fade out current form content (0.3s)
   showForm.value = false;
 
   if (goingToRegister) {
-    // LOGIN -> REGISTER
-    // Phase 2: After content fades out, slide card to center (keep login size)
     setTimeout(() => {
       panelPhase.value = 'center';
     }, 350);
-
-    // Phase 3: After slide completes, expand card to register size
     setTimeout(() => {
       cardSize.value = 'credentials';
-    }, 1350); // 350 + 1000ms slide
-
-    // Phase 4: After expand completes, show register form
+    }, 1350);
     setTimeout(() => {
       formKey.value = 'credentials';
       unlockHeight();
       void nextTick(() => {
         showForm.value = true;
         animating.value = false;
+        checkPendingAnimations();
       });
-    }, 1800); // 1350 + 450ms expand
+    }, 1800);
   } else {
-    // REGISTER -> LOGIN
-    // Phase 2: After content fades out, shrink card back to login size
     setTimeout(() => {
       cardSize.value = 'login';
     }, 350);
-
-    // Phase 3: After shrink completes, slide card back to right
     setTimeout(() => {
       panelPhase.value = 'right';
-    }, 800); // 350 + 450ms shrink
-
-    // Phase 4: After slide completes, show login form
+    }, 800);
     setTimeout(() => {
       formKey.value = 'login';
       unlockHeight();
       void nextTick(() => {
         showForm.value = true;
         animating.value = false;
+        checkPendingAnimations();
       });
-    }, 1800); // 800 + 1000ms slide
+    }, 1800);
   }
+};
+
+watch(isRegisterMode, (goingToRegister) => {
+  targetMode.value = goingToRegister;
+  if (animating.value) return;
+  runModeAnimation(goingToRegister);
 });
 
 // ============================================================
 // Step 1 <-> Step 2 within register
 // ============================================================
-watch(currentStep, (newStep) => {
-  if (!isRegisterMode.value) {
-    cardSize.value = newStep === 'profile' ? 'profile' : 'credentials';
-    formKey.value = newStep === 'profile' ? 'profile' : 'credentials';
-    return;
-  }
-  if (animating.value) return;
-  animating.value = true;
+const targetStep = ref<'credentials' | 'profile' | null>(null);
 
+const runStepAnimation = (newStep: 'credentials' | 'profile') => {
+  animating.value = true;
   lockHeight();
   showForm.value = false;
 
@@ -230,9 +218,48 @@ watch(currentStep, (newStep) => {
     void nextTick(() => {
       showForm.value = true;
       animating.value = false;
+      checkPendingAnimations();
     });
   }, 800);
+};
+
+watch(currentStep, (newStep) => {
+  if (!isRegisterMode.value) {
+    cardSize.value = newStep === 'profile' ? 'profile' : 'credentials';
+    formKey.value = newStep === 'profile' ? 'profile' : 'credentials';
+    return;
+  }
+  targetStep.value = newStep;
+  if (animating.value) return;
+  runStepAnimation(newStep);
 });
+
+const checkPendingAnimations = () => {
+  // Check if route mode changed while we were animating
+  if (targetMode.value !== null && targetMode.value !== isRegisterMode.value) {
+    targetMode.value = isRegisterMode.value;
+    runModeAnimation(isRegisterMode.value);
+    return;
+  }
+  // Make sure we end up in the actual requested mode regardless of targetMode variable
+  if (isRegisterMode.value && formKey.value === 'login') {
+    runModeAnimation(true);
+    return;
+  }
+  if (!isRegisterMode.value && formKey.value !== 'login') {
+    runModeAnimation(false);
+    return;
+  }
+
+  // Check if step changed while animating
+  if (targetStep.value !== null && isRegisterMode.value) {
+    const desiredFormKey = targetStep.value === 'profile' ? 'profile' : 'credentials';
+    if (formKey.value !== desiredFormKey) {
+      runStepAnimation(targetStep.value);
+      return;
+    }
+  }
+};
 
 /** Step 1 → Step 2 */
 const handleRegister = (payload: RegisterCredentials): void => {
