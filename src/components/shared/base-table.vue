@@ -2,11 +2,10 @@
   <div class="base-table-wrapper full-width">
     <q-table
       flat
-      :rows="rows"
+      :rows="displayRows"
       :columns="columns"
       :loading="loading"
       :pagination="pagination"
-      :no-data-label="emptyLabel"
       :hide-bottom="hidePagination"
       always-paginated
       @request="onRequest"
@@ -17,24 +16,31 @@
       </template>
 
       <template v-slot:body="props">
-        <slot name="body" v-bind="props">
-          <q-tr :props="props">
-            <q-td v-for="col in props.cols" :key="col.name" :props="props">
-              <slot
-                :name="`body-cell-${col.name}`"
-                v-bind="{ row: props.row, col, value: col.value }"
-              >
-                {{ col.value }}
-              </slot>
+        <template v-if="(props.row as any).__empty">
+          <q-tr>
+            <q-td
+              :colspan="columns.length"
+              class="text-center text-grey-8"
+              style="font-size: 13px; padding: 32px 16px; border-bottom: none"
+            >
+              {{ emptyLabel }}
             </q-td>
           </q-tr>
-        </slot>
-      </template>
-
-      <template v-slot:no-data>
-        <div class="full-width text-center text-grey-8" style="font-size: 13px">
-          No data available in table
-        </div>
+        </template>
+        <template v-else>
+          <slot name="body" v-bind="props">
+            <q-tr :props="props">
+              <q-td v-for="col in props.cols" :key="col.name" :props="props">
+                <slot
+                  :name="`body-cell-${col.name}`"
+                  v-bind="{ row: props.row, col, value: col.value }"
+                >
+                  {{ col.value }}
+                </slot>
+              </q-td>
+            </q-tr>
+          </slot>
+        </template>
       </template>
 
       <template v-slot:bottom="scope">
@@ -122,38 +128,11 @@
         </q-inner-loading>
       </template>
     </q-table>
-
-    <!-- Custom Bottom Bar for Empty State (forces rendering when table is empty) -->
-    <div
-      v-if="!hidePagination && !loading && (!rows || rows.length === 0)"
-      class="custom-empty-bottom row items-center justify-end full-width q-gutter-x-md text-grey-8"
-    >
-      <div class="row items-center q-gutter-x-sm">
-        <span>จำนวนต่อหน้า</span>
-        <q-select
-          :model-value="pagination?.rowsPerPage || 10"
-          :options="[10, 25, 50]"
-          dense
-          outlined
-          options-dense
-          class="pagination-select"
-          @update:model-value="onRowsPerPageChange"
-        />
-      </div>
-
-      <div>แสดงข้อมูล 0 ถึง 0 ของ 0 รายการ</div>
-
-      <div class="row items-center no-wrap">
-        <q-btn icon="first_page" round dense flat disable size="sm" />
-        <q-btn icon="chevron_left" round dense flat disable size="sm" />
-        <q-btn icon="chevron_right" round dense flat disable size="sm" />
-        <q-btn icon="last_page" round dense flat disable size="sm" />
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts" generic="T">
+import { computed } from 'vue';
 import type { QTableColumn } from 'quasar';
 
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
@@ -175,19 +154,13 @@ const emit = defineEmits<{
   (e: 'request', requestProps: TableRequestProps): void;
 }>();
 
-const onRequest = (props: TableRequestProps): void => {
-  emit('request', props);
-};
+// Inject a fake row when rows is empty so Quasar always renders the bottom slot
+const displayRows = computed<T[]>(() =>
+  props.rows && props.rows.length > 0 ? props.rows : ([{ __empty: true }] as T[]),
+);
 
-const onRowsPerPageChange = (val: number): void => {
-  emit('request', {
-    pagination: {
-      page: 1,
-      rowsPerPage: val,
-      rowsNumber: props.pagination?.rowsNumber || 0,
-    },
-    filter: undefined,
-  });
+const onRequest = (requestProps: TableRequestProps): void => {
+  emit('request', requestProps);
 };
 </script>
 
@@ -226,16 +199,6 @@ const onRowsPerPageChange = (val: number): void => {
   :deep(tbody tr) {
     height: auto;
   }
-
-  :deep(.q-table__empty),
-  :deep(.q-table__empty td),
-  :deep(tr.q-table__empty),
-  :deep(tr.q-table__empty td) {
-    background-color: var(--surface-page) !important;
-    padding: 32px 16px !important;
-    text-align: center !important;
-    border-bottom: none !important;
-  }
 }
 
 .pagination-select {
@@ -261,13 +224,5 @@ const onRowsPerPageChange = (val: number): void => {
     display: flex !important;
     align-items: center !important;
   }
-}
-
-.custom-empty-bottom {
-  border-top: 1px solid var(--border-color);
-  background-color: var(--surface-card);
-  padding: 12px 16px;
-  min-height: 48px;
-  font-size: 12px;
 }
 </style>
