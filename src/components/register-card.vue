@@ -273,8 +273,10 @@ const onThaiID = (): void => {
 .register-card {
   width: 100%;
   max-width: 500px;
-  margin: 0 auto;
-  font-family: 'Sarabun', sans-serif;
+  background: var(--surface-card);
+  border-radius: 12px;
+  // padding: 40px 36px 36px;
+  font-family: var(--font-family-base);
 }
 
 .buu-logo-img {

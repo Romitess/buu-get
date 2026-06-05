@@ -41,7 +41,7 @@
           </div>
           <div v-else-if="formKey === 'credentials'">
             <div class="register-card-shell">
-              <RegisterCard @register="handleRegister" />
+              <RegisterCard @register="handleRegister" @thaid-register="handleRegister" />
             </div>
           </div>
           <div v-else-if="formKey === 'profile'">
@@ -50,6 +50,7 @@
                 :initial-edit-mode="false"
                 :is-thai="isThai"
                 :credentials="credentials"
+                :registration-method="credentials.registrationMethod"
                 @close="goBackToCredentials"
                 @save="handleSave"
               />
@@ -322,6 +323,7 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
   width: 100%;
   min-height: 100dvh;
   overflow: hidden;
+  font-family: var(--font-family-base);
   background: linear-gradient(
     145deg,
     var(--primary-dark) 0%,
