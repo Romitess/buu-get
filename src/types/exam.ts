@@ -170,6 +170,7 @@ export interface ExamEnrollment {
   ERM_ID: number;
   USER_ID: number;
   SESSION_ID: number;
+  SL_ID?: number | null;
   LS_ID: number | null;
   ERM_STATUS: number;
   ERM_VERIFY_STATUS: number;
@@ -230,6 +231,12 @@ export interface BackendSession {
   SS_CAPACITY: number;
   LOCATION_ID?: number | null;
   LOCATION?: BackendLocation;
+  SESSION_LOCATIONS?: {
+    SL_ID: number;
+    LOCATION_ID: number;
+    SS_ID: number;
+    LOCATION: BackendLocation;
+  }[];
   ENROLLMENTS?: BackendEnrollment[];
   EXAM_ID?: number;
   EXAM?: BackendExam;

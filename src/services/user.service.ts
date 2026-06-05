@@ -67,6 +67,7 @@ export interface BackendUserResponse {
   USER_EMAIL: string;
   USER_STATUS: string;
   USER_IMAGE: string | null;
+  IMAGE?: { USER_IMAGE_URL?: string | null } | null;
   CREATED_AT: string;
   UPDATED_AT: string;
   PROFILE?: {
@@ -83,6 +84,7 @@ export interface BackendUserResponse {
     userProvince?: string | null;
     userCountry?: string | null;
     userRemark?: string | null;
+    userImagePath?: string | null;
   };
 }
 
@@ -108,6 +110,11 @@ export function mapBackendUserToFrontendUser(backendUser: BackendUserResponse): 
     address: backendUser.PROFILE?.userAddress || '',
     faculty: backendUser.PROFILE?.userFaculty || '',
     institution: backendUser.PROFILE?.userInstitution || '',
+    userImagePath:
+      backendUser.USER_IMAGE ||
+      backendUser.IMAGE?.USER_IMAGE_URL ||
+      backendUser.PROFILE?.userImagePath ||
+      '',
     taxId: '',
     thaidSynced: false,
     role: ROLES.CANDIDATE,

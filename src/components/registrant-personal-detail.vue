@@ -18,6 +18,7 @@
               class="profile-img"
               object-fit="cover"
               height="100%"
+              cache-bust
               :alt="$t('admin.registrantManagement.detail.photoAlt')"
             />
           </div>
@@ -154,7 +155,8 @@ const displayData = computed(() => {
     institution: profile?.userInstitution || '-',
     address: profile?.userAddress || '-',
     phone: formatPhone(profile?.userPhone || ''),
-    profileImagePath: user?.IMAGE?.USER_IMAGE_URL || null,
+    profileImagePath:
+      user?.USER_IMAGE || user?.PROFILE?.userImagePath || user?.IMAGE?.USER_IMAGE_URL || null,
     physicalStatus: props.enrollment?.ERM_PHYSICAL_STATUS || '-',
   };
 });

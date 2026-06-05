@@ -85,7 +85,7 @@ import {
   updateEnrollmentStatus,
   requestEnrollmentFix,
 } from 'src/services/enrollment.service';
-import { updateUserProfileByAdmin } from 'src/services/user.service';
+import { getUsersFromApi, updateUserProfileByAdmin } from 'src/services/user.service';
 import { useUserStore } from 'src/stores/user.store';
 import { VerifyStatus } from 'src/types/enrollment.types';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
@@ -125,7 +125,15 @@ const loadData = async (): Promise<void> => {
 
   isLoading.value = true;
   try {
-    enrollment.value = await fetchEnrollmentById(ermId);
+    const detail = await fetchEnrollmentById(ermId);
+    const latestUsers = await getUsersFromApi();
+    const latestUser = latestUsers.find((user) => user.id === detail.USER_ID);
+
+    if (latestUser?.userImagePath) {
+      detail.USER.USER_IMAGE = latestUser.userImagePath;
+    }
+
+    enrollment.value = detail;
   } catch (error) {
     console.error('Error fetching enrollment:', error);
     $q.notify({

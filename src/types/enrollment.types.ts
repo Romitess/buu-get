@@ -14,6 +14,7 @@ export interface BackendUserProfile {
   userProvince: string | null;
   userZipCode: string | null;
   userRemark: string | null;
+  userImagePath?: string | null;
 }
 
 export interface BackendUser {
@@ -21,6 +22,7 @@ export interface BackendUser {
   USER_NATIONAL_ID: string | null;
   USER_PASSPORT_NO: string | null;
   USER_EMAIL: string;
+  USER_IMAGE?: string | null;
   IMAGE?: { USER_IMAGE_URL: string } | null;
   PROFILE?: BackendUserProfile | null;
 }
@@ -71,6 +73,7 @@ export interface BackendEnrollmentDetail {
   ERM_ID: number;
   USER_ID: number;
   SESSION_ID: number;
+  SL_ID?: number | null;
   LS_ID: number | null;
   ERM_STATUS: number;
   ERM_VERIFY_STATUS: number;
@@ -87,6 +90,10 @@ export interface BackendEnrollmentDetail {
     LS_SEAT_LABEL: string | null;
     LS_ROW_NO?: number;
     LS_COL_NO?: number;
+  } | null;
+  SESSION_LOCATION?: {
+    SL_ID: number;
+    LOCATION_ID: number;
   } | null;
 }
 

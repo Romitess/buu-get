@@ -16,11 +16,14 @@ import { getImageUrl } from 'src/services/image.service';
  * // displayUrl.value = '/api/uploads/profile/user-123.jpg'
  * // isImageAvailable.value = true
  */
-export function useImageUrl(imagePath: MaybeRefOrGetter<string | null | undefined>): {
+export function useImageUrl(
+  imagePath: MaybeRefOrGetter<string | null | undefined>,
+  cacheBust: MaybeRefOrGetter<boolean> = false,
+): {
   displayUrl: ComputedRef<string>;
   isImageAvailable: ComputedRef<boolean>;
 } {
-  const displayUrl = computed(() => getImageUrl(toValue(imagePath)));
+  const displayUrl = computed(() => getImageUrl(toValue(imagePath), toValue(cacheBust)));
 
   const isImageAvailable = computed(() => {
     return displayUrl.value.length > 0;

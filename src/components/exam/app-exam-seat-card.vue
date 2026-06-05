@@ -3,8 +3,8 @@
     <q-card-section class="q-pa-md row items-center no-wrap">
       <!-- Avatar Section -->
       <div class="avatar-wrapper q-mr-md">
-        <q-avatar size="56px" class="bg-primary">
-          <img v-if="avatarUrl" :src="avatarUrl" alt="Student Avatar" />
+        <q-avatar size="60px" class="bg-primary">
+          <img v-if="avatarUrl" :src="avatarUrl" alt="Student Avatar" class="avatar-img" />
           <q-icon v-else name="person" color="white" />
         </q-avatar>
       </div>
@@ -14,7 +14,9 @@
         <div class="student-name line-height-tight q-mb-sm">
           {{ studentName }}
         </div>
-        <div class="row no-wrap items-center q-gutter-x-xl text-body2 info-details text-black">
+        <div
+          class="row no-wrap items-center justify-between text-body2 info-details text-black info-row"
+        >
           <span v-if="displayRemark" :class="['remark-badge', remarkBadgeClass]">
             หมายเหตุ: {{ displayRemark }}
           </span>
@@ -101,17 +103,25 @@ const remarkBadgeClass = computed((): string => {
   color: var(--text-primary, #000000);
 }
 
+.info-row {
+  flex-wrap: nowrap;
+  gap: 12px;
+}
+
 .remark-badge {
   font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .remark-foreigner {
-  color: var(--badge-error-text);
+  color: inherit;
 }
 
 .remark-special {
-  color: var(--badge-warning-text);
+  color: inherit;
 }
 
 .remark-default {
@@ -120,6 +130,14 @@ const remarkBadgeClass = computed((): string => {
 
 .seat-label {
   color: inherit;
+  flex: 0 0 auto;
+}
+
+.avatar-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .dots-section {

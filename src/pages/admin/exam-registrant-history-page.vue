@@ -444,7 +444,8 @@ const pagination = ref({
 });
 
 const avatarSrc = computed(() => {
-  const path = enrollment.value?.USER?.IMAGE?.USER_IMAGE_URL;
+  const user = enrollment.value?.USER;
+  const path = user?.USER_IMAGE || user?.PROFILE?.userImagePath || user?.IMAGE?.USER_IMAGE_URL;
   return path ? getImageUrl(path) : defaultUserImage;
 });
 
@@ -579,7 +580,9 @@ const getProfileValue = (key: string, isNew: boolean): string | null => {
   const user = enrollment.value?.USER;
 
   if (key === 'userNationalId') return user?.USER_NATIONAL_ID || '';
-  if (key === 'userImagePath') return user?.IMAGE?.USER_IMAGE_URL || null;
+  if (key === 'userImagePath') {
+    return user?.USER_IMAGE || user?.PROFILE?.userImagePath || user?.IMAGE?.USER_IMAGE_URL || null;
+  }
   return (profile?.[key as keyof typeof profile] as string) || '';
 };
 

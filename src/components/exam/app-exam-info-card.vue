@@ -15,9 +15,25 @@
             <q-icon name="schedule" size="20px" class="q-mr-sm" />
             <span>{{ time }}</span>
           </div>
-          <div class="info-item row items-center">
+          <div
+            class="info-item row items-center"
+            :class="{ 'location-select-item': locationOptions.length > 0 }"
+          >
             <q-icon name="location_on" size="20px" class="q-mr-sm" />
-            <span>{{ location }}</span>
+            <q-select
+              v-if="locationOptions.length > 0"
+              :model-value="selectedLocationId"
+              :options="locationOptions"
+              emit-value
+              map-options
+              outlined
+              dense
+              dropdown-icon="keyboard_arrow_down"
+              popup-content-class="seat-room-menu"
+              class="location-select"
+              @update:model-value="$emit('update:selectedLocationId', $event)"
+            />
+            <span v-else>{{ location }}</span>
           </div>
         </section>
       </header>
@@ -32,7 +48,7 @@
             {{ $t('components.examInfoCard.registeredCount') }}
           </div>
           <div class="applicant-value text-h4 text-weight-medium text-dark">
-            {{ applicantCount }}
+            {{ countWithCapacity ? `${applicantCount}/${totalCapacity}` : applicantCount }}
           </div>
         </div>
         <q-separator vertical class="stat-divider q-mx-sm" v-if="!hidePaid" />
@@ -89,6 +105,8 @@ interface Props {
   date: string;
   time: string;
   location: string;
+  selectedLocationId?: number | null;
+  locationOptions?: { label: string; value: number }[];
   applicantCount?: number | string;
   isAdmin?: boolean;
   isAttendance?: boolean;
@@ -97,15 +115,23 @@ interface Props {
   totalCapacity?: number | string;
   hidePaid?: boolean;
   hideMainSeparator?: boolean;
+  countWithCapacity?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
+  selectedLocationId: null,
+  locationOptions: () => [],
   isAdmin: false,
   hidePaid: false,
   isAttendance: false,
   isScore: false,
   hideMainSeparator: false,
+  countWithCapacity: false,
 });
+
+defineEmits<{
+  (e: 'update:selectedLocationId', value: number | null): void;
+}>();
 </script>
 
 <style scoped lang="scss">
@@ -160,6 +186,48 @@ withDefaults(defineProps<Props>(), {
   :deep(.q-icon) {
     color: var(--dashboard-info-item-icon);
   }
+}
+
+.location-select-item {
+  flex: 1 1 360px;
+}
+
+.location-select {
+  width: min(500px, 100%);
+  font-weight: 400;
+
+  :deep(.q-field__control) {
+    min-height: 44px;
+    border-radius: 12px;
+    color: #111111;
+  }
+
+  :deep(.q-field__native) {
+    font-size: 16px;
+    font-weight: 400;
+  }
+
+  :deep(.q-field__append) {
+    color: #222222;
+  }
+}
+
+:global(.seat-room-menu) {
+  width: min(500px, calc(100vw - 32px)) !important;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+:global(.seat-room-menu .q-item) {
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 16px;
+}
+
+:global(.seat-room-menu .q-item--active) {
+  color: #111111;
+  background: #ffffff;
 }
 
 .stat-divider {

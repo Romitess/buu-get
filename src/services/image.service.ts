@@ -50,16 +50,22 @@ export const uploadImage = async (request: ImageUploadRequest): Promise<string> 
 /**
  * สร้าง URL สำหรับแสดงรูปจาก platform-gateway
  * @param imagePath - path ของรูป (ที่ได้จากการ upload)
+ * @param cacheBust - ถ้า true จะเพิ่ม ?t=<timestamp> เพื่อบังคับ browser reload รูปใหม่
  * @returns URL ที่ใช้ display รูป
  */
-export const getImageUrl = (imagePath: string | null | undefined): string => {
+export const getImageUrl = (imagePath: string | null | undefined, cacheBust = false): string => {
   if (!imagePath) {
     return '';
   }
 
+  const appendCacheBust = (url: string): string => {
+    if (!cacheBust) return url;
+    return `${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}`;
+  };
+
   // ถ้า path เป็น full URL แล้ว ให้ return ตรงๆ
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath;
+    return appendCacheBust(imagePath);
   }
 
   // ใช้ API_BASE_URL จาก environment แทนการ hardcode '/api' เพื่อให้ดึงรูปข้ามเครื่องได้ถูกต้องในระหว่างพัฒนา
@@ -69,11 +75,15 @@ export const getImageUrl = (imagePath: string | null | undefined): string => {
 
   // เนื่องจาก PlatformGatewayController ใช้ @Controller('api') ร่วมกับ Global Prefix 'api'
   // พาร์ทที่เข้าถึงจึงต้องเป็น /api/api/... เสมอ
+  let url: string;
   if (baseUrl.includes('http://') || baseUrl.includes('https://')) {
-    return `${cleanBaseUrl}/api${sanitizedPath}`;
+    url = `${cleanBaseUrl}/api${sanitizedPath}`;
   } else {
-    return `/api/api${sanitizedPath}`;
+    url = `/api/api${sanitizedPath}`;
   }
+
+  // เพิ่ม cache-busting parameter เพื่อบังคับให้ browser โหลดรูปใหม่
+  return appendCacheBust(url);
 };
 
 /**

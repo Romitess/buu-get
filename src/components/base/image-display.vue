@@ -28,6 +28,8 @@ interface Props {
   objectFit?: 'cover' | 'contain' | 'fill' | 'scale-down';
   /** border-radius */
   borderRadius?: string;
+  /** add a timestamp query param so updated images at the same path are reloaded */
+  cacheBust?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -36,9 +38,13 @@ const props = withDefaults(defineProps<Props>(), {
   height: 'auto',
   objectFit: 'cover',
   borderRadius: '8px',
+  cacheBust: false,
 });
 
-const { displayUrl, isImageAvailable } = useImageUrl(() => props.imagePath);
+const { displayUrl, isImageAvailable } = useImageUrl(
+  () => props.imagePath,
+  () => props.cacheBust,
+);
 
 const imageSizeStyle = computed(() => ({
   width: props.width,

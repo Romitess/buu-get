@@ -1,162 +1,82 @@
 <template>
   <q-page class="page-container surface-page-bg">
-    <!-- Header -->
     <AppBreadcrumbs />
     <AppPageHeader
       :title="$t('admin.seatManagement.pageTitle')"
       :subtitle="$t('admin.seatManagement.pageSubtitle')"
+      class="seat-page-header"
     />
 
-    <!-- Time Tabs -->
-    <div class="q-mb-xs">
-      <AppExamSessionTime v-model="activeSessionId" :sessions="sessions" />
+    <div class="session-tabs-wrap">
+      <AppExamSessionTime v-model="activeSessionId" :sessions="sessionTimeTabs" />
     </div>
 
-    <!-- Exam Detail Header -->
-    <section class="q-mb-sm">
+    <section class="q-mb-md">
       <AppExamInfoCard
+        v-model:selected-location-id="activeSessionLocationId"
         :title="examTitle"
         :date="examDate"
         :time="sessionTime"
         :location="sessionLocation"
+        :location-options="roomOptions"
         :applicant-count="applicantCount"
         :paid-count="paidCount"
         :total-capacity="sessionTotalCapacity"
         hide-paid
         hide-main-separator
+        count-with-capacity
         is-admin
       />
     </section>
 
-    <!-- Main Layout -->
+    <!-- Horizontal layout: applicant list on the left, seat map on the right. -->
     <div class="row q-col-gutter-md items-stretch">
-      <!-- Left Panel: Student List (Back to left) -->
       <div class="col-12 col-md-4 flex column min-width-0">
-        <div
-          class="bg-white q-pa-lg border-radius-lg student-list-card custom-scroll-container full-height full-width min-width-0 overflow-hidden"
-        >
+        <div class="student-list-card">
           <div class="row items-center justify-between q-mb-md">
             <div class="text-subtitle1 text-weight-bold text-dark">
               {{ $t('admin.seatManagement.studentListTitle') }}
             </div>
-            <q-badge
-              color="primary"
-              rounded
-              :label="paidCount"
-              class="q-px-md q-py-xs badge-seat-count"
-            />
+            <q-badge color="primary" rounded :label="currentRoomCount" class="badge-seat-count" />
           </div>
 
           <div class="q-mb-md">
             <SearchBar v-model="searchQuery" full-width @search="handleSearch" />
           </div>
 
-          <!-- Student Cards List with visible scroll -->
-          <div class="student-scroll-area">
-            <div class="column q-gutter-y-sm q-pr-sm">
-              <!-- Wrap in native div to guarantee HTML5 drag events bubble perfectly -->
-              <div
-                v-for="student in filteredStudents"
-                :key="student.id"
-                class="cursor-pointer student-drag-source"
-                :class="{ 'is-dragging': draggedStudentId === student.id }"
-                @mousedown.prevent="onMouseDown($event, student.id)"
-              >
-                <AppExamSeatCard
-                  :student-name="student.name"
-                  :student-id="student.id"
-                  :seat-number="getSeatLabel(student.seat)"
-                  :avatar-url="student.avatar"
-                  :remark="student.remark"
-                  :is-foreigner="student.isForeigner"
-                />
-              </div>
+          <div class="student-list">
+            <AppExamSeatCard
+              v-for="student in filteredStudents"
+              :key="student.ermId"
+              :student-name="student.name"
+              :student-id="student.id"
+              :seat-number="getSeatLabel(student.seat)"
+              :avatar-url="student.avatar"
+              :remark="student.remark"
+              :is-foreigner="student.isForeigner"
+            />
 
-              <!-- Empty State -->
-              <div
-                v-if="filteredStudents.length === 0"
-                class="column items-center q-pa-xl text-grey-6"
-              >
-                <q-icon name="person_search" size="48px" />
-                <div class="text-body1 q-mt-sm">
-                  {{ $t('admin.seatManagement.emptyStudentList') }}
-                </div>
+            <div
+              v-if="filteredStudents.length === 0"
+              class="column items-center q-pa-xl text-grey-6"
+            >
+              <q-icon name="person_search" size="48px" />
+              <div class="text-body1 q-mt-sm">
+                {{ $t('admin.seatManagement.emptyStudentList') }}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Right Panel: Seat Layout (Back to right) -->
       <div class="col-12 col-md-8 min-width-0">
-        <!-- Main Content Box with Border -->
-        <div
-          class="bg-white q-pt-md q-px-xl q-pb-xl border-radius-lg main-seat-grid-box full-width min-width-0"
-        >
-          <div class="row items-center justify-between q-mb-md">
-            <div class="text-h6 text-weight-bold text-dark">
-              {{ $t('admin.seatManagement.seatLayoutTitle') }}
-            </div>
-            <AppSeatLegend :items="legendItems" />
-          </div>
+        <AppExamSeatAssignmentMap
+          :title="$t('admin.seatManagement.seatLayoutTitle')"
+          :seats-by-row="seatsByRow"
+          :split-left-right="splitLeftRight"
+          @swap="swapSeatAssignments"
+        />
 
-          <!-- Seat Grid Container with zoom-to-fit (no scrollbar) -->
-          <div ref="seatGridContainerRef" class="seat-grid-scroll-container">
-            <div
-              v-if="seatsByRow && seatsByRow.length > 0"
-              class="seat-grid-scaling-wrapper"
-              :style="wrapperStyle"
-            >
-              <div ref="seatGridInnerRef" class="seat-grid-scalable" :style="gridTransformStyle">
-                <div class="seat-grid-wrapper" :style="{ gap: seatStyle.rowGap }">
-                  <!-- Render each row separately to lock position -->
-                  <div
-                    v-for="(rowSeats, rowIndex) in seatsByRow"
-                    :key="rowIndex"
-                    class="seat-row"
-                    :style="{ gap: seatStyle.colGap }"
-                  >
-                    <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
-                      <!-- Aisle Gap between left/right halves -->
-                      <div
-                        v-if="
-                          splitLeftRight &&
-                          colIndex === Math.ceil(rowSeats.length / 2) &&
-                          rowSeats.length > 1
-                        "
-                        class="aisle-gap"
-                        :style="{ width: seatStyle.aisleWidth, height: seatStyle.height }"
-                      ></div>
-
-                      <div
-                        class="seat-item"
-                        :style="{ width: seatStyle.width, height: seatStyle.height }"
-                      >
-                        <AppExamSeatSquare
-                          :seat-number="seat.label"
-                          :status="seat.status"
-                          :style="{ width: '100%', height: '100%', fontSize: seatStyle.fontSize }"
-                          :class="{ 'drag-over-effect': draggedOverSeatId === seat.id }"
-                          @click="handleSeatClick(seat)"
-                          @mouseenter="onSeatEnter(seat.id)"
-                          @mouseleave="onSeatLeave(seat.id)"
-                          @mouseup="onSeatDrop(seat.id)"
-                        />
-                      </div>
-                    </template>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- Empty State -->
-            <div v-else class="column items-center q-pa-xl text-grey-6">
-              <q-icon name="grid_off" size="48px" />
-              <div class="text-body1 q-mt-sm">ไม่มีข้อมูลผังที่นั่ง</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Action Buttons (Closer together as requested) -->
         <div class="row justify-end q-mt-sm q-gutter-sm">
           <AppButton
             :label="$t('admin.seatManagement.cancelButton')"
@@ -173,65 +93,29 @@
         </div>
       </div>
     </div>
-
-    <!-- Custom Opaque Drag Ghost Teleported to body to ensure perfect fixed coordinate alignment without parent offsets -->
-    <teleport to="body">
-      <div
-        v-if="draggedStudentId && draggedStudentInfo"
-        class="custom-drag-ghost"
-        :style="{
-          left: dragX - dragOffsetX + 'px',
-          top: dragY - dragOffsetY + 'px',
-          width: dragWidth + 'px',
-        }"
-      >
-        <AppExamSeatCard
-          :student-name="draggedStudentInfo.name"
-          :student-id="draggedStudentInfo.id"
-          :seat-number="getSeatLabel(draggedStudentInfo.seat)"
-          :avatar-url="draggedStudentInfo.avatar"
-          :remark="draggedStudentInfo.remark"
-          :is-foreigner="draggedStudentInfo.isForeigner"
-        />
-      </div>
-    </teleport>
-
-    <!-- Hidden native ghost to bypass browser fading -->
-    <div id="hidden-drag-ghost" class="hidden-drag-ghost-box"></div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue';
+import { onMounted } from 'vue';
 import AppButton from 'src/components/base/app-button.vue';
 import AppExamSeatCard from 'src/components/exam/app-exam-seat-card.vue';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
+import AppExamSeatAssignmentMap from 'src/components/exam/app-exam-seat-assignment-map.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
-import AppExamSeatSquare from 'src/components/exam/app-exam-seat-square.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppExamSessionTime from 'src/components/exam/app-exam-session-time.vue';
-import AppSeatLegend from 'src/components/exam/app-seat-legend.vue';
 import { useExamSeatManagement } from 'src/composables/use-exam-seat-management';
-import { computed } from 'vue';
-import type { CSSProperties } from 'vue';
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
-
-const legendItems = computed(() => [
-  { label: t('admin.seatManagement.availableSeat'), dotClass: 'available' },
-  { label: t('admin.seatManagement.assignedSeat'), dotClass: 'assigned' },
-  { label: 'ชำรุด', dotClass: 'broken' },
-]);
 
 const {
   activeSessionId,
-  sessions,
+  activeSessionLocationId,
+  sessionTimeTabs,
+  roomOptions,
   searchQuery,
   splitLeftRight,
   seatsByRow,
-  seatStyle,
   examTitle,
   examDate,
   sessionTime,
@@ -239,150 +123,18 @@ const {
   sessionTotalCapacity,
   applicantCount,
   paidCount,
+  currentRoomCount,
   filteredStudents,
   isSeatAssignmentComplete,
-  draggedStudentId,
-  draggedOverSeatId,
-  dragX,
-  dragY,
-  dragOffsetX,
-  dragOffsetY,
-  dragWidth,
-  draggedStudentInfo,
   loadExamData,
   getSeatLabel,
-  onMouseDown,
-  onSeatEnter,
-  onSeatLeave,
-  onSeatDrop,
-  handleSeatClick,
   handleCancel,
   handleSave,
+  swapSeatAssignments,
 } = useExamSeatManagement();
-
-// ── Zoom-to-fit for seat grid ────────────────────────────────
-const seatGridContainerRef = ref<HTMLElement | null>(null);
-const seatGridInnerRef = ref<HTMLElement | null>(null);
-const seatScaleFactor = ref(1);
-const seatGridNaturalWidth = ref(0);
-const seatGridNaturalHeight = ref(0);
-const seatContainerWidth = ref(0);
-
-const measureAndScaleGrid = (): void => {
-  if (!seatGridInnerRef.value || !seatGridContainerRef.value) {
-    seatScaleFactor.value = 1;
-    return;
-  }
-
-  // Temporarily reset styles to measure natural size
-  const style = seatGridInnerRef.value.style;
-  const prevTransform = style.transform;
-  const prevPosition = style.position;
-  const prevWidth = style.width;
-  const prevHeight = style.height;
-
-  style.transform = 'none';
-  style.position = 'static';
-  style.width = 'max-content';
-  style.height = 'auto';
-
-  void seatGridInnerRef.value.offsetWidth; // force reflow
-
-  const gridW = seatGridInnerRef.value.scrollWidth;
-  const gridH = seatGridInnerRef.value.scrollHeight + 24;
-  seatGridNaturalWidth.value = gridW;
-  seatGridNaturalHeight.value = gridH;
-
-  // Restore style
-  style.transform = prevTransform;
-  style.position = prevPosition;
-  style.width = prevWidth;
-  style.height = prevHeight;
-
-  seatContainerWidth.value = seatGridContainerRef.value.clientWidth;
-  const availW = seatContainerWidth.value - 48;
-  const availH = seatGridContainerRef.value.clientHeight
-    ? seatGridContainerRef.value.clientHeight - 32
-    : 99999;
-
-  if (gridW <= 0 || gridH <= 0) {
-    seatScaleFactor.value = 1;
-    return;
-  }
-
-  const scaleX = availW / gridW;
-  const scaleY = availH / gridH;
-  const s = Math.min(scaleX, scaleY, 1); // never zoom in
-  seatScaleFactor.value = Math.max(0.15, s);
-};
-
-const wrapperStyle = computed<CSSProperties>(() => {
-  const s = seatScaleFactor.value;
-  const w = seatGridNaturalWidth.value;
-  const h = seatGridNaturalHeight.value;
-
-  if (s >= 1 || w <= 0 || h <= 0) {
-    return {
-      width: '100%',
-      display: 'flex',
-      justifyContent: 'center',
-    };
-  }
-
-  return {
-    width: `${seatContainerWidth.value - 48}px`, // Always take full available width
-    height: `${h * s}px`,
-    position: 'relative',
-    overflow: 'visible',
-  };
-});
-
-const gridTransformStyle = computed<CSSProperties>(() => {
-  const s = seatScaleFactor.value;
-  const w = seatGridNaturalWidth.value;
-  const h = seatGridNaturalHeight.value;
-
-  if (s >= 1 || w <= 0 || h <= 0) {
-    return {
-      transform: 'none',
-      width: 'max-content',
-    };
-  }
-
-  const targetW = (seatContainerWidth.value - 48) / s;
-
-  return {
-    transform: `scale(${s})`,
-    transformOrigin: 'top left',
-    position: 'absolute',
-    left: '0',
-    top: '0',
-    width: `${targetW}px`,
-    height: `${h}px`,
-  };
-});
-
-let resizeObs: ResizeObserver | null = null;
 
 onMounted(() => {
   void loadExamData();
-
-  if (seatGridContainerRef.value) {
-    resizeObs = new ResizeObserver(() => {
-      measureAndScaleGrid();
-    });
-    resizeObs.observe(seatGridContainerRef.value);
-  }
-  void nextTick(() => measureAndScaleGrid());
-});
-
-onBeforeUnmount(() => {
-  resizeObs?.disconnect();
-});
-
-// Re-measure when seat data changes
-watch([seatsByRow, splitLeftRight], () => {
-  void nextTick(() => measureAndScaleGrid());
 });
 
 const handleSearch = (val: string | number | null): void => {
@@ -399,150 +151,53 @@ const handleSearch = (val: string | number | null): void => {
   min-width: 0;
 }
 
-.badge-seat-count {
-  border-radius: 100px;
-  font-size: 14px;
+.seat-page-header {
+  margin-bottom: 8px !important;
 }
 
-.hidden-drag-ghost-box {
-  position: absolute;
-  top: -1000px;
-  left: -1000px;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-}
-
-/* Base Layout & Containers */
-.max-width-container {
-  width: 100%;
-  max-width: 100%; /* Fully responsive full screen */
-  padding: 0 16px;
-  margin: 0 auto;
-}
-
-h1 {
-  font-size: 1.75rem;
-  letter-spacing: -0.5px;
-}
-
-.border-radius-lg {
-  border-radius: 16px !important;
-}
-
-.main-seat-grid-box {
-  border: 1px solid var(--seat-grid-border) !important; /* Restored darker "black" border as requested */
-  box-shadow: var(--seat-grid-box-shadow);
-  overflow: hidden;
-  min-height: 400px;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.q-px-xl {
-  padding-left: 32px !important;
-  padding-right: 32px !important;
-}
-
-@media (min-width: 1024px) {
-  .q-px-xl {
-    padding-left: 48px !important;
-    padding-right: 48px !important;
-  }
+.session-tabs-wrap {
+  margin-top: -2px;
+  margin-bottom: 8px;
 }
 
 .student-list-card {
-  border: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
+  height: 100%;
+  min-height: 424px;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 18px;
+  overflow: hidden;
 }
 
-.student-scroll-area {
-  flex: 1;
+.badge-seat-count {
+  min-width: 54px;
+  justify-content: center;
+  padding: 4px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.student-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 355px;
   overflow-y: auto;
   padding-right: 4px;
 
-  /* Make scrollbar always visible for "คนเยอะ" */
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
   }
+
   &::-webkit-scrollbar-track {
-    background: var(--seat-scrollbar-track);
-    border-radius: 10px;
+    background: transparent;
   }
+
   &::-webkit-scrollbar-thumb {
-    background: var(--seat-scrollbar-thumb);
-    border-radius: 10px;
-    &:hover {
-      background: var(--seat-scrollbar-thumb-hover);
-    }
+    background: #777777;
+    border-radius: 999px;
   }
-}
-
-.seat-grid-scroll-container {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  overflow: hidden;
-  padding: 8px 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  flex: 1;
-  min-height: 0;
-}
-
-.seat-grid-scalable {
-  display: block;
-  width: max-content;
-  flex-shrink: 0;
-  transition: transform 0.25s ease;
-}
-
-.seat-grid-wrapper {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  align-items: stretch;
-  margin: 0 auto;
-}
-
-.seat-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: nowrap;
-  width: 100%;
-}
-
-.seat-item {
-  flex-shrink: 0;
-}
-
-.aisle-gap {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4px;
-    bottom: -4px;
-    width: 2px;
-    border-left: 2px dashed var(--q-primary, #1976d2);
-    opacity: 0.35;
-  }
-}
-
-.drag-over-effect {
-  /* Prevent bleeding out of scroll container by avoiding scale/box-shadow */
-  background-color: var(--seat-drag-over-bg) !important; /* Very light blue */
-  border: 2px solid var(--primary) !important;
-  opacity: 0.9;
 }
 
 .btn-cancel-seat {
@@ -554,51 +209,10 @@ h1 {
 }
 
 .btn-confirm-seat {
-  background-color: var(--primary) !important;
+  background-color: var(--primary, #0d47a1) !important;
   color: var(--text-on-primary) !important;
   border-radius: 8px !important;
   padding: 10px 32px !important;
   font-weight: 600;
-}
-
-.custom-drag-ghost {
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.95 !important; /* Premium slight transparency */
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2) !important; /* Premium lift shadow */
-  border-radius: 8px;
-  background: var(--surface-card);
-  transition: none !important; /* Zero lag positioning */
-  transform: scale(1.03); /* Interactive tactile physical lift without rotation */
-  transform-origin: center center;
-}
-
-.custom-drag-ghost :deep(.exam-seat-card) {
-  transition: none !important; /* Prevent child internal animations from lagging position */
-}
-
-.student-drag-source {
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-
-  &.is-dragging {
-    opacity: 0.3;
-    transform: scale(0.96);
-  }
-}
-
-.font-weight-medium {
-  font-weight: 500;
-}
-</style>
-
-<!-- Global helper styles for drag locking and cursor feedback -->
-<style lang="scss">
-body.is-dragging-active,
-body.is-dragging-active * {
-  cursor: grabbing !important;
-  user-select: none !important;
 }
 </style>
