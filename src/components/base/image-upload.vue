@@ -1,5 +1,17 @@
 <template>
   <div class="image-upload-container">
+    <q-file
+      ref="fileInputRef"
+      v-model="selectedFile"
+      @update:model-value="handleFileSelected"
+      accept=".jpg,.jpeg,.png"
+      max-file-size="5242880"
+      dense
+      filled
+      class="hidden-file-input"
+      style="display: none"
+    />
+
     <div v-if="displayUrl" class="preview-wrapper">
       <div class="preview-image-container">
         <img :src="displayUrl" :alt="alt" class="preview-image" />
@@ -29,17 +41,6 @@
     </div>
 
     <div v-else class="upload-zone" @click="triggerFileInput">
-      <q-file
-        ref="fileInputRef"
-        v-model="selectedFile"
-        @update:model-value="handleFileSelected"
-        accept=".jpg,.jpeg,.png"
-        max-file-size="5242880"
-        dense
-        filled
-        class="hidden-file-input"
-      />
-
       <div class="upload-zone-content">
         <q-icon name="add_photo_alternate" size="48px" color="black" />
       </div>
@@ -55,6 +56,14 @@
         {{ uploadError }}
       </q-banner>
     </div>
+
+    <q-dialog v-model="showCropDialog" persistent>
+      <AppImageCropper
+        :image-src="cropImageSrc"
+        :file-type="cropFileType"
+        @confirm="onCropConfirm"
+      />
+    </q-dialog>
   </div>
 </template>
 
@@ -63,6 +72,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useImageUpload } from 'src/composables/use-image-upload';
 import { useImageUrl } from 'src/composables/use-image-url';
+import AppImageCropper from 'src/components/shared/app-image-cropper.vue';
 
 interface Props {
   modelValue: string | null;
@@ -85,6 +95,10 @@ const { t } = useI18n();
 const fileInputRef = ref();
 const selectedFile = ref<File | null>(null);
 
+const showCropDialog = ref(false);
+const cropImageSrc = ref('');
+const cropFileType = ref('image/png');
+
 const { isUploading, uploadError, handleImageUpload } = useImageUpload({
   onSuccess: (imagePath: string) => {
     emit('update:modelValue', imagePath);
@@ -100,11 +114,24 @@ const triggerFileInput = (): void => {
   fileInputRef.value?.pickFiles();
 };
 
-const handleFileSelected = async (file: File | null): Promise<void> => {
+const handleFileSelected = (file: File | null): void => {
   if (!file) return;
+  cropFileType.value = file.type;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    if (e.target?.result) {
+      cropImageSrc.value = e.target.result as string;
+      showCropDialog.value = true;
+      selectedFile.value = null;
+    }
+  };
+  reader.readAsDataURL(file);
+};
 
+const onCropConfirm = async (croppedFile: File): Promise<void> => {
+  showCropDialog.value = false;
   try {
-    await handleImageUpload(file, props.folder);
+    await handleImageUpload(croppedFile, props.folder);
   } catch (error) {
     console.error('Error uploading image:', error);
   }

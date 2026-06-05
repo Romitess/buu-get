@@ -50,7 +50,6 @@ withDefaults(defineProps<Props>(), {
   white-space: nowrap;
   width: fit-content;
   color: inherit;
-  font-family: 'Sarabun', sans-serif;
 
   .badge-dot {
     width: calc(var(--space-unit) * 2);

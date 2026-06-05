@@ -158,7 +158,6 @@ const { displayDeadline } = useCountdown(toRef(props, 'deadline'), () => emit('t
 }
 
 .exam-title {
-  font-family: 'Sarabun', sans-serif;
   font-size: var(--font-size-h3);
   color: var(--text-primary);
   font-weight: var(--font-weight-black);

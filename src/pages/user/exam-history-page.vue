@@ -332,7 +332,6 @@ const handlePrintReceipt = (exam: ExamHistoryItem): void => {
     margin: 0 0 var(--space-sm) 0;
   }
   .page-subtitle {
-    font-family: 'Sarabun', sans-serif;
     font-size: var(--font-size-body);
     color: var(--text-primary);
     font-weight: var(--font-weight-black);

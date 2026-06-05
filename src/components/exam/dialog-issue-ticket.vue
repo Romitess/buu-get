@@ -132,7 +132,7 @@ function onCancelClick() {
   border-radius: var(--radius-md);
   overflow: hidden;
   background-color: var(--surface-card);
-  font-family: 'Sarabun', sans-serif;
+  font-family: var(--font-family-base);
 }
 
 .dialog-header {
@@ -230,7 +230,7 @@ function onCancelClick() {
   border-radius: 8px;
   padding: 12px 16px !important;
   min-height: 44px !important;
-  font-family: 'Sarabun', sans-serif;
+  font-family: var(--font-family-base);
   font-size: 14px;
   font-weight: 500 !important;
   line-height: 100%;

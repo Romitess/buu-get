@@ -113,7 +113,6 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 // ============================================================
 .register-page {
   min-height: calc(100vh - var(--header-height));
-  font-family: 'Inter', 'Noto Sans Thai', sans-serif;
   background: linear-gradient(
     145deg,
     var(--primary-dark) 0%,

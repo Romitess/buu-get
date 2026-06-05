@@ -211,10 +211,6 @@ const windowPrint = (): void => {
 </script>
 
 <style scoped lang="scss">
-// Import fonts matching app design system
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@100;200;300;400;500;600;700;800&display=swap');
-
 .page-container-test {
   display: flex;
   flex-direction: column;
@@ -228,7 +224,7 @@ const windowPrint = (): void => {
 .print-btn {
   border-radius: var(--radius-sm);
   padding: 8px 16px;
-  font-family: 'Sarabun', sans-serif;
+  font-family: var(--font-family-base);
   letter-spacing: 0.5px;
 }
 
@@ -236,7 +232,7 @@ const windowPrint = (): void => {
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  font-family: 'Outfit', 'Sarabun', 'Inter', sans-serif;
+  font-family: var(--font-family-base);
 }
 
 .voucher-card {
@@ -260,7 +256,7 @@ const windowPrint = (): void => {
   }
 
   .header-title {
-    font-family: 'Sarabun', sans-serif !important;
+    font-family: var(--font-family-base) !important;
     font-weight: 500 !important;
     font-style: normal !important;
     font-size: 20px !important;
@@ -273,7 +269,7 @@ const windowPrint = (): void => {
   }
 
   .header-subtitle {
-    font-family: 'Sarabun', sans-serif !important;
+    font-family: var(--font-family-base) !important;
     font-weight: 500 !important;
     font-style: normal !important;
     font-size: 20px !important;
@@ -304,7 +300,7 @@ const windowPrint = (): void => {
   top: 50%;
   left: 65%;
   transform: translate(-50%, -50%);
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-family-base);
   font-weight: 800;
   font-style: normal;
   font-size: 240px;
@@ -365,7 +361,7 @@ const windowPrint = (): void => {
   flex-direction: column;
 
   .info-label {
-    font-family: 'Sarabun', sans-serif !important;
+    font-family: var(--font-family-base) !important;
     font-size: 14px !important;
     color: #64748b !important;
     font-weight: 500 !important;
@@ -373,7 +369,7 @@ const windowPrint = (): void => {
   }
 
   .info-value {
-    font-family: 'Sarabun', sans-serif !important;
+    font-family: var(--font-family-base) !important;
     font-size: 18px !important;
     font-weight: 500 !important;
     color: var(--primary) !important;
@@ -403,7 +399,7 @@ const windowPrint = (): void => {
     }
 
     .barcode-value {
-      font-family: 'Inter', sans-serif !important;
+      font-family: var(--font-family-base) !important;
       font-weight: 700 !important;
       font-style: normal !important;
       font-size: 13.46px !important;

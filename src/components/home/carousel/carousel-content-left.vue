@@ -64,7 +64,6 @@ defineProps<{
   line-height: 1.1;
 }
 .font-sarabun {
-  font-family: 'Sarabun', sans-serif !important;
   letter-spacing: -0.02em;
 }
 </style>
