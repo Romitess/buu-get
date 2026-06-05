@@ -521,23 +521,8 @@ const birthdateDisplay: WritableComputedRef<string> = computed<string>({
   },
 });
 
-onMounted(async (): Promise<void> => {
-  const targetUserId = route.params.userI;
-
-  let user;
-  if (targetUserId) {
-    // Admin เปิดดู user คนอื่น → โหลดจาก API
-    try {
-      user = await userService.getUserById(targetUserId);
-    } catch {
-      $q.notify({ type: 'negative', message: 'ไม่สามารถโหลดข้อมูลผู้ใช้ได้' });
-      return;
-    }
-  } else {
-    // User ปกติ → ใช้ currentUser เหมือนเดิม
-    user = userStore.currentUser;
-  }
-
+onMounted((): void => {
+  const user = userStore.currentUser;
   if (user) {
     const isPreset = ['ทั่วไป', 'พระสงฆ์', 'ตั้งครรภ์', '', null, undefined].includes(
       user.userPhysicalStatus,
