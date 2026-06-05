@@ -57,7 +57,7 @@
               ref="fileInputRef"
               v-model="selectedFile"
               @update:model-value="handleFileSelected"
-              accept=".jpg,.jpeg"
+              accept=".jpg,.jpeg,.png"
               max-file-size="5242880"
               style="display: none"
             />
@@ -341,6 +341,14 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="showCropDialog" persistent>
+      <AppImageCropper
+        :image-src="cropImageSrc"
+        :file-type="cropFileType"
+        @confirm="onCropConfirm"
+      />
+    </q-dialog>
   </div>
 </template>
 
@@ -355,6 +363,7 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
 import { TITLE_TH_OPTIONS, EDUCATION_LEVEL_OPTIONS } from 'src/utils/form-options';
+import AppImageCropper from 'src/components/shared/app-image-cropper.vue';
 import * as userService from 'src/services/user.service';
 import { useImageUpload } from 'src/composables/use-image-upload';
 import defaultUserImage from 'src/assets/img/user-image.jpg';
@@ -373,6 +382,9 @@ const showPasswordDialog = ref(false);
 const currentPassword = ref('');
 const newPassword = ref('');
 const showCalendar = ref(false);
+const showCropDialog = ref(false);
+const cropImageSrc = ref('');
+const cropFileType = ref('image/png');
 
 const fileInputRef = ref();
 const selectedFile = ref<File | null>(null);
@@ -420,10 +432,24 @@ const triggerFileInput = (): void => {
   fileInputRef.value?.pickFiles();
 };
 
-const handleFileSelected = async (file: File | null): Promise<void> => {
+const handleFileSelected = (file: File | null): void => {
   if (!file) return;
+  cropFileType.value = file.type;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    if (e.target?.result) {
+      cropImageSrc.value = e.target.result as string;
+      showCropDialog.value = true;
+      selectedFile.value = null;
+    }
+  };
+  reader.readAsDataURL(file);
+};
+
+const onCropConfirm = async (croppedFile: File): Promise<void> => {
+  showCropDialog.value = false;
   try {
-    await handleImageUpload(file, '/user_images');
+    await handleImageUpload(croppedFile, '/user_images');
   } catch (error) {
     console.error('Error uploading image:', error);
   }

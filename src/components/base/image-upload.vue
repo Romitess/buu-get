@@ -35,7 +35,7 @@
         ref="fileInputRef"
         v-model="selectedFile"
         @update:model-value="handleFileSelected"
-        accept=".jpg,.jpeg"
+        accept=".jpg,.jpeg,.png"
         max-file-size="5242880"
         dense
         filled
