@@ -249,6 +249,19 @@ const navLinks = computed<NavigationItem[]>(() => {
           path: '/admin/test-voucher-management',
         });
       }
+      if (
+        role === ROLES.ADMIN ||
+        role === ROLES.STAFF ||
+        role === ROLES.REGISTRATION_OFFICER ||
+        role === ROLES.EXAM_OPERATIONS_OFFICER
+      ) {
+        links.push({
+          name: 'admin-score-criteria-management',
+          label: t('navigation.manageScoreCriteria'),
+          icon: 'grade',
+          path: '/admin/score-criteria-management',
+        });
+      }
     }
 
     // === Staff-specific: Dashboard ===

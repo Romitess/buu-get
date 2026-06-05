@@ -853,6 +853,22 @@ export default {
       defaultRegulationsTh:
         '1. กรณีสอบแบบกระดาษ ผู้เข้าสอบต้องนำดินสอ 2B ยางลบ และปากกา เข้าสอบ\n2. ผู้เข้าสอบต้องนำบัตรประชาชน หรือบัตรที่ทางราชการออกให้ ฉบับจริง หรือหนังสือเดินทางฉบับจริงแสดงตัว ก่อนเข้าห้องสอบ\n3. ผู้เข้าสอบต้องนั่งสอบตามเลขที่นั่งสอบของตนเองในห้องสอบที่กำหนดไว้เท่านั้น\n4. แต่งกายชุดสุภาพ\n5. ห้ามนำกระเป๋าเครื่องเขียนและอุปกรณ์สื่อสารทุกชนิดเข้าห้องสอบ\n6. ห้ามนำเครื่องดื่ม อาหาร เข้าห้องสอบโดยเด็ดขาด\n7. ไม่อนุญาตให้เข้าห้องน้ำระหว่างการสอบ',
     },
+    scoreCriteriaManagement: {
+      pageTitle: 'จัดการเกณฑ์คะแนนและใบ Certificate',
+      pageDescription: 'จัดการเกณฑ์คะแนนสอบที่ใช้สำหรับกำหนด Band หรือ Level',
+      previewTitle: 'ตัวอย่าง Certificate',
+      editTitle: 'แก้ไขข้อมูล BUU GET Band Description',
+      colBand: 'Band',
+      colScore: 'Score',
+      colCefr: 'CEFR',
+      colDescriptor: 'Performance Descriptor',
+      cancelBtn: 'ยกเลิก',
+      saveBtn: 'บันทึกข้อมูล',
+      notifications: {
+        saveSuccess: 'บันทึกข้อมูลเกณฑ์คะแนนสำเร็จ',
+        saveError: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล',
+      },
+    },
   },
   auth: {
     systemDescription: 'ระบบทดสอบวัดความสามารถทางภาษาอังกฤษ',
@@ -904,6 +920,8 @@ export default {
     editLocation: 'แก้ไขห้องสอบ',
     manageTestVoucher: 'จัดการ Test Voucher',
     language: 'ภาษา',
+    manageScoreCriteria: 'จัดการเกณฑ์คะแนน',
+    manageScoreCriteriaAndCert: 'จัดการเกณฑ์คะแนนและใบ Certificate',
   },
   image: {
     upload: {

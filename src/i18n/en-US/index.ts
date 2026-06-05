@@ -625,6 +625,22 @@ export default {
       defaultRegulationsTh:
         '1. กรณีสอบแบบกระดาษ ผู้เข้าสอบต้องนำดินสอ 2B ยางลบ และปากกา เข้าสอบ\n2. ผู้เข้าสอบต้องนำบัตรประชาชน หรือบัตรที่ทางราชการออกให้ ฉบับจริง หรือหนังสือเดินทางฉบับจริงแสดงตัว ก่อนเข้าห้องสอบ\n3. ผู้เข้าสอบต้องนั่งสอบตามเลขที่นั่งสอบของตนเองในห้องสอบที่กำหนดไว้เท่านั้น\n4. แต่งกายชุดสุภาพ\n5. ห้ามนำกระเป๋าเครื่องเขียนและอุปกรณ์สื่อสารทุกชนิดเข้าห้องสอบ\n6. ห้ามนำเครื่องดื่ม อาหาร เข้าห้องสอบโดยเด็ดขาด\n7. ไม่อนุญาตให้เข้าห้องน้ำระหว่างการสอบ',
     },
+    scoreCriteriaManagement: {
+      pageTitle: 'Manage Score Criteria & Certificates',
+      pageDescription: 'Manage score criteria used for defining Bands or Levels',
+      previewTitle: 'Certificate Preview',
+      editTitle: 'Edit BUU GET Band Description',
+      colBand: 'Band',
+      colScore: 'Score',
+      colCefr: 'CEFR',
+      colDescriptor: 'Performance Descriptor',
+      cancelBtn: 'Cancel',
+      saveBtn: 'Save Changes',
+      notifications: {
+        saveSuccess: 'Successfully saved score criteria information',
+        saveError: 'An error occurred while saving information',
+      },
+    },
   },
   auth: {
     systemDescription: 'English proficiency test comparable to CEFR standards',
@@ -675,6 +691,8 @@ export default {
     editLocation: 'Edit Exam Room',
     manageTestVoucher: 'Manage Test Voucher',
     language: 'Language',
+    manageScoreCriteria: 'Manage Score Criteria',
+    manageScoreCriteriaAndCert: 'Manage Score Criteria & Certificates',
   },
   profileEditHistory: {
     pageTitle: 'Candidate Profile Edit History',
