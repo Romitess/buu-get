@@ -274,7 +274,7 @@ const onThaiID = (): void => {
   width: 100%;
   max-width: 500px;
   margin: 0 auto;
-  font-family: 'Sarabun', sans-serif;
+  font-family: var(--font-family-base);
 }
 
 .buu-logo-img {
@@ -338,9 +338,9 @@ const onThaiID = (): void => {
 }
 
 .otp-helper-text {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--neutral-400);
-  font-weight: 500;
+  font-weight: 400;
   margin-top: -2px;
 }
 
@@ -352,8 +352,8 @@ const onThaiID = (): void => {
   background: var(--neutral-200) !important;
   color: #000;
   border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 500;
   transition: all 0.25s;
 
   &:hover {
@@ -366,8 +366,8 @@ const onThaiID = (): void => {
   background: var(--primary) !important;
   color: var(--text-on-primary);
   border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 500;
   transition: all 0.25s;
 
   &:hover {
@@ -387,8 +387,8 @@ const onThaiID = (): void => {
   background-color: var(--thaid-bg) !important;
   color: #fff;
   border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 500;
   padding: 14px 0;
   transition: all 0.2s ease;
 

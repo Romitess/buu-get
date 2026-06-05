@@ -172,6 +172,7 @@ const educationOptions = computed(() => [
   display: flex;
   flex-direction: column;
   gap: 12px;
+  font-family: var(--font-family-base);
 }
 
 .contact-top-group {

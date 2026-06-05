@@ -267,6 +267,7 @@ onMounted(() => {
   width: 100%;
   display: flex;
   justify-content: center;
+  font-family: var(--font-family-base);
 }
 
 .profile-card {
@@ -329,6 +330,7 @@ onMounted(() => {
 
 .profile-dialog-card {
   min-width: 350px;
+  font-family: var(--font-family-base);
 }
 
 @media (max-width: 900px) {

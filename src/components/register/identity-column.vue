@@ -154,6 +154,7 @@ const onTitleTHChange = (): void => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  font-family: var(--font-family-base);
 }
 
 .identity-bottom-group {
