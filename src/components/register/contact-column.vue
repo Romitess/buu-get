@@ -68,6 +68,7 @@
             <span class="text-negative">*</span>
           </div>
           <q-checkbox
+            v-if="showAddressCheckbox"
             v-model="useIdCardAddress"
             dense
             size="sm"
@@ -95,10 +96,11 @@
         :required="true"
         :rules="[(val) => !!val || t('profile.requiredPhone')]"
         reserve-bottom-space
+        maxlength="10"
       />
 
-      <!-- ─── อีเมล ─── -->
-      <div class="manual-field-wrapper">
+      <!-- ─── อีเมล (แสดงเฉพาะ ThaiD path) ─── -->
+      <div v-if="showEmailField" class="manual-field-wrapper">
         <div class="field-label-row text-body2 text-weight-medium q-mb-xs">
           <div>
             {{ t('profile.email') }}
@@ -113,9 +115,14 @@
           :placeholder="t('profile.emailPlaceholder')"
           outlined
           dense
-          readonly
+          :rules="[
+            (val) => !!val || t('profile.requiredEmail'),
+            (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || 'รูปแบบอีเมลไม่ถูกต้อง',
+          ]"
+          lazy-rules
           :hide-bottom-space="false"
           class="custom-input"
+          @update:model-value="(val) => emit('update:email', String(val ?? ''))"
         />
       </div>
     </div>
@@ -137,6 +144,12 @@ const tr = (key: string, fallback: string): string => (i18n.te(key) ? t(key) : f
 
 defineProps<{
   email: string;
+  showEmailField?: boolean;
+  showAddressCheckbox?: boolean;
+}>();
+
+const emit = defineEmits<{
+  'update:email': [value: string];
 }>();
 
 const birthdate = defineModel<string>('birthdate', { required: true });

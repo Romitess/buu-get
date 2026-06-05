@@ -30,12 +30,15 @@
           <div class="profile-form-column">
             <ContactColumn
               :email="formData.email"
+              :show-email-field="isThaiDPath"
+              :show-address-checkbox="isThaiDPath"
               v-model:birthdate="formData.birthdate"
               v-model:education-level="formData.educationLevel"
               v-model:faculty="formData.faculty"
               v-model:institution="formData.institution"
               v-model:address="formData.address"
               v-model:phone="formData.phone"
+              @update:email="onEmailUpdate"
             />
           </div>
         </div>
@@ -61,6 +64,7 @@
       </q-form>
     </q-card>
 
+    <!-- OTP Verification Dialog (ใช้เฉพาะ ThaiD path) -->
     <OtpVerificationDialog
       v-model="showOtpDialog"
       :is-sending="isSendingOtp"
@@ -116,10 +120,12 @@ interface Props {
   isThai?: boolean;
   credentials?: RegisterCredentials;
   userData?: User | null;
+  registrationMethod?: 'email' | 'thaid';
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isThai: true,
+  registrationMethod: 'email',
 });
 
 const emit = defineEmits<{
@@ -143,14 +149,27 @@ const { validateAndFocusFirstInvalid } = useFocusFirstInvalidField(formRef);
 /** isThai มาจาก prop ที่ parent ส่งมา (ตาม userType ใน step 1) */
 const isThailand = computed<boolean>(() => props.isThai);
 
-const submitButtonText = computed<string>(() =>
-  isEditMode.value ? t('profile.saveEdit') : tr('profile.sendOtp', 'ส่งรหัส OTP'),
-);
+/** ตรวจว่าเป็น ThaiD path หรือไม่ */
+const isThaiDPath = computed<boolean>(() => props.registrationMethod === 'thaid');
+
+/** Email path = skip OTP (ยืนยันไปแล้วที่ register-card) */
+const skipOtp = computed<boolean>(() => props.registrationMethod === 'email');
+
+const submitButtonText = computed<string>(() => {
+  if (isEditMode.value) return t('profile.saveEdit');
+  if (skipOtp.value) return tr('profile.register', 'สมัครสมาชิก');
+  return tr('profile.sendOtp', 'ส่งรหัส OTP');
+});
 
 const { formData, dialog, initFormData, handleTitleTHChange, submitForm, onDialogClose } =
   useRegisterForm(isEditMode.value, (payload) => {
     emit('save', payload);
   });
+
+/** อัปเดต email ใน formData เมื่อ ThaiD path user กรอก email ที่ contact-column */
+const onEmailUpdate = (value: string): void => {
+  formData.value.email = value;
+};
 
 const sendOtp = async (): Promise<boolean> => {
   isSendingOtp.value = true;
@@ -188,11 +207,19 @@ const onSubmit = async (): Promise<void> => {
     return;
   }
 
+  // Edit mode → submit ตรง ๆ
   if (isEditMode.value) {
     submitForm();
     return;
   }
 
+  // Email path → OTP ยืนยันไปแล้วที่ register-card → submit ตรง ๆ
+  if (skipOtp.value) {
+    submitForm();
+    return;
+  }
+
+  // ThaiD path → ต้องส่ง OTP ที่นี่ (ตาม email ที่กรอกใน form)
   const isSent = await sendOtp();
   if (isSent) {
     showOtpDialog.value = true;

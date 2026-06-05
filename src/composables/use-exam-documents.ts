@@ -1,5 +1,6 @@
 import { ref, nextTick } from 'vue';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { useUserStore } from 'src/stores/user.store';
@@ -10,6 +11,7 @@ import type { ReceiptData } from 'src/types/receipt';
 
 export function useExamDocuments() {
   const $q = useQuasar();
+  const { t } = useI18n();
   const userStore = useUserStore();
 
   const isDownloadingVoucher = ref(false);
@@ -102,7 +104,7 @@ export function useExamDocuments() {
       };
 
       $q.loading.show({
-        message: 'กำลังเตรียมบัตรประจำตัวผู้สอบเพื่อดาวน์โหลด (Generating Admission Voucher)...',
+        message: t('exam.voucher.downloading'),
       });
 
       isDownloadingVoucher.value = true;
@@ -111,10 +113,10 @@ export function useExamDocuments() {
       await nextTick();
       // Brief sleep to allow barcode canvas or images to render fully
       await new Promise((resolve) => setTimeout(resolve, 600));
-
       try {
         const container = document.getElementById('pdf-render-container');
-        const cardElement = container?.querySelector('.voucher-card') as HTMLElement | null;
+        const cardElement = (container?.querySelector('.voucher-wrapper') ||
+          container?.querySelector('.voucher-card')) as HTMLElement | null;
 
         if (cardElement) {
           const canvas = await html2canvas(cardElement, {
@@ -145,7 +147,7 @@ export function useExamDocuments() {
 
           $q.notify({
             type: 'positive',
-            message: 'ดาวน์โหลดบัตรประจำตัวผู้สอบเรียบร้อยแล้ว (PDF)',
+            message: t('exam.voucher.downloadSuccess'),
             position: 'top',
           });
         } else {
@@ -155,7 +157,7 @@ export function useExamDocuments() {
         console.error(err);
         $q.notify({
           type: 'negative',
-          message: 'เกิดข้อผิดพลาดในการสร้างไฟล์ดาวน์โหลด กรุณาลองใหม่อีกครั้ง',
+          message: t('exam.voucher.downloadError'),
           position: 'top',
         });
       } finally {
@@ -228,7 +230,7 @@ export function useExamDocuments() {
       };
 
       $q.loading.show({
-        message: 'กำลังเตรียมใบเสร็จรับเงินเพื่อดาวน์โหลด (Generating Electronic Receipt)...',
+        message: t('exam.receipt.downloading'),
       });
 
       isDownloadingReceipt.value = true;
@@ -264,7 +266,7 @@ export function useExamDocuments() {
 
           $q.notify({
             type: 'positive',
-            message: 'ดาวน์โหลดใบเสร็จรับเงินเรียบร้อยแล้ว (PDF)',
+            message: t('exam.receipt.downloadSuccess'),
             position: 'top',
           });
         } else {
@@ -274,7 +276,7 @@ export function useExamDocuments() {
         console.error(err);
         $q.notify({
           type: 'negative',
-          message: 'เกิดข้อผิดพลาดในการสร้างใบเสร็จ กรุณาลองใหม่อีกครั้ง',
+          message: t('exam.receipt.downloadError'),
           position: 'top',
         });
       } finally {

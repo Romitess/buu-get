@@ -29,15 +29,14 @@ export default defineRouter(({ store }) => {
     }
 
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
-    const matchedRecord = to.matched.find((record) => record.meta.roles);
-    const allowedRoles = matchedRecord
-      ? (matchedRecord.meta as { roles?: string[] }).roles
-      : undefined;
+    const roleRecords = to.matched.filter((record) => record.meta.roles);
     if (requiresAuth && !userStore.isLoggedIn) {
       return { name: 'login', query: { redirect: to.fullPath } };
     }
-    if (userStore.isLoggedIn && allowedRoles) {
-      const hasPermission = allowedRoles.includes(userStore.userRole || '');
+    if (userStore.isLoggedIn && roleRecords.length > 0) {
+      const hasPermission = roleRecords.every((record) =>
+        (record.meta.roles as string[]).includes(userStore.userRole || ''),
+      );
 
       if (!hasPermission) {
         const redirectRoute =

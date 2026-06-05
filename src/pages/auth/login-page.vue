@@ -86,6 +86,7 @@ const credentials = ref<RegisterCredentials>({
   email: '',
   password: '',
   userType: 'thai',
+  registrationMethod: 'email',
 });
 
 // ============================================================

@@ -12,7 +12,7 @@
     <!-- ─── Step 1: Registration Card (Email + Password) ─── -->
     <template v-if="currentStep === 'credentials'">
       <div class="form-center">
-        <RegisterCard @register="handleRegister" />
+        <RegisterCard @register="handleRegister" @thaid-register="handleThaiDRegister" />
       </div>
     </template>
 
@@ -23,6 +23,7 @@
           :initial-edit-mode="false"
           :is-thai="isThai"
           :credentials="credentials"
+          :registration-method="registrationMethod"
           @close="goBackToCredentials"
           @save="handleSave"
         />
@@ -51,16 +52,27 @@ const authStore = useAuthStore();
 
 const currentStep = ref<Step>('credentials');
 const isThai = ref<boolean>(true);
+const registrationMethod = ref<'email' | 'thaid'>('email');
 const credentials = ref<RegisterCredentials>({
   email: '',
   password: '',
   userType: 'thai',
+  registrationMethod: 'email',
 });
 
-/** Step 1 → Step 2: ผู้ใช้กรอกอีเมล+รหัสผ่านแล้ว กดสมัคร */
+/** Email Path: ผู้ใช้กรอกอีเมล+รหัสผ่าน + ยืนยัน OTP สำเร็จแล้ว → ไปหน้า profile */
 const handleRegister = (payload: RegisterCredentials): void => {
   credentials.value = payload;
   isThai.value = payload.userType === 'thai';
+  registrationMethod.value = 'email';
+  currentStep.value = 'profile';
+};
+
+/** ThaiD Path: ผู้ใช้กดปุ่ม ThaiD → ไปหน้า profile (มีช่องกรอก email) */
+const handleThaiDRegister = (payload: RegisterCredentials): void => {
+  credentials.value = payload;
+  isThai.value = true;
+  registrationMethod.value = 'thaid';
   currentStep.value = 'profile';
 };
 
