@@ -28,16 +28,22 @@
 
           <!-- Table Header -->
           <div
-            class="row items-center q-col-gutter-sm table-header-row text-weight-bold q-mb-sm text-grey-8"
+            class="row items-center table-header-row text-weight-bold q-mb-sm text-grey-8 no-wrap"
           >
-            <div class="col-auto text-center" style="width: 24px"></div>
-            <div class="col-2 text-center">{{ $t('admin.scoreCriteriaManagement.colBand') }}</div>
-            <div class="col-3 text-center">{{ $t('admin.scoreCriteriaManagement.colScore') }}</div>
-            <div class="col-2 text-center">{{ $t('admin.scoreCriteriaManagement.colCefr') }}</div>
-            <div class="col text-center">
+            <div style="width: 24px; margin-right: 8px"></div>
+            <div class="text-center" style="width: 50px; margin-right: 12px">
+              {{ $t('admin.scoreCriteriaManagement.colBand') }}
+            </div>
+            <div class="text-center" style="width: 140px; margin-right: 12px">
+              {{ $t('admin.scoreCriteriaManagement.colScore') }}
+            </div>
+            <div class="text-center" style="width: 60px; margin-right: 12px">
+              {{ $t('admin.scoreCriteriaManagement.colCefr') }}
+            </div>
+            <div class="text-center col" style="margin-right: 12px">
               {{ $t('admin.scoreCriteriaManagement.colDescriptor') }}
             </div>
-            <div class="col-auto" style="width: 40px"></div>
+            <div style="width: 40px"></div>
           </div>
 
           <!-- List of Band Rules -->
@@ -45,26 +51,36 @@
             <div
               v-for="(rule, index) in bandRules"
               :key="rule.id"
-              class="row items-center q-col-gutter-sm rule-row q-mb-md"
+              class="row items-center rule-row q-mb-md no-wrap"
             >
               <!-- Row Index -->
-              <div class="col-auto text-weight-bold text-grey-7 text-center" style="width: 24px">
+              <div
+                class="text-weight-bold text-grey-7 text-center"
+                style="width: 24px; margin-right: 8px"
+              >
                 {{ index + 1 }}
               </div>
 
               <!-- Band Input -->
-              <div class="col-2">
-                <q-input v-model="rule.band" outlined dense class="buu-input-muted text-center" />
+              <div style="width: 50px; margin-right: 12px">
+                <q-input
+                  v-model="rule.band"
+                  outlined
+                  dense
+                  class="buu-input-muted"
+                  input-class="text-center"
+                />
               </div>
 
               <!-- Score Range (Min - Max) -->
-              <div class="col-3 row items-center no-wrap">
+              <div class="row items-center no-wrap" style="width: 140px; margin-right: 12px">
                 <q-input
                   v-model.number="rule.minScore"
                   type="number"
                   outlined
                   dense
-                  class="buu-input-muted text-center col"
+                  class="buu-input-muted col"
+                  input-class="text-center"
                 />
                 <span class="q-mx-xs text-grey-6">-</span>
                 <q-input
@@ -72,30 +88,35 @@
                   type="number"
                   outlined
                   dense
-                  class="buu-input-muted text-center col"
+                  class="buu-input-muted col"
+                  input-class="text-center"
                 />
               </div>
 
               <!-- CEFR Input -->
-              <div class="col-2">
-                <q-input v-model="rule.cefr" outlined dense class="buu-input-muted text-center" />
+              <div style="width: 60px; margin-right: 12px">
+                <q-input
+                  v-model="rule.cefr"
+                  outlined
+                  dense
+                  class="buu-input-muted"
+                  input-class="text-center"
+                />
               </div>
 
               <!-- Performance Descriptor Input -->
-              <div class="col">
+              <div class="col" style="margin-right: 12px">
                 <q-input
                   v-model="rule.descriptor"
                   outlined
                   dense
-                  type="textarea"
-                  rows="1"
-                  class="buu-input-muted custom-textarea"
-                  autogrow
+                  type="text"
+                  class="buu-input-muted"
                 />
               </div>
 
               <!-- Delete Button -->
-              <div class="col-auto" style="width: 40px">
+              <div style="width: 40px">
                 <q-btn flat round dense color="negative" icon="delete" @click="removeBand(index)" />
               </div>
             </div>

@@ -116,11 +116,15 @@
               <q-icon name="qr_code_2" size="48px" color="dark" class="qr-code-icon" />
             </div>
           </div>
+        </div>
+      </div>
 
-          <!-- Dash separator -->
-          <div class="divider-dashed q-my-md"></div>
+      <!-- Band Description Table Section (Separate Box) -->
+      <div class="band-desc-block q-mt-lg">
+        <div class="band-desc-box relative-position">
+          <!-- Subtle Watermark Background -->
+          <div class="watermark-bg no-pointer-events">GET</div>
 
-          <!-- Band Description Table Section -->
           <div class="band-desc-section">
             <h3 class="band-desc-title text-center text-weight-bold text-uppercase q-mb-md">
               BUU GET Band Description
@@ -386,7 +390,27 @@ const windowPrint = (): void => {
 }
 
 /* ===== Band Description Section ===== */
+.band-desc-block {
+  margin-top: 16px;
+  text-align: left;
+}
+
+.band-desc-box {
+  position: relative;
+  background-color: var(--neutral-50, #f8fafc);
+  border: 1.5px solid var(--border-black, #000000);
+  border-radius: 6px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow-md);
+
+  .watermark-bg {
+    left: 50% !important;
+  }
+}
+
 .band-desc-section {
+  position: relative;
+  z-index: 1;
   text-align: left;
   font-family: 'Sarabun', 'Outfit', sans-serif;
 }
@@ -476,6 +500,12 @@ const windowPrint = (): void => {
   }
   .report-card {
     border: 0.1px solid var(--border-black) !important;
+    box-shadow: none !important;
+  }
+  .band-desc-box {
+    padding: 16px 20px;
+    background-color: var(--surface-card) !important;
+    border: 1.5px solid var(--border-black) !important;
     box-shadow: none !important;
   }
 }
