@@ -49,14 +49,15 @@ const imageSizeStyle = computed(() => ({
 
 <style scoped lang="scss">
 .image-display-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
   position: relative;
 }
 
 .image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 100%;
   height: 100%;
   object-fit: v-bind(objectFit);
@@ -64,7 +65,7 @@ const imageSizeStyle = computed(() => ({
   border-radius: inherit;
 
   &.default-user-avatar {
-    transform: scale(1.25); /* Zoom and crop the default user image to remove white padding */
+    transform: translate(-50%, -50%) scale(1.25); /* Zoom and crop the default user image to remove white padding */
   }
 }
 </style>

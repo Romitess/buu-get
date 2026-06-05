@@ -18,7 +18,7 @@
           draggable="false"
           alt="To Crop"
         />
-        <div class="crop-circle-mask"></div>
+        <div class="crop-card-mask"></div>
       </div>
 
       <div class="slider-container row items-center q-mt-md">
@@ -84,12 +84,16 @@ const offsetY = ref(0);
 const imgNaturalWidth = ref(0);
 const imgNaturalHeight = ref(0);
 
-const cropBoxSize = 240;
+const cropBoxWidth = 180;
+const cropBoxHeight = 240;
 
 const imageStyle = computed(() => {
   if (!imgNaturalWidth.value || !imgNaturalHeight.value) return {};
 
-  const baseScale = cropBoxSize / Math.min(imgNaturalWidth.value, imgNaturalHeight.value);
+  const baseScale = Math.max(
+    cropBoxWidth / imgNaturalWidth.value,
+    cropBoxHeight / imgNaturalHeight.value,
+  );
   const baseWidth = imgNaturalWidth.value * baseScale;
   const baseHeight = imgNaturalHeight.value * baseScale;
 
@@ -115,15 +119,18 @@ const onImageLoaded = () => {
 const clampOffsets = (x: number, y: number, z: number) => {
   if (!imgNaturalWidth.value || !imgNaturalHeight.value) return { x, y };
 
-  const baseScale = cropBoxSize / Math.min(imgNaturalWidth.value, imgNaturalHeight.value);
+  const baseScale = Math.max(
+    cropBoxWidth / imgNaturalWidth.value,
+    cropBoxHeight / imgNaturalHeight.value,
+  );
   const baseWidth = imgNaturalWidth.value * baseScale;
   const baseHeight = imgNaturalHeight.value * baseScale;
 
   const sw = baseWidth * z;
   const sh = baseHeight * z;
 
-  const maxX = Math.max(0, (sw - cropBoxSize) / 2);
-  const maxY = Math.max(0, (sh - cropBoxSize) / 2);
+  const maxX = Math.max(0, (sw - cropBoxWidth) / 2);
+  const maxY = Math.max(0, (sh - cropBoxHeight) / 2);
 
   return {
     x: Math.max(-maxX, Math.min(maxX, x)),
@@ -190,20 +197,24 @@ const confirmCrop = () => {
   const img = imageRef.value;
   if (!img || !imgNaturalWidth.value || !imgNaturalHeight.value) return;
 
-  const outputSize = 400;
+  const outputWidth = 300;
+  const outputHeight = 400;
   const canvas = document.createElement('canvas');
-  canvas.width = outputSize;
-  canvas.height = outputSize;
+  canvas.width = outputWidth;
+  canvas.height = outputHeight;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  const canvasScale = outputSize / cropBoxSize;
-  const baseScale = cropBoxSize / Math.min(imgNaturalWidth.value, imgNaturalHeight.value);
+  const canvasScale = outputWidth / cropBoxWidth;
+  const baseScale = Math.max(
+    cropBoxWidth / imgNaturalWidth.value,
+    cropBoxHeight / imgNaturalHeight.value,
+  );
   const drawW = imgNaturalWidth.value * baseScale * zoom.value * canvasScale;
   const drawH = imgNaturalHeight.value * baseScale * zoom.value * canvasScale;
 
-  const dx = outputSize / 2 + offsetX.value * canvasScale - drawW / 2;
-  const dy = outputSize / 2 + offsetY.value * canvasScale - drawH / 2;
+  const dx = outputWidth / 2 + offsetX.value * canvasScale - drawW / 2;
+  const dy = outputHeight / 2 + offsetY.value * canvasScale - drawH / 2;
 
   ctx.drawImage(img, dx, dy, drawW, drawH);
 
@@ -252,16 +263,18 @@ const confirmCrop = () => {
   pointer-events: none;
 }
 
-.crop-circle-mask {
+.crop-card-mask {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 180px;
+  height: 240px;
   pointer-events: none;
-  background: radial-gradient(circle at center, transparent 120px, rgba(0, 0, 0, 0.5) 120px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 2px dashed rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
   box-sizing: border-box;
+  border-radius: 4px;
 }
 
 .slider-container {

@@ -4,7 +4,7 @@
       ref="fileInputRef"
       v-model="selectedFile"
       @update:model-value="handleFileSelected"
-      accept=".jpg,.jpeg,.png"
+      accept=".jpg,.jpeg"
       max-file-size="5242880"
       dense
       filled
@@ -51,17 +51,12 @@
       <p class="text-caption text-center q-mt-sm">{{ uploadingText }}</p>
     </div>
 
-    <div v-if="uploadError" class="upload-error q-mt-md">
-      <q-banner class="bg-negative text-white rounded-borders">
-        {{ uploadError }}
-      </q-banner>
-    </div>
-
     <q-dialog v-model="showCropDialog" persistent>
       <AppImageCropper
         :image-src="cropImageSrc"
         :file-type="cropFileType"
         @confirm="onCropConfirm"
+        @cancel="showCropDialog = false"
       />
     </q-dialog>
   </div>
@@ -70,6 +65,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
 import { useImageUpload } from 'src/composables/use-image-upload';
 import { useImageUrl } from 'src/composables/use-image-url';
 import AppImageCropper from 'src/components/shared/app-image-cropper.vue';
@@ -92,17 +88,25 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>();
 
 const { t } = useI18n();
+const $q = useQuasar();
 const fileInputRef = ref();
 const selectedFile = ref<File | null>(null);
 
 const showCropDialog = ref(false);
 const cropImageSrc = ref('');
-const cropFileType = ref('image/png');
+const cropFileType = ref('image/jpeg');
 
-const { isUploading, uploadError, handleImageUpload } = useImageUpload({
+const { isUploading, handleImageUpload } = useImageUpload({
   onSuccess: (imagePath: string) => {
     emit('update:modelValue', imagePath);
     selectedFile.value = null;
+  },
+  onError: (error: Error) => {
+    $q.notify({
+      type: 'negative',
+      message: error.message || 'อัปโหลดรูปภาพไม่สำเร็จ',
+      position: 'top',
+    });
   },
 });
 
@@ -111,21 +115,54 @@ const { displayUrl } = useImageUrl(() => props.modelValue);
 const uploadingText = computed(() => t('image.upload.uploading') ?? 'Uploading...');
 
 const triggerFileInput = (): void => {
+  // Reset selected file first so same file can be re-selected
+  selectedFile.value = null;
   fileInputRef.value?.pickFiles();
 };
 
 const handleFileSelected = (file: File | null): void => {
   if (!file) return;
-  cropFileType.value = file.type;
+
+  // Validate JPG/JPEG format only
+  const isJpg =
+    file.type === 'image/jpeg' ||
+    file.name.toLowerCase().endsWith('.jpg') ||
+    file.name.toLowerCase().endsWith('.jpeg');
+  if (!isJpg) {
+    $q.notify({
+      type: 'negative',
+      message: 'กรุณาอัปโหลดรูปภาพนามสกุล JPG หรือ JPEG เท่านั้น',
+      position: 'top',
+    });
+    selectedFile.value = null;
+    return;
+  }
+
+  // Validate minimum file size (40 KB)
+  const minSize = 40 * 1024;
+  if (file.size < minSize) {
+    $q.notify({
+      type: 'negative',
+      message: 'ขนาดไฟล์ต้องมีขนาดไม่ต่ำกว่า 40 KB',
+      position: 'top',
+    });
+    selectedFile.value = null;
+    return;
+  }
+
+  cropFileType.value = 'image/jpeg';
+
   const reader = new FileReader();
   reader.onload = (e) => {
     if (e.target?.result) {
       cropImageSrc.value = e.target.result as string;
       showCropDialog.value = true;
-      selectedFile.value = null;
     }
   };
   reader.readAsDataURL(file);
+
+  // Reset selectedFile so the same file can be picked again next time
+  selectedFile.value = null;
 };
 
 const onCropConfirm = async (croppedFile: File): Promise<void> => {
@@ -147,6 +184,7 @@ const handleDelete = (): void => {
   width: 100%;
   height: 100%;
   aspect-ratio: 0.9 / 1;
+  border-radius: inherit;
 }
 
 .hidden-file-input {
@@ -176,6 +214,7 @@ const handleDelete = (): void => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 
 .preview-overlay {
@@ -217,10 +256,6 @@ const handleDelete = (): void => {
 }
 
 .upload-progress {
-  width: 100%;
-}
-
-.upload-error {
   width: 100%;
 }
 </style>
