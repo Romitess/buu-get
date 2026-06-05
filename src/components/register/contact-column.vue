@@ -78,12 +78,14 @@
         </div>
         <q-input
           v-model="address"
+          :type="!showEmailField ? 'textarea' : 'text'"
           :placeholder="t('profile.addressPlaceholder')"
           outlined
           dense
           :rules="[(val) => !!val || t('profile.required')]"
           :hide-bottom-space="false"
           class="custom-input"
+          :class="{ 'expanded-address': !showEmailField }"
         />
       </div>
 
@@ -117,7 +119,9 @@
           dense
           :rules="[
             (val) => !!val || t('profile.requiredEmail'),
-            (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || 'รูปแบบอีเมลไม่ถูกต้อง',
+            (val) =>
+              /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) ||
+              tr('profile.invalidEmail', 'รูปแบบอีเมลไม่ถูกต้อง'),
           ]"
           lazy-rules
           :hide-bottom-space="false"
@@ -245,6 +249,18 @@ const educationOptions = computed(() => [
 
   .email-helper {
     text-align: left;
+  }
+}
+
+.expanded-address {
+  :deep(.q-field__control) {
+    height: 166px !important;
+    align-items: flex-start;
+  }
+  :deep(textarea) {
+    resize: none;
+    padding-top: 8px;
+    min-height: 142px;
   }
 }
 </style>

@@ -184,6 +184,7 @@ export default {
     requiredBirthdate: 'กรุณาระบุวันเกิด',
     requiredEducation: 'กรุณาเลือกระดับการศึกษา',
     requiredPhone: 'กรุณากรอกเบอร์โทรศัพท์',
+    invalidEmail: 'รูปแบบอีเมลไม่ถูกต้อง',
     eduHighSchool: 'มัธยมศึกษา',
     eduBachelor: 'ปริญญาตรี',
     eduMaster: 'ปริญญาโท',

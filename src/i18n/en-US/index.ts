@@ -228,6 +228,7 @@ export default {
     requiredBirthdate: 'Please enter your date of birth',
     requiredEducation: 'Please select your education level',
     requiredPhone: 'Please enter your phone number',
+    invalidEmail: 'Invalid email format',
     eduHighSchool: 'High School',
     eduBachelor: "Bachelor's Degree",
     eduMaster: "Master's Degree",
