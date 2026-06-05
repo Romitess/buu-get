@@ -672,9 +672,6 @@ const onSavePassword = (): void => {
 </script>
 
 <style scoped lang="scss">
-.profile-page {
-}
-
 .user-profile-card {
   border-radius: 16px !important;
   border: 1px solid #e0e0e0 !important;
