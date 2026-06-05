@@ -5,7 +5,7 @@
       <q-btn
         color="primary"
         icon="print"
-        label="พิมพ์ใบเข้าห้องสอบ (Print)"
+        :label="$t('exam.voucher.print')"
         class="print-btn shadow-2 text-weight-bold"
         @click="windowPrint"
       />
@@ -23,8 +23,8 @@
 
           <!-- Titles -->
           <div class="col text-center">
-            <h1 class="header-title">BUU-GET : Burapha University's Graduate English Test</h1>
-            <h2 class="header-subtitle">ADMISSION VOUCHER</h2>
+            <h1 class="header-title">{{ $t('exam.voucher.title') }}</h1>
+            <h2 class="header-subtitle">{{ $t('exam.voucher.subtitle') }}</h2>
           </div>
         </div>
 
@@ -56,19 +56,19 @@
                 <!-- Column 1 (Left details) -->
                 <div class="col-12 col-sm-6 detail-group">
                   <div class="info-group">
-                    <label class="info-label">Test Taker ID:</label>
+                    <label class="info-label">{{ $t('exam.voucher.fields.testTakerId') }}</label>
                     <div class="info-value">{{ voucherData.studentId }}</div>
                   </div>
                   <div class="info-group">
-                    <label class="info-label">Name Surname:</label>
+                    <label class="info-label">{{ $t('exam.voucher.fields.nameSurname') }}</label>
                     <div class="info-value">{{ voucherData.fullName }}</div>
                   </div>
                   <div class="info-group">
-                    <label class="info-label">Citizen ID:</label>
+                    <label class="info-label">{{ $t('exam.voucher.fields.citizenId') }}</label>
                     <div class="info-value">{{ voucherData.citizenId || '-' }}</div>
                   </div>
                   <div class="info-group">
-                    <label class="info-label">Test Session:</label>
+                    <label class="info-label">{{ $t('exam.voucher.fields.testSession') }}</label>
                     <div class="info-value">{{ voucherData.testSession || '-' }}</div>
                   </div>
                 </div>
@@ -76,19 +76,19 @@
                 <!-- Column 2 (Right details) -->
                 <div class="col-12 col-sm-6 detail-group">
                   <div class="info-group">
-                    <label class="info-label">Test Date:</label>
+                    <label class="info-label">{{ $t('exam.voucher.fields.testDate') }}</label>
                     <div class="info-value">{{ voucherData.examDate }}</div>
                   </div>
                   <div class="info-group">
-                    <label class="info-label">Time:</label>
+                    <label class="info-label">{{ $t('exam.voucher.fields.time') }}</label>
                     <div class="info-value">{{ voucherData.examTime }}</div>
                   </div>
                   <div class="info-group">
-                    <label class="info-label">Venue:</label>
+                    <label class="info-label">{{ $t('exam.voucher.fields.venue') }}</label>
                     <div class="info-value">{{ voucherData.location }}</div>
                   </div>
                   <div class="info-group">
-                    <label class="info-label">Seat Number:</label>
+                    <label class="info-label">{{ $t('exam.voucher.fields.seatNumber') }}</label>
                     <div class="info-value highlight-value">{{ voucherData.seatNo }}</div>
                   </div>
                 </div>
@@ -171,20 +171,53 @@
           </div>
         </div>
       </div>
+
+      <!-- Test Regulations (English & Thai combined in a single card) -->
+      <div v-if="showRegulations" class="regulations-block q-mt-lg">
+        <div class="regulations-box relative-position">
+          <!-- Subtle Watermark Background -->
+          <div class="watermark-bg no-pointer-events">GET</div>
+
+          <div class="regulations-content-wrapper">
+            <h4 class="regulations-heading-inline">
+              {{ $t('admin.testVoucherManagement.regulationsEnLabel') }}
+            </h4>
+            <div class="regulations-text-content q-mb-md">
+              {{ displayRegulationsEn }}
+            </div>
+
+            <h4 class="regulations-heading-inline q-mt-md">
+              {{ $t('admin.testVoucherManagement.regulationsThLabel') }}
+            </h4>
+            <div class="regulations-text-content">
+              {{ displayRegulationsTh }}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { VoucherData } from 'src/types/voucher';
 import ImageDisplay from 'src/components/base/image-display.vue';
 
 // ===== Props =====
-const props = defineProps<{
-  /** ข้อมูลบัตรประจำตัว — ถ้าไม่ส่งจะใช้ Mock Data ตามรูปภาพ */
-  data?: VoucherData | undefined;
-}>();
+const props = withDefaults(
+  defineProps<{
+    /** ข้อมูลบัตรประจำตัว — ถ้าไม่ส่งจะใช้ Mock Data ตามรูปภาพ */
+    data?: VoucherData | undefined;
+    regulationsEn?: string | string[];
+    regulationsTh?: string | string[];
+    showRegulations?: boolean;
+  }>(),
+  {
+    showRegulations: true,
+  },
+);
 
 // ===== Mock Data (ตรงตามรูปภาพ) =====
 const mockData: VoucherData = {
@@ -204,6 +237,60 @@ const mockData: VoucherData = {
 
 const voucherData = computed<VoucherData>(() => props.data ?? mockData);
 
+// ===== Regulations State & Computed =====
+const { t } = useI18n();
+
+const localRegulationsEn = ref<string>('');
+const localRegulationsTh = ref<string>('');
+
+const defaultRegulationsEn = t('admin.testVoucherManagement.defaultRegulationsEn');
+const defaultRegulationsTh = t('admin.testVoucherManagement.defaultRegulationsTh');
+
+onMounted(() => {
+  try {
+    const savedEn = localStorage.getItem('buu-get-regulations-en');
+    const savedTh = localStorage.getItem('buu-get-regulations-th');
+    if (savedEn) {
+      if (savedEn.startsWith('[')) {
+        localRegulationsEn.value = JSON.parse(savedEn).join('\n');
+      } else {
+        localRegulationsEn.value = savedEn;
+      }
+    }
+    if (savedTh) {
+      if (savedTh.startsWith('[')) {
+        localRegulationsTh.value = JSON.parse(savedTh).join('\n');
+      } else {
+        localRegulationsTh.value = savedTh;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load regulations from localStorage', e);
+  }
+});
+
+const displayRegulationsEn = computed<string>(() => {
+  let val = props.regulationsEn;
+  if (!val) {
+    val = localRegulationsEn.value || defaultRegulationsEn;
+  }
+  if (Array.isArray(val)) {
+    return val.join('\n');
+  }
+  return val;
+});
+
+const displayRegulationsTh = computed<string>(() => {
+  let val = props.regulationsTh;
+  if (!val) {
+    val = localRegulationsTh.value || defaultRegulationsTh;
+  }
+  if (Array.isArray(val)) {
+    return val.join('\n');
+  }
+  return val;
+});
+
 // ===== Action: Window Print =====
 const windowPrint = (): void => {
   window.print();
@@ -222,40 +309,41 @@ const windowPrint = (): void => {
   justify-content: center;
   background-color: var(--surface-page);
   min-height: 100%;
-  padding: 24px 16px;
+  padding: 16px 12px;
 }
 
 .print-btn {
   border-radius: var(--radius-sm);
-  padding: 8px 16px;
+  padding: 6px 14px;
   font-family: 'Sarabun', sans-serif;
   letter-spacing: 0.5px;
+  font-size: 13px;
 }
 
 .voucher-wrapper {
   width: 100%;
-  max-width: 800px;
+  max-width: 520px;
   margin: 0 auto;
   font-family: 'Outfit', 'Sarabun', 'Inter', sans-serif;
 }
 
 .voucher-card {
   width: 100%;
-  background-color: var(--surface-card);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-lg);
+  background: var(--voucher-bg-gradient);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-black);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
 }
 
 /* ===== Header Area ===== */
 .voucher-header {
-  padding: 20px 28px;
+  padding: 16px 20px;
   background-color: var(--surface-card);
-  border-bottom: 2px solid #cbd5e1 !important;
+  border-bottom: 1.5px solid var(--neutral-300) !important;
 
   .header-logo {
-    height: 56px;
+    height: 40px;
     object-fit: contain;
   }
 
@@ -263,34 +351,35 @@ const windowPrint = (): void => {
     font-family: 'Sarabun', sans-serif !important;
     font-weight: 500 !important;
     font-style: normal !important;
-    font-size: 20px !important;
-    line-height: 100% !important;
+    font-size: 16px !important;
+    line-height: 120% !important;
     letter-spacing: 0% !important;
     text-align: center !important;
     vertical-align: middle !important;
     color: var(--primary) !important;
-    margin: 0 0 6px 0 !important;
+    margin: 0 0 3px 0 !important;
   }
 
   .header-subtitle {
     font-family: 'Sarabun', sans-serif !important;
     font-weight: 500 !important;
     font-style: normal !important;
-    font-size: 20px !important;
-    line-height: 100% !important;
+    font-size: 14px !important;
+    line-height: 120% !important;
     letter-spacing: 0% !important;
     text-align: center !important;
     vertical-align: middle !important;
-    color: #475569 !important;
+    color: var(--neutral-600) !important;
     margin: 0 !important;
   }
 }
 
 /* ===== Body Area ===== */
 .voucher-body {
-  padding: 32px;
-  background-color: #f8fbff;
-  min-height: 280px;
+  position: relative;
+  padding: 24px 20px;
+  background: transparent;
+  min-height: auto;
 
   .content-container {
     position: relative;
@@ -307,11 +396,11 @@ const windowPrint = (): void => {
   font-family: 'Outfit', sans-serif;
   font-weight: 800;
   font-style: normal;
-  font-size: 240px;
+  font-size: 140px;
   line-height: 100%;
   letter-spacing: 0%;
   vertical-align: middle;
-  color: rgba(30, 137, 229, 0.07);
+  color: var(--watermark-color);
   z-index: 0;
   user-select: none;
   pointer-events: none;
@@ -319,15 +408,15 @@ const windowPrint = (): void => {
 
 /* ===== Profile Photo ===== */
 .profile-photo-wrapper {
-  width: 156px;
-  height: 196px;
-  background-color: #e3f2fd;
-  border-radius: 4px;
+  width: 100px;
+  height: 126px;
+  background-color: var(--badge-primary-bg);
+  border-radius: 3px;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 3px solid #ffffff;
+  border: 2px solid var(--surface-card);
 
   .profile-photo-img {
     width: 100%;
@@ -342,22 +431,22 @@ const windowPrint = (): void => {
 }
 
 .photo-divider {
-  width: 156px;
-  height: 2px;
-  background-color: #94a3b8;
-  margin-top: 14px;
+  width: 100px;
+  height: 1.5px;
+  background-color: var(--neutral-400);
+  margin-top: 8px;
   border-radius: 1px;
 }
 
 /* ===== Detail Grid ===== */
 .detail-grid-column {
-  padding-left: 20px !important;
+  padding-left: 12px !important;
 }
 
 .detail-group {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
 }
 
 .info-group {
@@ -366,15 +455,16 @@ const windowPrint = (): void => {
 
   .info-label {
     font-family: 'Sarabun', sans-serif !important;
-    font-size: 14px !important;
-    color: #64748b !important;
+    font-size: 12px !important;
+    color: var(--neutral-500) !important;
     font-weight: 500 !important;
-    margin-bottom: 2px;
+    margin-bottom: 0px;
+    line-height: 1.2;
   }
 
   .info-value {
     font-family: 'Sarabun', sans-serif !important;
-    font-size: 18px !important;
+    font-size: 15px !important;
     font-weight: 500 !important;
     color: var(--primary) !important;
     line-height: 1.3;
@@ -388,8 +478,8 @@ const windowPrint = (): void => {
 
 /* ===== Barcode Footer Area ===== */
 .voucher-footer {
-  padding: 16px 24px 28px 24px;
-  background-color: #f8fbff; /* Seamlessly matches card body background */
+  padding: 16px 20px 24px 20px;
+  background: transparent;
   border-top: none;
 
   .barcode-wrapper {
@@ -398,49 +488,96 @@ const windowPrint = (): void => {
     padding: 0 !important;
 
     .barcode-svg {
-      width: 320px;
-      height: 48px;
+      width: 200px;
+      height: 32px;
     }
 
     .barcode-value {
       font-family: 'Inter', sans-serif !important;
       font-weight: 700 !important;
       font-style: normal !important;
-      font-size: 13.46px !important;
+      font-size: 10px !important;
       line-height: 100% !important;
       letter-spacing: 0% !important;
       text-align: center !important;
-      color: #1a1a1a !important;
-      margin-top: 6px !important;
     }
   }
 }
 
+/* ===== Regulations Section ===== */
+.regulations-block {
+  margin-top: 16px;
+  text-align: left;
+}
+
+.regulations-heading {
+  font-family: 'Sarabun', 'Outfit', 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--neutral-900);
+  margin: 0 0 8px 0;
+}
+
+.regulations-heading-inline {
+  font-family: 'Sarabun', 'Outfit', 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--neutral-900);
+  margin: 0 0 6px 0;
+}
+
+.regulations-box {
+  position: relative;
+  background-color: var(--neutral-50);
+  border: 1.5px solid var(--border-black);
+  border-radius: 6px;
+  padding: 12px 16px;
+
+  .watermark-bg {
+    left: 50% !important;
+  }
+}
+
+.regulations-content-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+.regulations-text-content {
+  font-family: 'Sarabun', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--neutral-900);
+  line-height: 1.6;
+  white-space: pre-line;
+  padding-left: 2px;
+}
+
 /* ===== Responsive Adaptability ===== */
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .detail-grid-column {
     padding-left: 0 !important;
-    margin-top: 20px;
+    margin-top: 12px;
   }
   .voucher-header {
     flex-direction: column;
-    padding: 20px;
-    gap: 16px;
+    padding: 12px;
+    gap: 8px;
     text-align: center;
   }
   .voucher-body {
-    padding: 20px;
+    padding: 12px;
   }
   .watermark-bg {
-    font-size: 10rem;
+    font-size: 6rem;
     left: 50%;
   }
 }
 
-/* ===== Print Optimization ===== */
+/* ===== Print Optimization — Scale up for paper ===== */
 @media print {
   body {
-    background-color: #ffffff !important;
+    background-color: var(--surface-card) !important;
   }
   .no-print {
     display: none !important;
@@ -455,8 +592,70 @@ const windowPrint = (): void => {
     box-shadow: none !important;
   }
   .voucher-card {
-    border: none !important;
+    border: 0.1px solid var(--border-black) !important;
     box-shadow: none !important;
+  }
+  .voucher-header {
+    padding: 20px 28px;
+    .header-logo {
+      height: 56px;
+    }
+    .header-title {
+      font-size: 18px !important;
+    }
+    .header-subtitle {
+      font-size: 16px !important;
+    }
+  }
+  .voucher-body {
+    padding: 28px;
+  }
+  .profile-photo-wrapper {
+    width: 140px;
+    height: 176px;
+  }
+  .photo-divider {
+    width: 140px;
+  }
+  .info-group .info-label {
+    font-size: 12px !important;
+  }
+  .info-group .info-value {
+    font-size: 16px !important;
+  }
+  .detail-group {
+    gap: 14px;
+  }
+  .barcode-wrapper .barcode-svg {
+    width: 300px;
+    height: 44px;
+  }
+  .barcode-wrapper .barcode-value {
+    font-size: 12px !important;
+  }
+  .watermark-bg {
+    font-size: 200px;
+  }
+
+  .regulations-block {
+    margin-top: 24px;
+  }
+  .regulations-heading {
+    font-size: 16px !important;
+    margin-bottom: 12px;
+  }
+  .regulations-heading-inline {
+    font-size: 15px !important;
+    margin-bottom: 10px;
+  }
+  .regulations-box {
+    padding: 16px 20px;
+    background-color: var(--surface-card) !important;
+    border: 1.5px solid var(--border-black) !important;
+  }
+  .regulations-text-content {
+    font-size: 14px !important;
+    line-height: 1.6;
   }
 }
 </style>

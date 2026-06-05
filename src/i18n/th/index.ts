@@ -71,6 +71,15 @@ export default {
         venue: 'สถานที่สอบ:',
         seatNumber: 'เลขที่นั่งสอบ:',
       },
+      downloading: 'กำลังเตรียมบัตรประจำตัวผู้สอบเพื่อดาวน์โหลด (Generating Admission Voucher)...',
+      downloadSuccess: 'ดาวน์โหลดบัตรประจำตัวผู้สอบเรียบร้อยแล้ว (PDF)',
+      downloadError: 'เกิดข้อผิดพลาดในการสร้างไฟล์ดาวน์โหลด กรุณาลองใหม่อีกครั้ง',
+      print: 'พิมพ์ใบเข้าห้องสอบ (Print)',
+    },
+    receipt: {
+      downloading: 'กำลังเตรียมใบเสร็จรับเงินเพื่อดาวน์โหลด (Generating Electronic Receipt)...',
+      downloadSuccess: 'ดาวน์โหลดใบเสร็จรับเงินเรียบร้อยแล้ว (PDF)',
+      downloadError: 'เกิดข้อผิดพลาดในการสร้างใบเสร็จ กรุณาลองใหม่อีกครั้ง',
     },
     calendar: {
       legendAvailable: 'มีรอบสอบ (ว่าง)',
@@ -823,6 +832,26 @@ export default {
       successMessage: 'บันทึกข้อมูลเรียบร้อยแล้ว',
       okBtn: 'ตกลง',
     },
+    testVoucherManagement: {
+      pageTitle: 'จัดการ Test Voucher',
+      pageDescription: 'จัดการข้อมูล Test Voucher เพื่อใช้สำหรับออกใบสมัคร',
+      previewTitle: 'ตัวอย่าง Test Voucher',
+      editTitle: 'แก้ไขข้อมูล Test Voucher',
+      regulationsEnLabel: 'Test Regulations (EN)',
+      regulationsThLabel: 'ข้อปฏิบัติสำหรับผู้เข้าสอบ (TH)',
+      placeholderEn: 'ใส่ข้อกำหนดภาษาอังกฤษ...',
+      placeholderTh: 'ใส่ข้อปฏิบัติภาษาไทย...',
+      cancelBtn: 'ยกเลิก',
+      saveBtn: 'บันทึกข้อมูล',
+      notifications: {
+        saveSuccess: 'บันทึกข้อมูล Test Voucher สำเร็จ',
+        saveError: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล',
+      },
+      defaultRegulationsEn:
+        '1. For paper-based test, you need to prepare 2B pencils, erasers, and ballpoint pens.\n2. You must show your ID cards or Passport (original copy) to the officers before entering the exam room.\n3. You must go to the exam room that you are assigned.\n4. Formal dress is required.\n5. Personal belongings (included handbags, cell phones, and any kinds of electronic devices) are not allowed.\n6. No food and drinks in the exam rooms.\n7. Going to the toilet during the test is not allowed.',
+      defaultRegulationsTh:
+        '1. กรณีสอบแบบกระดาษ ผู้เข้าสอบต้องนำดินสอ 2B ยางลบ และปากกา เข้าสอบ\n2. ผู้เข้าสอบต้องนำบัตรประชาชน หรือบัตรที่ทางราชการออกให้ ฉบับจริง หรือหนังสือเดินทางฉบับจริงแสดงตัว ก่อนเข้าห้องสอบ\n3. ผู้เข้าสอบต้องนั่งสอบตามเลขที่นั่งสอบของตนเองในห้องสอบที่กำหนดไว้เท่านั้น\n4. แต่งกายชุดสุภาพ\n5. ห้ามนำกระเป๋าเครื่องเขียนและอุปกรณ์สื่อสารทุกชนิดเข้าห้องสอบ\n6. ห้ามนำเครื่องดื่ม อาหาร เข้าห้องสอบโดยเด็ดขาด\n7. ไม่อนุญาตให้เข้าห้องน้ำระหว่างการสอบ',
+    },
   },
   auth: {
     systemDescription: 'ระบบทดสอบวัดความสามารถทางภาษาอังกฤษ',
@@ -870,6 +899,10 @@ export default {
     manageScores: 'จัดการคะแนนสอบ',
     examAttendance: 'ประวัติการเข้าสอบ',
     checkPayment: 'ตรวจสอบข้อมูลการชำระเงิน',
+    createLocation: 'สร้างห้องสอบ',
+    editLocation: 'แก้ไขห้องสอบ',
+    manageTestVoucher: 'จัดการ Test Voucher',
+    language: 'ภาษา',
   },
   image: {
     upload: {

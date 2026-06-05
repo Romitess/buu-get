@@ -50,6 +50,7 @@
   --neutral-50: #f8fafc;
   --neutral-100: #f1f5f9;
   --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
   --neutral-400: #94a3b8;
   --neutral-500: #64748b;
   --neutral-600: #334155;
@@ -94,6 +95,9 @@
 
   // Misc
   --border-color: #e8e8e8;
+  --border-black: #000000;
+  --voucher-bg-gradient: linear-gradient(180deg, #FAFAFA 0%, #F0F4F8 100%);
+  --watermark-color: rgba(30, 137, 229, 0.07);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
