@@ -69,52 +69,51 @@
                   </div>
                 </div>
 
-                <!-- Score Box -->
+                <!-- Score Section (no box) -->
                 <div class="col-12 q-mt-md">
-                  <div class="score-box-container q-pa-sm">
-                    <div class="score-header text-weight-bold q-mb-xs">Score</div>
+                  <div class="score-section">
+                    <div class="score-header q-mb-xs">Score</div>
                     <div class="row justify-between items-center q-py-xs score-row">
                       <div class="score-label">1. Vocabulary & Grammar</div>
-                      <div class="score-val text-weight-bold">XX/50</div>
+                      <div class="score-val">XX/50</div>
                     </div>
                     <div class="row justify-between items-center q-py-xs score-row">
                       <div class="score-label">2. Reading</div>
-                      <div class="score-val text-weight-bold">XX/50</div>
+                      <div class="score-val">XX/50</div>
                     </div>
-                    <q-separator class="q-my-xs" />
-                    <div
-                      class="row justify-between items-center q-py-xs text-weight-bold score-row-overall"
-                    >
+                    <div class="row justify-between items-center q-py-xs score-row">
                       <div class="score-label">Overall BUU-GET Score</div>
-                      <div class="score-val">XXX/100</div>
+                      <div class="score-val text-weight-bold">XXX/100</div>
                     </div>
-                    <div
-                      class="row justify-between items-center q-py-xs text-weight-bold score-row-overall"
-                    >
+                    <q-separator class="score-separator q-my-xs" />
+                    <div class="row justify-between items-center q-py-xs score-row-level">
                       <div class="score-label">Level</div>
-                      <div class="score-val">Band X</div>
+                      <div class="row no-wrap score-level-val">
+                        <div class="q-mr-xl">Band</div>
+                        <div>X</div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Bottom details / metadata row -->
-          <div class="row justify-between items-end q-mt-lg q-pt-md border-top-dashed">
-            <div class="col-auto text-left metadata-group">
-              <div>
-                <span class="metadata-label">Report Issue Date:</span>
-                <span class="metadata-value">XX XXX XXXX</span>
-              </div>
-              <div>
-                <span class="metadata-label">Score Valid Until:</span>
-                <span class="metadata-value">XX XXX XXXX</span>
-              </div>
+        <!-- ===== Footer / Metadata Section ===== -->
+        <div class="report-footer row justify-between items-center no-wrap">
+          <div class="col row q-col-gutter-x-xl metadata-group">
+            <div class="col-auto text-left">
+              <div class="metadata-label">Report Issue Date:</div>
+              <div class="metadata-value">XX XXX XXXX</div>
             </div>
-            <div class="col-auto text-right">
-              <q-icon name="qr_code_2" size="48px" color="dark" class="qr-code-icon" />
+            <div class="col-auto text-left">
+              <div class="metadata-label">Score Valid Until:</div>
+              <div class="metadata-value">XX XXX XXXX</div>
             </div>
+          </div>
+          <div class="col-auto text-right">
+            <q-icon name="qr_code_2" size="48px" color="dark" class="qr-code-icon" />
           </div>
         </div>
       </div>
@@ -126,7 +125,7 @@
           <div class="watermark-bg no-pointer-events">GET</div>
 
           <div class="band-desc-section">
-            <h3 class="band-desc-title text-center text-weight-bold text-uppercase q-mb-md">
+            <h3 class="band-desc-title text-center text-weight-bold q-mb-md">
               BUU GET Band Description
             </h3>
 
@@ -134,10 +133,10 @@
               <table class="band-table">
                 <thead>
                   <tr>
-                    <th style="width: 10%">Band</th>
-                    <th style="width: 15%">Score</th>
-                    <th style="width: 12%">CEFR</th>
-                    <th>Performance Descriptor</th>
+                    <th class="text-center" style="width: 10%">Band</th>
+                    <th class="text-center" style="width: 15%">Score</th>
+                    <th class="text-center" style="width: 12%">CEFR</th>
+                    <th class="text-center">Performance Descriptor</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -156,7 +155,7 @@
               </table>
             </div>
 
-            <p class="band-table-note text-center q-mt-md italic">
+            <p class="band-table-note text-left q-mt-md italic">
               The performance descriptor is taken from CEFR Overall Reading Comprehension Scale
             </p>
           </div>
@@ -215,7 +214,7 @@ const windowPrint = (): void => {
 
 .report-wrapper {
   width: 100%;
-  max-width: 520px;
+  max-width: 680px;
   margin: 0 auto;
   font-family: 'Outfit', 'Sarabun', 'Inter', sans-serif;
 }
@@ -224,7 +223,7 @@ const windowPrint = (): void => {
   width: 100%;
   background: var(--surface-card, #ffffff);
   border-radius: var(--radius-md, 12px);
-  border: 1.5px solid var(--border-black, #000000);
+  border: 1px solid var(--border-black, #000000);
   box-shadow: var(--shadow-md);
   overflow: hidden;
 }
@@ -241,18 +240,18 @@ const windowPrint = (): void => {
   }
 
   .header-title {
-    font-family: 'Sarabun', sans-serif !important;
-    font-weight: 700 !important;
-    font-size: 13px !important;
+    font-family: var(--font-family-base) !important;
+    font-weight: 500 !important;
+    font-size: 16px !important;
     line-height: 120% !important;
     color: var(--primary, #0d47a1) !important;
     margin: 0 0 3px 0 !important;
   }
 
   .header-subtitle {
-    font-family: 'Sarabun', sans-serif !important;
+    font-family: var(--font-family-base) !important;
     font-weight: 500 !important;
-    font-size: 11px !important;
+    font-size: 13px !important;
     line-height: 120% !important;
     color: var(--neutral-600, #334155) !important;
     margin: 0 !important;
@@ -324,69 +323,93 @@ const windowPrint = (): void => {
   flex-direction: column;
 
   .info-label {
-    font-family: 'Sarabun', sans-serif !important;
-    font-size: 11px !important;
-    color: var(--neutral-500, #64748b) !important;
-    font-weight: 600 !important;
+    font-family: var(--font-family-base) !important;
+    font-size: 12px !important;
+    color: var(--neutral-700, #334155) !important;
+    font-weight: 500 !important;
     margin-bottom: 0px;
     line-height: 1.2;
   }
 
   .info-value {
-    font-family: 'Sarabun', sans-serif !important;
-    font-size: 13px !important;
+    font-family: var(--font-family-base) !important;
+    font-size: 14px !important;
     font-weight: 600 !important;
-    color: var(--neutral-800, #1f2937) !important;
+    color: var(--primary, #0d47a1) !important;
     line-height: 1.3;
   }
 }
 
-/* ===== Score Box ===== */
-.score-box-container {
-  background-color: var(--neutral-50, #f8fafc);
-  border: 1px solid var(--neutral-200, #e2e8f0);
-  border-radius: 6px;
+/* ===== Score Section (no box) ===== */
+.score-section {
+  font-family: var(--font-family-base) !important;
 
   .score-header {
-    font-size: 12px;
+    font-family: var(--font-family-base) !important;
+    font-size: 13px;
     color: var(--neutral-800, #1f2937);
-    border-bottom: 1px solid var(--neutral-200, #e2e8f0);
     padding-bottom: 4px;
+    text-decoration: underline;
+    font-weight: 600;
   }
 
   .score-row {
-    font-size: 11px;
+    font-family: var(--font-family-base) !important;
+    font-size: 12px;
     color: var(--neutral-700, #334155);
   }
 
-  .score-row-overall {
+  .score-separator {
+    background-color: var(--border-black, #000000) !important;
+    height: 1px;
+    margin: 6px 0;
+    opacity: 1;
+  }
+
+  .score-row-level {
+    font-family: var(--font-family-base) !important;
     font-size: 12px;
-    color: var(--primary, #0d47a1);
+    color: var(--neutral-700, #334155);
+  }
+
+  .score-level-val {
+    font-family: var(--font-family-base) !important;
+    font-size: 12px;
+    color: var(--neutral-700, #334155);
+    display: flex;
+    gap: 48px;
   }
 }
 
-/* ===== Metadata ===== */
-.metadata-group {
-  font-size: 10px;
-  line-height: 1.4;
+/* ===== Footer / Metadata Section ===== */
+.report-footer {
+  padding: 16px 20px;
+  background-color: var(--neutral-50, #f8fafc);
+  border-top: 1.5px solid var(--border-black, #000000);
+  font-family: 'Sarabun', 'Outfit', sans-serif;
+
+  .metadata-group {
+    display: flex;
+    gap: 32px;
+  }
 
   .metadata-label {
-    color: var(--neutral-500, #64748b);
-    font-weight: 600;
+    font-size: 11px;
+    color: var(--neutral-800, #1f2937);
+    font-weight: 500;
+    line-height: 1.2;
   }
 
   .metadata-value {
-    color: var(--neutral-800, #1f2937);
+    font-size: 13px;
+    color: var(--primary, #0d47a1);
     font-weight: 600;
+    margin-top: 4px;
   }
-}
 
-.border-top-dashed {
-  border-top: 1px dashed var(--neutral-300, #cbd5e1);
-}
-
-.divider-dashed {
-  border-top: 1.5px dashed var(--border-black, #000000);
+  .qr-code-icon {
+    display: block;
+  }
 }
 
 /* ===== Band Description Section ===== */
@@ -416,7 +439,9 @@ const windowPrint = (): void => {
 }
 
 .band-desc-title {
-  font-size: 12px;
+  font-family: var(--font-family-base) !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
   color: var(--neutral-800, #1f2937);
   margin-top: 4px;
 }
@@ -429,20 +454,36 @@ const windowPrint = (): void => {
 .band-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 9.5px;
-  line-height: 1.3;
+  font-family: var(--font-family-base) !important;
+  font-size: 13px;
+  line-height: 1.4;
 
   th,
   td {
-    padding: 6px 8px;
-    border: 0.5px solid var(--neutral-300, #cbd5e1);
+    padding: 10px 8px;
+    border: none;
+  }
+
+  thead {
+    tr {
+      border-bottom: 1.5px solid var(--border-black, #000000);
+    }
   }
 
   th {
-    background-color: var(--neutral-50, #f8fafc);
+    background-color: transparent !important;
     color: var(--neutral-800, #1f2937);
     font-weight: 700;
-    text-align: center;
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid var(--neutral-300, #cbd5e1);
+
+      &:last-child {
+        border-bottom: 1.5px solid var(--border-black, #000000);
+      }
+    }
   }
 
   td {
@@ -451,16 +492,18 @@ const windowPrint = (): void => {
   }
 
   .descriptor-cell {
-    font-size: 8.5px;
+    font-size: 12px;
     white-space: normal;
     word-break: break-word;
   }
 }
 
 .band-table-note {
-  font-size: 8px;
-  color: var(--neutral-500, #64748b);
+  font-family: var(--font-family-base) !important;
+  font-size: 11px;
+  color: var(--neutral-600, #475569);
   margin-bottom: 0;
+  font-style: italic !important;
 }
 
 /* ===== Responsive Adaptability ===== */
@@ -507,6 +550,12 @@ const windowPrint = (): void => {
     background-color: var(--surface-card) !important;
     border: 1.5px solid var(--border-black) !important;
     box-shadow: none !important;
+  }
+  .report-footer {
+    background-color: var(--neutral-50, #f8fafc) !important;
+    border-top: 1.5px solid var(--border-black) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
 </style>

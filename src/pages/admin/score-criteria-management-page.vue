@@ -1,15 +1,12 @@
 <template>
   <q-page class="page-container score-criteria-management-page">
-    <!-- Breadcrumbs -->
     <AppBreadcrumbs />
     <AppPageHeader
       :title="$t('admin.scoreCriteriaManagement.pageTitle')"
       :subtitle="$t('admin.scoreCriteriaManagement.pageDescription')"
     />
 
-    <!-- Main Content: Two-Column Layout -->
     <div class="score-criteria-grid row q-col-gutter-lg">
-      <!-- Left Column: Certificate Preview (Scrollable) -->
       <div class="col-12 col-md-6">
         <div class="section-card section-card--scrollable">
           <h3 class="section-title">{{ $t('admin.scoreCriteriaManagement.previewTitle') }}</h3>
@@ -21,12 +18,10 @@
         </div>
       </div>
 
-      <!-- Right Column: Edit Form -->
       <div class="col-12 col-md-6">
         <div class="section-card">
           <h3 class="section-title">{{ $t('admin.scoreCriteriaManagement.editTitle') }}</h3>
 
-          <!-- Table Header -->
           <div
             class="row items-center table-header-row text-weight-bold q-mb-sm text-grey-8 no-wrap"
           >
@@ -46,14 +41,12 @@
             <div style="width: 40px"></div>
           </div>
 
-          <!-- List of Band Rules -->
           <div class="band-rules-list">
             <div
               v-for="(rule, index) in bandRules"
               :key="rule.id"
               class="row items-center rule-row q-mb-md no-wrap"
             >
-              <!-- Row Index -->
               <div
                 class="text-weight-bold text-grey-7 text-center"
                 style="width: 24px; margin-right: 8px"
@@ -61,7 +54,6 @@
                 {{ index + 1 }}
               </div>
 
-              <!-- Band Input -->
               <div style="width: 50px; margin-right: 12px">
                 <q-input
                   v-model="rule.band"
@@ -72,7 +64,6 @@
                 />
               </div>
 
-              <!-- Score Range (Min - Max) -->
               <div class="row items-center no-wrap" style="width: 140px; margin-right: 12px">
                 <q-input
                   v-model.number="rule.minScore"
@@ -93,7 +84,6 @@
                 />
               </div>
 
-              <!-- CEFR Input -->
               <div style="width: 60px; margin-right: 12px">
                 <q-input
                   v-model="rule.cefr"
@@ -104,7 +94,6 @@
                 />
               </div>
 
-              <!-- Performance Descriptor Input -->
               <div class="col" style="margin-right: 12px">
                 <q-input
                   v-model="rule.descriptor"
@@ -115,13 +104,11 @@
                 />
               </div>
 
-              <!-- Delete Button -->
               <div style="width: 40px">
                 <q-btn flat round dense color="negative" icon="delete" @click="removeBand(index)" />
               </div>
             </div>
 
-            <!-- Empty State -->
             <div
               v-if="!bandRules.length"
               class="text-center q-py-lg text-grey-5 border-dashed rounded-lg"
@@ -129,7 +116,6 @@
               No band rules defined. Click the "+" button to add one.
             </div>
 
-            <!-- Add Row Button -->
             <q-btn
               flat
               icon="add"
@@ -142,7 +128,6 @@
       </div>
     </div>
 
-    <!-- Action Buttons -->
     <div class="action-bar row justify-end q-mt-xl q-gutter-md">
       <AppButton
         :label="$t('admin.scoreCriteriaManagement.cancelBtn')"
@@ -175,15 +160,17 @@ import AppButton from 'src/components/base/app-button.vue';
 import CertificatePreviewReport from 'src/components/certificate-preview-report.vue';
 import type { BandRule } from 'src/components/certificate-preview-report.vue';
 
-const router = useRouter();
-const $q = useQuasar();
-const { t } = useI18n();
+// ===== ⚙️ Configuration & Constants (No Hard-coding) =====
+const LOCAL_STORAGE_KEY = 'buu-get-band-rules';
+const SCORE_MAX_LIMIT = 100;
+const DEFAULT_SCORE_GAP = 9;
 
-// ===== Reactive State for Band Rules =====
-const bandRules = ref<BandRule[]>([]);
+const DEFAULT_NEW_BAND: Omit<BandRule, 'id' | 'band' | 'minScore' | 'maxScore'> = {
+  cefr: 'B2',
+  descriptor: 'New performance descriptor text...',
+};
 
-// ===== Mock Defaults matching image =====
-const defaultBandRules: BandRule[] = [
+const DEFAULT_BAND_RULES: BandRule[] = [
   {
     id: '1',
     band: '1',
@@ -231,35 +218,41 @@ const defaultBandRules: BandRule[] = [
   },
 ];
 
-// Load rules on mount
+const router = useRouter();
+const $q = useQuasar();
+const { t } = useI18n();
+
+// ===== 📦 Reactive State =====
+const bandRules = ref<BandRule[]>([]);
+
+// ===== 🔄 Lifecycle Hooks =====
 onMounted(() => {
   try {
-    const savedRules = localStorage.getItem('buu-get-band-rules');
-    if (savedRules) {
-      bandRules.value = JSON.parse(savedRules);
-    } else {
-      bandRules.value = JSON.parse(JSON.stringify(defaultBandRules));
-    }
+    const savedRules = localStorage.getItem(LOCAL_STORAGE_KEY);
+    bandRules.value = savedRules
+      ? JSON.parse(savedRules)
+      : JSON.parse(JSON.stringify(DEFAULT_BAND_RULES));
   } catch (e) {
     console.error('Failed to load band rules from localStorage', e);
-    bandRules.value = JSON.parse(JSON.stringify(defaultBandRules));
+    bandRules.value = JSON.parse(JSON.stringify(DEFAULT_BAND_RULES));
   }
 });
 
-// ===== Actions =====
+// ===== ⚡ Actions =====
 const addBand = (): void => {
-  const nextMinScore = bandRules.value.length
-    ? Math.min(100, bandRules.value[bandRules.value.length - 1].maxScore + 1)
-    : 0;
-  const nextMaxScore = Math.min(100, nextMinScore + 9);
+  const lastRule = bandRules.value[bandRules.value.length - 1];
+
+  // คำนวณช่วงคะแนนโดยเช็คจากแถวล่าสุด (ถ้าไม่มีแถวก่อนหน้า จะเริ่มต้นที่ 0)
+  const nextMinScore = lastRule ? Math.min(SCORE_MAX_LIMIT, lastRule.maxScore + 1) : 0;
+
+  const nextMaxScore = Math.min(SCORE_MAX_LIMIT, nextMinScore + DEFAULT_SCORE_GAP);
 
   bandRules.value.push({
     id: String(Date.now()),
     band: String(bandRules.value.length + 1),
     minScore: nextMinScore,
     maxScore: nextMaxScore,
-    cefr: 'B2',
-    descriptor: 'New performance descriptor text...',
+    ...DEFAULT_NEW_BAND,
   });
 };
 
@@ -273,7 +266,7 @@ const handleCancel = (): void => {
 
 const handleSave = (): void => {
   try {
-    localStorage.setItem('buu-get-band-rules', JSON.stringify(bandRules.value));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(bandRules.value));
     $q.notify({
       type: 'positive',
       message: t('admin.scoreCriteriaManagement.notifications.saveSuccess'),

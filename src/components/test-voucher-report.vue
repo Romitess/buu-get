@@ -452,7 +452,7 @@ const windowPrint = (): void => {
   .info-label {
     font-family: var(--font-family-base) !important;
     font-size: 12px !important;
-    color: var(--neutral-500) !important;
+    color: var(--neutral-700, #334155) !important;
     font-weight: 500 !important;
     margin-bottom: 0px;
     line-height: 1.2;
