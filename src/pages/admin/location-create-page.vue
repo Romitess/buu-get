@@ -9,7 +9,7 @@
 
     <div class="row q-col-gutter-md location-create-layout items-stretch">
       <!-- Left Panel: Form Settings -->
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-auto form-panel">
         <div class="form-card">
           <div class="form-section">
             <div class="row items-center q-mb-sm">
@@ -135,7 +135,7 @@
       </div>
 
       <!-- Right Panel: Preview & Save -->
-      <div class="col-12 col-md-8 preview-panel">
+      <div class="col-12 col-md preview-panel">
         <div class="buu-premium-card preview-card q-pa-md">
           <div class="preview-scroll">
             <AppExamSeatPreview
@@ -283,6 +283,11 @@ const handleSave = async (): Promise<void> => {
   margin-top: calc(var(--space-sm) * -1);
 }
 
+.form-panel {
+  display: flex;
+  justify-content: flex-start;
+}
+
 .total-seats-box {
   background-color: var(--location-total-seats-bg);
 }
@@ -339,5 +344,12 @@ const handleSave = async (): Promise<void> => {
   flex-shrink: 0;
   margin-top: var(--space-md);
   padding-bottom: var(--space-xs);
+}
+
+@media (min-width: 1024px) {
+  .form-panel {
+    flex: 0 0 calc(400px + var(--space-xl));
+    max-width: calc(400px + var(--space-xl));
+  }
 }
 </style>
