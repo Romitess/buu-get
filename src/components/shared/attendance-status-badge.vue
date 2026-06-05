@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ExamAttendStatus } from 'src/types/enrollment.types';
 
 interface Props {
@@ -13,17 +14,18 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const { t } = useI18n();
 
 const label = computed(() => {
   switch (props.status) {
     case ExamAttendStatus.INTIME:
-      return 'เข้าสอบแล้ว';
+      return t('admin.examAttendance.status.intime');
     case ExamAttendStatus.LATE:
-      return 'สาย';
+      return t('admin.examAttendance.status.late');
     case ExamAttendStatus.MISSING:
-      return 'ขาด';
+      return t('admin.examAttendance.status.missing');
     default:
-      return 'ขาด';
+      return t('admin.examAttendance.status.missing');
   }
 });
 
@@ -56,20 +58,20 @@ const badgeClass = computed(() => {
 }
 
 .badge--on-time {
-  color: #4caf50;
+  color: var(--badge-success-dot);
   background-color: transparent;
-  border: 1.5px solid #4caf50;
+  border: 1.5px solid var(--badge-success-dot);
 }
 
 .badge--late {
-  color: #fbc02d;
+  color: var(--badge-warning-dot);
   background-color: transparent;
-  border: 1.5px solid #fbc02d;
+  border: 1.5px solid var(--badge-warning-dot);
 }
 
 .badge--absent {
-  color: #ef5350;
+  color: var(--badge-error-dot);
   background-color: transparent;
-  border: 1.5px solid #ef5350;
+  border: 1.5px solid var(--badge-error-dot);
 }
 </style>

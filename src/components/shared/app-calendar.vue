@@ -4,9 +4,7 @@
       <q-card class="calendar-card" flat>
         <q-resize-observer @resize="(size) => $emit('main-card-resize', size)" />
 
-        <!-- หน้าหลัก: ปฏิทินวัน -->
         <div v-if="!showPicker" class="calendar-main-view">
-          <!-- Header -->
           <div class="calendar-header">
             <q-btn
               flat
@@ -40,7 +38,6 @@
             />
           </div>
 
-          <!-- Grid -->
           <div class="calendar-grid">
             <div class="weekday" v-for="day in WEEKDAYS" :key="day">{{ day }}</div>
             <div class="day-cell empty" v-for="n in emptyDaysCount" :key="'empty-' + n"></div>
@@ -66,7 +63,6 @@
               <slot name="day-content" :day="day"></slot>
             </div>
 
-            <!-- ช่องว่างส่วนท้ายเพื่อให้ขนาดคงที่ -->
             <div
               v-for="n in trailingEmptyDaysCount"
               :key="'trailing-' + n"
@@ -74,20 +70,18 @@
             ></div>
           </div>
 
-          <!-- Legend / Status Indicators (Integrated inside card) -->
           <div v-if="props.showLegend" class="calendar-footer-legend">
             <div class="legend-item">
               <div class="legend-dot dot-available"></div>
-              <span>{{ t('exam.calendar.legendAvailable', 'มีที่นั่งว่าง') }}</span>
+              <span>{{ t('exam.calendar.legendAvailable') }}</span>
             </div>
             <div class="legend-item">
               <div class="legend-dot dot-full"></div>
-              <span>{{ t('exam.calendar.legendFull', 'รอบเต็มแล้ว') }}</span>
+              <span>{{ t('exam.calendar.legendFull') }}</span>
             </div>
           </div>
         </div>
 
-        <!-- หน้าเลือกเดือน/ปี (Overlay ตามรูป) -->
         <div v-else class="month-year-picker-view">
           <div class="picker-header row items-center justify-between q-px-sm q-py-xs">
             <div class="text-subtitle2 text-weight-bold">{{ currentMonthYearEN }}</div>
@@ -96,7 +90,6 @@
 
           <q-separator />
 
-          <!-- ส่วนบน: เลือกปี (List) -->
           <div class="year-selector scroll-column">
             <div
               v-for="y in yearOptions"
@@ -115,7 +108,6 @@
 
           <q-separator />
 
-          <!-- ส่วนล่าง: เลือกเดือน (Grid 4x3) -->
           <div class="month-grid q-pa-sm">
             <div
               v-for="(m, index) in SHORT_MONTH_NAMES_EN"
@@ -134,17 +126,12 @@
         </div>
       </q-card>
 
-      <!-- Slot สำหรับส่วนท้ายของปฏิทินเพิ่มเติม (ถ้ามี) -->
       <slot v-if="!showPicker" name="footer"></slot>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-/**
- * AppCalendar (Base Component)
- * คอมโพเนนต์ปฏิทินพื้นฐานที่รองรับการปรับแต่งผ่าน Slots
- */
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { AppCalendarProps } from '../../types/common';
@@ -154,7 +141,6 @@ const PAST_YEARS_RANGE = 100;
 const TOTAL_YEARS_RANGE = 111;
 const CALENDAR_TOTAL_SLOTS = 42;
 
-// ใช้ Intl API แทนการ Hardcode
 const WEEKDAYS = Array.from({ length: 7 }, (_, i) =>
   new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(new Date(2000, 0, 3 + i)),
 );
@@ -182,9 +168,6 @@ const emit = defineEmits<{
   (e: 'main-card-resize', size: { width: number; height: number }): void;
 }>();
 
-// ============================================================================
-// LOGIC
-// ============================================================================
 const showPicker = ref(false);
 const currentDate = ref(new Date());
 const todayString = ref(getTodayString());
@@ -203,8 +186,8 @@ const scheduleMidnightUpdate = () => {
 
   midnightTimer = setTimeout(() => {
     todayString.value = getTodayString();
-    scheduleMidnightUpdate(); // ตั้งเวลาสำหรับวันถัดไป
-  }, timeToMidnight + 1000); // บวก 1 วินาทีเพื่อความมั่นใจว่าข้ามวันแล้ว
+    scheduleMidnightUpdate();
+  }, timeToMidnight + 1000);
 };
 
 onMounted(() => {
@@ -305,7 +288,7 @@ const handleDaySelect = (day: { dateString: string; isPast: boolean }) => {
   background-color: var(--surface-card);
   position: relative;
   width: 320px;
-  height: 420px; // Increased height to accommodate legend without squeezing the grid
+  height: 420px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -523,7 +506,6 @@ const handleDaySelect = (day: { dateString: string; isPast: boolean }) => {
   }
 }
 
-// Legend Styles
 .calendar-footer-legend {
   padding: 12px 0 0 0;
   margin-top: 12px;

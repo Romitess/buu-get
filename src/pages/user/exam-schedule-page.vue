@@ -125,7 +125,6 @@ let scheduleInterval: ReturnType<typeof setInterval>;
 
 onMounted(async () => {
   await examStore.initSchedule();
-  // Real-time polling every 5 seconds
   scheduleInterval = setInterval(() => {
     void examStore.initSchedule();
   }, 5000);
@@ -236,18 +235,20 @@ const onConfirmRegistration = async (physicalStatus?: string): Promise<void> => 
       };
       const status = error?.response?.status;
       const resMsg = error?.response?.data?.message;
-      let msg = `เกิดข้อผิดพลาด: ${Array.isArray(resMsg) ? resMsg.join(', ') : resMsg || error.message || 'Unknown'}`;
+      let msg = t('examSchedule.notifications.unknownError', {
+        message: Array.isArray(resMsg) ? resMsg.join(', ') : resMsg || error.message || 'Unknown',
+      });
 
       if (status === 409) {
         msg = t('examSchedule.notifications.alreadyRegistered');
       } else if (status === 400 && resMsg === 'FULL') {
         msg = t('examSchedule.notifications.roundFull');
       } else if (status === 400 && resMsg === 'Invalid passcode for this user and exam') {
-        msg = 'รหัสเข้าสอบไม่ถูกต้องสำหรับคุณและรอบสอบนี้';
+        msg = t('examSchedule.notifications.invalidPasscode');
       } else if (status === 404) {
-        msg = 'ไม่พบข้อมูลรอบสอบ (อาจถูกลบไปแล้ว)';
+        msg = t('examSchedule.notifications.notFound');
       } else if (status && status >= 500) {
-        msg = 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์ (อาจเกิดจากการลบข้อมูล กรุณาลองเข้าสู่ระบบใหม่)';
+        msg = t('examSchedule.notifications.serverError');
       }
 
       $q.notify({
@@ -266,8 +267,5 @@ const onPasscodeConfirm = (passcode: string): void => {
   showConfirmDialog.value = true;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const onMonthChange = (month: number, year: number): void => {
-  // ในอนาคต: ดึงข้อมูล scheduleData ใหม่ของเดือนนั้นๆ จาก API
-};
+const onMonthChange = (): void => {};
 </script>

@@ -14,9 +14,7 @@ import {
 } from 'src/types/enrollment.types';
 
 interface Props {
-  /** The numeric status value from backend */
   status: number;
-  /** Whether this is a payment status or verify status */
   type: 'payment' | 'verify';
 }
 
@@ -47,7 +45,6 @@ const badgeClass = computed((): string => {
     }
   }
 
-  // verify status
   const vStatus: VerifyStatus = props.status;
   switch (vStatus) {
     case VerifyStatus.PASS:
@@ -78,46 +75,42 @@ const badgeClass = computed((): string => {
   text-align: center;
 }
 
-// Payment: ชำระเงินแล้ว — green border/text
 .badge--paid {
-  color: #1b5e20;
+  color: var(--badge-success-text);
   background-color: transparent;
-  border: 1.5px solid #4caf50;
+  border: 1.5px solid var(--badge-success-dot);
 }
 
-// Payment: ค้างชำระ — red border/text
 .badge--unpaid {
-  color: #c62828;
+  color: var(--badge-error-text);
   background-color: transparent;
-  border: 1.5px solid #ef5350;
+  border: 1.5px solid var(--badge-error-dot);
 }
 
-// Verify: ผ่าน — green border/text
 .badge--pass {
-  color: #1b5e20;
+  color: var(--badge-success-text);
   background-color: transparent;
-  border: 1.5px solid #4caf50;
+  border: 1.5px solid var(--badge-success-dot);
 }
 
 .badge--wait-fixed {
-  color: #c62828;
+  color: var(--badge-error-text);
   background-color: transparent;
-  border: 1.5px solid #ef5350;
+  border: 1.5px solid var(--badge-error-dot);
 }
 
 .badge--unchecked {
-  color: #1565c0;
+  color: var(--badge-primary-text);
   background-color: transparent;
-  border: 1.5px solid #1976d2;
+  border: 1.5px solid var(--badge-primary-dot);
 }
 
 .badge--cancelled {
-  color: #757575;
+  color: var(--badge-info-text);
   background-color: transparent;
-  border: 1.5px solid #bdbdbd;
+  border: 1.5px solid var(--badge-info-dot);
 }
 
-// Default fallback
 .badge--default {
   color: var(--text-secondary);
   background-color: transparent;

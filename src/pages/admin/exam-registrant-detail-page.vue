@@ -145,7 +145,7 @@ const handleEditSave = async (payload: Record<string, unknown>): Promise<void> =
   if (!enrollment.value?.USER?.PROFILE?.userProfileId) return;
 
   $q.loading.show({
-    message: 'กำลังบันทึกข้อมูลการแก้ไข...',
+    message: t('admin.registrantManagement.detail.staffEdit.saving'),
   });
 
   try {
@@ -154,7 +154,7 @@ const handleEditSave = async (payload: Record<string, unknown>): Promise<void> =
 
     $q.notify({
       type: 'positive',
-      message: 'บันทึกการแก้ไขข้อมูลผู้สมัครสำเร็จ',
+      message: t('admin.registrantManagement.detail.staffEdit.saveSuccess'),
     });
 
     await loadData();
@@ -162,7 +162,7 @@ const handleEditSave = async (payload: Record<string, unknown>): Promise<void> =
     console.error('Error updating profile by staff:', error);
     $q.notify({
       type: 'negative',
-      message: 'เกิดข้อผิดพลาดในการบันทึกข้อมูลการแก้ไข',
+      message: t('admin.registrantManagement.detail.staffEdit.saveError'),
     });
   } finally {
     $q.loading.hide();

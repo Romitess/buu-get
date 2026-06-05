@@ -2,8 +2,8 @@
   <q-page class="page-container attendance-page">
     <AppBreadcrumbs />
     <AppPageHeader
-      title="ประวัติการเข้าสอบ"
-      subtitle="ตรวจสอบประวัติการเข้าสอบ พร้อมดูรายละเอียดข้อมูลย้อนหลัง"
+      :title="$t('admin.examAttendance.title')"
+      :subtitle="$t('admin.examAttendance.subtitle')"
     />
 
     <AppExamSessionTabs v-model="selectedSessionId" :sessions="exam?.SESSIONS" />
@@ -22,7 +22,11 @@
     />
 
     <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
-      <SearchBar v-model="searchQuery" placeholder="ค้นหา" class="search-bar col-12 col-sm-auto" />
+      <SearchBar
+        v-model="searchQuery"
+        :placeholder="$t('admin.examAttendance.searchPlaceholder')"
+        class="search-bar col-12 col-sm-auto"
+      />
       <q-space class="gt-xs" />
       <ExportCsvButton
         :columns="columns"
@@ -78,6 +82,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import type { QTableColumn } from 'quasar';
 import BaseTable from 'src/components/shared/base-table.vue';
 import AttendanceStatusBadge from 'src/components/shared/attendance-status-badge.vue';
@@ -93,6 +98,7 @@ import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { ExamAttendStatus } from 'src/types/enrollment.types';
 
 const route = useRoute();
+const { t } = useI18n();
 const { formatThaiDate } = useThaiDate();
 
 const {
@@ -138,63 +144,63 @@ const pagination = ref<PaginationModel>({
   rowsNumber: 0,
 });
 
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => [
   {
     name: 'index',
-    label: 'ลำดับ',
+    label: t('admin.examAttendance.columns.index'),
     field: 'index',
     align: 'center',
     style: 'width: 60px',
   },
   {
     name: 'nationalId',
-    label: 'เลขประจำตัว',
+    label: t('admin.examAttendance.columns.nationalId'),
     field: 'nationalId',
     align: 'center',
   },
   {
     name: 'titleTh',
-    label: 'คำนำหน้า',
+    label: t('admin.examAttendance.columns.titleTh'),
     field: 'titleTh',
     align: 'center',
   },
   {
     name: 'fullnameTh',
-    label: 'ชื่อ-นามสกุล',
+    label: t('admin.examAttendance.columns.fullnameTh'),
     field: 'fullnameTh',
     align: 'center',
   },
   {
     name: 'seatNumber',
-    label: 'ที่นั่งสอบ',
+    label: t('admin.examAttendance.columns.seatNumber'),
     field: 'seatNumber',
     align: 'center',
   },
   {
     name: 'attendanceStatus',
-    label: 'สถานะ',
+    label: t('admin.examAttendance.columns.attendanceStatus'),
     field: 'attendanceStatus',
     align: 'center',
     format: (val: ExamAttendStatus) => {
       switch (val) {
         case ExamAttendStatus.INTIME:
-          return 'เข้าสอบแล้ว';
+          return t('admin.examAttendance.status.intime');
         case ExamAttendStatus.LATE:
-          return 'สาย';
+          return t('admin.examAttendance.status.late');
         case ExamAttendStatus.MISSING:
-          return 'ขาด';
+          return t('admin.examAttendance.status.missing');
         default:
-          return 'ขาด';
+          return t('admin.examAttendance.status.missing');
       }
     },
   },
   {
     name: 'checkInTime',
-    label: 'เวลาเข้าสอบ',
+    label: t('admin.examAttendance.columns.checkInTime'),
     field: 'checkInTime',
     align: 'center',
   },
-];
+]);
 
 const onRequest = (props: TableRequestProps): void => {
   const { page, rowsPerPage } = props.pagination;

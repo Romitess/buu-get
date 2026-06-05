@@ -16,6 +16,9 @@
   --secondary-light: #4dabf5;
   --secondary-dark: #115293;
   --negative: #e53934;
+  --btn-danger-light-bg: #ffebeb;
+  --btn-danger-light-text: #f44336;
+  --btn-danger-light-hover: #ffdada;
 
   // Backward Compatibility Aliases
   --buu-gold: var(--primary);
@@ -136,6 +139,24 @@
   --primary-light-alpha-20: rgba(30, 137, 229, 0.2);
   --white-alpha-20: rgba(255, 255, 255, 0.2);
   --negative-alpha-15: rgba(229, 57, 52, 0.15);
+
+  // Alert Banner Specific (Warning styling)
+  --alert-warning-bg-start: #fffaf0;
+  --alert-warning-bg-end: #fff8e1;
+  --alert-warning-border: #ffe082;
+  --alert-warning-shadow: rgba(255, 179, 0, 0.05);
+
+  // Floating Tip Badge Specific (Error/Negative styling)
+  --tip-badge-bg: #ffebee;
+  --tip-badge-text: #c62828;
+  --tip-badge-border: #ffcdd2;
+  --tip-badge-shadow-1: rgba(198, 40, 40, 0.15);
+  --tip-badge-shadow-2: rgba(198, 40, 40, 0.25);
+  --negative-rgb: 211, 47, 47;
+
+  // Highlights
+  --highlight-success-bg: rgba(46, 125, 50, 0.12);
+  --highlight-error-bg: rgba(198, 40, 40, 0.12);
 
   // Typography Scale
   --font-size-h1: 1.75rem; // 28px

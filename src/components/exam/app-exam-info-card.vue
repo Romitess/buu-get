@@ -28,14 +28,18 @@
       >
         <q-separator vertical class="stat-divider q-mr-md gt-xs" v-if="!hideMainSeparator" />
         <div class="text-center q-px-lg">
-          <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่ลงทะเบียน</div>
+          <div class="applicant-label text-grey-7 text-caption">
+            {{ $t('components.examInfoCard.registeredCount') }}
+          </div>
           <div class="applicant-value text-h4 text-weight-medium text-dark">
             {{ applicantCount }}
           </div>
         </div>
         <q-separator vertical class="stat-divider q-mx-sm" v-if="!hidePaid" />
         <div class="text-center q-px-lg" v-if="!hidePaid">
-          <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่ชำระเงิน</div>
+          <div class="applicant-label text-grey-7 text-caption">
+            {{ $t('components.examInfoCard.paidCount') }}
+          </div>
           <div class="applicant-value text-h4 text-weight-medium text-dark">
             {{ paidCount }}/{{ totalCapacity }}
           </div>
@@ -47,7 +51,9 @@
       >
         <q-separator vertical class="stat-divider q-mr-md gt-xs" v-if="!hideMainSeparator" />
         <div class="text-center q-px-lg">
-          <div class="applicant-label text-grey-7 text-caption">จำนวนคนเข้าสอบ</div>
+          <div class="applicant-label text-grey-7 text-caption">
+            {{ $t('components.examInfoCard.examTakerCount') }}
+          </div>
           <div class="applicant-value text-h4 text-weight-medium text-dark">
             {{ applicantCount }}
           </div>
@@ -59,14 +65,18 @@
       >
         <q-separator vertical class="stat-divider q-mr-md gt-xs" v-if="!hideMainSeparator" />
         <div class="text-center q-px-lg">
-          <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่มาแล้ว</div>
+          <div class="applicant-label text-grey-7 text-caption">
+            {{ $t('components.examInfoCard.attendedCount') }}
+          </div>
           <div class="applicant-value text-h4 text-weight-medium text-dark">
             {{ applicantCount }}/{{ totalCapacity }}
           </div>
         </div>
       </section>
       <section class="col-auto text-right self-start" v-else-if="applicantCount !== undefined">
-        <div class="applicant-label text-grey-7 text-caption">จำนวนคนที่สมัคร</div>
+        <div class="applicant-label text-grey-7 text-caption">
+          {{ $t('components.examInfoCard.candidateCount') }}
+        </div>
         <div class="applicant-value text-h4 text-weight-bold text-dark">{{ applicantCount }}</div>
       </section>
     </div>

@@ -5,6 +5,7 @@
 <script setup lang="ts" generic="T extends object">
 import { exportFile, date, useQuasar } from 'quasar';
 import type { QTableColumn } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
 
 interface Props {
@@ -22,6 +23,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const $q = useQuasar();
+const { t } = useI18n();
 
 const wrapCsvValue = (val: unknown, forceText = false): string => {
   if (val === null || val === undefined) return '""';
@@ -43,7 +45,7 @@ const wrapCsvValue = (val: unknown, forceText = false): string => {
 const exportTable = (): void => {
   if (!props.rows || props.rows.length === 0) {
     $q.notify({
-      message: 'ไม่มีข้อมูลสำหรับการส่งออก',
+      message: t('components.exportCsv.noData'),
       color: 'warning',
     });
     return;
@@ -88,7 +90,7 @@ const exportTable = (): void => {
 
   if (status !== true) {
     $q.notify({
-      message: 'การส่งออกไฟล์ถูกระงับโดยเบราว์เซอร์',
+      message: t('components.exportCsv.blocked'),
       color: 'negative',
       icon: 'warning',
     });

@@ -23,7 +23,7 @@
               class="text-center text-grey-8"
               style="font-size: 13px; padding: 32px 16px; border-bottom: none"
             >
-              {{ emptyLabel }}
+              {{ emptyLabel || $t('components.baseTable.emptyLabel') }}
             </q-td>
           </q-tr>
         </template>
@@ -49,7 +49,7 @@
           style="font-size: 12px"
         >
           <div class="row items-center q-gutter-x-sm">
-            <span>จำนวนต่อหน้า</span>
+            <span>{{ $t('components.baseTable.rowsPerPage') }}</span>
             <q-select
               v-model="scope.pagination.rowsPerPage"
               :options="[10, 25, 50]"
@@ -65,20 +65,20 @@
           </div>
 
           <div>
-            แสดงข้อมูล
+            {{ $t('components.baseTable.showing') }}
             {{
               (scope.pagination.rowsNumber || 0) === 0
                 ? 0
                 : scope.pagination.rowsPerPage * (scope.pagination.page - 1) + 1
             }}
-            ถึง
+            {{ $t('components.baseTable.to') }}
             {{
               Math.min(
                 scope.pagination.rowsPerPage * scope.pagination.page,
                 scope.pagination.rowsNumber || 0,
               )
             }}
-            ของ {{ scope.pagination.rowsNumber || 0 }} รายการ
+            {{ $t('components.baseTable.ofItems', { total: scope.pagination.rowsNumber || 0 }) }}
           </div>
 
           <div class="row items-center no-wrap">
@@ -147,14 +147,13 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  emptyLabel: 'ไม่พบข้อมูล',
+  emptyLabel: '',
 });
 
 const emit = defineEmits<{
   (e: 'request', requestProps: TableRequestProps): void;
 }>();
 
-// Inject a fake row when rows is empty so Quasar always renders the bottom slot
 const displayRows = computed<T[]>(() =>
   props.rows && props.rows.length > 0 ? props.rows : ([{ __empty: true }] as T[]),
 );

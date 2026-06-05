@@ -23,13 +23,20 @@
           </div>
           <figcaption class="text-center q-mt-md">
             <div class="text-subtitle2 text-weight-bold text-black">
-              {{ displayData.profileImagePath ? 'user_photo.jpg' : 'No Photo' }}
+              {{
+                displayData.profileImagePath
+                  ? 'user_photo.jpg'
+                  : $t('profileEditHistory.dialog.noPhoto')
+              }}
             </div>
             <div class="text-caption text-grey-6">
               {{
                 displayData.profileImagePath
-                  ? `1.2 MB · อัปโหลด ${uploadDateFormatted}`
-                  : 'Not Uploaded'
+                  ? $t('profileEditHistory.dialog.uploadedAt', {
+                      size: '1.2 MB',
+                      date: uploadDateFormatted,
+                    })
+                  : $t('profileEditHistory.dialog.notUploaded')
               }}
             </div>
           </figcaption>
@@ -168,8 +175,8 @@ const uploadDateFormatted = computed(() => {
 .registrant-card {
   border-radius: 12px;
   border: 1px solid var(--neutral-200);
-  background-color: #ffffff;
-  box-shadow: 0px 4px 4px 0px #00000040 !important;
+  background-color: var(--surface-card);
+  box-shadow: var(--dashboard-card-shadow) !important;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -199,8 +206,8 @@ const uploadDateFormatted = computed(() => {
   aspect-ratio: 180 / 220;
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #f0f0f0;
-  background-color: #e3f2fd;
+  border: 1px solid var(--neutral-100);
+  background-color: var(--badge-primary-bg);
   transition: all 0.3s ease;
 
   @media (max-width: 599px) {
@@ -221,14 +228,14 @@ const uploadDateFormatted = computed(() => {
 
 .info-label {
   font-size: 0.8125rem;
-  color: #8c8c8c;
+  color: var(--text-muted);
   font-weight: 400;
   line-height: 1.25rem;
 }
 
 .info-value {
   font-size: 0.9375rem;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-weight: 500;
   line-height: 1.5rem;
   word-break: break-word;

@@ -65,7 +65,6 @@
     }
   }
 
-  // logic for disabled states: grey background & grey icon as shown in mockup
   &:disabled,
   &.disabled,
   &.q-btn--disabled {

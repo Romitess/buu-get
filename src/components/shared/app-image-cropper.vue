@@ -1,7 +1,9 @@
 <template>
   <q-card class="cropper-card shadow-5">
     <q-card-section class="q-pb-none row items-center justify-between">
-      <div class="text-h6 text-weight-bold text-dark">ปรับแต่งรูปภาพ</div>
+      <div class="text-h6 text-weight-bold text-dark">
+        {{ $t('components.imageCropper.title') }}
+      </div>
       <q-btn icon="close" flat round dense v-close-popup />
     </q-card-section>
 
@@ -33,15 +35,21 @@
         <q-icon name="zoom_in" size="sm" class="text-grey-6 q-ml-sm" />
       </div>
       <div class="text-caption text-grey-6 q-mt-xs">
-        ลากเพื่อจัดตำแหน่ง และปรับแถบเพื่อซูมรูปภาพ
+        {{ $t('components.imageCropper.hint') }}
       </div>
     </q-card-section>
 
     <q-card-actions align="right" class="q-px-md q-pb-md">
-      <q-btn flat label="ยกเลิก" color="grey-7" class="text-weight-bold action-btn" v-close-popup />
+      <q-btn
+        flat
+        :label="$t('components.imageCropper.cancel')"
+        color="grey-7"
+        class="text-weight-bold action-btn"
+        v-close-popup
+      />
       <q-btn
         unelevated
-        label="บันทึก"
+        :label="$t('components.imageCropper.save')"
         color="primary"
         class="text-weight-bold action-btn"
         @click="confirmCrop"
@@ -217,7 +225,7 @@ const confirmCrop = () => {
   width: 100%;
   max-width: 400px;
   border-radius: 16px;
-  background: white;
+  background: var(--surface-card);
 }
 
 .crop-area-container {
@@ -225,7 +233,7 @@ const confirmCrop = () => {
   width: 300px;
   height: 300px;
   overflow: hidden;
-  background: #f5f5f5;
+  background: var(--surface-page);
   border-radius: 12px;
   cursor: grab;
   user-select: none;

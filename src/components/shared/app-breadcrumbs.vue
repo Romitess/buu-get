@@ -60,16 +60,15 @@ const breadcrumbs = computed(() => {
   return metaBreadcrumbs.map((b, index) => {
     let resolvedPath = b.to;
     if (resolvedPath) {
-      Object.keys(route.params).forEach((param) => {
-        // @ts-expect-error: TS doesn't know resolvedPath is string here inside replace
-        resolvedPath = resolvedPath.replace(`:${param}`, String(route.params[param]));
-      });
+      resolvedPath = Object.keys(route.params).reduce(
+        (acc, param) => acc.replace(`:${param}`, String(route.params[param])),
+        resolvedPath,
+      );
     }
 
     return {
       label: b.label,
       icon: b.icon,
-      // If it's the last item, remove the link
       to: index === metaBreadcrumbs.length - 1 ? undefined : resolvedPath,
     };
   });

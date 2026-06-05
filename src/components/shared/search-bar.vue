@@ -4,7 +4,7 @@
     outlined
     rounded
     dense
-    placeholder="ค้นหา"
+    :placeholder="placeholder || $t('components.searchBar.placeholder')"
     bg-color="grey-1"
     class="search-bar"
     :class="{ 'full-width': fullWidth }"
@@ -19,6 +19,7 @@
 <script setup lang="ts">
 defineProps<{
   fullWidth?: boolean;
+  placeholder?: string;
 }>();
 
 const model = defineModel<string>();

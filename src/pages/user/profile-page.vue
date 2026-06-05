@@ -6,7 +6,6 @@
       :subtitle="$t('profile.pageSubtitleEdit')"
     />
 
-    <!-- Warning banner if navigated from email -->
     <Transition name="fade">
       <div
         v-if="isFromEmail || userStore.currentUser?.remark"
@@ -20,7 +19,7 @@
           <div class="text-body2 text-grey-8">
             {{
               userStore.currentUser?.remark
-                ? `เหตุผลที่ต้องแก้ไข: ${userStore.currentUser.remark}`
+                ? `${$t('profile.fixReasonLabel')} ${userStore.currentUser.remark}`
                 : $t('profile.fixAlertDesc')
             }}
           </div>
@@ -28,14 +27,11 @@
       </div>
     </Transition>
 
-    <!-- Card 1: Identity Info -->
     <q-card class="user-profile-card q-pa-lg q-mb-md" flat>
       <div class="row q-col-gutter-xl">
-        <!-- Left: Avatar -->
         <div class="col-12 col-md-3 flex column flex-center relative-position">
           <div class="avatar-container q-mb-md cursor-pointer" @click="triggerFileInput">
             <q-avatar size="160px" class="profile-avatar">
-              <!-- ใช้ img โดยตรงแทน ImageDisplay เพื่อหลีกเลี่ยงการซ้อนกันของ wrapper div -->
               <img :src="avatarSrc" alt="Avatar" class="profile-avatar-img" />
               <q-inner-loading :showing="isUploading">
                 <q-spinner-gears size="50px" color="primary" />
@@ -52,7 +48,6 @@
               :loading="isUploading"
               @click.stop="triggerFileInput"
             />
-            <!-- Hidden File Input inside avatar container -->
             <q-file
               ref="fileInputRef"
               v-model="selectedFile"
@@ -68,10 +63,8 @@
           </div>
         </div>
 
-        <!-- Right: Form Fields -->
         <div class="col-12 col-md-9">
           <div class="row q-col-gutter-md">
-            <!-- Row 1 -->
             <div class="col-12 col-md-6">
               <div class="row justify-between items-center q-mb-xs">
                 <label class="form-label"
@@ -400,7 +393,6 @@ const institutionInputRef = ref();
 const addressInputRef = ref();
 const phoneInputRef = ref();
 
-/** URL ภาพสำหรับแสดงบน avatar - ใช้ computed ป้องกันซ้อนกัน */
 const avatarSrc = computed<string>(() => {
   const path = formData.value.userImagePath;
   if (path) {
@@ -415,14 +407,14 @@ const { isUploading, handleImageUpload } = useImageUpload({
     selectedFile.value = null;
     $q.notify({
       type: 'positive',
-      message: t('success') || 'อัปโหลดรูปภาพสำเร็จ',
+      message: t('profile.uploadSuccess'),
       position: 'top',
     });
   },
   onError: (err) => {
     $q.notify({
       type: 'negative',
-      message: err.message || 'อัปโหลดรูปภาพล้มเหลว',
+      message: err.message || t('profile.uploadError'),
       position: 'top',
     });
   },
@@ -596,7 +588,6 @@ const onSave = async (): Promise<void> => {
       userImagePath: formData.value.userImagePath,
     });
 
-    // บันทึกรูปภาพแยกใน UserImage entity ถ้ามีการเปลี่ยนรูป
     if (
       formData.value.userImagePath &&
       formData.value.userImagePath !== userStore.currentUser?.userImagePath
@@ -608,10 +599,7 @@ const onSave = async (): Promise<void> => {
           { headers: { Authorization: `Bearer ${token}` } },
         );
       } catch (imgErr) {
-        console.warn(
-          'ไม่สามารถบันทึกรูปภาพผ่าน /user-image/me ได้ (endpoint อาจยังไม่มี):',
-          imgErr,
-        );
+        console.warn('Failed to save image via /user-image/me (endpoint might not exist):', imgErr);
       }
     }
 
@@ -661,7 +649,7 @@ const onSavePassword = (): void => {
 <style scoped lang="scss">
 .user-profile-card {
   border-radius: 16px !important;
-  border: 1px solid #e0e0e0 !important;
+  border: 1px solid var(--neutral-gray-light) !important;
   box-shadow: none !important;
   background-color: var(--surface-card) !important;
 }
@@ -676,7 +664,7 @@ const onSavePassword = (): void => {
 }
 
 .profile-avatar {
-  border: 4px solid white;
+  border: 4px solid var(--surface-card);
   box-shadow: none !important;
   background-color: transparent !important;
   overflow: hidden;
@@ -700,7 +688,7 @@ const onSavePassword = (): void => {
 .form-label {
   display: block;
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
@@ -715,10 +703,14 @@ const onSavePassword = (): void => {
 }
 
 .fix-alert-banner {
-  background: linear-gradient(135deg, #fffaf0 0%, #fff8e1 100%);
-  border: 1px solid #ffe082;
+  background: linear-gradient(
+    135deg,
+    var(--alert-warning-bg-start) 0%,
+    var(--alert-warning-bg-end) 100%
+  );
+  border: 1px solid var(--alert-warning-border);
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(255, 179, 0, 0.05);
+  box-shadow: 0 4px 12px var(--alert-warning-shadow);
 }
 
 .fade-enter-active,
@@ -738,35 +730,35 @@ const onSavePassword = (): void => {
 
 @keyframes border-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.3);
+    box-shadow: 0 0 0 0 rgba(var(--negative-rgb), 0.3);
   }
   70% {
-    box-shadow: 0 0 0 6px rgba(211, 47, 47, 0);
+    box-shadow: 0 0 0 6px rgba(var(--negative-rgb), 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0);
+    box-shadow: 0 0 0 0 rgba(var(--negative-rgb), 0);
   }
 }
 
 :deep(.highlighted-field .q-field__control) {
-  border: 2px solid var(--q-negative, #d32f2f) !important;
-  background-color: rgba(211, 47, 47, 0.015) !important;
-  box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.2) !important;
+  border: 2px solid var(--negative) !important;
+  background-color: rgba(var(--negative-rgb), 0.015) !important;
+  box-shadow: 0 0 0 0 rgba(var(--negative-rgb), 0.2) !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   animation: border-pulse 2.5s infinite;
 }
 
 :deep(.highlighted-field.q-field--focused .q-field__control) {
-  border-color: var(--q-negative, #d32f2f) !important;
-  box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.15) !important;
-  background-color: rgba(211, 47, 47, 0.03) !important;
+  border-color: var(--negative) !important;
+  box-shadow: 0 0 0 4px rgba(var(--negative-rgb), 0.15) !important;
+  background-color: rgba(var(--negative-rgb), 0.03) !important;
   animation: none !important;
 }
 
 .avatar-container.highlighted-field {
   .profile-avatar {
-    border: 4px solid var(--q-negative, #d32f2f) !important;
-    box-shadow: 0 0 16px rgba(211, 47, 47, 0.3) !important;
+    border: 4px solid var(--negative) !important;
+    box-shadow: 0 0 16px rgba(var(--negative-rgb), 0.3) !important;
   }
 }
 
@@ -777,23 +769,23 @@ const onSavePassword = (): void => {
   z-index: 10;
   display: inline-flex;
   align-items: center;
-  background-color: #ffebee;
-  color: #c62828;
+  background-color: var(--tip-badge-bg);
+  color: var(--tip-badge-text);
   font-size: 11px;
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 6px;
-  border: 1px solid #ffcdd2;
-  box-shadow: 0 4px 10px rgba(198, 40, 40, 0.15);
+  border: 1px solid var(--tip-badge-border);
+  box-shadow: 0 4px 10px var(--tip-badge-shadow-1);
   cursor: pointer;
   user-select: none;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   animation: float-pulse 2s infinite;
 
   &:hover {
-    background-color: #ffcdd2;
+    background-color: var(--tip-badge-border);
     transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 6px 14px rgba(198, 40, 40, 0.25);
+    box-shadow: 0 6px 14px var(--tip-badge-shadow-2);
   }
 
   &:active {

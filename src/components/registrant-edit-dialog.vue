@@ -3,7 +3,9 @@
     <q-dialog v-model="internalValue" persistent>
       <q-card style="width: 900px; max-width: 95vw; border-radius: 16px">
         <q-card-section class="row items-center justify-between q-px-xl q-pt-lg q-pb-none">
-          <div class="text-h6 text-weight-bold text-black">แก้ไขข้อมูลผู้สมัคร</div>
+          <div class="text-h6 text-weight-bold text-black">
+            {{ $t('admin.registrantManagement.detail.editDialog.title') }}
+          </div>
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
 
@@ -11,14 +13,16 @@
           <div class="edit-card-border q-pa-lg">
             <div class="row items-center q-mb-md">
               <q-icon name="person_outline" size="24px" color="black" class="q-mr-sm" />
-              <div class="text-subtitle1 text-weight-bold text-black">ข้อมูลผู้สมัคร</div>
+              <div class="text-subtitle1 text-weight-bold text-black">
+                {{ $t('admin.registrantManagement.detail.editDialog.registrantInfo') }}
+              </div>
             </div>
 
             <q-form ref="formRef">
               <div class="row q-col-gutter-x-xl q-col-gutter-y-md">
                 <div class="col-12 col-md-6">
                   <div class="q-mb-sm">
-                    <label class="input-label">เลขบัตรประจำตัวประชาชน</label>
+                    <label class="input-label">{{ $t('profile.nationalId') }}</label>
                     <q-input
                       v-model="form.userNationalId"
                       outlined
@@ -27,13 +31,13 @@
                       unmasked-value
                       bg-color="white"
                       class="custom-input"
-                      :rules="[(val) => !!val || 'กรุณากรอกเลขบัตรประจำตัวประชาชน']"
+                      :rules="[(val) => !!val || $t('profile.requiredNationalId')]"
                       hide-bottom-space
                     />
                   </div>
 
                   <div class="q-mb-sm">
-                    <label class="input-label">คำนำหน้า</label>
+                    <label class="input-label">{{ $t('profile.prefix') }}</label>
                     <q-select
                       v-model="form.userTitleTh"
                       :options="titleOptions"
@@ -44,39 +48,39 @@
                       dropdown-icon="expand_more"
                       bg-color="white"
                       class="custom-input"
-                      :rules="[(val) => !!val || 'กรุณาเลือกคำนำหน้า']"
+                      :rules="[(val) => !!val || $t('profile.requiredPrefix')]"
                       hide-bottom-space
                     />
                   </div>
 
                   <div class="q-mb-sm">
-                    <label class="input-label">ชื่อ-นามสกุล</label>
+                    <label class="input-label">{{ $t('profile.fullName') }}</label>
                     <q-input
                       v-model="form.userFullnameTh"
                       outlined
                       dense
                       bg-color="white"
                       class="custom-input"
-                      :rules="[(val) => !!val || 'กรุณากรอกชื่อ-นามสกุล']"
+                      :rules="[(val) => !!val || $t('profile.requiredFullName')]"
                       hide-bottom-space
                     />
                   </div>
 
                   <div class="q-mb-sm">
-                    <label class="input-label">Full Name</label>
+                    <label class="input-label">{{ $t('profile.fullNameEn') }}</label>
                     <q-input
                       v-model="form.userFullnameEn"
                       outlined
                       dense
                       bg-color="white"
                       class="custom-input"
-                      :rules="[(val) => !!val || 'กรุณากรอก Full Name']"
+                      :rules="[(val) => !!val || $t('profile.requiredFullNameEn')]"
                       hide-bottom-space
                     />
                   </div>
 
                   <div class="q-mb-sm relative-position">
-                    <label class="input-label">วันเกิด</label>
+                    <label class="input-label">{{ $t('profile.birthdate') }}</label>
                     <q-input
                       v-model="birthdateDisplay"
                       outlined
@@ -84,7 +88,7 @@
                       bg-color="white"
                       readonly
                       class="cursor-pointer custom-input"
-                      :rules="[(val) => !!val || 'กรุณาระบุวันเกิด']"
+                      :rules="[(val) => !!val || $t('profile.requiredBirthdate')]"
                       hide-bottom-space
                       @click="showCalendar = true"
                     >
@@ -114,7 +118,7 @@
 
                 <div class="col-12 col-md-6">
                   <div class="q-mb-sm">
-                    <label class="input-label">ระดับการศึกษาสูงสุดของท่าน</label>
+                    <label class="input-label">{{ $t('profile.education') }}</label>
                     <q-select
                       v-model="form.userEducation"
                       :options="educationOptions"
@@ -123,39 +127,39 @@
                       dropdown-icon="expand_more"
                       bg-color="white"
                       class="custom-input"
-                      :rules="[(val) => !!val || 'กรุณาเลือกระดับการศึกษา']"
+                      :rules="[(val) => !!val || $t('profile.requiredEducation')]"
                       hide-bottom-space
                     />
                   </div>
 
                   <div class="q-mb-sm">
-                    <label class="input-label">คณะ/สาขาวิชา</label>
+                    <label class="input-label">{{ $t('profile.faculty') }}</label>
                     <q-input
                       v-model="form.userFaculty"
                       outlined
                       dense
                       bg-color="white"
                       class="custom-input"
-                      :rules="[(val) => !!val || 'กรุณากรอกคณะ/สาขาวิชา']"
+                      :rules="[(val) => !!val || $t('profile.required')]"
                       hide-bottom-space
                     />
                   </div>
 
                   <div class="q-mb-sm">
-                    <label class="input-label">ชื่อสถานศึกษา</label>
+                    <label class="input-label">{{ $t('profile.institution') }}</label>
                     <q-input
                       v-model="form.userInstitution"
                       outlined
                       dense
                       bg-color="white"
                       class="custom-input"
-                      :rules="[(val) => !!val || 'กรุณากรอกชื่อสถานศึกษา']"
+                      :rules="[(val) => !!val || $t('profile.required')]"
                       hide-bottom-space
                     />
                   </div>
 
                   <div class="q-mb-sm">
-                    <label class="input-label">ที่อยู่สำหรับจัดส่งเอกสาร</label>
+                    <label class="input-label">{{ $t('profile.address') }}</label>
                     <q-input
                       v-model="form.userAddress"
                       outlined
@@ -164,13 +168,13 @@
                       class="custom-input address-input"
                       type="textarea"
                       rows="3"
-                      :rules="[(val) => !!val || 'กรุณากรอกที่อยู่สำหรับจัดส่งเอกสาร']"
+                      :rules="[(val) => !!val || $t('profile.required')]"
                       hide-bottom-space
                     />
                   </div>
 
                   <div class="q-mb-sm">
-                    <label class="input-label">เบอร์โทรศัพท์</label>
+                    <label class="input-label">{{ $t('profile.phone') }}</label>
                     <q-input
                       v-model="form.userPhone"
                       outlined
@@ -178,7 +182,7 @@
                       mask="###-###-####"
                       bg-color="white"
                       class="custom-input"
-                      :rules="[(val) => !!val || 'กรุณากรอกเบอร์โทรศัพท์']"
+                      :rules="[(val) => !!val || $t('profile.requiredPhone')]"
                       hide-bottom-space
                     />
                   </div>
@@ -190,14 +194,14 @@
 
         <q-card-actions align="right" class="q-px-xl q-pb-xl q-pt-none q-gutter-md">
           <AppButton
-            label="คืนค่าข้อมูล"
+            :label="$t('admin.registrantManagement.detail.editDialog.reset')"
             color="grey-3"
             text-color="dark"
             style="min-width: 120px; border-radius: 8px"
             @click="resetForm"
           />
           <AppButton
-            label="บันทึกการแก้ไข"
+            :label="$t('admin.registrantManagement.detail.editDialog.save')"
             color="primary"
             style="min-width: 120px; border-radius: 8px"
             @click="onSaveClick"
@@ -209,24 +213,28 @@
     <q-dialog v-model="showConfirmDialog" persistent>
       <q-card style="width: 440px; border-radius: 12px; padding: 8px">
         <q-card-section class="row items-center q-pb-none justify-between">
-          <div class="text-subtitle1 text-weight-bold text-black">ยืนยันการบันทึกข้อมูล</div>
+          <div class="text-subtitle1 text-weight-bold text-black">
+            {{ $t('admin.registrantManagement.detail.editDialog.confirmSaveTitle') }}
+          </div>
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
 
         <q-card-section class="q-py-md text-center">
-          <div class="text-body1 text-grey-8 q-my-md">คุณต้องการบันทึกข้อมูลทั้งหมดใช่หรือไม่</div>
+          <div class="text-body1 text-grey-8 q-my-md">
+            {{ $t('admin.registrantManagement.detail.editDialog.confirmSaveMessage') }}
+          </div>
         </q-card-section>
 
         <q-card-actions align="center" class="q-pt-none q-pb-md q-gutter-md">
           <AppButton
-            label="ยกเลิก"
+            :label="$t('admin.registrantManagement.detail.editDialog.cancel')"
             color="grey-3"
             text-color="dark"
             style="min-width: 100px; border-radius: 8px"
             @click="showConfirmDialog = false"
           />
           <AppButton
-            label="ยืนยัน"
+            :label="$t('admin.registrantManagement.detail.editDialog.confirm')"
             color="primary"
             style="min-width: 100px; border-radius: 8px"
             @click="onConfirmSave"
@@ -241,6 +249,7 @@
 import { ref, computed, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import type { QForm } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
 import { TITLE_TH_OPTIONS, EDUCATION_LEVEL_OPTIONS } from 'src/utils/form-options';
@@ -254,6 +263,7 @@ interface Props {
 const props = defineProps<Props>();
 const emit = defineEmits(['update:modelValue', 'save']);
 const $q = useQuasar();
+const { t } = useI18n();
 
 const internalValue = ref(props.modelValue);
 const showCalendar = ref(false);
@@ -402,7 +412,7 @@ const onSaveClick = async () => {
     if (!isFormChanged.value) {
       $q.notify({
         type: 'warning',
-        message: 'ไม่มีการแก้ไขข้อมูลใดๆ',
+        message: t('admin.registrantManagement.detail.editDialog.noChanges'),
         position: 'top',
       });
       return;
@@ -411,7 +421,7 @@ const onSaveClick = async () => {
   } else {
     $q.notify({
       type: 'negative',
-      message: 'กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง',
+      message: t('admin.registrantManagement.detail.editDialog.invalidForm'),
       position: 'top',
     });
   }
@@ -426,15 +436,15 @@ const onConfirmSave = () => {
 
 <style scoped lang="scss">
 .edit-card-border {
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--neutral-gray-light);
   border-radius: 12px;
-  background-color: #fcfcfc;
+  background-color: var(--neutral-50);
 }
 
 .input-label {
   display: block;
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 500;
   margin-bottom: 4px;
 }

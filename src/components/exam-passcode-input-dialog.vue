@@ -1,7 +1,6 @@
 <template>
   <q-dialog v-model="isOpen" persistent>
     <q-card class="text-center passcode-card">
-      <!-- Close Button -->
       <q-btn
         icon="close"
         flat
@@ -12,27 +11,26 @@
         size="md"
       />
 
-      <!-- Lock Icon -->
       <div class="q-mt-sm q-mb-md flex flex-center">
         <div class="lock-icon-container flex flex-center">
           <q-icon name="lock" size="32px" color="dark" />
         </div>
       </div>
 
-      <!-- Title & Subtitle -->
-      <div class="text-h6 text-weight-bold q-mb-sm text-dark-title">{{ title }}</div>
+      <div class="text-h6 text-weight-bold q-mb-sm text-dark-title">
+        {{ title || $t('examSchedule.passcodeDialog.title') }}
+      </div>
       <div class="text-caption q-mb-lg subtitle-text">
-        {{ subtitle }}
+        {{ subtitle || $t('examSchedule.passcodeDialog.subtitle') }}
       </div>
 
-      <!-- Passcode Input -->
       <q-input
         v-model="passcode"
         outlined
         dense
         :type="isPasswordVisible ? 'text' : 'password'"
         class="q-mb-lg passcode-input"
-        :placeholder="placeholderText"
+        :placeholder="placeholderText || $t('examSchedule.passcodeDialog.placeholder')"
       >
         <template v-slot:append>
           <q-icon
@@ -44,17 +42,15 @@
         </template>
       </q-input>
 
-      <!-- Confirm Button -->
       <AppButton
-        :label="confirmBtnText"
+        :label="confirmBtnText || $t('examSchedule.passcodeDialog.confirm')"
         class="full-width q-mb-md confirm-btn"
         @click="confirmPasscode"
       />
 
-      <!-- Footer Support Text -->
       <div class="footer-text flex flex-center">
         <q-icon name="help_outline" size="16px" class="q-mr-xs" />
-        {{ footerSupportText }}
+        {{ footerSupportText || $t('examSchedule.passcodeDialog.footerSupport') }}
       </div>
     </q-card>
   </q-dialog>
@@ -73,11 +69,11 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  title: 'Enter Passcode',
-  subtitle: 'กรุณากรอกรหัสผ่าน Passcode เพื่อทำการลงทะเบียนสอบ',
-  placeholderText: '•••••••••••••••••',
-  confirmBtnText: 'ยืนยัน',
-  footerSupportText: 'พบปัญหา โปรดติดต่อพนักงาน',
+  title: '',
+  subtitle: '',
+  placeholderText: '',
+  confirmBtnText: '',
+  footerSupportText: '',
 });
 
 const isOpen = ref<boolean>(false);
@@ -128,7 +124,7 @@ defineExpose({
 }
 
 .lock-icon-container {
-  background-color: #e4e4e4;
+  background-color: var(--neutral-200);
   width: 64px;
   height: 64px;
   border-radius: 16px;
@@ -136,12 +132,12 @@ defineExpose({
 
 .text-dark-title {
   font-size: 22px;
-  color: #111;
+  color: var(--text-primary);
 }
 
 .subtitle-text {
   font-size: 15px;
-  color: #888;
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
@@ -159,7 +155,7 @@ defineExpose({
 
 .passcode-input :deep(input::placeholder) {
   letter-spacing: 3px;
-  color: #b0b0b0;
+  color: var(--text-placeholder);
   font-size: 20px;
 }
 
@@ -171,7 +167,7 @@ defineExpose({
 
 .footer-text {
   font-size: 14px;
-  color: #999;
+  color: var(--text-muted);
 }
 
 @media (max-width: 600px) {

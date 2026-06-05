@@ -27,15 +27,15 @@
             <div class="row q-col-gutter-md">
               <div class="col-12 col-sm-4 info-col">
                 <div class="info-row">
-                  <span class="info-label">เลขบัตรประจำตัวประชาชน:</span>
+                  <span class="info-label">{{ $t('profile.nationalId') }}:</span>
                   <span class="info-value q-ml-xs">{{ displayData.nationalId }}</span>
                 </div>
                 <div class="info-row q-mt-xs">
-                  <span class="info-label">วันเกิด:</span>
+                  <span class="info-label">{{ $t('profile.birthdate') }}:</span>
                   <span class="info-value q-ml-xs">{{ displayData.birthDate }}</span>
                 </div>
                 <div class="info-row q-mt-xs">
-                  <span class="info-label">เบอร์โทรศัพท์:</span>
+                  <span class="info-label">{{ $t('profile.phone') }}:</span>
                   <span class="info-value q-ml-xs">{{ displayData.phone }}</span>
                 </div>
               </div>
@@ -43,7 +43,7 @@
               <div class="col-12 col-sm-4 info-col">
                 <div class="info-row empty-row">&nbsp;</div>
                 <div class="info-row q-mt-xs">
-                  <span class="info-label">ที่อยู่สำหรับจัดส่งเอกสาร:</span>
+                  <span class="info-label">{{ $t('profile.address') }}:</span>
                 </div>
                 <div class="info-row">
                   <span class="info-value address-value">{{ displayData.address }}</span>
@@ -52,15 +52,15 @@
 
               <div class="col-12 col-sm-4 info-col">
                 <div class="info-row">
-                  <span class="info-label">ชื่อสถานศึกษา:</span>
+                  <span class="info-label">{{ $t('profile.institution') }}:</span>
                   <span class="info-value q-ml-xs">{{ displayData.institution }}</span>
                 </div>
                 <div class="info-row q-mt-xs">
-                  <span class="info-label">ระดับการศึกษาสูงสุดของท่าน:</span>
+                  <span class="info-label">{{ $t('profile.education') }}:</span>
                   <span class="info-value q-ml-xs">{{ displayData.education }}</span>
                 </div>
                 <div class="info-row q-mt-xs">
-                  <span class="info-label">คณะ/สาขาวิชา:</span>
+                  <span class="info-label">{{ $t('profile.faculty') }}:</span>
                   <span class="info-value q-ml-xs">{{ displayData.faculty }}</span>
                 </div>
               </div>
@@ -130,7 +130,9 @@
           <q-card flat bordered class="registrant-card q-mb-md">
             <header class="row items-center q-px-md q-px-sm-lg q-py-md">
               <q-icon name="person" size="24px" color="black" class="q-mr-sm" />
-              <h2 class="text-subtitle1 text-weight-bold text-black q-ma-none">ข้อมูลใหม่</h2>
+              <h2 class="text-subtitle1 text-weight-bold text-black q-ma-none">
+                {{ $t('profileEditHistory.dialog.newData') }}
+              </h2>
             </header>
             <q-separator />
             <section
@@ -151,13 +153,20 @@
                   </div>
                   <figcaption class="text-center q-mt-md">
                     <div class="text-subtitle2 text-weight-bold text-black">
-                      {{ displayProfileNew.imagePath ? 'user_photo.jpg' : 'No Photo' }}
+                      {{
+                        displayProfileNew.imagePath
+                          ? 'user_photo.jpg'
+                          : $t('profileEditHistory.dialog.noPhoto')
+                      }}
                     </div>
                     <div class="text-caption text-grey-6">
                       {{
                         displayProfileNew.imagePath
-                          ? `1.2 MB · อัปโหลด ${uploadDateFormatted}`
-                          : 'Not Uploaded'
+                          ? $t('profileEditHistory.dialog.uploadedAt', {
+                              size: '1.2 MB',
+                              date: uploadDateFormatted,
+                            })
+                          : $t('profileEditHistory.dialog.notUploaded')
                       }}
                     </div>
                   </figcaption>
@@ -258,7 +267,9 @@
           <q-card flat bordered class="registrant-card">
             <header class="row items-center q-px-md q-px-sm-lg q-py-md">
               <q-icon name="person" size="24px" color="black" class="q-mr-sm" />
-              <h2 class="text-subtitle1 text-weight-bold text-black q-ma-none">ข้อมูลเก่า</h2>
+              <h2 class="text-subtitle1 text-weight-bold text-black q-ma-none">
+                {{ $t('profileEditHistory.dialog.oldData') }}
+              </h2>
             </header>
             <q-separator />
             <section
@@ -279,13 +290,20 @@
                   </div>
                   <figcaption class="text-center q-mt-md">
                     <div class="text-subtitle2 text-weight-bold text-black">
-                      {{ displayProfileOld.imagePath ? 'user_photo.jpg' : 'No Photo' }}
+                      {{
+                        displayProfileOld.imagePath
+                          ? 'user_photo.jpg'
+                          : $t('profileEditHistory.dialog.noPhoto')
+                      }}
                     </div>
                     <div class="text-caption text-grey-6">
                       {{
                         displayProfileOld.imagePath
-                          ? `1.2 MB · อัปโหลด ${uploadDateFormatted}`
-                          : 'Not Uploaded'
+                          ? $t('profileEditHistory.dialog.uploadedAt', {
+                              size: '1.2 MB',
+                              date: uploadDateFormatted,
+                            })
+                          : $t('profileEditHistory.dialog.notUploaded')
                       }}
                     </div>
                   </figcaption>
@@ -454,7 +472,7 @@ const displayData = computed(() => {
   }
 
   const fullAddress = profile
-    ? `${profile.userAddress || ''} ${profile.userProvince ? `จ.${profile.userProvince}` : ''} ${profile.userZipCode || ''}`.trim()
+    ? `${profile.userAddress || ''} ${profile.userProvince ? `${t('profile.provincePrefix')}${profile.userProvince}` : ''} ${profile.userZipCode || ''}`.trim()
     : '-';
 
   return {
@@ -605,7 +623,8 @@ const getDisplayProfile = (isNew: boolean) => {
   const imagePath = getProfileValue('userImagePath', isNew);
 
   const fullAddress =
-    `${address || ''} ${province ? `จ.${province}` : ''} ${zipCode || ''}`.trim() || '-';
+    `${address || ''} ${province ? `${t('profile.provincePrefix')}${province}` : ''} ${zipCode || ''}`.trim() ||
+    '-';
 
   return {
     nationalId: formatNationalId(nationalIdRaw || ''),
@@ -704,8 +723,8 @@ onMounted(() => {
 
 .profile-summary-card {
   border-radius: 12px;
-  border: 1px solid #ebeef5;
-  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-card);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
   overflow: hidden;
 }
@@ -718,7 +737,7 @@ onMounted(() => {
 .brand-text {
   font-size: 20px;
   font-weight: 700;
-  color: #000000;
+  color: var(--text-primary);
   margin-bottom: 12px;
 }
 
@@ -742,21 +761,21 @@ onMounted(() => {
 
 .info-label {
   font-size: 15px;
-  color: #7f7f7f;
+  color: var(--text-muted);
   font-weight: 400;
   flex-shrink: 0;
 }
 
 .info-value {
   font-size: 15px;
-  color: #000000;
+  color: var(--text-primary);
   font-weight: 400;
   margin-left: 8px;
 }
 
 .address-value {
   font-size: 15px;
-  color: #000000;
+  color: var(--text-primary);
   font-weight: 400;
   max-width: 100%;
   white-space: normal;
@@ -774,7 +793,7 @@ onMounted(() => {
 .registrant-card {
   border-radius: 12px;
   border: 1px solid var(--neutral-200, #e0e0e0);
-  background-color: #ffffff;
+  background-color: var(--surface-card);
   overflow: hidden;
 }
 
@@ -789,8 +808,8 @@ onMounted(() => {
   aspect-ratio: 180 / 220;
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #f0f0f0;
-  background-color: #e3f2fd;
+  border: 1px solid var(--neutral-100);
+  background-color: var(--badge-primary-bg);
   transition: all 0.3s ease;
 
   @media (max-width: 599px) {
@@ -814,14 +833,14 @@ onMounted(() => {
 
   .info-label {
     font-size: 0.75rem;
-    color: #8c8c8c;
+    color: var(--text-muted);
     font-weight: 400;
     line-height: 1.25rem;
   }
 
   .info-value {
     font-size: 0.875rem;
-    color: #1a1a1a;
+    color: var(--text-primary);
     font-weight: 500;
     line-height: 1.5rem;
     word-break: break-word;
@@ -830,11 +849,11 @@ onMounted(() => {
 }
 
 .info-field.highlight-new {
-  background-color: rgba(46, 125, 50, 0.12) !important;
+  background-color: var(--highlight-success-bg) !important;
 }
 
 .info-field.highlight-old {
-  background-color: rgba(198, 40, 40, 0.12) !important;
+  background-color: var(--highlight-error-bg) !important;
 }
 
 .photo-figure-wrapper {
@@ -850,11 +869,11 @@ onMounted(() => {
   }
 
   &.highlight-new {
-    background-color: rgba(46, 125, 50, 0.12) !important;
+    background-color: var(--highlight-success-bg) !important;
   }
 
   &.highlight-old {
-    background-color: rgba(198, 40, 40, 0.12) !important;
+    background-color: var(--highlight-error-bg) !important;
   }
 }
 </style>

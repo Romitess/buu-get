@@ -46,6 +46,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useUserStore } from 'src/stores/user.store';
+import th from 'src/i18n/th';
 import ConvenienceStep from './convenience-step.vue';
 import ConfirmStep from './confirm-step.vue';
 
@@ -63,14 +64,18 @@ const emit = defineEmits<{
 
 const userStore = useUserStore();
 const currentStep = ref<number>(1);
-const selectedStatus = ref<string>('ไม่มีข้อมูลข้างต้น');
+
+const NONE_STATUS = th.examSchedule.convenienceDialog.options.none;
+const GENERAL_STATUS = th.examSchedule.convenienceDialog.options.general;
+
+const selectedStatus = ref<string>(NONE_STATUS);
 
 watch(
   () => props.modelValue,
   (val) => {
     if (val) {
       currentStep.value = 1;
-      selectedStatus.value = 'ไม่มีข้อมูลข้างต้น';
+      selectedStatus.value = NONE_STATUS;
     }
   },
 );
@@ -94,7 +99,7 @@ const dummyEnrollment = computed(() => {
     UPDATED_AT: new Date().toISOString(),
     DELETED_AT: null,
     ERM_PHYSICAL_STATUS:
-      selectedStatus.value === 'ไม่มีข้อมูลข้างต้น' ? 'ทั่วไป' : selectedStatus.value,
+      selectedStatus.value === NONE_STATUS ? GENERAL_STATUS : selectedStatus.value,
     USER: {
       USER_ID: u.id || 0,
       USER_NATIONAL_ID: u.nationalId,
