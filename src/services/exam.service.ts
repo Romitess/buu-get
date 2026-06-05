@@ -142,25 +142,37 @@ export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
       sortedSessions.forEach((session) => {
         const startTime = formatTime(session.SS_START_TIME);
         const endTime = formatTime(session.SS_END_TIME);
+        const timeRange = `${startTime} - ${endTime}`;
 
         const activeEnrollments = (session.ENROLLMENTS || []).filter(
-          (e) =>
-            e.ERM_STATUS !== ENROLLMENT_STATUS.UNPAID &&
-            e.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED,
+          (e) => e.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED,
         );
 
-        const round: ExamRound = {
-          id: session.SS_ID,
-          title: exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
-          timeRange: `${startTime} - ${endTime}`,
-          roundTypeLabel: exam.EXAM_TYPE || EXAM_TYPE_GENERAL,
-          availableSeats: (session.SS_CAPACITY || 0) - activeEnrollments.length,
-          totalSeats: session.SS_CAPACITY || 0,
-          regStartDate: exam.EXAM_REG_START_DATE,
-          regEndDate: exam.EXAM_REG_END_DATE,
-          examDate: formatBackendDate(exam.EXAM_DATE),
-        };
-        dayData.rounds.push(round);
+        const currentAvailable = (session.SS_CAPACITY || 0) - activeEnrollments.length;
+        const currentTotal = session.SS_CAPACITY || 0;
+
+        const existingRound = dayData.rounds.find((r) => r.timeRange === timeRange);
+
+        if (existingRound) {
+          existingRound.availableSeats += currentAvailable;
+          existingRound.totalSeats += currentTotal;
+          if (existingRound.availableSeats - currentAvailable <= 0 && currentAvailable > 0) {
+            existingRound.id = session.SS_ID;
+          }
+        } else {
+          const round: ExamRound = {
+            id: session.SS_ID,
+            title: exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
+            timeRange,
+            roundTypeLabel: exam.EXAM_TYPE || EXAM_TYPE_GENERAL,
+            availableSeats: currentAvailable,
+            totalSeats: currentTotal,
+            regStartDate: exam.EXAM_REG_START_DATE,
+            regEndDate: exam.EXAM_REG_END_DATE,
+            examDate: formatBackendDate(exam.EXAM_DATE),
+          };
+          dayData.rounds.push(round);
+        }
       });
     });
 
@@ -186,9 +198,7 @@ export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
         exam.SESSIONS.forEach((session) => {
           capacity += session.SS_CAPACITY || 0;
           const activeEnrollments = (session.ENROLLMENTS || []).filter(
-            (e) =>
-              e.ERM_STATUS !== ENROLLMENT_STATUS.UNPAID &&
-              e.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED,
+            (e) => e.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED,
           );
           registeredCount += activeEnrollments.length;
         });
@@ -393,12 +403,14 @@ export const createEnrollment = async (
   userId: number,
   sessionId: number,
   passcode?: string,
+  physicalStatus?: string,
 ): Promise<ExamEnrollment> => {
   try {
     const response = await api.post<ExamEnrollment>('/exam-enrollments', {
       USER_ID: userId,
       SESSION_ID: sessionId,
       PASSCODE: passcode,
+      PHYSICAL_STATUS: physicalStatus,
     });
     return response.data;
   } catch (error) {

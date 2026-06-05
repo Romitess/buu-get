@@ -29,7 +29,7 @@ export const fetchEnrollmentsByExamId = async (examId: number): Promise<Enrollme
       verifyStatus: enrollment.ERM_VERIFY_STATUS,
       sessionId: enrollment.SESSION_ID,
       userProfileId: enrollment.USER?.PROFILE?.userProfileId || 0,
-      remark: enrollment.USER?.PROFILE?.userPhysicalStatus || '',
+      remark: enrollment.ERM_PHYSICAL_STATUS || '',
     }),
   );
 };

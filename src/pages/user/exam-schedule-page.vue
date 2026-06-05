@@ -24,7 +24,6 @@
           @main-card-resize="onCalendarResize"
         />
       </div>
-      4k
 
       <div class="col-12 col-md-7">
         <q-card class="exam-schedule__rounds-section" :style="roundsSectionStyle">
@@ -76,6 +75,7 @@
       v-model="showConfirmDialog"
       :exam-date="formattedSelectedDate"
       :exam-time="selectedRound?.timeRange || ''"
+      :exam-fee="examInfo.feeText"
       @confirm="onConfirmRegistration"
     />
 
@@ -116,6 +116,7 @@ const { examInfo, selectedDate, selectedDateRounds, calendarAvailability, format
 const showConfirmDialog = ref(false);
 const passcodeDialogRef = ref<InstanceType<typeof ExamPasscodeInputDialog> | null>(null);
 const selectedRound = ref<ExamRound | null>(null);
+const savedPasscode = ref<string | undefined>(undefined);
 const calendarHeight = ref<number>(0);
 
 const roundsListOverflow = computed(() => ($q.screen.gt.sm ? 'auto' : 'visible'));
@@ -124,7 +125,6 @@ let scheduleInterval: ReturnType<typeof setInterval>;
 
 onMounted(async () => {
   await examStore.initSchedule();
-  // Real-time polling every 5 seconds
   scheduleInterval = setInterval(() => {
     void examStore.initSchedule();
   }, 5000);
@@ -188,6 +188,7 @@ const handleRegister = async (
   }
 
   selectedRound.value = round;
+  savedPasscode.value = undefined;
   if (round.roundTypeLabel === EXAM_TYPE_SPECIAL) {
     passcodeDialogRef.value?.openDialog();
   } else {
@@ -195,18 +196,32 @@ const handleRegister = async (
   }
 };
 
-const onConfirmRegistration = async (): Promise<void> => {
+const onConfirmRegistration = async (physicalStatus?: string): Promise<void> => {
   showConfirmDialog.value = false;
   if (selectedRound.value) {
     try {
-      await examStore.confirmRegistration(selectedRound.value);
-      $q.notify({
-        type: 'positive',
-        message: t('examSchedule.notifications.registrationSuccess'),
-        icon: 'check_circle',
-        position: 'top',
-        timeout: 3000,
-      });
+      if (selectedRound.value.roundTypeLabel === EXAM_TYPE_SPECIAL) {
+        await examStore.confirmSpecialRegistration(
+          selectedRound.value,
+          savedPasscode.value || '',
+          physicalStatus,
+        );
+        $q.notify({
+          type: 'positive',
+          message: t('examSchedule.notifications.passcodeSuccess'),
+          position: 'top',
+          timeout: 2000,
+        });
+      } else {
+        await examStore.confirmRegistration(selectedRound.value, undefined, physicalStatus);
+        $q.notify({
+          type: 'positive',
+          message: t('examSchedule.notifications.registrationSuccess'),
+          icon: 'check_circle',
+          position: 'top',
+          timeout: 3000,
+        });
+      }
       await router.push(ROUTES.HISTORY);
     } catch (err: unknown) {
       const error = err as {
@@ -220,16 +235,20 @@ const onConfirmRegistration = async (): Promise<void> => {
       };
       const status = error?.response?.status;
       const resMsg = error?.response?.data?.message;
-      let msg = `เกิดข้อผิดพลาด: ${Array.isArray(resMsg) ? resMsg.join(', ') : resMsg || error.message || 'Unknown'}`;
+      let msg = t('examSchedule.notifications.unknownError', {
+        message: Array.isArray(resMsg) ? resMsg.join(', ') : resMsg || error.message || 'Unknown',
+      });
 
       if (status === 409) {
         msg = t('examSchedule.notifications.alreadyRegistered');
       } else if (status === 400 && resMsg === 'FULL') {
         msg = t('examSchedule.notifications.roundFull');
+      } else if (status === 400 && resMsg === 'Invalid passcode for this user and exam') {
+        msg = t('examSchedule.notifications.invalidPasscode');
       } else if (status === 404) {
-        msg = 'ไม่พบข้อมูลรอบสอบ (อาจถูกลบไปแล้ว)';
+        msg = t('examSchedule.notifications.notFound');
       } else if (status && status >= 500) {
-        msg = 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์ (อาจเกิดจากการลบข้อมูล กรุณาลองเข้าสู่ระบบใหม่)';
+        msg = t('examSchedule.notifications.serverError');
       }
 
       $q.notify({
@@ -243,53 +262,10 @@ const onConfirmRegistration = async (): Promise<void> => {
   }
 };
 
-const onPasscodeConfirm = async (passcode: string): Promise<void> => {
-  if (selectedRound.value) {
-    try {
-      await examStore.confirmSpecialRegistration(selectedRound.value, passcode);
-      $q.notify({
-        type: 'positive',
-        message: t('examSchedule.notifications.passcodeSuccess'),
-        position: 'top',
-        timeout: 2000,
-      });
-      await router.push(ROUTES.HISTORY);
-    } catch (err: unknown) {
-      const error = err as {
-        response?: {
-          status?: number;
-          data?: {
-            message?: string | string[];
-          };
-        };
-        message?: string;
-      };
-      const status = error?.response?.status;
-      const resMsg = error?.response?.data?.message;
-      let msg = `เกิดข้อผิดพลาด: ${Array.isArray(resMsg) ? resMsg.join(', ') : resMsg || error.message || 'Unknown'}`;
-
-      if (status === 409) {
-        msg = t('examSchedule.notifications.alreadyRegistered');
-      } else if (status === 400 && resMsg === 'FULL') {
-        msg = t('examSchedule.notifications.roundFull');
-      } else if (status === 404) {
-        msg = 'ไม่พบข้อมูลรอบสอบ (อาจถูกลบไปแล้ว)';
-      } else if (status && status >= 500) {
-        msg = 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์ (อาจเกิดจากการลบข้อมูล กรุณาลองเข้าสู่ระบบใหม่)';
-      }
-
-      $q.notify({
-        type: 'negative',
-        message: msg,
-        position: 'top',
-        timeout: 3000,
-      });
-    }
-  }
+const onPasscodeConfirm = (passcode: string): void => {
+  savedPasscode.value = passcode;
+  showConfirmDialog.value = true;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const onMonthChange = (month: number, year: number): void => {
-  // ในอนาคต: ดึงข้อมูล scheduleData ใหม่ของเดือนนั้นๆ จาก API
-};
+const onMonthChange = (): void => {};
 </script>

@@ -6,6 +6,7 @@
 import { ref } from 'vue';
 import { uploadImage } from 'src/services/image.service';
 import type { ImageUploadRequest } from 'src/types/image';
+import { IMAGE_CONFIG } from 'src/constants/api';
 
 export interface UseImageUploadOptions {
   /** callback เมื่อ upload เสร็จ - return imagePath */
@@ -30,21 +31,21 @@ export function useImageUpload(options?: UseImageUploadOptions) {
     uploadError.value = null;
     uploadedPath.value = null;
 
-    // Validation: JPG only
-    const allowedExtensions = ['image/jpeg', 'image/jpg'];
+    const allowedExtensions = ['image/jpeg', 'image/jpg', 'image/png'];
     if (!allowedExtensions.includes(file.type)) {
-      const errorMsg = 'นามสกุลไฟล์ต้องเป็น JPG เท่านั้น';
+      const errorMsg = 'นามสกุลไฟล์ต้องเป็น JPG หรือ PNG เท่านั้น';
       uploadError.value = errorMsg;
       isUploading.value = false;
+      options?.onError?.(new Error(errorMsg));
       return null;
     }
 
-    // Validation: Min size 40KB
-    const minSize = 40 * 1024; // 40 KB
-    if (file.size < minSize) {
-      const errorMsg = 'ขนาดไฟล์ต้องไม่ต่ำกว่า 40 KB';
+    const maxSize = IMAGE_CONFIG.MAX_FILE_SIZE;
+    if (file.size > maxSize) {
+      const errorMsg = 'ขนาดไฟล์ต้องไม่เกิน 5 MB';
       uploadError.value = errorMsg;
       isUploading.value = false;
+      options?.onError?.(new Error(errorMsg));
       return null;
     }
 

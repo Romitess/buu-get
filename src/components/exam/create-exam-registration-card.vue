@@ -19,7 +19,7 @@
               :class="isSpecialRound ? 'col-md-6' : 'q-mb-md'"
               data-field="regStartDate"
             >
-              <div class="field-label">วันที่เริ่มต้น</div>
+              <div class="buu-label-muted q-mb-xs">วันที่เริ่มต้น</div>
               <q-input
                 v-model="form.regStartDate"
                 outlined
@@ -77,7 +77,7 @@
             </div>
 
             <div class="col-12" :class="isSpecialRound ? 'col-md-6' : ''" data-field="regEndDate">
-              <div class="field-label">วันที่สิ้นสุด</div>
+              <div class="buu-label-muted q-mb-xs">วันที่สิ้นสุด</div>
               <q-input
                 v-model="form.regEndDate"
                 outlined
@@ -142,7 +142,7 @@
 
           <div class="row q-col-gutter-md">
             <div class="col-12 q-mb-md" data-field="payStartDate">
-              <div class="field-label">วันที่เริ่มต้น</div>
+              <div class="buu-label-muted q-mb-xs">วันที่เริ่มต้น</div>
               <q-input
                 v-model="form.payStartDate"
                 outlined
@@ -200,7 +200,7 @@
             </div>
 
             <div class="col-12" data-field="payEndDate">
-              <div class="field-label">วันที่สิ้นสุด</div>
+              <div class="buu-label-muted q-mb-xs">วันที่สิ้นสุด</div>
               <q-input
                 v-model="form.payEndDate"
                 outlined
@@ -304,12 +304,6 @@ const showPayEnd = ref(false);
   font-size: 14px;
   font-weight: 700;
   color: var(--text-primary);
-}
-.field-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--label-color, #444);
-  margin-bottom: 4px;
 }
 .custom-input :deep(.q-field__control) {
   border-radius: var(--radius-sm);

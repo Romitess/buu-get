@@ -294,12 +294,6 @@ const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
     return true;
   }
 
-  if (emitName === TABLE_ACTIONS.MANAGE_SEATS) {
-    if ('isAllVerifyPassed' in row && row.isAllVerifyPassed === false) {
-      return true;
-    }
-  }
-
   if (emitName === TABLE_ACTIONS.VIEW_CANDIDATES || emitName === TABLE_ACTIONS.VIEW_SCORE) {
     if (!row.examDate) return true;
 
@@ -316,14 +310,6 @@ const isActionDisabled = (emitName: string, row: ExamSchedule): boolean => {
 };
 
 const getActionTooltip = (btn: CustomToolButton, row: ExamSchedule): string => {
-  if (
-    btn.emit === TABLE_ACTIONS.MANAGE_SEATS &&
-    'isAllVerifyPassed' in row &&
-    row.isAllVerifyPassed === false
-  ) {
-    return t('admin.examManagement.table.tooltips.manageSeatsDisabled');
-  }
-
   if (btn.emit === TABLE_ACTIONS.VIEW_SCORE || btn.emit === TABLE_ACTIONS.VIEW_CANDIDATES) {
     if (row.examDate) {
       const examDate = new Date(row.examDate);

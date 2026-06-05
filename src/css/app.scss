@@ -16,6 +16,9 @@
   --secondary-light: #4dabf5;
   --secondary-dark: #115293;
   --negative: #e53934;
+  --btn-danger-light-bg: #ffebeb;
+  --btn-danger-light-text: #f44336;
+  --btn-danger-light-hover: #ffdada;
 
   // Backward Compatibility Aliases
   --buu-gold: var(--primary);
@@ -41,12 +44,13 @@
   --text-on-dark: #e0e0e0;
   --text-on-primary: #ffffff;
   --buu-brown: #5d3f3d;
-  --label-color: var(--buu-brown); // สีของ Label หัวข้อฟิลด์
+  --label-color: var(--text-primary); // สีของ Label หัวข้อฟิลด์
 
   // Neutral scale (used in form fields, dividers, secondary text)
   --neutral-50: #f8fafc;
   --neutral-100: #f1f5f9;
   --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
   --neutral-400: #94a3b8;
   --neutral-500: #64748b;
   --neutral-600: #334155;
@@ -91,6 +95,9 @@
 
   // Misc
   --border-color: #e8e8e8;
+  --border-black: #000000;
+  --voucher-bg-gradient: linear-gradient(180deg, #FAFAFA 0%, #F0F4F8 100%);
+  --watermark-color: rgba(30, 137, 229, 0.07);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
@@ -135,6 +142,25 @@
   --primary-light-alpha-50: rgba(30, 137, 229, 0.5);
   --primary-light-alpha-20: rgba(30, 137, 229, 0.2);
   --white-alpha-20: rgba(255, 255, 255, 0.2);
+  --negative-alpha-15: rgba(229, 57, 52, 0.15);
+
+  // Alert Banner Specific (Warning styling)
+  --alert-warning-bg-start: #fffaf0;
+  --alert-warning-bg-end: #fff8e1;
+  --alert-warning-border: #ffe082;
+  --alert-warning-shadow: rgba(255, 179, 0, 0.05);
+
+  // Floating Tip Badge Specific (Error/Negative styling)
+  --tip-badge-bg: #ffebee;
+  --tip-badge-text: #c62828;
+  --tip-badge-border: #ffcdd2;
+  --tip-badge-shadow-1: rgba(198, 40, 40, 0.15);
+  --tip-badge-shadow-2: rgba(198, 40, 40, 0.25);
+  --negative-rgb: 211, 47, 47;
+
+  // Highlights
+  --highlight-success-bg: rgba(46, 125, 50, 0.12);
+  --highlight-error-bg: rgba(198, 40, 40, 0.12);
 
   // Typography Scale
   --font-size-h1: 1.75rem; // 28px
@@ -388,9 +414,10 @@ body {
 // === Custom Form Input Styles ===
 .custom-input {
   // We can leave this or remove it, but the crucial part is .q-field__control
-  
+
   .q-field__control {
     border-radius: var(--radius-sm);
+    overflow: hidden !important;
 
     &:before {
       border-color: var(--border-color);
@@ -418,7 +445,7 @@ body {
     height: 100% !important;
     transform: none !important;
   }
-  
+
   &.q-field--focused .q-field__control:after {
     border-color: var(--primary);
   }
@@ -667,6 +694,7 @@ body {
   &.q-field--outlined .q-field__control {
     border: 1px solid var(--neutral-200) !important;
     border-radius: 12px !important;
+    overflow: hidden !important;
     height: 39px !important;
     min-height: 39px !important;
     background-color: var(--surface-card);
@@ -682,17 +710,20 @@ body {
     }
   }
 
-  .q-field__native {
-    color: #000000 !important;
+  .q-field__native,
+  .q-field__input {
+    color: var(--text-input) !important;
+    font-weight: 500 !important;
     opacity: 1 !important;
-    -webkit-text-fill-color: #000000 !important;
+    -webkit-text-fill-color: var(--text-input) !important;
   }
   .q-field__prefix,
   .q-field__suffix,
   .q-select__dropdown-icon {
     color: var(--text-input) !important;
+    font-weight: 500 !important;
   }
-  .q-placeholder {
+  .q-placeholder:not(input):not(textarea) {
     color: var(--text-placeholder) !important;
     opacity: 0.65 !important;
   }
@@ -853,8 +884,8 @@ body {
 
   &.q-field--outlined .q-field__control,
   .q-field--outlined .q-field__control {
-    border-color: var(--negative, #e53934) !important;
-    box-shadow: 0 0 0 2px rgba(229, 57, 52, 0.15) !important;
+    border-color: var(--negative) !important;
+    box-shadow: 0 0 0 2px var(--negative-alpha-15) !important;
     transition:
       border-color 0.3s ease,
       box-shadow 0.3s ease;
@@ -862,8 +893,8 @@ body {
 
   // Also override the buu-input-muted border
   &.buu-input-muted.q-field--outlined .q-field__control {
-    border: 1px solid var(--negative, #e53934) !important;
-    box-shadow: 0 0 0 2px rgba(229, 57, 52, 0.15) !important;
+    border: 1px solid var(--negative) !important;
+    box-shadow: 0 0 0 2px var(--negative-alpha-15) !important;
   }
 }
 
@@ -875,7 +906,7 @@ body {
   margin-top: 4px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--negative, #e53934);
+  color: var(--negative);
   animation: buu-bounce-in 0.4s ease-out;
 
   .buu-error-icon {

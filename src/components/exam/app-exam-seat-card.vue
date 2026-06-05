@@ -11,20 +11,16 @@
 
       <!-- Information Section -->
       <div class="info-section col">
-        <div class="text-h6 text-weight-bold line-height-tight q-mb-xs text-black">
+        <div class="student-name line-height-tight q-mb-sm">
           {{ studentName }}
         </div>
-        <div class="row no-wrap q-gutter-x-lg text-body2 info-details text-black">
-          <div class="text-no-wrap">รหัส: {{ studentId }}</div>
-          <div v-if="hasSeat" class="text-no-wrap">เลขที่นั่งสอบ: {{ seatNumber }}</div>
-          <div v-else class="text-no-wrap">ยังไม่มีที่นั่ง</div>
-        </div>
-      </div>
-
-      <!-- Dots Section -->
-      <div class="dots-section q-ml-md">
-        <div class="dots-grid">
-          <div v-for="n in 6" :key="n" class="dot"></div>
+        <div class="row no-wrap items-center q-gutter-x-xl text-body2 info-details text-black">
+          <span v-if="displayRemark" :class="['remark-badge', remarkBadgeClass]">
+            หมายเหตุ: {{ displayRemark }}
+          </span>
+          <span v-if="hasSeat" class="text-no-wrap seat-label">
+            เลขที่นั่งสอบ: {{ seatNumber }}
+          </span>
         </div>
       </div>
     </q-card-section>
@@ -39,17 +35,31 @@ interface Props {
   studentId: string;
   seatNumber?: string | null;
   avatarUrl?: string | null;
+  remark?: string;
+  isForeigner?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   seatNumber: null,
   avatarUrl: null,
+  remark: '',
+  isForeigner: false,
 });
 
-const hasSeat = computed(() => {
+const hasSeat = computed((): boolean => {
   return (
     props.seatNumber !== null && props.seatNumber !== undefined && props.seatNumber.trim() !== ''
   );
+});
+
+const displayRemark = computed((): string => {
+  return props.remark || '';
+});
+
+const remarkBadgeClass = computed((): string => {
+  if (props.isForeigner) return 'remark-foreigner';
+  if (props.remark && props.remark !== 'ชาวไทย') return 'remark-special';
+  return 'remark-default';
 });
 </script>
 
@@ -75,8 +85,43 @@ const hasSeat = computed(() => {
   line-height: 1.2;
 }
 
+.student-name {
+  font-family: 'Sarabun', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 100%;
+  vertical-align: middle;
+  color: var(--text-primary, #000000);
+}
+
 .info-details {
-  font-size: 14px;
+  font-family: 'Sarabun', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 100%;
+  vertical-align: middle;
+  color: var(--text-primary, #000000);
+}
+
+.remark-badge {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.remark-foreigner {
+  color: var(--badge-error-text);
+}
+
+.remark-special {
+  color: var(--badge-warning-text);
+}
+
+.remark-default {
+  color: inherit;
+}
+
+.seat-label {
+  color: inherit;
 }
 
 .dots-section {

@@ -8,12 +8,12 @@
     />
 
     <!-- Time Tabs -->
-    <div class="q-mb-md">
+    <div class="q-mb-xs">
       <AppExamSessionTime v-model="activeSessionId" :sessions="sessions" />
     </div>
 
     <!-- Exam Detail Header -->
-    <section class="q-mb-lg">
+    <section class="q-mb-sm">
       <AppExamInfoCard
         :title="examTitle"
         :date="examDate"
@@ -29,7 +29,7 @@
     </section>
 
     <!-- Main Layout -->
-    <div class="row q-col-gutter-lg items-stretch">
+    <div class="row q-col-gutter-md items-stretch">
       <!-- Left Panel: Student List (Back to left) -->
       <div class="col-12 col-md-4 flex column min-width-0">
         <div
@@ -67,6 +67,8 @@
                   :student-id="student.id"
                   :seat-number="getSeatLabel(student.seat)"
                   :avatar-url="student.avatar"
+                  :remark="student.remark"
+                  :is-foreigner="student.isForeigner"
                 />
               </div>
 
@@ -98,48 +100,52 @@
             <AppSeatLegend :items="legendItems" />
           </div>
 
-          <!-- Seat Grid Container with Overflow handling -->
-          <div class="seat-grid-scroll-container">
+          <!-- Seat Grid Container with zoom-to-fit (no scrollbar) -->
+          <div ref="seatGridContainerRef" class="seat-grid-scroll-container">
             <div
               v-if="seatsByRow && seatsByRow.length > 0"
-              class="seat-grid-wrapper"
-              :style="{ gap: seatStyle.rowGap }"
+              class="seat-grid-scaling-wrapper"
+              :style="wrapperStyle"
             >
-              <!-- Render each row separately to lock position -->
-              <div
-                v-for="(rowSeats, rowIndex) in seatsByRow"
-                :key="rowIndex"
-                class="seat-row"
-                :style="{ gap: seatStyle.colGap }"
-              >
-                <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
-                  <!-- Aisle Gap between left/right halves -->
+              <div ref="seatGridInnerRef" class="seat-grid-scalable" :style="gridTransformStyle">
+                <div class="seat-grid-wrapper" :style="{ gap: seatStyle.rowGap }">
+                  <!-- Render each row separately to lock position -->
                   <div
-                    v-if="
-                      splitLeftRight &&
-                      colIndex === Math.ceil(rowSeats.length / 2) &&
-                      rowSeats.length > 1
-                    "
-                    class="aisle-gap"
-                    :style="{ width: seatStyle.aisleWidth, height: seatStyle.height }"
-                  ></div>
-
-                  <div
-                    class="seat-item"
-                    :style="{ width: seatStyle.width, height: seatStyle.height }"
+                    v-for="(rowSeats, rowIndex) in seatsByRow"
+                    :key="rowIndex"
+                    class="seat-row"
+                    :style="{ gap: seatStyle.colGap }"
                   >
-                    <AppExamSeatSquare
-                      :seat-number="seat.label"
-                      :status="seat.status"
-                      :style="{ width: '100%', height: '100%' }"
-                      :class="{ 'drag-over-effect': draggedOverSeatId === seat.id }"
-                      @click="handleSeatClick(seat)"
-                      @mouseenter="onSeatEnter(seat.id)"
-                      @mouseleave="onSeatLeave(seat.id)"
-                      @mouseup="onSeatDrop(seat.id)"
-                    />
+                    <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
+                      <!-- Aisle Gap between left/right halves -->
+                      <div
+                        v-if="
+                          splitLeftRight &&
+                          colIndex === Math.ceil(rowSeats.length / 2) &&
+                          rowSeats.length > 1
+                        "
+                        class="aisle-gap"
+                        :style="{ width: seatStyle.aisleWidth, height: seatStyle.height }"
+                      ></div>
+
+                      <div
+                        class="seat-item"
+                        :style="{ width: seatStyle.width, height: seatStyle.height }"
+                      >
+                        <AppExamSeatSquare
+                          :seat-number="seat.label"
+                          :status="seat.status"
+                          :style="{ width: '100%', height: '100%', fontSize: seatStyle.fontSize }"
+                          :class="{ 'drag-over-effect': draggedOverSeatId === seat.id }"
+                          @click="handleSeatClick(seat)"
+                          @mouseenter="onSeatEnter(seat.id)"
+                          @mouseleave="onSeatLeave(seat.id)"
+                          @mouseup="onSeatDrop(seat.id)"
+                        />
+                      </div>
+                    </template>
                   </div>
-                </template>
+                </div>
               </div>
             </div>
             <!-- Empty State -->
@@ -184,6 +190,8 @@
           :student-id="draggedStudentInfo.id"
           :seat-number="getSeatLabel(draggedStudentInfo.seat)"
           :avatar-url="draggedStudentInfo.avatar"
+          :remark="draggedStudentInfo.remark"
+          :is-foreigner="draggedStudentInfo.isForeigner"
         />
       </div>
     </teleport>
@@ -194,7 +202,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue';
 import AppButton from 'src/components/base/app-button.vue';
 import AppExamSeatCard from 'src/components/exam/app-exam-seat-card.vue';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
@@ -206,6 +214,7 @@ import AppExamSessionTime from 'src/components/exam/app-exam-session-time.vue';
 import AppSeatLegend from 'src/components/exam/app-seat-legend.vue';
 import { useExamSeatManagement } from 'src/composables/use-exam-seat-management';
 import { computed } from 'vue';
+import type { CSSProperties } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -251,8 +260,129 @@ const {
   handleSave,
 } = useExamSeatManagement();
 
+// ── Zoom-to-fit for seat grid ────────────────────────────────
+const seatGridContainerRef = ref<HTMLElement | null>(null);
+const seatGridInnerRef = ref<HTMLElement | null>(null);
+const seatScaleFactor = ref(1);
+const seatGridNaturalWidth = ref(0);
+const seatGridNaturalHeight = ref(0);
+const seatContainerWidth = ref(0);
+
+const measureAndScaleGrid = (): void => {
+  if (!seatGridInnerRef.value || !seatGridContainerRef.value) {
+    seatScaleFactor.value = 1;
+    return;
+  }
+
+  // Temporarily reset styles to measure natural size
+  const style = seatGridInnerRef.value.style;
+  const prevTransform = style.transform;
+  const prevPosition = style.position;
+  const prevWidth = style.width;
+  const prevHeight = style.height;
+
+  style.transform = 'none';
+  style.position = 'static';
+  style.width = 'max-content';
+  style.height = 'auto';
+
+  void seatGridInnerRef.value.offsetWidth; // force reflow
+
+  const gridW = seatGridInnerRef.value.scrollWidth;
+  const gridH = seatGridInnerRef.value.scrollHeight + 24;
+  seatGridNaturalWidth.value = gridW;
+  seatGridNaturalHeight.value = gridH;
+
+  // Restore style
+  style.transform = prevTransform;
+  style.position = prevPosition;
+  style.width = prevWidth;
+  style.height = prevHeight;
+
+  seatContainerWidth.value = seatGridContainerRef.value.clientWidth;
+  const availW = seatContainerWidth.value - 48;
+  const availH = seatGridContainerRef.value.clientHeight
+    ? seatGridContainerRef.value.clientHeight - 32
+    : 99999;
+
+  if (gridW <= 0 || gridH <= 0) {
+    seatScaleFactor.value = 1;
+    return;
+  }
+
+  const scaleX = availW / gridW;
+  const scaleY = availH / gridH;
+  const s = Math.min(scaleX, scaleY, 1); // never zoom in
+  seatScaleFactor.value = Math.max(0.15, s);
+};
+
+const wrapperStyle = computed<CSSProperties>(() => {
+  const s = seatScaleFactor.value;
+  const w = seatGridNaturalWidth.value;
+  const h = seatGridNaturalHeight.value;
+
+  if (s >= 1 || w <= 0 || h <= 0) {
+    return {
+      width: '100%',
+      display: 'flex',
+      justifyContent: 'center',
+    };
+  }
+
+  return {
+    width: `${seatContainerWidth.value - 48}px`, // Always take full available width
+    height: `${h * s}px`,
+    position: 'relative',
+    overflow: 'visible',
+  };
+});
+
+const gridTransformStyle = computed<CSSProperties>(() => {
+  const s = seatScaleFactor.value;
+  const w = seatGridNaturalWidth.value;
+  const h = seatGridNaturalHeight.value;
+
+  if (s >= 1 || w <= 0 || h <= 0) {
+    return {
+      transform: 'none',
+      width: 'max-content',
+    };
+  }
+
+  const targetW = (seatContainerWidth.value - 48) / s;
+
+  return {
+    transform: `scale(${s})`,
+    transformOrigin: 'top left',
+    position: 'absolute',
+    left: '0',
+    top: '0',
+    width: `${targetW}px`,
+    height: `${h}px`,
+  };
+});
+
+let resizeObs: ResizeObserver | null = null;
+
 onMounted(() => {
   void loadExamData();
+
+  if (seatGridContainerRef.value) {
+    resizeObs = new ResizeObserver(() => {
+      measureAndScaleGrid();
+    });
+    resizeObs.observe(seatGridContainerRef.value);
+  }
+  void nextTick(() => measureAndScaleGrid());
+});
+
+onBeforeUnmount(() => {
+  resizeObs?.disconnect();
+});
+
+// Re-measure when seat data changes
+watch([seatsByRow, splitLeftRight], () => {
+  void nextTick(() => measureAndScaleGrid());
 });
 
 const handleSearch = (val: string | number | null): void => {
@@ -305,7 +435,8 @@ h1 {
   box-shadow: var(--seat-grid-box-shadow);
   overflow: hidden;
   min-height: 400px;
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
 }
 
@@ -353,38 +484,36 @@ h1 {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  overflow-x: auto;
+  overflow: hidden;
   padding: 8px 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex: 1;
+  min-height: 0;
+}
 
-  /* Ensure it doesn't overflow its parent */
+.seat-grid-scalable {
   display: block;
-
-  &::-webkit-scrollbar {
-    height: 8px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: var(--seat-grid-scrollbar-thumb);
-    border-radius: 10px;
-
-    &:hover {
-      background: var(--seat-grid-scrollbar-thumb-hover);
-    }
-  }
+  width: max-content;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
 }
 
 .seat-grid-wrapper {
   display: flex;
   flex-direction: column;
-  width: fit-content;
-  align-items: center;
+  width: 100%;
+  align-items: stretch;
   margin: 0 auto;
 }
 
 .seat-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   flex-wrap: nowrap;
-  width: fit-content;
+  width: 100%;
 }
 
 .seat-item {

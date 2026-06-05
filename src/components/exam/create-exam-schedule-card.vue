@@ -47,12 +47,12 @@
         <!-- Date and Time Row -->
         <div class="row q-col-gutter-md q-mb-lg">
           <div class="col-12 col-md-6" data-field="examDate">
-            <div class="field-label-bold">วันที่สอบ</div>
+            <div class="buu-label-muted q-mb-xs">วันที่สอบ</div>
             <q-input
               v-model="form.examDate"
               outlined
               dense
-              class="custom-input bg-white cursor-pointer"
+              class="custom-input cursor-pointer"
               :class="{ 'buu-field-error': hasError('examDate') }"
               readonly
               :disable="locked"
@@ -102,12 +102,12 @@
             </div>
           </div>
           <div class="col-6 col-md-3" :data-field="`startTime_${activeSlotIndex}`">
-            <div class="field-label-bold">เวลาเริ่ม</div>
+            <div class="buu-label-muted q-mb-xs">เวลาเริ่ม</div>
             <q-input
               v-model="activeSlot.startTime"
               outlined
               dense
-              class="custom-input bg-white"
+              class="custom-input"
               :class="{ 'buu-field-error': hasError(`startTime_${activeSlotIndex}`) }"
               placeholder="08:00"
               mask="##:##"
@@ -126,12 +126,12 @@
             </div>
           </div>
           <div class="col-6 col-md-3" :data-field="`endTime_${activeSlotIndex}`">
-            <div class="field-label-bold">เวลาสิ้นสุด</div>
+            <div class="buu-label-muted q-mb-xs">เวลาสิ้นสุด</div>
             <q-input
               v-model="activeSlot.endTime"
               outlined
               dense
-              class="custom-input bg-white"
+              class="custom-input"
               :class="{ 'buu-field-error': hasError(`endTime_${activeSlotIndex}`) }"
               placeholder="10:00"
               mask="##:##"
@@ -169,13 +169,13 @@
           <!-- Room Header -->
           <div class="room-header row q-col-gutter-sm q-mb-xs">
             <div class="col-12 col-md-6">
-              <span class="room-header__label">สถานที่สอบ</span>
+              <span class="buu-label-muted">สถานที่สอบ</span>
             </div>
             <div class="col-12 col-md-3">
-              <span class="room-header__label">ผู้คุมสอบ</span>
+              <span class="buu-label-muted">ผู้คุมสอบ</span>
             </div>
             <div class="col-12 col-md-3">
-              <span class="room-header__label">จำนวนที่นั่ง</span>
+              <span class="buu-label-muted">จำนวนที่นั่ง</span>
             </div>
           </div>
 
@@ -195,15 +195,12 @@
                 map-options
                 outlined
                 dense
-                bg-color="white"
                 placeholder="เลือกสถานที่สอบ"
                 dropdown-icon="keyboard_arrow_down"
                 class="custom-input"
                 :class="{ 'buu-field-error': hasError(`locationId_${activeSlotIndex}_${rIdx}`) }"
                 :disable="locked"
-                @update:model-value="
-                  emit('clearFieldError', `locationId_${activeSlotIndex}_${rIdx}`)
-                "
+                @update:model-value="onLocationChange(room, activeSlotIndex, rIdx)"
               />
               <div
                 v-if="hasError(`locationId_${activeSlotIndex}_${rIdx}`)"
@@ -216,7 +213,9 @@
             </div>
             <div class="col-12 col-md-3">
               <q-select
-                v-model="room.proctorName"
+                v-model="room.proctors"
+                multiple
+                use-chips
                 :options="proctorOptions"
                 option-label="label"
                 option-value="value"
@@ -224,11 +223,9 @@
                 map-options
                 outlined
                 dense
-                bg-color="white"
-                placeholder="ผู้คุมสอบ"
+                placeholder="เลือกผู้คุมสอบ"
                 dropdown-icon="keyboard_arrow_down"
                 class="custom-input"
-                :disable="locked"
               />
             </div>
             <div class="col-12 col-md-3" :data-field="`seats_${activeSlotIndex}_${rIdx}`">
@@ -239,15 +236,30 @@
                     type="number"
                     outlined
                     dense
-                    bg-color="white"
                     class="custom-input"
-                    :class="{ 'buu-field-error': hasError(`seats_${activeSlotIndex}_${rIdx}`) }"
-                    placeholder="40"
-                    :disable="locked"
-                    @update:model-value="
-                      emit('clearFieldError', `seats_${activeSlotIndex}_${rIdx}`)
+                    :class="{
+                      'buu-field-error':
+                        hasError(`seats_${activeSlotIndex}_${rIdx}`) ||
+                        (room.locationId && room.seats > getLocationMaxSeats(room.locationId)),
+                    }"
+                    :placeholder="
+                      room.locationId ? String(getLocationMaxSeats(room.locationId)) : '40'
                     "
-                  />
+                    min="1"
+                    :max="getLocationMaxSeats(room.locationId)"
+                    :disable="locked"
+                    @keydown="preventNegativeAndDecimal"
+                    @update:model-value="
+                      (val: string | number | null) => {
+                        emit('clearFieldError', `seats_${activeSlotIndex}_${rIdx}`);
+                      }
+                    "
+                  >
+                    <q-tooltip v-if="room.locationId" class="bg-primary text-body2">
+                      จำนวนที่นั่งสูงสุดของสถานที่นี้คือ
+                      {{ getLocationMaxSeats(room.locationId) }} ที่นั่ง
+                    </q-tooltip>
+                  </q-input>
                 </div>
                 <div class="col-auto q-ml-sm" style="width: 24px">
                   <q-icon
@@ -261,7 +273,15 @@
                 </div>
               </div>
               <div
-                v-if="hasError(`seats_${activeSlotIndex}_${rIdx}`)"
+                v-if="room.locationId && room.seats > getLocationMaxSeats(room.locationId)"
+                class="buu-error-msg"
+              >
+                <q-icon name="error" class="buu-error-icon" />
+                เกินขอบเขตความจุที่นั่งของห้องสอบ มีที่นั่งได้ไม่เกิน
+                {{ getLocationMaxSeats(room.locationId) }} ที่นั่ง ในสถานที่นี้
+              </div>
+              <div
+                v-else-if="hasError(`seats_${activeSlotIndex}_${rIdx}`)"
                 :key="`seats-${rIdx}-${shakeKey}`"
                 class="buu-error-msg"
               >
@@ -278,7 +298,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import type { CreateExamForm, TimeSlot } from 'src/composables/use-create-exam';
+import type { CreateExamForm, TimeSlot, ExamRoom } from 'src/composables/use-create-exam';
 import type { ExamLocationOption } from 'src/services/exam.service';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
 import { beToCeString, ceToBeString } from 'src/utils/thai-date';
@@ -314,6 +334,36 @@ const emit = defineEmits([
 ]);
 
 const showExamDate = ref(false);
+
+const preventNegativeAndDecimal = (evt: KeyboardEvent) => {
+  if (['-', '+', 'e', 'E', '.', ','].includes(evt.key)) {
+    evt.preventDefault();
+  }
+};
+
+const getLocationMaxSeats = (locationId: number | null): number => {
+  if (!locationId) return 9999;
+  const option = props.locationOptions.find((opt) => opt.value === locationId);
+  if (!option || !option.raw) return 9999;
+  if (
+    option.raw.LOCATION_SEAT_CAPACITY !== undefined &&
+    option.raw.LOCATION_SEAT_CAPACITY !== null
+  ) {
+    return option.raw.LOCATION_SEAT_CAPACITY;
+  }
+  const seats = option.raw.SEATS;
+  if (!seats) return 0;
+  return seats.filter((s) => s.LS_SEAT_STATUS !== 1).length;
+};
+
+const onLocationChange = (room: ExamRoom, slotIdx: number, roomIdx: number) => {
+  emit('clearFieldError', `locationId_${slotIdx}_${roomIdx}`);
+
+  const maxSeats = getLocationMaxSeats(room.locationId);
+  if (maxSeats > 0 && maxSeats !== 9999) {
+    room.seats = maxSeats;
+  }
+};
 
 const activeSlot = computed(() => form.value.timeSlots[props.activeSlotIndex]);
 
@@ -374,8 +424,8 @@ const autoFormatTime = (time: string): string => {
 
 /* Active Slot Container */
 .active-slot-content {
-  background-color: #f4f6f8;
-  border-radius: var(--radius-sm, 8px);
+  background-color: var(--neutral-100);
+  border-radius: var(--radius-sm);
   padding: 24px;
 }
 
@@ -385,7 +435,7 @@ const autoFormatTime = (time: string): string => {
   flex-wrap: wrap;
   gap: 16px;
   align-items: center;
-  border-bottom: 1px solid var(--neutral-200, #eeeeee);
+  border-bottom: 1px solid var(--neutral-200);
 }
 .slot-tab {
   display: inline-flex;
@@ -394,7 +444,7 @@ const autoFormatTime = (time: string): string => {
   padding: 8px 4px;
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-primary, #333);
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
@@ -402,23 +452,23 @@ const autoFormatTime = (time: string): string => {
   margin-bottom: -1px;
 }
 .slot-tab:hover {
-  color: var(--primary, #1565c0);
+  color: var(--primary);
 }
 .slot-tab--active {
-  color: var(--primary, #1565c0);
+  color: var(--primary);
   font-weight: 600;
-  border-bottom: 2px solid var(--primary, #1565c0);
+  border-bottom: 2px solid var(--primary);
 }
 .slot-tab__label {
   white-space: nowrap;
 }
 .slot-tab__close {
-  color: var(--text-primary, #333);
+  color: var(--text-primary);
   cursor: pointer;
   transition: color 0.15s;
 }
 .slot-tab__close:hover {
-  color: var(--negative, #c10015);
+  color: var(--negative);
 }
 
 /* Rooms Section */
@@ -430,19 +480,7 @@ const autoFormatTime = (time: string): string => {
   font-weight: 700;
   color: var(--text-primary);
 }
-.room-header__label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--label-color, #666);
-}
-
 /* Field Styles */
-.field-label-bold {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--label-color);
-  margin-bottom: 4px;
-}
 .custom-input :deep(.q-field__control) {
   border-radius: var(--radius-sm);
   background-color: var(--surface-card);

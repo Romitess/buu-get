@@ -148,6 +148,7 @@ export interface BackendEnrollment {
   CREATED_AT: string;
   UPDATED_AT: string;
   DELETED_AT: string | null;
+  ERM_PHYSICAL_STATUS?: string | null;
 }
 
 export interface BackendScore {
@@ -172,6 +173,7 @@ export interface ExamEnrollment {
   LS_ID: number | null;
   ERM_STATUS: number;
   ERM_VERIFY_STATUS: number;
+  ERM_PHYSICAL_STATUS?: string | null;
   CREATED_AT: string;
   SESSION?: BackendSession;
   TRANSACTION?: {
@@ -210,6 +212,7 @@ export interface BackendLocation {
   LOCATION_TOTAL_ROWS?: number;
   LOCATION_TOTAL_COLS?: number;
   LOCATION_IS_SPLIT?: number;
+  LOCATION_SEAT_CAPACITY?: number;
   SEATS?: {
     LS_ID: number;
     LS_ROW_NO: number;

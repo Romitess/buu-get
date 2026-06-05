@@ -97,7 +97,7 @@ const columns = computed<QTableColumn[]>(() => [
   },
 ]);
 
-const getStatusColorClass = (status: string) => {
+const getStatusColorClass = (status: string): string => {
   if (status === 'ชำระเงินแล้ว' || status === 'สำเร็จ') {
     return 'text-positive';
   }
@@ -117,7 +117,7 @@ const getStatusColorClass = (status: string) => {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     padding: 12px 8px;
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    border-right: 1px solid var(--white-alpha-20);
   }
 
   :deep(.q-table thead tr th:last-child) {
@@ -147,8 +147,7 @@ const getStatusColorClass = (status: string) => {
   }
 
   :deep(.custom-empty-bottom) {
-    border: 1px solid var(--border-color);
-    border-top: none;
+    border-top: 1px solid var(--border-color);
     border-bottom-left-radius: var(--radius-md);
     border-bottom-right-radius: var(--radius-md);
   }

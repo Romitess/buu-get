@@ -83,7 +83,6 @@ export interface BackendUserResponse {
     userProvince?: string | null;
     userCountry?: string | null;
     userRemark?: string | null;
-    userPhysicalStatus?: string | null;
   };
 }
 
@@ -113,7 +112,6 @@ export function mapBackendUserToFrontendUser(backendUser: BackendUserResponse): 
     thaidSynced: false,
     role: ROLES.CANDIDATE,
     remark: backendUser.PROFILE?.userRemark || '',
-    userPhysicalStatus: backendUser.PROFILE?.userPhysicalStatus || '',
   };
 }
 
@@ -195,7 +193,6 @@ export async function updateProfile(
     userCountry?: string | undefined;
     userAddress?: string | undefined;
     userImagePath?: string | null | undefined;
-    userPhysicalStatus?: string | undefined;
     isFromEmail?: boolean | undefined;
   },
 ): Promise<User> {
@@ -208,6 +205,37 @@ export async function updateProfile(
     return response.data;
   } catch (err) {
     console.error('Failed to update profile:', err);
+    throw err;
+  }
+}
+
+export async function updateUserProfileByAdmin(
+  token: string,
+  userProfileId: number,
+  payload: {
+    userTitleTh?: string;
+    userFullnameTh?: string;
+    userTitleEn?: string;
+    userFullnameEn?: string;
+    userDateOfBirth?: string;
+    userPhone?: string;
+    userEducation?: string;
+    userFaculty?: string;
+    userInstitution?: string;
+    userAddress?: string;
+    userNationalId?: string;
+    userImagePath?: string;
+  },
+): Promise<unknown> {
+  try {
+    const response = await api.patch(`/user-profile/${userProfileId}`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (err) {
+    console.error('Failed to update user profile by admin:', err);
     throw err;
   }
 }

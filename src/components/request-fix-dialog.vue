@@ -226,7 +226,7 @@ const handleSubmit = (): void => {
 
 <style scoped lang="scss">
 .request-fix-dialog {
-  background-color: #ffffff;
+  background-color: var(--surface-card);
   display: flex;
   flex-direction: column;
   width: 500px;
@@ -258,8 +258,8 @@ const handleSubmit = (): void => {
 }
 
 .profile-info-block {
-  background: #f0f7ff;
-  border: 1.5px solid #bbdefb;
+  background: var(--badge-primary-bg);
+  border: 1.5px solid var(--badge-primary-dot);
   border-radius: 12px;
   flex-wrap: nowrap;
 }
@@ -267,42 +267,42 @@ const handleSubmit = (): void => {
 .field-label {
   font-size: 1rem;
   font-weight: 700;
-  color: #212121;
+  color: var(--text-primary);
 }
 
 .custom-input {
   :deep(.q-field__control) {
     border-radius: 10px;
-    background-color: #fcfcfc;
+    background-color: var(--neutral-50);
     transition: all 0.3s ease;
 
     &:before {
-      border: 1px solid #eeeeee !important;
+      border: 1px solid var(--border-color) !important;
       border-style: solid !important;
     }
 
     &:hover:before {
-      border-color: #e0e0e0 !important;
+      border-color: var(--neutral-gray-light) !important;
     }
   }
 
   :deep(.q-field__native) {
     font-weight: 500;
-    color: #424242;
+    color: var(--text-secondary);
   }
 }
 
 .custom-checkbox {
-  border: 1px solid #eeeeee;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 6px 12px;
   width: 100%;
   transition: all 0.2s ease;
-  background-color: #ffffff;
+  background-color: var(--surface-card);
 
   &:hover {
-    background-color: #fcfcfc;
-    border-color: #e0e0e0;
+    background-color: var(--neutral-50);
+    border-color: var(--neutral-gray-light);
   }
 
   :deep(.q-checkbox__inner) {
@@ -311,7 +311,7 @@ const handleSubmit = (): void => {
 
   :deep(.q-checkbox__label) {
     font-weight: 500;
-    color: #424242;
+    color: var(--text-secondary);
     font-size: 0.95rem;
   }
 }
@@ -341,11 +341,11 @@ const handleSubmit = (): void => {
 }
 
 .border-grey {
-  border: 1px solid #e0e0e0 !important;
+  border: 1px solid var(--border-color) !important;
 }
 
 .text-dark {
-  color: #212121 !important;
+  color: var(--text-primary) !important;
 }
 
 .flex-shrink-0 {

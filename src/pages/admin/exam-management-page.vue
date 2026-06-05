@@ -54,7 +54,6 @@ import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
 import { ROLES } from 'src/constants/roles';
 import type { Role, PaginationModel, TableRequestProps, ExamSchedule } from 'src/types/exam.types';
-import { fetchRawEnrollmentsByExamId } from 'src/services/enrollment.service';
 
 const $q = useQuasar();
 const router = useRouter();
@@ -98,30 +97,7 @@ const fetchData = async () => {
   isLoading.value = true;
   try {
     await examStore.loadManagementSchedules();
-
-    // Fetch enrollment status for each round to determine isAllVerifyPassed
-    const statusPromises = examStore.managementSchedules.map(async (exam) => {
-      try {
-        const enrollments = await fetchRawEnrollmentsByExamId(Number(exam.id));
-        // If there are registered candidates, all must have verify status PASS (1)
-        const isAllPassed =
-          enrollments.length > 0
-            ? enrollments.every((e) => Number(e.ERM_VERIFY_STATUS) === 1)
-            : true;
-        return {
-          ...exam,
-          isAllVerifyPassed: isAllPassed,
-        };
-      } catch (err) {
-        console.error(`Failed to fetch enrollments for exam ${exam.id}:`, err);
-        return {
-          ...exam,
-          isAllVerifyPassed: false,
-        };
-      }
-    });
-
-    examsWithVerifyStatus.value = await Promise.all(statusPromises);
+    examsWithVerifyStatus.value = examStore.managementSchedules;
     pagination.value.rowsNumber = exams.value.length;
   } catch {
     $q.notify({

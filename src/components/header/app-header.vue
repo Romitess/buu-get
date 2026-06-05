@@ -72,7 +72,7 @@
     >
       <q-list>
         <q-item-label header class="text-weight-bold text-body1">{{
-          $t('navigation.menu') || 'เมนู'
+          $t('navigation.menu')
         }}</q-item-label>
         <q-separator />
 
@@ -115,7 +115,7 @@
           </q-item-section>
           <q-item-section>
             <div class="row items-center justify-between">
-              <span>{{ locale === 'th' ? 'ภาษา' : 'Language' }}</span>
+              <span>{{ $t('navigation.language') }}</span>
               <q-badge outline color="primary" class="q-ml-sm text-weight-bold">
                 {{ locale === 'th' ? 'TH' : 'EN' }}
               </q-badge>
@@ -241,6 +241,14 @@ const navLinks = computed<NavigationItem[]>(() => {
         icon: 'edit_document',
         path: '/admin/exam-management',
       });
+      if (role === ROLES.ADMIN || role === ROLES.STAFF || role === ROLES.EXAM_OPERATIONS_OFFICER) {
+        links.push({
+          name: 'admin-test-voucher-management',
+          label: t('navigation.manageTestVoucher'),
+          icon: 'confirmation_number',
+          path: '/admin/test-voucher-management',
+        });
+      }
     }
 
     // === Staff-specific: Dashboard ===

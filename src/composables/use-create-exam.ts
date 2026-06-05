@@ -33,6 +33,8 @@ export interface ExamRoom {
   locationId: number | null;
   /** Proctor name (dropdown) */
   proctorName: string;
+  /** Selected proctors array */
+  proctors?: string[];
   /** Number of seats */
   seats: number;
   /** Backend session ID (only for existing sessions in edit mode) */
@@ -94,12 +96,13 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const examStore = useExamStore();
 
   const examId = options?.examId;
-  const isEditMode = computed(() => !!examId);
+  const isEditMode = computed<boolean>(() => !!examId);
 
   const wasOriginallyPublished = ref(false);
+  const originalExamDate = ref('');
 
   /** Whether the schedule section should be locked (published exam or has enrollments) */
-  const isScheduleLocked = computed(() => {
+  const isScheduleLocked = computed<boolean>(() => {
     if (!isEditMode.value) return false;
     const hasEnrollments = form.value.timeSlots.some((slot) =>
       slot.rooms.some((room) => (room.enrollmentCount || 0) > 0),
@@ -109,7 +112,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   });
 
   /** Checks if the schedule is locked specifically due to existing enrollments */
-  const isLockedByEnrollment = computed(() => {
+  const isLockedByEnrollment = computed<boolean>(() => {
     return form.value.timeSlots.some((slot) =>
       slot.rooms.some((room) => (room.enrollmentCount || 0) > 0),
     );
@@ -152,7 +155,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         {
           startTime: '08:00',
           endTime: '10:00',
-          rooms: [{ locationId: null, proctorName: '', seats: 40 }],
+          rooms: [{ locationId: null, proctorName: '', proctors: [], seats: 40 }],
         },
       ],
       regStartDate: today,
@@ -189,7 +192,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     return parseInt(y, 10) * 10000 + parseInt(m, 10) * 100 + parseInt(d, 10);
   };
 
-  const dateErrors = computed(() => {
+  const dateErrors = computed<Record<string, string>>(() => {
     const errors = {
       regStartDate: '',
       regEndDate: '',
@@ -238,9 +241,33 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         errors.examDate = 'วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการชำระเงิน';
       }
     }
+    // 7. วันที่สอบต้องไม่เป็นวันที่ผ่านไปแล้ว (เฉพาะกรณีสร้างใหม่ หรือมีการแก้ไขวันที่สอบ)
+    const isExamDateChanged = !isEditMode.value || form.value.examDate !== originalExamDate.value;
+    if (examVal > 0 && examVal < todayVal && isExamDateChanged) {
+      if (errors.examDate) {
+        errors.examDate += ' และต้องไม่เป็นวันที่ผ่านไปแล้ว';
+      } else {
+        errors.examDate = 'วันที่สอบต้องไม่เป็นวันที่ผ่านไปแล้ว';
+      }
+    }
 
     return errors;
   });
+
+  const getLocationMaxSeats = (locationId: number | null): number => {
+    if (!locationId) return 9999;
+    const option = locationOptions.value.find((opt) => opt.value === locationId);
+    if (!option || !option.raw) return 9999;
+    if (
+      option.raw.LOCATION_SEAT_CAPACITY !== undefined &&
+      option.raw.LOCATION_SEAT_CAPACITY !== null
+    ) {
+      return option.raw.LOCATION_SEAT_CAPACITY;
+    }
+    const seats = option.raw.SEATS;
+    if (!seats) return 0;
+    return seats.filter((s) => s.LS_SEAT_STATUS !== 1).length;
+  };
 
   // ── Field-level validation (required fields) ──
   /** Reactive object holding per-field validation error messages */
@@ -288,6 +315,12 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         }
         if (!room.seats || room.seats <= 0) {
           errors[`seats_${slotIdx}_${roomIdx}`] = VALIDATION_MSG.SEATS;
+        } else if (room.locationId) {
+          const maxSeats = getLocationMaxSeats(room.locationId);
+          if (room.seats > maxSeats) {
+            errors[`seats_${slotIdx}_${roomIdx}`] =
+              `เกินขอบเขตความจุที่นั่งของห้องสอบ มีที่นั่งได้ไม่เกิน ${maxSeats} ที่นั่ง ในสถานที่นี้`;
+          }
         }
       });
     });
@@ -399,6 +432,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         form.value.isPublished = exam.EXAM_PUBLISHED ?? false;
         wasOriginallyPublished.value = exam.EXAM_PUBLISHED ?? false;
         form.value.examDate = gregorianToBuddhistDisplay(exam.EXAM_DATE);
+        originalExamDate.value = form.value.examDate;
         form.value.regStartDate = gregorianToBuddhistDisplay(exam.EXAM_REG_START_DATE);
         form.value.regEndDate = gregorianToBuddhistDisplay(exam.EXAM_REG_END_DATE);
         form.value.payStartDate = gregorianToBuddhistDisplay(exam.EXAM_PAY_START_DATE);
@@ -423,9 +457,15 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
             }
 
             const slot = slotMap.get(key)!;
+            const proctorsList = session.SS_NAME
+              ? session.SS_NAME.split(',')
+                  .map((s) => s.trim())
+                  .filter((s) => s.length > 0)
+              : [];
             slot.rooms.push({
               locationId: session.LOCATION?.LOCATION_ID ?? session.LOCATION_ID ?? null,
               proctorName: session.SS_NAME || '',
+              proctors: proctorsList,
               seats: session.SS_CAPACITY ?? 40,
               sessionId: session.SS_ID,
               enrollmentCount: session.ENROLLMENTS?.length || 0,
@@ -543,6 +583,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     form.value.timeSlots[slotIndex]?.rooms.push({
       locationId: null,
       proctorName: '',
+      proctors: [],
       seats: 40,
     });
   };
@@ -802,7 +843,14 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    * Flatten all rooms from all time slots into a single array of time-range + room data
    * for backend submission.
    */
-  const flattenRoomsToTimeRanges = () => {
+  const flattenRoomsToTimeRanges = (): {
+    startTime: string;
+    endTime: string;
+    locationId: number;
+    seats: number;
+    proctorName: string;
+    sessionId?: number;
+  }[] => {
     const result: {
       startTime: string;
       endTime: string;
@@ -820,7 +868,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           endTime: formatTime(slot.endTime),
           locationId: Number(room.locationId),
           seats: Number(room.seats),
-          proctorName: room.proctorName || '',
+          proctorName:
+            room.proctors && room.proctors.length > 0
+              ? room.proctors.join(', ')
+              : room.proctorName || '',
           ...(room.sessionId != null ? { sessionId: room.sessionId } : {}),
         });
       });
@@ -939,6 +990,17 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       $q.notify({
         type: 'warning',
         message: 'วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการชำระเงิน',
+        position: 'top',
+      });
+      return false;
+    }
+
+    // 7. วันที่สอบต้องไม่เป็นวันที่ผ่านไปแล้ว (เฉพาะกรณีสร้างใหม่ หรือมีการแก้ไขวันที่สอบ)
+    const isExamDateChanged = !isEditMode.value || form.value.examDate !== originalExamDate.value;
+    if (examVal < todayVal && isExamDateChanged) {
+      $q.notify({
+        type: 'warning',
+        message: 'วันที่สอบต้องไม่เป็นวันที่ผ่านไปแล้ว',
         position: 'top',
       });
       return false;

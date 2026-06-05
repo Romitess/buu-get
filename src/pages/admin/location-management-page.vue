@@ -35,7 +35,7 @@
             text-color="grey-10"
             icon="edit"
             class="action-btn"
-            @click="openEditDialog(row)"
+            @click="navigateToEdit(row.LOCATION_ID)"
           >
             <q-tooltip class="bg-secondary text-white text-caption">
               {{ $t('admin.locationManagement.table.tooltips.edit') }}
@@ -62,13 +62,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useQuasar, type QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
 import BaseTable from 'src/components/shared/base-table.vue';
-import DialogLocationForm from 'src/components/exam/dialog-location-form.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import type { BackendLocation } from 'src/types/exam';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
@@ -76,9 +76,9 @@ import * as locationService from 'src/services/location.service';
 
 const $q = useQuasar();
 const { t } = useI18n();
+const router = useRouter();
 
 const isLoading = ref(false);
-const isSaving = ref(false);
 const searchQuery = ref('');
 const locations = ref<BackendLocation[]>([]);
 
@@ -160,7 +160,7 @@ const locationsWithComputedData = computed(() => {
     ...loc,
     index: idx + 1,
     floor: loc.LOCATION_FLOOR_NO ?? parseFloor(loc.LOCATION_ROOM_NO),
-    capacity: parseCapacity(loc.LOCATION_ROOM_NO),
+    capacity: loc.LOCATION_SEAT_CAPACITY ?? parseCapacity(loc.LOCATION_ROOM_NO),
   }));
 });
 
@@ -198,40 +198,11 @@ const onRequest = (props: TableRequestProps) => {
   pagination.value.rowsPerPage = rowsPerPage;
 };
 
-const openEditDialog = (row: BackendLocation) => {
-  $q.dialog({
-    component: DialogLocationForm,
-    componentProps: {
-      initialData: {
-        LOCATION_NAME: row.LOCATION_NAME,
-        LOCATION_ROOM_NO: row.LOCATION_ROOM_NO || '',
-      },
-      loading: isSaving.value,
-    },
-  }).onOk((payload: locationService.LocationPayload) => {
-    void saveForm(payload, row.LOCATION_ID);
+const navigateToEdit = (id: number) => {
+  void router.push({
+    name: 'admin-edit-location',
+    params: { locationId: String(id) },
   });
-};
-
-const saveForm = async (payload: locationService.LocationPayload, id: number) => {
-  isSaving.value = true;
-  try {
-    await locationService.updateLocation(id, payload);
-    $q.notify({
-      type: 'positive',
-      message: t('admin.locationManagement.notifications.updateSuccess'),
-      position: 'top',
-    });
-    await fetchData();
-  } catch {
-    $q.notify({
-      type: 'negative',
-      message: t('admin.locationManagement.notifications.updateError'),
-      position: 'top',
-    });
-  } finally {
-    isSaving.value = false;
-  }
 };
 
 const confirmDelete = (row: BackendLocation) => {

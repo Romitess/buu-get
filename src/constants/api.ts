@@ -38,5 +38,5 @@ export const IMAGE_CONFIG = {
   /** Allowed MIME types */
   ALLOWED_TYPES: ['image/jpeg', 'image/png'] as const,
   /** Allowed file extensions */
-  ALLOWED_EXTENSIONS: ['.jpg', '.jpeg'] as const,
+  ALLOWED_EXTENSIONS: ['.jpg', '.jpeg', '.png'] as const,
 } as const;

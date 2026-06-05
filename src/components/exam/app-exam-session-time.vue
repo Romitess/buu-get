@@ -43,12 +43,12 @@ const formatSessionLabel = (session: BackendSession): string => {
 
 <style scoped lang="scss">
 .app-exam-session-tabs {
-  border-bottom: 2px solid #e2e2e28a;
+  border-bottom: 2px solid var(--dashboard-tab-border);
 
   :deep(.q-tab) {
     padding: 0 16px;
     min-height: 48px;
-    color: #242424;
+    color: var(--text-primary);
 
     .q-tab__label {
       font-size: 18px;
@@ -58,7 +58,7 @@ const formatSessionLabel = (session: BackendSession): string => {
   }
 
   :deep(.q-tab--active) {
-    color: #2196f3 !important;
+    color: var(--primary) !important;
     .q-tab__label {
       font-weight: 500;
     }

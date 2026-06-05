@@ -104,7 +104,6 @@ const formatIcon = computed((): string => {
   font-weight: 500;
 }
 
-// Responsive adjustments
 @media (max-width: 600px) {
   .exam-detail-card {
     border-radius: 12px;

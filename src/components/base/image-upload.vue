@@ -1,6 +1,5 @@
 <template>
   <div class="image-upload-container">
-    <!-- Preview หรือ Upload Zone -->
     <div v-if="displayUrl" class="preview-wrapper">
       <div class="preview-image-container">
         <img :src="displayUrl" :alt="alt" class="preview-image" />
@@ -29,13 +28,12 @@
       </div>
     </div>
 
-    <!-- Upload Zone (เมื่อยังไม่มีรูป) -->
     <div v-else class="upload-zone" @click="triggerFileInput">
       <q-file
         ref="fileInputRef"
         v-model="selectedFile"
         @update:model-value="handleFileSelected"
-        accept=".jpg,.jpeg"
+        accept=".jpg,.jpeg,.png"
         max-file-size="5242880"
         dense
         filled
@@ -47,7 +45,6 @@
       </div>
     </div>
 
-    <!-- Loading & Error -->
     <div v-if="isUploading" class="upload-progress">
       <q-linear-progress indeterminate color="primary" />
       <p class="text-caption text-center q-mt-sm">{{ uploadingText }}</p>
@@ -68,16 +65,12 @@ import { useImageUpload } from 'src/composables/use-image-upload';
 import { useImageUrl } from 'src/composables/use-image-url';
 
 interface Props {
-  /** imagePath ที่เก็บใน database */
   modelValue: string | null;
-  /** folder destination สำหรับ upload (e.g. 'profile', 'certificate') */
   folder?: string;
-  /** alt text สำหรับรูป */
   alt?: string;
 }
 
 interface Emits {
-  /** emit เมื่อ imagePath เปลี่ยน */
   (e: 'update:modelValue', value: string): void;
 }
 
@@ -133,7 +126,6 @@ const handleDelete = (): void => {
   display: none;
 }
 
-// Preview
 .preview-wrapper {
   position: relative;
   width: 100%;
@@ -146,7 +138,7 @@ const handleDelete = (): void => {
   height: 100%;
   border-radius: inherit;
   overflow: hidden;
-  background-color: #f5f5f5;
+  background-color: var(--surface-page);
 
   &:hover .preview-overlay {
     opacity: 1;
@@ -174,11 +166,10 @@ const handleDelete = (): void => {
   transition: opacity 0.3s ease;
 }
 
-// Upload Zone
 .upload-zone {
   width: 100%;
   height: 100%;
-  background-color: #e0e0e0;
+  background-color: var(--neutral-gray-light);
   border-radius: inherit;
   display: flex;
   align-items: center;
@@ -187,7 +178,7 @@ const handleDelete = (): void => {
   transition: all 0.3s ease;
 
   &:hover {
-    background-color: #d5d5d5;
+    background-color: var(--neutral-200);
   }
 }
 
@@ -198,7 +189,6 @@ const handleDelete = (): void => {
   pointer-events: none;
 }
 
-// Progress & Error
 .upload-progress {
   width: 100%;
 }

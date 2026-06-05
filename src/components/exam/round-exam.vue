@@ -102,8 +102,8 @@ async function syncTime(): Promise<void> {
         now.value = getThaiTime();
         return;
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      void err;
     }
   }
 

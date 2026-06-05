@@ -29,7 +29,6 @@ export interface User {
   taxId: string;
   thaidSynced: boolean;
   userImagePath?: string;
-  userPhysicalStatus?: string;
 
   // ROLES
   role?: UserRole;

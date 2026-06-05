@@ -27,25 +27,13 @@
 </template>
 
 <script setup lang="ts">
-/**
- * AppButton Component
- * A reusable button component following the BUU-GET brand guidelines.
- * Curvature and colors are matched with the application's layout system.
- */
 interface Props {
-  /** Optional icon name (Quasar icons) */
   icon?: string;
-  /** Button label text */
   label?: string;
-  /** Button color (e.g., 'primary', 'secondary', 'full', 'buu-gray-dark') */
   color?: string;
-  /** If true, button will be flat */
   flat?: boolean;
-  /** If true, button will have an outline */
   outline?: boolean;
-  /** If true, button will be circular (round) */
   round?: boolean;
-  /** If true, button will have a pill shape (fully rounded) */
   pill?: boolean;
 }
 
@@ -60,7 +48,6 @@ withDefaults(defineProps<Props>(), {
 
 <style scoped lang="scss">
 .app-button {
-  // Border radius matching the layout elements
   border-radius: 8px;
   font-weight: 600;
   text-transform: none;
@@ -68,20 +55,17 @@ withDefaults(defineProps<Props>(), {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   letter-spacing: 0.02em;
 
-  // Round variant override
   &--round {
     border-radius: 50%;
     padding: 0;
   }
 
-  // Pill variant override
   &--pill {
     border-radius: 100px;
     padding: 6px 18px;
     font-size: 0.85rem;
   }
 
-  // Brand Variant (Primary Dark Blue - #0D47A1)
   &--brand {
     background-color: var(--primary) !important;
     color: white !important;
@@ -94,7 +78,6 @@ withDefaults(defineProps<Props>(), {
     }
   }
 
-  // Secondary Variant (Light Blue - #1E89E5)
   &--secondary {
     background-color: var(--secondary) !important;
     color: white !important;
@@ -107,18 +90,16 @@ withDefaults(defineProps<Props>(), {
     }
   }
 
-  // Full/Negative Variant (Light Red Background)
   &--full {
-    background-color: #ffebeb !important;
-    color: #f44336 !important;
+    background-color: var(--btn-danger-light-bg) !important;
+    color: var(--btn-danger-light-text) !important;
     border: none;
 
     &:hover {
-      background-color: #ffdada !important;
+      background-color: var(--btn-danger-light-hover) !important;
     }
   }
 
-  // Dark Variant
   &--dark {
     background-color: var(--surface-sidebar) !important;
     color: white !important;
@@ -130,7 +111,6 @@ withDefaults(defineProps<Props>(), {
     }
   }
 
-  // Flat Variant
   &--flat {
     &:hover {
       background: rgba(0, 0, 0, 0.05) !important;
@@ -142,7 +122,6 @@ withDefaults(defineProps<Props>(), {
     filter: brightness(0.95);
   }
 
-  // Ensure icons are centered
   :deep(.q-icon) {
     font-size: 1.2rem;
     margin-right: 6px;

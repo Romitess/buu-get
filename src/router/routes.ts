@@ -150,7 +150,23 @@ const routes: RouteRecordRaw[] = [
                   icon: 'room',
                   to: '/admin/location-management',
                 },
-                { label: 'สร้างห้องสอบ', icon: 'add_circle' }, // Using Thai since specific label may not be in i18n
+                { label: 'navigation.createLocation', icon: 'add_circle' },
+              ],
+            },
+          },
+          {
+            path: 'edit-location/:locationId',
+            name: 'admin-edit-location',
+            component: () => import('pages/admin/location-edit-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageLocations',
+                  icon: 'room',
+                  to: '/admin/location-management',
+                },
+                { label: 'navigation.editLocation', icon: 'edit' },
               ],
             },
           },
@@ -344,6 +360,18 @@ const routes: RouteRecordRaw[] = [
                   to: '/admin/payment-import',
                 },
                 { label: 'navigation.checkPayment', icon: 'fact_check' },
+              ],
+            },
+          },
+          {
+            path: 'test-voucher-management',
+            name: 'admin-test-voucher-management',
+            component: () => import('pages/admin/test-voucher-management-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.STAFF, ROLES.EXAM_OPERATIONS_OFFICER],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.manageTestVoucher', icon: 'star' },
               ],
             },
           },

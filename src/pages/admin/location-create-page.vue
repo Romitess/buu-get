@@ -9,7 +9,7 @@
 
     <div class="row q-col-gutter-md location-create-layout items-stretch">
       <!-- Left Panel: Form Settings -->
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-auto form-panel">
         <div class="form-card">
           <div class="form-section">
             <div class="row items-center q-mb-sm">
@@ -135,7 +135,7 @@
       </div>
 
       <!-- Right Panel: Preview & Save -->
-      <div class="col-12 col-md-8 preview-panel">
+      <div class="col-12 col-md preview-panel">
         <div class="buu-premium-card preview-card q-pa-md">
           <div class="preview-scroll">
             <AppExamSeatPreview
@@ -173,7 +173,7 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import AppExamSeatPreview from 'src/components/exam/app-exam-seat-preview.vue';
-import { createLocationWithSeats, updateSeatStatus } from 'src/services/location.service';
+import { createLocationWithSeats } from 'src/services/location.service';
 
 const MAX_SEAT_LAYOUT_SIZE = 25;
 
@@ -236,26 +236,24 @@ const handleSave = async (): Promise<void> => {
   isSaving.value = true;
 
   try {
-    const { seats } = await createLocationWithSeats({
-      LOCATION_NAME: building.value.trim(),
-      LOCATION_ROOM_NO: roomName.value.trim() || undefined,
-      LOCATION_FLOOR_NO:
-        floor.value !== null && String(floor.value).trim() !== '' ? Number(floor.value) : undefined,
-      LOCATION_TOTAL_ROWS: Number(rows.value),
-      LOCATION_TOTAL_COLS: Number(cols.value),
-      LOCATION_SEAT_CAPACITY: Number(totalSeats.value),
-      SEAT_LABEL_FORMAT: 'ROW_COL',
-      LOCATION_IS_SPLIT: splitLeftRight.value ? 1 : 0,
-    });
+    const brokenSeatLabels = Array.from(seatPreviewRef.value?.brokenSeats ?? new Set<string>());
 
-    const brokenSeatLabels = seatPreviewRef.value?.brokenSeats ?? new Set<string>();
-    if (brokenSeatLabels.size > 0) {
-      const brokenSeatIds = seats
-        .filter((seat) => seat.LS_SEAT_LABEL !== null && brokenSeatLabels.has(seat.LS_SEAT_LABEL))
-        .map((seat) => seat.LS_ID);
-
-      await Promise.all(brokenSeatIds.map((id) => updateSeatStatus(id, 1)));
-    }
+    await createLocationWithSeats(
+      {
+        LOCATION_NAME: building.value.trim(),
+        LOCATION_ROOM_NO: roomName.value.trim() || undefined,
+        LOCATION_FLOOR_NO:
+          floor.value !== null && String(floor.value).trim() !== ''
+            ? Number(floor.value)
+            : undefined,
+        LOCATION_TOTAL_ROWS: Number(rows.value),
+        LOCATION_TOTAL_COLS: Number(cols.value),
+        LOCATION_SEAT_CAPACITY: Number(totalSeats.value),
+        SEAT_LABEL_FORMAT: 'ROW_COL',
+        LOCATION_IS_SPLIT: splitLeftRight.value ? 1 : 0,
+      },
+      brokenSeatLabels,
+    );
 
     $q.notify({
       type: 'positive',
@@ -283,6 +281,11 @@ const handleSave = async (): Promise<void> => {
 
 .location-create-layout {
   margin-top: calc(var(--space-sm) * -1);
+}
+
+.form-panel {
+  display: flex;
+  justify-content: flex-start;
 }
 
 .total-seats-box {
@@ -325,22 +328,8 @@ const handleSave = async (): Promise<void> => {
 .preview-scroll {
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
   padding: var(--space-xs);
-
-  &::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--seat-scrollbar-thumb);
-    border-radius: var(--radius-pill);
-
-    &:hover {
-      background: var(--seat-scrollbar-thumb-hover);
-    }
-  }
 
   :deep(.seat-preview-content) {
     padding-bottom: var(--space-md);
@@ -355,5 +344,12 @@ const handleSave = async (): Promise<void> => {
   flex-shrink: 0;
   margin-top: var(--space-md);
   padding-bottom: var(--space-xs);
+}
+
+@media (min-width: 1024px) {
+  .form-panel {
+    flex: 0 0 calc(400px + var(--space-xl));
+    max-width: calc(400px + var(--space-xl));
+  }
 }
 </style>
