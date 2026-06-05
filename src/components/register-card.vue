@@ -273,6 +273,7 @@ const onThaiID = (): void => {
 .register-card {
   width: 100%;
   max-width: 500px;
+  margin: 0 auto;
   background: var(--surface-card);
   border-radius: 12px;
   // padding: 40px 36px 36px;
