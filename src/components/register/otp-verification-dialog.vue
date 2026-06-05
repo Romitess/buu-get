@@ -199,6 +199,7 @@ onBeforeUnmount(() => {
   padding: 42px 62px 24px;
   position: relative;
   text-align: center;
+  font-family: var(--font-family-base);
 }
 
 .otp-close-btn {
