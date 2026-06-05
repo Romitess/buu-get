@@ -218,7 +218,7 @@ export function useExamSeatManagement() {
 
     students.value = eligibleEnrollments.map((e) => {
       const profile = e.USER?.PROFILE;
-      const physicalStatus = profile?.userPhysicalStatus || '';
+      const physicalStatus = e.ERM_PHYSICAL_STATUS || '';
       const isForeigner = !!e.USER?.USER_PASSPORT_NO;
       const imagePath = e.USER?.IMAGE?.USER_IMAGE_URL || null;
 

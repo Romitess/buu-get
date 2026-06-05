@@ -93,6 +93,8 @@ const dummyEnrollment = computed(() => {
     CREATED_AT: new Date().toISOString(),
     UPDATED_AT: new Date().toISOString(),
     DELETED_AT: null,
+    ERM_PHYSICAL_STATUS:
+      selectedStatus.value === 'ไม่มีข้อมูลข้างต้น' ? 'ทั่วไป' : selectedStatus.value,
     USER: {
       USER_ID: u.id || 0,
       USER_NATIONAL_ID: u.nationalId,
@@ -115,8 +117,6 @@ const dummyEnrollment = computed(() => {
         userProvince: u.province || '-',
         userZipCode: u.zipCode || '-',
         userRemark: u.remark || null,
-        userPhysicalStatus:
-          selectedStatus.value === 'ไม่มีข้อมูลข้างต้น' ? 'ทั่วไป' : selectedStatus.value,
       },
     },
     SESSION: {

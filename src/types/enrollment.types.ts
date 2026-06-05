@@ -14,7 +14,6 @@ export interface BackendUserProfile {
   userProvince: string | null;
   userZipCode: string | null;
   userRemark: string | null;
-  userPhysicalStatus: string | null;
 }
 
 export interface BackendUser {
@@ -79,6 +78,7 @@ export interface BackendEnrollmentDetail {
   CREATED_AT: string;
   UPDATED_AT: string;
   DELETED_AT: string | null;
+  ERM_PHYSICAL_STATUS?: string | null;
   USER: BackendUser;
   SESSION: BackendSessionDetail;
   ATTENDANCES?: BackendAttendance[];

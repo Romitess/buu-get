@@ -442,8 +442,6 @@ interface ProfileFormData {
   address: string;
   phone: string;
   userImagePath?: string | undefined;
-  physicalStatus: string;
-  physicalStatusCustom: string;
 }
 
 const formData = ref<ProfileFormData>({
@@ -459,8 +457,6 @@ const formData = ref<ProfileFormData>({
   address: '',
   phone: '',
   userImagePath: undefined,
-  physicalStatus: 'ทั่วไป',
-  physicalStatusCustom: '',
 });
 
 const titleOptions: ComputedRef<{ label: string; value: string }[]> = computed<
@@ -524,9 +520,6 @@ const birthdateDisplay: WritableComputedRef<string> = computed<string>({
 onMounted((): void => {
   const user = userStore.currentUser;
   if (user) {
-    const isPreset = ['ทั่วไป', 'พระสงฆ์', 'ตั้งครรภ์', '', null, undefined].includes(
-      user.userPhysicalStatus,
-    );
     formData.value = {
       email: user.email || '',
       title: user.titleTH || TITLE_TH_OPTIONS[0].value,
@@ -540,8 +533,6 @@ onMounted((): void => {
       address: user.address || '',
       phone: user.phone || '',
       userImagePath: user.userImagePath || undefined,
-      physicalStatus: isPreset ? user.userPhysicalStatus || 'ทั่วไป' : 'อื่น ๆ',
-      physicalStatusCustom: isPreset ? '' : user.userPhysicalStatus || '',
     };
   }
 });
@@ -565,13 +556,6 @@ const onSave = async (): Promise<void> => {
     userStore.isLoadingGlobal = true;
     userStore.loadingText = t('profile.savingData');
 
-    const physicalStatusValue =
-      formData.value.physicalStatus === 'อื่น ๆ'
-        ? formData.value.physicalStatusCustom
-        : formData.value.physicalStatus === 'ทั่วไป'
-          ? 'ทั่วไป'
-          : formData.value.physicalStatus;
-
     await userService.updateProfile(token, {
       userTitleTh: formData.value.title,
       userFullnameTh: formData.value.fullNameTH,
@@ -582,7 +566,6 @@ const onSave = async (): Promise<void> => {
       userFaculty: formData.value.faculty,
       userInstitution: formData.value.institution,
       userAddress: formData.value.address,
-      userPhysicalStatus: physicalStatusValue,
       isFromEmail: isFromEmail.value,
       userImagePath: formData.value.userImagePath,
     });

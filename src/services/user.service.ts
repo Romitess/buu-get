@@ -83,7 +83,6 @@ export interface BackendUserResponse {
     userProvince?: string | null;
     userCountry?: string | null;
     userRemark?: string | null;
-    userPhysicalStatus?: string | null;
   };
 }
 
@@ -113,7 +112,6 @@ export function mapBackendUserToFrontendUser(backendUser: BackendUserResponse): 
     thaidSynced: false,
     role: ROLES.CANDIDATE,
     remark: backendUser.PROFILE?.userRemark || '',
-    userPhysicalStatus: backendUser.PROFILE?.userPhysicalStatus || '',
   };
 }
 
@@ -195,7 +193,6 @@ export async function updateProfile(
     userCountry?: string | undefined;
     userAddress?: string | undefined;
     userImagePath?: string | null | undefined;
-    userPhysicalStatus?: string | undefined;
     isFromEmail?: boolean | undefined;
   },
 ): Promise<User> {
@@ -226,7 +223,6 @@ export async function updateUserProfileByAdmin(
     userFaculty?: string;
     userInstitution?: string;
     userAddress?: string;
-    userPhysicalStatus?: string;
     userNationalId?: string;
     userImagePath?: string;
   },

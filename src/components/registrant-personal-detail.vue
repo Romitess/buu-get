@@ -148,7 +148,7 @@ const displayData = computed(() => {
     address: profile?.userAddress || '-',
     phone: formatPhone(profile?.userPhone || ''),
     profileImagePath: user?.IMAGE?.USER_IMAGE_URL || null,
-    physicalStatus: profile?.userPhysicalStatus || '-',
+    physicalStatus: props.enrollment?.ERM_PHYSICAL_STATUS || '-',
   };
 });
 
