@@ -11,10 +11,10 @@
 
       <!-- Information Section -->
       <div class="info-section col">
-        <div class="student-name line-height-tight q-mb-xs">
+        <div class="student-name line-height-tight q-mb-sm">
           {{ studentName }}
         </div>
-        <div class="row no-wrap items-center q-gutter-x-md text-body2 info-details text-black">
+        <div class="row no-wrap items-center q-gutter-x-xl text-body2 info-details text-black">
           <span v-if="displayRemark" :class="['remark-badge', remarkBadgeClass]">
             หมายเหตุ: {{ displayRemark }}
           </span>

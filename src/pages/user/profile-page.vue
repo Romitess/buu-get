@@ -258,27 +258,6 @@
               mask="###-###-####"
             />
           </div>
-          <div class="q-mt-md relative-position">
-            <label class="form-label">หมายเหตุ</label>
-            <q-select
-              v-model="formData.physicalStatus"
-              :options="physicalStatusOptions"
-              outlined
-              dense
-              bg-color="white"
-              dropdown-icon="expand_more"
-            />
-          </div>
-          <div v-if="formData.physicalStatus === 'อื่น ๆ'" class="q-mt-md relative-position">
-            <label class="form-label">โปรดระบุรายละเอียดเพิ่มเติม</label>
-            <q-input
-              v-model="formData.physicalStatusCustom"
-              outlined
-              dense
-              bg-color="white"
-              placeholder="ระบุสถานะพิเศษของคุณ"
-            />
-          </div>
         </div>
       </div>
     </q-card>
@@ -408,8 +387,6 @@ const facultyInputRef = ref();
 const institutionInputRef = ref();
 const addressInputRef = ref();
 const phoneInputRef = ref();
-
-const physicalStatusOptions = ['ทั่วไป', 'พระสงฆ์', 'ตั้งครรภ์', 'อื่น ๆ'];
 
 /** URL ภาพสำหรับแสดงบน avatar - ใช้ computed ป้องกันซ้อนกัน */
 const avatarSrc = computed<string>(() => {
@@ -592,7 +569,7 @@ const onSave = async (): Promise<void> => {
       formData.value.physicalStatus === 'อื่น ๆ'
         ? formData.value.physicalStatusCustom
         : formData.value.physicalStatus === 'ทั่วไป'
-          ? ''
+          ? 'ทั่วไป'
           : formData.value.physicalStatus;
 
     await userService.updateProfile(token, {
