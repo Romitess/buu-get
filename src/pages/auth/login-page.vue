@@ -322,7 +322,6 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
   width: 100%;
   min-height: 100dvh;
   overflow: hidden;
-  font-family: 'Inter', 'Noto Sans Thai', sans-serif;
   background: linear-gradient(
     145deg,
     var(--primary-dark) 0%,

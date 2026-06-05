@@ -163,6 +163,9 @@
   --highlight-error-bg: rgba(198, 40, 40, 0.12);
 
   // Typography Scale
+  --font-family-base:
+    'Sarabun', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    sans-serif;
   --font-size-h1: 1.75rem; // 28px
   --font-size-h2: 1.5rem; // 24px
   --font-size-h3: 1.25rem; // 20px
@@ -245,16 +248,16 @@
 }
 
 html,
+body,
+input,
+select,
+textarea,
+button {
+  font-family: var(--font-family-base);
+}
+
+html,
 body {
-  font-family:
-    'Sarabun',
-    'Inter',
-    'Noto Sans Thai',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--surface-page);

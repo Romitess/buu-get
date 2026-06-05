@@ -140,7 +140,7 @@ const contactSupport = () => {
 
 <style scoped lang="scss">
 .passcode-card {
-  font-family: 'Inter', 'Noto Sans Thai', 'Sarabun', sans-serif;
+  font-family: var(--font-family-base);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 

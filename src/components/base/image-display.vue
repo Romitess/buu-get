@@ -53,6 +53,7 @@ const imageSizeStyle = computed(() => ({
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  position: relative;
 }
 
 .image {
@@ -60,6 +61,7 @@ const imageSizeStyle = computed(() => ({
   height: 100%;
   object-fit: v-bind(objectFit);
   display: block;
+  border-radius: inherit;
 
   &.default-user-avatar {
     transform: scale(1.25); /* Zoom and crop the default user image to remove white padding */

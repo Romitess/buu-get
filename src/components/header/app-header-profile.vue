@@ -168,6 +168,7 @@ const onLogout = async (): Promise<void> => {
 
 .app-header-profile__avatar {
   border: 2px solid var(--neutral-200);
+  overflow: hidden;
 }
 </style>
 
@@ -198,6 +199,7 @@ const onLogout = async (): Promise<void> => {
   border: 3px solid var(--neutral-200);
   background: #ffffff;
   margin-bottom: 12px;
+  overflow: hidden;
 }
 
 .profile-card__name {

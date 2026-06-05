@@ -331,7 +331,6 @@ watch([rowCount, colCount, () => props.splitLeftRight], () => {
 .teacher-desk-label {
   background: #f1f2f4;
   color: #926f6c;
-  font-family: Loma, sans-serif;
   font-weight: 400;
   font-style: normal;
   font-size: 16px;

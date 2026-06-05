@@ -86,7 +86,6 @@ const remarkBadgeClass = computed((): string => {
 }
 
 .student-name {
-  font-family: 'Sarabun', sans-serif;
   font-weight: 500;
   font-size: 20px;
   line-height: 100%;
@@ -95,7 +94,6 @@ const remarkBadgeClass = computed((): string => {
 }
 
 .info-details {
-  font-family: 'Sarabun', sans-serif;
   font-weight: 500;
   font-size: 16px;
   line-height: 100%;
