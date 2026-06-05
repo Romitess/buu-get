@@ -168,13 +168,7 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import AppExamSeatPreview from 'src/components/exam/app-exam-seat-preview.vue';
 import { api } from 'src/boot/axios';
-import {
-  fetchLocationById,
-  updateLocation,
-  deleteLocationSeat,
-  updateSeatStatus,
-} from 'src/services/location.service';
-import type { BackendLocationSeat } from 'src/services/location.service';
+import { fetchLocationById, updateLocation } from 'src/services/location.service';
 
 const MAX_SEAT_LAYOUT_SIZE = 25;
 
@@ -283,38 +277,11 @@ const handleSave = async (): Promise<void> => {
       LOCATION_IS_SPLIT: splitLeftRight.value ? 1 : 0,
     });
 
-    const currentSeats = await api
-      .get<BackendLocationSeat[]>(`/exam-location-seats/location/${locationId}`)
-      .then((res) => res.data);
-    const seatsToDelete = currentSeats.filter(
-      (seat) => seat.LS_ROW_NO > Number(rows.value) || seat.LS_COL_NO > Number(cols.value),
-    );
-
-    if (seatsToDelete.length > 0) {
-      await Promise.all(seatsToDelete.map((seat) => deleteLocationSeat(seat.LS_ID)));
-    }
-
-    const finalSeats = await api
-      .post<BackendLocationSeat[]>(`/exam-location-seats/generate/${locationId}`)
-      .then((res) => res.data);
-
     const brokenSeatLabels = seatPreviewRef.value?.brokenSeats ?? new Set<string>();
 
-    const updatePromises = finalSeats.map((seat) => {
-      if (seat.LS_SEAT_LABEL) {
-        const isCurrentlyBroken = seat.LS_SEAT_STATUS === 1;
-        const shouldBeBroken = brokenSeatLabels.has(seat.LS_SEAT_LABEL);
-
-        if (shouldBeBroken && !isCurrentlyBroken) {
-          return updateSeatStatus(seat.LS_ID, 1);
-        } else if (!shouldBeBroken && isCurrentlyBroken) {
-          return updateSeatStatus(seat.LS_ID, 0);
-        }
-      }
-      return Promise.resolve();
+    await api.post(`/exam-location-seats/generate/${locationId}`, {
+      brokenSeats: Array.from(brokenSeatLabels),
     });
-
-    await Promise.all(updatePromises);
 
     $q.notify({
       type: 'positive',
