@@ -4,56 +4,64 @@
       <h2 class="seat-map-title">{{ title }}</h2>
       <div class="row items-center no-wrap q-gutter-x-sm">
         <span class="shuffle-label">{{ swapModeLabel }}</span>
-        <q-toggle v-model="swapMode" dense color="primary" />
+        <q-toggle v-model="swapMode" dense color="primary" class="shuffle-toggle" />
       </div>
     </header>
 
-    <div
-      v-if="seatsByRow.length > 0"
-      ref="gridEl"
-      class="seat-map-grid"
-      :class="{ 'is-swap-active': swapMode, 'is-dragging': draggingSeatId !== null }"
-      :style="gridStyle"
-    >
-      <div v-for="(rowSeats, rowIndex) in seatsByRow" :key="rowIndex" class="seat-map-row">
-        <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
-          <div
-            v-if="
-              splitLeftRight && colIndex === Math.ceil(rowSeats.length / 2) && rowSeats.length > 1
-            "
-            class="aisle-gap"
-          ></div>
-          <div
-            class="seat-cell"
-            :class="{
-              'is-drag-source': draggingSeatId === seat.id,
-              'is-drag-over': draggingSeatId !== null && dragOverSeatId === seat.id,
-            }"
-            @mousedown="onSeatMouseDown($event, seat)"
-            @mouseenter="onSeatMouseEnter(seat)"
-            @mouseleave="onSeatMouseLeave(seat)"
-          >
-            <AppExamSeatAssignmentTile
-              :seat-label="seat.label"
-              :status="seat.status"
-              :student="seat.student"
-              :swap-mode="swapMode"
-              :selected="
-                draggingSeatId === seat.id ||
-                (draggingSeatId !== null && dragOverSeatId === seat.id)
-              "
-            />
+    <!-- Seat Map Container (zoom-to-fit, no scrollbar) -->
+    <div ref="containerRef" class="seat-map-content">
+      <div v-if="seatsByRow.length > 0" class="seat-grid-scaling-wrapper" :style="wrapperStyle">
+        <div
+          ref="gridRef"
+          class="seat-grid-scalable"
+          :class="{ 'is-swap-active': swapMode, 'is-dragging': draggingSeatId !== null }"
+          :style="gridTransformStyle"
+        >
+          <div class="seat-grid-wrapper">
+            <div v-for="(rowSeats, rowIndex) in seatsByRow" :key="rowIndex" class="seat-map-row">
+              <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
+                <AppSeatSplitDivider
+                  v-if="
+                    splitLeftRight &&
+                    colIndex === Math.ceil(rowSeats.length / 2) &&
+                    rowSeats.length > 1
+                  "
+                  width="48px"
+                />
+                <div
+                  class="seat-cell"
+                  :class="{
+                    'is-drag-source': draggingSeatId === seat.id,
+                    'is-drag-over': draggingSeatId !== null && dragOverSeatId === seat.id,
+                  }"
+                  @mousedown="onSeatMouseDown($event, seat)"
+                  @mouseenter="onSeatMouseEnter(seat)"
+                  @mouseleave="onSeatMouseLeave(seat)"
+                >
+                  <AppExamSeatAssignmentTile
+                    :seat-label="seat.label"
+                    :status="seat.status"
+                    :student="seat.student"
+                    :swap-mode="swapMode"
+                    :selected="
+                      draggingSeatId === seat.id ||
+                      (draggingSeatId !== null && dragOverSeatId === seat.id)
+                    "
+                  />
+                </div>
+              </template>
+            </div>
           </div>
-        </template>
+        </div>
+      </div>
+
+      <div v-else class="empty-seat-map column items-center justify-center text-grey-6">
+        <q-icon name="grid_off" size="42px" />
+        <div class="text-body2 q-mt-sm">{{ emptyLabel }}</div>
       </div>
     </div>
 
-    <div v-else class="empty-seat-map column items-center justify-center text-grey-6">
-      <q-icon name="grid_off" size="42px" />
-      <div class="text-body2 q-mt-sm">{{ emptyLabel }}</div>
-    </div>
-
-    <!-- Floating ghost that follows the cursor while dragging a seat to swap -->
+    <!-- Dimmed ghost centered on the cursor so it feels like the seat is moving -->
     <Teleport to="body">
       <div v-if="draggedSeat" class="seat-drag-ghost" :style="ghostStyle">
         <div v-if="ghostName" class="ghost-name">{{ ghostName }}</div>
@@ -68,8 +76,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
+import type { CSSProperties } from 'vue';
 import AppExamSeatAssignmentTile from 'src/components/exam/app-exam-seat-assignment-tile.vue';
+import AppSeatSplitDivider from 'src/components/exam/app-seat-split-divider.vue';
 import type { SeatCell } from 'src/composables/use-exam-seat-management';
 
 const props = withDefaults(
@@ -93,35 +103,135 @@ const emit = defineEmits<{
 const swapMode = ref(false);
 
 // ── Zoom-to-fit ──────────────────────────────────────────
-// Measure the real grid width/height so a large layout can zoom out to fit.
-const gridEl = ref<HTMLElement | null>(null);
-const containerWidth = ref(700);
-const containerHeight = ref(342);
-let resizeObserver: ResizeObserver | null = null;
+const containerRef = ref<HTMLElement | null>(null);
+const gridRef = ref<HTMLElement | null>(null);
+const containerWidth = ref(0);
+const containerHeight = ref(0);
+const scaleFactor = ref(1);
+const gridNaturalWidth = ref(0);
+const gridNaturalHeight = ref(0);
 
-const measure = (): void => {
-  if (!gridEl.value) return;
-  containerWidth.value = gridEl.value.clientWidth || containerWidth.value;
-  containerHeight.value = gridEl.value.clientHeight || containerHeight.value;
+const measureAndScale = (): void => {
+  if (!gridRef.value || !containerRef.value) {
+    scaleFactor.value = 1;
+    return;
+  }
+
+  // Temporarily reset styles to measure natural size
+  const style = gridRef.value.style;
+  const prevTransform = style.transform;
+  const prevPosition = style.position;
+  const prevWidth = style.width;
+  const prevHeight = style.height;
+
+  style.transform = 'none';
+  style.position = 'static';
+  style.width = 'max-content';
+  style.height = 'auto';
+
+  void gridRef.value.offsetWidth; // force reflow
+
+  const gridW = gridRef.value.scrollWidth;
+  const gridH = gridRef.value.scrollHeight + 16;
+  gridNaturalWidth.value = gridW;
+  gridNaturalHeight.value = gridH;
+
+  // Restore style
+  style.transform = prevTransform;
+  style.position = prevPosition;
+  style.width = prevWidth;
+  style.height = prevHeight;
+
+  const parentEl = containerRef.value;
+  const availW = parentEl.clientWidth - 16; // small padding margin
+  const availH = parentEl.clientHeight ? parentEl.clientHeight - 8 : 99999;
+
+  if (gridW <= 0 || gridH <= 0) {
+    scaleFactor.value = 1;
+    return;
+  }
+
+  const scaleX = availW / gridW;
+  const scaleY = availH / gridH;
+  const s = Math.min(scaleX, scaleY, 1.4); // allow zooming in up to 1.4x to fill empty space
+  scaleFactor.value = Math.max(0.15, s);
 };
 
-const maxColumnCount = computed(() => Math.max(...props.seatsByRow.map((row) => row.length), 1));
-const rowCount = computed(() => Math.max(props.seatsByRow.length, 1));
+const wrapperStyle = computed<CSSProperties>(() => {
+  const s = scaleFactor.value;
+  const w = gridNaturalWidth.value;
+  const h = gridNaturalHeight.value;
 
-// Approximate footprint of one cell incl. gap (64px seat + label/gaps).
-const CELL_FOOTPRINT_X = 71;
-const CELL_FOOTPRINT_Y = 90;
-const MIN_SCALE = 0.3;
+  if (s === 1 || w <= 0 || h <= 0) {
+    return {
+      width: '100%',
+      display: 'flex',
+      justifyContent: 'center',
+    };
+  }
 
-const gridScale = computed(() => {
-  const widthScale = containerWidth.value / (maxColumnCount.value * CELL_FOOTPRINT_X);
-  const heightScale = containerHeight.value / (rowCount.value * CELL_FOOTPRINT_Y);
-  return Math.max(MIN_SCALE, Math.min(1, widthScale, heightScale));
+  return {
+    width: `${containerWidth.value - 16}px`, // Always take full available width of container
+    height: `${h * s}px`,
+    position: 'relative',
+    overflow: 'visible',
+  };
 });
 
-const gridStyle = computed(() => ({
-  '--seat-grid-scale': String(gridScale.value),
-}));
+const gridTransformStyle = computed<CSSProperties>(() => {
+  const s = scaleFactor.value;
+  const w = gridNaturalWidth.value;
+  const h = gridNaturalHeight.value;
+
+  if (s === 1 || w <= 0 || h <= 0) {
+    return {
+      transform: 'none',
+      width: 'max-content',
+    };
+  }
+
+  const leftOffset = Math.max((containerWidth.value - 16 - w * s) / 2, 0);
+
+  return {
+    transform: `scale(${s})`,
+    transformOrigin: 'top left',
+    position: 'absolute',
+    left: `${leftOffset}px`,
+    top: '0',
+    width: `${w}px`,
+    height: `${h}px`,
+  };
+});
+
+let resizeObserver: ResizeObserver | null = null;
+
+onMounted(() => {
+  if (containerRef.value) {
+    resizeObserver = new ResizeObserver(() => {
+      containerWidth.value = containerRef.value?.clientWidth ?? 0;
+      containerHeight.value = containerRef.value?.clientHeight ?? 0;
+      measureAndScale();
+    });
+    resizeObserver.observe(containerRef.value);
+  }
+  void nextTick(() => measureAndScale());
+});
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect();
+  window.removeEventListener('mousemove', onDragMove);
+  window.removeEventListener('mouseup', onDragEnd);
+  document.body.classList.remove('is-dragging-active');
+});
+
+// Recalculate when seatsByRow or splitLeftRight changes
+watch(
+  [() => props.seatsByRow, () => props.splitLeftRight],
+  () => {
+    void nextTick(() => measureAndScale());
+  },
+  { deep: true },
+);
 
 // ── Drag-to-swap ─────────────────────────────────────────
 const draggingSeatId = ref<string | null>(null);
@@ -192,30 +302,18 @@ const onSeatMouseEnter = (seat: SeatCell): void => {
 const onSeatMouseLeave = (seat: SeatCell): void => {
   if (dragOverSeatId.value === seat.id) dragOverSeatId.value = null;
 };
-
-onMounted(() => {
-  measure();
-  if (typeof ResizeObserver !== 'undefined' && gridEl.value) {
-    resizeObserver = new ResizeObserver(() => measure());
-    resizeObserver.observe(gridEl.value);
-  }
-});
-
-onBeforeUnmount(() => {
-  resizeObserver?.disconnect();
-  window.removeEventListener('mousemove', onDragMove);
-  window.removeEventListener('mouseup', onDragEnd);
-  document.body.classList.remove('is-dragging-active');
-});
 </script>
 
 <style scoped lang="scss">
 .seat-map-panel {
-  border: 1px solid #9e9e9e;
+  border: 1px solid #e0e0e0;
   border-radius: 10px;
   background: #ffffff;
   padding: 14px 18px 12px;
+  height: 100%;
   min-height: 424px;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -225,6 +323,7 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .seat-map-title {
@@ -236,20 +335,69 @@ onBeforeUnmount(() => {
 }
 
 .shuffle-label {
-  font-size: 14px;
+  font-size: 15px;
   color: #111111;
   white-space: nowrap;
 }
 
-.seat-map-grid {
+.shuffle-toggle {
+  :deep(.q-toggle__inner) {
+    width: 52px;
+    min-width: 52px;
+    height: 30px;
+    padding: 0;
+  }
+
+  :deep(.q-toggle__track) {
+    width: 52px;
+    height: 30px;
+    border-radius: 999px;
+    opacity: 1;
+    background: #d5dbe4;
+  }
+
+  :deep(.q-toggle__inner--truthy .q-toggle__track) {
+    background: var(--primary, #0d47a1);
+  }
+
+  :deep(.q-toggle__thumb) {
+    top: 4px;
+    left: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    color: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  }
+
+  :deep(.q-toggle__inner--truthy .q-toggle__thumb) {
+    left: 26px;
+  }
+}
+
+.seat-map-content {
+  background: transparent;
   width: 100%;
-  height: 420px;
   display: flex;
-  flex-direction: column;
-  gap: calc(8px * var(--seat-grid-scale));
-  overflow: hidden;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: var(--space-xs);
+  padding-bottom: var(--space-xs);
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+}
+
+.seat-grid-scaling-wrapper {
+  position: relative;
+  overflow: visible;
+}
+
+.seat-grid-scalable {
+  display: block;
+  width: max-content;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
 
   &.is-swap-active .seat-cell {
     cursor: grab;
@@ -260,22 +408,26 @@ onBeforeUnmount(() => {
   }
 }
 
+.seat-grid-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  margin-inline: auto;
+  align-items: stretch;
+}
+
 .seat-map-row {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: calc(7px * var(--seat-grid-scale));
+  gap: 24px;
   min-width: 0;
-  height: calc(82px * var(--seat-grid-scale));
 }
 
 .seat-cell {
-  // Shrink the layout box together with the visual scale so a wide grid always
-  // fits inside its panel and never bleeds over the student list on the left.
-  width: calc(64px * var(--seat-grid-scale));
-  flex: 0 0 calc(64px * var(--seat-grid-scale));
-  transform: scale(var(--seat-grid-scale));
-  transform-origin: top left;
+  width: 64px;
+  flex: 0 0 64px;
   transition: opacity 0.12s ease;
 }
 
@@ -283,19 +435,22 @@ onBeforeUnmount(() => {
   opacity: 0.4;
 }
 
-.aisle-gap {
-  width: 14px;
-  flex: 0 0 14px;
-}
-
 .empty-seat-map {
+  width: 100%;
+  height: 100%;
   min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
 }
 
+// Dimmed ghost centered on the cursor while dragging a seat
 .seat-drag-ghost {
   position: fixed;
   z-index: 9999;
-  transform: translate(12px, 12px);
+  transform: translate(-50%, -50%);
   pointer-events: none;
   display: flex;
   flex-direction: column;
@@ -305,7 +460,8 @@ onBeforeUnmount(() => {
   border-radius: 8px;
   background: var(--primary, #0d47a1);
   color: #ffffff;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  opacity: 0.65;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
 }
 
 .ghost-name {
@@ -333,7 +489,7 @@ onBeforeUnmount(() => {
   }
 
   .seat-map-row {
-    gap: calc(5px * var(--seat-grid-scale));
+    gap: 8px;
   }
 }
 </style>

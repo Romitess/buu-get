@@ -202,6 +202,10 @@ defineEmits<{
     color: #111111;
   }
 
+  :deep(.q-field__control:before) {
+    border: 1px solid var(--detail-dropdown-border);
+  }
+
   :deep(.q-field__native) {
     font-size: 16px;
     font-weight: 400;

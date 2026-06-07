@@ -10,16 +10,18 @@
     />
 
     <!-- Session Time Tabs -->
-    <AppExamSessionTabs v-model="selectedSessionId" :sessions="sessions" />
+    <AppExamSessionTabs v-model="selectedSessionId" :sessions="sessionTimeTabs" />
 
     <!-- Exam Info Card -->
     <AppExamInfoCard
       v-if="exam"
+      v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
       :title="exam.EXAM_NAME"
       :date="examDateLabel"
       :time="sessionTime"
       :location="sessionLocation"
+      :location-options="roomOptions"
       :applicant-count="candidateCount"
       :total-capacity="sessionCapacity"
       hide-paid
@@ -116,15 +118,19 @@ const $q = useQuasar();
 const {
   exam,
   sessions,
+  sessionTimeTabs,
   isLoading,
   searchQuery,
   selectedSessionId,
+  selectedSessionLocationId,
+  roomOptions,
   filteredRows,
   candidateCount,
   sessionTime,
   sessionLocation,
   sessionCapacity,
   sessionEnrollments,
+  getTimeTabSessionId,
   fetchData,
 } = useExamSeatCandidates();
 
@@ -285,6 +291,22 @@ watch(exam, (newExam) => {
   }
 });
 
+watch(
+  [selectedSessionId, roomOptions],
+  () => {
+    const firstRoomId = roomOptions.value[0]?.value ?? null;
+    if (firstRoomId === null) {
+      selectedSessionLocationId.value = null;
+      return;
+    }
+
+    if (!roomOptions.value.some((option) => option.value === selectedSessionLocationId.value)) {
+      selectedSessionLocationId.value = firstRoomId;
+    }
+  },
+  { immediate: true },
+);
+
 const loadData = async (): Promise<void> => {
   const examId = Number(route.params.examId);
   if (!isNaN(examId) && examId > 0) {
@@ -294,8 +316,17 @@ const loadData = async (): Promise<void> => {
       !isNaN(routeSessionId) &&
       sessions.value.some((session) => session.SS_ID === routeSessionId)
     ) {
-      selectedSessionId.value = routeSessionId;
+      selectedSessionId.value = getTimeTabSessionId(routeSessionId) ?? routeSessionId;
     }
+
+    const routeSessionLocationId = Number(route.query.sessionLocationId);
+    if (
+      !isNaN(routeSessionLocationId) &&
+      roomOptions.value.some((option) => option.value === routeSessionLocationId)
+    ) {
+      selectedSessionLocationId.value = routeSessionLocationId;
+    }
+
     pagination.value.rowsNumber = filteredRows.value.length;
   }
 };

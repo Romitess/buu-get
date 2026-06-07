@@ -54,6 +54,7 @@ export interface StudentSeatInfo {
   remark: string;
   isForeigner: boolean;
   titleEn: string | null;
+  sortName: string;
   /**
    * Seat-assignment priority (lower = seated first):
    * 0 พระภิกษุ/สามเณร, 1 นักบวช/ศาสนบุคคล, 2 บุคคลทุพพลภาพ,
@@ -256,7 +257,8 @@ export function useExamSeatManagement() {
       };
     }
 
-    const isForeigner = physicalStatusCode === 5 && hasPassport(enrollment.USER?.USER_PASSPORT_NO);
+    const isGeneralStatus = physicalStatusCode === null || physicalStatusCode === 5;
+    const isForeigner = isGeneralStatus && hasPassport(enrollment.USER?.USER_PASSPORT_NO);
 
     return {
       remark: isForeigner ? 'ชาวต่างชาติ' : 'ชาวไทย',
@@ -519,7 +521,7 @@ export function useExamSeatManagement() {
     // priority (พระ/เณร → … → คนไทย); within the same priority, sort by name A–Z.
     const orderedStudents = [...students.value].sort((a, b) => {
       if (a.priority !== b.priority) return a.priority - b.priority;
-      return a.name.localeCompare(b.name, 'th');
+      return a.sortName.localeCompare(b.sortName, 'en', { sensitivity: 'base' });
     });
 
     // Fill sequentially: the first room is filled before spilling into the next.
@@ -560,6 +562,7 @@ export function useExamSeatManagement() {
         titleEn && fullnameEn
           ? `${titleEn} ${fullnameEn}`
           : profile?.userFullnameTh || e.USER?.USER_EMAIL || t('admin.seatManagement.noName');
+      const sortName = fullnameEn || profile?.userFullnameTh || e.USER?.USER_EMAIL || displayName;
 
       return {
         ermId: e.ERM_ID,
@@ -575,6 +578,7 @@ export function useExamSeatManagement() {
         remark,
         isForeigner,
         titleEn,
+        sortName,
         priority: getSeatPriority(e, isForeigner),
       };
     });
@@ -842,7 +846,12 @@ export function useExamSeatManagement() {
       void router.push({
         name: 'admin-exam-seat-candidates',
         params: { examId: String(examId) },
-        query: { sessionId: String(activeSessionId.value) },
+        query: {
+          sessionId: String(activeSessionId.value),
+          ...(activeSessionLocationId.value !== null
+            ? { sessionLocationId: String(activeSessionLocationId.value) }
+            : {}),
+        },
       });
     } catch (err: unknown) {
       console.error('Failed to save seats', err);

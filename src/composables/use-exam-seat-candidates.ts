@@ -4,6 +4,18 @@ import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 import { fetchExamById } from 'src/services/exam.service';
 import { fetchRawEnrollmentsByExamId } from 'src/services/enrollment.service';
 
+export interface SessionLocationOption {
+  label: string;
+  value: number;
+}
+
+interface SeatCandidateSessionLocation {
+  SL_ID: number;
+  LOCATION_ID: number;
+  SS_ID: number;
+  LOCATION: NonNullable<BackendSession['LOCATION']>;
+}
+
 /** Row shape for the seat-candidates table */
 export interface SeatCandidateRow {
   index: number;
@@ -13,6 +25,11 @@ export interface SeatCandidateRow {
   fullnameTh: string;
   seatNumber: string;
   sessionId: number;
+}
+
+interface EnrollmentWithSeatOrder {
+  enrollment: BackendEnrollmentDetail;
+  seatOrder: number;
 }
 
 /**
@@ -27,6 +44,7 @@ export function useExamSeatCandidates() {
   const error = ref<string | null>(null);
   const searchQuery = ref('');
   const selectedSessionId = ref<number | null>(null);
+  const selectedSessionLocationId = ref<number | null>(null);
 
   // Derived: sessions list from exam
   const sessions = computed((): BackendSession[] => exam.value?.SESSIONS ?? []);
@@ -36,23 +54,108 @@ export function useExamSeatCandidates() {
     return sessions.value.find((s) => s.SS_ID === selectedSessionId.value) ?? null;
   });
 
+  const getSessionTimeKey = (session: BackendSession): string => {
+    const start = String(session.SS_START_TIME || '').substring(0, 5);
+    const end = String(session.SS_END_TIME || '').substring(0, 5);
+    return `${start}-${end}`;
+  };
+
+  const sessionTimeTabs = computed<BackendSession[]>(() => {
+    const seen = new Set<string>();
+    return sessions.value.filter((session) => {
+      const key = getSessionTimeKey(session);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  });
+
+  const activeTimeSessions = computed<BackendSession[]>(() => {
+    if (!activeSession.value) return [];
+    const activeKey = getSessionTimeKey(activeSession.value);
+    return sessions.value.filter((session) => getSessionTimeKey(session) === activeKey);
+  });
+
+  const activeSessionIds = computed(() => activeTimeSessions.value.map((session) => session.SS_ID));
+
+  const sessionLocations = computed<SeatCandidateSessionLocation[]>(() => {
+    return activeTimeSessions.value.flatMap((session) => {
+      const relationLocations = session.SESSION_LOCATIONS || [];
+      if (relationLocations.length > 0) {
+        return relationLocations
+          .filter((item) => item.LOCATION)
+          .map((item) => ({ ...item, SS_ID: item.SS_ID || session.SS_ID }));
+      }
+
+      if (!session.LOCATION) return [];
+      return [
+        {
+          SL_ID: -session.SS_ID,
+          LOCATION_ID: session.LOCATION.LOCATION_ID,
+          SS_ID: session.SS_ID,
+          LOCATION: session.LOCATION,
+        },
+      ];
+    });
+  });
+
+  const roomOptions = computed<SessionLocationOption[]>(() =>
+    sessionLocations.value.map((item) => ({
+      value: item.SL_ID,
+      label: `${item.LOCATION.LOCATION_NAME}${item.LOCATION.LOCATION_ROOM_NO ? ` (${item.LOCATION.LOCATION_ROOM_NO})` : ''}`,
+    })),
+  );
+
+  const activeSessionLocation = computed(() => {
+    return (
+      sessionLocations.value.find((item) => item.SL_ID === selectedSessionLocationId.value) ?? null
+    );
+  });
+
+  const activeLocation = computed(() => {
+    return activeSessionLocation.value?.LOCATION ?? activeSession.value?.LOCATION ?? null;
+  });
+
   // Enrollments filtered to the active session that have a seat assignment (status SEAT_ASSIGNED = 2)
   const STATUS_SEAT_ASSIGNED = 2;
   const STATUS_CANCELLED = 5;
 
   const sessionEnrollments = computed((): BackendEnrollmentDetail[] => {
-    if (!selectedSessionId.value) return [];
-    return allEnrollments.value.filter(
-      (e) =>
-        e.SESSION_ID === selectedSessionId.value &&
-        Number(e.ERM_STATUS) >= STATUS_SEAT_ASSIGNED &&
-        Number(e.ERM_STATUS) !== STATUS_CANCELLED &&
-        e.LS_ID,
-    );
+    if (activeSessionIds.value.length === 0) return [];
+
+    return allEnrollments.value.filter((e) => {
+      if (!activeSessionIds.value.includes(e.SESSION_ID)) return false;
+      if (Number(e.ERM_STATUS) < STATUS_SEAT_ASSIGNED) return false;
+      if (Number(e.ERM_STATUS) === STATUS_CANCELLED) return false;
+      if (!e.LS_ID) return false;
+
+      if (selectedSessionLocationId.value === null) {
+        return sessionLocations.value.length === 0;
+      }
+
+      if (e.SL_ID !== null && e.SL_ID !== undefined) {
+        return e.SL_ID === selectedSessionLocationId.value;
+      }
+
+      const seatLocation = sessionLocations.value.find((location) =>
+        location.LOCATION.SEATS?.some((seat) => seat.LS_ID === e.LS_ID),
+      );
+      if (seatLocation) {
+        return seatLocation.SL_ID === selectedSessionLocationId.value;
+      }
+
+      const enrollmentSessionLocations = sessionLocations.value.filter(
+        (location) => location.SS_ID === e.SESSION_ID,
+      );
+      return (
+        enrollmentSessionLocations.length === 1 &&
+        enrollmentSessionLocations[0]?.SL_ID === selectedSessionLocationId.value
+      );
+    });
   });
 
   const getSeatLabel = (enrollment: BackendEnrollmentDetail): string => {
-    const seat = activeSession.value?.LOCATION?.SEATS?.find((s) => s.LS_ID === enrollment.LS_ID);
+    const seat = activeLocation.value?.SEATS?.find((s) => s.LS_ID === enrollment.LS_ID);
     if (seat?.LS_SEAT_LABEL) {
       return seat.LS_SEAT_LABEL;
     }
@@ -67,19 +170,61 @@ export function useExamSeatCandidates() {
     return '-';
   };
 
+  const getSeatOrder = (enrollment: BackendEnrollmentDetail): number => {
+    const locationIndex = sessionLocations.value.findIndex((location) =>
+      location.LOCATION.SEATS?.some((seat) => seat.LS_ID === enrollment.LS_ID),
+    );
+    const normalizedLocationIndex =
+      locationIndex >= 0 ? locationIndex : Number.MAX_SAFE_INTEGER / 2;
+
+    const seat =
+      sessionLocations.value[locationIndex]?.LOCATION.SEATS?.find(
+        (item) => item.LS_ID === enrollment.LS_ID,
+      ) ??
+      activeLocation.value?.SEATS?.find((item) => item.LS_ID === enrollment.LS_ID) ??
+      null;
+
+    if (seat) {
+      return normalizedLocationIndex * 1_000_000 + seat.LS_ROW_NO * 1_000 + seat.LS_COL_NO;
+    }
+
+    const fallbackLabel = getSeatLabel(enrollment);
+    const match = fallbackLabel.match(/^([A-Za-z]+)(\d+)$/);
+    if (!match) return Number.MAX_SAFE_INTEGER;
+
+    const [, letters, digits] = match;
+    const rowOrder = (letters || '')
+      .toUpperCase()
+      .split('')
+      .reduce((sum, char) => sum * 26 + char.charCodeAt(0) - 64, 0);
+
+    return normalizedLocationIndex * 1_000_000 + rowOrder * 1_000 + Number(digits);
+  };
+
   // Map raw enrollment data to table rows
   const tableRows = computed((): SeatCandidateRow[] => {
-    return sessionEnrollments.value.map(
-      (e, idx): SeatCandidateRow => ({
-        index: idx + 1,
-        ermId: e.ERM_ID,
-        nationalId: e.USER?.USER_NATIONAL_ID || '-',
-        titleTh: e.USER?.PROFILE?.userTitleTh || '-',
-        fullnameTh: e.USER?.PROFILE?.userFullnameTh || '-',
-        seatNumber: getSeatLabel(e),
-        sessionId: e.SESSION_ID,
-      }),
-    );
+    return sessionEnrollments.value
+      .map(
+        (enrollment): EnrollmentWithSeatOrder => ({
+          enrollment,
+          seatOrder: getSeatOrder(enrollment),
+        }),
+      )
+      .sort((a, b) => {
+        if (a.seatOrder !== b.seatOrder) return a.seatOrder - b.seatOrder;
+        return a.enrollment.ERM_ID - b.enrollment.ERM_ID;
+      })
+      .map(
+        ({ enrollment: e }, idx): SeatCandidateRow => ({
+          index: idx + 1,
+          ermId: e.ERM_ID,
+          nationalId: e.USER?.USER_NATIONAL_ID || '-',
+          titleTh: e.USER?.PROFILE?.userTitleTh || '-',
+          fullnameTh: e.USER?.PROFILE?.userFullnameTh || '-',
+          seatNumber: getSeatLabel(e),
+          sessionId: e.SESSION_ID,
+        }),
+      );
   });
 
   // Search-filtered rows
@@ -107,12 +252,20 @@ export function useExamSeatCandidates() {
   });
 
   const sessionLocation = computed((): string => {
-    if (!activeSession.value?.LOCATION) return '-';
-    const loc = activeSession.value.LOCATION;
+    if (!activeLocation.value) return '-';
+    const loc = activeLocation.value;
     return `${loc.LOCATION_NAME}${loc.LOCATION_ROOM_NO ? ` (${loc.LOCATION_ROOM_NO})` : ''}`;
   });
 
-  const sessionCapacity = computed((): number => activeSession.value?.SS_CAPACITY ?? 0);
+  const sessionCapacity = computed((): number => activeLocation.value?.SEATS?.length ?? 0);
+
+  const getTimeTabSessionId = (sessionId: number): number | null => {
+    const session = sessions.value.find((item) => item.SS_ID === sessionId);
+    if (!session) return null;
+
+    const timeKey = getSessionTimeKey(session);
+    return sessionTimeTabs.value.find((item) => getSessionTimeKey(item) === timeKey)?.SS_ID ?? null;
+  };
 
   // Data fetching
   const fetchData = async (examId: number): Promise<void> => {
@@ -156,6 +309,9 @@ export function useExamSeatCandidates() {
     exam,
     sessions,
     activeSession,
+    sessionTimeTabs,
+    selectedSessionLocationId,
+    roomOptions,
     isLoading,
     error,
     searchQuery,
@@ -166,6 +322,7 @@ export function useExamSeatCandidates() {
     sessionLocation,
     sessionCapacity,
     sessionEnrollments,
+    getTimeTabSessionId,
     fetchData,
   };
 }

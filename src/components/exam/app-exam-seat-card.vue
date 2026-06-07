@@ -67,18 +67,20 @@ const remarkBadgeClass = computed((): string => {
 
 <style scoped lang="scss">
 .exam-seat-card {
-  border-radius: 8px;
+  border-radius: 4px;
   transition: all 0.3s ease;
 
   &.seat-assigned {
     background-color: var(--surface-card);
-    border: 1px solid #000000;
+    border: 1px solid #676767b2;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
     color: var(--text-primary);
   }
 
   &.seat-unassigned {
     background-color: #8fbceb; /* Rich blue matching the mockup precisely */
-    border: 1px solid #000000;
+    border: 1px solid #676767b2;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
     color: var(--text-primary);
   }
 }

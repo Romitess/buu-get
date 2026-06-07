@@ -27,16 +27,15 @@
               :style="{ gap: seatStyle.colGap }"
             >
               <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
-                <!-- Aisle Gap between left/right halves -->
-                <div
+                <!-- Aisle divider between left/right halves -->
+                <AppSeatSplitDivider
                   v-if="
                     props.splitLeftRight &&
                     colIndex === Math.ceil(rowSeats.length / 2) &&
                     rowSeats.length > 1
                   "
-                  class="aisle-gap"
-                  :style="{ width: seatStyle.aisleWidth, height: seatStyle.height }"
-                ></div>
+                  :width="seatStyle.aisleWidth"
+                />
 
                 <div
                   class="seat-item"
@@ -84,6 +83,7 @@ import { useI18n } from 'vue-i18n';
 import AppSeatLegend from './app-seat-legend.vue';
 import AppSeatBrokenDialog from './app-seat-broken-dialog.vue';
 import AppExamSeatSquare from './app-exam-seat-square.vue';
+import AppSeatSplitDivider from './app-seat-split-divider.vue';
 
 interface Props {
   rows?: number | null;
@@ -387,24 +387,6 @@ watch([rowCount, colCount, () => props.splitLeftRight], () => {
 .seat-item {
   flex-shrink: 0;
   font-weight: var(--font-weight-semibold);
-}
-
-.aisle-gap {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4px;
-    bottom: -4px;
-    width: 2px;
-    border-left: 2px dashed var(--q-primary, #1976d2);
-    opacity: 0.35;
-  }
 }
 
 .empty-preview {

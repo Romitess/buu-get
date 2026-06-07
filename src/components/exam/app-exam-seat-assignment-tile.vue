@@ -114,8 +114,14 @@ const shortName = computed(() => {
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--history-card, #00204599);
-  z-index: 0;
+  background: rgba(6, 28, 70, 0.48);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.is-assigned.is-swap-mode .seat-name,
+.is-assigned.is-swap-mode .seat-avatar {
+  opacity: 0.58;
 }
 
 .is-selected {
@@ -164,18 +170,11 @@ const shortName = computed(() => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.45);
   color: #ffffff;
-  font-size: 26px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  font-size: 30px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
 }
 
 .seat-label {
