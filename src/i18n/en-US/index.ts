@@ -37,6 +37,7 @@ export default {
       evaluating: 'Awaiting Evaluation',
       completed: 'Completed',
       cancelled: 'Cancelled',
+      registrationCancelled: 'Registration Cancelled',
       passed: 'Passed',
       failed: 'Failed',
       paymentTimeout: 'Payment Timeout',

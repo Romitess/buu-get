@@ -246,7 +246,7 @@ const historyExams = computed<ExamHistoryItem[]>(() =>
 
 // === Methods ===
 const handleTimeout = (exam: ExamHistoryItem): void => {
-  void examStore.cancelRegistration(exam.id);
+  void examStore.cancelRegistration(exam.id, 'paymentTimeout');
 };
 
 const handlePay = (exam: ExamHistoryItem): void => {
@@ -293,7 +293,7 @@ const handleCancel = (exam: ExamHistoryItem): void => {
 const handleConfirmCancel = async (): Promise<void> => {
   if (selectedExamForCancel.value) {
     try {
-      await examStore.cancelRegistration(selectedExamForCancel.value.id);
+      await examStore.cancelRegistration(selectedExamForCancel.value.id, 'manual');
       $q.notify({
         type: 'positive',
         message: 'ยกเลิกการสมัครสอบเรียบร้อยแล้ว',

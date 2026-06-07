@@ -31,6 +31,28 @@ export const useExamStore = defineStore('exam', () => {
   const i18n = useI18n();
   const selectedDate = ref<string>(new Date().toISOString().split('T')[0] || '');
   const scheduleData = ref<Record<string, DayData>>({});
+  const cancellationReasonStorageKey = 'exam_cancellation_reasons';
+
+  type CancellationReason = 'manual' | 'paymentTimeout';
+
+  const getCancellationReasons = (): Record<string, CancellationReason> => {
+    try {
+      const raw = localStorage.getItem(cancellationReasonStorageKey);
+      return raw ? (JSON.parse(raw) as Record<string, CancellationReason>) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const setCancellationReason = (enrollmentId: number, reason: CancellationReason): void => {
+    const reasons = getCancellationReasons();
+    reasons[String(enrollmentId)] = reason;
+    localStorage.setItem(cancellationReasonStorageKey, JSON.stringify(reasons));
+  };
+
+  const getCancellationReason = (enrollmentId: number): CancellationReason | null => {
+    return getCancellationReasons()[String(enrollmentId)] ?? null;
+  };
 
   const getMonthNames = (): string[] => {
     const raw = i18n.tm('common.months');
@@ -129,6 +151,25 @@ export const useExamStore = defineStore('exam', () => {
       const newPending: ExamHistoryItem[] = [];
       const newHistory: ExamHistoryItem[] = [];
 
+      const getPaymentDeadline = (createdAt: string): Date => {
+        const createdAtDate = new Date(createdAt);
+        return new Date(createdAtDate.getTime() + PAYMENT_DURATION_SECONDS_DEFAULT * 1000);
+      };
+
+      const isPaymentTimeoutCancellation = (enrollment: {
+        ERM_ID: number;
+        CREATED_AT: string;
+        UPDATED_AT?: string;
+      }): boolean => {
+        const reason = getCancellationReason(enrollment.ERM_ID);
+        if (reason) return reason === 'paymentTimeout';
+        if (!enrollment.CREATED_AT || !enrollment.UPDATED_AT) return false;
+        return (
+          new Date(enrollment.UPDATED_AT).getTime() >=
+          getPaymentDeadline(enrollment.CREATED_AT).getTime()
+        );
+      };
+
       enrollments.forEach((enrollment) => {
         const session = enrollment.SESSION;
         if (!session) return;
@@ -164,11 +205,7 @@ export const useExamStore = defineStore('exam', () => {
           item.statusType = 'primary';
           item.actions = ['cancel', 'pay'];
           if (enrollment.CREATED_AT) {
-            const createdAtDate = new Date(enrollment.CREATED_AT);
-            const deadlineDate = new Date(
-              createdAtDate.getTime() + PAYMENT_DURATION_SECONDS_DEFAULT * 1000,
-            );
-            item.deadline = deadlineDate.toISOString();
+            item.deadline = getPaymentDeadline(enrollment.CREATED_AT).toISOString();
           }
           newPending.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.PAID) {
@@ -232,13 +269,18 @@ export const useExamStore = defineStore('exam', () => {
           item.actions = actions;
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.CANCELLED) {
-          item.status = 'exam.status.cancelled';
-          item.statusType = 'error';
-          item.customStatus = {
-            label: 'exam.status.cancelled',
-            type: 'error',
-            icon: 'warning_amber',
-          };
+          const isPaymentTimeout = isPaymentTimeoutCancellation(enrollment);
+          item.status = isPaymentTimeout
+            ? 'exam.status.cancelled'
+            : 'exam.status.registrationCancelled';
+          item.statusType = 'primary';
+          if (isPaymentTimeout) {
+            item.customStatus = {
+              label: 'exam.status.paymentTimeout',
+              type: 'error',
+              icon: 'warning_amber',
+            };
+          }
           newHistory.push(item);
         }
       });
@@ -275,8 +317,12 @@ export const useExamStore = defineStore('exam', () => {
     await confirmRegistration(round, passcode, physicalStatus);
   }
 
-  async function cancelRegistration(enrollmentId: number): Promise<void> {
+  async function cancelRegistration(
+    enrollmentId: number,
+    reason: CancellationReason = 'manual',
+  ): Promise<void> {
     try {
+      setCancellationReason(enrollmentId, reason);
       await updateEnrollmentStatus(enrollmentId, ENROLLMENT_STATUS.CANCELLED);
       await fetchHistory();
       await initSchedule();

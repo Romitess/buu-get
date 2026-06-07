@@ -38,6 +38,7 @@ export default {
       evaluating: 'รอการประเมินผล',
       completed: 'เสร็จสิ้นการสอบ',
       cancelled: 'ถูกยกเลิก',
+      registrationCancelled: 'ยกเลิกการสมัคร',
       passed: 'ผ่าน',
       failed: 'ไม่ผ่าน',
       paymentTimeout: 'หมดเวลาการชำระเงิน',

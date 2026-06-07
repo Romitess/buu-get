@@ -176,6 +176,7 @@ export interface ExamEnrollment {
   ERM_VERIFY_STATUS: number;
   ERM_PHYSICAL_STATUS?: string | null;
   CREATED_AT: string;
+  UPDATED_AT?: string;
   SESSION?: BackendSession;
   TRANSACTION?: {
     TRANX_ID: number;
