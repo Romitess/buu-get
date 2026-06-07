@@ -172,11 +172,11 @@ export const useExamStore = defineStore('exam', () => {
           }
           newPending.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.PAID) {
-          item.status = 'exam.status.paymentCompleted';
-          item.statusType = 'primary';
           const isVerified = enrollment.ERM_VERIFY_STATUS === VERIFY_STATUS.PASS;
           const hasBankMatch =
             enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
+          item.status = isVerified ? 'exam.status.verified' : 'exam.status.paymentCompleted';
+          item.statusType = 'primary';
           item.actions = isVerified && hasBankMatch ? ['downloadReceipt'] : [];
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_ASSIGNED) {
