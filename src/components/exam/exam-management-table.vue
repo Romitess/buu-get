@@ -57,7 +57,7 @@
     <template v-slot:body-cell-tools="{ row }">
       <div class="row justify-center q-gutter-x-sm no-wrap">
         <ActionButton
-          v-for="btn in TOOL_BUTTONS[role]"
+          v-for="btn in getRowButtons(row)"
           :key="btn.emit"
           v-bind="getBtnProps(btn)"
           :tooltip="getActionTooltip(btn, row)"
@@ -105,7 +105,7 @@ const emit = defineEmits<{
   (e: 'viewCandidates', id: string): void;
   (e: 'viewScore', id: string): void;
   (e: 'printAdmitCard', id: string): void;
-  (e: 'moodle', id: string): void;
+  (e: 'passcodeHistory', id: string): void;
 }>();
 
 interface CustomToolButton {
@@ -195,13 +195,14 @@ const getProgressColor = (row: ExamSchedule) => {
   return 'blue-3';
 };
 
-const TOOL_BUTTONS = computed<Record<Role, CustomToolButton[]>>(() => ({
-  [ROLES.STAFF]: [
+// Partial<Record> เพื่อให้ role ที่ไม่มีใน map ได้ undefined → [] แทน error
+const TOOL_BUTTONS = computed<Partial<Record<Role, CustomToolButton[]>>>(() => ({
+  [ROLES.EXAM_OPERATIONS_OFFICER]: [
     {
-      image: '/moodle-icon.png',
-      color: 'primary',
-      tooltip: t('admin.examManagement.table.tooltips.moodle'),
-      emit: TABLE_ACTIONS.MOODLE,
+      icon: 'how_to_reg',
+      color: 'secondary',
+      tooltip: t('admin.examManagement.table.tooltips.passcodeHistory'),
+      emit: TABLE_ACTIONS.PASSCODE_HISTORY,
     },
     {
       icon: 'edit',
@@ -244,6 +245,12 @@ const TOOL_BUTTONS = computed<Record<Role, CustomToolButton[]>>(() => ({
   ],
   [ROLES.ADMIN]: [
     {
+      icon: 'how_to_reg',
+      color: 'primary',
+      tooltip: t('admin.examManagement.table.tooltips.passcodeHistory'),
+      emit: TABLE_ACTIONS.PASSCODE_HISTORY,
+    },
+    {
       icon: 'edit',
       color: 'secondary',
       tooltip: t('admin.examManagement.table.tooltips.edit'),
@@ -274,13 +281,24 @@ const TOOL_BUTTONS = computed<Record<Role, CustomToolButton[]>>(() => ({
       emit: TABLE_ACTIONS.VIEW_CANDIDATES,
     },
     {
-      icon: 'docs',
+      icon: 'description',
       color: 'primary',
       tooltip: t('admin.examManagement.table.tooltips.manageScores'),
       emit: TABLE_ACTIONS.VIEW_SCORE,
     },
   ],
 }));
+
+const getRowButtons = (row: ExamSchedule): CustomToolButton[] => {
+  const map = TOOL_BUTTONS.value;
+  const buttons = map[props.role] ?? [];
+  return buttons.filter((btn) => {
+    if (btn.emit === TABLE_ACTIONS.PASSCODE_HISTORY) {
+      return row.examType === 'special';
+    }
+    return true;
+  });
+};
 
 const getBtnProps = (btn: CustomToolButton) => {
   const propsObj: Record<string, string> = { color: btn.color };
@@ -340,8 +358,8 @@ const handleAction = (emitName: string, id: string) => {
     });
   } else {
     switch (emitName) {
-      case TABLE_ACTIONS.MOODLE:
-        emit(TABLE_ACTIONS.MOODLE, id);
+      case TABLE_ACTIONS.PASSCODE_HISTORY:
+        emit(TABLE_ACTIONS.PASSCODE_HISTORY, id);
         break;
       case TABLE_ACTIONS.EDIT:
         emit(TABLE_ACTIONS.EDIT, id);

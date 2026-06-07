@@ -429,7 +429,7 @@ export default {
           tools: 'Tools',
         },
         tooltips: {
-          moodle: 'Manage Moodle Data',
+          passcodeHistory: 'Passcode History',
           edit: 'Edit',
           delete: 'Delete',
           manageRegistrants: 'Manage Registrants',
@@ -458,6 +458,19 @@ export default {
       status: {
         published: 'Published',
         unpublished: 'Unpublished',
+      },
+    },
+    passcodeHistory: {
+      pageTitle: 'Passcode Usage History',
+      pageSubtitle: 'Shows the history of Passcode usage by exam candidates in special exam rounds',
+      table: {
+        columns: {
+          index: 'Index',
+          fullName: 'Full Name',
+          passcode: 'Passcode',
+          usedDate: 'Used Date',
+          usedTime: 'Used Time',
+        },
       },
     },
     registrantManagement: {
@@ -693,6 +706,7 @@ export default {
     language: 'Language',
     manageScoreCriteria: 'Manage Score Criteria',
     manageScoreCriteriaAndCert: 'Manage Score Criteria & Certificates',
+    passcodeHistory: 'Passcode History',
   },
   profileEditHistory: {
     pageTitle: 'Candidate Profile Edit History',

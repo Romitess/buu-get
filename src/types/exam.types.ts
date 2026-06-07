@@ -36,7 +36,7 @@ export type ToolButtonExtended = Omit<ToolButtonConfig, 'icon'> & {
 };
 
 export const TABLE_ACTIONS = {
-  MOODLE: 'moodle',
+  PASSCODE_HISTORY: 'passcodeHistory',
   EDIT: 'edit',
   DELETE: 'delete',
   MANAGE_REGISTRANTS: 'manageRegistrants',

@@ -18,3 +18,10 @@ export interface ExamCalendarProps {
   modelValue: string;
   availability?: Record<string, 'available' | 'full' | null>;
 }
+
+export interface PasscodeLog {
+  fullName: string;
+  passcode: string;
+  usedDate: string;
+  usedTime: string;
+}

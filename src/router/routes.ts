@@ -182,6 +182,22 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'passcode-history',
+            name: 'admin-passcode-history',
+            component: () => import('pages/admin/passcode-history-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                { label: 'navigation.passcodeHistory', icon: 'how_to_reg' },
+              ],
+            },
+          },
+          {
             path: 'create-exam',
             name: 'admin-create-exam',
             component: () => import('pages/admin/create-exam-page.vue'),
