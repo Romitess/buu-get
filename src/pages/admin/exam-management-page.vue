@@ -3,8 +3,8 @@
     <!-- Standardized Reusable Page Header -->
     <AppBreadcrumbs />
     <AppPageHeader
-      title="จัดการรอบสอบ"
-      subtitle="จัดการข้อมูลรอบสอบ ตรวจสอบกำหนดการ และติดตามสถานะการเปิดรับสมัคร"
+      :title="t('navigation.manageExam')"
+      :subtitle="t('admin.examManagement.description')"
     />
 
     <!-- Search and Action Bar -->
@@ -37,6 +37,7 @@
       @printAdmitCard="handlePrintAdmitCard"
       @viewCandidates="handleViewCandidates"
       @manageScores="handleManageScores"
+      @passcodeHistory="handlePasscodeHistory"
     />
   </q-page>
 </template>
@@ -71,6 +72,7 @@ const currentRole = computed<Role>(() => {
   const role = userStore.userRole;
   if (role === ROLES.ADMIN) return ROLES.ADMIN;
   if (role === ROLES.REGISTRATION_OFFICER) return ROLES.REGISTRATION_OFFICER;
+  if (role === ROLES.EXAM_OPERATIONS_OFFICER) return ROLES.EXAM_OPERATIONS_OFFICER;
   return ROLES.STAFF;
 });
 
@@ -116,9 +118,12 @@ const onRequest = (props: TableRequestProps) => {
   pagination.value.rowsPerPage = rowsPerPage;
 };
 
-// Actions Handlers
 const handleEdit = (id: string) => {
   void router.push({ name: 'admin-edit-exam', params: { examId: id } });
+};
+
+const handlePasscodeHistory = (id: string) => {
+  void router.push({ name: 'admin-passcode-history', query: { examId: id } });
 };
 
 const handleDelete = async (id: string) => {

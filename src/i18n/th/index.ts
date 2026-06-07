@@ -545,7 +545,7 @@ export default {
           tools: 'เครื่องมือ',
         },
         tooltips: {
-          moodle: 'จัดการข้อมูลในระบบ Moodle',
+          passcodeHistory: 'ประวัติการใช้งาน Passcode',
           edit: 'แก้ไข',
           delete: 'ลบ',
           manageRegistrants: 'จัดการผู้ลงทะเบียน',
@@ -574,6 +574,19 @@ export default {
       status: {
         published: 'เผยแพร่แล้ว',
         unpublished: 'ยังไม่เผยแพร่',
+      },
+    },
+    passcodeHistory: {
+      pageTitle: 'ประวัติการใช้งาน Passcode',
+      pageSubtitle: 'แสดงประวัติการใช้งาน Passcode ของผู้สมัครสอบในการสอบรอบพิเศษ',
+      table: {
+        columns: {
+          index: 'ลำดับ',
+          fullName: 'ชื่อ-นามสกุล',
+          passcode: 'Passcode',
+          usedDate: 'วันที่ใช้',
+          usedTime: 'เวลาที่ใช้',
+        },
       },
     },
     registrantManagement: {
@@ -922,6 +935,7 @@ export default {
     language: 'ภาษา',
     manageScoreCriteria: 'จัดการเกณฑ์คะแนน',
     manageScoreCriteriaAndCert: 'จัดการเกณฑ์คะแนนและใบ Certificate',
+    passcodeHistory: 'ประวัติการใช้ Passcode',
   },
   image: {
     upload: {
