@@ -396,12 +396,7 @@ const routes: RouteRecordRaw[] = [
             name: 'admin-score-criteria-management',
             component: () => import('pages/admin/score-criteria-management-page.vue'),
             meta: {
-              roles: [
-                ROLES.ADMIN,
-                ROLES.STAFF,
-                ROLES.REGISTRATION_OFFICER,
-                ROLES.EXAM_OPERATIONS_OFFICER,
-              ],
+              roles: [ROLES.ADMIN, ROLES.STAFF, ROLES.EXAM_OPERATIONS_OFFICER],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
                 { label: 'navigation.manageScoreCriteriaAndCert', icon: 'star' },
