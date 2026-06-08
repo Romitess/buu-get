@@ -103,25 +103,7 @@ async function syncTime(): Promise<void> {
         return;
       }
     } catch (err) {
-      void err;
-    }
-  }
-
-  try {
-    const response = await fetch('https://worldtimeapi.org/api/timezone/Asia/Bangkok');
-    const data = await response.json();
-    if (data && data.datetime) {
-      serverOffset.value = new Date(data.datetime).getTime() - Date.now();
-    }
-  } catch {
-    try {
-      const resp = await fetch('https://timeapi.io/api/Time/current/zone?timeZone=Asia/Bangkok');
-      const data = await resp.json();
-      if (data && data.dateTime) {
-        serverOffset.value = new Date(data.dateTime).getTime() - Date.now();
-      }
-    } catch (err) {
-      console.error('[TimeSync] Failed to sync time', err);
+      console.error('[TimeSync] Failed to sync with backend', err);
     }
   }
   now.value = getThaiTime();
