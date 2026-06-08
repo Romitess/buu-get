@@ -12,18 +12,18 @@
     <!-- ===== LEFT PANEL: Brand & Visual (always in place) ===== -->
     <div class="left-panel" :class="{ hidden: panelPhase === 'center' }">
       <div class="left-content">
-        <div class="brand-pill">
+        <!-- <div class="brand-pill">
           <div class="pill-wordmark">
             <span class="pill-buu">BUU</span><span class="pill-dash">-</span
             ><span class="pill-get">GET</span>
           </div>
-        </div>
+        </div> -->
         <div class="brand-logo-wrap">
           <img src="~assets/img/buu-get-logo.png" alt="BUU-GET Logo" class="brand-logo-img" />
         </div>
-        <div class="brand-headline">
+        <!-- <div class="brand-headline">
           <p>{{ $t('auth.systemDescription', 'ระบบทดสอบวัดความสามารถทางภาษาอังกฤษ') }}</p>
-        </div>
+        </div> -->
       </div>
     </div>
 
@@ -410,9 +410,9 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 
 // Size: login card
 .card-wrapper.size-login {
-  width: 336px;
-  max-width: 336px;
-  padding: 32px 29px 29px;
+  width: clamp(340px, 90vw, 420px);
+  max-width: 420px;
+  padding: 24px clamp(24px, 3.5vw, 36px);
 }
 
 // Size: register credentials
@@ -580,8 +580,8 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 100px;
-  padding: 10px 24px;
-  margin-bottom: 32px;
+  padding: 18px 56px;
+  margin-bottom: 48px;
   animation: fadeInDown 0.7s ease-out;
 
   .pill-wordmark {
@@ -591,21 +591,21 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
   }
 
   .pill-buu {
-    font-size: 1.58rem;
+    font-size: 3.5rem;
     font-weight: 900;
     color: #ffffff;
     letter-spacing: -0.01em;
   }
 
   .pill-dash {
-    font-size: 1.58rem;
+    font-size: 3.5rem;
     font-weight: 300;
     color: rgba(255, 255, 255, 0.5);
     margin: 0 2px;
   }
 
   .pill-get {
-    font-size: 1.58rem;
+    font-size: 3.5rem;
     font-weight: 900;
     color: #90caf9;
     letter-spacing: -0.01em;
@@ -613,11 +613,11 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 }
 
 .brand-logo-wrap {
-  margin-bottom: 24px;
+  margin-bottom: 40px;
   animation: fadeInUp 0.7s ease-out 0.05s both;
 
   .brand-logo-img {
-    max-width: 260px;
+    max-width: 680px;
     width: 100%;
     object-fit: contain;
     filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.3)) brightness(1.05);

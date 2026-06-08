@@ -3,7 +3,6 @@
     <!-- Header -->
     <div class="card-header">
       <img src="~assets/img/buu-logo.png" alt="BUU Logo" class="crest-img" />
-      <div class="logo-wordmark"></div>
       <h2>{{ $t('auth.welcome') }}</h2>
       <p>{{ $t('auth.signInToContinue') }}</p>
     </div>
@@ -53,7 +52,7 @@
           class="field-input"
         >
           <template v-slot:prepend>
-            <q-icon name="mail" size="14px" />
+            <q-icon name="mail" size="18px" />
           </template>
         </q-input>
       </div>
@@ -75,12 +74,12 @@
           class="field-input"
         >
           <template v-slot:prepend>
-            <q-icon name="lock_outline" size="14px" />
+            <q-icon name="lock_outline" size="18px" />
           </template>
           <template v-slot:append>
             <q-icon
               :name="showPwd ? 'visibility_off' : 'visibility'"
-              size="14px"
+              size="18px"
               class="cursor-pointer"
               @click="showPwd = !showPwd"
             />
@@ -91,7 +90,6 @@
       <!-- Submit -->
       <q-btn type="submit" class="submit-btn" unelevated no-caps :loading="loading">
         {{ $t('auth.login') }}
-        <span class="btn-arrow">→</span>
       </q-btn>
     </q-form>
 
@@ -210,6 +208,7 @@ const onSubmit = async () => {
   background: var(--surface-card);
   border-radius: 12px;
   padding: 40px 36px 36px;
+  zoom: 0.9;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.08),
     0 8px 32px rgba(0, 0, 0, 0.2),
@@ -246,59 +245,27 @@ const onSubmit = async () => {
 // ============================================================
 .card-header {
   text-align: center;
-  margin-bottom: 22px;
+  margin-bottom: 24px;
 
   .crest-img {
     display: block;
-    width: 51px;
-    height: 51px;
+    width: 68px;
+    height: 68px;
     object-fit: contain;
-    margin: 0 auto 10px;
-    filter: drop-shadow(0 2px 8px rgba(13, 71, 161, 0.12));
-  }
-
-  .logo-wordmark {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0;
-    margin: 0 auto 13px;
-    line-height: 1;
-
-    .wordmark-buu {
-      font-size: 1.6rem;
-      font-weight: 900;
-      color: var(--primary);
-      letter-spacing: -0.02em;
-    }
-
-    .wordmark-dash {
-      font-size: 1.6rem;
-      font-weight: 300;
-      color: var(--neutral-400);
-      margin: 0 1px;
-    }
-
-    .wordmark-get {
-      font-size: 1.6rem;
-      font-weight: 900;
-      background: linear-gradient(135deg, var(--primary-light), var(--secondary-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: -0.02em;
-    }
+    margin: 0 auto 8px;
+    filter: drop-shadow(0 2px 8px rgba(var(--primary-rgb), 0.12));
   }
 
   h2 {
-    font-size: 1.08rem;
-    font-weight: 700;
+    font-size: 1.8rem;
+    font-weight: 800;
     color: var(--neutral-900);
-    margin: 0 0 5px;
+    margin: 0 0 8px;
     letter-spacing: -0.01em;
   }
 
   p {
-    font-size: 0.7rem;
+    font-size: 1rem;
     color: var(--neutral-500);
     margin: 0;
   }
@@ -313,7 +280,7 @@ const onSubmit = async () => {
   background: var(--neutral-100);
   border-radius: 12px;
   padding: 3px;
-  margin-bottom: 19px;
+  margin-bottom: 24px;
 
   .toggle-slider {
     position: absolute;
@@ -335,10 +302,10 @@ const onSubmit = async () => {
     position: relative;
     z-index: 1;
     flex: 1;
-    padding: 8px 0;
+    padding: 10px 0;
     border: none;
     background: transparent;
-    font-size: 0.7rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--neutral-400);
     cursor: pointer;
@@ -360,11 +327,11 @@ const onSubmit = async () => {
 
 .thaid-btn {
   width: 100%;
-  height: 40px;
+  height: 48px;
   background: var(--thaid-bg) !important;
   color: var(--text-on-primary) !important;
-  border-radius: 12px !important;
-  font-size: 0.76rem;
+  border-radius: 8px !important;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   transition: all 0.2s;
@@ -391,7 +358,7 @@ const onSubmit = async () => {
   }
 
   span {
-    font-size: 0.62rem;
+    font-size: 0.75rem;
     color: var(--neutral-400);
     white-space: nowrap;
     font-weight: 500;
@@ -410,9 +377,9 @@ const onSubmit = async () => {
 .field-block {
   label {
     display: block;
-    font-size: 0.66rem;
-    font-weight: 600;
-    color: var(--neutral-600);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--neutral-900);
     margin-bottom: 5px;
   }
 }
@@ -425,7 +392,7 @@ const onSubmit = async () => {
 }
 
 .forgot-link {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--primary-light);
   text-decoration: none;
@@ -437,29 +404,26 @@ const onSubmit = async () => {
 
 .field-input {
   :deep(.q-field__control) {
-    background: var(--neutral-50);
-    border-radius: 10px;
-    border-color: var(--neutral-200);
+    background: var(--neutral-100);
+    border-radius: 8px;
+    border: none;
     transition: all 0.2s;
-    height: 32px;
-    min-height: 32px;
-  }
+    height: 40px;
+    min-height: 40px;
 
-  :deep(.q-field__control:hover::before) {
-    border-color: var(--neutral-400);
-  }
-
-  :deep(.q-field--focused .q-field__control::before) {
-    border-color: var(--primary);
-    border-width: 1.5px;
+    &::before,
+    &::after {
+      border: none !important;
+    }
   }
 
   :deep(.q-field__prepend) {
-    color: var(--neutral-400);
+    color: var(--neutral-600);
   }
 
   :deep(.q-field__native) {
-    font-size: 0.72rem;
+    font-size: 1rem;
+    color: var(--neutral-900);
   }
 }
 
@@ -468,20 +432,18 @@ const onSubmit = async () => {
 // ============================================================
 .submit-btn {
   width: 100%;
-  height: 42px;
+  height: 48px;
   margin-top: 3px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%) !important;
+  background: var(--primary) !important;
   color: var(--text-on-primary) !important;
-  border-radius: 12px !important;
-  font-size: 0.8rem;
+  border-radius: 8px !important;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.01em;
-  box-shadow: 0 6px 18px rgba(13, 71, 161, 0.28) !important;
   transition: all 0.25s;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 28px rgba(13, 71, 161, 0.38) !important;
+    filter: brightness(1.1);
   }
 
   &:active {
@@ -489,25 +451,13 @@ const onSubmit = async () => {
   }
 }
 
-.btn-arrow {
-  margin-left: 6px;
-  font-size: 0.88rem;
-  font-weight: 400;
-  transition: transform 0.2s;
-  display: inline-block;
-}
-
-.submit-btn:hover .btn-arrow {
-  transform: translateX(3px);
-}
-
 // ============================================================
 // Register Row
 // ============================================================
 .register-row {
   text-align: center;
-  margin-top: 18px;
-  font-size: 0.68rem;
+  margin-top: 16px;
+  font-size: 0.8rem;
   color: var(--neutral-500);
 
   a {
