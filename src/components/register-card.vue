@@ -280,8 +280,8 @@ const onThaiID = (): void => {
 }
 
 .buu-logo-img {
-  width: 60px;
-  height: 60px;
+  width: 54px;
+  height: 54px;
   object-fit: contain;
   transform: translateY(-8px);
 }
@@ -291,7 +291,7 @@ const onThaiID = (): void => {
 }
 
 .register-title {
-  font-size: clamp(1.2rem, 4vw, 1.44rem);
+  font-size: clamp(1.08rem, 3.6vw, 1.3rem);
   font-weight: 800;
   color: #000;
 }
@@ -308,7 +308,7 @@ const onThaiID = (): void => {
 .field-block {
   label {
     display: block;
-    font-size: clamp(0.7rem, 2vw, 0.76rem);
+    font-size: clamp(0.63rem, 1.8vw, 0.68rem);
     font-weight: 700;
     color: #000;
     margin-bottom: 2px;
@@ -321,11 +321,11 @@ const onThaiID = (): void => {
     border-radius: 4px;
     border: 1px solid var(--neutral-200);
     transition: all 0.2s;
-    height: 38px;
+    height: 34px;
   }
 
   :deep(.q-field__native) {
-    font-size: clamp(0.75rem, 2vw, 0.8rem);
+    font-size: clamp(0.68rem, 1.8vw, 0.72rem);
     padding: 0 10px;
   }
 
@@ -340,7 +340,7 @@ const onThaiID = (): void => {
 }
 
 .otp-helper-text {
-  font-size: 0.7rem;
+  font-size: 0.63rem;
   color: var(--neutral-400);
   font-weight: 400;
   margin-top: -2px;
@@ -350,11 +350,11 @@ const onThaiID = (): void => {
 // Action Buttons Row
 // ============================================================
 .q-btn.cancel-btn {
-  height: 54px;
+  height: 48px;
   background: var(--neutral-200) !important;
   color: #000;
   border-radius: 8px;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 500;
   transition: all 0.25s;
 
@@ -364,11 +364,11 @@ const onThaiID = (): void => {
 }
 
 .q-btn.submit-btn {
-  height: 54px;
+  height: 48px;
   background: var(--primary) !important;
   color: var(--text-on-primary);
   border-radius: 8px;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 500;
   transition: all 0.25s;
 
@@ -386,11 +386,11 @@ const onThaiID = (): void => {
 
 .q-btn.thaid-btn {
   width: 100%;
-  height: 54px;
+  height: 48px;
   background-color: var(--thaid-bg) !important;
   color: #fff;
   border-radius: 8px;
-  font-size: 0.84rem;
+  font-size: 0.76rem;
   font-weight: 500;
   padding: 0;
   transition: all 0.2s ease;

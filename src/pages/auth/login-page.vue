@@ -319,9 +319,10 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 // Root — full viewport, no flexbox layout shifts
 // ============================================================
 .login-root {
-  position: relative;
-  width: 100%;
-  min-height: 100dvh;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
   overflow: hidden;
   font-family: var(--font-family-base);
   background: linear-gradient(
@@ -384,6 +385,9 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
     max-width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
     min-height 0.45s cubic-bezier(0.25, 1, 0.5, 1),
     padding 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+
+  // Disable scrolling entirely
+  overflow: hidden;
 }
 
 // Position: right side (login)
@@ -412,10 +416,10 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 
 // Size: register credentials
 .card-wrapper.size-credentials {
-  width: 560px;
-  min-height: 610px;
-  max-width: 560px;
-  padding: clamp(24px, 4vw, 32px) clamp(20px, 3.5vw, 28px);
+  width: 504px;
+  min-height: 550px;
+  max-width: 504px;
+  padding: clamp(22px, 3.6vw, 29px) clamp(18px, 3.1vw, 25px);
 }
 
 // Size: register profile
