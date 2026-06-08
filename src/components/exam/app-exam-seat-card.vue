@@ -67,6 +67,8 @@ const remarkBadgeClass = computed((): string => {
 
 <style scoped lang="scss">
 .exam-seat-card {
+  width: 100%;
+  min-width: 0;
   border-radius: 4px;
   transition: all 0.3s ease;
 
@@ -85,11 +87,26 @@ const remarkBadgeClass = computed((): string => {
   }
 }
 
+.exam-seat-card :deep(.q-card__section) {
+  min-width: 0;
+}
+
+.avatar-wrapper {
+  flex: 0 0 auto;
+}
+
+.info-section {
+  min-width: 0;
+}
+
 .line-height-tight {
   line-height: 1.2;
 }
 
 .student-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-weight: 500;
   font-size: 20px;
   line-height: 100%;
@@ -106,11 +123,13 @@ const remarkBadgeClass = computed((): string => {
 }
 
 .info-row {
+  min-width: 0;
   flex-wrap: nowrap;
   gap: 12px;
 }
 
 .remark-badge {
+  flex: 1 1 auto;
   font-weight: 500;
   min-width: 0;
   overflow: hidden;
@@ -133,6 +152,9 @@ const remarkBadgeClass = computed((): string => {
 .seat-label {
   color: inherit;
   flex: 0 0 auto;
+  max-width: 42%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .avatar-img {

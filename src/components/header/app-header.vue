@@ -227,7 +227,7 @@ const navLinks = computed<NavigationItem[]>(() => {
       role === ROLES.REGISTRATION_OFFICER ||
       role === ROLES.EXAM_OPERATIONS_OFFICER
     ) {
-      if (role === ROLES.EXAM_OPERATIONS_OFFICER || role === ROLES.ADMIN) {
+      if (role === ROLES.REGISTRATION_OFFICER || role === ROLES.ADMIN) {
         links.push({
           name: 'admin-location-management',
           label: t('navigation.manageLocations'),
@@ -249,12 +249,7 @@ const navLinks = computed<NavigationItem[]>(() => {
           path: '/admin/test-voucher-management',
         });
       }
-      if (
-        role === ROLES.ADMIN ||
-        role === ROLES.STAFF ||
-        role === ROLES.REGISTRATION_OFFICER ||
-        role === ROLES.EXAM_OPERATIONS_OFFICER
-      ) {
+      if (role === ROLES.ADMIN || role === ROLES.STAFF || role === ROLES.EXAM_OPERATIONS_OFFICER) {
         links.push({
           name: 'admin-score-criteria-management',
           label: t('navigation.manageScoreCriteria'),

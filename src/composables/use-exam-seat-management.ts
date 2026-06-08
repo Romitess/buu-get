@@ -76,6 +76,11 @@ interface SeatSessionLocation {
   LOCATION: NonNullable<BackendSession['LOCATION']>;
 }
 
+interface UsableSeatAssignment {
+  seatId: string;
+  sessionLocationId: number;
+}
+
 /**
  * Composable for the "จัดการที่นั่งสอบ" page.
  * Owns exam/session/enrollment loading, the student list, the seat grid
@@ -406,6 +411,15 @@ export function useExamSeatManagement() {
   // Number of applicants seated in the currently selected room (drives the list badge)
   const currentRoomCount = computed((): number => currentRoomStudents.value.length);
 
+  const currentRoomCapacity = computed((): number => {
+    if (activeLocation.value?.SEATS?.length) return activeLocation.value.SEATS.length;
+
+    const activeSessionCapacity = activeTimeSessions.value.find(
+      (session) => session.SS_ID === activeSessionLocation.value?.SS_ID,
+    )?.SS_CAPACITY;
+    return activeSessionCapacity || 0;
+  });
+
   /**
    * Canonical reading-order key for an assigned seat (A1 < A2 < … < B1 …).
    * Uses LS_ROW_NO / LS_COL_NO so the list matches the seat-map grid.
@@ -496,11 +510,8 @@ export function useExamSeatManagement() {
     updateSeatStatuses();
   };
 
-  const autoAssignSeats = (): void => {
-    // Usable seats from every room in the active time slot, kept in room order
-    // (first room first) and sorted by reading order (A1, A2, … B1 …) within a
-    // room. This makes the first room fill up completely before the second.
-    const availableSeatAssignments = sessionLocations.value.flatMap((sessionLocation) => {
+  const getUsableSeatAssignments = (): UsableSeatAssignment[] => {
+    return sessionLocations.value.flatMap((sessionLocation) => {
       const seats = [...(sessionLocation.LOCATION.SEATS || [])]
         .filter((seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2)
         .sort((a, b) => a.LS_ROW_NO - b.LS_ROW_NO || a.LS_COL_NO - b.LS_COL_NO);
@@ -510,6 +521,13 @@ export function useExamSeatManagement() {
         seatId: String(seat.LS_ID),
       }));
     });
+  };
+
+  const autoAssignSeats = (): void => {
+    // Usable seats from every room in the active time slot, kept in room order
+    // (first room first) and sorted by reading order (A1, A2, … B1 …) within a
+    // room. This makes the first room fill up completely before the second.
+    const availableSeatAssignments = getUsableSeatAssignments();
 
     // Re-arrange everyone on each open: clear seats first.
     students.value.forEach((student) => {
@@ -734,37 +752,39 @@ export function useExamSeatManagement() {
   const swapSeatAssignments = (sourceSeatId: string, targetSeatId: string): void => {
     if (sourceSeatId === targetSeatId) return;
 
-    // Look both seats up across every room in the active time slot so swapping
-    // works regardless of which room is currently selected.
-    const seatLookup = sessionLocations.value.flatMap((location) =>
-      (location.LOCATION.SEATS || []).map((seat) => ({
-        seatId: String(seat.LS_ID),
-        status: seat.LS_SEAT_STATUS,
-        sessionLocationId: location.SL_ID,
-      })),
-    );
+    const usableSeats = getUsableSeatAssignments();
+    const sourceIndex = usableSeats.findIndex((seat) => seat.seatId === sourceSeatId);
+    const targetIndex = usableSeats.findIndex((seat) => seat.seatId === targetSeatId);
+    if (sourceIndex < 0 || targetIndex < 0) return;
 
-    const sourceSeat = seatLookup.find((seat) => seat.seatId === sourceSeatId);
-    const targetSeat = seatLookup.find((seat) => seat.seatId === targetSeatId);
-    if (!sourceSeat || !targetSeat) return;
-
-    // Never move anyone onto a broken (1) or blocked (2) seat.
-    const isUnusable = (status: number): boolean => status === 1 || status === 2;
-    if (isUnusable(sourceSeat.status) || isUnusable(targetSeat.status)) return;
-
-    // Seats are uniquely identified by LS_ID, so match students by seat alone.
     const sourceStudent = students.value.find((student) => student.seat === sourceSeatId);
-    const targetStudent = students.value.find((student) => student.seat === targetSeatId);
-    if (!sourceStudent && !targetStudent) return;
+    if (!sourceStudent) return;
 
-    if (sourceStudent) {
-      sourceStudent.seat = targetSeatId;
-      sourceStudent.sessionLocationId = targetSeat.sessionLocationId;
+    const studentBySeat = new Map<string, StudentSeatInfo>();
+    students.value.forEach((student) => {
+      if (student.id === sourceStudent.id || !student.seat) return;
+      studentBySeat.set(student.seat, student);
+    });
+
+    let emptyIndex = targetIndex;
+    while (emptyIndex < usableSeats.length && studentBySeat.has(usableSeats[emptyIndex]!.seatId)) {
+      emptyIndex += 1;
     }
-    if (targetStudent) {
-      targetStudent.seat = sourceSeatId;
-      targetStudent.sessionLocationId = sourceSeat.sessionLocationId;
+    if (emptyIndex >= usableSeats.length) return;
+
+    for (let index = emptyIndex; index > targetIndex; index -= 1) {
+      const fromSeat = usableSeats[index - 1]!;
+      const toSeat = usableSeats[index]!;
+      const movingStudent = studentBySeat.get(fromSeat.seatId);
+      if (!movingStudent) continue;
+
+      movingStudent.seat = toSeat.seatId;
+      movingStudent.sessionLocationId = toSeat.sessionLocationId;
     }
+
+    const targetSeat = usableSeats[targetIndex]!;
+    sourceStudent.seat = targetSeat.seatId;
+    sourceStudent.sessionLocationId = targetSeat.sessionLocationId;
 
     updateSeatStatuses();
   };
@@ -1016,6 +1036,7 @@ export function useExamSeatManagement() {
     applicantCount,
     paidCount,
     currentRoomCount,
+    currentRoomCapacity,
     filteredStudents,
     isSeatAssignmentComplete,
     // Drag state
