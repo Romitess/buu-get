@@ -15,14 +15,14 @@
     <div ref="voucherRef" class="voucher-wrapper">
       <div class="voucher-card">
         <!-- ===== Header Section ===== -->
-        <div class="voucher-header row items-center no-wrap">
+        <div class="voucher-header">
           <!-- Logo container -->
-          <div class="col-auto">
+          <div class="header-logo-pane">
             <img src="icons/logo-vocher.png" class="header-logo" alt="BUULI Logo" />
           </div>
 
           <!-- Titles -->
-          <div class="col text-center">
+          <div class="header-title-pane">
             <h1 class="header-title">{{ $t('exam.voucher.title') }}</h1>
             <h2 class="header-subtitle">{{ $t('exam.voucher.subtitle') }}</h2>
           </div>
@@ -33,9 +33,9 @@
           <!-- Subtle Watermark Background -->
           <div class="watermark-bg no-pointer-events">GET</div>
 
-          <div class="row q-col-gutter-lg items-stretch content-container">
+          <div class="content-container">
             <!-- Left: Profile Photo Column -->
-            <div class="col-12 col-sm-4 flex flex-center column">
+            <div class="profile-column">
               <div class="profile-photo-wrapper shadow-1">
                 <ImageDisplay
                   :image-path="voucherData.profileImage"
@@ -47,50 +47,43 @@
                   alt="Profile Photo"
                 />
               </div>
-              <div class="photo-divider"></div>
+              <div class="signature-line"></div>
             </div>
 
             <!-- Right: Details Grid -->
-            <div class="col-12 col-sm-8 detail-grid-column">
-              <div class="row q-col-gutter-y-lg full-height items-center">
-                <!-- Column 1 (Left details) -->
-                <div class="col-12 col-sm-6 detail-group">
-                  <div class="info-group">
-                    <label class="info-label">Test Taker ID:</label>
-                    <div class="info-value">{{ voucherData.studentId }}</div>
-                  </div>
-                  <div class="info-group">
-                    <label class="info-label">Name Surname:</label>
-                    <div class="info-value">{{ voucherData.fullName }}</div>
-                  </div>
-                  <div class="info-group">
-                    <label class="info-label">Citizen ID:</label>
-                    <div class="info-value">{{ voucherData.citizenId || '-' }}</div>
-                  </div>
-                  <div class="info-group">
-                    <label class="info-label">Test Session:</label>
-                    <div class="info-value">{{ voucherData.testSession || '-' }}</div>
-                  </div>
+            <div class="detail-grid-column">
+              <div class="details-grid">
+                <div class="info-group">
+                  <label class="info-label">Test Taker ID:</label>
+                  <div class="info-value">{{ voucherData.studentId }}</div>
                 </div>
-
-                <!-- Column 2 (Right details) -->
-                <div class="col-12 col-sm-6 detail-group">
-                  <div class="info-group">
-                    <label class="info-label">Test Date:</label>
-                    <div class="info-value">{{ voucherData.examDate }}</div>
-                  </div>
-                  <div class="info-group">
-                    <label class="info-label">Time:</label>
-                    <div class="info-value">{{ voucherData.examTime }}</div>
-                  </div>
-                  <div class="info-group">
-                    <label class="info-label">Venue:</label>
-                    <div class="info-value">{{ voucherData.location }}</div>
-                  </div>
-                  <div class="info-group">
-                    <label class="info-label">Seat Number:</label>
-                    <div class="info-value highlight-value">{{ voucherData.seatNo }}</div>
-                  </div>
+                <div class="info-group">
+                  <label class="info-label">Test Date:</label>
+                  <div class="info-value">{{ voucherData.examDate }}</div>
+                </div>
+                <div class="info-group">
+                  <label class="info-label">Name Surname:</label>
+                  <div class="info-value">{{ voucherData.fullName }}</div>
+                </div>
+                <div class="info-group">
+                  <label class="info-label">Time:</label>
+                  <div class="info-value">{{ voucherData.examTime }}</div>
+                </div>
+                <div class="info-group">
+                  <label class="info-label">Citizen ID:</label>
+                  <div class="info-value">{{ voucherData.citizenId || '-' }}</div>
+                </div>
+                <div class="info-group">
+                  <label class="info-label">Venue:</label>
+                  <div class="info-value">{{ voucherData.location }}</div>
+                </div>
+                <div class="info-group">
+                  <label class="info-label">Test Session:</label>
+                  <div class="info-value">{{ voucherData.testSession || '-' }}</div>
+                </div>
+                <div class="info-group">
+                  <label class="info-label">Seat Number:</label>
+                  <div class="info-value highlight-value">{{ voucherData.seatNo }}</div>
                 </div>
               </div>
             </div>
@@ -318,28 +311,50 @@ const windowPrint = (): void => {
 
 .voucher-wrapper {
   width: 100%;
-  max-width: 520px;
+  max-width: 668px;
   margin: 0 auto;
   font-family: var(--font-family-base);
+  padding: 1px;
 }
 
 .voucher-card {
   width: 100%;
-  background: var(--voucher-bg-gradient);
-  border-radius: var(--radius-md);
-  border: 1.5px solid var(--border-black);
-  box-shadow: var(--shadow-md);
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #000000;
+  box-shadow: none;
+  box-sizing: border-box;
   overflow: hidden;
+  padding: 10px;
 }
 
 /* ===== Header Area ===== */
 .voucher-header {
-  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr);
+  column-gap: 10px;
+  align-items: center;
+  min-height: 76px;
+  padding: 12px 24px;
   background-color: var(--surface-card);
   border-bottom: 1.5px solid var(--neutral-300) !important;
+  border-radius: 8px 8px 0 0;
+
+  .header-logo-pane {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .header-title-pane {
+    min-width: 0;
+    text-align: center;
+  }
 
   .header-logo {
-    height: 40px;
+    width: 142px;
+    max-width: 100%;
+    height: auto;
     object-fit: contain;
   }
 
@@ -349,20 +364,21 @@ const windowPrint = (): void => {
     font-style: normal !important;
     font-size: 16px !important;
     line-height: 120% !important;
-    letter-spacing: 0% !important;
+    letter-spacing: 0 !important;
     text-align: center !important;
     vertical-align: middle !important;
     color: var(--primary) !important;
     margin: 0 0 3px 0 !important;
+    white-space: nowrap;
   }
 
   .header-subtitle {
     font-family: var(--font-family-base) !important;
     font-weight: 500 !important;
     font-style: normal !important;
-    font-size: 14px !important;
+    font-size: 15px !important;
     line-height: 120% !important;
-    letter-spacing: 0% !important;
+    letter-spacing: 0 !important;
     text-align: center !important;
     vertical-align: middle !important;
     color: var(--neutral-600) !important;
@@ -373,28 +389,32 @@ const windowPrint = (): void => {
 /* ===== Body Area ===== */
 .voucher-body {
   position: relative;
-  padding: 24px 20px;
-  background: transparent;
+  padding: 18px 56px 8px;
+  background: #ffffff;
   min-height: auto;
 
   .content-container {
     position: relative;
     z-index: 1;
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    align-items: start;
+    column-gap: 30px;
   }
 }
 
 /* ===== Watermark ===== */
 .watermark-bg {
   position: absolute;
-  top: 50%;
-  left: 65%;
+  top: 46%;
+  left: 62%;
   transform: translate(-50%, -50%);
-  font-family: var(--font-family-base);
+  font-family: 'Outfit', var(--font-family-base);
   font-weight: 800;
   font-style: normal;
-  font-size: 140px;
+  font-size: 182px;
   line-height: 100%;
-  letter-spacing: 0%;
+  letter-spacing: 0;
   vertical-align: middle;
   color: var(--watermark-color);
   z-index: 0;
@@ -404,8 +424,8 @@ const windowPrint = (): void => {
 
 /* ===== Profile Photo ===== */
 .profile-photo-wrapper {
-  width: 100px;
-  height: 126px;
+  width: 140px;
+  height: 166px;
   background-color: var(--badge-primary-bg);
   border-radius: 3px;
   overflow: hidden;
@@ -426,28 +446,38 @@ const windowPrint = (): void => {
   }
 }
 
-.photo-divider {
-  width: 100px;
+.profile-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.signature-line {
+  width: 140px;
   height: 1.5px;
   background-color: var(--neutral-400);
-  margin-top: 8px;
+  margin-top: 30px;
   border-radius: 1px;
 }
 
 /* ===== Detail Grid ===== */
 .detail-grid-column {
-  padding-left: 12px !important;
+  min-width: 0;
 }
 
-.detail-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.details-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-auto-rows: minmax(39px, auto);
+  column-gap: 42px;
+  row-gap: 0;
+  align-items: start;
 }
 
 .info-group {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 
   .info-label {
     font-family: var(--font-family-base) !important;
@@ -465,6 +495,8 @@ const windowPrint = (): void => {
     color: var(--primary) !important;
     line-height: 1.3;
     letter-spacing: 0px !important;
+    overflow-wrap: anywhere;
+    word-break: normal;
 
     &.highlight-value {
       font-weight: 600 !important;
@@ -474,9 +506,10 @@ const windowPrint = (): void => {
 
 /* ===== Barcode Footer Area ===== */
 .voucher-footer {
-  padding: 16px 20px 24px 20px;
-  background: transparent;
+  padding: 8px 20px 20px 20px;
+  background: #ffffff;
   border-top: none;
+  border-radius: 0 0 8px 8px;
 
   .barcode-wrapper {
     background-color: transparent !important;
@@ -484,8 +517,8 @@ const windowPrint = (): void => {
     padding: 0 !important;
 
     .barcode-svg {
-      width: 200px;
-      height: 32px;
+      width: 254px;
+      height: 36px;
     }
 
     .barcode-value {
@@ -494,7 +527,7 @@ const windowPrint = (): void => {
       font-style: normal !important;
       font-size: 10px !important;
       line-height: 100% !important;
-      letter-spacing: 0% !important;
+      letter-spacing: 0 !important;
       text-align: center !important;
     }
   }
@@ -502,7 +535,7 @@ const windowPrint = (): void => {
 
 /* ===== Regulations Section ===== */
 .regulations-block {
-  margin-top: 16px;
+  margin-top: 10px;
   text-align: left;
 }
 
@@ -524,13 +557,22 @@ const windowPrint = (): void => {
 
 .regulations-box {
   position: relative;
-  background-color: var(--neutral-50);
-  border: 1.5px solid var(--border-black);
-  border-radius: 6px;
-  padding: 12px 16px;
+  background-color: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 12px;
+  box-sizing: border-box;
+  padding: 10px;
+
+  .regulations-content-wrapper {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 28px 30px 26px;
+  }
 
   .watermark-bg {
-    left: 50% !important;
+    top: 50%;
+    left: 56% !important;
+    font-size: 206px;
   }
 }
 
@@ -541,32 +583,66 @@ const windowPrint = (): void => {
 
 .regulations-text-content {
   font-family: var(--font-family-base);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
   color: var(--neutral-900);
-  line-height: 1.6;
+  line-height: 1.35;
   white-space: pre-line;
   padding-left: 2px;
 }
 
 /* ===== Responsive Adaptability ===== */
 @media (max-width: 480px) {
-  .detail-grid-column {
-    padding-left: 0 !important;
-    margin-top: 12px;
+  .voucher-wrapper {
+    max-width: 100%;
   }
   .voucher-header {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     padding: 12px;
     gap: 8px;
     text-align: center;
+
+    .header-logo-pane {
+      justify-content: center;
+    }
+
+    .header-title-pane {
+      grid-column: 1;
+    }
+
+    .header-title {
+      white-space: normal;
+    }
   }
   .voucher-body {
     padding: 12px;
+
+    .content-container {
+      grid-template-columns: 1fr;
+      row-gap: 16px;
+    }
+  }
+  .details-grid {
+    grid-template-columns: 1fr;
+    row-gap: 10px;
+  }
+  .profile-photo-wrapper {
+    width: 124px;
+    height: 150px;
+  }
+  .signature-line {
+    width: 124px;
+    margin-top: 18px;
   }
   .watermark-bg {
-    font-size: 6rem;
+    top: 48%;
     left: 50%;
+    font-size: 7rem;
+  }
+  .regulations-box .watermark-bg {
+    top: 52%;
+    left: 52% !important;
+    font-size: 8rem;
   }
 }
 
@@ -588,30 +664,31 @@ const windowPrint = (): void => {
     box-shadow: none !important;
   }
   .voucher-card {
-    border: 0.1px solid var(--border-black) !important;
+    border: 1px solid #000000 !important;
     box-shadow: none !important;
   }
   .voucher-header {
-    padding: 20px 28px;
+    padding: 14px 28px;
     .header-logo {
-      height: 56px;
+      width: 160px;
     }
     .header-title {
-      font-size: 18px !important;
+      font-size: 17px !important;
     }
     .header-subtitle {
-      font-size: 16px !important;
+      font-size: 15px !important;
     }
   }
   .voucher-body {
-    padding: 28px;
+    padding: 20px 56px 8px;
   }
   .profile-photo-wrapper {
     width: 140px;
-    height: 176px;
+    height: 166px;
   }
-  .photo-divider {
+  .signature-line {
     width: 140px;
+    margin-top: 28px;
   }
   .info-group .info-label {
     font-size: 12px !important;
@@ -619,22 +696,26 @@ const windowPrint = (): void => {
   .info-group .info-value {
     font-size: 16px !important;
   }
-  .detail-group {
-    gap: 14px;
-  }
   .barcode-wrapper .barcode-svg {
-    width: 300px;
-    height: 44px;
+    width: 254px;
+    height: 36px;
   }
   .barcode-wrapper .barcode-value {
     font-size: 12px !important;
   }
   .watermark-bg {
-    font-size: 200px;
+    top: 46%;
+    left: 62%;
+    font-size: 182px;
+  }
+  .regulations-box .watermark-bg {
+    top: 50%;
+    left: 56% !important;
+    font-size: 206px;
   }
 
   .regulations-block {
-    margin-top: 24px;
+    margin-top: 10px;
   }
   .regulations-heading {
     font-size: 16px !important;
@@ -645,9 +726,12 @@ const windowPrint = (): void => {
     margin-bottom: 10px;
   }
   .regulations-box {
-    padding: 16px 20px;
-    background-color: var(--surface-card) !important;
-    border: 1.5px solid var(--border-black) !important;
+    padding: 10px !important;
+    background-color: #ffffff !important;
+    border: 1px solid #000000 !important;
+  }
+  .regulations-box .regulations-content-wrapper {
+    padding: 28px 30px 26px !important;
   }
   .regulations-text-content {
     font-size: 14px !important;

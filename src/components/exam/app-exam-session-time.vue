@@ -11,7 +11,7 @@
     no-caps
   >
     <q-tab
-      v-for="session in sessions || []"
+      v-for="session in uniqueSessions"
       :key="session.SS_ID"
       :name="session.SS_ID"
       :label="formatSessionLabel(session)"
@@ -20,6 +20,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { BackendSession } from 'src/types/exam';
 
 interface Props {
@@ -27,7 +28,7 @@ interface Props {
   sessions?: BackendSession[] | undefined;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 defineEmits<{
   (e: 'update:modelValue', value: number | null): void;
@@ -39,6 +40,20 @@ const formatSessionLabel = (session: BackendSession): string => {
   if (!start || !end) return '-';
   return `${start}-${end}`;
 };
+
+const getSessionTimeKey = (session: BackendSession): string => {
+  return `${session.SS_START_TIME || ''}-${session.SS_END_TIME || ''}`;
+};
+
+const uniqueSessions = computed<BackendSession[]>(() => {
+  const seen = new Set<string>();
+  return (props.sessions || []).filter((session) => {
+    const key = getSessionTimeKey(session);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+});
 </script>
 
 <style scoped lang="scss">

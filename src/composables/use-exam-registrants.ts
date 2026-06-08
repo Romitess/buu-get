@@ -5,7 +5,7 @@ import {
   VERIFY_STATUS_LABELS,
   EnrollmentStatus,
 } from 'src/types/enrollment.types';
-import type { BackendExam } from 'src/types/exam';
+import type { BackendExam, BackendSession } from 'src/types/exam';
 import { fetchEnrollmentsByExamId } from 'src/services/enrollment.service';
 import { fetchExamById } from 'src/services/exam.service';
 
@@ -18,12 +18,39 @@ export function useExamRegistrants() {
   const searchQuery = ref('');
   const selectedSessionId = ref<number | null>(null);
 
+  const getSessionTimeKey = (session: BackendSession): string => {
+    return `${session.SS_START_TIME || ''}-${session.SS_END_TIME || ''}`;
+  };
+
+  const sessionTimeTabs = computed<BackendSession[]>(() => {
+    const seen = new Set<string>();
+    return (exam.value?.SESSIONS ?? []).filter((session) => {
+      const key = getSessionTimeKey(session);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  });
+
+  const activeSessionIds = computed<Set<number>>(() => {
+    if (!selectedSessionId.value) return new Set<number>();
+    const sessions = exam.value?.SESSIONS ?? [];
+    const selectedSession = sessions.find((session) => session.SS_ID === selectedSessionId.value);
+    if (!selectedSession) return new Set<number>([selectedSessionId.value]);
+    const activeKey = getSessionTimeKey(selectedSession);
+    return new Set(
+      sessions
+        .filter((session) => getSessionTimeKey(session) === activeKey)
+        .map((session) => session.SS_ID),
+    );
+  });
+
   const filteredEnrollments = computed((): EnrollmentTableRow[] => {
     // Filter out cancelled enrollments
     let list = enrollments.value.filter((e) => e.paymentStatus !== CANCELLED_STATUS);
 
     if (selectedSessionId.value) {
-      list = list.filter((e) => e.sessionId === selectedSessionId.value);
+      list = list.filter((e) => activeSessionIds.value.has(e.sessionId));
     }
 
     if (searchQuery.value) {
@@ -54,12 +81,12 @@ export function useExamRegistrants() {
   const sessionTotalCount = computed((): number => {
     const activeEnrollments = enrollments.value.filter((e) => e.paymentStatus !== CANCELLED_STATUS);
     if (!selectedSessionId.value) return activeEnrollments.length;
-    return activeEnrollments.filter((e) => e.sessionId === selectedSessionId.value).length;
+    return activeEnrollments.filter((e) => activeSessionIds.value.has(e.sessionId)).length;
   });
 
   const sessionPaidCount = computed((): number => {
     const list = selectedSessionId.value
-      ? enrollments.value.filter((e) => e.sessionId === selectedSessionId.value)
+      ? enrollments.value.filter((e) => activeSessionIds.value.has(e.sessionId))
       : enrollments.value;
     return list.filter((e) => e.paymentStatus >= 1 && e.paymentStatus !== CANCELLED_STATUS).length;
   });
@@ -100,6 +127,7 @@ export function useExamRegistrants() {
     error,
     searchQuery,
     selectedSessionId,
+    sessionTimeTabs,
     filteredEnrollments,
     sessionTotalCount,
     sessionPaidCount,

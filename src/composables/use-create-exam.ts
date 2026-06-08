@@ -498,6 +498,27 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
               );
               return opt ? opt.value : name;
             });
+
+            const relationLocations = session.SESSION_LOCATIONS || [];
+            if (relationLocations.length > 0) {
+              relationLocations
+                .filter((relation) => relation.LOCATION)
+                .forEach((relation) => {
+                  slot.rooms.push({
+                    locationId: relation.LOCATION_ID ?? relation.LOCATION.LOCATION_ID ?? null,
+                    proctorName: session.SS_NAME || '',
+                    proctors: mappedProctors,
+                    seats: relation.LOCATION.SEATS?.length || session.SS_CAPACITY || 40,
+                    sessionId: session.SS_ID,
+                    enrollmentCount:
+                      session.ENROLLMENTS?.filter(
+                        (enrollment) => enrollment.SL_ID === relation.SL_ID,
+                      ).length || 0,
+                  });
+                });
+              return;
+            }
+
             slot.rooms.push({
               locationId: session.LOCATION?.LOCATION_ID ?? session.LOCATION_ID ?? null,
               proctorName: session.SS_NAME || '',
