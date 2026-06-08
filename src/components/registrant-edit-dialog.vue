@@ -31,7 +31,10 @@
                       unmasked-value
                       bg-color="white"
                       class="custom-input"
-                      :rules="[(val) => !!val || $t('profile.requiredNationalId')]"
+                      :rules="[
+                        (val) => !!val || $t('profile.requiredNationalId'),
+                        (val) => !val || val.length === 13 || $t('profile.invalidNationalId'),
+                      ]"
                       hide-bottom-space
                     />
                   </div>
@@ -182,7 +185,13 @@
                       mask="###-###-####"
                       bg-color="white"
                       class="custom-input"
-                      :rules="[(val) => !!val || $t('profile.requiredPhone')]"
+                      :rules="[
+                        (val) => !!val || $t('profile.requiredPhone'),
+                        (val) =>
+                          !val ||
+                          val.replace(/\D/g, '').length === 10 ||
+                          $t('profile.invalidPhone'),
+                      ]"
                       hide-bottom-space
                     />
                   </div>

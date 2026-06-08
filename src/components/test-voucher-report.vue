@@ -56,19 +56,19 @@
                 <!-- Column 1 (Left details) -->
                 <div class="col-12 col-sm-6 detail-group">
                   <div class="info-group">
-                    <label class="info-label">{{ $t('exam.voucher.fields.testTakerId') }}</label>
+                    <label class="info-label">Test Taker ID:</label>
                     <div class="info-value">{{ voucherData.studentId }}</div>
                   </div>
                   <div class="info-group">
-                    <label class="info-label">{{ $t('exam.voucher.fields.nameSurname') }}</label>
+                    <label class="info-label">Name Surname:</label>
                     <div class="info-value">{{ voucherData.fullName }}</div>
                   </div>
                   <div class="info-group">
-                    <label class="info-label">{{ $t('exam.voucher.fields.citizenId') }}</label>
+                    <label class="info-label">Citizen ID:</label>
                     <div class="info-value">{{ voucherData.citizenId || '-' }}</div>
                   </div>
                   <div class="info-group">
-                    <label class="info-label">{{ $t('exam.voucher.fields.testSession') }}</label>
+                    <label class="info-label">Test Session:</label>
                     <div class="info-value">{{ voucherData.testSession || '-' }}</div>
                   </div>
                 </div>
@@ -76,19 +76,19 @@
                 <!-- Column 2 (Right details) -->
                 <div class="col-12 col-sm-6 detail-group">
                   <div class="info-group">
-                    <label class="info-label">{{ $t('exam.voucher.fields.testDate') }}</label>
+                    <label class="info-label">Test Date:</label>
                     <div class="info-value">{{ voucherData.examDate }}</div>
                   </div>
                   <div class="info-group">
-                    <label class="info-label">{{ $t('exam.voucher.fields.time') }}</label>
+                    <label class="info-label">Time:</label>
                     <div class="info-value">{{ voucherData.examTime }}</div>
                   </div>
                   <div class="info-group">
-                    <label class="info-label">{{ $t('exam.voucher.fields.venue') }}</label>
+                    <label class="info-label">Venue:</label>
                     <div class="info-value">{{ voucherData.location }}</div>
                   </div>
                   <div class="info-group">
-                    <label class="info-label">{{ $t('exam.voucher.fields.seatNumber') }}</label>
+                    <label class="info-label">Seat Number:</label>
                     <div class="info-value highlight-value">{{ voucherData.seatNo }}</div>
                   </div>
                 </div>
@@ -227,7 +227,7 @@ const mockData: VoucherData = {
   examName: 'BUU-GET : Burapha University\u2019s Graduate English Test',
   examDate: '15 May 2026',
   examTime: '08.00 AM - 10.00 AM',
-  examType: 'ทั่วไป',
+  examType: 'General',
   location: 'QS1, Burapha University',
   seatNo: 'A1',
   voucherNo: 'ENG2026-001',

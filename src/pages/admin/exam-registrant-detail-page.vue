@@ -257,6 +257,13 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@media (max-width: 1023px) {
+  .page-container {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
 .registrant-detail-page {
   padding-top: 16px;
   padding-bottom: 16px;

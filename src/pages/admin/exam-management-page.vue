@@ -13,10 +13,10 @@
         <SearchBar v-model="searchQuery" />
       </div>
       <q-btn
-        v-if="currentRole !== ROLES.REGISTRATION_OFFICER"
+        v-if="currentRole !== ROLES.EXAM_OPERATIONS_OFFICER"
         color="primary"
         icon="add"
-        label="สร้างรอบสอบ"
+        :label="t('admin.examManagement.createExam')"
         unelevated
         class="create-exam-btn text-weight-bold"
         @click="$router.push('/admin/create-exam')"
@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -92,6 +92,8 @@ const pagination = ref<PaginationModel>({
   page: 1,
   rowsPerPage: 10,
   rowsNumber: 0,
+  sortBy: null,
+  descending: false,
 });
 
 // Methods
@@ -117,6 +119,14 @@ const onRequest = (props: TableRequestProps) => {
   pagination.value.page = page;
   pagination.value.rowsPerPage = rowsPerPage;
 };
+
+watch(
+  exams,
+  (newExams) => {
+    pagination.value.rowsNumber = newExams.length;
+  },
+  { immediate: true },
+);
 
 const handleEdit = (id: string) => {
   void router.push({ name: 'admin-edit-exam', params: { examId: id } });

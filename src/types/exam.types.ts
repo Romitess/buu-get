@@ -15,9 +15,11 @@ export interface ExamSchedule {
 }
 
 export interface PaginationModel {
+  sortBy?: string | null;
+  descending?: boolean;
   page: number;
   rowsPerPage: number;
-  rowsNumber: number;
+  rowsNumber?: number;
 }
 
 export type Role = UserRole;

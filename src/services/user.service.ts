@@ -201,6 +201,7 @@ export async function updateProfile(
     userAddress?: string | undefined;
     userImagePath?: string | null | undefined;
     isFromEmail?: boolean | undefined;
+    userNationalId?: string | undefined;
   },
 ): Promise<User> {
   try {

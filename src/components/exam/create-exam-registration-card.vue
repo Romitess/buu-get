@@ -2,8 +2,8 @@
   <q-card flat bordered class="buu-premium-card q-mb-md">
     <q-card-section>
       <div class="row items-center q-mb-md">
-        <q-icon name="schedule" size="20px" class="q-mr-sm text-grey-8" />
-        <div class="text-subtitle1 text-weight-bold text-grey-9">
+        <q-icon name="schedule" size="20px" class="q-mr-sm text-dark" />
+        <div class="text-subtitle1 text-weight-bold text-dark">
           {{ isSpecialRound ? 'กำหนดการลงทะเบียน' : 'กำหนดการลงทะเบียนและชำระเงิน' }}
         </div>
       </div>

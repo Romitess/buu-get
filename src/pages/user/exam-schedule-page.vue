@@ -269,3 +269,12 @@ const onPasscodeConfirm = (passcode: string): void => {
 
 const onMonthChange = (): void => {};
 </script>
+
+<style scoped lang="scss">
+@media (max-width: 1023px) {
+  .page-container {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+</style>

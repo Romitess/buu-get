@@ -186,6 +186,8 @@ export default {
     requiredEducation: 'กรุณาเลือกระดับการศึกษา',
     requiredPhone: 'กรุณากรอกเบอร์โทรศัพท์',
     invalidEmail: 'รูปแบบอีเมลไม่ถูกต้อง',
+    invalidNationalId: 'เลขประจำตัวประชาชนต้องมี 13 หลัก',
+    invalidPhone: 'เบอร์โทรศัพท์ต้องมี 10 หลัก',
     eduHighSchool: 'มัธยมศึกษา',
     eduBachelor: 'ปริญญาตรี',
     eduMaster: 'ปริญญาโท',

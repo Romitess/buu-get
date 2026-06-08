@@ -3,8 +3,8 @@
     <q-card-section>
       <!-- Header Section -->
       <div class="row items-center q-mb-md">
-        <q-icon name="assignment" size="20px" class="q-mr-sm text-grey-8" />
-        <div class="text-subtitle1 text-weight-bold text-grey-9">ข้อมูลพื้นฐาน</div>
+        <q-icon name="assignment" size="20px" class="q-mr-sm text-dark" />
+        <div class="text-subtitle1 text-weight-bold text-dark">ข้อมูลพื้นฐาน</div>
       </div>
 
       <!-- Form Grid -->

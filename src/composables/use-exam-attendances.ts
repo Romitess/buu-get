@@ -37,7 +37,11 @@ export function useExamAttendances() {
       });
     }
 
-    return list;
+    // Re-index sequentially for clean UI presentation
+    return list.map((item, index) => ({
+      ...item,
+      index: index + 1,
+    }));
   });
 
   const sessionTotalCount = computed((): number => {

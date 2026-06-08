@@ -4,8 +4,8 @@
       <!-- Header Row: Title + Add Button -->
       <div class="row items-center justify-between q-mb-md section-header">
         <div class="row items-center no-wrap">
-          <q-icon name="calendar_today" size="20px" class="q-mr-xs" color="dark" />
-          <div class="section-title">กำหนดการสอบ</div>
+          <q-icon name="calendar_today" size="20px" class="q-mr-sm text-dark" />
+          <div class="text-subtitle1 text-weight-bold text-dark">กำหนดการสอบ</div>
         </div>
         <q-btn
           v-if="!locked"
@@ -261,9 +261,12 @@
                     </q-tooltip>
                   </q-input>
                 </div>
-                <div class="col-auto q-ml-sm" style="width: 24px">
+                <div
+                  v-if="!locked && activeSlot.rooms.length > 1"
+                  class="col-auto q-ml-sm"
+                  style="width: 24px"
+                >
                   <q-icon
-                    v-if="!locked && activeSlot.rooms.length > 1"
                     name="delete"
                     class="cursor-pointer"
                     size="sm"

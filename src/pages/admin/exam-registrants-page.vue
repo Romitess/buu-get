@@ -21,19 +21,23 @@
       is-admin
     />
 
-    <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
-      <SearchBar
-        v-model="searchQuery"
-        :placeholder="$t('admin.registrantManagement.searchPlaceholder')"
-        class="search-bar col-12 col-sm-auto"
-      />
+    <nav class="toolbar-section row q-col-gutter-md items-center q-mb-md">
+      <div class="col-12 col-sm-auto">
+        <SearchBar
+          v-model="searchQuery"
+          :placeholder="$t('admin.registrantManagement.searchPlaceholder')"
+          class="search-bar"
+        />
+      </div>
       <q-space class="gt-xs" />
-      <ExportCsvButton
-        :columns="columns"
-        :rows="filteredEnrollments"
-        file-name-prefix="exam-registrants"
-        class="export-btn col-12 col-sm-auto"
-      />
+      <div class="col-12 col-sm-auto">
+        <ExportCsvButton
+          :columns="columns"
+          :rows="filteredEnrollments"
+          file-name-prefix="exam-registrants"
+          class="export-btn"
+        />
+      </div>
     </nav>
 
     <main>
@@ -171,25 +175,28 @@ const columns: QTableColumn[] = [
     label: t('admin.registrantManagement.table.columns.index'),
     field: 'index',
     align: 'center',
-    style: 'width: 60px',
+    style: 'width: 6%',
   },
   {
     name: 'titleTh',
     label: t('admin.registrantManagement.table.columns.prefix'),
     field: 'titleTh',
     align: 'center',
+    style: 'width: 10%',
   },
   {
     name: 'fullnameTh',
     label: t('admin.registrantManagement.table.columns.fullName'),
     field: 'fullnameTh',
     align: 'center',
+    style: 'width: 18%',
   },
   {
     name: 'remark',
     label: t('admin.registrantManagement.table.columns.remark'),
     field: 'remark',
     align: 'center',
+    style: 'width: 21%',
   },
   {
     name: 'paymentStatus',
@@ -197,6 +204,7 @@ const columns: QTableColumn[] = [
     field: 'paymentStatus',
     align: 'center',
     format: (val: number) => PAYMENT_STATUS_LABELS[val] || '-',
+    style: 'width: 15%',
   },
   {
     name: 'verifyStatus',
@@ -204,13 +212,14 @@ const columns: QTableColumn[] = [
     field: 'verifyStatus',
     align: 'center',
     format: (val: number) => VERIFY_STATUS_LABELS[val] || '-',
+    style: 'width: 18%',
   },
   {
     name: 'tools',
     label: t('admin.registrantManagement.table.columns.tools'),
     field: 'tools',
     align: 'center',
-    style: 'width: 120px',
+    style: 'width: 12%',
   },
 ];
 
@@ -258,6 +267,13 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@media (max-width: 1023px) {
+  .page-container {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
 .registrants-page {
   min-height: 0 !important;
 }

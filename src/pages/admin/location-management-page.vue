@@ -6,17 +6,19 @@
       :subtitle="$t('admin.locationManagement.pageDescription')"
     />
 
-    <div class="row items-center q-mb-lg q-gutter-x-md">
-      <div class="col">
+    <div class="row q-col-gutter-md items-center q-mb-lg">
+      <div class="col-12 col-sm">
         <SearchBar v-model="searchQuery" />
       </div>
-      <AppButton
-        icon="add"
-        :label="$t('admin.locationManagement.createLocation')"
-        color="primary"
-        class="create-location-btn text-weight-bold"
-        @click="$router.push({ name: 'admin-create-location' })"
-      />
+      <div class="col-12 col-sm-auto text-right">
+        <AppButton
+          icon="add"
+          :label="$t('admin.locationManagement.createLocation')"
+          color="primary"
+          class="create-location-btn text-weight-bold"
+          @click="$router.push({ name: 'admin-create-location' })"
+        />
+      </div>
     </div>
 
     <BaseTable
@@ -122,29 +124,30 @@ const columns = computed<QTableColumn[]>(() => [
     label: t('admin.locationManagement.table.columns.roomName'),
     field: 'LOCATION_ROOM_NO',
     align: 'center',
-    style: 'width: 20%',
+    style: 'width: 24%',
     format: (val: string | null | undefined) => val || '-',
   },
   {
     name: 'floor',
     label: t('admin.locationManagement.table.columns.floor'),
     field: 'floor',
-    align: 'center',
+    align: 'left',
     style: 'width: 8%',
+    headerStyle: 'text-align: left !important;',
   },
   {
     name: 'locationName',
     label: t('admin.locationManagement.table.columns.locationName'),
     field: 'LOCATION_NAME',
-    align: 'center',
-    style: 'width: 42%',
+    align: 'left',
+    style: 'width: 36%',
   },
   {
     name: 'capacity',
     label: t('admin.locationManagement.table.columns.capacity'),
     field: 'capacity',
     align: 'center',
-    style: 'width: 10%',
+    style: 'width: 12%',
   },
   {
     name: 'tools',
@@ -241,10 +244,21 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@media (max-width: 1023px) {
+  .page-container {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
 .create-location-btn {
   border-radius: var(--radius-10) !important;
   height: 40px;
   padding: 0 24px;
+
+  @media (max-width: $breakpoint-xs-max) {
+    width: 100%;
+  }
 }
 
 .action-btn {

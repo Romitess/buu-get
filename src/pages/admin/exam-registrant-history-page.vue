@@ -41,7 +41,7 @@
               </div>
 
               <div class="col-12 col-sm-4 info-col">
-                <div class="info-row empty-row">&nbsp;</div>
+                <div class="info-row empty-row gt-xs">&nbsp;</div>
                 <div class="info-row q-mt-xs">
                   <span class="info-label">{{ $t('profile.address') }}:</span>
                 </div>
@@ -90,7 +90,7 @@
           </template>
 
           <template v-slot:body-cell-modifiedFields="{ row }">
-            <div class="text-center">{{ row.modifiedFields }}</div>
+            <div class="text-left">{{ row.modifiedFields }}</div>
           </template>
 
           <template v-slot:body-cell-modifiedDate="{ row }">
@@ -106,7 +106,7 @@
               <ActionButton
                 icon="visibility"
                 :tooltip="$t('profileEditHistory.dialog.title')"
-                color="primary"
+                color="black"
                 @click="viewDetails(row)"
               />
             </div>
@@ -720,6 +720,13 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@media (max-width: 1023px) {
+  .page-container {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
 .history-page {
   min-height: 0 !important;
 }
