@@ -26,6 +26,30 @@ import type { PasscodeLog } from 'src/types/common';
 // Retry configuration
 const RETRY_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 1000;
+const CACHE_DURATION_MS = 30000; // 30 seconds short-term cache
+
+// In-memory cache for exam data
+let examsCache: BackendExam[] | null = null;
+let lastFetchTimestamp = 0;
+
+/**
+ * Centrally fetch all exams with a short-term in-memory cache.
+ * This prevents redundant large downloads of the /exam endpoint when multiple
+ * components or stores request it simultaneously.
+ */
+export const fetchAllExamsRaw = async (force = false): Promise<BackendExam[]> => {
+  const now = Date.now();
+  if (!force && examsCache && now - lastFetchTimestamp < CACHE_DURATION_MS) {
+    return examsCache;
+  }
+
+  return retryAsync(async () => {
+    const response = await api.get<BackendExam[]>('/exam');
+    examsCache = response.data;
+    lastFetchTimestamp = Date.now();
+    return examsCache;
+  });
+};
 
 /**
  * Retry helper function - retries a function with exponential backoff
@@ -106,125 +130,122 @@ export interface ExamLocationOption {
   raw: BackendLocation;
 }
 
-export const fetchScheduleData = async (): Promise<Record<string, DayData>> => {
-  return retryAsync(async () => {
-    const response = await api.get<BackendExam[]>('/exam');
-    const exams: BackendExam[] = response.data.filter((e) => e.EXAM_PUBLISHED === true);
-    const schedule: Record<string, DayData> = {};
+export const fetchScheduleData = async (force = false): Promise<Record<string, DayData>> => {
+  const allExams = await fetchAllExamsRaw(force);
+  const exams: BackendExam[] = allExams.filter((e) => e.EXAM_PUBLISHED === true);
+  const schedule: Record<string, DayData> = {};
 
-    exams.forEach((exam: BackendExam) => {
-      const date = formatBackendDate(exam.EXAM_DATE);
+  exams.forEach((exam: BackendExam) => {
+    const date = formatBackendDate(exam.EXAM_DATE);
 
-      const sortedSessions = [...(exam.SESSIONS || [])].sort((a, b) =>
-        (a.SS_START_TIME || '').localeCompare(b.SS_START_TIME || ''),
+    const sortedSessions = [...(exam.SESSIONS || [])].sort((a, b) =>
+      (a.SS_START_TIME || '').localeCompare(b.SS_START_TIME || ''),
+    );
+
+    if (!schedule[date]) {
+      const firstLocation = sortedSessions[0]?.LOCATION;
+      const locationLabel = firstLocation
+        ? `${firstLocation.LOCATION_NAME}${firstLocation.LOCATION_ROOM_NO ? ` (${firstLocation.LOCATION_ROOM_NO})` : ''}`
+        : DEFAULT_LOCATION_TEXT;
+
+      schedule[date] = {
+        examId: exam.EXAM_ID,
+        title: exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
+        subtitle: firstLocation?.LOCATION_NAME || '',
+        location: locationLabel,
+        fee: formatFee(exam.EXAM_FEE),
+        formatText: exam.EXAM_FORMAT || '',
+        rounds: [],
+      };
+    }
+
+    const dayData = schedule[date];
+    if (!dayData || dayData.examId !== exam.EXAM_ID) return;
+
+    sortedSessions.forEach((session) => {
+      const startTime = formatTime(session.SS_START_TIME);
+      const endTime = formatTime(session.SS_END_TIME);
+      const timeRange = `${startTime} - ${endTime}`;
+
+      const activeCount = (session.ENROLLMENTS || []).reduce(
+        (acc, e) => (e.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED ? acc + 1 : acc),
+        0,
       );
 
-      if (!schedule[date]) {
-        const firstLocation = sortedSessions[0]?.LOCATION;
-        const locationLabel = firstLocation
-          ? `${firstLocation.LOCATION_NAME}${firstLocation.LOCATION_ROOM_NO ? ` (${firstLocation.LOCATION_ROOM_NO})` : ''}`
-          : DEFAULT_LOCATION_TEXT;
+      const currentAvailable = (session.SS_CAPACITY || 0) - activeCount;
+      const currentTotal = session.SS_CAPACITY || 0;
 
-        schedule[date] = {
-          examId: exam.EXAM_ID,
-          title: exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
-          subtitle: firstLocation?.LOCATION_NAME || '',
-          location: locationLabel,
-          fee: formatFee(exam.EXAM_FEE),
-          formatText: exam.EXAM_FORMAT || '',
-          rounds: [],
-        };
-      }
+      const existingRound = dayData.rounds.find((r) => r.timeRange === timeRange);
 
-      const dayData = schedule[date];
-      if (!dayData || dayData.examId !== exam.EXAM_ID) return;
-
-      sortedSessions.forEach((session) => {
-        const startTime = formatTime(session.SS_START_TIME);
-        const endTime = formatTime(session.SS_END_TIME);
-        const timeRange = `${startTime} - ${endTime}`;
-
-        const activeEnrollments = (session.ENROLLMENTS || []).filter(
-          (e) => e.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED,
-        );
-
-        const currentAvailable = (session.SS_CAPACITY || 0) - activeEnrollments.length;
-        const currentTotal = session.SS_CAPACITY || 0;
-
-        const existingRound = dayData.rounds.find((r) => r.timeRange === timeRange);
-
-        if (existingRound) {
-          existingRound.availableSeats += currentAvailable;
-          existingRound.totalSeats += currentTotal;
-          if (existingRound.availableSeats - currentAvailable <= 0 && currentAvailable > 0) {
-            existingRound.id = session.SS_ID;
-          }
-        } else {
-          const round: ExamRound = {
-            id: session.SS_ID,
-            title: exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
-            timeRange,
-            roundTypeLabel: exam.EXAM_TYPE || EXAM_TYPE_GENERAL,
-            availableSeats: currentAvailable,
-            totalSeats: currentTotal,
-            regStartDate: exam.EXAM_REG_START_DATE,
-            regEndDate: exam.EXAM_REG_END_DATE,
-            examDate: formatBackendDate(exam.EXAM_DATE),
-          };
-          dayData.rounds.push(round);
+      if (existingRound) {
+        existingRound.availableSeats += currentAvailable;
+        existingRound.totalSeats += currentTotal;
+        if (existingRound.availableSeats - currentAvailable <= 0 && currentAvailable > 0) {
+          existingRound.id = session.SS_ID;
         }
-      });
+      } else {
+        const round: ExamRound = {
+          id: session.SS_ID,
+          title: exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
+          timeRange,
+          roundTypeLabel: exam.EXAM_TYPE || EXAM_TYPE_GENERAL,
+          availableSeats: currentAvailable,
+          totalSeats: currentTotal,
+          regStartDate: exam.EXAM_REG_START_DATE,
+          regEndDate: exam.EXAM_REG_END_DATE,
+          examDate: formatBackendDate(exam.EXAM_DATE),
+        };
+        dayData.rounds.push(round);
+      }
     });
-
-    Object.values(schedule).forEach((day: DayData) => {
-      day.rounds.sort((a, b) => a.timeRange.localeCompare(b.timeRange));
-    });
-
-    return schedule;
   });
+
+  Object.values(schedule).forEach((day: DayData) => {
+    day.rounds.sort((a, b) => a.timeRange.localeCompare(b.timeRange));
+  });
+
+  return schedule;
 };
 
-export const fetchExamSchedules = async (): Promise<ExamSchedule[]> => {
-  return retryAsync(async () => {
-    const response = await api.get<BackendExam[]>('/exam');
-    const exams = response.data;
+export const fetchExamSchedules = async (force = false): Promise<ExamSchedule[]> => {
+  const exams = await fetchAllExamsRaw(force);
 
-    return exams.map((exam) => {
-      let capacity = 0;
-      let registeredCount = 0;
-      let locationName = DEFAULT_LOCATION_TEXT;
+  return exams.map((exam) => {
+    let capacity = 0;
+    let registeredCount = 0;
+    let locationName = DEFAULT_LOCATION_TEXT;
 
-      if (exam.SESSIONS && exam.SESSIONS.length > 0) {
-        exam.SESSIONS.forEach((session) => {
-          capacity += session.SS_CAPACITY || 0;
-          const activeEnrollments = (session.ENROLLMENTS || []).filter(
-            (e) => e.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED,
-          );
-          registeredCount += activeEnrollments.length;
-        });
+    if (exam.SESSIONS && exam.SESSIONS.length > 0) {
+      exam.SESSIONS.forEach((session) => {
+        capacity += session.SS_CAPACITY || 0;
+        const activeCount = (session.ENROLLMENTS || []).reduce(
+          (acc, e) => (e.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED ? acc + 1 : acc),
+          0,
+        );
+        registeredCount += activeCount;
+      });
 
-        const firstLoc = exam.SESSIONS[0]?.LOCATION;
-        if (firstLoc) {
-          locationName = formatLocationWithRoom(firstLoc.LOCATION_NAME, firstLoc.LOCATION_ROOM_NO);
-        }
+      const firstLoc = exam.SESSIONS[0]?.LOCATION;
+      if (firstLoc) {
+        locationName = formatLocationWithRoom(firstLoc.LOCATION_NAME, firstLoc.LOCATION_ROOM_NO);
       }
+    }
 
-      return {
-        id: String(exam.EXAM_ID),
-        examName: exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
-        examType:
-          exam.EXAM_TYPE === EXAM_TYPE_GENERAL || exam.EXAM_TYPE === INTERNAL_EXAM_TYPE_GENERAL
-            ? INTERNAL_EXAM_TYPE_GENERAL
-            : INTERNAL_EXAM_TYPE_SPECIAL,
-        examDate: formatBackendDate(exam.EXAM_DATE),
-        regStartDate: formatBackendDate(exam.EXAM_REG_START_DATE),
-        regEndDate: formatBackendDate(exam.EXAM_REG_END_DATE),
-        examLocation: locationName,
-        registeredCount,
-        capacity,
-        status: exam.EXAM_PUBLISHED === false ? EXAM_STATUS_UNPUBLISHED : EXAM_STATUS_PUBLISHED,
-      };
-    });
+    return {
+      id: String(exam.EXAM_ID),
+      examName: exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
+      examType:
+        exam.EXAM_TYPE === EXAM_TYPE_GENERAL || exam.EXAM_TYPE === INTERNAL_EXAM_TYPE_GENERAL
+          ? INTERNAL_EXAM_TYPE_GENERAL
+          : INTERNAL_EXAM_TYPE_SPECIAL,
+      examDate: formatBackendDate(exam.EXAM_DATE),
+      regStartDate: formatBackendDate(exam.EXAM_REG_START_DATE),
+      regEndDate: formatBackendDate(exam.EXAM_REG_END_DATE),
+      examLocation: locationName,
+      registeredCount,
+      capacity,
+      status: exam.EXAM_PUBLISHED === false ? EXAM_STATUS_UNPUBLISHED : EXAM_STATUS_PUBLISHED,
+    };
   });
 };
 

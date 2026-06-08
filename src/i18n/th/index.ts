@@ -13,6 +13,7 @@ export default {
   },
   common: {
     search: 'ค้นหา',
+    day: 'วัน | วัน',
     months: [
       'มกราคม',
       'กุมภาพันธ์',
@@ -378,13 +379,17 @@ export default {
     },
   },
   home: {
+    availableRoundsTitle: 'ตารางสอบที่มีที่นั่งว่าง',
     availableRounds: {
+      noData: 'ไม่พบข้อมูลตารางสอบ',
+      errorFetch: 'เกิดข้อผิดพลาดในการดึงข้อมูล',
       table: {
         columns: {
           round: 'รอบที่',
           date: 'วันที่สอบ',
           regPeriod: 'เปิดรับสมัคร',
           regDuration: 'ระยะเวลาสมัคร',
+          viewDetails: 'ดูรายละเอียด',
           action: '',
         },
       },

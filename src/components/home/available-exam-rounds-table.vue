@@ -6,7 +6,7 @@
         <q-icon name="event" color="white" size="18px" />
       </div>
       <div class="text-h6 text-weight-bolder text-dark">
-        {{ props.title }}
+        {{ props.title || $t('home.availableRoundsTitle') }}
       </div>
     </div>
     <q-separator color="grey-6" class="q-mb-md" />
@@ -18,13 +18,19 @@
       :rows="filteredRounds"
       :loading="isLoading"
       :pagination="pagination"
-      :empty-label="filteredRounds.length === 0 && !error ? props.emptyLabel : ''"
+      :empty-label="
+        error
+          ? error
+          : filteredRounds.length === 0
+            ? props.emptyLabel || $t('components.baseTable.emptyLabel')
+            : ''
+      "
       hide-pagination
       @request="onTableRequest"
     >
       <!-- Round Number Column -->
       <template v-slot:body-cell-roundNumber="{ row }">
-        <div class="text-center text-body2">
+        <div class="text-center text-body2 text-weight-bold">
           {{ row.roundNumber }}
         </div>
       </template>
@@ -32,21 +38,22 @@
       <!-- Exam Date Column -->
       <template v-slot:body-cell-examDate="{ row }">
         <div class="text-center text-body2">
-          {{ formatThaiDateShort(row.examDate) }}
+          {{ formatDateShort(row.examDate) }}
         </div>
       </template>
 
       <!-- Registration Period Column -->
       <template v-slot:body-cell-regPeriod="{ row }">
         <div class="text-center text-body2">
-          {{ formatThaiDateRange(row.regStartDate, row.regEndDate) }}
+          {{ formatDateRange(row.regStartDate, row.regEndDate) }}
         </div>
       </template>
 
       <!-- Registration Duration Column -->
       <template v-slot:body-cell-regDuration="{ row }">
         <div class="text-center text-body2">
-          {{ calcDaysDiff(row.regStartDate, row.regEndDate) }} วัน
+          {{ calcDaysDiff(row.regStartDate, row.regEndDate) }}
+          {{ $t('common.day', calcDaysDiff(row.regStartDate, row.regEndDate)) }}
         </div>
       </template>
 
@@ -58,8 +65,8 @@
             dense
             outline
             color="primary"
-            size="sm"
-            :label="ACTION_BUTTON_LABEL"
+            class="text-weight-bold"
+            :label="$t('home.availableRounds.table.columns.viewDetails')"
             @click="handleViewDetails(row)"
           />
         </div>
@@ -78,13 +85,12 @@ import {
   useAvailableExamRounds,
   type AvailableExamRound,
 } from 'src/composables/use-available-exam-rounds';
-import { useThaiDate } from 'src/composables/useThaiDate';
+import { useAppDate } from 'src/composables/useAppDate';
 
 // Constants
 const EXAM_SCHEDULE_PATH = '/user/exam-schedule' as const;
 const DEFAULT_PAGE = 1 as const;
 const DEFAULT_ROWS_PER_PAGE = 4 as const;
-const ACTION_BUTTON_LABEL = 'ดูรายละเอียด' as const;
 const COLUMN_ROUND_WIDTH = 'width: 12%' as const;
 const COLUMN_DATE_WIDTH = 'width: 18%' as const;
 const COLUMN_REG_PERIOD_WIDTH = 'width: 24%' as const;
@@ -97,8 +103,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: 'ตารางสอบที่มีที่นั่งว่าง',
-  emptyLabel: 'ไม่พบตารางสอบที่มีที่นั่งว่าง',
+  title: '',
+  emptyLabel: '',
 });
 
 const emit = defineEmits<{
@@ -107,7 +113,7 @@ const emit = defineEmits<{
 
 const router = useRouter();
 const { t } = useI18n();
-const { formatThaiDateShort, formatThaiDateRange, calcDaysDiff } = useThaiDate();
+const { formatDateShort, formatDateRange, calcDaysDiff } = useAppDate();
 const { filteredRounds, isLoading, error, fetchAvailableRounds } = useAvailableExamRounds();
 
 // Pagination state

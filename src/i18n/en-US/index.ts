@@ -26,6 +26,7 @@ export default {
       'November',
       'December',
     ],
+    day: 'day | days',
   },
   exam: {
     statusLabel: 'Status',
@@ -262,13 +263,17 @@ export default {
     or: 'or',
   },
   home: {
+    availableRoundsTitle: 'Available Exam Rounds',
     availableRounds: {
+      noData: 'No exam rounds found',
+      errorFetch: 'Error fetching exam rounds',
       table: {
         columns: {
           round: 'Round',
           date: 'Exam Date',
           regPeriod: 'Registration Period',
           regDuration: 'Duration',
+          viewDetails: 'View Details',
           action: '',
         },
       },

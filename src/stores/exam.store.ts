@@ -123,18 +123,18 @@ export const useExamStore = defineStore('exam', () => {
     return `${date.getDate()} ${monthName} ${buddhistYear}`;
   });
 
-  async function initSchedule(): Promise<void> {
+  async function initSchedule(force = false): Promise<void> {
     try {
-      const data = await fetchScheduleData();
+      const data = await fetchScheduleData(force);
       scheduleData.value = data;
     } catch (error) {
       console.error('Failed to load schedule:', error);
     }
   }
 
-  async function loadManagementSchedules(): Promise<void> {
+  async function loadManagementSchedules(force = false): Promise<void> {
     try {
-      managementSchedules.value = await fetchExamSchedules();
+      managementSchedules.value = await fetchExamSchedules(force);
     } catch (error) {
       console.error('Failed to load management schedules:', error);
     }
@@ -345,7 +345,7 @@ export const useExamStore = defineStore('exam', () => {
   async function addExamRound(payload: CreateExamPayload): Promise<number> {
     const examId = await createExamRound(payload);
 
-    await initSchedule();
+    await initSchedule(true);
 
     const [dd, mm, yyyy] = payload.examDate.split('/');
     if (dd && mm && yyyy) {
@@ -358,8 +358,8 @@ export const useExamStore = defineStore('exam', () => {
 
   async function deleteExamRound(id: number | string): Promise<void> {
     await deleteExam(id);
-    await loadManagementSchedules();
-    await initSchedule();
+    await loadManagementSchedules(true);
+    await initSchedule(true);
   }
 
   return {
