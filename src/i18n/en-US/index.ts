@@ -677,6 +677,35 @@ export default {
       },
     },
   },
+  components: {
+    examInfoCard: {
+      registeredCount: 'Registered count',
+      paidCount: 'Paid count',
+      examTakerCount: 'Exam participants',
+      attendedCount: 'Attended count',
+      candidateCount: 'Applicants',
+    },
+    baseTable: {
+      rowsPerPage: 'Rows per page',
+      showing: 'Showing',
+      to: 'to',
+      ofItems: 'of {total} items',
+      emptyLabel: 'No data found',
+    },
+    searchBar: {
+      placeholder: 'Search',
+    },
+    exportCsv: {
+      noData: 'No data available for export',
+      blocked: 'Export was blocked by the browser',
+    },
+    imageCropper: {
+      title: 'Adjust image',
+      hint: 'Drag to reposition and adjust the crop area to zoom in or out.',
+      cancel: 'Cancel',
+      save: 'Save',
+    },
+  },
   auth: {
     systemDescription: 'English proficiency test comparable to CEFR standards',
     welcome: 'Welcome Back',
@@ -706,6 +735,7 @@ export default {
     home: 'Home',
     examSchedule: 'Exam Schedule',
     selectSession: 'Select Session',
+    manageLocations: 'Manage Locations',
     examHistory: 'Exam History',
     manageExams: 'Manage Exams',
     dashboard: 'Dashboard',

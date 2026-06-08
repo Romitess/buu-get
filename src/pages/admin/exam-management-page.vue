@@ -16,7 +16,7 @@
         v-if="currentRole !== ROLES.EXAM_OPERATIONS_OFFICER"
         color="primary"
         icon="add"
-        label="สร้างรอบสอบ"
+        :label="t('admin.examManagement.createExam')"
         unelevated
         class="create-exam-btn text-weight-bold"
         @click="$router.push('/admin/create-exam')"
