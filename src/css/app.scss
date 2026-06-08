@@ -182,7 +182,7 @@
   --font-weight-black: 800;
 
   // Spacing Scale
-  --space-unit: 4px;
+  --space-unit: 0.25rem;
   --space-xs: calc(var(--space-unit) * 1); // 4px
   --space-sm: calc(var(--space-unit) * 2); // 8px
   --space-md: calc(var(--space-unit) * 4); // 16px
@@ -258,7 +258,7 @@ button {
 }
 
 html {
-  zoom: var(--app-zoom, 1);
+  font-size: clamp(13px, 0.5rem + 0.416vw, 16px);
 }
 
 html,
@@ -307,8 +307,8 @@ body {
 
 // === Page Content Styles ===
 .page-container {
-  padding: 24px 32px;
-  max-width: var(--page-max-width);
+  width: clamp(1024px, 90vw, 1600px);
+  padding: 1.5rem 2rem;
   margin: 0 auto;
   animation: fadeInUp 0.4s var(--transition-smooth) both;
 }

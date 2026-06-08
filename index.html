@@ -3,24 +3,6 @@
   <head>
     <title><%= productName %></title>
 
-    <script>
-      (function () {
-        function updateZoom() {
-          var width = window.innerWidth;
-          if (width >= 1024) {
-            var scale = width / 1920;
-            var clampedScale = Math.min(Math.max(scale, 0.6), 2.0);
-            document.documentElement.style.setProperty('--app-zoom', clampedScale.toString());
-          } else {
-            document.documentElement.style.removeProperty('--app-zoom');
-          }
-        }
-        updateZoom();
-        window.addEventListener('resize', updateZoom);
-        window.addEventListener('DOMContentLoaded', updateZoom);
-      })();
-    </script>
-
     <meta charset="utf-8" />
     <meta name="description" content="<%= productDescription %>" />
     <meta name="format-detection" content="telephone=no" />
