@@ -30,8 +30,8 @@
     </section>
 
     <!-- Horizontal layout: applicant list on the left, seat map on the right. -->
-    <div class="row q-col-gutter-md items-stretch seat-management-row">
-      <div class="col-12 col-md-4 flex column min-width-0">
+    <div class="seat-management-row">
+      <div class="seat-management-list-column flex column min-width-0">
         <div class="student-list-card">
           <div class="row items-center justify-between q-mb-md">
             <div class="text-subtitle1 text-weight-bold text-dark">
@@ -69,7 +69,7 @@
         </div>
       </div>
 
-      <div class="col-12 col-md-8 flex column min-width-0">
+      <div class="seat-management-map-column flex column min-width-0">
         <AppExamSeatAssignmentMap
           class="col"
           :title="$t('admin.seatManagement.seatLayoutTitle')"
@@ -153,11 +153,23 @@ const handleSearch = (val: string | number | null): void => {
 }
 
 .seat-management-row {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.38fr) minmax(0, 0.62fr);
+  gap: 24px;
   height: 540px;
+  align-items: stretch;
 
   & > div {
     height: 100%;
+    min-width: 0;
   }
+}
+
+.seat-management-list-column,
+.seat-management-map-column {
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
 }
 
 .seat-page-header {
@@ -170,12 +182,15 @@ const handleSearch = (val: string | number | null): void => {
 }
 
 .student-list-card {
+  width: 100%;
   height: 100%;
-  min-height: 424px;
+  min-height: 0;
   border-radius: 10px;
   background: #ffffff;
   padding: 18px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .badge-seat-count {
@@ -191,7 +206,8 @@ const handleSearch = (val: string | number | null): void => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 355px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding-right: 4px;
 

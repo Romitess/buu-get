@@ -129,6 +129,7 @@ const remarkBadgeClass = computed((): string => {
 }
 
 .remark-badge {
+  flex: 1 1 auto;
   font-weight: 500;
   min-width: 0;
   overflow: hidden;
@@ -151,6 +152,9 @@ const remarkBadgeClass = computed((): string => {
 .seat-label {
   color: inherit;
   flex: 0 0 auto;
+  max-width: 42%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .avatar-img {
