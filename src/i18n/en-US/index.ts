@@ -325,6 +325,25 @@ export default {
     },
   },
   admin: {
+    examAttendance: {
+      title: 'Exam Attendance',
+      subtitle: 'Verify candidate exam attendance and review historical check-in details',
+      searchPlaceholder: 'Search',
+      columns: {
+        index: 'No.',
+        nationalId: 'National ID',
+        titleTh: 'Prefix',
+        fullnameTh: 'Full Name',
+        seatNumber: 'Seat No.',
+        attendanceStatus: 'Status',
+        checkInTime: 'Check-in Time',
+      },
+      status: {
+        intime: 'Present',
+        late: 'Late',
+        missing: 'Absent',
+      },
+    },
     locationManagement: {
       pageTitle: 'Manage Exam Locations',
       pageDescription: 'Manage exam room information, set capacity, and arrange exam locations',

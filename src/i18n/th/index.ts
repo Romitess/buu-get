@@ -442,6 +442,25 @@ export default {
     },
   },
   admin: {
+    examAttendance: {
+      title: 'ประวัติการเข้าสอบ',
+      subtitle: 'ตรวจสอบประวัติการเข้าสอบ พร้อมดูรายละเอียดข้อมูลย้อนหลัง',
+      searchPlaceholder: 'ค้นหา',
+      columns: {
+        index: 'ลำดับ',
+        nationalId: 'เลขประจำตัว',
+        titleTh: 'คำนำหน้า',
+        fullnameTh: 'ชื่อ-นามสกุล',
+        seatNumber: 'ที่นั่งสอบ',
+        attendanceStatus: 'สถานะ',
+        checkInTime: 'เวลาเข้าสอบ',
+      },
+      status: {
+        intime: 'เข้าสอบแล้ว',
+        late: 'สาย',
+        missing: 'ขาด',
+      },
+    },
     locationManagement: {
       pageTitle: 'จัดการห้องสอบ',
       pageDescription: 'จัดการข้อมูลห้องสอบ กำหนดรายละเอียด ความจุ และรองรับการจัดสอบ',
