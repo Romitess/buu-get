@@ -109,7 +109,7 @@ const voucherPreviewData = ref<VoucherData>({
   examName: 'BUU-GET : Burapha University\u2019s Graduate English Test',
   examDate: 'XX May XXXX',
   examTime: '08.00 AM - 10.00 AM',
-  examType: 'ทั่วไป',
+  examType: 'General',
   location: 'QS1, Burapha University',
   seatNo: 'A1',
   voucherNo: 'ENG2026-001',

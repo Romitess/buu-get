@@ -27,68 +27,189 @@
       </div>
     </Transition>
 
-    <q-card class="user-profile-card q-pa-lg q-mb-md" flat>
-      <div class="row q-col-gutter-xl">
-        <div class="col-12 col-md-3 flex column flex-center relative-position">
-          <div class="avatar-container q-mb-md cursor-pointer" @click="triggerFileInput">
-            <q-avatar size="160px" class="profile-avatar">
-              <img :src="avatarSrc" alt="Avatar" class="profile-avatar-img" />
-              <q-inner-loading :showing="isUploading">
-                <q-spinner-gears size="50px" color="primary" />
-              </q-inner-loading>
-            </q-avatar>
-            <q-btn
-              round
-              color="grey-3"
-              text-color="dark"
-              icon="edit"
-              size="sm"
-              class="avatar-edit-btn"
-              unelevated
-              :loading="isUploading"
-              @click.stop="triggerFileInput"
-            />
-            <q-file
-              ref="fileInputRef"
-              v-model="selectedFile"
-              @update:model-value="handleFileSelected"
-              accept=".jpg,.jpeg,.png"
-              max-file-size="5242880"
-              style="display: none"
-            />
+    <q-form ref="formRef">
+      <q-card class="user-profile-card q-pa-lg q-mb-md" flat>
+        <div class="row q-col-gutter-xl">
+          <div class="col-12 col-md-3 flex column flex-center relative-position">
+            <div class="avatar-container q-mb-md cursor-pointer" @click="triggerFileInput">
+              <q-avatar size="160px" class="profile-avatar">
+                <img :src="avatarSrc" alt="Avatar" class="profile-avatar-img" />
+                <q-inner-loading :showing="isUploading">
+                  <q-spinner-gears size="50px" color="primary" />
+                </q-inner-loading>
+              </q-avatar>
+              <q-btn
+                round
+                color="grey-3"
+                text-color="dark"
+                icon="edit"
+                size="sm"
+                class="avatar-edit-btn"
+                unelevated
+                :loading="isUploading"
+                @click.stop="triggerFileInput"
+              />
+              <q-file
+                ref="fileInputRef"
+                v-model="selectedFile"
+                @update:model-value="handleFileSelected"
+                accept=".jpg,.jpeg,.png"
+                max-file-size="5242880"
+                style="display: none"
+              />
+            </div>
+            <div class="text-weight-medium text-body1">
+              {{ $t('profile.testTakerId') }}:
+              {{ userStore.currentUser?.nationalId || '66100001' }}
+            </div>
           </div>
-          <div class="text-weight-medium text-body1">
-            {{ $t('profile.testTakerId') }}:
-            {{ userStore.currentUser?.nationalId || '66100001' }}
+
+          <div class="col-12 col-md-9">
+            <div class="row q-col-gutter-md">
+              <div class="col-12 col-md-6">
+                <div class="row justify-between items-center q-mb-xs">
+                  <label class="form-label"
+                    >{{ $t('profile.email') }} <span class="text-negative">*</span></label
+                  >
+                  <a
+                    href="#"
+                    @click.prevent="showPasswordDialog = true"
+                    class="text-primary text-caption text-weight-medium no-wrap"
+                    style="text-decoration: none"
+                  >
+                    {{ $t('profile.pageTitleEditPassword') }}
+                  </a>
+                </div>
+                <q-input v-model="formData.email" outlined dense bg-color="white" />
+              </div>
+              <div class="col-12 col-md-6 relative-position">
+                <label class="form-label"
+                  >{{ $t('profile.prefix') }} <span class="text-negative">*</span></label
+                >
+                <q-select
+                  ref="titleSelectRef"
+                  v-model="formData.title"
+                  :options="titleOptions"
+                  outlined
+                  dense
+                  bg-color="white"
+                  dropdown-icon="expand_more"
+                  emit-value
+                  map-options
+                  lazy-rules
+                  :rules="[(val) => !!val || $t('profile.requiredPrefix')]"
+                  hide-bottom-space
+                />
+              </div>
+
+              <!-- Row 2 -->
+              <div class="col-12 col-md-6 relative-position">
+                <label class="form-label"
+                  >{{ $t('profile.nationalId') }} <span class="text-negative">*</span></label
+                >
+                <q-input
+                  ref="nationalIdInputRef"
+                  v-model="formData.nationalId"
+                  outlined
+                  dense
+                  bg-color="white"
+                  mask="#-####-#####-##-#"
+                  unmasked-value
+                  lazy-rules
+                  :rules="[
+                    (val) => !!val || $t('profile.requiredNationalId'),
+                    (val) => !val || val.length === 13 || $t('profile.invalidNationalId'),
+                  ]"
+                  hide-bottom-space
+                />
+              </div>
+              <div class="col-12 col-md-6 relative-position">
+                <label class="form-label"
+                  >{{ $t('profile.fullName') }} <span class="text-negative">*</span></label
+                >
+                <q-input
+                  ref="fullNameTHInputRef"
+                  v-model="formData.fullNameTH"
+                  outlined
+                  dense
+                  bg-color="white"
+                  lazy-rules
+                  :rules="[(val) => !!val || $t('profile.requiredFullName')]"
+                  hide-bottom-space
+                />
+              </div>
+
+              <!-- Row 3 -->
+              <div class="col-12 col-md-6 relative-position">
+                <label class="form-label"
+                  >{{ $t('profile.birthdate') }} <span class="text-negative">*</span></label
+                >
+                <q-input
+                  ref="birthdateInputRef"
+                  v-model="birthdateDisplay"
+                  outlined
+                  dense
+                  bg-color="white"
+                  readonly
+                  class="cursor-pointer"
+                  @click="showCalendar = true"
+                  lazy-rules
+                  :rules="[(val) => !!val || $t('profile.requiredBirthdate')]"
+                  hide-bottom-space
+                >
+                  <template v-slot:append>
+                    <q-icon
+                      name="calendar_today"
+                      class="cursor-pointer"
+                      size="xs"
+                      @click.stop="showCalendar = true"
+                    />
+                    <q-menu
+                      v-model="showCalendar"
+                      anchor="bottom left"
+                      self="top left"
+                      class="shadow-5 calendar-menu"
+                    >
+                      <AppCalendar
+                        :model-value="formData.birthdate"
+                        @update:model-value="(val: string) => (formData.birthdate = val)"
+                        @click-date="showCalendar = false"
+                      />
+                    </q-menu>
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-12 col-md-6 relative-position">
+                <label class="form-label"
+                  >{{ $t('profile.fullNameEn') }} <span class="text-negative">*</span></label
+                >
+                <q-input
+                  ref="fullNameENInputRef"
+                  v-model="formData.fullNameEN"
+                  outlined
+                  dense
+                  bg-color="white"
+                  lazy-rules
+                  :rules="[(val) => !!val || $t('profile.requiredFullNameEn')]"
+                  hide-bottom-space
+                />
+              </div>
+            </div>
           </div>
         </div>
+      </q-card>
 
-        <div class="col-12 col-md-9">
-          <div class="row q-col-gutter-md">
-            <div class="col-12 col-md-6">
-              <div class="row justify-between items-center q-mb-xs">
-                <label class="form-label"
-                  >{{ $t('profile.email') }} <span class="text-negative">*</span></label
-                >
-                <a
-                  href="#"
-                  @click.prevent="showPasswordDialog = true"
-                  class="text-primary text-caption text-weight-medium no-wrap"
-                  style="text-decoration: none"
-                >
-                  {{ $t('profile.pageTitleEditPassword') }}
-                </a>
-              </div>
-              <q-input v-model="formData.email" outlined dense bg-color="white" />
-            </div>
-            <div class="col-12 col-md-6 relative-position">
-              <label class="form-label"
-                >{{ $t('profile.prefix') }} <span class="text-negative">*</span></label
-              >
+      <!-- Card 2: Contact & Education Info -->
+      <q-card class="user-profile-card q-pa-lg q-mb-md" flat>
+        <div class="row q-col-gutter-xl">
+          <!-- Left Column: Education, Faculty, Institution -->
+          <div class="col-12 col-md-6">
+            <div class="q-mb-md relative-position">
+              <label class="form-label">{{ $t('profile.education') }}</label>
               <q-select
-                ref="titleSelectRef"
-                v-model="formData.title"
-                :options="titleOptions"
+                ref="educationLevelSelectRef"
+                v-model="formData.educationLevel"
+                :options="educationOptions"
                 outlined
                 dense
                 bg-color="white"
@@ -97,163 +218,72 @@
                 map-options
               />
             </div>
-
-            <!-- Row 2 -->
-            <div class="col-12 col-md-6 relative-position">
-              <label class="form-label"
-                >{{ $t('profile.nationalId') }} <span class="text-negative">*</span></label
-              >
+            <div class="q-mb-md relative-position">
+              <label class="form-label">{{ $t('profile.faculty') }}</label>
               <q-input
-                ref="nationalIdInputRef"
-                v-model="formData.nationalId"
-                outlined
-                dense
-                bg-color="white"
-                mask="#-####-#####-##-#"
-                unmasked-value
-              />
-            </div>
-            <div class="col-12 col-md-6 relative-position">
-              <label class="form-label"
-                >{{ $t('profile.fullName') }} <span class="text-negative">*</span></label
-              >
-              <q-input
-                ref="fullNameTHInputRef"
-                v-model="formData.fullNameTH"
+                ref="facultyInputRef"
+                v-model="formData.faculty"
                 outlined
                 dense
                 bg-color="white"
               />
             </div>
-
-            <!-- Row 3 -->
-            <div class="col-12 col-md-6 relative-position">
-              <label class="form-label"
-                >{{ $t('profile.birthdate') }} <span class="text-negative">*</span></label
-              >
+            <div class="relative-position">
+              <label class="form-label">{{ $t('profile.institution') }}</label>
               <q-input
-                ref="birthdateInputRef"
-                v-model="birthdateDisplay"
-                outlined
-                dense
-                bg-color="white"
-                readonly
-                class="cursor-pointer"
-                @click="showCalendar = true"
-              >
-                <template v-slot:append>
-                  <q-icon
-                    name="calendar_today"
-                    class="cursor-pointer"
-                    size="xs"
-                    @click.stop="showCalendar = true"
-                  />
-                  <q-menu
-                    v-model="showCalendar"
-                    anchor="bottom left"
-                    self="top left"
-                    class="shadow-5 calendar-menu"
-                  >
-                    <AppCalendar
-                      :model-value="formData.birthdate"
-                      @update:model-value="(val: string) => (formData.birthdate = val)"
-                      @click-date="showCalendar = false"
-                    />
-                  </q-menu>
-                </template>
-              </q-input>
-            </div>
-            <div class="col-12 col-md-6 relative-position">
-              <label class="form-label"
-                >{{ $t('profile.fullNameEn') }} <span class="text-negative">*</span></label
-              >
-              <q-input
-                ref="fullNameENInputRef"
-                v-model="formData.fullNameEN"
+                ref="institutionInputRef"
+                v-model="formData.institution"
                 outlined
                 dense
                 bg-color="white"
               />
             </div>
           </div>
-        </div>
-      </div>
-    </q-card>
 
-    <!-- Card 2: Contact & Education Info -->
-    <q-card class="user-profile-card q-pa-lg q-mb-md" flat>
-      <div class="row q-col-gutter-xl">
-        <!-- Left Column: Education, Faculty, Institution -->
-        <div class="col-12 col-md-6">
-          <div class="q-mb-md relative-position">
-            <label class="form-label">{{ $t('profile.education') }}</label>
-            <q-select
-              ref="educationLevelSelectRef"
-              v-model="formData.educationLevel"
-              :options="educationOptions"
-              outlined
-              dense
-              bg-color="white"
-              dropdown-icon="expand_more"
-              emit-value
-              map-options
-            />
-          </div>
-          <div class="q-mb-md relative-position">
-            <label class="form-label">{{ $t('profile.faculty') }}</label>
-            <q-input
-              ref="facultyInputRef"
-              v-model="formData.faculty"
-              outlined
-              dense
-              bg-color="white"
-            />
-          </div>
-          <div class="relative-position">
-            <label class="form-label">{{ $t('profile.institution') }}</label>
-            <q-input
-              ref="institutionInputRef"
-              v-model="formData.institution"
-              outlined
-              dense
-              bg-color="white"
-            />
-          </div>
-        </div>
-
-        <!-- Right Column: Address, Phone -->
-        <div class="col-12 col-md-6">
-          <div class="q-mb-md relative-position">
-            <label class="form-label"
-              >{{ $t('profile.address') }} <span class="text-negative">*</span></label
-            >
-            <q-input
-              ref="addressInputRef"
-              v-model="formData.address"
-              type="textarea"
-              outlined
-              dense
-              bg-color="white"
-              class="address-textarea"
-              input-style="resize: none;"
-            />
-          </div>
-          <div class="relative-position">
-            <label class="form-label"
-              >{{ $t('profile.phone') }} <span class="text-negative">*</span></label
-            >
-            <q-input
-              ref="phoneInputRef"
-              v-model="formData.phone"
-              outlined
-              dense
-              bg-color="white"
-              mask="###-###-####"
-            />
+          <!-- Right Column: Address, Phone -->
+          <div class="col-12 col-md-6">
+            <div class="q-mb-md relative-position">
+              <label class="form-label"
+                >{{ $t('profile.address') }} <span class="text-negative">*</span></label
+              >
+              <q-input
+                ref="addressInputRef"
+                v-model="formData.address"
+                type="textarea"
+                outlined
+                dense
+                bg-color="white"
+                class="address-textarea"
+                input-style="resize: none;"
+                lazy-rules
+                :rules="[(val) => !!val || $t('profile.required')]"
+                hide-bottom-space
+              />
+            </div>
+            <div class="relative-position">
+              <label class="form-label"
+                >{{ $t('profile.phone') }} <span class="text-negative">*</span></label
+              >
+              <q-input
+                ref="phoneInputRef"
+                v-model="formData.phone"
+                outlined
+                dense
+                bg-color="white"
+                mask="###-###-####"
+                lazy-rules
+                :rules="[
+                  (val) => !!val || $t('profile.requiredPhone'),
+                  (val) =>
+                    !val || val.replace(/\D/g, '').length === 10 || $t('profile.invalidPhone'),
+                ]"
+                hide-bottom-space
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </q-card>
+      </q-card>
+    </q-form>
 
     <!-- Action Buttons -->
     <div class="row justify-end q-gutter-md">
@@ -351,6 +381,7 @@ import type { ComputedRef, WritableComputedRef } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from 'src/stores/user.store';
 import { useQuasar } from 'quasar';
+import type { QForm } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
@@ -362,6 +393,7 @@ import { useImageUpload } from 'src/composables/use-image-upload';
 import defaultUserImage from 'src/assets/img/user-image.jpg';
 import { getImageUrl } from 'src/services/image.service';
 import { api } from 'src/boot/axios';
+import { useFocusFirstInvalidField } from 'src/composables/use-focus-first-invalid-field';
 
 const router = useRouter();
 const route = useRoute();
@@ -379,6 +411,8 @@ const showCropDialog = ref(false);
 const cropImageSrc = ref('');
 const cropFileType = ref('image/png');
 
+const formRef = ref<QForm | null>(null);
+const { validateAndFocusFirstInvalid } = useFocusFirstInvalidField(formRef);
 const fileInputRef = ref();
 const selectedFile = ref<File | null>(null);
 
@@ -560,6 +594,18 @@ const onCancel = (): void => {
 };
 
 const onSave = async (): Promise<void> => {
+  const isValid = await validateAndFocusFirstInvalid();
+  if (!isValid) {
+    $q.notify({
+      type: 'negative',
+      message:
+        t('admin.registrantManagement.detail.editDialog.invalidForm') ||
+        'กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง',
+      position: 'top',
+    });
+    return;
+  }
+
   const token = userStore.accessToken || localStorage.getItem('access_token');
   if (!token) {
     $q.notify({
@@ -586,6 +632,7 @@ const onSave = async (): Promise<void> => {
       userAddress: formData.value.address,
       isFromEmail: isFromEmail.value,
       userImagePath: formData.value.userImagePath,
+      userNationalId: formData.value.nationalId,
     });
 
     if (
@@ -610,8 +657,6 @@ const onSave = async (): Promise<void> => {
       message: t('profile.dialogUpdateSuccess'),
       position: 'top',
     });
-
-    void router.push('/user/exam-history');
   } catch (err) {
     console.error('Save profile failed:', err);
     $q.notify({

@@ -84,23 +84,54 @@ export function useExamDocuments() {
         ? `${locationObj.LOCATION_NAME}${locationObj.LOCATION_ROOM_NO ? ` (${locationObj.LOCATION_ROOM_NO})` : ''}`
         : 'QS1, Burapha University';
 
+      const mapTitleToEn = (titleTH?: string): string => {
+        if (!titleTH) return '';
+        const titleMap: Record<string, string> = {
+          นาย: 'Mr.',
+          นาง: 'Mrs.',
+          นางสาว: 'Miss',
+          'ดร.': 'Dr.',
+          ด็อกเตอร์: 'Dr.',
+          'ศ.': 'Prof.',
+          ศาสตราจารย์: 'Prof.',
+          'รศ.': 'Assoc. Prof.',
+          รองศาสตราจารย์: 'Assoc. Prof.',
+          'ผศ.': 'Asst. Prof.',
+          ผู้ช่วยศาสตราจารย์: 'Asst. Prof.',
+        };
+        return titleMap[titleTH] || titleTH;
+      };
+
+      const mapExamTypeToEn = (type?: string): string => {
+        if (!type) return 'General';
+        if (type === 'รอบทั่วไป' || type.toLowerCase() === 'general' || type === 'ทั่วไป')
+          return 'General';
+        if (type === 'รอบพิเศษ' || type.toLowerCase() === 'special' || type === 'พิเศษ')
+          return 'Special';
+        return type;
+      };
+
+      const examYear = examObj?.EXAM_DATE
+        ? new Date(examObj.EXAM_DATE).getFullYear()
+        : new Date().getFullYear();
+
       selectedVoucherData.value = {
         id: enrollment.ERM_ID,
         fullName: user
-          ? `${user.titleEN || ''} ${user.fullNameEN || user.fullNameTH || ''}`.trim()
+          ? `${user.titleEN || mapTitleToEn(user.titleTH) || ''} ${user.fullNameEN || user.fullNameTH || ''}`.trim()
           : 'Mr. Somdream Jaidee',
         studentId: user?.nationalId || String(user?.id || '66100001'),
         examName: examObj?.EXAM_NAME || "BUU-GET : Burapha University's Graduate English Test",
         examDate: dateStr,
         examTime: timeRange,
-        examType: examObj?.EXAM_TYPE || 'ทั่วไป',
+        examType: mapExamTypeToEn(examObj?.EXAM_TYPE),
         location: locationText,
         seatNo: enrollment.LOCATION_SEAT?.LS_SEAT_LABEL || 'A1',
-        voucherNo: `ENG2026-${String(enrollment.ERM_ID).padStart(3, '0')}`,
+        voucherNo: `ENG${examYear}-${String(enrollment.ERM_ID).padStart(3, '0')}`,
         citizenId: user?.nationalId || '1-1234-12345-12-1',
         testSession: session.SS_NAME || '1/2569',
         profileImage: user?.userImagePath ? getImageUrl(user.userImagePath) : undefined,
-        barcodeValue: `ENG2026${String(enrollment.ERM_ID).padStart(5, '0')}`,
+        barcodeValue: `ENG${examYear}${String(enrollment.ERM_ID).padStart(5, '0')}`,
       };
 
       $q.loading.show({
@@ -204,9 +235,16 @@ export function useExamDocuments() {
 
       const transaction = enrollment.TRANSACTION;
 
+      const receiptYear = transaction?.TRANX_PAID_AT
+        ? new Date(transaction.TRANX_PAID_AT).getFullYear()
+        : examObj?.EXAM_DATE
+          ? new Date(examObj.EXAM_DATE).getFullYear()
+          : new Date().getFullYear();
+
       selectedReceiptData.value = {
         receiptNo:
-          transaction?.TRANX_REF1 || `RC2026-${String(enrollment.ERM_ID).padStart(5, '0')}`,
+          transaction?.TRANX_REF1 ||
+          `RC${receiptYear}-${String(enrollment.ERM_ID).padStart(5, '0')}`,
         transactionDate: transaction?.TRANX_PAID_AT
           ? new Date(transaction.TRANX_PAID_AT).toISOString()
           : transaction?.TRANX_CREATED_AT

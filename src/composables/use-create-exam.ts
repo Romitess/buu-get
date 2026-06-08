@@ -149,7 +149,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       examFormat: EXAM_FORMAT_COMPUTER,
       fundSourceId: null,
       fee: '0.00',
-      isPublished: true,
+      isPublished: false,
       examDate: today,
       timeSlots: [
         {
@@ -280,6 +280,16 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    * Validate required fields and populate fieldErrors.
    * @returns true if all required fields are filled, false otherwise.
    */
+  const timeToMinutes = (timeStr: string | undefined): number => {
+    if (!timeStr) return 9999;
+    const cleaned = timeStr.replace(/\s/g, '');
+    if (!cleaned) return 9999;
+    const parts = cleaned.split(':');
+    const hours = parseInt(parts[0] || '0', 10);
+    const minutes = parseInt(parts[1] || '0', 10);
+    return hours * 60 + minutes;
+  };
+
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
@@ -303,12 +313,32 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     }
     // Validate time slots
     form.value.timeSlots.forEach((slot, slotIdx) => {
+      const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+      let hasValidStartTime = false;
+      let hasValidEndTime = false;
+
       if (!slot.startTime || !slot.startTime.trim()) {
         errors[`startTime_${slotIdx}`] = VALIDATION_MSG.START_TIME;
+      } else if (!timeRegex.test(slot.startTime)) {
+        errors[`startTime_${slotIdx}`] = 'รูปแบบเวลาไม่ถูกต้อง (ต้องอยู่ระหว่าง 00:00 - 23:59)';
+      } else {
+        hasValidStartTime = true;
       }
+
       if (!slot.endTime || !slot.endTime.trim()) {
         errors[`endTime_${slotIdx}`] = VALIDATION_MSG.END_TIME;
+      } else if (!timeRegex.test(slot.endTime)) {
+        errors[`endTime_${slotIdx}`] = 'รูปแบบเวลาไม่ถูกต้อง (ต้องอยู่ระหว่าง 00:00 - 23:59)';
+      } else {
+        hasValidEndTime = true;
       }
+
+      if (hasValidStartTime && hasValidEndTime) {
+        if (timeToMinutes(slot.endTime) <= timeToMinutes(slot.startTime)) {
+          errors[`endTime_${slotIdx}`] = 'เวลาสิ้นสุดต้องหลังจากเวลาเริ่ม';
+        }
+      }
+
       slot.rooms.forEach((room, roomIdx) => {
         if (!room.locationId) {
           errors[`locationId_${slotIdx}_${roomIdx}`] = VALIDATION_MSG.LOCATION;
@@ -462,10 +492,16 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
                   .map((s) => s.trim())
                   .filter((s) => s.length > 0)
               : [];
+            const mappedProctors = proctorsList.map((name) => {
+              const opt = proctorOptions.value.find(
+                (o) => o.label.trim().replace(/\s+/g, ' ') === name.trim().replace(/\s+/g, ' '),
+              );
+              return opt ? opt.value : name;
+            });
             slot.rooms.push({
               locationId: session.LOCATION?.LOCATION_ID ?? session.LOCATION_ID ?? null,
               proctorName: session.SS_NAME || '',
-              proctors: proctorsList,
+              proctors: mappedProctors,
               seats: session.SS_CAPACITY ?? 40,
               sessionId: session.SS_ID,
               enrollmentCount: session.ENROLLMENTS?.length || 0,
@@ -508,16 +544,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
     const currentActiveSlot = form.value.timeSlots[activeSlotIndex.value];
 
-    const timeToMinutes = (timeStr: string | undefined): number => {
-      if (!timeStr) return 9999;
-      const cleaned = timeStr.replace(/\s/g, '');
-      if (!cleaned) return 9999;
-      const parts = cleaned.split(':');
-      const hours = parseInt(parts[0] || '0', 10);
-      const minutes = parseInt(parts[1] || '0', 10);
-      return hours * 60 + minutes;
-    };
-
     form.value.timeSlots.sort((a, b) => {
       const aStart = timeToMinutes(a.startTime);
       const bStart = timeToMinutes(b.startTime);
@@ -545,7 +571,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       form.value.timeSlots.push({
         startTime: '',
         endTime: '',
-        rooms: [{ locationId: null, proctorName: '', seats: 40 }],
+        rooms: [{ locationId: null, proctorName: '', proctors: [], seats: 40 }],
       });
       sortTimeSlots();
       // Switch to the newly added tab
@@ -823,20 +849,29 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     void router.push('/admin/exam-management');
   };
 
-  /** Auto-formats a time string (e.g. "10" -> "10:00") */
+  /** Auto-formats a time string (e.g. "10" -> "10:00") and caps hour at 23 and minute at 59 */
   const autoFormatTime = (time: string): string => {
     if (!time) return '';
     const digits = time.replace(/\D/g, '');
+    let hh = 0;
+    let mm = 0;
     if (digits.length === 1 || digits.length === 2) {
-      return `${digits.padStart(2, '0')}:00`;
+      hh = parseInt(digits, 10);
+      mm = 0;
+    } else if (digits.length === 3) {
+      hh = parseInt(digits.substring(0, 1), 10);
+      mm = parseInt(digits.substring(1, 3), 10);
+    } else if (digits.length >= 4) {
+      hh = parseInt(digits.substring(0, 2), 10);
+      mm = parseInt(digits.substring(2, 4), 10);
+    } else {
+      return time;
     }
-    if (digits.length === 3) {
-      return `0${digits.substring(0, 1)}:${digits.substring(1, 3)}`;
-    }
-    if (digits.length >= 4) {
-      return `${digits.substring(0, 2)}:${digits.substring(2, 4)}`;
-    }
-    return time;
+
+    if (hh > 23) hh = 23;
+    if (mm > 59) mm = 59;
+
+    return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
   };
 
   /**
@@ -863,15 +898,20 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     form.value.timeSlots.forEach((slot) => {
       if (!slot.startTime || !slot.endTime) return;
       slot.rooms.forEach((room) => {
+        const mappedProctorNames =
+          room.proctors && room.proctors.length > 0
+            ? room.proctors.map((emailOrName) => {
+                const opt = proctorOptions.value.find((o) => o.value === emailOrName);
+                return opt ? opt.label : emailOrName;
+              })
+            : [];
         result.push({
           startTime: formatTime(slot.startTime),
           endTime: formatTime(slot.endTime),
           locationId: Number(room.locationId),
           seats: Number(room.seats),
           proctorName:
-            room.proctors && room.proctors.length > 0
-              ? room.proctors.join(', ')
-              : room.proctorName || '',
+            mappedProctorNames.length > 0 ? mappedProctorNames.join(', ') : room.proctorName || '',
           ...(room.sessionId != null ? { sessionId: room.sessionId } : {}),
         });
       });

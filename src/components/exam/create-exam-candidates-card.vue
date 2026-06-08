@@ -3,8 +3,8 @@
     <q-card-section>
       <!-- Header Section -->
       <div class="row items-center q-mb-md">
-        <q-icon name="person_add" size="20px" class="q-mr-sm text-grey-8" />
-        <div class="text-subtitle1 text-weight-bold text-grey-9">รายชื่อผู้มีสิทธิ์สอบ</div>
+        <q-icon name="person_add" size="20px" class="q-mr-sm text-dark" />
+        <div class="text-subtitle1 text-weight-bold text-dark">รายชื่อผู้มีสิทธิ์สอบ</div>
       </div>
 
       <!-- Search & Actions Row -->
