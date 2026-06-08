@@ -36,7 +36,7 @@
       @manageSeats="handleManageSeats"
       @printAdmitCard="handlePrintAdmitCard"
       @viewCandidates="handleViewCandidates"
-      @manageScores="handleManageScores"
+      @viewScore="handleManageScores"
       @passcodeHistory="handlePasscodeHistory"
     />
   </q-page>
