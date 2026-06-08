@@ -269,8 +269,7 @@ const columns: QTableColumn[] = [
 
 <style scoped lang="scss">
 .payment-import-page {
-  background-color: var(--payment-import-bg);
-  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .upload-card {
@@ -343,9 +342,22 @@ const columns: QTableColumn[] = [
 }
 
 .payment-import-table {
+  max-width: 100%;
+  overflow: hidden;
+
   :deep(.q-table__container) {
+    max-width: 100%;
     border-radius: var(--radius-md);
     box-shadow: var(--payment-import-table-shadow);
+    overflow: hidden;
+  }
+
+  :deep(.q-table__middle) {
+    overflow-x: auto;
+  }
+
+  :deep(table) {
+    min-width: 1120px;
   }
 }
 </style>
