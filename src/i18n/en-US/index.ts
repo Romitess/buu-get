@@ -53,7 +53,7 @@ export default {
       pay: 'Pay Now',
       cancel: 'Cancel Registration',
       downloadReceipt: 'Download Receipt',
-      candidateCard: 'Candidate Card',
+      candidateCard: 'Test voucher',
       scoreDetails: 'Score Details',
       certificate: 'Certificate',
       paymentDeadline: 'Payment deadline',
