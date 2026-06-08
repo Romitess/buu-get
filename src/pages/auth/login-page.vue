@@ -410,8 +410,9 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 
 // Size: login card
 .card-wrapper.size-login {
-  width: 420px;
-  max-width: 420px;
+  width: 336px;
+  max-width: 336px;
+  padding: 32px 29px 29px;
 }
 
 // Size: register credentials
