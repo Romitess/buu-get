@@ -171,25 +171,28 @@ const columns: QTableColumn[] = [
     label: t('admin.registrantManagement.table.columns.index'),
     field: 'index',
     align: 'center',
-    style: 'width: 60px',
+    style: 'width: 6%',
   },
   {
     name: 'titleTh',
     label: t('admin.registrantManagement.table.columns.prefix'),
     field: 'titleTh',
     align: 'center',
+    style: 'width: 10%',
   },
   {
     name: 'fullnameTh',
     label: t('admin.registrantManagement.table.columns.fullName'),
     field: 'fullnameTh',
     align: 'center',
+    style: 'width: 18%',
   },
   {
     name: 'remark',
     label: t('admin.registrantManagement.table.columns.remark'),
     field: 'remark',
     align: 'center',
+    style: 'width: 21%',
   },
   {
     name: 'paymentStatus',
@@ -197,6 +200,7 @@ const columns: QTableColumn[] = [
     field: 'paymentStatus',
     align: 'center',
     format: (val: number) => PAYMENT_STATUS_LABELS[val] || '-',
+    style: 'width: 15%',
   },
   {
     name: 'verifyStatus',
@@ -204,13 +208,14 @@ const columns: QTableColumn[] = [
     field: 'verifyStatus',
     align: 'center',
     format: (val: number) => VERIFY_STATUS_LABELS[val] || '-',
+    style: 'width: 18%',
   },
   {
     name: 'tools',
     label: t('admin.registrantManagement.table.columns.tools'),
     field: 'tools',
     align: 'center',
-    style: 'width: 120px',
+    style: 'width: 12%',
   },
 ];
 
