@@ -19,7 +19,7 @@
     <!-- Passcode Column -->
     <template v-slot:body-cell-passcode="{ row }">
       <div class="text-center">
-        <span class="passcode-chip">{{ row.passcode }}</span>
+        {{ row.passcode }}
       </div>
     </template>
 

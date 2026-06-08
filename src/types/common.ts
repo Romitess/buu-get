@@ -20,6 +20,7 @@ export interface ExamCalendarProps {
 }
 
 export interface PasscodeLog {
+  logId: number;
   fullName: string;
   passcode: string;
   usedDate: string;

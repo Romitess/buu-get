@@ -22,7 +22,7 @@ import {
   EXAM_STATUS_UNPUBLISHED,
   ENROLLMENT_STATUS,
 } from 'src/constants/exam';
-
+import type { PasscodeLog } from 'src/types/common';
 // Retry configuration
 const RETRY_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 1000;
@@ -460,6 +460,31 @@ export const createExamPasscodes = async (
     });
   } catch (error) {
     console.error(`Error creating passcodes for exam ${examId}:`, error);
+    throw error;
+  }
+};
+export const fetchPasscodeHistory = async (examId: number | string): Promise<PasscodeLog[]> => {
+  try {
+    const response = await api.get<PasscodeLog[]>(`/exam/${examId}/passcode-history`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching passcode history for exam ${examId}:`, error);
+    throw error;
+  }
+};
+
+export const logPasscodeUsage = async (
+  examId: number | string,
+  payload: {
+    passcodeId: number;
+    fullName: string;
+    passcode: string;
+  },
+): Promise<void> => {
+  try {
+    await api.post(`/exam/${examId}/passcode-log`, payload);
+  } catch (error) {
+    console.error(`Error logging passcode usage for exam ${examId}:`, error);
     throw error;
   }
 };

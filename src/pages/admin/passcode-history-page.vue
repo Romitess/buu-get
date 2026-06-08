@@ -43,6 +43,7 @@ import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
 import PasscodeHistoryTable from 'src/components/passcode-history-table.vue';
 import type { PasscodeLog } from 'src/types/common';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
+import { fetchPasscodeHistory } from 'src/services/exam.service';
 
 const $q = useQuasar();
 const route = useRoute();
@@ -76,13 +77,17 @@ const exportColumns: QTableColumn[] = [
   { name: 'usedTime', label: 'เวลาที่ใช้', field: 'usedTime', align: 'center' },
 ];
 
-const fetchData = () => {
-  if (!examId.value) return;
+const fetchData = async () => {
+  if (!examId.value) {
+    $q.notify({ type: 'warning', message: 'ไม่พบรหัสการสอบ', position: 'top' });
+    return;
+  }
+
   isLoading.value = true;
   try {
-    // TODO: replace with actual API call
-    // passcodes.value = await passcodeStore.loadHistory(examId.value);
-    pagination.value.rowsNumber = filteredPasscodes.value.length;
+    const data = await fetchPasscodeHistory(examId.value);
+    passcodes.value = data;
+    pagination.value.rowsNumber = data.length;
   } catch {
     $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการโหลดข้อมูล', position: 'top' });
   } finally {
