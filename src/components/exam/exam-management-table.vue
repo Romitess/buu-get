@@ -197,7 +197,7 @@ const getProgressColor = (row: ExamSchedule) => {
 
 // Partial<Record> เพื่อให้ role ที่ไม่มีใน map ได้ undefined → [] แทน error
 const TOOL_BUTTONS = computed<Partial<Record<Role, CustomToolButton[]>>>(() => ({
-  [ROLES.EXAM_OPERATIONS_OFFICER]: [
+  [ROLES.REGISTRATION_OFFICER]: [
     {
       icon: 'how_to_reg',
       color: 'secondary',
@@ -217,7 +217,7 @@ const TOOL_BUTTONS = computed<Partial<Record<Role, CustomToolButton[]>>>(() => (
       emit: TABLE_ACTIONS.DELETE,
     },
   ],
-  [ROLES.REGISTRATION_OFFICER]: [
+  [ROLES.EXAM_OPERATIONS_OFFICER]: [
     {
       icon: 'group',
       color: 'primary',

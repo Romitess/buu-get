@@ -3,8 +3,8 @@
     <!-- Standardized Reusable Page Header -->
     <AppBreadcrumbs />
     <AppPageHeader
-      :title="t('navigation.manageExam')"
-      :subtitle="t('admin.examManagement.description')"
+      :title="t('navigation.manageExams')"
+      :subtitle="t('admin.examManagement.pageDescription')"
     />
 
     <!-- Search and Action Bar -->

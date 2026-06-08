@@ -90,9 +90,6 @@ const userStore = useUserStore();
 const router = useRouter();
 const { t } = useI18n();
 
-/**
- * Display name — use Thai full name if available, else use username from email
- */
 const displayName = computed(() => {
   const user = userStore.currentUser;
   if (!user) return '';
@@ -107,25 +104,16 @@ const displayName = computed(() => {
   return '';
 });
 
-/**
- * Display role — translate role key dynamically using active locale
- */
 const displayRole = computed(() => {
   const role = userStore.userRole;
   if (!role) return '';
   return t(`roles.${role}`) || ROLE_LABELS[role] || role;
 });
 
-/**
- * Navigate to edit profile page
- */
 const goToEditProfile = async (): Promise<void> => {
   await router.push({ name: 'user-profile' });
 };
 
-/**
- * Logout handler
- */
 const onLogout = async (): Promise<void> => {
   userStore.logout();
   await router.push({ name: 'login' });
@@ -133,6 +121,16 @@ const onLogout = async (): Promise<void> => {
 </script>
 
 <style scoped lang="scss">
+.app-header-profile__avatar,
+.profile-card__avatar {
+  img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    display: block;
+  }
+}
+
 .app-header-profile {
   height: 100%;
 }
@@ -165,11 +163,6 @@ const onLogout = async (): Promise<void> => {
   color: var(--text-muted);
   line-height: 1.3;
 }
-
-.app-header-profile__avatar {
-  border: 2px solid var(--neutral-200);
-  overflow: hidden;
-}
 </style>
 
 <style lang="scss">
@@ -193,13 +186,6 @@ const onLogout = async (): Promise<void> => {
   align-items: center;
   padding: 24px 20px 20px;
   background: var(--surface-card);
-}
-
-.profile-card__avatar {
-  border: 3px solid var(--neutral-200);
-  background: #ffffff;
-  margin-bottom: 12px;
-  overflow: hidden;
 }
 
 .profile-card__name {
