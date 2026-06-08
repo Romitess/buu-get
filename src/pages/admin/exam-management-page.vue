@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -119,6 +119,14 @@ const onRequest = (props: TableRequestProps) => {
   pagination.value.page = page;
   pagination.value.rowsPerPage = rowsPerPage;
 };
+
+watch(
+  exams,
+  (newExams) => {
+    pagination.value.rowsNumber = newExams.length;
+  },
+  { immediate: true },
+);
 
 const handleEdit = (id: string) => {
   void router.push({ name: 'admin-edit-exam', params: { examId: id } });

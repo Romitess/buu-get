@@ -176,9 +176,19 @@ watch(
   { deep: true },
 );
 
-const displayRows = computed<T[]>(() =>
-  props.rows && props.rows.length > 0 ? props.rows : ([{ __empty: true }] as T[]),
-);
+const displayRows = computed<T[]>(() => {
+  const sourceRows = props.rows ?? [];
+
+  if (sourceRows.length === 0) {
+    return [{ __empty: true }] as T[];
+  }
+
+  const page = internalPagination.value.page || 1;
+  const rowsPerPage = internalPagination.value.rowsPerPage || sourceRows.length;
+  const start = (page - 1) * rowsPerPage;
+
+  return sourceRows.slice(start, start + rowsPerPage);
+});
 
 const isFirstPage = computed(() => internalPagination.value.page <= 1);
 const isLastPage = computed(() => {
