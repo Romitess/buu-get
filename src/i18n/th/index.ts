@@ -174,6 +174,8 @@ export default {
     // Validation messages
     required: 'กรุณากรอกข้อมูล',
     requiredNationalId: 'กรุณากรอกเลขประจำตัวประชาชน',
+    nationalIdDigitsOnly: 'กรุณากรอกเฉพาะตัวเลขเท่านั้น',
+    nationalIdLength: 'เลขบัตรประชาชนต้องมี 13 หลัก',
     requiredEmail: 'กรุณากรอกอีเมล',
     requiredPassword: 'กรุณากรอกรหัสผ่าน',
     requiredConfirmPassword: 'กรุณายืนยันรหัสผ่าน',

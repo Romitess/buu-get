@@ -57,7 +57,8 @@
         :placeholder="t('profile.nationalIdPlaceholder')"
         :readonly="isEditMode"
         :required="true"
-        :rules="[(val) => !!val || t('profile.requiredNationalId')]"
+        :rules="nationalIdRules"
+        maxlength="13"
         reserve-bottom-space
       />
       <AppFormField
@@ -147,6 +148,20 @@ const englishName = defineModel<string>('englishName', { required: true });
 const onTitleTHChange = (): void => {
   emit('title-th-change');
 };
+
+// ─── Validation: เลขบัตรประชาชน (ต้องครบ 13 หลัก, ตัวเลขเท่านั้น) ───
+const NATIONAL_ID_LENGTH = 13;
+
+const nationalIdRules = [
+  // ห้ามว่าง
+  (val: string | number | null | undefined) => !!val || t('profile.requiredNationalId'),
+  // ต้องเป็นตัวเลข 0-9 เท่านั้น
+  (val: string | number | null | undefined) =>
+    /^\d+$/.test(String(val ?? '')) || t('profile.nationalIdDigitsOnly'),
+  // ต้องมีความยาว 13 หลักพอดี
+  (val: string | number | null | undefined) =>
+    String(val ?? '').length === NATIONAL_ID_LENGTH || t('profile.nationalIdLength'),
+];
 </script>
 
 <style scoped lang="scss">

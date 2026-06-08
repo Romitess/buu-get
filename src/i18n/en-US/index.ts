@@ -218,6 +218,8 @@ export default {
     // Validation messages
     required: 'This field is required',
     requiredNationalId: 'Please enter your national ID',
+    nationalIdDigitsOnly: 'National ID must contain only digits',
+    nationalIdLength: 'National ID must be exactly 13 digits',
     requiredEmail: 'Please enter your email',
     requiredPassword: 'Please enter a password',
     requiredConfirmPassword: 'Please confirm your password',
