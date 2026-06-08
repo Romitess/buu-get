@@ -7,6 +7,7 @@
     :class="{
       'btn-danger': icon === 'delete',
       'btn-primary-bg': color === 'primary' || !!image,
+      'btn-black': color === 'black',
     }"
     :disable="disable"
     @click="$emit('click')"
@@ -33,6 +34,10 @@
   align-items: center;
   justify-content: center;
   padding: 0;
+
+  :deep(.q-icon) {
+    font-size: 18px !important;
+  }
 
   .btn-custom-img {
     width: 32px;
@@ -65,6 +70,15 @@
     }
   }
 
+  &.btn-black {
+    color: #000000 !important;
+    background-color: #add3f7 !important;
+
+    &:hover {
+      background-color: #92bce6 !important;
+    }
+  }
+
   &:disabled,
   &.disabled,
   &.q-btn--disabled {
@@ -74,7 +88,8 @@
     cursor: not-allowed !important;
 
     &.btn-danger,
-    &.btn-primary-bg {
+    &.btn-primary-bg,
+    &.btn-black {
       background-color: var(--neutral-100) !important;
       color: var(--text-muted) !important;
     }

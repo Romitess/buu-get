@@ -90,7 +90,7 @@
           </template>
 
           <template v-slot:body-cell-modifiedFields="{ row }">
-            <div class="text-center">{{ row.modifiedFields }}</div>
+            <div class="text-left">{{ row.modifiedFields }}</div>
           </template>
 
           <template v-slot:body-cell-modifiedDate="{ row }">
@@ -106,7 +106,7 @@
               <ActionButton
                 icon="visibility"
                 :tooltip="$t('profileEditHistory.dialog.title')"
-                color="primary"
+                color="black"
                 @click="viewDetails(row)"
               />
             </div>

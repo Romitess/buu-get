@@ -230,6 +230,8 @@ export default {
     requiredEducation: 'Please select your education level',
     requiredPhone: 'Please enter your phone number',
     invalidEmail: 'Invalid email format',
+    invalidNationalId: 'National ID must be exactly 13 digits',
+    invalidPhone: 'Phone number must be exactly 10 digits',
     eduHighSchool: 'High School',
     eduBachelor: "Bachelor's Degree",
     eduMaster: "Master's Degree",
