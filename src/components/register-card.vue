@@ -1,5 +1,5 @@
 <template>
-  <div class="register-card q-pa-lg">
+  <div class="register-card">
     <!-- BUU Circular Logo -->
     <div class="row justify-center q-mb-xs">
       <img src="~assets/img/buu-logo.png" :alt="$t('profile.buuLogoAlt')" class="buu-logo-img" />
@@ -117,7 +117,7 @@
             <span>{{ $t('profile.or') }}</span>
           </div>
           <q-btn class="full-width thaid-btn" unelevated no-caps @click="onThaiID">
-            <q-icon name="fingerprint" size="sm" class="q-mr-sm" />
+            <q-icon name="fingerprint" size="20px" class="q-mr-sm" />
             {{ $t('profile.thaidRegister') }}
           </q-btn>
         </div>
@@ -271,18 +271,17 @@ const onThaiID = (): void => {
 // Card Shell
 // ============================================================
 .register-card {
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  background: var(--surface-card);
-  border-radius: 12px;
-  // padding: 40px 36px 36px;
+  width: 85%;
+  max-width: 100%;
+  margin: clamp(8px, 2vw, 12px) auto;
+  background: transparent;
+  padding: 0;
   font-family: var(--font-family-base);
 }
 
 .buu-logo-img {
-  width: 75px;
-  height: 75px;
+  width: 60px;
+  height: 60px;
   object-fit: contain;
   transform: translateY(-8px);
 }
@@ -292,7 +291,7 @@ const onThaiID = (): void => {
 }
 
 .register-title {
-  font-size: 1.8rem;
+  font-size: clamp(1.2rem, 4vw, 1.44rem);
   font-weight: 800;
   color: #000;
 }
@@ -309,7 +308,7 @@ const onThaiID = (): void => {
 .field-block {
   label {
     display: block;
-    font-size: 0.95rem;
+    font-size: clamp(0.7rem, 2vw, 0.76rem);
     font-weight: 700;
     color: #000;
     margin-bottom: 2px;
@@ -322,11 +321,11 @@ const onThaiID = (): void => {
     border-radius: 4px;
     border: 1px solid var(--neutral-200);
     transition: all 0.2s;
-    height: 48px;
+    height: 38px;
   }
 
   :deep(.q-field__native) {
-    font-size: 0.95rem;
+    font-size: clamp(0.75rem, 2vw, 0.8rem);
     padding: 0 10px;
   }
 
@@ -341,7 +340,7 @@ const onThaiID = (): void => {
 }
 
 .otp-helper-text {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: var(--neutral-400);
   font-weight: 400;
   margin-top: -2px;
@@ -351,11 +350,11 @@ const onThaiID = (): void => {
 // Action Buttons Row
 // ============================================================
 .q-btn.cancel-btn {
-  height: 56px;
+  height: 54px;
   background: var(--neutral-200) !important;
   color: #000;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: 500;
   transition: all 0.25s;
 
@@ -365,11 +364,11 @@ const onThaiID = (): void => {
 }
 
 .q-btn.submit-btn {
-  height: 56px;
+  height: 54px;
   background: var(--primary) !important;
   color: var(--text-on-primary);
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: 500;
   transition: all 0.25s;
 
@@ -387,12 +386,13 @@ const onThaiID = (): void => {
 
 .q-btn.thaid-btn {
   width: 100%;
+  height: 54px;
   background-color: var(--thaid-bg) !important;
   color: #fff;
   border-radius: 8px;
-  font-size: 1.05rem;
+  font-size: 0.84rem;
   font-weight: 500;
-  padding: 14px 0;
+  padding: 0;
   transition: all 0.2s ease;
 
   &:hover {

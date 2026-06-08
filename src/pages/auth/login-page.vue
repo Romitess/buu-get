@@ -377,11 +377,12 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
     0 0 120px rgba(30, 137, 229, 0.12);
 
   // GPU-accelerated smooth transitions
-  will-change: transform, width, max-width;
+  will-change: transform, width, max-width, min-height, padding;
   transition:
     transform 1s cubic-bezier(0.25, 1, 0.5, 1),
     width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
     max-width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+    min-height 0.45s cubic-bezier(0.25, 1, 0.5, 1),
     padding 0.45s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
@@ -411,8 +412,10 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 
 // Size: register credentials
 .card-wrapper.size-credentials {
-  width: 600px;
-  max-width: 600px;
+  width: 560px;
+  min-height: 610px;
+  max-width: 560px;
+  padding: clamp(24px, 4vw, 32px) clamp(20px, 3.5vw, 28px);
 }
 
 // Size: register profile
