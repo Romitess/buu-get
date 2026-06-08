@@ -6,17 +6,19 @@
       :subtitle="$t('admin.locationManagement.pageDescription')"
     />
 
-    <div class="row items-center q-mb-lg q-gutter-x-md">
-      <div class="col">
+    <div class="row q-col-gutter-md items-center q-mb-lg">
+      <div class="col-12 col-sm">
         <SearchBar v-model="searchQuery" />
       </div>
-      <AppButton
-        icon="add"
-        :label="$t('admin.locationManagement.createLocation')"
-        color="primary"
-        class="create-location-btn text-weight-bold"
-        @click="$router.push({ name: 'admin-create-location' })"
-      />
+      <div class="col-12 col-sm-auto text-right">
+        <AppButton
+          icon="add"
+          :label="$t('admin.locationManagement.createLocation')"
+          color="primary"
+          class="create-location-btn text-weight-bold"
+          @click="$router.push({ name: 'admin-create-location' })"
+        />
+      </div>
     </div>
 
     <BaseTable
@@ -242,10 +244,21 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@media (max-width: 1023px) {
+  .page-container {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
 .create-location-btn {
   border-radius: var(--radius-10) !important;
   height: 40px;
   padding: 0 24px;
+
+  @media (max-width: $breakpoint-xs-max) {
+    width: 100%;
+  }
 }
 
 .action-btn {

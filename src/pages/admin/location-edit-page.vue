@@ -307,6 +307,13 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@media (max-width: 1023px) {
+  .page-container {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
 .surface-page-bg {
   background-color: var(--surface-page);
 }
@@ -333,6 +340,11 @@ onMounted(() => {
   background: var(--surface-card);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-card);
+
+  @media (max-width: 1023px) {
+    height: auto !important;
+    max-height: none !important;
+  }
 }
 
 .form-card {
@@ -342,6 +354,10 @@ onMounted(() => {
   flex-direction: column;
   gap: var(--space-lg);
   justify-content: flex-start;
+
+  @media (max-width: 1023px) {
+    max-width: 100% !important;
+  }
 }
 
 .preview-panel {
@@ -355,6 +371,11 @@ onMounted(() => {
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
+
+  @media (max-width: 1023px) {
+    height: 500px !important;
+    max-height: 500px !important;
+  }
 }
 
 .preview-scroll {

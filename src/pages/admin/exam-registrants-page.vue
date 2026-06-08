@@ -21,19 +21,23 @@
       is-admin
     />
 
-    <nav class="toolbar-section row items-center q-mb-md q-gutter-md">
-      <SearchBar
-        v-model="searchQuery"
-        :placeholder="$t('admin.registrantManagement.searchPlaceholder')"
-        class="search-bar col-12 col-sm-auto"
-      />
+    <nav class="toolbar-section row q-col-gutter-md items-center q-mb-md">
+      <div class="col-12 col-sm-auto">
+        <SearchBar
+          v-model="searchQuery"
+          :placeholder="$t('admin.registrantManagement.searchPlaceholder')"
+          class="search-bar"
+        />
+      </div>
       <q-space class="gt-xs" />
-      <ExportCsvButton
-        :columns="columns"
-        :rows="filteredEnrollments"
-        file-name-prefix="exam-registrants"
-        class="export-btn col-12 col-sm-auto"
-      />
+      <div class="col-12 col-sm-auto">
+        <ExportCsvButton
+          :columns="columns"
+          :rows="filteredEnrollments"
+          file-name-prefix="exam-registrants"
+          class="export-btn"
+        />
+      </div>
     </nav>
 
     <main>
@@ -263,6 +267,13 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@media (max-width: 1023px) {
+  .page-container {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
 .registrants-page {
   min-height: 0 !important;
 }
