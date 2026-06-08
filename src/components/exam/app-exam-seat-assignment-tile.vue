@@ -7,6 +7,7 @@
       'is-empty': status === 'available',
       'is-swap-mode': swapMode && status !== 'broken' && status !== 'blocked',
       'is-selected': selected,
+      'is-moving': moving,
     }"
     @click="emit('click')"
   >
@@ -39,6 +40,7 @@ const props = withDefaults(
     student?: StudentSeatInfo | null;
     swapMode?: boolean;
     selected?: boolean;
+    moving?: boolean;
     emptyLabel?: string;
     nameFallback?: string;
   }>(),
@@ -46,6 +48,7 @@ const props = withDefaults(
     student: null,
     swapMode: false,
     selected: false,
+    moving: false,
     emptyLabel: '\u0e27\u0e48\u0e32\u0e07',
     nameFallback: 'Name',
   },
@@ -129,6 +132,12 @@ const shortName = computed(() => {
     0 0 0 2px #ffffff,
     0 0 0 5px var(--primary, #0d47a1);
   transform: translateY(-1px);
+}
+
+.is-moving .seat-name,
+.is-moving .seat-avatar,
+.is-moving .swap-icon {
+  opacity: 0;
 }
 
 .seat-name {

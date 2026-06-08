@@ -176,9 +176,6 @@ const handleSearch = (val: string | number | null): void => {
   background: #ffffff;
   padding: 18px;
   overflow: hidden;
-  border: 1px solid #676767b2;
-  display: flex;
-  flex-direction: column;
 }
 
 .badge-seat-count {
@@ -194,8 +191,7 @@ const handleSearch = (val: string | number | null): void => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  flex: 1;
-  min-height: 0;
+  max-height: 355px;
   overflow-y: auto;
   padding-right: 4px;
 
