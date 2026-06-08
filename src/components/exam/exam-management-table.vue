@@ -220,25 +220,25 @@ const TOOL_BUTTONS = computed<Partial<Record<Role, CustomToolButton[]>>>(() => (
   [ROLES.EXAM_OPERATIONS_OFFICER]: [
     {
       icon: 'group',
-      color: 'primary',
+      color: 'secondary',
       tooltip: t('admin.examManagement.table.tooltips.manageRegistrants'),
       emit: TABLE_ACTIONS.MANAGE_REGISTRANTS,
     },
     {
       icon: 'event_seat',
-      color: 'primary',
+      color: 'secondary',
       tooltip: t('admin.examManagement.table.tooltips.manageSeats'),
       emit: TABLE_ACTIONS.MANAGE_SEATS,
     },
     {
       icon: 'format_list_bulleted',
-      color: 'primary',
+      color: 'secondary',
       tooltip: t('admin.examManagement.table.tooltips.viewCandidates'),
       emit: TABLE_ACTIONS.VIEW_CANDIDATES,
     },
     {
       icon: 'description',
-      color: 'primary',
+      color: 'secondary',
       tooltip: t('admin.examManagement.table.tooltips.manageScores'),
       emit: TABLE_ACTIONS.VIEW_SCORE,
     },
@@ -246,7 +246,7 @@ const TOOL_BUTTONS = computed<Partial<Record<Role, CustomToolButton[]>>>(() => (
   [ROLES.ADMIN]: [
     {
       icon: 'how_to_reg',
-      color: 'primary',
+      color: 'secondary',
       tooltip: t('admin.examManagement.table.tooltips.passcodeHistory'),
       emit: TABLE_ACTIONS.PASSCODE_HISTORY,
     },
@@ -264,25 +264,25 @@ const TOOL_BUTTONS = computed<Partial<Record<Role, CustomToolButton[]>>>(() => (
     },
     {
       icon: 'group',
-      color: 'primary',
+      color: 'secondary',
       tooltip: t('admin.examManagement.table.tooltips.manageRegistrants'),
       emit: TABLE_ACTIONS.MANAGE_REGISTRANTS,
     },
     {
       icon: 'event_seat',
-      color: 'primary',
+      color: 'secondary',
       tooltip: t('admin.examManagement.table.tooltips.manageSeats'),
       emit: TABLE_ACTIONS.MANAGE_SEATS,
     },
     {
       icon: 'format_list_bulleted',
-      color: 'primary',
+      color: 'secondary',
       tooltip: t('admin.examManagement.table.tooltips.viewCandidates'),
       emit: TABLE_ACTIONS.VIEW_CANDIDATES,
     },
     {
       icon: 'description',
-      color: 'primary',
+      color: 'secondary',
       tooltip: t('admin.examManagement.table.tooltips.manageScores'),
       emit: TABLE_ACTIONS.VIEW_SCORE,
     },

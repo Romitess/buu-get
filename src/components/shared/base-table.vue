@@ -5,7 +5,8 @@
       :rows="displayRows"
       :columns="columns"
       :loading="loading"
-      :pagination="pagination"
+      v-model:pagination="internalPagination"
+      :rows-per-page-options="[]"
       :hide-bottom="hidePagination"
       always-paginated
       @request="onRequest"
@@ -43,7 +44,7 @@
         </template>
       </template>
 
-      <template v-slot:bottom="scope">
+      <template v-slot:bottom>
         <div
           class="row items-center justify-end full-width q-gutter-x-md text-grey-8"
           style="font-size: 12px"
@@ -51,15 +52,17 @@
           <div class="row items-center q-gutter-x-sm">
             <span>{{ $t('components.baseTable.rowsPerPage') }}</span>
             <q-select
-              v-model="scope.pagination.rowsPerPage"
+              v-model="internalPagination.rowsPerPage"
               :options="[10, 25, 50]"
               dense
               outlined
               options-dense
               class="pagination-select"
               @update:model-value="
-                scope.pagination.page = 1;
-                scope.pagination.rowsPerPage = $event;
+                (val: number) => {
+                  internalPagination.rowsPerPage = val;
+                  onRequest({ pagination: buildPagination(1) });
+                }
               "
             />
           </div>
@@ -67,18 +70,18 @@
           <div>
             {{ $t('components.baseTable.showing') }}
             {{
-              (scope.pagination.rowsNumber || 0) === 0
+              (internalPagination.rowsNumber || 0) === 0
                 ? 0
-                : scope.pagination.rowsPerPage * (scope.pagination.page - 1) + 1
+                : internalPagination.rowsPerPage * (internalPagination.page - 1) + 1
             }}
             {{ $t('components.baseTable.to') }}
             {{
               Math.min(
-                scope.pagination.rowsPerPage * scope.pagination.page,
-                scope.pagination.rowsNumber || 0,
+                internalPagination.rowsPerPage * internalPagination.page,
+                internalPagination.rowsNumber || 0,
               )
             }}
-            {{ $t('components.baseTable.ofItems', { total: scope.pagination.rowsNumber || 0 }) }}
+            {{ $t('components.baseTable.ofItems', { total: internalPagination.rowsNumber || 0 }) }}
           </div>
 
           <div class="row items-center no-wrap">
@@ -87,36 +90,36 @@
               round
               dense
               flat
-              :disable="scope.isFirstPage"
-              @click="scope.firstPage"
               size="sm"
+              :disable="isFirstPage"
+              @click="goToFirstPage()"
             />
             <q-btn
               icon="chevron_left"
               round
               dense
               flat
-              :disable="scope.isFirstPage"
-              @click="scope.prevPage"
               size="sm"
+              :disable="isFirstPage"
+              @click="goToPrevPage()"
             />
             <q-btn
               icon="chevron_right"
               round
               dense
               flat
-              :disable="scope.isLastPage"
-              @click="scope.nextPage"
               size="sm"
+              :disable="isLastPage"
+              @click="goToNextPage()"
             />
             <q-btn
               icon="last_page"
               round
               dense
               flat
-              :disable="scope.isLastPage"
-              @click="scope.lastPage"
               size="sm"
+              :disable="isLastPage"
+              @click="goToLastPage()"
             />
           </div>
         </div>
@@ -132,9 +135,8 @@
 </template>
 
 <script setup lang="ts" generic="T">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { QTableColumn } from 'quasar';
-
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 
 interface Props {
@@ -154,12 +156,68 @@ const emit = defineEmits<{
   (e: 'request', requestProps: TableRequestProps): void;
 }>();
 
+// internalPagination ใช้เป็น v-model ให้ q-table
+// เพื่อให้ Quasar รู้ว่าเป็น server-side pagination และ rowsNumber เท่าไหร่
+const internalPagination = ref<PaginationModel>({
+  page: props.pagination?.page ?? 1,
+  rowsPerPage: props.pagination?.rowsPerPage ?? 10,
+  sortBy: props.pagination?.sortBy ?? null,
+  descending: props.pagination?.descending ?? false,
+  rowsNumber: props.pagination?.rowsNumber ?? 0,
+});
+
+watch(
+  () => props.pagination,
+  (val) => {
+    if (val) {
+      internalPagination.value = { ...val };
+    }
+  },
+  { deep: true },
+);
+
 const displayRows = computed<T[]>(() =>
   props.rows && props.rows.length > 0 ? props.rows : ([{ __empty: true }] as T[]),
 );
 
+const isFirstPage = computed(() => internalPagination.value.page <= 1);
+const isLastPage = computed(() => {
+  const total = internalPagination.value.rowsNumber ?? 0;
+  const lastPage = Math.ceil(total / internalPagination.value.rowsPerPage) || 1;
+  return internalPagination.value.page >= lastPage;
+});
+
 const onRequest = (requestProps: TableRequestProps): void => {
   emit('request', requestProps);
+};
+
+const buildPagination = (page: number): TableRequestProps['pagination'] => {
+  const { rowsPerPage, sortBy, descending, rowsNumber } = internalPagination.value;
+  return {
+    page,
+    rowsPerPage,
+    descending: descending ?? false,
+    rowsNumber: rowsNumber ?? 0,
+    ...(sortBy ? { sortBy } : {}),
+  };
+};
+
+const goToFirstPage = (): void => {
+  onRequest({ pagination: buildPagination(1) });
+};
+
+const goToPrevPage = (): void => {
+  onRequest({ pagination: buildPagination(internalPagination.value.page - 1) });
+};
+
+const goToNextPage = (): void => {
+  onRequest({ pagination: buildPagination(internalPagination.value.page + 1) });
+};
+
+const goToLastPage = (): void => {
+  const totalRows = internalPagination.value.rowsNumber ?? 0;
+  const lastPage = Math.ceil(totalRows / internalPagination.value.rowsPerPage) || 1;
+  onRequest({ pagination: buildPagination(lastPage) });
 };
 </script>
 
