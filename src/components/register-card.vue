@@ -6,7 +6,7 @@
     </div>
 
     <!-- Title -->
-    <div class="text-center q-mb-md">
+    <div class="text-center q-mb-sm">
       <div class="register-title">
         {{ $t('profile.register') }}
       </div>
@@ -28,6 +28,7 @@
             (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || 'รูปแบบอีเมลไม่ถูกต้อง',
           ]"
           lazy-rules
+          hide-bottom-space
         />
       </div>
 
@@ -45,6 +46,7 @@
             (val) => val.length >= 8 || $t('profile.passwordFormat'),
           ]"
           lazy-rules
+          hide-bottom-space
         >
           <template v-slot:append>
             <q-icon
@@ -70,6 +72,7 @@
             (val) => val === password || $t('profile.passwordMismatch'),
           ]"
           lazy-rules
+          hide-bottom-space
         >
           <template v-slot:append>
             <q-icon
@@ -291,7 +294,7 @@ const onThaiID = (): void => {
 }
 
 .register-title {
-  font-size: clamp(1.08rem, 3.6vw, 1.3rem);
+  font-size: clamp(1.56rem, 5.18vw, 1.87rem);
   font-weight: 800;
   color: #000;
 }
@@ -308,7 +311,7 @@ const onThaiID = (): void => {
 .field-block {
   label {
     display: block;
-    font-size: clamp(0.63rem, 1.8vw, 0.68rem);
+    font-size: clamp(0.91rem, 2.59vw, 0.98rem);
     font-weight: 700;
     color: #000;
     margin-bottom: 2px;
@@ -325,7 +328,7 @@ const onThaiID = (): void => {
   }
 
   :deep(.q-field__native) {
-    font-size: clamp(0.68rem, 1.8vw, 0.72rem);
+    font-size: clamp(0.98rem, 2.59vw, 1.03rem);
     padding: 0 10px;
   }
 
@@ -340,7 +343,7 @@ const onThaiID = (): void => {
 }
 
 .otp-helper-text {
-  font-size: 0.63rem;
+  font-size: 0.91rem;
   color: var(--neutral-400);
   font-weight: 400;
   margin-top: -2px;
@@ -350,11 +353,11 @@ const onThaiID = (): void => {
 // Action Buttons Row
 // ============================================================
 .q-btn.cancel-btn {
-  height: 48px;
+  height: 55px;
   background: var(--neutral-200) !important;
   color: #000;
   border-radius: 8px;
-  font-size: 0.72rem;
+  font-size: 1.03rem;
   font-weight: 500;
   transition: all 0.25s;
 
@@ -364,11 +367,11 @@ const onThaiID = (): void => {
 }
 
 .q-btn.submit-btn {
-  height: 48px;
+  height: 55px;
   background: var(--primary) !important;
   color: var(--text-on-primary);
   border-radius: 8px;
-  font-size: 0.72rem;
+  font-size: 1.03rem;
   font-weight: 500;
   transition: all 0.25s;
 
@@ -386,11 +389,11 @@ const onThaiID = (): void => {
 
 .q-btn.thaid-btn {
   width: 100%;
-  height: 48px;
+  height: 55px;
   background-color: var(--thaid-bg) !important;
   color: #fff;
   border-radius: 8px;
-  font-size: 0.76rem;
+  font-size: 1.09rem;
   font-weight: 500;
   padding: 0;
   transition: all 0.2s ease;
@@ -415,7 +418,7 @@ const onThaiID = (): void => {
   }
 
   span {
-    font-size: 0.85rem;
+    font-size: 1.22rem;
     color: var(--neutral-400);
     white-space: nowrap;
     font-weight: 500;

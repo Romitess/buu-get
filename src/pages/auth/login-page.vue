@@ -417,10 +417,10 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 
 // Size: register credentials
 .card-wrapper.size-credentials {
-  width: 504px;
-  min-height: 550px;
-  max-width: 504px;
-  padding: clamp(22px, 3.6vw, 29px) clamp(18px, 3.1vw, 25px);
+  width: clamp(340px, 90vw, 504px);
+  min-height: clamp(480px, 75dvh, 520px);
+  max-width: 100%;
+  padding: clamp(16px, 2.5vw, 20px) clamp(18px, 3.1vw, 25px);
 }
 
 // Size: register profile
@@ -591,21 +591,21 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
   }
 
   .pill-buu {
-    font-size: 1.1rem;
+    font-size: 1.58rem;
     font-weight: 900;
     color: #ffffff;
     letter-spacing: -0.01em;
   }
 
   .pill-dash {
-    font-size: 1.1rem;
+    font-size: 1.58rem;
     font-weight: 300;
     color: rgba(255, 255, 255, 0.5);
     margin: 0 2px;
   }
 
   .pill-get {
-    font-size: 1.1rem;
+    font-size: 1.58rem;
     font-weight: 900;
     color: #90caf9;
     letter-spacing: -0.01em;
@@ -628,7 +628,7 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
   animation: fadeInUp 0.7s ease-out 0.15s both;
 
   p {
-    font-size: 1rem;
+    font-size: 1.44rem;
     color: rgba(255, 255, 255, 0.75);
     line-height: 1.7;
     margin-bottom: 40px;
