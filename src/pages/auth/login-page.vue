@@ -377,14 +377,18 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
     0 32px 64px rgba(0, 0, 0, 0.25),
     0 0 120px rgba(30, 137, 229, 0.12);
 
-  // GPU-accelerated smooth transitions
-  will-change: transform, width, max-width, min-height, padding;
+  // GPU-accelerated smooth transitions and crisp text rendering
   transition:
     transform 1s cubic-bezier(0.25, 1, 0.5, 1),
     width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
     max-width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
     min-height 0.45s cubic-bezier(0.25, 1, 0.5, 1),
     padding 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
 
   // Disable scrolling entirely
   overflow: hidden;
