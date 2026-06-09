@@ -33,21 +33,38 @@
       />
       <q-space class="gt-sm" />
       <div class="row q-gutter-sm col-12 col-md-auto justify-end">
-        <q-btn
-          color="negative"
-          class="action-btn text-weight-bold br-sm"
-          unelevated
-          label="ลบข้อมูลทั้งหมด"
-          @click="clearImportedScores"
-        />
-        <q-btn
-          color="primary"
-          class="action-btn text-weight-bold br-sm"
-          unelevated
-          icon="file_upload"
-          label="IMPORT"
-          @click="showImportDialog = true"
-        />
+        <template v-if="hasSavedScores">
+          <AppButton
+            color="primary"
+            class="action-btn text-weight-bold br-sm"
+            icon="note"
+            label="ออกใบ Certificate"
+            @click="issueCertificates"
+          />
+          <ExportCsvButton
+            :columns="columns"
+            :rows="scoreRows"
+            :file-name-prefix="exportCsvFileNamePrefix"
+            class="action-btn text-weight-bold br-sm"
+          />
+        </template>
+        <template v-else>
+          <q-btn
+            color="negative"
+            class="action-btn text-weight-bold br-sm"
+            unelevated
+            label="ลบข้อมูลทั้งหมด"
+            @click="confirmClearImportedScores"
+          />
+          <q-btn
+            color="primary"
+            class="action-btn text-weight-bold br-sm"
+            unelevated
+            icon="file_upload"
+            label="IMPORT"
+            @click="showImportDialog = true"
+          />
+        </template>
       </div>
     </nav>
 
@@ -60,40 +77,21 @@
         class="scores-table"
         @request="onRequest"
       >
-        <template v-slot:body-cell-index="{ row }">
-          <div class="text-center">{{ row.index }}</div>
-        </template>
-
-        <template v-slot:body-cell-nationalId="{ row }">
-          <div class="text-center">{{ row.nationalId }}</div>
-        </template>
-
-        <template v-slot:body-cell-titleTh="{ row }">
-          <div class="text-center">{{ row.titleTh }}</div>
-        </template>
-
-        <template v-slot:body-cell-fullnameTh="{ row }">
-          <div class="text-center">{{ row.fullnameTh }}</div>
-        </template>
-
-        <template v-slot:body-cell-scoreGrammar="{ row }">
-          <div class="text-center">{{ row.hasImportedScore ? row.scoreGrammar : '' }}</div>
-        </template>
-
-        <template v-slot:body-cell-scoreReading="{ row }">
-          <div class="text-center">{{ row.hasImportedScore ? row.scoreReading : '' }}</div>
-        </template>
-
-        <template v-slot:body-cell-scoreTotal="{ row }">
-          <div class="text-center text-weight-bold text-primary">
-            {{ row.hasImportedScore ? row.scoreTotal : '' }}
-          </div>
-        </template>
-
-        <template v-slot:body-cell-band="{ row }">
-          <div class="text-center text-weight-bold">
-            {{ row.hasImportedScore ? row.band : '' }}
-          </div>
+        <template v-slot:body="props">
+          <q-tr :props="props">
+            <q-td class="text-center">{{ props.row.index }}</q-td>
+            <q-td class="text-center">{{ props.row.nationalId }}</q-td>
+            <q-td class="text-center">{{ props.row.titleTh }}</q-td>
+            <q-td class="text-center">{{ props.row.fullnameTh }}</q-td>
+            <q-td class="text-center">{{ props.row.hasScore ? props.row.scoreGrammar : '' }}</q-td>
+            <q-td class="text-center">{{ props.row.hasScore ? props.row.scoreReading : '' }}</q-td>
+            <q-td class="text-center text-weight-bold text-primary">
+              {{ props.row.hasScore ? props.row.scoreTotal : '' }}
+            </q-td>
+            <q-td class="text-center text-weight-bold">
+              {{ props.row.hasScore ? props.row.band : '' }}
+            </q-td>
+          </q-tr>
         </template>
       </BaseTable>
     </main>
@@ -105,7 +103,7 @@
         unelevated
         label="บันทึกคะแนน"
         :disable="!hasImportedScores"
-        @click="saveScores"
+        @click="showSaveConfirmDialog = true"
       />
     </div>
 
@@ -190,6 +188,35 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <DialogActionConfirm
+      v-model="showSaveConfirmDialog"
+      title="ยืนยันการบันทึกข้อมูล"
+      message="คุณต้องการบันทึกข้อมูลทั้งหมดใช่หรือไม่"
+      confirm-label="ยืนยัน"
+      cancel-label="ยกเลิก"
+      confirm-color="primary"
+      @confirm="saveScores"
+    />
+
+    <DialogActionConfirm
+      v-model="showClearConfirmDialog"
+      title="ยืนยันการลบข้อมูล"
+      message="คุณต้องการลบข้อมูลทั้งหมดใช่หรือไม่"
+      confirm-label="ยืนยัน"
+      cancel-label="ยกเลิก"
+      confirm-color="primary"
+      @confirm="clearImportedScores"
+    />
+
+    <DialogIssueCertificate
+      v-model="showIssueCertificateDialog"
+      :exam-date="exam?.EXAM_DATE"
+      :session-id="selectedSessionId"
+      :session-name="selectedSessionName"
+      :candidates="candidatesWithScores"
+      @issued="loadData"
+    />
   </q-page>
 </template>
 
@@ -200,10 +227,14 @@ import { useQuasar, type QTableColumn } from 'quasar';
 import BaseTable from 'src/components/shared/base-table.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
 import DialogCsvImport from 'src/components/exam/dialog-csv-import.vue';
+import DialogActionConfirm from 'src/components/exam/dialog-action-confirm.vue';
+import DialogIssueCertificate from 'src/components/exam/dialog-issue-certificate.vue';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
 import AppExamSessionTabs from 'src/components/exam/app-exam-session-time.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
+import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
+import AppButton from 'src/components/base/app-button.vue';
 import { fetchExamById } from 'src/services/exam.service';
 import { fetchRawEnrollmentsByExamId } from 'src/services/enrollment.service';
 import {
@@ -224,6 +255,7 @@ interface ScoreTableRow extends EnrollmentTableRow {
   scoreTotal: number;
   band: number;
   hasImportedScore: boolean;
+  hasScore: boolean;
 }
 
 interface ScoreDraft {
@@ -256,6 +288,10 @@ const importedEnrollmentIds = ref<Set<number>>(new Set());
 const showImportDialog = ref(false);
 const showUploadDialog = ref(false);
 const showSampleDialog = ref(false);
+const showSaveConfirmDialog = ref(false);
+const showClearConfirmDialog = ref(false);
+const showIssueCertificateDialog = ref(false);
+
 const sampleFileUrl =
   'https://docs.google.com/spreadsheets/d/1IJGChv6bg4W8sgYPRmMQwDAOk7YwSw1R/export?format=xlsx&gid=181366053';
 
@@ -396,6 +432,54 @@ const scoreByEnrollmentId = computed(() => {
   return new Map(examScores.value.map((score) => [score.ERM_ID, score]));
 });
 
+const hasSavedScores = computed(() => {
+  return (
+    currentRoomEnrollments.value.length > 0 &&
+    currentRoomEnrollments.value.some((enrollment) =>
+      scoreByEnrollmentId.value.has(enrollment.ERM_ID),
+    )
+  );
+});
+
+const exportCsvFileNamePrefix = computed(() => {
+  const examName = exam.value?.EXAM_NAME || '';
+  const time = selectedSessionTime.value || '';
+  const room = selectedSessionLocation.value || '';
+  return `คะแนนสอบ_${examName}_${time}_${room}`.replace(/[\s/\\?%*:|"<>]+/g, '_');
+});
+
+const selectedSessionName = computed(() => {
+  if (!selectedSession.value) return '';
+  if (selectedSession.value.SS_NAME) return selectedSession.value.SS_NAME;
+  const sessions = exam.value?.SESSIONS || [];
+  const index = sessions.findIndex((s) => s.SS_ID === selectedSessionId.value);
+  const roundNum = index !== -1 ? index + 1 : 1;
+  const year = exam.value?.EXAM_DATE
+    ? new Date(exam.value.EXAM_DATE).getFullYear() + 543
+    : new Date().getFullYear() + 543;
+  return `${roundNum}/${year}`;
+});
+
+const candidatesWithScores = computed(() => {
+  const activeSessionEnrollments = enrollments.value.filter((enrollment) =>
+    activeSessionIds.value.includes(enrollment.SESSION_ID),
+  );
+  return activeSessionEnrollments
+    .filter((enrollment) => scoreByEnrollmentId.value.has(enrollment.ERM_ID))
+    .map((enrollment) => {
+      const score = scoreByEnrollmentId.value.get(enrollment.ERM_ID);
+      return {
+        USER_ID: enrollment.USER_ID,
+        SCORES_ID: score?.SCORES_ID || 0,
+      };
+    })
+    .filter((c) => c.SCORES_ID > 0);
+});
+
+const issueCertificates = (): void => {
+  showIssueCertificateDialog.value = true;
+};
+
 const toNumber = (value: number | string | null | undefined): number => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -448,6 +532,9 @@ const scoreRows = computed(() => {
       scoreTotal: draft.scoreTotal,
       band: draft.band,
       hasImportedScore: importedEnrollmentIds.value.has(enrollment.ERM_ID),
+      hasScore:
+        importedEnrollmentIds.value.has(enrollment.ERM_ID) ||
+        scoreByEnrollmentId.value.has(enrollment.ERM_ID),
     };
   });
 
@@ -638,12 +725,6 @@ const columnNameToIndex = (cellRef: string): number => {
   return [...columnName].reduce((acc, char) => acc * 26 + char.charCodeAt(0) - 64, 0) - 1;
 };
 
-const decodeXmlText = (value: string): string => {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(`<root>${value}</root>`, 'application/xml');
-  return doc.documentElement.textContent || '';
-};
-
 const getZipEntries = (buffer: ArrayBuffer): Map<string, { method: number; data: Uint8Array }> => {
   const view = new DataView(buffer);
   const bytes = new Uint8Array(buffer);
@@ -722,11 +803,17 @@ const parseWorksheetRows = (xml: string, sharedStrings: string[]): string[][] =>
   const doc = new DOMParser().parseFromString(xml, 'application/xml');
 
   return [...doc.getElementsByTagName('row')].map((row) => {
-    const values: string[] = [];
-    [...row.getElementsByTagName('c')].forEach((cell) => {
-      const cellRef = cell.getAttribute('r') || '';
+    const cells = [...row.getElementsByTagName('c')];
+    if (cells.length === 0) return [];
+
+    const cellIndices = cells.map((cell) => columnNameToIndex(cell.getAttribute('r') || ''));
+    const maxIndex = Math.max(...cellIndices);
+    const values: string[] = Array(maxIndex + 1).fill('');
+
+    cells.forEach((cell, idx) => {
+      const cellIndex = cellIndices[idx];
+      if (cellIndex === undefined) return;
       const cellType = cell.getAttribute('t');
-      const cellIndex = columnNameToIndex(cellRef);
       const valueNode = cell.getElementsByTagName('v')[0];
       const inlineNode = cell.getElementsByTagName('t')[0];
       const rawValue = valueNode?.textContent || inlineNode?.textContent || '';
@@ -734,10 +821,10 @@ const parseWorksheetRows = (xml: string, sharedStrings: string[]): string[][] =>
       if (cellType === 's') {
         values[cellIndex] = sharedStrings[Number(rawValue)] || '';
       } else {
-        values[cellIndex] = decodeXmlText(rawValue);
+        values[cellIndex] = rawValue;
       }
     });
-    return values.map((value) => value || '');
+    return values;
   });
 };
 
@@ -772,64 +859,111 @@ const parseCsvRows = (text: string): string[][] => {
     .map((line) => line.split(',').map((value) => value.trim()));
 };
 
-const findEnrollmentByImportKey = (value: string): BackendEnrollmentDetail | undefined => {
-  const target = normalizeImportKey(value);
-  return currentRoomEnrollments.value.find((enrollment) => {
-    const keys = [
-      enrollment.USER?.USER_NATIONAL_ID || '',
-      enrollment.USER?.USER_PASSPORT_NO || '',
-    ].map(normalizeImportKey);
-
-    return keys.includes(target);
-  });
-};
-
 const applyImportedScoreRows = (rows: string[][]): void => {
   if (rows.length < 2) return;
 
   const headers = (rows[0] || []).map((header) => header.trim().toLowerCase());
-  const idxTestTakerId = headers.findIndex((header) => header.includes('test taker'));
-  const idxCitizenId = headers.findIndex((header) => header.includes('citizen'));
-  const idxPassport = headers.findIndex((header) => header.includes('passport'));
-  const idxNid =
-    idxTestTakerId >= 0
-      ? idxTestTakerId
-      : idxCitizenId >= 0
-        ? idxCitizenId
-        : idxPassport >= 0
-          ? idxPassport
-          : headers.findIndex(
-              (header) =>
-                header.includes('nationalid') ||
-                header.includes('national_id') ||
-                header.includes('ref'),
-            );
+  const idxTestTakerId = headers.findIndex(
+    (header) =>
+      header.includes('test taker') ||
+      header.includes('testtaker') ||
+      header.includes('เลขประจำตัวสอบ') ||
+      header.includes('รหัสผู้สอบ') ||
+      header.includes('candidate'),
+  );
+  const idxCitizenId = headers.findIndex(
+    (header) =>
+      header.includes('citizen') ||
+      header.includes('nationalid') ||
+      header.includes('national_id') ||
+      header.includes('บัตรประชาชน') ||
+      header.includes('เลขประจำตัวประชาชน') ||
+      header.includes('identification'),
+  );
+  const idxPassport = headers.findIndex(
+    (header) =>
+      header.includes('passport') ||
+      header.includes('หนังสือเดินทาง') ||
+      header.includes('passport_no') ||
+      header.includes('passportno'),
+  );
   const idxGrammar = headers.findIndex(
     (header) =>
-      header.includes('grammar') || header.includes('vocab') || header.includes('language'),
+      header.includes('grammar') ||
+      header.includes('vocab') ||
+      header.includes('language') ||
+      header.includes('คำศัพท์') ||
+      header.includes('ไวยากรณ์') ||
+      header.includes('lang_use') ||
+      header.includes('languse'),
   );
-  const idxReading = headers.findIndex((header) => header.includes('reading'));
-  const idxTotal = headers.findIndex((header) => header.includes('total'));
-  const idxLevel = headers.findIndex((header) => header.includes('level'));
+  const idxReading = headers.findIndex(
+    (header) =>
+      header.includes('reading') || header.includes('การอ่าน') || header.includes('read_score'),
+  );
+  const idxTotal = headers.findIndex(
+    (header) => header.includes('total') || header.includes('รวม') || header.includes('คะแนนรวม'),
+  );
+  const idxLevel = headers.findIndex(
+    (header) => header.includes('level') || header.includes('band') || header.includes('ระดับ'),
+  );
 
   let matchedCount = 0;
   const nextImportedIds = new Set(importedEnrollmentIds.value);
 
   for (let i = 1; i < rows.length; i++) {
     const values = rows[i] || [];
-    const importKey = (idxNid >= 0 ? values[idxNid] : values[1]) || '';
-    const rawGrammar = idxGrammar >= 0 ? values[idxGrammar] : values[4];
-    const rawReading = idxReading >= 0 ? values[idxReading] : values[5];
-    const rawTotal = idxTotal >= 0 ? values[idxTotal] : undefined;
-    const rawLevel = idxLevel >= 0 ? values[idxLevel] : undefined;
-    const matchedEnrollment = findEnrollmentByImportKey(importKey);
+    const citizenVal = idxCitizenId >= 0 ? values[idxCitizenId] : '';
+    const passportVal = idxPassport >= 0 ? values[idxPassport] : '';
+    const testTakerVal = idxTestTakerId >= 0 ? values[idxTestTakerId] : '';
+
+    const cleanCitizen = citizenVal ? citizenVal.trim() : '';
+    const cleanPassport = passportVal ? passportVal.trim() : '';
+    const cleanTestTaker = testTakerVal ? testTakerVal.trim() : '';
+
+    let matchedEnrollment = undefined;
+
+    if (cleanCitizen && cleanCitizen !== '-') {
+      const normCitizen = normalizeImportKey(cleanCitizen);
+      matchedEnrollment = currentRoomEnrollments.value.find((enrollment) => {
+        const dbNid = enrollment.USER?.USER_NATIONAL_ID;
+        return dbNid && normalizeImportKey(dbNid) === normCitizen;
+      });
+    }
+
+    if (!matchedEnrollment && cleanPassport && cleanPassport !== '-') {
+      const normPassport = normalizeImportKey(cleanPassport);
+      matchedEnrollment = currentRoomEnrollments.value.find((enrollment) => {
+        const dbPp = enrollment.USER?.USER_PASSPORT_NO;
+        return dbPp && normalizeImportKey(dbPp) === normPassport;
+      });
+    }
+
+    if (!matchedEnrollment && cleanTestTaker && cleanTestTaker !== '-') {
+      const normTestTaker = normalizeImportKey(cleanTestTaker);
+      matchedEnrollment = currentRoomEnrollments.value.find((enrollment) => {
+        const dbNid = enrollment.USER?.USER_NATIONAL_ID;
+        const dbPp = enrollment.USER?.USER_PASSPORT_NO;
+        return (
+          (dbNid && normalizeImportKey(dbNid) === normTestTaker) ||
+          (dbPp && normalizeImportKey(dbPp) === normTestTaker)
+        );
+      });
+    }
 
     if (!matchedEnrollment) continue;
 
+    const rawGrammar = idxGrammar >= 0 ? values[idxGrammar] : '';
+    const rawReading = idxReading >= 0 ? values[idxReading] : '';
+    const rawTotal = idxTotal >= 0 ? values[idxTotal] : undefined;
+    const rawLevel = idxLevel >= 0 ? values[idxLevel] : undefined;
+
     const grammar = Number(rawGrammar) || 0;
     const reading = Number(rawReading) || 0;
-    const total = Number(rawTotal) || grammar + reading;
-    const level = Number(rawLevel) || calculateBand(total);
+    const total = rawTotal !== undefined && rawTotal !== '' ? Number(rawTotal) : grammar + reading;
+    const level =
+      rawLevel !== undefined && rawLevel !== '' ? Number(rawLevel) : calculateBand(total);
+
     scoreDraftByEnrollmentId.value[matchedEnrollment.ERM_ID] = {
       scoreGrammar: grammar,
       scoreReading: reading,
@@ -892,6 +1026,21 @@ const downloadSampleFile = (): void => {
 
 const clearImportedScores = (): void => {
   initializeScoreDrafts();
+  $q.notify({
+    type: 'positive',
+    message: 'ลบข้อมูลสำเร็จ',
+  });
+};
+
+const confirmClearImportedScores = (): void => {
+  if (!hasImportedScores.value) {
+    $q.notify({
+      type: 'warning',
+      message: 'ไม่มีข้อมูลคะแนนที่นำเข้า',
+    });
+    return;
+  }
+  showClearConfirmDialog.value = true;
 };
 
 const saveScores = async (): Promise<void> => {
@@ -1011,7 +1160,7 @@ onMounted(() => {
 
 .action-btn {
   height: 40px;
-  padding: 0 24px;
+  padding: 0 20px;
 }
 
 .save-score-btn {
@@ -1102,5 +1251,10 @@ onMounted(() => {
   background: #dedede !important;
   color: var(--text-primary) !important;
   font-weight: 700;
+}
+
+.selected-row {
+  background-color: #e3f2fd !important;
+  transition: background-color 0.2s ease;
 }
 </style>
