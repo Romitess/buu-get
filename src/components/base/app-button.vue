@@ -117,6 +117,17 @@ withDefaults(defineProps<Props>(), {
     }
   }
 
+  &.cancel-btn,
+  &.cancel-btn:hover,
+  &.cancel-btn:focus,
+  &.cancel-btn:active {
+    box-shadow: none !important;
+  }
+
+  &.cancel-btn::before {
+    box-shadow: none !important;
+  }
+
   &:active {
     transform: translateY(0);
     filter: brightness(0.95);
