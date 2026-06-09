@@ -1,13 +1,11 @@
 <template>
-  <q-page class="create-exam-page q-px-lg q-px-sm-xl q-py-lg">
-    <div class="full-width">
-      <!-- Standardized Reusable Page Header -->
-      <AppBreadcrumbs />
-      <AppPageHeader title="สร้างรอบสอบ" subtitle="ดำเนินการสร้างรอบสอบและกำหนดรายละเอียดการสอบ" />
+  <q-page class="page-container create-exam-page">
+    <!-- Standardized Reusable Page Header -->
+    <AppBreadcrumbs />
+    <AppPageHeader title="สร้างรอบสอบ" subtitle="ดำเนินการสร้างรอบสอบและกำหนดรายละเอียดการสอบ" />
 
-      <!-- Consistently reusable Exam Form component -->
-      <exam-form v-model:form="form" />
-    </div>
+    <!-- Consistently reusable Exam Form component -->
+    <exam-form v-model:form="form" />
   </q-page>
 </template>
 
