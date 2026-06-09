@@ -139,6 +139,17 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'fund-source-management',
+            name: 'admin-fund-source-management',
+            component: () => import('pages/admin/fin-fund-source-mananagement-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.fundSourceManagement', icon: 'account_balance' },
+              ],
+            },
+          },
+          {
             path: 'create-location',
             name: 'admin-create-location',
             component: () => import('pages/admin/location-create-page.vue'),

@@ -334,6 +334,20 @@ const navLinks = computed<NavigationItem[]>(() => {
           },
         ],
       });
+      links.push(
+        {
+          name: 'admin-payment-import',
+          label: t('navigation.paymentImport'),
+          icon: 'payments',
+          path: '/admin/payment-import',
+        },
+        {
+          name: 'admin-fund-source-management',
+          label: t('navigation.fundSourceManagement'),
+          icon: 'account_balance',
+          path: '/admin/fund-source-management',
+        },
+      );
     }
   } else {
     // === Guest Navigation ===

@@ -707,6 +707,74 @@ export default {
       dialogPlaceholderRef1: 'Enter applicant ID (Ref1)',
       dialogPlaceholderRef2: 'Enter reference number (Ref2)',
     },
+    fundSourceManagement: {
+      pageTitle: 'Manage Fund Sources',
+      pageDescription: 'Display all fund source records for review and editing',
+      createFundSource: 'Create Fund Source',
+      table: {
+        columns: {
+          index: 'Index',
+          faculty: 'Faculty/Department',
+          accountCode: 'Fund Source Code',
+          name: 'Fund Source Name',
+          status: 'Status',
+          tools: 'Tools',
+        },
+        tooltips: {
+          edit: 'Edit',
+          delete: 'Delete',
+        },
+      },
+      notifications: {
+        loadError: 'Unable to load fund source list at this time',
+        deleteSuccess: 'Fund source removed successfully',
+        deleteError: 'Unable to delete fund source',
+      },
+      createDialog: {
+        title: 'Create Fund Source',
+        labels: {
+          faculty: 'Faculty/Department',
+          name: 'Fund Source Name',
+          accountCode: 'Fund Source Code',
+          status: 'Status',
+        },
+        status: {
+          open: 'Open',
+          closed: 'Closed',
+        },
+        actions: {
+          cancel: 'Cancel',
+          save: 'Save',
+        },
+        validation: {
+          faculty: 'Faculty/Department is required',
+          name: 'Fund source name is required',
+          accountCode: 'Fund source code is required',
+        },
+        notifications: {
+          created: 'Fund source created successfully',
+          createError: 'Unable to create fund source',
+        },
+      },
+      editDialog: {
+        title: 'Edit Fund Source',
+        actions: {
+          save: 'Update',
+        },
+        notifications: {
+          updated: 'Fund source updated successfully',
+          updateError: 'Unable to update fund source',
+        },
+      },
+      status: {
+        active: 'Active',
+        inactive: 'Inactive',
+      },
+      dialogs: {
+        deleteTitle: 'Confirm Deletion',
+        deleteMessage: 'Are you sure you want to delete this fund source?',
+      },
+    },
     searchUser: {
       triggerLabel: 'Search Applicant Info',
       dialogTitle: 'Search Applicant',
@@ -884,6 +952,7 @@ export default {
     reports: 'Reports',
     receiptUsageReport: 'Receipt Usage Report',
     applicationFeeReport: 'Application Fee Report',
+    fundSourceManagement: 'Fund Source Management',
   },
   profileEditHistory: {
     pageTitle: 'Candidate Profile Edit History',

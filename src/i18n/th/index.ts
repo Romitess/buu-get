@@ -842,6 +842,74 @@ export default {
       dialogPlaceholderRef1: 'กรอกรหัสประจำตัวผู้สมัคร (Ref1)',
       dialogPlaceholderRef2: 'กรอกเลขอ้างอิงการสมัคร (Ref2)',
     },
+    fundSourceManagement: {
+      pageTitle: 'จัดการผังแหล่งเงิน',
+      pageDescription: 'แสดงรายการผังแหล่งเงินทั้งหมดเพื่อตรวจสอบและแก้ไขให้เหมาะสม',
+      createFundSource: 'สร้างแหล่งาการเงิน',
+      table: {
+        columns: {
+          index: 'ลำดับ',
+          faculty: 'คณะ/ส่วนงาน',
+          accountCode: 'รหัสผังแหล่งเงิน',
+          name: 'ชื่อผังแหล่งเงิน',
+          status: 'สถานะ',
+          tools: 'เครื่องมือ',
+        },
+        tooltips: {
+          edit: 'แก้ไข',
+          delete: 'ลบ',
+        },
+      },
+      notifications: {
+        loadError: 'ไม่สามารถโหลดผังแหล่งเงินได้ในขณะนี้',
+        deleteSuccess: 'ลบผังแหล่งเงินเรียบร้อยแล้ว',
+        deleteError: 'ลบผังแหล่งเงินไม่สำเร็จ',
+      },
+      createDialog: {
+        title: 'สร้างผังแหล่งเงิน',
+        labels: {
+          faculty: 'คณะ/หน่วยงาน',
+          name: 'ชื่อผังแหล่งเงิน',
+          accountCode: 'รหัสผังแหล่งเงิน',
+          status: 'สถานะ',
+        },
+        status: {
+          open: 'เปิดใช้งาน',
+          closed: 'ปิดใช้งาน',
+        },
+        actions: {
+          cancel: 'ยกเลิก',
+          save: 'บันทึก',
+        },
+        validation: {
+          faculty: 'กรุณาระบุคณะ/หน่วยงาน',
+          name: 'กรุณาระบุชื่อผังแหล่งเงิน',
+          accountCode: 'กรุณาระบุรหัสผังแหล่งเงิน',
+        },
+        notifications: {
+          created: 'สร้างผังแหล่งเงินเรียบร้อยแล้ว',
+          createError: 'ไม่สามารถสร้างผังแหล่งเงินได้',
+        },
+      },
+      editDialog: {
+        title: 'แก้ไขผังแหล่งเงิน',
+        actions: {
+          save: 'บันทึกการเปลี่ยนแปลง',
+        },
+        notifications: {
+          updated: 'แก้ไขผังแหล่งเงินเรียบร้อยแล้ว',
+          updateError: 'ไม่สามารถแก้ไขผังแหล่งเงินได้',
+        },
+      },
+      status: {
+        active: 'เปิดใช้งาน',
+        inactive: 'ปิดใช้งาน',
+      },
+      dialogs: {
+        deleteTitle: 'ยืนยันการลบ',
+        deleteMessage: 'คุณแน่ใจหรือไม่ว่าต้องการลบผังแหล่งเงินนี้?',
+      },
+    },
     searchUser: {
       triggerLabel: 'ค้นหาข้อมูลผู้สมัคร',
       dialogTitle: 'ค้นหาผู้สมัคร',
@@ -990,6 +1058,7 @@ export default {
     reports: 'รายงาน',
     receiptUsageReport: 'รายงานสรุปการใช้ใบเสร็จรับเงิน',
     applicationFeeReport: 'รายงานสรุปการรับเงินค่าสมัครสอบ',
+    fundSourceManagement: 'จัดการผังแหล่งเงิน',
   },
   image: {
     upload: {
