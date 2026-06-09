@@ -105,7 +105,8 @@
               <!-- Row 2 -->
               <div class="col-12 col-md-6 relative-position">
                 <label class="form-label"
-                  >{{ $t('profile.nationalId') }} <span class="text-negative">*</span></label
+                  >{{ isForeigner ? $t('profile.passportNo') : $t('profile.nationalId') }}
+                  <span class="text-negative">*</span></label
                 >
                 <q-input
                   ref="nationalIdInputRef"
@@ -113,13 +114,17 @@
                   outlined
                   dense
                   bg-color="white"
-                  mask="#-####-#####-##-#"
-                  unmasked-value
+                  :mask="isForeigner ? 'XXXXXXXXX' : '#-####-#####-##-#'"
+                  :unmasked-value="!isForeigner"
                   lazy-rules
-                  :rules="[
-                    (val) => !!val || $t('profile.requiredNationalId'),
-                    (val) => !val || val.length === 13 || $t('profile.invalidNationalId'),
-                  ]"
+                  :rules="
+                    isForeigner
+                      ? [(val) => !!val || $t('profile.requiredNationalId')]
+                      : [
+                          (val) => !!val || $t('profile.requiredNationalId'),
+                          (val) => !val || val.length === 13 || $t('profile.invalidNationalId'),
+                        ]
+                  "
                   hide-bottom-space
                 />
               </div>
@@ -404,6 +409,7 @@ const $q = useQuasar();
 const { t } = useI18n();
 
 const isFromEmail: ComputedRef<boolean> = computed<boolean>(() => route.query.from === 'email');
+const isForeigner = computed<boolean>(() => !!userStore.currentUser?.passportNo);
 
 const showPasswordDialog = ref(false);
 const currentPassword = ref('');
@@ -584,7 +590,7 @@ onMounted((): void => {
     formData.value = {
       email: user.email || '',
       title: user.titleTH || TITLE_TH_OPTIONS[0].value,
-      nationalId: user.nationalId || '',
+      nationalId: user.nationalId || user.passportNo || '',
       fullNameTH: user.fullNameTH || '',
       birthdate: user.birthdate || '',
       fullNameEN: user.fullNameEN || '',
