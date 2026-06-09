@@ -34,6 +34,7 @@
               dense
               icon="chevron_right"
               class="calendar-nav-btn"
+              :disable="isNextMonthDisabled"
               @click="handleNextMonth"
             />
           </div>
@@ -51,7 +52,8 @@
                 today: day.isToday,
                 disabled:
                   (props.disablePastDates && day.isPast) ||
-                  (props.minDate && day.dateString < props.minDate),
+                  (props.minDate && day.dateString < props.minDate) ||
+                  (props.maxDate && day.dateString > props.maxDate),
               }"
               role="button"
               tabindex="0"
@@ -113,12 +115,15 @@
               v-for="(m, index) in SHORT_MONTH_NAMES_EN"
               :key="m"
               class="month-item"
-              :class="{ active: currentDate.getMonth() === index }"
+              :class="{
+                active: currentDate.getMonth() === index,
+                disabled: isMonthDisabled(index),
+              }"
               role="button"
               tabindex="0"
               :aria-label="`Select month ${m}`"
-              @click="handleMonthSelect(index)"
-              @keydown.enter="handleMonthSelect(index)"
+              @click="!isMonthDisabled(index) && handleMonthSelect(index)"
+              @keydown.enter="!isMonthDisabled(index) && handleMonthSelect(index)"
             >
               {{ m }}
             </div>
@@ -138,7 +143,6 @@ import type { AppCalendarProps } from '../../types/common';
 
 const THAI_YEAR_OFFSET = 543;
 const PAST_YEARS_RANGE = 100;
-const TOTAL_YEARS_RANGE = 111;
 const CALENDAR_TOTAL_SLOTS = 42;
 
 const WEEKDAYS = Array.from({ length: 7 }, (_, i) =>
@@ -207,12 +211,44 @@ const currentMonthYearEN = computed(
 );
 
 const yearOptions = computed(() => {
-  const currentYear = new Date().getFullYear() + THAI_YEAR_OFFSET;
-  return Array.from(
-    { length: TOTAL_YEARS_RANGE },
-    (_, i) => currentYear - PAST_YEARS_RANGE + i,
-  ).reverse();
+  let maxYear = new Date().getFullYear();
+  if (props.maxDate) {
+    const maxDateObj = new Date(props.maxDate);
+    if (!isNaN(maxDateObj.getTime())) {
+      maxYear = maxDateObj.getFullYear();
+    }
+  }
+  const maxYearThai = maxYear + THAI_YEAR_OFFSET;
+  // Only show up to maxYearThai, and go back PAST_YEARS_RANGE
+  return Array.from({ length: PAST_YEARS_RANGE + 1 }, (_, i) => maxYearThai - i);
 });
+
+const isNextMonthDisabled = computed(() => {
+  if (!props.maxDate) return false;
+  const maxDateObj = new Date(props.maxDate);
+  if (isNaN(maxDateObj.getTime())) return false;
+
+  const maxYear = maxDateObj.getFullYear();
+  const maxMonth = maxDateObj.getMonth();
+  const currentMonth = currentDate.value.getMonth();
+  const currentYear = currentDate.value.getFullYear();
+
+  return currentYear > maxYear || (currentYear === maxYear && currentMonth >= maxMonth);
+});
+
+const isMonthDisabled = (monthIndex: number) => {
+  if (!props.maxDate) return false;
+  const maxDateObj = new Date(props.maxDate);
+  if (isNaN(maxDateObj.getTime())) return false;
+
+  const maxYear = maxDateObj.getFullYear();
+  const maxMonth = maxDateObj.getMonth();
+  const currentPickerYear = currentDate.value.getFullYear();
+
+  if (currentPickerYear > maxYear) return true;
+  if (currentPickerYear === maxYear && monthIndex > maxMonth) return true;
+  return false;
+};
 
 const emptyDaysCount = computed(() => {
   const firstDay = new Date(
@@ -405,6 +441,17 @@ const handleDaySelect = (day: { dateString: string; isPast: boolean }) => {
     border-color: var(--calendar-active-bg);
     color: var(--calendar-active-bg);
     font-weight: bold;
+  }
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+    background-color: transparent !important;
+    color: var(--text-muted) !important;
+    border-color: transparent !important;
+    &:hover {
+      background-color: transparent !important;
+      border-color: transparent !important;
+    }
   }
 }
 

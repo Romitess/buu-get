@@ -22,7 +22,11 @@
               self="bottom left"
               class="shadow-5 calendar-menu"
             >
-              <AppCalendar v-model="birthdate" @click-date="showCalendar = false" />
+              <AppCalendar
+                v-model="birthdate"
+                :max-date="yesterdayString"
+                @click-date="showCalendar = false"
+              />
             </q-menu>
           </template>
         </AppFormField>
@@ -145,6 +149,12 @@ const showCalendar = ref(false);
 const useIdCardAddress = ref(false);
 
 const tr = (key: string, fallback: string): string => (i18n.te(key) ? t(key) : fallback);
+
+const yesterdayString = computed(() => {
+  const date = new Date();
+  date.setDate(date.getDate() - 1);
+  return date.toISOString().split('T')[0];
+});
 
 defineProps<{
   email: string;

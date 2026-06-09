@@ -11,7 +11,8 @@ export interface AppCalendarProps {
   modelValue: string;
   showLegend?: boolean;
   disablePastDates?: boolean;
-  minDate?: string;
+  minDate?: string | undefined;
+  maxDate?: string | undefined;
 }
 
 export interface ExamCalendarProps {

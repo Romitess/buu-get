@@ -172,6 +172,7 @@
                     >
                       <AppCalendar
                         :model-value="formData.birthdate"
+                        :max-date="yesterdayString"
                         @update:model-value="(val: string) => (formData.birthdate = val)"
                         @click-date="showCalendar = false"
                       />
@@ -409,6 +410,13 @@ const currentPassword = ref('');
 const newPassword = ref('');
 const showCalendar = ref(false);
 const showCropDialog = ref(false);
+
+const yesterdayString = computed(() => {
+  const date = new Date();
+  date.setDate(date.getDate() - 1);
+  return date.toISOString().split('T')[0];
+});
+
 const cropImageSrc = ref('');
 const cropFileType = ref('image/png');
 

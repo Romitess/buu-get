@@ -110,6 +110,7 @@
                         >
                           <AppCalendar
                             :model-value="form.userDateOfBirth"
+                            :max-date="yesterdayString"
                             @update:model-value="(val) => (form.userDateOfBirth = val)"
                             @click-date="showCalendar = false"
                           />
@@ -279,6 +280,12 @@ const internalValue = ref(props.modelValue);
 const showCalendar = ref(false);
 const showConfirmDialog = ref(false);
 const formRef = ref<QForm | null>(null);
+
+const yesterdayString = computed(() => {
+  const date = new Date();
+  date.setDate(date.getDate() - 1);
+  return date.toISOString().split('T')[0];
+});
 
 const form = ref({
   userNationalId: '',
