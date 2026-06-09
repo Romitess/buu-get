@@ -310,9 +310,13 @@ const handleReceiptInformationConfirm = (value: ReceiptInformation): void => {
 };
 
 const handleSaveQR = async (): Promise<void> => {
-  if (selectedExam.value) {
+  if (selectedExam.value && receiptInformation.value) {
     try {
-      await examStore.confirmPayment(selectedExam.value.id);
+      const amount = selectedExam.value.fee;
+      if (amount === undefined) {
+        throw new Error('Exam fee is missing');
+      }
+      await examStore.confirmPayment(selectedExam.value.id, amount, receiptInformation.value);
       $q.notify({
         type: 'positive',
         message: t('success'),

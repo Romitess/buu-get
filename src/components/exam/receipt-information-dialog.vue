@@ -46,7 +46,6 @@
             outlined
             dense
             lazy-rules
-            :maxlength="isForeignUser ? 9 : 13"
             :placeholder="identityPlaceholder"
             :rules="identityRules"
             @update:model-value="sanitizeIdentity"
@@ -164,10 +163,7 @@ const requiredRules = computed(() => [
 ]);
 const identityRules = computed(() => [
   ...requiredRules.value,
-  (value: string) =>
-    props.isForeignUser
-      ? /^[A-Za-z0-9]{1,9}$/.test(value) || t('exam.history.receiptForm.passportInvalid')
-      : /^\d{13}$/.test(value) || t('exam.history.receiptForm.nationalIdInvalid'),
+  (value: string) => /^\d+$/.test(value) || t('exam.history.receiptForm.identityDigitsOnly'),
 ]);
 const fullNameRules = computed(() => [
   ...requiredRules.value,
@@ -179,10 +175,7 @@ const phoneRules = computed(() => [
 ]);
 
 const sanitizeIdentity = (value: string | number | null): void => {
-  const text = String(value ?? '');
-  form.taxId = props.isForeignUser
-    ? text.replace(/[^A-Za-z0-9]/g, '').slice(0, 9)
-    : text.replace(/\D/g, '').slice(0, 13);
+  form.taxId = String(value ?? '').replace(/\D/g, '');
 };
 
 const sanitizeFullName = (value: string | number | null): void => {
