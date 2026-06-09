@@ -1007,7 +1007,7 @@ export default {
   },
   components: {
     examInfoCard: {
-      registeredCount: 'จำนวนคนที่ลงทะเบียน',
+      registeredCount: 'จำนวนคนที่สมัคร',
       paidCount: 'จำนวนคนที่ชำระเงิน',
       examTakerCount: 'จำนวนคนเข้าสอบ',
       attendedCount: 'จำนวนคนที่มาแล้ว',

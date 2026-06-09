@@ -1,6 +1,6 @@
 <template>
   <div class="app-exam-info-card buu-card q-pa-lg">
-    <div class="card-content row items-start no-wrap">
+    <div class="card-content row items-center no-wrap">
       <header class="col">
         <h2 class="exam-title text-h5 text-weight-bold q-mb-md q-ma-none">
           {{ title }}
@@ -39,24 +39,24 @@
       </header>
 
       <section
-        class="col-auto row no-wrap items-center stats-section"
+        class="col-auto row no-wrap items-center justify-end stats-section"
         v-if="isAdmin && !isAttendance && !isScore"
       >
         <q-separator vertical class="stat-divider q-mr-md gt-xs" v-if="!hideMainSeparator" />
-        <div class="text-center q-px-lg">
-          <div class="applicant-label text-grey-7 text-caption">
+        <div class="count-block text-center">
+          <div class="applicant-label text-grey-7">
             {{ $t('components.examInfoCard.registeredCount') }}
           </div>
-          <div class="applicant-value text-h4 text-weight-medium text-dark">
+          <div class="applicant-value text-weight-medium text-dark">
             {{ countWithCapacity ? `${applicantCount}/${totalCapacity}` : applicantCount }}
           </div>
         </div>
         <q-separator vertical class="stat-divider q-mx-sm" v-if="!hidePaid" />
-        <div class="text-center q-px-lg" v-if="!hidePaid">
-          <div class="applicant-label text-grey-7 text-caption">
+        <div class="count-block text-center" v-if="!hidePaid">
+          <div class="applicant-label text-grey-7">
             {{ $t('components.examInfoCard.paidCount') }}
           </div>
-          <div class="applicant-value text-h4 text-weight-medium text-dark">
+          <div class="applicant-value text-weight-medium text-dark">
             {{ paidCount }}/{{ totalCapacity }}
           </div>
         </div>
@@ -66,11 +66,11 @@
         v-else-if="isAdmin && isScore"
       >
         <q-separator vertical class="stat-divider q-mr-md gt-xs" v-if="!hideMainSeparator" />
-        <div class="text-center q-px-lg">
-          <div class="applicant-label text-grey-7 text-caption">
+        <div class="count-block text-center">
+          <div class="applicant-label text-grey-7">
             {{ $t('components.examInfoCard.examTakerCount') }}
           </div>
-          <div class="applicant-value text-h4 text-weight-medium text-dark">
+          <div class="applicant-value text-weight-medium text-dark">
             {{ applicantCount }}
           </div>
         </div>
@@ -80,11 +80,11 @@
         v-else-if="isAdmin && isAttendance"
       >
         <q-separator vertical class="stat-divider q-mr-md gt-xs" v-if="!hideMainSeparator" />
-        <div class="text-center q-px-lg">
-          <div class="applicant-label text-grey-7 text-caption">
+        <div class="count-block text-center">
+          <div class="applicant-label text-grey-7">
             {{ $t('components.examInfoCard.attendedCount') }}
           </div>
-          <div class="applicant-value text-h4 text-weight-medium text-dark">
+          <div class="applicant-value text-weight-medium text-dark">
             {{ applicantCount }}/{{ totalCapacity }}
           </div>
         </div>
@@ -142,7 +142,7 @@ defineEmits<{
   box-shadow: var(--shadow-card) !important;
   position: relative;
   overflow: hidden;
-  min-height: 133px;
+  min-height: 126px;
   display: flex;
   align-items: center;
 
@@ -176,6 +176,7 @@ defineEmits<{
 .exam-title {
   color: var(--dashboard-header-text);
   line-height: 1.3;
+  margin-bottom: 18px !important;
 }
 
 .info-item {
@@ -193,11 +194,11 @@ defineEmits<{
 }
 
 .location-select {
-  width: min(500px, 100%);
+  width: min(452px, 100%);
   font-weight: 400;
 
   :deep(.q-field__control) {
-    min-height: 44px;
+    min-height: 40px;
     border-radius: 12px;
     color: #111111;
   }
@@ -239,12 +240,27 @@ defineEmits<{
   background-color: var(--dashboard-divider-color);
 }
 
+.stats-section {
+  min-width: 160px;
+  padding-top: 4px;
+  margin-left: 28px;
+}
+
 .applicant-label {
-  margin-bottom: 2px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
 }
 
 .applicant-value {
   line-height: 1;
+  font-size: 32px;
+  font-weight: 500;
+}
+
+.count-block {
+  min-width: 138px;
 }
 
 @media (max-width: 800px) {
@@ -260,6 +276,8 @@ defineEmits<{
 
   .stats-section {
     margin-top: 16px;
+    padding-top: 0;
+    margin-left: 0;
     width: 100%;
     justify-content: space-around;
   }

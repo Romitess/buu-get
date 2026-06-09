@@ -19,9 +19,9 @@
         :time="sessionTime"
         :location="sessionLocation"
         :location-options="roomOptions"
-        :applicant-count="applicantCount"
+        :applicant-count="currentRoomCount"
         :paid-count="paidCount"
-        :total-capacity="sessionTotalCapacity"
+        :total-capacity="currentRoomCapacity"
         hide-paid
         hide-main-separator
         count-with-capacity
@@ -121,10 +121,9 @@ const {
   examDate,
   sessionTime,
   sessionLocation,
-  sessionTotalCapacity,
-  applicantCount,
   paidCount,
   currentRoomCount,
+  currentRoomCapacity,
   filteredStudents,
   isSeatAssignmentComplete,
   loadExamData,

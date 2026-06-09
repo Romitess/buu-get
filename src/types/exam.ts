@@ -143,6 +143,7 @@ export interface BackendEnrollment {
   ERM_ID: number;
   USER_ID: number;
   SESSION_ID: number;
+  SL_ID?: number | null;
   ERM_STATUS: number;
   ERM_VERIFY_STATUS: number;
   CREATED_AT: string;

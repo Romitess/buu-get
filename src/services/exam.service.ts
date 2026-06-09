@@ -113,8 +113,18 @@ export interface CreateExamPayload {
     locationId?: number;
     seats?: number;
     proctorName?: string;
+    sessionId?: number;
   }[];
   fundSourceId?: number | null;
+}
+
+interface GroupedSessionTimeRange {
+  startTime: string;
+  endTime: string;
+  seats: number;
+  proctorName: string;
+  locationIds: number[];
+  sessionId?: number;
 }
 
 export interface FundSource {
@@ -268,6 +278,59 @@ export const buddhistToGregorian = (dateStr: string): string => {
   return `${gregorianYear}-${m}-${day}`;
 };
 
+const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRange[] => {
+  const groupedRanges = new Map<string, GroupedSessionTimeRange>();
+
+  payload.timeRanges.forEach((range) => {
+    const startTime = formatTime(range.startTime);
+    const endTime = formatTime(range.endTime);
+    const key = `${startTime}-${endTime}`;
+    const locationId = Number(range.locationId || payload.locationId);
+    const seats = Number(range.seats || payload.seats || 0);
+    const proctorName = range.proctorName?.trim() || '';
+
+    const existingRange = groupedRanges.get(key);
+    if (existingRange) {
+      existingRange.seats += seats;
+      if (proctorName) {
+        existingRange.proctorName = existingRange.proctorName
+          ? `${existingRange.proctorName}, ${proctorName}`
+          : proctorName;
+      }
+      if (!existingRange.locationIds.includes(locationId)) {
+        existingRange.locationIds.push(locationId);
+      }
+      if (!existingRange.sessionId && range.sessionId) {
+        existingRange.sessionId = range.sessionId;
+      }
+      return;
+    }
+
+    groupedRanges.set(key, {
+      startTime,
+      endTime,
+      seats,
+      proctorName,
+      locationIds: [locationId],
+      ...(range.sessionId ? { sessionId: range.sessionId } : {}),
+    });
+  });
+
+  return Array.from(groupedRanges.values());
+};
+
+const createSessionLocations = async (sessionId: number, locationIds: number[]): Promise<void> => {
+  const uniqueLocationIds = [...new Set(locationIds)].filter((locationId) => locationId > 0);
+  await Promise.all(
+    uniqueLocationIds.map((locationId) =>
+      api.post('/exam-session-locations', {
+        SS_ID: sessionId,
+        LOCATION_ID: locationId,
+      }),
+    ),
+  );
+};
+
 export const createExamRound = async (payload: CreateExamPayload): Promise<number> => {
   try {
     // 1. Create the Exam
@@ -287,17 +350,21 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<numbe
 
     const examId = examResponse.data.EXAM_ID;
 
-    // 2. Create Sessions for each time range (each range may represent a room)
-    const sessionPromises = payload.timeRanges.map((range) => {
-      return api.post('/exam-sessions', {
+    // 2. Create one session per time range, then attach all rooms to that session.
+    const groupedRanges = groupTimeRangesByTime(payload);
+    const sessionPromises = groupedRanges.map(async (range) => {
+      const primaryLocationId = range.locationIds[0] || Number(payload.locationId);
+      const sessionResponse = await api.post<BackendExam['SESSIONS'][number]>('/exam-sessions', {
         EXAM_ID: Number(examId),
-        LOCATION_ID: Number(range.locationId || payload.locationId),
-        SS_START_TIME: formatTime(range.startTime),
-        SS_END_TIME: formatTime(range.endTime),
-        SS_CAPACITY: Number(range.seats || payload.seats),
+        LOCATION_ID: primaryLocationId,
+        SS_START_TIME: range.startTime,
+        SS_END_TIME: range.endTime,
+        SS_CAPACITY: range.seats,
         SS_NAME: range.proctorName || '',
         SS_SESSION_STATUS: SESSION_STATUS_OPEN,
       });
+
+      await createSessionLocations(sessionResponse.data.SS_ID, range.locationIds);
     });
 
     await Promise.all(sessionPromises);
@@ -360,35 +427,44 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
       // Fetch current sessions to diff
       const currentExam = await fetchExamById(payload.examId);
       const currentSessionIds = (currentExam.SESSIONS || []).map((s) => s.SS_ID);
-      const keepIds = payload.existingSessionIds || [];
+      const groupedRanges = groupTimeRangesByTime(payload);
+      const keepIds = [
+        ...new Set(
+          groupedRanges.map((range) => range.sessionId).filter((id): id is number => Boolean(id)),
+        ),
+      ];
 
       // 3. Delete sessions that were removed by the user
       const deleteIds = currentSessionIds.filter((id) => !keepIds.includes(id));
       const deletePromises = deleteIds.map((id) => api.delete(`/exam-sessions/${id}`));
       await Promise.all(deletePromises);
 
-      // 4. Update existing sessions & Create new ones
-      const sessionPromises = payload.timeRanges.map((range, index) => {
-        const existingId = keepIds[index];
+      // 4. Update existing sessions & create new ones, one row per time range.
+      const sessionPromises = groupedRanges.map(async (range) => {
+        const existingId = range.sessionId;
+        const primaryLocationId = range.locationIds[0] || Number(payload.locationId);
         const sessionPayload = {
-          LOCATION_ID: Number(range.locationId || payload.locationId),
-          SS_START_TIME: formatTime(range.startTime),
-          SS_END_TIME: formatTime(range.endTime),
-          SS_CAPACITY: Number(range.seats || payload.seats),
+          LOCATION_ID: primaryLocationId,
+          SS_START_TIME: range.startTime,
+          SS_END_TIME: range.endTime,
+          SS_CAPACITY: range.seats,
           SS_NAME: range.proctorName || '',
         };
 
         if (existingId) {
           // Update existing session
-          return api.patch(`/exam-sessions/${existingId}`, sessionPayload);
-        } else {
-          // Create new session
-          return api.post('/exam-sessions', {
-            ...sessionPayload,
-            EXAM_ID: Number(payload.examId),
-            SS_SESSION_STATUS: SESSION_STATUS_OPEN,
-          });
+          await api.patch(`/exam-sessions/${existingId}`, sessionPayload);
+          return;
         }
+
+        // Create new session
+        const sessionResponse = await api.post<BackendExam['SESSIONS'][number]>('/exam-sessions', {
+          ...sessionPayload,
+          EXAM_ID: Number(payload.examId),
+          SS_SESSION_STATUS: SESSION_STATUS_OPEN,
+        });
+
+        await createSessionLocations(sessionResponse.data.SS_ID, range.locationIds);
       });
 
       await Promise.all(sessionPromises);

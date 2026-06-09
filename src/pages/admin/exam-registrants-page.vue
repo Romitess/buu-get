@@ -6,7 +6,7 @@
       :subtitle="$t('admin.registrantManagement.pageSubtitle')"
     />
 
-    <AppExamSessionTabs v-model="selectedSessionId" :sessions="exam?.SESSIONS" />
+    <AppExamSessionTabs v-model="selectedSessionId" :sessions="sessionTimeTabs" />
 
     <AppExamInfoCard
       v-if="exam"
@@ -127,6 +127,7 @@ const {
   exam,
   searchQuery,
   selectedSessionId,
+  sessionTimeTabs,
   filteredEnrollments,
   sessionTotalCount,
   sessionPaidCount,
@@ -137,6 +138,16 @@ const selectedSession = computed(() => {
   return exam.value?.SESSIONS?.find((s) => s.SS_ID === selectedSessionId.value) || null;
 });
 
+const getSessionTimeKey = (session: NonNullable<typeof selectedSession.value>): string => {
+  return `${session.SS_START_TIME || ''}-${session.SS_END_TIME || ''}`;
+};
+
+const activeTimeSessions = computed(() => {
+  if (!selectedSession.value) return [];
+  const activeKey = getSessionTimeKey(selectedSession.value);
+  return (exam.value?.SESSIONS ?? []).filter((session) => getSessionTimeKey(session) === activeKey);
+});
+
 const selectedSessionTime = computed(() => {
   if (!selectedSession.value) return '-';
   const start = (selectedSession.value.SS_START_TIME || '').substring(0, 5);
@@ -145,18 +156,24 @@ const selectedSessionTime = computed(() => {
 });
 
 const selectedSessionLocation = computed(() => {
-  if (!selectedSession.value?.LOCATION) return '-';
-  const loc = selectedSession.value.LOCATION;
-  return `${loc.LOCATION_NAME}${loc.LOCATION_ROOM_NO ? ` (${loc.LOCATION_ROOM_NO})` : ''}`;
+  const locationNames = activeTimeSessions.value
+    .map((session) => session.LOCATION)
+    .filter((loc): loc is NonNullable<typeof loc> => Boolean(loc))
+    .map(
+      (loc) => `${loc.LOCATION_NAME}${loc.LOCATION_ROOM_NO ? ` (${loc.LOCATION_ROOM_NO})` : ''}`,
+    );
+
+  if (locationNames.length === 0) return '-';
+  return Array.from(new Set(locationNames)).join(', ');
 });
 
 const selectedSessionCapacity = computed(() => {
-  return selectedSession.value?.SS_CAPACITY || 0;
+  return activeTimeSessions.value.reduce((total, session) => total + (session.SS_CAPACITY || 0), 0);
 });
 
 watch(exam, (newExam) => {
-  if (newExam && newExam.SESSIONS && newExam.SESSIONS.length > 0 && !selectedSessionId.value) {
-    const firstSession = newExam.SESSIONS[0];
+  if (newExam && sessionTimeTabs.value.length > 0 && !selectedSessionId.value) {
+    const firstSession = sessionTimeTabs.value[0];
     if (firstSession) {
       selectedSessionId.value = firstSession.SS_ID;
     }

@@ -100,7 +100,7 @@ const remarkBadgeClass = computed((): string => {
 }
 
 .line-height-tight {
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 .student-name {
@@ -109,7 +109,7 @@ const remarkBadgeClass = computed((): string => {
   white-space: nowrap;
   font-weight: 500;
   font-size: 20px;
-  line-height: 100%;
+  line-height: 1.25;
   vertical-align: middle;
   color: var(--text-primary, #000000);
 }
@@ -117,7 +117,7 @@ const remarkBadgeClass = computed((): string => {
 .info-details {
   font-weight: 500;
   font-size: 16px;
-  line-height: 100%;
+  line-height: 1.3;
   vertical-align: middle;
   color: var(--text-primary, #000000);
 }
