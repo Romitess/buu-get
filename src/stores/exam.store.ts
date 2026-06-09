@@ -3,6 +3,8 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { ExamRound, ExamInfo, ExamHistoryItem, DayData } from 'src/types/exam';
 import type { ExamSchedule } from 'src/types/exam.types';
+import type { ReceiptInformation } from 'src/types/receipt-information';
+import { createPendingPayment } from 'src/services/transaction.service';
 import {
   fetchScheduleData,
   fetchExamSchedules,
@@ -331,9 +333,20 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
-  async function confirmPayment(enrollmentId: number): Promise<void> {
+  async function confirmPayment(
+    enrollmentId: number,
+    amount: number,
+    receipt: ReceiptInformation,
+  ): Promise<void> {
     try {
-      await updateEnrollmentStatus(enrollmentId, ENROLLMENT_STATUS.PAID);
+      await createPendingPayment({
+        ERM_ID: enrollmentId,
+        TRANX_AMOUNT: amount,
+        RC_TAX_ID: Number(receipt.taxId),
+        RC_NAME: receipt.fullName,
+        RC_PHONE: receipt.phone,
+        RC_ADDRESS: receipt.address,
+      });
       await fetchHistory();
     } catch (error: unknown) {
       console.error('Failed to confirm payment:', error);
