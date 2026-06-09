@@ -548,8 +548,10 @@ export const updateEnrollmentStatus = async (
 };
 
 export interface CreatePasscodeItemDto {
-  nationalId: string;
-  fullName: string;
+  nationalId?: string | undefined;
+  passportNo?: string | undefined;
+  fullName?: string | undefined;
+  fullNameEn?: string | undefined;
   passcode: string;
 }
 
