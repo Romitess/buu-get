@@ -306,12 +306,6 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
     address: formData.address,
   };
 
-  // If foreigner, map nationalId to passportNo
-  if (finalData.userType === 'foreigner') {
-    finalData.passportNo = finalData.nationalId;
-    finalData.nationalId = undefined;
-  }
-
   $q.loading.show();
 
   try {

@@ -12,6 +12,7 @@
       :rules="nationalIdRules"
       mask="#-####-#####-##-#"
       unmasked-value
+      lazy-rules
       reserve-bottom-space
     />
     <AppFormField
@@ -22,6 +23,8 @@
       :readonly="isEditMode"
       :required="true"
       :rules="[(val) => !!val || t('profile.requiredNationalId')]"
+      mask="XXXXXXXXX"
+      lazy-rules
       reserve-bottom-space
     />
 
@@ -33,6 +36,7 @@
       :placeholder="t('profile.nationalityPlaceholder')"
       :required="true"
       :rules="[(val) => !!val || t('profile.required')]"
+      lazy-rules
       reserve-bottom-space
     />
 
@@ -50,6 +54,7 @@
       @update:modelValue="onTitleTHChange"
       :required="true"
       :rules="[(val) => !!val || t('profile.requiredPrefix')]"
+      lazy-rules
       reserve-bottom-space
     />
 
@@ -60,6 +65,7 @@
       :label="t('profile.fullName')"
       :required="true"
       :rules="[(val) => !!val || t('profile.requiredFullName')]"
+      lazy-rules
       reserve-bottom-space
     />
 
@@ -70,6 +76,7 @@
       :placeholder="t('profile.fullNameEnPlaceholder')"
       :required="true"
       :rules="[(val) => !!val || t('profile.requiredFullNameEn')]"
+      lazy-rules
       reserve-bottom-space
     />
   </div>
