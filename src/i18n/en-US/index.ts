@@ -876,6 +876,9 @@ export default {
         endDate: 'End Date',
         department: 'Department',
         examName: 'Exam Name',
+        receiptNo: 'Receipt Number',
+        payer: 'Payer Name',
+        payee: 'Payee Name',
       },
       table: {
         emptyLabel: 'No revenue data found',
@@ -889,6 +892,52 @@ export default {
       },
       notifications: {
         loadError: 'An error occurred while loading the report data.',
+      },
+    },
+    receiptUsageReport: {
+      pageTitle: 'Receipt Usage Report',
+      pageSubtitle: 'Summary of issued receipts and usage details',
+      table: {
+        emptyLabel: 'No receipt data found',
+        columns: {
+          index: 'No.',
+          receiptNo: 'Receipt No.',
+          paymentDate: 'Payment Date',
+          receiptDate: 'Receipt Date',
+          year: 'Year',
+          documentType: 'Document Type',
+          amount: 'Amount',
+          examName: 'Exam Name',
+          payer: 'Payer',
+          payee: 'Payee',
+          actions: 'Actions',
+        },
+      },
+      actions: {
+        viewReceipt: 'View receipt',
+        viewReceiptMessage: 'Receipt {receiptNo} opened for viewing.',
+      },
+    },
+    applicationFeeReport: {
+      pageTitle: 'Application Fee Report',
+      pageSubtitle: 'Displays receipt and payment details for application fees.',
+      table: {
+        emptyLabel: 'No application fee data found',
+        columns: {
+          index: 'No.',
+          receiptNo: 'Receipt No.',
+          payer: 'Payer',
+          amount: 'Amount',
+          paymentDate: 'Payment Date',
+          examName: 'Exam Name',
+          importedDate: 'Imported Date',
+          payee: 'Payee',
+          actions: 'Receipt Copy',
+        },
+      },
+      actions: {
+        viewRecord: 'View record',
+        viewRecordMessage: 'Receipt {receiptNo} opened for review.',
       },
     },
   },

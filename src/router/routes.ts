@@ -426,6 +426,30 @@ const routes: RouteRecordRaw[] = [
               ],
             },
           },
+          {
+            path: 'receipt-usage-report',
+            name: 'admin-receipt-usage-report',
+            component: () => import('pages/admin/receipt-usage-report-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.receiptUsageReport', icon: 'receipt' },
+              ],
+            },
+          },
+          {
+            path: 'application-fee-report',
+            name: 'admin-application-fee-report',
+            component: () => import('pages/admin/application-fee-report-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.applicationFeeReport', icon: 'paid' },
+              ],
+            },
+          },
         ],
       },
     ],

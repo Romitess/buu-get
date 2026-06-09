@@ -13,6 +13,7 @@
     <DailyRevenueFilter
       :filter="filter"
       :department-options="departmentOptions"
+      mode="compact"
       @filter-change="applyFilter"
     />
 
