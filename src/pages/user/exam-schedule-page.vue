@@ -124,6 +124,12 @@ const roundsListOverflow = computed(() => ($q.screen.gt.sm ? 'auto' : 'visible')
 let scheduleInterval: ReturnType<typeof setInterval>;
 
 onMounted(async () => {
+  // Read the date from query parameter if provided
+  const dateFromQuery = router.currentRoute.value.query.date;
+  if (dateFromQuery && typeof dateFromQuery === 'string') {
+    selectedDate.value = dateFromQuery;
+  }
+
   await examStore.initSchedule();
   scheduleInterval = setInterval(() => {
     void examStore.initSchedule();
