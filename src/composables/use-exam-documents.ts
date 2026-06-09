@@ -251,6 +251,7 @@ export function useExamDocuments() {
         : 'QS1, Burapha University';
 
       const transaction = enrollment.TRANSACTION;
+      const receipt = transaction?.RECEIPTS?.[0];
 
       const receiptYear = transaction?.TRANX_PAID_AT
         ? new Date(transaction.TRANX_PAID_AT).getFullYear()
@@ -260,7 +261,7 @@ export function useExamDocuments() {
 
       selectedReceiptData.value = {
         receiptNo:
-          transaction?.TRANX_REF1 ||
+          (receipt?.RC_ID ? `RC${receiptYear}-${String(receipt.RC_ID).padStart(5, '0')}` : '') ||
           `RC${receiptYear}-${String(enrollment.ERM_ID).padStart(5, '0')}`,
         transactionDate: transaction?.TRANX_PAID_AT
           ? new Date(transaction.TRANX_PAID_AT).toISOString()
@@ -268,19 +269,17 @@ export function useExamDocuments() {
             ? new Date(transaction.TRANX_CREATED_AT).toISOString()
             : new Date().toISOString(),
         fullName:
-          transaction?.TRANX_RECEIPT_NAME ||
+          receipt?.RC_NAME ||
           (user
             ? `${user.titleEN || ''} ${user.fullNameEN || user.fullNameTH || ''}`.trim()
             : 'Mr. Somdream Jaidee'),
-        nationalId: transaction?.TRANX_TAX_ID || user?.nationalId || '1-1234-12345-12-1',
-        address:
-          transaction?.TRANX_RECEIPT_ADDRESS ||
-          '169 Longhad Bangsaen Rd, Saen Suk, Chon Buri 20131',
+        nationalId: String(receipt?.RC_TAX_ID || user?.nationalId || '1-1234-12345-12-1'),
+        address: receipt?.RC_ADDRESS || '169 Longhad Bangsaen Rd, Saen Suk, Chon Buri 20131',
         examName: examObj?.EXAM_NAME || "BUU-GET : Burapha University's Graduate English Test",
         examDate: dateStr,
         location: locationText,
-        amount: transaction?.TRANX_AMOUNT || examObj?.EXAM_FEE || 1500,
-        paymentMethod: transaction?.TRANX_CHANNEL || 'Mobile Banking',
+        amount: Number(transaction?.TRANX_AMOUNT ?? examObj?.EXAM_FEE ?? 0),
+        paymentMethod: transaction?.TRANX_CHANNEL === 3 ? 'QR' : 'Mobile Banking',
         status: 'SUCCESS',
       };
 

@@ -197,7 +197,7 @@ export const useExamStore = defineStore('exam', () => {
           date: formattedDate,
           time: `${formatTime(session.SS_START_TIME)} - ${formatTime(session.SS_END_TIME)}`,
           location: locationText,
-          fee: exam?.EXAM_FEE ?? 0,
+          fee: Number(exam?.EXAM_FEE ?? 0),
           rawEnrollment: enrollment,
         };
 

@@ -39,6 +39,9 @@ export const updateTransactionByErmId = async (
 export const createPendingPayment = async (
   data: CreatePendingPaymentPayload,
 ): Promise<PendingPaymentResponse> => {
-  const response = await api.post<PendingPaymentResponse>('/transactions/pending-payment', data);
+  const response = await api.post<PendingPaymentResponse>('/transactions/pending-payment', {
+    ...data,
+    TRANX_AMOUNT: Number(data.TRANX_AMOUNT),
+  });
   return response.data;
 };
