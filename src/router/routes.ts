@@ -403,6 +403,18 @@ const routes: RouteRecordRaw[] = [
               ],
             },
           },
+          {
+            path: 'daily-revenue-report',
+            name: 'admin-daily-revenue-report',
+            component: () => import('pages/admin/daily-revenue-report-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.dailyRevenueReport', icon: 'star' },
+              ],
+            },
+          },
         ],
       },
     ],

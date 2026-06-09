@@ -753,6 +753,30 @@ export default {
         saveError: 'An error occurred while saving information',
       },
     },
+    dailyRevenueReport: {
+      pageTitle: 'Daily Revenue Summary Report',
+      pageSubtitle:
+        'Displays a daily summary of revenue for financial tracking and operations monitoring.',
+      filter: {
+        startDate: 'Start Date',
+        endDate: 'End Date',
+        department: 'Department',
+        examName: 'Exam Name',
+      },
+      table: {
+        emptyLabel: 'No revenue data found',
+        totalLabel: 'Total',
+        columns: {
+          index: 'No.',
+          department: 'Department',
+          examName: 'Exam Name',
+          amount: 'Amount',
+        },
+      },
+      notifications: {
+        loadError: 'An error occurred while loading the report data.',
+      },
+    },
   },
   components: {
     examInfoCard: {
@@ -836,6 +860,10 @@ export default {
     manageScoreCriteria: 'Manage Score Criteria',
     manageScoreCriteriaAndCert: 'Manage Score Criteria & Certificates',
     passcodeHistory: 'Passcode History',
+    dailyRevenueReport: 'Daily Revenue Report',
+    reports: 'Reports',
+    receiptUsageReport: 'Receipt Usage Report',
+    applicationFeeReport: 'Application Fee Report',
   },
   profileEditHistory: {
     pageTitle: 'Candidate Profile Edit History',
