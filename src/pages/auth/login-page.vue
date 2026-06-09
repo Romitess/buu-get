@@ -422,7 +422,8 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 // Size: register credentials
 .card-wrapper.size-credentials {
   width: clamp(340px, 90vw, 504px);
-  min-height: clamp(480px, 75dvh, 520px);
+  max-height: 90dvh;
+  overflow-y: auto;
   max-width: 100%;
   padding: clamp(16px, 2.5vw, 20px) clamp(18px, 3.1vw, 25px);
 }
