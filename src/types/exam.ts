@@ -231,6 +231,7 @@ export interface BackendSession {
   SS_START_TIME: string;
   SS_END_TIME: string;
   SS_CAPACITY: number;
+  SS_SESSION_STATUS?: number;
   LOCATION_ID?: number | null;
   LOCATION?: BackendLocation;
   SESSION_LOCATIONS?: {

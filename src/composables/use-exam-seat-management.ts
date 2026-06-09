@@ -4,7 +4,7 @@ import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import type { BackendExam, BackendSession } from 'src/types/exam';
 import { EnrollmentStatus, type BackendEnrollmentDetail } from 'src/types/enrollment.types';
-import { fetchExamById } from 'src/services/exam.service';
+import { fetchExamById, updateExamSessionStatus } from 'src/services/exam.service';
 import {
   fetchRawEnrollmentsByExamId,
   updateEnrollmentStatus,
@@ -15,11 +15,13 @@ import { getImageUrl } from 'src/services/image.service';
 import { getUsersFromApi } from 'src/services/user.service';
 import { fetchProfileEditHistory } from 'src/services/profile-edit-history.service';
 import type { ProfileEditHistory } from 'src/types/profile-edit-history.types';
+import { useExamSeatNavigation } from 'src/composables/use-exam-seat-navigation';
 
 /** Enrollment status codes shared with the backend */
 const STATUS_PAID = 1;
 const STATUS_SEAT_ASSIGNED = 2;
 const STATUS_SEAT_PUBLISHED = 3;
+const SESSION_STATUS_SEAT_ALLOCATED = 2;
 
 /** Width of the custom drag ghost (px) used before the first real measurement */
 const DEFAULT_DRAG_WIDTH = 320;
@@ -89,6 +91,7 @@ interface UsableSeatAssignment {
 export function useExamSeatManagement() {
   const route = useRoute();
   const router = useRouter();
+  const { isSeatAllocationLocked } = useExamSeatNavigation();
   const $q = useQuasar();
   const { t } = useI18n();
 
@@ -398,10 +401,17 @@ export function useExamSeatManagement() {
   });
 
   const currentRoomStudents = computed((): StudentSeatInfo[] => {
-    if (activeSessionLocationId.value === null) return students.value;
-    return students.value.filter(
-      (student) => student.sessionLocationId === activeSessionLocationId.value,
+    const selectedSessionLocation = activeSessionLocation.value;
+    if (!selectedSessionLocation) return [];
+
+    const roomSeatIds = new Set(
+      (selectedSessionLocation.LOCATION.SEATS || []).map((seat) => String(seat.LS_ID)),
     );
+
+    return students.value.filter((student) => {
+      if (student.seat && roomSeatIds.has(student.seat)) return true;
+      return student.sessionLocationId === selectedSessionLocation.SL_ID;
+    });
   });
 
   const applicantCount = computed((): number => students.value.length);
@@ -412,12 +422,17 @@ export function useExamSeatManagement() {
   const currentRoomCount = computed((): number => currentRoomStudents.value.length);
 
   const currentRoomCapacity = computed((): number => {
-    if (activeLocation.value?.SEATS?.length) return activeLocation.value.SEATS.length;
+    const location = activeSessionLocation.value?.LOCATION;
+    if (!location) return 0;
 
-    const activeSessionCapacity = activeTimeSessions.value.find(
-      (session) => session.SS_ID === activeSessionLocation.value?.SS_ID,
-    )?.SS_CAPACITY;
-    return activeSessionCapacity || 0;
+    const usableSeatCount = (location.SEATS || []).filter(
+      (seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2,
+    ).length;
+    if (usableSeatCount > 0) return usableSeatCount;
+
+    if (location.LOCATION_SEAT_CAPACITY) return location.LOCATION_SEAT_CAPACITY;
+
+    return (location.LOCATION_TOTAL_ROWS || 0) * (location.LOCATION_TOTAL_COLS || 0);
   });
 
   /**
@@ -612,6 +627,14 @@ export function useExamSeatManagement() {
     try {
       $q.loading.show({ message: t('admin.seatManagement.loadingData') });
       examData.value = await fetchExamById(examId);
+
+      if (isSeatAllocationLocked(examData.value)) {
+        await router.replace({
+          name: 'admin-exam-seat-candidates',
+          params: { examId: String(examId) },
+        });
+        return;
+      }
 
       sessions.value = examData.value.SESSIONS || [];
       const firstSession = sessions.value[0];
@@ -853,6 +876,12 @@ export function useExamSeatManagement() {
         throw new Error(t('admin.seatManagement.notifications.saveError'));
       }
 
+      await Promise.all(
+        activeTimeSessions.value.map((session) =>
+          updateExamSessionStatus(session.SS_ID, SESSION_STATUS_SEAT_ALLOCATED),
+        ),
+      );
+
       filterStudentsBySession();
 
       $q.notify({
@@ -863,7 +892,7 @@ export function useExamSeatManagement() {
       });
 
       // Navigate to the candidates list page after successful save
-      void router.push({
+      void router.replace({
         name: 'admin-exam-seat-candidates',
         params: { examId: String(examId) },
         query: {
