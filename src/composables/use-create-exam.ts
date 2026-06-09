@@ -327,6 +327,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
       let hasValidStartTime = false;
       let hasValidEndTime = false;
+      const selectedLocationIds = new Set<number>();
 
       if (!slot.startTime || !slot.startTime.trim()) {
         errors[`startTime_${slotIdx}`] = VALIDATION_MSG.START_TIME;
@@ -353,6 +354,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       slot.rooms.forEach((room, roomIdx) => {
         if (!room.locationId) {
           errors[`locationId_${slotIdx}_${roomIdx}`] = VALIDATION_MSG.LOCATION;
+        } else if (selectedLocationIds.has(room.locationId)) {
+          errors[`locationId_${slotIdx}_${roomIdx}`] =
+            'ไม่สามารถเลือกห้องสอบซ้ำในช่วงเวลาเดียวกันได้';
+        } else {
+          selectedLocationIds.add(room.locationId);
         }
         if (!room.seats || room.seats <= 0) {
           errors[`seats_${slotIdx}_${roomIdx}`] = VALIDATION_MSG.SEATS;

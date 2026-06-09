@@ -188,7 +188,7 @@
             <div class="col-12 col-md-6" :data-field="`locationId_${activeSlotIndex}_${rIdx}`">
               <q-select
                 v-model="room.locationId"
-                :options="locationOptions"
+                :options="getAvailableLocationOptions(rIdx)"
                 option-label="label"
                 option-value="value"
                 emit-value
@@ -357,6 +357,19 @@ const getLocationMaxSeats = (locationId: number | null): number => {
   const seats = option.raw.SEATS;
   if (!seats) return 0;
   return seats.filter((s) => s.LS_SEAT_STATUS !== 1).length;
+};
+
+const getAvailableLocationOptions = (roomIndex: number): ExamLocationOption[] => {
+  if (!activeSlot.value) return props.locationOptions;
+
+  const selectedByOtherRooms = new Set(
+    activeSlot.value.rooms
+      .filter((_, index) => index !== roomIndex)
+      .map((room) => room.locationId)
+      .filter((locationId): locationId is number => locationId !== null),
+  );
+
+  return props.locationOptions.filter((option) => !selectedByOtherRooms.has(option.value));
 };
 
 const onLocationChange = (room: ExamRoom, slotIdx: number, roomIdx: number) => {
