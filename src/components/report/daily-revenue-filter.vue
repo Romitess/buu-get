@@ -11,7 +11,7 @@
             outlined
             dense
             readonly
-            bg-color="grey-1"
+            bg-color="grey-2"
             class="custom-input cursor-pointer"
             hide-bottom-space
           >
@@ -47,7 +47,7 @@
             outlined
             dense
             readonly
-            bg-color="grey-1"
+            bg-color="grey-2"
             class="custom-input cursor-pointer"
             hide-bottom-space
           >
@@ -86,7 +86,7 @@
             emit-value
             map-options
             clearable
-            bg-color="grey-1"
+            bg-color="grey-2"
             class="custom-input"
             hide-bottom-space
             placeholder="ทั้งหมด"
@@ -102,7 +102,7 @@
             v-model="localFilter.examName"
             outlined
             dense
-            bg-color="grey-1"
+            bg-color="grey-2"
             class="custom-input"
             placeholder="BUU-GET 1/2026"
             hide-bottom-space
@@ -119,7 +119,7 @@
               v-model="localFilter.receiptNo"
               outlined
               dense
-              bg-color="grey-1"
+              bg-color="grey-2"
               class="custom-input"
               placeholder="XXXXXXXXXXXX"
               hide-bottom-space
@@ -135,7 +135,7 @@
               v-model="localFilter.payerName"
               outlined
               dense
-              bg-color="grey-1"
+              bg-color="grey-2"
               class="custom-input"
               placeholder="สมชาย ใจดี"
               hide-bottom-space
@@ -151,7 +151,7 @@
               v-model="localFilter.payeeName"
               outlined
               dense
-              bg-color="grey-1"
+              bg-color="grey-2"
               class="custom-input"
               placeholder="สมใจ หมายปอง"
               hide-bottom-space
@@ -247,10 +247,21 @@ const emitFilterChange = (): void => {
 
 <style scoped lang="scss">
 .filter-card {
-  background: #ffffff;
-  border-radius: 8px; /* ปรับให้ขอบมนเหมือนในภาพ */
-  border: 1px solid #e0e0e0;
-  box-shadow: none; /* ในภาพดูเรียบแบน ไม่มีเงาชัดเจน */
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-card) !important;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--detail-card-hover-shadow) !important;
+    background-color: var(--detail-card-hover-bg);
+  }
 }
 
 .custom-label {
@@ -266,7 +277,7 @@ const emitFilterChange = (): void => {
   }
 
   :deep(.q-field__native) {
-    color: #424242; /* สีข้อความด้านใน */
+    color: #000000; /* สีข้อความด้านใน */
   }
 
   /* สีของ Placeholder ให้เป็นสีเทาอ่อน */
