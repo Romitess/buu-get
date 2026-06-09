@@ -55,9 +55,13 @@ export interface EligibleCandidate {
   /** Row index (display only) */
   index?: number;
   /** National ID or student ID */
-  nationalId: string;
-  /** Full name */
-  fullName: string;
+  nationalId?: string | undefined;
+  /** Passport number for foreign candidates */
+  passportNo?: string | undefined;
+  /** Full name in Thai */
+  fullName?: string | undefined;
+  /** Full name in English */
+  fullNameEn?: string | undefined;
   /** Generated passcode */
   passcode: string;
 }
@@ -172,12 +176,19 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const filteredCandidates = computed<EligibleCandidate[]>(() => {
     const q = candidateSearch.value.trim().toLowerCase();
     if (!q) return form.value.eligibleCandidates;
-    return form.value.eligibleCandidates.filter(
-      (c) =>
-        c.nationalId.toLowerCase().includes(q) ||
-        c.fullName.toLowerCase().includes(q) ||
-        c.passcode.toLowerCase().includes(q),
-    );
+    return form.value.eligibleCandidates.filter((c) => {
+      const id = c.nationalId?.toLowerCase() ?? '';
+      const name = c.fullName?.toLowerCase() ?? '';
+      const passport = c.passportNo?.toLowerCase() ?? '';
+      const nameEn = c.fullNameEn?.toLowerCase() ?? '';
+      return (
+        id.includes(q) ||
+        passport.includes(q) ||
+        name.includes(q) ||
+        nameEn.includes(q) ||
+        c.passcode.toLowerCase().includes(q)
+      );
+    });
   });
 
   // Helper to convert DD/MM/YYYY to numeric value for comparison
@@ -1175,8 +1186,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         form.value.eligibleCandidates.length > 0
       ) {
         const passcodesPayload = form.value.eligibleCandidates.map((c) => ({
-          nationalId: c.nationalId,
-          fullName: c.fullName,
+          nationalId: c.nationalId ?? undefined,
+          passportNo: c.passportNo ?? undefined,
+          fullName: c.fullName ?? undefined,
+          fullNameEn: c.fullNameEn ?? undefined,
           passcode: c.passcode,
         }));
         await createExamPasscodes(targetExamId, passcodesPayload);

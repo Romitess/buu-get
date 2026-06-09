@@ -13,7 +13,7 @@
 
     <!-- Full Name Column -->
     <template v-slot:body-cell-fullName="{ row }">
-      <div class="text-center">{{ row.fullName }}</div>
+      <div class="text-left q-pl-custom">{{ row.fullName }}</div>
     </template>
 
     <!-- Passcode Column -->
@@ -78,7 +78,7 @@ const columns = computed<QTableColumn[]>(() => [
     name: 'fullName',
     label: t('admin.passcodeHistory.table.columns.fullName'),
     field: 'fullName',
-    align: 'center',
+    align: 'left',
     style: 'width: 30%',
   },
   {
@@ -110,9 +110,7 @@ const onRequest = (req: TableRequestProps) => {
 </script>
 
 <style scoped lang="scss">
-.passcode-chip {
-  font-family: 'Courier New', Courier, monospace;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+.q-pl-custom {
+  padding-left: 128px;
 }
 </style>
