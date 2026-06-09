@@ -2,21 +2,34 @@
   <div class="register-profile-form">
     <!-- Match mockup styling: no heavy shadow, soft border, rounded corners -->
     <q-card class="shadow-0 profile-card">
-      <q-form ref="formRef" @submit.prevent="onSubmit">
+      <q-form ref="formRef" class="profile-form" @submit.prevent="onSubmit">
         <!-- ─── Title ─── -->
         <div class="profile-form-title">
           <q-icon name="people" size="20px" color="dark" />
           <div class="text-h6 text-weight-medium">{{ t('profile.personalInfo') }}</div>
         </div>
 
-        <!-- ─── 2-Column Layout ─── -->
+        <!-- ─── 2×2 Grid Layout ─── -->
         <div class="profile-form-grid">
-          <!-- คอลัมน์ซ้าย: ข้อมูลตัวตน -->
-          <div class="profile-form-column">
-            <IdentityColumn
+          <!-- (1,1) รูปภาพ + ข้อกำหนดรูปภาพ -->
+          <div class="profile-grid-cell profile-grid-cell--fill">
+            <PhotoSection v-model:profile-image="formData.profileImage" />
+          </div>
+
+          <!-- (1,2) วันเกิด / ระดับการศึกษา / คณะ-สาขา -->
+          <div class="profile-grid-cell">
+            <EducationSection
+              v-model:birthdate="formData.birthdate"
+              v-model:education-level="formData.educationLevel"
+              v-model:faculty="formData.faculty"
+            />
+          </div>
+
+          <!-- (2,1) ข้อมูลตัวตน 4 ฟิลด์ -->
+          <div class="profile-grid-cell">
+            <IdentityFields
               :is-thai="isThailand"
               :is-edit-mode="isEditMode"
-              v-model:profile-image="formData.profileImage"
               v-model:national-id="formData.nationalId"
               v-model:country="formData.country"
               v-model:title-t-h="formData.titleTH"
@@ -26,15 +39,12 @@
             />
           </div>
 
-          <!-- คอลัมน์ขวา: ข้อมูลสถาบัน/ที่อยู่ -->
-          <div class="profile-form-column">
-            <ContactColumn
+          <!-- (2,2) สถานศึกษา / ที่อยู่ / เบอร์โทร (+ ThaiD: checkbox + อีเมล) -->
+          <div class="profile-grid-cell">
+            <ContactFields
               :email="formData.email"
               :show-email-field="isThaiDPath"
               :show-address-checkbox="isThaiDPath"
-              v-model:birthdate="formData.birthdate"
-              v-model:education-level="formData.educationLevel"
-              v-model:faculty="formData.faculty"
               v-model:institution="formData.institution"
               v-model:address="formData.address"
               v-model:phone="formData.phone"
@@ -111,8 +121,10 @@ import { useFocusFirstInvalidField } from 'src/composables/use-focus-first-inval
 import { useAuthStore } from 'src/stores/auth.store';
 import { useQuasar } from 'quasar';
 
-import IdentityColumn from 'src/components/register/identity-column.vue';
-import ContactColumn from 'src/components/register/contact-column.vue';
+import PhotoSection from 'src/components/register/photo-section.vue';
+import EducationSection from 'src/components/register/education-section.vue';
+import IdentityFields from 'src/components/register/identity-fields.vue';
+import ContactFields from 'src/components/register/contact-fields.vue';
 import OtpVerificationDialog from 'src/components/register/otp-verification-dialog.vue';
 
 interface Props {
@@ -267,77 +279,100 @@ onMounted(() => {
 <style scoped lang="scss">
 .register-profile-form {
   width: 100%;
-  display: flex;
-  justify-content: center;
   font-family: var(--font-family-base);
 }
 
 .profile-card {
-  width: min(100%, 1720px);
+  width: 100%;
+  // Fit within viewport: leave room for header + footer + page padding
+  max-height: calc(100vh - var(--header-height) - 150px);
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--q-grey-3);
-  border-radius: 12px;
-  margin: 0 auto;
-  padding: 44px 84px 36px;
+  border-radius: 8px;
+  padding: 16px 28px 14px;
   background: var(--surface-card);
+  overflow: hidden; // Inner grid handles its own scroll
+}
+
+// Form fills the card so title/actions pin while the grid scrolls
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .profile-form-title {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 22px;
+  gap: 7px;
+  margin-bottom: 10px;
+  flex: 0 0 auto;
 }
 
 .profile-form-title .text-h6 {
-  font-size: 28px;
+  font-size: 18px;
   line-height: 1.3;
 }
 
 .profile-form-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 48px;
-  align-items: flex-start; // Prevent columns from stretching each other
+  grid-template-rows: auto auto;
+  column-gap: 22px;
+  row-gap: 10px;
+  align-items: start; // Row 2 cells align at the same baseline
+  // Scroll only the fields if the viewport is too short
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
-.profile-form-column {
+.profile-grid-cell {
   min-width: 0;
   display: flex;
   flex-direction: column;
 }
 
+// (1,1) ยืดเต็มความสูงของแถว เพื่อให้กล่องรูปสูงสุด
+.profile-grid-cell--fill {
+  align-self: stretch;
+}
+
 .profile-card :deep(.custom-input .q-field__control) {
-  min-height: 48px;
+  min-height: 32px;
 }
 
 .profile-card :deep(.custom-input .q-field__native),
 .profile-card :deep(.custom-input .q-field__input),
 .profile-card :deep(.custom-input .q-field__append) {
-  min-height: 48px;
+  min-height: 32px;
 }
 
 .profile-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 18px;
-  margin-top: 28px;
+  gap: 12px;
+  margin-top: 12px;
+  flex: 0 0 auto; // Stay pinned below the scrollable grid
 }
 
 .profile-action-btn {
-  width: 214px;
-  min-height: 64px;
-  border-radius: 8px;
-  font-size: 18px;
+  width: 124px;
+  min-height: 38px;
+  border-radius: 5px;
+  font-size: 16px;
 }
 
 .profile-dialog-card {
-  min-width: 350px;
+  min-width: 235px;
   font-family: var(--font-family-base);
 }
 
 @media (max-width: 900px) {
   .profile-card {
-    padding: 28px 24px;
+    padding: 19px 16px;
   }
 
   .profile-form-grid {
@@ -347,7 +382,7 @@ onMounted(() => {
 
 @media (max-width: 600px) {
   .profile-card {
-    padding: 22px 14px;
+    padding: 15px 9px;
   }
 
   .profile-actions {

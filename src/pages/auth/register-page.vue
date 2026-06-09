@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import RegisterCard from 'src/components/register-card.vue';
 import type { RegisterCredentials, RegisterFormData } from 'src/types/register';
@@ -49,6 +49,14 @@ const { t } = useI18n();
 const $q = useQuasar();
 const router = useRouter();
 const authStore = useAuthStore();
+
+onMounted(() => {
+  document.body.style.backgroundColor = 'var(--primary-dark)';
+});
+
+onUnmounted(() => {
+  document.body.style.backgroundColor = '';
+});
 
 const currentStep = ref<Step>('credentials');
 const isThai = ref<boolean>(true);
@@ -158,20 +166,22 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
     var(--primary) 55%,
     var(--secondary-dark) 100%
   );
+  background-attachment: fixed;
   position: relative;
-  padding: 40px 16px 80px;
+  padding: 27px 11px 54px;
 }
 
 .form-center {
   width: 100%;
-  max-width: 540px;
+  max-width: 362px;
   position: relative;
   z-index: 1;
   animation: fadeIn 0.7s ease-out;
 }
 
 .profile-form-container {
-  width: 100%;
+  flex: 0 0 860px; // Don't grow, don't shrink, fixed 860px
+  max-width: calc(100vw - 22px);
   position: relative;
   z-index: 1;
   animation: fadeIn 0.7s ease-out;

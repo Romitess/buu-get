@@ -194,9 +194,9 @@ onBeforeUnmount(() => {
 
 <style scoped lang="scss">
 .otp-card {
-  width: min(640px, calc(100vw - 32px));
-  border-radius: 10px;
-  padding: 42px 62px 24px;
+  width: min(429px, calc(100vw - 32px));
+  border-radius: 7px;
+  padding: 28px 42px 16px;
   position: relative;
   text-align: center;
   font-family: var(--font-family-base);
@@ -204,20 +204,20 @@ onBeforeUnmount(() => {
 
 .otp-close-btn {
   position: absolute;
-  top: 14px;
-  right: 16px;
+  top: 9px;
+  right: 11px;
   color: #8a8a8a;
 }
 
 .otp-icon-wrap {
-  width: 66px;
-  height: 66px;
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
   background: #dedede;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .otp-title {
@@ -225,14 +225,14 @@ onBeforeUnmount(() => {
   line-height: 1.2;
   font-weight: 700;
   color: #050505;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .otp-subtitle {
   font-size: 16px;
   line-height: 1.4;
   color: #666;
-  margin-bottom: 14px;
+  margin-bottom: 9px;
 }
 
 .otp-timer {
@@ -240,20 +240,20 @@ onBeforeUnmount(() => {
   line-height: 1.2;
   font-weight: 700;
   color: var(--q-primary);
-  margin-bottom: 20px;
+  margin-bottom: 13px;
 }
 
 .otp-input-row {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px;
-  margin-bottom: 24px;
+  gap: 7px;
+  margin-bottom: 16px;
 }
 
 .otp-digit {
   :deep(.q-field__control) {
-    height: 88px;
-    border-radius: 8px;
+    height: 59px;
+    border-radius: 5px;
   }
 }
 
@@ -264,11 +264,11 @@ onBeforeUnmount(() => {
 
 .otp-confirm-btn {
   width: 100%;
-  min-height: 56px;
-  border-radius: 8px;
+  min-height: 38px;
+  border-radius: 5px;
   font-size: 16px;
   font-weight: 700;
-  margin-bottom: 16px;
+  margin-bottom: 11px;
 }
 
 .otp-resend-btn {
@@ -287,16 +287,16 @@ onBeforeUnmount(() => {
 
 @media (max-width: 600px) {
   .otp-card {
-    padding: 34px 20px 22px;
+    padding: 23px 13px 15px;
   }
 
   .otp-input-row {
-    gap: 6px;
+    gap: 4px;
   }
 
   .otp-digit {
     :deep(.q-field__control) {
-      height: 64px;
+      height: 43px;
     }
   }
 }
