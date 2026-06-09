@@ -7,50 +7,17 @@
       </router-link>
 
       <!-- Center: Navigation Links (Desktop) -->
-      <q-space />
       <nav class="app-header__nav" v-if="!$q.screen.lt.md">
-        <template v-for="link in navLinks" :key="link.name">
-          <!-- Dropdown Menu -->
-          <div
-            v-if="link.children && link.children.length > 0"
-            class="app-header__nav-link cursor-pointer"
-            :class="{ 'app-header__nav-link--active': isActiveRoute(link) }"
-          >
-            {{ link.label }}
-            <q-icon name="expand_more" size="16px" class="q-ml-xs" />
-            <q-menu
-              auto-close
-              fit
-              anchor="bottom left"
-              self="top left"
-              transition-show="jump-down"
-              transition-hide="jump-up"
-            >
-              <q-list style="min-width: 220px">
-                <q-item
-                  v-for="child in link.children"
-                  :key="child.name"
-                  clickable
-                  :to="child.path"
-                  class="app-header__dropdown-item"
-                >
-                  <q-item-section>{{ child.label }}</q-item-section>
-                </q-item>
-              </q-list>
-            </q-menu>
-          </div>
-          <!-- Normal Link -->
-          <router-link
-            v-else
-            :to="link.path"
-            class="app-header__nav-link"
-            :class="{ 'app-header__nav-link--active': isActiveRoute(link) }"
-          >
-            {{ link.label }}
-          </router-link>
-        </template>
+        <router-link
+          v-for="link in navLinks"
+          :key="link.name"
+          :to="link.path || (link.children?.[0]?.path ?? '/')"
+          class="app-header__nav-link"
+          :class="{ 'app-header__nav-link--active': isActiveRoute(link) }"
+        >
+          {{ link.label }}
+        </router-link>
       </nav>
-      <q-space />
 
       <!-- Right: Auth Actions -->
       <div class="app-header__actions">
@@ -403,6 +370,7 @@ const logout = async () => {
   height: var(--header-height);
   padding: 0 32px;
   gap: 8px;
+  position: relative;
 }
 
 // === Logo ===
@@ -424,6 +392,10 @@ const logout = async () => {
   display: flex;
   align-items: center;
   gap: 4px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .app-header__nav-link {
@@ -468,6 +440,7 @@ const logout = async () => {
   align-items: center;
   gap: 16px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 // --- Not Logged-in ---
