@@ -30,32 +30,18 @@
     >
       <template v-slot:body-cell-tools="{ row }">
         <div class="row justify-center q-gutter-x-sm no-wrap">
-          <q-btn
-            unelevated
-            dense
-            color="blue-2"
-            text-color="grey-10"
+          <ActionButton
             icon="edit"
-            class="action-btn"
+            color="secondary"
+            :tooltip="$t('admin.locationManagement.table.tooltips.edit')"
             @click="navigateToEdit(row.LOCATION_ID)"
-          >
-            <q-tooltip class="bg-secondary text-white text-caption">
-              {{ $t('admin.locationManagement.table.tooltips.edit') }}
-            </q-tooltip>
-          </q-btn>
-          <q-btn
-            unelevated
-            dense
-            color="negative"
-            text-color="white"
+          />
+          <ActionButton
             icon="delete"
-            class="action-btn"
+            color="negative"
+            :tooltip="$t('admin.locationManagement.table.tooltips.delete')"
             @click="confirmDelete(row)"
-          >
-            <q-tooltip class="bg-negative text-white text-caption">
-              {{ $t('admin.locationManagement.table.tooltips.delete') }}
-            </q-tooltip>
-          </q-btn>
+          />
         </div>
       </template>
     </BaseTable>
@@ -71,6 +57,7 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
 import BaseTable from 'src/components/shared/base-table.vue';
+import ActionButton from 'src/components/shared/action-button.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import type { BackendLocation } from 'src/types/exam';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
@@ -123,7 +110,7 @@ const columns = computed<QTableColumn[]>(() => [
     name: 'roomName',
     label: t('admin.locationManagement.table.columns.roomName'),
     field: 'LOCATION_ROOM_NO',
-    align: 'center',
+    align: 'left',
     style: 'width: 24%',
     format: (val: string | null | undefined) => val || '-',
   },
@@ -259,14 +246,6 @@ onMounted(() => {
   @media (max-width: $breakpoint-xs-max) {
     width: 100%;
   }
-}
-
-.action-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 6px !important;
-  font-size: 14px;
-  transition: background-color var(--transition-fast);
 }
 
 .form-dialog-card {

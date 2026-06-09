@@ -31,6 +31,9 @@
               dropdown-icon="keyboard_arrow_down"
               popup-content-class="seat-room-menu"
               class="location-select"
+              :class="{ 'location-select--open': isLocationMenuOpen }"
+              @popup-show="isLocationMenuOpen = true"
+              @popup-hide="isLocationMenuOpen = false"
               @update:model-value="$emit('update:selectedLocationId', $event)"
             />
             <span v-else>{{ location }}</span>
@@ -100,6 +103,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+
 interface Props {
   title: string;
   date: string;
@@ -132,6 +137,8 @@ withDefaults(defineProps<Props>(), {
 defineEmits<{
   (e: 'update:selectedLocationId', value: number | null): void;
 }>();
+
+const isLocationMenuOpen = ref(false);
 </script>
 
 <style scoped lang="scss">
@@ -215,11 +222,17 @@ defineEmits<{
   :deep(.q-field__append) {
     color: #222222;
   }
+
+  &--open {
+    :deep(.q-field__control) {
+      border-radius: 12px 12px 0 0;
+    }
+  }
 }
 
 :global(.seat-room-menu) {
-  width: min(500px, calc(100vw - 32px)) !important;
-  border-radius: 0 0 12px 12px;
+  max-width: calc(100vw - 32px) !important;
+  border-radius: 0 0 12px 12px !important;
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
   overflow: hidden;
 }
@@ -228,6 +241,11 @@ defineEmits<{
   min-height: 44px;
   padding: 8px 12px;
   font-size: 16px;
+}
+
+:global(.seat-room-menu .q-item__label) {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 :global(.seat-room-menu .q-item--active) {
