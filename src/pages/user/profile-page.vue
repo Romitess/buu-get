@@ -271,6 +271,7 @@
                 dense
                 bg-color="white"
                 mask="###-###-####"
+                unmasked-value
                 lazy-rules
                 :rules="[
                   (val) => !!val || $t('profile.requiredPhone'),

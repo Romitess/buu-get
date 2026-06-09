@@ -58,7 +58,8 @@
         :readonly="isEditMode"
         :required="true"
         :rules="nationalIdRules"
-        maxlength="13"
+        mask="#-####-#####-##-#"
+        unmasked-value
       />
       <AppFormField
         v-else

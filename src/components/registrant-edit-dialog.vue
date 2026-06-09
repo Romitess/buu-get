@@ -183,6 +183,7 @@
                       outlined
                       dense
                       mask="###-###-####"
+                      unmasked-value
                       bg-color="white"
                       class="custom-input"
                       :rules="[

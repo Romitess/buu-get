@@ -97,7 +97,8 @@
         :required="true"
         :rules="[(val) => !!val || t('profile.requiredPhone')]"
         reserve-bottom-space
-        maxlength="10"
+        mask="###-###-####"
+        unmasked-value
       />
 
       <!-- ─── อีเมล (แสดงเฉพาะ ThaiD path) ─── -->
