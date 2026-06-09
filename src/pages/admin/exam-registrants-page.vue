@@ -22,15 +22,13 @@
     />
 
     <nav class="toolbar-section row q-col-gutter-md items-center q-mb-md">
-      <div class="col-12 col-sm-auto">
+      <div class="col">
         <SearchBar
           v-model="searchQuery"
           :placeholder="$t('admin.registrantManagement.searchPlaceholder')"
-          class="search-bar"
         />
       </div>
-      <q-space class="gt-xs" />
-      <div class="col-12 col-sm-auto">
+      <div class="col-auto">
         <ExportCsvButton
           :columns="columns"
           :rows="filteredEnrollments"
@@ -54,15 +52,63 @@
         </template>
 
         <template v-slot:body-cell-titleTh="{ row }">
-          <div class="text-center">{{ row.titleTh }}</div>
+          <div class="row justify-center">
+            <div style="position: relative; display: inline-block">
+              <span
+                style="
+                  visibility: hidden;
+                  font-weight: 600;
+                  font-size: var(--font-size-xs);
+                  white-space: nowrap;
+                "
+              >
+                {{ $t('admin.registrantManagement.table.columns.prefix') }}
+              </span>
+              <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
+                {{ row.titleTh }}
+              </span>
+            </div>
+          </div>
         </template>
 
         <template v-slot:body-cell-fullnameTh="{ row }">
-          <div class="text-center">{{ row.fullnameTh }}</div>
+          <div class="row justify-center">
+            <div style="position: relative; display: inline-block">
+              <span
+                style="
+                  visibility: hidden;
+                  font-weight: 600;
+                  font-size: var(--font-size-xs);
+                  white-space: nowrap;
+                "
+              >
+                {{ $t('admin.registrantManagement.table.columns.fullName') }}
+              </span>
+              <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
+                {{ row.fullnameTh }}
+              </span>
+            </div>
+          </div>
         </template>
 
         <template v-slot:body-cell-remark="{ row }">
-          <div class="text-center">{{ row.remark || '-' }}</div>
+          <div class="row justify-center">
+            <div style="position: relative; display: inline-block">
+              <span
+                style="
+                  visibility: hidden;
+                  font-weight: 600;
+                  font-size: var(--font-size-xs);
+                  white-space: nowrap;
+                "
+              >
+                {{ $t('admin.registrantManagement.table.columns.remark') }}
+              </span>
+              <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
+                {{ row.remark || '-' }}
+              </span>
+            </div>
+          </div>
         </template>
 
         <template v-slot:body-cell-paymentStatus="{ row }">
@@ -293,13 +339,6 @@ onMounted(() => {
 
 .registrants-page {
   min-height: 0 !important;
-}
-
-.search-bar {
-  min-width: 300px;
-  @media (max-width: $breakpoint-xs-max) {
-    min-width: 100%;
-  }
 }
 
 .export-btn {
