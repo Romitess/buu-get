@@ -166,7 +166,7 @@ const phone = defineModel<string>('phone', { required: true });
 
 .expanded-address {
   :deep(.q-field__control) {
-    height: 111px !important;
+    height: 135px !important;
     align-items: flex-start;
   }
   :deep(textarea) {

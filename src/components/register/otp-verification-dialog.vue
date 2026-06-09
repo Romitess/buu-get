@@ -212,7 +212,7 @@ onBeforeUnmount(() => {
 .otp-icon-wrap {
   width: 44px;
   height: 44px;
-  border-radius: 8px;
+  border-radius: 8px !important;
   background: #dedede;
   display: inline-flex;
   align-items: center;
