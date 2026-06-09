@@ -115,16 +115,17 @@
     <ReceiptInformationDialog
       v-model="showReceiptInformationDialog"
       :exam-title="selectedExam?.title || ''"
-      :amount="selectedExam?.fee || DEFAULT_EXAM_FEE_THB"
+      :amount="selectedExam?.fee ?? 0"
       :payment-deadline="selectedExamPaymentPeriod"
       :initial-value="initialReceiptInformation"
+      :is-foreign-user="isForeignUser"
       @confirm="handleReceiptInformationConfirm"
     />
 
     <!-- Payment Dialog -->
     <AppPaymentDialog
       v-model="showPaymentDialog"
-      :amount="selectedExam?.fee || DEFAULT_EXAM_FEE_THB"
+      :amount="selectedExam?.fee ?? 0"
       :expiry-time="paymentExpiryTime"
       @save="handleSaveQR"
     />
@@ -191,7 +192,7 @@ import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
 import { useExamDocuments } from 'src/composables/use-exam-documents';
 import { useAppDate } from 'src/composables/useAppDate';
-import { DEFAULT_EXAM_FEE_THB, PAYMENT_DURATION_SECONDS_DEFAULT } from 'src/constants/exam';
+import { PAYMENT_DURATION_SECONDS_DEFAULT } from 'src/constants/exam';
 import type { ExamHistoryItem } from 'src/types/exam';
 import type { ReceiptInformation } from 'src/types/receipt-information';
 
@@ -224,6 +225,10 @@ const initialReceiptInformation = computed<ReceiptInformation>(() => {
     address: user?.address || '',
   };
 });
+
+const isForeignUser = computed(
+  () => !userStore.currentUser?.nationalId && Boolean(userStore.currentUser?.passportNo),
+);
 
 const selectedExamPaymentPeriod = computed((): string => {
   const exam = selectedExam.value?.rawEnrollment?.SESSION?.EXAM;

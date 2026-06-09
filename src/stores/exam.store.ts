@@ -15,7 +15,6 @@ import {
   type CreateExamPayload,
 } from 'src/services/exam.service';
 import {
-  DEFAULT_EXAM_FEE_THB,
   BUDDHIST_YEAR_OFFSET,
   EMPTY_DETAILS,
   DEFAULT_LOCATION_TEXT,
@@ -196,7 +195,7 @@ export const useExamStore = defineStore('exam', () => {
           date: formattedDate,
           time: `${formatTime(session.SS_START_TIME)} - ${formatTime(session.SS_END_TIME)}`,
           location: locationText,
-          fee: exam?.EXAM_FEE || DEFAULT_EXAM_FEE_THB,
+          fee: exam?.EXAM_FEE ?? 0,
           rawEnrollment: enrollment,
         };
 

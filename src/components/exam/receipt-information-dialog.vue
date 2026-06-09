@@ -38,15 +38,18 @@
         </div>
       </section>
 
-      <q-form class="receipt-form" @submit.prevent="submitForm">
+      <q-form ref="receiptFormRef" class="receipt-form" @submit.prevent="submitForm">
         <label class="field-group">
-          <span>{{ t('exam.history.receiptForm.taxIdLabel') }}</span>
+          <span>{{ identityLabel }}</span>
           <q-input
             v-model="form.taxId"
             outlined
             dense
-            hide-bottom-space
-            :placeholder="profilePlaceholders.taxId"
+            lazy-rules
+            :maxlength="isForeignUser ? 9 : 13"
+            :placeholder="identityPlaceholder"
+            :rules="identityRules"
+            @update:model-value="sanitizeIdentity"
           />
         </label>
 
@@ -56,8 +59,10 @@
             v-model="form.fullName"
             outlined
             dense
-            hide-bottom-space
+            lazy-rules
             :placeholder="profilePlaceholders.fullName"
+            :rules="fullNameRules"
+            @update:model-value="sanitizeFullName"
           />
         </label>
 
@@ -67,8 +72,11 @@
             v-model="form.phone"
             outlined
             dense
-            hide-bottom-space
+            lazy-rules
+            maxlength="10"
             :placeholder="profilePlaceholders.phone"
+            :rules="phoneRules"
+            @update:model-value="sanitizePhone"
           />
         </label>
 
@@ -79,8 +87,9 @@
             type="textarea"
             outlined
             dense
-            hide-bottom-space
+            lazy-rules
             :placeholder="profilePlaceholders.address"
+            :rules="requiredRules"
           />
         </label>
 
@@ -103,8 +112,9 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, computed } from 'vue';
+import { reactive, watch, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import type { QForm } from 'quasar';
 import AppButton from 'src/components/base/app-button.vue';
 import type { ReceiptInformation } from 'src/types/receipt-information';
 
@@ -114,6 +124,7 @@ const props = defineProps<{
   amount: number;
   paymentDeadline?: string;
   initialValue: ReceiptInformation;
+  isForeignUser?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -122,6 +133,7 @@ const emit = defineEmits<{
 }>();
 
 const { t, locale } = useI18n();
+const receiptFormRef = ref<QForm | null>(null);
 const emptyForm = (): ReceiptInformation => ({
   taxId: '',
   fullName: '',
@@ -131,11 +143,57 @@ const emptyForm = (): ReceiptInformation => ({
 const form = reactive<ReceiptInformation>(emptyForm());
 
 const profilePlaceholders = computed<ReceiptInformation>(() => ({
-  taxId: t('exam.history.receiptForm.taxIdPlaceholder'),
+  taxId: identityPlaceholder.value,
   fullName: t('exam.history.receiptForm.fullNamePlaceholder'),
   phone: t('exam.history.receiptForm.phonePlaceholder'),
   address: t('exam.history.receiptForm.addressPlaceholder'),
 }));
+
+const identityLabel = computed(() =>
+  props.isForeignUser
+    ? t('exam.history.receiptForm.passportLabel')
+    : t('exam.history.receiptForm.taxIdLabel'),
+);
+const identityPlaceholder = computed(() =>
+  props.isForeignUser
+    ? t('exam.history.receiptForm.passportPlaceholder')
+    : t('exam.history.receiptForm.taxIdPlaceholder'),
+);
+const requiredRules = computed(() => [
+  (value: string) => Boolean(value?.trim()) || t('exam.history.receiptForm.required'),
+]);
+const identityRules = computed(() => [
+  ...requiredRules.value,
+  (value: string) =>
+    props.isForeignUser
+      ? /^[A-Za-z0-9]{1,9}$/.test(value) || t('exam.history.receiptForm.passportInvalid')
+      : /^\d{13}$/.test(value) || t('exam.history.receiptForm.nationalIdInvalid'),
+]);
+const fullNameRules = computed(() => [
+  ...requiredRules.value,
+  (value: string) => /^[\p{L}\s'-]+$/u.test(value) || t('exam.history.receiptForm.fullNameInvalid'),
+]);
+const phoneRules = computed(() => [
+  ...requiredRules.value,
+  (value: string) => /^\d{10}$/.test(value) || t('exam.history.receiptForm.phoneInvalid'),
+]);
+
+const sanitizeIdentity = (value: string | number | null): void => {
+  const text = String(value ?? '');
+  form.taxId = props.isForeignUser
+    ? text.replace(/[^A-Za-z0-9]/g, '').slice(0, 9)
+    : text.replace(/\D/g, '').slice(0, 13);
+};
+
+const sanitizeFullName = (value: string | number | null): void => {
+  form.fullName = String(value ?? '').replace(/[^\p{L}\s'-]/gu, '');
+};
+
+const sanitizePhone = (value: string | number | null): void => {
+  form.phone = String(value ?? '')
+    .replace(/\D/g, '')
+    .slice(0, 10);
+};
 
 const formattedAmount = computed(() => {
   const currency = t('exam.history.receiptForm.currency');
@@ -154,12 +212,15 @@ watch(
 
 const closeDialog = (): void => emit('update:modelValue', false);
 
-const submitForm = (): void => {
+const submitForm = async (): Promise<void> => {
+  const isValid = await receiptFormRef.value?.validate();
+  if (!isValid) return;
+
   emit('confirm', {
-    taxId: form.taxId.trim() || props.initialValue.taxId,
-    fullName: form.fullName.trim() || props.initialValue.fullName,
-    phone: form.phone.trim() || props.initialValue.phone,
-    address: form.address.trim() || props.initialValue.address,
+    taxId: form.taxId.trim(),
+    fullName: form.fullName.trim(),
+    phone: form.phone.trim(),
+    address: form.address.trim(),
   });
 };
 </script>
@@ -251,7 +312,7 @@ const submitForm = (): void => {
 
 .receipt-form {
   display: grid;
-  gap: 14px;
+  gap: 6px;
   margin-top: 22px;
 }
 
@@ -260,6 +321,10 @@ const submitForm = (): void => {
   gap: 6px;
   font-size: 15px;
   font-weight: 500;
+}
+
+.field-group :deep(.q-field--error .q-field__bottom) {
+  color: var(--negative);
 }
 
 .field-group :deep(.q-field__control) {
