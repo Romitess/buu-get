@@ -300,7 +300,9 @@ export default {
     },
     clockHourSuffix: 'น.',
     registrationTitle: 'การสมัครสอบ',
-    registrationSubtitle: 'กรุณาเลือกวันที่และรอบเวลาที่คุณต้องการสมัครเข้าทดสอบ BUU-GET',
+    registrationSubtitle: 'ดำเนินการสมัครสอบของคุณให้เสร็จสมบูรณ์',
+    examDetailSubtitle:
+      'เลือกวันที่และเวลาที่สะดวกในการมาทดสอบ โดยตรวจสอบจำนวนที่นั่งว่างในแต่ละช่วงเวลา',
     dateLabel: 'วันที่',
     noBadgeRounds: 'ไม่มีรอบสอบ',
     defaultEnrollmentTitle: 'การทดสอบวัดความสามารถทางภาษาอังกฤษ',
