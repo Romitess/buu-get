@@ -1,18 +1,18 @@
 <template>
   <q-card flat bordered class="filter-card q-mb-lg">
     <q-card-section>
-      <div class="row q-col-gutter-md items-end">
-        <!-- วันที่เริ่มต้น -->
+      <div class="row q-col-gutter-x-md q-col-gutter-y-md items-start">
         <div class="col-12 col-sm-6 col-md-3">
-          <div class="buu-label-muted q-mb-xs">
-            {{ $t('admin.dailyRevenueReport.filter.startDate') }}
+          <div class="custom-label q-mb-xs">
+            {{ t('admin.dailyRevenueReport.filter.startDate') }}
           </div>
           <q-input
             v-model="localFilter.startDate"
             outlined
             dense
             readonly
-            class="buu-input-muted cursor-pointer"
+            bg-color="grey-1"
+            class="custom-input cursor-pointer"
             hide-bottom-space
           >
             <template v-slot:append>
@@ -38,17 +38,17 @@
           </q-input>
         </div>
 
-        <!-- ถึงวันที่ -->
         <div class="col-12 col-sm-6 col-md-3">
-          <div class="buu-label-muted q-mb-xs">
-            {{ $t('admin.dailyRevenueReport.filter.endDate') }}
+          <div class="custom-label q-mb-xs">
+            {{ t('admin.dailyRevenueReport.filter.endDate') }}
           </div>
           <q-input
             v-model="localFilter.endDate"
             outlined
             dense
             readonly
-            class="buu-input-muted cursor-pointer"
+            bg-color="grey-1"
+            class="custom-input cursor-pointer"
             hide-bottom-space
           >
             <template v-slot:append>
@@ -74,10 +74,9 @@
           </q-input>
         </div>
 
-        <!-- ส่วนงาน -->
         <div class="col-12 col-sm-6 col-md-3">
-          <div class="buu-label-muted q-mb-xs">
-            {{ $t('admin.dailyRevenueReport.filter.department') }}
+          <div class="custom-label q-mb-xs">
+            {{ t('admin.dailyRevenueReport.filter.department') }}
           </div>
           <q-select
             v-model="localFilter.department"
@@ -87,40 +86,100 @@
             emit-value
             map-options
             clearable
-            class="buu-input-muted"
+            bg-color="grey-1"
+            class="custom-input"
             hide-bottom-space
+            placeholder="ทั้งหมด"
             @update:model-value="emitFilterChange"
           />
         </div>
 
-        <!-- ชื่อการสอบ -->
         <div class="col-12 col-sm-6 col-md-3">
-          <div class="buu-label-muted q-mb-xs">
-            {{ $t('admin.dailyRevenueReport.filter.examName') }}
+          <div class="custom-label q-mb-xs">
+            {{ t('admin.dailyRevenueReport.filter.examName') }}
           </div>
           <q-input
             v-model="localFilter.examName"
             outlined
             dense
-            class="buu-input-muted"
+            bg-color="grey-1"
+            class="custom-input"
+            placeholder="BUU-GET 1/2026"
             hide-bottom-space
             @update:model-value="emitFilterChange"
           />
         </div>
+
+        <template v-if="isFullMode">
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="custom-label q-mb-xs">
+              {{ t('admin.dailyRevenueReport.filter.receiptNo') }}
+            </div>
+            <q-input
+              v-model="localFilter.receiptNo"
+              outlined
+              dense
+              bg-color="grey-1"
+              class="custom-input"
+              placeholder="XXXXXXXXXXXX"
+              hide-bottom-space
+              @update:model-value="emitFilterChange"
+            />
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="custom-label q-mb-xs">
+              {{ t('admin.dailyRevenueReport.filter.payer') }}
+            </div>
+            <q-input
+              v-model="localFilter.payerName"
+              outlined
+              dense
+              bg-color="grey-1"
+              class="custom-input"
+              placeholder="สมชาย ใจดี"
+              hide-bottom-space
+              @update:model-value="emitFilterChange"
+            />
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="custom-label q-mb-xs">
+              {{ t('admin.dailyRevenueReport.filter.payee') }}
+            </div>
+            <q-input
+              v-model="localFilter.payeeName"
+              outlined
+              dense
+              bg-color="grey-1"
+              class="custom-input"
+              placeholder="สมใจ หมายปอง"
+              hide-bottom-space
+              @update:model-value="emitFilterChange"
+            />
+          </div>
+        </template>
       </div>
     </q-card-section>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, ref } from 'vue';
+import { reactive, watch, ref, onMounted } from 'vue';
 import type { QPopupProxy } from 'quasar';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
 import type { DailyRevenueFilter, DepartmentOption } from 'src/types/daily-revenue.types';
+import { useI18n } from 'vue-i18n';
+import { fetchFundSources } from 'src/services/finance.service';
+
+const { t } = useI18n();
+
+type DailyRevenueFilterMode = 'compact' | 'full';
 
 interface Props {
-  filter: DailyRevenueFilter;
-  departmentOptions: DepartmentOption[];
+  filter: DailyRevenueFilter & { receiptNo?: string; payerName?: string; payeeName?: string };
+  departmentOptions?: DepartmentOption[];
+  mode?: DailyRevenueFilterMode;
 }
 
 const props = defineProps<Props>();
@@ -129,14 +188,41 @@ const emit = defineEmits<{
   (e: 'filter-change', filter: DailyRevenueFilter): void;
 }>();
 
+const isFullMode = props.mode === 'full';
+
 const startDateProxy = ref<QPopupProxy | null>(null);
 const endDateProxy = ref<QPopupProxy | null>(null);
 
-const localFilter = reactive<DailyRevenueFilter>({
+const localFilter = reactive({
   startDate: props.filter.startDate,
   endDate: props.filter.endDate,
   department: props.filter.department,
   examName: props.filter.examName,
+  receiptNo: props.filter.receiptNo || '',
+  payerName: props.filter.payerName || '',
+  payeeName: props.filter.payeeName || '',
+});
+
+const departmentOptions = ref<DepartmentOption[]>(props.departmentOptions || []);
+
+const loadDepartmentOptions = async () => {
+  if (props.departmentOptions && props.departmentOptions.length) {
+    departmentOptions.value = props.departmentOptions;
+    return;
+  }
+
+  try {
+    const sources = await fetchFundSources();
+    const faculties = Array.from(new Set(sources.map((s) => s.FS_FACULTY).filter(Boolean)));
+    departmentOptions.value = faculties.map((f) => ({ label: f, value: f }));
+  } catch {
+    // ignore - keep options empty
+    // console.error('Failed to load fund sources');
+  }
+};
+
+onMounted(() => {
+  void loadDepartmentOptions();
 });
 
 // Sync props → local state when parent changes
@@ -147,6 +233,9 @@ watch(
     localFilter.endDate = newFilter.endDate;
     localFilter.department = newFilter.department;
     localFilter.examName = newFilter.examName;
+    localFilter.receiptNo = newFilter.receiptNo || '';
+    localFilter.payerName = newFilter.payerName || '';
+    localFilter.payeeName = newFilter.payeeName || '';
   },
   { deep: true },
 );
@@ -158,9 +247,32 @@ const emitFilterChange = (): void => {
 
 <style scoped lang="scss">
 .filter-card {
-  background: var(--surface-card);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-card);
+  background: #ffffff;
+  border-radius: 8px; /* ปรับให้ขอบมนเหมือนในภาพ */
+  border: 1px solid #e0e0e0;
+  box-shadow: none; /* ในภาพดูเรียบแบน ไม่มีเงาชัดเจน */
+}
+
+.custom-label {
+  font-size: 14px;
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.custom-input {
+  :deep(.q-field__control) {
+    border-radius: 6px;
+    border-color: #e0e0e0;
+  }
+
+  :deep(.q-field__native) {
+    color: #424242; /* สีข้อความด้านใน */
+  }
+
+  /* สีของ Placeholder ให้เป็นสีเทาอ่อน */
+  :deep(.q-field__native::placeholder) {
+    color: #615f5f;
+    opacity: 1;
+  }
 }
 </style>

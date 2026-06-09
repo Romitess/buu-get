@@ -10,6 +10,9 @@ export interface DailyRevenueFilter {
   endDate: string;
   department: string;
   examName: string;
+  receiptNo?: string;
+  payerName?: string;
+  payeeName?: string;
 }
 
 export interface DailyRevenueSummary {

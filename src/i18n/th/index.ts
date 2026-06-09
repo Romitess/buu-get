@@ -1006,6 +1006,9 @@ export default {
         endDate: 'ถึงวันที่',
         department: 'ส่วนงาน',
         examName: 'ชื่อการสอบ',
+        receiptNo: 'เลขที่ใบเสร็จ',
+        payer: 'ชื่อผู้ชำระเงิน',
+        payee: 'ชื่อผู้รับเงิน',
       },
       table: {
         emptyLabel: 'ไม่พบข้อมูลรายงาน',
@@ -1019,6 +1022,52 @@ export default {
       },
       notifications: {
         loadError: 'เกิดข้อผิดพลาดในการโหลดข้อมูลรายงาน',
+      },
+    },
+    receiptUsageReport: {
+      pageTitle: 'รายงานสรุปการใช้ใบเสร็จรับเงิน',
+      pageSubtitle: 'สรุปรายการใบเสร็จที่ออกและการใช้งาน',
+      table: {
+        emptyLabel: 'ไม่พบข้อมูลใบเสร็จ',
+        columns: {
+          index: 'ลำดับ',
+          receiptNo: 'เลขที่ใบเสร็จ',
+          paymentDate: 'วันที่จ่ายเงิน',
+          receiptDate: 'วันที่ใบเสร็จรับเงิน',
+          year: 'ปีเอกสาร',
+          documentType: 'ประเภทเอกสาร',
+          amount: 'จำนวนเงิน',
+          examName: 'ชื่อการสอบ',
+          payer: 'ผู้ชำระเงิน',
+          payee: 'ผู้รับเงิน',
+          actions: 'การดำเนินการ',
+        },
+      },
+      actions: {
+        viewReceipt: 'ดูรายละเอียด',
+        viewReceiptMessage: 'เปิดใบเสร็จ {receiptNo} เพื่อดูรายละเอียด',
+      },
+    },
+    applicationFeeReport: {
+      pageTitle: 'รายงานค่าธรรมเนียมการสมัครสอบ',
+      pageSubtitle: 'แสดงรายละเอียดใบเสร็จและการชำระเงินสำหรับค่าธรรมเนียมการสมัครสอบ',
+      table: {
+        emptyLabel: 'ไม่พบข้อมูลค่าธรรมเนียมการสมัครสอบ',
+        columns: {
+          index: 'ลำดับ',
+          receiptNo: 'เลขที่ใบเสร็จ',
+          payer: 'ผู้ชำระเงิน',
+          amount: 'จำนวนเงิน',
+          paymentDate: 'วันที่จ่ายเงิน',
+          examName: 'ชื่อการสอบ',
+          importedDate: 'วันที่นำเข้าข้อมูล',
+          payee: 'ผู้รับเงิน',
+          actions: 'สำเนาใบเสร็จรับเงิน',
+        },
+      },
+      actions: {
+        viewRecord: 'ดูรายละเอียด',
+        viewRecordMessage: 'เปิดใบเสร็จ {receiptNo} เพื่อดูรายละเอียด',
       },
     },
   },
