@@ -112,10 +112,20 @@
       </div>
     </div>
 
+    <ReceiptInformationDialog
+      v-model="showReceiptInformationDialog"
+      :exam-title="selectedExam?.title || ''"
+      :amount="selectedExam?.fee ?? 0"
+      :payment-deadline="selectedExamPaymentPeriod"
+      :initial-value="initialReceiptInformation"
+      :is-foreign-user="isForeignUser"
+      @confirm="handleReceiptInformationConfirm"
+    />
+
     <!-- Payment Dialog -->
     <AppPaymentDialog
       v-model="showPaymentDialog"
-      :amount="selectedExam?.fee || DEFAULT_EXAM_FEE_THB"
+      :amount="selectedExam?.fee ?? 0"
       :expiry-time="paymentExpiryTime"
       @save="handleSaveQR"
     />
@@ -174,17 +184,23 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppExamHistoryCard from 'src/components/exam/app-exam-history-card.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import AppPaymentDialog from 'src/components/exam/app-payment-dialog.vue';
+import ReceiptInformationDialog from 'src/components/exam/receipt-information-dialog.vue';
 import DialogCancel from 'src/components/exam/dialog-cancel.vue';
 import TestVoucherReport from 'src/components/test-voucher-report.vue';
 import ReceiptCard from 'src/components/receipt-card.vue';
 import { useExamStore } from 'src/stores/exam.store';
+import { useUserStore } from 'src/stores/user.store';
 import { useExamDocuments } from 'src/composables/use-exam-documents';
-import { DEFAULT_EXAM_FEE_THB, PAYMENT_DURATION_SECONDS_DEFAULT } from 'src/constants/exam';
+import { useAppDate } from 'src/composables/useAppDate';
+import { PAYMENT_DURATION_SECONDS_DEFAULT } from 'src/constants/exam';
 import type { ExamHistoryItem } from 'src/types/exam';
+import type { ReceiptInformation } from 'src/types/receipt-information';
 
 const $q = useQuasar();
 const { t } = useI18n();
 const examStore = useExamStore();
+const userStore = useUserStore();
+const { formatDateRange } = useAppDate();
 
 // === State จาก Store ===
 const { pendingRegistrations, historyRecords } = storeToRefs(examStore);
@@ -195,8 +211,30 @@ onMounted(async () => {
 
 // === UI-only State ===
 const showPaymentDialog = ref(false);
+const showReceiptInformationDialog = ref(false);
 const selectedExam = ref<ExamHistoryItem | null>(null);
 const paymentExpiryTime = ref<string>(new Date().toISOString());
+const receiptInformation = ref<ReceiptInformation | null>(null);
+
+const initialReceiptInformation = computed<ReceiptInformation>(() => {
+  const user = userStore.currentUser;
+  return {
+    taxId: user?.taxId || user?.nationalId || user?.passportNo || '',
+    fullName: user?.fullNameTH || user?.fullNameEN || '',
+    phone: user?.phone || '',
+    address: user?.address || '',
+  };
+});
+
+const isForeignUser = computed(
+  () => !userStore.currentUser?.nationalId && Boolean(userStore.currentUser?.passportNo),
+);
+
+const selectedExamPaymentPeriod = computed((): string => {
+  const exam = selectedExam.value?.rawEnrollment?.SESSION?.EXAM;
+  if (!exam?.EXAM_PAY_START_DATE || !exam.EXAM_PAY_END_DATE) return '-';
+  return formatDateRange(exam.EXAM_PAY_START_DATE, exam.EXAM_PAY_END_DATE);
+});
 
 const showCancelDialog = ref(false);
 const selectedExamForCancel = ref<ExamHistoryItem | null>(null);
@@ -262,6 +300,12 @@ const handlePay = (exam: ExamHistoryItem): void => {
     paymentExpiryTime.value = expiry.toISOString();
   }
 
+  showReceiptInformationDialog.value = true;
+};
+
+const handleReceiptInformationConfirm = (value: ReceiptInformation): void => {
+  receiptInformation.value = value;
+  showReceiptInformationDialog.value = false;
   showPaymentDialog.value = true;
 };
 
