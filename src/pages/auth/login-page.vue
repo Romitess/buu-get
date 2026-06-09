@@ -67,7 +67,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from 'src/stores/auth.store';
+import { useAuthStore, type RegisterPayload } from 'src/stores/auth.store';
 import LoginCard from 'src/components/auth/login-card.vue';
 import RegisterCard from 'src/components/register-card.vue';
 import type { RegisterCredentials } from 'src/types/register';
@@ -276,10 +276,41 @@ const goBackToCredentials = (): void => {
 
 /** Step 2 complete */
 const handleSave = async (formData: RegisterFormData): Promise<void> => {
-  const finalData = {
-    ...credentials.value,
-    ...formData,
+  // สำหรับ ThaiD path ที่ไม่มีรหัสผ่าน ให้สร้างรหัสผ่านชั่วคราว (ต้อง >= 8 ตัว)
+  let passwordToUse = credentials.value.password;
+  if (!passwordToUse) {
+    const randomSuffix = Math.random().toString().slice(2, 8);
+    passwordToUse = `${formData.nationalId}${randomSuffix}`;
+    if (passwordToUse.length < 8) {
+      passwordToUse = passwordToUse.padEnd(8, '0');
+    }
+  }
+
+  const finalData: RegisterPayload = {
+    email: (formData.email || credentials.value.email).trim().toLowerCase(),
+    password: passwordToUse,
+    confirmPassword: passwordToUse,
+    userType: credentials.value.userType,
+    profileImage: formData.profileImage || undefined,
+    nationalId: formData.nationalId,
+    country: formData.country,
+    titleTH: formData.titleTH,
+    titleEN: formData.titleEN,
+    fullName: formData.fullName,
+    englishName: formData.englishName,
+    phone: formData.phone,
+    birthdate: formData.birthdate,
+    educationLevel: formData.educationLevel,
+    faculty: formData.faculty,
+    institution: formData.institution,
+    address: formData.address,
   };
+
+  // If foreigner, map nationalId to passportNo
+  if (finalData.userType === 'foreigner') {
+    finalData.passportNo = finalData.nationalId;
+    finalData.nationalId = undefined;
+  }
 
   $q.loading.show();
 

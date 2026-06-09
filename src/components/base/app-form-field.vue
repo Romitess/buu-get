@@ -7,8 +7,8 @@
 
     <template v-if="type === 'select'">
       <q-select
-        :model-value="modelValue"
-        @update:model-value="$emit('update:model-value', $event)"
+        :model-value="modelValue ?? null"
+        @update:model-value="(val) => $emit('update:modelValue', val)"
         :options="options ? [...options] : undefined"
         emit-value
         map-options
@@ -25,8 +25,8 @@
 
     <template v-else>
       <q-input
-        :model-value="modelValue"
-        @update:model-value="$emit('update:model-value', $event)"
+        :model-value="modelValue ?? null"
+        @update:model-value="(val) => $emit('update:modelValue', val)"
         :type="type === 'date' ? 'text' : type"
         :placeholder="placeholder"
         outlined
@@ -83,5 +83,5 @@ withDefaults(defineProps<Props>(), {
   reserveBottomSpace: false,
 });
 
-defineEmits(['update:model-value']);
+defineEmits(['update:modelValue']);
 </script>

@@ -245,6 +245,7 @@ const handleVerifyOtp = async (otp: string): Promise<void> => {
     emit('register', {
       email: email.value,
       password: password.value,
+      confirmPassword: confirmPassword.value,
       userType: userType.value,
       registrationMethod: 'email',
     });

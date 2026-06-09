@@ -241,10 +241,7 @@
                       <div
                         class="info-field"
                         :class="{
-                          'highlight-new':
-                            isFieldChanged('userAddress') ||
-                            isFieldChanged('userProvince') ||
-                            isFieldChanged('userZipCode'),
+                          'highlight-new': isFieldChanged('userAddress'),
                         }"
                       >
                         <span class="info-label">{{ $t('profile.address') }}</span>
@@ -378,10 +375,7 @@
                       <div
                         class="info-field"
                         :class="{
-                          'highlight-old':
-                            isFieldChanged('userAddress') ||
-                            isFieldChanged('userProvince') ||
-                            isFieldChanged('userZipCode'),
+                          'highlight-old': isFieldChanged('userAddress'),
                         }"
                       >
                         <span class="info-label">{{ $t('profile.address') }}</span>
@@ -472,9 +466,7 @@ const displayData = computed(() => {
     }
   }
 
-  const fullAddress = profile
-    ? `${profile.userAddress || ''} ${profile.userProvince ? `${t('profile.provincePrefix')}${profile.userProvince}` : ''} ${profile.userZipCode || ''}`.trim()
-    : '-';
+  const fullAddress = profile ? `${profile.userAddress || ''}`.trim() : '-';
 
   return {
     nationalId: formattedNationalId,
@@ -620,14 +612,10 @@ const getDisplayProfile = (isNew: boolean) => {
   const faculty = getProfileValue('userFaculty', isNew);
   const institution = getProfileValue('userInstitution', isNew);
   const address = getProfileValue('userAddress', isNew);
-  const province = getProfileValue('userProvince', isNew);
-  const zipCode = getProfileValue('userZipCode', isNew);
   const phone = getProfileValue('userPhone', isNew);
   const imagePath = getProfileValue('userImagePath', isNew);
 
-  const fullAddress =
-    `${address || ''} ${province ? `${t('profile.provincePrefix')}${province}` : ''} ${zipCode || ''}`.trim() ||
-    '-';
+  const fullAddress = (address || '').trim() || '-';
 
   return {
     nationalId: formatNationalId(nationalIdRaw || ''),

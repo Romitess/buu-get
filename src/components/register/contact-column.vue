@@ -57,7 +57,6 @@
         :label="t('profile.institution')"
         :placeholder="t('profile.institutionPlaceholder')"
         :rules="[(val) => true]"
-        reserve-bottom-space
       />
 
       <!-- ─── ที่อยู่สำหรับจัดส่งเอกสาร ─── -->
@@ -83,7 +82,7 @@
           outlined
           dense
           :rules="[(val) => !!val || t('profile.required')]"
-          :hide-bottom-space="false"
+          :hide-bottom-space="true"
           class="custom-input"
           :class="{ 'expanded-address': !showEmailField }"
         />

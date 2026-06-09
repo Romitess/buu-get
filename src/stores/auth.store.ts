@@ -23,11 +23,9 @@ export interface RegisterPayload {
   faculty?: string | undefined;
   institution?: string | undefined;
   address?: string | undefined;
-  province?: string | undefined;
-  zipCode?: string | undefined;
-  profileImagePath?: string | undefined;
+  passportNo?: string | undefined;
+  profileImage?: string | undefined;
   confirmPassword?: string | undefined;
-  [key: string]: unknown;
 }
 
 export interface AuthResponse {

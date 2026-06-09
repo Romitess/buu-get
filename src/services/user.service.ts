@@ -27,7 +27,6 @@ export interface LoginResponse {
 //     phone: '0984343014',
 //     educationLevel: 'ปริญญาตรี',
 //     country: 'TH',
-//     province: 'ชลบุรี',
 //     address: '104/13 ถ.มาบมะยมใต้ ต.แสนสุข',
 //     taxId: '1234567890123',
 //     thaidSynced: true,
@@ -49,7 +48,6 @@ export interface LoginResponse {
 //     phone: '0812345678',
 //     educationLevel: 'ปริญญาโท',
 //     country: 'TH',
-//     province: 'ชลบุรี',
 //     address: 'อาคารสำนักงานอธิการบดี',
 //     taxId: '1111111111111',
 //     thaidSynced: true,
@@ -81,7 +79,6 @@ export interface BackendUserResponse {
     userFaculty?: string | null;
     userInstitution?: string | null;
     userAddress?: string | null;
-    userProvince?: string | null;
     userCountry?: string | null;
     userRemark?: string | null;
     userImagePath?: string | null;
@@ -97,7 +94,7 @@ export function mapBackendUserToFrontendUser(backendUser: BackendUserResponse): 
     nationalId: backendUser.USER_NATIONAL_ID || '',
     passportNo: backendUser.USER_PASSPORT_NO || '',
     email: backendUser.USER_EMAIL,
-    status: backendUser.USER_STATUS,
+    status: backendUser.USER_STATUS?.toUpperCase() || '',
     titleTH: backendUser.PROFILE?.userTitleTh || '',
     fullNameTH: backendUser.PROFILE?.userFullnameTh || '',
     titleEN: backendUser.PROFILE?.userTitleEn || '',
@@ -106,7 +103,6 @@ export function mapBackendUserToFrontendUser(backendUser: BackendUserResponse): 
     phone: backendUser.PROFILE?.userPhone || '',
     educationLevel: backendUser.PROFILE?.userEducation || '',
     country: backendUser.PROFILE?.userCountry || '',
-    province: backendUser.PROFILE?.userProvince || '',
     address: backendUser.PROFILE?.userAddress || '',
     faculty: backendUser.PROFILE?.userFaculty || '',
     institution: backendUser.PROFILE?.userInstitution || '',
@@ -175,7 +171,12 @@ export async function getProfile(token: string): Promise<User | null> {
         Authorization: `Bearer ${token}`,
       },
     });
-    return response.data;
+
+    const profile = response.data as User;
+    if (profile && profile.status) {
+      profile.status = profile.status.toUpperCase();
+    }
+    return profile;
   } catch (err) {
     console.error('Failed to fetch profile:', err);
     return null;

@@ -2,6 +2,7 @@
 export interface RegisterCredentials {
   email: string;
   password: string;
+  confirmPassword?: string;
   userType: 'thai' | 'foreigner';
   registrationMethod: 'email' | 'thaid';
 }
@@ -24,8 +25,6 @@ export interface RegisterFormData {
   faculty: string;
   institution: string;
   address: string;
-  province: string;
-  zipCode: string;
   userImagePath?: string | undefined;
 }
 

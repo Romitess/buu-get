@@ -119,8 +119,6 @@ const dummyEnrollment = computed(() => {
         userFaculty: u.faculty || '-',
         userInstitution: u.institution || '-',
         userAddress: u.address,
-        userProvince: u.province || '-',
-        userZipCode: u.zipCode || '-',
         userRemark: u.remark || null,
       },
     },

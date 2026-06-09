@@ -33,7 +33,6 @@ export const useUserStore = defineStore('user', () => {
       { label: 'เบอร์โทรศัพท์', value: u.phone },
       { label: 'ระดับการศึกษาสูงสุด', value: u.educationLevel },
       { label: 'ประเทศ', value: u.country },
-      { label: 'จังหวัด', value: u.province },
       { label: 'ที่อยู่', value: u.address },
       { label: 'เลขประจำตัวผู้เสียภาษี', value: u.taxId },
       { label: 'ซิงค์กับ ThaiD', value: u.thaidSynced ? 'ใช่' : 'ไม่ใช่' },

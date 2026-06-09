@@ -190,8 +190,6 @@ export default {
     institutionPlaceholder: 'Burapha University',
     address: 'Thai Mailing address',
     addressPlaceholder: '169 Longhaad Bangsaen Road, T. Saensook, A. Muang',
-    province: 'Thai Province',
-    provincePlaceholder: 'Chonburi',
     phone: 'Thai Phone number',
     phonePlaceholder: 'XXX-XXX-XXXX',
     back: 'Back',

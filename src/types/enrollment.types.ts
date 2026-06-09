@@ -11,8 +11,6 @@ export interface BackendUserProfile {
   userFaculty: string | null;
   userInstitution: string | null;
   userAddress: string | null;
-  userProvince: string | null;
-  userZipCode: string | null;
   userRemark: string | null;
   userImagePath?: string | null;
 }

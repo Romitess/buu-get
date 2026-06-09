@@ -257,6 +257,8 @@ onMounted(() => {
   if (props.credentials) {
     formData.value.email = props.credentials.email;
     formData.value.password = props.credentials.password;
+    formData.value.confirmPassword =
+      props.credentials.confirmPassword || props.credentials.password;
     formData.value.country = props.isThai ? 'TH' : '';
   }
 });

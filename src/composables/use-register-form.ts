@@ -27,8 +27,6 @@ export function useRegisterForm(isEditMode: boolean, onSave: (payload: RegisterF
     faculty: '',
     institution: '',
     address: '',
-    province: '',
-    zipCode: '',
   };
 
   const formData = ref<RegisterFormData>({ ...defaultData });
@@ -58,8 +56,6 @@ export function useRegisterForm(isEditMode: boolean, onSave: (payload: RegisterF
         faculty: userData.faculty ?? '',
         institution: userData.institution ?? '',
         address: userData.address,
-        province: userData.province,
-        zipCode: userData.zipCode ?? '',
         userImagePath: userData.userImagePath || undefined,
       };
     }

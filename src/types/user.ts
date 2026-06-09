@@ -21,9 +21,7 @@ export interface User {
   phone: string;
   educationLevel: string;
   country: string;
-  province: string;
   address: string;
-  zipCode?: string;
   faculty?: string;
   institution?: string;
   taxId: string;

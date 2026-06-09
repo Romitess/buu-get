@@ -59,7 +59,6 @@
         :required="true"
         :rules="nationalIdRules"
         maxlength="13"
-        reserve-bottom-space
       />
       <AppFormField
         v-else
@@ -69,7 +68,6 @@
         :readonly="isEditMode"
         :required="true"
         :rules="[(val) => !!val || t('profile.requiredNationalId')]"
-        reserve-bottom-space
       />
 
       <!-- ─── Nationality (Foreigner Only) ─── -->
@@ -80,7 +78,6 @@
         :placeholder="t('profile.nationalityPlaceholder')"
         :required="true"
         :rules="[(val) => !!val || t('profile.required')]"
-        reserve-bottom-space
       />
 
       <!-- ─── Prefix (คำนำหน้า) ─── -->
@@ -94,10 +91,9 @@
             value: opt.value,
           }))
         "
-        @update:model-value="onTitleTHChange"
+        @update:modelValue="onTitleTHChange"
         :required="true"
         :rules="[(val) => !!val || t('profile.requiredPrefix')]"
-        reserve-bottom-space
       />
 
       <!-- ─── Thai: ชื่อ-นามสกุล (ไทย) — ซ่อนสำหรับต่างชาติ ─── -->
@@ -107,7 +103,6 @@
         :label="t('profile.fullName')"
         :required="true"
         :rules="[(val) => !!val || t('profile.requiredFullName')]"
-        reserve-bottom-space
       />
 
       <!-- ─── Full Name (EN) ─── -->
@@ -117,7 +112,6 @@
         :placeholder="t('profile.fullNameEnPlaceholder')"
         :required="true"
         :rules="[(val) => !!val || t('profile.requiredFullNameEn')]"
-        reserve-bottom-space
       />
     </div>
   </div>

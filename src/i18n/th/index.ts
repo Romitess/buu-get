@@ -139,8 +139,6 @@ export default {
     institutionPlaceholder: 'มหาวิทยาลัยบูรพา',
     address: 'ที่อยู่สำหรับจัดส่งเอกสาร',
     addressPlaceholder: '169 ถ.ลงหาดบางแสน ต.แสนสุข อ.เมืองชลบุรี',
-    province: 'จังหวัด',
-    provincePlaceholder: 'ชลบุรี',
     phone: 'เบอร์โทรศัพท์',
     phonePlaceholder: 'XXX-XXX-XXXX',
     back: 'ย้อนกลับ',
@@ -170,7 +168,6 @@ export default {
     fixReasonLabel: 'เหตุผลที่ต้องแก้ไข:',
     uploadSuccess: 'อัปโหลดรูปภาพสำเร็จ',
     uploadError: 'อัปโหลดรูปภาพล้มเหลว',
-    provincePrefix: 'จ.',
     // Validation messages
     required: 'กรุณากรอกข้อมูล',
     requiredNationalId: 'กรุณากรอกเลขประจำตัวประชาชน',
