@@ -66,7 +66,7 @@ export const useExamStore = defineStore('exam', () => {
       return {
         badgeText: dynamicBadgeText.value,
         title: dayData.title,
-        subtitle: dayData.subtitle,
+        subtitle: i18n.t('examSchedule.examDetailSubtitle'),
         locationText: dayData.location,
         feeText: dayData.fee,
         formatText: dayData.formatText || '',

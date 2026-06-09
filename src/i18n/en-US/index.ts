@@ -153,8 +153,9 @@ export default {
     },
     clockHourSuffix: '',
     registrationTitle: 'Exam Registration',
-    registrationSubtitle:
-      'Please select the date and session time you wish to register for the BUU-GET test.',
+    registrationSubtitle: 'Complete your exam registration.',
+    examDetailSubtitle:
+      'Choose a convenient test date and time by checking the available seats in each session.',
     dateLabel: 'Date',
     noBadgeRounds: 'No exam rounds',
     defaultEnrollmentTitle: 'English Proficiency Test',
