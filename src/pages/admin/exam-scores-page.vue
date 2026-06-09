@@ -81,8 +81,44 @@
           <q-tr :props="props">
             <q-td class="text-center">{{ props.row.index }}</q-td>
             <q-td class="text-center">{{ props.row.nationalId }}</q-td>
-            <q-td class="text-center">{{ props.row.titleTh }}</q-td>
-            <q-td class="text-center">{{ props.row.fullnameTh }}</q-td>
+            <q-td class="text-center">
+              <div class="row justify-center">
+                <div style="position: relative; display: inline-block">
+                  <span
+                    style="
+                      visibility: hidden;
+                      font-weight: 600;
+                      font-size: var(--font-size-xs);
+                      white-space: nowrap;
+                    "
+                  >
+                    คำนำหน้า
+                  </span>
+                  <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
+                    {{ props.row.titleTh }}
+                  </span>
+                </div>
+              </div>
+            </q-td>
+            <q-td class="text-center">
+              <div class="row justify-center">
+                <div style="position: relative; display: inline-block">
+                  <span
+                    style="
+                      visibility: hidden;
+                      font-weight: 600;
+                      font-size: var(--font-size-xs);
+                      white-space: nowrap;
+                    "
+                  >
+                    ชื่อ-นามสกุล
+                  </span>
+                  <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
+                    {{ props.row.fullnameTh }}
+                  </span>
+                </div>
+              </div>
+            </q-td>
             <q-td class="text-center">{{ props.row.hasScore ? props.row.scoreGrammar : '' }}</q-td>
             <q-td class="text-center">{{ props.row.hasScore ? props.row.scoreReading : '' }}</q-td>
             <q-td class="text-center text-weight-bold text-primary">
@@ -577,8 +613,8 @@ const columns: QTableColumn[] = [
     label: 'ชื่อ-นามสกุล',
     field: 'fullnameTh',
     align: 'center',
-    style: 'min-width: 200px',
-    headerStyle: 'min-width: 200px',
+    style: 'width: 240px',
+    headerStyle: 'width: 240px',
   },
   {
     name: 'scoreGrammar',
