@@ -8,7 +8,7 @@
 
     <Transition name="fade">
       <div
-        v-if="isFromEmail || userStore.currentUser?.remark"
+        v-if="showFixAlert"
         class="q-mb-md q-pa-md row no-wrap items-center fix-alert-banner shadow-sm"
       >
         <q-icon name="report_problem" color="warning" size="md" class="q-mr-md" />
@@ -307,6 +307,7 @@
         :label="$t('profile.save')"
         color="primary"
         class="action-btn text-weight-bold"
+        :disable="!hasChanges"
         @click="onSave"
       />
     </div>
@@ -383,7 +384,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import type { ComputedRef, WritableComputedRef } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from 'src/stores/user.store';
@@ -416,6 +417,10 @@ const currentPassword = ref('');
 const newPassword = ref('');
 const showCalendar = ref(false);
 const showCropDialog = ref(false);
+const showFixAlert = ref(false);
+
+// Track original form data to detect changes
+const originalFormData = ref<string>('');
 
 const yesterdayString = computed(() => {
   const date = new Date();
@@ -526,6 +531,10 @@ const formData = ref<ProfileFormData>({
   userImagePath: undefined,
 });
 
+const hasChanges = computed<boolean>(() => {
+  return JSON.stringify(formData.value) !== originalFormData.value;
+});
+
 const titleOptions: ComputedRef<{ label: string; value: string }[]> = computed<
   { label: string; value: string }[]
 >(() =>
@@ -584,7 +593,7 @@ const birthdateDisplay: WritableComputedRef<string> = computed<string>({
   },
 });
 
-onMounted((): void => {
+const syncFormFromUser = (): void => {
   const user = userStore.currentUser;
   if (user) {
     formData.value = {
@@ -601,8 +610,26 @@ onMounted((): void => {
       phone: user.phone || '',
       userImagePath: user.userImagePath || undefined,
     };
+    originalFormData.value = JSON.stringify(formData.value);
   }
+};
+
+const updateAlertVisibility = (): void => {
+  showFixAlert.value = isFromEmail.value || !!userStore.currentUser?.remark;
+};
+
+onMounted((): void => {
+  syncFormFromUser();
+  updateAlertVisibility();
 });
+
+// Watch for remark changes in realtime
+watch(
+  () => userStore.currentUser?.remark,
+  () => {
+    updateAlertVisibility();
+  },
+);
 
 const onCancel = (): void => {
   void router.push('/');
@@ -666,6 +693,16 @@ const onSave = async (): Promise<void> => {
     }
 
     await userStore.initialize();
+
+    // Hide banner immediately after successful save (remark is cleared on backend)
+    showFixAlert.value = false;
+    // Sync form data from refreshed user and reset change tracking
+    syncFormFromUser();
+
+    // Remove 'from' query param if present so banner won't re-show on this session
+    if (isFromEmail.value) {
+      void router.replace({ query: { ...route.query, from: undefined } });
+    }
 
     $q.notify({
       type: 'positive',
