@@ -6,7 +6,7 @@
     </div>
 
     <!-- Divider -->
-    <div class="teacher-desk-divider row items-center justify-center q-mb-sm">
+    <div class="teacher-desk-divider q-mb-sm">
       <div class="teacher-line"></div>
       <div class="q-px-md rounded-borders teacher-desk-label">
         Teacher's Desk & Projector Screen
@@ -323,12 +323,19 @@ watch([rowCount, colCount, () => props.splitLeftRight], () => {
 }
 
 .teacher-desk-divider {
-  .q-separator {
-    opacity: 0.5;
-  }
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding-inline: var(--space-sm);
+  box-sizing: border-box;
 }
 
 .teacher-desk-label {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: min(100%, 420px);
   background: #f1f2f4;
   color: #926f6c;
   font-weight: 400;
@@ -339,10 +346,15 @@ watch([rowCount, colCount, () => props.splitLeftRight], () => {
   vertical-align: middle;
   padding: 6px 16px;
   border-radius: var(--radius-sm, 4px);
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .teacher-line {
-  width: 270px;
+  flex: 1 1 120px;
+  width: auto;
+  max-width: 270px;
+  min-width: 16px;
   height: 8px;
   background: #e7bdb9;
   border-radius: var(--radius-sm, 4px);
@@ -394,5 +406,24 @@ watch([rowCount, colCount, () => props.splitLeftRight], () => {
   height: 100%;
   min-height: 300px;
   color: var(--text-muted);
+}
+
+@media (max-width: 599px) {
+  .teacher-desk-divider {
+    gap: var(--space-xs);
+    padding-inline: 0;
+  }
+
+  .teacher-desk-label {
+    max-width: 70%;
+    padding: 6px 10px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .teacher-line {
+    flex-basis: 24px;
+    height: 6px;
+  }
 }
 </style>
