@@ -32,7 +32,7 @@
         :placeholder="t('profile.addressPlaceholder')"
         outlined
         dense
-        :rules="[(val) => !!val || t('profile.required')]"
+        :rules="[(val: string | number | null | undefined) => !!val || t('profile.required')]"
         :hide-bottom-space="false"
         class="custom-input"
         :class="{ 'expanded-address': !showEmailField }"
@@ -46,7 +46,7 @@
       :label="t('profile.phone')"
       :placeholder="t('profile.phonePlaceholder')"
       :required="true"
-      :rules="[(val) => !!val || t('profile.requiredPhone')]"
+      :rules="[(val: string | number | null | undefined) => !!val || t('profile.requiredPhone')]"
       reserve-bottom-space
       mask="###-###-####"
       unmasked-value
