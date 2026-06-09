@@ -358,13 +358,6 @@ onMounted(() => {
   flex: 0 0 auto; // Stay pinned below the scrollable grid
 }
 
-.profile-action-btn {
-  width: 124px;
-  min-height: 38px;
-  border-radius: 5px;
-  font-size: 16px;
-}
-
 .profile-dialog-card {
   min-width: 235px;
   font-family: var(--font-family-base);
