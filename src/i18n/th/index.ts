@@ -908,6 +908,30 @@ export default {
         saveError: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล',
       },
     },
+    dailyRevenueReport: {
+      pageTitle: 'รายงานสรุปการรับเงินประจำวัน',
+      pageSubtitle:
+        'แสดงรายงานสรุปการรับเงินประจำวัน เพื่อใช้ในการตรวจสอบและติดตามการดำเนินงานทางการเงิน',
+      filter: {
+        startDate: 'วันที่เริ่มต้น',
+        endDate: 'ถึงวันที่',
+        department: 'ส่วนงาน',
+        examName: 'ชื่อการสอบ',
+      },
+      table: {
+        emptyLabel: 'ไม่พบข้อมูลรายงาน',
+        totalLabel: 'รวม',
+        columns: {
+          index: 'ลำดับ',
+          department: 'คณะ/ส่วนงาน',
+          examName: 'ชื่อการสอบ',
+          amount: 'จำนวนเงิน',
+        },
+      },
+      notifications: {
+        loadError: 'เกิดข้อผิดพลาดในการโหลดข้อมูลรายงาน',
+      },
+    },
   },
   auth: {
     systemDescription: 'ระบบทดสอบวัดความสามารถทางภาษาอังกฤษ',
@@ -962,6 +986,10 @@ export default {
     manageScoreCriteria: 'จัดการเกณฑ์คะแนน',
     manageScoreCriteriaAndCert: 'จัดการเกณฑ์คะแนนและใบ Certificate',
     passcodeHistory: 'ประวัติการใช้ Passcode',
+    dailyRevenueReport: 'รายงานสรุปการรับเงินประจำวัน',
+    reports: 'รายงาน',
+    receiptUsageReport: 'รายงานสรุปการใช้ใบเสร็จรับเงิน',
+    applicationFeeReport: 'รายงานสรุปการรับเงินค่าสมัครสอบ',
   },
   image: {
     upload: {

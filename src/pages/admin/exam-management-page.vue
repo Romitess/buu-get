@@ -53,6 +53,7 @@ import ExamManagementTable from 'src/components/exam/exam-management-table.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
 import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
+import { useExamSeatNavigation } from 'src/composables/use-exam-seat-navigation';
 import { ROLES } from 'src/constants/roles';
 import type { Role, PaginationModel, TableRequestProps, ExamSchedule } from 'src/types/exam.types';
 
@@ -61,6 +62,7 @@ const router = useRouter();
 const { t } = useI18n();
 const examStore = useExamStore();
 const userStore = useUserStore();
+const { navigateFromSeatAction } = useExamSeatNavigation();
 
 // State
 const isLoading = ref(false);
@@ -161,8 +163,8 @@ const handleManageRegistrants = (id: string) => {
   void router.push({ name: 'admin-exam-registrants', params: { examId: id } });
 };
 
-const handleManageSeats = (id: string) => {
-  void router.push({ name: 'admin-exam-seat-management', params: { examId: id } });
+const handleManageSeats = (id: string): void => {
+  void navigateFromSeatAction(id);
 };
 
 const handlePrintAdmitCard = (id: string) => {

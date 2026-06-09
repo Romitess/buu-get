@@ -8,7 +8,7 @@
       </div>
     </header>
 
-    <!-- Seat Map Container (zoom-to-fit, no scrollbar) -->
+    <!-- Fit the map to the available width and scroll vertically for large rooms. -->
     <div ref="containerRef" class="seat-map-content">
       <div v-if="seatsByRow.length > 0" class="seat-grid-scaling-wrapper" :style="wrapperStyle">
         <div
@@ -260,7 +260,7 @@ const measureAndScale = (): void => {
 
   const parentEl = containerRef.value;
   const availW = parentEl.clientWidth - 16; // small padding margin
-  const availH = parentEl.clientHeight ? parentEl.clientHeight - 8 : 99999;
+  const availH = containerHeight.value ? containerHeight.value - 8 : gridH;
 
   if (gridW <= 0 || gridH <= 0) {
     scaleFactor.value = 1;
@@ -269,8 +269,11 @@ const measureAndScale = (): void => {
 
   const scaleX = availW / gridW;
   const scaleY = availH / gridH;
-  const s = Math.min(scaleX, scaleY, 1.4); // allow zooming in up to 1.4x to fill empty space
-  scaleFactor.value = Math.max(0.15, s);
+  const minimumReadableScale = 0.4;
+
+  // Small rooms fit entirely in the panel. Large rooms stop shrinking at a
+  // readable size and use vertical scrolling, while always fitting the width.
+  scaleFactor.value = Math.min(scaleX, Math.max(scaleY, minimumReadableScale), 1);
 };
 
 const wrapperStyle = computed<CSSProperties>(() => {
@@ -576,9 +579,29 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   justify-content: center;
   padding-top: var(--space-xs);
   padding-bottom: var(--space-xs);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
   flex: 1;
   min-height: 0;
+}
+
+.seat-map-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.seat-map-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.seat-map-content::-webkit-scrollbar-thumb {
+  background: #b8bec8;
+  border-radius: 4px;
+}
+
+.seat-map-content::-webkit-scrollbar-thumb:hover {
+  background: #8f98a5;
 }
 
 .seat-grid-scaling-wrapper {

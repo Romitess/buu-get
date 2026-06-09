@@ -37,6 +37,7 @@
 
       <div class="row q-gutter-sm col-12 col-sm-auto justify-end">
         <AppButton
+          v-if="!isVoucherSent"
           icon="badge"
           :label="$t('admin.seatCandidates.printVoucher')"
           color="primary"
@@ -107,8 +108,23 @@ import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { EnrollmentStatus } from 'src/types/enrollment.types';
 import { bulkIssueVouchers } from 'src/services/voucher.service';
 import { updateEnrollmentStatus } from 'src/services/enrollment.service';
+import { updateExamSessionStatus } from 'src/services/exam.service';
 import { formatThaiLongDate } from 'src/utils/thai-date';
-import { EXAM_TYPE_GENERAL } from 'src/constants/exam';
+import {
+  EXAM_TYPE_GENERAL,
+  EXAM_TYPE_SPECIAL,
+  INTERNAL_EXAM_TYPE_SPECIAL,
+} from 'src/constants/exam';
+
+const SESSION_STATUS_VOUCHER_SENT = 3;
+
+const getExamRoundTypeLabel = (): string => {
+  const examType = exam.value?.EXAM_TYPE?.trim().toLowerCase();
+  if (examType === INTERNAL_EXAM_TYPE_SPECIAL || examType === EXAM_TYPE_SPECIAL.toLowerCase()) {
+    return EXAM_TYPE_SPECIAL;
+  }
+  return EXAM_TYPE_GENERAL;
+};
 
 const route = useRoute();
 const router = useRouter();
@@ -130,6 +146,8 @@ const {
   sessionLocation,
   sessionCapacity,
   sessionEnrollments,
+  activeSessionIds,
+  isVoucherSent,
   getTimeTabSessionId,
   fetchData,
 } = useExamSeatCandidates();
@@ -185,6 +203,12 @@ const startIssuingTickets = async (): Promise<void> => {
       ),
     );
 
+    await Promise.all(
+      activeSessionIds.value.map((sessionId) =>
+        updateExamSessionStatus(sessionId, SESSION_STATUS_VOUCHER_SENT),
+      ),
+    );
+
     const examId = Number(route.params.examId);
     if (!isNaN(examId) && examId > 0) {
       await fetchData(examId);
@@ -214,13 +238,11 @@ const startIssuingTickets = async (): Promise<void> => {
 };
 
 const handlePrintVoucher = (): void => {
-  const currentSession = sessions.value.find((s) => s.SS_ID === selectedSessionId.value);
-
   $q.dialog({
     component: DialogIssueTicket,
     componentProps: {
       sessionDetails: {
-        roundName: currentSession?.SS_NAME || EXAM_TYPE_GENERAL,
+        roundName: getExamRoundTypeLabel(),
         date: examDateLabel.value,
         time: sessionTime.value,
         room: sessionLocation.value,

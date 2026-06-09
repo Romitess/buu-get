@@ -120,6 +120,28 @@ export default {
       confirm: 'Confirm',
       date: 'Date',
       time: 'Time',
+      examDetails: 'Exam Details',
+      examDate: 'Exam date: {date}',
+      examTime: 'Exam time: {time}',
+      examFee: 'Fee: {fee}',
+      back: 'Back',
+      baht: 'THB',
+    },
+    convenienceDialog: {
+      title: 'Accessibility Information',
+      subtitle: 'Please select any relevant information so appropriate assistance can be arranged.',
+      infoBanner:
+        'This information is used only to provide appropriate assistance and does not affect assessment or other rights.',
+      cancelBtn: 'Cancel',
+      nextBtn: 'Next',
+      options: {
+        monk: 'Buddhist monk / novice',
+        clergy: 'Clergy / religious person',
+        disabled: 'Person with a disability',
+        pregnant: 'Pregnant',
+        none: 'None of the above',
+        general: 'General',
+      },
     },
     dialogCancel: {
       title: 'Confirm Cancellation',
@@ -751,6 +773,30 @@ export default {
         saveError: 'An error occurred while saving information',
       },
     },
+    dailyRevenueReport: {
+      pageTitle: 'Daily Revenue Summary Report',
+      pageSubtitle:
+        'Displays a daily summary of revenue for financial tracking and operations monitoring.',
+      filter: {
+        startDate: 'Start Date',
+        endDate: 'End Date',
+        department: 'Department',
+        examName: 'Exam Name',
+      },
+      table: {
+        emptyLabel: 'No revenue data found',
+        totalLabel: 'Total',
+        columns: {
+          index: 'No.',
+          department: 'Department',
+          examName: 'Exam Name',
+          amount: 'Amount',
+        },
+      },
+      notifications: {
+        loadError: 'An error occurred while loading the report data.',
+      },
+    },
   },
   components: {
     examInfoCard: {
@@ -834,6 +880,10 @@ export default {
     manageScoreCriteria: 'Manage Score Criteria',
     manageScoreCriteriaAndCert: 'Manage Score Criteria & Certificates',
     passcodeHistory: 'Passcode History',
+    dailyRevenueReport: 'Daily Revenue Report',
+    reports: 'Reports',
+    receiptUsageReport: 'Receipt Usage Report',
+    applicationFeeReport: 'Application Fee Report',
   },
   profileEditHistory: {
     pageTitle: 'Candidate Profile Edit History',

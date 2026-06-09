@@ -4,6 +4,8 @@ import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 import { fetchExamById } from 'src/services/exam.service';
 import { fetchRawEnrollmentsByExamId } from 'src/services/enrollment.service';
 
+const SESSION_STATUS_VOUCHER_SENT = 3;
+
 export interface SessionLocationOption {
   label: string;
   value: number;
@@ -77,6 +79,15 @@ export function useExamSeatCandidates() {
   });
 
   const activeSessionIds = computed(() => activeTimeSessions.value.map((session) => session.SS_ID));
+
+  const isVoucherSent = computed((): boolean => {
+    return (
+      activeTimeSessions.value.length > 0 &&
+      activeTimeSessions.value.every(
+        (session) => Number(session.SS_SESSION_STATUS) >= SESSION_STATUS_VOUCHER_SENT,
+      )
+    );
+  });
 
   const sessionLocations = computed<SeatCandidateSessionLocation[]>(() => {
     return activeTimeSessions.value.flatMap((session) => {
@@ -322,6 +333,8 @@ export function useExamSeatCandidates() {
     sessionLocation,
     sessionCapacity,
     sessionEnrollments,
+    activeSessionIds,
+    isVoucherSent,
     getTimeTabSessionId,
     fetchData,
   };

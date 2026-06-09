@@ -49,8 +49,10 @@
           <div class="col-12 col-sm-6">
             <div class="column q-gutter-y-md">
               <div class="info-field">
-                <span class="info-label">{{ $t('profile.nationalId') }}</span>
-                <span class="info-value">{{ displayData.nationalId }}</span>
+                <span class="info-label">
+                  {{ $t(displayData.isPassport ? 'profile.passportNo' : 'profile.nationalId') }}
+                </span>
+                <span class="info-value">{{ displayData.identityNumber }}</span>
               </div>
               <div class="info-field">
                 <span class="info-label">{{ $t('profile.prefix') }}</span>
@@ -143,9 +145,13 @@ const formatBirthDateBE = (dateStr: string | null | undefined): string => {
 const displayData = computed(() => {
   const profile = props.enrollment?.USER?.PROFILE;
   const user = props.enrollment?.USER;
+  const nationalId = user?.USER_NATIONAL_ID?.trim() || '';
+  const passportNo = user?.USER_PASSPORT_NO?.trim() || '';
+  const isPassport = !nationalId && Boolean(passportNo);
 
   return {
-    nationalId: formatNationalId(user?.USER_NATIONAL_ID || ''),
+    identityNumber: isPassport ? passportNo : formatNationalId(nationalId),
+    isPassport,
     titleTh: profile?.userTitleTh || '-',
     fullnameTh: profile?.userFullnameTh || '-',
     fullnameEn: profile?.userFullnameEn || '-',

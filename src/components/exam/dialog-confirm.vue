@@ -46,7 +46,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useUserStore } from 'src/stores/user.store';
-import th from 'src/i18n/th';
 import ConvenienceStep from './convenience-step.vue';
 import ConfirmStep from './confirm-step.vue';
 
@@ -65,17 +64,16 @@ const emit = defineEmits<{
 const userStore = useUserStore();
 const currentStep = ref<number>(1);
 
-const NONE_STATUS = th.examSchedule.convenienceDialog.options.none;
-const GENERAL_STATUS = th.examSchedule.convenienceDialog.options.general;
+const GENERAL_STATUS = '5';
 
-const selectedStatus = ref<string>(NONE_STATUS);
+const selectedStatus = ref<string>(GENERAL_STATUS);
 
 watch(
   () => props.modelValue,
   (val) => {
     if (val) {
       currentStep.value = 1;
-      selectedStatus.value = NONE_STATUS;
+      selectedStatus.value = GENERAL_STATUS;
     }
   },
 );
@@ -98,8 +96,7 @@ const dummyEnrollment = computed(() => {
     CREATED_AT: new Date().toISOString(),
     UPDATED_AT: new Date().toISOString(),
     DELETED_AT: null,
-    ERM_PHYSICAL_STATUS:
-      selectedStatus.value === NONE_STATUS ? GENERAL_STATUS : selectedStatus.value,
+    ERM_PHYSICAL_STATUS: selectedStatus.value,
     USER: {
       USER_ID: u.id || 0,
       USER_NATIONAL_ID: u.nationalId,

@@ -5,7 +5,7 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { useUserStore } from 'src/stores/user.store';
 import { getImageUrl } from 'src/services/image.service';
-import type { ExamHistoryItem } from 'src/types/exam';
+import type { ExamEnrollment, ExamHistoryItem } from 'src/types/exam';
 import type { VoucherData } from 'src/types/voucher';
 import type { ReceiptData } from 'src/types/receipt';
 
@@ -44,6 +44,23 @@ export function useExamDocuments() {
       return `${String(formattedHour).padStart(2, '0')}.${min} ${ampm}`;
     }
     return timeStr;
+  };
+
+  const getTestSessionLabel = (currentSession: NonNullable<ExamEnrollment['SESSION']>): string => {
+    const examDate = currentSession.EXAM?.EXAM_DATE;
+    const examYear = examDate ? new Date(examDate).getFullYear() : new Date().getFullYear();
+    const sessionTimeKey = `${currentSession.SS_START_TIME || ''}-${currentSession.SS_END_TIME || ''}`;
+    const uniqueTimeKeys = [
+      ...new Set(
+        (currentSession.EXAM?.SESSIONS ?? [])
+          .map((session) => `${session.SS_START_TIME || ''}-${session.SS_END_TIME || ''}`)
+          .filter((timeKey) => timeKey !== '-'),
+      ),
+    ].sort();
+    const sessionIndex = uniqueTimeKeys.indexOf(sessionTimeKey);
+    const sessionNumber = sessionIndex >= 0 ? sessionIndex + 1 : 1;
+
+    return `${sessionNumber}/${examYear}`;
   };
 
   const printVoucher = async (exam: ExamHistoryItem): Promise<void> => {
@@ -129,7 +146,7 @@ export function useExamDocuments() {
         seatNo: enrollment.LOCATION_SEAT?.LS_SEAT_LABEL || 'A1',
         voucherNo: `ENG${examYear}-${String(enrollment.ERM_ID).padStart(3, '0')}`,
         citizenId: user?.nationalId || '1-1234-12345-12-1',
-        testSession: session.SS_NAME || '1/2569',
+        testSession: getTestSessionLabel(session),
         profileImage: user?.userImagePath ? getImageUrl(user.userImagePath) : undefined,
         barcodeValue: `ENG${examYear}${String(enrollment.ERM_ID).padStart(5, '0')}`,
       };

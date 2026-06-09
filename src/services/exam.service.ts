@@ -266,6 +266,12 @@ export const fetchExamById = async (id: number): Promise<BackendExam> => {
   });
 };
 
+export const updateExamSessionStatus = async (sessionId: number, status: number): Promise<void> => {
+  await api.patch(`/exam-sessions/${sessionId}`, {
+    SS_SESSION_STATUS: status,
+  });
+};
+
 export const buddhistToGregorian = (dateStr: string): string => {
   if (!dateStr || !dateStr.includes('/')) return '';
   const parts = dateStr.split('/');
@@ -542,8 +548,10 @@ export const updateEnrollmentStatus = async (
 };
 
 export interface CreatePasscodeItemDto {
-  nationalId: string;
-  fullName: string;
+  nationalId?: string | undefined;
+  passportNo?: string | undefined;
+  fullName?: string | undefined;
+  fullNameEn?: string | undefined;
   passcode: string;
 }
 
