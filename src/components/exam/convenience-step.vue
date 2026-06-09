@@ -57,7 +57,6 @@
 
 <script setup lang="ts">
 import AppButton from 'src/components/base/app-button.vue';
-import th from 'src/i18n/th';
 
 defineProps<{
   modelValue: string;
@@ -71,23 +70,23 @@ const emit = defineEmits<{
 
 const options = [
   {
-    value: th.examSchedule.convenienceDialog.options.monk,
+    value: '0',
     labelKey: 'examSchedule.convenienceDialog.options.monk',
   },
   {
-    value: th.examSchedule.convenienceDialog.options.clergy,
+    value: '1',
     labelKey: 'examSchedule.convenienceDialog.options.clergy',
   },
   {
-    value: th.examSchedule.convenienceDialog.options.disabled,
+    value: '2',
     labelKey: 'examSchedule.convenienceDialog.options.disabled',
   },
   {
-    value: th.examSchedule.convenienceDialog.options.pregnant,
+    value: '3',
     labelKey: 'examSchedule.convenienceDialog.options.pregnant',
   },
   {
-    value: th.examSchedule.convenienceDialog.options.none,
+    value: '5',
     labelKey: 'examSchedule.convenienceDialog.options.none',
   },
 ];

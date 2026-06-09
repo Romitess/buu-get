@@ -120,6 +120,28 @@ export default {
       confirm: 'Confirm',
       date: 'Date',
       time: 'Time',
+      examDetails: 'Exam Details',
+      examDate: 'Exam date: {date}',
+      examTime: 'Exam time: {time}',
+      examFee: 'Fee: {fee}',
+      back: 'Back',
+      baht: 'THB',
+    },
+    convenienceDialog: {
+      title: 'Accessibility Information',
+      subtitle: 'Please select any relevant information so appropriate assistance can be arranged.',
+      infoBanner:
+        'This information is used only to provide appropriate assistance and does not affect assessment or other rights.',
+      cancelBtn: 'Cancel',
+      nextBtn: 'Next',
+      options: {
+        monk: 'Buddhist monk / novice',
+        clergy: 'Clergy / religious person',
+        disabled: 'Person with a disability',
+        pregnant: 'Pregnant',
+        none: 'None of the above',
+        general: 'General',
+      },
     },
     dialogCancel: {
       title: 'Confirm Cancellation',
