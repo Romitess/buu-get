@@ -8,15 +8,49 @@
 
       <!-- Center: Navigation Links (Desktop) -->
       <nav class="app-header__nav" v-if="!$q.screen.lt.md">
-        <router-link
-          v-for="link in navLinks"
-          :key="link.name"
-          :to="link.path || (link.children?.[0]?.path ?? '/')"
-          class="app-header__nav-link"
-          :class="{ 'app-header__nav-link--active': isActiveRoute(link) }"
-        >
-          {{ link.label }}
-        </router-link>
+        <template v-for="link in navLinks" :key="link.name">
+          <!-- Dropdown link if has children -->
+          <div
+            v-if="link.children && link.children.length > 0"
+            class="app-header__nav-link app-header__nav-link--dropdown"
+            :class="{ 'app-header__nav-link--active': isActiveRoute(link) }"
+          >
+            <span>{{ link.label }}</span>
+            <q-icon name="expand_more" size="16px" class="q-ml-xs" />
+
+            <q-menu
+              auto-close
+              anchor="bottom left"
+              self="top left"
+              :offset="[0, 8]"
+              class="nav-dropdown"
+            >
+              <q-list style="min-width: 220px">
+                <q-item
+                  v-for="child in link.children"
+                  :key="child.name"
+                  clickable
+                  :to="child.path"
+                  class="nav-dropdown__item"
+                  :active="route.path === child.path"
+                  active-class="nav-dropdown__item--active"
+                >
+                  <q-item-section>{{ child.label }}</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </div>
+
+          <!-- Normal link if no children -->
+          <router-link
+            v-else
+            :to="link.path ?? '/'"
+            class="app-header__nav-link"
+            :class="{ 'app-header__nav-link--active': isActiveRoute(link) }"
+          >
+            {{ link.label }}
+          </router-link>
+        </template>
       </nav>
 
       <!-- Right: Auth Actions -->
@@ -490,6 +524,36 @@ const logout = async () => {
 
   .app-header__logo {
     height: 28px;
+  }
+}
+</style>
+
+<style lang="scss">
+.nav-dropdown {
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid var(--neutral-200);
+  overflow: hidden;
+}
+
+.nav-dropdown__item {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  color: var(--text-primary);
+  min-height: 40px;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+
+  &:hover {
+    background-color: var(--neutral-50);
+    color: var(--primary);
+  }
+
+  &--active {
+    color: var(--primary);
+    font-weight: var(--font-weight-semibold);
+    background-color: var(--neutral-50);
   }
 }
 </style>
