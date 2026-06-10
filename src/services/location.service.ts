@@ -24,7 +24,15 @@ export interface BackendLocationSeat {
 
 export const fetchLocations = async (): Promise<BackendLocation[]> => {
   const response = await api.get<BackendLocation[]>('/exam-locations');
-  return response.data;
+  return Promise.all(
+    response.data.map(async (location) => {
+      try {
+        return await fetchLocationById(location.LOCATION_ID);
+      } catch {
+        return location;
+      }
+    }),
+  );
 };
 
 export const createLocation = async (payload: LocationPayload): Promise<BackendLocation> => {

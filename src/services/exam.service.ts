@@ -394,7 +394,20 @@ export const fetchFundSources = async (): Promise<FundSource[]> => {
 export const fetchExamLocations = async (): Promise<ExamLocationOption[]> => {
   try {
     const response = await api.get<BackendLocation[]>('/exam-locations');
-    return response.data.map((loc) => ({
+    const locations = await Promise.all(
+      response.data.map(async (location) => {
+        try {
+          const detailResponse = await api.get<BackendLocation>(
+            `/exam-locations/${location.LOCATION_ID}`,
+          );
+          return detailResponse.data;
+        } catch {
+          return location;
+        }
+      }),
+    );
+
+    return locations.map((loc) => ({
       label: formatLocationWithRoom(loc.LOCATION_NAME, loc.LOCATION_ROOM_NO),
       value: loc.LOCATION_ID,
       raw: loc,
