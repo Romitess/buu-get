@@ -168,7 +168,7 @@ const onSubmit = async () => {
           await router.push({ name: 'exam-schedule' });
         }
       } else if (role === ROLES.EXAM_OPERATIONS_OFFICER) {
-        await router.push({ name: 'admin-location-management' });
+        await router.push({ name: 'admin-exam-management' });
       } else if (
         role === ROLES.ADMIN ||
         role === ROLES.STAFF ||
