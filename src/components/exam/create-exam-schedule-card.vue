@@ -225,7 +225,13 @@
                 dense
                 placeholder="เลือกผู้คุมสอบ"
                 dropdown-icon="keyboard_arrow_down"
-                class="custom-input"
+                class="custom-input proctors-select"
+                :class="{
+                  'proctors-select--stacked': openProctorSelectKey === `${activeSlotIndex}_${rIdx}`,
+                  'proctors-select--closed': openProctorSelectKey !== `${activeSlotIndex}_${rIdx}`,
+                }"
+                @popup-show="openProctorSelectKey = `${activeSlotIndex}_${rIdx}`"
+                @popup-hide="openProctorSelectKey = null"
               />
             </div>
             <div class="col-12 col-md-3" :data-field="`seats_${activeSlotIndex}_${rIdx}`">
@@ -337,6 +343,7 @@ const emit = defineEmits([
 ]);
 
 const showExamDate = ref(false);
+const openProctorSelectKey = ref<string | null>(null);
 
 const preventNegativeAndDecimal = (evt: KeyboardEvent) => {
   if (['-', '+', 'e', 'E', '.', ','].includes(evt.key)) {
@@ -509,5 +516,35 @@ const autoFormatTime = (time: string): string => {
 .calendar-menu {
   border-radius: var(--radius-lg);
   overflow: hidden;
+}
+
+.proctors-select--closed :deep(.q-field__native) {
+  flex-wrap: nowrap !important;
+  overflow: hidden !important;
+  max-width: 100%;
+}
+
+.proctors-select--closed :deep(.q-chip) {
+  flex-shrink: 0 !important;
+}
+
+.proctors-select--stacked :deep(.q-field__native) {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 4px;
+}
+
+.proctors-select--stacked :deep(.q-chip) {
+  margin: 2px 0 !important;
+  max-width: 100%;
+}
+
+.proctors-select :deep(.q-chip__icon--remove),
+.proctors-select :deep(.q-chip__close) {
+  display: none !important;
+}
+
+.proctors-select :deep(.q-chip) {
+  padding-right: 12px !important;
 }
 </style>

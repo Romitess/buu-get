@@ -61,31 +61,19 @@
       </div>
 
       <!-- Candidates Table -->
-      <q-table
-        :rows="filteredCandidates"
+      <BaseTable
         :columns="columns"
-        row-key="nationalId"
-        flat
-        bordered
-        dense
-        :pagination="{ rowsPerPage: 10 }"
+        :rows="filteredCandidates"
+        :pagination="pagination"
+        empty-label="No data available in table"
         class="candidates-table"
-        no-data-label="No data available in table"
+        @request="onRequest"
       >
-        <template v-slot:body-cell-index="props">
-          <q-td :props="props">
-            {{ props.rowIndex + 1 }}
-          </q-td>
+        <!-- Index Column -->
+        <template v-slot:body-cell-index="{ row }">
+          <div class="text-left">{{ getIndex(row) }}</div>
         </template>
-        <template v-slot:no-data="{ message }">
-          <div
-            class="full-width row flex-center bg-grey-4 text-grey-8 q-pa-sm"
-            style="min-height: 40px"
-          >
-            <span>{{ message }}</span>
-          </div>
-        </template>
-      </q-table>
+      </BaseTable>
     </q-card-section>
 
     <!-- CSV Import Dialog -->
@@ -102,15 +90,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { exportFile } from 'quasar';
 import type { EligibleCandidate } from 'src/composables/use-create-exam';
 import type { QTableColumn } from 'quasar';
 import type { PasscodeType } from 'src/types/exam';
+import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
+import BaseTable from 'src/components/shared/base-table.vue';
 import DialogCsvImport from 'src/components/exam/dialog-csv-import.vue';
 import DialogPasscodeType from 'src/components/exam/dialog-passcode-type.vue';
 
-defineProps<{
+const props = defineProps<{
   /** Filtered candidates to display */
   filteredCandidates: EligibleCandidate[];
   locked?: boolean;
@@ -124,6 +114,38 @@ const emit = defineEmits<{
   (e: 'url-submitted', url: string): void;
   (e: 'export-candidates'): void;
 }>();
+
+const pagination = ref<PaginationModel>({
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: props.filteredCandidates.length,
+});
+
+watch(
+  () => props.filteredCandidates,
+  (newCandidates) => {
+    pagination.value.rowsNumber = newCandidates.length;
+    const maxPage = Math.ceil(newCandidates.length / pagination.value.rowsPerPage) || 1;
+    if (pagination.value.page > maxPage) {
+      pagination.value.page = 1;
+    }
+  },
+  { deep: true },
+);
+
+const getIndex = (row: EligibleCandidate): number => {
+  const page = pagination.value.page ?? 1;
+  const rowsPerPage = pagination.value.rowsPerPage ?? 10;
+  const localIndex = props.filteredCandidates.indexOf(row);
+  return (page - 1) * rowsPerPage + localIndex + 1;
+};
+
+const onRequest = (reqProps: TableRequestProps) => {
+  if (reqProps.pagination) {
+    pagination.value.page = reqProps.pagination.page;
+    pagination.value.rowsPerPage = reqProps.pagination.rowsPerPage;
+  }
+};
 
 /** Dialog visibility state */
 const showCsvImportDialog = ref(false);
@@ -171,26 +193,26 @@ const columns: QTableColumn[] = [
     name: 'index',
     label: 'ลำดับ',
     field: 'index',
-    align: 'center',
+    align: 'left',
     style: 'width: 80px',
   },
   {
     name: 'nationalId',
     label: 'รหัสประชาชน',
     field: 'nationalId',
-    align: 'center',
+    align: 'left',
   },
   {
     name: 'fullName',
     label: 'ชื่อ-นามสกุล',
     field: 'fullName',
-    align: 'center',
+    align: 'left',
   },
   {
     name: 'passcode',
     label: 'Passcode',
     field: 'passcode',
-    align: 'center',
+    align: 'left',
   },
 ];
 </script>
@@ -210,16 +232,7 @@ const columns: QTableColumn[] = [
   color: white !important;
 }
 
-.candidates-table :deep(thead tr th) {
-  background-color: var(--primary, #1565c0);
-  color: white;
-  font-weight: 700;
-  font-size: 13px;
-}
-.candidates-table :deep(tbody tr td) {
-  font-size: 13px;
-}
-.candidates-table :deep(.q-table__bottom) {
-  font-size: 12px;
+.candidates-table :deep(.base-table thead tr th) {
+  text-align: left !important;
 }
 </style>
