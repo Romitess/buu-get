@@ -1,129 +1,134 @@
 <template>
   <div class="receipt-container q-mx-auto">
-    <!-- Header Section -->
-    <div class="row items-start justify-between q-mb-xl">
-      <div class="row items-center">
-        <q-img
-          src="/buu-logo.png"
-          style="width: 90px; height: 90px"
-          fit="contain"
-          class="q-mr-md"
-        />
-        <div>
-          <div class="text-subtitle1 text-weight-bold receipt-org-title">
-            {{ buuInfo.nameTH }} {{ buuInfo.nameEN }}
-          </div>
-          <div class="text-caption text-grey-8 receipt-org-meta">
+    <!-- ═══════════════════════════════════════════════
+         HEADER: Logo + Org Info (left) | Title + Date (right)
+    ════════════════════════════════════════════════ -->
+    <div class="receipt-header">
+      <!-- Left: Logo + University info -->
+      <div class="receipt-header-left">
+        <q-img src="/buu-logo.png" class="receipt-logo" fit="contain" />
+        <div class="receipt-org-info">
+          <div class="receipt-org-title">{{ buuInfo.nameTH }} {{ buuInfo.nameEN }}</div>
+          <div class="receipt-org-meta">
             {{ buuInfo.addressTH }}<br />
             {{ buuInfo.addressEN }}<br />
-            เลขประจำตัวผู้เสียภาษีอากร (Tax ID) {{ buuInfo.taxId }}
+            {{ t('exam.receipt.card.taxIdLabel') }} {{ buuInfo.taxId }}
           </div>
         </div>
       </div>
-      <div class="text-right q-mt-sm">
-        <div class="text-subtitle1 text-weight-bold">ใบเสร็จรับเงิน</div>
-        <div class="text-subtitle2 text-weight-bold" style="letter-spacing: 1px">RECEIPT</div>
+
+      <!-- Right: Title stacked, date below -->
+      <div class="receipt-header-right">
+        <div class="receipt-title-th">{{ t('exam.receipt.card.title') }}</div>
+        <div class="receipt-title-en">{{ t('exam.receipt.card.titleEn') }}</div>
       </div>
     </div>
 
-    <!-- Meta Info Section -->
-    <div class="row justify-end q-mb-md">
-      <div class="text-caption text-grey-8">วันที่ (Date) {{ formattedDate }}</div>
-    </div>
+    <!-- Date row: right-aligned, below header -->
+    <div class="receipt-date-row">{{ t('exam.receipt.card.date') }} {{ formattedDate }}</div>
 
-    <div class="q-mb-xl text-caption text-grey-9" style="line-height: 2">
-      <div>เลขที่ใบเสร็จรับเงิน (Receipt No.) &nbsp;&nbsp;{{ receipt.receiptNo }}</div>
-      <div>ได้รับเงินจาก (Received form) &nbsp;&nbsp;{{ receipt.fullName }}</div>
-      <div class="q-mt-sm">
-        เลขประจำตัวผู้เสียภาษีอากร (Tax No.) &nbsp;&nbsp;{{ receipt.nationalId }}
+    <!-- ═══════════════════════════════════════════════
+         META INFO: Receipt No / Received From (group 1)
+                    Tax No / Address (group 2)
+    ════════════════════════════════════════════════ -->
+    <div class="receipt-meta-group">
+      <div class="receipt-meta-line">
+        <span class="receipt-meta-label">{{ t('exam.receipt.card.receiptNo') }}</span>
+        <span class="receipt-meta-value">{{ receipt.receiptNo }}</span>
       </div>
-      <div>ที่อยู่ (Address) &nbsp;&nbsp;{{ receipt.address || '-' }}</div>
+      <div class="receipt-meta-line">
+        <span class="receipt-meta-label">{{ t('exam.receipt.card.receivedFrom') }}</span>
+        <span class="receipt-meta-value">{{ receipt.fullName }}</span>
+      </div>
     </div>
 
-    <!-- Table Section -->
-    <div class="receipt-table-wrapper relative-position q-mb-xl">
-      <!-- Watermark -->
-      <div class="watermark-container absolute-center">
-        <q-img
-          src="/buu-logo.png"
-          style="width: 300px; opacity: 0.15; filter: grayscale(100%)"
-          fit="contain"
-        />
+    <div class="receipt-meta-group receipt-meta-group--second">
+      <div class="receipt-meta-line">
+        <span class="receipt-meta-label">{{ t('exam.receipt.card.taxNo') }}</span>
+        <span class="receipt-meta-value">{{ receipt.nationalId }}</span>
+      </div>
+      <div class="receipt-meta-line">
+        <span class="receipt-meta-label">{{ t('exam.receipt.card.address') }}</span>
+        <span class="receipt-meta-value">{{ receipt.address || '-' }}</span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         TABLE
+    ════════════════════════════════════════════════ -->
+    <div class="receipt-table-wrapper">
+      <!-- Watermark inside table area -->
+      <div class="watermark-container">
+        <q-img src="/buu-logo.png" class="receipt-watermark" fit="contain" />
       </div>
 
       <table class="receipt-table">
         <thead>
           <tr>
-            <th class="col-no">ลำดับ<br />(No.)</th>
-            <th class="col-desc">รายการ<br />(Description)</th>
-            <th class="col-amount">จำนวนเงิน/บาท</th>
+            <th class="col-no">
+              {{ t('exam.receipt.card.tableNoLabel') }}<br />
+              ({{ t('exam.receipt.card.tableNoShort') }})
+            </th>
+            <th class="col-desc">
+              {{ t('exam.receipt.card.tableDescLabel') }}<br />
+              ({{ t('exam.receipt.card.tableDescShort') }})
+            </th>
+            <th class="col-amount">{{ t('exam.receipt.card.tableAmount') }}</th>
           </tr>
         </thead>
         <tbody>
-          <!-- Item Row -->
-          <tr>
-            <td class="text-center q-pt-md">1</td>
-            <td class="q-pt-md">{{ receipt.examName }}</td>
-            <td class="text-right q-pt-md">{{ formatCurrency(receipt.amount) }}</td>
+          <tr class="data-row">
+            <td class="text-center">1</td>
+            <td>{{ receipt.examName }}</td>
+            <td class="text-right">{{ formatCurrency(receipt.amount) }}</td>
           </tr>
-          <!-- Spacer Row to push total down -->
+          <!-- spacer pushes tfoot down — 3 cells รักษา border แต่ละ column -->
           <tr class="spacer-row">
-            <td></td>
-            <td></td>
-            <td></td>
+            <td class="spacer-cell"></td>
+            <td class="spacer-cell"></td>
+            <td class="spacer-cell"></td>
           </tr>
         </tbody>
         <tfoot>
           <tr>
-            <td colspan="2" class="text-left q-px-md">
-              รวมเงิน (total) {{ numberToThaiText(receipt.amount) }}
+            <td colspan="2" class="total-label-cell">
+              {{ t('exam.receipt.card.totalLabel') }} {{ numberToThaiText(receipt.amount) }}
             </td>
-            <td class="text-right">{{ formatCurrency(receipt.amount) }}</td>
+            <td class="total-amount-cell text-right">
+              {{ formatCurrency(receipt.amount) }}
+            </td>
           </tr>
         </tfoot>
       </table>
     </div>
 
-    <!-- Footer Section -->
-    <div
-      class="row justify-between text-caption text-grey-8"
-      style="line-height: 1.6; font-size: 11px"
-    >
-      <div class="col-9">
-        <div>URL ตรวจสอบใบเสร็จอิเล็กทรอนิกส์ E-receipt verification URL</div>
-        <div class="q-mb-md">{{ buuInfo.receiptVerifyUrl }}</div>
-        <div>หมายเหตุ :</div>
-        <div class="q-pl-lg q-mb-sm">
-          1. ใบเสร็จรับเงินนี้ได้ดำเนินการด้วยวิธีการทางอิเล็กทรอนิกส์ และผู้ชำระเงินสามารถสแกน QR
-          Code นี้เพื่อตรวจสอบความถูกต้อง/<br />
-          <span class="text-grey-6"
-            >This receipt has been issued by electronic means. The payer can scan the QR code to
-            verify its accuracy.</span
-          >
+    <!-- ═══════════════════════════════════════════════
+         FOOTER: URL + Notes (left) | Signature + Name + QR (right)
+    ════════════════════════════════════════════════ -->
+    <div class="receipt-footer">
+      <!-- Left: URL & Notes -->
+      <div class="receipt-footer-left">
+        <div class="footer-line">{{ t('exam.receipt.card.verifyUrl') }}</div>
+        <div class="footer-line footer-url q-mb-sm">{{ buuInfo.receiptVerifyUrl }}</div>
+        <div class="footer-line q-mb-xs">{{ t('exam.receipt.card.notes') }}</div>
+        <div class="footer-note q-mb-xs">
+          {{ t('exam.receipt.card.note1') }}<br />
+          <span class="footer-note-en">{{ t('exam.receipt.card.note1En') }}</span>
         </div>
-        <div class="q-pl-lg">
-          2. ใบเสร็จรับเงินฉบับนี้จะสมบูรณ์เมื่อได้รับชำระเงินเรียบร้อยแล้ว
-          และมีลายมือชื่อของผู้รับเงินครบถ้วน/<br />
-          <span class="text-grey-6"
-            >This receipt will be valid when the full payment is received and signed by the bill
-            collector.</span
-          >
+        <div class="footer-note">
+          {{ t('exam.receipt.card.note2') }}<br />
+          <span class="footer-note-en">{{ t('exam.receipt.card.note2En') }}</span>
         </div>
       </div>
 
-      <div class="col-3 flex column items-end">
-        <div class="signature-box flex flex-center q-mb-sm text-grey-7">ภาพลายมือชื่อ</div>
-        <div class="text-center q-mb-sm" style="width: 140px">
-          ( &nbsp;&nbsp;{{ receipt.fullName }} &nbsp;&nbsp;)<br />
-          ผู้รับเงิน (Collector)
+      <!-- Right: Signature box → Name → QR -->
+      <div class="receipt-footer-right">
+        <div class="signature-box">{{ t('exam.receipt.card.signatureBox') }}</div>
+        <div class="collector-name">
+          ( {{ receipt.fullName }} )<br />
+          {{ t('exam.receipt.card.collector') }}
         </div>
-        <q-img
-          v-if="showQr"
-          src="/receipt-qr.png"
-          style="width: 90px; height: 90px"
-          fit="contain"
-          class="q-mt-sm"
-        />
+        <q-img v-if="showQr" src="/receipt-qr.png" class="receipt-qr" fit="contain" />
       </div>
     </div>
   </div>
@@ -131,6 +136,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { ReceiptCardProps } from 'src/types/receipt';
 import { buuInfo } from 'src/services/university.service';
 import { numberToThaiText } from 'src/utils/thai-currency';
@@ -139,7 +145,8 @@ const props = withDefaults(defineProps<ReceiptCardProps>(), {
   showQr: true,
 });
 
-// Computed properties for formatting
+const { t } = useI18n();
+
 const formattedDate = computed(() => {
   if (!props.receipt.transactionDate) return 'xx/xx/xxxx';
   const date = new Date(props.receipt.transactionDate);
@@ -155,16 +162,18 @@ const formatCurrency = (amount: number) => {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap');
-
+/* ──────────────────────────────────────────────────
+   ROOT CONTAINER  (A4)
+────────────────────────────────────────────────── */
 .receipt-container {
   width: 210mm;
   min-height: 297mm;
   margin: 20px auto;
   background-color: var(--surface-card);
-  padding: 20mm;
-  font-family: 'Sarabun', sans-serif;
+  padding: 16mm 16mm 14mm;
+  font-family: var(--font-family-base);
   color: var(--receipt-text);
+  font-size: 12px;
   box-shadow: var(--receipt-shadow);
   box-sizing: border-box;
   position: relative;
@@ -172,83 +181,287 @@ const formatCurrency = (amount: number) => {
   flex-direction: column;
 }
 
+/* ──────────────────────────────────────────────────
+   HEADER
+────────────────────────────────────────────────── */
+.receipt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+
+.receipt-header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.receipt-logo {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+}
+
+.receipt-org-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .receipt-org-title {
-  letter-spacing: 0.5px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  line-height: 1.4;
 }
 
 .receipt-org-meta {
-  line-height: 1.3;
   font-size: 11px;
+  color: var(--receipt-text-light, #555);
+  line-height: 1.5;
 }
 
-/* Table Styles */
+/* Right block: title */
+.receipt-header-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.receipt-title-th {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  line-height: 1.4;
+}
+
+.receipt-title-en {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  line-height: 1.3;
+}
+
+/* Date row: flush right, below header block */
+.receipt-date-row {
+  text-align: right;
+  font-size: 11.5px;
+  color: var(--receipt-text-light, #555);
+  margin-bottom: 14px;
+  margin-top: 2px;
+}
+
+/* ──────────────────────────────────────────────────
+   META INFO
+────────────────────────────────────────────────── */
+.receipt-meta-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11.5px;
+  color: var(--receipt-text, #222);
+}
+
+/* Gap between group 1 and group 2 */
+.receipt-meta-group--second {
+  margin-top: 10px;
+  margin-bottom: 14px;
+}
+
+.receipt-meta-group:first-of-type {
+  margin-bottom: 0;
+}
+
+.receipt-meta-line {
+  display: flex;
+  align-items: baseline;
+}
+
+.receipt-meta-label {
+  /* fixed width so values align */
+  min-width: 220px;
+  font-size: 11.5px;
+  color: var(--receipt-text, #222);
+  line-height: 1.8;
+}
+
+.receipt-meta-value {
+  flex: 1;
+  font-size: 11.5px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+/* ──────────────────────────────────────────────────
+   TABLE
+────────────────────────────────────────────────── */
 .receipt-table-wrapper {
+  position: relative;
   width: 100%;
-  flex-grow: 1; /* Allow table section to take up available space */
+  height: 150mm; /* เพิ่มจาก 120mm → 150mm */
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+
+/* Watermark sits behind the table */
+.watermark-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.receipt-watermark {
+  width: 200px;
+  opacity: 0.13;
+  filter: grayscale(100%);
 }
 
 .receipt-table {
   width: 100%;
   border-collapse: collapse;
-  z-index: 1;
   position: relative;
+  z-index: 1;
+  /* ใช้ table-layout fixed + height 100% เพื่อให้ tbody ยืดได้ */
+  table-layout: fixed;
 }
 
+/* All cells share base border */
 .receipt-table th,
 .receipt-table td {
-  border: 1px solid var(--receipt-border);
-  padding: 10px 15px;
+  border: 1px solid var(--receipt-border, #bbb);
+  padding: 10px 14px;
+  font-size: 12px;
 }
 
-.receipt-table th {
+/* THEAD */
+.receipt-table thead th {
   text-align: center;
-  font-weight: 500;
-  color: var(--receipt-text-light);
-  padding: 15px 10px;
-  background-color: var(--receipt-header-bg);
+  font-weight: 600;
+  background-color: transparent;
+  color: var(--receipt-text, #222);
+  padding: 12px 14px;
+  line-height: 1.4;
 }
 
+/* TBODY data row */
 .receipt-table tbody td {
+  vertical-align: top;
   border-top: none;
   border-bottom: none;
-  vertical-align: top;
 }
 
-.spacer-row td {
-  height: 400px; /* Increased height to fill A4 space better */
+/* SPACER ROW — 150mm ≈ 567px − thead(44) − data-row(44) − tfoot(46) ≈ 433px */
+.spacer-row .spacer-cell {
+  height: 390px;
+  padding: 0;
+  border-top: none;
+  border-bottom: none;
 }
 
+/* TFOOT */
 .receipt-table tfoot td {
-  border-top: 1px solid var(--receipt-border);
+  border-top: 1px solid var(--receipt-border, #bbb);
+  border-bottom: 1px solid var(--receipt-border, #bbb);
   font-weight: 600;
-  padding: 15px;
 }
 
+.total-label-cell {
+  padding: 12px 14px;
+}
+
+.total-amount-cell {
+  padding: 12px 14px;
+}
+
+/* Column widths */
 .col-no {
   width: 10%;
 }
-
 .col-desc {
   width: 70%;
 }
-
 .col-amount {
   width: 20%;
 }
 
-.watermark-container {
-  z-index: 0;
-  pointer-events: none;
+/* ──────────────────────────────────────────────────
+   FOOTER
+────────────────────────────────────────────────── */
+.receipt-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--receipt-text-light, #555);
+}
+
+.receipt-footer-left {
+  flex: 1;
+}
+
+.footer-line {
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.footer-url {
+  color: var(--receipt-text, #222);
+}
+
+.footer-note {
+  padding-left: 14px;
+  font-size: 11px;
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+
+.footer-note-en {
+  color: #888;
+}
+
+/* Right column */
+.receipt-footer-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 150px;
 }
 
 .signature-box {
-  width: 140px;
-  height: 60px;
-  border: 1px solid var(--receipt-signature-border);
-  font-size: 12px;
+  width: 150px;
+  height: 54px;
+  border: 1px solid var(--receipt-signature-border, #aaa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--receipt-text-light, #777);
+  margin-bottom: 4px;
 }
 
-/* Print specific styles */
+.collector-name {
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--receipt-text, #222);
+  margin-bottom: 4px;
+  width: 150px;
+}
+
+.receipt-qr {
+  width: 90px;
+  height: 90px;
+}
+
+/* ──────────────────────────────────────────────────
+   PRINT
+────────────────────────────────────────────────── */
 @media print {
   @page {
     size: A4;
@@ -264,7 +477,7 @@ const formatCurrency = (amount: number) => {
   .receipt-container {
     width: 210mm;
     height: 297mm;
-    padding: 20mm;
+    padding: 16mm 16mm 14mm;
     margin: 0;
     box-shadow: none;
     border: none;

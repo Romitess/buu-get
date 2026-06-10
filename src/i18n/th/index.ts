@@ -108,6 +108,34 @@ export default {
       downloading: 'กำลังเตรียมใบเสร็จรับเงินเพื่อดาวน์โหลด (Generating Electronic Receipt)...',
       downloadSuccess: 'ดาวน์โหลดใบเสร็จรับเงินเรียบร้อยแล้ว (PDF)',
       downloadError: 'เกิดข้อผิดพลาดในการสร้างใบเสร็จ กรุณาลองใหม่อีกครั้ง',
+      card: {
+        title: 'ใบเสร็จรับเงิน',
+        titleEn: 'RECEIPT COPY',
+        date: 'วันที่ (Date)',
+        receiptNo: 'เลขที่ใบเสร็จรับเงิน (Receipt No.)',
+        receivedFrom: 'ได้รับเงินจาก (Received from)',
+        taxNo: 'เลขประจำตัวผู้เสียภาษีอากร (Tax No.)',
+        address: 'ที่อยู่ (Address)',
+        tableNoLabel: 'ลำดับ',
+        tableNoShort: 'No.',
+        tableDescLabel: 'รายการ',
+        tableDescShort: 'Description',
+        tableAmount: 'จำนวนเงิน/บาท',
+        totalLabel: 'รวมเงิน (total)',
+        verifyUrl: 'URL ตรวจสอบใบเสร็จอิเล็กทรอนิกส์ E-receipt verification URL',
+        notes: 'หมายเหตุ :',
+        note1:
+          '1. ใบเสร็จรับเงินนี้ได้ดำเนินการด้วยวิธีการทางอิเล็กทรอนิกส์ และผู้ชำระเงินสามารถสแกน QR Code นี้เพื่อตรวจสอบความถูกต้อง',
+        note1En:
+          'This receipt has been issued by electronic means. The payer can scan the QR code to verify its accuracy.',
+        note2:
+          '2. ใบเสร็จรับเงินฉบับนี้จะสมบูรณ์เมื่อได้รับชำระเงินเรียบร้อยแล้ว และมีลายมือชื่อของผู้รับเงินครบถ้วน',
+        note2En:
+          'This receipt will be valid when the full payment is received and signed by the bill collector.',
+        signatureBox: 'ภาพลายมือชื่อ',
+        collector: 'ผู้รับเงิน (Collector)',
+        taxIdLabel: 'เลขประจำตัวผู้เสียภาษีอากร (Tax ID)',
+      },
     },
     calendar: {
       legendAvailable: 'มีรอบสอบ (ว่าง)',
@@ -966,6 +994,7 @@ export default {
       confirmBtn: 'ยืนยัน',
       successTitle: 'บันทึกสำเร็จ',
       successMessage: 'บันทึกข้อมูลเรียบร้อยแล้ว',
+      saveError: 'เกิดข้อผิดพลาดในการบันทึกข้อมูลการชำระเงิน',
       okBtn: 'ตกลง',
     },
     testVoucherManagement: {
