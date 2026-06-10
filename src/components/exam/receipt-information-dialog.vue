@@ -167,7 +167,8 @@ const identityRules = computed(() => [
 ]);
 const fullNameRules = computed(() => [
   ...requiredRules.value,
-  (value: string) => /^[\p{L}\s'-]+$/u.test(value) || t('exam.history.receiptForm.fullNameInvalid'),
+  (value: string) =>
+    /^[\p{L}\p{M}\s'-]+$/u.test(value) || t('exam.history.receiptForm.fullNameInvalid'),
 ]);
 const phoneRules = computed(() => [
   ...requiredRules.value,
@@ -179,7 +180,7 @@ const sanitizeIdentity = (value: string | number | null): void => {
 };
 
 const sanitizeFullName = (value: string | number | null): void => {
-  form.fullName = String(value ?? '').replace(/[^\p{L}\s'-]/gu, '');
+  form.fullName = String(value ?? '').replace(/[^\p{L}\p{M}\s'-]/gu, '');
 };
 
 const sanitizePhone = (value: string | number | null): void => {
