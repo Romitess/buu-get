@@ -46,6 +46,8 @@
             outlined
             dense
             lazy-rules
+            :mask="isForeignUser ? undefined : '#-####-#####-##-#'"
+            :unmasked-value="!isForeignUser"
             :placeholder="identityPlaceholder"
             :rules="identityRules"
             @update:model-value="sanitizeIdentity"
@@ -72,10 +74,12 @@
             outlined
             dense
             lazy-rules
-            maxlength="10"
+            maxlength="12"
             :placeholder="profilePlaceholders.phone"
             :rules="phoneRules"
             @update:model-value="sanitizePhone"
+            mask="###-###-####"
+            unmasked-value
           />
         </label>
 
@@ -154,16 +158,17 @@ const identityLabel = computed(() =>
     : t('exam.history.receiptForm.taxIdLabel'),
 );
 const identityPlaceholder = computed(() =>
-  props.isForeignUser
-    ? t('exam.history.receiptForm.passportPlaceholder')
-    : t('exam.history.receiptForm.taxIdPlaceholder'),
+  props.isForeignUser ? t('exam.history.receiptForm.passportPlaceholder') : 'X-XXXX-XXXXX-XX-X',
 );
 const requiredRules = computed(() => [
   (value: string) => Boolean(value?.trim()) || t('exam.history.receiptForm.required'),
 ]);
 const identityRules = computed(() => [
   ...requiredRules.value,
-  (value: string) => /^\d+$/.test(value) || t('exam.history.receiptForm.identityDigitsOnly'),
+  (value: string) =>
+    props.isForeignUser ||
+    /^\d{13}$/.test(value) ||
+    t('exam.history.receiptForm.identityDigitsOnly'),
 ]);
 const fullNameRules = computed(() => [
   ...requiredRules.value,
@@ -172,11 +177,13 @@ const fullNameRules = computed(() => [
 ]);
 const phoneRules = computed(() => [
   ...requiredRules.value,
-  (value: string) => /^\d{10}$/.test(value) || t('exam.history.receiptForm.phoneInvalid'),
+  (value: string) =>
+    /^\d{3}-\d{3}-\d{4}$/.test(value) || t('exam.history.receiptForm.phoneInvalid'),
 ]);
 
 const sanitizeIdentity = (value: string | number | null): void => {
-  form.taxId = String(value ?? '').replace(/\D/g, '');
+  const input = String(value ?? '');
+  form.taxId = props.isForeignUser ? input : input.replace(/\D/g, '').slice(0, 13);
 };
 
 const sanitizeFullName = (value: string | number | null): void => {
@@ -184,9 +191,13 @@ const sanitizeFullName = (value: string | number | null): void => {
 };
 
 const sanitizePhone = (value: string | number | null): void => {
-  form.phone = String(value ?? '')
+  const digits = String(value ?? '')
     .replace(/\D/g, '')
     .slice(0, 10);
+
+  form.phone = [digits.slice(0, 3), digits.slice(3, 6), digits.slice(6, 10)]
+    .filter(Boolean)
+    .join('-');
 };
 
 const formattedAmount = computed(() => {
@@ -213,7 +224,7 @@ const submitForm = async (): Promise<void> => {
   emit('confirm', {
     taxId: form.taxId.trim(),
     fullName: form.fullName.trim(),
-    phone: form.phone.trim(),
+    phone: form.phone.replace(/\D/g, ''),
     address: form.address.trim(),
   });
 };
