@@ -456,7 +456,7 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 // Size: register profile
 .card-wrapper.size-profile {
   width: calc(100vw - 96px);
-  max-width: 1720px;
+  max-width: 1400px;
   max-height: calc(100dvh - 24px);
   overflow-y: auto;
   padding: 28px 44px 22px;
