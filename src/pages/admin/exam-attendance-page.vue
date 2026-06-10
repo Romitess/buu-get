@@ -47,6 +47,66 @@
         class="attendance-table"
         @request="onRequest"
       >
+        <template v-slot:body-cell-titleTh="{ row }">
+          <div class="row justify-center">
+            <div style="position: relative; display: inline-block">
+              <span
+                style="
+                  visibility: hidden;
+                  font-weight: 600;
+                  font-size: var(--font-size-xs);
+                  white-space: nowrap;
+                "
+              >
+                {{ $t('admin.examAttendance.columns.titleTh') }}
+              </span>
+              <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
+                {{ row.titleTh }}
+              </span>
+            </div>
+          </div>
+        </template>
+
+        <template v-slot:body-cell-fullnameTh="{ row }">
+          <div class="row justify-center">
+            <div style="position: relative; display: inline-block">
+              <span
+                style="
+                  visibility: hidden;
+                  font-weight: 600;
+                  font-size: var(--font-size-xs);
+                  white-space: nowrap;
+                "
+              >
+                {{ $t('admin.examAttendance.columns.fullnameTh') }}
+              </span>
+              <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
+                {{ row.fullnameTh }}
+              </span>
+            </div>
+          </div>
+        </template>
+
+        <template v-slot:body-cell-seatNumber="{ row }">
+          <div class="row justify-center">
+            <div style="position: relative; display: inline-block">
+              <span
+                style="
+                  visibility: hidden;
+                  font-weight: 600;
+                  font-size: var(--font-size-xs);
+                  white-space: nowrap;
+                "
+              >
+                {{ $t('admin.examAttendance.columns.seatNumber') }}
+              </span>
+              <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
+                {{ row.seatNumber }}
+              </span>
+            </div>
+          </div>
+        </template>
+
         <template v-slot:body-cell-attendanceStatus="{ row }">
           <AttendanceStatusBadge :status="row.attendanceStatus" />
         </template>
