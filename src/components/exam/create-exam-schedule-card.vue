@@ -348,15 +348,17 @@ const getLocationMaxSeats = (locationId: number | null): number => {
   if (!locationId) return 9999;
   const option = props.locationOptions.find((opt) => opt.value === locationId);
   if (!option || !option.raw) return 9999;
+  const seats = option.raw.SEATS;
+  if (seats) {
+    return seats.filter((seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2).length;
+  }
   if (
     option.raw.LOCATION_SEAT_CAPACITY !== undefined &&
     option.raw.LOCATION_SEAT_CAPACITY !== null
   ) {
     return option.raw.LOCATION_SEAT_CAPACITY;
   }
-  const seats = option.raw.SEATS;
-  if (!seats) return 0;
-  return seats.filter((s) => s.LS_SEAT_STATUS !== 1).length;
+  return 0;
 };
 
 const getAvailableLocationOptions = (roomIndex: number): ExamLocationOption[] => {

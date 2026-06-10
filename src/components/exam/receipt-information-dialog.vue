@@ -150,11 +150,7 @@ const profilePlaceholders = computed<ReceiptInformation>(() => ({
   address: t('exam.history.receiptForm.addressPlaceholder'),
 }));
 
-const identityLabel = computed(() =>
-  props.isForeignUser
-    ? t('exam.history.receiptForm.passportLabel')
-    : t('exam.history.receiptForm.taxIdLabel'),
-);
+const identityLabel = computed(() => t('exam.history.receiptForm.taxIdLabel'));
 const identityPlaceholder = computed(() =>
   props.isForeignUser ? t('exam.history.receiptForm.passportPlaceholder') : 'X-XXXX-XXXXX-XX-X',
 );

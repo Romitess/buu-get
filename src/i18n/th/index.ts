@@ -1189,10 +1189,10 @@ export default {
     manageScoreCriteria: 'จัดการเกณฑ์คะแนน',
     manageScoreCriteriaAndCert: 'จัดการเกณฑ์คะแนนและใบ Certificate',
     passcodeHistory: 'ประวัติการใช้ Passcode',
-    dailyRevenueReport: 'รายงานสรุปการรับเงินประจำวัน',
+    dailyRevenueReport: 'สรุปการรับเงินประจำวัน',
     reports: 'รายงาน',
-    receiptUsageReport: 'รายงานสรุปการใช้ใบเสร็จรับเงิน',
-    applicationFeeReport: 'รายงานสรุปการรับเงินค่าสมัครสอบ',
+    receiptUsageReport: 'การใช้ใบเสร็จรับเงิน',
+    applicationFeeReport: 'สรุปการรับเงินค่าสมัครสอบ',
     fundSourceManagement: 'จัดการผังแหล่งเงิน',
   },
   image: {
