@@ -3,6 +3,7 @@ import type {
   DayData,
   ExamRound,
   BackendExam,
+  BackendSession,
   BackendLocation,
   AdmissionVoucherData,
   ExamEnrollment,
@@ -337,6 +338,31 @@ const createSessionLocations = async (sessionId: number, locationIds: number[]):
   );
 };
 
+const syncSessionLocations = async (
+  sessionId: number,
+  currentLocations: BackendSession['SESSION_LOCATIONS'] | undefined,
+  locationIds: number[],
+): Promise<void> => {
+  const desiredIds = [...new Set(locationIds)].filter((locationId) => locationId > 0);
+  const current = currentLocations || [];
+  const desiredSet = new Set(desiredIds);
+  const currentIdSet = new Set(current.map((item) => item.LOCATION_ID));
+
+  await Promise.all([
+    ...current
+      .filter((item) => !desiredSet.has(item.LOCATION_ID))
+      .map((item) => api.delete(`/exam-session-locations/${item.SL_ID}`)),
+    ...desiredIds
+      .filter((locationId) => !currentIdSet.has(locationId))
+      .map((locationId) =>
+        api.post('/exam-session-locations', {
+          SS_ID: sessionId,
+          LOCATION_ID: locationId,
+        }),
+      ),
+  ]);
+};
+
 export const createExamRound = async (payload: CreateExamPayload): Promise<number> => {
   try {
     // 1. Create the Exam
@@ -446,6 +472,9 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
       // Fetch current sessions to diff
       const currentExam = await fetchExamById(payload.examId);
       const currentSessionIds = (currentExam.SESSIONS || []).map((s) => s.SS_ID);
+      const currentSessionsById = new Map(
+        (currentExam.SESSIONS || []).map((session) => [session.SS_ID, session]),
+      );
       const groupedRanges = groupTimeRangesByTime(payload);
       const keepIds = [
         ...new Set(
@@ -473,6 +502,11 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
         if (existingId) {
           // Update existing session
           await api.patch(`/exam-sessions/${existingId}`, sessionPayload);
+          await syncSessionLocations(
+            existingId,
+            currentSessionsById.get(existingId)?.SESSION_LOCATIONS,
+            range.locationIds,
+          );
           return;
         }
 

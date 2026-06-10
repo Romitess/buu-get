@@ -105,15 +105,13 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const wasOriginallyPublished = ref(false);
   const originalExamDate = ref('');
 
-  /** Whether the schedule section should be locked (published exam or has enrollments) */
-  const isScheduleLocked = computed<boolean>(() => {
-    if (!isEditMode.value) return false;
-    const hasEnrollments = form.value.timeSlots.some((slot) =>
-      slot.rooms.some((room) => (room.enrollmentCount || 0) > 0),
-    );
-    // Lock permanently if it was originally published, is currently published, or has enrollments
-    return wasOriginallyPublished.value || form.value.isPublished || hasEnrollments;
+  /** Published exams keep non-schedule sections read-only. */
+  const isPublishedSectionLocked = computed<boolean>(() => {
+    return isEditMode.value && (wasOriginallyPublished.value || form.value.isPublished);
   });
+
+  /** The schedule remains editable in edit mode, including after enrollment starts. */
+  const isScheduleLocked = computed<boolean>(() => false);
 
   /** Checks if the schedule is locked specifically due to existing enrollments */
   const isLockedByEnrollment = computed<boolean>(() => {
@@ -1123,6 +1121,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       locationId: r.locationId,
       seats: r.seats,
       proctorName: r.proctorName,
+      ...(r.sessionId != null ? { sessionId: r.sessionId } : {}),
     }));
 
     try {
@@ -1249,6 +1248,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     isLoadingData,
     error,
     isEditMode,
+    isPublishedSectionLocked,
     isScheduleLocked,
     isLockedByEnrollment,
     isSpecialRound,

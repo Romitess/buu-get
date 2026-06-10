@@ -7,7 +7,7 @@
       :exam-format-options="examFormatOptions"
       :fund-source-options="fundSourceOptions"
       :is-loading-data="isLoadingData"
-      :is-locked="wasOriginallyPublished"
+      :is-locked="isPublishedSectionLocked"
       :is-special-round="isSpecialRound"
       :field-errors="fieldErrors"
       :shake-key="shakeKey"
@@ -36,7 +36,7 @@
     <!-- Card 3: กำหนดการลงทะเบียนและชำระเงิน -->
     <create-exam-registration-card
       v-model:form="form"
-      :locked="isScheduleLocked"
+      :locked="isPublishedSectionLocked || isLockedByEnrollment"
       :is-special-round="isSpecialRound"
       :date-errors="dateErrors"
       :field-errors="fieldErrors"
@@ -49,35 +49,18 @@
       v-if="isSpecialRound"
       v-model:search-query="candidateSearch"
       :filtered-candidates="filteredCandidates"
-      :locked="isScheduleLocked"
+      :locked="isPublishedSectionLocked || isLockedByEnrollment"
       @import-candidates="importCandidates"
       @passcode-type-selected="generatePasscodes"
       @export-candidates="exportCandidates"
     />
 
     <!-- Schedule Lock Notice -->
-    <div v-if="isScheduleLocked">
+    <div v-if="isPublishedSectionLocked">
       <!-- Case 1: Locked by Enrollments (Permanent) -->
-      <q-banner
-        v-if="isLockedByEnrollment"
-        dense
-        class="alert-banner-error rounded-borders q-mb-md"
-      >
-        <template v-slot:avatar>
-          <q-icon name="error_outline" size="sm" />
-        </template>
-        <div class="text-weight-medium">
-          ไม่สามารถแก้ไขวัน/เวลาสอบ หรือสถานที่ได้ เนื่องจากมีผู้สมัครสอบแล้ว
-        </div>
-        <div class="text-caption">
-          เพื่อความปลอดภัยของข้อมูลผู้สมัคร ระบบไม่อนุญาตให้แก้ไขรายละเอียดหลัก
-          (แต่คุณยังสามารถแก้ไขรายชื่อผู้คุมสอบได้)
-        </div>
-      </q-banner>
-
       <!-- Warning Banner for Published/Locked Exams -->
       <q-banner
-        v-if="isScheduleLocked && !isLockedByEnrollment"
+        v-if="isPublishedSectionLocked"
         dense
         class="alert-banner-warning q-mb-md rounded-borders"
       >
@@ -131,6 +114,7 @@ const {
   fundSourceOptions,
   isLoadingData,
   isEditMode,
+  isPublishedSectionLocked,
   isScheduleLocked,
   isLockedByEnrollment,
   isSpecialRound,
