@@ -550,6 +550,7 @@ export default {
         late: 'สาย',
         missing: 'ขาด',
       },
+      noData: 'ไม่พบข้อมูลการเข้าสอบในรอบนี้',
     },
     locationManagement: {
       pageTitle: 'จัดการห้องสอบ',

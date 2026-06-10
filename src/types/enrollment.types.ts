@@ -118,6 +118,7 @@ export interface AttendanceTableRow {
   attendanceStatus: ExamAttendStatus;
   checkInTime: string | null;
   sessionId: number;
+  hasRecord: boolean;
 }
 
 export enum EnrollmentStatus {

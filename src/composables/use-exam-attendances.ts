@@ -20,6 +20,10 @@ export function useExamAttendances() {
       list = list.filter((e) => e.sessionId === selectedSessionId.value);
     }
 
+    // Filter to show only those who have an attendance record (not just MISSING by default)
+    // as per user requirement: "ถ้าไม่มีข้อมูลในตาราง attendance ไม่ต้องขึ้นแสดง"
+    list = list.filter((e) => e.hasRecord);
+
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase();
       list = list.filter((row: AttendanceTableRow) => {
@@ -55,15 +59,20 @@ export function useExamAttendances() {
       : attendances.value;
     return list.filter(
       (e) =>
-        e.attendanceStatus === ExamAttendStatus.INTIME ||
-        e.attendanceStatus === ExamAttendStatus.LATE,
+        e.hasRecord &&
+        (e.attendanceStatus === ExamAttendStatus.INTIME ||
+          e.attendanceStatus === ExamAttendStatus.LATE),
     ).length;
   });
 
   const formatCheckInTime = (dateStr: string | null | undefined): string => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
-    return date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString('th-TH', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
   };
 
   const fetchAttendances = async (examId: number): Promise<void> => {
@@ -83,10 +92,6 @@ export function useExamAttendances() {
 
       exam.value = examData;
 
-      // Filter only enrollments that are at least PAID or SEAT_ASSIGNED?
-      // Usually attendance is for people who have seats assigned (SEAT_ASSIGNED = 2, ATTENDED = 3)
-      // Let's include all for now or those with seat number
-
       const mappedAttendances = enrollmentData.map(
         (enrollment: BackendEnrollmentDetail, index: number): AttendanceTableRow => {
           const attendanceRecord =
@@ -94,11 +99,25 @@ export function useExamAttendances() {
               ? enrollment.ATTENDANCES[0]
               : null;
 
-          // Default status if no attendance record could be MISSING
-          const status: ExamAttendStatus = attendanceRecord
+          const checkInTimeStr = attendanceRecord?.ATTEND_CHECK_IN_TIME;
+          const session = enrollment.SESSION;
+
+          let status: ExamAttendStatus = attendanceRecord
             ? attendanceRecord.ATTEND_STATUS
             : ExamAttendStatus.MISSING;
-          const checkInTime = attendanceRecord ? attendanceRecord.ATTEND_CHECK_IN_TIME : null;
+
+          // Logic to determine status from check-in time vs session start time
+          if (checkInTimeStr && session?.SS_START_TIME && session?.EXAM?.EXAM_DATE) {
+            const checkInDate = new Date(checkInTimeStr);
+            const examDateOnly = session.EXAM.EXAM_DATE.split('T')[0];
+            const startDateTime = new Date(`${examDateOnly}T${session.SS_START_TIME}`);
+
+            if (checkInDate > startDateTime) {
+              status = ExamAttendStatus.LATE;
+            } else {
+              status = ExamAttendStatus.INTIME;
+            }
+          }
 
           return {
             index: index + 1,
@@ -108,8 +127,9 @@ export function useExamAttendances() {
             fullnameTh: enrollment.USER?.PROFILE?.userFullnameTh || '-',
             seatNumber: enrollment.LOCATION_SEAT?.LS_SEAT_LABEL || '-',
             attendanceStatus: status,
-            checkInTime: formatCheckInTime(checkInTime),
+            checkInTime: formatCheckInTime(checkInTimeStr),
             sessionId: enrollment.SESSION_ID,
+            hasRecord: !!attendanceRecord,
           };
         },
       );

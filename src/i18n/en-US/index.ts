@@ -497,6 +497,7 @@ export default {
         late: 'Late',
         missing: 'Absent',
       },
+      noData: 'No attendance records found for this session',
     },
     locationManagement: {
       pageTitle: 'Manage Exam Locations',

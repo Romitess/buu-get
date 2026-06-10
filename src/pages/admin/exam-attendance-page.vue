@@ -21,16 +21,14 @@
       is-attendance
     />
 
-    <nav class="toolbar-section row q-col-gutter-md items-center q-mb-md">
-      <div class="col-12 col-sm-auto">
+    <nav class="row items-center q-mb-lg q-gutter-x-md">
+      <div class="col">
         <SearchBar
           v-model="searchQuery"
           :placeholder="$t('admin.examAttendance.searchPlaceholder')"
-          class="search-bar"
         />
       </div>
-      <q-space class="gt-xs" />
-      <div class="col-12 col-sm-auto">
+      <div class="col-shrink">
         <ExportCsvButton
           :columns="columns"
           :rows="filteredAttendances"
@@ -40,7 +38,7 @@
       </div>
     </nav>
 
-    <main>
+    <main v-if="filteredAttendances.length > 0">
       <BaseTable
         :columns="columns"
         :rows="filteredAttendances"
@@ -49,69 +47,15 @@
         class="attendance-table"
         @request="onRequest"
       >
-        <template v-slot:body-cell-index="{ row }">
-          <div class="text-center">{{ row.index }}</div>
-        </template>
-
-        <template v-slot:body-cell-nationalId="{ row }">
-          <div class="text-center">{{ row.nationalId }}</div>
-        </template>
-
-        <template v-slot:body-cell-titleTh="{ row }">
-          <div class="row justify-center">
-            <div style="position: relative; display: inline-block">
-              <span
-                style="
-                  visibility: hidden;
-                  font-weight: 600;
-                  font-size: var(--font-size-xs);
-                  white-space: nowrap;
-                "
-              >
-                {{ $t('admin.examAttendance.columns.titleTh') }}
-              </span>
-              <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
-                {{ row.titleTh }}
-              </span>
-            </div>
-          </div>
-        </template>
-
-        <template v-slot:body-cell-fullnameTh="{ row }">
-          <div class="row justify-center">
-            <div style="position: relative; display: inline-block">
-              <span
-                style="
-                  visibility: hidden;
-                  font-weight: 600;
-                  font-size: var(--font-size-xs);
-                  white-space: nowrap;
-                "
-              >
-                {{ $t('admin.examAttendance.columns.fullnameTh') }}
-              </span>
-              <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
-                {{ row.fullnameTh }}
-              </span>
-            </div>
-          </div>
-        </template>
-
-        <template v-slot:body-cell-seatNumber="{ row }">
-          <div class="text-center">{{ row.seatNumber }}</div>
-        </template>
-
         <template v-slot:body-cell-attendanceStatus="{ row }">
-          <div class="text-center">
-            <AttendanceStatusBadge :status="row.attendanceStatus" />
-          </div>
-        </template>
-
-        <template v-slot:body-cell-checkInTime="{ row }">
-          <div class="text-center">{{ row.checkInTime || '' }}</div>
+          <AttendanceStatusBadge :status="row.attendanceStatus" />
         </template>
       </BaseTable>
     </main>
+    <div v-else-if="!isLoading" class="flex flex-center q-pa-xl text-grey-6">
+      <q-icon name="info" size="md" class="q-mr-sm" />
+      <span>{{ $t('admin.examAttendance.noData') }}</span>
+    </div>
   </q-page>
 </template>
 
@@ -273,17 +217,10 @@ onMounted(() => {
   min-height: 0 !important;
 }
 
-.search-bar {
-  min-width: 300px;
-  @media (max-width: $breakpoint-xs-max) {
-    min-width: 100%;
-  }
-}
-
 .export-btn {
-  @media (max-width: $breakpoint-xs-max) {
-    width: 100%;
-  }
+  border-radius: var(--radius-10) !important;
+  height: 40px;
+  padding: 0 24px;
 }
 
 .attendance-table {
