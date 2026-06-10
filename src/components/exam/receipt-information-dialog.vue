@@ -74,10 +74,8 @@
             outlined
             dense
             lazy-rules
-            maxlength="12"
             :placeholder="profilePlaceholders.phone"
             :rules="phoneRules"
-            @update:model-value="sanitizePhone"
             mask="###-###-####"
             unmasked-value
           />
@@ -177,8 +175,7 @@ const fullNameRules = computed(() => [
 ]);
 const phoneRules = computed(() => [
   ...requiredRules.value,
-  (value: string) =>
-    /^\d{3}-\d{3}-\d{4}$/.test(value) || t('exam.history.receiptForm.phoneInvalid'),
+  (value: string) => /^\d{10}$/.test(value) || t('exam.history.receiptForm.phoneInvalid'),
 ]);
 
 const sanitizeIdentity = (value: string | number | null): void => {
@@ -188,16 +185,6 @@ const sanitizeIdentity = (value: string | number | null): void => {
 
 const sanitizeFullName = (value: string | number | null): void => {
   form.fullName = String(value ?? '').replace(/[^\p{L}\p{M}\s'-]/gu, '');
-};
-
-const sanitizePhone = (value: string | number | null): void => {
-  const digits = String(value ?? '')
-    .replace(/\D/g, '')
-    .slice(0, 10);
-
-  form.phone = [digits.slice(0, 3), digits.slice(3, 6), digits.slice(6, 10)]
-    .filter(Boolean)
-    .join('-');
 };
 
 const formattedAmount = computed(() => {
@@ -224,7 +211,7 @@ const submitForm = async (): Promise<void> => {
   emit('confirm', {
     taxId: form.taxId.trim(),
     fullName: form.fullName.trim(),
-    phone: form.phone.replace(/\D/g, ''),
+    phone: form.phone.trim(),
     address: form.address.trim(),
   });
 };

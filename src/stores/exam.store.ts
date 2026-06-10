@@ -342,7 +342,7 @@ export const useExamStore = defineStore('exam', () => {
       await createPendingPayment({
         ERM_ID: enrollmentId,
         TRANX_AMOUNT: amount,
-        RC_TAX_ID: Number(receipt.taxId),
+        RC_TAX_ID: receipt.taxId,
         RC_NAME: receipt.fullName,
         RC_PHONE: receipt.phone,
         RC_ADDRESS: receipt.address,

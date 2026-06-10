@@ -12,7 +12,7 @@ export interface BackendTransaction {
 export interface CreatePendingPaymentPayload {
   ERM_ID: number;
   TRANX_AMOUNT: number;
-  RC_TAX_ID: number;
+  RC_TAX_ID: string;
   RC_NAME: string;
   RC_PHONE: string;
   RC_ADDRESS: string;
