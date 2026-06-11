@@ -71,7 +71,12 @@
       >
         <!-- Index Column -->
         <template v-slot:body-cell-index="{ row }">
-          <div class="text-left">{{ getIndex(row) }}</div>
+          <div class="text-center">{{ getIndex(row) }}</div>
+        </template>
+
+        <!-- Full Name Column -->
+        <template v-slot:body-cell-fullName="{ row }">
+          <div class="text-left q-pl-custom">{{ row.fullName }}</div>
         </template>
       </BaseTable>
     </q-card-section>
@@ -193,26 +198,27 @@ const columns: QTableColumn[] = [
     name: 'index',
     label: 'ลำดับ',
     field: 'index',
-    align: 'left',
+    align: 'center',
     style: 'width: 80px',
   },
   {
     name: 'nationalId',
     label: 'รหัสประชาชน',
     field: 'nationalId',
-    align: 'left',
+    align: 'center',
   },
   {
     name: 'fullName',
     label: 'ชื่อ-นามสกุล',
     field: 'fullName',
     align: 'left',
+    style: 'width: 30%',
   },
   {
     name: 'passcode',
     label: 'Passcode',
     field: 'passcode',
-    align: 'left',
+    align: 'center',
   },
 ];
 </script>
@@ -232,7 +238,7 @@ const columns: QTableColumn[] = [
   color: white !important;
 }
 
-.candidates-table :deep(.base-table thead tr th) {
-  text-align: left !important;
+.q-pl-custom {
+  padding-left: 128px;
 }
 </style>
