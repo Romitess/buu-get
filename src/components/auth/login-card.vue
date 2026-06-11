@@ -43,13 +43,15 @@
     <q-form @submit.prevent="onSubmit" class="login-form">
       <!-- Email -->
       <div class="field-block">
-        <label>{{ $t('auth.email') }}</label>
+        <div class="text-body2 text-weight-medium q-mb-xs field-label block">
+          {{ $t('auth.email') }}
+        </div>
         <q-input
           v-model="email"
           outlined
           dense
           :placeholder="$t('auth.emailPlaceholder')"
-          class="field-input"
+          class="custom-input"
         >
           <template v-slot:prepend>
             <q-icon name="mail" size="18px" />
@@ -60,7 +62,9 @@
       <!-- Password -->
       <div class="field-block">
         <div class="field-label-row">
-          <label>{{ $t('auth.password') }}</label>
+          <div class="text-body2 text-weight-medium q-mb-xs field-label block">
+            {{ $t('auth.password') }}
+          </div>
           <a href="#" class="forgot-link">
             {{ $t('auth.forgotPassword') }}
           </a>
@@ -71,7 +75,7 @@
           outlined
           dense
           :placeholder="$t('auth.passwordPlaceholder')"
-          class="field-input"
+          class="custom-input"
         >
           <template v-slot:prepend>
             <q-icon name="lock_outline" size="18px" />
@@ -305,7 +309,7 @@ const onSubmit = async () => {
     padding: 10px 0;
     border: none;
     background: transparent;
-    font-size: 0.85rem;
+    font-size: 16px !important;
     font-weight: 600;
     color: var(--neutral-400);
     cursor: pointer;
@@ -331,7 +335,7 @@ const onSubmit = async () => {
   background: var(--thaid-bg) !important;
   color: var(--text-on-primary) !important;
   border-radius: 8px !important;
-  font-size: 0.9rem;
+  font-size: 16px !important;
   font-weight: 700;
   letter-spacing: 0.01em;
   transition: all 0.2s;
@@ -375,13 +379,6 @@ const onSubmit = async () => {
 }
 
 .field-block {
-  label {
-    display: block;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--neutral-900);
-    margin-bottom: 5px;
-  }
 }
 
 .field-label-row {
@@ -392,38 +389,13 @@ const onSubmit = async () => {
 }
 
 .forgot-link {
-  font-size: 0.75rem;
+  font-size: 14px !important;
   font-weight: 600;
   color: var(--primary-light);
   text-decoration: none;
 
   &:hover {
     text-decoration: underline;
-  }
-}
-
-.field-input {
-  :deep(.q-field__control) {
-    background: var(--neutral-100);
-    border-radius: 8px;
-    border: none;
-    transition: all 0.2s;
-    height: 40px;
-    min-height: 40px;
-
-    &::before,
-    &::after {
-      border: none !important;
-    }
-  }
-
-  :deep(.q-field__prepend) {
-    color: var(--neutral-600);
-  }
-
-  :deep(.q-field__native) {
-    font-size: 1rem;
-    color: var(--neutral-900);
   }
 }
 
@@ -437,7 +409,7 @@ const onSubmit = async () => {
   background: var(--primary) !important;
   color: var(--text-on-primary) !important;
   border-radius: 8px !important;
-  font-size: 0.9rem;
+  font-size: 16px !important;
   font-weight: 700;
   letter-spacing: 0.01em;
   transition: all 0.25s;
@@ -457,7 +429,7 @@ const onSubmit = async () => {
 .register-row {
   text-align: center;
   margin-top: 16px;
-  font-size: 0.8rem;
+  font-size: 15px !important;
   color: var(--neutral-500);
 
   a {
@@ -465,6 +437,7 @@ const onSubmit = async () => {
     font-weight: 700;
     color: var(--primary);
     text-decoration: none;
+    font-size: 15px !important;
 
     &:hover {
       text-decoration: underline;

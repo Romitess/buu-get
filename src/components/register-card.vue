@@ -16,13 +16,15 @@
     <q-form ref="formRef" @submit.prevent="onSubmit" class="register-form">
       <!-- Email -->
       <div class="field-block">
-        <label class="buu-label-muted">{{ $t('profile.email') }}</label>
+        <div class="text-body2 text-weight-medium q-mb-xs field-label block">
+          {{ $t('profile.email') }}
+        </div>
         <q-input
           v-model="email"
           outlined
           dense
           :placeholder="$t('profile.emailPlaceholder')"
-          class="field-input buu-input-muted"
+          class="custom-input"
           :rules="[
             (val) => !!val || $t('profile.requiredEmail'),
             (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || 'รูปแบบอีเมลไม่ถูกต้อง',
@@ -34,13 +36,15 @@
 
       <!-- Password -->
       <div class="field-block">
-        <label class="buu-label-muted">{{ $t('profile.password') }}</label>
+        <div class="text-body2 text-weight-medium q-mb-xs field-label block">
+          {{ $t('profile.password') }}
+        </div>
         <q-input
           v-model="password"
           :type="showPassword ? 'text' : 'password'"
           outlined
           dense
-          class="field-input buu-input-muted"
+          class="custom-input"
           :rules="[
             (val) => !!val || $t('profile.requiredPassword'),
             (val) => val.length >= 8 || $t('profile.passwordFormat'),
@@ -60,13 +64,15 @@
 
       <!-- Confirm Password -->
       <div class="field-block">
-        <label class="buu-label-muted">{{ $t('profile.confirmPassword') }}</label>
+        <div class="text-body2 text-weight-medium q-mb-xs field-label block">
+          {{ $t('profile.confirmPassword') }}
+        </div>
         <q-input
           v-model="confirmPassword"
           :type="showConfirmPassword ? 'text' : 'password'"
           outlined
           dense
-          class="field-input buu-input-muted"
+          class="custom-input"
           :rules="[
             (val) => !!val || $t('profile.requiredConfirmPassword'),
             (val) => val === password || $t('profile.passwordMismatch'),
@@ -310,32 +316,6 @@ const onThaiID = (): void => {
 }
 
 .field-block {
-  label {
-    display: block;
-    font-size: clamp(0.91rem, 2.59vw, 0.98rem);
-    font-weight: 700;
-    color: #000;
-    margin-bottom: 2px;
-  }
-}
-
-.field-input {
-  :deep(.q-field__control) {
-    background: #fff;
-    border-radius: 4px;
-    border: 1px solid var(--neutral-200);
-    transition: all 0.2s;
-    height: 34px;
-  }
-
-  :deep(.q-field__native) {
-    font-size: clamp(0.98rem, 2.59vw, 1.03rem);
-    padding: 0 10px;
-  }
-
-  :deep(.q-field__bottom) {
-    padding: 2px 0 0;
-  }
 }
 
 .field-icon {
