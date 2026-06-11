@@ -159,12 +159,11 @@ const runModeAnimation = (goingToRegister: boolean) => {
   showForm.value = false;
 
   if (goingToRegister) {
+    // Super-fast parallel transitions
     setTimeout(() => {
       panelPhase.value = 'center';
-    }, 350);
-    setTimeout(() => {
       cardSize.value = 'credentials';
-    }, 1350);
+    }, 150);
     setTimeout(() => {
       formKey.value = 'credentials';
       unlockHeight();
@@ -173,14 +172,12 @@ const runModeAnimation = (goingToRegister: boolean) => {
         animating.value = false;
         checkPendingAnimations();
       });
-    }, 1800);
+    }, 600);
   } else {
     setTimeout(() => {
       cardSize.value = 'login';
-    }, 350);
-    setTimeout(() => {
       panelPhase.value = 'right';
-    }, 800);
+    }, 150);
     setTimeout(() => {
       formKey.value = 'login';
       unlockHeight();
@@ -189,7 +186,7 @@ const runModeAnimation = (goingToRegister: boolean) => {
         animating.value = false;
         checkPendingAnimations();
       });
-    }, 1800);
+    }, 600);
   }
 };
 
@@ -212,7 +209,7 @@ const runStepAnimation = (newStep: 'credentials' | 'profile') => {
   setTimeout(() => {
     cardSize.value = newStep === 'profile' ? 'profile' : 'credentials';
     formKey.value = newStep === 'profile' ? 'profile' : 'credentials';
-  }, 350);
+  }, 150);
 
   setTimeout(() => {
     unlockHeight();
@@ -221,7 +218,7 @@ const runStepAnimation = (newStep: 'credentials' | 'profile') => {
       animating.value = false;
       checkPendingAnimations();
     });
-  }, 800);
+  }, 500);
 };
 
 watch(currentStep, (newStep) => {
@@ -404,11 +401,11 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 
   // GPU-accelerated smooth transitions and crisp text rendering
   transition:
-    transform 1s cubic-bezier(0.25, 1, 0.5, 1),
-    width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
-    max-width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
-    min-height 0.45s cubic-bezier(0.25, 1, 0.5, 1),
-    padding 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+    width 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    max-width 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    min-height 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    padding 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -669,7 +666,7 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 // Fade transition for form content
 // ============================================================
 .fade-leave-active {
-  transition: opacity 0.3s ease-out;
+  transition: opacity 0.15s ease-out;
   position: absolute;
   width: 100%;
 }
@@ -678,7 +675,7 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
 }
 
 .fade-enter-active {
-  transition: opacity 0.4s ease-out;
+  transition: opacity 0.2s ease-out;
 }
 .fade-enter-from {
   opacity: 0;
