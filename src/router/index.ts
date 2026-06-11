@@ -60,7 +60,7 @@ export default defineRouter(({ store }) => {
       return userStore.userRole === ROLES.CANDIDATE
         ? { name: 'exam-schedule' }
         : userStore.userRole === ROLES.EXAM_OPERATIONS_OFFICER
-          ? { name: 'admin-location-management' }
+          ? { name: 'admin-exam-management' }
           : { name: 'admin-dashboard' };
     }
 
