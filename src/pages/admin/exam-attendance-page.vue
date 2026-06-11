@@ -177,8 +177,6 @@ const columns = computed<QTableColumn[]>(() => [
       switch (val) {
         case ExamAttendStatus.INTIME:
           return t('admin.examAttendance.status.intime');
-        case ExamAttendStatus.LATE:
-          return t('admin.examAttendance.status.late');
         case ExamAttendStatus.MISSING:
           return t('admin.examAttendance.status.missing');
         default:

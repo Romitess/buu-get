@@ -494,7 +494,6 @@ export default {
       },
       status: {
         intime: 'Present',
-        late: 'Late',
         missing: 'Absent',
       },
       noData: 'No attendance records found for this session',

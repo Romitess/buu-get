@@ -547,7 +547,6 @@ export default {
       },
       status: {
         intime: 'เข้าสอบแล้ว',
-        late: 'สาย',
         missing: 'ขาด',
       },
       noData: 'ไม่พบข้อมูลการเข้าสอบในรอบนี้',
@@ -796,7 +795,6 @@ export default {
         },
         status: {
           intime: 'เข้าสอบแล้ว',
-          late: 'สาย',
           missing: 'ขาด',
         },
       },

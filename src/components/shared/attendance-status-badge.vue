@@ -20,8 +20,6 @@ const label = computed(() => {
   switch (props.status) {
     case ExamAttendStatus.INTIME:
       return t('admin.examAttendance.status.intime');
-    case ExamAttendStatus.LATE:
-      return t('admin.examAttendance.status.late');
     case ExamAttendStatus.MISSING:
       return t('admin.examAttendance.status.missing');
     default:
@@ -33,8 +31,6 @@ const badgeClass = computed(() => {
   switch (props.status) {
     case ExamAttendStatus.INTIME:
       return 'badge--on-time';
-    case ExamAttendStatus.LATE:
-      return 'badge--late';
     case ExamAttendStatus.MISSING:
       return 'badge--absent';
     default:
@@ -61,12 +57,6 @@ const badgeClass = computed(() => {
   color: var(--badge-success-dot);
   background-color: transparent;
   border: 1.5px solid var(--badge-success-dot);
-}
-
-.badge--late {
-  color: var(--badge-warning-dot);
-  background-color: transparent;
-  border: 1.5px solid var(--badge-warning-dot);
 }
 
 .badge--absent {

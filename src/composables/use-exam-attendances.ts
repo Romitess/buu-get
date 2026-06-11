@@ -29,7 +29,6 @@ export function useExamAttendances() {
       list = list.filter((row: AttendanceTableRow) => {
         let statusLabel = 'ขาด';
         if (row.attendanceStatus === ExamAttendStatus.INTIME) statusLabel = 'เข้าสอบแล้ว';
-        else if (row.attendanceStatus === ExamAttendStatus.LATE) statusLabel = 'สาย';
 
         return (
           row.nationalId.toLowerCase().includes(query) ||
@@ -57,12 +56,7 @@ export function useExamAttendances() {
     const list = selectedSessionId.value
       ? attendances.value.filter((e) => e.sessionId === selectedSessionId.value)
       : attendances.value;
-    return list.filter(
-      (e) =>
-        e.hasRecord &&
-        (e.attendanceStatus === ExamAttendStatus.INTIME ||
-          e.attendanceStatus === ExamAttendStatus.LATE),
-    ).length;
+    return list.filter((e) => e.hasRecord && e.attendanceStatus === ExamAttendStatus.INTIME).length;
   });
 
   const formatCheckInTime = (dateStr: string | null | undefined): string => {
@@ -100,24 +94,10 @@ export function useExamAttendances() {
               : null;
 
           const checkInTimeStr = attendanceRecord?.ATTEND_CHECK_IN_TIME;
-          const session = enrollment.SESSION;
 
-          let status: ExamAttendStatus = attendanceRecord
+          const status: ExamAttendStatus = attendanceRecord
             ? attendanceRecord.ATTEND_STATUS
             : ExamAttendStatus.MISSING;
-
-          // Logic to determine status from check-in time vs session start time
-          if (checkInTimeStr && session?.SS_START_TIME && session?.EXAM?.EXAM_DATE) {
-            const checkInDate = new Date(checkInTimeStr);
-            const examDateOnly = session.EXAM.EXAM_DATE.split('T')[0];
-            const startDateTime = new Date(`${examDateOnly}T${session.SS_START_TIME}`);
-
-            if (checkInDate > startDateTime) {
-              status = ExamAttendStatus.LATE;
-            } else {
-              status = ExamAttendStatus.INTIME;
-            }
-          }
 
           return {
             index: index + 1,

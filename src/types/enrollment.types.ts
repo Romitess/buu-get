@@ -57,7 +57,6 @@ export interface BackendSessionDetail {
 export enum ExamAttendStatus {
   MISSING = 0,
   INTIME = 1,
-  LATE = 2,
 }
 
 export interface BackendAttendance {
