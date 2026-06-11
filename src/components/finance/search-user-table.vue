@@ -114,7 +114,7 @@ const getStatusColorClass = (status: string): string => {
   :deep(.q-table thead tr th) {
     background-color: var(--primary) !important;
     color: var(--text-on-primary) !important;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-md);
     font-weight: var(--font-weight-medium);
     padding: 12px 8px;
     border-right: 1px solid var(--white-alpha-20);
@@ -127,7 +127,7 @@ const getStatusColorClass = (status: string): string => {
   :deep(.q-table tbody tr td) {
     border-right: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-md);
     padding: 10px 8px;
   }
 
@@ -143,7 +143,7 @@ const getStatusColorClass = (status: string): string => {
     background-color: var(--surface-page) !important;
     color: var(--text-secondary) !important;
     padding: 16px !important;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-md);
   }
 
   :deep(.custom-empty-bottom) {

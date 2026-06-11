@@ -84,14 +84,7 @@
             <q-td class="text-center">
               <div class="row justify-center">
                 <div style="position: relative; display: inline-block">
-                  <span
-                    style="
-                      visibility: hidden;
-                      font-weight: 600;
-                      font-size: var(--font-size-xs);
-                      white-space: nowrap;
-                    "
-                  >
+                  <span style="visibility: hidden; font-weight: 600; white-space: nowrap">
                     คำนำหน้า
                   </span>
                   <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
@@ -103,14 +96,7 @@
             <q-td class="text-center">
               <div class="row justify-center">
                 <div style="position: relative; display: inline-block">
-                  <span
-                    style="
-                      visibility: hidden;
-                      font-weight: 600;
-                      font-size: var(--font-size-xs);
-                      white-space: nowrap;
-                    "
-                  >
+                  <span style="visibility: hidden; font-weight: 600; white-space: nowrap">
                     ชื่อ-นามสกุล
                   </span>
                   <span style="position: absolute; left: 0; top: 0; white-space: nowrap">

@@ -19,11 +19,7 @@
       <template v-slot:body="props">
         <template v-if="(props.row as any).__empty">
           <q-tr>
-            <q-td
-              :colspan="columns.length"
-              class="text-center text-grey-8"
-              style="font-size: 13px; padding: 32px 16px; border-bottom: none"
-            >
+            <q-td :colspan="columns.length" class="base-table-empty-cell text-center text-grey-8">
               {{ emptyLabel || $t('components.baseTable.emptyLabel') }}
             </q-td>
           </q-tr>
@@ -46,8 +42,7 @@
 
       <template v-slot:bottom>
         <div
-          class="row items-center justify-end full-width q-gutter-x-md text-grey-8"
-          style="font-size: 12px"
+          class="base-table-bottom row items-center justify-end full-width q-gutter-x-md text-grey-8"
         >
           <div class="row items-center q-gutter-x-sm">
             <span>{{ $t('components.baseTable.rowsPerPage') }}</span>
@@ -266,6 +261,16 @@ const goToLastPage = (): void => {
   :deep(tbody tr) {
     height: auto;
   }
+}
+
+.base-table-empty-cell {
+  border-bottom: none;
+  font-size: var(--font-size-md);
+  padding: 32px 16px;
+}
+
+.base-table-bottom {
+  font-size: var(--font-size-md);
 }
 
 .pagination-select {

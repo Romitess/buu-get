@@ -30,28 +30,28 @@
     >
       <!-- Round Number Column -->
       <template v-slot:body-cell-roundNumber="{ row }">
-        <div class="text-center text-body2 text-weight-bold">
+        <div class="text-center text-weight-bold">
           {{ row.roundNumber }}
         </div>
       </template>
 
       <!-- Exam Date Column -->
       <template v-slot:body-cell-examDate="{ row }">
-        <div class="text-center text-body2">
+        <div class="text-center">
           {{ formatDateShort(row.examDate) }}
         </div>
       </template>
 
       <!-- Registration Period Column -->
       <template v-slot:body-cell-regPeriod="{ row }">
-        <div class="text-center text-body2">
+        <div class="text-center">
           {{ formatDateRange(row.regStartDate, row.regEndDate) }}
         </div>
       </template>
 
       <!-- Registration Duration Column -->
       <template v-slot:body-cell-regDuration="{ row }">
-        <div class="text-center text-body2">
+        <div class="text-center">
           {{ calcDaysDiff(row.regStartDate, row.regEndDate) }}
           {{ $t('common.day', calcDaysDiff(row.regStartDate, row.regEndDate)) }}
         </div>

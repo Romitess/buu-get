@@ -40,7 +40,7 @@
           track-color="grey-5"
           class="q-mr-sm registration-progress"
         />
-        <span class="text-caption text-weight-medium registration-text">
+        <span class="text-weight-medium registration-text">
           {{ row.registeredCount }}/{{ row.capacity }}
         </span>
       </div>
@@ -48,7 +48,7 @@
 
     <!-- Status Column -->
     <template v-slot:body-cell-status="{ row }">
-      <div class="text-center text-body2">
+      <div class="text-center">
         {{ $t(`admin.examManagement.status.${row.status}`) }}
       </div>
     </template>
