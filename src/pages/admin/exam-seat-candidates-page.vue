@@ -62,27 +62,7 @@
         :pagination="pagination"
         class="seat-candidates-table"
         @request="onRequest"
-      >
-        <template v-slot:body-cell-index="{ row }">
-          <div class="text-center">{{ row.index }}</div>
-        </template>
-
-        <template v-slot:body-cell-nationalId="{ row }">
-          <div class="text-center">{{ row.nationalId }}</div>
-        </template>
-
-        <template v-slot:body-cell-titleTh="{ row }">
-          <div class="text-center">{{ row.titleTh }}</div>
-        </template>
-
-        <template v-slot:body-cell-fullnameTh="{ row }">
-          <div class="text-center">{{ row.fullnameTh }}</div>
-        </template>
-
-        <template v-slot:body-cell-seatNumber="{ row }">
-          <div class="text-center text-weight-bold">{{ row.seatNumber }}</div>
-        </template>
-      </BaseTable>
+      />
     </main>
   </q-page>
 </template>
@@ -266,31 +246,36 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.seatCandidates.table.columns.index'),
     field: 'index',
     align: 'center',
-    style: 'width: 80px',
+    style: 'width: 8%',
   },
   {
     name: 'nationalId',
     label: i18n.t('admin.seatCandidates.table.columns.nationalId'),
     field: 'nationalId',
     align: 'center',
+    style: 'width: 20%',
   },
   {
     name: 'titleTh',
     label: i18n.t('admin.seatCandidates.table.columns.prefix'),
     field: 'titleTh',
     align: 'center',
+    style: 'width: 10%',
   },
   {
     name: 'fullnameTh',
     label: i18n.t('admin.seatCandidates.table.columns.fullName'),
     field: 'fullnameTh',
-    align: 'center',
+    align: 'left',
+    style: 'width: 35%; padding-left: 16%',
   },
   {
     name: 'seatNumber',
     label: i18n.t('admin.seatCandidates.table.columns.seatNumber'),
     field: 'seatNumber',
     align: 'center',
+    style: 'width: 15%',
+    classes: 'text-weight-bold',
   },
 ];
 

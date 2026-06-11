@@ -76,46 +76,7 @@
         :pagination="pagination"
         class="scores-table"
         @request="onRequest"
-      >
-        <template v-slot:body="props">
-          <q-tr :props="props">
-            <q-td class="text-center">{{ props.row.index }}</q-td>
-            <q-td class="text-center">{{ props.row.nationalId }}</q-td>
-            <q-td class="text-center">
-              <div class="row justify-center">
-                <div style="position: relative; display: inline-block">
-                  <span style="visibility: hidden; font-weight: 600; white-space: nowrap">
-                    คำนำหน้า
-                  </span>
-                  <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
-                    {{ props.row.titleTh }}
-                  </span>
-                </div>
-              </div>
-            </q-td>
-            <q-td class="text-center">
-              <div class="row justify-center">
-                <div style="position: relative; display: inline-block">
-                  <span style="visibility: hidden; font-weight: 600; white-space: nowrap">
-                    ชื่อ-นามสกุล
-                  </span>
-                  <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
-                    {{ props.row.fullnameTh }}
-                  </span>
-                </div>
-              </div>
-            </q-td>
-            <q-td class="text-center">{{ props.row.hasScore ? props.row.scoreGrammar : '' }}</q-td>
-            <q-td class="text-center">{{ props.row.hasScore ? props.row.scoreReading : '' }}</q-td>
-            <q-td class="text-center text-weight-bold text-primary">
-              {{ props.row.hasScore ? props.row.scoreTotal : '' }}
-            </q-td>
-            <q-td class="text-center text-weight-bold">
-              {{ props.row.hasScore ? props.row.band : '' }}
-            </q-td>
-          </q-tr>
-        </template>
-      </BaseTable>
+      />
     </main>
 
     <div class="row justify-center q-mt-lg">
@@ -575,64 +536,62 @@ const columns: QTableColumn[] = [
     label: 'ลำดับ',
     field: 'index',
     align: 'center',
-    style: 'width: 80px',
-    headerStyle: 'width: 80px',
+    style: 'width: 8%',
   },
   {
     name: 'nationalId',
     label: 'เลขประจำตัวสอบ',
     field: 'nationalId',
     align: 'center',
-    style: 'width: 150px',
-    headerStyle: 'width: 150px',
+    style: 'width: 15%',
   },
   {
     name: 'titleTh',
     label: 'คำนำหน้า',
     field: 'titleTh',
     align: 'center',
-    style: 'width: 90px',
-    headerStyle: 'width: 90px',
+    style: 'width: 8%',
   },
   {
     name: 'fullnameTh',
     label: 'ชื่อ-นามสกุล',
     field: 'fullnameTh',
-    align: 'center',
-    style: 'width: 240px',
-    headerStyle: 'width: 240px',
+    align: 'left',
+    style: 'width: 25%; padding-left: 10%',
   },
   {
     name: 'scoreGrammar',
     label: 'คำศัพท์และไวยากรณ์',
     field: 'scoreGrammar',
     align: 'center',
-    style: 'width: 160px',
-    headerStyle: 'width: 160px',
+    style: 'width: 10%',
+    format: (val: unknown, row: ScoreTableRow) => (row.hasScore ? String(val) : ''),
   },
   {
     name: 'scoreReading',
     label: 'ทักษะการอ่าน',
     field: 'scoreReading',
     align: 'center',
-    style: 'width: 160px',
-    headerStyle: 'width: 160px',
+    style: 'width: 10%',
+    format: (val: unknown, row: ScoreTableRow) => (row.hasScore ? String(val) : ''),
   },
   {
     name: 'scoreTotal',
     label: 'คะแนนรวม',
     field: 'scoreTotal',
     align: 'center',
-    style: 'width: 160px',
-    headerStyle: 'width: 160px',
+    style: 'width: 5%',
+    format: (val: unknown, row: ScoreTableRow) => (row.hasScore ? String(val) : ''),
+    classes: 'text-weight-bold text-primary',
   },
   {
     name: 'band',
     label: 'Level',
     field: 'band',
     align: 'center',
-    style: 'width: 80px',
-    headerStyle: 'width: 80px',
+    style: 'width: 10%',
+    format: (val: unknown, row: ScoreTableRow) => (row.hasScore ? String(val) : ''),
+    classes: 'text-weight-bold',
   },
 ];
 
