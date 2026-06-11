@@ -142,7 +142,7 @@ const shortName = computed(() => {
 
 .seat-name {
   max-width: 56px;
-  font-size: 11px;
+  font-size: 15px;
   line-height: 1;
   color: #ffffff;
   text-align: center;
@@ -163,7 +163,7 @@ const shortName = computed(() => {
 }
 
 .empty-text {
-  font-size: 15px;
+  font-size: 20px;
   line-height: 1;
 }
 
@@ -189,7 +189,7 @@ const shortName = computed(() => {
 .seat-label {
   width: 64px;
   text-align: center;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 18px;
   color: #111111;
 }

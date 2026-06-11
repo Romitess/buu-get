@@ -177,11 +177,7 @@ export function useExamSeatManagement() {
   });
 
   const examTitle = computed((): string => {
-    const baseTitle = examData.value?.EXAM_NAME || DEFAULT_EXAM_TITLE;
-    if (activeSession.value?.SS_NAME) {
-      return `${baseTitle} (${activeSession.value.SS_NAME})`;
-    }
-    return baseTitle;
+    return examData.value?.EXAM_NAME || DEFAULT_EXAM_TITLE;
   });
 
   // Resolves a localized month name by 0-based index from i18n (type-safe, no cast)

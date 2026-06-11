@@ -154,8 +154,8 @@ const handleSearch = (val: string | number | null): void => {
 .seat-management-row {
   display: grid;
   grid-template-columns: minmax(360px, 0.38fr) minmax(0, 0.62fr);
-  gap: 24px;
-  height: 540px;
+  gap: 16px;
+  height: clamp(600px, 72vh, 760px);
   align-items: stretch;
 
   & > div {

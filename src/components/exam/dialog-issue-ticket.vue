@@ -1,90 +1,91 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide" persistent>
-    <q-card class="issue-ticket-dialog-card q-pa-none">
-      <!-- Header Area -->
-      <div class="bg-primary text-white q-pa-md row items-center no-wrap dialog-header">
-        <q-avatar class="q-mr-md header-avatar" size="48px">
-          <q-icon name="fact_check" size="28px" color="white" />
-        </q-avatar>
-        <div class="column">
-          <div class="dialog-title">
-            {{ $t('admin.seatCandidates.issueTicketDialog.title') }}
+  <q-dialog ref="dialogRef" persistent @hide="onDialogHide">
+    <q-card class="issue-ticket-dialog-card">
+      <header class="dialog-header">
+        <h2>ข้อมูลการออกใบ Test Voucher</h2>
+        <q-btn
+          flat
+          round
+          dense
+          icon="close"
+          color="grey-6"
+          aria-label="ปิด"
+          @click="onCancelClick"
+        />
+      </header>
+
+      <section class="exam-details">
+        <div class="details-title">
+          <q-icon name="description" size="23px" />
+          <span>รายละเอียดการสอบ</span>
+        </div>
+        <div class="details-grid">
+          <div class="detail-column">
+            <div class="detail-item">
+              <q-icon name="calendar_today" />
+              <span>วันที่สอบ: {{ sessionDetails.date || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <q-icon name="schedule" />
+              <span>เวลาที่สอบ: {{ sessionDetails.time || '-' }}</span>
+            </div>
           </div>
-          <div class="dialog-subtitle">
-            {{ $t('admin.seatCandidates.issueTicketDialog.subtitle') }}
+          <div class="detail-column detail-column-right">
+            <div class="detail-item">
+              <q-icon name="location_city" />
+              <span>สถานที่สอบ: {{ sessionDetails.room || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <q-icon name="group" />
+              <span>จำนวนผู้สมัคร: {{ sessionDetails.studentCount || 0 }} คน</span>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <q-card-section class="q-pt-lg q-px-lg q-pb-md">
-        <!-- Warning Alert -->
-        <div class="warning-alert row items-center no-wrap q-pa-md q-mb-lg">
-          <q-icon
-            name="error_outline"
-            color="secondary"
-            size="24px"
-            class="q-mr-md flex-shrink-0"
+      <section class="voucher-preview-section">
+        <div class="preview-heading">
+          <span>ตัวอย่างใบ Test Voucher</span>
+          <div class="side-tabs" role="tablist" aria-label="เลือกด้านของใบเข้าสอบ">
+            <button
+              type="button"
+              :class="{ active: previewSide === 'front' }"
+              @click="previewSide = 'front'"
+            >
+              ด้านหน้า
+            </button>
+            <span>|</span>
+            <button
+              type="button"
+              :class="{ active: previewSide === 'back' }"
+              @click="previewSide = 'back'"
+            >
+              ด้านหลัง
+            </button>
+          </div>
+        </div>
+
+        <div class="voucher-preview" :class="`is-${previewSide}`">
+          <TestVoucherReport
+            :data="voucherData"
+            :show-actions="false"
+            :show-voucher-card="previewSide === 'front'"
+            :show-regulations="previewSide === 'back'"
+            use-image-placeholder
           />
-          <div class="text-primary alert-text">
-            {{ $t('admin.seatCandidates.issueTicketDialog.warningAlert') }}
-          </div>
         </div>
+      </section>
 
-        <!-- Exam Data Section -->
-        <div class="exam-data-container">
-          <div class="exam-data-header q-px-md q-py-sm">
-            <span class="text-weight-medium">
-              {{ $t('admin.seatCandidates.issueTicketDialog.examInfoTitle') }}
-            </span>
-          </div>
-          <div class="exam-data-content q-px-md q-py-xs">
-            <!-- Row 1 -->
-            <div class="row justify-between items-center q-py-sm data-row">
-              <span class="row-label">{{
-                $t('admin.seatCandidates.issueTicketDialog.roundName')
-              }}</span>
-              <span class="row-value">{{ sessionDetails.roundName || '-' }}</span>
-            </div>
-            <!-- Row 2 -->
-            <div class="row justify-between items-center q-py-sm data-row">
-              <span class="row-label">{{ $t('admin.seatCandidates.issueTicketDialog.date') }}</span>
-              <span class="row-value">{{ sessionDetails.date || '-' }}</span>
-            </div>
-            <!-- Row 3 -->
-            <div class="row justify-between items-center q-py-sm data-row">
-              <span class="row-label">{{ $t('admin.seatCandidates.issueTicketDialog.time') }}</span>
-              <span class="row-value">{{ sessionDetails.time || '-' }}</span>
-            </div>
-            <!-- Row 4 -->
-            <div class="row justify-between items-center q-py-sm data-row">
-              <span class="row-label">{{ $t('admin.seatCandidates.issueTicketDialog.room') }}</span>
-              <span class="row-value">{{ sessionDetails.room || '-' }}</span>
-            </div>
-            <!-- Row 5 -->
-            <div class="row justify-between items-center q-py-sm data-row no-border">
-              <span class="row-label">{{
-                $t('admin.seatCandidates.issueTicketDialog.studentCount')
-              }}</span>
-              <span class="row-value">
-                {{ sessionDetails.studentCount || '0' }}
-                {{ $t('admin.seatCandidates.issueTicketDialog.studentCountSuffix') }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </q-card-section>
-
-      <!-- Actions -->
-      <q-card-actions class="q-px-lg q-pb-lg q-pt-sm row no-wrap action-container">
+      <q-card-actions class="dialog-actions">
         <AppButton
-          :label="$t('admin.seatCandidates.issueTicketDialog.cancel')"
-          color="grey-2"
+          label="ยกเลิก"
+          color="grey-3"
           text-color="black"
           class="action-btn"
           @click="onCancelClick"
         />
         <AppButton
-          :label="$t('admin.seatCandidates.issueTicketDialog.confirm')"
+          label="ยืนยันการออกใบเข้าสอบ"
           color="primary"
           class="action-btn"
           @click="onOKClick"
@@ -95,14 +96,16 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useDialogPluginComponent } from 'quasar';
 import type { PropType } from 'vue';
 import AppButton from 'src/components/base/app-button.vue';
+import TestVoucherReport from 'src/components/test-voucher-report.vue';
+import type { VoucherData } from 'src/types/voucher';
 
 defineProps({
   sessionDetails: {
     type: Object as PropType<{
-      roundName?: string;
       date?: string;
       time?: string;
       room?: string;
@@ -110,137 +113,331 @@ defineProps({
     }>,
     default: () => ({}),
   },
+  voucherData: {
+    type: Object as PropType<VoucherData>,
+    required: true,
+  },
 });
 
 defineEmits([...useDialogPluginComponent.emits]);
 
+const previewSide = ref<'front' | 'back'>('front');
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
 
-function onOKClick() {
-  onDialogOK();
-}
-
-function onCancelClick() {
-  onDialogCancel();
-}
+const onOKClick = (): void => onDialogOK();
+const onCancelClick = (): void => onDialogCancel();
 </script>
 
-<style lang="scss" scoped>
+<style scoped lang="scss">
 .issue-ticket-dialog-card {
-  width: 100%;
-  max-width: 440px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background-color: var(--surface-card);
-  font-family: var(--font-family-base);
+  width: min(760px, calc(100vw - 32px));
+  max-width: 760px;
+  max-height: calc(100vh - 32px);
+  padding: 28px 56px 32px;
+  border-radius: 10px;
+  overflow-y: auto;
+  background: #ffffff;
 }
 
 .dialog-header {
-  border-top-left-radius: var(--radius-md);
-  border-top-right-radius: var(--radius-md);
-
-  .dialog-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    line-height: 1.2;
-  }
-
-  .dialog-subtitle {
-    font-size: 0.85rem;
-    opacity: 0.85;
-    line-height: 1.4;
-  }
-}
-
-.header-avatar {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.warning-alert {
-  background-color: #eef4fc; // Light blue background
-  border-radius: var(--radius-sm);
-  position: relative;
-  overflow: hidden;
-  align-items: flex-start;
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background-color: var(--primary-light);
-  }
-
-  .alert-text {
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 1.4;
-  }
-}
-
-.exam-data-container {
-  border: none;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-
-.exam-data-header {
-  background-color: var(--primary);
-  color: var(--text-on-primary);
-
-  span {
-    font-size: 15px;
-    font-weight: 500;
-  }
-}
-
-.data-row {
-  border-bottom: 1px solid var(--neutral-200);
-  min-height: 44px;
-
-  &.no-border {
-    border-bottom: none;
-  }
-
-  .row-label {
-    color: var(--text-secondary);
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 100%;
-  }
-
-  .row-value {
-    color: var(--text-primary);
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 100%;
-    text-align: right;
-  }
-}
-
-.action-container {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  margin-bottom: 28px;
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+}
+
+.exam-details {
+  border: 1px solid #d7d7d7;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.details-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #dddddd;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 10px 20px;
+}
+
+.detail-column {
+  display: grid;
+  gap: 8px;
+  padding: 0 12px;
+}
+
+.detail-column-right {
+  border-left: 1px solid #dddddd;
+  padding-left: 28px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 30px;
+  font-size: 15px;
+
+  .q-icon {
+    flex: 0 0 23px;
+    font-size: 23px;
+  }
+}
+
+.voucher-preview-section {
+  margin-top: 24px;
+}
+
+.preview-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.side-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #aaaaaa;
+
+  button {
+    padding: 0 0 2px;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    background: transparent;
+    color: #aaaaaa;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  button.active {
+    border-bottom-color: #111111;
+    color: #111111;
+    font-weight: 600;
+  }
+}
+
+.voucher-preview {
+  height: 380px;
+  margin-top: 3px;
+  border: 1px solid #222222;
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(120.96deg, #fafafa 0%, #f0f4f8 100%);
+
+  :deep(.page-container-test) {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 0;
+    display: block;
+  }
+
+  :deep(.voucher-wrapper) {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  :deep(.voucher-card),
+  :deep(.regulations-block) {
+    width: 100%;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: linear-gradient(120.96deg, #fafafa 0%, #f0f4f8 100%);
+  }
+
+  :deep(.voucher-card) {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 8px;
+  }
+
+  &.is-front :deep(.voucher-header),
+  &.is-front :deep(.voucher-body),
+  &.is-front :deep(.voucher-footer) {
+    background: transparent;
+  }
+
+  &.is-front :deep(.voucher-header) {
+    grid-template-columns: 190px minmax(0, 1fr);
+    min-height: 74px;
+    padding: 10px 20px;
+  }
+
+  &.is-front :deep(.header-logo) {
+    width: 170px;
+  }
+
+  &.is-front :deep(.header-title) {
+    font-size: 17px !important;
+  }
+
+  &.is-front :deep(.header-subtitle) {
+    font-size: 16px !important;
+    color: var(--Gray, #676767) !important;
+  }
+
+  &.is-front :deep(.voucher-body) {
+    min-height: 225px;
+    padding: 14px 46px 6px;
+    display: flex;
+    align-items: center;
+  }
+
+  &.is-front :deep(.content-container) {
+    width: 100%;
+    grid-template-columns: 170px minmax(0, 1fr);
+    column-gap: 34px;
+  }
+
+  &.is-front :deep(.profile-photo-wrapper) {
+    width: 150px;
+    height: 174px;
+  }
+
+  &.is-front :deep(.signature-line) {
+    width: 150px;
+    margin-top: 32px;
+  }
+
+  &.is-front :deep(.details-grid) {
+    grid-auto-rows: minmax(42px, auto);
+    column-gap: 38px;
+  }
+
+  &.is-front :deep(.info-label) {
+    font-size: 13px !important;
+    color: var(--Gray, #676767) !important;
+  }
+
+  &.is-front :deep(.info-value) {
+    font-size: clamp(12px, 1.55vw, 16px) !important;
+    white-space: nowrap;
+    overflow: visible;
+  }
+
+  &.is-front :deep(.voucher-footer) {
+    padding: 5px 20px 12px;
+  }
+
+  &.is-front :deep(.barcode-svg) {
+    width: 290px;
+    height: 40px;
+  }
+
+  &.is-front :deep(.watermark-bg) {
+    left: 64%;
+    top: 40%;
+  }
+
+  :deep(.regulations-block) {
+    margin-top: 0 !important;
+    height: 100%;
+  }
+
+  :deep(.regulations-box) {
+    height: 100%;
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+  }
+
+  :deep(.watermark-bg) {
+    font-family: 'Outfit', var(--font-family-base);
+    font-size: 205px;
+    font-style: normal;
+    font-weight: 800;
+    line-height: 100%;
+    letter-spacing: 0;
+    vertical-align: middle;
+    color: #1e89e50d;
+  }
+
+  &.is-back :deep(.regulations-content-wrapper) {
+    height: 100%;
+    box-sizing: border-box;
+    padding: 16px 28px 14px;
+    overflow: hidden;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  &.is-back :deep(.watermark-bg) {
+    left: 48% !important;
+  }
+
+  &.is-back :deep(.regulations-heading-inline) {
+    margin-bottom: 5px;
+    font-size: 14px;
+  }
+
+  &.is-back :deep(.regulations-text-content) {
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
+  &.is-back :deep(.regulations-text-content.q-mb-md) {
+    margin-bottom: 8px;
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 30px 72px 0;
 }
 
 .action-btn {
-  border-radius: 8px;
-  padding: 12px 16px !important;
-  min-height: 44px !important;
-  font-family: var(--font-family-base);
-  font-size: 14px;
-  font-weight: 500 !important;
-  line-height: 100%;
-  text-align: center;
-  vertical-align: middle;
   flex: 1;
-  box-shadow: none !important;
+  min-height: 52px;
+  border-radius: 10px;
+  font-size: 16px;
 }
 
-.flex-shrink-0 {
-  flex-shrink: 0;
+@media (max-width: $breakpoint-xs-max) {
+  .issue-ticket-dialog-card {
+    padding: 22px 18px;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-column-right {
+    margin-top: 8px;
+    padding-left: 12px;
+    border-left: 0;
+  }
+
+  .dialog-actions {
+    padding-inline: 0;
+  }
 }
 </style>

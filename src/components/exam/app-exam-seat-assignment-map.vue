@@ -8,7 +8,7 @@
       </div>
     </header>
 
-    <!-- Fit the map to the available width and scroll vertically for large rooms. -->
+    <!-- Keep seats readable, fit the width, and scroll vertically for large rooms. -->
     <div ref="containerRef" class="seat-map-content">
       <div v-if="seatsByRow.length > 0" class="seat-grid-scaling-wrapper" :style="wrapperStyle">
         <div
@@ -269,10 +269,10 @@ const measureAndScale = (): void => {
 
   const scaleX = availW / gridW;
   const scaleY = availH / gridH;
-  const minimumReadableScale = 0.4;
+  const minimumReadableScale = 1;
 
-  // Small rooms fit entirely in the panel. Large rooms stop shrinking at a
-  // readable size and use vertical scrolling, while always fitting the width.
+  // Always fit the width. For tall rooms, preserve a readable seat size and
+  // let the map scroll vertically instead of shrinking every label.
   scaleFactor.value = Math.min(scaleX, Math.max(scaleY, minimumReadableScale), 1);
 };
 
@@ -505,7 +505,7 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   border: 1px solid #e0e0e0;
   border-radius: 10px;
   background: #ffffff;
-  padding: 14px 18px 12px;
+  padding: 12px 14px 10px;
   height: 100%;
   min-height: 424px;
   display: flex;
@@ -518,7 +518,7 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   flex-shrink: 0;
 }
 
@@ -596,12 +596,12 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
 }
 
 .seat-map-content::-webkit-scrollbar-thumb {
-  background: #b8bec8;
-  border-radius: 4px;
+  background: var(--neutral-400);
+  border-radius: var(--radius-pill);
 }
 
 .seat-map-content::-webkit-scrollbar-thumb:hover {
-  background: #8f98a5;
+  background: var(--neutral-500);
 }
 
 .seat-grid-scaling-wrapper {
@@ -627,7 +627,7 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
 .seat-grid-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   width: 100%;
   margin-inline: auto;
   align-items: stretch;
@@ -637,7 +637,7 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 24px;
+  gap: 16px;
   min-width: 0;
 }
 

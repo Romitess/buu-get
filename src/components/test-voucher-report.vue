@@ -1,7 +1,7 @@
 <template>
   <div class="q-pa-md page-container-test">
     <!-- Action Bar (Hidden when printing) -->
-    <div class="row justify-end q-mb-md no-print">
+    <div v-if="showActions" class="row justify-end q-mb-md no-print">
       <q-btn
         color="primary"
         icon="print"
@@ -13,7 +13,7 @@
 
     <!-- Preview / Printable Area -->
     <div ref="voucherRef" class="voucher-wrapper">
-      <div class="voucher-card">
+      <div v-if="showVoucherCard" class="voucher-card">
         <!-- ===== Header Section ===== -->
         <div class="voucher-header">
           <!-- Logo container -->
@@ -37,7 +37,11 @@
             <!-- Left: Profile Photo Column -->
             <div class="profile-column">
               <div class="profile-photo-wrapper shadow-1">
+                <div v-if="useImagePlaceholder" class="voucher-photo-placeholder">
+                  <q-icon name="image" size="38px" color="black" />
+                </div>
                 <ImageDisplay
+                  v-else
                   :image-path="voucherData.profileImage"
                   class="profile-photo-img"
                   width="100%"
@@ -206,9 +210,15 @@ const props = withDefaults(
     regulationsEn?: string | string[];
     regulationsTh?: string | string[];
     showRegulations?: boolean;
+    showVoucherCard?: boolean;
+    showActions?: boolean;
+    useImagePlaceholder?: boolean;
   }>(),
   {
     showRegulations: true,
+    showVoucherCard: true,
+    showActions: true,
+    useImagePlaceholder: false,
   },
 );
 
@@ -444,6 +454,15 @@ const windowPrint = (): void => {
     height: 100%;
     display: block;
   }
+}
+
+.voucher-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #cfcfd1;
 }
 
 .profile-column {

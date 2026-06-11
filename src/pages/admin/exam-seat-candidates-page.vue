@@ -90,6 +90,7 @@ import { bulkIssueVouchers } from 'src/services/voucher.service';
 import { updateEnrollmentStatus } from 'src/services/enrollment.service';
 import { updateExamSessionStatus } from 'src/services/exam.service';
 import { formatThaiLongDate } from 'src/utils/thai-date';
+import type { VoucherData } from 'src/types/voucher';
 import {
   EXAM_TYPE_GENERAL,
   EXAM_TYPE_SPECIAL,
@@ -138,6 +139,22 @@ const getMonthName = (monthIndex: number): string => i18n.t(`common.months[${mon
 const examDateLabel = computed((): string =>
   exam.value ? formatThaiLongDate(exam.value.EXAM_DATE, getMonthName) : '-',
 );
+
+const voucherPreviewData = computed<VoucherData>(() => ({
+  id: sessionEnrollments.value[0]?.ERM_ID ?? 0,
+  fullName: 'XX. XXXXXX XXXXXX',
+  studentId: 'XXXXXXXX',
+  examName: exam.value?.EXAM_NAME || 'BUU-GET Exam',
+  examDate: examDateLabel.value,
+  examTime: sessionTime.value,
+  examType: getExamRoundTypeLabel(),
+  location: sessionLocation.value,
+  seatNo: 'XX',
+  voucherNo: 'ENG2026-001',
+  citizenId: 'X-XXXX-XXXXX-XX-X',
+  testSession: 'X/XXXX',
+  barcodeValue: 'ENG2026-001',
+}));
 
 const startIssuingTickets = async (): Promise<void> => {
   if (!sessionEnrollments.value || sessionEnrollments.value.length === 0) {
@@ -222,12 +239,12 @@ const handlePrintVoucher = (): void => {
     component: DialogIssueTicket,
     componentProps: {
       sessionDetails: {
-        roundName: getExamRoundTypeLabel(),
         date: examDateLabel.value,
         time: sessionTime.value,
         room: sessionLocation.value,
         studentCount: candidateCount.value,
       },
+      voucherData: voucherPreviewData.value,
     },
   }).onOk(() => {
     void startIssuingTickets();
