@@ -86,7 +86,7 @@
                 <label class="text-body2 text-weight-medium q-mb-xs field-label block"
                   >{{ $t('profile.prefix') }} <span class="text-negative">*</span></label
                 >
-                <q-select
+                <AppSelect
                   ref="titleSelectRef"
                   v-model="formData.title"
                   :options="titleOptions"
@@ -97,7 +97,9 @@
                   emit-value
                   map-options
                   lazy-rules
-                  :rules="[(val) => !!val || $t('profile.requiredPrefix')]"
+                  :rules="[
+                    (val: string | null | undefined) => !!val || $t('profile.requiredPrefix'),
+                  ]"
                   hide-bottom-space
                 />
               </div>
@@ -213,7 +215,7 @@
               <label class="text-body2 text-weight-medium q-mb-xs field-label block">{{
                 $t('profile.education')
               }}</label>
-              <q-select
+              <AppSelect
                 ref="educationLevelSelectRef"
                 v-model="formData.educationLevel"
                 :options="educationOptions"
@@ -399,6 +401,7 @@ import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
+import AppSelect from 'src/components/base/app-select.vue';
 import { TITLE_TH_OPTIONS, EDUCATION_LEVEL_OPTIONS } from 'src/utils/form-options';
 import AppImageCropper from 'src/components/shared/app-image-cropper.vue';
 import * as userService from 'src/services/user.service';

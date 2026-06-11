@@ -6,7 +6,7 @@
     </div>
 
     <template v-if="type === 'select'">
-      <q-select
+      <AppSelect
         :model-value="modelValue ?? null"
         @update:model-value="(val) => $emit('update:modelValue', val)"
         :options="options ? [...options] : undefined"
@@ -51,6 +51,8 @@
 </template>
 
 <script setup lang="ts">
+import AppSelect from './app-select.vue';
+
 defineOptions({
   inheritAttrs: false,
 });
