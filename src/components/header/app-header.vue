@@ -347,18 +347,10 @@ const navLinks = computed<NavigationItem[]>(() => {
   } else {
     // === Guest Navigation ===
     links.push({
-      name: 'exam-info',
-      label: t('navigation.examSchedule'),
-      icon: 'quiz',
+      name: 'exam-schedule-guest',
+      label: t('navigation.viewSchedule'),
+      icon: 'event',
       path: '/user/exam-schedule',
-      children: [
-        {
-          name: 'exam-schedule-guest',
-          label: t('navigation.viewSchedule'),
-          icon: 'event',
-          path: '/user/exam-schedule',
-        },
-      ],
     });
   }
 
@@ -436,7 +428,7 @@ const logout = async () => {
   display: inline-flex;
   align-items: center;
   padding: 8px 16px;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-card-title);
   font-weight: var(--font-weight-medium);
   color: var(--text-secondary);
   text-decoration: none;

@@ -1169,7 +1169,7 @@ export default {
     manageLocations: 'จัดการห้องสอบ',
     manageExams: 'จัดการรอบสอบ',
     dashboard: 'แดชบอร์ด',
-    viewSchedule: 'ดูตารางสอบ',
+    viewSchedule: 'ตารางสอบ',
     paymentImport: 'นำเข้าไฟล์การชำระเงิน',
     logout: 'ออกจากระบบ',
     menu: 'เมนู',

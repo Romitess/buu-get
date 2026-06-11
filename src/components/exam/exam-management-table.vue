@@ -40,15 +40,13 @@
           track-color="grey-5"
           class="q-mr-sm registration-progress"
         />
-        <span class="text-weight-medium registration-text">
-          {{ row.registeredCount }}/{{ row.capacity }}
-        </span>
+        <span class="registration-text"> {{ row.registeredCount }}/{{ row.capacity }} </span>
       </div>
     </template>
 
     <!-- Status Column -->
     <template v-slot:body-cell-status="{ row }">
-      <div class="text-center">
+      <div class="text-center text-body2 status-text">
         {{ $t(`admin.examManagement.status.${row.status}`) }}
       </div>
     </template>
@@ -393,5 +391,12 @@ const onRequest = (req: TableRequestProps) => {
 .registration-text {
   min-width: 50px;
   text-align: left;
+  font-size: var(--font-size-md);
+}
+
+.status-text {
+  min-width: 50px;
+  text-align: center;
+  font-size: var(--font-size-md);
 }
 </style>

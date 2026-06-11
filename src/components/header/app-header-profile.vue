@@ -10,7 +10,7 @@
           {{ displayRole }}
         </div>
       </div>
-      <q-avatar size="36px" class="app-header-profile__avatar">
+      <q-avatar size="48px" class="app-header-profile__avatar">
         <ImageDisplay
           :image-path="userStore.currentUser?.userImagePath"
           width="100%"
@@ -24,7 +24,7 @@
         <div class="profile-card">
           <!-- Profile Header: Centered Avatar + Name + Role -->
           <div class="profile-card__header">
-            <q-avatar size="72px" class="profile-card__avatar">
+            <q-avatar size="84px" class="profile-card__avatar q-mb-sm">
               <ImageDisplay
                 :image-path="userStore.currentUser?.userImagePath"
                 width="100%"
@@ -147,7 +147,7 @@ const onLogout = async (): Promise<void> => {
 }
 
 .app-header-profile__name {
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   line-height: 1.3;
@@ -158,7 +158,7 @@ const onLogout = async (): Promise<void> => {
 }
 
 .app-header-profile__role {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-regular);
   color: var(--text-muted);
   line-height: 1.3;
@@ -189,7 +189,7 @@ const onLogout = async (): Promise<void> => {
 }
 
 .profile-card__name {
-  font-size: 16px;
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
   color: var(--text-primary);
   line-height: 1.3;
@@ -201,7 +201,7 @@ const onLogout = async (): Promise<void> => {
 }
 
 .profile-card__role {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-regular);
   color: var(--text-secondary);
   margin-top: 2px;
@@ -227,7 +227,7 @@ const onLogout = async (): Promise<void> => {
 }
 
 .profile-card__action-label {
-  font-size: 14px;
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
   color: var(--text-primary);
 }
@@ -243,7 +243,7 @@ const onLogout = async (): Promise<void> => {
 }
 
 .profile-card__logout-label {
-  font-size: 14px;
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-medium);
   color: #ef4444;
 }
