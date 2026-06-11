@@ -68,7 +68,7 @@
             <div class="row q-col-gutter-md">
               <div class="col-12 col-md-6">
                 <div class="row justify-between items-center q-mb-xs">
-                  <label class="form-label"
+                  <label class="text-body2 text-weight-medium q-mb-xs field-label block"
                     >{{ $t('profile.email') }} <span class="text-negative">*</span></label
                   >
                   <a
@@ -83,7 +83,7 @@
                 <q-input v-model="formData.email" outlined dense bg-color="white" />
               </div>
               <div class="col-12 col-md-6 relative-position">
-                <label class="form-label"
+                <label class="text-body2 text-weight-medium q-mb-xs field-label block"
                   >{{ $t('profile.prefix') }} <span class="text-negative">*</span></label
                 >
                 <q-select
@@ -104,7 +104,7 @@
 
               <!-- Row 2 -->
               <div class="col-12 col-md-6 relative-position">
-                <label class="form-label"
+                <label class="text-body2 text-weight-medium q-mb-xs field-label block"
                   >{{ isForeigner ? $t('profile.passportNo') : $t('profile.nationalId') }}
                   <span class="text-negative">*</span></label
                 >
@@ -129,7 +129,7 @@
                 />
               </div>
               <div class="col-12 col-md-6 relative-position">
-                <label class="form-label"
+                <label class="text-body2 text-weight-medium q-mb-xs field-label block"
                   >{{ $t('profile.fullName') }} <span class="text-negative">*</span></label
                 >
                 <q-input
@@ -146,7 +146,7 @@
 
               <!-- Row 3 -->
               <div class="col-12 col-md-6 relative-position">
-                <label class="form-label"
+                <label class="text-body2 text-weight-medium q-mb-xs field-label block"
                   >{{ $t('profile.birthdate') }} <span class="text-negative">*</span></label
                 >
                 <q-input
@@ -186,7 +186,7 @@
                 </q-input>
               </div>
               <div class="col-12 col-md-6 relative-position">
-                <label class="form-label"
+                <label class="text-body2 text-weight-medium q-mb-xs field-label block"
                   >{{ $t('profile.fullNameEn') }} <span class="text-negative">*</span></label
                 >
                 <q-input
@@ -211,7 +211,9 @@
           <!-- Left Column: Education, Faculty, Institution -->
           <div class="col-12 col-md-6">
             <div class="q-mb-md relative-position">
-              <label class="form-label">{{ $t('profile.education') }}</label>
+              <label class="text-body2 text-weight-medium q-mb-xs field-label block">{{
+                $t('profile.education')
+              }}</label>
               <q-select
                 ref="educationLevelSelectRef"
                 v-model="formData.educationLevel"
@@ -225,7 +227,9 @@
               />
             </div>
             <div class="q-mb-md relative-position">
-              <label class="form-label">{{ $t('profile.faculty') }}</label>
+              <label class="text-body2 text-weight-medium q-mb-xs field-label block">{{
+                $t('profile.faculty')
+              }}</label>
               <q-input
                 ref="facultyInputRef"
                 v-model="formData.faculty"
@@ -235,7 +239,9 @@
               />
             </div>
             <div class="relative-position">
-              <label class="form-label">{{ $t('profile.institution') }}</label>
+              <label class="text-body2 text-weight-medium q-mb-xs field-label block">{{
+                $t('profile.institution')
+              }}</label>
               <q-input
                 ref="institutionInputRef"
                 v-model="formData.institution"
@@ -249,7 +255,7 @@
           <!-- Right Column: Address, Phone -->
           <div class="col-12 col-md-6">
             <div class="q-mb-md relative-position">
-              <label class="form-label"
+              <label class="text-body2 text-weight-medium q-mb-xs field-label block"
                 >{{ $t('profile.address') }} <span class="text-negative">*</span></label
               >
               <q-input
@@ -267,7 +273,7 @@
               />
             </div>
             <div class="relative-position">
-              <label class="form-label"
+              <label class="text-body2 text-weight-medium q-mb-xs field-label block"
                 >{{ $t('profile.phone') }} <span class="text-negative">*</span></label
               >
               <q-input
@@ -324,7 +330,7 @@
 
         <q-card-section class="q-py-md">
           <div class="q-mb-md">
-            <label class="form-label"
+            <label class="text-body2 text-weight-medium q-mb-xs field-label block"
               >{{ $t('profile.currentPassword') }} <span class="text-negative">*</span></label
             >
             <q-input
@@ -337,7 +343,7 @@
             />
           </div>
           <div class="q-mb-md">
-            <label class="form-label"
+            <label class="text-body2 text-weight-medium q-mb-xs field-label block"
               >{{ $t('profile.newPassword') }} <span class="text-negative">*</span></label
             >
             <q-input
@@ -780,13 +786,6 @@ const onSavePassword = (): void => {
   right: 12px;
   border: 2px solid white;
   box-shadow: none !important;
-}
-
-.form-label {
-  display: block;
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-bottom: 4px;
 }
 
 .action-btn {
