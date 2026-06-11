@@ -103,18 +103,16 @@
           </div>
           <div class="col-6 col-md-3" :data-field="`startTime_${activeSlotIndex}`">
             <div class="buu-label-muted q-mb-xs">เวลาเริ่ม</div>
-            <q-input
+            <app-time-picker
               v-model="activeSlot.startTime"
               outlined
               dense
               class="custom-input"
               :class="{ 'buu-field-error': hasError(`startTime_${activeSlotIndex}`) }"
               placeholder="08:00"
-              mask="##:##"
               hide-bottom-space
               :disable="locked"
-              @blur="onTimeBlur('startTime')"
-              @update:model-value="emit('clearFieldError', `startTime_${activeSlotIndex}`)"
+              @select="onTimeSelected('startTime')"
             />
             <div
               v-if="hasError(`startTime_${activeSlotIndex}`)"
@@ -127,18 +125,16 @@
           </div>
           <div class="col-6 col-md-3" :data-field="`endTime_${activeSlotIndex}`">
             <div class="buu-label-muted q-mb-xs">เวลาสิ้นสุด</div>
-            <q-input
+            <app-time-picker
               v-model="activeSlot.endTime"
               outlined
               dense
               class="custom-input"
               :class="{ 'buu-field-error': hasError(`endTime_${activeSlotIndex}`) }"
               placeholder="10:00"
-              mask="##:##"
               hide-bottom-space
               :disable="locked"
-              @blur="onTimeBlur('endTime')"
-              @update:model-value="emit('clearFieldError', `endTime_${activeSlotIndex}`)"
+              @select="onTimeSelected('endTime')"
             />
             <div
               v-if="hasError(`endTime_${activeSlotIndex}`)"
@@ -186,7 +182,7 @@
             class="row items-start q-col-gutter-sm q-mb-sm"
           >
             <div class="col-12 col-md-6" :data-field="`locationId_${activeSlotIndex}_${rIdx}`">
-              <q-select
+              <app-select
                 v-model="room.locationId"
                 :options="getAvailableLocationOptions(rIdx)"
                 option-label="label"
@@ -212,7 +208,7 @@
               </div>
             </div>
             <div class="col-12 col-md-3">
-              <q-select
+              <app-select
                 v-model="room.proctors"
                 multiple
                 use-chips
@@ -226,12 +222,6 @@
                 placeholder="เลือกผู้คุมสอบ"
                 dropdown-icon="keyboard_arrow_down"
                 class="custom-input proctors-select"
-                :class="{
-                  'proctors-select--stacked': openProctorSelectKey === `${activeSlotIndex}_${rIdx}`,
-                  'proctors-select--closed': openProctorSelectKey !== `${activeSlotIndex}_${rIdx}`,
-                }"
-                @popup-show="openProctorSelectKey = `${activeSlotIndex}_${rIdx}`"
-                @popup-hide="openProctorSelectKey = null"
               />
             </div>
             <div class="col-12 col-md-3" :data-field="`seats_${activeSlotIndex}_${rIdx}`">
@@ -310,6 +300,8 @@ import { ref, computed } from 'vue';
 import type { CreateExamForm, TimeSlot, ExamRoom } from 'src/composables/use-create-exam';
 import type { ExamLocationOption } from 'src/services/exam.service';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
+import AppSelect from 'src/components/base/app-select.vue';
+import AppTimePicker from 'src/components/base/app-time-picker.vue';
 import { beToCeString, ceToBeString } from 'src/utils/thai-date';
 import { MAX_EXAM_SESSIONS } from 'src/constants/exam';
 
@@ -343,7 +335,6 @@ const emit = defineEmits([
 ]);
 
 const showExamDate = ref(false);
-const openProctorSelectKey = ref<string | null>(null);
 
 const preventNegativeAndDecimal = (evt: KeyboardEvent) => {
   if (['-', '+', 'e', 'E', '.', ','].includes(evt.key)) {
@@ -397,11 +388,9 @@ const hasError = (field: string): boolean => {
   return !!(props.fieldErrors && props.fieldErrors[field]);
 };
 
-const onTimeBlur = (field: 'startTime' | 'endTime') => {
-  if (activeSlot.value) {
-    activeSlot.value[field] = autoFormatTime(activeSlot.value[field]);
-    emit('sort-time-slots');
-  }
+const onTimeSelected = (field: 'startTime' | 'endTime'): void => {
+  emit('clearFieldError', `${field}_${props.activeSlotIndex}`);
+  emit('sort-time-slots');
 };
 
 const getSlotLabel = (slot: TimeSlot, index: number): string => {
@@ -411,21 +400,6 @@ const getSlotLabel = (slot: TimeSlot, index: number): string => {
     return `${start.replace(/\s/g, '')}-${end.replace(/\s/g, '')}`;
   }
   return `รอบที่ ${index + 1}`;
-};
-
-const autoFormatTime = (time: string): string => {
-  if (!time) return '';
-  const digits = time.replace(/\D/g, '');
-  if (digits.length === 1 || digits.length === 2) {
-    return `${digits.padStart(2, '0')}:00`;
-  }
-  if (digits.length === 3) {
-    return `0${digits.substring(0, 1)}:${digits.substring(1, 3)}`;
-  }
-  if (digits.length >= 4) {
-    return `${digits.substring(0, 2)}:${digits.substring(2, 4)}`;
-  }
-  return time;
 };
 </script>
 
@@ -516,33 +490,15 @@ const autoFormatTime = (time: string): string => {
   overflow: hidden;
 }
 
-.proctors-select--closed :deep(.q-field__native) {
-  flex-wrap: nowrap !important;
-  overflow: hidden !important;
-  max-width: 100%;
-}
-
-.proctors-select--closed :deep(.q-chip) {
-  flex-shrink: 0 !important;
-}
-
-.proctors-select--stacked :deep(.q-field__native) {
-  flex-direction: column !important;
-  align-items: flex-start !important;
+.proctors-select :deep(.q-field__native) {
+  flex-flow: row wrap !important;
+  align-items: center !important;
   gap: 4px;
 }
 
-.proctors-select--stacked :deep(.q-chip) {
+.proctors-select :deep(.q-chip) {
+  flex: 0 0 auto;
   margin: 2px 0 !important;
   max-width: 100%;
-}
-
-.proctors-select :deep(.q-chip__icon--remove),
-.proctors-select :deep(.q-chip__close) {
-  display: none !important;
-}
-
-.proctors-select :deep(.q-chip) {
-  padding-right: 12px !important;
 }
 </style>

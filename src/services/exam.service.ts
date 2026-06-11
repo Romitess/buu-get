@@ -113,7 +113,7 @@ export interface CreateExamPayload {
     endTime: string;
     locationId?: number;
     seats?: number;
-    proctorName?: string;
+    proctorName?: string | null;
     sessionId?: number;
   }[];
   fundSourceId?: number | null;
@@ -123,7 +123,7 @@ interface GroupedSessionTimeRange {
   startTime: string;
   endTime: string;
   seats: number;
-  proctorName: string;
+  proctorName: string | null;
   locationIds: number[];
   sessionId?: number;
 }
@@ -294,7 +294,7 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
     const key = `${startTime}-${endTime}`;
     const locationId = Number(range.locationId || payload.locationId);
     const seats = Number(range.seats || payload.seats || 0);
-    const proctorName = range.proctorName?.trim() || '';
+    const proctorName = range.proctorName?.trim() || null;
 
     const existingRange = groupedRanges.get(key);
     if (existingRange) {
@@ -392,7 +392,7 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<numbe
         SS_START_TIME: range.startTime,
         SS_END_TIME: range.endTime,
         SS_CAPACITY: range.seats,
-        SS_NAME: range.proctorName || '',
+        SS_NAME: range.proctorName,
         SS_SESSION_STATUS: SESSION_STATUS_OPEN,
       });
 
@@ -496,7 +496,7 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
           SS_START_TIME: range.startTime,
           SS_END_TIME: range.endTime,
           SS_CAPACITY: range.seats,
-          SS_NAME: range.proctorName || '',
+          SS_NAME: range.proctorName,
         };
 
         if (existingId) {

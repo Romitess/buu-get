@@ -12,7 +12,7 @@
         <!-- Row 1: ประเภทการสอบ | รูปแบบการสอบ -->
         <div class="col-12 col-md-6" data-field="examType">
           <div class="buu-label-muted q-mb-xs">ประเภทการสอบ</div>
-          <q-select
+          <app-select
             v-model="form.examType"
             :options="examTypeOptions"
             outlined
@@ -31,7 +31,7 @@
         </div>
         <div class="col-12 col-md-6" data-field="examFormat">
           <div class="buu-label-muted q-mb-xs">รูปแบบการสอบ</div>
-          <q-select
+          <app-select
             v-model="form.examFormat"
             :options="examFormatOptions"
             outlined
@@ -70,7 +70,7 @@
         </div>
         <div v-if="!isSpecialRound" class="col-12 col-md-6" data-field="fundSourceId">
           <div class="buu-label-muted q-mb-xs">รหัสผังแหล่งเงิน</div>
-          <q-select
+          <app-select
             v-model="form.fundSourceId"
             :options="fundSourceOptions"
             option-label="label"
@@ -139,6 +139,7 @@
 
 <script setup lang="ts">
 import type { CreateExamForm } from 'src/composables/use-create-exam';
+import AppSelect from 'src/components/base/app-select.vue';
 
 /**
  * Props for CreateExamDetailsCard.

@@ -32,7 +32,7 @@ export interface ExamRoom {
   /** Location ID (dropdown) */
   locationId: number | null;
   /** Proctor name (dropdown) */
-  proctorName: string;
+  proctorName: string | null;
   /** Selected proctors array */
   proctors?: string[];
   /** Number of seats */
@@ -926,7 +926,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     endTime: string;
     locationId: number;
     seats: number;
-    proctorName: string;
+    proctorName: string | null;
     sessionId?: number;
   }[] => {
     const result: {
@@ -934,7 +934,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       endTime: string;
       locationId: number;
       seats: number;
-      proctorName: string;
+      proctorName: string | null;
       sessionId?: number;
     }[] = [];
 
@@ -953,8 +953,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           endTime: formatTime(slot.endTime),
           locationId: Number(room.locationId),
           seats: Number(room.seats),
-          proctorName:
-            mappedProctorNames.length > 0 ? mappedProctorNames.join(', ') : room.proctorName || '',
+          proctorName: mappedProctorNames.length > 0 ? mappedProctorNames.join(', ') : null,
           ...(room.sessionId != null ? { sessionId: room.sessionId } : {}),
         });
       });
