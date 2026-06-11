@@ -78,7 +78,7 @@
           <div class="custom-label q-mb-xs">
             {{ t('admin.dailyRevenueReport.filter.department') }}
           </div>
-          <q-select
+          <AppSelect
             v-model="localFilter.department"
             :options="departmentOptions"
             outlined
@@ -168,6 +168,7 @@
 import { reactive, watch, ref, onMounted } from 'vue';
 import type { QPopupProxy } from 'quasar';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
+import AppSelect from 'src/components/base/app-select.vue';
 import type { DailyRevenueFilter, DepartmentOption } from 'src/types/daily-revenue.types';
 import { useI18n } from 'vue-i18n';
 import { fetchFundSources } from 'src/services/finance.service';
