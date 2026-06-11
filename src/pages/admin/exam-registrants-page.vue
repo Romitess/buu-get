@@ -51,64 +51,16 @@
           <div class="text-center">{{ row.index }}</div>
         </template>
 
-        <template v-slot:body-cell-titleTh="{ row }">
-          <div class="row justify-center">
-            <div style="position: relative; display: inline-block">
-              <span
-                style="
-                  visibility: hidden;
-                  font-weight: 600;
-                  font-size: var(--font-size-xs);
-                  white-space: nowrap;
-                "
-              >
-                {{ $t('admin.registrantManagement.table.columns.prefix') }}
-              </span>
-              <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
-                {{ row.titleTh }}
-              </span>
-            </div>
-          </div>
+        <template v-slot:body-cell-titleTh="{ value }">
+          <div class="text-center">{{ value }}</div>
         </template>
 
-        <template v-slot:body-cell-fullnameTh="{ row }">
-          <div class="row justify-center">
-            <div style="position: relative; display: inline-block">
-              <span
-                style="
-                  visibility: hidden;
-                  font-weight: 600;
-                  font-size: var(--font-size-xs);
-                  white-space: nowrap;
-                "
-              >
-                {{ $t('admin.registrantManagement.table.columns.fullName') }}
-              </span>
-              <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
-                {{ row.fullnameTh }}
-              </span>
-            </div>
-          </div>
+        <template v-slot:body-cell-fullnameTh="{ value }">
+          <div class="registrant-fullname-cell">{{ value }}</div>
         </template>
 
-        <template v-slot:body-cell-remark="{ row }">
-          <div class="row justify-center">
-            <div style="position: relative; display: inline-block">
-              <span
-                style="
-                  visibility: hidden;
-                  font-weight: 600;
-                  font-size: var(--font-size-xs);
-                  white-space: nowrap;
-                "
-              >
-                {{ $t('admin.registrantManagement.table.columns.remark') }}
-              </span>
-              <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
-                {{ row.remark || '-' }}
-              </span>
-            </div>
-          </div>
+        <template v-slot:body-cell-remark="{ value }">
+          <div class="text-center">{{ value || '-' }}</div>
         </template>
 
         <template v-slot:body-cell-paymentStatus="{ row }">
@@ -251,7 +203,7 @@ const columns: QTableColumn[] = [
     name: 'fullnameTh',
     label: t('admin.registrantManagement.table.columns.fullName'),
     field: 'fullnameTh',
-    align: 'center',
+    align: 'left',
     style: 'width: 18%',
   },
   {
@@ -352,5 +304,9 @@ onMounted(() => {
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
   }
+}
+
+.registrant-fullname-cell {
+  transform: translateX(75px);
 }
 </style>

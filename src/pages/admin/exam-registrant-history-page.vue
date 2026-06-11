@@ -82,15 +82,21 @@
           </template>
 
           <template v-slot:body-cell-modifierName="{ row }">
-            <div class="text-center">{{ row.modifierName }}</div>
+            <div class="history-cell history-cell--modifier-name">
+              {{ row.modifierName }}
+            </div>
           </template>
 
           <template v-slot:body-cell-modifierRole="{ row }">
-            <div class="text-center">{{ row.modifierRole }}</div>
+            <div class="history-cell history-cell--modifier-role">
+              {{ row.modifierRole }}
+            </div>
           </template>
 
           <template v-slot:body-cell-modifiedFields="{ row }">
-            <div class="text-left">{{ row.modifiedFields }}</div>
+            <div class="history-cell history-cell--modified-fields">
+              {{ row.modifiedFields }}
+            </div>
           </template>
 
           <template v-slot:body-cell-modifiedDate="{ row }">
@@ -786,6 +792,24 @@ onMounted(() => {
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
   }
+}
+
+.history-cell {
+  width: 100%;
+}
+
+.history-cell--modifier-name {
+  text-align: left;
+  transform: translateX(75px);
+}
+
+.history-cell--modifier-role {
+  text-align: center;
+}
+
+.history-cell--modified-fields {
+  text-align: left;
+  padding-left: 8px;
 }
 
 .registrant-card {

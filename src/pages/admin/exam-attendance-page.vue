@@ -48,63 +48,15 @@
         @request="onRequest"
       >
         <template v-slot:body-cell-titleTh="{ row }">
-          <div class="row justify-center">
-            <div style="position: relative; display: inline-block">
-              <span
-                style="
-                  visibility: hidden;
-                  font-weight: 600;
-                  font-size: var(--font-size-xs);
-                  white-space: nowrap;
-                "
-              >
-                {{ $t('admin.examAttendance.columns.titleTh') }}
-              </span>
-              <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
-                {{ row.titleTh }}
-              </span>
-            </div>
-          </div>
+          <div class="text-center">{{ row.titleTh }}</div>
         </template>
 
         <template v-slot:body-cell-fullnameTh="{ row }">
-          <div class="row justify-center">
-            <div style="position: relative; display: inline-block">
-              <span
-                style="
-                  visibility: hidden;
-                  font-weight: 600;
-                  font-size: var(--font-size-xs);
-                  white-space: nowrap;
-                "
-              >
-                {{ $t('admin.examAttendance.columns.fullnameTh') }}
-              </span>
-              <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
-                {{ row.fullnameTh }}
-              </span>
-            </div>
-          </div>
+          <div class="attendance-fullname-cell">{{ row.fullnameTh }}</div>
         </template>
 
         <template v-slot:body-cell-seatNumber="{ row }">
-          <div class="row justify-center">
-            <div style="position: relative; display: inline-block">
-              <span
-                style="
-                  visibility: hidden;
-                  font-weight: 600;
-                  font-size: var(--font-size-xs);
-                  white-space: nowrap;
-                "
-              >
-                {{ $t('admin.examAttendance.columns.seatNumber') }}
-              </span>
-              <span style="position: absolute; left: 0; top: 0; white-space: nowrap">
-                {{ row.seatNumber }}
-              </span>
-            </div>
-          </div>
+          <div class="text-center">{{ row.seatNumber }}</div>
         </template>
 
         <template v-slot:body-cell-attendanceStatus="{ row }">
@@ -288,5 +240,10 @@ onMounted(() => {
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
   }
+}
+
+.attendance-fullname-cell {
+  text-align: left;
+  transform: translateX(90px);
 }
 </style>
