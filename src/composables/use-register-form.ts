@@ -73,7 +73,10 @@ export function useRegisterForm(isEditMode: boolean, onSave: (payload: RegisterF
 
   const submitForm = (): void => {
     try {
-      onSave({ ...formData.value });
+      onSave({
+        ...formData.value,
+        address: formData.value.address?.trim() || null,
+      });
       if (isEditMode) {
         dialog.value = {
           show: true,

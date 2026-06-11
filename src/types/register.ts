@@ -24,7 +24,7 @@ export interface RegisterFormData {
   educationLevel: string;
   faculty: string;
   institution: string;
-  address: string;
+  address: string | null;
   userImagePath?: string | undefined;
 }
 

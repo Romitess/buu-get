@@ -256,9 +256,9 @@
           <!-- Right Column: Address, Phone -->
           <div class="col-12 col-md-6">
             <div class="q-mb-md relative-position">
-              <label class="text-body2 text-weight-medium q-mb-xs field-label block"
-                >{{ $t('profile.address') }} <span class="text-negative">*</span></label
-              >
+              <label class="text-body2 text-weight-medium q-mb-xs field-label block">
+                {{ $t('profile.address') }}
+              </label>
               <q-input
                 ref="addressInputRef"
                 v-model="formData.address"
@@ -268,8 +268,6 @@
                 bg-color="white"
                 class="address-textarea"
                 input-style="resize: none;"
-                lazy-rules
-                :rules="[(val) => !!val || $t('profile.required')]"
                 hide-bottom-space
               />
             </div>
@@ -673,7 +671,7 @@ const onSave = async (): Promise<void> => {
       userEducation: formData.value.educationLevel,
       userFaculty: formData.value.faculty,
       userInstitution: formData.value.institution,
-      userAddress: formData.value.address,
+      userAddress: formData.value.address.trim() || null,
       isFromEmail: isFromEmail.value,
       userImagePath: formData.value.userImagePath,
       userNationalId: formData.value.nationalId,

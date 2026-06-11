@@ -22,7 +22,7 @@ export interface RegisterPayload {
   educationLevel?: string | undefined;
   faculty?: string | undefined;
   institution?: string | undefined;
-  address?: string | undefined;
+  address?: string | null | undefined;
   passportNo?: string | undefined;
   profileImage?: string | undefined;
   confirmPassword?: string | undefined;

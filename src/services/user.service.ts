@@ -201,7 +201,7 @@ export async function updateProfile(
     userFaculty?: string | undefined;
     userInstitution?: string | undefined;
     userCountry?: string | undefined;
-    userAddress?: string | undefined;
+    userAddress?: string | null | undefined;
     userImagePath?: string | null | undefined;
     isFromEmail?: boolean | undefined;
     userNationalId?: string | undefined;

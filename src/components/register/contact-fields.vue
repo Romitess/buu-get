@@ -15,7 +15,6 @@
       <div class="field-label-row text-body2 text-weight-medium q-mb-xs field-label">
         <div>
           {{ t('profile.address') }}
-          <span class="text-negative">*</span>
         </div>
         <q-checkbox
           v-if="showAddressCheckbox"
@@ -32,7 +31,7 @@
         :placeholder="t('profile.addressPlaceholder')"
         outlined
         dense
-        :rules="[(val: string | number | null | undefined) => !!val || t('profile.required')]"
+        :rules="[() => true]"
         :hide-bottom-space="false"
         class="custom-input"
         :class="{ 'expanded-address': !showEmailField }"
@@ -105,7 +104,7 @@ const emit = defineEmits<{
 }>();
 
 const institution = defineModel<string>('institution', { required: true });
-const address = defineModel<string>('address', { required: true });
+const address = defineModel<string | null>('address', { required: true });
 const phone = defineModel<string>('phone', { required: true });
 </script>
 
