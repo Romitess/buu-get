@@ -160,34 +160,37 @@ const seatsByRow = computed(() => {
 });
 
 const seatStyle = computed(() => {
-  const total = rowCount.value * colCount.value;
-  const cols = colCount.value || 1;
-  const rows = rowCount.value || 1;
+  const maxDimension = Math.max(rowCount.value, colCount.value);
   const aisleWidth = props.splitLeftRight ? 48 : 0;
 
-  if (total <= 40) {
-    const rGap = rows <= 4 ? 56 : rows <= 6 ? 36 : 24;
+  if (maxDimension > 18) {
     return {
-      width: '64px',
-      height: '64px',
-      fontSize: '16px',
-      rowGap: `${rGap}px`,
-      colGap: '24px',
-      aisleWidth: `${aisleWidth}px`,
+      width: '40px',
+      height: '40px',
+      fontSize: '13px',
+      rowGap: '8px',
+      colGap: '12px',
+      aisleWidth: `${Math.round(aisleWidth * 0.7)}px`,
     };
   }
 
-  const containerW = 850;
-  const scale = Math.max(32, Math.min(64, (containerW - aisleWidth) / cols - 10));
-  const colGap = Math.max(6, Math.min(24, scale * 0.25));
-  const rowGap = Math.max(6, Math.min(56, (500 - rows * scale) / (rows - 1 || 1)));
+  if (maxDimension > 10) {
+    return {
+      width: '52px',
+      height: '52px',
+      fontSize: '14px',
+      rowGap: '16px',
+      colGap: '18px',
+      aisleWidth: `${Math.round(aisleWidth * 0.85)}px`,
+    };
+  }
 
   return {
-    width: `${scale}px`,
-    height: `${scale}px`,
-    fontSize: `${Math.max(12, scale * 0.44)}px`,
-    rowGap: `${rowGap}px`,
-    colGap: `${colGap}px`,
+    width: '64px',
+    height: '64px',
+    fontSize: '16px',
+    rowGap: '36px',
+    colGap: '24px',
     aisleWidth: `${aisleWidth}px`,
   };
 });
@@ -276,15 +279,13 @@ const gridTransformStyle = computed<CSSProperties>(() => {
     };
   }
 
-  const targetW = (containerWidth.value - 16) / s;
-
   return {
-    transform: `scale(${s})`,
-    transformOrigin: 'top left',
+    transform: `translateX(-50%) scale(${s})`,
+    transformOrigin: 'top center',
     position: 'absolute',
-    left: '0',
+    left: '50%',
     top: '0',
-    width: `${targetW}px`,
+    width: `${w}px`,
     height: `${h}px`,
   };
 });
@@ -383,17 +384,17 @@ watch([rowCount, colCount, () => props.splitLeftRight], () => {
 .seat-grid-wrapper {
   display: flex;
   flex-direction: column;
-  width: 100%;
+  width: max-content;
   margin-inline: auto;
-  align-items: stretch;
+  align-items: flex-start;
 }
 
 .seat-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   flex-wrap: nowrap;
-  width: 100%;
+  width: max-content;
 }
 
 .seat-item {
