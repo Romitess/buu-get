@@ -12,7 +12,7 @@
 
     <!-- ─── ที่อยู่สำหรับจัดส่งเอกสาร ─── -->
     <div class="manual-field-wrapper address-wrapper">
-      <div class="field-label-row text-body2 text-weight-medium q-mb-xs">
+      <div class="field-label-row text-body2 text-weight-medium q-mb-xs field-label">
         <div>
           {{ t('profile.address') }}
           <span class="text-negative">*</span>
@@ -54,7 +54,7 @@
 
     <!-- ─── อีเมล (แสดงเฉพาะ ThaiD path) ─── -->
     <div v-if="showEmailField" class="manual-field-wrapper email-wrapper">
-      <div class="field-label-row text-body2 text-weight-medium q-mb-xs">
+      <div class="field-label-row text-body2 text-weight-medium q-mb-xs field-label">
         <div>
           {{ t('profile.email') }}
           <span class="text-negative">*</span>

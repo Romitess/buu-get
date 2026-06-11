@@ -270,6 +270,11 @@ body {
   color: var(--text-primary);
 }
 
+// Global Form Field Labels size override (bypass viewport scaling)
+.field-label {
+  font-size: 14px !important;
+}
+
 // === Scrollbar Styling ===
 ::-webkit-scrollbar {
   width: 6px;

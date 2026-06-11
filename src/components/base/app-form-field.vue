@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-body2 text-weight-medium q-mb-xs">
+    <div class="text-body2 text-weight-medium q-mb-xs field-label">
       {{ label }}
       <span v-if="required" class="text-negative">*</span>
     </div>
