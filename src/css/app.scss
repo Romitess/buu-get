@@ -476,6 +476,11 @@ body {
   }
 }
 
+// Force readonly fields to have solid borders instead of Quasar's default dashed borders
+.q-field--readonly .q-field__control:before {
+  border-style: solid !important;
+}
+
 // === Profile Form Styles ===
 .profile-card {
   width: 95%;
