@@ -137,7 +137,7 @@ export function useExamDocuments() {
         fullName: user
           ? `${user.titleEN || mapTitleToEn(user.titleTH) || ''} ${user.fullNameEN || user.fullNameTH || ''}`.trim()
           : 'Mr. Somdream Jaidee',
-        studentId: user?.nationalId || String(user?.id || '66100001'),
+        studentId: user?.userCode || '-',
         examName: examObj?.EXAM_NAME || "BUU-GET : Burapha University's Graduate English Test",
         examDate: dateStr,
         examTime: timeRange,

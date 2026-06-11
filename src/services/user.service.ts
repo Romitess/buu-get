@@ -60,6 +60,7 @@ export interface LoginResponse {
  */
 export interface BackendUserResponse {
   USER_ID: number;
+  USER_CODE: string | null;
   USER_NATIONAL_ID: string | null;
   USER_PASSPORT_NO: string | null;
   USER_EMAIL: string;
@@ -91,6 +92,7 @@ export function findUserByIdentifier(): Promise<User | undefined> {
 export function mapBackendUserToFrontendUser(backendUser: BackendUserResponse): User {
   return {
     id: backendUser.USER_ID,
+    userCode: backendUser.USER_CODE || '',
     nationalId: backendUser.USER_NATIONAL_ID || '',
     passportNo: backendUser.USER_PASSPORT_NO || '',
     email: backendUser.USER_EMAIL,

@@ -60,7 +60,7 @@
             </div>
             <div class="text-weight-medium text-body1">
               {{ $t('profile.testTakerId') }}:
-              {{ userStore.currentUser?.nationalId || '66100001' }}
+              {{ userStore.currentUser?.userCode || '-' }}
             </div>
           </div>
 

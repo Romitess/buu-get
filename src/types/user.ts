@@ -5,6 +5,7 @@ export type UserRole = RolesType[keyof RolesType];
 export interface User {
   // USER
   id?: number;
+  userCode?: string;
   nationalId: string;
   passportNo: string;
   email: string;
