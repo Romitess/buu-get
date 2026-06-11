@@ -481,6 +481,15 @@ body {
   border-style: solid !important;
 }
 
+// Remove double shadow and nested borders when calendar is used inside a dropdown menu (q-menu)
+.q-menu {
+  .calendar-card {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+}
+
 // === Profile Form Styles ===
 .profile-card {
   width: 95%;

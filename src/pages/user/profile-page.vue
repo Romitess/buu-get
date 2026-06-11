@@ -177,7 +177,6 @@
                     >
                       <AppCalendar
                         :model-value="formData.birthdate"
-                        :max-date="yesterdayString"
                         @update:model-value="(val: string) => (formData.birthdate = val)"
                         @click-date="showCalendar = false"
                       />
@@ -427,12 +426,6 @@ const showFixAlert = ref(false);
 
 // Track original form data to detect changes
 const originalFormData = ref<string>('');
-
-const yesterdayString = computed(() => {
-  const date = new Date();
-  date.setDate(date.getDate() - 1);
-  return date.toISOString().split('T')[0];
-});
 
 const cropImageSrc = ref('');
 const cropFileType = ref('image/png');
