@@ -33,6 +33,14 @@ const CACHE_DURATION_MS = 30000; // 30 seconds short-term cache
 let examsCache: BackendExam[] | null = null;
 let lastFetchTimestamp = 0;
 
+export const invalidateExamCache = (): void => {
+  examsCache = null;
+  lastFetchTimestamp = 0;
+};
+
+const isActiveEnrollment = (enrollment: { ERM_STATUS: number }): boolean =>
+  enrollment.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED;
+
 /**
  * Centrally fetch all exams with a short-term in-memory cache.
  * This prevents redundant large downloads of the /exam endpoint when multiple
@@ -178,10 +186,7 @@ export const fetchScheduleData = async (force = false): Promise<Record<string, D
       const endTime = formatTime(session.SS_END_TIME);
       const timeRange = `${startTime} - ${endTime}`;
 
-      const activeCount = (session.ENROLLMENTS || []).reduce(
-        (acc, e) => (e.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED ? acc + 1 : acc),
-        0,
-      );
+      const activeCount = (session.ENROLLMENTS || []).filter(isActiveEnrollment).length;
 
       const currentAvailable = (session.SS_CAPACITY || 0) - activeCount;
       const currentTotal = session.SS_CAPACITY || 0;
@@ -229,10 +234,7 @@ export const fetchExamSchedules = async (force = false): Promise<ExamSchedule[]>
     if (exam.SESSIONS && exam.SESSIONS.length > 0) {
       exam.SESSIONS.forEach((session) => {
         capacity += session.SS_CAPACITY || 0;
-        const activeCount = (session.ENROLLMENTS || []).reduce(
-          (acc, e) => (e.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED ? acc + 1 : acc),
-          0,
-        );
+        const activeCount = (session.ENROLLMENTS || []).filter(isActiveEnrollment).length;
         registeredCount += activeCount;
       });
 
@@ -531,6 +533,7 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
 export const deleteExam = async (id: number | string): Promise<void> => {
   try {
     await api.delete(`/exam/${id}`);
+    invalidateExamCache();
   } catch (error) {
     console.error('Error deleting exam:', error);
     throw error;
@@ -562,6 +565,7 @@ export const createEnrollment = async (
       PASSCODE: passcode,
       PHYSICAL_STATUS: physicalStatus,
     });
+    invalidateExamCache();
     return response.data;
   } catch (error) {
     console.error('Error creating enrollment:', error);
@@ -587,6 +591,7 @@ export const updateEnrollmentStatus = async (
     const response = await api.patch<ExamEnrollment>(`/exam-enrollments/${enrollmentId}`, {
       ERM_STATUS: status,
     });
+    invalidateExamCache();
     return response.data;
   } catch (error) {
     console.error(`Error updating enrollment ${enrollmentId}:`, error);

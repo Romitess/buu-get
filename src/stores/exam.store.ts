@@ -307,7 +307,7 @@ export const useExamStore = defineStore('exam', () => {
 
     await createEnrollment(userId, round.id, passcode, physicalStatus);
     await fetchHistory();
-    await initSchedule();
+    await initSchedule(true);
   }
 
   async function confirmSpecialRegistration(
@@ -326,7 +326,7 @@ export const useExamStore = defineStore('exam', () => {
       setCancellationReason(enrollmentId, reason);
       await updateEnrollmentStatus(enrollmentId, ENROLLMENT_STATUS.CANCELLED);
       await fetchHistory();
-      await initSchedule();
+      await initSchedule(true);
     } catch (error: unknown) {
       console.error('Failed to cancel registration:', error);
       throw error;
