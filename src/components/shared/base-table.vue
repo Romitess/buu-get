@@ -243,13 +243,13 @@ const goToLastPage = (): void => {
     background-color: var(--primary) !important;
     color: var(--text-on-primary) !important;
     font-weight: 600;
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-md);
     padding: 10px 12px;
     text-align: center !important;
   }
 
   :deep(tbody tr td) {
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-md);
     color: var(--text-primary);
     border-color: var(--border-color);
     white-space: normal !important;

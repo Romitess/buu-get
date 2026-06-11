@@ -8,7 +8,7 @@
 
     <!-- Search and Action Bar -->
     <div class="row items-center justify-between q-mb-lg">
-      <div style="width: 340px">
+      <div class="col">
         <SearchBar v-model="searchQuery" />
       </div>
       <ExportCsvButton
