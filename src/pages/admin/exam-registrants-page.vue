@@ -304,9 +304,15 @@ onMounted(() => {
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
   }
+
+  :deep(tbody tr td:nth-child(3)) {
+    padding-left: clamp(12px, 4.6vw, 80px);
+  }
 }
 
 .registrant-fullname-cell {
-  transform: translateX(75px);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 </style>

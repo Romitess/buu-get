@@ -799,8 +799,11 @@ onMounted(() => {
 }
 
 .history-cell--modifier-name {
+  position: relative;
+  left: clamp(24px, 3.8vw, 64px);
   text-align: left;
-  transform: translateX(75px);
+  box-sizing: border-box;
+  max-width: calc(100% - clamp(24px, 3.8vw, 64px));
 }
 
 .history-cell--modifier-role {

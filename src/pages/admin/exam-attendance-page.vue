@@ -240,10 +240,16 @@ onMounted(() => {
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
   }
+
+  :deep(tbody tr td:nth-child(4)) {
+    padding-left: clamp(12px, 5vw, 102px);
+  }
 }
 
 .attendance-fullname-cell {
   text-align: left;
-  transform: translateX(90px);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 </style>
