@@ -275,6 +275,17 @@ body {
   font-size: 14px !important;
 }
 
+// Global Premium Card Header Title size override (bypass viewport scaling)
+.buu-premium-card .text-subtitle1 {
+  font-size: 14px !important;
+}
+
+// Global Exam Action Buttons size override (bypass viewport scaling)
+.add-slot-btn,
+.add-room-btn {
+  font-size: 14px !important;
+}
+
 // === Scrollbar Styling ===
 ::-webkit-scrollbar {
   width: 6px;
@@ -826,7 +837,7 @@ body {
 .buu-label-muted {
   color: var(--label-color);
   font-weight: 600;
-  font-size: 0.875rem; // 14px (ใหญ่ขึ้นนิดนึงให้อ่านง่าย)
+  font-size: 14px !important;
 }
 
 // 5. กล่องการ์ดพรีเมียม (มีเส้นขอบและเงาตามต้นฉบับ)

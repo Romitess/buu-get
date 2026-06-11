@@ -117,7 +117,7 @@
           <q-field outlined bg-color="white" class="buu-field-large buu-input-muted">
             <template v-slot:control>
               <div class="full-width row items-center justify-between no-wrap">
-                <span class="text-body2 text-grey-7">สถานะเผยแพร่</span>
+                <span class="buu-label-muted">สถานะเผยแพร่</span>
                 <q-toggle
                   v-model="form.isPublished"
                   color="primary"

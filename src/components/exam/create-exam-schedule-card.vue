@@ -440,11 +440,9 @@ const autoFormatTime = (time: string): string => {
 }
 .add-slot-btn {
   border-radius: 8px;
-  font-size: 13px;
 }
 .add-room-btn {
   border-radius: 8px;
-  font-size: 13px;
 }
 
 /* Active Slot Container */
