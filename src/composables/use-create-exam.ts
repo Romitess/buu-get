@@ -505,27 +505,23 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
             }
 
             const slot = slotMap.get(key)!;
-            const mappedProctors: string[] = [];
-
-            // Load proctor names from SS_NAME
-            if (session.SS_NAME) {
-              const customNames = session.SS_NAME.split(',')
-                .map((name) => name.trim())
-                .filter(Boolean);
-              mappedProctors.push(...customNames);
-            }
-
-            const uniqueProctors = Array.from(new Set(mappedProctors));
-
             const relationLocations = session.SESSION_LOCATIONS || [];
             if (relationLocations.length > 0) {
               relationLocations
                 .filter((relation) => relation.LOCATION)
                 .forEach((relation) => {
+                  const relationProctors: string[] = [];
+                  if (relation.SS_NAME) {
+                    const customNames = relation.SS_NAME.split(',')
+                      .map((name) => name.trim())
+                      .filter(Boolean);
+                    relationProctors.push(...customNames);
+                  }
+
                   slot.rooms.push({
                     locationId: relation.LOCATION_ID ?? relation.LOCATION.LOCATION_ID ?? null,
-                    proctorName: session.SS_NAME || '',
-                    proctors: uniqueProctors,
+                    proctorName: relation.SS_NAME || '',
+                    proctors: Array.from(new Set(relationProctors)),
                     seats:
                       relation.LOCATION.SEATS?.filter(
                         (seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2,
@@ -544,8 +540,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
             slot.rooms.push({
               locationId: session.LOCATION?.LOCATION_ID ?? session.LOCATION_ID ?? null,
-              proctorName: session.SS_NAME || '',
-              proctors: uniqueProctors,
+              proctorName: '',
+              proctors: [],
               seats: session.SS_CAPACITY ?? 40,
               sessionId: session.SS_ID,
               enrollmentCount: session.ENROLLMENTS?.length || 0,

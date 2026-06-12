@@ -252,6 +252,7 @@ interface SessionLocationOption {
   SL_ID: number;
   LOCATION_ID: number;
   SS_ID: number;
+  SS_NAME?: string | null;
   LOCATION: BackendLocation;
 }
 
@@ -433,7 +434,8 @@ const exportCsvFileNamePrefix = computed(() => {
 
 const selectedSessionName = computed((): string => {
   if (!selectedSession.value) return '';
-  if (selectedSession.value.SS_NAME) return selectedSession.value.SS_NAME;
+  const loc = activeSessionLocation.value;
+  if (loc && loc.SS_NAME) return loc.SS_NAME;
   const sessions = exam.value?.SESSIONS || [];
   const index = sessions.findIndex((s) => s.SS_ID === selectedSessionId.value);
   const roundNum = index !== -1 ? index + 1 : 1;

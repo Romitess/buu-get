@@ -75,6 +75,7 @@ interface SeatSessionLocation {
   SL_ID: number;
   LOCATION_ID: number;
   SS_ID: number;
+  SS_NAME?: string | null;
   LOCATION: NonNullable<BackendSession['LOCATION']>;
 }
 
@@ -181,7 +182,7 @@ export function useExamSeatManagement() {
     const supervisorNamesList: string[] = [];
 
     // Include supervisors from SS_NAME if present
-    const ssName = (activeSession.value as { SS_NAME?: string | null })?.SS_NAME;
+    const ssName = activeSessionLocation.value?.SS_NAME;
     if (ssName) {
       const customNames = ssName
         .split(',')

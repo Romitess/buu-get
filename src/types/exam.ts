@@ -231,7 +231,6 @@ export interface BackendLocation {
 
 export interface BackendSession {
   SS_ID: number;
-  SS_NAME: string;
   SS_START_TIME: string;
   SS_END_TIME: string;
   SS_CAPACITY: number;
@@ -242,6 +241,7 @@ export interface BackendSession {
     SL_ID: number;
     LOCATION_ID: number;
     SS_ID: number;
+    SS_NAME: string | null;
     LOCATION: BackendLocation;
   }[];
   ENROLLMENTS?: BackendEnrollment[];
