@@ -49,12 +49,12 @@
           </div>
         </div>
 
-        <!-- Row 2: ชื่อการสอบ | รหัสผังแหล่งเงิน (เฉพาะรอบทั่วไป) -->
+        <!-- Row 2: ชื่อการสอบ | รอบการสอบ -->
         <div class="col-12 col-md-6" data-field="examName">
           <div class="buu-label-muted q-mb-xs">ชื่อการสอบ</div>
           <q-input
             v-model="form.examName"
-            placeholder="เช่น การสอบวัดระดับภาษาอังกฤษ BUU-GET"
+            placeholder="BUU-GET"
             outlined
             dense
             bg-color="white"
@@ -68,6 +68,26 @@
             {{ fieldErrors?.examName }}
           </div>
         </div>
+        <div class="col-12 col-md-6" data-field="examRound">
+          <div class="buu-label-muted q-mb-xs">รอบการสอบ</div>
+          <q-input
+            v-model="form.examRound"
+            placeholder="1/2026"
+            outlined
+            dense
+            bg-color="white"
+            class="buu-input-muted"
+            :class="{ 'buu-field-error': hasError('examRound') }"
+            :disable="isLocked"
+            @update:model-value="emit('clearFieldError', 'examRound')"
+          />
+          <div v-if="hasError('examRound')" :key="`examRound-${shakeKey}`" class="buu-error-msg">
+            <q-icon name="error" class="buu-error-icon" />
+            {{ fieldErrors?.examRound }}
+          </div>
+        </div>
+
+        <!-- Row 3: รหัสผังแหล่งเงิน (เฉพาะรอบทั่วไป) | ค่าธรรมเนียม (เฉพาะรอบทั่วไป) -->
         <div v-if="!isSpecialRound" class="col-12 col-md-6" data-field="fundSourceId">
           <div class="buu-label-muted q-mb-xs">รหัสผังแหล่งเงิน</div>
           <app-select
@@ -98,7 +118,6 @@
           </div>
         </div>
 
-        <!-- Row 3: ค่าธรรมเนียม (เฉพาะรอบทั่วไป) | สถานะเผยแพร่ -->
         <div v-if="!isSpecialRound" class="col-12 col-md-6">
           <div class="buu-label-muted q-mb-xs">ค่าธรรมเนียม</div>
           <q-input
@@ -113,6 +132,7 @@
           />
         </div>
 
+        <!-- Row 4: สถานะเผยแพร่ -->
         <div class="col-12 col-md-6 self-end">
           <q-field outlined bg-color="white" class="buu-field-large buu-input-muted">
             <template v-slot:control>

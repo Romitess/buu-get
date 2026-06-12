@@ -68,6 +68,7 @@ export interface EligibleCandidate {
 
 export interface CreateExamForm {
   examName: string;
+  examRound: string;
   examType: string;
   examFormat: string;
   fundSourceId: number | null;
@@ -147,6 +148,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     externalForm ||
     ref<CreateExamForm>({
       examName: '',
+      examRound: '',
       examType: EXAM_TYPE_GENERAL,
       examFormat: EXAM_FORMAT_COMPUTER,
       fundSourceId: null,
@@ -307,6 +309,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     // ── Card 1: ข้อมูลพื้นฐาน ──
     if (!form.value.examName || !form.value.examName.trim()) {
       errors.examName = VALIDATION_MSG.EXAM_NAME;
+    }
+    if (!form.value.examRound || !form.value.examRound.trim()) {
+      errors.examRound = VALIDATION_MSG.EXAM_ROUND;
     }
     if (!form.value.examType) {
       errors.examType = VALIDATION_MSG.EXAM_TYPE;
@@ -473,7 +478,15 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       if (examId) {
         const exam = await fetchExamById(examId);
 
-        form.value.examName = exam.EXAM_NAME || '';
+        const rawExamName = exam.EXAM_NAME || '';
+        const match = rawExamName.match(/^(\d+\/\d+|รอบที่\s*\d+|รอบ\s*\d+)\s+(.*)$/);
+        if (match && match[1] && match[2]) {
+          form.value.examRound = match[1];
+          form.value.examName = match[2];
+        } else {
+          form.value.examRound = '';
+          form.value.examName = rawExamName;
+        }
         form.value.examType = exam.EXAM_TYPE || EXAM_TYPE_GENERAL;
         form.value.examFormat = exam.EXAM_FORMAT || EXAM_FORMAT_COMPUTER;
         form.value.fee = exam.EXAM_FEE ?? '0.00';
@@ -1117,6 +1130,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
     try {
       let targetExamId = isEditMode.value ? examId : null;
+      const combinedExamName = form.value.examRound
+        ? `${form.value.examRound.trim()} ${form.value.examName.trim()}`
+        : form.value.examName.trim();
 
       if (isEditMode.value && examId) {
         // === EDIT MODE ===
@@ -1126,7 +1142,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
         await updateExamRound({
           examId,
-          examName: form.value.examName,
+          examName: combinedExamName,
           locationId: Number(flatRooms[0]?.locationId || 0),
           examType: form.value.examType,
           examFormat: form.value.examFormat,
@@ -1155,7 +1171,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       } else {
         // === CREATE MODE ===
         const payload: CreateExamPayload = {
-          examName: form.value.examName,
+          examName: combinedExamName,
           locationId: flatRooms[0]?.locationId || 0,
           examType: form.value.examType,
           examFormat: form.value.examFormat,

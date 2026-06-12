@@ -64,6 +64,7 @@ export const NOTIFY_MSG = {
 /** ข้อความแจ้งเตือนเมื่อกรอกข้อมูลไม่ครบถ้วน (Validation) */
 export const VALIDATION_MSG = {
   EXAM_NAME: 'กรุณากรอกชื่อการสอบ',
+  EXAM_ROUND: 'กรุณากรอกรอบการสอบ',
   EXAM_TYPE: 'กรุณาเลือกประเภทการสอบ',
   EXAM_FORMAT: 'กรุณาเลือกรูปแบบการสอบ',
   FUND_SOURCE: 'กรุณาเลือกรหัสผังแหล่งเงิน',
