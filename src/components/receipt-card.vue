@@ -6,7 +6,7 @@
     <div class="receipt-header">
       <!-- Left: Logo + University info -->
       <div class="receipt-header-left">
-        <q-img src="/buu-logo.png" class="receipt-logo" fit="contain" />
+        <img src="/buu-logo.png" class="receipt-logo" alt="BUU Logo" />
         <div class="receipt-org-info">
           <div class="receipt-org-title">{{ buuInfo.nameTH }} {{ buuInfo.nameEN }}</div>
           <div class="receipt-org-meta">
@@ -59,7 +59,7 @@
     <div class="receipt-table-wrapper">
       <!-- Watermark inside table area -->
       <div class="watermark-container">
-        <q-img src="/buu-logo.png" class="receipt-watermark" fit="contain" />
+        <img src="/buu-logo.png" class="receipt-watermark" alt="Watermark Logo" />
       </div>
 
       <table class="receipt-table">
@@ -128,7 +128,7 @@
           ( {{ receipt.fullName }} )<br />
           {{ t('exam.receipt.card.collector') }}
         </div>
-        <q-img v-if="showQr" src="/receipt-qr.png" class="receipt-qr" fit="contain" />
+        <img v-if="showQr" src="/receipt-qr.png" class="receipt-qr" alt="Receipt QR" />
       </div>
     </div>
   </div>
@@ -201,6 +201,7 @@ const formatCurrency = (amount: number) => {
   width: 72px;
   height: 72px;
   flex-shrink: 0;
+  object-fit: contain;
 }
 
 .receipt-org-info {
@@ -317,6 +318,7 @@ const formatCurrency = (amount: number) => {
   width: 200px;
   opacity: 0.13;
   filter: grayscale(100%);
+  object-fit: contain;
 }
 
 .receipt-table {
@@ -457,6 +459,7 @@ const formatCurrency = (amount: number) => {
 .receipt-qr {
   width: 90px;
   height: 90px;
+  object-fit: contain;
 }
 
 /* ──────────────────────────────────────────────────
