@@ -215,39 +215,33 @@ export const useExamStore = defineStore('exam', () => {
             enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
           item.status = isVerified ? 'exam.status.verified' : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
-          item.actions = isVerified && hasBankMatch ? ['downloadReceipt'] : [];
+          item.actions = hasBankMatch ? ['downloadReceipt'] : [];
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_ASSIGNED) {
           item.status = 'exam.status.verified';
           item.statusType = 'primary';
-          const isVerified = enrollment.ERM_VERIFY_STATUS === VERIFY_STATUS.PASS;
           const hasBankMatch =
             enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
 
           const actions: string[] = [];
-          if (isVerified) {
-            if (hasBankMatch) {
-              actions.push('downloadReceipt');
-            }
+          if (hasBankMatch) {
+            actions.push('downloadReceipt');
           }
           item.actions = actions;
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_PUBLISHED) {
           item.status = 'exam.status.verified';
           item.statusType = 'primary';
-          const isVerified = enrollment.ERM_VERIFY_STATUS === VERIFY_STATUS.PASS;
           const hasBankMatch =
             enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
           const hasVoucher = !!(enrollment.VOUCHERS && enrollment.VOUCHERS.length > 0);
 
           const actions: string[] = [];
-          if (isVerified) {
-            if (hasVoucher) {
-              actions.push('candidateCard');
-            }
-            if (hasBankMatch) {
-              actions.push('downloadReceipt');
-            }
+          if (hasVoucher) {
+            actions.push('candidateCard');
+          }
+          if (hasBankMatch) {
+            actions.push('downloadReceipt');
           }
           item.actions = actions;
           newHistory.push(item);

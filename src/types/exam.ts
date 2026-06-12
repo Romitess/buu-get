@@ -177,6 +177,7 @@ export interface ExamEnrollment {
   LS_ID: number | null;
   ERM_STATUS: number;
   ERM_VERIFY_STATUS: number;
+  ERM_TEST_TAKER?: string | null;
   ERM_PHYSICAL_STATUS?: string | null;
   CREATED_AT: string;
   UPDATED_AT?: string;
