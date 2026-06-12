@@ -134,10 +134,12 @@ export function useExamDocuments() {
 
       selectedVoucherData.value = {
         id: enrollment.ERM_ID,
-        fullName: user
-          ? `${user.titleEN || mapTitleToEn(user.titleTH) || ''} ${user.fullNameEN || user.fullNameTH || ''}`.trim()
-          : 'Mr. Somdream Jaidee',
-        studentId: user?.userCode || '-',
+        fullName: enrollment.USER?.PROFILE
+          ? `${enrollment.USER.PROFILE.userTitleEn || mapTitleToEn(enrollment.USER.PROFILE.userTitleTh || undefined) || ''} ${enrollment.USER.PROFILE.userFullnameEn || enrollment.USER.PROFILE.userFullnameTh || ''}`.trim()
+          : user
+            ? `${user.titleEN || mapTitleToEn(user.titleTH) || ''} ${user.fullNameEN || user.fullNameTH || ''}`.trim()
+            : 'Mr. Somdream Jaidee',
+        studentId: enrollment.USER?.USER_CODE || user?.userCode || '-',
         examName: examObj?.EXAM_NAME || "BUU-GET : Burapha University's Graduate English Test",
         examDate: dateStr,
         examTime: timeRange,
@@ -145,7 +147,7 @@ export function useExamDocuments() {
         location: locationText,
         seatNo: enrollment.LOCATION_SEAT?.LS_SEAT_LABEL || 'A1',
         voucherNo: `ENG${examYear}-${String(enrollment.ERM_ID).padStart(3, '0')}`,
-        citizenId: user?.nationalId || '1-1234-12345-12-1',
+        citizenId: enrollment.USER?.USER_NATIONAL_ID || user?.nationalId || '1-1234-12345-12-1',
         testSession: getTestSessionLabel(session),
         profileImage: user?.userImagePath ? getImageUrl(user.userImagePath) : undefined,
         barcodeValue: `ENG${examYear}${String(enrollment.ERM_ID).padStart(5, '0')}`,
@@ -270,11 +272,23 @@ export function useExamDocuments() {
             : new Date().toISOString(),
         fullName:
           receipt?.RC_NAME ||
-          (user
-            ? `${user.titleEN || ''} ${user.fullNameEN || user.fullNameTH || ''}`.trim()
-            : 'Mr. Somdream Jaidee'),
-        nationalId: String(receipt?.RC_TAX_ID || user?.nationalId || '1-1234-12345-12-1'),
-        address: receipt?.RC_ADDRESS || '169 Longhad Bangsaen Rd, Saen Suk, Chon Buri 20131',
+          (enrollment.USER?.PROFILE
+            ? `${enrollment.USER.PROFILE.userTitleTh || enrollment.USER.PROFILE.userTitleEn || ''} ${enrollment.USER.PROFILE.userFullnameTh || enrollment.USER.PROFILE.userFullnameEn || ''}`.trim()
+            : user
+              ? `${user.fullNameTH || user.fullNameEN || ''}`.trim()
+              : 'Mr. Somdream Jaidee'),
+        nationalId: String(
+          receipt?.RC_TAX_ID ||
+            enrollment.USER?.USER_NATIONAL_ID ||
+            enrollment.USER?.USER_PASSPORT_NO ||
+            user?.nationalId ||
+            '1-1234-12345-12-1',
+        ),
+        address:
+          receipt?.RC_ADDRESS ||
+          enrollment.USER?.PROFILE?.userAddress ||
+          user?.address ||
+          '169 Longhad Bangsaen Rd, Saen Suk, Chon Buri 20131',
         examName: examObj?.EXAM_NAME || "BUU-GET : Burapha University's Graduate English Test",
         examDate: dateStr,
         location: locationText,

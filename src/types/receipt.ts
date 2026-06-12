@@ -14,4 +14,5 @@ export interface ReceiptData {
 export interface ReceiptCardProps {
   receipt: ReceiptData;
   showQr?: boolean;
+  isCopy?: boolean;
 }

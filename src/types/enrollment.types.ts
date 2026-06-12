@@ -17,6 +17,7 @@ export interface BackendUserProfile {
 
 export interface BackendUser {
   USER_ID: number;
+  USER_CODE?: string | null;
   USER_NATIONAL_ID: string | null;
   USER_PASSPORT_NO: string | null;
   USER_EMAIL: string;

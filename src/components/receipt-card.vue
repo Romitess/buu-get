@@ -19,8 +19,12 @@
 
       <!-- Right: Title stacked, date below -->
       <div class="receipt-header-right">
-        <div class="receipt-title-th">{{ t('exam.receipt.card.title') }}</div>
-        <div class="receipt-title-en">{{ t('exam.receipt.card.titleEn') }}</div>
+        <div class="receipt-title-th">
+          {{ props.isCopy ? 'สำเนาใบเสร็จรับเงิน' : t('exam.receipt.card.title') }}
+        </div>
+        <div class="receipt-title-en">
+          {{ props.isCopy ? 'RECEIPT COPY' : t('exam.receipt.card.titleEn') }}
+        </div>
       </div>
     </div>
 
@@ -143,6 +147,7 @@ import { numberToThaiText } from 'src/utils/thai-currency';
 
 const props = withDefaults(defineProps<ReceiptCardProps>(), {
   showQr: true,
+  isCopy: false,
 });
 
 const { t } = useI18n();

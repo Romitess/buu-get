@@ -1,3 +1,5 @@
+import type { BackendUser } from './enrollment.types';
+
 export type ExamType = 'กสพ' | 'ความถนัด' | 'ภาษา' | 'สมรรถนะ' | 'อื่นๆ';
 
 export interface ExamRegistration {
@@ -179,6 +181,7 @@ export interface ExamEnrollment {
   CREATED_AT: string;
   UPDATED_AT?: string;
   SESSION?: BackendSession;
+  USER?: BackendUser;
   TRANSACTION?: {
     TRANX_ID: number;
     TRANX_MATCH_STATUS?: number;
@@ -266,6 +269,7 @@ export interface BackendExam {
     FS_ID: number;
     FS_NAME: string;
     FS_ACCOUNT_CODE: string;
+    FS_FACULTY?: string;
   };
   SESSIONS: BackendSession[];
   PASSCODES?: BackendPasscode[];

@@ -38,7 +38,7 @@
       <BaseTable
         :columns="columns"
         :rows="filteredReceipts"
-        :loading="false"
+        :loading="loading"
         :pagination="pagination"
         :empty-label="$t('admin.applicationFeeReport.table.emptyLabel')"
       >
@@ -54,6 +54,24 @@
         </template>
       </BaseTable>
     </div>
+
+    <!-- Hidden container for Receipt PDF generation -->
+    <div
+      v-if="isDownloadingReceipt"
+      id="receipt-render-container"
+      style="
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        width: 210mm;
+        height: 297mm;
+        z-index: -1000;
+        pointer-events: none;
+        background-color: #ffffff;
+      "
+    >
+      <ReceiptCard :receipt="selectedReceiptData" :is-copy="true" />
+    </div>
   </q-page>
 </template>
 
@@ -68,6 +86,10 @@ import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
 import ActionButton from 'src/components/shared/action-button.vue';
 import BaseTable from 'src/components/shared/base-table.vue';
 import { useDailyRevenue } from 'src/composables/use-daily-revenue';
+import { fetchAllEnrollments } from 'src/services/enrollment.service';
+import { useExamDocuments } from 'src/composables/use-exam-documents';
+import ReceiptCard from 'src/components/receipt-card.vue';
+import type { ExamEnrollment } from 'src/types/exam';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 
@@ -75,6 +97,8 @@ const $q = useQuasar();
 
 const { error, filter, departmentOptions, fetchData, loadDepartmentOptions, applyFilter } =
   useDailyRevenue();
+
+const { isDownloadingReceipt, selectedReceiptData, printReceipt } = useExamDocuments();
 
 type ApplicationFeeRow = {
   index: number;
@@ -85,41 +109,135 @@ type ApplicationFeeRow = {
   examName: string;
   importedDate: string;
   payee: string;
+  rawEnrollment: ExamEnrollment;
 };
 
 const { t } = useI18n();
 
 const searchQuery = ref('');
+const loading = ref(false);
+const enrollments = ref<ExamEnrollment[]>([]);
 
-const feeRows = ref([
-  {
-    index: 1,
-    receiptNo: '6751300100001',
-    payer: 'นาย สมศรี ใจดี',
-    amount: 500.0,
-    paymentDate: '01/05/2569 14:05:06',
-    examName: '1/2026 การสอบวัดระดับภาษาอังกฤษ BUU-GET',
-    importedDate: '11/05/2569 09:31:07',
-    payee: 'สิงหา มานะอมรกุล',
-  },
-  {
-    index: 2,
-    receiptNo: '6751300100002',
-    payer: 'นาย สมกบ ใจดี',
-    amount: 500.0,
-    paymentDate: '01/05/2569 14:25:16',
-    examName: '1/2026 การสอบวัดระดับภาษาอังกฤษ BUU-GET',
-    importedDate: '11/05/2569 09:31:07',
-    payee: 'สิงหา มานะอมรกุล',
-  },
-]);
+const formatThaiDate = (dateStr?: string | Date) => {
+  if (!dateStr) return '-';
+  const date = new Date(dateStr);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const buddhistYear = date.getFullYear() + 543;
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${day}/${month}/${buddhistYear} ${hours}:${minutes}:${seconds}`;
+};
+
+const loadEnrollments = async (): Promise<void> => {
+  loading.value = true;
+  try {
+    const data = await fetchAllEnrollments();
+    // Filter only those that are paid
+    // Statuses representing paid are: PAID (1), SEAT_ASSIGNED (2), SEAT_PUBLISHED (3), ATTENDED (4)
+    enrollments.value = (data as unknown as ExamEnrollment[]).filter((e) =>
+      [1, 2, 3, 4].includes(e.ERM_STATUS),
+    );
+  } catch (err) {
+    console.error(err);
+    $q.notify({
+      type: 'negative',
+      message: 'ไม่สามารถดึงข้อมูลค่าธรรมเนียมสมัครสอบได้',
+      position: 'top',
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const feeRows = computed(() => {
+  return enrollments.value.map((enrollment, index) => {
+    const transaction = enrollment.TRANSACTION;
+    const receipt = transaction?.RECEIPTS?.[0];
+    const examObj = enrollment.SESSION?.EXAM;
+
+    const receiptYear = transaction?.TRANX_PAID_AT
+      ? new Date(transaction.TRANX_PAID_AT).getFullYear()
+      : examObj?.EXAM_DATE
+        ? new Date(examObj.EXAM_DATE).getFullYear()
+        : new Date().getFullYear();
+
+    const receiptNo =
+      (receipt?.RC_ID ? `RC${receiptYear}-${String(receipt.RC_ID).padStart(5, '0')}` : '') ||
+      `RC${receiptYear}-${String(enrollment.ERM_ID).padStart(5, '0')}`;
+
+    const payer =
+      receipt?.RC_NAME ||
+      `${enrollment.USER?.PROFILE?.userTitleTh || ''} ${enrollment.USER?.PROFILE?.userFullnameTh || ''}`.trim() ||
+      'ผู้สมัครสอบ';
+
+    const amount = Number(transaction?.TRANX_AMOUNT ?? examObj?.EXAM_FEE ?? 0);
+
+    const paymentDate = formatThaiDate(transaction?.TRANX_PAID_AT);
+    const importedDate = formatThaiDate(enrollment.CREATED_AT);
+
+    const payee = 'สิงหา มานะอมรกุล';
+
+    return {
+      index: index + 1,
+      receiptNo,
+      payer,
+      amount,
+      paymentDate,
+      examName: examObj?.EXAM_NAME || 'BUU-GET Exam',
+      importedDate,
+      payee,
+      rawEnrollment: enrollment,
+    };
+  });
+});
 
 const filteredReceipts = computed(() => {
-  if (!searchQuery.value) return feeRows.value;
-  const q = searchQuery.value.toString().toLowerCase();
-  return feeRows.value.filter((r) =>
-    [r.receiptNo, r.payer, r.examName, r.payee].join(' ').toLowerCase().includes(q),
-  );
+  let rows = feeRows.value;
+
+  // 1. Date Filters
+  if (filter.value.startDate) {
+    const start = new Date(`${filter.value.startDate}T00:00:00`);
+    rows = rows.filter((r) => {
+      const paidDate = r.rawEnrollment.TRANSACTION?.TRANX_PAID_AT;
+      return paidDate ? new Date(paidDate) >= start : false;
+    });
+  }
+  if (filter.value.endDate) {
+    const end = new Date(`${filter.value.endDate}T23:59:59`);
+    rows = rows.filter((r) => {
+      const paidDate = r.rawEnrollment.TRANSACTION?.TRANX_PAID_AT;
+      return paidDate ? new Date(paidDate) <= end : false;
+    });
+  }
+
+  // 2. Department Filter
+  if (filter.value.department) {
+    rows = rows.filter((r) => {
+      const dept = r.rawEnrollment.SESSION?.EXAM?.FUND_SOURCE?.FS_FACULTY;
+      return dept === filter.value.department;
+    });
+  }
+
+  // 3. Exam Name Filter
+  if (filter.value.examName) {
+    const searchExam = filter.value.examName.toLowerCase();
+    rows = rows.filter((r) => {
+      const examName = r.rawEnrollment.SESSION?.EXAM?.EXAM_NAME || '';
+      return examName.toLowerCase().includes(searchExam);
+    });
+  }
+
+  // 4. Search Query Filter
+  if (searchQuery.value) {
+    const q = searchQuery.value.toString().toLowerCase();
+    rows = rows.filter((r) =>
+      [r.receiptNo, r.payer, r.examName, r.payee].join(' ').toLowerCase().includes(q),
+    );
+  }
+
+  return rows.map((r, i) => ({ ...r, index: i + 1 }));
 });
 
 const pagination = computed(() => ({
@@ -254,14 +372,27 @@ const exportColumns: QTableColumn[] = [
   },
 ];
 
-const onRecordAction = (row: ApplicationFeeRow): void => {
-  $q.notify({
-    type: 'info',
-    message: t('admin.applicationFeeReport.actions.viewRecordMessage', {
-      receiptNo: row.receiptNo,
-    }),
-    position: 'top',
-  });
+const onRecordAction = async (row: ApplicationFeeRow): Promise<void> => {
+  try {
+    const examItem = {
+      id: row.rawEnrollment.ERM_ID,
+      title: row.examName,
+      status: 'SUCCESS',
+      statusType: 'success' as const,
+      date: row.paymentDate,
+      time: '',
+      location: '',
+      rawEnrollment: row.rawEnrollment,
+    };
+    await printReceipt(examItem);
+  } catch (err) {
+    console.error(err);
+    $q.notify({
+      type: 'negative',
+      message: 'เกิดข้อผิดพลาดในการดาวน์โหลดใบเสร็จ',
+      position: 'top',
+    });
+  }
 };
 
 // Show error notification when error changes
@@ -279,6 +410,7 @@ watch(error, (newVal) => {
 onMounted(() => {
   void loadDepartmentOptions();
   void fetchData();
+  void loadEnrollments();
 });
 </script>
 
