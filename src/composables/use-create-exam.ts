@@ -507,16 +507,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
             const slot = slotMap.get(key)!;
             const mappedProctors: string[] = [];
 
-            // Load from SUPERVISORS relation if present (backward compatibility)
-            if (session.SUPERVISORS && session.SUPERVISORS.length > 0) {
-              session.SUPERVISORS.forEach((s) => {
-                if (s.PROFILE?.userFullnameTh) {
-                  mappedProctors.push(s.PROFILE.userFullnameTh);
-                }
-              });
-            }
-
-            // Load from SS_NAME
+            // Load proctor names from SS_NAME
             if (session.SS_NAME) {
               const customNames = session.SS_NAME.split(',')
                 .map((name) => name.trim())
