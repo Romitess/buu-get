@@ -276,7 +276,7 @@
                       }
                     "
                   >
-                    <q-tooltip v-if="room.locationId" class="bg-primary text-body2">
+                    <q-tooltip v-if="room.locationId" class="bg-grey-8 text-body2">
                       จำนวนที่นั่งสูงสุดของสถานที่นี้คือ
                       {{ getLocationMaxSeats(room.locationId) }} ที่นั่ง
                     </q-tooltip>
@@ -603,9 +603,12 @@ const getSlotLabel = (slot: TimeSlot, index: number): string => {
   min-width: 80px !important;
   max-width: 150px !important;
   flex: 1 1 auto !important;
+<<<<<<< HEAD
 }
 
 .seats-input :deep(.q-field__control) {
   background-color: var(--neutral-100) !important;
+=======
+>>>>>>> eec1579 (feat(exam): refine proctors select UX and seats input styling)
 }
 </style>
