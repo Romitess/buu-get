@@ -1,5 +1,5 @@
 <template>
-  <q-page class="page-container create-exam-page">
+  <q-page class="page-container create-exam-page surface-page-bg">
     <!-- Standardized Reusable Page Header -->
     <AppBreadcrumbs />
     <AppPageHeader title="สร้างรอบสอบ" subtitle="ดำเนินการสร้างรอบสอบและกำหนดรายละเอียดการสอบ" />
@@ -20,5 +20,7 @@ const { form } = useCreateExam();
 </script>
 
 <style scoped>
-/* Page-specific styles (if any) */
+.surface-page-bg {
+  background-color: var(--surface-page);
+}
 </style>
