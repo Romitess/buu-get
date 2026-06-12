@@ -479,13 +479,19 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         const exam = await fetchExamById(examId);
 
         const rawExamName = exam.EXAM_NAME || '';
-        const match = rawExamName.match(/^(\d+\/\d+|รอบที่\s*\d+|รอบ\s*\d+)\s+(.*)$/);
-        if (match && match[1] && match[2]) {
-          form.value.examRound = match[1];
-          form.value.examName = match[2];
+        const matchEnd = rawExamName.match(/^(.*)\s+(\d+\/\d+|รอบที่\s*\d+|รอบ\s*\d+)$/);
+        if (matchEnd && matchEnd[1] && matchEnd[2]) {
+          form.value.examName = matchEnd[1];
+          form.value.examRound = matchEnd[2];
         } else {
-          form.value.examRound = '';
-          form.value.examName = rawExamName;
+          const matchStart = rawExamName.match(/^(\d+\/\d+|รอบที่\s*\d+|รอบ\s*\d+)\s+(.*)$/);
+          if (matchStart && matchStart[1] && matchStart[2]) {
+            form.value.examRound = matchStart[1];
+            form.value.examName = matchStart[2];
+          } else {
+            form.value.examRound = '';
+            form.value.examName = rawExamName;
+          }
         }
         form.value.examType = exam.EXAM_TYPE || EXAM_TYPE_GENERAL;
         form.value.examFormat = exam.EXAM_FORMAT || EXAM_FORMAT_COMPUTER;
@@ -1131,7 +1137,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     try {
       let targetExamId = isEditMode.value ? examId : null;
       const combinedExamName = form.value.examRound
-        ? `${form.value.examRound.trim()} ${form.value.examName.trim()}`
+        ? `${form.value.examName.trim()} ${form.value.examRound.trim()}`
         : form.value.examName.trim();
 
       if (isEditMode.value && examId) {
