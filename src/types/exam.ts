@@ -247,6 +247,13 @@ export interface BackendSession {
   ENROLLMENTS?: BackendEnrollment[];
   EXAM_ID?: number;
   EXAM?: BackendExam;
+  SUPERVISORS?: {
+    USER_ID: number;
+    PROFILE?: {
+      userTitleTh?: string;
+      userFullnameTh?: string;
+    };
+  }[];
 }
 
 export interface BackendExam {

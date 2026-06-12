@@ -177,7 +177,35 @@ export function useExamSeatManagement() {
   });
 
   const examTitle = computed((): string => {
-    return examData.value?.EXAM_NAME || DEFAULT_EXAM_TITLE;
+    const baseTitle = examData.value?.EXAM_NAME || DEFAULT_EXAM_TITLE;
+    const supervisorNamesList: string[] = [];
+
+    // Include custom supervisors from SS_NAME if present
+    const ssName = (activeSession.value as { SS_NAME?: string | null })?.SS_NAME;
+    if (ssName) {
+      const customNames = ssName
+        .split(',')
+        .map((name) => name.trim())
+        .filter(Boolean);
+      supervisorNamesList.push(...customNames);
+    }
+
+    // Include supervisors from relation if present (backward compatibility)
+    const supervisors = activeSession.value?.SUPERVISORS || [];
+    if (supervisors.length > 0) {
+      supervisors.forEach((s) => {
+        if (s.PROFILE?.userFullnameTh) {
+          supervisorNamesList.push(s.PROFILE.userFullnameTh);
+        }
+      });
+    }
+
+    const uniqueNames = Array.from(new Set(supervisorNamesList));
+
+    if (uniqueNames.length > 0) {
+      return `${baseTitle} (${uniqueNames.join(', ')})`;
+    }
+    return baseTitle;
   });
 
   // Resolves a localized month name by 0-based index from i18n (type-safe, no cast)

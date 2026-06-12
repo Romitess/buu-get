@@ -431,9 +431,16 @@ const exportCsvFileNamePrefix = computed(() => {
   return `คะแนนสอบ_${examName}_${time}_${room}`.replace(/[\s/\\?%*:|"<>]+/g, '_');
 });
 
-const selectedSessionName = computed(() => {
+const selectedSessionName = computed((): string => {
   if (!selectedSession.value) return '';
   if (selectedSession.value.SS_NAME) return selectedSession.value.SS_NAME;
+  const supervisors = selectedSession.value.SUPERVISORS || [];
+  if (supervisors.length > 0) {
+    return supervisors
+      .map((s) => s.PROFILE?.userFullnameTh || '')
+      .filter(Boolean)
+      .join(', ');
+  }
   const sessions = exam.value?.SESSIONS || [];
   const index = sessions.findIndex((s) => s.SS_ID === selectedSessionId.value);
   const roundNum = index !== -1 ? index + 1 : 1;
