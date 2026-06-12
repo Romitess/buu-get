@@ -131,8 +131,7 @@ interface GroupedSessionTimeRange {
   startTime: string;
   endTime: string;
   seats: number;
-  proctorName: string | null;
-  locationIds: number[];
+  locations: { locationId: number; proctorName: string | null }[];
   sessionId?: number;
 }
 
@@ -301,13 +300,13 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
     const existingRange = groupedRanges.get(key);
     if (existingRange) {
       existingRange.seats += seats;
-      if (proctorName) {
-        existingRange.proctorName = existingRange.proctorName
-          ? `${existingRange.proctorName}, ${proctorName}`
+      const existingLoc = existingRange.locations.find((l) => l.locationId === locationId);
+      if (!existingLoc) {
+        existingRange.locations.push({ locationId, proctorName });
+      } else if (proctorName) {
+        existingLoc.proctorName = existingLoc.proctorName
+          ? `${existingLoc.proctorName}, ${proctorName}`
           : proctorName;
-      }
-      if (!existingRange.locationIds.includes(locationId)) {
-        existingRange.locationIds.push(locationId);
       }
       if (!existingRange.sessionId && range.sessionId) {
         existingRange.sessionId = range.sessionId;
@@ -319,8 +318,7 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
       startTime,
       endTime,
       seats,
-      proctorName,
-      locationIds: [locationId],
+      locations: [{ locationId, proctorName }],
       ...(range.sessionId ? { sessionId: range.sessionId } : {}),
     });
   });
@@ -328,13 +326,25 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
   return Array.from(groupedRanges.values());
 };
 
-const createSessionLocations = async (sessionId: number, locationIds: number[]): Promise<void> => {
-  const uniqueLocationIds = [...new Set(locationIds)].filter((locationId) => locationId > 0);
+const createSessionLocations = async (
+  sessionId: number,
+  locations: { locationId: number; proctorName: string | null }[],
+): Promise<void> => {
+  const uniqueLocations = [];
+  const seenIds = new Set<number>();
+  for (const loc of locations) {
+    if (loc.locationId > 0 && !seenIds.has(loc.locationId)) {
+      uniqueLocations.push(loc);
+      seenIds.add(loc.locationId);
+    }
+  }
+
   await Promise.all(
-    uniqueLocationIds.map((locationId) =>
+    uniqueLocations.map((loc) =>
       api.post('/exam-session-locations', {
         SS_ID: sessionId,
-        LOCATION_ID: locationId,
+        LOCATION_ID: loc.locationId,
+        SS_NAME: loc.proctorName,
       }),
     ),
   );
@@ -343,26 +353,49 @@ const createSessionLocations = async (sessionId: number, locationIds: number[]):
 const syncSessionLocations = async (
   sessionId: number,
   currentLocations: BackendSession['SESSION_LOCATIONS'] | undefined,
-  locationIds: number[],
+  locations: { locationId: number; proctorName: string | null }[],
 ): Promise<void> => {
-  const desiredIds = [...new Set(locationIds)].filter((locationId) => locationId > 0);
-  const current = currentLocations || [];
-  const desiredSet = new Set(desiredIds);
-  const currentIdSet = new Set(current.map((item) => item.LOCATION_ID));
+  const uniqueLocations = [];
+  const seenIds = new Set<number>();
+  for (const loc of locations) {
+    if (loc.locationId > 0 && !seenIds.has(loc.locationId)) {
+      uniqueLocations.push(loc);
+      seenIds.add(loc.locationId);
+    }
+  }
 
-  await Promise.all([
-    ...current
-      .filter((item) => !desiredSet.has(item.LOCATION_ID))
-      .map((item) => api.delete(`/exam-session-locations/${item.SL_ID}`)),
-    ...desiredIds
-      .filter((locationId) => !currentIdSet.has(locationId))
-      .map((locationId) =>
+  const current = currentLocations || [];
+  const desiredSet = new Set(uniqueLocations.map((l) => l.locationId));
+  const currentMap = new Map(current.map((item) => [item.LOCATION_ID, item]));
+
+  const promises: Promise<unknown>[] = [];
+
+  for (const item of current) {
+    if (!desiredSet.has(item.LOCATION_ID)) {
+      promises.push(api.delete(`/exam-session-locations/${item.SL_ID}`));
+    }
+  }
+
+  for (const loc of uniqueLocations) {
+    const existing = currentMap.get(loc.locationId);
+    if (!existing) {
+      promises.push(
         api.post('/exam-session-locations', {
           SS_ID: sessionId,
-          LOCATION_ID: locationId,
+          LOCATION_ID: loc.locationId,
+          SS_NAME: loc.proctorName,
         }),
-      ),
-  ]);
+      );
+    } else if (existing.SS_NAME !== loc.proctorName) {
+      promises.push(
+        api.patch(`/exam-session-locations/${existing.SL_ID}`, {
+          SS_NAME: loc.proctorName,
+        }),
+      );
+    }
+  }
+
+  await Promise.all(promises);
 };
 
 export const createExamRound = async (payload: CreateExamPayload): Promise<number> => {
@@ -387,18 +420,17 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<numbe
     // 2. Create one session per time range, then attach all rooms to that session.
     const groupedRanges = groupTimeRangesByTime(payload);
     const sessionPromises = groupedRanges.map(async (range) => {
-      const primaryLocationId = range.locationIds[0] || Number(payload.locationId);
+      const primaryLocationId = range.locations[0]?.locationId || Number(payload.locationId);
       const sessionResponse = await api.post<BackendExam['SESSIONS'][number]>('/exam-sessions', {
         EXAM_ID: Number(examId),
         LOCATION_ID: primaryLocationId,
         SS_START_TIME: range.startTime,
         SS_END_TIME: range.endTime,
         SS_CAPACITY: range.seats,
-        SS_NAME: range.proctorName,
         SS_SESSION_STATUS: SESSION_STATUS_OPEN,
       });
 
-      await createSessionLocations(sessionResponse.data.SS_ID, range.locationIds);
+      await createSessionLocations(sessionResponse.data.SS_ID, range.locations);
     });
 
     await Promise.all(sessionPromises);
@@ -492,13 +524,12 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
       // 4. Update existing sessions & create new ones, one row per time range.
       const sessionPromises = groupedRanges.map(async (range) => {
         const existingId = range.sessionId;
-        const primaryLocationId = range.locationIds[0] || Number(payload.locationId);
+        const primaryLocationId = range.locations[0]?.locationId || Number(payload.locationId);
         const sessionPayload = {
           LOCATION_ID: primaryLocationId,
           SS_START_TIME: range.startTime,
           SS_END_TIME: range.endTime,
           SS_CAPACITY: range.seats,
-          SS_NAME: range.proctorName,
         };
 
         if (existingId) {
@@ -507,7 +538,7 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
           await syncSessionLocations(
             existingId,
             currentSessionsById.get(existingId)?.SESSION_LOCATIONS,
-            range.locationIds,
+            range.locations,
           );
           return;
         }
@@ -519,7 +550,7 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
           SS_SESSION_STATUS: SESSION_STATUS_OPEN,
         });
 
-        await createSessionLocations(sessionResponse.data.SS_ID, range.locationIds);
+        await createSessionLocations(sessionResponse.data.SS_ID, range.locations);
       });
 
       await Promise.all(sessionPromises);

@@ -212,7 +212,9 @@
                 v-model="room.proctors"
                 multiple
                 use-chips
-                :options="proctorOptions"
+                use-input
+                new-value-mode="add-unique"
+                :options="filteredProctors"
                 option-label="label"
                 option-value="value"
                 emit-value
@@ -222,6 +224,8 @@
                 placeholder="เลือกผู้คุมสอบ"
                 dropdown-icon="keyboard_arrow_down"
                 class="custom-input proctors-select"
+                input-debounce="0"
+                @filter="filterProctors"
               />
             </div>
             <div class="col-12 col-md-3" :data-field="`seats_${activeSlotIndex}_${rIdx}`">
@@ -296,7 +300,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { CreateExamForm, TimeSlot, ExamRoom } from 'src/composables/use-create-exam';
 import type { ExamLocationOption } from 'src/services/exam.service';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
@@ -335,6 +339,32 @@ const emit = defineEmits([
 ]);
 
 const showExamDate = ref(false);
+
+const filteredProctors = ref<{ label: string; value: string }[]>([]);
+
+watch(
+  () => props.proctorOptions,
+  (newVal) => {
+    filteredProctors.value = newVal;
+  },
+  { immediate: true },
+);
+
+const filterProctors = (val: string, update: (callback: () => void) => void) => {
+  if (val === '') {
+    update(() => {
+      filteredProctors.value = props.proctorOptions;
+    });
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    filteredProctors.value = props.proctorOptions.filter((v) =>
+      v.label.toLowerCase().includes(needle),
+    );
+  });
+};
 
 const preventNegativeAndDecimal = (evt: KeyboardEvent) => {
   if (['-', '+', 'e', 'E', '.', ','].includes(evt.key)) {

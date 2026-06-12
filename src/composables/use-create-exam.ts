@@ -462,9 +462,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       }));
       proctorOptions.value = proctors.map((u) => {
         const displayName = u.fullNameTH ? `${u.titleTH || ''} ${u.fullNameTH}`.trim() : u.email;
+        const finalName = displayName || 'ไม่ระบุชื่อ';
         return {
-          label: displayName || 'ไม่ระบุชื่อ',
-          value: u.email || '',
+          label: finalName,
+          value: finalName,
         };
       });
 
@@ -504,27 +505,23 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
             }
 
             const slot = slotMap.get(key)!;
-            const proctorsList = session.SS_NAME
-              ? session.SS_NAME.split(',')
-                  .map((s) => s.trim())
-                  .filter((s) => s.length > 0)
-              : [];
-            const mappedProctors = proctorsList.map((name) => {
-              const opt = proctorOptions.value.find(
-                (o) => o.label.trim().replace(/\s+/g, ' ') === name.trim().replace(/\s+/g, ' '),
-              );
-              return opt ? opt.value : name;
-            });
-
             const relationLocations = session.SESSION_LOCATIONS || [];
             if (relationLocations.length > 0) {
               relationLocations
                 .filter((relation) => relation.LOCATION)
                 .forEach((relation) => {
+                  const relationProctors: string[] = [];
+                  if (relation.SS_NAME) {
+                    const customNames = relation.SS_NAME.split(',')
+                      .map((name) => name.trim())
+                      .filter(Boolean);
+                    relationProctors.push(...customNames);
+                  }
+
                   slot.rooms.push({
                     locationId: relation.LOCATION_ID ?? relation.LOCATION.LOCATION_ID ?? null,
-                    proctorName: session.SS_NAME || '',
-                    proctors: mappedProctors,
+                    proctorName: relation.SS_NAME || '',
+                    proctors: Array.from(new Set(relationProctors)),
                     seats:
                       relation.LOCATION.SEATS?.filter(
                         (seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2,
@@ -543,8 +540,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
             slot.rooms.push({
               locationId: session.LOCATION?.LOCATION_ID ?? session.LOCATION_ID ?? null,
-              proctorName: session.SS_NAME || '',
-              proctors: mappedProctors,
+              proctorName: '',
+              proctors: [],
               seats: session.SS_CAPACITY ?? 40,
               sessionId: session.SS_ID,
               enrollmentCount: session.ENROLLMENTS?.length || 0,
@@ -941,19 +938,14 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     form.value.timeSlots.forEach((slot) => {
       if (!slot.startTime || !slot.endTime) return;
       slot.rooms.forEach((room) => {
-        const mappedProctorNames =
-          room.proctors && room.proctors.length > 0
-            ? room.proctors.map((emailOrName) => {
-                const opt = proctorOptions.value.find((o) => o.value === emailOrName);
-                return opt ? opt.label : emailOrName;
-              })
-            : [];
+        const proctorName =
+          room.proctors && room.proctors.length > 0 ? room.proctors.join(', ') : null;
         result.push({
           startTime: formatTime(slot.startTime),
           endTime: formatTime(slot.endTime),
           locationId: Number(room.locationId),
           seats: Number(room.seats),
-          proctorName: mappedProctorNames.length > 0 ? mappedProctorNames.join(', ') : null,
+          proctorName,
           ...(room.sessionId != null ? { sessionId: room.sessionId } : {}),
         });
       });
