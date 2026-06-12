@@ -237,10 +237,12 @@
                   <q-item v-bind="scope.itemProps">
                     <q-item-section>
                       <q-item-label>
-                        {{ typeof scope.opt === 'object' ? scope.opt.label : scope.opt }}
+                        {{
+                          typeof scope.opt === 'object' && scope.opt ? scope.opt.label : scope.opt
+                        }}
                       </q-item-label>
                     </q-item-section>
-                    <q-item-section side v-if="scope.selected">
+                    <q-item-section v-if="scope.selected" side>
                       <q-icon name="check" color="primary" size="20px" />
                     </q-item-section>
                   </q-item>
@@ -598,17 +600,9 @@ const getSlotLabel = (slot: TimeSlot, index: number): string => {
   margin: 0 !important;
   opacity: 0 !important;
 }
-
 .proctors-select :deep(.q-field__input) {
   min-width: 80px !important;
   max-width: 150px !important;
   flex: 1 1 auto !important;
-<<<<<<< HEAD
-}
-
-.seats-input :deep(.q-field__control) {
-  background-color: var(--neutral-100) !important;
-=======
->>>>>>> eec1579 (feat(exam): refine proctors select UX and seats input styling)
 }
 </style>
