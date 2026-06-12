@@ -17,7 +17,7 @@
     />
 
     <div class="row items-center justify-between q-mb-lg">
-      <div style="width: 340px">
+      <div class="col-6">
         <SearchBar v-model="searchQuery" />
       </div>
       <div class="text-weight-bold">&nbsp;</div>
