@@ -221,12 +221,31 @@
                 map-options
                 outlined
                 dense
-                placeholder="เลือกผู้คุมสอบ"
+                placeholder=""
                 dropdown-icon="keyboard_arrow_down"
                 class="custom-input proctors-select"
+                :class="`proctors-select-${rIdx}`"
                 input-debounce="0"
                 @filter="filterProctors"
-              />
+                @popup-show="scrollProctorsToRight(rIdx)"
+                @popup-hide="scrollProctorsToLeft(rIdx)"
+                @input-value="scrollProctorsToRight(rIdx)"
+                @focus="scrollProctorsToRight(rIdx)"
+                @blur="scrollProctorsToLeft(rIdx)"
+              >
+                <template v-slot:option="scope">
+                  <q-item v-bind="scope.itemProps">
+                    <q-item-section>
+                      <q-item-label>
+                        {{ typeof scope.opt === 'object' ? scope.opt.label : scope.opt }}
+                      </q-item-label>
+                    </q-item-section>
+                    <q-item-section side v-if="scope.selected">
+                      <q-icon name="check" color="primary" size="20px" />
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </app-select>
             </div>
             <div class="col-12 col-md-3" :data-field="`seats_${activeSlotIndex}_${rIdx}`">
               <div class="row no-wrap items-center">
@@ -236,14 +255,16 @@
                     type="number"
                     outlined
                     dense
-                    class="custom-input"
+                    class="custom-input seats-input"
                     :class="{
                       'buu-field-error':
                         hasError(`seats_${activeSlotIndex}_${rIdx}`) ||
                         (room.locationId && room.seats > getLocationMaxSeats(room.locationId)),
                     }"
                     :placeholder="
-                      room.locationId ? String(getLocationMaxSeats(room.locationId)) : '40'
+                      room.locationId
+                        ? String(getLocationMaxSeats(room.locationId))
+                        : DEFAULT_SEATS_PLACEHOLDER
                     "
                     min="1"
                     :max="getLocationMaxSeats(room.locationId)"
@@ -338,6 +359,12 @@ const emit = defineEmits([
   'clearFieldError',
 ]);
 
+const DEFAULT_SEATS_PLACEHOLDER = '40';
+const DEFAULT_MAX_SEATS = 9999;
+const SEAT_STATUS_UNAVAILABLE_1 = 1;
+const SEAT_STATUS_UNAVAILABLE_2 = 2;
+const SCROLL_DELAY_MS = 50;
+
 const showExamDate = ref(false);
 
 const filteredProctors = ref<{ label: string; value: string }[]>([]);
@@ -350,7 +377,7 @@ watch(
   { immediate: true },
 );
 
-const filterProctors = (val: string, update: (callback: () => void) => void) => {
+const filterProctors = (val: string, update: (callback: () => void) => void): void => {
   if (val === '') {
     update(() => {
       filteredProctors.value = props.proctorOptions;
@@ -366,19 +393,41 @@ const filterProctors = (val: string, update: (callback: () => void) => void) => 
   });
 };
 
-const preventNegativeAndDecimal = (evt: KeyboardEvent) => {
+const scrollProctorsToLeft = (rIdx: number): void => {
+  setTimeout(() => {
+    const el = document.querySelector(`.proctors-select-${rIdx} .q-field__native`);
+    if (el) {
+      el.scrollTo({ left: 0, behavior: 'smooth' });
+    }
+  }, SCROLL_DELAY_MS);
+};
+
+const scrollProctorsToRight = (rIdx: number): void => {
+  setTimeout(() => {
+    const el = document.querySelector(`.proctors-select-${rIdx} .q-field__native`);
+    if (el) {
+      el.scrollTo({ left: el.scrollWidth, behavior: 'smooth' });
+    }
+  }, SCROLL_DELAY_MS);
+};
+
+const preventNegativeAndDecimal = (evt: KeyboardEvent): void => {
   if (['-', '+', 'e', 'E', '.', ','].includes(evt.key)) {
     evt.preventDefault();
   }
 };
 
 const getLocationMaxSeats = (locationId: number | null): number => {
-  if (!locationId) return 9999;
+  if (!locationId) return DEFAULT_MAX_SEATS;
   const option = props.locationOptions.find((opt) => opt.value === locationId);
-  if (!option || !option.raw) return 9999;
+  if (!option || !option.raw) return DEFAULT_MAX_SEATS;
   const seats = option.raw.SEATS;
   if (seats) {
-    return seats.filter((seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2).length;
+    return seats.filter(
+      (seat) =>
+        seat.LS_SEAT_STATUS !== SEAT_STATUS_UNAVAILABLE_1 &&
+        seat.LS_SEAT_STATUS !== SEAT_STATUS_UNAVAILABLE_2,
+    ).length;
   }
   if (
     option.raw.LOCATION_SEAT_CAPACITY !== undefined &&
@@ -402,11 +451,11 @@ const getAvailableLocationOptions = (roomIndex: number): ExamLocationOption[] =>
   return props.locationOptions.filter((option) => !selectedByOtherRooms.has(option.value));
 };
 
-const onLocationChange = (room: ExamRoom, slotIdx: number, roomIdx: number) => {
+const onLocationChange = (room: ExamRoom, slotIdx: number, roomIdx: number): void => {
   emit('clearFieldError', `locationId_${slotIdx}_${roomIdx}`);
 
   const maxSeats = getLocationMaxSeats(room.locationId);
-  if (maxSeats > 0 && maxSeats !== 9999) {
+  if (maxSeats > 0 && maxSeats !== DEFAULT_MAX_SEATS) {
     room.seats = maxSeats;
   }
 };
@@ -521,14 +570,42 @@ const getSlotLabel = (slot: TimeSlot, index: number): string => {
 }
 
 .proctors-select :deep(.q-field__native) {
-  flex-flow: row wrap !important;
+  flex-flow: row nowrap !important;
   align-items: center !important;
   gap: 4px;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.proctors-select :deep(.q-field__native)::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .proctors-select :deep(.q-chip) {
-  flex: 0 0 auto;
+  flex: 0 0 auto !important;
   margin: 2px 0 !important;
-  max-width: 100%;
+  max-width: none !important;
+}
+.proctors-select:not(.q-field--focused):not(.app-select--open) :deep(.q-field__input) {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+}
+
+.proctors-select :deep(.q-field__input) {
+  min-width: 80px !important;
+  max-width: 150px !important;
+  flex: 1 1 auto !important;
+}
+
+.seats-input :deep(.q-field__control) {
+  background-color: var(--neutral-100) !important;
 }
 </style>
