@@ -89,7 +89,6 @@ import { EnrollmentStatus } from 'src/types/enrollment.types';
 import { bulkIssueVouchers } from 'src/services/voucher.service';
 import { updateEnrollmentStatus } from 'src/services/enrollment.service';
 import { updateExamSessionStatus } from 'src/services/exam.service';
-import { formatThaiLongDate } from 'src/utils/thai-date';
 import type { VoucherData } from 'src/types/voucher';
 import {
   EXAM_TYPE_GENERAL,
@@ -136,9 +135,16 @@ const {
 // Resolves a localized month name by 0-based index from i18n (type-safe, no cast)
 const getMonthName = (monthIndex: number): string => i18n.t(`common.months[${monthIndex}]`);
 
-const examDateLabel = computed((): string =>
-  exam.value ? formatThaiLongDate(exam.value.EXAM_DATE, getMonthName) : '-',
-);
+const examDateLabel = computed((): string => {
+  if (!exam.value?.EXAM_DATE) return '-';
+  const date = new Date(exam.value.EXAM_DATE);
+  if (isNaN(date.getTime())) return exam.value.EXAM_DATE;
+  const day = date.getDate();
+  const month = getMonthName(date.getMonth());
+  const isThai = i18n.locale.value.startsWith('th');
+  const year = date.getFullYear() + (isThai ? 543 : 0);
+  return `${day} ${month} ${year}`;
+});
 
 const voucherPreviewData = computed<VoucherData>(() => ({
   id: sessionEnrollments.value[0]?.ERM_ID ?? 0,

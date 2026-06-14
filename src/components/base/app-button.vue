@@ -69,24 +69,22 @@ withDefaults(defineProps<Props>(), {
   &--brand {
     background-color: var(--primary) !important;
     color: white !important;
-    box-shadow: 0 4px 10px rgba(13, 71, 161, 0.2);
+    box-shadow: none !important;
 
     &:hover {
-      filter: brightness(1.1);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 15px rgba(13, 71, 161, 0.3);
+      filter: brightness(1.1) !important;
+      box-shadow: none !important;
     }
   }
 
   &--secondary {
     background-color: var(--secondary) !important;
     color: white !important;
-    box-shadow: 0 4px 10px rgba(30, 137, 229, 0.2);
+    box-shadow: none !important;
 
     &:hover {
-      filter: brightness(1.1);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 15px rgba(30, 137, 229, 0.3);
+      filter: brightness(1.1) !important;
+      box-shadow: none !important;
     }
   }
 
@@ -103,11 +101,11 @@ withDefaults(defineProps<Props>(), {
   &--dark {
     background-color: var(--surface-sidebar) !important;
     color: white !important;
+    box-shadow: none !important;
 
     &:hover {
-      filter: brightness(1.2);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      filter: brightness(1.2) !important;
+      box-shadow: none !important;
     }
   }
 

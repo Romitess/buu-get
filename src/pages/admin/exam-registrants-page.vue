@@ -10,13 +10,15 @@
 
     <AppExamInfoCard
       v-if="exam"
+      v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
       :title="exam.EXAM_NAME"
-      :date="formatThaiDate(exam.EXAM_DATE)"
+      :date="examDateLabel"
       :time="selectedSessionTime"
       :location="selectedSessionLocation"
-      :applicant-count="sessionTotalCount"
-      :paid-count="sessionPaidCount"
+      :location-options="roomOptions"
+      :applicant-count="localSessionTotalCount"
+      :paid-count="localSessionPaidCount"
       :total-capacity="selectedSessionCapacity"
       is-admin
     />
@@ -31,7 +33,7 @@
       <div class="col-auto">
         <ExportCsvButton
           :columns="columns"
-          :rows="filteredEnrollments"
+          :rows="currentRoomEnrollments"
           file-name-prefix="exam-registrants"
           class="export-btn"
         />
@@ -41,7 +43,7 @@
     <main>
       <BaseTable
         :columns="columns"
-        :rows="filteredEnrollments"
+        :rows="currentRoomEnrollments"
         :loading="isLoading"
         :pagination="pagination"
         class="registrants-table"
@@ -111,14 +113,20 @@ import AppExamSessionTabs from 'src/components/exam/app-exam-session-time.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import { useExamRegistrants } from 'src/composables/use-exam-registrants';
-import { useThaiDate } from 'src/composables/useThaiDate';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollment.types';
+import type { BackendSession } from 'src/types/exam';
+
+interface SessionLocationOption {
+  SL_ID: number;
+  LOCATION_ID: number;
+  SS_ID: number;
+  LOCATION: NonNullable<BackendSession['LOCATION']>;
+}
 
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
-const { formatThaiDate } = useThaiDate();
+const i18n = useI18n();
 
 const {
   isLoading,
@@ -127,23 +135,76 @@ const {
   selectedSessionId,
   sessionTimeTabs,
   filteredEnrollments,
-  sessionTotalCount,
-  sessionPaidCount,
   fetchEnrollments,
 } = useExamRegistrants();
+
+const selectedSessionLocationId = ref<number | null>(null);
+
+const getMonthName = (monthIndex: number): string => i18n.t(`common.months[${monthIndex}]`);
+
+const examDateLabel = computed((): string => {
+  if (!exam.value?.EXAM_DATE) return '-';
+  const date = new Date(exam.value.EXAM_DATE);
+  if (isNaN(date.getTime())) return exam.value.EXAM_DATE;
+  const day = date.getDate();
+  const month = getMonthName(date.getMonth());
+  const isThai = i18n.locale.value.startsWith('th');
+  const year = date.getFullYear() + (isThai ? 543 : 0);
+  return `${day} ${month} ${year}`;
+});
 
 const selectedSession = computed(() => {
   return exam.value?.SESSIONS?.find((s) => s.SS_ID === selectedSessionId.value) || null;
 });
 
 const getSessionTimeKey = (session: NonNullable<typeof selectedSession.value>): string => {
-  return `${session.SS_START_TIME || ''}-${session.SS_END_TIME || ''}`;
+  const start = String(session.SS_START_TIME || '').substring(0, 5);
+  const end = String(session.SS_END_TIME || '').substring(0, 5);
+  return `${start}-${end}`;
 };
 
 const activeTimeSessions = computed(() => {
   if (!selectedSession.value) return [];
   const activeKey = getSessionTimeKey(selectedSession.value);
   return (exam.value?.SESSIONS ?? []).filter((session) => getSessionTimeKey(session) === activeKey);
+});
+
+const sessionLocations = computed<SessionLocationOption[]>(() => {
+  return activeTimeSessions.value.flatMap((session) => {
+    const relationLocations = session.SESSION_LOCATIONS || [];
+    if (relationLocations.length > 0) {
+      return relationLocations
+        .filter((item) => item.LOCATION)
+        .map((item) => ({ ...item, SS_ID: item.SS_ID || session.SS_ID }));
+    }
+
+    if (!session.LOCATION) return [];
+    return [
+      {
+        SL_ID: -session.SS_ID,
+        LOCATION_ID: session.LOCATION.LOCATION_ID,
+        SS_ID: session.SS_ID,
+        LOCATION: session.LOCATION,
+      },
+    ];
+  });
+});
+
+const roomOptions = computed(() =>
+  sessionLocations.value.map((item) => ({
+    value: item.SL_ID,
+    label: `${item.LOCATION.LOCATION_NAME}${item.LOCATION.LOCATION_ROOM_NO ? ` (${item.LOCATION.LOCATION_ROOM_NO})` : ''}`,
+  })),
+);
+
+const activeSessionLocation = computed(() => {
+  return (
+    sessionLocations.value.find((item) => item.SL_ID === selectedSessionLocationId.value) ?? null
+  );
+});
+
+const activeLocation = computed(() => {
+  return activeSessionLocation.value?.LOCATION ?? selectedSession.value?.LOCATION ?? null;
 });
 
 const selectedSessionTime = computed(() => {
@@ -154,19 +215,56 @@ const selectedSessionTime = computed(() => {
 });
 
 const selectedSessionLocation = computed(() => {
-  const locationNames = activeTimeSessions.value
-    .map((session) => session.LOCATION)
-    .filter((loc): loc is NonNullable<typeof loc> => Boolean(loc))
-    .map(
-      (loc) => `${loc.LOCATION_NAME}${loc.LOCATION_ROOM_NO ? ` (${loc.LOCATION_ROOM_NO})` : ''}`,
-    );
-
-  if (locationNames.length === 0) return '-';
-  return Array.from(new Set(locationNames)).join(', ');
+  if (!activeLocation.value) return '-';
+  const loc = activeLocation.value;
+  return `${loc.LOCATION_NAME}${loc.LOCATION_ROOM_NO ? ` (${loc.LOCATION_ROOM_NO})` : ''}`;
 });
 
 const selectedSessionCapacity = computed(() => {
-  return activeTimeSessions.value.reduce((total, session) => total + (session.SS_CAPACITY || 0), 0);
+  if (activeLocation.value?.SEATS?.length) return activeLocation.value.SEATS.length;
+  return (
+    activeTimeSessions.value.find((session) => session.SS_ID === activeSessionLocation.value?.SS_ID)
+      ?.SS_CAPACITY ?? 0
+  );
+});
+
+const currentRoomEnrollments = computed(() => {
+  const list = filteredEnrollments.value;
+  if (selectedSessionLocationId.value === null) return list;
+
+  const result = list.filter((e) => {
+    if (e.slId !== null && e.slId !== undefined) {
+      return e.slId === selectedSessionLocationId.value;
+    }
+
+    const seatLocation = sessionLocations.value.find((location) =>
+      location.LOCATION.SEATS?.some((seat) => seat.LS_ID === e.lsId),
+    );
+    if (seatLocation) {
+      return seatLocation.SL_ID === selectedSessionLocationId.value;
+    }
+
+    const enrollmentSessionLocations = sessionLocations.value.filter(
+      (location) => location.SS_ID === e.sessionId,
+    );
+    return (
+      enrollmentSessionLocations.length > 0 &&
+      enrollmentSessionLocations[0]?.SL_ID === selectedSessionLocationId.value
+    );
+  });
+
+  return result.map((item, idx) => ({
+    ...item,
+    index: idx + 1,
+  }));
+});
+
+const localSessionTotalCount = computed(() => currentRoomEnrollments.value.length);
+
+const localSessionPaidCount = computed(() => {
+  const list = currentRoomEnrollments.value;
+  const CANCELLED_STATUS = 5;
+  return list.filter((e) => e.paymentStatus >= 1 && e.paymentStatus !== CANCELLED_STATUS).length;
 });
 
 watch(exam, (newExam) => {
@@ -178,6 +276,22 @@ watch(exam, (newExam) => {
   }
 });
 
+watch(
+  [selectedSessionId, roomOptions],
+  () => {
+    const firstRoomId = roomOptions.value[0]?.value ?? null;
+    if (firstRoomId === null) {
+      selectedSessionLocationId.value = null;
+      return;
+    }
+
+    if (!roomOptions.value.some((option) => option.value === selectedSessionLocationId.value)) {
+      selectedSessionLocationId.value = firstRoomId;
+    }
+  },
+  { immediate: true },
+);
+
 const pagination = ref<PaginationModel>({
   page: 1,
   rowsPerPage: 10,
@@ -187,35 +301,35 @@ const pagination = ref<PaginationModel>({
 const columns: QTableColumn[] = [
   {
     name: 'index',
-    label: t('admin.registrantManagement.table.columns.index'),
+    label: i18n.t('admin.registrantManagement.table.columns.index'),
     field: 'index',
     align: 'center',
     style: 'width: 6%',
   },
   {
     name: 'titleTh',
-    label: t('admin.registrantManagement.table.columns.prefix'),
+    label: i18n.t('admin.registrantManagement.table.columns.prefix'),
     field: 'titleTh',
     align: 'center',
     style: 'width: 10%',
   },
   {
     name: 'fullnameTh',
-    label: t('admin.registrantManagement.table.columns.fullName'),
+    label: i18n.t('admin.registrantManagement.table.columns.fullName'),
     field: 'fullnameTh',
     align: 'left',
     style: 'width: 18%',
   },
   {
     name: 'remark',
-    label: t('admin.registrantManagement.table.columns.remark'),
+    label: i18n.t('admin.registrantManagement.table.columns.remark'),
     field: 'remark',
     align: 'center',
     style: 'width: 21%',
   },
   {
     name: 'paymentStatus',
-    label: t('admin.registrantManagement.table.columns.paymentStatus'),
+    label: i18n.t('admin.registrantManagement.table.columns.paymentStatus'),
     field: 'paymentStatus',
     align: 'center',
     format: (val: number) => PAYMENT_STATUS_LABELS[val] || '-',
@@ -223,7 +337,7 @@ const columns: QTableColumn[] = [
   },
   {
     name: 'verifyStatus',
-    label: t('admin.registrantManagement.table.columns.verifyStatus'),
+    label: i18n.t('admin.registrantManagement.table.columns.verifyStatus'),
     field: 'verifyStatus',
     align: 'center',
     format: (val: number) => VERIFY_STATUS_LABELS[val] || '-',
@@ -231,7 +345,7 @@ const columns: QTableColumn[] = [
   },
   {
     name: 'tools',
-    label: t('admin.registrantManagement.table.columns.tools'),
+    label: i18n.t('admin.registrantManagement.table.columns.tools'),
     field: 'tools',
     align: 'center',
     style: 'width: 12%',
@@ -268,11 +382,20 @@ const loadData = async (): Promise<void> => {
   const examId = Number(route.params.examId);
   if (!isNaN(examId) && examId > 0) {
     await fetchEnrollments(examId);
-    pagination.value.rowsNumber = filteredEnrollments.value.length;
+
+    const routeSessionLocationId = Number(route.query.sessionLocationId);
+    if (
+      !isNaN(routeSessionLocationId) &&
+      roomOptions.value.some((option) => option.value === routeSessionLocationId)
+    ) {
+      selectedSessionLocationId.value = routeSessionLocationId;
+    }
+
+    pagination.value.rowsNumber = currentRoomEnrollments.value.length;
   }
 };
 
-watch(filteredEnrollments, (newVal) => {
+watch(currentRoomEnrollments, (newVal) => {
   pagination.value.rowsNumber = newVal.length;
 });
 

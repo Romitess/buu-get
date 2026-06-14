@@ -110,6 +110,8 @@ export function useExamAttendances() {
             checkInTime: formatCheckInTime(checkInTimeStr),
             sessionId: enrollment.SESSION_ID,
             hasRecord: !!attendanceRecord,
+            slId: enrollment.SL_ID,
+            lsId: enrollment.LS_ID,
           };
         },
       );

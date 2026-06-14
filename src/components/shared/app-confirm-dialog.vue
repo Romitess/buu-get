@@ -128,11 +128,11 @@ const onConfirm = (): void => {
   .confirm-btn {
     background-color: var(--primary) !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 10px rgba(13, 71, 161, 0.2);
+    box-shadow: none !important;
 
     &:hover {
-      filter: brightness(1.1);
-      box-shadow: 0 6px 14px rgba(13, 71, 161, 0.3);
+      filter: brightness(1.1) !important;
+      box-shadow: none !important;
     }
   }
 }

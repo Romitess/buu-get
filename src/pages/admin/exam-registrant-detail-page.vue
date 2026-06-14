@@ -23,7 +23,7 @@
         />
         <AppButton
           :label="$t('admin.registrantManagement.detail.actions.editByStaff')"
-          color="grey-3"
+          color="grey-4"
           text-color="dark"
           unelevated
           class="action-btn col-12 col-sm-auto"
