@@ -140,8 +140,6 @@ const {
   fetchEnrollments,
 } = useExamRegistrants();
 
-const selectedSessionLocationId = ref<number | null>(null);
-
 const getMonthName = (monthIndex: number): string => i18n.t(`common.months[${monthIndex}]`);
 
 const examDateLabel = computed((): string => {
@@ -191,13 +189,6 @@ const sessionLocations = computed<SessionLocationOption[]>(() => {
     ];
   });
 });
-
-const roomOptions = computed(() =>
-  sessionLocations.value.map((item) => ({
-    value: item.SL_ID,
-    label: `${item.LOCATION.LOCATION_NAME}${item.LOCATION.LOCATION_ROOM_NO ? ` (${item.LOCATION.LOCATION_ROOM_NO})` : ''}`,
-  })),
-);
 
 const activeSessionLocation = computed(() => {
   return (
