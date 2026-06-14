@@ -13,7 +13,7 @@
       v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
       :title="exam.EXAM_NAME"
-      :date="formatThaiDate(exam.EXAM_DATE)"
+      :date="examDateLabel"
       :time="selectedSessionTime"
       :location="selectedSessionLocation"
       :location-options="roomOptions"
@@ -207,6 +207,7 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useQuasar, type QTableColumn } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import BaseTable from 'src/components/shared/base-table.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
 import DialogCsvImport from 'src/components/exam/dialog-csv-import.vue';
@@ -228,7 +229,6 @@ import {
   type SaveExamScorePayload,
 } from 'src/services/exam-score.service';
 import type { BackendExam, BackendLocation, BackendSession } from 'src/types/exam';
-import { useThaiDate } from 'src/composables/useThaiDate';
 import type { BackendEnrollmentDetail, EnrollmentTableRow } from 'src/types/enrollment.types';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 
@@ -258,7 +258,20 @@ interface SessionLocationOption {
 
 const route = useRoute();
 const $q = useQuasar();
-const { formatThaiDate } = useThaiDate();
+const i18n = useI18n();
+
+const getMonthName = (monthIndex: number): string => i18n.t(`common.months[${monthIndex}]`);
+
+const examDateLabel = computed((): string => {
+  if (!exam.value?.EXAM_DATE) return '-';
+  const date = new Date(exam.value.EXAM_DATE);
+  if (isNaN(date.getTime())) return exam.value.EXAM_DATE;
+  const day = date.getDate();
+  const month = getMonthName(date.getMonth());
+  const isThai = i18n.locale.value.startsWith('th');
+  const year = date.getFullYear() + (isThai ? 543 : 0);
+  return `${day} ${month} ${year}`;
+});
 
 const isLoading = ref(false);
 const exam = ref<BackendExam | null>(null);
@@ -372,10 +385,12 @@ const currentRoomEnrollments = computed(() => {
       return enrollmentSessionLocationId === selectedSessionLocationId.value;
     }
 
-    return sessionLocations.value.some(
-      (location) =>
-        location.SL_ID === selectedSessionLocationId.value &&
-        location.SS_ID === enrollment.SESSION_ID,
+    const enrollmentSessionLocations = sessionLocations.value.filter(
+      (location) => location.SS_ID === enrollment.SESSION_ID,
+    );
+    return (
+      enrollmentSessionLocations.length > 0 &&
+      enrollmentSessionLocations[0]?.SL_ID === selectedSessionLocationId.value
     );
   });
 });

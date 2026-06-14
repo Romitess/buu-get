@@ -40,7 +40,7 @@
               </q-avatar>
               <q-btn
                 round
-                color="grey-3"
+                color="grey-4"
                 text-color="dark"
                 icon="edit"
                 size="sm"
@@ -302,7 +302,7 @@
       <q-btn
         unelevated
         :label="$t('profile.cancel')"
-        color="grey-3"
+        color="grey-4"
         text-color="dark"
         class="action-btn text-weight-bold"
         @click="onCancel"
@@ -360,7 +360,7 @@
           <q-btn
             unelevated
             :label="$t('profile.cancel')"
-            color="grey-3"
+            color="grey-4"
             text-color="dark"
             style="border-radius: 8px; width: 120px"
             class="text-weight-bold"

@@ -31,6 +31,8 @@ export const fetchEnrollmentsByExamId = async (examId: number): Promise<Enrollme
       sessionLocationId: enrollment.SL_ID ?? null,
       userProfileId: enrollment.USER?.PROFILE?.userProfileId || 0,
       remark: enrollment.ERM_PHYSICAL_STATUS || '',
+      slId: enrollment.SL_ID,
+      lsId: enrollment.LS_ID,
     }),
   );
 };

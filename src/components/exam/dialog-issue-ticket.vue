@@ -52,7 +52,7 @@
       <q-card-actions class="dialog-actions">
         <AppButton
           label="ยกเลิก"
-          color="grey-3"
+          color="grey-4"
           text-color="black"
           class="action-btn"
           @click="onCancelClick"

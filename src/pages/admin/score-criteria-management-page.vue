@@ -131,7 +131,7 @@
     <div class="action-bar row justify-end q-mt-xl q-gutter-md">
       <AppButton
         :label="$t('admin.scoreCriteriaManagement.cancelBtn')"
-        color="grey-3"
+        color="grey-4"
         text-color="dark"
         unelevated
         class="action-btn"

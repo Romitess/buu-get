@@ -206,7 +206,7 @@
         <q-card-actions align="right" class="q-px-xl q-pb-xl q-pt-none q-gutter-md">
           <AppButton
             :label="$t('admin.registrantManagement.detail.editDialog.reset')"
-            color="grey-3"
+            color="grey-4"
             text-color="dark"
             style="min-width: 120px; border-radius: 8px"
             @click="resetForm"
@@ -239,7 +239,7 @@
         <q-card-actions align="center" class="q-pt-none q-pb-md q-gutter-md">
           <AppButton
             :label="$t('admin.registrantManagement.detail.editDialog.cancel')"
-            color="grey-3"
+            color="grey-4"
             text-color="dark"
             style="min-width: 100px; border-radius: 8px"
             @click="showConfirmDialog = false"

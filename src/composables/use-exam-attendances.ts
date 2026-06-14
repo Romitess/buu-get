@@ -158,6 +158,8 @@ export function useExamAttendances() {
             sessionId: enrollment.SESSION_ID,
             sessionLocationId: enrollment.SL_ID ?? null,
             hasRecord: !!attendanceRecord,
+            slId: enrollment.SL_ID,
+            lsId: enrollment.LS_ID,
           };
         },
       );

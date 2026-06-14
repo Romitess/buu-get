@@ -115,6 +115,8 @@ export interface EnrollmentTableRow {
   sessionLocationId: number | null;
   userProfileId: number;
   remark: string;
+  slId?: number | null | undefined;
+  lsId?: number | null | undefined;
 }
 
 export interface AttendanceTableRow {
@@ -129,6 +131,8 @@ export interface AttendanceTableRow {
   sessionId: number;
   sessionLocationId: number | null;
   hasRecord: boolean;
+  slId?: number | null | undefined;
+  lsId?: number | null | undefined;
 }
 
 export enum EnrollmentStatus {

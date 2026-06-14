@@ -72,8 +72,7 @@ withDefaults(defineProps<Props>(), {
     box-shadow: none !important;
 
     &:hover {
-      filter: brightness(1.1);
-      transform: translateY(-1px);
+      filter: brightness(1.1) !important;
       box-shadow: none !important;
     }
   }
@@ -84,8 +83,7 @@ withDefaults(defineProps<Props>(), {
     box-shadow: none !important;
 
     &:hover {
-      filter: brightness(1.1);
-      transform: translateY(-1px);
+      filter: brightness(1.1) !important;
       box-shadow: none !important;
     }
   }
@@ -103,11 +101,11 @@ withDefaults(defineProps<Props>(), {
   &--dark {
     background-color: var(--surface-sidebar) !important;
     color: white !important;
+    box-shadow: none !important;
 
     &:hover {
-      filter: brightness(1.2);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      filter: brightness(1.2) !important;
+      box-shadow: none !important;
     }
   }
 
