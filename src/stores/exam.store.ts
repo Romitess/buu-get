@@ -175,7 +175,7 @@ export const useExamStore = defineStore('exam', () => {
         const session = enrollment.SESSION;
         if (!session) return;
         const exam = session.EXAM;
-        const location = session.LOCATION;
+        const location = enrollment.SESSION_LOCATION?.LOCATION ?? session.LOCATION;
 
         const date = exam?.EXAM_DATE ? new Date(exam.EXAM_DATE) : new Date();
         const months = getMonthNames();

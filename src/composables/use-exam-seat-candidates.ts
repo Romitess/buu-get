@@ -27,6 +27,7 @@ export interface SeatCandidateRow {
   fullnameTh: string;
   seatNumber: string;
   sessionId: number;
+  enrollment: BackendEnrollmentDetail;
 }
 
 interface EnrollmentWithSeatOrder {
@@ -117,9 +118,21 @@ export function useExamSeatCandidates() {
     })),
   );
 
+  const effectiveSessionLocationId = computed<number | null>(() => {
+    const selectedLocationExists = sessionLocations.value.some(
+      (item) => item.SL_ID === selectedSessionLocationId.value,
+    );
+
+    if (selectedLocationExists) {
+      return selectedSessionLocationId.value;
+    }
+
+    return sessionLocations.value[0]?.SL_ID ?? null;
+  });
+
   const activeSessionLocation = computed(() => {
     return (
-      sessionLocations.value.find((item) => item.SL_ID === selectedSessionLocationId.value) ?? null
+      sessionLocations.value.find((item) => item.SL_ID === effectiveSessionLocationId.value) ?? null
     );
   });
 
@@ -140,19 +153,19 @@ export function useExamSeatCandidates() {
       if (Number(e.ERM_STATUS) === STATUS_CANCELLED) return false;
       if (!e.LS_ID) return false;
 
-      if (selectedSessionLocationId.value === null) {
+      if (effectiveSessionLocationId.value === null) {
         return sessionLocations.value.length === 0;
       }
 
       if (e.SL_ID !== null && e.SL_ID !== undefined) {
-        return e.SL_ID === selectedSessionLocationId.value;
+        return e.SL_ID === effectiveSessionLocationId.value;
       }
 
       const seatLocation = sessionLocations.value.find((location) =>
         location.LOCATION.SEATS?.some((seat) => seat.LS_ID === e.LS_ID),
       );
       if (seatLocation) {
-        return seatLocation.SL_ID === selectedSessionLocationId.value;
+        return seatLocation.SL_ID === effectiveSessionLocationId.value;
       }
 
       const enrollmentSessionLocations = sessionLocations.value.filter(
@@ -160,7 +173,7 @@ export function useExamSeatCandidates() {
       );
       return (
         enrollmentSessionLocations.length === 1 &&
-        enrollmentSessionLocations[0]?.SL_ID === selectedSessionLocationId.value
+        enrollmentSessionLocations[0]?.SL_ID === effectiveSessionLocationId.value
       );
     });
   });
@@ -229,11 +242,12 @@ export function useExamSeatCandidates() {
         ({ enrollment: e }, idx): SeatCandidateRow => ({
           index: idx + 1,
           ermId: e.ERM_ID,
-          nationalId: e.USER?.USER_NATIONAL_ID || '-',
+          nationalId: e.ERM_TEST_TAKER || '-',
           titleTh: e.USER?.PROFILE?.userTitleTh || '-',
           fullnameTh: e.USER?.PROFILE?.userFullnameTh || '-',
           seatNumber: getSeatLabel(e),
           sessionId: e.SESSION_ID,
+          enrollment: e,
         }),
       );
   });

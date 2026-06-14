@@ -28,6 +28,7 @@ export const fetchEnrollmentsByExamId = async (examId: number): Promise<Enrollme
       paymentStatus: enrollment.ERM_STATUS,
       verifyStatus: enrollment.ERM_VERIFY_STATUS,
       sessionId: enrollment.SESSION_ID,
+      sessionLocationId: enrollment.SL_ID ?? null,
       userProfileId: enrollment.USER?.PROFILE?.userProfileId || 0,
       remark: enrollment.ERM_PHYSICAL_STATUS || '',
     }),
@@ -51,6 +52,23 @@ export const updateEnrollmentStatus = async (
   data: Partial<BackendEnrollmentDetail>,
 ): Promise<BackendEnrollmentDetail> => {
   const response = await api.patch<BackendEnrollmentDetail>(`/exam-enrollments/${id}`, data);
+  return response.data;
+};
+
+export interface BulkSeatAssignment {
+  ermId: number;
+  lsId: number;
+  slId: number;
+}
+
+export const bulkAssignEnrollmentSeats = async (
+  assignments: BulkSeatAssignment[],
+  sessionIds: number[],
+): Promise<BackendEnrollmentDetail[]> => {
+  const response = await api.patch<BackendEnrollmentDetail[]>(
+    '/exam-enrollments/bulk-seat-assignments',
+    { assignments, sessionIds },
+  );
   return response.data;
 };
 

@@ -69,6 +69,7 @@ export interface BackendAttendance {
 
 export interface BackendEnrollmentDetail {
   ERM_ID: number;
+  ERM_TEST_TAKER?: string | null;
   USER_ID: number;
   SESSION_ID: number;
   SL_ID?: number | null;
@@ -92,7 +93,14 @@ export interface BackendEnrollmentDetail {
   SESSION_LOCATION?: {
     SL_ID: number;
     LOCATION_ID: number;
+    LOCATION?: NonNullable<BackendSessionDetail['LOCATION']>;
   } | null;
+  VOUCHERS?: {
+    VC_ID: number;
+    ERM_ID: number;
+    VC_CODE: string;
+    CREATED_AT: string;
+  }[];
 }
 
 export interface EnrollmentTableRow {
@@ -104,6 +112,7 @@ export interface EnrollmentTableRow {
   paymentStatus: number;
   verifyStatus: number;
   sessionId: number;
+  sessionLocationId: number | null;
   userProfileId: number;
   remark: string;
 }
@@ -118,6 +127,7 @@ export interface AttendanceTableRow {
   attendanceStatus: ExamAttendStatus;
   checkInTime: string | null;
   sessionId: number;
+  sessionLocationId: number | null;
   hasRecord: boolean;
 }
 

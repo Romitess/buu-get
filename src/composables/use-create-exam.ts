@@ -1166,7 +1166,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         });
 
         // Refresh the management schedules in the store after successful edit
-        await examStore.loadManagementSchedules();
+        await examStore.loadManagementSchedules(true);
 
         $q.notify({
           type: 'positive',
@@ -1195,7 +1195,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
         targetExamId = await examStore.addExamRound(payload);
         // Refresh the management schedules in the store after successful creation
-        await examStore.loadManagementSchedules();
+        await examStore.loadManagementSchedules(true);
 
         $q.notify({
           type: 'positive',

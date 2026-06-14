@@ -67,7 +67,7 @@
                 </div>
                 <div class="info-group">
                   <label class="info-label">Name Surname:</label>
-                  <div class="info-value">{{ voucherData.fullName }}</div>
+                  <div class="info-value name-value">{{ voucherData.fullName }}</div>
                 </div>
                 <div class="info-group">
                   <label class="info-label">Time:</label>
@@ -79,7 +79,10 @@
                 </div>
                 <div class="info-group">
                   <label class="info-label">Venue:</label>
-                  <div class="info-value">{{ voucherData.location }}</div>
+                  <div class="info-value venue-value">
+                    <span>{{ voucherData.location }}</span>
+                    <span v-if="voucherData.locationRoom">{{ voucherData.locationRoom }}</span>
+                  </div>
                 </div>
                 <div class="info-group">
                   <label class="info-label">Test Session:</label>
@@ -521,6 +524,18 @@ const windowPrint = (): void => {
       font-weight: 600 !important;
     }
   }
+}
+
+.name-value {
+  white-space: nowrap;
+  overflow: visible;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.venue-value {
+  display: flex;
+  flex-direction: column;
 }
 
 /* ===== Barcode Footer Area ===== */

@@ -26,8 +26,8 @@
 .action-btn {
   background-color: var(--badge-primary-bg);
   color: var(--badge-primary-text);
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   border-radius: 6px;
 
   display: inline-flex;
@@ -40,8 +40,8 @@
   }
 
   .btn-custom-img {
-    width: 32px;
-    height: 32px;
+    width: 38px;
+    height: 38px;
     object-fit: contain;
     display: block;
     user-select: none;

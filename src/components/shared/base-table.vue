@@ -3,7 +3,7 @@
     <q-table
       flat
       :rows="displayRows"
-      :columns="columns"
+      :columns="sortableColumns"
       :loading="loading"
       v-model:pagination="internalPagination"
       :rows-per-page-options="[]"
@@ -19,7 +19,10 @@
       <template v-slot:body="props">
         <template v-if="(props.row as any).__empty">
           <q-tr>
-            <q-td :colspan="columns.length" class="base-table-empty-cell text-center text-grey-8">
+            <q-td
+              :colspan="sortableColumns.length"
+              class="base-table-empty-cell text-center text-grey-8"
+            >
               {{ emptyLabel || $t('components.baseTable.emptyLabel') }}
             </q-td>
           </q-tr>
@@ -161,18 +164,103 @@ const internalPagination = ref<PaginationModel>({
   rowsNumber: props.pagination?.rowsNumber ?? 0,
 });
 
+const NON_SORTABLE_COLUMNS = new Set(['tools', 'actions', 'action']);
+
+const sortableColumns = computed<QTableColumn[]>(() =>
+  props.columns.map((column) => ({
+    ...column,
+    sortable: column.sortable ?? !NON_SORTABLE_COLUMNS.has(column.name),
+  })),
+);
+
+const defaultSortColumn = computed<QTableColumn | undefined>(() => {
+  const preferredNames = ['createdAt', 'CREATED_AT', 'updatedAt', 'UPDATED_AT', 'id', 'index'];
+
+  for (const name of preferredNames) {
+    const column = sortableColumns.value.find((item) => item.sortable && item.name === name);
+    if (column) return column;
+  }
+
+  return undefined;
+});
+
 watch(
   () => props.pagination,
   (val) => {
     if (val) {
-      internalPagination.value = { ...val };
+      internalPagination.value = {
+        ...internalPagination.value,
+        ...val,
+        sortBy: val.sortBy ?? internalPagination.value.sortBy ?? null,
+        descending: val.descending ?? internalPagination.value.descending ?? false,
+        rowsNumber: val.rowsNumber ?? internalPagination.value.rowsNumber ?? 0,
+      };
     }
   },
   { deep: true },
 );
 
-const displayRows = computed<T[]>(() => {
+const getColumnValue = (row: T, column: QTableColumn): unknown => {
+  if (typeof column.field === 'function') {
+    return column.field(row);
+  }
+
+  return (row as Record<string, unknown>)[column.field];
+};
+
+const compareValues = (left: unknown, right: unknown): number => {
+  if (left === right) return 0;
+  if (left === null || left === undefined) return 1;
+  if (right === null || right === undefined) return -1;
+
+  if (typeof left === 'number' && typeof right === 'number') {
+    return left - right;
+  }
+
+  if (left instanceof Date && right instanceof Date) {
+    return left.getTime() - right.getTime();
+  }
+
+  const toComparableText = (value: unknown): string => {
+    if (
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean' ||
+      typeof value === 'bigint'
+    ) {
+      return String(value);
+    }
+
+    return JSON.stringify(value) || '';
+  };
+
+  return toComparableText(left).localeCompare(toComparableText(right), 'th', {
+    numeric: true,
+    sensitivity: 'base',
+  });
+};
+
+const sortedRows = computed<T[]>(() => {
   const sourceRows = props.rows ?? [];
+  const sortBy = internalPagination.value.sortBy ?? defaultSortColumn.value?.name;
+  if (!sortBy) return sourceRows;
+
+  const column = sortableColumns.value.find((item) => item.name === sortBy);
+  if (!column?.sortable) return sourceRows;
+
+  const isDefaultSort = internalPagination.value.sortBy === null;
+  const defaultDescending = column.name !== 'index';
+  const direction = (isDefaultSort ? defaultDescending : internalPagination.value.descending)
+    ? -1
+    : 1;
+  return [...sourceRows].sort(
+    (left, right) =>
+      compareValues(getColumnValue(left, column), getColumnValue(right, column)) * direction,
+  );
+});
+
+const displayRows = computed<T[]>(() => {
+  const sourceRows = sortedRows.value;
 
   if (sourceRows.length === 0) {
     return [{ __empty: true }] as T[];
@@ -193,7 +281,13 @@ const isLastPage = computed(() => {
 });
 
 const onRequest = (requestProps: TableRequestProps): void => {
-  emit('request', requestProps);
+  const nextPagination: PaginationModel = {
+    ...internalPagination.value,
+    ...requestProps.pagination,
+    rowsNumber: internalPagination.value.rowsNumber ?? 0,
+  };
+  internalPagination.value = nextPagination;
+  emit('request', { ...requestProps, pagination: buildPagination(nextPagination.page) });
 };
 
 const buildPagination = (page: number): TableRequestProps['pagination'] => {

@@ -213,6 +213,11 @@ export interface ExamEnrollment {
     LS_ROW_NO?: number;
     LS_COL_NO?: number;
   } | null;
+  SESSION_LOCATION?: {
+    SL_ID: number;
+    LOCATION_ID: number;
+    LOCATION?: BackendLocation;
+  } | null;
 }
 
 export interface BackendLocation {

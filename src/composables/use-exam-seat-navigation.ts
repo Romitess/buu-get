@@ -14,12 +14,11 @@ export function useExamSeatNavigation() {
   };
 
   const navigateFromSeatAction = async (examId: number | string): Promise<void> => {
-    const numericExamId = Number(examId);
-    const exam = await fetchExamById(numericExamId);
-    const isAllocated = isSeatAllocationLocked(exam);
-
+    const exam = await fetchExamById(Number(examId));
     await router.push({
-      name: isAllocated ? 'admin-exam-seat-candidates' : 'admin-exam-seat-management',
+      name: isSeatAllocationLocked(exam)
+        ? 'admin-exam-seat-candidates'
+        : 'admin-exam-seat-management',
       params: { examId: String(examId) },
     });
   };

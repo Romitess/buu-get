@@ -65,15 +65,14 @@ export function useExamDocuments() {
 
   const printVoucher = async (exam: ExamHistoryItem): Promise<void> => {
     const enrollment = exam.rawEnrollment;
-    const user = userStore.currentUser;
+    const currentUser = userStore.currentUser;
 
     if (enrollment && enrollment.SESSION) {
       const session = enrollment.SESSION;
       const examObj = session.EXAM;
-      const locationObj = session.LOCATION;
+      const locationObj = enrollment.SESSION_LOCATION?.LOCATION || session.LOCATION;
 
-      // Format date nicely to match "15 May 2026"
-      let dateStr = '15 May 2026';
+      let dateStr = '-';
       if (examObj?.EXAM_DATE) {
         const d = new Date(examObj.EXAM_DATE);
         const months = [
@@ -95,11 +94,10 @@ export function useExamDocuments() {
 
       const startTime = formatTime(session.SS_START_TIME);
       const endTime = formatTime(session.SS_END_TIME);
-      const timeRange = startTime && endTime ? `${startTime} - ${endTime}` : '08.00 AM - 10.00 AM';
+      const timeRange = startTime && endTime ? `${startTime} - ${endTime}` : '-';
 
-      const locationText = locationObj
-        ? `${locationObj.LOCATION_NAME}${locationObj.LOCATION_ROOM_NO ? ` (${locationObj.LOCATION_ROOM_NO})` : ''}`
-        : 'QS1, Burapha University';
+      const locationText = locationObj?.LOCATION_NAME || '-';
+      const locationRoom = locationObj?.LOCATION_ROOM_NO || undefined;
 
       const mapTitleToEn = (titleTH?: string): string => {
         if (!titleTH) return '';
@@ -120,7 +118,7 @@ export function useExamDocuments() {
       };
 
       const mapExamTypeToEn = (type?: string): string => {
-        if (!type) return 'General';
+        if (!type) return '-';
         if (type === 'รอบทั่วไป' || type.toLowerCase() === 'general' || type === 'ทั่วไป')
           return 'General';
         if (type === 'รอบพิเศษ' || type.toLowerCase() === 'special' || type === 'พิเศษ')
@@ -128,29 +126,41 @@ export function useExamDocuments() {
         return type;
       };
 
-      const examYear = examObj?.EXAM_DATE
-        ? new Date(examObj.EXAM_DATE).getFullYear()
-        : new Date().getFullYear();
+      const profile = enrollment.USER?.PROFILE;
+      const enrollmentFullName = profile
+        ? `${profile.userTitleEn || mapTitleToEn(profile.userTitleTh || undefined) || ''} ${profile.userFullnameEn || profile.userFullnameTh || ''}`.trim()
+        : '';
+      const currentUserFullName = currentUser
+        ? `${currentUser.titleEN || mapTitleToEn(currentUser.titleTH) || ''} ${currentUser.fullNameEN || currentUser.fullNameTH || ''}`.trim()
+        : '';
+      const voucherCode = enrollment.VOUCHERS?.[0]?.VC_CODE || '-';
+      const profileImagePath =
+        enrollment.USER?.IMAGE?.USER_IMAGE_URL ||
+        profile?.userImagePath ||
+        currentUser?.userImagePath ||
+        undefined;
 
       selectedVoucherData.value = {
         id: enrollment.ERM_ID,
-        fullName: enrollment.USER?.PROFILE
-          ? `${enrollment.USER.PROFILE.userTitleEn || mapTitleToEn(enrollment.USER.PROFILE.userTitleTh || undefined) || ''} ${enrollment.USER.PROFILE.userFullnameEn || enrollment.USER.PROFILE.userFullnameTh || ''}`.trim()
-          : user
-            ? `${user.titleEN || mapTitleToEn(user.titleTH) || ''} ${user.fullNameEN || user.fullNameTH || ''}`.trim()
-            : 'Mr. Somdream Jaidee',
+        fullName: enrollmentFullName || currentUserFullName || '-',
         studentId: enrollment.ERM_TEST_TAKER || '-',
-        examName: examObj?.EXAM_NAME || "BUU-GET : Burapha University's Graduate English Test",
+        examName: examObj?.EXAM_NAME || '-',
         examDate: dateStr,
         examTime: timeRange,
         examType: mapExamTypeToEn(examObj?.EXAM_TYPE),
         location: locationText,
-        seatNo: enrollment.LOCATION_SEAT?.LS_SEAT_LABEL || 'A1',
-        voucherNo: `ENG${examYear}-${String(enrollment.ERM_ID).padStart(3, '0')}`,
-        citizenId: enrollment.USER?.USER_NATIONAL_ID || user?.nationalId || '1-1234-12345-12-1',
+        locationRoom,
+        seatNo: enrollment.LOCATION_SEAT?.LS_SEAT_LABEL || '-',
+        voucherNo: voucherCode,
+        citizenId:
+          enrollment.USER?.USER_NATIONAL_ID ||
+          enrollment.USER?.USER_PASSPORT_NO ||
+          currentUser?.nationalId ||
+          currentUser?.passportNo ||
+          '-',
         testSession: getTestSessionLabel(session),
-        profileImage: user?.userImagePath ? getImageUrl(user.userImagePath) : undefined,
-        barcodeValue: `ENG${examYear}${String(enrollment.ERM_ID).padStart(5, '0')}`,
+        profileImage: profileImagePath ? getImageUrl(profileImagePath) : undefined,
+        barcodeValue: voucherCode,
       };
 
       $q.loading.show({

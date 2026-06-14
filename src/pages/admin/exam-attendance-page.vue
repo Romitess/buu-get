@@ -10,11 +10,13 @@
 
     <AppExamInfoCard
       v-if="exam"
+      v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
       :title="exam.EXAM_NAME"
       :date="formatThaiDate(exam.EXAM_DATE)"
       :time="selectedSessionTime"
       :location="selectedSessionLocation"
+      :location-options="roomOptions"
       :applicant-count="sessionAttendedCount"
       :total-capacity="sessionTotalCount"
       is-admin
@@ -98,6 +100,8 @@ const {
   exam,
   searchQuery,
   selectedSessionId,
+  selectedSessionLocationId,
+  roomOptions,
   filteredAttendances,
   sessionTotalCount,
   sessionAttendedCount,
@@ -116,10 +120,21 @@ const selectedSessionTime = computed(() => {
 });
 
 const selectedSessionLocation = computed(() => {
-  if (!selectedSession.value?.LOCATION) return '-';
-  const loc = selectedSession.value.LOCATION;
-  return `${loc.LOCATION_NAME}${loc.LOCATION_ROOM_NO ? ` (${loc.LOCATION_ROOM_NO})` : ''}`;
+  return (
+    roomOptions.value.find((option) => option.value === selectedSessionLocationId.value)?.label ??
+    '-'
+  );
 });
+
+watch(
+  [selectedSessionId, roomOptions],
+  () => {
+    if (!roomOptions.value.some((option) => option.value === selectedSessionLocationId.value)) {
+      selectedSessionLocationId.value = roomOptions.value[0]?.value ?? null;
+    }
+  },
+  { immediate: true },
+);
 
 watch(exam, (newExam) => {
   if (newExam && newExam.SESSIONS && newExam.SESSIONS.length > 0 && !selectedSessionId.value) {

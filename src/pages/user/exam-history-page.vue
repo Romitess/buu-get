@@ -257,7 +257,7 @@ const {
 const pendingExams = computed<ExamHistoryItem[]>(() =>
   pendingRegistrations.value.map((item) => ({
     ...item,
-    title: t('exam.history.defaultExamTitle'),
+    title: item.title || t('exam.history.defaultExamTitle'),
     status: t(item.status),
   })),
 );
@@ -266,7 +266,7 @@ const historyExams = computed<ExamHistoryItem[]>(() =>
   historyRecords.value.map((item) => {
     const translated: ExamHistoryItem = {
       ...item,
-      title: t('exam.history.defaultExamTitle'),
+      title: item.title || t('exam.history.defaultExamTitle'),
       status: t(item.status),
     };
     if (item.customStatus) {

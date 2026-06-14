@@ -69,24 +69,24 @@ withDefaults(defineProps<Props>(), {
   &--brand {
     background-color: var(--primary) !important;
     color: white !important;
-    box-shadow: 0 4px 10px rgba(13, 71, 161, 0.2);
+    box-shadow: none !important;
 
     &:hover {
       filter: brightness(1.1);
       transform: translateY(-1px);
-      box-shadow: 0 6px 15px rgba(13, 71, 161, 0.3);
+      box-shadow: none !important;
     }
   }
 
   &--secondary {
     background-color: var(--secondary) !important;
     color: white !important;
-    box-shadow: 0 4px 10px rgba(30, 137, 229, 0.2);
+    box-shadow: none !important;
 
     &:hover {
       filter: brightness(1.1);
       transform: translateY(-1px);
-      box-shadow: 0 6px 15px rgba(30, 137, 229, 0.3);
+      box-shadow: none !important;
     }
   }
 
@@ -121,6 +121,9 @@ withDefaults(defineProps<Props>(), {
   &.cancel-btn:hover,
   &.cancel-btn:focus,
   &.cancel-btn:active {
+    background-color: var(--neutral-300) !important;
+    color: var(--text-primary) !important;
+    border: none !important;
     box-shadow: none !important;
   }
 

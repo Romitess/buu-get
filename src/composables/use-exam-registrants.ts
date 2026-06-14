@@ -17,6 +17,7 @@ export function useExamRegistrants() {
   const error = ref<string | null>(null);
   const searchQuery = ref('');
   const selectedSessionId = ref<number | null>(null);
+  const selectedSessionLocationId = ref<number | null>(null);
 
   const getSessionTimeKey = (session: BackendSession): string => {
     return `${session.SS_START_TIME || ''}-${session.SS_END_TIME || ''}`;
@@ -45,12 +46,33 @@ export function useExamRegistrants() {
     );
   });
 
+  const sessionLocations = computed(() => {
+    const sessions = exam.value?.SESSIONS ?? [];
+    return sessions
+      .filter((session) => activeSessionIds.value.has(session.SS_ID))
+      .flatMap((session) => session.SESSION_LOCATIONS ?? []);
+  });
+
+  const roomOptions = computed(() =>
+    sessionLocations.value
+      .filter((item) => item.LOCATION)
+      .map((item) => ({
+        value: item.SL_ID,
+        label: `${item.LOCATION.LOCATION_NAME}${
+          item.LOCATION.LOCATION_ROOM_NO ? ` (${item.LOCATION.LOCATION_ROOM_NO})` : ''
+        }`,
+      })),
+  );
+
   const filteredEnrollments = computed((): EnrollmentTableRow[] => {
     // Filter out cancelled enrollments
     let list = enrollments.value.filter((e) => e.paymentStatus !== CANCELLED_STATUS);
 
     if (selectedSessionId.value) {
       list = list.filter((e) => activeSessionIds.value.has(e.sessionId));
+    }
+    if (selectedSessionLocationId.value !== null) {
+      list = list.filter((e) => e.sessionLocationId === selectedSessionLocationId.value);
     }
 
     if (searchQuery.value) {
@@ -81,14 +103,25 @@ export function useExamRegistrants() {
   const sessionTotalCount = computed((): number => {
     const activeEnrollments = enrollments.value.filter((e) => e.paymentStatus !== CANCELLED_STATUS);
     if (!selectedSessionId.value) return activeEnrollments.length;
-    return activeEnrollments.filter((e) => activeSessionIds.value.has(e.sessionId)).length;
+    return activeEnrollments.filter(
+      (e) =>
+        activeSessionIds.value.has(e.sessionId) &&
+        (selectedSessionLocationId.value === null ||
+          e.sessionLocationId === selectedSessionLocationId.value),
+    ).length;
   });
 
   const sessionPaidCount = computed((): number => {
     const list = selectedSessionId.value
       ? enrollments.value.filter((e) => activeSessionIds.value.has(e.sessionId))
       : enrollments.value;
-    return list.filter((e) => e.paymentStatus >= 1 && e.paymentStatus !== CANCELLED_STATUS).length;
+    return list.filter(
+      (e) =>
+        e.paymentStatus >= 1 &&
+        e.paymentStatus !== CANCELLED_STATUS &&
+        (selectedSessionLocationId.value === null ||
+          e.sessionLocationId === selectedSessionLocationId.value),
+    ).length;
   });
 
   const fetchEnrollments = async (examId: number): Promise<void> => {
@@ -127,7 +160,9 @@ export function useExamRegistrants() {
     error,
     searchQuery,
     selectedSessionId,
+    selectedSessionLocationId,
     sessionTimeTabs,
+    roomOptions,
     filteredEnrollments,
     sessionTotalCount,
     sessionPaidCount,

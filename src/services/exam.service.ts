@@ -434,6 +434,7 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<numbe
     });
 
     await Promise.all(sessionPromises);
+    invalidateExamCache();
     return examId;
   } catch (error) {
     console.error('Error creating exam round:', error);

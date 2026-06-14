@@ -167,12 +167,9 @@ onMounted(loadInitialData);
   padding: 12px 32px;
 }
 /* Use deep selector if the component doesn't apply classes directly to the root of app-button */
-.cancel-btn {
-  background-color: var(--neutral-200) !important;
-  color: var(--text-primary) !important;
-}
 .save-btn {
   background-color: var(--primary) !important;
+  box-shadow: none !important;
 }
 .alert-banner-error {
   background-color: var(--badge-error-bg) !important;

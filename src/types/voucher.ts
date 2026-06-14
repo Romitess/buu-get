@@ -7,6 +7,7 @@ export interface VoucherData {
   examTime: string;
   examType: string;
   location: string;
+  locationRoom?: string | undefined;
   seatNo: string;
   voucherNo: string;
   citizenId?: string | undefined;

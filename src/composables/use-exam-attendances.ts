@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue';
 import type { AttendanceTableRow, BackendEnrollmentDetail } from 'src/types/enrollment.types';
 import { ExamAttendStatus } from 'src/types/enrollment.types';
-import type { BackendExam } from 'src/types/exam';
+import type { BackendExam, BackendSession } from 'src/types/exam';
 import { fetchRawEnrollmentsByExamId } from 'src/services/enrollment.service';
 import { fetchExamById } from 'src/services/exam.service';
 
@@ -12,12 +12,48 @@ export function useExamAttendances() {
   const error = ref<string | null>(null);
   const searchQuery = ref('');
   const selectedSessionId = ref<number | null>(null);
+  const selectedSessionLocationId = ref<number | null>(null);
+
+  const getSessionTimeKey = (session: BackendSession): string =>
+    `${session.SS_START_TIME || ''}-${session.SS_END_TIME || ''}`;
+
+  const activeSessionIds = computed<Set<number>>(() => {
+    const sessions = exam.value?.SESSIONS ?? [];
+    const selectedSession = sessions.find((session) => session.SS_ID === selectedSessionId.value);
+    if (!selectedSession) return new Set<number>();
+    const activeKey = getSessionTimeKey(selectedSession);
+    return new Set(
+      sessions
+        .filter((session) => getSessionTimeKey(session) === activeKey)
+        .map((session) => session.SS_ID),
+    );
+  });
+
+  const sessionLocations = computed(() =>
+    (exam.value?.SESSIONS ?? [])
+      .filter((session) => activeSessionIds.value.has(session.SS_ID))
+      .flatMap((session) => session.SESSION_LOCATIONS ?? []),
+  );
+
+  const roomOptions = computed(() =>
+    sessionLocations.value
+      .filter((item) => item.LOCATION)
+      .map((item) => ({
+        value: item.SL_ID,
+        label: `${item.LOCATION.LOCATION_NAME}${
+          item.LOCATION.LOCATION_ROOM_NO ? ` (${item.LOCATION.LOCATION_ROOM_NO})` : ''
+        }`,
+      })),
+  );
 
   const filteredAttendances = computed((): AttendanceTableRow[] => {
     let list = attendances.value;
 
     if (selectedSessionId.value) {
-      list = list.filter((e) => e.sessionId === selectedSessionId.value);
+      list = list.filter((e) => activeSessionIds.value.has(e.sessionId));
+    }
+    if (selectedSessionLocationId.value !== null) {
+      list = list.filter((e) => e.sessionLocationId === selectedSessionLocationId.value);
     }
 
     // Filter to show only those who have an attendance record (not just MISSING by default)
@@ -49,14 +85,25 @@ export function useExamAttendances() {
 
   const sessionTotalCount = computed((): number => {
     if (!selectedSessionId.value) return attendances.value.length;
-    return attendances.value.filter((e) => e.sessionId === selectedSessionId.value).length;
+    return attendances.value.filter(
+      (e) =>
+        activeSessionIds.value.has(e.sessionId) &&
+        (selectedSessionLocationId.value === null ||
+          e.sessionLocationId === selectedSessionLocationId.value),
+    ).length;
   });
 
   const sessionAttendedCount = computed((): number => {
     const list = selectedSessionId.value
-      ? attendances.value.filter((e) => e.sessionId === selectedSessionId.value)
+      ? attendances.value.filter((e) => activeSessionIds.value.has(e.sessionId))
       : attendances.value;
-    return list.filter((e) => e.hasRecord && e.attendanceStatus === ExamAttendStatus.INTIME).length;
+    return list.filter(
+      (e) =>
+        e.hasRecord &&
+        e.attendanceStatus === ExamAttendStatus.INTIME &&
+        (selectedSessionLocationId.value === null ||
+          e.sessionLocationId === selectedSessionLocationId.value),
+    ).length;
   });
 
   const formatCheckInTime = (dateStr: string | null | undefined): string => {
@@ -109,6 +156,7 @@ export function useExamAttendances() {
             attendanceStatus: status,
             checkInTime: formatCheckInTime(checkInTimeStr),
             sessionId: enrollment.SESSION_ID,
+            sessionLocationId: enrollment.SL_ID ?? null,
             hasRecord: !!attendanceRecord,
           };
         },
@@ -135,6 +183,8 @@ export function useExamAttendances() {
     error,
     searchQuery,
     selectedSessionId,
+    selectedSessionLocationId,
+    roomOptions,
     filteredAttendances,
     sessionTotalCount,
     sessionAttendedCount,

@@ -3,11 +3,11 @@ import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import type { BackendExam, BackendSession } from 'src/types/exam';
-import { EnrollmentStatus, type BackendEnrollmentDetail } from 'src/types/enrollment.types';
-import { fetchExamById, updateExamSessionStatus } from 'src/services/exam.service';
+import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
+import { fetchExamById } from 'src/services/exam.service';
 import {
+  bulkAssignEnrollmentSeats,
   fetchRawEnrollmentsByExamId,
-  updateEnrollmentStatus,
 } from 'src/services/enrollment.service';
 import { DEFAULT_EXAM_TITLE } from 'src/constants/exam';
 import { formatThaiLongDate } from 'src/utils/thai-date';
@@ -21,7 +21,6 @@ import { useExamSeatNavigation } from 'src/composables/use-exam-seat-navigation'
 const STATUS_PAID = 1;
 const STATUS_SEAT_ASSIGNED = 2;
 const STATUS_SEAT_PUBLISHED = 3;
-const SESSION_STATUS_SEAT_ALLOCATED = 2;
 
 /** Width of the custom drag ghost (px) used before the first real measurement */
 const DEFAULT_DRAG_WIDTH = 320;
@@ -84,6 +83,12 @@ interface UsableSeatAssignment {
   sessionLocationId: number;
 }
 
+interface EnrollmentSeatAssignment {
+  enrollment: BackendEnrollmentDetail;
+  seatId: number;
+  sessionLocationId: number;
+}
+
 /**
  * Composable for the "จัดการที่นั่งสอบ" page.
  * Owns exam/session/enrollment loading, the student list, the seat grid
@@ -109,8 +114,10 @@ export function useExamSeatManagement() {
   const latestUserImageById = ref<Record<number, string>>({});
   const latestProfileHistoryImageById = ref<Record<number, string>>({});
   const students = ref<StudentSeatInfo[]>([]);
+  const seatDraftsByTime = new Map<string, StudentSeatInfo[]>();
   const allSeats = ref<SeatCell[]>([]);
   const searchQuery = ref('');
+  const hasLoadedEnrollments = ref(false);
 
   // ── Computed: exam / session info ────────────────────────
   const activeSession = computed((): BackendSession | null => {
@@ -119,6 +126,16 @@ export function useExamSeatManagement() {
 
   const getSessionTimeKey = (session: BackendSession): string => {
     return `${session.SS_START_TIME || ''}-${session.SS_END_TIME || ''}`;
+  };
+
+  const cloneStudents = (source: StudentSeatInfo[]): StudentSeatInfo[] =>
+    source.map((student) => ({ ...student }));
+
+  const saveSeatDraft = (sessionId: number | null, source: StudentSeatInfo[]): void => {
+    if (sessionId === null) return;
+    const session = sessions.value.find((item) => item.SS_ID === sessionId);
+    if (!session) return;
+    seatDraftsByTime.set(getSessionTimeKey(session), cloneStudents(source));
   };
 
   const sessionTimeTabs = computed<BackendSession[]>(() => {
@@ -387,6 +404,7 @@ export function useExamSeatManagement() {
 
     allEnrollments.value = await fetchRawEnrollmentsByExamId(examId);
     await Promise.all([refreshLatestUserImages(), refreshLatestProfileHistoryImages()]);
+    hasLoadedEnrollments.value = true;
     filterStudentsBySession();
   };
 
@@ -404,7 +422,7 @@ export function useExamSeatManagement() {
       const imagePath = getEnrollmentImagePath(enrollment);
       return {
         ...student,
-        avatar: imagePath ? getImageUrl(imagePath, true) : null,
+        avatar: imagePath ? getImageUrl(imagePath) : null,
       };
     });
   };
@@ -588,6 +606,14 @@ export function useExamSeatManagement() {
       return;
     }
 
+    const timeKey = activeSession.value ? getSessionTimeKey(activeSession.value) : null;
+    const existingDraft = timeKey ? seatDraftsByTime.get(timeKey) : undefined;
+    if (existingDraft) {
+      students.value = cloneStudents(existingDraft);
+      updateSeatStatuses();
+      return;
+    }
+
     // Only show students who have status PAID (1), SEAT_ASSIGNED (2), or SEAT_PUBLISHED (3)
     const eligibleEnrollments = sessionEnrollments.value.filter(
       (e) =>
@@ -620,7 +646,7 @@ export function useExamSeatManagement() {
           e.SL_ID ??
           sessionLocations.value.find((location) => location.SS_ID === e.SESSION_ID)?.SL_ID ??
           null,
-        avatar: imagePath ? getImageUrl(imagePath, true) : null,
+        avatar: imagePath ? getImageUrl(imagePath) : null,
         remark,
         isForeigner,
         titleEn,
@@ -630,6 +656,9 @@ export function useExamSeatManagement() {
     });
 
     autoAssignSeats();
+    if (timeKey) {
+      seatDraftsByTime.set(timeKey, cloneStudents(students.value));
+    }
   };
 
   // ── Data loading ─────────────────────────────────────────
@@ -667,16 +696,17 @@ export function useExamSeatManagement() {
     }
   };
 
-  watch(activeSessionId, () => {
+  watch(activeSessionId, (newSessionId, previousSessionId) => {
+    saveSeatDraft(previousSessionId, students.value);
     const firstSessionLocation = sessionLocations.value[0]?.SL_ID ?? null;
     activeSessionLocationId.value = firstSessionLocation;
-    initializeSeats();
-    filterStudentsBySession();
+    if (hasLoadedEnrollments.value && newSessionId !== null) {
+      filterStudentsBySession();
+    }
   });
 
   watch(activeSessionLocationId, () => {
     initializeSeats();
-    updateSeatStatuses();
   });
 
   // ── Custom drag and drop ─────────────────────────────────
@@ -838,64 +868,103 @@ export function useExamSeatManagement() {
     try {
       $q.loading.show({ message: t('admin.seatManagement.savingData') });
 
-      const expectedSeatByEnrollmentId = new Map<number, number | null>(
-        students.value.map((student) => [
-          student.ermId,
-          student.seat ? Number(student.seat) : null,
-        ]),
-      );
+      saveSeatDraft(activeSessionId.value, students.value);
+      const seatAssignments: EnrollmentSeatAssignment[] = [];
 
-      // 1-Phase sequential update to prevent backend race conditions and duplicate check bugs
-      for (const student of students.value) {
-        const currentEnrollment = allEnrollments.value.find((e) => e.ERM_ID === student.ermId);
+      for (const timeSession of sessionTimeTabs.value) {
+        const timeKey = getSessionTimeKey(timeSession);
+        const draftStudents = seatDraftsByTime.get(timeKey) || [];
+        const draftStudentByEnrollmentId = new Map(
+          draftStudents.map((student) => [student.ermId, student]),
+        );
+        const timeSessions = sessions.value.filter(
+          (session) => getSessionTimeKey(session) === timeKey,
+        );
+        const timeSessionIds = new Set(timeSessions.map((session) => session.SS_ID));
+        const timeLocations = timeSessions.flatMap((session) => {
+          const relationLocations = session.SESSION_LOCATIONS || [];
+          if (relationLocations.length > 0) {
+            return relationLocations
+              .filter((item) => item.LOCATION)
+              .map((item) => ({ ...item, SS_ID: item.SS_ID || session.SS_ID }));
+          }
 
-        // Always assign the seat directly
-        const assignedStatus = Number(EnrollmentStatus.SEAT_ASSIGNED);
-        const currentStatus = Number(currentEnrollment?.ERM_STATUS);
-        const nextStatus = currentStatus >= assignedStatus ? currentStatus : assignedStatus;
+          if (!session.LOCATION) return [];
+          return [
+            {
+              SL_ID: -session.SS_ID,
+              LOCATION_ID: session.LOCATION.LOCATION_ID,
+              SS_ID: session.SS_ID,
+              LOCATION: session.LOCATION,
+            },
+          ];
+        });
+        const availableSeats = timeLocations.flatMap((location) =>
+          [...(location.LOCATION.SEATS || [])]
+            .filter((seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2)
+            .sort((a, b) => a.LS_ROW_NO - b.LS_ROW_NO || a.LS_COL_NO - b.LS_COL_NO)
+            .map((seat) => ({
+              seatId: seat.LS_ID,
+              sessionLocationId: location.SL_ID,
+            })),
+        );
+        const eligibleEnrollments = allEnrollments.value
+          .filter(
+            (enrollment) =>
+              timeSessionIds.has(enrollment.SESSION_ID) &&
+              (Number(enrollment.ERM_STATUS) === STATUS_PAID ||
+                Number(enrollment.ERM_STATUS) === STATUS_SEAT_ASSIGNED ||
+                Number(enrollment.ERM_STATUS) === STATUS_SEAT_PUBLISHED),
+          )
+          .sort((a, b) => {
+            const aProfile = a.USER?.PROFILE;
+            const bProfile = b.USER?.PROFILE;
+            const aRemark = getEnrollmentRemarkInfo(a);
+            const bRemark = getEnrollmentRemarkInfo(b);
+            const priorityDiff =
+              getSeatPriority(a, aRemark.isForeigner) - getSeatPriority(b, bRemark.isForeigner);
+            if (priorityDiff !== 0) return priorityDiff;
 
-        const sessionLocationId =
-          student.sessionLocationId && student.sessionLocationId > 0
-            ? student.sessionLocationId
-            : null;
+            const aName =
+              aProfile?.userFullnameEn ||
+              aProfile?.userFullnameTh ||
+              a.USER?.USER_EMAIL ||
+              String(a.USER_ID);
+            const bName =
+              bProfile?.userFullnameEn ||
+              bProfile?.userFullnameTh ||
+              b.USER?.USER_EMAIL ||
+              String(b.USER_ID);
+            return aName.localeCompare(bName, 'en', { sensitivity: 'base' });
+          });
 
-        await updateEnrollmentStatus(student.ermId, {
-          LS_ID: student.seat ? Number(student.seat) : null,
-          SL_ID: sessionLocationId,
-          ERM_STATUS: nextStatus,
+        if (eligibleEnrollments.length > availableSeats.length) {
+          throw new Error(t('admin.seatManagement.notifications.saveError'));
+        }
+
+        eligibleEnrollments.forEach((enrollment, index) => {
+          const draftStudent = draftStudentByEnrollmentId.get(enrollment.ERM_ID);
+          const generatedSeat = availableSeats[index];
+          const seatId = draftStudent?.seat ? Number(draftStudent.seat) : generatedSeat?.seatId;
+          const sessionLocationId =
+            draftStudent?.sessionLocationId ?? generatedSeat?.sessionLocationId;
+
+          if (!seatId || !sessionLocationId || sessionLocationId < 1) {
+            throw new Error(t('admin.seatManagement.notifications.saveError'));
+          }
+
+          seatAssignments.push({ enrollment, seatId, sessionLocationId });
         });
       }
 
-      // Refresh data to ensure sync with backend
-      await refreshStudentDisplayData();
-
-      const savedSessionEnrollments = allEnrollments.value.filter(
-        (enrollment) => enrollment.SESSION_ID === activeSessionId.value,
+      await bulkAssignEnrollmentSeats(
+        seatAssignments.map((assignment) => ({
+          ermId: assignment.enrollment.ERM_ID,
+          lsId: assignment.seatId,
+          slId: assignment.sessionLocationId,
+        })),
+        sessions.value.map((session) => session.SS_ID),
       );
-      const hasUnsavedSeat = savedSessionEnrollments.some((enrollment) => {
-        if (!expectedSeatByEnrollmentId.has(enrollment.ERM_ID)) return false;
-        const actualSeatId = enrollment.LS_ID === null ? null : Number(enrollment.LS_ID);
-        const expectedSeatId = expectedSeatByEnrollmentId.get(enrollment.ERM_ID);
-        if (actualSeatId !== expectedSeatId) {
-          console.error(
-            `[DEBUG] Mismatch for ERM_ID ${enrollment.ERM_ID}: expected ${expectedSeatId}, got ${actualSeatId}`,
-          );
-          return true;
-        }
-        return false;
-      });
-
-      if (hasUnsavedSeat) {
-        throw new Error(t('admin.seatManagement.notifications.saveError'));
-      }
-
-      await Promise.all(
-        activeTimeSessions.value.map((session) =>
-          updateExamSessionStatus(session.SS_ID, SESSION_STATUS_SEAT_ALLOCATED),
-        ),
-      );
-
-      filterStudentsBySession();
 
       $q.notify({
         color: 'positive',

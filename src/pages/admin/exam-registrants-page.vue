@@ -10,11 +10,13 @@
 
     <AppExamInfoCard
       v-if="exam"
+      v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
       :title="exam.EXAM_NAME"
       :date="formatThaiDate(exam.EXAM_DATE)"
       :time="selectedSessionTime"
       :location="selectedSessionLocation"
+      :location-options="roomOptions"
       :applicant-count="sessionTotalCount"
       :paid-count="sessionPaidCount"
       :total-capacity="selectedSessionCapacity"
@@ -125,7 +127,9 @@ const {
   exam,
   searchQuery,
   selectedSessionId,
+  selectedSessionLocationId,
   sessionTimeTabs,
+  roomOptions,
   filteredEnrollments,
   sessionTotalCount,
   sessionPaidCount,
@@ -154,6 +158,11 @@ const selectedSessionTime = computed(() => {
 });
 
 const selectedSessionLocation = computed(() => {
+  const selectedOption = roomOptions.value.find(
+    (option) => option.value === selectedSessionLocationId.value,
+  );
+  if (selectedOption) return selectedOption.label;
+
   const locationNames = activeTimeSessions.value
     .map((session) => session.LOCATION)
     .filter((loc): loc is NonNullable<typeof loc> => Boolean(loc))
@@ -164,6 +173,16 @@ const selectedSessionLocation = computed(() => {
   if (locationNames.length === 0) return '-';
   return Array.from(new Set(locationNames)).join(', ');
 });
+
+watch(
+  [selectedSessionId, roomOptions],
+  () => {
+    if (!roomOptions.value.some((option) => option.value === selectedSessionLocationId.value)) {
+      selectedSessionLocationId.value = roomOptions.value[0]?.value ?? null;
+    }
+  },
+  { immediate: true },
+);
 
 const selectedSessionCapacity = computed(() => {
   return activeTimeSessions.value.reduce((total, session) => total + (session.SS_CAPACITY || 0), 0);

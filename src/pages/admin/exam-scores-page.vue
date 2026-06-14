@@ -510,6 +510,7 @@ const scoreRows = computed(() => {
       paymentStatus: enrollment.ERM_STATUS,
       verifyStatus: enrollment.ERM_VERIFY_STATUS,
       sessionId: enrollment.SESSION_ID,
+      sessionLocationId: enrollment.SL_ID ?? null,
       userProfileId: profile?.userProfileId || 0,
       remark: enrollment.ERM_PHYSICAL_STATUS || '',
       scoreGrammar: draft.scoreGrammar,

@@ -91,7 +91,7 @@ const { displayDeadline } = useCountdown(toRef(props, 'expiryTime'), () => emit(
 .amount-card {
   width: 100%;
   margin-top: var(--space-md);
-  border: 2px solid var(--neutral-gray-light) !important;
+  border: 1px solid #dddddd !important;
   border-radius: var(--radius-sm) !important;
   padding: var(--space-md) var(--space-lg);
   text-align: center;

@@ -37,18 +37,21 @@
 
       <div class="row q-gutter-sm col-12 col-sm-auto justify-end">
         <AppButton
-          v-if="!isVoucherSent"
-          icon="badge"
-          :label="$t('admin.seatCandidates.printVoucher')"
+          :icon="isVoucherSent ? 'print' : 'badge'"
+          :label="
+            isVoucherSent
+              ? $t('admin.seatCandidates.printSeatPlan')
+              : $t('admin.seatCandidates.printVoucher')
+          "
           color="primary"
-          class="action-btn"
-          @click="handlePrintVoucher"
+          class="toolbar-action-btn"
+          @click="isVoucherSent ? handlePrintSeatPlan() : handlePrintVoucher()"
         />
         <ExportCsvButton
           :columns="columns"
           :rows="filteredRows"
           file-name-prefix="seat-candidates"
-          class="action-btn"
+          class="toolbar-action-btn"
         />
       </div>
     </nav>
@@ -62,7 +65,19 @@
         :pagination="pagination"
         class="seat-candidates-table"
         @request="onRequest"
-      />
+      >
+        <template v-slot:body-cell-tools="{ row }">
+          <div class="row justify-center">
+            <ActionButton
+              v-if="isVoucherSent"
+              icon="badge"
+              color="black"
+              :tooltip="$t('admin.seatCandidates.viewVoucher')"
+              @click="handleViewVoucher(row)"
+            />
+          </div>
+        </template>
+      </BaseTable>
     </main>
   </q-page>
 </template>
@@ -74,6 +89,7 @@ import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 import DialogIssueTicket from 'src/components/exam/dialog-issue-ticket.vue';
+import DialogViewVoucher from 'src/components/exam/dialog-view-voucher.vue';
 
 import BaseTable from 'src/components/shared/base-table.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
@@ -83,7 +99,11 @@ import AppExamSessionTabs from 'src/components/exam/app-exam-session-time.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
-import { useExamSeatCandidates } from 'src/composables/use-exam-seat-candidates';
+import ActionButton from 'src/components/shared/action-button.vue';
+import {
+  useExamSeatCandidates,
+  type SeatCandidateRow,
+} from 'src/composables/use-exam-seat-candidates';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { EnrollmentStatus } from 'src/types/enrollment.types';
 import { bulkIssueVouchers } from 'src/services/voucher.service';
@@ -91,6 +111,7 @@ import { updateEnrollmentStatus } from 'src/services/enrollment.service';
 import { updateExamSessionStatus } from 'src/services/exam.service';
 import { formatThaiLongDate } from 'src/utils/thai-date';
 import type { VoucherData } from 'src/types/voucher';
+import { getImageUrl } from 'src/services/image.service';
 import {
   EXAM_TYPE_GENERAL,
   EXAM_TYPE_SPECIAL,
@@ -98,6 +119,7 @@ import {
 } from 'src/constants/exam';
 
 const SESSION_STATUS_VOUCHER_SENT = 3;
+const SESSION_STATUS_SEAT_ALLOCATED = 2;
 
 const getExamRoundTypeLabel = (): string => {
   const examType = exam.value?.EXAM_TYPE?.trim().toLowerCase();
@@ -251,50 +273,111 @@ const handlePrintVoucher = (): void => {
   });
 };
 
+const buildVoucherData = (row: SeatCandidateRow): VoucherData => {
+  const enrollment = row.enrollment;
+  const profile = enrollment.USER?.PROFILE;
+  const title = profile?.userTitleEn || profile?.userTitleTh || '';
+  const fullName = profile?.userFullnameEn || profile?.userFullnameTh || '';
+  const location = enrollment.SESSION_LOCATION?.LOCATION;
+  const voucherCode = enrollment.VOUCHERS?.[0]?.VC_CODE || '-';
+  const imagePath =
+    enrollment.USER?.IMAGE?.USER_IMAGE_URL ||
+    enrollment.USER?.USER_IMAGE ||
+    profile?.userImagePath ||
+    undefined;
+
+  return {
+    id: enrollment.ERM_ID,
+    fullName: `${title} ${fullName}`.trim() || '-',
+    studentId: enrollment.ERM_TEST_TAKER || '-',
+    examName: exam.value?.EXAM_NAME || 'BUU-GET Exam',
+    examDate: examDateLabel.value,
+    examTime: sessionTime.value,
+    examType: getExamRoundTypeLabel(),
+    location: location?.LOCATION_NAME || sessionLocation.value,
+    locationRoom: location?.LOCATION_ROOM_NO || undefined,
+    seatNo: row.seatNumber,
+    voucherNo: voucherCode,
+    citizenId: enrollment.USER?.USER_NATIONAL_ID || enrollment.USER?.USER_PASSPORT_NO || '-',
+    testSession: '-',
+    profileImage: imagePath ? getImageUrl(imagePath) : undefined,
+    barcodeValue: voucherCode,
+  };
+};
+
+const handleViewVoucher = (row: SeatCandidateRow): void => {
+  $q.dialog({
+    component: DialogViewVoucher,
+    componentProps: {
+      voucherData: buildVoucherData(row),
+      candidateCount: candidateCount.value,
+    },
+  });
+};
+
+const handlePrintSeatPlan = (): void => {
+  window.print();
+};
+
 const pagination = ref<PaginationModel>({
   page: 1,
   rowsPerPage: 10,
   rowsNumber: 0,
 });
 
-const columns: QTableColumn[] = [
-  {
-    name: 'index',
-    label: i18n.t('admin.seatCandidates.table.columns.index'),
-    field: 'index',
-    align: 'center',
-    style: 'width: 8%',
-  },
-  {
-    name: 'nationalId',
-    label: i18n.t('admin.seatCandidates.table.columns.nationalId'),
-    field: 'nationalId',
-    align: 'center',
-    style: 'width: 20%',
-  },
-  {
-    name: 'titleTh',
-    label: i18n.t('admin.seatCandidates.table.columns.prefix'),
-    field: 'titleTh',
-    align: 'center',
-    style: 'width: 10%',
-  },
-  {
-    name: 'fullnameTh',
-    label: i18n.t('admin.seatCandidates.table.columns.fullName'),
-    field: 'fullnameTh',
-    align: 'left',
-    style: 'width: 35%; padding-left: 16%',
-  },
-  {
-    name: 'seatNumber',
-    label: i18n.t('admin.seatCandidates.table.columns.seatNumber'),
-    field: 'seatNumber',
-    align: 'center',
-    style: 'width: 15%',
-    classes: 'text-weight-bold',
-  },
-];
+const columns = computed<QTableColumn[]>(() => {
+  const baseColumns: QTableColumn[] = [
+    {
+      name: 'index',
+      label: i18n.t('admin.seatCandidates.table.columns.index'),
+      field: 'index',
+      align: 'center',
+      style: 'width: 8%',
+    },
+    {
+      name: 'nationalId',
+      label: i18n.t('admin.seatCandidates.table.columns.nationalId'),
+      field: 'nationalId',
+      align: 'center',
+      style: 'width: 20%',
+    },
+    {
+      name: 'titleTh',
+      label: i18n.t('admin.seatCandidates.table.columns.prefix'),
+      field: 'titleTh',
+      align: 'center',
+      style: 'width: 10%',
+    },
+    {
+      name: 'fullnameTh',
+      label: i18n.t('admin.seatCandidates.table.columns.fullName'),
+      field: 'fullnameTh',
+      align: 'left',
+      style: 'width: 35%; padding-left: 16%',
+    },
+    {
+      name: 'seatNumber',
+      label: i18n.t('admin.seatCandidates.table.columns.seatNumber'),
+      field: 'seatNumber',
+      align: 'center',
+      style: 'width: 15%',
+      classes: 'text-weight-bold',
+    },
+  ];
+
+  if (isVoucherSent.value) {
+    baseColumns.push({
+      name: 'tools',
+      label: i18n.t('admin.seatCandidates.table.columns.tools'),
+      field: 'tools',
+      align: 'center',
+      headerClasses: 'tools-column',
+      classes: 'tools-column',
+    });
+  }
+
+  return baseColumns;
+});
 
 const onRequest = (props: TableRequestProps): void => {
   const { page, rowsPerPage } = props.pagination;
@@ -335,6 +418,17 @@ const loadData = async (): Promise<void> => {
   const examId = Number(route.params.examId);
   if (!isNaN(examId) && examId > 0) {
     await fetchData(examId);
+    const hasAllocatedSession = sessions.value.some(
+      (session) => Number(session.SS_SESSION_STATUS) >= SESSION_STATUS_SEAT_ALLOCATED,
+    );
+    if (!hasAllocatedSession) {
+      await router.replace({
+        name: 'admin-exam-seat-management',
+        params: { examId: String(examId) },
+      });
+      return;
+    }
+
     const routeSessionId = Number(route.query.sessionId);
     if (
       !isNaN(routeSessionId) &&
@@ -361,7 +455,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.action-btn {
+.toolbar-action-btn {
   height: 40px;
   min-width: 160px;
 
@@ -374,6 +468,14 @@ onMounted(() => {
   :deep(.q-table__container) {
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
+  }
+
+  :deep(.tools-column) {
+    width: 80px !important;
+    min-width: 80px !important;
+    max-width: 80px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
   }
 }
 </style>
