@@ -332,7 +332,7 @@ const windowPrint = (): void => {
 
 .voucher-card {
   width: 100%;
-  background: #ffffff;
+  background: linear-gradient(to bottom, #fafafa, #f0f4f8);
   border-radius: 12px;
   border: 1px solid #000000;
   box-shadow: none;
@@ -349,7 +349,7 @@ const windowPrint = (): void => {
   align-items: center;
   min-height: 76px;
   padding: 12px 24px;
-  background-color: var(--surface-card);
+  background-color: transparent;
   border-bottom: 1.5px solid var(--neutral-300) !important;
   border-radius: 8px 8px 0 0;
 
@@ -403,7 +403,7 @@ const windowPrint = (): void => {
 .voucher-body {
   position: relative;
   padding: 18px 56px 8px;
-  background: #ffffff;
+  background: transparent;
   min-height: auto;
 
   .content-container {
@@ -541,7 +541,7 @@ const windowPrint = (): void => {
 /* ===== Barcode Footer Area ===== */
 .voucher-footer {
   padding: 8px 20px 20px 20px;
-  background: #ffffff;
+  background: transparent;
   border-top: none;
   border-radius: 0 0 8px 8px;
 
@@ -591,14 +591,14 @@ const windowPrint = (): void => {
 
 .regulations-box {
   position: relative;
-  background-color: #ffffff;
+  background: linear-gradient(to bottom, #fafafa, #f0f4f8);
   border: 1px solid #000000;
   border-radius: 12px;
   box-sizing: border-box;
   padding: 10px;
 
   .regulations-content-wrapper {
-    background-color: #ffffff;
+    background-color: transparent;
     border-radius: 8px;
     padding: 28px 30px 26px;
   }
@@ -700,6 +700,8 @@ const windowPrint = (): void => {
   .voucher-card {
     border: 1px solid #000000 !important;
     box-shadow: none !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
   }
   .voucher-header {
     padding: 14px 28px;
@@ -762,10 +764,12 @@ const windowPrint = (): void => {
   .regulations-box {
     padding: 10px !important;
     background-color: #ffffff !important;
+    background-image: none !important;
     border: 1px solid #000000 !important;
   }
   .regulations-box .regulations-content-wrapper {
     padding: 28px 30px 26px !important;
+    background-color: transparent !important;
   }
   .regulations-text-content {
     font-size: 14px !important;
