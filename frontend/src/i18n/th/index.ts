@@ -805,6 +805,7 @@ export default {
       studentListTitle: 'รายชื่อผู้สมัครและที่นั่ง',
       emptyStudentList: 'ไม่พบรายชื่อผู้เข้าสอบ',
       seatLayoutTitle: 'แผนผังที่นั่งสอบ',
+      swapModeLabel: 'โหมดสลับที่นั่ง',
       availableSeat: 'ที่นั่งว่าง',
       assignedSeat: 'จัดที่นั่งแล้ว',
       cancelButton: 'ยกเลิกการจัดที่นั่ง',

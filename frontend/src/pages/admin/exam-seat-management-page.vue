@@ -75,6 +75,7 @@
           :title="$t('admin.seatManagement.seatLayoutTitle')"
           :seats-by-row="seatsByRow"
           :split-left-right="splitLeftRight"
+          :swap-mode-label="$t('admin.seatManagement.swapModeLabel')"
           @swap="swapSeatAssignments"
         />
 

@@ -2,14 +2,35 @@
   <section class="seat-map-panel">
     <header class="seat-map-header">
       <h2 class="seat-map-title">{{ title }}</h2>
-      <div class="row items-center no-wrap q-gutter-x-sm">
-        <span class="shuffle-label">{{ swapModeLabel }}</span>
-        <q-toggle v-model="swapMode" dense color="primary" class="shuffle-toggle" />
+      <div class="seat-map-controls row items-center no-wrap q-gutter-x-md">
+        <div class="row items-center no-wrap q-gutter-x-sm">
+          <span class="shuffle-label">{{ swapModeLabel }}</span>
+          <q-toggle v-model="swapMode" dense color="primary" class="shuffle-toggle" />
+        </div>
+        <q-select
+          v-model="zoomPercent"
+          :options="zoomOptions"
+          emit-value
+          map-options
+          dense
+          outlined
+          options-dense
+          class="zoom-select"
+          aria-label="ระดับการซูมผังที่นั่ง"
+        >
+          <template #prepend>
+            <q-icon name="zoom_in" size="19px" color="grey-8" />
+          </template>
+        </q-select>
       </div>
     </header>
-
     <!-- Keep seats readable, fit the width, and scroll vertically for large rooms. -->
-    <div ref="containerRef" class="seat-map-content">
+    <div
+      ref="containerRef"
+      class="seat-map-content"
+      :class="{ 'is-panning': isPanning }"
+      @mousedown="onViewportMouseDown"
+    >
       <div v-if="seatsByRow.length > 0" class="seat-grid-scaling-wrapper" :style="wrapperStyle">
         <div
           ref="gridRef"
@@ -66,11 +87,11 @@
     <!-- Dimmed ghost centered on the cursor so it feels like the seat is moving -->
     <Teleport to="body">
       <div v-if="draggedSeat" class="seat-drag-ghost" :style="ghostStyle">
-        <div v-if="ghostName" class="ghost-name">{{ ghostName }}</div>
-        <q-avatar size="34px" class="ghost-avatar">
-          <img v-if="draggedSeat.student?.avatar" :src="draggedSeat.student.avatar" alt="" />
-          <q-icon v-else name="person" size="21px" color="grey-8" />
-        </q-avatar>
+        <AppExamSeatAssignmentTile
+          :seat-label="draggedSeat.label"
+          :status="draggedSeat.status"
+          :student="draggedSeat.student"
+        />
       </div>
     </Teleport>
 
@@ -110,7 +131,7 @@ const props = withDefaults(
     emptyLabel?: string;
   }>(),
   {
-    swapModeLabel: 'โหมดเลื่อนที่นั่ง',
+    swapModeLabel: 'โหมดสลับที่นั่ง',
     emptyLabel: 'ไม่มีข้อมูลผังที่นั่ง',
   },
 );
@@ -226,6 +247,18 @@ const containerHeight = ref(0);
 const scaleFactor = ref(1);
 const gridNaturalWidth = ref(0);
 const gridNaturalHeight = ref(0);
+const zoomPercent = ref(100);
+const isPanning = ref(false);
+
+const zoomOptions = [
+  { label: '50%', value: 50 },
+  { label: '75%', value: 75 },
+  { label: '100%', value: 100 },
+  { label: '125%', value: 125 },
+  { label: '150%', value: 150 },
+];
+
+const effectiveScale = computed(() => scaleFactor.value * (zoomPercent.value / 100));
 
 const measureAndScale = (): void => {
   if (!gridRef.value || !containerRef.value) {
@@ -277,11 +310,11 @@ const measureAndScale = (): void => {
 };
 
 const wrapperStyle = computed<CSSProperties>(() => {
-  const s = scaleFactor.value;
+  const s = effectiveScale.value;
   const w = gridNaturalWidth.value;
   const h = gridNaturalHeight.value;
 
-  if (s === 1 || w <= 0 || h <= 0) {
+  if (w <= 0 || h <= 0) {
     return {
       width: '100%',
       display: 'flex',
@@ -290,7 +323,7 @@ const wrapperStyle = computed<CSSProperties>(() => {
   }
 
   return {
-    width: `${containerWidth.value - 16}px`, // Always take full available width of container
+    width: `${Math.max(w * s, containerWidth.value - 16)}px`,
     height: `${h * s}px`,
     position: 'relative',
     overflow: 'visible',
@@ -298,11 +331,11 @@ const wrapperStyle = computed<CSSProperties>(() => {
 });
 
 const gridTransformStyle = computed<CSSProperties>(() => {
-  const s = scaleFactor.value;
+  const s = effectiveScale.value;
   const w = gridNaturalWidth.value;
   const h = gridNaturalHeight.value;
 
-  if (s === 1 || w <= 0 || h <= 0) {
+  if (w <= 0 || h <= 0) {
     return {
       transform: 'none',
       width: 'max-content',
@@ -321,6 +354,32 @@ const gridTransformStyle = computed<CSSProperties>(() => {
     height: `${h}px`,
   };
 });
+
+const stopViewportPan = (): void => {
+  isPanning.value = false;
+  window.removeEventListener('mousemove', onViewportMouseMove);
+  window.removeEventListener('mouseup', stopViewportPan);
+};
+
+const onViewportMouseMove = (event: MouseEvent): void => {
+  if (!isPanning.value || !containerRef.value) return;
+  containerRef.value.scrollLeft -= event.movementX;
+  containerRef.value.scrollTop -= event.movementY;
+};
+
+const onViewportMouseDown = (event: MouseEvent): void => {
+  if (event.button !== 0 || draggingSeatId.value !== null) return;
+
+  const target = event.target as HTMLElement | null;
+  if (target?.closest('.q-field, .q-toggle')) return;
+  if (swapMode.value && target?.closest('.seat-cell')) return;
+  if (!containerRef.value) return;
+
+  event.preventDefault();
+  isPanning.value = true;
+  window.addEventListener('mousemove', onViewportMouseMove);
+  window.addEventListener('mouseup', stopViewportPan);
+};
 
 let resizeObserver: ResizeObserver | null = null;
 
@@ -341,6 +400,7 @@ onBeforeUnmount(() => {
   resizeObserver?.disconnect();
   window.removeEventListener('mousemove', onDragMove);
   window.removeEventListener('mouseup', onDragEnd);
+  stopViewportPan();
   document.body.classList.remove('is-dragging-active');
 });
 
@@ -431,8 +491,6 @@ const draggedSeat = computed((): SeatCell | null => {
   return null;
 });
 
-const ghostName = computed((): string => draggedSeat.value?.student?.name ?? '');
-
 const ghostStyle = computed(() => ({
   left: `${dragX.value}px`,
   top: `${dragY.value}px`,
@@ -457,12 +515,6 @@ const onDragEnd = (): void => {
   dragOverSeatId.value = null;
 
   if (source && target && source !== target) {
-    shouldAnimateNextSeatChange.value = true;
-    clearPendingShiftResetTimer();
-    pendingShiftResetTimer = window.setTimeout(() => {
-      shouldAnimateNextSeatChange.value = false;
-      pendingShiftResetTimer = null;
-    }, 250);
     emit('swap', source, target);
   }
 };
@@ -473,11 +525,10 @@ const onSeatMouseDown = (e: MouseEvent, seat: SeatCell): void => {
   if (!isUsable(seat) || !seat.student) return;
 
   e.preventDefault();
-  const tileEl = (e.currentTarget as HTMLElement | null)?.querySelector('.seat-assignment-tile');
-  const tileRect = tileEl?.getBoundingClientRect();
-  if (tileRect) {
-    dragGhostWidth.value = tileRect.width;
-    dragGhostHeight.value = tileRect.height;
+  const seatCellRect = (e.currentTarget as HTMLElement | null)?.getBoundingClientRect();
+  if (seatCellRect) {
+    dragGhostWidth.value = seatCellRect.width;
+    dragGhostHeight.value = seatCellRect.height;
   }
 
   draggingSeatId.value = seat.id;
@@ -530,6 +581,36 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   line-height: 1.25;
 }
 
+.seat-map-controls {
+  flex-shrink: 0;
+}
+
+.zoom-select {
+  width: 116px;
+
+  :deep(.q-field__control) {
+    height: 36px;
+    min-height: 36px;
+    border-radius: 8px;
+  }
+
+  :deep(.q-field__prepend) {
+    padding-right: 6px;
+  }
+
+  :deep(.q-field__native) {
+    min-width: 44px;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  :deep(.q-field__native),
+  :deep(.q-field__marginal) {
+    min-height: 36px;
+  }
+}
+
 .shuffle-label {
   font-size: 15px;
   color: #111111;
@@ -579,16 +660,29 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   justify-content: center;
   padding-top: var(--space-xs);
   padding-bottom: var(--space-xs);
-  overflow-x: hidden;
+  overflow-x: auto;
   overflow-y: auto;
   scrollbar-gutter: stable;
   overscroll-behavior: contain;
   flex: 1;
   min-height: 0;
+  cursor: grab;
+  user-select: none;
+  contain: layout paint;
+  will-change: scroll-position;
+
+  &.is-panning {
+    cursor: grabbing;
+
+    .seat-grid-scalable {
+      transition: none;
+    }
+  }
 }
 
 .seat-map-content::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 .seat-map-content::-webkit-scrollbar-track {
@@ -613,7 +707,7 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   display: block;
   width: max-content;
   flex-shrink: 0;
-  transition: transform 0.25s ease;
+  transition: none;
 
   &.is-swap-active .seat-cell {
     cursor: grab;
@@ -668,38 +762,13 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   z-index: 9999;
   transform: translate(-50%, -50%);
   pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
   padding: 0;
-  border-radius: 7px;
-  border: 1px solid var(--primary, #0d47a1);
-  background: var(--primary, #0d47a1);
-  color: #ffffff;
-  opacity: 0.65;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
-}
+  opacity: 0.82;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.28));
 
-.ghost-name {
-  max-width: calc(100% - 8px);
-  font-size: 11px;
-  line-height: 1;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.ghost-avatar {
-  background: #0c8fe8;
-
-  img {
-    width: 34px;
-    height: 34px;
-    object-fit: cover;
+  :deep(.seat-assignment-tile) {
+    transition: none;
   }
 }
 
@@ -754,6 +823,18 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
 
   .seat-map-row {
     gap: 8px;
+  }
+}
+
+@media (max-width: $breakpoint-sm-max) {
+  .seat-map-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .seat-map-controls {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 </style>
