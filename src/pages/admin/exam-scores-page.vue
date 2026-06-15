@@ -12,7 +12,7 @@
       v-if="exam"
       v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
-      :title="exam.EXAM_NAME"
+      :title="exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME"
       :date="examDateLabel"
       :time="selectedSessionTime"
       :location="selectedSessionLocation"
@@ -76,7 +76,19 @@
         :pagination="pagination"
         class="scores-table"
         @request="onRequest"
-      />
+      >
+        <template v-slot:body-cell-tools="{ row }">
+          <div class="row justify-center q-gutter-x-sm no-wrap">
+            <ActionButton
+              v-if="row.hasSavedCertificate"
+              icon="description"
+              tooltip="ดูใบ Certificate"
+              color="black"
+              @click="viewIssuedCertificate(row)"
+            />
+          </div>
+        </template>
+      </BaseTable>
     </main>
 
     <div class="row justify-center q-mt-lg">
@@ -198,6 +210,8 @@
       :session-id="selectedSessionId"
       :session-name="selectedSessionName"
       :candidates="candidatesWithScores"
+      :view-mode="isViewMode"
+      :candidate-info="selectedCandidateInfo"
       @issued="loadData"
     />
   </q-page>
@@ -219,6 +233,7 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
 import AppButton from 'src/components/base/app-button.vue';
+import ActionButton from 'src/components/shared/action-button.vue';
 import { fetchExamById } from 'src/services/exam.service';
 import { fetchRawEnrollmentsByExamId } from 'src/services/enrollment.service';
 import {
@@ -239,6 +254,7 @@ interface ScoreTableRow extends EnrollmentTableRow {
   band: number;
   hasImportedScore: boolean;
   hasScore: boolean;
+  hasSavedCertificate: boolean;
 }
 
 interface ScoreDraft {
@@ -288,6 +304,24 @@ const showSampleDialog = ref(false);
 const showSaveConfirmDialog = ref(false);
 const showClearConfirmDialog = ref(false);
 const showIssueCertificateDialog = ref(false);
+const isViewMode = ref(false);
+const selectedCandidateInfo = ref<
+  | {
+      fullname?: string | undefined;
+      userCode?: string | undefined;
+      nationalId?: string | undefined;
+      scoreGrammar?: number | undefined;
+      scoreReading?: number | undefined;
+      scoreTotal?: number | undefined;
+      band?: number | undefined;
+      userPhoto?: string | undefined;
+      certIssuedAt?: string | undefined;
+      certExpiresAt?: string | undefined;
+      certCode?: string | undefined;
+    }
+  | null
+  | undefined
+>(null);
 
 const sampleFileUrl =
   'https://docs.google.com/spreadsheets/d/1IJGChv6bg4W8sgYPRmMQwDAOk7YwSw1R/export?format=xlsx&gid=181366053';
@@ -441,7 +475,9 @@ const hasSavedScores = computed(() => {
 });
 
 const exportCsvFileNamePrefix = computed(() => {
-  const examName = exam.value?.EXAM_NAME || '';
+  const examName = exam.value?.EXAM_ROUND
+    ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
+    : exam.value?.EXAM_NAME || '';
   const time = selectedSessionTime.value || '';
   const room = selectedSessionLocation.value || '';
   return `คะแนนสอบ_${examName}_${time}_${room}`.replace(/[\s/\\?%*:|"<>]+/g, '_');
@@ -477,6 +513,37 @@ const candidatesWithScores = computed(() => {
 });
 
 const issueCertificates = (): void => {
+  isViewMode.value = false;
+  selectedCandidateInfo.value = null;
+  showIssueCertificateDialog.value = true;
+};
+
+const viewIssuedCertificate = (row: ScoreTableRow): void => {
+  const score = scoreByEnrollmentId.value.get(row.ermId);
+  const cert = score?.CERTIFICATES?.[0];
+  if (!cert) return;
+
+  const enrollment = enrollments.value.find((e) => e.ERM_ID === row.ermId);
+
+  selectedCandidateInfo.value = {
+    fullname: row.fullnameTh,
+    userCode: enrollment?.USER?.USER_CODE || '',
+    nationalId: row.nationalId,
+    scoreGrammar: row.scoreGrammar,
+    scoreReading: row.scoreReading,
+    scoreTotal: row.scoreTotal,
+    band: row.band,
+    userPhoto:
+      enrollment?.USER?.USER_IMAGE ||
+      enrollment?.USER?.PROFILE?.userImagePath ||
+      enrollment?.USER?.IMAGE?.USER_IMAGE_URL ||
+      undefined,
+    certIssuedAt: cert.CERT_ISSUED_AT,
+    certExpiresAt: cert.CERT_EXPIRES_AT,
+    certCode: cert.CERT_CODE,
+  };
+
+  isViewMode.value = true;
   showIssueCertificateDialog.value = true;
 };
 
@@ -514,6 +581,8 @@ const scoreRows = computed(() => {
   const rows = currentRoomEnrollments.value.map((enrollment, index): ScoreTableRow => {
     const profile = enrollment.USER?.PROFILE;
     const draft = scoreDraftByEnrollmentId.value[enrollment.ERM_ID] ?? getScoreDraft(enrollment);
+    const score = scoreByEnrollmentId.value.get(enrollment.ERM_ID);
+    const hasSavedCertificate = !!(score?.CERTIFICATES && score.CERTIFICATES.length > 0);
 
     return {
       index: index + 1,
@@ -536,6 +605,7 @@ const scoreRows = computed(() => {
       hasScore:
         importedEnrollmentIds.value.has(enrollment.ERM_ID) ||
         scoreByEnrollmentId.value.has(enrollment.ERM_ID),
+      hasSavedCertificate,
     };
   });
 
@@ -610,6 +680,13 @@ const columns: QTableColumn[] = [
     style: 'width: 10%',
     format: (val: unknown, row: ScoreTableRow) => (row.hasScore ? String(val) : ''),
     classes: 'text-weight-bold',
+  },
+  {
+    name: 'tools',
+    label: 'เครื่องมือ',
+    field: 'tools',
+    align: 'center',
+    style: 'width: 10%',
   },
 ];
 

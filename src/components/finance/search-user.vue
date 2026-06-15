@@ -203,7 +203,9 @@ const handleSearch = async () => {
       ref2: String(e.ERM_ID),
       name: e.USER?.PROFILE?.userFullnameTh || e.USER?.PROFILE?.userFullnameEn || '-',
       amount: e.SESSION?.EXAM?.EXAM_FEE ? String(e.SESSION.EXAM.EXAM_FEE) : '500.00',
-      exam_name: e.SESSION?.EXAM?.EXAM_NAME || '-',
+      exam_name: e.SESSION?.EXAM?.EXAM_ROUND
+        ? `${e.SESSION.EXAM.EXAM_NAME} ${e.SESSION.EXAM.EXAM_ROUND}`
+        : e.SESSION?.EXAM?.EXAM_NAME || '-',
       payment_status: PAYMENT_STATUS_LABELS[e.ERM_STATUS] || 'ไม่ระบุ',
     }));
   } catch (err) {

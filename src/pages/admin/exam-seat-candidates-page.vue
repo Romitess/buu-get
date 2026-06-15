@@ -17,7 +17,7 @@
       v-if="exam"
       v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
-      :title="exam.EXAM_NAME"
+      :title="exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME"
       :date="examDateLabel"
       :time="sessionTime"
       :location="sessionLocation"
@@ -172,7 +172,9 @@ const voucherPreviewData = computed<VoucherData>(() => ({
   id: sessionEnrollments.value[0]?.ERM_ID ?? 0,
   fullName: 'XX. XXXXXX XXXXXX',
   studentId: 'XXXXXXXX',
-  examName: exam.value?.EXAM_NAME || 'BUU-GET Exam',
+  examName: exam.value?.EXAM_ROUND
+    ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
+    : exam.value?.EXAM_NAME || 'BUU-GET Exam',
   examDate: examDateLabel.value,
   examTime: sessionTime.value,
   examType: getExamRoundTypeLabel(),
@@ -211,7 +213,9 @@ const startIssuingTickets = async (): Promise<void> => {
       .filter((enrollment) => enrollment && enrollment.ERM_ID)
       .map((enrollment) => enrollment.ERM_ID);
 
-    const examName = exam.value?.EXAM_NAME || 'BUU-GET Exam';
+    const examName = exam.value?.EXAM_ROUND
+      ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
+      : exam.value?.EXAM_NAME || 'BUU-GET Exam';
 
     // Perform bulk voucher issuance and bulk email dispatch in a single optimized request
     await bulkIssueVouchers({
@@ -296,7 +300,9 @@ const buildVoucherData = (row: SeatCandidateRow): VoucherData => {
     id: enrollment.ERM_ID,
     fullName: `${title} ${fullName}`.trim() || '-',
     studentId: enrollment.ERM_TEST_TAKER || '-',
-    examName: exam.value?.EXAM_NAME || 'BUU-GET Exam',
+    examName: exam.value?.EXAM_ROUND
+      ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
+      : exam.value?.EXAM_NAME || 'BUU-GET Exam',
     examDate: examDateLabel.value,
     examTime: sessionTime.value,
     examType: getExamRoundTypeLabel(),

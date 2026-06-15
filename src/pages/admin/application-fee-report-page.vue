@@ -185,7 +185,9 @@ const feeRows = computed(() => {
       payer,
       amount,
       paymentDate,
-      examName: examObj?.EXAM_NAME || 'BUU-GET Exam',
+      examName: examObj?.EXAM_ROUND
+        ? `${examObj.EXAM_NAME} ${examObj.EXAM_ROUND}`
+        : examObj?.EXAM_NAME || 'BUU-GET Exam',
       importedDate,
       payee,
       rawEnrollment: enrollment,
@@ -224,7 +226,7 @@ const filteredReceipts = computed(() => {
   if (filter.value.examName) {
     const searchExam = filter.value.examName.toLowerCase();
     rows = rows.filter((r) => {
-      const examName = r.rawEnrollment.SESSION?.EXAM?.EXAM_NAME || '';
+      const examName = r.examName || '';
       return examName.toLowerCase().includes(searchExam);
     });
   }
