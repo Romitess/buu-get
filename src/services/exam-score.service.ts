@@ -7,6 +7,12 @@ export interface BackendExamScore {
   SC_READING_SCORE?: number | string | null;
   SC_TOTAL_SCORE?: number | string | null;
   SC_BAND_LEVEL?: number | string | null;
+  CERTIFICATES?: {
+    CERT_ID: number;
+    CERT_ISSUED_AT: string;
+    CERT_EXPIRES_AT: string;
+    CERT_CODE: string;
+  }[];
 }
 
 export interface SaveExamScorePayload {

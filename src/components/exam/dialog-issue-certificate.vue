@@ -7,13 +7,12 @@
     @update:model-value="$emit('update:modelValue', $event)"
   >
     <q-card class="certificate-dialog-card q-pa-md relative-position">
-      <q-btn
+      <AppButton
         icon="close"
         flat
         round
         dense
-        class="absolute-top-right q-ma-md text-grey-5"
-        style="z-index: 10"
+        class="absolute-top-right q-ma-md text-grey-5 close-btn"
         @click="onCancel"
       />
 
@@ -23,7 +22,9 @@
 
       <q-card-section class="q-pb-none">
         <div class="row items-center justify-between q-mb-sm">
-          <div class="text-subtitle2 text-weight-bold text-dark">ตัวอย่างใบ Certificate</div>
+          <div class="text-subtitle2 text-weight-bold text-dark">
+            {{ viewMode ? 'ใบ Certificate' : 'ตัวอย่างใบ Certificate' }}
+          </div>
           <div class="row items-center toggle-side-pane">
             <span
               class="cursor-pointer"
@@ -56,12 +57,10 @@
                 <img src="icons/logo-vocher.png" class="cert-logo" alt="BUULI Logo" />
               </div>
               <div class="col text-center cert-title-container">
-                <div class="cert-main-title text-primary text-weight-bold">
+                <div class="cert-main-title text-weight-bold">
                   BUU-GET: Burapha University's Graduate English Test
                 </div>
-                <div class="cert-sub-title text-grey-7 text-weight-medium">
-                  Test Taker Score Report
-                </div>
+                <div class="cert-sub-title text-weight-medium">Test Taker Score Report</div>
               </div>
             </div>
 
@@ -71,10 +70,21 @@
               <div class="row q-col-gutter-md items-stretch content-container">
                 <div class="col-12 col-sm-4 flex flex-center column">
                   <div class="profile-photo-wrapper shadow-1">
-                    <q-icon name="image" size="48px" color="grey-5" />
+                    <img
+                      v-if="userPhotoUrl"
+                      :src="userPhotoUrl"
+                      class="profile-photo-img"
+                      alt="Profile"
+                    />
+                    <q-icon
+                      v-else
+                      name="image"
+                      size="48px"
+                      class="profile-photo-placeholder-icon"
+                    />
                   </div>
-                  <div class="photo-name text-weight-bold text-primary q-mt-sm">
-                    XX. XXXXX XXXXXX
+                  <div class="photo-name text-weight-bold q-mt-sm">
+                    {{ previewFullname }}
                   </div>
                 </div>
 
@@ -83,11 +93,11 @@
                     <div class="col-12 col-sm-6 detail-group">
                       <div class="info-group">
                         <span class="info-label">Test Taker ID:</span>
-                        <span class="info-value">XXXXXXXXX</span>
+                        <span class="info-value">{{ previewUserCode }}</span>
                       </div>
                       <div class="info-group">
                         <span class="info-label">Citizen ID:</span>
-                        <span class="info-value">X-XXXX-XXXXX-XX-X</span>
+                        <span class="info-value">{{ previewNationalId }}</span>
                       </div>
                     </div>
 
@@ -107,25 +117,23 @@
                         <div class="score-header q-mb-xs">Score</div>
                         <div class="row justify-between items-center q-py-xs score-row">
                           <div class="score-label">1. Vocabulary & Grammar</div>
-                          <div class="score-val">XX/50</div>
+                          <div class="score-val">{{ previewVocabScore }}</div>
                         </div>
                         <div class="row justify-between items-center q-py-xs score-row">
                           <div class="score-label">2. Reading</div>
-                          <div class="score-val">XX/50</div>
+                          <div class="score-val">{{ previewReadingScore }}</div>
                         </div>
                         <div
                           class="row justify-between items-center q-py-xs score-row text-weight-bold"
                         >
-                          <div class="text-primary">Overall BUU-GET Score</div>
-                          <div class="text-primary">XXX/100</div>
+                          <div class="text-dark">Overall BUU-GET Score</div>
+                          <div class="text-dark">{{ previewTotalScore }}</div>
                         </div>
                         <q-separator class="score-separator q-my-xs" />
-                        <div class="row justify-between items-center q-py-xs score-row-level">
-                          <div class="score-label">Level</div>
-                          <div class="row no-wrap score-level-val">
-                            <div class="q-mr-xl">Band</div>
-                            <div>X</div>
-                          </div>
+                        <div class="row items-center q-py-xs score-row-level text-dark">
+                          <div class="col text-left">Level</div>
+                          <div class="col text-center">Band</div>
+                          <div class="col text-right text-weight-bold">{{ previewBandLevel }}</div>
                         </div>
                       </div>
                     </div>
@@ -229,35 +237,65 @@
       </q-card-section>
 
       <q-card-section class="q-pt-md">
-        <div class="text-subtitle2 text-weight-bold text-dark q-mb-xs">
-          Score Valid Until <span class="text-negative">*</span>
+        <div class="row q-col-gutter-md">
+          <div class="col-12 col-sm-6">
+            <div class="text-subtitle2 text-weight-bold text-dark q-mb-xs">
+              Report Issue Date <span v-if="!viewMode" class="text-negative">*</span>
+            </div>
+            <q-input
+              :model-value="displayValidFromDate"
+              placeholder="DD/MM/YYYY"
+              outlined
+              dense
+              readonly
+              class="valid-until-input"
+            >
+              <template v-slot:append v-if="!viewMode">
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-date v-model="validFromDate" mask="YYYY-MM-DD">
+                      <div class="row items-center justify-end">
+                        <AppButton v-close-popup label="ปิด" color="primary" flat />
+                      </div>
+                    </q-date>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
+          </div>
+
+          <div class="col-12 col-sm-6">
+            <div class="text-subtitle2 text-weight-bold text-dark q-mb-xs">
+              Score Valid Until <span v-if="!viewMode" class="text-negative">*</span>
+            </div>
+            <q-input
+              :model-value="displayValidUntilDate"
+              placeholder="DD/MM/YYYY"
+              outlined
+              dense
+              readonly
+              class="valid-until-input"
+            >
+              <template v-slot:append v-if="!viewMode">
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-date v-model="validUntilDate" mask="YYYY-MM-DD">
+                      <div class="row items-center justify-end">
+                        <AppButton v-close-popup label="ปิด" color="primary" flat />
+                      </div>
+                    </q-date>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
+          </div>
         </div>
-        <q-input
-          :model-value="displayValidUntilDate"
-          placeholder="DD/MM/YYYY"
-          outlined
-          dense
-          readonly
-          class="valid-until-input"
-        >
-          <template v-slot:append>
-            <q-icon name="event" class="cursor-pointer">
-              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                <q-date v-model="validUntilDate" mask="YYYY-MM-DD">
-                  <div class="row items-center justify-end">
-                    <q-btn v-close-popup label="ปิด" color="primary" flat />
-                  </div>
-                </q-date>
-              </q-popup-proxy>
-            </q-icon>
-          </template>
-        </q-input>
       </q-card-section>
 
-      <q-card-actions align="center" class="q-pb-md row q-gutter-lg no-wrap">
+      <q-card-actions v-if="!viewMode" align="center" class="q-pb-md row q-gutter-lg no-wrap">
         <AppButton label="ยกเลิก" class="dialog-btn cancel-btn" @click="onCancel" />
         <AppButton
-          label="ยืนยันการออกใบ Cer"
+          label="ยืนยันการออกใบคะแนน"
           color="primary"
           class="dialog-btn confirm-btn"
           :loading="isSubmitting"
@@ -273,14 +311,37 @@ import { ref, computed, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import AppButton from 'src/components/base/app-button.vue';
 import { createExamCertificate } from 'src/services/exam-certificate.service';
+import { getImageUrl } from 'src/services/image.service';
 
-const props = defineProps<{
+interface Props {
   modelValue: boolean;
   examDate: string | Date | null | undefined;
   sessionId: number | null | undefined;
   sessionName: string | null | undefined;
   candidates: Array<{ SCORES_ID: number; USER_ID: number }>;
-}>();
+  viewMode?: boolean;
+  candidateInfo?:
+    | {
+        fullname?: string | undefined;
+        userCode?: string | undefined;
+        nationalId?: string | undefined;
+        scoreGrammar?: number | undefined;
+        scoreReading?: number | undefined;
+        scoreTotal?: number | undefined;
+        band?: number | undefined;
+        userPhoto?: string | undefined;
+        certIssuedAt?: string | undefined;
+        certExpiresAt?: string | undefined;
+        certCode?: string | undefined;
+      }
+    | null
+    | undefined;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  viewMode: false,
+  candidateInfo: null,
+});
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
@@ -289,12 +350,14 @@ const emit = defineEmits<{
 
 const $q = useQuasar();
 const currentSide = ref<'front' | 'back'>('front');
+const validFromDate = ref('');
 const validUntilDate = ref('');
 const isSubmitting = ref(false);
 
 const formatEnglishDate = (dateStr: string | Date | undefined | null): string => {
   if (!dateStr) return '-';
   const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return String(dateStr);
   const day = d.getDate();
   const months = [
     'Jan',
@@ -316,6 +379,9 @@ const formatEnglishDate = (dateStr: string | Date | undefined | null): string =>
 };
 
 const testSession = computed(() => {
+  if (props.viewMode && props.candidateInfo?.certCode) {
+    return props.sessionName || '1/2569';
+  }
   if (props.sessionName) return props.sessionName;
   if (!props.sessionId || !props.examDate) return 'X/XXXX';
   const year = new Date(props.examDate).getFullYear() + 543;
@@ -323,11 +389,33 @@ const testSession = computed(() => {
 });
 
 const testDate = computed(() => {
+  if (props.viewMode && props.candidateInfo?.certIssuedAt) {
+    return formatEnglishDate(props.examDate);
+  }
   return formatEnglishDate(props.examDate);
 });
 
 const issueDate = computed(() => {
+  if (validFromDate.value) {
+    return formatEnglishDate(validFromDate.value);
+  }
   return formatEnglishDate(new Date());
+});
+
+const previewValidUntilDate = computed(() => {
+  if (validUntilDate.value) {
+    return formatEnglishDate(validUntilDate.value);
+  }
+  return 'XX XXX XXXX';
+});
+
+const displayValidFromDate = computed(() => {
+  if (!validFromDate.value) return '';
+  const parts = validFromDate.value.split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return validFromDate.value;
 });
 
 const displayValidUntilDate = computed(() => {
@@ -339,30 +427,94 @@ const displayValidUntilDate = computed(() => {
   return validUntilDate.value;
 });
 
-const previewValidUntilDate = computed(() => {
-  if (validUntilDate.value) {
-    return formatEnglishDate(validUntilDate.value);
+const previewFullname = computed(() => {
+  if (props.viewMode && props.candidateInfo?.fullname) return props.candidateInfo.fullname;
+  return 'XX. XXXXX XXXXXX';
+});
+
+const previewUserCode = computed(() => {
+  if (props.viewMode && props.candidateInfo?.userCode) return props.candidateInfo.userCode;
+  return 'XXXXXXXXX';
+});
+
+const previewNationalId = computed(() => {
+  if (props.viewMode && props.candidateInfo?.nationalId) return props.candidateInfo.nationalId;
+  return 'X-XXXX-XXXXX-XX-X';
+});
+
+const previewVocabScore = computed(() => {
+  if (props.viewMode && props.candidateInfo?.scoreGrammar !== undefined) {
+    return `${props.candidateInfo.scoreGrammar}/50`;
   }
-  if (props.examDate) {
-    const examDate = new Date(props.examDate);
-    const expiryDate = new Date(
-      examDate.getFullYear() + 2,
-      examDate.getMonth(),
-      examDate.getDate(),
-    );
-    return formatEnglishDate(expiryDate);
+  return 'XX/50';
+});
+
+const previewReadingScore = computed(() => {
+  if (props.viewMode && props.candidateInfo?.scoreReading !== undefined) {
+    return `${props.candidateInfo.scoreReading}/50`;
   }
-  return 'XX XXX XXXX';
+  return 'XX/50';
+});
+
+const previewTotalScore = computed(() => {
+  if (props.viewMode && props.candidateInfo?.scoreTotal !== undefined) {
+    return `${props.candidateInfo.scoreTotal}/100`;
+  }
+  return 'XXX/100';
+});
+
+const previewBandLevel = computed(() => {
+  if (props.viewMode && props.candidateInfo?.band !== undefined) {
+    return String(props.candidateInfo.band);
+  }
+  return 'X';
+});
+
+const userPhotoUrl = computed(() => {
+  if (props.viewMode && props.candidateInfo?.userPhoto) {
+    return getImageUrl(props.candidateInfo.userPhoto);
+  }
+  return null;
 });
 
 watch(
   () => props.modelValue,
-  () => {
-    validUntilDate.value = '';
-    currentSide.value = 'front';
+  (val) => {
+    if (val) {
+      currentSide.value = 'front';
+      if (props.viewMode && props.candidateInfo) {
+        validFromDate.value = props.candidateInfo.certIssuedAt
+          ? props.candidateInfo.certIssuedAt.split('T')[0] || ''
+          : '';
+        validUntilDate.value = props.candidateInfo.certExpiresAt
+          ? props.candidateInfo.certExpiresAt.split('T')[0] || ''
+          : '';
+      } else {
+        const today = new Date();
+        validFromDate.value = today.toISOString().split('T')[0] || '';
+
+        const expiry = new Date();
+        expiry.setFullYear(today.getFullYear() + 2);
+        validUntilDate.value = expiry.toISOString().split('T')[0] || '';
+      }
+    } else {
+      validFromDate.value = '';
+      validUntilDate.value = '';
+    }
   },
   { immediate: true },
 );
+
+watch(validFromDate, (newVal) => {
+  if (newVal && !props.viewMode) {
+    const d = new Date(newVal);
+    d.setFullYear(d.getFullYear() + 2);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    validUntilDate.value = `${yyyy}-${mm}-${dd}`;
+  }
+});
 
 const onCancel = (): void => {
   emit('update:modelValue', false);
@@ -377,23 +529,15 @@ const onConfirm = async (): Promise<void> => {
     return;
   }
 
-  let targetExpiryDate = validUntilDate.value;
-  if (!targetExpiryDate) {
-    if (props.examDate) {
-      const examDate = new Date(props.examDate);
-      const expiryDate = new Date(
-        examDate.getFullYear() + 2,
-        examDate.getMonth(),
-        examDate.getDate(),
-      );
-      const yyyy = expiryDate.getFullYear();
-      const mm = String(expiryDate.getMonth() + 1).padStart(2, '0');
-      const dd = String(expiryDate.getDate()).padStart(2, '0');
-      targetExpiryDate = `${yyyy}-${mm}-${dd}`;
-    }
+  if (!validFromDate.value) {
+    $q.notify({
+      type: 'warning',
+      message: 'กรุณาเลือกวันที่ออกใบรับรอง',
+    });
+    return;
   }
 
-  if (!targetExpiryDate) {
+  if (!validUntilDate.value) {
     $q.notify({
       type: 'warning',
       message: 'กรุณาเลือกวันที่สิ้นสุดอายุผลสอบ',
@@ -408,8 +552,8 @@ const onConfirm = async (): Promise<void> => {
       return createExamCertificate({
         SCORES_ID: candidate.SCORES_ID,
         USER_ID: candidate.USER_ID,
-        CERT_ISSUED_AT: new Date().toISOString(),
-        CERT_EXPIRES_AT: new Date(targetExpiryDate).toISOString(),
+        CERT_ISSUED_AT: new Date(validFromDate.value).toISOString(),
+        CERT_EXPIRES_AT: new Date(validUntilDate.value).toISOString(),
         CERT_CODE: certCode,
       });
     });
@@ -439,7 +583,7 @@ const onConfirm = async (): Promise<void> => {
   width: 100%;
   max-width: 680px;
   border-radius: 16px !important;
-  background: var(--surface-card);
+  background: #ffffff;
   box-shadow: var(--dialog-shadow);
 }
 
@@ -453,9 +597,9 @@ const onConfirm = async (): Promise<void> => {
 }
 
 .active-side {
-  color: var(--primary);
+  color: #000000;
   text-decoration: underline;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .inactive-side {
@@ -466,9 +610,9 @@ const onConfirm = async (): Promise<void> => {
 .certificate-card-preview {
   width: 100%;
   height: 375px;
-  border: 1px solid #000000;
+  border: 1.5px solid #cbd5e1;
   border-radius: 12px;
-  background-color: #ffffff;
+  background-color: #f8f9fa;
   overflow: hidden;
   position: relative;
   font-family: 'Outfit', 'Sarabun', 'Inter', sans-serif;
@@ -479,8 +623,8 @@ const onConfirm = async (): Promise<void> => {
 .cert-header {
   height: 60px;
   padding: 12px 20px;
-  background-color: #ffffff;
-  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  background-color: #f8f9fa;
+  border-bottom: 1.5px solid #cbd5e1;
   box-sizing: border-box;
 }
 
@@ -492,19 +636,19 @@ const onConfirm = async (): Promise<void> => {
 .cert-main-title {
   font-size: 13px;
   line-height: 1.2;
-  color: var(--primary, #0d47a1);
+  color: #104a8e;
 }
 
 .cert-sub-title {
   font-size: 11px;
   line-height: 1.2;
-  color: var(--neutral-600, #334155);
+  color: #707070;
 }
 
 .cert-body {
   position: relative;
   padding: 16px 20px;
-  background: #f4f7fa;
+  background: #f8f9fa;
 }
 
 .watermark-bg {
@@ -516,7 +660,7 @@ const onConfirm = async (): Promise<void> => {
   font-weight: 800;
   font-size: 120px;
   line-height: 100%;
-  color: rgba(30, 137, 229, 0.05);
+  color: rgba(16, 74, 142, 0.04);
   z-index: 0;
   user-select: none;
   pointer-events: none;
@@ -530,13 +674,17 @@ const onConfirm = async (): Promise<void> => {
 .profile-photo-wrapper {
   width: 120px;
   height: 144px;
-  background-color: #cbd5e1;
+  background-color: #00000033 !important;
   border-radius: 4px;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid #94a3b8;
+  border: 1.5px solid #00000033 !important;
+}
+
+.profile-photo-placeholder-icon {
+  color: #000000 !important;
 }
 
 .profile-photo-img {
@@ -551,6 +699,7 @@ const onConfirm = async (): Promise<void> => {
   text-align: center;
   max-width: 120px;
   word-break: break-word;
+  color: #104a8e;
 }
 
 .detail-grid-column {
@@ -560,7 +709,7 @@ const onConfirm = async (): Promise<void> => {
 .detail-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .info-group {
@@ -570,16 +719,16 @@ const onConfirm = async (): Promise<void> => {
 
 .info-label {
   font-size: 11px;
-  color: #475569;
-  font-weight: 500;
-  margin-bottom: 0px;
+  color: #000000;
+  font-weight: 600;
+  margin-bottom: 2px;
   line-height: 1.2;
 }
 
 .info-value {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--primary, #0d47a1);
+  font-size: 14px;
+  font-weight: 700;
+  color: #104a8e;
   line-height: 1.3;
 }
 
@@ -589,15 +738,15 @@ const onConfirm = async (): Promise<void> => {
 
 .score-header {
   font-size: 12px;
-  color: #1e293b;
+  color: #000000;
   padding-bottom: 2px;
   text-decoration: underline;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .score-row {
   font-size: 11px;
-  color: #334155;
+  color: #000000;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -609,31 +758,23 @@ const onConfirm = async (): Promise<void> => {
 }
 
 .score-separator {
-  background-color: #94a3b8 !important;
+  background-color: #000000 !important;
   height: 1px;
   margin: 4px 0;
-  opacity: 0.5;
+  opacity: 0.8;
 }
 
 .score-row-level {
   font-size: 11px;
-  color: #334155;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2px 0;
-}
-
-.score-level-val {
-  display: flex;
-  gap: 24px;
+  color: #000000;
+  font-weight: 600;
 }
 
 .cert-footer {
   height: 64px;
   padding: 12px 20px;
-  background-color: #ffffff;
-  border-top: 1px solid var(--border-color, #e2e8f0);
+  background-color: #f8f9fa;
+  border-top: 1.5px solid #cbd5e1;
   box-sizing: border-box;
 }
 
@@ -643,16 +784,16 @@ const onConfirm = async (): Promise<void> => {
 }
 
 .metadata-label {
-  font-size: 10px;
-  color: #475569;
-  font-weight: 500;
+  font-size: 11px;
+  color: #000000;
+  font-weight: 600;
   line-height: 1.2;
 }
 
 .metadata-value {
-  font-size: 12px;
-  color: var(--primary, #0d47a1);
-  font-weight: 600;
+  font-size: 13px;
+  color: #104a8e;
+  font-weight: 700;
   margin-top: 2px;
 }
 
@@ -728,7 +869,7 @@ const onConfirm = async (): Promise<void> => {
 }
 
 .dialog-btn {
-  width: 140px !important;
+  width: 200px !important;
   height: 44px !important;
   border-radius: 10px !important;
   font-size: 15px !important;
@@ -747,13 +888,13 @@ const onConfirm = async (): Promise<void> => {
   }
 }
 
-.confirm-btn {
-  width: 190px !important;
-}
-
 .valid-until-input {
   :deep(.q-field__control) {
     border-radius: 8px;
   }
+}
+
+.close-btn {
+  z-index: 10;
 }
 </style>
