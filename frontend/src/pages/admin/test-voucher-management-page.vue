@@ -96,6 +96,7 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import TestVoucherReport from 'src/components/test-voucher-report.vue';
 import type { VoucherData } from 'src/types/voucher';
+import { getRegulations, saveRegulations } from 'src/services/voucher-config.service';
 
 const router = useRouter();
 const $q = useQuasar();
@@ -123,27 +124,38 @@ const regulationsEn = ref<string>(t('admin.testVoucherManagement.defaultRegulati
 // ===== ข้อปฏิบัติสำหรับผู้เข้าสอบ (Thai) =====
 const regulationsTh = ref<string>(t('admin.testVoucherManagement.defaultRegulationsTh'));
 
-// Load saved data on mount
-onMounted(() => {
+// Load saved data on mount — ดึงจาก API ก่อน, fallback ไป localStorage
+onMounted(async () => {
   try {
-    const savedEn = localStorage.getItem('buu-get-regulations-en');
-    const savedTh = localStorage.getItem('buu-get-regulations-th');
-    if (savedEn) {
-      if (savedEn.startsWith('[')) {
-        regulationsEn.value = JSON.parse(savedEn).join('\n');
-      } else {
-        regulationsEn.value = savedEn;
-      }
+    const data = await getRegulations();
+    if (data.regulationsEn) {
+      regulationsEn.value = data.regulationsEn;
     }
-    if (savedTh) {
-      if (savedTh.startsWith('[')) {
-        regulationsTh.value = JSON.parse(savedTh).join('\n');
-      } else {
-        regulationsTh.value = savedTh;
-      }
+    if (data.regulationsTh) {
+      regulationsTh.value = data.regulationsTh;
     }
-  } catch (e) {
-    console.error('Failed to load regulations from localStorage', e);
+  } catch {
+    // Fallback: อ่านจาก localStorage กรณี API ไม่พร้อม
+    try {
+      const savedEn = localStorage.getItem('buu-get-regulations-en');
+      const savedTh = localStorage.getItem('buu-get-regulations-th');
+      if (savedEn) {
+        if (savedEn.startsWith('[')) {
+          regulationsEn.value = JSON.parse(savedEn).join('\n');
+        } else {
+          regulationsEn.value = savedEn;
+        }
+      }
+      if (savedTh) {
+        if (savedTh.startsWith('[')) {
+          regulationsTh.value = JSON.parse(savedTh).join('\n');
+        } else {
+          regulationsTh.value = savedTh;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load regulations from localStorage', e);
+    }
   }
 });
 
@@ -152,10 +164,12 @@ const handleCancel = (): void => {
   router.back();
 };
 
-const handleSave = (): void => {
+const handleSave = async (): Promise<void> => {
   try {
-    localStorage.setItem('buu-get-regulations-en', regulationsEn.value);
-    localStorage.setItem('buu-get-regulations-th', regulationsTh.value);
+    await saveRegulations({
+      regulationsEn: regulationsEn.value,
+      regulationsTh: regulationsTh.value,
+    });
     $q.notify({
       type: 'positive',
       message: t('admin.testVoucherManagement.notifications.saveSuccess'),
