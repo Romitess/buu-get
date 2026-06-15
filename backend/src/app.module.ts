@@ -37,7 +37,7 @@ import { PageBuilderModule } from './modules/page-builder/page-builder.module';
   imports: [
     ConfigModule.forRoot({
       load: [buuApiConfig],
-      envFilePath: ['.env'],
+      envFilePath: ['../.env'],
       isGlobal: true,
       validate: validateEnv,
     }),
