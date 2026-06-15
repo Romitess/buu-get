@@ -68,6 +68,8 @@
                 <q-input
                   v-model.number="rule.minScore"
                   type="number"
+                  :min="0"
+                  :max="100"
                   outlined
                   dense
                   class="buu-input-muted col"
@@ -77,6 +79,8 @@
                 <q-input
                   v-model.number="rule.maxScore"
                   type="number"
+                  :min="0"
+                  :max="100"
                   outlined
                   dense
                   class="buu-input-muted col"
@@ -277,6 +281,38 @@ const handleCancel = (): void => {
 };
 
 const handleSave = async (): Promise<void> => {
+  // 1. ตรวจสอบคะแนนห้ามติดลบ หรือเกิน 100
+  const hasInvalidScore = bandRules.value.some(
+    (rule) =>
+      typeof rule.minScore !== 'number' ||
+      typeof rule.maxScore !== 'number' ||
+      rule.minScore < 0 ||
+      rule.maxScore < 0 ||
+      rule.minScore > 100 ||
+      rule.maxScore > 100,
+  );
+
+  if (hasInvalidScore) {
+    $q.notify({
+      type: 'negative',
+      message: t('admin.scoreCriteriaManagement.notifications.invalidScore'),
+      position: 'top',
+    });
+    return;
+  }
+
+  // 2. ตรวจสอบคะแนนขั้นต่ำห้ามมากกว่าคะแนนสูงสุด
+  const hasMinGreaterThanMax = bandRules.value.some((rule) => rule.minScore > rule.maxScore);
+
+  if (hasMinGreaterThanMax) {
+    $q.notify({
+      type: 'negative',
+      message: t('admin.scoreCriteriaManagement.notifications.minGreaterThanMax'),
+      position: 'top',
+    });
+    return;
+  }
+
   try {
     await saveBandRules(bandRules.value);
     $q.notify({

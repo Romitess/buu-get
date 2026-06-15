@@ -894,6 +894,8 @@ export default {
       notifications: {
         saveSuccess: 'Successfully saved score criteria information',
         saveError: 'An error occurred while saving information',
+        invalidScore: 'Scores must be between 0 and 100 only',
+        minGreaterThanMax: 'Minimum score cannot be greater than maximum score',
       },
     },
     dailyRevenueReport: {
