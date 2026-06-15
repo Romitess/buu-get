@@ -221,7 +221,7 @@ const windowPrint = (): void => {
 
 .report-card {
   width: 100%;
-  background: var(--surface-card, #ffffff);
+  background: linear-gradient(to bottom, #fafafa, #f0f4f8);
   border-radius: var(--radius-md, 12px);
   border: 1px solid var(--border-black, #000000);
   box-shadow: var(--shadow-md);
@@ -231,7 +231,7 @@ const windowPrint = (): void => {
 /* ===== Header Area ===== */
 .report-header {
   padding: 16px 20px;
-  background-color: var(--surface-card, #ffffff);
+  background-color: transparent;
   border-bottom: 1.5px solid var(--primary, #0d47a1) !important;
 
   .header-logo {
@@ -384,7 +384,7 @@ const windowPrint = (): void => {
 /* ===== Footer / Metadata Section ===== */
 .report-footer {
   padding: 16px 20px;
-  background-color: var(--neutral-50, #f8fafc);
+  background-color: transparent;
   border-top: 1.5px solid var(--border-black, #000000);
   font-family: 'Sarabun', 'Outfit', sans-serif;
 
@@ -420,7 +420,7 @@ const windowPrint = (): void => {
 
 .band-desc-box {
   position: relative;
-  background-color: var(--neutral-50, #f8fafc);
+  background: linear-gradient(to bottom, #fafafa, #f0f4f8);
   border: 1.5px solid var(--border-black, #000000);
   border-radius: 6px;
   padding: 20px 24px;
@@ -544,15 +544,19 @@ const windowPrint = (): void => {
   .report-card {
     border: 0.1px solid var(--border-black) !important;
     box-shadow: none !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
   }
   .band-desc-box {
     padding: 16px 20px;
-    background-color: var(--surface-card) !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
     border: 1.5px solid var(--border-black) !important;
     box-shadow: none !important;
   }
   .report-footer {
     background-color: var(--neutral-50, #f8fafc) !important;
+    background-image: none !important;
     border-top: 1.5px solid var(--border-black) !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
