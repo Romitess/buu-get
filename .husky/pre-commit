@@ -1,1 +1,13 @@
-npx lint-staged
+if [ -d "frontend" ]; then
+  echo "Linting frontend..."
+  cd frontend
+  npx lint-staged
+  cd ..
+fi
+
+if [ -d "backend" ]; then
+  echo "Linting backend..."
+  cd backend
+  npx lint-staged
+  cd ..
+fi

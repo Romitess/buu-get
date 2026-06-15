@@ -1,0 +1,298 @@
+import { Injectable, BadRequestException, Inject } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { UsersService } from '../users/users.service';
+import { UserProfileService } from '../user-profile/user-profile.service';
+import { RolesService } from '../roles/roles.service';
+import { RoleEnum } from '../roles/enums/role.enum';
+import { User } from '../users/entities/user.entity';
+import { Role } from '../roles/entities/role.entity';
+import { UserProfile } from '../user-profile/entities/user-profile.entity';
+import { UserImage } from '../user-image/entities/user-image.entity';
+import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
+import { getOtpEmailTemplate } from './templates/otp-email.template';
+import * as bcrypt from 'bcrypt';
+
+export interface LoginResponse {
+  accessToken: string;
+  user: {
+    id: number;
+    email: string;
+    role: string;
+  };
+}
+
+export interface RegisterResponse {
+  message: string;
+  userId: number;
+}
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly userProfileService: UserProfileService,
+    private readonly rolesService: RolesService,
+    private readonly jwtService: JwtService,
+    private readonly dataSource: DataSource,
+    private readonly platformGatewayService: PlatformGatewayService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+  ) {}
+
+  private generateOtp(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  async sendOtp(
+    email: string,
+  ): Promise<{ success: boolean; message?: string }> {
+    const existingUser = await this.usersService.findByEmail(email);
+    if (existingUser) {
+      throw new BadRequestException('อีเมลนี้ถูกใช้งานในระบบแล้ว');
+    }
+
+    const otpCode = this.generateOtp();
+    console.log(`[OTP DEBUG] OTP for ${email} is ${otpCode}`);
+
+    // Storing OTP in cache with 5 minutes (300,000 milliseconds) TTL
+    await this.cacheManager.set(`otp_${email}`, otpCode, 300000);
+
+    const htmlContent = getOtpEmailTemplate({ otpCode });
+    const subject = `[BUU-GET] รหัส OTP: ${otpCode} (ยืนยันสมัครสมาชิก)`;
+
+    try {
+      await this.platformGatewayService.sendEmail(
+        'BUU-GET',
+        email,
+        subject,
+        htmlContent,
+      );
+      return { success: true };
+    } catch (err: unknown) {
+      console.error('Failed to send OTP email via platform gateway:', err);
+      throw new BadRequestException(
+        'ไม่สามารถส่งอีเมล OTP ได้ กรุณาลองใหม่อีกครั้ง',
+      );
+    }
+  }
+
+  async verifyOtp(
+    email: string,
+    otp: string,
+  ): Promise<{ success: boolean; message?: string }> {
+    const storedOtp = await this.cacheManager.get<string>(`otp_${email}`);
+    if (!storedOtp || storedOtp !== otp) {
+      throw new BadRequestException('รหัส OTP ไม่ถูกต้องหรือหมดอายุ');
+    }
+
+    // Delete the OTP after successful validation to prevent reuse
+    await this.cacheManager.del(`otp_${email}`);
+
+    return { success: true };
+  }
+
+  async login(loginDto: LoginDto): Promise<LoginResponse> {
+    const user = await this.usersService.findByEmail(loginDto.email);
+
+    if (!user) {
+      throw new BadRequestException('Invalid email or password');
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      loginDto.password,
+      user.USER_PASSWORD,
+    );
+
+    if (!isPasswordValid) {
+      throw new BadRequestException('Invalid email or password');
+    }
+
+    // ดึง role แรก (สมมติว่า 1 user มี 1 role หลักสำหรับตอนนี้)
+    const role = user.ROLES_ID?.[0]?.ROLE_NAME || RoleEnum.CANDIDATE;
+
+    const payload = {
+      sub: user.USER_ID,
+      email: user.USER_EMAIL,
+      role: role,
+    };
+
+    return {
+      accessToken: this.jwtService.sign(payload),
+      user: {
+        id: user.USER_ID,
+        email: user.USER_EMAIL,
+        role: role,
+      },
+    };
+  }
+
+  async register(registerDto: RegisterDto): Promise<RegisterResponse> {
+    const email = registerDto.email.trim().toLowerCase();
+    // Hash password
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(registerDto.password, salt);
+
+    // ค้นหา role 'candidate' เพื่อกำหนดให้ผู้ใช้ใหม่
+    const candidateRole = await this.rolesService.findByName(
+      RoleEnum.CANDIDATE,
+    );
+
+    // ใช้ Transaction เพื่อให้ User + UserProfile สร้างพร้อมกัน หรือ rollback พร้อมกัน
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Step 1: สร้าง User
+      const existingUser = await queryRunner.manager.findOne(User, {
+        where: { USER_EMAIL: email },
+      });
+      if (existingUser) {
+        throw new BadRequestException('อีเมลนี้ถูกใช้งานแล้ว');
+      }
+
+      // ตรวจสอบเลขบัตรประชาชน / Passport ซ้ำ
+      if (registerDto.nationalId && registerDto.nationalId.trim() !== '') {
+        const nationalId = registerDto.nationalId.trim();
+        const fieldToCheck =
+          registerDto.userType === 'thai'
+            ? 'USER_NATIONAL_ID'
+            : 'USER_PASSPORT_NO';
+        const existingId = await queryRunner.manager.findOne(User, {
+          where: { [fieldToCheck]: nationalId },
+        });
+
+        if (existingId) {
+          const errorMsg =
+            registerDto.userType === 'thai'
+              ? 'เลขบัตรประชาชนนี้ถูกใช้งานแล้ว'
+              : 'Passport number already exists';
+          throw new BadRequestException(errorMsg);
+        }
+      }
+
+      // กำหนด Role ID 1 (ผู้สมัครสอบ) ให้กับผู้ใช้งานใหม่
+      const roleToAssign =
+        candidateRole ||
+        (await queryRunner.manager.findOne(Role, { where: { ROLE_ID: 1 } }));
+
+      const newUser = queryRunner.manager.create(User, {
+        USER_EMAIL: email,
+        USER_PASSWORD: hashedPassword,
+        USER_STATUS: 'ACTIVE',
+        USER_NATIONAL_ID:
+          registerDto.userType === 'thai'
+            ? registerDto.nationalId?.trim() || undefined
+            : undefined,
+        USER_PASSPORT_NO:
+          registerDto.userType === 'foreigner'
+            ? registerDto.nationalId?.trim() || undefined
+            : undefined,
+        ROLES_ID: roleToAssign ? [roleToAssign] : [],
+      });
+
+      const savedUser = await queryRunner.manager.save(newUser);
+      savedUser.USER_CODE = this.usersService.generateUserCode(
+        savedUser.USER_ID,
+      );
+      await queryRunner.manager.update(
+        User,
+        { USER_ID: savedUser.USER_ID },
+        { USER_CODE: savedUser.USER_CODE },
+      );
+
+      // เตรียมวันที่เกิด (รองรับ format "2005 07 22" โดยเปลี่ยนเป็น "2005-07-22")
+      let birthDate: Date | null = null;
+      if (registerDto.birthdate) {
+        const formattedDate = registerDto.birthdate.replace(/\s+/g, '-');
+        birthDate = new Date(formattedDate);
+        if (isNaN(birthDate.getTime())) {
+          birthDate = null;
+        }
+      }
+
+      // Step 2: สร้าง UserProfile ภายใน transaction
+      const newUserProfile = queryRunner.manager.create(UserProfile, {
+        userId: savedUser.USER_ID,
+        userTitleTh: registerDto.titleTH,
+        userFullnameTh: registerDto.fullName,
+        userTitleEn: registerDto.titleEN,
+        userFullnameEn: registerDto.englishName,
+        userPhone: registerDto.phone,
+        userDateOfBirth: birthDate,
+        userEducation: registerDto.educationLevel,
+        userFaculty: registerDto.faculty,
+        userInstitution: registerDto.institution,
+        userCountry: registerDto.country,
+        userAddress: registerDto.address?.trim() || null,
+        userThaidSynced: registerDto.userType === 'thai',
+      });
+
+      await queryRunner.manager.save(newUserProfile);
+
+      // Step 3: บันทึก UserImage (ถ้ามี)
+      if (registerDto.profileImage) {
+        const newUserImage = queryRunner.manager.create(UserImage, {
+          USER_ID: savedUser.USER_ID,
+          USER_IMAGE_URL: registerDto.profileImage,
+        });
+        await queryRunner.manager.save(newUserImage);
+      }
+
+      await queryRunner.commitTransaction();
+
+      return {
+        message: 'Registration successful',
+        userId: savedUser.USER_ID,
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      console.error('Registration error details:', error);
+      const msg =
+        error instanceof Error ? error.message : 'Unknown database error';
+      throw new BadRequestException(msg);
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async getProfile(userId: number) {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Map role
+    const role = user.ROLES_ID?.[0]?.ROLE_NAME || RoleEnum.CANDIDATE;
+
+    // Map profile fields to match frontend User interface
+    return {
+      id: user.USER_ID,
+      userCode: user.USER_CODE,
+      email: user.USER_EMAIL,
+      nationalId: user.USER_NATIONAL_ID,
+      passportNo: user.USER_PASSPORT_NO,
+      status: user.USER_STATUS,
+      role: role,
+      // Profile data (Flattened)
+      titleTH: user.PROFILE?.userTitleTh || '',
+      fullNameTH: user.PROFILE?.userFullnameTh || '',
+      titleEN: user.PROFILE?.userTitleEn || '',
+      fullNameEN: user.PROFILE?.userFullnameEn || '',
+      birthdate: user.PROFILE?.userDateOfBirth || '',
+      phone: user.PROFILE?.userPhone || '',
+      educationLevel: user.PROFILE?.userEducation || '',
+      country: user.PROFILE?.userCountry || '',
+      address: user.PROFILE?.userAddress || '',
+      faculty: user.PROFILE?.userFaculty || '',
+      institution: user.PROFILE?.userInstitution || '',
+      thaidSynced: user.PROFILE?.userThaidSynced || false,
+      remark: user.PROFILE?.userRemark || '',
+      userImagePath: user.IMAGE?.USER_IMAGE_URL || null,
+    };
+  }
+}

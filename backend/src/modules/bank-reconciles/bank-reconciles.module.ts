@@ -1,0 +1,13 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { BankReconcilesService } from './bank-reconciles.service';
+import { BankReconcilesController } from './bank-reconciles.controller';
+import { BankReconcile } from './entities/bank-reconcile.entity';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([BankReconcile])],
+  controllers: [BankReconcilesController],
+  providers: [BankReconcilesService],
+  exports: [BankReconcilesService],
+})
+export class BankReconcilesModule {}

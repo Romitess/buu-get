@@ -1,1 +1,7 @@
-npx --no -- commitlint --edit "$1"
+if [ -f "frontend/node_modules/.bin/commitlint" ]; then
+  ./frontend/node_modules/.bin/commitlint --edit "$1"
+elif [ -f "backend/node_modules/.bin/commitlint" ]; then
+  ./backend/node_modules/.bin/commitlint --edit "$1"
+else
+  npx --no -- commitlint --edit "$1"
+fi
