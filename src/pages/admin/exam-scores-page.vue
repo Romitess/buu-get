@@ -12,7 +12,7 @@
       v-if="exam"
       v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
-      :title="exam.EXAM_NAME"
+      :title="exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME"
       :date="examDateLabel"
       :time="selectedSessionTime"
       :location="selectedSessionLocation"
@@ -441,7 +441,9 @@ const hasSavedScores = computed(() => {
 });
 
 const exportCsvFileNamePrefix = computed(() => {
-  const examName = exam.value?.EXAM_NAME || '';
+  const examName = exam.value?.EXAM_ROUND
+    ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
+    : exam.value?.EXAM_NAME || '';
   const time = selectedSessionTime.value || '';
   const room = selectedSessionLocation.value || '';
   return `คะแนนสอบ_${examName}_${time}_${room}`.replace(/[\s/\\?%*:|"<>]+/g, '_');

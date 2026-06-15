@@ -191,7 +191,9 @@ export const useExamStore = defineStore('exam', () => {
 
         const item: ExamHistoryItem = {
           id: enrollment.ERM_ID,
-          title: exam?.EXAM_NAME || i18n.t('examSchedule.defaultEnrollmentTitle'),
+          title: exam?.EXAM_ROUND
+            ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}`
+            : exam?.EXAM_NAME || i18n.t('examSchedule.defaultEnrollmentTitle'),
           status: '',
           statusType: 'primary',
           date: formattedDate,

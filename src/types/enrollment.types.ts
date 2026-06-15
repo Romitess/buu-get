@@ -36,6 +36,7 @@ export interface BackendSessionDetail {
     EXAM_ID: number;
     EXAM_NAME: string;
     EXAM_DATE: string;
+    EXAM_ROUND?: string | null;
     EXAM_FEE?: number;
   };
   LOCATION?: {

@@ -12,7 +12,7 @@
       v-if="exam"
       v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
-      :title="exam.EXAM_NAME"
+      :title="exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME"
       :date="examDateLabel"
       :time="selectedSessionTime"
       :location="selectedSessionLocation"

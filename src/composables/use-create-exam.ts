@@ -478,21 +478,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       if (examId) {
         const exam = await fetchExamById(examId);
 
-        const rawExamName = exam.EXAM_NAME || '';
-        const matchEnd = rawExamName.match(/^(.*)\s+(\d+\/\d+|รอบที่\s*\d+|รอบ\s*\d+)$/);
-        if (matchEnd && matchEnd[1] && matchEnd[2]) {
-          form.value.examName = matchEnd[1];
-          form.value.examRound = matchEnd[2];
-        } else {
-          const matchStart = rawExamName.match(/^(\d+\/\d+|รอบที่\s*\d+|รอบ\s*\d+)\s+(.*)$/);
-          if (matchStart && matchStart[1] && matchStart[2]) {
-            form.value.examRound = matchStart[1];
-            form.value.examName = matchStart[2];
-          } else {
-            form.value.examRound = '';
-            form.value.examName = rawExamName;
-          }
-        }
+        form.value.examName = exam.EXAM_NAME || '';
+        form.value.examRound = exam.EXAM_ROUND || '';
         form.value.examType = exam.EXAM_TYPE || EXAM_TYPE_GENERAL;
         form.value.examFormat = exam.EXAM_FORMAT || EXAM_FORMAT_COMPUTER;
         form.value.fee = exam.EXAM_FEE ?? '0.00';
@@ -1136,9 +1123,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
     try {
       let targetExamId = isEditMode.value ? examId : null;
-      const combinedExamName = form.value.examRound
-        ? `${form.value.examName.trim()} ${form.value.examRound.trim()}`
-        : form.value.examName.trim();
+      const combinedExamName = form.value.examName.trim();
 
       if (isEditMode.value && examId) {
         // === EDIT MODE ===
@@ -1162,6 +1147,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           payEndDate: form.value.payEndDate,
           timeRanges,
           fundSourceId: Number(form.value.fundSourceId || 0),
+          examRound: form.value.examRound,
           existingSessionIds,
         });
 
@@ -1191,6 +1177,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           payEndDate: form.value.payEndDate,
           timeRanges,
           fundSourceId: form.value.fundSourceId,
+          examRound: form.value.examRound,
         };
 
         targetExamId = await examStore.addExamRound(payload);

@@ -195,7 +195,10 @@ export function useExamSeatManagement() {
   });
 
   const examTitle = computed((): string => {
-    const baseTitle = examData.value?.EXAM_NAME || DEFAULT_EXAM_TITLE;
+    const baseName = examData.value?.EXAM_NAME || DEFAULT_EXAM_TITLE;
+    const baseTitle = examData.value?.EXAM_ROUND
+      ? `${baseName} ${examData.value.EXAM_ROUND}`
+      : baseName;
     const supervisorNamesList: string[] = [];
 
     // Include supervisors from SS_NAME if present
