@@ -1014,3 +1014,60 @@ body {
     }
   }
 }
+
+// ─────────────────────────────────────────────
+// 9. Document Previews Gradient Backgrounds (Voucher, Regulations, Report, Band Desc)
+// ─────────────────────────────────────────────
+.voucher-card {
+  background: var(--voucher-bg-gradient) !important;
+
+  .voucher-header {
+    background-color: transparent !important;
+  }
+  .voucher-body {
+    background: transparent !important;
+  }
+  .voucher-footer {
+    background: transparent !important;
+  }
+}
+
+.regulations-box {
+  background: var(--voucher-bg-gradient) !important;
+
+  .regulations-content-wrapper {
+    background-color: transparent !important;
+  }
+}
+
+.report-card {
+  background: var(--voucher-bg-gradient) !important;
+
+  .report-header {
+    background-color: transparent !important;
+  }
+  .report-body {
+    background: transparent !important;
+  }
+  .report-footer {
+    background-color: transparent !important;
+  }
+}
+
+.band-desc-box {
+  background: var(--voucher-bg-gradient) !important;
+}
+
+// Media print overrides to keep solid white background on paper
+@media print {
+  .voucher-card,
+  .regulations-box,
+  .report-card,
+  .band-desc-box {
+    background-color: #ffffff !important;
+    background-image: none !important;
+  }
+  .regulations-box .regulations-content-wrapper {
+    background-color: transparent !important;
+  }
+}
