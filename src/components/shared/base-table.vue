@@ -337,6 +337,10 @@ const goToLastPage = (): void => {
     text-align: center !important;
   }
 
+  :deep(th.sortable .q-table__sort-icon) {
+    position: absolute !important;
+  }
+
   :deep(tbody tr td) {
     font-size: var(--font-size-md);
     color: var(--text-primary);
