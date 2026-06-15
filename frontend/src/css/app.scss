@@ -1,0 +1,1073 @@
+// ============================================================
+// BUU-GET — Global Application Styles
+// Theme: Gray-Gold (Burapha University)
+// ============================================================
+
+// === Google Fonts ===
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&display=swap');
+
+// === CSS Custom Properties (Design Tokens) ===
+:root {
+  // Brand
+  --primary: #0d47a1;
+  --primary-light: #1e89e5;
+  --primary-dark: #0a3578;
+  --secondary: #1e89e5;
+  --secondary-light: #4dabf5;
+  --secondary-dark: #115293;
+  --negative: #e53934;
+  --btn-danger-light-bg: #ffebeb;
+  --btn-danger-light-text: #f44336;
+  --btn-danger-light-hover: #ffdada;
+
+  // Backward Compatibility Aliases
+  --buu-gold: var(--primary);
+  --buu-gold-light: var(--primary-light);
+  --buu-gold-dark: var(--primary-dark);
+  --buu-gray: var(--secondary);
+  --text-on-gold: var(--text-on-primary);
+
+  // Surfaces
+  --surface-sidebar: #2c2c2c;
+  --surface-sidebar-hover: #3a3a3a;
+  --surface-sidebar-active: #1a1a1a;
+  --surface-header: #ffffff;
+  --surface-page: #f5f5f5;
+  --surface-card: #ffffff;
+
+  // Text
+  --text-primary: #1a1a1a;
+  --text-secondary: #6c6c6c;
+  --text-input: #1a1a1a; // สีตัวอักษรในช่อง Input
+  --text-placeholder: #9ca3af;
+  --text-muted: #9a9a9a;
+  --text-on-dark: #e0e0e0;
+  --text-on-primary: #ffffff;
+  --buu-brown: #5d3f3d;
+  --label-color: var(--text-primary); // สีของ Label หัวข้อฟิลด์
+
+  // Neutral scale (used in form fields, dividers, secondary text)
+  --neutral-50: #f8fafc;
+  --neutral-100: #f1f5f9;
+  --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
+  --neutral-400: #94a3b8;
+  --neutral-500: #64748b;
+  --neutral-600: #334155;
+  --neutral-700: #1f2937;
+  --neutral-900: #0f172a;
+  --neutral-gray-light: #c5bdbd;
+  // Brand-specific (ThaID, accent)
+  --thaid-bg: #00006e;
+  --thaid-bg-rgb: 0, 0, 110;
+
+  // Registrant Dashboard Specific
+  --dashboard-card-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  --dashboard-border-color: var(--neutral-200);
+  --dashboard-header-text: var(--text-primary);
+  --dashboard-tab-border: #e2e2e28a;
+  --dashboard-info-item-icon: #424242;
+  --dashboard-divider-color: var(--neutral-200);
+
+  // Calendar / Status accents
+  --calendar-today-bg: #f3f4f6;
+  --calendar-active-bg: #1d4ed8;
+  --calendar-hover-bg: #3b82f6;
+  --calendar-hover-bg-light: rgba(0, 0, 0, 0.05);
+  --calendar-month-year-picker-border: var(--neutral-100);
+  --calendar-year-item-border: var(--neutral-50);
+  --calendar-year-item-hover: var(--neutral-100);
+  --calendar-month-item-hover: var(--neutral-100);
+  --calendar-month-item-border-hover: var(--neutral-200);
+  --calendar-scrollbar-track: #f9f9f9;
+  --calendar-scrollbar-thumb: #c1c1c1;
+  --calendar-scrollbar-thumb-hover: #a8a8a8;
+  --calendar-dot-available: #27ae60;
+  --calendar-dot-full: #c12a32;
+
+  // Receipt Styles
+  --receipt-text: #333333;
+  --receipt-text-light: #555555;
+  --receipt-border: #777777;
+  --receipt-header-bg: #fafafa;
+  --receipt-signature-border: #999999;
+  --receipt-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+
+  // Misc
+  --border-color: #e8e8e8;
+  --border-black: #000000;
+  --voucher-bg-gradient: linear-gradient(180deg, #fafafa 0%, #f0f4f8 100%);
+  --watermark-color: rgba(30, 137, 229, 0.07);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-card: 0px 4px 4px 0px rgba(0, 0, 0, 0.25); // The specific shadow from Figma
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-10: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 100px;
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Sidebar
+  --sidebar-width: 72px;
+  --sidebar-expanded-width: 260px;
+  --header-height: 64px;
+  --page-max-width: 1600px;
+
+  // Badges
+  --badge-primary-bg: #e3f2fd;
+  --badge-primary-text: #0d47a1;
+  --badge-primary-dot: #1e89e5;
+
+  --badge-success-bg: #e8f5e9;
+  --badge-success-text: #1b5e20;
+  --badge-success-dot: #4caf50;
+
+  --badge-warning-bg: #fff3e0;
+  --badge-warning-text: #e65100;
+  --badge-warning-dot: #ff9800;
+
+  --badge-error-bg: #ffebee;
+  --badge-error-text: #b71c1c;
+  --badge-error-dot: #f44336;
+
+  --badge-info-bg: #f5f5f5;
+  --badge-info-text: #424242;
+  --badge-info-dot: #9e9e9e;
+
+  // Specific Accents
+  --primary-light-alpha-50: rgba(30, 137, 229, 0.5);
+  --primary-light-alpha-20: rgba(30, 137, 229, 0.2);
+  --white-alpha-20: rgba(255, 255, 255, 0.2);
+  --negative-alpha-15: rgba(229, 57, 52, 0.15);
+
+  // Alert Banner Specific (Warning styling)
+  --alert-warning-bg-start: #fffaf0;
+  --alert-warning-bg-end: #fff8e1;
+  --alert-warning-border: #ffe082;
+  --alert-warning-shadow: rgba(255, 179, 0, 0.05);
+
+  // Floating Tip Badge Specific (Error/Negative styling)
+  --tip-badge-bg: #ffebee;
+  --tip-badge-text: #c62828;
+  --tip-badge-border: #ffcdd2;
+  --tip-badge-shadow-1: rgba(198, 40, 40, 0.15);
+  --tip-badge-shadow-2: rgba(198, 40, 40, 0.25);
+  --negative-rgb: 211, 47, 47;
+
+  // Highlights
+  --highlight-success-bg: rgba(46, 125, 50, 0.12);
+  --highlight-error-bg: rgba(198, 40, 40, 0.12);
+
+  // Typography Scale
+  --font-family-base:
+    'Sarabun', 'Inter', 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    sans-serif;
+  --font-size-h1: 1.75rem; // 28px
+  --font-size-h2: 1.5rem; // 24px
+  --font-size-h3: 1.25rem; // 20px
+  --font-size-card-title: 1.125rem; // 18px
+  --font-size-md: 1rem; // 16px
+  --font-size-body: 0.9375rem; // 15px
+  --font-size-sm: 0.875rem; // 14px
+  --font-size-xs: 0.8125rem; // 13px
+
+  // Font Weights
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 800;
+
+  // Spacing Scale
+  --space-unit: 0.25rem;
+  --space-xs: calc(var(--space-unit) * 1); // 4px
+  --space-sm: calc(var(--space-unit) * 2); // 8px
+  --space-md: calc(var(--space-unit) * 4); // 16px
+  --space-lg: calc(var(--space-unit) * 6); // 24px
+  --space-xl: calc(var(--space-unit) * 8); // 32px
+  --space-2xl: calc(var(--space-unit) * 12); // 48px
+
+  // exam Dialog & Component
+  --dialog-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  --dialog-icon-shadow: 0 4px 12px rgba(13, 71, 161, 0.25);
+  --dialog-icon-gradient: linear-gradient(135deg, #bbdefb 0%, #e3f2fd 100%);
+  --dialog-info-border: #aecdf5;
+  --primary-light-alpha-40: #1e89e566;
+  --dialog-icon-inner-surface: #323232;
+  --dialog-broken-icon-outer-bg: var(--primary-light-alpha-40);
+  --dialog-broken-icon-inner-bg: var(--dialog-icon-inner-surface);
+  --location-preview-bg: #f4f8fd;
+  --location-preview-border: #e1eefc;
+  --location-total-seats-bg: #d6e8fa;
+  --teacher-desk-line: var(--buu-brown);
+
+  --clock-bg: #ffffff;
+  --clock-icon: #424242;
+  --clock-border: #e0e0e0;
+  --clock-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --clock-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+  --round-exam-hover-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+  --round-exam-divider: #f5f5f5;
+
+  --detail-card-badge-bg: #e8f0fe;
+  --detail-card-hover-bg: #f9fbff;
+  --detail-card-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --detail-dropdown-border: #dddddd;
+
+  // Seat Management Specific
+  --seat-grid-border: #757575;
+  --seat-available-border: var(--secondary, #1e89e5);
+  --seat-broken-bg: #676767;
+  --seat-grid-box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  --seat-scrollbar-track: #f1f1f1;
+  --seat-scrollbar-thumb: #cccccc;
+  --seat-scrollbar-thumb-hover: #aaaaaa;
+  --seat-grid-scrollbar-thumb: #bdbdbd;
+  --seat-grid-scrollbar-thumb-hover: #9e9e9e;
+  --seat-drag-over-bg: var(--badge-primary-bg);
+  --seat-ghost-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+
+  // Payment Import Specific
+  --payment-import-bg: #fafbfc;
+  --payment-import-card-border: #eef2f6;
+  --payment-import-table-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  // Dashed upload-zone border; stroke color is kept inline because CSS
+  // custom properties cannot be interpolated inside a data: URI.
+  // The stroke %231e89e5 intentionally matches --primary-light (#1e89e5).
+  --upload-zone-dashed-border: url("data:image/svg+xml,%3csvg viewBox='0 0 420 130' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M 1.5 16.5 A 15 15 0 0 1 16.5 1.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 403.5 1.5 A 15 15 0 0 1 418.5 16.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 418.5 113.5 A 15 15 0 0 1 403.5 128.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 16.5 128.5 A 15 15 0 0 1 1.5 113.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-linecap='round'/%3e%3cpath d='M 16.5 1.5 L 403.5 1.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3cpath d='M 418.5 16.5 L 418.5 113.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3cpath d='M 403.5 128.5 L 16.5 128.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3cpath d='M 1.5 113.5 L 1.5 16.5' fill='none' stroke='%231e89e5' stroke-width='1.5' stroke-dasharray='12%2c 24' stroke-linecap='square'/%3e%3c/svg%3e");
+}
+
+// === Base Reset & Typography ===
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+input,
+select,
+textarea,
+button {
+  font-family: var(--font-family-base);
+}
+
+html {
+  font-size: clamp(13px, 0.5rem + 0.416vw, 16px);
+}
+
+html,
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--surface-page);
+  color: var(--text-primary);
+}
+
+// Global Form Field Labels size override (bypass viewport scaling)
+.field-label {
+  font-size: 14px !important;
+}
+
+// Global Premium Card Header Title size override (bypass viewport scaling)
+.buu-premium-card .text-subtitle1 {
+  font-size: 14px !important;
+}
+
+// Global Exam Action Buttons size override (bypass viewport scaling)
+.add-slot-btn,
+.add-room-btn {
+  font-size: 14px !important;
+}
+
+// === Scrollbar Styling ===
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(108, 108, 108, 0.3);
+  border-radius: 3px;
+
+  &:hover {
+    background: rgba(108, 108, 108, 0.5);
+  }
+}
+
+// === Utility Classes ===
+.text-primary {
+  color: var(--primary) !important;
+}
+
+.bg-primary {
+  background-color: var(--primary) !important;
+}
+
+.text-secondary {
+  color: var(--secondary) !important;
+}
+
+.bg-secondary {
+  background-color: var(--secondary) !important;
+}
+
+// === Page Content Styles ===
+.page-container {
+  width: clamp(1024px, 90vw, 1600px);
+  padding: 1.5rem 2rem;
+  margin: 0 auto;
+  animation: fadeInUp 0.4s var(--transition-smooth) both;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+// === Card Styles ===
+.buu-card {
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  transition:
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+}
+
+// === Stat Card ===
+.stat-card {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+  }
+
+  .stat-info {
+    flex: 1;
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+  }
+}
+
+// === Animations ===
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// === Responsive Breakpoints ===
+@media (max-width: 768px) {
+  .page-container {
+    padding: 16px;
+  }
+}
+
+// === Custom Form Input Styles ===
+.custom-input {
+  // We can leave this or remove it, but the crucial part is .q-field__control
+
+  .q-field__control {
+    border-radius: var(--radius-sm);
+    overflow: hidden !important;
+
+    &:before {
+      border-color: var(--border-color);
+      transition: border-color var(--transition-fast);
+      border-radius: inherit;
+    }
+
+    &:after {
+      border-radius: inherit;
+    }
+
+    &:hover:before {
+      border-color: var(--primary-light);
+    }
+  }
+
+  &.q-field--focused .q-field__control:after,
+  &.q-field--error .q-field__control:after {
+    border-width: 1px !important;
+    border-style: solid !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 100% !important;
+    transform: none !important;
+  }
+
+  &.q-field--focused .q-field__control:after {
+    border-color: var(--primary);
+  }
+}
+
+// Force readonly fields to have solid borders instead of Quasar's default dashed borders
+.q-field--readonly .q-field__control:before {
+  border-style: solid !important;
+}
+
+// Remove double shadow and nested borders when calendar is used inside a dropdown menu (q-menu)
+.q-menu {
+  .calendar-card {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+}
+
+// === Profile Form Styles ===
+.profile-card {
+  width: 95%;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin: 0 auto;
+}
+
+.profile-action-btn {
+  width: 160px;
+  border-radius: 8px;
+  padding: 10px 0;
+}
+
+.profile-dialog-card {
+  min-width: 350px;
+}
+
+// ─────────────────────────────────────────────
+// Exam Schedule Page
+// ─────────────────────────────────────────────
+
+.exam-schedule {
+  &.page-container {
+    padding: 16px 24px;
+
+    @media (max-width: 600px) {
+      padding: 12px 16px;
+    }
+  }
+
+  .calendar-card {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 440px;
+
+    @media (min-width: 1024px) {
+      min-height: 500px !important;
+      padding: 24px !important;
+    }
+  }
+
+  .calendar-title {
+    @media (min-width: 1024px) {
+      h2.month-title {
+        font-size: 19px !important;
+      }
+
+      p.month-subtitle {
+        font-size: 14px !important;
+      }
+    }
+  }
+
+  .calendar-grid {
+    @media (min-width: 1024px) {
+      row-gap: 6px !important;
+
+      .day-cell {
+        height: 52px !important;
+        font-size: 15px !important;
+        border-radius: 10px !important;
+      }
+
+      .dot {
+        width: 8px !important;
+        height: 8px !important;
+        bottom: 6px !important;
+      }
+    }
+  }
+
+  .status-footer {
+    @media (min-width: 1024px) {
+      margin-top: 24px !important;
+      padding: 16px !important;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+
+    @media (min-width: 1024px) {
+      margin-top: 16px !important;
+      padding-bottom: 32px;
+    }
+
+    @media (max-width: 1024px) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  &__rounds-section {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--surface-card);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    border: none;
+
+    @media (min-width: 1024px) {
+      padding: 24px !important;
+    }
+
+    @media (max-width: 1024px) {
+      max-height: 500px;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 600px) {
+      padding: 16px;
+      max-height: 480px;
+    }
+  }
+
+  &__rounds-header {
+    flex: 0 0 auto;
+    margin-bottom: 12px;
+
+    @media (min-width: 1024px) {
+      margin-bottom: 16px !important;
+    }
+
+    @media (max-width: 600px) {
+      margin-bottom: 12px;
+    }
+  }
+
+  &__rounds-title-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  &__rounds-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+
+    @media (min-width: 1024px) {
+      font-size: 1.3rem !important;
+    }
+
+    @media (max-width: 600px) {
+      font-size: 1.1rem;
+    }
+  }
+
+  &__rounds-subtitle {
+    font-size: 0.85rem;
+    margin: 0;
+    padding-left: 28px;
+    color: var(--text-secondary);
+
+    @media (min-width: 1024px) {
+      font-size: 0.9rem !important;
+      padding-left: 30px !important;
+    }
+
+    @media (max-width: 600px) {
+      font-size: 0.8rem;
+    }
+  }
+
+  &__rounds-list {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    padding: 8px 8px 8px 0;
+    min-height: 0;
+    scrollbar-gutter: stable;
+
+    @media (min-width: 1024px) {
+      gap: 12px !important;
+      padding: 10px 8px 10px 0 !important;
+    }
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: var(--neutral-100);
+      border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--neutral-400);
+      border-radius: 10px;
+
+      &:hover {
+        background: var(--neutral-500);
+      }
+    }
+  }
+
+  .round-exam {
+    @media (min-width: 1024px) {
+      padding: 16px 20px !important;
+      gap: 20px !important;
+      border-radius: 16px !important;
+
+      &__title {
+        font-size: 1.15rem !important;
+      }
+
+      &__btn {
+        padding: 8px 20px !important;
+        font-size: 0.95rem !important;
+        min-width: 140px !important;
+      }
+
+      &__status {
+        font-size: 0.9rem !important;
+      }
+    }
+  }
+
+  &__rounds-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--surface-page);
+  }
+}
+
+// ─────────────────────────────────────────────
+// BUU-GET — Muted & Premium Theme Utilities
+// ─────────────────────────────────────────────
+
+// 1. ช่อง Input และ Select แบบหม่น (Flat & Rounded)
+.buu-input-muted {
+  &.q-field--outlined .q-field__control {
+    border: 1px solid var(--neutral-200) !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    height: 39px !important;
+    min-height: 39px !important;
+    background-color: var(--surface-card);
+    box-shadow: none !important;
+    transition: border-color var(--transition-smooth);
+
+    &:before,
+    &:after {
+      border: none !important;
+    }
+
+    &:hover {
+      border-color: var(--neutral-400) !important;
+    }
+  }
+
+  .q-field__native,
+  .q-field__input {
+    color: var(--text-input) !important;
+    font-weight: 500 !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: var(--text-input) !important;
+  }
+
+  .q-field__prefix,
+  .q-field__suffix,
+  .q-select__dropdown-icon {
+    color: var(--text-input) !important;
+    font-weight: 500 !important;
+  }
+
+  .q-placeholder:not(input):not(textarea) {
+    color: var(--text-placeholder) !important;
+    opacity: 0.65 !important;
+  }
+
+  .q-field__native::placeholder,
+  .q-field__input::placeholder {
+    color: var(--text-placeholder) !important;
+    opacity: 0.65 !important;
+  }
+}
+
+// 2. กล่องสถานะ/ฟิลด์ขนาดใหญ่ (Large Field Matching Left Side)
+.buu-field-large {
+
+  &.q-field--outlined .q-field__control,
+  .q-field__control-container {
+    height: 64px !important;
+    padding-top: 0 !important;
+  }
+}
+
+// 3. ปุ่ม Toggle แบบหม่น (ปุ่มอยู่ข้างในราง แบบ iOS Style ตามรูป 2, 3)
+.buu-toggle-muted {
+
+  // --- บังคับขนาด Wrapper หลักให้เป๊ะ ---
+  .q-toggle__inner {
+    width: 44px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    min-width: unset !important;
+  }
+
+  // --- โครงสร้าง: ขนาดของราง (Track) ---
+  .q-toggle__track {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: var(--radius-md) !important;
+    opacity: 1 !important;
+    margin: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+
+  // --- โครงสร้าง: ขนาดของปุ่ม (Thumb) ให้อยู่ข้างในรางเป๊ะๆ ---
+  .q-toggle__thumb {
+    width: 18px !important;
+    height: 18px !important;
+    top: 3px !important; // เว้นขอบบน 3px
+    left: 3px !important; // เว้นขอบซ้าย 3px
+    margin: 0 !important; // เคลียร์ margin ติดลบของ Quasar ทิ้ง!
+    border-radius: var(--radius-pill) !important;
+    box-shadow: none !important; // ลบเงาทิ้งให้ปุ่มดูแบนราบ (Flat Design)
+
+    // ซ่อน element ภายในและเอฟเฟกต์ของ Quasar เดิมทิ้งทั้งหมด
+    &::before,
+    &::after,
+    .q-toggle__dot,
+    svg {
+      display: none !important;
+    }
+  }
+
+  // --- สถานะตอนปิด (OFF) ---
+  &[aria-checked='false'] {
+    .q-toggle__track {
+      background: var(--neutral-100) !important;
+      border: 1px solid var(--border-color) !important;
+    }
+
+    .q-toggle__thumb {
+      background: var(--text-muted) !important;
+      transform: translate3d(0, 0, 0) !important;
+    }
+  }
+
+  // --- สถานะตอนเปิด (ON) ---
+  &[aria-checked='true'] {
+    .q-toggle__track {
+      background: var(--primary) !important;
+      border: none !important;
+    }
+
+    .q-toggle__thumb {
+      background: var(--text-on-primary) !important;
+      transform: translate3d(20px, 0, 0) !important;
+    }
+  }
+}
+
+// 4. Label หัวข้อฟิลด์
+.buu-label-muted {
+  color: var(--label-color);
+  font-weight: 600;
+  font-size: 14px !important;
+}
+
+// 5. กล่องการ์ดพรีเมียม (มีเส้นขอบและเงาตามต้นฉบับ)
+.buu-premium-card {
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-sm) !important; // 8px
+  box-shadow: var(--shadow-card) !important; // ใช้เงา 0px 4px 4px 0px rgba(0, 0, 0, 0.25)
+  background-color: var(--surface-card) !important;
+}
+
+// 6. เส้นคั่นสีน้ำตาล
+.buu-divider-brown {
+  background-color: var(--buu-brown) !important;
+}
+
+// ─────────────────────────────────────────────
+// 7. Form Validation — Shake & Bounce Animation
+// ─────────────────────────────────────────────
+
+// Shake animation for invalid fields
+@keyframes buu-shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  50%,
+  90% {
+    transform: translateX(-4px);
+  }
+
+  30%,
+  70% {
+    transform: translateX(4px);
+  }
+}
+
+// Bounce-in for error messages
+@keyframes buu-bounce-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(2px) scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// Pulse glow for the error icon
+@keyframes buu-pulse-glow {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+// Error field wrapper — applies shake + red border
+.buu-field-error {
+  animation: buu-shake 0.5s ease-in-out;
+
+  &.q-field--outlined .q-field__control,
+  .q-field--outlined .q-field__control {
+    border-color: var(--negative) !important;
+    box-shadow: 0 0 0 2px var(--negative-alpha-15) !important;
+    transition:
+      border-color 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+
+  // Also override the buu-input-muted border
+  &.buu-input-muted.q-field--outlined .q-field__control {
+    border: 1px solid var(--negative) !important;
+    box-shadow: 0 0 0 2px var(--negative-alpha-15) !important;
+  }
+}
+
+// Error message text with bounce animation
+.buu-error-msg {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--negative);
+  animation: buu-bounce-in 0.4s ease-out;
+
+  .buu-error-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+}
+
+// ─────────────────────────────────────────────
+// 8. Auth Cards Button Font Size Standardizations
+// ─────────────────────────────────────────────
+.login-card,
+.register-card {
+  .card-header p {
+    font-size: 17px !important;
+  }
+
+  .toggle-btn {
+    font-size: 16px !important;
+  }
+
+  .thaid-btn {
+    font-size: 16px !important;
+  }
+
+  .or-divider span {
+    font-size: 16px !important;
+    color: var(--neutral-500) !important;
+  }
+
+  .submit-btn {
+    font-size: 16px !important;
+  }
+
+  .forgot-link {
+    font-size: 14px !important;
+  }
+
+  .register-row {
+    font-size: 15px !important;
+
+    a {
+      font-size: 15px !important;
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+// 9. Document Previews Gradient Backgrounds (Voucher, Regulations, Report, Band Desc)
+// ─────────────────────────────────────────────
+.voucher-card {
+  background: var(--voucher-bg-gradient) !important;
+
+  .voucher-header {
+    background-color: transparent !important;
+  }
+  .voucher-body {
+    background: transparent !important;
+  }
+  .voucher-footer {
+    background: transparent !important;
+  }
+}
+
+.regulations-box {
+  background: var(--voucher-bg-gradient) !important;
+
+  .regulations-content-wrapper {
+    background-color: transparent !important;
+  }
+}
+
+.report-card {
+  background: var(--voucher-bg-gradient) !important;
+
+  .report-header {
+    background-color: transparent !important;
+  }
+  .report-body {
+    background: transparent !important;
+  }
+  .report-footer {
+    background-color: transparent !important;
+  }
+}
+
+.band-desc-box {
+  background: var(--voucher-bg-gradient) !important;
+}
+
+// Media print overrides to keep solid white background on paper
+@media print {
+  .voucher-card,
+  .regulations-box,
+  .report-card,
+  .band-desc-box {
+    background-color: #ffffff !important;
+    background-image: none !important;
+  }
+  .regulations-box .regulations-content-wrapper {
+    background-color: transparent !important;
+  }
+}

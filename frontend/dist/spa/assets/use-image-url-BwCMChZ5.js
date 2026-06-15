@@ -1,0 +1,1 @@
+import{g as s}from"./image.service-Bx78KcTS.js";import{f as a,bn as r}from"./index-D5nNUwdo.js";function u(t,l=!1){const e=a(()=>s(r(t),r(l))),o=a(()=>e.value.length>0);return{displayUrl:e,isImageAvailable:o}}export{u};

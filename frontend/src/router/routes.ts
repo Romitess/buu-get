@@ -1,0 +1,465 @@
+import type { RouteRecordRaw } from 'vue-router';
+import { ROLES } from 'src/constants/roles';
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean;
+    roles?: string[];
+    hideHeader?: boolean;
+    hideDrawer?: boolean;
+    footerVariant?: 'primary' | 'white';
+    breadcrumb?: {
+      label: string;
+      icon?: string;
+      to?: string;
+    }[];
+  }
+}
+
+const routes: RouteRecordRaw[] = [
+  {
+    path: '/',
+    component: () => import('layouts/main-layout.vue'),
+    children: [
+      // === Public Routes ===
+      {
+        path: '',
+        name: 'home',
+        component: () => import('pages/home-page.vue'),
+        meta: {
+          requiresAuth: false,
+          breadcrumb: [{ label: 'navigation.home', icon: 'home' }],
+        },
+      },
+      {
+        path: 'user/exam-schedule',
+        name: 'exam-schedule',
+        component: () => import('pages/user/exam-schedule-page.vue'),
+        meta: {
+          requiresAuth: false,
+          breadcrumb: [
+            { label: 'navigation.home', icon: 'home', to: '/' },
+            { label: 'navigation.selectSession', icon: 'event' },
+          ],
+        },
+      },
+
+      // === Auth Routes ===
+      {
+        path: 'login',
+        name: 'login',
+        component: () => import('pages/auth/login-page.vue'),
+        meta: {
+          requiresAuth: false,
+          hideHeader: true,
+          hideDrawer: true,
+          footerVariant: 'white',
+        },
+      },
+      {
+        path: 'register',
+        name: 'register',
+        component: () => import('pages/auth/login-page.vue'),
+        meta: {
+          requiresAuth: false,
+          hideHeader: false,
+          hideDrawer: true,
+          footerVariant: 'white',
+        },
+      },
+
+      // === Common Authenticated Routes ===
+      {
+        path: 'user/profile',
+        name: 'user-profile',
+        component: () => import('pages/user/profile-page.vue'),
+        meta: {
+          requiresAuth: true,
+          breadcrumb: [
+            { label: 'navigation.home', icon: 'home', to: '/' },
+            { label: 'profile.pageTitleEdit', icon: 'person' },
+          ],
+        },
+      },
+
+      // === Candidate (User) Routes ===
+      {
+        path: 'user',
+        meta: { requiresAuth: true, roles: [ROLES.CANDIDATE] },
+        children: [
+          {
+            path: 'exam-history',
+            name: 'exam-history',
+            component: () => import('pages/user/exam-history-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.examHistory', icon: 'history' },
+              ],
+            },
+          },
+        ],
+      },
+
+      // === Staff (Admin) Routes ===
+      {
+        path: 'admin',
+        meta: {
+          requiresAuth: true,
+          roles: [
+            ROLES.ADMIN,
+            ROLES.STAFF,
+            ROLES.REGISTRATION_OFFICER,
+            ROLES.FINANCE,
+            ROLES.EXECUTIVE,
+            ROLES.PROCTOR,
+            ROLES.EXAM_OPERATIONS_OFFICER,
+          ],
+        },
+        children: [
+          {
+            path: 'dashboard',
+            name: 'admin-dashboard',
+            component: () => import('pages/admin/dashboard-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.dashboard', icon: 'dashboard' },
+              ],
+            },
+          },
+          {
+            path: 'location-management',
+            name: 'admin-location-management',
+            component: () => import('pages/admin/location-management-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.manageLocations', icon: 'room' },
+              ],
+            },
+          },
+          {
+            path: 'fund-source-management',
+            name: 'admin-fund-source-management',
+            component: () => import('pages/admin/fin-fund-source-mananagement-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.fundSourceManagement', icon: 'account_balance' },
+              ],
+            },
+          },
+          {
+            path: 'create-location',
+            name: 'admin-create-location',
+            component: () => import('pages/admin/location-create-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageLocations',
+                  icon: 'room',
+                  to: '/admin/location-management',
+                },
+                { label: 'navigation.createLocation', icon: 'add_circle' },
+              ],
+            },
+          },
+          {
+            path: 'edit-location/:locationId',
+            name: 'admin-edit-location',
+            component: () => import('pages/admin/location-edit-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageLocations',
+                  icon: 'room',
+                  to: '/admin/location-management',
+                },
+                { label: 'navigation.editLocation', icon: 'edit' },
+              ],
+            },
+          },
+          {
+            path: 'exam-management',
+            name: 'admin-exam-management',
+            component: () => import('pages/admin/exam-management-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.manageExams', icon: 'edit_document' },
+              ],
+            },
+          },
+          {
+            path: 'passcode-history',
+            name: 'admin-passcode-history',
+            component: () => import('pages/admin/passcode-history-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                { label: 'navigation.passcodeHistory', icon: 'how_to_reg' },
+              ],
+            },
+          },
+          {
+            path: 'create-exam',
+            name: 'admin-create-exam',
+            component: () => import('pages/admin/create-exam-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                { label: 'navigation.createExam', icon: 'add_circle' },
+              ],
+            },
+          },
+          {
+            path: 'edit-exam/:examId',
+            name: 'admin-edit-exam',
+            component: () => import('pages/admin/edit-exam-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                { label: 'navigation.editExam', icon: 'edit' },
+              ],
+            },
+          },
+          {
+            path: 'exam-management/:examId/seats',
+            name: 'admin-exam-seat-management',
+            component: () => import('pages/admin/exam-seat-management-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                { label: 'navigation.manageSeats', icon: 'event_seat' },
+              ],
+            },
+          },
+          {
+            path: 'exam-management/:examId/seats/candidates',
+            name: 'admin-exam-seat-candidates',
+            component: () => import('pages/admin/exam-seat-candidates-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.manageExams', icon: 'star', to: '/admin/exam-management' },
+                {
+                  label: 'navigation.manageSeats',
+                  icon: 'event_seat',
+                  to: '/admin/exam-management/:examId/seats',
+                },
+                { label: 'navigation.seatCandidates', icon: 'star' },
+              ],
+            },
+          },
+          {
+            path: 'exam-management/:examId/registrants',
+            name: 'admin-exam-registrants',
+            component: () => import('pages/admin/exam-registrants-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                { label: 'navigation.manageRegistrants', icon: 'group' },
+              ],
+            },
+          },
+          {
+            path: 'exam-management/:examId/registrants/:ermId/history',
+            name: 'admin-exam-registrant-history',
+            component: () => import('pages/admin/exam-registrant-history-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                {
+                  label: 'navigation.manageRegistrants',
+                  icon: 'group',
+                  to: '/admin/exam-management/:examId/registrants',
+                },
+                { label: 'profileEditHistory.pageTitle', icon: 'history' },
+              ],
+            },
+          },
+          {
+            path: 'exam-management/:examId/scores',
+            name: 'admin-exam-scores',
+            component: () => import('pages/admin/exam-scores-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                { label: 'navigation.manageScores', icon: 'star' },
+              ],
+            },
+          },
+          {
+            path: 'exam-management/:examId/registrants/:ermId',
+            name: 'admin-exam-registrant-detail',
+            component: () => import('pages/admin/exam-registrant-detail-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                {
+                  label: 'navigation.manageRegistrants',
+                  icon: 'group',
+                  to: '/admin/exam-management/:examId/registrants',
+                },
+                { label: 'navigation.registrantDetail', icon: 'person' },
+              ],
+            },
+          },
+          {
+            path: 'exam-management/:examId/attendance',
+            name: 'admin-exam-attendance',
+            component: () => import('pages/admin/exam-attendance-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.manageExams',
+                  icon: 'edit_document',
+                  to: '/admin/exam-management',
+                },
+                { label: 'navigation.examAttendance', icon: 'format_list_bulleted' },
+              ],
+            },
+          },
+          {
+            path: 'payment-import',
+            name: 'admin-payment-import',
+            component: () => import('pages/admin/payment-import-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.paymentImport', icon: 'upload_file' },
+              ],
+            },
+          },
+          {
+            path: 'fin-check-transcript',
+            name: 'admin-fin-check-transcript',
+            component: () => import('pages/admin/fin-check-transcript-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.paymentImport',
+                  icon: 'upload_file',
+                  to: '/admin/payment-import',
+                },
+                { label: 'navigation.checkPayment', icon: 'fact_check' },
+              ],
+            },
+          },
+          {
+            path: 'test-voucher-management',
+            name: 'admin-test-voucher-management',
+            component: () => import('pages/admin/test-voucher-management-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.STAFF, ROLES.EXAM_OPERATIONS_OFFICER],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.manageTestVoucher', icon: 'star' },
+              ],
+            },
+          },
+          {
+            path: 'score-criteria-management',
+            name: 'admin-score-criteria-management',
+            component: () => import('pages/admin/score-criteria-management-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.STAFF, ROLES.EXAM_OPERATIONS_OFFICER],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.manageScoreCriteriaAndCert', icon: 'star' },
+              ],
+            },
+          },
+          {
+            path: 'daily-revenue-report',
+            name: 'admin-daily-revenue-report',
+            component: () => import('pages/admin/daily-revenue-report-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.dailyRevenueReport', icon: 'star' },
+              ],
+            },
+          },
+          {
+            path: 'receipt-usage-report',
+            name: 'admin-receipt-usage-report',
+            component: () => import('pages/admin/receipt-usage-report-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.receiptUsageReport', icon: 'receipt' },
+              ],
+            },
+          },
+          {
+            path: 'application-fee-report',
+            name: 'admin-application-fee-report',
+            component: () => import('pages/admin/application-fee-report-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.applicationFeeReport', icon: 'paid' },
+              ],
+            },
+          },
+        ],
+      },
+    ],
+  },
+
+  // Always leave this as last one,
+  {
+    path: '/:catchAll(.*)*',
+    component: () => import('pages/error-not-found.vue'),
+  },
+];
+
+export default routes;

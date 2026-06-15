@@ -1,0 +1,1 @@
+import{O as s,Q as a,R as i,at as p,S as d,a2 as l}from"./index-D5nNUwdo.js";const r=s({__name:"app-seat-split-divider",props:{width:{default:"48px"}},setup(t){return(n,e)=>(a(),i("div",{class:"seat-split-divider",style:p({width:t.width})},[...e[0]||(e[0]=[d("span",{class:"seat-split-divider__line"},null,-1)])],4))}}),c=l(r,[["__scopeId","data-v-ee5828d5"]]);export{c as A};

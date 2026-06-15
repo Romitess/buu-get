@@ -1,0 +1,35 @@
+import type { RolesType } from '../constants/roles';
+
+export type UserRole = RolesType[keyof RolesType];
+
+export interface User {
+  // USER
+  id?: number;
+  userCode?: string;
+  nationalId: string;
+  passportNo: string;
+  email: string;
+  password?: string;
+  status: string;
+
+  // USER_PROFILE
+  profileId?: number;
+  titleTH: string;
+  fullNameTH: string;
+  titleEN: string;
+  fullNameEN: string;
+  birthdate: string;
+  phone: string;
+  educationLevel: string;
+  country: string;
+  address: string;
+  faculty?: string;
+  institution?: string;
+  taxId: string;
+  thaidSynced: boolean;
+  userImagePath?: string;
+
+  // ROLES
+  role?: UserRole;
+  remark?: string;
+}
