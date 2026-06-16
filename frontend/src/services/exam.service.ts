@@ -624,6 +624,16 @@ export const fetchUserEnrollments = async (userId: number): Promise<ExamEnrollme
   }
 };
 
+export const fetchEnrollmentById = async (enrollmentId: number): Promise<ExamEnrollment> => {
+  try {
+    const response = await api.get<ExamEnrollment>(`/exam-enrollments/${enrollmentId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching enrollment ${enrollmentId}:`, error);
+    throw error;
+  }
+};
+
 export const updateEnrollmentStatus = async (
   enrollmentId: number,
   status: number,

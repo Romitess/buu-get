@@ -409,8 +409,11 @@ export class ExamEnrollmentsService {
       relations: [
         'SESSION',
         'SESSION.EXAM',
+        'SESSION.LOCATION',
         'SESSION.SESSION_LOCATIONS',
         'SESSION.SESSION_LOCATIONS.LOCATION',
+        'SESSION_LOCATION',
+        'SESSION_LOCATION.LOCATION',
         'USER',
         'USER.PROFILE',
         'USER.IMAGE',

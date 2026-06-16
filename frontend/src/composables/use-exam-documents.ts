@@ -5,7 +5,9 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { useUserStore } from 'src/stores/user.store';
 import { getImageUrl } from 'src/services/image.service';
-import type { ExamEnrollment, ExamHistoryItem } from 'src/types/exam';
+import { fetchEnrollmentById } from 'src/services/exam.service';
+
+import type { ExamHistoryItem } from 'src/types/exam';
 import type { VoucherData } from 'src/types/voucher';
 import type { ReceiptData } from 'src/types/receipt';
 
@@ -46,31 +48,54 @@ export function useExamDocuments() {
     return timeStr;
   };
 
-  const getTestSessionLabel = (currentSession: NonNullable<ExamEnrollment['SESSION']>): string => {
-    const examDate = currentSession.EXAM?.EXAM_DATE;
-    const examYear = examDate ? new Date(examDate).getFullYear() : new Date().getFullYear();
-    const sessionTimeKey = `${currentSession.SS_START_TIME || ''}-${currentSession.SS_END_TIME || ''}`;
-    const uniqueTimeKeys = [
-      ...new Set(
-        (currentSession.EXAM?.SESSIONS ?? [])
-          .map((session) => `${session.SS_START_TIME || ''}-${session.SS_END_TIME || ''}`)
-          .filter((timeKey) => timeKey !== '-'),
-      ),
-    ].sort();
-    const sessionIndex = uniqueTimeKeys.indexOf(sessionTimeKey);
-    const sessionNumber = sessionIndex >= 0 ? sessionIndex + 1 : 1;
+  const waitForImages = async (element: HTMLElement, timeoutMs = 250): Promise<void> => {
+    const pendingImages = Array.from(element.querySelectorAll('img')).filter(
+      (image) => !image.complete,
+    );
 
-    return `${sessionNumber}/${examYear}`;
+    if (pendingImages.length === 0) return;
+
+    await Promise.race([
+      Promise.all(
+        pendingImages.map(
+          (image) =>
+            new Promise<void>((resolve) => {
+              image.onload = () => resolve();
+              image.onerror = () => resolve();
+            }),
+        ),
+      ).then(() => undefined),
+      new Promise<void>((resolve) => window.setTimeout(resolve, timeoutMs)),
+    ]);
   };
 
   const printVoucher = async (exam: ExamHistoryItem): Promise<void> => {
-    const enrollment = exam.rawEnrollment;
+    const cachedEnrollment = exam.rawEnrollment;
     const currentUser = userStore.currentUser;
 
-    if (enrollment && enrollment.SESSION) {
+    if (cachedEnrollment) {
+      $q.loading.show({
+        message: t('exam.voucher.downloading'),
+      });
+
+      isDownloadingVoucher.value = true;
+
+      let enrollment = cachedEnrollment;
+      try {
+        enrollment = await fetchEnrollmentById(cachedEnrollment.ERM_ID);
+      } catch (error) {
+        console.error(`Failed to refresh enrollment ${cachedEnrollment.ERM_ID}`, error);
+      }
+
+      if (!enrollment.SESSION) {
+        $q.loading.hide();
+        isDownloadingVoucher.value = false;
+        return;
+      }
+
       const session = enrollment.SESSION;
       const examObj = session.EXAM;
-      const locationObj = enrollment.SESSION_LOCATION?.LOCATION || session.LOCATION;
+      const locationObj = enrollment.SESSION_LOCATION?.LOCATION;
 
       let dateStr = '-';
       if (examObj?.EXAM_DATE) {
@@ -99,24 +124,6 @@ export function useExamDocuments() {
       const locationText = locationObj?.LOCATION_NAME || '-';
       const locationRoom = locationObj?.LOCATION_ROOM_NO || undefined;
 
-      const mapTitleToEn = (titleTH?: string): string => {
-        if (!titleTH) return '';
-        const titleMap: Record<string, string> = {
-          นาย: 'Mr.',
-          นาง: 'Mrs.',
-          นางสาว: 'Miss',
-          'ดร.': 'Dr.',
-          ด็อกเตอร์: 'Dr.',
-          'ศ.': 'Prof.',
-          ศาสตราจารย์: 'Prof.',
-          'รศ.': 'Assoc. Prof.',
-          รองศาสตราจารย์: 'Assoc. Prof.',
-          'ผศ.': 'Asst. Prof.',
-          ผู้ช่วยศาสตราจารย์: 'Asst. Prof.',
-        };
-        return titleMap[titleTH] || titleTH;
-      };
-
       const mapExamTypeToEn = (type?: string): string => {
         if (!type) return '-';
         if (type === 'รอบทั่วไป' || type.toLowerCase() === 'general' || type === 'ทั่วไป')
@@ -128,10 +135,7 @@ export function useExamDocuments() {
 
       const profile = enrollment.USER?.PROFILE;
       const enrollmentFullName = profile
-        ? `${profile.userTitleEn || mapTitleToEn(profile.userTitleTh || undefined) || ''} ${profile.userFullnameEn || profile.userFullnameTh || ''}`.trim()
-        : '';
-      const currentUserFullName = currentUser
-        ? `${currentUser.titleEN || mapTitleToEn(currentUser.titleTH) || ''} ${currentUser.fullNameEN || currentUser.fullNameTH || ''}`.trim()
+        ? `${profile.userTitleEn || ''} ${profile.userFullnameEn || ''}`.trim()
         : '';
       const voucherCode = enrollment.VOUCHERS?.[0]?.VC_CODE || '-';
       const profileImagePath =
@@ -142,7 +146,7 @@ export function useExamDocuments() {
 
       selectedVoucherData.value = {
         id: enrollment.ERM_ID,
-        fullName: enrollmentFullName || currentUserFullName || '-',
+        fullName: enrollmentFullName || '-',
         studentId: enrollment.ERM_TEST_TAKER || '-',
         examName: examObj?.EXAM_NAME || '-',
         examDate: dateStr,
@@ -158,51 +162,44 @@ export function useExamDocuments() {
           currentUser?.nationalId ||
           currentUser?.passportNo ||
           '-',
-        testSession: getTestSessionLabel(session),
+        testSession: examObj?.EXAM_ROUND || '-',
         profileImage: profileImagePath ? getImageUrl(profileImagePath) : undefined,
         barcodeValue: voucherCode,
       };
 
-      $q.loading.show({
-        message: t('exam.voucher.downloading'),
-      });
-
-      isDownloadingVoucher.value = true;
-
-      // Wait for DOM to mount offscreen container
       await nextTick();
-      // Brief sleep to allow barcode canvas or images to render fully
-      await new Promise((resolve) => setTimeout(resolve, 600));
       try {
         const container = document.getElementById('pdf-render-container');
         const cardElement = (container?.querySelector('.voucher-wrapper') ||
           container?.querySelector('.voucher-card')) as HTMLElement | null;
 
         if (cardElement) {
+          await waitForImages(cardElement);
+
+          const canvasScale = 3;
           const canvas = await html2canvas(cardElement, {
-            scale: 3, // very high-quality rendering (600 DPI feel)
+            scale: canvasScale,
             useCORS: true,
             allowTaint: true,
-            backgroundColor: null, // transparent backgrounds
+            backgroundColor: null,
           });
 
           const imgData = canvas.toDataURL('image/png');
 
-          // Calculate the exact size of the card in millimeters (1px = 0.264583mm)
-          // We divide by the scale (3) to get the original dimensions
           const pxToMm = 0.264583;
-          const widthMm = (canvas.width * pxToMm) / 3;
-          const heightMm = (canvas.height * pxToMm) / 3;
+          const widthMm = (canvas.width * pxToMm) / canvasScale;
+          const heightMm = (canvas.height * pxToMm) / canvasScale;
+          const pdfBleedMm = 1;
 
           // Create a PDF with the EXACT dimensions of the card
           const pdf = new jsPDF({
             orientation: widthMm > heightMm ? 'landscape' : 'portrait',
             unit: 'mm',
-            format: [widthMm, heightMm],
+            format: [widthMm + pdfBleedMm * 2, heightMm + pdfBleedMm * 2],
           });
 
           // Fill the entire PDF page with the image with no margins
-          pdf.addImage(imgData, 'PNG', 0, 0, widthMm, heightMm);
+          pdf.addImage(imgData, 'PNG', pdfBleedMm, pdfBleedMm, widthMm, heightMm);
           pdf.save(`BUU-GET_Voucher_${enrollment.ERM_ID}.pdf`);
 
           $q.notify({

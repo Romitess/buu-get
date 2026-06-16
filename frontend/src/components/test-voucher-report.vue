@@ -423,22 +423,22 @@ const windowPrint = (): void => {
     position: relative;
     z-index: 1;
     display: grid;
-    grid-template-columns: 160px minmax(0, 1fr);
+    grid-template-columns: 172px minmax(0, 1fr);
     align-items: start;
-    column-gap: 30px;
+    column-gap: 24px;
   }
 }
 
 /* ===== Watermark ===== */
 .watermark-bg {
   position: absolute;
-  top: 46%;
-  left: 62%;
+  top: 49%;
+  left: 66%;
   transform: translate(-50%, -50%);
   font-family: 'Outfit', var(--font-family-base);
   font-weight: 800;
   font-style: normal;
-  font-size: 182px;
+  font-size: 196px;
   line-height: 100%;
   letter-spacing: 0;
   vertical-align: middle;
@@ -450,8 +450,8 @@ const windowPrint = (): void => {
 
 /* ===== Profile Photo ===== */
 .profile-photo-wrapper {
-  width: 140px;
-  height: 166px;
+  width: 172px;
+  height: 178px;
   background-color: var(--badge-primary-bg);
   border-radius: 3px;
   overflow: hidden;
@@ -488,10 +488,10 @@ const windowPrint = (): void => {
 }
 
 .signature-line {
-  width: 140px;
+  width: 172px;
   height: 1.5px;
   background-color: var(--neutral-400);
-  margin-top: 30px;
+  margin-top: 22px;
   border-radius: 1px;
 }
 
