@@ -6,6 +6,7 @@ import { jsPDF } from 'jspdf';
 import { useUserStore } from 'src/stores/user.store';
 import { getImageUrl } from 'src/services/image.service';
 import { fetchEnrollmentById } from 'src/services/exam.service';
+import { getRegulations } from 'src/services/voucher-config.service';
 
 import type { ExamHistoryItem } from 'src/types/exam';
 import type { VoucherData } from 'src/types/voucher';
@@ -18,6 +19,8 @@ export function useExamDocuments() {
 
   const isDownloadingVoucher = ref(false);
   const selectedVoucherData = ref<VoucherData | undefined>(undefined);
+  const selectedVoucherRegulationsEn = ref('');
+  const selectedVoucherRegulationsTh = ref('');
 
   const isDownloadingReceipt = ref(false);
   const selectedReceiptData = ref<ReceiptData>({
@@ -95,7 +98,11 @@ export function useExamDocuments() {
 
       const session = enrollment.SESSION;
       const examObj = session.EXAM;
-      const locationObj = enrollment.SESSION_LOCATION?.LOCATION;
+      const locationObj =
+        enrollment.SESSION_LOCATION?.LOCATION ??
+        session.SESSION_LOCATIONS?.find(
+          (sessionLocation) => sessionLocation.SL_ID === enrollment.SL_ID,
+        )?.LOCATION;
 
       let dateStr = '-';
       if (examObj?.EXAM_DATE) {
@@ -143,6 +150,16 @@ export function useExamDocuments() {
         profile?.userImagePath ||
         currentUser?.userImagePath ||
         undefined;
+
+      try {
+        const regulations = await getRegulations();
+        selectedVoucherRegulationsEn.value = regulations.regulationsEn || '';
+        selectedVoucherRegulationsTh.value = regulations.regulationsTh || '';
+      } catch (error) {
+        console.error('Failed to load voucher regulations', error);
+        selectedVoucherRegulationsEn.value = '';
+        selectedVoucherRegulationsTh.value = '';
+      }
 
       selectedVoucherData.value = {
         id: enrollment.ERM_ID,
@@ -221,6 +238,8 @@ export function useExamDocuments() {
         $q.loading.hide();
         isDownloadingVoucher.value = false;
         selectedVoucherData.value = undefined;
+        selectedVoucherRegulationsEn.value = '';
+        selectedVoucherRegulationsTh.value = '';
       }
     }
   };
@@ -376,6 +395,8 @@ export function useExamDocuments() {
   return {
     isDownloadingVoucher,
     selectedVoucherData,
+    selectedVoucherRegulationsEn,
+    selectedVoucherRegulationsTh,
     isDownloadingReceipt,
     selectedReceiptData,
     printVoucher,

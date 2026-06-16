@@ -33,6 +33,7 @@ export class VoucherConfigsService {
   ): Promise<{ regulationsEn: string; regulationsTh: string }> {
     let rule = await this.examRuleRepository.findOne({
       where: { PCF_ACTIVE: true },
+      order: { ID: 'DESC' },
     });
 
     if (rule) {

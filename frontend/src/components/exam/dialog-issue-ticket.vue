@@ -101,10 +101,10 @@ const onCancelClick = (): void => onDialogCancel();
 
 <style scoped lang="scss">
 .issue-ticket-dialog-card {
-  width: min(760px, calc(100vw - 32px));
-  max-width: 760px;
+  width: min(860px, calc(100vw - 32px));
+  max-width: 860px;
   max-height: calc(100vh - 32px);
-  padding: 28px 56px 32px;
+  padding: 28px 48px 32px;
   border-radius: 10px;
   overflow-y: auto;
   background: #ffffff;

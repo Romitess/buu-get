@@ -124,7 +124,7 @@ const regulationsEn = ref<string>(t('admin.testVoucherManagement.defaultRegulati
 // ===== ข้อปฏิบัติสำหรับผู้เข้าสอบ (Thai) =====
 const regulationsTh = ref<string>(t('admin.testVoucherManagement.defaultRegulationsTh'));
 
-// Load saved data on mount — ดึงจาก API ก่อน, fallback ไป localStorage
+// Load regulations from API
 onMounted(async () => {
   try {
     const data = await getRegulations();
@@ -134,28 +134,8 @@ onMounted(async () => {
     if (data.regulationsTh) {
       regulationsTh.value = data.regulationsTh;
     }
-  } catch {
-    // Fallback: อ่านจาก localStorage กรณี API ไม่พร้อม
-    try {
-      const savedEn = localStorage.getItem('buu-get-regulations-en');
-      const savedTh = localStorage.getItem('buu-get-regulations-th');
-      if (savedEn) {
-        if (savedEn.startsWith('[')) {
-          regulationsEn.value = JSON.parse(savedEn).join('\n');
-        } else {
-          regulationsEn.value = savedEn;
-        }
-      }
-      if (savedTh) {
-        if (savedTh.startsWith('[')) {
-          regulationsTh.value = JSON.parse(savedTh).join('\n');
-        } else {
-          regulationsTh.value = savedTh;
-        }
-      }
-    } catch (e) {
-      console.error('Failed to load regulations from localStorage', e);
-    }
+  } catch (error) {
+    console.error('Failed to load voucher regulations', error);
   }
 });
 

@@ -104,7 +104,7 @@ const previewSide = ref<'front' | 'back'>('front');
   border: 1px solid #222222;
   border-radius: 14px;
   overflow: hidden;
-  background: linear-gradient(120.96deg, #fafafa 0%, #f0f4f8 100%);
+  background: #f0f4f8;
 
   :deep(.page-container-test) {
     width: 100%;
@@ -129,7 +129,7 @@ const previewSide = ref<'front' | 'back'>('front');
     border: 0;
     border-radius: 0;
     box-shadow: none;
-    background: linear-gradient(120.96deg, #fafafa 0%, #f0f4f8 100%);
+    background: #f0f4f8;
   }
 
   :deep(.voucher-card) {
@@ -166,7 +166,7 @@ const previewSide = ref<'front' | 'back'>('front');
 
   &.is-front :deep(.voucher-body) {
     min-height: 225px;
-    padding: 14px 46px 6px;
+    padding: 14px 40px 6px;
     display: flex;
     align-items: center;
   }
@@ -174,7 +174,7 @@ const previewSide = ref<'front' | 'back'>('front');
   &.is-front :deep(.content-container) {
     width: 100%;
     grid-template-columns: 170px minmax(0, 1fr);
-    column-gap: 34px;
+    column-gap: 28px;
   }
 
   &.is-front :deep(.profile-photo-wrapper) {
@@ -184,12 +184,13 @@ const previewSide = ref<'front' | 'back'>('front');
 
   &.is-front :deep(.signature-line) {
     width: 150px;
-    margin-top: 32px;
+    margin-top: 38px;
   }
 
   &.is-front :deep(.details-grid) {
+    grid-template-columns: minmax(0, 1.15fr) minmax(122px, 0.85fr);
     grid-auto-rows: minmax(42px, auto);
-    column-gap: 38px;
+    column-gap: 30px;
   }
 
   &.is-front :deep(.info-label) {
@@ -201,6 +202,20 @@ const previewSide = ref<'front' | 'back'>('front');
     font-size: clamp(12px, 1.55vw, 16px) !important;
     white-space: nowrap;
     overflow: visible;
+  }
+
+  &.is-front :deep(.venue-value) {
+    white-space: normal !important;
+    line-height: 1.25 !important;
+  }
+
+  &.is-front :deep(.name-value) {
+    display: block !important;
+    white-space: normal !important;
+    overflow: hidden !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    line-height: 1.2 !important;
   }
 
   &.is-front :deep(.voucher-footer) {
@@ -258,22 +273,23 @@ const previewSide = ref<'front' | 'back'>('front');
   }
 
   &.is-back :deep(.regulations-heading-inline) {
-    margin-bottom: 2px;
+    margin: 0 0 2px 0 !important;
     font-size: 14px;
     line-height: 1.2;
   }
 
   &.is-back :deep(.regulations-heading-inline.q-mt-md) {
-    margin-top: 5px;
+    margin-top: 5px !important;
   }
 
   &.is-back :deep(.regulations-text-content) {
     font-size: 13px;
-    line-height: 1.28;
+    line-height: 1.24;
+    margin-top: 0 !important;
   }
 
   &.is-back :deep(.regulations-text-content.q-mb-md) {
-    margin-bottom: 0;
+    margin-bottom: 4px !important;
   }
 }
 </style>
