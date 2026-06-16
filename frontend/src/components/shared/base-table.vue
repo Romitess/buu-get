@@ -154,15 +154,80 @@ const emit = defineEmits<{
   (e: 'request', requestProps: TableRequestProps): void;
 }>();
 
+const setPropValue = <K extends keyof PaginationModel>(
+  obj: PaginationModel | undefined,
+  key: K,
+  value: PaginationModel[K],
+) => {
+  if (obj) {
+    obj[key] = value;
+  }
+};
+
+const getSessionSort = () => {
+  try {
+    const key = `base-table-sort:${window.location.pathname}:${props.columns.map((c) => c.name).join('_')}`;
+    const stored = sessionStorage.getItem(key);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === 'object') {
+        return {
+          sortBy: parsed.sortBy,
+          descending: parsed.descending,
+        };
+      }
+    }
+  } catch {
+    void 0;
+  }
+  return null;
+};
+
+const sessionSort = getSessionSort();
+
+if (props.pagination && sessionSort) {
+  setPropValue(props.pagination, 'sortBy', sessionSort.sortBy);
+  setPropValue(props.pagination, 'descending', sessionSort.descending);
+}
+
 // internalPagination ใช้เป็น v-model ให้ q-table
 // เพื่อให้ Quasar รู้ว่าเป็น server-side pagination และ rowsNumber เท่าไหร่
 const internalPagination = ref<PaginationModel>({
   page: props.pagination?.page ?? 1,
   rowsPerPage: props.pagination?.rowsPerPage ?? 10,
-  sortBy: props.pagination?.sortBy ?? null,
-  descending: props.pagination?.descending ?? false,
+  sortBy: props.pagination?.sortBy ?? sessionSort?.sortBy ?? null,
+  descending: props.pagination?.descending ?? sessionSort?.descending ?? false,
   rowsNumber: props.pagination?.rowsNumber ?? 0,
 });
+
+watch(
+  () => [internalPagination.value.sortBy, internalPagination.value.descending],
+  (newValues) => {
+    const sortBy = newValues[0] as string | null | undefined;
+    const descending = newValues[1] as boolean | undefined;
+    try {
+      const key = `base-table-sort:${window.location.pathname}:${props.columns.map((c) => c.name).join('_')}`;
+      sessionStorage.setItem(
+        key,
+        JSON.stringify({
+          sortBy,
+          descending,
+        }),
+      );
+    } catch {
+      void 0;
+    }
+
+    if (props.pagination) {
+      if (props.pagination.sortBy !== sortBy) {
+        setPropValue(props.pagination, 'sortBy', sortBy);
+      }
+      if (props.pagination.descending !== descending) {
+        setPropValue(props.pagination, 'descending', descending);
+      }
+    }
+  },
+);
 
 const NON_SORTABLE_COLUMNS = new Set(['tools', 'actions', 'action']);
 
