@@ -517,10 +517,65 @@ body {
 
 .exam-schedule {
   &.page-container {
-    padding: 16px 24px;
+    width: clamp(921.6px, 81vw, 1440px) !important;
+    padding: 21.6px !important;
 
-    @media (max-width: 600px) {
-      padding: 12px 16px;
+    @media (max-width: 1023px) {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+  }
+
+  .q-breadcrumbs {
+    margin-bottom: 21.6px !important;
+  }
+
+  .page-header {
+    margin-bottom: 21.6px !important;
+
+    .page-title-size {
+      margin-bottom: 14.4px !important;
+    }
+  }
+
+  .exam-detail-card {
+    border-radius: 14.4px !important;
+
+    .q-card__section {
+      padding: 14.4px !important;
+      padding-left: 21.6px !important;
+    }
+
+    .exam-badge {
+      padding: 3.6px 10.8px !important;
+      border-radius: 14.4px !important;
+      gap: 7.2px !important;
+
+      .exam-dot {
+        width: 5.4px !important;
+        height: 5.4px !important;
+      }
+    }
+
+    .q-mb-sm {
+      margin-bottom: 7.2px !important;
+    }
+    .q-mb-xs {
+      margin-bottom: 3.6px !important;
+    }
+    .q-mb-md {
+      margin-bottom: 14.4px !important;
+    }
+    .q-mr-xs {
+      margin-right: 3.6px !important;
+    }
+
+    .q-gutter-x-lg {
+      margin-left: -21.6px !important;
+
+      > * {
+        padding-left: 21.6px !important;
+      }
     }
   }
 
@@ -530,15 +585,27 @@ body {
     min-height: 440px;
 
     @media (min-width: 1024px) {
-      min-height: 500px !important;
-      padding: 24px !important;
+      min-height: 450px !important;
+      padding: 21.6px !important;
+      border-radius: 14.4px !important;
     }
   }
 
+  .calendar-header {
+    margin-bottom: 10.8px !important;
+    height: 39.6px !important;
+  }
+
   .calendar-title {
+    padding: 3.6px 10.8px !important;
+
     @media (min-width: 1024px) {
       h2.month-title {
         font-size: 19px !important;
+
+        .dropdown-icon {
+          margin-left: 3.6px !important;
+        }
       }
 
       p.month-subtitle {
@@ -548,27 +615,45 @@ body {
   }
 
   .calendar-grid {
+    row-gap: 3.6px !important;
+    column-gap: 3.6px !important;
+
     @media (min-width: 1024px) {
-      row-gap: 6px !important;
+      row-gap: 5.4px !important;
 
       .day-cell {
-        height: 52px !important;
+        height: 46.8px !important;
         font-size: 15px !important;
-        border-radius: 10px !important;
+        border-radius: 9px !important;
       }
 
       .dot {
-        width: 8px !important;
-        height: 8px !important;
-        bottom: 6px !important;
+        width: 7.2px !important;
+        height: 7.2px !important;
+        bottom: 5.4px !important;
       }
     }
   }
 
   .status-footer {
     @media (min-width: 1024px) {
-      margin-top: 24px !important;
-      padding: 16px !important;
+      margin-top: 21.6px !important;
+      padding: 14.4px !important;
+    }
+  }
+
+  .calendar-footer-legend {
+    padding-top: 10.8px !important;
+    margin-top: 10.8px !important;
+    gap: 16.2px !important;
+
+    .legend-item {
+      gap: 7.2px !important;
+    }
+
+    .legend-dot {
+      width: 7.2px !important;
+      height: 7.2px !important;
     }
   }
 
@@ -577,9 +662,19 @@ body {
     flex-wrap: wrap;
     align-items: flex-start;
 
+    &.row {
+      margin-left: -10.8px !important;
+      margin-right: -10.8px !important;
+
+      > div {
+        padding-left: 10.8px !important;
+        padding-right: 10.8px !important;
+      }
+    }
+
     @media (min-width: 1024px) {
-      margin-top: 16px !important;
-      padding-bottom: 32px;
+      margin-top: 14.4px !important;
+      padding-bottom: 28.8px !important;
     }
 
     @media (max-width: 1024px) {
@@ -592,24 +687,24 @@ body {
     display: flex;
     flex-direction: column;
     background-color: var(--surface-card);
-    border-radius: var(--radius-lg);
+    border-radius: 14.4px !important;
     padding: 24px;
     box-shadow: var(--shadow-card);
     overflow: hidden;
     border: none;
 
     @media (min-width: 1024px) {
-      padding: 24px !important;
+      padding: 21.6px !important;
     }
 
     @media (max-width: 1024px) {
-      max-height: 500px;
-      margin-top: 24px;
+      max-height: 450px !important;
+      margin-top: 21.6px !important;
     }
 
     @media (max-width: 600px) {
-      padding: 16px;
-      max-height: 480px;
+      padding: 14.4px !important;
+      max-height: 432px !important;
     }
   }
 
@@ -618,18 +713,23 @@ body {
     margin-bottom: 12px;
 
     @media (min-width: 1024px) {
-      margin-bottom: 16px !important;
+      margin-bottom: 14.4px !important;
     }
 
     @media (max-width: 600px) {
-      margin-bottom: 12px;
+      margin-bottom: 10.8px !important;
     }
   }
 
   &__rounds-title-row {
     display: flex;
     align-items: center;
-    margin-bottom: 4px;
+    margin-bottom: 3.6px !important;
+
+    .q-icon {
+      font-size: 18px !important;
+      margin-right: 7.2px !important;
+    }
   }
 
   &__rounds-title {
@@ -650,12 +750,12 @@ body {
   &__rounds-subtitle {
     font-size: 0.85rem;
     margin: 0;
-    padding-left: 28px;
+    padding-left: 25.2px !important;
     color: var(--text-secondary);
 
     @media (min-width: 1024px) {
       font-size: 0.9rem !important;
-      padding-left: 30px !important;
+      padding-left: 27px !important;
     }
 
     @media (max-width: 600px) {
@@ -667,15 +767,15 @@ body {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10.8px !important;
     overflow-y: auto;
-    padding: 8px 8px 8px 0;
+    padding: 7.2px 7.2px 7.2px 0 !important;
     min-height: 0;
     scrollbar-gutter: stable;
 
     @media (min-width: 1024px) {
-      gap: 12px !important;
-      padding: 10px 8px 10px 0 !important;
+      gap: 10.8px !important;
+      padding: 9px 7.2px 9px 0 !important;
     }
 
     &::-webkit-scrollbar {
@@ -698,24 +798,69 @@ body {
   }
 
   .round-exam {
+    padding: 9px 16.2px !important;
+    border-radius: 14.4px !important;
+    margin-bottom: 10.8px !important;
+    gap: 12.6px !important;
+
     @media (min-width: 1024px) {
-      padding: 16px 20px !important;
-      gap: 20px !important;
-      border-radius: 16px !important;
+      padding: 14.4px 18px !important;
+      gap: 18px !important;
+      border-radius: 14.4px !important;
 
       &__title {
         font-size: 1.15rem !important;
       }
 
       &__btn {
-        padding: 8px 20px !important;
+        padding: 7.2px 18px !important;
         font-size: 0.95rem !important;
-        min-width: 140px !important;
+        min-width: 126px !important;
       }
 
       &__status {
         font-size: 0.9rem !important;
       }
+    }
+
+    .round-exam__info {
+      gap: 7.2px !important;
+
+      .round-exam__tag {
+        border-radius: 9px !important;
+        padding: 1.8px 7.2px !important;
+      }
+    }
+
+    .round-exam__action-group {
+      gap: 10.8px !important;
+    }
+
+    .round-exam__status {
+      gap: 5.4px !important;
+
+      .q-icon {
+        font-size: 10.8px !important;
+      }
+
+      .text-muted {
+        margin-left: 1.8px !important;
+      }
+    }
+
+    .round-exam__btn {
+      min-width: 117px !important;
+    }
+  }
+
+  .exam-clock {
+    padding: 9px 18px !important;
+    border-radius: 10.8px !important;
+    min-width: 108px !important;
+
+    &__icon {
+      font-size: 19.8px !important;
+      margin-bottom: 3.6px !important;
     }
   }
 
@@ -786,7 +931,6 @@ body {
 
 // 2. กล่องสถานะ/ฟิลด์ขนาดใหญ่ (Large Field Matching Left Side)
 .buu-field-large {
-
   &.q-field--outlined .q-field__control,
   .q-field__control-container {
     height: 64px !important;
@@ -796,7 +940,6 @@ body {
 
 // 3. ปุ่ม Toggle แบบหม่น (ปุ่มอยู่ข้างในราง แบบ iOS Style ตามรูป 2, 3)
 .buu-toggle-muted {
-
   // --- บังคับขนาด Wrapper หลักให้เป๊ะ ---
   .q-toggle__inner {
     width: 44px !important;
@@ -888,7 +1031,6 @@ body {
 
 // Shake animation for invalid fields
 @keyframes buu-shake {
-
   0%,
   100% {
     transform: translateX(0);
@@ -926,7 +1068,6 @@ body {
 
 // Pulse glow for the error icon
 @keyframes buu-pulse-glow {
-
   0%,
   100% {
     transform: scale(1);
