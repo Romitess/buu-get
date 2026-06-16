@@ -204,6 +204,7 @@ import { computed, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { VoucherData } from 'src/types/voucher';
 import ImageDisplay from 'src/components/base/image-display.vue';
+import { getRegulations } from 'src/services/voucher-config.service';
 
 // ===== Props =====
 const props = withDefaults(
@@ -252,26 +253,38 @@ const localRegulationsTh = ref<string>('');
 const defaultRegulationsEn = t('admin.testVoucherManagement.defaultRegulationsEn');
 const defaultRegulationsTh = t('admin.testVoucherManagement.defaultRegulationsTh');
 
-onMounted(() => {
+// ดึงจาก API ก่อน, fallback ไป localStorage
+onMounted(async () => {
   try {
-    const savedEn = localStorage.getItem('buu-get-regulations-en');
-    const savedTh = localStorage.getItem('buu-get-regulations-th');
-    if (savedEn) {
-      if (savedEn.startsWith('[')) {
-        localRegulationsEn.value = JSON.parse(savedEn).join('\n');
-      } else {
-        localRegulationsEn.value = savedEn;
-      }
+    const data = await getRegulations();
+    if (data.regulationsEn) {
+      localRegulationsEn.value = data.regulationsEn;
     }
-    if (savedTh) {
-      if (savedTh.startsWith('[')) {
-        localRegulationsTh.value = JSON.parse(savedTh).join('\n');
-      } else {
-        localRegulationsTh.value = savedTh;
-      }
+    if (data.regulationsTh) {
+      localRegulationsTh.value = data.regulationsTh;
     }
-  } catch (e) {
-    console.error('Failed to load regulations from localStorage', e);
+  } catch {
+    // Fallback: อ่านจาก localStorage กรณี API ไม่พร้อม
+    try {
+      const savedEn = localStorage.getItem('buu-get-regulations-en');
+      const savedTh = localStorage.getItem('buu-get-regulations-th');
+      if (savedEn) {
+        if (savedEn.startsWith('[')) {
+          localRegulationsEn.value = JSON.parse(savedEn).join('\n');
+        } else {
+          localRegulationsEn.value = savedEn;
+        }
+      }
+      if (savedTh) {
+        if (savedTh.startsWith('[')) {
+          localRegulationsTh.value = JSON.parse(savedTh).join('\n');
+        } else {
+          localRegulationsTh.value = savedTh;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load regulations from localStorage', e);
+    }
   }
 });
 

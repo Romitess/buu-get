@@ -1070,6 +1070,8 @@ export default {
       notifications: {
         saveSuccess: 'บันทึกข้อมูลเกณฑ์คะแนนสำเร็จ',
         saveError: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล',
+        invalidScore: 'คะแนนต้องอยู่ระหว่าง 0 ถึง 100 เท่านั้น',
+        minGreaterThanMax: 'คะแนนขั้นต่ำห้ามมากกว่าคะแนนสูงสุด',
       },
     },
     dailyRevenueReport: {

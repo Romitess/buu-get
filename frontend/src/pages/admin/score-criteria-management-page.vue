@@ -68,6 +68,8 @@
                 <q-input
                   v-model.number="rule.minScore"
                   type="number"
+                  :min="0"
+                  :max="100"
                   outlined
                   dense
                   class="buu-input-muted col"
@@ -77,6 +79,8 @@
                 <q-input
                   v-model.number="rule.maxScore"
                   type="number"
+                  :min="0"
+                  :max="100"
                   outlined
                   dense
                   class="buu-input-muted col"
@@ -159,6 +163,7 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import CertificatePreviewReport from 'src/components/certificate-preview-report.vue';
 import type { BandRule } from 'src/components/certificate-preview-report.vue';
+import { getBandRules, saveBandRules } from 'src/services/score-criteria.service';
 
 // ===== ⚙️ Configuration & Constants (No Hard-coding) =====
 const LOCAL_STORAGE_KEY = 'buu-get-band-rules';
@@ -225,16 +230,27 @@ const { t } = useI18n();
 // ===== 📦 Reactive State =====
 const bandRules = ref<BandRule[]>([]);
 
-// ===== 🔄 Lifecycle Hooks =====
-onMounted(() => {
+// ===== 🔄 Lifecycle Hooks — ดึงจาก API ก่อน, fallback ไป localStorage =====
+onMounted(async () => {
   try {
-    const savedRules = localStorage.getItem(LOCAL_STORAGE_KEY);
-    bandRules.value = savedRules
-      ? JSON.parse(savedRules)
-      : JSON.parse(JSON.stringify(DEFAULT_BAND_RULES));
-  } catch (e) {
-    console.error('Failed to load band rules from localStorage', e);
-    bandRules.value = JSON.parse(JSON.stringify(DEFAULT_BAND_RULES));
+    const data = await getBandRules();
+    if (data.bandRules && data.bandRules.length > 0) {
+      bandRules.value = data.bandRules;
+    } else {
+      // API ยังไม่มีข้อมูล — ใช้ค่า default
+      bandRules.value = JSON.parse(JSON.stringify(DEFAULT_BAND_RULES));
+    }
+  } catch {
+    // Fallback: อ่านจาก localStorage กรณี API ไม่พร้อม
+    try {
+      const savedRules = localStorage.getItem(LOCAL_STORAGE_KEY);
+      bandRules.value = savedRules
+        ? JSON.parse(savedRules)
+        : JSON.parse(JSON.stringify(DEFAULT_BAND_RULES));
+    } catch (e) {
+      console.error('Failed to load band rules from localStorage', e);
+      bandRules.value = JSON.parse(JSON.stringify(DEFAULT_BAND_RULES));
+    }
   }
 });
 
@@ -264,9 +280,41 @@ const handleCancel = (): void => {
   router.back();
 };
 
-const handleSave = (): void => {
+const handleSave = async (): Promise<void> => {
+  // 1. ตรวจสอบคะแนนห้ามติดลบ หรือเกิน 100
+  const hasInvalidScore = bandRules.value.some(
+    (rule) =>
+      typeof rule.minScore !== 'number' ||
+      typeof rule.maxScore !== 'number' ||
+      rule.minScore < 0 ||
+      rule.maxScore < 0 ||
+      rule.minScore > 100 ||
+      rule.maxScore > 100,
+  );
+
+  if (hasInvalidScore) {
+    $q.notify({
+      type: 'negative',
+      message: t('admin.scoreCriteriaManagement.notifications.invalidScore'),
+      position: 'top',
+    });
+    return;
+  }
+
+  // 2. ตรวจสอบคะแนนขั้นต่ำห้ามมากกว่าคะแนนสูงสุด
+  const hasMinGreaterThanMax = bandRules.value.some((rule) => rule.minScore > rule.maxScore);
+
+  if (hasMinGreaterThanMax) {
+    $q.notify({
+      type: 'negative',
+      message: t('admin.scoreCriteriaManagement.notifications.minGreaterThanMax'),
+      position: 'top',
+    });
+    return;
+  }
+
   try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(bandRules.value));
+    await saveBandRules(bandRules.value);
     $q.notify({
       type: 'positive',
       message: t('admin.scoreCriteriaManagement.notifications.saveSuccess'),
