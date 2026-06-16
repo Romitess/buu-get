@@ -16,14 +16,6 @@ export class ExamRule {
   ID: number;
 
   @Column({
-    name: 'PS_ID',
-    type: 'int',
-    nullable: true,
-    comment: 'รหัส section (Foreign Key) หรืออ้างอิงชุดหน้า',
-  })
-  PS_ID: number | null;
-
-  @Column({
     name: 'CONTENT_TH',
     type: 'text',
     nullable: true,
