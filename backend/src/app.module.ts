@@ -39,7 +39,7 @@ import { ScoreCriteriaModule } from './modules/score-criteria/score-criteria.mod
   imports: [
     ConfigModule.forRoot({
       load: [buuApiConfig],
-      envFilePath: ['../.env'],
+      envFilePath: ['.env', 'backend/.env', '../.env'],
       isGlobal: true,
       validate: validateEnv,
     }),
