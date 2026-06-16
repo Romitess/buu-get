@@ -26,16 +26,6 @@ import { ExamLocationSeat } from '../modules/exam-location-seats/entities/exam-l
 import { ExamPasscode } from '../modules/exam/entities/exam-passcode.entity';
 import { ExamPasscodeLog } from 'src/modules/exam/entities/exam-passcode-log.entity';
 import { PageConfig } from '../modules/page-builder/entities/page-config.entity';
-<<<<<<< HEAD:backend/src/database/data-source.ts
-=======
-import { PageSection } from '../modules/page-builder/entities/page-section.entity';
-import { BoxBanner } from '../modules/page-builder/entities/box-banner.entity';
-import { BoxCard } from '../modules/page-builder/entities/box-card.entity';
-import { BoxStep } from '../modules/page-builder/entities/box-step.entity';
-import { BoxExamRule } from '../modules/page-builder/entities/box-exam-rule.entity';
-import { ExamRule } from '../modules/voucher-configs/entities/voucher-config.entity';
-import { ScoreCriteria } from '../modules/score-criteria/entities/score-criteria.entity';
->>>>>>> 875612d (feat(database): implement voucher config with BUU_GET_T_EXAM_RULE and score criteria modules):src/database/data-source.ts
 
 export default new DataSource({
   type: 'mysql',
@@ -71,16 +61,6 @@ export default new DataSource({
     ExamPasscode,
     ExamPasscodeLog,
     PageConfig,
-<<<<<<< HEAD:backend/src/database/data-source.ts
-=======
-    PageSection,
-    BoxBanner,
-    BoxCard,
-    BoxStep,
-    BoxExamRule,
-    ExamRule,
-    ScoreCriteria,
->>>>>>> 875612d (feat(database): implement voucher config with BUU_GET_T_EXAM_RULE and score criteria modules):src/database/data-source.ts
   ],
   migrations: ['src/database/migrations/*.ts'],
   synchronize: false,
