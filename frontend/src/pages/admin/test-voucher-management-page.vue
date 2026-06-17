@@ -96,7 +96,7 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import TestVoucherReport from 'src/components/test-voucher-report.vue';
 import type { VoucherData } from 'src/types/voucher';
-import { getRegulations, saveRegulations } from 'src/services/voucher-config.service';
+import { getRegulations, saveRegulations } from 'src/services/exam-rule-voucher.service';
 
 const router = useRouter();
 const $q = useQuasar();

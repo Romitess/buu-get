@@ -1,12 +1,12 @@
 import { Controller, Get, Put, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
-import { VoucherConfigsService } from './voucher-configs.service';
+import { ExamRuleVouchersService } from './exam-rule-vouchers.service';
 import { SaveRegulationsDto } from './dto/save-regulations.dto';
 
-@ApiTags('voucher-configs')
-@Controller('voucher-configs')
-export class VoucherConfigsController {
-  constructor(private readonly voucherConfigsService: VoucherConfigsService) {}
+@ApiTags('exam-rule-vouchers')
+@Controller('exam-rule-vouchers')
+export class ExamRuleVouchersController {
+  constructor(private readonly examRuleVouchersService: ExamRuleVouchersService) {}
 
   @Get('regulations')
   @ApiOperation({ summary: 'ดึงข้อมูล Test Regulations (EN & TH)' })
@@ -24,7 +24,7 @@ export class VoucherConfigsController {
     regulationsEn: string;
     regulationsTh: string;
   }> {
-    return await this.voucherConfigsService.getRegulations();
+    return await this.examRuleVouchersService.getRegulations();
   }
 
   @Put('regulations')
@@ -42,6 +42,6 @@ export class VoucherConfigsController {
   async saveRegulations(
     @Body() dto: SaveRegulationsDto,
   ): Promise<{ regulationsEn: string; regulationsTh: string }> {
-    return await this.voucherConfigsService.saveRegulations(dto);
+    return await this.examRuleVouchersService.saveRegulations(dto);
   }
 }

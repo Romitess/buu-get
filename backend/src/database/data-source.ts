@@ -26,7 +26,7 @@ import { ExamLocationSeat } from '../modules/exam-location-seats/entities/exam-l
 import { ExamPasscode } from '../modules/exam/entities/exam-passcode.entity';
 import { ExamPasscodeLog } from 'src/modules/exam/entities/exam-passcode-log.entity';
 import { PageConfig } from '../modules/page-builder/entities/page-config.entity';
-import { ExamRule } from '../modules/voucher-configs/entities/voucher-config.entity';
+import { ExamRuleVoucher } from '../modules/exam-rule-vouchers/entities/exam-rule-voucher.entity';
 import { ScoreCriteria } from '../modules/score-criteria/entities/score-criteria.entity';
 
 export default new DataSource({
@@ -63,7 +63,7 @@ export default new DataSource({
     ExamPasscode,
     ExamPasscodeLog,
     PageConfig,
-    ExamRule,
+    ExamRuleVoucher,
     ScoreCriteria,
   ],
   migrations: ['src/database/migrations/*.ts'],

@@ -32,7 +32,7 @@ import buuApiConfig from './config/buu-api-config';
 import { PlatformGatewayModule } from './modules/platform-gateway/platform-gateway.module';
 import { ProfileEditHistoryModule } from './modules/profile-edit-history/profile-edit-history.module';
 import { PageBuilderModule } from './modules/page-builder/page-builder.module';
-import { VoucherConfigsModule } from './modules/voucher-configs/voucher-configs.module';
+import { ExamRuleVouchersModule } from './modules/exam-rule-vouchers/exam-rule-vouchers.module';
 import { ScoreCriteriaModule } from './modules/score-criteria/score-criteria.module';
 
 @Module({
@@ -88,7 +88,7 @@ import { ScoreCriteriaModule } from './modules/score-criteria/score-criteria.mod
     PlatformGatewayModule,
     ProfileEditHistoryModule,
     PageBuilderModule,
-    VoucherConfigsModule,
+    ExamRuleVouchersModule,
     ScoreCriteriaModule,
   ],
 })

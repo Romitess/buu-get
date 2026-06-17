@@ -7,13 +7,13 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 
-@Entity('BUU_GET_T_EXAM_RULE')
-export class ExamRule {
+@Entity('BUU_GET_T_EXAM_RULE_VOUCHERS')
+export class ExamRuleVoucher {
   @PrimaryGeneratedColumn({
-    name: 'ID',
+    name: 'EXRV_ID',
     comment: 'รหัสข้อปฏิบัติ',
   })
-  ID: number;
+  EXRV_ID: number;
 
   @Column({
     name: 'CONTENT_TH',
@@ -30,14 +30,6 @@ export class ExamRule {
     comment: 'ข้อความข้อปฏิบัติ (ภาษาอังกฤษ)',
   })
   CONTENT_EN: string | null;
-
-  @Column({
-    name: 'PCF_ACTIVE',
-    type: 'boolean',
-    default: true,
-    comment: 'สถานะการใช้งาน (Active)',
-  })
-  PCF_ACTIVE: boolean;
 
   @CreateDateColumn({ name: 'CREATED_AT', comment: 'วันที่สร้าง' })
   CREATED_AT: Date;

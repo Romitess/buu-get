@@ -204,7 +204,7 @@ import { computed, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { VoucherData } from 'src/types/voucher';
 import ImageDisplay from 'src/components/base/image-display.vue';
-import { getRegulations } from 'src/services/voucher-config.service';
+import { getRegulations } from 'src/services/exam-rule-voucher.service';
 
 // ===== Props =====
 const props = withDefaults(

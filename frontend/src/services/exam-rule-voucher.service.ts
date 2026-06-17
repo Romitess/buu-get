@@ -9,7 +9,7 @@ export interface RegulationsData {
  * ดึงข้อมูล Test Regulations (EN & TH) จาก API
  */
 export const getRegulations = async (): Promise<RegulationsData> => {
-  const response = await api.get<RegulationsData>('/voucher-configs/regulations');
+  const response = await api.get<RegulationsData>('/exam-rule-vouchers/regulations');
   return response.data;
 };
 
@@ -17,6 +17,6 @@ export const getRegulations = async (): Promise<RegulationsData> => {
  * บันทึกข้อมูล Test Regulations (EN & TH) ผ่าน API
  */
 export const saveRegulations = async (data: RegulationsData): Promise<RegulationsData> => {
-  const response = await api.put<RegulationsData>('/voucher-configs/regulations', data);
+  const response = await api.put<RegulationsData>('/exam-rule-vouchers/regulations', data);
   return response.data;
 };

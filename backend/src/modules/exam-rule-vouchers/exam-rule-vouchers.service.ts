@@ -1,24 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ExamRule } from './entities/voucher-config.entity';
+import { ExamRuleVoucher } from './entities/exam-rule-voucher.entity';
 import { SaveRegulationsDto } from './dto/save-regulations.dto';
 
 @Injectable()
-export class VoucherConfigsService {
+export class ExamRuleVouchersService {
   constructor(
-    @InjectRepository(ExamRule)
-    private readonly examRuleRepository: Repository<ExamRule>,
+    @InjectRepository(ExamRuleVoucher)
+    private readonly examRuleVoucherRepository: Repository<ExamRuleVoucher>,
   ) {}
 
-  /** ดึง regulations ทั้ง EN และ TH จากตาราง BUU_GET_T_EXAM_RULE */
+  /** ดึง regulations ทั้ง EN และ TH จากตาราง BUU_GET_T_EXAM_RULE_VOUCHERS */
   async getRegulations(): Promise<{
     regulationsEn: string;
     regulationsTh: string;
   }> {
-    const activeRule = await this.examRuleRepository.findOne({
-      where: { PCF_ACTIVE: true },
-      order: { ID: 'DESC' },
+    const [activeRule] = await this.examRuleVoucherRepository.find({
+      order: { EXRV_ID: 'DESC' },
+      take: 1,
     });
 
     return {
@@ -27,27 +27,26 @@ export class VoucherConfigsService {
     };
   }
 
-  /** บันทึก regulations ทั้ง EN และ TH ลงตาราง BUU_GET_T_EXAM_RULE (แบบแถวเดียว) */
+  /** บันทึก regulations ทั้ง EN และ TH ลงตาราง BUU_GET_T_EXAM_RULE_VOUCHERS (แบบแถวเดียว) */
   async saveRegulations(
     dto: SaveRegulationsDto,
   ): Promise<{ regulationsEn: string; regulationsTh: string }> {
-    let rule = await this.examRuleRepository.findOne({
-      where: { PCF_ACTIVE: true },
-      order: { ID: 'DESC' },
+    const [rule] = await this.examRuleVoucherRepository.find({
+      order: { EXRV_ID: 'DESC' },
+      take: 1,
     });
 
     if (rule) {
       rule.CONTENT_EN = dto.regulationsEn;
       rule.CONTENT_TH = dto.regulationsTh;
+      await this.examRuleVoucherRepository.save(rule);
     } else {
-      rule = this.examRuleRepository.create({
+      const newRule = this.examRuleVoucherRepository.create({
         CONTENT_EN: dto.regulationsEn,
         CONTENT_TH: dto.regulationsTh,
-        PCF_ACTIVE: true,
       });
+      await this.examRuleVoucherRepository.save(newRule);
     }
-
-    await this.examRuleRepository.save(rule);
 
     return {
       regulationsEn: dto.regulationsEn,
@@ -55,3 +54,4 @@ export class VoucherConfigsService {
     };
   }
 }
+
