@@ -6,7 +6,7 @@ import { jsPDF } from 'jspdf';
 import { useUserStore } from 'src/stores/user.store';
 import { getImageUrl } from 'src/services/image.service';
 import { fetchEnrollmentById } from 'src/services/exam.service';
-import { getRegulations } from 'src/services/voucher-config.service';
+import { getRegulations } from 'src/services/exam-rule-voucher.service';
 
 import type { ExamHistoryItem } from 'src/types/exam';
 import type { VoucherData } from 'src/types/voucher';

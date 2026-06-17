@@ -6,7 +6,9 @@ import { SaveRegulationsDto } from './dto/save-regulations.dto';
 @ApiTags('exam-rule-vouchers')
 @Controller('exam-rule-vouchers')
 export class ExamRuleVouchersController {
-  constructor(private readonly examRuleVouchersService: ExamRuleVouchersService) {}
+  constructor(
+    private readonly examRuleVouchersService: ExamRuleVouchersService,
+  ) {}
 
   @Get('regulations')
   @ApiOperation({ summary: 'ดึงข้อมูล Test Regulations (EN & TH)' })
