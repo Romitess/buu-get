@@ -516,6 +516,10 @@ export default {
           rows: 'Rows',
           cols: 'Columns',
           splitLeftRight: 'Split left-right',
+          seatNumberDirection: 'Seat numbering direction',
+          horizontalDirection: 'Horizontal',
+          verticalDirection: 'Vertical',
+          walkway: 'Walkway',
         },
         placeholders: {
           roomName: 'QS1-1001',
@@ -525,8 +529,11 @@ export default {
           cols: '1',
         },
         totalSeats: 'Total seats',
+        previewHint:
+          'Click a seat button to mark it as broken, and click a table header to skip an entire row',
         actions: {
           save: 'Save',
+          addWalkway: 'Add walkway',
         },
         validation: {
           roomNameRequired: 'Please enter the room name',
