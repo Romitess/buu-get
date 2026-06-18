@@ -1,6 +1,8 @@
 import { api } from 'src/boot/axios';
 import type { BackendLocation } from 'src/types/exam';
 
+export type SeatDirectionPayload = 'HORIZONTAL' | 'VERTICAL';
+
 export interface LocationPayload {
   LOCATION_NAME: string;
   LOCATION_ROOM_NO?: string | undefined;
@@ -9,7 +11,9 @@ export interface LocationPayload {
   LOCATION_TOTAL_COLS?: number | undefined;
   LOCATION_SEAT_CAPACITY?: number | undefined;
   SEAT_LABEL_FORMAT?: string | undefined;
-  LOCATION_IS_SPLIT?: number | undefined;
+  SEAT_DIRECTION?: SeatDirectionPayload | undefined;
+  AISLE_AFTER_COLS?: number[] | undefined;
+  AISLE_AFTER_ROWS?: number[] | undefined;
 }
 
 export interface BackendLocationSeat {
@@ -47,7 +51,7 @@ export const createLocation = async (payload: LocationPayload): Promise<BackendL
  */
 export const createLocationWithSeats = async (
   payload: LocationPayload,
-  brokenSeats?: string[],
+  seatStatuses?: Record<string, number>,
 ): Promise<{ location: BackendLocation; seats: BackendLocationSeat[] }> => {
   // Step 1: สร้างห้องสอบ
   const location = await createLocation(payload);
@@ -56,7 +60,7 @@ export const createLocationWithSeats = async (
   // เพิ่ม timeout เป็น 120 วินาที เนื่องจากกรณีสร้างที่นั่งจำนวนมาก (เช่น 625 ที่) อาจใช้เวลาในการบันทึกลงฐานข้อมูลนานกว่าปกติ
   const seatsResponse = await api.post<BackendLocationSeat[]>(
     `/exam-location-seats/generate/${location.LOCATION_ID}`,
-    { brokenSeats },
+    { seatStatuses },
     { timeout: 120000 },
   );
 
