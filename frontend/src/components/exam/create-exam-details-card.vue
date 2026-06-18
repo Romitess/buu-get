@@ -89,6 +89,7 @@
               bg-color="white"
               class="buu-input-muted"
               :disable="isLocked"
+              @keypress="onFeeKeypress"
               @update:model-value="onFeeInput"
             />
           </div>
@@ -230,6 +231,20 @@ const onFeeInput = (val: string | number | null): void => {
       sanitized.slice(0, firstDot + 1) + sanitized.slice(firstDot + 1).replace(/\./g, '');
   }
   form.value.fee = sanitized;
+};
+
+/**
+ * Block typing any character that is not a digit or a decimal point,
+ * and prevent a second decimal point. Letters/symbols never appear in the field.
+ */
+const onFeeKeypress = (e: KeyboardEvent): void => {
+  if (!/[0-9.]/.test(e.key)) {
+    e.preventDefault();
+    return;
+  }
+  if (e.key === '.' && String(form.value.fee ?? '').includes('.')) {
+    e.preventDefault();
+  }
 };
 </script>
 
