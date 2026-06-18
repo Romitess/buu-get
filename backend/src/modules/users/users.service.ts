@@ -179,4 +179,17 @@ export class UsersService {
 
     await this.usersRepository.softRemove(user);
   }
+
+  async findByCode(code: string): Promise<UserResponseDto> {
+    const user = await this.usersRepository.findOne({
+      where: { USER_CODE: code },
+      relations: ['PROFILE', 'ROLES_ID', 'IMAGE'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with code ${code} not found`);
+    }
+
+    return UserResponseDto.fromEntity(user);
+  }
 }
