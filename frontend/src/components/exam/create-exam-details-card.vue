@@ -247,6 +247,20 @@ const onFeeKeypress = (e: KeyboardEvent): void => {
     e.preventDefault();
   }
 };
+
+/**
+ * On blur, normalize the fee to two decimal places (e.g. "500" -> "500.00").
+ * Leaves the field empty when nothing was entered so the placeholder stays visible.
+ */
+const handleFeeBlur = (): void => {
+  const raw = String(form.value.fee ?? '').trim();
+  if (raw === '' || raw === '.') {
+    form.value.fee = '';
+    return;
+  }
+  const numeric = Number(raw);
+  form.value.fee = Number.isNaN(numeric) ? '' : numeric.toFixed(2);
+};
 </script>
 
 <style scoped>
