@@ -5,7 +5,11 @@ import { defineConfig } from '#q-app/wrappers';
 import path from 'path';
 import dotenv from 'dotenv';
 
+// Load environment variables. Cascading fallback: highest priority is process environment,
+// then root .env, then local .env.local, and finally local .env.
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(__dirname, '.env.local') });
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 export default defineConfig((/* ctx */) => {
   return {
@@ -66,7 +70,18 @@ export default defineConfig((/* ctx */) => {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf) {
+        viteConf.server = {
+          ...viteConf.server,
+          fs: {
+            ...viteConf.server?.fs,
+            allow: [
+              path.resolve(__dirname, '..'),
+            ],
+          },
+        };
+      },
+
       // viteVuePluginOptions: {},
 
       vitePlugins: [
