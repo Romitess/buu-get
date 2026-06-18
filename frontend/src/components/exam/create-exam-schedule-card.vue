@@ -275,6 +275,7 @@
                     @update:model-value="
                       (val: string | number | null) => {
                         emit('clearFieldError', `seats_${activeSlotIndex}_${rIdx}`);
+                        if (typeof val === 'number' && val < 1) room.seats = 1;
                       }
                     "
                   >

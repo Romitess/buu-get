@@ -42,54 +42,62 @@
           }"
           :style="gridTransformStyle"
         >
-          <div class="seat-grid-wrapper">
+          <div class="seat-grid-wrapper" :style="seatGridStyle">
             <template v-for="(rowSeats, rowIndex) in seatsByRow" :key="rowIndex">
-              <div class="seat-map-row">
-                <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
+              <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
+                <div
+                  :ref="(el) => setSeatCellRef(el, seat.id)"
+                  class="seat-cell"
+                  :class="{
+                    'is-drag-source': draggingSeatId === seat.id,
+                    'is-drag-over': draggingSeatId !== null && dragOverSeatId === seat.id,
+                  }"
+                  :style="getSeatCellGridStyle(rowIndex + 1, colIndex + 1)"
+                  @mousedown="onSeatMouseDown($event, seat)"
+                  @mouseenter="onSeatMouseEnter(seat)"
+                  @mouseleave="onSeatMouseLeave(seat)"
+                >
                   <div
-                    :ref="(el) => setSeatCellRef(el, seat.id)"
-                    class="seat-cell"
+                    class="seat-cell-content"
                     :class="{
-                      'is-drag-source': draggingSeatId === seat.id,
-                      'is-drag-over': draggingSeatId !== null && dragOverSeatId === seat.id,
+                      'is-seat-shifting': seat.student && movingStudentIds.has(seat.student.id),
                     }"
-                    @mousedown="onSeatMouseDown($event, seat)"
-                    @mouseenter="onSeatMouseEnter(seat)"
-                    @mouseleave="onSeatMouseLeave(seat)"
+                    :style="getSeatCellContentStyle(seat)"
                   >
-                    <div
-                      class="seat-cell-content"
-                      :class="{
-                        'is-seat-shifting': seat.student && movingStudentIds.has(seat.student.id),
-                      }"
-                      :style="getSeatCellContentStyle(seat)"
-                    >
-                      <AppExamSeatAssignmentTile
-                        :seat-label="seat.label"
-                        :status="draggingSeatId === seat.id ? 'available' : seat.status"
-                        :student="draggingSeatId === seat.id ? null : seat.student"
-                        :swap-mode="swapMode"
-                        :selected="
-                          draggingSeatId !== seat.id &&
-                          draggingSeatId !== null &&
-                          dragOverSeatId === seat.id
-                        "
-                      />
-                    </div>
+                    <AppExamSeatAssignmentTile
+                      :seat-label="seat.label"
+                      :status="draggingSeatId === seat.id ? 'available' : seat.status"
+                      :student="draggingSeatId === seat.id ? null : seat.student"
+                      :swap-mode="swapMode"
+                      :selected="
+                        draggingSeatId !== seat.id &&
+                        draggingSeatId !== null &&
+                        dragOverSeatId === seat.id
+                      "
+                    />
                   </div>
-                  <div
-                    v-if="shouldRenderColumnAisle(colIndex + 1)"
-                    class="seat-column-aisle"
-                    aria-hidden="true"
-                  ></div>
-                </template>
-              </div>
-              <div
-                v-if="shouldRenderRowAisle(rowIndex + 1)"
-                class="seat-row-aisle"
-                aria-hidden="true"
-              ></div>
+                </div>
+              </template>
             </template>
+
+            <div
+              v-for="colNo in columnAislePositions"
+              :key="`column-aisle-${colNo}`"
+              class="seat-column-aisle"
+              :style="getColumnAisleGridStyle(colNo)"
+              aria-hidden="true"
+            >
+              <span>ทางเดิน</span>
+            </div>
+            <div
+              v-for="rowNo in rowAislePositions"
+              :key="`row-aisle-${rowNo}`"
+              class="seat-row-aisle"
+              :style="getRowAisleGridStyle(rowNo)"
+              aria-hidden="true"
+            >
+              <span>ทางเดิน</span>
+            </div>
           </div>
         </div>
       </div>
@@ -161,14 +169,78 @@ const emit = defineEmits<{
 
 const swapMode = ref(false);
 
-const shouldRenderColumnAisle = (colNo: number): boolean => {
-  if (props.aisleAfterCols.length > 0) return props.aisleAfterCols.includes(colNo);
+const rowCount = computed(() => props.seatsByRow.length);
+const colCount = computed(() =>
+  props.seatsByRow.reduce((maxCols, rowSeats) => Math.max(maxCols, rowSeats.length), 0),
+);
 
-  const fallbackMidpoint = Math.ceil((props.seatsByRow[0]?.length ?? 0) / 2);
-  return props.splitLeftRight && colNo === fallbackMidpoint;
-};
+const normalizedAisleAfterCols = computed(() =>
+  [...new Set(props.aisleAfterCols)]
+    .filter((colNo) => Number.isInteger(colNo) && colNo >= 1 && colNo < colCount.value)
+    .sort((a, b) => a - b),
+);
 
-const shouldRenderRowAisle = (rowNo: number): boolean => props.aisleAfterRows.includes(rowNo);
+const normalizedAisleAfterRows = computed(() =>
+  [...new Set(props.aisleAfterRows)]
+    .filter((rowNo) => Number.isInteger(rowNo) && rowNo >= 1 && rowNo < rowCount.value)
+    .sort((a, b) => a - b),
+);
+
+const columnAislePositions = computed(() => {
+  if (normalizedAisleAfterCols.value.length > 0) return normalizedAisleAfterCols.value;
+
+  const fallbackMidpoint = Math.ceil(colCount.value / 2);
+  return props.splitLeftRight && fallbackMidpoint < colCount.value ? [fallbackMidpoint] : [];
+});
+
+const rowAislePositions = computed(() => normalizedAisleAfterRows.value);
+
+const getGridTrackIndex = (index: number, aisleIndexes: number[]): number =>
+  index + aisleIndexes.filter((aisleIndex) => aisleIndex < index).length;
+
+const getAisleTrackIndex = (index: number, aisleIndexes: number[]): number =>
+  index + aisleIndexes.filter((aisleIndex) => aisleIndex <= index).length;
+
+const seatGridStyle = computed<CSSProperties>(() => {
+  const columnTracks: string[] = [];
+  for (let col = 1; col <= colCount.value; col++) {
+    columnTracks.push('64px');
+    if (columnAislePositions.value.includes(col)) {
+      columnTracks.push('18px');
+    }
+  }
+
+  const rowTracks: string[] = [];
+  for (let row = 1; row <= rowCount.value; row++) {
+    rowTracks.push('82px');
+    if (rowAislePositions.value.includes(row)) {
+      rowTracks.push('18px');
+    }
+  }
+
+  return {
+    display: 'grid',
+    gridTemplateColumns: columnTracks.join(' '),
+    gridTemplateRows: rowTracks.join(' '),
+    columnGap: '16px',
+    rowGap: '10px',
+  };
+});
+
+const getSeatCellGridStyle = (rowNo: number, colNo: number): CSSProperties => ({
+  gridColumn: `${getGridTrackIndex(colNo, columnAislePositions.value)}`,
+  gridRow: `${getGridTrackIndex(rowNo, rowAislePositions.value)}`,
+});
+
+const getColumnAisleGridStyle = (colNo: number): CSSProperties => ({
+  gridColumn: `${getAisleTrackIndex(colNo, columnAislePositions.value)}`,
+  gridRow: `1 / ${rowCount.value + rowAislePositions.value.length + 1}`,
+});
+
+const getRowAisleGridStyle = (rowNo: number): CSSProperties => ({
+  gridColumn: `1 / ${colCount.value + columnAislePositions.value.length + 1}`,
+  gridRow: `${getAisleTrackIndex(rowNo, rowAislePositions.value)}`,
+});
 
 interface RectSnapshot {
   left: number;
@@ -458,7 +530,12 @@ onBeforeUnmount(() => {
 
 // Recalculate when seatsByRow or splitLeftRight changes
 watch(
-  [() => props.seatsByRow, () => props.splitLeftRight],
+  [
+    () => props.seatsByRow,
+    () => props.splitLeftRight,
+    () => props.aisleAfterCols,
+    () => props.aisleAfterRows,
+  ],
   () => {
     void nextTick(() => measureAndScale());
   },
@@ -844,43 +921,68 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
 }
 
 .seat-grid-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
+  display: grid;
+  width: max-content;
   margin-inline: auto;
-  align-items: stretch;
-}
-
-.seat-map-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 16px;
-  min-width: 0;
+  align-items: start;
+  justify-content: start;
 }
 
 .seat-column-aisle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 18px;
-  min-height: 82px;
-  align-self: stretch;
-  flex: 0 0 18px;
+  height: 100%;
   border-radius: 9px;
   background: var(--Surface-Selected, #dddddd);
+  color: #111111;
+  font-family: Sarabun, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.seat-column-aisle span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  background: var(--Surface-Selected, #dddddd);
+  border-radius: 6px;
+  padding-block: 4px;
+  padding-inline: 2px;
 }
 
 .seat-row-aisle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 18px;
-  flex: 0 0 18px;
   border-radius: 9px;
   background: var(--Surface-Selected, #dddddd);
+  color: #111111;
+  font-family: Sarabun, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 100%;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.seat-row-aisle span {
+  white-space: nowrap;
+  background: var(--Surface-Selected, #dddddd);
+  border-radius: 6px;
+  padding: 2px 10px;
 }
 
 .seat-cell {
   width: 64px;
-  flex: 0 0 64px;
   position: relative;
+  z-index: 2;
   transition:
     opacity 0.16s ease,
     transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -1042,10 +1144,6 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
 @media (max-width: 1200px) {
   .seat-map-panel {
     padding: 14px;
-  }
-
-  .seat-map-row {
-    gap: 8px;
   }
 }
 

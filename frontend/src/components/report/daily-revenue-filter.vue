@@ -85,11 +85,11 @@
             dense
             emit-value
             map-options
-            clearable
             bg-color="grey-2"
+            dropdown-icon="keyboard_arrow_down"
             class="custom-input"
             hide-bottom-space
-            placeholder="ทั้งหมด"
+            :placeholder="t('admin.dailyRevenueReport.filter.all')"
             @update:model-value="emitFilterChange"
           />
         </div>
@@ -104,7 +104,7 @@
             dense
             bg-color="grey-2"
             class="custom-input"
-            placeholder="BUU-GET 1/2026"
+            :placeholder="t('admin.dailyRevenueReport.filter.placeholders.examName')"
             hide-bottom-space
             @update:model-value="emitFilterChange"
           />
@@ -121,7 +121,7 @@
               dense
               bg-color="grey-2"
               class="custom-input"
-              placeholder="XXXXXXXXXXXX"
+              :placeholder="t('admin.dailyRevenueReport.filter.placeholders.receiptNo')"
               hide-bottom-space
               @update:model-value="emitFilterChange"
             />
@@ -137,7 +137,7 @@
               dense
               bg-color="grey-2"
               class="custom-input"
-              placeholder="สมชาย ใจดี"
+              :placeholder="t('admin.dailyRevenueReport.filter.placeholders.payer')"
               hide-bottom-space
               @update:model-value="emitFilterChange"
             />
@@ -153,7 +153,7 @@
               dense
               bg-color="grey-2"
               class="custom-input"
-              placeholder="สมใจ หมายปอง"
+              :placeholder="t('admin.dailyRevenueReport.filter.placeholders.payee')"
               hide-bottom-space
               @update:model-value="emitFilterChange"
             />
@@ -215,7 +215,11 @@ const loadDepartmentOptions = async () => {
   try {
     const sources = await fetchFundSources();
     const faculties = Array.from(new Set(sources.map((s) => s.FS_FACULTY).filter(Boolean)));
-    departmentOptions.value = faculties.map((f) => ({ label: f, value: f }));
+    const options = faculties.map((f) => ({ label: f, value: f }));
+    departmentOptions.value = [
+      { label: t('admin.dailyRevenueReport.filter.all'), value: '' },
+      ...options,
+    ];
   } catch {
     // ignore - keep options empty
     // console.error('Failed to load fund sources');

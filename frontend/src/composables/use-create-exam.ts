@@ -482,7 +482,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         form.value.examRound = exam.EXAM_ROUND || '';
         form.value.examType = exam.EXAM_TYPE || EXAM_TYPE_GENERAL;
         form.value.examFormat = exam.EXAM_FORMAT || EXAM_FORMAT_COMPUTER;
-        form.value.fee = exam.EXAM_FEE ?? '0.00';
+        form.value.fee = Number(exam.EXAM_FEE ?? 0).toFixed(2);
         form.value.isPublished = exam.EXAM_PUBLISHED ?? false;
         wasOriginallyPublished.value = exam.EXAM_PUBLISHED ?? false;
         form.value.examDate = gregorianToBuddhistDisplay(exam.EXAM_DATE);

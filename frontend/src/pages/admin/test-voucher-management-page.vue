@@ -177,6 +177,15 @@ const handleSave = async (): Promise<void> => {
   }
 }
 
+// Enable columns to stretch cards to equal height in Safari/Mac
+.voucher-content-grid {
+  & > div {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 // ===== Section Card =====
 .section-card {
   background: var(--surface-card);
@@ -348,6 +357,7 @@ const handleSave = async (): Promise<void> => {
 
   :deep(.q-field__native) {
     flex: 1;
+    height: 100% !important; // Safari height stretch fix
     resize: none;
     font-family: 'Sarabun', sans-serif;
     font-size: 0.875rem;
