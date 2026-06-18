@@ -10,7 +10,10 @@ import {
   ExamLocationSeat,
   LocationSeatStatus,
 } from './entities/exam-location-seat.entity';
-import { ExamLocation } from '../exam-locations/entities/exam-location.entity';
+import {
+  ExamLocation,
+  SeatDirection,
+} from '../exam-locations/entities/exam-location.entity';
 import { CreateExamLocationSeatDto } from './dto/create-exam-location-seat.dto';
 import { UpdateExamLocationSeatDto } from './dto/update-exam-location-seat.dto';
 
@@ -117,9 +120,43 @@ export class ExamLocationSeatsService {
     await this.seatRepository.softRemove(seat);
   }
 
+  private getSeatLabel(
+    row: number,
+    col: number,
+    direction: SeatDirection,
+  ): string {
+    const rowLabel = String.fromCharCode(64 + row);
+    const colLabel = String.fromCharCode(64 + col);
+
+    return direction === SeatDirection.VERTICAL
+      ? `${colLabel}${row}`
+      : `${rowLabel}${col}`;
+  }
+
+  private getTargetSeatStatus(
+    label: string,
+    brokenSet: Set<string>,
+    seatStatuses?: Record<string, LocationSeatStatus>,
+  ): LocationSeatStatus {
+    const mappedStatus = seatStatuses?.[label];
+
+    if (
+      mappedStatus === LocationSeatStatus.AVAILABLE ||
+      mappedStatus === LocationSeatStatus.BROKEN ||
+      mappedStatus === LocationSeatStatus.BLOCKED
+    ) {
+      return mappedStatus;
+    }
+
+    return brokenSet.has(label)
+      ? LocationSeatStatus.BROKEN
+      : LocationSeatStatus.AVAILABLE;
+  }
+
   async generateSeats(
     locationId: number,
     brokenSeats: string[] = [],
+    seatStatuses?: Record<string, LocationSeatStatus>,
   ): Promise<ExamLocationSeat[]> {
     const location = await this.validateLocation(locationId);
 
@@ -157,16 +194,18 @@ export class ExamLocationSeatsService {
     const brokenSet = new Set(brokenSeats);
     const seatsToInsert: Partial<ExamLocationSeat>[] = [];
     const seatsToUpdate: ExamLocationSeat[] = [];
+    const seatsToRelabel = new Map<number, string>();
     let sortOrder = 1;
 
     for (let row = 1; row <= maxRows; row++) {
       for (let col = 1; col <= maxCols; col++) {
         const key = `${row}-${col}`;
-        const label = `${String.fromCharCode(64 + row)}${col}`;
-        const shouldBeBroken = brokenSet.has(label);
-        const targetStatus = shouldBeBroken
-          ? LocationSeatStatus.BROKEN
-          : LocationSeatStatus.AVAILABLE;
+        const label = this.getSeatLabel(row, col, location.SEAT_DIRECTION);
+        const targetStatus = this.getTargetSeatStatus(
+          label,
+          brokenSet,
+          seatStatuses,
+        );
 
         const seat = existingSeatsMap.get(key);
 
@@ -190,6 +229,11 @@ export class ExamLocationSeatsService {
             seat.LS_SEAT_STATUS = targetStatus;
             changed = true;
           }
+          if (seat.LS_SEAT_LABEL !== label) {
+            seatsToRelabel.set(seat.LS_ID, label);
+            seat.LS_SEAT_LABEL = label;
+            changed = true;
+          }
           if (seat.LS_SORT_ORDER !== sortOrder) {
             seat.LS_SORT_ORDER = sortOrder;
             changed = true;
@@ -204,9 +248,18 @@ export class ExamLocationSeatsService {
     }
 
     if (seatsToInsert.length > 0) {
-      await this.seatRepository.insert(seatsToInsert);
+      await this.seatRepository.save(this.seatRepository.create(seatsToInsert));
     }
     if (seatsToUpdate.length > 0) {
+      if (seatsToRelabel.size > 0) {
+        await Promise.all(
+          Array.from(seatsToRelabel.keys()).map((seatId) =>
+            this.seatRepository.update(seatId, {
+              LS_SEAT_LABEL: `__TMP_${seatId}`,
+            }),
+          ),
+        );
+      }
       await this.seatRepository.save(seatsToUpdate);
     }
 

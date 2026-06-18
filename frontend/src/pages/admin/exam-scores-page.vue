@@ -527,8 +527,8 @@ const viewIssuedCertificate = (row: ScoreTableRow): void => {
 
   selectedCandidateInfo.value = {
     fullname: row.fullnameTh,
-    userCode: enrollment?.USER?.USER_CODE || '',
-    nationalId: row.nationalId,
+    userCode: enrollment?.ERM_TEST_TAKER || '',
+    nationalId: enrollment?.USER?.USER_NATIONAL_ID || enrollment?.USER?.USER_PASSPORT_NO || '-',
     scoreGrammar: row.scoreGrammar,
     scoreReading: row.scoreReading,
     scoreTotal: row.scoreTotal,
@@ -587,7 +587,7 @@ const scoreRows = computed(() => {
     return {
       index: index + 1,
       ermId: enrollment.ERM_ID,
-      nationalId: enrollment.USER?.USER_NATIONAL_ID || enrollment.USER?.USER_PASSPORT_NO || '-',
+      nationalId: enrollment.ERM_TEST_TAKER || '-',
       titleTh: profile?.userTitleTh || profile?.userTitleEn || '-',
       fullnameTh:
         profile?.userFullnameTh || profile?.userFullnameEn || enrollment.USER?.USER_EMAIL || '-',
@@ -929,10 +929,48 @@ const parseXlsxFile = async (file: File): Promise<string[][]> => {
 };
 
 const parseCsvRows = (text: string): string[][] => {
-  return text
-    .split(/\r?\n/)
-    .filter((line) => line.trim() !== '')
-    .map((line) => line.split(',').map((value) => value.trim()));
+  const result: string[][] = [];
+  let row: string[] = [];
+  let col = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const nextChar = text[i + 1];
+
+    if (inQuotes) {
+      if (char === '"') {
+        if (nextChar === '"') {
+          col += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        col += char;
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+      } else if (char === ',') {
+        row.push(col.trim());
+        col = '';
+      } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+        row.push(col.trim());
+        result.push(row);
+        row = [];
+        col = '';
+        if (char === '\r') i++;
+      } else {
+        col += char;
+      }
+    }
+  }
+  if (row.length > 0 || col !== '') {
+    row.push(col.trim());
+    result.push(row);
+  }
+  return result.filter((r) => r.some((cell) => cell !== ''));
 };
 
 const applyImportedScoreRows = (rows: string[][]): void => {
@@ -999,31 +1037,27 @@ const applyImportedScoreRows = (rows: string[][]): void => {
 
     let matchedEnrollment = undefined;
 
-    if (cleanCitizen && cleanCitizen !== '-') {
+    if (cleanTestTaker && cleanTestTaker !== '-') {
+      const normTestTaker = normalizeImportKey(cleanTestTaker);
+      matchedEnrollment = currentRoomEnrollments.value.find((enrollment) => {
+        const dbTestTaker = enrollment.ERM_TEST_TAKER;
+        return dbTestTaker && normalizeImportKey(dbTestTaker) === normTestTaker;
+      });
+    }
+
+    if (!matchedEnrollment && cleanCitizen && cleanCitizen !== '-') {
       const normCitizen = normalizeImportKey(cleanCitizen);
       matchedEnrollment = currentRoomEnrollments.value.find((enrollment) => {
-        const dbNid = enrollment.USER?.USER_NATIONAL_ID;
-        return dbNid && normalizeImportKey(dbNid) === normCitizen;
+        const dbTestTaker = enrollment.ERM_TEST_TAKER;
+        return dbTestTaker && normalizeImportKey(dbTestTaker) === normCitizen;
       });
     }
 
     if (!matchedEnrollment && cleanPassport && cleanPassport !== '-') {
       const normPassport = normalizeImportKey(cleanPassport);
       matchedEnrollment = currentRoomEnrollments.value.find((enrollment) => {
-        const dbPp = enrollment.USER?.USER_PASSPORT_NO;
-        return dbPp && normalizeImportKey(dbPp) === normPassport;
-      });
-    }
-
-    if (!matchedEnrollment && cleanTestTaker && cleanTestTaker !== '-') {
-      const normTestTaker = normalizeImportKey(cleanTestTaker);
-      matchedEnrollment = currentRoomEnrollments.value.find((enrollment) => {
-        const dbNid = enrollment.USER?.USER_NATIONAL_ID;
-        const dbPp = enrollment.USER?.USER_PASSPORT_NO;
-        return (
-          (dbNid && normalizeImportKey(dbNid) === normTestTaker) ||
-          (dbPp && normalizeImportKey(dbPp) === normTestTaker)
-        );
+        const dbTestTaker = enrollment.ERM_TEST_TAKER;
+        return dbTestTaker && normalizeImportKey(dbTestTaker) === normPassport;
       });
     }
 

@@ -12,12 +12,12 @@
         <q-tr :props="props">
           <q-th>{{ t('admin.paymentImport.table.paymentDate') }}</q-th>
           <q-th>{{ t('admin.paymentImport.table.paymentTime') }}</q-th>
-          <q-th>{{ t('admin.paymentImport.table.applicantId') }}</q-th>
-          <q-th>{{ t('admin.paymentImport.table.referenceNo') }}</q-th>
+          <q-th class="th-narrow">{{ t('admin.paymentImport.table.applicantId') }}</q-th>
+          <q-th class="th-narrow">{{ t('admin.paymentImport.table.referenceNo') }}</q-th>
           <q-th>{{ t('admin.paymentImport.table.payerName') }}</q-th>
           <q-th>{{ t('admin.paymentImport.table.amount') }}</q-th>
-          <q-th>{{ t('admin.paymentImport.table.applicantId') }}</q-th>
-          <q-th>{{ t('admin.paymentImport.table.referenceNo') }}</q-th>
+          <q-th class="th-narrow">{{ t('admin.paymentImport.table.applicantId') }}</q-th>
+          <q-th class="th-narrow">{{ t('admin.paymentImport.table.referenceNo') }}</q-th>
           <q-th>{{ t('admin.paymentImport.table.payerName') }}</q-th>
           <q-th>{{ t('admin.paymentImport.table.amount') }}</q-th>
         </q-tr>
@@ -32,15 +32,15 @@
           <!-- Payment File Columns -->
           <q-td class="text-center">{{ props.row.file_payment_date }}</q-td>
           <q-td class="text-center">{{ props.row.file_payment_time }}</q-td>
-          <q-td class="text-center">{{ props.row.file_ref }}</q-td>
-          <q-td class="text-center">{{ props.row.file_ref2 }}</q-td>
+          <q-td class="text-center td-narrow">{{ props.row.file_ref }}</q-td>
+          <q-td class="text-center td-narrow">{{ props.row.file_ref2 }}</q-td>
           <q-td>{{ props.row.file_payer }}</q-td>
           <q-td class="text-center">{{ props.row.file_amount }}</q-td>
 
           <!-- Database Columns -->
           <template v-if="props.row.db_ref">
-            <q-td class="text-center">{{ props.row.db_ref }}</q-td>
-            <q-td class="text-center">{{ props.row.db_ref2 }}</q-td>
+            <q-td class="text-center td-narrow">{{ props.row.db_ref }}</q-td>
+            <q-td class="text-center td-narrow">{{ props.row.db_ref2 }}</q-td>
             <q-td>{{ props.row.db_name }}</q-td>
             <q-td class="text-center">{{ props.row.db_amount }}</q-td>
           </template>
@@ -283,6 +283,20 @@ const handleSave = () => {
 </script>
 
 <style scoped lang="scss">
+/* column width is controlled by q-th, not q-td */
+.th-narrow {
+  width: 150px;
+  max-width: 150px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.td-narrow {
+  white-space: normal;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
 .edit-dialog-card {
   width: 600px;
   max-width: 95vw;

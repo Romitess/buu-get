@@ -15,31 +15,58 @@
     </div>
 
     <!-- Seat Preview Container (zoom-to-fit, no scrollbar) -->
-    <div ref="containerRef" class="seat-preview-content">
+    <div
+      ref="containerRef"
+      class="seat-preview-content"
+      :class="{ 'seat-preview-content--scroll': shouldUseLargeGridScroll }"
+    >
       <div v-if="totalSeats > 0" class="seat-grid-scaling-wrapper" :style="wrapperStyle">
         <div ref="gridRef" class="seat-grid-scalable" :style="gridTransformStyle">
-          <div class="seat-grid-wrapper" :style="{ gap: seatStyle.rowGap }">
-            <!-- Render each row separately to lock position -->
-            <div
-              v-for="(rowSeats, rowIndex) in seatsByRow"
-              :key="rowIndex"
-              class="seat-row"
-              :style="{ gap: seatStyle.colGap }"
-            >
-              <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
-                <!-- Aisle divider between left/right halves -->
-                <AppSeatSplitDivider
-                  v-if="
-                    props.splitLeftRight &&
-                    colIndex === Math.ceil(rowSeats.length / 2) &&
-                    rowSeats.length > 1
-                  "
-                  :width="seatStyle.aisleWidth"
-                />
+          <div class="seat-grid-wrapper" :style="seatGridStyle">
+            <template v-if="props.showSeatGuides && colCount > 0">
+              <div
+                class="seat-row-guide-spacer"
+                :style="{ gridColumn: '1', gridRow: '1', width: seatStyle.rowGuideWidth }"
+              ></div>
+              <template v-for="colIndex in colCount" :key="`col-guide-${colIndex}`">
+                <button
+                  class="seat-column-guide"
+                  type="button"
+                  :style="{
+                    gridColumn: getSeatGridColumn(colIndex),
+                    gridRow: '1',
+                    width: seatStyle.width,
+                  }"
+                  @click="openColumnStatusDialog(colIndex)"
+                >
+                  {{ columnGuideLabels[colIndex - 1] }}
+                </button>
+              </template>
+            </template>
 
+            <template v-for="(rowSeats, rowIndex) in seatsByRow" :key="`row-${rowIndex}`">
+              <button
+                v-if="props.showSeatGuides"
+                class="seat-row-guide"
+                type="button"
+                :style="{
+                  gridColumn: '1',
+                  gridRow: getSeatGridRow(rowIndex + 1),
+                  width: seatStyle.rowGuideWidth,
+                  height: seatStyle.height,
+                  fontSize: seatStyle.guideFontSize,
+                }"
+                @click="openRowStatusDialog(rowIndex)"
+              >
+                {{ rowGuideLabels[rowIndex] }}
+              </button>
+
+              <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
                 <div
                   class="seat-item"
                   :style="{
+                    gridColumn: getSeatGridColumn(colIndex + 1),
+                    gridRow: getSeatGridRow(rowIndex + 1),
                     width: seatStyle.width,
                     height: seatStyle.height,
                     fontSize: seatStyle.fontSize,
@@ -47,10 +74,14 @@
                 >
                   <AppExamSeatSquare
                     :seat-number="seat.id"
-                    :status="brokenSeats.has(seat.id) ? 'broken' : 'available'"
+                    :status="getSeatStatus(seat.id)"
                     @click="handleSeatClick"
                   >
-                    <q-tooltip anchor="top middle" self="bottom middle" class="text-body2">
+                    <q-tooltip
+                      anchor="top middle"
+                      self="bottom middle"
+                      class="seat-tooltip text-body2"
+                    >
                       {{
                         brokenSeats.has(seat.id)
                           ? t('admin.locationManagement.seatTooltip.markAvailable')
@@ -60,6 +91,24 @@
                   </AppExamSeatSquare>
                 </div>
               </template>
+            </template>
+
+            <div
+              v-for="position in columnWalkwayPositions"
+              :key="`column-walkway-${position.index}`"
+              class="seat-column-walkway"
+              :style="getColumnWalkwayStyle(position.index)"
+            >
+              <span>ทางเดิน</span>
+            </div>
+
+            <div
+              v-for="position in rowWalkwayPositions"
+              :key="`row-walkway-${position.index}`"
+              class="seat-row-walkway"
+              :style="getRowWalkwayStyle(position.index)"
+            >
+              <span>ทางเดิน</span>
             </div>
           </div>
         </div>
@@ -67,11 +116,18 @@
       <div v-else class="empty-preview"></div>
     </div>
 
-    <!-- Broken Seat Dialog -->
-    <AppSeatBrokenDialog
-      v-model="isDialogOpen"
-      :seat-id="selectedSeatId"
-      @confirm="confirmBrokenSeat"
+    <div v-if="props.showFooterHint" class="seat-preview-footer">
+      <q-icon name="info_outline" size="18px" color="dark" />
+      <span>
+        {{ t('admin.locationManagement.createPage.previewHint') }}
+      </span>
+    </div>
+
+    <AppSeatStatusDialog
+      v-model="isSeatStatusDialogOpen"
+      :target-label="statusDialogTarget"
+      :current-status="statusDialogCurrentStatus"
+      @select="applySeatStatus"
     />
   </div>
 </template>
@@ -81,15 +137,30 @@ import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import type { CSSProperties } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AppSeatLegend from './app-seat-legend.vue';
-import AppSeatBrokenDialog from './app-seat-broken-dialog.vue';
 import AppExamSeatSquare from './app-exam-seat-square.vue';
-import AppSeatSplitDivider from './app-seat-split-divider.vue';
+import AppSeatStatusDialog from './app-seat-status-dialog.vue';
+
+type SeatStatusOption = 'available' | 'omitted' | 'broken';
+type SeatStatusTarget =
+  | { type: 'row' | 'column'; index: number }
+  | { type: 'seat'; seatId: string }
+  | null;
+
+interface WalkwayPosition {
+  type: 'row' | 'column';
+  index: number;
+}
 
 interface Props {
   rows?: number | null;
   cols?: number | null;
   placeholderText?: string;
   splitLeftRight?: boolean;
+  walkwayPositions?: WalkwayPosition[];
+  numberingDirection?: 'horizontal' | 'vertical';
+  omittedSeats?: Set<string>;
+  showSeatGuides?: boolean;
+  showFooterHint?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -97,6 +168,11 @@ const props = withDefaults(defineProps<Props>(), {
   cols: 0,
   placeholderText: 'จำนวนที่นั่งทั้งหมด',
   splitLeftRight: false,
+  walkwayPositions: () => [],
+  numberingDirection: 'vertical',
+  omittedSeats: () => new Set<string>(),
+  showSeatGuides: false,
+  showFooterHint: false,
 });
 
 const MAX_SEATS = Infinity;
@@ -112,7 +188,8 @@ const colCount = computed(() => props.cols ?? 0);
 
 const legendItems = [
   { label: 'ที่นั่งว่าง', dotClass: 'available' },
-  { label: 'ชำรุด', dotClass: 'broken' },
+  { label: 'ละเว้นที่นั่ง', dotClass: 'omitted' },
+  { label: 'ที่นั่งชำรุด', dotClass: 'broken' },
 ];
 
 const totalSeats = computed(() => {
@@ -120,29 +197,162 @@ const totalSeats = computed(() => {
   return Math.min(total, MAX_SEATS);
 });
 
-const isDialogOpen = ref(false);
-const selectedSeatId = ref('');
+const isSeatStatusDialogOpen = ref(false);
+const statusDialogTarget = ref('');
+const statusDialogTargetMeta = ref<SeatStatusTarget>(null);
+const statusDialogCurrentStatus = ref<SeatStatusOption>('available');
+const localOmittedSeats = ref<Set<string>>(new Set());
 const brokenSeats = ref<Set<string>>(new Set());
 
-const handleSeatClick = (seatId: string) => {
-  if (!brokenSeats.value.has(seatId)) {
-    selectedSeatId.value = seatId;
-    isDialogOpen.value = true;
-  } else {
-    // Un-break if already broken
-    brokenSeats.value.delete(seatId);
+const handleSeatClick = (seatId: string): void => {
+  statusDialogTarget.value = `ที่นั่ง ${seatId}`;
+  statusDialogTargetMeta.value = { type: 'seat', seatId };
+  statusDialogCurrentStatus.value = getSeatStatusOption(seatId);
+  isSeatStatusDialogOpen.value = true;
+};
+
+const openColumnStatusDialog = (colIndex: number): void => {
+  statusDialogTarget.value = `คอลัมน์ ${colIndex}`;
+  statusDialogTargetMeta.value = { type: 'column', index: colIndex - 1 };
+  statusDialogCurrentStatus.value = getTargetStatus();
+  isSeatStatusDialogOpen.value = true;
+};
+
+const openRowStatusDialog = (rowIndex: number): void => {
+  statusDialogTarget.value = `แถว ${rowIndex + 1}`;
+  statusDialogTargetMeta.value = { type: 'row', index: rowIndex };
+  statusDialogCurrentStatus.value = getTargetStatus();
+  isSeatStatusDialogOpen.value = true;
+};
+
+const getTargetSeatIds = (): string[] => {
+  const target = statusDialogTargetMeta.value;
+
+  if (!target) return [];
+
+  if (target.type === 'seat') {
+    return [target.seatId];
   }
+
+  if (target.type === 'row') {
+    return seatsByRow.value[target.index]?.map((seat) => seat.id) ?? [];
+  }
+
+  return seatsByRow.value
+    .map((rowSeats) => rowSeats[target.index]?.id)
+    .filter((seatId): seatId is string => typeof seatId === 'string');
 };
 
-const confirmBrokenSeat = (seatId: string): void => {
-  brokenSeats.value.add(seatId);
+const applySeatStatus = (status: SeatStatusOption): void => {
+  const targetSeatIds = getTargetSeatIds();
+  const nextOmittedSeats = new Set(localOmittedSeats.value);
+  const nextBrokenSeats = new Set(brokenSeats.value);
+
+  targetSeatIds.forEach((seatId) => {
+    nextOmittedSeats.delete(seatId);
+    nextBrokenSeats.delete(seatId);
+
+    if (status === 'omitted') {
+      nextOmittedSeats.add(seatId);
+    }
+
+    if (status === 'broken') {
+      nextBrokenSeats.add(seatId);
+    }
+  });
+
+  localOmittedSeats.value = nextOmittedSeats;
+  brokenSeats.value = nextBrokenSeats;
+  statusDialogCurrentStatus.value = status;
 };
 
-defineExpose({ brokenSeats });
+const getSeatStatusOption = (seatId: string): SeatStatusOption => {
+  if (localOmittedSeats.value.has(seatId)) return 'omitted';
+  if (brokenSeats.value.has(seatId)) return 'broken';
+
+  return 'available';
+};
+
+const getTargetStatus = (): SeatStatusOption => {
+  const targetSeatIds = getTargetSeatIds();
+  const firstSeatId = targetSeatIds[0];
+
+  if (!firstSeatId) return 'available';
+
+  const firstStatus = getSeatStatusOption(firstSeatId);
+  const isSameStatus = targetSeatIds.every((seatId) => getSeatStatusOption(seatId) === firstStatus);
+
+  return isSameStatus ? firstStatus : 'available';
+};
+
+defineExpose({ brokenSeats, omittedSeats: localOmittedSeats });
+
+const getSeatStatus = (seatId: string): 'available' | 'assigned' | 'broken' | 'blocked' => {
+  if (localOmittedSeats.value.has(seatId)) return 'blocked';
+  if (brokenSeats.value.has(seatId)) return 'broken';
+
+  return 'available';
+};
+
+const getSeatIdByPosition = (
+  rowIndex: number,
+  colIndex: number,
+  direction: 'horizontal' | 'vertical',
+): string => {
+  const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const horizontalSeatId = `${rowLetters[rowIndex] ?? rowIndex + 1}${colIndex + 1}`;
+  const verticalSeatId = `${rowLetters[colIndex] ?? colIndex + 1}${rowIndex + 1}`;
+
+  return direction === 'horizontal' ? horizontalSeatId : verticalSeatId;
+};
+
+const remapSeatStatusSetByDirection = (
+  source: Set<string>,
+  oldDirection: 'horizontal' | 'vertical',
+  nextDirection: 'horizontal' | 'vertical',
+): Set<string> => {
+  if (oldDirection === nextDirection) return new Set(source);
+
+  const remapped = new Set<string>();
+
+  for (let row = 0; row < rowCount.value; row++) {
+    for (let col = 0; col < colCount.value; col++) {
+      const oldSeatId = getSeatIdByPosition(row, col, oldDirection);
+
+      if (source.has(oldSeatId)) {
+        remapped.add(getSeatIdByPosition(row, col, nextDirection));
+      }
+    }
+  }
+
+  return remapped;
+};
+
+const columnGuideLabels = computed(() => {
+  const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+  if (props.numberingDirection === 'horizontal') {
+    return Array.from({ length: colCount.value }, (_, index) => `${index + 1}`);
+  }
+
+  return Array.from({ length: colCount.value }, (_, index) => rowLetters[index] ?? `${index + 1}`);
+});
+
+const rowGuideLabels = computed(() => {
+  const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+  if (props.numberingDirection === 'horizontal') {
+    return Array.from(
+      { length: rowCount.value },
+      (_, index) => rowLetters[index] ?? `${index + 1}`,
+    );
+  }
+
+  return Array.from({ length: rowCount.value }, (_, index) => `${index + 1}`);
+});
 
 const seatsByRow = computed(() => {
   const rows: Array<Array<{ id: string }>> = [];
-  const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
   const numRows = rowCount.value;
   const numCols = colCount.value;
 
@@ -150,7 +360,7 @@ const seatsByRow = computed(() => {
     const rowSeats = [];
     for (let col = 0; col < numCols; col++) {
       rowSeats.push({
-        id: `${rowLetters[row]}${col + 1}`,
+        id: getSeatIdByPosition(row, col, props.numberingDirection),
       });
     }
     rows.push(rowSeats);
@@ -159,18 +369,51 @@ const seatsByRow = computed(() => {
   return rows;
 });
 
+const columnWalkwayPositions = computed(() =>
+  props.walkwayPositions
+    .filter((position) => position.type === 'column')
+    .sort((a, b) => a.index - b.index),
+);
+
+const rowWalkwayPositions = computed(() =>
+  props.walkwayPositions
+    .filter((position) => position.type === 'row')
+    .sort((a, b) => a.index - b.index),
+);
+
+const hasColumnWalkways = computed(() => columnWalkwayPositions.value.length > 0);
+const hasRowWalkways = computed(() => rowWalkwayPositions.value.length > 0);
+
+const getSeatGridColumn = (colIndex: number): string => {
+  return `${colIndex + 1}`;
+};
+
+const getSeatGridRow = (rowIndex: number): string => {
+  return `${rowIndex + 1}`;
+};
+
+const cssNumber = (value: string): number => Number.parseFloat(value) || 0;
+
 const seatStyle = computed(() => {
   const maxDimension = Math.max(rowCount.value, colCount.value);
-  const aisleWidth = props.splitLeftRight ? 48 : 0;
+  const denseWithWalkways = maxDimension > 18 && (hasColumnWalkways.value || hasRowWalkways.value);
+  const mediumWithWalkways = maxDimension > 10 && (hasColumnWalkways.value || hasRowWalkways.value);
+  const walkwaySize = denseWithWalkways ? '18px' : mediumWithWalkways ? '20px' : '18px';
 
   if (maxDimension > 18) {
     return {
       width: '40px',
       height: '40px',
       fontSize: '13px',
-      rowGap: '8px',
-      colGap: '12px',
-      aisleWidth: `${Math.round(aisleWidth * 0.7)}px`,
+      rowGap: hasRowWalkways.value ? '24px' : '8px',
+      colGap: hasColumnWalkways.value ? '24px' : '12px',
+      aisleWidth: hasColumnWalkways.value ? walkwaySize : '10px',
+      aisleHeight: hasRowWalkways.value ? walkwaySize : '10px',
+      guideHeight: '22px',
+      rowGuideWidth: '22px',
+      rowWalkwayOffset: '34px',
+      guideFontSize: '12px',
+      walkwayFontSize: denseWithWalkways ? '14px' : '14px',
     };
   }
 
@@ -179,9 +422,15 @@ const seatStyle = computed(() => {
       width: '52px',
       height: '52px',
       fontSize: '14px',
-      rowGap: '16px',
-      colGap: '18px',
-      aisleWidth: `${Math.round(aisleWidth * 0.85)}px`,
+      rowGap: hasRowWalkways.value ? '28px' : '16px',
+      colGap: hasColumnWalkways.value ? '28px' : '18px',
+      aisleWidth: hasColumnWalkways.value ? walkwaySize : '14px',
+      aisleHeight: hasRowWalkways.value ? walkwaySize : '14px',
+      guideHeight: '24px',
+      rowGuideWidth: '24px',
+      rowWalkwayOffset: '42px',
+      guideFontSize: '13px',
+      walkwayFontSize: '14px',
     };
   }
 
@@ -191,14 +440,145 @@ const seatStyle = computed(() => {
     fontSize: '16px',
     rowGap: '36px',
     colGap: '24px',
-    aisleWidth: `${aisleWidth}px`,
+    aisleWidth: walkwaySize,
+    aisleHeight: walkwaySize,
+    guideHeight: '26px',
+    rowGuideWidth: '26px',
+    rowWalkwayOffset: '50px',
+    guideFontSize: '14px',
+    walkwayFontSize: '14px',
   };
 });
+
+const seatGridStyle = computed<CSSProperties>(() => {
+  const columnTracks = [
+    props.showSeatGuides ? seatStyle.value.rowGuideWidth : '0px',
+    ...Array.from({ length: colCount.value }, () => seatStyle.value.width),
+  ];
+  const rowTracks = [
+    props.showSeatGuides ? seatStyle.value.guideHeight : '0px',
+    ...Array.from({ length: rowCount.value }, () => seatStyle.value.height),
+  ];
+
+  return {
+    display: 'grid',
+    gridTemplateColumns: columnTracks.join(' '),
+    gridTemplateRows: rowTracks.join(' '),
+    columnGap: seatStyle.value.colGap,
+    rowGap: seatStyle.value.rowGap,
+    paddingRight: seatStyle.value.colGap,
+    paddingBottom: seatStyle.value.rowGap,
+  };
+});
+
+const seatBodyMetrics = computed(() => {
+  const guideWidth = props.showSeatGuides ? cssNumber(seatStyle.value.rowGuideWidth) : 0;
+  const guideHeight = props.showSeatGuides ? cssNumber(seatStyle.value.guideHeight) : 0;
+  const seatWidth = cssNumber(seatStyle.value.width);
+  const seatHeight = cssNumber(seatStyle.value.height);
+  const colGap = cssNumber(seatStyle.value.colGap);
+  const rowGap = cssNumber(seatStyle.value.rowGap);
+
+  return {
+    bodyLeft: guideWidth + colGap,
+    bodyTop: guideHeight + rowGap,
+    bodyWidth: colCount.value * seatWidth + Math.max(colCount.value - 1, 0) * colGap,
+    bodyHeight: rowCount.value * seatHeight + Math.max(rowCount.value - 1, 0) * rowGap,
+    colGap,
+    rowGap,
+    seatWidth,
+    seatHeight,
+  };
+});
+
+const getColumnWalkwayStyle = (colIndex: number): CSSProperties => {
+  const metrics = seatBodyMetrics.value;
+  const width = cssNumber(seatStyle.value.aisleWidth);
+  const walkwayHeight = cssNumber(seatStyle.value.aisleHeight);
+  const left =
+    metrics.bodyLeft +
+    colIndex * metrics.seatWidth +
+    Math.max(colIndex - 1, 0) * metrics.colGap +
+    (metrics.colGap - width) / 2;
+  const rowWalkwayBands = rowWalkwayPositions.value
+    .map((position) => {
+      const top =
+        position.index * metrics.seatHeight +
+        Math.max(position.index - 1, 0) * metrics.rowGap +
+        (metrics.rowGap - walkwayHeight) / 2;
+
+      return {
+        start: Math.max(0, top - 4),
+        end: Math.min(metrics.bodyHeight, top + walkwayHeight + 4),
+      };
+    })
+    .sort((a, b) => a.start - b.start);
+  const clearSegments = rowWalkwayBands.reduce<Array<{ start: number; end: number }>>(
+    (segments, band) => {
+      const previous = segments[segments.length - 1];
+
+      if (!previous) return segments;
+
+      if (band.start > previous.start) {
+        previous.end = Math.min(previous.end, band.start);
+      }
+
+      if (band.end < metrics.bodyHeight) {
+        segments.push({ start: band.end, end: metrics.bodyHeight });
+      }
+
+      return segments;
+    },
+    [{ start: 0, end: metrics.bodyHeight }],
+  );
+  const labelSegment = clearSegments.reduce(
+    (largest, segment) =>
+      segment.end - segment.start > largest.end - largest.start ? segment : largest,
+    clearSegments[0] ?? { start: 0, end: metrics.bodyHeight },
+  );
+  const labelTop = Math.max(
+    8,
+    Math.min(
+      labelSegment.start + (labelSegment.end - labelSegment.start) / 2,
+      metrics.bodyHeight - 8,
+    ),
+  );
+
+  return {
+    position: 'absolute',
+    left: `${left}px`,
+    top: `${metrics.bodyTop}px`,
+    width: seatStyle.value.aisleWidth,
+    height: `${metrics.bodyHeight}px`,
+    fontSize: seatStyle.value.walkwayFontSize,
+    '--column-label-top': `${labelTop}px`,
+  };
+};
+
+const getRowWalkwayStyle = (rowIndex: number): CSSProperties => {
+  const metrics = seatBodyMetrics.value;
+  const height = cssNumber(seatStyle.value.aisleHeight);
+  const top =
+    metrics.bodyTop +
+    rowIndex * metrics.seatHeight +
+    Math.max(rowIndex - 1, 0) * metrics.rowGap +
+    (metrics.rowGap - height) / 2;
+
+  return {
+    position: 'absolute',
+    left: `${metrics.bodyLeft}px`,
+    top: `${top}px`,
+    width: `${metrics.bodyWidth}px`,
+    height: seatStyle.value.aisleHeight,
+    fontSize: seatStyle.value.walkwayFontSize,
+  };
+};
 
 // ── Zoom-to-fit logic ──────────────────────────────────────
 const scaleFactor = ref(1);
 const gridNaturalWidth = ref(0);
 const gridNaturalHeight = ref(0);
+const shouldUseLargeGridScroll = computed(() => rowCount.value > 20 || colCount.value > 20);
 
 const measureAndScale = (): void => {
   if (!gridRef.value || !containerRef.value) {
@@ -240,6 +620,11 @@ const measureAndScale = (): void => {
     return;
   }
 
+  if (shouldUseLargeGridScroll.value) {
+    scaleFactor.value = Math.min(availW / gridW, 1);
+    return;
+  }
+
   const scaleX = availW / gridW;
   const scaleY = availH / gridH;
   const s = Math.min(scaleX, scaleY, 1); // never zoom in, only zoom out
@@ -250,6 +635,17 @@ const wrapperStyle = computed<CSSProperties>(() => {
   const s = scaleFactor.value;
   const w = gridNaturalWidth.value;
   const h = gridNaturalHeight.value;
+
+  if (shouldUseLargeGridScroll.value) {
+    return {
+      width: '100%',
+      height: `${h * s}px`,
+      position: 'relative',
+      overflow: 'visible',
+      display: 'flex',
+      justifyContent: 'center',
+    };
+  }
 
   if (s >= 1 || w <= 0 || h <= 0) {
     return {
@@ -271,6 +667,18 @@ const gridTransformStyle = computed<CSSProperties>(() => {
   const s = scaleFactor.value;
   const w = gridNaturalWidth.value;
   const h = gridNaturalHeight.value;
+
+  if (shouldUseLargeGridScroll.value) {
+    return {
+      transform: `translateX(-50%) scale(${s})`,
+      transformOrigin: 'top center',
+      position: 'absolute',
+      left: '50%',
+      top: '0',
+      width: `${w}px`,
+      height: `${h}px`,
+    };
+  }
 
   if (s >= 1 || w <= 0 || h <= 0) {
     return {
@@ -309,9 +717,44 @@ onBeforeUnmount(() => {
 });
 
 // Recalculate when rows/cols/split change
-watch([rowCount, colCount, () => props.splitLeftRight], () => {
-  void nextTick(() => measureAndScale());
-});
+watch(
+  [
+    rowCount,
+    colCount,
+    () => props.splitLeftRight,
+    () => props.numberingDirection,
+    () => props.walkwayPositions,
+  ],
+  () => {
+    void nextTick(() => measureAndScale());
+  },
+);
+
+watch(
+  () => props.numberingDirection,
+  (nextDirection, oldDirection) => {
+    if (!oldDirection || nextDirection === oldDirection) return;
+
+    brokenSeats.value = remapSeatStatusSetByDirection(
+      brokenSeats.value,
+      oldDirection,
+      nextDirection,
+    );
+    localOmittedSeats.value = remapSeatStatusSetByDirection(
+      localOmittedSeats.value,
+      oldDirection,
+      nextDirection,
+    );
+  },
+);
+
+watch(
+  () => props.omittedSeats,
+  (value) => {
+    localOmittedSeats.value = new Set(value);
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped lang="scss">
@@ -324,21 +767,35 @@ watch([rowCount, colCount, () => props.splitLeftRight], () => {
 }
 
 .teacher-desk-divider {
+  position: relative;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
   padding-inline: var(--space-sm);
   box-sizing: border-box;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: var(--space-sm);
+    right: var(--space-sm);
+    top: 50%;
+    height: 8px;
+    background: #7b6753;
+    border-radius: var(--radius-sm, 4px);
+    transform: translateY(-50%);
+  }
 }
 
 .teacher-desk-label {
+  position: relative;
+  z-index: 1;
   flex: 0 1 auto;
   min-width: 0;
   max-width: min(100%, 420px);
   background: #f1f2f4;
-  color: #926f6c;
+  color: #000000;
   font-weight: 400;
   font-style: normal;
   font-size: 16px;
@@ -352,13 +809,7 @@ watch([rowCount, colCount, () => props.splitLeftRight], () => {
 }
 
 .teacher-line {
-  flex: 1 1 120px;
-  width: auto;
-  max-width: 270px;
-  min-width: 16px;
-  height: 8px;
-  background: #e7bdb9;
-  border-radius: var(--radius-sm, 4px);
+  display: none;
 }
 
 .seat-preview-content {
@@ -369,37 +820,126 @@ watch([rowCount, colCount, () => props.splitLeftRight], () => {
   justify-content: center;
   padding-top: var(--space-md);
   padding-bottom: var(--space-md);
-  overflow: hidden;
+  overflow: auto;
   flex: 1;
   min-height: 0;
+}
+
+.seat-preview-content--scroll {
+  justify-content: center;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .seat-grid-scalable {
   display: block;
   width: max-content;
   flex-shrink: 0;
-  transition: transform 0.25s ease;
 }
 
 .seat-grid-wrapper {
-  display: flex;
-  flex-direction: column;
+  position: relative;
   width: max-content;
   margin-inline: auto;
-  align-items: flex-start;
 }
 
-.seat-row {
+.seat-row-guide-spacer {
+  flex-shrink: 0;
+}
+
+.seat-column-guide,
+.seat-row-guide {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  flex-wrap: nowrap;
-  width: max-content;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: #e7f3ff;
+  color: #0d47a1;
+  border-radius: 12px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.seat-column-guide {
+  height: 26px;
+  font-size: 14px;
+  transform: translateY(4px);
+}
+
+.seat-row-guide {
+  transform: translateX(4px);
+}
+
+.seat-column-walkway {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid var(--Surface-Selected, #dddddd);
+  background: var(--Surface-Selected, #dddddd);
+  color: #111111;
+  font-family: Sarabun, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 100%;
+  text-align: center;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.seat-column-walkway span {
+  position: absolute;
+  top: var(--column-label-top, 50%);
+  left: 50%;
+  z-index: 4;
+  writing-mode: vertical-rl;
+  transform: translate(-50%, -50%) rotate(180deg);
+  white-space: nowrap;
+  background: var(--Surface-Selected, #dddddd) !important;
+  border-radius: 6px;
+  max-height: calc(100% - 28px);
+  padding-block: 4px;
+  padding-inline: 2px;
+  overflow: hidden;
+}
+
+.seat-row-walkway {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid var(--Surface-Selected, #dddddd);
+  background: var(--Surface-Selected, #dddddd);
+  color: #111111;
+  font-family: Sarabun, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 100%;
+  text-align: center;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.seat-row-walkway span {
+  position: relative;
+  z-index: 6;
+  background: var(--Surface-Selected, #dddddd) !important;
+  border-radius: 6px;
+  max-width: calc(100% - 12px);
+  padding: 3px 10px;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .seat-item {
   flex-shrink: 0;
   font-weight: var(--font-weight-semibold);
+  z-index: 4;
 }
 
 .empty-preview {
@@ -407,6 +947,22 @@ watch([rowCount, colCount, () => props.splitLeftRight], () => {
   height: 100%;
   min-height: 300px;
   color: var(--text-muted);
+}
+
+.seat-preview-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.4;
+  padding-top: var(--space-xs);
+  text-align: center;
+}
+
+:global(.seat-tooltip) {
+  z-index: 10000;
 }
 
 @media (max-width: 599px) {

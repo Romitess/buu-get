@@ -75,6 +75,8 @@
           :title="$t('admin.seatManagement.seatLayoutTitle')"
           :seats-by-row="seatsByRow"
           :split-left-right="splitLeftRight"
+          :aisle-after-cols="aisleAfterCols"
+          :aisle-after-rows="aisleAfterRows"
           :swap-mode-label="$t('admin.seatManagement.swapModeLabel')"
           @swap="swapSeatAssignments"
         />
@@ -117,6 +119,8 @@ const {
   roomOptions,
   searchQuery,
   splitLeftRight,
+  aisleAfterCols,
+  aisleAfterRows,
   seatsByRow,
   examTitle,
   examDate,

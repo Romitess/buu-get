@@ -151,7 +151,11 @@
         pointer-events: none;
       "
     >
-      <TestVoucherReport :data="selectedVoucherData" />
+      <TestVoucherReport
+        :data="selectedVoucherData"
+        :regulations-en="selectedVoucherRegulationsEn"
+        :regulations-th="selectedVoucherRegulationsTh"
+      />
     </div>
 
     <!-- Hidden container for Receipt PDF generation -->
@@ -243,6 +247,8 @@ const selectedExamForCancel = ref<ExamHistoryItem | null>(null);
 const {
   isDownloadingVoucher,
   selectedVoucherData,
+  selectedVoucherRegulationsEn,
+  selectedVoucherRegulationsTh,
   isDownloadingReceipt,
   selectedReceiptData,
   printVoucher,

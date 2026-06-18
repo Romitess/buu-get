@@ -13,7 +13,7 @@
         <div class="form-card">
           <div class="form-section">
             <div class="row items-center q-mb-sm">
-              <q-icon name="info_outline" color="primary" size="sm" class="q-mr-sm" />
+              <q-icon name="info_outline" size="sm" class="section-heading-icon q-mr-sm" />
               <div class="text-h6 text-weight-bold text-black">
                 {{ $t('admin.locationManagement.createPage.sections.roomInfo') }}
               </div>
@@ -31,44 +31,52 @@
                   dense
                   :placeholder="$t('admin.locationManagement.createPage.placeholders.roomName')"
                   class="buu-input-muted"
-                  hide-bottom-space
+                  :error="!!formErrors.roomName"
+                  :error-message="formErrors.roomName"
+                  @update:model-value="clearFieldError('roomName')"
                 />
               </div>
 
-              <div>
-                <div class="buu-label-muted q-mb-xs">
-                  {{ $t('admin.locationManagement.createPage.fields.floor') }}
+              <div class="row q-col-gutter-sm">
+                <div class="col-12 col-sm-7">
+                  <div class="buu-label-muted q-mb-xs">
+                    {{ $t('admin.locationManagement.createPage.fields.building') }}
+                  </div>
+                  <q-input
+                    v-model="building"
+                    outlined
+                    dense
+                    :placeholder="$t('admin.locationManagement.createPage.placeholders.building')"
+                    class="buu-input-muted"
+                    :error="!!formErrors.building"
+                    :error-message="formErrors.building"
+                    @update:model-value="clearFieldError('building')"
+                  />
                 </div>
-                <q-input
-                  v-model="floor"
-                  type="number"
-                  outlined
-                  dense
-                  :placeholder="$t('admin.locationManagement.createPage.placeholders.floor')"
-                  class="buu-input-muted"
-                  hide-bottom-space
-                />
-              </div>
 
-              <div>
-                <div class="buu-label-muted q-mb-xs">
-                  {{ $t('admin.locationManagement.createPage.fields.building') }}
+                <div class="col-12 col-sm-5">
+                  <div class="buu-label-muted q-mb-xs">
+                    {{ $t('admin.locationManagement.createPage.fields.floor') }}
+                  </div>
+                  <q-input
+                    v-model="floor"
+                    type="number"
+                    outlined
+                    dense
+                    :placeholder="$t('admin.locationManagement.createPage.placeholders.floor')"
+                    class="buu-input-muted"
+                    :error="!!formErrors.floor"
+                    :error-message="formErrors.floor"
+                    @update:model-value="clearFieldError('floor')"
+                  />
                 </div>
-                <q-input
-                  v-model="building"
-                  outlined
-                  dense
-                  :placeholder="$t('admin.locationManagement.createPage.placeholders.building')"
-                  class="buu-input-muted"
-                  hide-bottom-space
-                />
               </div>
             </div>
           </div>
 
           <div class="form-section">
             <div class="row items-center q-mb-xs">
-              <q-icon name="grid_view" color="primary" size="sm" class="q-mr-sm" />
+              <q-icon name="grid_view" size="sm" class="section-heading-icon q-mr-sm" />
               <div class="text-h6 text-weight-bold text-black">
                 {{ $t('admin.locationManagement.createPage.sections.seatLayout') }}
               </div>
@@ -87,10 +95,16 @@
                   dense
                   :placeholder="$t('admin.locationManagement.createPage.placeholders.rows')"
                   class="buu-input-muted"
-                  hide-bottom-space
+                  :error="!!formErrors.rows"
+                  :error-message="formErrors.rows"
                   min="1"
                   :max="MAX_SEAT_LAYOUT_SIZE"
-                  @update:model-value="(val) => (rows = clampSeatLayoutValue(val))"
+                  @update:model-value="
+                    (val) => {
+                      rows = clampSeatLayoutValue(val);
+                      clearFieldError('rows');
+                    }
+                  "
                 />
               </div>
               <div class="col-6">
@@ -104,30 +118,85 @@
                   dense
                   :placeholder="$t('admin.locationManagement.createPage.placeholders.cols')"
                   class="buu-input-muted"
-                  hide-bottom-space
+                  :error="!!formErrors.cols"
+                  :error-message="formErrors.cols"
                   min="1"
                   :max="MAX_SEAT_LAYOUT_SIZE"
-                  @update:model-value="(val) => (cols = clampSeatLayoutValue(val))"
+                  @update:model-value="
+                    (val) => {
+                      cols = clampSeatLayoutValue(val);
+                      clearFieldError('cols');
+                    }
+                  "
                 />
               </div>
             </div>
 
-            <!-- Split Toggle -->
-            <div
-              class="bg-grey-2 rounded-borders q-mb-md row items-center justify-between"
-              style="padding: 12px 16px"
-            >
-              <span class="text-body2 text-dark font-weight-medium">
-                {{ $t('admin.locationManagement.createPage.fields.splitLeftRight') }}
-              </span>
-              <q-toggle v-model="splitLeftRight" class="buu-toggle-muted" color="primary" />
+            <div class="layout-setting-panel">
+              <div class="seat-direction-row">
+                <div class="seat-direction-label">
+                  {{ $t('admin.locationManagement.createPage.fields.seatNumberDirection') }}
+                </div>
+                <q-btn-toggle
+                  v-model="seatNumberDirection"
+                  dense
+                  unelevated
+                  toggle-color="primary"
+                  toggle-text-color="white"
+                  color="grey-3"
+                  text-color="dark"
+                  :options="seatDirectionOptions"
+                  class="layout-direction-toggle"
+                />
+              </div>
+            </div>
+
+            <div class="walkway-row">
+              <div class="buu-label-muted">
+                {{ $t('admin.locationManagement.createPage.fields.walkway') }}
+              </div>
+              <div class="walkway-control-row">
+                <div
+                  v-if="selectedWalkwayPositions.length > 0"
+                  class="walkway-chip-row"
+                  :class="{ 'walkway-chip-row--scroll': selectedWalkwayPositions.length > 2 }"
+                >
+                  <div
+                    v-for="position in selectedWalkwayPositions"
+                    :key="`${position.type}-${position.index}`"
+                    class="walkway-chip"
+                  >
+                    <span class="walkway-chip-label">{{ getWalkwayPositionLabel(position) }}</span>
+                    <button
+                      type="button"
+                      class="walkway-chip-remove"
+                      aria-label="Remove walkway"
+                      @click="removeWalkwayPosition(position)"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+                <AppButton
+                  outline
+                  dense
+                  no-caps
+                  color="primary"
+                  icon="add"
+                  :label="$t('admin.locationManagement.createPage.actions.addWalkway')"
+                  class="walkway-add-btn"
+                  @click="isWalkwayDialogOpen = true"
+                />
+              </div>
             </div>
 
             <!-- Total Seats Box -->
-            <div class="total-seats-box column flex-center rounded-borders" style="padding: 16px">
-              <div class="text-primary text-h4 text-weight-bold">{{ totalSeats }}</div>
-              <div class="text-caption text-grey-8">
-                {{ $t('admin.locationManagement.createPage.totalSeats') }}
+            <div class="total-seats-box rounded-borders total-seats-offset">
+              <div class="total-seats-content">
+                <div class="total-seats-value text-primary text-weight-bold">{{ totalSeats }}</div>
+                <div class="total-seats-label">
+                  {{ $t('admin.locationManagement.createPage.totalSeats') }}
+                </div>
               </div>
             </div>
           </div>
@@ -143,6 +212,10 @@
               :rows="rows"
               :cols="cols"
               :split-left-right="splitLeftRight"
+              :walkway-positions="selectedWalkwayPositions"
+              :numbering-direction="seatNumberDirection"
+              :show-seat-guides="true"
+              :show-footer-hint="true"
             />
           </div>
         </div>
@@ -161,6 +234,15 @@
         </div>
       </div>
     </div>
+
+    <AppWalkwayPositionDialog
+      v-model="isWalkwayDialogOpen"
+      :rows="normalizedRows"
+      :cols="normalizedCols"
+      :numbering-direction="seatNumberDirection"
+      :selected-positions="selectedWalkwayPositionValues"
+      @confirm="handleWalkwayConfirm"
+    />
   </q-page>
 </template>
 
@@ -173,9 +255,15 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import AppExamSeatPreview from 'src/components/exam/app-exam-seat-preview.vue';
+import AppWalkwayPositionDialog from 'src/components/exam/app-walkway-position-dialog.vue';
 import { createLocationWithSeats } from 'src/services/location.service';
 
 const MAX_SEAT_LAYOUT_SIZE = 25;
+
+interface WalkwayPosition {
+  type: 'row' | 'column';
+  index: number;
+}
 
 const router = useRouter();
 const $q = useQuasar();
@@ -186,13 +274,59 @@ const floor = ref<number | null>(null);
 const building = ref('');
 const rows = ref<number | null>(null);
 const cols = ref<number | null>(null);
-const splitLeftRight = ref(false);
+const seatNumberDirection = ref<'horizontal' | 'vertical'>('vertical');
 const isSaving = ref(false);
+const isWalkwayDialogOpen = ref(false);
+const selectedWalkwayPositions = ref<WalkwayPosition[]>([]);
 const seatPreviewRef = ref<InstanceType<typeof AppExamSeatPreview> | null>(null);
+
+interface LocationFormErrors {
+  roomName?: string;
+  building?: string;
+  floor?: string;
+  rows?: string;
+  cols?: string;
+}
+
+const formErrors = ref<LocationFormErrors>({});
+
+const seatDirectionOptions = [
+  {
+    label: t('admin.locationManagement.createPage.fields.horizontalDirection'),
+    value: 'horizontal',
+  },
+  {
+    label: t('admin.locationManagement.createPage.fields.verticalDirection'),
+    value: 'vertical',
+  },
+];
 
 const totalSeats = computed(() => {
   return (rows.value || 0) * (cols.value || 0);
 });
+
+const normalizedRows = computed(() => rows.value || 0);
+const normalizedCols = computed(() => cols.value || 0);
+const splitLeftRight = computed(() => selectedWalkwayPositions.value.length > 0);
+const selectedWalkwayPositionValues = computed(() =>
+  selectedWalkwayPositions.value.map(
+    (position) => `${position.type === 'row' ? 'row' : 'col'}-${position.index}`,
+  ),
+);
+
+const aisleAfterCols = computed(() =>
+  selectedWalkwayPositions.value
+    .filter((position) => position.type === 'column')
+    .map((position) => position.index)
+    .sort((a, b) => a - b),
+);
+
+const aisleAfterRows = computed(() =>
+  selectedWalkwayPositions.value
+    .filter((position) => position.type === 'row')
+    .map((position) => position.index)
+    .sort((a, b) => a - b),
+);
 
 const clampSeatLayoutValue = (value: unknown): number | null => {
   if (value === '' || value === null || value === undefined) return null;
@@ -203,41 +337,124 @@ const clampSeatLayoutValue = (value: unknown): number | null => {
   return Math.min(MAX_SEAT_LAYOUT_SIZE, Math.max(1, Math.floor(numericValue)));
 };
 
+const clearFieldError = (field: keyof LocationFormErrors): void => {
+  if (!formErrors.value[field]) return;
+
+  formErrors.value = {
+    ...formErrors.value,
+    [field]: undefined,
+  };
+};
+
+const isBlank = (value: string | number | null | undefined): boolean =>
+  value === null || value === undefined || String(value).trim() === '';
+
+const validateForm = (): boolean => {
+  const errors: LocationFormErrors = {};
+
+  if (isBlank(roomName.value)) {
+    errors.roomName = 'กรุณากรอกชื่อห้องสอบ';
+  }
+
+  if (isBlank(building.value)) {
+    errors.building = 'กรุณากรอกสถานที่/อาคาร';
+  }
+
+  if (isBlank(floor.value)) {
+    errors.floor = 'กรุณากรอกชั้นที่สอบ';
+  }
+
+  if (!rows.value || rows.value < 1) {
+    errors.rows = 'กรุณากรอกแถว (Rows)';
+  } else if (rows.value > MAX_SEAT_LAYOUT_SIZE) {
+    errors.rows = t('admin.locationManagement.createPage.validation.layoutLimit', {
+      max: MAX_SEAT_LAYOUT_SIZE,
+    });
+  }
+
+  if (!cols.value || cols.value < 1) {
+    errors.cols = 'กรุณากรอกคอลัมน์ (Cols)';
+  } else if (cols.value > MAX_SEAT_LAYOUT_SIZE) {
+    errors.cols = t('admin.locationManagement.createPage.validation.layoutLimit', {
+      max: MAX_SEAT_LAYOUT_SIZE,
+    });
+  }
+
+  formErrors.value = errors;
+
+  return Object.keys(errors).length === 0;
+};
+
+const rowGuideLabel = (index: number): string => {
+  const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+  if (seatNumberDirection.value === 'horizontal') return rowLetters[index - 1] ?? `${index}`;
+
+  return `${index}`;
+};
+
+const columnGuideLabel = (index: number): string => {
+  const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+  if (seatNumberDirection.value === 'horizontal') return `${index}`;
+
+  return rowLetters[index - 1] ?? `${index}`;
+};
+
+const getWalkwayPositionLabel = (position: WalkwayPosition): string => {
+  if (position.type === 'row') return `หลังแถว ${rowGuideLabel(position.index)}`;
+
+  return `หลังคอลัมน์ ${columnGuideLabel(position.index)}`;
+};
+
+const parseWalkwayPosition = (positionValue: string): WalkwayPosition | null => {
+  const [typeValue, indexValue] = positionValue.split('-');
+  const parsedIndex = Number(indexValue);
+
+  if ((typeValue !== 'row' && typeValue !== 'col') || !Number.isInteger(parsedIndex)) return null;
+
+  return {
+    type: typeValue === 'row' ? 'row' : 'column',
+    index: parsedIndex,
+  };
+};
+
+const handleWalkwayConfirm = (positionValues: string[]): void => {
+  selectedWalkwayPositions.value = positionValues
+    .map(parseWalkwayPosition)
+    .filter((position): position is WalkwayPosition => position !== null);
+};
+
+const removeWalkwayPosition = (position: WalkwayPosition): void => {
+  selectedWalkwayPositions.value = selectedWalkwayPositions.value.filter(
+    (item) => !(item.type === position.type && item.index === position.index),
+  );
+};
+
+const buildSeatStatuses = (): Record<string, number> => {
+  const statusMap: Record<string, number> = {};
+  const omittedSeats = seatPreviewRef.value?.omittedSeats ?? new Set<string>();
+  const brokenSeats = seatPreviewRef.value?.brokenSeats ?? new Set<string>();
+
+  omittedSeats.forEach((seatLabel) => {
+    statusMap[seatLabel] = 2;
+  });
+
+  brokenSeats.forEach((seatLabel) => {
+    statusMap[seatLabel] = 1;
+  });
+
+  return statusMap;
+};
+
 const handleSave = async (): Promise<void> => {
-  if (!roomName.value.trim()) {
-    $q.notify({
-      type: 'warning',
-      message: t('admin.locationManagement.createPage.validation.roomNameRequired'),
-      position: 'top',
-    });
-    return;
-  }
-
-  if (!rows.value || rows.value < 1 || !cols.value || cols.value < 1) {
-    $q.notify({
-      type: 'warning',
-      message: t('admin.locationManagement.createPage.validation.layoutRequired'),
-      position: 'top',
-    });
-    return;
-  }
-
-  if (rows.value > MAX_SEAT_LAYOUT_SIZE || cols.value > MAX_SEAT_LAYOUT_SIZE) {
-    $q.notify({
-      type: 'warning',
-      message: t('admin.locationManagement.createPage.validation.layoutLimit', {
-        max: MAX_SEAT_LAYOUT_SIZE,
-      }),
-      position: 'top',
-    });
+  if (!validateForm()) {
     return;
   }
 
   isSaving.value = true;
 
   try {
-    const brokenSeatLabels = Array.from(seatPreviewRef.value?.brokenSeats ?? new Set<string>());
-
     await createLocationWithSeats(
       {
         LOCATION_NAME: building.value.trim(),
@@ -250,9 +467,11 @@ const handleSave = async (): Promise<void> => {
         LOCATION_TOTAL_COLS: Number(cols.value),
         LOCATION_SEAT_CAPACITY: Number(totalSeats.value),
         SEAT_LABEL_FORMAT: 'ROW_COL',
-        LOCATION_IS_SPLIT: splitLeftRight.value ? 1 : 0,
+        SEAT_DIRECTION: seatNumberDirection.value === 'horizontal' ? 'HORIZONTAL' : 'VERTICAL',
+        AISLE_AFTER_COLS: aisleAfterCols.value,
+        AISLE_AFTER_ROWS: aisleAfterRows.value,
       },
-      brokenSeatLabels,
+      buildSeatStatuses(),
     );
 
     $q.notify({
@@ -292,11 +511,264 @@ const handleSave = async (): Promise<void> => {
   background-color: var(--location-total-seats-bg);
 }
 
+.total-seats-offset {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: min(352px, 100%);
+  height: 96px;
+  margin-top: 12px;
+  margin-bottom: 0;
+  margin-inline: auto;
+  padding: 16px;
+  gap: 10px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.total-seats-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  min-height: 64px;
+  border-radius: 12px;
+  gap: 4px;
+  opacity: 1;
+  transform: translateY(-4px);
+}
+
+.total-seats-value {
+  font-size: 32px;
+  line-height: 36px;
+}
+
+.total-seats-label {
+  font-family: 'Sarabun', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0;
+  text-align: center;
+  color: #4b5563;
+}
+
+.layout-setting-panel {
+  width: min(352px, 100%);
+  height: 62px;
+  min-height: 62px;
+  background: #f3f4f6;
+  border: 1px solid #dedede;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.seat-direction-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.seat-direction-label {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.layout-direction-toggle {
+  width: 131px;
+  min-width: 131px;
+  height: 36px;
+  min-height: 36px;
+  padding: 3px;
+  border-radius: 12px;
+  background: #dddddd;
+
+  :deep(.q-btn) {
+    min-height: 30px;
+    min-width: 61px;
+    padding-inline: 8px;
+    border-radius: 9px;
+    font-weight: var(--font-weight-semibold);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  :deep(.q-btn:not(.bg-primary)) {
+    background: #dddddd !important;
+  }
+
+  :deep(.q-btn.bg-primary) {
+    background: #ffffff !important;
+    color: var(--primary) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  }
+}
+
+.walkway-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.walkway-control-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-height: 39px;
+}
+
+.walkway-chip-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 0 1 auto;
+  width: max-content;
+  min-width: 0;
+  max-width: calc((100% - 8px) * 2 / 3);
+  overflow-x: hidden;
+  overflow-y: hidden;
+  height: 39px;
+  padding-bottom: 0;
+  scrollbar-width: none;
+  scrollbar-gutter: stable;
+
+  &::-webkit-scrollbar {
+    display: none;
+    height: 0;
+  }
+}
+
+.walkway-chip-row--scroll {
+  height: 49px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar-thumb {
+    background: #8d8d8d;
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar {
+    display: block;
+    height: 4px;
+  }
+}
+
+.walkway-chip {
+  min-width: 0;
+  flex: 0 0 111px;
+  height: 39px;
+  min-height: 39px;
+  margin: 0;
+  padding: 0 8px;
+  border-radius: 12px;
+  border: 1px solid #dddddd;
+  background: #ffffff !important;
+  color: #111111;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.walkway-chip-label {
+  flex: 0 0 auto;
+  min-width: max-content;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.walkway-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 10px;
+  height: 20px;
+  color: #000000;
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 18px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+}
+
+.walkway-add-btn {
+  width: calc((100% - 16px) / 3);
+  flex: 0 0 calc((100% - 16px) / 3);
+  min-width: 0;
+  height: 39px;
+  min-height: 39px;
+  padding: 0 8px;
+  gap: 0;
+  border-radius: 12px;
+  color: var(--primary, #0d47a1) !important;
+  background: #ffffff !important;
+
+  &::before {
+    border: 1px solid var(--primary, #0d47a1) !important;
+  }
+
+  :deep(.q-btn__content) {
+    gap: 4px;
+    flex-wrap: nowrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  :deep(.q-icon) {
+    font-size: 20px;
+    color: var(--primary, #0d47a1);
+  }
+
+  :deep(.q-icon.on-left) {
+    margin-right: 0;
+  }
+
+  :deep(.block) {
+    color: var(--primary, #0d47a1);
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+}
+
+.section-heading-icon {
+  color: var(--Black, #000000);
+}
+
 .form-card,
 .preview-card {
   width: 100%;
-  height: 669px;
-  max-height: 669px;
+  height: 760px;
+  max-height: 760px;
   border-radius: var(--radius-sm);
   background: var(--surface-card);
   border: 1px solid var(--border-color);
@@ -305,11 +777,18 @@ const handleSave = async (): Promise<void> => {
 
 .form-card {
   max-width: 400px;
-  padding: var(--space-lg);
+  padding: var(--space-lg) var(--space-lg) 32px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: var(--space-md);
   justify-content: flex-start;
+}
+
+.buu-input-muted {
+  :deep(.q-field__bottom) {
+    min-height: 20px;
+    padding-top: 4px;
+  }
 }
 
 .preview-panel {
@@ -333,6 +812,10 @@ const handleSave = async (): Promise<void> => {
 
   :deep(.seat-preview-content) {
     padding-bottom: var(--space-md);
+  }
+
+  :deep(.seat-preview-content--scroll) {
+    padding-right: var(--space-sm);
   }
 
   :deep(.empty-preview) {

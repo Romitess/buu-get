@@ -35,45 +35,61 @@
         <div
           ref="gridRef"
           class="seat-grid-scalable"
-          :class="{ 'is-swap-active': swapMode, 'is-dragging': draggingSeatId !== null }"
+          :class="{
+            'is-swap-active': swapMode,
+            'is-dragging': draggingSeatId !== null,
+            'is-preparing-seat-shift': isPreparingSeatShift,
+          }"
           :style="gridTransformStyle"
         >
           <div class="seat-grid-wrapper">
-            <div v-for="(rowSeats, rowIndex) in seatsByRow" :key="rowIndex" class="seat-map-row">
-              <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
-                <AppSeatSplitDivider
-                  v-if="
-                    splitLeftRight &&
-                    colIndex === Math.ceil(rowSeats.length / 2) &&
-                    rowSeats.length > 1
-                  "
-                  width="48px"
-                />
-                <div
-                  :ref="(el) => setSeatCellRef(el, seat.id)"
-                  class="seat-cell"
-                  :class="{
-                    'is-drag-source': draggingSeatId === seat.id,
-                    'is-drag-over': draggingSeatId !== null && dragOverSeatId === seat.id,
-                  }"
-                  @mousedown="onSeatMouseDown($event, seat)"
-                  @mouseenter="onSeatMouseEnter(seat)"
-                  @mouseleave="onSeatMouseLeave(seat)"
-                >
-                  <AppExamSeatAssignmentTile
-                    :seat-label="seat.label"
-                    :status="seat.status"
-                    :student="seat.student"
-                    :swap-mode="swapMode"
-                    :selected="
-                      draggingSeatId === seat.id ||
-                      (draggingSeatId !== null && dragOverSeatId === seat.id)
-                    "
-                    :moving="seat.student ? movingStudentIds.has(seat.student.id) : false"
-                  />
-                </div>
-              </template>
-            </div>
+            <template v-for="(rowSeats, rowIndex) in seatsByRow" :key="rowIndex">
+              <div class="seat-map-row">
+                <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
+                  <div
+                    :ref="(el) => setSeatCellRef(el, seat.id)"
+                    class="seat-cell"
+                    :class="{
+                      'is-drag-source': draggingSeatId === seat.id,
+                      'is-drag-over': draggingSeatId !== null && dragOverSeatId === seat.id,
+                    }"
+                    @mousedown="onSeatMouseDown($event, seat)"
+                    @mouseenter="onSeatMouseEnter(seat)"
+                    @mouseleave="onSeatMouseLeave(seat)"
+                  >
+                    <div
+                      class="seat-cell-content"
+                      :class="{
+                        'is-seat-shifting': seat.student && movingStudentIds.has(seat.student.id),
+                      }"
+                      :style="getSeatCellContentStyle(seat)"
+                    >
+                      <AppExamSeatAssignmentTile
+                        :seat-label="seat.label"
+                        :status="draggingSeatId === seat.id ? 'available' : seat.status"
+                        :student="draggingSeatId === seat.id ? null : seat.student"
+                        :swap-mode="swapMode"
+                        :selected="
+                          draggingSeatId !== seat.id &&
+                          draggingSeatId !== null &&
+                          dragOverSeatId === seat.id
+                        "
+                      />
+                    </div>
+                  </div>
+                  <div
+                    v-if="shouldRenderColumnAisle(colIndex + 1)"
+                    class="seat-column-aisle"
+                    aria-hidden="true"
+                  ></div>
+                </template>
+              </div>
+              <div
+                v-if="shouldRenderRowAisle(rowIndex + 1)"
+                class="seat-row-aisle"
+                aria-hidden="true"
+              ></div>
+            </template>
           </div>
         </div>
       </div>
@@ -86,7 +102,7 @@
 
     <!-- Dimmed ghost centered on the cursor so it feels like the seat is moving -->
     <Teleport to="body">
-      <div v-if="draggedSeat" class="seat-drag-ghost" :style="ghostStyle">
+      <div v-if="draggedSeat" ref="dragGhostRef" class="seat-drag-ghost" :style="ghostStyle">
         <AppExamSeatAssignmentTile
           :seat-label="draggedSeat.label"
           :status="draggedSeat.status"
@@ -117,20 +133,23 @@
 import { computed, ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import type { ComponentPublicInstance, CSSProperties } from 'vue';
 import AppExamSeatAssignmentTile from 'src/components/exam/app-exam-seat-assignment-tile.vue';
-import AppSeatSplitDivider from 'src/components/exam/app-seat-split-divider.vue';
 import type { SeatCell } from 'src/composables/use-exam-seat-management';
 
-const SHIFT_ANIMATION_MS = 360;
+const SHIFT_ANIMATION_MS = 460;
 
 const props = withDefaults(
   defineProps<{
     title: string;
     seatsByRow: SeatCell[][];
     splitLeftRight: boolean;
+    aisleAfterCols?: number[];
+    aisleAfterRows?: number[];
     swapModeLabel?: string;
     emptyLabel?: string;
   }>(),
   {
+    aisleAfterCols: () => [],
+    aisleAfterRows: () => [],
     swapModeLabel: 'โหมดสลับที่นั่ง',
     emptyLabel: 'ไม่มีข้อมูลผังที่นั่ง',
   },
@@ -141,6 +160,15 @@ const emit = defineEmits<{
 }>();
 
 const swapMode = ref(false);
+
+const shouldRenderColumnAisle = (colNo: number): boolean => {
+  if (props.aisleAfterCols.length > 0) return props.aisleAfterCols.includes(colNo);
+
+  const fallbackMidpoint = Math.ceil((props.seatsByRow[0]?.length ?? 0) / 2);
+  return props.splitLeftRight && colNo === fallbackMidpoint;
+};
+
+const shouldRenderRowAisle = (rowNo: number): boolean => props.aisleAfterRows.includes(rowNo);
 
 interface RectSnapshot {
   left: number;
@@ -169,9 +197,14 @@ interface SeatShiftGhost {
 const seatCellRefs = new Map<string, HTMLElement>();
 const shiftGhosts = ref<SeatShiftGhost[]>([]);
 const movingStudentIds = ref<Set<string>>(new Set());
+const seatShiftTransforms = ref<Map<string, string>>(new Map());
+const isPreparingSeatShift = ref(false);
 const shouldAnimateNextSeatChange = ref(false);
 let shiftAnimationSequence = 0;
 let pendingShiftResetTimer: number | null = null;
+let pendingShiftOldRects: Map<string, RectSnapshot> | null = null;
+let pendingShiftOldStudents: Map<string, StudentSeatSnapshot> | null = null;
+let pendingDraggedStudentId: string | null = null;
 
 const setSeatCellRef = (el: Element | ComponentPublicInstance | null, seatId: string): void => {
   if (el instanceof HTMLElement) {
@@ -223,6 +256,15 @@ const getShiftGhostStyle = (ghost: SeatShiftGhost): CSSProperties => ({
     : 'translate(0, 0)',
 });
 
+type SeatCellContentStyle = CSSProperties & Record<string, string>;
+
+const getSeatCellContentStyle = (seat: SeatCell): SeatCellContentStyle => {
+  if (!seat.student) return {};
+
+  const transform = seatShiftTransforms.value.get(seat.student.id);
+  return transform ? { '--seat-card-shift': transform } : {};
+};
+
 const addMovingStudentIds = (studentIds: Set<string>): void => {
   movingStudentIds.value = new Set([...movingStudentIds.value, ...studentIds]);
 };
@@ -231,12 +273,21 @@ const removeMovingStudentIds = (studentIds: Set<string>): void => {
   movingStudentIds.value = new Set(
     [...movingStudentIds.value].filter((studentId) => !studentIds.has(studentId)),
   );
+  seatShiftTransforms.value = new Map(
+    [...seatShiftTransforms.value].filter(([studentId]) => !studentIds.has(studentId)),
+  );
 };
 
 const clearPendingShiftResetTimer = (): void => {
   if (pendingShiftResetTimer === null) return;
   window.clearTimeout(pendingShiftResetTimer);
   pendingShiftResetTimer = null;
+};
+
+const clearSeatShiftAnimation = (studentIds: Set<string>): void => {
+  seatShiftTransforms.value = new Map(
+    [...seatShiftTransforms.value].filter(([studentId]) => !studentIds.has(studentId)),
+  );
 };
 
 // ── Zoom-to-fit ──────────────────────────────────────────
@@ -400,6 +451,7 @@ onBeforeUnmount(() => {
   resizeObserver?.disconnect();
   window.removeEventListener('mousemove', onDragMove);
   window.removeEventListener('mouseup', onDragEnd);
+  window.removeEventListener('blur', cancelDrag);
   stopViewportPan();
   document.body.classList.remove('is-dragging-active');
 });
@@ -421,17 +473,24 @@ watch(
     shouldAnimateNextSeatChange.value = false;
     clearPendingShiftResetTimer();
 
-    const oldStudents = getStudentSeatSnapshots(oldRows);
-    const oldRects = getSeatRects();
+    const oldStudents = pendingShiftOldStudents ?? getStudentSeatSnapshots(oldRows);
+    const oldRects = pendingShiftOldRects ?? getSeatRects();
+    const draggedStudentId = pendingDraggedStudentId;
+    pendingShiftOldStudents = null;
+    pendingShiftOldRects = null;
+    pendingDraggedStudentId = null;
 
     void nextTick(() => {
       const newStudents = getStudentSeatSnapshots(newRows);
       const newRects = getSeatRects();
       const movedStudentIds = new Set<string>();
+      const shiftTransforms = new Map<string, string>();
       const ghosts: SeatShiftGhost[] = [];
       const sequence = ++shiftAnimationSequence;
 
       newStudents.forEach((newSeat, studentId) => {
+        if (studentId === draggedStudentId) return;
+
         const oldSeat = oldStudents.get(studentId);
         if (!oldSeat || oldSeat.seatId === newSeat.seatId) return;
 
@@ -440,6 +499,10 @@ watch(
         if (!from || !to) return;
 
         movedStudentIds.add(studentId);
+        shiftTransforms.set(
+          studentId,
+          `translate3d(${from.left - to.left}px, ${from.top - to.top}px, 0)`,
+        );
         ghosts.push({
           key: `${sequence}-${studentId}`,
           studentId,
@@ -453,18 +516,21 @@ watch(
 
       if (ghosts.length === 0) return;
 
+      isPreparingSeatShift.value = true;
       addMovingStudentIds(movedStudentIds);
-      shiftGhosts.value = [...shiftGhosts.value, ...ghosts];
+      seatShiftTransforms.value = new Map([...seatShiftTransforms.value, ...shiftTransforms]);
+      shiftGhosts.value = [];
 
       window.requestAnimationFrame(() => {
-        shiftGhosts.value = shiftGhosts.value.map((ghost) =>
-          ghosts.some((item) => item.key === ghost.key) ? { ...ghost, active: true } : ghost,
-        );
+        if (gridRef.value) void gridRef.value.offsetHeight;
+        isPreparingSeatShift.value = false;
+
+        window.requestAnimationFrame(() => {
+          clearSeatShiftAnimation(movedStudentIds);
+        });
       });
 
       window.setTimeout(() => {
-        const ghostKeys = new Set(ghosts.map((ghost) => ghost.key));
-        shiftGhosts.value = shiftGhosts.value.filter((ghost) => !ghostKeys.has(ghost.key));
         removeMovingStudentIds(movedStudentIds);
       }, SHIFT_ANIMATION_MS + 80);
     });
@@ -475,8 +541,9 @@ watch(
 // ── Drag-to-shift ────────────────────────────────────────
 const draggingSeatId = ref<string | null>(null);
 const dragOverSeatId = ref<string | null>(null);
-const dragX = ref(0);
-const dragY = ref(0);
+const dragGhostRef = ref<HTMLElement | null>(null);
+const dragOffsetX = ref(32);
+const dragOffsetY = ref(32);
 const dragGhostWidth = ref(64);
 const dragGhostHeight = ref(64);
 
@@ -492,31 +559,78 @@ const draggedSeat = computed((): SeatCell | null => {
 });
 
 const ghostStyle = computed(() => ({
-  left: `${dragX.value}px`,
-  top: `${dragY.value}px`,
+  left: '0',
+  top: '0',
   width: `${dragGhostWidth.value}px`,
   height: `${dragGhostHeight.value}px`,
 }));
 
-const onDragMove = (e: MouseEvent): void => {
-  dragX.value = e.clientX;
-  dragY.value = e.clientY;
+const updateDragGhostPosition = (clientX: number, clientY: number): void => {
+  const ghost = dragGhostRef.value;
+  if (!ghost) return;
+  ghost.style.transform = `translate3d(${clientX - dragOffsetX.value}px, ${
+    clientY - dragOffsetY.value
+  }px, 0) scale(1.04)`;
 };
 
-const onDragEnd = (): void => {
+const getSeatIdAtPoint = (clientX: number, clientY: number): string | null => {
+  const element = document.elementFromPoint(clientX, clientY);
+  const seatCell = element?.closest('.seat-cell');
+  if (!(seatCell instanceof HTMLElement)) return null;
+
+  for (const [seatId, el] of seatCellRefs) {
+    if (el === seatCell) return seatId;
+  }
+  return null;
+};
+
+const updateDragOverFromPoint = (clientX: number, clientY: number): void => {
+  const seatId = getSeatIdAtPoint(clientX, clientY);
+  if (!seatId) {
+    dragOverSeatId.value = null;
+    return;
+  }
+
+  const seat = props.seatsByRow.flat().find((item) => item.id === seatId);
+  dragOverSeatId.value = seat && isUsable(seat) ? seat.id : null;
+};
+
+const onDragMove = (e: MouseEvent): void => {
+  updateDragGhostPosition(e.clientX, e.clientY);
+  updateDragOverFromPoint(e.clientX, e.clientY);
+};
+
+const onDragEnd = (e?: MouseEvent): void => {
+  if (e) updateDragOverFromPoint(e.clientX, e.clientY);
+
   const source = draggingSeatId.value;
   const target = dragOverSeatId.value;
+  const sourceSeat = props.seatsByRow.flat().find((seat) => seat.id === source);
 
   window.removeEventListener('mousemove', onDragMove);
   window.removeEventListener('mouseup', onDragEnd);
+  window.removeEventListener('blur', cancelDrag);
   document.body.classList.remove('is-dragging-active');
 
   draggingSeatId.value = null;
   dragOverSeatId.value = null;
 
   if (source && target && source !== target) {
+    pendingShiftOldStudents = getStudentSeatSnapshots(props.seatsByRow);
+    pendingShiftOldRects = getSeatRects();
+    pendingDraggedStudentId = sourceSeat?.student?.id ?? null;
+    shouldAnimateNextSeatChange.value = true;
     emit('swap', source, target);
   }
+};
+
+const cancelDrag = (): void => {
+  window.removeEventListener('mousemove', onDragMove);
+  window.removeEventListener('mouseup', onDragEnd);
+  window.removeEventListener('blur', cancelDrag);
+  document.body.classList.remove('is-dragging-active');
+  draggingSeatId.value = null;
+  dragOverSeatId.value = null;
 };
 
 const onSeatMouseDown = (e: MouseEvent, seat: SeatCell): void => {
@@ -525,20 +639,25 @@ const onSeatMouseDown = (e: MouseEvent, seat: SeatCell): void => {
   if (!isUsable(seat) || !seat.student) return;
 
   e.preventDefault();
-  const seatCellRect = (e.currentTarget as HTMLElement | null)?.getBoundingClientRect();
-  if (seatCellRect) {
-    dragGhostWidth.value = seatCellRect.width;
-    dragGhostHeight.value = seatCellRect.height;
+  const seatCell = e.currentTarget as HTMLElement | null;
+  const seatTileRect = seatCell?.querySelector('.seat-assignment-tile')?.getBoundingClientRect();
+  if (seatTileRect) {
+    dragGhostWidth.value = seatTileRect.width;
+    dragGhostHeight.value = seatTileRect.height;
+    dragOffsetX.value = e.clientX - seatTileRect.left;
+    dragOffsetY.value = e.clientY - seatTileRect.top;
   }
 
   draggingSeatId.value = seat.id;
   dragOverSeatId.value = null;
-  dragX.value = e.clientX;
-  dragY.value = e.clientY;
+  void nextTick(() => {
+    updateDragGhostPosition(e.clientX, e.clientY);
+  });
 
   document.body.classList.add('is-dragging-active');
   window.addEventListener('mousemove', onDragMove);
   window.addEventListener('mouseup', onDragEnd);
+  window.addEventListener('blur', cancelDrag);
 };
 
 const onSeatMouseEnter = (seat: SeatCell): void => {
@@ -716,6 +835,12 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   &.is-dragging .seat-cell {
     cursor: grabbing;
   }
+
+  &.is-preparing-seat-shift .seat-cell-content {
+    :deep(.seat-assignment-tile) {
+      transition: none !important;
+    }
+  }
 }
 
 .seat-grid-wrapper {
@@ -735,14 +860,94 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   min-width: 0;
 }
 
+.seat-column-aisle {
+  width: 18px;
+  min-height: 82px;
+  align-self: stretch;
+  flex: 0 0 18px;
+  border-radius: 9px;
+  background: var(--Surface-Selected, #dddddd);
+}
+
+.seat-row-aisle {
+  width: 100%;
+  height: 18px;
+  flex: 0 0 18px;
+  border-radius: 9px;
+  background: var(--Surface-Selected, #dddddd);
+}
+
 .seat-cell {
   width: 64px;
   flex: 0 0 64px;
-  transition: opacity 0.12s ease;
+  position: relative;
+  transition:
+    opacity 0.16s ease,
+    transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.seat-cell-content {
+  width: 64px;
+  min-height: 82px;
+  position: relative;
+  backface-visibility: hidden;
+}
+
+.seat-cell-content.is-seat-shifting {
+  position: relative;
+  z-index: 5;
+  pointer-events: none;
+
+  &::before {
+    content: 'ว่าง';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--primary, #0d47a1);
+    border-radius: 7px;
+    background: #ffffff;
+    box-sizing: border-box;
+    color: var(--primary, #0d47a1);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+    z-index: 0;
+  }
+
+  :deep(.seat-assignment-tile) {
+    position: relative;
+    z-index: 1;
+    border: 1px solid var(--primary, #0d47a1);
+    background: var(--primary, #0d47a1);
+    box-shadow:
+      0 12px 22px rgba(8, 15, 30, 0.2),
+      0 0 0 1px rgba(13, 71, 161, 0.18);
+    opacity: 1;
+    backface-visibility: hidden;
+    transform: var(--seat-card-shift, translate3d(0, 0, 0));
+    transition: transform 0.46s cubic-bezier(0.18, 0.9, 0.22, 1);
+    will-change: transform;
+  }
 }
 
 .seat-cell.is-drag-source {
-  opacity: 0.4;
+  pointer-events: none;
+}
+
+.seat-cell.is-drag-over {
+  transform: translateY(-2px);
+
+  :deep(.seat-assignment-tile) {
+    box-shadow:
+      0 0 0 2px #ffffff,
+      0 0 0 5px var(--primary, #0d47a1),
+      0 12px 26px rgba(13, 71, 161, 0.22);
+  }
 }
 
 .empty-seat-map {
@@ -756,19 +961,31 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   color: var(--text-muted);
 }
 
-// Dimmed ghost centered on the cursor while dragging a seat
 .seat-drag-ghost {
   position: fixed;
   z-index: 9999;
-  transform: translate(-50%, -50%);
+  transform-origin: top left;
   pointer-events: none;
   padding: 0;
   box-sizing: border-box;
-  opacity: 0.82;
-  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.28));
+  opacity: 0.96;
+  filter: drop-shadow(0 14px 20px rgba(13, 71, 161, 0.22));
+  transition: none;
+  will-change: transform;
 
   :deep(.seat-assignment-tile) {
+    border: 1px solid rgba(13, 71, 161, 0.46);
+    background: var(--primary, #0d47a1);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+      0 0 0 1px rgba(13, 71, 161, 0.12);
     transition: none;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  :deep(.seat-label) {
+    display: none;
   }
 }
 
@@ -782,17 +999,23 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   justify-content: center;
   gap: 4px;
   border-radius: 7px;
-  border: 1px solid var(--primary, #0d47a1);
-  background: var(--primary, #0d47a1);
+  border: 2px solid rgba(255, 255, 255, 0.24);
+  background: #14233d;
   color: #ffffff;
-  opacity: 0.96;
-  box-shadow: 0 10px 24px rgba(13, 71, 161, 0.26);
+  opacity: 0;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 12px 24px rgba(8, 15, 30, 0.24);
   transition:
-    transform 0.36s cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 0.36s ease;
+    transform 0.46s cubic-bezier(0.18, 0.9, 0.22, 1),
+    opacity 0.16s ease,
+    box-shadow 0.46s ease;
 
   &.is-active {
-    box-shadow: 0 16px 32px rgba(13, 71, 161, 0.34);
+    opacity: 0.98;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 18px 34px rgba(8, 15, 30, 0.3);
   }
 }
 
