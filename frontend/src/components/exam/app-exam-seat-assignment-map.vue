@@ -1,8 +1,8 @@
 <template>
-  <section class="seat-map-panel">
-    <header class="seat-map-header">
+  <section class="seat-map-panel" :class="{ 'is-print-mode': printMode }">
+    <header v-if="!hideHeader" class="seat-map-header">
       <h2 class="seat-map-title">{{ title }}</h2>
-      <div class="seat-map-controls row items-center no-wrap q-gutter-x-md">
+      <div v-if="!printMode" class="seat-map-controls row items-center no-wrap q-gutter-x-md">
         <div class="row items-center no-wrap q-gutter-x-sm">
           <span class="shuffle-label">{{ swapModeLabel }}</span>
           <q-toggle v-model="swapMode" dense color="primary" class="shuffle-toggle" />
@@ -152,12 +152,16 @@ const props = withDefaults(
     splitLeftRight: boolean;
     aisleAfterCols?: number[];
     aisleAfterRows?: number[];
+    printMode?: boolean;
+    hideHeader?: boolean;
     swapModeLabel?: string;
     emptyLabel?: string;
   }>(),
   {
     aisleAfterCols: () => [],
     aisleAfterRows: () => [],
+    printMode: false,
+    hideHeader: false,
     swapModeLabel: 'โหมดสลับที่นั่ง',
     emptyLabel: 'ไม่มีข้อมูลผังที่นั่ง',
   },
@@ -224,6 +228,7 @@ const seatGridStyle = computed<CSSProperties>(() => {
     gridTemplateRows: rowTracks.join(' '),
     columnGap: '16px',
     rowGap: '10px',
+    paddingBottom: '28px',
   };
 });
 
@@ -232,9 +237,70 @@ const getSeatCellGridStyle = (rowNo: number, colNo: number): CSSProperties => ({
   gridRow: `${getGridTrackIndex(rowNo, rowAislePositions.value)}`,
 });
 
+const getColumnAisleLabelTop = (): number => {
+  const seatTrackHeight = 82;
+  const aisleTrackHeight = 18;
+  const rowGap = 10;
+  const totalTracks = rowCount.value + rowAislePositions.value.length;
+  const totalHeight =
+    rowCount.value * seatTrackHeight +
+    rowAislePositions.value.length * aisleTrackHeight +
+    Math.max(totalTracks - 1, 0) * rowGap;
+
+  const rowAisleBands = rowAislePositions.value
+    .map((rowNo) => {
+      const aisleTrackIndex = getAisleTrackIndex(rowNo, rowAislePositions.value);
+      let top = 0;
+
+      for (let track = 1; track < aisleTrackIndex; track += 1) {
+        const isAisleTrack = rowAislePositions.value.some(
+          (aisleRowNo) => getAisleTrackIndex(aisleRowNo, rowAislePositions.value) === track,
+        );
+        top += isAisleTrack ? aisleTrackHeight : seatTrackHeight;
+        top += rowGap;
+      }
+
+      return {
+        start: Math.max(0, top - 6),
+        end: Math.min(totalHeight, top + aisleTrackHeight + 6),
+      };
+    })
+    .sort((a, b) => a.start - b.start);
+
+  const clearSegments = rowAisleBands.reduce<Array<{ start: number; end: number }>>(
+    (segments, band) => {
+      const previous = segments[segments.length - 1];
+      if (!previous) return segments;
+
+      if (band.start > previous.start) {
+        previous.end = Math.min(previous.end, band.start);
+      }
+
+      if (band.end < totalHeight) {
+        segments.push({ start: band.end, end: totalHeight });
+      }
+
+      return segments;
+    },
+    [{ start: 0, end: totalHeight }],
+  );
+
+  const labelSegment = clearSegments.reduce(
+    (largest, segment) =>
+      segment.end - segment.start > largest.end - largest.start ? segment : largest,
+    clearSegments[0] ?? { start: 0, end: totalHeight },
+  );
+
+  return Math.max(
+    18,
+    Math.min(labelSegment.start + (labelSegment.end - labelSegment.start) / 2, totalHeight - 18),
+  );
+};
+
 const getColumnAisleGridStyle = (colNo: number): CSSProperties => ({
   gridColumn: `${getAisleTrackIndex(colNo, columnAislePositions.value)}`,
   gridRow: `1 / ${rowCount.value + rowAislePositions.value.length + 1}`,
+  '--column-aisle-label-top': `${getColumnAisleLabelTop()}px`,
 });
 
 const getRowAisleGridStyle = (rowNo: number): CSSProperties => ({
@@ -404,7 +470,7 @@ const measureAndScale = (): void => {
   void gridRef.value.offsetWidth; // force reflow
 
   const gridW = gridRef.value.scrollWidth;
-  const gridH = gridRef.value.scrollHeight + 16;
+  const gridH = gridRef.value.scrollHeight + 56;
   gridNaturalWidth.value = gridW;
   gridNaturalHeight.value = gridH;
 
@@ -491,6 +557,7 @@ const onViewportMouseMove = (event: MouseEvent): void => {
 };
 
 const onViewportMouseDown = (event: MouseEvent): void => {
+  if (props.printMode) return;
   if (event.button !== 0 || draggingSeatId.value !== null) return;
 
   const target = event.target as HTMLElement | null;
@@ -711,6 +778,7 @@ const cancelDrag = (): void => {
 };
 
 const onSeatMouseDown = (e: MouseEvent, seat: SeatCell): void => {
+  if (props.printMode) return;
   // Drag-to-shift only when swap mode is on, left button, from an occupied seat.
   if (!swapMode.value || e.button !== 0) return;
   if (!isUsable(seat) || !seat.student) return;
@@ -758,6 +826,30 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.seat-map-panel.is-print-mode {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  min-height: 0;
+  height: auto;
+  overflow: visible;
+
+  .seat-map-header {
+    margin-bottom: 14px;
+  }
+
+  .seat-map-title {
+    font-size: 22px;
+  }
+
+  .seat-map-content {
+    overflow: visible;
+    cursor: default;
+    user-select: text;
+    scrollbar-gutter: auto;
+  }
 }
 
 .seat-map-header {
@@ -864,7 +956,7 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   min-height: 0;
   cursor: grab;
   user-select: none;
-  contain: layout paint;
+  contain: layout;
   will-change: scroll-position;
 
   &.is-panning {
@@ -932,27 +1024,41 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
   width: 18px;
   height: 100%;
   border-radius: 9px;
-  background: var(--Surface-Selected, #dddddd);
+  background: transparent;
   color: #111111;
   font-family: Sarabun, sans-serif;
   font-size: 14px;
   font-weight: 500;
   line-height: 100%;
-  overflow: hidden;
+  overflow: visible;
   z-index: 0;
 }
 
-.seat-column-aisle span {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  white-space: nowrap;
+.seat-column-aisle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9px;
   background: var(--Surface-Selected, #dddddd);
-  border-radius: 6px;
-  padding-block: 4px;
-  padding-inline: 2px;
+}
+
+.seat-column-aisle span {
+  position: absolute;
+  top: var(--column-aisle-label-top, 50%);
+  left: 50%;
+  writing-mode: vertical-rl;
+  transform: translate(-50%, -50%) rotate(180deg);
+  white-space: nowrap;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  max-height: calc(100% - 28px);
+  overflow: hidden;
+  z-index: 1;
 }
 
 .seat-row-aisle {
@@ -962,21 +1068,32 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   width: 100%;
   height: 18px;
   border-radius: 9px;
-  background: var(--Surface-Selected, #dddddd);
+  position: relative;
+  background: transparent;
   color: #111111;
   font-family: Sarabun, sans-serif;
   font-size: 14px;
   font-weight: 500;
   line-height: 100%;
-  overflow: hidden;
-  z-index: 1;
+  overflow: visible;
+  z-index: 3;
+}
+
+.seat-row-aisle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9px;
+  background: var(--Surface-Selected, #dddddd);
 }
 
 .seat-row-aisle span {
+  position: relative;
+  z-index: 4;
   white-space: nowrap;
-  background: var(--Surface-Selected, #dddddd);
-  border-radius: 6px;
-  padding: 2px 10px;
+  background: transparent;
+  border-radius: 0;
+  padding: 0 10px;
 }
 
 .seat-cell {

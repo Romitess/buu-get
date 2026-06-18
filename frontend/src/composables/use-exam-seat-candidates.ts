@@ -334,6 +334,7 @@ export function useExamSeatCandidates() {
     exam,
     sessions,
     activeSession,
+    activeLocation,
     sessionTimeTabs,
     selectedSessionLocationId,
     roomOptions,
