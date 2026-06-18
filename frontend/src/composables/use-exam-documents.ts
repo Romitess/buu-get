@@ -193,15 +193,15 @@ export function useExamDocuments() {
         if (cardElement) {
           await waitForImages(cardElement);
 
-          const canvasScale = 3;
+          const canvasScale = 2;
           const canvas = await html2canvas(cardElement, {
             scale: canvasScale,
             useCORS: true,
             allowTaint: true,
-            backgroundColor: null,
+            backgroundColor: '#ffffff',
           });
 
-          const imgData = canvas.toDataURL('image/png');
+          const imgData = canvas.toDataURL('image/jpeg', 0.8);
 
           const pxToMm = 0.264583;
           const widthMm = (canvas.width * pxToMm) / canvasScale;
@@ -216,7 +216,7 @@ export function useExamDocuments() {
           });
 
           // Fill the entire PDF page with the image with no margins
-          pdf.addImage(imgData, 'PNG', pdfBleedMm, pdfBleedMm, widthMm, heightMm);
+          pdf.addImage(imgData, 'JPEG', pdfBleedMm, pdfBleedMm, widthMm, heightMm, undefined, 'FAST');
           pdf.save(`BUU-GET_Voucher_${enrollment.ERM_ID}.pdf`);
 
           $q.notify({
@@ -340,12 +340,13 @@ export function useExamDocuments() {
 
         if (receiptElement) {
           const canvas = await html2canvas(receiptElement, {
-            scale: 3, // very high-quality rendering (600 DPI feel)
+            scale: 2,
             useCORS: true,
             allowTaint: true,
+            backgroundColor: '#ffffff',
           });
 
-          const imgData = canvas.toDataURL('image/png');
+          const imgData = canvas.toDataURL('image/jpeg', 0.8);
 
           // Standard A4 dimensions in PDF: 210mm x 297mm
           const pdf = new jsPDF({
@@ -355,7 +356,7 @@ export function useExamDocuments() {
           });
 
           // Fill the entire PDF page with the image with no margins
-          pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+          pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
           pdf.save(`BUU-GET_Receipt_${enrollment.ERM_ID}.pdf`);
 
           $q.notify({
