@@ -33,12 +33,12 @@
           <!-- Subtle Watermark Background -->
           <div class="watermark-bg no-pointer-events">GET</div>
 
-          <div class="row q-col-gutter-lg items-stretch content-container">
+          <div class="content-container">
             <!-- Left: Profile Photo Column -->
-            <div class="col-12 col-sm-4 flex flex-center column">
-              <div class="profile-photo-wrapper shadow-1">
+            <div class="profile-column">
+              <div class="profile-photo-wrapper" :class="{ 'shadow-1': !useImagePlaceholder }">
                 <div v-if="useImagePlaceholder" class="voucher-photo-placeholder">
-                  <q-icon name="image" size="48px" color="grey-5" />
+                  <q-icon name="image" size="48px" color="black" />
                 </div>
                 <ImageDisplay
                   v-else
@@ -55,7 +55,7 @@
             </div>
 
             <!-- Right: Details Grid -->
-            <div class="col-12 col-sm-8 detail-grid-column">
+            <div class="detail-grid-column">
               <div class="row q-col-gutter-y-sm full-height items-center">
                 <!-- Column 1 -->
                 <div class="col-12 col-sm-6 detail-group">
@@ -91,12 +91,12 @@
                     <label class="info-label">Venue:</label>
                     <div class="info-value venue-value">
                       <span>{{ voucherData.location }}</span>
-                      <span v-if="voucherData.locationRoom">{{ voucherData.locationRoom }}</span>
+                      <span v-if="voucherData.locationRoom">&nbsp;{{ voucherData.locationRoom }}</span>
                     </div>
                   </div>
                   <div class="info-group">
                     <label class="info-label">Seat Number:</label>
-                    <div class="info-value highlight-value">{{ voucherData.seatNo }}</div>
+                    <div class="info-value">{{ voucherData.seatNo }}</div>
                   </div>
                 </div>
               </div>
@@ -180,14 +180,14 @@
       </div>
 
       <!-- Test Regulations (English & Thai combined in a single card) -->
-      <div v-if="showRegulations" class="regulations-block q-mt-lg">
+      <div v-if="showRegulations" class="regulations-block">
         <div class="regulations-box relative-position">
           <!-- Subtle Watermark Background -->
           <div class="watermark-bg no-pointer-events">GET</div>
 
           <div class="regulations-content-wrapper">
             <h4 class="regulations-heading-inline">
-              {{ $t('admin.testVoucherManagement.regulationsEnLabel') }}
+              {{ $t('admin.testVoucherManagement.regulationsEnLabel') }}:
             </h4>
             <div class="regulations-text-content q-mb-md">
               {{ displayRegulationsEn }}
@@ -218,8 +218,8 @@ const props = withDefaults(
   defineProps<{
     /** ข้อมูลบัตรประจำตัว — ถ้าไม่ส่งจะใช้ Mock Data ตามรูปภาพ */
     data?: VoucherData | undefined;
-    regulationsEn?: string | string[];
-    regulationsTh?: string | string[];
+    regulationsEn?: string | string[] | undefined;
+    regulationsTh?: string | string[] | undefined;
     showRegulations?: boolean;
     showVoucherCard?: boolean;
     showActions?: boolean;
@@ -300,10 +300,8 @@ const displayRegulationsEn = computed<string>(() => {
   if (!val) {
     val = localRegulationsEn.value || defaultRegulationsEn;
   }
-  if (Array.isArray(val)) {
-    return val.join('\n');
-  }
-  return val;
+  const str = Array.isArray(val) ? val.join('\n') : val;
+  return str ? str.trim().replace(/\n\s*(?!\d+\.)/g, ' ') : '';
 });
 
 const displayRegulationsTh = computed<string>(() => {
@@ -311,10 +309,8 @@ const displayRegulationsTh = computed<string>(() => {
   if (!val) {
     val = localRegulationsTh.value || defaultRegulationsTh;
   }
-  if (Array.isArray(val)) {
-    return val.join('\n');
-  }
-  return val;
+  const str = Array.isArray(val) ? val.join('\n') : val;
+  return str ? str.trim().replace(/\n\s*(?!\d+\.)/g, ' ') : '';
 });
 
 // ===== Action: Window Print =====
@@ -364,7 +360,7 @@ const windowPrint = (): void => {
 
 /* ===== Header Area ===== */
 .voucher-header {
-  padding: 16px 20px;
+  padding: 16px 28px 16px 48px;
   background-color: transparent;
   border-bottom: 1.5px solid var(--primary, #0d47a1) !important;
 
@@ -397,12 +393,16 @@ const windowPrint = (): void => {
 /* ===== Body Area ===== */
 .voucher-body {
   position: relative;
-  padding: 24px 20px 8px 20px;
+  padding: 24px 28px 8px 48px;
   background: transparent;
 
   .content-container {
     position: relative;
     z-index: 1;
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    align-items: start;
+    column-gap: 32px;
   }
 }
 
@@ -424,15 +424,15 @@ const windowPrint = (): void => {
 
 /* ===== Profile Photo ===== */
 .profile-photo-wrapper {
-  width: 100px;
-  height: 126px;
-  background-color: #212121;
-  border-radius: 3px;
+  width: 120px;
+  height: 144px;
+  background-color: #00000033 !important;
+  border-radius: 4px;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1.5px solid var(--border-black, #000000);
+  border: 1.5px solid #00000033 !important;
 
   .profile-photo-img {
     width: 100%;
@@ -447,21 +447,18 @@ const windowPrint = (): void => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #cfcfd1;
+  background: #c8c8c8;
 }
 
 .signature-line {
-  width: 100px;
+  width: 120px;
   height: 1.5px;
   background-color: var(--neutral-400);
-  margin-top: 20px;
+  margin-top: 24px;
   border-radius: 1px;
 }
 
 /* ===== Detail Grid ===== */
-.detail-grid-column {
-  padding-left: 12px !important;
-}
 
 .detail-group {
   display: flex;
@@ -487,26 +484,24 @@ const windowPrint = (): void => {
     font-size: 13px !important;
     font-weight: 600 !important;
     color: var(--primary, #0d47a1) !important;
-    line-height: 1.3;
-
-    &.highlight-value {
-      color: #e53935 !important;
-      font-weight: 700 !important;
-    }
+    line-height: 1.25;
+    letter-spacing: 0px !important;
+    white-space: normal !important;
+    overflow-wrap: break-word;
+    word-break: normal;
   }
 }
 
 .name-value {
   display: block;
-  white-space: normal;
-  overflow: hidden;
+  white-space: normal !important;
   overflow-wrap: break-word;
-  word-break: normal;
 }
 
 .venue-value {
-  display: flex;
-  flex-direction: column;
+  display: block;
+  white-space: normal !important;
+  overflow-wrap: break-word;
 }
 
 /* ===== Barcode Footer Section ===== */
@@ -543,6 +538,22 @@ const windowPrint = (): void => {
   text-align: left;
 }
 
+.regulations-heading {
+  font-family: var(--font-family-base);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--neutral-900);
+  margin: 0 0 8px 0;
+}
+
+.regulations-heading-inline {
+  font-family: var(--font-family-base) !important;
+  font-size: 14.5px !important;
+  font-weight: 500 !important;
+  color: var(--neutral-900) !important;
+  margin: 0 !important;
+}
+
 .regulations-box {
   position: relative;
   background: linear-gradient(to bottom, #fafafa, #f0f4f8);
@@ -554,6 +565,9 @@ const windowPrint = (): void => {
   .regulations-content-wrapper {
     position: relative;
     z-index: 1;
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 0;
   }
 
   .watermark-bg {
@@ -561,20 +575,15 @@ const windowPrint = (): void => {
   }
 }
 
-.regulations-heading-inline {
-  font-family: var(--font-family-base) !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  color: var(--neutral-800, #1f2937);
-  margin: 0 0 8px 0 !important;
-}
-
 .regulations-text-content {
   font-family: 'Sarabun', var(--font-family-base);
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--neutral-700, #334155);
-  line-height: 1.5;
+  font-size: 14px;
+  font-weight: 300;
+  font-style: normal;
+  color: var(--neutral-900);
+  line-height: 1.45;
+  letter-spacing: 0;
+  vertical-align: middle;
   white-space: pre-line;
   margin-bottom: 16px;
   padding-left: 2px;
@@ -594,13 +603,36 @@ const windowPrint = (): void => {
   }
   .voucher-body {
     padding: 12px;
+
+    .content-container {
+      grid-template-columns: 1fr;
+      row-gap: 16px;
+    }
+  }
+  .details-grid {
+    grid-template-columns: 1fr;
+    row-gap: 10px;
+  }
+  .profile-photo-wrapper {
+    width: 120px;
+    height: 144px;
+  }
+  .signature-line {
+    width: 120px;
+    margin-top: 24px;
   }
   .watermark-bg {
     font-size: 6rem;
     left: 50%;
   }
-  .regulations-box .watermark-bg {
-    font-size: 8rem;
+  .regulations-box {
+    padding: 12px;
+    .watermark-bg {
+      font-size: 8rem;
+    }
+    .regulations-content-wrapper {
+      padding: 0 !important;
+    }
   }
 }
 
@@ -624,12 +656,90 @@ const windowPrint = (): void => {
     background-color: #ffffff !important;
     background-image: none !important;
   }
+  .voucher-header {
+    padding: 14px 48px 14px 76px;
+    .header-logo {
+      width: 160px;
+    }
+    .header-title {
+      font-size: 17px !important;
+    }
+    .header-subtitle {
+      font-size: 15px !important;
+    }
+  }
+  .voucher-body {
+    padding: 20px 48px 8px 76px;
+  }
+  .profile-photo-wrapper {
+    width: 120px;
+    height: 144px;
+  }
+  .signature-line {
+    width: 120px;
+    margin-top: 34px;
+  }
+  .info-group .info-label {
+    font-size: 12px !important;
+  }
+  .info-group .info-value {
+    font-size: 16px !important;
+  }
+  .barcode-wrapper .barcode-svg {
+    width: 254px;
+    height: 36px;
+  }
+  .barcode-wrapper .barcode-value {
+    font-size: 12px !important;
+  }
+  .watermark-bg {
+    top: 46%;
+    left: 62%;
+    font-size: 182px;
+  }
+  .regulations-box .watermark-bg {
+    top: 50%;
+    left: 48% !important;
+    font-size: 206px;
+  }
+
+  .regulations-block {
+    margin-top: 10px;
+  }
+  .regulations-heading {
+    font-size: 16px !important;
+    margin-bottom: 12px;
+  }
+  .regulations-heading-inline {
+    font-size: 16px !important;
+    margin: 0 !important;
+  }
   .regulations-box {
-    padding: 16px 20px;
+    padding: 16px 24px;
     background-color: #ffffff !important;
     background-image: none !important;
-    border: 1.5px solid var(--border-black) !important;
-    box-shadow: none !important;
+    border: 1px solid #000000 !important;
+
+    .regulations-content-wrapper {
+      padding: 0 !important;
+      background-color: transparent !important;
+    }
+    .regulations-text-content {
+      font-family: 'Sarabun', var(--font-family-base) !important;
+      font-size: 15px !important;
+      font-weight: 300 !important;
+      font-style: normal !important;
+      line-height: 1.38 !important;
+      letter-spacing: 0 !important;
+      vertical-align: middle;
+      margin-top: -6px !important;
+    }
+    .regulations-text-content.q-mb-md {
+      margin-bottom: -2px !important;
+    }
+    .regulations-heading-inline.q-mt-md {
+      margin-top: 0 !important;
+    }
   }
 }
 </style>

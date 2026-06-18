@@ -75,9 +75,7 @@ export default defineConfig((/* ctx */) => {
           ...viteConf.server,
           fs: {
             ...viteConf.server?.fs,
-            allow: [
-              path.resolve(__dirname, '..'),
-            ],
+            allow: [path.resolve(__dirname, '..')],
           },
         };
       },

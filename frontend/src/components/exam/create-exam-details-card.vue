@@ -228,8 +228,7 @@ const onFeeInput = (val: string | number | null): void => {
   let sanitized = String(val ?? '').replace(/[^\d.]/g, '');
   const firstDot = sanitized.indexOf('.');
   if (firstDot !== -1) {
-    sanitized =
-      sanitized.slice(0, firstDot + 1) + sanitized.slice(firstDot + 1).replace(/\./g, '');
+    sanitized = sanitized.slice(0, firstDot + 1) + sanitized.slice(firstDot + 1).replace(/\./g, '');
   }
   form.value.fee = sanitized;
 };

@@ -1,17 +1,14 @@
 <template>
   <q-page class="page-container test-voucher-management-page">
-    <!-- Breadcrumbs -->
     <AppBreadcrumbs />
     <AppPageHeader
       :title="$t('admin.testVoucherManagement.pageTitle')"
       :subtitle="$t('admin.testVoucherManagement.pageDescription')"
     />
 
-    <!-- Main Content: Two-Column Layout -->
     <div class="voucher-content-grid row q-col-gutter-lg">
-      <!-- Left Column: Voucher Preview + Regulations (Scrollable) -->
       <div class="col-12 col-md-6">
-        <div class="section-card section-card--scrollable">
+        <q-card class="section-card section-card--scrollable">
           <h3 class="section-title">{{ $t('admin.testVoucherManagement.previewTitle') }}</h3>
           <div class="scrollable-content">
             <div class="admin-voucher-preview">
@@ -20,15 +17,15 @@
                 :regulations-en="regulationsEn"
                 :regulations-th="regulationsTh"
                 :show-regulations="true"
+                :use-image-placeholder="true"
               />
             </div>
           </div>
-        </div>
+        </q-card>
       </div>
 
-      <!-- Right Column: Edit Form -->
       <div class="col-12 col-md-6">
-        <div class="section-card">
+        <q-card class="section-card">
           <h3 class="section-title">{{ $t('admin.testVoucherManagement.editTitle') }}</h3>
 
           <!-- Test Regulations (English) -->
@@ -40,7 +37,6 @@
               v-model="regulationsEn"
               outlined
               type="textarea"
-              rows="6"
               :placeholder="$t('admin.testVoucherManagement.placeholderEn')"
               class="custom-rule-input"
             />
@@ -55,17 +51,16 @@
               v-model="regulationsTh"
               outlined
               type="textarea"
-              rows="6"
               :placeholder="$t('admin.testVoucherManagement.placeholderTh')"
               class="custom-rule-input"
             />
           </div>
-        </div>
+        </q-card>
       </div>
     </div>
 
     <!-- Action Buttons -->
-    <div class="action-bar row justify-end q-mt-xl q-gutter-md">
+    <div class="action-bar row justify-end q-mt-lg q-gutter-md">
       <AppButton
         :label="$t('admin.testVoucherManagement.cancelBtn')"
         color="grey-4"
@@ -78,7 +73,7 @@
         :label="$t('admin.testVoucherManagement.saveBtn')"
         color="primary"
         unelevated
-        class="action-btn action-btn--save"
+        class="action-btn"
         @click="handleSave"
       />
     </div>
@@ -129,10 +124,10 @@ onMounted(async () => {
   try {
     const data = await getRegulations();
     if (data.regulationsEn) {
-      regulationsEn.value = data.regulationsEn;
+      regulationsEn.value = data.regulationsEn.trim();
     }
     if (data.regulationsTh) {
-      regulationsTh.value = data.regulationsTh;
+      regulationsTh.value = data.regulationsTh.trim();
     }
   } catch (error) {
     console.error('Failed to load voucher regulations', error);
@@ -177,7 +172,6 @@ const handleSave = async (): Promise<void> => {
   }
 }
 
-// Enable columns to stretch cards to equal height in Safari/Mac
 .voucher-content-grid {
   & > div {
     display: flex;
@@ -186,12 +180,11 @@ const handleSave = async (): Promise<void> => {
   }
 }
 
-// ===== Section Card =====
 .section-card {
-  background: var(--surface-card);
+  background: #ffffff;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
+  border: none;
+  box-shadow: 0px 4px 4px 0px #00000040 !important;
   padding: 28px;
   height: 100%;
   transition: box-shadow var(--transition-fast);
@@ -199,7 +192,7 @@ const handleSave = async (): Promise<void> => {
   flex-direction: column;
 
   &:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: 0px 4px 4px 0px #00000040;
   }
 
   &--scrollable {
@@ -219,34 +212,32 @@ const handleSave = async (): Promise<void> => {
   padding-right: 4px;
 
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
   &::-webkit-scrollbar-track {
-    background: var(--neutral-100);
+    background: #f1f1f1;
     border-radius: 10px;
   }
   &::-webkit-scrollbar-thumb {
-    background: var(--neutral-400);
+    background: #595959;
     border-radius: 10px;
     &:hover {
-      background: var(--neutral-500);
+      background: #444444;
     }
   }
 }
 
 .section-title {
   font-family: 'Sarabun', 'Inter', sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #0f172a;
   margin: 0 0 20px 0;
-  padding-bottom: 12px;
-  border-bottom: 2px solid var(--neutral-200);
 }
 
-// ===== Voucher Preview =====
 .admin-voucher-preview {
-  // Override the inner component padding and background for inline display
+  padding: 0 4px;
+
   :deep(.page-container-test) {
     padding: 0 !important;
     min-height: auto !important;
@@ -259,11 +250,39 @@ const handleSave = async (): Promise<void> => {
   }
 
   :deep(.voucher-wrapper) {
-    max-width: 100% !important;
+    max-width: 98% !important;
+    margin: 0 auto !important;
+  }
+
+  :deep(.voucher-body) {
+    padding-left: 48px !important;
+    padding-right: 28px !important;
+  }
+
+  :deep(.details-grid) {
+    column-gap: 16px !important;
+  }
+
+  :deep(.info-value) {
+    font-size: 13.5px !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.25 !important;
+  }
+
+  :deep(.name-value) {
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.25 !important;
+  }
+
+  :deep(.venue-value) {
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.25 !important;
   }
 }
 
-// ===== Regulations =====
 .regulations-block {
   margin-top: 4px;
   flex: 1;
@@ -273,47 +292,10 @@ const handleSave = async (): Promise<void> => {
 
 .regulations-heading {
   font-family: 'Sarabun', 'Inter', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 500;
   color: #0f172a;
-  margin: 0 0 12px 0;
-}
-
-.regulations-heading-inline {
-  font-family: 'Sarabun', 'Inter', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 8px 0;
-}
-
-.regulations-box {
-  background-color: var(--neutral-50);
-  border: 1px solid var(--neutral-200);
-  border-radius: var(--radius-sm);
-  padding: 20px 24px;
-}
-
-.regulations-list {
-  margin: 0;
-  padding-left: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  li {
-    font-family: 'Sarabun', 'Inter', sans-serif;
-    font-size: 0.875rem;
-    font-weight: 400;
-    color: #0f172a;
-    line-height: 1.6;
-    padding-left: 4px;
-
-    &::marker {
-      color: var(--primary);
-      font-weight: 600;
-    }
-  }
+  margin: 0 0 4px 0;
 }
 
 .custom-rule-input {
@@ -334,6 +316,8 @@ const handleSave = async (): Promise<void> => {
     border-radius: 8px;
     background-color: #ffffff;
     transition: all 0.2s ease;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
 
     &:before {
       border: 1px solid var(--neutral-200, #e2e8f0) !important;
@@ -357,18 +341,20 @@ const handleSave = async (): Promise<void> => {
 
   :deep(.q-field__native) {
     flex: 1;
-    height: 100% !important; // Safari height stretch fix
+    height: 100% !important;
     resize: none;
     font-family: 'Sarabun', sans-serif;
-    font-size: 0.875rem;
+    font-size: 1.05rem;
     color: #0f172a !important;
+    line-height: 1.65 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
   }
 }
 
-// ===== Action Buttons =====
 .action-bar {
-  padding-top: 24px;
-  border-top: 1px solid var(--border-color);
+  padding-top: 0;
+  border-top: none;
 }
 
 .action-btn {
@@ -378,13 +364,8 @@ const handleSave = async (): Promise<void> => {
   font-weight: 700;
   font-size: var(--font-size-sm);
   letter-spacing: 0.3px;
-
-  &--save {
-    min-width: 180px;
-  }
 }
 
-// ===== Responsive =====
 @media (max-width: 1023px) {
   .voucher-content-grid {
     flex-direction: column;

@@ -843,7 +843,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     }
   };
 
-
   /** Export candidates to CSV */
   const exportCandidates = (): void => {
     if (form.value.eligibleCandidates.length === 0) {

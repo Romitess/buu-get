@@ -437,7 +437,7 @@ onMounted(() => {
   }
 
   :deep(tbody tr td:nth-child(3)) {
-    padding-left: clamp(12px, 4.0vw, 70px) !important;
+    padding-left: clamp(12px, 4vw, 70px) !important;
   }
 }
 
