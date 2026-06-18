@@ -45,7 +45,9 @@ export interface BackendSessionDetail {
     LOCATION_ROOM_NO: string;
     LOCATION_TOTAL_ROWS?: number;
     LOCATION_TOTAL_COLS?: number;
-    LOCATION_IS_SPLIT?: number;
+    SEAT_DIRECTION?: 'HORIZONTAL' | 'VERTICAL';
+    AISLE_AFTER_COLS?: number[] | null;
+    AISLE_AFTER_ROWS?: number[] | null;
     SEATS?: {
       LS_ID: number;
       LS_ROW_NO: number;

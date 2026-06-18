@@ -1032,8 +1032,14 @@ export function useExamSeatManagement() {
   });
 
   const splitLeftRight = computed((): boolean => {
-    return activeLocation.value?.LOCATION_IS_SPLIT === 1;
+    return (
+      (activeLocation.value?.AISLE_AFTER_COLS?.length ?? 0) > 0 ||
+      (activeLocation.value?.AISLE_AFTER_ROWS?.length ?? 0) > 0
+    );
   });
+
+  const aisleAfterCols = computed((): number[] => activeLocation.value?.AISLE_AFTER_COLS ?? []);
+  const aisleAfterRows = computed((): number[] => activeLocation.value?.AISLE_AFTER_ROWS ?? []);
 
   const seatsByRow = computed((): SeatCell[][] => {
     if (!activeLocation.value?.SEATS) return [];
@@ -1139,6 +1145,8 @@ export function useExamSeatManagement() {
     allSeats,
     gridCols,
     splitLeftRight,
+    aisleAfterCols,
+    aisleAfterRows,
     seatsByRow,
     seatStyle,
     // Exam / session info

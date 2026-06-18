@@ -17,6 +17,11 @@ export enum SeatLabelFormat {
   CUSTOM = 'CUSTOM',
 }
 
+export enum SeatDirection {
+  HORIZONTAL = 'HORIZONTAL',
+  VERTICAL = 'VERTICAL',
+}
+
 @Entity('EXAM_T_LOCATIONS')
 export class ExamLocation {
   @ApiProperty({ example: 1, description: 'รหัสสถานที่จัดสอบ' })
@@ -106,17 +111,46 @@ export class ExamLocation {
   SEAT_LABEL_FORMAT: SeatLabelFormat | null;
 
   @ApiProperty({
-    example: 0,
+    example: SeatDirection.HORIZONTAL,
     description: 'สถานะการแบ่งที่นั่ง (0: NORMAL, 1: SPLIT)',
-    required: false,
+    enum: SeatDirection,
   })
   @Column({
-    name: 'LOCATION_IS_SPLIT',
-    type: 'tinyint',
-    default: 0,
+    name: 'SEAT_DIRECTION',
+    type: 'enum',
+    enum: SeatDirection,
+    default: SeatDirection.HORIZONTAL,
     comment: 'สถานะการแบ่งที่นั่ง (0: NORMAL, 1: SPLIT)',
   })
-  LOCATION_IS_SPLIT: number;
+  SEAT_DIRECTION: SeatDirection;
+
+  @ApiProperty({
+    example: [5, 8, 10],
+    description: 'Column indexes that have an aisle after them',
+    required: false,
+    type: [Number],
+  })
+  @Column({
+    name: 'AISLE_AFTER_COLS',
+    type: 'json',
+    nullable: true,
+    comment: 'Column indexes that have an aisle after them',
+  })
+  AISLE_AFTER_COLS: number[] | null;
+
+  @ApiProperty({
+    example: [2, 4],
+    description: 'Row indexes that have an aisle after them',
+    required: false,
+    type: [Number],
+  })
+  @Column({
+    name: 'AISLE_AFTER_ROWS',
+    type: 'json',
+    nullable: true,
+    comment: 'Row indexes that have an aisle after them',
+  })
+  AISLE_AFTER_ROWS: number[] | null;
 
   @ApiProperty({ description: 'วันที่สร้าง' })
   @CreateDateColumn({ name: 'CREATED_AT', comment: 'วันที่สร้างสถานที่จัดสอบ' })
