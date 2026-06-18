@@ -1,56 +1,37 @@
 {
-  "name": "buu-get-front",
-  "version": "0.0.1",
-  "description": "BUU GET frontend application",
-  "productName": "BUU GET Front",
-  "author": "Tanakit Wongviroj <65160167@go.buu.ac.th>",
-  "type": "module",
+  "name": "buu-get",
+  "version": "1.0.0",
   "private": true,
+  "description": "BUU GET monorepo — frontend (Quasar) + backend (NestJS)",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
-    "lint": "eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
-    "format": "prettier --write \"**/*.{js,ts,vue,css,scss,html,md,json}\" --ignore-path .gitignore",
-    "test": "echo \"No test specified\" && exit 0",
-    "dev": "quasar dev",
-    "build": "quasar build",
     "prepare": "husky",
-    "postinstall": "quasar prepare"
-  },
-  "dependencies": {
-    "@quasar/extras": "^1.16.4",
-    "axios": "^1.13.2",
-    "pinia": "^3.0.1",
-    "quasar": "^2.16.0",
-    "vue": "^3.5.22",
-    "vue-router": "^5.0.3"
-  },
-  "devDependencies": {
-    "@commitlint/cli": "^20.1.0",
-    "@commitlint/config-conventional": "^20.0.0",
-    "@eslint/js": "^9.39.4",
-    "@quasar/app-vite": "2.4.1",
-    "@types/node": "^22.19.11",
-    "@vue/eslint-config-prettier": "^10.2.0",
-    "@vue/eslint-config-typescript": "^14.7.0",
-    "autoprefixer": "^10.4.27",
-    "eslint": "^9.39.4",
-    "eslint-plugin-vue": "^10.8.0",
-    "globals": "^17.4.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "prettier": "^3.8.1",
-    "typescript": "^5.9.3",
-    "vite-plugin-checker": "^0.12.0",
-    "vue-eslint-parser": "^10.4.0",
-    "vue-tsc": "^3.2.6"
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "npm run build --workspace=backend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "dev": "npm run dev:frontend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:backend": "npm run start:dev --workspace=backend",
+    "start:backend": "npm run start:prod --workspace=backend",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "npm run lint --workspace=backend",
+    "lint:frontend": "npm run lint --workspace=frontend",
+    "format": "npm run format --workspace=backend && npm run format --workspace=frontend",
+    "test": "npm run test --workspace=backend",
+    "migration:run": "npm run migration:run --workspace=backend",
+    "migration:generate": "npm run migration:generate --workspace=backend",
+    "migration:revert": "npm run migration:revert --workspace=backend"
   },
   "engines": {
     "node": ">=22.12.0",
     "npm": ">=11.0.0"
   },
-  "lint-staged": {
-    "src/**/*.{ts,vue}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
+  "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "husky": "^9.1.7"
   }
 }
