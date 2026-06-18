@@ -204,7 +204,7 @@ import { computed, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { VoucherData } from 'src/types/voucher';
 import ImageDisplay from 'src/components/base/image-display.vue';
-import { getRegulations } from 'src/services/voucher-config.service';
+import { getRegulations } from 'src/services/exam-rule-voucher.service';
 
 // ===== Props =====
 const props = withDefaults(
@@ -491,7 +491,7 @@ const windowPrint = (): void => {
   width: 172px;
   height: 1.5px;
   background-color: var(--neutral-400);
-  margin-top: 22px;
+  margin-top: 30px;
   border-radius: 1px;
 }
 
@@ -502,9 +502,9 @@ const windowPrint = (): void => {
 
 .details-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.15fr) minmax(122px, 0.85fr);
   grid-auto-rows: minmax(39px, auto);
-  column-gap: 42px;
+  column-gap: 28px;
   row-gap: 0;
   align-items: start;
 }
@@ -540,9 +540,10 @@ const windowPrint = (): void => {
 }
 
 .name-value {
-  white-space: nowrap;
-  overflow: visible;
-  overflow-wrap: normal;
+  display: block;
+  white-space: normal;
+  overflow: hidden;
+  overflow-wrap: break-word;
   word-break: normal;
 }
 
@@ -599,7 +600,7 @@ const windowPrint = (): void => {
   font-size: 13px;
   font-weight: 700;
   color: var(--neutral-900);
-  margin: 0 0 6px 0;
+  margin: 0 !important;
 }
 
 .regulations-box {
@@ -613,12 +614,12 @@ const windowPrint = (): void => {
   .regulations-content-wrapper {
     background-color: transparent;
     border-radius: 8px;
-    padding: 28px 30px 26px;
+    padding: 0 30px 26px;
   }
 
   .watermark-bg {
     top: 50%;
-    left: 56% !important;
+    left: 48% !important;
     font-size: 206px;
   }
 }
@@ -629,13 +630,25 @@ const windowPrint = (): void => {
 }
 
 .regulations-text-content {
-  font-family: var(--font-family-base);
+  font-family: 'Sarabun', var(--font-family-base);
   font-size: 13px;
-  font-weight: 400;
+  font-weight: 300;
+  font-style: normal;
   color: var(--neutral-900);
-  line-height: 1.35;
+  line-height: 1.38;
+  letter-spacing: 0;
+  vertical-align: middle;
   white-space: pre-line;
   padding-left: 2px;
+  margin-top: -6px !important;
+}
+
+.regulations-text-content.q-mb-md {
+  margin-bottom: -2px !important;
+}
+
+.regulations-heading-inline.q-mt-md {
+  margin-top: 0 !important;
 }
 
 /* ===== Responsive Adaptability ===== */
@@ -679,7 +692,7 @@ const windowPrint = (): void => {
   }
   .signature-line {
     width: 124px;
-    margin-top: 18px;
+    margin-top: 24px;
   }
   .watermark-bg {
     top: 48%;
@@ -737,7 +750,7 @@ const windowPrint = (): void => {
   }
   .signature-line {
     width: 140px;
-    margin-top: 28px;
+    margin-top: 34px;
   }
   .info-group .info-label {
     font-size: 12px !important;
@@ -759,7 +772,7 @@ const windowPrint = (): void => {
   }
   .regulations-box .watermark-bg {
     top: 50%;
-    left: 56% !important;
+    left: 48% !important;
     font-size: 206px;
   }
 
@@ -772,7 +785,7 @@ const windowPrint = (): void => {
   }
   .regulations-heading-inline {
     font-size: 15px !important;
-    margin-bottom: 10px;
+    margin: 0 !important;
   }
   .regulations-box {
     padding: 10px !important;
@@ -781,12 +794,24 @@ const windowPrint = (): void => {
     border: 1px solid #000000 !important;
   }
   .regulations-box .regulations-content-wrapper {
-    padding: 28px 30px 26px !important;
+    padding: 0 30px 26px !important;
     background-color: transparent !important;
   }
   .regulations-text-content {
+    font-family: 'Sarabun', var(--font-family-base) !important;
     font-size: 14px !important;
-    line-height: 1.6;
+    font-weight: 300 !important;
+    font-style: normal !important;
+    line-height: 1.38 !important;
+    letter-spacing: 0 !important;
+    vertical-align: middle;
+    margin-top: -6px !important;
+  }
+  .regulations-text-content.q-mb-md {
+    margin-bottom: -2px !important;
+  }
+  .regulations-heading-inline.q-mt-md {
+    margin-top: 0 !important;
   }
 }
 </style>

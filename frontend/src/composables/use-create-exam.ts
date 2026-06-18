@@ -684,31 +684,51 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   };
 
   /**
-   * Parse a single CSV line, handling quoted values that may contain commas.
+   * Parse CSV content into rows and columns, handling quotes and literal newlines.
    */
-  const parseCsvLine = (line: string): string[] => {
-    const result: string[] = [];
-    let current = '';
+  const parseCsvRows = (text: string): string[][] => {
+    const result: string[][] = [];
+    let row: string[] = [];
+    let col = '';
     let inQuotes = false;
 
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (char === '"') {
-        if (inQuotes && line[i + 1] === '"') {
-          current += '"';
-          i++; // skip escaped quote
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
+
+      if (inQuotes) {
+        if (char === '"') {
+          if (nextChar === '"') {
+            col += '"';
+            i++;
+          } else {
+            inQuotes = false;
+          }
         } else {
-          inQuotes = !inQuotes;
+          col += char;
         }
-      } else if (char === ',' && !inQuotes) {
-        result.push(current.trim());
-        current = '';
       } else {
-        current += char;
+        if (char === '"') {
+          inQuotes = true;
+        } else if (char === ',') {
+          row.push(col.trim());
+          col = '';
+        } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+          row.push(col.trim());
+          result.push(row);
+          row = [];
+          col = '';
+          if (char === '\r') i++;
+        } else {
+          col += char;
+        }
       }
     }
-    result.push(current.trim());
-    return result;
+    if (row.length > 0 || col !== '') {
+      row.push(col.trim());
+      result.push(row);
+    }
+    return result.filter((r) => r.some((cell) => cell !== ''));
   };
 
   /**
@@ -733,9 +753,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         try {
           const rawText = e.target?.result as string;
           const text = stripBom(rawText);
-          const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+          const rows = parseCsvRows(text);
 
-          if (lines.length < 2) {
+          if (rows.length < 2) {
             $q.notify({
               type: 'warning',
               message: 'ไฟล์ไม่มีข้อมูล (ต้องมีอย่างน้อย header + 1 แถว)',
@@ -745,7 +765,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           }
 
           // ── Header detection ──
-          const headerCols = parseCsvLine(lines[0] ?? '');
+          const headerCols = rows[0] ?? [];
 
           // Keywords for matching columns
           const idKeywords = [
@@ -784,10 +804,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           // ── Parse data rows ──
           const candidates: EligibleCandidate[] = [];
 
-          for (let i = 1; i < lines.length; i++) {
-            const line = lines[i];
-            if (!line) continue;
-            const cols = parseCsvLine(line);
+          for (let i = 1; i < rows.length; i++) {
+            const cols = rows[i];
+            if (!cols) continue;
 
             const nationalId = cols[idColIndex];
             const fullName = cols[nameColIndex];
@@ -824,6 +843,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล' });
     }
   };
+
 
   /** Export candidates to CSV */
   const exportCandidates = (): void => {

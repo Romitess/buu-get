@@ -569,6 +569,10 @@ export default {
           rows: 'แถว (Rows)',
           cols: 'คอลัมน์ (Cols)',
           splitLeftRight: 'แบ่งซ้าย-ขวา',
+          seatNumberDirection: 'ทิศทางการเรียงเลขที่นั่ง',
+          horizontalDirection: 'แนวนอน',
+          verticalDirection: 'แนวตั้ง',
+          walkway: 'ทางเดิน',
         },
         placeholders: {
           roomName: 'QS1-1001',
@@ -578,8 +582,11 @@ export default {
           cols: '1',
         },
         totalSeats: 'จำนวนที่นั่งทั้งหมด',
+        previewHint:
+          'สามารถคลิกที่ปุ่มที่นั่งเพื่อระบุที่นั่งที่ชำรุดได้ และคลิกที่หัวตารางเพื่อเว้นที่นั่งทั้งแถว',
         actions: {
           save: 'บันทึก',
+          addWalkway: 'เพิ่มทางเดิน',
         },
         validation: {
           roomNameRequired: 'กรุณากรอกชื่อห้องสอบ',

@@ -10,7 +10,7 @@
     @click="$emit('click', seatNumber)"
   >
     <img
-      v-if="status === 'broken' || status === 'blocked'"
+      v-if="status === 'broken'"
       src="/icons/seat-broken.svg"
       class="broken-icon"
       alt=""
@@ -93,12 +93,12 @@ defineEmits<{
 }
 
 .blocked-bg {
-  background-color: var(--neutral-gray-light);
+  background-color: var(--gray, #bcbbbb);
   cursor: not-allowed;
 }
 
 .border-blocked {
-  border-color: var(--text-muted);
+  border-color: var(--gray, #bcbbbb);
 }
 
 .broken-icon {

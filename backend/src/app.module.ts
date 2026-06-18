@@ -32,14 +32,15 @@ import buuApiConfig from './config/buu-api-config';
 import { PlatformGatewayModule } from './modules/platform-gateway/platform-gateway.module';
 import { ProfileEditHistoryModule } from './modules/profile-edit-history/profile-edit-history.module';
 import { PageBuilderModule } from './modules/page-builder/page-builder.module';
-import { VoucherConfigsModule } from './modules/voucher-configs/voucher-configs.module';
+import { ExamRuleVouchersModule } from './modules/exam-rule-vouchers/exam-rule-vouchers.module';
 import { ScoreCriteriaModule } from './modules/score-criteria/score-criteria.module';
+import { MoodleSyncLogsModule } from './modules/moodle-sync-logs/moodle-sync-logs.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       load: [buuApiConfig],
-      envFilePath: ['../.env'],
+      envFilePath: ['.env', 'backend/.env', '../.env'],
       isGlobal: true,
       validate: validateEnv,
     }),
@@ -88,8 +89,9 @@ import { ScoreCriteriaModule } from './modules/score-criteria/score-criteria.mod
     PlatformGatewayModule,
     ProfileEditHistoryModule,
     PageBuilderModule,
-    VoucherConfigsModule,
+    ExamRuleVouchersModule,
     ScoreCriteriaModule,
+    MoodleSyncLogsModule,
   ],
 })
 export class AppModule {}

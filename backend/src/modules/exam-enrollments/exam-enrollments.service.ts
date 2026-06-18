@@ -344,7 +344,10 @@ export class ExamEnrollmentsService {
         'SESSION.EXAM',
         'SESSION.SESSION_LOCATIONS',
         'SESSION.SESSION_LOCATIONS.LOCATION',
+        'SESSION_LOCATION',
+        'SESSION_LOCATION.LOCATION',
         'ATTENDANCES',
+        'VOUCHERS',
         'LOCATION_SEAT',
       ],
       order: { CREATED_AT: 'ASC' },
@@ -409,7 +412,6 @@ export class ExamEnrollmentsService {
       relations: [
         'SESSION',
         'SESSION.EXAM',
-        'SESSION.LOCATION',
         'SESSION.SESSION_LOCATIONS',
         'SESSION.SESSION_LOCATIONS.LOCATION',
         'SESSION_LOCATION',

@@ -107,7 +107,7 @@ import {
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { EnrollmentStatus } from 'src/types/enrollment.types';
 import { bulkIssueVouchers } from 'src/services/voucher.service';
-import { updateEnrollmentStatus } from 'src/services/enrollment.service';
+import { fetchEnrollmentById, updateEnrollmentStatus } from 'src/services/enrollment.service';
 import { updateExamSessionStatus } from 'src/services/exam.service';
 import type { VoucherData } from 'src/types/voucher';
 import { getImageUrl } from 'src/services/image.service';
@@ -283,8 +283,8 @@ const handlePrintVoucher = (): void => {
   });
 };
 
-const buildVoucherData = (row: SeatCandidateRow): VoucherData => {
-  const enrollment = row.enrollment;
+const buildVoucherData = (row: SeatCandidateRow, freshEnrollment = row.enrollment): VoucherData => {
+  const enrollment = freshEnrollment;
   const profile = enrollment.USER?.PROFILE;
   const title = profile?.userTitleEn || profile?.userTitleTh || '';
   const fullName = profile?.userFullnameEn || profile?.userFullnameTh || '';
@@ -308,23 +308,36 @@ const buildVoucherData = (row: SeatCandidateRow): VoucherData => {
     examType: getExamRoundTypeLabel(),
     location: location?.LOCATION_NAME || sessionLocation.value,
     locationRoom: location?.LOCATION_ROOM_NO || undefined,
-    seatNo: row.seatNumber,
+    seatNo: enrollment.LOCATION_SEAT?.LS_SEAT_LABEL || row.seatNumber,
     voucherNo: voucherCode,
     citizenId: enrollment.USER?.USER_NATIONAL_ID || enrollment.USER?.USER_PASSPORT_NO || '-',
-    testSession: '-',
+    testSession: exam.value?.EXAM_ROUND || '-',
     profileImage: imagePath ? getImageUrl(imagePath) : undefined,
     barcodeValue: voucherCode,
   };
 };
 
-const handleViewVoucher = (row: SeatCandidateRow): void => {
-  $q.dialog({
-    component: DialogViewVoucher,
-    componentProps: {
-      voucherData: buildVoucherData(row),
-      candidateCount: candidateCount.value,
-    },
-  });
+const handleViewVoucher = async (row: SeatCandidateRow): Promise<void> => {
+  $q.loading.show();
+  try {
+    const enrollment = await fetchEnrollmentById(row.ermId);
+    $q.dialog({
+      component: DialogViewVoucher,
+      componentProps: {
+        voucherData: buildVoucherData(row, enrollment),
+        candidateCount: candidateCount.value,
+      },
+    });
+  } catch (error) {
+    console.error('Failed to load voucher data:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'ไม่สามารถโหลดข้อมูลตั๋วได้ กรุณาลองใหม่อีกครั้ง',
+      position: 'top',
+    });
+  } finally {
+    $q.loading.hide();
+  }
 };
 
 const handlePrintSeatPlan = (): void => {

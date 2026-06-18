@@ -45,6 +45,10 @@ defineProps<{
     background-color: var(--primary-light);
   }
 
+  &.omitted {
+    background-color: var(--gray, #bcbbbb);
+  }
+
   &.broken {
     background-color: var(--seat-broken-bg); // Grey color for broken
   }

@@ -16,6 +16,7 @@ import { ExamCertificate } from '../../exam-certificates/entities/exam-certifica
 import { VoidedReceipt } from '../../voided-receipts/entities/voided-receipt.entity';
 import { UserProfile } from '../../user-profile/entities/user-profile.entity';
 import { UserImage } from '../../user-image/entities/user-image.entity';
+import { MoodleSyncLog } from '../../moodle-sync-logs/entities/moodle-sync-log.entity';
 
 @Entity({ name: 'BUU_GET_T_USER' })
 export class User {
@@ -123,4 +124,7 @@ export class User {
 
   @OneToOne(() => UserImage, (image) => image.USER)
   IMAGE: UserImage;
+
+  @OneToMany(() => MoodleSyncLog, (log) => log.USER)
+  MOODLE_SYNC_LOGS: MoodleSyncLog[];
 }
