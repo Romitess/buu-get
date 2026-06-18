@@ -227,7 +227,9 @@ export interface BackendLocation {
   LOCATION_FLOOR_NO?: number | null;
   LOCATION_TOTAL_ROWS?: number;
   LOCATION_TOTAL_COLS?: number;
-  LOCATION_IS_SPLIT?: number;
+  SEAT_DIRECTION?: 'HORIZONTAL' | 'VERTICAL';
+  AISLE_AFTER_COLS?: number[] | null;
+  AISLE_AFTER_ROWS?: number[] | null;
   LOCATION_SEAT_CAPACITY?: number;
   SEATS?: {
     LS_ID: number;

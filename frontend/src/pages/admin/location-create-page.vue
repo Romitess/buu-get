@@ -31,7 +31,9 @@
                   dense
                   :placeholder="$t('admin.locationManagement.createPage.placeholders.roomName')"
                   class="buu-input-muted"
-                  hide-bottom-space
+                  :error="!!formErrors.roomName"
+                  :error-message="formErrors.roomName"
+                  @update:model-value="clearFieldError('roomName')"
                 />
               </div>
 
@@ -46,7 +48,9 @@
                     dense
                     :placeholder="$t('admin.locationManagement.createPage.placeholders.building')"
                     class="buu-input-muted"
-                    hide-bottom-space
+                    :error="!!formErrors.building"
+                    :error-message="formErrors.building"
+                    @update:model-value="clearFieldError('building')"
                   />
                 </div>
 
@@ -61,7 +65,9 @@
                     dense
                     :placeholder="$t('admin.locationManagement.createPage.placeholders.floor')"
                     class="buu-input-muted"
-                    hide-bottom-space
+                    :error="!!formErrors.floor"
+                    :error-message="formErrors.floor"
+                    @update:model-value="clearFieldError('floor')"
                   />
                 </div>
               </div>
@@ -89,10 +95,16 @@
                   dense
                   :placeholder="$t('admin.locationManagement.createPage.placeholders.rows')"
                   class="buu-input-muted"
-                  hide-bottom-space
+                  :error="!!formErrors.rows"
+                  :error-message="formErrors.rows"
                   min="1"
                   :max="MAX_SEAT_LAYOUT_SIZE"
-                  @update:model-value="(val) => (rows = clampSeatLayoutValue(val))"
+                  @update:model-value="
+                    (val) => {
+                      rows = clampSeatLayoutValue(val);
+                      clearFieldError('rows');
+                    }
+                  "
                 />
               </div>
               <div class="col-6">
@@ -106,10 +118,16 @@
                   dense
                   :placeholder="$t('admin.locationManagement.createPage.placeholders.cols')"
                   class="buu-input-muted"
-                  hide-bottom-space
+                  :error="!!formErrors.cols"
+                  :error-message="formErrors.cols"
                   min="1"
                   :max="MAX_SEAT_LAYOUT_SIZE"
-                  @update:model-value="(val) => (cols = clampSeatLayoutValue(val))"
+                  @update:model-value="
+                    (val) => {
+                      cols = clampSeatLayoutValue(val);
+                      clearFieldError('cols');
+                    }
+                  "
                 />
               </div>
             </div>
@@ -139,6 +157,7 @@
               </div>
               <div class="walkway-control-row">
                 <div
+                  v-if="selectedWalkwayPositions.length > 0"
                   class="walkway-chip-row"
                   :class="{ 'walkway-chip-row--scroll': selectedWalkwayPositions.length > 2 }"
                 >
@@ -255,12 +274,21 @@ const floor = ref<number | null>(null);
 const building = ref('');
 const rows = ref<number | null>(null);
 const cols = ref<number | null>(null);
-const splitLeftRight = ref(false);
 const seatNumberDirection = ref<'horizontal' | 'vertical'>('vertical');
 const isSaving = ref(false);
 const isWalkwayDialogOpen = ref(false);
 const selectedWalkwayPositions = ref<WalkwayPosition[]>([]);
 const seatPreviewRef = ref<InstanceType<typeof AppExamSeatPreview> | null>(null);
+
+interface LocationFormErrors {
+  roomName?: string;
+  building?: string;
+  floor?: string;
+  rows?: string;
+  cols?: string;
+}
+
+const formErrors = ref<LocationFormErrors>({});
 
 const seatDirectionOptions = [
   {
@@ -279,10 +307,25 @@ const totalSeats = computed(() => {
 
 const normalizedRows = computed(() => rows.value || 0);
 const normalizedCols = computed(() => cols.value || 0);
+const splitLeftRight = computed(() => selectedWalkwayPositions.value.length > 0);
 const selectedWalkwayPositionValues = computed(() =>
   selectedWalkwayPositions.value.map(
     (position) => `${position.type === 'row' ? 'row' : 'col'}-${position.index}`,
   ),
+);
+
+const aisleAfterCols = computed(() =>
+  selectedWalkwayPositions.value
+    .filter((position) => position.type === 'column')
+    .map((position) => position.index)
+    .sort((a, b) => a - b),
+);
+
+const aisleAfterRows = computed(() =>
+  selectedWalkwayPositions.value
+    .filter((position) => position.type === 'row')
+    .map((position) => position.index)
+    .sort((a, b) => a - b),
 );
 
 const clampSeatLayoutValue = (value: unknown): number | null => {
@@ -292,6 +335,54 @@ const clampSeatLayoutValue = (value: unknown): number | null => {
   if (!Number.isFinite(numericValue)) return null;
 
   return Math.min(MAX_SEAT_LAYOUT_SIZE, Math.max(1, Math.floor(numericValue)));
+};
+
+const clearFieldError = (field: keyof LocationFormErrors): void => {
+  if (!formErrors.value[field]) return;
+
+  formErrors.value = {
+    ...formErrors.value,
+    [field]: undefined,
+  };
+};
+
+const isBlank = (value: string | number | null | undefined): boolean =>
+  value === null || value === undefined || String(value).trim() === '';
+
+const validateForm = (): boolean => {
+  const errors: LocationFormErrors = {};
+
+  if (isBlank(roomName.value)) {
+    errors.roomName = 'กรุณากรอกชื่อห้องสอบ';
+  }
+
+  if (isBlank(building.value)) {
+    errors.building = 'กรุณากรอกสถานที่/อาคาร';
+  }
+
+  if (isBlank(floor.value)) {
+    errors.floor = 'กรุณากรอกชั้นที่สอบ';
+  }
+
+  if (!rows.value || rows.value < 1) {
+    errors.rows = 'กรุณากรอกแถว (Rows)';
+  } else if (rows.value > MAX_SEAT_LAYOUT_SIZE) {
+    errors.rows = t('admin.locationManagement.createPage.validation.layoutLimit', {
+      max: MAX_SEAT_LAYOUT_SIZE,
+    });
+  }
+
+  if (!cols.value || cols.value < 1) {
+    errors.cols = 'กรุณากรอกคอลัมน์ (Cols)';
+  } else if (cols.value > MAX_SEAT_LAYOUT_SIZE) {
+    errors.cols = t('admin.locationManagement.createPage.validation.layoutLimit', {
+      max: MAX_SEAT_LAYOUT_SIZE,
+    });
+  }
+
+  formErrors.value = errors;
+
+  return Object.keys(errors).length === 0;
 };
 
 const rowGuideLabel = (index: number): string => {
@@ -316,10 +407,6 @@ const getWalkwayPositionLabel = (position: WalkwayPosition): string => {
   return `หลังคอลัมน์ ${columnGuideLabel(position.index)}`;
 };
 
-const syncWalkwaySplitState = (): void => {
-  splitLeftRight.value = selectedWalkwayPositions.value.length > 0;
-};
-
 const parseWalkwayPosition = (positionValue: string): WalkwayPosition | null => {
   const [typeValue, indexValue] = positionValue.split('-');
   const parsedIndex = Number(indexValue);
@@ -336,51 +423,38 @@ const handleWalkwayConfirm = (positionValues: string[]): void => {
   selectedWalkwayPositions.value = positionValues
     .map(parseWalkwayPosition)
     .filter((position): position is WalkwayPosition => position !== null);
-  syncWalkwaySplitState();
 };
 
 const removeWalkwayPosition = (position: WalkwayPosition): void => {
   selectedWalkwayPositions.value = selectedWalkwayPositions.value.filter(
     (item) => !(item.type === position.type && item.index === position.index),
   );
-  syncWalkwaySplitState();
+};
+
+const buildSeatStatuses = (): Record<string, number> => {
+  const statusMap: Record<string, number> = {};
+  const omittedSeats = seatPreviewRef.value?.omittedSeats ?? new Set<string>();
+  const brokenSeats = seatPreviewRef.value?.brokenSeats ?? new Set<string>();
+
+  omittedSeats.forEach((seatLabel) => {
+    statusMap[seatLabel] = 2;
+  });
+
+  brokenSeats.forEach((seatLabel) => {
+    statusMap[seatLabel] = 1;
+  });
+
+  return statusMap;
 };
 
 const handleSave = async (): Promise<void> => {
-  if (!roomName.value.trim()) {
-    $q.notify({
-      type: 'warning',
-      message: t('admin.locationManagement.createPage.validation.roomNameRequired'),
-      position: 'top',
-    });
-    return;
-  }
-
-  if (!rows.value || rows.value < 1 || !cols.value || cols.value < 1) {
-    $q.notify({
-      type: 'warning',
-      message: t('admin.locationManagement.createPage.validation.layoutRequired'),
-      position: 'top',
-    });
-    return;
-  }
-
-  if (rows.value > MAX_SEAT_LAYOUT_SIZE || cols.value > MAX_SEAT_LAYOUT_SIZE) {
-    $q.notify({
-      type: 'warning',
-      message: t('admin.locationManagement.createPage.validation.layoutLimit', {
-        max: MAX_SEAT_LAYOUT_SIZE,
-      }),
-      position: 'top',
-    });
+  if (!validateForm()) {
     return;
   }
 
   isSaving.value = true;
 
   try {
-    const brokenSeatLabels = Array.from(seatPreviewRef.value?.brokenSeats ?? new Set<string>());
-
     await createLocationWithSeats(
       {
         LOCATION_NAME: building.value.trim(),
@@ -393,9 +467,11 @@ const handleSave = async (): Promise<void> => {
         LOCATION_TOTAL_COLS: Number(cols.value),
         LOCATION_SEAT_CAPACITY: Number(totalSeats.value),
         SEAT_LABEL_FORMAT: 'ROW_COL',
-        LOCATION_IS_SPLIT: splitLeftRight.value ? 1 : 0,
+        SEAT_DIRECTION: seatNumberDirection.value === 'horizontal' ? 'HORIZONTAL' : 'VERTICAL',
+        AISLE_AFTER_COLS: aisleAfterCols.value,
+        AISLE_AFTER_ROWS: aisleAfterRows.value,
       },
-      brokenSeatLabels,
+      buildSeatStatuses(),
     );
 
     $q.notify({
@@ -441,9 +517,9 @@ const handleSave = async (): Promise<void> => {
   align-items: center;
   justify-content: center;
   width: min(352px, 100%);
-  height: 108px;
-  margin-top: 18px;
-  margin-bottom: 22px;
+  height: 96px;
+  margin-top: 12px;
+  margin-bottom: 0;
   margin-inline: auto;
   padding: 16px;
   gap: 10px;
@@ -559,8 +635,10 @@ const handleSave = async (): Promise<void> => {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  flex: 0 0 calc((100% - 8px) * 2 / 3);
+  flex: 0 1 auto;
+  width: max-content;
   min-width: 0;
+  max-width: calc((100% - 8px) * 2 / 3);
   overflow-x: hidden;
   overflow-y: hidden;
   height: 39px;
@@ -597,7 +675,7 @@ const handleSave = async (): Promise<void> => {
 
 .walkway-chip {
   min-width: 0;
-  flex: 0 0 calc((100% - 8px) / 2);
+  flex: 0 0 111px;
   height: 39px;
   min-height: 39px;
   margin: 0;
@@ -689,8 +767,8 @@ const handleSave = async (): Promise<void> => {
 .form-card,
 .preview-card {
   width: 100%;
-  height: 704px;
-  max-height: 704px;
+  height: 760px;
+  max-height: 760px;
   border-radius: var(--radius-sm);
   background: var(--surface-card);
   border: 1px solid var(--border-color);
@@ -699,11 +777,18 @@ const handleSave = async (): Promise<void> => {
 
 .form-card {
   max-width: 400px;
-  padding: var(--space-lg) var(--space-lg) 56px;
+  padding: var(--space-lg) var(--space-lg) 32px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: var(--space-md);
   justify-content: flex-start;
+}
+
+.buu-input-muted {
+  :deep(.q-field__bottom) {
+    min-height: 20px;
+    padding-top: 4px;
+  }
 }
 
 .preview-panel {

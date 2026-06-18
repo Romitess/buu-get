@@ -285,13 +285,47 @@ const getTargetStatus = (): SeatStatusOption => {
   return isSameStatus ? firstStatus : 'available';
 };
 
-defineExpose({ brokenSeats });
+defineExpose({ brokenSeats, omittedSeats: localOmittedSeats });
 
 const getSeatStatus = (seatId: string): 'available' | 'assigned' | 'broken' | 'blocked' => {
   if (localOmittedSeats.value.has(seatId)) return 'blocked';
   if (brokenSeats.value.has(seatId)) return 'broken';
 
   return 'available';
+};
+
+const getSeatIdByPosition = (
+  rowIndex: number,
+  colIndex: number,
+  direction: 'horizontal' | 'vertical',
+): string => {
+  const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const horizontalSeatId = `${rowLetters[rowIndex] ?? rowIndex + 1}${colIndex + 1}`;
+  const verticalSeatId = `${rowLetters[colIndex] ?? colIndex + 1}${rowIndex + 1}`;
+
+  return direction === 'horizontal' ? horizontalSeatId : verticalSeatId;
+};
+
+const remapSeatStatusSetByDirection = (
+  source: Set<string>,
+  oldDirection: 'horizontal' | 'vertical',
+  nextDirection: 'horizontal' | 'vertical',
+): Set<string> => {
+  if (oldDirection === nextDirection) return new Set(source);
+
+  const remapped = new Set<string>();
+
+  for (let row = 0; row < rowCount.value; row++) {
+    for (let col = 0; col < colCount.value; col++) {
+      const oldSeatId = getSeatIdByPosition(row, col, oldDirection);
+
+      if (source.has(oldSeatId)) {
+        remapped.add(getSeatIdByPosition(row, col, nextDirection));
+      }
+    }
+  }
+
+  return remapped;
 };
 
 const columnGuideLabels = computed(() => {
@@ -319,18 +353,14 @@ const rowGuideLabels = computed(() => {
 
 const seatsByRow = computed(() => {
   const rows: Array<Array<{ id: string }>> = [];
-  const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
   const numRows = rowCount.value;
   const numCols = colCount.value;
 
   for (let row = 0; row < numRows; row++) {
     const rowSeats = [];
     for (let col = 0; col < numCols; col++) {
-      const horizontalSeatId = `${rowLetters[row] ?? row + 1}${col + 1}`;
-      const verticalSeatId = `${rowLetters[col] ?? col + 1}${row + 1}`;
-
       rowSeats.push({
-        id: props.numberingDirection === 'horizontal' ? horizontalSeatId : verticalSeatId,
+        id: getSeatIdByPosition(row, col, props.numberingDirection),
       });
     }
     rows.push(rowSeats);
@@ -464,11 +494,55 @@ const seatBodyMetrics = computed(() => {
 const getColumnWalkwayStyle = (colIndex: number): CSSProperties => {
   const metrics = seatBodyMetrics.value;
   const width = cssNumber(seatStyle.value.aisleWidth);
+  const walkwayHeight = cssNumber(seatStyle.value.aisleHeight);
   const left =
     metrics.bodyLeft +
     colIndex * metrics.seatWidth +
     Math.max(colIndex - 1, 0) * metrics.colGap +
     (metrics.colGap - width) / 2;
+  const rowWalkwayBands = rowWalkwayPositions.value
+    .map((position) => {
+      const top =
+        position.index * metrics.seatHeight +
+        Math.max(position.index - 1, 0) * metrics.rowGap +
+        (metrics.rowGap - walkwayHeight) / 2;
+
+      return {
+        start: Math.max(0, top - 4),
+        end: Math.min(metrics.bodyHeight, top + walkwayHeight + 4),
+      };
+    })
+    .sort((a, b) => a.start - b.start);
+  const clearSegments = rowWalkwayBands.reduce<Array<{ start: number; end: number }>>(
+    (segments, band) => {
+      const previous = segments[segments.length - 1];
+
+      if (!previous) return segments;
+
+      if (band.start > previous.start) {
+        previous.end = Math.min(previous.end, band.start);
+      }
+
+      if (band.end < metrics.bodyHeight) {
+        segments.push({ start: band.end, end: metrics.bodyHeight });
+      }
+
+      return segments;
+    },
+    [{ start: 0, end: metrics.bodyHeight }],
+  );
+  const labelSegment = clearSegments.reduce(
+    (largest, segment) =>
+      segment.end - segment.start > largest.end - largest.start ? segment : largest,
+    clearSegments[0] ?? { start: 0, end: metrics.bodyHeight },
+  );
+  const labelTop = Math.max(
+    8,
+    Math.min(
+      labelSegment.start + (labelSegment.end - labelSegment.start) / 2,
+      metrics.bodyHeight - 8,
+    ),
+  );
 
   return {
     position: 'absolute',
@@ -477,6 +551,7 @@ const getColumnWalkwayStyle = (colIndex: number): CSSProperties => {
     width: seatStyle.value.aisleWidth,
     height: `${metrics.bodyHeight}px`,
     fontSize: seatStyle.value.walkwayFontSize,
+    '--column-label-top': `${labelTop}px`,
   };
 };
 
@@ -656,6 +731,24 @@ watch(
 );
 
 watch(
+  () => props.numberingDirection,
+  (nextDirection, oldDirection) => {
+    if (!oldDirection || nextDirection === oldDirection) return;
+
+    brokenSeats.value = remapSeatStatusSetByDirection(
+      brokenSeats.value,
+      oldDirection,
+      nextDirection,
+    );
+    localOmittedSeats.value = remapSeatStatusSetByDirection(
+      localOmittedSeats.value,
+      oldDirection,
+      nextDirection,
+    );
+  },
+);
+
+watch(
   () => props.omittedSeats,
   (value) => {
     localOmittedSeats.value = new Set(value);
@@ -799,16 +892,18 @@ watch(
 }
 
 .seat-column-walkway span {
-  position: relative;
-  z-index: 3;
+  position: absolute;
+  top: var(--column-label-top, 50%);
+  left: 50%;
+  z-index: 4;
   writing-mode: vertical-rl;
-  transform: rotate(180deg);
+  transform: translate(-50%, -50%) rotate(180deg);
   white-space: nowrap;
-  background: var(--Surface-Selected, #dddddd);
+  background: var(--Surface-Selected, #dddddd) !important;
   border-radius: 6px;
-  max-height: calc(100% - 12px);
-  padding-block: 3px;
-  padding-inline: 1px;
+  max-height: calc(100% - 28px);
+  padding-block: 4px;
+  padding-inline: 2px;
   overflow: hidden;
 }
 
@@ -825,18 +920,18 @@ watch(
   letter-spacing: 0;
   line-height: 100%;
   text-align: center;
-  z-index: 2;
+  z-index: 5;
   pointer-events: none;
   overflow: hidden;
 }
 
 .seat-row-walkway span {
   position: relative;
-  z-index: 3;
-  background: var(--Surface-Selected, #dddddd);
+  z-index: 6;
+  background: var(--Surface-Selected, #dddddd) !important;
   border-radius: 6px;
   max-width: calc(100% - 12px);
-  padding: 2px 8px;
+  padding: 3px 10px;
   white-space: nowrap;
   overflow: hidden;
 }

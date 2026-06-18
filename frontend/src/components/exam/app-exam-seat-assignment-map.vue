@@ -43,49 +43,53 @@
           :style="gridTransformStyle"
         >
           <div class="seat-grid-wrapper">
-            <div v-for="(rowSeats, rowIndex) in seatsByRow" :key="rowIndex" class="seat-map-row">
-              <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
-                <AppSeatSplitDivider
-                  v-if="
-                    splitLeftRight &&
-                    colIndex === Math.ceil(rowSeats.length / 2) &&
-                    rowSeats.length > 1
-                  "
-                  width="48px"
-                />
-                <div
-                  :ref="(el) => setSeatCellRef(el, seat.id)"
-                  class="seat-cell"
-                  :class="{
-                    'is-drag-source': draggingSeatId === seat.id,
-                    'is-drag-over': draggingSeatId !== null && dragOverSeatId === seat.id,
-                  }"
-                  @mousedown="onSeatMouseDown($event, seat)"
-                  @mouseenter="onSeatMouseEnter(seat)"
-                  @mouseleave="onSeatMouseLeave(seat)"
-                >
+            <template v-for="(rowSeats, rowIndex) in seatsByRow" :key="rowIndex">
+              <div class="seat-map-row">
+                <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
                   <div
-                    class="seat-cell-content"
+                    :ref="(el) => setSeatCellRef(el, seat.id)"
+                    class="seat-cell"
                     :class="{
-                      'is-seat-shifting': seat.student && movingStudentIds.has(seat.student.id),
+                      'is-drag-source': draggingSeatId === seat.id,
+                      'is-drag-over': draggingSeatId !== null && dragOverSeatId === seat.id,
                     }"
-                    :style="getSeatCellContentStyle(seat)"
+                    @mousedown="onSeatMouseDown($event, seat)"
+                    @mouseenter="onSeatMouseEnter(seat)"
+                    @mouseleave="onSeatMouseLeave(seat)"
                   >
-                    <AppExamSeatAssignmentTile
-                      :seat-label="seat.label"
-                      :status="draggingSeatId === seat.id ? 'available' : seat.status"
-                      :student="draggingSeatId === seat.id ? null : seat.student"
-                      :swap-mode="swapMode"
-                      :selected="
-                        draggingSeatId !== seat.id &&
-                        draggingSeatId !== null &&
-                        dragOverSeatId === seat.id
-                      "
-                    />
+                    <div
+                      class="seat-cell-content"
+                      :class="{
+                        'is-seat-shifting': seat.student && movingStudentIds.has(seat.student.id),
+                      }"
+                      :style="getSeatCellContentStyle(seat)"
+                    >
+                      <AppExamSeatAssignmentTile
+                        :seat-label="seat.label"
+                        :status="draggingSeatId === seat.id ? 'available' : seat.status"
+                        :student="draggingSeatId === seat.id ? null : seat.student"
+                        :swap-mode="swapMode"
+                        :selected="
+                          draggingSeatId !== seat.id &&
+                          draggingSeatId !== null &&
+                          dragOverSeatId === seat.id
+                        "
+                      />
+                    </div>
                   </div>
-                </div>
-              </template>
-            </div>
+                  <div
+                    v-if="shouldRenderColumnAisle(colIndex + 1)"
+                    class="seat-column-aisle"
+                    aria-hidden="true"
+                  ></div>
+                </template>
+              </div>
+              <div
+                v-if="shouldRenderRowAisle(rowIndex + 1)"
+                class="seat-row-aisle"
+                aria-hidden="true"
+              ></div>
+            </template>
           </div>
         </div>
       </div>
@@ -129,7 +133,6 @@
 import { computed, ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import type { ComponentPublicInstance, CSSProperties } from 'vue';
 import AppExamSeatAssignmentTile from 'src/components/exam/app-exam-seat-assignment-tile.vue';
-import AppSeatSplitDivider from 'src/components/exam/app-seat-split-divider.vue';
 import type { SeatCell } from 'src/composables/use-exam-seat-management';
 
 const SHIFT_ANIMATION_MS = 460;
@@ -139,10 +142,14 @@ const props = withDefaults(
     title: string;
     seatsByRow: SeatCell[][];
     splitLeftRight: boolean;
+    aisleAfterCols?: number[];
+    aisleAfterRows?: number[];
     swapModeLabel?: string;
     emptyLabel?: string;
   }>(),
   {
+    aisleAfterCols: () => [],
+    aisleAfterRows: () => [],
     swapModeLabel: 'โหมดสลับที่นั่ง',
     emptyLabel: 'ไม่มีข้อมูลผังที่นั่ง',
   },
@@ -153,6 +160,15 @@ const emit = defineEmits<{
 }>();
 
 const swapMode = ref(false);
+
+const shouldRenderColumnAisle = (colNo: number): boolean => {
+  if (props.aisleAfterCols.length > 0) return props.aisleAfterCols.includes(colNo);
+
+  const fallbackMidpoint = Math.ceil((props.seatsByRow[0]?.length ?? 0) / 2);
+  return props.splitLeftRight && colNo === fallbackMidpoint;
+};
+
+const shouldRenderRowAisle = (rowNo: number): boolean => props.aisleAfterRows.includes(rowNo);
 
 interface RectSnapshot {
   left: number;
@@ -842,6 +858,23 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   justify-content: center;
   gap: 16px;
   min-width: 0;
+}
+
+.seat-column-aisle {
+  width: 18px;
+  min-height: 82px;
+  align-self: stretch;
+  flex: 0 0 18px;
+  border-radius: 9px;
+  background: var(--Surface-Selected, #dddddd);
+}
+
+.seat-row-aisle {
+  width: 100%;
+  height: 18px;
+  flex: 0 0 18px;
+  border-radius: 9px;
+  background: var(--Surface-Selected, #dddddd);
 }
 
 .seat-cell {

@@ -1,6 +1,16 @@
-import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { SeatLabelFormat } from '../entities/exam-location.entity';
+import {
+  SeatDirection,
+  SeatLabelFormat,
+} from '../entities/exam-location.entity';
 
 export class CreateExamLocationDto {
   @ApiProperty({ example: 'อาคารเรียนรวม', description: 'ชื่อสถานที่จัดสอบ' })
@@ -59,11 +69,36 @@ export class CreateExamLocationDto {
   SEAT_LABEL_FORMAT?: SeatLabelFormat;
 
   @ApiProperty({
-    example: 0,
+    example: SeatDirection.HORIZONTAL,
     description: 'สถานะการแบ่งที่นั่ง (0: NORMAL, 1: SPLIT)',
+    enum: SeatDirection,
     required: false,
   })
   @IsOptional()
-  @IsInt()
-  LOCATION_IS_SPLIT?: number;
+  @IsEnum(SeatDirection)
+  SEAT_DIRECTION?: SeatDirection;
+
+  @ApiProperty({
+    example: [5, 8, 10],
+    description: 'Column indexes that have an aisle after them',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  @Min(1, { each: true })
+  AISLE_AFTER_COLS?: number[];
+
+  @ApiProperty({
+    example: [2, 4],
+    description: 'Row indexes that have an aisle after them',
+    required: false,
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  @Min(1, { each: true })
+  AISLE_AFTER_ROWS?: number[];
 }

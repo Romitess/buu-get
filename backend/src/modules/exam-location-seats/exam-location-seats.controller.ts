@@ -17,6 +17,7 @@ import {
 import { ExamLocationSeatsService } from './exam-location-seats.service';
 import { CreateExamLocationSeatDto } from './dto/create-exam-location-seat.dto';
 import { UpdateExamLocationSeatDto } from './dto/update-exam-location-seat.dto';
+import { GenerateExamLocationSeatsDto } from './dto/generate-exam-location-seats.dto';
 import { ExamLocationSeat } from './entities/exam-location-seat.entity';
 
 @ApiTags('exam-location-seats')
@@ -78,9 +79,13 @@ export class ExamLocationSeatsController {
   @ApiOkResponse({ type: ExamLocationSeat, isArray: true })
   async generateSeats(
     @Param('locationId', ParseIntPipe) locationId: number,
-    @Body() body?: { brokenSeats?: string[] },
+    @Body() body?: GenerateExamLocationSeatsDto,
   ): Promise<ExamLocationSeat[]> {
     const brokenSeats = body?.brokenSeats || [];
-    return this.examLocationSeatsService.generateSeats(locationId, brokenSeats);
+    return this.examLocationSeatsService.generateSeats(
+      locationId,
+      brokenSeats,
+      body?.seatStatuses,
+    );
   }
 }
