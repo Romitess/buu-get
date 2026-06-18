@@ -152,7 +152,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       examType: EXAM_TYPE_GENERAL,
       examFormat: EXAM_FORMAT_COMPUTER,
       fundSourceId: null,
-      fee: '0.00',
+      fee: '',
       isPublished: false,
       examDate: today,
       timeSlots: [
@@ -1187,7 +1187,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           locationId: flatRooms[0]?.locationId || 0,
           examType: form.value.examType,
           examFormat: form.value.examFormat,
-          fee: form.value.fee,
+          fee: form.value.fee === '' ? 0 : form.value.fee,
           seats: flatRooms[0]?.seats || 1,
           isPublished: form.value.isPublished,
           examDate: form.value.examDate,
