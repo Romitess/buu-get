@@ -90,6 +90,7 @@
               class="buu-input-muted"
               :disable="isLocked"
               @update:model-value="onFeeInput"
+              @blur="handleFeeBlur"
             />
           </div>
         </div>
@@ -230,6 +231,13 @@ const onFeeInput = (val: string | number | null): void => {
       sanitized.slice(0, firstDot + 1) + sanitized.slice(firstDot + 1).replace(/\./g, '');
   }
   form.value.fee = sanitized;
+};
+
+/** Auto-format fee to 2 decimal places on blur. */
+const handleFeeBlur = (): void => {
+  if (form.value.fee !== '' && form.value.fee !== null) {
+    form.value.fee = Number(form.value.fee).toFixed(2);
+  }
 };
 </script>
 
