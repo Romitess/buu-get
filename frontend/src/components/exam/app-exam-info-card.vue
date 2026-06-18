@@ -3,7 +3,7 @@
     <div class="card-content row items-center no-wrap">
       <header class="col">
         <h2 class="exam-title text-h5 text-weight-bold q-mb-md q-ma-none">
-          {{ title }}
+          {{ displayTitle }}
         </h2>
 
         <section class="row items-center q-gutter-x-xl details-row">
@@ -103,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 interface Props {
   title: string;
@@ -123,7 +123,7 @@ interface Props {
   countWithCapacity?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   selectedLocationId: null,
   locationOptions: () => [],
   isAdmin: false,
@@ -139,6 +139,15 @@ defineEmits<{
 }>();
 
 const isLocationMenuOpen = ref(false);
+
+const displayTitle = computed((): string => {
+  const withoutCandidateNames = props.title.replace(/\s*\([^)]*\)\s*$/u, '').trim();
+  const withoutRoundSuffix = withoutCandidateNames
+    .replace(/\s+(?:รอบ(?:ที่)?\s*)?\d+\/\d{4}\s*$/u, '')
+    .trim();
+
+  return withoutRoundSuffix || withoutCandidateNames || props.title;
+});
 </script>
 
 <style scoped lang="scss">

@@ -432,19 +432,7 @@ const removeWalkwayPosition = (position: WalkwayPosition): void => {
 };
 
 const buildSeatStatuses = (): Record<string, number> => {
-  const statusMap: Record<string, number> = {};
-  const omittedSeats = seatPreviewRef.value?.omittedSeats ?? new Set<string>();
-  const brokenSeats = seatPreviewRef.value?.brokenSeats ?? new Set<string>();
-
-  omittedSeats.forEach((seatLabel) => {
-    statusMap[seatLabel] = 2;
-  });
-
-  brokenSeats.forEach((seatLabel) => {
-    statusMap[seatLabel] = 1;
-  });
-
-  return statusMap;
+  return seatPreviewRef.value?.getSeatStatuses() ?? {};
 };
 
 const handleSave = async (): Promise<void> => {

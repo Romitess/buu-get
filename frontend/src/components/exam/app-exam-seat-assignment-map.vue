@@ -494,8 +494,8 @@ const measureAndScale = (): void => {
   const minimumReadableScale = 1;
 
   // Always fit the width. For tall rooms, preserve a readable seat size and
-  // let the map scroll vertically instead of shrinking every label.
-  scaleFactor.value = Math.min(scaleX, Math.max(scaleY, minimumReadableScale), 1);
+  // let the map scroll vertically instead of shrinking every label. Up to 2.0 scale.
+  scaleFactor.value = Math.min(scaleX, Math.max(scaleY, minimumReadableScale), 2.0);
 };
 
 const wrapperStyle = computed<CSSProperties>(() => {

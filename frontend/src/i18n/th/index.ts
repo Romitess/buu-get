@@ -877,6 +877,7 @@ export default {
           nationalId: 'เลขประจำตัวสอบ',
           prefix: 'คำนำหน้า',
           fullName: 'ชื่อ-นามสกุล',
+          fullNameEn: 'Full Name',
           seatNumber: 'เลขที่นั่งสอบ',
           tools: 'เครื่องมือ',
         },

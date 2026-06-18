@@ -24,20 +24,23 @@
               <div class="seat-guide-spacer"></div>
 
               <div
-                v-for="(label, index) in columnGuideLabels"
-                :key="`col-guide-${index}`"
+                v-for="colNo in colCount"
+                :key="`col-guide-${colNo}`"
                 class="seat-column-guide"
-                :style="{ gridColumn: getSeatGridColumn(index + 1), gridRow: '1' }"
+                :style="{ gridColumn: getSeatGridColumn(colNo), gridRow: '1' }"
               >
-                {{ label }}
+                {{ columnGuideLabel(colNo) }}
               </div>
 
-              <template v-for="(rowSeats, rowIndex) in seatsByRow" :key="`row-${rowIndex}`">
+              <template
+                v-for="(rowSeats, rowIndex) in normalizedSeatsByRow"
+                :key="`row-${rowIndex}`"
+              >
                 <div
                   class="seat-row-guide"
                   :style="{ gridColumn: '1', gridRow: getSeatGridRow(rowIndex + 1) }"
                 >
-                  {{ rowGuideLabels[rowIndex] }}
+                  {{ rowGuideLabel(rowIndex + 1) }}
                 </div>
 
                 <div
@@ -49,11 +52,22 @@
                     'is-broken': seat.status === 'broken',
                   }"
                   :style="{
-                    gridColumn: getSeatGridColumn(colIndex + 1),
-                    gridRow: getSeatGridRow(rowIndex + 1),
+                    gridColumn: getSeatGridColumn(seat.colNo || colIndex + 1),
+                    gridRow: getSeatGridRow(seat.rowNo || rowIndex + 1),
                   }"
                 >
-                  <span>{{ seat.label }}</span>
+                  <svg
+                    v-if="seat.status === 'broken'"
+                    class="seat-print-broken-icon"
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M12 2.75A9.25 9.25 0 1 0 12 21.25 9.25 9.25 0 0 0 12 2.75Zm0 2.5c1.47 0 2.82.48 3.91 1.3L6.55 15.91A6.72 6.72 0 0 1 5.25 12 6.75 6.75 0 0 1 12 5.25Zm0 13.5c-1.47 0-2.82-.48-3.91-1.3l9.36-9.36A6.72 6.72 0 0 1 18.75 12 6.75 6.75 0 0 1 12 18.75Z"
+                    />
+                  </svg>
+                  <span v-else>{{ seat.label }}</span>
                 </div>
               </template>
 
@@ -94,11 +108,15 @@ const props = withDefaults(
     aisleAfterCols?: number[];
     aisleAfterRows?: number[];
     seatDirection?: 'HORIZONTAL' | 'VERTICAL';
+    layoutRows?: number;
+    layoutCols?: number;
   }>(),
   {
     aisleAfterCols: () => [],
     aisleAfterRows: () => [],
     seatDirection: 'HORIZONTAL',
+    layoutRows: 0,
+    layoutCols: 0,
   },
 );
 
@@ -106,18 +124,35 @@ const seatSize = 58;
 const guideSize = 26;
 const aisleSize = 22;
 const compactGap = 12;
-const stageWidth = 1040;
-const stageHeight = 520;
+const stageWidth = 700;
+const stageHeight = 880;
 const teacherHeight = 46;
 const teacherBottomGap = 24;
-const maxScale = 2.05;
+const maxScale = 2.5;
 const minScale = 0.22;
 
-const rowCount = computed(() => props.seatsByRow.length);
-const colCount = computed(() =>
-  props.seatsByRow.reduce((maxCols, rowSeats) => Math.max(maxCols, rowSeats.length), 0),
+const flatSeats = computed(() => props.seatsByRow.flat());
+const seatRowCount = computed(() =>
+  props.seatsByRow.reduce(
+    (maxRows, rowSeats, rowIndex) =>
+      Math.max(maxRows, rowIndex + 1, ...rowSeats.map((seat) => seat.rowNo)),
+    props.seatsByRow.length,
+  ),
 );
-const seatCount = computed(() => props.seatsByRow.flat().length);
+const seatColCount = computed(() =>
+  props.seatsByRow.reduce(
+    (maxCols, rowSeats) =>
+      Math.max(maxCols, rowSeats.length, ...rowSeats.map((seat) => seat.colNo)),
+    0,
+  ),
+);
+const rowCount = computed(() => props.layoutRows || seatRowCount.value);
+const colCount = computed(() => props.layoutCols || seatColCount.value);
+const seatCount = computed(() => flatSeats.value.length);
+
+const normalizedSeatsByRow = computed(() =>
+  Array.from({ length: rowCount.value }, (_, rowIndex) => props.seatsByRow[rowIndex] ?? []),
+);
 
 const normalizedAisleAfterCols = computed(() =>
   [...new Set(props.aisleAfterCols)]
@@ -189,29 +224,19 @@ const teacherDeskStyle = computed<CSSProperties>(() => ({
   width: `${teacherDeskWidth.value}px`,
 }));
 
-const parseSeatLabel = (label: string): { letters: string; number: string } => {
-  const match = label.match(/^([A-Za-z]+)(\d+)$/);
-  return {
-    letters: match?.[1] ?? label,
-    number: match?.[2] ?? label,
-  };
+const guideLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+const columnGuideLabel = (colNo: number): string => {
+  if (props.seatDirection === 'HORIZONTAL') return `${colNo}`;
+
+  return guideLetters[colNo - 1] ?? `${colNo}`;
 };
 
-const columnGuideLabels = computed(() =>
-  Array.from({ length: colCount.value }, (_, index) => {
-    const label = props.seatsByRow[0]?.[index]?.label ?? `${index + 1}`;
-    const parsed = parseSeatLabel(label);
-    return props.seatDirection === 'VERTICAL' ? parsed.letters : parsed.number;
-  }),
-);
+const rowGuideLabel = (rowNo: number): string => {
+  if (props.seatDirection === 'HORIZONTAL') return guideLetters[rowNo - 1] ?? `${rowNo}`;
 
-const rowGuideLabels = computed(() =>
-  props.seatsByRow.map((rowSeats, index) => {
-    const label = rowSeats[0]?.label ?? `${index + 1}`;
-    const parsed = parseSeatLabel(label);
-    return props.seatDirection === 'VERTICAL' ? parsed.number : parsed.letters;
-  }),
-);
+  return `${rowNo}`;
+};
 
 const countAislesBeforeColumn = (colNo: number): number =>
   normalizedAisleAfterCols.value.filter((aisleColNo) => aisleColNo < colNo).length;
@@ -312,11 +337,10 @@ const getRowAisleStyle = (rowNo: number): CSSProperties => {
 
 .seat-plan-print__stage {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   flex: 1;
-  min-height: 520px;
-  padding-top: 12px;
+  padding-top: 8px;
   overflow: hidden;
 }
 
@@ -423,6 +447,12 @@ const getRowAisleStyle = (rowNo: number): CSSProperties => {
   border-color: #6b6b6b;
   background: #6b6b6b;
   color: #ffffff;
+}
+
+.seat-print-broken-icon {
+  width: 25px;
+  height: 25px;
+  display: block;
 }
 
 .seat-column-aisle,
