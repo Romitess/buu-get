@@ -192,7 +192,14 @@ export class ExamLocationSeatsService {
     }
 
     const brokenSet = new Set(brokenSeats);
-    const seatsToInsert: Partial<ExamLocationSeat>[] = [];
+    const seatsToInsert: {
+      LOCATION_ID: number;
+      LS_ROW_NO: number;
+      LS_COL_NO: number;
+      LS_SEAT_LABEL: string;
+      LS_SORT_ORDER: number;
+      LS_SEAT_STATUS: LocationSeatStatus;
+    }[] = [];
     const seatsToUpdate: ExamLocationSeat[] = [];
     const seatsToRelabel = new Map<number, string>();
     let sortOrder = 1;

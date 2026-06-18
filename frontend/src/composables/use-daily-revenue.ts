@@ -58,7 +58,11 @@ export function useDailyRevenue() {
 
   const loadDepartmentOptions = async (): Promise<void> => {
     try {
-      departmentOptions.value = await fetchDepartmentOptions();
+      const options = await fetchDepartmentOptions();
+      departmentOptions.value = [
+        { label: t('admin.dailyRevenueReport.filter.all'), value: '' },
+        ...options,
+      ];
     } catch {
       departmentOptions.value = [];
     }

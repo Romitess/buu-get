@@ -33,45 +33,47 @@
           </div>
 
           <!-- ชื่อการสอบ & รอบการสอบ ในแถวเดียวกัน -->
-          <div class="col-12 row q-col-gutter-x-md">
-            <div class="col-6" data-field="examName">
-              <div class="buu-label-muted q-mb-xs">ชื่อการสอบ</div>
-              <q-input
-                v-model="form.examName"
-                placeholder="BUU-GET"
-                outlined
-                dense
-                bg-color="white"
-                class="buu-input-muted"
-                :class="{ 'buu-field-error': hasError('examName') }"
-                :disable="isLocked"
-                @update:model-value="emit('clearFieldError', 'examName')"
-              />
-              <div v-if="hasError('examName')" :key="`examName-${shakeKey}`" class="buu-error-msg">
-                <q-icon name="error" class="buu-error-icon" />
-                {{ fieldErrors?.examName }}
+          <div class="col-12">
+            <div class="row q-col-gutter-x-md">
+              <div class="col-6" data-field="examName">
+                <div class="buu-label-muted q-mb-xs">ชื่อการสอบ</div>
+                <q-input
+                  v-model="form.examName"
+                  placeholder="BUU-GET"
+                  outlined
+                  dense
+                  bg-color="white"
+                  class="buu-input-muted"
+                  :class="{ 'buu-field-error': hasError('examName') }"
+                  :disable="isLocked"
+                  @update:model-value="emit('clearFieldError', 'examName')"
+                />
+                <div v-if="hasError('examName')" :key="`examName-${shakeKey}`" class="buu-error-msg">
+                  <q-icon name="error" class="buu-error-icon" />
+                  {{ fieldErrors?.examName }}
+                </div>
               </div>
-            </div>
-            <div class="col-6" data-field="examRound">
-              <div class="buu-label-muted q-mb-xs">รอบการสอบ</div>
-              <q-input
-                v-model="form.examRound"
-                placeholder="1/2026"
-                outlined
-                dense
-                bg-color="white"
-                class="buu-input-muted"
-                :class="{ 'buu-field-error': hasError('examRound') }"
-                :disable="isLocked"
-                @update:model-value="emit('clearFieldError', 'examRound')"
-              />
-              <div
-                v-if="hasError('examRound')"
-                :key="`examRound-${shakeKey}`"
-                class="buu-error-msg"
-              >
-                <q-icon name="error" class="buu-error-icon" />
-                {{ fieldErrors?.examRound }}
+              <div class="col-6" data-field="examRound">
+                <div class="buu-label-muted q-mb-xs">รอบการสอบ</div>
+                <q-input
+                  v-model="form.examRound"
+                  placeholder="1/2026"
+                  outlined
+                  dense
+                  bg-color="white"
+                  class="buu-input-muted"
+                  :class="{ 'buu-field-error': hasError('examRound') }"
+                  :disable="isLocked"
+                  @update:model-value="emit('clearFieldError', 'examRound')"
+                />
+                <div
+                  v-if="hasError('examRound')"
+                  :key="`examRound-${shakeKey}`"
+                  class="buu-error-msg"
+                >
+                  <q-icon name="error" class="buu-error-icon" />
+                  {{ fieldErrors?.examRound }}
+                </div>
               </div>
             </div>
           </div>
@@ -82,12 +84,17 @@
             <q-input
               v-model="form.fee"
               type="number"
+              min="0"
+              step="0.01"
               suffix="THB"
               outlined
               dense
               bg-color="white"
               class="buu-input-muted"
               :disable="isLocked"
+              @keydown="(e) => ['-', '+', 'e', 'E'].includes(e.key) && e.preventDefault()"
+              @blur="() => { if (form.fee !== '' && form.fee !== null) form.fee = Number(form.fee).toFixed(2) }"
+              @update:model-value="(val) => { if (Number(val) < 0) form.fee = '0.00' }"
             />
           </div>
         </div>

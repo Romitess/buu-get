@@ -1102,6 +1102,7 @@ export default {
       pageSubtitle:
         'แสดงรายงานสรุปการรับเงินประจำวัน เพื่อใช้ในการตรวจสอบและติดตามการดำเนินงานทางการเงิน',
       filter: {
+        all: 'ทั้งหมด',
         startDate: 'วันที่เริ่มต้น',
         endDate: 'ถึงวันที่',
         department: 'ส่วนงาน',
@@ -1109,6 +1110,12 @@ export default {
         receiptNo: 'เลขที่ใบเสร็จ',
         payer: 'ชื่อผู้ชำระเงิน',
         payee: 'ชื่อผู้รับเงิน',
+        placeholders: {
+          examName: 'BUU-GET 1/2026',
+          receiptNo: 'XXXXXXXXXXXX',
+          payer: 'สมชาย ใจดี',
+          payee: 'สมใจ หมายปอง',
+        },
       },
       table: {
         emptyLabel: 'ไม่พบข้อมูลรายงาน',

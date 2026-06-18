@@ -21,4 +21,19 @@ export class DailyRevenueQueryDto {
   @IsString()
   @IsOptional()
   examName?: string;
+
+  @ApiPropertyOptional({ description: 'เลขที่ใบเสร็จ' })
+  @IsString()
+  @IsOptional()
+  receiptNo?: string;
+
+  @ApiPropertyOptional({ description: 'ชื่อผู้ชำระเงิน' })
+  @IsString()
+  @IsOptional()
+  payerName?: string;
+
+  @ApiPropertyOptional({ description: 'ชื่อผู้รับเงิน' })
+  @IsString()
+  @IsOptional()
+  payeeName?: string;
 }

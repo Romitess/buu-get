@@ -926,6 +926,7 @@ export default {
       pageSubtitle:
         'Displays a daily summary of revenue for financial tracking and operations monitoring.',
       filter: {
+        all: 'All',
         startDate: 'Start Date',
         endDate: 'End Date',
         department: 'Department',
@@ -933,6 +934,12 @@ export default {
         receiptNo: 'Receipt Number',
         payer: 'Payer Name',
         payee: 'Payee Name',
+        placeholders: {
+          examName: 'BUU-GET 1/2026',
+          receiptNo: 'XXXXXXXXXXXX',
+          payer: 'John Doe',
+          payee: 'Jane Doe',
+        },
       },
       table: {
         emptyLabel: 'No revenue data found',
