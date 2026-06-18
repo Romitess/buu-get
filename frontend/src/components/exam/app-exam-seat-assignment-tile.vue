@@ -3,7 +3,8 @@
     class="seat-assignment-tile"
     :class="{
       'is-assigned': status === 'assigned',
-      'is-broken': status === 'broken' || status === 'blocked',
+      'is-broken': status === 'broken',
+      'is-blocked': status === 'blocked',
       'is-empty': status === 'available',
       'is-swap-mode': swapMode && status !== 'broken' && status !== 'blocked',
       'is-selected': selected,
@@ -11,9 +12,10 @@
     }"
     @click="emit('click')"
   >
-    <template v-if="status === 'broken' || status === 'blocked'">
+    <template v-if="status === 'broken'">
       <img src="/icons/seat-broken.svg" class="broken-icon" alt="" aria-hidden="true" />
     </template>
+    <template v-else-if="status === 'blocked'"></template>
     <template v-else-if="student">
       <div class="seat-name">{{ shortName }}</div>
       <q-avatar size="34px" class="seat-avatar">
@@ -107,6 +109,12 @@ const shortName = computed(() => {
 .is-broken {
   background: #6b6b6b;
   border-color: #6b6b6b;
+}
+
+.is-blocked {
+  background: var(--gray, #bcbbbb);
+  border-color: var(--gray, #bcbbbb);
+  color: #111111;
 }
 
 .is-swap-mode {
