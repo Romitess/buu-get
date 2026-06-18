@@ -21,7 +21,6 @@ import {
   fetchExamById,
   updateExamRound,
   formatTime,
-  buddhistToGregorian,
   createExamPasscodes,
 } from 'src/services/exam.service';
 import { getUsersFromApi } from 'src/services/user.service';
@@ -1102,31 +1101,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         type: 'warning',
         message: 'วันที่สอบต้องไม่เป็นวันที่ผ่านไปแล้ว',
         position: 'top',
-      });
-      return false;
-    }
-
-    // === BUSINESS RULE VALIDATION: Strictly 1 Exam Per Day ===
-    const targetDateGregorian = buddhistToGregorian(form.value.examDate);
-
-    // Make sure we have the latest schedules to check against
-    await examStore.loadManagementSchedules();
-
-    const hasConflict = examStore.managementSchedules.some((exam) => {
-      // Skip checking against itself if in edit mode
-      if (isEditMode.value && String(exam.id) === String(examId)) return false;
-
-      // Match date - ANY exam on the same date is a conflict!
-      return exam.examDate === targetDateGregorian;
-    });
-
-    if (hasConflict) {
-      $q.notify({
-        type: 'negative',
-        message: NOTIFY_MSG.CONFLICT_DATE(form.value.examDate),
-        position: 'top',
-        timeout: 5000,
-        actions: [{ icon: 'close', color: 'white' }],
       });
       return false;
     }
