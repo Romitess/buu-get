@@ -91,6 +91,7 @@
               :disable="isLocked"
               @keypress="onFeeKeypress"
               @update:model-value="onFeeInput"
+              @blur="handleFeeBlur"
             />
           </div>
         </div>
