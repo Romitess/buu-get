@@ -71,9 +71,6 @@ export function useExamRegistrants() {
     if (selectedSessionId.value) {
       list = list.filter((e) => activeSessionIds.value.has(e.sessionId));
     }
-    if (selectedSessionLocationId.value !== null) {
-      list = list.filter((e) => e.sessionLocationId === selectedSessionLocationId.value);
-    }
 
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase();

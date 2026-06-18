@@ -431,8 +431,13 @@ onMounted(() => {
     box-shadow: var(--shadow-md);
   }
 
+  :deep(thead tr th:nth-child(3)) {
+    text-align: left !important;
+    padding-left: clamp(12px, 4.6vw, 80px) !important;
+  }
+
   :deep(tbody tr td:nth-child(3)) {
-    padding-left: clamp(12px, 4.6vw, 80px);
+    padding-left: clamp(12px, 4.0vw, 70px) !important;
   }
 }
 
