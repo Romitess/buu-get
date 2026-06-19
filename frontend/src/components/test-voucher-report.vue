@@ -91,7 +91,9 @@
                     <label class="info-label">Venue:</label>
                     <div class="info-value venue-value">
                       <span>{{ voucherData.location }}</span>
-                      <span v-if="voucherData.locationRoom">&nbsp;{{ voucherData.locationRoom }}</span>
+                      <span v-if="voucherData.locationRoom"
+                        >&nbsp;{{ voucherData.locationRoom }}</span
+                      >
                     </div>
                   </div>
                   <div class="info-group">

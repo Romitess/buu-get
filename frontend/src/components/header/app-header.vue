@@ -15,7 +15,7 @@
             class="app-header__nav-link app-header__nav-link--dropdown"
             :class="{
               'app-header__nav-link--active': isActiveRoute(link),
-              [`app-header__nav-link--${link.name}`]: true
+              [`app-header__nav-link--${link.name}`]: true,
             }"
           >
             <span>{{ link.label }}</span>
@@ -51,7 +51,7 @@
             class="app-header__nav-link"
             :class="{
               'app-header__nav-link--active': isActiveRoute(link),
-              [`app-header__nav-link--${link.name}`]: true
+              [`app-header__nav-link--${link.name}`]: true,
             }"
           >
             {{ link.label }}

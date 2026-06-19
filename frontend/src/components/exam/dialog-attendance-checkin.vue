@@ -32,12 +32,7 @@
             </AppLabeledInput>
           </div>
           <div class="col-shrink">
-            <AppButton
-              label="ค้นหา"
-              color="primary"
-              class="search-btn"
-              @click="handleSearch"
-            />
+            <AppButton label="ค้นหา" color="primary" class="search-btn" @click="handleSearch" />
           </div>
         </div>
         <div v-if="validationError" class="validation-error q-mt-xs">
@@ -58,11 +53,7 @@
       </section>
 
       <footer class="action-footer row justify-center q-mt-xl q-gutter-x-md">
-        <AppButton
-          label="ยกเลิก"
-          class="footer-btn cancel-btn"
-          @click="onCancelClick"
-        />
+        <AppButton label="ยกเลิก" class="footer-btn cancel-btn" @click="onCancelClick" />
         <AppButton
           label="เช็คอินเข้าห้องสอบ"
           color="primary"
@@ -176,7 +167,9 @@ const currentVoucherData = computed<VoucherData>(() => {
 });
 
 const canCheckIn = computed(() => {
-  return searchedCandidate.value && searchedCandidate.value.attendanceStatus !== ExamAttendStatus.INTIME;
+  return (
+    searchedCandidate.value && searchedCandidate.value.attendanceStatus !== ExamAttendStatus.INTIME
+  );
 });
 
 const handleCheckIn = async () => {
@@ -303,4 +296,3 @@ const onCancelClick = () => {
   }
 }
 </style>
-

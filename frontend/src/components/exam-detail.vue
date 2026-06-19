@@ -17,7 +17,7 @@
         {{ subtitle }}
       </div>
 
-      <div class="row items-center q-gutter-x-lg">
+      <div class="row items-center detail-row">
         <div class="row items-center" v-if="locationText">
           <q-icon name="location_on" color="primary" size="20px" class="q-mr-xs" />
           <span class="detail-text text-dark">{{ locationText }}</span>
@@ -104,6 +104,14 @@ const formatIcon = computed((): string => {
   font-weight: 500;
 }
 
+.detail-row {
+  gap: 24px;
+
+  :global(.exam-schedule) & {
+    gap: 21.6px;
+  }
+}
+
 @media (max-width: 600px) {
   .exam-detail-card {
     border-radius: 12px;
@@ -118,7 +126,7 @@ const formatIcon = computed((): string => {
     line-height: 1.3;
   }
 
-  .row.items-center.q-gutter-x-lg {
+  .detail-row {
     display: flex;
     flex-direction: column;
     align-items: flex-start;

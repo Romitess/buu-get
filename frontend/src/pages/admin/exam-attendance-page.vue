@@ -111,8 +111,15 @@ interface SessionLocationOption {
 const route = useRoute();
 const i18n = useI18n();
 
-const { isLoading, exam, searchQuery, selectedSessionId, filteredAttendances, fetchAttendances, attendances } =
-  useExamAttendances();
+const {
+  isLoading,
+  exam,
+  searchQuery,
+  selectedSessionId,
+  filteredAttendances,
+  fetchAttendances,
+  attendances,
+} = useExamAttendances();
 
 const selectedSessionLocationId = ref<number | null>(null);
 
@@ -123,7 +130,9 @@ const openCheckInDialog = () => {
     component: DialogAttendanceCheckin,
     componentProps: {
       attendances: attendances.value,
-      examName: exam.value?.EXAM_ROUND ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}` : exam.value?.EXAM_NAME || '',
+      examName: exam.value?.EXAM_ROUND
+        ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
+        : exam.value?.EXAM_NAME || '',
       examDate: examDateLabel.value,
       examTime: selectedSessionTime.value,
       examLocation: selectedSessionLocation.value,
