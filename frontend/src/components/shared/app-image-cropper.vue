@@ -18,7 +18,11 @@
           draggable="false"
           alt="To Crop"
         />
-        <div class="crop-card-mask"></div>
+        <div
+          class="crop-card-mask"
+          :class="{ 'is-circular': props.circular }"
+          :style="maskStyle"
+        ></div>
       </div>
 
       <div class="slider-container row items-center q-mt-md">
@@ -34,7 +38,7 @@
         />
         <q-icon name="zoom_in" size="sm" class="text-grey-6 q-ml-sm" />
       </div>
-      <div class="text-caption text-grey-6 q-mt-xs">
+      <div class="text-caption text-grey-6 q-mt-xs text-center">
         {{ $t('components.imageCropper.hint') }}
       </div>
     </q-card-section>
@@ -64,6 +68,7 @@ import { ref, computed } from 'vue';
 interface Props {
   imageSrc: string;
   fileType?: string;
+  circular?: boolean;
 }
 
 interface Emits {
@@ -73,6 +78,7 @@ interface Emits {
 
 const props = withDefaults(defineProps<Props>(), {
   fileType: 'image/png',
+  circular: false,
 });
 const emit = defineEmits<Emits>();
 
@@ -84,15 +90,15 @@ const offsetY = ref(0);
 const imgNaturalWidth = ref(0);
 const imgNaturalHeight = ref(0);
 
-const cropBoxWidth = 180;
-const cropBoxHeight = 240;
+const cropBoxWidth = computed(() => (props.circular ? 220 : 180));
+const cropBoxHeight = computed(() => (props.circular ? 220 : 240));
 
 const imageStyle = computed(() => {
   if (!imgNaturalWidth.value || !imgNaturalHeight.value) return {};
 
   const baseScale = Math.max(
-    cropBoxWidth / imgNaturalWidth.value,
-    cropBoxHeight / imgNaturalHeight.value,
+    cropBoxWidth.value / imgNaturalWidth.value,
+    cropBoxHeight.value / imgNaturalHeight.value,
   );
   const baseWidth = imgNaturalWidth.value * baseScale;
   const baseHeight = imgNaturalHeight.value * baseScale;
@@ -104,6 +110,13 @@ const imageStyle = computed(() => {
     width: `${w}px`,
     height: `${h}px`,
     transform: `translate(calc(-50% + ${offsetX.value}px), calc(-50% + ${offsetY.value}px))`,
+  };
+});
+
+const maskStyle = computed(() => {
+  return {
+    width: `${cropBoxWidth.value}px`,
+    height: `${cropBoxHeight.value}px`,
   };
 });
 
@@ -120,8 +133,8 @@ const clampOffsets = (x: number, y: number, z: number) => {
   if (!imgNaturalWidth.value || !imgNaturalHeight.value) return { x, y };
 
   const baseScale = Math.max(
-    cropBoxWidth / imgNaturalWidth.value,
-    cropBoxHeight / imgNaturalHeight.value,
+    cropBoxWidth.value / imgNaturalWidth.value,
+    cropBoxHeight.value / imgNaturalHeight.value,
   );
   const baseWidth = imgNaturalWidth.value * baseScale;
   const baseHeight = imgNaturalHeight.value * baseScale;
@@ -129,8 +142,8 @@ const clampOffsets = (x: number, y: number, z: number) => {
   const sw = baseWidth * z;
   const sh = baseHeight * z;
 
-  const maxX = Math.max(0, (sw - cropBoxWidth) / 2);
-  const maxY = Math.max(0, (sh - cropBoxHeight) / 2);
+  const maxX = Math.max(0, (sw - cropBoxWidth.value) / 2);
+  const maxY = Math.max(0, (sh - cropBoxHeight.value) / 2);
 
   return {
     x: Math.max(-maxX, Math.min(maxX, x)),
@@ -197,18 +210,18 @@ const confirmCrop = () => {
   const img = imageRef.value;
   if (!img || !imgNaturalWidth.value || !imgNaturalHeight.value) return;
 
-  const outputWidth = 300;
-  const outputHeight = 400;
+  const outputWidth = props.circular ? 400 : 300;
+  const outputHeight = props.circular ? 400 : 400;
   const canvas = document.createElement('canvas');
   canvas.width = outputWidth;
   canvas.height = outputHeight;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  const canvasScale = outputWidth / cropBoxWidth;
+  const canvasScale = outputWidth / cropBoxWidth.value;
   const baseScale = Math.max(
-    cropBoxWidth / imgNaturalWidth.value,
-    cropBoxHeight / imgNaturalHeight.value,
+    cropBoxWidth.value / imgNaturalWidth.value,
+    cropBoxHeight.value / imgNaturalHeight.value,
   );
   const drawW = imgNaturalWidth.value * baseScale * zoom.value * canvasScale;
   const drawH = imgNaturalHeight.value * baseScale * zoom.value * canvasScale;
@@ -268,13 +281,16 @@ const confirmCrop = () => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 180px;
-  height: 240px;
   pointer-events: none;
   border: 2px dashed rgba(255, 255, 255, 0.85);
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
   box-sizing: border-box;
   border-radius: 4px;
+  transition: border-radius 0.3s ease;
+
+  &.is-circular {
+    border-radius: 50%;
+  }
 }
 
 .slider-container {
