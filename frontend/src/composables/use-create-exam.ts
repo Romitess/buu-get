@@ -110,7 +110,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
   /** Published exams keep non-schedule sections read-only. */
   const isPublishedSectionLocked = computed<boolean>(() => {
-    return isEditMode.value && (wasOriginallyPublished.value || form.value.isPublished);
+    return isEditMode.value && wasOriginallyPublished.value;
   });
 
   /** The schedule remains editable in edit mode, including after enrollment starts. */
