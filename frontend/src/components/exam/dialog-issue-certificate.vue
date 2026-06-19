@@ -869,11 +869,13 @@ const onConfirm = async (): Promise<void> => {
 }
 
 .dialog-btn {
-  width: 200px !important;
+  width: 220px !important;
   height: 44px !important;
   border-radius: 10px !important;
   font-size: 15px !important;
   font-weight: 600 !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
 }
 
 .cancel-btn {
