@@ -13,7 +13,10 @@
           <div
             v-if="link.children && link.children.length > 0"
             class="app-header__nav-link app-header__nav-link--dropdown"
-            :class="{ 'app-header__nav-link--active': isActiveRoute(link) }"
+            :class="{
+              'app-header__nav-link--active': isActiveRoute(link),
+              [`app-header__nav-link--${link.name}`]: true
+            }"
           >
             <span>{{ link.label }}</span>
             <q-icon name="expand_more" size="16px" class="q-ml-xs" />
@@ -46,7 +49,10 @@
             v-else
             :to="link.path ?? '/'"
             class="app-header__nav-link"
-            :class="{ 'app-header__nav-link--active': isActiveRoute(link) }"
+            :class="{
+              'app-header__nav-link--active': isActiveRoute(link),
+              [`app-header__nav-link--${link.name}`]: true
+            }"
           >
             {{ link.label }}
           </router-link>
@@ -427,6 +433,8 @@ const logout = async () => {
 .app-header__nav-link {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   padding: 8px 16px;
   font-size: var(--font-size-card-title);
   font-weight: var(--font-weight-medium);
@@ -448,6 +456,44 @@ const logout = async () => {
     color: var(--primary);
     font-weight: var(--font-weight-semibold);
   }
+
+  // Stable min-widths for each menu item to prevent layout shift on translation
+  &--home {
+    min-width: 80px;
+  }
+  &--exam-menu {
+    min-width: 140px;
+  }
+  &--exam-history {
+    min-width: 140px;
+  }
+  &--admin-location-management {
+    min-width: 160px;
+  }
+  &--admin-exam-management {
+    min-width: 140px;
+  }
+  &--admin-test-voucher-management {
+    min-width: 190px;
+  }
+  &--admin-score-criteria-management {
+    min-width: 200px;
+  }
+  &--admin-dashboard {
+    min-width: 120px;
+  }
+  &--admin-payment-import {
+    min-width: 180px;
+  }
+  &--admin-fund-source-management {
+    min-width: 210px;
+  }
+  &--admin-reports {
+    min-width: 100px;
+  }
+  &--exam-schedule-guest {
+    min-width: 130px;
+  }
 }
 
 .app-header__dropdown-item {
@@ -464,7 +510,7 @@ const logout = async () => {
 .app-header__actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-shrink: 0;
   margin-left: auto;
 }
@@ -480,6 +526,11 @@ const logout = async () => {
   transition:
     color var(--transition-fast),
     background-color var(--transition-fast);
+  min-width: 80px;
+  text-align: center;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 
   &:hover {
     color: var(--primary);
@@ -493,6 +544,7 @@ const logout = async () => {
   border-radius: var(--radius-sm) !important;
   padding: 6px 20px !important;
   letter-spacing: 0;
+  min-width: 120px;
 }
 
 // === Mobile Drawer ===
