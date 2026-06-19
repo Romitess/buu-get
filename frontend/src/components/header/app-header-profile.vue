@@ -147,7 +147,7 @@ const onLogout = async (): Promise<void> => {
 }
 
 .app-header-profile__text {
-  min-width: 110px;
+  min-width: 150px;
 }
 
 .app-header-profile__name {
