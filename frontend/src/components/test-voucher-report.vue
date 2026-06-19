@@ -301,7 +301,7 @@ const displayRegulationsEn = computed<string>(() => {
     val = localRegulationsEn.value || defaultRegulationsEn;
   }
   const str = Array.isArray(val) ? val.join('\n') : val;
-  return str ? str.trim().replace(/\n\s*(?!\d+\.)/g, ' ') : '';
+  return str ? str.trim() : '';
 });
 
 const displayRegulationsTh = computed<string>(() => {
@@ -310,7 +310,7 @@ const displayRegulationsTh = computed<string>(() => {
     val = localRegulationsTh.value || defaultRegulationsTh;
   }
   const str = Array.isArray(val) ? val.join('\n') : val;
-  return str ? str.trim().replace(/\n\s*(?!\d+\.)/g, ' ') : '';
+  return str ? str.trim() : '';
 });
 
 // ===== Action: Window Print =====
