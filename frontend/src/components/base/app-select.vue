@@ -1,5 +1,8 @@
 <template>
   <q-select
+    ref="selectRef"
+    menu-anchor="bottom left"
+    menu-self="top left"
     v-bind="$attrs"
     :model-value="modelValue"
     popup-content-class="app-select-menu"
@@ -17,6 +20,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import type { QSelect } from 'quasar';
 
 defineOptions({
   inheritAttrs: false,
@@ -32,6 +36,7 @@ const emit = defineEmits<{
   (e: 'popupHide'): void;
 }>();
 
+const selectRef = ref<QSelect | null>(null);
 const isOpen = ref(false);
 
 const handlePopupShow = (): void => {
@@ -74,7 +79,7 @@ const handlePopupHide = (): void => {
   border-radius: 0 0 var(--radius-sm) var(--radius-sm) !important;
   box-shadow: 0 10px 20px rgb(15 23 42 / 12%) !important;
   overflow-y: auto !important;
-  max-height: 300px !important;
+  max-height: 200px !important;
 }
 
 :global(.app-select-menu .q-virtual-scroll__content) {

@@ -19,6 +19,7 @@
       v-model:form="form"
       :locked="isScheduleLocked"
       :location-options="locationOptions"
+      :occupied-location-ids="occupiedLocationIds"
       :proctor-options="proctorOptions"
       :active-slot-index="activeSlotIndex"
       :date-errors="dateErrors"
@@ -112,6 +113,7 @@ const {
   proctorOptions,
   locationOptions,
   fundSourceOptions,
+  occupiedLocationIds,
   isLoadingData,
   isEditMode,
   isPublishedSectionLocked,

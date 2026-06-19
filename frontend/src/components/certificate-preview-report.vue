@@ -246,6 +246,7 @@ const windowPrint = (): void => {
     line-height: 120% !important;
     color: var(--primary, #0d47a1) !important;
     margin: 0 0 3px 0 !important;
+    white-space: nowrap;
   }
 
   .header-subtitle {
