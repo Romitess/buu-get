@@ -60,7 +60,7 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="action-bar row justify-end q-mt-lg q-gutter-md">
+    <div class="action-bar row justify-end q-mt-sm q-gutter-md">
       <AppButton
         :label="$t('admin.testVoucherManagement.cancelBtn')"
         color="grey-4"
@@ -250,7 +250,6 @@ const handleSave = async (): Promise<void> => {
   }
 
   :deep(.voucher-wrapper) {
-    max-width: 98% !important;
     margin: 0 auto !important;
   }
 
@@ -358,7 +357,7 @@ const handleSave = async (): Promise<void> => {
 }
 
 .action-btn {
-  min-width: 160px;
+  min-width: 180px;
   height: 48px;
   border-radius: var(--radius-10) !important;
   font-weight: 700;

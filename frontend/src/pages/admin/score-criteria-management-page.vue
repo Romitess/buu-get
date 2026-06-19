@@ -8,18 +8,18 @@
 
     <div class="score-criteria-grid row q-col-gutter-lg">
       <div class="col-12 col-md-6">
-        <div class="section-card section-card--scrollable">
+        <q-card class="section-card section-card--scrollable">
           <h3 class="section-title">{{ $t('admin.scoreCriteriaManagement.previewTitle') }}</h3>
           <div class="scrollable-content">
             <div class="admin-cert-preview">
               <CertificatePreviewReport :band-rules="bandRules" />
             </div>
           </div>
-        </div>
+        </q-card>
       </div>
 
       <div class="col-12 col-md-6">
-        <div class="section-card">
+        <q-card class="section-card">
           <h3 class="section-title">{{ $t('admin.scoreCriteriaManagement.editTitle') }}</h3>
 
           <div
@@ -130,11 +130,11 @@
               @click="addBand"
             />
           </div>
-        </div>
+        </q-card>
       </div>
     </div>
 
-    <div class="action-bar row justify-end q-mt-xl q-gutter-md">
+    <div class="action-bar row justify-end q-mt-sm q-gutter-md">
       <AppButton
         :label="$t('admin.scoreCriteriaManagement.cancelBtn')"
         color="grey-4"
@@ -147,7 +147,7 @@
         :label="$t('admin.scoreCriteriaManagement.saveBtn')"
         color="primary"
         unelevated
-        class="action-btn action-btn--save"
+        class="action-btn"
         @click="handleSave"
       />
     </div>
@@ -379,12 +379,20 @@ const handleScorePaste = (event: ClipboardEvent): void => {
   }
 }
 
+.score-criteria-grid {
+  & > div {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 // ===== Section Card =====
 .section-card {
-  background: var(--surface-card);
+  background: #ffffff;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
+  border: none;
+  box-shadow: 0px 4px 4px 0px #00000040 !important;
   padding: 28px;
   height: 100%;
   transition: box-shadow var(--transition-fast);
@@ -392,7 +400,7 @@ const handleScorePaste = (event: ClipboardEvent): void => {
   flex-direction: column;
 
   &:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: 0px 4px 4px 0px #00000040;
   }
 
   &--scrollable {
@@ -409,32 +417,33 @@ const handleScorePaste = (event: ClipboardEvent): void => {
 .scrollable-content {
   flex: 1;
   overflow-y: auto;
-  padding-right: 4px;
+  scrollbar-gutter: stable;
+  padding-right: 16px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
   &::-webkit-scrollbar-track {
-    background: var(--neutral-100);
+    background: #f1f1f1;
     border-radius: 10px;
   }
   &::-webkit-scrollbar-thumb {
-    background: var(--neutral-400);
+    background: #595959;
     border-radius: 10px;
     &:hover {
-      background: var(--neutral-500);
+      background: #444444;
     }
   }
 }
 
 .section-title {
   font-family: 'Sarabun', 'Inter', sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #0f172a;
   margin: 0 0 20px 0;
-  padding-bottom: 12px;
-  border-bottom: 2px solid var(--neutral-200);
 }
 
 .table-header-row {
@@ -445,6 +454,25 @@ const handleScorePaste = (event: ClipboardEvent): void => {
 .band-rules-list {
   flex: 1;
   overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding-right: 8px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #595959;
+    border-radius: 10px;
+    &:hover {
+      background: #444444;
+    }
+  }
 }
 
 .rule-row {
@@ -475,6 +503,8 @@ const handleScorePaste = (event: ClipboardEvent): void => {
 }
 
 .admin-cert-preview {
+  padding: 0 4px;
+
   :deep(.page-container-test) {
     padding: 0 !important;
     min-height: auto !important;
@@ -487,27 +517,23 @@ const handleScorePaste = (event: ClipboardEvent): void => {
   }
 
   :deep(.report-wrapper) {
-    max-width: 100% !important;
+    margin: 0 auto !important;
   }
 }
 
 // ===== Action Buttons =====
 .action-bar {
-  padding-top: 24px;
-  border-top: 1px solid var(--border-color);
+  padding-top: 0;
+  border-top: none;
 }
 
 .action-btn {
-  min-width: 160px;
+  min-width: 180px;
   height: 48px;
   border-radius: var(--radius-10) !important;
   font-weight: 700;
   font-size: var(--font-size-sm);
   letter-spacing: 0.3px;
-
-  &--save {
-    min-width: 180px;
-  }
 }
 
 .border-dashed {

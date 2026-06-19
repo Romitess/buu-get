@@ -12,85 +12,93 @@
     </div>
 
     <!-- Preview / Printable Area -->
-    <div ref="reportRef" class="report-wrapper">
-      <div class="report-card">
-        <!-- ===== Header Section ===== -->
-        <div class="report-header row items-center no-wrap">
-          <!-- Logo container -->
-          <div class="col-auto">
-            <img src="icons/logo-vocher.png" class="header-logo" alt="BUULI Logo" />
-          </div>
-
-          <!-- Titles -->
-          <div class="col text-center">
-            <h1 class="header-title">BUU-GET: Burapha University's Graduate English Test</h1>
-            <h2 class="header-subtitle">Test Taker Score Report</h2>
-          </div>
-        </div>
-
-        <!-- ===== Body Section ===== -->
-        <div class="report-body relative-position">
-          <!-- Subtle Watermark Background -->
-          <div class="watermark-bg no-pointer-events">GET</div>
-
-          <div class="row q-col-gutter-lg items-stretch content-container">
-            <!-- Left: Profile Photo Column -->
-            <div class="col-12 col-sm-4 flex flex-center column">
-              <div class="profile-photo-wrapper shadow-1">
-                <q-icon name="image" size="48px" color="grey-5" />
-              </div>
-              <div class="photo-name text-weight-bold text-primary q-mt-sm">XX. XXXXX XXXXXX</div>
+    <div ref="scaleWrapperRef" class="scale-wrapper" :style="{ height: scaledHeight }">
+      <div
+        ref="reportRef"
+        class="report-wrapper"
+        :style="`width: 674px !important; min-width: 674px !important; max-width: 674px !important; padding: 0 12px 16px 12px !important; transform: scale(${scale}) !important; transform-origin: top center; flex-shrink: 0;`"
+      >
+        <div class="report-card">
+          <!-- ===== Header Section ===== -->
+          <div class="report-header row items-center no-wrap">
+            <!-- Logo container -->
+            <div class="col-auto">
+              <img src="icons/logo-vocher.png" class="header-logo" alt="BUULI Logo" />
             </div>
 
-            <!-- Right: Details Grid -->
-            <div class="col-12 col-sm-8 detail-grid-column">
-              <div class="row q-col-gutter-y-sm full-height items-center">
-                <!-- Column 1 (Left details) -->
-                <div class="col-12 col-sm-6 detail-group">
-                  <div class="info-group">
-                    <label class="info-label">Test Taker ID:</label>
-                    <div class="info-value">XXXXXXXXX</div>
-                  </div>
-                  <div class="info-group">
-                    <label class="info-label">Citizen ID:</label>
-                    <div class="info-value">X-XXXX-XXXXX-XX-X</div>
+            <!-- Titles -->
+            <div class="col text-center">
+              <h1 class="header-title">BUU-GET: Burapha University's Graduate English Test</h1>
+              <h2 class="header-subtitle">Test Taker Score Report</h2>
+            </div>
+          </div>
+
+          <!-- ===== Body Section ===== -->
+          <div class="report-body relative-position">
+            <!-- Subtle Watermark Background -->
+            <div class="watermark-bg no-pointer-events">GET</div>
+
+            <div class="row q-col-gutter-lg items-stretch content-container">
+              <!-- Left: Profile Photo Column -->
+              <div class="col-4 flex flex-center column">
+                <div class="profile-photo-wrapper">
+                  <div class="voucher-photo-placeholder">
+                    <q-icon name="image" size="48px" color="black" />
                   </div>
                 </div>
+                <div class="photo-name text-weight-bold text-primary q-mt-sm">XX. XXXXX XXXXXX</div>
+              </div>
 
-                <!-- Column 2 (Right details) -->
-                <div class="col-12 col-sm-6 detail-group">
-                  <div class="info-group">
-                    <label class="info-label">Test Session:</label>
-                    <div class="info-value">X/XXXX</div>
+              <!-- Right: Details Grid -->
+              <div class="col-8 detail-grid-column">
+                <div class="row q-col-gutter-y-sm full-height items-center">
+                  <!-- Column 1 (Left details) -->
+                  <div class="col-6 detail-group">
+                    <div class="info-group">
+                      <label class="info-label">Test Taker ID:</label>
+                      <div class="info-value">XXXXXXXXX</div>
+                    </div>
+                    <div class="info-group">
+                      <label class="info-label">Citizen ID:</label>
+                      <div class="info-value">X-XXXX-XXXXX-XX-X</div>
+                    </div>
                   </div>
-                  <div class="info-group">
-                    <label class="info-label">Test Date:</label>
-                    <div class="info-value">XX XXX XXXX</div>
-                  </div>
-                </div>
 
-                <!-- Score Section (no box) -->
-                <div class="col-12 q-mt-md">
-                  <div class="score-section">
-                    <div class="score-header q-mb-xs">Score</div>
-                    <div class="row justify-between items-center q-py-xs score-row">
-                      <div class="score-label">1. Vocabulary & Grammar</div>
-                      <div class="score-val">XX/50</div>
+                  <!-- Column 2 (Right details) -->
+                  <div class="col-6 detail-group">
+                    <div class="info-group">
+                      <label class="info-label">Test Session:</label>
+                      <div class="info-value">X/XXXX</div>
                     </div>
-                    <div class="row justify-between items-center q-py-xs score-row">
-                      <div class="score-label">2. Reading</div>
-                      <div class="score-val">XX/50</div>
+                    <div class="info-group">
+                      <label class="info-label">Test Date:</label>
+                      <div class="info-value">XX XXX XXXX</div>
                     </div>
-                    <div class="row justify-between items-center q-py-xs score-row">
-                      <div class="score-label">Overall BUU-GET Score</div>
-                      <div class="score-val text-weight-bold">XXX/100</div>
-                    </div>
-                    <q-separator class="score-separator q-my-xs" />
-                    <div class="row justify-between items-center q-py-xs score-row-level">
-                      <div class="score-label">Level</div>
-                      <div class="row no-wrap score-level-val">
-                        <div class="q-mr-xl">Band</div>
-                        <div>X</div>
+                  </div>
+
+                  <!-- Score Section (no box) -->
+                  <div class="col-12 q-mt-md">
+                    <div class="score-section">
+                      <div class="score-header q-mb-xs">Score</div>
+                      <div class="row justify-between items-center q-py-xs score-row">
+                        <div class="score-label">1. Vocabulary & Grammar</div>
+                        <div class="score-val">XX/50</div>
+                      </div>
+                      <div class="row justify-between items-center q-py-xs score-row">
+                        <div class="score-label">2. Reading</div>
+                        <div class="score-val">XX/50</div>
+                      </div>
+                      <div class="row justify-between items-center q-py-xs score-row">
+                        <div class="score-label">Overall BUU-GET Score</div>
+                        <div class="score-val text-weight-bold">XXX/100</div>
+                      </div>
+                      <q-separator class="score-separator q-my-xs" />
+                      <div class="row justify-between items-center q-py-xs score-row-level">
+                        <div class="score-label">Level</div>
+                        <div class="row no-wrap score-level-val">
+                          <div class="q-mr-xl">Band</div>
+                          <div>X</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -98,66 +106,66 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- ===== Footer / Metadata Section ===== -->
-        <div class="report-footer row justify-between items-center no-wrap">
-          <div class="col row q-col-gutter-x-xl metadata-group">
-            <div class="col-auto text-left">
-              <div class="metadata-label">Report Issue Date:</div>
-              <div class="metadata-value">XX XXX XXXX</div>
+          <!-- ===== Footer / Metadata Section ===== -->
+          <div class="report-footer row justify-between items-center no-wrap">
+            <div class="col row q-col-gutter-x-xl metadata-group">
+              <div class="col-auto text-left">
+                <div class="metadata-label">Report Issue Date:</div>
+                <div class="metadata-value">XX XXX XXXX</div>
+              </div>
+              <div class="col-auto text-left">
+                <div class="metadata-label">Score Valid Until:</div>
+                <div class="metadata-value">XX XXX XXXX</div>
+              </div>
             </div>
-            <div class="col-auto text-left">
-              <div class="metadata-label">Score Valid Until:</div>
-              <div class="metadata-value">XX XXX XXXX</div>
+            <div class="col-auto text-right">
+              <q-icon name="qr_code_2" size="48px" color="dark" class="qr-code-icon" />
             </div>
           </div>
-          <div class="col-auto text-right">
-            <q-icon name="qr_code_2" size="48px" color="dark" class="qr-code-icon" />
-          </div>
         </div>
-      </div>
 
-      <!-- Band Description Table Section (Separate Box) -->
-      <div class="band-desc-block q-mt-lg">
-        <div class="band-desc-box relative-position">
-          <!-- Subtle Watermark Background -->
-          <div class="watermark-bg no-pointer-events">GET</div>
+        <!-- Band Description Table Section (Separate Box) -->
+        <div class="band-desc-block q-mt-lg">
+          <div class="band-desc-box relative-position">
+            <!-- Subtle Watermark Background -->
+            <div class="watermark-bg no-pointer-events">GET</div>
 
-          <div class="band-desc-section">
-            <h3 class="band-desc-title text-center text-weight-bold q-mb-md">
-              BUU GET Band Description
-            </h3>
+            <div class="band-desc-section">
+              <h3 class="band-desc-title text-center text-weight-bold q-mb-md">
+                BUU GET Band Description
+              </h3>
 
-            <div class="band-table-container">
-              <table class="band-table">
-                <thead>
-                  <tr>
-                    <th class="text-center" style="width: 10%">Band</th>
-                    <th class="text-center" style="width: 15%">Score</th>
-                    <th class="text-center" style="width: 12%">CEFR</th>
-                    <th class="text-center">Performance Descriptor</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="rule in bandRules" :key="rule.id">
-                    <td class="text-center text-weight-bold">{{ rule.band }}</td>
-                    <td class="text-center">{{ rule.minScore }}-{{ rule.maxScore }}</td>
-                    <td class="text-center">{{ rule.cefr }}</td>
-                    <td class="text-left descriptor-cell">{{ rule.descriptor }}</td>
-                  </tr>
-                  <tr v-if="!bandRules.length">
-                    <td colspan="4" class="text-center text-grey-6 py-md">
-                      No band descriptions defined
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <div class="band-table-container">
+                <table class="band-table">
+                  <thead>
+                    <tr>
+                      <th class="text-center" style="width: 10%">Band</th>
+                      <th class="text-center" style="width: 15%">Score</th>
+                      <th class="text-center" style="width: 12%">CEFR</th>
+                      <th class="text-center">Performance Descriptor</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="rule in bandRules" :key="rule.id">
+                      <td class="text-center text-weight-bold">{{ rule.band }}</td>
+                      <td class="text-center">{{ rule.minScore }}-{{ rule.maxScore }}</td>
+                      <td class="text-center">{{ rule.cefr }}</td>
+                      <td class="text-left descriptor-cell">{{ rule.descriptor }}</td>
+                    </tr>
+                    <tr v-if="!bandRules.length">
+                      <td colspan="4" class="text-center text-grey-6 py-md">
+                        No band descriptions defined
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p class="band-table-note text-left q-mt-md italic">
+                The performance descriptor is taken from CEFR Overall Reading Comprehension Scale
+              </p>
             </div>
-
-            <p class="band-table-note text-left q-mt-md italic">
-              The performance descriptor is taken from CEFR Overall Reading Comprehension Scale
-            </p>
           </div>
         </div>
       </div>
@@ -166,7 +174,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 
 export interface BandRule {
   id: string;
@@ -182,7 +190,61 @@ defineProps<{
   bandRules: BandRule[];
 }>();
 
+// ===== Ref & Scaling States =====
 const reportRef = ref<HTMLElement | null>(null);
+const scaleWrapperRef = ref<HTMLElement | null>(null);
+const scale = ref<number>(1);
+const scaledHeight = ref<string>('auto');
+
+let resizeObserver: ResizeObserver | null = null;
+let frameId: number | null = null;
+
+const updateScale = (): void => {
+  if (frameId !== null) {
+    cancelAnimationFrame(frameId);
+  }
+
+  frameId = requestAnimationFrame(() => {
+    if (!scaleWrapperRef.value || !reportRef.value) return;
+
+    const containerWidth = scaleWrapperRef.value.getBoundingClientRect().width;
+    const targetWidth = 674; // Adjusted for padding (650px card + 24px padding)
+
+    if (containerWidth < targetWidth && containerWidth > 0) {
+      const s = containerWidth / targetWidth;
+      scale.value = s;
+      scaledHeight.value = `${reportRef.value.offsetHeight * s}px`;
+    } else {
+      scale.value = 1;
+      scaledHeight.value = 'auto';
+    }
+    frameId = null;
+  });
+};
+
+onMounted(() => {
+  void nextTick(() => {
+    updateScale();
+    if (scaleWrapperRef.value && typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => {
+        updateScale();
+      });
+      resizeObserver.observe(scaleWrapperRef.value);
+      if (reportRef.value) {
+        resizeObserver.observe(reportRef.value);
+      }
+    }
+  });
+});
+
+onUnmounted(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+  }
+  if (frameId !== null) {
+    cancelAnimationFrame(frameId);
+  }
+});
 
 // ===== Action: Window Print =====
 const windowPrint = (): void => {
@@ -212,11 +274,24 @@ const windowPrint = (): void => {
   font-size: 13px;
 }
 
-.report-wrapper {
+.scale-wrapper {
   width: 100%;
-  max-width: 680px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.report-wrapper {
+  width: 674px !important;
+  min-width: 674px !important;
+  max-width: 674px !important;
+  padding: 0 12px 16px 12px !important;
   margin: 0 auto;
   font-family: 'Outfit', 'Sarabun', 'Inter', sans-serif;
+  transform-origin: top center;
+  flex-shrink: 0;
 }
 
 .report-card {
@@ -291,15 +366,24 @@ const windowPrint = (): void => {
 
 /* ===== Profile Photo ===== */
 .profile-photo-wrapper {
-  width: 100px;
-  height: 126px;
-  background-color: #212121;
-  border-radius: 3px;
+  width: 120px;
+  height: 144px;
+  background-color: #00000033 !important;
+  border-radius: 4px;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1.5px solid var(--border-black, #000000);
+  border: 1.5px solid #00000033 !important;
+}
+
+.voucher-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #c8c8c8;
 }
 
 .photo-name {
@@ -422,7 +506,7 @@ const windowPrint = (): void => {
 .band-desc-box {
   position: relative;
   background: linear-gradient(to bottom, #fafafa, #f0f4f8);
-  border: 1.5px solid var(--border-black, #000000);
+  border: 1px solid var(--border-black, #000000);
   border-radius: 6px;
   padding: 20px 24px;
   box-shadow: var(--shadow-md);
@@ -507,27 +591,6 @@ const windowPrint = (): void => {
   font-style: italic !important;
 }
 
-/* ===== Responsive Adaptability ===== */
-@media (max-width: 480px) {
-  .detail-grid-column {
-    padding-left: 0 !important;
-    margin-top: 12px;
-  }
-  .report-header {
-    flex-direction: column;
-    padding: 12px;
-    gap: 8px;
-    text-align: center;
-  }
-  .report-body {
-    padding: 12px;
-  }
-  .watermark-bg {
-    font-size: 6rem;
-    left: 50%;
-  }
-}
-
 /* ===== Print Optimization ===== */
 @media print {
   .no-print {
@@ -537,9 +600,17 @@ const windowPrint = (): void => {
     padding: 0 !important;
     background-color: transparent !important;
   }
+  .scale-wrapper {
+    height: auto !important;
+    overflow: visible !important;
+  }
   .report-wrapper {
-    max-width: 100% !important;
-    margin: 0 !important;
+    width: 674px !important;
+    min-width: 674px !important;
+    max-width: 674px !important;
+    padding: 0 12px 16px 12px !important;
+    transform: none !important;
+    margin: 0 auto !important;
     box-shadow: none !important;
   }
   .report-card {
@@ -552,7 +623,7 @@ const windowPrint = (): void => {
     padding: 16px 20px;
     background-color: #ffffff !important;
     background-image: none !important;
-    border: 1.5px solid var(--border-black) !important;
+    border: 0.1px solid var(--border-black) !important;
     box-shadow: none !important;
   }
   .report-footer {
@@ -561,6 +632,10 @@ const windowPrint = (): void => {
     border-top: 1.5px solid var(--border-black) !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+  .profile-photo-wrapper {
+    width: 120px;
+    height: 144px;
   }
 }
 </style>
