@@ -38,6 +38,7 @@ export interface BackendSessionDetail {
     EXAM_DATE: string;
     EXAM_ROUND?: string | null;
     EXAM_FEE?: number;
+    EXAM_TYPE?: string | null;
   };
   LOCATION?: {
     LOCATION_ID: number;
@@ -136,6 +137,13 @@ export interface AttendanceTableRow {
   hasRecord: boolean;
   slId?: number | null | undefined;
   lsId?: number | null | undefined;
+  passportNo?: string | null;
+  profileImage?: string | null;
+  testSession?: string | null;
+  voucherNo?: string | null;
+  examType?: string | null;
+  testTakerCode?: string | null;
+  paymentStatus: EnrollmentStatus;
 }
 
 export enum EnrollmentStatus {

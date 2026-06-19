@@ -113,8 +113,13 @@ const ROUTES = {
 const { examInfo, selectedDate, selectedDateRounds, calendarAvailability, formattedSelectedDate } =
   storeToRefs(examStore);
 
+interface ExamPasscodeDialogExpose {
+  openDialog: () => void;
+  closeDialog: () => void;
+}
+
 const showConfirmDialog = ref(false);
-const passcodeDialogRef = ref<InstanceType<typeof ExamPasscodeInputDialog> | null>(null);
+const passcodeDialogRef = ref<ExamPasscodeDialogExpose | null>(null);
 const selectedRound = ref<ExamRound | null>(null);
 const savedPasscode = ref<string | undefined>(undefined);
 const calendarHeight = ref<number>(0);
