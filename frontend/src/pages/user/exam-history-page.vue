@@ -151,11 +151,13 @@
         pointer-events: none;
       "
     >
-      <TestVoucherReport
-        :data="selectedVoucherData"
-        :regulations-en="selectedVoucherRegulationsEn"
-        :regulations-th="selectedVoucherRegulationsTh"
-      />
+      <div class="exam-history-voucher-download">
+        <TestVoucherReport
+          :data="selectedVoucherData"
+          :regulations-en="selectedVoucherRegulationsEn"
+          :regulations-th="selectedVoucherRegulationsTh"
+        />
+      </div>
     </div>
 
     <!-- Hidden container for Receipt PDF generation -->
@@ -452,6 +454,58 @@ const handlePrintReceipt = (exam: ExamHistoryItem): void => {
     :deep(.q-icon) {
       font-size: var(--font-size-body) !important;
     }
+  }
+}
+
+.exam-history-voucher-download {
+  --voucher-download-subtitle-size: 15px;
+  --voucher-download-photo-width: 140px;
+  --voucher-download-photo-height: 156px;
+  --voucher-download-details-gap: 40px;
+  --voucher-download-signature-gap: 30px;
+  --voucher-download-watermark-color: #1e89e50d;
+  --voucher-download-front-watermark-left: 52%;
+  --voucher-download-front-watermark-top: 47%;
+  --voucher-download-rules-watermark-left: 48%;
+  --voucher-download-rules-watermark-top: 52%;
+  --voucher-download-rules-watermark-size: 150px;
+
+  :deep(.voucher-header .header-subtitle) {
+    font-size: var(--voucher-download-subtitle-size) !important;
+    line-height: 1.25 !important;
+  }
+
+  :deep(.voucher-body .content-container) {
+    grid-template-columns: var(--voucher-download-photo-width) minmax(0, 1fr);
+    column-gap: var(--voucher-download-details-gap);
+  }
+
+  :deep(.profile-photo-wrapper) {
+    width: var(--voucher-download-photo-width);
+    height: var(--voucher-download-photo-height);
+    border-radius: 0;
+  }
+
+  :deep(.profile-photo-wrapper .profile-photo-img) {
+    border-radius: 0 !important;
+  }
+
+  :deep(.signature-line) {
+    width: var(--voucher-download-photo-width);
+    margin-top: var(--voucher-download-signature-gap);
+  }
+
+  :deep(.voucher-card .watermark-bg) {
+    color: var(--voucher-download-watermark-color);
+    left: var(--voucher-download-front-watermark-left);
+    top: var(--voucher-download-front-watermark-top);
+  }
+
+  :deep(.regulations-box .watermark-bg) {
+    color: var(--voucher-download-watermark-color);
+    left: var(--voucher-download-rules-watermark-left) !important;
+    top: var(--voucher-download-rules-watermark-top);
+    font-size: var(--voucher-download-rules-watermark-size);
   }
 }
 @media (max-width: 600px) {

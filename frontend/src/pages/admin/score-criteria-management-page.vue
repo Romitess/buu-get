@@ -66,25 +66,27 @@
 
               <div class="row items-center no-wrap" style="width: 140px; margin-right: 12px">
                 <q-input
-                  v-model.number="rule.minScore"
-                  type="number"
-                  :min="0"
-                  :max="100"
+                  :model-value="rule.minScore"
+                  maxlength="3"
                   outlined
                   dense
                   class="buu-input-muted col"
                   input-class="text-center"
+                  @keypress="onScoreKeypress"
+                  @update:model-value="val => onScoreInput(val, rule, 'minScore')"
+                  @paste="handleScorePaste"
                 />
                 <span class="q-mx-xs text-grey-6">-</span>
                 <q-input
-                  v-model.number="rule.maxScore"
-                  type="number"
-                  :min="0"
-                  :max="100"
+                  :model-value="rule.maxScore"
+                  maxlength="3"
                   outlined
                   dense
                   class="buu-input-muted col"
                   input-class="text-center"
+                  @keypress="onScoreKeypress"
+                  @update:model-value="val => onScoreInput(val, rule, 'maxScore')"
+                  @paste="handleScorePaste"
                 />
               </div>
 
@@ -327,6 +329,37 @@ const handleSave = async (): Promise<void> => {
       message: t('admin.scoreCriteriaManagement.notifications.saveError'),
       position: 'top',
     });
+  }
+};
+
+const onScoreKeypress = (event: KeyboardEvent): void => {
+  // Allow control and navigation keys
+  const allowedKeys = ['Backspace', 'Tab', 'Enter', 'Delete', 'Escape', 'ArrowLeft', 'ArrowRight'];
+  if (allowedKeys.includes(event.key) || event.ctrlKey || event.metaKey) {
+    return;
+  }
+  // Block any non-digit character (blocking -, +, e, E, .)
+  if (!/[0-9]/.test(event.key)) {
+    event.preventDefault();
+  }
+};
+
+const onScoreInput = (val: string | number | null, rule: BandRule, field: 'minScore' | 'maxScore'): void => {
+  const sanitized = String(val ?? '').replace(/\D/g, '');
+  if (sanitized !== '') {
+    const num = parseInt(sanitized, 10);
+    rule[field] = Math.min(num, SCORE_MAX_LIMIT);
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    rule[field] = '' as any;
+  }
+};
+
+const handleScorePaste = (event: ClipboardEvent): void => {
+  const pasteData = event.clipboardData?.getData('text') || '';
+  // If the pasted data contains any non-digit character, prevent it
+  if (!/^\d+$/.test(pasteData)) {
+    event.preventDefault();
   }
 };
 </script>

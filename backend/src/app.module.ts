@@ -55,6 +55,8 @@ import { MoodleSyncLogsModule } from './modules/moodle-sync-logs/moodle-sync-log
           username: configService.getOrThrow<string>('DB_USER'),
           password: configService.getOrThrow<string>('DB_PASSWORD'),
           database: configService.getOrThrow<string>('DB_NAME'),
+          // MySQL datetime columns store Thailand wall-clock time; align connection TZ on UTC servers (e.g. K8s).
+          timezone: '+07:00',
           autoLoadEntities: true,
           synchronize: false,
           // dropSchema: false,

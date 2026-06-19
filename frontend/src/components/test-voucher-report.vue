@@ -15,7 +15,7 @@
     <div ref="voucherRef" class="voucher-wrapper">
       <div v-if="showVoucherCard" class="voucher-card">
         <!-- ===== Header Section ===== -->
-        <div class="voucher-header row items-center no-wrap">
+        <div class="report-header row items-center no-wrap">
           <!-- Logo container -->
           <div class="col-auto">
             <img src="icons/logo-vocher.png" class="header-logo" alt="BUULI Logo" />
@@ -301,7 +301,7 @@ const displayRegulationsEn = computed<string>(() => {
     val = localRegulationsEn.value || defaultRegulationsEn;
   }
   const str = Array.isArray(val) ? val.join('\n') : val;
-  return str ? str.trim().replace(/\n\s*(?!\d+\.)/g, ' ') : '';
+  return str ? str.trim() : '';
 });
 
 const displayRegulationsTh = computed<string>(() => {
@@ -310,7 +310,7 @@ const displayRegulationsTh = computed<string>(() => {
     val = localRegulationsTh.value || defaultRegulationsTh;
   }
   const str = Array.isArray(val) ? val.join('\n') : val;
-  return str ? str.trim().replace(/\n\s*(?!\d+\.)/g, ' ') : '';
+  return str ? str.trim() : '';
 });
 
 // ===== Action: Window Print =====
@@ -359,8 +359,8 @@ const windowPrint = (): void => {
 }
 
 /* ===== Header Area ===== */
-.voucher-header {
-  padding: 16px 28px 16px 48px;
+.report-header {
+  padding: 16px 20px;
   background-color: transparent;
   border-bottom: 1.5px solid var(--primary, #0d47a1) !important;
 
@@ -587,6 +587,8 @@ const windowPrint = (): void => {
   white-space: pre-line;
   margin-bottom: 16px;
   padding-left: 2px;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* ===== Responsive Adaptability ===== */
@@ -595,7 +597,7 @@ const windowPrint = (): void => {
     padding-left: 0 !important;
     margin-top: 12px;
   }
-  .voucher-header {
+  .report-header {
     flex-direction: column;
     padding: 12px;
     gap: 8px;
@@ -656,8 +658,8 @@ const windowPrint = (): void => {
     background-color: #ffffff !important;
     background-image: none !important;
   }
-  .voucher-header {
-    padding: 14px 48px 14px 76px;
+  .report-header {
+    padding: 16px 20px;
     .header-logo {
       width: 160px;
     }
@@ -733,6 +735,8 @@ const windowPrint = (): void => {
       letter-spacing: 0 !important;
       vertical-align: middle;
       margin-top: -6px !important;
+      overflow-wrap: break-word !important;
+      word-break: break-word !important;
     }
     .regulations-text-content.q-mb-md {
       margin-bottom: -2px !important;
