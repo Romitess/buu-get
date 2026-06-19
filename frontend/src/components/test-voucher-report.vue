@@ -15,7 +15,7 @@
     <div ref="voucherRef" class="voucher-wrapper">
       <div v-if="showVoucherCard" class="voucher-card">
         <!-- ===== Header Section ===== -->
-        <div class="voucher-header row items-center no-wrap">
+        <div class="report-header row items-center no-wrap">
           <!-- Logo container -->
           <div class="col-auto">
             <img src="icons/logo-vocher.png" class="header-logo" alt="BUULI Logo" />
@@ -359,8 +359,8 @@ const windowPrint = (): void => {
 }
 
 /* ===== Header Area ===== */
-.voucher-header {
-  padding: 16px 28px 16px 48px;
+.report-header {
+  padding: 16px 20px;
   background-color: transparent;
   border-bottom: 1.5px solid var(--primary, #0d47a1) !important;
 
@@ -597,7 +597,7 @@ const windowPrint = (): void => {
     padding-left: 0 !important;
     margin-top: 12px;
   }
-  .voucher-header {
+  .report-header {
     flex-direction: column;
     padding: 12px;
     gap: 8px;
@@ -658,8 +658,8 @@ const windowPrint = (): void => {
     background-color: #ffffff !important;
     background-image: none !important;
   }
-  .voucher-header {
-    padding: 14px 48px 14px 76px;
+  .report-header {
+    padding: 16px 20px;
     .header-logo {
       width: 160px;
     }
