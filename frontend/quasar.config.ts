@@ -55,6 +55,10 @@ export default defineConfig((ctx) => {
       // analyze: true,
       // .env อยู่ที่ monorepo root (buu-get-front/.env)
       envFolder: '..',
+      // อ่านจาก pipeline/CI env ตอน build (static SPA ไม่เห็น runtime env ใน K8s)
+      env: {
+        API_BASE_URL: process.env.API_BASE_URL,
+      },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,

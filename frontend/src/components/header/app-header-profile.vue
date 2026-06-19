@@ -146,6 +146,10 @@ const onLogout = async (): Promise<void> => {
   }
 }
 
+.app-header-profile__text {
+  min-width: 110px;
+}
+
 .app-header-profile__name {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
