@@ -297,7 +297,7 @@ onMounted(async () => {
 
 const displayRegulationsEn = computed<string>(() => {
   let val = props.regulationsEn;
-  if (!val) {
+  if (val === undefined || val === null) {
     val = localRegulationsEn.value || defaultRegulationsEn;
   }
   const str = Array.isArray(val) ? val.join('\n') : val;
@@ -306,7 +306,7 @@ const displayRegulationsEn = computed<string>(() => {
 
 const displayRegulationsTh = computed<string>(() => {
   let val = props.regulationsTh;
-  if (!val) {
+  if (val === undefined || val === null) {
     val = localRegulationsTh.value || defaultRegulationsTh;
   }
   const str = Array.isArray(val) ? val.join('\n') : val;
