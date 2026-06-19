@@ -1,9 +1,24 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
+import { config as loadEnv } from 'dotenv';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from '@quasar/app-vite/wrappers';
+import { resolveApiBaseUrl } from './config/resolve-api-base-url';
+
+// โหลด buu-get-front/.env ก่อน evaluate config — Quasar envFolder ยังไม่ inject ตอนนี้
+const __dirname = dirname(fileURLToPath(import.meta.url));
+loadEnv({ path: resolve(__dirname, '../.env') });
 
 export default defineConfig((ctx) => {
+  const apiBaseUrl = resolveApiBaseUrl({
+    dev: ctx.dev,
+    ...(process.env.API_BASE_URL
+      ? { fromEnv: process.env.API_BASE_URL }
+      : {}),
+  });
+
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -53,11 +68,10 @@ export default defineConfig((ctx) => {
 
       // publicPath: '/',
       // analyze: true,
-      // .env อยู่ที่ monorepo root (buu-get-front/.env)
+      // .env อยู่ที่ monorepo root (buu-get-front/.env) — ไม่ใช่ frontend/.env
       envFolder: '..',
-      // อ่านจาก pipeline/CI env ตอน build (static SPA ไม่เห็น runtime env ใน K8s)
       env: {
-        API_BASE_URL: process.env.API_BASE_URL,
+        ...(apiBaseUrl ? { API_BASE_URL: apiBaseUrl } : {}),
       },
       // rawDefine: {}
       // ignorePublicFolder: true,
@@ -68,23 +82,8 @@ export default defineConfig((ctx) => {
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
 
-      // checker ใช้เฉพาะ dev — ป้องกัน reload.js WebSocket โผล่ใน production build
-      vitePlugins: ctx.dev
-        ? [
-            [
-              'vite-plugin-checker',
-              {
-                vueTsc: true,
-                eslint: {
-                  lintCommand:
-                    'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs,vue}"',
-                  useFlatConfig: true,
-                },
-              },
-              { server: false },
-            ],
-          ]
-        : [],
+      // ใช้ npm run lint / npm run typecheck แทน — ป้องกัน reload.js หลุด production
+      vitePlugins: [],
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver
