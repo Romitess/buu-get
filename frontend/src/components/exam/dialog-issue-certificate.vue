@@ -615,7 +615,7 @@ const onConfirm = async (): Promise<void> => {
   background-color: #f8f9fa;
   overflow: hidden;
   position: relative;
-  font-family: 'Outfit', 'Sarabun', 'Inter', sans-serif;
+  font-family: 'Sarabun', 'Inter', sans-serif;
   display: flex;
   flex-direction: column;
 }
@@ -656,7 +656,7 @@ const onConfirm = async (): Promise<void> => {
   top: 50%;
   left: 60%;
   transform: translate(-50%, -50%);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Sarabun', 'Inter', sans-serif;
   font-weight: 800;
   font-size: 120px;
   line-height: 100%;

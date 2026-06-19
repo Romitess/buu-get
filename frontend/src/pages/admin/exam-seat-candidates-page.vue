@@ -79,15 +79,65 @@
         </template>
       </BaseTable>
     </main>
+
+    <Teleport to="body">
+      <div v-if="isPrintingSeatPlan" class="seat-print-render-root" aria-hidden="true">
+        <section class="seat-plan-print-area seat-print-page">
+          <AppExamSeatPlanPrint
+            :room-label="printRoomLabel"
+            :seats-by-row="printSeatPlanRows"
+            :aisle-after-cols="printAisleAfterCols"
+            :aisle-after-rows="printAisleAfterRows"
+            :seat-direction="printSeatDirection"
+            :layout-rows="printSeatRowCount"
+            :layout-cols="printSeatColCount"
+          />
+        </section>
+
+        <section class="seat-list-print-area seat-print-page">
+          <div class="seat-list-print">
+            <header class="seat-list-print__header">
+              <h1>ใบรายชื่อผู้เข้าสอบ</h1>
+              <p>{{ printRoomLabel }}</p>
+            </header>
+
+            <table class="seat-list-print__table">
+              <thead>
+                <tr>
+                  <th>ลำดับ</th>
+                  <th>เลขประจำตัวผู้สอบ</th>
+                  <th>คำนำหน้า</th>
+                  <th>ชื่อ-นามสกุล</th>
+                  <th>Full Name</th>
+                  <th>ที่นั่ง</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in printCandidateRows" :key="row.ermId">
+                  <td>{{ row.index }}</td>
+                  <td>{{ row.nationalId }}</td>
+                  <td>{{ row.titleTh }}</td>
+                  <td class="text-left">{{ row.fullnameTh }}</td>
+                  <td class="text-left">{{ row.fullnameEn }}</td>
+                  <td>{{ row.seatNumber }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </Teleport>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, nextTick, onBeforeUnmount, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import DialogIssueTicket from 'src/components/exam/dialog-issue-ticket.vue';
 import DialogViewVoucher from 'src/components/exam/dialog-view-voucher.vue';
 
@@ -100,10 +150,14 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import ActionButton from 'src/components/shared/action-button.vue';
+import AppExamSeatPlanPrint from 'src/components/exam/app-exam-seat-plan-print.vue';
+import { fetchLocationById } from 'src/services/location.service';
 import {
   useExamSeatCandidates,
   type SeatCandidateRow,
 } from 'src/composables/use-exam-seat-candidates';
+import type { SeatCell, SeatStatus } from 'src/composables/use-exam-seat-management';
+import type { BackendLocation } from 'src/types/exam';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { EnrollmentStatus } from 'src/types/enrollment.types';
 import { bulkIssueVouchers } from 'src/services/voucher.service';
@@ -137,6 +191,7 @@ const {
   exam,
   sessions,
   sessionTimeTabs,
+  activeLocation,
   isLoading,
   searchQuery,
   selectedSessionId,
@@ -153,6 +208,13 @@ const {
   getTimeTabSessionId,
   fetchData,
 } = useExamSeatCandidates();
+
+const isPrintingSeatPlan = ref(false);
+type PrintLocationSeat = NonNullable<BackendLocation['SEATS']>[number];
+type PrintLocation = BackendLocation & { SEATS?: PrintLocationSeat[] };
+
+const freshActiveLocation = ref<PrintLocation | null>(null);
+const freshActiveLocationId = ref<number | null>(null);
 
 // Resolves a localized month name by 0-based index from i18n (type-safe, no cast)
 const getMonthName = (monthIndex: number): string => i18n.t(`common.months[${monthIndex}]`);
@@ -340,8 +402,193 @@ const handleViewVoucher = async (row: SeatCandidateRow): Promise<void> => {
   }
 };
 
-const handlePrintSeatPlan = (): void => {
-  window.print();
+const printLocation = computed(() => freshActiveLocation.value ?? activeLocation.value);
+
+const refreshActiveLocation = async (force = false): Promise<void> => {
+  const locationId = activeLocation.value?.LOCATION_ID;
+  if (!locationId) {
+    freshActiveLocation.value = null;
+    freshActiveLocationId.value = null;
+    return;
+  }
+
+  if (!force && freshActiveLocationId.value === locationId && freshActiveLocation.value) {
+    return;
+  }
+
+  try {
+    freshActiveLocation.value = await fetchLocationById(locationId);
+    freshActiveLocationId.value = locationId;
+  } catch (error) {
+    console.error('Failed to refresh active location:', error);
+    freshActiveLocation.value = null;
+    freshActiveLocationId.value = null;
+  }
+};
+
+const printAisleAfterCols = computed((): number[] => printLocation.value?.AISLE_AFTER_COLS ?? []);
+const printAisleAfterRows = computed((): number[] => printLocation.value?.AISLE_AFTER_ROWS ?? []);
+const printSeatDirection = computed(
+  (): 'HORIZONTAL' | 'VERTICAL' => printLocation.value?.SEAT_DIRECTION ?? 'HORIZONTAL',
+);
+
+const printSeatRowCount = computed((): number => {
+  const locationRows = printLocation.value?.LOCATION_TOTAL_ROWS ?? 0;
+  const maxSeatRow = Math.max(
+    0,
+    ...(printLocation.value?.SEATS ?? []).map((seat) => seat.LS_ROW_NO),
+  );
+
+  return Math.max(locationRows, maxSeatRow);
+});
+
+const printSeatColCount = computed((): number => {
+  const locationCols = printLocation.value?.LOCATION_TOTAL_COLS ?? 0;
+  const maxSeatCol = Math.max(
+    0,
+    ...(printLocation.value?.SEATS ?? []).map((seat) => seat.LS_COL_NO),
+  );
+
+  return Math.max(locationCols, maxSeatCol);
+});
+
+const printSeatGuideLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+const getPrintSeatLabel = (rowNo: number, colNo: number): string => {
+  if (printSeatDirection.value === 'VERTICAL') {
+    return `${printSeatGuideLetters[colNo - 1] ?? colNo}${rowNo}`;
+  }
+
+  return `${printSeatGuideLetters[rowNo - 1] ?? rowNo}${colNo}`;
+};
+
+const printRoomLabel = computed((): string => {
+  const location = printLocation.value;
+  if (!location) return sessionLocation.value;
+
+  const roomNo = location.LOCATION_ROOM_NO ? ` ห้อง ${location.LOCATION_ROOM_NO}` : '';
+  const floorNo =
+    location.LOCATION_FLOOR_NO !== null && location.LOCATION_FLOOR_NO !== undefined
+      ? ` ชั้น ${location.LOCATION_FLOOR_NO}`
+      : '';
+
+  return `${location.LOCATION_NAME}${roomNo}${floorNo}`;
+});
+
+const printSeatPlanRows = computed((): SeatCell[][] => {
+  const seats = printLocation.value?.SEATS ?? [];
+  if (printSeatRowCount.value === 0 || printSeatColCount.value === 0) return [];
+
+  const rows = Array.from({ length: printSeatRowCount.value }, (): SeatCell[] => []);
+  const seatsByPosition = new Map<string, PrintLocationSeat>();
+  const seatsByLabel = new Map<string, PrintLocationSeat>();
+
+  seats.forEach((seat) => {
+    seatsByPosition.set(`${seat.LS_ROW_NO}-${seat.LS_COL_NO}`, seat);
+    if (seat.LS_SEAT_LABEL) {
+      seatsByLabel.set(seat.LS_SEAT_LABEL, seat);
+    }
+  });
+
+  for (let rowNo = 1; rowNo <= printSeatRowCount.value; rowNo += 1) {
+    for (let colNo = 1; colNo <= printSeatColCount.value; colNo += 1) {
+      const label = getPrintSeatLabel(rowNo, colNo);
+      const seat = seatsByLabel.get(label) ?? seatsByPosition.get(`${rowNo}-${colNo}`);
+      const statusCode = Number(seat?.LS_SEAT_STATUS ?? 0);
+      let status: SeatStatus = 'available';
+      if (statusCode === 1) {
+        status = 'broken';
+      } else if (statusCode === 2) {
+        status = 'blocked';
+      }
+
+      rows[rowNo - 1]?.push({
+        id: seat ? String(seat.LS_ID) : `virtual-${rowNo}-${colNo}`,
+        label,
+        status,
+        rowNo,
+        colNo,
+        student: null,
+      });
+    }
+  }
+
+  return rows;
+});
+
+const printCandidateRows = computed((): SeatCandidateRow[] => filteredRows.value);
+
+const cleanupSeatPlanPrint = (): void => {
+  isPrintingSeatPlan.value = false;
+};
+
+const canvasToJpegDataUrl = (canvas: HTMLCanvasElement): string =>
+  canvas.toDataURL('image/jpeg', 0.92);
+
+const renderPrintPageToCanvas = async (element: HTMLElement): Promise<HTMLCanvasElement> =>
+  html2canvas(element, {
+    scale: 1.7,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: '#ffffff',
+    windowWidth: element.scrollWidth,
+    windowHeight: element.scrollHeight,
+  });
+
+const handlePrintSeatPlan = async (): Promise<void> => {
+  await refreshActiveLocation();
+  isPrintingSeatPlan.value = true;
+  $q.loading.show();
+
+  await nextTick();
+  await new Promise<void>((resolve) => {
+    window.requestAnimationFrame(() => resolve());
+  });
+
+  try {
+    const printPages = [...document.querySelectorAll<HTMLElement>('.seat-print-page')];
+    if (printPages.length === 0) {
+      throw new Error('Seat print pages not found');
+    }
+
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+
+    for (const [pageIndex, printPage] of printPages.entries()) {
+      if (pageIndex > 0) {
+        pdf.addPage('a4', 'portrait');
+      }
+
+      const canvas = await renderPrintPageToCanvas(printPage);
+      pdf.addImage(canvasToJpegDataUrl(canvas), 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+    }
+
+    pdf.autoPrint();
+
+    const pdfBlob = pdf.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    const printWindow = window.open(pdfUrl, '_blank');
+
+    if (!printWindow) {
+      pdf.save('seat-plan.pdf');
+      URL.revokeObjectURL(pdfUrl);
+    } else {
+      window.setTimeout(() => URL.revokeObjectURL(pdfUrl), 60000);
+    }
+  } catch (error) {
+    console.error('Error printing seat plan:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'ไม่สามารถพิมพ์แผนผังที่นั่งได้',
+      position: 'top',
+    });
+  } finally {
+    $q.loading.hide();
+    cleanupSeatPlanPrint();
+  }
 };
 
 const pagination = ref<PaginationModel>({
@@ -351,6 +598,7 @@ const pagination = ref<PaginationModel>({
 });
 
 const columns = computed<QTableColumn[]>(() => {
+  const nameWidth = isVoucherSent.value ? 13 : 19;
   const baseColumns: QTableColumn[] = [
     {
       name: 'index',
@@ -371,21 +619,28 @@ const columns = computed<QTableColumn[]>(() => {
       label: i18n.t('admin.seatCandidates.table.columns.prefix'),
       field: 'titleTh',
       align: 'center',
-      style: 'width: 10%',
+      style: 'width: 12%',
     },
     {
       name: 'fullnameTh',
       label: i18n.t('admin.seatCandidates.table.columns.fullName'),
       field: 'fullnameTh',
       align: 'left',
-      style: 'width: 35%; padding-left: 16%',
+      style: `width: ${nameWidth}%`,
+    },
+    {
+      name: 'fullnameEn',
+      label: i18n.t('admin.seatCandidates.table.columns.fullNameEn'),
+      field: 'fullnameEn',
+      align: 'left',
+      style: `width: ${nameWidth}%`,
     },
     {
       name: 'seatNumber',
       label: i18n.t('admin.seatCandidates.table.columns.seatNumber'),
       field: 'seatNumber',
       align: 'center',
-      style: 'width: 15%',
+      style: 'width: 22%',
       classes: 'text-weight-bold',
     },
   ];
@@ -413,6 +668,14 @@ const onRequest = (props: TableRequestProps): void => {
 watch(filteredRows, (newVal) => {
   pagination.value.rowsNumber = newVal.length;
 });
+
+watch(
+  () => activeLocation.value?.LOCATION_ID,
+  () => {
+    void refreshActiveLocation();
+  },
+  { immediate: true },
+);
 
 watch(exam, (newExam) => {
   if (newExam?.SESSIONS?.length && !selectedSessionId.value) {
@@ -477,6 +740,10 @@ const loadData = async (): Promise<void> => {
 onMounted(() => {
   void loadData();
 });
+
+onBeforeUnmount(() => {
+  cleanupSeatPlanPrint();
+});
 </script>
 
 <style scoped lang="scss">
@@ -502,5 +769,93 @@ onMounted(() => {
     padding-left: 8px !important;
     padding-right: 8px !important;
   }
+}
+
+.seat-print-render-root {
+  position: fixed;
+  top: 0;
+  left: -9999px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.seat-print-page {
+  width: 794px;
+  height: 1123px;
+  padding: 40px 36px;
+  box-sizing: border-box;
+  background: #ffffff;
+  color: #111111;
+  overflow: hidden;
+}
+
+.seat-list-print {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: Sarabun, Arial, sans-serif;
+}
+
+.seat-list-print__header {
+  flex-shrink: 0;
+  padding: 0 0 12px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.seat-list-print__header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.seat-list-print__header p {
+  margin: 4px 0 0;
+  color: #343434;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.seat-list-print__table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 15px;
+}
+
+.seat-list-print__table th,
+.seat-list-print__table td {
+  height: 34px;
+  padding: 6px 8px;
+  border: 1px solid #d6d6d6;
+  text-align: center;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seat-list-print__table th {
+  background: #e7f3ff;
+  color: #0d47a1;
+  font-weight: 700;
+}
+
+.seat-list-print__table th:nth-child(1),
+.seat-list-print__table td:nth-child(1) {
+  width: 64px;
+}
+
+.seat-list-print__table th:nth-child(3),
+.seat-list-print__table td:nth-child(3),
+.seat-list-print__table th:nth-child(6),
+.seat-list-print__table td:nth-child(6) {
+  width: 110px;
+}
+
+.seat-list-print__table .text-left {
+  text-align: left;
 }
 </style>

@@ -83,6 +83,12 @@ interface UsableSeatAssignment {
   sessionLocationId: number;
 }
 
+interface SeatLabelOrderItem {
+  LS_SEAT_LABEL?: string | null;
+  LS_ROW_NO: number;
+  LS_COL_NO: number;
+}
+
 interface EnrollmentSeatAssignment {
   enrollment: BackendEnrollmentDetail;
   seatId: number;
@@ -264,6 +270,44 @@ export function useExamSeatManagement() {
 
     const seat = activeLocation.value?.SEATS?.find((s) => String(s.LS_ID) === seatId);
     return seat?.LS_SEAT_LABEL || seatId;
+  };
+
+  const getSeatLabelOrderParts = (
+    label: string | null | undefined,
+  ): { letterOrder: number; numberOrder: number } | null => {
+    const match = label
+      ?.trim()
+      .toUpperCase()
+      .match(/^([A-Z]+)(\d+)$/);
+    if (!match) return null;
+
+    const letters = match[1] ?? '';
+    const numberOrder = Number(match[2]);
+    if (!Number.isInteger(numberOrder)) return null;
+
+    const letterOrder = letters.split('').reduce((total, letter) => {
+      return total * 26 + (letter.charCodeAt(0) - 64);
+    }, 0);
+
+    return { letterOrder, numberOrder };
+  };
+
+  const compareSeatsByLabelOrder = (a: SeatLabelOrderItem, b: SeatLabelOrderItem): number => {
+    const aLabelOrder = getSeatLabelOrderParts(a.LS_SEAT_LABEL);
+    const bLabelOrder = getSeatLabelOrderParts(b.LS_SEAT_LABEL);
+
+    if (aLabelOrder && bLabelOrder) {
+      const letterDiff = aLabelOrder.letterOrder - bLabelOrder.letterOrder;
+      if (letterDiff !== 0) return letterDiff;
+
+      const numberDiff = aLabelOrder.numberOrder - bLabelOrder.numberOrder;
+      if (numberDiff !== 0) return numberDiff;
+    }
+
+    if (aLabelOrder && !bLabelOrder) return -1;
+    if (!aLabelOrder && bLabelOrder) return 1;
+
+    return a.LS_ROW_NO - b.LS_ROW_NO || a.LS_COL_NO - b.LS_COL_NO;
   };
 
   const normalizePhysicalStatusCode = (
@@ -481,7 +525,12 @@ export function useExamSeatManagement() {
       const seat = location.LOCATION.SEATS?.find((s) => String(s.LS_ID) === student.seat);
       if (seat) {
         // Room first, then row, then column → stable, grid-aligned order
-        return location.SL_ID * 1_000_000 + seat.LS_ROW_NO * 1_000 + seat.LS_COL_NO;
+        const labelOrder = getSeatLabelOrderParts(seat.LS_SEAT_LABEL);
+        const seatOrder = labelOrder
+          ? labelOrder.letterOrder * 1_000 + labelOrder.numberOrder
+          : seat.LS_ROW_NO * 1_000 + seat.LS_COL_NO;
+
+        return location.SL_ID * 1_000_000 + seatOrder;
       }
     }
 
@@ -563,7 +612,7 @@ export function useExamSeatManagement() {
     return sessionLocations.value.flatMap((sessionLocation) => {
       const seats = [...(sessionLocation.LOCATION.SEATS || [])]
         .filter((seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2)
-        .sort((a, b) => a.LS_ROW_NO - b.LS_ROW_NO || a.LS_COL_NO - b.LS_COL_NO);
+        .sort(compareSeatsByLabelOrder);
 
       return seats.map((seat) => ({
         sessionLocationId: sessionLocation.SL_ID,
@@ -905,7 +954,7 @@ export function useExamSeatManagement() {
         const availableSeats = timeLocations.flatMap((location) =>
           [...(location.LOCATION.SEATS || [])]
             .filter((seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2)
-            .sort((a, b) => a.LS_ROW_NO - b.LS_ROW_NO || a.LS_COL_NO - b.LS_COL_NO)
+            .sort(compareSeatsByLabelOrder)
             .map((seat) => ({
               seatId: seat.LS_ID,
               sessionLocationId: location.SL_ID,

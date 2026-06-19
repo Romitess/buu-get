@@ -25,6 +25,7 @@ export interface SeatCandidateRow {
   nationalId: string;
   titleTh: string;
   fullnameTh: string;
+  fullnameEn: string;
   seatNumber: string;
   sessionId: number;
   enrollment: BackendEnrollmentDetail;
@@ -245,6 +246,7 @@ export function useExamSeatCandidates() {
           nationalId: e.ERM_TEST_TAKER || '-',
           titleTh: e.USER?.PROFILE?.userTitleTh || '-',
           fullnameTh: e.USER?.PROFILE?.userFullnameTh || '-',
+          fullnameEn: e.USER?.PROFILE?.userFullnameEn || '-',
           seatNumber: getSeatLabel(e),
           sessionId: e.SESSION_ID,
           enrollment: e,
@@ -260,6 +262,7 @@ export function useExamSeatCandidates() {
       (row) =>
         row.nationalId.toLowerCase().includes(q) ||
         row.fullnameTh.toLowerCase().includes(q) ||
+        row.fullnameEn.toLowerCase().includes(q) ||
         row.titleTh.toLowerCase().includes(q) ||
         row.seatNumber.toLowerCase().includes(q),
     );
@@ -334,6 +337,7 @@ export function useExamSeatCandidates() {
     exam,
     sessions,
     activeSession,
+    activeLocation,
     sessionTimeTabs,
     selectedSessionLocationId,
     roomOptions,

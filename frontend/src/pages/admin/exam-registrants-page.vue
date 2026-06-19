@@ -321,14 +321,14 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.registrantManagement.table.columns.fullName'),
     field: 'fullnameTh',
     align: 'left',
-    style: 'width: 18%',
+    style: 'width: 21%',
   },
   {
     name: 'remark',
     label: i18n.t('admin.registrantManagement.table.columns.remark'),
     field: 'remark',
     align: 'center',
-    style: 'width: 21%',
+    style: 'width: 18%',
   },
   {
     name: 'paymentStatus',
@@ -431,8 +431,13 @@ onMounted(() => {
     box-shadow: var(--shadow-md);
   }
 
+  :deep(thead tr th:nth-child(3)) {
+    text-align: center !important;
+    padding-left: 0 !important;
+  }
+
   :deep(tbody tr td:nth-child(3)) {
-    padding-left: clamp(12px, 4.6vw, 80px);
+    padding-left: clamp(12px, 4vw, 70px) !important;
   }
 }
 

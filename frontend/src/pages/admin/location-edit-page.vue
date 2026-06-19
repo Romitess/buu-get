@@ -432,19 +432,7 @@ const removeWalkwayPosition = (position: WalkwayPosition): void => {
 };
 
 const buildSeatStatuses = (): Record<string, number> => {
-  const statusMap: Record<string, number> = {};
-  const omittedSeats = seatPreviewRef.value?.omittedSeats ?? new Set<string>();
-  const brokenSeats = seatPreviewRef.value?.brokenSeats ?? new Set<string>();
-
-  omittedSeats.forEach((seatLabel) => {
-    statusMap[seatLabel] = 2;
-  });
-
-  brokenSeats.forEach((seatLabel) => {
-    statusMap[seatLabel] = 1;
-  });
-
-  return statusMap;
+  return seatPreviewRef.value?.getSeatStatuses() ?? {};
 };
 
 const loadLocationData = async () => {
@@ -463,18 +451,22 @@ const loadLocationData = async () => {
 
     await nextTick();
     if (seatPreviewRef.value) {
-      seatPreviewRef.value.brokenSeats.clear();
-      seatPreviewRef.value.omittedSeats.clear();
+      const loadedBrokenSeats = new Set<string>();
+      const loadedOmittedSeats = new Set<string>();
       if (data.SEATS) {
         data.SEATS.forEach((seat) => {
           if (seat.LS_SEAT_STATUS === 1 && seat.LS_SEAT_LABEL) {
-            seatPreviewRef.value?.brokenSeats.add(seat.LS_SEAT_LABEL);
+            loadedBrokenSeats.add(seat.LS_SEAT_LABEL);
           }
           if (seat.LS_SEAT_STATUS === 2 && seat.LS_SEAT_LABEL) {
-            seatPreviewRef.value?.omittedSeats.add(seat.LS_SEAT_LABEL);
+            loadedOmittedSeats.add(seat.LS_SEAT_LABEL);
           }
         });
       }
+      seatPreviewRef.value.setSeatStatusSets({
+        brokenSeats: loadedBrokenSeats,
+        omittedSeats: loadedOmittedSeats,
+      });
     }
   } catch (error) {
     console.error('Error loading location:', error);

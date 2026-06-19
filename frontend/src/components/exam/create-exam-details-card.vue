@@ -32,9 +32,9 @@
             </div>
           </div>
 
-          <!-- ชื่อการสอบ & รอบการสอบ ในแถวเดียวกัน -->
-          <div class="col-12 row q-col-gutter-x-md">
-            <div class="col-6" data-field="examName">
+          <!-- ชื่อการสอบ & รอบการสอบ ในแถวเดียวกัน (กว้างเท่ากัน, รวมกัน = ความกว้างของ field ค่าธรรมเนียมด้านล่าง) -->
+          <div class="col-12 row no-wrap exam-name-round-row">
+            <div class="col" data-field="examName">
               <div class="buu-label-muted q-mb-xs">ชื่อการสอบ</div>
               <q-input
                 v-model="form.examName"
@@ -52,7 +52,7 @@
                 {{ fieldErrors?.examName }}
               </div>
             </div>
-            <div class="col-6" data-field="examRound">
+            <div class="col" data-field="examRound">
               <div class="buu-label-muted q-mb-xs">รอบการสอบ</div>
               <q-input
                 v-model="form.examRound"
@@ -80,14 +80,18 @@
           <div v-if="!isSpecialRound" class="col-12" data-field="fee">
             <div class="buu-label-muted q-mb-xs">ค่าธรรมเนียม</div>
             <q-input
-              v-model="form.fee"
-              type="number"
+              :model-value="form.fee"
+              placeholder="0.00"
+              inputmode="decimal"
               suffix="THB"
               outlined
               dense
               bg-color="white"
               class="buu-input-muted"
               :disable="isLocked"
+              @keypress="onFeeKeypress"
+              @update:model-value="onFeeInput"
+              @blur="handleFeeBlur"
             />
           </div>
         </div>
@@ -215,10 +219,55 @@ const form = defineModel<CreateExamForm>('form', { required: true });
 const hasError = (field: string): boolean => {
   return !!(props.fieldErrors && props.fieldErrors[field]);
 };
+
+/**
+ * Sanitize the fee input: allow only digits and a single decimal point.
+ * Blocks negative values, the minus sign, the letter "e", and any other characters.
+ */
+const onFeeInput = (val: string | number | null): void => {
+  let sanitized = String(val ?? '').replace(/[^\d.]/g, '');
+  const firstDot = sanitized.indexOf('.');
+  if (firstDot !== -1) {
+    sanitized = sanitized.slice(0, firstDot + 1) + sanitized.slice(firstDot + 1).replace(/\./g, '');
+  }
+  form.value.fee = sanitized;
+};
+
+/**
+ * Block typing any character that is not a digit or a decimal point,
+ * and prevent a second decimal point. Letters/symbols never appear in the field.
+ */
+const onFeeKeypress = (e: KeyboardEvent): void => {
+  if (!/[0-9.]/.test(e.key)) {
+    e.preventDefault();
+    return;
+  }
+  if (e.key === '.' && String(form.value.fee ?? '').includes('.')) {
+    e.preventDefault();
+  }
+};
+
+/**
+ * On blur, normalize the fee to two decimal places (e.g. "500" -> "500.00").
+ * Leaves the field empty when nothing was entered so the placeholder stays visible.
+ */
+const handleFeeBlur = (): void => {
+  const raw = String(form.value.fee ?? '').trim();
+  if (raw === '' || raw === '.') {
+    form.value.fee = '';
+    return;
+  }
+  const numeric = Number(raw);
+  form.value.fee = Number.isNaN(numeric) ? '' : numeric.toFixed(2);
+};
 </script>
 
 <style scoped>
 .exam-card {
   border-radius: 8px;
+}
+/* ระยะห่างระหว่าง ชื่อการสอบ และ รอบการสอบ โดยขอบซ้าย-ขวาตรงกับ field ด้านบน/ล่าง */
+.exam-name-round-row {
+  column-gap: 16px;
 }
 </style>

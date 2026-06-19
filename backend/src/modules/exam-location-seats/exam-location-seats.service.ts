@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import {
   ExamLocationSeat,
   LocationSeatStatus,
@@ -16,6 +16,10 @@ import {
 } from '../exam-locations/entities/exam-location.entity';
 import { CreateExamLocationSeatDto } from './dto/create-exam-location-seat.dto';
 import { UpdateExamLocationSeatDto } from './dto/update-exam-location-seat.dto';
+import {
+  ExamEnrollment,
+  ExamEnrollmentStatus,
+} from '../exam-enrollments/entities/exam-enrollment.entity';
 
 @Injectable()
 export class ExamLocationSeatsService {
@@ -135,10 +139,14 @@ export class ExamLocationSeatsService {
 
   private getTargetSeatStatus(
     label: string,
+    row: number,
+    col: number,
     brokenSet: Set<string>,
     seatStatuses?: Record<string, LocationSeatStatus>,
+    currentStatus?: LocationSeatStatus,
   ): LocationSeatStatus {
-    const mappedStatus = seatStatuses?.[label];
+    const mappedStatus =
+      seatStatuses?.[label] ?? seatStatuses?.[`${row}-${col}`];
 
     if (
       mappedStatus === LocationSeatStatus.AVAILABLE ||
@@ -150,7 +158,43 @@ export class ExamLocationSeatsService {
 
     return brokenSet.has(label)
       ? LocationSeatStatus.BROKEN
-      : LocationSeatStatus.AVAILABLE;
+      : (currentStatus ?? LocationSeatStatus.AVAILABLE);
+  }
+
+  private async validateSeatsCanBeRemoved(
+    manager: EntityManager,
+    seatsToRemove: ExamLocationSeat[],
+  ): Promise<void> {
+    if (seatsToRemove.length === 0) {
+      return;
+    }
+
+    const seatIds = seatsToRemove.map((seat) => seat.LS_ID);
+    const assignedSeats = await manager
+      .getRepository(ExamEnrollment)
+      .createQueryBuilder('enrollment')
+      .select('enrollment.LS_ID', 'LS_ID')
+      .where('enrollment.LS_ID IN (:...seatIds)', { seatIds })
+      .andWhere('enrollment.ERM_STATUS != :cancelledStatus', {
+        cancelledStatus: ExamEnrollmentStatus.CANCELLED,
+      })
+      .andWhere('enrollment.DELETED_AT IS NULL')
+      .getRawMany<{ LS_ID: number }>();
+
+    if (assignedSeats.length === 0) {
+      return;
+    }
+
+    const assignedSeatIds = new Set(
+      assignedSeats.map((seat) => Number(seat.LS_ID)),
+    );
+    const assignedSeatLabels = seatsToRemove
+      .filter((seat) => assignedSeatIds.has(seat.LS_ID))
+      .map((seat) => seat.LS_SEAT_LABEL ?? `LS_ID ${seat.LS_ID}`);
+
+    throw new BadRequestException(
+      `Cannot remove assigned seats: ${assignedSeatLabels.join(', ')}`,
+    );
   }
 
   async generateSeats(
@@ -169,100 +213,105 @@ export class ExamLocationSeatsService {
     const maxRows = location.LOCATION_TOTAL_ROWS;
     const maxCols = location.LOCATION_TOTAL_COLS;
 
-    const existingSeats = await this.seatRepository.find({
-      where: { LOCATION_ID: locationId },
-      withDeleted: true,
-    });
+    return await this.seatRepository.manager.transaction(
+      async (manager): Promise<ExamLocationSeat[]> => {
+        const seatRepository = manager.getRepository(ExamLocationSeat);
 
-    const seatsToSoftDelete: ExamLocationSeat[] = [];
-    const existingSeatsMap = new Map<string, ExamLocationSeat>();
+        const existingSeats = await seatRepository.find({
+          where: { LOCATION_ID: locationId },
+          withDeleted: true,
+        });
 
-    existingSeats.forEach((seat) => {
-      if (seat.LS_ROW_NO > maxRows || seat.LS_COL_NO > maxCols) {
-        if (!seat.DELETED_AT) {
-          seatsToSoftDelete.push(seat);
-        }
-      } else {
-        existingSeatsMap.set(`${seat.LS_ROW_NO}-${seat.LS_COL_NO}`, seat);
-      }
-    });
+        const seatsToSoftDelete: ExamLocationSeat[] = [];
+        const existingSeatsMap = new Map<string, ExamLocationSeat>();
 
-    if (seatsToSoftDelete.length > 0) {
-      await this.seatRepository.softRemove(seatsToSoftDelete);
-    }
+        existingSeats.forEach((seat) => {
+          if (seat.LS_ROW_NO > maxRows || seat.LS_COL_NO > maxCols) {
+            if (!seat.DELETED_AT) {
+              seatsToSoftDelete.push(seat);
+            }
+          } else {
+            existingSeatsMap.set(`${seat.LS_ROW_NO}-${seat.LS_COL_NO}`, seat);
+          }
+        });
 
-    const brokenSet = new Set(brokenSeats);
-    const seatsToInsert: Partial<ExamLocationSeat>[] = [];
-    const seatsToUpdate: ExamLocationSeat[] = [];
-    const seatsToRelabel = new Map<number, string>();
-    let sortOrder = 1;
+        await this.validateSeatsCanBeRemoved(manager, seatsToSoftDelete);
 
-    for (let row = 1; row <= maxRows; row++) {
-      for (let col = 1; col <= maxCols; col++) {
-        const key = `${row}-${col}`;
-        const label = this.getSeatLabel(row, col, location.SEAT_DIRECTION);
-        const targetStatus = this.getTargetSeatStatus(
-          label,
-          brokenSet,
-          seatStatuses,
-        );
-
-        const seat = existingSeatsMap.get(key);
-
-        if (!seat) {
-          seatsToInsert.push({
-            LOCATION_ID: locationId,
-            LS_ROW_NO: row,
-            LS_COL_NO: col,
-            LS_SEAT_LABEL: label,
-            LS_SORT_ORDER: sortOrder,
-            LS_SEAT_STATUS: targetStatus,
+        if (existingSeats.length > 0) {
+          await Promise.all(
+            existingSeats.map((seat) =>
+              seatRepository.update(seat.LS_ID, {
+                LS_SEAT_LABEL: `__TMP_${seat.LS_ID}`,
+              }),
+            ),
+          );
+          existingSeats.forEach((seat) => {
+            seat.LS_SEAT_LABEL = `__TMP_${seat.LS_ID}`;
           });
-        } else {
-          let changed = false;
+        }
 
-          if (seat.DELETED_AT !== null) {
-            seat.DELETED_AT = null;
-            changed = true;
-          }
-          if (seat.LS_SEAT_STATUS !== targetStatus) {
-            seat.LS_SEAT_STATUS = targetStatus;
-            changed = true;
-          }
-          if (seat.LS_SEAT_LABEL !== label) {
-            seatsToRelabel.set(seat.LS_ID, label);
-            seat.LS_SEAT_LABEL = label;
-            changed = true;
-          }
-          if (seat.LS_SORT_ORDER !== sortOrder) {
-            seat.LS_SORT_ORDER = sortOrder;
-            changed = true;
-          }
+        if (seatsToSoftDelete.length > 0) {
+          await seatRepository.softRemove(seatsToSoftDelete);
+        }
 
-          if (changed) {
-            seatsToUpdate.push(seat);
+        const brokenSet = new Set(brokenSeats);
+        const seatsToInsert: {
+          LOCATION_ID: number;
+          LS_ROW_NO: number;
+          LS_COL_NO: number;
+          LS_SEAT_LABEL: string;
+          LS_SORT_ORDER: number;
+          LS_SEAT_STATUS: LocationSeatStatus;
+        }[] = [];
+        const seatsToUpdate: ExamLocationSeat[] = [];
+        let sortOrder = 1;
+
+        for (let row = 1; row <= maxRows; row++) {
+          for (let col = 1; col <= maxCols; col++) {
+            const key = `${row}-${col}`;
+            const label = this.getSeatLabel(row, col, location.SEAT_DIRECTION);
+            const seat = existingSeatsMap.get(key);
+            const targetStatus = this.getTargetSeatStatus(
+              label,
+              row,
+              col,
+              brokenSet,
+              seatStatuses,
+              seat?.LS_SEAT_STATUS,
+            );
+
+            if (!seat) {
+              seatsToInsert.push({
+                LOCATION_ID: locationId,
+                LS_ROW_NO: row,
+                LS_COL_NO: col,
+                LS_SEAT_LABEL: label,
+                LS_SORT_ORDER: sortOrder,
+                LS_SEAT_STATUS: targetStatus,
+              });
+            } else {
+              seat.DELETED_AT = null;
+              seat.LS_SEAT_STATUS = targetStatus;
+              seat.LS_SEAT_LABEL = label;
+              seat.LS_SORT_ORDER = sortOrder;
+              seatsToUpdate.push(seat);
+            }
+            sortOrder++;
           }
         }
-        sortOrder++;
-      }
-    }
 
-    if (seatsToInsert.length > 0) {
-      await this.seatRepository.save(this.seatRepository.create(seatsToInsert));
-    }
-    if (seatsToUpdate.length > 0) {
-      if (seatsToRelabel.size > 0) {
-        await Promise.all(
-          Array.from(seatsToRelabel.keys()).map((seatId) =>
-            this.seatRepository.update(seatId, {
-              LS_SEAT_LABEL: `__TMP_${seatId}`,
-            }),
-          ),
-        );
-      }
-      await this.seatRepository.save(seatsToUpdate);
-    }
+        if (seatsToUpdate.length > 0) {
+          await seatRepository.save(seatsToUpdate);
+        }
+        if (seatsToInsert.length > 0) {
+          await seatRepository.save(seatRepository.create(seatsToInsert));
+        }
 
-    return await this.findAll(locationId);
+        return await seatRepository.find({
+          where: { LOCATION_ID: locationId },
+          order: { LS_SORT_ORDER: 'ASC', LS_ROW_NO: 'ASC', LS_COL_NO: 'ASC' },
+        });
+      },
+    );
   }
 }

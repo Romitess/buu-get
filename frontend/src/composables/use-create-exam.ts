@@ -21,7 +21,6 @@ import {
   fetchExamById,
   updateExamRound,
   formatTime,
-  buddhistToGregorian,
   createExamPasscodes,
 } from 'src/services/exam.service';
 import { getUsersFromApi } from 'src/services/user.service';
@@ -152,7 +151,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       examType: EXAM_TYPE_GENERAL,
       examFormat: EXAM_FORMAT_COMPUTER,
       fundSourceId: null,
-      fee: '0.00',
+      fee: '',
       isPublished: false,
       examDate: today,
       timeSlots: [
@@ -482,7 +481,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         form.value.examRound = exam.EXAM_ROUND || '';
         form.value.examType = exam.EXAM_TYPE || EXAM_TYPE_GENERAL;
         form.value.examFormat = exam.EXAM_FORMAT || EXAM_FORMAT_COMPUTER;
-        form.value.fee = exam.EXAM_FEE ?? '0.00';
+        form.value.fee = Number(exam.EXAM_FEE ?? 0).toFixed(2);
         form.value.isPublished = exam.EXAM_PUBLISHED ?? false;
         wasOriginallyPublished.value = exam.EXAM_PUBLISHED ?? false;
         form.value.examDate = gregorianToBuddhistDisplay(exam.EXAM_DATE);
@@ -844,7 +843,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     }
   };
 
-
   /** Export candidates to CSV */
   const exportCandidates = (): void => {
     if (form.value.eligibleCandidates.length === 0) {
@@ -1106,31 +1104,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       return false;
     }
 
-    // === BUSINESS RULE VALIDATION: Strictly 1 Exam Per Day ===
-    const targetDateGregorian = buddhistToGregorian(form.value.examDate);
-
-    // Make sure we have the latest schedules to check against
-    await examStore.loadManagementSchedules();
-
-    const hasConflict = examStore.managementSchedules.some((exam) => {
-      // Skip checking against itself if in edit mode
-      if (isEditMode.value && String(exam.id) === String(examId)) return false;
-
-      // Match date - ANY exam on the same date is a conflict!
-      return exam.examDate === targetDateGregorian;
-    });
-
-    if (hasConflict) {
-      $q.notify({
-        type: 'negative',
-        message: NOTIFY_MSG.CONFLICT_DATE(form.value.examDate),
-        position: 'top',
-        timeout: 5000,
-        actions: [{ icon: 'close', color: 'white' }],
-      });
-      return false;
-    }
-
     // Build time ranges from flat rooms (for backward compatible payload)
     const timeRanges = flatRooms.map((r) => ({
       startTime: r.startTime,
@@ -1187,7 +1160,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           locationId: flatRooms[0]?.locationId || 0,
           examType: form.value.examType,
           examFormat: form.value.examFormat,
-          fee: form.value.fee,
+          fee: form.value.fee === '' ? 0 : form.value.fee,
           seats: flatRooms[0]?.seats || 1,
           isPublished: form.value.isPublished,
           examDate: form.value.examDate,

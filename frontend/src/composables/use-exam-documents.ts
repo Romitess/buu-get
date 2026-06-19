@@ -216,7 +216,16 @@ export function useExamDocuments() {
           });
 
           // Fill the entire PDF page with the image with no margins
-          pdf.addImage(imgData, 'JPEG', pdfBleedMm, pdfBleedMm, widthMm, heightMm, undefined, 'FAST');
+          pdf.addImage(
+            imgData,
+            'JPEG',
+            pdfBleedMm,
+            pdfBleedMm,
+            widthMm,
+            heightMm,
+            undefined,
+            'FAST',
+          );
           pdf.save(`BUU-GET_Voucher_${enrollment.ERM_ID}.pdf`);
 
           $q.notify({

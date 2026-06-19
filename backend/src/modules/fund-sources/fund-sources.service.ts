@@ -81,16 +81,22 @@ export class FundSourcesService {
       ],
     });
 
-    // Date filters (comparing against TRANX_PAID_AT)
+    // Date filters (comparing against TRANX_PAID_AT or fallback to TRANX_CREATED_AT)
     if (query.startDate) {
-      qb.andWhere('transaction.TRANX_PAID_AT >= :startDate', {
-        startDate: `${query.startDate} 00:00:00`,
-      });
+      qb.andWhere(
+        'COALESCE(transaction.TRANX_PAID_AT, transaction.TRANX_CREATED_AT) >= :startDate',
+        {
+          startDate: `${query.startDate} 00:00:00`,
+        },
+      );
     }
     if (query.endDate) {
-      qb.andWhere('transaction.TRANX_PAID_AT <= :endDate', {
-        endDate: `${query.endDate} 23:59:59`,
-      });
+      qb.andWhere(
+        'COALESCE(transaction.TRANX_PAID_AT, transaction.TRANX_CREATED_AT) <= :endDate',
+        {
+          endDate: `${query.endDate} 23:59:59`,
+        },
+      );
     }
 
     // Department filter
@@ -115,6 +121,11 @@ export class FundSourcesService {
 
     qb.groupBy('fundSource.FS_FACULTY');
     qb.addGroupBy('exam.EXAM_NAME');
+
+    console.log('=== API SQL ===');
+    console.log(qb.getSql());
+    console.log(qb.getParameters());
+    console.log('===============');
 
     const rawRows = await qb.getRawMany<RawDailyRevenueRow>();
 

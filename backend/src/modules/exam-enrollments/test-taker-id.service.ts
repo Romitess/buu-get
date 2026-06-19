@@ -146,9 +146,34 @@ export class TestTakerIdService {
     const buddhistExamYear = examDate.getUTCFullYear() + 543;
     const examYearCode = buddhistExamYear.toString().slice(-2);
     const examTypeCode = this.getExamTypeCode(exam.EXAM_FORMAT, exam.EXAM_TYPE);
-    const examSequenceCode = exam.EXAM_ID.toString().padStart(2, '0').slice(-2);
+    const examSequenceCode = this.getExamRoundCode(exam);
 
     return `${examYearCode}${examTypeCode}${examSequenceCode}`;
+  }
+
+  private getExamRoundCode(exam: Exam): string {
+    const examRound = exam.EXAM_ROUND?.trim();
+    if (!examRound) {
+      throw new BadRequestException(
+        `EXAM_ROUND is required to generate a test taker ID for exam ${exam.EXAM_ID}`,
+      );
+    }
+
+    const roundMatch = examRound.match(/^(\d+)/u);
+    if (!roundMatch?.[1]) {
+      throw new BadRequestException(
+        `Invalid EXAM_ROUND '${examRound}' for exam ${exam.EXAM_ID}`,
+      );
+    }
+
+    const roundNumber = Number(roundMatch[1]);
+    if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > 99) {
+      throw new BadRequestException(
+        `EXAM_ROUND must start with a number from 1 to 99 for exam ${exam.EXAM_ID}`,
+      );
+    }
+
+    return roundNumber.toString().padStart(2, '0');
   }
 
   private getExamTypeCode(examFormat: string, examType: string): number {

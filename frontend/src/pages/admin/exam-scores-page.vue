@@ -645,7 +645,7 @@ const columns: QTableColumn[] = [
     label: 'ชื่อ-นามสกุล',
     field: 'fullnameTh',
     align: 'left',
-    style: 'width: 25%; padding-left: 10%',
+    style: 'width: 25%; padding-left: 5%',
   },
   {
     name: 'scoreGrammar',

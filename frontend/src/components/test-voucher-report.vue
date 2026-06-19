@@ -15,14 +15,14 @@
     <div ref="voucherRef" class="voucher-wrapper">
       <div v-if="showVoucherCard" class="voucher-card">
         <!-- ===== Header Section ===== -->
-        <div class="voucher-header">
+        <div class="voucher-header row items-center no-wrap">
           <!-- Logo container -->
-          <div class="header-logo-pane">
+          <div class="col-auto">
             <img src="icons/logo-vocher.png" class="header-logo" alt="BUULI Logo" />
           </div>
 
           <!-- Titles -->
-          <div class="header-title-pane">
+          <div class="col text-center">
             <h1 class="header-title">{{ $t('exam.voucher.title') }}</h1>
             <h2 class="header-subtitle">{{ $t('exam.voucher.subtitle') }}</h2>
           </div>
@@ -36,9 +36,9 @@
           <div class="content-container">
             <!-- Left: Profile Photo Column -->
             <div class="profile-column">
-              <div class="profile-photo-wrapper shadow-1">
+              <div class="profile-photo-wrapper" :class="{ 'shadow-1': !useImagePlaceholder }">
                 <div v-if="useImagePlaceholder" class="voucher-photo-placeholder">
-                  <q-icon name="image" size="38px" color="black" />
+                  <q-icon name="image" size="48px" color="black" />
                 </div>
                 <ImageDisplay
                   v-else
@@ -56,41 +56,48 @@
 
             <!-- Right: Details Grid -->
             <div class="detail-grid-column">
-              <div class="details-grid">
-                <div class="info-group">
-                  <label class="info-label">Test Taker ID:</label>
-                  <div class="info-value">{{ voucherData.studentId }}</div>
-                </div>
-                <div class="info-group">
-                  <label class="info-label">Test Date:</label>
-                  <div class="info-value">{{ voucherData.examDate }}</div>
-                </div>
-                <div class="info-group">
-                  <label class="info-label">Name Surname:</label>
-                  <div class="info-value name-value">{{ voucherData.fullName }}</div>
-                </div>
-                <div class="info-group">
-                  <label class="info-label">Time:</label>
-                  <div class="info-value">{{ voucherData.examTime }}</div>
-                </div>
-                <div class="info-group">
-                  <label class="info-label">Citizen ID:</label>
-                  <div class="info-value">{{ voucherData.citizenId || '-' }}</div>
-                </div>
-                <div class="info-group">
-                  <label class="info-label">Venue:</label>
-                  <div class="info-value venue-value">
-                    <span>{{ voucherData.location }}</span>
-                    <span v-if="voucherData.locationRoom">{{ voucherData.locationRoom }}</span>
+              <div class="row q-col-gutter-y-sm full-height items-center">
+                <!-- Column 1 -->
+                <div class="col-12 col-sm-6 detail-group">
+                  <div class="info-group">
+                    <label class="info-label">Test Taker ID:</label>
+                    <div class="info-value">{{ voucherData.studentId }}</div>
+                  </div>
+                  <div class="info-group">
+                    <label class="info-label">Name Surname:</label>
+                    <div class="info-value name-value">{{ voucherData.fullName }}</div>
+                  </div>
+                  <div class="info-group">
+                    <label class="info-label">Citizen ID:</label>
+                    <div class="info-value">{{ voucherData.citizenId || '-' }}</div>
+                  </div>
+                  <div class="info-group">
+                    <label class="info-label">Test Session:</label>
+                    <div class="info-value">{{ voucherData.testSession || '-' }}</div>
                   </div>
                 </div>
-                <div class="info-group">
-                  <label class="info-label">Test Session:</label>
-                  <div class="info-value">{{ voucherData.testSession || '-' }}</div>
-                </div>
-                <div class="info-group">
-                  <label class="info-label">Seat Number:</label>
-                  <div class="info-value highlight-value">{{ voucherData.seatNo }}</div>
+
+                <!-- Column 2 -->
+                <div class="col-12 col-sm-6 detail-group">
+                  <div class="info-group">
+                    <label class="info-label">Test Date:</label>
+                    <div class="info-value">{{ voucherData.examDate }}</div>
+                  </div>
+                  <div class="info-group">
+                    <label class="info-label">Time:</label>
+                    <div class="info-value">{{ voucherData.examTime }}</div>
+                  </div>
+                  <div class="info-group">
+                    <label class="info-label">Venue:</label>
+                    <div class="info-value venue-value">
+                      <span>{{ voucherData.location }}</span>
+                      <span v-if="voucherData.locationRoom">&nbsp;{{ voucherData.locationRoom }}</span>
+                    </div>
+                  </div>
+                  <div class="info-group">
+                    <label class="info-label">Seat Number:</label>
+                    <div class="info-value">{{ voucherData.seatNo }}</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -173,14 +180,14 @@
       </div>
 
       <!-- Test Regulations (English & Thai combined in a single card) -->
-      <div v-if="showRegulations" class="regulations-block q-mt-lg">
+      <div v-if="showRegulations" class="regulations-block">
         <div class="regulations-box relative-position">
           <!-- Subtle Watermark Background -->
           <div class="watermark-bg no-pointer-events">GET</div>
 
           <div class="regulations-content-wrapper">
             <h4 class="regulations-heading-inline">
-              {{ $t('admin.testVoucherManagement.regulationsEnLabel') }}
+              {{ $t('admin.testVoucherManagement.regulationsEnLabel') }}:
             </h4>
             <div class="regulations-text-content q-mb-md">
               {{ displayRegulationsEn }}
@@ -211,8 +218,8 @@ const props = withDefaults(
   defineProps<{
     /** ข้อมูลบัตรประจำตัว — ถ้าไม่ส่งจะใช้ Mock Data ตามรูปภาพ */
     data?: VoucherData | undefined;
-    regulationsEn?: string | string[];
-    regulationsTh?: string | string[];
+    regulationsEn?: string | string[] | undefined;
+    regulationsTh?: string | string[] | undefined;
     showRegulations?: boolean;
     showVoucherCard?: boolean;
     showActions?: boolean;
@@ -290,24 +297,20 @@ onMounted(async () => {
 
 const displayRegulationsEn = computed<string>(() => {
   let val = props.regulationsEn;
-  if (!val) {
+  if (val === undefined || val === null) {
     val = localRegulationsEn.value || defaultRegulationsEn;
   }
-  if (Array.isArray(val)) {
-    return val.join('\n');
-  }
-  return val;
+  const str = Array.isArray(val) ? val.join('\n') : val;
+  return str ? str.trim().replace(/\n\s*(?!\d+\.)/g, ' ') : '';
 });
 
 const displayRegulationsTh = computed<string>(() => {
   let val = props.regulationsTh;
-  if (!val) {
+  if (val === undefined || val === null) {
     val = localRegulationsTh.value || defaultRegulationsTh;
   }
-  if (Array.isArray(val)) {
-    return val.join('\n');
-  }
-  return val;
+  const str = Array.isArray(val) ? val.join('\n') : val;
+  return str ? str.trim().replace(/\n\s*(?!\d+\.)/g, ' ') : '';
 });
 
 // ===== Action: Window Print =====
@@ -317,132 +320,103 @@ const windowPrint = (): void => {
 </script>
 
 <style scoped lang="scss">
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@100;200;300;400;500;600;700;800&display=swap');
+
 .page-container-test {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: var(--surface-page);
+  background-color: transparent;
   min-height: 100%;
-  padding: 16px 12px;
+  padding: 0;
 }
 
 .print-btn {
   border-radius: var(--radius-sm);
   padding: 6px 14px;
-  font-family: var(--font-family-base);
+  font-family: 'Sarabun', sans-serif;
   letter-spacing: 0.5px;
   font-size: 13px;
 }
 
 .voucher-wrapper {
   width: 100%;
-  max-width: 668px;
+  max-width: 680px;
   margin: 0 auto;
-  font-family: var(--font-family-base);
-  padding: 1px;
+  font-family: 'Outfit', 'Sarabun', 'Inter', sans-serif;
 }
 
 .voucher-card {
   width: 100%;
   background: linear-gradient(to bottom, #fafafa, #f0f4f8);
-  border-radius: 12px;
-  border: 1px solid #000000;
-  box-shadow: none;
-  box-sizing: border-box;
+  border-radius: var(--radius-md, 12px);
+  border: 1px solid var(--border-black, #000000);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
-  padding: 10px;
+  padding: 0;
 }
 
 /* ===== Header Area ===== */
 .voucher-header {
-  display: grid;
-  grid-template-columns: 148px minmax(0, 1fr);
-  column-gap: 10px;
-  align-items: center;
-  min-height: 76px;
-  padding: 12px 24px;
+  padding: 16px 28px 16px 48px;
   background-color: transparent;
-  border-bottom: 1.5px solid var(--neutral-300) !important;
-  border-radius: 8px 8px 0 0;
-
-  .header-logo-pane {
-    display: flex;
-    align-items: center;
-    min-width: 0;
-  }
-
-  .header-title-pane {
-    min-width: 0;
-    text-align: center;
-  }
+  border-bottom: 1.5px solid var(--primary, #0d47a1) !important;
 
   .header-logo {
-    width: 142px;
-    max-width: 100%;
-    height: auto;
+    height: 40px;
     object-fit: contain;
   }
 
   .header-title {
     font-family: var(--font-family-base) !important;
     font-weight: 500 !important;
-    font-style: normal !important;
     font-size: 16px !important;
     line-height: 120% !important;
-    letter-spacing: 0 !important;
-    text-align: center !important;
-    vertical-align: middle !important;
-    color: var(--primary) !important;
+    color: var(--primary, #0d47a1) !important;
     margin: 0 0 3px 0 !important;
-    white-space: nowrap;
   }
 
   .header-subtitle {
     font-family: var(--font-family-base) !important;
     font-weight: 500 !important;
-    font-style: normal !important;
-    font-size: 15px !important;
+    font-size: 13px !important;
     line-height: 120% !important;
-    letter-spacing: 0 !important;
-    text-align: center !important;
-    vertical-align: middle !important;
-    color: var(--neutral-600) !important;
+    color: var(--neutral-600, #334155) !important;
     margin: 0 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 }
 
 /* ===== Body Area ===== */
 .voucher-body {
   position: relative;
-  padding: 18px 56px 8px;
+  padding: 24px 28px 8px 48px;
   background: transparent;
-  min-height: auto;
 
   .content-container {
     position: relative;
     z-index: 1;
     display: grid;
-    grid-template-columns: 172px minmax(0, 1fr);
+    grid-template-columns: 120px minmax(0, 1fr);
     align-items: start;
-    column-gap: 24px;
+    column-gap: 32px;
   }
 }
 
 /* ===== Watermark ===== */
 .watermark-bg {
   position: absolute;
-  top: 49%;
-  left: 66%;
+  top: 35%;
+  left: 60%;
   transform: translate(-50%, -50%);
-  font-family: 'Outfit', var(--font-family-base);
+  font-family: 'Outfit', sans-serif;
   font-weight: 800;
-  font-style: normal;
-  font-size: 196px;
+  font-size: 140px;
   line-height: 100%;
-  letter-spacing: 0;
-  vertical-align: middle;
-  color: var(--watermark-color);
+  color: var(--watermark-color, rgba(30, 137, 229, 0.07));
   z-index: 0;
   user-select: none;
   pointer-events: none;
@@ -450,25 +424,20 @@ const windowPrint = (): void => {
 
 /* ===== Profile Photo ===== */
 .profile-photo-wrapper {
-  width: 172px;
-  height: 178px;
-  background-color: var(--badge-primary-bg);
-  border-radius: 3px;
+  width: 120px;
+  height: 144px;
+  background-color: #00000033 !important;
+  border-radius: 4px;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 2px solid var(--surface-card);
+  border: 1.5px solid #00000033 !important;
 
   .profile-photo-img {
     width: 100%;
     height: 100%;
-  }
-
-  .avatar-svg {
-    width: 100%;
-    height: 100%;
-    display: block;
+    object-fit: cover;
   }
 }
 
@@ -478,45 +447,32 @@ const windowPrint = (): void => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #cfcfd1;
-}
-
-.profile-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  background: #c8c8c8;
 }
 
 .signature-line {
-  width: 172px;
+  width: 120px;
   height: 1.5px;
   background-color: var(--neutral-400);
-  margin-top: 30px;
+  margin-top: 24px;
   border-radius: 1px;
 }
 
 /* ===== Detail Grid ===== */
-.detail-grid-column {
-  min-width: 0;
-}
 
-.details-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(122px, 0.85fr);
-  grid-auto-rows: minmax(39px, auto);
-  column-gap: 28px;
-  row-gap: 0;
-  align-items: start;
+.detail-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .info-group {
   display: flex;
   flex-direction: column;
-  min-width: 0;
 
   .info-label {
     font-family: var(--font-family-base) !important;
-    font-size: 12px !important;
+    font-size: 11px !important;
     color: var(--neutral-700, #334155) !important;
     font-weight: 500 !important;
     margin-bottom: 0px;
@@ -525,39 +481,34 @@ const windowPrint = (): void => {
 
   .info-value {
     font-family: var(--font-family-base) !important;
-    font-size: 15px !important;
-    font-weight: 500 !important;
-    color: var(--primary) !important;
-    line-height: 1.3;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--primary, #0d47a1) !important;
+    line-height: 1.25;
     letter-spacing: 0px !important;
-    overflow-wrap: anywhere;
+    white-space: normal !important;
+    overflow-wrap: break-word;
     word-break: normal;
-
-    &.highlight-value {
-      font-weight: 600 !important;
-    }
   }
 }
 
 .name-value {
   display: block;
-  white-space: normal;
-  overflow: hidden;
+  white-space: normal !important;
   overflow-wrap: break-word;
-  word-break: normal;
 }
 
 .venue-value {
-  display: flex;
-  flex-direction: column;
+  display: block;
+  white-space: normal !important;
+  overflow-wrap: break-word;
 }
 
-/* ===== Barcode Footer Area ===== */
+/* ===== Barcode Footer Section ===== */
 .voucher-footer {
   padding: 8px 20px 20px 20px;
   background: transparent;
   border-top: none;
-  border-radius: 0 0 8px 8px;
 
   .barcode-wrapper {
     background-color: transparent !important;
@@ -572,18 +523,18 @@ const windowPrint = (): void => {
     .barcode-value {
       font-family: var(--font-family-base) !important;
       font-weight: 700 !important;
-      font-style: normal !important;
       font-size: 10px !important;
       line-height: 100% !important;
-      letter-spacing: 0 !important;
+      letter-spacing: 0.5px !important;
       text-align: center !important;
+      margin-top: 4px;
     }
   }
 }
 
 /* ===== Regulations Section ===== */
 .regulations-block {
-  margin-top: 10px;
+  margin-top: 16px;
   text-align: left;
 }
 
@@ -596,83 +547,59 @@ const windowPrint = (): void => {
 }
 
 .regulations-heading-inline {
-  font-family: var(--font-family-base);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--neutral-900);
+  font-family: var(--font-family-base) !important;
+  font-size: 14.5px !important;
+  font-weight: 500 !important;
+  color: var(--neutral-900) !important;
   margin: 0 !important;
 }
 
 .regulations-box {
   position: relative;
   background: linear-gradient(to bottom, #fafafa, #f0f4f8);
-  border: 1px solid #000000;
-  border-radius: 12px;
-  box-sizing: border-box;
-  padding: 10px;
+  border: 1.5px solid var(--border-black, #000000);
+  border-radius: 6px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow-md);
 
   .regulations-content-wrapper {
+    position: relative;
+    z-index: 1;
     background-color: transparent;
     border-radius: 8px;
-    padding: 0 30px 26px;
+    padding: 0;
   }
 
   .watermark-bg {
-    top: 50%;
-    left: 48% !important;
-    font-size: 206px;
+    left: 50% !important;
   }
-}
-
-.regulations-content-wrapper {
-  position: relative;
-  z-index: 1;
 }
 
 .regulations-text-content {
   font-family: 'Sarabun', var(--font-family-base);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 300;
   font-style: normal;
   color: var(--neutral-900);
-  line-height: 1.38;
+  line-height: 1.45;
   letter-spacing: 0;
   vertical-align: middle;
   white-space: pre-line;
+  margin-bottom: 16px;
   padding-left: 2px;
-  margin-top: -6px !important;
-}
-
-.regulations-text-content.q-mb-md {
-  margin-bottom: -2px !important;
-}
-
-.regulations-heading-inline.q-mt-md {
-  margin-top: 0 !important;
 }
 
 /* ===== Responsive Adaptability ===== */
 @media (max-width: 480px) {
-  .voucher-wrapper {
-    max-width: 100%;
+  .detail-grid-column {
+    padding-left: 0 !important;
+    margin-top: 12px;
   }
   .voucher-header {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     padding: 12px;
     gap: 8px;
     text-align: center;
-
-    .header-logo-pane {
-      justify-content: center;
-    }
-
-    .header-title-pane {
-      grid-column: 1;
-    }
-
-    .header-title {
-      white-space: normal;
-    }
   }
   .voucher-body {
     padding: 12px;
@@ -687,30 +614,30 @@ const windowPrint = (): void => {
     row-gap: 10px;
   }
   .profile-photo-wrapper {
-    width: 124px;
-    height: 150px;
+    width: 120px;
+    height: 144px;
   }
   .signature-line {
-    width: 124px;
+    width: 120px;
     margin-top: 24px;
   }
   .watermark-bg {
-    top: 48%;
+    font-size: 6rem;
     left: 50%;
-    font-size: 7rem;
   }
-  .regulations-box .watermark-bg {
-    top: 52%;
-    left: 52% !important;
-    font-size: 8rem;
+  .regulations-box {
+    padding: 12px;
+    .watermark-bg {
+      font-size: 8rem;
+    }
+    .regulations-content-wrapper {
+      padding: 0 !important;
+    }
   }
 }
 
-/* ===== Print Optimization — Scale up for paper ===== */
+/* ===== Print Optimization ===== */
 @media print {
-  body {
-    background-color: var(--surface-card) !important;
-  }
   .no-print {
     display: none !important;
   }
@@ -724,13 +651,13 @@ const windowPrint = (): void => {
     box-shadow: none !important;
   }
   .voucher-card {
-    border: 1px solid #000000 !important;
+    border: 0.1px solid var(--border-black) !important;
     box-shadow: none !important;
     background-color: #ffffff !important;
     background-image: none !important;
   }
   .voucher-header {
-    padding: 14px 28px;
+    padding: 14px 48px 14px 76px;
     .header-logo {
       width: 160px;
     }
@@ -742,14 +669,14 @@ const windowPrint = (): void => {
     }
   }
   .voucher-body {
-    padding: 20px 56px 8px;
+    padding: 20px 48px 8px 76px;
   }
   .profile-photo-wrapper {
-    width: 140px;
-    height: 166px;
+    width: 120px;
+    height: 144px;
   }
   .signature-line {
-    width: 140px;
+    width: 120px;
     margin-top: 34px;
   }
   .info-group .info-label {
@@ -784,34 +711,35 @@ const windowPrint = (): void => {
     margin-bottom: 12px;
   }
   .regulations-heading-inline {
-    font-size: 15px !important;
+    font-size: 16px !important;
     margin: 0 !important;
   }
   .regulations-box {
-    padding: 10px !important;
+    padding: 16px 24px;
     background-color: #ffffff !important;
     background-image: none !important;
     border: 1px solid #000000 !important;
-  }
-  .regulations-box .regulations-content-wrapper {
-    padding: 0 30px 26px !important;
-    background-color: transparent !important;
-  }
-  .regulations-text-content {
-    font-family: 'Sarabun', var(--font-family-base) !important;
-    font-size: 14px !important;
-    font-weight: 300 !important;
-    font-style: normal !important;
-    line-height: 1.38 !important;
-    letter-spacing: 0 !important;
-    vertical-align: middle;
-    margin-top: -6px !important;
-  }
-  .regulations-text-content.q-mb-md {
-    margin-bottom: -2px !important;
-  }
-  .regulations-heading-inline.q-mt-md {
-    margin-top: 0 !important;
+
+    .regulations-content-wrapper {
+      padding: 0 !important;
+      background-color: transparent !important;
+    }
+    .regulations-text-content {
+      font-family: 'Sarabun', var(--font-family-base) !important;
+      font-size: 15px !important;
+      font-weight: 300 !important;
+      font-style: normal !important;
+      line-height: 1.38 !important;
+      letter-spacing: 0 !important;
+      vertical-align: middle;
+      margin-top: -6px !important;
+    }
+    .regulations-text-content.q-mb-md {
+      margin-bottom: -2px !important;
+    }
+    .regulations-heading-inline.q-mt-md {
+      margin-top: 0 !important;
+    }
   }
 }
 </style>

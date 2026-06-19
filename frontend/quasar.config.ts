@@ -1,13 +1,9 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
-import { defineConfig } from '#q-app/wrappers';
-import path from 'path';
-import dotenv from 'dotenv';
+import { defineConfig } from '@quasar/app-vite/wrappers';
 
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
-
-export default defineConfig((/* ctx */) => {
+export default defineConfig((ctx) => {
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -57,9 +53,8 @@ export default defineConfig((/* ctx */) => {
 
       // publicPath: '/',
       // analyze: true,
-      env: {
-        API_BASE_URL: process.env.API_BASE_URL,
-      },
+      // .env อยู่ที่ monorepo root (buu-get-front/.env)
+      envFolder: '..',
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
@@ -69,19 +64,23 @@ export default defineConfig((/* ctx */) => {
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
 
-      vitePlugins: [
-        [
-          'vite-plugin-checker',
-          {
-            vueTsc: true,
-            eslint: {
-              lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs,vue}"',
-              useFlatConfig: true,
-            },
-          },
-          { server: false },
-        ],
-      ],
+      // checker ใช้เฉพาะ dev — ป้องกัน reload.js WebSocket โผล่ใน production build
+      vitePlugins: ctx.dev
+        ? [
+            [
+              'vite-plugin-checker',
+              {
+                vueTsc: true,
+                eslint: {
+                  lintCommand:
+                    'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs,vue}"',
+                  useFlatConfig: true,
+                },
+              },
+              { server: false },
+            ],
+          ]
+        : [],
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver

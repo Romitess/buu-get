@@ -36,6 +36,8 @@
         :show-voucher-card="previewSide === 'front'"
         :show-regulations="previewSide === 'back'"
         :use-image-placeholder="useImagePlaceholder"
+        :regulations-en="regulationsEn"
+        :regulations-th="regulationsTh"
       />
     </div>
   </section>
@@ -52,6 +54,8 @@ const props = withDefaults(
     voucherData: VoucherData;
     useImagePlaceholder?: boolean;
     title?: string;
+    regulationsEn?: string | string[];
+    regulationsTh?: string | string[];
   }>(),
   {
     useImagePlaceholder: false,
@@ -148,7 +152,7 @@ const previewSide = ref<'front' | 'back'>('front');
   &.is-front :deep(.voucher-header) {
     grid-template-columns: 190px minmax(0, 1fr);
     min-height: 74px;
-    padding: 10px 20px;
+    padding: 10px 28px 10px 48px;
   }
 
   &.is-front :deep(.header-logo) {
@@ -166,24 +170,24 @@ const previewSide = ref<'front' | 'back'>('front');
 
   &.is-front :deep(.voucher-body) {
     min-height: 225px;
-    padding: 14px 40px 6px;
+    padding: 14px 28px 6px 48px;
     display: flex;
     align-items: center;
   }
 
   &.is-front :deep(.content-container) {
     width: 100%;
-    grid-template-columns: 170px minmax(0, 1fr);
-    column-gap: 28px;
+    grid-template-columns: 120px minmax(0, 1fr);
+    column-gap: 32px;
   }
 
   &.is-front :deep(.profile-photo-wrapper) {
-    width: 150px;
-    height: 174px;
+    width: 120px;
+    height: 144px;
   }
 
   &.is-front :deep(.signature-line) {
-    width: 150px;
+    width: 120px;
     margin-top: 38px;
   }
 
@@ -200,8 +204,9 @@ const previewSide = ref<'front' | 'back'>('front');
 
   &.is-front :deep(.info-value) {
     font-size: clamp(12px, 1.55vw, 16px) !important;
-    white-space: nowrap;
-    overflow: visible;
+    white-space: normal !important;
+    overflow-wrap: break-word;
+    line-height: 1.25;
   }
 
   &.is-front :deep(.venue-value) {

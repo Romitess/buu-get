@@ -285,7 +285,35 @@ const getTargetStatus = (): SeatStatusOption => {
   return isSameStatus ? firstStatus : 'available';
 };
 
-defineExpose({ brokenSeats, omittedSeats: localOmittedSeats });
+const setSeatStatusSets = (statuses: {
+  brokenSeats?: Iterable<string>;
+  omittedSeats?: Iterable<string>;
+}): void => {
+  brokenSeats.value = new Set(statuses.brokenSeats ?? []);
+  localOmittedSeats.value = new Set(statuses.omittedSeats ?? []);
+};
+
+const getSeatStatuses = (): Record<string, number> => {
+  const statusMap: Record<string, number> = {};
+
+  seatsByRow.value.forEach((rowSeats, rowIndex) => {
+    rowSeats.forEach((seat, colIndex) => {
+      const status = getSeatStatusOption(seat.id);
+      const statusCode = status === 'broken' ? 1 : status === 'omitted' ? 2 : 0;
+      statusMap[seat.id] = statusCode;
+      statusMap[`${rowIndex + 1}-${colIndex + 1}`] = statusCode;
+    });
+  });
+
+  return statusMap;
+};
+
+defineExpose({
+  brokenSeats,
+  omittedSeats: localOmittedSeats,
+  setSeatStatusSets,
+  getSeatStatuses,
+});
 
 const getSeatStatus = (seatId: string): 'available' | 'assigned' | 'broken' | 'blocked' => {
   if (localOmittedSeats.value.has(seatId)) return 'blocked';
