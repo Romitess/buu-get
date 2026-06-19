@@ -598,48 +598,49 @@ const pagination = ref<PaginationModel>({
 });
 
 const columns = computed<QTableColumn[]>(() => {
+  const nameWidth = isVoucherSent.value ? 13 : 19;
   const baseColumns: QTableColumn[] = [
     {
       name: 'index',
       label: i18n.t('admin.seatCandidates.table.columns.index'),
       field: 'index',
       align: 'center',
-      style: 'width: 6%',
+      style: 'width: 8%',
     },
     {
       name: 'nationalId',
       label: i18n.t('admin.seatCandidates.table.columns.nationalId'),
       field: 'nationalId',
       align: 'center',
-      style: 'width: 15%',
+      style: 'width: 20%',
     },
     {
       name: 'titleTh',
       label: i18n.t('admin.seatCandidates.table.columns.prefix'),
       field: 'titleTh',
       align: 'center',
-      style: 'width: 8%',
+      style: 'width: 12%',
     },
     {
       name: 'fullnameTh',
       label: i18n.t('admin.seatCandidates.table.columns.fullName'),
       field: 'fullnameTh',
       align: 'left',
-      style: 'width: 28%',
+      style: `width: ${nameWidth}%`,
     },
     {
       name: 'fullnameEn',
       label: i18n.t('admin.seatCandidates.table.columns.fullNameEn'),
       field: 'fullnameEn',
       align: 'left',
-      style: 'width: 28%',
+      style: `width: ${nameWidth}%`,
     },
     {
       name: 'seatNumber',
       label: i18n.t('admin.seatCandidates.table.columns.seatNumber'),
       field: 'seatNumber',
       align: 'center',
-      style: 'width: 15%',
+      style: 'width: 22%',
       classes: 'text-weight-bold',
     },
   ];
