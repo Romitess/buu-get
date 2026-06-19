@@ -48,6 +48,7 @@
                 : registerBtnText || t('examSchedule.registerBtnText')
         "
         :color="isDisabled ? 'full' : 'primary'"
+        :disable="isDisabled"
         class="round-exam__btn"
         @click="handleRegister"
       />
@@ -157,6 +158,7 @@ const isNotOpenYet = computed((): boolean => {
 const isDisabled = computed((): boolean => isFull.value || isExpired.value || isNotOpenYet.value);
 
 const handleRegister = (): void => {
+  if (isDisabled.value) return;
   const status = isExpired.value ? 'expired' : isNotOpenYet.value ? 'notOpen' : '';
   emit('register', status);
 };
