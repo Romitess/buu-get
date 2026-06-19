@@ -750,22 +750,31 @@ const handleSave = async (): Promise<void> => {
     box-shadow 220ms ease;
 }
 
-.walkway-chip-motion-move,
-.walkway-chip-motion-enter-active,
-.walkway-chip-motion-leave-active {
+.walkway-chip-motion-enter-active {
   transition:
     transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
     opacity 220ms ease;
 }
 
-.walkway-chip-motion-enter-from,
-.walkway-chip-motion-leave-to {
+.walkway-chip-motion-move,
+.walkway-chip-motion-leave-active {
+  transition: none;
+}
+
+.walkway-chip-motion-enter-from {
   opacity: 0;
   transform: translateY(-6px) scale(0.96);
 }
 
 .walkway-chip-motion-leave-active {
   position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.walkway-chip-motion-leave-to {
+  opacity: 0;
+  transform: none;
 }
 
 .walkway-chip-label {
