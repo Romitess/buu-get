@@ -59,21 +59,21 @@
                     {{ $t('admin.locationManagement.createPage.fields.floor') }}
                   </div>
                   <q-input
-                    v-model.number="floor"
-                    type="number"
+                    :model-value="floor"
+                    type="text"
                     outlined
                     dense
+                    mask="##"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
                     :placeholder="$t('admin.locationManagement.createPage.placeholders.floor')"
                     class="buu-input-muted"
                     :error="!!formErrors.floor"
                     :error-message="formErrors.floor"
                     min="0"
-                    @update:model-value="
-                      (val) => {
-                        floor = clampFloorValue(val);
-                        clearFieldError('floor');
-                      }
-                    "
+                    @beforeinput="preventNonDigitInput"
+                    @paste="handleFloorPaste"
+                    @update:model-value="handleFloorUpdate"
                   />
                 </div>
               </div>
@@ -96,9 +96,12 @@
                 </div>
                 <q-input
                   v-model.number="rows"
-                  type="number"
+                  type="text"
                   outlined
                   dense
+                  mask="##"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
                   :placeholder="$t('admin.locationManagement.createPage.placeholders.rows')"
                   class="buu-input-muted"
                   :error="!!formErrors.rows"
@@ -108,6 +111,7 @@
                   @update:model-value="
                     (val) => {
                       rows = clampSeatLayoutValue(val);
+                      resetWalkwaysOnLayoutChange();
                       clearFieldError('rows');
                     }
                   "
@@ -119,9 +123,12 @@
                 </div>
                 <q-input
                   v-model.number="cols"
-                  type="number"
+                  type="text"
                   outlined
                   dense
+                  mask="##"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
                   :placeholder="$t('admin.locationManagement.createPage.placeholders.cols')"
                   class="buu-input-muted"
                   :error="!!formErrors.cols"
@@ -131,6 +138,7 @@
                   @update:model-value="
                     (val) => {
                       cols = clampSeatLayoutValue(val);
+                      resetWalkwaysOnLayoutChange();
                       clearFieldError('cols');
                     }
                   "
@@ -162,8 +170,10 @@
                 {{ $t('admin.locationManagement.createPage.fields.walkway') }}
               </div>
               <div class="walkway-control-row">
-                <div
+                <TransitionGroup
                   v-if="selectedWalkwayPositions.length > 0"
+                  name="walkway-chip-motion"
+                  tag="div"
                   class="walkway-chip-row"
                   :class="{ 'walkway-chip-row--scroll': selectedWalkwayPositions.length > 2 }"
                 >
@@ -182,7 +192,7 @@
                       ×
                     </button>
                   </div>
-                </div>
+                </TransitionGroup>
                 <AppButton
                   outline
                   dense
@@ -343,6 +353,12 @@ const clampSeatLayoutValue = (value: unknown): number | null => {
   return Math.min(MAX_SEAT_LAYOUT_SIZE, Math.max(1, Math.floor(numericValue)));
 };
 
+const resetWalkwaysOnLayoutChange = (): void => {
+  if (selectedWalkwayPositions.value.length === 0) return;
+
+  selectedWalkwayPositions.value = [];
+};
+
 const clampFloorValue = (value: unknown): number | null => {
   if (value === '' || value === null || value === undefined) return null;
 
@@ -350,6 +366,30 @@ const clampFloorValue = (value: unknown): number | null => {
   if (!Number.isFinite(numericValue)) return null;
 
   return Math.max(0, Math.floor(numericValue));
+};
+
+const digitsOnly = (value: string | number | null | undefined): string =>
+  String(value ?? '').replace(/\D/g, '');
+
+const handleFloorUpdate = (value: string | number | null): void => {
+  floor.value = clampFloorValue(digitsOnly(value));
+  clearFieldError('floor');
+};
+
+const preventNonDigitInput = (event: InputEvent): void => {
+  if (!event.data || /^\d+$/.test(event.data)) return;
+
+  event.preventDefault();
+};
+
+const handleFloorPaste = (event: ClipboardEvent): void => {
+  const pastedText = event.clipboardData?.getData('text') ?? '';
+
+  if (/^\d*$/.test(pastedText)) return;
+
+  event.preventDefault();
+  floor.value = clampFloorValue(digitsOnly(pastedText));
+  clearFieldError('floor');
 };
 
 const clearFieldError = (field: keyof LocationFormErrors): void => {
@@ -634,11 +674,12 @@ const handleSave = async (): Promise<void> => {
   flex-wrap: nowrap;
   gap: 4px;
   width: 100%;
-  min-height: 39px;
+  min-height: 41px;
   overflow: visible;
 }
 
 .walkway-chip-row {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 4px;
@@ -648,8 +689,8 @@ const handleSave = async (): Promise<void> => {
   max-width: calc(100% - 124px);
   overflow-x: hidden;
   overflow-y: hidden;
-  height: 39px;
-  padding-bottom: 0;
+  height: 41px;
+  padding-bottom: 2px;
   scrollbar-width: none;
   scrollbar-gutter: stable;
 
@@ -661,7 +702,7 @@ const handleSave = async (): Promise<void> => {
 
 .walkway-chip-row--scroll {
   align-items: flex-start;
-  height: 51px;
+  height: 53px;
   overflow-x: auto;
   padding-bottom: 12px;
   scrollbar-width: thin;
@@ -700,6 +741,31 @@ const handleSave = async (): Promise<void> => {
   align-items: center;
   justify-content: center;
   gap: 4px;
+  transform-origin: center;
+  will-change: transform, opacity;
+  transition:
+    transform 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.walkway-chip-motion-move,
+.walkway-chip-motion-enter-active,
+.walkway-chip-motion-leave-active {
+  transition:
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 220ms ease;
+}
+
+.walkway-chip-motion-enter-from,
+.walkway-chip-motion-leave-to {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.96);
+}
+
+.walkway-chip-motion-leave-active {
+  position: absolute;
 }
 
 .walkway-chip-label {
@@ -766,6 +832,15 @@ const handleSave = async (): Promise<void> => {
     font-size: 12px;
     line-height: 1;
     white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .walkway-chip,
+  .walkway-chip-motion-move,
+  .walkway-chip-motion-enter-active,
+  .walkway-chip-motion-leave-active {
+    transition: none !important;
   }
 }
 
