@@ -1,0 +1,222 @@
+import {
+  O as _,
+  P as V,
+  r as c,
+  t as M,
+  Q as b,
+  _ as y,
+  W as u,
+  V as a,
+  S as t,
+  an as m,
+  T as i,
+  av as g,
+  a2 as T,
+} from './index-CKSooU2k.js';
+import { Q as E } from './QPage-CM3LWBRo.js';
+import { u as $ } from './use-quasar-DaOT29F-.js';
+import { u as B } from './vue-i18n-Bebkm_iB.js';
+import { A as w, a as k } from './app-breadcrumbs-C0oZOPYe.js';
+import { A as h } from './app-button-D_cMl4aM.js';
+import { T as A } from './test-voucher-report-uCQBvIhM.js';
+import { g as N, s as Q } from './exam-rule-voucher.service-CrkXcGFH.js';
+import './image-display-9myJRY3L.js';
+import './use-image-url-Bi9bxevq.js';
+import './image.service-iLwePKJ0.js';
+import './user-image-BTNlQ5Ur.js';
+const S = { class: 'voucher-content-grid row q-col-gutter-lg' },
+  C = { class: 'col-12 col-md-6' },
+  R = { class: 'section-title' },
+  U = { class: 'scrollable-content' },
+  q = { class: 'admin-voucher-preview' },
+  I = { class: 'col-12 col-md-6' },
+  P = { class: 'section-title' },
+  D = { class: 'regulations-block' },
+  G = { class: 'regulations-heading' },
+  L = { class: 'regulations-block q-mt-lg' },
+  j = { class: 'regulations-heading' },
+  x = { class: 'action-bar row justify-end q-mt-lg q-gutter-md' },
+  z = _({
+    __name: 'test-voucher-management-page',
+    setup(F) {
+      const p = V(),
+        d = $(),
+        { t: n } = B(),
+        v = c({
+          id: 1,
+          fullName: 'Mr. Somdream Jaidee',
+          studentId: 'XXXXXXXX',
+          examName: 'BUU-GET : Burapha University’s Graduate English Test',
+          examDate: 'XX May XXXX',
+          examTime: '08.00 AM - 10.00 AM',
+          examType: 'General',
+          location: 'QS1, Burapha University',
+          seatNo: 'A1',
+          voucherNo: 'ENG2026-001',
+          citizenId: 'X-XXXX-XXXXX-XX-X',
+          testSession: 'X/XXXX',
+        }),
+        o = c(n('admin.testVoucherManagement.defaultRegulationsEn')),
+        s = c(n('admin.testVoucherManagement.defaultRegulationsTh'));
+      M(async () => {
+        try {
+          const e = await N();
+          (e.regulationsEn && (o.value = e.regulationsEn.trim()),
+            e.regulationsTh && (s.value = e.regulationsTh.trim()));
+        } catch (e) {
+          console.error('Failed to load voucher regulations', e);
+        }
+      });
+      const X = () => {
+          p.back();
+        },
+        f = async () => {
+          try {
+            (await Q({ regulationsEn: o.value, regulationsTh: s.value }),
+              d.notify({
+                type: 'positive',
+                message: n('admin.testVoucherManagement.notifications.saveSuccess'),
+                position: 'top',
+              }));
+          } catch (e) {
+            (console.error(e),
+              d.notify({
+                type: 'negative',
+                message: n('admin.testVoucherManagement.notifications.saveError'),
+                position: 'top',
+              }));
+          }
+        };
+      return (e, l) => (
+        b(),
+        y(
+          E,
+          { class: 'page-container test-voucher-management-page' },
+          {
+            default: u(() => [
+              a(w),
+              a(
+                k,
+                {
+                  title: e.$t('admin.testVoucherManagement.pageTitle'),
+                  subtitle: e.$t('admin.testVoucherManagement.pageDescription'),
+                },
+                null,
+                8,
+                ['title', 'subtitle'],
+              ),
+              t('div', S, [
+                t('div', C, [
+                  a(
+                    m,
+                    { class: 'section-card section-card--scrollable' },
+                    {
+                      default: u(() => [
+                        t('h3', R, i(e.$t('admin.testVoucherManagement.previewTitle')), 1),
+                        t('div', U, [
+                          t('div', q, [
+                            a(
+                              A,
+                              {
+                                data: v.value,
+                                'regulations-en': o.value,
+                                'regulations-th': s.value,
+                                'show-regulations': !0,
+                                'use-image-placeholder': !0,
+                              },
+                              null,
+                              8,
+                              ['data', 'regulations-en', 'regulations-th'],
+                            ),
+                          ]),
+                        ]),
+                      ]),
+                      _: 1,
+                    },
+                  ),
+                ]),
+                t('div', I, [
+                  a(
+                    m,
+                    { class: 'section-card' },
+                    {
+                      default: u(() => [
+                        t('h3', P, i(e.$t('admin.testVoucherManagement.editTitle')), 1),
+                        t('div', D, [
+                          t('h4', G, i(e.$t('admin.testVoucherManagement.regulationsEnLabel')), 1),
+                          a(
+                            g,
+                            {
+                              modelValue: o.value,
+                              'onUpdate:modelValue': l[0] || (l[0] = (r) => (o.value = r)),
+                              outlined: '',
+                              type: 'textarea',
+                              placeholder: e.$t('admin.testVoucherManagement.placeholderEn'),
+                              class: 'custom-rule-input',
+                            },
+                            null,
+                            8,
+                            ['modelValue', 'placeholder'],
+                          ),
+                        ]),
+                        t('div', L, [
+                          t('h4', j, i(e.$t('admin.testVoucherManagement.regulationsThLabel')), 1),
+                          a(
+                            g,
+                            {
+                              modelValue: s.value,
+                              'onUpdate:modelValue': l[1] || (l[1] = (r) => (s.value = r)),
+                              outlined: '',
+                              type: 'textarea',
+                              placeholder: e.$t('admin.testVoucherManagement.placeholderTh'),
+                              class: 'custom-rule-input',
+                            },
+                            null,
+                            8,
+                            ['modelValue', 'placeholder'],
+                          ),
+                        ]),
+                      ]),
+                      _: 1,
+                    },
+                  ),
+                ]),
+              ]),
+              t('div', x, [
+                a(
+                  h,
+                  {
+                    label: e.$t('admin.testVoucherManagement.cancelBtn'),
+                    color: 'grey-4',
+                    'text-color': 'dark',
+                    unelevated: '',
+                    class: 'action-btn',
+                    onClick: X,
+                  },
+                  null,
+                  8,
+                  ['label'],
+                ),
+                a(
+                  h,
+                  {
+                    label: e.$t('admin.testVoucherManagement.saveBtn'),
+                    color: 'primary',
+                    unelevated: '',
+                    class: 'action-btn',
+                    onClick: f,
+                  },
+                  null,
+                  8,
+                  ['label'],
+                ),
+              ]),
+            ]),
+            _: 1,
+          },
+        )
+      );
+    },
+  }),
+  ne = T(z, [['__scopeId', 'data-v-d9bdb7a3']]);
+export { ne as default };

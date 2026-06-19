@@ -512,7 +512,7 @@ export default {
         intime: 'Present',
         missing: 'Absent',
       },
-      noData: 'No attendance records found for this session',
+      noData: 'No data found',
     },
     locationManagement: {
       pageTitle: 'Manage Exam Locations',
@@ -1043,6 +1043,49 @@ export default {
         viewRecordMessage: 'Receipt {receiptNo} opened for review.',
       },
     },
+    examReport: {
+      pageTitle: 'Exam Report',
+      pageSubtitle: 'Overview of applications, attendance, and scores for monitoring and planning.',
+      filter: {
+        fromYear: 'Year',
+        fromMonth: 'Month',
+        fromRound: 'Round',
+        toYear: 'Year',
+        toMonth: 'Month',
+        toRound: 'Round',
+        apply: 'Filter',
+        placeholders: {
+          year: 'Select year',
+          month: 'Select month',
+          round: 'Select round',
+        },
+      },
+      charts: {
+        attendanceTitle: 'Attended vs. Absent',
+        attended: 'Attended',
+        absent: 'Absent',
+        trendTitle: 'Yearly Attendance Trend',
+        registered: 'Registrations',
+        scoreSummaryTitle: 'Yearly Score Summary',
+        peopleUnit: 'People',
+      },
+      table: {
+        title: 'Exam Rounds',
+        emptyLabel: 'No exam round data found',
+        viewRegistrants: 'View registrants',
+        columns: {
+          round: 'Round',
+          date: 'Date',
+          registered: 'Registered',
+          attended: 'Attended',
+          absent: 'Absent',
+          tools: 'Tools',
+        },
+      },
+      notifications: {
+        loadError: 'Failed to load exam report data',
+      },
+    },
   },
   components: {
     examInfoCard: {
@@ -1131,6 +1174,7 @@ export default {
     receiptUsageReport: 'Receipt Usage Report',
     applicationFeeReport: 'Application Fee Report',
     fundSourceManagement: 'Fund Source Management',
+    examReport: 'Exam Report',
   },
   profileEditHistory: {
     pageTitle: 'Candidate Profile Edit History',

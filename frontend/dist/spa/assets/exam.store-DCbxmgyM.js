@@ -1,0 +1,268 @@
+import { ay as Z, r as h, f as m } from './index-CKSooU2k.js';
+import { u as tt } from './vue-i18n-Bebkm_iB.js';
+import { c as at } from './transaction.service-Cj5D4WKX.js';
+import {
+  D as et,
+  k as L,
+  B as N,
+  l as st,
+  m as nt,
+  n as ot,
+  P as rt,
+  o as ct,
+  p as it,
+  j as P,
+  q as E,
+  r as ut,
+  T as g,
+  s as Tt,
+  t as lt,
+  v as dt,
+  w as St,
+} from './exam.service-0p8xz0zq.js';
+const _t = Z('exam', () => {
+  const u = tt(),
+    l = h(new Date().toISOString().split('T')[0] || ''),
+    A = h({}),
+    p = 'exam_cancellation_reasons',
+    I = () => {
+      try {
+        const t = localStorage.getItem(p);
+        return t ? JSON.parse(t) : {};
+      } catch {
+        return {};
+      }
+    },
+    $ = (t, s) => {
+      const e = I();
+      ((e[String(t)] = s), localStorage.setItem(p, JSON.stringify(e)));
+    },
+    X = (t) => I()[String(t)] ?? null,
+    C = () => {
+      const t = u.tm('common.months');
+      return Array.isArray(t) ? t.map((s) => s) : [];
+    },
+    H = m(() => {
+      const t = A.value[l.value];
+      return t
+        ? {
+            badgeText: U.value,
+            title: t.title,
+            subtitle: u.t('examSchedule.examDetailSubtitle'),
+            locationText: t.location,
+            feeText: t.fee,
+            formatText: t.formatText || '',
+          }
+        : { ...et };
+    }),
+    M = h([]),
+    O = h([]),
+    w = h([]),
+    x = m(() => A.value[l.value]?.rounds || []),
+    b = m(() => {
+      const t = A.value[l.value];
+      return t ? { location: t.location, fee: t.fee } : { location: L.LOCATION, fee: L.FEE };
+    }),
+    U = m(() => x.value[0]?.roundTypeLabel ?? u.t('examSchedule.noBadgeRounds')),
+    Y = m(() => {
+      const t = {};
+      return (
+        Object.entries(A.value).forEach(([s, e]) => {
+          const o = e.rounds.some((r) => r.availableSeats > 0);
+          t[s] = o ? 'available' : 'full';
+        }),
+        t
+      );
+    }),
+    B = m(() => {
+      if (!l.value) return '';
+      const t = new Date(l.value),
+        e = C()[t.getMonth()] || '';
+      if (u.locale.value?.startsWith('en')) return `${t.getDate()} ${e} ${t.getFullYear()}`;
+      const o = t.getFullYear() + N;
+      return `${t.getDate()} ${e} ${o}`;
+    });
+  async function f(t = !1) {
+    try {
+      const s = await st(t);
+      A.value = s;
+    } catch (s) {
+      console.error('Failed to load schedule:', s);
+    }
+  }
+  async function v(t = !1) {
+    try {
+      w.value = await nt(t);
+    } catch (s) {
+      console.error('Failed to load management schedules:', s);
+    }
+  }
+  async function _() {
+    const t = localStorage.getItem('user_id');
+    if (!t) return;
+    const s = parseInt(t, 10);
+    if (!isNaN(s))
+      try {
+        const e = await ot(s),
+          o = [],
+          r = [],
+          D = (a) => {
+            const i = new Date(a);
+            return new Date(i.getTime() + rt * 1e3);
+          },
+          q = (a) => {
+            const i = X(a.ERM_ID);
+            return i
+              ? i === 'paymentTimeout'
+              : !a.CREATED_AT || !a.UPDATED_AT
+                ? !1
+                : new Date(a.UPDATED_AT).getTime() >= D(a.CREATED_AT).getTime();
+          };
+        (e.forEach((a) => {
+          const i = a.SESSION;
+          if (!i) return;
+          const d = i.EXAM,
+            y = a.SESSION_LOCATION?.LOCATION ?? i.LOCATION,
+            R = d?.EXAM_DATE ? new Date(d.EXAM_DATE) : new Date(),
+            G = C()[R.getMonth()] || '',
+            K = u.locale.value?.startsWith('en') ? R.getFullYear() : R.getFullYear() + N,
+            z = `${R.getDate()} ${G} ${K}`,
+            Q = y ? ct(y.LOCATION_NAME, y.LOCATION_ROOM_NO) : it,
+            n = {
+              id: a.ERM_ID,
+              title: d?.EXAM_ROUND
+                ? `${d.EXAM_NAME} ${d.EXAM_ROUND}`
+                : d?.EXAM_NAME || u.t('examSchedule.defaultEnrollmentTitle'),
+              status: '',
+              statusType: 'primary',
+              date: z,
+              time: `${P(i.SS_START_TIME)} - ${P(i.SS_END_TIME)}`,
+              location: Q,
+              fee: Number(d?.EXAM_FEE ?? 0),
+              rawEnrollment: a,
+            };
+          if (a.ERM_STATUS === E.UNPAID)
+            ((n.status = 'exam.status.pending'),
+              (n.statusType = 'primary'),
+              (n.actions = ['cancel', 'pay']),
+              a.CREATED_AT && (n.deadline = D(a.CREATED_AT).toISOString()),
+              o.push(n));
+          else if (a.ERM_STATUS === E.PAID) {
+            const c = a.ERM_VERIFY_STATUS === ut.PASS,
+              T = a.TRANSACTION?.TRANX_MATCH_STATUS === g.MATCH;
+            ((n.status = c ? 'exam.status.verified' : 'exam.status.paymentCompleted'),
+              (n.statusType = 'primary'),
+              (n.actions = T ? ['downloadReceipt'] : []),
+              r.push(n));
+          } else if (a.ERM_STATUS === E.SEAT_ASSIGNED) {
+            ((n.status = 'exam.status.verified'), (n.statusType = 'primary'));
+            const c = a.TRANSACTION?.TRANX_MATCH_STATUS === g.MATCH,
+              T = [];
+            (c && T.push('downloadReceipt'), (n.actions = T), r.push(n));
+          } else if (a.ERM_STATUS === E.SEAT_PUBLISHED) {
+            ((n.status = 'exam.status.verified'), (n.statusType = 'primary'));
+            const c = a.TRANSACTION?.TRANX_MATCH_STATUS === g.MATCH,
+              T = !!(a.VOUCHERS && a.VOUCHERS.length > 0),
+              S = [];
+            (T && S.push('candidateCard'),
+              c && S.push('downloadReceipt'),
+              (n.actions = S),
+              r.push(n));
+          } else if (a.ERM_STATUS === E.ATTENDED) {
+            const c = !!a.SCORE,
+              T = !!(a.SCORE?.CERTIFICATES && a.SCORE.CERTIFICATES.length > 0),
+              S = [];
+            (c && S.push('scoreDetails'),
+              T && S.push('certificate'),
+              (n.status = c ? 'exam.status.completed' : 'exam.status.evaluating'),
+              (n.statusType = 'primary'),
+              (n.actions = S),
+              r.push(n));
+          } else if (a.ERM_STATUS === E.CANCELLED) {
+            const c = q(a);
+            ((n.status = c ? 'exam.status.cancelled' : 'exam.status.registrationCancelled'),
+              (n.statusType = 'primary'),
+              c &&
+                (n.customStatus = {
+                  label: 'exam.status.paymentTimeout',
+                  type: 'error',
+                  icon: 'warning_amber',
+                }),
+              r.push(n));
+          }
+        }),
+          (M.value = o),
+          (O.value = r));
+      } catch (e) {
+        console.error('Failed to fetch user history:', e);
+      }
+  }
+  async function F(t, s, e) {
+    const o = localStorage.getItem('user_id');
+    if (!o) throw new Error(u.t('examSchedule.userNotLoggedIn'));
+    const r = parseInt(o, 10);
+    if (isNaN(r)) throw new Error(u.t('examSchedule.invalidUserId'));
+    (await Tt(r, t.id, s, e), await _(), await f(!0));
+  }
+  async function V(t, s, e) {
+    await F(t, s, e);
+  }
+  async function k(t, s = 'manual') {
+    try {
+      ($(t, s), await lt(t, E.CANCELLED), await _(), await f(!0));
+    } catch (e) {
+      throw (console.error('Failed to cancel registration:', e), e);
+    }
+  }
+  async function W(t, s, e) {
+    try {
+      (await at({
+        ERM_ID: t,
+        TRANX_AMOUNT: s,
+        RC_TAX_ID: e.taxId,
+        RC_NAME: e.fullName,
+        RC_PHONE: e.phone,
+        RC_ADDRESS: e.address,
+      }),
+        await _());
+    } catch (o) {
+      throw (console.error('Failed to confirm payment:', o), o);
+    }
+  }
+  async function j(t) {
+    const s = await dt(t);
+    await f(!0);
+    const [e, o, r] = t.examDate.split('/');
+    if (e && o && r) {
+      const D = parseInt(r) - N;
+      l.value = `${D}-${o}-${e}`;
+    }
+    return s;
+  }
+  async function J(t) {
+    (await St(t), await v(!0), await f(!0));
+  }
+  return {
+    examInfo: H,
+    selectedDate: l,
+    scheduleData: A,
+    selectedDateRounds: x,
+    currentDayDetails: b,
+    dynamicBadgeText: U,
+    calendarAvailability: Y,
+    formattedSelectedDate: B,
+    pendingRegistrations: M,
+    historyRecords: O,
+    managementSchedules: w,
+    confirmRegistration: F,
+    confirmSpecialRegistration: V,
+    cancelRegistration: k,
+    confirmPayment: W,
+    addExamRound: j,
+    deleteExamRound: J,
+    initSchedule: f,
+    loadManagementSchedules: v,
+    fetchHistory: _,
+  };
+});
+export { _t as u };

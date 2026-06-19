@@ -165,7 +165,10 @@ export function useExamAttendances() {
             hasRecord: !!attendanceRecord,
             slId: enrollment.SL_ID,
             lsId: enrollment.LS_ID,
-            profileImage: enrollment.USER?.IMAGE?.USER_IMAGE_URL || enrollment.USER?.PROFILE?.userImagePath || null,
+            profileImage:
+              enrollment.USER?.IMAGE?.USER_IMAGE_URL ||
+              enrollment.USER?.PROFILE?.userImagePath ||
+              null,
             testSession: enrollment.SESSION?.EXAM?.EXAM_ROUND || '-',
             voucherNo: enrollment.VOUCHERS?.[0]?.VC_CODE || '-',
             examType: enrollment.SESSION?.EXAM?.EXAM_TYPE || '-',

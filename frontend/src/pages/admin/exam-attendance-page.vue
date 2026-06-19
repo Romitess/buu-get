@@ -47,12 +47,13 @@
       </div>
     </nav>
 
-    <main v-if="currentRoomAttendances.length > 0">
+    <main>
       <BaseTable
         :columns="columns"
         :rows="currentRoomAttendances"
         :loading="isLoading"
         :pagination="pagination"
+        :empty-label="$t('admin.examAttendance.noData')"
         class="attendance-table"
         @request="onRequest"
       >
@@ -73,10 +74,6 @@
         </template>
       </BaseTable>
     </main>
-    <div v-else-if="!isLoading" class="flex flex-center q-pa-xl text-grey-6">
-      <q-icon name="info" size="md" class="q-mr-sm" />
-      <span>{{ $t('admin.examAttendance.noData') }}</span>
-    </div>
   </q-page>
 </template>
 
@@ -111,8 +108,15 @@ interface SessionLocationOption {
 const route = useRoute();
 const i18n = useI18n();
 
-const { isLoading, exam, searchQuery, selectedSessionId, filteredAttendances, fetchAttendances, attendances } =
-  useExamAttendances();
+const {
+  isLoading,
+  exam,
+  searchQuery,
+  selectedSessionId,
+  filteredAttendances,
+  fetchAttendances,
+  attendances,
+} = useExamAttendances();
 
 const selectedSessionLocationId = ref<number | null>(null);
 
@@ -123,7 +127,9 @@ const openCheckInDialog = () => {
     component: DialogAttendanceCheckin,
     componentProps: {
       attendances: attendances.value,
-      examName: exam.value?.EXAM_ROUND ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}` : exam.value?.EXAM_NAME || '',
+      examName: exam.value?.EXAM_ROUND
+        ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
+        : exam.value?.EXAM_NAME || '',
       examDate: examDateLabel.value,
       examTime: selectedSessionTime.value,
       examLocation: selectedSessionLocation.value,

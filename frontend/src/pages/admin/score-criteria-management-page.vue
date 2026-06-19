@@ -73,7 +73,7 @@
                   class="buu-input-muted col"
                   input-class="text-center"
                   @keypress="onScoreKeypress"
-                  @update:model-value="val => onScoreInput(val, rule, 'minScore')"
+                  @update:model-value="(val) => onScoreInput(val, rule, 'minScore')"
                   @paste="handleScorePaste"
                 />
                 <span class="q-mx-xs text-grey-6">-</span>
@@ -85,7 +85,7 @@
                   class="buu-input-muted col"
                   input-class="text-center"
                   @keypress="onScoreKeypress"
-                  @update:model-value="val => onScoreInput(val, rule, 'maxScore')"
+                  @update:model-value="(val) => onScoreInput(val, rule, 'maxScore')"
                   @paste="handleScorePaste"
                 />
               </div>
@@ -344,7 +344,11 @@ const onScoreKeypress = (event: KeyboardEvent): void => {
   }
 };
 
-const onScoreInput = (val: string | number | null, rule: BandRule, field: 'minScore' | 'maxScore'): void => {
+const onScoreInput = (
+  val: string | number | null,
+  rule: BandRule,
+  field: 'minScore' | 'maxScore',
+): void => {
   const sanitized = String(val ?? '').replace(/\D/g, '');
   if (sanitized !== '') {
     const num = parseInt(sanitized, 10);

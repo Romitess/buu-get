@@ -26,7 +26,7 @@ export default defineConfig((ctx) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['axios', 'i18n', 'auth', 'notify'],
+    boot: ['axios', 'i18n', 'auth', 'notify', 'apexcharts'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['app.scss'],
@@ -90,6 +90,12 @@ export default defineConfig((ctx) => {
     devServer: {
       // https: true,
       open: false,
+      // โปรเจกต์เป็น npm workspaces → @quasar/extras ถูก hoist ไป root node_modules
+      // ต้องอนุญาตให้ Vite dev server เสิร์ฟไฟล์จาก monorepo root (..) ไม่งั้นฟอนต์
+      // Material Icons จะถูกบล็อก ("outside of Vite serving allow list") → icon โชว์เป็นชื่อข้อความ
+      fs: {
+        allow: [resolve(__dirname, '..')],
+      },
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework

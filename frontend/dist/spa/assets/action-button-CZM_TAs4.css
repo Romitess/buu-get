@@ -1,0 +1,72 @@
+.action-btn[data-v-68f46393] {
+  background-color: var(--badge-primary-bg);
+  color: var(--badge-primary-text);
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.action-btn[data-v-68f46393] .q-icon {
+  font-size: 18px !important;
+}
+.action-btn .btn-custom-img[data-v-68f46393] {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  display: block;
+  -webkit-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+.action-btn[data-v-68f46393]:hover {
+  background-color: var(--dialog-info-border);
+}
+.action-btn.btn-danger[data-v-68f46393] {
+  background-color: var(--badge-error-dot);
+  color: var(--text-on-primary);
+}
+.action-btn.btn-danger[data-v-68f46393]:hover {
+  background-color: var(--badge-error-text);
+}
+.action-btn.btn-primary-bg[data-v-68f46393] {
+  background-color: var(--primary) !important;
+  color: #fff !important;
+}
+.action-btn.btn-primary-bg[data-v-68f46393]:hover {
+  background-color: var(--primary-dark) !important;
+}
+.action-btn.btn-black[data-v-68f46393] {
+  color: #000 !important;
+  background-color: #add3f7 !important;
+}
+.action-btn.btn-black[data-v-68f46393]:hover {
+  background-color: #92bce6 !important;
+}
+.action-btn[data-v-68f46393]:disabled,
+.action-btn.disabled[data-v-68f46393],
+.action-btn.q-btn--disabled[data-v-68f46393] {
+  background-color: var(--neutral-100) !important;
+  color: var(--text-muted) !important;
+  opacity: 1 !important;
+  cursor: not-allowed !important;
+}
+.action-btn:disabled.btn-danger[data-v-68f46393],
+.action-btn:disabled.btn-primary-bg[data-v-68f46393],
+.action-btn:disabled.btn-black[data-v-68f46393],
+.action-btn.disabled.btn-danger[data-v-68f46393],
+.action-btn.disabled.btn-primary-bg[data-v-68f46393],
+.action-btn.disabled.btn-black[data-v-68f46393],
+.action-btn.q-btn--disabled.btn-danger[data-v-68f46393],
+.action-btn.q-btn--disabled.btn-primary-bg[data-v-68f46393],
+.action-btn.q-btn--disabled.btn-black[data-v-68f46393] {
+  background-color: var(--neutral-100) !important;
+  color: var(--text-muted) !important;
+}
+.action-btn:disabled .btn-custom-img[data-v-68f46393],
+.action-btn.disabled .btn-custom-img[data-v-68f46393],
+.action-btn.q-btn--disabled .btn-custom-img[data-v-68f46393] {
+  filter: grayscale(100%) opacity(0.6);
+}

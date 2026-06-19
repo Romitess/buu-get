@@ -1,0 +1,28 @@
+import { c as o, h as s, a as r, f as a } from './index-CKSooU2k.js';
+const m = o({
+  name: 'QItemLabel',
+  props: { overline: Boolean, caption: Boolean, header: Boolean, lines: [Number, String] },
+  setup(e, { slots: t }) {
+    const l = a(() => Number.parseInt(e.lines, 10)),
+      i = a(
+        () =>
+          'q-item__label' +
+          (e.overline ? ' q-item__label--overline text-overline' : '') +
+          (e.caption ? ' q-item__label--caption text-caption' : '') +
+          (e.header ? ' q-item__label--header' : '') +
+          (l.value === 1 ? ' ellipsis' : ''),
+      ),
+      n = a(() =>
+        e.lines !== void 0 && l.value > 1
+          ? {
+              overflow: 'hidden',
+              display: '-webkit-box',
+              '-webkit-box-orient': 'vertical',
+              '-webkit-line-clamp': l.value,
+            }
+          : null,
+      );
+    return () => s('div', { style: n.value, class: i.value }, r(t.default));
+  },
+});
+export { m as Q };

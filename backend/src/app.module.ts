@@ -35,6 +35,7 @@ import { PageBuilderModule } from './modules/page-builder/page-builder.module';
 import { ExamRuleVouchersModule } from './modules/exam-rule-vouchers/exam-rule-vouchers.module';
 import { ScoreCriteriaModule } from './modules/score-criteria/score-criteria.module';
 import { MoodleSyncLogsModule } from './modules/moodle-sync-logs/moodle-sync-logs.module';
+import { ExamReportModule } from './modules/exam-report/exam-report.module';
 
 @Module({
   imports: [
@@ -94,6 +95,7 @@ import { MoodleSyncLogsModule } from './modules/moodle-sync-logs/moodle-sync-log
     ExamRuleVouchersModule,
     ScoreCriteriaModule,
     MoodleSyncLogsModule,
+    ExamReportModule,
   ],
 })
 export class AppModule {}

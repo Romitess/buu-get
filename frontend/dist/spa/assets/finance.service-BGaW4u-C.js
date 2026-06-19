@@ -1,0 +1,8 @@
+import { aq as e } from './index-CKSooU2k.js';
+const o = async () => (await e.get('/fund-sources')).data,
+  r = async (s) => (await e.post('/fund-sources', s)).data,
+  c = async (s, n) => (await e.put(`/fund-sources/${s}`, n)).data,
+  u = async (s) => {
+    await e.delete(`/fund-sources/${s}`);
+  };
+export { r as c, u as d, o as f, c as u };

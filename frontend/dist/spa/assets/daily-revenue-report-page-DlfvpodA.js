@@ -1,0 +1,182 @@
+import { Q as h } from './QPage-CM3LWBRo.js';
+import { u as w } from './use-quasar-DaOT29F-.js';
+import { A as x, a as D } from './app-breadcrumbs-C0oZOPYe.js';
+import { u as B, D as N } from './use-daily-revenue-XZfrg-bR.js';
+import { u as T } from './vue-i18n-Bebkm_iB.js';
+import { B as F } from './base-table-DuGvP-XM.js';
+import {
+  O as v,
+  Q as b,
+  R as $,
+  V as s,
+  W as m,
+  S as t,
+  T as n,
+  f as y,
+  a2 as _,
+  w as P,
+  t as S,
+  _ as A,
+  X as i,
+} from './index-CKSooU2k.js';
+import './QPopupProxy-SS26l2Ne.js';
+import './format-DnjzHs7F.js';
+import './position-engine-Bv76xS6k.js';
+import './app-calendar-3fcHCMzM.js';
+import './QResizeObserver-C4jaR1Qo.js';
+import './app-select-DSldWHEY.js';
+import './QSelect-CcXwe87O.js';
+import './QItem-D-DX6y8A.js';
+import './QItemLabel-Ca36qfFu.js';
+import './finance.service-BGaW4u-C.js';
+import './QTable-B4W-6HCk.js';
+import './QList-fArhXj97.js';
+import './QLinearProgress-ComgvJOP.js';
+import './QSpinnerDots-Dwh4MvNX.js';
+import './QInnerLoading-CAwPoqSH.js';
+const C = { class: 'daily-revenue-table-wrapper' },
+  L = { class: 'text-center' },
+  Q = { class: 'text-right' },
+  k = { class: 'total-row row items-center justify-end' },
+  q = { class: 'total-label' },
+  I = { class: 'total-value' },
+  O = v({
+    __name: 'daily-revenue-table',
+    props: { rows: {}, loading: { type: Boolean }, formattedTotal: {} },
+    emits: ['request'],
+    setup(l) {
+      const d = l,
+        { t: a } = T(),
+        p = (o) =>
+          o.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+        u = y(() => ({ page: 1, rowsPerPage: d.rows.length || 10, rowsNumber: d.rows.length })),
+        c = () => {},
+        g = y(() => [
+          {
+            name: 'index',
+            label: a('admin.dailyRevenueReport.table.columns.index'),
+            field: 'index',
+            align: 'center',
+            style: 'width: 80px',
+          },
+          {
+            name: 'department',
+            label: a('admin.dailyRevenueReport.table.columns.department'),
+            field: 'department',
+            align: 'left',
+            style: 'width: 220px',
+          },
+          {
+            name: 'examName',
+            label: a('admin.dailyRevenueReport.table.columns.examName'),
+            field: 'examName',
+            align: 'left',
+          },
+          {
+            name: 'amount',
+            label: a('admin.dailyRevenueReport.table.columns.amount'),
+            field: 'amount',
+            align: 'right',
+            style: 'width: 180px',
+          },
+        ]);
+      return (o, f) => (
+        b(),
+        $('div', C, [
+          s(
+            F,
+            {
+              columns: g.value,
+              rows: l.rows,
+              loading: l.loading,
+              pagination: u.value,
+              'empty-label': o.$t('admin.dailyRevenueReport.table.emptyLabel'),
+              'hide-pagination': '',
+              onRequest: c,
+            },
+            {
+              'body-cell-index': m(({ row: e }) => [t('div', L, n(e.index), 1)]),
+              'body-cell-department': m(({ row: e }) => [t('div', null, n(e.department), 1)]),
+              'body-cell-examName': m(({ row: e }) => [t('div', null, n(e.examName), 1)]),
+              'body-cell-amount': m(({ row: e }) => [t('div', Q, n(p(e.amount)), 1)]),
+              _: 1,
+            },
+            8,
+            ['columns', 'rows', 'loading', 'pagination', 'empty-label'],
+          ),
+          t('div', k, [
+            t('span', q, n(o.$t('admin.dailyRevenueReport.table.totalLabel')), 1),
+            t('span', I, n(l.formattedTotal), 1),
+          ]),
+        ])
+      );
+    },
+  }),
+  V = _(O, [['__scopeId', 'data-v-3c5ed391']]),
+  j = v({
+    __name: 'daily-revenue-report-page',
+    setup(l) {
+      const d = w(),
+        {
+          rows: a,
+          isLoading: p,
+          error: u,
+          filter: c,
+          formattedTotal: g,
+          departmentOptions: o,
+          fetchData: f,
+          loadDepartmentOptions: e,
+          applyFilter: R,
+        } = B();
+      return (
+        P(u, (r) => {
+          r && d.notify({ type: 'negative', message: r, position: 'top' });
+        }),
+        S(() => {
+          (e(), f());
+        }),
+        (r, E) => (
+          b(),
+          A(
+            h,
+            { class: 'page-container daily-revenue-report-page' },
+            {
+              default: m(() => [
+                s(x),
+                s(
+                  D,
+                  {
+                    title: r.$t('admin.dailyRevenueReport.pageTitle'),
+                    subtitle: r.$t('admin.dailyRevenueReport.pageSubtitle'),
+                  },
+                  null,
+                  8,
+                  ['title', 'subtitle'],
+                ),
+                s(
+                  N,
+                  {
+                    filter: i(c),
+                    'department-options': i(o),
+                    mode: 'compact',
+                    onFilterChange: i(R),
+                  },
+                  null,
+                  8,
+                  ['filter', 'department-options', 'onFilterChange'],
+                ),
+                s(V, { rows: i(a), loading: i(p), 'formatted-total': i(g) }, null, 8, [
+                  'rows',
+                  'loading',
+                  'formatted-total',
+                ]),
+              ]),
+              _: 1,
+            },
+          )
+        )
+      );
+    },
+  }),
+  pe = _(j, [['__scopeId', 'data-v-dd7e691a']]);
+export { pe as default };

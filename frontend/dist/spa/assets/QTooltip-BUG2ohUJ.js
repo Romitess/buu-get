@@ -1,0 +1,215 @@
+import {
+  c as te,
+  C as oe,
+  s as ae,
+  bs as y,
+  E as ne,
+  bc as ie,
+  F as se,
+  G as le,
+  bt as re,
+  w as C,
+  o as E,
+  ab as k,
+  ae as x,
+  n as ce,
+  h as H,
+  ai as ue,
+  g as de,
+  r as A,
+  f,
+  by as fe,
+  a as he,
+  af as ve,
+} from './index-CKSooU2k.js';
+import {
+  v as ge,
+  a as q,
+  f as me,
+  b as ye,
+  d as Te,
+  e as be,
+  r as D,
+  s as pe,
+  c as M,
+  p as j,
+} from './position-engine-Bv76xS6k.js';
+const we = te({
+  name: 'QTooltip',
+  inheritAttrs: !1,
+  props: {
+    ...me,
+    ...ne,
+    ...y,
+    maxHeight: { type: String, default: null },
+    maxWidth: { type: String, default: null },
+    transitionShow: { ...y.transitionShow, default: 'jump-down' },
+    transitionHide: { ...y.transitionHide, default: 'jump-up' },
+    anchor: { type: String, default: 'bottom middle', validator: q },
+    self: { type: String, default: 'top middle', validator: q },
+    offset: { type: Array, default: () => [14, 14], validator: ge },
+    scrollTarget: ae,
+    delay: { type: Number, default: 0 },
+    hideDelay: { type: Number, default: 0 },
+    persistent: Boolean,
+  },
+  emits: [...oe],
+  setup(e, { slots: L, emit: T, attrs: h }) {
+    let i, s;
+    const v = de(),
+      {
+        proxy: { $q: o },
+      } = v,
+      l = A(null),
+      u = A(!1),
+      Q = f(() => j(e.anchor, o.lang.rtl)),
+      W = f(() => j(e.self, o.lang.rtl)),
+      B = f(() => !e.persistent),
+      { registerTick: N, removeTick: R } = ie(),
+      { registerTimeout: d } = se(),
+      { transitionProps: _, transitionStyle: F } = fe(e),
+      { localScrollTarget: b, changeScrollEvent: G, unconfigureScrollTarget: I } = ye(e, w),
+      { anchorEl: a, canShow: U, anchorEvents: r } = Te({ showing: u, configureAnchorEl: Y }),
+      { show: V, hide: g } = le({
+        showing: u,
+        canShow: U,
+        handleShow: z,
+        handleHide: J,
+        hideOnRouteChange: B,
+        processOnMount: !0,
+      });
+    Object.assign(r, { delayShow: K, delayHide: X });
+    const { showPortal: p, hidePortal: S, renderPortal: $ } = re(v, l, ee, 'tooltip');
+    if (o.platform.is.mobile) {
+      const t = {
+          anchorEl: a,
+          innerRef: l,
+          onClickOutside(n) {
+            return (g(n), n.target.classList.contains('q-dialog__backdrop') && ve(n), !0);
+          },
+        },
+        m = f(() => e.modelValue === null && !e.persistent && u.value);
+      (C(m, (n) => {
+        (n ? be : D)(t);
+      }),
+        E(() => {
+          D(t);
+        }));
+    }
+    function z(t) {
+      (p(),
+        N(() => {
+          ((s = new MutationObserver(() => c())),
+            s.observe(l.value, { attributes: !1, childList: !0, characterData: !0, subtree: !0 }),
+            c(),
+            w());
+        }),
+        i === void 0 &&
+          (i = C(
+            () =>
+              o.screen.width +
+              '|' +
+              o.screen.height +
+              '|' +
+              e.self +
+              '|' +
+              e.anchor +
+              '|' +
+              o.lang.rtl,
+            c,
+          )),
+        d(() => {
+          (p(!0), T('show', t));
+        }, e.transitionDuration));
+    }
+    function J(t) {
+      (R(),
+        S(),
+        P(),
+        d(() => {
+          (S(!0), T('hide', t));
+        }, e.transitionDuration));
+    }
+    function P() {
+      (s !== void 0 && (s.disconnect(), (s = void 0)),
+        i !== void 0 && (i(), (i = void 0)),
+        I(),
+        k(r, 'tooltipTemp'));
+    }
+    function c() {
+      pe({
+        targetEl: l.value,
+        offset: e.offset,
+        anchorEl: a.value,
+        anchorOrigin: Q.value,
+        selfOrigin: W.value,
+        maxHeight: e.maxHeight,
+        maxWidth: e.maxWidth,
+      });
+    }
+    function K(t) {
+      if (o.platform.is.mobile) {
+        (M(), document.body.classList.add('non-selectable'));
+        const m = a.value,
+          n = ['touchmove', 'touchcancel', 'touchend', 'click'].map((O) => [
+            m,
+            O,
+            'delayHide',
+            'passiveCapture',
+          ]);
+        x(r, 'tooltipTemp', n);
+      }
+      d(() => {
+        V(t);
+      }, e.delay);
+    }
+    function X(t) {
+      (o.platform.is.mobile &&
+        (k(r, 'tooltipTemp'),
+        M(),
+        setTimeout(() => {
+          document.body.classList.remove('non-selectable');
+        }, 10)),
+        d(() => {
+          g(t);
+        }, e.hideDelay));
+    }
+    function Y() {
+      if (e.noParentEvent || a.value === null) return;
+      const t = o.platform.is.mobile
+        ? [[a.value, 'touchstart', 'delayShow', 'passive']]
+        : [
+            [a.value, 'mouseenter', 'delayShow', 'passive'],
+            [a.value, 'mouseleave', 'delayHide', 'passive'],
+          ];
+      x(r, 'anchor', t);
+    }
+    function w() {
+      if (a.value !== null || e.scrollTarget !== void 0) {
+        b.value = ce(a.value, e.scrollTarget);
+        const t = e.noParentEvent ? c : g;
+        G(b.value, t);
+      }
+    }
+    function Z() {
+      return u.value
+        ? H(
+            'div',
+            {
+              ...h,
+              ref: l,
+              class: ['q-tooltip q-tooltip--style q-position-engine no-pointer-events', h.class],
+              style: [h.style, F.value],
+              role: 'tooltip',
+            },
+            he(L.default),
+          )
+        : null;
+    }
+    function ee() {
+      return H(ue, _.value, Z);
+    }
+    return (E(P), Object.assign(v.proxy, { updatePosition: c }), $);
+  },
+});
+export { we as Q };

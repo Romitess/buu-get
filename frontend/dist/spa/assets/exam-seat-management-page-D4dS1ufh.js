@@ -1,0 +1,2045 @@
+import { Q as Ut } from './QBadge-DdRynt7O.js';
+import {
+  O as rt,
+  Q as v,
+  _ as ve,
+  an as Bt,
+  a3 as me,
+  W as be,
+  V as R,
+  S as g,
+  Y as Lt,
+  R as h,
+  $ as Re,
+  T as J,
+  U as Me,
+  am as Pt,
+  f as i,
+  a2 as it,
+  a6 as le,
+  t as _t,
+  I as ot,
+  o as Mt,
+  w as lt,
+  b0 as Ft,
+  at as de,
+  a7 as Be,
+  b1 as wt,
+  r as u,
+  a4 as Gt,
+  P as Ht,
+  a$ as Wt,
+  X as w,
+  ax as pt,
+} from './index-CKSooU2k.js';
+import { Q as Vt } from './QPage-CM3LWBRo.js';
+import { A as At } from './app-button-D_cMl4aM.js';
+import { A as zt, a as qt } from './app-exam-session-time-DwwTVopE.js';
+import { b as Xt } from './QSelect-CcXwe87O.js';
+import { A as Yt, a as Qt } from './app-breadcrumbs-C0oZOPYe.js';
+import { S as jt } from './search-bar-BgXkcRlY.js';
+import { u as Kt } from './use-quasar-DaOT29F-.js';
+import { u as Zt } from './vue-i18n-Bebkm_iB.js';
+import { i as Jt, x as ea } from './exam.service-0p8xz0zq.js';
+import { b as ta, f as Et } from './enrollment.service-D8jIpEGB.js';
+import { f as aa } from './thai-date-DNnHYwmb.js';
+import { g as Tt } from './image.service-iLwePKJ0.js';
+import { f as sa } from './profile-edit-history.service-BF1IT3RS.js';
+import { u as na } from './use-exam-seat-navigation-DiOvVxr_.js';
+import './QResizeObserver-C4jaR1Qo.js';
+import './QItem-D-DX6y8A.js';
+import './QItemLabel-Ca36qfFu.js';
+import './format-DnjzHs7F.js';
+import './position-engine-Bv76xS6k.js';
+const oa = { class: 'avatar-wrapper q-mr-md' },
+  la = ['src'],
+  ra = { class: 'info-section col' },
+  ia = { class: 'student-name line-height-tight q-mb-sm' },
+  ua = {
+    class: 'row no-wrap items-center justify-between text-body2 info-details text-black info-row',
+  },
+  ca = { key: 1, class: 'text-no-wrap seat-label' },
+  da = rt({
+    __name: 'app-exam-seat-card',
+    props: {
+      studentName: {},
+      studentId: {},
+      seatNumber: { default: null },
+      avatarUrl: { default: null },
+      remark: { default: '' },
+      isForeigner: { type: Boolean, default: !1 },
+    },
+    setup(d) {
+      const M = d,
+        p = i(() => M.seatNumber !== null && M.seatNumber !== void 0 && M.seatNumber.trim() !== ''),
+        P = i(() => M.remark || ''),
+        T = i(() =>
+          M.isForeigner
+            ? 'remark-foreigner'
+            : M.remark && M.remark !== 'ชาวไทย'
+              ? 'remark-special'
+              : 'remark-default',
+        );
+      return (_, A) => (
+        v(),
+        ve(
+          Bt,
+          {
+            class: me(['exam-seat-card', p.value ? 'seat-assigned' : 'seat-unassigned']),
+            flat: '',
+          },
+          {
+            default: be(() => [
+              R(
+                Pt,
+                { class: 'q-pa-md row items-center no-wrap' },
+                {
+                  default: be(() => [
+                    g('div', oa, [
+                      R(
+                        Lt,
+                        { size: '60px', class: 'bg-primary' },
+                        {
+                          default: be(() => [
+                            d.avatarUrl
+                              ? (v(),
+                                h(
+                                  'img',
+                                  {
+                                    key: 0,
+                                    src: d.avatarUrl,
+                                    alt: 'Student Avatar',
+                                    class: 'avatar-img',
+                                  },
+                                  null,
+                                  8,
+                                  la,
+                                ))
+                              : (v(), ve(Re, { key: 1, name: 'person', color: 'white' })),
+                          ]),
+                          _: 1,
+                        },
+                      ),
+                    ]),
+                    g('div', ra, [
+                      g('div', ia, J(d.studentName), 1),
+                      g('div', ua, [
+                        P.value
+                          ? (v(),
+                            h(
+                              'span',
+                              { key: 0, class: me(['remark-badge', T.value]) },
+                              ' หมายเหตุ: ' + J(P.value),
+                              3,
+                            ))
+                          : Me('', !0),
+                        p.value
+                          ? (v(), h('span', ca, ' เลขที่นั่งสอบ: ' + J(d.seatNumber), 1))
+                          : Me('', !0),
+                      ]),
+                    ]),
+                  ]),
+                  _: 1,
+                },
+              ),
+            ]),
+            _: 1,
+          },
+          8,
+          ['class'],
+        )
+      );
+    },
+  }),
+  ma = it(da, [['__scopeId', 'data-v-84f801fe']]),
+  va = {
+    key: 0,
+    src: '/icons/seat-broken.svg',
+    class: 'broken-icon',
+    alt: '',
+    'aria-hidden': 'true',
+  },
+  fa = { class: 'seat-name' },
+  Sa = ['src'],
+  ga = { key: 3, class: 'empty-text' },
+  pa = { class: 'seat-label' },
+  ha = rt({
+    __name: 'app-exam-seat-assignment-tile',
+    props: {
+      seatLabel: {},
+      status: {},
+      student: { default: null },
+      swapMode: { type: Boolean, default: !1 },
+      selected: { type: Boolean, default: !1 },
+      moving: { type: Boolean, default: !1 },
+      emptyLabel: { default: 'ว่าง' },
+      nameFallback: { default: 'Name' },
+    },
+    emits: ['click'],
+    setup(d, { emit: M }) {
+      const p = d,
+        P = M,
+        T = i(() => {
+          const _ = p.student?.name?.trim();
+          if (!_) return p.nameFallback;
+          const A = _.split(/\s+/).filter(Boolean);
+          return A.length >= 2 && /^[A-Za-z.]+$/.test(A[0] ?? '') ? (A[1] ?? _) : (A[0] ?? _);
+        });
+      return (_, A) => (
+        v(),
+        h(
+          le,
+          null,
+          [
+            g(
+              'div',
+              {
+                class: me([
+                  'seat-assignment-tile',
+                  {
+                    'is-assigned': d.status === 'assigned',
+                    'is-broken': d.status === 'broken',
+                    'is-blocked': d.status === 'blocked',
+                    'is-empty': d.status === 'available',
+                    'is-swap-mode': d.swapMode && d.status !== 'broken' && d.status !== 'blocked',
+                    'is-selected': d.selected,
+                    'is-moving': d.moving,
+                  },
+                ]),
+                onClick: A[0] || (A[0] = (ee) => P('click')),
+              },
+              [
+                d.status === 'broken'
+                  ? (v(), h('img', va))
+                  : d.status === 'blocked'
+                    ? (v(), h(le, { key: 1 }, [], 64))
+                    : d.student
+                      ? (v(),
+                        h(
+                          le,
+                          { key: 2 },
+                          [
+                            g('div', fa, J(T.value), 1),
+                            R(
+                              Lt,
+                              { size: '34px', class: 'seat-avatar' },
+                              {
+                                default: be(() => [
+                                  d.student.avatar
+                                    ? (v(),
+                                      h(
+                                        'img',
+                                        { key: 0, src: d.student.avatar, alt: '' },
+                                        null,
+                                        8,
+                                        Sa,
+                                      ))
+                                    : (v(),
+                                      ve(Re, {
+                                        key: 1,
+                                        name: 'person',
+                                        size: '21px',
+                                        color: 'grey-8',
+                                      })),
+                                ]),
+                                _: 1,
+                              },
+                            ),
+                            d.swapMode
+                              ? (v(), ve(Re, { key: 0, name: 'swap_horiz', class: 'swap-icon' }))
+                              : Me('', !0),
+                          ],
+                          64,
+                        ))
+                      : (v(), h('span', ga, J(d.emptyLabel), 1)),
+              ],
+              2,
+            ),
+            g('div', pa, J(d.seatLabel), 1),
+          ],
+          64,
+        )
+      );
+    },
+  }),
+  yt = it(ha, [['__scopeId', 'data-v-e426cf35']]),
+  La = { key: 0, class: 'seat-map-header' },
+  _a = { class: 'seat-map-title' },
+  Ia = { key: 0, class: 'seat-map-controls row items-center no-wrap q-gutter-x-md' },
+  wa = { class: 'row items-center no-wrap q-gutter-x-sm' },
+  Aa = { class: 'shuffle-label' },
+  Ea = ['onMousedown', 'onMouseenter', 'onMouseleave'],
+  Ta = { key: 1, class: 'empty-seat-map column items-center justify-center text-grey-6' },
+  ya = { class: 'text-body2 q-mt-sm' },
+  Oa = { class: 'shift-ghost-name' },
+  ba = ['src'],
+  Ra = 460,
+  Ma = rt({
+    __name: 'app-exam-seat-assignment-map',
+    props: {
+      title: {},
+      seatsByRow: {},
+      splitLeftRight: { type: Boolean },
+      aisleAfterCols: { default: () => [] },
+      aisleAfterRows: { default: () => [] },
+      printMode: { type: Boolean, default: !1 },
+      hideHeader: { type: Boolean, default: !1 },
+      swapModeLabel: { default: 'โหมดสลับที่นั่ง' },
+      emptyLabel: { default: 'ไม่มีข้อมูลผังที่นั่ง' },
+    },
+    emits: ['swap'],
+    setup(d, { emit: M }) {
+      const p = d,
+        P = M,
+        T = u(!1),
+        _ = i(() => p.seatsByRow.length),
+        A = i(() => p.seatsByRow.reduce((a, o) => Math.max(a, o.length), 0)),
+        ee = i(() =>
+          [...new Set(p.aisleAfterCols)]
+            .filter((a) => Number.isInteger(a) && a >= 1 && a < A.value)
+            .sort((a, o) => a - o),
+        ),
+        Y = i(() =>
+          [...new Set(p.aisleAfterRows)]
+            .filter((a) => Number.isInteger(a) && a >= 1 && a < _.value)
+            .sort((a, o) => a - o),
+        ),
+        G = i(() => {
+          if (ee.value.length > 0) return ee.value;
+          const a = Math.ceil(A.value / 2);
+          return p.splitLeftRight && a < A.value ? [a] : [];
+        }),
+        E = i(() => Y.value),
+        z = (a, o) => a + o.filter((l) => l < a).length,
+        te = (a, o) => a + o.filter((l) => l <= a).length,
+        Ce = i(() => {
+          const a = [];
+          for (let l = 1; l <= A.value; l++)
+            (a.push('64px'), G.value.includes(l) && a.push('18px'));
+          const o = [];
+          for (let l = 1; l <= _.value; l++)
+            (o.push('82px'), E.value.includes(l) && o.push('18px'));
+          return {
+            display: 'grid',
+            gridTemplateColumns: a.join(' '),
+            gridTemplateRows: o.join(' '),
+            columnGap: '16px',
+            rowGap: '10px',
+            paddingBottom: '28px',
+          };
+        }),
+        Ne = (a, o) => ({ gridColumn: `${z(o, G.value)}`, gridRow: `${z(a, E.value)}` }),
+        L = () => {
+          const c = _.value + E.value.length,
+            f = _.value * 82 + E.value.length * 18 + Math.max(c - 1, 0) * 10,
+            U = E.value
+              .map((O) => {
+                const N = te(O, E.value);
+                let H = 0;
+                for (let K = 1; K < N; K += 1) {
+                  const W = E.value.some((Ie) => te(Ie, E.value) === K);
+                  ((H += W ? 18 : 82), (H += 10));
+                }
+                return { start: Math.max(0, H - 6), end: Math.min(f, H + 18 + 6) };
+              })
+              .sort((O, N) => O.start - N.start)
+              .reduce(
+                (O, N) => {
+                  const H = O[O.length - 1];
+                  return (
+                    H &&
+                      (N.start > H.start && (H.end = Math.min(H.end, N.start)),
+                      N.end < f && O.push({ start: N.end, end: f })),
+                    O
+                  );
+                },
+                [{ start: 0, end: f }],
+              ),
+            ne = U.reduce(
+              (O, N) => (N.end - N.start > O.end - O.start ? N : O),
+              U[0] ?? { start: 0, end: f },
+            );
+          return Math.max(18, Math.min(ne.start + (ne.end - ne.start) / 2, f - 18));
+        },
+        fe = (a) => ({
+          gridColumn: `${te(a, G.value)}`,
+          gridRow: `1 / ${_.value + E.value.length + 1}`,
+          '--column-aisle-label-top': `${L()}px`,
+        }),
+        ae = (a) => ({
+          gridColumn: `1 / ${A.value + G.value.length + 1}`,
+          gridRow: `${te(a, E.value)}`,
+        }),
+        re = new Map(),
+        we = u([]),
+        k = u(new Set()),
+        D = u(new Map()),
+        ie = u(!1),
+        Se = u(!1);
+      let xe = 0,
+        x = null,
+        Q = null,
+        I = null;
+      const ut = (a, o) => {
+          a instanceof HTMLElement ? re.set(o, a) : re.delete(o);
+        },
+        ge = () => {
+          const a = new Map();
+          return (
+            re.forEach((o, l) => {
+              const c = o.getBoundingClientRect();
+              a.set(l, { left: c.left, top: c.top, width: c.width, height: c.height });
+            }),
+            a
+          );
+        },
+        C = (a) => {
+          const o = new Map();
+          return (
+            a?.forEach((l) => {
+              l.forEach((c) => {
+                c.student &&
+                  o.set(c.student.id, {
+                    seatId: c.id,
+                    studentId: c.student.id,
+                    name: c.student.name,
+                    avatar: c.student.avatar,
+                  });
+              });
+            }),
+            o
+          );
+        },
+        ct = (a) => ({
+          left: `${a.from.left}px`,
+          top: `${a.from.top}px`,
+          width: `${a.from.width}px`,
+          height: `${a.from.height}px`,
+          transform: a.active
+            ? `translate(${a.to.left - a.from.left}px, ${a.to.top - a.from.top}px)`
+            : 'translate(0, 0)',
+        }),
+        dt = (a) => {
+          if (!a.student) return {};
+          const o = D.value.get(a.student.id);
+          return o ? { '--seat-card-shift': o } : {};
+        },
+        mt = (a) => {
+          k.value = new Set([...k.value, ...a]);
+        },
+        vt = (a) => {
+          ((k.value = new Set([...k.value].filter((o) => !a.has(o)))),
+            (D.value = new Map([...D.value].filter(([o]) => !a.has(o)))));
+        },
+        ft = (a) => {
+          D.value = new Map([...D.value].filter(([o]) => !a.has(o)));
+        },
+        q = u(null),
+        se = u(null),
+        ke = u(0),
+        Ae = u(0),
+        Ee = u(1),
+        De = u(0),
+        Pe = u(0),
+        Te = u(100),
+        pe = u(!1),
+        qe = [
+          { label: '50%', value: 50 },
+          { label: '75%', value: 75 },
+          { label: '100%', value: 100 },
+          { label: '125%', value: 125 },
+          { label: '150%', value: 150 },
+        ],
+        Xe = i(() => Ee.value * (Te.value / 100)),
+        Fe = () => {
+          if (!se.value || !q.value) {
+            Ee.value = 1;
+            return;
+          }
+          const a = se.value.style,
+            o = a.transform,
+            l = a.position,
+            c = a.width,
+            f = a.height;
+          ((a.transform = 'none'),
+            (a.position = 'static'),
+            (a.width = 'max-content'),
+            (a.height = 'auto'),
+            se.value.offsetWidth);
+          const j = se.value.scrollWidth,
+            U = se.value.scrollHeight + 56;
+          ((De.value = j),
+            (Pe.value = U),
+            (a.transform = o),
+            (a.position = l),
+            (a.width = c),
+            (a.height = f));
+          const O = q.value.clientWidth - 16,
+            N = Ae.value ? Ae.value - 8 : U;
+          if (j <= 0 || U <= 0) {
+            Ee.value = 1;
+            return;
+          }
+          const H = O / j,
+            K = N / U,
+            W = 1;
+          Ee.value = Math.min(H, Math.max(K, W), 2);
+        },
+        Ye = i(() => {
+          const a = Xe.value,
+            o = De.value,
+            l = Pe.value;
+          return o <= 0 || l <= 0
+            ? { width: '100%', display: 'flex', justifyContent: 'center' }
+            : {
+                width: `${Math.max(o * a, ke.value - 16)}px`,
+                height: `${l * a}px`,
+                position: 'relative',
+                overflow: 'visible',
+              };
+        }),
+        Qe = i(() => {
+          const a = Xe.value,
+            o = De.value,
+            l = Pe.value;
+          if (o <= 0 || l <= 0) return { transform: 'none', width: 'max-content' };
+          const c = Math.max((ke.value - 16 - o * a) / 2, 0);
+          return {
+            transform: `scale(${a})`,
+            transformOrigin: 'top left',
+            position: 'absolute',
+            left: `${c}px`,
+            top: '0',
+            width: `${o}px`,
+            height: `${l}px`,
+          };
+        }),
+        Ge = () => {
+          ((pe.value = !1),
+            window.removeEventListener('mousemove', je),
+            window.removeEventListener('mouseup', Ge));
+        },
+        je = (a) => {
+          !pe.value ||
+            !q.value ||
+            ((q.value.scrollLeft -= a.movementX), (q.value.scrollTop -= a.movementY));
+        },
+        Ke = (a) => {
+          if (p.printMode || a.button !== 0 || $.value !== null) return;
+          const o = a.target;
+          o?.closest('.q-field, .q-toggle') ||
+            (T.value && o?.closest('.seat-cell')) ||
+            (q.value &&
+              (a.preventDefault(),
+              (pe.value = !0),
+              window.addEventListener('mousemove', je),
+              window.addEventListener('mouseup', Ge)));
+        };
+      let he = null;
+      (_t(() => {
+        (q.value &&
+          ((he = new ResizeObserver(() => {
+            ((ke.value = q.value?.clientWidth ?? 0), (Ae.value = q.value?.clientHeight ?? 0), Fe());
+          })),
+          he.observe(q.value)),
+          ot(() => Fe()));
+      }),
+        Mt(() => {
+          (he?.disconnect(),
+            window.removeEventListener('mousemove', oe),
+            window.removeEventListener('mouseup', Le),
+            window.removeEventListener('blur', _e),
+            Ge(),
+            document.body.classList.remove('is-dragging-active'));
+        }),
+        lt(
+          [
+            () => p.seatsByRow,
+            () => p.splitLeftRight,
+            () => p.aisleAfterCols,
+            () => p.aisleAfterRows,
+          ],
+          () => {
+            ot(() => Fe());
+          },
+          { deep: !0 },
+        ),
+        lt(
+          () => p.seatsByRow,
+          (a, o) => {
+            if (!Se.value) return;
+            Se.value = !1;
+            const l = Q ?? C(o),
+              c = x ?? ge(),
+              f = I;
+            ((Q = null),
+              (x = null),
+              (I = null),
+              ot(() => {
+                const j = C(a),
+                  U = ge(),
+                  ne = new Set(),
+                  O = new Map(),
+                  N = [],
+                  H = ++xe;
+                (j.forEach((K, W) => {
+                  if (W === f) return;
+                  const Ie = l.get(W);
+                  if (!Ie || Ie.seatId === K.seatId) return;
+                  const Ue = c.get(Ie.seatId),
+                    Oe = U.get(K.seatId);
+                  !Ue ||
+                    !Oe ||
+                    (ne.add(W),
+                    O.set(W, `translate3d(${Ue.left - Oe.left}px, ${Ue.top - Oe.top}px, 0)`),
+                    N.push({
+                      key: `${H}-${W}`,
+                      studentId: W,
+                      name: K.name,
+                      avatar: K.avatar,
+                      from: Ue,
+                      to: Oe,
+                      active: !1,
+                    }));
+                }),
+                  N.length !== 0 &&
+                    ((ie.value = !0),
+                    mt(ne),
+                    (D.value = new Map([...D.value, ...O])),
+                    (we.value = []),
+                    window.requestAnimationFrame(() => {
+                      (se.value && se.value.offsetHeight,
+                        (ie.value = !1),
+                        window.requestAnimationFrame(() => {
+                          ft(ne);
+                        }));
+                    }),
+                    window.setTimeout(() => {
+                      vt(ne);
+                    }, Ra + 80)));
+              }));
+          },
+          { deep: !0, flush: 'pre' },
+        ));
+      const $ = u(null),
+        X = u(null),
+        Ze = u(null),
+        Je = u(32),
+        He = u(32),
+        et = u(64),
+        ue = u(64),
+        $e = (a) => a.status !== 'broken' && a.status !== 'blocked',
+        ye = i(() => {
+          if (!$.value) return null;
+          for (const a of p.seatsByRow) {
+            const o = a.find((l) => l.id === $.value);
+            if (o) return o;
+          }
+          return null;
+        }),
+        St = i(() => ({ left: '0', top: '0', width: `${et.value}px`, height: `${ue.value}px` })),
+        We = (a, o) => {
+          const l = Ze.value;
+          l &&
+            (l.style.transform = `translate3d(${a - Je.value}px, ${o - He.value}px, 0) scale(1.04)`);
+        },
+        gt = (a, o) => {
+          const c = document.elementFromPoint(a, o)?.closest('.seat-cell');
+          if (!(c instanceof HTMLElement)) return null;
+          for (const [f, j] of re) if (j === c) return f;
+          return null;
+        },
+        ce = (a, o) => {
+          const l = gt(a, o);
+          if (!l) {
+            X.value = null;
+            return;
+          }
+          const c = p.seatsByRow.flat().find((f) => f.id === l);
+          X.value = c && $e(c) ? c.id : null;
+        },
+        oe = (a) => {
+          (We(a.clientX, a.clientY), ce(a.clientX, a.clientY));
+        },
+        Le = (a) => {
+          a && ce(a.clientX, a.clientY);
+          const o = $.value,
+            l = X.value,
+            c = p.seatsByRow.flat().find((f) => f.id === o);
+          (window.removeEventListener('mousemove', oe),
+            window.removeEventListener('mouseup', Le),
+            window.removeEventListener('blur', _e),
+            document.body.classList.remove('is-dragging-active'),
+            ($.value = null),
+            (X.value = null),
+            o &&
+              l &&
+              o !== l &&
+              ((Q = C(p.seatsByRow)),
+              (x = ge()),
+              (I = c?.student?.id ?? null),
+              (Se.value = !0),
+              P('swap', o, l)));
+        },
+        _e = () => {
+          (window.removeEventListener('mousemove', oe),
+            window.removeEventListener('mouseup', Le),
+            window.removeEventListener('blur', _e),
+            document.body.classList.remove('is-dragging-active'),
+            ($.value = null),
+            (X.value = null));
+        },
+        tt = (a, o) => {
+          if (p.printMode || !T.value || a.button !== 0 || !$e(o) || !o.student) return;
+          a.preventDefault();
+          const c = a.currentTarget
+            ?.querySelector('.seat-assignment-tile')
+            ?.getBoundingClientRect();
+          (c &&
+            ((et.value = c.width),
+            (ue.value = c.height),
+            (Je.value = a.clientX - c.left),
+            (He.value = a.clientY - c.top)),
+            ($.value = o.id),
+            (X.value = null),
+            ot(() => {
+              We(a.clientX, a.clientY);
+            }),
+            document.body.classList.add('is-dragging-active'),
+            window.addEventListener('mousemove', oe),
+            window.addEventListener('mouseup', Le),
+            window.addEventListener('blur', _e));
+        },
+        at = (a) => {
+          $.value && (X.value = $e(a) ? a.id : null);
+        },
+        st = (a) => {
+          X.value === a.id && (X.value = null);
+        };
+      return (a, o) => (
+        v(),
+        h(
+          'section',
+          { class: me(['seat-map-panel', { 'is-print-mode': d.printMode }]) },
+          [
+            d.hideHeader
+              ? Me('', !0)
+              : (v(),
+                h('header', La, [
+                  g('h2', _a, J(d.title), 1),
+                  d.printMode
+                    ? Me('', !0)
+                    : (v(),
+                      h('div', Ia, [
+                        g('div', wa, [
+                          g('span', Aa, J(d.swapModeLabel), 1),
+                          R(
+                            Ft,
+                            {
+                              modelValue: T.value,
+                              'onUpdate:modelValue': o[0] || (o[0] = (l) => (T.value = l)),
+                              dense: '',
+                              color: 'primary',
+                              class: 'shuffle-toggle',
+                            },
+                            null,
+                            8,
+                            ['modelValue'],
+                          ),
+                        ]),
+                        R(
+                          Xt,
+                          {
+                            modelValue: Te.value,
+                            'onUpdate:modelValue': o[1] || (o[1] = (l) => (Te.value = l)),
+                            options: qe,
+                            'emit-value': '',
+                            'map-options': '',
+                            dense: '',
+                            outlined: '',
+                            'options-dense': '',
+                            class: 'zoom-select',
+                            'aria-label': 'ระดับการซูมผังที่นั่ง',
+                          },
+                          {
+                            prepend: be(() => [
+                              R(Re, { name: 'zoom_in', size: '19px', color: 'grey-8' }),
+                            ]),
+                            _: 1,
+                          },
+                          8,
+                          ['modelValue'],
+                        ),
+                      ])),
+                ])),
+            g(
+              'div',
+              {
+                ref_key: 'containerRef',
+                ref: q,
+                class: me(['seat-map-content', { 'is-panning': pe.value }]),
+                onMousedown: Ke,
+              },
+              [
+                d.seatsByRow.length > 0
+                  ? (v(),
+                    h(
+                      'div',
+                      { key: 0, class: 'seat-grid-scaling-wrapper', style: de(Ye.value) },
+                      [
+                        g(
+                          'div',
+                          {
+                            ref_key: 'gridRef',
+                            ref: se,
+                            class: me([
+                              'seat-grid-scalable',
+                              {
+                                'is-swap-active': T.value,
+                                'is-dragging': $.value !== null,
+                                'is-preparing-seat-shift': ie.value,
+                              },
+                            ]),
+                            style: de(Qe.value),
+                          },
+                          [
+                            g(
+                              'div',
+                              { class: 'seat-grid-wrapper', style: de(Ce.value) },
+                              [
+                                (v(!0),
+                                h(
+                                  le,
+                                  null,
+                                  Be(
+                                    d.seatsByRow,
+                                    (l, c) => (
+                                      v(),
+                                      h(
+                                        le,
+                                        { key: c },
+                                        [
+                                          (v(!0),
+                                          h(
+                                            le,
+                                            null,
+                                            Be(
+                                              l,
+                                              (f, j) => (
+                                                v(),
+                                                h(
+                                                  'div',
+                                                  {
+                                                    key: f.id,
+                                                    ref_for: !0,
+                                                    ref: (U) => ut(U, f.id),
+                                                    class: me([
+                                                      'seat-cell',
+                                                      {
+                                                        'is-drag-source': $.value === f.id,
+                                                        'is-drag-over':
+                                                          $.value !== null && X.value === f.id,
+                                                      },
+                                                    ]),
+                                                    style: de(Ne(c + 1, j + 1)),
+                                                    onMousedown: (U) => tt(U, f),
+                                                    onMouseenter: (U) => at(f),
+                                                    onMouseleave: (U) => st(f),
+                                                  },
+                                                  [
+                                                    g(
+                                                      'div',
+                                                      {
+                                                        class: me([
+                                                          'seat-cell-content',
+                                                          {
+                                                            'is-seat-shifting':
+                                                              f.student &&
+                                                              k.value.has(f.student.id),
+                                                          },
+                                                        ]),
+                                                        style: de(dt(f)),
+                                                      },
+                                                      [
+                                                        R(
+                                                          yt,
+                                                          {
+                                                            'seat-label': f.label,
+                                                            status:
+                                                              $.value === f.id
+                                                                ? 'available'
+                                                                : f.status,
+                                                            student:
+                                                              $.value === f.id ? null : f.student,
+                                                            'swap-mode': T.value,
+                                                            selected:
+                                                              $.value !== f.id &&
+                                                              $.value !== null &&
+                                                              X.value === f.id,
+                                                          },
+                                                          null,
+                                                          8,
+                                                          [
+                                                            'seat-label',
+                                                            'status',
+                                                            'student',
+                                                            'swap-mode',
+                                                            'selected',
+                                                          ],
+                                                        ),
+                                                      ],
+                                                      6,
+                                                    ),
+                                                  ],
+                                                  46,
+                                                  Ea,
+                                                )
+                                              ),
+                                            ),
+                                            128,
+                                          )),
+                                        ],
+                                        64,
+                                      )
+                                    ),
+                                  ),
+                                  128,
+                                )),
+                                (v(!0),
+                                h(
+                                  le,
+                                  null,
+                                  Be(
+                                    G.value,
+                                    (l) => (
+                                      v(),
+                                      h(
+                                        'div',
+                                        {
+                                          key: `column-aisle-${l}`,
+                                          class: 'seat-column-aisle',
+                                          style: de(fe(l)),
+                                          'aria-hidden': 'true',
+                                        },
+                                        [...(o[2] || (o[2] = [g('span', null, 'ทางเดิน', -1)]))],
+                                        4,
+                                      )
+                                    ),
+                                  ),
+                                  128,
+                                )),
+                                (v(!0),
+                                h(
+                                  le,
+                                  null,
+                                  Be(
+                                    E.value,
+                                    (l) => (
+                                      v(),
+                                      h(
+                                        'div',
+                                        {
+                                          key: `row-aisle-${l}`,
+                                          class: 'seat-row-aisle',
+                                          style: de(ae(l)),
+                                          'aria-hidden': 'true',
+                                        },
+                                        [...(o[3] || (o[3] = [g('span', null, 'ทางเดิน', -1)]))],
+                                        4,
+                                      )
+                                    ),
+                                  ),
+                                  128,
+                                )),
+                              ],
+                              4,
+                            ),
+                          ],
+                          6,
+                        ),
+                      ],
+                      4,
+                    ))
+                  : (v(),
+                    h('div', Ta, [
+                      R(Re, { name: 'grid_off', size: '42px' }),
+                      g('div', ya, J(d.emptyLabel), 1),
+                    ])),
+              ],
+              34,
+            ),
+            (v(),
+            ve(wt, { to: 'body' }, [
+              ye.value
+                ? (v(),
+                  h(
+                    'div',
+                    {
+                      key: 0,
+                      ref_key: 'dragGhostRef',
+                      ref: Ze,
+                      class: 'seat-drag-ghost',
+                      style: de(St.value),
+                    },
+                    [
+                      R(
+                        yt,
+                        {
+                          'seat-label': ye.value.label,
+                          status: ye.value.status,
+                          student: ye.value.student,
+                        },
+                        null,
+                        8,
+                        ['seat-label', 'status', 'student'],
+                      ),
+                    ],
+                    4,
+                  ))
+                : Me('', !0),
+            ])),
+            (v(),
+            ve(wt, { to: 'body' }, [
+              (v(!0),
+              h(
+                le,
+                null,
+                Be(
+                  we.value,
+                  (l) => (
+                    v(),
+                    h(
+                      'div',
+                      {
+                        key: l.key,
+                        class: me(['seat-shift-ghost', { 'is-active': l.active }]),
+                        style: de(ct(l)),
+                      },
+                      [
+                        g('div', Oa, J(l.name), 1),
+                        R(
+                          Lt,
+                          { size: '34px', class: 'shift-ghost-avatar' },
+                          {
+                            default: be(() => [
+                              l.avatar
+                                ? (v(), h('img', { key: 0, src: l.avatar, alt: '' }, null, 8, ba))
+                                : (v(),
+                                  ve(Re, {
+                                    key: 1,
+                                    name: 'person',
+                                    size: '21px',
+                                    color: 'grey-8',
+                                  })),
+                            ]),
+                            _: 2,
+                          },
+                          1024,
+                        ),
+                      ],
+                      6,
+                    )
+                  ),
+                ),
+                128,
+              )),
+            ])),
+          ],
+          2,
+        )
+      );
+    },
+  }),
+  Ca = it(Ma, [['__scopeId', 'data-v-37e7811b']]),
+  Ot = 1,
+  bt = 2,
+  Rt = 3,
+  Na = 320,
+  ht = {
+    0: 'พระภิกษุ / สามเณร',
+    1: 'นักบวช / ศาสนบุคคล',
+    2: 'บุคคลทุพพลภาพ',
+    3: 'ผู้ตั้งครรภ์',
+    4: 'ผู้พิการรณ์',
+  };
+function xa() {
+  const d = Gt(),
+    M = Ht(),
+    { isSeatAllocationLocked: p } = na(),
+    P = Kt(),
+    { t: T } = Zt(),
+    _ = Number(d.params.examId),
+    A = u(!1),
+    ee = u(null),
+    Y = u(null),
+    G = u(null),
+    E = u([]),
+    z = u(null),
+    te = u([]),
+    Ce = u({}),
+    Ne = u({}),
+    L = u([]),
+    fe = new Map(),
+    ae = u([]),
+    re = u(''),
+    we = u(!1),
+    k = i(() => E.value.find((e) => e.SS_ID === Y.value) ?? null),
+    D = (e) => `${e.SS_START_TIME || ''}-${e.SS_END_TIME || ''}`,
+    ie = (e) => e.map((s) => ({ ...s })),
+    Se = (e, s) => {
+      if (e === null) return;
+      const t = E.value.find((n) => n.SS_ID === e);
+      t && fe.set(D(t), ie(s));
+    },
+    xe = i(() => {
+      const e = new Set();
+      return E.value.filter((s) => {
+        const t = D(s);
+        return e.has(t) ? !1 : (e.add(t), !0);
+      });
+    }),
+    x = i(() => {
+      if (!k.value) return [];
+      const e = D(k.value);
+      return E.value.filter((s) => D(s) === e);
+    }),
+    Q = i(() => x.value.map((e) => e.SS_ID)),
+    I = i(() =>
+      x.value.flatMap((e) => {
+        const s = e.SESSION_LOCATIONS || [];
+        return s.length > 0
+          ? s.filter((t) => t.LOCATION).map((t) => ({ ...t, SS_ID: t.SS_ID || e.SS_ID }))
+          : e.LOCATION
+            ? [
+                {
+                  SL_ID: -e.SS_ID,
+                  LOCATION_ID: e.LOCATION.LOCATION_ID,
+                  SS_ID: e.SS_ID,
+                  LOCATION: e.LOCATION,
+                },
+              ]
+            : [];
+      }),
+    ),
+    ut = i(() =>
+      I.value.map((e) => ({
+        value: e.SL_ID,
+        label: `${e.LOCATION.LOCATION_NAME}${e.LOCATION.LOCATION_ROOM_NO ? ` (${e.LOCATION.LOCATION_ROOM_NO})` : ''}`,
+      })),
+    ),
+    ge = i(() => I.value.find((e) => e.SL_ID === G.value) ?? null),
+    C = i(() => ge.value?.LOCATION ?? k.value?.LOCATION ?? null),
+    ct = i(() => {
+      const e = z.value?.EXAM_NAME || ea,
+        s = z.value?.EXAM_ROUND ? `${e} ${z.value.EXAM_ROUND}` : e,
+        t = [],
+        n = ge.value?.SS_NAME;
+      if (n) {
+        const r = n
+          .split(',')
+          .map((m) => m.trim())
+          .filter(Boolean);
+        t.push(...r);
+      }
+      return t.length > 0 ? `${s} (${t.join(', ')})` : s;
+    }),
+    dt = (e) => T(`common.months[${e}]`),
+    mt = i(() => (z.value?.EXAM_DATE ? aa(z.value.EXAM_DATE, dt) : '-')),
+    vt = i(() => {
+      if (!k.value) return '-';
+      const e = (n) => {
+          if (!n) return '';
+          const r = String(n).trim(),
+            m = r.match(/(\d{2}:\d{2})/);
+          return m && m[1] ? m[1] : r.substring(0, 5);
+        },
+        s = e(k.value.SS_START_TIME) || '00:00',
+        t = e(k.value.SS_END_TIME) || '00:00';
+      return `${s}-${t}`;
+    }),
+    ft = i(() => {
+      if (!C.value) return '-';
+      const e = C.value;
+      return `${e.LOCATION_NAME} ${e.LOCATION_ROOM_NO ? `(${e.LOCATION_ROOM_NO})` : ''}`;
+    }),
+    q = i(() => {
+      const e = I.value.reduce((s, t) => s + (t.LOCATION.SEATS?.length || 0), 0);
+      return e > 0 ? e : x.value.reduce((s, t) => s + (t.SS_CAPACITY || 0), 0);
+    }),
+    se = i(() => te.value.filter((e) => Q.value.includes(e.SESSION_ID))),
+    ke = (e) => (e ? C.value?.SEATS?.find((t) => String(t.LS_ID) === e)?.LS_SEAT_LABEL || e : null),
+    Ae = (e) => {
+      const s = e
+        ?.trim()
+        .toUpperCase()
+        .match(/^([A-Z]+)(\d+)$/);
+      if (!s) return null;
+      const t = s[1] ?? '',
+        n = Number(s[2]);
+      return Number.isInteger(n)
+        ? {
+            letterOrder: t.split('').reduce((m, F) => m * 26 + (F.charCodeAt(0) - 64), 0),
+            numberOrder: n,
+          }
+        : null;
+    },
+    Ee = (e, s) => {
+      const t = Ae(e.LS_SEAT_LABEL),
+        n = Ae(s.LS_SEAT_LABEL);
+      if (t && n) {
+        const r = t.letterOrder - n.letterOrder;
+        if (r !== 0) return r;
+        const m = t.numberOrder - n.numberOrder;
+        if (m !== 0) return m;
+      }
+      return t && !n ? -1 : !t && n ? 1 : e.LS_ROW_NO - s.LS_ROW_NO || e.LS_COL_NO - s.LS_COL_NO;
+    },
+    De = (e) => {
+      if (e == null || e === '') return null;
+      const s = Number(e);
+      if (Number.isInteger(s)) return s;
+      const t = Object.entries({ ...ht, 5: 'ทั่วไป' }).find(([, n]) => n === e);
+      return t ? Number(t[0]) : null;
+    },
+    Pe = (e) => !!e?.trim(),
+    Te = (e) => {
+      const s = De(e.ERM_PHYSICAL_STATUS);
+      if (s !== null && s in ht) return { remark: ht[s] ?? '', isForeigner: !1 };
+      const n = (s === null || s === 5) && Pe(e.USER?.USER_PASSPORT_NO);
+      return { remark: n ? 'ชาวต่างชาติ' : 'ชาวไทย', isForeigner: n };
+    },
+    pe = (e, s) => {
+      const t = De(e.ERM_PHYSICAL_STATUS);
+      return t !== null && t >= 0 && t <= 4 ? t : s ? 5 : 6;
+    },
+    qe = (e) => {
+      const s = e.USER?.PROFILE?.userProfileId;
+      return (
+        Ce.value[e.USER_ID] ||
+        e.USER?.USER_IMAGE ||
+        e.USER?.IMAGE?.USER_IMAGE_URL ||
+        (s ? Ne.value[s] : null) ||
+        e.USER?.PROFILE?.userImagePath ||
+        null
+      );
+    },
+    Xe = (e) => {
+      if (!e) return {};
+      try {
+        return JSON.parse(e);
+      } catch {
+        return {};
+      }
+    },
+    Fe = (e) => {
+      const s = [...e].sort(
+        (t, n) => new Date(n.createdAt).getTime() - new Date(t.createdAt).getTime(),
+      );
+      for (const t of s) {
+        const r = Xe(t.newValues).userImagePath;
+        if (typeof r == 'string' && r.trim()) return r;
+      }
+      return null;
+    },
+    Ye = async () => {
+      const e = await Wt();
+      Ce.value = e.reduce(
+        (s, t) => (t.id && t.userImagePath && (s[t.id] = t.userImagePath), s),
+        {},
+      );
+    },
+    Qe = async () => {
+      const e = [
+          ...new Set(se.value.map((t) => t.USER?.PROFILE?.userProfileId).filter((t) => !!t)),
+        ],
+        s = await Promise.all(
+          e.map(async (t) => {
+            try {
+              const n = await sa(t);
+              return [t, Fe(n)];
+            } catch (n) {
+              return (
+                console.error(`Failed to fetch profile edit history for profile ${t}`, n),
+                [t, null]
+              );
+            }
+          }),
+        );
+      Ne.value = s.reduce((t, [n, r]) => (r && (t[n] = r), t), {});
+    },
+    Ge = async () => {
+      _ && ((te.value = await Et(_)), await Promise.all([Ye(), Qe()]), (we.value = !0), We());
+    },
+    je = async () => {
+      if (!_) return;
+      const e = await Et(_);
+      ((te.value = e),
+        await Promise.all([Ye(), Qe()]),
+        (L.value = L.value.map((s) => {
+          const t = e.find((r) => r.ERM_ID === s.ermId);
+          if (!t) return s;
+          const n = qe(t);
+          return { ...s, avatar: n ? Tt(n) : null };
+        })));
+    },
+    Ke = i(() => L.value.length > 0 && L.value.every((e) => !!e.seat)),
+    he = i(() => {
+      const e = ge.value;
+      if (!e) return [];
+      const s = new Set((e.LOCATION.SEATS || []).map((t) => String(t.LS_ID)));
+      return L.value.filter((t) =>
+        t.seat && s.has(t.seat) ? !0 : t.sessionLocationId === e.SL_ID,
+      );
+    }),
+    $ = i(() => L.value.length),
+    X = i(() => L.value.length),
+    Ze = i(() => he.value.length),
+    Je = i(() => {
+      const e = ge.value?.LOCATION;
+      if (!e) return 0;
+      const s = (e.SEATS || []).filter(
+        (t) => t.LS_SEAT_STATUS !== 1 && t.LS_SEAT_STATUS !== 2,
+      ).length;
+      return s > 0
+        ? s
+        : e.LOCATION_SEAT_CAPACITY
+          ? e.LOCATION_SEAT_CAPACITY
+          : (e.LOCATION_TOTAL_ROWS || 0) * (e.LOCATION_TOTAL_COLS || 0);
+    }),
+    He = (e) => {
+      if (!e.seat) return Number.MAX_SAFE_INTEGER;
+      for (const s of I.value) {
+        const t = s.LOCATION.SEATS?.find((n) => String(n.LS_ID) === e.seat);
+        if (t) {
+          const n = Ae(t.LS_SEAT_LABEL),
+            r = n ? n.letterOrder * 1e3 + n.numberOrder : t.LS_ROW_NO * 1e3 + t.LS_COL_NO;
+          return s.SL_ID * 1e6 + r;
+        }
+      }
+      return Number.MAX_SAFE_INTEGER;
+    },
+    et = i(() => {
+      const e = re.value.toLowerCase().trim(),
+        s = he.value;
+      return (
+        e
+          ? s.filter((n) => {
+              const r = ke(n.seat)?.toLowerCase() || '';
+              return (
+                n.name.toLowerCase().includes(e) || n.id.toLowerCase().includes(e) || r.includes(e)
+              );
+            })
+          : [...s]
+      ).sort((n, r) => {
+        const m = He(n) - He(r);
+        return m !== 0 ? m : n.name.localeCompare(r.name, 'th');
+      });
+    }),
+    ue = () => {
+      ae.value.forEach((e) => {
+        const s = C.value?.SEATS?.find((n) => String(n.LS_ID) === e.id);
+        if (s) {
+          if (s.LS_SEAT_STATUS === 1) {
+            e.status = 'broken';
+            return;
+          }
+          if (s.LS_SEAT_STATUS === 2) {
+            e.status = 'blocked';
+            return;
+          }
+        }
+        const t = L.value.some((n) => n.seat === e.id && n.sessionLocationId === G.value);
+        e.status = t ? 'assigned' : 'available';
+      });
+    },
+    $e = () => {
+      if (((ae.value = []), !C.value?.SEATS)) return;
+      (C.value.SEATS.forEach((s) => {
+        let t = 'available';
+        (s.LS_SEAT_STATUS === 1 ? (t = 'broken') : s.LS_SEAT_STATUS === 2 && (t = 'blocked'),
+          ae.value.push({
+            id: String(s.LS_ID),
+            label: s.LS_SEAT_LABEL || '',
+            status: t,
+            rowNo: s.LS_ROW_NO,
+            colNo: s.LS_COL_NO,
+            student: null,
+          }));
+      }),
+        ue());
+    },
+    ye = () =>
+      I.value.flatMap((e) =>
+        [...(e.LOCATION.SEATS || [])]
+          .filter((t) => t.LS_SEAT_STATUS !== 1 && t.LS_SEAT_STATUS !== 2)
+          .sort(Ee)
+          .map((t) => ({ sessionLocationId: e.SL_ID, seatId: String(t.LS_ID) })),
+      ),
+    St = () => {
+      const e = ye();
+      (L.value.forEach((t) => {
+        ((t.seat = null), (t.sessionLocationId = null));
+      }),
+        [...L.value]
+          .sort((t, n) =>
+            t.priority !== n.priority
+              ? t.priority - n.priority
+              : t.sortName.localeCompare(n.sortName, 'en', { sensitivity: 'base' }),
+          )
+          .forEach((t, n) => {
+            const r = e[n];
+            r && ((t.seat = r.seatId), (t.sessionLocationId = r.sessionLocationId));
+          }),
+        ue());
+    },
+    We = () => {
+      if (!Y.value) {
+        L.value = [];
+        return;
+      }
+      const e = k.value ? D(k.value) : null,
+        s = e ? fe.get(e) : void 0;
+      if (s) {
+        ((L.value = ie(s)), ue());
+        return;
+      }
+      const t = se.value.filter(
+        (n) =>
+          Number(n.ERM_STATUS) === Ot || Number(n.ERM_STATUS) === bt || Number(n.ERM_STATUS) === Rt,
+      );
+      ((L.value = t.map((n) => {
+        const r = n.USER?.PROFILE,
+          { remark: m, isForeigner: F } = Te(n),
+          V = qe(n),
+          Z = r?.userTitleEn || null,
+          y = r?.userFullnameEn || null,
+          S =
+            Z && y
+              ? `${Z} ${y}`
+              : r?.userFullnameTh || n.USER?.USER_EMAIL || T('admin.seatManagement.noName'),
+          b = y || r?.userFullnameTh || n.USER?.USER_EMAIL || S;
+        return {
+          ermId: n.ERM_ID,
+          sessionId: n.SESSION_ID,
+          id: n.USER?.USER_NATIONAL_ID || String(n.USER_ID),
+          name: S,
+          seat: n.LS_ID ? String(n.LS_ID) : null,
+          sessionLocationId:
+            n.SL_ID ?? I.value.find((B) => B.SS_ID === n.SESSION_ID)?.SL_ID ?? null,
+          avatar: V ? Tt(V) : null,
+          remark: m,
+          isForeigner: F,
+          titleEn: Z,
+          sortName: b,
+          priority: pe(n, F),
+        };
+      })),
+        St(),
+        e && fe.set(e, ie(L.value)));
+    },
+    gt = async () => {
+      if (_) {
+        ((A.value = !0), (ee.value = null));
+        try {
+          if (
+            (P.loading.show({ message: T('admin.seatManagement.loadingData') }),
+            (z.value = await Jt(_)),
+            p(z.value))
+          ) {
+            await M.replace({ name: 'admin-exam-seat-candidates', params: { examId: String(_) } });
+            return;
+          }
+          E.value = z.value.SESSIONS || [];
+          const e = E.value[0];
+          (e && (Y.value = e.SS_ID), await Ge());
+        } catch (e) {
+          console.error('Failed to load exam data', e);
+          const s = T('admin.seatManagement.notifications.loadError');
+          ((ee.value = s), P.notify({ type: 'negative', message: s }));
+        } finally {
+          (P.loading.hide(), (A.value = !1));
+        }
+      }
+    };
+  (lt(Y, (e, s) => {
+    Se(s, L.value);
+    const t = I.value[0]?.SL_ID ?? null;
+    ((G.value = t), we.value && e !== null && We());
+  }),
+    lt(G, () => {
+      $e();
+    }));
+  const ce = u(null),
+    oe = u(null),
+    Le = u(0),
+    _e = u(0),
+    tt = u(0),
+    at = u(0),
+    st = u(Na),
+    a = u(!1),
+    o = i(() => L.value.find((e) => e.id === ce.value)),
+    l = (e) => {
+      a.value && ((Le.value = e.clientX), (_e.value = e.clientY));
+    },
+    c = () => {
+      a.value &&
+        ((a.value = !1),
+        (ce.value = null),
+        (oe.value = null),
+        document.body.classList.remove('is-dragging-active'),
+        window.removeEventListener('mousemove', l),
+        window.removeEventListener('mouseup', c));
+    },
+    f = (e, s) => {
+      if (e.button !== 0) return;
+      const t = e.currentTarget;
+      if (t) {
+        const n = t.getBoundingClientRect();
+        ((tt.value = e.clientX - n.left), (at.value = e.clientY - n.top), (st.value = n.width));
+      }
+      ((a.value = !0),
+        (ce.value = s),
+        (Le.value = e.clientX),
+        (_e.value = e.clientY),
+        document.body.classList.add('is-dragging-active'),
+        window.addEventListener('mousemove', l),
+        window.addEventListener('mouseup', c));
+    },
+    j = (e) => {
+      if (a.value) {
+        const s = ae.value.find((t) => t.id === e);
+        s && s.status !== 'broken' && s.status !== 'blocked' && (oe.value = e);
+      }
+    },
+    U = (e) => {
+      oe.value === e && (oe.value = null);
+    },
+    ne = (e) => {
+      if (!a.value || !ce.value) return;
+      const s = ae.value.find((n) => n.id === e);
+      if (s && (s.status === 'broken' || s.status === 'blocked')) return;
+      const t = L.value.find((n) => n.id === ce.value);
+      if (t) {
+        const n = L.value.find((r) => r.seat === e && r.id !== t.id);
+        (n && (n.seat = null), (t.seat = e), ue());
+      }
+    },
+    O = (e) => {
+      if (e.status === 'broken' || e.status === 'blocked') return;
+      const s = L.value.find((t) => t.seat === e.id);
+      s && ((s.seat = null), ue());
+    },
+    N = (e, s) => {
+      if (e === s) return;
+      const t = ye(),
+        n = t.findIndex((y) => y.seatId === e),
+        r = t.findIndex((y) => y.seatId === s);
+      if (n < 0 || r < 0) return;
+      const m = L.value.find((y) => y.seat === e);
+      if (!m) return;
+      const F = new Map();
+      L.value.forEach((y) => {
+        y.id === m.id || !y.seat || F.set(y.seat, y);
+      });
+      let V = r;
+      for (; V < t.length && F.has(t[V].seatId); ) V += 1;
+      if (V >= t.length) return;
+      for (let y = V; y > r; y -= 1) {
+        const S = t[y - 1],
+          b = t[y],
+          B = F.get(S.seatId);
+        B && ((B.seat = b.seatId), (B.sessionLocationId = b.sessionLocationId));
+      }
+      const Z = t[r];
+      ((m.seat = Z.seatId), (m.sessionLocationId = Z.sessionLocationId), ue());
+    },
+    H = () => {
+      M.back();
+    },
+    K = async () => {
+      if (Y.value && Ke.value) {
+        ((A.value = !0), (ee.value = null));
+        try {
+          (P.loading.show({ message: T('admin.seatManagement.savingData') }), Se(Y.value, L.value));
+          const e = [];
+          for (const s of xe.value) {
+            const t = D(s),
+              n = fe.get(t) || [],
+              r = new Map(n.map((S) => [S.ermId, S])),
+              m = E.value.filter((S) => D(S) === t),
+              F = new Set(m.map((S) => S.SS_ID)),
+              Z = m
+                .flatMap((S) => {
+                  const b = S.SESSION_LOCATIONS || [];
+                  return b.length > 0
+                    ? b.filter((B) => B.LOCATION).map((B) => ({ ...B, SS_ID: B.SS_ID || S.SS_ID }))
+                    : S.LOCATION
+                      ? [
+                          {
+                            SL_ID: -S.SS_ID,
+                            LOCATION_ID: S.LOCATION.LOCATION_ID,
+                            SS_ID: S.SS_ID,
+                            LOCATION: S.LOCATION,
+                          },
+                        ]
+                      : [];
+                })
+                .flatMap((S) =>
+                  [...(S.LOCATION.SEATS || [])]
+                    .filter((b) => b.LS_SEAT_STATUS !== 1 && b.LS_SEAT_STATUS !== 2)
+                    .sort(Ee)
+                    .map((b) => ({ seatId: b.LS_ID, sessionLocationId: S.SL_ID })),
+                ),
+              y = te.value
+                .filter(
+                  (S) =>
+                    F.has(S.SESSION_ID) &&
+                    (Number(S.ERM_STATUS) === Ot ||
+                      Number(S.ERM_STATUS) === bt ||
+                      Number(S.ERM_STATUS) === Rt),
+                )
+                .sort((S, b) => {
+                  const B = S.USER?.PROFILE,
+                    Ve = b.USER?.PROFILE,
+                    nt = Te(S),
+                    ze = Te(b),
+                    It = pe(S, nt.isForeigner) - pe(b, ze.isForeigner);
+                  if (It !== 0) return It;
+                  const Dt =
+                      B?.userFullnameEn ||
+                      B?.userFullnameTh ||
+                      S.USER?.USER_EMAIL ||
+                      String(S.USER_ID),
+                    $t =
+                      Ve?.userFullnameEn ||
+                      Ve?.userFullnameTh ||
+                      b.USER?.USER_EMAIL ||
+                      String(b.USER_ID);
+                  return Dt.localeCompare($t, 'en', { sensitivity: 'base' });
+                });
+            if (y.length > Z.length)
+              throw new Error(T('admin.seatManagement.notifications.saveError'));
+            y.forEach((S, b) => {
+              const B = r.get(S.ERM_ID),
+                Ve = Z[b],
+                nt = B?.seat ? Number(B.seat) : Ve?.seatId,
+                ze = B?.sessionLocationId ?? Ve?.sessionLocationId;
+              if (!nt || !ze || ze < 1)
+                throw new Error(T('admin.seatManagement.notifications.saveError'));
+              e.push({ enrollment: S, seatId: nt, sessionLocationId: ze });
+            });
+          }
+          (await ta(
+            e.map((s) => ({
+              ermId: s.enrollment.ERM_ID,
+              lsId: s.seatId,
+              slId: s.sessionLocationId,
+            })),
+            E.value.map((s) => s.SS_ID),
+          ),
+            P.notify({
+              color: 'positive',
+              position: 'top',
+              message: T('admin.seatManagement.notifications.saveSuccess'),
+              icon: 'check_circle',
+            }),
+            M.replace({
+              name: 'admin-exam-seat-candidates',
+              params: { examId: String(_) },
+              query: {
+                sessionId: String(Y.value),
+                ...(G.value !== null ? { sessionLocationId: String(G.value) } : {}),
+              },
+            }));
+        } catch (e) {
+          console.error('Failed to save seats', e);
+          let s = T('admin.seatManagement.notifications.saveError');
+          (e && typeof e == 'object' && 'response' in e && (s = e.response?.data?.message || s),
+            (ee.value = s),
+            P.notify({ type: 'negative', message: s }));
+        } finally {
+          (P.loading.hide(), (A.value = !1));
+        }
+      }
+    };
+  k.value && $e();
+  const W = () => {
+      A.value || je();
+    },
+    Ie = () => {
+      document.hidden || W();
+    };
+  _t(() => {
+    (window.addEventListener('focus', W), document.addEventListener('visibilitychange', Ie));
+  });
+  const Ue = i(() => C.value?.LOCATION_TOTAL_COLS || 10),
+    Oe = i(
+      () =>
+        (C.value?.AISLE_AFTER_COLS?.length ?? 0) > 0 ||
+        (C.value?.AISLE_AFTER_ROWS?.length ?? 0) > 0,
+    ),
+    Ct = i(() => C.value?.AISLE_AFTER_COLS ?? []),
+    Nt = i(() => C.value?.AISLE_AFTER_ROWS ?? []),
+    xt = i(() => {
+      if (!C.value?.SEATS) return [];
+      const e = {};
+      return (
+        C.value.SEATS.forEach((n) => {
+          const r = n.LS_ROW_NO;
+          e[r] || (e[r] = []);
+          let m = 'available';
+          n.LS_SEAT_STATUS === 1
+            ? (m = 'broken')
+            : n.LS_SEAT_STATUS === 2
+              ? (m = 'blocked')
+              : (he.value.find((Z) => Z.seat === String(n.LS_ID)) ?? null) && (m = 'assigned');
+          const F =
+            m === 'assigned' ? (he.value.find((V) => V.seat === String(n.LS_ID)) ?? null) : null;
+          e[r].push({
+            id: String(n.LS_ID),
+            label: n.LS_SEAT_LABEL || '',
+            status: m,
+            rowNo: n.LS_ROW_NO,
+            colNo: n.LS_COL_NO,
+            student: F,
+          });
+        }),
+        Object.keys(e)
+          .map(Number)
+          .sort((n, r) => n - r)
+          .map((n) => {
+            const r = e[n];
+            return r ? r.sort((m, F) => m.colNo - F.colNo) : [];
+          })
+      );
+    }),
+    kt = i(() => {
+      const e = C.value?.LOCATION_TOTAL_COLS || 1,
+        s = C.value?.LOCATION_TOTAL_ROWS || 1,
+        t = Oe.value ? 48 : 0;
+      if (s * e <= 40)
+        return {
+          width: '92px',
+          height: '92px',
+          fontSize: '22px',
+          rowGap: `${s <= 4 ? 56 : s <= 6 ? 36 : 24}px`,
+          colGap: '24px',
+          aisleWidth: `${t}px`,
+        };
+      const m = Math.max(60, Math.min(100, (1e3 - t) / e - 6)),
+        F = Math.max(10, Math.min(28, m * 0.25)),
+        V = Math.max(10, Math.min(56, (650 - s * m) / (s - 1 || 1)));
+      return {
+        width: `${m}px`,
+        height: `${m}px`,
+        fontSize: `${Math.max(16, m * 0.35)}px`,
+        rowGap: `${V}px`,
+        colGap: `${F}px`,
+        aisleWidth: `${t}px`,
+      };
+    });
+  return (
+    Mt(() => {
+      (document.body.classList.remove('is-dragging-active'),
+        window.removeEventListener('focus', W),
+        document.removeEventListener('visibilitychange', Ie),
+        window.removeEventListener('mousemove', l),
+        window.removeEventListener('mouseup', c));
+    }),
+    {
+      isLoading: A,
+      error: ee,
+      activeSessionId: Y,
+      activeSessionLocationId: G,
+      sessions: E,
+      sessionTimeTabs: xe,
+      roomOptions: ut,
+      searchQuery: re,
+      allSeats: ae,
+      gridCols: Ue,
+      splitLeftRight: Oe,
+      aisleAfterCols: Ct,
+      aisleAfterRows: Nt,
+      seatsByRow: xt,
+      seatStyle: kt,
+      examTitle: ct,
+      examDate: mt,
+      sessionTime: vt,
+      sessionLocation: ft,
+      sessionTotalCapacity: q,
+      applicantCount: $,
+      paidCount: X,
+      currentRoomCount: Ze,
+      currentRoomCapacity: Je,
+      filteredStudents: et,
+      isSeatAssignmentComplete: Ke,
+      draggedStudentId: ce,
+      draggedOverSeatId: oe,
+      dragX: Le,
+      dragY: _e,
+      dragOffsetX: tt,
+      dragOffsetY: at,
+      dragWidth: st,
+      draggedStudentInfo: o,
+      loadExamData: gt,
+      getSeatLabel: ke,
+      onMouseDown: f,
+      onSeatEnter: j,
+      onSeatLeave: U,
+      onSeatDrop: ne,
+      handleSeatClick: O,
+      swapSeatAssignments: N,
+      handleCancel: H,
+      handleSave: K,
+    }
+  );
+}
+const ka = { class: 'session-tabs-wrap' },
+  Da = { class: 'q-mb-md' },
+  $a = { class: 'seat-management-row' },
+  Ua = { class: 'seat-management-list-column flex column min-width-0' },
+  Ba = { class: 'student-list-card' },
+  Pa = { class: 'row items-center justify-between q-mb-md' },
+  Fa = { class: 'text-subtitle1 text-weight-bold text-dark' },
+  Ga = { class: 'q-mb-md' },
+  Ha = { class: 'student-list' },
+  Wa = { key: 0, class: 'column items-center q-pa-xl text-grey-6' },
+  Va = { class: 'text-body1 q-mt-sm' },
+  za = { class: 'seat-management-map-column flex column min-width-0' },
+  qa = { class: 'row justify-end q-mt-sm q-gutter-sm' },
+  Xa = rt({
+    __name: 'exam-seat-management-page',
+    setup(d) {
+      const {
+        activeSessionId: M,
+        activeSessionLocationId: p,
+        sessionTimeTabs: P,
+        roomOptions: T,
+        searchQuery: _,
+        splitLeftRight: A,
+        aisleAfterCols: ee,
+        aisleAfterRows: Y,
+        seatsByRow: G,
+        examTitle: E,
+        examDate: z,
+        sessionTime: te,
+        sessionLocation: Ce,
+        paidCount: Ne,
+        currentRoomCount: L,
+        currentRoomCapacity: fe,
+        filteredStudents: ae,
+        isSeatAssignmentComplete: re,
+        loadExamData: we,
+        getSeatLabel: k,
+        handleCancel: D,
+        handleSave: ie,
+        swapSeatAssignments: Se,
+      } = xa();
+      _t(() => {
+        we();
+      });
+      const xe = (x) => {
+        _.value = String(x || '');
+      };
+      return (x, Q) => (
+        v(),
+        ve(
+          Vt,
+          { class: 'page-container surface-page-bg' },
+          {
+            default: be(() => [
+              R(Yt),
+              R(
+                Qt,
+                {
+                  title: x.$t('admin.seatManagement.pageTitle'),
+                  subtitle: x.$t('admin.seatManagement.pageSubtitle'),
+                  class: 'seat-page-header',
+                },
+                null,
+                8,
+                ['title', 'subtitle'],
+              ),
+              g('div', ka, [
+                R(
+                  zt,
+                  {
+                    modelValue: w(M),
+                    'onUpdate:modelValue': Q[0] || (Q[0] = (I) => (pt(M) ? (M.value = I) : null)),
+                    sessions: w(P),
+                  },
+                  null,
+                  8,
+                  ['modelValue', 'sessions'],
+                ),
+              ]),
+              g('section', Da, [
+                R(
+                  qt,
+                  {
+                    'selected-location-id': w(p),
+                    'onUpdate:selectedLocationId':
+                      Q[1] || (Q[1] = (I) => (pt(p) ? (p.value = I) : null)),
+                    title: w(E),
+                    date: w(z),
+                    time: w(te),
+                    location: w(Ce),
+                    'location-options': w(T),
+                    'applicant-count': w(L),
+                    'paid-count': w(Ne),
+                    'total-capacity': w(fe),
+                    'hide-paid': '',
+                    'hide-main-separator': '',
+                    'count-with-capacity': '',
+                    'is-admin': '',
+                  },
+                  null,
+                  8,
+                  [
+                    'selected-location-id',
+                    'title',
+                    'date',
+                    'time',
+                    'location',
+                    'location-options',
+                    'applicant-count',
+                    'paid-count',
+                    'total-capacity',
+                  ],
+                ),
+              ]),
+              g('div', $a, [
+                g('div', Ua, [
+                  g('div', Ba, [
+                    g('div', Pa, [
+                      g('div', Fa, J(x.$t('admin.seatManagement.studentListTitle')), 1),
+                      R(
+                        Ut,
+                        { color: 'primary', rounded: '', label: w(L), class: 'badge-seat-count' },
+                        null,
+                        8,
+                        ['label'],
+                      ),
+                    ]),
+                    g('div', Ga, [
+                      R(
+                        jt,
+                        {
+                          modelValue: w(_),
+                          'onUpdate:modelValue':
+                            Q[2] || (Q[2] = (I) => (pt(_) ? (_.value = I) : null)),
+                          'full-width': '',
+                          onSearch: xe,
+                        },
+                        null,
+                        8,
+                        ['modelValue'],
+                      ),
+                    ]),
+                    g('div', Ha, [
+                      (v(!0),
+                      h(
+                        le,
+                        null,
+                        Be(
+                          w(ae),
+                          (I) => (
+                            v(),
+                            ve(
+                              ma,
+                              {
+                                key: I.ermId,
+                                'student-name': I.name,
+                                'student-id': I.id,
+                                'seat-number': w(k)(I.seat),
+                                'avatar-url': I.avatar,
+                                remark: I.remark,
+                                'is-foreigner': I.isForeigner,
+                              },
+                              null,
+                              8,
+                              [
+                                'student-name',
+                                'student-id',
+                                'seat-number',
+                                'avatar-url',
+                                'remark',
+                                'is-foreigner',
+                              ],
+                            )
+                          ),
+                        ),
+                        128,
+                      )),
+                      w(ae).length === 0
+                        ? (v(),
+                          h('div', Wa, [
+                            R(Re, { name: 'person_search', size: '48px' }),
+                            g('div', Va, J(x.$t('admin.seatManagement.emptyStudentList')), 1),
+                          ]))
+                        : Me('', !0),
+                    ]),
+                  ]),
+                ]),
+                g('div', za, [
+                  R(
+                    Ca,
+                    {
+                      class: 'col',
+                      title: x.$t('admin.seatManagement.seatLayoutTitle'),
+                      'seats-by-row': w(G),
+                      'split-left-right': w(A),
+                      'aisle-after-cols': w(ee),
+                      'aisle-after-rows': w(Y),
+                      'swap-mode-label': x.$t('admin.seatManagement.swapModeLabel'),
+                      onSwap: w(Se),
+                    },
+                    null,
+                    8,
+                    [
+                      'title',
+                      'seats-by-row',
+                      'split-left-right',
+                      'aisle-after-cols',
+                      'aisle-after-rows',
+                      'swap-mode-label',
+                      'onSwap',
+                    ],
+                  ),
+                  g('div', qa, [
+                    R(
+                      At,
+                      {
+                        label: x.$t('admin.seatManagement.cancelButton'),
+                        class: 'btn-cancel-seat',
+                        flat: '',
+                        onClick: w(D),
+                      },
+                      null,
+                      8,
+                      ['label', 'onClick'],
+                    ),
+                    R(
+                      At,
+                      {
+                        label: x.$t('admin.seatManagement.saveButton'),
+                        class: 'btn-confirm-seat',
+                        disable: !w(re),
+                        onClick: w(ie),
+                      },
+                      null,
+                      8,
+                      ['label', 'disable', 'onClick'],
+                    ),
+                  ]),
+                ]),
+              ]),
+            ]),
+            _: 1,
+          },
+        )
+      );
+    },
+  }),
+  Ss = it(Xa, [['__scopeId', 'data-v-b7c17e14']]);
+export { Ss as default };

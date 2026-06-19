@@ -450,6 +450,18 @@ const routes: RouteRecordRaw[] = [
               ],
             },
           },
+          {
+            path: 'exam-report',
+            name: 'admin-exam-report',
+            component: () => import('pages/admin/exam-report/exam-report-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.examReport', icon: 'assessment' },
+              ],
+            },
+          },
         ],
       },
     ],

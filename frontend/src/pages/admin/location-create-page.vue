@@ -59,7 +59,7 @@
                     {{ $t('admin.locationManagement.createPage.fields.floor') }}
                   </div>
                   <q-input
-                    v-model="floor"
+                    v-model.number="floor"
                     type="number"
                     outlined
                     dense
@@ -67,7 +67,13 @@
                     class="buu-input-muted"
                     :error="!!formErrors.floor"
                     :error-message="formErrors.floor"
-                    @update:model-value="clearFieldError('floor')"
+                    min="0"
+                    @update:model-value="
+                      (val) => {
+                        floor = clampFloorValue(val);
+                        clearFieldError('floor');
+                      }
+                    "
                   />
                 </div>
               </div>
@@ -337,6 +343,15 @@ const clampSeatLayoutValue = (value: unknown): number | null => {
   return Math.min(MAX_SEAT_LAYOUT_SIZE, Math.max(1, Math.floor(numericValue)));
 };
 
+const clampFloorValue = (value: unknown): number | null => {
+  if (value === '' || value === null || value === undefined) return null;
+
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return null;
+
+  return Math.max(0, Math.floor(numericValue));
+};
+
 const clearFieldError = (field: keyof LocationFormErrors): void => {
   if (!formErrors.value[field]) return;
 
@@ -362,6 +377,8 @@ const validateForm = (): boolean => {
 
   if (isBlank(floor.value)) {
     errors.floor = 'กรุณากรอกชั้นที่สอบ';
+  } else if (Number(floor.value) < 0) {
+    errors.floor = 'ชั้นที่สอบต้องไม่ติดลบ';
   }
 
   if (!rows.value || rows.value < 1) {
@@ -614,19 +631,21 @@ const handleSave = async (): Promise<void> => {
 .walkway-control-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  flex-wrap: nowrap;
+  gap: 4px;
   width: 100%;
   min-height: 39px;
+  overflow: visible;
 }
 
 .walkway-chip-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 4px;
   flex: 0 1 auto;
   width: max-content;
   min-width: 0;
-  max-width: calc((100% - 8px) * 2 / 3);
+  max-width: calc(100% - 124px);
   overflow-x: hidden;
   overflow-y: hidden;
   height: 39px;
@@ -641,9 +660,10 @@ const handleSave = async (): Promise<void> => {
 }
 
 .walkway-chip-row--scroll {
-  height: 49px;
+  align-items: flex-start;
+  height: 51px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding-bottom: 12px;
   scrollbar-width: thin;
 
   &::-webkit-scrollbar-thumb {
@@ -663,17 +683,18 @@ const handleSave = async (): Promise<void> => {
 
 .walkway-chip {
   min-width: 0;
-  flex: 0 0 111px;
+  flex: 0 0 110px;
+  width: 110px;
   height: 39px;
   min-height: 39px;
   margin: 0;
-  padding: 0 8px;
+  padding: 0 6px;
   border-radius: 12px;
   border: 1px solid #dddddd;
   background: #ffffff !important;
   color: #111111;
   font-family: 'Sarabun', sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   display: inline-flex;
   align-items: center;
@@ -682,10 +703,10 @@ const handleSave = async (): Promise<void> => {
 }
 
 .walkway-chip-label {
-  flex: 0 0 auto;
-  min-width: max-content;
-  overflow: visible;
-  text-overflow: clip;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -694,11 +715,11 @@ const handleSave = async (): Promise<void> => {
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: 10px;
+  width: 8px;
   height: 20px;
   color: #000000;
   font-family: Arial, sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 18px;
   border: 0;
@@ -709,8 +730,8 @@ const handleSave = async (): Promise<void> => {
 }
 
 .walkway-add-btn {
-  width: calc((100% - 16px) / 3);
-  flex: 0 0 calc((100% - 16px) / 3);
+  width: 120px;
+  flex: 0 0 120px;
   min-width: 0;
   height: 39px;
   min-height: 39px;
@@ -732,7 +753,7 @@ const handleSave = async (): Promise<void> => {
   }
 
   :deep(.q-icon) {
-    font-size: 20px;
+    font-size: 18px;
     color: var(--primary, #0d47a1);
   }
 
@@ -742,7 +763,7 @@ const handleSave = async (): Promise<void> => {
 
   :deep(.block) {
     color: var(--primary, #0d47a1);
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1;
     white-space: nowrap;
   }

@@ -1,0 +1,78 @@
+.app-button[data-v-776d580d] {
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: none;
+  padding: 8px 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.02em;
+}
+.app-button--round[data-v-776d580d] {
+  border-radius: 50%;
+  padding: 0;
+}
+.app-button--pill[data-v-776d580d] {
+  border-radius: 100px;
+  padding: 6px 18px;
+  font-size: 0.85rem;
+}
+.app-button--brand[data-v-776d580d] {
+  background-color: var(--primary) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.app-button--brand[data-v-776d580d]:hover {
+  filter: brightness(1.1) !important;
+  box-shadow: none !important;
+}
+.app-button--secondary[data-v-776d580d] {
+  background-color: var(--secondary) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.app-button--secondary[data-v-776d580d]:hover {
+  filter: brightness(1.1) !important;
+  box-shadow: none !important;
+}
+.app-button--full[data-v-776d580d] {
+  background-color: var(--btn-danger-light-bg) !important;
+  color: var(--btn-danger-light-text) !important;
+  border: none;
+}
+.app-button--full[data-v-776d580d]:hover {
+  background-color: var(--btn-danger-light-hover) !important;
+}
+.app-button--dark[data-v-776d580d] {
+  background-color: var(--surface-sidebar) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.app-button--dark[data-v-776d580d]:hover {
+  filter: brightness(1.2) !important;
+  box-shadow: none !important;
+}
+.app-button--flat[data-v-776d580d]:hover {
+  background: #0000000d !important;
+}
+.app-button.cancel-btn[data-v-776d580d],
+.app-button.cancel-btn[data-v-776d580d]:hover,
+.app-button.cancel-btn[data-v-776d580d]:focus,
+.app-button.cancel-btn[data-v-776d580d]:active {
+  background-color: var(--neutral-300) !important;
+  color: var(--text-primary) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.app-button.cancel-btn[data-v-776d580d]:before {
+  box-shadow: none !important;
+}
+.app-button[data-v-776d580d]:active {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+.app-button[data-v-776d580d] .q-icon {
+  font-size: 1.2rem;
+  margin-right: 6px;
+}
+.app-button--round[data-v-776d580d] .q-icon {
+  margin-right: 0;
+}

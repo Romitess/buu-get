@@ -1,0 +1,58 @@
+.base-table-wrapper[data-v-1ec1a169] {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.base-table[data-v-1ec1a169] thead tr th {
+  background-color: var(--primary) !important;
+  color: var(--text-on-primary) !important;
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  padding: 10px 12px;
+  text-align: center !important;
+}
+.base-table[data-v-1ec1a169] th.sortable .q-table__sort-icon {
+  position: absolute !important;
+}
+.base-table[data-v-1ec1a169] tbody tr td {
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+  white-space: normal !important;
+  word-break: break-word;
+  line-height: 1.4;
+  padding: 8px 12px;
+}
+.base-table[data-v-1ec1a169] tr.q-table__bottom-item td {
+  background-color: var(--surface-page) !important;
+  padding: 12px !important;
+}
+.base-table[data-v-1ec1a169] tbody tr {
+  height: auto;
+}
+.base-table-empty-cell[data-v-1ec1a169] {
+  border-bottom: none;
+  font-size: var(--font-size-md);
+  padding: 32px 16px;
+}
+.base-table-bottom[data-v-1ec1a169] {
+  font-size: var(--font-size-md);
+}
+.pagination-select[data-v-1ec1a169] {
+  width: 65px;
+}
+.pagination-select[data-v-1ec1a169] .q-field__control {
+  height: 28px;
+  min-height: 28px;
+  padding: 0 8px;
+  display: flex !important;
+  align-items: center !important;
+}
+.pagination-select[data-v-1ec1a169] .q-field__native,
+.pagination-select[data-v-1ec1a169] .q-field__append {
+  min-height: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}

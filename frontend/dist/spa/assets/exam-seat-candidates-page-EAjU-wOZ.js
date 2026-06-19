@@ -1,0 +1,1562 @@
+import { Q as He } from './QSpace-BPMiD-JH.js';
+import { Q as We } from './QPage-CM3LWBRo.js';
+import {
+  g as je,
+  r as w,
+  O as de,
+  Q as h,
+  R as C,
+  S as a,
+  T as _,
+  X as f,
+  a3 as fe,
+  V as p,
+  a2 as me,
+  _ as ne,
+  W as Y,
+  an as ye,
+  a8 as De,
+  $ as B,
+  ap as Qe,
+  au as we,
+  f as o,
+  U as he,
+  at as F,
+  a6 as Z,
+  a7 as se,
+  aq as qe,
+  a4 as ze,
+  P as Ke,
+  w as _e,
+  t as Ze,
+  o as Ye,
+  ax as Ie,
+  b1 as Je,
+  I as et,
+} from './index-CKSooU2k.js';
+import { u as $e } from './vue-i18n-Bebkm_iB.js';
+import { u as tt } from './use-quasar-DaOT29F-.js';
+import { E as at, h as st } from './jspdf.es.min-UKkqpIx2.js';
+import { A as Te } from './app-button-D_cMl4aM.js';
+import { T as nt } from './test-voucher-report-uCQBvIhM.js';
+import { B as ot } from './base-table-DuGvP-XM.js';
+import { S as lt } from './search-bar-BgXkcRlY.js';
+import { _ as it } from './export-csv-button.vue_vue_type_script_setup_true_lang-VSWIuzMe.js';
+import { A as rt, a as ut } from './app-exam-session-time-DwwTVopE.js';
+import { A as ct, a as dt } from './app-breadcrumbs-C0oZOPYe.js';
+import { A as mt } from './action-button-LWkAWINi.js';
+import { a as vt } from './location.service-BLTYQ1bo.js';
+import { i as St, y as pt, I as _t, E as Ne, c as ft } from './exam.service-0p8xz0zq.js';
+import { f as ht, a as gt, u as Et } from './enrollment.service-D8jIpEGB.js';
+import { E as It } from './enrollment.types-BjT4wGLO.js';
+import { g as At } from './image.service-iLwePKJ0.js';
+import './image-display-9myJRY3L.js';
+import './use-image-url-Bi9bxevq.js';
+import './user-image-BTNlQ5Ur.js';
+import './exam-rule-voucher.service-CrkXcGFH.js';
+import './QTable-B4W-6HCk.js';
+import './QList-fArhXj97.js';
+import './QSelect-CcXwe87O.js';
+import './QItem-D-DX6y8A.js';
+import './QItemLabel-Ca36qfFu.js';
+import './format-DnjzHs7F.js';
+import './position-engine-Bv76xS6k.js';
+import './QLinearProgress-ComgvJOP.js';
+import './QSpinnerDots-Dwh4MvNX.js';
+import './QInnerLoading-CAwPoqSH.js';
+import './export-file-BbXX5Gbn.js';
+import './date-DmslTAtO.js';
+import './QResizeObserver-C4jaR1Qo.js';
+import './QTooltip-BUG2ohUJ.js';
+const Tt = () => !0;
+function Ot(d) {
+  const v = {};
+  return (
+    d.forEach((g) => {
+      v[g] = Tt;
+    }),
+    v
+  );
+}
+function oe() {
+  const { emit: d, proxy: v } = je(),
+    g = w(null);
+  function L() {
+    g.value.show();
+  }
+  function c() {
+    g.value.hide();
+  }
+  function m(E) {
+    (d('ok', E), c());
+  }
+  function i() {
+    d('hide');
+  }
+  return (
+    Object.assign(v, { show: L, hide: c }),
+    { dialogRef: g, onDialogHide: i, onDialogOK: m, onDialogCancel: c }
+  );
+}
+const Me = ['ok', 'hide'];
+oe.emits = Me;
+oe.emitsObject = Ot(Me);
+const Lt = { class: 'voucher-preview-section' },
+  Ct = { class: 'preview-heading' },
+  Nt = ['aria-label'],
+  bt = ['aria-selected'],
+  Rt = ['aria-selected'],
+  yt = de({
+    __name: 'app-voucher-preview',
+    props: {
+      voucherData: {},
+      useImagePlaceholder: { type: Boolean, default: !1 },
+      title: {},
+      regulationsEn: {},
+      regulationsTh: {},
+    },
+    setup(d) {
+      const v = d,
+        { t: g } = $e(),
+        L = v.title ?? g('admin.seatCandidates.voucherTitle'),
+        c = w('front');
+      return (m, i) => (
+        h(),
+        C('section', Lt, [
+          a('div', Ct, [
+            a('span', null, _(f(L)), 1),
+            a(
+              'div',
+              {
+                class: 'side-tabs',
+                role: 'tablist',
+                'aria-label': m.$t('admin.seatCandidates.voucherSideLabel'),
+              },
+              [
+                a(
+                  'button',
+                  {
+                    type: 'button',
+                    role: 'tab',
+                    'aria-selected': c.value === 'front',
+                    class: fe({ active: c.value === 'front' }),
+                    onClick: i[0] || (i[0] = (E) => (c.value = 'front')),
+                  },
+                  _(m.$t('admin.seatCandidates.frontSide')),
+                  11,
+                  bt,
+                ),
+                i[2] || (i[2] = a('span', { 'aria-hidden': 'true' }, '|', -1)),
+                a(
+                  'button',
+                  {
+                    type: 'button',
+                    role: 'tab',
+                    'aria-selected': c.value === 'back',
+                    class: fe({ active: c.value === 'back' }),
+                    onClick: i[1] || (i[1] = (E) => (c.value = 'back')),
+                  },
+                  _(m.$t('admin.seatCandidates.backSide')),
+                  11,
+                  Rt,
+                ),
+              ],
+              8,
+              Nt,
+            ),
+          ]),
+          a(
+            'div',
+            { class: fe(['voucher-preview', `is-${c.value}`]) },
+            [
+              p(
+                nt,
+                {
+                  data: d.voucherData,
+                  'show-actions': !1,
+                  'show-voucher-card': c.value === 'front',
+                  'show-regulations': c.value === 'back',
+                  'use-image-placeholder': d.useImagePlaceholder,
+                  'regulations-en': d.regulationsEn,
+                  'regulations-th': d.regulationsTh,
+                },
+                null,
+                8,
+                [
+                  'data',
+                  'show-voucher-card',
+                  'show-regulations',
+                  'use-image-placeholder',
+                  'regulations-en',
+                  'regulations-th',
+                ],
+              ),
+            ],
+            2,
+          ),
+        ])
+      );
+    },
+  }),
+  xe = me(yt, [['__scopeId', 'data-v-7712fbcb']]),
+  Dt = { class: 'dialog-header' },
+  wt = { class: 'exam-details' },
+  $t = { class: 'details-title' },
+  Mt = { class: 'details-grid' },
+  xt = { class: 'detail-column' },
+  kt = { class: 'detail-item' },
+  Xt = { class: 'detail-item' },
+  Ut = { class: 'detail-column detail-column-right' },
+  Pt = { class: 'detail-item' },
+  Bt = { class: 'detail-item' },
+  Vt = de({
+    __name: 'dialog-issue-ticket',
+    props: {
+      sessionDetails: { type: Object, default: () => ({}) },
+      voucherData: { type: Object, required: !0 },
+    },
+    emits: [...oe.emits],
+    setup(d) {
+      const { dialogRef: v, onDialogHide: g, onDialogOK: L, onDialogCancel: c } = oe(),
+        m = () => L(),
+        i = () => c();
+      return (E, T) => (
+        h(),
+        ne(
+          we,
+          { ref_key: 'dialogRef', ref: v, persistent: '', onHide: f(g) },
+          {
+            default: Y(() => [
+              p(
+                ye,
+                { class: 'issue-ticket-dialog-card' },
+                {
+                  default: Y(() => [
+                    a('header', Dt, [
+                      T[0] || (T[0] = a('h2', null, 'ข้อมูลการออกใบ Test Voucher', -1)),
+                      p(De, {
+                        flat: '',
+                        round: '',
+                        dense: '',
+                        icon: 'close',
+                        color: 'grey-6',
+                        'aria-label': 'ปิด',
+                        onClick: i,
+                      }),
+                    ]),
+                    a('section', wt, [
+                      a('div', $t, [
+                        p(B, { name: 'description', size: '23px' }),
+                        T[1] || (T[1] = a('span', null, 'รายละเอียดการสอบ', -1)),
+                      ]),
+                      a('div', Mt, [
+                        a('div', xt, [
+                          a('div', kt, [
+                            p(B, { name: 'calendar_today' }),
+                            a('span', null, 'วันที่สอบ: ' + _(d.sessionDetails.date || '-'), 1),
+                          ]),
+                          a('div', Xt, [
+                            p(B, { name: 'schedule' }),
+                            a('span', null, 'เวลาที่สอบ: ' + _(d.sessionDetails.time || '-'), 1),
+                          ]),
+                        ]),
+                        a('div', Ut, [
+                          a('div', Pt, [
+                            p(B, { name: 'location_city' }),
+                            a('span', null, 'สถานที่สอบ: ' + _(d.sessionDetails.room || '-'), 1),
+                          ]),
+                          a('div', Bt, [
+                            p(B, { name: 'group' }),
+                            a(
+                              'span',
+                              null,
+                              'จำนวนผู้สมัคร: ' + _(d.sessionDetails.studentCount || 0) + ' คน',
+                              1,
+                            ),
+                          ]),
+                        ]),
+                      ]),
+                    ]),
+                    p(
+                      xe,
+                      {
+                        'voucher-data': d.voucherData,
+                        title: E.$t('admin.seatCandidates.voucherPreviewTitle'),
+                        'use-image-placeholder': '',
+                      },
+                      null,
+                      8,
+                      ['voucher-data', 'title'],
+                    ),
+                    p(
+                      Qe,
+                      { class: 'dialog-actions' },
+                      {
+                        default: Y(() => [
+                          p(Te, {
+                            label: 'ยกเลิก',
+                            color: 'grey-4',
+                            'text-color': 'black',
+                            class: 'action-btn',
+                            onClick: i,
+                          }),
+                          p(Te, {
+                            label: 'ยืนยันการออกใบเข้าสอบ',
+                            color: 'primary',
+                            class: 'action-btn',
+                            onClick: m,
+                          }),
+                        ]),
+                        _: 1,
+                      },
+                    ),
+                  ]),
+                  _: 1,
+                },
+              ),
+            ]),
+            _: 1,
+          },
+          8,
+          ['onHide'],
+        )
+      );
+    },
+  }),
+  Ft = me(Vt, [['__scopeId', 'data-v-ce93176b']]),
+  Gt = { class: 'dialog-header' },
+  Ht = { class: 'exam-details' },
+  Wt = { class: 'details-title' },
+  jt = { class: 'details-grid' },
+  Qt = { class: 'detail-item' },
+  qt = { class: 'detail-item' },
+  zt = { class: 'detail-item' },
+  Kt = { class: 'detail-item' },
+  Zt = de({
+    __name: 'dialog-view-voucher',
+    props: { voucherData: {}, candidateCount: {} },
+    emits: [...oe.emits],
+    setup(d) {
+      const v = d,
+        { dialogRef: g, onDialogHide: L, onDialogCancel: c } = oe(),
+        m = () => c(),
+        i = o(() => [v.voucherData.location, v.voucherData.locationRoom].filter(Boolean).join(' '));
+      return (E, T) => (
+        h(),
+        ne(
+          we,
+          { ref_key: 'dialogRef', ref: g, onHide: f(L) },
+          {
+            default: Y(() => [
+              p(
+                ye,
+                { class: 'view-voucher-dialog-card' },
+                {
+                  default: Y(() => [
+                    a('header', Gt, [
+                      a('h2', null, _(E.$t('admin.seatCandidates.viewVoucherTitle')), 1),
+                      p(De, {
+                        flat: '',
+                        round: '',
+                        dense: '',
+                        icon: 'close',
+                        color: 'grey-6',
+                        'aria-label': 'ปิด',
+                        onClick: m,
+                      }),
+                    ]),
+                    a('section', Ht, [
+                      a('div', Wt, [
+                        p(B, { name: 'description', size: '23px' }),
+                        a('span', null, _(E.$t('admin.seatCandidates.examDetails')), 1),
+                      ]),
+                      a('div', jt, [
+                        a('div', Qt, [
+                          p(B, { name: 'calendar_today' }),
+                          a('span', null, _(d.voucherData.examDate), 1),
+                        ]),
+                        a('div', qt, [
+                          p(B, { name: 'location_city' }),
+                          a('span', null, _(i.value), 1),
+                        ]),
+                        a('div', zt, [
+                          p(B, { name: 'schedule' }),
+                          a('span', null, _(d.voucherData.examTime), 1),
+                        ]),
+                        a('div', Kt, [
+                          p(B, { name: 'groups' }),
+                          a(
+                            'span',
+                            null,
+                            _(d.candidateCount) +
+                              ' ' +
+                              _(E.$t('admin.seatCandidates.peopleSuffix')),
+                            1,
+                          ),
+                        ]),
+                      ]),
+                    ]),
+                    p(xe, { 'voucher-data': d.voucherData }, null, 8, ['voucher-data']),
+                  ]),
+                  _: 1,
+                },
+              ),
+            ]),
+            _: 1,
+          },
+          8,
+          ['onHide'],
+        )
+      );
+    },
+  }),
+  Yt = me(Zt, [['__scopeId', 'data-v-5f451e4b']]),
+  Jt = { class: 'seat-plan-print' },
+  ea = { class: 'seat-plan-print__header' },
+  ta = { class: 'seat-plan-print__stage' },
+  aa = { class: 'seat-plan-print__grid-shell' },
+  sa = { key: 0, class: 'seat-print-broken-icon', 'aria-hidden': 'true', viewBox: '0 0 24 24' },
+  na = { key: 1 },
+  be = 58,
+  Ae = 26,
+  Re = 22,
+  ce = 12,
+  oa = 700,
+  la = 880,
+  ia = 46,
+  ra = 24,
+  ua = 2.5,
+  ca = 0.22,
+  da = de({
+    __name: 'app-exam-seat-plan-print',
+    props: {
+      roomLabel: {},
+      seatsByRow: {},
+      aisleAfterCols: { default: () => [] },
+      aisleAfterRows: { default: () => [] },
+      seatDirection: { default: 'HORIZONTAL' },
+      layoutRows: { default: 0 },
+      layoutCols: { default: 0 },
+    },
+    setup(d) {
+      const v = d,
+        g = o(() =>
+          v.seatsByRow.reduce(
+            (e, t, r) => Math.max(e, r + 1, ...t.map((u) => u.rowNo)),
+            v.seatsByRow.length,
+          ),
+        ),
+        L = o(() =>
+          v.seatsByRow.reduce((e, t) => Math.max(e, t.length, ...t.map((r) => r.colNo)), 0),
+        ),
+        c = o(() => v.layoutRows || g.value),
+        m = o(() => v.layoutCols || L.value),
+        i = o(() => Array.from({ length: c.value }, (e, t) => v.seatsByRow[t] ?? [])),
+        E = o(() =>
+          [...new Set(v.aisleAfterCols)]
+            .filter((e) => Number.isInteger(e) && e >= 1 && e < m.value)
+            .sort((e, t) => e - t),
+        ),
+        T = o(() =>
+          [...new Set(v.aisleAfterRows)]
+            .filter((e) => Number.isInteger(e) && e >= 1 && e < c.value)
+            .sort((e, t) => e - t),
+        ),
+        N = o(() => {
+          const e = [Ae];
+          for (let t = 1; t <= m.value; t += 1) (e.push(be), E.value.includes(t) && e.push(Re));
+          return e;
+        }),
+        V = o(() => {
+          const e = [Ae];
+          for (let t = 1; t <= c.value; t += 1) (e.push(be), T.value.includes(t) && e.push(Re));
+          return e;
+        }),
+        x = o(() => N.value.reduce((e, t) => e + t, 0) + Math.max(N.value.length - 1, 0) * ce),
+        R = o(() => V.value.reduce((e, t) => e + t, 0) + Math.max(V.value.length - 1, 0) * ce),
+        $ = o(() => Math.max(x.value - Ae - ce, 420)),
+        A = o(() => Math.max(x.value, $.value)),
+        M = o(() => ia + ra + R.value),
+        y = o(() => {
+          if (A.value <= 0 || M.value <= 0) return 1;
+          const e = Math.min(oa / A.value, la / M.value);
+          return Math.max(ca, Math.min(e, ua));
+        }),
+        G = o(() => ({ width: `${A.value * y.value}px`, height: `${M.value * y.value}px` })),
+        b = o(() => ({
+          width: `${A.value}px`,
+          height: `${M.value}px`,
+          transform: `scale(${y.value})`,
+        })),
+        le = o(() => ({ width: `${$.value}px` })),
+        U = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
+        z = (e) => (v.seatDirection === 'HORIZONTAL' ? `${e}` : (U[e - 1] ?? `${e}`)),
+        k = (e) => (v.seatDirection === 'HORIZONTAL' ? (U[e - 1] ?? `${e}`) : `${e}`),
+        J = (e) => E.value.filter((t) => t < e).length,
+        H = (e) => T.value.filter((t) => t < e).length,
+        W = (e) => `${e + 1 + J(e)}`,
+        P = (e) => `${e + 1 + H(e)}`,
+        j = o(() => ({
+          display: 'grid',
+          gridTemplateColumns: N.value.map((e) => `${e}px`).join(' '),
+          gridTemplateRows: V.value.map((e) => `${e}px`).join(' '),
+          columnGap: `${ce}px`,
+          rowGap: `${ce}px`,
+        })),
+        ie = o(() => N.value.length),
+        Q = o(() => V.value.length),
+        ve = (e) => ({ gridColumn: `${e + 2 + J(e)}`, gridRow: `2 / ${Q.value + 1}` }),
+        Se = (e) => ({ gridColumn: `2 / ${ie.value + 1}`, gridRow: `${e + 2 + H(e)}` });
+      return (e, t) => (
+        h(),
+        C('article', Jt, [
+          a('header', ea, [
+            a('div', null, [
+              t[0] || (t[0] = a('h1', null, 'แผนผังที่นั่งสอบ', -1)),
+              a('p', null, _(d.roomLabel), 1),
+            ]),
+            he('', !0),
+          ]),
+          a('section', ta, [
+            a(
+              'div',
+              { class: 'seat-plan-print__scale-shell', style: F(G.value) },
+              [
+                a(
+                  'div',
+                  { class: 'seat-plan-print__scale-content', style: F(b.value) },
+                  [
+                    a(
+                      'div',
+                      { class: 'teacher-desk-divider', style: F(le.value) },
+                      [
+                        ...(t[1] ||
+                          (t[1] = [
+                            a(
+                              'div',
+                              { class: 'teacher-desk-label' },
+                              "Teacher's Desk & Projector Screen",
+                              -1,
+                            ),
+                          ])),
+                      ],
+                      4,
+                    ),
+                    a('div', aa, [
+                      a(
+                        'div',
+                        { class: 'seat-plan-print__grid', style: F(j.value) },
+                        [
+                          t[5] || (t[5] = a('div', { class: 'seat-guide-spacer' }, null, -1)),
+                          (h(!0),
+                          C(
+                            Z,
+                            null,
+                            se(
+                              m.value,
+                              (r) => (
+                                h(),
+                                C(
+                                  'div',
+                                  {
+                                    key: `col-guide-${r}`,
+                                    class: 'seat-column-guide',
+                                    style: F({ gridColumn: W(r), gridRow: '1' }),
+                                  },
+                                  _(z(r)),
+                                  5,
+                                )
+                              ),
+                            ),
+                            128,
+                          )),
+                          (h(!0),
+                          C(
+                            Z,
+                            null,
+                            se(
+                              i.value,
+                              (r, u) => (
+                                h(),
+                                C(
+                                  Z,
+                                  { key: `row-${u}` },
+                                  [
+                                    a(
+                                      'div',
+                                      {
+                                        class: 'seat-row-guide',
+                                        style: F({ gridColumn: '1', gridRow: P(u + 1) }),
+                                      },
+                                      _(k(u + 1)),
+                                      5,
+                                    ),
+                                    (h(!0),
+                                    C(
+                                      Z,
+                                      null,
+                                      se(
+                                        r,
+                                        (D, ee) => (
+                                          h(),
+                                          C(
+                                            'div',
+                                            {
+                                              key: D.id,
+                                              class: fe([
+                                                'seat-print-square',
+                                                {
+                                                  'is-blocked': D.status === 'blocked',
+                                                  'is-broken': D.status === 'broken',
+                                                },
+                                              ]),
+                                              style: F({
+                                                gridColumn: W(D.colNo || ee + 1),
+                                                gridRow: P(D.rowNo || u + 1),
+                                              }),
+                                            },
+                                            [
+                                              D.status === 'broken'
+                                                ? (h(),
+                                                  C('svg', sa, [
+                                                    ...(t[2] ||
+                                                      (t[2] = [
+                                                        a(
+                                                          'path',
+                                                          {
+                                                            fill: 'currentColor',
+                                                            d: 'M12 2.75A9.25 9.25 0 1 0 12 21.25 9.25 9.25 0 0 0 12 2.75Zm0 2.5c1.47 0 2.82.48 3.91 1.3L6.55 15.91A6.72 6.72 0 0 1 5.25 12 6.75 6.75 0 0 1 12 5.25Zm0 13.5c-1.47 0-2.82-.48-3.91-1.3l9.36-9.36A6.72 6.72 0 0 1 18.75 12 6.75 6.75 0 0 1 12 18.75Z',
+                                                          },
+                                                          null,
+                                                          -1,
+                                                        ),
+                                                      ])),
+                                                  ]))
+                                                : (h(), C('span', na, _(D.label), 1)),
+                                            ],
+                                            6,
+                                          )
+                                        ),
+                                      ),
+                                      128,
+                                    )),
+                                  ],
+                                  64,
+                                )
+                              ),
+                            ),
+                            128,
+                          )),
+                          (h(!0),
+                          C(
+                            Z,
+                            null,
+                            se(
+                              E.value,
+                              (r) => (
+                                h(),
+                                C(
+                                  'div',
+                                  {
+                                    key: `col-aisle-${r}`,
+                                    class: 'seat-column-aisle',
+                                    style: F(ve(r)),
+                                  },
+                                  [...(t[3] || (t[3] = [a('span', null, 'ทางเดิน', -1)]))],
+                                  4,
+                                )
+                              ),
+                            ),
+                            128,
+                          )),
+                          (h(!0),
+                          C(
+                            Z,
+                            null,
+                            se(
+                              T.value,
+                              (r) => (
+                                h(),
+                                C(
+                                  'div',
+                                  {
+                                    key: `row-aisle-${r}`,
+                                    class: 'seat-row-aisle',
+                                    style: F(Se(r)),
+                                  },
+                                  [...(t[4] || (t[4] = [a('span', null, 'ทางเดิน', -1)]))],
+                                  4,
+                                )
+                              ),
+                            ),
+                            128,
+                          )),
+                        ],
+                        4,
+                      ),
+                    ]),
+                  ],
+                  4,
+                ),
+              ],
+              4,
+            ),
+          ]),
+        ])
+      );
+    },
+  }),
+  ma = me(da, [['__scopeId', 'data-v-051adb4c']]),
+  va = 3;
+function Sa() {
+  const d = w(null),
+    v = w([]),
+    g = w(!1),
+    L = w(null),
+    c = w(''),
+    m = w(null),
+    i = w(null),
+    E = o(() => d.value?.SESSIONS ?? []),
+    T = o(() => E.value.find((e) => e.SS_ID === m.value) ?? null),
+    N = (e) => {
+      const t = String(e.SS_START_TIME || '').substring(0, 5),
+        r = String(e.SS_END_TIME || '').substring(0, 5);
+      return `${t}-${r}`;
+    },
+    V = o(() => {
+      const e = new Set();
+      return E.value.filter((t) => {
+        const r = N(t);
+        return e.has(r) ? !1 : (e.add(r), !0);
+      });
+    }),
+    x = o(() => {
+      if (!T.value) return [];
+      const e = N(T.value);
+      return E.value.filter((t) => N(t) === e);
+    }),
+    R = o(() => x.value.map((e) => e.SS_ID)),
+    $ = o(() => x.value.length > 0 && x.value.every((e) => Number(e.SS_SESSION_STATUS) >= va)),
+    A = o(() =>
+      x.value.flatMap((e) => {
+        const t = e.SESSION_LOCATIONS || [];
+        return t.length > 0
+          ? t.filter((r) => r.LOCATION).map((r) => ({ ...r, SS_ID: r.SS_ID || e.SS_ID }))
+          : e.LOCATION
+            ? [
+                {
+                  SL_ID: -e.SS_ID,
+                  LOCATION_ID: e.LOCATION.LOCATION_ID,
+                  SS_ID: e.SS_ID,
+                  LOCATION: e.LOCATION,
+                },
+              ]
+            : [];
+      }),
+    ),
+    M = o(() =>
+      A.value.map((e) => ({
+        value: e.SL_ID,
+        label: `${e.LOCATION.LOCATION_NAME}${e.LOCATION.LOCATION_ROOM_NO ? ` (${e.LOCATION.LOCATION_ROOM_NO})` : ''}`,
+      })),
+    ),
+    y = o(() => (A.value.some((t) => t.SL_ID === i.value) ? i.value : (A.value[0]?.SL_ID ?? null))),
+    G = o(() => A.value.find((e) => e.SL_ID === y.value) ?? null),
+    b = o(() => G.value?.LOCATION ?? T.value?.LOCATION ?? null),
+    le = 2,
+    U = 5,
+    z = o(() =>
+      R.value.length === 0
+        ? []
+        : v.value.filter((e) => {
+            if (
+              !R.value.includes(e.SESSION_ID) ||
+              Number(e.ERM_STATUS) < le ||
+              Number(e.ERM_STATUS) === U ||
+              !e.LS_ID
+            )
+              return !1;
+            if (y.value === null) return A.value.length === 0;
+            if (e.SL_ID !== null && e.SL_ID !== void 0) return e.SL_ID === y.value;
+            const t = A.value.find((u) => u.LOCATION.SEATS?.some((D) => D.LS_ID === e.LS_ID));
+            if (t) return t.SL_ID === y.value;
+            const r = A.value.filter((u) => u.SS_ID === e.SESSION_ID);
+            return r.length === 1 && r[0]?.SL_ID === y.value;
+          }),
+    ),
+    k = (e) => {
+      const t = b.value?.SEATS?.find((r) => r.LS_ID === e.LS_ID);
+      return t?.LS_SEAT_LABEL
+        ? t.LS_SEAT_LABEL
+        : e.LOCATION_SEAT?.LS_ID === e.LS_ID && e.LOCATION_SEAT.LS_SEAT_LABEL
+          ? e.LOCATION_SEAT.LS_SEAT_LABEL
+          : '-';
+    },
+    J = (e) => {
+      const t = A.value.findIndex((X) => X.LOCATION.SEATS?.some((ae) => ae.LS_ID === e.LS_ID)),
+        r = t >= 0 ? t : Number.MAX_SAFE_INTEGER / 2,
+        u =
+          A.value[t]?.LOCATION.SEATS?.find((X) => X.LS_ID === e.LS_ID) ??
+          b.value?.SEATS?.find((X) => X.LS_ID === e.LS_ID) ??
+          null;
+      if (u) return r * 1e6 + u.LS_ROW_NO * 1e3 + u.LS_COL_NO;
+      const ee = k(e).match(/^([A-Za-z]+)(\d+)$/);
+      if (!ee) return Number.MAX_SAFE_INTEGER;
+      const [, ge, pe] = ee,
+        te = (ge || '')
+          .toUpperCase()
+          .split('')
+          .reduce((X, ae) => X * 26 + ae.charCodeAt(0) - 64, 0);
+      return r * 1e6 + te * 1e3 + Number(pe);
+    },
+    H = o(() =>
+      z.value
+        .map((e) => ({ enrollment: e, seatOrder: J(e) }))
+        .sort((e, t) =>
+          e.seatOrder !== t.seatOrder
+            ? e.seatOrder - t.seatOrder
+            : e.enrollment.ERM_ID - t.enrollment.ERM_ID,
+        )
+        .map(({ enrollment: e }, t) => ({
+          index: t + 1,
+          ermId: e.ERM_ID,
+          nationalId: e.ERM_TEST_TAKER || '-',
+          titleTh: e.USER?.PROFILE?.userTitleTh || '-',
+          fullnameTh: e.USER?.PROFILE?.userFullnameTh || '-',
+          fullnameEn: e.USER?.PROFILE?.userFullnameEn || '-',
+          seatNumber: k(e),
+          sessionId: e.SESSION_ID,
+          enrollment: e,
+        })),
+    ),
+    W = o(() => {
+      const e = c.value.toLowerCase().trim();
+      return e
+        ? H.value.filter(
+            (t) =>
+              t.nationalId.toLowerCase().includes(e) ||
+              t.fullnameTh.toLowerCase().includes(e) ||
+              t.fullnameEn.toLowerCase().includes(e) ||
+              t.titleTh.toLowerCase().includes(e) ||
+              t.seatNumber.toLowerCase().includes(e),
+          )
+        : H.value;
+    }),
+    P = o(() => z.value.length),
+    j = o(() => {
+      if (!T.value) return '-';
+      const e = (T.value.SS_START_TIME || '').substring(0, 5),
+        t = (T.value.SS_END_TIME || '').substring(0, 5);
+      return `${e}-${t}`;
+    }),
+    ie = o(() => {
+      if (!b.value) return '-';
+      const e = b.value;
+      return `${e.LOCATION_NAME}${e.LOCATION_ROOM_NO ? ` (${e.LOCATION_ROOM_NO})` : ''}`;
+    }),
+    Q = o(() => b.value?.SEATS?.length ?? 0);
+  return {
+    exam: d,
+    sessions: E,
+    activeSession: T,
+    activeLocation: b,
+    sessionTimeTabs: V,
+    selectedSessionLocationId: i,
+    roomOptions: M,
+    isLoading: g,
+    error: L,
+    searchQuery: c,
+    selectedSessionId: m,
+    filteredRows: W,
+    candidateCount: P,
+    sessionTime: j,
+    sessionLocation: ie,
+    sessionCapacity: Q,
+    sessionEnrollments: z,
+    activeSessionIds: R,
+    isVoucherSent: $,
+    getTimeTabSessionId: (e) => {
+      const t = E.value.find((u) => u.SS_ID === e);
+      if (!t) return null;
+      const r = N(t);
+      return V.value.find((u) => N(u) === r)?.SS_ID ?? null;
+    },
+    fetchData: async (e) => {
+      ((g.value = !0), (L.value = null));
+      try {
+        const [t, r] = await Promise.all([
+          St(e).catch((u) => (console.error('Failed to fetch exam:', u), null)),
+          ht(e).catch((u) => (console.error('Failed to fetch enrollments:', u), [])),
+        ]);
+        if (((d.value = t), (v.value = r), t?.SESSIONS?.length && !m.value)) {
+          const u = t.SESSIONS[0];
+          u && (m.value = u.SS_ID);
+        }
+        !t && r.length === 0 && (L.value = 'ไม่พบข้อมูลการสอบ');
+      } catch (t) {
+        (console.error('Critical error:', t), (L.value = 'เกิดข้อผิดพลาดในการโหลดข้อมูล'));
+      } finally {
+        g.value = !1;
+      }
+    },
+  };
+}
+const pa = async (d) => (await qe.post('/exam-vouchers/bulk-issue', d)).data,
+  _a = { class: 'toolbar-section row items-center q-mb-md q-gutter-md' },
+  fa = { class: 'row q-gutter-sm col-12 col-sm-auto justify-end' },
+  ha = { class: 'row justify-center' },
+  ga = { key: 0, class: 'seat-print-render-root', 'aria-hidden': 'true' },
+  Ea = { class: 'seat-plan-print-area seat-print-page' },
+  Ia = { class: 'seat-list-print-area seat-print-page' },
+  Aa = { class: 'seat-list-print' },
+  Ta = { class: 'seat-list-print__header' },
+  Oa = { class: 'seat-list-print__table' },
+  La = { class: 'text-left' },
+  Ca = { class: 'text-left' },
+  Na = 3,
+  ba = 2,
+  Ra = de({
+    __name: 'exam-seat-candidates-page',
+    setup(d) {
+      const v = () => {
+          const s = i.value?.EXAM_TYPE?.trim().toLowerCase();
+          return s === _t || s === Ne.toLowerCase() ? Ne : ft;
+        },
+        g = ze(),
+        L = Ke(),
+        c = $e(),
+        m = tt(),
+        {
+          exam: i,
+          sessions: E,
+          sessionTimeTabs: T,
+          activeLocation: N,
+          isLoading: V,
+          searchQuery: x,
+          selectedSessionId: R,
+          selectedSessionLocationId: $,
+          roomOptions: A,
+          filteredRows: M,
+          candidateCount: y,
+          sessionTime: G,
+          sessionLocation: b,
+          sessionCapacity: le,
+          sessionEnrollments: U,
+          activeSessionIds: z,
+          isVoucherSent: k,
+          getTimeTabSessionId: J,
+          fetchData: H,
+        } = Sa(),
+        W = w(!1),
+        P = w(null),
+        j = w(null),
+        ie = (s) => c.t(`common.months[${s}]`),
+        Q = o(() => {
+          if (!i.value?.EXAM_DATE) return '-';
+          const s = new Date(i.value.EXAM_DATE);
+          if (isNaN(s.getTime())) return i.value.EXAM_DATE;
+          const n = s.getDate(),
+            l = ie(s.getMonth()),
+            I = c.locale.value.startsWith('th'),
+            S = s.getFullYear() + (I ? 543 : 0);
+          return `${n} ${l} ${S}`;
+        }),
+        ve = o(() => ({
+          id: U.value[0]?.ERM_ID ?? 0,
+          fullName: 'XX. XXXXXX XXXXXX',
+          studentId: 'XXXXXXXX',
+          examName: i.value?.EXAM_ROUND
+            ? `${i.value.EXAM_NAME} ${i.value.EXAM_ROUND}`
+            : i.value?.EXAM_NAME || 'BUU-GET Exam',
+          examDate: Q.value,
+          examTime: G.value,
+          examType: v(),
+          location: b.value,
+          seatNo: 'XX',
+          voucherNo: 'ENG2026-001',
+          citizenId: 'X-XXXX-XXXXX-XX-X',
+          testSession: 'X/XXXX',
+          barcodeValue: 'ENG2026-001',
+        })),
+        Se = async () => {
+          if (!U.value || U.value.length === 0) {
+            m.notify({
+              type: 'warning',
+              message: 'ไม่พบรายชื่อผู้เข้าสอบในรอบนี้',
+              position: 'top',
+              timeout: 2500,
+            });
+            return;
+          }
+          m.loading.show({
+            message: 'กำลังออกบัตรประจำตัวสอบและจัดส่งอีเมลแจ้งเตือนผู้เข้าสอบทั้งหมด...',
+          });
+          try {
+            const s = L.resolve({ name: 'exam-history' }),
+              n = new URL(s.href, window.location.origin).href,
+              l = U.value.filter((O) => O && O.ERM_ID).map((O) => O.ERM_ID),
+              I = i.value?.EXAM_ROUND
+                ? `${i.value.EXAM_NAME} ${i.value.EXAM_ROUND}`
+                : i.value?.EXAM_NAME || 'BUU-GET Exam';
+            (await pa({ ermIds: l, examName: I, historyUrl: n }),
+              await Promise.all(
+                U.value.map((O) => Et(O.ERM_ID, { ERM_STATUS: It.SEAT_PUBLISHED })),
+              ),
+              await Promise.all(z.value.map((O) => pt(O, Na))));
+            const S = Number(g.params.examId);
+            (!isNaN(S) && S > 0 && (await H(S)),
+              m.notify({
+                type: 'positive',
+                message: 'ออกบัตรประจำตัวและส่งอีเมลหาผู้เข้าสอบทุกคนสำเร็จเรียบร้อยแล้ว!',
+                icon: 'check_circle',
+                position: 'top',
+                timeout: 3e3,
+                actions: [{ icon: 'close', color: 'white' }],
+              }));
+          } catch (s) {
+            (console.error('Failed to issue tickets:', s),
+              m.notify({
+                type: 'negative',
+                message: 'เกิดข้อผิดพลาดในการออกบัตรหรือส่งอีเมล กรุณาลองใหม่อีกครั้ง',
+                icon: 'report_problem',
+                position: 'top',
+                timeout: 3500,
+                actions: [{ icon: 'close', color: 'white' }],
+              }));
+          } finally {
+            m.loading.hide();
+          }
+        },
+        e = () => {
+          m.dialog({
+            component: Ft,
+            componentProps: {
+              sessionDetails: {
+                date: Q.value,
+                time: G.value,
+                room: b.value,
+                studentCount: y.value,
+              },
+              voucherData: ve.value,
+            },
+          }).onOk(() => {
+            Se();
+          });
+        },
+        t = (s, n = s.enrollment) => {
+          const l = n,
+            I = l.USER?.PROFILE,
+            S = I?.userTitleEn || I?.userTitleTh || '',
+            O = I?.userFullnameEn || I?.userFullnameTh || '',
+            K = l.SESSION_LOCATION?.LOCATION,
+            q = l.VOUCHERS?.[0]?.VC_CODE || '-',
+            ue = l.USER?.IMAGE?.USER_IMAGE_URL || l.USER?.USER_IMAGE || I?.userImagePath || void 0;
+          return {
+            id: l.ERM_ID,
+            fullName: `${S} ${O}`.trim() || '-',
+            studentId: l.ERM_TEST_TAKER || '-',
+            examName: i.value?.EXAM_ROUND
+              ? `${i.value.EXAM_NAME} ${i.value.EXAM_ROUND}`
+              : i.value?.EXAM_NAME || 'BUU-GET Exam',
+            examDate: Q.value,
+            examTime: G.value,
+            examType: v(),
+            location: K?.LOCATION_NAME || b.value,
+            locationRoom: K?.LOCATION_ROOM_NO || void 0,
+            seatNo: l.LOCATION_SEAT?.LS_SEAT_LABEL || s.seatNumber,
+            voucherNo: q,
+            citizenId: l.USER?.USER_NATIONAL_ID || l.USER?.USER_PASSPORT_NO || '-',
+            testSession: i.value?.EXAM_ROUND || '-',
+            profileImage: ue ? At(ue) : void 0,
+            barcodeValue: q,
+          };
+        },
+        r = async (s) => {
+          m.loading.show();
+          try {
+            const n = await gt(s.ermId);
+            m.dialog({
+              component: Yt,
+              componentProps: { voucherData: t(s, n), candidateCount: y.value },
+            });
+          } catch (n) {
+            (console.error('Failed to load voucher data:', n),
+              m.notify({
+                type: 'negative',
+                message: 'ไม่สามารถโหลดข้อมูลตั๋วได้ กรุณาลองใหม่อีกครั้ง',
+                position: 'top',
+              }));
+          } finally {
+            m.loading.hide();
+          }
+        },
+        u = o(() => P.value ?? N.value),
+        D = async (s = !1) => {
+          const n = N.value?.LOCATION_ID;
+          if (!n) {
+            ((P.value = null), (j.value = null));
+            return;
+          }
+          if (!(!s && j.value === n && P.value))
+            try {
+              ((P.value = await vt(n)), (j.value = n));
+            } catch (l) {
+              (console.error('Failed to refresh active location:', l),
+                (P.value = null),
+                (j.value = null));
+            }
+        },
+        ee = o(() => u.value?.AISLE_AFTER_COLS ?? []),
+        ge = o(() => u.value?.AISLE_AFTER_ROWS ?? []),
+        pe = o(() => u.value?.SEAT_DIRECTION ?? 'HORIZONTAL'),
+        te = o(() => {
+          const s = u.value?.LOCATION_TOTAL_ROWS ?? 0,
+            n = Math.max(0, ...(u.value?.SEATS ?? []).map((l) => l.LS_ROW_NO));
+          return Math.max(s, n);
+        }),
+        X = o(() => {
+          const s = u.value?.LOCATION_TOTAL_COLS ?? 0,
+            n = Math.max(0, ...(u.value?.SEATS ?? []).map((l) => l.LS_COL_NO));
+          return Math.max(s, n);
+        }),
+        ae = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
+        ke = (s, n) =>
+          pe.value === 'VERTICAL' ? `${ae[n - 1] ?? n}${s}` : `${ae[s - 1] ?? s}${n}`,
+        Oe = o(() => {
+          const s = u.value;
+          if (!s) return b.value;
+          const n = s.LOCATION_ROOM_NO ? ` ห้อง ${s.LOCATION_ROOM_NO}` : '',
+            l =
+              s.LOCATION_FLOOR_NO !== null && s.LOCATION_FLOOR_NO !== void 0
+                ? ` ชั้น ${s.LOCATION_FLOOR_NO}`
+                : '';
+          return `${s.LOCATION_NAME}${n}${l}`;
+        }),
+        Xe = o(() => {
+          const s = u.value?.SEATS ?? [];
+          if (te.value === 0 || X.value === 0) return [];
+          const n = Array.from({ length: te.value }, () => []),
+            l = new Map(),
+            I = new Map();
+          s.forEach((S) => {
+            (l.set(`${S.LS_ROW_NO}-${S.LS_COL_NO}`, S),
+              S.LS_SEAT_LABEL && I.set(S.LS_SEAT_LABEL, S));
+          });
+          for (let S = 1; S <= te.value; S += 1)
+            for (let O = 1; O <= X.value; O += 1) {
+              const K = ke(S, O),
+                q = I.get(K) ?? l.get(`${S}-${O}`),
+                ue = Number(q?.LS_SEAT_STATUS ?? 0);
+              let Ee = 'available';
+              (ue === 1 ? (Ee = 'broken') : ue === 2 && (Ee = 'blocked'),
+                n[S - 1]?.push({
+                  id: q ? String(q.LS_ID) : `virtual-${S}-${O}`,
+                  label: K,
+                  status: Ee,
+                  rowNo: S,
+                  colNo: O,
+                  student: null,
+                }));
+            }
+          return n;
+        }),
+        Ue = o(() => M.value),
+        Le = () => {
+          W.value = !1;
+        },
+        Pe = (s) => s.toDataURL('image/jpeg', 0.92),
+        Be = async (s) =>
+          st(s, {
+            scale: 1.7,
+            useCORS: !0,
+            allowTaint: !0,
+            backgroundColor: '#ffffff',
+            windowWidth: s.scrollWidth,
+            windowHeight: s.scrollHeight,
+          }),
+        Ve = async () => {
+          (await D(),
+            (W.value = !0),
+            m.loading.show(),
+            await et(),
+            await new Promise((s) => {
+              window.requestAnimationFrame(() => s());
+            }));
+          try {
+            const s = [...document.querySelectorAll('.seat-print-page')];
+            if (s.length === 0) throw new Error('Seat print pages not found');
+            const n = new at({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            for (const [O, K] of s.entries()) {
+              O > 0 && n.addPage('a4', 'portrait');
+              const q = await Be(K);
+              n.addImage(Pe(q), 'JPEG', 0, 0, 210, 297, void 0, 'FAST');
+            }
+            n.autoPrint();
+            const l = n.output('blob'),
+              I = URL.createObjectURL(l);
+            window.open(I, '_blank')
+              ? window.setTimeout(() => URL.revokeObjectURL(I), 6e4)
+              : (n.save('seat-plan.pdf'), URL.revokeObjectURL(I));
+          } catch (s) {
+            (console.error('Error printing seat plan:', s),
+              m.notify({
+                type: 'negative',
+                message: 'ไม่สามารถพิมพ์แผนผังที่นั่งได้',
+                position: 'top',
+              }));
+          } finally {
+            (m.loading.hide(), Le());
+          }
+        },
+        re = w({ page: 1, rowsPerPage: 10, rowsNumber: 0 }),
+        Ce = o(() => {
+          const s = k.value ? 13 : 19,
+            n = [
+              {
+                name: 'index',
+                label: c.t('admin.seatCandidates.table.columns.index'),
+                field: 'index',
+                align: 'center',
+                style: 'width: 8%',
+              },
+              {
+                name: 'nationalId',
+                label: c.t('admin.seatCandidates.table.columns.nationalId'),
+                field: 'nationalId',
+                align: 'center',
+                style: 'width: 20%',
+              },
+              {
+                name: 'titleTh',
+                label: c.t('admin.seatCandidates.table.columns.prefix'),
+                field: 'titleTh',
+                align: 'center',
+                style: 'width: 12%',
+              },
+              {
+                name: 'fullnameTh',
+                label: c.t('admin.seatCandidates.table.columns.fullName'),
+                field: 'fullnameTh',
+                align: 'left',
+                style: `width: ${s}%`,
+              },
+              {
+                name: 'fullnameEn',
+                label: c.t('admin.seatCandidates.table.columns.fullNameEn'),
+                field: 'fullnameEn',
+                align: 'left',
+                style: `width: ${s}%`,
+              },
+              {
+                name: 'seatNumber',
+                label: c.t('admin.seatCandidates.table.columns.seatNumber'),
+                field: 'seatNumber',
+                align: 'center',
+                style: 'width: 22%',
+                classes: 'text-weight-bold',
+              },
+            ];
+          return (
+            k.value &&
+              n.push({
+                name: 'tools',
+                label: c.t('admin.seatCandidates.table.columns.tools'),
+                field: 'tools',
+                align: 'center',
+                headerClasses: 'tools-column',
+                classes: 'tools-column',
+              }),
+            n
+          );
+        }),
+        Fe = (s) => {
+          const { page: n, rowsPerPage: l } = s.pagination;
+          ((re.value.page = n), (re.value.rowsPerPage = l));
+        };
+      (_e(M, (s) => {
+        re.value.rowsNumber = s.length;
+      }),
+        _e(
+          () => N.value?.LOCATION_ID,
+          () => {
+            D();
+          },
+          { immediate: !0 },
+        ),
+        _e(i, (s) => {
+          if (s?.SESSIONS?.length && !R.value) {
+            const n = s.SESSIONS[0];
+            n && (R.value = n.SS_ID);
+          }
+        }),
+        _e(
+          [R, A],
+          () => {
+            const s = A.value[0]?.value ?? null;
+            if (s === null) {
+              $.value = null;
+              return;
+            }
+            A.value.some((n) => n.value === $.value) || ($.value = s);
+          },
+          { immediate: !0 },
+        ));
+      const Ge = async () => {
+        const s = Number(g.params.examId);
+        if (!isNaN(s) && s > 0) {
+          if ((await H(s), !E.value.some((S) => Number(S.SS_SESSION_STATUS) >= ba))) {
+            await L.replace({ name: 'admin-exam-seat-management', params: { examId: String(s) } });
+            return;
+          }
+          const l = Number(g.query.sessionId);
+          !isNaN(l) && E.value.some((S) => S.SS_ID === l) && (R.value = J(l) ?? l);
+          const I = Number(g.query.sessionLocationId);
+          (!isNaN(I) && A.value.some((S) => S.value === I) && ($.value = I),
+            (re.value.rowsNumber = M.value.length));
+        }
+      };
+      return (
+        Ze(() => {
+          Ge();
+        }),
+        Ye(() => {
+          Le();
+        }),
+        (s, n) => (
+          h(),
+          ne(
+            We,
+            { class: 'page-container seat-candidates-page' },
+            {
+              default: Y(() => [
+                p(ct),
+                p(
+                  dt,
+                  {
+                    title: s.$t('admin.seatCandidates.pageTitle'),
+                    subtitle: s.$t('admin.seatCandidates.pageSubtitle'),
+                  },
+                  null,
+                  8,
+                  ['title', 'subtitle'],
+                ),
+                p(
+                  rt,
+                  {
+                    modelValue: f(R),
+                    'onUpdate:modelValue': n[0] || (n[0] = (l) => (Ie(R) ? (R.value = l) : null)),
+                    sessions: f(T),
+                  },
+                  null,
+                  8,
+                  ['modelValue', 'sessions'],
+                ),
+                f(i)
+                  ? (h(),
+                    ne(
+                      ut,
+                      {
+                        key: 0,
+                        'selected-location-id': f($),
+                        'onUpdate:selectedLocationId':
+                          n[1] || (n[1] = (l) => (Ie($) ? ($.value = l) : null)),
+                        class: 'q-mb-md',
+                        title: f(i).EXAM_ROUND
+                          ? `${f(i).EXAM_NAME} ${f(i).EXAM_ROUND}`
+                          : f(i).EXAM_NAME,
+                        date: Q.value,
+                        time: f(G),
+                        location: f(b),
+                        'location-options': f(A),
+                        'applicant-count': f(y),
+                        'total-capacity': f(le),
+                        'hide-paid': '',
+                        'hide-main-separator': '',
+                        'is-admin': '',
+                      },
+                      null,
+                      8,
+                      [
+                        'selected-location-id',
+                        'title',
+                        'date',
+                        'time',
+                        'location',
+                        'location-options',
+                        'applicant-count',
+                        'total-capacity',
+                      ],
+                    ))
+                  : he('', !0),
+                a('nav', _a, [
+                  p(
+                    lt,
+                    {
+                      modelValue: f(x),
+                      'onUpdate:modelValue': n[2] || (n[2] = (l) => (Ie(x) ? (x.value = l) : null)),
+                      class: 'col-12 col-sm-auto',
+                    },
+                    null,
+                    8,
+                    ['modelValue'],
+                  ),
+                  p(He, { class: 'gt-xs' }),
+                  a('div', fa, [
+                    p(
+                      Te,
+                      {
+                        icon: f(k) ? 'print' : 'badge',
+                        label: f(k)
+                          ? s.$t('admin.seatCandidates.printSeatPlan')
+                          : s.$t('admin.seatCandidates.printVoucher'),
+                        color: 'primary',
+                        class: 'toolbar-action-btn',
+                        onClick: n[3] || (n[3] = (l) => (f(k) ? Ve() : e())),
+                      },
+                      null,
+                      8,
+                      ['icon', 'label'],
+                    ),
+                    p(
+                      it,
+                      {
+                        columns: Ce.value,
+                        rows: f(M),
+                        'file-name-prefix': 'seat-candidates',
+                        class: 'toolbar-action-btn',
+                      },
+                      null,
+                      8,
+                      ['columns', 'rows'],
+                    ),
+                  ]),
+                ]),
+                a('main', null, [
+                  p(
+                    ot,
+                    {
+                      columns: Ce.value,
+                      rows: f(M),
+                      loading: f(V),
+                      pagination: re.value,
+                      class: 'seat-candidates-table',
+                      onRequest: Fe,
+                    },
+                    {
+                      'body-cell-tools': Y(({ row: l }) => [
+                        a('div', ha, [
+                          f(k)
+                            ? (h(),
+                              ne(
+                                mt,
+                                {
+                                  key: 0,
+                                  icon: 'badge',
+                                  color: 'black',
+                                  tooltip: s.$t('admin.seatCandidates.viewVoucher'),
+                                  onClick: (I) => r(l),
+                                },
+                                null,
+                                8,
+                                ['tooltip', 'onClick'],
+                              ))
+                            : he('', !0),
+                        ]),
+                      ]),
+                      _: 1,
+                    },
+                    8,
+                    ['columns', 'rows', 'loading', 'pagination'],
+                  ),
+                ]),
+                (h(),
+                ne(Je, { to: 'body' }, [
+                  W.value
+                    ? (h(),
+                      C('div', ga, [
+                        a('section', Ea, [
+                          p(
+                            ma,
+                            {
+                              'room-label': Oe.value,
+                              'seats-by-row': Xe.value,
+                              'aisle-after-cols': ee.value,
+                              'aisle-after-rows': ge.value,
+                              'seat-direction': pe.value,
+                              'layout-rows': te.value,
+                              'layout-cols': X.value,
+                            },
+                            null,
+                            8,
+                            [
+                              'room-label',
+                              'seats-by-row',
+                              'aisle-after-cols',
+                              'aisle-after-rows',
+                              'seat-direction',
+                              'layout-rows',
+                              'layout-cols',
+                            ],
+                          ),
+                        ]),
+                        a('section', Ia, [
+                          a('div', Aa, [
+                            a('header', Ta, [
+                              n[4] || (n[4] = a('h1', null, 'ใบรายชื่อผู้เข้าสอบ', -1)),
+                              a('p', null, _(Oe.value), 1),
+                            ]),
+                            a('table', Oa, [
+                              n[5] ||
+                                (n[5] = a(
+                                  'thead',
+                                  null,
+                                  [
+                                    a('tr', null, [
+                                      a('th', null, 'ลำดับ'),
+                                      a('th', null, 'เลขประจำตัวผู้สอบ'),
+                                      a('th', null, 'คำนำหน้า'),
+                                      a('th', null, 'ชื่อ-นามสกุล'),
+                                      a('th', null, 'Full Name'),
+                                      a('th', null, 'ที่นั่ง'),
+                                    ]),
+                                  ],
+                                  -1,
+                                )),
+                              a('tbody', null, [
+                                (h(!0),
+                                C(
+                                  Z,
+                                  null,
+                                  se(
+                                    Ue.value,
+                                    (l) => (
+                                      h(),
+                                      C('tr', { key: l.ermId }, [
+                                        a('td', null, _(l.index), 1),
+                                        a('td', null, _(l.nationalId), 1),
+                                        a('td', null, _(l.titleTh), 1),
+                                        a('td', La, _(l.fullnameTh), 1),
+                                        a('td', Ca, _(l.fullnameEn), 1),
+                                        a('td', null, _(l.seatNumber), 1),
+                                      ])
+                                    ),
+                                  ),
+                                  128,
+                                )),
+                              ]),
+                            ]),
+                          ]),
+                        ]),
+                      ]))
+                    : he('', !0),
+                ])),
+              ]),
+              _: 1,
+            },
+          )
+        )
+      );
+    },
+  }),
+  vs = me(Ra, [['__scopeId', 'data-v-d3e4dd7a']]);
+export { vs as default };

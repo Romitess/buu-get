@@ -15,7 +15,7 @@
             class="app-header__nav-link app-header__nav-link--dropdown"
             :class="{
               'app-header__nav-link--active': isActiveRoute(link),
-              [`app-header__nav-link--${link.name}`]: true
+              [`app-header__nav-link--${link.name}`]: true,
             }"
           >
             <span>{{ link.label }}</span>
@@ -51,7 +51,7 @@
             class="app-header__nav-link"
             :class="{
               'app-header__nav-link--active': isActiveRoute(link),
-              [`app-header__nav-link--${link.name}`]: true
+              [`app-header__nav-link--${link.name}`]: true,
             }"
           >
             {{ link.label }}
@@ -347,7 +347,25 @@ const navLinks = computed<NavigationItem[]>(() => {
             icon: 'summarize',
             path: '/admin/application-fee-report',
           },
+          {
+            name: 'admin-exam-report',
+            label: t('navigation.examReport'),
+            icon: 'assessment',
+            path: '/admin/exam-report',
+          },
         ],
+      });
+    }
+
+    // === Executive: Exam Report ===
+    // executive ไม่อยู่ในกลุ่ม ADMIN/FINANCE จึงเพิ่มลิงก์รายงานการสอบแยกให้ตรงนี้
+    // (admin เห็นเมนูนี้อยู่แล้วในกลุ่ม "รายงาน" ด้านบน — ไม่ใส่ซ้ำ)
+    if (role === ROLES.EXECUTIVE) {
+      links.push({
+        name: 'admin-exam-report',
+        label: t('navigation.examReport'),
+        icon: 'assessment',
+        path: '/admin/exam-report',
       });
     }
   } else {

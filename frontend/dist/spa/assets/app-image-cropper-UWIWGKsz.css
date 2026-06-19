@@ -1,0 +1,48 @@
+.cropper-card[data-v-5d0b0cd9] {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 16px;
+  background: var(--surface-card);
+}
+.crop-area-container[data-v-5d0b0cd9] {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  overflow: hidden;
+  background: var(--surface-page);
+  border-radius: 12px;
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.crop-area-container[data-v-5d0b0cd9]:active {
+  cursor: grabbing;
+}
+.crop-image[data-v-5d0b0cd9] {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: none;
+  max-height: none;
+  pointer-events: none;
+}
+.crop-card-mask[data-v-5d0b0cd9] {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 180px;
+  height: 240px;
+  pointer-events: none;
+  border: 2px dashed rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 9999px #0000008c;
+  box-sizing: border-box;
+  border-radius: 4px;
+}
+.slider-container[data-v-5d0b0cd9] {
+  width: 280px;
+}
+.action-btn[data-v-5d0b0cd9] {
+  width: 90px;
+  border-radius: 8px;
+}

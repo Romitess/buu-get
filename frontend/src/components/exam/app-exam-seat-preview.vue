@@ -40,6 +40,13 @@
                   @click="openColumnStatusDialog(colIndex)"
                 >
                   {{ columnGuideLabels[colIndex - 1] }}
+                  <q-tooltip
+                    anchor="top middle"
+                    self="bottom middle"
+                    class="seat-tooltip text-body2"
+                  >
+                    คลิกเพื่อตั้งค่าสถานะที่นั่งทั้งแถว
+                  </q-tooltip>
                 </button>
               </template>
             </template>
@@ -59,6 +66,9 @@
                 @click="openRowStatusDialog(rowIndex)"
               >
                 {{ rowGuideLabels[rowIndex] }}
+                <q-tooltip anchor="top middle" self="bottom middle" class="seat-tooltip text-body2">
+                  คลิกเพื่อตั้งค่าสถานะที่นั่งทั้งแถว
+                </q-tooltip>
               </button>
 
               <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
@@ -82,11 +92,7 @@
                       self="bottom middle"
                       class="seat-tooltip text-body2"
                     >
-                      {{
-                        brokenSeats.has(seat.id)
-                          ? t('admin.locationManagement.seatTooltip.markAvailable')
-                          : t('admin.locationManagement.seatTooltip.markBroken')
-                      }}
+                      คลิกเพื่อตั้งค่าสถานะที่นั่ง
                     </q-tooltip>
                   </AppExamSeatSquare>
                 </div>

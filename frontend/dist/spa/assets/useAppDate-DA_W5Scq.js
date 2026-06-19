@@ -1,0 +1,58 @@
+import { u as h } from './vue-i18n-Bebkm_iB.js';
+import { B as N } from './exam.service-0p8xz0zq.js';
+const T = 1e3 * 60 * 60 * 24;
+function Y() {
+  const { locale: D } = h(),
+    c = () => {
+      const t = D.value === 'th';
+      return { locale: t ? 'th-TH' : 'en-US', yearOffset: t ? N : 0 };
+    };
+  return {
+    formatDate: (t) => {
+      if (!t) return '-';
+      const e = new Date(t);
+      if (isNaN(e.getTime())) return String(t);
+      const { yearOffset: a } = c(),
+        n = e.getDate().toString().padStart(2, '0'),
+        o = (e.getMonth() + 1).toString().padStart(2, '0'),
+        r = e.getFullYear() + a;
+      return `${n}/${o}/${r}`;
+    },
+    formatDateShort: (t) => {
+      if (!t) return '-';
+      const e = new Date(t);
+      if (isNaN(e.getTime())) return String(t);
+      const { locale: a, yearOffset: n } = c(),
+        o = new Intl.DateTimeFormat(a, { month: 'short' }).format(e),
+        r = e.getDate(),
+        s = e.getFullYear() + n;
+      return `${r} ${o} ${s}`;
+    },
+    formatDateRange: (t, e) => {
+      if (!t || !e) return '-';
+      const a = new Date(t),
+        n = new Date(e);
+      if (isNaN(a.getTime()) || isNaN(n.getTime())) return '-';
+      const { locale: o, yearOffset: r } = c(),
+        s = a.getDate(),
+        i = n.getDate(),
+        l = a.getMonth(),
+        g = n.getMonth(),
+        u = new Intl.DateTimeFormat(o, { month: 'short' }).format(a),
+        f = new Intl.DateTimeFormat(o, { month: 'short' }).format(n),
+        m = n.getFullYear() + r;
+      return l === g && a.getFullYear() === n.getFullYear()
+        ? `${s} - ${i} ${f} ${m}`
+        : `${s} ${u} - ${i} ${f} ${m}`;
+    },
+    calcDaysDiff: (t, e) => {
+      if (!t || !e) return 0;
+      const a = new Date(t),
+        n = new Date(e);
+      if (isNaN(a.getTime()) || isNaN(n.getTime())) return 0;
+      const o = Math.abs(n.getTime() - a.getTime());
+      return Math.ceil(o / T);
+    },
+  };
+}
+export { Y as u };
