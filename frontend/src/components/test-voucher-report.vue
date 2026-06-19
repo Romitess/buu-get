@@ -587,6 +587,8 @@ const windowPrint = (): void => {
   white-space: pre-line;
   margin-bottom: 16px;
   padding-left: 2px;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* ===== Responsive Adaptability ===== */
@@ -733,6 +735,8 @@ const windowPrint = (): void => {
       letter-spacing: 0 !important;
       vertical-align: middle;
       margin-top: -6px !important;
+      overflow-wrap: break-word !important;
+      word-break: break-word !important;
     }
     .regulations-text-content.q-mb-md {
       margin-bottom: -2px !important;
