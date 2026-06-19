@@ -1178,6 +1178,49 @@ export default {
         viewRecordMessage: 'เปิดใบเสร็จ {receiptNo} เพื่อดูรายละเอียด',
       },
     },
+    examReport: {
+      pageTitle: 'รายงานการสอบ',
+      pageSubtitle: 'สรุปภาพรวมการสมัครสอบ การเข้าสอบ และผลคะแนน เพื่อใช้ในการติดตามและวางแผน',
+      filter: {
+        fromYear: 'รายปี',
+        fromMonth: 'รายเดือน',
+        fromRound: 'รายรอบ',
+        toYear: 'รายปี',
+        toMonth: 'รายเดือน',
+        toRound: 'รายรอบ',
+        apply: 'กรองข้อมูล',
+        placeholders: {
+          year: 'เลือกปีที่ต้องการ',
+          month: 'เลือกเดือนที่ต้องการ',
+          round: 'รอบสอบที่ต้องการ',
+        },
+      },
+      charts: {
+        attendanceTitle: 'จำนวนผู้เข้าสอบและขาดสอบ',
+        attended: 'เข้าสอบ',
+        absent: 'ขาดสอบ',
+        trendTitle: 'แนวโน้มผู้เข้าสอบรายปี',
+        registered: 'จำนวนผู้ลงทะเบียน',
+        scoreSummaryTitle: 'รายงานสรุปคะแนนรายปี',
+        peopleUnit: 'จำนวนคน',
+      },
+      table: {
+        title: 'ตารางรอบสอบ',
+        emptyLabel: 'ไม่พบข้อมูลรอบสอบ',
+        viewRegistrants: 'ดูรายชื่อผู้สมัคร',
+        columns: {
+          round: 'รอบสอบ',
+          date: 'วันที่',
+          registered: 'ลงทะเบียน',
+          attended: 'เข้าสอบ',
+          absent: 'ขาดสอบ',
+          tools: 'เครื่องมือ',
+        },
+      },
+      notifications: {
+        loadError: 'เกิดข้อผิดพลาดในการโหลดข้อมูลรายงานการสอบ',
+      },
+    },
   },
   auth: {
     systemDescription: 'ระบบทดสอบวัดความสามารถทางภาษาอังกฤษ',
@@ -1237,6 +1280,7 @@ export default {
     receiptUsageReport: 'การใช้ใบเสร็จรับเงิน',
     applicationFeeReport: 'สรุปการรับเงินค่าสมัครสอบ',
     fundSourceManagement: 'จัดการผังแหล่งเงิน',
+    examReport: 'รายงานการสอบ',
   },
   image: {
     upload: {

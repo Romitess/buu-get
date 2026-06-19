@@ -1,0 +1,1 @@
+import{aq as e}from"./index-CKSooU2k.js";const o=async()=>(await e.get("/exam-rule-vouchers/regulations")).data,r=async s=>(await e.put("/exam-rule-vouchers/regulations",s)).data;export{o as g,r as s};
