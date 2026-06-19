@@ -233,8 +233,8 @@ const previewSide = ref<'front' | 'back'>('front');
   }
 
   &.is-front :deep(.watermark-bg) {
-    left: 64%;
-    top: 40%;
+    left: 56%;
+    top: 47%;
   }
 
   :deep(.regulations-block) {
@@ -274,7 +274,8 @@ const previewSide = ref<'front' | 'back'>('front');
   }
 
   &.is-back :deep(.watermark-bg) {
-    left: 48% !important;
+    left: 56% !important;
+    top: 52%;
   }
 
   &.is-back :deep(.regulations-heading-inline) {

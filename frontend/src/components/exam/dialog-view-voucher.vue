@@ -66,10 +66,10 @@ const locationLabel = computed(() =>
 
 <style scoped lang="scss">
 .view-voucher-dialog-card {
-  width: min(860px, calc(100vw - 32px));
-  max-width: 860px;
+  width: min(800px, calc(100vw - 32px));
+  max-width: 800px;
   max-height: calc(100vh - 32px);
-  padding: 28px 48px 36px;
+  padding: 28px 40px 36px;
   border-radius: 10px;
   overflow-y: auto;
   background: var(--surface-card);

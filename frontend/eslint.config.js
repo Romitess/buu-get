@@ -48,6 +48,9 @@ export default defineConfigWithVueTs(
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+      },
 
       globals: {
         ...globals.browser,
