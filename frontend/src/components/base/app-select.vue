@@ -74,6 +74,7 @@ const handlePopupHide = (): void => {
   border-radius: 0 0 var(--radius-sm) var(--radius-sm) !important;
   box-shadow: 0 10px 20px rgb(15 23 42 / 12%) !important;
   overflow: hidden;
+  max-height: 300px !important;
 }
 
 :global(.app-select-menu .q-virtual-scroll__content) {
