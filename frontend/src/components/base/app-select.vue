@@ -5,7 +5,7 @@
     menu-self="top left"
     v-bind="$attrs"
     :model-value="modelValue"
-    popup-content-class="app-select-menu"
+    :popup-content-class="`app-select-menu ${isMuted ? 'app-select-menu--muted' : ''}`"
     class="app-select"
     :class="{ 'app-select--open': isOpen }"
     @update:model-value="emit('update:modelValue', $event)"
@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, useAttrs, computed } from 'vue';
 import type { QSelect } from 'quasar';
 
 defineOptions({
@@ -38,6 +38,15 @@ const emit = defineEmits<{
 
 const selectRef = ref<QSelect | null>(null);
 const isOpen = ref(false);
+
+const attrs = useAttrs();
+const isMuted = computed(() => {
+  const className = attrs.class;
+  if (typeof className === 'string') {
+    return className.includes('buu-input-muted');
+  }
+  return false;
+});
 
 const handlePopupShow = (): void => {
   isOpen.value = true;
@@ -72,6 +81,13 @@ const handlePopupHide = (): void => {
   border-radius: var(--radius-sm) var(--radius-sm) 0 0 !important;
 }
 
+/* For buu-input-muted style when open */
+.app-select--open.buu-input-muted :deep(.q-field__control) {
+  border-color: var(--primary) !important;
+  border-bottom-color: transparent !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
 :global(.app-select-menu) {
   margin-top: -1px !important;
   border: 1px solid var(--primary);
@@ -80,6 +96,10 @@ const handlePopupHide = (): void => {
   box-shadow: 0 10px 20px rgb(15 23 42 / 12%) !important;
   overflow-y: auto !important;
   max-height: 200px !important;
+}
+
+:global(.app-select-menu.app-select-menu--muted) {
+  border-radius: 0 0 12px 12px !important;
 }
 
 :global(.app-select-menu .q-virtual-scroll__content) {
@@ -96,5 +116,9 @@ const handlePopupHide = (): void => {
 
 :global(.app-select-menu .q-item:last-child) {
   border-radius: 0 0 calc(var(--radius-sm) - 1px) calc(var(--radius-sm) - 1px);
+}
+
+:global(.app-select-menu.app-select-menu--muted .q-item:last-child) {
+  border-radius: 0 0 11px 11px !important;
 }
 </style>
