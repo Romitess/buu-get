@@ -930,6 +930,10 @@ body {
     }
   }
 
+  &.q-field--focused.q-field--outlined .q-field__control {
+    border-color: var(--primary) !important;
+  }
+
   .q-field__native,
   .q-field__input {
     color: var(--text-input) !important;
