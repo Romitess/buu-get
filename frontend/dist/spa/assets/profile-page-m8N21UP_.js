@@ -1,1 +1,1039 @@
-import{c as Ie,aF as Ve,h as ke,aG as qe,O as $e,P as Ne,a4 as Ce,u as Ue,r as i,t as Te,w as _e,Q as X,R as Y,V as s,W as d,$ as j,S as a,T as r,X as w,U as Se,ai as Pe,an as _,Y as Re,a8 as v,az as S,a0 as m,av as p,am as G,J,ap as Ee,au as K,f,aH as Fe,aq as Le,a2 as Ae}from"./index-CKSooU2k.js";import{Q as ze}from"./QInnerLoading-CAwPoqSH.js";import{Q as Qe,A as De,a as He,u as Me}from"./app-image-cropper-B7mLtgoP.js";import{Q as Oe}from"./format-DnjzHs7F.js";import{Q as Be}from"./QForm-7Hg-hjp5.js";import{C as W}from"./ClosePopup-D9BZcpVj.js";import{u as Xe}from"./use-quasar-DaOT29F-.js";import{u as Ye}from"./vue-i18n-Bebkm_iB.js";import{A as je,a as Ge}from"./app-breadcrumbs-C0oZOPYe.js";import{A as Je}from"./app-calendar-3fcHCMzM.js";import{A as Z}from"./app-select-DSldWHEY.js";import{E as b,T as P}from"./form-options-Dk6dOt2o.js";import{d as Ke}from"./user-image-BTNlQ5Ur.js";import{g as We}from"./image.service-iLwePKJ0.js";import"./QSelect-CcXwe87O.js";import"./QItem-D-DX6y8A.js";import"./QItemLabel-Ca36qfFu.js";import"./TouchPan-CIOdv6jG.js";import"./touch-CAyG4izs.js";import"./position-engine-Bv76xS6k.js";import"./QResizeObserver-C4jaR1Qo.js";const Ze='<g transform="translate(-20,-20)"><path d="M79.9,52.6C80,51.8,80,50.9,80,50s0-1.8-0.1-2.6l-5.1-0.4c-0.3-2.4-0.9-4.6-1.8-6.7l4.2-2.9c-0.7-1.6-1.6-3.1-2.6-4.5 L70,35c-1.4-1.9-3.1-3.5-4.9-4.9l2.2-4.6c-1.4-1-2.9-1.9-4.5-2.6L59.8,27c-2.1-0.9-4.4-1.5-6.7-1.8l-0.4-5.1C51.8,20,50.9,20,50,20 s-1.8,0-2.6,0.1l-0.4,5.1c-2.4,0.3-4.6,0.9-6.7,1.8l-2.9-4.1c-1.6,0.7-3.1,1.6-4.5,2.6l2.1,4.6c-1.9,1.4-3.5,3.1-5,4.9l-4.5-2.1 c-1,1.4-1.9,2.9-2.6,4.5l4.1,2.9c-0.9,2.1-1.5,4.4-1.8,6.8l-5,0.4C20,48.2,20,49.1,20,50s0,1.8,0.1,2.6l5,0.4 c0.3,2.4,0.9,4.7,1.8,6.8l-4.1,2.9c0.7,1.6,1.6,3.1,2.6,4.5l4.5-2.1c1.4,1.9,3.1,3.5,5,4.9l-2.1,4.6c1.4,1,2.9,1.9,4.5,2.6l2.9-4.1 c2.1,0.9,4.4,1.5,6.7,1.8l0.4,5.1C48.2,80,49.1,80,50,80s1.8,0,2.6-0.1l0.4-5.1c2.3-0.3,4.6-0.9,6.7-1.8l2.9,4.2 c1.6-0.7,3.1-1.6,4.5-2.6L65,69.9c1.9-1.4,3.5-3,4.9-4.9l4.6,2.2c1-1.4,1.9-2.9,2.6-4.5L73,59.8c0.9-2.1,1.5-4.4,1.8-6.7L79.9,52.6 z M50,65c-8.3,0-15-6.7-15-15c0-8.3,6.7-15,15-15s15,6.7,15,15C65,58.3,58.3,65,50,65z" fill="currentColor"><animateTransform attributeName="transform" type="rotate" from="90 50 50" to="0 50 50" dur="1s" repeatCount="indefinite"></animateTransform></path></g><g transform="translate(20,20) rotate(15 50 50)"><path d="M79.9,52.6C80,51.8,80,50.9,80,50s0-1.8-0.1-2.6l-5.1-0.4c-0.3-2.4-0.9-4.6-1.8-6.7l4.2-2.9c-0.7-1.6-1.6-3.1-2.6-4.5 L70,35c-1.4-1.9-3.1-3.5-4.9-4.9l2.2-4.6c-1.4-1-2.9-1.9-4.5-2.6L59.8,27c-2.1-0.9-4.4-1.5-6.7-1.8l-0.4-5.1C51.8,20,50.9,20,50,20 s-1.8,0-2.6,0.1l-0.4,5.1c-2.4,0.3-4.6,0.9-6.7,1.8l-2.9-4.1c-1.6,0.7-3.1,1.6-4.5,2.6l2.1,4.6c-1.9,1.4-3.5,3.1-5,4.9l-4.5-2.1 c-1,1.4-1.9,2.9-2.6,4.5l4.1,2.9c-0.9,2.1-1.5,4.4-1.8,6.8l-5,0.4C20,48.2,20,49.1,20,50s0,1.8,0.1,2.6l5,0.4 c0.3,2.4,0.9,4.7,1.8,6.8l-4.1,2.9c0.7,1.6,1.6,3.1,2.6,4.5l4.5-2.1c1.4,1.9,3.1,3.5,5,4.9l-2.1,4.6c1.4,1,2.9,1.9,4.5,2.6l2.9-4.1 c2.1,0.9,4.4,1.5,6.7,1.8l0.4,5.1C48.2,80,49.1,80,50,80s1.8,0,2.6-0.1l0.4-5.1c2.3-0.3,4.6-0.9,6.7-1.8l2.9,4.2 c1.6-0.7,3.1-1.6,4.5-2.6L65,69.9c1.9-1.4,3.5-3,4.9-4.9l4.6,2.2c1-1.4,1.9-2.9,2.6-4.5L73,59.8c0.9-2.1,1.5-4.4,1.8-6.7L79.9,52.6 z M50,65c-8.3,0-15-6.7-15-15c0-8.3,6.7-15,15-15s15,6.7,15,15C65,58.3,58.3,65,50,65z" fill="currentColor"><animateTransform attributeName="transform" type="rotate" from="0 50 50" to="90 50 50" dur="1s" repeatCount="indefinite"></animateTransform></path></g>',et=Ie({name:"QSpinnerGears",props:Ve,setup(R){const{cSize:g,classes:x}=qe(R);return()=>ke("svg",{class:x.value,width:g.value,height:g.value,viewBox:"0 0 100 100",preserveAspectRatio:"xMidYMid",xmlns:"http://www.w3.org/2000/svg",innerHTML:Ze})}}),tt={class:"page-container profile-page q-pa-lg"},lt={key:0,class:"q-mb-md q-pa-md row no-wrap items-center fix-alert-banner shadow-sm"},at={class:"text-weight-bold text-subtitle1 text-warning q-mb-xs"},ot={class:"text-body2 text-grey-8"},st={class:"row q-col-gutter-xl"},it={class:"col-12 col-md-3 flex column flex-center relative-position"},rt=["src"],nt={class:"text-weight-medium text-body1"},dt={class:"col-12 col-md-9"},ut={class:"row q-col-gutter-md"},pt={class:"col-12 col-md-6"},mt={class:"row justify-between items-center q-mb-xs"},ct={class:"text-body2 text-weight-medium q-mb-xs field-label block"},ft={class:"col-12 col-md-6 relative-position"},vt={class:"text-body2 text-weight-medium q-mb-xs field-label block"},bt={class:"col-12 col-md-6 relative-position"},gt={class:"text-body2 text-weight-medium q-mb-xs field-label block"},ht={class:"col-12 col-md-6 relative-position"},yt={class:"text-body2 text-weight-medium q-mb-xs field-label block"},wt={class:"col-12 col-md-6 relative-position"},xt={class:"text-body2 text-weight-medium q-mb-xs field-label block"},It={class:"col-12 col-md-6 relative-position"},Vt={class:"text-body2 text-weight-medium q-mb-xs field-label block"},kt={class:"row q-col-gutter-xl"},qt={class:"col-12 col-md-6"},$t={class:"q-mb-md relative-position"},Nt={class:"text-body2 text-weight-medium q-mb-xs field-label block"},Ct={class:"q-mb-md relative-position"},Ut={class:"text-body2 text-weight-medium q-mb-xs field-label block"},Tt={class:"relative-position"},_t={class:"text-body2 text-weight-medium q-mb-xs field-label block"},St={class:"col-12 col-md-6"},Pt={class:"q-mb-md relative-position"},Rt={class:"text-body2 text-weight-medium q-mb-xs field-label block"},Et={class:"relative-position"},Ft={class:"text-body2 text-weight-medium q-mb-xs field-label block"},Lt={class:"row justify-end q-gutter-md"},At={class:"text-h6 text-weight-bold"},zt={class:"q-mb-md"},Qt={class:"text-body2 text-weight-medium q-mb-xs field-label block"},Dt={class:"q-mb-md"},Ht={class:"text-body2 text-weight-medium q-mb-xs field-label block"},Mt=$e({__name:"profile-page",setup(R){const g=Ne(),x=Ce(),u=Ue(),c=Xe(),{t:n}=Ye(),C=f(()=>x.query.from==="email"),I=f(()=>!!u.currentUser?.passportNo),V=i(!1),k=i(""),q=i(""),h=i(!1),$=i(!1),U=i(!1),E=i(""),F=i(""),L=i("image/png"),A=i(null),{validateAndFocusFirstInvalid:ee}=Me(A),z=i(),N=i(null),te=i(),le=i(),ae=i(),oe=i(),se=i(),ie=i(),re=i(),ne=i(),de=i(),ue=i(),pe=f(()=>{const t=o.value.userImagePath;return t?We(t):Ke}),{isUploading:Q,handleImageUpload:me}=He({onSuccess:t=>{o.value.userImagePath=t,N.value=null,c.notify({type:"positive",message:n("profile.uploadSuccess"),position:"top"})},onError:t=>{c.notify({type:"negative",message:t.message||n("profile.uploadError"),position:"top"})}}),D=()=>{z.value?.pickFiles()},ce=t=>{if(!t)return;L.value=t.type;const e=new FileReader;e.onload=l=>{l.target?.result&&(F.value=l.target.result,$.value=!0,N.value=null)},e.readAsDataURL(t)},fe=async t=>{$.value=!1;try{await me(t,"/user_images")}catch(e){console.error("Error uploading image:",e)}},o=i({email:"",title:P[0].value,nationalId:"",fullNameTH:"",birthdate:"",fullNameEN:"",educationLevel:b[1],faculty:"",institution:"",address:"",phone:"",userImagePath:void 0}),ve=f(()=>JSON.stringify(o.value)!==E.value),be=f(()=>P.map(t=>({label:n(`profile.prefixes.${t.i18nKey}`),value:t.value}))),ge=f(()=>[{label:n("profile.eduHighSchool"),value:b[0]},{label:n("profile.eduBachelor"),value:b[1]},{label:n("profile.eduMaster"),value:b[2]},{label:n("profile.eduDoctor"),value:b[3]}]),H=f({get(){if(!o.value.birthdate)return"";const t=o.value.birthdate.split("-");if(t.length===3){const e=t[0],l=t[1],y=t[2];if(e&&l&&y){const B=parseInt(e,10)+543;return`${y}/${l}/${B}`}}return o.value.birthdate.includes("/"),o.value.birthdate},set(t){if(!t){o.value.birthdate="";return}const e=t.split("/");if(e.length===3){const l=e[0],y=e[1],T=e[2];if(l&&y&&T){const xe=parseInt(T,10)-543;o.value.birthdate=`${xe}-${y}-${l}`}}else o.value.birthdate=t}}),M=()=>{const t=u.currentUser;t&&(o.value={email:t.email||"",title:t.titleTH||P[0].value,nationalId:t.nationalId||t.passportNo||"",fullNameTH:t.fullNameTH||"",birthdate:t.birthdate||"",fullNameEN:t.fullNameEN||"",educationLevel:t.educationLevel||b[1],faculty:t.faculty||"",institution:t.institution||"",address:t.address||"",phone:t.phone||"",userImagePath:t.userImagePath||void 0},E.value=JSON.stringify(o.value))},O=()=>{U.value=C.value||!!u.currentUser?.remark};Te(()=>{M(),O()}),_e(()=>u.currentUser?.remark,()=>{O()});const he=()=>{g.push("/")},ye=async()=>{if(!await ee()){c.notify({type:"negative",message:n("admin.registrantManagement.detail.editDialog.invalidForm")||"กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง",position:"top"});return}const e=u.accessToken||localStorage.getItem("access_token");if(!e){c.notify({type:"negative",message:n("profile.requireLogin"),position:"top"});return}try{if(u.isLoadingGlobal=!0,u.loadingText=n("profile.savingData"),await Fe(e,{userTitleTh:o.value.title,userFullnameTh:o.value.fullNameTH,userFullnameEn:o.value.fullNameEN,userDateOfBirth:o.value.birthdate||void 0,userPhone:o.value.phone,userEducation:o.value.educationLevel,userFaculty:o.value.faculty,userInstitution:o.value.institution,userAddress:o.value.address.trim()||null,isFromEmail:C.value,userImagePath:o.value.userImagePath,userNationalId:o.value.nationalId}),o.value.userImagePath&&o.value.userImagePath!==u.currentUser?.userImagePath)try{await Le.patch("/user-image/me",{userImageUrl:o.value.userImagePath},{headers:{Authorization:`Bearer ${e}`}})}catch(l){console.warn("Failed to save image via /user-image/me (endpoint might not exist):",l)}await u.initialize(),U.value=!1,M(),C.value&&g.replace({query:{...x.query,from:void 0}}),c.notify({type:"positive",message:n("profile.dialogUpdateSuccess"),position:"top"})}catch(l){console.error("Save profile failed:",l),c.notify({type:"negative",message:n("profile.saveError"),position:"top"})}finally{u.isLoadingGlobal=!1}},we=()=>{if(!k.value||!q.value){c.notify({type:"negative",message:n("profile.required"),position:"top"});return}c.notify({type:"positive",message:n("profile.dialogUpdateSuccess"),position:"top"}),k.value="",q.value="",V.value=!1};return(t,e)=>(X(),Y("div",tt,[s(je),s(Ge,{title:t.$t("profile.pageTitleEdit"),subtitle:t.$t("profile.pageSubtitleEdit")},null,8,["title","subtitle"]),s(Pe,{name:"fade"},{default:d(()=>[U.value?(X(),Y("div",lt,[s(j,{name:"report_problem",color:"warning",size:"md",class:"q-mr-md"}),a("div",null,[a("div",at,r(t.$t("profile.fixAlertTitle")),1),a("div",ot,r(w(u).currentUser?.remark?`${t.$t("profile.fixReasonLabel")} ${w(u).currentUser.remark}`:t.$t("profile.fixAlertDesc")),1)])])):Se("",!0)]),_:1}),s(Be,{ref_key:"formRef",ref:A},{default:d(()=>[s(_,{class:"user-profile-card q-pa-lg q-mb-md",flat:""},{default:d(()=>[a("div",st,[a("div",it,[a("div",{class:"avatar-container q-mb-md cursor-pointer",onClick:D},[s(Re,{size:"160px",class:"profile-avatar"},{default:d(()=>[a("img",{src:pe.value,alt:"Avatar",class:"profile-avatar-img"},null,8,rt),s(ze,{showing:w(Q)},{default:d(()=>[s(et,{size:"50px",color:"primary"})]),_:1},8,["showing"])]),_:1}),s(v,{round:"",color:"grey-4","text-color":"dark",icon:"edit",size:"sm",class:"avatar-edit-btn",unelevated:"",loading:w(Q),onClick:S(D,["stop"])},null,8,["loading"]),s(Qe,{ref_key:"fileInputRef",ref:z,modelValue:N.value,"onUpdate:modelValue":[e[0]||(e[0]=l=>N.value=l),ce],accept:".jpg,.jpeg,.png","max-file-size":"5242880",style:{display:"none"}},null,8,["modelValue"])]),a("div",nt,r(t.$t("profile.testTakerId"))+": "+r(w(u).currentUser?.userCode||"-"),1)]),a("div",dt,[a("div",ut,[a("div",pt,[a("div",mt,[a("label",ct,[m(r(t.$t("profile.email"))+" ",1),e[22]||(e[22]=a("span",{class:"text-negative"},"*",-1))]),a("a",{href:"#",onClick:e[1]||(e[1]=S(l=>V.value=!0,["prevent"])),class:"text-primary text-caption text-weight-medium no-wrap",style:{"text-decoration":"none"}},r(t.$t("profile.pageTitleEditPassword")),1)]),s(p,{modelValue:o.value.email,"onUpdate:modelValue":e[2]||(e[2]=l=>o.value.email=l),outlined:"",dense:"","bg-color":"white"},null,8,["modelValue"])]),a("div",ft,[a("label",vt,[m(r(t.$t("profile.prefix"))+" ",1),e[23]||(e[23]=a("span",{class:"text-negative"},"*",-1))]),s(Z,{ref_key:"titleSelectRef",ref:te,modelValue:o.value.title,"onUpdate:modelValue":e[3]||(e[3]=l=>o.value.title=l),options:be.value,outlined:"",dense:"","bg-color":"white","dropdown-icon":"expand_more","emit-value":"","map-options":"","lazy-rules":"",rules:[l=>!!l||t.$t("profile.requiredPrefix")],"hide-bottom-space":""},null,8,["modelValue","options","rules"])]),a("div",bt,[a("label",gt,[m(r(I.value?t.$t("profile.passportNo"):t.$t("profile.nationalId"))+" ",1),e[24]||(e[24]=a("span",{class:"text-negative"},"*",-1))]),s(p,{ref_key:"nationalIdInputRef",ref:le,modelValue:o.value.nationalId,"onUpdate:modelValue":e[4]||(e[4]=l=>o.value.nationalId=l),outlined:"",dense:"","bg-color":"white",mask:I.value?"XXXXXXXXX":"#-####-#####-##-#","unmasked-value":!I.value,"lazy-rules":"",rules:I.value?[l=>!!l||t.$t("profile.requiredNationalId")]:[l=>!!l||t.$t("profile.requiredNationalId"),l=>!l||l.length===13||t.$t("profile.invalidNationalId")],"hide-bottom-space":""},null,8,["modelValue","mask","unmasked-value","rules"])]),a("div",ht,[a("label",yt,[m(r(t.$t("profile.fullName"))+" ",1),e[25]||(e[25]=a("span",{class:"text-negative"},"*",-1))]),s(p,{ref_key:"fullNameTHInputRef",ref:ae,modelValue:o.value.fullNameTH,"onUpdate:modelValue":e[5]||(e[5]=l=>o.value.fullNameTH=l),outlined:"",dense:"","bg-color":"white","lazy-rules":"",rules:[l=>!!l||t.$t("profile.requiredFullName")],"hide-bottom-space":""},null,8,["modelValue","rules"])]),a("div",wt,[a("label",xt,[m(r(t.$t("profile.birthdate"))+" ",1),e[26]||(e[26]=a("span",{class:"text-negative"},"*",-1))]),s(p,{ref_key:"birthdateInputRef",ref:oe,modelValue:H.value,"onUpdate:modelValue":e[10]||(e[10]=l=>H.value=l),outlined:"",dense:"","bg-color":"white",readonly:"",class:"cursor-pointer",onClick:e[11]||(e[11]=l=>h.value=!0),"lazy-rules":"",rules:[l=>!!l||t.$t("profile.requiredBirthdate")],"hide-bottom-space":""},{append:d(()=>[s(j,{name:"calendar_today",class:"cursor-pointer",size:"xs",onClick:e[6]||(e[6]=S(l=>h.value=!0,["stop"]))}),s(Oe,{modelValue:h.value,"onUpdate:modelValue":e[9]||(e[9]=l=>h.value=l),anchor:"bottom left",self:"top left",class:"shadow-5 calendar-menu"},{default:d(()=>[s(Je,{"model-value":o.value.birthdate,"onUpdate:modelValue":e[7]||(e[7]=l=>o.value.birthdate=l),onClickDate:e[8]||(e[8]=l=>h.value=!1)},null,8,["model-value"])]),_:1},8,["modelValue"])]),_:1},8,["modelValue","rules"])]),a("div",It,[a("label",Vt,[m(r(t.$t("profile.fullNameEn"))+" ",1),e[27]||(e[27]=a("span",{class:"text-negative"},"*",-1))]),s(p,{ref_key:"fullNameENInputRef",ref:se,modelValue:o.value.fullNameEN,"onUpdate:modelValue":e[12]||(e[12]=l=>o.value.fullNameEN=l),outlined:"",dense:"","bg-color":"white","lazy-rules":"",rules:[l=>!!l||t.$t("profile.requiredFullNameEn")],"hide-bottom-space":""},null,8,["modelValue","rules"])])])])])]),_:1}),s(_,{class:"user-profile-card q-pa-lg q-mb-md",flat:""},{default:d(()=>[a("div",kt,[a("div",qt,[a("div",$t,[a("label",Nt,r(t.$t("profile.education")),1),s(Z,{ref_key:"educationLevelSelectRef",ref:ie,modelValue:o.value.educationLevel,"onUpdate:modelValue":e[13]||(e[13]=l=>o.value.educationLevel=l),options:ge.value,outlined:"",dense:"","bg-color":"white","dropdown-icon":"expand_more","emit-value":"","map-options":""},null,8,["modelValue","options"])]),a("div",Ct,[a("label",Ut,r(t.$t("profile.faculty")),1),s(p,{ref_key:"facultyInputRef",ref:re,modelValue:o.value.faculty,"onUpdate:modelValue":e[14]||(e[14]=l=>o.value.faculty=l),outlined:"",dense:"","bg-color":"white"},null,8,["modelValue"])]),a("div",Tt,[a("label",_t,r(t.$t("profile.institution")),1),s(p,{ref_key:"institutionInputRef",ref:ne,modelValue:o.value.institution,"onUpdate:modelValue":e[15]||(e[15]=l=>o.value.institution=l),outlined:"",dense:"","bg-color":"white"},null,8,["modelValue"])])]),a("div",St,[a("div",Pt,[a("label",Rt,r(t.$t("profile.address")),1),s(p,{ref_key:"addressInputRef",ref:de,modelValue:o.value.address,"onUpdate:modelValue":e[16]||(e[16]=l=>o.value.address=l),type:"textarea",outlined:"",dense:"","bg-color":"white",class:"address-textarea","input-style":"resize: none;","hide-bottom-space":""},null,8,["modelValue"])]),a("div",Et,[a("label",Ft,[m(r(t.$t("profile.phone"))+" ",1),e[28]||(e[28]=a("span",{class:"text-negative"},"*",-1))]),s(p,{ref_key:"phoneInputRef",ref:ue,modelValue:o.value.phone,"onUpdate:modelValue":e[17]||(e[17]=l=>o.value.phone=l),outlined:"",dense:"","bg-color":"white",mask:"###-###-####","unmasked-value":"","lazy-rules":"",rules:[l=>!!l||t.$t("profile.requiredPhone"),l=>!l||l.replace(/\D/g,"").length===10||t.$t("profile.invalidPhone")],"hide-bottom-space":""},null,8,["modelValue","rules"])])])])]),_:1})]),_:1},512),a("div",Lt,[s(v,{unelevated:"",label:t.$t("profile.cancel"),color:"grey-4","text-color":"dark",class:"action-btn text-weight-bold",onClick:he},null,8,["label"]),s(v,{unelevated:"",label:t.$t("profile.save"),color:"primary",class:"action-btn text-weight-bold",disable:!ve.value,onClick:ye},null,8,["label","disable"])]),s(K,{modelValue:V.value,"onUpdate:modelValue":e[20]||(e[20]=l=>V.value=l),persistent:""},{default:d(()=>[s(_,{style:{"min-width":"400px","border-radius":"16px",padding:"12px"}},{default:d(()=>[s(G,{class:"row items-center q-pb-none justify-between"},{default:d(()=>[a("div",At,r(t.$t("profile.pageTitleEditPassword")),1),J(s(v,{icon:"close",flat:"",round:"",dense:""},null,512),[[W]])]),_:1}),s(G,{class:"q-py-md"},{default:d(()=>[a("div",zt,[a("label",Qt,[m(r(t.$t("profile.currentPassword"))+" ",1),e[29]||(e[29]=a("span",{class:"text-negative"},"*",-1))]),s(p,{modelValue:k.value,"onUpdate:modelValue":e[18]||(e[18]=l=>k.value=l),type:"password",outlined:"",dense:"","bg-color":"white",placeholder:""},null,8,["modelValue"])]),a("div",Dt,[a("label",Ht,[m(r(t.$t("profile.newPassword"))+" ",1),e[30]||(e[30]=a("span",{class:"text-negative"},"*",-1))]),s(p,{modelValue:q.value,"onUpdate:modelValue":e[19]||(e[19]=l=>q.value=l),type:"password",outlined:"",dense:"","bg-color":"white",placeholder:""},null,8,["modelValue"])])]),_:1}),s(Ee,{align:"center",class:"q-pt-none q-pb-md"},{default:d(()=>[J(s(v,{unelevated:"",label:t.$t("profile.cancel"),color:"grey-4","text-color":"dark",style:{"border-radius":"8px",width:"120px"},class:"text-weight-bold"},null,8,["label"]),[[W]]),s(v,{unelevated:"",label:t.$t("profile.confirm"),color:"primary",style:{"border-radius":"8px",width:"120px"},class:"text-weight-bold",onClick:we},null,8,["label"])]),_:1})]),_:1})]),_:1},8,["modelValue"]),s(K,{modelValue:$.value,"onUpdate:modelValue":e[21]||(e[21]=l=>$.value=l),persistent:""},{default:d(()=>[s(De,{"image-src":F.value,"file-type":L.value,onConfirm:fe},null,8,["image-src","file-type"])]),_:1},8,["modelValue"])]))}}),pl=Ae(Mt,[["__scopeId","data-v-a79391d9"]]);export{pl as default};
+import {
+  c as Ie,
+  aF as Ve,
+  h as ke,
+  aG as qe,
+  O as $e,
+  P as Ne,
+  a4 as Ce,
+  u as Ue,
+  r as i,
+  t as Te,
+  w as _e,
+  Q as X,
+  R as Y,
+  V as s,
+  W as d,
+  $ as j,
+  S as a,
+  T as r,
+  X as w,
+  U as Se,
+  ai as Pe,
+  an as _,
+  Y as Re,
+  a8 as v,
+  az as S,
+  a0 as m,
+  av as p,
+  am as G,
+  J,
+  ap as Ee,
+  au as K,
+  f,
+  aH as Fe,
+  aq as Le,
+  a2 as Ae,
+} from './index-CKSooU2k.js';
+import { Q as ze } from './QInnerLoading-CAwPoqSH.js';
+import { Q as Qe, A as De, a as He, u as Me } from './app-image-cropper-B7mLtgoP.js';
+import { Q as Oe } from './format-DnjzHs7F.js';
+import { Q as Be } from './QForm-7Hg-hjp5.js';
+import { C as W } from './ClosePopup-D9BZcpVj.js';
+import { u as Xe } from './use-quasar-DaOT29F-.js';
+import { u as Ye } from './vue-i18n-Bebkm_iB.js';
+import { A as je, a as Ge } from './app-breadcrumbs-C0oZOPYe.js';
+import { A as Je } from './app-calendar-3fcHCMzM.js';
+import { A as Z } from './app-select-DSldWHEY.js';
+import { E as b, T as P } from './form-options-Dk6dOt2o.js';
+import { d as Ke } from './user-image-BTNlQ5Ur.js';
+import { g as We } from './image.service-iLwePKJ0.js';
+import './QSelect-CcXwe87O.js';
+import './QItem-D-DX6y8A.js';
+import './QItemLabel-Ca36qfFu.js';
+import './TouchPan-CIOdv6jG.js';
+import './touch-CAyG4izs.js';
+import './position-engine-Bv76xS6k.js';
+import './QResizeObserver-C4jaR1Qo.js';
+const Ze =
+    '<g transform="translate(-20,-20)"><path d="M79.9,52.6C80,51.8,80,50.9,80,50s0-1.8-0.1-2.6l-5.1-0.4c-0.3-2.4-0.9-4.6-1.8-6.7l4.2-2.9c-0.7-1.6-1.6-3.1-2.6-4.5 L70,35c-1.4-1.9-3.1-3.5-4.9-4.9l2.2-4.6c-1.4-1-2.9-1.9-4.5-2.6L59.8,27c-2.1-0.9-4.4-1.5-6.7-1.8l-0.4-5.1C51.8,20,50.9,20,50,20 s-1.8,0-2.6,0.1l-0.4,5.1c-2.4,0.3-4.6,0.9-6.7,1.8l-2.9-4.1c-1.6,0.7-3.1,1.6-4.5,2.6l2.1,4.6c-1.9,1.4-3.5,3.1-5,4.9l-4.5-2.1 c-1,1.4-1.9,2.9-2.6,4.5l4.1,2.9c-0.9,2.1-1.5,4.4-1.8,6.8l-5,0.4C20,48.2,20,49.1,20,50s0,1.8,0.1,2.6l5,0.4 c0.3,2.4,0.9,4.7,1.8,6.8l-4.1,2.9c0.7,1.6,1.6,3.1,2.6,4.5l4.5-2.1c1.4,1.9,3.1,3.5,5,4.9l-2.1,4.6c1.4,1,2.9,1.9,4.5,2.6l2.9-4.1 c2.1,0.9,4.4,1.5,6.7,1.8l0.4,5.1C48.2,80,49.1,80,50,80s1.8,0,2.6-0.1l0.4-5.1c2.3-0.3,4.6-0.9,6.7-1.8l2.9,4.2 c1.6-0.7,3.1-1.6,4.5-2.6L65,69.9c1.9-1.4,3.5-3,4.9-4.9l4.6,2.2c1-1.4,1.9-2.9,2.6-4.5L73,59.8c0.9-2.1,1.5-4.4,1.8-6.7L79.9,52.6 z M50,65c-8.3,0-15-6.7-15-15c0-8.3,6.7-15,15-15s15,6.7,15,15C65,58.3,58.3,65,50,65z" fill="currentColor"><animateTransform attributeName="transform" type="rotate" from="90 50 50" to="0 50 50" dur="1s" repeatCount="indefinite"></animateTransform></path></g><g transform="translate(20,20) rotate(15 50 50)"><path d="M79.9,52.6C80,51.8,80,50.9,80,50s0-1.8-0.1-2.6l-5.1-0.4c-0.3-2.4-0.9-4.6-1.8-6.7l4.2-2.9c-0.7-1.6-1.6-3.1-2.6-4.5 L70,35c-1.4-1.9-3.1-3.5-4.9-4.9l2.2-4.6c-1.4-1-2.9-1.9-4.5-2.6L59.8,27c-2.1-0.9-4.4-1.5-6.7-1.8l-0.4-5.1C51.8,20,50.9,20,50,20 s-1.8,0-2.6,0.1l-0.4,5.1c-2.4,0.3-4.6,0.9-6.7,1.8l-2.9-4.1c-1.6,0.7-3.1,1.6-4.5,2.6l2.1,4.6c-1.9,1.4-3.5,3.1-5,4.9l-4.5-2.1 c-1,1.4-1.9,2.9-2.6,4.5l4.1,2.9c-0.9,2.1-1.5,4.4-1.8,6.8l-5,0.4C20,48.2,20,49.1,20,50s0,1.8,0.1,2.6l5,0.4 c0.3,2.4,0.9,4.7,1.8,6.8l-4.1,2.9c0.7,1.6,1.6,3.1,2.6,4.5l4.5-2.1c1.4,1.9,3.1,3.5,5,4.9l-2.1,4.6c1.4,1,2.9,1.9,4.5,2.6l2.9-4.1 c2.1,0.9,4.4,1.5,6.7,1.8l0.4,5.1C48.2,80,49.1,80,50,80s1.8,0,2.6-0.1l0.4-5.1c2.3-0.3,4.6-0.9,6.7-1.8l2.9,4.2 c1.6-0.7,3.1-1.6,4.5-2.6L65,69.9c1.9-1.4,3.5-3,4.9-4.9l4.6,2.2c1-1.4,1.9-2.9,2.6-4.5L73,59.8c0.9-2.1,1.5-4.4,1.8-6.7L79.9,52.6 z M50,65c-8.3,0-15-6.7-15-15c0-8.3,6.7-15,15-15s15,6.7,15,15C65,58.3,58.3,65,50,65z" fill="currentColor"><animateTransform attributeName="transform" type="rotate" from="0 50 50" to="90 50 50" dur="1s" repeatCount="indefinite"></animateTransform></path></g>',
+  et = Ie({
+    name: 'QSpinnerGears',
+    props: Ve,
+    setup(R) {
+      const { cSize: g, classes: x } = qe(R);
+      return () =>
+        ke('svg', {
+          class: x.value,
+          width: g.value,
+          height: g.value,
+          viewBox: '0 0 100 100',
+          preserveAspectRatio: 'xMidYMid',
+          xmlns: 'http://www.w3.org/2000/svg',
+          innerHTML: Ze,
+        });
+    },
+  }),
+  tt = { class: 'page-container profile-page q-pa-lg' },
+  lt = { key: 0, class: 'q-mb-md q-pa-md row no-wrap items-center fix-alert-banner shadow-sm' },
+  at = { class: 'text-weight-bold text-subtitle1 text-warning q-mb-xs' },
+  ot = { class: 'text-body2 text-grey-8' },
+  st = { class: 'row q-col-gutter-xl' },
+  it = { class: 'col-12 col-md-3 flex column flex-center relative-position' },
+  rt = ['src'],
+  nt = { class: 'text-weight-medium text-body1' },
+  dt = { class: 'col-12 col-md-9' },
+  ut = { class: 'row q-col-gutter-md' },
+  pt = { class: 'col-12 col-md-6' },
+  mt = { class: 'row justify-between items-center q-mb-xs' },
+  ct = { class: 'text-body2 text-weight-medium q-mb-xs field-label block' },
+  ft = { class: 'col-12 col-md-6 relative-position' },
+  vt = { class: 'text-body2 text-weight-medium q-mb-xs field-label block' },
+  bt = { class: 'col-12 col-md-6 relative-position' },
+  gt = { class: 'text-body2 text-weight-medium q-mb-xs field-label block' },
+  ht = { class: 'col-12 col-md-6 relative-position' },
+  yt = { class: 'text-body2 text-weight-medium q-mb-xs field-label block' },
+  wt = { class: 'col-12 col-md-6 relative-position' },
+  xt = { class: 'text-body2 text-weight-medium q-mb-xs field-label block' },
+  It = { class: 'col-12 col-md-6 relative-position' },
+  Vt = { class: 'text-body2 text-weight-medium q-mb-xs field-label block' },
+  kt = { class: 'row q-col-gutter-xl' },
+  qt = { class: 'col-12 col-md-6' },
+  $t = { class: 'q-mb-md relative-position' },
+  Nt = { class: 'text-body2 text-weight-medium q-mb-xs field-label block' },
+  Ct = { class: 'q-mb-md relative-position' },
+  Ut = { class: 'text-body2 text-weight-medium q-mb-xs field-label block' },
+  Tt = { class: 'relative-position' },
+  _t = { class: 'text-body2 text-weight-medium q-mb-xs field-label block' },
+  St = { class: 'col-12 col-md-6' },
+  Pt = { class: 'q-mb-md relative-position' },
+  Rt = { class: 'text-body2 text-weight-medium q-mb-xs field-label block' },
+  Et = { class: 'relative-position' },
+  Ft = { class: 'text-body2 text-weight-medium q-mb-xs field-label block' },
+  Lt = { class: 'row justify-end q-gutter-md' },
+  At = { class: 'text-h6 text-weight-bold' },
+  zt = { class: 'q-mb-md' },
+  Qt = { class: 'text-body2 text-weight-medium q-mb-xs field-label block' },
+  Dt = { class: 'q-mb-md' },
+  Ht = { class: 'text-body2 text-weight-medium q-mb-xs field-label block' },
+  Mt = $e({
+    __name: 'profile-page',
+    setup(R) {
+      const g = Ne(),
+        x = Ce(),
+        u = Ue(),
+        c = Xe(),
+        { t: n } = Ye(),
+        C = f(() => x.query.from === 'email'),
+        I = f(() => !!u.currentUser?.passportNo),
+        V = i(!1),
+        k = i(''),
+        q = i(''),
+        h = i(!1),
+        $ = i(!1),
+        U = i(!1),
+        E = i(''),
+        F = i(''),
+        L = i('image/png'),
+        A = i(null),
+        { validateAndFocusFirstInvalid: ee } = Me(A),
+        z = i(),
+        N = i(null),
+        te = i(),
+        le = i(),
+        ae = i(),
+        oe = i(),
+        se = i(),
+        ie = i(),
+        re = i(),
+        ne = i(),
+        de = i(),
+        ue = i(),
+        pe = f(() => {
+          const t = o.value.userImagePath;
+          return t ? We(t) : Ke;
+        }),
+        { isUploading: Q, handleImageUpload: me } = He({
+          onSuccess: (t) => {
+            ((o.value.userImagePath = t),
+              (N.value = null),
+              c.notify({ type: 'positive', message: n('profile.uploadSuccess'), position: 'top' }));
+          },
+          onError: (t) => {
+            c.notify({
+              type: 'negative',
+              message: t.message || n('profile.uploadError'),
+              position: 'top',
+            });
+          },
+        }),
+        D = () => {
+          z.value?.pickFiles();
+        },
+        ce = (t) => {
+          if (!t) return;
+          L.value = t.type;
+          const e = new FileReader();
+          ((e.onload = (l) => {
+            l.target?.result && ((F.value = l.target.result), ($.value = !0), (N.value = null));
+          }),
+            e.readAsDataURL(t));
+        },
+        fe = async (t) => {
+          $.value = !1;
+          try {
+            await me(t, '/user_images');
+          } catch (e) {
+            console.error('Error uploading image:', e);
+          }
+        },
+        o = i({
+          email: '',
+          title: P[0].value,
+          nationalId: '',
+          fullNameTH: '',
+          birthdate: '',
+          fullNameEN: '',
+          educationLevel: b[1],
+          faculty: '',
+          institution: '',
+          address: '',
+          phone: '',
+          userImagePath: void 0,
+        }),
+        ve = f(() => JSON.stringify(o.value) !== E.value),
+        be = f(() => P.map((t) => ({ label: n(`profile.prefixes.${t.i18nKey}`), value: t.value }))),
+        ge = f(() => [
+          { label: n('profile.eduHighSchool'), value: b[0] },
+          { label: n('profile.eduBachelor'), value: b[1] },
+          { label: n('profile.eduMaster'), value: b[2] },
+          { label: n('profile.eduDoctor'), value: b[3] },
+        ]),
+        H = f({
+          get() {
+            if (!o.value.birthdate) return '';
+            const t = o.value.birthdate.split('-');
+            if (t.length === 3) {
+              const e = t[0],
+                l = t[1],
+                y = t[2];
+              if (e && l && y) {
+                const B = parseInt(e, 10) + 543;
+                return `${y}/${l}/${B}`;
+              }
+            }
+            return (o.value.birthdate.includes('/'), o.value.birthdate);
+          },
+          set(t) {
+            if (!t) {
+              o.value.birthdate = '';
+              return;
+            }
+            const e = t.split('/');
+            if (e.length === 3) {
+              const l = e[0],
+                y = e[1],
+                T = e[2];
+              if (l && y && T) {
+                const xe = parseInt(T, 10) - 543;
+                o.value.birthdate = `${xe}-${y}-${l}`;
+              }
+            } else o.value.birthdate = t;
+          },
+        }),
+        M = () => {
+          const t = u.currentUser;
+          t &&
+            ((o.value = {
+              email: t.email || '',
+              title: t.titleTH || P[0].value,
+              nationalId: t.nationalId || t.passportNo || '',
+              fullNameTH: t.fullNameTH || '',
+              birthdate: t.birthdate || '',
+              fullNameEN: t.fullNameEN || '',
+              educationLevel: t.educationLevel || b[1],
+              faculty: t.faculty || '',
+              institution: t.institution || '',
+              address: t.address || '',
+              phone: t.phone || '',
+              userImagePath: t.userImagePath || void 0,
+            }),
+            (E.value = JSON.stringify(o.value)));
+        },
+        O = () => {
+          U.value = C.value || !!u.currentUser?.remark;
+        };
+      (Te(() => {
+        (M(), O());
+      }),
+        _e(
+          () => u.currentUser?.remark,
+          () => {
+            O();
+          },
+        ));
+      const he = () => {
+          g.push('/');
+        },
+        ye = async () => {
+          if (!(await ee())) {
+            c.notify({
+              type: 'negative',
+              message:
+                n('admin.registrantManagement.detail.editDialog.invalidForm') ||
+                'กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง',
+              position: 'top',
+            });
+            return;
+          }
+          const e = u.accessToken || localStorage.getItem('access_token');
+          if (!e) {
+            c.notify({ type: 'negative', message: n('profile.requireLogin'), position: 'top' });
+            return;
+          }
+          try {
+            if (
+              ((u.isLoadingGlobal = !0),
+              (u.loadingText = n('profile.savingData')),
+              await Fe(e, {
+                userTitleTh: o.value.title,
+                userFullnameTh: o.value.fullNameTH,
+                userFullnameEn: o.value.fullNameEN,
+                userDateOfBirth: o.value.birthdate || void 0,
+                userPhone: o.value.phone,
+                userEducation: o.value.educationLevel,
+                userFaculty: o.value.faculty,
+                userInstitution: o.value.institution,
+                userAddress: o.value.address.trim() || null,
+                isFromEmail: C.value,
+                userImagePath: o.value.userImagePath,
+                userNationalId: o.value.nationalId,
+              }),
+              o.value.userImagePath && o.value.userImagePath !== u.currentUser?.userImagePath)
+            )
+              try {
+                await Le.patch(
+                  '/user-image/me',
+                  { userImageUrl: o.value.userImagePath },
+                  { headers: { Authorization: `Bearer ${e}` } },
+                );
+              } catch (l) {
+                console.warn(
+                  'Failed to save image via /user-image/me (endpoint might not exist):',
+                  l,
+                );
+              }
+            (await u.initialize(),
+              (U.value = !1),
+              M(),
+              C.value && g.replace({ query: { ...x.query, from: void 0 } }),
+              c.notify({
+                type: 'positive',
+                message: n('profile.dialogUpdateSuccess'),
+                position: 'top',
+              }));
+          } catch (l) {
+            (console.error('Save profile failed:', l),
+              c.notify({ type: 'negative', message: n('profile.saveError'), position: 'top' }));
+          } finally {
+            u.isLoadingGlobal = !1;
+          }
+        },
+        we = () => {
+          if (!k.value || !q.value) {
+            c.notify({ type: 'negative', message: n('profile.required'), position: 'top' });
+            return;
+          }
+          (c.notify({
+            type: 'positive',
+            message: n('profile.dialogUpdateSuccess'),
+            position: 'top',
+          }),
+            (k.value = ''),
+            (q.value = ''),
+            (V.value = !1));
+        };
+      return (t, e) => (
+        X(),
+        Y('div', tt, [
+          s(je),
+          s(
+            Ge,
+            { title: t.$t('profile.pageTitleEdit'), subtitle: t.$t('profile.pageSubtitleEdit') },
+            null,
+            8,
+            ['title', 'subtitle'],
+          ),
+          s(
+            Pe,
+            { name: 'fade' },
+            {
+              default: d(() => [
+                U.value
+                  ? (X(),
+                    Y('div', lt, [
+                      s(j, {
+                        name: 'report_problem',
+                        color: 'warning',
+                        size: 'md',
+                        class: 'q-mr-md',
+                      }),
+                      a('div', null, [
+                        a('div', at, r(t.$t('profile.fixAlertTitle')), 1),
+                        a(
+                          'div',
+                          ot,
+                          r(
+                            w(u).currentUser?.remark
+                              ? `${t.$t('profile.fixReasonLabel')} ${w(u).currentUser.remark}`
+                              : t.$t('profile.fixAlertDesc'),
+                          ),
+                          1,
+                        ),
+                      ]),
+                    ]))
+                  : Se('', !0),
+              ]),
+              _: 1,
+            },
+          ),
+          s(
+            Be,
+            { ref_key: 'formRef', ref: A },
+            {
+              default: d(() => [
+                s(
+                  _,
+                  { class: 'user-profile-card q-pa-lg q-mb-md', flat: '' },
+                  {
+                    default: d(() => [
+                      a('div', st, [
+                        a('div', it, [
+                          a(
+                            'div',
+                            { class: 'avatar-container q-mb-md cursor-pointer', onClick: D },
+                            [
+                              s(
+                                Re,
+                                { size: '160px', class: 'profile-avatar' },
+                                {
+                                  default: d(() => [
+                                    a(
+                                      'img',
+                                      { src: pe.value, alt: 'Avatar', class: 'profile-avatar-img' },
+                                      null,
+                                      8,
+                                      rt,
+                                    ),
+                                    s(
+                                      ze,
+                                      { showing: w(Q) },
+                                      {
+                                        default: d(() => [
+                                          s(et, { size: '50px', color: 'primary' }),
+                                        ]),
+                                        _: 1,
+                                      },
+                                      8,
+                                      ['showing'],
+                                    ),
+                                  ]),
+                                  _: 1,
+                                },
+                              ),
+                              s(
+                                v,
+                                {
+                                  round: '',
+                                  color: 'grey-4',
+                                  'text-color': 'dark',
+                                  icon: 'edit',
+                                  size: 'sm',
+                                  class: 'avatar-edit-btn',
+                                  unelevated: '',
+                                  loading: w(Q),
+                                  onClick: S(D, ['stop']),
+                                },
+                                null,
+                                8,
+                                ['loading'],
+                              ),
+                              s(
+                                Qe,
+                                {
+                                  ref_key: 'fileInputRef',
+                                  ref: z,
+                                  modelValue: N.value,
+                                  'onUpdate:modelValue': [
+                                    e[0] || (e[0] = (l) => (N.value = l)),
+                                    ce,
+                                  ],
+                                  accept: '.jpg,.jpeg,.png',
+                                  'max-file-size': '5242880',
+                                  style: { display: 'none' },
+                                },
+                                null,
+                                8,
+                                ['modelValue'],
+                              ),
+                            ],
+                          ),
+                          a(
+                            'div',
+                            nt,
+                            r(t.$t('profile.testTakerId')) +
+                              ': ' +
+                              r(w(u).currentUser?.userCode || '-'),
+                            1,
+                          ),
+                        ]),
+                        a('div', dt, [
+                          a('div', ut, [
+                            a('div', pt, [
+                              a('div', mt, [
+                                a('label', ct, [
+                                  m(r(t.$t('profile.email')) + ' ', 1),
+                                  e[22] || (e[22] = a('span', { class: 'text-negative' }, '*', -1)),
+                                ]),
+                                a(
+                                  'a',
+                                  {
+                                    href: '#',
+                                    onClick: e[1] || (e[1] = S((l) => (V.value = !0), ['prevent'])),
+                                    class: 'text-primary text-caption text-weight-medium no-wrap',
+                                    style: { 'text-decoration': 'none' },
+                                  },
+                                  r(t.$t('profile.pageTitleEditPassword')),
+                                  1,
+                                ),
+                              ]),
+                              s(
+                                p,
+                                {
+                                  modelValue: o.value.email,
+                                  'onUpdate:modelValue':
+                                    e[2] || (e[2] = (l) => (o.value.email = l)),
+                                  outlined: '',
+                                  dense: '',
+                                  'bg-color': 'white',
+                                },
+                                null,
+                                8,
+                                ['modelValue'],
+                              ),
+                            ]),
+                            a('div', ft, [
+                              a('label', vt, [
+                                m(r(t.$t('profile.prefix')) + ' ', 1),
+                                e[23] || (e[23] = a('span', { class: 'text-negative' }, '*', -1)),
+                              ]),
+                              s(
+                                Z,
+                                {
+                                  ref_key: 'titleSelectRef',
+                                  ref: te,
+                                  modelValue: o.value.title,
+                                  'onUpdate:modelValue':
+                                    e[3] || (e[3] = (l) => (o.value.title = l)),
+                                  options: be.value,
+                                  outlined: '',
+                                  dense: '',
+                                  'bg-color': 'white',
+                                  'dropdown-icon': 'expand_more',
+                                  'emit-value': '',
+                                  'map-options': '',
+                                  'lazy-rules': '',
+                                  rules: [(l) => !!l || t.$t('profile.requiredPrefix')],
+                                  'hide-bottom-space': '',
+                                },
+                                null,
+                                8,
+                                ['modelValue', 'options', 'rules'],
+                              ),
+                            ]),
+                            a('div', bt, [
+                              a('label', gt, [
+                                m(
+                                  r(
+                                    I.value
+                                      ? t.$t('profile.passportNo')
+                                      : t.$t('profile.nationalId'),
+                                  ) + ' ',
+                                  1,
+                                ),
+                                e[24] || (e[24] = a('span', { class: 'text-negative' }, '*', -1)),
+                              ]),
+                              s(
+                                p,
+                                {
+                                  ref_key: 'nationalIdInputRef',
+                                  ref: le,
+                                  modelValue: o.value.nationalId,
+                                  'onUpdate:modelValue':
+                                    e[4] || (e[4] = (l) => (o.value.nationalId = l)),
+                                  outlined: '',
+                                  dense: '',
+                                  'bg-color': 'white',
+                                  mask: I.value ? 'XXXXXXXXX' : '#-####-#####-##-#',
+                                  'unmasked-value': !I.value,
+                                  'lazy-rules': '',
+                                  rules: I.value
+                                    ? [(l) => !!l || t.$t('profile.requiredNationalId')]
+                                    : [
+                                        (l) => !!l || t.$t('profile.requiredNationalId'),
+                                        (l) =>
+                                          !l ||
+                                          l.length === 13 ||
+                                          t.$t('profile.invalidNationalId'),
+                                      ],
+                                  'hide-bottom-space': '',
+                                },
+                                null,
+                                8,
+                                ['modelValue', 'mask', 'unmasked-value', 'rules'],
+                              ),
+                            ]),
+                            a('div', ht, [
+                              a('label', yt, [
+                                m(r(t.$t('profile.fullName')) + ' ', 1),
+                                e[25] || (e[25] = a('span', { class: 'text-negative' }, '*', -1)),
+                              ]),
+                              s(
+                                p,
+                                {
+                                  ref_key: 'fullNameTHInputRef',
+                                  ref: ae,
+                                  modelValue: o.value.fullNameTH,
+                                  'onUpdate:modelValue':
+                                    e[5] || (e[5] = (l) => (o.value.fullNameTH = l)),
+                                  outlined: '',
+                                  dense: '',
+                                  'bg-color': 'white',
+                                  'lazy-rules': '',
+                                  rules: [(l) => !!l || t.$t('profile.requiredFullName')],
+                                  'hide-bottom-space': '',
+                                },
+                                null,
+                                8,
+                                ['modelValue', 'rules'],
+                              ),
+                            ]),
+                            a('div', wt, [
+                              a('label', xt, [
+                                m(r(t.$t('profile.birthdate')) + ' ', 1),
+                                e[26] || (e[26] = a('span', { class: 'text-negative' }, '*', -1)),
+                              ]),
+                              s(
+                                p,
+                                {
+                                  ref_key: 'birthdateInputRef',
+                                  ref: oe,
+                                  modelValue: H.value,
+                                  'onUpdate:modelValue': e[10] || (e[10] = (l) => (H.value = l)),
+                                  outlined: '',
+                                  dense: '',
+                                  'bg-color': 'white',
+                                  readonly: '',
+                                  class: 'cursor-pointer',
+                                  onClick: e[11] || (e[11] = (l) => (h.value = !0)),
+                                  'lazy-rules': '',
+                                  rules: [(l) => !!l || t.$t('profile.requiredBirthdate')],
+                                  'hide-bottom-space': '',
+                                },
+                                {
+                                  append: d(() => [
+                                    s(j, {
+                                      name: 'calendar_today',
+                                      class: 'cursor-pointer',
+                                      size: 'xs',
+                                      onClick: e[6] || (e[6] = S((l) => (h.value = !0), ['stop'])),
+                                    }),
+                                    s(
+                                      Oe,
+                                      {
+                                        modelValue: h.value,
+                                        'onUpdate:modelValue':
+                                          e[9] || (e[9] = (l) => (h.value = l)),
+                                        anchor: 'bottom left',
+                                        self: 'top left',
+                                        class: 'shadow-5 calendar-menu',
+                                      },
+                                      {
+                                        default: d(() => [
+                                          s(
+                                            Je,
+                                            {
+                                              'model-value': o.value.birthdate,
+                                              'onUpdate:modelValue':
+                                                e[7] || (e[7] = (l) => (o.value.birthdate = l)),
+                                              onClickDate: e[8] || (e[8] = (l) => (h.value = !1)),
+                                            },
+                                            null,
+                                            8,
+                                            ['model-value'],
+                                          ),
+                                        ]),
+                                        _: 1,
+                                      },
+                                      8,
+                                      ['modelValue'],
+                                    ),
+                                  ]),
+                                  _: 1,
+                                },
+                                8,
+                                ['modelValue', 'rules'],
+                              ),
+                            ]),
+                            a('div', It, [
+                              a('label', Vt, [
+                                m(r(t.$t('profile.fullNameEn')) + ' ', 1),
+                                e[27] || (e[27] = a('span', { class: 'text-negative' }, '*', -1)),
+                              ]),
+                              s(
+                                p,
+                                {
+                                  ref_key: 'fullNameENInputRef',
+                                  ref: se,
+                                  modelValue: o.value.fullNameEN,
+                                  'onUpdate:modelValue':
+                                    e[12] || (e[12] = (l) => (o.value.fullNameEN = l)),
+                                  outlined: '',
+                                  dense: '',
+                                  'bg-color': 'white',
+                                  'lazy-rules': '',
+                                  rules: [(l) => !!l || t.$t('profile.requiredFullNameEn')],
+                                  'hide-bottom-space': '',
+                                },
+                                null,
+                                8,
+                                ['modelValue', 'rules'],
+                              ),
+                            ]),
+                          ]),
+                        ]),
+                      ]),
+                    ]),
+                    _: 1,
+                  },
+                ),
+                s(
+                  _,
+                  { class: 'user-profile-card q-pa-lg q-mb-md', flat: '' },
+                  {
+                    default: d(() => [
+                      a('div', kt, [
+                        a('div', qt, [
+                          a('div', $t, [
+                            a('label', Nt, r(t.$t('profile.education')), 1),
+                            s(
+                              Z,
+                              {
+                                ref_key: 'educationLevelSelectRef',
+                                ref: ie,
+                                modelValue: o.value.educationLevel,
+                                'onUpdate:modelValue':
+                                  e[13] || (e[13] = (l) => (o.value.educationLevel = l)),
+                                options: ge.value,
+                                outlined: '',
+                                dense: '',
+                                'bg-color': 'white',
+                                'dropdown-icon': 'expand_more',
+                                'emit-value': '',
+                                'map-options': '',
+                              },
+                              null,
+                              8,
+                              ['modelValue', 'options'],
+                            ),
+                          ]),
+                          a('div', Ct, [
+                            a('label', Ut, r(t.$t('profile.faculty')), 1),
+                            s(
+                              p,
+                              {
+                                ref_key: 'facultyInputRef',
+                                ref: re,
+                                modelValue: o.value.faculty,
+                                'onUpdate:modelValue':
+                                  e[14] || (e[14] = (l) => (o.value.faculty = l)),
+                                outlined: '',
+                                dense: '',
+                                'bg-color': 'white',
+                              },
+                              null,
+                              8,
+                              ['modelValue'],
+                            ),
+                          ]),
+                          a('div', Tt, [
+                            a('label', _t, r(t.$t('profile.institution')), 1),
+                            s(
+                              p,
+                              {
+                                ref_key: 'institutionInputRef',
+                                ref: ne,
+                                modelValue: o.value.institution,
+                                'onUpdate:modelValue':
+                                  e[15] || (e[15] = (l) => (o.value.institution = l)),
+                                outlined: '',
+                                dense: '',
+                                'bg-color': 'white',
+                              },
+                              null,
+                              8,
+                              ['modelValue'],
+                            ),
+                          ]),
+                        ]),
+                        a('div', St, [
+                          a('div', Pt, [
+                            a('label', Rt, r(t.$t('profile.address')), 1),
+                            s(
+                              p,
+                              {
+                                ref_key: 'addressInputRef',
+                                ref: de,
+                                modelValue: o.value.address,
+                                'onUpdate:modelValue':
+                                  e[16] || (e[16] = (l) => (o.value.address = l)),
+                                type: 'textarea',
+                                outlined: '',
+                                dense: '',
+                                'bg-color': 'white',
+                                class: 'address-textarea',
+                                'input-style': 'resize: none;',
+                                'hide-bottom-space': '',
+                              },
+                              null,
+                              8,
+                              ['modelValue'],
+                            ),
+                          ]),
+                          a('div', Et, [
+                            a('label', Ft, [
+                              m(r(t.$t('profile.phone')) + ' ', 1),
+                              e[28] || (e[28] = a('span', { class: 'text-negative' }, '*', -1)),
+                            ]),
+                            s(
+                              p,
+                              {
+                                ref_key: 'phoneInputRef',
+                                ref: ue,
+                                modelValue: o.value.phone,
+                                'onUpdate:modelValue':
+                                  e[17] || (e[17] = (l) => (o.value.phone = l)),
+                                outlined: '',
+                                dense: '',
+                                'bg-color': 'white',
+                                mask: '###-###-####',
+                                'unmasked-value': '',
+                                'lazy-rules': '',
+                                rules: [
+                                  (l) => !!l || t.$t('profile.requiredPhone'),
+                                  (l) =>
+                                    !l ||
+                                    l.replace(/\D/g, '').length === 10 ||
+                                    t.$t('profile.invalidPhone'),
+                                ],
+                                'hide-bottom-space': '',
+                              },
+                              null,
+                              8,
+                              ['modelValue', 'rules'],
+                            ),
+                          ]),
+                        ]),
+                      ]),
+                    ]),
+                    _: 1,
+                  },
+                ),
+              ]),
+              _: 1,
+            },
+            512,
+          ),
+          a('div', Lt, [
+            s(
+              v,
+              {
+                unelevated: '',
+                label: t.$t('profile.cancel'),
+                color: 'grey-4',
+                'text-color': 'dark',
+                class: 'action-btn text-weight-bold',
+                onClick: he,
+              },
+              null,
+              8,
+              ['label'],
+            ),
+            s(
+              v,
+              {
+                unelevated: '',
+                label: t.$t('profile.save'),
+                color: 'primary',
+                class: 'action-btn text-weight-bold',
+                disable: !ve.value,
+                onClick: ye,
+              },
+              null,
+              8,
+              ['label', 'disable'],
+            ),
+          ]),
+          s(
+            K,
+            {
+              modelValue: V.value,
+              'onUpdate:modelValue': e[20] || (e[20] = (l) => (V.value = l)),
+              persistent: '',
+            },
+            {
+              default: d(() => [
+                s(
+                  _,
+                  { style: { 'min-width': '400px', 'border-radius': '16px', padding: '12px' } },
+                  {
+                    default: d(() => [
+                      s(
+                        G,
+                        { class: 'row items-center q-pb-none justify-between' },
+                        {
+                          default: d(() => [
+                            a('div', At, r(t.$t('profile.pageTitleEditPassword')), 1),
+                            J(s(v, { icon: 'close', flat: '', round: '', dense: '' }, null, 512), [
+                              [W],
+                            ]),
+                          ]),
+                          _: 1,
+                        },
+                      ),
+                      s(
+                        G,
+                        { class: 'q-py-md' },
+                        {
+                          default: d(() => [
+                            a('div', zt, [
+                              a('label', Qt, [
+                                m(r(t.$t('profile.currentPassword')) + ' ', 1),
+                                e[29] || (e[29] = a('span', { class: 'text-negative' }, '*', -1)),
+                              ]),
+                              s(
+                                p,
+                                {
+                                  modelValue: k.value,
+                                  'onUpdate:modelValue': e[18] || (e[18] = (l) => (k.value = l)),
+                                  type: 'password',
+                                  outlined: '',
+                                  dense: '',
+                                  'bg-color': 'white',
+                                  placeholder: '',
+                                },
+                                null,
+                                8,
+                                ['modelValue'],
+                              ),
+                            ]),
+                            a('div', Dt, [
+                              a('label', Ht, [
+                                m(r(t.$t('profile.newPassword')) + ' ', 1),
+                                e[30] || (e[30] = a('span', { class: 'text-negative' }, '*', -1)),
+                              ]),
+                              s(
+                                p,
+                                {
+                                  modelValue: q.value,
+                                  'onUpdate:modelValue': e[19] || (e[19] = (l) => (q.value = l)),
+                                  type: 'password',
+                                  outlined: '',
+                                  dense: '',
+                                  'bg-color': 'white',
+                                  placeholder: '',
+                                },
+                                null,
+                                8,
+                                ['modelValue'],
+                              ),
+                            ]),
+                          ]),
+                          _: 1,
+                        },
+                      ),
+                      s(
+                        Ee,
+                        { align: 'center', class: 'q-pt-none q-pb-md' },
+                        {
+                          default: d(() => [
+                            J(
+                              s(
+                                v,
+                                {
+                                  unelevated: '',
+                                  label: t.$t('profile.cancel'),
+                                  color: 'grey-4',
+                                  'text-color': 'dark',
+                                  style: { 'border-radius': '8px', width: '120px' },
+                                  class: 'text-weight-bold',
+                                },
+                                null,
+                                8,
+                                ['label'],
+                              ),
+                              [[W]],
+                            ),
+                            s(
+                              v,
+                              {
+                                unelevated: '',
+                                label: t.$t('profile.confirm'),
+                                color: 'primary',
+                                style: { 'border-radius': '8px', width: '120px' },
+                                class: 'text-weight-bold',
+                                onClick: we,
+                              },
+                              null,
+                              8,
+                              ['label'],
+                            ),
+                          ]),
+                          _: 1,
+                        },
+                      ),
+                    ]),
+                    _: 1,
+                  },
+                ),
+              ]),
+              _: 1,
+            },
+            8,
+            ['modelValue'],
+          ),
+          s(
+            K,
+            {
+              modelValue: $.value,
+              'onUpdate:modelValue': e[21] || (e[21] = (l) => ($.value = l)),
+              persistent: '',
+            },
+            {
+              default: d(() => [
+                s(De, { 'image-src': F.value, 'file-type': L.value, onConfirm: fe }, null, 8, [
+                  'image-src',
+                  'file-type',
+                ]),
+              ]),
+              _: 1,
+            },
+            8,
+            ['modelValue'],
+          ),
+        ])
+      );
+    },
+  }),
+  pl = Ae(Mt, [['__scopeId', 'data-v-a79391d9']]);
+export { pl as default };

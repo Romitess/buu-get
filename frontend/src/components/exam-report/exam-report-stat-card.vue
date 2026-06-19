@@ -69,9 +69,11 @@ const props = defineProps<Props>();
 
 const iconColor = computed((): string => getCssVar(props.card.iconColorVar));
 
-const iconBoxStyle = computed((): Record<string, string> => ({
-  backgroundColor: getCssVar(props.card.iconBgVar),
-}));
+const iconBoxStyle = computed(
+  (): Record<string, string> => ({
+    backgroundColor: getCssVar(props.card.iconBgVar),
+  }),
+);
 
 const formattedValue = computed((): string => props.card.value.toLocaleString('en-US'));
 

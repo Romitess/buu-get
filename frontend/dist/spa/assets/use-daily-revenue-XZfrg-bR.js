@@ -1,1 +1,431 @@
-import{Q as V}from"./QPopupProxy-SS26l2Ne.js";import{O as w,B as C,r as i,t as S,w as k,Q as g,_ as A,an as F,W as c,V as r,S as n,T as v,X as d,av as D,$ as x,R as P,a6 as Q,U as B,am as I,a2 as E,aq as U,f as L}from"./index-CKSooU2k.js";import{A as O}from"./app-calendar-3fcHCMzM.js";import{A as T}from"./app-select-DSldWHEY.js";import{u as q}from"./vue-i18n-Bebkm_iB.js";import{f as j}from"./finance.service-BGaW4u-C.js";const M={class:"row q-col-gutter-x-md q-col-gutter-y-md items-start"},W={class:"col-12 col-sm-6 col-md-3"},X={class:"custom-label q-mb-xs"},Y={class:"col-12 col-sm-6 col-md-3"},$={class:"custom-label q-mb-xs"},z={class:"col-12 col-sm-6 col-md-3"},G={class:"custom-label q-mb-xs"},H={class:"col-12 col-sm-6 col-md-3"},J={class:"custom-label q-mb-xs"},K={class:"col-12 col-sm-6 col-md-3"},Z={class:"custom-label q-mb-xs"},ee={class:"col-12 col-sm-6 col-md-3"},te={class:"custom-label q-mb-xs"},ae={class:"col-12 col-sm-6 col-md-3"},oe={class:"custom-label q-mb-xs"},le=w({__name:"daily-revenue-filter",props:{filter:{},departmentOptions:{},mode:{}},emits:["filter-change"],setup(p,{emit:u}){const{t:l}=q(),a=p,y=u,b=a.mode==="full",f=i(null),h=i(null),e=C({startDate:a.filter.startDate,endDate:a.filter.endDate,department:a.filter.department,examName:a.filter.examName,receiptNo:a.filter.receiptNo||"",payerName:a.filter.payerName||"",payeeName:a.filter.payeeName||""}),R=i(a.departmentOptions||[]),_=async()=>{if(a.departmentOptions&&a.departmentOptions.length){R.value=a.departmentOptions;return}try{const s=await j(),o=Array.from(new Set(s.map(N=>N.FS_FACULTY).filter(Boolean))).map(N=>({label:N,value:N}));R.value=[{label:l("admin.dailyRevenueReport.filter.all"),value:""},...o]}catch{}};S(()=>{_()}),k(()=>a.filter,s=>{e.startDate=s.startDate,e.endDate=s.endDate,e.department=s.department,e.examName=s.examName,e.receiptNo=s.receiptNo||"",e.payerName=s.payerName||"",e.payeeName=s.payeeName||""},{deep:!0});const m=()=>{y("filter-change",{...e})};return(s,t)=>(g(),A(F,{flat:"",bordered:"",class:"filter-card q-mb-lg"},{default:c(()=>[r(I,null,{default:c(()=>[n("div",M,[n("div",W,[n("div",X,v(d(l)("admin.dailyRevenueReport.filter.startDate")),1),r(D,{modelValue:e.startDate,"onUpdate:modelValue":t[2]||(t[2]=o=>e.startDate=o),outlined:"",dense:"",readonly:"","bg-color":"grey-2",class:"custom-input cursor-pointer","hide-bottom-space":""},{append:c(()=>[r(x,{name:"event",class:"cursor-pointer"},{default:c(()=>[r(V,{ref_key:"startDateProxy",ref:f,cover:"","transition-show":"scale","transition-hide":"scale"},{default:c(()=>[r(O,{modelValue:e.startDate,"onUpdate:modelValue":t[0]||(t[0]=o=>e.startDate=o),onClickDate:t[1]||(t[1]=()=>{f.value?.hide(),m()})},null,8,["modelValue"])]),_:1},512)]),_:1})]),_:1},8,["modelValue"])]),n("div",Y,[n("div",$,v(d(l)("admin.dailyRevenueReport.filter.endDate")),1),r(D,{modelValue:e.endDate,"onUpdate:modelValue":t[5]||(t[5]=o=>e.endDate=o),outlined:"",dense:"",readonly:"","bg-color":"grey-2",class:"custom-input cursor-pointer","hide-bottom-space":""},{append:c(()=>[r(x,{name:"event",class:"cursor-pointer"},{default:c(()=>[r(V,{ref_key:"endDateProxy",ref:h,cover:"","transition-show":"scale","transition-hide":"scale"},{default:c(()=>[r(O,{modelValue:e.endDate,"onUpdate:modelValue":t[3]||(t[3]=o=>e.endDate=o),onClickDate:t[4]||(t[4]=()=>{h.value?.hide(),m()})},null,8,["modelValue"])]),_:1},512)]),_:1})]),_:1},8,["modelValue"])]),n("div",z,[n("div",G,v(d(l)("admin.dailyRevenueReport.filter.department")),1),r(T,{modelValue:e.department,"onUpdate:modelValue":[t[6]||(t[6]=o=>e.department=o),m],options:R.value,outlined:"",dense:"","emit-value":"","map-options":"","bg-color":"grey-2","dropdown-icon":"keyboard_arrow_down",class:"custom-input","hide-bottom-space":"",placeholder:d(l)("admin.dailyRevenueReport.filter.all")},null,8,["modelValue","options","placeholder"])]),n("div",H,[n("div",J,v(d(l)("admin.dailyRevenueReport.filter.examName")),1),r(D,{modelValue:e.examName,"onUpdate:modelValue":[t[7]||(t[7]=o=>e.examName=o),m],outlined:"",dense:"","bg-color":"grey-2",class:"custom-input",placeholder:d(l)("admin.dailyRevenueReport.filter.placeholders.examName"),"hide-bottom-space":""},null,8,["modelValue","placeholder"])]),b?(g(),P(Q,{key:0},[n("div",K,[n("div",Z,v(d(l)("admin.dailyRevenueReport.filter.receiptNo")),1),r(D,{modelValue:e.receiptNo,"onUpdate:modelValue":[t[8]||(t[8]=o=>e.receiptNo=o),m],outlined:"",dense:"","bg-color":"grey-2",class:"custom-input",placeholder:d(l)("admin.dailyRevenueReport.filter.placeholders.receiptNo"),"hide-bottom-space":""},null,8,["modelValue","placeholder"])]),n("div",ee,[n("div",te,v(d(l)("admin.dailyRevenueReport.filter.payer")),1),r(D,{modelValue:e.payerName,"onUpdate:modelValue":[t[9]||(t[9]=o=>e.payerName=o),m],outlined:"",dense:"","bg-color":"grey-2",class:"custom-input",placeholder:d(l)("admin.dailyRevenueReport.filter.placeholders.payer"),"hide-bottom-space":""},null,8,["modelValue","placeholder"])]),n("div",ae,[n("div",oe,v(d(l)("admin.dailyRevenueReport.filter.payee")),1),r(D,{modelValue:e.payeeName,"onUpdate:modelValue":[t[10]||(t[10]=o=>e.payeeName=o),m],outlined:"",dense:"","bg-color":"grey-2",class:"custom-input",placeholder:d(l)("admin.dailyRevenueReport.filter.placeholders.payee"),"hide-bottom-space":""},null,8,["modelValue","placeholder"])])],64)):B("",!0)])]),_:1})]),_:1}))}}),ue=E(le,[["__scopeId","data-v-63026583"]]),se=async p=>{const u=Object.fromEntries(Object.entries(p).filter(a=>a[1]!==""&&a[1]!==null&&a[1]!==void 0));return(await U.get("/fund-sources/daily-revenue",{params:u})).data},ne=async()=>(await U.get("/fund-sources/departments")).data;function fe(){const{t:p}=q(),u=i([]),l=i(!1),a=i(null),y=i(0),b=i([]),f=i({startDate:"",endDate:"",department:"",examName:""}),h=L(()=>y.value.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})),e=async()=>{l.value=!0,a.value=null;try{const s=await se(f.value);u.value=s.rows,y.value=s.totalAmount}catch{a.value=p("admin.dailyRevenueReport.notifications.loadError"),u.value=[],y.value=0}finally{l.value=!1}};return{rows:u,isLoading:l,error:a,filter:f,totalAmount:y,formattedTotal:h,departmentOptions:b,fetchData:e,loadDepartmentOptions:async()=>{try{const s=await ne();b.value=[{label:p("admin.dailyRevenueReport.filter.all"),value:""},...s]}catch{b.value=[]}},applyFilter:s=>{f.value={...s},e()},resetFilter:()=>{f.value={startDate:"",endDate:"",department:"",examName:""},e()}}}export{ue as D,fe as u};
+import { Q as V } from './QPopupProxy-SS26l2Ne.js';
+import {
+  O as w,
+  B as C,
+  r as i,
+  t as S,
+  w as k,
+  Q as g,
+  _ as A,
+  an as F,
+  W as c,
+  V as r,
+  S as n,
+  T as v,
+  X as d,
+  av as D,
+  $ as x,
+  R as P,
+  a6 as Q,
+  U as B,
+  am as I,
+  a2 as E,
+  aq as U,
+  f as L,
+} from './index-CKSooU2k.js';
+import { A as O } from './app-calendar-3fcHCMzM.js';
+import { A as T } from './app-select-DSldWHEY.js';
+import { u as q } from './vue-i18n-Bebkm_iB.js';
+import { f as j } from './finance.service-BGaW4u-C.js';
+const M = { class: 'row q-col-gutter-x-md q-col-gutter-y-md items-start' },
+  W = { class: 'col-12 col-sm-6 col-md-3' },
+  X = { class: 'custom-label q-mb-xs' },
+  Y = { class: 'col-12 col-sm-6 col-md-3' },
+  $ = { class: 'custom-label q-mb-xs' },
+  z = { class: 'col-12 col-sm-6 col-md-3' },
+  G = { class: 'custom-label q-mb-xs' },
+  H = { class: 'col-12 col-sm-6 col-md-3' },
+  J = { class: 'custom-label q-mb-xs' },
+  K = { class: 'col-12 col-sm-6 col-md-3' },
+  Z = { class: 'custom-label q-mb-xs' },
+  ee = { class: 'col-12 col-sm-6 col-md-3' },
+  te = { class: 'custom-label q-mb-xs' },
+  ae = { class: 'col-12 col-sm-6 col-md-3' },
+  oe = { class: 'custom-label q-mb-xs' },
+  le = w({
+    __name: 'daily-revenue-filter',
+    props: { filter: {}, departmentOptions: {}, mode: {} },
+    emits: ['filter-change'],
+    setup(p, { emit: u }) {
+      const { t: l } = q(),
+        a = p,
+        y = u,
+        b = a.mode === 'full',
+        f = i(null),
+        h = i(null),
+        e = C({
+          startDate: a.filter.startDate,
+          endDate: a.filter.endDate,
+          department: a.filter.department,
+          examName: a.filter.examName,
+          receiptNo: a.filter.receiptNo || '',
+          payerName: a.filter.payerName || '',
+          payeeName: a.filter.payeeName || '',
+        }),
+        R = i(a.departmentOptions || []),
+        _ = async () => {
+          if (a.departmentOptions && a.departmentOptions.length) {
+            R.value = a.departmentOptions;
+            return;
+          }
+          try {
+            const s = await j(),
+              o = Array.from(new Set(s.map((N) => N.FS_FACULTY).filter(Boolean))).map((N) => ({
+                label: N,
+                value: N,
+              }));
+            R.value = [{ label: l('admin.dailyRevenueReport.filter.all'), value: '' }, ...o];
+          } catch {}
+        };
+      (S(() => {
+        _();
+      }),
+        k(
+          () => a.filter,
+          (s) => {
+            ((e.startDate = s.startDate),
+              (e.endDate = s.endDate),
+              (e.department = s.department),
+              (e.examName = s.examName),
+              (e.receiptNo = s.receiptNo || ''),
+              (e.payerName = s.payerName || ''),
+              (e.payeeName = s.payeeName || ''));
+          },
+          { deep: !0 },
+        ));
+      const m = () => {
+        y('filter-change', { ...e });
+      };
+      return (s, t) => (
+        g(),
+        A(
+          F,
+          { flat: '', bordered: '', class: 'filter-card q-mb-lg' },
+          {
+            default: c(() => [
+              r(I, null, {
+                default: c(() => [
+                  n('div', M, [
+                    n('div', W, [
+                      n('div', X, v(d(l)('admin.dailyRevenueReport.filter.startDate')), 1),
+                      r(
+                        D,
+                        {
+                          modelValue: e.startDate,
+                          'onUpdate:modelValue': t[2] || (t[2] = (o) => (e.startDate = o)),
+                          outlined: '',
+                          dense: '',
+                          readonly: '',
+                          'bg-color': 'grey-2',
+                          class: 'custom-input cursor-pointer',
+                          'hide-bottom-space': '',
+                        },
+                        {
+                          append: c(() => [
+                            r(
+                              x,
+                              { name: 'event', class: 'cursor-pointer' },
+                              {
+                                default: c(() => [
+                                  r(
+                                    V,
+                                    {
+                                      ref_key: 'startDateProxy',
+                                      ref: f,
+                                      cover: '',
+                                      'transition-show': 'scale',
+                                      'transition-hide': 'scale',
+                                    },
+                                    {
+                                      default: c(() => [
+                                        r(
+                                          O,
+                                          {
+                                            modelValue: e.startDate,
+                                            'onUpdate:modelValue':
+                                              t[0] || (t[0] = (o) => (e.startDate = o)),
+                                            onClickDate:
+                                              t[1] ||
+                                              (t[1] = () => {
+                                                (f.value?.hide(), m());
+                                              }),
+                                          },
+                                          null,
+                                          8,
+                                          ['modelValue'],
+                                        ),
+                                      ]),
+                                      _: 1,
+                                    },
+                                    512,
+                                  ),
+                                ]),
+                                _: 1,
+                              },
+                            ),
+                          ]),
+                          _: 1,
+                        },
+                        8,
+                        ['modelValue'],
+                      ),
+                    ]),
+                    n('div', Y, [
+                      n('div', $, v(d(l)('admin.dailyRevenueReport.filter.endDate')), 1),
+                      r(
+                        D,
+                        {
+                          modelValue: e.endDate,
+                          'onUpdate:modelValue': t[5] || (t[5] = (o) => (e.endDate = o)),
+                          outlined: '',
+                          dense: '',
+                          readonly: '',
+                          'bg-color': 'grey-2',
+                          class: 'custom-input cursor-pointer',
+                          'hide-bottom-space': '',
+                        },
+                        {
+                          append: c(() => [
+                            r(
+                              x,
+                              { name: 'event', class: 'cursor-pointer' },
+                              {
+                                default: c(() => [
+                                  r(
+                                    V,
+                                    {
+                                      ref_key: 'endDateProxy',
+                                      ref: h,
+                                      cover: '',
+                                      'transition-show': 'scale',
+                                      'transition-hide': 'scale',
+                                    },
+                                    {
+                                      default: c(() => [
+                                        r(
+                                          O,
+                                          {
+                                            modelValue: e.endDate,
+                                            'onUpdate:modelValue':
+                                              t[3] || (t[3] = (o) => (e.endDate = o)),
+                                            onClickDate:
+                                              t[4] ||
+                                              (t[4] = () => {
+                                                (h.value?.hide(), m());
+                                              }),
+                                          },
+                                          null,
+                                          8,
+                                          ['modelValue'],
+                                        ),
+                                      ]),
+                                      _: 1,
+                                    },
+                                    512,
+                                  ),
+                                ]),
+                                _: 1,
+                              },
+                            ),
+                          ]),
+                          _: 1,
+                        },
+                        8,
+                        ['modelValue'],
+                      ),
+                    ]),
+                    n('div', z, [
+                      n('div', G, v(d(l)('admin.dailyRevenueReport.filter.department')), 1),
+                      r(
+                        T,
+                        {
+                          modelValue: e.department,
+                          'onUpdate:modelValue': [t[6] || (t[6] = (o) => (e.department = o)), m],
+                          options: R.value,
+                          outlined: '',
+                          dense: '',
+                          'emit-value': '',
+                          'map-options': '',
+                          'bg-color': 'grey-2',
+                          'dropdown-icon': 'keyboard_arrow_down',
+                          class: 'custom-input',
+                          'hide-bottom-space': '',
+                          placeholder: d(l)('admin.dailyRevenueReport.filter.all'),
+                        },
+                        null,
+                        8,
+                        ['modelValue', 'options', 'placeholder'],
+                      ),
+                    ]),
+                    n('div', H, [
+                      n('div', J, v(d(l)('admin.dailyRevenueReport.filter.examName')), 1),
+                      r(
+                        D,
+                        {
+                          modelValue: e.examName,
+                          'onUpdate:modelValue': [t[7] || (t[7] = (o) => (e.examName = o)), m],
+                          outlined: '',
+                          dense: '',
+                          'bg-color': 'grey-2',
+                          class: 'custom-input',
+                          placeholder: d(l)(
+                            'admin.dailyRevenueReport.filter.placeholders.examName',
+                          ),
+                          'hide-bottom-space': '',
+                        },
+                        null,
+                        8,
+                        ['modelValue', 'placeholder'],
+                      ),
+                    ]),
+                    b
+                      ? (g(),
+                        P(
+                          Q,
+                          { key: 0 },
+                          [
+                            n('div', K, [
+                              n('div', Z, v(d(l)('admin.dailyRevenueReport.filter.receiptNo')), 1),
+                              r(
+                                D,
+                                {
+                                  modelValue: e.receiptNo,
+                                  'onUpdate:modelValue': [
+                                    t[8] || (t[8] = (o) => (e.receiptNo = o)),
+                                    m,
+                                  ],
+                                  outlined: '',
+                                  dense: '',
+                                  'bg-color': 'grey-2',
+                                  class: 'custom-input',
+                                  placeholder: d(l)(
+                                    'admin.dailyRevenueReport.filter.placeholders.receiptNo',
+                                  ),
+                                  'hide-bottom-space': '',
+                                },
+                                null,
+                                8,
+                                ['modelValue', 'placeholder'],
+                              ),
+                            ]),
+                            n('div', ee, [
+                              n('div', te, v(d(l)('admin.dailyRevenueReport.filter.payer')), 1),
+                              r(
+                                D,
+                                {
+                                  modelValue: e.payerName,
+                                  'onUpdate:modelValue': [
+                                    t[9] || (t[9] = (o) => (e.payerName = o)),
+                                    m,
+                                  ],
+                                  outlined: '',
+                                  dense: '',
+                                  'bg-color': 'grey-2',
+                                  class: 'custom-input',
+                                  placeholder: d(l)(
+                                    'admin.dailyRevenueReport.filter.placeholders.payer',
+                                  ),
+                                  'hide-bottom-space': '',
+                                },
+                                null,
+                                8,
+                                ['modelValue', 'placeholder'],
+                              ),
+                            ]),
+                            n('div', ae, [
+                              n('div', oe, v(d(l)('admin.dailyRevenueReport.filter.payee')), 1),
+                              r(
+                                D,
+                                {
+                                  modelValue: e.payeeName,
+                                  'onUpdate:modelValue': [
+                                    t[10] || (t[10] = (o) => (e.payeeName = o)),
+                                    m,
+                                  ],
+                                  outlined: '',
+                                  dense: '',
+                                  'bg-color': 'grey-2',
+                                  class: 'custom-input',
+                                  placeholder: d(l)(
+                                    'admin.dailyRevenueReport.filter.placeholders.payee',
+                                  ),
+                                  'hide-bottom-space': '',
+                                },
+                                null,
+                                8,
+                                ['modelValue', 'placeholder'],
+                              ),
+                            ]),
+                          ],
+                          64,
+                        ))
+                      : B('', !0),
+                  ]),
+                ]),
+                _: 1,
+              }),
+            ]),
+            _: 1,
+          },
+        )
+      );
+    },
+  }),
+  ue = E(le, [['__scopeId', 'data-v-63026583']]),
+  se = async (p) => {
+    const u = Object.fromEntries(
+      Object.entries(p).filter((a) => a[1] !== '' && a[1] !== null && a[1] !== void 0),
+    );
+    return (await U.get('/fund-sources/daily-revenue', { params: u })).data;
+  },
+  ne = async () => (await U.get('/fund-sources/departments')).data;
+function fe() {
+  const { t: p } = q(),
+    u = i([]),
+    l = i(!1),
+    a = i(null),
+    y = i(0),
+    b = i([]),
+    f = i({ startDate: '', endDate: '', department: '', examName: '' }),
+    h = L(() =>
+      y.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    ),
+    e = async () => {
+      ((l.value = !0), (a.value = null));
+      try {
+        const s = await se(f.value);
+        ((u.value = s.rows), (y.value = s.totalAmount));
+      } catch {
+        ((a.value = p('admin.dailyRevenueReport.notifications.loadError')),
+          (u.value = []),
+          (y.value = 0));
+      } finally {
+        l.value = !1;
+      }
+    };
+  return {
+    rows: u,
+    isLoading: l,
+    error: a,
+    filter: f,
+    totalAmount: y,
+    formattedTotal: h,
+    departmentOptions: b,
+    fetchData: e,
+    loadDepartmentOptions: async () => {
+      try {
+        const s = await ne();
+        b.value = [{ label: p('admin.dailyRevenueReport.filter.all'), value: '' }, ...s];
+      } catch {
+        b.value = [];
+      }
+    },
+    applyFilter: (s) => {
+      ((f.value = { ...s }), e());
+    },
+    resetFilter: () => {
+      ((f.value = { startDate: '', endDate: '', department: '', examName: '' }), e());
+    },
+  };
+}
+export { ue as D, fe as u };

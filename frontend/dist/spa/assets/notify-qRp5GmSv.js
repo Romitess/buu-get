@@ -1,1 +1,12 @@
-import{b as r,N as t}from"./index-CKSooU2k.js";const e=t.create,i=function(o){return typeof o=="string"?e.call(t,{message:o,position:"bottom"}):(o&&typeof o=="object"&&(o.position="bottom"),e.call(t,o))};t.create=i;const f=r(({app:o})=>{o.config.globalProperties.$q&&(o.config.globalProperties.$q.notify=i)});export{f as default};
+import { b as r, N as t } from './index-CKSooU2k.js';
+const e = t.create,
+  i = function (o) {
+    return typeof o == 'string'
+      ? e.call(t, { message: o, position: 'bottom' })
+      : (o && typeof o == 'object' && (o.position = 'bottom'), e.call(t, o));
+  };
+t.create = i;
+const f = r(({ app: o }) => {
+  o.config.globalProperties.$q && (o.config.globalProperties.$q.notify = i);
+});
+export { f as default };

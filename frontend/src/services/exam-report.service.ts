@@ -56,9 +56,7 @@ export const fetchRoundOptions = (): Promise<ExamReportOption[]> =>
  * ดึงข้อมูลสรุปทั้งหน้ารายงานการสอบ
  * (mock — ค่าตามดีไซน์ Figma; ยังไม่กรองตาม filter จริง)
  */
-export const fetchExamReportSummary = (
-  filter: ExamReportFilter,
-): Promise<ExamReportSummary> => {
+export const fetchExamReportSummary = (filter: ExamReportFilter): Promise<ExamReportSummary> => {
   // TODO: ส่ง filter ไปกรองข้อมูลกับ API จริงเมื่อพร้อม (ตอนนี้ mock ทั้งหมด)
   void filter;
 

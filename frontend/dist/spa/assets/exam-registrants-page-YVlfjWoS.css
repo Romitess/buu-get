@@ -1,1 +1,77 @@
-.enrollment-status-badge[data-v-3d55673f]{display:inline-flex;align-items:center;justify-content:center;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:500;white-space:nowrap;min-width:120px;text-align:center}.badge--paid[data-v-3d55673f]{color:var(--badge-success-text);background-color:transparent;border:1.5px solid var(--badge-success-dot)}.badge--unpaid[data-v-3d55673f]{color:var(--badge-error-text);background-color:transparent;border:1.5px solid var(--badge-error-dot)}.badge--pass[data-v-3d55673f]{color:var(--badge-success-text);background-color:transparent;border:1.5px solid var(--badge-success-dot)}.badge--wait-fixed[data-v-3d55673f]{color:var(--badge-error-text);background-color:transparent;border:1.5px solid var(--badge-error-dot)}.badge--unchecked[data-v-3d55673f]{color:var(--badge-primary-text);background-color:transparent;border:1.5px solid var(--badge-primary-dot)}.badge--cancelled[data-v-3d55673f]{color:var(--badge-info-text);background-color:transparent;border:1.5px solid var(--badge-info-dot)}.badge--default[data-v-3d55673f]{color:var(--text-secondary);background-color:transparent;border:1.5px solid var(--border-color)}@media(max-width:1023px){.page-container[data-v-e6dd0ac7]{width:100%!important;min-width:0!important}}.registrants-page[data-v-e6dd0ac7]{min-height:0!important}@media(max-width:599.98px){.export-btn[data-v-e6dd0ac7]{width:100%}}.registrants-table[data-v-e6dd0ac7] .q-table__container{border-radius:var(--radius-md);box-shadow:var(--shadow-md)}.registrants-table[data-v-e6dd0ac7] thead tr th:nth-child(3){text-align:center!important;padding-left:0!important}.registrants-table[data-v-e6dd0ac7] tbody tr td:nth-child(3){padding-left:clamp(12px,4vw,70px)!important}.registrant-fullname-cell[data-v-e6dd0ac7]{width:100%;min-width:0;box-sizing:border-box}
+.enrollment-status-badge[data-v-3d55673f] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  min-width: 120px;
+  text-align: center;
+}
+.badge--paid[data-v-3d55673f] {
+  color: var(--badge-success-text);
+  background-color: transparent;
+  border: 1.5px solid var(--badge-success-dot);
+}
+.badge--unpaid[data-v-3d55673f] {
+  color: var(--badge-error-text);
+  background-color: transparent;
+  border: 1.5px solid var(--badge-error-dot);
+}
+.badge--pass[data-v-3d55673f] {
+  color: var(--badge-success-text);
+  background-color: transparent;
+  border: 1.5px solid var(--badge-success-dot);
+}
+.badge--wait-fixed[data-v-3d55673f] {
+  color: var(--badge-error-text);
+  background-color: transparent;
+  border: 1.5px solid var(--badge-error-dot);
+}
+.badge--unchecked[data-v-3d55673f] {
+  color: var(--badge-primary-text);
+  background-color: transparent;
+  border: 1.5px solid var(--badge-primary-dot);
+}
+.badge--cancelled[data-v-3d55673f] {
+  color: var(--badge-info-text);
+  background-color: transparent;
+  border: 1.5px solid var(--badge-info-dot);
+}
+.badge--default[data-v-3d55673f] {
+  color: var(--text-secondary);
+  background-color: transparent;
+  border: 1.5px solid var(--border-color);
+}
+@media (max-width: 1023px) {
+  .page-container[data-v-e6dd0ac7] {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+.registrants-page[data-v-e6dd0ac7] {
+  min-height: 0 !important;
+}
+@media (max-width: 599.98px) {
+  .export-btn[data-v-e6dd0ac7] {
+    width: 100%;
+  }
+}
+.registrants-table[data-v-e6dd0ac7] .q-table__container {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+.registrants-table[data-v-e6dd0ac7] thead tr th:nth-child(3) {
+  text-align: center !important;
+  padding-left: 0 !important;
+}
+.registrants-table[data-v-e6dd0ac7] tbody tr td:nth-child(3) {
+  padding-left: clamp(12px, 4vw, 70px) !important;
+}
+.registrant-fullname-cell[data-v-e6dd0ac7] {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}

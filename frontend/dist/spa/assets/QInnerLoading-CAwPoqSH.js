@@ -1,1 +1,50 @@
-import{c as g,bs as v,D as f,M as y,h as n,ai as S,g as m,by as C,f as t,aX as h}from"./index-CKSooU2k.js";const k=g({name:"QInnerLoading",props:{...f,...v,showing:Boolean,color:String,size:{type:[String,Number],default:"42px"},label:String,labelClass:String,labelStyle:[String,Array,Object]},setup(e,{slots:a}){const s=m(),i=y(e,s.proxy.$q),{transitionProps:r,transitionStyle:o}=C(e),u=t(()=>"q-inner-loading q--avoid-card-border absolute-full column flex-center"+(i.value?" q-inner-loading--dark":"")),c=t(()=>"q-inner-loading__label"+(e.labelClass!==void 0?` ${e.labelClass}`:""));function d(){const l=[n(h,{size:e.size,color:e.color})];return e.label!==void 0&&l.push(n("div",{class:c.value,style:e.labelStyle},[e.label])),l}function b(){return e.showing?n("div",{class:u.value,style:o.value},a.default!==void 0?a.default():d()):null}return()=>n(S,r.value,b)}});export{k as Q};
+import {
+  c as g,
+  bs as v,
+  D as f,
+  M as y,
+  h as n,
+  ai as S,
+  g as m,
+  by as C,
+  f as t,
+  aX as h,
+} from './index-CKSooU2k.js';
+const k = g({
+  name: 'QInnerLoading',
+  props: {
+    ...f,
+    ...v,
+    showing: Boolean,
+    color: String,
+    size: { type: [String, Number], default: '42px' },
+    label: String,
+    labelClass: String,
+    labelStyle: [String, Array, Object],
+  },
+  setup(e, { slots: a }) {
+    const s = m(),
+      i = y(e, s.proxy.$q),
+      { transitionProps: r, transitionStyle: o } = C(e),
+      u = t(
+        () =>
+          'q-inner-loading q--avoid-card-border absolute-full column flex-center' +
+          (i.value ? ' q-inner-loading--dark' : ''),
+      ),
+      c = t(() => 'q-inner-loading__label' + (e.labelClass !== void 0 ? ` ${e.labelClass}` : ''));
+    function d() {
+      const l = [n(h, { size: e.size, color: e.color })];
+      return (
+        e.label !== void 0 && l.push(n('div', { class: c.value, style: e.labelStyle }, [e.label])),
+        l
+      );
+    }
+    function b() {
+      return e.showing
+        ? n('div', { class: u.value, style: o.value }, a.default !== void 0 ? a.default() : d())
+        : null;
+    }
+    return () => n(S, r.value, b);
+  },
+});
+export { k as Q };

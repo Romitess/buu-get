@@ -1,1 +1,25 @@
-function d(t){setTimeout(()=>{window.URL.revokeObjectURL(t.href)},1e4),t.remove()}function m(t,n,o={}){const{mimeType:a,byteOrderMark:c,encoding:i}=typeof o=="string"?{mimeType:o}:o,r=i!==void 0?new TextEncoder(i).encode([n]):n,s=c!==void 0?[c,r]:[r],l=new Blob(s,{type:a||"application/octet-stream"}),e=document.createElement("a");e.href=window.URL.createObjectURL(l),e.setAttribute("download",t),e.download===void 0&&e.setAttribute("target","_blank"),e.classList.add("hidden"),e.style.position="fixed",document.body.append(e);try{return e.click(),d(e),!0}catch(b){return d(e),b}}export{m as e};
+function d(t) {
+  (setTimeout(() => {
+    window.URL.revokeObjectURL(t.href);
+  }, 1e4),
+    t.remove());
+}
+function m(t, n, o = {}) {
+  const { mimeType: a, byteOrderMark: c, encoding: i } = typeof o == 'string' ? { mimeType: o } : o,
+    r = i !== void 0 ? new TextEncoder(i).encode([n]) : n,
+    s = c !== void 0 ? [c, r] : [r],
+    l = new Blob(s, { type: a || 'application/octet-stream' }),
+    e = document.createElement('a');
+  ((e.href = window.URL.createObjectURL(l)),
+    e.setAttribute('download', t),
+    e.download === void 0 && e.setAttribute('target', '_blank'),
+    e.classList.add('hidden'),
+    (e.style.position = 'fixed'),
+    document.body.append(e));
+  try {
+    return (e.click(), d(e), !0);
+  } catch (b) {
+    return (d(e), b);
+  }
+}
+export { m as e };

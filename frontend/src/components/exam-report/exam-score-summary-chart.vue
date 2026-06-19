@@ -44,9 +44,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const series = computed(() =>
-  props.data.series.map((s) => ({ name: s.name, data: s.data })),
-);
+const series = computed(() => props.data.series.map((s) => ({ name: s.name, data: s.data })));
 
 // legend แบบ custom เพื่อให้อยู่แถวเดียวกับ title ของการ์ด
 const legendItems = computed(() =>

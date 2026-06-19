@@ -1,1 +1,1161 @@
-import{I as be,g as ee,f as l,aI as Ye,af as ie,ac as Ge,h as S,r as E,c as we,aJ as Je,aK as Me,aL as Ze,aM as et,aN as he,aO as tt,aP as at,aQ as lt,aR as nt,aS as st,D as rt,o as ot,ag as it,K as ut,M as ct,aT as dt,al as vt,aU as re,aV as mt,w as ft,O as pt,Q as gt,_ as bt,W as G,V as O,am as xe,S as W,T as ye,J as Ce,a8 as oe,at as ht,$ as ke,ap as xt,an as yt,a2 as Ct}from"./index-CKSooU2k.js";import{Q as kt}from"./QSelect-CcXwe87O.js";import{h as St,b as H}from"./format-DnjzHs7F.js";import{u as Ft,I as wt}from"./image.service-iLwePKJ0.js";import{T as Mt}from"./TouchPan-CIOdv6jG.js";import{C as Se}from"./ClosePopup-D9BZcpVj.js";const _t=".q-field--error",$t=['input:not([type="hidden"]):not([disabled])',"textarea:not([disabled])","select:not([disabled])","button:not([disabled])",'[tabindex]:not([tabindex="-1"])','[contenteditable="true"]'].join(","),ue=t=>t instanceof HTMLElement,Lt=t=>{const o=t.$el;return ue(o)?o:null},qt=(t,o)=>{const b=t.getBoundingClientRect(),i=o.getBoundingClientRect();return b.top!==i.top?b.top-i.top:b.left-i.left},Et=t=>{const o=t.querySelector($t);return ue(o)?o:t};function ea(t,o={}){const b=async()=>{await be();const e=t.value;if(!e)return!1;const m=Lt(e);if(!m)return!1;const c=Array.from(m.querySelectorAll(o.invalidFieldSelector??_t)).filter(ue).sort(qt)[0];return c?(c.scrollIntoView({behavior:o.scrollBehavior??"smooth",block:o.block??"center",inline:o.inline??"nearest"}),await be(),Et(c).focus({preventScroll:!0}),!0):!1};return{validateAndFocusFirstInvalid:async()=>{const e=t.value;return e?await e.validate(!1)?!0:(await b(),!1):!1},focusFirstInvalidField:b}}function X(t,o,b,i){const e=[];return t.forEach(m=>{i(m)?e.push(m):o.push({failedPropValidation:b,file:m})}),e}function J(t){t?.dataTransfer&&(t.dataTransfer.dropEffect="copy"),ie(t)}const It={multiple:Boolean,accept:String,capture:String,maxFileSize:[Number,String],maxTotalSize:[Number,String],maxFiles:[Number,String],filter:Function},Tt=["rejected"];function Vt({editable:t,dnd:o,getFileInput:b,addFilesToQueue:i}){const{props:e,emit:m,proxy:h}=ee(),c=E(null),w=l(()=>e.accept!==void 0?e.accept.split(",").map(n=>(n=n.trim(),n==="*"?"*/":(n.endsWith("/*")&&(n=n.slice(0,-1)),n.toUpperCase()))):null),F=l(()=>Number.parseInt(e.maxFiles,10)),x=l(()=>Number.parseInt(e.maxTotalSize,10));function M(n){if(t.value)if(n!==Object(n)&&(n={target:null}),n.target?.matches('input[type="file"]')===!0)n.clientX===0&&n.clientY===0&&Ye(n);else{const p=b();p!==n.target&&p?.click(n)}}function T(n){t.value&&n&&i(null,n)}function A(n,p,L,I){let g=[...p||n.target.files];const s=[],d=()=>{s.length!==0&&m("rejected",s)};if(e.accept!==void 0&&!w.value.includes("*/")&&(g=X(g,s,"accept",r=>w.value.some(f=>r.type.toUpperCase().startsWith(f)||r.name.toUpperCase().endsWith(f))),g.length===0))return d();if(e.maxFileSize!==void 0){const r=Number.parseInt(e.maxFileSize,10);if(g=X(g,s,"max-file-size",f=>f.size<=r),g.length===0)return d()}if(!e.multiple&&g.length!==0&&(g=[g[0]]),g.forEach(r=>{r.__key=r.webkitRelativePath+r.lastModified+r.name+r.size}),I){const r=L.map(f=>f.__key);g=X(g,s,"duplicate",f=>!r.includes(f.__key))}if(g.length===0)return d();if(e.maxTotalSize!==void 0){let r=I?L.reduce((f,q)=>f+q.size,0):0;if(g=X(g,s,"max-total-size",f=>(r+=f.size,r<=x.value)),g.length===0)return d()}if(typeof e.filter=="function"){const r=e.filter(g);g=X(g,s,"filter",f=>r.includes(f))}if(e.maxFiles!==void 0){let r=I?L.length:0;if(g=X(g,s,"max-files",()=>(r++,r<=F.value)),g.length===0)return d()}if(d(),g.length!==0)return g}function $(n){J(n),o.value||(o.value=!0)}function y(n){ie(n),(n.relatedTarget!==null||!Ge.is.safari?n.relatedTarget!==c.value:!document.elementsFromPoint(n.clientX,n.clientY).includes(c.value))&&(o.value=!1)}function V(n){J(n);const p=n.dataTransfer.files;p.length!==0&&i(null,p),o.value=!1}function N(n){if(o.value)return S("div",{ref:c,class:`q-${n}__dnd absolute-full`,onDragenter:J,onDragover:J,onDragleave:y,onDrop:V})}return Object.assign(h,{pickFiles:M,addFiles:T}),{pickFiles:M,addFiles:T,onDragover:$,onDragleave:y,processFiles:A,getDndNode:N,maxFilesNumber:F,maxTotalSizeNumber:x}}function Nt(t){t.keyCode===13&&st(t)}const ta=we({name:"QFile",inheritAttrs:!1,props:{...Ze,...Me,...It,modelValue:[File,FileList,Array],append:Boolean,useChips:Boolean,displayValue:[String,Number],tabindex:{type:[String,Number],default:0},counterLabel:Function,inputClass:[Array,String,Object],inputStyle:[Array,String,Object]},emits:[...Je,...Tt],setup(t,{slots:o,emit:b,attrs:i}){const{proxy:e}=ee(),m=et(),h=E(null),c=E(!1),w=nt(t),{pickFiles:F,onDragover:x,onDragleave:M,processFiles:T,getDndNode:A}=Vt({editable:m.editable,dnd:c,getFileInput:q,addFilesToQueue:D}),$=lt(t),y=l(()=>Object(t.modelValue)===t.modelValue?"length"in t.modelValue?[...t.modelValue]:[t.modelValue]:[]),V=l(()=>he(y.value)),N=l(()=>y.value.map(v=>v.name).join(", ")),n=l(()=>St(y.value.reduce((v,_)=>v+_.size,0))),p=l(()=>({totalSize:n.value,filesNumber:y.value.length,maxFiles:t.maxFiles})),L=l(()=>({tabindex:-1,type:"file",title:"",accept:t.accept,capture:t.capture,name:w.value,...i,id:m.targetUid.value,disabled:!m.editable.value})),I=l(()=>"q-file q-field--auto-height"+(c.value?" q-file--dnd":"")),g=l(()=>t.multiple&&t.append);function s(v){const _=[...y.value];_.splice(v,1),r(_)}function d(v){const _=y.value.indexOf(v);_!==-1&&s(_)}function r(v){b("update:modelValue",t.multiple?v:v[0])}function f(v){(v.keyCode===13||v.keyCode===32)&&F(v)}function q(){return h.value}function D(v,_){const z=T(v,_,y.value,g.value),Q=q();Q!=null&&(Q.value=""),z!==void 0&&((t.multiple?t.modelValue&&z.every(K=>y.value.includes(K)):t.modelValue===z[0])||r(g.value?[...y.value,...z]:z))}function R(){return[S("input",{class:[t.inputClass,"q-file__filler"],style:t.inputStyle})]}function P(){if(o.file!==void 0)return y.value.length===0?R():y.value.map((_,z)=>o.file({index:z,file:_,ref:this}));if(o.selected!==void 0)return y.value.length===0?R():o.selected({files:y.value,ref:this});if(t.useChips)return y.value.length===0?R():y.value.map((_,z)=>S(kt,{key:"file-"+z,removable:m.editable.value,dense:!0,textColor:t.color,tabindex:t.tabindex,onRemove:()=>{s(z)}},()=>S("span",{class:"ellipsis",textContent:_.name})));const v=t.displayValue!==void 0?t.displayValue:N.value;return v.length!==0?[S("div",{class:t.inputClass,style:t.inputStyle,textContent:v})]:R()}function j(){const v={ref:h,...L.value,...$.value,class:"q-field__input fit absolute-full cursor-pointer",onChange:D};return t.multiple&&(v.multiple=!0),S("input",v)}return Object.assign(m,{fieldClass:I,emitValue:r,hasValue:V,inputRef:h,innerValue:y,floatingLabel:l(()=>V.value||he(t.displayValue)),computedCounter:l(()=>{if(t.counterLabel!==void 0)return t.counterLabel(p.value);const v=t.maxFiles;return`${y.value.length}${v!==void 0?" / "+v:""} (${n.value})`}),getControlChild:()=>A("file"),getControl:()=>{const v={ref:m.targetRef,class:"q-field__native row items-center cursor-pointer",tabindex:t.tabindex};return m.editable.value&&Object.assign(v,{onDragover:x,onDragleave:M,onKeydown:Nt,onKeyup:f}),S("div",v,[j()].concat(P()))}}),Object.assign(e,{removeAtIndex:s,removeFile:d,getNativeElement:()=>h.value}),tt(e,"nativeEl",()=>h.value),at(m)}});function aa(t){const o=E(!1),b=E(null),i=E(null);return{isUploading:o,uploadError:b,uploadedPath:i,handleImageUpload:async(h,c)=>{if(o.value=!0,b.value=null,i.value=null,!["image/jpeg","image/jpg","image/png"].includes(h.type)){const x="นามสกุลไฟล์ต้องเป็น JPG หรือ PNG เท่านั้น";return b.value=x,o.value=!1,t?.onError?.(new Error(x)),null}const F=wt.MAX_FILE_SIZE;if(h.size>F){const x="ขนาดไฟล์ต้องไม่เกิน 5 MB";return b.value=x,o.value=!1,t?.onError?.(new Error(x)),null}try{const M=await Ft(c?{file:h,folder:c}:{file:h});return i.value=M,t?.onSuccess?.(M),M}catch(x){const M=x instanceof Error?x.message:"Unknown error occurred";return b.value=M,t?.onError?.(x instanceof Error?x:new Error(M)),null}finally{o.value=!1}},resetUploadState:()=>{o.value=!1,b.value=null,i.value=null}}}const Fe="q-slider__marker-labels",zt=t=>({value:t}),Bt=({marker:t})=>S("div",{key:t.value,style:t.style,class:t.classes},t.label),_e=[34,37,40,33,39,38],At={...rt,...Me,min:{type:Number,default:0},max:{type:Number,default:100},innerMin:Number,innerMax:Number,step:{type:Number,default:1,validator:t=>t>=0},snap:Boolean,vertical:Boolean,reverse:Boolean,color:String,markerLabelsClass:String,label:Boolean,labelColor:String,labelTextColor:String,labelAlways:Boolean,switchLabelSide:Boolean,markers:[Boolean,Number],markerLabels:[Boolean,Array,Object,Function],switchMarkerLabelsSide:Boolean,trackImg:String,trackColor:String,innerTrackImg:String,innerTrackColor:String,selectionColor:String,selectionImg:String,thumbSize:{type:String,default:"20px"},trackSize:{type:String,default:"4px"},disable:Boolean,readonly:Boolean,dense:Boolean,tabindex:[String,Number],thumbColor:String,thumbPath:{type:String,default:"M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"}},Dt=["pan","update:modelValue","change"];function Rt({updateValue:t,updatePosition:o,getDragging:b,formAttrs:i}){const{props:e,emit:m,slots:h,proxy:{$q:c}}=ee(),w=ct(e,c),F=dt(i),x=E(!1),M=E(!1),T=E(!1),A=E(!1),$=l(()=>e.vertical?"--v":"--h"),y=l(()=>"-"+(e.switchLabelSide?"switched":"standard")),V=l(()=>e.vertical?e.reverse:e.reverse!==(c.lang.rtl===!0)),N=l(()=>!Number.isFinite(e.innerMin)||e.innerMin<e.min?e.min:e.innerMin),n=l(()=>!Number.isFinite(e.innerMax)||e.innerMax>e.max?e.max:e.innerMax),p=l(()=>!e.disable&&!e.readonly&&N.value<n.value),L=l(()=>{if(e.step===0)return u=>u;const a=(String(e.step).trim().split(".")[1]||"").length;return u=>Number.parseFloat(u.toFixed(a))}),I=l(()=>e.step===0?1:e.step),g=l(()=>p.value?e.tabindex||0:-1),s=l(()=>e.max-e.min),d=l(()=>n.value-N.value),r=l(()=>te(N.value)),f=l(()=>te(n.value)),q=l(()=>e.vertical?V.value?"bottom":"top":V.value?"right":"left"),D=l(()=>e.vertical?"height":"width"),R=l(()=>e.vertical?"width":"height"),P=l(()=>e.vertical?"vertical":"horizontal"),j=l(()=>{const a={role:"slider","aria-valuemin":N.value,"aria-valuemax":n.value,"aria-orientation":P.value,"data-step":e.step};return e.disable?a["aria-disabled"]="true":e.readonly&&(a["aria-readonly"]="true"),a}),v=l(()=>`q-slider q-slider${$.value} q-slider--${x.value?"":"in"}active inline no-wrap `+(e.vertical?"row":"column")+(e.disable?" disabled":" q-slider--enabled"+(p.value?" q-slider--editable":""))+(T.value==="both"?" q-slider--focus":"")+(e.label||e.labelAlways?" q-slider--label":"")+(e.labelAlways?" q-slider--label-always":"")+(w.value?" q-slider--dark":"")+(e.dense?" q-slider--dense q-slider--dense"+$.value:""));function _(a){const u="q-slider__"+a;return`${u} ${u}${$.value} ${u}${$.value}${y.value}`}function z(a){const u="q-slider__"+a;return`${u} ${u}${$.value}`}const Q=l(()=>{const a=e.selectionColor||e.color;return"q-slider__selection absolute"+(a!==void 0?` text-${a}`:"")}),K=l(()=>z("markers")+" absolute overflow-hidden"),$e=l(()=>z("track-container")),Le=l(()=>_("pin")),qe=l(()=>_("label")),Ee=l(()=>_("text-container")),Ie=l(()=>_("marker-labels-container")+(e.markerLabelsClass!==void 0?` ${e.markerLabelsClass}`:"")),Te=l(()=>"q-slider__track relative-position no-outline"+(e.trackColor!==void 0?` bg-${e.trackColor}`:"")),Ve=l(()=>{const a={[R.value]:e.trackSize};return e.trackImg!==void 0&&(a.backgroundImage=`url(${e.trackImg}) !important`),a}),Ne=l(()=>"q-slider__inner absolute"+(e.innerTrackColor!==void 0?` bg-${e.innerTrackColor}`:"")),ce=l(()=>{const a=f.value-r.value,u={[q.value]:`${100*r.value}%`,[D.value]:a===0?"2px":`${100*a}%`};return e.innerTrackImg!==void 0&&(u.backgroundImage=`url(${e.innerTrackImg}) !important`),u});function ze(a){const{min:u,max:C,step:k}=e;let B=u+a*(C-u);if(k>0){const U=(B-N.value)%k;B+=(Math.abs(U)>=k/2?(U<0?-1:1)*k:0)-U}return B=L.value(B),H(B,N.value,n.value)}function te(a){return s.value===0?0:(a-e.min)/s.value}function Be(a,u){const C=it(a),k=e.vertical?H((C.top-u.top)/u.height,0,1):H((C.left-u.left)/u.width,0,1);return H(V.value?1-k:k,r.value,f.value)}const de=l(()=>vt(e.markers)?e.markers:I.value),ve=l(()=>{const a=[],u=de.value,C=e.max;let k=e.min;do a.push(k),k+=u;while(k<C);return a.push(C),a}),me=l(()=>{const a=` ${Fe}${$.value}-`;return Fe+`${a}${e.switchMarkerLabelsSide?"switched":"standard"}${a}${V.value?"rtl":"ltr"}`}),ae=l(()=>e.markerLabels===!1?null:De(e.markerLabels).map((a,u)=>({index:u,value:a.value,label:a.label||a.value,classes:me.value+(a.classes!==void 0?" "+a.classes:""),style:{...pe(a.value),...a.style}}))),fe=l(()=>({markerList:ae.value,markerMap:Re.value,classes:me.value,getStyle:pe})),Ae=l(()=>{const a=d.value===0?"2px":100*de.value/d.value;return{...ce.value,backgroundSize:e.vertical?`2px ${a}%`:`${a}% 2px`}});function De(a){if(a===!1)return null;if(a===!0)return ve.value.map(zt);if(typeof a=="function")return ve.value.map(C=>{const k=a(C);return re(k)?{...k,value:C}:{value:C,label:k}});const u=({value:C})=>C>=e.min&&C<=e.max;return Array.isArray(a)?a.map(C=>re(C)?C:{value:C}).filter(u):Object.keys(a).map(C=>{const k=a[C],B=Number(C);return re(k)?{...k,value:B}:{value:B,label:k}}).filter(u)}function pe(a){return{[q.value]:`${100*(a-e.min)/s.value}%`}}const Re=l(()=>{if(e.markerLabels===!1)return null;const a={};return ae.value.forEach(u=>{a[u.value]=u}),a});function Pe(){if(h["marker-label-group"]!==void 0)return h["marker-label-group"](fe.value);const a=h["marker-label"]||Bt;return ae.value.map(u=>a({marker:u,...fe.value}))}const je=l(()=>[[Mt,Oe,void 0,{[P.value]:!0,prevent:!0,stop:!0,mouse:!0,mouseAllDir:!0}]]);function Oe(a){a.isFinal?(A.value!==void 0&&(o(a.evt),a.touch&&t(!0),A.value=void 0,m("pan","end")),x.value=!1,T.value=!1):a.isFirst?(A.value=b(a.evt),o(a.evt),t(),x.value=!0,m("pan","start")):(o(a.evt),t())}function ge(){T.value=!1}function Ue(a){o(a,b(a)),t(),M.value=!0,x.value=!0,document.addEventListener("mouseup",le,!0)}function le(){M.value=!1,x.value=!1,t(!0),ge(),document.removeEventListener("mouseup",le,!0)}function Qe(a){o(a,b(a)),t(!0)}function We(a){_e.includes(a.keyCode)&&t(!0)}function Xe(a){if(e.vertical)return null;const u=c.lang.rtl!==e.reverse?1-a:a;return{transform:`translateX(calc(${2*u-1} * ${e.thumbSize} / 2 + ${50-100*u}%))`}}function He(a){const u=l(()=>!M.value&&(T.value===a.focusValue||T.value==="both")?" q-slider--focus":""),C=l(()=>`q-slider__thumb q-slider__thumb${$.value} q-slider__thumb${$.value}-${V.value?"rtl":"ltr"} absolute non-selectable`+u.value+(a.thumbColor.value!==void 0?` text-${a.thumbColor.value}`:"")),k=l(()=>({width:e.thumbSize,height:e.thumbSize,[q.value]:`${100*a.ratio.value}%`,zIndex:T.value===a.focusValue?2:void 0})),B=l(()=>a.labelColor.value!==void 0?` text-${a.labelColor.value}`:""),U=l(()=>Xe(a.ratio.value)),ne=l(()=>"q-slider__text"+(a.labelTextColor.value!==void 0?` text-${a.labelTextColor.value}`:""));return()=>{const se=[S("svg",{class:"q-slider__thumb-shape absolute-full",viewBox:"0 0 20 20","aria-hidden":"true"},[S("path",{d:e.thumbPath})]),S("div",{class:"q-slider__focus-ring fit"})];return(e.label||e.labelAlways)&&(se.push(S("div",{class:Le.value+" absolute fit no-pointer-events"+B.value},[S("div",{class:qe.value,style:{minWidth:e.thumbSize}},[S("div",{class:Ee.value,style:U.value},[S("span",{class:ne.value},a.label.value)])])])),e.name!==void 0&&!e.disable&&F(se,"push")),S("div",{class:C.value,style:k.value,...a.getNodeData()},se)}}function Ke(a,u,C,k){const B=[];e.innerTrackColor!=="transparent"&&B.push(S("div",{key:"inner",class:Ne.value,style:ce.value})),e.selectionColor!=="transparent"&&B.push(S("div",{key:"selection",class:Q.value,style:a.value})),e.markers!==!1&&B.push(S("div",{key:"marker",class:K.value,style:Ae.value})),k(B);const U=[ut("div",{key:"trackC",class:$e.value,tabindex:u.value,...C.value},[S("div",{class:Te.value,style:Ve.value},B)],"slide",p.value,()=>je.value)];if(e.markerLabels!==!1){const ne=e.switchMarkerLabelsSide?"unshift":"push";U[ne](S("div",{key:"markerL",class:Ie.value},Pe()))}return U}return ot(()=>{document.removeEventListener("mouseup",le,!0)}),{state:{active:x,focus:T,preventFocus:M,dragging:A,editable:p,classes:v,tabindex:g,attributes:j,roundValueFn:L,keyStep:I,trackLen:s,innerMin:N,innerMinRatio:r,innerMax:n,innerMaxRatio:f,positionProp:q,sizeProp:D,isReversed:V},methods:{onActivate:Ue,onMobileClick:Qe,onBlur:ge,onKeyup:We,getContent:Ke,getThumbRenderFn:He,convertRatioToModel:ze,convertModelToRatio:te,getDraggingRatio:Be}}}const Pt=()=>({}),jt=we({name:"QSlider",props:{...At,modelValue:{required:!0,default:null,validator:t=>typeof t=="number"||t===null},labelValue:[String,Number]},emits:Dt,setup(t,{emit:o}){const{proxy:{$q:b}}=ee(),{state:i,methods:e}=Rt({updateValue:$,updatePosition:V,getDragging:y,formAttrs:mt(t)}),m=E(null),h=E(0),c=E(0);function w(){c.value=t.modelValue===null?i.innerMin.value:H(t.modelValue,i.innerMin.value,i.innerMax.value)}ft(()=>`${t.modelValue}|${i.innerMin.value}|${i.innerMax.value}`,w,{immediate:!0});const F=l(()=>e.convertModelToRatio(c.value)),x=l(()=>i.active.value?h.value:F.value),M=l(()=>{const p={[i.positionProp.value]:`${100*i.innerMinRatio.value}%`,[i.sizeProp.value]:`${100*(x.value-i.innerMinRatio.value)}%`};return t.selectionImg!==void 0&&(p.backgroundImage=`url(${t.selectionImg}) !important`),p}),T=e.getThumbRenderFn({focusValue:!0,getNodeData:Pt,ratio:x,label:l(()=>t.labelValue!==void 0?t.labelValue:c.value),thumbColor:l(()=>t.thumbColor||t.color),labelColor:l(()=>t.labelColor),labelTextColor:l(()=>t.labelTextColor)}),A=l(()=>i.editable.value?b.platform.is.mobile?{onClick:e.onMobileClick}:{onMousedown:e.onActivate,onFocus:N,onBlur:e.onBlur,onKeydown:n,onKeyup:e.onKeyup}:{});function $(p){c.value!==t.modelValue&&o("update:modelValue",c.value),p&&o("change",c.value)}function y(){return m.value.getBoundingClientRect()}function V(p,L=i.dragging.value){const I=e.getDraggingRatio(p,L);c.value=e.convertRatioToModel(I),h.value=!t.snap||t.step===0?I:e.convertModelToRatio(c.value)}function N(){i.focus.value=!0}function n(p){if(!_e.includes(p.keyCode))return;ie(p);const L=([34,33].includes(p.keyCode)?10:1)*i.keyStep.value,I=([34,37,40].includes(p.keyCode)?-1:1)*(i.isReversed.value?-1:1)*(t.vertical?-1:1)*L;c.value=H(i.roundValueFn.value(c.value+I),i.innerMin.value,i.innerMax.value),$()}return()=>{const p=e.getContent(M,i.tabindex,A,L=>{L.push(T())});return S("div",{ref:m,class:i.classes.value+(t.modelValue===null?" q-slider--no-value":""),...i.attributes.value,"aria-valuenow":t.modelValue},p)}}}),Ot={class:"text-h6 text-weight-bold text-dark"},Ut=["src"],Qt={class:"slider-container row items-center q-mt-md"},Wt={class:"text-caption text-grey-6 q-mt-xs"},Y=180,Z=240,Xt=pt({__name:"app-image-cropper",props:{imageSrc:{},fileType:{default:"image/png"}},emits:["confirm","cancel"],setup(t,{emit:o}){const b=t,i=o,e=E(null),m=E(1),h=E(0),c=E(0),w=E(0),F=E(0),x=l(()=>{if(!w.value||!F.value)return{};const s=Math.max(Y/w.value,Z/F.value),d=w.value*s,r=F.value*s,f=d*m.value,q=r*m.value;return{width:`${f}px`,height:`${q}px`,transform:`translate(calc(-50% + ${h.value}px), calc(-50% + ${c.value}px))`}}),M=()=>{e.value&&(w.value=e.value.naturalWidth,F.value=e.value.naturalHeight,h.value=0,c.value=0,m.value=1)},T=(s,d,r)=>{if(!w.value||!F.value)return{x:s,y:d};const f=Math.max(Y/w.value,Z/F.value),q=w.value*f,D=F.value*f,R=q*r,P=D*r,j=Math.max(0,(R-Y)/2),v=Math.max(0,(P-Z)/2);return{x:Math.max(-j,Math.min(j,s)),y:Math.max(-v,Math.min(v,d))}},A=s=>{const d=s||1,r=T(h.value,c.value,d);h.value=r.x,c.value=r.y};let $=!1,y=0,V=0,N=0,n=0;const p=s=>{$=!0;const d="touches"in s?s.touches[0]:s;d&&(y=d.clientX,V=d.clientY,N=h.value,n=c.value,"touches"in s?(window.addEventListener("touchmove",L,{passive:!1}),window.addEventListener("touchend",I)):(window.addEventListener("mousemove",L),window.addEventListener("mouseup",I)))},L=s=>{if(!$)return;s.cancelable&&s.preventDefault();const d="touches"in s?s.touches[0]:s;if(!d)return;const r=d.clientX-y,f=d.clientY-V,q=T(N+r,n+f,m.value);h.value=q.x,c.value=q.y},I=()=>{$=!1,window.removeEventListener("mousemove",L),window.removeEventListener("mouseup",I),window.removeEventListener("touchmove",L),window.removeEventListener("touchend",I)},g=()=>{const s=e.value;if(!s||!w.value||!F.value)return;const d=300,r=400,f=document.createElement("canvas");f.width=d,f.height=r;const q=f.getContext("2d");if(!q)return;const D=d/Y,R=Math.max(Y/w.value,Z/F.value),P=w.value*R*m.value*D,j=F.value*R*m.value*D,v=d/2+h.value*D-P/2,_=r/2+c.value*D-j/2;q.drawImage(s,v,_,P,j),f.toBlob(z=>{if(!z)return;const Q=b.fileType==="image/jpeg"?"avatar.jpg":"avatar.png",K=new File([z],Q,{type:b.fileType});i("confirm",K)},b.fileType,b.fileType==="image/jpeg"?.9:void 0)};return(s,d)=>(gt(),bt(yt,{class:"cropper-card shadow-5"},{default:G(()=>[O(xe,{class:"q-pb-none row items-center justify-between"},{default:G(()=>[W("div",Ot,ye(s.$t("components.imageCropper.title")),1),Ce(O(oe,{icon:"close",flat:"",round:"",dense:""},null,512),[[Se]])]),_:1}),O(xe,{class:"flex column items-center q-py-lg"},{default:G(()=>[W("div",{class:"crop-area-container",onMousedown:p,onTouchstart:p},[W("img",{ref_key:"imageRef",ref:e,src:t.imageSrc,style:ht(x.value),onLoad:M,class:"crop-image",draggable:"false",alt:"To Crop"},null,44,Ut),d[1]||(d[1]=W("div",{class:"crop-card-mask"},null,-1))],32),W("div",Qt,[O(ke,{name:"zoom_out",size:"sm",class:"text-grey-6 q-mr-sm"}),O(jt,{modelValue:m.value,"onUpdate:modelValue":[d[0]||(d[0]=r=>m.value=r),A],min:1,max:3,step:.01,color:"primary",class:"col"},null,8,["modelValue"]),O(ke,{name:"zoom_in",size:"sm",class:"text-grey-6 q-ml-sm"})]),W("div",Wt,ye(s.$t("components.imageCropper.hint")),1)]),_:1}),O(xt,{align:"right",class:"q-px-md q-pb-md"},{default:G(()=>[Ce(O(oe,{flat:"",label:s.$t("components.imageCropper.cancel"),color:"grey-7",class:"text-weight-bold action-btn"},null,8,["label"]),[[Se]]),O(oe,{unelevated:"",label:s.$t("components.imageCropper.save"),color:"primary",class:"text-weight-bold action-btn",onClick:g},null,8,["label"])]),_:1})]),_:1}))}}),la=Ct(Xt,[["__scopeId","data-v-5d0b0cd9"]]);export{la as A,ta as Q,aa as a,ea as u};
+import {
+  I as be,
+  g as ee,
+  f as l,
+  aI as Ye,
+  af as ie,
+  ac as Ge,
+  h as S,
+  r as E,
+  c as we,
+  aJ as Je,
+  aK as Me,
+  aL as Ze,
+  aM as et,
+  aN as he,
+  aO as tt,
+  aP as at,
+  aQ as lt,
+  aR as nt,
+  aS as st,
+  D as rt,
+  o as ot,
+  ag as it,
+  K as ut,
+  M as ct,
+  aT as dt,
+  al as vt,
+  aU as re,
+  aV as mt,
+  w as ft,
+  O as pt,
+  Q as gt,
+  _ as bt,
+  W as G,
+  V as O,
+  am as xe,
+  S as W,
+  T as ye,
+  J as Ce,
+  a8 as oe,
+  at as ht,
+  $ as ke,
+  ap as xt,
+  an as yt,
+  a2 as Ct,
+} from './index-CKSooU2k.js';
+import { Q as kt } from './QSelect-CcXwe87O.js';
+import { h as St, b as H } from './format-DnjzHs7F.js';
+import { u as Ft, I as wt } from './image.service-iLwePKJ0.js';
+import { T as Mt } from './TouchPan-CIOdv6jG.js';
+import { C as Se } from './ClosePopup-D9BZcpVj.js';
+const _t = '.q-field--error',
+  $t = [
+    'input:not([type="hidden"]):not([disabled])',
+    'textarea:not([disabled])',
+    'select:not([disabled])',
+    'button:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])',
+    '[contenteditable="true"]',
+  ].join(','),
+  ue = (t) => t instanceof HTMLElement,
+  Lt = (t) => {
+    const o = t.$el;
+    return ue(o) ? o : null;
+  },
+  qt = (t, o) => {
+    const b = t.getBoundingClientRect(),
+      i = o.getBoundingClientRect();
+    return b.top !== i.top ? b.top - i.top : b.left - i.left;
+  },
+  Et = (t) => {
+    const o = t.querySelector($t);
+    return ue(o) ? o : t;
+  };
+function ea(t, o = {}) {
+  const b = async () => {
+    await be();
+    const e = t.value;
+    if (!e) return !1;
+    const m = Lt(e);
+    if (!m) return !1;
+    const c = Array.from(m.querySelectorAll(o.invalidFieldSelector ?? _t))
+      .filter(ue)
+      .sort(qt)[0];
+    return c
+      ? (c.scrollIntoView({
+          behavior: o.scrollBehavior ?? 'smooth',
+          block: o.block ?? 'center',
+          inline: o.inline ?? 'nearest',
+        }),
+        await be(),
+        Et(c).focus({ preventScroll: !0 }),
+        !0)
+      : !1;
+  };
+  return {
+    validateAndFocusFirstInvalid: async () => {
+      const e = t.value;
+      return e ? ((await e.validate(!1)) ? !0 : (await b(), !1)) : !1;
+    },
+    focusFirstInvalidField: b,
+  };
+}
+function X(t, o, b, i) {
+  const e = [];
+  return (
+    t.forEach((m) => {
+      i(m) ? e.push(m) : o.push({ failedPropValidation: b, file: m });
+    }),
+    e
+  );
+}
+function J(t) {
+  (t?.dataTransfer && (t.dataTransfer.dropEffect = 'copy'), ie(t));
+}
+const It = {
+    multiple: Boolean,
+    accept: String,
+    capture: String,
+    maxFileSize: [Number, String],
+    maxTotalSize: [Number, String],
+    maxFiles: [Number, String],
+    filter: Function,
+  },
+  Tt = ['rejected'];
+function Vt({ editable: t, dnd: o, getFileInput: b, addFilesToQueue: i }) {
+  const { props: e, emit: m, proxy: h } = ee(),
+    c = E(null),
+    w = l(() =>
+      e.accept !== void 0
+        ? e.accept
+            .split(',')
+            .map(
+              (n) => (
+                (n = n.trim()),
+                n === '*' ? '*/' : (n.endsWith('/*') && (n = n.slice(0, -1)), n.toUpperCase())
+              ),
+            )
+        : null,
+    ),
+    F = l(() => Number.parseInt(e.maxFiles, 10)),
+    x = l(() => Number.parseInt(e.maxTotalSize, 10));
+  function M(n) {
+    if (t.value)
+      if (
+        (n !== Object(n) && (n = { target: null }), n.target?.matches('input[type="file"]') === !0)
+      )
+        n.clientX === 0 && n.clientY === 0 && Ye(n);
+      else {
+        const p = b();
+        p !== n.target && p?.click(n);
+      }
+  }
+  function T(n) {
+    t.value && n && i(null, n);
+  }
+  function A(n, p, L, I) {
+    let g = [...(p || n.target.files)];
+    const s = [],
+      d = () => {
+        s.length !== 0 && m('rejected', s);
+      };
+    if (
+      e.accept !== void 0 &&
+      !w.value.includes('*/') &&
+      ((g = X(g, s, 'accept', (r) =>
+        w.value.some((f) => r.type.toUpperCase().startsWith(f) || r.name.toUpperCase().endsWith(f)),
+      )),
+      g.length === 0)
+    )
+      return d();
+    if (e.maxFileSize !== void 0) {
+      const r = Number.parseInt(e.maxFileSize, 10);
+      if (((g = X(g, s, 'max-file-size', (f) => f.size <= r)), g.length === 0)) return d();
+    }
+    if (
+      (!e.multiple && g.length !== 0 && (g = [g[0]]),
+      g.forEach((r) => {
+        r.__key = r.webkitRelativePath + r.lastModified + r.name + r.size;
+      }),
+      I)
+    ) {
+      const r = L.map((f) => f.__key);
+      g = X(g, s, 'duplicate', (f) => !r.includes(f.__key));
+    }
+    if (g.length === 0) return d();
+    if (e.maxTotalSize !== void 0) {
+      let r = I ? L.reduce((f, q) => f + q.size, 0) : 0;
+      if (((g = X(g, s, 'max-total-size', (f) => ((r += f.size), r <= x.value))), g.length === 0))
+        return d();
+    }
+    if (typeof e.filter == 'function') {
+      const r = e.filter(g);
+      g = X(g, s, 'filter', (f) => r.includes(f));
+    }
+    if (e.maxFiles !== void 0) {
+      let r = I ? L.length : 0;
+      if (((g = X(g, s, 'max-files', () => (r++, r <= F.value))), g.length === 0)) return d();
+    }
+    if ((d(), g.length !== 0)) return g;
+  }
+  function $(n) {
+    (J(n), o.value || (o.value = !0));
+  }
+  function y(n) {
+    (ie(n),
+      (n.relatedTarget !== null || !Ge.is.safari
+        ? n.relatedTarget !== c.value
+        : !document.elementsFromPoint(n.clientX, n.clientY).includes(c.value)) && (o.value = !1));
+  }
+  function V(n) {
+    J(n);
+    const p = n.dataTransfer.files;
+    (p.length !== 0 && i(null, p), (o.value = !1));
+  }
+  function N(n) {
+    if (o.value)
+      return S('div', {
+        ref: c,
+        class: `q-${n}__dnd absolute-full`,
+        onDragenter: J,
+        onDragover: J,
+        onDragleave: y,
+        onDrop: V,
+      });
+  }
+  return (
+    Object.assign(h, { pickFiles: M, addFiles: T }),
+    {
+      pickFiles: M,
+      addFiles: T,
+      onDragover: $,
+      onDragleave: y,
+      processFiles: A,
+      getDndNode: N,
+      maxFilesNumber: F,
+      maxTotalSizeNumber: x,
+    }
+  );
+}
+function Nt(t) {
+  t.keyCode === 13 && st(t);
+}
+const ta = we({
+  name: 'QFile',
+  inheritAttrs: !1,
+  props: {
+    ...Ze,
+    ...Me,
+    ...It,
+    modelValue: [File, FileList, Array],
+    append: Boolean,
+    useChips: Boolean,
+    displayValue: [String, Number],
+    tabindex: { type: [String, Number], default: 0 },
+    counterLabel: Function,
+    inputClass: [Array, String, Object],
+    inputStyle: [Array, String, Object],
+  },
+  emits: [...Je, ...Tt],
+  setup(t, { slots: o, emit: b, attrs: i }) {
+    const { proxy: e } = ee(),
+      m = et(),
+      h = E(null),
+      c = E(!1),
+      w = nt(t),
+      {
+        pickFiles: F,
+        onDragover: x,
+        onDragleave: M,
+        processFiles: T,
+        getDndNode: A,
+      } = Vt({ editable: m.editable, dnd: c, getFileInput: q, addFilesToQueue: D }),
+      $ = lt(t),
+      y = l(() =>
+        Object(t.modelValue) === t.modelValue
+          ? 'length' in t.modelValue
+            ? [...t.modelValue]
+            : [t.modelValue]
+          : [],
+      ),
+      V = l(() => he(y.value)),
+      N = l(() => y.value.map((v) => v.name).join(', ')),
+      n = l(() => St(y.value.reduce((v, _) => v + _.size, 0))),
+      p = l(() => ({ totalSize: n.value, filesNumber: y.value.length, maxFiles: t.maxFiles })),
+      L = l(() => ({
+        tabindex: -1,
+        type: 'file',
+        title: '',
+        accept: t.accept,
+        capture: t.capture,
+        name: w.value,
+        ...i,
+        id: m.targetUid.value,
+        disabled: !m.editable.value,
+      })),
+      I = l(() => 'q-file q-field--auto-height' + (c.value ? ' q-file--dnd' : '')),
+      g = l(() => t.multiple && t.append);
+    function s(v) {
+      const _ = [...y.value];
+      (_.splice(v, 1), r(_));
+    }
+    function d(v) {
+      const _ = y.value.indexOf(v);
+      _ !== -1 && s(_);
+    }
+    function r(v) {
+      b('update:modelValue', t.multiple ? v : v[0]);
+    }
+    function f(v) {
+      (v.keyCode === 13 || v.keyCode === 32) && F(v);
+    }
+    function q() {
+      return h.value;
+    }
+    function D(v, _) {
+      const z = T(v, _, y.value, g.value),
+        Q = q();
+      (Q != null && (Q.value = ''),
+        z !== void 0 &&
+          ((t.multiple
+            ? t.modelValue && z.every((K) => y.value.includes(K))
+            : t.modelValue === z[0]) ||
+            r(g.value ? [...y.value, ...z] : z)));
+    }
+    function R() {
+      return [S('input', { class: [t.inputClass, 'q-file__filler'], style: t.inputStyle })];
+    }
+    function P() {
+      if (o.file !== void 0)
+        return y.value.length === 0
+          ? R()
+          : y.value.map((_, z) => o.file({ index: z, file: _, ref: this }));
+      if (o.selected !== void 0)
+        return y.value.length === 0 ? R() : o.selected({ files: y.value, ref: this });
+      if (t.useChips)
+        return y.value.length === 0
+          ? R()
+          : y.value.map((_, z) =>
+              S(
+                kt,
+                {
+                  key: 'file-' + z,
+                  removable: m.editable.value,
+                  dense: !0,
+                  textColor: t.color,
+                  tabindex: t.tabindex,
+                  onRemove: () => {
+                    s(z);
+                  },
+                },
+                () => S('span', { class: 'ellipsis', textContent: _.name }),
+              ),
+            );
+      const v = t.displayValue !== void 0 ? t.displayValue : N.value;
+      return v.length !== 0
+        ? [S('div', { class: t.inputClass, style: t.inputStyle, textContent: v })]
+        : R();
+    }
+    function j() {
+      const v = {
+        ref: h,
+        ...L.value,
+        ...$.value,
+        class: 'q-field__input fit absolute-full cursor-pointer',
+        onChange: D,
+      };
+      return (t.multiple && (v.multiple = !0), S('input', v));
+    }
+    return (
+      Object.assign(m, {
+        fieldClass: I,
+        emitValue: r,
+        hasValue: V,
+        inputRef: h,
+        innerValue: y,
+        floatingLabel: l(() => V.value || he(t.displayValue)),
+        computedCounter: l(() => {
+          if (t.counterLabel !== void 0) return t.counterLabel(p.value);
+          const v = t.maxFiles;
+          return `${y.value.length}${v !== void 0 ? ' / ' + v : ''} (${n.value})`;
+        }),
+        getControlChild: () => A('file'),
+        getControl: () => {
+          const v = {
+            ref: m.targetRef,
+            class: 'q-field__native row items-center cursor-pointer',
+            tabindex: t.tabindex,
+          };
+          return (
+            m.editable.value &&
+              Object.assign(v, { onDragover: x, onDragleave: M, onKeydown: Nt, onKeyup: f }),
+            S('div', v, [j()].concat(P()))
+          );
+        },
+      }),
+      Object.assign(e, { removeAtIndex: s, removeFile: d, getNativeElement: () => h.value }),
+      tt(e, 'nativeEl', () => h.value),
+      at(m)
+    );
+  },
+});
+function aa(t) {
+  const o = E(!1),
+    b = E(null),
+    i = E(null);
+  return {
+    isUploading: o,
+    uploadError: b,
+    uploadedPath: i,
+    handleImageUpload: async (h, c) => {
+      if (
+        ((o.value = !0),
+        (b.value = null),
+        (i.value = null),
+        !['image/jpeg', 'image/jpg', 'image/png'].includes(h.type))
+      ) {
+        const x = 'นามสกุลไฟล์ต้องเป็น JPG หรือ PNG เท่านั้น';
+        return ((b.value = x), (o.value = !1), t?.onError?.(new Error(x)), null);
+      }
+      const F = wt.MAX_FILE_SIZE;
+      if (h.size > F) {
+        const x = 'ขนาดไฟล์ต้องไม่เกิน 5 MB';
+        return ((b.value = x), (o.value = !1), t?.onError?.(new Error(x)), null);
+      }
+      try {
+        const M = await Ft(c ? { file: h, folder: c } : { file: h });
+        return ((i.value = M), t?.onSuccess?.(M), M);
+      } catch (x) {
+        const M = x instanceof Error ? x.message : 'Unknown error occurred';
+        return ((b.value = M), t?.onError?.(x instanceof Error ? x : new Error(M)), null);
+      } finally {
+        o.value = !1;
+      }
+    },
+    resetUploadState: () => {
+      ((o.value = !1), (b.value = null), (i.value = null));
+    },
+  };
+}
+const Fe = 'q-slider__marker-labels',
+  zt = (t) => ({ value: t }),
+  Bt = ({ marker: t }) => S('div', { key: t.value, style: t.style, class: t.classes }, t.label),
+  _e = [34, 37, 40, 33, 39, 38],
+  At = {
+    ...rt,
+    ...Me,
+    min: { type: Number, default: 0 },
+    max: { type: Number, default: 100 },
+    innerMin: Number,
+    innerMax: Number,
+    step: { type: Number, default: 1, validator: (t) => t >= 0 },
+    snap: Boolean,
+    vertical: Boolean,
+    reverse: Boolean,
+    color: String,
+    markerLabelsClass: String,
+    label: Boolean,
+    labelColor: String,
+    labelTextColor: String,
+    labelAlways: Boolean,
+    switchLabelSide: Boolean,
+    markers: [Boolean, Number],
+    markerLabels: [Boolean, Array, Object, Function],
+    switchMarkerLabelsSide: Boolean,
+    trackImg: String,
+    trackColor: String,
+    innerTrackImg: String,
+    innerTrackColor: String,
+    selectionColor: String,
+    selectionImg: String,
+    thumbSize: { type: String, default: '20px' },
+    trackSize: { type: String, default: '4px' },
+    disable: Boolean,
+    readonly: Boolean,
+    dense: Boolean,
+    tabindex: [String, Number],
+    thumbColor: String,
+    thumbPath: { type: String, default: 'M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0' },
+  },
+  Dt = ['pan', 'update:modelValue', 'change'];
+function Rt({ updateValue: t, updatePosition: o, getDragging: b, formAttrs: i }) {
+  const {
+      props: e,
+      emit: m,
+      slots: h,
+      proxy: { $q: c },
+    } = ee(),
+    w = ct(e, c),
+    F = dt(i),
+    x = E(!1),
+    M = E(!1),
+    T = E(!1),
+    A = E(!1),
+    $ = l(() => (e.vertical ? '--v' : '--h')),
+    y = l(() => '-' + (e.switchLabelSide ? 'switched' : 'standard')),
+    V = l(() => (e.vertical ? e.reverse : e.reverse !== (c.lang.rtl === !0))),
+    N = l(() => (!Number.isFinite(e.innerMin) || e.innerMin < e.min ? e.min : e.innerMin)),
+    n = l(() => (!Number.isFinite(e.innerMax) || e.innerMax > e.max ? e.max : e.innerMax)),
+    p = l(() => !e.disable && !e.readonly && N.value < n.value),
+    L = l(() => {
+      if (e.step === 0) return (u) => u;
+      const a = (String(e.step).trim().split('.')[1] || '').length;
+      return (u) => Number.parseFloat(u.toFixed(a));
+    }),
+    I = l(() => (e.step === 0 ? 1 : e.step)),
+    g = l(() => (p.value ? e.tabindex || 0 : -1)),
+    s = l(() => e.max - e.min),
+    d = l(() => n.value - N.value),
+    r = l(() => te(N.value)),
+    f = l(() => te(n.value)),
+    q = l(() => (e.vertical ? (V.value ? 'bottom' : 'top') : V.value ? 'right' : 'left')),
+    D = l(() => (e.vertical ? 'height' : 'width')),
+    R = l(() => (e.vertical ? 'width' : 'height')),
+    P = l(() => (e.vertical ? 'vertical' : 'horizontal')),
+    j = l(() => {
+      const a = {
+        role: 'slider',
+        'aria-valuemin': N.value,
+        'aria-valuemax': n.value,
+        'aria-orientation': P.value,
+        'data-step': e.step,
+      };
+      return (
+        e.disable ? (a['aria-disabled'] = 'true') : e.readonly && (a['aria-readonly'] = 'true'),
+        a
+      );
+    }),
+    v = l(
+      () =>
+        `q-slider q-slider${$.value} q-slider--${x.value ? '' : 'in'}active inline no-wrap ` +
+        (e.vertical ? 'row' : 'column') +
+        (e.disable ? ' disabled' : ' q-slider--enabled' + (p.value ? ' q-slider--editable' : '')) +
+        (T.value === 'both' ? ' q-slider--focus' : '') +
+        (e.label || e.labelAlways ? ' q-slider--label' : '') +
+        (e.labelAlways ? ' q-slider--label-always' : '') +
+        (w.value ? ' q-slider--dark' : '') +
+        (e.dense ? ' q-slider--dense q-slider--dense' + $.value : ''),
+    );
+  function _(a) {
+    const u = 'q-slider__' + a;
+    return `${u} ${u}${$.value} ${u}${$.value}${y.value}`;
+  }
+  function z(a) {
+    const u = 'q-slider__' + a;
+    return `${u} ${u}${$.value}`;
+  }
+  const Q = l(() => {
+      const a = e.selectionColor || e.color;
+      return 'q-slider__selection absolute' + (a !== void 0 ? ` text-${a}` : '');
+    }),
+    K = l(() => z('markers') + ' absolute overflow-hidden'),
+    $e = l(() => z('track-container')),
+    Le = l(() => _('pin')),
+    qe = l(() => _('label')),
+    Ee = l(() => _('text-container')),
+    Ie = l(
+      () =>
+        _('marker-labels-container') +
+        (e.markerLabelsClass !== void 0 ? ` ${e.markerLabelsClass}` : ''),
+    ),
+    Te = l(
+      () =>
+        'q-slider__track relative-position no-outline' +
+        (e.trackColor !== void 0 ? ` bg-${e.trackColor}` : ''),
+    ),
+    Ve = l(() => {
+      const a = { [R.value]: e.trackSize };
+      return (e.trackImg !== void 0 && (a.backgroundImage = `url(${e.trackImg}) !important`), a);
+    }),
+    Ne = l(
+      () =>
+        'q-slider__inner absolute' +
+        (e.innerTrackColor !== void 0 ? ` bg-${e.innerTrackColor}` : ''),
+    ),
+    ce = l(() => {
+      const a = f.value - r.value,
+        u = { [q.value]: `${100 * r.value}%`, [D.value]: a === 0 ? '2px' : `${100 * a}%` };
+      return (
+        e.innerTrackImg !== void 0 && (u.backgroundImage = `url(${e.innerTrackImg}) !important`),
+        u
+      );
+    });
+  function ze(a) {
+    const { min: u, max: C, step: k } = e;
+    let B = u + a * (C - u);
+    if (k > 0) {
+      const U = (B - N.value) % k;
+      B += (Math.abs(U) >= k / 2 ? (U < 0 ? -1 : 1) * k : 0) - U;
+    }
+    return ((B = L.value(B)), H(B, N.value, n.value));
+  }
+  function te(a) {
+    return s.value === 0 ? 0 : (a - e.min) / s.value;
+  }
+  function Be(a, u) {
+    const C = it(a),
+      k = e.vertical ? H((C.top - u.top) / u.height, 0, 1) : H((C.left - u.left) / u.width, 0, 1);
+    return H(V.value ? 1 - k : k, r.value, f.value);
+  }
+  const de = l(() => (vt(e.markers) ? e.markers : I.value)),
+    ve = l(() => {
+      const a = [],
+        u = de.value,
+        C = e.max;
+      let k = e.min;
+      do (a.push(k), (k += u));
+      while (k < C);
+      return (a.push(C), a);
+    }),
+    me = l(() => {
+      const a = ` ${Fe}${$.value}-`;
+      return (
+        Fe +
+        `${a}${e.switchMarkerLabelsSide ? 'switched' : 'standard'}${a}${V.value ? 'rtl' : 'ltr'}`
+      );
+    }),
+    ae = l(() =>
+      e.markerLabels === !1
+        ? null
+        : De(e.markerLabels).map((a, u) => ({
+            index: u,
+            value: a.value,
+            label: a.label || a.value,
+            classes: me.value + (a.classes !== void 0 ? ' ' + a.classes : ''),
+            style: { ...pe(a.value), ...a.style },
+          })),
+    ),
+    fe = l(() => ({ markerList: ae.value, markerMap: Re.value, classes: me.value, getStyle: pe })),
+    Ae = l(() => {
+      const a = d.value === 0 ? '2px' : (100 * de.value) / d.value;
+      return { ...ce.value, backgroundSize: e.vertical ? `2px ${a}%` : `${a}% 2px` };
+    });
+  function De(a) {
+    if (a === !1) return null;
+    if (a === !0) return ve.value.map(zt);
+    if (typeof a == 'function')
+      return ve.value.map((C) => {
+        const k = a(C);
+        return re(k) ? { ...k, value: C } : { value: C, label: k };
+      });
+    const u = ({ value: C }) => C >= e.min && C <= e.max;
+    return Array.isArray(a)
+      ? a.map((C) => (re(C) ? C : { value: C })).filter(u)
+      : Object.keys(a)
+          .map((C) => {
+            const k = a[C],
+              B = Number(C);
+            return re(k) ? { ...k, value: B } : { value: B, label: k };
+          })
+          .filter(u);
+  }
+  function pe(a) {
+    return { [q.value]: `${(100 * (a - e.min)) / s.value}%` };
+  }
+  const Re = l(() => {
+    if (e.markerLabels === !1) return null;
+    const a = {};
+    return (
+      ae.value.forEach((u) => {
+        a[u.value] = u;
+      }),
+      a
+    );
+  });
+  function Pe() {
+    if (h['marker-label-group'] !== void 0) return h['marker-label-group'](fe.value);
+    const a = h['marker-label'] || Bt;
+    return ae.value.map((u) => a({ marker: u, ...fe.value }));
+  }
+  const je = l(() => [
+    [Mt, Oe, void 0, { [P.value]: !0, prevent: !0, stop: !0, mouse: !0, mouseAllDir: !0 }],
+  ]);
+  function Oe(a) {
+    a.isFinal
+      ? (A.value !== void 0 && (o(a.evt), a.touch && t(!0), (A.value = void 0), m('pan', 'end')),
+        (x.value = !1),
+        (T.value = !1))
+      : a.isFirst
+        ? ((A.value = b(a.evt)), o(a.evt), t(), (x.value = !0), m('pan', 'start'))
+        : (o(a.evt), t());
+  }
+  function ge() {
+    T.value = !1;
+  }
+  function Ue(a) {
+    (o(a, b(a)), t(), (M.value = !0), (x.value = !0), document.addEventListener('mouseup', le, !0));
+  }
+  function le() {
+    ((M.value = !1), (x.value = !1), t(!0), ge(), document.removeEventListener('mouseup', le, !0));
+  }
+  function Qe(a) {
+    (o(a, b(a)), t(!0));
+  }
+  function We(a) {
+    _e.includes(a.keyCode) && t(!0);
+  }
+  function Xe(a) {
+    if (e.vertical) return null;
+    const u = c.lang.rtl !== e.reverse ? 1 - a : a;
+    return { transform: `translateX(calc(${2 * u - 1} * ${e.thumbSize} / 2 + ${50 - 100 * u}%))` };
+  }
+  function He(a) {
+    const u = l(() =>
+        !M.value && (T.value === a.focusValue || T.value === 'both') ? ' q-slider--focus' : '',
+      ),
+      C = l(
+        () =>
+          `q-slider__thumb q-slider__thumb${$.value} q-slider__thumb${$.value}-${V.value ? 'rtl' : 'ltr'} absolute non-selectable` +
+          u.value +
+          (a.thumbColor.value !== void 0 ? ` text-${a.thumbColor.value}` : ''),
+      ),
+      k = l(() => ({
+        width: e.thumbSize,
+        height: e.thumbSize,
+        [q.value]: `${100 * a.ratio.value}%`,
+        zIndex: T.value === a.focusValue ? 2 : void 0,
+      })),
+      B = l(() => (a.labelColor.value !== void 0 ? ` text-${a.labelColor.value}` : '')),
+      U = l(() => Xe(a.ratio.value)),
+      ne = l(
+        () =>
+          'q-slider__text' +
+          (a.labelTextColor.value !== void 0 ? ` text-${a.labelTextColor.value}` : ''),
+      );
+    return () => {
+      const se = [
+        S(
+          'svg',
+          {
+            class: 'q-slider__thumb-shape absolute-full',
+            viewBox: '0 0 20 20',
+            'aria-hidden': 'true',
+          },
+          [S('path', { d: e.thumbPath })],
+        ),
+        S('div', { class: 'q-slider__focus-ring fit' }),
+      ];
+      return (
+        (e.label || e.labelAlways) &&
+          (se.push(
+            S('div', { class: Le.value + ' absolute fit no-pointer-events' + B.value }, [
+              S('div', { class: qe.value, style: { minWidth: e.thumbSize } }, [
+                S('div', { class: Ee.value, style: U.value }, [
+                  S('span', { class: ne.value }, a.label.value),
+                ]),
+              ]),
+            ]),
+          ),
+          e.name !== void 0 && !e.disable && F(se, 'push')),
+        S('div', { class: C.value, style: k.value, ...a.getNodeData() }, se)
+      );
+    };
+  }
+  function Ke(a, u, C, k) {
+    const B = [];
+    (e.innerTrackColor !== 'transparent' &&
+      B.push(S('div', { key: 'inner', class: Ne.value, style: ce.value })),
+      e.selectionColor !== 'transparent' &&
+        B.push(S('div', { key: 'selection', class: Q.value, style: a.value })),
+      e.markers !== !1 && B.push(S('div', { key: 'marker', class: K.value, style: Ae.value })),
+      k(B));
+    const U = [
+      ut(
+        'div',
+        { key: 'trackC', class: $e.value, tabindex: u.value, ...C.value },
+        [S('div', { class: Te.value, style: Ve.value }, B)],
+        'slide',
+        p.value,
+        () => je.value,
+      ),
+    ];
+    if (e.markerLabels !== !1) {
+      const ne = e.switchMarkerLabelsSide ? 'unshift' : 'push';
+      U[ne](S('div', { key: 'markerL', class: Ie.value }, Pe()));
+    }
+    return U;
+  }
+  return (
+    ot(() => {
+      document.removeEventListener('mouseup', le, !0);
+    }),
+    {
+      state: {
+        active: x,
+        focus: T,
+        preventFocus: M,
+        dragging: A,
+        editable: p,
+        classes: v,
+        tabindex: g,
+        attributes: j,
+        roundValueFn: L,
+        keyStep: I,
+        trackLen: s,
+        innerMin: N,
+        innerMinRatio: r,
+        innerMax: n,
+        innerMaxRatio: f,
+        positionProp: q,
+        sizeProp: D,
+        isReversed: V,
+      },
+      methods: {
+        onActivate: Ue,
+        onMobileClick: Qe,
+        onBlur: ge,
+        onKeyup: We,
+        getContent: Ke,
+        getThumbRenderFn: He,
+        convertRatioToModel: ze,
+        convertModelToRatio: te,
+        getDraggingRatio: Be,
+      },
+    }
+  );
+}
+const Pt = () => ({}),
+  jt = we({
+    name: 'QSlider',
+    props: {
+      ...At,
+      modelValue: {
+        required: !0,
+        default: null,
+        validator: (t) => typeof t == 'number' || t === null,
+      },
+      labelValue: [String, Number],
+    },
+    emits: Dt,
+    setup(t, { emit: o }) {
+      const {
+          proxy: { $q: b },
+        } = ee(),
+        { state: i, methods: e } = Rt({
+          updateValue: $,
+          updatePosition: V,
+          getDragging: y,
+          formAttrs: mt(t),
+        }),
+        m = E(null),
+        h = E(0),
+        c = E(0);
+      function w() {
+        c.value =
+          t.modelValue === null
+            ? i.innerMin.value
+            : H(t.modelValue, i.innerMin.value, i.innerMax.value);
+      }
+      ft(() => `${t.modelValue}|${i.innerMin.value}|${i.innerMax.value}`, w, { immediate: !0 });
+      const F = l(() => e.convertModelToRatio(c.value)),
+        x = l(() => (i.active.value ? h.value : F.value)),
+        M = l(() => {
+          const p = {
+            [i.positionProp.value]: `${100 * i.innerMinRatio.value}%`,
+            [i.sizeProp.value]: `${100 * (x.value - i.innerMinRatio.value)}%`,
+          };
+          return (
+            t.selectionImg !== void 0 && (p.backgroundImage = `url(${t.selectionImg}) !important`),
+            p
+          );
+        }),
+        T = e.getThumbRenderFn({
+          focusValue: !0,
+          getNodeData: Pt,
+          ratio: x,
+          label: l(() => (t.labelValue !== void 0 ? t.labelValue : c.value)),
+          thumbColor: l(() => t.thumbColor || t.color),
+          labelColor: l(() => t.labelColor),
+          labelTextColor: l(() => t.labelTextColor),
+        }),
+        A = l(() =>
+          i.editable.value
+            ? b.platform.is.mobile
+              ? { onClick: e.onMobileClick }
+              : {
+                  onMousedown: e.onActivate,
+                  onFocus: N,
+                  onBlur: e.onBlur,
+                  onKeydown: n,
+                  onKeyup: e.onKeyup,
+                }
+            : {},
+        );
+      function $(p) {
+        (c.value !== t.modelValue && o('update:modelValue', c.value), p && o('change', c.value));
+      }
+      function y() {
+        return m.value.getBoundingClientRect();
+      }
+      function V(p, L = i.dragging.value) {
+        const I = e.getDraggingRatio(p, L);
+        ((c.value = e.convertRatioToModel(I)),
+          (h.value = !t.snap || t.step === 0 ? I : e.convertModelToRatio(c.value)));
+      }
+      function N() {
+        i.focus.value = !0;
+      }
+      function n(p) {
+        if (!_e.includes(p.keyCode)) return;
+        ie(p);
+        const L = ([34, 33].includes(p.keyCode) ? 10 : 1) * i.keyStep.value,
+          I =
+            ([34, 37, 40].includes(p.keyCode) ? -1 : 1) *
+            (i.isReversed.value ? -1 : 1) *
+            (t.vertical ? -1 : 1) *
+            L;
+        ((c.value = H(i.roundValueFn.value(c.value + I), i.innerMin.value, i.innerMax.value)), $());
+      }
+      return () => {
+        const p = e.getContent(M, i.tabindex, A, (L) => {
+          L.push(T());
+        });
+        return S(
+          'div',
+          {
+            ref: m,
+            class: i.classes.value + (t.modelValue === null ? ' q-slider--no-value' : ''),
+            ...i.attributes.value,
+            'aria-valuenow': t.modelValue,
+          },
+          p,
+        );
+      };
+    },
+  }),
+  Ot = { class: 'text-h6 text-weight-bold text-dark' },
+  Ut = ['src'],
+  Qt = { class: 'slider-container row items-center q-mt-md' },
+  Wt = { class: 'text-caption text-grey-6 q-mt-xs' },
+  Y = 180,
+  Z = 240,
+  Xt = pt({
+    __name: 'app-image-cropper',
+    props: { imageSrc: {}, fileType: { default: 'image/png' } },
+    emits: ['confirm', 'cancel'],
+    setup(t, { emit: o }) {
+      const b = t,
+        i = o,
+        e = E(null),
+        m = E(1),
+        h = E(0),
+        c = E(0),
+        w = E(0),
+        F = E(0),
+        x = l(() => {
+          if (!w.value || !F.value) return {};
+          const s = Math.max(Y / w.value, Z / F.value),
+            d = w.value * s,
+            r = F.value * s,
+            f = d * m.value,
+            q = r * m.value;
+          return {
+            width: `${f}px`,
+            height: `${q}px`,
+            transform: `translate(calc(-50% + ${h.value}px), calc(-50% + ${c.value}px))`,
+          };
+        }),
+        M = () => {
+          e.value &&
+            ((w.value = e.value.naturalWidth),
+            (F.value = e.value.naturalHeight),
+            (h.value = 0),
+            (c.value = 0),
+            (m.value = 1));
+        },
+        T = (s, d, r) => {
+          if (!w.value || !F.value) return { x: s, y: d };
+          const f = Math.max(Y / w.value, Z / F.value),
+            q = w.value * f,
+            D = F.value * f,
+            R = q * r,
+            P = D * r,
+            j = Math.max(0, (R - Y) / 2),
+            v = Math.max(0, (P - Z) / 2);
+          return { x: Math.max(-j, Math.min(j, s)), y: Math.max(-v, Math.min(v, d)) };
+        },
+        A = (s) => {
+          const d = s || 1,
+            r = T(h.value, c.value, d);
+          ((h.value = r.x), (c.value = r.y));
+        };
+      let $ = !1,
+        y = 0,
+        V = 0,
+        N = 0,
+        n = 0;
+      const p = (s) => {
+          $ = !0;
+          const d = 'touches' in s ? s.touches[0] : s;
+          d &&
+            ((y = d.clientX),
+            (V = d.clientY),
+            (N = h.value),
+            (n = c.value),
+            'touches' in s
+              ? (window.addEventListener('touchmove', L, { passive: !1 }),
+                window.addEventListener('touchend', I))
+              : (window.addEventListener('mousemove', L), window.addEventListener('mouseup', I)));
+        },
+        L = (s) => {
+          if (!$) return;
+          s.cancelable && s.preventDefault();
+          const d = 'touches' in s ? s.touches[0] : s;
+          if (!d) return;
+          const r = d.clientX - y,
+            f = d.clientY - V,
+            q = T(N + r, n + f, m.value);
+          ((h.value = q.x), (c.value = q.y));
+        },
+        I = () => {
+          (($ = !1),
+            window.removeEventListener('mousemove', L),
+            window.removeEventListener('mouseup', I),
+            window.removeEventListener('touchmove', L),
+            window.removeEventListener('touchend', I));
+        },
+        g = () => {
+          const s = e.value;
+          if (!s || !w.value || !F.value) return;
+          const d = 300,
+            r = 400,
+            f = document.createElement('canvas');
+          ((f.width = d), (f.height = r));
+          const q = f.getContext('2d');
+          if (!q) return;
+          const D = d / Y,
+            R = Math.max(Y / w.value, Z / F.value),
+            P = w.value * R * m.value * D,
+            j = F.value * R * m.value * D,
+            v = d / 2 + h.value * D - P / 2,
+            _ = r / 2 + c.value * D - j / 2;
+          (q.drawImage(s, v, _, P, j),
+            f.toBlob(
+              (z) => {
+                if (!z) return;
+                const Q = b.fileType === 'image/jpeg' ? 'avatar.jpg' : 'avatar.png',
+                  K = new File([z], Q, { type: b.fileType });
+                i('confirm', K);
+              },
+              b.fileType,
+              b.fileType === 'image/jpeg' ? 0.9 : void 0,
+            ));
+        };
+      return (s, d) => (
+        gt(),
+        bt(
+          yt,
+          { class: 'cropper-card shadow-5' },
+          {
+            default: G(() => [
+              O(
+                xe,
+                { class: 'q-pb-none row items-center justify-between' },
+                {
+                  default: G(() => [
+                    W('div', Ot, ye(s.$t('components.imageCropper.title')), 1),
+                    Ce(O(oe, { icon: 'close', flat: '', round: '', dense: '' }, null, 512), [[Se]]),
+                  ]),
+                  _: 1,
+                },
+              ),
+              O(
+                xe,
+                { class: 'flex column items-center q-py-lg' },
+                {
+                  default: G(() => [
+                    W(
+                      'div',
+                      { class: 'crop-area-container', onMousedown: p, onTouchstart: p },
+                      [
+                        W(
+                          'img',
+                          {
+                            ref_key: 'imageRef',
+                            ref: e,
+                            src: t.imageSrc,
+                            style: ht(x.value),
+                            onLoad: M,
+                            class: 'crop-image',
+                            draggable: 'false',
+                            alt: 'To Crop',
+                          },
+                          null,
+                          44,
+                          Ut,
+                        ),
+                        d[1] || (d[1] = W('div', { class: 'crop-card-mask' }, null, -1)),
+                      ],
+                      32,
+                    ),
+                    W('div', Qt, [
+                      O(ke, { name: 'zoom_out', size: 'sm', class: 'text-grey-6 q-mr-sm' }),
+                      O(
+                        jt,
+                        {
+                          modelValue: m.value,
+                          'onUpdate:modelValue': [d[0] || (d[0] = (r) => (m.value = r)), A],
+                          min: 1,
+                          max: 3,
+                          step: 0.01,
+                          color: 'primary',
+                          class: 'col',
+                        },
+                        null,
+                        8,
+                        ['modelValue'],
+                      ),
+                      O(ke, { name: 'zoom_in', size: 'sm', class: 'text-grey-6 q-ml-sm' }),
+                    ]),
+                    W('div', Wt, ye(s.$t('components.imageCropper.hint')), 1),
+                  ]),
+                  _: 1,
+                },
+              ),
+              O(
+                xt,
+                { align: 'right', class: 'q-px-md q-pb-md' },
+                {
+                  default: G(() => [
+                    Ce(
+                      O(
+                        oe,
+                        {
+                          flat: '',
+                          label: s.$t('components.imageCropper.cancel'),
+                          color: 'grey-7',
+                          class: 'text-weight-bold action-btn',
+                        },
+                        null,
+                        8,
+                        ['label'],
+                      ),
+                      [[Se]],
+                    ),
+                    O(
+                      oe,
+                      {
+                        unelevated: '',
+                        label: s.$t('components.imageCropper.save'),
+                        color: 'primary',
+                        class: 'text-weight-bold action-btn',
+                        onClick: g,
+                      },
+                      null,
+                      8,
+                      ['label'],
+                    ),
+                  ]),
+                  _: 1,
+                },
+              ),
+            ]),
+            _: 1,
+          },
+        )
+      );
+    },
+  }),
+  la = Ct(Xt, [['__scopeId', 'data-v-5d0b0cd9']]);
+export { la as A, ta as Q, aa as a, ea as u };

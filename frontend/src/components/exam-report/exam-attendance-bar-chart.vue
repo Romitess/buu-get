@@ -2,12 +2,7 @@
   <q-card flat bordered class="chart-card">
     <q-card-section>
       <div class="chart-card__title">{{ t('admin.examReport.charts.attendanceTitle') }}</div>
-      <VueApexCharts
-        type="bar"
-        height="320"
-        :options="chartOptions"
-        :series="series"
-      />
+      <VueApexCharts type="bar" height="320" :options="chartOptions" :series="series" />
     </q-card-section>
   </q-card>
 </template>

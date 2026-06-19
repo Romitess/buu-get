@@ -47,12 +47,13 @@
       </div>
     </nav>
 
-    <main v-if="currentRoomAttendances.length > 0">
+    <main>
       <BaseTable
         :columns="columns"
         :rows="currentRoomAttendances"
         :loading="isLoading"
         :pagination="pagination"
+        :empty-label="$t('admin.examAttendance.noData')"
         class="attendance-table"
         @request="onRequest"
       >
@@ -73,10 +74,6 @@
         </template>
       </BaseTable>
     </main>
-    <div v-else-if="!isLoading" class="flex flex-center q-pa-xl text-grey-6">
-      <q-icon name="info" size="md" class="q-mr-sm" />
-      <span>{{ $t('admin.examAttendance.noData') }}</span>
-    </div>
   </q-page>
 </template>
 

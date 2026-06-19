@@ -1,1 +1,142 @@
-.exam-report-filter[data-v-13e7f6dc]{border-radius:var(--radius-md);border:1px solid var(--border-color);box-shadow:var(--exam-report-card-shadow)!important}.custom-label[data-v-13e7f6dc]{font-size:var(--font-size-sm);color:var(--text-secondary);font-weight:600}.custom-input[data-v-13e7f6dc] .q-field__control{border-radius:var(--radius-md)}.range-separator[data-v-13e7f6dc]{color:var(--text-primary);font-size:var(--font-size-lg);font-weight:600;padding-bottom:6px}.filter-btn[data-v-13e7f6dc]{border-radius:var(--radius-sm);height:40px;font-weight:600}.stat-card[data-v-1f555a0b]{border-radius:var(--radius-md);border:1px solid var(--border-color);box-shadow:var(--exam-report-card-shadow)!important;height:100%;transition:transform var(--transition-fast),box-shadow var(--transition-fast)}.stat-card[data-v-1f555a0b]:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)!important}.stat-card__body[data-v-1f555a0b]{gap:12px;min-height:126px}.stat-card__icon-box[data-v-1f555a0b]{width:40px;height:40px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center}.stat-card__label[data-v-1f555a0b]{font-size:var(--font-size-sm);color:var(--text-secondary);font-weight:600}.stat-card__value[data-v-1f555a0b]{font-size:26px;font-weight:700;color:var(--neutral-900);line-height:1.2}.stat-card__trend[data-v-1f555a0b]{gap:6px;flex-wrap:wrap}.stat-card__change[data-v-1f555a0b]{font-size:var(--font-size-xs);font-weight:600}.stat-card__compare[data-v-1f555a0b]{font-size:var(--font-size-xs);color:var(--text-secondary)}.stat-card__visual[data-v-1f555a0b]{min-width:80px}.stat-card__donut-value[data-v-1f555a0b]{font-size:var(--font-size-xs);font-weight:700;color:var(--neutral-900)}.stat-card__visual-caption[data-v-1f555a0b]{margin-top:4px;font-size:var(--font-size-xs);color:var(--text-secondary);text-align:center}.chart-card[data-v-7ac1c54a]{border-radius:var(--radius-md);border:1px solid var(--border-color);box-shadow:var(--exam-report-card-shadow)!important;height:100%}.chart-card__title[data-v-7ac1c54a]{font-size:var(--font-size-md);font-weight:600;color:var(--text-primary);margin-bottom:12px}.chart-card[data-v-0629bfa5]{border-radius:var(--radius-md);border:1px solid var(--border-color);box-shadow:var(--exam-report-card-shadow)!important;height:100%}.chart-card__title[data-v-0629bfa5]{font-size:var(--font-size-md);font-weight:600;color:var(--text-primary);margin-bottom:12px}.chart-card[data-v-f5fc9224]{border-radius:var(--radius-md);border:1px solid var(--border-color);box-shadow:var(--exam-report-card-shadow)!important;height:100%}.chart-card__title[data-v-f5fc9224]{font-size:var(--font-size-md);font-weight:600;color:var(--text-primary);margin-bottom:12px}.rounds-card[data-v-6726d096]{border-radius:var(--radius-md);border:1px solid var(--border-color);box-shadow:var(--exam-report-card-shadow)!important;height:100%}.rounds-card__title[data-v-6726d096]{font-size:var(--font-size-md);font-weight:600;color:var(--text-primary);margin-bottom:12px}.rounds-table[data-v-6726d096] thead tr th{background-color:var(--primary);color:var(--text-on-primary);font-weight:600}.exam-report-page[data-v-1d7a8381]{overflow-x:hidden}
+.exam-report-filter[data-v-13e7f6dc] {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--exam-report-card-shadow) !important;
+}
+.custom-label[data-v-13e7f6dc] {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+.custom-input[data-v-13e7f6dc] .q-field__control {
+  border-radius: var(--radius-md);
+}
+.range-separator[data-v-13e7f6dc] {
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  padding-bottom: 6px;
+}
+.filter-btn[data-v-13e7f6dc] {
+  border-radius: var(--radius-sm);
+  height: 40px;
+  font-weight: 600;
+}
+.stat-card[data-v-1f555a0b] {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--exam-report-card-shadow) !important;
+  height: 100%;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+.stat-card[data-v-1f555a0b]:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md) !important;
+}
+.stat-card__body[data-v-1f555a0b] {
+  gap: 12px;
+  min-height: 126px;
+}
+.stat-card__icon-box[data-v-1f555a0b] {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stat-card__label[data-v-1f555a0b] {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+.stat-card__value[data-v-1f555a0b] {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--neutral-900);
+  line-height: 1.2;
+}
+.stat-card__trend[data-v-1f555a0b] {
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.stat-card__change[data-v-1f555a0b] {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+.stat-card__compare[data-v-1f555a0b] {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+.stat-card__visual[data-v-1f555a0b] {
+  min-width: 80px;
+}
+.stat-card__donut-value[data-v-1f555a0b] {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--neutral-900);
+}
+.stat-card__visual-caption[data-v-1f555a0b] {
+  margin-top: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  text-align: center;
+}
+.chart-card[data-v-7ac1c54a] {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--exam-report-card-shadow) !important;
+  height: 100%;
+}
+.chart-card__title[data-v-7ac1c54a] {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.chart-card[data-v-0629bfa5] {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--exam-report-card-shadow) !important;
+  height: 100%;
+}
+.chart-card__title[data-v-0629bfa5] {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.chart-card[data-v-f5fc9224] {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--exam-report-card-shadow) !important;
+  height: 100%;
+}
+.chart-card__title[data-v-f5fc9224] {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.rounds-card[data-v-6726d096] {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--exam-report-card-shadow) !important;
+  height: 100%;
+}
+.rounds-card__title[data-v-6726d096] {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.rounds-table[data-v-6726d096] thead tr th {
+  background-color: var(--primary);
+  color: var(--text-on-primary);
+  font-weight: 600;
+}
+.exam-report-page[data-v-1d7a8381] {
+  overflow-x: hidden;
+}

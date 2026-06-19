@@ -512,7 +512,7 @@ export default {
         intime: 'Present',
         missing: 'Absent',
       },
-      noData: 'No attendance records found for this session',
+      noData: 'No data found',
     },
     locationManagement: {
       pageTitle: 'Manage Exam Locations',
@@ -1045,8 +1045,7 @@ export default {
     },
     examReport: {
       pageTitle: 'Exam Report',
-      pageSubtitle:
-        'Overview of applications, attendance, and scores for monitoring and planning.',
+      pageSubtitle: 'Overview of applications, attendance, and scores for monitoring and planning.',
       filter: {
         fromYear: 'Year',
         fromMonth: 'Month',

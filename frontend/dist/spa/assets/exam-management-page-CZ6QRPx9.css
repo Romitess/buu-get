@@ -1,1 +1,21 @@
-.registration-progress[data-v-0116453b]{width:120px}.registration-text[data-v-0116453b]{min-width:50px;text-align:left;font-size:var(--font-size-md)}.status-text[data-v-0116453b]{min-width:50px;text-align:center;font-size:var(--font-size-md)}.create-exam-btn[data-v-976b45cd]{border-radius:var(--radius-10)!important;height:40px;padding:0 24px}.text-primary[data-v-976b45cd]{color:var(--primary)!important}
+.registration-progress[data-v-0116453b] {
+  width: 120px;
+}
+.registration-text[data-v-0116453b] {
+  min-width: 50px;
+  text-align: left;
+  font-size: var(--font-size-md);
+}
+.status-text[data-v-0116453b] {
+  min-width: 50px;
+  text-align: center;
+  font-size: var(--font-size-md);
+}
+.create-exam-btn[data-v-976b45cd] {
+  border-radius: var(--radius-10) !important;
+  height: 40px;
+  padding: 0 24px;
+}
+.text-primary[data-v-976b45cd] {
+  color: var(--primary) !important;
+}

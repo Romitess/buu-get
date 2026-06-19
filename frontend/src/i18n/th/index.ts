@@ -565,7 +565,7 @@ export default {
         intime: 'เข้าสอบแล้ว',
         missing: 'ขาด',
       },
-      noData: 'ไม่พบข้อมูลการเข้าสอบในรอบนี้',
+      noData: 'ไม่พบข้อมูล',
     },
     locationManagement: {
       pageTitle: 'จัดการห้องสอบ',

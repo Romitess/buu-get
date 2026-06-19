@@ -1,2 +1,74 @@
-import{e as x}from"./export-file-BbXX5Gbn.js";import{d as b}from"./date-DmslTAtO.js";import{u as w}from"./use-quasar-DaOT29F-.js";import{u as y}from"./vue-i18n-Bebkm_iB.js";import{A as C}from"./app-button-D_cMl4aM.js";import{O as $,Q as h,_ as D,ao as F}from"./index-CKSooU2k.js";const j=$({__name:"export-csv-button",props:{columns:{},rows:{},fileNamePrefix:{default:"export"},label:{default:"EXPORT TO CSV"},icon:{default:"download"}},setup(i){const r=i,f=w(),{t:m}=y(),l=(e,a=!1)=>{if(e==null)return'""';let t="";return typeof e=="string"||typeof e=="number"||typeof e=="boolean"?t=String(e):t=JSON.stringify(e),a&&/^\d+$/.test(t)&&(t=`	${t}`),`"${t.replace(/"/g,'""')}"`},c=()=>{if(!r.rows||r.rows.length===0){f.notify({message:m("components.exportCsv.noData"),color:"warning"});return}const e=r.columns.filter(o=>o.name!=="tools"&&o.name!=="actions"),a=e.map(o=>l(o.label)).join(","),t=r.rows.map(o=>e.map(n=>{let s;typeof n.field=="function"?s=n.field(o):typeof n.field=="string"&&(s=o[n.field]),n.format&&(s=n.format(s,o));const g=n.name.toLowerCase().includes("id")||n.name.toLowerCase().includes("code")||typeof s=="string"&&s.length>10&&/^\d+$/.test(s);return l(s,g)}).join(",")),p=[a,...t].join(`\r
-`),u=b.formatDate(Date.now(),"YYYY-MM-DD"),d=`${r.fileNamePrefix}_${u}.csv`;x(d,"\uFEFF"+p,"text/csv")!==!0&&f.notify({message:m("components.exportCsv.blocked"),color:"negative",icon:"warning"})};return(e,a)=>(h(),D(C,F({icon:i.icon,label:i.label},e.$attrs,{onClick:c}),null,16,["icon","label"]))}});export{j as _};
+import { e as x } from './export-file-BbXX5Gbn.js';
+import { d as b } from './date-DmslTAtO.js';
+import { u as w } from './use-quasar-DaOT29F-.js';
+import { u as y } from './vue-i18n-Bebkm_iB.js';
+import { A as C } from './app-button-D_cMl4aM.js';
+import { O as $, Q as h, _ as D, ao as F } from './index-CKSooU2k.js';
+const j = $({
+  __name: 'export-csv-button',
+  props: {
+    columns: {},
+    rows: {},
+    fileNamePrefix: { default: 'export' },
+    label: { default: 'EXPORT TO CSV' },
+    icon: { default: 'download' },
+  },
+  setup(i) {
+    const r = i,
+      f = w(),
+      { t: m } = y(),
+      l = (e, a = !1) => {
+        if (e == null) return '""';
+        let t = '';
+        return (
+          typeof e == 'string' || typeof e == 'number' || typeof e == 'boolean'
+            ? (t = String(e))
+            : (t = JSON.stringify(e)),
+          a && /^\d+$/.test(t) && (t = `	${t}`),
+          `"${t.replace(/"/g, '""')}"`
+        );
+      },
+      c = () => {
+        if (!r.rows || r.rows.length === 0) {
+          f.notify({ message: m('components.exportCsv.noData'), color: 'warning' });
+          return;
+        }
+        const e = r.columns.filter((o) => o.name !== 'tools' && o.name !== 'actions'),
+          a = e.map((o) => l(o.label)).join(','),
+          t = r.rows.map((o) =>
+            e
+              .map((n) => {
+                let s;
+                (typeof n.field == 'function'
+                  ? (s = n.field(o))
+                  : typeof n.field == 'string' && (s = o[n.field]),
+                  n.format && (s = n.format(s, o)));
+                const g =
+                  n.name.toLowerCase().includes('id') ||
+                  n.name.toLowerCase().includes('code') ||
+                  (typeof s == 'string' && s.length > 10 && /^\d+$/.test(s));
+                return l(s, g);
+              })
+              .join(','),
+          ),
+          p = [a, ...t].join(`\r
+`),
+          u = b.formatDate(Date.now(), 'YYYY-MM-DD'),
+          d = `${r.fileNamePrefix}_${u}.csv`;
+        x(d, '\uFEFF' + p, 'text/csv') !== !0 &&
+          f.notify({
+            message: m('components.exportCsv.blocked'),
+            color: 'negative',
+            icon: 'warning',
+          });
+      };
+    return (e, a) => (
+      h(),
+      D(C, F({ icon: i.icon, label: i.label }, e.$attrs, { onClick: c }), null, 16, [
+        'icon',
+        'label',
+      ])
+    );
+  },
+});
+export { j as _ };
