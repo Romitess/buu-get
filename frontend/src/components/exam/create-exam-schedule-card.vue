@@ -210,7 +210,13 @@
                       </q-item-label>
                     </q-item-section>
                     <q-item-section v-if="scope.opt.disable" side>
-                      <q-badge color="orange-3" text-color="orange-9" label="ไม่ว่าง" />
+                      <q-badge
+                        v-if="scope.opt.isSelectedByOther"
+                        color="blue-2"
+                        text-color="blue-9"
+                        label="เลือกแล้ว"
+                      />
+                      <q-badge v-else color="orange-3" text-color="orange-9" label="ไม่ว่าง" />
                     </q-item-section>
                   </q-item>
                 </template>
@@ -462,7 +468,7 @@ const getLocationMaxSeats = (locationId: number | null): number => {
 
 const getAvailableLocationOptions = (
   roomIndex: number,
-): (ExamLocationOption & { disable?: boolean })[] => {
+): (ExamLocationOption & { disable?: boolean; isSelectedByOther?: boolean })[] => {
   if (!activeSlot.value) return props.locationOptions;
 
   // Location IDs ที่ห้องอื่นใน slot เดียวกันเลือกไว้แล้ว
@@ -475,12 +481,15 @@ const getAvailableLocationOptions = (
 
   const occupied = props.occupiedLocationIds ?? new Set<number>();
 
-  return props.locationOptions
-    .filter((option) => !selectedByOtherRooms.has(option.value))
-    .map((option) => ({
+  return props.locationOptions.map((option) => {
+    const isSelectedByOther = selectedByOtherRooms.has(option.value);
+    const isOccupied = occupied.has(option.value);
+    return {
       ...option,
-      disable: occupied.has(option.value),
-    }));
+      disable: isOccupied || isSelectedByOther,
+      isSelectedByOther,
+    };
+  });
 };
 
 const onLocationChange = (room: ExamRoom, slotIdx: number, roomIdx: number): void => {
