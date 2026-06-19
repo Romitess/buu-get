@@ -12,194 +12,200 @@
     </div>
 
     <!-- Preview / Printable Area -->
-    <div ref="voucherRef" class="voucher-wrapper">
-      <div v-if="showVoucherCard" class="voucher-card">
-        <!-- ===== Header Section ===== -->
-        <div class="report-header row items-center no-wrap">
-          <!-- Logo container -->
-          <div class="col-auto">
-            <img src="icons/logo-vocher.png" class="header-logo" alt="BUULI Logo" />
-          </div>
-
-          <!-- Titles -->
-          <div class="col text-center">
-            <h1 class="header-title">{{ $t('exam.voucher.title') }}</h1>
-            <h2 class="header-subtitle">{{ $t('exam.voucher.subtitle') }}</h2>
-          </div>
-        </div>
-
-        <!-- ===== Body Section ===== -->
-        <div class="voucher-body relative-position">
-          <!-- Subtle Watermark Background -->
-          <div class="watermark-bg no-pointer-events">GET</div>
-
-          <div class="content-container">
-            <!-- Left: Profile Photo Column -->
-            <div class="profile-column">
-              <div class="profile-photo-wrapper" :class="{ 'shadow-1': !useImagePlaceholder }">
-                <div v-if="useImagePlaceholder" class="voucher-photo-placeholder">
-                  <q-icon name="image" size="48px" color="black" />
-                </div>
-                <ImageDisplay
-                  v-else
-                  :image-path="voucherData.profileImage"
-                  class="profile-photo-img"
-                  width="100%"
-                  height="100%"
-                  object-fit="cover"
-                  border-radius="0px"
-                  alt="Profile Photo"
-                />
-              </div>
-              <div class="signature-line"></div>
+    <div ref="scaleWrapperRef" class="scale-wrapper" :style="{ height: showVoucherCard ? scaledHeight : 'auto' }">
+      <div
+        ref="voucherRef"
+        class="voucher-wrapper"
+        :style="`width: 674px !important; min-width: 674px !important; max-width: 674px !important; padding: 0 12px 16px 12px !important; transform: scale(${scale}) !important; transform-origin: top center; flex-shrink: 0;`"
+      >
+        <div v-if="showVoucherCard" class="voucher-card">
+          <!-- ===== Header Section ===== -->
+          <div class="report-header row items-center no-wrap">
+            <!-- Logo container -->
+            <div class="col-auto">
+              <img src="icons/logo-vocher.png" class="header-logo" alt="BUULI Logo" />
             </div>
 
-            <!-- Right: Details Grid -->
-            <div class="detail-grid-column">
-              <div class="row q-col-gutter-y-sm full-height items-center">
-                <!-- Column 1 -->
-                <div class="col-12 col-sm-6 detail-group">
-                  <div class="info-group">
-                    <label class="info-label">Test Taker ID:</label>
-                    <div class="info-value">{{ voucherData.studentId }}</div>
-                  </div>
-                  <div class="info-group">
-                    <label class="info-label">Name Surname:</label>
-                    <div class="info-value name-value">{{ voucherData.fullName }}</div>
-                  </div>
-                  <div class="info-group">
-                    <label class="info-label">Citizen ID:</label>
-                    <div class="info-value">{{ voucherData.citizenId || '-' }}</div>
-                  </div>
-                  <div class="info-group">
-                    <label class="info-label">Test Session:</label>
-                    <div class="info-value">{{ voucherData.testSession || '-' }}</div>
-                  </div>
-                </div>
+            <!-- Titles -->
+            <div class="col text-center">
+              <h1 class="header-title">{{ $t('exam.voucher.title') }}</h1>
+              <h2 class="header-subtitle">{{ $t('exam.voucher.subtitle') }}</h2>
+            </div>
+          </div>
 
-                <!-- Column 2 -->
-                <div class="col-12 col-sm-6 detail-group">
-                  <div class="info-group">
-                    <label class="info-label">Test Date:</label>
-                    <div class="info-value">{{ voucherData.examDate }}</div>
+          <!-- ===== Body Section ===== -->
+          <div class="voucher-body relative-position">
+            <!-- Subtle Watermark Background -->
+            <div class="watermark-bg no-pointer-events">GET</div>
+
+            <div class="content-container">
+              <!-- Left: Profile Photo Column -->
+              <div class="profile-column">
+                <div class="profile-photo-wrapper" :class="{ 'shadow-1': !useImagePlaceholder }">
+                  <div v-if="useImagePlaceholder" class="voucher-photo-placeholder">
+                    <q-icon name="image" size="48px" color="black" />
                   </div>
-                  <div class="info-group">
-                    <label class="info-label">Time:</label>
-                    <div class="info-value">{{ voucherData.examTime }}</div>
-                  </div>
-                  <div class="info-group">
-                    <label class="info-label">Venue:</label>
-                    <div class="info-value venue-value">
-                      <span>{{ voucherData.location }}</span>
-                      <span v-if="voucherData.locationRoom"
-                        >&nbsp;{{ voucherData.locationRoom }}</span
-                      >
+                  <ImageDisplay
+                    v-else
+                    :image-path="voucherData.profileImage"
+                    class="profile-photo-img"
+                    width="100%"
+                    height="100%"
+                    object-fit="cover"
+                    border-radius="0px"
+                    alt="Profile Photo"
+                  />
+                </div>
+                <div class="signature-line"></div>
+              </div>
+
+              <!-- Right: Details Grid -->
+              <div class="detail-grid-column">
+                <div class="row q-col-gutter-y-sm full-height items-center">
+                  <!-- Column 1 -->
+                  <div class="col-6 detail-group">
+                    <div class="info-group">
+                      <label class="info-label">Test Taker ID:</label>
+                      <div class="info-value">{{ voucherData.studentId }}</div>
+                    </div>
+                    <div class="info-group">
+                      <label class="info-label">Name Surname:</label>
+                      <div class="info-value name-value">{{ voucherData.fullName }}</div>
+                    </div>
+                    <div class="info-group">
+                      <label class="info-label">Citizen ID:</label>
+                      <div class="info-value">{{ voucherData.citizenId || '-' }}</div>
+                    </div>
+                    <div class="info-group">
+                      <label class="info-label">Test Session:</label>
+                      <div class="info-value">{{ voucherData.testSession || '-' }}</div>
                     </div>
                   </div>
-                  <div class="info-group">
-                    <label class="info-label">Seat Number:</label>
-                    <div class="info-value">{{ voucherData.seatNo }}</div>
+
+                  <!-- Column 2 -->
+                  <div class="col-6 detail-group">
+                    <div class="info-group">
+                      <label class="info-label">Test Date:</label>
+                      <div class="info-value">{{ voucherData.examDate }}</div>
+                    </div>
+                    <div class="info-group">
+                      <label class="info-label">Time:</label>
+                      <div class="info-value">{{ voucherData.examTime }}</div>
+                    </div>
+                    <div class="info-group">
+                      <label class="info-label">Venue:</label>
+                      <div class="info-value venue-value">
+                        <span>{{ voucherData.location }}</span>
+                        <span v-if="voucherData.locationRoom"
+                          >&nbsp;{{ voucherData.locationRoom }}</span
+                        >
+                      </div>
+                    </div>
+                    <div class="info-group">
+                      <label class="info-label">Seat Number:</label>
+                      <div class="info-value">{{ voucherData.seatNo }}</div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- ===== Barcode Footer Section ===== -->
-        <div class="voucher-footer flex flex-center column">
-          <div class="barcode-wrapper flex flex-center column bg-white q-pa-sm">
-            <!-- SVG Vector Barcode -->
-            <svg class="barcode-svg" viewBox="0 0 360 48" xmlns="http://www.w3.org/2000/svg">
-              <rect x="0" y="0" width="3" height="48" fill="#000" />
-              <rect x="6" y="0" width="1" height="48" fill="#000" />
-              <rect x="10" y="0" width="4" height="48" fill="#000" />
-              <rect x="18" y="0" width="2" height="48" fill="#000" />
-              <rect x="22" y="0" width="1" height="48" fill="#000" />
-              <rect x="26" y="0" width="3" height="48" fill="#000" />
-              <rect x="34" y="0" width="2" height="48" fill="#000" />
-              <rect x="40" y="0" width="1" height="48" fill="#000" />
-              <rect x="44" y="0" width="4" height="48" fill="#000" />
-              <rect x="52" y="0" width="2" height="48" fill="#000" />
-              <rect x="58" y="0" width="3" height="48" fill="#000" />
-              <rect x="64" y="0" width="1" height="48" fill="#000" />
-              <rect x="68" y="0" width="2" height="48" fill="#000" />
-              <rect x="74" y="0" width="4" height="48" fill="#000" />
-              <rect x="80" y="0" width="1" height="48" fill="#000" />
-              <rect x="84" y="0" width="3" height="48" fill="#000" />
-              <rect x="92" y="0" width="2" height="48" fill="#000" />
-              <rect x="98" y="0" width="1" height="48" fill="#000" />
-              <rect x="102" y="0" width="4" height="48" fill="#000" />
-              <rect x="110" y="0" width="2" height="48" fill="#000" />
-              <rect x="116" y="0" width="3" height="48" fill="#000" />
-              <rect x="122" y="0" width="1" height="48" fill="#000" />
-              <rect x="126" y="0" width="2" height="48" fill="#000" />
-              <rect x="132" y="0" width="4" height="48" fill="#000" />
-              <rect x="138" y="0" width="1" height="48" fill="#000" />
-              <rect x="142" y="0" width="3" height="48" fill="#000" />
-              <rect x="150" y="0" width="2" height="48" fill="#000" />
-              <rect x="156" y="0" width="1" height="48" fill="#000" />
-              <rect x="160" y="0" width="4" height="48" fill="#000" />
-              <rect x="168" y="0" width="2" height="48" fill="#000" />
-              <rect x="174" y="0" width="3" height="48" fill="#000" />
-              <rect x="180" y="0" width="1" height="48" fill="#000" />
-              <rect x="184" y="0" width="2" height="48" fill="#000" />
-              <rect x="190" y="0" width="4" height="48" fill="#000" />
-              <rect x="196" y="0" width="1" height="48" fill="#000" />
-              <rect x="200" y="0" width="3" height="48" fill="#000" />
-              <rect x="208" y="0" width="2" height="48" fill="#000" />
-              <rect x="214" y="0" width="1" height="48" fill="#000" />
-              <rect x="218" y="0" width="4" height="48" fill="#000" />
-              <rect x="226" y="0" width="2" height="48" fill="#000" />
-              <rect x="232" y="0" width="3" height="48" fill="#000" />
-              <rect x="238" y="0" width="1" height="48" fill="#000" />
-              <rect x="242" y="0" width="2" height="48" fill="#000" />
-              <rect x="248" y="0" width="4" height="48" fill="#000" />
-              <rect x="254" y="0" width="1" height="48" fill="#000" />
-              <rect x="258" y="0" width="3" height="48" fill="#000" />
-              <rect x="266" y="0" width="2" height="48" fill="#000" />
-              <rect x="272" y="0" width="1" height="48" fill="#000" />
-              <rect x="276" y="0" width="4" height="48" fill="#000" />
-              <rect x="284" y="0" width="2" height="48" fill="#000" />
-              <rect x="290" y="0" width="3" height="48" fill="#000" />
-              <rect x="296" y="0" width="1" height="48" fill="#000" />
-              <rect x="300" y="0" width="2" height="48" fill="#000" />
-              <rect x="306" y="0" width="4" height="48" fill="#000" />
-              <rect x="312" y="0" width="1" height="48" fill="#000" />
-              <rect x="316" y="0" width="3" height="48" fill="#000" />
-              <rect x="324" y="0" width="2" height="48" fill="#000" />
-              <rect x="330" y="0" width="1" height="48" fill="#000" />
-              <rect x="334" y="0" width="4" height="48" fill="#000" />
-              <rect x="342" y="0" width="2" height="48" fill="#000" />
-              <rect x="348" y="0" width="3" height="48" fill="#000" />
-              <rect x="354" y="0" width="1" height="48" fill="#000" />
-            </svg>
-            <div class="barcode-value text-weight-bold text-uppercase">
-              {{ voucherData.barcodeValue || voucherData.voucherNo }}
+          <!-- ===== Barcode Footer Section ===== -->
+          <div class="voucher-footer flex flex-center column">
+            <div class="barcode-wrapper flex flex-center column bg-white q-pa-sm">
+              <!-- SVG Vector Barcode -->
+              <svg class="barcode-svg" viewBox="0 0 360 48" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0" y="0" width="3" height="48" fill="#000" />
+                <rect x="6" y="0" width="1" height="48" fill="#000" />
+                <rect x="10" y="0" width="4" height="48" fill="#000" />
+                <rect x="18" y="0" width="2" height="48" fill="#000" />
+                <rect x="22" y="0" width="1" height="48" fill="#000" />
+                <rect x="26" y="0" width="3" height="48" fill="#000" />
+                <rect x="34" y="0" width="2" height="48" fill="#000" />
+                <rect x="40" y="0" width="1" height="48" fill="#000" />
+                <rect x="44" y="0" width="4" height="48" fill="#000" />
+                <rect x="52" y="0" width="2" height="48" fill="#000" />
+                <rect x="58" y="0" width="3" height="48" fill="#000" />
+                <rect x="64" y="0" width="1" height="48" fill="#000" />
+                <rect x="68" y="0" width="2" height="48" fill="#000" />
+                <rect x="74" y="0" width="4" height="48" fill="#000" />
+                <rect x="80" y="0" width="1" height="48" fill="#000" />
+                <rect x="84" y="0" width="3" height="48" fill="#000" />
+                <rect x="92" y="0" width="2" height="48" fill="#000" />
+                <rect x="98" y="0" width="1" height="48" fill="#000" />
+                <rect x="102" y="0" width="4" height="48" fill="#000" />
+                <rect x="110" y="0" width="2" height="48" fill="#000" />
+                <rect x="116" y="0" width="3" height="48" fill="#000" />
+                <rect x="122" y="0" width="1" height="48" fill="#000" />
+                <rect x="126" y="0" width="2" height="48" fill="#000" />
+                <rect x="132" y="0" width="4" height="48" fill="#000" />
+                <rect x="138" y="0" width="1" height="48" fill="#000" />
+                <rect x="142" y="0" width="3" height="48" fill="#000" />
+                <rect x="150" y="0" width="2" height="48" fill="#000" />
+                <rect x="156" y="0" width="1" height="48" fill="#000" />
+                <rect x="160" y="0" width="4" height="48" fill="#000" />
+                <rect x="168" y="0" width="2" height="48" fill="#000" />
+                <rect x="174" y="0" width="3" height="48" fill="#000" />
+                <rect x="180" y="0" width="1" height="48" fill="#000" />
+                <rect x="184" y="0" width="2" height="48" fill="#000" />
+                <rect x="190" y="0" width="4" height="48" fill="#000" />
+                <rect x="196" y="0" width="1" height="48" fill="#000" />
+                <rect x="200" y="0" width="3" height="48" fill="#000" />
+                <rect x="208" y="0" width="2" height="48" fill="#000" />
+                <rect x="214" y="0" width="1" height="48" fill="#000" />
+                <rect x="218" y="0" width="4" height="48" fill="#000" />
+                <rect x="226" y="0" width="2" height="48" fill="#000" />
+                <rect x="232" y="0" width="3" height="48" fill="#000" />
+                <rect x="238" y="0" width="1" height="48" fill="#000" />
+                <rect x="242" y="0" width="2" height="48" fill="#000" />
+                <rect x="248" y="0" width="4" height="48" fill="#000" />
+                <rect x="254" y="0" width="1" height="48" fill="#000" />
+                <rect x="258" y="0" width="3" height="48" fill="#000" />
+                <rect x="266" y="0" width="2" height="48" fill="#000" />
+                <rect x="272" y="0" width="1" height="48" fill="#000" />
+                <rect x="276" y="0" width="4" height="48" fill="#000" />
+                <rect x="284" y="0" width="2" height="48" fill="#000" />
+                <rect x="290" y="0" width="3" height="48" fill="#000" />
+                <rect x="296" y="0" width="1" height="48" fill="#000" />
+                <rect x="300" y="0" width="2" height="48" fill="#000" />
+                <rect x="306" y="0" width="4" height="48" fill="#000" />
+                <rect x="312" y="0" width="1" height="48" fill="#000" />
+                <rect x="316" y="0" width="3" height="48" fill="#000" />
+                <rect x="324" y="0" width="2" height="48" fill="#000" />
+                <rect x="330" y="0" width="1" height="48" fill="#000" />
+                <rect x="334" y="0" width="4" height="48" fill="#000" />
+                <rect x="342" y="0" width="2" height="48" fill="#000" />
+                <rect x="348" y="0" width="3" height="48" fill="#000" />
+                <rect x="354" y="0" width="1" height="48" fill="#000" />
+              </svg>
+              <div class="barcode-value text-weight-bold text-uppercase">
+                {{ voucherData.barcodeValue || voucherData.voucherNo }}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Test Regulations (English & Thai combined in a single card) -->
-      <div v-if="showRegulations" class="regulations-block">
-        <div class="regulations-box relative-position">
-          <!-- Subtle Watermark Background -->
-          <div class="watermark-bg no-pointer-events">GET</div>
+        <!-- Test Regulations (English & Thai combined in a single card) -->
+        <div v-if="showRegulations" class="regulations-block">
+          <div class="regulations-box relative-position">
+            <!-- Subtle Watermark Background -->
+            <div class="watermark-bg no-pointer-events">GET</div>
 
-          <div class="regulations-content-wrapper">
-            <h4 class="regulations-heading-inline">
-              {{ $t('admin.testVoucherManagement.regulationsEnLabel') }}:
-            </h4>
-            <div class="regulations-text-content q-mb-md">
-              {{ displayRegulationsEn }}
-            </div>
+            <div class="regulations-content-wrapper">
+              <h4 class="regulations-heading-inline">
+                {{ $t('admin.testVoucherManagement.regulationsEnLabel') }}:
+              </h4>
+              <div class="regulations-text-content q-mb-md">
+                {{ displayRegulationsEn }}
+              </div>
 
-            <h4 class="regulations-heading-inline q-mt-md">
-              {{ $t('admin.testVoucherManagement.regulationsThLabel') }}
-            </h4>
-            <div class="regulations-text-content">
-              {{ displayRegulationsTh }}
+              <h4 class="regulations-heading-inline q-mt-md">
+                {{ $t('admin.testVoucherManagement.regulationsThLabel') }}
+              </h4>
+              <div class="regulations-text-content">
+                {{ displayRegulationsTh }}
+              </div>
             </div>
           </div>
         </div>
@@ -209,7 +215,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { VoucherData } from 'src/types/voucher';
 import ImageDisplay from 'src/components/base/image-display.vue';
@@ -262,6 +268,39 @@ const localRegulationsTh = ref<string>('');
 const defaultRegulationsEn = t('admin.testVoucherManagement.defaultRegulationsEn');
 const defaultRegulationsTh = t('admin.testVoucherManagement.defaultRegulationsTh');
 
+// ===== Ref & Scaling States =====
+const voucherRef = ref<HTMLElement | null>(null);
+const scaleWrapperRef = ref<HTMLElement | null>(null);
+const scale = ref<number>(1);
+const scaledHeight = ref<string>('auto');
+
+let resizeObserver: ResizeObserver | null = null;
+let frameId: number | null = null;
+
+const updateScale = (): void => {
+  if (frameId !== null) {
+    cancelAnimationFrame(frameId);
+  }
+  
+  frameId = requestAnimationFrame(() => {
+    if (!scaleWrapperRef.value || !voucherRef.value) return;
+    
+    const containerWidth = scaleWrapperRef.value.getBoundingClientRect().width;
+    const targetWidth = 674; // Adjusted for padding (650px card + 24px padding)
+    
+    if (containerWidth < targetWidth && containerWidth > 0) {
+      const s = containerWidth / targetWidth;
+      scale.value = s;
+      // Set height of scale wrapper to scaled height of the content to prevent empty vertical space
+      scaledHeight.value = `${voucherRef.value.offsetHeight * s}px`;
+    } else {
+      scale.value = 1;
+      scaledHeight.value = 'auto';
+    }
+    frameId = null;
+  });
+};
+
 // ดึงจาก API ก่อน, fallback ไป localStorage
 onMounted(async () => {
   try {
@@ -294,6 +333,29 @@ onMounted(async () => {
     } catch (e) {
       console.error('Failed to load regulations from localStorage', e);
     }
+  }
+
+  // Setup ResizeObserver
+  void nextTick(() => {
+    updateScale();
+    if (scaleWrapperRef.value && typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => {
+        updateScale();
+      });
+      resizeObserver.observe(scaleWrapperRef.value);
+      if (voucherRef.value) {
+        resizeObserver.observe(voucherRef.value);
+      }
+    }
+  });
+});
+
+onUnmounted(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+  }
+  if (frameId !== null) {
+    cancelAnimationFrame(frameId);
   }
 });
 
@@ -343,11 +405,24 @@ const windowPrint = (): void => {
   font-size: 13px;
 }
 
-.voucher-wrapper {
+.scale-wrapper {
   width: 100%;
-  max-width: 680px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.voucher-wrapper {
+  width: 674px !important;
+  min-width: 674px !important;
+  max-width: 674px !important;
+  padding: 0 12px 16px 12px !important;
   margin: 0 auto;
   font-family: 'Outfit', 'Sarabun', 'Inter', sans-serif;
+  transform-origin: top center;
+  flex-shrink: 0;
 }
 
 .voucher-card {
@@ -559,7 +634,7 @@ const windowPrint = (): void => {
 .regulations-box {
   position: relative;
   background: linear-gradient(to bottom, #fafafa, #f0f4f8);
-  border: 1.5px solid var(--border-black, #000000);
+  border: 1px solid var(--border-black, #000000);
   border-radius: 6px;
   padding: 20px 24px;
   box-shadow: var(--shadow-md);
@@ -593,53 +668,6 @@ const windowPrint = (): void => {
   word-break: break-word;
 }
 
-/* ===== Responsive Adaptability ===== */
-@media (max-width: 480px) {
-  .detail-grid-column {
-    padding-left: 0 !important;
-    margin-top: 12px;
-  }
-  .report-header {
-    flex-direction: column;
-    padding: 12px;
-    gap: 8px;
-    text-align: center;
-  }
-  .voucher-body {
-    padding: 12px;
-
-    .content-container {
-      grid-template-columns: 1fr;
-      row-gap: 16px;
-    }
-  }
-  .details-grid {
-    grid-template-columns: 1fr;
-    row-gap: 10px;
-  }
-  .profile-photo-wrapper {
-    width: 120px;
-    height: 144px;
-  }
-  .signature-line {
-    width: 120px;
-    margin-top: 24px;
-  }
-  .watermark-bg {
-    font-size: 6rem;
-    left: 50%;
-  }
-  .regulations-box {
-    padding: 12px;
-    .watermark-bg {
-      font-size: 8rem;
-    }
-    .regulations-content-wrapper {
-      padding: 0 !important;
-    }
-  }
-}
-
 /* ===== Print Optimization ===== */
 @media print {
   .no-print {
@@ -649,9 +677,17 @@ const windowPrint = (): void => {
     padding: 0 !important;
     background-color: transparent !important;
   }
+  .scale-wrapper {
+    height: auto !important;
+    overflow: visible !important;
+  }
   .voucher-wrapper {
-    max-width: 100% !important;
-    margin: 0 !important;
+    width: 674px !important;
+    min-width: 674px !important;
+    max-width: 674px !important;
+    padding: 0 12px 16px 12px !important;
+    transform: none !important;
+    margin: 0 auto !important;
     box-shadow: none !important;
   }
   .voucher-card {
@@ -722,7 +758,7 @@ const windowPrint = (): void => {
     padding: 16px 24px;
     background-color: #ffffff !important;
     background-image: none !important;
-    border: 1px solid #000000 !important;
+    border: 0.1px solid var(--border-black) !important;
 
     .regulations-content-wrapper {
       padding: 0 !important;
