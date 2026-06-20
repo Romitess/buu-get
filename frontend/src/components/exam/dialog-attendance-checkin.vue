@@ -150,9 +150,10 @@ const currentVoucherData = computed<VoucherData>(() => {
   }
 
   const candidate = searchedCandidate.value;
-  const fullNameEn = candidate.titleEn && candidate.fullnameEn
-    ? `${candidate.titleEn} ${candidate.fullnameEn}`
-    : candidate.fullnameEn || candidate.fullnameTh || '-';
+  const fullNameEn =
+    candidate.titleEn && candidate.fullnameEn
+      ? `${candidate.titleEn} ${candidate.fullnameEn}`
+      : candidate.fullnameEn || candidate.fullnameTh || '-';
   return {
     id: candidate.ermId,
     fullName: fullNameEn,

@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -21,6 +22,7 @@ import { MatchExamEnrollmentDto } from './dto/match-exam-enrollment.dto';
 import { RequestFixDto } from './dto/request-fix.dto';
 import { BulkSeatAssignmentDto } from './dto/bulk-seat-assignment.dto';
 import { ExamEnrollment } from './entities/exam-enrollment.entity';
+import { ExamEnrollmentQueryDto } from './dto/exam-enrollment-query.dto';
 
 @ApiTags('exam-enrollments')
 @Controller('exam-enrollments')
@@ -61,8 +63,12 @@ export class ExamEnrollmentsController {
   @ApiOkResponse({ type: ExamEnrollment, isArray: true })
   async findByExamId(
     @Param('examId', ParseIntPipe) examId: number,
-  ): Promise<ExamEnrollment[]> {
-    return await this.examEnrollmentsService.findByExamId(examId);
+    @Query() query: ExamEnrollmentQueryDto,
+  ): Promise<
+    | ExamEnrollment[]
+    | { data: ExamEnrollment[]; total: number; totalPaid: number }
+  > {
+    return await this.examEnrollmentsService.findByExamId(examId, query);
   }
 
   @Get('user/:userId')

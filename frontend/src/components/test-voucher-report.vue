@@ -12,7 +12,11 @@
     </div>
 
     <!-- Preview / Printable Area -->
-    <div ref="scaleWrapperRef" class="scale-wrapper" :style="{ height: showVoucherCard ? scaledHeight : 'auto' }">
+    <div
+      ref="scaleWrapperRef"
+      class="scale-wrapper"
+      :style="{ height: showVoucherCard ? scaledHeight : 'auto' }"
+    >
       <div
         ref="voucherRef"
         class="voucher-wrapper"
@@ -281,13 +285,13 @@ const updateScale = (): void => {
   if (frameId !== null) {
     cancelAnimationFrame(frameId);
   }
-  
+
   frameId = requestAnimationFrame(() => {
     if (!scaleWrapperRef.value || !voucherRef.value) return;
-    
+
     const containerWidth = scaleWrapperRef.value.getBoundingClientRect().width;
     const targetWidth = 674; // Adjusted for padding (650px card + 24px padding)
-    
+
     if (containerWidth < targetWidth && containerWidth > 0) {
       const s = containerWidth / targetWidth;
       scale.value = s;
@@ -376,8 +380,6 @@ const displayRegulationsTh = computed<string>(() => {
   const str = Array.isArray(val) ? val.join('\n') : val;
   return str ? str.trim() : '';
 });
-
-
 
 // ===== Action: Window Print =====
 const windowPrint = (): void => {
