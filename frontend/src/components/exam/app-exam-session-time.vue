@@ -73,7 +73,6 @@ const uniqueSessions = computed<BackendSession[]>(() => {
   }
 
   :deep(.q-tab--active) {
-    color: var(--primary) !important;
     .q-tab__label {
       font-weight: 500;
     }
