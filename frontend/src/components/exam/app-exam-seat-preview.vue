@@ -116,7 +116,13 @@
               class="seat-row-walkway"
               :style="getRowWalkwayStyle(position.index)"
             >
-              <span>ทางเดิน</span>
+              <span
+                v-for="labelPosition in getRowWalkwayLabelPositions()"
+                :key="`row-walkway-label-${position.index}-${labelPosition}`"
+                :style="{ left: `${labelPosition}%` }"
+              >
+                ทางเดิน
+              </span>
             </div>
           </div>
         </div>
@@ -546,12 +552,31 @@ const seatGridStyle = computed<CSSProperties>(() => {
   };
 });
 
+const getColumnWalkwayLabelTop = (): string => {
+  const rowBoundaries = [0, ...activeRowWalkwayIndexes.value, rowCount.value];
+  let longestStart = 0;
+  let longestEnd = 0;
+
+  for (let index = 0; index < rowBoundaries.length - 1; index += 1) {
+    const start = rowBoundaries[index] ?? 0;
+    const end = rowBoundaries[index + 1] ?? rowCount.value;
+
+    if (end - start > longestEnd - longestStart) {
+      longestStart = start;
+      longestEnd = end;
+    }
+  }
+
+  return `${((longestStart + longestEnd) / 2 / rowCount.value) * 100}%`;
+};
+
 const getColumnWalkwayStyle = (colIndex: number): CSSProperties => {
   return {
     gridColumn: getColumnWalkwayGridColumn(colIndex),
     gridRow: `2 / ${rowCount.value + activeRowWalkwayIndexes.value.length + 2}`,
     width: seatStyle.value.aisleWidth,
     fontSize: seatStyle.value.walkwayFontSize,
+    '--column-label-top': hasRowWalkways.value ? getColumnWalkwayLabelTop() : '50%',
   };
 };
 
@@ -562,6 +587,15 @@ const getRowWalkwayStyle = (rowIndex: number): CSSProperties => {
     height: seatStyle.value.aisleHeight,
     fontSize: seatStyle.value.walkwayFontSize,
   };
+};
+
+const getRowWalkwayLabelPositions = (): number[] => {
+  const columnBoundaries = [0, ...activeColumnWalkwayIndexes.value, colCount.value];
+
+  return columnBoundaries.slice(0, -1).map((start, index) => {
+    const end = columnBoundaries[index + 1] ?? colCount.value;
+    return ((start + end) / 2 / colCount.value) * 100;
+  });
 };
 
 // ── Zoom-to-fit logic ──────────────────────────────────────
@@ -980,12 +1014,14 @@ watch(
 }
 
 .seat-row-walkway span {
-  position: relative;
+  position: absolute;
+  top: 50%;
   z-index: 6;
   background: var(--Surface-Selected, #dddddd) !important;
   border-radius: 6px;
   max-width: calc(100% - 12px);
   padding: 3px 10px;
+  transform: translate(-50%, -50%);
   white-space: nowrap;
   overflow: hidden;
 }

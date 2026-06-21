@@ -219,36 +219,16 @@
         </div>
       </div>
 
-      <!-- Right Panel: Preview & Save -->
-      <div class="col-12 col-md preview-panel">
-        <div class="buu-premium-card preview-card q-pa-md">
-          <div class="preview-scroll">
-            <AppExamSeatPreview
-              ref="seatPreviewRef"
-              :rows="rows"
-              :cols="cols"
-              :split-left-right="splitLeftRight"
-              :walkway-positions="selectedWalkwayPositions"
-              :numbering-direction="seatNumberDirection"
-              :show-seat-guides="true"
-              :show-footer-hint="true"
-            />
-          </div>
-        </div>
-
-        <!-- Save Button -->
-        <div class="row justify-end preview-actions">
-          <AppButton
-            :label="$t('admin.locationManagement.createPage.actions.save')"
-            color="primary"
-            class="text-weight-bold q-px-xl"
-            style="border-radius: 8px; min-width: 140px"
-            :loading="isSaving"
-            :disable="isSaving"
-            @click="handleSave"
-          />
-        </div>
-      </div>
+      <AppLocationSeatPreviewPanel
+        ref="seatPreviewRef"
+        :rows="rows"
+        :cols="cols"
+        :split-left-right="splitLeftRight"
+        :walkway-positions="selectedWalkwayPositions"
+        :numbering-direction="seatNumberDirection"
+        :is-saving="isSaving"
+        @save="handleSave"
+      />
     </div>
 
     <AppWalkwayPositionDialog
@@ -270,7 +250,7 @@ import { useQuasar } from 'quasar';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
-import AppExamSeatPreview from 'src/components/exam/app-exam-seat-preview.vue';
+import AppLocationSeatPreviewPanel from 'src/components/exam/app-location-seat-preview-panel.vue';
 import AppWalkwayPositionDialog from 'src/components/exam/app-walkway-position-dialog.vue';
 import { createLocationWithSeats } from 'src/services/location.service';
 
@@ -294,7 +274,7 @@ const seatNumberDirection = ref<'horizontal' | 'vertical'>('vertical');
 const isSaving = ref(false);
 const isWalkwayDialogOpen = ref(false);
 const selectedWalkwayPositions = ref<WalkwayPosition[]>([]);
-const seatPreviewRef = ref<InstanceType<typeof AppExamSeatPreview> | null>(null);
+const seatPreviewRef = ref<InstanceType<typeof AppLocationSeatPreviewPanel> | null>(null);
 
 interface LocationFormErrors {
   roomName?: string;

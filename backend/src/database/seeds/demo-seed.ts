@@ -184,7 +184,7 @@ interface Candidate {
 }
 
 async function api<T>(
-  method: 'GET' | 'POST',
+  method: 'GET' | 'POST' | 'DELETE',
   url: string,
   body?: unknown,
   token?: string,
@@ -376,7 +376,30 @@ interface SeedExam {
   sessionIds: number[];
 }
 
+interface BackendExam {
+  EXAM_ID: number;
+  EXAM_MOODLE_COURSE_ID: string | null;
+}
+
+async function removeSeedExams(token: string): Promise<void> {
+  const allExams = await api<BackendExam[]>('GET', '/exam', undefined, token);
+  const seedExamIds = allExams
+    .filter((exam) => exam.EXAM_MOODLE_COURSE_ID === SEED_TAG)
+    .map((exam) => exam.EXAM_ID);
+
+  if (seedExamIds.length === 0) return;
+
+  await Promise.all(
+    seedExamIds.map((examId) =>
+      api<void>('DELETE', `/exam/${examId}`, undefined, token),
+    ),
+  );
+  console.log(`✓ ลบข้อสอบ demo เดิม ${seedExamIds.length} รายการแล้ว`);
+}
+
 async function seedExams(token: string): Promise<SeedExam[]> {
+  await removeSeedExams(token);
+
   // location จริงที่ capacity ≥ 40
   interface Loc {
     LOCATION_ID: number;
@@ -398,30 +421,11 @@ async function seedExams(token: string): Promise<SeedExam[]> {
     `✓ location ใช้ได้ (cap ≥ ${MIN_SEATS}): ${usableLocs.length} ห้อง`,
   );
 
-  // idempotent: ใช้ exam ที่ seed ไว้แล้ว (tag) ถ้ามีครบแล้ว
-  interface BackendExam {
-    EXAM_ID: number;
-    EXAM_FEE: string | number | null;
-    EXAM_MOODLE_COURSE_ID: string | null;
-    SESSIONS?: { SS_ID: number }[];
-  }
-  const allExams = await api<BackendExam[]>('GET', '/exam', undefined, token);
-  const existing = allExams.filter((e) => e.EXAM_MOODLE_COURSE_ID === SEED_TAG);
-  const result: SeedExam[] = existing.map((e) => ({
-    examId: e.EXAM_ID,
-    fee: Number(e.EXAM_FEE ?? 0),
-    sessionIds: (e.SESSIONS ?? []).map((s) => s.SS_ID),
-  }));
-  if (result.length >= EXAM_COUNT) {
-    console.log(
-      `✓ พบ exam ที่ seed ไว้แล้ว ${result.length} → ใช้ซ้ำ (ไม่สร้างใหม่)`,
-    );
-    return result.slice(0, EXAM_COUNT);
-  }
+  const result: SeedExam[] = [];
 
   const now = Date.now();
   const day = 86400000;
-  for (let i = result.length + 1; i <= EXAM_COUNT; i++) {
+  for (let i = 1; i <= EXAM_COUNT; i++) {
     const fee = pick(EXAM_FEES);
     const examDate = new Date(now + (20 + rand(160)) * day);
     const examDateStr = examDate.toISOString().slice(0, 10);
@@ -434,7 +438,7 @@ async function seedExams(token: string): Promise<SeedExam[]> {
       {
         EXAM_NAME: `${pick(EXAM_NAMES)} ครั้งที่ ${i}/2569`,
         EXAM_TYPE: 'รอบทั่วไป',
-        EXAM_FORMAT: pick(['ปรนัย', 'คอมพิวเตอร์']),
+        EXAM_FORMAT: pick(['กระดาษ', 'คอมพิวเตอร์']),
         EXAM_FEE: fee,
         EXAM_DATE: examDateStr,
         EXAM_REG_START_DATE: regStart,
