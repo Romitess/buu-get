@@ -28,11 +28,16 @@ export function useExamRegistrants() {
 
   const sessionTimeTabs = computed<BackendSession[]>(() => {
     const seen = new Set<string>();
-    return (exam.value?.SESSIONS ?? []).filter((session) => {
+    const unique = (exam.value?.SESSIONS ?? []).filter((session) => {
       const key = getSessionTimeKey(session);
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
+    });
+    return [...unique].sort((a, b) => {
+      const timeA = a.SS_START_TIME || '';
+      const timeB = b.SS_START_TIME || '';
+      return timeA.localeCompare(timeB);
     });
   });
 
