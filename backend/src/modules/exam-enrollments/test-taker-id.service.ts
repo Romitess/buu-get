@@ -44,6 +44,7 @@ export class TestTakerIdService {
         .innerJoinAndSelect('session.EXAM', 'exam')
         .innerJoinAndSelect('enrollment.USER', 'user')
         .leftJoinAndSelect('user.PROFILE', 'profile')
+        .innerJoinAndSelect('enrollment.LOCATION_SEAT', 'locationSeat')
         .where('session.EXAM_ID = :examId', { examId })
         .andWhere('enrollment.ERM_STATUS IN (:...statuses)', {
           statuses: [
@@ -53,22 +54,8 @@ export class TestTakerIdService {
         })
         .getMany();
 
-      const enrollmentWithoutEnglishName = allEligibleEnrollments.find(
-        (enrollment) => !enrollment.USER?.PROFILE?.userFullnameEn?.trim(),
-      );
-      if (enrollmentWithoutEnglishName) {
-        throw new BadRequestException(
-          `English name is required for enrollment ${enrollmentWithoutEnglishName.ERM_ID}`,
-        );
-      }
-
       const sortedEnrollments = allEligibleEnrollments.sort((left, right) => {
-        const leftName = left.USER.PROFILE.userFullnameEn?.trim() ?? '';
-        const rightName = right.USER.PROFILE.userFullnameEn?.trim() ?? '';
-        const nameComparison = leftName.localeCompare(rightName, 'en', {
-          sensitivity: 'base',
-        });
-        return nameComparison || left.ERM_ID - right.ERM_ID;
+        return this.compareBySeatLabel(left, right);
       });
 
       if (sortedEnrollments.length > MAX_TEST_TAKER_SEQUENCE) {
@@ -149,6 +136,45 @@ export class TestTakerIdService {
     const examSequenceCode = this.getExamRoundCode(exam);
 
     return `${examYearCode}${examTypeCode}${examSequenceCode}`;
+  }
+
+  private compareBySeatLabel(
+    left: ExamEnrollment,
+    right: ExamEnrollment,
+  ): number {
+    const leftLabel = left.LOCATION_SEAT?.LS_SEAT_LABEL;
+    const rightLabel = right.LOCATION_SEAT?.LS_SEAT_LABEL;
+    const leftPosition = this.parseSeatLabel(leftLabel);
+    const rightPosition = this.parseSeatLabel(rightLabel);
+
+    if (!leftPosition || !rightPosition) {
+      throw new BadRequestException(
+        `Seat label is required to create a test taker ID for enrollment ${!leftPosition ? left.ERM_ID : right.ERM_ID}`,
+      );
+    }
+
+    return (
+      leftPosition.letterOrder - rightPosition.letterOrder ||
+      leftPosition.numberOrder - rightPosition.numberOrder ||
+      left.ERM_ID - right.ERM_ID
+    );
+  }
+
+  private parseSeatLabel(
+    label: string | null | undefined,
+  ): { letterOrder: number; numberOrder: number } | null {
+    const match = label
+      ?.trim()
+      .toUpperCase()
+      .match(/^([A-Z]+)(\d+)$/u);
+    if (!match?.[1] || !match[2]) return null;
+
+    const letterOrder = match[1].split('').reduce((total, letter) => {
+      return total * 26 + (letter.charCodeAt(0) - 64);
+    }, 0);
+    const numberOrder = Number(match[2]);
+
+    return Number.isInteger(numberOrder) ? { letterOrder, numberOrder } : null;
   }
 
   private getExamRoundCode(exam: Exam): string {

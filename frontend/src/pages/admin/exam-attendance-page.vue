@@ -122,6 +122,30 @@ const selectedSessionLocationId = ref<number | null>(null);
 
 const $q = useQuasar();
 
+const examDateEnglishLabel = computed((): string => {
+  if (!exam.value?.EXAM_DATE) return '-';
+  const date = new Date(exam.value.EXAM_DATE);
+  if (isNaN(date.getTime())) return exam.value.EXAM_DATE;
+  const day = date.getDate();
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  return `${day} ${month} ${year}`;
+});
+
 const openCheckInDialog = () => {
   $q.dialog({
     component: DialogAttendanceCheckin,
@@ -130,7 +154,7 @@ const openCheckInDialog = () => {
       examName: exam.value?.EXAM_ROUND
         ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
         : exam.value?.EXAM_NAME || '',
-      examDate: examDateLabel.value,
+      examDate: examDateEnglishLabel.value,
       examTime: selectedSessionTime.value,
       examLocation: selectedSessionLocation.value,
       examRound: exam.value?.EXAM_ROUND || '',

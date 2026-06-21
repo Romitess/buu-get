@@ -12,7 +12,11 @@
     </div>
 
     <!-- Preview / Printable Area -->
-    <div ref="scaleWrapperRef" class="scale-wrapper" :style="{ height: showVoucherCard ? scaledHeight : 'auto' }">
+    <div
+      ref="scaleWrapperRef"
+      class="scale-wrapper"
+      :style="{ height: showVoucherCard ? scaledHeight : 'auto' }"
+    >
       <div
         ref="voucherRef"
         class="voucher-wrapper"
@@ -63,7 +67,7 @@
               <div class="detail-grid-column">
                 <div class="row q-col-gutter-y-sm full-height items-center">
                   <!-- Column 1 -->
-                  <div class="col-6 detail-group">
+                  <div class="col-left detail-group">
                     <div class="info-group">
                       <label class="info-label">Test Taker ID:</label>
                       <div class="info-value">{{ voucherData.studentId }}</div>
@@ -83,7 +87,7 @@
                   </div>
 
                   <!-- Column 2 -->
-                  <div class="col-6 detail-group">
+                  <div class="col-right detail-group">
                     <div class="info-group">
                       <label class="info-label">Test Date:</label>
                       <div class="info-value">{{ voucherData.examDate }}</div>
@@ -281,13 +285,13 @@ const updateScale = (): void => {
   if (frameId !== null) {
     cancelAnimationFrame(frameId);
   }
-  
+
   frameId = requestAnimationFrame(() => {
     if (!scaleWrapperRef.value || !voucherRef.value) return;
-    
+
     const containerWidth = scaleWrapperRef.value.getBoundingClientRect().width;
     const targetWidth = 674; // Adjusted for padding (650px card + 24px padding)
-    
+
     if (containerWidth < targetWidth && containerWidth > 0) {
       const s = containerWidth / targetWidth;
       scale.value = s;
@@ -453,6 +457,7 @@ const windowPrint = (): void => {
     line-height: 120% !important;
     color: var(--primary, #0d47a1) !important;
     margin: 0 0 3px 0 !important;
+    white-space: nowrap;
   }
 
   .header-subtitle {
@@ -543,6 +548,16 @@ const windowPrint = (): void => {
   gap: 8px;
 }
 
+.col-left {
+  width: 46%;
+  flex: 0 0 46%;
+}
+
+.col-right {
+  width: 54%;
+  flex: 0 0 54%;
+}
+
 .info-group {
   display: flex;
   flex-direction: column;
@@ -569,16 +584,19 @@ const windowPrint = (): void => {
   }
 }
 
-.name-value {
+.info-value.name-value {
   display: block;
-  white-space: normal !important;
-  overflow-wrap: break-word;
+  white-space: nowrap !important;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  letter-spacing: -0.3px !important;
 }
 
-.venue-value {
+.info-value.venue-value {
   display: block;
-  white-space: normal !important;
-  overflow-wrap: break-word;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  letter-spacing: -0.3px !important;
 }
 
 /* ===== Barcode Footer Section ===== */

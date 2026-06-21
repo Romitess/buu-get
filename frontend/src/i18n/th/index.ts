@@ -87,7 +87,7 @@ export default {
       },
     },
     voucher: {
-      title: "BUU-GET : Burapha University's Graduate English Test",
+      title: "BUU-GET: Burapha University's Graduate English Test",
       subtitle: 'ADMISSION VOUCHER',
       fields: {
         testTakerId: 'เลขประจำตัวผู้สอบ:',

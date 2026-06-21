@@ -44,27 +44,16 @@ export const createLocation = async (payload: LocationPayload): Promise<BackendL
   return response.data;
 };
 
-/**
- * สร้างห้องสอบ + generate ที่นั่งอัตโนมัติ (เรียก 2 API ต่อกัน)
- * 1. POST /exam-locations  → ได้ LOCATION_ID
- * 2. POST /exam-location-seats/generate/:locationId → สร้างที่นั่งตาม rows × cols
- */
 export const createLocationWithSeats = async (
   payload: LocationPayload,
   seatStatuses?: Record<string, number>,
-): Promise<{ location: BackendLocation; seats: BackendLocationSeat[] }> => {
-  // Step 1: สร้างห้องสอบ
-  const location = await createLocation(payload);
-
-  // Step 2: Auto-generate ที่นั่งจาก LOCATION_TOTAL_ROWS × LOCATION_TOTAL_COLS
-  // เพิ่ม timeout เป็น 120 วินาที เนื่องจากกรณีสร้างที่นั่งจำนวนมาก (เช่น 625 ที่) อาจใช้เวลาในการบันทึกลงฐานข้อมูลนานกว่าปกติ
-  const seatsResponse = await api.post<BackendLocationSeat[]>(
-    `/exam-location-seats/generate/${location.LOCATION_ID}`,
-    { seatStatuses },
-    { timeout: 120000 },
+): Promise<{ locationId: number; seatCount: number }> => {
+  const response = await api.post<{ locationId: number; seatCount: number }>(
+    '/exam-locations/with-seats',
+    { ...payload, seatStatuses },
   );
 
-  return { location, seats: seatsResponse.data };
+  return response.data;
 };
 
 export const updateLocation = async (

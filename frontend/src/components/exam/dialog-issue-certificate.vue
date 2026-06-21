@@ -177,51 +177,17 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td class="text-center text-weight-bold">1</td>
-                        <td class="text-center">40-49</td>
-                        <td class="text-center">A2</td>
+                      <tr v-for="rule in bandRules" :key="rule.id">
+                        <td class="text-center text-weight-bold">{{ rule.band }}</td>
+                        <td class="text-center">{{ rule.minScore }}-{{ rule.maxScore }}</td>
+                        <td class="text-center">{{ rule.cefr }}</td>
                         <td class="text-left descriptor-cell">
-                          Can understand short, simple texts on familiar matters of a concrete type
-                          which consist of high frequency every day or job-related language.
+                          {{ rule.descriptor }}
                         </td>
                       </tr>
-                      <tr>
-                        <td class="text-center text-weight-bold">2</td>
-                        <td class="text-center">50-59</td>
-                        <td class="text-center">A2</td>
-                        <td class="text-left descriptor-cell">
-                          Can understand short, simple texts on familiar matters of a concrete type
-                          which consist of high frequency every day or job-related language.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td class="text-center text-weight-bold">3</td>
-                        <td class="text-center">60-69</td>
-                        <td class="text-center">B1</td>
-                        <td class="text-left descriptor-cell">
-                          Can read straightforward factual texts on subjects related to his/her
-                          field and interest with a satisfactory level of comprehension.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td class="text-center text-weight-bold">4</td>
-                        <td class="text-center">70-79</td>
-                        <td class="text-center">B1</td>
-                        <td class="text-left descriptor-cell">
-                          Can read straightforward factual texts on subjects related to his/her
-                          field and interest with a satisfactory level of comprehension.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td class="text-center text-weight-bold">5</td>
-                        <td class="text-center">80-100</td>
-                        <td class="text-center">B2</td>
-                        <td class="text-left descriptor-cell">
-                          Can read with a large degree of independence, adapting style and speed of
-                          reading to different texts and purposes, and using appropriate reference
-                          sources selectively. Has a broad active reading vocabulary, but may
-                          experience some difficulty with low frequency idioms.
+                      <tr v-if="!bandRules.length">
+                        <td colspan="4" class="text-center text-grey-6 py-md">
+                          No band descriptions defined
                         </td>
                       </tr>
                     </tbody>
@@ -307,11 +273,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import AppButton from 'src/components/base/app-button.vue';
 import { createExamCertificate } from 'src/services/exam-certificate.service';
 import { getImageUrl } from 'src/services/image.service';
+import { getBandRules, type BandRuleData } from 'src/services/score-criteria.service';
 
 interface Props {
   modelValue: boolean;
@@ -353,6 +320,75 @@ const currentSide = ref<'front' | 'back'>('front');
 const validFromDate = ref('');
 const validUntilDate = ref('');
 const isSubmitting = ref(false);
+
+const DEFAULT_BAND_RULES: Omit<BandRuleData, 'id'>[] = [
+  {
+    band: '1',
+    minScore: 40,
+    maxScore: 49,
+    cefr: 'A2',
+    descriptor:
+      'Can understand short, simple texts on familiar matters of a concrete type which consist of high frequency every day or job-related language.',
+  },
+  {
+    band: '2',
+    minScore: 50,
+    maxScore: 59,
+    cefr: 'A2',
+    descriptor:
+      'Can understand short, simple texts on familiar matters of a concrete type which consist of high frequency every day or job-related language.',
+  },
+  {
+    band: '3',
+    minScore: 60,
+    maxScore: 69,
+    cefr: 'B1',
+    descriptor:
+      'Can read straightforward factual texts on subjects related to his/her field and interest with a satisfactory level of comprehension.',
+  },
+  {
+    band: '4',
+    minScore: 70,
+    maxScore: 79,
+    cefr: 'B1',
+    descriptor:
+      'Can read straightforward factual texts on subjects related to his/her field and interest with a satisfactory level of comprehension.',
+  },
+  {
+    band: '5',
+    minScore: 80,
+    maxScore: 100,
+    cefr: 'B2',
+    descriptor:
+      'Can read with a large degree of independence, adapting style and speed of reading to different texts and purposes, and using appropriate reference sources selectively. Has a broad active reading vocabulary, but may experience some difficulty with low frequency idioms.',
+  },
+];
+
+const bandRules = ref<BandRuleData[]>([]);
+
+const loadBandRules = async (): Promise<void> => {
+  try {
+    const data = await getBandRules();
+    if (data.bandRules && data.bandRules.length > 0) {
+      bandRules.value = data.bandRules;
+    } else {
+      bandRules.value = DEFAULT_BAND_RULES.map((rule, idx) => ({
+        id: String(idx + 1),
+        ...rule,
+      }));
+    }
+  } catch (err) {
+    console.error('Failed to load band rules in certificate dialog:', err);
+    bandRules.value = DEFAULT_BAND_RULES.map((rule, idx) => ({
+      id: String(idx + 1),
+      ...rule,
+    }));
+  }
+};
+
+onMounted(() => {
+  void loadBandRules();
+});
 
 const formatEnglishDate = (dateStr: string | Date | undefined | null): string => {
   if (!dateStr) return '-';
@@ -869,11 +905,13 @@ const onConfirm = async (): Promise<void> => {
 }
 
 .dialog-btn {
-  width: 200px !important;
+  width: 220px !important;
   height: 44px !important;
   border-radius: 10px !important;
   font-size: 15px !important;
   font-weight: 600 !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
 }
 
 .cancel-btn {

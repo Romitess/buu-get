@@ -24,6 +24,7 @@
               placeholder="กรอกเลขบัตรประชาชน หรือ Passport"
               class="custom-labeled-input"
               maxlength="13"
+              hide-bottom-space
               @keyup.enter="handleSearch"
             >
               <template v-slot:label>
@@ -40,7 +41,7 @@
         </div>
       </section>
 
-      <section class="voucher-section q-mt-md">
+      <section class="voucher-section">
         <h3 class="voucher-section-title">Test Voucher</h3>
         <div class="voucher-preview-container">
           <TestVoucherReport
@@ -52,7 +53,7 @@
         </div>
       </section>
 
-      <footer class="action-footer row justify-center q-mt-xl q-gutter-x-md">
+      <footer class="action-footer row justify-center q-mt-md q-gutter-x-md">
         <AppButton label="ยกเลิก" class="footer-btn cancel-btn" @click="onCancelClick" />
         <AppButton
           label="เช็คอินเข้าห้องสอบ"
@@ -149,9 +150,13 @@ const currentVoucherData = computed<VoucherData>(() => {
   }
 
   const candidate = searchedCandidate.value;
+  const fullNameEn =
+    candidate.titleEn && candidate.fullnameEn
+      ? `${candidate.titleEn} ${candidate.fullnameEn}`
+      : candidate.fullnameEn || candidate.fullnameTh || '-';
   return {
     id: candidate.ermId,
-    fullName: candidate.fullnameTh,
+    fullName: fullNameEn,
     studentId: candidate.testTakerCode || '-',
     examName: props.examName,
     examDate: props.examDate,
@@ -205,10 +210,10 @@ const onCancelClick = () => {
 
 <style scoped lang="scss">
 .checkin-dialog-card {
-  width: min(800px, calc(100vw - 32px));
-  max-width: 800px;
+  width: min(722px, calc(100vw - 32px));
+  max-width: 722px;
   max-height: calc(100vh - 32px);
-  padding: 32px 40px;
+  padding: 24px;
   border-radius: 12px;
   overflow-y: auto;
   background: #ffffff;
@@ -218,7 +223,8 @@ const onCancelClick = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
+  padding: 0 12px;
 
   h2 {
     margin: 0;
@@ -229,7 +235,8 @@ const onCancelClick = () => {
 }
 
 .search-section {
-  margin-bottom: 24px;
+  margin-bottom: 8px;
+  padding: 0 12px;
 }
 
 .search-btn {
@@ -248,7 +255,7 @@ const onCancelClick = () => {
   font-size: 16px;
   font-weight: 600;
   color: #334155;
-  margin: 0 0 8px 0;
+  margin: 0 12px 8px 12px;
 }
 
 .voucher-preview-container {
@@ -257,14 +264,8 @@ const onCancelClick = () => {
 
   :deep(.page-container-test) {
     width: 100%;
-    padding: 0;
+    padding: 0 !important;
     display: block;
-  }
-
-  :deep(.voucher-wrapper) {
-    width: 100%;
-    max-width: none;
-    margin: 0;
   }
 
   :deep(.voucher-card) {

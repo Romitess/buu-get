@@ -129,6 +129,8 @@ export interface AttendanceTableRow {
   nationalId: string;
   titleTh: string;
   fullnameTh: string;
+  titleEn?: string | null;
+  fullnameEn?: string | null;
   seatNumber: string;
   attendanceStatus: ExamAttendStatus;
   checkInTime: string | null;

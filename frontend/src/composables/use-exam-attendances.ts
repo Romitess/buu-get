@@ -157,6 +157,8 @@ export function useExamAttendances() {
             passportNo: enrollment.USER?.USER_PASSPORT_NO || null,
             titleTh: enrollment.USER?.PROFILE?.userTitleTh || '-',
             fullnameTh: enrollment.USER?.PROFILE?.userFullnameTh || '-',
+            titleEn: enrollment.USER?.PROFILE?.userTitleEn || '',
+            fullnameEn: enrollment.USER?.PROFILE?.userFullnameEn || '',
             seatNumber: enrollment.LOCATION_SEAT?.LS_SEAT_LABEL || '-',
             attendanceStatus: status,
             checkInTime: formatCheckInTime(checkInTimeStr),

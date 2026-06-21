@@ -197,7 +197,30 @@
                 :class="{ 'buu-field-error': hasError(`locationId_${activeSlotIndex}_${rIdx}`) }"
                 :disable="locked"
                 @update:model-value="onLocationChange(room, activeSlotIndex, rIdx)"
-              />
+              >
+                <template v-slot:option="scope">
+                  <q-item
+                    v-bind="scope.itemProps"
+                    :disable="!!scope.opt.disable"
+                    :class="{ 'location-disabled': scope.opt.disable }"
+                  >
+                    <q-item-section>
+                      <q-item-label :class="{ 'text-grey-5': scope.opt.disable }">
+                        {{ scope.opt.label }}
+                      </q-item-label>
+                    </q-item-section>
+                    <q-item-section v-if="scope.opt.disable" side>
+                      <q-badge
+                        v-if="scope.opt.isSelectedByOther"
+                        color="blue-2"
+                        text-color="blue-9"
+                        label="เลือกแล้ว"
+                      />
+                      <q-badge v-else color="orange-3" text-color="orange-9" label="ไม่ว่าง" />
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </app-select>
               <div
                 v-if="hasError(`locationId_${activeSlotIndex}_${rIdx}`)"
                 :key="`loc-${rIdx}-${shakeKey}`"
@@ -338,6 +361,8 @@ const props = defineProps<{
   locked?: boolean;
   /** Location options from the API */
   locationOptions: ExamLocationOption[];
+  /** Location IDs occupied by other exams on the same date+time */
+  occupiedLocationIds?: Set<number>;
   /** Proctor options (from API) */
   proctorOptions: { label: string; value: string }[];
   /** Currently active slot tab index */
@@ -441,9 +466,12 @@ const getLocationMaxSeats = (locationId: number | null): number => {
   return 0;
 };
 
-const getAvailableLocationOptions = (roomIndex: number): ExamLocationOption[] => {
+const getAvailableLocationOptions = (
+  roomIndex: number,
+): (ExamLocationOption & { disable?: boolean; isSelectedByOther?: boolean })[] => {
   if (!activeSlot.value) return props.locationOptions;
 
+  // Location IDs ที่ห้องอื่นใน slot เดียวกันเลือกไว้แล้ว
   const selectedByOtherRooms = new Set(
     activeSlot.value.rooms
       .filter((_, index) => index !== roomIndex)
@@ -451,7 +479,17 @@ const getAvailableLocationOptions = (roomIndex: number): ExamLocationOption[] =>
       .filter((locationId): locationId is number => locationId !== null),
   );
 
-  return props.locationOptions.filter((option) => !selectedByOtherRooms.has(option.value));
+  const occupied = props.occupiedLocationIds ?? new Set<number>();
+
+  return props.locationOptions.map((option) => {
+    const isSelectedByOther = selectedByOtherRooms.has(option.value);
+    const isOccupied = occupied.has(option.value);
+    return {
+      ...option,
+      disable: isOccupied || isSelectedByOther,
+      isSelectedByOther,
+    };
+  });
 };
 
 const onLocationChange = (room: ExamRoom, slotIdx: number, roomIdx: number): void => {
@@ -570,6 +608,12 @@ const getSlotLabel = (slot: TimeSlot, index: number): string => {
 .calendar-menu {
   border-radius: var(--radius-lg);
   overflow: hidden;
+}
+
+.location-disabled {
+  background-color: var(--neutral-100) !important;
+  cursor: not-allowed !important;
+  opacity: 0.8;
 }
 
 .proctors-select :deep(.q-field__native) {
