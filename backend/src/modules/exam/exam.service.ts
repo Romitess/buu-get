@@ -30,6 +30,9 @@ export class ExamService {
 
   async findAll(): Promise<Exam[]> {
     return await this.examRepository.find({
+      // โหลด relation แบบแยก query ต่อ relation แทน JOIN เดียว เพื่อเลี่ยง
+      // cartesian product (ENROLLMENTS x SESSION_LOCATIONS) ที่ทำให้ query ช้ามาก
+      relationLoadStrategy: 'query',
       order: {
         CREATED_AT: 'DESC',
       },
@@ -89,6 +92,10 @@ export class ExamService {
   async findOne(id: number): Promise<Exam> {
     const exam = await this.examRepository.findOne({
       where: { EXAM_ID: id },
+      // โหลด relation แบบแยก query ต่อ relation แทน JOIN เดียว เพื่อเลี่ยง
+      // cartesian product (ENROLLMENTS x SEATS x SESSION_LOCATIONS) ที่ทำให้
+      // endpoint /exam/:id ช้ามาก (วัดได้ ~131s บนรอบสอบใหญ่)
+      relationLoadStrategy: 'query',
       relations: [
         'SESSIONS',
         'SESSIONS.SESSION_LOCATIONS',
