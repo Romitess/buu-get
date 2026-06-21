@@ -16,6 +16,7 @@ import {
 } from '@nestjs/swagger';
 import { ExamLocationsService } from './exam-locations.service';
 import { CreateExamLocationDto } from './dto/create-exam-location.dto';
+import { CreateExamLocationWithSeatsDto } from './dto/create-exam-location-with-seats.dto';
 import { UpdateExamLocationDto } from './dto/update-exam-location.dto';
 import { ExamLocation } from './entities/exam-location.entity';
 
@@ -31,6 +32,21 @@ export class ExamLocationsController {
     @Body() createExamLocationDto: CreateExamLocationDto,
   ): Promise<ExamLocation> {
     return this.examLocationsService.create(createExamLocationDto);
+  }
+
+  @Post('with-seats')
+  @ApiOperation({
+    summary: 'Create an exam location and all seats in one transaction',
+  })
+  @ApiCreatedResponse({
+    description: 'Location and seats created successfully',
+  })
+  async createWithSeats(
+    @Body() createExamLocationWithSeatsDto: CreateExamLocationWithSeatsDto,
+  ): Promise<{ locationId: number; seatCount: number }> {
+    return this.examLocationsService.createWithSeats(
+      createExamLocationWithSeatsDto,
+    );
   }
 
   @Get()
