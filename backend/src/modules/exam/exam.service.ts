@@ -28,8 +28,21 @@ export class ExamService {
     return await this.examRepository.save(exam);
   }
 
+  /**
+   * เซ็ต virtual property SESSION.LOCATION เองหลังโหลด เพราะเมื่อใช้
+   * relationLoadStrategy: 'query' relation จะถูกโหลดแยกหลัง @AfterLoad ทำงานไปแล้ว
+   * hook populateLocation() ของ entity จึงไม่ทันเซ็ตค่าให้ (ทำให้สถานที่ขึ้น TBA)
+   */
+  private populateSessionLocations(exams: Exam[]): void {
+    for (const exam of exams) {
+      for (const session of exam.SESSIONS ?? []) {
+        session.populateLocation();
+      }
+    }
+  }
+
   async findAll(): Promise<Exam[]> {
-    return await this.examRepository.find({
+    const exams = await this.examRepository.find({
       // โหลด relation แบบแยก query ต่อ relation แทน JOIN เดียว เพื่อเลี่ยง
       // cartesian product (ENROLLMENTS x SESSION_LOCATIONS) ที่ทำให้ query ช้ามาก
       relationLoadStrategy: 'query',
@@ -87,6 +100,9 @@ export class ExamService {
         },
       },
     });
+
+    this.populateSessionLocations(exams);
+    return exams;
   }
 
   async findOne(id: number): Promise<Exam> {
@@ -111,6 +127,7 @@ export class ExamService {
       throw new NotFoundException(`Exam with ID ${id} not found`);
     }
 
+    this.populateSessionLocations([exam]);
     return exam;
   }
 
