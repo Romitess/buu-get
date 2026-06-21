@@ -45,6 +45,16 @@
         </div>
       </template>
     </BaseTable>
+
+    <DialogDeleteConfirm
+      v-model="isDeleteConfirmOpen"
+      :title="$t('admin.locationManagement.dialogs.deleteTitle')"
+      :message="$t('admin.locationManagement.dialogs.deleteMessage')"
+      :confirm-label="$t('profile.confirm')"
+      :cancel-label="$t('profile.cancel')"
+      :loading="isDeleting"
+      @confirm="handleDeleteConfirm"
+    />
   </q-page>
 </template>
 
@@ -59,6 +69,7 @@ import SearchBar from 'src/components/shared/search-bar.vue';
 import BaseTable from 'src/components/shared/base-table.vue';
 import ActionButton from 'src/components/shared/action-button.vue';
 import AppButton from 'src/components/base/app-button.vue';
+import DialogDeleteConfirm from 'src/components/exam/dialog-delete-confirm.vue';
 import type { BackendLocation } from 'src/types/exam';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import * as locationService from 'src/services/location.service';
@@ -70,6 +81,9 @@ const router = useRouter();
 const isLoading = ref(false);
 const searchQuery = ref('');
 const locations = ref<BackendLocation[]>([]);
+const isDeleteConfirmOpen = ref(false);
+const locationToDelete = ref<BackendLocation | null>(null);
+const isDeleting = ref(false);
 
 const pagination = ref<PaginationModel>({
   page: 1,
@@ -198,33 +212,32 @@ const navigateToEdit = (id: number) => {
 };
 
 const confirmDelete = (row: BackendLocation) => {
-  $q.dialog({
-    title: t('admin.locationManagement.dialogs.deleteTitle'),
-    message: t('admin.locationManagement.dialogs.deleteMessage'),
-    cancel: true,
-    persistent: true,
-  }).onOk(() => {
-    void (async () => {
-      isLoading.value = true;
-      try {
-        await locationService.deleteLocation(row.LOCATION_ID);
-        $q.notify({
-          type: 'positive',
-          message: t('admin.locationManagement.notifications.deleteSuccess'),
-          position: 'top',
-        });
-        await fetchData();
-      } catch {
-        $q.notify({
-          type: 'negative',
-          message: t('admin.locationManagement.notifications.deleteError'),
-          position: 'top',
-        });
-      } finally {
-        isLoading.value = false;
-      }
-    })();
-  });
+  locationToDelete.value = row;
+  isDeleteConfirmOpen.value = true;
+};
+
+const handleDeleteConfirm = async () => {
+  if (!locationToDelete.value) return;
+  isDeleting.value = true;
+  try {
+    await locationService.deleteLocation(locationToDelete.value.LOCATION_ID);
+    $q.notify({
+      type: 'positive',
+      message: t('admin.locationManagement.notifications.deleteSuccess'),
+      position: 'top',
+    });
+    await fetchData();
+    isDeleteConfirmOpen.value = false;
+  } catch {
+    $q.notify({
+      type: 'negative',
+      message: t('admin.locationManagement.notifications.deleteError'),
+      position: 'top',
+    });
+  } finally {
+    isDeleting.value = false;
+    locationToDelete.value = null;
+  }
 };
 
 onMounted(() => {
