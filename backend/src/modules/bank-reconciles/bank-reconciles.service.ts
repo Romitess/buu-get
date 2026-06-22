@@ -48,13 +48,17 @@ export interface BankReconcileImportResult {
 }
 
 export interface BankReconcileMatchResult {
+  TSR_ID: number;
+  TRANX_ID: number;
+  BR_ID: number | null;
   TSC_REF1: string;
   TSC_REF2: string | null;
-  TRANX_ID: number;
-  TRANX_AMOUNT: number;
-  USER_NATIONAL_ID: string;
-  userFullnameTh: string;
-  ERM_ID: number;
+  TSC_REF3: string | null;
+  TSC_REF4: string | null;
+  TSC_BANK_REF: string;
+  TSC_PARTNER_REF: string;
+  CREATED_AT: Date;
+  UPDATED_AT: Date;
 }
 
 interface TransactionStatusSnapshot {
@@ -393,26 +397,36 @@ export class BankReconcilesService {
   ): Promise<BankReconcileMatchResult[]> {
     if (!refs || refs.length === 0) return [];
 
+    const normalizedRefs = refs
+      .map((ref) => ({
+        ref1: ref.ref1?.trim() ?? '',
+        ref2: ref.ref2?.trim() ?? '',
+      }))
+      .filter((ref) => ref.ref1 || ref.ref2);
+
+    if (normalizedRefs.length === 0) return [];
+
     const queryBuilder = this.dataSource
       .createQueryBuilder()
       .select([
+        'tr.TSR_ID AS TSR_ID',
+        'tr.TRANX_ID AS TRANX_ID',
+        'tr.BR_ID AS BR_ID',
         'tr.TSC_REF1 AS TSC_REF1',
         'tr.TSC_REF2 AS TSC_REF2',
-        't.TRANX_ID AS TRANX_ID',
-        't.TRANX_AMOUNT AS TRANX_AMOUNT',
-        'u.USER_NATIONAL_ID AS USER_NATIONAL_ID',
-        'p.userFullnameTh AS userFullnameTh',
-        'e.ERM_ID AS ERM_ID',
+        'tr.TSC_REF3 AS TSC_REF3',
+        'tr.TSC_REF4 AS TSC_REF4',
+        'tr.TSC_BANK_REF AS TSC_BANK_REF',
+        'tr.TSC_PARTNER_REF AS TSC_PARTNER_REF',
+        'tr.CREATED_AT AS CREATED_AT',
+        'tr.UPDATED_AT AS UPDATED_AT',
       ])
       .from('FIN_T_TRANSACTIONS_REFS', 'tr')
-      .innerJoin('FIN_T_TRANSACTIONS', 't', 't.TRANX_ID = tr.TRANX_ID')
-      .innerJoin('EXAM_T_ENROLLMENTS', 'e', 'e.ERM_ID = t.ERM_ID')
-      .innerJoin('BUU_GET_T_USER', 'u', 'u.USER_ID = e.USER_ID')
-      .innerJoin('BUU_GET_T_USER_PROFILE', 'p', 'p.USER_ID = u.USER_ID');
+      .where('tr.DELETED_AT IS NULL');
 
-    queryBuilder.where(
+    queryBuilder.andWhere(
       new Brackets((qb) => {
-        refs.forEach((ref, index) => {
+        normalizedRefs.forEach((ref, index) => {
           if (ref.ref1 && ref.ref2) {
             qb.orWhere(
               `(tr.TSC_REF1 = :ref1_${index} AND tr.TSC_REF2 = :ref2_${index})`,
@@ -425,12 +439,16 @@ export class BankReconcilesService {
             qb.orWhere(`tr.TSC_REF1 = :ref1_${index}`, {
               [`ref1_${index}`]: ref.ref1,
             });
+          } else if (ref.ref2) {
+            qb.orWhere(`tr.TSC_REF2 = :ref2_${index}`, {
+              [`ref2_${index}`]: ref.ref2,
+            });
           }
         });
       }),
     );
 
-    return queryBuilder.getRawMany();
+    return queryBuilder.orderBy('tr.TSR_ID', 'ASC').getRawMany();
   }
 
   async confirmPayment(

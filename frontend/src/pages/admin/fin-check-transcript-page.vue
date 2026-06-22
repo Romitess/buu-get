@@ -50,7 +50,10 @@ import SearchUser from 'src/components/finance/search-user.vue';
 import FinSaveTranscription from 'src/components/finance/fin-save-transcription.vue';
 import FinCheckTranscriptTable from 'src/components/finance/fin-check-transcript-table.vue';
 import { globalImportedRows } from 'src/composables/use-payment-import';
-import { matchBankReconciles, type BankReconcileMatchResult } from 'src/services/bank-reconcile.service';
+import {
+  matchBankReconciles,
+  type BankReconcileMatchResult,
+} from 'src/services/bank-reconcile.service';
 import type { PaymentRow } from '../../types/exam.types';
 
 export interface ExtendedPaymentRow extends PaymentRow {
@@ -89,8 +92,14 @@ const loadData = async () => {
 
     transcriptRows.value = globalImportedRows.value.map((imported) => {
       const matched = matchedData.find((m) => {
-        const ref1Match = imported.applicantId && imported.applicantId !== '-' ? m.TSC_REF1 === imported.applicantId : true;
-        const ref2Match = imported.referenceNo && imported.referenceNo !== '-' ? m.TSC_REF2 === imported.referenceNo : true;
+        const ref1Match =
+          imported.applicantId && imported.applicantId !== '-'
+            ? m.TSC_REF1 === imported.applicantId
+            : true;
+        const ref2Match =
+          imported.referenceNo && imported.referenceNo !== '-'
+            ? m.TSC_REF2 === imported.referenceNo
+            : true;
         // Require at least one to match if both are present
         return ref1Match && ref2Match;
       });
@@ -103,12 +112,10 @@ const loadData = async () => {
         file_ref2: imported.referenceNo,
         file_payer: imported.payerName,
         file_amount: formatCurrency(imported.amount),
-        db_ref: matched ? matched.USER_NATIONAL_ID || String(matched.ERM_ID) : '',
-        db_ref2: matched ? String(matched.ERM_ID) : '',
-        db_name: matched ? matched.userFullnameTh || '-' : '',
-        db_amount: matched?.TRANX_AMOUNT
-          ? formatCurrency(matched.TRANX_AMOUNT)
-          : '',
+        db_ref: matched?.TSC_REF1 ?? '',
+        db_ref2: matched?.TSC_REF2 ?? '',
+        db_bank_ref: matched?.TSC_BANK_REF ?? '',
+        db_partner_ref: matched?.TSC_PARTNER_REF ?? '',
         tranxId: matched ? matched.TRANX_ID : null,
       };
     });
@@ -132,9 +139,10 @@ const filteredRows = computed(() => {
       row.file_payer.toLowerCase().includes(query) ||
       row.file_ref.includes(query) ||
       row.file_ref2.includes(query) ||
-      row.db_name.toLowerCase().includes(query) ||
       row.db_ref.includes(query) ||
-      row.db_ref2.includes(query)
+      row.db_ref2.includes(query) ||
+      row.db_bank_ref.toLowerCase().includes(query) ||
+      row.db_partner_ref.toLowerCase().includes(query)
     );
   });
 });
@@ -143,7 +151,15 @@ const hasUnresolvedRows = computed(() => {
   return transcriptRows.value.length === 0 || transcriptRows.value.some((row) => !row.db_ref);
 });
 
-const handleSaveRow = async ({ rowId, ref1, ref2 }: { rowId: number; ref1: string; ref2: string }) => {
+const handleSaveRow = async ({
+  rowId,
+  ref1,
+  ref2,
+}: {
+  rowId: number;
+  ref1: string;
+  ref2: string;
+}) => {
   const row = transcriptRows.value.find((r) => r.id === rowId);
   if (row) {
     row.file_ref = ref1;
@@ -153,12 +169,10 @@ const handleSaveRow = async ({ rowId, ref1, ref2 }: { rowId: number; ref1: strin
       const matchedData = await matchBankReconciles([{ ref1, ref2 }]);
       const matched = matchedData.length > 0 ? matchedData[0] : null;
 
-      row.db_ref = matched ? matched.USER_NATIONAL_ID || String(matched.ERM_ID) : '';
-      row.db_ref2 = matched ? String(matched.ERM_ID) : '';
-      row.db_name = matched ? matched.userFullnameTh || '-' : '';
-      row.db_amount = matched?.TRANX_AMOUNT
-        ? formatCurrency(matched.TRANX_AMOUNT)
-        : '';
+      row.db_ref = matched?.TSC_REF1 ?? '';
+      row.db_ref2 = matched?.TSC_REF2 ?? '';
+      row.db_bank_ref = matched?.TSC_BANK_REF ?? '';
+      row.db_partner_ref = matched?.TSC_PARTNER_REF ?? '';
       row.tranxId = matched ? matched.TRANX_ID : null;
     } catch (err) {
       console.error('Failed to re-match:', err);

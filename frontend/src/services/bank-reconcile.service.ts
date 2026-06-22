@@ -32,18 +32,20 @@ export interface BankReconcileImportResponse {
 }
 
 export interface BankReconcileMatchResult {
+  TSR_ID: number;
+  TRANX_ID: number;
+  BR_ID: number | null;
   TSC_REF1: string;
   TSC_REF2: string | null;
-  TRANX_ID: number;
-  TRANX_AMOUNT: number;
-  USER_NATIONAL_ID: string;
-  userFullnameTh: string;
-  ERM_ID: number;
+  TSC_REF3: string | null;
+  TSC_REF4: string | null;
+  TSC_BANK_REF: string;
+  TSC_PARTNER_REF: string;
+  CREATED_AT: string;
+  UPDATED_AT: string;
 }
 
-export const importBankReconcileFile = async (
-  file: File,
-): Promise<BankReconcileImportResponse> => {
+export const importBankReconcileFile = async (file: File): Promise<BankReconcileImportResponse> => {
   const formData = new FormData();
   formData.append('file', file);
 
@@ -70,10 +72,7 @@ export const fetchBankReconciles = async (): Promise<BackendBankReconcile[]> => 
 };
 
 export const verifyBankReconciles = async (): Promise<BackendBankReconcile[]> => {
-  const response = await api.post<BackendBankReconcile[]>(
-    '/bank-reconciles/verify',
-    undefined,
-  );
+  const response = await api.post<BackendBankReconcile[]>('/bank-reconciles/verify', undefined);
   return response.data;
 };
 
