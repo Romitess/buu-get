@@ -65,7 +65,7 @@
 
               <!-- Right: Details Grid -->
               <div class="detail-grid-column">
-                <div class="row q-col-gutter-y-sm full-height items-center">
+                <div class="row q-col-gutter-y-sm full-height items-start">
                   <!-- Column 1 -->
                   <div class="col-left detail-group">
                     <div class="info-group">
@@ -99,10 +99,10 @@
                     <div class="info-group">
                       <label class="info-label">Venue:</label>
                       <div class="info-value venue-value">
-                        <span>{{ voucherData.location }}</span>
-                        <span v-if="voucherData.locationRoom"
-                          >&nbsp;{{ voucherData.locationRoom }}</span
-                        >
+                        <span class="venue-location">{{ voucherData.location }}</span>
+                        <span v-if="voucherData.locationRoom" class="venue-room">{{
+                          voucherData.locationRoom
+                        }}</span>
                       </div>
                     </div>
                     <div class="info-group">
@@ -549,13 +549,13 @@ const windowPrint = (): void => {
 }
 
 .col-left {
-  width: 46%;
-  flex: 0 0 46%;
+  width: 38%;
+  flex: 0 0 38%;
 }
 
 .col-right {
-  width: 54%;
-  flex: 0 0 54%;
+  width: 62%;
+  flex: 0 0 62%;
 }
 
 .info-group {
@@ -593,9 +593,12 @@ const windowPrint = (): void => {
 }
 
 .info-value.venue-value {
-  display: block;
-  white-space: nowrap !important;
-  overflow: visible !important;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 6px;
+  white-space: normal !important;
+  overflow-wrap: break-word;
+  word-break: break-word;
   letter-spacing: -0.3px !important;
 }
 
