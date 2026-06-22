@@ -127,6 +127,13 @@ export const VERIFY_STATUS = {
 
 export const TRANSACTION_MATCH_STATUS = {
   MATCH: 1,
+  UNMATCH: 0,
+} as const;
+
+export const ReceiptStatus = {
+  UNISSUED : 0,
+  ISSUED   : 1,
+  VOIDED   : 2,
 } as const;
 
 export const HTTP_STATUS = {

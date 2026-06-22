@@ -106,7 +106,7 @@ export default {
     },
     card: {
       title: 'ใบเสร็จรับเงิน',
-      titleEn: 'RECEIPT COPY',
+      titleEn: 'RECEIPT',
       date: 'วันที่ (Date)',
       receiptNo: 'เลขที่ใบเสร็จรับเงิน (Receipt No.)',
       receivedFrom: 'ได้รับเงินจาก (Received from)',
@@ -138,7 +138,7 @@ export default {
       downloadError: 'เกิดข้อผิดพลาดในการสร้างใบเสร็จ กรุณาลองใหม่อีกครั้ง',
       card: {
         title: 'ใบเสร็จรับเงิน',
-        titleEn: 'RECEIPT COPY',
+        titleEn: 'RECEIPT',
         date: 'วันที่ (Date)',
         receiptNo: 'เลขที่ใบเสร็จรับเงิน (Receipt No.)',
         receivedFrom: 'ได้รับเงินจาก (Received from)',

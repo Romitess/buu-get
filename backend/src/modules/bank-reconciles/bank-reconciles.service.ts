@@ -1,17 +1,74 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { parse as parseCsv } from 'csv-parse/sync';
+import { Brackets, DataSource, In, IsNull, Repository } from 'typeorm';
+import * as XLSX from 'xlsx';
+import {
+  Transaction,
+  TransactionMatchStatus,
+  TransactionPaymentStatus,
+} from '../transactions/entities/transaction.entity';
+import { TransactionRef } from '../transaction-refs/entities/transaction-ref.entity';
+import { TransactionApiType } from '../transaction-status-history/entities/transaction-status-history.entity';
+import { ExamEnrollmentStatus } from '../exam-enrollments/entities/exam-enrollment.entity';
+import { ReceiptStatus } from '../receipts/entities/receipt.entity';
 import { BankReconcile } from './entities/bank-reconcile.entity';
 import {
   CreateBankReconcileDto,
   UpdateBankReconcileDto,
 } from './dto/bank-reconcile.dto';
 
+interface ImportPaymentRow {
+  applicantId: string;
+  referenceNo: string | null;
+  payerName: string;
+  amount: number;
+  paymentDate: string | null;
+  paymentTime: string | null;
+}
+
+interface RawPaymentRow {
+  applicantId?: unknown;
+  referenceNo?: unknown;
+  payerName?: unknown;
+  amount?: unknown;
+  paymentDate?: unknown;
+  paymentTime?: unknown;
+}
+
+export interface BankReconcileImportResult {
+  total: number;
+  imported: number;
+  skipped: number;
+  data: BankReconcile[];
+}
+
+export interface BankReconcileMatchResult {
+  TSC_REF1: string;
+  TSC_REF2: string | null;
+  TRANX_ID: number;
+  TRANX_AMOUNT: number;
+  USER_NATIONAL_ID: string;
+  userFullnameTh: string;
+  ERM_ID: number;
+}
+
+interface TransactionStatusSnapshot {
+  TRANX_ID: number | string;
+  TRANX_PAYMENT_STATUS: number | string;
+  ERM_ID: number | string | null;
+}
+
 @Injectable()
 export class BankReconcilesService {
   constructor(
     @InjectRepository(BankReconcile)
     private readonly bankReconcilesRepository: Repository<BankReconcile>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(
@@ -23,21 +80,139 @@ export class BankReconcilesService {
     return this.bankReconcilesRepository.save(bankReconcile);
   }
 
+  async importFile(
+    file: Express.Multer.File,
+    userId: number,
+  ): Promise<BankReconcileImportResult> {
+    if (!file) {
+      throw new BadRequestException('Payment import file is required');
+    }
+
+    const rows = this.parsePaymentFile(file);
+    const validRows: ImportPaymentRow[] = [];
+
+    for (const row of rows) {
+      const normalized = this.normalizeImportRow(row);
+      if (normalized) {
+        validRows.push(normalized);
+      }
+    }
+
+    const reconciles = this.bankReconcilesRepository.create(
+      validRows.map((row) => ({
+        CREATED_BY: userId,
+        BR_REF1: row.applicantId,
+        BR_REF2: row.referenceNo,
+        BR_REF3: row.paymentDate,
+        BR_REF4: row.paymentTime,
+        BR_AMOUNT: row.amount,
+        BR_PAID_BY: row.payerName,
+      })),
+    );
+
+    const saved = await this.bankReconcilesRepository.save(reconciles);
+
+    const data =
+      saved.length > 0
+        ? await this.bankReconcilesRepository.find({
+            where: { BR_ID: In(saved.map((s) => s.BR_ID)) },
+            relations: ['USER', 'USER.PROFILE', 'TRANSACTION'],
+          })
+        : [];
+
+    return {
+      total: rows.length,
+      imported: saved.length,
+      skipped: rows.length - saved.length,
+      data,
+    };
+  }
+
   async findAll(): Promise<BankReconcile[]> {
     return this.bankReconcilesRepository.find({
-      relations: ['USER', 'TRANSACTION'],
+      relations: ['USER', 'USER.PROFILE', 'TRANSACTION'],
+      where: { DELETED_AT: IsNull() },
+      order: { BR_ID: 'ASC' },
     });
   }
 
   async findOne(id: number): Promise<BankReconcile> {
     const bankReconcile = await this.bankReconcilesRepository.findOne({
       where: { BR_ID: id },
-      relations: ['USER', 'TRANSACTION'],
+      relations: ['USER', 'USER.PROFILE', 'TRANSACTION'],
     });
     if (!bankReconcile) {
       throw new NotFoundException(`BankReconcile with ID ${id} not found`);
     }
     return bankReconcile;
+  }
+
+  async verifyData(): Promise<BankReconcile[]> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const bankReconcileRepository =
+        queryRunner.manager.getRepository(BankReconcile);
+      const transactionRefRepository =
+        queryRunner.manager.getRepository(TransactionRef);
+      const transactionRepository =
+        queryRunner.manager.getRepository(Transaction);
+
+      const reconciles = await bankReconcileRepository.find({
+        where: { DELETED_AT: IsNull() },
+        order: { BR_ID: 'ASC' },
+      });
+
+      for (const reconcile of reconciles) {
+        const transactionRef = await transactionRefRepository.findOne({
+          where: {
+            TSC_REF1: reconcile.BR_REF1,
+            TSC_REF2: reconcile.BR_REF2 ?? IsNull(),
+          },
+          relations: ['TRANSACTION'],
+        });
+
+        if (!transactionRef) {
+          reconcile.TRANX_ID = null;
+          await bankReconcileRepository.save(reconcile);
+          continue;
+        }
+
+        const transaction = transactionRef.TRANSACTION;
+        const matchesAmount =
+          this.toCents(transaction.TRANX_AMOUNT) ===
+          this.toCents(reconcile.BR_AMOUNT);
+
+        transaction.TRANX_MATCH_STATUS = matchesAmount
+          ? TransactionMatchStatus.MATCH
+          : TransactionMatchStatus.MISSING;
+        await transactionRepository.save(transaction);
+
+        reconcile.TRANX_ID = transactionRef.TRANX_ID;
+        transactionRef.BR_ID = reconcile.BR_ID;
+
+        await bankReconcileRepository.save(reconcile);
+        await transactionRefRepository.save(transactionRef);
+      }
+
+      await queryRunner.commitTransaction();
+      return this.findAll();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async clearAll(): Promise<void> {
+    await this.bankReconcilesRepository
+      .createQueryBuilder()
+      .softDelete()
+      .where('1 = 1')
+      .execute();
   }
 
   async update(
@@ -52,5 +227,297 @@ export class BankReconcilesService {
   async remove(id: number): Promise<void> {
     const bankReconcile = await this.findOne(id);
     await this.bankReconcilesRepository.softRemove(bankReconcile);
+  }
+
+  private parsePaymentFile(file: Express.Multer.File): RawPaymentRow[] {
+    const extension = this.getFileExtension(file.originalname);
+
+    if (extension === 'csv') {
+      return parseCsv(file.buffer.toString('utf8'), {
+        columns: true,
+        skip_empty_lines: true,
+        trim: true,
+        bom: true,
+      });
+    }
+
+    if (extension === 'xlsx' || extension === 'xls') {
+      const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      if (!sheetName) {
+        return [];
+      }
+      const worksheet = workbook.Sheets[sheetName];
+      if (!worksheet) {
+        return [];
+      }
+      return XLSX.utils.sheet_to_json<RawPaymentRow>(worksheet, {
+        defval: '',
+      });
+    }
+
+    throw new BadRequestException(
+      'Only .csv, .xlsx, and .xls files are allowed',
+    );
+  }
+
+  private normalizeImportRow(row: RawPaymentRow): ImportPaymentRow | null {
+    const applicantId = this.toCellString(
+      this.getRowValue(row, [
+        'applicantId',
+        'applicant_id',
+        'applicantID',
+        'ApplicantID',
+        'ref1',
+        'ref_1',
+        'รหัสประจำตัวนักศึกษา (ref1)',
+        'รหัสประจำตัวนักศึกษา',
+      ]),
+    );
+    const referenceNo = this.toCellString(
+      this.getRowValue(row, [
+        'referenceNo',
+        'reference_no',
+        'referenceNo2',
+        'reference_no_2',
+        'ref2',
+        'ref_2',
+        'เลขอ้างอิงการชำระเงิน (ref2)',
+        'เลขอ้างอิงการชำระเงิน',
+      ]),
+    );
+    const payerName = this.toCellString(
+      this.getRowValue(row, [
+        'payerName',
+        'payer_name',
+        'payer',
+        'paidBy',
+        'paid_by',
+        'ผู้จ่ายเงิน',
+      ]),
+    );
+    const amountText = this.toCellString(
+      this.getRowValue(row, [
+        'amount',
+        'Amount',
+        'AMOUNT',
+        'paidAmount',
+        'paid_amount',
+        'จำนวนเงิน',
+      ]),
+    ).replace(/,/g, '');
+    const amount = Number(amountText);
+
+    const paymentDate = this.toCellString(
+      this.getRowValue(row, [
+        'paymentDate',
+        'payment_date',
+        'paymentdate',
+        'วันที่จ่ายเงิน',
+        'วันที่ชำระเงิน',
+        'วันที่จ่าย',
+        'วันที่ชำระ',
+      ]),
+    );
+    const paymentTime = this.toCellString(
+      this.getRowValue(row, [
+        'paymentTime',
+        'payment_time',
+        'paymenttime',
+        'เวลาจ่ายเงิน',
+        'เวลาชำระเงิน',
+        'เวลาจ่าย',
+        'เวลาชำระ',
+      ]),
+    );
+
+    if (!applicantId || !payerName || !amountText || Number.isNaN(amount)) {
+      return null;
+    }
+
+    return {
+      applicantId: applicantId.slice(0, 20),
+      referenceNo: referenceNo ? referenceNo.slice(0, 20) : null,
+      payerName: payerName.slice(0, 20),
+      amount,
+      paymentDate: paymentDate ? paymentDate.slice(0, 20) : null,
+      paymentTime: paymentTime ? paymentTime.slice(0, 20) : null,
+    };
+  }
+
+  private getRowValue(row: RawPaymentRow, aliases: string[]): unknown {
+    const normalizedAliases = aliases.map((alias) =>
+      alias.trim().toLowerCase(),
+    );
+
+    for (const [key, value] of Object.entries(row)) {
+      if (
+        normalizedAliases.includes(key.trim().toLowerCase()) &&
+        value !== undefined
+      ) {
+        return value;
+      }
+    }
+
+    return undefined;
+  }
+
+  private toCellString(value: unknown): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    if (value instanceof Date) {
+      return value.toISOString().trim();
+    }
+    if (
+      typeof value !== 'string' &&
+      typeof value !== 'number' &&
+      typeof value !== 'boolean' &&
+      typeof value !== 'bigint'
+    ) {
+      return '';
+    }
+    return String(value).trim();
+  }
+
+  private toCents(value: number | string): number {
+    return Math.round(Number(value) * 100);
+  }
+
+  private getFileExtension(filename: string): string {
+    return filename.split('.').pop()?.toLowerCase() ?? '';
+  }
+
+  async matchRefs(
+    refs: Array<{ ref1: string; ref2: string }>,
+  ): Promise<BankReconcileMatchResult[]> {
+    if (!refs || refs.length === 0) return [];
+
+    const queryBuilder = this.dataSource
+      .createQueryBuilder()
+      .select([
+        'tr.TSC_REF1 AS TSC_REF1',
+        'tr.TSC_REF2 AS TSC_REF2',
+        't.TRANX_ID AS TRANX_ID',
+        't.TRANX_AMOUNT AS TRANX_AMOUNT',
+        'u.USER_NATIONAL_ID AS USER_NATIONAL_ID',
+        'p.userFullnameTh AS userFullnameTh',
+        'e.ERM_ID AS ERM_ID',
+      ])
+      .from('FIN_T_TRANSACTIONS_REFS', 'tr')
+      .innerJoin('FIN_T_TRANSACTIONS', 't', 't.TRANX_ID = tr.TRANX_ID')
+      .innerJoin('EXAM_T_ENROLLMENTS', 'e', 'e.ERM_ID = t.ERM_ID')
+      .innerJoin('BUU_GET_T_USER', 'u', 'u.USER_ID = e.USER_ID')
+      .innerJoin('BUU_GET_T_USER_PROFILE', 'p', 'p.USER_ID = u.USER_ID');
+
+    queryBuilder.where(
+      new Brackets((qb) => {
+        refs.forEach((ref, index) => {
+          if (ref.ref1 && ref.ref2) {
+            qb.orWhere(
+              `(tr.TSC_REF1 = :ref1_${index} AND tr.TSC_REF2 = :ref2_${index})`,
+              {
+                [`ref1_${index}`]: ref.ref1,
+                [`ref2_${index}`]: ref.ref2,
+              },
+            );
+          } else if (ref.ref1) {
+            qb.orWhere(`tr.TSC_REF1 = :ref1_${index}`, {
+              [`ref1_${index}`]: ref.ref1,
+            });
+          }
+        });
+      }),
+    );
+
+    return queryBuilder.getRawMany();
+  }
+
+  async confirmPayment(
+    tranxIds: number[],
+  ): Promise<{ success: boolean; updated: number }> {
+    if (!tranxIds || tranxIds.length === 0) {
+      return { success: true, updated: 0 };
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const transactions = await queryRunner.manager
+        .createQueryBuilder()
+        .select([
+          't.TRANX_ID AS TRANX_ID',
+          't.TRANX_PAYMENT_STATUS AS TRANX_PAYMENT_STATUS',
+          't.ERM_ID AS ERM_ID',
+        ])
+        .from('FIN_T_TRANSACTIONS', 't')
+        .where('t.TRANX_ID IN (:...tranxIds)', { tranxIds })
+        .getRawMany<TransactionStatusSnapshot>();
+
+      // 1. Update Transactions
+      const updateTranxResult = await queryRunner.manager
+        .createQueryBuilder()
+        .update('FIN_T_TRANSACTIONS')
+        .set({
+          TRANX_PAYMENT_STATUS: TransactionPaymentStatus.APPROVED,
+          TRANX_MATCH_STATUS: TransactionMatchStatus.MATCH,
+        })
+        .where('TRANX_ID IN (:...tranxIds)', { tranxIds })
+        .execute();
+
+      // 2. Insert into History using the status before approval.
+      if (transactions.length > 0) {
+        await queryRunner.manager
+          .createQueryBuilder()
+          .insert()
+          .into('FIN_T_TRANSACTION_STATUS_HISTORY')
+          .values(
+            transactions.map((transaction) => ({
+              TRANX_ID: Number(transaction.TRANX_ID),
+              TSH_FROM: String(transaction.TRANX_PAYMENT_STATUS),
+              TSH_TO: String(TransactionPaymentStatus.APPROVED),
+              TSH_API_TYPE: TransactionApiType.APPROVE,
+              TSH_RESP_CODE: '00',
+              TSH_RESP_MESSAGE: 'SUCCESS',
+              CREATED_AT: new Date(),
+            })),
+          )
+          .execute();
+      }
+
+      // 3. Update Receipts
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update('FIN_T_RECEIPTS')
+        .set({
+          RC_STATUS: ReceiptStatus.ISSUED,
+        })
+        .where('TRANX_ID IN (:...tranxIds)', { tranxIds })
+        .execute();
+
+      // 4. Update Exam Enrollments
+      const ermIds = transactions
+        .map((transaction) => Number(transaction.ERM_ID))
+        .filter((ermId) => Number.isInteger(ermId) && ermId > 0);
+
+      if (ermIds.length > 0) {
+        await queryRunner.manager
+          .createQueryBuilder()
+          .update('EXAM_T_ENROLLMENTS')
+          .set({ ERM_STATUS: ExamEnrollmentStatus.PAID })
+          .where('ERM_ID IN (:...ermIds)', { ermIds })
+          .execute();
+      }
+
+      await queryRunner.commitTransaction();
+      return { success: true, updated: updateTranxResult.affected ?? 0 };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

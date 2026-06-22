@@ -1,0 +1,99 @@
+import { api } from 'src/boot/axios';
+
+export interface BackendBankReconcile {
+  BR_ID: number;
+  TRANX_ID: number | null;
+  CREATED_BY: number;
+  BR_REF1: string;
+  BR_REF2: string | null;
+  BR_REF3: string | null;
+  BR_REF4: string | null;
+  BR_AMOUNT: number | string;
+  BR_PAID_BY: string;
+  CREATED_AT: string;
+  UPDATED_AT: string;
+  DELETED_AT: string | null;
+  USER?: {
+    USER_ID: number;
+    USER_CODE: string | null;
+    USER_EMAIL: string;
+    PROFILE?: {
+      userFullnameTh: string | null;
+      userFullnameEn: string | null;
+    } | null;
+  } | null;
+}
+
+export interface BankReconcileImportResponse {
+  total: number;
+  imported: number;
+  skipped: number;
+  data: BackendBankReconcile[];
+}
+
+export interface BankReconcileMatchResult {
+  TSC_REF1: string;
+  TSC_REF2: string | null;
+  TRANX_ID: number;
+  TRANX_AMOUNT: number;
+  USER_NATIONAL_ID: string;
+  userFullnameTh: string;
+  ERM_ID: number;
+}
+
+export const importBankReconcileFile = async (
+  file: File,
+): Promise<BankReconcileImportResponse> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  console.log('[DEBUG] Uploading file:', file.name, file.size, file.type);
+  console.log('[DEBUG] FormData:', formData);
+
+  try {
+    console.log('[DEBUG] Sending POST request to /bank-reconciles/import');
+    const response = await api.post<BankReconcileImportResponse>(
+      '/bank-reconciles/import',
+      formData,
+    );
+    console.log('[DEBUG] Upload response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('[ERROR] Upload failed:', error);
+    throw error;
+  }
+};
+
+export const fetchBankReconciles = async (): Promise<BackendBankReconcile[]> => {
+  const response = await api.get<BackendBankReconcile[]>('/bank-reconciles');
+  return response.data;
+};
+
+export const verifyBankReconciles = async (): Promise<BackendBankReconcile[]> => {
+  const response = await api.post<BackendBankReconcile[]>(
+    '/bank-reconciles/verify',
+    undefined,
+  );
+  return response.data;
+};
+
+export const clearBankReconciles = async (): Promise<void> => {
+  await api.delete('/bank-reconciles');
+};
+
+export const matchBankReconciles = async (
+  refs: Array<{ ref1: string; ref2: string }>,
+): Promise<BankReconcileMatchResult[]> => {
+  const response = await api.post<BankReconcileMatchResult[]>('/bank-reconciles/match', { refs });
+  return response.data;
+};
+
+export const confirmBankReconcilePayments = async (
+  tranxIds: number[],
+): Promise<{ success: boolean; updated: number }> => {
+  const response = await api.post<{ success: boolean; updated: number }>(
+    '/bank-reconciles/confirm-payment',
+    { tranxIds },
+  );
+  return response.data;
+};
