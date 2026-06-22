@@ -113,7 +113,7 @@ export class Transaction {
   @Column({
     name: 'TRANX_PAYMENT_STATUS',
     type: 'int',
-    default: TransactionPaymentStatus.PAID,
+    default: TransactionPaymentStatus.PENDING,
     comment: 'สถานะการชำระเงิน',
   })
   TRANX_PAYMENT_STATUS: TransactionPaymentStatus;

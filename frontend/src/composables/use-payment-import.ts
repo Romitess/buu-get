@@ -1,5 +1,12 @@
-import { ref, computed } from 'vue';
-import { useUserStore } from 'src/stores/user.store';
+import { computed, onMounted, ref } from 'vue';
+import {
+  clearBankReconciles,
+  fetchBankReconciles,
+  importBankReconcileFile,
+  verifyBankReconciles,
+  type BackendBankReconcile,
+  type BankReconcileImportResponse,
+} from 'src/services/bank-reconcile.service';
 
 /** Row shape for the payment import table */
 export interface PaymentImportRow {
@@ -13,35 +20,26 @@ export interface PaymentImportRow {
   importedAt: string;
   importedBy: string;
 }
-// Global State
+
 export const globalImportedRows = ref<PaymentImportRow[]>([]);
 export const globalSelectedFile = ref<File | null>(null);
 
 /**
  * Composable for the "นำเข้าไฟล์การชำระเงิน" page.
- * Handles CSV/Excel file parsing and local state management.
+ * Handles import API calls and table state.
  */
 export function usePaymentImport() {
-  const userStore = useUserStore();
-
-  // Reference the global state so existing code works
   const importedRows = globalImportedRows;
   const selectedFile = globalSelectedFile;
 
   const isLoading = ref(false);
   const error = ref<string | null>(null);
   const searchQuery = ref('');
+  const skippedRows = ref(0);
 
   // คณะ/ส่วนงาน: สำนักคอมพิวเตอร์ (82994)
   const departmentLabel = ref('สำนักคอมพิวเตอร์ (82994)');
 
-  const currentUserName = computed(() => {
-    const user = userStore.currentUser;
-    if (!user) return 'ไม่ระบุชื่อ';
-    return user.fullNameTH || user.fullNameEN || user.email || 'ไม่ระบุชื่อ';
-  });
-
-  // Derived: search-filtered rows
   const filteredRows = computed((): PaymentImportRow[] => {
     const q = searchQuery.value.toLowerCase().trim();
     if (!q) return importedRows.value;
@@ -54,92 +52,95 @@ export function usePaymentImport() {
     );
   });
 
-  // Total row count
   const totalCount = computed((): number => importedRows.value.length);
 
-  /**
-   * Parse the uploaded CSV file into PaymentImportRow[].
-   * Expects columns: applicantId (Ref1), referenceNo (Ref2), payerName,
-   * paymentDate, paymentTime, amount
-   */
-  const parseFile = async (file: File): Promise<void> => {
+  const hasEmptyRows = computed((): boolean => {
+    return (
+      skippedRows.value > 0 ||
+      importedRows.value.some((row) => !row.applicantId.trim() || !row.amount.trim())
+    );
+  });
+
+  const loadData = async (): Promise<void> => {
+    isLoading.value = true;
+    error.value = null;
+
+    try {
+      const reconciles = await fetchBankReconciles();
+      importedRows.value = reconciles.map(mapBankReconcileToRow);
+      skippedRows.value = 0;
+    } catch (err) {
+      console.error('Failed to load payment imports:', err);
+      error.value = 'ไม่สามารถโหลดข้อมูลนำเข้าได้';
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const parseFile = async (file: File): Promise<BankReconcileImportResponse | void> => {
     isLoading.value = true;
     error.value = null;
     selectedFile.value = file;
 
+    console.log('[DEBUG] parseFile started with file:', file.name);
+
     try {
-      const text = await file.text();
-      const lines = text
-        .split('\n')
-        .map((l) => l.trim())
-        .filter((l) => l.length > 0);
-
-      // Skip the header row (first line)
-      const dataLines = lines.slice(1);
-      const now = new Date();
-      const importTimestamp = formatImportDate(now);
-
-      const parsed = dataLines.map((line, idx): PaymentImportRow => {
-        const cols = line.split(',').map((c) => c.trim().replace(/^"|"$/g, ''));
-        return {
-          index: idx + 1,
-          applicantId: cols[0] || '-',
-          referenceNo: cols[1] || '-',
-          payerName: cols[2] || '-',
-          paymentDate: cols[3] || '-',
-          paymentTime: cols[4] || '-',
-          amount: cols[5] || '0.00',
-          importedAt: importTimestamp,
-          importedBy: currentUserName.value,
-        };
-      });
-
-      for (const row of parsed) {
-        if (row.applicantId.length > 20) {
-          throw new Error(
-            `Ref 1 (รหัสผู้สมัคร) "${row.applicantId}" ในแถวที่ ${row.index} มีความยาวเกิน 20 ตัวอักษร (สูงสุด 20 ตัวอักษร)`,
-          );
-        }
-        if (row.referenceNo.length > 20) {
-          throw new Error(
-            `Ref 2 (เลขที่อ้างอิง) "${row.referenceNo}" ในแถวที่ ${row.index} มีความยาวเกิน 20 ตัวอักษร (สูงสุด 20 ตัวอักษร)`,
-          );
-        }
-      }
-
-      importedRows.value = parsed;
+      console.log('[DEBUG] Calling importBankReconcileFile...');
+      const result = await importBankReconcileFile(file);
+      console.log('[DEBUG] Import result:', result);
+      importedRows.value = result.data.map(mapBankReconcileToRow);
+      skippedRows.value = result.skipped;
+      console.log('[DEBUG] parseFile success! Rows:', importedRows.value.length);
+      return result;
     } catch (err) {
-      console.error('Failed to parse payment file:', err);
+      console.error('[ERROR] Failed to import payment file:', err);
       error.value =
-        err instanceof Error ? err.message : 'ไม่สามารถอ่านไฟล์ได้ กรุณาตรวจสอบรูปแบบไฟล์';
-      importedRows.value = [];
+        err instanceof Error ? err.message : 'ไม่สามารถนำเข้าไฟล์ได้ กรุณาตรวจสอบรูปแบบไฟล์';
       selectedFile.value = null;
     } finally {
       isLoading.value = false;
     }
   };
 
-  /** Clear all imported data */
-  const clearAllData = (): void => {
-    importedRows.value = [];
-    selectedFile.value = null;
-    error.value = null;
-  };
-
-  /** Verify imported data (placeholder for API call) */
-  const verifyData = (): void => {
+  const clearAllData = async (): Promise<void> => {
     isLoading.value = true;
+    error.value = null;
+
     try {
-      // TODO: Call backend API to verify/submit payment data
-      // await paymentService.verifyImportedPayments(importedRows.value);
-      console.log('Verifying data:', importedRows.value.length, 'records');
+      await clearBankReconciles();
+      importedRows.value = [];
+      selectedFile.value = null;
+      skippedRows.value = 0;
+      searchQuery.value = '';
     } catch (err) {
-      console.error('Verification failed:', err);
-      error.value = 'การตรวจสอบข้อมูลล้มเหลว';
+      console.error('Failed to clear payment imports:', err);
+      error.value = 'ไม่สามารถลบข้อมูลได้';
+      throw err;
     } finally {
       isLoading.value = false;
     }
   };
+
+  const verifyData = async (): Promise<void> => {
+    isLoading.value = true;
+    error.value = null;
+
+    try {
+      const reconciles = await verifyBankReconciles();
+      importedRows.value = reconciles.map(mapBankReconcileToRow);
+      skippedRows.value = 0;
+    } catch (err) {
+      console.error('Verification failed:', err);
+      error.value = 'การตรวจสอบข้อมูลล้มเหลว';
+      throw err;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  onMounted(() => {
+    void loadData();
+  });
 
   return {
     importedRows,
@@ -150,18 +151,45 @@ export function usePaymentImport() {
     selectedFile,
     departmentLabel,
     totalCount,
+    hasEmptyRows,
+    loadData,
     parseFile,
     clearAllData,
     verifyData,
   };
 }
 
-// ── Helpers ───────────────────────────────────────────────
+function mapBankReconcileToRow(item: BackendBankReconcile, index: number): PaymentImportRow {
+  return {
+    index: index + 1,
+    applicantId: item.BR_REF1 ?? '',
+    referenceNo: item.BR_REF2 ?? '',
+    payerName: item.BR_PAID_BY ?? '',
+    paymentDate: item.BR_REF3 ?? '-',
+    paymentTime: item.BR_REF4 ?? '-',
+    amount: formatAmount(item.BR_AMOUNT),
+    importedAt: item.CREATED_AT ? formatImportDate(new Date(item.CREATED_AT)) : '-',
+    importedBy: item.USER?.PROFILE?.userFullnameTh || item.USER?.USER_EMAIL || String(item.CREATED_BY),
+  };
+}
+
+function formatAmount(value: number | string): string {
+  const amount = Number(value);
+  if (Number.isNaN(amount)) {
+    return '';
+  }
+  return amount.toFixed(2);
+}
+
 function formatImportDate(date: Date): string {
+  if (Number.isNaN(date.getTime())) {
+    return '-';
+  }
+
   const pad = (n: number): string => String(n).padStart(2, '0');
   const day = pad(date.getDate());
   const month = pad(date.getMonth() + 1);
-  const year = date.getFullYear() + 543; // Buddhist era
+  const year = date.getFullYear() + 543;
   const hours = pad(date.getHours());
   const minutes = pad(date.getMinutes());
   return `${day}/${month}/${year} ${hours}:${minutes}`;

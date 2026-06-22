@@ -7,7 +7,10 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  StreamableFile,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ReceiptsService } from './receipts.service';
 import { CreateReceiptDto, UpdateReceiptDto } from './dto/receipt.dto';
@@ -73,5 +76,22 @@ export class ReceiptsController {
   @ApiResponse({ status: 404, description: 'ไม่พบใบเสร็จ' })
   remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.receiptsService.remove(id);
+  }
+
+  @Get(':tranxId/download')
+  @ApiOperation({ summary: 'ดาวน์โหลดใบเสร็จรับเงินด้วยรหัสธุรกรรม' })
+  @ApiResponse({ status: 200, description: 'ไฟล์ใบเสร็จรับเงิน PDF' })
+  @ApiResponse({ status: 403, description: 'ใบเสร็จยังไม่ออก' })
+  @ApiResponse({ status: 404, description: 'ไม่พบใบเสร็จ' })
+  async downloadReceipt(
+    @Param('tranxId', ParseIntPipe) tranxId: number,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    const buffer = await this.receiptsService.downloadReceipt(tranxId);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="receipt-${tranxId}.pdf"`,
+    });
+    return new StreamableFile(buffer);
   }
 }

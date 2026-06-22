@@ -33,6 +33,7 @@
         <ExportCsvButton
           :columns="columns"
           :rows="currentRoomEnrollments"
+          :load-rows="loadExportRows"
           file-name-prefix="exam-registrants"
           class="export-btn"
         />
@@ -124,8 +125,13 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import { useExamRegistrants } from 'src/composables/use-exam-registrants';
 import { fetchExamById } from 'src/services/exam.service';
+import { fetchEnrollmentsByExamId } from 'src/services/enrollment.service';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
-import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollment.types';
+import {
+  PAYMENT_STATUS_LABELS,
+  VERIFY_STATUS_LABELS,
+  type EnrollmentTableRow,
+} from 'src/types/enrollment.types';
 
 const route = useRoute();
 const router = useRouter();
@@ -323,6 +329,35 @@ const loadData = async (): Promise<void> => {
 
     pagination.value.rowsNumber = totalRows.value;
   }
+};
+
+const loadExportRows = async (): Promise<EnrollmentTableRow[]> => {
+  const examId = Number(route.params.examId);
+  if (isNaN(examId) || examId <= 0) {
+    return [];
+  }
+
+  const totalResult = await fetchEnrollmentsByExamId(examId, {
+    page: 1,
+    limit: 1,
+    search: searchQuery.value,
+    sessionId: selectedSessionId.value,
+    sessionLocationId: null,
+  });
+
+  if (Array.isArray(totalResult) || totalResult.total === 0) {
+    return [];
+  }
+
+  const exportResult = await fetchEnrollmentsByExamId(examId, {
+    page: 1,
+    limit: totalResult.total,
+    search: searchQuery.value,
+    sessionId: selectedSessionId.value,
+    sessionLocationId: null,
+  });
+
+  return Array.isArray(exportResult) ? exportResult : exportResult.data;
 };
 
 const debouncedLoadData = debounce(loadData, 400);

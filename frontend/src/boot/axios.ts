@@ -26,6 +26,24 @@ const api = axios.create({
   },
 });
 
+// Request interceptor to automatically add JWT token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // Remove Content-Type header for FormData (let browser set it automatically with boundary)
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
+    return config;
+  },
+  (error: Error) => Promise.reject(error),
+);
+
 export default boot(({ app }) => {
   app.config.globalProperties.$axios = axios;
   app.config.globalProperties.$api = api;

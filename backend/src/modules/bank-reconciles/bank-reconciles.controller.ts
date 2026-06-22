@@ -1,37 +1,72 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
   Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  ParseIntPipe,
+  Request,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { BankReconcilesService } from './bank-reconciles.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
-  CreateBankReconcileDto,
-  UpdateBankReconcileDto,
-} from './dto/bank-reconcile.dto';
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  BankReconcileImportResult,
+  BankReconcileMatchResult,
+  BankReconcilesService,
+} from './bank-reconciles.service';
 import { BankReconcile } from './entities/bank-reconcile.entity';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RoleEnum } from '../roles/enums/role.enum';
+
+interface AuthenticatedRequest {
+  user: {
+    userId: number;
+    email: string;
+    role: RoleEnum;
+  };
+}
 
 @ApiTags('Bank Reconciles')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('bank-reconciles')
 export class BankReconcilesController {
   constructor(private readonly bankReconcilesService: BankReconcilesService) {}
 
-  @Post()
-  @ApiOperation({ summary: 'สร้างรายการกระทบยอดธนาคารใหม่' })
+  @Post('import')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'นำเข้าไฟล์รายการชำระเงินจากธนาคาร' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @ApiResponse({
     status: 201,
-    description: 'สร้างรายการกระทบยอดธนาคารสำเร็จ',
-    type: BankReconcile,
+    description: 'นำเข้าไฟล์รายการชำระเงินสำเร็จ',
   })
-  create(
-    @Body() createBankReconcileDto: CreateBankReconcileDto,
-  ): Promise<BankReconcile> {
-    return this.bankReconcilesService.create(createBankReconcileDto);
+  importFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Request() request: AuthenticatedRequest,
+  ): Promise<BankReconcileImportResult> {
+    return this.bankReconcilesService.importFile(file, request.user.userId);
   }
 
   @Get()
@@ -45,41 +80,70 @@ export class BankReconcilesController {
     return this.bankReconcilesService.findAll();
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'ดึงข้อมูลรายการกระทบยอดธนาคารด้วย ID' })
+  @Post('verify')
+  @ApiOperation({ summary: 'ตรวจสอบและจับคู่ข้อมูลการชำระเงิน' })
   @ApiResponse({
-    status: 200,
-    description: 'ข้อมูลรายการกระทบยอดธนาคารที่พบ',
-    type: BankReconcile,
+    status: 201,
+    description: 'ตรวจสอบข้อมูลการชำระเงินสำเร็จ',
+    type: [BankReconcile],
   })
-  @ApiResponse({ status: 404, description: 'ไม่พบรายการกระทบยอดธนาคาร' })
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<BankReconcile> {
-    return this.bankReconcilesService.findOne(id);
+  verifyData(): Promise<BankReconcile[]> {
+    return this.bankReconcilesService.verifyData();
   }
 
-  @Patch(':id')
-  @ApiOperation({ summary: 'แก้ไขข้อมูลรายการกระทบยอดธนาคาร' })
+  @Delete()
+  @ApiOperation({ summary: 'ลบข้อมูลนำเข้าทั้งหมดแบบ Soft delete' })
   @ApiResponse({
     status: 200,
-    description: 'แก้ไขรายการกระทบยอดธนาคารสำเร็จ',
-    type: BankReconcile,
+    description: 'ลบข้อมูลนำเข้าทั้งหมดสำเร็จ',
   })
-  @ApiResponse({ status: 404, description: 'ไม่พบรายการกระทบยอดธนาคาร' })
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateBankReconcileDto: UpdateBankReconcileDto,
-  ): Promise<BankReconcile> {
-    return this.bankReconcilesService.update(id, updateBankReconcileDto);
+  clearAll(): Promise<void> {
+    return this.bankReconcilesService.clearAll();
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'ลบข้อมูลรายการกระทบยอดธนาคาร (Soft delete)' })
-  @ApiResponse({
-    status: 200,
-    description: 'ลบรายการกระทบยอดธนาคารสำเร็จ',
+  @Post('match')
+  @ApiOperation({ summary: 'จับคู่รายการจากไฟล์กับระบบ' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        refs: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              ref1: { type: 'string' },
+              ref2: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
   })
-  @ApiResponse({ status: 404, description: 'ไม่พบรายการกระทบยอดธนาคาร' })
-  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.bankReconcilesService.remove(id);
+  @ApiResponse({ status: 200, description: 'Matched data returned' })
+  matchRefs(
+    @Body('refs') refs: Array<{ ref1: string; ref2: string }>,
+  ): Promise<BankReconcileMatchResult[]> {
+    return this.bankReconcilesService.matchRefs(refs);
+  }
+
+  @Post('confirm-payment')
+  @ApiOperation({ summary: 'ยืนยันการชำระเงินและเปลี่ยนสถานะ' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        tranxIds: {
+          type: 'array',
+          items: { type: 'number' },
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Confirmed successfully' })
+  confirmPayment(
+    @Body('tranxIds') tranxIds: number[],
+  ): Promise<{ success: boolean; updated: number }> {
+    return this.bankReconcilesService.confirmPayment(tranxIds);
   }
 }

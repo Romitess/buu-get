@@ -88,13 +88,13 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { confirmBankReconcilePayments } from 'src/services/bank-reconcile.service';
+
 import type { PaymentRow } from 'src/types/exam.types';
-import { updateEnrollmentStatus } from 'src/services/enrollment.service';
-import { updateTransactionByErmId } from 'src/services/transaction.service';
 
 const props = defineProps<{
   disabled?: boolean;
-  rows?: PaymentRow[];
+  rows?: (PaymentRow & { tranxId?: number | null })[];
 }>();
 
 const { t } = useI18n();
@@ -107,18 +107,13 @@ const onConfirm = async () => {
   isLoading.value = true;
   try {
     if (props.rows) {
-      // Process all matched rows to update enrollment status to PAID (1) and transaction match status to APPROVED (1)
-      const promises = props.rows
-        .filter((row) => row.db_ref2)
-        .flatMap((row) => {
-          const ermId = Number(row.db_ref2);
-          return [
-            updateEnrollmentStatus(ermId, { ERM_STATUS: 1 }),
-            updateTransactionByErmId(ermId, { TRANX_MATCH_STATUS: 1 }),
-          ];
-        });
+      const tranxIds = props.rows
+        .filter((row) => row.tranxId)
+        .map((row) => Number(row.tranxId));
 
-      await Promise.all(promises);
+      if (tranxIds.length > 0) {
+        await confirmBankReconcilePayments(tranxIds);
+      }
     }
     showConfirm.value = false;
     showSuccess.value = true;
