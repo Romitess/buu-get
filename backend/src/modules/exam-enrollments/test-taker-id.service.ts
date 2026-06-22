@@ -6,6 +6,7 @@ import {
 } from './entities/exam-enrollment.entity';
 import { Exam } from '../exam/entities/exam.entity';
 import { UserPhysicalStatus } from '../user-profile/entities/user-profile.entity';
+import { ExamLocationSeat } from '../exam-location-seats/entities/exam-location-seat.entity';
 
 const MAX_TEST_TAKER_SEQUENCE = 999;
 
@@ -55,7 +56,7 @@ export class TestTakerIdService {
         .getMany();
 
       const sortedEnrollments = allEligibleEnrollments.sort((left, right) => {
-        return this.compareBySeatLabel(left, right);
+        return this.compareByExamSchedule(left, right);
       });
 
       if (sortedEnrollments.length > MAX_TEST_TAKER_SEQUENCE) {
@@ -76,19 +77,7 @@ export class TestTakerIdService {
       }
 
       const codePrefix = this.buildPrefix(exam);
-      const enrollmentsToSave = selectedForExam.filter(
-        (enrollment) => !enrollment.ERM_TEST_TAKER,
-      );
-      const assignedCodeOwners = new Map(
-        allEligibleEnrollments
-          .filter((enrollment) => Boolean(enrollment.ERM_TEST_TAKER))
-          .map((enrollment) => [
-            enrollment.ERM_TEST_TAKER as string,
-            enrollment.ERM_ID,
-          ]),
-      );
-
-      for (const enrollment of enrollmentsToSave) {
+      for (const enrollment of allEligibleEnrollments) {
         const sequence = sequenceByErmId.get(enrollment.ERM_ID);
         if (!sequence) {
           throw new BadRequestException(
@@ -99,19 +88,13 @@ export class TestTakerIdService {
         const testTakerId = `${codePrefix}${this.getApplicantType(enrollment)}${sequence
           .toString()
           .padStart(3, '0')}`;
-        const existingOwner = assignedCodeOwners.get(testTakerId);
-        if (existingOwner && existingOwner !== enrollment.ERM_ID) {
-          throw new BadRequestException(
-            `Test taker ID ${testTakerId} is already assigned to enrollment ${existingOwner}`,
-          );
-        }
-
         enrollment.ERM_TEST_TAKER = testTakerId;
-        assignedCodeOwners.set(testTakerId, enrollment.ERM_ID);
       }
 
-      if (enrollmentsToSave.length > 0) {
-        await manager.getRepository(ExamEnrollment).save(enrollmentsToSave);
+      if (allEligibleEnrollments.length > 0) {
+        await manager
+          .getRepository(ExamEnrollment)
+          .save(allEligibleEnrollments);
       }
     }
   }
@@ -138,25 +121,62 @@ export class TestTakerIdService {
     return `${examYearCode}${examTypeCode}${examSequenceCode}`;
   }
 
-  private compareBySeatLabel(
+  private compareByExamSchedule(
     left: ExamEnrollment,
     right: ExamEnrollment,
   ): number {
-    const leftLabel = left.LOCATION_SEAT?.LS_SEAT_LABEL;
-    const rightLabel = right.LOCATION_SEAT?.LS_SEAT_LABEL;
-    const leftPosition = this.parseSeatLabel(leftLabel);
-    const rightPosition = this.parseSeatLabel(rightLabel);
-
-    if (!leftPosition || !rightPosition) {
+    const leftStartTime = left.SESSION?.SS_START_TIME;
+    const rightStartTime = right.SESSION?.SS_START_TIME;
+    if (!leftStartTime || !rightStartTime) {
       throw new BadRequestException(
-        `Seat label is required to create a test taker ID for enrollment ${!leftPosition ? left.ERM_ID : right.ERM_ID}`,
+        `Session start time is required to create a test taker ID for enrollment ${!leftStartTime ? left.ERM_ID : right.ERM_ID}`,
+      );
+    }
+
+    const leftSessionLocationId = left.SL_ID;
+    const rightSessionLocationId = right.SL_ID;
+    if (!leftSessionLocationId || !rightSessionLocationId) {
+      throw new BadRequestException(
+        `Session location is required to create a test taker ID for enrollment ${!leftSessionLocationId ? left.ERM_ID : right.ERM_ID}`,
+      );
+    }
+
+    const leftSeat = left.LOCATION_SEAT;
+    const rightSeat = right.LOCATION_SEAT;
+    if (!leftSeat || !rightSeat) {
+      throw new BadRequestException(
+        `Seat is required to create a test taker ID for enrollment ${!leftSeat ? left.ERM_ID : right.ERM_ID}`,
       );
     }
 
     return (
-      leftPosition.letterOrder - rightPosition.letterOrder ||
-      leftPosition.numberOrder - rightPosition.numberOrder ||
+      leftStartTime.localeCompare(rightStartTime) ||
+      leftSessionLocationId - rightSessionLocationId ||
+      this.compareSeatsByLabel(leftSeat, rightSeat) ||
       left.ERM_ID - right.ERM_ID
+    );
+  }
+
+  private compareSeatsByLabel(
+    left: ExamLocationSeat,
+    right: ExamLocationSeat,
+  ): number {
+    const leftPosition = this.parseSeatLabel(left.LS_SEAT_LABEL);
+    const rightPosition = this.parseSeatLabel(right.LS_SEAT_LABEL);
+
+    if (leftPosition && rightPosition) {
+      return (
+        leftPosition.letterOrder - rightPosition.letterOrder ||
+        leftPosition.numberOrder - rightPosition.numberOrder
+      );
+    }
+    if (leftPosition) return -1;
+    if (rightPosition) return 1;
+
+    return (
+      left.LS_ROW_NO - right.LS_ROW_NO ||
+      left.LS_COL_NO - right.LS_COL_NO ||
+      left.LS_ID - right.LS_ID
     );
   }
 
