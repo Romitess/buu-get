@@ -61,7 +61,8 @@ import { ExamReportModule } from './modules/exam-report/exam-report.module';
           autoLoadEntities: true,
           synchronize: false,
           // dropSchema: false,
-          migrationsRun: true,
+          // TEMP: ปิด auto-run migration ตอน boot เพื่อทดสอบว่าต้นเหตุ timeout คือ migration AlterAttendanceStatusToTinyint หรือไม่
+          migrationsRun: false,
           migrations: ['dist/database/migrations/*.js'],
         }) as TypeOrmModuleOptions,
     }),
