@@ -149,44 +149,12 @@
               </div>
             </div>
 
-            <div class="walkway-row">
-              <div class="buu-label-muted">
-                {{ $t('admin.locationManagement.createPage.fields.walkway') }}
-              </div>
-              <div class="walkway-control-row">
-                <div
-                  v-if="selectedWalkwayPositions.length > 0"
-                  class="walkway-chip-row"
-                  :class="{ 'walkway-chip-row--scroll': selectedWalkwayPositions.length > 2 }"
-                >
-                  <div
-                    v-for="position in selectedWalkwayPositions"
-                    :key="`${position.type}-${position.index}`"
-                    class="walkway-chip"
-                  >
-                    <span class="walkway-chip-label">{{ getWalkwayPositionLabel(position) }}</span>
-                    <button
-                      type="button"
-                      class="walkway-chip-remove"
-                      aria-label="Remove walkway"
-                      @click="removeWalkwayPosition(position)"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-                <AppButton
-                  outline
-                  dense
-                  no-caps
-                  color="primary"
-                  icon="add"
-                  :label="$t('admin.locationManagement.createPage.actions.addWalkway')"
-                  class="walkway-add-btn"
-                  @click="isWalkwayDialogOpen = true"
-                />
-              </div>
-            </div>
+            <AppLocationWalkwayControls
+              :positions="selectedWalkwayPositions"
+              :numbering-direction="seatNumberDirection"
+              @add="isWalkwayDialogOpen = true"
+              @remove="removeWalkwayPosition"
+            />
 
             <div class="total-seats-box rounded-borders total-seats-offset">
               <div class="total-seats-content">
@@ -230,8 +198,8 @@ import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
-import AppButton from 'src/components/base/app-button.vue';
 import AppLocationSeatPreviewPanel from 'src/components/exam/app-location-seat-preview-panel.vue';
+import AppLocationWalkwayControls from 'src/components/exam/app-location-walkway-controls.vue';
 import AppWalkwayPositionDialog from 'src/components/exam/app-walkway-position-dialog.vue';
 import { api } from 'src/boot/axios';
 import { fetchLocationById, updateLocation } from 'src/services/location.service';
@@ -365,28 +333,6 @@ const validateForm = (): boolean => {
   formErrors.value = errors;
 
   return Object.keys(errors).length === 0;
-};
-
-const rowGuideLabel = (index: number): string => {
-  const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
-  if (seatNumberDirection.value === 'horizontal') return rowLetters[index - 1] ?? `${index}`;
-
-  return `${index}`;
-};
-
-const columnGuideLabel = (index: number): string => {
-  const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
-  if (seatNumberDirection.value === 'horizontal') return `${index}`;
-
-  return rowLetters[index - 1] ?? `${index}`;
-};
-
-const getWalkwayPositionLabel = (position: WalkwayPosition): string => {
-  if (position.type === 'row') return `หลังแถว ${rowGuideLabel(position.index)}`;
-
-  return `หลังคอลัมน์ ${columnGuideLabel(position.index)}`;
 };
 
 const parseWalkwayPosition = (positionValue: string): WalkwayPosition | null => {
@@ -706,7 +652,7 @@ onMounted(() => {
   padding: 0 6px;
   border-radius: 12px;
   border: 1px solid #dddddd;
-  background: #ffffff !important;
+  background: #ffffff;
   color: #111111;
   font-family: 'Sarabun', sans-serif;
   font-size: 12px;
@@ -754,11 +700,11 @@ onMounted(() => {
   padding: 0 8px;
   gap: 0;
   border-radius: 12px;
-  color: var(--primary, #0d47a1) !important;
-  background: #ffffff !important;
+  color: var(--primary, #0d47a1);
+  background: #ffffff;
 
   &::before {
-    border: 1px solid var(--primary, #0d47a1) !important;
+    border: 1px solid var(--primary, #0d47a1);
   }
 
   :deep(.q-btn__content) {

@@ -80,8 +80,8 @@ export interface PaymentRow {
   file_amount: string;
   db_ref: string;
   db_ref2: string;
-  db_name: string;
-  db_amount: string;
+  db_bank_ref: string;
+  db_partner_ref: string;
 }
 
 export interface SearchRow {

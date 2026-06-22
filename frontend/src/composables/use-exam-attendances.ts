@@ -147,7 +147,7 @@ export function useExamAttendances() {
           const checkInTimeStr = attendanceRecord?.ATTEND_CHECK_IN_TIME;
 
           const status: ExamAttendStatus = attendanceRecord
-            ? attendanceRecord.ATTEND_STATUS
+            ? Number(attendanceRecord.ATTEND_STATUS)
             : ExamAttendStatus.MISSING;
 
           return {

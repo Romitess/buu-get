@@ -106,7 +106,7 @@ export default {
     },
     card: {
       title: 'ใบเสร็จรับเงิน',
-      titleEn: 'RECEIPT COPY',
+      titleEn: 'RECEIPT',
       date: 'วันที่ (Date)',
       receiptNo: 'เลขที่ใบเสร็จรับเงิน (Receipt No.)',
       receivedFrom: 'ได้รับเงินจาก (Received from)',
@@ -138,7 +138,7 @@ export default {
       downloadError: 'เกิดข้อผิดพลาดในการสร้างใบเสร็จ กรุณาลองใหม่อีกครั้ง',
       card: {
         title: 'ใบเสร็จรับเงิน',
-        titleEn: 'RECEIPT COPY',
+        titleEn: 'RECEIPT',
         date: 'วันที่ (Date)',
         receiptNo: 'เลขที่ใบเสร็จรับเงิน (Receipt No.)',
         receivedFrom: 'ได้รับเงินจาก (Received from)',
@@ -952,9 +952,13 @@ export default {
     },
     finCheckTranscript: {
       pageTitle: 'ตรวจสอบข้อมูลการชำระเงิน',
-      searchPlaceholder: 'ค้นหาชื่อผู้จ่ายเงิน, ชื่อผู้สมัคร หรือรหัสอ้างอิง...',
+      searchPlaceholder: 'ค้นหาชื่อผู้จ่ายเงิน หรือรหัสอ้างอิง...',
       titleFile: 'ไฟล์จ่ายเงิน',
-      titleDb: 'ฐานข้อมูล',
+      titleDb: 'ฐานข้อมูล (FIN_T_TRANSACTIONS_REFS)',
+      ref1: 'TSC_REF1',
+      ref2: 'TSC_REF2',
+      bankRef: 'TSC_BANK_REF',
+      partnerRef: 'TSC_PARTNER_REF',
       noData: 'ไม่พบข้อมูล',
       editTooltip: 'แก้ไข/จับคู่ข้อมูล',
       dialogTitle: 'แก้ไขไฟล์จ่ายเงิน',
@@ -1342,6 +1346,7 @@ export default {
     exportCsv: {
       noData: 'ไม่มีข้อมูลสำหรับการส่งออก',
       blocked: 'การส่งออกไฟล์ถูกระงับโดยเบราว์เซอร์',
+      loadError: 'ไม่สามารถโหลดข้อมูลสำหรับส่งออกได้',
     },
     imageCropper: {
       title: 'ปรับแต่งรูปภาพ',

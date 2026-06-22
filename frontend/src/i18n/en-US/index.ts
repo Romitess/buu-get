@@ -818,9 +818,13 @@ export default {
     },
     finCheckTranscript: {
       pageTitle: 'Verify Payment Transcripts',
-      searchPlaceholder: 'Search payer name, applicant name or reference...',
+      searchPlaceholder: 'Search payer name or reference...',
       titleFile: 'Payment File',
-      titleDb: 'Database',
+      titleDb: 'Database (FIN_T_TRANSACTIONS_REFS)',
+      ref1: 'TSC_REF1',
+      ref2: 'TSC_REF2',
+      bankRef: 'TSC_BANK_REF',
+      partnerRef: 'TSC_PARTNER_REF',
       noData: 'Data not found',
       editTooltip: 'Edit/Match Data',
       dialogTitle: 'Edit Payment File',
@@ -1108,6 +1112,7 @@ export default {
     exportCsv: {
       noData: 'No data available for export',
       blocked: 'Export was blocked by the browser',
+      loadError: 'Unable to load data for export',
     },
     imageCropper: {
       title: 'Adjust image',

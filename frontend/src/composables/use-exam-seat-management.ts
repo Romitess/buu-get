@@ -143,12 +143,21 @@ export function useExamSeatManagement() {
 
   const sessionTimeTabs = computed<BackendSession[]>(() => {
     const seen = new Set<string>();
-    return sessions.value.filter((session) => {
-      const key = getSessionTimeKey(session);
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    return [...sessions.value]
+      .sort((left, right) => {
+        const startTimeComparison = (left.SS_START_TIME || '').localeCompare(
+          right.SS_START_TIME || '',
+        );
+        if (startTimeComparison !== 0) return startTimeComparison;
+
+        return (left.SS_END_TIME || '').localeCompare(right.SS_END_TIME || '');
+      })
+      .filter((session) => {
+        const key = getSessionTimeKey(session);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
   });
 
   const activeTimeSessions = computed<BackendSession[]>(() => {
@@ -699,7 +708,7 @@ export function useExamSeatManagement() {
       }
 
       sessions.value = examData.value.SESSIONS || [];
-      const firstSession = sessions.value[0];
+      const firstSession = sessionTimeTabs.value[0];
       if (firstSession) {
         activeSessionId.value = firstSession.SS_ID;
       }

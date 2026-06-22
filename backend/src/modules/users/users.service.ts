@@ -92,7 +92,8 @@ export class UsersService {
   }
 
   generateUserCode(userId: number, date: Date = new Date()): string {
-    const yearPrefix = date.getFullYear().toString().slice(-2);
+    const buddhistYear = date.getFullYear() + 543;
+    const yearPrefix = buddhistYear.toString().slice(-2);
 
     return `${yearPrefix}${String(userId).padStart(6, '0')}`;
   }
