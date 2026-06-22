@@ -1112,6 +1112,7 @@ export default {
     exportCsv: {
       noData: 'No data available for export',
       blocked: 'Export was blocked by the browser',
+      loadError: 'Unable to load data for export',
     },
     imageCropper: {
       title: 'Adjust image',
