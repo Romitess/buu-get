@@ -1175,7 +1175,7 @@ export default {
           paymentDate: 'วันที่จ่ายเงิน',
           examName: 'ชื่อการสอบ',
           importedDate: 'วันที่นำเข้าข้อมูล',
-          payee: 'ผู้รับเงิน',
+          payee: 'ผู้นำเข้าข้อมูล',
           actions: 'สำเนาใบเสร็จรับเงิน',
         },
       },

@@ -1040,7 +1040,7 @@ export default {
           paymentDate: 'Payment Date',
           examName: 'Exam Name',
           importedDate: 'Imported Date',
-          payee: 'Payee',
+          payee: 'Importer',
           actions: 'Receipt Copy',
         },
       },

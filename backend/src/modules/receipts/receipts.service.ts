@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Receipt } from './entities/receipt.entity';
+import { Receipt, ReceiptStatus } from './entities/receipt.entity';
 import { CreateReceiptDto, UpdateReceiptDto } from './dto/receipt.dto';
 
 @Injectable()
@@ -22,6 +22,29 @@ export class ReceiptsService {
 
   async findAll(): Promise<Receipt[]> {
     return this.receiptsRepository.find({ relations: ['TRANSACTION'] });
+  }
+
+  async findIssued(): Promise<Receipt[]> {
+    return this.receiptsRepository.find({
+      where: { RC_STATUS: ReceiptStatus.ISSUED },
+      relations: [
+        'TRANSACTION',
+        'TRANSACTION.ENROLLMENT',
+        'TRANSACTION.ENROLLMENT.USER',
+        'TRANSACTION.ENROLLMENT.USER.PROFILE',
+        'TRANSACTION.ENROLLMENT.SESSION',
+        'TRANSACTION.ENROLLMENT.SESSION.EXAM',
+        'TRANSACTION.ENROLLMENT.SESSION.EXAM.FUND_SOURCE',
+        'TRANSACTION.BANK_RECONCILES',
+        'TRANSACTION.BANK_RECONCILES.USER',
+        'TRANSACTION.BANK_RECONCILES.USER.PROFILE',
+      ],
+      order: {
+        RC_ISSUED_AT: 'DESC',
+        CREATED_AT: 'DESC',
+        RC_ID: 'DESC',
+      },
+    });
   }
 
   async findOne(id: number): Promise<Receipt> {
@@ -60,8 +83,7 @@ export class ReceiptsService {
       );
     }
 
-    if (receipt.RC_STATUS !== 1) {
-      // 1 = ISSUED
+    if (receipt.RC_STATUS !== ReceiptStatus.ISSUED) {
       throw new ForbiddenException(`Receipt is not in ISSUED status`);
     }
 

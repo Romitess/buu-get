@@ -43,6 +43,17 @@ export class ReceiptsController {
     return this.receiptsService.findAll();
   }
 
+  @Get('issued')
+  @ApiOperation({ summary: 'ดึงข้อมูลใบเสร็จที่ออกแล้วทั้งหมด' })
+  @ApiResponse({
+    status: 200,
+    description: 'รายการใบเสร็จที่มีสถานะออกใบเสร็จแล้ว',
+    type: [Receipt],
+  })
+  findIssued(): Promise<Receipt[]> {
+    return this.receiptsService.findIssued();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'ดึงข้อมูลใบเสร็จด้วย ID' })
   @ApiResponse({
