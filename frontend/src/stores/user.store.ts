@@ -14,8 +14,26 @@ export const useUserStore = defineStore('user', () => {
   const accessToken = ref<string | null>(localStorage.getItem('access_token'));
   const error = ref<string | null>(null);
 
+  // === Helpers ===
+  /** normalize ชื่อ role ให้เป็น snake_case ตัวพิมพ์เล็ก (ตรงกับ ROLES constant) */
+  const normalizeRole = (role: string): UserRole =>
+    role.toLowerCase().replace(/\s+/g, '_');
+
+  /** แปลง role/roles จาก backend → roles array ที่ normalize แล้ว (รวม primary เสมอ) */
+  const buildRoles = (
+    primary: string | undefined,
+    list: string[] | undefined,
+  ): UserRole[] => {
+    const source = list && list.length > 0 ? list : primary ? [primary] : [];
+    const normalized = source.map(normalizeRole);
+    return normalized.length > 0 ? normalized : [ROLES.CANDIDATE];
+  };
+
   // === Computed ===
   const userRole = computed<UserRole | null>(() => (currentUser.value?.role as UserRole) || null);
+
+  /** role ทั้งหมดของผู้ใช้ — ใช้สำหรับเช็คสิทธิ์แบบ multi-role */
+  const userRoles = computed<UserRole[]>(() => currentUser.value?.roles ?? []);
 
   const profileItems = computed(() => {
     if (!currentUser.value) return [];
@@ -52,9 +70,11 @@ export const useUserStore = defineStore('user', () => {
       try {
         const profile = await userService.getProfile(token);
         if (profile) {
+          const roles = buildRoles(profile.role, profile.roles);
           currentUser.value = {
             ...profile,
-            role: profile.role?.toLowerCase().replace(/\s+/g, '_') || ROLES.CANDIDATE,
+            role: roles[0],
+            roles,
           };
           isLoggedIn.value = true;
           accessToken.value = token;
@@ -90,9 +110,11 @@ export const useUserStore = defineStore('user', () => {
         }
         accessToken.value = result.accessToken;
 
+        const roles = buildRoles(result.user.role, result.user.roles);
         currentUser.value = {
           email: result.user.email,
-          role: result.user.role?.toLowerCase().replace(/\s+/g, '_') || ROLES.CANDIDATE,
+          role: roles[0],
+          roles,
           id: result.user.id,
         } as User;
 
@@ -153,6 +175,7 @@ export const useUserStore = defineStore('user', () => {
     accessToken,
     error,
     userRole,
+    userRoles,
     profileItems,
     initialize,
     login,

@@ -34,8 +34,11 @@ export default defineRouter(({ store }) => {
       return { name: 'login', query: { redirect: to.fullPath } };
     }
     if (userStore.isLoggedIn && roleRecords.length > 0) {
+      // multi-role: ผ่านถ้า user มี role อย่างน้อยหนึ่งตัวที่ route อนุญาต
       const hasPermission = roleRecords.every((record) =>
-        (record.meta.roles as string[]).includes(userStore.userRole || ''),
+        (record.meta.roles as string[]).some((allowed) =>
+          userStore.userRoles.includes(allowed),
+        ),
       );
 
       if (!hasPermission) {
