@@ -56,10 +56,48 @@ export interface ExamScoreSummary {
   rows: ExamScoreSummaryRow[];
 }
 
+/**
+ * สรุปการเปลี่ยนแปลงระดับ Band ของผู้เข้าสอบซ้ำ
+ * (ผู้ที่มีคะแนน/Band ตั้งแต่ 2 ครั้งขึ้นไป — เทียบครั้งล่าสุดกับครั้งก่อนหน้า)
+ */
+export interface ExamBandChange {
+  /** จำนวนผู้เข้าสอบซ้ำทั้งหมด (= increased + same + decreased) */
+  repeatTakers: number;
+  increased: number;
+  same: number;
+  decreased: number;
+}
+
+/** แถวสรุปรายปีของตารางภาพรวม */
+export interface ExamYearTableRow {
+  year: number;
+  registered: number;
+  attended: number;
+  absent: number;
+  repeatTakers: number;
+  minScore: number | null;
+  maxScore: number | null;
+  averageScore: number | null;
+}
+
 export interface ExamReportSummary {
   stats: ExamReportStats;
   attendanceByYear: ExamAttendanceByYear[];
   registrationTrend: ExamRegistrationTrendByYear[];
   rounds: ExamReportRound[];
   scoreSummaryByYear: ExamScoreSummary;
+  bandChange: ExamBandChange;
+  yearTable: ExamYearTableRow[];
+}
+
+/** ตัวเลือกใน dropdown ของฟิลเตอร์ */
+export interface ExamReportOption {
+  label: string;
+  value: string;
+}
+
+export interface ExamReportOptions {
+  years: ExamReportOption[];
+  months: ExamReportOption[];
+  rounds: ExamReportOption[];
 }

@@ -8,12 +8,12 @@ import type {
   ExamRegistrationTrendChartData,
   ExamReportRoundRow,
   ExamScoreSummaryChartData,
+  ExamBandChangeData,
+  ExamYearTableRow,
 } from 'src/types/exam-report.types';
 import {
   fetchExamReportSummary,
-  fetchMonthOptions,
-  fetchRoundOptions,
-  fetchYearOptions,
+  fetchExamReportOptions,
 } from 'src/services/exam-report.service';
 
 /**
@@ -36,6 +36,13 @@ export function useExamReport() {
   const trendChart = ref<ExamRegistrationTrendChartData>({ categories: [], registered: [] });
   const rounds = ref<ExamReportRoundRow[]>([]);
   const scoreSummaryChart = ref<ExamScoreSummaryChartData>({ years: [], series: [] });
+  const bandChange = ref<ExamBandChangeData>({
+    repeatTakers: 0,
+    increased: 0,
+    same: 0,
+    decreased: 0,
+  });
+  const yearTable = ref<ExamYearTableRow[]>([]);
 
   const yearOptions = ref<ExamReportOption[]>([]);
   const monthOptions = ref<ExamReportOption[]>([]);
@@ -63,10 +70,13 @@ export function useExamReport() {
       trendChart.value = summary.trendChart;
       rounds.value = summary.rounds;
       scoreSummaryChart.value = summary.scoreSummaryChart;
+      bandChange.value = summary.bandChange;
+      yearTable.value = summary.yearTable;
     } catch {
       error.value = t('admin.examReport.notifications.loadError');
       statCards.value = [];
       rounds.value = [];
+      yearTable.value = [];
     } finally {
       isLoading.value = false;
     }
@@ -74,14 +84,10 @@ export function useExamReport() {
 
   const loadFilterOptions = async (): Promise<void> => {
     try {
-      const [years, months, exRounds] = await Promise.all([
-        fetchYearOptions(),
-        fetchMonthOptions(),
-        fetchRoundOptions(),
-      ]);
-      yearOptions.value = years;
-      monthOptions.value = months;
-      roundOptions.value = exRounds;
+      const options = await fetchExamReportOptions();
+      yearOptions.value = options.years;
+      monthOptions.value = options.months;
+      roundOptions.value = options.rounds;
     } catch {
       yearOptions.value = [];
       monthOptions.value = [];
@@ -108,6 +114,8 @@ export function useExamReport() {
     trendChart,
     rounds,
     scoreSummaryChart,
+    bandChange,
+    yearTable,
     yearOptions,
     monthOptions,
     roundOptions,

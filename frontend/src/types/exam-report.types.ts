@@ -79,6 +79,27 @@ export interface ExamScoreRangeSeries {
   data: number[];
 }
 
+/** ข้อมูลกราฟวงกลมการเปลี่ยนแปลงระดับ Band ของผู้เข้าสอบซ้ำ */
+export interface ExamBandChangeData {
+  /** จำนวนผู้เข้าสอบซ้ำทั้งหมด (= increased + same + decreased) */
+  repeatTakers: number;
+  increased: number;
+  same: number;
+  decreased: number;
+}
+
+/** แถวสรุปรายปีในตารางภาพรวม */
+export interface ExamYearTableRow {
+  year: number;
+  registered: number;
+  attended: number;
+  absent: number;
+  repeatTakers: number;
+  minScore: number | null;
+  maxScore: number | null;
+  averageScore: number | null;
+}
+
 /** โครงสร้างข้อมูลรวมทั้งหน้ารายงาน */
 export interface ExamReportSummary {
   statCards: ExamReportStatCard[];
@@ -86,4 +107,13 @@ export interface ExamReportSummary {
   trendChart: ExamRegistrationTrendChartData;
   rounds: ExamReportRoundRow[];
   scoreSummaryChart: ExamScoreSummaryChartData;
+  bandChange: ExamBandChangeData;
+  yearTable: ExamYearTableRow[];
+}
+
+/** ตัวเลือกฟิลเตอร์ทั้งหมดจาก backend */
+export interface ExamReportOptions {
+  years: ExamReportOption[];
+  months: ExamReportOption[];
+  rounds: ExamReportOption[];
 }

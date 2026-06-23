@@ -2,17 +2,38 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, SelectQueryBuilder } from 'typeorm';
 import { ExamReportQueryDto } from './dto/exam-report-query.dto';
 import {
+  ExamBandChange,
+  ExamReportOption,
+  ExamReportOptions,
   ExamReportStat,
   ExamReportSummary,
+  ExamYearTableRow,
 } from './interfaces/exam-report.interface';
 import {
   ExamEnrollment,
   ExamEnrollmentStatus,
 } from '../exam-enrollments/entities/exam-enrollment.entity';
 import { ExamAttendStatus } from '../exam-attendances/entities/exam-attendance.entity';
+import { Exam } from '../exam/entities/exam.entity';
 
 /** ช่วงคะแนนของกราฟสรุปคะแนน (เลือก B: นับเฉพาะ >= 40) */
 const SCORE_RANGES = ['40-49', '50-59', '60-69', '70-79', '80-100'];
+
+/** ชื่อเดือนภาษาไทยสำหรับ dropdown ฟิลเตอร์ */
+const THAI_MONTHS = [
+  'มกราคม',
+  'กุมภาพันธ์',
+  'มีนาคม',
+  'เมษายน',
+  'พฤษภาคม',
+  'มิถุนายน',
+  'กรกฎาคม',
+  'สิงหาคม',
+  'กันยายน',
+  'ตุลาคม',
+  'พฤศจิกายน',
+  'ธันวาคม',
+];
 
 interface YearMetricRow {
   year: string | number;
@@ -41,6 +62,18 @@ interface RoundRawRow {
   attended: string | number;
 }
 
+interface ScoredAttemptRow {
+  userId: string | number;
+  year: string | number;
+  band: string | number | null;
+}
+
+interface YearMinMaxRow {
+  year: string | number;
+  minScore: string | number | null;
+  maxScore: string | number | null;
+}
+
 @Injectable()
 export class ExamReportService {
   constructor(private readonly dataSource: DataSource) {}
@@ -50,6 +83,8 @@ export class ExamReportService {
     const avgByYear = await this.getAvgScoreByYear(query);
     const bucketByYear = await this.getScoreBucketByYear(query);
     const rounds = await this.getRounds(query);
+    const minMaxByYear = await this.getScoreMinMaxByYear(query);
+    const scoredAttempts = await this.getUserScoredAttempts(query);
 
     // ปีที่อยู่ในข้อมูล (เรียงจากน้อยไปมาก)
     const years = metricByYear.map((m) => Number(m.year)).sort((a, b) => a - b);
@@ -131,13 +166,82 @@ export class ExamReportService {
       })),
     };
 
+    // ── การเปลี่ยนแปลง Band ของผู้เข้าสอบซ้ำ + ผู้เข้าสอบซ้ำรายปี ──
+    const { bandChange, repeatByYear } = this.computeBandChange(scoredAttempts);
+
+    // ── ตารางสรุปรายปี ──
+    const minScoreMap = new Map<number, number | null>();
+    const maxScoreMap = new Map<number, number | null>();
+    minMaxByYear.forEach((m) => {
+      minScoreMap.set(
+        Number(m.year),
+        m.minScore === null ? null : this.round1(Number(m.minScore)),
+      );
+      maxScoreMap.set(
+        Number(m.year),
+        m.maxScore === null ? null : this.round1(Number(m.maxScore)),
+      );
+    });
+
+    const yearTable: ExamYearTableRow[] = years.map((y) => {
+      const registered = registeredMap.get(y) ?? 0;
+      const attended = attendedMap.get(y) ?? 0;
+      const avg = avgMap.get(y);
+      return {
+        year: y,
+        registered,
+        attended,
+        absent: registered - attended,
+        repeatTakers: repeatByYear.get(y) ?? 0,
+        minScore: minScoreMap.get(y) ?? null,
+        maxScore: maxScoreMap.get(y) ?? null,
+        averageScore: avg === undefined ? null : this.round1(avg),
+      };
+    });
+
     return {
       stats,
       attendanceByYear,
       registrationTrend,
       rounds,
       scoreSummaryByYear,
+      bandChange,
+      yearTable,
     };
+  }
+
+  /** ตัวเลือกฟิลเตอร์ (ปี/เดือน/รอบ) จากข้อมูลจริง */
+  async getOptions(): Promise<ExamReportOptions> {
+    const examRepo = this.dataSource.getRepository(Exam);
+
+    const yearRows = await examRepo
+      .createQueryBuilder('x')
+      .select('DISTINCT YEAR(x.EXAM_DATE)', 'year')
+      .where('x.EXAM_DATE IS NOT NULL')
+      .orderBy('year', 'DESC')
+      .getRawMany<{ year: string | number }>();
+
+    const years: ExamReportOption[] = yearRows
+      .filter((r) => r.year !== null)
+      .map((r) => ({ label: String(r.year), value: String(r.year) }));
+
+    const months: ExamReportOption[] = THAI_MONTHS.map((name, idx) => ({
+      label: name,
+      value: String(idx + 1).padStart(2, '0'),
+    }));
+
+    const roundRows = await examRepo
+      .createQueryBuilder('x')
+      .select('DISTINCT x.EXAM_ROUND', 'round')
+      .where('x.EXAM_ROUND IS NOT NULL')
+      .orderBy('x.EXAM_ROUND', 'ASC')
+      .getRawMany<{ round: string | null }>();
+
+    const rounds: ExamReportOption[] = roundRows
+      .filter((r) => r.round)
+      .map((r) => ({ label: String(r.round), value: String(r.round) }));
+
+    return { years, months, rounds };
   }
 
   // ── Query helpers ─────────────────────────────────────────
@@ -208,6 +312,95 @@ export class ExamReportService {
 
     this.applyYearRange(qb, query);
     return qb.getRawMany<YearBucketRow>();
+  }
+
+  /** คะแนนต่ำสุด/สูงสุด (SC_TOTAL_SCORE) ต่อปี */
+  private async getScoreMinMaxByYear(
+    query: ExamReportQueryDto,
+  ): Promise<YearMinMaxRow[]> {
+    const qb = this.baseEnrollmentQb()
+      .innerJoin('e.SCORE', 'sc')
+      .select('YEAR(x.EXAM_DATE)', 'year')
+      .addSelect('MIN(sc.SC_TOTAL_SCORE)', 'minScore')
+      .addSelect('MAX(sc.SC_TOTAL_SCORE)', 'maxScore')
+      .where('sc.SC_TOTAL_SCORE IS NOT NULL')
+      .groupBy('year')
+      .having('year IS NOT NULL');
+
+    this.applyYearRange(qb, query);
+    return qb.getRawMany<YearMinMaxRow>();
+  }
+
+  /**
+   * ครั้งที่เข้าสอบและมีคะแนนของผู้ใช้แต่ละคน (เรียงตามวันสอบ)
+   * ใช้คำนวณการเปลี่ยนแปลง Band และจำนวนผู้เข้าสอบซ้ำรายปี
+   */
+  private async getUserScoredAttempts(
+    query: ExamReportQueryDto,
+  ): Promise<ScoredAttemptRow[]> {
+    const qb = this.baseEnrollmentQb()
+      .innerJoin('e.SCORE', 'sc')
+      .select('e.USER_ID', 'userId')
+      .addSelect('YEAR(x.EXAM_DATE)', 'year')
+      .addSelect('sc.SC_BAND_LEVEL', 'band')
+      .where('x.EXAM_DATE IS NOT NULL')
+      .orderBy('e.USER_ID', 'ASC')
+      .addOrderBy('x.EXAM_DATE', 'ASC');
+
+    this.applyYearRange(qb, query);
+    return qb.getRawMany<ScoredAttemptRow>();
+  }
+
+  /**
+   * จากรายการครั้งสอบที่เรียงตามผู้ใช้+วันสอบ → คำนวณ:
+   * - bandChange: เทียบ Band ครั้งล่าสุดกับครั้งก่อนหน้าของผู้เข้าสอบซ้ำ
+   * - repeatByYear: นับครั้งสอบที่ "ไม่ใช่ครั้งแรก" ของผู้ใช้ ตามปีของครั้งนั้น
+   */
+  private computeBandChange(rows: ScoredAttemptRow[]): {
+    bandChange: ExamBandChange;
+    repeatByYear: Map<number, number>;
+  } {
+    const attemptsByUser = new Map<
+      number,
+      { year: number; band: number | null }[]
+    >();
+    rows.forEach((r) => {
+      const userId = Number(r.userId);
+      const list = attemptsByUser.get(userId) ?? [];
+      list.push({
+        year: Number(r.year),
+        band: r.band === null ? null : Number(r.band),
+      });
+      attemptsByUser.set(userId, list);
+    });
+
+    const bandChange: ExamBandChange = {
+      repeatTakers: 0,
+      increased: 0,
+      same: 0,
+      decreased: 0,
+    };
+    const repeatByYear = new Map<number, number>();
+
+    attemptsByUser.forEach((attempts) => {
+      // ครั้งสอบที่ไม่ใช่ครั้งแรก → นับเป็นผู้เข้าสอบซ้ำของปีนั้น
+      attempts.slice(1).forEach((a) => {
+        repeatByYear.set(a.year, (repeatByYear.get(a.year) ?? 0) + 1);
+      });
+
+      // การเปลี่ยน Band: ใช้เฉพาะครั้งที่มี Band เทียบสองครั้งล่าสุด
+      const withBand = attempts.filter((a) => a.band !== null);
+      if (withBand.length < 2) return;
+
+      const last = withBand[withBand.length - 1].band as number;
+      const prev = withBand[withBand.length - 2].band as number;
+      bandChange.repeatTakers += 1;
+      if (last > prev) bandChange.increased += 1;
+      else if (last < prev) bandChange.decreased += 1;
+      else bandChange.same += 1;
+    });
+
+    return { bandChange, repeatByYear };
   }
 
   /** ตารางรอบสอบ — registered / attended ต่อรอบ (ต่อ Exam) */

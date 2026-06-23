@@ -268,6 +268,15 @@
   --exam-report-score-60: #3cc3df;
   --exam-report-score-70: #ffae4c;
   --exam-report-score-80: #537ff1;
+  // Band change palette (เพิ่มขึ้น / เท่าเดิม / ลดลง / ผู้เข้าสอบซ้ำ)
+  --exam-report-band-increase: #388e39;
+  --exam-report-band-increase-bg: rgba(56, 142, 57, 0.15);
+  --exam-report-band-same: #f0b400;
+  --exam-report-band-same-bg: rgba(255, 206, 0, 0.15);
+  --exam-report-band-decrease: #e53934;
+  --exam-report-band-decrease-bg: rgba(229, 57, 52, 0.15);
+  --exam-report-band-repeat: #0d47a1;
+  --exam-report-band-repeat-bg: rgba(13, 71, 161, 0.15);
 }
 
 // === Base Reset & Typography ===
