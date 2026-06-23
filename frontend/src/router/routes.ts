@@ -462,6 +462,23 @@ const routes: RouteRecordRaw[] = [
               ],
             },
           },
+          {
+            path: 'page-builder',
+            name: 'admin-page-builder',
+            component: () => import('pages/admin/page-builder-page.vue'),
+            meta: {
+              roles: [
+                ROLES.ADMIN,
+                ROLES.STAFF,
+                ROLES.REGISTRATION_OFFICER,
+                ROLES.EXAM_OPERATIONS_OFFICER,
+              ],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.manageHomeContent', icon: 'edit' },
+              ],
+            },
+          },
         ],
       },
     ],

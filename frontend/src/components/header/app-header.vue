@@ -1,13 +1,37 @@
 <template>
-  <header class="app-header">
+  <q-header class="app-header bg-white text-black">
     <div class="app-header__inner">
-      <!-- Left: Logo -->
-      <router-link to="/" class="app-header__logo-link">
-        <img :src="logoSrc" alt="BUU-GET Logo" class="app-header__logo" />
-      </router-link>
+      <!-- Left: Hamburger & Logo -->
+      <div
+        class="row items-center no-wrap app-header__left"
+        :class="{ 'app-header__left--admin': showAdminDrawer && !$q.screen.lt.md }"
+      >
+        <div v-if="showAdminDrawer && !$q.screen.lt.md" class="app-header__hamburger-container">
+          <q-btn
+            flat
+            dense
+            round
+            icon="menu"
+            class="app-header__hamburger-btn"
+            @click="handleHamburgerClick"
+          />
+        </div>
+        <q-btn
+          v-else-if="$q.screen.lt.md || showAdminDrawer"
+          flat
+          dense
+          round
+          icon="menu"
+          class="app-header__hamburger q-mr-sm"
+          @click="handleHamburgerClick"
+        />
+        <router-link to="/" class="app-header__logo-link">
+          <img :src="logoSrc" alt="BUU-GET Logo" class="app-header__logo" />
+        </router-link>
+      </div>
 
       <!-- Center: Navigation Links (Desktop) -->
-      <nav class="app-header__nav" v-if="!$q.screen.lt.md">
+      <nav class="app-header__nav" v-if="!$q.screen.lt.md && !showAdminDrawer">
         <template v-for="link in navLinks" :key="link.name">
           <!-- Dropdown link if has children -->
           <div
@@ -61,9 +85,6 @@
 
       <!-- Right: Auth Actions -->
       <div class="app-header__actions">
-        <!-- Desktop Language Switcher -->
-        <LanguageSwitcher v-if="!$q.screen.lt.md" />
-
         <!-- Logged In State -->
         <template v-if="userStore.isLoggedIn">
           <AppHeaderProfile />
@@ -85,16 +106,7 @@
         </template>
       </div>
 
-      <!-- Mobile: Hamburger Menu -->
-      <q-btn
-        v-if="$q.screen.lt.md"
-        flat
-        dense
-        round
-        icon="menu"
-        class="app-header__hamburger"
-        @click="mobileMenuOpen = !mobileMenuOpen"
-      />
+      <!-- Mobile: Hamburger Menu removed, moved to the left -->
     </div>
 
     <!-- Subtle shadow bottom border -->
@@ -190,7 +202,7 @@
         </template>
       </q-list>
     </q-drawer>
-  </header>
+  </q-header>
 </template>
 
 <script setup lang="ts">
@@ -201,15 +213,24 @@ import { useUserStore } from 'src/stores/user.store';
 import { ROLES } from 'src/constants/roles';
 import type { NavigationItem } from 'src/types/navigation';
 import headerLogo from 'src/assets/img/header-buu-get-logo.png';
+import { useNavigation } from 'src/composables/use-navigation';
 
 // Components
 import AppHeaderProfile from './app-header-profile.vue';
-import LanguageSwitcher from './language-switcher.vue';
 
 const userStore = useUserStore();
 const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
+const { showAdminDrawer, toggleLeftDrawer } = useNavigation();
+
+const handleHamburgerClick = () => {
+  if (showAdminDrawer.value) {
+    toggleLeftDrawer();
+  } else {
+    mobileMenuOpen.value = !mobileMenuOpen.value;
+  }
+};
 
 const toggleLanguage = (): void => {
   const nextLocale = locale.value === 'th' ? 'en-US' : 'th';
@@ -407,10 +428,7 @@ const logout = async () => {
 
 <style scoped lang="scss">
 .app-header {
-  position: sticky;
-  top: 0;
   background-color: var(--surface-header);
-  z-index: 2000;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
@@ -565,10 +583,43 @@ const logout = async () => {
   min-width: 120px;
 }
 
-// === Mobile Drawer ===
+// === Mobile Drawer & Hamburger Button Alignment ===
+.app-header__left {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  position: relative;
+  height: 100%;
+
+  &--admin {
+    margin-left: -32px; // Offset the header padding to start at 0px
+    padding-left: 72px; // Make space for the absolute hamburger container
+  }
+}
+
+.app-header__hamburger-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 72px; // Matches the mini-drawer width exactly
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.app-header__logo-link {
+  margin-left: 24px;
+}
+
 .app-header__hamburger {
   color: var(--text-primary);
   margin-left: 8px;
+}
+
+.app-header__hamburger-btn {
+  color: var(--text-primary);
 }
 
 // === Mobile Drawer ===

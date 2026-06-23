@@ -1210,6 +1210,7 @@ export default {
     applicationFeeReport: 'Application Fee Report',
     fundSourceManagement: 'Fund Source Management',
     examReport: 'Exam Report',
+    manageHomeContent: 'Manage Home Content',
   },
   profileEditHistory: {
     pageTitle: 'Candidate Profile Edit History',

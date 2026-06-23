@@ -1315,6 +1315,7 @@ export default {
     applicationFeeReport: 'สรุปการรับเงินค่าสมัครสอบ',
     fundSourceManagement: 'จัดการผังแหล่งเงิน',
     examReport: 'รายงานการสอบ',
+    manageHomeContent: 'จัดการเนื้อหาหน้าหลัก',
   },
   image: {
     upload: {
