@@ -19,6 +19,7 @@ import { ReceiptStatus } from '../receipts/entities/receipt.entity';
 import { BankReconcile } from './entities/bank-reconcile.entity';
 import {
   CreateBankReconcileDto,
+  UpdateBankReconcileRefsDto,
   UpdateBankReconcileDto,
 } from './dto/bank-reconcile.dto';
 
@@ -40,10 +41,21 @@ interface RawPaymentRow {
   paymentTime?: unknown;
 }
 
+interface ExistingBankReconcileKeyRow {
+  BR_REF1: string;
+  BR_REF2: string | null;
+  BR_REF3: string | null;
+  BR_REF4: string | null;
+  BR_AMOUNT: number | string;
+  BR_PAID_BY: string;
+}
+
 export interface BankReconcileImportResult {
   total: number;
   imported: number;
   skipped: number;
+  invalidSkipped: number;
+  duplicateSkipped: number;
   data: BankReconcile[];
 }
 
@@ -57,6 +69,8 @@ export interface BankReconcileMatchResult {
   TSC_REF4: string | null;
   TSC_BANK_REF: string;
   TSC_PARTNER_REF: string;
+  APPLICANT_NAME: string | null;
+  TRANX_AMOUNT: number | string | null;
   CREATED_AT: Date;
   UPDATED_AT: Date;
 }
@@ -94,16 +108,50 @@ export class BankReconcilesService {
 
     const rows = this.parsePaymentFile(file);
     const validRows: ImportPaymentRow[] = [];
+    const seenImportKeys = new Set<string>();
+    let invalidSkipped = 0;
+    let duplicateSkipped = 0;
 
     for (const row of rows) {
       const normalized = this.normalizeImportRow(row);
-      if (normalized) {
-        validRows.push(normalized);
+      if (!normalized) {
+        invalidSkipped += 1;
+        continue;
       }
+
+      const importKey = this.getImportRowKey(normalized);
+      if (seenImportKeys.has(importKey)) {
+        duplicateSkipped += 1;
+        continue;
+      }
+
+      seenImportKeys.add(importKey);
+      validRows.push(normalized);
+    }
+
+    const existingImportKeys = await this.getExistingImportKeys(validRows);
+    const uniqueRows = validRows.filter((row) => {
+      const importKey = this.getImportRowKey(row);
+      if (existingImportKeys.has(importKey)) {
+        duplicateSkipped += 1;
+        return false;
+      }
+      return true;
+    });
+
+    if (duplicateSkipped > 0) {
+      return {
+        total: rows.length,
+        imported: 0,
+        skipped: rows.length,
+        invalidSkipped,
+        duplicateSkipped,
+        data: [],
+      };
     }
 
     const reconciles = this.bankReconcilesRepository.create(
-      validRows.map((row) => ({
+      uniqueRows.map((row) => ({
         CREATED_BY: userId,
         BR_REF1: row.applicantId,
         BR_REF2: row.referenceNo,
@@ -114,7 +162,10 @@ export class BankReconcilesService {
       })),
     );
 
-    const saved = await this.bankReconcilesRepository.save(reconciles);
+    const saved =
+      reconciles.length > 0
+        ? await this.bankReconcilesRepository.save(reconciles)
+        : [];
 
     const data =
       saved.length > 0
@@ -127,7 +178,9 @@ export class BankReconcilesService {
     return {
       total: rows.length,
       imported: saved.length,
-      skipped: rows.length - saved.length,
+      skipped: invalidSkipped + duplicateSkipped,
+      invalidSkipped,
+      duplicateSkipped,
       data,
     };
   }
@@ -226,6 +279,86 @@ export class BankReconcilesService {
     const bankReconcile = await this.findOne(id);
     Object.assign(bankReconcile, updateBankReconcileDto);
     return this.bankReconcilesRepository.save(bankReconcile);
+  }
+
+  async updateRefs(
+    id: number,
+    updateBankReconcileRefsDto: UpdateBankReconcileRefsDto,
+  ): Promise<BankReconcile> {
+    return this.dataSource.transaction(async (manager) => {
+      const bankReconcileRepository = manager.getRepository(BankReconcile);
+      const transactionRefRepository = manager.getRepository(TransactionRef);
+      const transactionRepository = manager.getRepository(Transaction);
+
+      const bankReconcile = await bankReconcileRepository.findOne({
+        where: { BR_ID: id, DELETED_AT: IsNull() },
+        relations: ['TRANSACTION'],
+      });
+
+      if (!bankReconcile) {
+        throw new NotFoundException(`BankReconcile with ID ${id} not found`);
+      }
+
+      const previousTranxId = bankReconcile.TRANX_ID;
+
+      await transactionRefRepository.update(
+        { BR_ID: bankReconcile.BR_ID },
+        { BR_ID: null },
+      );
+
+      if (previousTranxId) {
+        await transactionRepository.update(
+          { TRANX_ID: previousTranxId },
+          { TRANX_MATCH_STATUS: TransactionMatchStatus.UNMATCH },
+        );
+      }
+
+      const nextRef1 = updateBankReconcileRefsDto.BR_REF1.trim();
+      if (!nextRef1) {
+        throw new BadRequestException('BR_REF1 is required');
+      }
+
+      bankReconcile.BR_REF1 = nextRef1;
+      bankReconcile.BR_REF2 =
+        updateBankReconcileRefsDto.BR_REF2?.trim() || null;
+      bankReconcile.TRANX_ID = null;
+
+      const transactionRef = await transactionRefRepository.findOne({
+        where: {
+          TSC_REF1: bankReconcile.BR_REF1,
+          TSC_REF2: bankReconcile.BR_REF2 ?? IsNull(),
+        },
+        relations: ['TRANSACTION'],
+      });
+
+      if (transactionRef) {
+        const transaction = transactionRef.TRANSACTION;
+        const matchesAmount =
+          this.toCents(transaction.TRANX_AMOUNT) ===
+          this.toCents(bankReconcile.BR_AMOUNT);
+
+        transaction.TRANX_MATCH_STATUS = matchesAmount
+          ? TransactionMatchStatus.MATCH
+          : TransactionMatchStatus.MISSING;
+        bankReconcile.TRANX_ID = transactionRef.TRANX_ID;
+        transactionRef.BR_ID = bankReconcile.BR_ID;
+
+        await transactionRepository.save(transaction);
+        await transactionRefRepository.save(transactionRef);
+      }
+
+      await bankReconcileRepository.save(bankReconcile);
+      const updatedBankReconcile = await bankReconcileRepository.findOne({
+        where: { BR_ID: id },
+        relations: ['USER', 'USER.PROFILE', 'TRANSACTION'],
+      });
+
+      if (!updatedBankReconcile) {
+        throw new NotFoundException(`BankReconcile with ID ${id} not found`);
+      }
+
+      return updatedBankReconcile;
+    });
   }
 
   async remove(id: number): Promise<void> {
@@ -388,6 +521,62 @@ export class BankReconcilesService {
     return Math.round(Number(value) * 100);
   }
 
+  private async getExistingImportKeys(
+    rows: ImportPaymentRow[],
+  ): Promise<Set<string>> {
+    const applicantIds = [...new Set(rows.map((row) => row.applicantId))];
+    if (applicantIds.length === 0) {
+      return new Set<string>();
+    }
+
+    const existingRows = await this.dataSource
+      .createQueryBuilder()
+      .select([
+        'br.BR_REF1 AS BR_REF1',
+        'br.BR_REF2 AS BR_REF2',
+        'br.BR_REF3 AS BR_REF3',
+        'br.BR_REF4 AS BR_REF4',
+        'br.BR_AMOUNT AS BR_AMOUNT',
+        'br.BR_PAID_BY AS BR_PAID_BY',
+      ])
+      .from('FIN_T_BANK_RECONCILES', 'br')
+      .where('br.DELETED_AT IS NULL')
+      .andWhere('br.BR_REF1 IN (:...applicantIds)', { applicantIds })
+      .getRawMany<ExistingBankReconcileKeyRow>();
+
+    return new Set(
+      existingRows.map((row) => this.getExistingBankReconcileKey(row)),
+    );
+  }
+
+  private getImportRowKey(row: ImportPaymentRow): string {
+    return [
+      this.normalizeKeyCell(row.applicantId),
+      this.normalizeKeyCell(row.referenceNo),
+      this.normalizeKeyCell(row.paymentDate),
+      this.normalizeKeyCell(row.paymentTime),
+      String(this.toCents(row.amount)),
+      this.normalizeKeyCell(row.payerName),
+    ].join('|');
+  }
+
+  private getExistingBankReconcileKey(
+    row: ExistingBankReconcileKeyRow,
+  ): string {
+    return [
+      this.normalizeKeyCell(row.BR_REF1),
+      this.normalizeKeyCell(row.BR_REF2),
+      this.normalizeKeyCell(row.BR_REF3),
+      this.normalizeKeyCell(row.BR_REF4),
+      String(this.toCents(row.BR_AMOUNT)),
+      this.normalizeKeyCell(row.BR_PAID_BY),
+    ].join('|');
+  }
+
+  private normalizeKeyCell(value: string | null | undefined): string {
+    return (value ?? '').trim().toLowerCase();
+  }
+
   private getFileExtension(filename: string): string {
     return filename.split('.').pop()?.toLowerCase() ?? '';
   }
@@ -418,10 +607,36 @@ export class BankReconcilesService {
         'tr.TSC_REF4 AS TSC_REF4',
         'tr.TSC_BANK_REF AS TSC_BANK_REF',
         'tr.TSC_PARTNER_REF AS TSC_PARTNER_REF',
+        `COALESCE(
+          NULLIF(TRIM(CONCAT_WS(' ', profile.USER_TITLE_TH, profile.USER_FULLNAME_TH)), ''),
+          NULLIF(TRIM(CONCAT_WS(' ', profile.USER_TITLE_EN, profile.USER_FULLNAME_EN)), ''),
+          tp.TP_NAME
+        ) AS APPLICANT_NAME`,
+        't.TRANX_AMOUNT AS TRANX_AMOUNT',
         'tr.CREATED_AT AS CREATED_AT',
         'tr.UPDATED_AT AS UPDATED_AT',
       ])
       .from('FIN_T_TRANSACTIONS_REFS', 'tr')
+      .innerJoin(
+        'FIN_T_TRANSACTIONS',
+        't',
+        't.TRANX_ID = tr.TRANX_ID AND t.TRANX_DELETED_AT IS NULL',
+      )
+      .leftJoin(
+        'EXAM_T_ENROLLMENTS',
+        'enrollment',
+        'enrollment.ERM_ID = t.ERM_ID AND enrollment.DELETED_AT IS NULL',
+      )
+      .leftJoin(
+        'BUU_GET_T_USER_PROFILE',
+        'profile',
+        'profile.USER_ID = enrollment.USER_ID AND profile.DELETED_AT IS NULL',
+      )
+      .leftJoin(
+        'FIN_T_TRANSACTION_PROFILE',
+        'tp',
+        'tp.TRANX_ID = t.TRANX_ID AND tp.DELETED_AT IS NULL',
+      )
       .where('tr.DELETED_AT IS NULL');
 
     queryBuilder.andWhere(

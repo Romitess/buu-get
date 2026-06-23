@@ -18,8 +18,8 @@
           <q-th>{{ t('admin.paymentImport.table.amount') }}</q-th>
           <q-th class="th-narrow">{{ t('admin.finCheckTranscript.ref1') }}</q-th>
           <q-th class="th-narrow">{{ t('admin.finCheckTranscript.ref2') }}</q-th>
-          <q-th>{{ t('admin.finCheckTranscript.bankRef') }}</q-th>
-          <q-th>{{ t('admin.finCheckTranscript.partnerRef') }}</q-th>
+          <q-th>{{ t('admin.finCheckTranscript.applicantName') }}</q-th>
+          <q-th>{{ t('admin.finCheckTranscript.amount') }}</q-th>
         </q-tr>
       </template>
 
@@ -41,8 +41,8 @@
           <template v-if="props.row.db_ref">
             <q-td class="text-center td-narrow">{{ props.row.db_ref }}</q-td>
             <q-td class="text-center td-narrow">{{ props.row.db_ref2 }}</q-td>
-            <q-td>{{ props.row.db_bank_ref }}</q-td>
-            <q-td class="text-center">{{ props.row.db_partner_ref }}</q-td>
+            <q-td>{{ props.row.db_applicant_name }}</q-td>
+            <q-td class="text-center">{{ props.row.db_amount }}</q-td>
           </template>
           <template v-else>
             <q-td class="text-center text-grey-5">-</q-td>
@@ -244,15 +244,15 @@ const columns = computed<QTableColumn[]>(() => [
     align: 'center',
   },
   {
-    name: 'db_bank_ref',
-    field: 'db_bank_ref',
-    label: t('admin.finCheckTranscript.bankRef'),
+    name: 'db_applicant_name',
+    field: 'db_applicant_name',
+    label: t('admin.finCheckTranscript.applicantName'),
     align: 'left',
   },
   {
-    name: 'db_partner_ref',
-    field: 'db_partner_ref',
-    label: t('admin.finCheckTranscript.partnerRef'),
+    name: 'db_amount',
+    field: 'db_amount',
+    label: t('admin.finCheckTranscript.amount'),
     align: 'center',
   },
   {

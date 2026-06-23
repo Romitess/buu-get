@@ -44,40 +44,40 @@ const columns = computed<QTableColumn[]>(() => [
     field: 'id',
     label: t('admin.searchUser.table.index'),
     align: 'center',
-    style: 'width: 5%',
-    headerStyle: 'width: 5%',
+    style: 'width: 6%',
+    headerStyle: 'width: 6%',
   },
   {
     name: 'ref1',
     field: 'ref1',
     label: t('admin.searchUser.table.applicantId'),
     align: 'center',
-    style: 'width: 13%; white-space: normal !important;',
-    headerStyle: 'width: 13%; white-space: normal !important; line-height: 1.3;',
+    style: 'width: 17%; white-space: normal !important;',
+    headerStyle: 'width: 17%; white-space: normal !important; line-height: 1.25;',
   },
   {
     name: 'ref2',
     field: 'ref2',
     label: t('admin.searchUser.table.referenceNo'),
     align: 'center',
-    style: 'width: 13%; white-space: normal !important;',
-    headerStyle: 'width: 13%; white-space: normal !important; line-height: 1.3;',
+    style: 'width: 17%; white-space: normal !important;',
+    headerStyle: 'width: 17%; white-space: normal !important; line-height: 1.25;',
   },
   {
     name: 'name',
     field: 'name',
     label: t('admin.searchUser.table.fullName'),
     align: 'left',
-    style: 'width: 28%; white-space: normal !important;',
-    headerStyle: 'width: 28%; white-space: normal !important;',
+    style: 'width: 16%; white-space: normal !important;',
+    headerStyle: 'width: 16%; white-space: normal !important;',
   },
   {
     name: 'amount',
     field: 'amount',
     label: t('admin.searchUser.table.amount'),
     align: 'center',
-    style: 'width: 8%',
-    headerStyle: 'width: 8%',
+    style: 'width: 10%',
+    headerStyle: 'width: 10%',
   },
   {
     name: 'exam_name',
@@ -92,8 +92,8 @@ const columns = computed<QTableColumn[]>(() => [
     field: 'payment_status',
     label: t('admin.searchUser.table.status'),
     align: 'center',
-    style: 'width: 13%',
-    headerStyle: 'width: 13%',
+    style: 'width: 14%',
+    headerStyle: 'width: 14%',
   },
 ]);
 
@@ -111,13 +111,22 @@ const getStatusColorClass = (status: string): string => {
   overflow: hidden;
   border: 1px solid var(--border-color);
 
+  :deep(.q-table) {
+    width: 100%;
+    table-layout: fixed;
+  }
+
   :deep(.q-table thead tr th) {
     background-color: var(--primary) !important;
     color: var(--text-on-primary) !important;
-    font-size: var(--font-size-md);
+    font-size: 14px;
     font-weight: var(--font-weight-medium);
-    padding: 12px 8px;
+    line-height: 1.25;
+    padding: 8px 6px;
     border-right: 1px solid var(--white-alpha-20);
+    vertical-align: middle;
+    white-space: normal !important;
+    word-break: keep-all;
   }
 
   :deep(.q-table thead tr th:last-child) {
@@ -128,7 +137,44 @@ const getStatusColorClass = (status: string): string => {
     border-right: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
     font-size: var(--font-size-md);
-    padding: 10px 8px;
+    padding: 10px 6px;
+    white-space: normal !important;
+    word-break: break-word;
+  }
+
+  :deep(.q-table thead tr th:nth-child(1)),
+  :deep(.q-table tbody tr td:nth-child(1)) {
+    width: 6%;
+  }
+
+  :deep(.q-table thead tr th:nth-child(2)),
+  :deep(.q-table tbody tr td:nth-child(2)) {
+    width: 17%;
+  }
+
+  :deep(.q-table thead tr th:nth-child(3)),
+  :deep(.q-table tbody tr td:nth-child(3)) {
+    width: 17%;
+  }
+
+  :deep(.q-table thead tr th:nth-child(4)),
+  :deep(.q-table tbody tr td:nth-child(4)) {
+    width: 16%;
+  }
+
+  :deep(.q-table thead tr th:nth-child(5)),
+  :deep(.q-table tbody tr td:nth-child(5)) {
+    width: 10%;
+  }
+
+  :deep(.q-table thead tr th:nth-child(6)),
+  :deep(.q-table tbody tr td:nth-child(6)) {
+    width: 20%;
+  }
+
+  :deep(.q-table thead tr th:nth-child(7)),
+  :deep(.q-table tbody tr td:nth-child(7)) {
+    width: 14%;
   }
 
   :deep(.q-table tbody tr td:last-child) {

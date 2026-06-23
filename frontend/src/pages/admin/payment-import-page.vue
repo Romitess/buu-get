@@ -142,6 +142,20 @@ const {
   verifyData,
 } = usePaymentImport();
 
+const formatSkippedReason = (result: {
+  duplicateSkipped?: number;
+  invalidSkipped?: number;
+}): string => {
+  const reasons: string[] = [];
+  if (result.duplicateSkipped && result.duplicateSkipped > 0) {
+    reasons.push(`ข้อมูลซ้ำ ${result.duplicateSkipped} รายการ`);
+  }
+  if (result.invalidSkipped && result.invalidSkipped > 0) {
+    reasons.push(`ข้อมูลแถวไม่ครบ ${result.invalidSkipped} รายการ`);
+  }
+  return reasons.length > 0 ? ` (${reasons.join(', ')})` : '';
+};
+
 watch(error, (newVal) => {
   if (newVal) {
     $q.notify({
@@ -157,12 +171,24 @@ watch(error, (newVal) => {
 const onFileSelected = async (file: File): Promise<void> => {
   const result = await parseFile(file);
   if (result) {
+    const skippedReason = formatSkippedReason(result);
     if (result.imported > 0 && result.skipped === 0) {
       $q.notify({ type: 'positive', message: `นำเข้าสำเร็จ ${result.imported} รายการ` });
     } else if (result.imported > 0 && result.skipped > 0) {
-      $q.notify({ type: 'warning', message: `นำเข้า ${result.imported} รายการ, ข้าม ${result.skipped} รายการ (ข้อมูลแถวไม่ครบ)` });
+      $q.notify({
+        type: 'warning',
+        message: `นำเข้า ${result.imported} รายการ, ข้าม ${result.skipped} รายการ${skippedReason}`,
+      });
+    } else if (result.imported === 0 && result.duplicateSkipped > 0) {
+      $q.notify({
+        type: 'warning',
+        message: `พบข้อมูลซ้ำ จึงไม่นำเข้าไฟล์นี้ (ข้ามทั้งหมด ${result.skipped} รายการ${skippedReason})`,
+      });
     } else if (result.imported === 0 && result.skipped > 0) {
-      $q.notify({ type: 'negative', message: `ไม่สามารถนำเข้าได้เลย (ข้าม ${result.skipped} รายการ) กรุณาตรวจสอบชื่อคอลัมน์ในไฟล์` });
+      $q.notify({
+        type: 'negative',
+        message: `ไม่สามารถนำเข้าได้เลย (ข้าม ${result.skipped} รายการ${skippedReason}) กรุณาตรวจสอบชื่อคอลัมน์ในไฟล์`,
+      });
     }
   }
 };

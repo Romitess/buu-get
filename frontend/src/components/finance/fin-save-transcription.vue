@@ -88,6 +88,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { clearPaymentImportLocalData } from 'src/composables/use-payment-import';
 import { confirmBankReconcilePayments } from 'src/services/bank-reconcile.service';
 
 import type { PaymentRow } from 'src/types/exam.types';
@@ -107,9 +108,7 @@ const onConfirm = async () => {
   isLoading.value = true;
   try {
     if (props.rows) {
-      const tranxIds = props.rows
-        .filter((row) => row.tranxId)
-        .map((row) => Number(row.tranxId));
+      const tranxIds = props.rows.filter((row) => row.tranxId).map((row) => Number(row.tranxId));
 
       if (tranxIds.length > 0) {
         await confirmBankReconcilePayments(tranxIds);
@@ -126,6 +125,7 @@ const onConfirm = async () => {
 
 const onSuccessClose = () => {
   showSuccess.value = false;
+  clearPaymentImportLocalData({ suspendAutoLoad: true });
   void router.push('/admin/payment-import');
 };
 </script>
