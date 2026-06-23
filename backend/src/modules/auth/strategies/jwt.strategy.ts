@@ -12,8 +12,10 @@ export interface JwtPayload {
   sub: number;
   /** Email ของผู้ใช้ */
   email: string;
-  /** Role ของผู้ใช้ */
+  /** Role หลักของผู้ใช้ (ตัวแรก) — คงไว้เพื่อ backward compatibility */
   role: RoleEnum;
+  /** Role ทั้งหมดที่ผู้ใช้มี (1 user มีได้หลาย role) */
+  roles?: RoleEnum[];
 }
 
 @Injectable()
@@ -31,10 +33,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * ค่าที่ return จะถูกแนบไปใน request.user โดยอัตโนมัติ
    */
   validate(payload: JwtPayload) {
+    // token เก่าที่ยังไม่มี roles → fallback เป็น [role] เพื่อความเข้ากันได้
+    const roles =
+      payload.roles && payload.roles.length > 0
+        ? payload.roles
+        : payload.role
+          ? [payload.role]
+          : [];
+
     return {
       userId: payload.sub,
       email: payload.email,
       role: payload.role,
+      roles,
     };
   }
 }

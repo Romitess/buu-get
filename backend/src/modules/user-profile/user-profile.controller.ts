@@ -29,7 +29,7 @@ export class UserProfileController {
   findMe(
     @Request()
     req: ExpressRequest & {
-      user: { userId: number; email: string; role: string };
+      user: { userId: number; email: string; role: string; roles: string[] };
     },
   ) {
     return this.userProfileService.findByUserId(req.user.userId);
@@ -41,7 +41,7 @@ export class UserProfileController {
   async updateMe(
     @Request()
     req: ExpressRequest & {
-      user: { userId: number; email: string; role: string };
+      user: { userId: number; email: string; role: string; roles: string[] };
     },
     @Body() updateUserProfileDto: UpdateUserProfileDto,
   ) {
@@ -49,9 +49,15 @@ export class UserProfileController {
       req.user.userId,
     );
     const name = userProfile.userFullnameTh || req.user.email;
+    // ถือเป็นผู้สมัครก็ต่อเมื่อทุก role ของ user เป็น candidate/user เท่านั้น
+    // (ถ้ามี role เจ้าหน้าที่ปนอยู่ด้วย ให้ถือเป็นเจ้าหน้าที่)
+    const userRoles = req.user.roles ?? (req.user.role ? [req.user.role] : []);
     const isCandidate =
-      req.user.role?.toLowerCase() === 'candidate' ||
-      req.user.role?.toLowerCase() === 'user';
+      userRoles.length > 0 &&
+      userRoles.every((r) => {
+        const v = r.toLowerCase();
+        return v === 'candidate' || v === 'user';
+      });
     const modifier = {
       modifierId: req.user.userId,
       modifierName: name,
@@ -86,7 +92,7 @@ export class UserProfileController {
     @Param('id', ParseIntPipe) id: number,
     @Request()
     req: ExpressRequest & {
-      user: { userId: number; email: string; role: string };
+      user: { userId: number; email: string; role: string; roles: string[] };
     },
     @Body() updateUserProfileDto: UpdateUserProfileDto,
   ) {
@@ -102,9 +108,15 @@ export class UserProfileController {
       // Ignored
     }
 
+    // ถือเป็นผู้สมัครก็ต่อเมื่อทุก role ของ user เป็น candidate/user เท่านั้น
+    // (ถ้ามี role เจ้าหน้าที่ปนอยู่ด้วย ให้ถือเป็นเจ้าหน้าที่)
+    const userRoles = req.user.roles ?? (req.user.role ? [req.user.role] : []);
     const isCandidate =
-      req.user.role?.toLowerCase() === 'candidate' ||
-      req.user.role?.toLowerCase() === 'user';
+      userRoles.length > 0 &&
+      userRoles.every((r) => {
+        const v = r.toLowerCase();
+        return v === 'candidate' || v === 'user';
+      });
     const modifier = {
       modifierId: req.user.userId,
       modifierName,
