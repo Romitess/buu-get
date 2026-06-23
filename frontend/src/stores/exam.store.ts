@@ -219,7 +219,8 @@ export const useExamStore = defineStore('exam', () => {
           const isVerified = enrollment.ERM_VERIFY_STATUS === VERIFY_STATUS.PASS;
           const hasBankMatch =
             enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
-          item.status = isVerified ? 'exam.status.verified' : 'exam.status.paymentCompleted';
+          item.status =
+            isVerified || hasBankMatch ? 'exam.status.verified' : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
           item.actions = hasBankMatch ? ['downloadReceipt'] : [];
           newHistory.push(item);

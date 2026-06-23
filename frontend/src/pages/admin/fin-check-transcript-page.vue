@@ -43,6 +43,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
@@ -52,15 +53,18 @@ import FinCheckTranscriptTable from 'src/components/finance/fin-check-transcript
 import { globalImportedRows } from 'src/composables/use-payment-import';
 import {
   matchBankReconciles,
+  updateBankReconcileRefs,
   type BankReconcileMatchResult,
 } from 'src/services/bank-reconcile.service';
 import type { PaymentRow } from '../../types/exam.types';
 
 export interface ExtendedPaymentRow extends PaymentRow {
+  brId: number;
   tranxId?: number | null;
 }
 
 const { t } = useI18n();
+const $q = useQuasar();
 
 const searchQuery = ref('');
 
@@ -105,6 +109,7 @@ const loadData = async () => {
       });
 
       return {
+        brId: imported.brId,
         id: imported.index,
         file_payment_date: imported.paymentDate,
         file_payment_time: imported.paymentTime,
@@ -114,8 +119,8 @@ const loadData = async () => {
         file_amount: formatCurrency(imported.amount),
         db_ref: matched?.TSC_REF1 ?? '',
         db_ref2: matched?.TSC_REF2 ?? '',
-        db_bank_ref: matched?.TSC_BANK_REF ?? '',
-        db_partner_ref: matched?.TSC_PARTNER_REF ?? '',
+        db_applicant_name: matched?.APPLICANT_NAME ?? '',
+        db_amount: matched?.TRANX_AMOUNT != null ? formatCurrency(matched.TRANX_AMOUNT) : '',
         tranxId: matched ? matched.TRANX_ID : null,
       };
     });
@@ -141,8 +146,8 @@ const filteredRows = computed(() => {
       row.file_ref2.includes(query) ||
       row.db_ref.includes(query) ||
       row.db_ref2.includes(query) ||
-      row.db_bank_ref.toLowerCase().includes(query) ||
-      row.db_partner_ref.toLowerCase().includes(query)
+      row.db_applicant_name.toLowerCase().includes(query) ||
+      row.db_amount.includes(query)
     );
   });
 });
@@ -162,20 +167,56 @@ const handleSaveRow = async ({
 }) => {
   const row = transcriptRows.value.find((r) => r.id === rowId);
   if (row) {
-    row.file_ref = ref1;
-    row.file_ref2 = ref2;
+    const normalizedRef1 = ref1.trim();
+    const normalizedRef2 = ref2.trim();
 
+    if (!normalizedRef1) {
+      $q.notify({
+        type: 'warning',
+        message: 'กรุณากรอก Ref 1',
+        position: 'top',
+      });
+      return;
+    }
+
+    isLoading.value = true;
     try {
-      const matchedData = await matchBankReconciles([{ ref1, ref2 }]);
+      const updatedBankReconcile = await updateBankReconcileRefs(row.brId, {
+        BR_REF1: normalizedRef1,
+        BR_REF2: normalizedRef2 || null,
+      });
+
+      row.file_ref = updatedBankReconcile.BR_REF1;
+      row.file_ref2 = updatedBankReconcile.BR_REF2 ?? '';
+
+      const importedRow = globalImportedRows.value.find((item) => item.brId === row.brId);
+      if (importedRow) {
+        importedRow.applicantId = row.file_ref;
+        importedRow.referenceNo = row.file_ref2;
+      }
+
+      const matchedData = await matchBankReconciles([{ ref1: row.file_ref, ref2: row.file_ref2 }]);
       const matched = matchedData.length > 0 ? matchedData[0] : null;
 
       row.db_ref = matched?.TSC_REF1 ?? '';
       row.db_ref2 = matched?.TSC_REF2 ?? '';
-      row.db_bank_ref = matched?.TSC_BANK_REF ?? '';
-      row.db_partner_ref = matched?.TSC_PARTNER_REF ?? '';
+      row.db_applicant_name = matched?.APPLICANT_NAME ?? '';
+      row.db_amount = matched?.TRANX_AMOUNT != null ? formatCurrency(matched.TRANX_AMOUNT) : '';
       row.tranxId = matched ? matched.TRANX_ID : null;
+      $q.notify({
+        type: 'positive',
+        message: 'บันทึกข้อมูลไฟล์การเงินสำเร็จ',
+        position: 'top',
+      });
     } catch (err) {
-      console.error('Failed to re-match:', err);
+      console.error('Failed to update bank reconcile refs:', err);
+      $q.notify({
+        type: 'negative',
+        message: 'ไม่สามารถบันทึกข้อมูลไฟล์การเงินได้',
+        position: 'top',
+      });
+    } finally {
+      isLoading.value = false;
     }
   }
 };
