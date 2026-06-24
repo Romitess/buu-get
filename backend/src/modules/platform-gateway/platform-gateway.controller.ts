@@ -102,6 +102,7 @@ export class PlatformGatewayController {
     );
   }
 
+  // เสิร์ฟไฟล์ folder ชั้นเดียว เช่น page_builder/<uuid> (shared)
   @Public()
   @Get('/:folder/:fileName')
   async serveFile(
@@ -109,14 +110,25 @@ export class PlatformGatewayController {
     @Param('fileName') fileName: string,
     @Res() res: Response,
   ) {
-    try {
-      const fullPath = `${folder}/${fileName}`;
-      const result = await this.platformGatewayService.getPublicFile(fullPath);
+    return this.streamPublicFile(`${folder}/${fileName}`, res);
+  }
 
-      // console.log(
-      //   `[serveFile] Path: ${fullPath}, Result:`,
-      //   JSON.stringify(result),
-      // );
+  // เสิร์ฟไฟล์ folder สองชั้น เช่น user_images/<userId>/<uuid> (per-user)
+  @Public()
+  @Get('/:folder/:sub/:fileName')
+  async serveNestedFile(
+    @Param('folder') folder: string,
+    @Param('sub') sub: string,
+    @Param('fileName') fileName: string,
+    @Res() res: Response,
+  ) {
+    return this.streamPublicFile(`${folder}/${sub}/${fileName}`, res);
+  }
+
+  /** ดึงไฟล์จาก gateway (pre-signed URL) แล้ว stream กลับ — ใช้ร่วมกันทุก serve route */
+  private async streamPublicFile(fullPath: string, res: Response) {
+    try {
+      const result = await this.platformGatewayService.getPublicFile(fullPath);
 
       const fileData = result?.result?.file_1 || result?.file_1;
       const fileUrl = typeof fileData === 'string' ? fileData : fileData?.view;
@@ -131,10 +143,7 @@ export class PlatformGatewayController {
       }
       return res.status(404).send('File pre-signed URL not found');
     } catch (error) {
-      console.error(
-        `[serveFile] Error serving file ${folder}/${fileName}:`,
-        error,
-      );
+      console.error(`[serveFile] Error serving file ${fullPath}:`, error);
       return res.status(500).send('Error retrieving file from gateway');
     }
   }
