@@ -49,22 +49,79 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 
+interface BreadcrumbItem {
+  label: string;
+  icon?: string;
+  to?: string;
+}
+
+const resolveRouteValue = (value: unknown): string | undefined => {
+  if (Array.isArray(value)) {
+    return resolveRouteValue(value[0]);
+  }
+
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+
+  return undefined;
+};
+
+const removeUnresolvedQueryParams = (path: string): string => {
+  const queryStartIndex = path.indexOf('?');
+  if (queryStartIndex === -1) {
+    return path;
+  }
+
+  const pathname = path.slice(0, queryStartIndex);
+  const queryString = path.slice(queryStartIndex + 1);
+  const searchParams = new URLSearchParams(queryString);
+
+  Array.from(searchParams.entries()).forEach(([key, value]) => {
+    if (/:[A-Za-z0-9_]+/.test(value)) {
+      searchParams.delete(key);
+    }
+  });
+
+  const resolvedQueryString = searchParams.toString();
+  return resolvedQueryString ? `${pathname}?${resolvedQueryString}` : pathname;
+};
+
+const resolveBreadcrumbPath = (path: string): string => {
+  const routeValues = new Map<string, string>();
+
+  Object.entries(route.params).forEach(([key, value]) => {
+    const resolvedValue = resolveRouteValue(value);
+    if (resolvedValue !== undefined) {
+      routeValues.set(key, resolvedValue);
+    }
+  });
+
+  Object.entries(route.query).forEach(([key, value]) => {
+    const resolvedValue = resolveRouteValue(value);
+    if (resolvedValue !== undefined) {
+      routeValues.set(key, resolvedValue);
+    }
+  });
+
+  const resolvedPath = Array.from(routeValues.entries()).reduce(
+    (resolvedPath, [key, value]) => resolvedPath.split(`:${key}`).join(encodeURIComponent(value)),
+    path,
+  );
+
+  return removeUnresolvedQueryParams(resolvedPath);
+};
+
 const breadcrumbs = computed(() => {
-  const metaBreadcrumbs = route.meta.breadcrumb as Array<{
-    label: string;
-    icon?: string;
-    to?: string;
-  }>;
+  const metaBreadcrumbs = route.meta.breadcrumb as BreadcrumbItem[] | undefined;
   if (!metaBreadcrumbs) return [];
 
   return metaBreadcrumbs.map((b, index) => {
-    let resolvedPath = b.to;
-    if (resolvedPath) {
-      resolvedPath = Object.keys(route.params).reduce(
-        (acc, param) => acc.replace(`:${param}`, String(route.params[param])),
-        resolvedPath,
-      );
-    }
+    const resolvedPath = b.to ? resolveBreadcrumbPath(b.to) : undefined;
 
     return {
       label: b.label,

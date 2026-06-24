@@ -527,6 +527,33 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'exam-information/:year/candidates/:ermId/history',
+            name: 'admin-executive-exam-history',
+            component: () => import('pages/admin/executive-exam-history-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.examReport',
+                  icon: 'assessment',
+                  to: '/admin/dashboard',
+                },
+                {
+                  label: 'navigation.examInformation',
+                  icon: 'info',
+                  to: '/admin/exam-information/:year',
+                },
+                {
+                  label: 'navigation.examCandidatesInfo',
+                  icon: 'groups',
+                  to: '/admin/exam-information/:year/candidates?round=:round',
+                },
+                { label: 'navigation.examHistory', icon: 'history' },
+              ],
+            },
+          },
+          {
             path: 'page-builder',
             name: 'admin-page-builder',
             component: () => import('pages/admin/page-builder-page.vue'),

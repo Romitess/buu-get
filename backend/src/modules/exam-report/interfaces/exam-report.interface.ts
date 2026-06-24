@@ -92,6 +92,21 @@ export interface ExamInformationRound {
   averageScore: number | null;
 }
 
+export type ExamCandidateAttemptStatus = 'firstAttempt' | 'repeatAttempt';
+
+/** แถวข้อมูลผู้เข้าสอบรายบุคคลภายในรอบสอบที่เลือก */
+export interface ExamCandidateInfo {
+  id: string;
+  examNumber: string;
+  prefix: string;
+  fullName: string;
+  vocabularyGrammarScore: number | null;
+  readingScore: number | null;
+  totalScore: number | null;
+  level: number | null;
+  attemptStatus: ExamCandidateAttemptStatus;
+}
+
 export interface ExamReportSummary {
   stats: ExamReportStats;
   attendanceByYear: ExamAttendanceByYear[];
