@@ -36,7 +36,12 @@ export class ExamLocationsService {
       const cols = location.LOCATION_TOTAL_COLS ?? 0;
       const seats: Omit<
         ExamLocationSeat,
-        'LS_ID' | 'CREATED_AT' | 'UPDATED_AT' | 'DELETED_AT' | 'LOCATION'
+        | 'LS_ID'
+        | 'CREATED_AT'
+        | 'UPDATED_AT'
+        | 'DELETED_AT'
+        | 'LOCATION'
+        | 'BLOCKED_SEATS'
       >[] = [];
       let sortOrder = 1;
 

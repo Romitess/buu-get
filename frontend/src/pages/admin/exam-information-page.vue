@@ -42,7 +42,7 @@
           <ActionButton
             icon="visibility"
             color="black"
-            tooltip="ดูข้อมูลผู้เข้าสอบ"
+            tooltip="ดูข้อมูลประวัติการสอบ"
             @click="handleView(row)"
           />
         </div>
