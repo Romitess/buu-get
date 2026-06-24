@@ -485,7 +485,7 @@ const routes: RouteRecordRaw[] = [
                 {
                   label: 'navigation.examReport',
                   icon: 'assessment',
-                  to: '/admin/exam-report',
+                  to: '/admin/dashboard',
                 },
                 { label: 'navigation.examInformation', icon: 'info' },
               ],
@@ -502,7 +502,7 @@ const routes: RouteRecordRaw[] = [
                 {
                   label: 'navigation.examReport',
                   icon: 'assessment',
-                  to: '/admin/exam-report',
+                  to: '/admin/dashboard',
                 },
                 {
                   label: 'navigation.examInformation',

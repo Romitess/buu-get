@@ -970,7 +970,7 @@ export default {
     fundSourceManagement: {
       pageTitle: 'จัดการผังแหล่งเงิน',
       pageDescription: 'แสดงรายการผังแหล่งเงินทั้งหมดเพื่อตรวจสอบและแก้ไขให้เหมาะสม',
-      createFundSource: 'สร้างแหล่งาการเงิน',
+      createFundSource: 'สร้างแหล่งฝังเงิน',
       table: {
         columns: {
           index: 'ลำดับ',

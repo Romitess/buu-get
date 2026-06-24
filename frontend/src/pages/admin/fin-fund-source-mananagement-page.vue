@@ -39,7 +39,7 @@
             class="action-btn"
             @click="navigateToEdit(row.FS_ID)"
           >
-            <q-tooltip class="bg-secondary text-white text-caption">
+            <q-tooltip>
               {{ $t('admin.fundSourceManagement.table.tooltips.edit') }}
             </q-tooltip>
           </q-btn>
@@ -52,7 +52,7 @@
             class="action-btn"
             @click="confirmDelete(row)"
           >
-            <q-tooltip class="bg-negative text-white text-caption">
+            <q-tooltip>
               {{ $t('admin.fundSourceManagement.table.tooltips.delete') }}
             </q-tooltip>
           </q-btn>
