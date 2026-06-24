@@ -21,13 +21,16 @@ import {
   fetchExamById,
   fetchAllExamsRaw,
   updateExamRound,
+  notifyExamChanges,
   formatTime,
   formatBackendDate,
   buddhistToGregorian,
   createExamPasscodes,
+  type ExamChangeItem,
 } from 'src/services/exam.service';
 import { getUsersFromApi } from 'src/services/user.service';
 import { ROLES } from 'src/constants/roles';
+import { useUserStore } from 'src/stores/user.store';
 
 /** A single room within a time slot */
 export interface ExamRoom {
@@ -92,6 +95,22 @@ export interface UseExamFormOptions {
   examId?: number | undefined;
 }
 
+/** Snapshot ของฟิลด์ที่ใช้เปรียบเทียบหาความเปลี่ยนแปลงของรอบสอบ */
+interface ExamComparisonSnapshot {
+  examName: string;
+  examRound: string;
+  examType: string;
+  examFormat: string;
+  fee: string;
+  fundSourceLabel: string;
+  examDate: string;
+  regStartDate: string;
+  regEndDate: string;
+  payStartDate: string;
+  payEndDate: string;
+  scheduleText: string;
+}
+
 /**
  * Composable for managing exam creation/editing logic.
  * @param externalForm - Optional external form ref (useful for injecting initial data or v-model syncing)
@@ -101,12 +120,19 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const router = useRouter();
   const $q = useQuasar();
   const examStore = useExamStore();
+  const userStore = useUserStore();
 
   const examId = options?.examId;
   const isEditMode = computed<boolean>(() => !!examId);
 
   const wasOriginallyPublished = ref(false);
   const originalExamDate = ref('');
+
+  /**
+   * สแนปช็อตข้อมูลรอบสอบ ณ ตอนโหลด (edit mode) เพื่อใช้เปรียบเทียบหาความเปลี่ยนแปลง
+   * สำหรับแจ้งเตือนผู้เข้าสอบทางอีเมล
+   */
+  const originalSnapshot = ref<ExamComparisonSnapshot | null>(null);
 
   /** Published exams keep non-schedule sections read-only. */
   const isPublishedSectionLocked = computed<boolean>(() => {
@@ -509,6 +535,89 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     return `${d}/${m}/${y}`;
   };
 
+  /** หา label แหล่งทุนจาก id เพื่อแสดงในรายละเอียดการเปลี่ยนแปลง */
+  const fundSourceLabelFor = (id: number | null): string => {
+    if (!id) return 'ไม่ระบุ';
+    return fundSourceOptions.value.find((o) => o.value === id)?.label || String(id);
+  };
+
+  /**
+   * สร้างข้อความสรุปกำหนดการสอบและห้องสอบ (เรียงตามเวลา) เพื่อใช้เปรียบเทียบ
+   * และแสดงในอีเมลแจ้งเตือน
+   */
+  const buildScheduleText = (): string => {
+    const slots = [...form.value.timeSlots]
+      .filter((slot) => slot.startTime && slot.endTime)
+      .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+    return slots
+      .map((slot) => {
+        const rooms = slot.rooms
+          .map((room) => {
+            const loc = locationOptions.value.find((o) => o.value === room.locationId);
+            const locLabel = loc?.label || 'ไม่ระบุห้อง';
+            const proctorText =
+              room.proctors && room.proctors.length > 0
+                ? ` (ผู้คุมสอบ: ${room.proctors.join(', ')})`
+                : '';
+            return `• ${locLabel} ${room.seats} ที่นั่ง${proctorText}`;
+          })
+          .join('\n');
+        return `เวลา ${slot.startTime} - ${slot.endTime} น.\n${rooms}`;
+      })
+      .join('\n\n');
+  };
+
+  /** สร้าง snapshot ของข้อมูลรอบสอบจากค่าปัจจุบันในฟอร์ม */
+  const buildComparisonSnapshot = (): ExamComparisonSnapshot => ({
+    examName: form.value.examName.trim(),
+    examRound: form.value.examRound.trim(),
+    examType: form.value.examType,
+    examFormat: form.value.examFormat,
+    fee: String(form.value.fee ?? ''),
+    fundSourceLabel: fundSourceLabelFor(form.value.fundSourceId),
+    examDate: form.value.examDate,
+    regStartDate: form.value.regStartDate,
+    regEndDate: form.value.regEndDate,
+    payStartDate: form.value.payStartDate,
+    payEndDate: form.value.payEndDate,
+    scheduleText: buildScheduleText(),
+  });
+
+  /**
+   * เปรียบเทียบ snapshot เดิมกับค่าปัจจุบัน แล้วสร้างรายการการเปลี่ยนแปลง
+   * (เฉพาะฟิลด์ที่มีการเปลี่ยนแปลงจริง)
+   */
+  const buildExamChanges = (): ExamChangeItem[] => {
+    const before = originalSnapshot.value;
+    if (!before) return [];
+    const after = buildComparisonSnapshot();
+    const changes: ExamChangeItem[] = [];
+
+    const push = (label: string, oldValue: string, newValue: string): void => {
+      if (oldValue !== newValue) {
+        changes.push({ label, oldValue, newValue });
+      }
+    };
+
+    push('ชื่อรอบสอบ', before.examName, after.examName);
+    push('รอบสอบ', before.examRound, after.examRound);
+    push('ประเภทการสอบ', before.examType, after.examType);
+    push('รูปแบบการสอบ', before.examFormat, after.examFormat);
+    if (before.fee !== after.fee) {
+      push('ค่าธรรมเนียม', `${before.fee} บาท`, `${after.fee} บาท`);
+    }
+    push('แหล่งทุน', before.fundSourceLabel, after.fundSourceLabel);
+    push('วันที่สอบ', before.examDate, after.examDate);
+    push('วันที่เริ่มรับสมัคร', before.regStartDate, after.regStartDate);
+    push('วันที่สิ้นสุดรับสมัคร', before.regEndDate, after.regEndDate);
+    push('วันที่เริ่มชำระเงิน', before.payStartDate, after.payStartDate);
+    push('วันที่สิ้นสุดชำระเงิน', before.payEndDate, after.payEndDate);
+    push('กำหนดการสอบและห้องสอบ', before.scheduleText, after.scheduleText);
+
+    return changes;
+  };
+
   const loadInitialData = async (): Promise<void> => {
     isLoadingData.value = true;
     error.value = null;
@@ -630,6 +739,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
         // The schedule lock is now handled by the computed property 'isScheduleLocked'
         // based on exam.EXAM_PUBLISHED and session enrollment counts.
+
+        // เก็บ snapshot ของข้อมูลรอบสอบหลังโหลดเสร็จ (options ถูกโหลดครบแล้ว)
+        // เพื่อใช้เปรียบเทียบหาความเปลี่ยนแปลงตอนบันทึก
+        originalSnapshot.value = buildComparisonSnapshot();
       }
     } catch (err) {
       console.error('Failed to load initial data:', err);
@@ -1214,6 +1327,18 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           position: 'top',
           timeout: 2000,
         });
+
+        // แจ้งเตือนผู้เข้าสอบทุกคนในรอบสอบทางอีเมล เมื่อเจ้าหน้าที่ทะเบียน (registration officer)
+        // แก้ไขรอบสอบ โดยส่งเฉพาะรายละเอียดที่มีการเปลี่ยนแปลงจริง
+        // ยิงแบบไม่บล็อก (fire-and-forget) เพื่อให้การบันทึกลื่นไหล ไม่ต้องรอการส่งอีเมล
+        if (userStore.userRole === ROLES.REGISTRATION_OFFICER) {
+          const changes = buildExamChanges();
+          if (changes.length > 0) {
+            void notifyExamChanges(examId, changes).catch((notifyErr) => {
+              console.error('Failed to notify exam changes:', notifyErr);
+            });
+          }
+        }
       } else {
         // === CREATE MODE ===
         const payload: CreateExamPayload = {
