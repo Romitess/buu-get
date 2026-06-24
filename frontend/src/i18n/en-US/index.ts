@@ -1049,6 +1049,60 @@ export default {
         viewRecordMessage: 'Receipt {receiptNo} opened for review.',
       },
     },
+    examInformation: {
+      pageTitle: 'Exam Information {year}',
+      pageSubtitle: 'Shows exam statistics and score results for candidates in {year}.',
+      searchPlaceholder: 'Search',
+      table: {
+        emptyLabel: 'No exam information found',
+        columns: {
+          round: 'Exam Round',
+          applicants: 'Applicants',
+          attended: 'Attended',
+          absent: 'Absent',
+          repeatTakers: 'Repeat Takers',
+          minScore: 'Min Score',
+          maxScore: 'Max Score',
+          averageScore: 'Avg Score',
+          detail: 'Detail',
+        },
+        tooltips: {
+          viewDetail: 'View detail',
+        },
+      },
+      notifications: {
+        loadError: 'Unable to load yearly exam information',
+      },
+    },
+    examCandidatesInfo: {
+      pageTitle: 'Exam Candidates Round {round}',
+      pageTitleFallback: 'Exam Candidates {year}',
+      pageSubtitle: 'Shows individual candidate information and score results for exam round {round}.',
+      pageSubtitleFallback: 'Shows individual candidate information and score results in {year}.',
+      searchPlaceholder: 'Search',
+      status: {
+        firstAttempt: 'First attempt',
+        repeatAttempt: 'Repeat attempt',
+      },
+      table: {
+        emptyLabel: 'No exam candidate data found',
+        columns: {
+          index: 'No.',
+          examNumber: 'Exam ID',
+          prefix: 'Prefix',
+          fullName: 'Full Name',
+          vocabularyGrammarScore: 'Vocabulary & Grammar',
+          readingScore: 'Reading',
+          totalScore: 'Total Score',
+          level: 'Level',
+          status: 'Status',
+          tools: 'Tools',
+        },
+        tooltips: {
+          viewHistory: 'View exam history',
+        },
+      },
+    },
     examReport: {
       pageTitle: 'Exam Report',
       pageSubtitle: 'Overview of applications, attendance, and scores for monitoring and planning.',
@@ -1211,6 +1265,8 @@ export default {
     applicationFeeReport: 'Application Fee Report',
     fundSourceManagement: 'Fund Source Management',
     examReport: 'Exam Report',
+    examInformation: 'Exam Information',
+    examCandidatesInfo: 'Exam Candidates',
     manageHomeContent: 'Manage Home Content',
   },
   profileEditHistory: {

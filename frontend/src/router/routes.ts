@@ -465,7 +465,7 @@ const routes: RouteRecordRaw[] = [
           {
             path: 'executive/test-takers',
             name: 'admin-executive-test-takers',
-            component: () => import('pages/admin/exam-information-page.vue'),
+            component: () => import('pages/admin/exam-information-yearly-page.vue'),
             meta: {
               roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
               breadcrumb: [
@@ -475,15 +475,41 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'executive/test-takers/:examId/:ermId/exam-history',
-            name: 'admin-executive-exam-history',
-            component: () => import('pages/admin/executive-exam-history-page.vue'),
+            path: 'exam-information/:year?',
+            name: 'admin-exam-information',
+            component: () => import('pages/admin/exam-information-yearly-page.vue'),
             meta: {
               roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
-                { label: 'ข้อมูลผู้เข้าสอบ', icon: 'star', to: '/admin/executive/test-takers' },
-                { label: 'ประวัติการสอบ', icon: 'history' },
+                {
+                  label: 'navigation.examReport',
+                  icon: 'assessment',
+                  to: '/admin/exam-report',
+                },
+                { label: 'navigation.examInformation', icon: 'info' },
+              ],
+            },
+          },
+          {
+            path: 'exam-information/:year/candidates',
+            name: 'admin-exam-candidates-info',
+            component: () => import('pages/admin/exam-candidates-info-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.examReport',
+                  icon: 'assessment',
+                  to: '/admin/exam-report',
+                },
+                {
+                  label: 'navigation.examInformation',
+                  icon: 'info',
+                  to: '/admin/exam-information',
+                },
+                { label: 'navigation.examCandidatesInfo', icon: 'groups' },
               ],
             },
           },

@@ -43,6 +43,7 @@
 
 <script setup lang="ts">
 import { onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import ExamReportFilter from 'src/components/exam-report/exam-report-filter.vue';
 import ExamReportStatCard from 'src/components/exam-report/exam-report-stat-card.vue';
@@ -55,6 +56,7 @@ import { useExamReport } from 'src/composables/use-exam-report';
 import type { ExamYearTableRow } from 'src/types/exam-report.types';
 
 const $q = useQuasar();
+const router = useRouter();
 
 const {
   isLoading,
@@ -81,7 +83,10 @@ watch(error, (newVal) => {
 });
 
 const onViewDetail = (row: ExamYearTableRow): void => {
-  $q.notify({ type: 'info', message: String(row.year), position: 'top' });
+  void router.push({
+    name: 'admin-exam-information',
+    params: { year: String(row.year) },
+  });
 };
 
 onMounted(() => {
