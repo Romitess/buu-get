@@ -135,6 +135,41 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    */
   const originalSnapshot = ref<ExamComparisonSnapshot | null>(null);
 
+  const today = (() => {
+    const now = new Date();
+    const d = String(now.getDate()).padStart(2, '0');
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const y = now.getFullYear() + BUDDHIST_YEAR_OFFSET;
+    return `${d}/${m}/${y}`;
+  })();
+
+  // Use external form if provided, otherwise create a new one.
+  // This must be initialized before computed values and watchers that read form.value.
+  const form =
+    externalForm ||
+    ref<CreateExamForm>({
+      examName: '',
+      examRound: '',
+      examType: EXAM_TYPE_GENERAL,
+      examFormat: EXAM_FORMAT_COMPUTER,
+      fundSourceId: null,
+      fee: '',
+      isPublished: false,
+      examDate: today,
+      timeSlots: [
+        {
+          startTime: '08:00',
+          endTime: '10:00',
+          rooms: [{ locationId: null, proctorName: '', proctors: [], seats: 40 }],
+        },
+      ],
+      regStartDate: today,
+      regEndDate: today,
+      payStartDate: today,
+      payEndDate: today,
+      eligibleCandidates: [],
+    });
+
   /** Published exams keep non-schedule sections read-only. */
   const isPublishedSectionLocked = computed<boolean>(() => {
     return isEditMode.value && wasOriginallyPublished.value;
@@ -149,14 +184,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       slot.rooms.some((room) => (room.enrollmentCount || 0) > 0),
     );
   });
-
-  const today = (() => {
-    const now = new Date();
-    const d = String(now.getDate()).padStart(2, '0');
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const y = now.getFullYear() + BUDDHIST_YEAR_OFFSET;
-    return `${d}/${m}/${y}`;
-  })();
 
   const examTypeOptions: string[] = [EXAM_TYPE_GENERAL, EXAM_TYPE_SPECIAL];
   const examFormatOptions: string[] = [EXAM_FORMAT_COMPUTER, EXAM_FORMAT_PAPER];
@@ -223,51 +250,22 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   });
 
   // Watch occupied location IDs and reset locationId if it becomes occupied (unless loading data)
-  watch(
-    occupiedLocationIds,
-    (occupied) => {
-      if (isLoadingData.value) return;
-      form.value.timeSlots.forEach((slot) => {
-        slot.rooms.forEach((room) => {
-          if (room.locationId !== null && occupied.has(room.locationId)) {
-            room.locationId = null;
-          }
-        });
+  watch(occupiedLocationIds, (occupied) => {
+    if (isLoadingData.value) return;
+    form.value.timeSlots.forEach((slot) => {
+      slot.rooms.forEach((room) => {
+        if (room.locationId !== null && occupied.has(room.locationId)) {
+          room.locationId = null;
+        }
       });
-    }
-  );
+    });
+  });
 
   /** Currently active time slot tab index */
   const activeSlotIndex = ref(0);
 
   /** Search query for eligible candidates table */
   const candidateSearch = ref('');
-
-  // Use external form if provided, otherwise create a new one
-  const form =
-    externalForm ||
-    ref<CreateExamForm>({
-      examName: '',
-      examRound: '',
-      examType: EXAM_TYPE_GENERAL,
-      examFormat: EXAM_FORMAT_COMPUTER,
-      fundSourceId: null,
-      fee: '',
-      isPublished: false,
-      examDate: today,
-      timeSlots: [
-        {
-          startTime: '08:00',
-          endTime: '10:00',
-          rooms: [{ locationId: null, proctorName: '', proctors: [], seats: 40 }],
-        },
-      ],
-      regStartDate: today,
-      regEndDate: today,
-      payStartDate: today,
-      payEndDate: today,
-      eligibleCandidates: [],
-    });
 
   /** Whether the current exam type is special */
   const isSpecialRound = computed<boolean>(() => form.value.examType === EXAM_TYPE_SPECIAL);
@@ -393,7 +391,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    * Validate required fields and populate fieldErrors.
    * @returns true if all required fields are filled, false otherwise.
    */
-  const timeToMinutes = (timeStr: string | undefined): number => {
+  function timeToMinutes(timeStr: string | undefined): number {
     if (!timeStr) return 9999;
     const cleaned = timeStr.replace(/\s/g, '');
     if (!cleaned) return 9999;
@@ -401,7 +399,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     const hours = parseInt(parts[0] || '0', 10);
     const minutes = parseInt(parts[1] || '0', 10);
     return hours * 60 + minutes;
-  };
+  }
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
