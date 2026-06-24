@@ -46,8 +46,6 @@ export const DEFAULT_EXAM_TITLE = 'BUU - GET';
 
 /** ข้อความแจ้งเตือนต่างๆ */
 export const NOTIFY_MSG = {
-  CONFLICT_DATE: (date: string) =>
-    `ไม่สามารถจัดสอบได้ เนื่องจากวันที่ ${date} มีการจัดสอบอยู่แล้ว (1 วันสามารถจัดได้เพียง 1 วิชาเท่านั้น หากต้องการเพิ่มรอบสอบ กรุณาแก้ไขวิชาเดิมเพื่อเพิ่มเวลา)`,
   SELECT_FUND: 'กรุณาเลือกแหล่งเงิน',
   LOAD_ERROR: 'ไม่สามารถโหลดข้อมูลได้',
   MAX_SESSIONS: (max: number) => `สามารถเพิ่มรอบเวลาสอบได้สูงสุด ${max} รอบ`,
@@ -58,7 +56,6 @@ export const NOTIFY_MSG = {
   CREATE_SUCCESS: 'สร้างรอบสอบสำเร็จ',
   UPDATE_ERROR: 'เกิดข้อผิดพลาดในการแก้ไขรอบสอบ',
   CREATE_ERROR: 'เกิดข้อผิดพลาดในการสร้างรอบสอบ',
-  DUPLICATE_DATE: 'วันที่นี้มีการจัดสอบซ้ำซ้อน (Duplicate) กรุณาลบรายการที่ไม่ต้องการออก',
 };
 
 /** ข้อความแจ้งเตือนเมื่อกรอกข้อมูลไม่ครบถ้วน (Validation) */
@@ -130,6 +127,13 @@ export const VERIFY_STATUS = {
 
 export const TRANSACTION_MATCH_STATUS = {
   MATCH: 1,
+  UNMATCH: 0,
+} as const;
+
+export const ReceiptStatus = {
+  UNISSUED : 0,
+  ISSUED   : 1,
+  VOIDED   : 2,
 } as const;
 
 export const HTTP_STATUS = {

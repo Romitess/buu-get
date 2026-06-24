@@ -47,12 +47,21 @@ const getSessionTimeKey = (session: BackendSession): string => {
 
 const uniqueSessions = computed<BackendSession[]>(() => {
   const seen = new Set<string>();
-  return (props.sessions || []).filter((session) => {
-    const key = getSessionTimeKey(session);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  return [...(props.sessions || [])]
+    .sort((left, right) => {
+      const startTimeComparison = (left.SS_START_TIME || '').localeCompare(
+        right.SS_START_TIME || '',
+      );
+      if (startTimeComparison !== 0) return startTimeComparison;
+
+      return (left.SS_END_TIME || '').localeCompare(right.SS_END_TIME || '');
+    })
+    .filter((session) => {
+      const key = getSessionTimeKey(session);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 });
 </script>
 
@@ -73,7 +82,6 @@ const uniqueSessions = computed<BackendSession[]>(() => {
   }
 
   :deep(.q-tab--active) {
-    color: var(--primary) !important;
     .q-tab__label {
       font-weight: 500;
     }

@@ -36,10 +36,19 @@
                     gridColumn: getSeatGridColumn(colIndex),
                     gridRow: '1',
                     width: seatStyle.width,
+                    height: seatStyle.guideHeight,
+                    fontSize: seatStyle.guideFontSize,
                   }"
                   @click="openColumnStatusDialog(colIndex)"
                 >
                   {{ columnGuideLabels[colIndex - 1] }}
+                  <q-tooltip
+                    anchor="top middle"
+                    self="bottom middle"
+                    class="seat-tooltip text-body2"
+                  >
+                    คลิกเพื่อตั้งค่าสถานะที่นั่งทั้งแถว
+                  </q-tooltip>
                 </button>
               </template>
             </template>
@@ -59,6 +68,9 @@
                 @click="openRowStatusDialog(rowIndex)"
               >
                 {{ rowGuideLabels[rowIndex] }}
+                <q-tooltip anchor="top middle" self="bottom middle" class="seat-tooltip text-body2">
+                  คลิกเพื่อตั้งค่าสถานะที่นั่งทั้งแถว
+                </q-tooltip>
               </button>
 
               <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
@@ -82,11 +94,7 @@
                       self="bottom middle"
                       class="seat-tooltip text-body2"
                     >
-                      {{
-                        brokenSeats.has(seat.id)
-                          ? t('admin.locationManagement.seatTooltip.markAvailable')
-                          : t('admin.locationManagement.seatTooltip.markBroken')
-                      }}
+                      คลิกเพื่อตั้งค่าสถานะที่นั่ง
                     </q-tooltip>
                   </AppExamSeatSquare>
                 </div>
@@ -108,7 +116,13 @@
               class="seat-row-walkway"
               :style="getRowWalkwayStyle(position.index)"
             >
-              <span>ทางเดิน</span>
+              <span
+                v-for="labelPosition in getRowWalkwayLabelPositions()"
+                :key="`row-walkway-label-${position.index}-${labelPosition}`"
+                :style="{ left: `${labelPosition}%` }"
+              >
+                ทางเดิน
+              </span>
             </div>
           </div>
         </div>
@@ -285,7 +299,35 @@ const getTargetStatus = (): SeatStatusOption => {
   return isSameStatus ? firstStatus : 'available';
 };
 
-defineExpose({ brokenSeats, omittedSeats: localOmittedSeats });
+const setSeatStatusSets = (statuses: {
+  brokenSeats?: Iterable<string>;
+  omittedSeats?: Iterable<string>;
+}): void => {
+  brokenSeats.value = new Set(statuses.brokenSeats ?? []);
+  localOmittedSeats.value = new Set(statuses.omittedSeats ?? []);
+};
+
+const getSeatStatuses = (): Record<string, number> => {
+  const statusMap: Record<string, number> = {};
+
+  seatsByRow.value.forEach((rowSeats, rowIndex) => {
+    rowSeats.forEach((seat, colIndex) => {
+      const status = getSeatStatusOption(seat.id);
+      const statusCode = status === 'broken' ? 1 : status === 'omitted' ? 2 : 0;
+      statusMap[seat.id] = statusCode;
+      statusMap[`${rowIndex + 1}-${colIndex + 1}`] = statusCode;
+    });
+  });
+
+  return statusMap;
+};
+
+defineExpose({
+  brokenSeats,
+  omittedSeats: localOmittedSeats,
+  setSeatStatusSets,
+  getSeatStatuses,
+});
 
 const getSeatStatus = (seatId: string): 'available' | 'assigned' | 'broken' | 'blocked' => {
   if (localOmittedSeats.value.has(seatId)) return 'blocked';
@@ -384,29 +426,61 @@ const rowWalkwayPositions = computed(() =>
 const hasColumnWalkways = computed(() => columnWalkwayPositions.value.length > 0);
 const hasRowWalkways = computed(() => rowWalkwayPositions.value.length > 0);
 
+const activeColumnWalkwayIndexes = computed(() =>
+  Array.from(
+    new Set(
+      columnWalkwayPositions.value
+        .map((position) => position.index)
+        .filter((index) => index > 0 && index < colCount.value),
+    ),
+  ).sort((a, b) => a - b),
+);
+
+const activeRowWalkwayIndexes = computed(() =>
+  Array.from(
+    new Set(
+      rowWalkwayPositions.value
+        .map((position) => position.index)
+        .filter((index) => index > 0 && index < rowCount.value),
+    ),
+  ).sort((a, b) => a - b),
+);
+
+const getColumnWalkwaysBefore = (colIndex: number): number =>
+  activeColumnWalkwayIndexes.value.filter((index) => index < colIndex).length;
+
+const getRowWalkwaysBefore = (rowIndex: number): number =>
+  activeRowWalkwayIndexes.value.filter((index) => index < rowIndex).length;
+
 const getSeatGridColumn = (colIndex: number): string => {
-  return `${colIndex + 1}`;
+  return `${colIndex + 1 + getColumnWalkwaysBefore(colIndex)}`;
 };
 
 const getSeatGridRow = (rowIndex: number): string => {
-  return `${rowIndex + 1}`;
+  return `${rowIndex + 1 + getRowWalkwaysBefore(rowIndex)}`;
 };
 
-const cssNumber = (value: string): number => Number.parseFloat(value) || 0;
+const getColumnWalkwayGridColumn = (colIndex: number): string => {
+  return `${colIndex + 2 + getColumnWalkwaysBefore(colIndex)}`;
+};
+
+const getRowWalkwayGridRow = (rowIndex: number): string => {
+  return `${rowIndex + 2 + getRowWalkwaysBefore(rowIndex)}`;
+};
 
 const seatStyle = computed(() => {
   const maxDimension = Math.max(rowCount.value, colCount.value);
   const denseWithWalkways = maxDimension > 18 && (hasColumnWalkways.value || hasRowWalkways.value);
   const mediumWithWalkways = maxDimension > 10 && (hasColumnWalkways.value || hasRowWalkways.value);
-  const walkwaySize = denseWithWalkways ? '18px' : mediumWithWalkways ? '20px' : '18px';
+  const walkwaySize = denseWithWalkways ? '22px' : mediumWithWalkways ? '24px' : '26px';
 
   if (maxDimension > 18) {
     return {
       width: '40px',
       height: '40px',
       fontSize: '13px',
-      rowGap: hasRowWalkways.value ? '24px' : '8px',
-      colGap: hasColumnWalkways.value ? '24px' : '12px',
+      rowGap: '8px',
+      colGap: '12px',
       aisleWidth: hasColumnWalkways.value ? walkwaySize : '10px',
       aisleHeight: hasRowWalkways.value ? walkwaySize : '10px',
       guideHeight: '22px',
@@ -422,8 +496,8 @@ const seatStyle = computed(() => {
       width: '52px',
       height: '52px',
       fontSize: '14px',
-      rowGap: hasRowWalkways.value ? '28px' : '16px',
-      colGap: hasColumnWalkways.value ? '28px' : '18px',
+      rowGap: '16px',
+      colGap: '18px',
       aisleWidth: hasColumnWalkways.value ? walkwaySize : '14px',
       aisleHeight: hasRowWalkways.value ? walkwaySize : '14px',
       guideHeight: '24px',
@@ -451,14 +525,21 @@ const seatStyle = computed(() => {
 });
 
 const seatGridStyle = computed<CSSProperties>(() => {
-  const columnTracks = [
-    props.showSeatGuides ? seatStyle.value.rowGuideWidth : '0px',
-    ...Array.from({ length: colCount.value }, () => seatStyle.value.width),
-  ];
-  const rowTracks = [
-    props.showSeatGuides ? seatStyle.value.guideHeight : '0px',
-    ...Array.from({ length: rowCount.value }, () => seatStyle.value.height),
-  ];
+  const columnTracks = [props.showSeatGuides ? seatStyle.value.rowGuideWidth : '0px'];
+  for (let col = 1; col <= colCount.value; col += 1) {
+    columnTracks.push(seatStyle.value.width);
+    if (activeColumnWalkwayIndexes.value.includes(col)) {
+      columnTracks.push(seatStyle.value.aisleWidth);
+    }
+  }
+
+  const rowTracks = [props.showSeatGuides ? seatStyle.value.guideHeight : '0px'];
+  for (let row = 1; row <= rowCount.value; row += 1) {
+    rowTracks.push(seatStyle.value.height);
+    if (activeRowWalkwayIndexes.value.includes(row)) {
+      rowTracks.push(seatStyle.value.aisleHeight);
+    }
+  }
 
   return {
     display: 'grid',
@@ -471,107 +552,50 @@ const seatGridStyle = computed<CSSProperties>(() => {
   };
 });
 
-const seatBodyMetrics = computed(() => {
-  const guideWidth = props.showSeatGuides ? cssNumber(seatStyle.value.rowGuideWidth) : 0;
-  const guideHeight = props.showSeatGuides ? cssNumber(seatStyle.value.guideHeight) : 0;
-  const seatWidth = cssNumber(seatStyle.value.width);
-  const seatHeight = cssNumber(seatStyle.value.height);
-  const colGap = cssNumber(seatStyle.value.colGap);
-  const rowGap = cssNumber(seatStyle.value.rowGap);
+const getColumnWalkwayLabelTop = (): string => {
+  const rowBoundaries = [0, ...activeRowWalkwayIndexes.value, rowCount.value];
+  let longestStart = 0;
+  let longestEnd = 0;
 
-  return {
-    bodyLeft: guideWidth + colGap,
-    bodyTop: guideHeight + rowGap,
-    bodyWidth: colCount.value * seatWidth + Math.max(colCount.value - 1, 0) * colGap,
-    bodyHeight: rowCount.value * seatHeight + Math.max(rowCount.value - 1, 0) * rowGap,
-    colGap,
-    rowGap,
-    seatWidth,
-    seatHeight,
-  };
-});
+  for (let index = 0; index < rowBoundaries.length - 1; index += 1) {
+    const start = rowBoundaries[index] ?? 0;
+    const end = rowBoundaries[index + 1] ?? rowCount.value;
+
+    if (end - start > longestEnd - longestStart) {
+      longestStart = start;
+      longestEnd = end;
+    }
+  }
+
+  return `${((longestStart + longestEnd) / 2 / rowCount.value) * 100}%`;
+};
 
 const getColumnWalkwayStyle = (colIndex: number): CSSProperties => {
-  const metrics = seatBodyMetrics.value;
-  const width = cssNumber(seatStyle.value.aisleWidth);
-  const walkwayHeight = cssNumber(seatStyle.value.aisleHeight);
-  const left =
-    metrics.bodyLeft +
-    colIndex * metrics.seatWidth +
-    Math.max(colIndex - 1, 0) * metrics.colGap +
-    (metrics.colGap - width) / 2;
-  const rowWalkwayBands = rowWalkwayPositions.value
-    .map((position) => {
-      const top =
-        position.index * metrics.seatHeight +
-        Math.max(position.index - 1, 0) * metrics.rowGap +
-        (metrics.rowGap - walkwayHeight) / 2;
-
-      return {
-        start: Math.max(0, top - 4),
-        end: Math.min(metrics.bodyHeight, top + walkwayHeight + 4),
-      };
-    })
-    .sort((a, b) => a.start - b.start);
-  const clearSegments = rowWalkwayBands.reduce<Array<{ start: number; end: number }>>(
-    (segments, band) => {
-      const previous = segments[segments.length - 1];
-
-      if (!previous) return segments;
-
-      if (band.start > previous.start) {
-        previous.end = Math.min(previous.end, band.start);
-      }
-
-      if (band.end < metrics.bodyHeight) {
-        segments.push({ start: band.end, end: metrics.bodyHeight });
-      }
-
-      return segments;
-    },
-    [{ start: 0, end: metrics.bodyHeight }],
-  );
-  const labelSegment = clearSegments.reduce(
-    (largest, segment) =>
-      segment.end - segment.start > largest.end - largest.start ? segment : largest,
-    clearSegments[0] ?? { start: 0, end: metrics.bodyHeight },
-  );
-  const labelTop = Math.max(
-    8,
-    Math.min(
-      labelSegment.start + (labelSegment.end - labelSegment.start) / 2,
-      metrics.bodyHeight - 8,
-    ),
-  );
-
   return {
-    position: 'absolute',
-    left: `${left}px`,
-    top: `${metrics.bodyTop}px`,
+    gridColumn: getColumnWalkwayGridColumn(colIndex),
+    gridRow: `2 / ${rowCount.value + activeRowWalkwayIndexes.value.length + 2}`,
     width: seatStyle.value.aisleWidth,
-    height: `${metrics.bodyHeight}px`,
     fontSize: seatStyle.value.walkwayFontSize,
-    '--column-label-top': `${labelTop}px`,
+    '--column-label-top': hasRowWalkways.value ? getColumnWalkwayLabelTop() : '50%',
   };
 };
 
 const getRowWalkwayStyle = (rowIndex: number): CSSProperties => {
-  const metrics = seatBodyMetrics.value;
-  const height = cssNumber(seatStyle.value.aisleHeight);
-  const top =
-    metrics.bodyTop +
-    rowIndex * metrics.seatHeight +
-    Math.max(rowIndex - 1, 0) * metrics.rowGap +
-    (metrics.rowGap - height) / 2;
-
   return {
-    position: 'absolute',
-    left: `${metrics.bodyLeft}px`,
-    top: `${top}px`,
-    width: `${metrics.bodyWidth}px`,
+    gridColumn: `2 / ${colCount.value + activeColumnWalkwayIndexes.value.length + 2}`,
+    gridRow: getRowWalkwayGridRow(rowIndex),
     height: seatStyle.value.aisleHeight,
     fontSize: seatStyle.value.walkwayFontSize,
   };
+};
+
+const getRowWalkwayLabelPositions = (): number[] => {
+  const columnBoundaries = [0, ...activeColumnWalkwayIndexes.value, colCount.value];
+
+  return columnBoundaries.slice(0, -1).map((start, index) => {
+    const end = columnBoundaries[index + 1] ?? colCount.value;
+    return ((start + end) / 2 / colCount.value) * 100;
+  });
 };
 
 // ── Zoom-to-fit logic ──────────────────────────────────────
@@ -579,6 +603,8 @@ const scaleFactor = ref(1);
 const gridNaturalWidth = ref(0);
 const gridNaturalHeight = ref(0);
 const shouldUseLargeGridScroll = computed(() => rowCount.value > 20 || colCount.value > 20);
+const PREVIEW_HORIZONTAL_SAFETY_GAP = 2;
+const MAX_PREVIEW_FILL_SCALE = 1.35;
 
 const measureAndScale = (): void => {
   if (!gridRef.value || !containerRef.value) {
@@ -612,7 +638,7 @@ const measureAndScale = (): void => {
   style.height = prevHeight;
 
   const parentEl = containerRef.value;
-  const availW = parentEl.clientWidth - 16; // small padding margin
+  const availW = Math.max(parentEl.clientWidth - PREVIEW_HORIZONTAL_SAFETY_GAP, 1);
   const availH = parentEl.clientHeight ? parentEl.clientHeight - 8 : 99999;
 
   if (gridW <= 0 || gridH <= 0) {
@@ -620,12 +646,13 @@ const measureAndScale = (): void => {
     return;
   }
 
-  if (shouldUseLargeGridScroll.value) {
-    scaleFactor.value = Math.min(availW / gridW, 1);
+  const scaleX = availW / gridW;
+
+  if (shouldUseLargeGridScroll.value || gridH > availH) {
+    scaleFactor.value = Math.max(0.15, Math.min(scaleX, MAX_PREVIEW_FILL_SCALE));
     return;
   }
 
-  const scaleX = availW / gridW;
   const scaleY = availH / gridH;
   const s = Math.min(scaleX, scaleY, 1); // never zoom in, only zoom out
   scaleFactor.value = Math.max(0.15, s);
@@ -636,27 +663,35 @@ const wrapperStyle = computed<CSSProperties>(() => {
   const w = gridNaturalWidth.value;
   const h = gridNaturalHeight.value;
 
+  if (w <= 0 || h <= 0) {
+    return {
+      width: '100%',
+      minHeight: '120px',
+      position: 'relative',
+      overflow: 'visible',
+    };
+  }
+
   if (shouldUseLargeGridScroll.value) {
     return {
       width: '100%',
       height: `${h * s}px`,
       position: 'relative',
       overflow: 'visible',
-      display: 'flex',
-      justifyContent: 'center',
     };
   }
 
-  if (s >= 1 || w <= 0 || h <= 0) {
+  if (s >= 1) {
     return {
       width: '100%',
-      display: 'flex',
-      justifyContent: 'center',
+      height: `${h}px`,
+      position: 'relative',
+      overflow: 'visible',
     };
   }
 
   return {
-    width: `${containerWidth.value - 16}px`, // Always take full available width of container
+    width: `${Math.max(containerWidth.value - PREVIEW_HORIZONTAL_SAFETY_GAP, 1)}px`,
     height: `${h * s}px`,
     position: 'relative',
     overflow: 'visible',
@@ -668,6 +703,19 @@ const gridTransformStyle = computed<CSSProperties>(() => {
   const w = gridNaturalWidth.value;
   const h = gridNaturalHeight.value;
 
+  if (w <= 0 || h <= 0) {
+    return {
+      transform: 'translateX(-50%) scale(1)',
+      transformOrigin: 'top center',
+      position: 'absolute',
+      left: '50%',
+      top: '0',
+      width: 'max-content',
+      opacity: 0,
+      pointerEvents: 'none',
+    };
+  }
+
   if (shouldUseLargeGridScroll.value) {
     return {
       transform: `translateX(-50%) scale(${s})`,
@@ -677,13 +725,20 @@ const gridTransformStyle = computed<CSSProperties>(() => {
       top: '0',
       width: `${w}px`,
       height: `${h}px`,
+      opacity: 1,
     };
   }
 
-  if (s >= 1 || w <= 0 || h <= 0) {
+  if (s >= 1) {
     return {
-      transform: 'none',
-      width: 'max-content',
+      transform: 'translateX(-50%) scale(1)',
+      transformOrigin: 'top center',
+      position: 'absolute',
+      left: '50%',
+      top: '0',
+      width: `${w}px`,
+      height: `${h}px`,
+      opacity: 1,
     };
   }
 
@@ -695,6 +750,7 @@ const gridTransformStyle = computed<CSSProperties>(() => {
     top: '0',
     width: `${w}px`,
     height: `${h}px`,
+    opacity: 1,
   };
 });
 
@@ -719,6 +775,7 @@ onBeforeUnmount(() => {
 // Recalculate when rows/cols/split change
 watch(
   [
+    totalSeats,
     rowCount,
     colCount,
     () => props.splitLeftRight,
@@ -726,6 +783,13 @@ watch(
     () => props.walkwayPositions,
   ],
   () => {
+    if (totalSeats.value <= 0) {
+      scaleFactor.value = 1;
+      gridNaturalWidth.value = 0;
+      gridNaturalHeight.value = 0;
+      return;
+    }
+
     void nextTick(() => measureAndScale());
   },
 );
@@ -820,7 +884,8 @@ watch(
   justify-content: center;
   padding-top: var(--space-md);
   padding-bottom: var(--space-md);
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   flex: 1;
   min-height: 0;
 }
@@ -835,6 +900,8 @@ watch(
   display: block;
   width: max-content;
   flex-shrink: 0;
+  will-change: opacity;
+  transition: opacity 180ms ease;
 }
 
 .seat-grid-wrapper {
@@ -861,12 +928,16 @@ watch(
   font-weight: var(--font-weight-semibold);
   line-height: 1;
   cursor: pointer;
+  will-change: transform, opacity;
+  transition:
+    transform 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 220ms ease,
+    background-color 220ms ease;
 }
 
 .seat-column-guide {
   height: 26px;
   font-size: 14px;
-  transform: translateY(4px);
 }
 
 .seat-row-guide {
@@ -874,9 +945,11 @@ watch(
 }
 
 .seat-column-walkway {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: stretch;
   border-radius: 10px;
   border: 1px solid var(--Surface-Selected, #dddddd);
   background: var(--Surface-Selected, #dddddd);
@@ -889,6 +962,13 @@ watch(
   z-index: 2;
   pointer-events: none;
   overflow: hidden;
+  transform-origin: center;
+  will-change: transform, opacity;
+  animation: seat-walkway-enter 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 220ms ease,
+    width 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .seat-column-walkway span {
@@ -911,6 +991,7 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
+  justify-self: stretch;
   border-radius: 10px;
   border: 1px solid var(--Surface-Selected, #dddddd);
   background: var(--Surface-Selected, #dddddd);
@@ -923,15 +1004,24 @@ watch(
   z-index: 5;
   pointer-events: none;
   overflow: hidden;
+  transform-origin: center;
+  will-change: transform, opacity;
+  animation: seat-walkway-enter 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 220ms ease,
+    height 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .seat-row-walkway span {
-  position: relative;
+  position: absolute;
+  top: 50%;
   z-index: 6;
   background: var(--Surface-Selected, #dddddd) !important;
   border-radius: 6px;
   max-width: calc(100% - 12px);
   padding: 3px 10px;
+  transform: translate(-50%, -50%);
   white-space: nowrap;
   overflow: hidden;
 }
@@ -940,6 +1030,36 @@ watch(
   flex-shrink: 0;
   font-weight: var(--font-weight-semibold);
   z-index: 4;
+  transform-origin: center;
+  will-change: transform, opacity;
+  animation: seat-item-enter 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    transform 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 220ms ease;
+}
+
+@keyframes seat-item-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes seat-walkway-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .empty-preview {
@@ -963,6 +1083,20 @@ watch(
 
 :global(.seat-tooltip) {
   z-index: 10000;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seat-grid-scaling-wrapper,
+  .seat-grid-scalable,
+  .seat-grid-wrapper,
+  .seat-column-guide,
+  .seat-row-guide,
+  .seat-column-walkway,
+  .seat-row-walkway,
+  .seat-item {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 @media (max-width: 599px) {

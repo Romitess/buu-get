@@ -1,8 +1,8 @@
 <template>
-  <section class="seat-map-panel">
-    <header class="seat-map-header">
+  <section class="seat-map-panel" :class="{ 'is-print-mode': printMode }">
+    <header v-if="!hideHeader" class="seat-map-header">
       <h2 class="seat-map-title">{{ title }}</h2>
-      <div class="seat-map-controls row items-center no-wrap q-gutter-x-md">
+      <div v-if="!printMode" class="seat-map-controls row items-center no-wrap q-gutter-x-md">
         <div class="row items-center no-wrap q-gutter-x-sm">
           <span class="shuffle-label">{{ swapModeLabel }}</span>
           <q-toggle v-model="swapMode" dense color="primary" class="shuffle-toggle" />
@@ -42,54 +42,62 @@
           }"
           :style="gridTransformStyle"
         >
-          <div class="seat-grid-wrapper">
+          <div class="seat-grid-wrapper" :style="seatGridStyle">
             <template v-for="(rowSeats, rowIndex) in seatsByRow" :key="rowIndex">
-              <div class="seat-map-row">
-                <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
+              <template v-for="(seat, colIndex) in rowSeats" :key="seat.id">
+                <div
+                  :ref="(el) => setSeatCellRef(el, seat.id)"
+                  class="seat-cell"
+                  :class="{
+                    'is-drag-source': draggingSeatId === seat.id,
+                    'is-drag-over': draggingSeatId !== null && dragOverSeatId === seat.id,
+                  }"
+                  :style="getSeatCellGridStyle(rowIndex + 1, colIndex + 1)"
+                  @mousedown="onSeatMouseDown($event, seat)"
+                  @mouseenter="onSeatMouseEnter(seat)"
+                  @mouseleave="onSeatMouseLeave(seat)"
+                >
                   <div
-                    :ref="(el) => setSeatCellRef(el, seat.id)"
-                    class="seat-cell"
+                    class="seat-cell-content"
                     :class="{
-                      'is-drag-source': draggingSeatId === seat.id,
-                      'is-drag-over': draggingSeatId !== null && dragOverSeatId === seat.id,
+                      'is-seat-shifting': seat.student && movingStudentIds.has(seat.student.id),
                     }"
-                    @mousedown="onSeatMouseDown($event, seat)"
-                    @mouseenter="onSeatMouseEnter(seat)"
-                    @mouseleave="onSeatMouseLeave(seat)"
+                    :style="getSeatCellContentStyle(seat)"
                   >
-                    <div
-                      class="seat-cell-content"
-                      :class="{
-                        'is-seat-shifting': seat.student && movingStudentIds.has(seat.student.id),
-                      }"
-                      :style="getSeatCellContentStyle(seat)"
-                    >
-                      <AppExamSeatAssignmentTile
-                        :seat-label="seat.label"
-                        :status="draggingSeatId === seat.id ? 'available' : seat.status"
-                        :student="draggingSeatId === seat.id ? null : seat.student"
-                        :swap-mode="swapMode"
-                        :selected="
-                          draggingSeatId !== seat.id &&
-                          draggingSeatId !== null &&
-                          dragOverSeatId === seat.id
-                        "
-                      />
-                    </div>
+                    <AppExamSeatAssignmentTile
+                      :seat-label="seat.label"
+                      :status="draggingSeatId === seat.id ? 'available' : seat.status"
+                      :student="draggingSeatId === seat.id ? null : seat.student"
+                      :swap-mode="swapMode"
+                      :selected="
+                        draggingSeatId !== seat.id &&
+                        draggingSeatId !== null &&
+                        dragOverSeatId === seat.id
+                      "
+                    />
                   </div>
-                  <div
-                    v-if="shouldRenderColumnAisle(colIndex + 1)"
-                    class="seat-column-aisle"
-                    aria-hidden="true"
-                  ></div>
-                </template>
-              </div>
-              <div
-                v-if="shouldRenderRowAisle(rowIndex + 1)"
-                class="seat-row-aisle"
-                aria-hidden="true"
-              ></div>
+                </div>
+              </template>
             </template>
+
+            <div
+              v-for="colNo in columnAislePositions"
+              :key="`column-aisle-${colNo}`"
+              class="seat-column-aisle"
+              :style="getColumnAisleGridStyle(colNo)"
+              aria-hidden="true"
+            >
+              <span>ทางเดิน</span>
+            </div>
+            <div
+              v-for="rowNo in rowAislePositions"
+              :key="`row-aisle-${rowNo}`"
+              class="seat-row-aisle"
+              :style="getRowAisleGridStyle(rowNo)"
+              aria-hidden="true"
+            >
+              <span>ทางเดิน</span>
+            </div>
           </div>
         </div>
       </div>
@@ -144,12 +152,16 @@ const props = withDefaults(
     splitLeftRight: boolean;
     aisleAfterCols?: number[];
     aisleAfterRows?: number[];
+    printMode?: boolean;
+    hideHeader?: boolean;
     swapModeLabel?: string;
     emptyLabel?: string;
   }>(),
   {
     aisleAfterCols: () => [],
     aisleAfterRows: () => [],
+    printMode: false,
+    hideHeader: false,
     swapModeLabel: 'โหมดสลับที่นั่ง',
     emptyLabel: 'ไม่มีข้อมูลผังที่นั่ง',
   },
@@ -161,14 +173,140 @@ const emit = defineEmits<{
 
 const swapMode = ref(false);
 
-const shouldRenderColumnAisle = (colNo: number): boolean => {
-  if (props.aisleAfterCols.length > 0) return props.aisleAfterCols.includes(colNo);
+const rowCount = computed(() => props.seatsByRow.length);
+const colCount = computed(() =>
+  props.seatsByRow.reduce((maxCols, rowSeats) => Math.max(maxCols, rowSeats.length), 0),
+);
 
-  const fallbackMidpoint = Math.ceil((props.seatsByRow[0]?.length ?? 0) / 2);
-  return props.splitLeftRight && colNo === fallbackMidpoint;
+const normalizedAisleAfterCols = computed(() =>
+  [...new Set(props.aisleAfterCols)]
+    .filter((colNo) => Number.isInteger(colNo) && colNo >= 1 && colNo < colCount.value)
+    .sort((a, b) => a - b),
+);
+
+const normalizedAisleAfterRows = computed(() =>
+  [...new Set(props.aisleAfterRows)]
+    .filter((rowNo) => Number.isInteger(rowNo) && rowNo >= 1 && rowNo < rowCount.value)
+    .sort((a, b) => a - b),
+);
+
+const columnAislePositions = computed(() => {
+  if (normalizedAisleAfterCols.value.length > 0) return normalizedAisleAfterCols.value;
+
+  const fallbackMidpoint = Math.ceil(colCount.value / 2);
+  return props.splitLeftRight && fallbackMidpoint < colCount.value ? [fallbackMidpoint] : [];
+});
+
+const rowAislePositions = computed(() => normalizedAisleAfterRows.value);
+
+const getGridTrackIndex = (index: number, aisleIndexes: number[]): number =>
+  index + aisleIndexes.filter((aisleIndex) => aisleIndex < index).length;
+
+const getAisleTrackIndex = (index: number, aisleIndexes: number[]): number =>
+  index + aisleIndexes.filter((aisleIndex) => aisleIndex <= index).length;
+
+const seatGridStyle = computed<CSSProperties>(() => {
+  const columnTracks: string[] = [];
+  for (let col = 1; col <= colCount.value; col++) {
+    columnTracks.push('64px');
+    if (columnAislePositions.value.includes(col)) {
+      columnTracks.push('18px');
+    }
+  }
+
+  const rowTracks: string[] = [];
+  for (let row = 1; row <= rowCount.value; row++) {
+    rowTracks.push('82px');
+    if (rowAislePositions.value.includes(row)) {
+      rowTracks.push('18px');
+    }
+  }
+
+  return {
+    display: 'grid',
+    gridTemplateColumns: columnTracks.join(' '),
+    gridTemplateRows: rowTracks.join(' '),
+    columnGap: '16px',
+    rowGap: '10px',
+    paddingBottom: '28px',
+  };
+});
+
+const getSeatCellGridStyle = (rowNo: number, colNo: number): CSSProperties => ({
+  gridColumn: `${getGridTrackIndex(colNo, columnAislePositions.value)}`,
+  gridRow: `${getGridTrackIndex(rowNo, rowAislePositions.value)}`,
+});
+
+const getColumnAisleLabelTop = (): number => {
+  const seatTrackHeight = 82;
+  const aisleTrackHeight = 18;
+  const rowGap = 10;
+  const totalTracks = rowCount.value + rowAislePositions.value.length;
+  const totalHeight =
+    rowCount.value * seatTrackHeight +
+    rowAislePositions.value.length * aisleTrackHeight +
+    Math.max(totalTracks - 1, 0) * rowGap;
+
+  const rowAisleBands = rowAislePositions.value
+    .map((rowNo) => {
+      const aisleTrackIndex = getAisleTrackIndex(rowNo, rowAislePositions.value);
+      let top = 0;
+
+      for (let track = 1; track < aisleTrackIndex; track += 1) {
+        const isAisleTrack = rowAislePositions.value.some(
+          (aisleRowNo) => getAisleTrackIndex(aisleRowNo, rowAislePositions.value) === track,
+        );
+        top += isAisleTrack ? aisleTrackHeight : seatTrackHeight;
+        top += rowGap;
+      }
+
+      return {
+        start: Math.max(0, top - 6),
+        end: Math.min(totalHeight, top + aisleTrackHeight + 6),
+      };
+    })
+    .sort((a, b) => a.start - b.start);
+
+  const clearSegments = rowAisleBands.reduce<Array<{ start: number; end: number }>>(
+    (segments, band) => {
+      const previous = segments[segments.length - 1];
+      if (!previous) return segments;
+
+      if (band.start > previous.start) {
+        previous.end = Math.min(previous.end, band.start);
+      }
+
+      if (band.end < totalHeight) {
+        segments.push({ start: band.end, end: totalHeight });
+      }
+
+      return segments;
+    },
+    [{ start: 0, end: totalHeight }],
+  );
+
+  const labelSegment = clearSegments.reduce(
+    (largest, segment) =>
+      segment.end - segment.start > largest.end - largest.start ? segment : largest,
+    clearSegments[0] ?? { start: 0, end: totalHeight },
+  );
+
+  return Math.max(
+    18,
+    Math.min(labelSegment.start + (labelSegment.end - labelSegment.start) / 2, totalHeight - 18),
+  );
 };
 
-const shouldRenderRowAisle = (rowNo: number): boolean => props.aisleAfterRows.includes(rowNo);
+const getColumnAisleGridStyle = (colNo: number): CSSProperties => ({
+  gridColumn: `${getAisleTrackIndex(colNo, columnAislePositions.value)}`,
+  gridRow: `1 / ${rowCount.value + rowAislePositions.value.length + 1}`,
+  '--column-aisle-label-top': `${getColumnAisleLabelTop()}px`,
+});
+
+const getRowAisleGridStyle = (rowNo: number): CSSProperties => ({
+  gridColumn: `1 / ${colCount.value + columnAislePositions.value.length + 1}`,
+  gridRow: `${getAisleTrackIndex(rowNo, rowAislePositions.value)}`,
+});
 
 interface RectSnapshot {
   left: number;
@@ -332,7 +470,7 @@ const measureAndScale = (): void => {
   void gridRef.value.offsetWidth; // force reflow
 
   const gridW = gridRef.value.scrollWidth;
-  const gridH = gridRef.value.scrollHeight + 16;
+  const gridH = gridRef.value.scrollHeight + 56;
   gridNaturalWidth.value = gridW;
   gridNaturalHeight.value = gridH;
 
@@ -356,8 +494,8 @@ const measureAndScale = (): void => {
   const minimumReadableScale = 1;
 
   // Always fit the width. For tall rooms, preserve a readable seat size and
-  // let the map scroll vertically instead of shrinking every label.
-  scaleFactor.value = Math.min(scaleX, Math.max(scaleY, minimumReadableScale), 1);
+  // let the map scroll vertically instead of shrinking every label. Up to 2.0 scale.
+  scaleFactor.value = Math.min(scaleX, Math.max(scaleY, minimumReadableScale), 2.0);
 };
 
 const wrapperStyle = computed<CSSProperties>(() => {
@@ -419,6 +557,7 @@ const onViewportMouseMove = (event: MouseEvent): void => {
 };
 
 const onViewportMouseDown = (event: MouseEvent): void => {
+  if (props.printMode) return;
   if (event.button !== 0 || draggingSeatId.value !== null) return;
 
   const target = event.target as HTMLElement | null;
@@ -458,7 +597,12 @@ onBeforeUnmount(() => {
 
 // Recalculate when seatsByRow or splitLeftRight changes
 watch(
-  [() => props.seatsByRow, () => props.splitLeftRight],
+  [
+    () => props.seatsByRow,
+    () => props.splitLeftRight,
+    () => props.aisleAfterCols,
+    () => props.aisleAfterRows,
+  ],
   () => {
     void nextTick(() => measureAndScale());
   },
@@ -634,6 +778,7 @@ const cancelDrag = (): void => {
 };
 
 const onSeatMouseDown = (e: MouseEvent, seat: SeatCell): void => {
+  if (props.printMode) return;
   // Drag-to-shift only when swap mode is on, left button, from an occupied seat.
   if (!swapMode.value || e.button !== 0) return;
   if (!isUsable(seat) || !seat.student) return;
@@ -681,6 +826,30 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.seat-map-panel.is-print-mode {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  min-height: 0;
+  height: auto;
+  overflow: visible;
+
+  .seat-map-header {
+    margin-bottom: 14px;
+  }
+
+  .seat-map-title {
+    font-size: 22px;
+  }
+
+  .seat-map-content {
+    overflow: visible;
+    cursor: default;
+    user-select: text;
+    scrollbar-gutter: auto;
+  }
 }
 
 .seat-map-header {
@@ -787,7 +956,7 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   min-height: 0;
   cursor: grab;
   user-select: none;
-  contain: layout paint;
+  contain: layout;
   will-change: scroll-position;
 
   &.is-panning {
@@ -844,43 +1013,93 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
 }
 
 .seat-grid-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
+  display: grid;
+  width: max-content;
   margin-inline: auto;
-  align-items: stretch;
-}
-
-.seat-map-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 16px;
-  min-width: 0;
+  align-items: start;
+  justify-content: start;
 }
 
 .seat-column-aisle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
   width: 18px;
-  min-height: 82px;
-  align-self: stretch;
-  flex: 0 0 18px;
+  height: 100%;
+  border-radius: 9px;
+  background: transparent;
+  color: #111111;
+  font-family: Sarabun, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 100%;
+  overflow: visible;
+  z-index: 0;
+}
+
+.seat-column-aisle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   border-radius: 9px;
   background: var(--Surface-Selected, #dddddd);
 }
 
+.seat-column-aisle span {
+  position: absolute;
+  top: var(--column-aisle-label-top, 50%);
+  left: 50%;
+  writing-mode: vertical-rl;
+  transform: translate(-50%, -50%) rotate(180deg);
+  white-space: nowrap;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  max-height: calc(100% - 28px);
+  overflow: hidden;
+  z-index: 1;
+}
+
 .seat-row-aisle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 18px;
-  flex: 0 0 18px;
+  border-radius: 9px;
+  position: relative;
+  background: transparent;
+  color: #111111;
+  font-family: Sarabun, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 100%;
+  overflow: visible;
+  z-index: 3;
+}
+
+.seat-row-aisle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   border-radius: 9px;
   background: var(--Surface-Selected, #dddddd);
+}
+
+.seat-row-aisle span {
+  position: relative;
+  z-index: 4;
+  white-space: nowrap;
+  background: transparent;
+  border-radius: 0;
+  padding: 0 10px;
 }
 
 .seat-cell {
   width: 64px;
-  flex: 0 0 64px;
   position: relative;
+  z-index: 2;
   transition:
     opacity 0.16s ease,
     transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -1042,10 +1261,6 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
 @media (max-width: 1200px) {
   .seat-map-panel {
     padding: 14px;
-  }
-
-  .seat-map-row {
-    gap: 8px;
   }
 }
 

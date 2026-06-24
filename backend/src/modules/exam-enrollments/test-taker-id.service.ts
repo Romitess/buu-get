@@ -6,6 +6,7 @@ import {
 } from './entities/exam-enrollment.entity';
 import { Exam } from '../exam/entities/exam.entity';
 import { UserPhysicalStatus } from '../user-profile/entities/user-profile.entity';
+import { ExamLocationSeat } from '../exam-location-seats/entities/exam-location-seat.entity';
 
 const MAX_TEST_TAKER_SEQUENCE = 999;
 
@@ -44,6 +45,7 @@ export class TestTakerIdService {
         .innerJoinAndSelect('session.EXAM', 'exam')
         .innerJoinAndSelect('enrollment.USER', 'user')
         .leftJoinAndSelect('user.PROFILE', 'profile')
+        .innerJoinAndSelect('enrollment.LOCATION_SEAT', 'locationSeat')
         .where('session.EXAM_ID = :examId', { examId })
         .andWhere('enrollment.ERM_STATUS IN (:...statuses)', {
           statuses: [
@@ -53,22 +55,8 @@ export class TestTakerIdService {
         })
         .getMany();
 
-      const enrollmentWithoutEnglishName = allEligibleEnrollments.find(
-        (enrollment) => !enrollment.USER?.PROFILE?.userFullnameEn?.trim(),
-      );
-      if (enrollmentWithoutEnglishName) {
-        throw new BadRequestException(
-          `English name is required for enrollment ${enrollmentWithoutEnglishName.ERM_ID}`,
-        );
-      }
-
       const sortedEnrollments = allEligibleEnrollments.sort((left, right) => {
-        const leftName = left.USER.PROFILE.userFullnameEn?.trim() ?? '';
-        const rightName = right.USER.PROFILE.userFullnameEn?.trim() ?? '';
-        const nameComparison = leftName.localeCompare(rightName, 'en', {
-          sensitivity: 'base',
-        });
-        return nameComparison || left.ERM_ID - right.ERM_ID;
+        return this.compareByExamSchedule(left, right);
       });
 
       if (sortedEnrollments.length > MAX_TEST_TAKER_SEQUENCE) {
@@ -89,19 +77,7 @@ export class TestTakerIdService {
       }
 
       const codePrefix = this.buildPrefix(exam);
-      const enrollmentsToSave = selectedForExam.filter(
-        (enrollment) => !enrollment.ERM_TEST_TAKER,
-      );
-      const assignedCodeOwners = new Map(
-        allEligibleEnrollments
-          .filter((enrollment) => Boolean(enrollment.ERM_TEST_TAKER))
-          .map((enrollment) => [
-            enrollment.ERM_TEST_TAKER as string,
-            enrollment.ERM_ID,
-          ]),
-      );
-
-      for (const enrollment of enrollmentsToSave) {
+      for (const enrollment of allEligibleEnrollments) {
         const sequence = sequenceByErmId.get(enrollment.ERM_ID);
         if (!sequence) {
           throw new BadRequestException(
@@ -112,19 +88,13 @@ export class TestTakerIdService {
         const testTakerId = `${codePrefix}${this.getApplicantType(enrollment)}${sequence
           .toString()
           .padStart(3, '0')}`;
-        const existingOwner = assignedCodeOwners.get(testTakerId);
-        if (existingOwner && existingOwner !== enrollment.ERM_ID) {
-          throw new BadRequestException(
-            `Test taker ID ${testTakerId} is already assigned to enrollment ${existingOwner}`,
-          );
-        }
-
         enrollment.ERM_TEST_TAKER = testTakerId;
-        assignedCodeOwners.set(testTakerId, enrollment.ERM_ID);
       }
 
-      if (enrollmentsToSave.length > 0) {
-        await manager.getRepository(ExamEnrollment).save(enrollmentsToSave);
+      if (allEligibleEnrollments.length > 0) {
+        await manager
+          .getRepository(ExamEnrollment)
+          .save(allEligibleEnrollments);
       }
     }
   }
@@ -146,9 +116,110 @@ export class TestTakerIdService {
     const buddhistExamYear = examDate.getUTCFullYear() + 543;
     const examYearCode = buddhistExamYear.toString().slice(-2);
     const examTypeCode = this.getExamTypeCode(exam.EXAM_FORMAT, exam.EXAM_TYPE);
-    const examSequenceCode = exam.EXAM_ID.toString().padStart(2, '0').slice(-2);
+    const examSequenceCode = this.getExamRoundCode(exam);
 
     return `${examYearCode}${examTypeCode}${examSequenceCode}`;
+  }
+
+  private compareByExamSchedule(
+    left: ExamEnrollment,
+    right: ExamEnrollment,
+  ): number {
+    const leftStartTime = left.SESSION?.SS_START_TIME;
+    const rightStartTime = right.SESSION?.SS_START_TIME;
+    if (!leftStartTime || !rightStartTime) {
+      throw new BadRequestException(
+        `Session start time is required to create a test taker ID for enrollment ${!leftStartTime ? left.ERM_ID : right.ERM_ID}`,
+      );
+    }
+
+    const leftSessionLocationId = left.SL_ID;
+    const rightSessionLocationId = right.SL_ID;
+    if (!leftSessionLocationId || !rightSessionLocationId) {
+      throw new BadRequestException(
+        `Session location is required to create a test taker ID for enrollment ${!leftSessionLocationId ? left.ERM_ID : right.ERM_ID}`,
+      );
+    }
+
+    const leftSeat = left.LOCATION_SEAT;
+    const rightSeat = right.LOCATION_SEAT;
+    if (!leftSeat || !rightSeat) {
+      throw new BadRequestException(
+        `Seat is required to create a test taker ID for enrollment ${!leftSeat ? left.ERM_ID : right.ERM_ID}`,
+      );
+    }
+
+    return (
+      leftStartTime.localeCompare(rightStartTime) ||
+      leftSessionLocationId - rightSessionLocationId ||
+      this.compareSeatsByLabel(leftSeat, rightSeat) ||
+      left.ERM_ID - right.ERM_ID
+    );
+  }
+
+  private compareSeatsByLabel(
+    left: ExamLocationSeat,
+    right: ExamLocationSeat,
+  ): number {
+    const leftPosition = this.parseSeatLabel(left.LS_SEAT_LABEL);
+    const rightPosition = this.parseSeatLabel(right.LS_SEAT_LABEL);
+
+    if (leftPosition && rightPosition) {
+      return (
+        leftPosition.letterOrder - rightPosition.letterOrder ||
+        leftPosition.numberOrder - rightPosition.numberOrder
+      );
+    }
+    if (leftPosition) return -1;
+    if (rightPosition) return 1;
+
+    return (
+      left.LS_ROW_NO - right.LS_ROW_NO ||
+      left.LS_COL_NO - right.LS_COL_NO ||
+      left.LS_ID - right.LS_ID
+    );
+  }
+
+  private parseSeatLabel(
+    label: string | null | undefined,
+  ): { letterOrder: number; numberOrder: number } | null {
+    const match = label
+      ?.trim()
+      .toUpperCase()
+      .match(/^([A-Z]+)(\d+)$/u);
+    if (!match?.[1] || !match[2]) return null;
+
+    const letterOrder = match[1].split('').reduce((total, letter) => {
+      return total * 26 + (letter.charCodeAt(0) - 64);
+    }, 0);
+    const numberOrder = Number(match[2]);
+
+    return Number.isInteger(numberOrder) ? { letterOrder, numberOrder } : null;
+  }
+
+  private getExamRoundCode(exam: Exam): string {
+    const examRound = exam.EXAM_ROUND?.trim();
+    if (!examRound) {
+      throw new BadRequestException(
+        `EXAM_ROUND is required to generate a test taker ID for exam ${exam.EXAM_ID}`,
+      );
+    }
+
+    const roundMatch = examRound.match(/^(\d+)/u);
+    if (!roundMatch?.[1]) {
+      throw new BadRequestException(
+        `Invalid EXAM_ROUND '${examRound}' for exam ${exam.EXAM_ID}`,
+      );
+    }
+
+    const roundNumber = Number(roundMatch[1]);
+    if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > 99) {
+      throw new BadRequestException(
+        `EXAM_ROUND must start with a number from 1 to 99 for exam ${exam.EXAM_ID}`,
+      );
+    }
+
+    return roundNumber.toString().padStart(2, '0');
   }
 
   private getExamTypeCode(examFormat: string, examType: string): number {

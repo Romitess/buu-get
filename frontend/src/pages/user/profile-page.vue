@@ -382,6 +382,7 @@
       <AppImageCropper
         :image-src="cropImageSrc"
         :file-type="cropFileType"
+        :circular="true"
         @confirm="onCropConfirm"
       />
     </q-dialog>

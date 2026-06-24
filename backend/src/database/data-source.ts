@@ -1,5 +1,17 @@
-import 'dotenv/config';
+import * as dotenv from 'dotenv';
+import { existsSync } from 'fs';
+import { resolve } from 'path';
 import { DataSource } from 'typeorm';
+
+// โหลด .env ให้ตรงกับ ConfigModule ของแอป (envFilePath: ['.env', 'backend/.env', '../.env'])
+// เพื่อให้ CLI migration ใช้ค่า env ชุดเดียวกับตอนรันแอป (รองรับ root .env เมื่อรันจาก backend/)
+for (const candidate of ['.env', 'backend/.env', '../.env']) {
+  const fullPath = resolve(process.cwd(), candidate);
+  if (existsSync(fullPath)) {
+    dotenv.config({ path: fullPath });
+    break;
+  }
+}
 import { User } from '../modules/users/entities/user.entity';
 import { Role } from '../modules/roles/entities/role.entity';
 import { Exam } from '../modules/exam/entities/exam.entity';
@@ -13,6 +25,7 @@ import { FundSource } from '../modules/fund-sources/entities/fund-source.entity'
 import { Transaction } from '../modules/transactions/entities/transaction.entity';
 import { Receipt } from '../modules/receipts/entities/receipt.entity';
 import { BankReconcile } from '../modules/bank-reconciles/entities/bank-reconcile.entity';
+import { BankReconcileEditLog } from '../modules/bank-reconciles/entities/bank-reconcile-edit-log.entity';
 import { ExamScore } from '../modules/exam-scores/entities/exam-score.entity';
 import { ExamCertificate } from '../modules/exam-certificates/entities/exam-certificate.entity';
 import { TransactionRef } from '../modules/transaction-refs/entities/transaction-ref.entity';
@@ -28,6 +41,7 @@ import { ExamPasscodeLog } from 'src/modules/exam/entities/exam-passcode-log.ent
 import { PageConfig } from '../modules/page-builder/entities/page-config.entity';
 import { ExamRuleVoucher } from '../modules/exam-rule-vouchers/entities/exam-rule-voucher.entity';
 import { ScoreCriteria } from '../modules/score-criteria/entities/score-criteria.entity';
+import { MoodleSyncLog } from '../modules/moodle-sync-logs/entities/moodle-sync-log.entity';
 
 export default new DataSource({
   type: 'mysql',
@@ -53,6 +67,7 @@ export default new DataSource({
     Transaction,
     Receipt,
     BankReconcile,
+    BankReconcileEditLog,
     ExamScore,
     ExamCertificate,
     TransactionRef,
@@ -65,6 +80,7 @@ export default new DataSource({
     PageConfig,
     ExamRuleVoucher,
     ScoreCriteria,
+    MoodleSyncLog,
   ],
   migrations: ['src/database/migrations/*.ts'],
   synchronize: false,

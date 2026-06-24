@@ -30,22 +30,30 @@
           :placeholder="$t('admin.examAttendance.searchPlaceholder')"
         />
       </div>
-      <div class="col-shrink">
+      <div class="col-shrink row q-gutter-x-md no-wrap">
+        <AppButton
+          icon="assignment_ind"
+          label="เช็คอินเข้าห้องสอบ"
+          color="primary"
+          class="action-btn"
+          @click="openCheckInDialog"
+        />
         <ExportCsvButton
           :columns="columns"
           :rows="currentRoomAttendances"
           file-name-prefix="exam-attendances"
-          class="export-btn"
+          class="action-btn"
         />
       </div>
     </nav>
 
-    <main v-if="currentRoomAttendances.length > 0">
+    <main>
       <BaseTable
         :columns="columns"
         :rows="currentRoomAttendances"
         :loading="isLoading"
         :pagination="pagination"
+        :empty-label="$t('admin.examAttendance.noData')"
         class="attendance-table"
         @request="onRequest"
       >
@@ -66,10 +74,6 @@
         </template>
       </BaseTable>
     </main>
-    <div v-else-if="!isLoading" class="flex flex-center q-pa-xl text-grey-6">
-      <q-icon name="info" size="md" class="q-mr-sm" />
-      <span>{{ $t('admin.examAttendance.noData') }}</span>
-    </div>
   </q-page>
 </template>
 
@@ -77,7 +81,10 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
 import type { QTableColumn } from 'quasar';
+import AppButton from 'src/components/base/app-button.vue';
+import DialogAttendanceCheckin from 'src/components/exam/dialog-attendance-checkin.vue';
 import BaseTable from 'src/components/shared/base-table.vue';
 import AttendanceStatusBadge from 'src/components/shared/attendance-status-badge.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
@@ -101,10 +108,61 @@ interface SessionLocationOption {
 const route = useRoute();
 const i18n = useI18n();
 
-const { isLoading, exam, searchQuery, selectedSessionId, filteredAttendances, fetchAttendances } =
-  useExamAttendances();
+const {
+  isLoading,
+  exam,
+  searchQuery,
+  selectedSessionId,
+  filteredAttendances,
+  fetchAttendances,
+  attendances,
+} = useExamAttendances();
 
 const selectedSessionLocationId = ref<number | null>(null);
+
+const $q = useQuasar();
+
+const examDateEnglishLabel = computed((): string => {
+  if (!exam.value?.EXAM_DATE) return '-';
+  const date = new Date(exam.value.EXAM_DATE);
+  if (isNaN(date.getTime())) return exam.value.EXAM_DATE;
+  const day = date.getDate();
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  return `${day} ${month} ${year}`;
+});
+
+const openCheckInDialog = () => {
+  $q.dialog({
+    component: DialogAttendanceCheckin,
+    componentProps: {
+      attendances: attendances.value,
+      examName: exam.value?.EXAM_ROUND
+        ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
+        : exam.value?.EXAM_NAME || '',
+      examDate: examDateEnglishLabel.value,
+      examTime: selectedSessionTime.value,
+      examLocation: selectedSessionLocation.value,
+      examRound: exam.value?.EXAM_ROUND || '',
+    },
+  }).onOk(() => {
+    void loadData();
+  });
+};
 
 const getMonthName = (monthIndex: number): string => i18n.t(`common.months[${monthIndex}]`);
 
@@ -272,8 +330,9 @@ const columns = computed<QTableColumn[]>(() => [
   {
     name: 'nationalId',
     label: i18n.t('admin.examAttendance.columns.nationalId'),
-    field: 'nationalId',
+    field: 'testTakerCode',
     align: 'center',
+    format: (val: string | null) => val || '-',
   },
   {
     name: 'titleTh',
@@ -361,7 +420,7 @@ onMounted(() => {
   min-height: 0 !important;
 }
 
-.export-btn {
+.action-btn {
   border-radius: var(--radius-10) !important;
   height: 40px;
   padding: 0 24px;

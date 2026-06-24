@@ -70,7 +70,7 @@
 
     <main>
       <BaseTable
-        :columns="columns"
+        :columns="tableColumns"
         :rows="scoreRows"
         :loading="isLoading"
         :pagination="pagination"
@@ -645,7 +645,7 @@ const columns: QTableColumn[] = [
     label: 'ชื่อ-นามสกุล',
     field: 'fullnameTh',
     align: 'left',
-    style: 'width: 25%; padding-left: 10%',
+    style: 'width: 25%; padding-left: 5%',
   },
   {
     name: 'scoreGrammar',
@@ -689,6 +689,14 @@ const columns: QTableColumn[] = [
     style: 'width: 10%',
   },
 ];
+
+const tableColumns = computed(() => {
+  const hasAnyCertificate = scoreRows.value.some((row) => row.hasSavedCertificate);
+  if (!hasAnyCertificate) {
+    return columns.filter((col) => col.name !== 'tools');
+  }
+  return columns;
+});
 
 const sampleColumns: QTableColumn[] = [
   {

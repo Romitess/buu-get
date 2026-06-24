@@ -7,7 +7,7 @@ export class UserResponseDto {
   @ApiProperty({ example: 1 })
   USER_ID: number;
 
-  @ApiProperty({ example: '26000001', nullable: true })
+  @ApiProperty({ example: '69000001', nullable: true })
   USER_CODE: string | null;
 
   @ApiProperty({ example: '1234567890123', nullable: true })

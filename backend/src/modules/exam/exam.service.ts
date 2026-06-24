@@ -28,8 +28,24 @@ export class ExamService {
     return await this.examRepository.save(exam);
   }
 
+  /**
+   * เซ็ต virtual property SESSION.LOCATION เองหลังโหลด เพราะเมื่อใช้
+   * relationLoadStrategy: 'query' relation จะถูกโหลดแยกหลัง @AfterLoad ทำงานไปแล้ว
+   * hook populateLocation() ของ entity จึงไม่ทันเซ็ตค่าให้ (ทำให้สถานที่ขึ้น TBA)
+   */
+  private populateSessionLocations(exams: Exam[]): void {
+    for (const exam of exams) {
+      for (const session of exam.SESSIONS ?? []) {
+        session.populateLocation();
+      }
+    }
+  }
+
   async findAll(): Promise<Exam[]> {
-    return await this.examRepository.find({
+    const exams = await this.examRepository.find({
+      // โหลด relation แบบแยก query ต่อ relation แทน JOIN เดียว เพื่อเลี่ยง
+      // cartesian product (ENROLLMENTS x SESSION_LOCATIONS) ที่ทำให้ query ช้ามาก
+      relationLoadStrategy: 'query',
       order: {
         CREATED_AT: 'DESC',
       },
@@ -38,14 +54,64 @@ export class ExamService {
         'SESSIONS.ENROLLMENTS',
         'SESSIONS.SESSION_LOCATIONS',
         'SESSIONS.SESSION_LOCATIONS.LOCATION',
-        'SESSIONS.SESSION_LOCATIONS.LOCATION.SEATS',
       ],
+      select: {
+        EXAM_ID: true,
+        EXAM_NAME: true,
+        EXAM_ROUND: true,
+        EXAM_TYPE: true,
+        EXAM_FORMAT: true,
+        EXAM_FEE: true,
+        EXAM_DATE: true,
+        EXAM_REG_START_DATE: true,
+        EXAM_REG_END_DATE: true,
+        EXAM_PAY_START_DATE: true,
+        EXAM_PAY_END_DATE: true,
+        EXAM_PUBLISHED: true,
+        EXAM_MOODLE_COURSE_ID: true,
+        CREATED_AT: true,
+        UPDATED_AT: true,
+        FUND_SOURCE_ID: true,
+        SESSIONS: {
+          SS_ID: true,
+          EXAM_ID: true,
+          SS_START_TIME: true,
+          SS_END_TIME: true,
+          SS_CAPACITY: true,
+          SS_SESSION_STATUS: true,
+          ENROLLMENTS: {
+            ERM_ID: true,
+            SESSION_ID: true,
+            SL_ID: true,
+            ERM_STATUS: true,
+          },
+          SESSION_LOCATIONS: {
+            SL_ID: true,
+            LOCATION_ID: true,
+            SS_ID: true,
+            SS_NAME: true,
+            LOCATION: {
+              LOCATION_ID: true,
+              LOCATION_NAME: true,
+              LOCATION_ROOM_NO: true,
+              LOCATION_SEAT_CAPACITY: true,
+            },
+          },
+        },
+      },
     });
+
+    this.populateSessionLocations(exams);
+    return exams;
   }
 
   async findOne(id: number): Promise<Exam> {
     const exam = await this.examRepository.findOne({
       where: { EXAM_ID: id },
+      // โหลด relation แบบแยก query ต่อ relation แทน JOIN เดียว เพื่อเลี่ยง
+      // cartesian product (ENROLLMENTS x SEATS x SESSION_LOCATIONS) ที่ทำให้
+      // endpoint /exam/:id ช้ามาก (วัดได้ ~131s บนรอบสอบใหญ่)
+      relationLoadStrategy: 'query',
       relations: [
         'SESSIONS',
         'SESSIONS.SESSION_LOCATIONS',
@@ -61,6 +127,7 @@ export class ExamService {
       throw new NotFoundException(`Exam with ID ${id} not found`);
     }
 
+    this.populateSessionLocations([exam]);
     return exam;
   }
 

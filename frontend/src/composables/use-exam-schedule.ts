@@ -16,12 +16,16 @@ import {
   HTTP_STATUS,
 } from 'src/constants/exam';
 import type { ExamRound } from 'src/types/exam';
-import type ExamPasscodeInputDialog from 'src/components/exam-passcode-input-dialog.vue';
 
 type RegistrationStatus = 'expired' | 'notOpen' | '';
 
 interface ApiErrorData {
   message?: string | string[];
+}
+
+interface ExamPasscodeDialogExpose {
+  openDialog: () => void;
+  closeDialog: () => void;
 }
 
 const ROUTE_NAMES = {
@@ -45,7 +49,7 @@ export function useExamSchedule() {
   } = storeToRefs(examStore);
 
   const showConfirmDialog = ref(false);
-  const passcodeDialogRef = ref<InstanceType<typeof ExamPasscodeInputDialog> | null>(null);
+  const passcodeDialogRef = ref<ExamPasscodeDialogExpose | null>(null);
   const selectedRound = ref<ExamRound | null>(null);
   const calendarHeight = ref<number>(0);
   let scheduleInterval: ReturnType<typeof setInterval>;

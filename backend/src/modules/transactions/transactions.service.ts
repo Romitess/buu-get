@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import {
   Transaction,
@@ -25,10 +25,22 @@ import {
   ExamEnrollmentStatus,
 } from '../exam-enrollments/entities/exam-enrollment.entity';
 import { PaymentConfig } from '../payment-configs/entities/payment-config.entity';
+import { CreateTransactionFlowDto } from './dto/create-transaction-flow.dto';
+import { ConfirmPaymentFlowDto } from './dto/confirm-payment-flow.dto';
+import {
+  TransactionStatusHistory,
+  TransactionApiType,
+} from '../transaction-status-history/entities/transaction-status-history.entity';
+import { TransactionRef } from '../transaction-refs/entities/transaction-ref.entity';
+import { TransactionProfile } from '../transaction-profiles/entities/transaction-profile.entity';
 
 export interface PendingPaymentResult {
   transaction: Transaction;
   receipt: Receipt;
+}
+
+export interface TransactionFlowResult {
+  TRANX_ID: number;
 }
 
 @Injectable()
@@ -45,6 +57,298 @@ export class TransactionsService {
     const transaction =
       this.transactionsRepository.create(createTransactionDto);
     return this.transactionsRepository.save(transaction);
+  }
+
+  async createTransactionForFlow(
+    dto: CreateTransactionFlowDto,
+  ): Promise<TransactionFlowResult> {
+    return this.dataSource.transaction(async (manager) => {
+      const transactionRepository = manager.getRepository(Transaction);
+      const historyRepository = manager.getRepository(TransactionStatusHistory);
+      const paymentConfigRepository = manager.getRepository(PaymentConfig);
+
+      const pcExists = await paymentConfigRepository.exists({
+        where: { PC_ID: dto.pcId },
+      });
+      if (!pcExists) {
+        throw new NotFoundException(
+          `Payment config with ID ${dto.pcId} not found`,
+        );
+      }
+
+      const transaction = transactionRepository.create({
+        ERM_ID: dto.ermId,
+        PC_ID: dto.pcId,
+        TRANX_QR_CODE: uuidv4(),
+        TRANX_AMOUNT: dto.amount,
+        TRANX_PAYMENT_STATUS: TransactionPaymentStatus.PENDING,
+        TRANX_MATCH_STATUS: TransactionMatchStatus.UNMATCH,
+        TRANX_PAYMENT_METHOD: TransactionPaymentMethod.QR,
+        TRANX_BANK_CODE: 'KTB',
+        TRANX_CHANNEL: TransactionChannel.QR,
+        TRANX_CREATED_AT: new Date(),
+      });
+
+      const savedTransaction = await transactionRepository.save(transaction);
+
+      const history = historyRepository.create({
+        TRANX_ID: savedTransaction.TRANX_ID,
+        TSH_FROM: null,
+        TSH_TO: this.toHistoryStatus(TransactionPaymentStatus.PENDING),
+        TSH_API_TYPE: TransactionApiType.PAYMENT,
+        TSH_RESP_CODE: '000',
+        TSH_RESP_MESSAGE: 'Created pending transaction',
+      });
+      await historyRepository.save(history);
+
+      return { TRANX_ID: savedTransaction.TRANX_ID };
+    });
+  }
+
+  async confirmPaymentFlow(
+    tranxId: number,
+    dto: ConfirmPaymentFlowDto,
+  ): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const manager = queryRunner.manager;
+      const transactionRepository = manager.getRepository(Transaction);
+      const paymentConfigRepository = manager.getRepository(PaymentConfig);
+      const historyRepository = manager.getRepository(TransactionStatusHistory);
+      const refRepository = manager.getRepository(TransactionRef);
+
+      const transaction = await transactionRepository.findOne({
+        where: { TRANX_ID: tranxId },
+      });
+
+      if (!transaction) {
+        throw new NotFoundException(`Transaction with ID ${tranxId} not found`);
+      }
+
+      if (
+        transaction.TRANX_PAYMENT_STATUS !== TransactionPaymentStatus.PENDING
+      ) {
+        throw new BadRequestException('Transaction is not in PENDING status');
+      }
+
+      const paymentConfig = await paymentConfigRepository.findOne({
+        where: { PC_ID: transaction.PC_ID },
+      });
+
+      if (!paymentConfig) {
+        throw new NotFoundException(
+          `Payment config with ID ${transaction.PC_ID} not found`,
+        );
+      }
+
+      if (!paymentConfig.PC_IS_ACTIVE) {
+        throw new BadRequestException('Payment configuration is inactive');
+      }
+
+      if (
+        paymentConfig.PC_EFFECTIVE_TO &&
+        paymentConfig.PC_EFFECTIVE_TO < new Date()
+      ) {
+        throw new BadRequestException('Payment configuration is expired');
+      }
+
+      transaction.TRANX_PAYMENT_STATUS = TransactionPaymentStatus.PAID;
+      transaction.TRANX_PAID_AT = new Date();
+      transaction.TRANX_UPDATED_AT = new Date();
+      await transactionRepository.save(transaction);
+
+      // อัปเดตสถานะการสมัครสอบเป็น PAID
+      const enrollmentRepository = manager.getRepository(ExamEnrollment);
+      const enrollment = await enrollmentRepository.findOne({
+        where: { ERM_ID: transaction.ERM_ID },
+      });
+      if (enrollment) {
+        enrollment.ERM_STATUS = ExamEnrollmentStatus.PAID;
+        await enrollmentRepository.save(enrollment);
+      }
+
+      const history = historyRepository.create({
+        TRANX_ID: tranxId,
+        TSH_FROM: this.toHistoryStatus(TransactionPaymentStatus.PENDING),
+        TSH_TO: this.toHistoryStatus(TransactionPaymentStatus.PAID),
+        TSH_API_TYPE: TransactionApiType.APPROVE,
+        TSH_RESP_CODE: '000',
+        TSH_RESP_MESSAGE: 'Payment confirmed',
+      });
+      await historyRepository.save(history);
+
+      const refCreatedAt = new Date();
+      const ref = refRepository.create({
+        TRANX_ID: tranxId,
+        TSC_REF1: dto.userCode,
+        TSC_REF2: this.buildEnrollmentRefCode(transaction.ERM_ID, refCreatedAt),
+        TSC_BANK_REF: paymentConfig.PC_COMP_CODE,
+        TSC_PARTNER_REF: paymentConfig.PC_PROD_CODE,
+      });
+      await refRepository.save(ref);
+
+      // จัดการข้อมูลใบเสร็จ
+      await this.handleReceiptSync(manager, tranxId, dto);
+
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async expireTransaction(tranxId: number): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const manager = queryRunner.manager;
+      const transactionRepository = manager.getRepository(Transaction);
+      const historyRepository = manager.getRepository(TransactionStatusHistory);
+
+      const transaction = await transactionRepository.findOne({
+        where: { TRANX_ID: tranxId },
+      });
+
+      if (!transaction) {
+        throw new NotFoundException(`Transaction with ID ${tranxId} not found`);
+      }
+
+      if (
+        transaction.TRANX_PAYMENT_STATUS !== TransactionPaymentStatus.PENDING
+      ) {
+        throw new BadRequestException('Transaction is not in PENDING status');
+      }
+
+      transaction.TRANX_PAYMENT_STATUS = TransactionPaymentStatus.EXPIRED;
+      transaction.TRANX_UPDATED_AT = new Date();
+      await transactionRepository.save(transaction);
+
+      const history = historyRepository.create({
+        TRANX_ID: tranxId,
+        TSH_FROM: this.toHistoryStatus(TransactionPaymentStatus.PENDING),
+        TSH_TO: this.toHistoryStatus(TransactionPaymentStatus.EXPIRED),
+        TSH_API_TYPE: TransactionApiType.PAYMENT,
+        TSH_RESP_CODE: '000',
+        TSH_RESP_MESSAGE: 'Payment expired',
+      });
+      await historyRepository.save(history);
+
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  private async handleReceiptSync(
+    manager: EntityManager,
+    tranxId: number,
+    dto: ConfirmPaymentFlowDto,
+  ): Promise<void> {
+    if (dto.receiptName) {
+      const receiptRepository = manager.getRepository(Receipt);
+      let receipt = await receiptRepository.findOne({
+        where: { TRANX_ID: tranxId },
+      });
+
+      // ตรวจสอบว่าเป็นตัวเลขหรือไม่ (เพื่อเลี่ยงข้อผิดพลาด bigint ในบาง DB)
+      const safeTaxId =
+        dto.receiptTaxId && /^\d+$/.test(dto.receiptTaxId)
+          ? dto.receiptTaxId
+          : null;
+
+      if (receipt) {
+        receipt.RC_TAX_ID = safeTaxId ?? receipt.RC_TAX_ID;
+        receipt.RC_NAME = dto.receiptName ?? receipt.RC_NAME;
+        receipt.RC_PHONE = dto.receiptPhone ?? receipt.RC_PHONE;
+        receipt.RC_ADDRESS = dto.receiptAddress ?? receipt.RC_ADDRESS;
+        receipt.RC_STATUS = ReceiptStatus.UNISSUED;
+        receipt.UPDATED_AT = new Date();
+      } else {
+        receipt = receiptRepository.create({
+          TRANX_ID: tranxId,
+          RC_TAX_ID: safeTaxId,
+          RC_NAME: dto.receiptName,
+          RC_PHONE: dto.receiptPhone,
+          RC_ADDRESS: dto.receiptAddress,
+          RC_STATUS: ReceiptStatus.UNISSUED,
+          RC_SIGNATURE_ID: uuidv4(),
+        });
+      }
+      receipt = await receiptRepository.save(receipt);
+      await this.syncTransactionProfileFromReceipt(manager, receipt);
+    }
+  }
+
+  private async syncTransactionProfileFromReceipt(
+    manager: EntityManager,
+    receipt: Receipt,
+  ): Promise<void> {
+    const profileRepository = manager.getRepository(TransactionProfile);
+    const taxId = this.parseReceiptTaxId(receipt.RC_TAX_ID);
+
+    let profile = await profileRepository.findOne({
+      where: { TRANX_ID: receipt.TRANX_ID },
+    });
+
+    if (profile) {
+      profile.TP_NAME = receipt.RC_NAME ?? '';
+      profile.TP_ADDRESS = receipt.RC_ADDRESS ?? '';
+      profile.TP_TAX_ID = taxId;
+      profile.TP_PHONE = receipt.RC_PHONE ?? '';
+    } else {
+      profile = profileRepository.create({
+        TRANX_ID: receipt.TRANX_ID,
+        TP_NAME: receipt.RC_NAME ?? '',
+        TP_ADDRESS: receipt.RC_ADDRESS ?? '',
+        TP_TAX_ID: taxId,
+        TP_PHONE: receipt.RC_PHONE ?? '',
+      });
+    }
+
+    await profileRepository.save(profile);
+  }
+
+  private parseReceiptTaxId(taxId: string | null): number {
+    if (!taxId) return 0;
+
+    const parsedTaxId = parseInt(taxId, 10);
+    return Number.isNaN(parsedTaxId) ? 0 : parsedTaxId;
+  }
+
+  private buildEnrollmentRefCode(
+    enrollmentId: number,
+    createdAt: Date,
+  ): string {
+    if (
+      !Number.isInteger(enrollmentId) ||
+      enrollmentId < 0 ||
+      enrollmentId > 999999
+    ) {
+      throw new BadRequestException(
+        'Enrollment ID must be between 0 and 999999 to generate transaction reference',
+      );
+    }
+
+    const year = String(createdAt.getFullYear()).slice(-2);
+    const day = String(createdAt.getDate()).padStart(2, '0');
+    const month = String(createdAt.getMonth() + 1).padStart(2, '0');
+    const enrollmentCode = String(enrollmentId).padStart(6, '0');
+
+    return `${year}${day}${month}${enrollmentCode}`;
+  }
+
+  private toHistoryStatus(status: TransactionPaymentStatus): string {
+    return String(status);
   }
 
   async createPendingPayment(
@@ -105,7 +409,7 @@ export class TransactionsService {
         transaction.TRANX_QR_CODE ||= uuidv4();
         transaction.TRANX_PAYMENT_METHOD = TransactionPaymentMethod.QR;
         transaction.TRANX_PAYMENT_STATUS = TransactionPaymentStatus.PAID;
-        transaction.TRANX_MATCH_STATUS = TransactionMatchStatus.UNMATCH;
+        transaction.TRANX_MATCH_STATUS = TransactionMatchStatus.MATCH;
         transaction.TRANX_BANK_CODE = 'KTB';
         transaction.TRANX_CHANNEL = TransactionChannel.QR;
       } else {
@@ -116,7 +420,7 @@ export class TransactionsService {
           TRANX_QR_CODE: uuidv4(),
           TRANX_PAYMENT_METHOD: TransactionPaymentMethod.QR,
           TRANX_PAYMENT_STATUS: TransactionPaymentStatus.PAID,
-          TRANX_MATCH_STATUS: TransactionMatchStatus.UNMATCH,
+          TRANX_MATCH_STATUS: TransactionMatchStatus.MATCH,
           TRANX_BANK_CODE: 'KTB',
           TRANX_CHANNEL: TransactionChannel.QR,
         });
@@ -142,6 +446,7 @@ export class TransactionsService {
         });
       }
       receipt = await receiptRepository.save(receipt);
+      await this.syncTransactionProfileFromReceipt(manager, receipt);
       enrollment.ERM_STATUS = ExamEnrollmentStatus.PAID;
       await enrollmentRepository.save(enrollment);
 

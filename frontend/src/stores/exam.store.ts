@@ -4,7 +4,11 @@ import { useI18n } from 'vue-i18n';
 import type { ExamRound, ExamInfo, ExamHistoryItem, DayData } from 'src/types/exam';
 import type { ExamSchedule } from 'src/types/exam.types';
 import type { ReceiptInformation } from 'src/types/receipt-information';
-import { createPendingPayment } from 'src/services/transaction.service';
+import {
+  createTransaction as createTransactionRequest,
+  confirmPaymentFlow,
+  expireTransaction as expireTransactionRequest,
+} from 'src/services/transaction.service';
 import {
   fetchScheduleData,
   fetchExamSchedules,
@@ -215,7 +219,8 @@ export const useExamStore = defineStore('exam', () => {
           const isVerified = enrollment.ERM_VERIFY_STATUS === VERIFY_STATUS.PASS;
           const hasBankMatch =
             enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
-          item.status = isVerified ? 'exam.status.verified' : 'exam.status.paymentCompleted';
+          item.status =
+            isVerified || hasBankMatch ? 'exam.status.verified' : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
           item.actions = hasBankMatch ? ['downloadReceipt'] : [];
           newHistory.push(item);
@@ -329,23 +334,52 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
-  async function confirmPayment(
+  async function createTransaction(
     enrollmentId: number,
     amount: number,
-    receipt: ReceiptInformation,
+    pcId = 1,
+  ): Promise<number> {
+    try {
+      const { TRANX_ID } = await createTransactionRequest({
+        ermId: enrollmentId,
+        pcId,
+        amount,
+      });
+
+      return TRANX_ID;
+    } catch (error: unknown) {
+      console.error('Failed to create transaction:', error);
+      throw error;
+    }
+  }
+
+  async function confirmPayment(
+    tranxId: number,
+    userCode: string,
+    receiptInfo?: ReceiptInformation,
   ): Promise<void> {
     try {
-      await createPendingPayment({
-        ERM_ID: enrollmentId,
-        TRANX_AMOUNT: amount,
-        RC_TAX_ID: receipt.taxId,
-        RC_NAME: receipt.fullName,
-        RC_PHONE: receipt.phone,
-        RC_ADDRESS: receipt.address,
+      await confirmPaymentFlow(tranxId, {
+        userCode,
+        receiptTaxId: receiptInfo?.taxId,
+        receiptName: receiptInfo?.fullName,
+        receiptPhone: receiptInfo?.phone,
+        receiptAddress: receiptInfo?.address,
       });
+
       await fetchHistory();
     } catch (error: unknown) {
       console.error('Failed to confirm payment:', error);
+      throw error;
+    }
+  }
+
+  async function expireTransaction(tranxId: number): Promise<void> {
+    try {
+      await expireTransactionRequest(tranxId);
+      await fetchHistory();
+    } catch (error: unknown) {
+      console.error('Failed to expire transaction:', error);
       throw error;
     }
   }
@@ -385,7 +419,9 @@ export const useExamStore = defineStore('exam', () => {
     confirmRegistration,
     confirmSpecialRegistration,
     cancelRegistration,
+    createTransaction,
     confirmPayment,
+    expireTransaction,
     addExamRound,
     deleteExamRound,
     initSchedule,

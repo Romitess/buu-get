@@ -117,7 +117,9 @@ import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 import SearchUserTable from './search-user-table.vue';
 import { fetchAllEnrollments } from 'src/services/enrollment.service';
+import { fetchTransactionRefs } from 'src/services/transaction-ref.service';
 import { PAYMENT_STATUS_LABELS } from 'src/types/enrollment.types';
+import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 import type { SearchRow } from 'src/types/exam.types';
 
 const { t } = useI18n();
@@ -138,6 +140,41 @@ const errors = ref({
   ref2: false,
   name: false,
 });
+
+const normalizeSearchValue = (value: string | number | null | undefined): string =>
+  String(value ?? '').trim();
+
+const getEnrollmentName = (enrollment: BackendEnrollmentDetail | undefined): string =>
+  enrollment?.USER?.PROFILE?.userFullnameTh || enrollment?.USER?.PROFILE?.userFullnameEn || '-';
+
+const getEnrollmentSearchText = (enrollment: BackendEnrollmentDetail | undefined): string =>
+  [enrollment?.USER?.PROFILE?.userFullnameTh, enrollment?.USER?.PROFILE?.userFullnameEn]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+const getExamName = (enrollment: BackendEnrollmentDetail | undefined): string => {
+  const exam = enrollment?.SESSION?.EXAM;
+  if (!exam) return '-';
+  return exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME || '-';
+};
+
+const formatAmount = (amount: number | string | null | undefined): string => {
+  const numericAmount = Number(amount);
+  return Number.isFinite(numericAmount) ? numericAmount.toFixed(2) : '500.00';
+};
+
+const getPaymentStatusLabel = (
+  enrollmentStatus: number | undefined,
+  transactionPaymentStatus: number | null | undefined,
+): string => {
+  if (enrollmentStatus !== undefined) {
+    return PAYMENT_STATUS_LABELS[enrollmentStatus] || 'ไม่ระบุ';
+  }
+  if (transactionPaymentStatus === 3) return 'ชำระเงินแล้ว';
+  if (transactionPaymentStatus === 0) return 'ค้างชำระ';
+  return 'ไม่ระบุ';
+};
 
 const openDialog = () => {
   isDialogOpen.value = true;
@@ -167,17 +204,26 @@ const handleSearch = async () => {
   isLoading.value = true;
   try {
     const nameQueryLower = nameQuery.toLowerCase();
-    const enrollments = await fetchAllEnrollments();
+    const [enrollments, transactionRefs] = await Promise.all([
+      fetchAllEnrollments(),
+      fetchTransactionRefs(),
+    ]);
+    const enrollmentById = new Map(
+      enrollments.map((enrollment) => [enrollment.ERM_ID, enrollment]),
+    );
 
-    const filtered = enrollments.filter((e) => {
+    const filtered = transactionRefs.filter((transactionRef) => {
+      const enrollment = transactionRef.TRANSACTION?.ERM_ID
+        ? enrollmentById.get(transactionRef.TRANSACTION.ERM_ID)
+        : undefined;
+      const fullName = getEnrollmentSearchText(enrollment);
       const matchesRef1 = ref1Query
-        ? e.USER?.USER_NATIONAL_ID?.includes(ref1Query) || String(e.ERM_ID).includes(ref1Query)
+        ? normalizeSearchValue(transactionRef.TSC_REF1).includes(ref1Query)
         : true;
-      const matchesRef2 = ref2Query ? String(e.ERM_ID).includes(ref2Query) : true;
-      const matchesName = nameQueryLower
-        ? e.USER?.PROFILE?.userFullnameTh?.toLowerCase().includes(nameQueryLower) ||
-          e.USER?.PROFILE?.userFullnameEn?.toLowerCase().includes(nameQueryLower)
+      const matchesRef2 = ref2Query
+        ? normalizeSearchValue(transactionRef.TSC_REF2).includes(ref2Query)
         : true;
+      const matchesName = nameQueryLower ? fullName.includes(nameQueryLower) : true;
 
       return matchesRef1 && matchesRef2 && matchesName;
     });
@@ -197,17 +243,23 @@ const handleSearch = async () => {
       return;
     }
 
-    rows.value = filtered.map((e, index) => ({
-      id: index + 1,
-      ref1: e.USER?.USER_NATIONAL_ID || String(e.ERM_ID),
-      ref2: String(e.ERM_ID),
-      name: e.USER?.PROFILE?.userFullnameTh || e.USER?.PROFILE?.userFullnameEn || '-',
-      amount: e.SESSION?.EXAM?.EXAM_FEE ? String(e.SESSION.EXAM.EXAM_FEE) : '500.00',
-      exam_name: e.SESSION?.EXAM?.EXAM_ROUND
-        ? `${e.SESSION.EXAM.EXAM_NAME} ${e.SESSION.EXAM.EXAM_ROUND}`
-        : e.SESSION?.EXAM?.EXAM_NAME || '-',
-      payment_status: PAYMENT_STATUS_LABELS[e.ERM_STATUS] || 'ไม่ระบุ',
-    }));
+    rows.value = filtered.map((transactionRef, index) => {
+      const transaction = transactionRef.TRANSACTION;
+      const enrollment = transaction?.ERM_ID ? enrollmentById.get(transaction.ERM_ID) : undefined;
+
+      return {
+        id: index + 1,
+        ref1: normalizeSearchValue(transactionRef.TSC_REF1) || '-',
+        ref2: normalizeSearchValue(transactionRef.TSC_REF2) || '-',
+        name: getEnrollmentName(enrollment),
+        amount: formatAmount(transaction?.TRANX_AMOUNT ?? enrollment?.SESSION?.EXAM?.EXAM_FEE),
+        exam_name: getExamName(enrollment),
+        payment_status: getPaymentStatusLabel(
+          enrollment?.ERM_STATUS,
+          transaction?.TRANX_PAYMENT_STATUS,
+        ),
+      };
+    });
   } catch (err) {
     console.error('Failed to search users:', err);
   } finally {

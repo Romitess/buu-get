@@ -1,12 +1,19 @@
-import { computed, ref, type ComputedRef, type Ref } from 'vue';
+import { computed, ref, type ComputedRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from 'src/stores/user.store';
 import { ROLES } from 'src/constants/roles';
 import type { NavigationItem } from 'src/types/navigation';
+import { useQuasar } from 'quasar';
+
+// Global shared state for the admin sidebar drawer
+const leftDrawerOpen = ref(true); // Default open on desktop
+const miniState = ref(true);      // Default mini (collapsed)
+const isHovered = ref(false);     // Expanded on hover
 
 export function useNavigation() {
   const userStore = useUserStore();
   const router = useRouter();
+  const $q = useQuasar();
 
   const allLinks: NavigationItem[] = [
     {
@@ -52,6 +59,13 @@ export function useNavigation() {
       path: '/admin/exam-management',
       requiredRoles: [ROLES.STAFF, ROLES.ADMIN, ROLES.REGISTRATION_OFFICER],
     },
+    {
+      name: 'admin-page-builder',
+      label: 'จัดการหน้าแรก',
+      icon: 'web',
+      path: '/admin/page-builder',
+      requiredRoles: [ROLES.STAFF, ROLES.ADMIN, ROLES.REGISTRATION_OFFICER],
+    },
   ];
 
   const computedLinks: ComputedRef<NavigationItem[]> = computed(() => {
@@ -72,11 +86,25 @@ export function useNavigation() {
     });
   });
 
-  const leftDrawerOpen: Ref<boolean> = ref(false);
-
-  const toggleLeftDrawer = (): void => {
+const toggleLeftDrawer = (): void => {
+  if ($q.screen.lt.md) {
     leftDrawerOpen.value = !leftDrawerOpen.value;
-  };
+  } else {
+    if (leftDrawerOpen.value) {
+      leftDrawerOpen.value = false;
+      miniState.value = true;
+    } else {
+      leftDrawerOpen.value = true;
+      miniState.value = true;
+    }
+  }
+};
+
+  const isMini = computed(() => !isHovered.value && miniState.value);
+
+  const showAdminDrawer = computed(() => {
+    return true;
+  });
 
   const logout = async (): Promise<void> => {
     userStore.logout();
@@ -87,6 +115,10 @@ export function useNavigation() {
     userStore,
     computedLinks,
     leftDrawerOpen,
+    miniState,
+    isHovered,
+    isMini,
+    showAdminDrawer,
     toggleLeftDrawer,
     logout,
   };

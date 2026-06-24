@@ -13,20 +13,7 @@
 
     <!-- Date Column -->
     <template v-slot:body-cell-examDate="{ row }">
-      <div class="text-center row items-center justify-center no-wrap">
-        <span>{{ formatThaiDate(row.examDate) }}</span>
-        <q-icon
-          v-if="isDuplicate(row.examDate)"
-          name="warning"
-          color="negative"
-          size="18px"
-          class="q-ml-xs cursor-pointer"
-        >
-          <q-tooltip class="bg-negative text-white text-body2">
-            {{ NOTIFY_MSG.DUPLICATE_DATE }}
-          </q-tooltip>
-        </q-icon>
-      </div>
+      <div class="text-center">{{ formatThaiDate(row.examDate) }}</div>
     </template>
 
     <!-- Registration Progress Column -->
@@ -76,7 +63,6 @@ import BaseTable from '../shared/base-table.vue';
 import ActionButton from '../shared/action-button.vue';
 import { useThaiDate } from 'src/composables/useThaiDate';
 import { ROLES } from 'src/constants/roles';
-import { NOTIFY_MSG } from 'src/constants/exam';
 import {
   type ExamSchedule,
   type PaginationModel,
@@ -113,17 +99,6 @@ interface CustomToolButton {
   tooltip: string;
   emit: string;
 }
-
-const duplicateDates = computed(() => {
-  const counts: Record<string, number> = {};
-  props.exams.forEach((exam) => {
-    if (!exam.examDate) return;
-    counts[exam.examDate] = (counts[exam.examDate] || 0) + 1;
-  });
-  return Object.keys(counts).filter((date) => (counts[date] ?? 0) > 1);
-});
-
-const isDuplicate = (date: string) => duplicateDates.value.includes(date);
 
 const { formatThaiDate } = useThaiDate();
 const { t } = useI18n();

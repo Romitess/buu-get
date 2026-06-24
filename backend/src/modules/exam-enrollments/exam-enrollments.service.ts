@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, Not, In, LessThan } from 'typeorm';
+import { DataSource, Repository, Not, In, LessThan, Brackets } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
@@ -18,6 +18,7 @@ import { CreateExamEnrollmentDto } from './dto/create-exam-enrollment.dto';
 import { UpdateExamEnrollmentDto } from './dto/update-exam-enrollment.dto';
 import { BulkSeatAssignmentDto } from './dto/bulk-seat-assignment.dto';
 import { RequestFixDto } from './dto/request-fix.dto';
+import { ExamEnrollmentQueryDto } from './dto/exam-enrollment-query.dto';
 import {
   ExamLocationSeat,
   LocationSeatStatus,
@@ -331,27 +332,330 @@ export class ExamEnrollmentsService {
     });
   }
 
-  async findByExamId(examId: number): Promise<ExamEnrollment[]> {
-    return await this.examEnrollmentRepository.find({
-      where: {
-        SESSION: { EXAM_ID: examId },
-      },
-      relations: [
-        'USER',
-        'USER.PROFILE',
-        'USER.IMAGE',
-        'SESSION',
-        'SESSION.EXAM',
-        'SESSION.SESSION_LOCATIONS',
-        'SESSION.SESSION_LOCATIONS.LOCATION',
-        'SESSION_LOCATION',
-        'SESSION_LOCATION.LOCATION',
-        'ATTENDANCES',
-        'VOUCHERS',
-        'LOCATION_SEAT',
-      ],
-      order: { CREATED_AT: 'ASC' },
-    });
+  async findByExamId(
+    examId: number,
+    query?: ExamEnrollmentQueryDto,
+  ): Promise<
+    | ExamEnrollment[]
+    | { data: ExamEnrollment[]; total: number; totalPaid: number }
+  > {
+    if (!query || !query.page || !query.limit) {
+      return await this.examEnrollmentRepository.find({
+        where: {
+          SESSION: { EXAM_ID: examId },
+        },
+        relations: [
+          'USER',
+          'USER.PROFILE',
+          'USER.IMAGE',
+          'SESSION',
+          'SESSION.EXAM',
+          'SESSION.SESSION_LOCATIONS',
+          'SESSION.SESSION_LOCATIONS.LOCATION',
+          'SESSION_LOCATION',
+          'SESSION_LOCATION.LOCATION',
+          'ATTENDANCES',
+          'VOUCHERS',
+          'LOCATION_SEAT',
+        ],
+        select: {
+          ERM_ID: true,
+          USER_ID: true,
+          SESSION_ID: true,
+          SL_ID: true,
+          LS_ID: true,
+          ERM_TEST_TAKER: true,
+          ERM_STATUS: true,
+          ERM_VERIFY_STATUS: true,
+          ERM_PHYSICAL_STATUS: true,
+          CREATED_AT: true,
+          USER: {
+            USER_ID: true,
+            USER_NATIONAL_ID: true,
+            USER_PASSPORT_NO: true,
+            USER_EMAIL: true,
+            USER_CODE: true,
+            PROFILE: {
+              userProfileId: true,
+              userTitleTh: true,
+              userFullnameTh: true,
+              userTitleEn: true,
+              userFullnameEn: true,
+            },
+            IMAGE: {
+              USER_IMAGE_ID: true,
+              USER_IMAGE_URL: true,
+            },
+          },
+          SESSION: {
+            SS_ID: true,
+            EXAM_ID: true,
+            SS_START_TIME: true,
+            SS_END_TIME: true,
+            EXAM: {
+              EXAM_ID: true,
+              EXAM_ROUND: true,
+              EXAM_NAME: true,
+              EXAM_TYPE: true,
+            },
+          },
+          SESSION_LOCATION: {
+            SL_ID: true,
+            LOCATION_ID: true,
+            LOCATION: {
+              LOCATION_ID: true,
+              LOCATION_NAME: true,
+              LOCATION_ROOM_NO: true,
+            },
+          },
+          ATTENDANCES: {
+            ATTEND_ID: true,
+            ERM_ID: true,
+            ATTEND_STATUS: true,
+            ATTEND_CHECK_IN_TIME: true,
+          },
+          VOUCHERS: {
+            VC_ID: true,
+            ERM_ID: true,
+            VC_CODE: true,
+          },
+          LOCATION_SEAT: {
+            LS_ID: true,
+            LOCATION_ID: true,
+            LS_SEAT_LABEL: true,
+          },
+        },
+        order: { CREATED_AT: 'ASC' },
+      });
+    }
+
+    const qb = this.examEnrollmentRepository
+      .createQueryBuilder('enrollment')
+      .innerJoin('enrollment.SESSION', 'session')
+      .leftJoinAndSelect('enrollment.USER', 'user')
+      .leftJoinAndSelect('user.PROFILE', 'profile')
+      .where('session.EXAM_ID = :examId', { examId })
+      .andWhere('enrollment.ERM_STATUS != :cancelledStatus', {
+        cancelledStatus: ExamEnrollmentStatus.CANCELLED,
+      });
+
+    let sessionIds: number[] = [];
+    if (query.sessionId) {
+      const selectedSession = await this.examSessionRepository.findOne({
+        where: { SS_ID: query.sessionId },
+      });
+      if (selectedSession) {
+        const sisterSessions = await this.examSessionRepository.find({
+          where: {
+            EXAM_ID: selectedSession.EXAM_ID,
+            SS_START_TIME: selectedSession.SS_START_TIME,
+            SS_END_TIME: selectedSession.SS_END_TIME,
+          },
+        });
+        sessionIds = sisterSessions.map((s) => s.SS_ID);
+      } else {
+        sessionIds = [query.sessionId];
+      }
+    }
+
+    if (sessionIds.length > 0) {
+      qb.andWhere('enrollment.SESSION_ID IN (:...sessionIds)', {
+        sessionIds,
+      });
+    }
+
+    if (query.sessionLocationId) {
+      qb.andWhere(
+        new Brackets((innerQb) => {
+          innerQb
+            .where('enrollment.SL_ID = :sessionLocationId', {
+              sessionLocationId: query.sessionLocationId,
+            })
+            .orWhere(
+              'enrollment.SL_ID IS NULL AND :sessionLocationId = (SELECT MIN(sl.SL_ID) FROM EXAM_T_SESSION_LOCATIONS sl WHERE sl.SS_ID = enrollment.SESSION_ID)',
+              { sessionLocationId: query.sessionLocationId },
+            );
+        }),
+      );
+    }
+
+    const statusMatches: number[] = [];
+    const verifyMatches: number[] = [];
+    const physicalMatches: number[] = [];
+
+    if (query.search) {
+      const searchLower = query.search.trim().toLowerCase();
+
+      // Payment Status mapping
+      if ('รอชำระเงิน'.includes(searchLower)) statusMatches.push(0);
+      if ('ชำระเงินแล้ว'.includes(searchLower)) statusMatches.push(1);
+      if ('จัดที่นั่งแล้ว'.includes(searchLower)) statusMatches.push(2);
+      if ('ประกาศที่นั่งแล้ว'.includes(searchLower)) statusMatches.push(3);
+      if ('เข้าสอบแล้ว'.includes(searchLower)) statusMatches.push(4);
+
+      // Verify Status mapping
+      if ('รอตรวจสอบ'.includes(searchLower)) verifyMatches.push(0);
+      if ('ผ่าน'.includes(searchLower)) verifyMatches.push(1);
+      if ('ให้แก้ไข'.includes(searchLower)) verifyMatches.push(2);
+
+      // Physical Status mapping
+      if (
+        'พระภิกษุ'.includes(searchLower) ||
+        'สามเณร'.includes(searchLower) ||
+        'พระสงฆ์'.includes(searchLower)
+      )
+        physicalMatches.push(0);
+      if ('นักบวช'.includes(searchLower)) physicalMatches.push(1);
+      if ('ทุพพลภาพ'.includes(searchLower)) physicalMatches.push(2);
+      if ('ตั้งครรภ์'.includes(searchLower)) physicalMatches.push(3);
+      if ('พิการ'.includes(searchLower)) physicalMatches.push(4);
+      if ('ทั่วไป'.includes(searchLower)) physicalMatches.push(5);
+
+      qb.andWhere(
+        new Brackets((innerQb) => {
+          innerQb
+            .where('user.USER_NATIONAL_ID LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            })
+            .orWhere('user.USER_PASSPORT_NO LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            })
+            .orWhere('user.USER_EMAIL LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            })
+            .orWhere('user.USER_CODE LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            })
+            .orWhere('profile.userFullnameTh LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            })
+            .orWhere('profile.userFullnameEn LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            })
+            .orWhere('profile.userTitleTh LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            })
+            .orWhere('profile.userTitleEn LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            });
+
+          if (statusMatches.length > 0) {
+            innerQb.orWhere('enrollment.ERM_STATUS IN (:...statusMatches)', {
+              statusMatches,
+            });
+          }
+          if (verifyMatches.length > 0) {
+            innerQb.orWhere(
+              'enrollment.ERM_VERIFY_STATUS IN (:...verifyMatches)',
+              { verifyMatches },
+            );
+          }
+          if (physicalMatches.length > 0) {
+            innerQb.orWhere(
+              'enrollment.ERM_PHYSICAL_STATUS IN (:...physicalMatches)',
+              { physicalMatches },
+            );
+          }
+        }),
+      );
+    }
+
+    // Clone qb logic to construct paid count query builder
+    const paidQb = this.examEnrollmentRepository
+      .createQueryBuilder('enrollment')
+      .innerJoin('enrollment.SESSION', 'session')
+      .leftJoin('enrollment.USER', 'user')
+      .leftJoin('user.PROFILE', 'profile')
+      .where('session.EXAM_ID = :examId', { examId })
+      .andWhere('enrollment.ERM_STATUS != :cancelledStatus', {
+        cancelledStatus: ExamEnrollmentStatus.CANCELLED,
+      })
+      .andWhere('enrollment.ERM_STATUS >= :paidStatus', {
+        paidStatus: ExamEnrollmentStatus.PAID,
+      });
+
+    if (sessionIds.length > 0) {
+      paidQb.andWhere('enrollment.SESSION_ID IN (:...sessionIds)', {
+        sessionIds,
+      });
+    }
+
+    if (query.sessionLocationId) {
+      paidQb.andWhere(
+        new Brackets((innerQb) => {
+          innerQb
+            .where('enrollment.SL_ID = :sessionLocationId', {
+              sessionLocationId: query.sessionLocationId,
+            })
+            .orWhere(
+              'enrollment.SL_ID IS NULL AND :sessionLocationId = (SELECT MIN(sl.SL_ID) FROM EXAM_T_SESSION_LOCATIONS sl WHERE sl.SS_ID = enrollment.SESSION_ID)',
+              { sessionLocationId: query.sessionLocationId },
+            );
+        }),
+      );
+    }
+
+    if (query.search) {
+      paidQb.andWhere(
+        new Brackets((innerQb) => {
+          innerQb
+            .where('user.USER_NATIONAL_ID LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            })
+            .orWhere('user.USER_PASSPORT_NO LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            })
+            .orWhere('user.USER_EMAIL LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            })
+            .orWhere('user.USER_CODE LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            })
+            .orWhere('profile.userFullnameTh LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            })
+            .orWhere('profile.userFullnameEn LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            })
+            .orWhere('profile.userTitleTh LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            })
+            .orWhere('profile.userTitleEn LIKE :searchPattern', {
+              searchPattern: `%${query.search}%`,
+            });
+
+          if (statusMatches.length > 0) {
+            innerQb.orWhere('enrollment.ERM_STATUS IN (:...statusMatches)', {
+              statusMatches,
+            });
+          }
+          if (verifyMatches.length > 0) {
+            innerQb.orWhere(
+              'enrollment.ERM_VERIFY_STATUS IN (:...verifyMatches)',
+              { verifyMatches },
+            );
+          }
+          if (physicalMatches.length > 0) {
+            innerQb.orWhere(
+              'enrollment.ERM_PHYSICAL_STATUS IN (:...physicalMatches)',
+              { physicalMatches },
+            );
+          }
+        }),
+      );
+    }
+
+    const skip = (query.page - 1) * query.limit;
+    qb.orderBy('enrollment.CREATED_AT', 'ASC').skip(skip).take(query.limit);
+
+    const [data, total] = await qb.getManyAndCount();
+    const totalPaid = await paidQb.getCount();
+
+    return {
+      data,
+      total,
+      totalPaid,
+    };
   }
 
   async findByUserId(userId: number): Promise<ExamEnrollment[]> {

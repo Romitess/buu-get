@@ -149,44 +149,12 @@
               </div>
             </div>
 
-            <div class="walkway-row">
-              <div class="buu-label-muted">
-                {{ $t('admin.locationManagement.createPage.fields.walkway') }}
-              </div>
-              <div class="walkway-control-row">
-                <div
-                  v-if="selectedWalkwayPositions.length > 0"
-                  class="walkway-chip-row"
-                  :class="{ 'walkway-chip-row--scroll': selectedWalkwayPositions.length > 2 }"
-                >
-                  <div
-                    v-for="position in selectedWalkwayPositions"
-                    :key="`${position.type}-${position.index}`"
-                    class="walkway-chip"
-                  >
-                    <span class="walkway-chip-label">{{ getWalkwayPositionLabel(position) }}</span>
-                    <button
-                      type="button"
-                      class="walkway-chip-remove"
-                      aria-label="Remove walkway"
-                      @click="removeWalkwayPosition(position)"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-                <AppButton
-                  outline
-                  dense
-                  no-caps
-                  color="primary"
-                  icon="add"
-                  :label="$t('admin.locationManagement.createPage.actions.addWalkway')"
-                  class="walkway-add-btn"
-                  @click="isWalkwayDialogOpen = true"
-                />
-              </div>
-            </div>
+            <AppLocationWalkwayControls
+              :positions="selectedWalkwayPositions"
+              :numbering-direction="seatNumberDirection"
+              @add="isWalkwayDialogOpen = true"
+              @remove="removeWalkwayPosition"
+            />
 
             <div class="total-seats-box rounded-borders total-seats-offset">
               <div class="total-seats-content">
@@ -200,34 +168,16 @@
         </div>
       </div>
 
-      <div class="col-12 col-md preview-panel">
-        <div class="buu-premium-card preview-card q-pa-md">
-          <div class="preview-scroll">
-            <AppExamSeatPreview
-              ref="seatPreviewRef"
-              :rows="rows"
-              :cols="cols"
-              :split-left-right="splitLeftRight"
-              :walkway-positions="selectedWalkwayPositions"
-              :numbering-direction="seatNumberDirection"
-              :show-seat-guides="true"
-              :show-footer-hint="true"
-            />
-          </div>
-        </div>
-
-        <div class="row justify-end preview-actions">
-          <AppButton
-            :label="$t('admin.locationManagement.createPage.actions.save')"
-            color="primary"
-            class="text-weight-bold q-px-xl"
-            style="border-radius: 8px; min-width: 140px"
-            :loading="isSaving"
-            :disable="isSaving"
-            @click="handleSave"
-          />
-        </div>
-      </div>
+      <AppLocationSeatPreviewPanel
+        ref="seatPreviewRef"
+        :rows="rows"
+        :cols="cols"
+        :split-left-right="splitLeftRight"
+        :walkway-positions="selectedWalkwayPositions"
+        :numbering-direction="seatNumberDirection"
+        :is-saving="isSaving"
+        @save="handleSave"
+      />
     </div>
 
     <AppWalkwayPositionDialog
@@ -248,8 +198,8 @@ import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
-import AppButton from 'src/components/base/app-button.vue';
-import AppExamSeatPreview from 'src/components/exam/app-exam-seat-preview.vue';
+import AppLocationSeatPreviewPanel from 'src/components/exam/app-location-seat-preview-panel.vue';
+import AppLocationWalkwayControls from 'src/components/exam/app-location-walkway-controls.vue';
 import AppWalkwayPositionDialog from 'src/components/exam/app-walkway-position-dialog.vue';
 import { api } from 'src/boot/axios';
 import { fetchLocationById, updateLocation } from 'src/services/location.service';
@@ -271,7 +221,7 @@ const cols = ref<number | null>(null);
 const seatNumberDirection = ref<'horizontal' | 'vertical'>('vertical');
 const isSaving = ref(false);
 const isWalkwayDialogOpen = ref(false);
-const seatPreviewRef = ref<InstanceType<typeof AppExamSeatPreview> | null>(null);
+const seatPreviewRef = ref<InstanceType<typeof AppLocationSeatPreviewPanel> | null>(null);
 
 interface WalkwayPosition {
   type: 'row' | 'column';
@@ -385,28 +335,6 @@ const validateForm = (): boolean => {
   return Object.keys(errors).length === 0;
 };
 
-const rowGuideLabel = (index: number): string => {
-  const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
-  if (seatNumberDirection.value === 'horizontal') return rowLetters[index - 1] ?? `${index}`;
-
-  return `${index}`;
-};
-
-const columnGuideLabel = (index: number): string => {
-  const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
-  if (seatNumberDirection.value === 'horizontal') return `${index}`;
-
-  return rowLetters[index - 1] ?? `${index}`;
-};
-
-const getWalkwayPositionLabel = (position: WalkwayPosition): string => {
-  if (position.type === 'row') return `หลังแถว ${rowGuideLabel(position.index)}`;
-
-  return `หลังคอลัมน์ ${columnGuideLabel(position.index)}`;
-};
-
 const parseWalkwayPosition = (positionValue: string): WalkwayPosition | null => {
   const [typeValue, indexValue] = positionValue.split('-');
   const parsedIndex = Number(indexValue);
@@ -432,19 +360,7 @@ const removeWalkwayPosition = (position: WalkwayPosition): void => {
 };
 
 const buildSeatStatuses = (): Record<string, number> => {
-  const statusMap: Record<string, number> = {};
-  const omittedSeats = seatPreviewRef.value?.omittedSeats ?? new Set<string>();
-  const brokenSeats = seatPreviewRef.value?.brokenSeats ?? new Set<string>();
-
-  omittedSeats.forEach((seatLabel) => {
-    statusMap[seatLabel] = 2;
-  });
-
-  brokenSeats.forEach((seatLabel) => {
-    statusMap[seatLabel] = 1;
-  });
-
-  return statusMap;
+  return seatPreviewRef.value?.getSeatStatuses() ?? {};
 };
 
 const loadLocationData = async () => {
@@ -463,18 +379,22 @@ const loadLocationData = async () => {
 
     await nextTick();
     if (seatPreviewRef.value) {
-      seatPreviewRef.value.brokenSeats.clear();
-      seatPreviewRef.value.omittedSeats.clear();
+      const loadedBrokenSeats = new Set<string>();
+      const loadedOmittedSeats = new Set<string>();
       if (data.SEATS) {
         data.SEATS.forEach((seat) => {
           if (seat.LS_SEAT_STATUS === 1 && seat.LS_SEAT_LABEL) {
-            seatPreviewRef.value?.brokenSeats.add(seat.LS_SEAT_LABEL);
+            loadedBrokenSeats.add(seat.LS_SEAT_LABEL);
           }
           if (seat.LS_SEAT_STATUS === 2 && seat.LS_SEAT_LABEL) {
-            seatPreviewRef.value?.omittedSeats.add(seat.LS_SEAT_LABEL);
+            loadedOmittedSeats.add(seat.LS_SEAT_LABEL);
           }
         });
       }
+      seatPreviewRef.value.setSeatStatusSets({
+        brokenSeats: loadedBrokenSeats,
+        omittedSeats: loadedOmittedSeats,
+      });
     }
   } catch (error) {
     console.error('Error loading location:', error);
@@ -675,23 +595,22 @@ onMounted(() => {
 .walkway-control-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 4px;
   width: 100%;
-  min-height: 39px;
+  min-height: 41px;
 }
 
 .walkway-chip-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 4px;
   flex: 0 1 auto;
   width: max-content;
   min-width: 0;
-  max-width: calc((100% - 8px) * 2 / 3);
-  overflow-x: hidden;
-  overflow-y: hidden;
-  height: 39px;
-  padding-bottom: 0;
+  max-width: calc(100% - 124px);
+  overflow: visible;
+  height: 41px;
+  padding-bottom: 2px;
   scrollbar-width: none;
   scrollbar-gutter: stable;
 
@@ -702,9 +621,9 @@ onMounted(() => {
 }
 
 .walkway-chip-row--scroll {
-  height: 49px;
+  height: 53px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding-bottom: 12px;
   scrollbar-width: thin;
 
   &::-webkit-scrollbar-thumb {
@@ -723,18 +642,20 @@ onMounted(() => {
 }
 
 .walkway-chip {
+  box-sizing: border-box;
   min-width: 0;
-  flex: 0 0 111px;
+  flex: 0 0 102px;
+  width: 102px;
   height: 39px;
   min-height: 39px;
   margin: 0;
-  padding: 0 8px;
+  padding: 0 6px;
   border-radius: 12px;
   border: 1px solid #dddddd;
-  background: #ffffff !important;
+  background: #ffffff;
   color: #111111;
   font-family: 'Sarabun', sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   display: inline-flex;
   align-items: center;
@@ -743,10 +664,11 @@ onMounted(() => {
 }
 
 .walkway-chip-label {
-  flex: 0 0 auto;
-  min-width: max-content;
-  overflow: visible;
-  text-overflow: clip;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
   white-space: nowrap;
 }
 
@@ -755,11 +677,11 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: 10px;
+  width: 8px;
   height: 20px;
   color: #000000;
   font-family: Arial, sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 18px;
   border: 0;
@@ -770,19 +692,19 @@ onMounted(() => {
 }
 
 .walkway-add-btn {
-  width: calc((100% - 16px) / 3);
-  flex: 0 0 calc((100% - 16px) / 3);
+  width: 120px;
+  flex: 0 0 120px;
   min-width: 0;
   height: 39px;
   min-height: 39px;
   padding: 0 8px;
   gap: 0;
   border-radius: 12px;
-  color: var(--primary, #0d47a1) !important;
-  background: #ffffff !important;
+  color: var(--primary, #0d47a1);
+  background: #ffffff;
 
   &::before {
-    border: 1px solid var(--primary, #0d47a1) !important;
+    border: 1px solid var(--primary, #0d47a1);
   }
 
   :deep(.q-btn__content) {
@@ -793,7 +715,7 @@ onMounted(() => {
   }
 
   :deep(.q-icon) {
-    font-size: 20px;
+    font-size: 18px;
     color: var(--primary, #0d47a1);
   }
 
@@ -803,7 +725,7 @@ onMounted(() => {
 
   :deep(.block) {
     color: var(--primary, #0d47a1);
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1;
     white-space: nowrap;
   }

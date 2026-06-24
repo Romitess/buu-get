@@ -33,16 +33,25 @@ export class RolesGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<{
-      user: { role: RoleEnum };
+      user: { role?: RoleEnum; roles?: RoleEnum[] };
     }>();
     const user = request.user;
 
-    if (!user || !user.role) {
+    // รวบรวม role ทั้งหมดของ user — รองรับทั้งแบบ array (roles)
+    // และ token เก่าที่มีแค่ role เดี่ยว
+    const userRoles =
+      user?.roles && user.roles.length > 0
+        ? user.roles
+        : user?.role
+          ? [user.role]
+          : [];
+
+    if (userRoles.length === 0) {
       throw new ForbiddenException('Access denied: No role assigned');
     }
 
-    // ตรวจสอบว่า role ของ user ตรงกับ role ที่ต้องการหรือไม่
-    const hasRole = requiredRoles.includes(user.role);
+    // ผ่านถ้า user มี role อย่างน้อยหนึ่งตัวที่ตรงกับที่ route ต้องการ
+    const hasRole = requiredRoles.some((role) => userRoles.includes(role));
 
     if (!hasRole) {
       throw new ForbiddenException(

@@ -10,13 +10,12 @@
 
     <AppExamInfoCard
       v-if="exam"
-      v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
       :title="exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME"
       :date="examDateLabel"
       :time="selectedSessionTime"
       :location="selectedSessionLocation"
-      :location-options="roomOptions"
+      :location-options="[]"
       :applicant-count="localSessionTotalCount"
       :paid-count="localSessionPaidCount"
       :total-capacity="selectedSessionCapacity"
@@ -34,6 +33,7 @@
         <ExportCsvButton
           :columns="columns"
           :rows="currentRoomEnrollments"
+          :load-rows="loadExportRows"
           file-name-prefix="exam-registrants"
           class="export-btn"
         />
@@ -41,11 +41,22 @@
     </nav>
 
     <main>
+      <q-banner v-if="error" class="bg-red-1 text-red-9 q-mb-md rounded-borders shadow-1">
+        <template v-slot:avatar>
+          <q-icon name="warning" color="negative" />
+        </template>
+        {{ error }}
+        <template v-slot:action>
+          <q-btn flat color="negative" label="ลองใหม่" @click="loadData" />
+        </template>
+      </q-banner>
+
       <BaseTable
         :columns="columns"
         :rows="currentRoomEnrollments"
         :loading="isLoading"
         :pagination="pagination"
+        is-server-side
         class="registrants-table"
         @request="onRequest"
       >
@@ -101,7 +112,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import type { QTableColumn } from 'quasar';
+import { type QTableColumn, debounce } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import BaseTable from 'src/components/shared/base-table.vue';
 import ActionButton from 'src/components/shared/action-button.vue';
@@ -113,16 +124,14 @@ import AppExamSessionTabs from 'src/components/exam/app-exam-session-time.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import { useExamRegistrants } from 'src/composables/use-exam-registrants';
+import { fetchExamById } from 'src/services/exam.service';
+import { fetchEnrollmentsByExamId } from 'src/services/enrollment.service';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
-import { PAYMENT_STATUS_LABELS, VERIFY_STATUS_LABELS } from 'src/types/enrollment.types';
-import type { BackendSession } from 'src/types/exam';
-
-interface SessionLocationOption {
-  SL_ID: number;
-  LOCATION_ID: number;
-  SS_ID: number;
-  LOCATION: NonNullable<BackendSession['LOCATION']>;
-}
+import {
+  PAYMENT_STATUS_LABELS,
+  VERIFY_STATUS_LABELS,
+  type EnrollmentTableRow,
+} from 'src/types/enrollment.types';
 
 const route = useRoute();
 const router = useRouter();
@@ -133,12 +142,15 @@ const {
   exam,
   searchQuery,
   selectedSessionId,
-  selectedSessionLocationId,
   sessionTimeTabs,
-  roomOptions,
   filteredEnrollments,
   fetchEnrollments,
+  totalRows,
+  totalPaidRows,
+  error,
 } = useExamRegistrants();
+
+const isInitializing = ref(true);
 
 const getMonthName = (monthIndex: number): string => i18n.t(`common.months[${monthIndex}]`);
 
@@ -169,37 +181,6 @@ const activeTimeSessions = computed(() => {
   return (exam.value?.SESSIONS ?? []).filter((session) => getSessionTimeKey(session) === activeKey);
 });
 
-const sessionLocations = computed<SessionLocationOption[]>(() => {
-  return activeTimeSessions.value.flatMap((session) => {
-    const relationLocations = session.SESSION_LOCATIONS || [];
-    if (relationLocations.length > 0) {
-      return relationLocations
-        .filter((item) => item.LOCATION)
-        .map((item) => ({ ...item, SS_ID: item.SS_ID || session.SS_ID }));
-    }
-
-    if (!session.LOCATION) return [];
-    return [
-      {
-        SL_ID: -session.SS_ID,
-        LOCATION_ID: session.LOCATION.LOCATION_ID,
-        SS_ID: session.SS_ID,
-        LOCATION: session.LOCATION,
-      },
-    ];
-  });
-});
-
-const activeSessionLocation = computed(() => {
-  return (
-    sessionLocations.value.find((item) => item.SL_ID === selectedSessionLocationId.value) ?? null
-  );
-});
-
-const activeLocation = computed(() => {
-  return activeSessionLocation.value?.LOCATION ?? selectedSession.value?.LOCATION ?? null;
-});
-
 const selectedSessionTime = computed(() => {
   if (!selectedSession.value) return '-';
   const start = (selectedSession.value.SS_START_TIME || '').substring(0, 5);
@@ -208,69 +189,35 @@ const selectedSessionTime = computed(() => {
 });
 
 const selectedSessionLocation = computed(() => {
-  if (!activeLocation.value) return '-';
-  const loc = activeLocation.value;
-  return `${loc.LOCATION_NAME}${loc.LOCATION_ROOM_NO ? ` (${loc.LOCATION_ROOM_NO})` : ''}`;
+  if (!activeTimeSessions.value.length) return '-';
+  const locs = activeTimeSessions.value
+    .flatMap((s) => s.SESSION_LOCATIONS || [])
+    .map((sl) => sl.LOCATION)
+    .filter(Boolean);
+  if (locs.length === 0) {
+    const defaultLoc = selectedSession.value?.LOCATION;
+    return defaultLoc?.LOCATION_NAME || '-';
+  }
+  return locs[0]?.LOCATION_NAME || '-';
 });
 
-watch(
-  [selectedSessionId, roomOptions],
-  () => {
-    if (!roomOptions.value.some((option) => option.value === selectedSessionLocationId.value)) {
-      selectedSessionLocationId.value = roomOptions.value[0]?.value ?? null;
-    }
-  },
-  { immediate: true },
-);
-
 const selectedSessionCapacity = computed(() => {
-  if (activeLocation.value?.SEATS?.length) return activeLocation.value.SEATS.length;
-  return (
-    activeTimeSessions.value.find((session) => session.SS_ID === activeSessionLocation.value?.SS_ID)
-      ?.SS_CAPACITY ?? 0
-  );
+  if (activeTimeSessions.value.length > 0) {
+    return activeTimeSessions.value.reduce((sum, s) => sum + (s.SS_CAPACITY || 0), 0);
+  }
+  return selectedSession.value?.SS_CAPACITY ?? 0;
 });
 
 const currentRoomEnrollments = computed(() => {
-  const list = filteredEnrollments.value;
-  if (selectedSessionLocationId.value === null) return list;
-
-  const result = list.filter((e) => {
-    if (e.slId !== null && e.slId !== undefined) {
-      return e.slId === selectedSessionLocationId.value;
-    }
-
-    const seatLocation = sessionLocations.value.find((location) =>
-      location.LOCATION.SEATS?.some((seat) => seat.LS_ID === e.lsId),
-    );
-    if (seatLocation) {
-      return seatLocation.SL_ID === selectedSessionLocationId.value;
-    }
-
-    const enrollmentSessionLocations = sessionLocations.value.filter(
-      (location) => location.SS_ID === e.sessionId,
-    );
-    return (
-      enrollmentSessionLocations.length > 0 &&
-      enrollmentSessionLocations[0]?.SL_ID === selectedSessionLocationId.value
-    );
-  });
-
-  return result.map((item, idx) => ({
-    ...item,
-    index: idx + 1,
-  }));
+  return filteredEnrollments.value;
 });
 
-const localSessionTotalCount = computed(() => currentRoomEnrollments.value.length);
+const localSessionTotalCount = computed(() => totalRows.value);
 
-const localSessionPaidCount = computed(() => {
-  const list = currentRoomEnrollments.value;
-  const CANCELLED_STATUS = 5;
-  return list.filter((e) => e.paymentStatus >= 1 && e.paymentStatus !== CANCELLED_STATUS).length;
-});
+const localSessionPaidCount = computed(() => totalPaidRows.value);
 
 watch(exam, (newExam) => {
+  if (isInitializing.value) return;
   if (newExam && sessionTimeTabs.value.length > 0 && !selectedSessionId.value) {
     const firstSession = sessionTimeTabs.value[0];
     if (firstSession) {
@@ -278,22 +225,6 @@ watch(exam, (newExam) => {
     }
   }
 });
-
-watch(
-  [selectedSessionId, roomOptions],
-  () => {
-    const firstRoomId = roomOptions.value[0]?.value ?? null;
-    if (firstRoomId === null) {
-      selectedSessionLocationId.value = null;
-      return;
-    }
-
-    if (!roomOptions.value.some((option) => option.value === selectedSessionLocationId.value)) {
-      selectedSessionLocationId.value = firstRoomId;
-    }
-  },
-  { immediate: true },
-);
 
 const pagination = ref<PaginationModel>({
   page: 1,
@@ -321,14 +252,14 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.registrantManagement.table.columns.fullName'),
     field: 'fullnameTh',
     align: 'left',
-    style: 'width: 18%',
+    style: 'width: 21%',
   },
   {
     name: 'remark',
     label: i18n.t('admin.registrantManagement.table.columns.remark'),
     field: 'remark',
     align: 'center',
-    style: 'width: 21%',
+    style: 'width: 18%',
   },
   {
     name: 'paymentStatus',
@@ -359,6 +290,7 @@ const onRequest = (props: TableRequestProps): void => {
   const { page, rowsPerPage } = props.pagination;
   pagination.value.page = page;
   pagination.value.rowsPerPage = rowsPerPage;
+  void loadData();
 };
 
 const handleView = (ermId: number): void => {
@@ -384,26 +316,92 @@ const handleHistory = (ermId: number): void => {
 const loadData = async (): Promise<void> => {
   const examId = Number(route.params.examId);
   if (!isNaN(examId) && examId > 0) {
-    await fetchEnrollments(examId);
+    // If not initialized, wait until parameters are selected
+    if (isInitializing.value) return;
 
-    const routeSessionLocationId = Number(route.query.sessionLocationId);
-    if (
-      !isNaN(routeSessionLocationId) &&
-      roomOptions.value.some((option) => option.value === routeSessionLocationId)
-    ) {
-      selectedSessionLocationId.value = routeSessionLocationId;
-    }
+    await fetchEnrollments(examId, {
+      page: pagination.value.page,
+      limit: pagination.value.rowsPerPage,
+      search: searchQuery.value,
+      sessionId: selectedSessionId.value,
+      sessionLocationId: null, // load all rooms for this session
+    });
 
-    pagination.value.rowsNumber = currentRoomEnrollments.value.length;
+    pagination.value.rowsNumber = totalRows.value;
   }
 };
 
-watch(currentRoomEnrollments, (newVal) => {
-  pagination.value.rowsNumber = newVal.length;
+const loadExportRows = async (): Promise<EnrollmentTableRow[]> => {
+  const examId = Number(route.params.examId);
+  if (isNaN(examId) || examId <= 0) {
+    return [];
+  }
+
+  const totalResult = await fetchEnrollmentsByExamId(examId, {
+    page: 1,
+    limit: 1,
+    search: searchQuery.value,
+    sessionId: selectedSessionId.value,
+    sessionLocationId: null,
+  });
+
+  if (Array.isArray(totalResult) || totalResult.total === 0) {
+    return [];
+  }
+
+  const exportResult = await fetchEnrollmentsByExamId(examId, {
+    page: 1,
+    limit: totalResult.total,
+    search: searchQuery.value,
+    sessionId: selectedSessionId.value,
+    sessionLocationId: null,
+  });
+
+  return Array.isArray(exportResult) ? exportResult : exportResult.data;
+};
+
+const debouncedLoadData = debounce(loadData, 400);
+
+// Single watcher on session changes
+watch(selectedSessionId, () => {
+  if (isInitializing.value) return;
+  pagination.value.page = 1;
+  void loadData();
 });
 
-onMounted(() => {
-  void loadData();
+watch(searchQuery, () => {
+  if (isInitializing.value) return;
+  pagination.value.page = 1;
+  void debouncedLoadData();
+});
+
+onMounted(async () => {
+  const examId = Number(route.params.examId);
+  if (!isNaN(examId) && examId > 0) {
+    try {
+      isLoading.value = true;
+      // 1. Fetch exam details first
+      const examData = await fetchExamById(examId);
+      exam.value = examData;
+
+      // 2. Set default session
+      const firstSession = sessionTimeTabs.value[0];
+      if (examData && firstSession) {
+        selectedSessionId.value = firstSession.SS_ID ?? null;
+      }
+
+      // 3. Mark initialization as finished
+      isInitializing.value = false;
+
+      // 4. Fetch actual paginated data
+      await loadData();
+    } catch (err) {
+      console.error('Failed to initialize registrants page:', err);
+      isInitializing.value = false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
 });
 </script>
 
@@ -431,8 +429,13 @@ onMounted(() => {
     box-shadow: var(--shadow-md);
   }
 
+  :deep(thead tr th:nth-child(3)) {
+    text-align: center !important;
+    padding-left: 0 !important;
+  }
+
   :deep(tbody tr td:nth-child(3)) {
-    padding-left: clamp(12px, 4.6vw, 80px);
+    padding-left: clamp(12px, 4vw, 70px) !important;
   }
 }
 

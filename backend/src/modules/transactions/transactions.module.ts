@@ -6,6 +6,9 @@ import { Transaction } from './entities/transaction.entity';
 import { Receipt } from '../receipts/entities/receipt.entity';
 import { ExamEnrollment } from '../exam-enrollments/entities/exam-enrollment.entity';
 import { PaymentConfig } from '../payment-configs/entities/payment-config.entity';
+import { TransactionStatusHistory } from '../transaction-status-history/entities/transaction-status-history.entity';
+import { TransactionRef } from '../transaction-refs/entities/transaction-ref.entity';
+import { TransactionProfile } from '../transaction-profiles/entities/transaction-profile.entity';
 
 @Module({
   imports: [
@@ -14,6 +17,9 @@ import { PaymentConfig } from '../payment-configs/entities/payment-config.entity
       Receipt,
       ExamEnrollment,
       PaymentConfig,
+      TransactionStatusHistory,
+      TransactionRef,
+      TransactionProfile,
     ]),
   ],
   controllers: [TransactionsController],

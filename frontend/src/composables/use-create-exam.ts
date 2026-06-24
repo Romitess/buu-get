@@ -14,13 +14,15 @@ import {
   VALIDATION_MSG,
 } from 'src/constants/exam';
 import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
-import type { PasscodeType } from 'src/types/exam';
+import type { PasscodeType, BackendExam } from 'src/types/exam';
 import {
   fetchExamLocations,
   fetchFundSources,
   fetchExamById,
+  fetchAllExamsRaw,
   updateExamRound,
   formatTime,
+  formatBackendDate,
   buddhistToGregorian,
   createExamPasscodes,
 } from 'src/services/exam.service';
@@ -108,7 +110,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
   /** Published exams keep non-schedule sections read-only. */
   const isPublishedSectionLocked = computed<boolean>(() => {
-    return isEditMode.value && (wasOriginallyPublished.value || form.value.isPublished);
+    return isEditMode.value && wasOriginallyPublished.value;
   });
 
   /** The schedule remains editable in edit mode, including after enrollment starts. */
@@ -134,8 +136,64 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const proctorOptions = ref<{ label: string; value: string }[]>([]);
   const locationOptions = ref<ExamLocationOption[]>([]);
   const fundSourceOptions = ref<{ label: string; value: number }[]>([]);
+  const allExams = ref<BackendExam[]>([]);
   const isLoadingData = ref(false);
   const error = ref<string | null>(null);
+
+  /**
+   * คำนวณ location IDs ที่ถูกใช้โดย exam อื่นในวัน+เวลาเดียวกัน
+   * เพื่อแสดงเป็น disabled ใน dropdown
+   */
+  const occupiedLocationIds = computed<Set<number>>(() => {
+    const occupied = new Set<number>();
+    const formExamDate = form.value.examDate;
+    if (!formExamDate) return occupied;
+
+    // แปลงวันที่ form (DD/MM/YYYY พ.ศ.) เป็น YYYY-MM-DD ค.ศ.
+    const formDateGregorian = buddhistToGregorian(formExamDate);
+    if (!formDateGregorian) return occupied;
+
+    // รวบรวมช่วงเวลาทั้งหมดจาก form
+    const formTimeSlots = form.value.timeSlots
+      .filter((s) => s.startTime && s.endTime)
+      .map((s) => ({
+        start: timeToMinutes(s.startTime),
+        end: timeToMinutes(s.endTime),
+      }));
+
+    if (formTimeSlots.length === 0) return occupied;
+
+    for (const exam of allExams.value) {
+      // ข้ามตัวเอง (edit mode)
+      if (examId && exam.EXAM_ID === examId) continue;
+
+      const examDate = formatBackendDate(exam.EXAM_DATE);
+      if (examDate !== formDateGregorian) continue;
+
+      // ตรวจ session ที่มีเวลาซ้อนทับ
+      for (const session of exam.SESSIONS || []) {
+        const ssStart = timeToMinutes(session.SS_START_TIME?.substring(0, 5));
+        const ssEnd = timeToMinutes(session.SS_END_TIME?.substring(0, 5));
+
+        const isOverlapping = formTimeSlots.some(
+          (slot) => ssStart < slot.end && ssEnd > slot.start,
+        );
+
+        if (!isOverlapping) continue;
+
+        // เก็บ location IDs จาก session ที่ซ้อนทับ
+        if (session.SESSION_LOCATIONS && session.SESSION_LOCATIONS.length > 0) {
+          for (const loc of session.SESSION_LOCATIONS) {
+            if (loc.LOCATION_ID) occupied.add(loc.LOCATION_ID);
+          }
+        } else if (session.LOCATION_ID) {
+          occupied.add(session.LOCATION_ID);
+        }
+      }
+    }
+
+    return occupied;
+  });
 
   /** Currently active time slot tab index */
   const activeSlotIndex = ref(0);
@@ -152,7 +210,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       examType: EXAM_TYPE_GENERAL,
       examFormat: EXAM_FORMAT_COMPUTER,
       fundSourceId: null,
-      fee: '0.00',
+      fee: '',
       isPublished: false,
       examDate: today,
       timeSlots: [
@@ -455,12 +513,14 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     isLoadingData.value = true;
     error.value = null;
     try {
-      const [locations, fundSources, proctors] = await Promise.all([
+      const [locations, fundSources, proctors, exams] = await Promise.all([
         fetchExamLocations(),
         fetchFundSources(),
         getUsersFromApi(ROLES.PROCTOR),
+        fetchAllExamsRaw(),
       ]);
       locationOptions.value = locations;
+      allExams.value = exams;
       fundSourceOptions.value = fundSources.map((fs: FundSource) => ({
         label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
         value: fs.FS_ID,
@@ -482,7 +542,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         form.value.examRound = exam.EXAM_ROUND || '';
         form.value.examType = exam.EXAM_TYPE || EXAM_TYPE_GENERAL;
         form.value.examFormat = exam.EXAM_FORMAT || EXAM_FORMAT_COMPUTER;
-        form.value.fee = exam.EXAM_FEE ?? '0.00';
+        form.value.fee = Number(exam.EXAM_FEE ?? 0).toFixed(2);
         form.value.isPublished = exam.EXAM_PUBLISHED ?? false;
         wasOriginallyPublished.value = exam.EXAM_PUBLISHED ?? false;
         form.value.examDate = gregorianToBuddhistDisplay(exam.EXAM_DATE);
@@ -844,7 +904,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     }
   };
 
-
   /** Export candidates to CSV */
   const exportCandidates = (): void => {
     if (form.value.eligibleCandidates.length === 0) {
@@ -1106,31 +1165,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       return false;
     }
 
-    // === BUSINESS RULE VALIDATION: Strictly 1 Exam Per Day ===
-    const targetDateGregorian = buddhistToGregorian(form.value.examDate);
-
-    // Make sure we have the latest schedules to check against
-    await examStore.loadManagementSchedules();
-
-    const hasConflict = examStore.managementSchedules.some((exam) => {
-      // Skip checking against itself if in edit mode
-      if (isEditMode.value && String(exam.id) === String(examId)) return false;
-
-      // Match date - ANY exam on the same date is a conflict!
-      return exam.examDate === targetDateGregorian;
-    });
-
-    if (hasConflict) {
-      $q.notify({
-        type: 'negative',
-        message: NOTIFY_MSG.CONFLICT_DATE(form.value.examDate),
-        position: 'top',
-        timeout: 5000,
-        actions: [{ icon: 'close', color: 'white' }],
-      });
-      return false;
-    }
-
     // Build time ranges from flat rooms (for backward compatible payload)
     const timeRanges = flatRooms.map((r) => ({
       startTime: r.startTime,
@@ -1187,7 +1221,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           locationId: flatRooms[0]?.locationId || 0,
           examType: form.value.examType,
           examFormat: form.value.examFormat,
-          fee: form.value.fee,
+          fee: form.value.fee === '' ? 0 : form.value.fee,
           seats: flatRooms[0]?.seats || 1,
           isPublished: form.value.isPublished,
           examDate: form.value.examDate,
@@ -1265,6 +1299,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     proctorOptions,
     locationOptions,
     fundSourceOptions,
+    occupiedLocationIds,
     isLoadingData,
     error,
     isEditMode,

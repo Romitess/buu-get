@@ -36,7 +36,7 @@
       <BaseTable
         :columns="columns"
         :rows="filteredReceipts"
-        :loading="false"
+        :loading="loading"
         :pagination="pagination"
         :empty-label="$t('admin.receiptUsageReport.table.emptyLabel')"
       >
@@ -55,57 +55,206 @@ import SearchBar from 'src/components/shared/search-bar.vue';
 import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
 import { useDailyRevenue } from 'src/composables/use-daily-revenue';
 import BaseTable from 'src/components/shared/base-table.vue';
+import { fetchIssuedReceipts, type IssuedReceipt } from 'src/services/receipt.service';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import type { DailyRevenueFilter as DailyRevenueFilterModel } from 'src/types/daily-revenue.types';
 
 const $q = useQuasar();
 
-const { error, filter, departmentOptions, fetchData, loadDepartmentOptions, applyFilter } =
-  useDailyRevenue();
-
-// Mock rows for receipt usage table (not connected to API yet)
-const receiptRows = ref([
-  {
-    index: 1,
-    receiptNo: '6751300100001',
-    paymentDate: '01/05/2569 14:05:06',
-    receiptDate: '11/05/2569 09:31:07',
-    year: '2569',
-    documentType: 'ใบเสร็จ',
-    amount: 500.0,
-    examName: '1/2026 การสอบวัดระดับภาษาอังกฤษ BUU-GET',
-    payer: 'นาย สมศรี ใจดี',
-    payee: 'สิงหา มานะอมรกุล',
-  },
-  {
-    index: 2,
-    receiptNo: '6751300100002',
-    paymentDate: '01/05/2569 14:25:16',
-    receiptDate: '11/05/2569 09:31:07',
-    year: '2569',
-    documentType: 'ใบเสร็จ',
-    amount: 500.0,
-    examName: '1/2026 การสอบวัดระดับภาษาอังกฤษ BUU-GET',
-    payer: 'นาย สมกบ ใจดี',
-    payee: 'สิงหา มานะอมรกุล',
-  },
-]);
+const { error, filter, departmentOptions, loadDepartmentOptions } = useDailyRevenue();
 
 const { t } = useI18n();
 
 const searchQuery = ref('');
+const loading = ref(false);
+const receipts = ref<IssuedReceipt[]>([]);
+
+type ReceiptUsageRow = {
+  index: number;
+  receiptNo: string;
+  paymentDate: string;
+  receiptDate: string;
+  year: string;
+  documentType: string;
+  amount: number;
+  examName: string;
+  payer: string;
+  payee: string;
+  paymentDateRaw: string | null;
+  department: string;
+};
+
+const applyFilter = (newFilter: DailyRevenueFilterModel): void => {
+  filter.value = { ...newFilter };
+};
+
+const formatThaiDate = (dateStr?: string | null): string => {
+  if (!dateStr) return '-';
+  const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return '-';
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const buddhistYear = date.getFullYear() + 543;
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${day}/${month}/${buddhistYear} ${hours}:${minutes}:${seconds}`;
+};
+
+const formatReceiptYear = (dateStr?: string | null): string => {
+  if (!dateStr) return '-';
+  const date = new Date(dateStr);
+  return Number.isNaN(date.getTime()) ? '-' : String(date.getFullYear() + 543);
+};
+
+const getReceiptNo = (receipt: IssuedReceipt, paymentDate: string | null): string => {
+  const receiptYear = paymentDate
+    ? new Date(paymentDate).getFullYear()
+    : receipt.RC_ISSUED_AT
+      ? new Date(receipt.RC_ISSUED_AT).getFullYear()
+      : new Date(receipt.CREATED_AT).getFullYear();
+
+  return `RC${receiptYear}-${String(receipt.RC_ID).padStart(5, '0')}`;
+};
+
+const getReceiptBankReconcile = (receipt: IssuedReceipt) => {
+  const bankReconciles = receipt.TRANSACTION?.BANK_RECONCILES ?? [];
+  return [...bankReconciles].sort(
+    (left, right) => new Date(right.CREATED_AT).getTime() - new Date(left.CREATED_AT).getTime(),
+  )[0];
+};
+
+const getPersonName = (
+  profile?: {
+    userTitleTh?: string | null;
+    userFullnameTh?: string | null;
+    userTitleEn?: string | null;
+    userFullnameEn?: string | null;
+  } | null,
+): string => {
+  const fullnameTh = [profile?.userTitleTh, profile?.userFullnameTh].filter(Boolean).join(' ');
+  const fullnameEn = [profile?.userTitleEn, profile?.userFullnameEn].filter(Boolean).join(' ');
+  return fullnameTh || fullnameEn;
+};
+
+const getPayeeName = (receipt: IssuedReceipt): string => {
+  const bankReconcile = getReceiptBankReconcile(receipt);
+  return getPersonName(bankReconcile?.USER?.PROFILE) || bankReconcile?.USER?.USER_EMAIL || '-';
+};
+
+const loadReceipts = async (): Promise<void> => {
+  loading.value = true;
+  try {
+    receipts.value = await fetchIssuedReceipts();
+  } catch (err) {
+    console.error(err);
+    receipts.value = [];
+    $q.notify({
+      type: 'negative',
+      message: 'ไม่สามารถดึงข้อมูลการใช้ใบเสร็จรับเงินได้',
+      position: 'top',
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const receiptRows = computed<ReceiptUsageRow[]>(() =>
+  receipts.value.flatMap((receipt, index) => {
+    const transaction = receipt.TRANSACTION;
+    const enrollment = transaction?.ENROLLMENT;
+    if (!transaction || !enrollment) return [];
+
+    const exam = enrollment.SESSION?.EXAM;
+    const paymentDateRaw = transaction.TRANX_PAID_AT ?? receipt.RC_ISSUED_AT;
+    const receiptDateRaw = receipt.RC_ISSUED_AT ?? receipt.CREATED_AT;
+    const payer =
+      receipt.RC_NAME ||
+      getPersonName(enrollment.USER?.PROFILE) ||
+      enrollment.USER?.USER_EMAIL ||
+      'ผู้สมัครสอบ';
+
+    return [
+      {
+        index: index + 1,
+        receiptNo: getReceiptNo(receipt, paymentDateRaw),
+        paymentDate: formatThaiDate(paymentDateRaw),
+        receiptDate: formatThaiDate(receiptDateRaw),
+        year: formatReceiptYear(receiptDateRaw),
+        documentType: 'ใบเสร็จ',
+        amount: Number(transaction.TRANX_AMOUNT ?? exam?.EXAM_FEE ?? 0),
+        examName: exam?.EXAM_ROUND
+          ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}`
+          : exam?.EXAM_NAME || 'BUU-GET Exam',
+        payer,
+        payee: getPayeeName(receipt),
+        paymentDateRaw,
+        department: exam?.FUND_SOURCE?.FS_FACULTY || '',
+      },
+    ];
+  }),
+);
 
 const filteredReceipts = computed(() => {
-  if (!searchQuery.value) return receiptRows.value;
-  const q = searchQuery.value.toString().toLowerCase();
-  return receiptRows.value.filter((r) => {
-    return (
-      String(r.receiptNo).toLowerCase().includes(q) ||
-      String(r.examName).toLowerCase().includes(q) ||
-      String(r.payer).toLowerCase().includes(q) ||
-      String(r.payee).toLowerCase().includes(q)
+  let rows = receiptRows.value;
+
+  if (filter.value.startDate) {
+    const start = new Date(`${filter.value.startDate}T00:00:00`);
+    rows = rows.filter((row) =>
+      row.paymentDateRaw ? new Date(row.paymentDateRaw) >= start : false,
     );
-  });
+  }
+
+  if (filter.value.endDate) {
+    const end = new Date(`${filter.value.endDate}T23:59:59`);
+    rows = rows.filter((row) => (row.paymentDateRaw ? new Date(row.paymentDateRaw) <= end : false));
+  }
+
+  if (filter.value.department) {
+    rows = rows.filter((row) => row.department === filter.value.department);
+  }
+
+  if (filter.value.examName) {
+    const examName = filter.value.examName.toLowerCase();
+    rows = rows.filter((row) => row.examName.toLowerCase().includes(examName));
+  }
+
+  if (filter.value.receiptNo) {
+    const receiptNo = filter.value.receiptNo.toLowerCase();
+    rows = rows.filter((row) => row.receiptNo.toLowerCase().includes(receiptNo));
+  }
+
+  if (filter.value.payerName) {
+    const payerName = filter.value.payerName.toLowerCase();
+    rows = rows.filter((row) => row.payer.toLowerCase().includes(payerName));
+  }
+
+  if (filter.value.payeeName) {
+    const payeeName = filter.value.payeeName.toLowerCase();
+    rows = rows.filter((row) => row.payee.toLowerCase().includes(payeeName));
+  }
+
+  if (searchQuery.value) {
+    const q = searchQuery.value.toString().toLowerCase();
+    rows = rows.filter((row) =>
+      [
+        row.receiptNo,
+        row.paymentDate,
+        row.receiptDate,
+        row.year,
+        row.documentType,
+        row.examName,
+        row.payer,
+        row.payee,
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(q),
+    );
+  }
+
+  return rows.map((row, index) => ({ ...row, index: index + 1 }));
 });
 
 const pagination = computed(() => ({
@@ -247,7 +396,7 @@ watch(error, (newVal) => {
 // Initial load
 onMounted(() => {
   void loadDepartmentOptions();
-  void fetchData();
+  void loadReceipts();
 });
 </script>
 

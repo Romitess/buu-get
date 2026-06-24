@@ -8,18 +8,18 @@
 
     <div class="score-criteria-grid row q-col-gutter-lg">
       <div class="col-12 col-md-6">
-        <div class="section-card section-card--scrollable">
+        <q-card class="section-card section-card--scrollable">
           <h3 class="section-title">{{ $t('admin.scoreCriteriaManagement.previewTitle') }}</h3>
           <div class="scrollable-content">
             <div class="admin-cert-preview">
               <CertificatePreviewReport :band-rules="bandRules" />
             </div>
           </div>
-        </div>
+        </q-card>
       </div>
 
       <div class="col-12 col-md-6">
-        <div class="section-card">
+        <q-card class="section-card">
           <h3 class="section-title">{{ $t('admin.scoreCriteriaManagement.editTitle') }}</h3>
 
           <div
@@ -66,25 +66,27 @@
 
               <div class="row items-center no-wrap" style="width: 140px; margin-right: 12px">
                 <q-input
-                  v-model.number="rule.minScore"
-                  type="number"
-                  :min="0"
-                  :max="100"
+                  :model-value="rule.minScore"
+                  maxlength="3"
                   outlined
                   dense
                   class="buu-input-muted col"
                   input-class="text-center"
+                  @keypress="onScoreKeypress"
+                  @update:model-value="(val) => onScoreInput(val, rule, 'minScore')"
+                  @paste="handleScorePaste"
                 />
                 <span class="q-mx-xs text-grey-6">-</span>
                 <q-input
-                  v-model.number="rule.maxScore"
-                  type="number"
-                  :min="0"
-                  :max="100"
+                  :model-value="rule.maxScore"
+                  maxlength="3"
                   outlined
                   dense
                   class="buu-input-muted col"
                   input-class="text-center"
+                  @keypress="onScoreKeypress"
+                  @update:model-value="(val) => onScoreInput(val, rule, 'maxScore')"
+                  @paste="handleScorePaste"
                 />
               </div>
 
@@ -128,11 +130,11 @@
               @click="addBand"
             />
           </div>
-        </div>
+        </q-card>
       </div>
     </div>
 
-    <div class="action-bar row justify-end q-mt-xl q-gutter-md">
+    <div class="action-bar row justify-end q-mt-sm q-gutter-md">
       <AppButton
         :label="$t('admin.scoreCriteriaManagement.cancelBtn')"
         color="grey-4"
@@ -145,7 +147,7 @@
         :label="$t('admin.scoreCriteriaManagement.saveBtn')"
         color="primary"
         unelevated
-        class="action-btn action-btn--save"
+        class="action-btn"
         @click="handleSave"
       />
     </div>
@@ -329,6 +331,41 @@ const handleSave = async (): Promise<void> => {
     });
   }
 };
+
+const onScoreKeypress = (event: KeyboardEvent): void => {
+  // Allow control and navigation keys
+  const allowedKeys = ['Backspace', 'Tab', 'Enter', 'Delete', 'Escape', 'ArrowLeft', 'ArrowRight'];
+  if (allowedKeys.includes(event.key) || event.ctrlKey || event.metaKey) {
+    return;
+  }
+  // Block any non-digit character (blocking -, +, e, E, .)
+  if (!/[0-9]/.test(event.key)) {
+    event.preventDefault();
+  }
+};
+
+const onScoreInput = (
+  val: string | number | null,
+  rule: BandRule,
+  field: 'minScore' | 'maxScore',
+): void => {
+  const sanitized = String(val ?? '').replace(/\D/g, '');
+  if (sanitized !== '') {
+    const num = parseInt(sanitized, 10);
+    rule[field] = Math.min(num, SCORE_MAX_LIMIT);
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    rule[field] = '' as any;
+  }
+};
+
+const handleScorePaste = (event: ClipboardEvent): void => {
+  const pasteData = event.clipboardData?.getData('text') || '';
+  // If the pasted data contains any non-digit character, prevent it
+  if (!/^\d+$/.test(pasteData)) {
+    event.preventDefault();
+  }
+};
 </script>
 
 <style scoped lang="scss">
@@ -342,12 +379,20 @@ const handleSave = async (): Promise<void> => {
   }
 }
 
+.score-criteria-grid {
+  & > div {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 // ===== Section Card =====
 .section-card {
-  background: var(--surface-card);
+  background: #ffffff;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
+  border: none;
+  box-shadow: 0px 4px 4px 0px #00000040 !important;
   padding: 28px;
   height: 100%;
   transition: box-shadow var(--transition-fast);
@@ -355,7 +400,7 @@ const handleSave = async (): Promise<void> => {
   flex-direction: column;
 
   &:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: 0px 4px 4px 0px #00000040;
   }
 
   &--scrollable {
@@ -372,32 +417,33 @@ const handleSave = async (): Promise<void> => {
 .scrollable-content {
   flex: 1;
   overflow-y: auto;
-  padding-right: 4px;
+  scrollbar-gutter: stable;
+  padding-right: 16px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
   &::-webkit-scrollbar-track {
-    background: var(--neutral-100);
+    background: #f1f1f1;
     border-radius: 10px;
   }
   &::-webkit-scrollbar-thumb {
-    background: var(--neutral-400);
+    background: #595959;
     border-radius: 10px;
     &:hover {
-      background: var(--neutral-500);
+      background: #444444;
     }
   }
 }
 
 .section-title {
   font-family: 'Sarabun', 'Inter', sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #0f172a;
   margin: 0 0 20px 0;
-  padding-bottom: 12px;
-  border-bottom: 2px solid var(--neutral-200);
 }
 
 .table-header-row {
@@ -408,6 +454,25 @@ const handleSave = async (): Promise<void> => {
 .band-rules-list {
   flex: 1;
   overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding-right: 8px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #595959;
+    border-radius: 10px;
+    &:hover {
+      background: #444444;
+    }
+  }
 }
 
 .rule-row {
@@ -438,6 +503,8 @@ const handleSave = async (): Promise<void> => {
 }
 
 .admin-cert-preview {
+  padding: 0 4px;
+
   :deep(.page-container-test) {
     padding: 0 !important;
     min-height: auto !important;
@@ -450,27 +517,23 @@ const handleSave = async (): Promise<void> => {
   }
 
   :deep(.report-wrapper) {
-    max-width: 100% !important;
+    margin: 0 auto !important;
   }
 }
 
 // ===== Action Buttons =====
 .action-bar {
-  padding-top: 24px;
-  border-top: 1px solid var(--border-color);
+  padding-top: 0;
+  border-top: none;
 }
 
 .action-btn {
-  min-width: 160px;
+  min-width: 180px;
   height: 48px;
   border-radius: var(--radius-10) !important;
   font-weight: 700;
   font-size: var(--font-size-sm);
   letter-spacing: 0.3px;
-
-  &--save {
-    min-width: 180px;
-  }
 }
 
 .border-dashed {

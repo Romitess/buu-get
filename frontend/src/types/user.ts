@@ -30,6 +30,9 @@ export interface User {
   userImagePath?: string;
 
   // ROLES
+  /** role หลัก (ตัวแรก) — ใช้สำหรับ default landing/แสดงผล */
   role?: UserRole;
+  /** role ทั้งหมดที่ผู้ใช้มี (1 user มีได้หลาย role) */
+  roles?: UserRole[];
   remark?: string;
 }

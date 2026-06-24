@@ -18,6 +18,9 @@ export function useExamRegistrants() {
   const searchQuery = ref('');
   const selectedSessionId = ref<number | null>(null);
   const selectedSessionLocationId = ref<number | null>(null);
+  const isServerSide = ref(false);
+  const totalRows = ref(0);
+  const totalPaidRows = ref(0);
 
   const getSessionTimeKey = (session: BackendSession): string => {
     return `${session.SS_START_TIME || ''}-${session.SS_END_TIME || ''}`;
@@ -25,11 +28,16 @@ export function useExamRegistrants() {
 
   const sessionTimeTabs = computed<BackendSession[]>(() => {
     const seen = new Set<string>();
-    return (exam.value?.SESSIONS ?? []).filter((session) => {
+    const unique = (exam.value?.SESSIONS ?? []).filter((session) => {
       const key = getSessionTimeKey(session);
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
+    });
+    return [...unique].sort((a, b) => {
+      const timeA = a.SS_START_TIME || '';
+      const timeB = b.SS_START_TIME || '';
+      return timeA.localeCompare(timeB);
     });
   });
 
@@ -65,14 +73,15 @@ export function useExamRegistrants() {
   );
 
   const filteredEnrollments = computed((): EnrollmentTableRow[] => {
+    if (isServerSide.value) {
+      return enrollments.value;
+    }
+
     // Filter out cancelled enrollments
     let list = enrollments.value.filter((e) => e.paymentStatus !== CANCELLED_STATUS);
 
     if (selectedSessionId.value) {
       list = list.filter((e) => activeSessionIds.value.has(e.sessionId));
-    }
-    if (selectedSessionLocationId.value !== null) {
-      list = list.filter((e) => e.sessionLocationId === selectedSessionLocationId.value);
     }
 
     if (searchQuery.value) {
@@ -101,6 +110,8 @@ export function useExamRegistrants() {
   });
 
   const sessionTotalCount = computed((): number => {
+    if (isServerSide.value) return totalRows.value;
+
     const activeEnrollments = enrollments.value.filter((e) => e.paymentStatus !== CANCELLED_STATUS);
     if (!selectedSessionId.value) return activeEnrollments.length;
     return activeEnrollments.filter(
@@ -112,6 +123,8 @@ export function useExamRegistrants() {
   });
 
   const sessionPaidCount = computed((): number => {
+    if (isServerSide.value) return totalPaidRows.value;
+
     const list = selectedSessionId.value
       ? enrollments.value.filter((e) => activeSessionIds.value.has(e.sessionId))
       : enrollments.value;
@@ -124,25 +137,48 @@ export function useExamRegistrants() {
     ).length;
   });
 
-  const fetchEnrollments = async (examId: number): Promise<void> => {
+  const fetchEnrollments = async (
+    examId: number,
+    params?: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      sessionId?: number | null;
+      sessionLocationId?: number | null;
+    },
+  ): Promise<void> => {
     isLoading.value = true;
     error.value = null;
+    isServerSide.value = !!(params?.page && params?.limit);
     try {
-      const enrollmentTask = fetchEnrollmentsByExamId(examId).catch((err) => {
+      const enrollmentTask = fetchEnrollmentsByExamId(examId, params).catch((err) => {
         console.error('Failed to fetch enrollments:', err);
-        return [];
+        return params?.page && params?.limit ? { data: [], total: 0, totalPaid: 0 } : [];
       });
-      const examTask = fetchExamById(examId).catch((err) => {
-        console.error('Failed to fetch exam details:', err);
-        return null;
-      });
+      const examTask = exam.value
+        ? Promise.resolve(exam.value)
+        : fetchExamById(examId).catch((err) => {
+            console.error('Failed to fetch exam details:', err);
+            return null;
+          });
 
-      const [enrollmentData, examData] = await Promise.all([enrollmentTask, examTask]);
+      const [enrollmentResult, examData] = await Promise.all([enrollmentTask, examTask]);
 
-      enrollments.value = enrollmentData;
+      if (Array.isArray(enrollmentResult)) {
+        enrollments.value = enrollmentResult;
+        totalRows.value = enrollmentResult.length;
+        totalPaidRows.value = enrollmentResult.filter(
+          (e) => e.paymentStatus >= 1 && e.paymentStatus !== CANCELLED_STATUS,
+        ).length;
+      } else {
+        enrollments.value = enrollmentResult.data;
+        totalRows.value = enrollmentResult.total;
+        totalPaidRows.value = enrollmentResult.totalPaid;
+      }
+
       exam.value = examData;
 
-      if (enrollmentData.length === 0 && !examData) {
+      if (enrollments.value.length === 0 && !examData) {
         error.value = 'ไม่พบข้อมูลการสอบหรือรายชื่อผู้สมัคร';
       }
     } catch (err) {
@@ -167,5 +203,8 @@ export function useExamRegistrants() {
     sessionTotalCount,
     sessionPaidCount,
     fetchEnrollments,
+    isServerSide,
+    totalRows,
+    totalPaidRows,
   };
 }

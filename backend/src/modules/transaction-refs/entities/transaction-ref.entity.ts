@@ -32,7 +32,7 @@ export class TransactionRef {
     name: 'TSC_REF1',
     type: 'varchar',
     length: 20,
-    comment: 'เลขอ้างอิง 1',
+    comment: 'เลขประจำตัวผู้สมัครเลขอ้างอิง 1',
   })
   TSC_REF1: string;
 
@@ -41,7 +41,7 @@ export class TransactionRef {
     type: 'varchar',
     length: 20,
     nullable: true,
-    comment: 'เลขอ้างอิง 2',
+    comment: 'เลขสมัครสอบอ้างอิง 2',
   })
   TSC_REF2: string | null;
 

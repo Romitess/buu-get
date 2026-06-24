@@ -15,10 +15,59 @@ export const fetchMatchedEnrollments = async (
   return response.data;
 };
 
-export const fetchEnrollmentsByExamId = async (examId: number): Promise<EnrollmentTableRow[]> => {
-  const response = await api.get<BackendEnrollmentDetail[]>(`/exam-enrollments/exam/${examId}`);
+export interface PaginatedEnrollmentResponse {
+  data: EnrollmentTableRow[];
+  total: number;
+  totalPaid: number;
+}
 
-  return response.data.map(
+export const fetchEnrollmentsByExamId = async (
+  examId: number,
+  params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sessionId?: number | null;
+    sessionLocationId?: number | null;
+  },
+): Promise<EnrollmentTableRow[] | PaginatedEnrollmentResponse> => {
+  const response = await api.get<
+    | BackendEnrollmentDetail[]
+    | { data: BackendEnrollmentDetail[]; total: number; totalPaid: number }
+  >(`/exam-enrollments/exam/${examId}`, { params });
+
+  if (params?.page && params?.limit) {
+    const paginatedData = response.data as {
+      data: BackendEnrollmentDetail[];
+      total: number;
+      totalPaid: number;
+    };
+    const data = (paginatedData.data || []).map(
+      (enrollment: BackendEnrollmentDetail, index: number): EnrollmentTableRow => ({
+        index: (params.page! - 1) * params.limit! + index + 1,
+        ermId: enrollment.ERM_ID,
+        nationalId: enrollment.USER?.USER_NATIONAL_ID || '-',
+        titleTh: enrollment.USER?.PROFILE?.userTitleTh || '-',
+        fullnameTh: enrollment.USER?.PROFILE?.userFullnameTh || '-',
+        paymentStatus: enrollment.ERM_STATUS,
+        verifyStatus: enrollment.ERM_VERIFY_STATUS,
+        sessionId: enrollment.SESSION_ID,
+        sessionLocationId: enrollment.SL_ID ?? null,
+        userProfileId: enrollment.USER?.PROFILE?.userProfileId || 0,
+        remark: enrollment.ERM_PHYSICAL_STATUS || '',
+        slId: enrollment.SL_ID,
+        lsId: enrollment.LS_ID,
+      }),
+    );
+    return {
+      data,
+      total: paginatedData.total || 0,
+      totalPaid: paginatedData.totalPaid || 0,
+    };
+  }
+
+  const listData = response.data as BackendEnrollmentDetail[];
+  return (listData || []).map(
     (enrollment: BackendEnrollmentDetail, index: number): EnrollmentTableRow => ({
       index: index + 1,
       ermId: enrollment.ERM_ID,

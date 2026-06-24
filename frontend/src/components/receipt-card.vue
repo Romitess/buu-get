@@ -12,24 +12,20 @@
           <div class="receipt-org-meta">
             {{ buuInfo.addressTH }}<br />
             {{ buuInfo.addressEN }}<br />
-            {{ t('exam.receipt.card.taxIdLabel') }} {{ buuInfo.taxId }}
+            {{ t('exam.card.taxIdLabel') }} {{ buuInfo.taxId }}
           </div>
         </div>
       </div>
 
       <!-- Right: Title stacked, date below -->
       <div class="receipt-header-right">
-        <div class="receipt-title-th">
-          {{ props.isCopy ? 'สำเนาใบเสร็จรับเงิน' : t('exam.receipt.card.title') }}
-        </div>
-        <div class="receipt-title-en">
-          {{ props.isCopy ? 'RECEIPT COPY' : t('exam.receipt.card.titleEn') }}
-        </div>
+        <div class="receipt-title-th">{{ receiptTitleTh }}</div>
+        <div class="receipt-title-en">{{ receiptTitleEn }}</div>
       </div>
     </div>
 
     <!-- Date row: right-aligned, below header -->
-    <div class="receipt-date-row">{{ t('exam.receipt.card.date') }} {{ formattedDate }}</div>
+    <div class="receipt-date-row">{{ t('exam.card.date') }} {{ formattedDate }}</div>
 
     <!-- ═══════════════════════════════════════════════
          META INFO: Receipt No / Received From (group 1)
@@ -37,22 +33,22 @@
     ════════════════════════════════════════════════ -->
     <div class="receipt-meta-group">
       <div class="receipt-meta-line">
-        <span class="receipt-meta-label">{{ t('exam.receipt.card.receiptNo') }}</span>
+        <span class="receipt-meta-label">{{ t('exam.card.receiptNo') }}</span>
         <span class="receipt-meta-value">{{ receipt.receiptNo }}</span>
       </div>
       <div class="receipt-meta-line">
-        <span class="receipt-meta-label">{{ t('exam.receipt.card.receivedFrom') }}</span>
+        <span class="receipt-meta-label">{{ t('exam.card.receivedFrom') }}</span>
         <span class="receipt-meta-value">{{ receipt.fullName }}</span>
       </div>
     </div>
 
     <div class="receipt-meta-group receipt-meta-group--second">
       <div class="receipt-meta-line">
-        <span class="receipt-meta-label">{{ t('exam.receipt.card.taxNo') }}</span>
+        <span class="receipt-meta-label">{{ t('exam.card.taxNo') }}</span>
         <span class="receipt-meta-value">{{ receipt.nationalId }}</span>
       </div>
       <div class="receipt-meta-line">
-        <span class="receipt-meta-label">{{ t('exam.receipt.card.address') }}</span>
+        <span class="receipt-meta-label">{{ t('exam.card.address') }}</span>
         <span class="receipt-meta-value">{{ receipt.address || '-' }}</span>
       </div>
     </div>
@@ -70,14 +66,14 @@
         <thead>
           <tr>
             <th class="col-no">
-              {{ t('exam.receipt.card.tableNoLabel') }}<br />
-              ({{ t('exam.receipt.card.tableNoShort') }})
+              {{ t('exam.card.tableNoLabel') }}<br />
+              ({{ t('exam.card.tableNoShort') }})
             </th>
             <th class="col-desc">
-              {{ t('exam.receipt.card.tableDescLabel') }}<br />
-              ({{ t('exam.receipt.card.tableDescShort') }})
+              {{ t('exam.card.tableDescLabel') }}<br />
+              ({{ t('exam.card.tableDescShort') }})
             </th>
-            <th class="col-amount">{{ t('exam.receipt.card.tableAmount') }}</th>
+            <th class="col-amount">{{ t('exam.card.tableAmount') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -96,7 +92,7 @@
         <tfoot>
           <tr>
             <td colspan="2" class="total-label-cell">
-              {{ t('exam.receipt.card.totalLabel') }} {{ numberToThaiText(receipt.amount) }}
+              {{ t('exam.card.totalLabel') }} {{ numberToThaiText(receipt.amount) }}
             </td>
             <td class="total-amount-cell text-right">
               {{ formatCurrency(receipt.amount) }}
@@ -112,25 +108,25 @@
     <div class="receipt-footer">
       <!-- Left: URL & Notes -->
       <div class="receipt-footer-left">
-        <div class="footer-line">{{ t('exam.receipt.card.verifyUrl') }}</div>
+        <div class="footer-line">{{ t('exam.card.verifyUrl') }}</div>
         <div class="footer-line footer-url q-mb-sm">{{ buuInfo.receiptVerifyUrl }}</div>
-        <div class="footer-line q-mb-xs">{{ t('exam.receipt.card.notes') }}</div>
+        <div class="footer-line q-mb-xs">{{ t('exam.card.notes') }}</div>
         <div class="footer-note q-mb-xs">
-          {{ t('exam.receipt.card.note1') }}<br />
-          <span class="footer-note-en">{{ t('exam.receipt.card.note1En') }}</span>
+          {{ t('exam.card.note1') }}<br />
+          <span class="footer-note-en">{{ t('exam.card.note1En') }}</span>
         </div>
         <div class="footer-note">
-          {{ t('exam.receipt.card.note2') }}<br />
-          <span class="footer-note-en">{{ t('exam.receipt.card.note2En') }}</span>
+          {{ t('exam.card.note2') }}<br />
+          <span class="footer-note-en">{{ t('exam.card.note2En') }}</span>
         </div>
       </div>
 
       <!-- Right: Signature box → Name → QR -->
       <div class="receipt-footer-right">
-        <div class="signature-box">{{ t('exam.receipt.card.signatureBox') }}</div>
+        <div class="signature-box">{{ t('exam.card.signatureBox') }}</div>
         <div class="collector-name">
           ( {{ receipt.fullName }} )<br />
-          {{ t('exam.receipt.card.collector') }}
+          {{ t('exam.card.collector') }}
         </div>
         <img v-if="showQr" src="/receipt-qr.png" class="receipt-qr" alt="Receipt QR" />
       </div>
@@ -151,6 +147,12 @@ const props = withDefaults(defineProps<ReceiptCardProps>(), {
 });
 
 const { t } = useI18n();
+
+const receiptTitleTh = computed<string>(() =>
+  props.isCopy ? 'สำเนาใบเสร็จรับเงิน' : t('exam.card.title'),
+);
+
+const receiptTitleEn = computed<string>(() => (props.isCopy ? 'RECEIPT COPY' : 'RECEIPT'));
 
 const formattedDate = computed(() => {
   if (!props.receipt.transactionDate) return 'xx/xx/xxxx';

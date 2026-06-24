@@ -1,13 +1,24 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
-import { defineConfig } from '#q-app/wrappers';
-import path from 'path';
-import dotenv from 'dotenv';
+import { config as loadEnv } from 'dotenv';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { defineConfig } from '@quasar/app-vite/wrappers';
+import { resolveApiBaseUrl } from './config/resolve-api-base-url';
 
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+// โหลด buu-get-front/.env ก่อน evaluate config — Quasar envFolder ยังไม่ inject ตอนนี้
+const __dirname = dirname(fileURLToPath(import.meta.url));
+loadEnv({ path: resolve(__dirname, '../.env') });
 
-export default defineConfig((/* ctx */) => {
+export default defineConfig((ctx) => {
+  const apiBaseUrl = resolveApiBaseUrl({
+    dev: ctx.dev,
+    ...(process.env.API_BASE_URL
+      ? { fromEnv: process.env.API_BASE_URL }
+      : {}),
+  });
+
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -15,7 +26,7 @@ export default defineConfig((/* ctx */) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['axios', 'i18n', 'auth', 'notify'],
+    boot: ['axios', 'i18n', 'auth', 'notify', 'apexcharts'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['app.scss'],
@@ -57,8 +68,10 @@ export default defineConfig((/* ctx */) => {
 
       // publicPath: '/',
       // analyze: true,
+      // .env อยู่ที่ monorepo root (buu-get-front/.env) — ไม่ใช่ frontend/.env
+      envFolder: '..',
       env: {
-        API_BASE_URL: process.env.API_BASE_URL,
+        ...(apiBaseUrl ? { API_BASE_URL: apiBaseUrl } : {}),
       },
       // rawDefine: {}
       // ignorePublicFolder: true,
@@ -69,25 +82,20 @@ export default defineConfig((/* ctx */) => {
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
 
-      vitePlugins: [
-        [
-          'vite-plugin-checker',
-          {
-            vueTsc: true,
-            eslint: {
-              lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{ts,js,mjs,cjs,vue}"',
-              useFlatConfig: true,
-            },
-          },
-          { server: false },
-        ],
-      ],
+      // ใช้ npm run lint / npm run typecheck แทน — ป้องกัน reload.js หลุด production
+      vitePlugins: [],
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver
     devServer: {
       // https: true,
       open: false,
+      // โปรเจกต์เป็น npm workspaces → @quasar/extras ถูก hoist ไป root node_modules
+      // ต้องอนุญาตให้ Vite dev server เสิร์ฟไฟล์จาก monorepo root (..) ไม่งั้นฟอนต์
+      // Material Icons จะถูกบล็อก ("outside of Vite serving allow list") → icon โชว์เป็นชื่อข้อความ
+      fs: {
+        allow: [resolve(__dirname, '..')],
+      },
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework

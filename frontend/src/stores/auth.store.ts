@@ -42,7 +42,7 @@ export interface LoginPayload {
 export interface LoginResponse {
   success: boolean;
   accessToken?: string;
-  user?: { id: number; email: string; role: string };
+  user?: { id: number; email: string; role: string; roles?: string[] };
   message?: string;
 }
 

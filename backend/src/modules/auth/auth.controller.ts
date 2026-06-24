@@ -13,9 +13,6 @@ import { RegisterDto } from './dto/register.dto';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/common/guards/roles.guard';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { RoleEnum } from '../roles/enums/role.enum';
 
 import { Request as ExpressRequest } from 'express';
 
@@ -35,6 +32,7 @@ export class AuthController {
             id: { type: 'number' },
             email: { type: 'string' },
             role: { type: 'string' },
+            roles: { type: 'array', items: { type: 'string' } },
           },
         },
       },
@@ -93,17 +91,9 @@ export class AuthController {
   getProfile(
     @Request()
     req: ExpressRequest & {
-      user: { userId: number; email: string; role: string };
+      user: { userId: number; email: string; role: string; roles: string[] };
     },
   ) {
     return this.authService.getProfile(req.user.userId);
-  }
-
-  @Get('staff-only')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleEnum.STAFF)
-  @ApiBearerAuth()
-  staffOnly() {
-    return { message: 'This is only for staff' };
   }
 }

@@ -35,6 +35,7 @@ import { PageBuilderModule } from './modules/page-builder/page-builder.module';
 import { ExamRuleVouchersModule } from './modules/exam-rule-vouchers/exam-rule-vouchers.module';
 import { ScoreCriteriaModule } from './modules/score-criteria/score-criteria.module';
 import { MoodleSyncLogsModule } from './modules/moodle-sync-logs/moodle-sync-logs.module';
+import { ExamReportModule } from './modules/exam-report/exam-report.module';
 
 @Module({
   imports: [
@@ -55,9 +56,12 @@ import { MoodleSyncLogsModule } from './modules/moodle-sync-logs/moodle-sync-log
           username: configService.getOrThrow<string>('DB_USER'),
           password: configService.getOrThrow<string>('DB_PASSWORD'),
           database: configService.getOrThrow<string>('DB_NAME'),
+          // MySQL datetime columns store Thailand wall-clock time; align connection TZ on UTC servers (e.g. K8s).
+          timezone: '+07:00',
           autoLoadEntities: true,
           synchronize: false,
           // dropSchema: false,
+          // TEMP: ปิด auto-run migration ตอน boot เพื่อทดสอบว่าต้นเหตุ timeout คือ migration AlterAttendanceStatusToTinyint หรือไม่
           migrationsRun: true,
           migrations: ['dist/database/migrations/*.js'],
         }) as TypeOrmModuleOptions,
@@ -92,6 +96,7 @@ import { MoodleSyncLogsModule } from './modules/moodle-sync-logs/moodle-sync-log
     ExamRuleVouchersModule,
     ScoreCriteriaModule,
     MoodleSyncLogsModule,
+    ExamReportModule,
   ],
 })
 export class AppModule {}

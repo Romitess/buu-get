@@ -58,3 +58,31 @@ export class CreateBankReconcileDto {
 export class UpdateBankReconcileDto extends PartialType(
   CreateBankReconcileDto,
 ) {}
+
+export class UpdateBankReconcileRefsDto {
+  @ApiProperty({ description: 'Ref 1', maxLength: 20 })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(20)
+  BR_REF1: string;
+
+  @ApiPropertyOptional({
+    description: 'Ref 2',
+    maxLength: 20,
+    nullable: true,
+  })
+  @IsString()
+  @IsOptional()
+  @MaxLength(20)
+  BR_REF2?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'เหตุผลการแก้ไข Ref',
+    maxLength: 255,
+    nullable: true,
+  })
+  @IsString()
+  @IsOptional()
+  @MaxLength(255)
+  CHANGE_REASON?: string | null;
+}

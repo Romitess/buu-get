@@ -86,8 +86,8 @@ import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
 import ActionButton from 'src/components/shared/action-button.vue';
 import BaseTable from 'src/components/shared/base-table.vue';
 import { useDailyRevenue } from 'src/composables/use-daily-revenue';
-import { fetchAllEnrollments } from 'src/services/enrollment.service';
 import { useExamDocuments } from 'src/composables/use-exam-documents';
+import { fetchIssuedReceipts, type IssuedReceipt } from 'src/services/receipt.service';
 import ReceiptCard from 'src/components/receipt-card.vue';
 import type { ExamEnrollment } from 'src/types/exam';
 import type { QTableColumn } from 'quasar';
@@ -110,13 +110,14 @@ type ApplicationFeeRow = {
   importedDate: string;
   payee: string;
   rawEnrollment: ExamEnrollment;
+  paymentDateRaw: string | null;
 };
 
 const { t } = useI18n();
 
 const searchQuery = ref('');
 const loading = ref(false);
-const enrollments = ref<ExamEnrollment[]>([]);
+const receipts = ref<IssuedReceipt[]>([]);
 
 const formatThaiDate = (dateStr?: string | Date) => {
   if (!dateStr) return '-';
@@ -130,15 +131,73 @@ const formatThaiDate = (dateStr?: string | Date) => {
   return `${day}/${month}/${buddhistYear} ${hours}:${minutes}:${seconds}`;
 };
 
-const loadEnrollments = async (): Promise<void> => {
+const getReceiptNo = (receipt: IssuedReceipt, paymentDate: string | null): string => {
+  const receiptYear = paymentDate
+    ? new Date(paymentDate).getFullYear()
+    : receipt.RC_ISSUED_AT
+      ? new Date(receipt.RC_ISSUED_AT).getFullYear()
+      : new Date(receipt.CREATED_AT).getFullYear();
+
+  return `RC${receiptYear}-${String(receipt.RC_ID).padStart(5, '0')}`;
+};
+
+const getReceiptBankReconcile = (receipt: IssuedReceipt) => {
+  const bankReconciles = receipt.TRANSACTION?.BANK_RECONCILES ?? [];
+  return [...bankReconciles].sort(
+    (left, right) => new Date(right.CREATED_AT).getTime() - new Date(left.CREATED_AT).getTime(),
+  )[0];
+};
+
+const getImporterName = (receipt: IssuedReceipt): string => {
+  const bankReconcile = getReceiptBankReconcile(receipt);
+  const profile = bankReconcile?.USER?.PROFILE;
+  const fullnameTh = [profile?.userTitleTh, profile?.userFullnameTh].filter(Boolean).join(' ');
+  const fullnameEn = [profile?.userTitleEn, profile?.userFullnameEn].filter(Boolean).join(' ');
+
+  return fullnameTh || fullnameEn || bankReconcile?.USER?.USER_EMAIL || '-';
+};
+
+const buildReceiptEnrollment = (receipt: IssuedReceipt): ExamEnrollment | null => {
+  const transaction = receipt.TRANSACTION;
+  const enrollment = transaction?.ENROLLMENT;
+  if (!transaction || !enrollment) return null;
+
+  const bankReconciles = transaction.BANK_RECONCILES?.map((bankReconcile) => ({
+    BR_ID: bankReconcile.BR_ID,
+    TRANX_ID: transaction.TRANX_ID,
+  }));
+  const receiptTaxId = receipt.RC_TAX_ID === null ? null : Number(receipt.RC_TAX_ID);
+
+  return {
+    ...enrollment,
+    TRANSACTION: {
+      TRANX_ID: transaction.TRANX_ID,
+      ...(enrollment.TRANSACTION?.TRANX_MATCH_STATUS !== undefined
+        ? { TRANX_MATCH_STATUS: enrollment.TRANSACTION.TRANX_MATCH_STATUS }
+        : {}),
+      ...(transaction.TRANX_PAID_AT ? { TRANX_PAID_AT: transaction.TRANX_PAID_AT } : {}),
+      ...(transaction.TRANX_CREATED_AT ? { TRANX_CREATED_AT: transaction.TRANX_CREATED_AT } : {}),
+      TRANX_AMOUNT: Number(transaction.TRANX_AMOUNT ?? 0),
+      ...(transaction.TRANX_CHANNEL !== null ? { TRANX_CHANNEL: transaction.TRANX_CHANNEL } : {}),
+      RECEIPTS: [
+        {
+          RC_ID: receipt.RC_ID,
+          RC_NAME: receipt.RC_NAME,
+          RC_TAX_ID: receiptTaxId === null || Number.isNaN(receiptTaxId) ? null : receiptTaxId,
+          RC_PHONE: receipt.RC_PHONE,
+          RC_ADDRESS: receipt.RC_ADDRESS,
+          RC_STATUS: receipt.RC_STATUS,
+        },
+      ],
+      ...(bankReconciles ? { BANK_RECONCILES: bankReconciles } : {}),
+    },
+  };
+};
+
+const loadReceipts = async (): Promise<void> => {
   loading.value = true;
   try {
-    const data = await fetchAllEnrollments();
-    // Filter only those that are paid
-    // Statuses representing paid are: PAID (1), SEAT_ASSIGNED (2), SEAT_PUBLISHED (3), ATTENDED (4)
-    enrollments.value = (data as unknown as ExamEnrollment[]).filter((e) =>
-      [1, 2, 3, 4].includes(e.ERM_STATUS),
-    );
+    receipts.value = await fetchIssuedReceipts();
   } catch (err) {
     console.error(err);
     $q.notify({
@@ -152,46 +211,42 @@ const loadEnrollments = async (): Promise<void> => {
 };
 
 const feeRows = computed(() => {
-  return enrollments.value.map((enrollment, index) => {
-    const transaction = enrollment.TRANSACTION;
-    const receipt = transaction?.RECEIPTS?.[0];
+  return receipts.value.flatMap((receipt, index) => {
+    const transaction = receipt.TRANSACTION;
+    const enrollment = buildReceiptEnrollment(receipt);
+    if (!transaction || !enrollment) return [];
+
     const examObj = enrollment.SESSION?.EXAM;
-
-    const receiptYear = transaction?.TRANX_PAID_AT
-      ? new Date(transaction.TRANX_PAID_AT).getFullYear()
-      : examObj?.EXAM_DATE
-        ? new Date(examObj.EXAM_DATE).getFullYear()
-        : new Date().getFullYear();
-
-    const receiptNo =
-      (receipt?.RC_ID ? `RC${receiptYear}-${String(receipt.RC_ID).padStart(5, '0')}` : '') ||
-      `RC${receiptYear}-${String(enrollment.ERM_ID).padStart(5, '0')}`;
+    const paymentDateRaw = transaction.TRANX_PAID_AT ?? receipt.RC_ISSUED_AT;
 
     const payer =
-      receipt?.RC_NAME ||
+      receipt.RC_NAME ||
       `${enrollment.USER?.PROFILE?.userTitleTh || ''} ${enrollment.USER?.PROFILE?.userFullnameTh || ''}`.trim() ||
       'ผู้สมัครสอบ';
 
-    const amount = Number(transaction?.TRANX_AMOUNT ?? examObj?.EXAM_FEE ?? 0);
+    const amount = Number(transaction.TRANX_AMOUNT ?? examObj?.EXAM_FEE ?? 0);
+    const bankReconcile = getReceiptBankReconcile(receipt);
 
-    const paymentDate = formatThaiDate(transaction?.TRANX_PAID_AT);
-    const importedDate = formatThaiDate(enrollment.CREATED_AT);
+    const paymentDate = formatThaiDate(paymentDateRaw ?? undefined);
+    const importedDate = formatThaiDate(bankReconcile?.CREATED_AT);
+    const payee = getImporterName(receipt);
 
-    const payee = 'สิงหา มานะอมรกุล';
-
-    return {
-      index: index + 1,
-      receiptNo,
-      payer,
-      amount,
-      paymentDate,
-      examName: examObj?.EXAM_ROUND
-        ? `${examObj.EXAM_NAME} ${examObj.EXAM_ROUND}`
-        : examObj?.EXAM_NAME || 'BUU-GET Exam',
-      importedDate,
-      payee,
-      rawEnrollment: enrollment,
-    };
+    return [
+      {
+        index: index + 1,
+        receiptNo: getReceiptNo(receipt, paymentDateRaw),
+        payer,
+        amount,
+        paymentDate,
+        examName: examObj?.EXAM_ROUND
+          ? `${examObj.EXAM_NAME} ${examObj.EXAM_ROUND}`
+          : examObj?.EXAM_NAME || 'BUU-GET Exam',
+        importedDate,
+        payee,
+        rawEnrollment: enrollment,
+        paymentDateRaw,
+      },
+    ];
   });
 });
 
@@ -202,15 +257,13 @@ const filteredReceipts = computed(() => {
   if (filter.value.startDate) {
     const start = new Date(`${filter.value.startDate}T00:00:00`);
     rows = rows.filter((r) => {
-      const paidDate = r.rawEnrollment.TRANSACTION?.TRANX_PAID_AT;
-      return paidDate ? new Date(paidDate) >= start : false;
+      return r.paymentDateRaw ? new Date(r.paymentDateRaw) >= start : false;
     });
   }
   if (filter.value.endDate) {
     const end = new Date(`${filter.value.endDate}T23:59:59`);
     rows = rows.filter((r) => {
-      const paidDate = r.rawEnrollment.TRANSACTION?.TRANX_PAID_AT;
-      return paidDate ? new Date(paidDate) <= end : false;
+      return r.paymentDateRaw ? new Date(r.paymentDateRaw) <= end : false;
     });
   }
 
@@ -412,7 +465,7 @@ watch(error, (newVal) => {
 onMounted(() => {
   void loadDepartmentOptions();
   void fetchData();
-  void loadEnrollments();
+  void loadReceipts();
 });
 </script>
 

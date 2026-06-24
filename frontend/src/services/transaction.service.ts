@@ -28,6 +28,24 @@ export interface PendingPaymentResponse {
   };
 }
 
+export interface CreateTransactionFlowPayload {
+  ermId: number;
+  pcId: number;
+  amount: number;
+}
+
+export interface CreateTransactionFlowResponse {
+  TRANX_ID: number;
+}
+
+export interface ConfirmPaymentFlowPayload {
+  userCode: string;
+  receiptTaxId?: string | undefined;
+  receiptName?: string | undefined;
+  receiptPhone?: string | undefined;
+  receiptAddress?: string | undefined;
+}
+
 export const updateTransactionByErmId = async (
   ermId: number,
   data: Partial<BackendTransaction>,
@@ -44,4 +62,29 @@ export const createPendingPayment = async (
     TRANX_AMOUNT: Number(data.TRANX_AMOUNT),
   });
   return response.data;
+};
+
+/** FLOW 1: สร้างธุรกรรม PENDING และ log ประวัติ */
+export const createTransaction = async (
+  data: CreateTransactionFlowPayload,
+): Promise<CreateTransactionFlowResponse> => {
+  const response = await api.post<CreateTransactionFlowResponse>('/transactions', {
+    ermId: Number(data.ermId),
+    pcId: Number(data.pcId),
+    amount: Number(data.amount),
+  });
+  return response.data;
+};
+
+/** FLOW 2: ยืนยันการชำระเงิน → อัปเดต PAID + สร้าง TransactionRef */
+export const confirmPaymentFlow = async (
+  tranxId: number,
+  data: ConfirmPaymentFlowPayload,
+): Promise<void> => {
+  await api.patch(`/transactions/${tranxId}/confirm`, data);
+};
+
+/** FLOW 3: ทำให้ธุรกรรมหมดอายุ */
+export const expireTransaction = async (tranxId: number): Promise<void> => {
+  await api.patch(`/transactions/${tranxId}/expire`);
 };

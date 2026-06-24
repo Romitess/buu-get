@@ -128,6 +128,7 @@
       :amount="selectedExam?.fee ?? 0"
       :expiry-time="paymentExpiryTime"
       @save="handleSaveQR"
+      @timeout="handlePaymentTimeout"
     />
 
     <!-- Cancel Dialog -->
@@ -151,11 +152,13 @@
         pointer-events: none;
       "
     >
-      <TestVoucherReport
-        :data="selectedVoucherData"
-        :regulations-en="selectedVoucherRegulationsEn"
-        :regulations-th="selectedVoucherRegulationsTh"
-      />
+      <div class="exam-history-voucher-download">
+        <TestVoucherReport
+          :data="selectedVoucherData"
+          :regulations-en="selectedVoucherRegulationsEn"
+          :regulations-th="selectedVoucherRegulationsTh"
+        />
+      </div>
     </div>
 
     <!-- Hidden container for Receipt PDF generation -->
@@ -183,6 +186,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
+import { AxiosError } from 'axios';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppExamHistoryCard from 'src/components/exam/app-exam-history-card.vue';
@@ -217,6 +221,7 @@ onMounted(async () => {
 const showPaymentDialog = ref(false);
 const showReceiptInformationDialog = ref(false);
 const selectedExam = ref<ExamHistoryItem | null>(null);
+const pendingTransactionId = ref<number | null>(null);
 const paymentExpiryTime = ref<string>(new Date().toISOString());
 const receiptInformation = ref<ReceiptInformation | null>(null);
 
@@ -293,20 +298,42 @@ const handleTimeout = (exam: ExamHistoryItem): void => {
   void examStore.cancelRegistration(exam.id, 'paymentTimeout');
 };
 
-const handlePay = (exam: ExamHistoryItem): void => {
-  selectedExam.value = exam;
+const getErrorMessage = (err: unknown, fallback: string): string => {
+  if (err instanceof AxiosError) {
+    return err.response?.data?.message || err.message || fallback;
+  }
+  if (err instanceof Error) {
+    return err.message;
+  }
+  return fallback;
+};
 
-  // Use the existing deadline from the exam object to stay in sync with the page
-  if (exam.deadline) {
-    paymentExpiryTime.value = exam.deadline;
-  } else {
-    // Fallback only if deadline is missing
+const handlePay = async (exam: ExamHistoryItem): Promise<void> => {
+  selectedExam.value = exam;
+  receiptInformation.value = null;
+  pendingTransactionId.value = null;
+
+  try {
+    const amount = exam.fee;
+    if (amount === undefined) {
+      throw new Error('Exam fee is missing');
+    }
+
     const now = new Date();
     const expiry = new Date(now.getTime() + PAYMENT_DURATION_SECONDS_DEFAULT * 1000);
     paymentExpiryTime.value = expiry.toISOString();
-  }
 
-  showReceiptInformationDialog.value = true;
+    pendingTransactionId.value = await examStore.createTransaction(exam.id, amount, 1);
+    showReceiptInformationDialog.value = true;
+  } catch (err: unknown) {
+    console.error('Transaction creation failed:', err);
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(err, 'เกิดข้อผิดพลาดในการสร้างรายการชำระเงิน'),
+      position: 'bottom',
+      timeout: 5000,
+    });
+  }
 };
 
 const handleReceiptInformationConfirm = (value: ReceiptInformation): void => {
@@ -316,27 +343,47 @@ const handleReceiptInformationConfirm = (value: ReceiptInformation): void => {
 };
 
 const handleSaveQR = async (): Promise<void> => {
-  if (selectedExam.value && receiptInformation.value) {
+  if (pendingTransactionId.value && receiptInformation.value) {
     try {
-      const amount = selectedExam.value.fee;
-      if (amount === undefined) {
-        throw new Error('Exam fee is missing');
-      }
-      await examStore.confirmPayment(selectedExam.value.id, amount, receiptInformation.value);
+      const userCode = userStore.currentUser?.userCode ?? '';
+
+      await examStore.confirmPayment(pendingTransactionId.value, userCode, receiptInformation.value);
+      pendingTransactionId.value = null;
       $q.notify({
         type: 'positive',
         message: t('success'),
         position: 'bottom',
       });
-    } catch {
+    } catch (err: unknown) {
+      console.error('Payment confirmation failed:', err);
       $q.notify({
         type: 'negative',
-        message: 'เกิดข้อผิดพลาดในการบันทึกการชำระเงิน',
+        message: getErrorMessage(err, 'เกิดข้อผิดพลาดในการบันทึกการชำระเงิน'),
         position: 'bottom',
+        timeout: 5000,
       });
     }
   }
   showPaymentDialog.value = false;
+};
+
+const handlePaymentTimeout = async (): Promise<void> => {
+  const tranxId = pendingTransactionId.value;
+  if (!tranxId) return;
+
+  try {
+    await examStore.expireTransaction(tranxId);
+    pendingTransactionId.value = null;
+    showPaymentDialog.value = false;
+  } catch (err: unknown) {
+    console.error('Payment expiration failed:', err);
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(err, 'เกิดข้อผิดพลาดในการหมดอายุรายการชำระเงิน'),
+      position: 'bottom',
+      timeout: 5000,
+    });
+  }
 };
 
 const handleCancel = (exam: ExamHistoryItem): void => {
@@ -452,6 +499,58 @@ const handlePrintReceipt = (exam: ExamHistoryItem): void => {
     :deep(.q-icon) {
       font-size: var(--font-size-body) !important;
     }
+  }
+}
+
+.exam-history-voucher-download {
+  --voucher-download-subtitle-size: 15px;
+  --voucher-download-photo-width: 140px;
+  --voucher-download-photo-height: 156px;
+  --voucher-download-details-gap: 40px;
+  --voucher-download-signature-gap: 30px;
+  --voucher-download-watermark-color: #1e89e50d;
+  --voucher-download-front-watermark-left: 52%;
+  --voucher-download-front-watermark-top: 47%;
+  --voucher-download-rules-watermark-left: 48%;
+  --voucher-download-rules-watermark-top: 52%;
+  --voucher-download-rules-watermark-size: 150px;
+
+  :deep(.voucher-header .header-subtitle) {
+    font-size: var(--voucher-download-subtitle-size) !important;
+    line-height: 1.25 !important;
+  }
+
+  :deep(.voucher-body .content-container) {
+    grid-template-columns: var(--voucher-download-photo-width) minmax(0, 1fr);
+    column-gap: var(--voucher-download-details-gap);
+  }
+
+  :deep(.profile-photo-wrapper) {
+    width: var(--voucher-download-photo-width);
+    height: var(--voucher-download-photo-height);
+    border-radius: 0;
+  }
+
+  :deep(.profile-photo-wrapper .profile-photo-img) {
+    border-radius: 0 !important;
+  }
+
+  :deep(.signature-line) {
+    width: var(--voucher-download-photo-width);
+    margin-top: var(--voucher-download-signature-gap);
+  }
+
+  :deep(.voucher-card .watermark-bg) {
+    color: var(--voucher-download-watermark-color);
+    left: var(--voucher-download-front-watermark-left);
+    top: var(--voucher-download-front-watermark-top);
+  }
+
+  :deep(.regulations-box .watermark-bg) {
+    color: var(--voucher-download-watermark-color);
+    left: var(--voucher-download-rules-watermark-left) !important;
+    top: var(--voucher-download-rules-watermark-top);
+    font-size: var(--voucher-download-rules-watermark-size);
   }
 }
 @media (max-width: 600px) {

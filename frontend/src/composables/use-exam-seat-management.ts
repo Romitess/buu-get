@@ -12,9 +12,7 @@ import {
 import { DEFAULT_EXAM_TITLE } from 'src/constants/exam';
 import { formatThaiLongDate } from 'src/utils/thai-date';
 import { getImageUrl } from 'src/services/image.service';
-import { getUsersFromApi } from 'src/services/user.service';
-import { fetchProfileEditHistory } from 'src/services/profile-edit-history.service';
-import type { ProfileEditHistory } from 'src/types/profile-edit-history.types';
+import { fetchLatestProfileHistoryImages } from 'src/services/profile-edit-history.service';
 import { useExamSeatNavigation } from 'src/composables/use-exam-seat-navigation';
 
 /** Enrollment status codes shared with the backend */
@@ -83,6 +81,12 @@ interface UsableSeatAssignment {
   sessionLocationId: number;
 }
 
+interface SeatLabelOrderItem {
+  LS_SEAT_LABEL?: string | null;
+  LS_ROW_NO: number;
+  LS_COL_NO: number;
+}
+
 interface EnrollmentSeatAssignment {
   enrollment: BackendEnrollmentDetail;
   seatId: number;
@@ -111,7 +115,6 @@ export function useExamSeatManagement() {
   const sessions = ref<BackendSession[]>([]);
   const examData = ref<BackendExam | null>(null);
   const allEnrollments = ref<BackendEnrollmentDetail[]>([]);
-  const latestUserImageById = ref<Record<number, string>>({});
   const latestProfileHistoryImageById = ref<Record<number, string>>({});
   const students = ref<StudentSeatInfo[]>([]);
   const seatDraftsByTime = new Map<string, StudentSeatInfo[]>();
@@ -140,12 +143,21 @@ export function useExamSeatManagement() {
 
   const sessionTimeTabs = computed<BackendSession[]>(() => {
     const seen = new Set<string>();
-    return sessions.value.filter((session) => {
-      const key = getSessionTimeKey(session);
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    return [...sessions.value]
+      .sort((left, right) => {
+        const startTimeComparison = (left.SS_START_TIME || '').localeCompare(
+          right.SS_START_TIME || '',
+        );
+        if (startTimeComparison !== 0) return startTimeComparison;
+
+        return (left.SS_END_TIME || '').localeCompare(right.SS_END_TIME || '');
+      })
+      .filter((session) => {
+        const key = getSessionTimeKey(session);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
   });
 
   const activeTimeSessions = computed<BackendSession[]>(() => {
@@ -266,6 +278,44 @@ export function useExamSeatManagement() {
     return seat?.LS_SEAT_LABEL || seatId;
   };
 
+  const getSeatLabelOrderParts = (
+    label: string | null | undefined,
+  ): { letterOrder: number; numberOrder: number } | null => {
+    const match = label
+      ?.trim()
+      .toUpperCase()
+      .match(/^([A-Z]+)(\d+)$/);
+    if (!match) return null;
+
+    const letters = match[1] ?? '';
+    const numberOrder = Number(match[2]);
+    if (!Number.isInteger(numberOrder)) return null;
+
+    const letterOrder = letters.split('').reduce((total, letter) => {
+      return total * 26 + (letter.charCodeAt(0) - 64);
+    }, 0);
+
+    return { letterOrder, numberOrder };
+  };
+
+  const compareSeatsByLabelOrder = (a: SeatLabelOrderItem, b: SeatLabelOrderItem): number => {
+    const aLabelOrder = getSeatLabelOrderParts(a.LS_SEAT_LABEL);
+    const bLabelOrder = getSeatLabelOrderParts(b.LS_SEAT_LABEL);
+
+    if (aLabelOrder && bLabelOrder) {
+      const letterDiff = aLabelOrder.letterOrder - bLabelOrder.letterOrder;
+      if (letterDiff !== 0) return letterDiff;
+
+      const numberDiff = aLabelOrder.numberOrder - bLabelOrder.numberOrder;
+      if (numberDiff !== 0) return numberDiff;
+    }
+
+    if (aLabelOrder && !bLabelOrder) return -1;
+    if (!aLabelOrder && bLabelOrder) return 1;
+
+    return a.LS_ROW_NO - b.LS_ROW_NO || a.LS_COL_NO - b.LS_COL_NO;
+  };
+
   const normalizePhysicalStatusCode = (
     value: string | number | null | undefined,
   ): number | null => {
@@ -325,49 +375,15 @@ export function useExamSeatManagement() {
 
   const getEnrollmentImagePath = (enrollment: BackendEnrollmentDetail): string | null => {
     const profileId = enrollment.USER?.PROFILE?.userProfileId;
+    // รูปปัจจุบันของผู้ใช้ถูกแนบมากับ enrollment อยู่แล้ว (USER_IMAGE / IMAGE.USER_IMAGE_URL)
+    // จึงไม่ต้องดึง user ทั้งระบบมาทำ map อีก; ใช้ history image เป็น fallback กรณีรูปปัจจุบันหาย
     return (
-      latestUserImageById.value[enrollment.USER_ID] ||
       enrollment.USER?.USER_IMAGE ||
       enrollment.USER?.IMAGE?.USER_IMAGE_URL ||
       (profileId ? latestProfileHistoryImageById.value[profileId] : null) ||
       enrollment.USER?.PROFILE?.userImagePath ||
       null
     );
-  };
-
-  const parseHistoryValues = (value: string | null): Record<string, unknown> => {
-    if (!value) return {};
-    try {
-      return JSON.parse(value) as Record<string, unknown>;
-    } catch {
-      return {};
-    }
-  };
-
-  const getLatestImageFromHistory = (logs: ProfileEditHistory[]): string | null => {
-    const sortedLogs = [...logs].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
-
-    for (const log of sortedLogs) {
-      const newValues = parseHistoryValues(log.newValues);
-      const imagePath = newValues.userImagePath;
-      if (typeof imagePath === 'string' && imagePath.trim()) {
-        return imagePath;
-      }
-    }
-
-    return null;
-  };
-
-  const refreshLatestUserImages = async (): Promise<void> => {
-    const latestUsers = await getUsersFromApi();
-    latestUserImageById.value = latestUsers.reduce<Record<number, string>>((acc, user) => {
-      if (user.id && user.userImagePath) {
-        acc[user.id] = user.userImagePath;
-      }
-      return acc;
-    }, {});
   };
 
   const refreshLatestProfileHistoryImages = async (): Promise<void> => {
@@ -379,34 +395,33 @@ export function useExamSeatManagement() {
       ),
     ];
 
-    const historyEntries = await Promise.all(
-      profileIds.map(async (profileId) => {
-        try {
-          const logs = await fetchProfileEditHistory(profileId);
-          return [profileId, getLatestImageFromHistory(logs)] as const;
-        } catch (err) {
-          console.error(`Failed to fetch profile edit history for profile ${profileId}`, err);
-          return [profileId, null] as const;
-        }
-      }),
-    );
+    if (profileIds.length === 0) {
+      latestProfileHistoryImageById.value = {};
+      return;
+    }
 
-    latestProfileHistoryImageById.value = historyEntries.reduce<Record<number, string>>(
-      (acc, [profileId, imagePath]) => {
+    try {
+      // ยิงครั้งเดียวสำหรับทุก profile (เดิม N+1: 1 request ต่อผู้สมัคร 1 คน)
+      const imagesByProfileId = await fetchLatestProfileHistoryImages(profileIds);
+      latestProfileHistoryImageById.value = Object.entries(imagesByProfileId).reduce<
+        Record<number, string>
+      >((acc, [profileId, imagePath]) => {
         if (imagePath) {
-          acc[profileId] = imagePath;
+          acc[Number(profileId)] = imagePath;
         }
         return acc;
-      },
-      {},
-    );
+      }, {});
+    } catch (err) {
+      console.error('Failed to fetch latest profile history images', err);
+      latestProfileHistoryImageById.value = {};
+    }
   };
 
   const refreshStudentDisplayData = async (): Promise<void> => {
     if (!examId) return;
 
     allEnrollments.value = await fetchRawEnrollmentsByExamId(examId);
-    await Promise.all([refreshLatestUserImages(), refreshLatestProfileHistoryImages()]);
+    await refreshLatestProfileHistoryImages();
     hasLoadedEnrollments.value = true;
     filterStudentsBySession();
   };
@@ -416,10 +431,11 @@ export function useExamSeatManagement() {
 
     const latestEnrollments = await fetchRawEnrollmentsByExamId(examId);
     allEnrollments.value = latestEnrollments;
-    await Promise.all([refreshLatestUserImages(), refreshLatestProfileHistoryImages()]);
+    await refreshLatestProfileHistoryImages();
 
+    const enrollmentByErmId = new Map(latestEnrollments.map((e) => [e.ERM_ID, e]));
     students.value = students.value.map((student) => {
-      const enrollment = latestEnrollments.find((e) => e.ERM_ID === student.ermId);
+      const enrollment = enrollmentByErmId.get(student.ermId);
       if (!enrollment) return student;
 
       const imagePath = getEnrollmentImagePath(enrollment);
@@ -481,7 +497,12 @@ export function useExamSeatManagement() {
       const seat = location.LOCATION.SEATS?.find((s) => String(s.LS_ID) === student.seat);
       if (seat) {
         // Room first, then row, then column → stable, grid-aligned order
-        return location.SL_ID * 1_000_000 + seat.LS_ROW_NO * 1_000 + seat.LS_COL_NO;
+        const labelOrder = getSeatLabelOrderParts(seat.LS_SEAT_LABEL);
+        const seatOrder = labelOrder
+          ? labelOrder.letterOrder * 1_000 + labelOrder.numberOrder
+          : seat.LS_ROW_NO * 1_000 + seat.LS_COL_NO;
+
+        return location.SL_ID * 1_000_000 + seatOrder;
       }
     }
 
@@ -515,22 +536,27 @@ export function useExamSeatManagement() {
   // ── Seat grid ────────────────────────────────────────────
   // Sync seat visual status with student data
   const updateSeatStatuses = (): void => {
+    // สร้าง lookup ครั้งเดียว แทนการ .find()/.some() ซ้ำในทุก seat (เดิม O(seats × students))
+    const dbSeatById = new Map(
+      (activeLocation.value?.SEATS ?? []).map((s) => [String(s.LS_ID), s]),
+    );
+    const occupiedSeatIds = new Set(
+      students.value
+        .filter((s) => s.seat && s.sessionLocationId === activeSessionLocationId.value)
+        .map((s) => s.seat),
+    );
+
     allSeats.value.forEach((seat) => {
-      const dbSeat = activeLocation.value?.SEATS?.find((s) => String(s.LS_ID) === seat.id);
-      if (dbSeat) {
-        if (dbSeat.LS_SEAT_STATUS === 1) {
-          seat.status = 'broken';
-          return;
-        }
-        if (dbSeat.LS_SEAT_STATUS === 2) {
-          seat.status = 'blocked';
-          return;
-        }
+      const dbSeat = dbSeatById.get(seat.id);
+      if (dbSeat?.LS_SEAT_STATUS === 1) {
+        seat.status = 'broken';
+        return;
       }
-      const isOccupied = students.value.some(
-        (s) => s.seat === seat.id && s.sessionLocationId === activeSessionLocationId.value,
-      );
-      seat.status = isOccupied ? 'assigned' : 'available';
+      if (dbSeat?.LS_SEAT_STATUS === 2) {
+        seat.status = 'blocked';
+        return;
+      }
+      seat.status = occupiedSeatIds.has(seat.id) ? 'assigned' : 'available';
     });
   };
 
@@ -563,7 +589,7 @@ export function useExamSeatManagement() {
     return sessionLocations.value.flatMap((sessionLocation) => {
       const seats = [...(sessionLocation.LOCATION.SEATS || [])]
         .filter((seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2)
-        .sort((a, b) => a.LS_ROW_NO - b.LS_ROW_NO || a.LS_COL_NO - b.LS_COL_NO);
+        .sort(compareSeatsByLabelOrder);
 
       return seats.map((seat) => ({
         sessionLocationId: sessionLocation.SL_ID,
@@ -682,7 +708,7 @@ export function useExamSeatManagement() {
       }
 
       sessions.value = examData.value.SESSIONS || [];
-      const firstSession = sessions.value[0];
+      const firstSession = sessionTimeTabs.value[0];
       if (firstSession) {
         activeSessionId.value = firstSession.SS_ID;
       }
@@ -905,7 +931,7 @@ export function useExamSeatManagement() {
         const availableSeats = timeLocations.flatMap((location) =>
           [...(location.LOCATION.SEATS || [])]
             .filter((seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2)
-            .sort((a, b) => a.LS_ROW_NO - b.LS_ROW_NO || a.LS_COL_NO - b.LS_COL_NO)
+            .sort(compareSeatsByLabelOrder)
             .map((seat) => ({
               seatId: seat.LS_ID,
               sessionLocationId: location.SL_ID,
@@ -1010,10 +1036,21 @@ export function useExamSeatManagement() {
     initializeSeats();
   }
 
+  // กัน refetch ถี่เกินไป: focus กับ visibilitychange มักยิงพร้อมกัน และผู้ใช้สลับ tab บ่อย
+  // จึง refresh เฉพาะเมื่อไม่มีการโหลดค้างอยู่ และเว้นระยะอย่างน้อย MIN_REFRESH_INTERVAL_MS
+  const MIN_REFRESH_INTERVAL_MS = 15000;
+  let isRefreshingImages = false;
+  let lastImageRefreshAt = 0;
+
   const handleWindowFocus = (): void => {
-    if (!isLoading.value) {
-      void refreshStudentImages();
-    }
+    if (isLoading.value || isRefreshingImages) return;
+    if (Date.now() - lastImageRefreshAt < MIN_REFRESH_INTERVAL_MS) return;
+
+    isRefreshingImages = true;
+    void refreshStudentImages().finally(() => {
+      isRefreshingImages = false;
+      lastImageRefreshAt = Date.now();
+    });
   };
 
   const handleVisibilityChange = (): void => {
@@ -1047,6 +1084,12 @@ export function useExamSeatManagement() {
     const rowsMap: { [key: number]: SeatCell[] } = {};
     const seats = activeLocation.value.SEATS;
 
+    // lookup ครั้งเดียว แทนการ .find() ในทุก seat (เดิม O(seats × students) ถึง 2 รอบ)
+    const studentBySeatId = new Map<string, StudentSeatInfo>();
+    currentRoomStudents.value.forEach((student) => {
+      if (student.seat) studentBySeatId.set(student.seat, student);
+    });
+
     seats.forEach((seat) => {
       const r = seat.LS_ROW_NO;
       if (!rowsMap[r]) {
@@ -1054,22 +1097,18 @@ export function useExamSeatManagement() {
       }
 
       let status: SeatStatus = 'available';
+      let student: StudentSeatInfo | null = null;
       if (seat.LS_SEAT_STATUS === 1) {
         status = 'broken';
       } else if (seat.LS_SEAT_STATUS === 2) {
         status = 'blocked';
       } else {
-        const occupant =
-          currentRoomStudents.value.find((student) => student.seat === String(seat.LS_ID)) ?? null;
+        const occupant = studentBySeatId.get(String(seat.LS_ID)) ?? null;
         if (occupant) {
           status = 'assigned';
+          student = occupant;
         }
       }
-
-      const student =
-        status === 'assigned'
-          ? (currentRoomStudents.value.find((item) => item.seat === String(seat.LS_ID)) ?? null)
-          : null;
 
       rowsMap[r].push({
         id: String(seat.LS_ID),

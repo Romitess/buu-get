@@ -59,15 +59,21 @@
                     {{ $t('admin.locationManagement.createPage.fields.floor') }}
                   </div>
                   <q-input
-                    v-model="floor"
-                    type="number"
+                    :model-value="floor"
+                    type="text"
                     outlined
                     dense
+                    mask="##"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
                     :placeholder="$t('admin.locationManagement.createPage.placeholders.floor')"
                     class="buu-input-muted"
                     :error="!!formErrors.floor"
                     :error-message="formErrors.floor"
-                    @update:model-value="clearFieldError('floor')"
+                    min="0"
+                    @beforeinput="preventNonDigitInput"
+                    @paste="handleFloorPaste"
+                    @update:model-value="handleFloorUpdate"
                   />
                 </div>
               </div>
@@ -90,9 +96,12 @@
                 </div>
                 <q-input
                   v-model.number="rows"
-                  type="number"
+                  type="text"
                   outlined
                   dense
+                  mask="##"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
                   :placeholder="$t('admin.locationManagement.createPage.placeholders.rows')"
                   class="buu-input-muted"
                   :error="!!formErrors.rows"
@@ -102,6 +111,7 @@
                   @update:model-value="
                     (val) => {
                       rows = clampSeatLayoutValue(val);
+                      resetWalkwaysOnLayoutChange();
                       clearFieldError('rows');
                     }
                   "
@@ -113,9 +123,12 @@
                 </div>
                 <q-input
                   v-model.number="cols"
-                  type="number"
+                  type="text"
                   outlined
                   dense
+                  mask="##"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
                   :placeholder="$t('admin.locationManagement.createPage.placeholders.cols')"
                   class="buu-input-muted"
                   :error="!!formErrors.cols"
@@ -125,6 +138,7 @@
                   @update:model-value="
                     (val) => {
                       cols = clampSeatLayoutValue(val);
+                      resetWalkwaysOnLayoutChange();
                       clearFieldError('cols');
                     }
                   "
@@ -151,44 +165,12 @@
               </div>
             </div>
 
-            <div class="walkway-row">
-              <div class="buu-label-muted">
-                {{ $t('admin.locationManagement.createPage.fields.walkway') }}
-              </div>
-              <div class="walkway-control-row">
-                <div
-                  v-if="selectedWalkwayPositions.length > 0"
-                  class="walkway-chip-row"
-                  :class="{ 'walkway-chip-row--scroll': selectedWalkwayPositions.length > 2 }"
-                >
-                  <div
-                    v-for="position in selectedWalkwayPositions"
-                    :key="`${position.type}-${position.index}`"
-                    class="walkway-chip"
-                  >
-                    <span class="walkway-chip-label">{{ getWalkwayPositionLabel(position) }}</span>
-                    <button
-                      type="button"
-                      class="walkway-chip-remove"
-                      aria-label="Remove walkway"
-                      @click="removeWalkwayPosition(position)"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-                <AppButton
-                  outline
-                  dense
-                  no-caps
-                  color="primary"
-                  icon="add"
-                  :label="$t('admin.locationManagement.createPage.actions.addWalkway')"
-                  class="walkway-add-btn"
-                  @click="isWalkwayDialogOpen = true"
-                />
-              </div>
-            </div>
+            <AppLocationWalkwayControls
+              :positions="selectedWalkwayPositions"
+              :numbering-direction="seatNumberDirection"
+              @add="isWalkwayDialogOpen = true"
+              @remove="removeWalkwayPosition"
+            />
 
             <!-- Total Seats Box -->
             <div class="total-seats-box rounded-borders total-seats-offset">
@@ -203,36 +185,16 @@
         </div>
       </div>
 
-      <!-- Right Panel: Preview & Save -->
-      <div class="col-12 col-md preview-panel">
-        <div class="buu-premium-card preview-card q-pa-md">
-          <div class="preview-scroll">
-            <AppExamSeatPreview
-              ref="seatPreviewRef"
-              :rows="rows"
-              :cols="cols"
-              :split-left-right="splitLeftRight"
-              :walkway-positions="selectedWalkwayPositions"
-              :numbering-direction="seatNumberDirection"
-              :show-seat-guides="true"
-              :show-footer-hint="true"
-            />
-          </div>
-        </div>
-
-        <!-- Save Button -->
-        <div class="row justify-end preview-actions">
-          <AppButton
-            :label="$t('admin.locationManagement.createPage.actions.save')"
-            color="primary"
-            class="text-weight-bold q-px-xl"
-            style="border-radius: 8px; min-width: 140px"
-            :loading="isSaving"
-            :disable="isSaving"
-            @click="handleSave"
-          />
-        </div>
-      </div>
+      <AppLocationSeatPreviewPanel
+        ref="seatPreviewRef"
+        :rows="rows"
+        :cols="cols"
+        :split-left-right="splitLeftRight"
+        :walkway-positions="selectedWalkwayPositions"
+        :numbering-direction="seatNumberDirection"
+        :is-saving="isSaving"
+        @save="handleSave"
+      />
     </div>
 
     <AppWalkwayPositionDialog
@@ -253,8 +215,8 @@ import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
-import AppButton from 'src/components/base/app-button.vue';
-import AppExamSeatPreview from 'src/components/exam/app-exam-seat-preview.vue';
+import AppLocationSeatPreviewPanel from 'src/components/exam/app-location-seat-preview-panel.vue';
+import AppLocationWalkwayControls from 'src/components/exam/app-location-walkway-controls.vue';
 import AppWalkwayPositionDialog from 'src/components/exam/app-walkway-position-dialog.vue';
 import { createLocationWithSeats } from 'src/services/location.service';
 
@@ -278,7 +240,7 @@ const seatNumberDirection = ref<'horizontal' | 'vertical'>('vertical');
 const isSaving = ref(false);
 const isWalkwayDialogOpen = ref(false);
 const selectedWalkwayPositions = ref<WalkwayPosition[]>([]);
-const seatPreviewRef = ref<InstanceType<typeof AppExamSeatPreview> | null>(null);
+const seatPreviewRef = ref<InstanceType<typeof AppLocationSeatPreviewPanel> | null>(null);
 
 interface LocationFormErrors {
   roomName?: string;
@@ -337,6 +299,45 @@ const clampSeatLayoutValue = (value: unknown): number | null => {
   return Math.min(MAX_SEAT_LAYOUT_SIZE, Math.max(1, Math.floor(numericValue)));
 };
 
+const resetWalkwaysOnLayoutChange = (): void => {
+  if (selectedWalkwayPositions.value.length === 0) return;
+
+  selectedWalkwayPositions.value = [];
+};
+
+const clampFloorValue = (value: unknown): number | null => {
+  if (value === '' || value === null || value === undefined) return null;
+
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return null;
+
+  return Math.max(0, Math.floor(numericValue));
+};
+
+const digitsOnly = (value: string | number | null | undefined): string =>
+  String(value ?? '').replace(/\D/g, '');
+
+const handleFloorUpdate = (value: string | number | null): void => {
+  floor.value = clampFloorValue(digitsOnly(value));
+  clearFieldError('floor');
+};
+
+const preventNonDigitInput = (event: InputEvent): void => {
+  if (!event.data || /^\d+$/.test(event.data)) return;
+
+  event.preventDefault();
+};
+
+const handleFloorPaste = (event: ClipboardEvent): void => {
+  const pastedText = event.clipboardData?.getData('text') ?? '';
+
+  if (/^\d*$/.test(pastedText)) return;
+
+  event.preventDefault();
+  floor.value = clampFloorValue(digitsOnly(pastedText));
+  clearFieldError('floor');
+};
+
 const clearFieldError = (field: keyof LocationFormErrors): void => {
   if (!formErrors.value[field]) return;
 
@@ -362,6 +363,8 @@ const validateForm = (): boolean => {
 
   if (isBlank(floor.value)) {
     errors.floor = 'กรุณากรอกชั้นที่สอบ';
+  } else if (Number(floor.value) < 0) {
+    errors.floor = 'ชั้นที่สอบต้องไม่ติดลบ';
   }
 
   if (!rows.value || rows.value < 1) {
@@ -383,28 +386,6 @@ const validateForm = (): boolean => {
   formErrors.value = errors;
 
   return Object.keys(errors).length === 0;
-};
-
-const rowGuideLabel = (index: number): string => {
-  const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
-  if (seatNumberDirection.value === 'horizontal') return rowLetters[index - 1] ?? `${index}`;
-
-  return `${index}`;
-};
-
-const columnGuideLabel = (index: number): string => {
-  const rowLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
-  if (seatNumberDirection.value === 'horizontal') return `${index}`;
-
-  return rowLetters[index - 1] ?? `${index}`;
-};
-
-const getWalkwayPositionLabel = (position: WalkwayPosition): string => {
-  if (position.type === 'row') return `หลังแถว ${rowGuideLabel(position.index)}`;
-
-  return `หลังคอลัมน์ ${columnGuideLabel(position.index)}`;
 };
 
 const parseWalkwayPosition = (positionValue: string): WalkwayPosition | null => {
@@ -432,19 +413,7 @@ const removeWalkwayPosition = (position: WalkwayPosition): void => {
 };
 
 const buildSeatStatuses = (): Record<string, number> => {
-  const statusMap: Record<string, number> = {};
-  const omittedSeats = seatPreviewRef.value?.omittedSeats ?? new Set<string>();
-  const brokenSeats = seatPreviewRef.value?.brokenSeats ?? new Set<string>();
-
-  omittedSeats.forEach((seatLabel) => {
-    statusMap[seatLabel] = 2;
-  });
-
-  brokenSeats.forEach((seatLabel) => {
-    statusMap[seatLabel] = 1;
-  });
-
-  return statusMap;
+  return seatPreviewRef.value?.getSeatStatuses() ?? {};
 };
 
 const handleSave = async (): Promise<void> => {
@@ -626,23 +595,26 @@ const handleSave = async (): Promise<void> => {
 .walkway-control-row {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  flex-wrap: nowrap;
+  gap: 4px;
   width: 100%;
-  min-height: 39px;
+  min-height: 41px;
+  overflow: visible;
 }
 
 .walkway-chip-row {
+  position: relative;
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 4px;
   flex: 0 1 auto;
   width: max-content;
   min-width: 0;
-  max-width: calc((100% - 8px) * 2 / 3);
+  max-width: calc(100% - 124px);
   overflow-x: hidden;
   overflow-y: hidden;
-  height: 39px;
-  padding-bottom: 0;
+  height: 41px;
+  padding-bottom: 2px;
   scrollbar-width: none;
   scrollbar-gutter: stable;
 
@@ -653,9 +625,10 @@ const handleSave = async (): Promise<void> => {
 }
 
 .walkway-chip-row--scroll {
-  height: 49px;
+  align-items: flex-start;
+  height: 53px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding-bottom: 12px;
   scrollbar-width: thin;
 
   &::-webkit-scrollbar-thumb {
@@ -675,29 +648,64 @@ const handleSave = async (): Promise<void> => {
 
 .walkway-chip {
   min-width: 0;
-  flex: 0 0 111px;
+  flex: 0 0 110px;
+  width: 110px;
   height: 39px;
   min-height: 39px;
   margin: 0;
-  padding: 0 8px;
+  padding: 0 6px;
   border-radius: 12px;
   border: 1px solid #dddddd;
-  background: #ffffff !important;
+  background: #ffffff;
   color: #111111;
   font-family: 'Sarabun', sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
+  transform-origin: center;
+  will-change: transform, opacity;
+  transition:
+    transform 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.walkway-chip-motion-enter-active {
+  transition:
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 220ms ease;
+}
+
+.walkway-chip-motion-move,
+.walkway-chip-motion-leave-active {
+  transition: none;
+}
+
+.walkway-chip-motion-enter-from {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.96);
+}
+
+.walkway-chip-motion-leave-active {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.walkway-chip-motion-leave-to {
+  opacity: 0;
+  transform: none;
 }
 
 .walkway-chip-label {
-  flex: 0 0 auto;
-  min-width: max-content;
-  overflow: visible;
-  text-overflow: clip;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -706,11 +714,11 @@ const handleSave = async (): Promise<void> => {
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: 10px;
+  width: 8px;
   height: 20px;
   color: #000000;
   font-family: Arial, sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 18px;
   border: 0;
@@ -721,19 +729,19 @@ const handleSave = async (): Promise<void> => {
 }
 
 .walkway-add-btn {
-  width: calc((100% - 16px) / 3);
-  flex: 0 0 calc((100% - 16px) / 3);
+  width: 120px;
+  flex: 0 0 120px;
   min-width: 0;
   height: 39px;
   min-height: 39px;
   padding: 0 8px;
   gap: 0;
   border-radius: 12px;
-  color: var(--primary, #0d47a1) !important;
-  background: #ffffff !important;
+  color: var(--primary, #0d47a1);
+  background: #ffffff;
 
   &::before {
-    border: 1px solid var(--primary, #0d47a1) !important;
+    border: 1px solid var(--primary, #0d47a1);
   }
 
   :deep(.q-btn__content) {
@@ -744,7 +752,7 @@ const handleSave = async (): Promise<void> => {
   }
 
   :deep(.q-icon) {
-    font-size: 20px;
+    font-size: 18px;
     color: var(--primary, #0d47a1);
   }
 
@@ -754,9 +762,18 @@ const handleSave = async (): Promise<void> => {
 
   :deep(.block) {
     color: var(--primary, #0d47a1);
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1;
     white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .walkway-chip,
+  .walkway-chip-motion-move,
+  .walkway-chip-motion-enter-active,
+  .walkway-chip-motion-leave-active {
+    transition: none;
   }
 }
 

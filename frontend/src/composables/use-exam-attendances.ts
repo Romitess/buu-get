@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue';
 import type { AttendanceTableRow, BackendEnrollmentDetail } from 'src/types/enrollment.types';
-import { ExamAttendStatus } from 'src/types/enrollment.types';
+import { ExamAttendStatus, EnrollmentStatus } from 'src/types/enrollment.types';
 import type { BackendExam, BackendSession } from 'src/types/exam';
 import { fetchRawEnrollmentsByExamId } from 'src/services/enrollment.service';
 import { fetchExamById } from 'src/services/exam.service';
@@ -56,9 +56,12 @@ export function useExamAttendances() {
       list = list.filter((e) => e.sessionLocationId === selectedSessionLocationId.value);
     }
 
-    // Filter to show only those who have an attendance record (not just MISSING by default)
-    // as per user requirement: "ถ้าไม่มีข้อมูลในตาราง attendance ไม่ต้องขึ้นแสดง"
-    list = list.filter((e) => e.hasRecord);
+    // Only show active/enrolled test takers (not cancelled or unpaid)
+    list = list.filter(
+      (e) =>
+        e.paymentStatus !== EnrollmentStatus.CANCELLED &&
+        e.paymentStatus !== EnrollmentStatus.UNPAID,
+    );
 
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase();
@@ -68,6 +71,7 @@ export function useExamAttendances() {
 
         return (
           row.nationalId.toLowerCase().includes(query) ||
+          (row.testTakerCode && row.testTakerCode.toLowerCase().includes(query)) ||
           row.fullnameTh.toLowerCase().includes(query) ||
           row.titleTh.toLowerCase().includes(query) ||
           (row.seatNumber && row.seatNumber.toLowerCase().includes(query)) ||
@@ -143,15 +147,18 @@ export function useExamAttendances() {
           const checkInTimeStr = attendanceRecord?.ATTEND_CHECK_IN_TIME;
 
           const status: ExamAttendStatus = attendanceRecord
-            ? attendanceRecord.ATTEND_STATUS
+            ? Number(attendanceRecord.ATTEND_STATUS)
             : ExamAttendStatus.MISSING;
 
           return {
             index: index + 1,
             ermId: enrollment.ERM_ID,
             nationalId: enrollment.USER?.USER_NATIONAL_ID || '-',
+            passportNo: enrollment.USER?.USER_PASSPORT_NO || null,
             titleTh: enrollment.USER?.PROFILE?.userTitleTh || '-',
             fullnameTh: enrollment.USER?.PROFILE?.userFullnameTh || '-',
+            titleEn: enrollment.USER?.PROFILE?.userTitleEn || '',
+            fullnameEn: enrollment.USER?.PROFILE?.userFullnameEn || '',
             seatNumber: enrollment.LOCATION_SEAT?.LS_SEAT_LABEL || '-',
             attendanceStatus: status,
             checkInTime: formatCheckInTime(checkInTimeStr),
@@ -160,6 +167,15 @@ export function useExamAttendances() {
             hasRecord: !!attendanceRecord,
             slId: enrollment.SL_ID,
             lsId: enrollment.LS_ID,
+            profileImage:
+              enrollment.USER?.IMAGE?.USER_IMAGE_URL ||
+              enrollment.USER?.PROFILE?.userImagePath ||
+              null,
+            testSession: enrollment.SESSION?.EXAM?.EXAM_ROUND || '-',
+            voucherNo: enrollment.VOUCHERS?.[0]?.VC_CODE || '-',
+            examType: enrollment.SESSION?.EXAM?.EXAM_TYPE || '-',
+            testTakerCode: enrollment.ERM_TEST_TAKER || null,
+            paymentStatus: enrollment.ERM_STATUS,
           };
         },
       );

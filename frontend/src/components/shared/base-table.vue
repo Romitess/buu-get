@@ -144,10 +144,12 @@ interface Props {
   pagination?: PaginationModel | undefined;
   emptyLabel?: string | undefined;
   hidePagination?: boolean | undefined;
+  isServerSide?: boolean | undefined;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   emptyLabel: '',
+  isServerSide: false,
 });
 
 const emit = defineEmits<{
@@ -307,6 +309,8 @@ const compareValues = (left: unknown, right: unknown): number => {
 
 const sortedRows = computed<T[]>(() => {
   const sourceRows = props.rows ?? [];
+  if (props.isServerSide) return sourceRows;
+
   const sortBy = internalPagination.value.sortBy ?? defaultSortColumn.value?.name;
   if (!sortBy) return sourceRows;
 
@@ -325,6 +329,13 @@ const sortedRows = computed<T[]>(() => {
 });
 
 const displayRows = computed<T[]>(() => {
+  if (props.isServerSide) {
+    if ((props.rows ?? []).length === 0) {
+      return [{ __empty: true }] as T[];
+    }
+    return props.rows;
+  }
+
   const sourceRows = sortedRows.value;
 
   if (sourceRows.length === 0) {

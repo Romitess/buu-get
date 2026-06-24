@@ -1,19 +1,46 @@
 <template>
-  <header class="app-header">
+  <q-header class="app-header bg-white text-black">
     <div class="app-header__inner">
-      <!-- Left: Logo -->
-      <router-link to="/" class="app-header__logo-link">
-        <img :src="logoSrc" alt="BUU-GET Logo" class="app-header__logo" />
-      </router-link>
+      <!-- Left: Hamburger & Logo -->
+      <div
+        class="row items-center no-wrap app-header__left"
+        :class="{ 'app-header__left--admin': showAdminDrawer && !$q.screen.lt.md }"
+      >
+        <div v-if="showAdminDrawer && !$q.screen.lt.md" class="app-header__hamburger-container">
+          <q-btn
+            flat
+            dense
+            round
+            icon="menu"
+            class="app-header__hamburger-btn"
+            @click="handleHamburgerClick"
+          />
+        </div>
+        <q-btn
+          v-else-if="$q.screen.lt.md || showAdminDrawer"
+          flat
+          dense
+          round
+          icon="menu"
+          class="app-header__hamburger q-mr-sm"
+          @click="handleHamburgerClick"
+        />
+        <router-link to="/" class="app-header__logo-link">
+          <img :src="logoSrc" alt="BUU-GET Logo" class="app-header__logo" />
+        </router-link>
+      </div>
 
       <!-- Center: Navigation Links (Desktop) -->
-      <nav class="app-header__nav" v-if="!$q.screen.lt.md">
+      <nav class="app-header__nav" v-if="!$q.screen.lt.md && !showAdminDrawer">
         <template v-for="link in navLinks" :key="link.name">
           <!-- Dropdown link if has children -->
           <div
             v-if="link.children && link.children.length > 0"
             class="app-header__nav-link app-header__nav-link--dropdown"
-            :class="{ 'app-header__nav-link--active': isActiveRoute(link) }"
+            :class="{
+              'app-header__nav-link--active': isActiveRoute(link),
+              [`app-header__nav-link--${link.name}`]: true,
+            }"
           >
             <span>{{ link.label }}</span>
             <q-icon name="expand_more" size="16px" class="q-ml-xs" />
@@ -46,7 +73,10 @@
             v-else
             :to="link.path ?? '/'"
             class="app-header__nav-link"
-            :class="{ 'app-header__nav-link--active': isActiveRoute(link) }"
+            :class="{
+              'app-header__nav-link--active': isActiveRoute(link),
+              [`app-header__nav-link--${link.name}`]: true,
+            }"
           >
             {{ link.label }}
           </router-link>
@@ -55,9 +85,6 @@
 
       <!-- Right: Auth Actions -->
       <div class="app-header__actions">
-        <!-- Desktop Language Switcher -->
-        <LanguageSwitcher v-if="!$q.screen.lt.md" />
-
         <!-- Logged In State -->
         <template v-if="userStore.isLoggedIn">
           <AppHeaderProfile />
@@ -79,16 +106,7 @@
         </template>
       </div>
 
-      <!-- Mobile: Hamburger Menu -->
-      <q-btn
-        v-if="$q.screen.lt.md"
-        flat
-        dense
-        round
-        icon="menu"
-        class="app-header__hamburger"
-        @click="mobileMenuOpen = !mobileMenuOpen"
-      />
+      <!-- Mobile: Hamburger Menu removed, moved to the left -->
     </div>
 
     <!-- Subtle shadow bottom border -->
@@ -184,7 +202,7 @@
         </template>
       </q-list>
     </q-drawer>
-  </header>
+  </q-header>
 </template>
 
 <script setup lang="ts">
@@ -195,15 +213,24 @@ import { useUserStore } from 'src/stores/user.store';
 import { ROLES } from 'src/constants/roles';
 import type { NavigationItem } from 'src/types/navigation';
 import headerLogo from 'src/assets/img/header-buu-get-logo.png';
+import { useNavigation } from 'src/composables/use-navigation';
 
 // Components
 import AppHeaderProfile from './app-header-profile.vue';
-import LanguageSwitcher from './language-switcher.vue';
 
 const userStore = useUserStore();
 const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
+const { showAdminDrawer, toggleLeftDrawer } = useNavigation();
+
+const handleHamburgerClick = () => {
+  if (showAdminDrawer.value) {
+    toggleLeftDrawer();
+  } else {
+    mobileMenuOpen.value = !mobileMenuOpen.value;
+  }
+};
 
 const toggleLanguage = (): void => {
   const nextLocale = locale.value === 'th' ? 'en-US' : 'th';
@@ -341,7 +368,25 @@ const navLinks = computed<NavigationItem[]>(() => {
             icon: 'summarize',
             path: '/admin/application-fee-report',
           },
+          {
+            name: 'admin-exam-report',
+            label: t('navigation.examReport'),
+            icon: 'assessment',
+            path: '/admin/exam-report',
+          },
         ],
+      });
+    }
+
+    // === Executive: Exam Report ===
+    // executive ไม่อยู่ในกลุ่ม ADMIN/FINANCE จึงเพิ่มลิงก์รายงานการสอบแยกให้ตรงนี้
+    // (admin เห็นเมนูนี้อยู่แล้วในกลุ่ม "รายงาน" ด้านบน — ไม่ใส่ซ้ำ)
+    if (role === ROLES.EXECUTIVE) {
+      links.push({
+        name: 'admin-exam-report',
+        label: t('navigation.examReport'),
+        icon: 'assessment',
+        path: '/admin/exam-report',
       });
     }
   } else {
@@ -383,10 +428,7 @@ const logout = async () => {
 
 <style scoped lang="scss">
 .app-header {
-  position: sticky;
-  top: 0;
   background-color: var(--surface-header);
-  z-index: 2000;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
@@ -427,6 +469,8 @@ const logout = async () => {
 .app-header__nav-link {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   padding: 8px 16px;
   font-size: var(--font-size-card-title);
   font-weight: var(--font-weight-medium);
@@ -448,6 +492,44 @@ const logout = async () => {
     color: var(--primary);
     font-weight: var(--font-weight-semibold);
   }
+
+  // Stable min-widths for each menu item to prevent layout shift on translation
+  &--home {
+    min-width: 80px;
+  }
+  &--exam-menu {
+    min-width: 140px;
+  }
+  &--exam-history {
+    min-width: 140px;
+  }
+  &--admin-location-management {
+    min-width: 160px;
+  }
+  &--admin-exam-management {
+    min-width: 140px;
+  }
+  &--admin-test-voucher-management {
+    min-width: 190px;
+  }
+  &--admin-score-criteria-management {
+    min-width: 200px;
+  }
+  &--admin-dashboard {
+    min-width: 120px;
+  }
+  &--admin-payment-import {
+    min-width: 180px;
+  }
+  &--admin-fund-source-management {
+    min-width: 210px;
+  }
+  &--admin-reports {
+    min-width: 100px;
+  }
+  &--exam-schedule-guest {
+    min-width: 130px;
+  }
 }
 
 .app-header__dropdown-item {
@@ -464,7 +546,7 @@ const logout = async () => {
 .app-header__actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-shrink: 0;
   margin-left: auto;
 }
@@ -480,6 +562,11 @@ const logout = async () => {
   transition:
     color var(--transition-fast),
     background-color var(--transition-fast);
+  min-width: 80px;
+  text-align: center;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 
   &:hover {
     color: var(--primary);
@@ -493,12 +580,46 @@ const logout = async () => {
   border-radius: var(--radius-sm) !important;
   padding: 6px 20px !important;
   letter-spacing: 0;
+  min-width: 120px;
 }
 
-// === Mobile Drawer ===
+// === Mobile Drawer & Hamburger Button Alignment ===
+.app-header__left {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  position: relative;
+  height: 100%;
+
+  &--admin {
+    margin-left: -32px; // Offset the header padding to start at 0px
+    padding-left: 72px; // Make space for the absolute hamburger container
+  }
+}
+
+.app-header__hamburger-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 72px; // Matches the mini-drawer width exactly
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.app-header__logo-link {
+  margin-left: 24px;
+}
+
 .app-header__hamburger {
   color: var(--text-primary);
   margin-left: 8px;
+}
+
+.app-header__hamburger-btn {
+  color: var(--text-primary);
 }
 
 // === Mobile Drawer ===
