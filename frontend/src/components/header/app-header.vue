@@ -321,8 +321,8 @@ const navLinks = computed<NavigationItem[]>(() => {
       }
     }
 
-    // === Staff-specific: Dashboard ===
-    if (role === ROLES.ADMIN || role === ROLES.STAFF) {
+    // === Staff/Executive-specific: Dashboard ===
+    if (role === ROLES.ADMIN || role === ROLES.STAFF || role === ROLES.EXECUTIVE) {
       links.push({
         name: 'admin-dashboard',
         label: t('navigation.dashboard'),
@@ -375,17 +375,7 @@ const navLinks = computed<NavigationItem[]>(() => {
       });
     }
 
-    // === Executive: Exam Report ===
-    // executive ไม่อยู่ในกลุ่ม ADMIN/FINANCE จึงเพิ่มลิงก์รายงานการสอบแยกให้ตรงนี้
-    // (admin เห็นเมนูนี้อยู่แล้วในกลุ่ม "รายงาน" ด้านบน — ไม่ใส่ซ้ำ)
-    if (role === ROLES.EXECUTIVE) {
-      links.push({
-        name: 'admin-exam-report',
-        label: t('navigation.examReport'),
-        icon: 'assessment',
-        path: '/admin/exam-report',
-      });
-    }
+
   } else {
     // === Guest Navigation ===
     links.push({

@@ -214,10 +214,10 @@ const menuLinks = computed(() => {
   // IF: Executive
   else if (role === ROLES.EXECUTIVE) {
     links.push({
-      name: 'exam-report',
-      label: t('navigation.examReport') || 'รายงานการสอบ',
-      icon: 'assessment',
-      path: '/admin/exam-report',
+      name: 'admin-dashboard',
+      label: t('navigation.dashboard') || 'แดชบอร์ด',
+      icon: 'dashboard',
+      path: '/admin/dashboard',
     });
     links.push({
       name: 'executive-test-takers',
