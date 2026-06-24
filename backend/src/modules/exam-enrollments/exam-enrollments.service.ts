@@ -36,6 +36,11 @@ import { EXAM_TYPE } from '../exam/constants/exam.constants';
 import { getProfileFixEmailTemplate } from './templates/profile-fix-email.template';
 import { ExamPasscodeLog } from '../exam/entities/exam-passcode-log.entity';
 import { TestTakerIdService } from './test-taker-id.service';
+import { ExecutiveTestTakerQueryDto } from './dto/executive-test-taker-query.dto';
+import {
+  ExecutiveTestTakerPage,
+  ExecutiveTestTakerRow,
+} from './interfaces/executive-test-taker.interface';
 
 @Injectable()
 export class ExamEnrollmentsService {
@@ -330,6 +335,75 @@ export class ExamEnrollmentsService {
         'TRANSACTION.RECEIPTS',
       ],
     });
+  }
+
+  async findExecutiveTestTakers(
+    query: ExecutiveTestTakerQueryDto,
+  ): Promise<ExecutiveTestTakerPage> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const search = query.search?.trim();
+
+    const queryBuilder = this.examEnrollmentRepository
+      .createQueryBuilder('enrollment')
+      .leftJoin('enrollment.USER', 'user')
+      .leftJoin('user.PROFILE', 'profile')
+      .leftJoin('enrollment.SESSION', 'session')
+      .innerJoin('enrollment.ATTENDANCES', 'attendance')
+      .select('MIN(enrollment.ERM_ID)', 'enrollmentId')
+      .addSelect('MIN(session.EXAM_ID)', 'examId')
+      .addSelect('MIN(enrollment.ERM_TEST_TAKER)', 'testTakerId')
+      .addSelect('MIN(enrollment.ERM_STATUS)', 'status')
+      .addSelect('profile.userTitleTh', 'title')
+      .addSelect('profile.userFullnameTh', 'fullName')
+      .addSelect('COUNT(DISTINCT attendance.ATTEND_ID)', 'examRoundCount');
+
+    if (search) {
+      queryBuilder.andWhere(
+        new Brackets((where) => {
+          where
+            .where('enrollment.ERM_TEST_TAKER LIKE :search')
+            .orWhere('profile.userTitleTh LIKE :search')
+            .orWhere('profile.userFullnameTh LIKE :search');
+        }),
+        { search: `%${search}%` },
+      );
+    }
+
+    const totalResult = await queryBuilder
+      .clone()
+      .select('COUNT(DISTINCT enrollment.USER_ID)', 'total')
+      .getRawOne<{ total: string }>();
+    const total = Number(totalResult?.total ?? 0);
+    const rawRows = await queryBuilder
+      .groupBy('enrollment.USER_ID')
+      .addGroupBy('profile.userTitleTh')
+      .addGroupBy('profile.userFullnameTh')
+      .orderBy('testTakerId', 'ASC')
+      .addOrderBy('enrollmentId', 'ASC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getRawMany<{
+        enrollmentId: string;
+        examId: string;
+        testTakerId: string | null;
+        title: string | null;
+        fullName: string | null;
+        examRoundCount: string;
+        status: string;
+      }>();
+
+    const data: ExecutiveTestTakerRow[] = rawRows.map((row) => ({
+      enrollmentId: Number(row.enrollmentId),
+      examId: Number(row.examId),
+      testTakerId: row.testTakerId,
+      title: row.title,
+      fullName: row.fullName,
+      examRoundCount: Number(row.examRoundCount),
+      status: Number(row.status),
+    }));
+
+    return { data, total };
   }
 
   async findByExamId(

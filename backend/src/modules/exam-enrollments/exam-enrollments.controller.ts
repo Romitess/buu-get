@@ -23,6 +23,8 @@ import { RequestFixDto } from './dto/request-fix.dto';
 import { BulkSeatAssignmentDto } from './dto/bulk-seat-assignment.dto';
 import { ExamEnrollment } from './entities/exam-enrollment.entity';
 import { ExamEnrollmentQueryDto } from './dto/exam-enrollment-query.dto';
+import { ExecutiveTestTakerQueryDto } from './dto/executive-test-taker-query.dto';
+import { ExecutiveTestTakerPage } from './interfaces/executive-test-taker.interface';
 
 @ApiTags('exam-enrollments')
 @Controller('exam-enrollments')
@@ -45,6 +47,14 @@ export class ExamEnrollmentsController {
   @ApiOkResponse({ type: ExamEnrollment, isArray: true })
   async findAll(): Promise<ExamEnrollment[]> {
     return await this.examEnrollmentsService.findAll();
+  }
+
+  @Get('executive/test-takers')
+  @ApiOperation({ summary: 'ค้นหาผู้เข้าสอบสำหรับผู้บริหาร' })
+  async findExecutiveTestTakers(
+    @Query() query: ExecutiveTestTakerQueryDto,
+  ): Promise<ExecutiveTestTakerPage> {
+    return await this.examEnrollmentsService.findExecutiveTestTakers(query);
   }
 
   @Post('match-import')

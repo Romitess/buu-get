@@ -474,6 +474,18 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'executive/test-takers',
+            name: 'admin-executive-test-takers',
+            component: () => import('pages/admin/exam-information-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'ข้อมูลผู้เข้าสอบ', icon: 'star' },
+              ],
+            },
+          },
+          {
             path: 'page-builder',
             name: 'admin-page-builder',
             component: () => import('pages/admin/page-builder-page.vue'),

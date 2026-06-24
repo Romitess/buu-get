@@ -12,8 +12,6 @@
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
-
-
     <!-- Sidebar List -->
     <q-list class="sidebar-list">
       <template v-for="link in menuLinks" :key="link.name">
@@ -82,13 +80,7 @@ import { useNavigation } from 'src/composables/use-navigation';
 import { ROLES } from 'src/constants/roles';
 
 const { t } = useI18n();
-const {
-  userStore,
-  leftDrawerOpen,
-  miniState,
-  isHovered,
-  isMini,
-} = useNavigation();
+const { userStore, leftDrawerOpen, miniState, isHovered, isMini } = useNavigation();
 
 // Dynamic role-based navigation menu links
 const menuLinks = computed(() => {
@@ -238,6 +230,12 @@ const menuLinks = computed(() => {
       label: t('navigation.examReport') || 'รายงานการสอบ',
       icon: 'assessment',
       path: '/admin/exam-report',
+    });
+    links.push({
+      name: 'executive-test-takers',
+      label: 'ข้อมูลผู้เข้าสอบ',
+      icon: 'groups',
+      path: '/admin/executive/test-takers',
     });
   }
 
