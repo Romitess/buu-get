@@ -76,6 +76,15 @@ export class BankReconcile {
   })
   BR_PAID_BY: string;
 
+  @Column({
+    name: 'BR_IMPORT_KEY_HASH',
+    type: 'varchar',
+    length: 64,
+    nullable: true,
+    comment: 'Hash สำหรับตรวจสอบรายการนำเข้าซ้ำจากไฟล์ธนาคาร',
+  })
+  BR_IMPORT_KEY_HASH: string | null;
+
   @CreateDateColumn({ name: 'CREATED_AT', comment: 'วันที่สร้าง' })
   CREATED_AT: Date;
 

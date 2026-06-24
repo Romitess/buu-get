@@ -86,28 +86,24 @@ export function useNavigation() {
     });
   });
 
-  const toggleLeftDrawer = (): void => {
-    if ($q.screen.lt.md) {
-      leftDrawerOpen.value = !leftDrawerOpen.value;
+const toggleLeftDrawer = (): void => {
+  if ($q.screen.lt.md) {
+    leftDrawerOpen.value = !leftDrawerOpen.value;
+  } else {
+    if (leftDrawerOpen.value) {
+      leftDrawerOpen.value = false;
+      miniState.value = true;
     } else {
-      miniState.value = !miniState.value;
+      leftDrawerOpen.value = true;
+      miniState.value = true;
     }
-  };
+  }
+};
 
   const isMini = computed(() => !isHovered.value && miniState.value);
 
   const showAdminDrawer = computed(() => {
-    if (!userStore.isLoggedIn) return false;
-    const role = userStore.userRole;
-    return [
-      ROLES.ADMIN,
-      ROLES.STAFF,
-      ROLES.REGISTRATION_OFFICER,
-      ROLES.EXAM_OPERATIONS_OFFICER,
-      ROLES.FINANCE,
-      ROLES.EXECUTIVE,
-      ROLES.PROCTOR,
-    ].includes(role as string);
+    return true;
   });
 
   const logout = async (): Promise<void> => {

@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { parse as parseCsv } from 'csv-parse/sync';
+import { createHash } from 'crypto';
 import { Brackets, DataSource, In, IsNull, Repository } from 'typeorm';
 import * as XLSX from 'xlsx';
 import {
@@ -17,6 +18,11 @@ import { TransactionApiType } from '../transaction-status-history/entities/trans
 import { ExamEnrollmentStatus } from '../exam-enrollments/entities/exam-enrollment.entity';
 import { ReceiptStatus } from '../receipts/entities/receipt.entity';
 import { BankReconcile } from './entities/bank-reconcile.entity';
+import {
+  BankReconcileChangedField,
+  BankReconcileEditLog,
+  BankReconcileEditSnapshot,
+} from './entities/bank-reconcile-edit-log.entity';
 import {
   CreateBankReconcileDto,
   UpdateBankReconcileRefsDto,
@@ -41,11 +47,15 @@ interface RawPaymentRow {
   paymentTime?: unknown;
 }
 
-interface ExistingBankReconcileKeyRow {
+interface ExistingBankReconcileHashRow {
+  BR_IMPORT_KEY_HASH: string | null;
+}
+
+interface BankReconcileImportHashSource {
   BR_REF1: string;
-  BR_REF2: string | null;
-  BR_REF3: string | null;
-  BR_REF4: string | null;
+  BR_REF2?: string | null;
+  BR_REF3?: string | null;
+  BR_REF4?: string | null;
   BR_AMOUNT: number | string;
   BR_PAID_BY: string;
 }
@@ -92,9 +102,12 @@ export class BankReconcilesService {
   async create(
     createBankReconcileDto: CreateBankReconcileDto,
   ): Promise<BankReconcile> {
-    const bankReconcile = this.bankReconcilesRepository.create(
-      createBankReconcileDto,
-    );
+    const bankReconcile = this.bankReconcilesRepository.create({
+      ...createBankReconcileDto,
+      BR_IMPORT_KEY_HASH: this.getBankReconcileImportHash(
+        createBankReconcileDto,
+      ),
+    });
     return this.bankReconcilesRepository.save(bankReconcile);
   }
 
@@ -119,20 +132,21 @@ export class BankReconcilesService {
         continue;
       }
 
-      const importKey = this.getImportRowKey(normalized);
-      if (seenImportKeys.has(importKey)) {
+      const importKeyHash = this.getImportRowHash(normalized);
+      if (seenImportKeys.has(importKeyHash)) {
         duplicateSkipped += 1;
         continue;
       }
 
-      seenImportKeys.add(importKey);
+      seenImportKeys.add(importKeyHash);
       validRows.push(normalized);
     }
 
-    const existingImportKeys = await this.getExistingImportKeys(validRows);
+    const existingImportKeyHashes =
+      await this.getExistingImportKeyHashes(validRows);
     const uniqueRows = validRows.filter((row) => {
-      const importKey = this.getImportRowKey(row);
-      if (existingImportKeys.has(importKey)) {
+      const importKeyHash = this.getImportRowHash(row);
+      if (existingImportKeyHashes.has(importKeyHash)) {
         duplicateSkipped += 1;
         return false;
       }
@@ -159,6 +173,7 @@ export class BankReconcilesService {
         BR_REF4: row.paymentTime,
         BR_AMOUNT: row.amount,
         BR_PAID_BY: row.payerName,
+        BR_IMPORT_KEY_HASH: this.getImportRowHash(row),
       })),
     );
 
@@ -284,9 +299,11 @@ export class BankReconcilesService {
   async updateRefs(
     id: number,
     updateBankReconcileRefsDto: UpdateBankReconcileRefsDto,
+    userId: number,
   ): Promise<BankReconcile> {
     return this.dataSource.transaction(async (manager) => {
       const bankReconcileRepository = manager.getRepository(BankReconcile);
+      const editLogRepository = manager.getRepository(BankReconcileEditLog);
       const transactionRefRepository = manager.getRepository(TransactionRef);
       const transactionRepository = manager.getRepository(Transaction);
 
@@ -300,6 +317,7 @@ export class BankReconcilesService {
       }
 
       const previousTranxId = bankReconcile.TRANX_ID;
+      const oldSnapshot = this.createEditSnapshot(bankReconcile);
 
       await transactionRefRepository.update(
         { BR_ID: bankReconcile.BR_ID },
@@ -355,6 +373,23 @@ export class BankReconcilesService {
 
       if (!updatedBankReconcile) {
         throw new NotFoundException(`BankReconcile with ID ${id} not found`);
+      }
+
+      const newSnapshot = this.createEditSnapshot(updatedBankReconcile);
+      const changedFields = this.getChangedFields(oldSnapshot, newSnapshot);
+
+      if (changedFields.length > 0) {
+        await editLogRepository.save(
+          editLogRepository.create({
+            BR_ID: id,
+            CHANGED_BY: userId,
+            OLD_SNAPSHOT: oldSnapshot,
+            NEW_SNAPSHOT: newSnapshot,
+            CHANGED_FIELDS: changedFields,
+            CHANGE_REASON:
+              updateBankReconcileRefsDto.CHANGE_REASON?.trim() || null,
+          }),
+        );
       }
 
       return updatedBankReconcile;
@@ -521,31 +556,30 @@ export class BankReconcilesService {
     return Math.round(Number(value) * 100);
   }
 
-  private async getExistingImportKeys(
+  private async getExistingImportKeyHashes(
     rows: ImportPaymentRow[],
   ): Promise<Set<string>> {
-    const applicantIds = [...new Set(rows.map((row) => row.applicantId))];
-    if (applicantIds.length === 0) {
+    const importKeyHashes = [
+      ...new Set(rows.map((row) => this.getImportRowHash(row))),
+    ];
+    if (importKeyHashes.length === 0) {
       return new Set<string>();
     }
 
     const existingRows = await this.dataSource
       .createQueryBuilder()
-      .select([
-        'br.BR_REF1 AS BR_REF1',
-        'br.BR_REF2 AS BR_REF2',
-        'br.BR_REF3 AS BR_REF3',
-        'br.BR_REF4 AS BR_REF4',
-        'br.BR_AMOUNT AS BR_AMOUNT',
-        'br.BR_PAID_BY AS BR_PAID_BY',
-      ])
+      .select(['br.BR_IMPORT_KEY_HASH AS BR_IMPORT_KEY_HASH'])
       .from('FIN_T_BANK_RECONCILES', 'br')
       .where('br.DELETED_AT IS NULL')
-      .andWhere('br.BR_REF1 IN (:...applicantIds)', { applicantIds })
-      .getRawMany<ExistingBankReconcileKeyRow>();
+      .andWhere('br.BR_IMPORT_KEY_HASH IN (:...importKeyHashes)', {
+        importKeyHashes,
+      })
+      .getRawMany<ExistingBankReconcileHashRow>();
 
     return new Set(
-      existingRows.map((row) => this.getExistingBankReconcileKey(row)),
+      existingRows
+        .map((row) => row.BR_IMPORT_KEY_HASH)
+        .filter((hash): hash is string => Boolean(hash)),
     );
   }
 
@@ -560,10 +594,10 @@ export class BankReconcilesService {
     ].join('|');
   }
 
-  private getExistingBankReconcileKey(
-    row: ExistingBankReconcileKeyRow,
+  private getBankReconcileImportHash(
+    row: BankReconcileImportHashSource,
   ): string {
-    return [
+    const importKey = [
       this.normalizeKeyCell(row.BR_REF1),
       this.normalizeKeyCell(row.BR_REF2),
       this.normalizeKeyCell(row.BR_REF3),
@@ -571,6 +605,41 @@ export class BankReconcilesService {
       String(this.toCents(row.BR_AMOUNT)),
       this.normalizeKeyCell(row.BR_PAID_BY),
     ].join('|');
+
+    return this.createImportKeyHash(importKey);
+  }
+
+  private getImportRowHash(row: ImportPaymentRow): string {
+    return this.createImportKeyHash(this.getImportRowKey(row));
+  }
+
+  private createImportKeyHash(importKey: string): string {
+    return createHash('sha256').update(importKey).digest('hex');
+  }
+
+  private createEditSnapshot(
+    bankReconcile: BankReconcile,
+  ): BankReconcileEditSnapshot {
+    return {
+      BR_REF1: bankReconcile.BR_REF1,
+      BR_REF2: bankReconcile.BR_REF2,
+      TRANX_ID: bankReconcile.TRANX_ID,
+      TRANX_MATCH_STATUS: bankReconcile.TRANSACTION?.TRANX_MATCH_STATUS ?? null,
+    };
+  }
+
+  private getChangedFields(
+    oldSnapshot: BankReconcileEditSnapshot,
+    newSnapshot: BankReconcileEditSnapshot,
+  ): BankReconcileChangedField[] {
+    const fields: BankReconcileChangedField[] = [
+      'BR_REF1',
+      'BR_REF2',
+      'TRANX_ID',
+      'TRANX_MATCH_STATUS',
+    ];
+
+    return fields.filter((field) => oldSnapshot[field] !== newSnapshot[field]);
   }
 
   private normalizeKeyCell(value: string | null | undefined): string {

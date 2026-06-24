@@ -105,10 +105,12 @@ export class BankReconcilesController {
   updateRefs(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateBankReconcileRefsDto: UpdateBankReconcileRefsDto,
+    @Request() request: AuthenticatedRequest,
   ): Promise<BankReconcile> {
     return this.bankReconcilesService.updateRefs(
       id,
       updateBankReconcileRefsDto,
+      request.user.userId,
     );
   }
 

@@ -25,6 +25,7 @@ import { FundSource } from '../modules/fund-sources/entities/fund-source.entity'
 import { Transaction } from '../modules/transactions/entities/transaction.entity';
 import { Receipt } from '../modules/receipts/entities/receipt.entity';
 import { BankReconcile } from '../modules/bank-reconciles/entities/bank-reconcile.entity';
+import { BankReconcileEditLog } from '../modules/bank-reconciles/entities/bank-reconcile-edit-log.entity';
 import { ExamScore } from '../modules/exam-scores/entities/exam-score.entity';
 import { ExamCertificate } from '../modules/exam-certificates/entities/exam-certificate.entity';
 import { TransactionRef } from '../modules/transaction-refs/entities/transaction-ref.entity';
@@ -66,6 +67,7 @@ export default new DataSource({
     Transaction,
     Receipt,
     BankReconcile,
+    BankReconcileEditLog,
     ExamScore,
     ExamCertificate,
     TransactionRef,

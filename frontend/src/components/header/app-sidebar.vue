@@ -20,13 +20,20 @@
         <!-- Expanded Group (isGroup = true) -->
         <q-expansion-item
           v-if="link.isGroup"
-          :icon="link.icon"
-          :label="link.label"
           :default-opened="true"
           class="sidebar-group"
           header-class="sidebar-item"
           active-class="sidebar-item--active"
         >
+          <template v-slot:header>
+            <q-item-section avatar class="sidebar-item__avatar">
+              <q-icon :name="link.icon" size="24px" class="sidebar-item__icon" />
+            </q-item-section>
+            <q-item-section class="sidebar-item__text">
+              <q-item-label class="text-weight-bold">{{ link.label }}</q-item-label>
+            </q-item-section>
+          </template>
+
           <q-list class="sidebar-child-list">
             <q-item
               v-for="child in link.children"
@@ -97,8 +104,32 @@ const menuLinks = computed(() => {
   });
 
   // 2. Role-specific links
+  // IF: Candidate
+  if (role === ROLES.CANDIDATE) {
+    links.push({
+      name: 'exam-schedule',
+      label: t('navigation.examSchedule') || 'ตารางสอบ',
+      icon: 'event',
+      path: '/user/exam-schedule',
+    });
+    links.push({
+      name: 'exam-history',
+      label: t('navigation.examHistory') || 'ประวัติการสอบ',
+      icon: 'history',
+      path: '/user/exam-history',
+    });
+  }
+  // IF: Guest (not logged in)
+  else if (!userStore.isLoggedIn) {
+    links.push({
+      name: 'exam-schedule-guest',
+      label: t('navigation.viewSchedule') || 'ตารางสอบ',
+      icon: 'event',
+      path: '/user/exam-schedule',
+    });
+  }
   // IF: Registration Officer or Admin
-  if (role === ROLES.REGISTRATION_OFFICER || role === ROLES.ADMIN) {
+  else if (role === ROLES.REGISTRATION_OFFICER || role === ROLES.ADMIN) {
     links.push({
       name: 'exam-report',
       label: t('navigation.examReport') || 'รายงานการสอบ',
