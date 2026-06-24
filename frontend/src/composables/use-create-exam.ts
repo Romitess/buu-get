@@ -26,6 +26,7 @@ import {
   formatBackendDate,
   buddhistToGregorian,
   createExamPasscodes,
+  parseBangkokDate,
   type ExamChangeItem,
 } from 'src/services/exam.service';
 import { getUsersFromApi } from 'src/services/user.service';
@@ -527,11 +528,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    */
   const gregorianToBuddhistDisplay = (dateStr: string | null | undefined): string => {
     if (!dateStr) return today;
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return today;
-    const d = String(date.getDate()).padStart(2, '0');
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const y = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
+    const { year, month, day } = parseBangkokDate(dateStr);
+    const d = String(day).padStart(2, '0');
+    const m = String(month).padStart(2, '0');
+    const y = year + BUDDHIST_YEAR_OFFSET;
     return `${d}/${m}/${y}`;
   };
 

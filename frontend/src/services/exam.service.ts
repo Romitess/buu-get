@@ -98,9 +98,35 @@ export const formatTime = (timeStr: string | null | undefined): string => {
   return timeStr.replace(/\s/g, '').substring(0, 5);
 };
 
+export const parseBangkokDate = (dateStr: string): { year: number; month: number; day: number } => {
+  if (!dateStr) return { year: 1970, month: 1, day: 1 };
+  // If it's a date-only string like YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return { year: y || 1970, month: m || 1, day: d || 1 };
+  }
+  
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) {
+    return { year: 1970, month: 1, day: 1 };
+  }
+  
+  // Adjust to UTC+7 (Bangkok)
+  const bangkokTime = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+  return {
+    year: bangkokTime.getUTCFullYear(),
+    month: bangkokTime.getUTCMonth() + 1,
+    day: bangkokTime.getUTCDate(),
+  };
+};
+
 export const formatBackendDate = (dateStr: string | null | undefined): string => {
   if (!dateStr) return '';
-  return dateStr.includes('T') ? (dateStr.split('T')[0] ?? '') : dateStr;
+  const { year, month, day } = parseBangkokDate(dateStr);
+  const y = String(year);
+  const m = String(month).padStart(2, '0');
+  const d = String(day).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 };
 
 export interface CreateExamPayload {
