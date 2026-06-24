@@ -1,5 +1,17 @@
-import 'dotenv/config';
+import * as dotenv from 'dotenv';
+import { existsSync } from 'fs';
+import { resolve } from 'path';
 import { DataSource } from 'typeorm';
+
+// โหลด .env ให้ตรงกับ ConfigModule ของแอป (envFilePath: ['.env', 'backend/.env', '../.env'])
+// เพื่อให้ CLI migration ใช้ค่า env ชุดเดียวกับตอนรันแอป (รองรับ root .env เมื่อรันจาก backend/)
+for (const candidate of ['.env', 'backend/.env', '../.env']) {
+  const fullPath = resolve(process.cwd(), candidate);
+  if (existsSync(fullPath)) {
+    dotenv.config({ path: fullPath });
+    break;
+  }
+}
 import { User } from '../modules/users/entities/user.entity';
 import { Role } from '../modules/roles/entities/role.entity';
 import { Exam } from '../modules/exam/entities/exam.entity';

@@ -7,7 +7,10 @@ import {
 } from '@nestjs/swagger';
 import { ExamReportService } from './exam-report.service';
 import { ExamReportQueryDto } from './dto/exam-report-query.dto';
-import { ExamReportSummary } from './interfaces/exam-report.interface';
+import {
+  ExamReportOptions,
+  ExamReportSummary,
+} from './interfaces/exam-report.interface';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
@@ -28,5 +31,14 @@ export class ExamReportController {
   @ApiResponse({ status: 200, description: 'ข้อมูลสรุปรายงานการสอบ' })
   getSummary(@Query() query: ExamReportQueryDto): Promise<ExamReportSummary> {
     return this.examReportService.getSummary(query);
+  }
+
+  @Get('options')
+  @ApiOperation({
+    summary: 'ดึงตัวเลือกฟิลเตอร์ (ปี/เดือน/รอบสอบ) จากข้อมูลจริง',
+  })
+  @ApiResponse({ status: 200, description: 'ตัวเลือกฟิลเตอร์รายงานการสอบ' })
+  getOptions(): Promise<ExamReportOptions> {
+    return this.examReportService.getOptions();
   }
 }

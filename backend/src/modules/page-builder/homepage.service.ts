@@ -1,25 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
 import { PageConfig } from './entities/page-config.entity';
+import { PageConfigsService } from './page-configs.service';
 
 @Injectable()
 export class HomepageService {
-  constructor(
-    @InjectRepository(PageConfig)
-    private readonly pageConfigsRepository: Repository<PageConfig>,
-  ) {}
+  constructor(private readonly pageConfigsService: PageConfigsService) {}
 
   /**
-   * คืน active config พร้อมโครงสร้าง sections + boxes (เก็บใน PCF_CONTENT) ในครั้งเดียว
+   * คืนเนื้อหาหน้า (sections + boxes) สำหรับแสดงผลหน้าแรก
    */
   async getActiveHomepage(): Promise<PageConfig> {
-    const config = await this.pageConfigsRepository.findOne({
-      where: { PCF_ACTIVE: true },
-    });
-    if (!config) {
-      throw new NotFoundException('No active page config found');
-    }
-    return config;
+    return this.pageConfigsService.getPage();
   }
 }

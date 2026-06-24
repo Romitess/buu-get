@@ -10,6 +10,7 @@ import {
 
 /** Row shape for the payment import table */
 export interface PaymentImportRow {
+  brId: number;
   index: number;
   applicantId: string;
   referenceNo: string;
@@ -23,6 +24,54 @@ export interface PaymentImportRow {
 
 export const globalImportedRows = ref<PaymentImportRow[]>([]);
 export const globalSelectedFile = ref<File | null>(null);
+
+const autoLoadSuspendedStorageKey = 'payment-import:auto-load-suspended';
+
+const readAutoLoadSuspended = (): boolean => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  try {
+    return window.sessionStorage.getItem(autoLoadSuspendedStorageKey) === 'true';
+  } catch (err) {
+    console.warn('Unable to read payment import auto-load state:', err);
+    return false;
+  }
+};
+
+const persistAutoLoadSuspended = (value: boolean): void => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    if (value) {
+      window.sessionStorage.setItem(autoLoadSuspendedStorageKey, 'true');
+    } else {
+      window.sessionStorage.removeItem(autoLoadSuspendedStorageKey);
+    }
+  } catch (err) {
+    console.warn('Unable to persist payment import auto-load state:', err);
+  }
+};
+
+const isAutoLoadSuspended = ref(readAutoLoadSuspended());
+
+const setAutoLoadSuspended = (value: boolean): void => {
+  isAutoLoadSuspended.value = value;
+  persistAutoLoadSuspended(value);
+};
+
+export const clearPaymentImportLocalData = (
+  options: { skipNextLoad?: boolean; suspendAutoLoad?: boolean } = {},
+): void => {
+  globalImportedRows.value = [];
+  globalSelectedFile.value = null;
+  if (options.skipNextLoad || options.suspendAutoLoad) {
+    setAutoLoadSuspended(true);
+  }
+};
 
 /**
  * Composable for the "นำเข้าไฟล์การชำระเงิน" page.
@@ -77,6 +126,12 @@ export function usePaymentImport() {
     }
   };
 
+  const clearLocalData = (): void => {
+    clearPaymentImportLocalData();
+    skippedRows.value = 0;
+    searchQuery.value = '';
+  };
+
   const parseFile = async (file: File): Promise<BankReconcileImportResponse | void> => {
     isLoading.value = true;
     error.value = null;
@@ -88,7 +143,13 @@ export function usePaymentImport() {
       console.log('[DEBUG] Calling importBankReconcileFile...');
       const result = await importBankReconcileFile(file);
       console.log('[DEBUG] Import result:', result);
-      importedRows.value = result.data.map(mapBankReconcileToRow);
+      if (result.imported > 0) {
+        setAutoLoadSuspended(false);
+        importedRows.value = result.data.map(mapBankReconcileToRow);
+      } else {
+        setAutoLoadSuspended(true);
+        importedRows.value = [];
+      }
       skippedRows.value = result.skipped;
       console.log('[DEBUG] parseFile success! Rows:', importedRows.value.length);
       return result;
@@ -108,10 +169,7 @@ export function usePaymentImport() {
 
     try {
       await clearBankReconciles();
-      importedRows.value = [];
-      selectedFile.value = null;
-      skippedRows.value = 0;
-      searchQuery.value = '';
+      clearLocalData();
     } catch (err) {
       console.error('Failed to clear payment imports:', err);
       error.value = 'ไม่สามารถลบข้อมูลได้';
@@ -126,8 +184,15 @@ export function usePaymentImport() {
     error.value = null;
 
     try {
+      const currentImportedIds = new Set(
+        importedRows.value.map((row) => row.brId).filter((brId) => brId > 0),
+      );
       const reconciles = await verifyBankReconciles();
-      importedRows.value = reconciles.map(mapBankReconcileToRow);
+      const currentReconciles =
+        currentImportedIds.size > 0
+          ? reconciles.filter((reconcile) => currentImportedIds.has(reconcile.BR_ID))
+          : reconciles;
+      importedRows.value = currentReconciles.map(mapBankReconcileToRow);
       skippedRows.value = 0;
     } catch (err) {
       console.error('Verification failed:', err);
@@ -139,6 +204,11 @@ export function usePaymentImport() {
   };
 
   onMounted(() => {
+    if (isAutoLoadSuspended.value) {
+      clearLocalData();
+      return;
+    }
+
     void loadData();
   });
 
@@ -154,6 +224,7 @@ export function usePaymentImport() {
     hasEmptyRows,
     loadData,
     parseFile,
+    clearLocalData,
     clearAllData,
     verifyData,
   };
@@ -161,6 +232,7 @@ export function usePaymentImport() {
 
 function mapBankReconcileToRow(item: BackendBankReconcile, index: number): PaymentImportRow {
   return {
+    brId: item.BR_ID,
     index: index + 1,
     applicantId: item.BR_REF1 ?? '',
     referenceNo: item.BR_REF2 ?? '',
@@ -169,7 +241,8 @@ function mapBankReconcileToRow(item: BackendBankReconcile, index: number): Payme
     paymentTime: item.BR_REF4 ?? '-',
     amount: formatAmount(item.BR_AMOUNT),
     importedAt: item.CREATED_AT ? formatImportDate(new Date(item.CREATED_AT)) : '-',
-    importedBy: item.USER?.PROFILE?.userFullnameTh || item.USER?.USER_EMAIL || String(item.CREATED_BY),
+    importedBy:
+      item.USER?.PROFILE?.userFullnameTh || item.USER?.USER_EMAIL || String(item.CREATED_BY),
   };
 }
 

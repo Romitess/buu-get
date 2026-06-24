@@ -75,24 +75,8 @@ export interface PageContent {
 
 @Entity('BUU_GET_T_PAGE_CONFIGS')
 export class PageConfig {
-  @PrimaryGeneratedColumn({ name: 'PCF_ID', comment: 'รหัสชุดหน้า' })
+  @PrimaryGeneratedColumn({ name: 'PCF_ID', comment: 'รหัสหน้า' })
   PCF_ID: number;
-
-  @Column({
-    name: 'PCF_NAME',
-    type: 'varchar',
-    length: 255,
-    comment: 'ชื่อชุดหน้า เช่น Set A, Set B',
-  })
-  PCF_NAME: string;
-
-  @Column({
-    name: 'PCF_ACTIVE',
-    type: 'boolean',
-    default: false,
-    comment: 'ชุดที่เปิดใช้งาน (เปิดได้ครั้งละ 1 ชุด)',
-  })
-  PCF_ACTIVE: boolean;
 
   @Column({
     name: 'PCF_CONTENT',

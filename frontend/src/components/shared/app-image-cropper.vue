@@ -8,7 +8,12 @@
     </q-card-section>
 
     <q-card-section class="flex column items-center q-py-lg">
-      <div class="crop-area-container" @mousedown="startDrag" @touchstart="startDrag">
+      <div
+        class="crop-area-container"
+        :style="containerStyle"
+        @mousedown="startDrag"
+        @touchstart="startDrag"
+      >
         <img
           ref="imageRef"
           :src="imageSrc"
@@ -69,6 +74,12 @@ interface Props {
   imageSrc: string;
   fileType?: string;
   circular?: boolean;
+  /** ขนาดกรอบ crop (px) — ถ้าไม่ระบุใช้ค่าเริ่มต้นตามโหมด circular/portrait */
+  cropWidth?: number;
+  cropHeight?: number;
+  /** ขนาดรูปผลลัพธ์ (px) — ถ้าไม่ระบุใช้ค่าเริ่มต้น */
+  outputWidth?: number;
+  outputHeight?: number;
 }
 
 interface Emits {
@@ -90,8 +101,8 @@ const offsetY = ref(0);
 const imgNaturalWidth = ref(0);
 const imgNaturalHeight = ref(0);
 
-const cropBoxWidth = computed(() => (props.circular ? 220 : 180));
-const cropBoxHeight = computed(() => (props.circular ? 220 : 240));
+const cropBoxWidth = computed(() => props.cropWidth ?? (props.circular ? 220 : 180));
+const cropBoxHeight = computed(() => props.cropHeight ?? (props.circular ? 220 : 240));
 
 const imageStyle = computed(() => {
   if (!imgNaturalWidth.value || !imgNaturalHeight.value) return {};
@@ -118,6 +129,19 @@ const maskStyle = computed(() => {
     width: `${cropBoxWidth.value}px`,
     height: `${cropBoxHeight.value}px`,
   };
+});
+
+// ปรับขนาด container ให้พอดีกรอบ crop เฉพาะเมื่อกำหนดขนาดเอง (เช่น banner)
+// ถ้าไม่ระบุ ใช้ค่าเริ่มต้นจาก scss (300x300) เพื่อไม่กระทบหน้าสมัคร/โปรไฟล์
+const containerStyle = computed(() => {
+  if (props.cropWidth || props.cropHeight) {
+    const margin = 40;
+    return {
+      width: `${cropBoxWidth.value + margin}px`,
+      height: `${cropBoxHeight.value + margin}px`,
+    };
+  }
+  return {};
 });
 
 const onImageLoaded = () => {
@@ -210,8 +234,8 @@ const confirmCrop = () => {
   const img = imageRef.value;
   if (!img || !imgNaturalWidth.value || !imgNaturalHeight.value) return;
 
-  const outputWidth = props.circular ? 400 : 300;
-  const outputHeight = props.circular ? 400 : 400;
+  const outputWidth = props.outputWidth ?? (props.circular ? 400 : 300);
+  const outputHeight = props.outputHeight ?? (props.circular ? 400 : 400);
   const canvas = document.createElement('canvas');
   canvas.width = outputWidth;
   canvas.height = outputHeight;

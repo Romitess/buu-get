@@ -23,6 +23,7 @@ export interface LoginResponse {
     id: number;
     email: string;
     role: string;
+    roles: string[];
   };
 }
 
@@ -111,13 +112,19 @@ export class AuthService {
       throw new BadRequestException('Invalid email or password');
     }
 
-    // ดึง role แรก (สมมติว่า 1 user มี 1 role หลักสำหรับตอนนี้)
-    const role = user.ROLES_ID?.[0]?.ROLE_NAME || RoleEnum.CANDIDATE;
+    // ดึง role ทั้งหมดที่ user มี (1 user มีได้หลาย role — ManyToMany)
+    const roles = user.ROLES_ID?.map((r) => r.ROLE_NAME).filter(Boolean) ?? [];
+    if (roles.length === 0) {
+      roles.push(RoleEnum.CANDIDATE);
+    }
+    // role หลัก (ตัวแรก) — คงไว้เพื่อ backward compatibility กับ consumer เดิม
+    const role = roles[0];
 
     const payload = {
       sub: user.USER_ID,
       email: user.USER_EMAIL,
       role: role,
+      roles: roles,
     };
 
     return {
@@ -126,6 +133,7 @@ export class AuthService {
         id: user.USER_ID,
         email: user.USER_EMAIL,
         role: role,
+        roles: roles,
       },
     };
   }
@@ -266,8 +274,12 @@ export class AuthService {
       throw new BadRequestException('User not found');
     }
 
-    // Map role
-    const role = user.ROLES_ID?.[0]?.ROLE_NAME || RoleEnum.CANDIDATE;
+    // Map roles (1 user มีได้หลาย role) — role คือ primary (ตัวแรก) เพื่อ backward compatibility
+    const roles = user.ROLES_ID?.map((r) => r.ROLE_NAME).filter(Boolean) ?? [];
+    if (roles.length === 0) {
+      roles.push(RoleEnum.CANDIDATE);
+    }
+    const role = roles[0];
 
     // Map profile fields to match frontend User interface
     return {
@@ -278,6 +290,7 @@ export class AuthService {
       passportNo: user.USER_PASSPORT_NO,
       status: user.USER_STATUS,
       role: role,
+      roles: roles,
       // Profile data (Flattened)
       titleTH: user.PROFILE?.userTitleTh || '',
       fullNameTH: user.PROFILE?.userFullnameTh || '',

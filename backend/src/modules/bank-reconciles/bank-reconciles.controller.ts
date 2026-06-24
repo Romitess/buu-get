@@ -3,6 +3,9 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
+  ParseIntPipe,
+  Patch,
   Post,
   Request,
   UploadedFile,
@@ -26,6 +29,7 @@ import {
 import { BankReconcile } from './entities/bank-reconcile.entity';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RoleEnum } from '../roles/enums/role.enum';
+import { UpdateBankReconcileRefsDto } from './dto/bank-reconcile.dto';
 
 interface AuthenticatedRequest {
   user: {
@@ -89,6 +93,23 @@ export class BankReconcilesController {
   })
   verifyData(): Promise<BankReconcile[]> {
     return this.bankReconcilesService.verifyData();
+  }
+
+  @Patch(':id/refs')
+  @ApiOperation({ summary: 'แก้ไข Ref ของรายการกระทบยอดธนาคาร' })
+  @ApiResponse({
+    status: 200,
+    description: 'แก้ไข Ref ของรายการกระทบยอดธนาคารสำเร็จ',
+    type: BankReconcile,
+  })
+  updateRefs(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateBankReconcileRefsDto: UpdateBankReconcileRefsDto,
+  ): Promise<BankReconcile> {
+    return this.bankReconcilesService.updateRefs(
+      id,
+      updateBankReconcileRefsDto,
+    );
   }
 
   @Delete()

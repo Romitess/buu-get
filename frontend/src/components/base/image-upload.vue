@@ -1,5 +1,5 @@
 <template>
-  <div class="image-upload-container">
+  <div class="image-upload-container" :style="{ aspectRatio: props.aspectRatio }">
     <q-file
       ref="fileInputRef"
       v-model="selectedFile"
@@ -55,6 +55,7 @@
       <AppImageCropper
         :image-src="cropImageSrc"
         :file-type="cropFileType"
+        v-bind="cropDimensions"
         @confirm="onCropConfirm"
         @cancel="showCropDialog = false"
       />
@@ -74,6 +75,14 @@ interface Props {
   modelValue: string | null;
   folder?: string;
   alt?: string;
+  /** สัดส่วนกล่องอัปโหลด (css aspect-ratio) ค่าเริ่มต้น = รูปสมัคร/โปรไฟล์ */
+  aspectRatio?: string;
+  /** ขนาดกรอบ crop (px) ส่งต่อให้ cropper */
+  cropWidth?: number;
+  cropHeight?: number;
+  /** ขนาดรูปผลลัพธ์ (px) ส่งต่อให้ cropper */
+  outputWidth?: number;
+  outputHeight?: number;
 }
 
 interface Emits {
@@ -83,6 +92,7 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   modelValue: null,
   alt: 'Uploaded image',
+  aspectRatio: '0.9 / 1',
 });
 
 const emit = defineEmits<Emits>();
@@ -111,6 +121,16 @@ const { isUploading, handleImageUpload } = useImageUpload({
 });
 
 const { displayUrl } = useImageUrl(() => props.modelValue);
+
+// ส่งเฉพาะค่าที่กำหนดไปยัง cropper (กัน exactOptionalPropertyTypes กับ undefined)
+const cropDimensions = computed<Record<string, number>>(() => {
+  const dims: Record<string, number> = {};
+  if (props.cropWidth !== undefined) dims.cropWidth = props.cropWidth;
+  if (props.cropHeight !== undefined) dims.cropHeight = props.cropHeight;
+  if (props.outputWidth !== undefined) dims.outputWidth = props.outputWidth;
+  if (props.outputHeight !== undefined) dims.outputHeight = props.outputHeight;
+  return dims;
+});
 
 const uploadingText = computed(() => t('image.upload.uploading') ?? 'Uploading...');
 
