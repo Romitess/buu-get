@@ -1,4 +1,4 @@
-import { ref, computed, nextTick, type Ref } from 'vue';
+import { ref, computed, nextTick, watch, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useExamStore } from 'src/stores/exam.store';
@@ -221,6 +221,21 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
     return occupied;
   });
+
+  // Watch occupied location IDs and reset locationId if it becomes occupied (unless loading data)
+  watch(
+    occupiedLocationIds,
+    (occupied) => {
+      if (isLoadingData.value) return;
+      form.value.timeSlots.forEach((slot) => {
+        slot.rooms.forEach((room) => {
+          if (room.locationId !== null && occupied.has(room.locationId)) {
+            room.locationId = null;
+          }
+        });
+      });
+    }
+  );
 
   /** Currently active time slot tab index */
   const activeSlotIndex = ref(0);
