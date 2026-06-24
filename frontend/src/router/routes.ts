@@ -507,7 +507,7 @@ const routes: RouteRecordRaw[] = [
                 {
                   label: 'navigation.examInformation',
                   icon: 'info',
-                  to: '/admin/exam-information',
+                  to: '/admin/exam-information/:year',
                 },
                 { label: 'navigation.examCandidatesInfo', icon: 'groups' },
               ],

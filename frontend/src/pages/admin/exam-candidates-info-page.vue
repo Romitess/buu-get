@@ -38,6 +38,7 @@ const { t } = useI18n();
 
 const isLoading = ref(false);
 const searchQuery = ref('');
+const candidates = ref<ExamCandidateInfoRow[]>([]);
 const selectedCandidate = ref<ExamCandidateInfoRow | null>(null);
 
 const getRouteValue = (
@@ -60,8 +61,6 @@ const examYear = computed(() => {
 
 const examRound = computed(() => getRouteValue(route.query.round));
 
-const displayRound = computed(() => examRound.value ?? examYear.value);
-
 const pageTitle = computed(() =>
   examRound.value
     ? t('admin.examCandidatesInfo.pageTitle', { round: examRound.value })
@@ -72,85 +71,6 @@ const pageSubtitle = computed(() =>
   examRound.value
     ? t('admin.examCandidatesInfo.pageSubtitle', { round: examRound.value })
     : t('admin.examCandidatesInfo.pageSubtitleFallback', { year: examYear.value }),
-);
-
-const buildMockCandidates = (round: string): ExamCandidateInfoRow[] => {
-  const seed = round
-    .split('')
-    .reduce((total, char) => total + char.charCodeAt(0), 0);
-
-  return [
-    {
-      id: `${round}-1`,
-      examNumber: String(66100001 + (seed % 17)),
-      prefix: 'นาย',
-      fullName: 'สมศรี ใจดี',
-      vocabularyGrammarScore: 50,
-      readingScore: 50,
-      totalScore: 100,
-      level: 5,
-      attemptStatus: 'repeatAttempt',
-    },
-    {
-      id: `${round}-2`,
-      examNumber: String(66100002 + (seed % 17)),
-      prefix: 'นาย',
-      fullName: 'สมภพ ใจดี',
-      vocabularyGrammarScore: 50,
-      readingScore: 50,
-      totalScore: 100,
-      level: 5,
-      attemptStatus: 'firstAttempt',
-    },
-    {
-      id: `${round}-3`,
-      examNumber: String(66100003 + (seed % 17)),
-      prefix: 'นาย',
-      fullName: 'สมวิว ใจดี',
-      vocabularyGrammarScore: 50,
-      readingScore: 50,
-      totalScore: 100,
-      level: 5,
-      attemptStatus: 'firstAttempt',
-    },
-    {
-      id: `${round}-4`,
-      examNumber: String(66100004 + (seed % 17)),
-      prefix: 'นางสาว',
-      fullName: 'สมอั้น ใจดี',
-      vocabularyGrammarScore: 50,
-      readingScore: 50,
-      totalScore: 100,
-      level: 5,
-      attemptStatus: 'repeatAttempt',
-    },
-    {
-      id: `${round}-5`,
-      examNumber: String(66100005 + (seed % 17)),
-      prefix: 'นางสาว',
-      fullName: 'สมหยก ใจดี',
-      vocabularyGrammarScore: 50,
-      readingScore: 50,
-      totalScore: 100,
-      level: 5,
-      attemptStatus: 'firstAttempt',
-    },
-    {
-      id: `${round}-6`,
-      examNumber: String(66100006 + (seed % 17)),
-      prefix: 'นางสาว',
-      fullName: 'สมฟ้า ใจดี',
-      vocabularyGrammarScore: 50,
-      readingScore: 50,
-      totalScore: 100,
-      level: 5,
-      attemptStatus: 'firstAttempt',
-    },
-  ];
-};
-
-const candidates = computed<ExamCandidateInfoRow[]>(() =>
-  buildMockCandidates(displayRound.value),
 );
 
 const pagination = ref<PaginationModel>({
@@ -202,7 +122,7 @@ watch(
   { immediate: true },
 );
 
-watch([searchQuery, displayRound], () => {
+watch(searchQuery, () => {
   pagination.value.page = 1;
 });
 </script>
