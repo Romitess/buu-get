@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { EntityManager } from 'typeorm';
 import { MoodleClientService } from './moodle-client.service';
 import { MoodleAction } from '../moodle-sync-logs/entities/moodle-sync-log.entity';
 import {
@@ -59,11 +60,13 @@ export class MoodleSyncService {
   async createUser(
     input: MoodleUserInput,
     meta: MoodleLogMeta,
+    manager?: EntityManager,
   ): Promise<number> {
     const data = await this.client.call<MoodleCreatedUser[]>(
       MoodleAction.CORE_USER_CREATE_USERS,
       { users: [{ auth: 'manual', ...input }] },
       meta,
+      manager,
     );
     const id = data?.[0]?.id;
     if (!id) {

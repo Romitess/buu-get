@@ -4,6 +4,7 @@ import axios, { AxiosError } from 'axios';
 import * as https from 'https';
 import * as tls from 'tls';
 import * as qs from 'qs';
+import { EntityManager } from 'typeorm';
 import { MoodleSyncLogsService } from '../moodle-sync-logs/moodle-sync-logs.service';
 import { MoodleAction } from '../moodle-sync-logs/entities/moodle-sync-log.entity';
 import { MoodleLogMeta } from './types/moodle.types';
@@ -69,6 +70,7 @@ export class MoodleClientService {
     action: MoodleAction,
     params: Record<string, unknown>,
     meta: MoodleLogMeta,
+    manager?: EntityManager,
   ): Promise<T> {
     // ต่อ TCP ไป IP ภายใน (PRIVATE_IP) แต่ verify TLS + ส่ง Host/SNI ตามชื่อโดเมน (MOODLE_NAME)
     const ip = this.configService
@@ -118,6 +120,7 @@ export class MoodleClientService {
         httpStatus,
         errorMessage,
         meta,
+        manager,
       );
     }
   }
@@ -184,27 +187,31 @@ export class MoodleClientService {
     httpStatus: number | null,
     errorMessage: string | null,
     meta: MoodleLogMeta,
+    manager?: EntityManager,
   ): Promise<void> {
     try {
-      await this.syncLogsService.create({
-        USER_ID: meta.userId,
-        ML_ACTION: action,
-        ML_WS_FUNCTION: action,
-        ML_REQUEST_URL: url,
-        ML_REQUEST_PAYLOAD: this.maskPayload(params),
-        ML_RESPONSE_BODY:
-          responseBody && typeof responseBody === 'object'
-            ? (responseBody as Record<string, unknown>)
-            : responseBody !== null
-              ? { value: responseBody }
-              : undefined,
-        ML_HTTP_METHOD: 'POST',
-        ML_HTTP_STATUS: httpStatus ?? undefined,
-        ML_ERROR_MASSAGE: errorMessage ?? undefined,
-        ML_REF_TYPE: meta.refType,
-        ML_REF_ID: meta.refId,
-        ML_MOODLE_REF_ID: meta.moodleRefId ?? 0,
-      });
+      await this.syncLogsService.create(
+        {
+          USER_ID: meta.userId,
+          ML_ACTION: action,
+          ML_WS_FUNCTION: action,
+          ML_REQUEST_URL: url,
+          ML_REQUEST_PAYLOAD: this.maskPayload(params),
+          ML_RESPONSE_BODY:
+            responseBody && typeof responseBody === 'object'
+              ? (responseBody as Record<string, unknown>)
+              : responseBody !== null
+                ? { value: responseBody }
+                : undefined,
+          ML_HTTP_METHOD: 'POST',
+          ML_HTTP_STATUS: httpStatus ?? undefined,
+          ML_ERROR_MASSAGE: errorMessage ?? undefined,
+          ML_REF_TYPE: meta.refType,
+          ML_REF_ID: meta.refId,
+          ML_MOODLE_REF_ID: meta.moodleRefId ?? 0,
+        },
+        manager,
+      );
     } catch (logError) {
       // ห้ามให้การ log ล้มเหลวไปกระทบ flow หลัก
       this.logger.error(

@@ -31,6 +31,7 @@ export class ExamService {
   ): Promise<Exam> {
     const exam = this.examRepository.create(createExamDto);
     const saved = await this.examRepository.save(exam);
+    // รอสร้างคอร์ส Moodle แล้ว map EXAM_MOODLE_COURSE_ID (ล้มเหลวจะ log ไว้ แต่ไม่ทำให้สร้างรอบสอบ fail)
     await this.syncCourseToMoodle(saved, actingUserId);
     return saved;
   }

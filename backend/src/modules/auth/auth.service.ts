@@ -64,45 +64,6 @@ export class AuthService {
     return { firstname: local, lastname: local };
   }
 
-  /**
-   * สร้าง user ใน Moodle แล้ว map USER_MOODLE_ID (เรียกหลัง commit — ไม่ค้าง transaction)
-   * ถ้าล้มเหลวจะ log ไว้แต่ไม่ทำให้การสมัครสมาชิกล้มเหลว (worker/แอดมินตามแก้ภายหลังได้)
-   */
-  private async syncUserToMoodle(params: {
-    userId: number;
-    email: string;
-    plainPassword: string;
-    fullNameEn?: string;
-    fullNameTh?: string;
-    idnumber?: string;
-  }): Promise<void> {
-    try {
-      const { firstname, lastname } = this.deriveName(
-        params.fullNameEn || params.fullNameTh,
-        params.email,
-      );
-      const moodleUserId = await this.moodleSyncService.createUser(
-        {
-          username: params.email,
-          password: params.plainPassword,
-          firstname,
-          lastname,
-          email: params.email,
-          ...(params.idnumber ? { idnumber: params.idnumber } : {}),
-        },
-        { userId: params.userId, refType: 'user', refId: params.userId },
-      );
-      await this.dataSource
-        .getRepository(User)
-        .update({ USER_ID: params.userId }, { USER_MOODLE_ID: moodleUserId });
-    } catch (error) {
-      console.error(
-        `[Moodle] สร้าง user ไม่สำเร็จสำหรับ USER_ID ${params.userId}:`,
-        error,
-      );
-    }
-  }
-
   private generateOtp(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
@@ -341,9 +302,38 @@ export class AuthService {
 
       await queryRunner.manager.save(newUserProfile);
 
+      // Step 3: สร้าง user ใน Moodle "ก่อน commit" — ถ้า Moodle ล้มเหลวจะ rollback ทั้งหมด (ไม่สร้าง user)
+      // ใช้ queryRunner.manager เขียน moodle_sync_log ใน transaction เดียวกัน (FK USER_ID ยังไม่ commit)
+      const { firstname, lastname } = this.deriveName(
+        registerDto.englishName || registerDto.fullName,
+        email,
+      );
+      const moodleIdnumber = registerDto.nationalId?.trim() || undefined;
+      const moodleUserId = await this.moodleSyncService.createUser(
+        {
+          username: email,
+          password: registerDto.password,
+          firstname,
+          lastname,
+          email,
+          ...(moodleIdnumber ? { idnumber: moodleIdnumber } : {}),
+        },
+        {
+          userId: savedUser.USER_ID,
+          refType: 'user',
+          refId: savedUser.USER_ID,
+        },
+        queryRunner.manager,
+      );
+      await queryRunner.manager.update(
+        User,
+        { USER_ID: savedUser.USER_ID },
+        { USER_MOODLE_ID: moodleUserId },
+      );
+
       await queryRunner.commitTransaction();
 
-      // Step 3: บันทึกรูปโปรไฟล์ "หลัง commit" (มี userId แล้ว และไม่ค้าง transaction)
+      // บันทึกรูปโปรไฟล์ "หลัง commit" (มี userId แล้ว และไม่ค้าง transaction)
       // - data URL → upload จริงไป /user_images/{userId}/ ผ่าน gateway
       // - path ธรรมดา (เช่นจาก seed/mock) → เก็บตรง ๆ
       // รูปเป็น optional: ถ้า upload ล้มเหลว ไม่ทำให้การสมัครล้มเหลว
@@ -355,16 +345,6 @@ export class AuthService {
       } catch (imgErr) {
         console.error('Failed to persist register profile image:', imgErr);
       }
-
-      // Sync ไป Moodle หลัง commit (รอ response เพื่อ map USER_MOODLE_ID, ไม่ค้าง transaction)
-      await this.syncUserToMoodle({
-        userId: savedUser.USER_ID,
-        email,
-        plainPassword: registerDto.password,
-        fullNameEn: registerDto.englishName,
-        fullNameTh: registerDto.fullName,
-        idnumber: registerDto.nationalId?.trim() || undefined,
-      });
 
       return {
         message: 'Registration successful',
