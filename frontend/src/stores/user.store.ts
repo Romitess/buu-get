@@ -75,7 +75,7 @@ export const useUserStore = defineStore('user', () => {
             ...profile,
             role: roles[0] ?? ROLES.CANDIDATE,
             roles,
-          };
+          } as User;
           isLoggedIn.value = true;
           accessToken.value = token;
           if (profile.id) {

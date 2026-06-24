@@ -97,8 +97,32 @@ const menuLinks = computed(() => {
   });
 
   // 2. Role-specific links
+  // IF: Candidate
+  if (role === ROLES.CANDIDATE) {
+    links.push({
+      name: 'exam-schedule',
+      label: t('navigation.examSchedule') || 'ตารางสอบ',
+      icon: 'event',
+      path: '/user/exam-schedule',
+    });
+    links.push({
+      name: 'exam-history',
+      label: t('navigation.examHistory') || 'ประวัติการสอบ',
+      icon: 'history',
+      path: '/user/exam-history',
+    });
+  }
+  // IF: Guest (not logged in)
+  else if (!userStore.isLoggedIn) {
+    links.push({
+      name: 'exam-schedule-guest',
+      label: t('navigation.viewSchedule') || 'ตารางสอบ',
+      icon: 'event',
+      path: '/user/exam-schedule',
+    });
+  }
   // IF: Registration Officer or Admin
-  if (role === ROLES.REGISTRATION_OFFICER || role === ROLES.ADMIN) {
+  else if (role === ROLES.REGISTRATION_OFFICER || role === ROLES.ADMIN) {
     links.push({
       name: 'exam-report',
       label: t('navigation.examReport') || 'รายงานการสอบ',
