@@ -219,51 +219,18 @@ const menuLinks = computed(() => {
   background-color: var(--surface-card) !important;
   transition: all 0.3s ease;
   overflow-x: hidden;
-
-  &.q-drawer--mini {
-    :deep(.q-drawer__content) {
-      width: 72px !important;
-      overflow-x: hidden;
-    }
-
-    .sidebar-list {
-      padding: 8px 0 !important;
-    }
-
-    .sidebar-item {
-      width: 48px !important;
-      height: 48px !important;
-      min-height: 48px !important;
-      padding: 0 !important;
-      margin: 0 auto 6px auto !important;
-      justify-content: center !important;
-    }
-
-    .sidebar-item__avatar {
-      min-width: 0 !important;
-      margin-right: 0 !important;
-      padding: 0 !important;
-      padding-right: 0 !important;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-  }
 }
-
 
 .sidebar-list {
   padding: 8px 12px;
 }
 
 .sidebar-item {
-  border-radius: 8px; /* Match Image 3 rounded corners */
+  border-radius: 8px;
   margin-bottom: 6px;
   color: var(--text-primary);
   min-height: 48px;
-  padding: 8px 12px; /* 12px list padding + 12px item padding = 24px total left space. Center of 72px width */
+  padding: 8px 12px;
   transition: all 0.2s ease;
 
   .sidebar-item__icon {
@@ -273,7 +240,7 @@ const menuLinks = computed(() => {
 
   &--active {
     color: var(--primary) !important;
-    background-color: #ebf1fa !important; /* Soft blue tint matching Image 3 */
+    background-color: #ebf1fa !important;
 
     .sidebar-item__icon {
       color: var(--primary) !important;
@@ -302,7 +269,7 @@ const menuLinks = computed(() => {
 
 .sidebar-group {
   margin-bottom: 6px;
-  
+
   :deep(.q-item) {
     border-radius: 8px;
     min-height: 48px;
@@ -311,5 +278,40 @@ const menuLinks = computed(() => {
 
 .sidebar-item__avatar {
   min-width: 40px !important;
+}
+
+// Mini mode — ต้องใช้ :deep ทั้งหมด
+:deep(.q-drawer--mini) {
+  .q-drawer__content {
+    overflow-x: hidden;
+  }
+
+  .q-list {
+    padding: 8px 0 !important;
+  }
+
+  .q-item {
+    width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 !important;
+    margin: 0 auto 6px auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .q-item__section--avatar {
+    min-width: 0 !important;
+    padding-right: 0 !important;
+    width: auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .q-item__section--main {
+    display: none !important;
+  }
 }
 </style>
