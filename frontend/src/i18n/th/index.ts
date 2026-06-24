@@ -1203,6 +1203,7 @@ export default {
         },
         tooltips: {
           viewDetail: 'ดูรายละเอียด',
+          incompleteDetail: 'ข้อมูลไม่ครบ ไม่สามารถดูรายละเอียดได้',
         },
       },
       notifications: {
@@ -1236,6 +1237,9 @@ export default {
         tooltips: {
           viewHistory: 'ดูประวัติการสอบ',
         },
+      },
+      notifications: {
+        loadError: 'ไม่สามารถโหลดข้อมูลผู้เข้าสอบได้',
       },
     },
     examReport: {

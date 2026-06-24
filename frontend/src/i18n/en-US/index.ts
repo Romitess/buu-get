@@ -1068,6 +1068,7 @@ export default {
         },
         tooltips: {
           viewDetail: 'View detail',
+          incompleteDetail: 'Incomplete data cannot be viewed',
         },
       },
       notifications: {
@@ -1102,6 +1103,9 @@ export default {
         tooltips: {
           viewHistory: 'View exam history',
         },
+      },
+      notifications: {
+        loadError: 'Unable to load exam candidate data',
       },
     },
     examReport: {

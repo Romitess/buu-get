@@ -11,10 +11,11 @@
     <template #body-cell-detail="{ row }">
       <div class="row items-center justify-center">
         <ActionButton
-          icon="groups"
+          icon="people_outline"
           color="black"
-          :tooltip="t('admin.examInformation.table.tooltips.viewDetail')"
-          @click="emit('view-detail', row)"
+          :tooltip="getDetailTooltip(row)"
+          :disable="!canViewDetail(row)"
+          @click="handleViewDetail(row)"
         />
       </div>
     </template>
@@ -49,6 +50,41 @@ const formatInteger = (value: number): string => value.toLocaleString('en-US');
 
 const formatScore = (value: number | null): string =>
   value === null ? '-' : value.toLocaleString('en-US', { maximumFractionDigits: 2 });
+
+const detailRequiredFields: ReadonlyArray<keyof ExamInformationRoundRow> = [
+  'round',
+  'applicants',
+  'attended',
+  'absent',
+  'repeatTakers',
+  'minScore',
+  'maxScore',
+  'averageScore',
+];
+
+const isCompleteValue = (
+  value: ExamInformationRoundRow[keyof ExamInformationRoundRow],
+): boolean => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') return value.trim().length > 0;
+  if (typeof value === 'number') return Number.isFinite(value);
+
+  return true;
+};
+
+const canViewDetail = (row: ExamInformationRoundRow): boolean =>
+  detailRequiredFields.every((field) => isCompleteValue(row[field]));
+
+const getDetailTooltip = (row: ExamInformationRoundRow): string =>
+  canViewDetail(row)
+    ? t('admin.examInformation.table.tooltips.viewDetail')
+    : t('admin.examInformation.table.tooltips.incompleteDetail');
+
+const handleViewDetail = (row: ExamInformationRoundRow): void => {
+  if (!canViewDetail(row)) return;
+
+  emit('view-detail', row);
+};
 
 const columns = computed<QTableColumn<ExamInformationRoundRow>[]>(() => [
   {
