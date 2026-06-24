@@ -36,6 +36,15 @@ import { EXAM_TYPE } from '../exam/constants/exam.constants';
 import { getProfileFixEmailTemplate } from './templates/profile-fix-email.template';
 import { ExamPasscodeLog } from '../exam/entities/exam-passcode-log.entity';
 import { TestTakerIdService } from './test-taker-id.service';
+import { ExecutiveTestTakerQueryDto } from './dto/executive-test-taker-query.dto';
+import {
+  ExecutiveTestTakerPage,
+  ExecutiveTestTakerRow,
+} from './interfaces/executive-test-taker.interface';
+import {
+  ExamHistoryRow,
+  ExecutiveExamHistoryResponse,
+} from './interfaces/executive-exam-history.interface';
 
 @Injectable()
 export class ExamEnrollmentsService {
@@ -330,6 +339,156 @@ export class ExamEnrollmentsService {
         'TRANSACTION.RECEIPTS',
       ],
     });
+  }
+
+  async findExecutiveTestTakers(
+    query: ExecutiveTestTakerQueryDto,
+  ): Promise<ExecutiveTestTakerPage> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const search = query.search?.trim();
+
+    const queryBuilder = this.examEnrollmentRepository
+      .createQueryBuilder('enrollment')
+      .leftJoin('enrollment.USER', 'user')
+      .leftJoin('user.PROFILE', 'profile')
+      .leftJoin('enrollment.SESSION', 'session')
+      .innerJoin('enrollment.ATTENDANCES', 'attendance')
+      .select('MIN(enrollment.ERM_ID)', 'enrollmentId')
+      .addSelect('MIN(session.EXAM_ID)', 'examId')
+      .addSelect('MIN(enrollment.ERM_TEST_TAKER)', 'testTakerId')
+      .addSelect('MIN(enrollment.ERM_STATUS)', 'status')
+      .addSelect('profile.userTitleTh', 'title')
+      .addSelect('profile.userFullnameTh', 'fullName')
+      .addSelect('COUNT(DISTINCT attendance.ATTEND_ID)', 'examRoundCount');
+
+    if (search) {
+      queryBuilder.andWhere(
+        new Brackets((where) => {
+          where
+            .where('enrollment.ERM_TEST_TAKER LIKE :search')
+            .orWhere('profile.userTitleTh LIKE :search')
+            .orWhere('profile.userFullnameTh LIKE :search');
+        }),
+        { search: `%${search}%` },
+      );
+    }
+
+    const totalResult = await queryBuilder
+      .clone()
+      .select('COUNT(DISTINCT enrollment.USER_ID)', 'total')
+      .getRawOne<{ total: string }>();
+    const total = Number(totalResult?.total ?? 0);
+    const rawRows = await queryBuilder
+      .groupBy('enrollment.USER_ID')
+      .addGroupBy('profile.userTitleTh')
+      .addGroupBy('profile.userFullnameTh')
+      .orderBy('testTakerId', 'ASC')
+      .addOrderBy('enrollmentId', 'ASC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getRawMany<{
+        enrollmentId: string;
+        examId: string;
+        testTakerId: string | null;
+        title: string | null;
+        fullName: string | null;
+        examRoundCount: string;
+        status: string;
+      }>();
+
+    const data: ExecutiveTestTakerRow[] = rawRows.map((row) => ({
+      enrollmentId: Number(row.enrollmentId),
+      examId: Number(row.examId),
+      testTakerId: row.testTakerId,
+      title: row.title,
+      fullName: row.fullName,
+      examRoundCount: Number(row.examRoundCount),
+      status: Number(row.status),
+    }));
+
+    return { data, total };
+  }
+
+  async findExamHistoryByEnrollmentId(
+    enrollmentId: number,
+  ): Promise<ExecutiveExamHistoryResponse> {
+    const enrollment = await this.examEnrollmentRepository.findOne({
+      where: { ERM_ID: enrollmentId },
+      relations: ['USER', 'USER.PROFILE', 'USER.IMAGE'],
+    });
+
+    if (!enrollment) {
+      throw new NotFoundException(
+        `Enrollment with ID ${enrollmentId} not found`,
+      );
+    }
+
+    const userId = enrollment.USER_ID;
+
+    const enrollments = await this.examEnrollmentRepository.find({
+      where: { USER_ID: userId },
+      relations: [
+        'SESSION',
+        'SESSION.EXAM',
+        'ATTENDANCES',
+        'SCORE',
+        'SCORE.CERTIFICATES',
+      ],
+      order: { CREATED_AT: 'DESC' },
+    });
+
+    const attendedEnrollments = enrollments.filter(
+      (e) => e.ATTENDANCES && e.ATTENDANCES.length > 0,
+    );
+
+    const examHistory: ExamHistoryRow[] = attendedEnrollments.map(
+      (e, index) => {
+        const exam = e.SESSION?.EXAM;
+        const examRound = exam?.EXAM_ROUND || '-';
+
+        let examDate = '-';
+        if (exam?.EXAM_DATE) {
+          const d = new Date(exam.EXAM_DATE);
+          const day = String(d.getDate()).padStart(2, '0');
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const beYear = d.getFullYear() + 543;
+          examDate = `${day}/${month}/${beYear}`;
+        }
+
+        const score = e.SCORE;
+        const certificates = score?.CERTIFICATES || [];
+        const hasCertificate = certificates.length > 0;
+        const cert = hasCertificate ? certificates[0] : null;
+
+        return {
+          index: index + 1,
+          examRound,
+          examDate,
+          langUseScore: score?.SC_LANG_USE_SCORE
+            ? Number(score.SC_LANG_USE_SCORE)
+            : null,
+          readingScore: score?.SC_READING_SCORE
+            ? Number(score.SC_READING_SCORE)
+            : null,
+          totalScore: score?.SC_TOTAL_SCORE
+            ? Number(score.SC_TOTAL_SCORE)
+            : null,
+          bandLevel: score?.SC_BAND_LEVEL ?? null,
+          hasCertificate,
+          certificateId: cert ? cert.CERT_ID : null,
+          certIssuedAt: cert?.CERT_ISSUED_AT
+            ? cert.CERT_ISSUED_AT.toISOString()
+            : null,
+          certExpiresAt: cert?.CERT_EXPIRES_AT
+            ? cert.CERT_EXPIRES_AT.toISOString()
+            : null,
+          certCode: cert ? cert.CERT_CODE : null,
+        };
+      },
+    );
+
+    return { examHistory };
   }
 
   async findByExamId(
@@ -646,7 +805,32 @@ export class ExamEnrollmentsService {
     }
 
     const skip = (query.page - 1) * query.limit;
-    qb.orderBy('enrollment.CREATED_AT', 'ASC').skip(skip).take(query.limit);
+
+    let sortColumn = 'enrollment.CREATED_AT';
+    let sortOrder: 'ASC' | 'DESC' = 'ASC';
+
+    if (query.sortBy) {
+      const mapping: Record<string, string> = {
+        titleTh: 'profile.userTitleTh',
+        fullnameTh: 'profile.userFullnameTh',
+        remark: 'enrollment.ERM_PHYSICAL_STATUS',
+        paymentStatus: 'enrollment.ERM_STATUS',
+        verifyStatus: 'enrollment.ERM_VERIFY_STATUS',
+        createdAt: 'enrollment.CREATED_AT',
+      };
+      const sortBy = query.sortBy;
+      if (Object.prototype.hasOwnProperty.call(mapping, sortBy)) {
+        sortColumn = mapping[sortBy];
+      }
+      if (query.descending !== undefined) {
+        sortOrder =
+          query.descending === 'true' || query.descending === true
+            ? 'DESC'
+            : 'ASC';
+      }
+    }
+
+    qb.orderBy(sortColumn, sortOrder).skip(skip).take(query.limit);
 
     const [data, total] = await qb.getManyAndCount();
     const totalPaid = await paidQb.getCount();

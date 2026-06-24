@@ -100,6 +100,33 @@ export interface ExamYearTableRow {
   averageScore: number | null;
 }
 
+/** แถวรายละเอียดรอบสอบภายในปีที่เลือก */
+export interface ExamInformationRoundRow {
+  round: string;
+  applicants: number;
+  attended: number;
+  absent: number;
+  repeatTakers: number;
+  minScore: number | null;
+  maxScore: number | null;
+  averageScore: number | null;
+}
+
+export type ExamCandidateAttemptStatus = 'firstAttempt' | 'repeatAttempt';
+
+/** แถวข้อมูลผู้เข้าสอบรายบุคคลในรอบสอบที่เลือก */
+export interface ExamCandidateInfoRow {
+  id: string;
+  examNumber: string;
+  prefix: string;
+  fullName: string;
+  vocabularyGrammarScore: number | null;
+  readingScore: number | null;
+  totalScore: number | null;
+  level: number | null;
+  attemptStatus: ExamCandidateAttemptStatus;
+}
+
 /** โครงสร้างข้อมูลรวมทั้งหน้ารายงาน */
 export interface ExamReportSummary {
   statCards: ExamReportStatCard[];

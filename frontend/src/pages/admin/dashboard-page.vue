@@ -37,7 +37,7 @@
     </div>
 
     <!-- ตารางสรุปรายปี -->
-    <ExamYearSummaryTable :rows="yearTable" :loading="isLoading" @view-detail="onViewDetail" />
+    <ExamYearSummaryTable :rows="yearTable" :loading="isLoading" />
   </q-page>
 </template>
 
@@ -52,7 +52,6 @@ import ExamScoreSummaryChart from 'src/components/exam-report/exam-score-summary
 import ExamBandChangeChart from 'src/components/exam-report/exam-band-change-chart.vue';
 import ExamYearSummaryTable from 'src/components/exam-report/exam-year-summary-table.vue';
 import { useExamReport } from 'src/composables/use-exam-report';
-import type { ExamYearTableRow } from 'src/types/exam-report.types';
 
 const $q = useQuasar();
 
@@ -79,10 +78,6 @@ watch(error, (newVal) => {
     $q.notify({ type: 'negative', message: newVal, position: 'top' });
   }
 });
-
-const onViewDetail = (row: ExamYearTableRow): void => {
-  $q.notify({ type: 'info', message: String(row.year), position: 'top' });
-};
 
 onMounted(() => {
   void loadFilterOptions();

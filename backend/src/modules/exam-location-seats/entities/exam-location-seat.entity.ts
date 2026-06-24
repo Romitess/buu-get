@@ -8,9 +8,11 @@ import {
   ManyToOne,
   JoinColumn,
   Unique,
+  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { ExamLocation } from '../../exam-locations/entities/exam-location.entity';
+import { ExamBlockedSeat } from '../../exam-blocked-seats/entities/exam-blocked-seat.entity';
 
 export enum LocationSeatStatus {
   AVAILABLE = 0,
@@ -97,4 +99,10 @@ export class ExamLocationSeat {
   @ManyToOne(() => ExamLocation, (location: ExamLocation) => location.SEATS)
   @JoinColumn({ name: 'LOCATION_ID' })
   LOCATION: ExamLocation;
+
+  @OneToMany(
+    () => ExamBlockedSeat,
+    (blockedSeat: ExamBlockedSeat) => blockedSeat.LOCATION_SEAT,
+  )
+  BLOCKED_SEATS: ExamBlockedSeat[];
 }

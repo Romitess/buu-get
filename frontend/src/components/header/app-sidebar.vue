@@ -12,21 +12,26 @@
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
-
-
     <!-- Sidebar List -->
     <q-list class="sidebar-list">
       <template v-for="link in menuLinks" :key="link.name">
         <!-- Expanded Group (isGroup = true) -->
         <q-expansion-item
           v-if="link.isGroup"
-          :icon="link.icon"
-          :label="link.label"
           :default-opened="true"
           class="sidebar-group"
           header-class="sidebar-item"
           active-class="sidebar-item--active"
         >
+          <template v-slot:header>
+            <q-item-section avatar class="sidebar-item__avatar">
+              <q-icon :name="link.icon" size="24px" class="sidebar-item__icon" />
+            </q-item-section>
+            <q-item-section class="sidebar-item__text">
+              <q-item-label class="text-weight-bold">{{ link.label }}</q-item-label>
+            </q-item-section>
+          </template>
+
           <q-list class="sidebar-child-list">
             <q-item
               v-for="child in link.children"
@@ -75,13 +80,7 @@ import { useNavigation } from 'src/composables/use-navigation';
 import { ROLES } from 'src/constants/roles';
 
 const { t } = useI18n();
-const {
-  userStore,
-  leftDrawerOpen,
-  miniState,
-  isHovered,
-  isMini,
-} = useNavigation();
+const { userStore, leftDrawerOpen, miniState, isHovered, isMini } = useNavigation();
 
 // Dynamic role-based navigation menu links
 const menuLinks = computed(() => {
@@ -97,14 +96,32 @@ const menuLinks = computed(() => {
   });
 
   // 2. Role-specific links
-  // IF: Registration Officer or Admin
-  if (role === ROLES.REGISTRATION_OFFICER || role === ROLES.ADMIN) {
+  // IF: Candidate
+  if (role === ROLES.CANDIDATE) {
     links.push({
-      name: 'exam-report',
-      label: t('navigation.examReport') || 'รายงานการสอบ',
-      icon: 'bar_chart',
-      path: '/admin/exam-report',
+      name: 'exam-schedule',
+      label: t('navigation.examSchedule') || 'ตารางสอบ',
+      icon: 'event',
+      path: '/user/exam-schedule',
     });
+    links.push({
+      name: 'exam-history',
+      label: t('navigation.examHistory') || 'ประวัติการสอบ',
+      icon: 'history',
+      path: '/user/exam-history',
+    });
+  }
+  // IF: Guest (not logged in)
+  else if (!userStore.isLoggedIn) {
+    links.push({
+      name: 'exam-schedule-guest',
+      label: t('navigation.viewSchedule') || 'ตารางสอบ',
+      icon: 'event',
+      path: '/user/exam-schedule',
+    });
+  }
+  // IF: Registration Officer or Admin
+  else if (role === ROLES.REGISTRATION_OFFICER || role === ROLES.ADMIN) {
     links.push({
       name: 'location-management',
       label: t('navigation.manageLocations') || 'จัดการห้องสอบ',
@@ -126,12 +143,6 @@ const menuLinks = computed(() => {
   }
   // IF: Exam Operations Officer or Staff
   else if (role === ROLES.EXAM_OPERATIONS_OFFICER || role === ROLES.STAFF) {
-    links.push({
-      name: 'exam-report',
-      label: t('navigation.examReport') || 'รายงานการสอบ',
-      icon: 'bar_chart',
-      path: '/admin/exam-report',
-    });
     links.push({
       name: 'exam-management',
       label: t('navigation.manageExams') || 'จัดการรอบสอบ',
@@ -203,10 +214,16 @@ const menuLinks = computed(() => {
   // IF: Executive
   else if (role === ROLES.EXECUTIVE) {
     links.push({
-      name: 'exam-report',
-      label: t('navigation.examReport') || 'รายงานการสอบ',
-      icon: 'assessment',
-      path: '/admin/exam-report',
+      name: 'admin-dashboard',
+      label: t('navigation.dashboard') || 'แดชบอร์ด',
+      icon: 'dashboard',
+      path: '/admin/dashboard',
+    });
+    links.push({
+      name: 'admin-executive-test-takers',
+      label: t('navigation.examInformation') || 'ข้อมูลการสอบ',
+      icon: 'groups',
+      path: '/admin/executive/test-takers',
     });
   }
 

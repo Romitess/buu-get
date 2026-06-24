@@ -1,20 +1,31 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Exam } from './entities/exam.entity';
 import { ExamPasscode } from './entities/exam-passcode.entity';
 import { CreateExamDto } from './dto/create-exam.dto';
 import { UpdateExamDto } from './dto/update-exam.dto';
 import { CreatePasscodesDto } from './dto/create-passcodes.dto';
+import { NotifyExamChangesDto } from './dto/notify-exam-changes.dto';
 import { ExamPasscodeLog } from './entities/exam-passcode-log.entity';
 import { PasscodeLogResponseDto } from './dto/passcode-log-response.dto';
+import {
+  ExamEnrollment,
+  ExamEnrollmentStatus,
+} from '../exam-enrollments/entities/exam-enrollment.entity';
+import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
+import { getExamChangeEmailTemplate } from './templates/exam-change-email.template';
 import { MoodleSyncService } from '../moodle/moodle-sync.service';
+
 @Injectable()
 export class ExamService {
+  private readonly logger = new Logger(ExamService.name);
+
   constructor(
     @InjectRepository(Exam)
     private readonly examRepository: Repository<Exam>,
@@ -23,6 +34,10 @@ export class ExamService {
     @InjectRepository(ExamPasscodeLog)
     private readonly examPasscodeLogRepository: Repository<ExamPasscodeLog>,
     private readonly moodleSyncService: MoodleSyncService,
+
+    @InjectRepository(ExamEnrollment)
+    private readonly examEnrollmentRepository: Repository<ExamEnrollment>,
+    private readonly platformGatewayService: PlatformGatewayService,
   ) {}
 
   async create(
@@ -252,5 +267,138 @@ export class ExamService {
     });
 
     return await this.examPasscodeRepository.save(passcodes);
+  }
+
+  /** จำนวนอีเมลที่ส่งพร้อมกันต่อรอบ เพื่อไม่ให้ยิง request พร้อมกันมากเกินไป */
+  private static readonly EMAIL_SEND_CONCURRENCY = 25;
+
+  /**
+   * แจ้งเตือนผู้เข้าสอบทุกคนในรอบสอบทางอีเมล เมื่อมีการแก้ไขรายละเอียดรอบสอบ
+   * ตอบกลับทันทีและดำเนินการส่งอีเมลแบบเบื้องหลัง เพื่อให้ UI ลื่นไหล
+   * ไม่ว่าจะมีผู้เข้าสอบมากแค่ไหน
+   */
+  notifyExamChanges(
+    examId: number,
+    dto: NotifyExamChangesDto,
+  ): { success: boolean } {
+    void this.dispatchExamChangeEmails(examId, dto).catch((err: unknown) => {
+      this.logger.error(
+        `Failed to dispatch exam change emails for exam ${examId}: ${String(
+          err,
+        )}`,
+      );
+    });
+    return { success: true };
+  }
+
+  /**
+   * โหลดผู้รับและส่งอีเมลแจ้งเตือนการเปลี่ยนแปลงรอบสอบแบบเบื้องหลัง
+   * โดยทยอยส่งทีละชุด (batch) แบบขนาน เพื่อความเร็วและไม่ให้ระบบล้น
+   */
+  private async dispatchExamChangeEmails(
+    examId: number,
+    dto: NotifyExamChangesDto,
+  ): Promise<void> {
+    const exam = await this.examRepository.findOne({
+      where: { EXAM_ID: examId },
+      select: { EXAM_ID: true, EXAM_NAME: true, EXAM_ROUND: true },
+    });
+
+    if (!exam) {
+      this.logger.warn(
+        `Skip exam change notification: exam ${examId} not found`,
+      );
+      return;
+    }
+
+    // โหลดผู้สมัครที่ยังลงทะเบียนอยู่ (ไม่นับที่ยกเลิก) ของทุก session ในรอบสอบนี้
+    const enrollments = await this.examEnrollmentRepository.find({
+      where: {
+        SESSION: { EXAM_ID: examId },
+        ERM_STATUS: Not(ExamEnrollmentStatus.CANCELLED),
+      },
+      relations: ['SESSION', 'USER', 'USER.PROFILE'],
+      select: {
+        ERM_ID: true,
+        USER_ID: true,
+        SESSION_ID: true,
+        SESSION: { SS_ID: true, EXAM_ID: true },
+        USER: {
+          USER_ID: true,
+          USER_EMAIL: true,
+          PROFILE: {
+            userProfileId: true,
+            userTitleTh: true,
+            userFullnameTh: true,
+          },
+        },
+      },
+    });
+
+    // จัดกลุ่มตามอีเมล (ผู้รับไม่ซ้ำ) เพื่อไม่ให้ส่งซ้ำหากลงทะเบียนหลาย session
+    const recipientByEmail = new Map<string, string>();
+    for (const enrollment of enrollments) {
+      const email = enrollment.USER?.USER_EMAIL?.trim();
+      if (!email) {
+        continue;
+      }
+      if (!recipientByEmail.has(email)) {
+        const prefix = enrollment.USER?.PROFILE?.userTitleTh || '';
+        const fullname = enrollment.USER?.PROFILE?.userFullnameTh || '';
+        const fullName = `${prefix} ${fullname}`.trim() || 'ผู้เข้าสอบ';
+        recipientByEmail.set(email, fullName);
+      }
+    }
+
+    const recipients = [...recipientByEmail.entries()];
+    if (recipients.length === 0) {
+      return;
+    }
+
+    const examName = exam.EXAM_NAME || 'BUU-GET Exam';
+    const examRound = exam.EXAM_ROUND || '';
+    const subject = `[แจ้งเตือนการเปลี่ยนแปลงรอบสอบ] - ${examName}`;
+
+    // ทยอยส่งทีละชุดแบบขนาน (allSettled เพื่อให้ผู้รับรายอื่นไม่หยุดเมื่อรายใดล้มเหลว)
+    const batchSize = ExamService.EMAIL_SEND_CONCURRENCY;
+    let sent = 0;
+    let failed = 0;
+
+    for (let i = 0; i < recipients.length; i += batchSize) {
+      const batch = recipients.slice(i, i + batchSize);
+      const results = await Promise.allSettled(
+        batch.map(([email, fullName]) => {
+          const htmlContent = getExamChangeEmailTemplate({
+            fullName,
+            examName,
+            examRound,
+            changes: dto.changes,
+          });
+          return this.platformGatewayService.sendEmail(
+            'BUU-GET',
+            email,
+            subject,
+            htmlContent,
+          );
+        }),
+      );
+
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          sent += 1;
+        } else {
+          failed += 1;
+          this.logger.error(
+            `Failed to send exam change notification for exam ${examId}: ${String(
+              result.reason,
+            )}`,
+          );
+        }
+      }
+    }
+
+    this.logger.log(
+      `Exam change notifications for exam ${examId}: sent ${sent}, failed ${failed}, total ${recipients.length}`,
+    );
   }
 }

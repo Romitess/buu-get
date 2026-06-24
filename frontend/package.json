@@ -2,7 +2,7 @@
   "name": "buu-get-front",
   "version": "0.0.1",
   "description": "BUU GET frontend application",
-  "productName": "BUU GET Front",
+  "productName": "BUU GET",
   "author": "Tanakit Wongviroj <65160167@go.buu.ac.th>",
   "type": "module",
   "private": true,

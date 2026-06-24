@@ -85,6 +85,8 @@
 
       <!-- Right: Auth Actions -->
       <div class="app-header__actions">
+        <LanguageSwitcher />
+
         <!-- Logged In State -->
         <template v-if="userStore.isLoggedIn">
           <AppHeaderProfile />
@@ -217,6 +219,7 @@ import { useNavigation } from 'src/composables/use-navigation';
 
 // Components
 import AppHeaderProfile from './app-header-profile.vue';
+import LanguageSwitcher from './language-switcher.vue';
 
 const userStore = useUserStore();
 const route = useRoute();
@@ -318,8 +321,8 @@ const navLinks = computed<NavigationItem[]>(() => {
       }
     }
 
-    // === Staff-specific: Dashboard ===
-    if (role === ROLES.ADMIN || role === ROLES.STAFF) {
+    // === Staff/Executive-specific: Dashboard ===
+    if (role === ROLES.ADMIN || role === ROLES.STAFF || role === ROLES.EXECUTIVE) {
       links.push({
         name: 'admin-dashboard',
         label: t('navigation.dashboard'),
@@ -368,27 +371,11 @@ const navLinks = computed<NavigationItem[]>(() => {
             icon: 'summarize',
             path: '/admin/application-fee-report',
           },
-          {
-            name: 'admin-exam-report',
-            label: t('navigation.examReport'),
-            icon: 'assessment',
-            path: '/admin/exam-report',
-          },
         ],
       });
     }
 
-    // === Executive: Exam Report ===
-    // executive ไม่อยู่ในกลุ่ม ADMIN/FINANCE จึงเพิ่มลิงก์รายงานการสอบแยกให้ตรงนี้
-    // (admin เห็นเมนูนี้อยู่แล้วในกลุ่ม "รายงาน" ด้านบน — ไม่ใส่ซ้ำ)
-    if (role === ROLES.EXECUTIVE) {
-      links.push({
-        name: 'admin-exam-report',
-        label: t('navigation.examReport'),
-        icon: 'assessment',
-        path: '/admin/exam-report',
-      });
-    }
+
   } else {
     // === Guest Navigation ===
     links.push({

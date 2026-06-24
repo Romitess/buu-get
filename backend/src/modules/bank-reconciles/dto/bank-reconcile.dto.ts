@@ -75,14 +75,4 @@ export class UpdateBankReconcileRefsDto {
   @IsOptional()
   @MaxLength(20)
   BR_REF2?: string | null;
-
-  @ApiPropertyOptional({
-    description: 'เหตุผลการแก้ไข Ref',
-    maxLength: 255,
-    nullable: true,
-  })
-  @IsString()
-  @IsOptional()
-  @MaxLength(255)
-  CHANGE_REASON?: string | null;
 }

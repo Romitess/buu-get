@@ -1,4 +1,5 @@
 import { BUDDHIST_YEAR_OFFSET } from 'src/constants/exam';
+import { parseBangkokDate } from 'src/services/exam.service';
 
 /** ชื่อเดือนย่อภาษาไทย */
 const THAI_SHORT_MONTHS: string[] = [
@@ -22,12 +23,11 @@ const MS_PER_DAY = 1000 * 60 * 60 * 24;
 export function useThaiDate() {
   const formatThaiDate = (dateStr: string): string => {
     if (!dateStr) return '-';
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return dateStr;
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
-    return `${day}/${month}/${year}`;
+    const { year, month, day } = parseBangkokDate(dateStr);
+    const dayStr = String(day).padStart(2, '0');
+    const monthStr = String(month).padStart(2, '0');
+    const bYear = year + BUDDHIST_YEAR_OFFSET;
+    return `${dayStr}/${monthStr}/${bYear}`;
   };
 
   /**
@@ -35,12 +35,10 @@ export function useThaiDate() {
    */
   const formatThaiDateShort = (dateStr: string): string => {
     if (!dateStr) return '-';
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return dateStr;
-    const day = date.getDate();
-    const monthName = THAI_SHORT_MONTHS[date.getMonth()] ?? '';
-    const year = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
-    return `${day} ${monthName} ${year}`;
+    const { year, month, day } = parseBangkokDate(dateStr);
+    const monthName = THAI_SHORT_MONTHS[month - 1] ?? '';
+    const bYear = year + BUDDHIST_YEAR_OFFSET;
+    return `${day} ${monthName} ${bYear}`;
   };
 
   /**
@@ -50,19 +48,18 @@ export function useThaiDate() {
    */
   const formatThaiDateRange = (startDateStr: string, endDateStr: string): string => {
     if (!startDateStr || !endDateStr) return '-';
-    const startDate = new Date(startDateStr);
-    const endDate = new Date(endDateStr);
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return '-';
+    const start = parseBangkokDate(startDateStr);
+    const end = parseBangkokDate(endDateStr);
 
-    const startDay = startDate.getDate();
-    const endDay = endDate.getDate();
-    const startMonth = startDate.getMonth();
-    const endMonth = endDate.getMonth();
-    const startMonthName = THAI_SHORT_MONTHS[startMonth] ?? '';
-    const endMonthName = THAI_SHORT_MONTHS[endMonth] ?? '';
-    const endYear = endDate.getFullYear() + BUDDHIST_YEAR_OFFSET;
+    const startDay = start.day;
+    const endDay = end.day;
+    const startMonth = start.month;
+    const endMonth = end.month;
+    const startMonthName = THAI_SHORT_MONTHS[startMonth - 1] ?? '';
+    const endMonthName = THAI_SHORT_MONTHS[endMonth - 1] ?? '';
+    const endYear = end.year + BUDDHIST_YEAR_OFFSET;
 
-    if (startMonth === endMonth && startDate.getFullYear() === endDate.getFullYear()) {
+    if (startMonth === endMonth && start.year === end.year) {
       // Same month: "7 - 25 ต.ค. 2569"
       return `${startDay} - ${endDay} ${endMonthName} ${endYear}`;
     }
@@ -75,9 +72,10 @@ export function useThaiDate() {
    */
   const calcDaysDiff = (startDateStr: string, endDateStr: string): number => {
     if (!startDateStr || !endDateStr) return 0;
-    const startDate = new Date(startDateStr);
-    const endDate = new Date(endDateStr);
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return 0;
+    const start = parseBangkokDate(startDateStr);
+    const end = parseBangkokDate(endDateStr);
+    const startDate = new Date(start.year, start.month - 1, start.day);
+    const endDate = new Date(end.year, end.month - 1, end.day);
     const diff = Math.abs(endDate.getTime() - startDate.getTime());
     return Math.ceil(diff / MS_PER_DAY);
   };

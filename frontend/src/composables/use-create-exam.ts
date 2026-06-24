@@ -1,4 +1,4 @@
-import { ref, computed, nextTick, type Ref } from 'vue';
+import { ref, computed, nextTick, watch, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useExamStore } from 'src/stores/exam.store';
@@ -21,13 +21,17 @@ import {
   fetchExamById,
   fetchAllExamsRaw,
   updateExamRound,
+  notifyExamChanges,
   formatTime,
   formatBackendDate,
   buddhistToGregorian,
   createExamPasscodes,
+  parseBangkokDate,
+  type ExamChangeItem,
 } from 'src/services/exam.service';
 import { getUsersFromApi } from 'src/services/user.service';
 import { ROLES } from 'src/constants/roles';
+import { useUserStore } from 'src/stores/user.store';
 
 /** A single room within a time slot */
 export interface ExamRoom {
@@ -92,6 +96,22 @@ export interface UseExamFormOptions {
   examId?: number | undefined;
 }
 
+/** Snapshot ของฟิลด์ที่ใช้เปรียบเทียบหาความเปลี่ยนแปลงของรอบสอบ */
+interface ExamComparisonSnapshot {
+  examName: string;
+  examRound: string;
+  examType: string;
+  examFormat: string;
+  fee: string;
+  fundSourceLabel: string;
+  examDate: string;
+  regStartDate: string;
+  regEndDate: string;
+  payStartDate: string;
+  payEndDate: string;
+  scheduleText: string;
+}
+
 /**
  * Composable for managing exam creation/editing logic.
  * @param externalForm - Optional external form ref (useful for injecting initial data or v-model syncing)
@@ -101,12 +121,54 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const router = useRouter();
   const $q = useQuasar();
   const examStore = useExamStore();
+  const userStore = useUserStore();
 
   const examId = options?.examId;
   const isEditMode = computed<boolean>(() => !!examId);
 
   const wasOriginallyPublished = ref(false);
   const originalExamDate = ref('');
+
+  /**
+   * สแนปช็อตข้อมูลรอบสอบ ณ ตอนโหลด (edit mode) เพื่อใช้เปรียบเทียบหาความเปลี่ยนแปลง
+   * สำหรับแจ้งเตือนผู้เข้าสอบทางอีเมล
+   */
+  const originalSnapshot = ref<ExamComparisonSnapshot | null>(null);
+
+  const today = (() => {
+    const now = new Date();
+    const d = String(now.getDate()).padStart(2, '0');
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const y = now.getFullYear() + BUDDHIST_YEAR_OFFSET;
+    return `${d}/${m}/${y}`;
+  })();
+
+  // Use external form if provided, otherwise create a new one.
+  // This must be initialized before computed values and watchers that read form.value.
+  const form =
+    externalForm ||
+    ref<CreateExamForm>({
+      examName: '',
+      examRound: '',
+      examType: EXAM_TYPE_GENERAL,
+      examFormat: EXAM_FORMAT_COMPUTER,
+      fundSourceId: null,
+      fee: '',
+      isPublished: false,
+      examDate: today,
+      timeSlots: [
+        {
+          startTime: '08:00',
+          endTime: '10:00',
+          rooms: [{ locationId: null, proctorName: '', proctors: [], seats: 40 }],
+        },
+      ],
+      regStartDate: today,
+      regEndDate: today,
+      payStartDate: today,
+      payEndDate: today,
+      eligibleCandidates: [],
+    });
 
   /** Published exams keep non-schedule sections read-only. */
   const isPublishedSectionLocked = computed<boolean>(() => {
@@ -122,14 +184,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       slot.rooms.some((room) => (room.enrollmentCount || 0) > 0),
     );
   });
-
-  const today = (() => {
-    const now = new Date();
-    const d = String(now.getDate()).padStart(2, '0');
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const y = now.getFullYear() + BUDDHIST_YEAR_OFFSET;
-    return `${d}/${m}/${y}`;
-  })();
 
   const examTypeOptions: string[] = [EXAM_TYPE_GENERAL, EXAM_TYPE_SPECIAL];
   const examFormatOptions: string[] = [EXAM_FORMAT_COMPUTER, EXAM_FORMAT_PAPER];
@@ -195,37 +249,23 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     return occupied;
   });
 
+  // Watch occupied location IDs and reset locationId if it becomes occupied (unless loading data)
+  watch(occupiedLocationIds, (occupied) => {
+    if (isLoadingData.value) return;
+    form.value.timeSlots.forEach((slot) => {
+      slot.rooms.forEach((room) => {
+        if (room.locationId !== null && occupied.has(room.locationId)) {
+          room.locationId = null;
+        }
+      });
+    });
+  });
+
   /** Currently active time slot tab index */
   const activeSlotIndex = ref(0);
 
   /** Search query for eligible candidates table */
   const candidateSearch = ref('');
-
-  // Use external form if provided, otherwise create a new one
-  const form =
-    externalForm ||
-    ref<CreateExamForm>({
-      examName: '',
-      examRound: '',
-      examType: EXAM_TYPE_GENERAL,
-      examFormat: EXAM_FORMAT_COMPUTER,
-      fundSourceId: null,
-      fee: '',
-      isPublished: false,
-      examDate: today,
-      timeSlots: [
-        {
-          startTime: '08:00',
-          endTime: '10:00',
-          rooms: [{ locationId: null, proctorName: '', proctors: [], seats: 40 }],
-        },
-      ],
-      regStartDate: today,
-      regEndDate: today,
-      payStartDate: today,
-      payEndDate: today,
-      eligibleCandidates: [],
-    });
 
   /** Whether the current exam type is special */
   const isSpecialRound = computed<boolean>(() => form.value.examType === EXAM_TYPE_SPECIAL);
@@ -351,7 +391,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    * Validate required fields and populate fieldErrors.
    * @returns true if all required fields are filled, false otherwise.
    */
-  const timeToMinutes = (timeStr: string | undefined): number => {
+  function timeToMinutes(timeStr: string | undefined): number {
     if (!timeStr) return 9999;
     const cleaned = timeStr.replace(/\s/g, '');
     if (!cleaned) return 9999;
@@ -359,7 +399,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     const hours = parseInt(parts[0] || '0', 10);
     const minutes = parseInt(parts[1] || '0', 10);
     return hours * 60 + minutes;
-  };
+  }
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
@@ -501,12 +541,94 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    */
   const gregorianToBuddhistDisplay = (dateStr: string | null | undefined): string => {
     if (!dateStr) return today;
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return today;
-    const d = String(date.getDate()).padStart(2, '0');
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const y = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
+    const { year, month, day } = parseBangkokDate(dateStr);
+    const d = String(day).padStart(2, '0');
+    const m = String(month).padStart(2, '0');
+    const y = year + BUDDHIST_YEAR_OFFSET;
     return `${d}/${m}/${y}`;
+  };
+
+  /** หา label แหล่งทุนจาก id เพื่อแสดงในรายละเอียดการเปลี่ยนแปลง */
+  const fundSourceLabelFor = (id: number | null): string => {
+    if (!id) return 'ไม่ระบุ';
+    return fundSourceOptions.value.find((o) => o.value === id)?.label || String(id);
+  };
+
+  /**
+   * สร้างข้อความสรุปกำหนดการสอบและห้องสอบ (เรียงตามเวลา) เพื่อใช้เปรียบเทียบ
+   * และแสดงในอีเมลแจ้งเตือน
+   */
+  const buildScheduleText = (): string => {
+    const slots = [...form.value.timeSlots]
+      .filter((slot) => slot.startTime && slot.endTime)
+      .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+    return slots
+      .map((slot) => {
+        const rooms = slot.rooms
+          .map((room) => {
+            const loc = locationOptions.value.find((o) => o.value === room.locationId);
+            const locLabel = loc?.label || 'ไม่ระบุห้อง';
+            const proctorText =
+              room.proctors && room.proctors.length > 0
+                ? ` (ผู้คุมสอบ: ${room.proctors.join(', ')})`
+                : '';
+            return `• ${locLabel} ${room.seats} ที่นั่ง${proctorText}`;
+          })
+          .join('\n');
+        return `เวลา ${slot.startTime} - ${slot.endTime} น.\n${rooms}`;
+      })
+      .join('\n\n');
+  };
+
+  /** สร้าง snapshot ของข้อมูลรอบสอบจากค่าปัจจุบันในฟอร์ม */
+  const buildComparisonSnapshot = (): ExamComparisonSnapshot => ({
+    examName: form.value.examName.trim(),
+    examRound: form.value.examRound.trim(),
+    examType: form.value.examType,
+    examFormat: form.value.examFormat,
+    fee: String(form.value.fee ?? ''),
+    fundSourceLabel: fundSourceLabelFor(form.value.fundSourceId),
+    examDate: form.value.examDate,
+    regStartDate: form.value.regStartDate,
+    regEndDate: form.value.regEndDate,
+    payStartDate: form.value.payStartDate,
+    payEndDate: form.value.payEndDate,
+    scheduleText: buildScheduleText(),
+  });
+
+  /**
+   * เปรียบเทียบ snapshot เดิมกับค่าปัจจุบัน แล้วสร้างรายการการเปลี่ยนแปลง
+   * (เฉพาะฟิลด์ที่มีการเปลี่ยนแปลงจริง)
+   */
+  const buildExamChanges = (): ExamChangeItem[] => {
+    const before = originalSnapshot.value;
+    if (!before) return [];
+    const after = buildComparisonSnapshot();
+    const changes: ExamChangeItem[] = [];
+
+    const push = (label: string, oldValue: string, newValue: string): void => {
+      if (oldValue !== newValue) {
+        changes.push({ label, oldValue, newValue });
+      }
+    };
+
+    push('ชื่อรอบสอบ', before.examName, after.examName);
+    push('รอบสอบ', before.examRound, after.examRound);
+    push('ประเภทการสอบ', before.examType, after.examType);
+    push('รูปแบบการสอบ', before.examFormat, after.examFormat);
+    if (before.fee !== after.fee) {
+      push('ค่าธรรมเนียม', `${before.fee} บาท`, `${after.fee} บาท`);
+    }
+    push('แหล่งทุน', before.fundSourceLabel, after.fundSourceLabel);
+    push('วันที่สอบ', before.examDate, after.examDate);
+    push('วันที่เริ่มรับสมัคร', before.regStartDate, after.regStartDate);
+    push('วันที่สิ้นสุดรับสมัคร', before.regEndDate, after.regEndDate);
+    push('วันที่เริ่มชำระเงิน', before.payStartDate, after.payStartDate);
+    push('วันที่สิ้นสุดชำระเงิน', before.payEndDate, after.payEndDate);
+    push('กำหนดการสอบและห้องสอบ', before.scheduleText, after.scheduleText);
+
+    return changes;
   };
 
   const loadInitialData = async (): Promise<void> => {
@@ -630,6 +752,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
         // The schedule lock is now handled by the computed property 'isScheduleLocked'
         // based on exam.EXAM_PUBLISHED and session enrollment counts.
+
+        // เก็บ snapshot ของข้อมูลรอบสอบหลังโหลดเสร็จ (options ถูกโหลดครบแล้ว)
+        // เพื่อใช้เปรียบเทียบหาความเปลี่ยนแปลงตอนบันทึก
+        originalSnapshot.value = buildComparisonSnapshot();
       }
     } catch (err) {
       console.error('Failed to load initial data:', err);
@@ -1214,6 +1340,18 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           position: 'top',
           timeout: 2000,
         });
+
+        // แจ้งเตือนผู้เข้าสอบทุกคนในรอบสอบทางอีเมล เมื่อเจ้าหน้าที่ทะเบียน (registration officer)
+        // แก้ไขรอบสอบ โดยส่งเฉพาะรายละเอียดที่มีการเปลี่ยนแปลงจริง
+        // ยิงแบบไม่บล็อก (fire-and-forget) เพื่อให้การบันทึกลื่นไหล ไม่ต้องรอการส่งอีเมล
+        if (userStore.userRole === ROLES.REGISTRATION_OFFICER) {
+          const changes = buildExamChanges();
+          if (changes.length > 0) {
+            void notifyExamChanges(examId, changes).catch((notifyErr) => {
+              console.error('Failed to notify exam changes:', notifyErr);
+            });
+          }
+        }
       } else {
         // === CREATE MODE ===
         const payload: CreateExamPayload = {

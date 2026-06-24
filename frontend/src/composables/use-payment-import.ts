@@ -204,12 +204,7 @@ export function usePaymentImport() {
   };
 
   onMounted(() => {
-    if (isAutoLoadSuspended.value) {
-      clearLocalData();
-      return;
-    }
-
-    void loadData();
+    clearLocalData();
   });
 
   return {
