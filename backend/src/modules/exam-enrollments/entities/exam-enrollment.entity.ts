@@ -140,6 +140,14 @@ export class ExamEnrollment {
   })
   ERM_AT: Date;
 
+  @Column({
+    name: 'ERM_MOODLE_ENROLL_ID',
+    type: 'int',
+    nullable: true,
+    comment: 'รหัส enrol ฝั่ง Moodle (เติมโดย worker)',
+  })
+  ERM_MOODLE_ENROLL_ID: number | null;
+
   @CreateDateColumn({ name: 'CREATED_AT', comment: 'วันที่สร้าง' })
   CREATED_AT: Date;
 

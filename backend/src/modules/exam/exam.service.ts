@@ -12,6 +12,7 @@ import { UpdateExamDto } from './dto/update-exam.dto';
 import { CreatePasscodesDto } from './dto/create-passcodes.dto';
 import { ExamPasscodeLog } from './entities/exam-passcode-log.entity';
 import { PasscodeLogResponseDto } from './dto/passcode-log-response.dto';
+import { MoodleSyncService } from '../moodle/moodle-sync.service';
 @Injectable()
 export class ExamService {
   constructor(
@@ -21,11 +22,51 @@ export class ExamService {
     private readonly examPasscodeRepository: Repository<ExamPasscode>,
     @InjectRepository(ExamPasscodeLog)
     private readonly examPasscodeLogRepository: Repository<ExamPasscodeLog>,
+    private readonly moodleSyncService: MoodleSyncService,
   ) {}
 
-  async create(createExamDto: CreateExamDto): Promise<Exam> {
+  async create(
+    createExamDto: CreateExamDto,
+    actingUserId: number,
+  ): Promise<Exam> {
     const exam = this.examRepository.create(createExamDto);
-    return await this.examRepository.save(exam);
+    const saved = await this.examRepository.save(exam);
+    await this.syncCourseToMoodle(saved, actingUserId);
+    return saved;
+  }
+
+  /**
+   * สร้างคอร์สใน Moodle แล้ว map EXAM_MOODLE_COURSE_ID (เรียกหลัง save — ไม่ค้าง transaction)
+   * ถ้าล้มเหลวจะ log ไว้แต่ไม่ทำให้การสร้างรอบสอบล้มเหลว
+   */
+  private async syncCourseToMoodle(
+    exam: Exam,
+    actingUserId: number,
+  ): Promise<void> {
+    try {
+      const toUnix = (d?: Date | string | null): number | undefined =>
+        d ? Math.floor(new Date(d).getTime() / 1000) : undefined;
+      const moodleCourseId = await this.moodleSyncService.createCourse(
+        {
+          fullname: exam.EXAM_NAME,
+          shortname: `BUUGET-${exam.EXAM_ID}-R${exam.EXAM_ROUND}`,
+          categoryid: this.moodleSyncService.courseCategoryId,
+          startdate: toUnix(exam.EXAM_REG_START_DATE) ?? toUnix(exam.EXAM_DATE),
+          enddate: toUnix(exam.EXAM_DATE),
+        },
+        { userId: actingUserId, refType: 'course', refId: exam.EXAM_ID },
+      );
+      exam.EXAM_MOODLE_COURSE_ID = String(moodleCourseId);
+      await this.examRepository.update(
+        { EXAM_ID: exam.EXAM_ID },
+        { EXAM_MOODLE_COURSE_ID: String(moodleCourseId) },
+      );
+    } catch (error) {
+      console.error(
+        `[Moodle] สร้างคอร์สไม่สำเร็จสำหรับ EXAM_ID ${exam.EXAM_ID}:`,
+        error,
+      );
+    }
   }
 
   /**

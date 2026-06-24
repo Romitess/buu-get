@@ -77,6 +77,15 @@ export class User {
   })
   USER_STATUS: string;
 
+  @Column({
+    name: 'USER_MOODLE_ID',
+    type: 'int',
+    nullable: true,
+    unique: true,
+    comment: 'รหัสผู้ใช้ฝั่ง Moodle',
+  })
+  USER_MOODLE_ID: number | null;
+
   @CreateDateColumn({
     name: 'CREATED_AT',
     comment: 'วันที่สร้างบัญชี',

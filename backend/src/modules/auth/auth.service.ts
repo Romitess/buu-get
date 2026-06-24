@@ -15,6 +15,7 @@ import { UserProfile } from '../user-profile/entities/user-profile.entity';
 import { UserImage } from '../user-image/entities/user-image.entity';
 import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
 import { resolveImageFolder } from '../platform-gateway/constants/image-category.config';
+import { MoodleSyncService } from '../moodle/moodle-sync.service';
 import { getOtpEmailTemplate } from './templates/otp-email.template';
 import * as bcrypt from 'bcrypt';
 
@@ -42,8 +43,65 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly dataSource: DataSource,
     private readonly platformGatewayService: PlatformGatewayService,
+    private readonly moodleSyncService: MoodleSyncService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
+
+  /** แยกชื่อ-นามสกุลจาก fullname (fallback เป็น local-part ของอีเมล) สำหรับส่งให้ Moodle */
+  private deriveName(
+    fullName: string | undefined,
+    email: string,
+  ): { firstname: string; lastname: string } {
+    const source = (fullName ?? '').trim();
+    if (source) {
+      const parts = source.split(/\s+/);
+      if (parts.length >= 2) {
+        return { firstname: parts[0], lastname: parts.slice(1).join(' ') };
+      }
+      return { firstname: source, lastname: source };
+    }
+    const local = email.split('@')[0] || 'user';
+    return { firstname: local, lastname: local };
+  }
+
+  /**
+   * สร้าง user ใน Moodle แล้ว map USER_MOODLE_ID (เรียกหลัง commit — ไม่ค้าง transaction)
+   * ถ้าล้มเหลวจะ log ไว้แต่ไม่ทำให้การสมัครสมาชิกล้มเหลว (worker/แอดมินตามแก้ภายหลังได้)
+   */
+  private async syncUserToMoodle(params: {
+    userId: number;
+    email: string;
+    plainPassword: string;
+    fullNameEn?: string;
+    fullNameTh?: string;
+    idnumber?: string;
+  }): Promise<void> {
+    try {
+      const { firstname, lastname } = this.deriveName(
+        params.fullNameEn || params.fullNameTh,
+        params.email,
+      );
+      const moodleUserId = await this.moodleSyncService.createUser(
+        {
+          username: params.email,
+          password: params.plainPassword,
+          firstname,
+          lastname,
+          email: params.email,
+          ...(params.idnumber ? { idnumber: params.idnumber } : {}),
+        },
+        { userId: params.userId, refType: 'user', refId: params.userId },
+      );
+      await this.dataSource
+        .getRepository(User)
+        .update({ USER_ID: params.userId }, { USER_MOODLE_ID: moodleUserId });
+    } catch (error) {
+      console.error(
+        `[Moodle] สร้าง user ไม่สำเร็จสำหรับ USER_ID ${params.userId}:`,
+        error,
+      );
+    }
+  }
 
   private generateOtp(): string {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -297,6 +355,16 @@ export class AuthService {
       } catch (imgErr) {
         console.error('Failed to persist register profile image:', imgErr);
       }
+
+      // Sync ไป Moodle หลัง commit (รอ response เพื่อ map USER_MOODLE_ID, ไม่ค้าง transaction)
+      await this.syncUserToMoodle({
+        userId: savedUser.USER_ID,
+        email,
+        plainPassword: registerDto.password,
+        fullNameEn: registerDto.englishName,
+        fullNameTh: registerDto.fullName,
+        idnumber: registerDto.nationalId?.trim() || undefined,
+      });
 
       return {
         message: 'Registration successful',
