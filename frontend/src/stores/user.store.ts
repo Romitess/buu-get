@@ -73,7 +73,7 @@ export const useUserStore = defineStore('user', () => {
           const roles = buildRoles(profile.role, profile.roles);
           currentUser.value = {
             ...profile,
-            role: roles[0],
+            role: roles[0] ?? ROLES.CANDIDATE,
             roles,
           };
           isLoggedIn.value = true;
