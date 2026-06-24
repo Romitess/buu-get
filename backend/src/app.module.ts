@@ -35,6 +35,7 @@ import { PageBuilderModule } from './modules/page-builder/page-builder.module';
 import { ExamRuleVouchersModule } from './modules/exam-rule-vouchers/exam-rule-vouchers.module';
 import { ScoreCriteriaModule } from './modules/score-criteria/score-criteria.module';
 import { MoodleSyncLogsModule } from './modules/moodle-sync-logs/moodle-sync-logs.module';
+import { MoodleModule } from './modules/moodle/moodle.module';
 import { ExamReportModule } from './modules/exam-report/exam-report.module';
 import { ExamBlockedSeatsModule } from './modules/exam-blocked-seats/exam-blocked-seats.module';
 
@@ -97,6 +98,7 @@ import { ExamBlockedSeatsModule } from './modules/exam-blocked-seats/exam-blocke
     ExamRuleVouchersModule,
     ScoreCriteriaModule,
     MoodleSyncLogsModule,
+    MoodleModule,
     ExamReportModule,
     ExamBlockedSeatsModule,
   ],

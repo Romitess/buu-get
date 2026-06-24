@@ -15,7 +15,7 @@
       >
         <ImageUpload
           v-model="box.imagePath"
-          folder="/page_builder"
+          category="page-builder"
           alt="banner"
           aspect-ratio="5 / 1"
           :crop-width="350"

@@ -10,6 +10,18 @@ export interface EnvironmentVariables {
   DB_PASSWORD: string;
   DB_NAME: string;
   JWT_SECRET: string;
+  // Moodle host (เลือกใช้ PRIVATE_IP สำหรับ server→server)
+  MOODLE_PRIVATE_IP?: string;
+  MOODLE_PUBLIC_IP?: string;
+  MOODLE_HOST_IP?: string;
+  MOODLE_NAME?: string;
+  MOODLE_USER?: string;
+  MOODLE_PASSWORD?: string;
+  MOODLE_WS_TOKEN?: string;
+  /** scheme ที่ใช้เรียก Moodle (default http) */
+  MOODLE_SCHEME?: string;
+  MOODLE_COURSE_CATEGORY_ID?: number;
+  MOODLE_STUDENT_ROLEID?: number;
 }
 
 const envSchema = Joi.object<EnvironmentVariables>({
@@ -24,6 +36,17 @@ const envSchema = Joi.object<EnvironmentVariables>({
   DB_PASSWORD: Joi.string().allow('').required(),
   DB_NAME: Joi.string().required(),
   JWT_SECRET: Joi.string().min(16).required(),
+  // Moodle Web Service (optional ที่ boot — service จะ getOrThrow ตอนเรียกจริง)
+  MOODLE_PRIVATE_IP: Joi.string().optional(),
+  MOODLE_PUBLIC_IP: Joi.string().optional(),
+  MOODLE_HOST_IP: Joi.string().optional(),
+  MOODLE_NAME: Joi.string().optional(),
+  MOODLE_USER: Joi.string().optional(),
+  MOODLE_PASSWORD: Joi.string().optional(),
+  MOODLE_WS_TOKEN: Joi.string().optional(),
+  MOODLE_SCHEME: Joi.string().valid('http', 'https').optional(),
+  MOODLE_COURSE_CATEGORY_ID: Joi.number().optional(),
+  MOODLE_STUDENT_ROLEID: Joi.number().optional(),
 });
 
 export function validateEnv(

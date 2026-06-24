@@ -7,7 +7,10 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import {
   ApiTags,
   ApiOperation,
@@ -36,10 +39,14 @@ export class ExamController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'สร้างข้อมูลการสอบใหม่' })
   @ApiCreatedResponse({ type: Exam })
-  async create(@Body() createExamDto: CreateExamDto): Promise<Exam> {
-    return this.examService.create(createExamDto);
+  async create(
+    @Body() createExamDto: CreateExamDto,
+    @Req() req: { user: { userId: number } },
+  ): Promise<Exam> {
+    return this.examService.create(createExamDto, req.user.userId);
   }
 
   @Get()

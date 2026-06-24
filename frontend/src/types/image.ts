@@ -3,6 +3,8 @@
  * ไฟล์นี้กำหนด types และ interfaces สำหรับการจัดการรูปภาพ
  */
 
+import type { ImageCategory } from 'src/constants/api';
+
 export interface ImageUploadResponse {
   /** path ของรูปที่บันทึกไว้ใน platform-gateway */
   path: string;
@@ -19,8 +21,8 @@ export interface ImageUploadResponse {
 export interface ImageUploadRequest {
   /** ไฟล์รูปที่ต้อง upload */
   file: File;
-  /** folder destination (optional) - ถ้าไม่ระบุจะใช้ default */
-  folder?: string;
+  /** ชนิดรูป (category) - backend จะ map เป็น folder ปลายทางเอง */
+  category: ImageCategory;
 }
 
 export interface ImageAsset {

@@ -497,7 +497,7 @@ const handleFileSelected = (file: File | null): void => {
 const onCropConfirm = async (croppedFile: File): Promise<void> => {
   showCropDialog.value = false;
   try {
-    await handleImageUpload(croppedFile, '/user_images');
+    await handleImageUpload(croppedFile, 'user-image');
   } catch (error) {
     console.error('Error uploading image:', error);
   }
