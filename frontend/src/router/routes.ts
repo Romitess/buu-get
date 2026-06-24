@@ -465,12 +465,25 @@ const routes: RouteRecordRaw[] = [
           {
             path: 'executive/test-takers',
             name: 'admin-executive-test-takers',
-            component: () => import('pages/admin/exam-information-yearly-page.vue'),
+            component: () => import('pages/admin/exam-information-page.vue'),
             meta: {
               roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
-                { label: 'navigation.examInformation', icon: 'info' },
+                { label: 'ข้อมูลผู้เข้าสอบ', icon: 'star' },
+              ],
+            },
+          },
+          {
+            path: 'executive/test-takers/:examId/:ermId/history',
+            name: 'admin-executive-exam-history',
+            component: () => import('pages/admin/executive-exam-history-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'ข้อมูลผู้เข้าสอบ', icon: 'star', to: '/admin/executive/test-takers' },
+                { label: 'ประวัติการสอบ', icon: 'star' },
               ],
             },
           },
