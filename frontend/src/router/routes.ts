@@ -470,7 +470,7 @@ const routes: RouteRecordRaw[] = [
               roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
-                { label: 'ข้อมูลผู้เข้าสอบ', icon: 'star' },
+                { label: 'navigation.examInformation', icon: 'info' },
               ],
             },
           },

@@ -1077,35 +1077,6 @@ export default {
     examCandidatesInfo: {
       pageTitle: 'Exam Candidates Round {round}',
       pageTitleFallback: 'Exam Candidates {year}',
-      pageSubtitle: 'Shows individual candidate information and score results for exam round {round}.',
-      pageSubtitleFallback: 'Shows individual candidate information and score results in {year}.',
-      searchPlaceholder: 'Search',
-      status: {
-        firstAttempt: 'First attempt',
-        repeatAttempt: 'Repeat attempt',
-      },
-      table: {
-        emptyLabel: 'No exam candidate data found',
-        columns: {
-          index: 'No.',
-          examNumber: 'Exam ID',
-          prefix: 'Prefix',
-          fullName: 'Full Name',
-          vocabularyGrammarScore: 'Vocabulary & Grammar',
-          readingScore: 'Reading',
-          totalScore: 'Total Score',
-          level: 'Level',
-          status: 'Status',
-          tools: 'Tools',
-        },
-        tooltips: {
-          viewHistory: 'View exam history',
-        },
-      },
-    },
-    examCandidatesInfo: {
-      pageTitle: 'Exam Candidates Round {round}',
-      pageTitleFallback: 'Exam Candidates {year}',
       pageSubtitle:
         'Shows individual candidate information and score results for exam round {round}.',
       pageSubtitleFallback: 'Shows individual candidate information and score results in {year}.',
