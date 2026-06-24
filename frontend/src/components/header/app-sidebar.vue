@@ -123,12 +123,6 @@ const menuLinks = computed(() => {
   // IF: Registration Officer or Admin
   else if (role === ROLES.REGISTRATION_OFFICER || role === ROLES.ADMIN) {
     links.push({
-      name: 'exam-report',
-      label: t('navigation.examReport') || 'รายงานการสอบ',
-      icon: 'bar_chart',
-      path: '/admin/exam-report',
-    });
-    links.push({
       name: 'location-management',
       label: t('navigation.manageLocations') || 'จัดการห้องสอบ',
       icon: 'corporate_fare',
@@ -149,12 +143,6 @@ const menuLinks = computed(() => {
   }
   // IF: Exam Operations Officer or Staff
   else if (role === ROLES.EXAM_OPERATIONS_OFFICER || role === ROLES.STAFF) {
-    links.push({
-      name: 'exam-report',
-      label: t('navigation.examReport') || 'รายงานการสอบ',
-      icon: 'bar_chart',
-      path: '/admin/exam-report',
-    });
     links.push({
       name: 'exam-management',
       label: t('navigation.manageExams') || 'จัดการรอบสอบ',

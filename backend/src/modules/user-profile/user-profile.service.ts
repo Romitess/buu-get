@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, Repository, Not } from 'typeorm';
 import { CreateUserProfileDto } from './dto/create-user-profile.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { UserProfile } from './entities/user-profile.entity';
@@ -233,6 +237,28 @@ export class UserProfileService {
       const fieldToUpdate = isForeigner
         ? 'USER_PASSPORT_NO'
         : 'USER_NATIONAL_ID';
+
+      if (userNationalId !== null && userNationalId !== '') {
+        const existingUser = await this.userProfileRepository.manager.findOne(
+          User,
+          {
+            where: {
+              [fieldToUpdate]: userNationalId,
+              USER_ID: Not(userProfile.userId),
+            },
+            withDeleted: true,
+          },
+        );
+
+        if (existingUser) {
+          throw new ConflictException(
+            isForeigner
+              ? 'หนังสือเดินทางนี้มีผู้ใช้งานแล้วในระบบ'
+              : 'เลขประจำตัวประชาชนนี้มีผู้ใช้งานแล้วในระบบ',
+          );
+        }
+      }
+
       await this.userProfileRepository.manager.update(
         User,
         { USER_ID: userProfile.userId },
