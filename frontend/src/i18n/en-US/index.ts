@@ -1184,6 +1184,7 @@ export default {
     examHistory: 'Exam History',
     manageExams: 'Manage Exams',
     dashboard: 'Dashboard',
+    pageBuilder: 'Homepage Builder',
     viewSchedule: 'View Schedule',
     logout: 'Logout',
     menu: 'Menu',

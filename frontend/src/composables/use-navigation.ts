@@ -52,6 +52,13 @@ export function useNavigation() {
       path: '/admin/exam-management',
       requiredRoles: [ROLES.STAFF, ROLES.ADMIN, ROLES.REGISTRATION_OFFICER],
     },
+    {
+      name: 'admin-page-builder',
+      label: 'จัดการหน้าแรก',
+      icon: 'web',
+      path: '/admin/page-builder',
+      requiredRoles: [ROLES.STAFF, ROLES.ADMIN, ROLES.REGISTRATION_OFFICER],
+    },
   ];
 
   const computedLinks: ComputedRef<NavigationItem[]> = computed(() => {
