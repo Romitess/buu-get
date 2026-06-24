@@ -41,6 +41,10 @@ import {
   ExecutiveTestTakerPage,
   ExecutiveTestTakerRow,
 } from './interfaces/executive-test-taker.interface';
+import {
+  ExamHistoryRow,
+  ExecutiveExamHistoryResponse,
+} from './interfaces/executive-exam-history.interface';
 
 @Injectable()
 export class ExamEnrollmentsService {
@@ -404,6 +408,87 @@ export class ExamEnrollmentsService {
     }));
 
     return { data, total };
+  }
+
+  async findExamHistoryByEnrollmentId(
+    enrollmentId: number,
+  ): Promise<ExecutiveExamHistoryResponse> {
+    const enrollment = await this.examEnrollmentRepository.findOne({
+      where: { ERM_ID: enrollmentId },
+      relations: ['USER', 'USER.PROFILE', 'USER.IMAGE'],
+    });
+
+    if (!enrollment) {
+      throw new NotFoundException(
+        `Enrollment with ID ${enrollmentId} not found`,
+      );
+    }
+
+    const userId = enrollment.USER_ID;
+
+    const enrollments = await this.examEnrollmentRepository.find({
+      where: { USER_ID: userId },
+      relations: [
+        'SESSION',
+        'SESSION.EXAM',
+        'ATTENDANCES',
+        'SCORE',
+        'SCORE.CERTIFICATES',
+      ],
+      order: { CREATED_AT: 'DESC' },
+    });
+
+    const attendedEnrollments = enrollments.filter(
+      (e) => e.ATTENDANCES && e.ATTENDANCES.length > 0,
+    );
+
+    const examHistory: ExamHistoryRow[] = attendedEnrollments.map(
+      (e, index) => {
+        const exam = e.SESSION?.EXAM;
+        const examRound = exam?.EXAM_ROUND || '-';
+
+        let examDate = '-';
+        if (exam?.EXAM_DATE) {
+          const d = new Date(exam.EXAM_DATE);
+          const day = String(d.getDate()).padStart(2, '0');
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const beYear = d.getFullYear() + 543;
+          examDate = `${day}/${month}/${beYear}`;
+        }
+
+        const score = e.SCORE;
+        const certificates = score?.CERTIFICATES || [];
+        const hasCertificate = certificates.length > 0;
+        const cert = hasCertificate ? certificates[0] : null;
+
+        return {
+          index: index + 1,
+          examRound,
+          examDate,
+          langUseScore: score?.SC_LANG_USE_SCORE
+            ? Number(score.SC_LANG_USE_SCORE)
+            : null,
+          readingScore: score?.SC_READING_SCORE
+            ? Number(score.SC_READING_SCORE)
+            : null,
+          totalScore: score?.SC_TOTAL_SCORE
+            ? Number(score.SC_TOTAL_SCORE)
+            : null,
+          bandLevel: score?.SC_BAND_LEVEL ?? null,
+          hasCertificate,
+          certificateId: cert ? cert.CERT_ID : null,
+          certIssuedAt: cert?.CERT_ISSUED_AT
+            ? cert.CERT_ISSUED_AT.toISOString()
+            : null,
+          certExpiresAt: cert?.CERT_EXPIRES_AT
+            ? cert.CERT_EXPIRES_AT.toISOString()
+            : null,
+          certCode: cert ? cert.CERT_CODE : null,
+        };
+      },
+    );
+
+    return { examHistory };
   }
 
   async findByExamId(

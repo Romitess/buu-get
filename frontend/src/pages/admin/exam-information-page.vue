@@ -131,7 +131,7 @@ const onRequest = ({ pagination: nextPagination }: TableRequestProps): void => {
 
 const handleView = (row: ExecutiveTestTakerTableRow): void => {
   void router.push({
-    name: 'admin-exam-registrant-detail',
+    name: 'admin-executive-exam-history',
     params: { examId: row.examId, ermId: row.enrollmentId },
   });
 };

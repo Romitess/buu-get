@@ -1,5 +1,5 @@
 import { api } from 'src/boot/axios';
-import type { ExecutiveTestTakerPage } from 'src/types/executive-test-taker.types';
+import type { ExecutiveTestTakerPage, ExecutiveExamHistoryResponse } from 'src/types/executive-test-taker.types';
 
 export interface ExecutiveTestTakerQuery {
   page: number;
@@ -15,6 +15,15 @@ export const fetchExecutiveTestTakers = async (
     {
       params: query,
     },
+  );
+  return response.data;
+};
+
+export const fetchExecutiveExamHistory = async (
+  enrollmentId: number,
+): Promise<ExecutiveExamHistoryResponse> => {
+  const response = await api.get<ExecutiveExamHistoryResponse>(
+    `/exam-enrollments/executive/test-takers/${enrollmentId}/exam-history`,
   );
   return response.data;
 };

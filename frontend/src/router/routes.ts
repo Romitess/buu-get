@@ -475,6 +475,19 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'executive/test-takers/:examId/:ermId/exam-history',
+            name: 'admin-executive-exam-history',
+            component: () => import('pages/admin/executive-exam-history-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'ข้อมูลผู้เข้าสอบ', icon: 'star', to: '/admin/executive/test-takers' },
+                { label: 'ประวัติการสอบ', icon: 'history' },
+              ],
+            },
+          },
+          {
             path: 'page-builder',
             name: 'admin-page-builder',
             component: () => import('pages/admin/page-builder-page.vue'),

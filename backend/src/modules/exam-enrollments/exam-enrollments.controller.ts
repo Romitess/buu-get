@@ -25,6 +25,7 @@ import { ExamEnrollment } from './entities/exam-enrollment.entity';
 import { ExamEnrollmentQueryDto } from './dto/exam-enrollment-query.dto';
 import { ExecutiveTestTakerQueryDto } from './dto/executive-test-taker-query.dto';
 import { ExecutiveTestTakerPage } from './interfaces/executive-test-taker.interface';
+import { ExecutiveExamHistoryResponse } from './interfaces/executive-exam-history.interface';
 
 @ApiTags('exam-enrollments')
 @Controller('exam-enrollments')
@@ -55,6 +56,17 @@ export class ExamEnrollmentsController {
     @Query() query: ExecutiveTestTakerQueryDto,
   ): Promise<ExecutiveTestTakerPage> {
     return await this.examEnrollmentsService.findExecutiveTestTakers(query);
+  }
+
+  @Get('executive/test-takers/:enrollmentId/exam-history')
+  @ApiOperation({ summary: 'ดึงประวัติการสอบรายบุคคลสำหรับผู้บริหาร' })
+  @ApiOkResponse({ description: 'ข้อมูลประวัติการสอบพร้อมคะแนน' })
+  async findExamHistoryByEnrollmentId(
+    @Param('enrollmentId', ParseIntPipe) enrollmentId: number,
+  ): Promise<ExecutiveExamHistoryResponse> {
+    return await this.examEnrollmentsService.findExamHistoryByEnrollmentId(
+      enrollmentId,
+    );
   }
 
   @Post('match-import')
