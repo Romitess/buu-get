@@ -371,12 +371,6 @@ const navLinks = computed<NavigationItem[]>(() => {
             icon: 'summarize',
             path: '/admin/application-fee-report',
           },
-          {
-            name: 'admin-exam-report',
-            label: t('navigation.examReport'),
-            icon: 'assessment',
-            path: '/admin/exam-report',
-          },
         ],
       });
     }

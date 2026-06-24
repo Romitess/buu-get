@@ -20,7 +20,7 @@ import { RoleEnum } from 'src/modules/roles/enums/role.enum';
 @ApiBearerAuth()
 @Controller('exam-report')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(RoleEnum.ADMIN, RoleEnum.EXECUTIVE)
+@Roles(RoleEnum.EXECUTIVE)
 export class ExamReportController {
   constructor(private readonly examReportService: ExamReportService) {}
 
