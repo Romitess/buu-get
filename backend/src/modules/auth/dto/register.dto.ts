@@ -89,9 +89,10 @@ export class RegisterDto {
   confirmPassword?: string;
 
   @ApiProperty({
-    example: '/user_images/abc-123.jpg',
+    example: 'data:image/jpeg;base64,/9j/4AAQ...',
     required: false,
-    description: 'path ของรูปโปรไฟล์ที่ upload ผ่าน platform-gateway แล้ว',
+    description:
+      'รูปโปรไฟล์: รับได้ทั้ง data URL (base64 — backend จะ upload ไป /user_images/{userId}/ ให้) หรือ path ที่ upload มาแล้ว',
   })
   @IsOptional()
   @IsString()

@@ -14,6 +14,7 @@ import { Role } from '../roles/entities/role.entity';
 import { UserProfile } from '../user-profile/entities/user-profile.entity';
 import { UserImage } from '../user-image/entities/user-image.entity';
 import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
+import { resolveImageFolder } from '../platform-gateway/constants/image-category.config';
 import { getOtpEmailTemplate } from './templates/otp-email.template';
 import * as bcrypt from 'bcrypt';
 
@@ -138,6 +139,46 @@ export class AuthService {
     };
   }
 
+  /**
+   * บันทึกรูปโปรไฟล์ตอนสมัครสมาชิก
+   * - ถ้าเป็น data URL (base64) → upload ไป /user_images/{userId}/ แล้วเก็บ path ที่ได้
+   * - ถ้าเป็น path ธรรมดา → เก็บลง DB ตรง ๆ (backward compat)
+   */
+  private async persistRegisterProfileImage(
+    profileImage: string | undefined,
+    userId: number,
+  ): Promise<void> {
+    if (!profileImage) return;
+
+    let imageUrl = profileImage;
+
+    if (profileImage.startsWith('data:')) {
+      const match = /^data:(image\/[\w.+-]+);base64,(.+)$/s.exec(profileImage);
+      if (!match) {
+        console.error('Invalid profileImage data URL on register');
+        return;
+      }
+      const ext = match[1].split('/')[1] || 'jpg';
+      const buffer = Buffer.from(match[2], 'base64');
+      const folder = resolveImageFolder('user-image', userId);
+      const result = (await this.platformGatewayService.uploadBuffer(
+        buffer,
+        `profile.${ext}`,
+        { path: folder, bucket: 'hrd.storage' },
+      )) as { result?: string; filename?: string; path?: string } | undefined;
+      const returned: string | undefined =
+        result?.result || result?.filename || result?.path;
+      if (typeof returned !== 'string' || !returned) {
+        console.error('uploadBuffer returned no path on register');
+        return;
+      }
+      imageUrl = returned;
+    }
+
+    const repo = this.dataSource.getRepository(UserImage);
+    await repo.save(repo.create({ USER_ID: userId, USER_IMAGE_URL: imageUrl }));
+  }
+
   async register(registerDto: RegisterDto): Promise<RegisterResponse> {
     const email = registerDto.email.trim().toLowerCase();
     // Hash password
@@ -242,16 +283,20 @@ export class AuthService {
 
       await queryRunner.manager.save(newUserProfile);
 
-      // Step 3: บันทึก UserImage (ถ้ามี)
-      if (registerDto.profileImage) {
-        const newUserImage = queryRunner.manager.create(UserImage, {
-          USER_ID: savedUser.USER_ID,
-          USER_IMAGE_URL: registerDto.profileImage,
-        });
-        await queryRunner.manager.save(newUserImage);
-      }
-
       await queryRunner.commitTransaction();
+
+      // Step 3: บันทึกรูปโปรไฟล์ "หลัง commit" (มี userId แล้ว และไม่ค้าง transaction)
+      // - data URL → upload จริงไป /user_images/{userId}/ ผ่าน gateway
+      // - path ธรรมดา (เช่นจาก seed/mock) → เก็บตรง ๆ
+      // รูปเป็น optional: ถ้า upload ล้มเหลว ไม่ทำให้การสมัครล้มเหลว
+      try {
+        await this.persistRegisterProfileImage(
+          registerDto.profileImage,
+          savedUser.USER_ID,
+        );
+      } catch (imgErr) {
+        console.error('Failed to persist register profile image:', imgErr);
+      }
 
       return {
         message: 'Registration successful',

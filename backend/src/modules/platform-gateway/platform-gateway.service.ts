@@ -1,5 +1,10 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
 import axios from 'axios';
@@ -13,6 +18,11 @@ import {
   UploadFileDto,
   UploadCertificateFileDto,
 } from 'src/types/api/uploadFile';
+import {
+  ImageCategory,
+  isImageCategory,
+  resolveImageFolder,
+} from './constants/image-category.config';
 
 @Injectable()
 export class PlatformGatewayService {
@@ -351,6 +361,69 @@ export class PlatformGatewayService {
     }
   }
 
+  /**
+   * Upload รูปตามชนิด (category) โดยให้ registry เป็นผู้กำหนด folder ปลายทาง
+   * - per-user category จะต่อท้ายด้วย /{userId}
+   * - validate category กับ allow-list กัน write นอกขอบเขต
+   */
+  async uploadByCategory(
+    category: string,
+    file: Express.Multer.File,
+    userId?: number,
+  ): Promise<any> {
+    if (!isImageCategory(category)) {
+      throw new BadRequestException(`Unknown image category: ${category}`);
+    }
+    let folder: string;
+    try {
+      folder = resolveImageFolder(category as ImageCategory, userId);
+    } catch {
+      throw new BadRequestException(
+        `Image category "${category}" requires an authenticated user`,
+      );
+    }
+    return this.uploadFile(file, {
+      path: folder,
+      fileName: file.originalname,
+    });
+  }
+
+  /**
+   * Upload รูปจาก Buffer (ไม่มีไฟล์บนดิสก์) — ใช้ตอน register ที่ backend ถือ base64
+   */
+  async uploadBuffer(
+    buffer: Buffer,
+    originalName: string,
+    uploadFileDto: UploadFileDto,
+  ): Promise<any> {
+    const apiName = 'uploadFile';
+    const apiConfig = this.getApiConfig(apiName);
+    const cacheToken = await this.getCacheToken(apiName);
+    const dataObj = this.constructFileData(
+      { filename: originalName } as Express.Multer.File,
+      uploadFileDto,
+    );
+    dataObj.fileUpload = buffer;
+    try {
+      const response = await this.uploadToApi(apiConfig, cacheToken, dataObj);
+      return response.data;
+    } catch (error: any) {
+      if (
+        error.response?.data?.error === 'invalid_token' ||
+        error.response?.status === 401
+      ) {
+        await this.refreshToken(apiName);
+        const retryToken = await this.getCacheToken(apiName);
+        const response = await this.uploadToApi(apiConfig, retryToken, dataObj);
+        return response.data;
+      }
+      await this.sendNoti(
+        `${this.getNotiEndpoint()}${apiName}: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
   // async uploadCertificate(
   //   file: Express.Multer.File,
   //   uploadCertificateDto: UploadCertificateFileDto,
@@ -417,7 +490,14 @@ export class PlatformGatewayService {
       const form = new FormData();
       for (const key in dataObj) {
         if (Object.prototype.hasOwnProperty.call(dataObj, key)) {
-          form.append(key, dataObj[key]);
+          const value = dataObj[key];
+          // Buffer (เช่นจาก uploadBuffer) ต้องระบุ filename ให้ form-data
+          // ส่วน stream จาก createReadStream มี path/filename ในตัวอยู่แล้ว
+          if (key === 'fileUpload' && Buffer.isBuffer(value)) {
+            form.append(key, value, { filename: String(dataObj.fileName) });
+          } else {
+            form.append(key, value);
+          }
         }
       }
       payload = form;

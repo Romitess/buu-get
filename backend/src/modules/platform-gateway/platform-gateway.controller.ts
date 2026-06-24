@@ -6,11 +6,13 @@ import {
   Get,
   Param,
   Post,
+  Req,
   Res,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { PlatformGatewayService } from './platform-gateway.service';
 import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { UploadFileDto } from 'src/types/api/uploadFile';
@@ -18,9 +20,18 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { Public } from 'src/decorators/public.decorator';
+import { OptionalJwtAuthGuard } from 'src/common/guards/optional-jwt-auth.guard';
 import axios from 'axios';
 
 type AnyRecord = Record<string, unknown>;
+
+/** multer disk storage ใช้ร่วมกันทุก endpoint ที่รับไฟล์ */
+const uploadDiskStorage = diskStorage({
+  destination: './uploaded_file',
+  filename: (_req, file, cb) => {
+    cb(null, uuidv4() + extname(file.originalname));
+  },
+});
 
 const isString = (value: unknown): value is string =>
   typeof value === 'string' && value.length > 0;
@@ -48,17 +59,7 @@ export class PlatformGatewayController {
 
   @Public()
   @Post('/uploadFile')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploaded_file',
-        filename: (req, file, cb) => {
-          const name = uuidv4();
-          cb(null, name + extname(file.originalname));
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor('file', { storage: uploadDiskStorage }))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() uploadFileDto: UploadFileDto,
@@ -72,6 +73,33 @@ export class PlatformGatewayController {
       uploadFileDto.fileName = file.originalname; // ใช้ชื่อไฟล์ต้นฉบับถ้าไม่ได้ระบุ fileName
     }
     return this.platformGatewayService.uploadFile(file, uploadFileDto);
+  }
+
+  /**
+   * Upload รูปตามชนิด (category) — folder ปลายทางถูกกำหนดโดย registry ฝั่ง backend
+   * client ส่งแค่ field `category` (semantic) ไม่ต้องรู้ path จริง
+   *
+   * OptionalJwtAuthGuard: ถ้ามี token จะดึง userId มาทำ per-user folder ได้
+   */
+  @UseGuards(OptionalJwtAuthGuard)
+  @Post('/images/upload')
+  @UseInterceptors(FileInterceptor('file', { storage: uploadDiskStorage }))
+  async uploadImageByCategory(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: AnyRecord,
+    @Req() req: Request & { user?: { userId: number } },
+  ) {
+    if (!file) {
+      throw new BadRequestException(
+        'No file uploaded. Please send multipart/form-data with a file field named "file".',
+      );
+    }
+    const category = isString(body?.category) ? body.category : '';
+    return this.platformGatewayService.uploadByCategory(
+      category,
+      file,
+      req.user?.userId,
+    );
   }
 
   @Public()
