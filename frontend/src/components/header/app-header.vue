@@ -85,6 +85,8 @@
 
       <!-- Right: Auth Actions -->
       <div class="app-header__actions">
+        <LanguageSwitcher />
+
         <!-- Logged In State -->
         <template v-if="userStore.isLoggedIn">
           <AppHeaderProfile />
@@ -217,6 +219,7 @@ import { useNavigation } from 'src/composables/use-navigation';
 
 // Components
 import AppHeaderProfile from './app-header-profile.vue';
+import LanguageSwitcher from './language-switcher.vue';
 
 const userStore = useUserStore();
 const route = useRoute();
