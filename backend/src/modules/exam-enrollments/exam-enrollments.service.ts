@@ -646,7 +646,32 @@ export class ExamEnrollmentsService {
     }
 
     const skip = (query.page - 1) * query.limit;
-    qb.orderBy('enrollment.CREATED_AT', 'ASC').skip(skip).take(query.limit);
+
+    let sortColumn = 'enrollment.CREATED_AT';
+    let sortOrder: 'ASC' | 'DESC' = 'ASC';
+
+    if (query.sortBy) {
+      const mapping: Record<string, string> = {
+        titleTh: 'profile.userTitleTh',
+        fullnameTh: 'profile.userFullnameTh',
+        remark: 'enrollment.ERM_PHYSICAL_STATUS',
+        paymentStatus: 'enrollment.ERM_STATUS',
+        verifyStatus: 'enrollment.ERM_VERIFY_STATUS',
+        createdAt: 'enrollment.CREATED_AT',
+      };
+      const sortBy = query.sortBy;
+      if (Object.prototype.hasOwnProperty.call(mapping, sortBy)) {
+        sortColumn = mapping[sortBy];
+      }
+      if (query.descending !== undefined) {
+        sortOrder =
+          query.descending === 'true' || query.descending === true
+            ? 'DESC'
+            : 'ASC';
+      }
+    }
+
+    qb.orderBy(sortColumn, sortOrder).skip(skip).take(query.limit);
 
     const [data, total] = await qb.getManyAndCount();
     const totalPaid = await paidQb.getCount();
