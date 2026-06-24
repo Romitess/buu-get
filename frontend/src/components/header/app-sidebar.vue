@@ -220,8 +220,8 @@ const menuLinks = computed(() => {
       path: '/admin/dashboard',
     });
     links.push({
-      name: 'executive-test-takers',
-      label: 'ข้อมูลผู้เข้าสอบ',
+      name: 'admin-executive-test-takers',
+      label: t('navigation.examInformation') || 'ข้อมูลการสอบ',
       icon: 'groups',
       path: '/admin/executive/test-takers',
     });

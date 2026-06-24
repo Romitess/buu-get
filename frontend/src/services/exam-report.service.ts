@@ -6,6 +6,7 @@ import type {
   ExamReportSummary,
   ExamReportRoundRow,
   ExamYearTableRow,
+  ExamInformationRoundRow,
 } from 'src/types/exam-report.types';
 
 // ============================================================
@@ -52,6 +53,17 @@ interface BackendExamReportSummary {
     decreased: number;
   };
   yearTable: ExamYearTableRow[];
+}
+
+interface BackendExamInformationRound {
+  round: string;
+  applicants: number;
+  attended: number;
+  absent: number;
+  repeatTakers: number;
+  minScore: number | null;
+  maxScore: number | null;
+  averageScore: number | null;
 }
 
 /** ตัวแปร CSS สีของแต่ละช่วงคะแนน (เรียงตาม ranges จาก backend) */
@@ -193,4 +205,23 @@ export const fetchExamReportSummary = async (
 export const fetchExamReportOptions = async (): Promise<ExamReportOptions> => {
   const response = await api.get<ExamReportOptions>('/exam-report/options');
   return response.data;
+};
+
+export const fetchExamInformationRounds = async (
+  year: string | number,
+): Promise<ExamInformationRoundRow[]> => {
+  const response = await api.get<BackendExamInformationRound[]>(
+    `/exam-report/years/${year}/rounds`,
+  );
+
+  return response.data.map((row) => ({
+    round: row.round,
+    applicants: Number(row.applicants),
+    attended: Number(row.attended),
+    absent: Number(row.absent),
+    repeatTakers: Number(row.repeatTakers),
+    minScore: row.minScore === null ? null : Number(row.minScore),
+    maxScore: row.maxScore === null ? null : Number(row.maxScore),
+    averageScore: row.averageScore === null ? null : Number(row.averageScore),
+  }));
 };

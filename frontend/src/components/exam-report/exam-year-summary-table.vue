@@ -20,7 +20,7 @@
               dense
               color="primary"
               icon="people_outline"
-              @click="emit('view-detail', props.row)"
+              @click="goToExamInformation(props.row)"
             >
               <q-tooltip>{{ t('admin.examReport.yearTable.viewDetail') }}</q-tooltip>
             </q-btn>
@@ -40,9 +40,11 @@
 import { computed } from 'vue';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import type { ExamYearTableRow } from 'src/types/exam-report.types';
 
 const { t } = useI18n();
+const router = useRouter();
 
 interface Props {
   rows: ExamYearTableRow[];
@@ -51,15 +53,18 @@ interface Props {
 
 defineProps<Props>();
 
-const emit = defineEmits<{
-  (e: 'view-detail', row: ExamYearTableRow): void;
-}>();
-
 const pagination = { rowsPerPage: 5 };
 
 const intText = (value: number): string => value.toLocaleString('en-US');
 const numText = (value: number | null): string =>
   value === null ? '-' : value.toLocaleString('en-US', { maximumFractionDigits: 2 });
+
+const goToExamInformation = (row: ExamYearTableRow): void => {
+  void router.push({
+    name: 'admin-exam-information',
+    params: { year: String(row.year) },
+  });
+};
 
 const columns = computed((): QTableColumn<ExamYearTableRow>[] => [
   {

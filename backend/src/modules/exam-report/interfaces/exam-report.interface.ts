@@ -80,6 +80,18 @@ export interface ExamYearTableRow {
   averageScore: number | null;
 }
 
+/** แถวรายละเอียดรอบสอบภายในปีที่เลือก */
+export interface ExamInformationRound {
+  round: string;
+  applicants: number;
+  attended: number;
+  absent: number;
+  repeatTakers: number;
+  minScore: number | null;
+  maxScore: number | null;
+  averageScore: number | null;
+}
+
 export interface ExamReportSummary {
   stats: ExamReportStats;
   attendanceByYear: ExamAttendanceByYear[];

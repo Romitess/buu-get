@@ -21,6 +21,11 @@ export interface BankReconcileEditSnapshot {
 
 export type BankReconcileChangedField = keyof BankReconcileEditSnapshot;
 
+export type BankReconcileChangeReason =
+  | 'UPDATE_REF1'
+  | 'UPDATE_REF2'
+  | 'UPDATE_BOTH';
+
 @Entity('FIN_T_BANK_RECONCILE_EDIT_LOGS')
 export class BankReconcileEditLog {
   @PrimaryGeneratedColumn({
@@ -60,9 +65,9 @@ export class BankReconcileEditLog {
     name: 'CHANGE_REASON',
     type: 'text',
     nullable: true,
-    comment: 'เหตุผลการแก้ไข',
+    comment: 'ตำแหน่ง Ref ที่ถูกแก้ไข',
   })
-  CHANGE_REASON: string | null;
+  CHANGE_REASON: BankReconcileChangeReason | null;
 
   @CreateDateColumn({ name: 'CREATED_AT', comment: 'วันที่สร้าง' })
   CREATED_AT: Date;

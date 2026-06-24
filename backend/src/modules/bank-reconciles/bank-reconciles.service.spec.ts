@@ -47,6 +47,10 @@ jest.mock('./entities/bank-reconcile-edit-log.entity', () => ({
 
 import { BankReconcilesService } from './bank-reconciles.service';
 import type { BankReconcile } from './entities/bank-reconcile.entity';
+import type {
+  BankReconcileChangeReason,
+  BankReconcileEditSnapshot,
+} from './entities/bank-reconcile-edit-log.entity';
 
 interface ExistingBankReconcileHashRow {
   BR_IMPORT_KEY_HASH: string | null;
@@ -64,6 +68,13 @@ interface MockBankReconcileRepository {
   create: jest.Mock<BankReconcile[], [Array<Partial<BankReconcile>>]>;
   save: jest.Mock<Promise<BankReconcile[]>, [BankReconcile[]]>;
   find: jest.Mock<Promise<BankReconcile[]>, [unknown?]>;
+}
+
+interface ChangeReasonProbe {
+  getChangeReason(
+    oldSnapshot: BankReconcileEditSnapshot,
+    newSnapshot: BankReconcileEditSnapshot,
+  ): BankReconcileChangeReason | null;
 }
 
 const createCsvFile = (content: string): Express.Multer.File =>
@@ -200,5 +211,41 @@ describe('BankReconcilesService', () => {
     });
     expect(repository.create).not.toHaveBeenCalled();
     expect(repository.save).not.toHaveBeenCalled();
+  });
+
+  it('derives edit log change reason from changed refs', () => {
+    const probe = service as unknown as ChangeReasonProbe;
+    const oldSnapshot: BankReconcileEditSnapshot = {
+      BR_REF1: 'REF1-A',
+      BR_REF2: 'REF2-A',
+      TRANX_ID: 1,
+      TRANX_MATCH_STATUS: 1,
+    };
+
+    expect(
+      probe.getChangeReason(oldSnapshot, {
+        ...oldSnapshot,
+        BR_REF1: 'REF1-B',
+      }),
+    ).toBe('UPDATE_REF1');
+    expect(
+      probe.getChangeReason(oldSnapshot, {
+        ...oldSnapshot,
+        BR_REF2: 'REF2-B',
+      }),
+    ).toBe('UPDATE_REF2');
+    expect(
+      probe.getChangeReason(oldSnapshot, {
+        ...oldSnapshot,
+        BR_REF1: 'REF1-B',
+        BR_REF2: 'REF2-B',
+      }),
+    ).toBe('UPDATE_BOTH');
+    expect(
+      probe.getChangeReason(oldSnapshot, {
+        ...oldSnapshot,
+        TRANX_ID: 2,
+      }),
+    ).toBeNull();
   });
 });
