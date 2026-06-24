@@ -230,6 +230,8 @@ const pagination = ref<PaginationModel>({
   page: 1,
   rowsPerPage: 10,
   rowsNumber: 0,
+  sortBy: null,
+  descending: false,
 });
 
 const columns: QTableColumn[] = [
@@ -287,9 +289,11 @@ const columns: QTableColumn[] = [
 ];
 
 const onRequest = (props: TableRequestProps): void => {
-  const { page, rowsPerPage } = props.pagination;
+  const { page, rowsPerPage, sortBy, descending } = props.pagination;
   pagination.value.page = page;
   pagination.value.rowsPerPage = rowsPerPage;
+  pagination.value.sortBy = sortBy ?? null;
+  pagination.value.descending = descending ?? false;
   void loadData();
 };
 
@@ -325,6 +329,8 @@ const loadData = async (): Promise<void> => {
       search: searchQuery.value,
       sessionId: selectedSessionId.value,
       sessionLocationId: null, // load all rooms for this session
+      sortBy: pagination.value.sortBy,
+      descending: pagination.value.descending,
     });
 
     pagination.value.rowsNumber = totalRows.value;

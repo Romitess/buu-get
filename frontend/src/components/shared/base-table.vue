@@ -132,7 +132,7 @@
   </div>
 </template>
 
-<script setup lang="ts" generic="T">
+<script setup lang="ts" generic="T extends object">
 import { computed, ref, watch } from 'vue';
 import type { QTableColumn } from 'quasar';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
@@ -233,11 +233,27 @@ watch(
 
 const NON_SORTABLE_COLUMNS = new Set(['tools', 'actions', 'action']);
 
+const isIdColumnPresent = computed(() => {
+  return props.columns.some((c) => c.name === 'id' || c.name === 'index');
+});
+
 const sortableColumns = computed<QTableColumn[]>(() =>
-  props.columns.map((column) => ({
-    ...column,
-    sortable: column.sortable ?? !NON_SORTABLE_COLUMNS.has(column.name),
-  })),
+  props.columns.map((column) => {
+    const isIdOrIndex = column.name === 'id' || column.name === 'index';
+    return {
+      ...column,
+      sortable: isIdOrIndex ? false : (column.sortable ?? !NON_SORTABLE_COLUMNS.has(column.name)),
+      field: isIdOrIndex
+        ? (row: T) => {
+            const page = internalPagination.value.page || 1;
+            const rowsPerPage = internalPagination.value.rowsPerPage || 10;
+            const start = (page - 1) * rowsPerPage;
+            const rowIndex = displayRows.value.indexOf(row);
+            return rowIndex !== -1 ? start + rowIndex + 1 : (row as Record<string, unknown>)[column.name];
+          }
+        : (column.field ?? column.name),
+    };
+  }),
 );
 
 const defaultSortColumn = computed<QTableColumn | undefined>(() => {
@@ -329,24 +345,61 @@ const sortedRows = computed<T[]>(() => {
 });
 
 const displayRows = computed<T[]>(() => {
+  let rows: T[] = [];
   if (props.isServerSide) {
     if ((props.rows ?? []).length === 0) {
       return [{ __empty: true }] as T[];
     }
-    return props.rows;
+    rows = props.rows;
+  } else {
+    const sourceRows = sortedRows.value;
+
+    if (sourceRows.length === 0) {
+      return [{ __empty: true }] as T[];
+    }
+
+    const page = internalPagination.value.page || 1;
+    const rowsPerPage = internalPagination.value.rowsPerPage || sourceRows.length;
+    const start = (page - 1) * rowsPerPage;
+
+    rows = sourceRows.slice(start, start + rowsPerPage);
   }
 
-  const sourceRows = sortedRows.value;
-
-  if (sourceRows.length === 0) {
-    return [{ __empty: true }] as T[];
+  if (!isIdColumnPresent.value) {
+    return rows;
   }
 
   const page = internalPagination.value.page || 1;
-  const rowsPerPage = internalPagination.value.rowsPerPage || sourceRows.length;
+  const rowsPerPage = internalPagination.value.rowsPerPage || 10;
   const start = (page - 1) * rowsPerPage;
 
-  return sourceRows.slice(start, start + rowsPerPage);
+  return rows.map((row, index) => {
+    if (row && typeof row === 'object' && '__empty' in row) return row;
+
+    return new Proxy(row, {
+      get(target, prop, receiver) {
+        if (prop === 'id' || prop === 'index') {
+          const stack = new Error().stack || '';
+          const isRender =
+            /\b(render|patch|update|vnode|q-?td|q-?tr|q-?table)\b/i.test(stack);
+
+          if (isRender) {
+            return start + index + 1;
+          }
+        }
+        return Reflect.get(target, prop, receiver);
+      },
+      has(target, prop) {
+        return Reflect.has(target, prop);
+      },
+      ownKeys(target) {
+        return Reflect.ownKeys(target);
+      },
+      getOwnPropertyDescriptor(target, prop) {
+        return Reflect.getOwnPropertyDescriptor(target, prop);
+      },
+    });
+  });
 });
 
 const isFirstPage = computed(() => internalPagination.value.page <= 1);

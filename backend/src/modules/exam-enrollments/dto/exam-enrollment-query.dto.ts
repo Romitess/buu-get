@@ -36,4 +36,13 @@ export class ExamEnrollmentQueryDto {
   @IsInt()
   @IsOptional()
   sessionLocationId?: number;
+
+  @ApiPropertyOptional({ description: 'คอลัมน์ที่ต้องการจัดเรียง' })
+  @IsString()
+  @IsOptional()
+  sortBy?: string;
+
+  @ApiPropertyOptional({ description: 'จัดเรียงจากมากไปน้อย' })
+  @IsOptional()
+  descending?: boolean | string;
 }

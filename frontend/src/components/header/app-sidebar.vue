@@ -12,8 +12,6 @@
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
-
-
     <!-- Sidebar List -->
     <q-list class="sidebar-list">
       <template v-for="link in menuLinks" :key="link.name">
@@ -82,13 +80,7 @@ import { useNavigation } from 'src/composables/use-navigation';
 import { ROLES } from 'src/constants/roles';
 
 const { t } = useI18n();
-const {
-  userStore,
-  leftDrawerOpen,
-  miniState,
-  isHovered,
-  isMini,
-} = useNavigation();
+const { userStore, leftDrawerOpen, miniState, isHovered, isMini } = useNavigation();
 
 // Dynamic role-based navigation menu links
 const menuLinks = computed(() => {
@@ -131,12 +123,6 @@ const menuLinks = computed(() => {
   // IF: Registration Officer or Admin
   else if (role === ROLES.REGISTRATION_OFFICER || role === ROLES.ADMIN) {
     links.push({
-      name: 'exam-report',
-      label: t('navigation.examReport') || 'รายงานการสอบ',
-      icon: 'bar_chart',
-      path: '/admin/exam-report',
-    });
-    links.push({
       name: 'location-management',
       label: t('navigation.manageLocations') || 'จัดการห้องสอบ',
       icon: 'corporate_fare',
@@ -157,12 +143,6 @@ const menuLinks = computed(() => {
   }
   // IF: Exam Operations Officer or Staff
   else if (role === ROLES.EXAM_OPERATIONS_OFFICER || role === ROLES.STAFF) {
-    links.push({
-      name: 'exam-report',
-      label: t('navigation.examReport') || 'รายงานการสอบ',
-      icon: 'bar_chart',
-      path: '/admin/exam-report',
-    });
     links.push({
       name: 'exam-management',
       label: t('navigation.manageExams') || 'จัดการรอบสอบ',
@@ -234,10 +214,16 @@ const menuLinks = computed(() => {
   // IF: Executive
   else if (role === ROLES.EXECUTIVE) {
     links.push({
-      name: 'exam-report',
-      label: t('navigation.examReport') || 'รายงานการสอบ',
-      icon: 'assessment',
-      path: '/admin/exam-report',
+      name: 'admin-dashboard',
+      label: t('navigation.dashboard') || 'แดชบอร์ด',
+      icon: 'dashboard',
+      path: '/admin/dashboard',
+    });
+    links.push({
+      name: 'admin-executive-test-takers',
+      label: t('navigation.examInformation') || 'ข้อมูลการสอบ',
+      icon: 'groups',
+      path: '/admin/executive/test-takers',
     });
   }
 

@@ -11,6 +11,7 @@ import { UserProfileModule } from '../user-profile/user-profile.module';
 import { RolesModule } from '../roles/roles.module';
 import { UserImageModule } from '../user-image/user-image.module';
 import { PlatformGatewayModule } from '../platform-gateway/platform-gateway.module';
+import { MoodleModule } from '../moodle/moodle.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PlatformGatewayModule } from '../platform-gateway/platform-gateway.modu
     RolesModule,
     UserImageModule,
     PlatformGatewayModule,
+    MoodleModule,
     CacheModule.register(),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

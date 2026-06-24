@@ -461,15 +461,68 @@ const routes: RouteRecordRaw[] = [
               ],
             },
           },
+
           {
-            path: 'exam-report',
-            name: 'admin-exam-report',
-            component: () => import('pages/admin/exam-report/exam-report-page.vue'),
+            path: 'executive/test-takers',
+            name: 'admin-executive-test-takers',
+            component: () => import('pages/admin/exam-information-page.vue'),
             meta: {
               roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
-                { label: 'navigation.examReport', icon: 'assessment' },
+                { label: 'ข้อมูลผู้เข้าสอบ', icon: 'star' },
+              ],
+            },
+          },
+          {
+            path: 'executive/test-takers/:examId/:ermId/history',
+            name: 'admin-executive-exam-history',
+            component: () => import('pages/admin/executive-exam-history-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'ข้อมูลผู้เข้าสอบ', icon: 'star', to: '/admin/executive/test-takers' },
+                { label: 'ประวัติการสอบ', icon: 'star' },
+              ],
+            },
+          },
+          {
+            path: 'exam-information/:year?',
+            name: 'admin-exam-information',
+            component: () => import('pages/admin/exam-information-yearly-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.examReport',
+                  icon: 'assessment',
+                  to: '/admin/dashboard',
+                },
+                { label: 'navigation.examInformation', icon: 'info' },
+              ],
+            },
+          },
+          {
+            path: 'exam-information/:year/candidates',
+            name: 'admin-exam-candidates-info',
+            component: () => import('pages/admin/exam-candidates-info-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.examReport',
+                  icon: 'assessment',
+                  to: '/admin/dashboard',
+                },
+                {
+                  label: 'navigation.examInformation',
+                  icon: 'info',
+                  to: '/admin/exam-information/:year',
+                },
+                { label: 'navigation.examCandidatesInfo', icon: 'groups' },
               ],
             },
           },

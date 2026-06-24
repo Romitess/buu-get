@@ -20,6 +20,7 @@ import { ReceiptStatus } from '../receipts/entities/receipt.entity';
 import { BankReconcile } from './entities/bank-reconcile.entity';
 import {
   BankReconcileChangedField,
+  BankReconcileChangeReason,
   BankReconcileEditLog,
   BankReconcileEditSnapshot,
 } from './entities/bank-reconcile-edit-log.entity';
@@ -377,8 +378,9 @@ export class BankReconcilesService {
 
       const newSnapshot = this.createEditSnapshot(updatedBankReconcile);
       const changedFields = this.getChangedFields(oldSnapshot, newSnapshot);
+      const changeReason = this.getChangeReason(oldSnapshot, newSnapshot);
 
-      if (changedFields.length > 0) {
+      if (changeReason) {
         await editLogRepository.save(
           editLogRepository.create({
             BR_ID: id,
@@ -386,8 +388,7 @@ export class BankReconcilesService {
             OLD_SNAPSHOT: oldSnapshot,
             NEW_SNAPSHOT: newSnapshot,
             CHANGED_FIELDS: changedFields,
-            CHANGE_REASON:
-              updateBankReconcileRefsDto.CHANGE_REASON?.trim() || null,
+            CHANGE_REASON: changeReason,
           }),
         );
       }
@@ -640,6 +641,28 @@ export class BankReconcilesService {
     ];
 
     return fields.filter((field) => oldSnapshot[field] !== newSnapshot[field]);
+  }
+
+  private getChangeReason(
+    oldSnapshot: BankReconcileEditSnapshot,
+    newSnapshot: BankReconcileEditSnapshot,
+  ): BankReconcileChangeReason | null {
+    const hasRef1Changed = oldSnapshot.BR_REF1 !== newSnapshot.BR_REF1;
+    const hasRef2Changed = oldSnapshot.BR_REF2 !== newSnapshot.BR_REF2;
+
+    if (hasRef1Changed && hasRef2Changed) {
+      return 'UPDATE_BOTH';
+    }
+
+    if (hasRef1Changed) {
+      return 'UPDATE_REF1';
+    }
+
+    if (hasRef2Changed) {
+      return 'UPDATE_REF2';
+    }
+
+    return null;
   }
 
   private normalizeKeyCell(value: string | null | undefined): string {

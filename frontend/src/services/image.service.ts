@@ -19,11 +19,9 @@ export const uploadImage = async (request: ImageUploadRequest): Promise<string> 
   const formData = new FormData();
   formData.append('file', request.file);
 
-  // Backend UploadFileDto ใช้ field 'path' สำหรับกำหนด folder ปลายทาง
-  // ถ้าไม่ระบุ Backend จะ default เป็น '/uploaded_files'
-  if (request.folder) {
-    formData.append('path', request.folder);
-  }
+  // ส่งแค่ 'category' (semantic) — backend เป็นผู้ map เป็น folder ปลายทางเอง
+  // (per-user category จะผูก userId จาก JWT ฝั่ง backend)
+  formData.append('category', request.category);
 
   try {
     const response = await api.post<ImageUploadResponse>(PLATFORM_GATEWAY.UPLOAD_IMAGE, formData, {
@@ -62,6 +60,11 @@ export const getImageUrl = (imagePath: string | null | undefined, cacheBust = fa
     if (!cacheBust) return url;
     return `${url}${url.includes('?') ? '&' : '?'}t=${Date.now()}`;
   };
+
+  // data URL (เช่นรูปที่ยังไม่ upload ในโหมด register) → ใช้แสดง preview ได้ตรง ๆ
+  if (imagePath.startsWith('data:')) {
+    return imagePath;
+  }
 
   // ถ้า path เป็น full URL แล้ว ให้ return ตรงๆ
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {

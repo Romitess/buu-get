@@ -5,7 +5,8 @@
     <div class="photo-upload-cell">
       <ImageUpload
         v-model="profileImage"
-        folder="/user_images"
+        category="user-image"
+        deferred
         :alt="t('profile.photoRequirementsTitle')"
         class="photo-upload-box"
       />

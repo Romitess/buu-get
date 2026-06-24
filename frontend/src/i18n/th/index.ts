@@ -970,7 +970,7 @@ export default {
     fundSourceManagement: {
       pageTitle: 'จัดการผังแหล่งเงิน',
       pageDescription: 'แสดงรายการผังแหล่งเงินทั้งหมดเพื่อตรวจสอบและแก้ไขให้เหมาะสม',
-      createFundSource: 'สร้างแหล่งาการเงิน',
+      createFundSource: 'สร้างแหล่งฝังเงิน',
       table: {
         columns: {
           index: 'ลำดับ',
@@ -1184,6 +1184,60 @@ export default {
         viewRecordMessage: 'เปิดใบเสร็จ {receiptNo} เพื่อดูรายละเอียด',
       },
     },
+    examInformation: {
+      pageTitle: 'ข้อมูลการสอบปี {year}',
+      pageSubtitle: 'แสดงข้อมูลสถิติและผลการสอบของผู้เข้าสอบในปี {year}',
+      searchPlaceholder: 'ค้นหา',
+      table: {
+        emptyLabel: 'ไม่พบข้อมูลการสอบ',
+        columns: {
+          round: 'รอบการสอบ',
+          applicants: 'ผู้สมัคร (คน)',
+          attended: 'เข้าสอบ (คน)',
+          absent: 'ขาดสอบ (คน)',
+          repeatTakers: 'ผู้เข้าสอบซ้ำ (คน)',
+          minScore: 'คะแนนต่ำสุด',
+          maxScore: 'คะแนนสูงสุด',
+          averageScore: 'คะแนนเฉลี่ย',
+          detail: 'รายละเอียด',
+        },
+        tooltips: {
+          viewDetail: 'ดูรายละเอียด',
+        },
+      },
+      notifications: {
+        loadError: 'ไม่สามารถโหลดข้อมูลการสอบรายปีได้',
+      },
+    },
+    examCandidatesInfo: {
+      pageTitle: 'ข้อมูลผู้เข้าสอบรอบ {round}',
+      pageTitleFallback: 'ข้อมูลผู้เข้าสอบปี {year}',
+      pageSubtitle: 'แสดงข้อมูลและผลการสอบของผู้เข้าสอบรายบุคคลในรอบการสอบที่ {round}',
+      pageSubtitleFallback: 'แสดงข้อมูลและผลการสอบของผู้เข้าสอบรายบุคคลในปี {year}',
+      searchPlaceholder: 'ค้นหา',
+      status: {
+        firstAttempt: 'สอบครั้งแรก',
+        repeatAttempt: 'สอบซ้ำ',
+      },
+      table: {
+        emptyLabel: 'ไม่พบข้อมูลผู้เข้าสอบ',
+        columns: {
+          index: 'ลำดับ',
+          examNumber: 'เลขประจำตัวสอบ',
+          prefix: 'คำนำหน้า',
+          fullName: 'ชื่อ-นามสกุล',
+          vocabularyGrammarScore: 'ศัพท์และไวยากรณ์',
+          readingScore: 'ทักษะการอ่าน',
+          totalScore: 'คะแนนรวม',
+          level: 'Level',
+          status: 'สถานะ',
+          tools: 'เครื่องมือ',
+        },
+        tooltips: {
+          viewHistory: 'ดูประวัติการสอบ',
+        },
+      },
+    },
     examReport: {
       pageTitle: 'รายงานการสอบ',
       pageSubtitle: 'สรุปภาพรวมการสมัครสอบ การเข้าสอบ และผลคะแนน เพื่อใช้ในการติดตามและวางแผน',
@@ -1316,6 +1370,8 @@ export default {
     applicationFeeReport: 'สรุปการรับเงินค่าสมัครสอบ',
     fundSourceManagement: 'จัดการผังแหล่งเงิน',
     examReport: 'รายงานการสอบ',
+    examInformation: 'ข้อมูลการสอบ',
+    examCandidatesInfo: 'ข้อมูลผู้เข้าสอบ',
     manageHomeContent: 'จัดการเนื้อหาหน้าหลัก',
   },
   image: {

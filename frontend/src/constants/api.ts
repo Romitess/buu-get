@@ -11,11 +11,21 @@
 export const PLATFORM_GATEWAY = {
   /** Base path สำหรับ platform gateway */
   BASE_PATH: '/api',
-  /** Endpoint สำหรับ upload รูป (ตรงกับ Backend POST /api/uploadFile) */
-  UPLOAD_IMAGE: '/api/uploadFile',
+  /**
+   * Endpoint สำหรับ upload รูปตามชนิด (ตรงกับ Backend POST /api/images/upload)
+   * client ส่งแค่ field `category` — backend เป็นผู้กำหนด folder ปลายทาง
+   */
+  UPLOAD_IMAGE: '/api/images/upload',
   /** Endpoint สำหรับดึง public file URL */
   GET_PUBLIC_FILE: '/api/uploadFile',
 } as const;
+
+/**
+ * ชนิดรูปภาพ (category) — ต้อง sync กับ registry ฝั่ง backend
+ * (backend/src/modules/platform-gateway/constants/image-category.config.ts)
+ * เพิ่มชนิดใหม่ = เพิ่ม key ที่นี่ + เพิ่ม entry ฝั่ง backend
+ */
+export type ImageCategory = 'user-image' | 'page-builder';
 
 /**
  * Backend API Endpoints (main application API)

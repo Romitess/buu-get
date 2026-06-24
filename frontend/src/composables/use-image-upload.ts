@@ -6,7 +6,7 @@
 import { ref } from 'vue';
 import { uploadImage } from 'src/services/image.service';
 import type { ImageUploadRequest } from 'src/types/image';
-import { IMAGE_CONFIG } from 'src/constants/api';
+import { IMAGE_CONFIG, type ImageCategory } from 'src/constants/api';
 
 export interface UseImageUploadOptions {
   /** callback เมื่อ upload เสร็จ - return imagePath */
@@ -23,10 +23,13 @@ export function useImageUpload(options?: UseImageUploadOptions) {
   /**
    * ทำการ upload รูป
    * @param file - ไฟล์รูปที่ต้อง upload
-   * @param folder - (optional) folder destination
+   * @param category - ชนิดรูป (backend map เป็น folder ปลายทางเอง)
    * @returns imagePath ที่บันทึกไว้
    */
-  const handleImageUpload = async (file: File, folder?: string): Promise<string | null> => {
+  const handleImageUpload = async (
+    file: File,
+    category: ImageCategory,
+  ): Promise<string | null> => {
     isUploading.value = true;
     uploadError.value = null;
     uploadedPath.value = null;
@@ -50,7 +53,7 @@ export function useImageUpload(options?: UseImageUploadOptions) {
     }
 
     try {
-      const request: ImageUploadRequest = folder ? { file, folder } : { file };
+      const request: ImageUploadRequest = { file, category };
       const imagePath = await uploadImage(request);
 
       uploadedPath.value = imagePath;

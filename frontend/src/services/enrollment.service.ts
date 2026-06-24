@@ -29,6 +29,8 @@ export const fetchEnrollmentsByExamId = async (
     search?: string;
     sessionId?: number | null;
     sessionLocationId?: number | null;
+    sortBy?: string | null | undefined;
+    descending?: boolean | null | undefined;
   },
 ): Promise<EnrollmentTableRow[] | PaginatedEnrollmentResponse> => {
   const response = await api.get<
