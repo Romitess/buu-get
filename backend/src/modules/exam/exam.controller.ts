@@ -18,6 +18,7 @@ import { ExamService } from './exam.service';
 import { CreateExamDto } from './dto/create-exam.dto';
 import { UpdateExamDto } from './dto/update-exam.dto';
 import { CreatePasscodesDto } from './dto/create-passcodes.dto';
+import { NotifyExamChangesDto } from './dto/notify-exam-changes.dto';
 import { Exam } from './entities/exam.entity';
 import { ExamPasscode } from './entities/exam-passcode.entity';
 import { PasscodeLogResponseDto } from './dto/passcode-log-response.dto';
@@ -73,6 +74,20 @@ export class ExamController {
     @Body() updateExamDto: UpdateExamDto,
   ): Promise<Exam> {
     return this.examService.update(id, updateExamDto);
+  }
+
+  @Post(':id/notify-changes')
+  @ApiOperation({
+    summary: 'แจ้งเตือนผู้เข้าสอบทุกคนในรอบสอบทางอีเมลเมื่อมีการแก้ไขรอบสอบ',
+  })
+  @ApiOkResponse({
+    description: 'รับคำขอแจ้งเตือนสำเร็จ (ระบบส่งอีเมลแบบเบื้องหลัง)',
+  })
+  notifyChanges(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() notifyExamChangesDto: NotifyExamChangesDto,
+  ): { success: boolean } {
+    return this.examService.notifyExamChanges(id, notifyExamChangesDto);
   }
 
   @Delete(':id')

@@ -571,6 +571,24 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
   }
 };
 
+/** รายการการเปลี่ยนแปลงรอบสอบ (สำหรับแจ้งเตือนผู้เข้าสอบ) */
+export interface ExamChangeItem {
+  label: string;
+  oldValue: string;
+  newValue: string;
+}
+
+/**
+ * แจ้งเตือนผู้เข้าสอบทุกคนในรอบสอบทางอีเมล เมื่อมีการแก้ไขรายละเอียดรอบสอบ
+ * ฝั่ง backend จะตอบกลับทันทีและส่งอีเมลแบบเบื้องหลัง
+ */
+export const notifyExamChanges = async (
+  examId: number,
+  changes: ExamChangeItem[],
+): Promise<void> => {
+  await api.post(`/exam/${examId}/notify-changes`, { changes });
+};
+
 export const deleteExam = async (id: number | string): Promise<void> => {
   try {
     await api.delete(`/exam/${id}`);

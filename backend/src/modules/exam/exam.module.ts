@@ -5,9 +5,17 @@ import { ExamService } from './exam.service';
 import { Exam } from './entities/exam.entity';
 import { ExamPasscode } from './entities/exam-passcode.entity';
 import { ExamPasscodeLog } from './entities/exam-passcode-log.entity';
+import { ExamEnrollment } from '../exam-enrollments/entities/exam-enrollment.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Exam, ExamPasscode, ExamPasscodeLog])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Exam,
+      ExamPasscode,
+      ExamPasscodeLog,
+      ExamEnrollment,
+    ]),
+  ],
   controllers: [ExamController],
   providers: [ExamService],
   exports: [ExamService],
