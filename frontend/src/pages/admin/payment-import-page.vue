@@ -187,7 +187,7 @@ const onFileSelected = async (file: File): Promise<void> => {
     } else if (result.imported === 0 && result.skipped > 0) {
       $q.notify({
         type: 'negative',
-        message: `ไม่สามารถนำเข้าได้เลย (ข้าม ${result.skipped} รายการ${skippedReason}) กรุณาตรวจสอบชื่อคอลัมน์ในไฟล์`,
+        message: `ไม่สามารถนำเข้าได้ (ข้าม ${result.skipped} รายการ${skippedReason}) กรุณาตรวจสอบชื่อคอลัมน์ในไฟล์`,
       });
     }
   }
