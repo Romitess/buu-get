@@ -20,13 +20,20 @@
         <!-- Expanded Group (isGroup = true) -->
         <q-expansion-item
           v-if="link.isGroup"
-          :icon="link.icon"
-          :label="link.label"
           :default-opened="true"
           class="sidebar-group"
           header-class="sidebar-item"
           active-class="sidebar-item--active"
         >
+          <template v-slot:header>
+            <q-item-section avatar class="sidebar-item__avatar">
+              <q-icon :name="link.icon" size="24px" class="sidebar-item__icon" />
+            </q-item-section>
+            <q-item-section class="sidebar-item__text">
+              <q-item-label class="text-weight-bold">{{ link.label }}</q-item-label>
+            </q-item-section>
+          </template>
+
           <q-list class="sidebar-child-list">
             <q-item
               v-for="child in link.children"
