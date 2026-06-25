@@ -51,7 +51,7 @@
             <span>{{ $t('components.baseTable.rowsPerPage') }}</span>
             <q-select
               v-model="internalPagination.rowsPerPage"
-              :options="[10, 25, 50]"
+              :options="rowsPerPageOptions"
               dense
               outlined
               options-dense
@@ -142,6 +142,7 @@ interface Props {
   rows: T[];
   loading?: boolean | undefined;
   pagination?: PaginationModel | undefined;
+  rowsPerPageOptions?: number[] | undefined;
   emptyLabel?: string | undefined;
   hidePagination?: boolean | undefined;
   isServerSide?: boolean | undefined;
@@ -149,6 +150,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   emptyLabel: '',
+  rowsPerPageOptions: () => [10, 25, 50],
   isServerSide: false,
 });
 
@@ -249,7 +251,9 @@ const sortableColumns = computed<QTableColumn[]>(() =>
             const rowsPerPage = internalPagination.value.rowsPerPage || 10;
             const start = (page - 1) * rowsPerPage;
             const rowIndex = displayRows.value.indexOf(row);
-            return rowIndex !== -1 ? start + rowIndex + 1 : (row as Record<string, unknown>)[column.name];
+            return rowIndex !== -1
+              ? start + rowIndex + 1
+              : (row as Record<string, unknown>)[column.name];
           }
         : (column.field ?? column.name),
     };
@@ -380,8 +384,7 @@ const displayRows = computed<T[]>(() => {
       get(target, prop, receiver) {
         if (prop === 'id' || prop === 'index') {
           const stack = new Error().stack || '';
-          const isRender =
-            /\b(render|patch|update|vnode|q-?td|q-?tr|q-?table)\b/i.test(stack);
+          const isRender = /\b(render|patch|update|vnode|q-?td|q-?tr|q-?table)\b/i.test(stack);
 
           if (isRender) {
             return start + index + 1;
