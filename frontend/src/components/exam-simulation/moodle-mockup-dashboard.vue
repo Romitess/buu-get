@@ -4,7 +4,9 @@
     <div class="moodle-header row items-center justify-between q-px-md">
       <div class="row items-center">
         <div class="text-h6 text-weight-bold q-mr-lg">BUU-GET</div>
-        <div class="moodle-nav-item active">My courses</div>
+        <button type="button" class="moodle-nav-item active" @click="goToView('overview')">
+          My courses
+        </button>
       </div>
       <div class="row items-center q-gutter-sm">
         <q-btn flat round dense icon="notifications" color="grey-8" />
@@ -29,8 +31,11 @@
       <div class="moodle-sidebar" :class="{ 'moodle-sidebar--collapsed': !sidebarOpen }">
         <!-- Sidebar Header: Title and Menu Button on the same row -->
         <div class="sidebar-header row items-center justify-between no-wrap q-py-sm">
-          <div v-show="sidebarOpen" class="sidebar-title text-weight-bold text-black ellipsis q-pl-md">
-            วันที่ 22 มิถุนายน 256...
+          <div
+            v-show="sidebarOpen"
+            class="sidebar-title text-weight-bold text-black ellipsis q-pl-md"
+          >
+            วันที่ 22 มิถุนายน 2569
           </div>
           <q-btn
             flat
@@ -75,7 +80,9 @@
                 clickable
                 v-ripple
                 class="sidebar-item"
-                :class="{ 'sidebar-item--active': currentView === 'quiz' }"
+                :class="{
+                  'sidebar-item--active': currentView === 'quiz' || currentView === 'attempt',
+                }"
                 @click="goToView('quiz')"
               >
                 <q-item-section>แบบทดสอบ</q-item-section>
@@ -143,12 +150,7 @@
               @click="goToView('course')"
             >
               <div class="course-card-img">
-                <svg
-                  width="100%"
-                  height="100%"
-                  viewBox="0 0 100 100"
-                  preserveAspectRatio="none"
-                >
+                <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
                   <polygon points="0,0 50,0 25,50" fill="#dadddf" />
                   <polygon points="50,0 100,0 75,50" fill="#ced4da" />
                   <polygon points="0,0 25,50 0,100" fill="#e9ecef" />
@@ -236,8 +238,14 @@
         <div v-else-if="currentView === 'quiz'" class="view-quiz">
           <div class="text-caption text-primary q-mb-lg cursor-pointer">
             <span @click="goToView('overview')" class="hover-underline">SSSS</span> /
-            <span @click="goToView('course')" class="hover-underline">แบบทดสอบ</span> /
-            แบบทดสอบ
+            <button
+              type="button"
+              class="breadcrumb-link hover-underline"
+              @click="goToView('course')"
+            >
+              วันที่ 22 มิถุนายน 2569 (รอบสอบ 9.00)
+            </button>
+            / แบบทดสอบ
           </div>
 
           <div class="row items-center q-mb-md">
@@ -261,15 +269,20 @@
         </div>
 
         <!-- View 4: Quiz Attempt -->
-        <MoodleTestSamulation v-else-if="currentView === 'attempt'" @back="goToView('quiz')" />
+        <MoodleTestSimulation
+          v-else-if="currentView === 'attempt'"
+          @back="goToView('quiz')"
+          @course="goToView('course')"
+        />
 
         <!-- Help Icon at bottom right -->
         <q-btn
+          v-if="currentView !== 'attempt'"
           round
           color="grey-5"
           text-color="white"
           icon="question_mark"
-          class="moodle-help-btn absolute-bottom-right q-ma-xl shadow-0"
+          class="absolute-bottom-right q-ma-xl shadow-0"
           size="sm"
         />
       </div>
@@ -281,7 +294,7 @@
 import { ref, computed } from 'vue';
 import { useUserStore } from 'src/stores/user.store';
 import ImageDisplay from 'src/components/base/image-display.vue';
-import MoodleTestSamulation from 'src/components/exam-simulation/moodle-test-samulation.vue';
+import MoodleTestSimulation from 'src/components/exam-simulation/moodle-test-simulation.vue';
 
 type ViewType = 'overview' | 'course' | 'quiz' | 'attempt';
 
@@ -324,7 +337,10 @@ const goToView = (view: ViewType) => {
 }
 
 .moodle-nav-item {
+  background: transparent;
+  border: 0;
   font-size: 1rem;
+  font-family: inherit;
   color: #495057;
   padding: 18px 4px;
   cursor: pointer;
@@ -350,10 +366,12 @@ const goToView = (view: ViewType) => {
   width: 280px;
   min-width: 280px;
   background-color: #f8f9fa;
-  border-right: 1px solid #dee2e6;
   overflow-y: auto;
   overflow-x: hidden;
-  transition: width 0.25s ease, min-width 0.25s ease, background-color 0.25s ease;
+  transition:
+    width 0.25s ease,
+    min-width 0.25s ease,
+    background-color 0.25s ease;
 
   &--collapsed {
     width: 48px;
@@ -439,7 +457,7 @@ const goToView = (view: ViewType) => {
 }
 
 .moodle-main-content--attempt {
-  padding: 40px 32px 24px;
+  padding: 0 0 0 32px;
 }
 
 .wave-emoji {
@@ -466,6 +484,15 @@ const goToView = (view: ViewType) => {
 
 .line-height-tight {
   line-height: 1.3;
+}
+
+.breadcrumb-link {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
 }
 
 .hover-underline:hover {
