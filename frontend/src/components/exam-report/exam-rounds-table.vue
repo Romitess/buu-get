@@ -2,54 +2,39 @@
   <q-card flat bordered class="rounds-card">
     <q-card-section>
       <div class="rounds-card__title">{{ t('admin.examReport.table.title') }}</div>
-      <q-table
-        flat
+      <BaseTable
         :rows="rows"
         :columns="columns"
-        row-key="round"
         :loading="loading"
         :pagination="pagination"
         :rows-per-page-options="[6, 10, 20]"
+        :empty-label="t('admin.examReport.table.emptyLabel')"
         class="rounds-table"
+        @request="onRequest"
       >
-        <template v-slot:body-cell-registered="props">
-          <q-td :props="props">{{ formatNumber(props.row.registered) }}</q-td>
-        </template>
-        <template v-slot:body-cell-attended="props">
-          <q-td :props="props">{{ formatNumber(props.row.attended) }}</q-td>
-        </template>
-        <template v-slot:body-cell-absent="props">
-          <q-td :props="props">{{ formatNumber(props.row.absent) }}</q-td>
-        </template>
-        <template v-slot:body-cell-tools="props">
-          <q-td :props="props">
-            <q-btn
-              flat
-              round
-              dense
-              color="primary"
+        <template #body-cell-tools="{ row }">
+          <div class="row items-center justify-center">
+            <ActionButton
               icon="people_outline"
-              :disable="props.row.registered === null"
-              @click="emit('view-registrants', props.row)"
-            >
-              <q-tooltip>{{ t('admin.examReport.table.viewRegistrants') }}</q-tooltip>
-            </q-btn>
-          </q-td>
-        </template>
-        <template v-slot:no-data>
-          <div class="full-width text-center text-grey-6 q-pa-md">
-            {{ t('admin.examReport.table.emptyLabel') }}
+              color="black"
+              :tooltip="t('admin.examReport.table.viewRegistrants')"
+              :disable="row.registered === null"
+              @click="emit('view-registrants', row)"
+            />
           </div>
         </template>
-      </q-table>
+      </BaseTable>
     </q-card-section>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import BaseTable from 'src/components/shared/base-table.vue';
+import ActionButton from 'src/components/shared/action-button.vue';
+import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import type { ExamReportRoundRow } from 'src/types/exam-report.types';
 
 const { t } = useI18n();
@@ -59,16 +44,41 @@ interface Props {
   loading?: boolean;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
   (e: 'view-registrants', row: ExamReportRoundRow): void;
 }>();
 
-const pagination = { rowsPerPage: 6 };
+const pagination = ref<PaginationModel>({
+  page: 1,
+  rowsPerPage: 6,
+  rowsNumber: props.rows.length,
+  sortBy: null,
+  descending: false,
+});
 
 const formatNumber = (value: number | null): string =>
   value === null ? '-' : value.toLocaleString('en-US');
+
+const onRequest = (requestProps: TableRequestProps): void => {
+  const { page, rowsPerPage, sortBy, descending } = requestProps.pagination;
+  pagination.value.page = page;
+  pagination.value.rowsPerPage = rowsPerPage;
+  pagination.value.sortBy = sortBy ?? null;
+  pagination.value.descending = descending ?? false;
+  pagination.value.rowsNumber = props.rows.length;
+};
+
+watch(
+  () => props.rows.length,
+  (rowCount) => {
+    const lastPage = Math.max(1, Math.ceil(rowCount / pagination.value.rowsPerPage));
+    pagination.value.rowsNumber = rowCount;
+    pagination.value.page = Math.min(pagination.value.page, lastPage);
+  },
+  { immediate: true },
+);
 
 const columns = computed((): QTableColumn<ExamReportRoundRow>[] => [
   {
@@ -88,24 +98,28 @@ const columns = computed((): QTableColumn<ExamReportRoundRow>[] => [
     label: t('admin.examReport.table.columns.registered'),
     field: 'registered',
     align: 'center',
+    format: formatNumber,
   },
   {
     name: 'attended',
     label: t('admin.examReport.table.columns.attended'),
     field: 'attended',
     align: 'center',
+    format: formatNumber,
   },
   {
     name: 'absent',
     label: t('admin.examReport.table.columns.absent'),
     field: 'absent',
     align: 'center',
+    format: formatNumber,
   },
   {
     name: 'tools',
     label: t('admin.examReport.table.columns.tools'),
     field: 'round',
     align: 'center',
+    sortable: false,
   },
 ]);
 </script>
@@ -132,9 +146,6 @@ const columns = computed((): QTableColumn<ExamReportRoundRow>[] => [
   }
 
   :deep(thead tr th) {
-    background-color: var(--primary);
-    color: var(--text-on-primary);
-    font-weight: 600;
     position: sticky;
     top: 0;
     z-index: 1;
