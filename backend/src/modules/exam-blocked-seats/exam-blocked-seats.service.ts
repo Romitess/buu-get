@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ExamBlockedSeat } from './entities/exam-blocked-seat.entity';
 import { CreateExamBlockedSeatDto } from './dto/create-exam-blocked-seat.dto';
 import { UpdateExamBlockedSeatDto } from './dto/update-exam-blocked-seat.dto';
+import { ReplaceExamBlockedSeatItemDto } from './dto/replace-exam-blocked-seats.dto';
 
 @Injectable()
 export class ExamBlockedSeatsService {
@@ -26,6 +27,36 @@ export class ExamBlockedSeatsService {
     }
     return this.blockedSeatRepository.find({
       relations: ['LOCATION_SEAT', 'SESSION'],
+    });
+  }
+
+  async replaceForSession(
+    sessionId: number,
+    seats: ReplaceExamBlockedSeatItemDto[],
+  ): Promise<ExamBlockedSeat[]> {
+    return this.blockedSeatRepository.manager.transaction(async (manager) => {
+      const repository = manager.getRepository(ExamBlockedSeat);
+      const existingSeats = await repository.find({
+        where: { SS_ID: sessionId },
+      });
+
+      if (existingSeats.length > 0) {
+        await repository.softRemove(existingSeats);
+      }
+
+      if (seats.length === 0) {
+        return [];
+      }
+
+      const nextSeats = repository.create(
+        seats.map((seat) => ({
+          SS_ID: sessionId,
+          LS_ID: seat.LS_ID,
+          BLOCK_STATUS: seat.BLOCK_STATUS,
+        })),
+      );
+
+      return repository.save(nextSeats);
     });
   }
 

@@ -19,6 +19,7 @@ import {
   fetchExamLocations,
   fetchFundSources,
   fetchExamById,
+  fetchExamBlockedSeats,
   fetchAllExamsRaw,
   updateExamRound,
   notifyExamChanges,
@@ -47,6 +48,8 @@ export interface ExamRoom {
   sessionId?: number;
   /** Enrollment count (for locking) */
   enrollmentCount?: number;
+  /** Seat status overrides for this exam session, keyed by LS_ID */
+  seatOverrides?: Record<number, number>;
 }
 
 export interface TimeSlot {
@@ -738,6 +741,31 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
           form.value.timeSlots = Array.from(slotMap.values());
           sortTimeSlots();
+
+          const blockedSeatsBySession = await Promise.all(
+            exam.SESSIONS.map(async (session) => ({
+              sessionId: session.SS_ID,
+              seats: await fetchExamBlockedSeats(session.SS_ID),
+            })),
+          );
+
+          blockedSeatsBySession.forEach(({ sessionId, seats }) => {
+            const rooms = form.value.timeSlots.flatMap((slot) =>
+              slot.rooms.filter((room) => room.sessionId === sessionId),
+            );
+
+            seats.forEach((blockedSeat) => {
+              const locationId = blockedSeat.LOCATION_SEAT?.LOCATION_ID;
+              const targetRoom =
+                rooms.find((room) => room.locationId === locationId) ?? rooms[0] ?? null;
+              if (!targetRoom) return;
+
+              targetRoom.seatOverrides = {
+                ...(targetRoom.seatOverrides ?? {}),
+                [blockedSeat.LS_ID]: blockedSeat.BLOCK_STATUS,
+              };
+            });
+          });
         }
 
         // Load passcodes into eligibleCandidates for special rounds
@@ -1136,6 +1164,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     seats: number;
     proctorName: string | null;
     sessionId?: number;
+    seatOverrides?: Record<number, number>;
   }[] => {
     const result: {
       startTime: string;
@@ -1144,6 +1173,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       seats: number;
       proctorName: string | null;
       sessionId?: number;
+      seatOverrides?: Record<number, number>;
     }[] = [];
 
     form.value.timeSlots.forEach((slot) => {
@@ -1158,6 +1188,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           seats: Number(room.seats),
           proctorName,
           ...(room.sessionId != null ? { sessionId: room.sessionId } : {}),
+          ...(room.seatOverrides ? { seatOverrides: { ...room.seatOverrides } } : {}),
         });
       });
     });
@@ -1299,6 +1330,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       seats: r.seats,
       proctorName: r.proctorName,
       ...(r.sessionId != null ? { sessionId: r.sessionId } : {}),
+      ...(r.seatOverrides ? { seatOverrides: r.seatOverrides } : {}),
     }));
 
     try {

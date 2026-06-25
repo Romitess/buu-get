@@ -242,6 +242,19 @@ export interface BackendLocation {
   }[];
 }
 
+export interface BackendBlockedSeat {
+  BLOCK_ID: number;
+  LS_ID: number;
+  SS_ID: number;
+  BLOCK_STATUS: number;
+  LOCATION_SEAT?: {
+    LS_ID: number;
+    LOCATION_ID: number;
+    LS_SEAT_LABEL: string | null;
+    LS_SEAT_STATUS: number;
+  } | null;
+}
+
 export interface BackendSession {
   SS_ID: number;
   SS_START_TIME: string;

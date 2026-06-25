@@ -19,6 +19,7 @@ import {
 import { ExamBlockedSeatsService } from './exam-blocked-seats.service';
 import { CreateExamBlockedSeatDto } from './dto/create-exam-blocked-seat.dto';
 import { UpdateExamBlockedSeatDto } from './dto/update-exam-blocked-seat.dto';
+import { ReplaceExamBlockedSeatsDto } from './dto/replace-exam-blocked-seats.dto';
 import { ExamBlockedSeat } from './entities/exam-blocked-seat.entity';
 
 @ApiTags('exam-blocked-seats')
@@ -54,6 +55,18 @@ export class ExamBlockedSeatsController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ExamBlockedSeat> {
     return this.examBlockedSeatsService.findOne(id);
+  }
+
+  @Post('session/:sessionId/replace')
+  @ApiOperation({
+    summary: 'Replace all seat overrides for a session',
+  })
+  @ApiOkResponse({ type: ExamBlockedSeat, isArray: true })
+  async replaceForSession(
+    @Param('sessionId', ParseIntPipe) sessionId: number,
+    @Body() dto: ReplaceExamBlockedSeatsDto,
+  ): Promise<ExamBlockedSeat[]> {
+    return this.examBlockedSeatsService.replaceForSession(sessionId, dto.seats);
   }
 
   @Patch(':id')

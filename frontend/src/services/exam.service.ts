@@ -5,6 +5,7 @@ import type {
   BackendExam,
   BackendSession,
   BackendLocation,
+  BackendBlockedSeat,
   AdmissionVoucherData,
   ExamEnrollment,
 } from 'src/types/exam';
@@ -105,12 +106,12 @@ export const parseBangkokDate = (dateStr: string): { year: number; month: number
     const [y, m, d] = dateStr.split('-').map(Number);
     return { year: y || 1970, month: m || 1, day: d || 1 };
   }
-  
+
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) {
     return { year: 1970, month: 1, day: 1 };
   }
-  
+
   // Adjust to UTC+7 (Bangkok)
   const bangkokTime = new Date(date.getTime() + 7 * 60 * 60 * 1000);
   return {
@@ -149,6 +150,7 @@ export interface CreateExamPayload {
     seats?: number;
     proctorName?: string | null;
     sessionId?: number;
+    seatOverrides?: Record<number, number>;
   }[];
   fundSourceId?: number | null;
   examRound?: string;
@@ -158,7 +160,11 @@ interface GroupedSessionTimeRange {
   startTime: string;
   endTime: string;
   seats: number;
-  locations: { locationId: number; proctorName: string | null }[];
+  locations: {
+    locationId: number;
+    proctorName: string | null;
+    seatOverrides?: Record<number, number>;
+  }[];
   sessionId?: number;
 }
 
@@ -329,17 +335,24 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
     const locationId = Number(range.locationId || payload.locationId);
     const seats = Number(range.seats || payload.seats || 0);
     const proctorName = range.proctorName?.trim() || null;
+    const seatOverrides = range.seatOverrides ?? {};
 
     const existingRange = groupedRanges.get(key);
     if (existingRange) {
       existingRange.seats += seats;
       const existingLoc = existingRange.locations.find((l) => l.locationId === locationId);
       if (!existingLoc) {
-        existingRange.locations.push({ locationId, proctorName });
-      } else if (proctorName) {
-        existingLoc.proctorName = existingLoc.proctorName
-          ? `${existingLoc.proctorName}, ${proctorName}`
-          : proctorName;
+        existingRange.locations.push({ locationId, proctorName, seatOverrides });
+      } else {
+        if (proctorName) {
+          existingLoc.proctorName = existingLoc.proctorName
+            ? `${existingLoc.proctorName}, ${proctorName}`
+            : proctorName;
+        }
+        existingLoc.seatOverrides = {
+          ...(existingLoc.seatOverrides ?? {}),
+          ...seatOverrides,
+        };
       }
       if (!existingRange.sessionId && range.sessionId) {
         existingRange.sessionId = range.sessionId;
@@ -351,7 +364,7 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
       startTime,
       endTime,
       seats,
-      locations: [{ locationId, proctorName }],
+      locations: [{ locationId, proctorName, seatOverrides }],
       ...(range.sessionId ? { sessionId: range.sessionId } : {}),
     });
   });
@@ -431,6 +444,45 @@ const syncSessionLocations = async (
   await Promise.all(promises);
 };
 
+const buildBlockedSeatPayload = (
+  locations: { seatOverrides?: Record<number, number> }[],
+): { LS_ID: number; BLOCK_STATUS: number }[] => {
+  const mergedOverrides = new Map<number, number>();
+
+  locations.forEach((location) => {
+    Object.entries(location.seatOverrides ?? {}).forEach(([seatId, status]) => {
+      mergedOverrides.set(Number(seatId), Number(status));
+    });
+  });
+
+  return Array.from(mergedOverrides.entries()).map(([LS_ID, BLOCK_STATUS]) => ({
+    LS_ID,
+    BLOCK_STATUS,
+  }));
+};
+
+export const replaceExamBlockedSeats = async (
+  sessionId: number,
+  seats: { LS_ID: number; BLOCK_STATUS: number }[],
+): Promise<BackendBlockedSeat[]> => {
+  const response = await api.post<BackendBlockedSeat[]>(
+    `/exam-blocked-seats/session/${sessionId}/replace`,
+    {
+      seats,
+    },
+  );
+
+  return response.data;
+};
+
+export const fetchExamBlockedSeats = async (sessionId: number): Promise<BackendBlockedSeat[]> => {
+  const response = await api.get<BackendBlockedSeat[]>('/exam-blocked-seats', {
+    params: { sessionId },
+  });
+
+  return response.data;
+};
+
 export const createExamRound = async (payload: CreateExamPayload): Promise<number> => {
   try {
     // 1. Create the Exam
@@ -465,6 +517,10 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<numbe
       });
 
       await createSessionLocations(sessionResponse.data.SS_ID, range.locations);
+      await replaceExamBlockedSeats(
+        sessionResponse.data.SS_ID,
+        buildBlockedSeatPayload(range.locations),
+      );
     });
 
     await Promise.all(sessionPromises);
@@ -576,6 +632,7 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
             currentSessionsById.get(existingId)?.SESSION_LOCATIONS,
             range.locations,
           );
+          await replaceExamBlockedSeats(existingId, buildBlockedSeatPayload(range.locations));
           return;
         }
 
@@ -587,6 +644,10 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
         });
 
         await createSessionLocations(sessionResponse.data.SS_ID, range.locations);
+        await replaceExamBlockedSeats(
+          sessionResponse.data.SS_ID,
+          buildBlockedSeatPayload(range.locations),
+        );
       });
 
       await Promise.all(sessionPromises);

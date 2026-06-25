@@ -7,18 +7,18 @@
           <div class="text-subtitle1 text-weight-bold text-dark">แก้ไขข้อมูลห้องสอบ</div>
         </div>
 
-        <div v-if="selectedLocations.length > 0" class="room-tabs" role="tablist">
+        <div v-if="selectedRooms.length > 0" class="room-tabs" role="tablist">
           <button
-            v-for="location in selectedLocations"
-            :key="location.value"
+            v-for="room in selectedRooms"
+            :key="room.key"
             class="room-tab"
-            :class="{ 'room-tab--active': location.value === activeLocationId }"
+            :class="{ 'room-tab--active': room.key === activeRoomKey }"
             type="button"
             role="tab"
-            :aria-selected="location.value === activeLocationId"
-            @click="activeLocationId = location.value"
+            :aria-selected="room.key === activeRoomKey"
+            @click="activeRoomKey = room.key"
           >
-            {{ location.label }}
+            {{ room.label }}
           </button>
         </div>
       </div>
@@ -50,11 +50,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
-import type { CreateExamForm } from 'src/composables/use-create-exam';
+import type { CreateExamForm, ExamRoom } from 'src/composables/use-create-exam';
 import type { ExamLocationOption } from 'src/services/exam.service';
 import type { BackendLocation } from 'src/types/exam';
 import AppExamSeatPreview from 'src/components/exam/app-exam-seat-preview.vue';
-import { updateSeatStatus } from 'src/services/location.service';
 
 interface WalkwayPosition {
   type: 'row' | 'column';
@@ -63,6 +62,14 @@ interface WalkwayPosition {
 
 type SeatStatusOption = 'available' | 'omitted' | 'broken';
 
+interface SelectedRoom {
+  key: string;
+  label: string;
+  slotIndex: number;
+  roomIndex: number;
+  option: ExamLocationOption;
+}
+
 const props = defineProps<{
   locationOptions: ExamLocationOption[];
 }>();
@@ -70,37 +77,58 @@ const props = defineProps<{
 const form = defineModel<CreateExamForm>('form', { required: true });
 const $q = useQuasar();
 
-const activeLocationId = ref<number | null>(null);
+const activeRoomKey = ref<string | null>(null);
 
-const selectedLocationIds = computed<number[]>(() => {
-  const ids: number[] = [];
+const selectedRooms = computed<SelectedRoom[]>(() => {
+  const rooms: SelectedRoom[] = [];
 
-  form.value.timeSlots.forEach((slot) => {
-    slot.rooms.forEach((room) => {
-      if (room.locationId !== null && !ids.includes(room.locationId)) {
-        ids.push(room.locationId);
-      }
+  form.value.timeSlots.forEach((slot, slotIndex) => {
+    slot.rooms.forEach((room, roomIndex) => {
+      if (room.locationId === null) return;
+
+      const option = props.locationOptions.find((location) => location.value === room.locationId);
+      if (!option) return;
+
+      rooms.push({
+        key: `${slotIndex}-${roomIndex}`,
+        label:
+          form.value.timeSlots.length > 1
+            ? `${option.label} (${slot.startTime || '--:--'}-${slot.endTime || '--:--'})`
+            : option.label,
+        slotIndex,
+        roomIndex,
+        option,
+      });
     });
   });
 
-  return ids;
+  return rooms;
 });
 
-const selectedLocations = computed<ExamLocationOption[]>(() =>
-  selectedLocationIds.value
-    .map((id) => props.locationOptions.find((location) => location.value === id))
-    .filter((location): location is ExamLocationOption => Boolean(location)),
-);
-
-const activeOption = computed<ExamLocationOption | null>(() => {
+const activeSelectedRoom = computed<SelectedRoom | null>(() => {
   return (
-    selectedLocations.value.find((location) => location.value === activeLocationId.value) ??
-    selectedLocations.value[0] ??
+    selectedRooms.value.find((room) => room.key === activeRoomKey.value) ??
+    selectedRooms.value[0] ??
     null
   );
 });
 
+const activeRoom = computed<ExamRoom | null>(() => {
+  const selectedRoom = activeSelectedRoom.value;
+  if (!selectedRoom) return null;
+
+  return form.value.timeSlots[selectedRoom.slotIndex]?.rooms[selectedRoom.roomIndex] ?? null;
+});
+
+const activeOption = computed<ExamLocationOption | null>(
+  () => activeSelectedRoom.value?.option ?? null,
+);
+
 const activeLocation = computed<BackendLocation | null>(() => activeOption.value?.raw ?? null);
+
+const activeSeatOverrides = computed<Record<number, number>>(
+  () => activeRoom.value?.seatOverrides ?? {},
+);
 
 const activeRows = computed<number>(() => {
   if (activeLocation.value?.LOCATION_TOTAL_ROWS) return activeLocation.value.LOCATION_TOTAL_ROWS;
@@ -131,7 +159,10 @@ const walkwayPositions = computed<WalkwayPosition[]>(() => [
 
 const omittedSeats = computed<Set<string>>(() => {
   const seats = (activeLocation.value?.SEATS ?? [])
-    .filter((seat) => seat.LS_SEAT_STATUS === 2 && seat.LS_SEAT_LABEL)
+    .filter(
+      (seat) =>
+        (activeSeatOverrides.value[seat.LS_ID] ?? seat.LS_SEAT_STATUS) === 2 && seat.LS_SEAT_LABEL,
+    )
     .map((seat) => seat.LS_SEAT_LABEL as string);
 
   return new Set(seats);
@@ -139,7 +170,10 @@ const omittedSeats = computed<Set<string>>(() => {
 
 const brokenSeats = computed<Set<string>>(() => {
   const seats = (activeLocation.value?.SEATS ?? [])
-    .filter((seat) => seat.LS_SEAT_STATUS === 1 && seat.LS_SEAT_LABEL)
+    .filter(
+      (seat) =>
+        (activeSeatOverrides.value[seat.LS_ID] ?? seat.LS_SEAT_STATUS) === 1 && seat.LS_SEAT_LABEL,
+    )
     .map((seat) => seat.LS_SEAT_LABEL as string);
 
   return new Set(seats);
@@ -152,12 +186,10 @@ const getSeatStatusCode = (status: SeatStatusOption): number => {
   return 0;
 };
 
-const handleSeatStatusChange = async (payload: {
-  seatIds: string[];
-  status: SeatStatusOption;
-}): Promise<void> => {
+const handleSeatStatusChange = (payload: { seatIds: string[]; status: SeatStatusOption }): void => {
   const location = activeLocation.value;
-  if (!location?.SEATS?.length) return;
+  const room = activeRoom.value;
+  if (!location?.SEATS?.length || !room) return;
 
   const nextStatusCode = getSeatStatusCode(payload.status);
   const targetSeats = location.SEATS.filter(
@@ -167,10 +199,17 @@ const handleSeatStatusChange = async (payload: {
   if (targetSeats.length === 0) return;
 
   try {
-    await Promise.all(targetSeats.map((seat) => updateSeatStatus(seat.LS_ID, nextStatusCode)));
+    const nextOverrides = { ...(room.seatOverrides ?? {}) };
     targetSeats.forEach((seat) => {
-      seat.LS_SEAT_STATUS = nextStatusCode;
+      if (seat.LS_SEAT_STATUS === nextStatusCode) {
+        delete nextOverrides[seat.LS_ID];
+        return;
+      }
+
+      nextOverrides[seat.LS_ID] = nextStatusCode;
     });
+
+    room.seatOverrides = nextOverrides;
   } catch (error) {
     console.error('Error updating location seat status:', error);
     $q.notify({
@@ -182,11 +221,13 @@ const handleSeatStatusChange = async (payload: {
 };
 
 watch(
-  selectedLocationIds,
-  (ids) => {
-    if (activeLocationId.value !== null && ids.includes(activeLocationId.value)) return;
+  selectedRooms,
+  (rooms) => {
+    if (activeRoomKey.value !== null && rooms.some((room) => room.key === activeRoomKey.value)) {
+      return;
+    }
 
-    activeLocationId.value = ids[0] ?? null;
+    activeRoomKey.value = rooms[0]?.key ?? null;
   },
   { immediate: true },
 );
