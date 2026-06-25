@@ -1239,6 +1239,10 @@ export default {
       connectionError: 'Connection error occurred',
     },
   },
+  examSimulation: {
+    pageSubtitle:
+      'A computer-based exam simulation to help candidates familiarize with the system before the actual test',
+  },
   navigation: {
     home: 'Home',
     examSchedule: 'Exams',

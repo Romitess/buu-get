@@ -1343,6 +1343,10 @@ export default {
       connectionError: 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
     },
   },
+  examSimulation: {
+    pageSubtitle:
+      'ใช้สำหรับจำลองการสอบรูปแบบคอมพิวเตอร์ เพื่อให้ผู้เข้าสอบคุ้นเคยกับระบบก่อนสอบจริง',
+  },
   navigation: {
     home: 'หน้าหลัก',
     examSchedule: 'รายการสอบ',
