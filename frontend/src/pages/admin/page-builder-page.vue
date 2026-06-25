@@ -45,7 +45,7 @@
           :edit-locale="editLocale"
         />
 
-        <div class="row items-center justify-end q-gutter-x-md q-mt-sm">
+        <div class="row items-center justify-end q-gutter-x-md q-mt-sm pb-actions">
           <AppButton
             color="grey-4"
             text-color="dark"
@@ -141,6 +141,14 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .page-builder-page {
+  // Override global .page-container width (clamp min 1024px) so the page never
+  // forces horizontal scroll on phones / Mac / zoom — keep the 90vw feel + 1600px cap.
+  width: min(90vw, 1600px);
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  // Responsive, proportionally-consistent padding across every screen size.
+  padding: clamp(16px, 2.4vw, 32px);
   overflow-x: hidden;
   font-family: var(--font-family-base) !important;
 
@@ -191,6 +199,25 @@ onMounted(() => {
 @media (max-width: 1023px) {
   .pb-middle-row > * + * {
     margin-top: var(--space-lg);
+  }
+}
+
+@media (max-width: 599px) {
+  .page-title {
+    font-size: 22px;
+  }
+
+  // Stack action buttons full-width so 3 buttons never overflow a small screen.
+  .pb-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .pb-actions .pb-action-btn {
+    width: 100%;
+    min-width: 0;
+    margin-left: 0 !important;
   }
 }
 </style>

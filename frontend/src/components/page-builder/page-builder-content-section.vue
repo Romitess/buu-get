@@ -146,4 +146,14 @@ const onDragEnd = (): void => {
   border: 1px dashed var(--neutral-300);
   border-radius: var(--radius-md);
 }
+
+@media (max-width: 599px) {
+  .pb-card {
+    padding: 16px;
+  }
+
+  .pb-add-btn {
+    flex: 0 0 auto;
+  }
+}
 </style>

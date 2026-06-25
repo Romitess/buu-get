@@ -141,4 +141,10 @@ const onDragEnd = (): void => {
   border: 1px dashed var(--neutral-300);
   border-radius: var(--radius-md);
 }
+
+@media (max-width: 599px) {
+  .rule-column {
+    padding: 14px;
+  }
+}
 </style>

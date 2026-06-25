@@ -123,4 +123,16 @@ const onDragEnd = (): void => {
     height: 264px;
   }
 }
+
+@media (max-width: 599px) {
+  .pb-card {
+    padding: 16px;
+  }
+
+  .banner-list-container {
+    height: auto;
+    max-height: 320px;
+    padding-right: 8px;
+  }
+}
 </style>

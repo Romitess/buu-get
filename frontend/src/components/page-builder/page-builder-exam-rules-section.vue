@@ -53,4 +53,10 @@ const computer = defineModel<EditorSection<ExamRuleBoxContent>>('computer', {
   font-weight: 600;
   color: var(--pb-heading-color);
 }
+
+@media (max-width: 599px) {
+  .pb-card {
+    padding: 16px;
+  }
+}
 </style>
