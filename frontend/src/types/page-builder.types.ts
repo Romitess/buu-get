@@ -44,6 +44,18 @@ export interface ExamRuleBoxContent {
   active: boolean;
 }
 
+/**
+ * รูปแบบ box สำหรับ editor ของ section ที่เป็น "หัวข้อ + เนื้อหา"
+ * (รูปแบบการทดสอบ → card, ขั้นตอนการสมัครสอบ → step)
+ * composable เป็นผู้ map ฟิลด์ content ไปเป็น subtitle/description ตอนบันทึก
+ */
+export interface ContentBoxContent {
+  sortOrder: number;
+  title: LocalizedText;
+  content: LocalizedText;
+  active: boolean;
+}
+
 export type BoxContent =
   | BannerBoxContent
   | CardBoxContent
@@ -61,6 +73,14 @@ export interface PageSectionContent {
 
 export interface PageContent {
   sections: PageSectionContent[];
+}
+
+/** state ของ section ใน editor (แยกตามชนิด box ที่ถืออยู่) */
+export interface EditorSection<T> {
+  type: PageSectionType;
+  title: LocalizedText;
+  active: boolean;
+  boxes: T[];
 }
 
 /** payload ที่ backend คืนกลับ (GET /page-builder/homepage) */
