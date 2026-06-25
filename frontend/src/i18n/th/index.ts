@@ -1346,8 +1346,10 @@ export default {
   navigation: {
     home: 'หน้าหลัก',
     examSchedule: 'รายการสอบ',
+    examSimulation: 'จำลองการสอบ',
     selectSession: 'เลือกวันและรอบการสอบ',
-    examHistory: 'ประวัติการสมัครและสอบ',
+    examHistory: 'ประวัติการสอบ',
+    personalProfile: 'ข้อมูลส่วนตัว',
     manageLocations: 'จัดการห้องสอบ',
     manageExams: 'จัดการรอบสอบ',
     dashboard: 'แดชบอร์ด',

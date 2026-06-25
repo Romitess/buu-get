@@ -1241,10 +1241,12 @@ export default {
   },
   navigation: {
     home: 'Home',
-    examSchedule: 'Exam Schedule',
+    examSchedule: 'Exams',
+    examSimulation: 'Exam Simulation',
     selectSession: 'Select Session',
     manageLocations: 'Manage Locations',
     examHistory: 'Exam History',
+    personalProfile: 'Personal Profile',
     manageExams: 'Manage Exams',
     dashboard: 'Dashboard',
     pageBuilder: 'Homepage Builder',

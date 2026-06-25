@@ -100,15 +100,27 @@ const menuLinks = computed(() => {
   if (role === ROLES.CANDIDATE) {
     links.push({
       name: 'exam-schedule',
-      label: t('navigation.examSchedule') || 'ตารางสอบ',
-      icon: 'event',
+      label: t('navigation.examSchedule') || 'รายการสอบ',
+      icon: 'list_alt',
       path: '/user/exam-schedule',
+    });
+    links.push({
+      name: 'exam-simulation',
+      label: t('navigation.examSimulation') || 'จำลองการสอบ',
+      icon: 'monitor',
+      path: '/user/exam-simulation',
     });
     links.push({
       name: 'exam-history',
       label: t('navigation.examHistory') || 'ประวัติการสอบ',
       icon: 'history',
       path: '/user/exam-history',
+    });
+    links.push({
+      name: 'user-profile',
+      label: t('navigation.personalProfile') || 'ข้อมูลส่วนตัว',
+      icon: 'person',
+      path: '/user/profile',
     });
   }
   // IF: Guest (not logged in)

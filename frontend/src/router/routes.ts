@@ -97,6 +97,17 @@ const routes: RouteRecordRaw[] = [
               ],
             },
           },
+          {
+            path: 'exam-simulation',
+            name: 'exam-simulation',
+            component: () => import('pages/user/exam-simulation-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.examSimulation', icon: 'monitor' },
+              ],
+            },
+          },
         ],
       },
 
