@@ -27,22 +27,24 @@
     <div class="moodle-body row no-wrap">
       <!-- Sidebar -->
       <div class="moodle-sidebar" :class="{ 'moodle-sidebar--collapsed': !sidebarOpen }">
-        <!-- Toggle button always visible -->
-        <div class="sidebar-toggle-row">
+        <!-- Sidebar Header: Title and Menu Button on the same row -->
+        <div class="sidebar-header row items-center justify-between no-wrap q-py-sm">
+          <div v-show="sidebarOpen" class="sidebar-title text-weight-bold text-black ellipsis q-pl-md">
+            วันที่ 22 มิถุนายน 256...
+          </div>
           <q-btn
-            flat round dense
+            flat
+            round
+            dense
             icon="menu"
-            color="grey-8"
+            color="black"
+            class="sidebar-toggle-btn q-mr-sm"
             @click="sidebarOpen = !sidebarOpen"
           />
         </div>
 
         <!-- Sidebar content hidden when collapsed -->
-        <div class="sidebar-content">
-          <div class="sidebar-title q-px-md q-pb-sm text-weight-bold">
-            วันที่ 22 มิถุนายน 256...
-          </div>
-
+        <div class="sidebar-content" v-show="sidebarOpen">
           <q-expansion-item
             label="General"
             default-opened
@@ -349,28 +351,41 @@ const goToView = (view: ViewType) => {
   border-right: 1px solid #dee2e6;
   overflow-y: auto;
   overflow-x: hidden;
-  transition: width 0.25s ease, min-width 0.25s ease;
+  transition: width 0.25s ease, min-width 0.25s ease, background-color 0.25s ease;
 
   &--collapsed {
     width: 48px;
     min-width: 48px;
+    background-color: #ffffff !important;
 
     .sidebar-content {
       opacity: 0;
       pointer-events: none;
     }
 
-    .sidebar-toggle-row {
+    .sidebar-header {
       justify-content: center;
+      padding: 12px 0 4px;
+
+      .sidebar-toggle-btn {
+        margin-right: 0 !important;
+      }
     }
   }
 }
 
-.sidebar-toggle-row {
+.sidebar-header {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   padding: 12px 8px 4px;
+  width: 100%;
+}
+
+.sidebar-title {
+  font-size: 0.95rem;
+  color: #000000;
+  max-width: calc(100% - 48px);
 }
 
 .sidebar-content {
