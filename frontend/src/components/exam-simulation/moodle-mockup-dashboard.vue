@@ -26,42 +26,61 @@
     <!-- Body -->
     <div class="moodle-body row no-wrap">
       <!-- Sidebar -->
-      <div class="moodle-sidebar">
-        <div class="sidebar-title q-px-md q-pt-lg q-pb-sm text-weight-bold">
-          วันที่ 22 มิถุนายน 256...
+      <div class="moodle-sidebar" :class="{ 'moodle-sidebar--collapsed': !sidebarOpen }">
+        <!-- Toggle button always visible -->
+        <div class="sidebar-toggle-row">
+          <q-btn
+            flat round dense
+            icon="menu"
+            color="grey-8"
+            @click="sidebarOpen = !sidebarOpen"
+          />
         </div>
 
-        <q-expansion-item
-          label="General"
-          default-opened
-          header-class="text-weight-bold sidebar-exp-header"
-          class="sidebar-exp"
-        >
-          <q-list class="q-pl-md">
-            <q-item clickable v-ripple class="sidebar-item">
-              <q-item-section>Announcements</q-item-section>
-            </q-item>
-          </q-list>
-        </q-expansion-item>
+        <!-- Sidebar content hidden when collapsed -->
+        <div class="sidebar-content">
+          <div class="sidebar-title q-px-md q-pb-sm text-weight-bold">
+            วันที่ 22 มิถุนายน 256...
+          </div>
 
-        <q-expansion-item
-          label="แบบทดสอบ"
-          default-opened
-          header-class="text-weight-bold sidebar-exp-header"
-          class="sidebar-exp"
-        >
-          <q-list class="q-pl-md">
-            <q-item
-              clickable
-              v-ripple
-              class="sidebar-item"
-              :class="{ 'sidebar-item--active': currentView === 'quiz' }"
-              @click="goToView('quiz')"
-            >
-              <q-item-section>แบบทดสอบ</q-item-section>
-            </q-item>
-          </q-list>
-        </q-expansion-item>
+          <q-expansion-item
+            label="General"
+            default-opened
+            header-class="text-weight-bold sidebar-exp-header"
+            class="sidebar-exp"
+            expand-icon-class="sidebar-exp-icon"
+            expand-icon="expand_less"
+            expanded-icon="expand_more"
+          >
+            <q-list>
+              <q-item clickable v-ripple class="sidebar-item">
+                <q-item-section>Announcements</q-item-section>
+              </q-item>
+            </q-list>
+          </q-expansion-item>
+
+          <q-expansion-item
+            label="แบบทดสอบ"
+            default-opened
+            header-class="text-weight-bold sidebar-exp-header"
+            class="sidebar-exp"
+            expand-icon-class="sidebar-exp-icon"
+            expand-icon="expand_less"
+            expanded-icon="expand_more"
+          >
+            <q-list>
+              <q-item
+                clickable
+                v-ripple
+                class="sidebar-item"
+                :class="{ 'sidebar-item--active': currentView === 'quiz' }"
+                @click="goToView('quiz')"
+              >
+                <q-item-section>แบบทดสอบ</q-item-section>
+              </q-item>
+            </q-list>
+          </q-expansion-item>
+        </div>
       </div>
 
       <!-- Main Content Area -->
@@ -119,7 +138,6 @@
               @click="goToView('course')"
             >
               <div class="course-card-img">
-                <!-- Placeholder Pattern -->
                 <svg
                   width="100%"
                   height="100%"
@@ -153,7 +171,6 @@
             วันที่ 22 มิถุนายน 2569 (รอบสอบ 9.00)
           </div>
 
-          <!-- General Section -->
           <q-card flat bordered class="q-mb-md rounded-borders">
             <q-expansion-item
               default-opened
@@ -182,7 +199,6 @@
             </q-expansion-item>
           </q-card>
 
-          <!-- แบบทดสอบ Section -->
           <q-card flat bordered class="rounded-borders">
             <q-expansion-item
               default-opened
@@ -200,7 +216,7 @@
               </template>
 
               <q-card-section class="q-pt-none q-pb-md q-px-xl">
-                <div 
+                <div
                   class="row items-start q-pl-lg q-py-sm cursor-pointer hover-text-primary"
                   @click="goToView('quiz')"
                 >
@@ -218,8 +234,8 @@
         <!-- View 3: Quiz Detail -->
         <div v-else-if="currentView === 'quiz'" class="view-quiz">
           <div class="text-caption text-primary q-mb-lg cursor-pointer">
-            <span @click="goToView('overview')" class="hover-underline">SSSS</span> / 
-            <span @click="goToView('course')" class="hover-underline">แบบทดสอบ</span> / 
+            <span @click="goToView('overview')" class="hover-underline">SSSS</span> /
+            <span @click="goToView('course')" class="hover-underline">แบบทดสอบ</span> /
             แบบทดสอบ
           </div>
 
@@ -267,8 +283,8 @@ type ViewType = 'overview' | 'course' | 'quiz';
 
 const userStore = useUserStore();
 const currentView = ref<ViewType>('overview');
+const sidebarOpen = ref(true);
 
-// Filter states (mock)
 const filterAll = ref('All');
 const searchQuery = ref('');
 const sortFilter = ref('Sort by course name');
@@ -277,14 +293,9 @@ const viewFilter = ref('Card');
 const displayName = computed(() => {
   const user = userStore.currentUser;
   if (!user) return 'Student';
-
   if (user.fullNameTH) return user.fullNameTH;
   if (user.fullNameEN) return user.fullNameEN;
-
-  if (user.email) {
-    return user.email.split('@')[0];
-  }
-
+  if (user.email) return user.email.split('@')[0];
   return 'Student';
 });
 
@@ -299,7 +310,7 @@ const goToView = (view: ViewType) => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: 700px; // Fixed height for the mockup
+  height: 700px;
 }
 
 .moodle-header {
@@ -313,7 +324,7 @@ const goToView = (view: ViewType) => {
   color: #495057;
   padding: 18px 4px;
   cursor: pointer;
-  
+
   &.active {
     color: var(--q-primary);
     border-bottom: 3px solid var(--q-primary);
@@ -333,9 +344,53 @@ const goToView = (view: ViewType) => {
 // Sidebar
 .moodle-sidebar {
   width: 280px;
+  min-width: 280px;
   background-color: #f8f9fa;
   border-right: 1px solid #dee2e6;
   overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.25s ease, min-width 0.25s ease;
+
+  &--collapsed {
+    width: 48px;
+    min-width: 48px;
+
+    .sidebar-content {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .sidebar-toggle-row {
+      justify-content: center;
+    }
+  }
+}
+
+.sidebar-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 12px 8px 4px;
+}
+
+.sidebar-content {
+  opacity: 1;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+}
+
+// Move expansion chevron to the left, before label
+:deep(.sidebar-exp-header) {
+  font-size: 0.95rem;
+  white-space: nowrap;
+  flex-direction: row-reverse; // puts expand icon on left
+  padding-left: 8px;
+  padding-right: 16px;
+}
+
+:deep(.sidebar-exp-icon) {
+  margin-right: 4px;
+  margin-left: 0;
 }
 
 .sidebar-item {
@@ -344,7 +399,8 @@ const goToView = (view: ViewType) => {
   margin: 2px 8px;
   padding: 4px 12px;
   min-height: 36px;
-  
+  white-space: nowrap;
+
   &:hover {
     background-color: rgba(0,0,0,0.03);
   }
@@ -353,15 +409,10 @@ const goToView = (view: ViewType) => {
 .sidebar-item--active {
   background-color: #1565c0;
   color: white;
-  
+
   &:hover {
     background-color: #1565c0;
   }
-}
-
-:deep(.sidebar-exp-header) {
-  padding-left: 16px;
-  font-size: 0.95rem;
 }
 
 // Main Content
@@ -380,7 +431,7 @@ const goToView = (view: ViewType) => {
   width: 280px;
   border-radius: 8px;
   transition: box-shadow 0.2s;
-  
+
   &:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
   }
