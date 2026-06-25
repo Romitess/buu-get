@@ -11,15 +11,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ExamLocationSeat } from '../../exam-location-seats/entities/exam-location-seat.entity';
 import { ExamSessionLocation } from '../../exam-session-locations/entities/exam-session-location.entity';
 
-export enum SeatLabelFormat {
-  ROW_COL = 'ROW_COL',
-  RUNNING_NUMBER = 'RUNNING_NUMBER',
-  CUSTOM = 'CUSTOM',
-}
-
 export enum SeatDirection {
   HORIZONTAL = 'HORIZONTAL',
   VERTICAL = 'VERTICAL',
+}
+
+export interface LocationAislePosition {
+  type: 'row' | 'column';
+  index: number;
 }
 
 @Entity('EXAM_T_LOCATIONS')
@@ -96,61 +95,35 @@ export class ExamLocation {
   LOCATION_SEAT_CAPACITY: number | null;
 
   @ApiProperty({
-    example: SeatLabelFormat.ROW_COL,
-    enum: SeatLabelFormat,
-    description: 'รูปแบบ Label ที่นั่ง (ROW_COL, RUNNING_NUMBER, CUSTOM)',
-    required: false,
-  })
-  @Column({
-    name: 'SEAT_LABEL_FORMAT',
-    type: 'enum',
-    enum: SeatLabelFormat,
-    nullable: true,
-    comment: 'รูปแบบ Label ที่นั่ง (ROW_COL, RUNNING_NUMBER, CUSTOM)',
-  })
-  SEAT_LABEL_FORMAT: SeatLabelFormat | null;
-
-  @ApiProperty({
     example: SeatDirection.HORIZONTAL,
-    description: 'สถานะการแบ่งที่นั่ง (0: NORMAL, 1: SPLIT)',
+    description: 'ทิศทางการจัดเรียงที่นั่ง',
     enum: SeatDirection,
   })
   @Column({
-    name: 'SEAT_DIRECTION',
+    name: 'LOCATION_SEAT_DIRECTION',
     type: 'enum',
     enum: SeatDirection,
     default: SeatDirection.HORIZONTAL,
-    comment: 'สถานะการแบ่งที่นั่ง (0: NORMAL, 1: SPLIT)',
+    comment: 'ทิศทางการจัดเรียงที่นั่ง',
   })
-  SEAT_DIRECTION: SeatDirection;
+  LOCATION_SEAT_DIRECTION: SeatDirection;
 
   @ApiProperty({
-    example: [5, 8, 10],
-    description: 'Column indexes that have an aisle after them',
+    example: [
+      { type: 'row', index: 3 },
+      { type: 'column', index: 5 },
+    ],
+    description: 'Aisle positions after row or column indexes',
     required: false,
-    type: [Number],
+    type: 'array',
   })
   @Column({
-    name: 'AISLE_AFTER_COLS',
+    name: 'LOCATION_AISLE_AFTER_COL',
     type: 'json',
     nullable: true,
-    comment: 'Column indexes that have an aisle after them',
+    comment: 'Aisle positions after row or column indexes',
   })
-  AISLE_AFTER_COLS: number[] | null;
-
-  @ApiProperty({
-    example: [2, 4],
-    description: 'Row indexes that have an aisle after them',
-    required: false,
-    type: [Number],
-  })
-  @Column({
-    name: 'AISLE_AFTER_ROWS',
-    type: 'json',
-    nullable: true,
-    comment: 'Row indexes that have an aisle after them',
-  })
-  AISLE_AFTER_ROWS: number[] | null;
+  LOCATION_AISLE_AFTER_COL: LocationAislePosition[] | number[] | null;
 
   @ApiProperty({ description: 'วันที่สร้าง' })
   @CreateDateColumn({ name: 'CREATED_AT', comment: 'วันที่สร้างสถานที่จัดสอบ' })

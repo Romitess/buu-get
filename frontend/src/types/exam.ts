@@ -227,6 +227,8 @@ export interface BackendLocation {
   LOCATION_FLOOR_NO?: number | null;
   LOCATION_TOTAL_ROWS?: number;
   LOCATION_TOTAL_COLS?: number;
+  LOCATION_SEAT_DIRECTION?: 'HORIZONTAL' | 'VERTICAL';
+  LOCATION_AISLE_AFTER_COL?: Array<{ type: 'row' | 'column'; index: number } | number> | null;
   SEAT_DIRECTION?: 'HORIZONTAL' | 'VERTICAL';
   AISLE_AFTER_COLS?: number[] | null;
   AISLE_AFTER_ROWS?: number[] | null;

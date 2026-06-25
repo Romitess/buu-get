@@ -6,7 +6,6 @@ import {
 } from './entities/exam-enrollment.entity';
 import { Exam } from '../exam/entities/exam.entity';
 import { UserPhysicalStatus } from '../user-profile/entities/user-profile.entity';
-import { ExamLocationSeat } from '../exam-location-seats/entities/exam-location-seat.entity';
 
 const MAX_TEST_TAKER_SEQUENCE = 999;
 
@@ -45,7 +44,6 @@ export class TestTakerIdService {
         .innerJoinAndSelect('session.EXAM', 'exam')
         .innerJoinAndSelect('enrollment.USER', 'user')
         .leftJoinAndSelect('user.PROFILE', 'profile')
-        .innerJoinAndSelect('enrollment.LOCATION_SEAT', 'locationSeat')
         .where('session.EXAM_ID = :examId', { examId })
         .andWhere('enrollment.ERM_STATUS IN (:...statuses)', {
           statuses: [
@@ -141,28 +139,31 @@ export class TestTakerIdService {
       );
     }
 
-    const leftSeat = left.LOCATION_SEAT;
-    const rightSeat = right.LOCATION_SEAT;
-    if (!leftSeat || !rightSeat) {
+    if (!left.ERM_SEAT_LABEL || !right.ERM_SEAT_LABEL) {
       throw new BadRequestException(
-        `Seat is required to create a test taker ID for enrollment ${!leftSeat ? left.ERM_ID : right.ERM_ID}`,
+        `Seat label is required to create a test taker ID for enrollment ${!left.ERM_SEAT_LABEL ? left.ERM_ID : right.ERM_ID}`,
       );
     }
 
     return (
       leftStartTime.localeCompare(rightStartTime) ||
       leftSessionLocationId - rightSessionLocationId ||
-      this.compareSeatsByLabel(leftSeat, rightSeat) ||
+      this.compareEnrollmentsBySeat(left, right) ||
       left.ERM_ID - right.ERM_ID
     );
   }
 
-  private compareSeatsByLabel(
-    left: ExamLocationSeat,
-    right: ExamLocationSeat,
+  private compareEnrollmentsBySeat(
+    left: ExamEnrollment,
+    right: ExamEnrollment,
   ): number {
-    const leftPosition = this.parseSeatLabel(left.LS_SEAT_LABEL);
-    const rightPosition = this.parseSeatLabel(right.LS_SEAT_LABEL);
+    if (left.ERM_SORT_ORDER !== null && right.ERM_SORT_ORDER !== null) {
+      if (left.ERM_SORT_ORDER !== right.ERM_SORT_ORDER) {
+        return left.ERM_SORT_ORDER - right.ERM_SORT_ORDER;
+      }
+    }
+    const leftPosition = this.parseSeatLabel(left.ERM_SEAT_LABEL);
+    const rightPosition = this.parseSeatLabel(right.ERM_SEAT_LABEL);
 
     if (leftPosition && rightPosition) {
       return (
@@ -173,10 +174,8 @@ export class TestTakerIdService {
     if (leftPosition) return -1;
     if (rightPosition) return 1;
 
-    return (
-      left.LS_ROW_NO - right.LS_ROW_NO ||
-      left.LS_COL_NO - right.LS_COL_NO ||
-      left.LS_ID - right.LS_ID
+    return (left.ERM_SEAT_LABEL ?? '').localeCompare(
+      right.ERM_SEAT_LABEL ?? '',
     );
   }
 

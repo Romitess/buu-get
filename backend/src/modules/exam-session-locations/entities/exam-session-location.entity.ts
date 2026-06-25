@@ -6,11 +6,16 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  OneToMany,
   JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { ExamLocation } from '../../exam-locations/entities/exam-location.entity';
+import {
+  ExamLocation,
+  SeatDirection,
+} from '../../exam-locations/entities/exam-location.entity';
 import { ExamSession } from '../../exam-sessions/entities/exam-session.entity';
+import { ExamEnrollment } from '../../exam-enrollments/entities/exam-enrollment.entity';
 
 @Entity('EXAM_T_SESSION_LOCATIONS')
 export class ExamSessionLocation {
@@ -47,6 +52,81 @@ export class ExamSessionLocation {
   })
   SS_NAME: string | null;
 
+  @ApiProperty({ example: 10, description: 'จำนวนแถวทั้งหมด', required: false })
+  @Column({
+    name: 'TOTAL_ROWS',
+    type: 'int',
+    nullable: true,
+    comment: 'จำนวนแถวทั้งหมด',
+  })
+  TOTAL_ROWS: number | null;
+
+  @ApiProperty({
+    example: 5,
+    description: 'จำนวนคอลัมน์ทั้งหมด',
+    required: false,
+  })
+  @Column({
+    name: 'TOTAL_COLS',
+    type: 'int',
+    nullable: true,
+    comment: 'จำนวนคอลัมน์ทั้งหมด',
+  })
+  TOTAL_COLS: number | null;
+
+  @ApiProperty({
+    example: { after_cols: [4], after_rows: [3] },
+    description: 'ข้อมูลทางเดินหลังจากคอลัมน์/แถว',
+    required: false,
+  })
+  @Column({
+    name: 'AISLE_AFTER',
+    type: 'json',
+    nullable: true,
+    comment: 'ข้อมูลทางเดินหลังจากคอลัมน์/แถว',
+  })
+  AISLE_AFTER: { after_cols: number[]; after_rows: number[] } | null;
+
+  @ApiProperty({
+    example: SeatDirection.HORIZONTAL,
+    description: 'ทิศทางการจัดเรียงที่นั่ง',
+    enum: SeatDirection,
+  })
+  @Column({
+    name: 'LOCATION_SEAT_DIRECTION',
+    type: 'enum',
+    enum: SeatDirection,
+    default: SeatDirection.HORIZONTAL,
+    comment: 'ทิศทางการจัดเรียงที่นั่ง',
+  })
+  LOCATION_SEAT_DIRECTION: SeatDirection;
+
+  @ApiProperty({
+    example: 50,
+    description: 'ความจุที่นั่งทั้งหมด',
+    required: false,
+  })
+  @Column({
+    name: 'LOCATION_SEAT_CAPACITY',
+    type: 'int',
+    nullable: true,
+    comment: 'ความจุที่นั่งทั้งหมด',
+  })
+  LOCATION_SEAT_CAPACITY: number | null;
+
+  @ApiProperty({
+    example: [{ label: 'A1', status: 'AVAILABLE', sortorder: 1 }],
+    description: 'ผังที่นั่ง snapshot',
+    required: false,
+  })
+  @Column({
+    name: 'SEATS_SNAPSHOT',
+    type: 'json',
+    nullable: true,
+    comment: 'ผังที่นั่ง snapshot',
+  })
+  SEATS_SNAPSHOT: Record<string, unknown> | Record<string, unknown>[] | null;
+
   @CreateDateColumn({ name: 'CREATED_AT', comment: 'วันที่สร้าง' })
   CREATED_AT: Date;
 
@@ -73,4 +153,10 @@ export class ExamSessionLocation {
   )
   @JoinColumn({ name: 'SS_ID' })
   SESSION: ExamSession;
+
+  @OneToMany(
+    () => ExamEnrollment,
+    (enrollment: ExamEnrollment) => enrollment.SESSION_LOCATION,
+  )
+  ENROLLMENTS: ExamEnrollment[];
 }

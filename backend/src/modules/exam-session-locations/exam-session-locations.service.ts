@@ -113,9 +113,7 @@ export class ExamSessionLocationsService {
     dto: UpdateExamSessionLocationDto,
   ): Promise<ExamSessionLocation> {
     const sl = await this.findOne(id);
-    if (dto.SS_NAME !== undefined) {
-      sl.SS_NAME = dto.SS_NAME;
-    }
+    Object.assign(sl, dto);
     return await this.sessionLocationRepository.save(sl);
   }
 

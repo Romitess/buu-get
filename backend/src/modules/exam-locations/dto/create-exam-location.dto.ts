@@ -1,16 +1,27 @@
 import {
   IsArray,
   IsEnum,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
   Min,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  SeatDirection,
-  SeatLabelFormat,
-} from '../entities/exam-location.entity';
+import { SeatDirection } from '../entities/exam-location.entity';
+
+export class LocationAislePositionDto {
+  @ApiProperty({ example: 'row', enum: ['row', 'column'] })
+  @IsIn(['row', 'column'])
+  type: 'row' | 'column';
+
+  @ApiProperty({ example: 3 })
+  @IsInt()
+  @Min(1)
+  index: number;
+}
 
 export class CreateExamLocationDto {
   @ApiProperty({ example: 'อาคารเรียนรวม', description: 'ชื่อสถานที่จัดสอบ' })
@@ -59,18 +70,18 @@ export class CreateExamLocationDto {
   LOCATION_SEAT_CAPACITY?: number;
 
   @ApiProperty({
-    example: SeatLabelFormat.ROW_COL,
-    enum: SeatLabelFormat,
-    description: 'รูปแบบ Label ที่นั่ง (ROW_COL, RUNNING_NUMBER, CUSTOM)',
+    example: SeatDirection.HORIZONTAL,
+    description: 'ทิศทางการจัดเรียงที่นั่ง',
+    enum: SeatDirection,
     required: false,
   })
   @IsOptional()
-  @IsEnum(SeatLabelFormat)
-  SEAT_LABEL_FORMAT?: SeatLabelFormat;
+  @IsEnum(SeatDirection)
+  LOCATION_SEAT_DIRECTION?: SeatDirection;
 
   @ApiProperty({
     example: SeatDirection.HORIZONTAL,
-    description: 'สถานะการแบ่งที่นั่ง (0: NORMAL, 1: SPLIT)',
+    description: 'Backward-compatible seat numbering direction',
     enum: SeatDirection,
     required: false,
   })
@@ -79,8 +90,24 @@ export class CreateExamLocationDto {
   SEAT_DIRECTION?: SeatDirection;
 
   @ApiProperty({
-    example: [5, 8, 10],
-    description: 'Column indexes that have an aisle after them',
+    example: [
+      { type: 'row', index: 3 },
+      { type: 'column', index: 5 },
+    ],
+    description: 'Aisle positions after row or column indexes',
+    required: false,
+    type: [LocationAislePositionDto],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => LocationAislePositionDto)
+  LOCATION_AISLE_AFTER_COL?: LocationAislePositionDto[];
+
+  @ApiProperty({
+    example: [5, 8],
+    description:
+      'Backward-compatible column indexes that have an aisle after them',
     required: false,
     type: [Number],
   })
@@ -91,8 +118,9 @@ export class CreateExamLocationDto {
   AISLE_AFTER_COLS?: number[];
 
   @ApiProperty({
-    example: [2, 4],
-    description: 'Row indexes that have an aisle after them',
+    example: [3],
+    description:
+      'Backward-compatible row indexes that have an aisle after them',
     required: false,
     type: [Number],
   })

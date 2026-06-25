@@ -16,13 +16,13 @@ import {
 } from './entities/exam-enrollment.entity';
 import { CreateExamEnrollmentDto } from './dto/create-exam-enrollment.dto';
 import { UpdateExamEnrollmentDto } from './dto/update-exam-enrollment.dto';
-import { BulkSeatAssignmentDto } from './dto/bulk-seat-assignment.dto';
+import {
+  BulkSeatAssignmentDto,
+  SeatAssignmentItemDto,
+} from './dto/bulk-seat-assignment.dto';
 import { RequestFixDto } from './dto/request-fix.dto';
 import { ExamEnrollmentQueryDto } from './dto/exam-enrollment-query.dto';
-import {
-  ExamLocationSeat,
-  LocationSeatStatus,
-} from '../exam-location-seats/entities/exam-location-seat.entity';
+import { ExamLocationSeat } from '../exam-location-seats/entities/exam-location-seat.entity';
 import { ExamSessionLocation } from '../exam-session-locations/entities/exam-session-location.entity';
 
 import {
@@ -71,7 +71,6 @@ export class ExamEnrollmentsService {
 
   async bulkAssignSeats(dto: BulkSeatAssignmentDto): Promise<ExamEnrollment[]> {
     const enrollmentIds = dto.assignments.map((item) => item.ermId);
-    const seatIds = dto.assignments.map((item) => item.lsId);
     const sessionLocationIds = dto.assignments.map((item) => item.slId);
     const uniqueEnrollmentIds = new Set(enrollmentIds);
 
@@ -88,12 +87,9 @@ export class ExamEnrollmentsService {
       );
     }
 
-    const [sessionLocations, seats, sessions] = await Promise.all([
+    const [sessionLocations, sessions] = await Promise.all([
       this.examSessionLocationRepository.find({
         where: { SL_ID: In(sessionLocationIds) },
-      }),
-      this.examLocationSeatRepository.find({
-        where: { LS_ID: In(seatIds) },
       }),
       this.examSessionRepository.find({
         where: { SS_ID: In(dto.sessionIds) },
@@ -106,7 +102,6 @@ export class ExamEnrollmentsService {
     const sessionLocationById = new Map(
       sessionLocations.map((location) => [location.SL_ID, location]),
     );
-    const seatById = new Map(seats.map((seat) => [seat.LS_ID, seat]));
     const sessionIdSet = new Set(dto.sessionIds);
     const usedSessionSeats = new Set<string>();
 
@@ -117,9 +112,8 @@ export class ExamEnrollmentsService {
     for (const assignment of dto.assignments) {
       const enrollment = enrollmentById.get(assignment.ermId);
       const sessionLocation = sessionLocationById.get(assignment.slId);
-      const seat = seatById.get(assignment.lsId);
 
-      if (!enrollment || !sessionLocation || !seat) {
+      if (!enrollment || !sessionLocation) {
         throw new BadRequestException('Invalid seat assignment data');
       }
       if (!sessionIdSet.has(enrollment.SESSION_ID)) {
@@ -132,16 +126,8 @@ export class ExamEnrollmentsService {
           'Session location does not belong to the enrollment session',
         );
       }
-      if (seat.LOCATION_ID !== sessionLocation.LOCATION_ID) {
-        throw new BadRequestException(
-          'Seat does not belong to the selected session location',
-        );
-      }
-      if (seat.LS_SEAT_STATUS !== LocationSeatStatus.AVAILABLE) {
-        throw new BadRequestException('Seat is unavailable');
-      }
 
-      const sessionSeatKey = `${enrollment.SESSION_ID}:${assignment.lsId}`;
+      const sessionSeatKey = `${assignment.slId}:${assignment.seatLabel}`;
       if (usedSessionSeats.has(sessionSeatKey)) {
         throw new ConflictException('Duplicate seat assignment in session');
       }
@@ -152,18 +138,25 @@ export class ExamEnrollmentsService {
       await manager.update(
         ExamEnrollment,
         { ERM_ID: In(enrollmentIds) },
-        { LS_ID: null, SL_ID: null },
+        { ERM_SEAT_LABEL: null, ERM_SORT_ORDER: null, SL_ID: null },
       );
 
-      const updatedEnrollments = dto.assignments.map((assignment) => {
-        const enrollment = enrollmentById.get(assignment.ermId)!;
-        enrollment.LS_ID = assignment.lsId;
-        enrollment.SL_ID = assignment.slId;
-        if (enrollment.ERM_STATUS < ExamEnrollmentStatus.SEAT_ASSIGNED) {
-          enrollment.ERM_STATUS = ExamEnrollmentStatus.SEAT_ASSIGNED;
-        }
-        return enrollment;
-      });
+      const updatedEnrollments = dto.assignments.map(
+        (assignment: SeatAssignmentItemDto) => {
+          const enrollment = enrollmentById.get(assignment.ermId)!;
+          const rawSortOrder: unknown = assignment.sortOrder;
+          const sortOrder: number | null =
+            typeof rawSortOrder === 'number' ? rawSortOrder : null;
+
+          enrollment.ERM_SEAT_LABEL = assignment.seatLabel;
+          enrollment.ERM_SORT_ORDER = sortOrder;
+          enrollment.SL_ID = assignment.slId;
+          if (enrollment.ERM_STATUS < ExamEnrollmentStatus.SEAT_ASSIGNED) {
+            enrollment.ERM_STATUS = ExamEnrollmentStatus.SEAT_ASSIGNED;
+          }
+          return enrollment;
+        },
+      );
 
       await manager.save(ExamEnrollment, updatedEnrollments);
       await this.testTakerIdService.assign(manager, enrollmentIds);
@@ -334,7 +327,6 @@ export class ExamEnrollmentsService {
         'USER',
         'USER.PROFILE',
         'USER.IMAGE',
-        'LOCATION_SEAT',
         'TRANSACTION',
         'TRANSACTION.RECEIPTS',
       ],
@@ -515,14 +507,13 @@ export class ExamEnrollmentsService {
           'SESSION_LOCATION.LOCATION',
           'ATTENDANCES',
           'VOUCHERS',
-          'LOCATION_SEAT',
         ],
         select: {
           ERM_ID: true,
           USER_ID: true,
           SESSION_ID: true,
           SL_ID: true,
-          LS_ID: true,
+          ERM_SEAT_LABEL: true,
           ERM_TEST_TAKER: true,
           ERM_STATUS: true,
           ERM_VERIFY_STATUS: true,
@@ -577,11 +568,6 @@ export class ExamEnrollmentsService {
             VC_ID: true,
             ERM_ID: true,
             VC_CODE: true,
-          },
-          LOCATION_SEAT: {
-            LS_ID: true,
-            LOCATION_ID: true,
-            LS_SEAT_LABEL: true,
           },
         },
         order: { CREATED_AT: 'ASC' },
@@ -861,7 +847,6 @@ export class ExamEnrollmentsService {
         'VOUCHERS',
         'SCORE',
         'SCORE.CERTIFICATES',
-        'LOCATION_SEAT',
       ],
       order: { CREATED_AT: 'DESC' },
     });
@@ -889,7 +874,6 @@ export class ExamEnrollmentsService {
         'SESSION.EXAM',
         'SESSION.SESSION_LOCATIONS',
         'SESSION.SESSION_LOCATIONS.LOCATION',
-        'LOCATION_SEAT',
       ],
     });
   }
@@ -908,7 +892,6 @@ export class ExamEnrollmentsService {
         'USER.PROFILE',
         'USER.IMAGE',
         'VOUCHERS',
-        'LOCATION_SEAT',
       ],
     });
 
@@ -927,13 +910,15 @@ export class ExamEnrollmentsService {
     await this.validateSeatAssignment(enrollment, updateExamEnrollmentDto);
 
     if (
-      updateExamEnrollmentDto.LS_ID !== undefined &&
-      updateExamEnrollmentDto.LS_ID !== null
+      updateExamEnrollmentDto.ERM_SEAT_LABEL !== undefined &&
+      updateExamEnrollmentDto.ERM_SEAT_LABEL !== null &&
+      updateExamEnrollmentDto.SL_ID !== undefined &&
+      updateExamEnrollmentDto.SL_ID !== null
     ) {
       const duplicate = await this.examEnrollmentRepository.findOne({
         where: {
-          SESSION_ID: enrollment.SESSION_ID,
-          LS_ID: updateExamEnrollmentDto.LS_ID,
+          SL_ID: updateExamEnrollmentDto.SL_ID,
+          ERM_SEAT_LABEL: updateExamEnrollmentDto.ERM_SEAT_LABEL,
           ERM_ID: Not(id),
         },
       });
@@ -946,11 +931,8 @@ export class ExamEnrollmentsService {
     }
 
     // Sync relations with scalar columns to prevent TypeORM's loaded FK relations from overriding DTO updates
-    if (updateExamEnrollmentDto.LS_ID !== undefined) {
-      enrollment.LS_ID = updateExamEnrollmentDto.LS_ID;
-      enrollment.LOCATION_SEAT = updateExamEnrollmentDto.LS_ID
-        ? ({ LS_ID: updateExamEnrollmentDto.LS_ID } as ExamLocationSeat)
-        : (null as unknown as ExamLocationSeat);
+    if (updateExamEnrollmentDto.ERM_SEAT_LABEL !== undefined) {
+      enrollment.ERM_SEAT_LABEL = updateExamEnrollmentDto.ERM_SEAT_LABEL;
     }
 
     if (updateExamEnrollmentDto.SL_ID !== undefined) {
@@ -968,11 +950,16 @@ export class ExamEnrollmentsService {
     const saved = await this.examEnrollmentRepository.save(updated);
     const currentStatus: ExamEnrollmentStatus = Number(saved.ERM_STATUS);
 
-    if (saved.LS_ID && currentStatus === ExamEnrollmentStatus.PAID) {
+    if (
+      saved.SL_ID &&
+      saved.ERM_SEAT_LABEL &&
+      currentStatus === ExamEnrollmentStatus.PAID
+    ) {
       saved.ERM_STATUS = ExamEnrollmentStatus.SEAT_ASSIGNED;
       await this.examEnrollmentRepository.save(saved);
     } else if (
-      !saved.LS_ID &&
+      !saved.SL_ID &&
+      !saved.ERM_SEAT_LABEL &&
       currentStatus === ExamEnrollmentStatus.SEAT_ASSIGNED
     ) {
       saved.ERM_STATUS = ExamEnrollmentStatus.PAID;
@@ -987,30 +974,30 @@ export class ExamEnrollmentsService {
     updateExamEnrollmentDto: UpdateExamEnrollmentDto,
   ): Promise<void> {
     if (
-      updateExamEnrollmentDto.LS_ID === undefined &&
+      updateExamEnrollmentDto.ERM_SEAT_LABEL === undefined &&
       updateExamEnrollmentDto.SL_ID === undefined
     ) {
       return;
     }
 
-    const nextSeatId =
-      updateExamEnrollmentDto.LS_ID !== undefined
-        ? updateExamEnrollmentDto.LS_ID
-        : enrollment.LS_ID;
+    const nextSeatLabel =
+      updateExamEnrollmentDto.ERM_SEAT_LABEL !== undefined
+        ? updateExamEnrollmentDto.ERM_SEAT_LABEL
+        : enrollment.ERM_SEAT_LABEL;
     const nextSessionLocationId =
       updateExamEnrollmentDto.SL_ID !== undefined
         ? updateExamEnrollmentDto.SL_ID
         : enrollment.SL_ID;
 
-    if (!nextSeatId && !nextSessionLocationId) return;
+    if (!nextSeatLabel && !nextSessionLocationId) return;
 
-    if (nextSeatId && !nextSessionLocationId) {
+    if (nextSeatLabel && !nextSessionLocationId) {
       throw new BadRequestException('SL_ID is required when assigning a seat');
     }
 
-    if (!nextSeatId && nextSessionLocationId) {
+    if (!nextSeatLabel && nextSessionLocationId) {
       throw new BadRequestException(
-        'LS_ID is required when assigning a session location',
+        'ERM_SEAT_LABEL is required when assigning a session location',
       );
     }
 
@@ -1025,20 +1012,6 @@ export class ExamEnrollmentsService {
     if (sessionLocation.SS_ID !== enrollment.SESSION_ID) {
       throw new BadRequestException(
         'Session location does not belong to this enrollment session',
-      );
-    }
-
-    const seat = await this.examLocationSeatRepository.findOne({
-      where: { LS_ID: Number(nextSeatId) },
-    });
-
-    if (!seat) {
-      throw new BadRequestException('Invalid seat');
-    }
-
-    if (seat.LOCATION_ID !== sessionLocation.LOCATION_ID) {
-      throw new BadRequestException(
-        'Seat does not belong to the selected session location',
       );
     }
   }
