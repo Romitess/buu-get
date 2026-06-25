@@ -35,6 +35,8 @@
     />
 
     <!-- Card 3: กำหนดการลงทะเบียนและชำระเงิน -->
+    <create-exam-room-preview-card v-model:form="form" :location-options="locationOptions" />
+
     <create-exam-registration-card
       v-model:form="form"
       :locked="isPublishedSectionLocked || isLockedByEnrollment"
@@ -95,6 +97,7 @@ import { useCreateExam, type CreateExamForm } from 'src/composables/use-create-e
 import AppButton from 'src/components/base/app-button.vue';
 import CreateExamDetailsCard from 'src/components/exam/create-exam-details-card.vue';
 import CreateExamScheduleCard from 'src/components/exam/create-exam-schedule-card.vue';
+import CreateExamRoomPreviewCard from 'src/components/exam/create-exam-room-preview-card.vue';
 import CreateExamRegistrationCard from 'src/components/exam/create-exam-registration-card.vue';
 import CreateExamCandidatesCard from 'src/components/exam/create-exam-candidates-card.vue';
 

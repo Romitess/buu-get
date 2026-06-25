@@ -356,10 +356,6 @@ const onThaiID = (): void => {
   flex-direction: column;
   gap: 8px;
 }
-
-.field-block {
-}
-
 .password-requirements {
   display: grid;
   gap: 2px;

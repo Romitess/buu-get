@@ -5,14 +5,15 @@
       <AppSeatLegend :items="legendItems" />
     </div>
 
-    <!-- Divider -->
-    <div class="teacher-desk-divider q-mb-sm">
-      <div class="teacher-line"></div>
-      <div class="q-px-md rounded-borders teacher-desk-label">
-        Teacher's Desk & Projector Screen
+    <template v-if="!props.scrollHeaderWithContent">
+      <div class="teacher-desk-divider q-mb-sm">
+        <div class="teacher-line"></div>
+        <div class="q-px-md rounded-borders teacher-desk-label">
+          Teacher's Desk & Projector Screen
+        </div>
+        <div class="teacher-line"></div>
       </div>
-      <div class="teacher-line"></div>
-    </div>
+    </template>
 
     <!-- Seat Preview Container (zoom-to-fit, no scrollbar) -->
     <div
@@ -22,6 +23,16 @@
     >
       <div v-if="totalSeats > 0" class="seat-grid-scaling-wrapper" :style="wrapperStyle">
         <div ref="gridRef" class="seat-grid-scalable" :style="gridTransformStyle">
+          <template v-if="props.scrollHeaderWithContent">
+            <div class="teacher-desk-divider teacher-desk-divider--scroll q-mb-sm">
+              <div class="teacher-line"></div>
+              <div class="q-px-md rounded-borders teacher-desk-label">
+                Teacher's Desk & Projector Screen
+              </div>
+              <div class="teacher-line"></div>
+            </div>
+          </template>
+
           <div class="seat-grid-wrapper" :style="seatGridStyle">
             <template v-if="props.showSeatGuides && colCount > 0">
               <div
@@ -173,8 +184,10 @@ interface Props {
   walkwayPositions?: WalkwayPosition[];
   numberingDirection?: 'horizontal' | 'vertical';
   omittedSeats?: Set<string>;
+  brokenSeats?: Set<string>;
   showSeatGuides?: boolean;
   showFooterHint?: boolean;
+  scrollHeaderWithContent?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -185,9 +198,15 @@ const props = withDefaults(defineProps<Props>(), {
   walkwayPositions: () => [],
   numberingDirection: 'vertical',
   omittedSeats: () => new Set<string>(),
+  brokenSeats: () => new Set<string>(),
   showSeatGuides: false,
   showFooterHint: false,
+  scrollHeaderWithContent: false,
 });
+
+const emit = defineEmits<{
+  (e: 'seat-status-change', payload: { seatIds: string[]; status: SeatStatusOption }): void;
+}>();
 
 const MAX_SEATS = Infinity;
 const { t } = useI18n();
@@ -216,7 +235,7 @@ const statusDialogTarget = ref('');
 const statusDialogTargetMeta = ref<SeatStatusTarget>(null);
 const statusDialogCurrentStatus = ref<SeatStatusOption>('available');
 const localOmittedSeats = ref<Set<string>>(new Set());
-const brokenSeats = ref<Set<string>>(new Set());
+const localBrokenSeats = ref<Set<string>>(new Set());
 
 const handleSeatClick = (seatId: string): void => {
   statusDialogTarget.value = `ที่นั่ง ${seatId}`;
@@ -260,7 +279,7 @@ const getTargetSeatIds = (): string[] => {
 const applySeatStatus = (status: SeatStatusOption): void => {
   const targetSeatIds = getTargetSeatIds();
   const nextOmittedSeats = new Set(localOmittedSeats.value);
-  const nextBrokenSeats = new Set(brokenSeats.value);
+  const nextBrokenSeats = new Set(localBrokenSeats.value);
 
   targetSeatIds.forEach((seatId) => {
     nextOmittedSeats.delete(seatId);
@@ -276,13 +295,14 @@ const applySeatStatus = (status: SeatStatusOption): void => {
   });
 
   localOmittedSeats.value = nextOmittedSeats;
-  brokenSeats.value = nextBrokenSeats;
+  localBrokenSeats.value = nextBrokenSeats;
   statusDialogCurrentStatus.value = status;
+  emit('seat-status-change', { seatIds: targetSeatIds, status });
 };
 
 const getSeatStatusOption = (seatId: string): SeatStatusOption => {
   if (localOmittedSeats.value.has(seatId)) return 'omitted';
-  if (brokenSeats.value.has(seatId)) return 'broken';
+  if (localBrokenSeats.value.has(seatId)) return 'broken';
 
   return 'available';
 };
@@ -303,7 +323,7 @@ const setSeatStatusSets = (statuses: {
   brokenSeats?: Iterable<string>;
   omittedSeats?: Iterable<string>;
 }): void => {
-  brokenSeats.value = new Set(statuses.brokenSeats ?? []);
+  localBrokenSeats.value = new Set(statuses.brokenSeats ?? []);
   localOmittedSeats.value = new Set(statuses.omittedSeats ?? []);
 };
 
@@ -323,7 +343,7 @@ const getSeatStatuses = (): Record<string, number> => {
 };
 
 defineExpose({
-  brokenSeats,
+  brokenSeats: localBrokenSeats,
   omittedSeats: localOmittedSeats,
   setSeatStatusSets,
   getSeatStatuses,
@@ -331,7 +351,7 @@ defineExpose({
 
 const getSeatStatus = (seatId: string): 'available' | 'assigned' | 'broken' | 'blocked' => {
   if (localOmittedSeats.value.has(seatId)) return 'blocked';
-  if (brokenSeats.value.has(seatId)) return 'broken';
+  if (localBrokenSeats.value.has(seatId)) return 'broken';
 
   return 'available';
 };
@@ -799,8 +819,8 @@ watch(
   (nextDirection, oldDirection) => {
     if (!oldDirection || nextDirection === oldDirection) return;
 
-    brokenSeats.value = remapSeatStatusSetByDirection(
-      brokenSeats.value,
+    localBrokenSeats.value = remapSeatStatusSetByDirection(
+      localBrokenSeats.value,
       oldDirection,
       nextDirection,
     );
@@ -816,6 +836,14 @@ watch(
   () => props.omittedSeats,
   (value) => {
     localOmittedSeats.value = new Set(value);
+  },
+  { immediate: true },
+);
+
+watch(
+  () => props.brokenSeats,
+  (value) => {
+    localBrokenSeats.value = new Set(value);
   },
   { immediate: true },
 );
@@ -850,6 +878,12 @@ watch(
     border-radius: var(--radius-sm, 4px);
     transform: translateY(-50%);
   }
+}
+
+.teacher-desk-divider--scroll {
+  width: 860px;
+  max-width: 100%;
+  margin-inline: auto;
 }
 
 .teacher-desk-label {
