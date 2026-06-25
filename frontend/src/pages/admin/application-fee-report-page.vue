@@ -308,6 +308,7 @@ const columns = computed<QTableColumn[]>(() => [
     field: 'index',
     align: 'center',
     style: 'width:60px',
+    sortable: true,
   },
   {
     name: 'receiptNo',

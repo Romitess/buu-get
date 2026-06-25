@@ -121,6 +121,14 @@ const routes: RouteRecordRaw[] = [
             name: 'admin-dashboard',
             component: () => import('pages/admin/dashboard-page.vue'),
             meta: {
+              roles: [
+                ROLES.ADMIN,
+                ROLES.STAFF,
+                ROLES.REGISTRATION_OFFICER,
+                ROLES.EXECUTIVE,
+                ROLES.PROCTOR,
+                ROLES.EXAM_OPERATIONS_OFFICER,
+              ],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
                 { label: 'navigation.dashboard', icon: 'dashboard' },
@@ -476,7 +484,7 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: 'executive/test-takers/:examId/:ermId/history',
-            name: 'admin-executive-exam-history',
+            name: 'admin-executive-test-taker-history',
             component: () => import('pages/admin/executive-exam-history-page.vue'),
             meta: {
               roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
