@@ -402,6 +402,20 @@ watch(
   { immediate: true },
 );
 
+watch(
+  () => form.value.timeSlots,
+  (slots) => {
+    slots.forEach((slot) => {
+      slot.rooms.forEach((room) => {
+        if (room.lastLocationId === undefined) {
+          room.lastLocationId = room.locationId;
+        }
+      });
+    });
+  },
+  { deep: true, immediate: true },
+);
+
 const filterProctors = (val: string, update: (callback: () => void) => void): void => {
   if (val === '') {
     update(() => {
@@ -522,6 +536,33 @@ const getAvailableLocationOptions = (
 
 const onLocationChange = (room: ExamRoom, slotIdx: number, roomIdx: number): void => {
   emit('clearFieldError', `locationId_${slotIdx}_${roomIdx}`);
+  const nextLocationId = room.locationId;
+  const previousLocationId = room.lastLocationId ?? null;
+  room.locationDrafts = room.locationDrafts ?? {};
+
+  if (previousLocationId !== null && previousLocationId !== nextLocationId) {
+    room.locationDrafts[previousLocationId] = {
+      seats: room.seats,
+      ...(room.seatOverrides ? { seatOverrides: { ...room.seatOverrides } } : {}),
+      ...(room.sessionLocationSnapshot
+        ? { sessionLocationSnapshot: { ...room.sessionLocationSnapshot } }
+        : {}),
+    };
+  }
+
+  if (nextLocationId !== null && room.locationDrafts[nextLocationId]) {
+    const draft = room.locationDrafts[nextLocationId];
+    room.seats = draft.seats;
+    room.seatOverrides = draft.seatOverrides ? { ...draft.seatOverrides } : {};
+    if (draft.sessionLocationSnapshot) {
+      room.sessionLocationSnapshot = { ...draft.sessionLocationSnapshot };
+    } else {
+      delete room.sessionLocationSnapshot;
+    }
+    room.lastLocationId = nextLocationId;
+    return;
+  }
+
   room.seatOverrides = {};
   delete room.sessionLocationSnapshot;
 
@@ -529,6 +570,7 @@ const onLocationChange = (room: ExamRoom, slotIdx: number, roomIdx: number): voi
   if (maxSeats > 0 && maxSeats !== DEFAULT_MAX_SEATS) {
     room.seats = maxSeats;
   }
+  room.lastLocationId = nextLocationId;
 };
 
 const activeSlot = computed(() => form.value.timeSlots[props.activeSlotIndex]);

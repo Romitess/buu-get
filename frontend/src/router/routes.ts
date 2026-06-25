@@ -147,17 +147,6 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'page-builder',
-            name: 'admin-page-builder',
-            component: () => import('pages/admin/page-builder-page.vue'),
-            meta: {
-              breadcrumb: [
-                { label: 'navigation.home', icon: 'home', to: '/' },
-                { label: 'navigation.pageBuilder', icon: 'web' },
-              ],
-            },
-          },
-          {
             path: 'location-management',
             name: 'admin-location-management',
             component: () => import('pages/admin/location-management-page.vue'),
@@ -585,7 +574,7 @@ const routes: RouteRecordRaw[] = [
               ],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
-                { label: 'navigation.manageHomeContent', icon: 'edit' },
+                { label: 'navigation.manageHomeContent', icon: 'star' },
               ],
             },
           },

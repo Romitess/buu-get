@@ -53,6 +53,17 @@ export interface ExamRoom {
   seatOverrides?: Record<number, number>;
   /** Session-specific room layout snapshot */
   sessionLocationSnapshot?: SessionLocationSnapshotPayload;
+  /** Last selected location, used to restore per-location draft state while editing */
+  lastLocationId?: number | null;
+  /** Per-location draft state for switching locations in the same room row */
+  locationDrafts?: Record<
+    number,
+    {
+      seats: number;
+      seatOverrides?: Record<number, number>;
+      sessionLocationSnapshot?: SessionLocationSnapshotPayload;
+    }
+  >;
 }
 
 export interface TimeSlot {
