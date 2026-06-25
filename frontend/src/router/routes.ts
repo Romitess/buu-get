@@ -522,7 +522,7 @@ const routes: RouteRecordRaw[] = [
                   icon: 'info',
                   to: '/admin/exam-information/:year',
                 },
-                { label: 'navigation.examCandidatesInfo', icon: 'groups' },
+                { label: 'navigation.examCandidatesInfo', icon: 'people_outline' },
               ],
             },
           },
@@ -546,7 +546,7 @@ const routes: RouteRecordRaw[] = [
                 },
                 {
                   label: 'navigation.examCandidatesInfo',
-                  icon: 'groups',
+                  icon: 'people_outline',
                   to: '/admin/exam-information/:year/candidates?round=:round',
                 },
                 { label: 'navigation.examHistory', icon: 'history' },

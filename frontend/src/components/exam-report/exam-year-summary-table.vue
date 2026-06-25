@@ -14,16 +14,12 @@
       >
         <template #body-cell-detail="{ row }">
           <div class="row items-center justify-center">
-            <q-btn
-              flat
-              round
-              dense
-              color="primary"
+            <ActionButton
               icon="people_outline"
+              color="black"
+              :tooltip="t('admin.examReport.yearTable.viewDetail')"
               @click="goToExamInformation(row)"
-            >
-              <q-tooltip>{{ t('admin.examReport.yearTable.viewDetail') }}</q-tooltip>
-            </q-btn>
+            />
           </div>
         </template>
       </BaseTable>
@@ -37,6 +33,7 @@ import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import BaseTable from 'src/components/shared/base-table.vue';
+import ActionButton from 'src/components/shared/action-button.vue';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import type { ExamYearTableRow } from 'src/types/exam-report.types';
 
@@ -93,7 +90,7 @@ const columns = computed((): QTableColumn<ExamYearTableRow>[] => [
     name: 'year',
     label: t('admin.examReport.yearTable.columns.year'),
     field: 'year',
-    align: 'left',
+    align: 'center',
   },
   {
     name: 'registered',
