@@ -34,6 +34,8 @@ const CACHE_DURATION_MS = 30000; // 30 seconds short-term cache
 let examsCache: BackendExam[] | null = null;
 let lastFetchTimestamp = 0;
 
+type BackendSessionLocation = NonNullable<BackendSession['SESSION_LOCATIONS']>[number];
+
 export const invalidateExamCache = (): void => {
   examsCache = null;
   lastFetchTimestamp = 0;
@@ -434,6 +436,27 @@ const createSessionLocations = async (
   );
 };
 
+const normalizeJson = (value: unknown): string => JSON.stringify(value ?? null);
+
+const sessionLocationMatches = (
+  existing: BackendSessionLocation,
+  desired: {
+    proctorName: string | null;
+    sessionLocationSnapshot?: SessionLocationSnapshotPayload;
+  },
+): boolean => {
+  const snapshot = desired.sessionLocationSnapshot;
+  return (
+    (existing.SS_NAME ?? null) === (desired.proctorName ?? null) &&
+    (existing.TOTAL_ROWS ?? null) === (snapshot?.TOTAL_ROWS ?? null) &&
+    (existing.TOTAL_COLS ?? null) === (snapshot?.TOTAL_COLS ?? null) &&
+    normalizeJson(existing.AISLE_AFTER) === normalizeJson(snapshot?.AISLE_AFTER) &&
+    (existing.LOCATION_SEAT_DIRECTION ?? null) === (snapshot?.LOCATION_SEAT_DIRECTION ?? null) &&
+    (existing.LOCATION_SEAT_CAPACITY ?? null) === (snapshot?.LOCATION_SEAT_CAPACITY ?? null) &&
+    normalizeJson(existing.SEATS_SNAPSHOT) === normalizeJson(snapshot?.SEATS_SNAPSHOT)
+  );
+};
+
 const syncSessionLocations = async (
   sessionId: number,
   currentLocations: BackendSession['SESSION_LOCATIONS'] | undefined,
@@ -476,6 +499,10 @@ const syncSessionLocations = async (
         }),
       );
     } else {
+      if (sessionLocationMatches(existing, loc)) {
+        continue;
+      }
+
       promises.push(
         api.patch(`/exam-session-locations/${existing.SL_ID}`, {
           SS_NAME: loc.proctorName,
@@ -503,6 +530,56 @@ const buildBlockedSeatPayload = (
     LS_ID,
     BLOCK_STATUS,
   }));
+};
+
+const snapshotStatusToCode = (status: 'AVAILABLE' | 'BROKEN' | 'BLOCKED'): number => {
+  if (status === 'BROKEN') return 1;
+  if (status === 'BLOCKED') return 2;
+  return 0;
+};
+
+const buildBlockedSeatPayloadFromSession = (
+  session: BackendSession | undefined,
+): { LS_ID: number; BLOCK_STATUS: number }[] | null => {
+  if (!session?.SESSION_LOCATIONS?.length) return null;
+
+  const mergedOverrides = new Map<number, number>();
+  for (const relation of session.SESSION_LOCATIONS) {
+    if (!relation.SEATS_SNAPSHOT?.length || !relation.LOCATION?.SEATS?.length) return null;
+
+    relation.SEATS_SNAPSHOT.forEach((snapshotSeat) => {
+      const baseSeat = relation.LOCATION.SEATS?.find(
+        (seat) => seat.LS_SEAT_LABEL === snapshotSeat.label,
+      );
+      if (!baseSeat) return;
+
+      const snapshotStatus = snapshotStatusToCode(snapshotSeat.status);
+      if (baseSeat.LS_SEAT_STATUS !== snapshotStatus) {
+        mergedOverrides.set(baseSeat.LS_ID, snapshotStatus);
+      }
+    });
+  }
+
+  return Array.from(mergedOverrides.entries()).map(([LS_ID, BLOCK_STATUS]) => ({
+    LS_ID,
+    BLOCK_STATUS,
+  }));
+};
+
+const blockedSeatPayloadMatches = (
+  currentPayload: { LS_ID: number; BLOCK_STATUS: number }[] | null,
+  desiredPayload: { LS_ID: number; BLOCK_STATUS: number }[],
+): boolean => {
+  if (currentPayload === null) return false;
+
+  const serialize = (payload: { LS_ID: number; BLOCK_STATUS: number }[]): string =>
+    JSON.stringify(
+      [...payload]
+        .map((seat) => ({ LS_ID: Number(seat.LS_ID), BLOCK_STATUS: Number(seat.BLOCK_STATUS) }))
+        .sort((a, b) => a.LS_ID - b.LS_ID),
+    );
+
+  return serialize(currentPayload) === serialize(desiredPayload);
 };
 
 export const replaceExamBlockedSeats = async (
@@ -560,11 +637,13 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<numbe
         SS_SESSION_STATUS: SESSION_STATUS_OPEN,
       });
 
-      await createSessionLocations(sessionResponse.data.SS_ID, range.locations);
-      await replaceExamBlockedSeats(
-        sessionResponse.data.SS_ID,
-        buildBlockedSeatPayload(range.locations),
-      );
+      const blockedSeatPayload = buildBlockedSeatPayload(range.locations);
+      await Promise.all([
+        createSessionLocations(sessionResponse.data.SS_ID, range.locations),
+        ...(blockedSeatPayload.length > 0
+          ? [replaceExamBlockedSeats(sessionResponse.data.SS_ID, blockedSeatPayload)]
+          : []),
+      ]);
     });
 
     await Promise.all(sessionPromises);
@@ -670,13 +749,27 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
 
         if (existingId) {
           // Update existing session
-          await api.patch(`/exam-sessions/${existingId}`, sessionPayload);
-          await syncSessionLocations(
-            existingId,
-            currentSessionsById.get(existingId)?.SESSION_LOCATIONS,
-            range.locations,
-          );
-          await replaceExamBlockedSeats(existingId, buildBlockedSeatPayload(range.locations));
+          const currentSession = currentSessionsById.get(existingId);
+          const isSessionUnchanged =
+            currentSession &&
+            currentSession.LOCATION_ID === sessionPayload.LOCATION_ID &&
+            (currentSession.SS_START_TIME || '').substring(0, 5) === sessionPayload.SS_START_TIME &&
+            (currentSession.SS_END_TIME || '').substring(0, 5) === sessionPayload.SS_END_TIME &&
+            Number(currentSession.SS_CAPACITY) === Number(sessionPayload.SS_CAPACITY);
+          const blockedSeatPayload = buildBlockedSeatPayload(range.locations);
+          const currentBlockedSeatPayload = buildBlockedSeatPayloadFromSession(currentSession);
+          const writePromises: Promise<unknown>[] = [
+            syncSessionLocations(existingId, currentSession?.SESSION_LOCATIONS, range.locations),
+          ];
+
+          if (!isSessionUnchanged) {
+            writePromises.push(api.patch(`/exam-sessions/${existingId}`, sessionPayload));
+          }
+          if (!blockedSeatPayloadMatches(currentBlockedSeatPayload, blockedSeatPayload)) {
+            writePromises.push(replaceExamBlockedSeats(existingId, blockedSeatPayload));
+          }
+
+          await Promise.all([...writePromises]);
           return;
         }
 
@@ -687,15 +780,19 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
           SS_SESSION_STATUS: SESSION_STATUS_OPEN,
         });
 
-        await createSessionLocations(sessionResponse.data.SS_ID, range.locations);
-        await replaceExamBlockedSeats(
-          sessionResponse.data.SS_ID,
-          buildBlockedSeatPayload(range.locations),
-        );
+        const blockedSeatPayload = buildBlockedSeatPayload(range.locations);
+        await Promise.all([
+          createSessionLocations(sessionResponse.data.SS_ID, range.locations),
+          ...(blockedSeatPayload.length > 0
+            ? [replaceExamBlockedSeats(sessionResponse.data.SS_ID, blockedSeatPayload)]
+            : []),
+        ]);
       });
 
       await Promise.all(sessionPromises);
     }
+
+    invalidateExamCache();
   } catch (error) {
     console.error('Error updating exam round:', error);
     throw error;

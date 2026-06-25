@@ -707,11 +707,12 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     isLoadingData.value = true;
     error.value = null;
     try {
-      const [locations, fundSources, proctors, exams] = await Promise.all([
+      const [locations, fundSources, proctors, exams, editExam] = await Promise.all([
         fetchExamLocations(),
         fetchFundSources(),
         getUsersFromApi(ROLES.PROCTOR),
         fetchAllExamsRaw(),
+        examId ? fetchExamById(examId) : Promise.resolve(null),
       ]);
       locationOptions.value = locations;
       allExams.value = exams;
@@ -729,9 +730,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       });
 
       // If in edit mode, load the existing exam data into the form
-      if (examId) {
-        const exam = await fetchExamById(examId);
-
+      if (editExam) {
+        const exam = editExam;
         form.value.examName = exam.EXAM_NAME || '';
         form.value.examRound = exam.EXAM_ROUND || '';
         form.value.examType = exam.EXAM_TYPE || EXAM_TYPE_GENERAL;
@@ -750,6 +750,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         // Group sessions by time range into time slots with rooms
         if (exam.SESSIONS && exam.SESSIONS.length > 0) {
           const slotMap = new Map<string, TimeSlot>();
+          const sessionsNeedingBlockedFallback = new Set<number>();
 
           exam.SESSIONS.forEach((session) => {
             const start = session.SS_START_TIME ? session.SS_START_TIME.substring(0, 5) : '';
@@ -770,6 +771,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
               relationLocations
                 .filter((relation) => relation.LOCATION)
                 .forEach((relation) => {
+                  const hasSeatSnapshot = (relation.SEATS_SNAPSHOT?.length ?? 0) > 0;
+                  if (!hasSeatSnapshot) {
+                    sessionsNeedingBlockedFallback.add(session.SS_ID);
+                  }
+
                   const relationProctors: string[] = [];
                   if (relation.SS_NAME) {
                     const customNames = relation.SS_NAME.split(',')
@@ -834,43 +840,47 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
               sessionId: session.SS_ID,
               enrollmentCount: session.ENROLLMENTS?.length || 0,
             });
+            sessionsNeedingBlockedFallback.add(session.SS_ID);
           });
 
           form.value.timeSlots = Array.from(slotMap.values());
           sortTimeSlots();
-          const blockedSeatGroups = await Promise.all(
-            exam.SESSIONS.map(async (session) => ({
-              sessionId: session.SS_ID,
-              seats: await fetchExamBlockedSeats(session.SS_ID),
-            })),
-          );
-
-          blockedSeatGroups.forEach(({ sessionId, seats }) => {
-            const sessionRooms = form.value.timeSlots.flatMap((slot) =>
-              slot.rooms.filter((room) => room.sessionId === sessionId),
+          const blockedFallbackSessionIds = Array.from(sessionsNeedingBlockedFallback);
+          if (blockedFallbackSessionIds.length > 0) {
+            const blockedSeatGroups = await Promise.all(
+              blockedFallbackSessionIds.map(async (sessionId) => ({
+                sessionId,
+                seats: await fetchExamBlockedSeats(sessionId),
+              })),
             );
 
-            seats.forEach((blockedSeat) => {
-              const locationId = blockedSeat.LOCATION_SEAT?.LOCATION_ID;
-              const targetRoom =
-                sessionRooms.find((room) => room.locationId === locationId) ??
-                sessionRooms[0] ??
-                null;
-              if (!targetRoom) return;
+            blockedSeatGroups.forEach(({ sessionId, seats }) => {
+              const sessionRooms = form.value.timeSlots.flatMap((slot) =>
+                slot.rooms.filter((room) => room.sessionId === sessionId),
+              );
 
-              targetRoom.seatOverrides = {
-                ...(targetRoom.seatOverrides ?? {}),
-                [blockedSeat.LS_ID]: blockedSeat.BLOCK_STATUS,
-              };
-              const targetLocation = getLocationById(targetRoom.locationId);
-              if (targetLocation) {
-                const maxSeats = countAvailableSeats(targetLocation, targetRoom.seatOverrides);
-                if (targetRoom.seats > maxSeats) {
-                  targetRoom.seats = maxSeats;
+              seats.forEach((blockedSeat) => {
+                const locationId = blockedSeat.LOCATION_SEAT?.LOCATION_ID;
+                const targetRoom =
+                  sessionRooms.find((room) => room.locationId === locationId) ??
+                  sessionRooms[0] ??
+                  null;
+                if (!targetRoom) return;
+
+                targetRoom.seatOverrides = {
+                  ...(targetRoom.seatOverrides ?? {}),
+                  [blockedSeat.LS_ID]: blockedSeat.BLOCK_STATUS,
+                };
+                const targetLocation = getLocationById(targetRoom.locationId);
+                if (targetLocation) {
+                  const maxSeats = countAvailableSeats(targetLocation, targetRoom.seatOverrides);
+                  if (targetRoom.seats > maxSeats) {
+                    targetRoom.seats = maxSeats;
+                  }
                 }
-              }
+              });
             });
-          });
+          }
         }
 
         // Load passcodes into eligibleCandidates for special rounds
@@ -1534,9 +1544,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           existingSessionIds,
         });
 
-        // Refresh the management schedules in the store after successful edit
-        await examStore.loadManagementSchedules(true);
-
         $q.notify({
           type: 'positive',
           message: NOTIFY_MSG.UPDATE_SUCCESS,
@@ -1576,8 +1583,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         };
 
         targetExamId = await examStore.addExamRound(payload);
-        // Refresh the management schedules in the store after successful creation
-        await examStore.loadManagementSchedules(true);
 
         $q.notify({
           type: 'positive',

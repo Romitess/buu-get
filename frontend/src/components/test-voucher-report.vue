@@ -443,7 +443,7 @@ const windowPrint = (): void => {
 .report-header {
   padding: 16px 20px;
   background-color: transparent;
-  border-bottom: 1.5px solid var(--primary, #0d47a1) !important;
+  border-bottom: 2px solid var(--detail-dropdown-border) !important;
 
   .header-logo {
     height: 40px;

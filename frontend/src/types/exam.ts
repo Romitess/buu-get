@@ -175,6 +175,8 @@ export interface ExamEnrollment {
   SESSION_ID: number;
   SL_ID?: number | null;
   LS_ID: number | null;
+  ERM_SEAT_LABEL?: string | null;
+  ERM_SORT_ORDER?: number | null;
   ERM_STATUS: number;
   ERM_VERIFY_STATUS: number;
   ERM_TEST_TAKER?: string | null;

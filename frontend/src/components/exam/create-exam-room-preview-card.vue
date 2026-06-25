@@ -38,6 +38,11 @@
           @seat-status-change="handleSeatStatusChange"
         />
 
+        <div v-else-if="isLoadingData" class="room-preview-empty">
+          <q-spinner color="primary" size="40px" />
+          <div>กำลังโหลดผังที่นั่ง</div>
+        </div>
+
         <div v-else class="room-preview-empty">
           <q-icon name="meeting_room" size="40px" color="grey-5" />
           <div>เลือกสถานที่สอบในกำหนดการสอบเพื่อแสดงผังที่นั่ง</div>
@@ -73,6 +78,7 @@ interface SelectedRoom {
 const props = defineProps<{
   locationOptions: ExamLocationOption[];
   activeSlotIndex: number;
+  isLoadingData: boolean;
 }>();
 
 const form = defineModel<CreateExamForm>('form', { required: true });

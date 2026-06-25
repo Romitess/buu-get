@@ -39,6 +39,7 @@
       v-model:form="form"
       :location-options="locationOptions"
       :active-slot-index="activeSlotIndex"
+      :is-loading-data="isLoadingData"
     />
 
     <create-exam-registration-card
