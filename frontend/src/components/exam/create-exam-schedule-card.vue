@@ -284,27 +284,24 @@
                     :class="{
                       'buu-field-error':
                         hasError(`seats_${activeSlotIndex}_${rIdx}`) ||
-                        (room.locationId && room.seats > getLocationMaxSeats(room.locationId)),
+                        (room.locationId && room.seats > getRoomMaxSeats(room)),
                     }"
                     :placeholder="
-                      room.locationId
-                        ? String(getLocationMaxSeats(room.locationId))
-                        : DEFAULT_SEATS_PLACEHOLDER
+                      room.locationId ? String(getRoomMaxSeats(room)) : DEFAULT_SEATS_PLACEHOLDER
                     "
                     min="1"
-                    :max="getLocationMaxSeats(room.locationId)"
+                    :max="getRoomMaxSeats(room)"
                     :disable="locked"
                     @keydown="preventNegativeAndDecimal"
                     @update:model-value="
                       (val: string | number | null) => {
                         emit('clearFieldError', `seats_${activeSlotIndex}_${rIdx}`);
-                        if (typeof val === 'number' && val < 1) room.seats = 1;
+                        clampRoomSeats(room, val);
                       }
                     "
                   >
                     <q-tooltip v-if="room.locationId" class="bg-grey-8 text-body2">
-                      จำนวนที่นั่งสูงสุดของสถานที่นี้คือ
-                      {{ getLocationMaxSeats(room.locationId) }} ที่นั่ง
+                      จำนวนที่นั่งสูงสุดตามผังที่แก้ไขคือ {{ getRoomMaxSeats(room) }} ที่นั่ง
                     </q-tooltip>
                   </q-input>
                 </div>
@@ -323,12 +320,12 @@
                 </div>
               </div>
               <div
-                v-if="room.locationId && room.seats > getLocationMaxSeats(room.locationId)"
+                v-if="room.locationId && room.seats > getRoomMaxSeats(room)"
                 class="buu-error-msg"
               >
                 <q-icon name="error" class="buu-error-icon" />
-                เกินขอบเขตความจุที่นั่งของห้องสอบ มีที่นั่งได้ไม่เกิน
-                {{ getLocationMaxSeats(room.locationId) }} ที่นั่ง ในสถานที่นี้
+                จำนวนที่นั่งเกินผังที่แก้ไข มีที่นั่งใช้ได้ไม่เกิน
+                {{ getRoomMaxSeats(room) }} ที่นั่ง
               </div>
               <div
                 v-else-if="hasError(`seats_${activeSlotIndex}_${rIdx}`)"
@@ -466,6 +463,37 @@ const getLocationMaxSeats = (locationId: number | null): number => {
   return 0;
 };
 
+const getRoomMaxSeats = (room: ExamRoom): number => {
+  if (!room.locationId) return DEFAULT_MAX_SEATS;
+  const option = props.locationOptions.find((opt) => opt.value === room.locationId);
+  if (!option?.raw) return DEFAULT_MAX_SEATS;
+  const seats = option.raw.SEATS;
+
+  if (seats) {
+    return seats.filter((seat) => {
+      const status = room.seatOverrides?.[seat.LS_ID] ?? seat.LS_SEAT_STATUS;
+      return status !== SEAT_STATUS_UNAVAILABLE_1 && status !== SEAT_STATUS_UNAVAILABLE_2;
+    }).length;
+  }
+
+  return getLocationMaxSeats(room.locationId);
+};
+
+const clampRoomSeats = (room: ExamRoom, value: string | number | null): void => {
+  const maxSeats = getRoomMaxSeats(room);
+  const numericValue = typeof value === 'number' ? value : Number.parseInt(String(value ?? ''), 10);
+
+  if (!Number.isFinite(numericValue)) return;
+  if (numericValue < 1) {
+    room.seats = 1;
+    return;
+  }
+
+  if (numericValue > maxSeats) {
+    room.seats = maxSeats;
+  }
+};
+
 const getAvailableLocationOptions = (
   roomIndex: number,
 ): (ExamLocationOption & { disable?: boolean; isSelectedByOther?: boolean })[] => {
@@ -494,6 +522,8 @@ const getAvailableLocationOptions = (
 
 const onLocationChange = (room: ExamRoom, slotIdx: number, roomIdx: number): void => {
   emit('clearFieldError', `locationId_${slotIdx}_${roomIdx}`);
+  room.seatOverrides = {};
+  delete room.sessionLocationSnapshot;
 
   const maxSeats = getLocationMaxSeats(room.locationId);
   if (maxSeats > 0 && maxSeats !== DEFAULT_MAX_SEATS) {

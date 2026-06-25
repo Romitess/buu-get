@@ -35,7 +35,11 @@
     />
 
     <!-- Card 3: กำหนดการลงทะเบียนและชำระเงิน -->
-    <create-exam-room-preview-card v-model:form="form" :location-options="locationOptions" />
+    <create-exam-room-preview-card
+      v-model:form="form"
+      :location-options="locationOptions"
+      :active-slot-index="activeSlotIndex"
+    />
 
     <create-exam-registration-card
       v-model:form="form"

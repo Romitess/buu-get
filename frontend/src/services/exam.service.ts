@@ -151,6 +151,7 @@ export interface CreateExamPayload {
     proctorName?: string | null;
     sessionId?: number;
     seatOverrides?: Record<number, number>;
+    sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   }[];
   fundSourceId?: number | null;
   examRound?: string;
@@ -164,6 +165,7 @@ interface GroupedSessionTimeRange {
     locationId: number;
     proctorName: string | null;
     seatOverrides?: Record<number, number>;
+    sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   }[];
   sessionId?: number;
 }
@@ -173,6 +175,21 @@ export interface FundSource {
   FS_NAME: string;
   FS_ACCOUNT_CODE: string;
   FS_FACULTY?: string;
+}
+
+export interface SessionLocationSnapshotPayload {
+  TOTAL_ROWS: number | null;
+  TOTAL_COLS: number | null;
+  AISLE_AFTER: { after_cols: number[]; after_rows: number[] } | null;
+  LOCATION_SEAT_DIRECTION: 'HORIZONTAL' | 'VERTICAL';
+  LOCATION_SEAT_CAPACITY: number | null;
+  SEATS_SNAPSHOT:
+    | {
+        label: string | null;
+        status: 'AVAILABLE' | 'BROKEN' | 'BLOCKED';
+        sortorder: number | null;
+      }[]
+    | null;
 }
 
 export interface ExamLocationOption {
@@ -336,13 +353,19 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
     const seats = Number(range.seats || payload.seats || 0);
     const proctorName = range.proctorName?.trim() || null;
     const seatOverrides = range.seatOverrides ?? {};
+    const sessionLocationSnapshot = range.sessionLocationSnapshot;
 
     const existingRange = groupedRanges.get(key);
     if (existingRange) {
       existingRange.seats += seats;
       const existingLoc = existingRange.locations.find((l) => l.locationId === locationId);
       if (!existingLoc) {
-        existingRange.locations.push({ locationId, proctorName, seatOverrides });
+        existingRange.locations.push({
+          locationId,
+          proctorName,
+          seatOverrides,
+          ...(sessionLocationSnapshot ? { sessionLocationSnapshot } : {}),
+        });
       } else {
         if (proctorName) {
           existingLoc.proctorName = existingLoc.proctorName
@@ -353,6 +376,9 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
           ...(existingLoc.seatOverrides ?? {}),
           ...seatOverrides,
         };
+        if (sessionLocationSnapshot) {
+          existingLoc.sessionLocationSnapshot = sessionLocationSnapshot;
+        }
       }
       if (!existingRange.sessionId && range.sessionId) {
         existingRange.sessionId = range.sessionId;
@@ -364,7 +390,14 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
       startTime,
       endTime,
       seats,
-      locations: [{ locationId, proctorName, seatOverrides }],
+      locations: [
+        {
+          locationId,
+          proctorName,
+          seatOverrides,
+          ...(sessionLocationSnapshot ? { sessionLocationSnapshot } : {}),
+        },
+      ],
       ...(range.sessionId ? { sessionId: range.sessionId } : {}),
     });
   });
@@ -374,7 +407,11 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
 
 const createSessionLocations = async (
   sessionId: number,
-  locations: { locationId: number; proctorName: string | null }[],
+  locations: {
+    locationId: number;
+    proctorName: string | null;
+    sessionLocationSnapshot?: SessionLocationSnapshotPayload;
+  }[],
 ): Promise<void> => {
   const uniqueLocations = [];
   const seenIds = new Set<number>();
@@ -391,6 +428,7 @@ const createSessionLocations = async (
         SS_ID: sessionId,
         LOCATION_ID: loc.locationId,
         SS_NAME: loc.proctorName,
+        ...(loc.sessionLocationSnapshot ?? {}),
       }),
     ),
   );
@@ -399,7 +437,11 @@ const createSessionLocations = async (
 const syncSessionLocations = async (
   sessionId: number,
   currentLocations: BackendSession['SESSION_LOCATIONS'] | undefined,
-  locations: { locationId: number; proctorName: string | null }[],
+  locations: {
+    locationId: number;
+    proctorName: string | null;
+    sessionLocationSnapshot?: SessionLocationSnapshotPayload;
+  }[],
 ): Promise<void> => {
   const uniqueLocations = [];
   const seenIds = new Set<number>();
@@ -430,12 +472,14 @@ const syncSessionLocations = async (
           SS_ID: sessionId,
           LOCATION_ID: loc.locationId,
           SS_NAME: loc.proctorName,
+          ...(loc.sessionLocationSnapshot ?? {}),
         }),
       );
-    } else if (existing.SS_NAME !== loc.proctorName) {
+    } else {
       promises.push(
         api.patch(`/exam-session-locations/${existing.SL_ID}`, {
           SS_NAME: loc.proctorName,
+          ...(loc.sessionLocationSnapshot ?? {}),
         }),
       );
     }

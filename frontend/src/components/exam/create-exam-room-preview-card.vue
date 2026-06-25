@@ -72,6 +72,7 @@ interface SelectedRoom {
 
 const props = defineProps<{
   locationOptions: ExamLocationOption[];
+  activeSlotIndex: number;
 }>();
 
 const form = defineModel<CreateExamForm>('form', { required: true });
@@ -82,23 +83,24 @@ const activeRoomKey = ref<string | null>(null);
 const selectedRooms = computed<SelectedRoom[]>(() => {
   const rooms: SelectedRoom[] = [];
 
-  form.value.timeSlots.forEach((slot, slotIndex) => {
-    slot.rooms.forEach((room, roomIndex) => {
-      if (room.locationId === null) return;
+  const activeSlot = form.value.timeSlots[props.activeSlotIndex];
+  if (!activeSlot) return rooms;
 
-      const option = props.locationOptions.find((location) => location.value === room.locationId);
-      if (!option) return;
+  activeSlot.rooms.forEach((room, roomIndex) => {
+    if (room.locationId === null) return;
 
-      rooms.push({
-        key: `${slotIndex}-${roomIndex}`,
-        label:
-          form.value.timeSlots.length > 1
-            ? `${option.label} (${slot.startTime || '--:--'}-${slot.endTime || '--:--'})`
-            : option.label,
-        slotIndex,
-        roomIndex,
-        option,
-      });
+    const option = props.locationOptions.find((location) => location.value === room.locationId);
+    if (!option) return;
+
+    rooms.push({
+      key: `${props.activeSlotIndex}-${roomIndex}`,
+      label:
+        activeSlot.rooms.length > 1
+          ? `${option.label} (${activeSlot.startTime || '--:--'}-${activeSlot.endTime || '--:--'})`
+          : option.label,
+      slotIndex: props.activeSlotIndex,
+      roomIndex,
+      option,
     });
   });
 
@@ -130,28 +132,78 @@ const activeSeatOverrides = computed<Record<number, number>>(
   () => activeRoom.value?.seatOverrides ?? {},
 );
 
+const activeSessionSnapshot = computed(() => activeRoom.value?.sessionLocationSnapshot ?? null);
+
 const activeRows = computed<number>(() => {
+  if (activeSessionSnapshot.value?.TOTAL_ROWS) return activeSessionSnapshot.value.TOTAL_ROWS;
   if (activeLocation.value?.LOCATION_TOTAL_ROWS) return activeLocation.value.LOCATION_TOTAL_ROWS;
 
   return Math.max(...(activeLocation.value?.SEATS ?? []).map((seat) => seat.LS_ROW_NO), 0);
 });
 
 const activeCols = computed<number>(() => {
+  if (activeSessionSnapshot.value?.TOTAL_COLS) return activeSessionSnapshot.value.TOTAL_COLS;
   if (activeLocation.value?.LOCATION_TOTAL_COLS) return activeLocation.value.LOCATION_TOTAL_COLS;
 
   return Math.max(...(activeLocation.value?.SEATS ?? []).map((seat) => seat.LS_COL_NO), 0);
 });
 
 const numberingDirection = computed<'horizontal' | 'vertical'>(() =>
-  activeLocation.value?.SEAT_DIRECTION === 'HORIZONTAL' ? 'horizontal' : 'vertical',
+  (activeSessionSnapshot.value?.LOCATION_SEAT_DIRECTION ??
+    activeLocation.value?.LOCATION_SEAT_DIRECTION ??
+    activeLocation.value?.SEAT_DIRECTION) === 'HORIZONTAL'
+    ? 'horizontal'
+    : 'vertical',
 );
 
+const locationAisleAfter = computed<{ after_cols: number[]; after_rows: number[] }>(() => {
+  const location = activeLocation.value;
+  if (!location) return { after_cols: [], after_rows: [] };
+
+  const combined = location.LOCATION_AISLE_AFTER_COL ?? [];
+
+  return {
+    after_cols: [
+      ...(location.AISLE_AFTER_COLS ?? []),
+      ...combined
+        .filter((item): item is { type: 'column'; index: number } =>
+          typeof item === 'object' ? item.type === 'column' : false,
+        )
+        .map((item) => item.index),
+      ...combined.filter((item): item is number => typeof item === 'number'),
+    ],
+    after_rows: [
+      ...(location.AISLE_AFTER_ROWS ?? []),
+      ...combined
+        .filter((item): item is { type: 'row'; index: number } =>
+          typeof item === 'object' ? item.type === 'row' : false,
+        )
+        .map((item) => item.index),
+    ],
+  };
+});
+
+const hasAisleAfter = (
+  aisleAfter: { after_cols: number[]; after_rows: number[] } | null | undefined,
+): aisleAfter is { after_cols: number[]; after_rows: number[] } => {
+  return Boolean(
+    aisleAfter && (aisleAfter.after_cols.length > 0 || aisleAfter.after_rows.length > 0),
+  );
+};
+
+const activeAisleAfter = computed<{ after_cols: number[]; after_rows: number[] }>(() => {
+  const snapshotAisleAfter = activeSessionSnapshot.value?.AISLE_AFTER;
+  if (hasAisleAfter(snapshotAisleAfter)) return snapshotAisleAfter;
+
+  return locationAisleAfter.value;
+});
+
 const walkwayPositions = computed<WalkwayPosition[]>(() => [
-  ...(activeLocation.value?.AISLE_AFTER_ROWS ?? []).map((index) => ({
+  ...activeAisleAfter.value.after_rows.map((index) => ({
     type: 'row' as const,
     index,
   })),
-  ...(activeLocation.value?.AISLE_AFTER_COLS ?? []).map((index) => ({
+  ...activeAisleAfter.value.after_cols.map((index) => ({
     type: 'column' as const,
     index,
   })),
@@ -186,6 +238,15 @@ const getSeatStatusCode = (status: SeatStatusOption): number => {
   return 0;
 };
 
+const countAvailableSeats = (
+  location: BackendLocation,
+  seatOverrides?: Record<number, number>,
+): number => {
+  return (location.SEATS ?? []).filter(
+    (seat) => (seatOverrides?.[seat.LS_ID] ?? seat.LS_SEAT_STATUS) === 0,
+  ).length;
+};
+
 const handleSeatStatusChange = (payload: { seatIds: string[]; status: SeatStatusOption }): void => {
   const location = activeLocation.value;
   const room = activeRoom.value;
@@ -210,6 +271,10 @@ const handleSeatStatusChange = (payload: { seatIds: string[]; status: SeatStatus
     });
 
     room.seatOverrides = nextOverrides;
+    const maxSeats = countAvailableSeats(location, nextOverrides);
+    if (room.seats > maxSeats) {
+      room.seats = maxSeats;
+    }
   } catch (error) {
     console.error('Error updating location seat status:', error);
     $q.notify({

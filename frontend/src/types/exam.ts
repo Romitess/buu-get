@@ -239,6 +239,7 @@ export interface BackendLocation {
     LS_COL_NO: number;
     LS_SEAT_LABEL: string | null;
     LS_SEAT_STATUS: number;
+    LS_SORT_ORDER?: number | null;
   }[];
 }
 
@@ -268,6 +269,18 @@ export interface BackendSession {
     LOCATION_ID: number;
     SS_ID: number;
     SS_NAME: string | null;
+    TOTAL_ROWS?: number | null;
+    TOTAL_COLS?: number | null;
+    AISLE_AFTER?: { after_cols: number[]; after_rows: number[] } | null;
+    LOCATION_SEAT_DIRECTION?: 'HORIZONTAL' | 'VERTICAL';
+    LOCATION_SEAT_CAPACITY?: number | null;
+    SEATS_SNAPSHOT?:
+      | {
+          label: string | null;
+          status: 'AVAILABLE' | 'BROKEN' | 'BLOCKED';
+          sortorder: number | null;
+        }[]
+      | null;
     LOCATION: BackendLocation;
   }[];
   ENROLLMENTS?: BackendEnrollment[];
