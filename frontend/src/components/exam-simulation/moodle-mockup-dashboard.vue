@@ -86,7 +86,10 @@
       </div>
 
       <!-- Main Content Area -->
-      <div class="moodle-main-content col q-pa-xl position-relative">
+      <div
+        class="moodle-main-content col position-relative"
+        :class="currentView === 'attempt' ? 'moodle-main-content--attempt' : 'q-pa-xl'"
+      >
         <!-- View 1: My Courses (Overview) -->
         <div v-if="currentView === 'overview'" class="view-overview">
           <div class="text-h4 text-weight-bold q-mb-xs">My courses</div>
@@ -155,7 +158,9 @@
                 </svg>
               </div>
               <q-card-section>
-                <div class="text-subtitle1 text-weight-medium text-primary line-height-tight q-mb-md">
+                <div
+                  class="text-subtitle1 text-weight-medium text-primary line-height-tight q-mb-md"
+                >
                   วันที่ 22 มิถุนายน 2569 (รอบสอบ 9.00)
                 </div>
                 <div class="text-caption text-grey-8">Category 1</div>
@@ -169,15 +174,10 @@
 
         <!-- View 2: Course Detail -->
         <div v-else-if="currentView === 'course'" class="view-course">
-          <div class="text-h4 text-weight-bold q-mb-xl">
-            วันที่ 22 มิถุนายน 2569 (รอบสอบ 9.00)
-          </div>
+          <div class="text-h4 text-weight-bold q-mb-xl">วันที่ 22 มิถุนายน 2569 (รอบสอบ 9.00)</div>
 
           <q-card flat bordered class="q-mb-md rounded-borders">
-            <q-expansion-item
-              default-opened
-              header-class="bg-white text-weight-medium"
-            >
+            <q-expansion-item default-opened header-class="bg-white text-weight-medium">
               <template v-slot:header>
                 <q-item-section avatar>
                   <div class="bg-blue-1 text-primary q-pa-xs rounded-borders flex flex-center">
@@ -202,10 +202,7 @@
           </q-card>
 
           <q-card flat bordered class="rounded-borders">
-            <q-expansion-item
-              default-opened
-              header-class="bg-white text-weight-medium"
-            >
+            <q-expansion-item default-opened header-class="bg-white text-weight-medium">
               <template v-slot:header>
                 <q-item-section avatar>
                   <div class="bg-blue-1 text-primary q-pa-xs rounded-borders flex flex-center">
@@ -225,7 +222,9 @@
                   <q-icon name="assignment" size="20px" class="q-mr-md q-mt-xs text-grey-8" />
                   <div>
                     <div class="text-body1 text-primary text-weight-medium">แบบทดสอบ</div>
-                    <div class="text-caption text-grey-8 q-mt-xs">Opened: Monday, 22 June 2026, 9:00 AM</div>
+                    <div class="text-caption text-grey-8 q-mt-xs">
+                      Opened: Monday, 22 June 2026, 9:00 AM
+                    </div>
                   </div>
                 </div>
               </q-card-section>
@@ -255,12 +254,14 @@
             label="Attempt Quiz"
             no-caps
             class="q-px-lg q-py-sm text-weight-bold q-mb-lg rounded-borders"
+            @click="goToView('attempt')"
           />
 
-          <div class="text-body1 text-weight-medium">
-            Attempts allowed: 1
-          </div>
+          <div class="text-body1 text-weight-medium">Attempts allowed: 1</div>
         </div>
+
+        <!-- View 4: Quiz Attempt -->
+        <MoodleTestSamulation v-else-if="currentView === 'attempt'" @back="goToView('quiz')" />
 
         <!-- Help Icon at bottom right -->
         <q-btn
@@ -268,7 +269,7 @@
           color="grey-5"
           text-color="white"
           icon="question_mark"
-          class="absolute-bottom-right q-ma-xl shadow-0"
+          class="moodle-help-btn absolute-bottom-right q-ma-xl shadow-0"
           size="sm"
         />
       </div>
@@ -280,8 +281,9 @@
 import { ref, computed } from 'vue';
 import { useUserStore } from 'src/stores/user.store';
 import ImageDisplay from 'src/components/base/image-display.vue';
+import MoodleTestSamulation from 'src/components/exam-simulation/moodle-test-samulation.vue';
 
-type ViewType = 'overview' | 'course' | 'quiz';
+type ViewType = 'overview' | 'course' | 'quiz' | 'attempt';
 
 const userStore = useUserStore();
 const currentView = ref<ViewType>('overview');
@@ -417,7 +419,7 @@ const goToView = (view: ViewType) => {
   white-space: nowrap;
 
   &:hover {
-    background-color: rgba(0,0,0,0.03);
+    background-color: rgba(0, 0, 0, 0.03);
   }
 }
 
@@ -436,6 +438,10 @@ const goToView = (view: ViewType) => {
   overflow-y: auto;
 }
 
+.moodle-main-content--attempt {
+  padding: 40px 32px 24px;
+}
+
 .wave-emoji {
   display: inline-block;
   font-size: 2rem;
@@ -448,7 +454,7 @@ const goToView = (view: ViewType) => {
   transition: box-shadow 0.2s;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
   }
 }
 
