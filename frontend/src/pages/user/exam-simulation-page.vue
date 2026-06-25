@@ -1,9 +1,9 @@
 <template>
-  <div class="exam-simulation-page">
+  <div class="page-container exam-simulation-page q-pa-lg">
     <AppBreadcrumbs />
 
     <!-- PAGE HEADER -->
-    <div class="q-px-lg q-pt-md q-pb-sm">
+    <div class="q-pt-md q-pb-sm">
       <AppPageHeader
         :title="t('navigation.examSimulation') || 'จำลองการสอบ'"
         :subtitle="
@@ -14,23 +14,20 @@
     </div>
 
     <!-- MOODLE LMS CONTENT -->
-    <div class="moodle-content q-px-lg q-pb-lg">
+    <div class="moodle-content q-pb-lg">
       <!-- State 1: Mock Login (Hero Card) -->
       <q-card v-if="!isLoggedIn" class="moodle-hero-card q-mb-lg" flat>
         <div class="hero-layout">
-
           <!-- Left: Welcome Banner -->
           <div class="hero-left">
             <!-- กล่องน้ำเงินเทาใน -->
             <div class="hero-inner-box">
               <h2 class="hero-inner-box__title">Welcome to Moodle</h2>
               <p class="hero-inner-box__desc">
-                Your learning journey starts here. Access courses,
-                connect with peers, and achieve your goals.
+                Your learning journey starts here. Access courses, connect with peers, and achieve
+                your goals.
               </p>
-              <p class="hero-inner-box__sub">
-                You're part of a global learning community
-              </p>
+              <p class="hero-inner-box__sub">You're part of a global learning community</p>
               <div class="hero-stats">
                 <div class="hero-stat">
                   <div class="hero-stat__value">500M</div>
@@ -52,9 +49,7 @@
           <div class="hero-right">
             <div class="hero-login-panel">
               <h3 class="hero-login-panel__title">Welcome back</h3>
-              <p class="hero-login-panel__subtitle text-grey-7">
-                Log in to LMS-BUUGET
-              </p>
+              <p class="hero-login-panel__subtitle text-grey-7">Log in to LMS-BUUGET</p>
 
               <div class="q-mt-lg">
                 <label class="field-label">Username or email</label>
@@ -104,7 +99,6 @@
               </div>
             </div>
           </div>
-
         </div>
       </q-card>
 
@@ -144,9 +138,13 @@ const handleMockLogin = (): void => {
 
 // Transitions
 .fade-enter-active,
-.fade-leave-active { transition: opacity 0.3s ease; }
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
 .fade-enter-from,
-.fade-leave-from    { opacity: 0; }
+.fade-leave-from {
+  opacity: 0;
+}
 
 // ── Hero Card ─────────────────────────────────────────────────
 .moodle-hero-card {
@@ -158,8 +156,8 @@ const handleMockLogin = (): void => {
 // ใช้ CSS Grid แทน Quasar row เพื่อควบคุมได้เต็มที่
 .hero-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;   // 50 / 50
-  min-height: 560px;                // ปรับความสูงเพิ่มขึ้นตามต้องการ
+  grid-template-columns: 1fr 1fr; // 50 / 50
+  min-height: 560px; // ปรับความสูงเพิ่มขึ้นตามต้องการ
 
   @media (max-width: 1023px) {
     grid-template-columns: 1fr;
@@ -168,7 +166,7 @@ const handleMockLogin = (): void => {
 
 // ── ฝั่งซ้าย: พื้นเทาเข้ม + กล่องน้ำเงินเทาลอยตรงกลาง ────────
 .hero-left {
-  background-color: #616161;        // ปรับเป็นสีเทาเข้มตามรูปภาพ
+  background-color: #616161; // ปรับเป็นสีเทาเข้มตามรูปภาพ
   display: flex;
   align-items: center;
   justify-content: center;
@@ -182,12 +180,12 @@ const handleMockLogin = (): void => {
 
 // กล่องน้ำเงินเทา — ความสูงตาม content ไม่ยืด
 .hero-inner-box {
-  background-color: #3b5982;        // ปรับสีน้ำเงินอมเทาตามรูปภาพ
+  background-color: #3b5982; // ปรับสีน้ำเงินอมเทาตามรูปภาพ
   border-radius: 12px;
   padding: 36px 32px;
   width: 100%;
   max-width: 400px;
-  text-align: center;               // จัดข้อความให้อยู่ตรงกลางทั้งหมด
+  text-align: center; // จัดข้อความให้อยู่ตรงกลางทั้งหมด
   // ไม่กำหนด height → ยืดตาม content เท่านั้น
 }
 
@@ -218,7 +216,7 @@ const handleMockLogin = (): void => {
 // stats row
 .hero-stats {
   display: flex;
-  justify-content: space-around;   // จัดการกระจายของข้อมูลสถิติให้อยู่ห่างกันอย่างสวยงาม
+  justify-content: space-around; // จัดการกระจายของข้อมูลสถิติให้อยู่ห่างกันอย่างสวยงาม
   margin-top: 24px;
 }
 
@@ -280,7 +278,9 @@ const handleMockLogin = (): void => {
 .forgot-link {
   font-size: 0.85rem;
   color: var(--q-primary, #1565c0);
-  &:hover { text-decoration: underline; }
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .login-btn {
@@ -291,6 +291,8 @@ const handleMockLogin = (): void => {
 
 .cookies-link {
   font-size: 0.8rem;
-  &:hover { text-decoration: underline; }
+  &:hover {
+    text-decoration: underline;
+  }
 }
 </style>
