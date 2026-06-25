@@ -17,42 +17,39 @@
     <div class="moodle-content q-px-lg q-pb-lg">
       <!-- State 1: Mock Login (Hero Card) -->
       <q-card v-if="!isLoggedIn" class="moodle-hero-card q-mb-lg" flat>
-        <div class="row no-wrap items-stretch hero-row">
+        <div class="hero-layout">
+
           <!-- Left: Welcome Banner -->
-          <div class="col-12 col-md-5 hero-banner-col">
-            <div class="hero-banner">
-              <div class="hero-banner__overlay" />
-              <div class="hero-banner__content">
-                <h2 class="hero-banner__title">
-                  Welcome to Moodle
-                </h2>
-                <p class="hero-banner__desc">
-                  Your learning journey starts here. Access courses,
-                  connect with peers, and achieve your goals.
-                </p>
-                <p class="hero-banner__sub">
-                  You're part of a global learning community
-                </p>
-                <div class="hero-stats row q-gutter-lg q-mt-lg">
-                  <div class="hero-stat text-center">
-                    <div class="hero-stat__value">500M</div>
-                    <div class="hero-stat__label">users</div>
-                  </div>
-                  <div class="hero-stat text-center">
-                    <div class="hero-stat__value">150K</div>
-                    <div class="hero-stat__label">sites</div>
-                  </div>
-                  <div class="hero-stat text-center">
-                    <div class="hero-stat__value">200+</div>
-                    <div class="hero-stat__label">countries</div>
-                  </div>
+          <div class="hero-left">
+            <!-- กล่องน้ำเงินเทาใน -->
+            <div class="hero-inner-box">
+              <h2 class="hero-inner-box__title">Welcome to Moodle</h2>
+              <p class="hero-inner-box__desc">
+                Your learning journey starts here. Access courses,
+                connect with peers, and achieve your goals.
+              </p>
+              <p class="hero-inner-box__sub">
+                You're part of a global learning community
+              </p>
+              <div class="hero-stats">
+                <div class="hero-stat">
+                  <div class="hero-stat__value">500M</div>
+                  <div class="hero-stat__label">users</div>
+                </div>
+                <div class="hero-stat">
+                  <div class="hero-stat__value">150K</div>
+                  <div class="hero-stat__label">sites</div>
+                </div>
+                <div class="hero-stat">
+                  <div class="hero-stat__value">200+</div>
+                  <div class="hero-stat__label">countries</div>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Right: Login Panel -->
-          <div class="col-12 col-md-7 hero-login-col">
+          <div class="hero-right">
             <div class="hero-login-panel">
               <h3 class="hero-login-panel__title">Welcome back</h3>
               <p class="hero-login-panel__subtitle text-grey-7">
@@ -89,9 +86,7 @@
                 </q-input>
 
                 <div class="text-right q-mb-lg">
-                  <span class="forgot-link cursor-pointer">
-                    Forgot password?
-                  </span>
+                  <span class="forgot-link cursor-pointer">Forgot password?</span>
                 </div>
 
                 <q-btn
@@ -104,13 +99,12 @@
                 />
 
                 <div class="text-center q-mt-md">
-                  <span class="cookies-link text-grey-6 cursor-pointer">
-                    Cookies notice
-                  </span>
+                  <span class="cookies-link text-grey-6 cursor-pointer">Cookies notice</span>
                 </div>
               </div>
             </div>
           </div>
+
         </div>
       </q-card>
 
@@ -118,33 +112,12 @@
       <transition name="fade">
         <MoodleMockupDashboard v-if="isLoggedIn" class="q-mb-lg" />
       </transition>
-
-      <!-- Info Banner -->
-      <q-banner class="info-banner rounded-borders q-mb-lg" dense>
-        <template v-slot:avatar>
-          <q-icon name="info" color="primary" size="24px" />
-        </template>
-        <div class="text-body2 text-grey-8">
-          <span class="text-weight-bold">หมายเหตุ:</span>
-          ระบบจำลองการสอบนี้เป็นเพียง <span class="text-primary text-weight-bold">หน้าจอจำลอง (Mockup)</span> เท่านั้น ไม่ได้เชื่อมต่อกับ Moodle จริง เพื่อให้ผู้เข้าสอบทดลองคลิกใช้งานระบบ
-        </div>
-      </q-banner>
-    </div>
-
-    <!-- FOOTER -->
-    <div class="moodle-footer row justify-between items-center q-px-lg q-py-sm">
-      <span class="text-caption text-grey-7">
-        Crafted by the computer center of Burapha University
-      </span>
-      <span class="text-caption text-grey-7">
-        © {{ currentYear }} Copyright All Right Reserved.
-      </span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
@@ -152,17 +125,12 @@ import MoodleMockupDashboard from 'src/components/exam-simulation/moodle-mockup-
 
 const { t } = useI18n();
 
-// === STATE ===
 const isLoggedIn = ref(false);
 const lmsUsername = ref('');
 const lmsPassword = ref('');
 const showPassword = ref(false);
 
-const currentYear = computed<number>(() => new Date().getFullYear());
-
-// === METHODS ===
 const handleMockLogin = (): void => {
-  // In a real app this would validate, but here we just show the mockup
   isLoggedIn.value = true;
 };
 </script>
@@ -176,121 +144,124 @@ const handleMockLogin = (): void => {
 
 // Transitions
 .fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
+.fade-leave-active { transition: opacity 0.3s ease; }
 .fade-enter-from,
-.fade-leave-from {
-  opacity: 0;
-}
+.fade-leave-from    { opacity: 0; }
 
-// Hero Card
+// ── Hero Card ─────────────────────────────────────────────────
 .moodle-hero-card {
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.hero-row {
-  min-height: 480px;
+// ใช้ CSS Grid แทน Quasar row เพื่อควบคุมได้เต็มที่
+.hero-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;   // 50 / 50
+  min-height: 560px;                // ปรับความสูงเพิ่มขึ้นตามต้องการ
 
   @media (max-width: 1023px) {
-    flex-wrap: wrap;
+    grid-template-columns: 1fr;
   }
 }
 
-// Left banner
-.hero-banner-col {
-  @media (max-width: 1023px) {
-    max-height: 280px;
-  }
-}
-
-.hero-banner {
-  position: relative;
-  height: 100%;
-  background: linear-gradient(135deg, #546e8a 0%, #6b8299 40%, #8fa4b5 100%);
+// ── ฝั่งซ้าย: พื้นเทาเข้ม + กล่องน้ำเงินเทาลอยตรงกลาง ────────
+.hero-left {
+  background-color: #616161;        // ปรับเป็นสีเทาเข้มตามรูปภาพ
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 48px 40px;
 
   @media (max-width: 1023px) {
-    padding: 32px 24px;
+    padding: 36px 28px;
+    min-height: 320px;
   }
 }
 
-.hero-banner__overlay {
-  position: absolute;
-  top: 10%;
-  left: 8%;
-  right: 20%;
-  bottom: 15%;
-  background-color: rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
+// กล่องน้ำเงินเทา — ความสูงตาม content ไม่ยืด
+.hero-inner-box {
+  background-color: #3b5982;        // ปรับสีน้ำเงินอมเทาตามรูปภาพ
+  border-radius: 12px;
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;               // จัดข้อความให้อยู่ตรงกลางทั้งหมด
+  // ไม่กำหนด height → ยืดตาม content เท่านั้น
 }
 
-.hero-banner__content {
-  position: relative;
-  z-index: 2;
-  color: #ffffff;
-}
-
-.hero-banner__title {
-  font-size: 2rem;
+.hero-inner-box__title {
+  font-size: 1.85rem;
   font-weight: 700;
-  margin: 0 0 12px;
-  line-height: 1.2;
+  color: #ffffff;
+  margin: 0 0 16px;
+  line-height: 1.25;
+  text-align: center;
 }
 
-.hero-banner__desc {
-  font-size: 0.95rem;
-  opacity: 0.9;
-  line-height: 1.6;
+.hero-inner-box__desc {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.65;
   margin: 0 0 8px;
+  text-align: center;
 }
 
-.hero-banner__sub {
-  font-size: 0.85rem;
-  opacity: 0.75;
-  margin: 0;
+.hero-inner-box__sub {
+  font-size: 0.83rem;
+  color: rgba(255, 255, 255, 0.72);
+  text-align: center;
+  margin: 0 0 24px;
 }
 
+// stats row
 .hero-stats {
+  display: flex;
+  justify-content: space-around;   // จัดการกระจายของข้อมูลสถิติให้อยู่ห่างกันอย่างสวยงาม
   margin-top: 24px;
 }
 
+.hero-stat {
+  text-align: center;
+}
+
 .hero-stat__value {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 800;
   color: #ffffff;
+  line-height: 1.2;
 }
 
 .hero-stat__label {
-  font-size: 0.8rem;
-  opacity: 0.7;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.65);
   text-transform: lowercase;
 }
 
-// Right login panel
-.hero-login-panel {
-  padding: 48px 56px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+// ── ฝั่งขวา: Login Panel ─────────────────────────────────────
+.hero-right {
   background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-login-panel {
+  width: 100%;
+  max-width: 420px;
+  padding: 48px 56px;
 
   @media (max-width: 1023px) {
-    padding: 32px 24px;
+    padding: 36px 28px;
   }
 }
 
 .hero-login-panel__title {
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 700;
-  margin: 0;
   color: #1a1a1a;
+  margin: 0;
 }
 
 .hero-login-panel__subtitle {
@@ -309,11 +280,7 @@ const handleMockLogin = (): void => {
 .forgot-link {
   font-size: 0.85rem;
   color: var(--q-primary, #1565c0);
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
+  &:hover { text-decoration: underline; }
 }
 
 .login-btn {
@@ -324,23 +291,6 @@ const handleMockLogin = (): void => {
 
 .cookies-link {
   font-size: 0.8rem;
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-// Info Banner
-.info-banner {
-  background-color: #e8f0fe;
-  border: 1px solid #c5d8f0;
-}
-
-// Footer
-.moodle-footer {
-  margin-top: auto;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  background-color: #fafafa;
+  &:hover { text-decoration: underline; }
 }
 </style>
