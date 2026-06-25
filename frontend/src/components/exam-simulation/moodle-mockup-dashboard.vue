@@ -11,7 +11,12 @@
         <q-btn flat round dense icon="chat" color="grey-8" />
         <div class="row items-center cursor-pointer q-ml-sm q-pl-sm border-left">
           <q-avatar size="32px">
-            <img src="https://cdn.quasar.dev/img/avatar.png" />
+            <ImageDisplay
+              :image-path="userStore.currentUser?.userImagePath"
+              width="100%"
+              height="100%"
+              border-radius="50%"
+            />
           </q-avatar>
           <q-icon name="keyboard_arrow_down" color="grey-8" size="20px" />
         </div>
@@ -65,7 +70,7 @@
         <div v-if="currentView === 'overview'" class="view-overview">
           <div class="text-h4 text-weight-bold q-mb-xs">My courses</div>
           <div class="text-h4 text-weight-bold q-mb-sm">
-            Hi, Somdream! <span class="wave-emoji">✋</span>
+            Hi, {{ displayName }}! <span class="wave-emoji">✋</span>
           </div>
           <div class="text-h5 q-mb-lg">Course overview</div>
 
@@ -254,10 +259,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useUserStore } from 'src/stores/user.store';
+import ImageDisplay from 'src/components/base/image-display.vue';
 
 type ViewType = 'overview' | 'course' | 'quiz';
 
+const userStore = useUserStore();
 const currentView = ref<ViewType>('overview');
 
 // Filter states (mock)
@@ -265,6 +273,20 @@ const filterAll = ref('All');
 const searchQuery = ref('');
 const sortFilter = ref('Sort by course name');
 const viewFilter = ref('Card');
+
+const displayName = computed(() => {
+  const user = userStore.currentUser;
+  if (!user) return 'Student';
+
+  if (user.fullNameTH) return user.fullNameTH;
+  if (user.fullNameEN) return user.fullNameEN;
+
+  if (user.email) {
+    return user.email.split('@')[0];
+  }
+
+  return 'Student';
+});
 
 const goToView = (view: ViewType) => {
   currentView.value = view;
