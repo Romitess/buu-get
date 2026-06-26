@@ -97,6 +97,17 @@ const routes: RouteRecordRaw[] = [
               ],
             },
           },
+          {
+            path: 'exam-simulation',
+            name: 'exam-simulation',
+            component: () => import('pages/user/exam-simulation-page.vue'),
+            meta: {
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.examSimulation', icon: 'monitor' },
+              ],
+            },
+          },
         ],
       },
 
@@ -121,20 +132,17 @@ const routes: RouteRecordRaw[] = [
             name: 'admin-dashboard',
             component: () => import('pages/admin/dashboard-page.vue'),
             meta: {
+              roles: [
+                ROLES.ADMIN,
+                ROLES.STAFF,
+                ROLES.REGISTRATION_OFFICER,
+                ROLES.EXECUTIVE,
+                ROLES.PROCTOR,
+                ROLES.EXAM_OPERATIONS_OFFICER,
+              ],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
                 { label: 'navigation.dashboard', icon: 'dashboard' },
-              ],
-            },
-          },
-          {
-            path: 'page-builder',
-            name: 'admin-page-builder',
-            component: () => import('pages/admin/page-builder-page.vue'),
-            meta: {
-              breadcrumb: [
-                { label: 'navigation.home', icon: 'home', to: '/' },
-                { label: 'navigation.pageBuilder', icon: 'web' },
               ],
             },
           },
@@ -476,7 +484,7 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: 'executive/test-takers/:examId/:ermId/history',
-            name: 'admin-executive-exam-history',
+            name: 'admin-executive-test-taker-history',
             component: () => import('pages/admin/executive-exam-history-page.vue'),
             meta: {
               roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
@@ -522,7 +530,34 @@ const routes: RouteRecordRaw[] = [
                   icon: 'info',
                   to: '/admin/exam-information/:year',
                 },
-                { label: 'navigation.examCandidatesInfo', icon: 'groups' },
+                { label: 'navigation.examCandidatesInfo', icon: 'people_outline' },
+              ],
+            },
+          },
+          {
+            path: 'exam-information/:year/candidates/:ermId/history',
+            name: 'admin-executive-exam-history',
+            component: () => import('pages/admin/executive-exam-history-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.examReport',
+                  icon: 'assessment',
+                  to: '/admin/dashboard',
+                },
+                {
+                  label: 'navigation.examInformation',
+                  icon: 'info',
+                  to: '/admin/exam-information/:year',
+                },
+                {
+                  label: 'navigation.examCandidatesInfo',
+                  icon: 'people_outline',
+                  to: '/admin/exam-information/:year/candidates?round=:round',
+                },
+                { label: 'navigation.examHistory', icon: 'history' },
               ],
             },
           },
@@ -539,7 +574,7 @@ const routes: RouteRecordRaw[] = [
               ],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
-                { label: 'navigation.manageHomeContent', icon: 'edit' },
+                { label: 'navigation.manageHomeContent', icon: 'star' },
               ],
             },
           },

@@ -82,6 +82,31 @@
   --calendar-scrollbar-track: #f9f9f9;
   --calendar-scrollbar-thumb: #c1c1c1;
   --calendar-scrollbar-thumb-hover: #a8a8a8;
+
+  // === Page Builder (จัดการหน้าหลัก) ===
+  --pb-heading-color: rgba(0, 0, 0, 0.87);
+  --pb-subtitle-color: #676767;
+  --pb-uploader-bg: rgba(246, 246, 246, 0.66);
+  --pb-uploader-hover-bg: #f1f5fb;
+  --pb-scrollbar-track: #ecebeb;
+  --pb-scrollbar-thumb: #676767;
+
+  // Page Builder — Rule Card
+  --pb-rule-icon-size: 44px;
+  --pb-rule-icon-radius: var(--radius-10);
+  --pb-rule-icon-border: var(--neutral-400);
+  --pb-rule-icon-bg: var(--surface-card);
+  --pb-rule-icon-color: #424242;
+  --pb-rule-icon-hover-border: var(--primary);
+  --pb-rule-icon-hover-bg: var(--badge-primary-bg);
+
+  // Page Builder — Icon Picker
+  --pb-icon-picker-width: 240px;
+  --pb-icon-picker-max-height: 180px;
+  --pb-icon-picker-btn-size: 32px;
+  --pb-icon-picker-btn-radius: var(--radius-10);
+  --pb-icon-picker-selected-bg: var(--badge-primary-bg);
+
   --calendar-dot-available: #27ae60;
   --calendar-dot-full: #c12a32;
 
@@ -113,7 +138,7 @@
 
   // Sidebar
   --sidebar-width: 72px;
-  --sidebar-expanded-width: 260px;
+  --sidebar-expanded-width: 290px;
   --header-height: 64px;
   --page-max-width: 1600px;
 

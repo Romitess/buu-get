@@ -110,8 +110,9 @@ export const updateEnrollmentStatus = async (
 
 export interface BulkSeatAssignment {
   ermId: number;
-  lsId: number;
   slId: number;
+  seatLabel: string;
+  sortOrder?: number;
 }
 
 export const bulkAssignEnrollmentSeats = async (

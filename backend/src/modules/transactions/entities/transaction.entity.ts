@@ -114,7 +114,8 @@ export class Transaction {
     name: 'TRANX_PAYMENT_STATUS',
     type: 'int',
     default: TransactionPaymentStatus.PENDING,
-    comment: 'สถานะการชำระเงิน',
+    comment:
+      'สถานะการชำระเงิน (PENDING, APPROVED, REJECTED, PAID, PAYMENT_FAILED, EXPIRED, REVERSED, REFUND)',
   })
   TRANX_PAYMENT_STATUS: TransactionPaymentStatus;
 

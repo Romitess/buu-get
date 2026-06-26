@@ -218,7 +218,10 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppLocationSeatPreviewPanel from 'src/components/exam/app-location-seat-preview-panel.vue';
 import AppLocationWalkwayControls from 'src/components/exam/app-location-walkway-controls.vue';
 import AppWalkwayPositionDialog from 'src/components/exam/app-walkway-position-dialog.vue';
-import { createLocationWithSeats } from 'src/services/location.service';
+import {
+  createLocationWithSeats,
+  type LocationAislePositionPayload,
+} from 'src/services/location.service';
 
 const MAX_SEAT_LAYOUT_SIZE = 25;
 
@@ -276,18 +279,13 @@ const selectedWalkwayPositionValues = computed(() =>
   ),
 );
 
-const aisleAfterCols = computed(() =>
-  selectedWalkwayPositions.value
-    .filter((position) => position.type === 'column')
-    .map((position) => position.index)
-    .sort((a, b) => a - b),
-);
-
-const aisleAfterRows = computed(() =>
-  selectedWalkwayPositions.value
-    .filter((position) => position.type === 'row')
-    .map((position) => position.index)
-    .sort((a, b) => a - b),
+const locationAislePositions = computed<LocationAislePositionPayload[]>(() =>
+  [...selectedWalkwayPositions.value]
+    .sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'row' ? -1 : 1;
+      return a.index - b.index;
+    })
+    .map((position) => ({ type: position.type, index: position.index })),
 );
 
 const clampSeatLayoutValue = (value: unknown): number | null => {
@@ -435,10 +433,9 @@ const handleSave = async (): Promise<void> => {
         LOCATION_TOTAL_ROWS: Number(rows.value),
         LOCATION_TOTAL_COLS: Number(cols.value),
         LOCATION_SEAT_CAPACITY: Number(totalSeats.value),
-        SEAT_LABEL_FORMAT: 'ROW_COL',
-        SEAT_DIRECTION: seatNumberDirection.value === 'horizontal' ? 'HORIZONTAL' : 'VERTICAL',
-        AISLE_AFTER_COLS: aisleAfterCols.value,
-        AISLE_AFTER_ROWS: aisleAfterRows.value,
+        LOCATION_SEAT_DIRECTION:
+          seatNumberDirection.value === 'horizontal' ? 'HORIZONTAL' : 'VERTICAL',
+        LOCATION_AISLE_AFTER_COL: locationAislePositions.value,
       },
       buildSeatStatuses(),
     );

@@ -42,6 +42,7 @@ import { PageConfig } from '../modules/page-builder/entities/page-config.entity'
 import { ExamRuleVoucher } from '../modules/exam-rule-vouchers/entities/exam-rule-voucher.entity';
 import { ScoreCriteria } from '../modules/score-criteria/entities/score-criteria.entity';
 import { MoodleSyncLog } from '../modules/moodle-sync-logs/entities/moodle-sync-log.entity';
+import { ExamBlockedSeat } from '../modules/exam-blocked-seats/entities/exam-blocked-seat.entity';
 
 export default new DataSource({
   type: 'mysql',
@@ -81,6 +82,7 @@ export default new DataSource({
     ExamRuleVoucher,
     ScoreCriteria,
     MoodleSyncLog,
+    ExamBlockedSeat,
   ],
   migrations: ['src/database/migrations/*.ts'],
   synchronize: false,

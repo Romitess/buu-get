@@ -66,6 +66,7 @@ export class TransactionsService {
       const transactionRepository = manager.getRepository(Transaction);
       const historyRepository = manager.getRepository(TransactionStatusHistory);
       const paymentConfigRepository = manager.getRepository(PaymentConfig);
+      const enrollmentRepository = manager.getRepository(ExamEnrollment);
 
       const pcExists = await paymentConfigRepository.exists({
         where: { PC_ID: dto.pcId },
@@ -76,30 +77,77 @@ export class TransactionsService {
         );
       }
 
-      const transaction = transactionRepository.create({
-        ERM_ID: dto.ermId,
-        PC_ID: dto.pcId,
-        TRANX_QR_CODE: uuidv4(),
-        TRANX_AMOUNT: dto.amount,
-        TRANX_PAYMENT_STATUS: TransactionPaymentStatus.PENDING,
-        TRANX_MATCH_STATUS: TransactionMatchStatus.UNMATCH,
-        TRANX_PAYMENT_METHOD: TransactionPaymentMethod.QR,
-        TRANX_BANK_CODE: 'KTB',
-        TRANX_CHANNEL: TransactionChannel.QR,
-        TRANX_CREATED_AT: new Date(),
+      const enrollmentExists = await enrollmentRepository.exists({
+        where: { ERM_ID: dto.ermId },
       });
+      if (!enrollmentExists) {
+        throw new NotFoundException(
+          `Enrollment with ID ${dto.ermId} not found`,
+        );
+      }
+
+      let transaction = await transactionRepository.findOne({
+        where: { ERM_ID: dto.ermId },
+        order: { TRANX_CREATED_AT: 'DESC' },
+      });
+
+      if (transaction?.TRANX_PAYMENT_STATUS === TransactionPaymentStatus.PAID) {
+        throw new ConflictException(
+          'A paid transaction already exists for this enrollment',
+        );
+      }
+
+      const previousStatus = transaction?.TRANX_PAYMENT_STATUS ?? null;
+
+      if (transaction) {
+        transaction.PC_ID = dto.pcId;
+        transaction.TRANX_AMOUNT = dto.amount;
+        transaction.TRANX_QR_CODE =
+          previousStatus === TransactionPaymentStatus.PENDING
+            ? (transaction.TRANX_QR_CODE ?? uuidv4())
+            : uuidv4();
+        transaction.TRANX_PAYMENT_STATUS = TransactionPaymentStatus.PENDING;
+        transaction.TRANX_MATCH_STATUS = TransactionMatchStatus.UNMATCH;
+        transaction.TRANX_PAYMENT_METHOD = TransactionPaymentMethod.QR;
+        transaction.TRANX_BANK_CODE = 'KTB';
+        transaction.TRANX_CHANNEL = TransactionChannel.QR;
+        transaction.TRANX_PAID_AT = null;
+        transaction.TRANX_REJECTED_AT = null;
+        transaction.TRANX_UPDATED_AT = new Date();
+      } else {
+        transaction = transactionRepository.create({
+          ERM_ID: dto.ermId,
+          PC_ID: dto.pcId,
+          TRANX_QR_CODE: uuidv4(),
+          TRANX_AMOUNT: dto.amount,
+          TRANX_PAYMENT_STATUS: TransactionPaymentStatus.PENDING,
+          TRANX_MATCH_STATUS: TransactionMatchStatus.UNMATCH,
+          TRANX_PAYMENT_METHOD: TransactionPaymentMethod.QR,
+          TRANX_BANK_CODE: 'KTB',
+          TRANX_CHANNEL: TransactionChannel.QR,
+          TRANX_CREATED_AT: new Date(),
+        });
+      }
 
       const savedTransaction = await transactionRepository.save(transaction);
 
-      const history = historyRepository.create({
-        TRANX_ID: savedTransaction.TRANX_ID,
-        TSH_FROM: null,
-        TSH_TO: this.toHistoryStatus(TransactionPaymentStatus.PENDING),
-        TSH_API_TYPE: TransactionApiType.PAYMENT,
-        TSH_RESP_CODE: '000',
-        TSH_RESP_MESSAGE: 'Created pending transaction',
-      });
-      await historyRepository.save(history);
+      if (previousStatus !== TransactionPaymentStatus.PENDING) {
+        const history = historyRepository.create({
+          TRANX_ID: savedTransaction.TRANX_ID,
+          TSH_FROM:
+            previousStatus === null
+              ? null
+              : this.toHistoryStatus(previousStatus),
+          TSH_TO: this.toHistoryStatus(TransactionPaymentStatus.PENDING),
+          TSH_API_TYPE: TransactionApiType.PAYMENT,
+          TSH_RESP_CODE: '000',
+          TSH_RESP_MESSAGE:
+            previousStatus === null
+              ? 'Created pending transaction'
+              : 'Restarted pending transaction',
+        });
+        await historyRepository.save(history);
+      }
 
       return { TRANX_ID: savedTransaction.TRANX_ID };
     });

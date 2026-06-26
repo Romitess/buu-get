@@ -1,57 +1,136 @@
 /**
  * Composable: Page Builder
- * จัดการ state + การแก้ไขเนื้อหาหน้าแรก (banner / card / exam_rule)
+ * จัดการ state + การโหลด/บันทึกเนื้อหาหน้าหลัก ตาม Figma
+ * แบ่งเป็น: แบรนเนอร์ / รูปแบบการทดสอบ / ขั้นตอนการสมัครสอบ / ข้อปฏิบัติ (กระดาษ + คอมพิวเตอร์)
  */
 
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { getHomepage, updatePageContent } from 'src/services/page-builder.service';
 import {
   PageSectionType,
   type BannerBoxContent,
   type CardBoxContent,
+  type ContentBoxContent,
+  type EditorSection,
   type ExamRuleBoxContent,
+  type LocalizedText,
   type PageContent,
   type PageSectionContent,
+  type StepBoxContent,
 } from 'src/types/page-builder.types';
 
-/** สร้าง section เปล่าตามชนิดที่ระบุ */
-const createEmptySection = (
+const emptyText = (): LocalizedText => ({ th: '', en: '' });
+
+const SECTION_TITLE = {
+  banner: { th: 'ข้อมูลแบรนเนอร์', en: 'Banner' },
+  format: { th: 'รูปแบบการทดสอบ', en: 'Test format' },
+  step: { th: 'ขั้นตอนการสมัครสอบ', en: 'Registration steps' },
+  rulePaper: { th: 'รูปแบบกระดาษ', en: 'Paper-based' },
+  ruleComputer: { th: 'รูปแบบคอมพิวเตอร์', en: 'Computer-based' },
+} as const;
+
+const createBannerSection = (): EditorSection<BannerBoxContent> => ({
+  type: PageSectionType.BANNER,
+  title: { ...SECTION_TITLE.banner },
+  active: true,
+  boxes: [],
+});
+
+const createContentSection = (
   type: PageSectionType,
-  sortOrder: number,
-): PageSectionContent => ({
+  title: LocalizedText,
+): EditorSection<ContentBoxContent> => ({
   type,
-  sortOrder,
-  title: { th: '', en: '' },
-  icon: null,
+  title: { ...title },
+  active: true,
+  boxes: [],
+});
+
+const createRuleSection = (title: LocalizedText): EditorSection<ExamRuleBoxContent> => ({
+  type: PageSectionType.EXAM_RULE,
+  title: { ...title },
   active: true,
   boxes: [],
 });
 
 export function usePageBuilder() {
+  const { t } = useI18n();
   const isLoading = ref(false);
   const isSaving = ref(false);
   const error = ref<string | null>(null);
 
-  // section หลักของหน้า (ลำดับตาม Figma: banner → card → exam_rule)
-  const bannerSection = ref<PageSectionContent>(
-    createEmptySection(PageSectionType.BANNER, 1),
+  const bannerSection = ref<EditorSection<BannerBoxContent>>(createBannerSection());
+  const formatSection = ref<EditorSection<ContentBoxContent>>(
+    createContentSection(PageSectionType.CARD, SECTION_TITLE.format),
   );
-  const cardSection = ref<PageSectionContent>(
-    createEmptySection(PageSectionType.CARD, 2),
+  const stepSection = ref<EditorSection<ContentBoxContent>>(
+    createContentSection(PageSectionType.STEP, SECTION_TITLE.step),
   );
-  const examRuleSection = ref<PageSectionContent>(
-    createEmptySection(PageSectionType.EXAM_RULE, 3),
+  const rulePaperSection = ref<EditorSection<ExamRuleBoxContent>>(
+    createRuleSection(SECTION_TITLE.rulePaper),
+  );
+  const ruleComputerSection = ref<EditorSection<ExamRuleBoxContent>>(
+    createRuleSection(SECTION_TITLE.ruleComputer),
   );
 
-  /** ดึง section ตามชนิดจาก content (ถ้าไม่มีให้ใช้ค่าเริ่มต้น) */
-  const pickSection = (
+  const findSection = (
     sections: PageSectionContent[],
     type: PageSectionType,
-    fallbackOrder: number,
-  ): PageSectionContent => {
-    const found = sections.find((s) => s.type === type);
-    return found ?? createEmptySection(type, fallbackOrder);
+  ): PageSectionContent | undefined => sections.find((section) => section.type === type);
+
+  const readBanner = (sections: PageSectionContent[]): EditorSection<BannerBoxContent> => {
+    const source = findSection(sections, PageSectionType.BANNER);
+    const base = createBannerSection();
+    if (!source) return base;
+    return {
+      ...base,
+      title: source.title ?? base.title,
+      active: source.active ?? true,
+      boxes: (source.boxes as BannerBoxContent[]).map((box) => ({
+        sortOrder: box.sortOrder,
+        imagePath: box.imagePath,
+        active: box.active ?? true,
+      })),
+    };
   };
+
+  const readContent = (
+    sections: PageSectionContent[],
+    type: PageSectionType,
+    contentFrom: (box: CardBoxContent | StepBoxContent) => LocalizedText | undefined,
+    fallbackTitle: LocalizedText,
+  ): EditorSection<ContentBoxContent> => {
+    const source = findSection(sections, type);
+    const base = createContentSection(type, fallbackTitle);
+    if (!source) return base;
+    return {
+      ...base,
+      title: source.title ?? base.title,
+      active: source.active ?? true,
+      boxes: (source.boxes as Array<CardBoxContent | StepBoxContent>).map((box) => ({
+        sortOrder: box.sortOrder,
+        title: box.title ?? emptyText(),
+        content: contentFrom(box) ?? emptyText(),
+        active: box.active ?? true,
+      })),
+    };
+  };
+
+  const mapRuleSection = (
+    source: PageSectionContent,
+    fallbackTitle: LocalizedText,
+  ): EditorSection<ExamRuleBoxContent> => ({
+    type: PageSectionType.EXAM_RULE,
+    title: source.title ?? { ...fallbackTitle },
+    active: source.active ?? true,
+    boxes: (source.boxes as ExamRuleBoxContent[]).map((box) => ({
+      sortOrder: box.sortOrder,
+      icon: box.icon ?? null,
+      text: box.text ?? emptyText(),
+      active: box.active ?? true,
+    })),
+  });
 
   const fetchPage = async (): Promise<void> => {
     isLoading.value = true;
@@ -59,29 +138,104 @@ export function usePageBuilder() {
     try {
       const data = await getHomepage();
       const sections = data.PCF_CONTENT?.sections ?? [];
-      bannerSection.value = pickSection(sections, PageSectionType.BANNER, 1);
-      cardSection.value = pickSection(sections, PageSectionType.CARD, 2);
-      examRuleSection.value = pickSection(sections, PageSectionType.EXAM_RULE, 3);
+      bannerSection.value = readBanner(sections);
+      formatSection.value = readContent(
+        sections,
+        PageSectionType.CARD,
+        (box) => (box as CardBoxContent).subtitle,
+        SECTION_TITLE.format,
+      );
+      stepSection.value = readContent(
+        sections,
+        PageSectionType.STEP,
+        (box) => (box as StepBoxContent).description,
+        SECTION_TITLE.step,
+      );
+
+      // ข้อปฏิบัติ: เก็บเป็น exam_rule 2 ชุด (กระดาษ, คอมพิวเตอร์) เรียงตามลำดับ
+      const ruleSections = sections.filter((section) => section.type === PageSectionType.EXAM_RULE);
+      rulePaperSection.value = ruleSections[0]
+        ? mapRuleSection(ruleSections[0], SECTION_TITLE.rulePaper)
+        : createRuleSection(SECTION_TITLE.rulePaper);
+      ruleComputerSection.value = ruleSections[1]
+        ? mapRuleSection(ruleSections[1], SECTION_TITLE.ruleComputer)
+        : createRuleSection(SECTION_TITLE.ruleComputer);
     } catch {
-      error.value = 'ไม่สามารถโหลดข้อมูลหน้าแรกได้';
+      error.value = t('admin.pageBuilder.messages.loadFailed');
     } finally {
       isLoading.value = false;
     }
   };
 
-  /** ประกอบ sections ทั้งหมด + จัด sortOrder ใหม่ตามตำแหน่งปัจจุบัน */
+  /** ประกอบ payload ให้ตรงกับ DTO ของ backend + จัดลำดับใหม่ตามตำแหน่งปัจจุบัน */
   const buildContent = (): PageContent => {
-    const normalize = (section: PageSectionContent, order: number): PageSectionContent => ({
-      ...section,
-      sortOrder: order,
-      boxes: section.boxes.map((box, index) => ({ ...box, sortOrder: index + 1 })),
-    });
+    const bannerBoxes: BannerBoxContent[] = bannerSection.value.boxes
+      .filter((box) => box.imagePath)
+      .map((box, index) => ({
+        sortOrder: index + 1,
+        imagePath: box.imagePath,
+        active: box.active,
+      }));
+
+    const cardBoxes: CardBoxContent[] = formatSection.value.boxes.map((box, index) => ({
+      sortOrder: index + 1,
+      title: box.title,
+      subtitle: box.content,
+      active: box.active,
+    }));
+
+    const stepBoxes: StepBoxContent[] = stepSection.value.boxes.map((box, index) => ({
+      sortOrder: index + 1,
+      title: box.title,
+      description: box.content,
+      active: box.active,
+    }));
+
+    const ruleBoxes = (section: EditorSection<ExamRuleBoxContent>): ExamRuleBoxContent[] =>
+      section.boxes.map((box, index) => ({
+        sortOrder: index + 1,
+        icon: box.icon ?? null,
+        text: box.text ?? emptyText(),
+        active: box.active,
+      }));
 
     return {
       sections: [
-        normalize(bannerSection.value, 1),
-        normalize(cardSection.value, 2),
-        normalize(examRuleSection.value, 3),
+        {
+          type: PageSectionType.BANNER,
+          sortOrder: 1,
+          title: bannerSection.value.title,
+          active: bannerSection.value.active,
+          boxes: bannerBoxes,
+        },
+        {
+          type: PageSectionType.CARD,
+          sortOrder: 2,
+          title: formatSection.value.title,
+          active: formatSection.value.active,
+          boxes: cardBoxes,
+        },
+        {
+          type: PageSectionType.STEP,
+          sortOrder: 3,
+          title: stepSection.value.title,
+          active: stepSection.value.active,
+          boxes: stepBoxes,
+        },
+        {
+          type: PageSectionType.EXAM_RULE,
+          sortOrder: 4,
+          title: rulePaperSection.value.title,
+          active: rulePaperSection.value.active,
+          boxes: ruleBoxes(rulePaperSection.value),
+        },
+        {
+          type: PageSectionType.EXAM_RULE,
+          sortOrder: 5,
+          title: ruleComputerSection.value.title,
+          active: ruleComputerSection.value.active,
+          boxes: ruleBoxes(ruleComputerSection.value),
+        },
       ],
     };
   };
@@ -93,53 +247,11 @@ export function usePageBuilder() {
       await updatePageContent(buildContent());
       return true;
     } catch {
-      error.value = 'บันทึกข้อมูลไม่สำเร็จ';
+      error.value = t('admin.pageBuilder.messages.saveFailed');
       return false;
     } finally {
       isSaving.value = false;
     }
-  };
-
-  // ---------- helper: จัดการ box ในแต่ละ section ----------
-
-  const addBanner = (): void => {
-    const box: BannerBoxContent = {
-      sortOrder: bannerSection.value.boxes.length + 1,
-      imagePath: '',
-      active: true,
-    };
-    bannerSection.value.boxes.push(box);
-  };
-
-  const addCard = (): void => {
-    const box: CardBoxContent = {
-      sortOrder: cardSection.value.boxes.length + 1,
-      title: { th: '', en: '' },
-      subtitle: { th: '', en: '' },
-      icon: null,
-      active: true,
-    };
-    cardSection.value.boxes.push(box);
-  };
-
-  const addExamRule = (): void => {
-    const box: ExamRuleBoxContent = {
-      sortOrder: examRuleSection.value.boxes.length + 1,
-      icon: null,
-      text: { th: '', en: '' },
-      active: true,
-    };
-    examRuleSection.value.boxes.push(box);
-  };
-
-  const removeBox = (section: PageSectionContent, index: number): void => {
-    section.boxes.splice(index, 1);
-  };
-
-  const moveBox = (section: PageSectionContent, from: number, to: number): void => {
-    if (to < 0 || to >= section.boxes.length) return;
-    const [moved] = section.boxes.splice(from, 1);
-    if (moved) section.boxes.splice(to, 0, moved);
   };
 
   return {
@@ -147,14 +259,11 @@ export function usePageBuilder() {
     isSaving,
     error,
     bannerSection,
-    cardSection,
-    examRuleSection,
+    formatSection,
+    stepSection,
+    rulePaperSection,
+    ruleComputerSection,
     fetchPage,
     save,
-    addBanner,
-    addCard,
-    addExamRule,
-    removeBox,
-    moveBox,
   };
 }

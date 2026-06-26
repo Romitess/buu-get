@@ -44,11 +44,8 @@
           :type="showPassword ? 'text' : 'password'"
           outlined
           dense
-          class="custom-input"
-          :rules="[
-            (val) => !!val || $t('profile.requiredPassword'),
-            (val) => val.length >= 8 || $t('profile.passwordFormat'),
-          ]"
+          class="custom-input password-input"
+          :rules="[validatePassword]"
           lazy-rules
           hide-bottom-space
         >
@@ -60,6 +57,21 @@
             />
           </template>
         </q-input>
+
+        <div class="password-requirements" aria-live="polite">
+          <div
+            v-for="requirement in passwordRequirements"
+            :key="requirement.label"
+            class="password-requirement"
+            :class="{ 'password-requirement--met': requirement.isMet }"
+          >
+            <q-icon
+              :name="requirement.isMet ? 'check_circle' : 'circle'"
+              :size="requirement.isMet ? '11px' : '7px'"
+            />
+            <span>{{ requirement.label }}</span>
+          </div>
+        </div>
       </div>
 
       <!-- Confirm Password -->
@@ -145,7 +157,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
@@ -180,6 +192,36 @@ const showOtpDialog = ref(false);
 const isSendingOtp = ref(false);
 const isVerifyingOtp = ref(false);
 const { validateAndFocusFirstInvalid } = useFocusFirstInvalidField(formRef);
+
+interface PasswordRequirement {
+  label: string;
+  isMet: boolean;
+}
+
+const passwordRequirements = computed<PasswordRequirement[]>(() => [
+  {
+    label: t('profile.passwordRequirementMinLength'),
+    isMet: password.value.length >= 8,
+  },
+  {
+    label: t('profile.passwordRequirementUppercase'),
+    isMet: /[A-Z]/u.test(password.value),
+  },
+  {
+    label: t('profile.passwordRequirementSpecial'),
+    isMet: /[!@#]/u.test(password.value),
+  },
+]);
+
+const validatePassword = (): true | string => {
+  if (!password.value) {
+    return t('profile.requiredPassword');
+  }
+
+  return passwordRequirements.value.every((requirement) => requirement.isMet)
+    ? true
+    : t('profile.passwordRequirementError');
+};
 
 // Lifecycle
 onMounted(() => {
@@ -314,8 +356,27 @@ const onThaiID = (): void => {
   flex-direction: column;
   gap: 8px;
 }
+.password-requirements {
+  display: grid;
+  gap: 2px;
+  margin-top: 3px;
+}
 
-.field-block {
+.password-requirement {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--neutral-400);
+  font-size: 0.84rem;
+  line-height: 1.15;
+
+  .q-icon {
+    flex: 0 0 auto;
+  }
+}
+
+.password-requirement--met {
+  color: #21ba45;
 }
 
 .field-icon {

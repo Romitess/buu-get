@@ -1,3 +1,5 @@
+import type { DayData } from './exam';
+
 export interface Todo {
   id: number;
   content: string;
@@ -18,6 +20,8 @@ export interface AppCalendarProps {
 export interface ExamCalendarProps {
   modelValue: string;
   availability?: Record<string, 'available' | 'full' | null>;
+  scheduleData?: Record<string, DayData>;
+  currentTime?: Date;
 }
 
 export interface PasscodeLog {

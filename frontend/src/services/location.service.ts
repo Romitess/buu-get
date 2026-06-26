@@ -2,6 +2,12 @@ import { api } from 'src/boot/axios';
 import type { BackendLocation } from 'src/types/exam';
 
 export type SeatDirectionPayload = 'HORIZONTAL' | 'VERTICAL';
+export type LocationAislePositionType = 'row' | 'column';
+
+export interface LocationAislePositionPayload {
+  type: LocationAislePositionType;
+  index: number;
+}
 
 export interface LocationPayload {
   LOCATION_NAME: string;
@@ -10,10 +16,8 @@ export interface LocationPayload {
   LOCATION_TOTAL_ROWS?: number | undefined;
   LOCATION_TOTAL_COLS?: number | undefined;
   LOCATION_SEAT_CAPACITY?: number | undefined;
-  SEAT_LABEL_FORMAT?: string | undefined;
-  SEAT_DIRECTION?: SeatDirectionPayload | undefined;
-  AISLE_AFTER_COLS?: number[] | undefined;
-  AISLE_AFTER_ROWS?: number[] | undefined;
+  LOCATION_SEAT_DIRECTION?: SeatDirectionPayload | undefined;
+  LOCATION_AISLE_AFTER_COL?: LocationAislePositionPayload[] | undefined;
 }
 
 export interface BackendLocationSeat {
@@ -26,6 +30,49 @@ export interface BackendLocationSeat {
   LS_SORT_ORDER: number | null;
 }
 
+interface BackendLocationRaw extends BackendLocation {
+  LOCATION_SEAT_DIRECTION?: SeatDirectionPayload;
+  LOCATION_AISLE_AFTER_COL?: Array<LocationAislePositionPayload | number> | null;
+}
+
+const splitAislePositions = (
+  positions: Array<LocationAislePositionPayload | number> | null | undefined,
+): { rows: number[]; cols: number[] } => {
+  const rows: number[] = [];
+  const cols: number[] = [];
+
+  positions?.forEach((position) => {
+    if (typeof position === 'number') {
+      cols.push(position);
+      return;
+    }
+
+    if (position.type === 'row') {
+      rows.push(position.index);
+      return;
+    }
+
+    cols.push(position.index);
+  });
+
+  return {
+    rows: rows.sort((a, b) => a - b),
+    cols: cols.sort((a, b) => a - b),
+  };
+};
+
+const normalizeLocation = <T extends BackendLocation>(location: T): T => {
+  const raw = location as BackendLocationRaw;
+  const { rows, cols } = splitAislePositions(raw.LOCATION_AISLE_AFTER_COL);
+
+  return {
+    ...location,
+    SEAT_DIRECTION: location.SEAT_DIRECTION ?? raw.LOCATION_SEAT_DIRECTION,
+    AISLE_AFTER_COLS: location.AISLE_AFTER_COLS ?? cols,
+    AISLE_AFTER_ROWS: location.AISLE_AFTER_ROWS ?? rows,
+  };
+};
+
 export const fetchLocations = async (): Promise<BackendLocation[]> => {
   const response = await api.get<BackendLocation[]>('/exam-locations');
   return Promise.all(
@@ -33,7 +80,7 @@ export const fetchLocations = async (): Promise<BackendLocation[]> => {
       try {
         return await fetchLocationById(location.LOCATION_ID);
       } catch {
-        return location;
+        return normalizeLocation(location);
       }
     }),
   );
@@ -41,7 +88,7 @@ export const fetchLocations = async (): Promise<BackendLocation[]> => {
 
 export const createLocation = async (payload: LocationPayload): Promise<BackendLocation> => {
   const response = await api.post<BackendLocation>('/exam-locations', payload);
-  return response.data;
+  return normalizeLocation(response.data);
 };
 
 export const createLocationWithSeats = async (
@@ -61,7 +108,7 @@ export const updateLocation = async (
   payload: LocationPayload,
 ): Promise<BackendLocation> => {
   const response = await api.patch<BackendLocation>(`/exam-locations/${id}`, payload);
-  return response.data;
+  return normalizeLocation(response.data);
 };
 
 export const updateSeatStatus = async (
@@ -71,6 +118,15 @@ export const updateSeatStatus = async (
   const response = await api.patch<BackendLocationSeat>(`/exam-location-seats/${seatId}`, {
     LS_SEAT_STATUS: status,
   });
+  return response.data;
+};
+
+export const fetchLocationSeats = async (
+  locationId: number | string,
+): Promise<BackendLocationSeat[]> => {
+  const response = await api.get<BackendLocationSeat[]>(
+    `/exam-location-seats/location/${locationId}`,
+  );
   return response.data;
 };
 
@@ -84,7 +140,7 @@ export const fetchLocationById = async (
   const response = await api.get<BackendLocation & { SEATS: BackendLocationSeat[] }>(
     `/exam-locations/${id}`,
   );
-  return response.data;
+  return normalizeLocation(response.data);
 };
 
 export const deleteLocationSeat = async (id: number | string): Promise<void> => {

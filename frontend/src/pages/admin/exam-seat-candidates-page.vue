@@ -151,7 +151,6 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import ActionButton from 'src/components/shared/action-button.vue';
 import AppExamSeatPlanPrint from 'src/components/exam/app-exam-seat-plan-print.vue';
-import { fetchLocationById } from 'src/services/location.service';
 import {
   useExamSeatCandidates,
   type SeatCandidateRow,
@@ -191,6 +190,8 @@ const {
   exam,
   sessions,
   sessionTimeTabs,
+  activeSessionLocation,
+  activeSessionSeatSnapshot,
   activeLocation,
   isLoading,
   searchQuery,
@@ -211,10 +212,6 @@ const {
 
 const isPrintingSeatPlan = ref(false);
 type PrintLocationSeat = NonNullable<BackendLocation['SEATS']>[number];
-type PrintLocation = BackendLocation & { SEATS?: PrintLocationSeat[] };
-
-const freshActiveLocation = ref<PrintLocation | null>(null);
-const freshActiveLocationId = ref<number | null>(null);
 
 // Resolves a localized month name by 0-based index from i18n (type-safe, no cast)
 const getMonthName = (monthIndex: number): string => i18n.t(`common.months[${monthIndex}]`);
@@ -370,7 +367,7 @@ const buildVoucherData = (row: SeatCandidateRow, freshEnrollment = row.enrollmen
     examType: getExamRoundTypeLabel(),
     location: location?.LOCATION_NAME || sessionLocation.value,
     locationRoom: location?.LOCATION_ROOM_NO || undefined,
-    seatNo: enrollment.LOCATION_SEAT?.LS_SEAT_LABEL || row.seatNumber,
+    seatNo: enrollment.ERM_SEAT_LABEL || row.seatNumber,
     voucherNo: voucherCode,
     citizenId: enrollment.USER?.USER_NATIONAL_ID || enrollment.USER?.USER_PASSPORT_NO || '-',
     testSession: exam.value?.EXAM_ROUND || '-',
@@ -402,37 +399,54 @@ const handleViewVoucher = async (row: SeatCandidateRow): Promise<void> => {
   }
 };
 
-const printLocation = computed(() => freshActiveLocation.value ?? activeLocation.value);
+const printLocation = computed(() => activeLocation.value);
 
-const refreshActiveLocation = async (force = false): Promise<void> => {
-  const locationId = activeLocation.value?.LOCATION_ID;
-  if (!locationId) {
-    freshActiveLocation.value = null;
-    freshActiveLocationId.value = null;
-    return;
-  }
+const getLocationAisleAfter = (): { after_cols: number[]; after_rows: number[] } => {
+  const location = printLocation.value;
+  const combined = location?.LOCATION_AISLE_AFTER_COL ?? [];
 
-  if (!force && freshActiveLocationId.value === locationId && freshActiveLocation.value) {
-    return;
-  }
-
-  try {
-    freshActiveLocation.value = await fetchLocationById(locationId);
-    freshActiveLocationId.value = locationId;
-  } catch (error) {
-    console.error('Failed to refresh active location:', error);
-    freshActiveLocation.value = null;
-    freshActiveLocationId.value = null;
-  }
+  return {
+    after_cols: [
+      ...(location?.AISLE_AFTER_COLS ?? []),
+      ...combined
+        .filter((item): item is { type: 'column'; index: number } => {
+          return typeof item === 'object' && item.type === 'column';
+        })
+        .map((item) => item.index),
+      ...combined.filter((item): item is number => typeof item === 'number'),
+    ],
+    after_rows: [
+      ...(location?.AISLE_AFTER_ROWS ?? []),
+      ...combined
+        .filter((item): item is { type: 'row'; index: number } => {
+          return typeof item === 'object' && item.type === 'row';
+        })
+        .map((item) => item.index),
+    ],
+  };
 };
 
-const printAisleAfterCols = computed((): number[] => printLocation.value?.AISLE_AFTER_COLS ?? []);
-const printAisleAfterRows = computed((): number[] => printLocation.value?.AISLE_AFTER_ROWS ?? []);
+const printAisleAfterCols = computed(
+  (): number[] =>
+    activeSessionLocation.value?.AISLE_AFTER?.after_cols ?? getLocationAisleAfter().after_cols,
+);
+const printAisleAfterRows = computed(
+  (): number[] =>
+    activeSessionLocation.value?.AISLE_AFTER?.after_rows ?? getLocationAisleAfter().after_rows,
+);
 const printSeatDirection = computed(
-  (): 'HORIZONTAL' | 'VERTICAL' => printLocation.value?.SEAT_DIRECTION ?? 'HORIZONTAL',
+  (): 'HORIZONTAL' | 'VERTICAL' =>
+    activeSessionLocation.value?.LOCATION_SEAT_DIRECTION ??
+    printLocation.value?.LOCATION_SEAT_DIRECTION ??
+    printLocation.value?.SEAT_DIRECTION ??
+    'HORIZONTAL',
 );
 
 const printSeatRowCount = computed((): number => {
+  if (activeSessionLocation.value?.TOTAL_ROWS != null) {
+    return activeSessionLocation.value.TOTAL_ROWS;
+  }
+
   const locationRows = printLocation.value?.LOCATION_TOTAL_ROWS ?? 0;
   const maxSeatRow = Math.max(
     0,
@@ -443,6 +457,10 @@ const printSeatRowCount = computed((): number => {
 });
 
 const printSeatColCount = computed((): number => {
+  if (activeSessionLocation.value?.TOTAL_COLS != null) {
+    return activeSessionLocation.value.TOTAL_COLS;
+  }
+
   const locationCols = printLocation.value?.LOCATION_TOTAL_COLS ?? 0;
   const maxSeatCol = Math.max(
     0,
@@ -477,6 +495,11 @@ const printRoomLabel = computed((): string => {
 
 const printSeatPlanRows = computed((): SeatCell[][] => {
   const seats = printLocation.value?.SEATS ?? [];
+  const snapshotByLabel = new Map(
+    activeSessionSeatSnapshot.value
+      .filter((seat) => seat.label)
+      .map((seat) => [seat.label as string, seat]),
+  );
   if (printSeatRowCount.value === 0 || printSeatColCount.value === 0) return [];
 
   const rows = Array.from({ length: printSeatRowCount.value }, (): SeatCell[] => []);
@@ -494,12 +517,19 @@ const printSeatPlanRows = computed((): SeatCell[][] => {
     for (let colNo = 1; colNo <= printSeatColCount.value; colNo += 1) {
       const label = getPrintSeatLabel(rowNo, colNo);
       const seat = seatsByLabel.get(label) ?? seatsByPosition.get(`${rowNo}-${colNo}`);
-      const statusCode = Number(seat?.LS_SEAT_STATUS ?? 0);
+      const snapshotSeat = snapshotByLabel.get(label);
       let status: SeatStatus = 'available';
-      if (statusCode === 1) {
+      if (snapshotSeat?.status === 'BROKEN') {
         status = 'broken';
-      } else if (statusCode === 2) {
+      } else if (snapshotSeat?.status === 'BLOCKED') {
         status = 'blocked';
+      } else {
+        const statusCode = Number(seat?.LS_SEAT_STATUS ?? 0);
+        if (statusCode === 1) {
+          status = 'broken';
+        } else if (statusCode === 2) {
+          status = 'blocked';
+        }
       }
 
       rows[rowNo - 1]?.push({
@@ -536,7 +566,6 @@ const renderPrintPageToCanvas = async (element: HTMLElement): Promise<HTMLCanvas
   });
 
 const handlePrintSeatPlan = async (): Promise<void> => {
-  await refreshActiveLocation();
   isPrintingSeatPlan.value = true;
   $q.loading.show();
 
@@ -668,14 +697,6 @@ const onRequest = (props: TableRequestProps): void => {
 watch(filteredRows, (newVal) => {
   pagination.value.rowsNumber = newVal.length;
 });
-
-watch(
-  () => activeLocation.value?.LOCATION_ID,
-  () => {
-    void refreshActiveLocation();
-  },
-  { immediate: true },
-);
 
 watch(exam, (newExam) => {
   if (newExam?.SESSIONS?.length && !selectedSessionId.value) {

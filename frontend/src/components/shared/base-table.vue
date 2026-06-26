@@ -51,7 +51,7 @@
             <span>{{ $t('components.baseTable.rowsPerPage') }}</span>
             <q-select
               v-model="internalPagination.rowsPerPage"
-              :options="[10, 25, 50]"
+              :options="rowsPerPageOptions"
               dense
               outlined
               options-dense
@@ -142,6 +142,7 @@ interface Props {
   rows: T[];
   loading?: boolean | undefined;
   pagination?: PaginationModel | undefined;
+  rowsPerPageOptions?: number[] | undefined;
   emptyLabel?: string | undefined;
   hidePagination?: boolean | undefined;
   isServerSide?: boolean | undefined;
@@ -149,6 +150,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   emptyLabel: '',
+  rowsPerPageOptions: () => [10, 25, 50],
   isServerSide: false,
 });
 
@@ -233,23 +235,34 @@ watch(
 
 const NON_SORTABLE_COLUMNS = new Set(['tools', 'actions', 'action']);
 
-const isIdColumnPresent = computed(() => {
-  return props.columns.some((c) => c.name === 'id' || c.name === 'index');
+const autoNumberColumnNames = computed(() => {
+  return new Set(
+    props.columns
+      .filter(
+        (column) => (column.name === 'id' || column.name === 'index') && column.sortable !== true,
+      )
+      .map((column) => column.name),
+  );
 });
 
 const sortableColumns = computed<QTableColumn[]>(() =>
   props.columns.map((column) => {
     const isIdOrIndex = column.name === 'id' || column.name === 'index';
+    const shouldAutoNumber = autoNumberColumnNames.value.has(column.name);
     return {
       ...column,
-      sortable: isIdOrIndex ? false : (column.sortable ?? !NON_SORTABLE_COLUMNS.has(column.name)),
-      field: isIdOrIndex
+      sortable: isIdOrIndex
+        ? (column.sortable ?? false)
+        : (column.sortable ?? !NON_SORTABLE_COLUMNS.has(column.name)),
+      field: shouldAutoNumber
         ? (row: T) => {
             const page = internalPagination.value.page || 1;
             const rowsPerPage = internalPagination.value.rowsPerPage || 10;
             const start = (page - 1) * rowsPerPage;
             const rowIndex = displayRows.value.indexOf(row);
-            return rowIndex !== -1 ? start + rowIndex + 1 : (row as Record<string, unknown>)[column.name];
+            return rowIndex !== -1
+              ? start + rowIndex + 1
+              : (row as Record<string, unknown>)[column.name];
           }
         : (column.field ?? column.name),
     };
@@ -365,7 +378,7 @@ const displayRows = computed<T[]>(() => {
     rows = sourceRows.slice(start, start + rowsPerPage);
   }
 
-  if (!isIdColumnPresent.value) {
+  if (autoNumberColumnNames.value.size === 0) {
     return rows;
   }
 
@@ -379,9 +392,12 @@ const displayRows = computed<T[]>(() => {
     return new Proxy(row, {
       get(target, prop, receiver) {
         if (prop === 'id' || prop === 'index') {
+          if (!autoNumberColumnNames.value.has(prop)) {
+            return Reflect.get(target, prop, receiver);
+          }
+
           const stack = new Error().stack || '';
-          const isRender =
-            /\b(render|patch|update|vnode|q-?td|q-?tr|q-?table)\b/i.test(stack);
+          const isRender = /\b(render|patch|update|vnode|q-?td|q-?tr|q-?table)\b/i.test(stack);
 
           if (isRender) {
             return start + index + 1;

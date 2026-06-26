@@ -3,7 +3,9 @@ import {
   ArrayNotEmpty,
   IsArray,
   IsInt,
+  IsOptional,
   IsPositive,
+  IsString,
   ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -14,15 +16,24 @@ export class SeatAssignmentItemDto {
   @IsPositive()
   ermId: number;
 
-  @ApiProperty({ example: 10 })
-  @IsInt()
-  @IsPositive()
-  lsId: number;
+  @ApiProperty({ example: 'A-01', description: 'เลขที่นั่งสอบ' })
+  @IsString()
+  seatLabel: string;
 
   @ApiProperty({ example: 3 })
   @IsInt()
   @IsPositive()
   slId: number;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ลำดับการเรียงที่นั่ง',
+    required: false,
+  })
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  sortOrder?: number;
 }
 
 export class BulkSeatAssignmentDto {

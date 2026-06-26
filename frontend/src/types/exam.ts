@@ -166,6 +166,7 @@ export interface BackendScore {
     SCORES_ID: number;
     CERT_CODE: string;
     CERT_ISSUED_AT: string;
+    CERT_EXPIRES_AT?: string | null;
   }[];
 }
 
@@ -175,6 +176,8 @@ export interface ExamEnrollment {
   SESSION_ID: number;
   SL_ID?: number | null;
   LS_ID: number | null;
+  ERM_SEAT_LABEL?: string | null;
+  ERM_SORT_ORDER?: number | null;
   ERM_STATUS: number;
   ERM_VERIFY_STATUS: number;
   ERM_TEST_TAKER?: string | null;
@@ -227,6 +230,8 @@ export interface BackendLocation {
   LOCATION_FLOOR_NO?: number | null;
   LOCATION_TOTAL_ROWS?: number;
   LOCATION_TOTAL_COLS?: number;
+  LOCATION_SEAT_DIRECTION?: 'HORIZONTAL' | 'VERTICAL';
+  LOCATION_AISLE_AFTER_COL?: Array<{ type: 'row' | 'column'; index: number } | number> | null;
   SEAT_DIRECTION?: 'HORIZONTAL' | 'VERTICAL';
   AISLE_AFTER_COLS?: number[] | null;
   AISLE_AFTER_ROWS?: number[] | null;
@@ -237,7 +242,21 @@ export interface BackendLocation {
     LS_COL_NO: number;
     LS_SEAT_LABEL: string | null;
     LS_SEAT_STATUS: number;
+    LS_SORT_ORDER?: number | null;
   }[];
+}
+
+export interface BackendBlockedSeat {
+  BLOCK_ID: number;
+  LS_ID: number;
+  SS_ID: number;
+  BLOCK_STATUS: number;
+  LOCATION_SEAT?: {
+    LS_ID: number;
+    LOCATION_ID: number;
+    LS_SEAT_LABEL: string | null;
+    LS_SEAT_STATUS: number;
+  } | null;
 }
 
 export interface BackendSession {
@@ -253,6 +272,18 @@ export interface BackendSession {
     LOCATION_ID: number;
     SS_ID: number;
     SS_NAME: string | null;
+    TOTAL_ROWS?: number | null;
+    TOTAL_COLS?: number | null;
+    AISLE_AFTER?: { after_cols: number[]; after_rows: number[] } | null;
+    LOCATION_SEAT_DIRECTION?: 'HORIZONTAL' | 'VERTICAL';
+    LOCATION_SEAT_CAPACITY?: number | null;
+    SEATS_SNAPSHOT?:
+      | {
+          label: string | null;
+          status: 'AVAILABLE' | 'BROKEN' | 'BLOCKED';
+          sortorder: number | null;
+        }[]
+      | null;
     LOCATION: BackendLocation;
   }[];
   ENROLLMENTS?: BackendEnrollment[];

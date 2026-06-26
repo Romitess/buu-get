@@ -14,12 +14,13 @@ import {
   VALIDATION_MSG,
 } from 'src/constants/exam';
 import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
-import type { PasscodeType, BackendExam } from 'src/types/exam';
+import type { PasscodeType, BackendExam, BackendLocation } from 'src/types/exam';
 import {
   fetchExamLocations,
   fetchFundSources,
   fetchExamById,
   fetchAllExamsRaw,
+  fetchExamBlockedSeats,
   updateExamRound,
   notifyExamChanges,
   formatTime,
@@ -28,6 +29,7 @@ import {
   createExamPasscodes,
   parseBangkokDate,
   type ExamChangeItem,
+  type SessionLocationSnapshotPayload,
 } from 'src/services/exam.service';
 import { getUsersFromApi } from 'src/services/user.service';
 import { ROLES } from 'src/constants/roles';
@@ -47,6 +49,10 @@ export interface ExamRoom {
   sessionId?: number;
   /** Enrollment count (for locking) */
   enrollmentCount?: number;
+  /** Seat status overrides for this exam session, keyed by LS_ID */
+  seatOverrides?: Record<number, number>;
+  /** Session-specific room layout snapshot */
+  sessionLocationSnapshot?: SessionLocationSnapshotPayload;
 }
 
 export interface TimeSlot {
@@ -111,6 +117,58 @@ interface ExamComparisonSnapshot {
   payEndDate: string;
   scheduleText: string;
 }
+
+const snapshotStatusToCode = (status: string | null | undefined): number => {
+  if (status === 'BROKEN') return 1;
+  if (status === 'BLOCKED') return 2;
+
+  return 0;
+};
+
+const countAvailableSeats = (
+  location: BackendLocation,
+  seatOverrides?: Record<number, number>,
+): number => {
+  return (location.SEATS ?? []).filter(
+    (seat) => (seatOverrides?.[seat.LS_ID] ?? seat.LS_SEAT_STATUS) === 0,
+  ).length;
+};
+
+const getLocationAisleAfter = (
+  location: BackendLocation,
+): { after_cols: number[]; after_rows: number[] } => {
+  const fromLegacyCols = location.AISLE_AFTER_COLS ?? [];
+  const fromLegacyRows = location.AISLE_AFTER_ROWS ?? [];
+  const fromCombined = location.LOCATION_AISLE_AFTER_COL ?? [];
+
+  return {
+    after_cols: [
+      ...fromLegacyCols,
+      ...fromCombined
+        .filter((item): item is { type: 'column'; index: number } =>
+          typeof item === 'object' ? item.type === 'column' : false,
+        )
+        .map((item) => item.index),
+      ...fromCombined.filter((item): item is number => typeof item === 'number'),
+    ],
+    after_rows: [
+      ...fromLegacyRows,
+      ...fromCombined
+        .filter((item): item is { type: 'row'; index: number } =>
+          typeof item === 'object' ? item.type === 'row' : false,
+        )
+        .map((item) => item.index),
+    ],
+  };
+};
+
+const hasAisleAfter = (
+  aisleAfter: { after_cols: number[]; after_rows: number[] } | null | undefined,
+): aisleAfter is { after_cols: number[]; after_rows: number[] } => {
+  return Boolean(
+    aisleAfter && (aisleAfter.after_cols.length > 0 || aisleAfter.after_rows.length > 0),
+  );
+};
 
 /**
  * Composable for managing exam creation/editing logic.
@@ -363,13 +421,16 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     return errors;
   });
 
-  const getLocationMaxSeats = (locationId: number | null): number => {
+  const getLocationMaxSeats = (
+    locationId: number | null,
+    seatOverrides?: Record<number, number>,
+  ): number => {
     if (!locationId) return 9999;
     const option = locationOptions.value.find((opt) => opt.value === locationId);
     if (!option || !option.raw) return 9999;
     const seats = option.raw.SEATS;
     if (seats) {
-      return seats.filter((seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2).length;
+      return countAvailableSeats(option.raw, seatOverrides);
     }
     if (
       option.raw.LOCATION_SEAT_CAPACITY !== undefined &&
@@ -466,7 +527,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         if (!room.seats || room.seats <= 0) {
           errors[`seats_${slotIdx}_${roomIdx}`] = VALIDATION_MSG.SEATS;
         } else if (room.locationId) {
-          const maxSeats = getLocationMaxSeats(room.locationId);
+          const maxSeats = getLocationMaxSeats(room.locationId, room.seatOverrides);
           if (room.seats > maxSeats) {
             errors[`seats_${slotIdx}_${roomIdx}`] =
               `เกินขอบเขตความจุที่นั่งของห้องสอบ มีที่นั่งได้ไม่เกิน ${maxSeats} ที่นั่ง ในสถานที่นี้`;
@@ -635,15 +696,17 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     isLoadingData.value = true;
     error.value = null;
     try {
-      const [locations, fundSources, proctors, exams] = await Promise.all([
+      const [locations, fundSources, proctors, exams, editExam] = await Promise.all([
         fetchExamLocations(),
         fetchFundSources(),
         getUsersFromApi(ROLES.PROCTOR),
         fetchAllExamsRaw(),
+        examId ? fetchExamById(examId) : Promise.resolve(null),
       ]);
       locationOptions.value = locations;
       allExams.value = exams;
-      fundSourceOptions.value = fundSources.map((fs: FundSource) => ({
+      const activeFundSources = fundSources.filter((fs: FundSource) => fs.FS_OPEN_STATUS !== false);
+      fundSourceOptions.value = activeFundSources.map((fs: FundSource) => ({
         label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
         value: fs.FS_ID,
       }));
@@ -657,9 +720,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       });
 
       // If in edit mode, load the existing exam data into the form
-      if (examId) {
-        const exam = await fetchExamById(examId);
-
+      if (editExam) {
+        const exam = editExam;
         form.value.examName = exam.EXAM_NAME || '';
         form.value.examRound = exam.EXAM_ROUND || '';
         form.value.examType = exam.EXAM_TYPE || EXAM_TYPE_GENERAL;
@@ -678,6 +740,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         // Group sessions by time range into time slots with rooms
         if (exam.SESSIONS && exam.SESSIONS.length > 0) {
           const slotMap = new Map<string, TimeSlot>();
+          const sessionsNeedingBlockedFallback = new Set<number>();
 
           exam.SESSIONS.forEach((session) => {
             const start = session.SS_START_TIME ? session.SS_START_TIME.substring(0, 5) : '';
@@ -698,6 +761,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
               relationLocations
                 .filter((relation) => relation.LOCATION)
                 .forEach((relation) => {
+                  const hasSeatSnapshot = (relation.SEATS_SNAPSHOT?.length ?? 0) > 0;
+                  if (!hasSeatSnapshot) {
+                    sessionsNeedingBlockedFallback.add(session.SS_ID);
+                  }
+
                   const relationProctors: string[] = [];
                   if (relation.SS_NAME) {
                     const customNames = relation.SS_NAME.split(',')
@@ -705,22 +773,50 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
                       .filter(Boolean);
                     relationProctors.push(...customNames);
                   }
+                  const seatOverrides = Object.fromEntries(
+                    (relation.SEATS_SNAPSHOT ?? [])
+                      .map((snapshotSeat) => {
+                        const baseSeat = relation.LOCATION.SEATS?.find(
+                          (seat) => seat.LS_SEAT_LABEL === snapshotSeat.label,
+                        );
+                        const snapshotStatus = snapshotStatusToCode(snapshotSeat.status);
+                        if (!baseSeat || baseSeat.LS_SEAT_STATUS === snapshotStatus) return null;
+
+                        return [baseSeat.LS_ID, snapshotStatus] as const;
+                      })
+                      .filter((entry): entry is readonly [number, number] => entry !== null),
+                  );
 
                   slot.rooms.push({
                     locationId: relation.LOCATION_ID ?? relation.LOCATION.LOCATION_ID ?? null,
                     proctorName: relation.SS_NAME || '',
                     proctors: Array.from(new Set(relationProctors)),
-                    seats:
-                      relation.LOCATION.SEATS?.filter(
-                        (seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2,
-                      ).length ||
-                      relation.LOCATION.LOCATION_SEAT_CAPACITY ||
-                      40,
+                    seats: countAvailableSeats(relation.LOCATION, seatOverrides),
                     sessionId: session.SS_ID,
                     enrollmentCount:
                       session.ENROLLMENTS?.filter(
                         (enrollment) => enrollment.SL_ID === relation.SL_ID,
                       ).length || 0,
+                    seatOverrides,
+                    sessionLocationSnapshot: {
+                      TOTAL_ROWS:
+                        relation.TOTAL_ROWS ?? relation.LOCATION.LOCATION_TOTAL_ROWS ?? null,
+                      TOTAL_COLS:
+                        relation.TOTAL_COLS ?? relation.LOCATION.LOCATION_TOTAL_COLS ?? null,
+                      AISLE_AFTER: hasAisleAfter(relation.AISLE_AFTER)
+                        ? relation.AISLE_AFTER
+                        : getLocationAisleAfter(relation.LOCATION),
+                      LOCATION_SEAT_DIRECTION:
+                        relation.LOCATION_SEAT_DIRECTION ??
+                        relation.LOCATION.LOCATION_SEAT_DIRECTION ??
+                        relation.LOCATION.SEAT_DIRECTION ??
+                        'HORIZONTAL',
+                      LOCATION_SEAT_CAPACITY:
+                        relation.LOCATION_SEAT_CAPACITY ??
+                        relation.LOCATION.LOCATION_SEAT_CAPACITY ??
+                        null,
+                      SEATS_SNAPSHOT: relation.SEATS_SNAPSHOT ?? null,
+                    },
                   });
                 });
               return;
@@ -734,10 +830,47 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
               sessionId: session.SS_ID,
               enrollmentCount: session.ENROLLMENTS?.length || 0,
             });
+            sessionsNeedingBlockedFallback.add(session.SS_ID);
           });
 
           form.value.timeSlots = Array.from(slotMap.values());
           sortTimeSlots();
+          const blockedFallbackSessionIds = Array.from(sessionsNeedingBlockedFallback);
+          if (blockedFallbackSessionIds.length > 0) {
+            const blockedSeatGroups = await Promise.all(
+              blockedFallbackSessionIds.map(async (sessionId) => ({
+                sessionId,
+                seats: await fetchExamBlockedSeats(sessionId),
+              })),
+            );
+
+            blockedSeatGroups.forEach(({ sessionId, seats }) => {
+              const sessionRooms = form.value.timeSlots.flatMap((slot) =>
+                slot.rooms.filter((room) => room.sessionId === sessionId),
+              );
+
+              seats.forEach((blockedSeat) => {
+                const locationId = blockedSeat.LOCATION_SEAT?.LOCATION_ID;
+                const targetRoom =
+                  sessionRooms.find((room) => room.locationId === locationId) ??
+                  sessionRooms[0] ??
+                  null;
+                if (!targetRoom) return;
+
+                targetRoom.seatOverrides = {
+                  ...(targetRoom.seatOverrides ?? {}),
+                  [blockedSeat.LS_ID]: blockedSeat.BLOCK_STATUS,
+                };
+                const targetLocation = getLocationById(targetRoom.locationId);
+                if (targetLocation) {
+                  const maxSeats = countAvailableSeats(targetLocation, targetRoom.seatOverrides);
+                  if (targetRoom.seats > maxSeats) {
+                    targetRoom.seats = maxSeats;
+                  }
+                }
+              });
+            });
+          }
         }
 
         // Load passcodes into eligibleCandidates for special rounds
@@ -867,6 +1000,54 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    */
   const stripBom = (text: string): string => {
     return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+  };
+
+  const getLocationById = (locationId: number | null): BackendLocation | null => {
+    if (locationId === null) return null;
+
+    return locationOptions.value.find((location) => location.value === locationId)?.raw ?? null;
+  };
+
+  const getSeatStatusLabel = (status: number): 'AVAILABLE' | 'BROKEN' | 'BLOCKED' => {
+    if (status === 1) return 'BROKEN';
+    if (status === 2) return 'BLOCKED';
+
+    return 'AVAILABLE';
+  };
+
+  const buildSessionLocationSnapshot = (
+    location: BackendLocation,
+    seatOverrides?: Record<number, number>,
+    currentSnapshot?: SessionLocationSnapshotPayload,
+    seatCapacity?: number,
+  ): SessionLocationSnapshotPayload => {
+    const direction =
+      currentSnapshot?.LOCATION_SEAT_DIRECTION ??
+      location.LOCATION_SEAT_DIRECTION ??
+      location.SEAT_DIRECTION ??
+      'HORIZONTAL';
+    const maxAvailableSeats = countAvailableSeats(location, seatOverrides);
+    const snapshotCapacity =
+      seatCapacity != null ? Math.min(seatCapacity, maxAvailableSeats) : maxAvailableSeats;
+
+    return {
+      TOTAL_ROWS: currentSnapshot?.TOTAL_ROWS ?? location.LOCATION_TOTAL_ROWS ?? null,
+      TOTAL_COLS: currentSnapshot?.TOTAL_COLS ?? location.LOCATION_TOTAL_COLS ?? null,
+      AISLE_AFTER: hasAisleAfter(currentSnapshot?.AISLE_AFTER)
+        ? currentSnapshot.AISLE_AFTER
+        : getLocationAisleAfter(location),
+      LOCATION_SEAT_DIRECTION: direction,
+      LOCATION_SEAT_CAPACITY: snapshotCapacity,
+      SEATS_SNAPSHOT: (location.SEATS ?? []).map((seat) => {
+        const status = seatOverrides?.[seat.LS_ID] ?? seat.LS_SEAT_STATUS;
+
+        return {
+          label: seat.LS_SEAT_LABEL,
+          status: getSeatStatusLabel(status),
+          sortorder: seat.LS_SORT_ORDER ?? null,
+        };
+      }),
+    };
   };
 
   /**
@@ -1136,6 +1317,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     seats: number;
     proctorName: string | null;
     sessionId?: number;
+    seatOverrides?: Record<number, number>;
+    sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   }[] => {
     const result: {
       startTime: string;
@@ -1144,20 +1327,38 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       seats: number;
       proctorName: string | null;
       sessionId?: number;
+      seatOverrides?: Record<number, number>;
+      sessionLocationSnapshot?: SessionLocationSnapshotPayload;
     }[] = [];
 
     form.value.timeSlots.forEach((slot) => {
       if (!slot.startTime || !slot.endTime) return;
       slot.rooms.forEach((room) => {
+        const location = getLocationById(room.locationId);
+        const maxAvailableSeats = location
+          ? countAvailableSeats(location, room.seatOverrides)
+          : Number(room.seats);
+        const seats = Math.min(Number(room.seats), maxAvailableSeats);
         const proctorName =
           room.proctors && room.proctors.length > 0 ? room.proctors.join(', ') : null;
         result.push({
           startTime: formatTime(slot.startTime),
           endTime: formatTime(slot.endTime),
           locationId: Number(room.locationId),
-          seats: Number(room.seats),
+          seats,
           proctorName,
           ...(room.sessionId != null ? { sessionId: room.sessionId } : {}),
+          ...(room.seatOverrides ? { seatOverrides: { ...room.seatOverrides } } : {}),
+          ...(location
+            ? {
+                sessionLocationSnapshot: buildSessionLocationSnapshot(
+                  location,
+                  room.seatOverrides,
+                  room.sessionLocationSnapshot,
+                  seats,
+                ),
+              }
+            : {}),
         });
       });
     });
@@ -1299,6 +1500,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       seats: r.seats,
       proctorName: r.proctorName,
       ...(r.sessionId != null ? { sessionId: r.sessionId } : {}),
+      ...(r.seatOverrides ? { seatOverrides: r.seatOverrides } : {}),
+      ...(r.sessionLocationSnapshot ? { sessionLocationSnapshot: r.sessionLocationSnapshot } : {}),
     }));
 
     try {
@@ -1330,9 +1533,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           examRound: form.value.examRound,
           existingSessionIds,
         });
-
-        // Refresh the management schedules in the store after successful edit
-        await examStore.loadManagementSchedules(true);
 
         $q.notify({
           type: 'positive',
@@ -1373,8 +1573,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         };
 
         targetExamId = await examStore.addExamRound(payload);
-        // Refresh the management schedules in the store after successful creation
-        await examStore.loadManagementSchedules(true);
 
         $q.notify({
           type: 'positive',
