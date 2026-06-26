@@ -150,6 +150,7 @@ export class FundSourcesService {
       .select('DISTINCT fs.FS_FACULTY', 'faculty')
       .where('fs.FS_FACULTY IS NOT NULL')
       .andWhere("fs.FS_FACULTY != ''")
+      .andWhere('fs.FS_OPEN_STATUS = :status', { status: true })
       .getRawMany<RawDepartmentRow>();
 
     return departments.map((d) => ({

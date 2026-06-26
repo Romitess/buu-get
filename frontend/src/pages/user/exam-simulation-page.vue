@@ -134,6 +134,15 @@ const handleMockLogin = (): void => {
   display: flex;
   flex-direction: column;
   min-height: 100%;
+
+  // ให้เว้นซ้ายขวาของหน้าให้เท่ากับหน้า exam-schedule-page
+  width: clamp(921.6px, 81vw, 1440px) !important;
+  margin: 0 auto;
+
+  @media (max-width: 1023px) {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
 }
 
 // Transitions

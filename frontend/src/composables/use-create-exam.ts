@@ -705,7 +705,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       ]);
       locationOptions.value = locations;
       allExams.value = exams;
-      fundSourceOptions.value = fundSources.map((fs: FundSource) => ({
+      const activeFundSources = fundSources.filter((fs: FundSource) => fs.FS_OPEN_STATUS !== false);
+      fundSourceOptions.value = activeFundSources.map((fs: FundSource) => ({
         label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
         value: fs.FS_ID,
       }));

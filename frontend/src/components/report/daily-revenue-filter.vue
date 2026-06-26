@@ -214,7 +214,8 @@ const loadDepartmentOptions = async () => {
 
   try {
     const sources = await fetchFundSources();
-    const faculties = Array.from(new Set(sources.map((s) => s.FS_FACULTY).filter(Boolean)));
+    const activeSources = sources.filter((s) => s.FS_OPEN_STATUS !== false);
+    const faculties = Array.from(new Set(activeSources.map((s) => s.FS_FACULTY).filter(Boolean)));
     const options = faculties.map((f) => ({ label: f, value: f }));
     departmentOptions.value = [
       { label: t('admin.dailyRevenueReport.filter.all'), value: '' },

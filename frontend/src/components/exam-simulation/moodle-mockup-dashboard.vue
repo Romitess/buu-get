@@ -50,31 +50,39 @@
 
         <!-- Sidebar content hidden when collapsed -->
         <div class="sidebar-content" v-show="sidebarOpen">
-          <q-expansion-item
-            label="General"
-            default-opened
-            header-class="text-weight-bold sidebar-exp-header"
-            class="sidebar-exp"
-            expand-icon-class="sidebar-exp-icon"
-            expand-icon="expand_less"
-            expanded-icon="expand_more"
-          >
+          <q-expansion-item default-opened class="sidebar-exp" v-model="generalOpened">
+            <template v-slot:header>
+              <div
+                class="row items-center no-wrap full-width text-weight-bold sidebar-header-content"
+              >
+                <q-icon
+                  :name="generalOpened ? 'keyboard_arrow_down' : 'keyboard_arrow_right'"
+                  class="sidebar-chevron q-mr-xs"
+                  size="20px"
+                />
+                <span>General</span>
+              </div>
+            </template>
             <q-list>
               <q-item clickable v-ripple class="sidebar-item">
-                <q-item-section>Announcements</q-item-section>
+                <q-item-section style="padding-left: 28px">Announcements</q-item-section>
               </q-item>
             </q-list>
           </q-expansion-item>
 
-          <q-expansion-item
-            label="แบบทดสอบ"
-            default-opened
-            header-class="text-weight-bold sidebar-exp-header"
-            class="sidebar-exp"
-            expand-icon-class="sidebar-exp-icon"
-            expand-icon="expand_less"
-            expanded-icon="expand_more"
-          >
+          <q-expansion-item default-opened class="sidebar-exp" v-model="quizOpened">
+            <template v-slot:header>
+              <div
+                class="row items-center no-wrap full-width text-weight-bold sidebar-header-content"
+              >
+                <q-icon
+                  :name="quizOpened ? 'keyboard_arrow_down' : 'keyboard_arrow_right'"
+                  class="sidebar-chevron q-mr-xs"
+                  size="20px"
+                />
+                <span>แบบทดสอบ</span>
+              </div>
+            </template>
             <q-list>
               <q-item
                 clickable
@@ -85,7 +93,7 @@
                 }"
                 @click="goToView('quiz')"
               >
-                <q-item-section>แบบทดสอบ</q-item-section>
+                <q-item-section style="padding-left: 28px">แบบทดสอบ</q-item-section>
               </q-item>
             </q-list>
           </q-expansion-item>
@@ -301,6 +309,8 @@ type ViewType = 'overview' | 'course' | 'quiz' | 'attempt';
 const userStore = useUserStore();
 const currentView = ref<ViewType>('overview');
 const sidebarOpen = ref(true);
+const generalOpened = ref(true);
+const quizOpened = ref(true);
 
 const filterAll = ref('All');
 const searchQuery = ref('');
@@ -415,38 +425,54 @@ const goToView = (view: ViewType) => {
 }
 
 // Move expansion chevron to the left, before label
-:deep(.sidebar-exp-header) {
-  font-size: 0.95rem;
-  white-space: nowrap;
-  flex-direction: row-reverse; // puts expand icon on left
-  padding-left: 8px;
-  padding-right: 16px;
+:deep(.sidebar-exp) {
+  .q-item {
+    padding: 8px 16px;
+    min-height: auto;
+
+    /* Hide the default expand icon completely */
+    .q-item__section--side {
+      display: none !important;
+    }
+
+    .q-item__section--main {
+      padding: 0;
+    }
+  }
 }
 
-:deep(.sidebar-exp-icon) {
-  margin-right: 4px;
-  margin-left: 0;
+.sidebar-header-content {
+  font-size: 1rem;
+  color: #212529;
+}
+
+.sidebar-chevron {
+  color: #212529;
+  font-size: 1.25rem;
 }
 
 .sidebar-item {
-  color: #495057;
+  color: #212529;
+  font-size: 0.95rem;
   border-radius: 4px;
   margin: 2px 8px;
-  padding: 4px 12px;
-  min-height: 36px;
+  padding: 6px 16px 6px 40px; /* Align text with "General" */
+  min-height: auto;
   white-space: nowrap;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.03);
+    background-color: rgba(0, 0, 0, 0.04);
+    color: #0f6cbf;
   }
 }
 
 .sidebar-item--active {
-  background-color: var(--q-secondary);
-  color: white;
+  background-color: #e8f0fe;
+  color: #0f6cbf;
+  font-weight: 500;
 
   &:hover {
-    background-color: var(--q-secondary);
+    background-color: #d2e3fc;
   }
 }
 
