@@ -41,6 +41,8 @@ export const useExamStore = defineStore('exam', () => {
   const selectedDate = ref<string>(new Date().toISOString().split('T')[0] || '');
   const scheduleData = ref<Record<string, DayData>>({});
   const cancellationReasonStorageKey = 'exam_cancellation_reasons';
+  const HISTORY_CACHE_TTL_MS = 2000;
+  let lastHistoryFetchAt = 0;
 
   type CancellationReason = 'manual' | 'paymentTimeout';
 
@@ -149,7 +151,9 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
-  async function fetchHistory(): Promise<void> {
+  async function fetchHistory(force = false): Promise<void> {
+    if (!force && Date.now() - lastHistoryFetchAt < HISTORY_CACHE_TTL_MS) return;
+
     const userIdStr = localStorage.getItem('user_id');
     if (!userIdStr) return;
     const userId = parseInt(userIdStr, 10);
@@ -294,6 +298,7 @@ export const useExamStore = defineStore('exam', () => {
 
       pendingRegistrations.value = newPending;
       historyRecords.value = newHistory;
+      lastHistoryFetchAt = Date.now();
     } catch (error: unknown) {
       console.error('Failed to fetch user history:', error);
     }
@@ -312,8 +317,7 @@ export const useExamStore = defineStore('exam', () => {
     }
 
     await createEnrollment(userId, round.id, passcode, physicalStatus);
-    await fetchHistory();
-    await initSchedule(true);
+    await fetchHistory(true);
   }
 
   async function confirmSpecialRegistration(
@@ -331,8 +335,7 @@ export const useExamStore = defineStore('exam', () => {
     try {
       setCancellationReason(enrollmentId, reason);
       await updateEnrollmentStatus(enrollmentId, ENROLLMENT_STATUS.CANCELLED);
-      await fetchHistory();
-      await initSchedule(true);
+      await fetchHistory(true);
     } catch (error: unknown) {
       console.error('Failed to cancel registration:', error);
       throw error;
@@ -372,7 +375,7 @@ export const useExamStore = defineStore('exam', () => {
         receiptAddress: receiptInfo?.address,
       });
 
-      await fetchHistory();
+      await fetchHistory(true);
     } catch (error: unknown) {
       console.error('Failed to confirm payment:', error);
       throw error;
@@ -382,7 +385,7 @@ export const useExamStore = defineStore('exam', () => {
   async function expireTransaction(tranxId: number): Promise<void> {
     try {
       await expireTransactionRequest(tranxId);
-      await fetchHistory();
+      await fetchHistory(true);
     } catch (error: unknown) {
       console.error('Failed to expire transaction:', error);
       throw error;
