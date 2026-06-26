@@ -50,8 +50,15 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('Access denied: No role assigned');
     }
 
-    // ผ่านถ้า user มี role อย่างน้อยหนึ่งตัวที่ตรงกับที่ route ต้องการ
-    const hasRole = requiredRoles.some((role) => userRoles.includes(role));
+    const normalizeRole = (r: string): string =>
+      r.toLowerCase().replace(/[\s-_]+/g, '');
+
+    const normalizedRequired = requiredRoles.map((r) => normalizeRole(r));
+    const normalizedUser = userRoles.map((r) => normalizeRole(r));
+
+    const hasRole = normalizedRequired.some((role) =>
+      normalizedUser.includes(role),
+    );
 
     if (!hasRole) {
       throw new ForbiddenException(

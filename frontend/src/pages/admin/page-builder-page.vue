@@ -71,14 +71,22 @@
           />
         </div>
       </div>
+      <!-- Maximized Full-Page Preview Dialog Component -->
+      <PageBuilderPreviewDialog
+        v-model="showPreviewDialog"
+        :banner-section="bannerSection"
+        :format-section="formatSection"
+        :step-section="stepSection"
+        :rule-paper-section="rulePaperSection"
+        :rule-computer-section="ruleComputerSection"
+      />
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch, computed } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useQuasar } from 'quasar';
-import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
@@ -86,9 +94,9 @@ import PageBuilderBannerSection from 'src/components/page-builder/page-builder-b
 import PageBuilderContentSection from 'src/components/page-builder/page-builder-content-section.vue';
 import PageBuilderExamRulesSection from 'src/components/page-builder/page-builder-exam-rules-section.vue';
 import { usePageBuilder } from 'src/composables/use-page-builder';
+import PageBuilderPreviewDialog from 'src/components/page-builder/page-builder-preview-dialog.vue';
 
 const $q = useQuasar();
-const router = useRouter();
 const { locale, t } = useI18n();
 
 const editLocale = computed<'th' | 'en'>(() => {
@@ -107,6 +115,10 @@ const {
   fetchPage,
   save,
 } = usePageBuilder();
+
+const showPreviewDialog = ref(false);
+
+
 
 watch(error, (val) => {
   if (val) {
@@ -130,8 +142,7 @@ const onCancel = (): void => {
 };
 
 const onPreview = (): void => {
-  const { href } = router.resolve({ name: 'home' });
-  window.open(href, '_blank', 'noopener');
+  showPreviewDialog.value = true;
 };
 
 onMounted(() => {
@@ -219,5 +230,11 @@ onMounted(() => {
     min-width: 0;
     margin-left: 0 !important;
   }
+}
+
+.preview-container-home {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 </style>

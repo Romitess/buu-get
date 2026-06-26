@@ -16,7 +16,12 @@ import { PageConfig } from './entities/page-config.entity';
 @ApiTags('Page Builder - Configs')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(RoleEnum.ADMIN, RoleEnum.STAFF, RoleEnum.REGISTRATION_OFFICER)
+@Roles(
+  RoleEnum.ADMIN,
+  RoleEnum.STAFF,
+  RoleEnum.REGISTRATION_OFFICER,
+  RoleEnum.EXAM_OPERATIONS_OFFICER,
+)
 @Controller('page-builder')
 export class PageConfigsController {
   constructor(private readonly pageConfigsService: PageConfigsService) {}

@@ -19,7 +19,9 @@
           :key="index"
           v-model="section.boxes[index]!"
           :edit-locale="editLocale"
-          draggable="true"
+          :draggable="activeDragIndex === index"
+          @mousedown="handleMousedown(index, $event)"
+          @mouseup="handleMouseup"
           @dragstart="onDragStart(index)"
           @dragover.prevent
           @drop.prevent="onDrop(index)"
@@ -59,6 +61,20 @@ withDefaults(defineProps<Props>(), {
 const section = defineModel<EditorSection<ContentBoxContent>>({ required: true });
 
 const dragIndex = ref<number | null>(null);
+const activeDragIndex = ref<number | null>(null);
+
+const handleMousedown = (index: number, event: MouseEvent): void => {
+  const target = event.target as HTMLElement;
+  if (target.closest('.content-card__handle')) {
+    activeDragIndex.value = index;
+  } else {
+    activeDragIndex.value = null;
+  }
+};
+
+const handleMouseup = (): void => {
+  activeDragIndex.value = null;
+};
 
 const addBox = (): void => {
   section.value.boxes.push({
@@ -83,10 +99,12 @@ const onDrop = (targetIndex: number): void => {
   const [moved] = section.value.boxes.splice(from, 1);
   if (moved) section.value.boxes.splice(targetIndex, 0, moved);
   dragIndex.value = null;
+  activeDragIndex.value = null;
 };
 
 const onDragEnd = (): void => {
   dragIndex.value = null;
+  activeDragIndex.value = null;
 };
 </script>
 

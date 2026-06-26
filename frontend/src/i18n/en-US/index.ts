@@ -1185,6 +1185,7 @@ export default {
     },
     pageBuilder: {
       title: 'Manage Homepage Content',
+      previewTitle: 'Homepage Preview',
       subtitle: 'Manage information displayed on the homepage',
       bannerInfo: 'Banner Information',
       testFormat: 'Test Format',
@@ -1254,6 +1255,7 @@ export default {
       hint: 'Drag to reposition and adjust the crop area to zoom in or out.',
       cancel: 'Cancel',
       save: 'Save',
+      livePreview: 'Live Banner Preview (Actual Homepage Size)',
     },
   },
   auth: {

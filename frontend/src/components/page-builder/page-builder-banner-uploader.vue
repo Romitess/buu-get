@@ -33,6 +33,7 @@
         :crop-height="cropHeight"
         :output-width="outputWidth"
         :output-height="outputHeight"
+        show-preview
         @confirm="onCropConfirm"
         @cancel="showCropDialog = false"
       />
@@ -55,8 +56,8 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  cropWidth: 350,
-  cropHeight: 70,
+  cropWidth: 900,
+  cropHeight: 180,
   outputWidth: 1500,
   outputHeight: 300,
 });

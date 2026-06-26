@@ -1319,6 +1319,7 @@ export default {
     },
     pageBuilder: {
       title: 'จัดการเนื้อหาหน้าหลัก',
+      previewTitle: 'ตัวอย่างหน้าแรก (Homepage Preview)',
       subtitle: 'จัดการข้อมูลที่แสดงในหน้าหลัก',
       bannerInfo: 'ข้อมูลแบรนเนอร์',
       testFormat: 'รูปแบบการทดสอบ',
@@ -1497,6 +1498,7 @@ export default {
       hint: 'ลากเพื่อจัดตำแหน่ง และปรับแถบเพื่อซูมรูปภาพ',
       cancel: 'ยกเลิก',
       save: 'บันทึก',
+      livePreview: 'ตัวอย่างขนาดจริงหน้าแรก (Homepage Banner Preview)',
     },
   },
 };
