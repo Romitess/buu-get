@@ -22,6 +22,9 @@
     <div class="text-body1 text-grey-9 q-mt-xs">
       {{ $t('admin.pageBuilder.uploadHint') }}
     </div>
+    <div class="text-caption text-grey-7 q-mt-xs">
+      {{ $t('admin.pageBuilder.uploadSizeTip') }}
+    </div>
 
     <q-inner-loading :showing="isUploading" :label="$t('admin.pageBuilder.uploading')" />
 

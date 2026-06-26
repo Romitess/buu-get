@@ -14,14 +14,18 @@
     />
 
     <!-- Main Carousel Card -->
-    <q-card
-      flat
-      bordered
-      class="info-carousel overflow-hidden border-radius-lg shadow-1"
-      :class="{ 'image-banner-aspect': banners.length > 0 }"
-    >
+    <q-card flat bordered class="info-carousel image-banner-aspect overflow-hidden">
       <div v-if="isLoading" class="full-height row flex-center bg-white">
         <q-spinner color="primary" size="40px" />
+      </div>
+
+      <!-- Empty State (no banners configured) -->
+      <div
+        v-else-if="banners.length === 0"
+        class="full-height column flex-center bg-grey-2 text-grey-6"
+      >
+        <q-icon name="image" size="48px" />
+        <div class="q-mt-sm text-body2">{{ $t('home.bannerEmpty') }}</div>
       </div>
 
       <q-carousel
@@ -37,58 +41,25 @@
         infinite
         swipeable
       >
-        <!-- Dynamic Image Banners -->
-        <template v-if="banners.length > 0">
-          <q-carousel-slide
-            v-for="(banner, index) in banners"
-            :key="index"
-            :name="index"
-            class="q-pa-none"
+        <q-carousel-slide
+          v-for="(banner, index) in banners"
+          :key="index"
+          :name="index"
+          class="q-pa-none"
+        >
+          <q-img
+            :src="getImageUrl(banner.imagePath)"
+            fit="cover"
+            class="full-width full-height"
+            loading="eager"
           >
-            <q-img
-              :src="getImageUrl(banner.imagePath)"
-              fit="cover"
-              class="full-width full-height"
-              loading="eager"
-            >
-              <template #error>
-                <div class="absolute-full flex flex-center bg-grey-2 text-grey-6">
-                  <q-icon name="broken_image" size="48px" />
-                </div>
-              </template>
-            </q-img>
-          </q-carousel-slide>
-        </template>
-
-        <!-- Fallback Mock Slides -->
-        <template v-else>
-          <q-carousel-slide
-            v-for="page in carouselPages"
-            :key="page.id"
-            :name="page.id"
-            class="q-pa-none"
-          >
-            <div class="row items-stretch">
-              <!-- Left Section -->
-              <div class="col-12 col-md-6 bg-white column justify-center min-height-350">
-                <CarouselContentLeft v-bind="page.branding" />
+            <template #error>
+              <div class="absolute-full flex flex-center bg-grey-2 text-grey-6">
+                <q-icon name="broken_image" size="48px" />
               </div>
-
-              <!-- Right Section -->
-              <q-card-section
-                class="col-12 col-md-6 bg-grey-1 q-pt-lg q-px-lg q-pb-md column justify-center items-center"
-              >
-                <div class="full-width max-width-80">
-                  <div class="row q-col-gutter-y-lg">
-                    <div class="col-6" v-for="(stat, index) in page.stats" :key="index">
-                      <CarouselStatItem v-bind="stat" />
-                    </div>
-                  </div>
-                </div>
-              </q-card-section>
-            </div>
-          </q-carousel-slide>
-        </template>
+            </template>
+          </q-img>
+        </q-carousel-slide>
       </q-carousel>
     </q-card>
 
@@ -106,21 +77,22 @@
     />
   </div>
 
-  <!-- External Navigation Dots -->
-  <div v-if="totalSlides > 0" class="row justify-center q-mt-md q-gutter-x-sm">
-    <div
-      v-for="n in totalSlides"
-      :key="n"
-      class="nav-dot cursor-pointer"
-      :class="{ active: isSlideActive(n) }"
-      @click="setSlide(n)"
-    ></div>
+  <!-- External Navigation Dots — reserve space even when hidden to avoid layout shift -->
+  <div class="nav-dots-row row justify-center q-mt-md q-gutter-x-sm">
+    <template v-if="totalSlides > 1">
+      <div
+        v-for="n in totalSlides"
+        :key="n"
+        class="nav-dot cursor-pointer"
+        :class="{ active: isSlideActive(n) }"
+        @click="setSlide(n)"
+      ></div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
 import type { QCarousel } from 'quasar';
 import { getHomepage } from 'src/services/page-builder.service';
 import { getImageUrl } from 'src/services/image.service';
@@ -129,13 +101,9 @@ import {
   type BannerBoxContent,
   type PageSectionContent,
 } from 'src/types/page-builder.types';
-import CarouselContentLeft from './carousel-content-left.vue';
-import CarouselStatItem from './carousel-stat-item.vue';
-
-const i18n = useI18n();
 
 const carouselRef = ref<QCarousel | null>(null);
-const slide = ref(1);
+const slide = ref(0);
 const isLoading = ref(true);
 const banners = ref<BannerBoxContent[]>([]);
 
@@ -149,74 +117,12 @@ const props = withDefaults(defineProps<Props>(), {
   previewBanners: () => [],
 });
 
-interface CarouselStat {
-  label: string;
-  value: string;
-  description: string;
-}
+const totalSlides = computed((): number => banners.value.length);
 
-interface CarouselBranding {
-  overline: string;
-  title: string;
-  subtitle: string;
-  description1: string;
-  description2: string;
-  info1: string;
-  info1Icon: string;
-  info2: string;
-  info2Icon: string;
-}
-
-interface CarouselPageData extends CarouselBranding {
-  stats: CarouselStat[];
-}
-
-interface CarouselPage {
-  id: number;
-  branding: CarouselBranding;
-  stats: CarouselStat[];
-}
-
-const carouselPages = computed<CarouselPage[]>(() => {
-  const allData: Record<string, CarouselPageData> = i18n.tm('carousel');
-  return Object.entries(allData)
-    .filter(([key]: [string, CarouselPageData]) => key.startsWith('page'))
-    .map(([, pageData]: [string, CarouselPageData], index: number) => {
-      return {
-        id: index + 1,
-        branding: {
-          overline: pageData.overline,
-          title: pageData.title,
-          subtitle: pageData.subtitle,
-          description1: pageData.description1,
-          description2: pageData.description2,
-          info1: pageData.info1,
-          info1Icon: pageData.info1Icon,
-          info2: pageData.info2,
-          info2Icon: pageData.info2Icon,
-        },
-        stats: pageData.stats,
-      };
-    });
-});
-
-const totalSlides = computed((): number => {
-  return banners.value.length > 0 ? banners.value.length : carouselPages.value.length;
-});
-
-const isSlideActive = (n: number): boolean => {
-  if (banners.value.length > 0) {
-    return slide.value === n - 1;
-  }
-  return slide.value === n;
-};
+const isSlideActive = (n: number): boolean => slide.value === n - 1;
 
 const setSlide = (n: number): void => {
-  if (banners.value.length > 0) {
-    slide.value = n - 1;
-  } else {
-    slide.value = n;
-  }
+  slide.value = n - 1;
 };
 
 if (props.previewMode) {
@@ -226,7 +132,7 @@ if (props.previewMode) {
       banners.value = newBanners
         .filter((box) => box.active !== false && box.imagePath)
         .sort((a, b) => a.sortOrder - b.sortOrder);
-      slide.value = banners.value.length > 0 ? 0 : 1;
+      slide.value = 0;
     },
     { immediate: true, deep: true },
   );
@@ -255,7 +161,7 @@ onMounted(async () => {
     console.error('Failed to load homepage banners:', error);
   } finally {
     isLoading.value = false;
-    slide.value = banners.value.length > 0 ? 0 : 1;
+    slide.value = 0;
   }
 });
 </script>
@@ -295,32 +201,20 @@ onMounted(async () => {
   }
 }
 
-.min-height-300 {
-  min-height: 300px;
-}
-
-.max-width-80 {
-  max-width: 80%;
-}
-
 .info-carousel {
   border: 2px solid rgba($primary, 0.8) !important;
   border-radius: 12px;
   box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.3) !important;
-  height: 350px;
-
-  @media (max-width: 1023px) {
-    height: 300px;
-  }
-
-  @media (max-width: 599px) {
-    height: 220px;
-  }
 }
 
+/* Banner images keep a fixed 5:1 ratio and scale down responsively */
 .image-banner-aspect {
-  aspect-ratio: 5 / 1 !important;
-  height: auto !important;
+  aspect-ratio: 5 / 1;
+}
+
+/* Reserve the dot row height so the layout doesn't shift when dots are hidden */
+.nav-dots-row {
+  min-height: 10px;
 }
 
 /* Custom Navigation Dots (External) */
