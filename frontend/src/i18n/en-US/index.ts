@@ -146,6 +146,14 @@ export default {
     subtitle: 'Please select a round you wish to register',
     emptyRounds: 'No exam rounds available on the selected date',
     roundTypeLabel: 'General Round',
+    examType: {
+      general: 'General Round',
+      special: 'Special Round',
+    },
+    examFormat: {
+      computer: 'Computer-based',
+      paper: 'Paper-based',
+    },
     fullStatusText: 'No Seats Available',
     expiredStatusText: 'Registration Closed',
     notOpenStatusText: 'Registration Not Open',
@@ -166,6 +174,7 @@ export default {
       notFound: 'Exam round not found (it may have been deleted).',
       serverError: 'A server error occurred. Please try logging in again.',
       unknownError: 'An error occurred: {message}',
+      invalidPasscode: 'The passcode is invalid for you and this exam round.',
     },
     dialogConfirm: {
       title: 'Confirm Registration',

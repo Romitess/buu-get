@@ -7,12 +7,12 @@
     />
 
     <ExamDetail
-      :badge-text="examInfo.badgeText"
+      :badge-text="translateExamType(examInfo.badgeText)"
       :title="examInfo.title"
       :subtitle="examInfo.subtitle"
       :location-text="examInfo.locationText"
       :fee-text="examInfo.feeText"
-      :format-text="examInfo.formatText"
+      :format-text="translateExamFormat(examInfo.formatText)"
     />
 
     <div class="exam-schedule__content row q-col-gutter-lg q-mt-sm">
@@ -56,7 +56,7 @@
                 :time-range="round.timeRange"
                 :available-seats="round.availableSeats"
                 :total-seats="round.totalSeats"
-                :round-type-label="round.roundTypeLabel"
+                :round-type-label="translateExamType(round.roundTypeLabel)"
                 :reg-start-date="round.regStartDate"
                 :reg-end-date="round.regEndDate"
                 :exam-date="round.examDate"
@@ -100,7 +100,12 @@ import DialogConfirm from 'src/components/exam/dialog-confirm.vue';
 import ExamPasscodeInputDialog from 'src/components/exam-passcode-input-dialog.vue';
 import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
-import { EXAM_TYPE_SPECIAL } from 'src/constants/exam';
+import {
+  EXAM_TYPE_GENERAL,
+  EXAM_TYPE_SPECIAL,
+  EXAM_FORMAT_COMPUTER,
+  EXAM_FORMAT_PAPER,
+} from 'src/constants/exam';
 import { api } from 'src/boot/axios';
 import type { ExamRound } from 'src/types/exam';
 
@@ -121,6 +126,21 @@ const {
   formattedSelectedDate,
   scheduleData,
 } = storeToRefs(examStore);
+
+// แปลงค่าประเภทรอบสอบ (รอบทั่วไป/รอบพิเศษ) ที่มาจาก backend ให้แสดงผลตามภาษาที่เลือก
+// คงค่าเดิมไว้สำหรับ logic การลงทะเบียน (เทียบกับ EXAM_TYPE_SPECIAL) — แปลเฉพาะตอนแสดงผลเท่านั้น
+const translateExamType = (value: string): string => {
+  if (value === EXAM_TYPE_GENERAL) return t('examSchedule.examType.general');
+  if (value === EXAM_TYPE_SPECIAL) return t('examSchedule.examType.special');
+  return value;
+};
+
+// แปลงรูปแบบการสอบ (คอมพิวเตอร์/กระดาษ) ที่มาจาก backend ให้แสดงผลตามภาษาที่เลือก
+const translateExamFormat = (value: string): string => {
+  if (value === EXAM_FORMAT_COMPUTER) return t('examSchedule.examFormat.computer');
+  if (value === EXAM_FORMAT_PAPER) return t('examSchedule.examFormat.paper');
+  return value;
+};
 
 interface ExamPasscodeDialogExpose {
   openDialog: () => void;

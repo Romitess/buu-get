@@ -318,6 +318,14 @@ export default {
     subtitle: 'กรุณาเลือกรอบเวลาที่ท่านต้องการลงทะเบียน',
     emptyRounds: 'ไม่มีรอบสอบในวันที่เลือก',
     roundTypeLabel: 'รอบทั่วไป',
+    examType: {
+      general: 'รอบทั่วไป',
+      special: 'รอบพิเศษ',
+    },
+    examFormat: {
+      computer: 'คอมพิวเตอร์',
+      paper: 'กระดาษ',
+    },
     fullStatusText: 'ไม่มีที่ว่าง',
     expiredStatusText: 'หมดเขตสมัครแล้ว',
     notOpenStatusText: 'ยังไม่เปิดรับสมัคร',
