@@ -1268,7 +1268,7 @@ export default {
       computerBased: 'รูปแบบคอมพิวเตอร์',
       editLanguage: 'ภาษาที่กำลังแก้ไข',
       uploadHint: 'ลากไฟล์มาวาง หรือคลิกเพื่ออัปโหลด (JPG, PNG)',
-      uploadSizeTip: 'แนะนำขนาดภาพ 1300 x 350 พิกเซล',
+      uploadSizeTip: 'แนะนำขนาดภาพ 1700 x 340 พิกเซล',
       uploading: 'กำลังอัปโหลด...',
       selectIcon: 'เลือกไอคอน',
       searchIcon: 'ค้นหาไอคอน...',

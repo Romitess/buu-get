@@ -176,20 +176,29 @@
 
     <!-- Hidden container for Certificate PDF generation -->
     <div
-      v-if="isDownloadingCertificate"
+      v-if="isDownloadingCertificate && selectedCertificateData"
       id="certificate-render-container"
-      style="
-        position: absolute;
-        left: -9999px;
-        top: -9999px;
-        width: 210mm;
-        height: 297mm;
-        z-index: -1000;
-        pointer-events: none;
-        background-color: #ffffff;
-      "
+      class="certificate-render-container"
     >
-      <CertificateScoreReport v-if="selectedCertificateData" :data="selectedCertificateData" />
+      <CertificateCard
+        v-for="side in certificateSides"
+        :key="side"
+        class="certificate-render-card"
+        :side="side"
+        :fullname="selectedCertificateData.fullName"
+        :test-taker-id="selectedCertificateData.testTakerId"
+        :national-id="selectedCertificateData.nationalId"
+        :test-session="selectedCertificateData.testSession"
+        :test-date="selectedCertificateData.testDate"
+        :vocab-score="selectedCertificateData.vocabScore"
+        :reading-score="selectedCertificateData.readingScore"
+        :total-score="selectedCertificateData.totalScore"
+        :band-level="selectedCertificateData.bandLevel"
+        :issue-date="selectedCertificateData.reportIssueDate"
+        :valid-until="selectedCertificateData.scoreValidUntil"
+        :band-rules="selectedCertificateData.bandRules"
+        :photo-url="selectedCertificateData.profileImage"
+      />
     </div>
   </div>
 </template>
@@ -209,7 +218,7 @@ import ReceiptInformationDialog from 'src/components/exam/receipt-information-di
 import DialogCancel from 'src/components/exam/dialog-cancel.vue';
 import TestVoucherReport from 'src/components/test-voucher-report.vue';
 import ReceiptCard from 'src/components/receipt-card.vue';
-import CertificateScoreReport from 'src/components/certificate-score-report.vue';
+import CertificateCard from 'src/components/exam/certificate-card.vue';
 import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
 import { useExamDocuments } from 'src/composables/use-exam-documents';
@@ -277,6 +286,8 @@ const {
 
 const { isDownloadingCertificate, selectedCertificateData, printCertificate } =
   useExamCertificateDocument();
+
+const certificateSides = ['front', 'back'] as const;
 
 // === Computed: แปลง i18n keys เป็นข้อความจริง ===
 /**
@@ -526,6 +537,20 @@ const handlePrintCertificate = (exam: ExamHistoryItem): void => {
       font-size: var(--font-size-body) !important;
     }
   }
+}
+
+.certificate-render-container {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  z-index: -1000;
+  pointer-events: none;
+  width: 616px;
+  background-color: #ffffff;
+}
+
+.certificate-render-card + .certificate-render-card {
+  margin-top: var(--space-md);
 }
 
 .exam-history-voucher-download {

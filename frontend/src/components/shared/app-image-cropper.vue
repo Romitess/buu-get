@@ -325,6 +325,13 @@ const confirmCrop = () => {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
+  // JPEG can't store transparency, so transparent PNG areas (or any region the
+  // image doesn't cover) would flatten to black. Paint a white background first.
+  if (props.fileType !== 'image/png') {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, outputWidth, outputHeight);
+  }
+
   const canvasScale = outputWidth / cropBoxWidth.value;
   const baseScale = Math.max(
     cropBoxWidth.value / imgNaturalWidth.value,
