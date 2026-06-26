@@ -4,7 +4,7 @@
     show-if-above
     :mini="isMini"
     :mini-to-overlay="miniState"
-    :width="260"
+    :width="290"
     :mini-width="72"
     bordered
     side="left"
@@ -46,7 +46,7 @@
               <q-item-section avatar class="sidebar-item__avatar">
                 <q-icon :name="child.icon" size="20px" class="sidebar-item__icon" />
               </q-item-section>
-              <q-item-section>
+              <q-item-section class="sidebar-item__text">
                 <q-item-label class="text-weight-medium">{{ child.label }}</q-item-label>
               </q-item-section>
             </q-item>
