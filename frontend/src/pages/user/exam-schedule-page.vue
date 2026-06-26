@@ -20,6 +20,8 @@
         <ExamCalendar
           v-model="selectedDate"
           :availability="calendarAvailability"
+          :schedule-data="scheduleData"
+          :current-time="calendarNow"
           @change-month="onMonthChange"
           @main-card-resize="onCalendarResize"
         />
@@ -99,6 +101,7 @@ import ExamPasscodeInputDialog from 'src/components/exam-passcode-input-dialog.v
 import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
 import { EXAM_TYPE_SPECIAL } from 'src/constants/exam';
+import { api } from 'src/boot/axios';
 import type { ExamRound } from 'src/types/exam';
 
 const $q = useQuasar();
@@ -110,8 +113,14 @@ const ROUTES = {
   HISTORY: '/user/exam-history',
 };
 
-const { examInfo, selectedDate, selectedDateRounds, calendarAvailability, formattedSelectedDate } =
-  storeToRefs(examStore);
+const {
+  examInfo,
+  selectedDate,
+  selectedDateRounds,
+  calendarAvailability,
+  formattedSelectedDate,
+  scheduleData,
+} = storeToRefs(examStore);
 
 interface ExamPasscodeDialogExpose {
   openDialog: () => void;
@@ -123,10 +132,49 @@ const passcodeDialogRef = ref<ExamPasscodeDialogExpose | null>(null);
 const selectedRound = ref<ExamRound | null>(null);
 const savedPasscode = ref<string | undefined>(undefined);
 const calendarHeight = ref<number>(0);
+const calendarNow = ref(new Date());
+const calendarServerOffset = ref(0);
 
 const roundsListOverflow = computed(() => ($q.screen.gt.sm ? 'auto' : 'visible'));
 
 let scheduleInterval: ReturnType<typeof setInterval>;
+let calendarClockInterval: ReturnType<typeof setInterval> | null = null;
+let calendarClockResyncInterval: ReturnType<typeof setInterval> | null = null;
+
+const getSyncedCalendarTime = (): Date => new Date(Date.now() + calendarServerOffset.value);
+
+const updateCalendarNow = (): void => {
+  calendarNow.value = getSyncedCalendarTime();
+};
+
+const syncCalendarTime = async (): Promise<void> => {
+  const start = Date.now();
+
+  try {
+    const response = await api.get<{ serverTime: string }>('/exam/time', { params: { _t: start } });
+    if (response.data.serverTime) {
+      const serverTime = new Date(response.data.serverTime).getTime();
+      const end = Date.now();
+      const latency = (end - start) / 2;
+      calendarServerOffset.value = serverTime + latency - end;
+    }
+  } catch {
+    try {
+      const response = await api.get<unknown>('/exam', { params: { _t: start } });
+      const serverDate = response.headers['date'];
+      if (serverDate) {
+        const serverTime = new Date(serverDate).getTime();
+        const end = Date.now();
+        const latency = (end - start) / 2;
+        calendarServerOffset.value = serverTime + latency - end;
+      }
+    } catch (err) {
+      console.error('[CalendarTimeSync] Failed to sync with backend', err);
+    }
+  } finally {
+    updateCalendarNow();
+  }
+};
 
 onMounted(async () => {
   // Read the date from query parameter if provided
@@ -135,15 +183,26 @@ onMounted(async () => {
     selectedDate.value = dateFromQuery;
   }
 
+  await syncCalendarTime();
   await examStore.initSchedule();
   scheduleInterval = setInterval(() => {
     void examStore.initSchedule();
   }, 5000);
+  calendarClockInterval = setInterval(updateCalendarNow, 1000);
+  calendarClockResyncInterval = setInterval(() => {
+    void syncCalendarTime();
+  }, 60000);
 });
 
 onUnmounted(() => {
   if (scheduleInterval) {
     clearInterval(scheduleInterval);
+  }
+  if (calendarClockInterval) {
+    clearInterval(calendarClockInterval);
+  }
+  if (calendarClockResyncInterval) {
+    clearInterval(calendarClockResyncInterval);
   }
 });
 

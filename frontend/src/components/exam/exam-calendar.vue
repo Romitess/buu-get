@@ -9,25 +9,24 @@
       @main-card-resize="onMainCardResize"
     >
       <template #day-content="{ day }">
-        <div
-          v-if="availability?.[day.dateString] && !day.isPast && !day.isToday"
-          class="dot"
-          :class="{
-            'dot-green': availability[day.dateString] === 'available',
-            'dot-red': availability[day.dateString] === 'full',
-          }"
-        ></div>
+        <div v-if="shouldShowDot(day)" class="dot" :class="getDotClasses(day.dateString)"></div>
       </template>
     </AppCalendar>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import AppCalendar from '../shared/app-calendar.vue';
 import type { ExamCalendarProps } from '../../types/common';
+import {
+  getExamRoundsCalendarAvailability,
+  type ExamCalendarAvailability,
+} from 'src/utils/exam-registration';
 
-withDefaults(defineProps<ExamCalendarProps>(), {
+const props = withDefaults(defineProps<ExamCalendarProps>(), {
   availability: () => ({}),
+  scheduleData: () => ({}),
 });
 
 const emit = defineEmits<{
@@ -35,6 +34,36 @@ const emit = defineEmits<{
   (e: 'change-month', month: number, year: number): void;
   (e: 'main-card-resize', size: { width: number; height: number }): void;
 }>();
+
+interface CalendarDay {
+  dateString: string;
+  isPast: boolean;
+  isToday: boolean;
+}
+
+const activeTime = computed((): Date => props.currentTime ?? new Date());
+
+const getDayAvailability = (dateString: string): ExamCalendarAvailability => {
+  const rounds = props.scheduleData[dateString]?.rounds;
+  if (rounds?.length) {
+    return getExamRoundsCalendarAvailability(rounds, activeTime.value);
+  }
+
+  return props.availability[dateString] ?? null;
+};
+
+const shouldShowDot = (day: CalendarDay): boolean => {
+  return Boolean(getDayAvailability(day.dateString)) && !day.isPast && !day.isToday;
+};
+
+const getDotClasses = (dateString: string): Record<string, boolean> => {
+  const dayAvailability = getDayAvailability(dateString);
+
+  return {
+    'dot-green': dayAvailability === 'available',
+    'dot-red': dayAvailability === 'full',
+  };
+};
 
 const onUpdateModelValue = (val: string) => {
   emit('update:modelValue', val);

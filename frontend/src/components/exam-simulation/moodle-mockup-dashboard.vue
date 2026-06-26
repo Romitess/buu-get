@@ -442,11 +442,11 @@ const goToView = (view: ViewType) => {
 }
 
 .sidebar-item--active {
-  background-color: #1565c0;
+  background-color: var(--q-secondary);
   color: white;
 
   &:hover {
-    background-color: #1565c0;
+    background-color: var(--q-secondary);
   }
 }
 

@@ -31,6 +31,10 @@ import {
   formatLocationWithRoom,
   PAYMENT_DURATION_SECONDS_DEFAULT,
 } from 'src/constants/exam';
+import {
+  getExamRoundsCalendarAvailability,
+  type ExamCalendarAvailability,
+} from 'src/utils/exam-registration';
 
 export const useExamStore = defineStore('exam', () => {
   const i18n = useI18n();
@@ -106,11 +110,11 @@ export const useExamStore = defineStore('exam', () => {
     return rounds[0]?.roundTypeLabel ?? i18n.t('examSchedule.noBadgeRounds');
   });
 
-  const calendarAvailability = computed((): Record<string, 'available' | 'full' | null> => {
-    const result: Record<string, 'available' | 'full' | null> = {};
+  const calendarAvailability = computed((): Record<string, ExamCalendarAvailability> => {
+    const result: Record<string, ExamCalendarAvailability> = {};
+    const now = new Date();
     Object.entries(scheduleData.value).forEach(([date, data]) => {
-      const hasAvailable = data.rounds.some((r) => r.availableSeats > 0);
-      result[date] = hasAvailable ? 'available' : 'full';
+      result[date] = getExamRoundsCalendarAvailability(data.rounds, now);
     });
     return result;
   });
