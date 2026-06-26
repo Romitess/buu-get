@@ -52,7 +52,8 @@ const { displayUrl } = useImageUrl(toRef(props, 'imagePath'));
 
 .banner-item__image {
   border-radius: 8px;
-  border: 1px solid var(--neutral-200, #e2e8f0);
+  border-left: 1px solid var(--neutral-200, #e2e8f0);
+  border-right: 1px solid var(--neutral-200, #e2e8f0);
   overflow: hidden;
   min-width: 0;
 }
