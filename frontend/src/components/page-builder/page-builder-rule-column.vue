@@ -134,6 +134,8 @@ const onDragEnd = (): void => {
 .rule-column__list-container {
   max-height: 400px;
   overflow-y: auto;
+  // Gap between the rule cards and the scrollbar so they aren't flush
+  padding-right: 12px;
   scrollbar-width: thin;
   scrollbar-color: var(--pb-scrollbar-thumb) var(--pb-scrollbar-track);
 

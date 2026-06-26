@@ -139,6 +139,8 @@ const onDragEnd = (): void => {
 .content-list-container {
   max-height: 500px;
   overflow-y: auto;
+  // Gap between the content cards and the scrollbar so they aren't flush
+  padding-right: 12px;
   scrollbar-width: thin;
   scrollbar-color: var(--pb-scrollbar-thumb) var(--pb-scrollbar-track);
 
