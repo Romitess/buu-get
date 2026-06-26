@@ -28,6 +28,7 @@ import {
   ENROLLMENT_STATUS,
   VERIFY_STATUS,
   TRANSACTION_MATCH_STATUS,
+  SESSION_STATUS_COMPLETED,
   formatLocationWithRoom,
   PAYMENT_DURATION_SECONDS_DEFAULT,
 } from 'src/constants/exam';
@@ -258,15 +259,19 @@ export const useExamStore = defineStore('exam', () => {
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.ATTENDED) {
           const hasScore = !!enrollment.SCORE;
+          const hasBankMatch =
+            enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
+          const hasCompletedSession =
+            Number(enrollment.SESSION?.SS_SESSION_STATUS) === SESSION_STATUS_COMPLETED;
           const hasCertificate = !!(
             enrollment.SCORE?.CERTIFICATES && enrollment.SCORE.CERTIFICATES.length > 0
           );
 
           const actions: string[] = [];
-          if (hasScore) {
-            actions.push('scoreDetails');
+          if (hasBankMatch) {
+            actions.push('downloadReceipt');
           }
-          if (hasCertificate) {
+          if (hasCompletedSession && hasCertificate) {
             actions.push('certificate');
           }
 

@@ -82,16 +82,18 @@
 
           <template #actions>
             <AppButton
-              v-if="exam.actions?.includes('scoreDetails')"
-              outline
-              :label="$t('exam.history.scoreDetails')"
-              class="action-btn btn-action-outline"
+              v-if="exam.actions?.includes('downloadReceipt')"
+              icon="receipt_long"
+              :label="$t('exam.history.downloadReceipt')"
+              class="action-btn btn-action-filled"
+              @click="handlePrintReceipt(exam)"
             />
             <AppButton
               v-if="exam.actions?.includes('certificate')"
               icon="file_download"
               :label="$t('exam.history.certificate')"
               class="action-btn btn-action-filled"
+              @click="handlePrintCertificate(exam)"
             />
             <AppButton
               v-if="exam.actions?.includes('candidateCard')"
@@ -99,13 +101,6 @@
               :label="$t('exam.history.candidateCard')"
               class="action-btn btn-action-filled"
               @click="handlePrintVoucher(exam)"
-            />
-            <AppButton
-              v-if="exam.actions?.includes('downloadReceipt')"
-              icon="receipt_long"
-              :label="$t('exam.history.downloadReceipt')"
-              class="action-btn btn-action-filled"
-              @click="handlePrintReceipt(exam)"
             />
           </template>
         </AppExamHistoryCard>
@@ -178,6 +173,24 @@
     >
       <ReceiptCard :receipt="selectedReceiptData" />
     </div>
+
+    <!-- Hidden container for Certificate PDF generation -->
+    <div
+      v-if="isDownloadingCertificate"
+      id="certificate-render-container"
+      style="
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        width: 210mm;
+        height: 297mm;
+        z-index: -1000;
+        pointer-events: none;
+        background-color: #ffffff;
+      "
+    >
+      <CertificateScoreReport v-if="selectedCertificateData" :data="selectedCertificateData" />
+    </div>
   </div>
 </template>
 
@@ -196,9 +209,11 @@ import ReceiptInformationDialog from 'src/components/exam/receipt-information-di
 import DialogCancel from 'src/components/exam/dialog-cancel.vue';
 import TestVoucherReport from 'src/components/test-voucher-report.vue';
 import ReceiptCard from 'src/components/receipt-card.vue';
+import CertificateScoreReport from 'src/components/certificate-score-report.vue';
 import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
 import { useExamDocuments } from 'src/composables/use-exam-documents';
+import { useExamCertificateDocument } from 'src/composables/use-exam-certificate-document';
 import { useAppDate } from 'src/composables/useAppDate';
 import { PAYMENT_DURATION_SECONDS_DEFAULT } from 'src/constants/exam';
 import type { ExamHistoryItem } from 'src/types/exam';
@@ -259,6 +274,9 @@ const {
   printVoucher,
   printReceipt,
 } = useExamDocuments();
+
+const { isDownloadingCertificate, selectedCertificateData, printCertificate } =
+  useExamCertificateDocument();
 
 // === Computed: แปลง i18n keys เป็นข้อความจริง ===
 /**
@@ -347,7 +365,11 @@ const handleSaveQR = async (): Promise<void> => {
     try {
       const userCode = userStore.currentUser?.userCode ?? '';
 
-      await examStore.confirmPayment(pendingTransactionId.value, userCode, receiptInformation.value);
+      await examStore.confirmPayment(
+        pendingTransactionId.value,
+        userCode,
+        receiptInformation.value,
+      );
       pendingTransactionId.value = null;
       $q.notify({
         type: 'positive',
@@ -419,6 +441,10 @@ const handlePrintVoucher = (exam: ExamHistoryItem): void => {
 
 const handlePrintReceipt = (exam: ExamHistoryItem): void => {
   void printReceipt(exam);
+};
+
+const handlePrintCertificate = (exam: ExamHistoryItem): void => {
+  void printCertificate(exam);
 };
 </script>
 

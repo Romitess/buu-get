@@ -267,6 +267,8 @@ const handleSeatStatusChange = (payload: { seatIds: string[]; status: SeatStatus
 
   try {
     const nextOverrides = { ...(room.seatOverrides ?? {}) };
+    const previousMaxSeats = countAvailableSeats(location, nextOverrides);
+
     targetSeats.forEach((seat) => {
       if (seat.LS_SEAT_STATUS === nextStatusCode) {
         delete nextOverrides[seat.LS_ID];
@@ -280,6 +282,8 @@ const handleSeatStatusChange = (payload: { seatIds: string[]; status: SeatStatus
     const maxSeats = countAvailableSeats(location, nextOverrides);
     if (room.seats > maxSeats) {
       room.seats = maxSeats;
+    } else if (maxSeats > previousMaxSeats) {
+      room.seats = Math.min(room.seats + (maxSeats - previousMaxSeats), maxSeats);
     }
   } catch (error) {
     console.error('Error updating location seat status:', error);
