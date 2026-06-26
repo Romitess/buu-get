@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { ExamRound, ExamInfo, ExamHistoryItem, DayData } from 'src/types/exam';
+import type { ExamRound, ExamInfo, ExamHistoryItem, DayData, ExamEnrollment } from 'src/types/exam';
 import type { ExamSchedule } from 'src/types/exam.types';
 import type { ReceiptInformation } from 'src/types/receipt-information';
 import {
@@ -26,7 +26,6 @@ import {
   DEFAULT_LOCATION_TEXT,
   DEFAULT_EXAM_INFO,
   ENROLLMENT_STATUS,
-  VERIFY_STATUS,
   TRANSACTION_MATCH_STATUS,
   SESSION_STATUS_COMPLETED,
   formatLocationWithRoom,
@@ -180,6 +179,9 @@ export const useExamStore = defineStore('exam', () => {
         );
       };
 
+      const hasMatchedPayment = (enrollment: ExamEnrollment): boolean =>
+        enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
+
       enrollments.forEach((enrollment) => {
         const session = enrollment.SESSION;
         if (!session) return;
@@ -221,19 +223,15 @@ export const useExamStore = defineStore('exam', () => {
           }
           newPending.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.PAID) {
-          const isVerified = enrollment.ERM_VERIFY_STATUS === VERIFY_STATUS.PASS;
-          const hasBankMatch =
-            enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
-          item.status =
-            isVerified || hasBankMatch ? 'exam.status.verified' : 'exam.status.paymentCompleted';
+          const hasBankMatch = hasMatchedPayment(enrollment);
+          item.status = hasBankMatch ? 'exam.status.verified' : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
           item.actions = hasBankMatch ? ['downloadReceipt'] : [];
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_ASSIGNED) {
-          item.status = 'exam.status.verified';
+          const hasBankMatch = hasMatchedPayment(enrollment);
+          item.status = hasBankMatch ? 'exam.status.verified' : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
-          const hasBankMatch =
-            enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
 
           const actions: string[] = [];
           if (hasBankMatch) {
@@ -242,10 +240,9 @@ export const useExamStore = defineStore('exam', () => {
           item.actions = actions;
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_PUBLISHED) {
-          item.status = 'exam.status.verified';
+          const hasBankMatch = hasMatchedPayment(enrollment);
+          item.status = hasBankMatch ? 'exam.status.verified' : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
-          const hasBankMatch =
-            enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
           const hasVoucher = !!(enrollment.VOUCHERS && enrollment.VOUCHERS.length > 0);
 
           const actions: string[] = [];
@@ -259,8 +256,7 @@ export const useExamStore = defineStore('exam', () => {
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.ATTENDED) {
           const hasScore = !!enrollment.SCORE;
-          const hasBankMatch =
-            enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
+          const hasBankMatch = hasMatchedPayment(enrollment);
           const hasCompletedSession =
             Number(enrollment.SESSION?.SS_SESSION_STATUS) === SESSION_STATUS_COMPLETED;
           const hasCertificate = !!(

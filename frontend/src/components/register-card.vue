@@ -209,7 +209,7 @@ const passwordRequirements = computed<PasswordRequirement[]>(() => [
   },
   {
     label: t('profile.passwordRequirementSpecial'),
-    isMet: /[!@#$%^&*()_\-+=[\]{}|\\:;"'<>,.?/~`]/u.test(password.value),
+    isMet: /[!@#]/u.test(password.value),
   },
 ]);
 
