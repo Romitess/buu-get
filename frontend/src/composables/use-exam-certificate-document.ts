@@ -6,14 +6,14 @@ import { useUserStore } from 'src/stores/user.store';
 import { getImageUrl } from 'src/services/image.service';
 import { getBandRules } from 'src/services/score-criteria.service';
 import type { ExamHistoryItem } from 'src/types/exam';
-import type { CertificateScoreReportData } from 'src/types/certificate';
+import type { CertificateCardData } from 'src/types/certificate';
 
 export function useExamCertificateDocument() {
   const $q = useQuasar();
   const userStore = useUserStore();
 
   const isDownloadingCertificate = ref(false);
-  const selectedCertificateData = ref<CertificateScoreReportData | undefined>(undefined);
+  const selectedCertificateData = ref<CertificateCardData | undefined>(undefined);
 
   const waitForImages = async (element: HTMLElement, timeoutMs = 250): Promise<void> => {
     const pendingImages = Array.from(element.querySelectorAll('img')).filter(
@@ -101,46 +101,77 @@ export function useExamCertificateDocument() {
           '-',
         testSession: examObj?.EXAM_ROUND || '-',
         testDate: formatEnglishDate(examObj?.EXAM_DATE),
-        vocabScore: Number(score.SC_LANG_USE_SCORE ?? 0),
-        readingScore: Number(score.SC_READING_SCORE ?? 0),
-        totalScore: Number(score.SC_TOTAL_SCORE ?? 0),
-        band: Number(score.SC_BAND_LEVEL ?? 0),
+        vocabScore: `${Number(score.SC_LANG_USE_SCORE ?? 0)}/50`,
+        readingScore: `${Number(score.SC_READING_SCORE ?? 0)}/50`,
+        totalScore: `${Number(score.SC_TOTAL_SCORE ?? 0)}/100`,
+        bandLevel: String(Number(score.SC_BAND_LEVEL ?? 0)),
         reportIssueDate: formatEnglishDate(certificate.CERT_ISSUED_AT),
         scoreValidUntil: formatEnglishDate(certificate.CERT_EXPIRES_AT),
         certificateCode: certificate.CERT_CODE,
-        ...(profileImagePath ? { profileImage: getImageUrl(profileImagePath) } : {}),
         bandRules: bandRulesResponse.bandRules,
+        profileImage: profileImagePath ? getImageUrl(profileImagePath) : null,
       };
 
       await nextTick();
       await new Promise((resolve) => setTimeout(resolve, 600));
 
       const container = document.getElementById('certificate-render-container');
-      const certificateElement = container?.querySelector(
-        '.certificate-score-report',
-      ) as HTMLElement | null;
+      const cardElements = Array.from(
+        container?.querySelectorAll<HTMLElement>('.certificate-card-preview') ?? [],
+      );
 
-      if (!certificateElement) {
+      if (cardElements.length === 0) {
         throw new Error('Certificate element not found');
       }
 
-      await waitForImages(certificateElement);
-
-      const canvas = await html2canvas(certificateElement, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.85);
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
       });
 
-      pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const horizontalMargin = 14;
+      const cardGap = 10;
+      const imgWidth = pageWidth - horizontalMargin * 2;
+
+      const renderedCards: { imgData: string; imgHeight: number }[] = [];
+      for (const cardElement of cardElements) {
+        await waitForImages(cardElement);
+
+        const canvas = await html2canvas(cardElement, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+        });
+
+        renderedCards.push({
+          imgData: canvas.toDataURL('image/jpeg', 0.92),
+          imgHeight: (imgWidth * canvas.height) / canvas.width,
+        });
+      }
+
+      const totalHeight =
+        renderedCards.reduce((sum, card) => sum + card.imgHeight, 0) +
+        cardGap * Math.max(renderedCards.length - 1, 0);
+      let offsetY = Math.max((pageHeight - totalHeight) / 2, horizontalMargin);
+
+      for (const card of renderedCards) {
+        pdf.addImage(
+          card.imgData,
+          'JPEG',
+          horizontalMargin,
+          offsetY,
+          imgWidth,
+          card.imgHeight,
+          undefined,
+          'FAST',
+        );
+        offsetY += card.imgHeight + cardGap;
+      }
+
       pdf.save(`BUU-GET_Certificate_${enrollment.ERM_ID}.pdf`);
 
       $q.notify({

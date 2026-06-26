@@ -13,7 +13,7 @@
     </div>
 
     <div class="content-list-container">
-      <div class="column q-gutter-y-md">
+      <div ref="listRef" class="column q-gutter-y-md">
         <PageBuilderContentCard
           v-for="(box, index) in section.boxes"
           :key="index"
@@ -44,6 +44,7 @@
 import { ref } from 'vue';
 import AppButton from 'src/components/base/app-button.vue';
 import PageBuilderContentCard from './page-builder-content-card.vue';
+import { scrollNewBoxIntoView } from 'src/composables/use-page-builder-scroll';
 import type { ContentBoxContent, EditorSection } from 'src/types/page-builder.types';
 
 interface Props {
@@ -60,6 +61,7 @@ withDefaults(defineProps<Props>(), {
 
 const section = defineModel<EditorSection<ContentBoxContent>>({ required: true });
 
+const listRef = ref<HTMLElement | null>(null);
 const dragIndex = ref<number | null>(null);
 const activeDragIndex = ref<number | null>(null);
 
@@ -83,6 +85,7 @@ const addBox = (): void => {
     content: { th: '', en: '' },
     active: true,
   });
+  void scrollNewBoxIntoView(listRef);
 };
 
 const removeBox = (index: number): void => {
@@ -165,6 +168,23 @@ const onDragEnd = (): void => {
   height: 200px;
   border: 1px dashed var(--neutral-300);
   border-radius: var(--radius-md);
+}
+
+// Brief highlight on the box that was just added (class toggled at runtime)
+.pb-flash {
+  animation: pb-flash-pulse 1.2s ease;
+}
+
+@keyframes pb-flash-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 71, 161, 0.35);
+  }
+  30% {
+    box-shadow: 0 0 0 4px rgba(13, 71, 161, 0.18);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 71, 161, 0);
+  }
 }
 
 @media (max-width: 599px) {

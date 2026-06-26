@@ -3,9 +3,17 @@
     <div class="text-h6 pb-section-title q-mb-lg">{{ $t('admin.pageBuilder.bannerInfo') }}</div>
 
     <div class="row q-col-gutter-xl items-stretch">
-      <div class="col-12 col-md-6 column justify-center">
-        <div class="banner-list-container">
-          <div class="column q-gutter-y-md">
+      <div class="col-12 col-md-6 column">
+        <div
+          v-if="section.boxes.length === 0"
+          class="banner-empty column flex-center text-grey-6"
+        >
+          <q-icon name="image" size="40px" />
+          <div class="text-body2 q-mt-sm">{{ $t('admin.pageBuilder.empty.banner') }}</div>
+        </div>
+
+        <div v-else class="banner-list-container">
+          <div ref="listRef" class="column q-gutter-y-md">
             <PageBuilderBannerItem
               v-for="(box, index) in section.boxes"
               :key="`${box.imagePath}-${index}`"
@@ -17,14 +25,6 @@
               @dragend="onDragEnd"
               @remove="removeBanner(index)"
             />
-
-            <div
-              v-if="section.boxes.length === 0"
-              class="banner-empty column flex-center text-grey-6"
-            >
-              <q-icon name="image" size="40px" />
-              <div class="text-body2 q-mt-sm">{{ $t('admin.pageBuilder.empty.banner') }}</div>
-            </div>
           </div>
         </div>
       </div>
@@ -40,10 +40,12 @@
 import { ref } from 'vue';
 import PageBuilderBannerItem from './page-builder-banner-item.vue';
 import PageBuilderBannerUploader from './page-builder-banner-uploader.vue';
+import { scrollNewBoxIntoView } from 'src/composables/use-page-builder-scroll';
 import type { BannerBoxContent, EditorSection } from 'src/types/page-builder.types';
 
 const section = defineModel<EditorSection<BannerBoxContent>>({ required: true });
 
+const listRef = ref<HTMLElement | null>(null);
 const dragIndex = ref<number | null>(null);
 
 const addBanner = (imagePath: string): void => {
@@ -52,6 +54,7 @@ const addBanner = (imagePath: string): void => {
     imagePath,
     active: true,
   });
+  void scrollNewBoxIntoView(listRef);
 };
 
 const removeBanner = (index: number): void => {
@@ -113,9 +116,31 @@ const onDragEnd = (): void => {
 }
 
 .banner-empty {
-  height: 200px;
+  height: 100%;
+  min-height: 288px;
   border: 1px dashed var(--neutral-300);
   border-radius: var(--radius-md);
+
+  @media (max-width: 1023px) {
+    min-height: 200px;
+  }
+}
+
+// Brief highlight on the banner that was just added (class toggled at runtime)
+.pb-flash {
+  animation: pb-flash-pulse 1.2s ease;
+}
+
+@keyframes pb-flash-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 71, 161, 0.35);
+  }
+  30% {
+    box-shadow: 0 0 0 4px rgba(13, 71, 161, 0.18);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 71, 161, 0);
+  }
 }
 
 @media (max-width: 1023px) {

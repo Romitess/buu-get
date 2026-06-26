@@ -1135,7 +1135,7 @@ export default {
       computerBased: 'Computer-based',
       editLanguage: 'Active Edit Language',
       uploadHint: 'Drag and drop file here, or click to upload (JPG, PNG)',
-      uploadSizeTip: 'Recommended image size 1300 x 350 px',
+      uploadSizeTip: 'Recommended image size 1700 x 340 px',
       uploading: 'Uploading...',
       selectIcon: 'Select Icon',
       searchIcon: 'Search icons...',
