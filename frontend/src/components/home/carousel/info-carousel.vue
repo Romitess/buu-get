@@ -1,5 +1,5 @@
 <template>
-  <div class="row items-center no-wrap q-gutter-x-md carousel-wrapper q-mx-auto">
+  <div class="carousel-wrapper q-mx-auto">
     <!-- Left Navigation Button -->
     <q-btn
       flat
@@ -8,6 +8,7 @@
       icon="chevron_left"
       size="xl"
       color="grey-6"
+      class="carousel-nav carousel-nav--left"
       :class="{ invisible: totalSlides <= 1 }"
       @click="carouselRef?.previous()"
     />
@@ -16,7 +17,7 @@
     <q-card
       flat
       bordered
-      class="info-carousel overflow-hidden border-radius-lg shadow-1 col"
+      class="info-carousel overflow-hidden border-radius-lg shadow-1"
       :class="{ 'image-banner-aspect': banners.length > 0 }"
     >
       <div v-if="isLoading" class="full-height row flex-center bg-white">
@@ -99,6 +100,7 @@
       icon="chevron_right"
       size="xl"
       color="grey-6"
+      class="carousel-nav carousel-nav--right"
       :class="{ invisible: totalSlides <= 1 }"
       @click="carouselRef?.next()"
     />
@@ -259,9 +261,38 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
+/* Match the width/padding of the exam-rounds table below so both blocks align */
 .carousel-wrapper {
-  max-width: 1500px;
+  position: relative;
+  max-width: 1300px;
   width: 100%;
+  padding: 0 10px;
+}
+
+/* Navigation buttons overlay the card edges so they don't widen the block */
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.carousel-nav--left {
+  left: -48px;
+}
+
+.carousel-nav--right {
+  right: -48px;
+}
+
+@media (max-width: 1023px) {
+  .carousel-nav--left {
+    left: -4px;
+  }
+
+  .carousel-nav--right {
+    right: -4px;
+  }
 }
 
 .min-height-300 {
