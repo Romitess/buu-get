@@ -261,7 +261,7 @@ export default {
     passwordMismatch: 'รหัสผ่านไม่ตรงกัน',
     passwordRequirementMinLength: 'อย่างน้อย 8 ตัวอักษร',
     passwordRequirementUppercase: 'มีตัวอักษรภาษาอังกฤษตัวพิมพ์ใหญ่อย่างน้อย 1 ตัว',
-    passwordRequirementSpecial: 'มีอักขระพิเศษอย่างน้อย 1 ตัว เช่น ! @ #',
+    passwordRequirementSpecial: "มีอักขระพิเศษอย่างน้อย 1 ตัว เช่น ! {'@'} #",
     passwordRequirementError: 'รหัสผ่านยังไม่ตรงตามเงื่อนไข',
     requiredCountry: 'กรุณาเลือกประเทศ',
     requiredPrefix: 'กรุณาเลือกคำนำหน้า',

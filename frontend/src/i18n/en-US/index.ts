@@ -310,7 +310,7 @@ export default {
     passwordMismatch: 'Passwords do not match',
     passwordRequirementMinLength: 'At least 8 characters',
     passwordRequirementUppercase: 'At least 1 uppercase English letter',
-    passwordRequirementSpecial: 'At least 1 special character, such as ! @ #',
+    passwordRequirementSpecial: "At least 1 special character, such as ! {'@'} #",
     passwordRequirementError: 'Password does not meet the requirements',
     requiredCountry: 'Please select a country',
     requiredPrefix: 'Please select a prefix',
