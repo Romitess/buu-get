@@ -93,14 +93,16 @@ const columns = computed<QTableColumn[]>(() => [
     name: 'department',
     label: t('admin.dailyRevenueReport.table.columns.department'),
     field: 'department',
-    align: 'left',
-    style: 'width: 220px',
+    align: 'center',
+    style: 'width: 360px',
   },
   {
     name: 'examName',
     label: t('admin.dailyRevenueReport.table.columns.examName'),
     field: 'examName',
     align: 'left',
+    classes: 'exam-name-cell',
+    headerClasses: 'exam-name-header',
   },
   {
     name: 'amount',
@@ -141,6 +143,31 @@ onMounted(() => {
     border-bottom: none;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
+  }
+
+  :deep(td),
+  :deep(th) {
+    padding: 12px 16px !important;
+    vertical-align: middle !important;
+    white-space: nowrap;
+  }
+
+  :deep(tr) {
+    height: auto !important;
+  }
+
+  // Shift examName header and body data inward so they visually align.
+  // Header gets the same padding so it centers within the data content area.
+  :deep(thead th.exam-name-header) {
+    padding-left: 0px !important;
+  }
+
+  :deep(td.exam-name-cell) {
+    padding-left: 200px !important;
+  }
+
+  :deep(thead th.text-right) {
+    text-align: right !important;
   }
 
   // Use q-table's default inline sort icon (beside the column label) instead

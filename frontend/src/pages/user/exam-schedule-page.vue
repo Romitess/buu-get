@@ -129,14 +129,16 @@ const {
 
 // แปลงค่าประเภทรอบสอบ (รอบทั่วไป/รอบพิเศษ) ที่มาจาก backend ให้แสดงผลตามภาษาที่เลือก
 // คงค่าเดิมไว้สำหรับ logic การลงทะเบียน (เทียบกับ EXAM_TYPE_SPECIAL) — แปลเฉพาะตอนแสดงผลเท่านั้น
-const translateExamType = (value: string): string => {
+const translateExamType = (value?: string): string => {
+  if (!value) return '';
   if (value === EXAM_TYPE_GENERAL) return t('examSchedule.examType.general');
   if (value === EXAM_TYPE_SPECIAL) return t('examSchedule.examType.special');
   return value;
 };
 
 // แปลงรูปแบบการสอบ (คอมพิวเตอร์/กระดาษ) ที่มาจาก backend ให้แสดงผลตามภาษาที่เลือก
-const translateExamFormat = (value: string): string => {
+const translateExamFormat = (value?: string): string => {
+  if (!value) return '';
   if (value === EXAM_FORMAT_COMPUTER) return t('examSchedule.examFormat.computer');
   if (value === EXAM_FORMAT_PAPER) return t('examSchedule.examFormat.paper');
   return value;

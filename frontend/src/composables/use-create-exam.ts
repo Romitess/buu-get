@@ -53,17 +53,6 @@ export interface ExamRoom {
   seatOverrides?: Record<number, number>;
   /** Session-specific room layout snapshot */
   sessionLocationSnapshot?: SessionLocationSnapshotPayload;
-  /** Last selected location, used to restore per-location draft state while editing */
-  lastLocationId?: number | null;
-  /** Per-location draft state for switching locations in the same room row */
-  locationDrafts?: Record<
-    number,
-    {
-      seats: number;
-      seatOverrides?: Record<number, number>;
-      sessionLocationSnapshot?: SessionLocationSnapshotPayload;
-    }
-  >;
 }
 
 export interface TimeSlot {
@@ -716,7 +705,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       ]);
       locationOptions.value = locations;
       allExams.value = exams;
-      fundSourceOptions.value = fundSources.map((fs: FundSource) => ({
+      const activeFundSources = fundSources.filter((fs: FundSource) => fs.FS_OPEN_STATUS !== false);
+      fundSourceOptions.value = activeFundSources.map((fs: FundSource) => ({
         label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
         value: fs.FS_ID,
       }));

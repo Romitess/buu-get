@@ -166,6 +166,7 @@ export interface BackendScore {
     SCORES_ID: number;
     CERT_CODE: string;
     CERT_ISSUED_AT: string;
+    CERT_EXPIRES_AT?: string | null;
   }[];
 }
 

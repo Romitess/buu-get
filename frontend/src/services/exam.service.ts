@@ -177,6 +177,7 @@ export interface FundSource {
   FS_NAME: string;
   FS_ACCOUNT_CODE: string;
   FS_FACULTY?: string;
+  FS_OPEN_STATUS?: boolean;
 }
 
 export interface SessionLocationSnapshotPayload {

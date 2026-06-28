@@ -3,7 +3,7 @@
     <div class="text-subtitle1 text-weight-bold text-primary q-mb-md">{{ title }}</div>
 
     <div class="rule-column__list-container">
-      <div class="column q-gutter-y-sm">
+      <div ref="listRef" class="column q-gutter-y-sm">
         <PageBuilderRuleCard
           v-for="(box, index) in section.boxes"
           :key="index"
@@ -36,6 +36,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import PageBuilderRuleCard from './page-builder-rule-card.vue';
+import { scrollNewBoxIntoView } from 'src/composables/use-page-builder-scroll';
 import type { EditorSection, ExamRuleBoxContent } from 'src/types/page-builder.types';
 
 interface Props {
@@ -50,6 +51,7 @@ withDefaults(defineProps<Props>(), {
 
 const section = defineModel<EditorSection<ExamRuleBoxContent>>({ required: true });
 
+const listRef = ref<HTMLElement | null>(null);
 const dragIndex = ref<number | null>(null);
 const activeDragIndex = ref<number | null>(null);
 
@@ -73,6 +75,7 @@ const addRule = (): void => {
     text: { th: '', en: '' },
     active: true,
   });
+  void scrollNewBoxIntoView(listRef);
 };
 
 const removeRule = (index: number): void => {
@@ -160,6 +163,23 @@ const onDragEnd = (): void => {
   height: 160px;
   border: 1px dashed var(--neutral-300);
   border-radius: var(--radius-md);
+}
+
+// Brief highlight on the rule that was just added (class toggled at runtime)
+.pb-flash {
+  animation: pb-flash-pulse 1.2s ease;
+}
+
+@keyframes pb-flash-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 71, 161, 0.35);
+  }
+  30% {
+    box-shadow: 0 0 0 4px rgba(13, 71, 161, 0.18);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 71, 161, 0);
+  }
 }
 
 @media (max-width: 599px) {

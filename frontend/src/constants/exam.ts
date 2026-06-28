@@ -33,6 +33,7 @@ export const DEFAULT_EXAM_INFO = {
 
 /** สถานะตั้งต้นของ Session (1 = OPEN) */
 export const SESSION_STATUS_OPEN = 1;
+export const SESSION_STATUS_COMPLETED = 4;
 
 /** จำนวนรอบสอบสูงสุดและต่ำสุดที่อนุญาต */
 export const MAX_EXAM_SESSIONS = 4;
@@ -131,9 +132,9 @@ export const TRANSACTION_MATCH_STATUS = {
 } as const;
 
 export const ReceiptStatus = {
-  UNISSUED : 0,
-  ISSUED   : 1,
-  VOIDED   : 2,
+  UNISSUED: 0,
+  ISSUED: 1,
+  VOIDED: 2,
 } as const;
 
 export const HTTP_STATUS = {

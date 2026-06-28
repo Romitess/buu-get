@@ -97,7 +97,7 @@ export class ExamSessionLocation {
     type: 'enum',
     enum: SeatDirection,
     default: SeatDirection.HORIZONTAL,
-    comment: 'ทิศทางการจัดเรียงที่นั่ง',
+    comment: 'ทิศทางการจัดเรียงที่นั่ง (HORIZONTAL, VERTICAL)',
   })
   LOCATION_SEAT_DIRECTION: SeatDirection;
 
