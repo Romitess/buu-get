@@ -29,7 +29,10 @@ import {
 import { BankReconcile } from './entities/bank-reconcile.entity';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RoleEnum } from '../roles/enums/role.enum';
-import { UpdateBankReconcileRefsDto } from './dto/bank-reconcile.dto';
+import {
+  UpdateBankReconcileRefsDto,
+  VerifyBankReconcilesDto,
+} from './dto/bank-reconcile.dto';
 
 interface AuthenticatedRequest {
   user: {
@@ -91,8 +94,10 @@ export class BankReconcilesController {
     description: 'ตรวจสอบข้อมูลการชำระเงินสำเร็จ',
     type: [BankReconcile],
   })
-  verifyData(): Promise<BankReconcile[]> {
-    return this.bankReconcilesService.verifyData();
+  verifyData(
+    @Body() verifyBankReconcilesDto: VerifyBankReconcilesDto = {},
+  ): Promise<BankReconcile[]> {
+    return this.bankReconcilesService.verifyData(verifyBankReconcilesDto.brIds);
   }
 
   @Patch(':id/refs')

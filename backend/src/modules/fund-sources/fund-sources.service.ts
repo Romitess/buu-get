@@ -6,7 +6,10 @@ import { CreateFundSourceDto } from './dto/create-fund-source.dto';
 import { UpdateFundSourceDto } from './dto/update-fund-source.dto';
 import { DailyRevenueQueryDto } from './dto/daily-revenue-query.dto';
 import { DailyRevenueSummary } from './interfaces/daily-revenue.interface';
-import { Transaction } from '../transactions/entities/transaction.entity';
+import {
+  Transaction,
+  TransactionPaymentStatus,
+} from '../transactions/entities/transaction.entity';
 import { ExamEnrollmentStatus } from '../exam-enrollments/entities/exam-enrollment.entity';
 
 interface RawDailyRevenueRow {
@@ -79,6 +82,9 @@ export class FundSourcesService {
         ExamEnrollmentStatus.SEAT_PUBLISHED,
         ExamEnrollmentStatus.ATTENDED,
       ],
+    });
+    qb.andWhere('transaction.TRANX_PAYMENT_STATUS = :approvedStatus', {
+      approvedStatus: TransactionPaymentStatus.APPROVED,
     });
 
     // Date filters (comparing against TRANX_PAID_AT or fallback to TRANX_CREATED_AT)

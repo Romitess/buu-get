@@ -80,8 +80,11 @@ export const fetchBankReconciles = async (): Promise<BackendBankReconcile[]> => 
   return response.data;
 };
 
-export const verifyBankReconciles = async (): Promise<BackendBankReconcile[]> => {
-  const response = await api.post<BackendBankReconcile[]>('/bank-reconciles/verify', undefined);
+export const verifyBankReconciles = async (brIds?: number[]): Promise<BackendBankReconcile[]> => {
+  const response = await api.post<BackendBankReconcile[]>(
+    '/bank-reconciles/verify',
+    brIds && brIds.length > 0 ? { brIds } : undefined,
+  );
   return response.data;
 };
 

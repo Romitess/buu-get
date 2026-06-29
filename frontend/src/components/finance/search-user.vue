@@ -105,7 +105,12 @@
         </div>
 
         <!-- Table Area -->
-        <SearchUserTable :rows="rows" :loading="isLoading" />
+        <SearchUserTable
+          :rows="rows"
+          :loading="isLoading"
+          :pagination="pagination"
+          @request="handleTableRequest"
+        />
       </q-card>
     </q-dialog>
   </div>
@@ -116,11 +121,14 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 import SearchUserTable from './search-user-table.vue';
-import { fetchAllEnrollments } from 'src/services/enrollment.service';
-import { fetchTransactionRefs } from 'src/services/transaction-ref.service';
+import {
+  searchTransactionRefs,
+  type BackendTransactionRef,
+  type BackendTransactionRefEnrollment,
+  type TransactionRefSearchParams,
+} from 'src/services/transaction-ref.service';
 import { PAYMENT_STATUS_LABELS } from 'src/types/enrollment.types';
-import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
-import type { SearchRow } from 'src/types/exam.types';
+import type { PaginationModel, SearchRow, TableRequestProps } from 'src/types/exam.types';
 
 const { t } = useI18n();
 const $q = useQuasar();
@@ -128,12 +136,30 @@ const $q = useQuasar();
 const isDialogOpen = ref(false);
 const isLoading = ref(false);
 const rows = ref<SearchRow[]>([]);
+const pagination = ref<PaginationModel>({
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0,
+});
+
+interface SearchCriteria {
+  ref1: string;
+  ref2: string;
+  name: string;
+}
+
+const createEmptySearchCriteria = (): SearchCriteria => ({
+  ref1: '',
+  ref2: '',
+  name: '',
+});
 
 const searchForm = ref({
   ref1: '',
   ref2: '',
   name: '',
 });
+const activeSearchCriteria = ref<SearchCriteria>(createEmptySearchCriteria());
 
 const errors = ref({
   ref1: false,
@@ -144,17 +170,18 @@ const errors = ref({
 const normalizeSearchValue = (value: string | number | null | undefined): string =>
   String(value ?? '').trim();
 
-const getEnrollmentName = (enrollment: BackendEnrollmentDetail | undefined): string =>
-  enrollment?.USER?.PROFILE?.userFullnameTh || enrollment?.USER?.PROFILE?.userFullnameEn || '-';
+const getEnrollmentName = (
+  enrollment: BackendTransactionRefEnrollment | null | undefined,
+): string => {
+  if (!enrollment) return '-';
+  return (
+    enrollment.USER?.PROFILE?.userFullnameTh || enrollment.USER?.PROFILE?.userFullnameEn || '-'
+  );
+};
 
-const getEnrollmentSearchText = (enrollment: BackendEnrollmentDetail | undefined): string =>
-  [enrollment?.USER?.PROFILE?.userFullnameTh, enrollment?.USER?.PROFILE?.userFullnameEn]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-
-const getExamName = (enrollment: BackendEnrollmentDetail | undefined): string => {
-  const exam = enrollment?.SESSION?.EXAM;
+const getExamName = (enrollment: BackendTransactionRefEnrollment | null | undefined): string => {
+  if (!enrollment) return '-';
+  const exam = enrollment.SESSION?.EXAM;
   if (!exam) return '-';
   return exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME || '-';
 };
@@ -176,59 +203,76 @@ const getPaymentStatusLabel = (
   return 'ไม่ระบุ';
 };
 
+const resetPagination = (): void => {
+  pagination.value = {
+    page: 1,
+    rowsPerPage: 10,
+    rowsNumber: 0,
+  };
+};
+
 const openDialog = () => {
   isDialogOpen.value = true;
   // Reset form, rows, and errors on open
-  searchForm.value = { ref1: '', ref2: '', name: '' };
+  searchForm.value = createEmptySearchCriteria();
+  activeSearchCriteria.value = createEmptySearchCriteria();
   rows.value = [];
+  resetPagination();
   errors.value = { ref1: false, ref2: false, name: false };
 };
 
-const handleSearch = async () => {
-  const ref1Query = searchForm.value.ref1.trim();
-  const ref2Query = searchForm.value.ref2.trim();
-  const nameQuery = searchForm.value.name.trim();
+const getTrimmedSearchCriteria = (): SearchCriteria => ({
+  ref1: searchForm.value.ref1.trim(),
+  ref2: searchForm.value.ref2.trim(),
+  name: searchForm.value.name.trim(),
+});
 
-  // Reset errors
-  errors.value = { ref1: false, ref2: false, name: false };
+const hasSearchCriteria = (criteria: SearchCriteria): boolean =>
+  Boolean(criteria.ref1 || criteria.ref2 || criteria.name);
 
-  if (!ref1Query && !ref2Query && !nameQuery) {
-    errors.value = {
-      ref1: true,
-      ref2: true,
-      name: true,
-    };
-    return;
-  }
+const buildSearchParams = (): TransactionRefSearchParams => {
+  const params: TransactionRefSearchParams = {
+    page: pagination.value.page,
+    limit: pagination.value.rowsPerPage,
+  };
+  const criteria = activeSearchCriteria.value;
 
+  if (criteria.ref1) params.ref1 = criteria.ref1;
+  if (criteria.ref2) params.ref2 = criteria.ref2;
+  if (criteria.name) params.name = criteria.name;
+
+  return params;
+};
+
+const mapTransactionRefToRow = (
+  transactionRef: BackendTransactionRef,
+  index: number,
+): SearchRow => {
+  const transaction = transactionRef.TRANSACTION;
+  const enrollment = transaction?.ENROLLMENT;
+
+  return {
+    id: (pagination.value.page - 1) * pagination.value.rowsPerPage + index + 1,
+    ref1: normalizeSearchValue(transactionRef.TSC_REF1) || '-',
+    ref2: normalizeSearchValue(transactionRef.TSC_REF2) || '-',
+    name: getEnrollmentName(enrollment),
+    amount: formatAmount(transaction?.TRANX_AMOUNT ?? enrollment?.SESSION?.EXAM?.EXAM_FEE),
+    exam_name: getExamName(enrollment),
+    payment_status: getPaymentStatusLabel(
+      enrollment?.ERM_STATUS,
+      transaction?.TRANX_PAYMENT_STATUS,
+    ),
+  };
+};
+
+const loadSearchResults = async (showNotFoundDialog: boolean): Promise<void> => {
   isLoading.value = true;
   try {
-    const nameQueryLower = nameQuery.toLowerCase();
-    const [enrollments, transactionRefs] = await Promise.all([
-      fetchAllEnrollments(),
-      fetchTransactionRefs(),
-    ]);
-    const enrollmentById = new Map(
-      enrollments.map((enrollment) => [enrollment.ERM_ID, enrollment]),
-    );
+    const response = await searchTransactionRefs(buildSearchParams());
+    pagination.value.rowsNumber = response.total;
+    rows.value = response.data.map(mapTransactionRefToRow);
 
-    const filtered = transactionRefs.filter((transactionRef) => {
-      const enrollment = transactionRef.TRANSACTION?.ERM_ID
-        ? enrollmentById.get(transactionRef.TRANSACTION.ERM_ID)
-        : undefined;
-      const fullName = getEnrollmentSearchText(enrollment);
-      const matchesRef1 = ref1Query
-        ? normalizeSearchValue(transactionRef.TSC_REF1).includes(ref1Query)
-        : true;
-      const matchesRef2 = ref2Query
-        ? normalizeSearchValue(transactionRef.TSC_REF2).includes(ref2Query)
-        : true;
-      const matchesName = nameQueryLower ? fullName.includes(nameQueryLower) : true;
-
-      return matchesRef1 && matchesRef2 && matchesName;
-    });
-
-    if (filtered.length === 0) {
+    if (response.total === 0 && showNotFoundDialog) {
       $q.dialog({
         title: t('admin.searchUser.dialogTitle'),
         message: t('admin.searchUser.validation.notFound'),
@@ -239,32 +283,41 @@ const handleSearch = async () => {
           unelevated: true,
         },
       });
-      rows.value = [];
-      return;
     }
-
-    rows.value = filtered.map((transactionRef, index) => {
-      const transaction = transactionRef.TRANSACTION;
-      const enrollment = transaction?.ERM_ID ? enrollmentById.get(transaction.ERM_ID) : undefined;
-
-      return {
-        id: index + 1,
-        ref1: normalizeSearchValue(transactionRef.TSC_REF1) || '-',
-        ref2: normalizeSearchValue(transactionRef.TSC_REF2) || '-',
-        name: getEnrollmentName(enrollment),
-        amount: formatAmount(transaction?.TRANX_AMOUNT ?? enrollment?.SESSION?.EXAM?.EXAM_FEE),
-        exam_name: getExamName(enrollment),
-        payment_status: getPaymentStatusLabel(
-          enrollment?.ERM_STATUS,
-          transaction?.TRANX_PAYMENT_STATUS,
-        ),
-      };
-    });
   } catch (err) {
     console.error('Failed to search users:', err);
   } finally {
     isLoading.value = false;
   }
+};
+
+const handleSearch = async (): Promise<void> => {
+  // Reset errors
+  errors.value = { ref1: false, ref2: false, name: false };
+  const criteria = getTrimmedSearchCriteria();
+
+  if (!hasSearchCriteria(criteria)) {
+    errors.value = {
+      ref1: true,
+      ref2: true,
+      name: true,
+    };
+    return;
+  }
+
+  activeSearchCriteria.value = criteria;
+  pagination.value.page = 1;
+  pagination.value.rowsNumber = 0;
+  await loadSearchResults(true);
+};
+
+const handleTableRequest = (requestProps: TableRequestProps): void => {
+  pagination.value.page = requestProps.pagination.page;
+  pagination.value.rowsPerPage = requestProps.pagination.rowsPerPage;
+
+  if (!hasSearchCriteria(activeSearchCriteria.value)) return;
+
+  void loadSearchResults(false);
 };
 </script>
 

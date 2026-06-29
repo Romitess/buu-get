@@ -4,9 +4,12 @@
       :rows="rows"
       :columns="columns"
       :loading="loading"
+      :pagination="pagination"
+      is-server-side
       empty-label="No data available in table"
       row-key="id"
       class="custom-bordered-table"
+      @request="onRequest"
     >
       <!-- Custom rendering for payment status -->
       <template #body-cell-payment_status="props">
@@ -25,16 +28,21 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { QTableColumn } from 'quasar';
 import BaseTable from 'src/components/shared/base-table.vue';
-import type { SearchRow } from 'src/types/exam.types';
+import type { PaginationModel, SearchRow, TableRequestProps } from 'src/types/exam.types';
 
 interface Props {
   rows: SearchRow[];
+  pagination: PaginationModel;
   loading?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
   loading: false,
 });
+
+const emit = defineEmits<{
+  (e: 'request', requestProps: TableRequestProps): void;
+}>();
 
 const { t } = useI18n();
 
@@ -46,6 +54,7 @@ const columns = computed<QTableColumn[]>(() => [
     align: 'center',
     style: 'width: 6%',
     headerStyle: 'width: 6%',
+    sortable: false,
   },
   {
     name: 'ref1',
@@ -54,6 +63,7 @@ const columns = computed<QTableColumn[]>(() => [
     align: 'center',
     style: 'width: 17%; white-space: normal !important;',
     headerStyle: 'width: 17%; white-space: normal !important; line-height: 1.25;',
+    sortable: false,
   },
   {
     name: 'ref2',
@@ -62,6 +72,7 @@ const columns = computed<QTableColumn[]>(() => [
     align: 'center',
     style: 'width: 17%; white-space: normal !important;',
     headerStyle: 'width: 17%; white-space: normal !important; line-height: 1.25;',
+    sortable: false,
   },
   {
     name: 'name',
@@ -70,6 +81,7 @@ const columns = computed<QTableColumn[]>(() => [
     align: 'left',
     style: 'width: 16%; white-space: normal !important;',
     headerStyle: 'width: 16%; white-space: normal !important;',
+    sortable: false,
   },
   {
     name: 'amount',
@@ -78,6 +90,7 @@ const columns = computed<QTableColumn[]>(() => [
     align: 'center',
     style: 'width: 10%',
     headerStyle: 'width: 10%',
+    sortable: false,
   },
   {
     name: 'exam_name',
@@ -86,6 +99,7 @@ const columns = computed<QTableColumn[]>(() => [
     align: 'left',
     style: 'width: 20%; white-space: normal !important;',
     headerStyle: 'width: 20%; white-space: normal !important;',
+    sortable: false,
   },
   {
     name: 'payment_status',
@@ -94,8 +108,13 @@ const columns = computed<QTableColumn[]>(() => [
     align: 'center',
     style: 'width: 14%',
     headerStyle: 'width: 14%',
+    sortable: false,
   },
 ]);
+
+const onRequest = (requestProps: TableRequestProps): void => {
+  emit('request', requestProps);
+};
 
 const getStatusColorClass = (status: string): string => {
   if (status === 'ชำระเงินแล้ว' || status === 'สำเร็จ') {

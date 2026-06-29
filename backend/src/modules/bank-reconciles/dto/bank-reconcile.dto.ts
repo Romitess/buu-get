@@ -1,11 +1,13 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import {
   IsInt,
+  IsArray,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   MaxLength,
+  Min,
 } from 'class-validator';
 
 export class CreateBankReconcileDto {
@@ -75,4 +77,16 @@ export class UpdateBankReconcileRefsDto {
   @IsOptional()
   @MaxLength(20)
   BR_REF2?: string | null;
+}
+
+export class VerifyBankReconcilesDto {
+  @ApiPropertyOptional({
+    description: 'รายการ BR_ID ที่ต้องการตรวจ หากไม่ส่งจะตรวจทั้งหมด',
+    type: [Number],
+  })
+  @IsArray()
+  @IsInt({ each: true })
+  @Min(1, { each: true })
+  @IsOptional()
+  brIds?: number[];
 }
