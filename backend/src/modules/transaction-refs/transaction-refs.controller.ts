@@ -8,6 +8,7 @@ import {
   Delete,
   HttpStatus,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { TransactionRefsService } from './transaction-refs.service';
@@ -15,7 +16,9 @@ import {
   CreateTransactionRefDto,
   UpdateTransactionRefDto,
 } from './dto/transaction-ref.dto';
+import { TransactionRefSearchQueryDto } from './dto/transaction-ref-search-query.dto';
 import { TransactionRef } from './entities/transaction-ref.entity';
+import { TransactionRefSearchPage } from './interfaces/transaction-ref-search.interface';
 
 @ApiTags('Transaction Refs')
 @Controller('transaction-refs')
@@ -38,6 +41,15 @@ export class TransactionRefsController {
   @ApiResponse({ status: HttpStatus.OK, type: [TransactionRef] })
   async findAll(): Promise<TransactionRef[]> {
     return this.transactionRefsService.findAll();
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'ค้นหาข้อมูลอ้างอิงธุรกรรมพร้อมแบ่งหน้า' })
+  @ApiResponse({ status: HttpStatus.OK })
+  async search(
+    @Query() query: TransactionRefSearchQueryDto,
+  ): Promise<TransactionRefSearchPage> {
+    return this.transactionRefsService.search(query);
   }
 
   @Get(':id')
