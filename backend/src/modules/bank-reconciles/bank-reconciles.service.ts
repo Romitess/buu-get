@@ -6,7 +6,14 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { parse as parseCsv } from 'csv-parse/sync';
 import { createHash } from 'crypto';
-import { Brackets, DataSource, In, IsNull, Repository } from 'typeorm';
+import {
+  Brackets,
+  DataSource,
+  In,
+  IsNull,
+  QueryRunner,
+  Repository,
+} from 'typeorm';
 import * as XLSX from 'xlsx';
 import {
   Transaction,
@@ -90,6 +97,21 @@ interface TransactionStatusSnapshot {
   TRANX_ID: number | string;
   TRANX_PAYMENT_STATUS: number | string;
   ERM_ID: number | string | null;
+}
+
+interface BankReconcileVerifyRow {
+  BR_ID: number | string;
+  BR_AMOUNT: number | string;
+  TSR_ID: number | string | null;
+  TRANX_ID: number | string | null;
+  TRANX_AMOUNT: number | string | null;
+}
+
+interface BankReconcileVerifyMatch {
+  brId: number;
+  tsrId: number;
+  tranxId: number;
+  matchStatus: TransactionMatchStatus;
 }
 
 @Injectable()
@@ -220,64 +242,265 @@ export class BankReconcilesService {
     return bankReconcile;
   }
 
-  async verifyData(): Promise<BankReconcile[]> {
+  async verifyData(brIds?: number[]): Promise<BankReconcile[]> {
+    const targetBrIds = this.normalizePositiveIds(brIds ?? []);
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const bankReconcileRepository =
-        queryRunner.manager.getRepository(BankReconcile);
-      const transactionRefRepository =
-        queryRunner.manager.getRepository(TransactionRef);
-      const transactionRepository =
-        queryRunner.manager.getRepository(Transaction);
+      const verifyQuery = queryRunner.manager
+        .createQueryBuilder()
+        .select([
+          'br.BR_ID AS BR_ID',
+          'br.BR_AMOUNT AS BR_AMOUNT',
+          'tr.TSR_ID AS TSR_ID',
+          'tr.TRANX_ID AS TRANX_ID',
+          't.TRANX_AMOUNT AS TRANX_AMOUNT',
+        ])
+        .from('FIN_T_BANK_RECONCILES', 'br')
+        .leftJoin(
+          'FIN_T_TRANSACTIONS_REFS',
+          'tr',
+          `
+            tr.DELETED_AT IS NULL
+            AND tr.TSC_REF1 = br.BR_REF1
+            AND (
+              (br.BR_REF2 IS NULL AND tr.TSC_REF2 IS NULL)
+              OR tr.TSC_REF2 = br.BR_REF2
+            )
+          `,
+        )
+        .leftJoin(
+          'FIN_T_TRANSACTIONS',
+          't',
+          't.TRANX_ID = tr.TRANX_ID AND t.TRANX_DELETED_AT IS NULL',
+        )
+        .where('br.DELETED_AT IS NULL')
+        .orderBy('br.BR_ID', 'ASC')
+        .addOrderBy('tr.TSR_ID', 'ASC');
 
-      const reconciles = await bankReconcileRepository.find({
-        where: { DELETED_AT: IsNull() },
-        order: { BR_ID: 'ASC' },
-      });
-
-      for (const reconcile of reconciles) {
-        const transactionRef = await transactionRefRepository.findOne({
-          where: {
-            TSC_REF1: reconcile.BR_REF1,
-            TSC_REF2: reconcile.BR_REF2 ?? IsNull(),
-          },
-          relations: ['TRANSACTION'],
+      if (targetBrIds.length > 0) {
+        verifyQuery.andWhere('br.BR_ID IN (:...brIds)', {
+          brIds: targetBrIds,
         });
-
-        if (!transactionRef) {
-          reconcile.TRANX_ID = null;
-          await bankReconcileRepository.save(reconcile);
-          continue;
-        }
-
-        const transaction = transactionRef.TRANSACTION;
-        const matchesAmount =
-          this.toCents(transaction.TRANX_AMOUNT) ===
-          this.toCents(reconcile.BR_AMOUNT);
-
-        transaction.TRANX_MATCH_STATUS = matchesAmount
-          ? TransactionMatchStatus.MATCH
-          : TransactionMatchStatus.MISSING;
-        await transactionRepository.save(transaction);
-
-        reconcile.TRANX_ID = transactionRef.TRANX_ID;
-        transactionRef.BR_ID = reconcile.BR_ID;
-
-        await bankReconcileRepository.save(reconcile);
-        await transactionRefRepository.save(transactionRef);
       }
 
+      const rawRows = await verifyQuery.getRawMany<BankReconcileVerifyRow>();
+
+      const brIds = [
+        ...new Set(
+          rawRows.map((row) => Number(row.BR_ID)).filter((id) => id > 0),
+        ),
+      ];
+      const matches = this.buildVerifyMatches(rawRows);
+
+      await this.updateVerifiedBankReconciles(queryRunner, brIds, matches);
+      await this.updateVerifiedTransactionRefs(queryRunner, brIds, matches);
+      await this.updateVerifiedTransactionStatuses(queryRunner, matches);
+
       await queryRunner.commitTransaction();
-      return this.findAll();
+      return targetBrIds.length > 0
+        ? this.findByIds(targetBrIds)
+        : this.findAll();
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
     } finally {
       await queryRunner.release();
     }
+  }
+
+  private async findByIds(brIds: number[]): Promise<BankReconcile[]> {
+    if (brIds.length === 0) {
+      return [];
+    }
+
+    return this.bankReconcilesRepository.find({
+      relations: ['USER', 'USER.PROFILE', 'TRANSACTION'],
+      where: { BR_ID: In(brIds), DELETED_AT: IsNull() },
+      order: { BR_ID: 'ASC' },
+    });
+  }
+
+  private buildVerifyMatches(
+    rawRows: BankReconcileVerifyRow[],
+  ): BankReconcileVerifyMatch[] {
+    const matchedBrIds = new Set<number>();
+    const matches: BankReconcileVerifyMatch[] = [];
+
+    for (const row of rawRows) {
+      const brId = Number(row.BR_ID);
+      const tsrId = Number(row.TSR_ID);
+      const tranxId = Number(row.TRANX_ID);
+
+      if (
+        matchedBrIds.has(brId) ||
+        !Number.isInteger(brId) ||
+        !Number.isInteger(tsrId) ||
+        !Number.isInteger(tranxId) ||
+        brId <= 0 ||
+        tsrId <= 0 ||
+        tranxId <= 0 ||
+        row.TRANX_AMOUNT === null
+      ) {
+        continue;
+      }
+
+      const matchesAmount =
+        this.toCents(row.TRANX_AMOUNT) === this.toCents(row.BR_AMOUNT);
+
+      matches.push({
+        brId,
+        tsrId,
+        tranxId,
+        matchStatus: matchesAmount
+          ? TransactionMatchStatus.MATCH
+          : TransactionMatchStatus.MISSING,
+      });
+      matchedBrIds.add(brId);
+    }
+
+    return matches;
+  }
+
+  private async updateVerifiedBankReconciles(
+    queryRunner: QueryRunner,
+    brIds: number[],
+    matches: BankReconcileVerifyMatch[],
+  ): Promise<void> {
+    const tranxIdByBrId = new Map(
+      matches.map((match) => [match.brId, match.tranxId]),
+    );
+
+    for (const brIdChunk of this.chunkArray(brIds)) {
+      const caseSql = this.buildNumericCaseSql(
+        'BR_ID',
+        brIdChunk.map((brId) => ({
+          id: brId,
+          value: tranxIdByBrId.get(brId) ?? null,
+        })),
+      );
+
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update('FIN_T_BANK_RECONCILES')
+        .set({ TRANX_ID: () => caseSql })
+        .where('BR_ID IN (:...brIds)', { brIds: brIdChunk })
+        .execute();
+    }
+  }
+
+  private async updateVerifiedTransactionRefs(
+    queryRunner: QueryRunner,
+    brIds: number[],
+    matches: BankReconcileVerifyMatch[],
+  ): Promise<void> {
+    for (const brIdChunk of this.chunkArray(brIds)) {
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update('FIN_T_TRANSACTIONS_REFS')
+        .set({ BR_ID: null })
+        .where('BR_ID IN (:...brIds)', { brIds: brIdChunk })
+        .execute();
+    }
+
+    for (const matchChunk of this.chunkArray(matches)) {
+      const tsrIds = matchChunk.map((match) => match.tsrId);
+      const caseSql = this.buildNumericCaseSql(
+        'TSR_ID',
+        matchChunk.map((match) => ({
+          id: match.tsrId,
+          value: match.brId,
+        })),
+        'BR_ID',
+      );
+
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update('FIN_T_TRANSACTIONS_REFS')
+        .set({ BR_ID: () => caseSql })
+        .where('TSR_ID IN (:...tsrIds)', { tsrIds })
+        .execute();
+    }
+  }
+
+  private async updateVerifiedTransactionStatuses(
+    queryRunner: QueryRunner,
+    matches: BankReconcileVerifyMatch[],
+  ): Promise<void> {
+    const matchIds = [
+      ...new Set(
+        matches
+          .filter((match) => match.matchStatus === TransactionMatchStatus.MATCH)
+          .map((match) => match.tranxId),
+      ),
+    ];
+    const missingIds = [
+      ...new Set(
+        matches
+          .filter(
+            (match) => match.matchStatus === TransactionMatchStatus.MISSING,
+          )
+          .map((match) => match.tranxId),
+      ),
+    ];
+
+    await this.updateTransactionMatchStatus(
+      queryRunner,
+      matchIds,
+      TransactionMatchStatus.MATCH,
+    );
+    await this.updateTransactionMatchStatus(
+      queryRunner,
+      missingIds,
+      TransactionMatchStatus.MISSING,
+    );
+  }
+
+  private async updateTransactionMatchStatus(
+    queryRunner: QueryRunner,
+    tranxIds: number[],
+    matchStatus: TransactionMatchStatus,
+  ): Promise<void> {
+    for (const tranxIdChunk of this.chunkArray(tranxIds)) {
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update('FIN_T_TRANSACTIONS')
+        .set({ TRANX_MATCH_STATUS: matchStatus })
+        .where('TRANX_ID IN (:...tranxIds)', { tranxIds: tranxIdChunk })
+        .execute();
+    }
+  }
+
+  private buildNumericCaseSql(
+    column: string,
+    cases: Array<{ id: number; value: number | null }>,
+    defaultSql = 'NULL',
+  ): string {
+    const whenClauses = cases
+      .map(({ id, value }) => `WHEN ${id} THEN ${value ?? 'NULL'}`)
+      .join(' ');
+
+    return `CASE ${column} ${whenClauses} ELSE ${defaultSql} END`;
+  }
+
+  private chunkArray<T>(items: T[], size = 500): T[][] {
+    const chunks: T[][] = [];
+    for (let index = 0; index < items.length; index += size) {
+      chunks.push(items.slice(index, index + size));
+    }
+    return chunks;
+  }
+
+  private normalizePositiveIds(ids: number[]): number[] {
+    return [
+      ...new Set(
+        ids
+          .map((id) => Number(id))
+          .filter((id) => Number.isInteger(id) && id > 0),
+      ),
+    ];
   }
 
   async clearAll(): Promise<void> {
