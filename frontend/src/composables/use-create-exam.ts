@@ -1,4 +1,4 @@
-import { ref, computed, nextTick, type Ref } from 'vue';
+import { ref, computed, nextTick, watch, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useExamStore } from 'src/stores/exam.store';
@@ -14,20 +14,26 @@ import {
   VALIDATION_MSG,
 } from 'src/constants/exam';
 import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
-import type { PasscodeType, BackendExam } from 'src/types/exam';
+import type { PasscodeType, BackendExam, BackendLocation } from 'src/types/exam';
 import {
   fetchExamLocations,
   fetchFundSources,
   fetchExamById,
   fetchAllExamsRaw,
+  fetchExamBlockedSeats,
   updateExamRound,
+  notifyExamChanges,
   formatTime,
   formatBackendDate,
   buddhistToGregorian,
   createExamPasscodes,
+  parseBangkokDate,
+  type ExamChangeItem,
+  type SessionLocationSnapshotPayload,
 } from 'src/services/exam.service';
 import { getUsersFromApi } from 'src/services/user.service';
 import { ROLES } from 'src/constants/roles';
+import { useUserStore } from 'src/stores/user.store';
 
 /** A single room within a time slot */
 export interface ExamRoom {
@@ -43,6 +49,10 @@ export interface ExamRoom {
   sessionId?: number;
   /** Enrollment count (for locking) */
   enrollmentCount?: number;
+  /** Seat status overrides for this exam session, keyed by LS_ID */
+  seatOverrides?: Record<number, number>;
+  /** Session-specific room layout snapshot */
+  sessionLocationSnapshot?: SessionLocationSnapshotPayload;
 }
 
 export interface TimeSlot {
@@ -92,6 +102,74 @@ export interface UseExamFormOptions {
   examId?: number | undefined;
 }
 
+/** Snapshot ของฟิลด์ที่ใช้เปรียบเทียบหาความเปลี่ยนแปลงของรอบสอบ */
+interface ExamComparisonSnapshot {
+  examName: string;
+  examRound: string;
+  examType: string;
+  examFormat: string;
+  fee: string;
+  fundSourceLabel: string;
+  examDate: string;
+  regStartDate: string;
+  regEndDate: string;
+  payStartDate: string;
+  payEndDate: string;
+  scheduleText: string;
+}
+
+const snapshotStatusToCode = (status: string | null | undefined): number => {
+  if (status === 'BROKEN') return 1;
+  if (status === 'BLOCKED') return 2;
+
+  return 0;
+};
+
+const countAvailableSeats = (
+  location: BackendLocation,
+  seatOverrides?: Record<number, number>,
+): number => {
+  return (location.SEATS ?? []).filter(
+    (seat) => (seatOverrides?.[seat.LS_ID] ?? seat.LS_SEAT_STATUS) === 0,
+  ).length;
+};
+
+const getLocationAisleAfter = (
+  location: BackendLocation,
+): { after_cols: number[]; after_rows: number[] } => {
+  const fromLegacyCols = location.AISLE_AFTER_COLS ?? [];
+  const fromLegacyRows = location.AISLE_AFTER_ROWS ?? [];
+  const fromCombined = location.LOCATION_AISLE_AFTER_COL ?? [];
+
+  return {
+    after_cols: [
+      ...fromLegacyCols,
+      ...fromCombined
+        .filter((item): item is { type: 'column'; index: number } =>
+          typeof item === 'object' ? item.type === 'column' : false,
+        )
+        .map((item) => item.index),
+      ...fromCombined.filter((item): item is number => typeof item === 'number'),
+    ],
+    after_rows: [
+      ...fromLegacyRows,
+      ...fromCombined
+        .filter((item): item is { type: 'row'; index: number } =>
+          typeof item === 'object' ? item.type === 'row' : false,
+        )
+        .map((item) => item.index),
+    ],
+  };
+};
+
+const hasAisleAfter = (
+  aisleAfter: { after_cols: number[]; after_rows: number[] } | null | undefined,
+): aisleAfter is { after_cols: number[]; after_rows: number[] } => {
+  return Boolean(
+    aisleAfter && (aisleAfter.after_cols.length > 0 || aisleAfter.after_rows.length > 0),
+  );
+};
+
 /**
  * Composable for managing exam creation/editing logic.
  * @param externalForm - Optional external form ref (useful for injecting initial data or v-model syncing)
@@ -101,12 +179,54 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const router = useRouter();
   const $q = useQuasar();
   const examStore = useExamStore();
+  const userStore = useUserStore();
 
   const examId = options?.examId;
   const isEditMode = computed<boolean>(() => !!examId);
 
   const wasOriginallyPublished = ref(false);
   const originalExamDate = ref('');
+
+  /**
+   * สแนปช็อตข้อมูลรอบสอบ ณ ตอนโหลด (edit mode) เพื่อใช้เปรียบเทียบหาความเปลี่ยนแปลง
+   * สำหรับแจ้งเตือนผู้เข้าสอบทางอีเมล
+   */
+  const originalSnapshot = ref<ExamComparisonSnapshot | null>(null);
+
+  const today = (() => {
+    const now = new Date();
+    const d = String(now.getDate()).padStart(2, '0');
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const y = now.getFullYear() + BUDDHIST_YEAR_OFFSET;
+    return `${d}/${m}/${y}`;
+  })();
+
+  // Use external form if provided, otherwise create a new one.
+  // This must be initialized before computed values and watchers that read form.value.
+  const form =
+    externalForm ||
+    ref<CreateExamForm>({
+      examName: '',
+      examRound: '',
+      examType: EXAM_TYPE_GENERAL,
+      examFormat: EXAM_FORMAT_COMPUTER,
+      fundSourceId: null,
+      fee: '',
+      isPublished: false,
+      examDate: today,
+      timeSlots: [
+        {
+          startTime: '08:00',
+          endTime: '10:00',
+          rooms: [{ locationId: null, proctorName: '', proctors: [], seats: 40 }],
+        },
+      ],
+      regStartDate: today,
+      regEndDate: today,
+      payStartDate: today,
+      payEndDate: today,
+      eligibleCandidates: [],
+    });
 
   /** Published exams keep non-schedule sections read-only. */
   const isPublishedSectionLocked = computed<boolean>(() => {
@@ -122,14 +242,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       slot.rooms.some((room) => (room.enrollmentCount || 0) > 0),
     );
   });
-
-  const today = (() => {
-    const now = new Date();
-    const d = String(now.getDate()).padStart(2, '0');
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const y = now.getFullYear() + BUDDHIST_YEAR_OFFSET;
-    return `${d}/${m}/${y}`;
-  })();
 
   const examTypeOptions: string[] = [EXAM_TYPE_GENERAL, EXAM_TYPE_SPECIAL];
   const examFormatOptions: string[] = [EXAM_FORMAT_COMPUTER, EXAM_FORMAT_PAPER];
@@ -195,37 +307,23 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     return occupied;
   });
 
+  // Watch occupied location IDs and reset locationId if it becomes occupied (unless loading data)
+  watch(occupiedLocationIds, (occupied) => {
+    if (isLoadingData.value) return;
+    form.value.timeSlots.forEach((slot) => {
+      slot.rooms.forEach((room) => {
+        if (room.locationId !== null && occupied.has(room.locationId)) {
+          room.locationId = null;
+        }
+      });
+    });
+  });
+
   /** Currently active time slot tab index */
   const activeSlotIndex = ref(0);
 
   /** Search query for eligible candidates table */
   const candidateSearch = ref('');
-
-  // Use external form if provided, otherwise create a new one
-  const form =
-    externalForm ||
-    ref<CreateExamForm>({
-      examName: '',
-      examRound: '',
-      examType: EXAM_TYPE_GENERAL,
-      examFormat: EXAM_FORMAT_COMPUTER,
-      fundSourceId: null,
-      fee: '',
-      isPublished: false,
-      examDate: today,
-      timeSlots: [
-        {
-          startTime: '08:00',
-          endTime: '10:00',
-          rooms: [{ locationId: null, proctorName: '', proctors: [], seats: 40 }],
-        },
-      ],
-      regStartDate: today,
-      regEndDate: today,
-      payStartDate: today,
-      payEndDate: today,
-      eligibleCandidates: [],
-    });
 
   /** Whether the current exam type is special */
   const isSpecialRound = computed<boolean>(() => form.value.examType === EXAM_TYPE_SPECIAL);
@@ -323,13 +421,16 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     return errors;
   });
 
-  const getLocationMaxSeats = (locationId: number | null): number => {
+  const getLocationMaxSeats = (
+    locationId: number | null,
+    seatOverrides?: Record<number, number>,
+  ): number => {
     if (!locationId) return 9999;
     const option = locationOptions.value.find((opt) => opt.value === locationId);
     if (!option || !option.raw) return 9999;
     const seats = option.raw.SEATS;
     if (seats) {
-      return seats.filter((seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2).length;
+      return countAvailableSeats(option.raw, seatOverrides);
     }
     if (
       option.raw.LOCATION_SEAT_CAPACITY !== undefined &&
@@ -351,7 +452,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    * Validate required fields and populate fieldErrors.
    * @returns true if all required fields are filled, false otherwise.
    */
-  const timeToMinutes = (timeStr: string | undefined): number => {
+  function timeToMinutes(timeStr: string | undefined): number {
     if (!timeStr) return 9999;
     const cleaned = timeStr.replace(/\s/g, '');
     if (!cleaned) return 9999;
@@ -359,7 +460,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     const hours = parseInt(parts[0] || '0', 10);
     const minutes = parseInt(parts[1] || '0', 10);
     return hours * 60 + minutes;
-  };
+  }
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
@@ -426,7 +527,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         if (!room.seats || room.seats <= 0) {
           errors[`seats_${slotIdx}_${roomIdx}`] = VALIDATION_MSG.SEATS;
         } else if (room.locationId) {
-          const maxSeats = getLocationMaxSeats(room.locationId);
+          const maxSeats = getLocationMaxSeats(room.locationId, room.seatOverrides);
           if (room.seats > maxSeats) {
             errors[`seats_${slotIdx}_${roomIdx}`] =
               `เกินขอบเขตความจุที่นั่งของห้องสอบ มีที่นั่งได้ไม่เกิน ${maxSeats} ที่นั่ง ในสถานที่นี้`;
@@ -501,27 +602,111 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    */
   const gregorianToBuddhistDisplay = (dateStr: string | null | undefined): string => {
     if (!dateStr) return today;
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return today;
-    const d = String(date.getDate()).padStart(2, '0');
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const y = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
+    const { year, month, day } = parseBangkokDate(dateStr);
+    const d = String(day).padStart(2, '0');
+    const m = String(month).padStart(2, '0');
+    const y = year + BUDDHIST_YEAR_OFFSET;
     return `${d}/${m}/${y}`;
+  };
+
+  /** หา label แหล่งทุนจาก id เพื่อแสดงในรายละเอียดการเปลี่ยนแปลง */
+  const fundSourceLabelFor = (id: number | null): string => {
+    if (!id) return 'ไม่ระบุ';
+    return fundSourceOptions.value.find((o) => o.value === id)?.label || String(id);
+  };
+
+  /**
+   * สร้างข้อความสรุปกำหนดการสอบและห้องสอบ (เรียงตามเวลา) เพื่อใช้เปรียบเทียบ
+   * และแสดงในอีเมลแจ้งเตือน
+   */
+  const buildScheduleText = (): string => {
+    const slots = [...form.value.timeSlots]
+      .filter((slot) => slot.startTime && slot.endTime)
+      .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+    return slots
+      .map((slot) => {
+        const rooms = slot.rooms
+          .map((room) => {
+            const loc = locationOptions.value.find((o) => o.value === room.locationId);
+            const locLabel = loc?.label || 'ไม่ระบุห้อง';
+            const proctorText =
+              room.proctors && room.proctors.length > 0
+                ? ` (ผู้คุมสอบ: ${room.proctors.join(', ')})`
+                : '';
+            return `• ${locLabel} ${room.seats} ที่นั่ง${proctorText}`;
+          })
+          .join('\n');
+        return `เวลา ${slot.startTime} - ${slot.endTime} น.\n${rooms}`;
+      })
+      .join('\n\n');
+  };
+
+  /** สร้าง snapshot ของข้อมูลรอบสอบจากค่าปัจจุบันในฟอร์ม */
+  const buildComparisonSnapshot = (): ExamComparisonSnapshot => ({
+    examName: form.value.examName.trim(),
+    examRound: form.value.examRound.trim(),
+    examType: form.value.examType,
+    examFormat: form.value.examFormat,
+    fee: String(form.value.fee ?? ''),
+    fundSourceLabel: fundSourceLabelFor(form.value.fundSourceId),
+    examDate: form.value.examDate,
+    regStartDate: form.value.regStartDate,
+    regEndDate: form.value.regEndDate,
+    payStartDate: form.value.payStartDate,
+    payEndDate: form.value.payEndDate,
+    scheduleText: buildScheduleText(),
+  });
+
+  /**
+   * เปรียบเทียบ snapshot เดิมกับค่าปัจจุบัน แล้วสร้างรายการการเปลี่ยนแปลง
+   * (เฉพาะฟิลด์ที่มีการเปลี่ยนแปลงจริง)
+   */
+  const buildExamChanges = (): ExamChangeItem[] => {
+    const before = originalSnapshot.value;
+    if (!before) return [];
+    const after = buildComparisonSnapshot();
+    const changes: ExamChangeItem[] = [];
+
+    const push = (label: string, oldValue: string, newValue: string): void => {
+      if (oldValue !== newValue) {
+        changes.push({ label, oldValue, newValue });
+      }
+    };
+
+    push('ชื่อรอบสอบ', before.examName, after.examName);
+    push('รอบสอบ', before.examRound, after.examRound);
+    push('ประเภทการสอบ', before.examType, after.examType);
+    push('รูปแบบการสอบ', before.examFormat, after.examFormat);
+    if (before.fee !== after.fee) {
+      push('ค่าธรรมเนียม', `${before.fee} บาท`, `${after.fee} บาท`);
+    }
+    push('แหล่งทุน', before.fundSourceLabel, after.fundSourceLabel);
+    push('วันที่สอบ', before.examDate, after.examDate);
+    push('วันที่เริ่มรับสมัคร', before.regStartDate, after.regStartDate);
+    push('วันที่สิ้นสุดรับสมัคร', before.regEndDate, after.regEndDate);
+    push('วันที่เริ่มชำระเงิน', before.payStartDate, after.payStartDate);
+    push('วันที่สิ้นสุดชำระเงิน', before.payEndDate, after.payEndDate);
+    push('กำหนดการสอบและห้องสอบ', before.scheduleText, after.scheduleText);
+
+    return changes;
   };
 
   const loadInitialData = async (): Promise<void> => {
     isLoadingData.value = true;
     error.value = null;
     try {
-      const [locations, fundSources, proctors, exams] = await Promise.all([
+      const [locations, fundSources, proctors, exams, editExam] = await Promise.all([
         fetchExamLocations(),
         fetchFundSources(),
         getUsersFromApi(ROLES.PROCTOR),
         fetchAllExamsRaw(),
+        examId ? fetchExamById(examId) : Promise.resolve(null),
       ]);
       locationOptions.value = locations;
       allExams.value = exams;
-      fundSourceOptions.value = fundSources.map((fs: FundSource) => ({
+      const activeFundSources = fundSources.filter((fs: FundSource) => fs.FS_OPEN_STATUS !== false);
+      fundSourceOptions.value = activeFundSources.map((fs: FundSource) => ({
         label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
         value: fs.FS_ID,
       }));
@@ -535,9 +720,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       });
 
       // If in edit mode, load the existing exam data into the form
-      if (examId) {
-        const exam = await fetchExamById(examId);
-
+      if (editExam) {
+        const exam = editExam;
         form.value.examName = exam.EXAM_NAME || '';
         form.value.examRound = exam.EXAM_ROUND || '';
         form.value.examType = exam.EXAM_TYPE || EXAM_TYPE_GENERAL;
@@ -556,6 +740,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         // Group sessions by time range into time slots with rooms
         if (exam.SESSIONS && exam.SESSIONS.length > 0) {
           const slotMap = new Map<string, TimeSlot>();
+          const sessionsNeedingBlockedFallback = new Set<number>();
 
           exam.SESSIONS.forEach((session) => {
             const start = session.SS_START_TIME ? session.SS_START_TIME.substring(0, 5) : '';
@@ -576,6 +761,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
               relationLocations
                 .filter((relation) => relation.LOCATION)
                 .forEach((relation) => {
+                  const hasSeatSnapshot = (relation.SEATS_SNAPSHOT?.length ?? 0) > 0;
+                  if (!hasSeatSnapshot) {
+                    sessionsNeedingBlockedFallback.add(session.SS_ID);
+                  }
+
                   const relationProctors: string[] = [];
                   if (relation.SS_NAME) {
                     const customNames = relation.SS_NAME.split(',')
@@ -583,22 +773,50 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
                       .filter(Boolean);
                     relationProctors.push(...customNames);
                   }
+                  const seatOverrides = Object.fromEntries(
+                    (relation.SEATS_SNAPSHOT ?? [])
+                      .map((snapshotSeat) => {
+                        const baseSeat = relation.LOCATION.SEATS?.find(
+                          (seat) => seat.LS_SEAT_LABEL === snapshotSeat.label,
+                        );
+                        const snapshotStatus = snapshotStatusToCode(snapshotSeat.status);
+                        if (!baseSeat || baseSeat.LS_SEAT_STATUS === snapshotStatus) return null;
+
+                        return [baseSeat.LS_ID, snapshotStatus] as const;
+                      })
+                      .filter((entry): entry is readonly [number, number] => entry !== null),
+                  );
 
                   slot.rooms.push({
                     locationId: relation.LOCATION_ID ?? relation.LOCATION.LOCATION_ID ?? null,
                     proctorName: relation.SS_NAME || '',
                     proctors: Array.from(new Set(relationProctors)),
-                    seats:
-                      relation.LOCATION.SEATS?.filter(
-                        (seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2,
-                      ).length ||
-                      relation.LOCATION.LOCATION_SEAT_CAPACITY ||
-                      40,
+                    seats: countAvailableSeats(relation.LOCATION, seatOverrides),
                     sessionId: session.SS_ID,
                     enrollmentCount:
                       session.ENROLLMENTS?.filter(
                         (enrollment) => enrollment.SL_ID === relation.SL_ID,
                       ).length || 0,
+                    seatOverrides,
+                    sessionLocationSnapshot: {
+                      TOTAL_ROWS:
+                        relation.TOTAL_ROWS ?? relation.LOCATION.LOCATION_TOTAL_ROWS ?? null,
+                      TOTAL_COLS:
+                        relation.TOTAL_COLS ?? relation.LOCATION.LOCATION_TOTAL_COLS ?? null,
+                      AISLE_AFTER: hasAisleAfter(relation.AISLE_AFTER)
+                        ? relation.AISLE_AFTER
+                        : getLocationAisleAfter(relation.LOCATION),
+                      LOCATION_SEAT_DIRECTION:
+                        relation.LOCATION_SEAT_DIRECTION ??
+                        relation.LOCATION.LOCATION_SEAT_DIRECTION ??
+                        relation.LOCATION.SEAT_DIRECTION ??
+                        'HORIZONTAL',
+                      LOCATION_SEAT_CAPACITY:
+                        relation.LOCATION_SEAT_CAPACITY ??
+                        relation.LOCATION.LOCATION_SEAT_CAPACITY ??
+                        null,
+                      SEATS_SNAPSHOT: relation.SEATS_SNAPSHOT ?? null,
+                    },
                   });
                 });
               return;
@@ -612,10 +830,47 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
               sessionId: session.SS_ID,
               enrollmentCount: session.ENROLLMENTS?.length || 0,
             });
+            sessionsNeedingBlockedFallback.add(session.SS_ID);
           });
 
           form.value.timeSlots = Array.from(slotMap.values());
           sortTimeSlots();
+          const blockedFallbackSessionIds = Array.from(sessionsNeedingBlockedFallback);
+          if (blockedFallbackSessionIds.length > 0) {
+            const blockedSeatGroups = await Promise.all(
+              blockedFallbackSessionIds.map(async (sessionId) => ({
+                sessionId,
+                seats: await fetchExamBlockedSeats(sessionId),
+              })),
+            );
+
+            blockedSeatGroups.forEach(({ sessionId, seats }) => {
+              const sessionRooms = form.value.timeSlots.flatMap((slot) =>
+                slot.rooms.filter((room) => room.sessionId === sessionId),
+              );
+
+              seats.forEach((blockedSeat) => {
+                const locationId = blockedSeat.LOCATION_SEAT?.LOCATION_ID;
+                const targetRoom =
+                  sessionRooms.find((room) => room.locationId === locationId) ??
+                  sessionRooms[0] ??
+                  null;
+                if (!targetRoom) return;
+
+                targetRoom.seatOverrides = {
+                  ...(targetRoom.seatOverrides ?? {}),
+                  [blockedSeat.LS_ID]: blockedSeat.BLOCK_STATUS,
+                };
+                const targetLocation = getLocationById(targetRoom.locationId);
+                if (targetLocation) {
+                  const maxSeats = countAvailableSeats(targetLocation, targetRoom.seatOverrides);
+                  if (targetRoom.seats > maxSeats) {
+                    targetRoom.seats = maxSeats;
+                  }
+                }
+              });
+            });
+          }
         }
 
         // Load passcodes into eligibleCandidates for special rounds
@@ -630,6 +885,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
         // The schedule lock is now handled by the computed property 'isScheduleLocked'
         // based on exam.EXAM_PUBLISHED and session enrollment counts.
+
+        // เก็บ snapshot ของข้อมูลรอบสอบหลังโหลดเสร็จ (options ถูกโหลดครบแล้ว)
+        // เพื่อใช้เปรียบเทียบหาความเปลี่ยนแปลงตอนบันทึก
+        originalSnapshot.value = buildComparisonSnapshot();
       }
     } catch (err) {
       console.error('Failed to load initial data:', err);
@@ -741,6 +1000,54 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    */
   const stripBom = (text: string): string => {
     return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+  };
+
+  const getLocationById = (locationId: number | null): BackendLocation | null => {
+    if (locationId === null) return null;
+
+    return locationOptions.value.find((location) => location.value === locationId)?.raw ?? null;
+  };
+
+  const getSeatStatusLabel = (status: number): 'AVAILABLE' | 'BROKEN' | 'BLOCKED' => {
+    if (status === 1) return 'BROKEN';
+    if (status === 2) return 'BLOCKED';
+
+    return 'AVAILABLE';
+  };
+
+  const buildSessionLocationSnapshot = (
+    location: BackendLocation,
+    seatOverrides?: Record<number, number>,
+    currentSnapshot?: SessionLocationSnapshotPayload,
+    seatCapacity?: number,
+  ): SessionLocationSnapshotPayload => {
+    const direction =
+      currentSnapshot?.LOCATION_SEAT_DIRECTION ??
+      location.LOCATION_SEAT_DIRECTION ??
+      location.SEAT_DIRECTION ??
+      'HORIZONTAL';
+    const maxAvailableSeats = countAvailableSeats(location, seatOverrides);
+    const snapshotCapacity =
+      seatCapacity != null ? Math.min(seatCapacity, maxAvailableSeats) : maxAvailableSeats;
+
+    return {
+      TOTAL_ROWS: currentSnapshot?.TOTAL_ROWS ?? location.LOCATION_TOTAL_ROWS ?? null,
+      TOTAL_COLS: currentSnapshot?.TOTAL_COLS ?? location.LOCATION_TOTAL_COLS ?? null,
+      AISLE_AFTER: hasAisleAfter(currentSnapshot?.AISLE_AFTER)
+        ? currentSnapshot.AISLE_AFTER
+        : getLocationAisleAfter(location),
+      LOCATION_SEAT_DIRECTION: direction,
+      LOCATION_SEAT_CAPACITY: snapshotCapacity,
+      SEATS_SNAPSHOT: (location.SEATS ?? []).map((seat) => {
+        const status = seatOverrides?.[seat.LS_ID] ?? seat.LS_SEAT_STATUS;
+
+        return {
+          label: seat.LS_SEAT_LABEL,
+          status: getSeatStatusLabel(status),
+          sortorder: seat.LS_SORT_ORDER ?? null,
+        };
+      }),
+    };
   };
 
   /**
@@ -1010,6 +1317,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     seats: number;
     proctorName: string | null;
     sessionId?: number;
+    seatOverrides?: Record<number, number>;
+    sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   }[] => {
     const result: {
       startTime: string;
@@ -1018,20 +1327,38 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       seats: number;
       proctorName: string | null;
       sessionId?: number;
+      seatOverrides?: Record<number, number>;
+      sessionLocationSnapshot?: SessionLocationSnapshotPayload;
     }[] = [];
 
     form.value.timeSlots.forEach((slot) => {
       if (!slot.startTime || !slot.endTime) return;
       slot.rooms.forEach((room) => {
+        const location = getLocationById(room.locationId);
+        const maxAvailableSeats = location
+          ? countAvailableSeats(location, room.seatOverrides)
+          : Number(room.seats);
+        const seats = Math.min(Number(room.seats), maxAvailableSeats);
         const proctorName =
           room.proctors && room.proctors.length > 0 ? room.proctors.join(', ') : null;
         result.push({
           startTime: formatTime(slot.startTime),
           endTime: formatTime(slot.endTime),
           locationId: Number(room.locationId),
-          seats: Number(room.seats),
+          seats,
           proctorName,
           ...(room.sessionId != null ? { sessionId: room.sessionId } : {}),
+          ...(room.seatOverrides ? { seatOverrides: { ...room.seatOverrides } } : {}),
+          ...(location
+            ? {
+                sessionLocationSnapshot: buildSessionLocationSnapshot(
+                  location,
+                  room.seatOverrides,
+                  room.sessionLocationSnapshot,
+                  seats,
+                ),
+              }
+            : {}),
         });
       });
     });
@@ -1173,6 +1500,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       seats: r.seats,
       proctorName: r.proctorName,
       ...(r.sessionId != null ? { sessionId: r.sessionId } : {}),
+      ...(r.seatOverrides ? { seatOverrides: r.seatOverrides } : {}),
+      ...(r.sessionLocationSnapshot ? { sessionLocationSnapshot: r.sessionLocationSnapshot } : {}),
     }));
 
     try {
@@ -1205,15 +1534,24 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           existingSessionIds,
         });
 
-        // Refresh the management schedules in the store after successful edit
-        await examStore.loadManagementSchedules(true);
-
         $q.notify({
           type: 'positive',
           message: NOTIFY_MSG.UPDATE_SUCCESS,
           position: 'top',
           timeout: 2000,
         });
+
+        // แจ้งเตือนผู้เข้าสอบทุกคนในรอบสอบทางอีเมล เมื่อเจ้าหน้าที่ทะเบียน (registration officer)
+        // แก้ไขรอบสอบ โดยส่งเฉพาะรายละเอียดที่มีการเปลี่ยนแปลงจริง
+        // ยิงแบบไม่บล็อก (fire-and-forget) เพื่อให้การบันทึกลื่นไหล ไม่ต้องรอการส่งอีเมล
+        if (userStore.userRole === ROLES.REGISTRATION_OFFICER) {
+          const changes = buildExamChanges();
+          if (changes.length > 0) {
+            void notifyExamChanges(examId, changes).catch((notifyErr) => {
+              console.error('Failed to notify exam changes:', notifyErr);
+            });
+          }
+        }
       } else {
         // === CREATE MODE ===
         const payload: CreateExamPayload = {
@@ -1235,8 +1573,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         };
 
         targetExamId = await examStore.addExamRound(payload);
-        // Refresh the management schedules in the store after successful creation
-        await examStore.loadManagementSchedules(true);
 
         $q.notify({
           type: 'positive',

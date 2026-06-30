@@ -29,6 +29,8 @@ export const fetchEnrollmentsByExamId = async (
     search?: string;
     sessionId?: number | null;
     sessionLocationId?: number | null;
+    sortBy?: string | null | undefined;
+    descending?: boolean | null | undefined;
   },
 ): Promise<EnrollmentTableRow[] | PaginatedEnrollmentResponse> => {
   const response = await api.get<
@@ -108,8 +110,9 @@ export const updateEnrollmentStatus = async (
 
 export interface BulkSeatAssignment {
   ermId: number;
-  lsId: number;
   slId: number;
+  seatLabel: string;
+  sortOrder?: number;
 }
 
 export const bulkAssignEnrollmentSeats = async (

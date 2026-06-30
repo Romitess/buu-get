@@ -3,8 +3,7 @@ import {
   IsOptional,
   IsDateString,
   IsEnum,
-  ValidateIf,
-  Allow,
+  IsInt,
   IsString,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
@@ -40,15 +39,22 @@ export class CreateExamEnrollmentDto {
   SESSION_ID: number;
 
   @ApiProperty({
-    example: 1,
-    description: 'รหัสที่นั่งในห้องสอบ (FK)',
+    example: 'A-01',
+    description: 'เลขที่นั่งสอบ/รหัสที่นั่งสอบ',
     required: false,
   })
-  @Allow()
-  @ValidateIf((o: CreateExamEnrollmentDto) => o.LS_ID !== null)
   @IsOptional()
-  @IsNumber()
-  LS_ID?: number | null;
+  @IsString()
+  ERM_SEAT_LABEL?: string | null;
+
+  @ApiProperty({
+    example: 1,
+    description: 'ลำดับการเรียงที่นั่ง',
+    required: false,
+  })
+  @IsOptional()
+  @IsInt()
+  ERM_SORT_ORDER?: number | null;
 
   @ApiProperty({
     example: ExamEnrollmentStatus.UNPAID,

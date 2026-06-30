@@ -202,7 +202,12 @@ import AppLocationSeatPreviewPanel from 'src/components/exam/app-location-seat-p
 import AppLocationWalkwayControls from 'src/components/exam/app-location-walkway-controls.vue';
 import AppWalkwayPositionDialog from 'src/components/exam/app-walkway-position-dialog.vue';
 import { api } from 'src/boot/axios';
-import { fetchLocationById, updateLocation } from 'src/services/location.service';
+import {
+  fetchLocationById,
+  fetchLocationSeats,
+  updateLocation,
+  type LocationAislePositionPayload,
+} from 'src/services/location.service';
 
 const MAX_SEAT_LAYOUT_SIZE = 25;
 
@@ -264,18 +269,13 @@ const selectedWalkwayPositionValues = computed(() =>
   ),
 );
 
-const aisleAfterCols = computed(() =>
-  selectedWalkwayPositions.value
-    .filter((position) => position.type === 'column')
-    .map((position) => position.index)
-    .sort((a, b) => a - b),
-);
-
-const aisleAfterRows = computed(() =>
-  selectedWalkwayPositions.value
-    .filter((position) => position.type === 'row')
-    .map((position) => position.index)
-    .sort((a, b) => a - b),
+const locationAislePositions = computed<LocationAislePositionPayload[]>(() =>
+  [...selectedWalkwayPositions.value]
+    .sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'row' ? -1 : 1;
+      return a.index - b.index;
+    })
+    .map((position) => ({ type: position.type, index: position.index })),
 );
 
 const clampSeatLayoutValue = (value: unknown): number | null => {
@@ -365,12 +365,18 @@ const buildSeatStatuses = (): Record<string, number> => {
 
 const loadLocationData = async () => {
   try {
-    const data = await fetchLocationById(locationId);
+    const [data, seats] = await Promise.all([
+      fetchLocationById(locationId),
+      fetchLocationSeats(locationId),
+    ]);
+    const maxSeatRow = Math.max(0, ...seats.map((seat) => seat.LS_ROW_NO));
+    const maxSeatCol = Math.max(0, ...seats.map((seat) => seat.LS_COL_NO));
+
     roomName.value = data.LOCATION_ROOM_NO || '';
     floor.value = data.LOCATION_FLOOR_NO ?? null;
     building.value = data.LOCATION_NAME || '';
-    rows.value = data.LOCATION_TOTAL_ROWS ?? null;
-    cols.value = data.LOCATION_TOTAL_COLS ?? null;
+    rows.value = data.LOCATION_TOTAL_ROWS ?? (maxSeatRow > 0 ? maxSeatRow : null);
+    cols.value = data.LOCATION_TOTAL_COLS ?? (maxSeatCol > 0 ? maxSeatCol : null);
     seatNumberDirection.value = data.SEAT_DIRECTION === 'HORIZONTAL' ? 'horizontal' : 'vertical';
     selectedWalkwayPositions.value = [
       ...(data.AISLE_AFTER_ROWS ?? []).map((index) => ({ type: 'row' as const, index })),
@@ -381,16 +387,17 @@ const loadLocationData = async () => {
     if (seatPreviewRef.value) {
       const loadedBrokenSeats = new Set<string>();
       const loadedOmittedSeats = new Set<string>();
-      if (data.SEATS) {
-        data.SEATS.forEach((seat) => {
-          if (seat.LS_SEAT_STATUS === 1 && seat.LS_SEAT_LABEL) {
-            loadedBrokenSeats.add(seat.LS_SEAT_LABEL);
-          }
-          if (seat.LS_SEAT_STATUS === 2 && seat.LS_SEAT_LABEL) {
-            loadedOmittedSeats.add(seat.LS_SEAT_LABEL);
-          }
-        });
-      }
+      const loadedSeats = seats.length > 0 ? seats : (data.SEATS ?? []);
+
+      loadedSeats.forEach((seat) => {
+        if (seat.LS_SEAT_STATUS === 1 && seat.LS_SEAT_LABEL) {
+          loadedBrokenSeats.add(seat.LS_SEAT_LABEL);
+        }
+        if (seat.LS_SEAT_STATUS === 2 && seat.LS_SEAT_LABEL) {
+          loadedOmittedSeats.add(seat.LS_SEAT_LABEL);
+        }
+      });
+
       seatPreviewRef.value.setSeatStatusSets({
         brokenSeats: loadedBrokenSeats,
         omittedSeats: loadedOmittedSeats,
@@ -423,9 +430,9 @@ const handleSave = async (): Promise<void> => {
       LOCATION_TOTAL_ROWS: Number(rows.value),
       LOCATION_TOTAL_COLS: Number(cols.value),
       LOCATION_SEAT_CAPACITY: Number(totalSeats.value),
-      SEAT_DIRECTION: seatNumberDirection.value === 'horizontal' ? 'HORIZONTAL' : 'VERTICAL',
-      AISLE_AFTER_COLS: aisleAfterCols.value,
-      AISLE_AFTER_ROWS: aisleAfterRows.value,
+      LOCATION_SEAT_DIRECTION:
+        seatNumberDirection.value === 'horizontal' ? 'HORIZONTAL' : 'VERTICAL',
+      LOCATION_AISLE_AFTER_COL: locationAislePositions.value,
     });
 
     await api.post(`/exam-location-seats/generate/${locationId}`, {

@@ -14,6 +14,7 @@ import { Exam } from '../../exam/entities/exam.entity';
 import { ExamEnrollment } from '../../exam-enrollments/entities/exam-enrollment.entity';
 import { ExamLocation } from '../../exam-locations/entities/exam-location.entity';
 import { ExamSessionLocation } from '../../exam-session-locations/entities/exam-session-location.entity';
+import { ExamBlockedSeat } from '../../exam-blocked-seats/entities/exam-blocked-seat.entity';
 
 export enum ExamSessionStatus {
   DRAFT = 0,
@@ -99,4 +100,10 @@ export class ExamSession {
 
   @OneToMany(() => ExamSessionLocation, (sl: ExamSessionLocation) => sl.SESSION)
   SESSION_LOCATIONS: ExamSessionLocation[];
+
+  @OneToMany(
+    () => ExamBlockedSeat,
+    (blockedSeat: ExamBlockedSeat) => blockedSeat.SESSION,
+  )
+  BLOCKED_SEATS: ExamBlockedSeat[];
 }

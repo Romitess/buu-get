@@ -3,6 +3,8 @@ import { DataSource, SelectQueryBuilder } from 'typeorm';
 import { ExamReportQueryDto } from './dto/exam-report-query.dto';
 import {
   ExamBandChange,
+  ExamCandidateInfo,
+  ExamInformationRound,
   ExamReportOption,
   ExamReportOptions,
   ExamReportStat,
@@ -72,6 +74,29 @@ interface YearMinMaxRow {
   year: string | number;
   minScore: string | number | null;
   maxScore: string | number | null;
+}
+
+interface ExamInformationRoundRawRow {
+  round: string | null;
+  examDate: string | null;
+  applicants: string | number;
+  attended: string | number;
+  repeatTakers: string | number;
+  minScore: string | number | null;
+  maxScore: string | number | null;
+  averageScore: string | number | null;
+}
+
+interface ExamCandidateInfoRawRow {
+  enrollmentId: string | number;
+  examNumber: string | null;
+  prefix: string | null;
+  fullName: string | null;
+  vocabularyGrammarScore: string | number | null;
+  readingScore: string | number | null;
+  totalScore: string | number | null;
+  level: string | number | null;
+  attemptStatus: 'firstAttempt' | 'repeatAttempt';
 }
 
 @Injectable()
@@ -242,6 +267,161 @@ export class ExamReportService {
       .map((r) => ({ label: String(r.round), value: String(r.round) }));
 
     return { years, months, rounds };
+  }
+
+  /** รายละเอียดรอบสอบภายในปีที่เลือก สำหรับหน้า exam-information */
+  async getYearRounds(year: number): Promise<ExamInformationRound[]> {
+    const repeatTakersSql = `
+      COUNT(DISTINCT CASE
+        WHEN sc.SCORES_ID IS NOT NULL
+          AND EXISTS (
+            SELECT 1
+            FROM EXAM_T_ENROLLMENTS prev_e
+            INNER JOIN EXAM_T_SESSIONS prev_s
+              ON prev_s.SS_ID = prev_e.SESSION_ID
+              AND prev_s.DELETED_AT IS NULL
+            INNER JOIN EXAM_T_EXAM prev_x
+              ON prev_x.EXAM_ID = prev_s.EXAM_ID
+              AND prev_x.DELETED_AT IS NULL
+            INNER JOIN EXAM_T_SCORES prev_sc
+              ON prev_sc.ERM_ID = prev_e.ERM_ID
+              AND prev_sc.DELETED_AT IS NULL
+            WHERE prev_e.USER_ID = e.USER_ID
+              AND prev_e.ERM_ID <> e.ERM_ID
+              AND prev_e.DELETED_AT IS NULL
+              AND prev_e.ERM_STATUS != :cancelled
+              AND prev_x.EXAM_DATE IS NOT NULL
+              AND (
+                prev_x.EXAM_DATE < x.EXAM_DATE
+                OR (prev_x.EXAM_DATE = x.EXAM_DATE AND prev_x.EXAM_ID < x.EXAM_ID)
+              )
+          )
+        THEN e.USER_ID
+      END)
+    `;
+
+    const rows = await this.baseEnrollmentQb()
+      .leftJoin('e.ATTENDANCES', 'a')
+      .leftJoin('e.SCORE', 'sc')
+      .select('x.EXAM_ROUND', 'round')
+      .addSelect('x.EXAM_DATE', 'examDate')
+      .addSelect('COUNT(DISTINCT e.ERM_ID)', 'applicants')
+      .addSelect(
+        `COUNT(DISTINCT CASE WHEN a.ATTEND_STATUS = ${ExamAttendStatus.INTIME} THEN e.ERM_ID END)`,
+        'attended',
+      )
+      .addSelect(repeatTakersSql, 'repeatTakers')
+      .addSelect('MIN(sc.SC_TOTAL_SCORE)', 'minScore')
+      .addSelect('MAX(sc.SC_TOTAL_SCORE)', 'maxScore')
+      .addSelect('AVG(sc.SC_TOTAL_SCORE)', 'averageScore')
+      .andWhere('x.EXAM_DATE IS NOT NULL')
+      .andWhere('YEAR(x.EXAM_DATE) = :year', { year })
+      .groupBy('x.EXAM_ID')
+      .addGroupBy('x.EXAM_ROUND')
+      .addGroupBy('x.EXAM_DATE')
+      .orderBy('x.EXAM_DATE', 'ASC')
+      .addOrderBy('x.EXAM_ID', 'ASC')
+      .getRawMany<ExamInformationRoundRawRow>();
+
+    return rows.map((row) => {
+      const applicants = Number(row.applicants);
+      const attended = Number(row.attended);
+      const examDate = row.examDate ? new Date(row.examDate) : null;
+      const examYear = examDate?.getFullYear() ?? year;
+      const round = this.formatRoundLabel(row.round, examYear);
+
+      return {
+        round,
+        applicants,
+        attended,
+        absent: applicants - attended,
+        repeatTakers: Number(row.repeatTakers),
+        minScore: this.roundNullable(row.minScore),
+        maxScore: this.roundNullable(row.maxScore),
+        averageScore: this.roundNullable(row.averageScore),
+      };
+    });
+  }
+
+  /** รายชื่อผู้เข้าสอบและคะแนนรายบุคคลภายในปี/รอบสอบที่เลือก */
+  async getYearRoundCandidates(
+    year: number,
+    round?: string,
+  ): Promise<ExamCandidateInfo[]> {
+    const previousScoreExistsSql = `
+      EXISTS (
+        SELECT 1
+        FROM EXAM_T_ENROLLMENTS prev_e
+        INNER JOIN EXAM_T_SESSIONS prev_s
+          ON prev_s.SS_ID = prev_e.SESSION_ID
+          AND prev_s.DELETED_AT IS NULL
+        INNER JOIN EXAM_T_EXAM prev_x
+          ON prev_x.EXAM_ID = prev_s.EXAM_ID
+          AND prev_x.DELETED_AT IS NULL
+        INNER JOIN EXAM_T_SCORES prev_sc
+          ON prev_sc.ERM_ID = prev_e.ERM_ID
+          AND prev_sc.DELETED_AT IS NULL
+        WHERE prev_e.USER_ID = e.USER_ID
+          AND prev_e.ERM_ID <> e.ERM_ID
+          AND prev_e.DELETED_AT IS NULL
+          AND prev_e.ERM_STATUS != :cancelled
+          AND prev_x.EXAM_DATE IS NOT NULL
+          AND (
+            prev_x.EXAM_DATE < x.EXAM_DATE
+            OR (prev_x.EXAM_DATE = x.EXAM_DATE AND prev_x.EXAM_ID < x.EXAM_ID)
+          )
+      )
+    `;
+
+    const qb = this.baseEnrollmentQb()
+      .innerJoin('e.USER', 'u')
+      .leftJoin('e.SCORE', 'sc')
+      .leftJoin(
+        'BUU_GET_T_USER_PROFILE',
+        'profile',
+        'profile.USER_ID = e.USER_ID AND profile.DELETED_AT IS NULL',
+      )
+      .select('e.ERM_ID', 'enrollmentId')
+      .addSelect("COALESCE(e.ERM_TEST_TAKER, u.USER_CODE, '')", 'examNumber')
+      .addSelect(
+        "COALESCE(profile.USER_TITLE_TH, profile.USER_TITLE_EN, '')",
+        'prefix',
+      )
+      .addSelect(
+        "COALESCE(profile.USER_FULLNAME_TH, profile.USER_FULLNAME_EN, u.USER_EMAIL, '')",
+        'fullName',
+      )
+      .addSelect('sc.SC_LANG_USE_SCORE', 'vocabularyGrammarScore')
+      .addSelect('sc.SC_READING_SCORE', 'readingScore')
+      .addSelect('sc.SC_TOTAL_SCORE', 'totalScore')
+      .addSelect('sc.SC_BAND_LEVEL', 'level')
+      .addSelect(
+        `CASE WHEN ${previousScoreExistsSql} THEN 'repeatAttempt' ELSE 'firstAttempt' END`,
+        'attemptStatus',
+      )
+      .andWhere('x.EXAM_DATE IS NOT NULL')
+      .andWhere('YEAR(x.EXAM_DATE) = :year', { year })
+      .orderBy('e.ERM_TEST_TAKER', 'ASC')
+      .addOrderBy('e.ERM_ID', 'ASC');
+
+    this.applyRoundLabelFilter(qb, round);
+
+    const rows = await qb.getRawMany<ExamCandidateInfoRawRow>();
+
+    return rows.map((row) => ({
+      id: String(row.enrollmentId),
+      examNumber: row.examNumber ?? '',
+      prefix: row.prefix ?? '',
+      fullName: row.fullName ?? '',
+      vocabularyGrammarScore: this.roundNullable(row.vocabularyGrammarScore),
+      readingScore: this.roundNullable(row.readingScore),
+      totalScore: this.roundNullable(row.totalScore),
+      level: this.roundNullable(row.level),
+      attemptStatus:
+        row.attemptStatus === 'repeatAttempt'
+          ? 'repeatAttempt'
+          : 'firstAttempt',
+    }));
   }
 
   // ── Query helpers ─────────────────────────────────────────
@@ -430,7 +610,7 @@ export class ExamReportService {
     return rows.map((row) => {
       const examDateStr = row.examDate ?? '';
       const yearLabel = examDateStr ? new Date(examDateStr).getFullYear() : '';
-      const round = row.round ? `${row.round}/${yearLabel}` : `${yearLabel}`;
+      const round = this.formatRoundLabel(row.round, yearLabel);
 
       const registered = Number(row.registered);
       const attended = Number(row.attended);
@@ -471,6 +651,35 @@ export class ExamReportService {
       });
   }
 
+  private formatRoundLabel(
+    round: string | null,
+    year: number | string | null,
+  ): string {
+    const roundText = round?.trim();
+    const yearText = year === null ? '' : String(year).trim();
+
+    if (!roundText) return yearText;
+    if (!yearText || roundText.endsWith(`/${yearText}`)) return roundText;
+
+    return `${roundText}/${yearText}`;
+  }
+
+  private applyRoundLabelFilter(
+    qb: SelectQueryBuilder<ExamEnrollment>,
+    round?: string,
+  ): void {
+    const roundText = round?.trim();
+    if (!roundText) return;
+
+    qb.andWhere(
+      `(
+        TRIM(x.EXAM_ROUND) = :roundLabel
+        OR CONCAT(TRIM(x.EXAM_ROUND), '/', YEAR(x.EXAM_DATE)) = :roundLabel
+      )`,
+      { roundLabel: roundText },
+    );
+  }
+
   /** กรองช่วงปีจาก Exam.EXAM_DATE (month/round filter เป็น TODO รอบหน้า) */
   private applyYearRange(
     qb: SelectQueryBuilder<ExamEnrollment>,
@@ -505,5 +714,12 @@ export class ExamReportService {
 
   private round1(value: number): number {
     return Math.round(value * 10) / 10;
+  }
+
+  private roundNullable(value: string | number | null): number | null {
+    if (value === null) return null;
+
+    const numericValue = Number(value);
+    return Number.isNaN(numericValue) ? null : this.round1(numericValue);
   }
 }

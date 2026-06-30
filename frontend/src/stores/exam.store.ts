@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { ExamRound, ExamInfo, ExamHistoryItem, DayData } from 'src/types/exam';
+import type { ExamRound, ExamInfo, ExamHistoryItem, DayData, ExamEnrollment } from 'src/types/exam';
 import type { ExamSchedule } from 'src/types/exam.types';
 import type { ReceiptInformation } from 'src/types/receipt-information';
 import {
@@ -26,17 +26,23 @@ import {
   DEFAULT_LOCATION_TEXT,
   DEFAULT_EXAM_INFO,
   ENROLLMENT_STATUS,
-  VERIFY_STATUS,
   TRANSACTION_MATCH_STATUS,
+  SESSION_STATUS_COMPLETED,
   formatLocationWithRoom,
   PAYMENT_DURATION_SECONDS_DEFAULT,
 } from 'src/constants/exam';
+import {
+  getExamRoundsCalendarAvailability,
+  type ExamCalendarAvailability,
+} from 'src/utils/exam-registration';
 
 export const useExamStore = defineStore('exam', () => {
   const i18n = useI18n();
   const selectedDate = ref<string>(new Date().toISOString().split('T')[0] || '');
   const scheduleData = ref<Record<string, DayData>>({});
   const cancellationReasonStorageKey = 'exam_cancellation_reasons';
+  const HISTORY_CACHE_TTL_MS = 2000;
+  let lastHistoryFetchAt = 0;
 
   type CancellationReason = 'manual' | 'paymentTimeout';
 
@@ -106,11 +112,11 @@ export const useExamStore = defineStore('exam', () => {
     return rounds[0]?.roundTypeLabel ?? i18n.t('examSchedule.noBadgeRounds');
   });
 
-  const calendarAvailability = computed((): Record<string, 'available' | 'full' | null> => {
-    const result: Record<string, 'available' | 'full' | null> = {};
+  const calendarAvailability = computed((): Record<string, ExamCalendarAvailability> => {
+    const result: Record<string, ExamCalendarAvailability> = {};
+    const now = new Date();
     Object.entries(scheduleData.value).forEach(([date, data]) => {
-      const hasAvailable = data.rounds.some((r) => r.availableSeats > 0);
-      result[date] = hasAvailable ? 'available' : 'full';
+      result[date] = getExamRoundsCalendarAvailability(data.rounds, now);
     });
     return result;
   });
@@ -145,7 +151,9 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
-  async function fetchHistory(): Promise<void> {
+  async function fetchHistory(force = false): Promise<void> {
+    if (!force && Date.now() - lastHistoryFetchAt < HISTORY_CACHE_TTL_MS) return;
+
     const userIdStr = localStorage.getItem('user_id');
     if (!userIdStr) return;
     const userId = parseInt(userIdStr, 10);
@@ -174,6 +182,9 @@ export const useExamStore = defineStore('exam', () => {
           getPaymentDeadline(enrollment.CREATED_AT).getTime()
         );
       };
+
+      const hasMatchedPayment = (enrollment: ExamEnrollment): boolean =>
+        enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
 
       enrollments.forEach((enrollment) => {
         const session = enrollment.SESSION;
@@ -216,19 +227,15 @@ export const useExamStore = defineStore('exam', () => {
           }
           newPending.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.PAID) {
-          const isVerified = enrollment.ERM_VERIFY_STATUS === VERIFY_STATUS.PASS;
-          const hasBankMatch =
-            enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
-          item.status =
-            isVerified || hasBankMatch ? 'exam.status.verified' : 'exam.status.paymentCompleted';
+          const hasBankMatch = hasMatchedPayment(enrollment);
+          item.status = hasBankMatch ? 'exam.status.verified' : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
           item.actions = hasBankMatch ? ['downloadReceipt'] : [];
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_ASSIGNED) {
-          item.status = 'exam.status.verified';
+          const hasBankMatch = hasMatchedPayment(enrollment);
+          item.status = hasBankMatch ? 'exam.status.verified' : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
-          const hasBankMatch =
-            enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
 
           const actions: string[] = [];
           if (hasBankMatch) {
@@ -237,10 +244,9 @@ export const useExamStore = defineStore('exam', () => {
           item.actions = actions;
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_PUBLISHED) {
-          item.status = 'exam.status.verified';
+          const hasBankMatch = hasMatchedPayment(enrollment);
+          item.status = hasBankMatch ? 'exam.status.verified' : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
-          const hasBankMatch =
-            enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
           const hasVoucher = !!(enrollment.VOUCHERS && enrollment.VOUCHERS.length > 0);
 
           const actions: string[] = [];
@@ -254,15 +260,18 @@ export const useExamStore = defineStore('exam', () => {
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.ATTENDED) {
           const hasScore = !!enrollment.SCORE;
+          const hasBankMatch = hasMatchedPayment(enrollment);
+          const hasCompletedSession =
+            Number(enrollment.SESSION?.SS_SESSION_STATUS) === SESSION_STATUS_COMPLETED;
           const hasCertificate = !!(
             enrollment.SCORE?.CERTIFICATES && enrollment.SCORE.CERTIFICATES.length > 0
           );
 
           const actions: string[] = [];
-          if (hasScore) {
-            actions.push('scoreDetails');
+          if (hasBankMatch) {
+            actions.push('downloadReceipt');
           }
-          if (hasCertificate) {
+          if (hasCompletedSession && hasCertificate) {
             actions.push('certificate');
           }
 
@@ -289,6 +298,7 @@ export const useExamStore = defineStore('exam', () => {
 
       pendingRegistrations.value = newPending;
       historyRecords.value = newHistory;
+      lastHistoryFetchAt = Date.now();
     } catch (error: unknown) {
       console.error('Failed to fetch user history:', error);
     }
@@ -307,8 +317,7 @@ export const useExamStore = defineStore('exam', () => {
     }
 
     await createEnrollment(userId, round.id, passcode, physicalStatus);
-    await fetchHistory();
-    await initSchedule(true);
+    await fetchHistory(true);
   }
 
   async function confirmSpecialRegistration(
@@ -326,8 +335,7 @@ export const useExamStore = defineStore('exam', () => {
     try {
       setCancellationReason(enrollmentId, reason);
       await updateEnrollmentStatus(enrollmentId, ENROLLMENT_STATUS.CANCELLED);
-      await fetchHistory();
-      await initSchedule(true);
+      await fetchHistory(true);
     } catch (error: unknown) {
       console.error('Failed to cancel registration:', error);
       throw error;
@@ -367,7 +375,7 @@ export const useExamStore = defineStore('exam', () => {
         receiptAddress: receiptInfo?.address,
       });
 
-      await fetchHistory();
+      await fetchHistory(true);
     } catch (error: unknown) {
       console.error('Failed to confirm payment:', error);
       throw error;
@@ -377,7 +385,7 @@ export const useExamStore = defineStore('exam', () => {
   async function expireTransaction(tranxId: number): Promise<void> {
     try {
       await expireTransactionRequest(tranxId);
-      await fetchHistory();
+      await fetchHistory(true);
     } catch (error: unknown) {
       console.error('Failed to expire transaction:', error);
       throw error;

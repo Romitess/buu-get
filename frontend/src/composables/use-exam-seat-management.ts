@@ -2,9 +2,9 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import type { BackendExam, BackendSession } from 'src/types/exam';
+import type { BackendBlockedSeat, BackendExam, BackendSession } from 'src/types/exam';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
-import { fetchExamById } from 'src/services/exam.service';
+import { fetchExamBlockedSeats, fetchExamById } from 'src/services/exam.service';
 import {
   bulkAssignEnrollmentSeats,
   fetchRawEnrollmentsByExamId,
@@ -19,9 +19,6 @@ import { useExamSeatNavigation } from 'src/composables/use-exam-seat-navigation'
 const STATUS_PAID = 1;
 const STATUS_SEAT_ASSIGNED = 2;
 const STATUS_SEAT_PUBLISHED = 3;
-
-/** Width of the custom drag ghost (px) used before the first real measurement */
-const DEFAULT_DRAG_WIDTH = 320;
 
 const PHYSICAL_STATUS_REMARKS: Record<number, string> = {
   0: 'พระภิกษุ / สามเณร',
@@ -73,6 +70,11 @@ interface SeatSessionLocation {
   LOCATION_ID: number;
   SS_ID: number;
   SS_NAME?: string | null;
+  TOTAL_ROWS?: number | null;
+  TOTAL_COLS?: number | null;
+  AISLE_AFTER?: { after_cols: number[]; after_rows: number[] } | null;
+  LOCATION_SEAT_CAPACITY?: number | null;
+  SEATS_SNAPSHOT?: SessionSnapshotSeat[] | null;
   LOCATION: NonNullable<BackendSession['LOCATION']>;
 }
 
@@ -85,12 +87,26 @@ interface SeatLabelOrderItem {
   LS_SEAT_LABEL?: string | null;
   LS_ROW_NO: number;
   LS_COL_NO: number;
+  LS_SORT_ORDER?: number | null;
+}
+
+interface SessionSnapshotSeat {
+  label: string | null;
+  status: 'AVAILABLE' | 'BROKEN' | 'BLOCKED';
+  sortorder: number | null;
+}
+
+interface SessionSeatItem extends SeatLabelOrderItem {
+  LS_ID: number;
+  LS_SEAT_LABEL: string | null;
+  LS_SEAT_STATUS: number;
 }
 
 interface EnrollmentSeatAssignment {
   enrollment: BackendEnrollmentDetail;
-  seatId: number;
   sessionLocationId: number;
+  seatLabel: string;
+  sortOrder?: number;
 }
 
 /**
@@ -118,7 +134,7 @@ export function useExamSeatManagement() {
   const latestProfileHistoryImageById = ref<Record<number, string>>({});
   const students = ref<StudentSeatInfo[]>([]);
   const seatDraftsByTime = new Map<string, StudentSeatInfo[]>();
-  const allSeats = ref<SeatCell[]>([]);
+  const blockedSeatsBySessionId = ref<Record<number, BackendBlockedSeat[]>>({});
   const searchQuery = ref('');
   const hasLoadedEnrollments = ref(false);
 
@@ -258,7 +274,7 @@ export function useExamSeatManagement() {
 
   const sessionTotalCapacity = computed((): number => {
     const totalSeats = sessionLocations.value.reduce(
-      (sum, sessionLocation) => sum + (sessionLocation.LOCATION.SEATS?.length || 0),
+      (sum, sessionLocation) => sum + buildSessionSeatItems(sessionLocation).length,
       0,
     );
     if (totalSeats > 0) return totalSeats;
@@ -274,7 +290,7 @@ export function useExamSeatManagement() {
   const getSeatLabel = (seatId: string | null | undefined): string | null => {
     if (!seatId) return null;
 
-    const seat = activeLocation.value?.SEATS?.find((s) => String(s.LS_ID) === seatId);
+    const seat = activeSessionSeatById.value.get(seatId);
     return seat?.LS_SEAT_LABEL || seatId;
   };
 
@@ -299,6 +315,13 @@ export function useExamSeatManagement() {
   };
 
   const compareSeatsByLabelOrder = (a: SeatLabelOrderItem, b: SeatLabelOrderItem): number => {
+    if (a.LS_SORT_ORDER != null && b.LS_SORT_ORDER != null) {
+      const sortOrderDiff = a.LS_SORT_ORDER - b.LS_SORT_ORDER;
+      if (sortOrderDiff !== 0) return sortOrderDiff;
+    }
+    if (a.LS_SORT_ORDER != null && b.LS_SORT_ORDER == null) return -1;
+    if (a.LS_SORT_ORDER == null && b.LS_SORT_ORDER != null) return 1;
+
     const aLabelOrder = getSeatLabelOrderParts(a.LS_SEAT_LABEL);
     const bLabelOrder = getSeatLabelOrderParts(b.LS_SEAT_LABEL);
 
@@ -315,6 +338,92 @@ export function useExamSeatManagement() {
 
     return a.LS_ROW_NO - b.LS_ROW_NO || a.LS_COL_NO - b.LS_COL_NO;
   };
+
+  const snapshotStatusToSeatCode = (status: string | null | undefined): number => {
+    if (status === 'BROKEN') return 1;
+    if (status === 'BLOCKED') return 2;
+
+    return 0;
+  };
+
+  const getLocationAisleAfter = (
+    location: NonNullable<BackendSession['LOCATION']>,
+  ): { after_cols: number[]; after_rows: number[] } => {
+    const combined = location.LOCATION_AISLE_AFTER_COL ?? [];
+
+    return {
+      after_cols: [
+        ...(location.AISLE_AFTER_COLS ?? []),
+        ...combined
+          .filter((item): item is { type: 'column'; index: number } => {
+            return typeof item === 'object' && item.type === 'column';
+          })
+          .map((item) => item.index),
+        ...combined.filter((item): item is number => typeof item === 'number'),
+      ],
+      after_rows: [
+        ...(location.AISLE_AFTER_ROWS ?? []),
+        ...combined
+          .filter((item): item is { type: 'row'; index: number } => {
+            return typeof item === 'object' && item.type === 'row';
+          })
+          .map((item) => item.index),
+      ],
+    };
+  };
+
+  const getBlockedSeatsForSessionLocation = (
+    sessionLocation: SeatSessionLocation,
+  ): BackendBlockedSeat[] => {
+    const seatIds = new Set((sessionLocation.LOCATION.SEATS ?? []).map((seat) => seat.LS_ID));
+
+    return (blockedSeatsBySessionId.value[sessionLocation.SS_ID] ?? []).filter((seat) => {
+      if (!seatIds.has(seat.LS_ID)) return false;
+      const blockedLocationId = seat.LOCATION_SEAT?.LOCATION_ID;
+      return blockedLocationId == null || blockedLocationId === sessionLocation.LOCATION_ID;
+    });
+  };
+
+  const buildSessionSeatItems = (sessionLocation: SeatSessionLocation): SessionSeatItem[] => {
+    const baseSeats = [...(sessionLocation.LOCATION.SEATS ?? [])];
+    const snapshotByLabel = new Map(
+      (sessionLocation.SEATS_SNAPSHOT ?? [])
+        .filter((seat) => seat.label)
+        .map((seat) => [seat.label as string, seat]),
+    );
+    const blockedStatusBySeatId = new Map(
+      getBlockedSeatsForSessionLocation(sessionLocation).map((seat) => [
+        seat.LS_ID,
+        seat.BLOCK_STATUS,
+      ]),
+    );
+
+    return baseSeats.map((seat) => {
+      const snapshotSeat = seat.LS_SEAT_LABEL ? snapshotByLabel.get(seat.LS_SEAT_LABEL) : undefined;
+      const snapshotStatus = snapshotSeat
+        ? snapshotStatusToSeatCode(snapshotSeat.status)
+        : seat.LS_SEAT_STATUS;
+      const status = blockedStatusBySeatId.get(seat.LS_ID) ?? snapshotStatus;
+
+      return {
+        LS_ID: seat.LS_ID,
+        LS_ROW_NO: seat.LS_ROW_NO,
+        LS_COL_NO: seat.LS_COL_NO,
+        LS_SEAT_LABEL: seat.LS_SEAT_LABEL,
+        LS_SEAT_STATUS: status,
+        LS_SORT_ORDER: snapshotSeat?.sortorder ?? seat.LS_SORT_ORDER ?? null,
+      };
+    });
+  };
+
+  const activeSessionSeatItems = computed<SessionSeatItem[]>(() => {
+    const selectedSessionLocation = activeSessionLocation.value;
+    return selectedSessionLocation ? buildSessionSeatItems(selectedSessionLocation) : [];
+  });
+
+  const activeSessionSeatById = computed((): Map<string, SessionSeatItem> => {
+    return new Map(activeSessionSeatItems.value.map((seat) => [String(seat.LS_ID), seat]));
+  });
 
   const normalizePhysicalStatusCode = (
     value: string | number | null | undefined,
@@ -446,6 +555,23 @@ export function useExamSeatManagement() {
     });
   };
 
+  const refreshBlockedSeats = async (): Promise<void> => {
+    const sessionIds = [...new Set(sessions.value.map((session) => session.SS_ID))];
+    if (sessionIds.length === 0) {
+      blockedSeatsBySessionId.value = {};
+      return;
+    }
+
+    const blockedSeatEntries = await Promise.all(
+      sessionIds.map(async (sessionId) => {
+        const seats = await fetchExamBlockedSeats(sessionId);
+        return [sessionId, seats] as const;
+      }),
+    );
+
+    blockedSeatsBySessionId.value = Object.fromEntries(blockedSeatEntries);
+  };
+
   const isSeatAssignmentComplete = computed((): boolean => {
     return students.value.length > 0 && students.value.every((student) => Boolean(student.seat));
   });
@@ -454,9 +580,7 @@ export function useExamSeatManagement() {
     const selectedSessionLocation = activeSessionLocation.value;
     if (!selectedSessionLocation) return [];
 
-    const roomSeatIds = new Set(
-      (selectedSessionLocation.LOCATION.SEATS || []).map((seat) => String(seat.LS_ID)),
-    );
+    const roomSeatIds = new Set(activeSessionSeatItems.value.map((seat) => String(seat.LS_ID)));
 
     return students.value.filter((student) => {
       if (student.seat && roomSeatIds.has(student.seat)) return true;
@@ -472,17 +596,26 @@ export function useExamSeatManagement() {
   const currentRoomCount = computed((): number => currentRoomStudents.value.length);
 
   const currentRoomCapacity = computed((): number => {
-    const location = activeSessionLocation.value?.LOCATION;
-    if (!location) return 0;
+    const selectedSessionLocation = activeSessionLocation.value;
+    if (!selectedSessionLocation) return 0;
 
-    const usableSeatCount = (location.SEATS || []).filter(
+    const usableSeatCount = activeSessionSeatItems.value.filter(
       (seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2,
     ).length;
-    if (usableSeatCount > 0) return usableSeatCount;
+    if (activeSessionSeatItems.value.length > 0) return usableSeatCount;
 
-    if (location.LOCATION_SEAT_CAPACITY) return location.LOCATION_SEAT_CAPACITY;
+    if (selectedSessionLocation.LOCATION_SEAT_CAPACITY) {
+      return selectedSessionLocation.LOCATION_SEAT_CAPACITY;
+    }
 
-    return (location.LOCATION_TOTAL_ROWS || 0) * (location.LOCATION_TOTAL_COLS || 0);
+    return (
+      (selectedSessionLocation.TOTAL_ROWS ||
+        selectedSessionLocation.LOCATION.LOCATION_TOTAL_ROWS ||
+        0) *
+      (selectedSessionLocation.TOTAL_COLS ||
+        selectedSessionLocation.LOCATION.LOCATION_TOTAL_COLS ||
+        0)
+    );
   });
 
   /**
@@ -494,7 +627,7 @@ export function useExamSeatManagement() {
     if (!student.seat) return Number.MAX_SAFE_INTEGER;
 
     for (const location of sessionLocations.value) {
-      const seat = location.LOCATION.SEATS?.find((s) => String(s.LS_ID) === student.seat);
+      const seat = buildSessionSeatItems(location).find((s) => String(s.LS_ID) === student.seat);
       if (seat) {
         // Room first, then row, then column → stable, grid-aligned order
         const labelOrder = getSeatLabelOrderParts(seat.LS_SEAT_LABEL);
@@ -534,60 +667,9 @@ export function useExamSeatManagement() {
   });
 
   // ── Seat grid ────────────────────────────────────────────
-  // Sync seat visual status with student data
-  const updateSeatStatuses = (): void => {
-    // สร้าง lookup ครั้งเดียว แทนการ .find()/.some() ซ้ำในทุก seat (เดิม O(seats × students))
-    const dbSeatById = new Map(
-      (activeLocation.value?.SEATS ?? []).map((s) => [String(s.LS_ID), s]),
-    );
-    const occupiedSeatIds = new Set(
-      students.value
-        .filter((s) => s.seat && s.sessionLocationId === activeSessionLocationId.value)
-        .map((s) => s.seat),
-    );
-
-    allSeats.value.forEach((seat) => {
-      const dbSeat = dbSeatById.get(seat.id);
-      if (dbSeat?.LS_SEAT_STATUS === 1) {
-        seat.status = 'broken';
-        return;
-      }
-      if (dbSeat?.LS_SEAT_STATUS === 2) {
-        seat.status = 'blocked';
-        return;
-      }
-      seat.status = occupiedSeatIds.has(seat.id) ? 'assigned' : 'available';
-    });
-  };
-
-  // Pull seats from backend location
-  const initializeSeats = (): void => {
-    allSeats.value = [];
-    if (!activeLocation.value?.SEATS) return;
-
-    const seats = activeLocation.value.SEATS;
-    seats.forEach((seat) => {
-      let status: SeatStatus = 'available';
-      if (seat.LS_SEAT_STATUS === 1) {
-        status = 'broken';
-      } else if (seat.LS_SEAT_STATUS === 2) {
-        status = 'blocked';
-      }
-      allSeats.value.push({
-        id: String(seat.LS_ID),
-        label: seat.LS_SEAT_LABEL || '',
-        status: status,
-        rowNo: seat.LS_ROW_NO,
-        colNo: seat.LS_COL_NO,
-        student: null,
-      });
-    });
-    updateSeatStatuses();
-  };
-
   const getUsableSeatAssignments = (): UsableSeatAssignment[] => {
     return sessionLocations.value.flatMap((sessionLocation) => {
-      const seats = [...(sessionLocation.LOCATION.SEATS || [])]
+      const seats = buildSessionSeatItems(sessionLocation)
         .filter((seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2)
         .sort(compareSeatsByLabelOrder);
 
@@ -625,8 +707,6 @@ export function useExamSeatManagement() {
       student.seat = nextSeat.seatId;
       student.sessionLocationId = nextSeat.sessionLocationId;
     });
-
-    updateSeatStatuses();
   };
 
   const filterStudentsBySession = (): void => {
@@ -639,7 +719,6 @@ export function useExamSeatManagement() {
     const existingDraft = timeKey ? seatDraftsByTime.get(timeKey) : undefined;
     if (existingDraft) {
       students.value = cloneStudents(existingDraft);
-      updateSeatStatuses();
       return;
     }
 
@@ -708,6 +787,7 @@ export function useExamSeatManagement() {
       }
 
       sessions.value = examData.value.SESSIONS || [];
+      await refreshBlockedSeats();
       const firstSession = sessionTimeTabs.value[0];
       if (firstSession) {
         activeSessionId.value = firstSession.SS_ID;
@@ -733,116 +813,6 @@ export function useExamSeatManagement() {
       filterStudentsBySession();
     }
   });
-
-  watch(activeSessionLocationId, () => {
-    initializeSeats();
-  });
-
-  // ── Custom drag and drop ─────────────────────────────────
-  const draggedStudentId = ref<string | null>(null);
-  const draggedOverSeatId = ref<string | null>(null);
-  const dragX = ref(0);
-  const dragY = ref(0);
-  const dragOffsetX = ref(0);
-  const dragOffsetY = ref(0);
-  const dragWidth = ref(DEFAULT_DRAG_WIDTH);
-  const isDragging = ref(false);
-
-  const draggedStudentInfo = computed((): StudentSeatInfo | undefined => {
-    return students.value.find((s) => s.id === draggedStudentId.value);
-  });
-
-  const onMouseMove = (e: MouseEvent): void => {
-    if (!isDragging.value) return;
-    dragX.value = e.clientX;
-    dragY.value = e.clientY;
-  };
-
-  const onGlobalMouseUp = (): void => {
-    if (isDragging.value) {
-      isDragging.value = false;
-      draggedStudentId.value = null;
-      draggedOverSeatId.value = null;
-
-      document.body.classList.remove('is-dragging-active');
-
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onGlobalMouseUp);
-    }
-  };
-
-  const onMouseDown = (e: MouseEvent, studentId: string): void => {
-    if (e.button !== 0) return; // Only trigger on left mouse button
-
-    // Calculate exact position so the card doesn't "jump" to the mouse center
-    const targetElement = e.currentTarget as HTMLElement;
-    if (targetElement) {
-      const rect = targetElement.getBoundingClientRect();
-      dragOffsetX.value = e.clientX - rect.left;
-      dragOffsetY.value = e.clientY - rect.top;
-      dragWidth.value = rect.width;
-    }
-
-    isDragging.value = true;
-    draggedStudentId.value = studentId;
-    dragX.value = e.clientX;
-    dragY.value = e.clientY;
-
-    document.body.classList.add('is-dragging-active');
-
-    // Track global mouse movement for the ghost
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onGlobalMouseUp);
-  };
-
-  const onSeatEnter = (seatId: string): void => {
-    if (isDragging.value) {
-      const seat = allSeats.value.find((s) => s.id === seatId);
-      if (seat && seat.status !== 'broken' && seat.status !== 'blocked') {
-        draggedOverSeatId.value = seatId;
-      }
-    }
-  };
-
-  const onSeatLeave = (seatId: string): void => {
-    if (draggedOverSeatId.value === seatId) {
-      draggedOverSeatId.value = null;
-    }
-  };
-
-  const onSeatDrop = (seatId: string): void => {
-    if (!isDragging.value || !draggedStudentId.value) return;
-
-    const targetSeat = allSeats.value.find((s) => s.id === seatId);
-    if (targetSeat && (targetSeat.status === 'broken' || targetSeat.status === 'blocked')) {
-      return;
-    }
-
-    const student = students.value.find((s) => s.id === draggedStudentId.value);
-    if (student) {
-      // Unassign anyone currently in this seat
-      const existingOccupant = students.value.find((s) => s.seat === seatId && s.id !== student.id);
-      if (existingOccupant) {
-        existingOccupant.seat = null;
-      }
-
-      // Assign new seat to the dragged student
-      student.seat = seatId;
-      updateSeatStatuses();
-    }
-  };
-
-  // Click an occupied seat to remove its student
-  const handleSeatClick = (seat: SeatCell): void => {
-    if (seat.status === 'broken' || seat.status === 'blocked') {
-      return;
-    }
-    const occupant = students.value.find((s) => s.seat === seat.id);
-    if (occupant) {
-      occupant.seat = null;
-      updateSeatStatuses();
-    }
-  };
 
   const swapSeatAssignments = (sourceSeatId: string, targetSeatId: string): void => {
     if (sourceSeatId === targetSeatId) return;
@@ -880,8 +850,6 @@ export function useExamSeatManagement() {
     const targetSeat = usableSeats[targetIndex]!;
     sourceStudent.seat = targetSeat.seatId;
     sourceStudent.sessionLocationId = targetSeat.sessionLocationId;
-
-    updateSeatStatuses();
   };
 
   const handleCancel = (): void => {
@@ -929,13 +897,24 @@ export function useExamSeatManagement() {
           ];
         });
         const availableSeats = timeLocations.flatMap((location) =>
-          [...(location.LOCATION.SEATS || [])]
+          buildSessionSeatItems(location)
             .filter((seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2)
             .sort(compareSeatsByLabelOrder)
-            .map((seat) => ({
-              seatId: seat.LS_ID,
-              sessionLocationId: location.SL_ID,
-            })),
+            .flatMap((seat, index) => {
+              if (!seat.LS_SEAT_LABEL) return [];
+
+              return [
+                {
+                  seatId: seat.LS_ID,
+                  seatLabel: seat.LS_SEAT_LABEL,
+                  sortOrder: seat.LS_SORT_ORDER ?? index + 1,
+                  sessionLocationId: location.SL_ID,
+                },
+              ];
+            }),
+        );
+        const availableSeatByLocationAndId = new Map(
+          availableSeats.map((seat) => [`${seat.sessionLocationId}:${seat.seatId}`, seat]),
         );
         const eligibleEnrollments = allEnrollments.value
           .filter(
@@ -977,20 +956,30 @@ export function useExamSeatManagement() {
           const seatId = draftStudent?.seat ? Number(draftStudent.seat) : generatedSeat?.seatId;
           const sessionLocationId =
             draftStudent?.sessionLocationId ?? generatedSeat?.sessionLocationId;
+          const selectedSeat =
+            seatId && sessionLocationId
+              ? availableSeatByLocationAndId.get(`${sessionLocationId}:${seatId}`)
+              : undefined;
 
-          if (!seatId || !sessionLocationId || sessionLocationId < 1) {
+          if (!selectedSeat || !sessionLocationId || sessionLocationId < 1) {
             throw new Error(t('admin.seatManagement.notifications.saveError'));
           }
 
-          seatAssignments.push({ enrollment, seatId, sessionLocationId });
+          seatAssignments.push({
+            enrollment,
+            sessionLocationId,
+            seatLabel: selectedSeat.seatLabel,
+            sortOrder: selectedSeat.sortOrder,
+          });
         });
       }
 
       await bulkAssignEnrollmentSeats(
         seatAssignments.map((assignment) => ({
           ermId: assignment.enrollment.ERM_ID,
-          lsId: assignment.seatId,
           slId: assignment.sessionLocationId,
+          seatLabel: assignment.seatLabel,
+          ...(assignment.sortOrder !== undefined ? { sortOrder: assignment.sortOrder } : {}),
         })),
         sessions.value.map((session) => session.SS_ID),
       );
@@ -1031,11 +1020,6 @@ export function useExamSeatManagement() {
     }
   };
 
-  // Build the grid if we already have data
-  if (activeSession.value) {
-    initializeSeats();
-  }
-
   // กัน refetch ถี่เกินไป: focus กับ visibilitychange มักยิงพร้อมกัน และผู้ใช้สลับ tab บ่อย
   // จึง refresh เฉพาะเมื่อไม่มีการโหลดค้างอยู่ และเว้นระยะอย่างน้อย MIN_REFRESH_INTERVAL_MS
   const MIN_REFRESH_INTERVAL_MS = 15000;
@@ -1065,24 +1049,42 @@ export function useExamSeatManagement() {
   });
 
   const gridCols = computed(() => {
-    return activeLocation.value?.LOCATION_TOTAL_COLS || 10;
-  });
-
-  const splitLeftRight = computed((): boolean => {
     return (
-      (activeLocation.value?.AISLE_AFTER_COLS?.length ?? 0) > 0 ||
-      (activeLocation.value?.AISLE_AFTER_ROWS?.length ?? 0) > 0
+      activeSessionLocation.value?.TOTAL_COLS ||
+      activeSessionLocation.value?.LOCATION.LOCATION_TOTAL_COLS ||
+      10
     );
   });
 
-  const aisleAfterCols = computed((): number[] => activeLocation.value?.AISLE_AFTER_COLS ?? []);
-  const aisleAfterRows = computed((): number[] => activeLocation.value?.AISLE_AFTER_ROWS ?? []);
+  const splitLeftRight = computed((): boolean => {
+    return aisleAfterCols.value.length > 0 || aisleAfterRows.value.length > 0;
+  });
+
+  const aisleAfterCols = computed((): number[] => {
+    const selectedSessionLocation = activeSessionLocation.value;
+    if (!selectedSessionLocation) return [];
+
+    return (
+      selectedSessionLocation.AISLE_AFTER?.after_cols ??
+      getLocationAisleAfter(selectedSessionLocation.LOCATION).after_cols
+    );
+  });
+
+  const aisleAfterRows = computed((): number[] => {
+    const selectedSessionLocation = activeSessionLocation.value;
+    if (!selectedSessionLocation) return [];
+
+    return (
+      selectedSessionLocation.AISLE_AFTER?.after_rows ??
+      getLocationAisleAfter(selectedSessionLocation.LOCATION).after_rows
+    );
+  });
 
   const seatsByRow = computed((): SeatCell[][] => {
-    if (!activeLocation.value?.SEATS) return [];
+    if (activeSessionSeatItems.value.length === 0) return [];
 
     const rowsMap: { [key: number]: SeatCell[] } = {};
-    const seats = activeLocation.value.SEATS;
+    const seats = activeSessionSeatItems.value;
 
     // lookup ครั้งเดียว แทนการ .find() ในทุก seat (เดิม O(seats × students) ถึง 2 รอบ)
     const studentBySeatId = new Map<string, StudentSeatInfo>();
@@ -1131,8 +1133,11 @@ export function useExamSeatManagement() {
   });
 
   const seatStyle = computed(() => {
-    const cols = activeLocation.value?.LOCATION_TOTAL_COLS || 1;
-    const rows = activeLocation.value?.LOCATION_TOTAL_ROWS || 1;
+    const cols = activeSessionLocation.value?.TOTAL_COLS || gridCols.value || 1;
+    const rows =
+      activeSessionLocation.value?.TOTAL_ROWS ||
+      activeSessionLocation.value?.LOCATION.LOCATION_TOTAL_ROWS ||
+      1;
     const aisleWidth = splitLeftRight.value ? 48 : 0;
     const total = rows * cols;
 
@@ -1167,8 +1172,6 @@ export function useExamSeatManagement() {
     document.body.classList.remove('is-dragging-active');
     window.removeEventListener('focus', handleWindowFocus);
     document.removeEventListener('visibilitychange', handleVisibilityChange);
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', onGlobalMouseUp);
   });
 
   return {
@@ -1181,7 +1184,6 @@ export function useExamSeatManagement() {
     sessionTimeTabs,
     roomOptions,
     searchQuery,
-    allSeats,
     gridCols,
     splitLeftRight,
     aisleAfterCols,
@@ -1200,23 +1202,9 @@ export function useExamSeatManagement() {
     currentRoomCapacity,
     filteredStudents,
     isSeatAssignmentComplete,
-    // Drag state
-    draggedStudentId,
-    draggedOverSeatId,
-    dragX,
-    dragY,
-    dragOffsetX,
-    dragOffsetY,
-    dragWidth,
-    draggedStudentInfo,
     // Methods
     loadExamData,
     getSeatLabel,
-    onMouseDown,
-    onSeatEnter,
-    onSeatLeave,
-    onSeatDrop,
-    handleSeatClick,
     swapSeatAssignments,
     handleCancel,
     handleSave,

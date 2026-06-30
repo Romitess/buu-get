@@ -22,7 +22,7 @@ export const updateFundSource = async (
   id: number | string,
   payload: CreateFundSourcePayload,
 ): Promise<FundSource> => {
-  const response = await api.put<FundSource>(`/fund-sources/${id}`, payload);
+  const response = await api.patch<FundSource>(`/fund-sources/${id}`, payload);
   return response.data;
 };
 

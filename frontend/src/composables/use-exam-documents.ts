@@ -171,7 +171,7 @@ export function useExamDocuments() {
         examType: mapExamTypeToEn(examObj?.EXAM_TYPE),
         location: locationText,
         locationRoom,
-        seatNo: enrollment.LOCATION_SEAT?.LS_SEAT_LABEL || '-',
+        seatNo: enrollment.ERM_SEAT_LABEL || enrollment.LOCATION_SEAT?.LS_SEAT_LABEL || '-',
         voucherNo: voucherCode,
         citizenId:
           enrollment.USER?.USER_NATIONAL_ID ||

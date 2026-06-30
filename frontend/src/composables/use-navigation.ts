@@ -25,16 +25,30 @@ export function useNavigation() {
     // === Candidate Menus ===
     {
       name: 'exam-schedule',
-      label: 'ตารางสอบ (Candidate)',
-      icon: 'event',
+      label: 'รายการสอบ',
+      icon: 'list_alt',
       path: '/user/exam-schedule',
       requiredRoles: [ROLES.CANDIDATE],
     },
     {
+      name: 'exam-simulation',
+      label: 'จำลองการสอบ',
+      icon: 'monitor',
+      path: '/user/exam-simulation',
+      requiredRoles: [ROLES.CANDIDATE],
+    },
+    {
       name: 'exam-history',
-      label: 'ประวัติการสอบ (Candidate)',
+      label: 'ประวัติการสอบ',
       icon: 'history',
       path: '/user/exam-history',
+      requiredRoles: [ROLES.CANDIDATE],
+    },
+    {
+      name: 'user-profile',
+      label: 'ข้อมูลส่วนตัว',
+      icon: 'person',
+      path: '/user/profile',
       requiredRoles: [ROLES.CANDIDATE],
     },
     // === Staff Menus ===

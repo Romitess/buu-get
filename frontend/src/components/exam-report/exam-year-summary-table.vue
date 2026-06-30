@@ -2,71 +2,95 @@
   <q-card flat bordered class="year-table-card">
     <q-card-section>
       <div class="year-table-card__title">{{ t('admin.examReport.yearTable.title') }}</div>
-      <q-table
-        flat
+      <BaseTable
         :rows="rows"
         :columns="columns"
-        row-key="year"
         :loading="loading"
         :pagination="pagination"
         :rows-per-page-options="[5, 10, 20]"
+        :empty-label="t('admin.examReport.yearTable.empty')"
         class="year-table"
+        @request="onRequest"
       >
-        <template v-slot:body-cell-detail="props">
-          <q-td :props="props">
-            <q-btn
-              flat
-              round
-              dense
-              color="primary"
+        <template #body-cell-detail="{ row }">
+          <div class="row items-center justify-center">
+            <ActionButton
               icon="people_outline"
-              @click="emit('view-detail', props.row)"
-            >
-              <q-tooltip>{{ t('admin.examReport.yearTable.viewDetail') }}</q-tooltip>
-            </q-btn>
-          </q-td>
-        </template>
-        <template v-slot:no-data>
-          <div class="full-width text-center text-grey-6 q-pa-md">
-            {{ t('admin.examReport.yearTable.empty') }}
+              color="black"
+              :tooltip="t('admin.examReport.yearTable.viewDetail')"
+              @click="goToExamInformation(row)"
+            />
           </div>
         </template>
-      </q-table>
+      </BaseTable>
     </q-card-section>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import BaseTable from 'src/components/shared/base-table.vue';
+import ActionButton from 'src/components/shared/action-button.vue';
+import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import type { ExamYearTableRow } from 'src/types/exam-report.types';
 
 const { t } = useI18n();
+const router = useRouter();
 
 interface Props {
   rows: ExamYearTableRow[];
   loading?: boolean;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
-const emit = defineEmits<{
-  (e: 'view-detail', row: ExamYearTableRow): void;
-}>();
-
-const pagination = { rowsPerPage: 5 };
+const pagination = ref<PaginationModel>({
+  page: 1,
+  rowsPerPage: 5,
+  rowsNumber: props.rows.length,
+  sortBy: null,
+  descending: false,
+});
 
 const intText = (value: number): string => value.toLocaleString('en-US');
 const numText = (value: number | null): string =>
   value === null ? '-' : value.toLocaleString('en-US', { maximumFractionDigits: 2 });
+
+const goToExamInformation = (row: ExamYearTableRow): void => {
+  void router.push({
+    name: 'admin-exam-information',
+    params: { year: String(row.year) },
+  });
+};
+
+const onRequest = (requestProps: TableRequestProps): void => {
+  const { page, rowsPerPage, sortBy, descending } = requestProps.pagination;
+  pagination.value.page = page;
+  pagination.value.rowsPerPage = rowsPerPage;
+  pagination.value.sortBy = sortBy ?? null;
+  pagination.value.descending = descending ?? false;
+  pagination.value.rowsNumber = props.rows.length;
+};
+
+watch(
+  () => props.rows.length,
+  (rowCount) => {
+    const lastPage = Math.max(1, Math.ceil(rowCount / pagination.value.rowsPerPage));
+    pagination.value.rowsNumber = rowCount;
+    pagination.value.page = Math.min(pagination.value.page, lastPage);
+  },
+  { immediate: true },
+);
 
 const columns = computed((): QTableColumn<ExamYearTableRow>[] => [
   {
     name: 'year',
     label: t('admin.examReport.yearTable.columns.year'),
     field: 'year',
-    align: 'left',
+    align: 'center',
   },
   {
     name: 'registered',
@@ -122,6 +146,7 @@ const columns = computed((): QTableColumn<ExamYearTableRow>[] => [
     label: t('admin.examReport.yearTable.columns.detail'),
     field: 'year',
     align: 'center',
+    sortable: false,
   },
 ]);
 </script>
@@ -141,13 +166,8 @@ const columns = computed((): QTableColumn<ExamYearTableRow>[] => [
 }
 
 .year-table {
-  :deep(thead tr th) {
-    background-color: var(--primary);
-    color: var(--text-on-primary);
-    font-weight: 600;
-    position: sticky;
-    top: 0;
-    z-index: 1;
+  :deep(.base-table table) {
+    min-width: 960px;
   }
 }
 </style>

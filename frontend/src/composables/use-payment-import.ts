@@ -184,15 +184,11 @@ export function usePaymentImport() {
     error.value = null;
 
     try {
-      const currentImportedIds = new Set(
-        importedRows.value.map((row) => row.brId).filter((brId) => brId > 0),
-      );
-      const reconciles = await verifyBankReconciles();
-      const currentReconciles =
-        currentImportedIds.size > 0
-          ? reconciles.filter((reconcile) => currentImportedIds.has(reconcile.BR_ID))
-          : reconciles;
-      importedRows.value = currentReconciles.map(mapBankReconcileToRow);
+      const currentImportedIds = importedRows.value
+        .map((row) => row.brId)
+        .filter((brId) => brId > 0);
+      const reconciles = await verifyBankReconciles(currentImportedIds);
+      importedRows.value = reconciles.map(mapBankReconcileToRow);
       skippedRows.value = 0;
     } catch (err) {
       console.error('Verification failed:', err);
@@ -204,12 +200,7 @@ export function usePaymentImport() {
   };
 
   onMounted(() => {
-    if (isAutoLoadSuspended.value) {
-      clearLocalData();
-      return;
-    }
-
-    void loadData();
+    clearLocalData();
   });
 
   return {

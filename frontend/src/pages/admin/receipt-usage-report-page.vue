@@ -269,6 +269,7 @@ const columns = computed<QTableColumn[]>(() => [
     label: t('admin.receiptUsageReport.table.columns.index'),
     field: 'index',
     align: 'center',
+    sortable: true,
   },
   {
     name: 'receiptNo',

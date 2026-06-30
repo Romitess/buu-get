@@ -4,12 +4,18 @@ import { Repository } from 'typeorm';
 import { ExamAttendance } from './entities/exam-attendance.entity';
 import { CreateExamAttendanceDto } from './dto/create-exam-attendance.dto';
 import { UpdateExamAttendanceDto } from './dto/update-exam-attendance.dto';
+import {
+  ExamEnrollment,
+  ExamEnrollmentStatus,
+} from '../exam-enrollments/entities/exam-enrollment.entity';
 
 @Injectable()
 export class ExamAttendancesService {
   constructor(
     @InjectRepository(ExamAttendance)
     private readonly examAttendanceRepository: Repository<ExamAttendance>,
+    @InjectRepository(ExamEnrollment)
+    private readonly examEnrollmentRepository: Repository<ExamEnrollment>,
   ) {}
 
   async create(
@@ -23,7 +29,15 @@ export class ExamAttendancesService {
     const attendance = this.examAttendanceRepository.create(
       createExamAttendanceDto,
     );
-    return await this.examAttendanceRepository.save(attendance);
+    const saved = await this.examAttendanceRepository.save(attendance);
+
+    if (Number(saved.ATTEND_STATUS) === 1) {
+      await this.examEnrollmentRepository.update(saved.ERM_ID, {
+        ERM_STATUS: ExamEnrollmentStatus.ATTENDED,
+      });
+    }
+
+    return saved;
   }
 
   async findAll(): Promise<ExamAttendance[]> {
@@ -54,7 +68,15 @@ export class ExamAttendancesService {
       attendance,
       updateExamAttendanceDto,
     );
-    return await this.examAttendanceRepository.save(updated);
+    const saved = await this.examAttendanceRepository.save(updated);
+
+    if (Number(saved.ATTEND_STATUS) === 1) {
+      await this.examEnrollmentRepository.update(saved.ERM_ID, {
+        ERM_STATUS: ExamEnrollmentStatus.ATTENDED,
+      });
+    }
+
+    return saved;
   }
 
   async remove(id: number): Promise<void> {

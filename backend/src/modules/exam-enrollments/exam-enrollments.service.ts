@@ -16,13 +16,13 @@ import {
 } from './entities/exam-enrollment.entity';
 import { CreateExamEnrollmentDto } from './dto/create-exam-enrollment.dto';
 import { UpdateExamEnrollmentDto } from './dto/update-exam-enrollment.dto';
-import { BulkSeatAssignmentDto } from './dto/bulk-seat-assignment.dto';
+import {
+  BulkSeatAssignmentDto,
+  SeatAssignmentItemDto,
+} from './dto/bulk-seat-assignment.dto';
 import { RequestFixDto } from './dto/request-fix.dto';
 import { ExamEnrollmentQueryDto } from './dto/exam-enrollment-query.dto';
-import {
-  ExamLocationSeat,
-  LocationSeatStatus,
-} from '../exam-location-seats/entities/exam-location-seat.entity';
+import { ExamLocationSeat } from '../exam-location-seats/entities/exam-location-seat.entity';
 import { ExamSessionLocation } from '../exam-session-locations/entities/exam-session-location.entity';
 
 import {
@@ -36,6 +36,15 @@ import { EXAM_TYPE } from '../exam/constants/exam.constants';
 import { getProfileFixEmailTemplate } from './templates/profile-fix-email.template';
 import { ExamPasscodeLog } from '../exam/entities/exam-passcode-log.entity';
 import { TestTakerIdService } from './test-taker-id.service';
+import { ExecutiveTestTakerQueryDto } from './dto/executive-test-taker-query.dto';
+import {
+  ExecutiveTestTakerPage,
+  ExecutiveTestTakerRow,
+} from './interfaces/executive-test-taker.interface';
+import {
+  ExamHistoryRow,
+  ExecutiveExamHistoryResponse,
+} from './interfaces/executive-exam-history.interface';
 
 @Injectable()
 export class ExamEnrollmentsService {
@@ -62,7 +71,6 @@ export class ExamEnrollmentsService {
 
   async bulkAssignSeats(dto: BulkSeatAssignmentDto): Promise<ExamEnrollment[]> {
     const enrollmentIds = dto.assignments.map((item) => item.ermId);
-    const seatIds = dto.assignments.map((item) => item.lsId);
     const sessionLocationIds = dto.assignments.map((item) => item.slId);
     const uniqueEnrollmentIds = new Set(enrollmentIds);
 
@@ -79,12 +87,9 @@ export class ExamEnrollmentsService {
       );
     }
 
-    const [sessionLocations, seats, sessions] = await Promise.all([
+    const [sessionLocations, sessions] = await Promise.all([
       this.examSessionLocationRepository.find({
         where: { SL_ID: In(sessionLocationIds) },
-      }),
-      this.examLocationSeatRepository.find({
-        where: { LS_ID: In(seatIds) },
       }),
       this.examSessionRepository.find({
         where: { SS_ID: In(dto.sessionIds) },
@@ -97,7 +102,6 @@ export class ExamEnrollmentsService {
     const sessionLocationById = new Map(
       sessionLocations.map((location) => [location.SL_ID, location]),
     );
-    const seatById = new Map(seats.map((seat) => [seat.LS_ID, seat]));
     const sessionIdSet = new Set(dto.sessionIds);
     const usedSessionSeats = new Set<string>();
 
@@ -108,9 +112,8 @@ export class ExamEnrollmentsService {
     for (const assignment of dto.assignments) {
       const enrollment = enrollmentById.get(assignment.ermId);
       const sessionLocation = sessionLocationById.get(assignment.slId);
-      const seat = seatById.get(assignment.lsId);
 
-      if (!enrollment || !sessionLocation || !seat) {
+      if (!enrollment || !sessionLocation) {
         throw new BadRequestException('Invalid seat assignment data');
       }
       if (!sessionIdSet.has(enrollment.SESSION_ID)) {
@@ -123,16 +126,8 @@ export class ExamEnrollmentsService {
           'Session location does not belong to the enrollment session',
         );
       }
-      if (seat.LOCATION_ID !== sessionLocation.LOCATION_ID) {
-        throw new BadRequestException(
-          'Seat does not belong to the selected session location',
-        );
-      }
-      if (seat.LS_SEAT_STATUS !== LocationSeatStatus.AVAILABLE) {
-        throw new BadRequestException('Seat is unavailable');
-      }
 
-      const sessionSeatKey = `${enrollment.SESSION_ID}:${assignment.lsId}`;
+      const sessionSeatKey = `${assignment.slId}:${assignment.seatLabel}`;
       if (usedSessionSeats.has(sessionSeatKey)) {
         throw new ConflictException('Duplicate seat assignment in session');
       }
@@ -143,18 +138,25 @@ export class ExamEnrollmentsService {
       await manager.update(
         ExamEnrollment,
         { ERM_ID: In(enrollmentIds) },
-        { LS_ID: null, SL_ID: null },
+        { ERM_SEAT_LABEL: null, ERM_SORT_ORDER: null, SL_ID: null },
       );
 
-      const updatedEnrollments = dto.assignments.map((assignment) => {
-        const enrollment = enrollmentById.get(assignment.ermId)!;
-        enrollment.LS_ID = assignment.lsId;
-        enrollment.SL_ID = assignment.slId;
-        if (enrollment.ERM_STATUS < ExamEnrollmentStatus.SEAT_ASSIGNED) {
-          enrollment.ERM_STATUS = ExamEnrollmentStatus.SEAT_ASSIGNED;
-        }
-        return enrollment;
-      });
+      const updatedEnrollments = dto.assignments.map(
+        (assignment: SeatAssignmentItemDto) => {
+          const enrollment = enrollmentById.get(assignment.ermId)!;
+          const rawSortOrder: unknown = assignment.sortOrder;
+          const sortOrder: number | null =
+            typeof rawSortOrder === 'number' ? rawSortOrder : null;
+
+          enrollment.ERM_SEAT_LABEL = assignment.seatLabel;
+          enrollment.ERM_SORT_ORDER = sortOrder;
+          enrollment.SL_ID = assignment.slId;
+          if (enrollment.ERM_STATUS < ExamEnrollmentStatus.SEAT_ASSIGNED) {
+            enrollment.ERM_STATUS = ExamEnrollmentStatus.SEAT_ASSIGNED;
+          }
+          return enrollment;
+        },
+      );
 
       await manager.save(ExamEnrollment, updatedEnrollments);
       await this.testTakerIdService.assign(manager, enrollmentIds);
@@ -325,11 +327,160 @@ export class ExamEnrollmentsService {
         'USER',
         'USER.PROFILE',
         'USER.IMAGE',
-        'LOCATION_SEAT',
         'TRANSACTION',
         'TRANSACTION.RECEIPTS',
       ],
     });
+  }
+
+  async findExecutiveTestTakers(
+    query: ExecutiveTestTakerQueryDto,
+  ): Promise<ExecutiveTestTakerPage> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const search = query.search?.trim();
+
+    const queryBuilder = this.examEnrollmentRepository
+      .createQueryBuilder('enrollment')
+      .leftJoin('enrollment.USER', 'user')
+      .leftJoin('user.PROFILE', 'profile')
+      .leftJoin('enrollment.SESSION', 'session')
+      .innerJoin('enrollment.ATTENDANCES', 'attendance')
+      .select('MIN(enrollment.ERM_ID)', 'enrollmentId')
+      .addSelect('MIN(session.EXAM_ID)', 'examId')
+      .addSelect('MIN(enrollment.ERM_TEST_TAKER)', 'testTakerId')
+      .addSelect('MIN(enrollment.ERM_STATUS)', 'status')
+      .addSelect('profile.userTitleTh', 'title')
+      .addSelect('profile.userFullnameTh', 'fullName')
+      .addSelect('COUNT(DISTINCT attendance.ATTEND_ID)', 'examRoundCount');
+
+    if (search) {
+      queryBuilder.andWhere(
+        new Brackets((where) => {
+          where
+            .where('enrollment.ERM_TEST_TAKER LIKE :search')
+            .orWhere('profile.userTitleTh LIKE :search')
+            .orWhere('profile.userFullnameTh LIKE :search');
+        }),
+        { search: `%${search}%` },
+      );
+    }
+
+    const totalResult = await queryBuilder
+      .clone()
+      .select('COUNT(DISTINCT enrollment.USER_ID)', 'total')
+      .getRawOne<{ total: string }>();
+    const total = Number(totalResult?.total ?? 0);
+    const rawRows = await queryBuilder
+      .groupBy('enrollment.USER_ID')
+      .addGroupBy('profile.userTitleTh')
+      .addGroupBy('profile.userFullnameTh')
+      .orderBy('testTakerId', 'ASC')
+      .addOrderBy('enrollmentId', 'ASC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getRawMany<{
+        enrollmentId: string;
+        examId: string;
+        testTakerId: string | null;
+        title: string | null;
+        fullName: string | null;
+        examRoundCount: string;
+        status: string;
+      }>();
+
+    const data: ExecutiveTestTakerRow[] = rawRows.map((row) => ({
+      enrollmentId: Number(row.enrollmentId),
+      examId: Number(row.examId),
+      testTakerId: row.testTakerId,
+      title: row.title,
+      fullName: row.fullName,
+      examRoundCount: Number(row.examRoundCount),
+      status: Number(row.status),
+    }));
+
+    return { data, total };
+  }
+
+  async findExamHistoryByEnrollmentId(
+    enrollmentId: number,
+  ): Promise<ExecutiveExamHistoryResponse> {
+    const enrollment = await this.examEnrollmentRepository.findOne({
+      where: { ERM_ID: enrollmentId },
+      relations: ['USER', 'USER.PROFILE', 'USER.IMAGE'],
+    });
+
+    if (!enrollment) {
+      throw new NotFoundException(
+        `Enrollment with ID ${enrollmentId} not found`,
+      );
+    }
+
+    const userId = enrollment.USER_ID;
+
+    const enrollments = await this.examEnrollmentRepository.find({
+      where: { USER_ID: userId },
+      relations: [
+        'SESSION',
+        'SESSION.EXAM',
+        'ATTENDANCES',
+        'SCORE',
+        'SCORE.CERTIFICATES',
+      ],
+      order: { CREATED_AT: 'DESC' },
+    });
+
+    const attendedEnrollments = enrollments.filter(
+      (e) => e.ATTENDANCES && e.ATTENDANCES.length > 0,
+    );
+
+    const examHistory: ExamHistoryRow[] = attendedEnrollments.map(
+      (e, index) => {
+        const exam = e.SESSION?.EXAM;
+        const examRound = exam?.EXAM_ROUND || '-';
+
+        let examDate = '-';
+        if (exam?.EXAM_DATE) {
+          const d = new Date(exam.EXAM_DATE);
+          const day = String(d.getDate()).padStart(2, '0');
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const beYear = d.getFullYear() + 543;
+          examDate = `${day}/${month}/${beYear}`;
+        }
+
+        const score = e.SCORE;
+        const certificates = score?.CERTIFICATES || [];
+        const hasCertificate = certificates.length > 0;
+        const cert = hasCertificate ? certificates[0] : null;
+
+        return {
+          index: index + 1,
+          examRound,
+          examDate,
+          langUseScore: score?.SC_LANG_USE_SCORE
+            ? Number(score.SC_LANG_USE_SCORE)
+            : null,
+          readingScore: score?.SC_READING_SCORE
+            ? Number(score.SC_READING_SCORE)
+            : null,
+          totalScore: score?.SC_TOTAL_SCORE
+            ? Number(score.SC_TOTAL_SCORE)
+            : null,
+          bandLevel: score?.SC_BAND_LEVEL ?? null,
+          hasCertificate,
+          certificateId: cert ? cert.CERT_ID : null,
+          certIssuedAt: cert?.CERT_ISSUED_AT
+            ? cert.CERT_ISSUED_AT.toISOString()
+            : null,
+          certExpiresAt: cert?.CERT_EXPIRES_AT
+            ? cert.CERT_EXPIRES_AT.toISOString()
+            : null,
+          certCode: cert ? cert.CERT_CODE : null,
+        };
+      },
+    );
+
+    return { examHistory };
   }
 
   async findByExamId(
@@ -356,14 +507,13 @@ export class ExamEnrollmentsService {
           'SESSION_LOCATION.LOCATION',
           'ATTENDANCES',
           'VOUCHERS',
-          'LOCATION_SEAT',
         ],
         select: {
           ERM_ID: true,
           USER_ID: true,
           SESSION_ID: true,
           SL_ID: true,
-          LS_ID: true,
+          ERM_SEAT_LABEL: true,
           ERM_TEST_TAKER: true,
           ERM_STATUS: true,
           ERM_VERIFY_STATUS: true,
@@ -418,11 +568,6 @@ export class ExamEnrollmentsService {
             VC_ID: true,
             ERM_ID: true,
             VC_CODE: true,
-          },
-          LOCATION_SEAT: {
-            LS_ID: true,
-            LOCATION_ID: true,
-            LS_SEAT_LABEL: true,
           },
         },
         order: { CREATED_AT: 'ASC' },
@@ -646,7 +791,32 @@ export class ExamEnrollmentsService {
     }
 
     const skip = (query.page - 1) * query.limit;
-    qb.orderBy('enrollment.CREATED_AT', 'ASC').skip(skip).take(query.limit);
+
+    let sortColumn = 'enrollment.CREATED_AT';
+    let sortOrder: 'ASC' | 'DESC' = 'ASC';
+
+    if (query.sortBy) {
+      const mapping: Record<string, string> = {
+        titleTh: 'profile.userTitleTh',
+        fullnameTh: 'profile.userFullnameTh',
+        remark: 'enrollment.ERM_PHYSICAL_STATUS',
+        paymentStatus: 'enrollment.ERM_STATUS',
+        verifyStatus: 'enrollment.ERM_VERIFY_STATUS',
+        createdAt: 'enrollment.CREATED_AT',
+      };
+      const sortBy = query.sortBy;
+      if (Object.prototype.hasOwnProperty.call(mapping, sortBy)) {
+        sortColumn = mapping[sortBy];
+      }
+      if (query.descending !== undefined) {
+        sortOrder =
+          query.descending === 'true' || query.descending === true
+            ? 'DESC'
+            : 'ASC';
+      }
+    }
+
+    qb.orderBy(sortColumn, sortOrder).skip(skip).take(query.limit);
 
     const [data, total] = await qb.getManyAndCount();
     const totalPaid = await paidQb.getCount();
@@ -677,7 +847,6 @@ export class ExamEnrollmentsService {
         'VOUCHERS',
         'SCORE',
         'SCORE.CERTIFICATES',
-        'LOCATION_SEAT',
       ],
       order: { CREATED_AT: 'DESC' },
     });
@@ -705,7 +874,6 @@ export class ExamEnrollmentsService {
         'SESSION.EXAM',
         'SESSION.SESSION_LOCATIONS',
         'SESSION.SESSION_LOCATIONS.LOCATION',
-        'LOCATION_SEAT',
       ],
     });
   }
@@ -724,7 +892,6 @@ export class ExamEnrollmentsService {
         'USER.PROFILE',
         'USER.IMAGE',
         'VOUCHERS',
-        'LOCATION_SEAT',
       ],
     });
 
@@ -743,13 +910,15 @@ export class ExamEnrollmentsService {
     await this.validateSeatAssignment(enrollment, updateExamEnrollmentDto);
 
     if (
-      updateExamEnrollmentDto.LS_ID !== undefined &&
-      updateExamEnrollmentDto.LS_ID !== null
+      updateExamEnrollmentDto.ERM_SEAT_LABEL !== undefined &&
+      updateExamEnrollmentDto.ERM_SEAT_LABEL !== null &&
+      updateExamEnrollmentDto.SL_ID !== undefined &&
+      updateExamEnrollmentDto.SL_ID !== null
     ) {
       const duplicate = await this.examEnrollmentRepository.findOne({
         where: {
-          SESSION_ID: enrollment.SESSION_ID,
-          LS_ID: updateExamEnrollmentDto.LS_ID,
+          SL_ID: updateExamEnrollmentDto.SL_ID,
+          ERM_SEAT_LABEL: updateExamEnrollmentDto.ERM_SEAT_LABEL,
           ERM_ID: Not(id),
         },
       });
@@ -762,11 +931,8 @@ export class ExamEnrollmentsService {
     }
 
     // Sync relations with scalar columns to prevent TypeORM's loaded FK relations from overriding DTO updates
-    if (updateExamEnrollmentDto.LS_ID !== undefined) {
-      enrollment.LS_ID = updateExamEnrollmentDto.LS_ID;
-      enrollment.LOCATION_SEAT = updateExamEnrollmentDto.LS_ID
-        ? ({ LS_ID: updateExamEnrollmentDto.LS_ID } as ExamLocationSeat)
-        : (null as unknown as ExamLocationSeat);
+    if (updateExamEnrollmentDto.ERM_SEAT_LABEL !== undefined) {
+      enrollment.ERM_SEAT_LABEL = updateExamEnrollmentDto.ERM_SEAT_LABEL;
     }
 
     if (updateExamEnrollmentDto.SL_ID !== undefined) {
@@ -784,11 +950,16 @@ export class ExamEnrollmentsService {
     const saved = await this.examEnrollmentRepository.save(updated);
     const currentStatus: ExamEnrollmentStatus = Number(saved.ERM_STATUS);
 
-    if (saved.LS_ID && currentStatus === ExamEnrollmentStatus.PAID) {
+    if (
+      saved.SL_ID &&
+      saved.ERM_SEAT_LABEL &&
+      currentStatus === ExamEnrollmentStatus.PAID
+    ) {
       saved.ERM_STATUS = ExamEnrollmentStatus.SEAT_ASSIGNED;
       await this.examEnrollmentRepository.save(saved);
     } else if (
-      !saved.LS_ID &&
+      !saved.SL_ID &&
+      !saved.ERM_SEAT_LABEL &&
       currentStatus === ExamEnrollmentStatus.SEAT_ASSIGNED
     ) {
       saved.ERM_STATUS = ExamEnrollmentStatus.PAID;
@@ -803,30 +974,30 @@ export class ExamEnrollmentsService {
     updateExamEnrollmentDto: UpdateExamEnrollmentDto,
   ): Promise<void> {
     if (
-      updateExamEnrollmentDto.LS_ID === undefined &&
+      updateExamEnrollmentDto.ERM_SEAT_LABEL === undefined &&
       updateExamEnrollmentDto.SL_ID === undefined
     ) {
       return;
     }
 
-    const nextSeatId =
-      updateExamEnrollmentDto.LS_ID !== undefined
-        ? updateExamEnrollmentDto.LS_ID
-        : enrollment.LS_ID;
+    const nextSeatLabel =
+      updateExamEnrollmentDto.ERM_SEAT_LABEL !== undefined
+        ? updateExamEnrollmentDto.ERM_SEAT_LABEL
+        : enrollment.ERM_SEAT_LABEL;
     const nextSessionLocationId =
       updateExamEnrollmentDto.SL_ID !== undefined
         ? updateExamEnrollmentDto.SL_ID
         : enrollment.SL_ID;
 
-    if (!nextSeatId && !nextSessionLocationId) return;
+    if (!nextSeatLabel && !nextSessionLocationId) return;
 
-    if (nextSeatId && !nextSessionLocationId) {
+    if (nextSeatLabel && !nextSessionLocationId) {
       throw new BadRequestException('SL_ID is required when assigning a seat');
     }
 
-    if (!nextSeatId && nextSessionLocationId) {
+    if (!nextSeatLabel && nextSessionLocationId) {
       throw new BadRequestException(
-        'LS_ID is required when assigning a session location',
+        'ERM_SEAT_LABEL is required when assigning a session location',
       );
     }
 
@@ -841,20 +1012,6 @@ export class ExamEnrollmentsService {
     if (sessionLocation.SS_ID !== enrollment.SESSION_ID) {
       throw new BadRequestException(
         'Session location does not belong to this enrollment session',
-      );
-    }
-
-    const seat = await this.examLocationSeatRepository.findOne({
-      where: { LS_ID: Number(nextSeatId) },
-    });
-
-    if (!seat) {
-      throw new BadRequestException('Invalid seat');
-    }
-
-    if (seat.LOCATION_ID !== sessionLocation.LOCATION_ID) {
-      throw new BadRequestException(
-        'Seat does not belong to the selected session location',
       );
     }
   }

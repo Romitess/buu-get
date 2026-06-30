@@ -7,7 +7,7 @@ import {
 } from 'vue-router';
 import routes from './routes';
 import { useUserStore } from 'src/stores/user.store';
-import { ROLES } from 'src/constants/roles';
+import { getDefaultRouteForRole } from 'src/utils/default-route';
 
 export default defineRouter(({ store }) => {
   const createHistory = process.env.SERVER
@@ -36,18 +36,11 @@ export default defineRouter(({ store }) => {
     if (userStore.isLoggedIn && roleRecords.length > 0) {
       // multi-role: ผ่านถ้า user มี role อย่างน้อยหนึ่งตัวที่ route อนุญาต
       const hasPermission = roleRecords.every((record) =>
-        (record.meta.roles as string[]).some((allowed) =>
-          userStore.userRoles.includes(allowed),
-        ),
+        (record.meta.roles as string[]).some((allowed) => userStore.userRoles.includes(allowed)),
       );
 
       if (!hasPermission) {
-        const redirectRoute =
-          userStore.userRole === ROLES.CANDIDATE
-            ? { name: 'exam-schedule' }
-            : userStore.userRole === ROLES.EXAM_OPERATIONS_OFFICER
-              ? { name: 'admin-exam-management' }
-              : { name: 'admin-dashboard' };
+        const redirectRoute = getDefaultRouteForRole(userStore.userRole);
         if (to.name === redirectRoute.name) {
           console.warn('Access denied even to default dashboard. Redirecting to login.');
           return { name: 'login' };
@@ -60,11 +53,7 @@ export default defineRouter(({ store }) => {
       if (to.query.redirect) {
         return to.query.redirect as string;
       }
-      return userStore.userRole === ROLES.CANDIDATE
-        ? { name: 'exam-schedule' }
-        : userStore.userRole === ROLES.EXAM_OPERATIONS_OFFICER
-          ? { name: 'admin-exam-management' }
-          : { name: 'admin-dashboard' };
+      return getDefaultRouteForRole(userStore.userRole);
     }
 
     return true;

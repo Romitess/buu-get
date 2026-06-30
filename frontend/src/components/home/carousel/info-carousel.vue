@@ -1,5 +1,5 @@
 <template>
-  <div class="row items-center no-wrap q-gutter-x-md carousel-wrapper q-mx-auto">
+  <div class="carousel-wrapper q-mx-auto">
     <!-- Left Navigation Button -->
     <q-btn
       flat
@@ -8,49 +8,57 @@
       icon="chevron_left"
       size="xl"
       color="grey-6"
+      class="carousel-nav carousel-nav--left"
+      :class="{ invisible: totalSlides <= 1 }"
       @click="carouselRef?.previous()"
     />
 
     <!-- Main Carousel Card -->
-    <q-card flat bordered class="info-carousel overflow-hidden border-radius-lg shadow-1 col">
+    <q-card flat bordered class="info-carousel image-banner-aspect overflow-hidden">
+      <div v-if="isLoading" class="full-height row flex-center bg-white">
+        <q-spinner color="primary" size="40px" />
+      </div>
+
+      <!-- Empty State (no banners configured) -->
+      <div
+        v-else-if="banners.length === 0"
+        class="full-height column flex-center bg-grey-2 text-grey-6"
+      >
+        <q-icon name="image" size="48px" />
+        <div class="q-mt-sm text-body2">{{ $t('home.bannerEmpty') }}</div>
+      </div>
+
       <q-carousel
+        v-else
         ref="carouselRef"
         v-model="slide"
         animated
         transition-prev="slide-right"
         transition-next="slide-left"
-        height="auto"
-        class="bg-transparent"
+        height="100%"
+        class="bg-transparent full-height"
         autoplay
         infinite
         swipeable
       >
-        <!-- Dynamic Slides 1-4 -->
         <q-carousel-slide
-          v-for="page in carouselPages"
-          :key="page.id"
-          :name="page.id"
+          v-for="(banner, index) in banners"
+          :key="index"
+          :name="index"
           class="q-pa-none"
         >
-          <div class="row items-stretch">
-            <!-- Left Section -->
-            <div class="col-12 col-md-6 bg-white column justify-center min-height-350">
-              <CarouselContentLeft v-bind="page.branding" />
-            </div>
-
-            <!-- Right Section -->
-            <q-card-section
-              class="col-12 col-md-6 bg-grey-1 q-pt-lg q-px-lg q-pb-md column justify-center items-center"
-            >
-              <div class="full-width max-width-80">
-                <div class="row q-col-gutter-y-lg">
-                  <div class="col-6" v-for="(stat, index) in page.stats" :key="index">
-                    <CarouselStatItem v-bind="stat" />
-                  </div>
-                </div>
+          <q-img
+            :src="getImageUrl(banner.imagePath)"
+            fit="cover"
+            class="full-width full-height"
+            loading="eager"
+          >
+            <template #error>
+              <div class="absolute-full flex flex-center bg-grey-2 text-grey-6">
+                <q-icon name="broken_image" size="48px" />
               </div>
-            </q-card-section>
-          </div>
+            </template>
+          </q-img>
         </q-carousel-slide>
       </q-carousel>
     </q-card>
@@ -63,106 +71,150 @@
       icon="chevron_right"
       size="xl"
       color="grey-6"
+      class="carousel-nav carousel-nav--right"
+      :class="{ invisible: totalSlides <= 1 }"
       @click="carouselRef?.next()"
     />
   </div>
 
-  <!-- External Navigation Dots -->
-  <div class="row justify-center q-mt-md q-gutter-x-sm">
-    <div
-      v-for="n in carouselPages.length"
-      :key="n"
-      class="nav-dot cursor-pointer"
-      :class="{ active: slide === n }"
-      @click="slide = n"
-    ></div>
+  <!-- External Navigation Dots — reserve space even when hidden to avoid layout shift -->
+  <div class="nav-dots-row row justify-center q-mt-md q-gutter-x-sm">
+    <template v-if="totalSlides > 1">
+      <div
+        v-for="n in totalSlides"
+        :key="n"
+        class="nav-dot cursor-pointer"
+        :class="{ active: isSlideActive(n) }"
+        @click="setSlide(n)"
+      ></div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { ref, computed, onMounted, watch } from 'vue';
 import type { QCarousel } from 'quasar';
-import CarouselContentLeft from './carousel-content-left.vue';
-import CarouselStatItem from './carousel-stat-item.vue';
-
-const i18n = useI18n();
+import { getHomepage } from 'src/services/page-builder.service';
+import { getImageUrl } from 'src/services/image.service';
+import {
+  PageSectionType,
+  type BannerBoxContent,
+  type PageSectionContent,
+} from 'src/types/page-builder.types';
 
 const carouselRef = ref<QCarousel | null>(null);
-const slide = ref(1);
+const slide = ref(0);
+const isLoading = ref(true);
+const banners = ref<BannerBoxContent[]>([]);
 
-// Interfaces for type safety
-interface CarouselStat {
-  label: string;
-  value: string;
-  description: string;
+interface Props {
+  previewMode?: boolean;
+  previewBanners?: BannerBoxContent[];
 }
 
-interface CarouselBranding {
-  overline: string;
-  title: string;
-  subtitle: string;
-  description1: string;
-  description2: string;
-  info1: string;
-  info1Icon: string;
-  info2: string;
-  info2Icon: string;
+const props = withDefaults(defineProps<Props>(), {
+  previewMode: false,
+  previewBanners: () => [],
+});
+
+const totalSlides = computed((): number => banners.value.length);
+
+const isSlideActive = (n: number): boolean => slide.value === n - 1;
+
+const setSlide = (n: number): void => {
+  slide.value = n - 1;
+};
+
+if (props.previewMode) {
+  watch(
+    () => props.previewBanners,
+    (newBanners) => {
+      banners.value = newBanners
+        .filter((box) => box.active !== false && box.imagePath)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+      slide.value = 0;
+    },
+    { immediate: true, deep: true },
+  );
 }
 
-interface CarouselPageData extends CarouselBranding {
-  stats: CarouselStat[];
-}
+onMounted(async () => {
+  if (props.previewMode) {
+    isLoading.value = false;
+    return;
+  }
 
-interface CarouselPage {
-  id: number;
-  branding: CarouselBranding;
-  stats: CarouselStat[];
-}
-
-// Map i18n data to our local structure
-const carouselPages = computed<CarouselPage[]>(() => {
-  const allData: Record<string, CarouselPageData> = i18n.tm('carousel');
-  return Object.entries(allData)
-    .filter(([key]: [string, CarouselPageData]) => key.startsWith('page'))
-    .map(([, pageData]: [string, CarouselPageData], index: number) => {
-      return {
-        id: index + 1,
-        branding: {
-          overline: pageData.overline,
-          title: pageData.title,
-          subtitle: pageData.subtitle,
-          description1: pageData.description1,
-          description2: pageData.description2,
-          info1: pageData.info1,
-          info1Icon: pageData.info1Icon,
-          info2: pageData.info2,
-          info2Icon: pageData.info2Icon,
-        },
-        stats: pageData.stats,
-      };
-    });
+  isLoading.value = true;
+  try {
+    const response = await getHomepage();
+    if (response?.PCF_CONTENT?.sections) {
+      const bannerSection = response.PCF_CONTENT.sections.find(
+        (sec: PageSectionContent) => sec.type === PageSectionType.BANNER,
+      );
+      if (bannerSection && bannerSection.active !== false) {
+        banners.value = (bannerSection.boxes as BannerBoxContent[])
+          .filter((box) => box.active !== false && box.imagePath)
+          .sort((a, b) => a.sortOrder - b.sortOrder);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load homepage banners:', error);
+  } finally {
+    isLoading.value = false;
+    slide.value = 0;
+  }
 });
 </script>
 
 <style scoped lang="scss">
+/* Match the width/padding of the exam-rounds table below so both blocks align */
 .carousel-wrapper {
-  max-width: 1500px;
+  position: relative;
+  max-width: 1300px;
   width: 100%;
+  padding: 0 10px;
 }
 
-.min-height-300 {
-  min-height: 300px;
+/* Navigation buttons overlay the card edges so they don't widen the block */
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
 }
 
-.max-width-80 {
-  max-width: 80%;
+.carousel-nav--left {
+  left: -48px;
+}
+
+.carousel-nav--right {
+  right: -48px;
+}
+
+@media (max-width: 1023px) {
+  .carousel-nav--left {
+    left: -4px;
+  }
+
+  .carousel-nav--right {
+    right: -4px;
+  }
 }
 
 .info-carousel {
   border: 2px solid rgba($primary, 0.8) !important;
   border-radius: 12px;
   box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Banner images keep a fixed 5:1 ratio and scale down responsively */
+.image-banner-aspect {
+  aspect-ratio: 5 / 1;
+}
+
+/* Reserve the dot row height so the layout doesn't shift when dots are hidden */
+.nav-dots-row {
+  min-height: 10px;
 }
 
 /* Custom Navigation Dots (External) */

@@ -70,10 +70,17 @@ import { useQuasar } from 'quasar';
 import { useImageUpload } from 'src/composables/use-image-upload';
 import { useImageUrl } from 'src/composables/use-image-url';
 import AppImageCropper from 'src/components/shared/app-image-cropper.vue';
+import type { ImageCategory } from 'src/constants/api';
 
 interface Props {
   modelValue: string | null;
-  folder?: string;
+  /** ชนิดรูป (category) - backend map เป็น folder ปลายทางเอง */
+  category: ImageCategory;
+  /**
+   * deferred = ไม่ upload ทันที แต่เก็บรูปเป็น data URL ส่งไปกับฟอร์ม
+   * ใช้ตอน register ที่ยังไม่มี userId (backend จะ upload ให้ตอนสร้าง user)
+   */
+  deferred?: boolean;
   alt?: string;
   /** สัดส่วนกล่องอัปโหลด (css aspect-ratio) ค่าเริ่มต้น = รูปสมัคร/โปรไฟล์ */
   aspectRatio?: string;
@@ -187,8 +194,23 @@ const handleFileSelected = (file: File | null): void => {
 
 const onCropConfirm = async (croppedFile: File): Promise<void> => {
   showCropDialog.value = false;
+
+  // โหมด deferred (register): ยังไม่มี userId → เก็บเป็น data URL ส่งไปกับฟอร์ม
+  // backend จะ upload ไป /user_images/{userId}/ ให้ตอนสร้าง user
+  if (props.deferred) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        emit('update:modelValue', e.target.result as string);
+        selectedFile.value = null;
+      }
+    };
+    reader.readAsDataURL(croppedFile);
+    return;
+  }
+
   try {
-    await handleImageUpload(croppedFile, props.folder);
+    await handleImageUpload(croppedFile, props.category);
   } catch (error) {
     console.error('Error uploading image:', error);
   }

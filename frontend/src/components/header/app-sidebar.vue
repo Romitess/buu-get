@@ -4,16 +4,15 @@
     show-if-above
     :mini="isMini"
     :mini-to-overlay="miniState"
-    :width="260"
+    :width="290"
     :mini-width="72"
     bordered
     side="left"
     class="app-sidebar"
-    @mouseenter="isHovered = true"
-    @mouseleave="isHovered = false"
+    :class="{ 'app-sidebar--expanding': isHovered && miniState }"
+    @mouseenter="onMouseEnter"
+    @mouseleave="onMouseLeave"
   >
-
-
     <!-- Sidebar List -->
     <q-list class="sidebar-list">
       <template v-for="link in menuLinks" :key="link.name">
@@ -47,7 +46,7 @@
               <q-item-section avatar class="sidebar-item__avatar">
                 <q-icon :name="child.icon" size="20px" class="sidebar-item__icon" />
               </q-item-section>
-              <q-item-section>
+              <q-item-section class="sidebar-item__text">
                 <q-item-label class="text-weight-medium">{{ child.label }}</q-item-label>
               </q-item-section>
             </q-item>
@@ -82,13 +81,20 @@ import { useNavigation } from 'src/composables/use-navigation';
 import { ROLES } from 'src/constants/roles';
 
 const { t } = useI18n();
-const {
-  userStore,
-  leftDrawerOpen,
-  miniState,
-  isHovered,
-  isMini,
-} = useNavigation();
+const { userStore, leftDrawerOpen, miniState, isHovered, isMini } = useNavigation();
+
+let hoverTimer: ReturnType<typeof setTimeout> | null = null;
+
+const onMouseEnter = (): void => {
+  if (hoverTimer) clearTimeout(hoverTimer);
+  isHovered.value = true;
+};
+
+const onMouseLeave = (): void => {
+  hoverTimer = setTimeout(() => {
+    isHovered.value = false;
+  }, 80);
+};
 
 // Dynamic role-based navigation menu links
 const menuLinks = computed(() => {
@@ -108,15 +114,27 @@ const menuLinks = computed(() => {
   if (role === ROLES.CANDIDATE) {
     links.push({
       name: 'exam-schedule',
-      label: t('navigation.examSchedule') || 'ตารางสอบ',
-      icon: 'event',
+      label: t('navigation.examSchedule') || 'รายการสอบ',
+      icon: 'list_alt',
       path: '/user/exam-schedule',
+    });
+    links.push({
+      name: 'exam-simulation',
+      label: t('navigation.examSimulation') || 'จำลองการสอบ',
+      icon: 'monitor',
+      path: '/user/exam-simulation',
     });
     links.push({
       name: 'exam-history',
       label: t('navigation.examHistory') || 'ประวัติการสอบ',
       icon: 'history',
       path: '/user/exam-history',
+    });
+    links.push({
+      name: 'user-profile',
+      label: t('navigation.personalProfile') || 'ข้อมูลส่วนตัว',
+      icon: 'person',
+      path: '/user/profile',
     });
   }
   // IF: Guest (not logged in)
@@ -130,12 +148,6 @@ const menuLinks = computed(() => {
   }
   // IF: Registration Officer or Admin
   else if (role === ROLES.REGISTRATION_OFFICER || role === ROLES.ADMIN) {
-    links.push({
-      name: 'exam-report',
-      label: t('navigation.examReport') || 'รายงานการสอบ',
-      icon: 'bar_chart',
-      path: '/admin/exam-report',
-    });
     links.push({
       name: 'location-management',
       label: t('navigation.manageLocations') || 'จัดการห้องสอบ',
@@ -157,12 +169,6 @@ const menuLinks = computed(() => {
   }
   // IF: Exam Operations Officer or Staff
   else if (role === ROLES.EXAM_OPERATIONS_OFFICER || role === ROLES.STAFF) {
-    links.push({
-      name: 'exam-report',
-      label: t('navigation.examReport') || 'รายงานการสอบ',
-      icon: 'bar_chart',
-      path: '/admin/exam-report',
-    });
     links.push({
       name: 'exam-management',
       label: t('navigation.manageExams') || 'จัดการรอบสอบ',
@@ -234,10 +240,16 @@ const menuLinks = computed(() => {
   // IF: Executive
   else if (role === ROLES.EXECUTIVE) {
     links.push({
-      name: 'exam-report',
-      label: t('navigation.examReport') || 'รายงานการสอบ',
-      icon: 'assessment',
-      path: '/admin/exam-report',
+      name: 'admin-dashboard',
+      label: t('navigation.dashboard') || 'แดชบอร์ด',
+      icon: 'dashboard',
+      path: '/admin/dashboard',
+    });
+    links.push({
+      name: 'admin-executive-test-takers',
+      label: t('navigation.examInformation') || 'ข้อมูลการสอบ',
+      icon: 'groups',
+      path: '/admin/executive/test-takers',
     });
   }
 
@@ -248,7 +260,13 @@ const menuLinks = computed(() => {
 <style scoped lang="scss">
 .app-sidebar {
   background-color: var(--surface-card) !important;
-  transition: all 0.3s ease;
+  overflow-x: hidden;
+  will-change: width;
+}
+
+// Smooth the overlay transition on the Quasar drawer itself
+:deep(.q-drawer__content) {
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-x: hidden;
 }
 
@@ -262,7 +280,9 @@ const menuLinks = computed(() => {
   color: var(--text-primary);
   min-height: 48px;
   padding: 8px 12px;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 
   .sidebar-item__icon {
     color: var(--text-primary);
@@ -307,35 +327,49 @@ const menuLinks = computed(() => {
   }
 }
 
-.sidebar-item__avatar {
-  min-width: 40px !important;
+// Make q-expansion-item body transitions faster so they don't lag behind the drawer
+:deep(.sidebar-group .q-expansion-item__content) {
+  transition: none;
 }
 
-// Mini mode — ต้องใช้ :deep ทั้งหมด
+.sidebar-item__avatar {
+  min-width: 24px !important;
+  margin-right: 12px;
+}
+
+// Smooth the text/label appearance during hover expand
+.sidebar-item__text {
+  opacity: 1;
+  transition: opacity 0.15s ease 0.05s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+// Mini mode
 :deep(.q-drawer--mini) {
   .q-drawer__content {
     overflow-x: hidden;
   }
 
   .q-list {
-    padding: 8px 0 !important;
+    padding: 8px 12px !important;
   }
 
   .q-item {
     width: 48px !important;
     height: 48px !important;
     min-height: 48px !important;
-    padding: 0 !important;
+    padding: 8px 12px !important;
     margin: 0 auto 6px auto !important;
     display: flex !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
     align-items: center !important;
   }
 
   .q-item__section--avatar {
-    min-width: 0 !important;
+    min-width: 24px !important;
     padding-right: 0 !important;
-    width: auto !important;
+    width: 24px !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
@@ -343,6 +377,34 @@ const menuLinks = computed(() => {
 
   .q-item__section--main {
     display: none !important;
+  }
+
+  // Hide expansion content when mini to avoid flash
+  .q-expansion-item__content {
+    display: none !important;
+  }
+
+  // Hide the expansion toggle icon when mini
+  .q-expansion-item__toggle-icon {
+    display: none !important;
+  }
+}
+
+// When expanding from mini on hover, animate content in
+.app-sidebar--expanding {
+  :deep(.q-item__section--main) {
+    animation: fadeInText 0.2s ease-out forwards;
+  }
+}
+
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 </style>

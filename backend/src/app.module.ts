@@ -35,7 +35,9 @@ import { PageBuilderModule } from './modules/page-builder/page-builder.module';
 import { ExamRuleVouchersModule } from './modules/exam-rule-vouchers/exam-rule-vouchers.module';
 import { ScoreCriteriaModule } from './modules/score-criteria/score-criteria.module';
 import { MoodleSyncLogsModule } from './modules/moodle-sync-logs/moodle-sync-logs.module';
+import { MoodleModule } from './modules/moodle/moodle.module';
 import { ExamReportModule } from './modules/exam-report/exam-report.module';
+import { ExamBlockedSeatsModule } from './modules/exam-blocked-seats/exam-blocked-seats.module';
 
 @Module({
   imports: [
@@ -58,6 +60,11 @@ import { ExamReportModule } from './modules/exam-report/exam-report.module';
           database: configService.getOrThrow<string>('DB_NAME'),
           // MySQL datetime columns store Thailand wall-clock time; align connection TZ on UTC servers (e.g. K8s).
           timezone: '+07:00',
+          // DATE columns (เช่น EXAM_DATE, USER_DATE_OF_BIRTH) เป็นวันที่ล้วนไม่มีเวลา
+          // ห้ามให้ผ่านการแปลง timezone ('+07:00') ไม่งั้น mysql2 จะแปลงเป็น instant
+          // เที่ยงคืนไทย = 17:00Z ของวันก่อนหน้า ทำให้ค่าที่ส่งออก API ถอยไป 1 วันบน server UTC
+          // บังคับให้คืนเป็น string 'YYYY-MM-DD' ตรง ๆ (ตรงกับ entity ที่ type เป็น string อยู่แล้ว)
+          extra: { dateStrings: ['DATE'] },
           autoLoadEntities: true,
           synchronize: false,
           // dropSchema: false,
@@ -96,7 +103,9 @@ import { ExamReportModule } from './modules/exam-report/exam-report.module';
     ExamRuleVouchersModule,
     ScoreCriteriaModule,
     MoodleSyncLogsModule,
+    MoodleModule,
     ExamReportModule,
+    ExamBlockedSeatsModule,
   ],
 })
 export class AppModule {}

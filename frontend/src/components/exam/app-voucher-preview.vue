@@ -273,6 +273,12 @@ const previewSide = ref<'front' | 'back'>('front');
     justify-content: center;
   }
 
+  &.is-back :deep(.regulations-box) {
+    box-shadow: none !important;
+    background: transparent !important;
+    background-image: none !important;
+  }
+
   &.is-back :deep(.watermark-bg) {
     left: 56% !important;
     top: 52%;

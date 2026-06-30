@@ -137,6 +137,18 @@ export class ExamLocationSeatsService {
       : `${rowLabel}${col}`;
   }
 
+  private getSeatSortOrder(
+    row: number,
+    col: number,
+    rows: number,
+    cols: number,
+    direction: SeatDirection,
+  ): number {
+    return direction === SeatDirection.VERTICAL
+      ? (col - 1) * rows + row
+      : (row - 1) * cols + col;
+  }
+
   private getTargetSeatStatus(
     label: string,
     row: number,
@@ -264,12 +276,15 @@ export class ExamLocationSeatsService {
           LS_SEAT_STATUS: LocationSeatStatus;
         }[] = [];
         const seatsToUpdate: ExamLocationSeat[] = [];
-        let sortOrder = 1;
 
         for (let row = 1; row <= maxRows; row++) {
           for (let col = 1; col <= maxCols; col++) {
             const key = `${row}-${col}`;
-            const label = this.getSeatLabel(row, col, location.SEAT_DIRECTION);
+            const label = this.getSeatLabel(
+              row,
+              col,
+              location.LOCATION_SEAT_DIRECTION,
+            );
             const seat = existingSeatsMap.get(key);
             const targetStatus = this.getTargetSeatStatus(
               label,
@@ -286,17 +301,28 @@ export class ExamLocationSeatsService {
                 LS_ROW_NO: row,
                 LS_COL_NO: col,
                 LS_SEAT_LABEL: label,
-                LS_SORT_ORDER: sortOrder,
+                LS_SORT_ORDER: this.getSeatSortOrder(
+                  row,
+                  col,
+                  maxRows,
+                  maxCols,
+                  location.LOCATION_SEAT_DIRECTION,
+                ),
                 LS_SEAT_STATUS: targetStatus,
               });
             } else {
               seat.DELETED_AT = null;
               seat.LS_SEAT_STATUS = targetStatus;
               seat.LS_SEAT_LABEL = label;
-              seat.LS_SORT_ORDER = sortOrder;
+              seat.LS_SORT_ORDER = this.getSeatSortOrder(
+                row,
+                col,
+                maxRows,
+                maxCols,
+                location.LOCATION_SEAT_DIRECTION,
+              );
               seatsToUpdate.push(seat);
             }
-            sortOrder++;
           }
         }
 

@@ -145,6 +145,8 @@ export function useExamRegistrants() {
       search?: string;
       sessionId?: number | null;
       sessionLocationId?: number | null;
+      sortBy?: string | null | undefined;
+      descending?: boolean | null | undefined;
     },
   ): Promise<void> => {
     isLoading.value = true;

@@ -1,5 +1,5 @@
 <template>
-  <q-card class="cropper-card shadow-5">
+  <q-card class="cropper-card shadow-5" :style="{ '--cropper-max-width': cropperMaxWidth }">
     <q-card-section class="q-pb-none row items-center justify-between">
       <div class="text-h6 text-weight-bold text-dark">
         {{ $t('components.imageCropper.title') }}
@@ -30,7 +30,7 @@
         ></div>
       </div>
 
-      <div class="slider-container row items-center q-mt-md">
+      <div class="slider-container row items-center q-mt-md" :style="{ width: sliderWidth }">
         <q-icon name="zoom_out" size="sm" class="text-grey-6 q-mr-sm" />
         <q-slider
           v-model="zoom"
@@ -45,6 +45,24 @@
       </div>
       <div class="text-caption text-grey-6 q-mt-xs text-center">
         {{ $t('components.imageCropper.hint') }}
+      </div>
+
+      <!-- Live Preview for Banner -->
+      <div v-if="props.showPreview" class="preview-section q-mt-lg column items-center full-width">
+        <div class="text-subtitle2 text-weight-bold text-grey-8 q-mb-sm text-center">
+          {{ $t('components.imageCropper.livePreview') }}
+        </div>
+        <div class="preview-container" :style="previewContainerStyle">
+          <div class="preview-crop-box" :style="previewCropBoxStyle">
+            <img
+              :src="imageSrc"
+              :style="imageStyle"
+              class="preview-image"
+              draggable="false"
+              alt="Cropped Preview"
+            />
+          </div>
+        </div>
       </div>
     </q-card-section>
 
@@ -68,7 +86,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 
 interface Props {
   imageSrc: string;
@@ -80,6 +98,7 @@ interface Props {
   /** ขนาดรูปผลลัพธ์ (px) — ถ้าไม่ระบุใช้ค่าเริ่มต้น */
   outputWidth?: number;
   outputHeight?: number;
+  showPreview?: boolean;
 }
 
 interface Emits {
@@ -90,6 +109,7 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   fileType: 'image/png',
   circular: false,
+  showPreview: false,
 });
 const emit = defineEmits<Emits>();
 
@@ -101,8 +121,53 @@ const offsetY = ref(0);
 const imgNaturalWidth = ref(0);
 const imgNaturalHeight = ref(0);
 
-const cropBoxWidth = computed(() => props.cropWidth ?? (props.circular ? 220 : 180));
-const cropBoxHeight = computed(() => props.cropHeight ?? (props.circular ? 220 : 240));
+const getViewportWidth = () => {
+  return typeof window !== 'undefined' ? window.innerWidth : 1024;
+};
+
+const windowWidth = ref(getViewportWidth());
+
+const handleResize = () => {
+  windowWidth.value = getViewportWidth();
+};
+
+onMounted(() => {
+  window.addEventListener('resize', handleResize);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize);
+});
+
+const cropBoxWidth = computed(() => {
+  if (props.cropWidth) {
+    const margin = 60;
+    const maxWidth = windowWidth.value - margin;
+    return Math.max(100, Math.min(props.cropWidth, maxWidth));
+  }
+  return props.circular ? 220 : 180;
+});
+
+const cropBoxHeight = computed(() => {
+  if (props.cropWidth && props.cropHeight) {
+    const ratio = props.cropHeight / props.cropWidth;
+    return cropBoxWidth.value * ratio;
+  }
+  return props.circular ? 220 : 240;
+});
+
+const cropperMaxWidth = computed(() => {
+  if (props.cropWidth) {
+    const margin = 80;
+    const maxWidth = windowWidth.value - 20;
+    return `${Math.max(200, Math.min(props.cropWidth + margin, maxWidth))}px`;
+  }
+  return '400px';
+});
+
+const sliderWidth = computed(() => {
+  return `${cropBoxWidth.value}px`;
+});
 
 const imageStyle = computed(() => {
   if (!imgNaturalWidth.value || !imgNaturalHeight.value) return {};
@@ -135,13 +200,31 @@ const maskStyle = computed(() => {
 // ถ้าไม่ระบุ ใช้ค่าเริ่มต้นจาก scss (300x300) เพื่อไม่กระทบหน้าสมัคร/โปรไฟล์
 const containerStyle = computed(() => {
   if (props.cropWidth || props.cropHeight) {
-    const margin = 40;
+    const extraWidth = 40;
+    // On small screens, keep the container height smaller.
+    // On desktop, keep a minimum height of 350px so that narrow banner crops show context.
+    const minHeight = windowWidth.value < 600 ? 200 : 350;
+    const extraHeight = Math.max(40, minHeight - cropBoxHeight.value);
     return {
-      width: `${cropBoxWidth.value + margin}px`,
-      height: `${cropBoxHeight.value + margin}px`,
+      width: `${cropBoxWidth.value + extraWidth}px`,
+      height: `${cropBoxHeight.value + extraHeight}px`,
     };
   }
   return {};
+});
+
+const previewCropBoxStyle = computed(() => {
+  return {
+    width: `${cropBoxWidth.value}px`,
+    height: `${cropBoxHeight.value}px`,
+  };
+});
+
+const previewContainerStyle = computed(() => {
+  return {
+    maxWidth: `${cropBoxWidth.value}px`,
+    width: '100%',
+  };
 });
 
 const onImageLoaded = () => {
@@ -242,6 +325,13 @@ const confirmCrop = () => {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
+  // JPEG can't store transparency, so transparent PNG areas (or any region the
+  // image doesn't cover) would flatten to black. Paint a white background first.
+  if (props.fileType !== 'image/png') {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, outputWidth, outputHeight);
+  }
+
   const canvasScale = outputWidth / cropBoxWidth.value;
   const baseScale = Math.max(
     cropBoxWidth.value / imgNaturalWidth.value,
@@ -271,7 +361,7 @@ const confirmCrop = () => {
 <style scoped lang="scss">
 .cropper-card {
   width: 100%;
-  max-width: 400px;
+  max-width: var(--cropper-max-width, 400px);
   border-radius: 16px;
   background: var(--surface-card);
 }
@@ -318,11 +408,37 @@ const confirmCrop = () => {
 }
 
 .slider-container {
-  width: 280px;
+  width: 100%;
 }
 
 .action-btn {
   width: 90px;
   border-radius: 8px;
+}
+
+.preview-section {
+  width: 100%;
+}
+
+.preview-container {
+  border: 2px solid rgba(13, 71, 161, 0.8); /* matching primary color overlay border on homepage */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.3);
+  background-color: #fff;
+}
+
+.preview-crop-box {
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: none;
+  max-height: none;
+  pointer-events: none;
 }
 </style>

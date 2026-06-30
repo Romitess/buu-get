@@ -9,6 +9,7 @@ import {
   OneToMany,
   OneToOne,
   JoinColumn,
+  Unique,
 } from 'typeorm';
 import { ExamSession } from '../../exam-sessions/entities/exam-session.entity';
 import { User } from '../../users/entities/user.entity';
@@ -17,7 +18,6 @@ import { ExamAttendance } from '../../exam-attendances/entities/exam-attendance.
 import { Transaction } from '../../transactions/entities/transaction.entity';
 import { ExamScore } from '../../exam-scores/entities/exam-score.entity';
 import { ExamSessionLocation } from '../../exam-session-locations/entities/exam-session-location.entity';
-import { ExamLocationSeat } from '../../exam-location-seats/entities/exam-location-seat.entity';
 import { UserPhysicalStatus } from '../../user-profile/entities/user-profile.entity';
 
 export enum ExamEnrollmentStatus {
@@ -37,6 +37,7 @@ export enum ExamVerifyStatus {
 }
 
 @Entity('EXAM_T_ENROLLMENTS')
+@Unique('UQ_ENROLLMENT_SEAT_LABEL', ['SL_ID', 'ERM_SEAT_LABEL'])
 export class ExamEnrollment {
   @PrimaryGeneratedColumn({ name: 'ERM_ID', comment: 'รหัสผู้สมัคร' })
   ERM_ID: number;
@@ -56,12 +57,21 @@ export class ExamEnrollment {
   SL_ID: number | null;
 
   @Column({
-    name: 'LS_ID',
+    name: 'ERM_SEAT_LABEL',
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+    comment: 'เลขที่นั่งสอบ/รหัสที่นั่งสอบ',
+  })
+  ERM_SEAT_LABEL: string | null;
+
+  @Column({
+    name: 'ERM_SORT_ORDER',
     type: 'int',
     nullable: true,
-    comment: 'รหัสที่นั่งในห้องสอบ (FK)',
+    comment: 'ลำดับการเรียงที่นั่ง',
   })
-  LS_ID: number | null;
+  ERM_SORT_ORDER: number | null;
 
   @Column({
     name: 'ERM_TEST_TAKER',
@@ -140,6 +150,14 @@ export class ExamEnrollment {
   })
   ERM_AT: Date;
 
+  @Column({
+    name: 'ERM_MOODLE_ENROLL_ID',
+    type: 'int',
+    nullable: true,
+    comment: 'รหัส enrol ฝั่ง Moodle (เติมโดย worker)',
+  })
+  ERM_MOODLE_ENROLL_ID: number | null;
+
   @CreateDateColumn({ name: 'CREATED_AT', comment: 'วันที่สร้าง' })
   CREATED_AT: Date;
 
@@ -175,11 +193,10 @@ export class ExamEnrollment {
   @OneToOne(() => ExamScore, (score: ExamScore) => score.ENROLLMENT)
   SCORE: ExamScore;
 
-  @ManyToOne(() => ExamSessionLocation)
+  @ManyToOne(
+    () => ExamSessionLocation,
+    (sessionLocation: ExamSessionLocation) => sessionLocation.ENROLLMENTS,
+  )
   @JoinColumn({ name: 'SL_ID' })
   SESSION_LOCATION: ExamSessionLocation;
-
-  @ManyToOne(() => ExamLocationSeat)
-  @JoinColumn({ name: 'LS_ID' })
-  LOCATION_SEAT: ExamLocationSeat;
 }

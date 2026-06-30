@@ -113,6 +113,7 @@ import { useUserStore } from 'src/stores/user.store';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { ROLES } from 'src/constants/roles';
+import { getDefaultRouteForRole } from 'src/utils/default-route';
 
 const router = useRouter();
 const route = useRoute();
@@ -162,27 +163,13 @@ const onSubmit = async () => {
       }
 
       // Role-based redirection
-      const role = userStore.userRole?.toLowerCase();
+      const role = userStore.userRole;
       console.log('Login successful. User Role:', role);
 
-      if (role === ROLES.CANDIDATE) {
-        if (userStore.currentUser?.remark) {
-          await router.push({ name: 'user-profile', query: { from: 'email' } });
-        } else {
-          await router.push({ name: 'exam-schedule' });
-        }
-      } else if (role === ROLES.EXAM_OPERATIONS_OFFICER) {
-        await router.push({ name: 'admin-exam-management' });
-      } else if (
-        role === ROLES.ADMIN ||
-        role === ROLES.STAFF ||
-        role === ROLES.REGISTRATION_OFFICER
-      ) {
-        // ทุกบทบาทที่เป็น Admin/Staff/Registration ให้ไปหน้าจัดการสอบ
-        await router.push({ name: 'admin-exam-management' });
+      if (role === ROLES.CANDIDATE && userStore.currentUser?.remark) {
+        await router.push({ name: 'user-profile', query: { from: 'email' } });
       } else {
-        // บทบาทอื่นๆ (Finance, Executive, etc.) ให้ไป Dashboard กลาง
-        await router.push({ name: 'admin-dashboard' });
+        await router.push(getDefaultRouteForRole(role));
       }
     } else {
       $q.notify({

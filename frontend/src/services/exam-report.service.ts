@@ -6,6 +6,8 @@ import type {
   ExamReportSummary,
   ExamReportRoundRow,
   ExamYearTableRow,
+  ExamInformationRoundRow,
+  ExamCandidateInfoRow,
 } from 'src/types/exam-report.types';
 
 // ============================================================
@@ -52,6 +54,29 @@ interface BackendExamReportSummary {
     decreased: number;
   };
   yearTable: ExamYearTableRow[];
+}
+
+interface BackendExamInformationRound {
+  round: string;
+  applicants: number;
+  attended: number;
+  absent: number;
+  repeatTakers: number;
+  minScore: number | null;
+  maxScore: number | null;
+  averageScore: number | null;
+}
+
+interface BackendExamCandidateInfo {
+  id: string;
+  examNumber: string;
+  prefix: string;
+  fullName: string;
+  vocabularyGrammarScore: number | null;
+  readingScore: number | null;
+  totalScore: number | null;
+  level: number | null;
+  attemptStatus: ExamCandidateInfoRow['attemptStatus'];
 }
 
 /** ตัวแปร CSS สีของแต่ละช่วงคะแนน (เรียงตาม ranges จาก backend) */
@@ -193,4 +218,48 @@ export const fetchExamReportSummary = async (
 export const fetchExamReportOptions = async (): Promise<ExamReportOptions> => {
   const response = await api.get<ExamReportOptions>('/exam-report/options');
   return response.data;
+};
+
+export const fetchExamInformationRounds = async (
+  year: string | number,
+): Promise<ExamInformationRoundRow[]> => {
+  const response = await api.get<BackendExamInformationRound[]>(
+    `/exam-report/years/${year}/rounds`,
+  );
+
+  return response.data.map((row) => ({
+    round: row.round,
+    applicants: Number(row.applicants),
+    attended: Number(row.attended),
+    absent: Number(row.absent),
+    repeatTakers: Number(row.repeatTakers),
+    minScore: row.minScore === null ? null : Number(row.minScore),
+    maxScore: row.maxScore === null ? null : Number(row.maxScore),
+    averageScore: row.averageScore === null ? null : Number(row.averageScore),
+  }));
+};
+
+export const fetchExamCandidateInfo = async (
+  year: string | number,
+  round?: string,
+): Promise<ExamCandidateInfoRow[]> => {
+  const response = await api.get<BackendExamCandidateInfo[]>(
+    `/exam-report/years/${year}/candidates`,
+    {
+      params: round ? { round } : undefined,
+    },
+  );
+
+  return response.data.map((row) => ({
+    id: row.id,
+    examNumber: row.examNumber,
+    prefix: row.prefix,
+    fullName: row.fullName,
+    vocabularyGrammarScore:
+      row.vocabularyGrammarScore === null ? null : Number(row.vocabularyGrammarScore),
+    readingScore: row.readingScore === null ? null : Number(row.readingScore),
+    totalScore: row.totalScore === null ? null : Number(row.totalScore),
+    level: row.level === null ? null : Number(row.level),
+    attemptStatus: row.attemptStatus,
+  }));
 };

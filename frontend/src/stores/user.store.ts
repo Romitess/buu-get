@@ -16,17 +16,16 @@ export const useUserStore = defineStore('user', () => {
 
   // === Helpers ===
   /** normalize ชื่อ role ให้เป็น snake_case ตัวพิมพ์เล็ก (ตรงกับ ROLES constant) */
-  const normalizeRole = (role: string): UserRole =>
-    role.toLowerCase().replace(/\s+/g, '_');
+  const normalizeRole = (role: string): UserRole => role.toLowerCase().replace(/\s+/g, '_');
 
   /** แปลง role/roles จาก backend → roles array ที่ normalize แล้ว (รวม primary เสมอ) */
-  const buildRoles = (
-    primary: string | undefined,
-    list: string[] | undefined,
-  ): UserRole[] => {
-    const source = list && list.length > 0 ? list : primary ? [primary] : [];
-    const normalized = source.map(normalizeRole);
-    return normalized.length > 0 ? normalized : [ROLES.CANDIDATE];
+  const buildRoles = (primary: string | undefined, list: string[] | undefined): UserRole[] => {
+    const normalized = [
+      ...(primary ? [normalizeRole(primary)] : []),
+      ...(list ?? []).map(normalizeRole),
+    ];
+    const uniqueRoles = [...new Set(normalized)];
+    return uniqueRoles.length > 0 ? uniqueRoles : [ROLES.CANDIDATE];
   };
 
   // === Computed ===

@@ -408,6 +408,7 @@ import { useImageUpload } from 'src/composables/use-image-upload';
 import defaultUserImage from 'src/assets/img/user-image.jpg';
 import { getImageUrl } from 'src/services/image.service';
 import { api } from 'src/boot/axios';
+import type { AxiosError } from 'axios';
 import { useFocusFirstInvalidField } from 'src/composables/use-focus-first-invalid-field';
 
 const router = useRouter();
@@ -496,7 +497,7 @@ const handleFileSelected = (file: File | null): void => {
 const onCropConfirm = async (croppedFile: File): Promise<void> => {
   showCropDialog.value = false;
   try {
-    await handleImageUpload(croppedFile, '/user_images');
+    await handleImageUpload(croppedFile, 'user-image');
   } catch (error) {
     console.error('Error uploading image:', error);
   }
@@ -710,11 +711,27 @@ const onSave = async (): Promise<void> => {
       message: t('profile.dialogUpdateSuccess'),
       position: 'top',
     });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error('Save profile failed:', err);
+    const axiosError = err as AxiosError<{ message?: string | string[] }>;
+    const data = axiosError.response?.data;
+    let errorMessage = '';
+
+    if (data && typeof data === 'object') {
+      if (Array.isArray(data.message)) {
+        errorMessage = data.message.join(', ');
+      } else if (typeof data.message === 'string') {
+        errorMessage = data.message;
+      }
+    }
+
+    if (!errorMessage) {
+      errorMessage = axiosError.message || t('profile.saveError');
+    }
+
     $q.notify({
       type: 'negative',
-      message: t('profile.saveError'),
+      message: errorMessage,
       position: 'top',
     });
   } finally {

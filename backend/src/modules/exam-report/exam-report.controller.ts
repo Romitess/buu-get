@@ -1,13 +1,24 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { ExamReportService } from './exam-report.service';
 import { ExamReportQueryDto } from './dto/exam-report-query.dto';
 import {
+  ExamCandidateInfo,
+  ExamInformationRound,
   ExamReportOptions,
   ExamReportSummary,
 } from './interfaces/exam-report.interface';
@@ -40,5 +51,36 @@ export class ExamReportController {
   @ApiResponse({ status: 200, description: 'ตัวเลือกฟิลเตอร์รายงานการสอบ' })
   getOptions(): Promise<ExamReportOptions> {
     return this.examReportService.getOptions();
+  }
+
+  @Get('years/:year/rounds')
+  @ApiOperation({
+    summary: 'ดึงข้อมูลรอบสอบและผลคะแนนรายรอบของปีที่เลือก',
+  })
+  @ApiParam({ name: 'year', description: 'ปี ค.ศ. เช่น 2026', example: 2026 })
+  @ApiResponse({ status: 200, description: 'ข้อมูลรอบสอบรายปี' })
+  getYearRounds(
+    @Param('year', ParseIntPipe) year: number,
+  ): Promise<ExamInformationRound[]> {
+    return this.examReportService.getYearRounds(year);
+  }
+
+  @Get('years/:year/candidates')
+  @ApiOperation({
+    summary: 'ดึงข้อมูลผู้เข้าสอบและผลคะแนนรายบุคคลของปี/รอบสอบที่เลือก',
+  })
+  @ApiParam({ name: 'year', description: 'ปี ค.ศ. เช่น 2026', example: 2026 })
+  @ApiQuery({
+    name: 'round',
+    required: false,
+    description: 'รอบสอบ เช่น 1/2026',
+    example: '1/2026',
+  })
+  @ApiResponse({ status: 200, description: 'ข้อมูลผู้เข้าสอบรายบุคคล' })
+  getYearRoundCandidates(
+    @Param('year', ParseIntPipe) year: number,
+    @Query('round') round?: string,
+  ): Promise<ExamCandidateInfo[]> {
+    return this.examReportService.getYearRoundCandidates(year, round);
   }
 }

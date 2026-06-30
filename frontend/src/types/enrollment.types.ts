@@ -46,6 +46,8 @@ export interface BackendSessionDetail {
     LOCATION_ROOM_NO: string;
     LOCATION_TOTAL_ROWS?: number;
     LOCATION_TOTAL_COLS?: number;
+    LOCATION_SEAT_DIRECTION?: 'HORIZONTAL' | 'VERTICAL';
+    LOCATION_AISLE_AFTER_COL?: Array<{ type: 'row' | 'column'; index: number } | number> | null;
     SEAT_DIRECTION?: 'HORIZONTAL' | 'VERTICAL';
     AISLE_AFTER_COLS?: number[] | null;
     AISLE_AFTER_ROWS?: number[] | null;
@@ -78,6 +80,8 @@ export interface BackendEnrollmentDetail {
   SESSION_ID: number;
   SL_ID?: number | null;
   LS_ID: number | null;
+  ERM_SEAT_LABEL?: string | null;
+  ERM_SORT_ORDER?: number | null;
   ERM_STATUS: number;
   ERM_VERIFY_STATUS: number;
   ERM_AT: string | null;

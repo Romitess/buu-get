@@ -1,6 +1,13 @@
 <template>
   <div>
-    <base-table :rows="rows" :columns="columns" :loading="loading" row-key="id">
+    <base-table
+      :rows="rows"
+      :columns="columns"
+      :loading="loading"
+      :pagination="pagination"
+      row-key="id"
+      @request="onRequest"
+    >
       <!-- Custom Header matching the design in the image -->
       <template #header="props">
         <q-tr :props="props">
@@ -164,19 +171,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { QTableColumn } from 'quasar';
 import BaseTable from '../shared/base-table.vue';
 import ActionButton from '../shared/action-button.vue';
 import type { PaymentRow } from 'src/types/exam.types';
+import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 
 interface Props {
   rows: PaymentRow[];
   loading?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   loading: false,
 });
 
@@ -192,6 +200,30 @@ const editForm = ref({
   ref1: '',
   ref2: '',
 });
+
+const pagination = ref<PaginationModel>({
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0,
+});
+
+const onRequest = (requestProps: TableRequestProps): void => {
+  const { page, rowsPerPage } = requestProps.pagination;
+  pagination.value.page = page;
+  pagination.value.rowsPerPage = rowsPerPage;
+};
+
+watch(
+  () => props.rows.length,
+  (rowsNumber) => {
+    pagination.value.rowsNumber = rowsNumber;
+    const lastPage = Math.max(1, Math.ceil(rowsNumber / pagination.value.rowsPerPage));
+    if (pagination.value.page > lastPage) {
+      pagination.value.page = lastPage;
+    }
+  },
+  { immediate: true },
+);
 
 const columns = computed<QTableColumn[]>(() => [
   { name: 'id', field: 'id', label: t('admin.paymentImport.table.index'), align: 'center' },
