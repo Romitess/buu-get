@@ -84,6 +84,10 @@ export default new DataSource({
     MoodleSyncLog,
     ExamBlockedSeat,
   ],
-  migrations: ['src/database/migrations/*.ts'],
+  migrations: [
+    __filename.endsWith('.js')
+      ? 'dist/database/migrations/*.js'
+      : 'src/database/migrations/*.ts',
+  ],
   synchronize: false,
 });
