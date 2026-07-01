@@ -6,10 +6,12 @@ import {
   Inject,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
 import axios, { AxiosError, AxiosResponse } from 'axios';
+import { Readable } from 'stream';
 import FormData from 'form-data';
 import ApiToken from 'src/types/api/apiToken';
 import RequestTokenApiConfig from 'src/types/api/requestTokenApiConfig';
@@ -618,6 +620,29 @@ export class PlatformGatewayService {
         console.log(error);
       }
     }
+  }
+
+  /**
+   * ดึงไฟล์จาก gateway (pre-signed URL) แล้วคืนเป็น stream + content-type
+   * ให้ controller นำไป pipe ลง response — logic การเรียก axios/stream อยู่ในชั้น service
+   * @throws NotFoundException ถ้าไม่พบ pre-signed URL
+   */
+  async getPublicFileStream(
+    fullPath: string,
+  ): Promise<{ stream: Readable; contentType: string }> {
+    const result = await this.getPublicFile(fullPath);
+    const fileData = result?.result?.file_1 || result?.file_1;
+    const fileUrl = typeof fileData === 'string' ? fileData : fileData?.view;
+
+    if (!fileUrl) {
+      throw new NotFoundException(`File pre-signed URL not found: ${fullPath}`);
+    }
+
+    const response = await axios.get<Readable>(fileUrl, {
+      responseType: 'stream',
+    });
+    const contentType = String(response.headers['content-type'] || 'image/jpeg');
+    return { stream: response.data, contentType };
   }
 
   async getPublicFiles(

@@ -21,7 +21,6 @@ import { extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { Public } from 'src/decorators/public.decorator';
 import { OptionalJwtAuthGuard } from 'src/common/guards/optional-jwt-auth.guard';
-import axios from 'axios';
 import { UploadImageCategoryDto } from './dto/upload-image-category.dto';
 import { SendEmailDto } from './dto/send-email.dto';
 import {
@@ -117,27 +116,12 @@ export class PlatformGatewayController {
     return this.streamPublicFile(`${folder}/${sub}/${fileName}`, res);
   }
 
-  /** ดึงไฟล์จาก gateway (pre-signed URL) แล้ว stream กลับ — ใช้ร่วมกันทุก serve route */
+  /** ดึงไฟล์จาก gateway แล้ว stream กลับ — ใช้ร่วมกันทุก serve route (logic อยู่ในชั้น service) */
   private async streamPublicFile(fullPath: string, res: Response) {
-    try {
-      const result = await this.platformGatewayService.getPublicFile(fullPath);
-
-      const fileData = result?.result?.file_1 || result?.file_1;
-      const fileUrl = typeof fileData === 'string' ? fileData : fileData?.view;
-
-      if (fileUrl) {
-        const response = await axios.get(fileUrl, { responseType: 'stream' });
-        res.setHeader(
-          'Content-Type',
-          String(response.headers['content-type'] || 'image/jpeg'),
-        );
-        return response.data.pipe(res);
-      }
-      return res.status(404).send('File pre-signed URL not found');
-    } catch (error) {
-      console.error(`[serveFile] Error serving file ${fullPath}:`, error);
-      return res.status(500).send('Error retrieving file from gateway');
-    }
+    const { stream, contentType } =
+      await this.platformGatewayService.getPublicFileStream(fullPath);
+    res.setHeader('Content-Type', contentType);
+    stream.pipe(res);
   }
 
   @Public()

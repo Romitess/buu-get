@@ -1,4 +1,8 @@
-import { ValidationPipe } from '@nestjs/common';
+import {
+  ValidationPipe,
+  VersioningType,
+  VERSION_NEUTRAL,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -18,6 +22,12 @@ async function bootstrap(): Promise<void> {
     exposedHeaders: ['Date'],
   });
   app.setGlobalPrefix('api');
+  // เปิด URI versioning แบบ opt-in: route เดิมไม่มี @Version จะเป็น VERSION_NEUTRAL (path เดิม /api/... ไม่เปลี่ยน)
+  // เมื่อจะออก breaking API ใหม่ ให้ใส่ @Version('1') ที่ controller/handler → path เป็น /api/v1/...
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: VERSION_NEUTRAL,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
