@@ -6,23 +6,17 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * - join table ที่ relation ถูกถอดออกจาก entity ไปแล้ว: EXAM_SESSION_SUPERVISORS
  * ลำดับการลบไล่จากตารางลูก (BOXES) -> parent (PAGE_SECTIONS) ตาม foreign key
  */
-export class DropOrphanLegacyTables1789780343250
-  implements MigrationInterface
-{
+export class DropOrphanLegacyTables1789780343250 implements MigrationInterface {
   name = 'DropOrphanLegacyTables1789780343250';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `DROP TABLE IF EXISTS \`BUU_GET_T_BOXES_BANNER\``,
-    );
+    await queryRunner.query(`DROP TABLE IF EXISTS \`BUU_GET_T_BOXES_BANNER\``);
     await queryRunner.query(`DROP TABLE IF EXISTS \`BUU_GET_T_BOXES_CARD\``);
     await queryRunner.query(
       `DROP TABLE IF EXISTS \`BUU_GET_T_BOXES_EXAM_RULE\``,
     );
     await queryRunner.query(`DROP TABLE IF EXISTS \`BUU_GET_T_BOXES_STEP\``);
-    await queryRunner.query(
-      `DROP TABLE IF EXISTS \`BUU_GET_T_PAGE_SECTIONS\``,
-    );
+    await queryRunner.query(`DROP TABLE IF EXISTS \`BUU_GET_T_PAGE_SECTIONS\``);
     await queryRunner.query(
       `DROP TABLE IF EXISTS \`EXAM_SESSION_SUPERVISORS\``,
     );

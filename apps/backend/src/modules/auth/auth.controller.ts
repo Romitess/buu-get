@@ -13,6 +13,7 @@ import { RegisterDto } from './dto/register.dto';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Public } from 'src/decorators/public.decorator';
 
 import { Request as ExpressRequest } from 'express';
 
@@ -21,6 +22,7 @@ import { Request as ExpressRequest } from 'express';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('login')
   @ApiOkResponse({
     schema: {
@@ -42,6 +44,7 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Public()
   @Post('register')
   @ApiOkResponse({
     schema: {
@@ -55,6 +58,7 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
+  @Public()
   @Post('send-otp')
   @ApiOkResponse({
     schema: {
@@ -70,6 +74,7 @@ export class AuthController {
     return this.authService.sendOtp(sendOtpDto.email);
   }
 
+  @Public()
   @Post('verify-otp')
   @ApiOkResponse({
     schema: {

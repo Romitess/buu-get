@@ -11,6 +11,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Public } from 'src/decorators/public.decorator';
 import {
   ApiTags,
   ApiOperation,
@@ -31,6 +32,7 @@ import { ExamPasscodeLog } from './entities/exam-passcode-log.entity';
 @Controller('exam')
 export class ExamController {
   constructor(private readonly examService: ExamService) {}
+  @Public()
   @Get('time')
   @ApiOperation({ summary: 'ดึงเวลาปัจจุบันของเซิร์ฟเวอร์' })
   @ApiOkResponse({ description: 'เวลาปัจจุบันในรูปแบบ ISO' })
@@ -49,6 +51,7 @@ export class ExamController {
     return this.examService.create(createExamDto, req.user.userId);
   }
 
+  @Public()
   @Get()
   @ApiOperation({ summary: 'ดึงข้อมูลการสอบทั้งหมด' })
   @ApiOkResponse({ type: Exam, isArray: true })
@@ -56,6 +59,7 @@ export class ExamController {
     return this.examService.findAll();
   }
 
+  @Public()
   @Get(':id')
   @ApiOperation({ summary: 'ดึงข้อมูลการสอบตาม ID' })
   @ApiOkResponse({ type: Exam })

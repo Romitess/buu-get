@@ -53,10 +53,7 @@ export interface ExamRuleBoxContent {
 }
 
 export type BoxContent =
-  | BannerBoxContent
-  | CardBoxContent
-  | StepBoxContent
-  | ExamRuleBoxContent;
+  BannerBoxContent | CardBoxContent | StepBoxContent | ExamRuleBoxContent;
 
 /** หนึ่ง section พร้อม box ทั้งหมดในตัว */
 export interface PageSectionContent {

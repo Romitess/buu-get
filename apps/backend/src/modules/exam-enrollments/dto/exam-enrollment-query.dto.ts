@@ -1,22 +1,9 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsInt, Min } from 'class-validator';
+import { IsOptional, IsString, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
+import { PaginationQueryDto } from '../../../common/dto/pagination-query.dto';
 
-export class ExamEnrollmentQueryDto {
-  @ApiPropertyOptional({ description: 'หมายเลขหน้าเริ่มต้นจาก 1' })
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @IsOptional()
-  page?: number;
-
-  @ApiPropertyOptional({ description: 'จำนวนรายการต่อหน้า' })
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @IsOptional()
-  limit?: number;
-
+export class ExamEnrollmentQueryDto extends PaginationQueryDto {
   @ApiPropertyOptional({
     description:
       'คำค้นหา (ชื่อ-นามสกุล, เลขประจำตัวประชาชน/พาสปอร์ต, อีเมล, รหัสผู้สมัคร)',

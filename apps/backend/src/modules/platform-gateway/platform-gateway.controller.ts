@@ -22,7 +22,17 @@ import { v4 as uuidv4 } from 'uuid';
 import { Public } from 'src/decorators/public.decorator';
 import { OptionalJwtAuthGuard } from 'src/common/guards/optional-jwt-auth.guard';
 import axios from 'axios';
+import { UploadImageCategoryDto } from './dto/upload-image-category.dto';
+import { SendEmailDto } from './dto/send-email.dto';
+import {
+  FileNameDto,
+  GetFileListDto,
+  SendNotiDto,
+} from './dto/file-name.dto';
+import { GetPublicFilesDto } from './dto/get-public-files.dto';
 
+// endpoint ที่ forward body ดิบไป upstream (createShortUrl/getOriginalUrl/timeStamp)
+// ยังคงรับ AnyRecord เพราะ shape ขึ้นกับ payload ปลายทาง — DTO เข้มจะตัด field ที่จำเป็นทิ้ง
 type AnyRecord = Record<string, unknown>;
 
 /** multer disk storage ใช้ร่วมกันทุก endpoint ที่รับไฟล์ */
@@ -32,24 +42,6 @@ const uploadDiskStorage = diskStorage({
     cb(null, uuidv4() + extname(file.originalname));
   },
 });
-
-const isString = (value: unknown): value is string =>
-  typeof value === 'string' && value.length > 0;
-
-const normalizeFileList = (
-  value: unknown,
-): { fileName: string; downloadName?: string }[] => {
-  if (!Array.isArray(value)) return [];
-  return value
-    .filter(
-      (item): item is AnyRecord => typeof item === 'object' && item !== null,
-    )
-    .map((item) => ({
-      fileName: isString(item.fileName) ? item.fileName : '',
-      downloadName: isString(item.downloadName) ? item.downloadName : undefined,
-    }))
-    .filter((item) => item.fileName !== '');
-};
 
 @Controller('api')
 export class PlatformGatewayController {
@@ -81,12 +73,13 @@ export class PlatformGatewayController {
    *
    * OptionalJwtAuthGuard: ถ้ามี token จะดึง userId มาทำ per-user folder ได้
    */
+  @Public()
   @UseGuards(OptionalJwtAuthGuard)
   @Post('/images/upload')
   @UseInterceptors(FileInterceptor('file', { storage: uploadDiskStorage }))
   async uploadImageByCategory(
     @UploadedFile() file: Express.Multer.File,
-    @Body() body: AnyRecord,
+    @Body() body: UploadImageCategoryDto,
     @Req() req: Request & { user?: { userId: number } },
   ) {
     if (!file) {
@@ -94,9 +87,8 @@ export class PlatformGatewayController {
         'No file uploaded. Please send multipart/form-data with a file field named "file".',
       );
     }
-    const category = isString(body?.category) ? body.category : '';
     return this.platformGatewayService.uploadByCategory(
-      category,
+      body.category,
       file,
       req.user?.userId,
     );
@@ -150,48 +142,46 @@ export class PlatformGatewayController {
 
   @Public()
   @Post('/getFileList')
-  getFileList(@Body() body: AnyRecord) {
-    const path = isString(body?.path) ? body.path : '/uploaded_files';
-    return this.platformGatewayService.getFileList(path);
+  getFileList(@Body() body: GetFileListDto) {
+    return this.platformGatewayService.getFileList(
+      body.path ?? '/uploaded_files',
+    );
   }
 
   @Public()
   @Post('/getPublicFile')
-  getPublicFile(@Body() body: AnyRecord) {
-    const fileName = isString(body?.fileName) ? body.fileName : '';
-    return this.platformGatewayService.getPublicFile(fileName);
+  getPublicFile(@Body() body: FileNameDto) {
+    return this.platformGatewayService.getPublicFile(body.fileName);
   }
 
   @Public()
   @Post('/getPublicFiles')
-  getPublicFiles(@Body() body: AnyRecord) {
+  getPublicFiles(@Body() body: GetPublicFilesDto) {
     const files =
-      normalizeFileList(body?.files) ||
-      (isString(body?.fileName) ? [{ fileName: body.fileName }] : []);
+      body.files ?? (body.fileName ? [{ fileName: body.fileName }] : []);
     return this.platformGatewayService.getPublicFiles(files);
   }
 
   @Post('/sendNoti')
-  sendNoti(@Body() body: AnyRecord) {
-    const message = isString(body?.message) ? body.message : '';
-    return this.platformGatewayService.sendNoti(message);
+  sendNoti(@Body() body: SendNotiDto) {
+    return this.platformGatewayService.sendNoti(body.message);
   }
 
   @Public()
   @Post('/sendEmail')
-  sendEmail(@Body() body: AnyRecord) {
-    const system = isString(body?.system) ? body.system : '';
-    const to = isString(body?.to) ? body.to : '';
-    const subject = isString(body?.subject) ? body.subject : '';
-    const message = isString(body?.message) ? body.message : '';
-    return this.platformGatewayService.sendEmail(system, to, subject, message);
+  sendEmail(@Body() body: SendEmailDto) {
+    return this.platformGatewayService.sendEmail(
+      body.system,
+      body.to,
+      body.subject,
+      body.message,
+    );
   }
 
   @Public()
   @Delete('/deleteFile')
-  deleteFile(@Body() body: AnyRecord) {
-    const fileName = isString(body?.fileName) ? body.fileName : '';
-    return this.platformGatewayService.deleteFile(fileName);
+  deleteFile(@Body() body: FileNameDto) {
+    return this.platformGatewayService.deleteFile(body.fileName);
   }
 
   @Public()

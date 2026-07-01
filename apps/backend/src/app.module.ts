@@ -1,5 +1,7 @@
-import { Module } from '@nestjs/common';
+import { ClassSerializerInterceptor, Module } from '@nestjs/common';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
@@ -106,6 +108,14 @@ import { ExamBlockedSeatsModule } from './modules/exam-blocked-seats/exam-blocke
     MoodleModule,
     ExamReportModule,
     ExamBlockedSeatsModule,
+  ],
+  providers: [
+    // Global auth guard — ทุก endpoint ต้องมี JWT ที่ถูกต้อง ยกเว้นที่ทำเครื่องหมาย @Public()
+    // เปลี่ยน default posture จาก open เป็น closed (เดิม guard เป็น opt-in per-controller)
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    // ตัด field ที่ทำเครื่องหมาย @Exclude (เช่น USER_PASSWORD) ออกจากทุก response ที่คืน entity/instance
+    // เป็น defense-in-depth เสริมจากการ map ผ่าน response DTO รายโมดูล
+    { provide: APP_INTERCEPTOR, useClass: ClassSerializerInterceptor },
   ],
 })
 export class AppModule {}

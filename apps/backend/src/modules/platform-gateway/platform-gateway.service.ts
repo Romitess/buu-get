@@ -1,13 +1,15 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import FormData from 'form-data';
 import ApiToken from 'src/types/api/apiToken';
 import RequestTokenApiConfig from 'src/types/api/requestTokenApiConfig';
@@ -83,7 +85,8 @@ export class PlatformGatewayService {
     funcName: string,
     apiName: string,
     data?: any,
-  ) {
+    retried = false,
+  ): Promise<AxiosResponse> {
     let apiConfig;
 
     apiConfig = this.getApiConfig(apiName);
@@ -134,18 +137,34 @@ export class PlatformGatewayService {
           throw new Error(`Unsupported method: ${method}`);
       }
       return response;
-    } catch (error: any) {
-      // Log response body for 500 to help debug
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      // Log response body for 500 to help debug (ฝั่ง server เท่านั้น)
       try {
-        const status = error.response?.status;
-        const body = error.response?.data;
+        const status = axiosError.response?.status;
+        const body = axiosError.response?.data;
         this.logger?.error?.(
           `❌ API ${apiName} returned status ${status}. Body: ${JSON.stringify(body)}`,
         );
       } catch {
         // ignore
       }
-      return this.handleApiError(apiName, error, data, method, funcName);
+
+      // 401 / invalid_token → refresh แล้ว retry ครั้งเดียว (กัน loop ด้วย flag retried)
+      const upstreamError = (
+        axiosError.response?.data as { error?: string } | undefined
+      )?.error;
+      if (
+        !retried &&
+        (upstreamError === 'invalid_token' ||
+          axiosError.response?.status === 401)
+      ) {
+        this.logger.log(`redo ${funcName} for ${apiName}`);
+        await this.refreshToken(apiName);
+        return this.makeApiRequest(method, funcName, apiName, data, true);
+      }
+
+      return this.handleApiError(apiName, error);
     }
   }
 
@@ -189,32 +208,31 @@ export class PlatformGatewayService {
     return sanitized;
   }
 
-  async handleApiError(
-    apiName: string,
-    error: any,
-    data: any,
-    method: string,
-    funcName: string,
-  ) {
-    if (
-      error.response?.data.error === 'invalid_token' ||
-      error.response?.status === 401
-    ) {
-      await this.refreshToken(apiName);
-      console.log('redo ', funcName);
-      const handler = (this as Record<string, any>)[funcName];
-      if (typeof handler === 'function') {
-        return handler.call(this, apiName, data);
-      } else {
-        console.error(`Method ${funcName} is not a valid function`);
-        return error.response?.data;
-      }
-    } else {
-      await this.sendNoti(
-        `${this.getNotiEndpoint()}${apiName}: ${error.message}`,
-      );
-      return error.response?.data;
-    }
+  /**
+   * แปลง error จาก upstream (Kong gateway) เป็น HttpException มาตรฐาน แล้ว throw
+   * - แจ้งเตือน (sendNoti) ฝั่ง server
+   * - ไม่ forward upstream error body (อาจมี internal detail) ให้ client — คืนเฉพาะข้อความกลาง ๆ
+   * - คง HTTP status ต้นทางไว้ถ้าเป็น 4xx/5xx ที่ใช้ได้ ไม่งั้นตอบ 502 Bad Gateway
+   */
+  async handleApiError(apiName: string, error: unknown): Promise<never> {
+    const axiosError = error as AxiosError;
+    const message = axiosError?.message ?? String(error);
+    await this.sendNoti(`${this.getNotiEndpoint()}${apiName}: ${message}`);
+
+    const status = axiosError?.response?.status;
+    const httpStatus =
+      typeof status === 'number' && status >= 400 && status < 600
+        ? status
+        : HttpStatus.BAD_GATEWAY;
+
+    throw new HttpException(
+      {
+        statusCode: httpStatus,
+        message: `Upstream API "${apiName}" request failed`,
+        error: 'Bad Gateway',
+      },
+      httpStatus,
+    );
   }
 
   async refreshToken(apiName: string) {
@@ -244,7 +262,7 @@ export class PlatformGatewayService {
 
       await this.cacheManager.set(`${apiName}_apiToken`, response.data, 0);
     } catch (error) {
-      return this.handleApiError(apiName, error, {}, 'post', 'refreshToken');
+      return this.handleApiError(apiName, error);
     }
   }
 
@@ -269,7 +287,7 @@ export class PlatformGatewayService {
 
       await this.cacheManager.set(`${apiName}_apiToken`, response.data, 0);
     } catch (error) {
-      return this.handleApiError(apiName, error, {}, 'post', 'requestToken');
+      return this.handleApiError(apiName, error);
     }
   }
 

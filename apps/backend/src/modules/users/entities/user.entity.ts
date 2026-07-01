@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Role } from 'src/modules/roles/entities/role.entity';
 import {
   Column,
@@ -61,6 +62,7 @@ export class User {
   })
   USER_EMAIL: string;
 
+  @Exclude()
   @Column({
     name: 'USER_PASSWORD',
     type: 'varchar',
