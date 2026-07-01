@@ -19,7 +19,8 @@
     "migration:generate": "npm run typeorm -- migration:generate",
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
-    "seed:demo": "ts-node -r tsconfig-paths/register src/database/seeds/demo-seed.ts"
+    "seed:demo": "ts-node -r tsconfig-paths/register src/database/seeds/demo-seed.ts",
+    "schema:dump": "ts-node -r tsconfig-paths/register scripts/dump-schema.ts"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.1.2",
@@ -29,6 +30,7 @@
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/schedule": "^6.1.3",
     "@nestjs/swagger": "^11.0.0",
     "@nestjs/typeorm": "^11.0.0",
     "axios": "^1.16.1",
@@ -58,7 +60,6 @@
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.17.0",
     "@nestjs/cli": "^11.0.0",
-    "@nestjs/schedule": "^6.1.3",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.0",
     "@types/bcrypt": "^6.0.0",
