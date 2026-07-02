@@ -35,3 +35,6 @@ pnpm-debug.log*
 
 # Local project memory / scratch notes (do not push)
 /memory/
+
+.cursor/
+.claude.md
