@@ -3,9 +3,9 @@ import { existsSync } from 'fs';
 import { resolve } from 'path';
 import { DataSource } from 'typeorm';
 
-// โหลด .env ให้ตรงกับ ConfigModule ของแอป (envFilePath: ['.env', 'backend/.env', '../.env'])
-// เพื่อให้ CLI migration ใช้ค่า env ชุดเดียวกับตอนรันแอป (รองรับ root .env เมื่อรันจาก backend/)
-for (const candidate of ['.env', 'backend/.env', '../.env']) {
+// โหลด .env ให้ตรงกับ ConfigModule ของแอป
+// รองรับทั้ง apps/backend/.env และ root .env ของ monorepo (../../.env)
+for (const candidate of ['.env', '../../.env', 'backend/.env', '../.env']) {
   const fullPath = resolve(process.cwd(), candidate);
   if (existsSync(fullPath)) {
     dotenv.config({ path: fullPath });

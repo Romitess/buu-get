@@ -45,7 +45,7 @@ import { ExamBlockedSeatsModule } from './modules/exam-blocked-seats/exam-blocke
   imports: [
     ConfigModule.forRoot({
       load: [buuApiConfig],
-      envFilePath: ['.env', 'backend/.env', '../.env'],
+      envFilePath: ['.env', '../../.env', 'backend/.env', '../.env'],
       isGlobal: true,
       validate: validateEnv,
     }),
