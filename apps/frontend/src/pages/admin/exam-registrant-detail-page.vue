@@ -6,11 +6,11 @@
       :subtitle="$t('admin.registrantManagement.detail.pageSubtitle')"
     />
 
-    <div v-if="isLoading" class="flex flex-center q-pa-xl">
-      <q-spinner-dots color="primary" size="40px" />
-    </div>
+    <PageSkeleton v-if="isLoading" :fields="8" :columns="2" />
 
     <main v-else-if="enrollment">
+      <PageSkeleton v-if="isActionLoading" :fields="8" :columns="2" />
+      <template v-else>
       <RegistrantPersonalDetail :enrollment="enrollment" />
 
       <div class="action-container row justify-end q-mt-sm q-gutter-sm q-gutter-md-md">
@@ -37,6 +37,7 @@
           @click="handleVerify"
         />
       </div>
+      </template>
     </main>
 
     <section v-else class="text-center q-pa-xl">
@@ -89,6 +90,7 @@ import { getUsersFromApi, updateUserProfileByAdmin } from 'src/services/user.ser
 import { useUserStore } from 'src/stores/user.store';
 import { VerifyStatus } from 'src/types/enrollment.types';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
+import { PageSkeleton } from 'src/components/base/skeleton';
 
 const route = useRoute();
 const router = useRouter();
@@ -98,6 +100,7 @@ const userStore = useUserStore();
 
 const enrollment = ref<BackendEnrollmentDetail | null>(null);
 const isLoading = ref(true);
+const isActionLoading = ref(false);
 const showFixDialog = ref(false);
 const showEditDialog = ref(false);
 
@@ -152,9 +155,7 @@ const goBack = (): void => {
 const handleEditSave = async (payload: Record<string, unknown>): Promise<void> => {
   if (!enrollment.value?.USER?.PROFILE?.userProfileId) return;
 
-  $q.loading.show({
-    message: t('admin.registrantManagement.detail.staffEdit.saving'),
-  });
+  isActionLoading.value = true;
 
   try {
     const token = userStore.accessToken || localStorage.getItem('access_token') || '';
@@ -173,7 +174,7 @@ const handleEditSave = async (payload: Record<string, unknown>): Promise<void> =
       message: t('admin.registrantManagement.detail.staffEdit.saveError'),
     });
   } finally {
-    $q.loading.hide();
+    isActionLoading.value = false;
   }
 };
 
@@ -184,9 +185,7 @@ const handleFixSubmit = async (payload: {
 }): Promise<void> => {
   if (!enrollment.value) return;
 
-  $q.loading.show({
-    message: t('admin.registrantManagement.detail.notifications.sending'),
-  });
+  isActionLoading.value = true;
 
   try {
     const resolvedRoute = router.resolve({
@@ -221,7 +220,7 @@ const handleFixSubmit = async (payload: {
       message: t('admin.registrantManagement.detail.notifications.sendError'),
     });
   } finally {
-    $q.loading.hide();
+    isActionLoading.value = false;
   }
 };
 

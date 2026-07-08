@@ -294,6 +294,24 @@ export function useFeatureName() {
 }
 ```
 
+### 4.4.1 Loading & Skeleton UI
+
+- **Data fetch:** ใช้ `isLoading` จาก composable + skeleton ที่สะท้อน layout จริง (`components/base/skeleton/`)
+- **Mutation ยาว:** ใช้ `is{Verb}ing` (เช่น `isSaving`, `isImportingCandidates`) + skeleton ในพื้นที่ที่เกี่ยวข้อง
+- **ปุ่ม submit สั้นๆ:** ใช้ `q-btn :loading` ได้
+- **ตาราง:** ส่ง `:loading="isLoading"` ไปที่ `BaseTable` — จะแสดง `TableSkeleton` อัตโนมัติ
+- **ห้ามใช้:** `$q.loading`, `q-inner-loading`, page-level `q-spinner` สำหรับ data fetch
+
+| Component | ใช้เมื่อ |
+|-----------|---------|
+| `TableSkeleton` | ตาราง (ผ่าน `BaseTable`) |
+| `CardGridSkeleton` | หน้า home / card grid |
+| `BannerSkeleton` | carousel / banner |
+| `FormSkeleton` | ฟอร์ม / seat map |
+| `PageSkeleton` | หน้า detail ที่โหลดทั้งก้อน |
+
+Presentation components รับ prop `loading: boolean` จาก parent `isLoading`
+
 ---
 
 ### 4.5 Linting & Formatting

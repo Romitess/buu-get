@@ -36,7 +36,7 @@
       <BaseTable
         :columns="columns"
         :rows="filteredReceipts"
-        :loading="loading"
+        :loading="isLoading"
         :pagination="pagination"
         :empty-label="$t('admin.receiptUsageReport.table.emptyLabel')"
       >
@@ -67,7 +67,7 @@ const { error, filter, departmentOptions, loadDepartmentOptions } = useDailyReve
 const { t } = useI18n();
 
 const searchQuery = ref('');
-const loading = ref(false);
+const isLoading = ref(false);
 const receipts = ref<IssuedReceipt[]>([]);
 
 type ReceiptUsageRow = {
@@ -144,7 +144,7 @@ const getPayeeName = (receipt: IssuedReceipt): string => {
 };
 
 const loadReceipts = async (): Promise<void> => {
-  loading.value = true;
+  isLoading.value = true;
   try {
     receipts.value = await fetchIssuedReceipts();
   } catch (err) {
@@ -156,7 +156,7 @@ const loadReceipts = async (): Promise<void> => {
       position: 'top',
     });
   } finally {
-    loading.value = false;
+    isLoading.value = false;
   }
 };
 

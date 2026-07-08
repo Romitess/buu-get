@@ -1,10 +1,9 @@
 <template>
-  <div class="home-main-content q-pb-xl q-pt-none">
-    <div v-if="props.loading" class="column flex-center q-py-xl">
-      <q-spinner color="primary" size="40px" />
+    <div v-if="props.loading" class="home-main-content q-pb-xl q-pt-none">
+      <CardGridSkeleton />
     </div>
 
-    <div v-else>
+    <div v-else class="home-main-content q-pb-xl q-pt-none">
       <!-- Section 1: Test Format -->
       <div class="q-mb-xl">
         <div class="row items-center q-mb-md">
@@ -136,7 +135,6 @@
         <HomeVoucherError />
       </div>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -146,6 +144,7 @@ import HomeCard from './home-card.vue';
 import HomeStep from './home-step.vue';
 import HomeGuidelineSection from './home-guideline-section.vue';
 import HomeVoucherError from './home-voucher-error.vue';
+import { CardGridSkeleton } from 'src/components/base/skeleton';
 import type {
   PageSectionType,
   CardBoxContent,

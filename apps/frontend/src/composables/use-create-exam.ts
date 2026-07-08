@@ -250,6 +250,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const fundSourceOptions = ref<{ label: string; value: number }[]>([]);
   const allExams = ref<BackendExam[]>([]);
   const isLoadingData = ref(false);
+  const isImportingCandidates = ref(false);
   const error = ref<string | null>(null);
 
   /**
@@ -1113,7 +1114,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const importCandidates = (file?: File): void => {
     try {
       if (!file) return;
-      $q.loading.show({ message: 'กำลังเตรียมนำเข้าข้อมูล...' });
+      isImportingCandidates.value = true;
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -1127,7 +1128,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
               type: 'warning',
               message: 'ไฟล์ไม่มีข้อมูล (ต้องมีอย่างน้อย header + 1 แถว)',
             });
-            $q.loading.hide();
+            isImportingCandidates.value = false;
             return;
           }
 
@@ -1163,7 +1164,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
                 type: 'negative',
                 message: 'ไฟล์ต้องมีอย่างน้อย 2 คอลัมน์ (รหัสประจำตัว, ชื่อ-นามสกุล)',
               });
-              $q.loading.hide();
+              isImportingCandidates.value = false;
               return;
             }
           }
@@ -1189,7 +1190,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
           if (candidates.length === 0) {
             $q.notify({ type: 'warning', message: 'ไม่พบข้อมูลรายชื่อในไฟล์' });
-            $q.loading.hide();
+            isImportingCandidates.value = false;
             return;
           }
 
@@ -1201,12 +1202,12 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         } catch {
           $q.notify({ type: 'negative', message: 'รูปแบบไฟล์ไม่ถูกต้อง' });
         } finally {
-          $q.loading.hide();
+          isImportingCandidates.value = false;
         }
       };
       reader.readAsText(file, 'UTF-8');
     } catch {
-      $q.loading.hide();
+      isImportingCandidates.value = false;
       $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล' });
     }
   };
@@ -1637,6 +1638,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     fundSourceOptions,
     occupiedLocationIds,
     isLoadingData,
+    isImportingCandidates,
     error,
     isEditMode,
     isPublishedSectionLocked,

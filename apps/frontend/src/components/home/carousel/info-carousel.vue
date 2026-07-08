@@ -15,8 +15,8 @@
 
     <!-- Main Carousel Card -->
     <q-card flat bordered class="info-carousel image-banner-aspect overflow-hidden">
-      <div v-if="isLoading" class="full-height row flex-center bg-white">
-        <q-spinner color="primary" size="40px" />
+      <div v-if="isLoading" class="full-height">
+        <BannerSkeleton />
       </div>
 
       <!-- Empty State (no banners configured) -->
@@ -101,20 +101,28 @@ import {
   type BannerBoxContent,
   type PageSectionContent,
 } from 'src/types/page-builder.types';
+import { BannerSkeleton } from 'src/components/base/skeleton';
 
 const carouselRef = ref<QCarousel | null>(null);
 const slide = ref(0);
-const isLoading = ref(true);
+const internalLoading = ref(true);
 const banners = ref<BannerBoxContent[]>([]);
 
 interface Props {
   previewMode?: boolean;
   previewBanners?: BannerBoxContent[];
+  loading?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   previewMode: false,
   previewBanners: () => [],
+  loading: false,
+});
+
+const isLoading = computed(() => {
+  if (props.previewMode) return props.loading;
+  return internalLoading.value;
 });
 
 const totalSlides = computed((): number => banners.value.length);
@@ -140,11 +148,11 @@ if (props.previewMode) {
 
 onMounted(async () => {
   if (props.previewMode) {
-    isLoading.value = false;
+    internalLoading.value = false;
     return;
   }
 
-  isLoading.value = true;
+  internalLoading.value = true;
   try {
     const response = await getHomepage();
     if (response?.PCF_CONTENT?.sections) {
@@ -160,7 +168,7 @@ onMounted(async () => {
   } catch (error) {
     console.error('Failed to load homepage banners:', error);
   } finally {
-    isLoading.value = false;
+    internalLoading.value = false;
     slide.value = 0;
   }
 });

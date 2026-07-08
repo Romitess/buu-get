@@ -3,14 +3,11 @@ import { ref, computed } from 'vue';
 import type { User, UserRole } from 'src/types/user';
 import * as userService from 'src/services/user.service';
 import { ROLES } from 'src/constants/roles';
-import { AUTH_LOADING_DURATION_MS, DEFAULT_LOADING_DURATION_MS } from 'src/constants/timing';
 
 export const useUserStore = defineStore('user', () => {
   // === State ===
   const currentUser = ref<User | null>(null);
   const isLoggedIn = ref<boolean>(false);
-  const isLoadingGlobal = ref<boolean>(false);
-  const loadingText = ref<string>('กำลังโหลดข้อมูล...');
   const accessToken = ref<string | null>(localStorage.getItem('access_token'));
   const error = ref<string | null>(null);
 
@@ -94,8 +91,6 @@ export const useUserStore = defineStore('user', () => {
    * ฟังก์ชัน Login แบบ Async ต่อ Backend จริง
    */
   async function login(email: string, password?: string): Promise<boolean> {
-    loadingText.value = 'กำลังเข้าสู่ระบบ...';
-    isLoadingGlobal.value = true;
     error.value = null;
 
     try {
@@ -127,10 +122,6 @@ export const useUserStore = defineStore('user', () => {
       console.error('Login Error:', err);
       error.value = 'เกิดข้อผิดพลาดในการเชื่อมต่อระบบ';
       return false;
-    } finally {
-      setTimeout(() => {
-        isLoadingGlobal.value = false;
-      }, 500);
     }
   }
 
@@ -144,33 +135,11 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_id');
-
-    loadingText.value = 'กำลังออกจากระบบ...';
-    isLoadingGlobal.value = true;
-    setTimeout(() => {
-      isLoadingGlobal.value = false;
-    }, AUTH_LOADING_DURATION_MS);
-  }
-
-  /**
-   * ฟังก์ชันจำลองการโหลด
-   */
-  function triggerLoading(
-    text = 'กำลังโหลดข้อมูล...',
-    duration = DEFAULT_LOADING_DURATION_MS,
-  ): void {
-    loadingText.value = text;
-    isLoadingGlobal.value = true;
-    setTimeout(() => {
-      isLoadingGlobal.value = false;
-    }, duration);
   }
 
   return {
     currentUser,
     isLoggedIn,
-    isLoadingGlobal,
-    loadingText,
     accessToken,
     error,
     userRole,
@@ -179,6 +148,5 @@ export const useUserStore = defineStore('user', () => {
     initialize,
     login,
     logout,
-    triggerLoading,
   };
 });

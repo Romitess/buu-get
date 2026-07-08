@@ -1418,6 +1418,9 @@ export default {
       attendedCount: 'จำนวนคนที่มาแล้ว',
       candidateCount: 'จำนวนคนที่สมัคร',
     },
+    skeleton: {
+      loading: 'กำลังโหลดข้อมูล',
+    },
     baseTable: {
       rowsPerPage: 'จำนวนต่อหน้า',
       showing: 'แสดงข้อมูล',

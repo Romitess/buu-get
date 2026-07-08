@@ -6,9 +6,10 @@
       :subtitle="$t('profileEditHistory.pageSubtitle')"
     />
 
-    <div v-if="isLoading || isLoadingHistory" class="flex flex-center q-pa-xl">
-      <q-spinner-dots color="primary" size="40px" />
-    </div>
+    <PageSkeleton v-if="isLoading" :show-header="false">
+      <CardSkeleton height="160px" :lines="3" class="q-mb-lg" />
+      <TableSkeleton :columns="columns" :rows="6" />
+    </PageSkeleton>
 
     <div v-else-if="enrollment" class="history-content">
       <ProfileSummaryCard :enrollment="enrollment" class="q-mb-lg" />
@@ -368,6 +369,7 @@ import type { ProfileEditHistory } from 'src/types/profile-edit-history.types';
 import defaultUserImage from 'src/assets/img/user-image.jpg';
 import { getImageUrl } from 'src/services/image.service';
 import { useUserStore } from 'src/stores/user.store';
+import { PageSkeleton, CardSkeleton, TableSkeleton } from 'src/components/base/skeleton';
 
 const route = useRoute();
 const userStore = useUserStore();

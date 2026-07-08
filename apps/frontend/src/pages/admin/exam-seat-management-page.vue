@@ -29,6 +29,9 @@
       />
     </section>
 
+    <FormSkeleton v-if="isLoading" :fields="12" :columns="2" class="seat-management-skeleton" />
+
+    <template v-else>
     <!-- Horizontal layout: applicant list on the left, seat map on the right. -->
     <div class="seat-management-row">
       <div class="seat-management-list-column flex column min-width-0">
@@ -97,6 +100,7 @@
         </div>
       </div>
     </div>
+    </template>
   </q-page>
 </template>
 
@@ -111,8 +115,10 @@ import SearchBar from 'src/components/shared/search-bar.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppExamSessionTime from 'src/components/exam/app-exam-session-time.vue';
 import { useExamSeatManagement } from 'src/composables/use-exam-seat-management';
+import { FormSkeleton } from 'src/components/base/skeleton';
 
 const {
+  isLoading,
   activeSessionId,
   activeSessionLocationId,
   sessionTimeTabs,
@@ -154,6 +160,10 @@ const handleSearch = (val: string | number | null): void => {
 
 .min-width-0 {
   min-width: 0;
+}
+
+.seat-management-skeleton {
+  min-height: clamp(600px, 72vh, 760px);
 }
 
 .seat-management-row {

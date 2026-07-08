@@ -39,8 +39,8 @@
         />
 
         <div v-else-if="isLoadingData" class="room-preview-empty">
-          <q-spinner color="primary" size="40px" />
-          <div>กำลังโหลดผังที่นั่ง</div>
+          <q-skeleton type="rect" height="320px" width="100%" animation="pulse" />
+          <div class="q-mt-sm text-grey-7">กำลังโหลดผังที่นั่ง</div>
         </div>
 
         <div v-else class="room-preview-empty">

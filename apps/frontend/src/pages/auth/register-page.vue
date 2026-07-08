@@ -19,7 +19,9 @@
     <!-- ─── Step 2: Profile Form (Identity + Contact Info) ─── -->
     <template v-if="currentStep === 'profile'">
       <div class="profile-form-container">
+        <FormSkeleton v-if="isSubmitting" :fields="10" :columns="2" />
         <RegisterAndEditProfile
+          v-else
           :initial-edit-mode="false"
           :is-thai="isThai"
           :credentials="credentials"
@@ -40,15 +42,15 @@ import type { RegisterCredentials, RegisterFormData } from 'src/types/register';
 import type { RegisterPayload } from 'src/stores/auth.store';
 import RegisterAndEditProfile from 'src/components/register-and-edit-profile.vue';
 import { useAuthStore } from 'src/stores/auth.store';
-import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
+import { FormSkeleton } from 'src/components/base/skeleton';
 
 type Step = 'credentials' | 'profile';
 
 const { t } = useI18n();
-const $q = useQuasar();
 const router = useRouter();
 const authStore = useAuthStore();
+const isSubmitting = ref(false);
 
 onMounted(() => {
   document.body.style.backgroundColor = 'var(--primary-dark)';
@@ -123,7 +125,7 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
     address: formData.address,
   };
 
-  $q.loading.show();
+  isSubmitting.value = true;
 
   try {
     const response = await authStore.register(finalData);
@@ -149,7 +151,7 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
       position: 'top',
     });
   } finally {
-    $q.loading.hide();
+    isSubmitting.value = false;
   }
 };
 </script>

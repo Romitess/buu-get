@@ -57,7 +57,6 @@ export interface OtpResponse {
 
 export const useAuthStore = defineStore('auth', () => {
   // === State ===
-  const isLoading = ref(false);
   const error = ref<string | null>(null);
   const accessToken = ref<string | null>(localStorage.getItem('access_token'));
 
@@ -67,7 +66,6 @@ export const useAuthStore = defineStore('auth', () => {
    * สมัครสมาชิก — เรียก POST /auth/register
    */
   async function register(payload: RegisterPayload): Promise<AuthResponse> {
-    isLoading.value = true;
     error.value = null;
 
     try {
@@ -78,8 +76,6 @@ export const useAuthStore = defineStore('auth', () => {
       const msg = axiosError.response?.data?.message || 'Registration failed';
       error.value = msg;
       return { success: false, message: msg };
-    } finally {
-      isLoading.value = false;
     }
   }
 
@@ -87,7 +83,6 @@ export const useAuthStore = defineStore('auth', () => {
    * เข้าสู่ระบบ — เรียก POST /auth/login
    */
   async function login(payload: LoginPayload): Promise<LoginResponse> {
-    isLoading.value = true;
     error.value = null;
 
     try {
@@ -108,13 +103,10 @@ export const useAuthStore = defineStore('auth', () => {
       const msg = axiosError.response?.data?.message || 'Login failed';
       error.value = msg;
       return { success: false, message: msg };
-    } finally {
-      isLoading.value = false;
     }
   }
 
   async function sendOtp(email: string): Promise<OtpResponse> {
-    isLoading.value = true;
     error.value = null;
 
     try {
@@ -125,13 +117,10 @@ export const useAuthStore = defineStore('auth', () => {
       const msg = axiosError.response?.data?.message || 'Failed to send OTP';
       error.value = msg;
       return { success: false, message: msg };
-    } finally {
-      isLoading.value = false;
     }
   }
 
   async function verifyOtp(email: string, otp: string): Promise<OtpResponse> {
-    isLoading.value = true;
     error.value = null;
 
     try {
@@ -142,8 +131,6 @@ export const useAuthStore = defineStore('auth', () => {
       const msg = axiosError.response?.data?.message || 'Invalid OTP';
       error.value = msg;
       return { success: false, message: msg };
-    } finally {
-      isLoading.value = false;
     }
   }
 
@@ -166,7 +153,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     // State
-    isLoading,
     error,
     accessToken,
 

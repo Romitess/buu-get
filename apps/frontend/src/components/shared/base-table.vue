@@ -124,9 +124,7 @@
       </template>
 
       <template v-slot:loading>
-        <q-inner-loading showing color="primary">
-          <q-spinner-dots size="50px" color="primary" />
-        </q-inner-loading>
+        <TableSkeleton :columns="sortableColumns" />
       </template>
     </q-table>
   </div>
@@ -136,6 +134,7 @@
 import { computed, ref, watch } from 'vue';
 import type { QTableColumn } from 'quasar';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
+import { TableSkeleton } from 'src/components/base/skeleton';
 
 interface Props {
   columns: QTableColumn[];

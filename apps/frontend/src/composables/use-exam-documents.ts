@@ -77,10 +77,6 @@ export function useExamDocuments() {
     const currentUser = userStore.currentUser;
 
     if (cachedEnrollment) {
-      $q.loading.show({
-        message: t('exam.voucher.downloading'),
-      });
-
       isDownloadingVoucher.value = true;
 
       let enrollment = cachedEnrollment;
@@ -91,7 +87,6 @@ export function useExamDocuments() {
       }
 
       if (!enrollment.SESSION) {
-        $q.loading.hide();
         isDownloadingVoucher.value = false;
         return;
       }
@@ -244,7 +239,6 @@ export function useExamDocuments() {
           position: 'top',
         });
       } finally {
-        $q.loading.hide();
         isDownloadingVoucher.value = false;
         selectedVoucherData.value = undefined;
         selectedVoucherRegulationsEn.value = '';
@@ -332,10 +326,6 @@ export function useExamDocuments() {
         status: 'SUCCESS',
       };
 
-      $q.loading.show({
-        message: t('exam.receipt.downloading'),
-      });
-
       isDownloadingReceipt.value = true;
 
       // Wait for DOM to mount offscreen container
@@ -384,7 +374,6 @@ export function useExamDocuments() {
           position: 'top',
         });
       } finally {
-        $q.loading.hide();
         isDownloadingReceipt.value = false;
         selectedReceiptData.value = {
           receiptNo: '',

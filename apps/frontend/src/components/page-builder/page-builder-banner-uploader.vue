@@ -1,7 +1,7 @@
 <template>
   <q-card
     flat
-    class="banner-uploader column flex-center text-center cursor-pointer"
+    class="banner-uploader column flex-center text-center cursor-pointer relative-position"
     @click="pickFile"
     @dragover.prevent
     @drop.prevent="onDrop"
@@ -15,6 +15,11 @@
       @update:model-value="onFileSelected"
     />
 
+    <div v-if="isUploading" class="banner-upload-skeleton absolute-full flex flex-center">
+      <BannerSkeleton />
+    </div>
+
+    <template v-else>
     <q-icon name="cloud_upload" size="100px" color="grey-9" />
     <div class="text-h6 text-weight-bold q-mt-sm">
       {{ $t('admin.pageBuilder.actions.addBanner') }}
@@ -25,8 +30,7 @@
     <div class="text-caption text-grey-7 q-mt-xs">
       {{ $t('admin.pageBuilder.uploadSizeTip') }}
     </div>
-
-    <q-inner-loading :showing="isUploading" :label="$t('admin.pageBuilder.uploading')" />
+    </template>
 
     <q-dialog v-model="showCropDialog" persistent>
       <AppImageCropper
@@ -50,6 +54,7 @@ import { QFile, useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import AppImageCropper from 'src/components/shared/app-image-cropper.vue';
 import { useImageUpload } from 'src/composables/use-image-upload';
+import { BannerSkeleton } from 'src/components/base/skeleton';
 
 interface Props {
   cropWidth?: number;

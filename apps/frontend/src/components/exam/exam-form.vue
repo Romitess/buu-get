@@ -57,6 +57,7 @@
       v-if="isSpecialRound"
       v-model:search-query="candidateSearch"
       :filtered-candidates="filteredCandidates"
+      :loading="isImportingCandidates"
       :locked="isPublishedSectionLocked || isLockedByEnrollment"
       @import-candidates="importCandidates"
       @passcode-type-selected="generatePasscodes"
@@ -123,6 +124,7 @@ const {
   fundSourceOptions,
   occupiedLocationIds,
   isLoadingData,
+  isImportingCandidates,
   isEditMode,
   isPublishedSectionLocked,
   isScheduleLocked,

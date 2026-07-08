@@ -775,7 +775,6 @@ export function useExamSeatManagement() {
     isLoading.value = true;
     error.value = null;
     try {
-      $q.loading.show({ message: t('admin.seatManagement.loadingData') });
       examData.value = await fetchExamById(examId);
 
       if (isSeatAllocationLocked(examData.value)) {
@@ -800,7 +799,6 @@ export function useExamSeatManagement() {
       error.value = msg;
       $q.notify({ type: 'negative', message: msg });
     } finally {
-      $q.loading.hide();
       isLoading.value = false;
     }
   };
@@ -863,8 +861,6 @@ export function useExamSeatManagement() {
     isLoading.value = true;
     error.value = null;
     try {
-      $q.loading.show({ message: t('admin.seatManagement.savingData') });
-
       saveSeatDraft(activeSessionId.value, students.value);
       const seatAssignments: EnrollmentSeatAssignment[] = [];
 
@@ -1015,7 +1011,6 @@ export function useExamSeatManagement() {
       error.value = message;
       $q.notify({ type: 'negative', message });
     } finally {
-      $q.loading.hide();
       isLoading.value = false;
     }
   };

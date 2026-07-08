@@ -1176,6 +1176,9 @@ export default {
       attendedCount: 'Attended count',
       candidateCount: 'Applicants',
     },
+    skeleton: {
+      loading: 'Loading content',
+    },
     baseTable: {
       rowsPerPage: 'Rows per page',
       showing: 'Showing',

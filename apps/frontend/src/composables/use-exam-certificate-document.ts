@@ -82,9 +82,6 @@ export function useExamCertificateDocument() {
       profile?.userImagePath ||
       userStore.currentUser?.userImagePath;
 
-    $q.loading.show({
-      message: 'กำลังดาวน์โหลดใบประกาศนียบัตร...',
-    });
     isDownloadingCertificate.value = true;
 
     try {
@@ -187,7 +184,6 @@ export function useExamCertificateDocument() {
         position: 'top',
       });
     } finally {
-      $q.loading.hide();
       isDownloadingCertificate.value = false;
       selectedCertificateData.value = undefined;
     }

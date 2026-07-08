@@ -38,7 +38,7 @@
       <BaseTable
         :columns="columns"
         :rows="filteredReceipts"
-        :loading="loading"
+        :loading="isLoading"
         :pagination="pagination"
         :empty-label="$t('admin.applicationFeeReport.table.emptyLabel')"
       >
@@ -116,7 +116,7 @@ type ApplicationFeeRow = {
 const { t } = useI18n();
 
 const searchQuery = ref('');
-const loading = ref(false);
+const isLoading = ref(false);
 const receipts = ref<IssuedReceipt[]>([]);
 
 const formatThaiDate = (dateStr?: string | Date) => {
@@ -195,7 +195,7 @@ const buildReceiptEnrollment = (receipt: IssuedReceipt): ExamEnrollment | null =
 };
 
 const loadReceipts = async (): Promise<void> => {
-  loading.value = true;
+  isLoading.value = true;
   try {
     receipts.value = await fetchIssuedReceipts();
   } catch (err) {
@@ -206,7 +206,7 @@ const loadReceipts = async (): Promise<void> => {
       position: 'top',
     });
   } finally {
-    loading.value = false;
+    isLoading.value = false;
   }
 };
 

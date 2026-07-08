@@ -11,8 +11,17 @@
         </div>
       </div>
 
-      <div v-if="isLoading" class="column flex-center q-py-xl">
-        <q-spinner color="primary" size="40px" />
+      <div v-if="isLoading" class="column pb-sections-list">
+        <BannerSkeleton class="q-mb-lg" />
+        <div class="row q-col-gutter-x-lg pb-middle-row">
+          <div class="col-12 col-md-6">
+            <CardSkeleton height="280px" :lines="4" />
+          </div>
+          <div class="col-12 col-md-6">
+            <CardSkeleton height="280px" :lines="4" />
+          </div>
+        </div>
+        <CardSkeleton height="200px" :lines="3" class="q-mt-lg" />
       </div>
 
       <div v-else class="column pb-sections-list">
@@ -95,6 +104,7 @@ import PageBuilderContentSection from 'src/components/page-builder/page-builder-
 import PageBuilderExamRulesSection from 'src/components/page-builder/page-builder-exam-rules-section.vue';
 import { usePageBuilder } from 'src/composables/use-page-builder';
 import PageBuilderPreviewDialog from 'src/components/page-builder/page-builder-preview-dialog.vue';
+import { BannerSkeleton, CardSkeleton } from 'src/components/base/skeleton';
 
 const $q = useQuasar();
 const { locale, t } = useI18n();

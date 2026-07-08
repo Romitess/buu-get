@@ -61,7 +61,7 @@
       <BaseTable
         :columns="columns"
         :rows="filteredRows"
-        :loading="isLoading"
+        :loading="isLoading || isActionLoading || isPrintingSeatPlan"
         :pagination="pagination"
         class="seat-candidates-table"
         @request="onRequest"
@@ -185,6 +185,7 @@ const route = useRoute();
 const router = useRouter();
 const i18n = useI18n();
 const $q = useQuasar();
+const isActionLoading = ref(false);
 
 const {
   exam,
@@ -256,9 +257,7 @@ const startIssuingTickets = async (): Promise<void> => {
     return;
   }
 
-  $q.loading.show({
-    message: 'กำลังออกบัตรประจำตัวสอบและจัดส่งอีเมลแจ้งเตือนผู้เข้าสอบทั้งหมด...',
-  });
+  isActionLoading.value = true;
 
   try {
     // Resolve the exact absolute URL correctly using Vue Router (handles Hash mode / History mode automatically)
@@ -321,7 +320,7 @@ const startIssuingTickets = async (): Promise<void> => {
       actions: [{ icon: 'close', color: 'white' }],
     });
   } finally {
-    $q.loading.hide();
+    isActionLoading.value = false;
   }
 };
 
@@ -377,7 +376,7 @@ const buildVoucherData = (row: SeatCandidateRow, freshEnrollment = row.enrollmen
 };
 
 const handleViewVoucher = async (row: SeatCandidateRow): Promise<void> => {
-  $q.loading.show();
+  isActionLoading.value = true;
   try {
     const enrollment = await fetchEnrollmentById(row.ermId);
     $q.dialog({
@@ -395,7 +394,7 @@ const handleViewVoucher = async (row: SeatCandidateRow): Promise<void> => {
       position: 'top',
     });
   } finally {
-    $q.loading.hide();
+    isActionLoading.value = false;
   }
 };
 
@@ -567,7 +566,6 @@ const renderPrintPageToCanvas = async (element: HTMLElement): Promise<HTMLCanvas
 
 const handlePrintSeatPlan = async (): Promise<void> => {
   isPrintingSeatPlan.value = true;
-  $q.loading.show();
 
   await nextTick();
   await new Promise<void>((resolve) => {
@@ -615,7 +613,6 @@ const handlePrintSeatPlan = async (): Promise<void> => {
       position: 'top',
     });
   } finally {
-    $q.loading.hide();
     cleanupSeatPlanPrint();
   }
 };
