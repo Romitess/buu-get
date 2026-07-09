@@ -5,31 +5,39 @@
     <div class="row q-col-gutter-x-xl">
       <!-- Side: Paper-based -->
       <div class="col-12 col-md-6">
-        <div class="side-label text-weight-bold text-primary">
-          {{ rulePaperSection?.title ? getLocalizedText(rulePaperSection.title) : t('home.examRules.paperBased.label') }}
-        </div>
+        <ScrollReveal :disabled="revealDisabled">
+          <div class="side-label text-weight-bold text-primary">
+            {{ rulePaperSection?.title ? getLocalizedText(rulePaperSection.title) : t('home.examRules.paperBased.label') }}
+          </div>
+        </ScrollReveal>
         <div class="column guideline-list">
-          <HomeGuidelineCard
+          <ScrollReveal
             v-for="(rule, index) in paperRulesList"
             :key="`paper-${index}`"
-            :icon="rule.icon"
-            :text="rule.text"
-          />
+            :delay="index * STAGGER_DELAY"
+            :disabled="revealDisabled"
+          >
+            <HomeGuidelineCard :icon="rule.icon" :text="rule.text" />
+          </ScrollReveal>
         </div>
       </div>
 
       <!-- Side: Computer-based -->
       <div class="col-12 col-md-6 side-computer">
-        <div class="side-label text-weight-bold text-primary">
-          {{ ruleComputerSection?.title ? getLocalizedText(ruleComputerSection.title) : t('home.examRules.computerBased.label') }}
-        </div>
+        <ScrollReveal :delay="COLUMN_LABEL_DELAY" :disabled="revealDisabled">
+          <div class="side-label text-weight-bold text-primary">
+            {{ ruleComputerSection?.title ? getLocalizedText(ruleComputerSection.title) : t('home.examRules.computerBased.label') }}
+          </div>
+        </ScrollReveal>
         <div class="column guideline-list">
-          <HomeGuidelineCard
+          <ScrollReveal
             v-for="(rule, index) in computerRulesList"
             :key="`computer-${index}`"
-            :icon="rule.icon"
-            :text="rule.text"
-          />
+            :delay="index * STAGGER_DELAY"
+            :disabled="revealDisabled"
+          >
+            <HomeGuidelineCard :icon="rule.icon" :text="rule.text" />
+          </ScrollReveal>
         </div>
       </div>
     </div>
@@ -40,11 +48,15 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import HomeGuidelineCard from './home-guideline-card.vue';
+import ScrollReveal from 'src/components/base/scroll-reveal.vue';
 import type {
   PageSectionType,
   ExamRuleBoxContent,
   LocalizedText,
 } from 'src/types/page-builder.types';
+
+const STAGGER_DELAY = 50;
+const COLUMN_LABEL_DELAY = 80;
 
 interface SectionData<T> {
   type: PageSectionType;
@@ -56,9 +68,14 @@ interface SectionData<T> {
 interface Props {
   rulePaperSection?: SectionData<ExamRuleBoxContent> | null;
   ruleComputerSection?: SectionData<ExamRuleBoxContent> | null;
+  previewMode?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  previewMode: false,
+});
+
+const revealDisabled = computed(() => props.previewMode);
 
 const { locale, t } = useI18n();
 

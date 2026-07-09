@@ -30,8 +30,8 @@ defineProps<{
   border-radius: 12px;
   box-shadow: 0 8px 12px -4px rgba(0, 0, 0, 0.3) !important;
   transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+    transform 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 200ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .home-card:hover {
   transform: translateY(-5px);

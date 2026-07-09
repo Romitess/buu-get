@@ -1,19 +1,32 @@
 <template>
-  <q-banner dense class="voucher-error-banner text-white q-pa-md q-mt-xl">
-    <template v-slot:avatar>
-      <q-icon name="error_outline" color="white" size="sm" />
-    </template>
-    <div class="text-body2 text-weight-medium">
-      {{ translatedText }}
-    </div>
-  </q-banner>
+  <ScrollReveal :disabled="revealDisabled">
+    <q-banner dense class="voucher-error-banner text-white q-pa-md q-mt-xl">
+      <template v-slot:avatar>
+        <q-icon name="error_outline" color="white" size="sm" />
+      </template>
+      <div class="text-body2 text-weight-medium">
+        {{ translatedText }}
+      </div>
+    </q-banner>
+  </ScrollReveal>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import ScrollReveal from 'src/components/base/scroll-reveal.vue';
 import { SUPPORT_CONTACT } from 'src/constants/support';
+
+interface Props {
+  previewMode?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  previewMode: false,
+});
+
+const revealDisabled = computed(() => props.previewMode);
 
 const { t } = useI18n();
 

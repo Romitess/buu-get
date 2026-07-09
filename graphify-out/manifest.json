@@ -2105,23 +2105,23 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-card.vue": {
-    "mtime": 1783042948.8490338,
-    "ast_hash": "b42f340e1067ff313705e3886de7b78a",
+    "mtime": 1783570142.238259,
+    "ast_hash": "ae68094adeb095d6edcdd0205aed4136",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-guideline-card.vue": {
-    "mtime": 1783042948.849089,
-    "ast_hash": "dcf2f6e0e0b327eae1b30388be3ca0d6",
+    "mtime": 1783570142.8757105,
+    "ast_hash": "890068030954df5fe877be9391cc450e",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-guideline-section.vue": {
-    "mtime": 1783042948.8491454,
-    "ast_hash": "84701bc06350f714d9dec147178a0317",
+    "mtime": 1783570135.2460263,
+    "ast_hash": "9f71c65ebc1d91b0a9069e380d7e3847",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-main-content.vue": {
-    "mtime": 1783495414.6460638,
-    "ast_hash": "cac500477f12933f842fa31b0d5ec474",
+    "mtime": 1783570204.1031363,
+    "ast_hash": "1b07d160421087b8e3c4c88eec76e0d3",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-step.vue": {
@@ -2130,8 +2130,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-voucher-error.vue": {
-    "mtime": 1783042948.849299,
-    "ast_hash": "9ad805c97fc30721e653e2e3554e97b1",
+    "mtime": 1783570140.6411862,
+    "ast_hash": "9cd2f97a86acc7415e9c0658ee14a7a8",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/page-builder/page-builder-banner-item.vue": {
@@ -2285,8 +2285,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/shared/base-table.vue": {
-    "mtime": 1783568410.154847,
-    "ast_hash": "090145a946d55ed608f6a16e3e0a8e24",
+    "mtime": 1783568614.1600862,
+    "ast_hash": "3090461d0b879dcf179d67b6ebabc377",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/shared/enrollment-status-badge.vue": {
@@ -2670,8 +2670,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/home-page.vue": {
-    "mtime": 1783042948.860374,
-    "ast_hash": "4056ec180ef2fb7464fbf608810ed018",
+    "mtime": 1783570076.788125,
+    "ast_hash": "c7fe650647dca806ef3d1c1e9420fbba",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/index-page.vue": {
@@ -3132,6 +3132,16 @@
   "apps/frontend/src/assets/quasar-logo-vertical.svg": {
     "mtime": 1783042948.8409383,
     "ast_hash": "ef0c03f0d188f763626d94f6d2318d5d",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/components/base/scroll-reveal.vue": {
+    "mtime": 1783570394.6443071,
+    "ast_hash": "f2e90ac29c423d023280d82a7444e2c0",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/composables/use-scroll-reveal.ts": {
+    "mtime": 1783570387.848327,
+    "ast_hash": "53289f20647ff50db66accf3626bfd81",
     "semantic_hash": ""
   }
 }
