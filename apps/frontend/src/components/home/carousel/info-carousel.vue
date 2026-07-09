@@ -52,7 +52,13 @@
             fit="cover"
             class="full-width full-height"
             loading="eager"
+            no-spinner
           >
+            <template #loading>
+              <div class="absolute-full">
+                <BannerSkeleton fill class="full-height" />
+              </div>
+            </template>
             <template #error>
               <div class="absolute-full flex flex-center bg-grey-2 text-grey-6">
                 <q-icon name="broken_image" size="48px" />
