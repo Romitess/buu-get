@@ -40,3 +40,5 @@ pnpm-debug.log*
 
 .cursor/
 .claude.md
+
+.graphify-out/
