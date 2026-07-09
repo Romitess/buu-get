@@ -2,7 +2,8 @@
   <q-skeleton
     type="circle"
     :size="size"
-    animation="pulse"
+    animation="wave"
+    class="avatar-skeleton skeleton-root"
     :aria-busy="true"
     :aria-label="ariaLabel"
   />

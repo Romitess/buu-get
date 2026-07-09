@@ -7,8 +7,13 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { FINANCE_ROLES } from 'src/common/constants/role-groups';
+import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { VoidedReceiptsService } from './voided-receipts.service';
 import { CreateVoidedReceiptDto } from './dto/create-voided-receipt.dto';
 import { UpdateVoidedReceiptDto } from './dto/update-voided-receipt.dto';
@@ -16,6 +21,7 @@ import { VoidedReceipt } from './entities/voided-receipt.entity';
 
 @ApiTags('Voided Receipts')
 @Controller('voided-receipts')
+@Roles(...FINANCE_ROLES)
 export class VoidedReceiptsController {
   constructor(private readonly voidedReceiptsService: VoidedReceiptsService) {}
 
@@ -30,9 +36,11 @@ export class VoidedReceiptsController {
 
   @Get()
   @ApiOperation({ summary: 'ดึงรายการใบเสร็จที่ถูกยกเลิกทั้งหมด' })
-  @ApiResponse({ status: 200, type: [VoidedReceipt] })
-  async findAll(): Promise<VoidedReceipt[]> {
-    return await this.voidedReceiptsService.findAll();
+  @ApiResponse({ status: 200, description: 'รายการแบบแบ่งหน้า' })
+  async findAll(
+    @Query() query: PaginationQueryDto,
+  ): Promise<PaginatedResponse<VoidedReceipt>> {
+    return await this.voidedReceiptsService.findAll(query);
   }
 
   @Get(':id')

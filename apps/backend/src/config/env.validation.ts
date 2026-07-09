@@ -22,6 +22,12 @@ export interface EnvironmentVariables {
   MOODLE_SCHEME?: string;
   MOODLE_COURSE_CATEGORY_ID?: number;
   MOODLE_STUDENT_ROLEID?: number;
+  /** comma-separated allowed CORS origins; empty = reflect request origin in dev only */
+  CORS_ORIGINS?: string;
+  /** default JSON/urlencoded body limit (e.g. 1mb) */
+  BODY_LIMIT?: string;
+  /** larger limit for file upload routes (e.g. 50mb) */
+  UPLOAD_BODY_LIMIT?: string;
 }
 
 const envSchema = Joi.object<EnvironmentVariables>({
@@ -47,6 +53,9 @@ const envSchema = Joi.object<EnvironmentVariables>({
   MOODLE_SCHEME: Joi.string().valid('http', 'https').optional(),
   MOODLE_COURSE_CATEGORY_ID: Joi.number().optional(),
   MOODLE_STUDENT_ROLEID: Joi.number().optional(),
+  CORS_ORIGINS: Joi.string().optional(),
+  BODY_LIMIT: Joi.string().default('1mb'),
+  UPLOAD_BODY_LIMIT: Joi.string().default('50mb'),
 });
 
 export function validateEnv(

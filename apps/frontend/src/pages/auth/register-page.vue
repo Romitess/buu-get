@@ -35,6 +35,7 @@
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar';
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import RegisterCard from 'src/components/register-card.vue';
@@ -50,6 +51,7 @@ type Step = 'credentials' | 'profile';
 const { t } = useI18n();
 const router = useRouter();
 const authStore = useAuthStore();
+const $q = useQuasar();
 const isSubmitting = ref(false);
 
 onMounted(() => {

@@ -5,3 +5,6 @@ export { default as BannerSkeleton } from './banner-skeleton.vue';
 export { default as FormSkeleton } from './form-skeleton.vue';
 export { default as PageSkeleton } from './page-skeleton.vue';
 export { default as AvatarSkeleton } from './avatar-skeleton.vue';
+export { default as ChartPanelSkeleton } from './chart-panel-skeleton.vue';
+export { default as SeatManagementSkeleton } from './seat-management-skeleton.vue';
+export { default as RoomPreviewSkeleton } from './room-preview-skeleton.vue';

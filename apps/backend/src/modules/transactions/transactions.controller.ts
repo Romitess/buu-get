@@ -7,8 +7,13 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { FINANCE_ROLES } from 'src/common/constants/role-groups';
+import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { TransactionsService } from './transactions.service';
 import { UpdateTransactionDto } from './dto/transaction.dto';
 import { Transaction } from './entities/transaction.entity';
@@ -45,14 +50,16 @@ export class TransactionsController {
   }
 
   @Get()
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'ดึงข้อมูลธุรกรรมทั้งหมด' })
   @ApiResponse({
     status: 200,
-    description: 'รายการธุรกรรมทั้งหมด',
-    type: [Transaction],
+    description: 'รายการธุรกรรมแบบแบ่งหน้า',
   })
-  findAll(): Promise<Transaction[]> {
-    return this.transactionsService.findAll();
+  findAll(
+    @Query() query: PaginationQueryDto,
+  ): Promise<PaginatedResponse<Transaction>> {
+    return this.transactionsService.findAll(query);
   }
 
   @Get(':id')
@@ -68,6 +75,7 @@ export class TransactionsController {
   }
 
   @Patch(':tranxId/confirm')
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'ยืนยันการชำระเงิน (FLOW 2)' })
   @ApiResponse({
     status: 200,
@@ -81,6 +89,7 @@ export class TransactionsController {
   }
 
   @Patch(':tranxId/expire')
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'ทำให้ธุรกรรมหมดอายุ (FLOW 3)' })
   @ApiResponse({
     status: 200,
@@ -93,6 +102,7 @@ export class TransactionsController {
   }
 
   @Patch('by-erm/:ermId')
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'แก้ไขข้อมูลธุรกรรมด้วย ERM_ID' })
   @ApiResponse({
     status: 200,
@@ -108,6 +118,7 @@ export class TransactionsController {
   }
 
   @Patch(':id')
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'แก้ไขข้อมูลธุรกรรม' })
   @ApiResponse({
     status: 200,
@@ -123,6 +134,7 @@ export class TransactionsController {
   }
 
   @Delete(':id')
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'ลบข้อมูลธุรกรรม (Soft delete)' })
   @ApiResponse({
     status: 200,

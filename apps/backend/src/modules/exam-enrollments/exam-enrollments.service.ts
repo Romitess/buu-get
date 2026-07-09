@@ -8,6 +8,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, Not, In, LessThan, Brackets } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
+import {
+  buildPaginatedResponse,
+  PaginatedResponse,
+} from 'src/common/dto/paginated-response.dto';
+import {
+  PAGINATION_DEFAULT_LIMIT,
+  PAGINATION_DEFAULT_PAGE,
+  PaginationQueryDto,
+} from 'src/common/dto/pagination-query.dto';
 import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
 import {
   ExamEnrollment,
@@ -319,8 +328,12 @@ export class ExamEnrollmentsService {
     return await this.findOne(saved.ERM_ID);
   }
 
-  async findAll(): Promise<ExamEnrollment[]> {
-    return await this.examEnrollmentRepository.find({
+  async findAll(
+    query: PaginationQueryDto = {},
+  ): Promise<PaginatedResponse<ExamEnrollment>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const [data, total] = await this.examEnrollmentRepository.findAndCount({
       relations: [
         'SESSION',
         'SESSION.EXAM',
@@ -330,7 +343,11 @@ export class ExamEnrollmentsService {
         'TRANSACTION',
         'TRANSACTION.RECEIPTS',
       ],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { ERM_ID: 'DESC' },
     });
+    return buildPaginatedResponse(data, total, page, limit);
   }
 
   async findExecutiveTestTakers(

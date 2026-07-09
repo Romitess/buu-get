@@ -8,11 +8,14 @@ import {
   Delete,
   ParseIntPipe,
 } from '@nestjs/common';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { USER_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 
 @Controller('roles')
+@Roles(...USER_ADMIN_ROLES)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 

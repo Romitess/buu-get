@@ -5,6 +5,15 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository, Not } from 'typeorm';
+import {
+  buildPaginatedResponse,
+  PaginatedResponse,
+} from 'src/common/dto/paginated-response.dto';
+import {
+  PAGINATION_DEFAULT_LIMIT,
+  PAGINATION_DEFAULT_PAGE,
+  PaginationQueryDto,
+} from 'src/common/dto/pagination-query.dto';
 import { CreateUserProfileDto } from './dto/create-user-profile.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { UserProfile } from './entities/user-profile.entity';
@@ -35,10 +44,17 @@ export class UserProfileService {
     return await repo.save(userProfile);
   }
 
-  async findAll(): Promise<UserProfile[]> {
-    return await this.userProfileRepository.find({
+  async findAll(
+    query: PaginationQueryDto = {},
+  ): Promise<PaginatedResponse<UserProfile>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const [data, total] = await this.userProfileRepository.findAndCount({
       order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
     });
+    return buildPaginatedResponse(data, total, page, limit);
   }
 
   async findOne(id: number): Promise<UserProfile> {

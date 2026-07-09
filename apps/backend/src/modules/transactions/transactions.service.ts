@@ -8,6 +8,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import {
+  buildPaginatedResponse,
+  PaginatedResponse,
+} from 'src/common/dto/paginated-response.dto';
+import {
+  PAGINATION_DEFAULT_LIMIT,
+  PAGINATION_DEFAULT_PAGE,
+  PaginationQueryDto,
+} from 'src/common/dto/pagination-query.dto';
+import {
   Transaction,
   TransactionChannel,
   TransactionMatchStatus,
@@ -502,8 +511,18 @@ export class TransactionsService {
     });
   }
 
-  async findAll(): Promise<Transaction[]> {
-    return this.transactionsRepository.find({ relations: ['ENROLLMENT'] });
+  async findAll(
+    query: PaginationQueryDto = {},
+  ): Promise<PaginatedResponse<Transaction>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const [data, total] = await this.transactionsRepository.findAndCount({
+      relations: ['ENROLLMENT'],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { TRANX_ID: 'DESC' },
+    });
+    return buildPaginatedResponse(data, total, page, limit);
   }
 
   async findOne(id: number): Promise<Transaction> {

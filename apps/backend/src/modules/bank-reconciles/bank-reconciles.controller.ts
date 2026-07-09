@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   Request,
   UploadedFile,
   UseGuards,
@@ -28,7 +29,11 @@ import {
 } from './bank-reconciles.service';
 import { BankReconcile } from './entities/bank-reconcile.entity';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { FINANCE_ROLES } from '../../common/constants/role-groups';
 import { RoleEnum } from '../roles/enums/role.enum';
+import { PaginatedResponse } from '../../common/dto/paginated-response.dto';
+import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import {
   UpdateBankReconcileRefsDto,
   VerifyBankReconcilesDto,
@@ -45,6 +50,7 @@ interface AuthenticatedRequest {
 @ApiTags('Bank Reconciles')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
+@Roles(...FINANCE_ROLES)
 @Controller('bank-reconciles')
 export class BankReconcilesController {
   constructor(private readonly bankReconcilesService: BankReconcilesService) {}
@@ -80,11 +86,12 @@ export class BankReconcilesController {
   @ApiOperation({ summary: 'ดึงข้อมูลรายการกระทบยอดธนาคารทั้งหมด' })
   @ApiResponse({
     status: 200,
-    description: 'รายการกระทบยอดธนาคารทั้งหมด',
-    type: [BankReconcile],
+    description: 'รายการกระทบยอดธนาคารแบบแบ่งหน้า',
   })
-  findAll(): Promise<BankReconcile[]> {
-    return this.bankReconcilesService.findAll();
+  findAll(
+    @Query() query: PaginationQueryDto,
+  ): Promise<PaginatedResponse<BankReconcile>> {
+    return this.bankReconcilesService.findAll(query);
   }
 
   @Post('verify')

@@ -15,6 +15,18 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import {
+  ENROLLMENT_ADMIN_ROLES,
+  EXECUTIVE_ROLES,
+} from 'src/common/constants/role-groups';
+import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import {
+  assertSelfOrRoles,
+  AuthenticatedUser,
+} from 'src/common/utils/authz.util';
 import { ExamEnrollmentsService } from './exam-enrollments.service';
 import { CreateExamEnrollmentDto } from './dto/create-exam-enrollment.dto';
 import { UpdateExamEnrollmentDto } from './dto/update-exam-enrollment.dto';
@@ -44,13 +56,17 @@ export class ExamEnrollmentsController {
   }
 
   @Get()
+  @Roles(...ENROLLMENT_ADMIN_ROLES)
   @ApiOperation({ summary: 'ดึงข้อมูลการสมัครสอบทั้งหมด' })
-  @ApiOkResponse({ type: ExamEnrollment, isArray: true })
-  async findAll(): Promise<ExamEnrollment[]> {
-    return await this.examEnrollmentsService.findAll();
+  @ApiOkResponse({ description: 'รายการการสมัครสอบแบบแบ่งหน้า' })
+  async findAll(
+    @Query() query: PaginationQueryDto,
+  ): Promise<PaginatedResponse<ExamEnrollment>> {
+    return await this.examEnrollmentsService.findAll(query);
   }
 
   @Get('executive/test-takers')
+  @Roles(...EXECUTIVE_ROLES)
   @ApiOperation({ summary: 'ค้นหาผู้เข้าสอบสำหรับผู้บริหาร' })
   async findExecutiveTestTakers(
     @Query() query: ExecutiveTestTakerQueryDto,
@@ -59,6 +75,7 @@ export class ExamEnrollmentsController {
   }
 
   @Get('executive/test-takers/:enrollmentId/exam-history')
+  @Roles(...EXECUTIVE_ROLES)
   @ApiOperation({ summary: 'ดึงประวัติการสอบรายบุคคลสำหรับผู้บริหาร' })
   @ApiOkResponse({ description: 'ข้อมูลประวัติการสอบพร้อมคะแนน' })
   async findExamHistoryByEnrollmentId(
@@ -70,6 +87,7 @@ export class ExamEnrollmentsController {
   }
 
   @Post('match-import')
+  @Roles(...ENROLLMENT_ADMIN_ROLES)
   @ApiOperation({ summary: 'ค้นหาผู้สมัครจากรหัสอ้างอิง (Ref1, Ref2)' })
   @ApiOkResponse({ type: ExamEnrollment, isArray: true })
   async findMatchedEnrollments(
@@ -98,7 +116,9 @@ export class ExamEnrollmentsController {
   @ApiOkResponse({ type: ExamEnrollment, isArray: true })
   async findByUserId(
     @Param('userId', ParseIntPipe) userId: number,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<ExamEnrollment[]> {
+    assertSelfOrRoles(user, userId, ENROLLMENT_ADMIN_ROLES);
     return await this.examEnrollmentsService.findByUserId(userId);
   }
 
@@ -112,6 +132,7 @@ export class ExamEnrollmentsController {
   }
 
   @Patch('bulk-seat-assignments')
+  @Roles(...ENROLLMENT_ADMIN_ROLES)
   @ApiOperation({
     summary: 'Assign seats to multiple exam enrollments atomically',
   })
@@ -125,6 +146,7 @@ export class ExamEnrollmentsController {
   }
 
   @Patch(':id')
+  @Roles(...ENROLLMENT_ADMIN_ROLES)
   @ApiOperation({ summary: 'แก้ไขข้อมูลการสมัครสอบ' })
   @ApiOkResponse({ type: ExamEnrollment })
   async update(
@@ -138,6 +160,7 @@ export class ExamEnrollmentsController {
   }
 
   @Delete(':id')
+  @Roles(...ENROLLMENT_ADMIN_ROLES)
   @ApiOperation({ summary: 'ลบข้อมูลการสมัครสอบ' })
   @ApiOkResponse({ description: 'ลบข้อมูลสำเร็จ' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
@@ -145,6 +168,7 @@ export class ExamEnrollmentsController {
   }
 
   @Post('sessions/:sessionId/allocate')
+  @Roles(...ENROLLMENT_ADMIN_ROLES)
   @ApiOperation({ summary: 'จัดที่นั่งสอบสำหรับรอบสอบ' })
   @ApiOkResponse({ type: ExamEnrollment, isArray: true })
   async allocateSeats(
@@ -154,6 +178,7 @@ export class ExamEnrollmentsController {
   }
 
   @Post(':id/request-fix')
+  @Roles(...ENROLLMENT_ADMIN_ROLES)
   @ApiOperation({ summary: 'ส่งคำขอแก้ไขข้อมูลไปยังผู้สมัคร' })
   @ApiOkResponse({ description: 'ส่งคำขอแก้ไขและส่งอีเมลสำเร็จ' })
   async requestFix(

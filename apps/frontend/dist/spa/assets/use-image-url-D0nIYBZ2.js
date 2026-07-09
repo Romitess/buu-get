@@ -1,1 +1,0 @@
-import{g as s}from"./image.service-DGmDsNkp.js";import{f as a,bF as r}from"./index-DLeLVTPA.js";function n(t,l=!1){const e=a(()=>s(r(t),r(l))),o=a(()=>e.value.length>0);return{displayUrl:e,isImageAvailable:o}}export{n as u};

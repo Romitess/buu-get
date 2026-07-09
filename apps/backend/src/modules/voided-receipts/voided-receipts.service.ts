@@ -1,6 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import {
+  buildPaginatedResponse,
+  PaginatedResponse,
+} from 'src/common/dto/paginated-response.dto';
+import {
+  PAGINATION_DEFAULT_LIMIT,
+  PAGINATION_DEFAULT_PAGE,
+  PaginationQueryDto,
+} from 'src/common/dto/pagination-query.dto';
 import { VoidedReceipt } from './entities/voided-receipt.entity';
 import { CreateVoidedReceiptDto } from './dto/create-voided-receipt.dto';
 import { UpdateVoidedReceiptDto } from './dto/update-voided-receipt.dto';
@@ -17,10 +26,18 @@ export class VoidedReceiptsService {
     return await this.voidedReceiptRepository.save(voidedReceipt);
   }
 
-  async findAll(): Promise<VoidedReceipt[]> {
-    return await this.voidedReceiptRepository.find({
+  async findAll(
+    query: PaginationQueryDto = {},
+  ): Promise<PaginatedResponse<VoidedReceipt>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const [data, total] = await this.voidedReceiptRepository.findAndCount({
       relations: ['RECEIPT', 'USER'],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { VR_ID: 'DESC' },
     });
+    return buildPaginatedResponse(data, total, page, limit);
   }
 
   async findOne(id: number): Promise<VoidedReceipt> {

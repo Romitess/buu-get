@@ -9,11 +9,15 @@ import {
   Request,
   UseGuards,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { UserProfileService } from './user-profile.service';
 import { CreateUserProfileDto } from './dto/create-user-profile.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { USER_ADMIN_ROLES } from 'src/common/constants/role-groups';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { Request as ExpressRequest } from 'express';
@@ -71,16 +75,19 @@ export class UserProfileController {
   }
 
   @Post()
+  @Roles(...USER_ADMIN_ROLES)
   create(@Body() createUserProfileDto: CreateUserProfileDto) {
     return this.userProfileService.create(createUserProfileDto);
   }
 
   @Get()
-  findAll() {
-    return this.userProfileService.findAll();
+  @Roles(...USER_ADMIN_ROLES)
+  findAll(@Query() query: PaginationQueryDto) {
+    return this.userProfileService.findAll(query);
   }
 
   @Get(':id')
+  @Roles(...USER_ADMIN_ROLES)
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userProfileService.findOne(id);
   }
@@ -127,6 +134,7 @@ export class UserProfileController {
   }
 
   @Delete(':id')
+  @Roles(...USER_ADMIN_ROLES)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.userProfileService.remove(id);
   }

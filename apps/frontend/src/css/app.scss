@@ -1278,3 +1278,22 @@ body {
     background-color: transparent !important;
   }
 }
+
+// ============================================================
+// Skeleton loading — shared visual tokens
+// ============================================================
+.skeleton-root {
+  .q-skeleton {
+    background: #ebebeb !important;
+    border-radius: var(--radius-sm);
+  }
+
+  .q-skeleton--anim-wave::after {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.55),
+      transparent
+    ) !important;
+  }
+}

@@ -10,15 +10,49 @@ import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
+function parseCorsOrigins(
+  raw: string | undefined,
+  nodeEnv: string,
+): boolean | string[] {
+  if (raw && raw.trim().length > 0) {
+    return raw
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean);
+  }
+  // ไม่กำหนด CORS_ORIGINS ใน production → ปิด cross-origin
+  if (nodeEnv === 'production') {
+    return false;
+  }
+  return true;
+}
+
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
-  app.use(json({ limit: '50mb' }));
-  app.use(urlencoded({ limit: '50mb', extended: true }));
   const configService = app.get(ConfigService);
   const nodeEnv = configService.getOrThrow<string>('NODE_ENV');
   const port = configService.getOrThrow<number>('PORT');
+  const bodyLimit = configService.get<string>('BODY_LIMIT') ?? '1mb';
+  const uploadBodyLimit =
+    configService.get<string>('UPLOAD_BODY_LIMIT') ?? '50mb';
+  const corsOrigins = configService.get<string>('CORS_ORIGINS');
+
+  app.use(json({ limit: bodyLimit }));
+  app.use(urlencoded({ limit: bodyLimit, extended: true }));
+  // upload routes ต้องรับ payload ใหญ่กว่า default
+  app.use('/api/uploadFile', json({ limit: uploadBodyLimit }));
+  app.use(
+    '/api/uploadFile',
+    urlencoded({ limit: uploadBodyLimit, extended: true }),
+  );
+  app.use('/api/images/upload', json({ limit: uploadBodyLimit }));
+  app.use(
+    '/api/images/upload',
+    urlencoded({ limit: uploadBodyLimit, extended: true }),
+  );
 
   app.enableCors({
+    origin: parseCorsOrigins(corsOrigins, nodeEnv),
     exposedHeaders: ['Date'],
   });
   app.setGlobalPrefix('api');

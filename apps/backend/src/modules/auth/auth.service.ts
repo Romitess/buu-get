@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  Inject,
+  Logger,
+} from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -36,6 +41,8 @@ export interface RegisterResponse {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly userProfileService: UserProfileService,
@@ -77,7 +84,6 @@ export class AuthService {
     }
 
     const otpCode = this.generateOtp();
-    console.log(`[OTP DEBUG] OTP for ${email} is ${otpCode}`);
 
     // Storing OTP in cache with 5 minutes (300,000 milliseconds) TTL
     await this.cacheManager.set(`otp_${email}`, otpCode, 300000);
@@ -94,7 +100,10 @@ export class AuthService {
       );
       return { success: true };
     } catch (err: unknown) {
-      console.error('Failed to send OTP email via platform gateway:', err);
+      this.logger.error(
+        'Failed to send OTP email via platform gateway',
+        err instanceof Error ? err.stack : undefined,
+      );
       throw new BadRequestException(
         'ไม่สามารถส่งอีเมล OTP ได้ กรุณาลองใหม่อีกครั้ง',
       );

@@ -320,6 +320,21 @@ Presentation components รับ prop `loading: boolean` จาก parent `isLo
 - **ก่อน Commit ทุกครั้ง** ต้องรัน `npm run lint` เพื่อตรวจสอบความถูกต้อง
 - ห้าม Commit โค้ดที่มี Lint Error เด็ดขาด
 
+### 4.6 Testing & Definition of Done
+
+ก่อนเปิด PR สำหรับงานที่แตะ backend/frontend ต้องผ่านอย่างน้อย:
+
+- `npm run lint` (root)
+- `npm run typecheck` (root)
+- `npm run test` (backend unit tests; frontend เมื่อมี Vitest)
+- `npm run build` (เมื่อแก้ contract หรือ build config)
+
+**โมดูลที่ต้องมี unit test เมื่อแก้ไข:** `auth`, `transactions`, `exam-enrollments`, `bank-reconciles`, `roles`/`authz`
+
+- เพิ่มหรืออัปเดต `*.spec.ts` ให้ครอบ business rule ที่เปลี่ยน
+- ห้าม merge ถ้า `npm test` แดง
+- CI (`.github/workflows/ci.yml`) เป็น quality gate หลัก
+
 ---
 
 ## 5. 🌿 Git Workflow

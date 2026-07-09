@@ -1,1 +1,0 @@
-import{at as a}from"./index-DLeLVTPA.js";const t=async()=>(await a.get("/score-criteria/band-rules")).data,n=async s=>(await a.put("/score-criteria/band-rules",{bandRules:s})).data;export{t as g,n as s};

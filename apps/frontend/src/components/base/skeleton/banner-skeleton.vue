@@ -1,14 +1,6 @@
 <template>
-  <div
-    class="banner-skeleton full-width full-height"
-    :aria-busy="true"
-    :aria-label="ariaLabel"
-  >
-    <q-skeleton
-      type="rect"
-      class="full-width full-height"
-      animation="pulse"
-    />
+  <div class="banner-skeleton skeleton-root full-width" :aria-busy="true" :aria-label="ariaLabel">
+    <q-skeleton type="rect" class="banner-skeleton__rect full-width" animation="wave" />
   </div>
 </template>
 
@@ -20,8 +12,14 @@ const { t } = useI18n();
 const ariaLabel = computed(() => t('components.skeleton.loading'));
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .banner-skeleton {
   min-height: 120px;
+}
+
+.banner-skeleton__rect {
+  aspect-ratio: 5 / 1;
+  min-height: 120px;
+  border-radius: var(--radius-md);
 }
 </style>

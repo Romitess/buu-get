@@ -65,6 +65,7 @@
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar';
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -79,6 +80,7 @@ import { FormSkeleton } from 'src/components/base/skeleton';
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
+const $q = useQuasar();
 const authStore = useAuthStore();
 const isSubmitting = ref(false);
 

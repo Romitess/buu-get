@@ -1,17 +1,9 @@
 <template>
-  <div
-    class="form-skeleton"
-    :aria-busy="true"
-    :aria-label="ariaLabel"
-  >
+  <div class="form-skeleton skeleton-root" :aria-busy="true" :aria-label="ariaLabel">
     <div class="row q-col-gutter-md">
-      <div
-        v-for="field in fields"
-        :key="`field-${field}`"
-        :class="columnClass"
-      >
-        <q-skeleton type="text" width="40%" animation="wave" class="q-mb-xs" />
-        <q-skeleton type="rect" height="40px" animation="pulse" />
+      <div v-for="field in fields" :key="`field-${field}`" :class="columnClass">
+        <q-skeleton type="text" width="38%" height="14px" animation="wave" class="q-mb-sm" />
+        <q-skeleton type="rect" height="40px" animation="wave" class="form-skeleton__field" />
       </div>
     </div>
   </div>
@@ -40,3 +32,9 @@ const columnClass = computed(() => {
   return 'col-12 col-md-6';
 });
 </script>
+
+<style scoped lang="scss">
+.form-skeleton__field {
+  border-radius: var(--radius-sm);
+}
+</style>

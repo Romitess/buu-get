@@ -16,6 +16,16 @@ import {
 } from 'typeorm';
 import * as XLSX from 'xlsx';
 import {
+  buildPaginatedResponse,
+  PaginatedResponse,
+} from 'src/common/dto/paginated-response.dto';
+import {
+  PAGINATION_DEFAULT_LIMIT,
+  PAGINATION_DEFAULT_PAGE,
+  PAGINATION_MAX_LIMIT,
+  PaginationQueryDto,
+} from 'src/common/dto/pagination-query.dto';
+import {
   Transaction,
   TransactionMatchStatus,
   TransactionPaymentStatus,
@@ -223,12 +233,19 @@ export class BankReconcilesService {
     };
   }
 
-  async findAll(): Promise<BankReconcile[]> {
-    return this.bankReconcilesRepository.find({
+  async findAll(
+    query: PaginationQueryDto = {},
+  ): Promise<PaginatedResponse<BankReconcile>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const [data, total] = await this.bankReconcilesRepository.findAndCount({
       relations: ['USER', 'USER.PROFILE', 'TRANSACTION'],
       where: { DELETED_AT: IsNull() },
+      skip: (page - 1) * limit,
+      take: limit,
       order: { BR_ID: 'ASC' },
     });
+    return buildPaginatedResponse(data, total, page, limit);
   }
 
   async findOne(id: number): Promise<BankReconcile> {
@@ -300,9 +317,14 @@ export class BankReconcilesService {
       await this.updateVerifiedTransactionStatuses(queryRunner, matches);
 
       await queryRunner.commitTransaction();
-      return targetBrIds.length > 0
-        ? this.findByIds(targetBrIds)
-        : this.findAll();
+      if (targetBrIds.length > 0) {
+        return this.findByIds(targetBrIds);
+      }
+      const { data } = await this.findAll({
+        page: 1,
+        limit: PAGINATION_MAX_LIMIT,
+      });
+      return data;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;

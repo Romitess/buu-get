@@ -1,1 +1,0 @@
-import{at as t}from"./index-DLeLVTPA.js";const r=async e=>(await t.get("/exam-enrollments/executive/test-takers",{params:e})).data,n=async e=>(await t.get(`/exam-enrollments/executive/test-takers/${e}/exam-history`)).data;export{n as a,r as f};

@@ -1,12 +1,8 @@
 <template>
-  <div
-    class="page-skeleton"
-    :aria-busy="true"
-    :aria-label="ariaLabel"
-  >
+  <div class="page-skeleton skeleton-root" :aria-busy="true" :aria-label="ariaLabel">
     <div v-if="showHeader" class="q-mb-lg">
-      <q-skeleton type="text" width="280px" height="32px" animation="wave" class="q-mb-sm" />
-      <q-skeleton type="text" width="60%" animation="wave" />
+      <q-skeleton type="text" width="240px" height="28px" animation="wave" class="q-mb-sm" />
+      <q-skeleton type="text" width="55%" height="16px" animation="wave" />
     </div>
     <slot>
       <FormSkeleton :fields="fields" :columns="columns" />
