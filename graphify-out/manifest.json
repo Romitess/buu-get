@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/app.module.ts": {
-    "mtime": 1783042948.7905943,
-    "ast_hash": "6a45800850a16203836bca472f6bd5f9",
+    "mtime": 1783502898.6672091,
+    "ast_hash": "3047ebd392e319c92ddef958ef283701",
     "semantic_hash": ""
   },
   "apps/backend/src/common/decorators/roles.decorator.ts": {
@@ -65,8 +65,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/database/data-source.ts": {
-    "mtime": 1783042948.7919285,
-    "ast_hash": "c047667265cc425d0c1fbe22398acb41",
+    "mtime": 1783502898.6673532,
+    "ast_hash": "c1a3a5b4194c79922316057675a88e2f",
     "semantic_hash": ""
   },
   "apps/backend/src/database/migrations/1778470882994-InitialSchema.ts": {
@@ -1560,8 +1560,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/quasar.config.ts": {
-    "mtime": 1783042948.8390393,
-    "ast_hash": "66744e8e601dc3c97dafbeb70f17c907",
+    "mtime": 1783502898.6677623,
+    "ast_hash": "eaf9b30de79c7b6d2b3c3f1eca67f80e",
     "semantic_hash": ""
   },
   "apps/frontend/src/App.vue": {
@@ -1685,8 +1685,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/base/skeleton/table-skeleton.vue": {
-    "mtime": 1783495913.8694868,
-    "ast_hash": "e36be55c57d386f5e237723a5504aed0",
+    "mtime": 1783568390.847005,
+    "ast_hash": "ee6520ee9435be165969a2f5ce486392",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/certificate-preview-report.vue": {
@@ -2285,8 +2285,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/shared/base-table.vue": {
-    "mtime": 1783495374.8034146,
-    "ast_hash": "1a6502710132126972af1c6d6d7268dd",
+    "mtime": 1783568410.154847,
+    "ast_hash": "090145a946d55ed608f6a16e3e0a8e24",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/shared/enrollment-status-badge.vue": {
@@ -2980,13 +2980,13 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1782895223.6055045,
-    "ast_hash": "10613ee45d6f95ef50f2c6c3319eba12",
+    "mtime": 1783502898.6699595,
+    "ast_hash": "e10d86cd11547cbac639890cbe895894",
     "semantic_hash": ""
   },
   "scripts/deploy-k3s.sh": {
-    "mtime": 1782895223.6055841,
-    "ast_hash": "cd29f68c40d3cefe51da76a3741f5185",
+    "mtime": 1783502898.6710043,
+    "ast_hash": "2b1a51cde59a7b4e673eaa70e8d69939",
     "semantic_hash": ""
   },
   ".agents/skills/backend-design/SKILL.md": {
@@ -3030,8 +3030,8 @@
     "semantic_hash": ""
   },
   "claude.md": {
-    "mtime": 1783042948.867435,
-    "ast_hash": "09f2434835a4e8477308ea485d393173",
+    "mtime": 1783502898.6680403,
+    "ast_hash": "9ec0ad922dd4f4557e747bbcf6035ddb",
     "semantic_hash": ""
   },
   "apps/frontend/public/buu-get-logo-zoomed.png": {

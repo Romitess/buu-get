@@ -4,7 +4,7 @@
       flat
       :rows="displayRows"
       :columns="sortableColumns"
-      :loading="loading"
+      :loading="showTableLoading"
       v-model:pagination="internalPagination"
       :rows-per-page-options="[]"
       :hide-bottom="hidePagination"
@@ -17,7 +17,8 @@
       </template>
 
       <template v-slot:body="props">
-        <template v-if="(props.row as any).__empty">
+        <TableSkeleton v-if="(props.row as SkeletonRow).__skeleton" :row-props="props" />
+        <template v-else-if="(props.row as SkeletonRow).__empty">
           <q-tr>
             <q-td
               :colspan="sortableColumns.length"
@@ -123,9 +124,6 @@
         </div>
       </template>
 
-      <template v-slot:loading>
-        <TableSkeleton :columns="sortableColumns" />
-      </template>
     </q-table>
   </div>
 </template>
@@ -135,6 +133,11 @@ import { computed, ref, watch } from 'vue';
 import type { QTableColumn } from 'quasar';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { TableSkeleton } from 'src/components/base/skeleton';
+
+type SkeletonRow = {
+  __skeleton?: boolean;
+  __empty?: boolean;
+};
 
 interface Props {
   columns: QTableColumn[];
@@ -156,6 +159,10 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   (e: 'request', requestProps: TableRequestProps): void;
 }>();
+
+const showTableLoading = computed(
+  () => Boolean(props.loading && (props.rows?.length ?? 0) > 0),
+);
 
 const setPropValue = <K extends keyof PaginationModel>(
   obj: PaginationModel | undefined,
@@ -357,9 +364,22 @@ const sortedRows = computed<T[]>(() => {
 });
 
 const displayRows = computed<T[]>(() => {
+  const sourceRowCount = props.rows?.length ?? 0;
+
+  if (props.loading && sourceRowCount === 0) {
+    const skeletonCount = Math.min(internalPagination.value.rowsPerPage || 10, 10);
+    const skeletonRows: Array<{ __skeleton: true; id: string }> = [];
+    for (let index = 0; index < skeletonCount; index += 1) {
+      skeletonRows.push({ __skeleton: true, id: `skeleton-${index}` });
+    }
+    // Placeholder rows are not real T; cast matches existing __empty row pattern.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- skeleton rows are synthetic placeholders for generic row type T
+    return skeletonRows as T[];
+  }
+
   let rows: T[] = [];
   if (props.isServerSide) {
-    if ((props.rows ?? []).length === 0) {
+    if (sourceRowCount === 0) {
       return [{ __empty: true }] as T[];
     }
     rows = props.rows;
@@ -386,7 +406,7 @@ const displayRows = computed<T[]>(() => {
   const start = (page - 1) * rowsPerPage;
 
   return rows.map((row, index) => {
-    if (row && typeof row === 'object' && '__empty' in row) return row;
+    if (row && typeof row === 'object' && ('__empty' in row || '__skeleton' in row)) return row;
 
     return new Proxy(row, {
       get(target, prop, receiver) {
