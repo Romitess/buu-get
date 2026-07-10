@@ -1378,7 +1378,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_pagination_query_dto",
-      "community": 34,
+      "community": 10,
       "norm_label": "pagination-query.dto.ts"
     },
     {
@@ -1388,7 +1388,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "dto_pagination_query_dto_paginationquerydto",
-      "community": 34,
+      "community": 10,
       "norm_label": "paginationquerydto"
     },
     {
@@ -1528,7 +1528,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "guards_roles_guard_spec",
-      "community": 80,
+      "community": 14,
       "norm_label": "roles.guard.spec.ts"
     },
     {
@@ -1538,7 +1538,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "guards_roles_guard",
-      "community": 80,
+      "community": 14,
       "norm_label": "roles.guard.ts"
     },
     {
@@ -1548,7 +1548,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "guards_roles_guard_rolesguard",
-      "community": 80,
+      "community": 14,
       "norm_label": "rolesguard"
     },
     {
@@ -1558,7 +1558,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "guards_roles_guard_rolesguard_constructor",
-      "community": 80,
+      "community": 14,
       "norm_label": ".constructor()"
     },
     {
@@ -1568,7 +1568,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "guards_roles_guard_rolesguard_canactivate",
-      "community": 80,
+      "community": 14,
       "norm_label": ".canactivate()"
     },
     {
@@ -4208,7 +4208,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "auth_auth_module",
-      "community": 14,
+      "community": 39,
       "norm_label": "auth.module.ts"
     },
     {
@@ -4278,7 +4278,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "auth_auth_service_authservice_constructor",
-      "community": 13,
+      "community": 40,
       "norm_label": ".constructor()"
     },
     {
@@ -4478,7 +4478,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "strategies_jwt_strategy",
-      "community": 14,
+      "community": 39,
       "norm_label": "jwt.strategy.ts"
     },
     {
@@ -4488,7 +4488,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "strategies_jwt_strategy_jwtpayload",
-      "community": 14,
+      "community": 39,
       "norm_label": "jwtpayload"
     },
     {
@@ -4498,7 +4498,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "strategies_jwt_strategy_jwtstrategy",
-      "community": 14,
+      "community": 39,
       "norm_label": "jwtstrategy"
     },
     {
@@ -4508,7 +4508,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "strategies_jwt_strategy_jwtstrategy_constructor",
-      "community": 14,
+      "community": 39,
       "norm_label": ".constructor()"
     },
     {
@@ -4518,7 +4518,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "strategies_jwt_strategy_jwtstrategy_validate",
-      "community": 14,
+      "community": 39,
       "norm_label": ".validate()"
     },
     {
@@ -4578,7 +4578,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_controller_authenticatedrequest",
-      "community": 13,
+      "community": 52,
       "norm_label": "authenticatedrequest"
     },
     {
@@ -4868,7 +4868,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_bankreconcileverifymatch",
-      "community": 27,
+      "community": 52,
       "norm_label": "bankreconcileverifymatch"
     },
     {
@@ -5058,7 +5058,7 @@
       "source_location": "L545",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_bankreconcilesservice_updaterefs",
-      "community": 52,
+      "community": 20,
       "norm_label": ".updaterefs()"
     },
     {
@@ -5178,7 +5178,7 @@
       "source_location": "L866",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_bankreconcilesservice_createeditsnapshot",
-      "community": 52,
+      "community": 20,
       "norm_label": ".createeditsnapshot()"
     },
     {
@@ -5358,7 +5358,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "entities_bank_reconcile_entity_bankreconcile",
-      "community": 52,
+      "community": 20,
       "norm_label": "bankreconcile"
     },
     {
@@ -6178,7 +6178,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "dto_bulk_seat_assignment_dto_bulkseatassignmentdto",
-      "community": 18,
+      "community": 10,
       "norm_label": "bulkseatassignmentdto"
     },
     {
@@ -6208,7 +6208,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_exam_enrollment_query_dto",
-      "community": 34,
+      "community": 10,
       "norm_label": "exam-enrollment-query.dto.ts"
     },
     {
@@ -6218,7 +6218,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "dto_exam_enrollment_query_dto_examenrollmentquerydto",
-      "community": 34,
+      "community": 10,
       "norm_label": "examenrollmentquerydto"
     },
     {
@@ -6228,7 +6228,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_executive_test_taker_query_dto",
-      "community": 34,
+      "community": 10,
       "norm_label": "executive-test-taker-query.dto.ts"
     },
     {
@@ -6238,7 +6238,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "dto_executive_test_taker_query_dto_executivetesttakerquerydto",
-      "community": 34,
+      "community": 10,
       "norm_label": "executivetesttakerquerydto"
     },
     {
@@ -6248,7 +6248,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_match_exam_enrollment_dto",
-      "community": 34,
+      "community": 10,
       "norm_label": "match-exam-enrollment.dto.ts"
     },
     {
@@ -6258,7 +6258,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_match_exam_enrollment_dto_matchexamenrollmentdto",
-      "community": 34,
+      "community": 10,
       "norm_label": "matchexamenrollmentdto"
     },
     {
@@ -6268,7 +6268,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_request_fix_dto",
-      "community": 34,
+      "community": 10,
       "norm_label": "request-fix.dto.ts"
     },
     {
@@ -6278,7 +6278,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_request_fix_dto_requestfixdto",
-      "community": 34,
+      "community": 10,
       "norm_label": "requestfixdto"
     },
     {
@@ -6298,7 +6298,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_update_exam_enrollment_dto_updateexamenrollmentdto",
-      "community": 18,
+      "community": 10,
       "norm_label": "updateexamenrollmentdto"
     },
     {
@@ -6348,7 +6348,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller",
-      "community": 34,
+      "community": 10,
       "norm_label": "exam-enrollments.controller.ts"
     },
     {
@@ -6378,7 +6378,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_create",
-      "community": 10,
+      "community": 18,
       "norm_label": ".create()"
     },
     {
@@ -6398,7 +6398,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_findexecutivetesttakers",
-      "community": 34,
+      "community": 10,
       "norm_label": ".findexecutivetesttakers()"
     },
     {
@@ -6408,7 +6408,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_findexamhistorybyenrollmentid",
-      "community": 34,
+      "community": 18,
       "norm_label": ".findexamhistorybyenrollmentid()"
     },
     {
@@ -6418,7 +6418,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_findmatchedenrollments",
-      "community": 34,
+      "community": 18,
       "norm_label": ".findmatchedenrollments()"
     },
     {
@@ -6498,7 +6498,7 @@
       "source_location": "L184",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_requestfix",
-      "community": 34,
+      "community": 18,
       "norm_label": ".requestfix()"
     },
     {
@@ -6558,7 +6558,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_service_examenrollmentsservice_constructor",
-      "community": 18,
+      "community": 47,
       "norm_label": ".constructor()"
     },
     {
@@ -6588,7 +6588,7 @@
       "source_location": "L333",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_service_examenrollmentsservice_findall",
-      "community": 18,
+      "community": 25,
       "norm_label": ".findall()"
     },
     {
@@ -6598,7 +6598,7 @@
       "source_location": "L355",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_service_examenrollmentsservice_findexecutivetesttakers",
-      "community": 34,
+      "community": 10,
       "norm_label": ".findexecutivetesttakers()"
     },
     {
@@ -6728,7 +6728,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "interfaces_executive_exam_history_interface",
-      "community": 34,
+      "community": 10,
       "norm_label": "executive-exam-history.interface.ts"
     },
     {
@@ -6738,7 +6738,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "interfaces_executive_exam_history_interface_examhistoryrow",
-      "community": 34,
+      "community": 10,
       "norm_label": "examhistoryrow"
     },
     {
@@ -6748,7 +6748,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "interfaces_executive_exam_history_interface_executiveexamhistoryresponse",
-      "community": 34,
+      "community": 10,
       "norm_label": "executiveexamhistoryresponse"
     },
     {
@@ -6778,7 +6778,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "interfaces_executive_test_taker_interface_executivetesttakerpage",
-      "community": 34,
+      "community": 10,
       "norm_label": "executivetesttakerpage"
     },
     {
@@ -8448,7 +8448,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "exam_rule_vouchers_exam_rule_vouchers_module_examrulevouchersmodule",
-      "community": 53,
+      "community": 14,
       "norm_label": "examrulevouchersmodule"
     },
     {
@@ -8748,7 +8748,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_create_exam_session_location_dto",
-      "community": 16,
+      "community": 34,
       "norm_label": "create-exam-session-location.dto.ts"
     },
     {
@@ -8758,7 +8758,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "dto_create_exam_session_location_dto_createexamsessionlocationdto",
-      "community": 16,
+      "community": 34,
       "norm_label": "createexamsessionlocationdto"
     },
     {
@@ -8768,7 +8768,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_update_exam_session_location_dto",
-      "community": 16,
+      "community": 34,
       "norm_label": "update-exam-session-location.dto.ts"
     },
     {
@@ -8778,7 +8778,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_update_exam_session_location_dto_updateexamsessionlocationdto",
-      "community": 16,
+      "community": 34,
       "norm_label": "updateexamsessionlocationdto"
     },
     {
@@ -8788,7 +8788,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_exam_session_location_entity",
-      "community": 10,
+      "community": 34,
       "norm_label": "exam-session-location.entity.ts"
     },
     {
@@ -8798,7 +8798,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "entities_exam_session_location_entity_examsessionlocation",
-      "community": 16,
+      "community": 34,
       "norm_label": "examsessionlocation"
     },
     {
@@ -8808,7 +8808,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller",
-      "community": 16,
+      "community": 34,
       "norm_label": "exam-session-locations.controller.ts"
     },
     {
@@ -8818,7 +8818,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller",
-      "community": 16,
+      "community": 34,
       "norm_label": "examsessionlocationscontroller"
     },
     {
@@ -8828,7 +8828,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller_constructor",
-      "community": 16,
+      "community": 34,
       "norm_label": ".constructor()"
     },
     {
@@ -8838,7 +8838,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller_create",
-      "community": 16,
+      "community": 34,
       "norm_label": ".create()"
     },
     {
@@ -8848,7 +8848,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller_findallbylocation",
-      "community": 16,
+      "community": 34,
       "norm_label": ".findallbylocation()"
     },
     {
@@ -8858,7 +8858,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller_findallbysession",
-      "community": 16,
+      "community": 34,
       "norm_label": ".findallbysession()"
     },
     {
@@ -8868,7 +8868,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller_findone",
-      "community": 16,
+      "community": 34,
       "norm_label": ".findone()"
     },
     {
@@ -8878,7 +8878,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller_update",
-      "community": 16,
+      "community": 34,
       "norm_label": ".update()"
     },
     {
@@ -8888,7 +8888,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller_remove",
-      "community": 16,
+      "community": 34,
       "norm_label": ".remove()"
     },
     {
@@ -8898,7 +8898,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_module",
-      "community": 16,
+      "community": 34,
       "norm_label": "exam-session-locations.module.ts"
     },
     {
@@ -8908,7 +8908,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_module_examsessionlocationsmodule",
-      "community": 16,
+      "community": 14,
       "norm_label": "examsessionlocationsmodule"
     },
     {
@@ -8918,7 +8918,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service",
-      "community": 16,
+      "community": 34,
       "norm_label": "exam-session-locations.service.ts"
     },
     {
@@ -8928,7 +8928,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice",
-      "community": 16,
+      "community": 34,
       "norm_label": "examsessionlocationsservice"
     },
     {
@@ -8938,7 +8938,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_constructor",
-      "community": 16,
+      "community": 34,
       "norm_label": ".constructor()"
     },
     {
@@ -8948,7 +8948,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_validatelocationandsession",
-      "community": 16,
+      "community": 34,
       "norm_label": ".validatelocationandsession()"
     },
     {
@@ -8958,7 +8958,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_create",
-      "community": 16,
+      "community": 34,
       "norm_label": ".create()"
     },
     {
@@ -8968,7 +8968,7 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_findallbylocation",
-      "community": 16,
+      "community": 34,
       "norm_label": ".findallbylocation()"
     },
     {
@@ -8978,7 +8978,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_findallbysession",
-      "community": 16,
+      "community": 34,
       "norm_label": ".findallbysession()"
     },
     {
@@ -8988,7 +8988,7 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_findone",
-      "community": 16,
+      "community": 34,
       "norm_label": ".findone()"
     },
     {
@@ -8998,7 +8998,7 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_update",
-      "community": 16,
+      "community": 34,
       "norm_label": ".update()"
     },
     {
@@ -9008,7 +9008,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_remove",
-      "community": 16,
+      "community": 34,
       "norm_label": ".remove()"
     },
     {
@@ -9058,7 +9058,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_exam_session_entity",
-      "community": 10,
+      "community": 29,
       "norm_label": "exam-session.entity.ts"
     },
     {
@@ -9068,7 +9068,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "entities_exam_session_entity_examsessionstatus",
-      "community": 10,
+      "community": 29,
       "norm_label": "examsessionstatus"
     },
     {
@@ -9498,7 +9498,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "exam_vouchers_exam_vouchers_module_examvouchersmodule",
-      "community": 14,
+      "community": 11,
       "norm_label": "examvouchersmodule"
     },
     {
@@ -9508,8 +9508,18 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_vouchers_exam_vouchers_service_spec",
-      "community": 10,
+      "community": 29,
       "norm_label": "exam-vouchers.service.spec.ts"
+    },
+    {
+      "label": "RepositoryEntity",
+      "file_type": "code",
+      "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.spec.ts",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "exam_vouchers_exam_vouchers_service_spec_repositoryentity",
+      "community": 29,
+      "norm_label": "repositoryentity"
     },
     {
       "label": "exam-vouchers.service.ts",
@@ -9635,7 +9645,7 @@
       "label": ".generateVoucherCode()",
       "file_type": "code",
       "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.ts",
-      "source_location": "L278",
+      "source_location": "L288",
       "_origin": "ast",
       "id": "exam_vouchers_exam_vouchers_service_examvouchersservice_generatevouchercode",
       "community": 11,
@@ -9645,7 +9655,7 @@
       "label": ".sendVoucherEmailsInBatch()",
       "file_type": "code",
       "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.ts",
-      "source_location": "L284",
+      "source_location": "L294",
       "_origin": "ast",
       "id": "exam_vouchers_exam_vouchers_service_examvouchersservice_sendvoucheremailsinbatch",
       "community": 11,
@@ -10418,7 +10428,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_module_fundsourcesmodule",
-      "community": 12,
+      "community": 14,
       "norm_label": "fundsourcesmodule"
     },
     {
@@ -10678,7 +10688,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "moodle_sync_logs_moodle_sync_logs_module_moodlesynclogsmodule",
-      "community": 14,
+      "community": 110,
       "norm_label": "moodlesynclogsmodule"
     },
     {
@@ -10768,7 +10778,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "moodle_moodle_client_service_moodleclientservice",
-      "community": 7,
+      "community": 108,
       "norm_label": "moodleclientservice"
     },
     {
@@ -10778,7 +10788,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "moodle_moodle_client_service_moodleclientservice_constructor",
-      "community": 7,
+      "community": 108,
       "norm_label": ".constructor()"
     },
     {
@@ -10788,7 +10798,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "moodle_moodle_client_service_moodleclientservice_gethttpsagent",
-      "community": 7,
+      "community": 108,
       "norm_label": ".gethttpsagent()"
     },
     {
@@ -10798,7 +10808,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "moodle_moodle_client_service_moodleclientservice_call",
-      "community": 7,
+      "community": 108,
       "norm_label": ".call()"
     },
     {
@@ -10808,7 +10818,7 @@
       "source_location": "L128",
       "_origin": "ast",
       "id": "moodle_moodle_client_service_moodleclientservice_postwithretry",
-      "community": 7,
+      "community": 108,
       "norm_label": ".postwithretry()"
     },
     {
@@ -10818,7 +10828,7 @@
       "source_location": "L158",
       "_origin": "ast",
       "id": "moodle_moodle_client_service_moodleclientservice_delay",
-      "community": 7,
+      "community": 108,
       "norm_label": ".delay()"
     },
     {
@@ -10828,7 +10838,7 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "moodle_moodle_client_service_moodleclientservice_maskpayload",
-      "community": 7,
+      "community": 108,
       "norm_label": ".maskpayload()"
     },
     {
@@ -10838,7 +10848,7 @@
       "source_location": "L182",
       "_origin": "ast",
       "id": "moodle_moodle_client_service_moodleclientservice_writelog",
-      "community": 7,
+      "community": 108,
       "norm_label": ".writelog()"
     },
     {
@@ -10848,7 +10858,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "moodle_moodle_enrol_worker",
-      "community": 7,
+      "community": 45,
       "norm_label": "moodle-enrol.worker.ts"
     },
     {
@@ -10858,7 +10868,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "moodle_moodle_enrol_worker_moodleenrolworker",
-      "community": 7,
+      "community": 110,
       "norm_label": "moodleenrolworker"
     },
     {
@@ -10868,7 +10878,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "moodle_moodle_enrol_worker_moodleenrolworker_constructor",
-      "community": 7,
+      "community": 110,
       "norm_label": ".constructor()"
     },
     {
@@ -10878,7 +10888,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "moodle_moodle_enrol_worker_moodleenrolworker_syncpendingenrolments",
-      "community": 7,
+      "community": 110,
       "norm_label": ".syncpendingenrolments()"
     },
     {
@@ -10888,7 +10898,7 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "moodle_moodle_enrol_worker_moodleenrolworker_processchunk",
-      "community": 7,
+      "community": 110,
       "norm_label": ".processchunk()"
     },
     {
@@ -10898,7 +10908,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "moodle_moodle_sync_service",
-      "community": 7,
+      "community": 45,
       "norm_label": "moodle-sync.service.ts"
     },
     {
@@ -10908,7 +10918,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "moodle_moodle_sync_service_moodlesyncservice",
-      "community": 7,
+      "community": 45,
       "norm_label": "moodlesyncservice"
     },
     {
@@ -10918,7 +10928,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "moodle_moodle_sync_service_moodlesyncservice_constructor",
-      "community": 7,
+      "community": 108,
       "norm_label": ".constructor()"
     },
     {
@@ -10928,7 +10938,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "moodle_moodle_sync_service_moodlesyncservice_studentroleid",
-      "community": 7,
+      "community": 45,
       "norm_label": ".studentroleid()"
     },
     {
@@ -10938,7 +10948,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "moodle_moodle_sync_service_moodlesyncservice_coursecategoryid",
-      "community": 7,
+      "community": 45,
       "norm_label": ".coursecategoryid()"
     },
     {
@@ -10948,7 +10958,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "moodle_moodle_sync_service_moodlesyncservice_createcourse",
-      "community": 7,
+      "community": 45,
       "norm_label": ".createcourse()"
     },
     {
@@ -10958,7 +10968,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "moodle_moodle_sync_service_moodlesyncservice_createuser",
-      "community": 7,
+      "community": 45,
       "norm_label": ".createuser()"
     },
     {
@@ -10968,7 +10978,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "moodle_moodle_sync_service_moodlesyncservice_enrolusers",
-      "community": 7,
+      "community": 45,
       "norm_label": ".enrolusers()"
     },
     {
@@ -10978,7 +10988,7 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "moodle_moodle_sync_service_moodlesyncservice_getusergradeitems",
-      "community": 7,
+      "community": 45,
       "norm_label": ".getusergradeitems()"
     },
     {
@@ -10988,7 +10998,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "moodle_moodle_module",
-      "community": 14,
+      "community": 110,
       "norm_label": "moodle.module.ts"
     },
     {
@@ -10998,7 +11008,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "moodle_moodle_module_moodlemodule",
-      "community": 14,
+      "community": 110,
       "norm_label": "moodlemodule"
     },
     {
@@ -11008,7 +11018,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_moodle_types",
-      "community": 7,
+      "community": 45,
       "norm_label": "moodle.types.ts"
     },
     {
@@ -11018,7 +11028,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "types_moodle_types_moodlelogmeta",
-      "community": 7,
+      "community": 45,
       "norm_label": "moodlelogmeta"
     },
     {
@@ -11028,7 +11038,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "types_moodle_types_moodlecourseinput",
-      "community": 7,
+      "community": 45,
       "norm_label": "moodlecourseinput"
     },
     {
@@ -11038,7 +11048,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "types_moodle_types_moodlecreatedcourse",
-      "community": 7,
+      "community": 45,
       "norm_label": "moodlecreatedcourse"
     },
     {
@@ -11048,7 +11058,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "types_moodle_types_moodleuserinput",
-      "community": 7,
+      "community": 45,
       "norm_label": "moodleuserinput"
     },
     {
@@ -11058,7 +11068,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "types_moodle_types_moodlecreateduser",
-      "community": 7,
+      "community": 45,
       "norm_label": "moodlecreateduser"
     },
     {
@@ -11068,7 +11078,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "types_moodle_types_moodleenrolmentinput",
-      "community": 7,
+      "community": 45,
       "norm_label": "moodleenrolmentinput"
     },
     {
@@ -12138,7 +12148,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "platform_gateway_platform_gateway_module",
-      "community": 14,
+      "community": 0,
       "norm_label": "platform-gateway.module.ts"
     },
     {
@@ -12148,7 +12158,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "platform_gateway_platform_gateway_module_platformgatewaymodule",
-      "community": 14,
+      "community": 0,
       "norm_label": "platformgatewaymodule"
     },
     {
@@ -12678,7 +12688,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "profile_edit_history_profile_edit_history_module_profileedithistorymodule",
-      "community": 14,
+      "community": 42,
       "norm_label": "profileedithistorymodule"
     },
     {
@@ -13078,7 +13088,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_role_entity",
-      "community": 35,
+      "community": 39,
       "norm_label": "role.entity.ts"
     },
     {
@@ -13088,7 +13098,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "entities_role_entity_role",
-      "community": 35,
+      "community": 39,
       "norm_label": "role"
     },
     {
@@ -13198,7 +13208,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "roles_roles_module",
-      "community": 14,
+      "community": 39,
       "norm_label": "roles.module.ts"
     },
     {
@@ -13208,7 +13218,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "roles_roles_module_rolesmodule",
-      "community": 14,
+      "community": 39,
       "norm_label": "rolesmodule"
     },
     {
@@ -14128,7 +14138,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "transaction_status_history_transaction_status_history_module_transactionstatushistorymodule",
-      "community": 46,
+      "community": 14,
       "norm_label": "transactionstatushistorymodule"
     },
     {
@@ -14648,7 +14658,7 @@
       "source_location": "L514",
       "_origin": "ast",
       "id": "transactions_transactions_service_transactionsservice_findall",
-      "community": 27,
+      "community": 25,
       "norm_label": ".findall()"
     },
     {
@@ -14788,7 +14798,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "user_image_user_image_module_userimagemodule",
-      "community": 14,
+      "community": 58,
       "norm_label": "userimagemodule"
     },
     {
@@ -14888,7 +14898,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_user_profile_entity",
-      "community": 58,
+      "community": 39,
       "norm_label": "user-profile.entity.ts"
     },
     {
@@ -15018,7 +15028,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "user_profile_user_profile_module",
-      "community": 14,
+      "community": 39,
       "norm_label": "user-profile.module.ts"
     },
     {
@@ -15028,7 +15038,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "user_profile_user_profile_module_userprofilemodule",
-      "community": 14,
+      "community": 39,
       "norm_label": "userprofilemodule"
     },
     {
@@ -15178,7 +15188,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_user_response_dto",
-      "community": 35,
+      "community": 39,
       "norm_label": "user-response.dto.ts"
     },
     {
@@ -15198,7 +15208,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "dto_user_response_dto_userresponsedto_fromentity",
-      "community": 35,
+      "community": 39,
       "norm_label": ".fromentity()"
     },
     {
@@ -15228,7 +15238,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_user_entity",
-      "community": 58,
+      "community": 39,
       "norm_label": "user.entity.ts"
     },
     {
@@ -15238,7 +15248,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "entities_user_entity_user",
-      "community": 58,
+      "community": 39,
       "norm_label": "user"
     },
     {
@@ -15328,7 +15338,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_users_module",
-      "community": 35,
+      "community": 39,
       "norm_label": "users.module.ts"
     },
     {
@@ -15338,7 +15348,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "users_users_module_usersmodule",
-      "community": 14,
+      "community": 39,
       "norm_label": "usersmodule"
     },
     {
@@ -15348,7 +15358,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_users_service_spec",
-      "community": 35,
+      "community": 39,
       "norm_label": "users.service.spec.ts"
     },
     {
@@ -15378,7 +15388,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "users_users_service_usersservice_constructor",
-      "community": 33,
+      "community": 39,
       "norm_label": ".constructor()"
     },
     {
@@ -15518,7 +15528,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_voided_receipt_entity",
-      "community": 54,
+      "community": 25,
       "norm_label": "voided-receipt.entity.ts"
     },
     {
@@ -16898,7 +16908,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "boot_axios",
-      "community": 113,
+      "community": 119,
       "norm_label": "axios.ts"
     },
     {
@@ -16908,7 +16918,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "boot_axios_componentcustomproperties",
-      "community": 113,
+      "community": 119,
       "norm_label": "componentcustomproperties"
     },
     {
@@ -17608,7 +17618,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_report_exam_candidates_info_table",
-      "community": 62,
+      "community": 72,
       "norm_label": "exam-candidates-info-table.vue"
     },
     {
@@ -17618,7 +17628,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "exam_report_exam_candidates_info_table_t",
-      "community": 62,
+      "community": 72,
       "norm_label": "{ t }"
     },
     {
@@ -17628,7 +17638,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "exam_report_exam_candidates_info_table_formatnumber",
-      "community": 62,
+      "community": 72,
       "norm_label": "formatnumber()"
     },
     {
@@ -17638,7 +17648,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "exam_report_exam_candidates_info_table_onrequest",
-      "community": 62,
+      "community": 72,
       "norm_label": "onrequest"
     },
     {
@@ -19418,7 +19428,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "page_builder_page_builder_banner_uploader",
-      "community": 113,
+      "community": 112,
       "norm_label": "page-builder-banner-uploader.vue"
     },
     {
@@ -19428,7 +19438,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "page_builder_page_builder_banner_uploader_q",
-      "community": 113,
+      "community": 112,
       "norm_label": "$q"
     },
     {
@@ -19438,7 +19448,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "page_builder_page_builder_banner_uploader_t",
-      "community": 113,
+      "community": 112,
       "norm_label": "{ t }"
     },
     {
@@ -19448,7 +19458,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "page_builder_page_builder_banner_uploader_showcropdialog",
-      "community": 113,
+      "community": 112,
       "norm_label": "showcropdialog"
     },
     {
@@ -19458,7 +19468,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "page_builder_page_builder_banner_uploader_cropimagesrc",
-      "community": 113,
+      "community": 112,
       "norm_label": "cropimagesrc"
     },
     {
@@ -19468,7 +19478,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "page_builder_page_builder_banner_uploader_isuploading_handleimageupload",
-      "community": 113,
+      "community": 112,
       "norm_label": "{ isuploading, handleimageupload }"
     },
     {
@@ -20058,7 +20068,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_action_button",
-      "community": 62,
+      "community": 66,
       "norm_label": "action-button.vue"
     },
     {
@@ -20068,7 +20078,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_app_breadcrumbs",
-      "community": 112,
+      "community": 109,
       "norm_label": "app-breadcrumbs.vue"
     },
     {
@@ -20078,7 +20088,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "shared_app_breadcrumbs_route",
-      "community": 112,
+      "community": 109,
       "norm_label": "route"
     },
     {
@@ -20088,7 +20098,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "shared_app_breadcrumbs_if",
-      "community": 112,
+      "community": 109,
       "norm_label": "if()"
     },
     {
@@ -20098,7 +20108,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "shared_app_breadcrumbs_removeunresolvedqueryparams",
-      "community": 112,
+      "community": 109,
       "norm_label": "removeunresolvedqueryparams()"
     },
     {
@@ -20108,7 +20118,7 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "shared_app_breadcrumbs_resolvebreadcrumbpath",
-      "community": 112,
+      "community": 109,
       "norm_label": "resolvebreadcrumbpath()"
     },
     {
@@ -20118,7 +20128,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "shared_app_breadcrumbs_breadcrumbs",
-      "community": 112,
+      "community": 109,
       "norm_label": "breadcrumbs"
     },
     {
@@ -20398,7 +20408,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_app_image_cropper",
-      "community": 113,
+      "community": 112,
       "norm_label": "app-image-cropper.vue"
     },
     {
@@ -20498,7 +20508,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_base_table",
-      "community": 66,
+      "community": 122,
       "norm_label": "base-table.vue"
     },
     {
@@ -20508,7 +20518,7 @@
       "source_location": "L414",
       "_origin": "ast",
       "id": "shared_base_table_get",
-      "community": 66,
+      "community": 122,
       "norm_label": "get()"
     },
     {
@@ -20518,7 +20528,7 @@
       "source_location": "L429",
       "_origin": "ast",
       "id": "shared_base_table_has",
-      "community": 66,
+      "community": 122,
       "norm_label": "has()"
     },
     {
@@ -20528,7 +20538,7 @@
       "source_location": "L432",
       "_origin": "ast",
       "id": "shared_base_table_ownkeys",
-      "community": 66,
+      "community": 122,
       "norm_label": "ownkeys()"
     },
     {
@@ -20538,7 +20548,7 @@
       "source_location": "L435",
       "_origin": "ast",
       "id": "shared_base_table_getownpropertydescriptor",
-      "community": 66,
+      "community": 122,
       "norm_label": "getownpropertydescriptor()"
     },
     {
@@ -20618,7 +20628,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_test_voucher_report",
-      "community": 69,
+      "community": 24,
       "norm_label": "test-voucher-report.vue"
     },
     {
@@ -20688,7 +20698,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_countries",
-      "community": 39,
+      "community": 56,
       "norm_label": "use-countries.ts"
     },
     {
@@ -20698,7 +20708,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "composables_use_countries_country",
-      "community": 39,
+      "community": 56,
       "norm_label": "country"
     },
     {
@@ -20708,7 +20718,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "composables_use_countries_usecountries",
-      "community": 39,
+      "community": 56,
       "norm_label": "usecountries()"
     },
     {
@@ -21058,7 +21068,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "composables_use_exam_seat_candidates_seatcandidatesessionlocation",
-      "community": 57,
+      "community": 69,
       "norm_label": "seatcandidatesessionlocation"
     },
     {
@@ -21158,7 +21168,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "composables_use_exam_seat_management_seatsessionlocation",
-      "community": 57,
+      "community": 69,
       "norm_label": "seatsessionlocation"
     },
     {
@@ -21708,7 +21718,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_register_form",
-      "community": 39,
+      "community": 56,
       "norm_label": "use-register-form.ts"
     },
     {
@@ -21718,7 +21728,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "composables_use_register_form_useregisterform",
-      "community": 39,
+      "community": 56,
       "norm_label": "useregisterform()"
     },
     {
@@ -21848,7 +21858,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_usethaidate",
-      "community": 4,
+      "community": 62,
       "norm_label": "usethaidate.ts"
     },
     {
@@ -21858,7 +21868,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "composables_usethaidate_thai_short_months",
-      "community": 4,
+      "community": 62,
       "norm_label": "thai_short_months"
     },
     {
@@ -21868,7 +21878,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "composables_usethaidate_usethaidate",
-      "community": 4,
+      "community": 62,
       "norm_label": "usethaidate()"
     },
     {
@@ -21978,7 +21988,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "constants_exam_notify_msg",
-      "community": 9,
+      "community": 4,
       "norm_label": "notify_msg"
     },
     {
@@ -21988,7 +21998,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "constants_exam_validation_msg",
-      "community": 9,
+      "community": 4,
       "norm_label": "validation_msg"
     },
     {
@@ -23818,7 +23828,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "services_exam_report_service_backendexamcandidateinfo",
-      "community": 49,
+      "community": 72,
       "norm_label": "backendexamcandidateinfo"
     },
     {
@@ -24068,7 +24078,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "services_exam_service_retryasync",
-      "community": 69,
+      "community": 4,
       "norm_label": "retryasync()"
     },
     {
@@ -24078,7 +24088,7 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "services_exam_service_formattime",
-      "community": 9,
+      "community": 4,
       "norm_label": "formattime()"
     },
     {
@@ -24178,7 +24188,7 @@
       "source_location": "L323",
       "_origin": "ast",
       "id": "services_exam_service_fetchexambyid",
-      "community": 69,
+      "community": 4,
       "norm_label": "fetchexambyid()"
     },
     {
@@ -24838,7 +24848,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_profile_edit_history_service",
-      "community": 119,
+      "community": 114,
       "norm_label": "profile-edit-history.service.ts"
     },
     {
@@ -24848,7 +24858,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "services_profile_edit_history_service_fetchprofileedithistory",
-      "community": 119,
+      "community": 114,
       "norm_label": "fetchprofileedithistory()"
     },
     {
@@ -24858,7 +24868,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "services_profile_edit_history_service_fetchlatestprofilehistoryimages",
-      "community": 119,
+      "community": 114,
       "norm_label": "fetchlatestprofilehistoryimages()"
     },
     {
@@ -25098,7 +25108,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_transaction_service",
-      "community": 9,
+      "community": 80,
       "norm_label": "transaction.service.ts"
     },
     {
@@ -25108,7 +25118,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "services_transaction_service_backendtransaction",
-      "community": 9,
+      "community": 80,
       "norm_label": "backendtransaction"
     },
     {
@@ -25118,7 +25128,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "services_transaction_service_creatependingpaymentpayload",
-      "community": 9,
+      "community": 80,
       "norm_label": "creatependingpaymentpayload"
     },
     {
@@ -25128,7 +25138,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "services_transaction_service_pendingpaymentresponse",
-      "community": 9,
+      "community": 80,
       "norm_label": "pendingpaymentresponse"
     },
     {
@@ -25138,7 +25148,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "services_transaction_service_createtransactionflowpayload",
-      "community": 9,
+      "community": 80,
       "norm_label": "createtransactionflowpayload"
     },
     {
@@ -25148,7 +25158,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "services_transaction_service_createtransactionflowresponse",
-      "community": 9,
+      "community": 80,
       "norm_label": "createtransactionflowresponse"
     },
     {
@@ -25158,7 +25168,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "services_transaction_service_confirmpaymentflowpayload",
-      "community": 9,
+      "community": 80,
       "norm_label": "confirmpaymentflowpayload"
     },
     {
@@ -25168,7 +25178,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "services_transaction_service_updatetransactionbyermid",
-      "community": 9,
+      "community": 80,
       "norm_label": "updatetransactionbyermid()"
     },
     {
@@ -25178,7 +25188,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "services_transaction_service_creatependingpayment",
-      "community": 9,
+      "community": 80,
       "norm_label": "creatependingpayment()"
     },
     {
@@ -25188,7 +25198,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "services_transaction_service_createtransaction",
-      "community": 9,
+      "community": 80,
       "norm_label": "createtransaction()"
     },
     {
@@ -25198,7 +25208,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "services_transaction_service_confirmpaymentflow",
-      "community": 9,
+      "community": 80,
       "norm_label": "confirmpaymentflow()"
     },
     {
@@ -25208,7 +25218,7 @@
       "source_location": "L88",
       "_origin": "ast",
       "id": "services_transaction_service_expiretransaction",
-      "community": 9,
+      "community": 80,
       "norm_label": "expiretransaction()"
     },
     {
@@ -25568,7 +25578,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "stores_user_store",
-      "community": 123,
+      "community": 59,
       "norm_label": "user.store.ts"
     },
     {
@@ -25838,7 +25848,7 @@
       "source_location": "L155",
       "_origin": "ast",
       "id": "types_enrollment_types_enrollmentstatus",
-      "community": 69,
+      "community": 125,
       "norm_label": "enrollmentstatus"
     },
     {
@@ -26028,7 +26038,7 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "types_exam_report_types_examcandidateinforow",
-      "community": 49,
+      "community": 72,
       "norm_label": "examcandidateinforow"
     },
     {
@@ -26128,7 +26138,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "types_exam_examinfo",
-      "community": 9,
+      "community": 5,
       "norm_label": "examinfo"
     },
     {
@@ -26278,7 +26288,7 @@
       "source_location": "L262",
       "_origin": "ast",
       "id": "types_exam_backendsession",
-      "community": 57,
+      "community": 69,
       "norm_label": "backendsession"
     },
     {
@@ -26328,7 +26338,7 @@
       "source_location": "L350",
       "_origin": "ast",
       "id": "types_exam_passcodetype",
-      "community": 4,
+      "community": 5,
       "norm_label": "passcodetype"
     },
     {
@@ -26338,7 +26348,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_exam_types",
-      "community": 62,
+      "community": 105,
       "norm_label": "exam.types.ts"
     },
     {
@@ -26358,7 +26368,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "types_exam_types_paginationmodel",
-      "community": 62,
+      "community": 72,
       "norm_label": "paginationmodel"
     },
     {
@@ -26368,7 +26378,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "types_exam_types_role",
-      "community": 62,
+      "community": 105,
       "norm_label": "role"
     },
     {
@@ -26378,7 +26388,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "types_exam_types_toolbuttonconfig",
-      "community": 62,
+      "community": 105,
       "norm_label": "toolbuttonconfig"
     },
     {
@@ -26388,7 +26398,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "types_exam_types_toolbuttonextended",
-      "community": 62,
+      "community": 105,
       "norm_label": "toolbuttonextended"
     },
     {
@@ -26398,7 +26408,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "types_exam_types_table_actions",
-      "community": 62,
+      "community": 105,
       "norm_label": "table_actions"
     },
     {
@@ -26408,7 +26418,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "types_exam_types_tableaction",
-      "community": 62,
+      "community": 105,
       "norm_label": "tableaction"
     },
     {
@@ -26418,7 +26428,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "types_exam_types_exam_type_labels",
-      "community": 62,
+      "community": 105,
       "norm_label": "exam_type_labels"
     },
     {
@@ -26428,7 +26438,7 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "types_exam_types_exam_status_labels",
-      "community": 62,
+      "community": 105,
       "norm_label": "exam_status_labels"
     },
     {
@@ -26438,7 +26448,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "types_exam_types_tablerequestprops",
-      "community": 62,
+      "community": 72,
       "norm_label": "tablerequestprops"
     },
     {
@@ -26448,7 +26458,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "types_exam_types_paymentrow",
-      "community": 62,
+      "community": 105,
       "norm_label": "paymentrow"
     },
     {
@@ -26458,7 +26468,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "types_exam_types_searchrow",
-      "community": 62,
+      "community": 105,
       "norm_label": "searchrow"
     },
     {
@@ -26578,7 +26588,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_navigation",
-      "community": 138,
+      "community": 59,
       "norm_label": "navigation.ts"
     },
     {
@@ -26588,7 +26598,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "types_navigation_navigationitem",
-      "community": 138,
+      "community": 59,
       "norm_label": "navigationitem"
     },
     {
@@ -26598,7 +26608,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "types_navigation_navigationgroup",
-      "community": 138,
+      "community": 59,
       "norm_label": "navigationgroup"
     },
     {
@@ -26738,7 +26748,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_profile_edit_history_types",
-      "community": 119,
+      "community": 114,
       "norm_label": "profile-edit-history.types.ts"
     },
     {
@@ -26748,7 +26758,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_profile_edit_history_types_profileedithistory",
-      "community": 119,
+      "community": 114,
       "norm_label": "profileedithistory"
     },
     {
@@ -26858,7 +26868,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "types_user_userrole",
-      "community": 138,
+      "community": 59,
       "norm_label": "userrole"
     },
     {
@@ -41292,9 +41302,9 @@
       "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.spec.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_vouchers_exam_vouchers_service_spec",
-      "target": "entities_exam_enrollment_entity",
-      "confidence_score": 1.0
+      "target": "entities_exam_enrollment_entity"
     },
     {
       "relation": "imports_from",
@@ -41391,9 +41401,9 @@
       "source_file": "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.spec.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_enrollments_exam_enrollments_service_spec",
-      "target": "entities_exam_enrollment_entity_examenrollmentstatus",
-      "confidence_score": 1.0
+      "target": "entities_exam_enrollment_entity_examenrollmentstatus"
     },
     {
       "relation": "imports",
@@ -41457,9 +41467,9 @@
       "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.spec.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_vouchers_exam_vouchers_service_spec",
-      "target": "entities_exam_enrollment_entity_examenrollmentstatus",
-      "confidence_score": 1.0
+      "target": "entities_exam_enrollment_entity_examenrollmentstatus"
     },
     {
       "relation": "imports",
@@ -42114,6 +42124,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.spec.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "exam_vouchers_exam_vouchers_service_spec",
+      "target": "entities_exam_enrollment_entity_examenrollment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "apps/backend/src/modules/moodle/moodle-enrol.worker.ts",
       "source_location": "L5",
       "weight": 1.0,
@@ -42651,9 +42672,9 @@
       "source_file": "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.spec.ts",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_enrollments_exam_enrollments_service_spec",
-      "target": "entities_exam_session_entity",
-      "confidence_score": 1.0
+      "target": "entities_exam_session_entity"
     },
     {
       "relation": "imports",
@@ -42662,9 +42683,9 @@
       "source_file": "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.spec.ts",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_enrollments_exam_enrollments_service_spec",
-      "target": "entities_exam_session_entity_examsession",
-      "confidence_score": 1.0
+      "target": "entities_exam_session_entity_examsession"
     },
     {
       "relation": "imports",
@@ -42673,9 +42694,9 @@
       "source_file": "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.spec.ts",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_enrollments_exam_enrollments_service_spec",
-      "target": "entities_exam_session_entity_examsessionstatus",
-      "confidence_score": 1.0
+      "target": "entities_exam_session_entity_examsessionstatus"
     },
     {
       "relation": "imports_from",
@@ -42684,9 +42705,9 @@
       "source_file": "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.spec.ts",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_enrollments_exam_enrollments_service_spec",
-      "target": "entities_exam_session_location_entity",
-      "confidence_score": 1.0
+      "target": "entities_exam_session_location_entity"
     },
     {
       "relation": "imports",
@@ -42695,9 +42716,9 @@
       "source_file": "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.spec.ts",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_enrollments_exam_enrollments_service_spec",
-      "target": "entities_exam_session_location_entity_examsessionlocation",
-      "confidence_score": 1.0
+      "target": "entities_exam_session_location_entity_examsessionlocation"
     },
     {
       "relation": "imports_from",
@@ -42728,9 +42749,9 @@
       "source_file": "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.spec.ts",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_enrollments_exam_enrollments_service_spec",
-      "target": "exam_enrollments_test_taker_id_service",
-      "confidence_score": 1.0
+      "target": "exam_enrollments_test_taker_id_service"
     },
     {
       "relation": "imports",
@@ -42739,9 +42760,9 @@
       "source_file": "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.spec.ts",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_enrollments_exam_enrollments_service_spec",
-      "target": "exam_enrollments_test_taker_id_service_testtakeridservice",
-      "confidence_score": 1.0
+      "target": "exam_enrollments_test_taker_id_service_testtakeridservice"
     },
     {
       "relation": "imports_from",
@@ -43088,9 +43109,9 @@
       "source_file": "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.ts",
       "source_location": "L1043",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_enrollments_exam_enrollments_service_examenrollmentsservice",
-      "target": "exam_enrollments_exam_enrollments_service_examenrollmentsservice_assertseateditingallowed",
-      "confidence_score": 1.0
+      "target": "exam_enrollments_exam_enrollments_service_examenrollmentsservice_assertseateditingallowed"
     },
     {
       "relation": "method",
@@ -43337,9 +43358,9 @@
       "source_file": "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.ts",
       "source_location": "L121",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_enrollments_exam_enrollments_service_examenrollmentsservice_bulkassignseats",
-      "target": "exam_enrollments_exam_enrollments_service_examenrollmentsservice_assertseateditingallowed",
-      "confidence_score": 1.0
+      "target": "exam_enrollments_exam_enrollments_service_examenrollmentsservice_assertseateditingallowed"
     },
     {
       "relation": "calls",
@@ -43469,9 +43490,9 @@
       "source_file": "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.ts",
       "source_location": "L1037",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_enrollments_exam_enrollments_service_examenrollmentsservice_validateseatassignment",
-      "target": "exam_enrollments_exam_enrollments_service_examenrollmentsservice_assertseateditingallowed",
-      "confidence_score": 1.0
+      "target": "exam_enrollments_exam_enrollments_service_examenrollmentsservice_assertseateditingallowed"
     },
     {
       "relation": "calls",
@@ -49647,9 +49668,9 @@
       "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_vouchers_exam_vouchers_service",
-      "target": "entities_exam_session_entity",
-      "confidence_score": 1.0
+      "target": "entities_exam_session_entity"
     },
     {
       "relation": "imports_from",
@@ -49658,9 +49679,9 @@
       "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.spec.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_vouchers_exam_vouchers_service_spec",
-      "target": "entities_exam_session_entity",
-      "confidence_score": 1.0
+      "target": "entities_exam_session_entity"
     },
     {
       "relation": "imports",
@@ -49669,9 +49690,9 @@
       "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_vouchers_exam_vouchers_service",
-      "target": "entities_exam_session_entity_examsessionstatus",
-      "confidence_score": 1.0
+      "target": "entities_exam_session_entity_examsessionstatus"
     },
     {
       "relation": "imports",
@@ -49680,9 +49701,9 @@
       "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.spec.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_vouchers_exam_vouchers_service_spec",
-      "target": "entities_exam_session_entity_examsessionstatus",
-      "confidence_score": 1.0
+      "target": "entities_exam_session_entity_examsessionstatus"
     },
     {
       "relation": "imports",
@@ -49855,7 +49876,18 @@
       "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_vouchers_exam_vouchers_service",
+      "target": "entities_exam_session_entity_examsession"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.spec.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "exam_vouchers_exam_vouchers_service_spec",
       "target": "entities_exam_session_entity_examsession",
       "confidence_score": 1.0
     },
@@ -50489,6 +50521,17 @@
       "target": "entities_exam_voucher_entity"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.spec.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "exam_vouchers_exam_vouchers_service_spec",
+      "target": "entities_exam_voucher_entity",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -50641,6 +50684,17 @@
       "confidence_score": 1.0,
       "source": "exam_vouchers_exam_vouchers_service_examvouchersservice_update",
       "target": "entities_exam_voucher_entity_examvoucher"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.spec.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "exam_vouchers_exam_vouchers_service_spec",
+      "target": "entities_exam_voucher_entity_examvoucher",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -50836,9 +50890,9 @@
       "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.spec.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_vouchers_exam_vouchers_service_spec",
-      "target": "exam_vouchers_exam_vouchers_service",
-      "confidence_score": 1.0
+      "target": "exam_vouchers_exam_vouchers_service"
     },
     {
       "relation": "imports",
@@ -50847,8 +50901,18 @@
       "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.spec.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_vouchers_exam_vouchers_service_spec",
-      "target": "exam_vouchers_exam_vouchers_service_examvouchersservice",
+      "target": "exam_vouchers_exam_vouchers_service_examvouchersservice"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.spec.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "exam_vouchers_exam_vouchers_service_spec",
+      "target": "exam_vouchers_exam_vouchers_service_spec_repositoryentity",
       "confidence_score": 1.0
     },
     {
@@ -50857,9 +50921,9 @@
       "source_file": "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_vouchers_exam_vouchers_service",
-      "target": "exam_vouchers_exam_vouchers_service_bulkissuevouchersresult",
-      "confidence_score": 1.0
+      "target": "exam_vouchers_exam_vouchers_service_bulkissuevouchersresult"
     },
     {
       "relation": "contains",
@@ -68971,9 +69035,9 @@
       "source_file": "apps/frontend/src/components/base/skeleton/card-skeleton.vue",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skeleton_card_skeleton",
-      "target": "skeleton_card_skeleton_getlinewidth",
-      "confidence_score": 1.0
+      "target": "skeleton_card_skeleton_getlinewidth"
     },
     {
       "relation": "re_exports",
@@ -68993,9 +69057,9 @@
       "source_file": "apps/frontend/src/components/base/skeleton/index.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skeleton_index",
-      "target": "skeleton_chart_panel_skeleton",
-      "confidence_score": 1.0
+      "target": "skeleton_chart_panel_skeleton"
     },
     {
       "relation": "contains",
@@ -69091,9 +69155,9 @@
       "source_file": "apps/frontend/src/components/base/skeleton/index.ts",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skeleton_index",
-      "target": "skeleton_room_preview_skeleton",
-      "confidence_score": 1.0
+      "target": "skeleton_room_preview_skeleton"
     },
     {
       "relation": "re_exports",
@@ -69102,9 +69166,9 @@
       "source_file": "apps/frontend/src/components/base/skeleton/index.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skeleton_index",
-      "target": "skeleton_seat_management_skeleton",
-      "confidence_score": 1.0
+      "target": "skeleton_seat_management_skeleton"
     },
     {
       "relation": "re_exports",
@@ -69183,9 +69247,9 @@
       "source_file": "apps/frontend/src/components/base/skeleton/table-skeleton.vue",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skeleton_table_skeleton",
-      "target": "skeleton_table_skeleton_widthpattern",
-      "confidence_score": 1.0
+      "target": "skeleton_table_skeleton_widthpattern"
     },
     {
       "relation": "imports_from",
@@ -70381,9 +70445,9 @@
       "source_file": "apps/frontend/src/components/exam/dialog-issue-ticket.spec.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket_spec",
-      "target": "exam_dialog_issue_ticket",
-      "confidence_score": 1.0
+      "target": "exam_dialog_issue_ticket"
     },
     {
       "relation": "contains",
@@ -70391,9 +70455,9 @@
       "source_file": "apps/frontend/src/components/exam/dialog-issue-ticket.spec.ts",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket_spec",
-      "target": "exam_dialog_issue_ticket_spec_i18n",
-      "confidence_score": 1.0
+      "target": "exam_dialog_issue_ticket_spec_i18n"
     },
     {
       "relation": "contains",
@@ -70401,9 +70465,9 @@
       "source_file": "apps/frontend/src/components/exam/dialog-issue-ticket.spec.ts",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket_spec",
-      "target": "exam_dialog_issue_ticket_spec_mountdialog",
-      "confidence_score": 1.0
+      "target": "exam_dialog_issue_ticket_spec_mountdialog"
     },
     {
       "relation": "contains",
@@ -70411,9 +70475,9 @@
       "source_file": "apps/frontend/src/components/exam/dialog-issue-ticket.spec.ts",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket_spec",
-      "target": "exam_dialog_issue_ticket_spec_voucherdata",
-      "confidence_score": 1.0
+      "target": "exam_dialog_issue_ticket_spec_voucherdata"
     },
     {
       "relation": "imports_from",
@@ -70422,9 +70486,9 @@
       "source_file": "apps/frontend/src/components/exam/dialog-issue-ticket.spec.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket_spec",
-      "target": "types_voucher",
-      "confidence_score": 1.0
+      "target": "types_voucher"
     },
     {
       "relation": "imports",
@@ -70433,9 +70497,9 @@
       "source_file": "apps/frontend/src/components/exam/dialog-issue-ticket.spec.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket_spec",
-      "target": "types_voucher_voucherdata",
-      "confidence_score": 1.0
+      "target": "types_voucher_voucherdata"
     },
     {
       "relation": "contains",
@@ -70453,9 +70517,9 @@
       "source_file": "apps/frontend/src/components/exam/dialog-issue-ticket.vue",
       "source_location": "L113",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket",
-      "target": "exam_dialog_issue_ticket_if",
-      "confidence_score": 1.0
+      "target": "exam_dialog_issue_ticket_if"
     },
     {
       "relation": "contains",
@@ -70463,9 +70527,9 @@
       "source_file": "apps/frontend/src/components/exam/dialog-issue-ticket.vue",
       "source_location": "L109",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket",
-      "target": "exam_dialog_issue_ticket_isconfirming",
-      "confidence_score": 1.0
+      "target": "exam_dialog_issue_ticket_isconfirming"
     },
     {
       "relation": "contains",
@@ -70473,9 +70537,9 @@
       "source_file": "apps/frontend/src/components/exam/dialog-issue-ticket.vue",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket",
-      "target": "exam_dialog_issue_ticket_props",
-      "confidence_score": 1.0
+      "target": "exam_dialog_issue_ticket_props"
     },
     {
       "relation": "imports_from",
@@ -74410,9 +74474,9 @@
       "source_file": "apps/frontend/src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "composables_use_exam_seat_candidates",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_seat_candidates"
     },
     {
       "relation": "contains",
@@ -74420,9 +74484,9 @@
       "source_file": "apps/frontend/src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "composables_use_exam_seat_candidates_spec_testharness",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_seat_candidates_spec_testharness"
     },
     {
       "relation": "imports",
@@ -74431,9 +74495,9 @@
       "source_file": "apps/frontend/src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "composables_use_exam_seat_candidates_useexamseatcandidates",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_seat_candidates_useexamseatcandidates"
     },
     {
       "relation": "imports_from",
@@ -74442,9 +74506,9 @@
       "source_file": "apps/frontend/src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "services_enrollment_service",
-      "confidence_score": 1.0
+      "target": "services_enrollment_service"
     },
     {
       "relation": "imports",
@@ -74453,9 +74517,9 @@
       "source_file": "apps/frontend/src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "services_enrollment_service_fetchrawenrollmentsbyexamid",
-      "confidence_score": 1.0
+      "target": "services_enrollment_service_fetchrawenrollmentsbyexamid"
     },
     {
       "relation": "imports_from",
@@ -74464,9 +74528,9 @@
       "source_file": "apps/frontend/src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "services_exam_service",
-      "confidence_score": 1.0
+      "target": "services_exam_service"
     },
     {
       "relation": "imports",
@@ -74475,9 +74539,9 @@
       "source_file": "apps/frontend/src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "services_exam_service_fetchexambyid",
-      "confidence_score": 1.0
+      "target": "services_exam_service_fetchexambyid"
     },
     {
       "relation": "imports_from",
@@ -74486,9 +74550,9 @@
       "source_file": "apps/frontend/src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "types_enrollment_types",
-      "confidence_score": 1.0
+      "target": "types_enrollment_types"
     },
     {
       "relation": "imports",
@@ -74497,9 +74561,9 @@
       "source_file": "apps/frontend/src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "types_enrollment_types_backendenrollmentdetail",
-      "confidence_score": 1.0
+      "target": "types_enrollment_types_backendenrollmentdetail"
     },
     {
       "relation": "imports",
@@ -74508,9 +74572,9 @@
       "source_file": "apps/frontend/src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "types_enrollment_types_enrollmentstatus",
-      "confidence_score": 1.0
+      "target": "types_enrollment_types_enrollmentstatus"
     },
     {
       "relation": "imports_from",
@@ -74519,9 +74583,9 @@
       "source_file": "apps/frontend/src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "types_exam",
-      "confidence_score": 1.0
+      "target": "types_exam"
     },
     {
       "relation": "imports",
@@ -74530,9 +74594,9 @@
       "source_file": "apps/frontend/src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "types_exam_backendexam",
-      "confidence_score": 1.0
+      "target": "types_exam_backendexam"
     },
     {
       "relation": "contains",
@@ -74657,9 +74721,9 @@
       "source_file": "apps/frontend/src/composables/use-exam-seat-candidates.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates",
-      "target": "types_enrollment_types_enrollmentstatus",
-      "confidence_score": 1.0
+      "target": "types_enrollment_types_enrollmentstatus"
     },
     {
       "relation": "imports_from",
@@ -75183,9 +75247,9 @@
       "source_file": "apps/frontend/src/composables/use-exam-seat-navigation.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_navigation",
-      "target": "types_exam_backendsession",
-      "confidence_score": 1.0
+      "target": "types_exam_backendsession"
     },
     {
       "relation": "contains",
@@ -81111,9 +81175,9 @@
       "source_file": "apps/frontend/src/services/voucher.service.ts",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_voucher_service",
-      "target": "services_voucher_service_bulkissuevouchersresult",
-      "confidence_score": 1.0
+      "target": "services_voucher_service_bulkissuevouchersresult"
     },
     {
       "relation": "contains",
@@ -84413,5 +84477,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5402c69e8d4c53fc86800813d46ea219a8356a12"
+  "built_at_commit": "0dadf22afbe870d212df3818ecc78204a7b4812a"
 }
