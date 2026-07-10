@@ -117,7 +117,7 @@ interface EnrollmentSeatAssignment {
 export function useExamSeatManagement() {
   const route = useRoute();
   const router = useRouter();
-  const { isSeatAllocationLocked } = useExamSeatNavigation();
+  const { isSeatEditingLocked } = useExamSeatNavigation();
   const $q = useQuasar();
   const { t } = useI18n();
 
@@ -576,6 +576,18 @@ export function useExamSeatManagement() {
     return students.value.length > 0 && students.value.every((student) => Boolean(student.seat));
   });
 
+  const isReEditingSeatAssignment = computed((): boolean => {
+    return activeTimeSessions.value.some(
+      (session) => Number(session.SS_SESSION_STATUS) >= STATUS_SEAT_ASSIGNED,
+    );
+  });
+
+  const saveButtonLabel = computed((): string => {
+    return isReEditingSeatAssignment.value
+      ? t('admin.seatManagement.saveButtonEdit')
+      : t('admin.seatManagement.saveButton');
+  });
+
   const currentRoomStudents = computed((): StudentSeatInfo[] => {
     const selectedSessionLocation = activeSessionLocation.value;
     if (!selectedSessionLocation) return [];
@@ -680,6 +692,54 @@ export function useExamSeatManagement() {
     });
   };
 
+  const resolveSeatIdFromEnrollment = (
+    enrollment: BackendEnrollmentDetail,
+    locations: SeatSessionLocation[],
+  ): string | null => {
+    if (!enrollment.ERM_SEAT_LABEL || enrollment.SL_ID == null) {
+      return null;
+    }
+
+    const sessionLocation = locations.find((location) => location.SL_ID === enrollment.SL_ID);
+    if (!sessionLocation) {
+      return null;
+    }
+
+    const matchedSeat = buildSessionSeatItems(sessionLocation).find(
+      (seat) => seat.LS_SEAT_LABEL === enrollment.ERM_SEAT_LABEL,
+    );
+
+    return matchedSeat ? String(matchedSeat.LS_ID) : null;
+  };
+
+  const getTimeTabSessions = (sessionId: number | null): BackendSession[] => {
+    if (sessionId === null) return [];
+    const session = sessions.value.find((item) => item.SS_ID === sessionId);
+    if (!session) return [];
+
+    const timeKey = getSessionTimeKey(session);
+    return sessions.value.filter((item) => getSessionTimeKey(item) === timeKey);
+  };
+
+  const redirectIfSeatEditingLocked = async (sessionId: number | null): Promise<boolean> => {
+    const timeTabSessions = getTimeTabSessions(sessionId);
+    if (!isSeatEditingLocked(timeTabSessions)) {
+      return false;
+    }
+
+    await router.replace({
+      name: 'admin-exam-seat-candidates',
+      params: { examId: String(examId) },
+      query: {
+        ...(sessionId !== null ? { sessionId: String(sessionId) } : {}),
+        ...(activeSessionLocationId.value !== null
+          ? { sessionLocationId: String(activeSessionLocationId.value) }
+          : {}),
+      },
+    });
+    return true;
+  };
+
   const autoAssignSeats = (): void => {
     // Usable seats from every room in the active time slot, kept in room order
     // (first room first) and sorted by reading order (A1, A2, … B1 …) within a
@@ -749,7 +809,7 @@ export function useExamSeatManagement() {
         sessionId: e.SESSION_ID,
         id: e.USER?.USER_NATIONAL_ID || String(e.USER_ID),
         name: displayName,
-        seat: e.LS_ID ? String(e.LS_ID) : null,
+        seat: resolveSeatIdFromEnrollment(e, sessionLocations.value),
         sessionLocationId:
           e.SL_ID ??
           sessionLocations.value.find((location) => location.SS_ID === e.SESSION_ID)?.SL_ID ??
@@ -763,7 +823,12 @@ export function useExamSeatManagement() {
       };
     });
 
-    autoAssignSeats();
+    const hasExistingSeatAssignments = eligibleEnrollments.some((enrollment) =>
+      Boolean(enrollment.ERM_SEAT_LABEL && enrollment.SL_ID != null),
+    );
+    if (!hasExistingSeatAssignments) {
+      autoAssignSeats();
+    }
     if (timeKey) {
       seatDraftsByTime.set(timeKey, cloneStudents(students.value));
     }
@@ -776,22 +841,34 @@ export function useExamSeatManagement() {
     error.value = null;
     try {
       examData.value = await fetchExamById(examId);
+      sessions.value = examData.value.SESSIONS || [];
 
-      if (isSeatAllocationLocked(examData.value)) {
-        await router.replace({
-          name: 'admin-exam-seat-candidates',
-          params: { examId: String(examId) },
-        });
+      const routeSessionId = Number(route.query.sessionId);
+      if (
+        !isNaN(routeSessionId) &&
+        sessions.value.some((session) => session.SS_ID === routeSessionId)
+      ) {
+        activeSessionId.value = routeSessionId;
+      } else {
+        const firstSession = sessionTimeTabs.value[0];
+        if (firstSession) {
+          activeSessionId.value = firstSession.SS_ID;
+        }
+      }
+
+      if (await redirectIfSeatEditingLocked(activeSessionId.value)) {
         return;
       }
 
-      sessions.value = examData.value.SESSIONS || [];
-      await refreshBlockedSeats();
-      const firstSession = sessionTimeTabs.value[0];
-      if (firstSession) {
-        activeSessionId.value = firstSession.SS_ID;
+      const routeSessionLocationId = Number(route.query.sessionLocationId);
+      if (
+        !isNaN(routeSessionLocationId) &&
+        sessionLocations.value.some((location) => location.SL_ID === routeSessionLocationId)
+      ) {
+        activeSessionLocationId.value = routeSessionLocationId;
       }
 
+      await refreshBlockedSeats();
       await refreshStudentDisplayData();
     } catch (err) {
       console.error('Failed to load exam data', err);
@@ -803,10 +880,13 @@ export function useExamSeatManagement() {
     }
   };
 
-  watch(activeSessionId, (newSessionId, previousSessionId) => {
+  watch(activeSessionId, async (newSessionId, previousSessionId) => {
     saveSeatDraft(previousSessionId, students.value);
     const firstSessionLocation = sessionLocations.value[0]?.SL_ID ?? null;
     activeSessionLocationId.value = firstSessionLocation;
+    if (newSessionId !== null && (await redirectIfSeatEditingLocked(newSessionId))) {
+      return;
+    }
     if (hasLoadedEnrollments.value && newSessionId !== null) {
       filterStudentsBySession();
     }
@@ -1197,6 +1277,8 @@ export function useExamSeatManagement() {
     currentRoomCapacity,
     filteredStudents,
     isSeatAssignmentComplete,
+    isReEditingSeatAssignment,
+    saveButtonLabel,
     // Methods
     loadExamData,
     getSeatLabel,

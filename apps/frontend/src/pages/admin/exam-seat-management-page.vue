@@ -92,7 +92,7 @@
               @click="handleCancel"
             />
             <AppButton
-              :label="$t('admin.seatManagement.saveButton')"
+              :label="saveButtonLabel"
               class="btn-confirm-seat"
               :disable="!isSeatAssignmentComplete"
               @click="handleSave"
@@ -137,6 +137,7 @@ const {
   currentRoomCapacity,
   filteredStudents,
   isSeatAssignmentComplete,
+  saveButtonLabel,
   loadExamData,
   getSeatLabel,
   handleCancel,

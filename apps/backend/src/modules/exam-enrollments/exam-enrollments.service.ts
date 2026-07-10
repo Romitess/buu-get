@@ -118,6 +118,8 @@ export class ExamEnrollmentsService {
       throw new NotFoundException('One or more exam sessions were not found');
     }
 
+    await this.assertSeatEditingAllowed(enrollmentIds, dto.sessionIds);
+
     for (const assignment of dto.assignments) {
       const enrollment = enrollmentById.get(assignment.ermId);
       const sessionLocation = sessionLocationById.get(assignment.slId);
@@ -1029,6 +1031,67 @@ export class ExamEnrollmentsService {
     if (sessionLocation.SS_ID !== enrollment.SESSION_ID) {
       throw new BadRequestException(
         'Session location does not belong to this enrollment session',
+      );
+    }
+
+    await this.assertSeatEditingAllowed(
+      [enrollment.ERM_ID],
+      [enrollment.SESSION_ID],
+    );
+  }
+
+  private async assertSeatEditingAllowed(
+    enrollmentIds: number[],
+    sessionIds: number[],
+  ): Promise<void> {
+    const uniqueEnrollmentIds = [...new Set(enrollmentIds)];
+    const uniqueSessionIds = [...new Set(sessionIds)];
+
+    const [sessions, enrollments] = await Promise.all([
+      uniqueSessionIds.length > 0
+        ? this.examSessionRepository.find({
+            where: { SS_ID: In(uniqueSessionIds) },
+            select: ['SS_ID', 'SS_SESSION_STATUS'],
+          })
+        : Promise.resolve([]),
+      uniqueEnrollmentIds.length > 0
+        ? this.examEnrollmentRepository.find({
+            where: { ERM_ID: In(uniqueEnrollmentIds) },
+            relations: ['VOUCHERS'],
+            select: ['ERM_ID', 'ERM_STATUS'],
+          })
+        : Promise.resolve([]),
+    ]);
+
+    if (
+      sessions.some(
+        (session) =>
+          Number(session.SS_SESSION_STATUS) >=
+          Number(ExamSessionStatus.VOUCHER_SENT),
+      )
+    ) {
+      throw new ConflictException(
+        'ไม่สามารถแก้ไขที่นั่งได้ เนื่องจากออก Test Voucher แล้ว',
+      );
+    }
+
+    if (
+      enrollments.some(
+        (enrollment) =>
+          Number(enrollment.ERM_STATUS) >=
+          Number(ExamEnrollmentStatus.SEAT_PUBLISHED),
+      )
+    ) {
+      throw new ConflictException(
+        'ไม่สามารถแก้ไขที่นั่งได้ เนื่องจากออก Test Voucher แล้ว',
+      );
+    }
+
+    if (
+      enrollments.some((enrollment) => (enrollment.VOUCHERS?.length ?? 0) > 0)
+    ) {
+      throw new ConflictException(
+        'ไม่สามารถแก้ไขที่นั่งได้ เนื่องจากออก Test Voucher แล้ว',
       );
     }
   }

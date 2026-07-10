@@ -681,11 +681,16 @@ export default {
         },
       },
     },
+    seatManagement: {
+      saveButton: 'Confirm Seat Assignment',
+      saveButtonEdit: 'Save Seat Changes',
+    },
     seatCandidates: {
       pageTitle: 'Manage Exam Seats',
       pageSubtitle:
         'Plan and manage exam seats to accommodate candidates appropriately and conveniently',
       printVoucher: 'Issue Test Voucher',
+      editSeats: 'Edit Seat Assignments',
       printSeatPlan: 'Print Seat Plan',
       viewVoucher: 'View Test Voucher',
       viewVoucherTitle: 'Test Voucher Issuance Details',

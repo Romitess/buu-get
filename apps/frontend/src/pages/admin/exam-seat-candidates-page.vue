@@ -37,6 +37,14 @@
 
       <div class="row q-gutter-sm col-12 col-sm-auto justify-end">
         <AppButton
+          v-if="!isVoucherSent"
+          icon="edit"
+          :label="$t('admin.seatCandidates.editSeats')"
+          color="secondary"
+          class="toolbar-action-btn"
+          @click="handleEditSeats"
+        />
+        <AppButton
           :icon="isVoucherSent ? 'print' : 'badge'"
           :label="
             isVoucherSent
@@ -322,6 +330,22 @@ const startIssuingTickets = async (): Promise<void> => {
   } finally {
     isActionLoading.value = false;
   }
+};
+
+const handleEditSeats = (): void => {
+  const examId = Number(route.params.examId);
+  if (isNaN(examId) || examId <= 0) return;
+
+  void router.push({
+    name: 'admin-exam-seat-management',
+    params: { examId: String(examId) },
+    query: {
+      sessionId: String(selectedSessionId.value),
+      ...(selectedSessionLocationId.value !== null
+        ? { sessionLocationId: String(selectedSessionLocationId.value) }
+        : {}),
+    },
+  });
 };
 
 const handlePrintVoucher = (): void => {
