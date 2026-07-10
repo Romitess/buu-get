@@ -15,6 +15,16 @@ import {
   ExamEnrollment,
   ExamEnrollmentStatus,
 } from '../exam-enrollments/entities/exam-enrollment.entity';
+import {
+  ExamSession,
+  ExamSessionStatus,
+} from '../exam-sessions/entities/exam-session.entity';
+
+export interface BulkIssueVouchersResult {
+  success: boolean;
+  updatedEnrollmentCount: number;
+  updatedSessionIds: number[];
+}
 
 @Injectable()
 export class ExamVouchersService {
@@ -150,15 +160,23 @@ export class ExamVouchersService {
 
   async bulkIssueVouchers(
     dto: BulkIssueVouchersDto,
-  ): Promise<{ success: boolean }> {
-    const { ermIds, examName, historyUrl } = dto;
+  ): Promise<BulkIssueVouchersResult> {
+    const { ermIds, examName, historyUrl, sessionIds } = dto;
     if (!ermIds || ermIds.length === 0) {
-      return { success: true };
+      return {
+        success: true,
+        updatedEnrollmentCount: 0,
+        updatedSessionIds: [],
+      };
     }
+
+    let updatedEnrollmentCount = 0;
+    let updatedSessionIds: number[] = [];
 
     const enrollments = await this.dataSource.transaction(async (manager) => {
       const enrollmentRepository = manager.getRepository(ExamEnrollment);
       const voucherRepository = manager.getRepository(ExamVoucher);
+      const sessionRepository = manager.getRepository(ExamSession);
       const selectedEnrollments = await enrollmentRepository.find({
         where: { ERM_ID: In(ermIds) },
         relations: ['SESSION', 'SESSION.EXAM', 'USER', 'USER.PROFILE'],
@@ -187,6 +205,37 @@ export class ExamVouchersService {
           enrollment.ERM_STATUS = ExamEnrollmentStatus.SEAT_PUBLISHED;
         }
         await enrollmentRepository.save(enrollmentsToUpdate);
+        updatedEnrollmentCount = enrollmentsToUpdate.length;
+      }
+
+      const sessionIdsToUpdate =
+        sessionIds && sessionIds.length > 0
+          ? sessionIds
+          : [
+              ...new Set(
+                selectedEnrollments.map((enrollment) => enrollment.SESSION_ID),
+              ),
+            ];
+
+      if (sessionIdsToUpdate.length > 0) {
+        const sessionsToUpdate = await sessionRepository.find({
+          where: { SS_ID: In(sessionIdsToUpdate) },
+        });
+
+        const sessionsNeedingUpdate = sessionsToUpdate.filter(
+          (session) =>
+            session.SS_SESSION_STATUS < ExamSessionStatus.VOUCHER_SENT,
+        );
+
+        if (sessionsNeedingUpdate.length > 0) {
+          for (const session of sessionsNeedingUpdate) {
+            session.SS_SESSION_STATUS = ExamSessionStatus.VOUCHER_SENT;
+          }
+          await sessionRepository.save(sessionsNeedingUpdate);
+          updatedSessionIds = sessionsNeedingUpdate.map(
+            (session) => session.SS_ID,
+          );
+        }
       }
 
       const existingVouchers = await voucherRepository.find({
@@ -213,7 +262,11 @@ export class ExamVouchersService {
     });
 
     if (enrollments.length === 0) {
-      return { success: true };
+      return {
+        success: true,
+        updatedEnrollmentCount: 0,
+        updatedSessionIds: [],
+      };
     }
 
     this.sendVoucherEmailsInBatch(enrollments, examName, historyUrl).catch(
@@ -225,7 +278,11 @@ export class ExamVouchersService {
       },
     );
 
-    return { success: true };
+    return {
+      success: true,
+      updatedEnrollmentCount,
+      updatedSessionIds,
+    };
   }
 
   private generateVoucherCode(ermId: number): string {

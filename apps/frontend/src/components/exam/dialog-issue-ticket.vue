@@ -10,6 +10,7 @@
           icon="close"
           color="grey-6"
           aria-label="ปิด"
+          :disable="isConfirming"
           @click="onCancelClick"
         />
       </header>
@@ -49,18 +50,23 @@
         use-image-placeholder
       />
 
+      <p v-if="confirmError" class="confirm-error" role="alert">{{ confirmError }}</p>
+
       <q-card-actions class="dialog-actions">
         <AppButton
           label="ยกเลิก"
           color="grey-4"
           text-color="black"
           class="action-btn"
+          :disable="isConfirming"
           @click="onCancelClick"
         />
         <AppButton
           label="ยืนยันการออกใบเข้าสอบ"
           color="primary"
           class="action-btn"
+          :loading="isConfirming"
+          :disable="isConfirming"
           @click="onOKClick"
         />
       </q-card-actions>
@@ -69,13 +75,14 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useDialogPluginComponent } from 'quasar';
 import type { PropType } from 'vue';
 import AppButton from 'src/components/base/app-button.vue';
 import AppVoucherPreview from 'src/components/exam/app-voucher-preview.vue';
 import type { VoucherData } from 'src/types/voucher';
 
-defineProps({
+const props = defineProps({
   sessionDetails: {
     type: Object as PropType<{
       date?: string;
@@ -89,14 +96,42 @@ defineProps({
     type: Object as PropType<VoucherData>,
     required: true,
   },
+  onConfirm: {
+    type: Function as PropType<() => Promise<void>>,
+    default: undefined,
+  },
 });
 
 defineEmits([...useDialogPluginComponent.emits]);
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
 
-const onOKClick = (): void => onDialogOK();
-const onCancelClick = (): void => onDialogCancel();
+const isConfirming = ref(false);
+const confirmError = ref<string | null>(null);
+
+const onOKClick = async (): Promise<void> => {
+  if (!props.onConfirm) {
+    onDialogOK();
+    return;
+  }
+
+  isConfirming.value = true;
+  confirmError.value = null;
+
+  try {
+    await props.onConfirm();
+    onDialogOK();
+  } catch {
+    confirmError.value = 'เกิดข้อผิดพลาดในการออกบัตรหรือส่งอีเมล กรุณาลองใหม่อีกครั้ง';
+  } finally {
+    isConfirming.value = false;
+  }
+};
+
+const onCancelClick = (): void => {
+  if (isConfirming.value) return;
+  onDialogCancel();
+};
 </script>
 
 <style scoped lang="scss">
@@ -168,6 +203,13 @@ const onCancelClick = (): void => onDialogCancel();
     flex: 0 0 23px;
     font-size: 23px;
   }
+}
+
+.confirm-error {
+  margin: 16px 0 0;
+  color: #c10015;
+  font-size: 14px;
+  text-align: center;
 }
 
 .dialog-actions {
