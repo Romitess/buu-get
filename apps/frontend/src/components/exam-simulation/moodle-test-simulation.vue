@@ -95,6 +95,7 @@
             />
             <q-btn
               v-else
+              data-tour="finish-attempt"
               color="primary"
               label="Finish attempt"
               no-caps

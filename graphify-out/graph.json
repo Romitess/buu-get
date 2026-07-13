@@ -20775,7 +20775,7 @@
       "label": "getStepIndex()",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/exam-simulation-tour-steps.ts",
-      "source_location": "L141",
+      "source_location": "L154",
       "_origin": "ast",
       "id": "composables_exam_simulation_tour_steps_getstepindex",
       "community": 39,
@@ -20785,7 +20785,7 @@
       "label": "getCourseCardStepIndex()",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/exam-simulation-tour-steps.ts",
-      "source_location": "L145",
+      "source_location": "L158",
       "_origin": "ast",
       "id": "composables_exam_simulation_tour_steps_getcoursecardstepindex",
       "community": 39,
@@ -20795,7 +20795,7 @@
       "label": "getQuizSectionStepIndex()",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/exam-simulation-tour-steps.ts",
-      "source_location": "L147",
+      "source_location": "L160",
       "_origin": "ast",
       "id": "composables_exam_simulation_tour_steps_getquizsectionstepindex",
       "community": 39,
@@ -20805,7 +20805,7 @@
       "label": "VIEW_PRIMARY_STEP",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/exam-simulation-tour-steps.ts",
-      "source_location": "L150",
+      "source_location": "L163",
       "_origin": "ast",
       "id": "composables_exam_simulation_tour_steps_view_primary_step",
       "community": 39,
@@ -20815,7 +20815,7 @@
       "label": "getRestartStepIndex()",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/exam-simulation-tour-steps.ts",
-      "source_location": "L157",
+      "source_location": "L170",
       "_origin": "ast",
       "id": "composables_exam_simulation_tour_steps_getrestartstepindex",
       "community": 39,
@@ -21545,7 +21545,7 @@
       "label": "getInitialStepIndex()",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/use-exam-simulation-tour.ts",
-      "source_location": "L93",
+      "source_location": "L94",
       "_origin": "ast",
       "id": "composables_use_exam_simulation_tour_getinitialstepindex",
       "community": 39,
@@ -21555,7 +21555,7 @@
       "label": "useExamSimulationTour()",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/use-exam-simulation-tour.ts",
-      "source_location": "L101",
+      "source_location": "L102",
       "_origin": "ast",
       "id": "composables_use_exam_simulation_tour_useexamsimulationtour",
       "community": 39,
@@ -25888,7 +25888,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "stores_user_store",
-      "community": 59,
+      "community": 123,
       "norm_label": "user.store.ts"
     },
     {
@@ -26898,7 +26898,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_navigation",
-      "community": 59,
+      "community": 195,
       "norm_label": "navigation.ts"
     },
     {
@@ -26908,7 +26908,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "types_navigation_navigationitem",
-      "community": 59,
+      "community": 195,
       "norm_label": "navigationitem"
     },
     {
@@ -26918,7 +26918,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "types_navigation_navigationgroup",
-      "community": 59,
+      "community": 195,
       "norm_label": "navigationgroup"
     },
     {
@@ -27178,7 +27178,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "types_user_userrole",
-      "community": 59,
+      "community": 195,
       "norm_label": "userrole"
     },
     {
@@ -27188,7 +27188,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "types_user_user",
-      "community": 59,
+      "community": 56,
       "norm_label": "user"
     },
     {
@@ -85276,5 +85276,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "816553e7c7f6c3750eeb35c3db3afa0019f03d60"
+  "built_at_commit": "6ac516b148e3cc0924cfd71cd3ef47884804c40e"
 }

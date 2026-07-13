@@ -1,16 +1,16 @@
 # Graph Report - buu-get  (2026-07-13)
 
 ## Corpus Check
-- 651 files · ~351,998 words
+- 651 files · ~352,108 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2893 nodes · 5325 edges · 324 communities (237 shown, 87 thin omitted)
+- 2893 nodes · 5325 edges · 325 communities (238 shown, 87 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `816553e7`
+- Built from commit: `6ac516b1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -208,6 +208,7 @@
 - [[_COMMUNITY_Community 192|Community 192]]
 - [[_COMMUNITY_Community 193|Community 193]]
 - [[_COMMUNITY_Community 194|Community 194]]
+- [[_COMMUNITY_Community 195|Community 195]]
 - [[_COMMUNITY_Community 199|Community 199]]
 - [[_COMMUNITY_Community 201|Community 201]]
 - [[_COMMUNITY_Community 203|Community 203]]
@@ -255,7 +256,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (324 total, 87 thin omitted)
+## Communities (325 total, 87 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
@@ -470,8 +471,8 @@ Cohesion: 0.27
 Nodes (5): CurrentUser, assertSelfOrRoles(), AuthenticatedUser, getUserRoles(), userHasAnyRole()
 
 ### Community 56 - "Community 56"
-Cohesion: 0.18
-Nodes (12): Country, useCountries(), useRegisterForm(), AuthResponse, LoginPayload, LoginResponse, OtpResponse, RegisterPayload (+4 more)
+Cohesion: 0.16
+Nodes (13): Country, useCountries(), useRegisterForm(), AuthResponse, LoginPayload, LoginResponse, OtpResponse, RegisterPayload (+5 more)
 
 ### Community 57 - "Community 57"
 Cohesion: 0.13
@@ -482,8 +483,8 @@ Cohesion: 0.22
 Nodes (4): UpdateUserImageDto, UserImageController, UserImageModule, UserImageService
 
 ### Community 59 - "Community 59"
-Cohesion: 0.21
-Nodes (11): ROLE_LABELS, ROLES, RolesType, RouteMeta, routes, NavigationGroup, NavigationItem, User (+3 more)
+Cohesion: 0.28
+Nodes (7): ROLE_LABELS, ROLES, RolesType, RouteMeta, routes, DefaultRouteLocation, getDefaultRouteForRole()
 
 ### Community 60 - "Community 60"
 Cohesion: 0.11
@@ -731,7 +732,7 @@ Cohesion: 0.20
 Nodes (13): BackendExamCandidateInfo, BackendExamInformationRound, BackendExamReportSummary, BackendRateStat, BackendScoreStat, BackendStat, cleanParams(), fetchExamReportSummary() (+5 more)
 
 ### Community 123 - "Community 123"
-Cohesion: 0.28
+Cohesion: 0.29
 Nodes (6): useExamCertificateDocument(), useUserStore, CertificateBandRule, CertificateCardData, CertificateData, CertificateScoreReportData
 
 ### Community 124 - "Community 124"
@@ -789,6 +790,10 @@ Nodes (4): ImageCategory, ImageCategoryConfig, isImageCategory(), resolveImageFo
 ### Community 193 - "Community 193"
 Cohesion: 0.33
 Nodes (4): colOptions, isOpen, props, rowOptions
+
+### Community 195 - "Community 195"
+Cohesion: 0.67
+Nodes (3): NavigationGroup, NavigationItem, UserRole
 
 ## Knowledge Gaps
 - **756 isolated node(s):** `husky.sh script`, `$schema`, `collection`, `sourceRoot`, `name` (+751 more)

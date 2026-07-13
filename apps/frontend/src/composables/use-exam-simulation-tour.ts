@@ -84,7 +84,8 @@ const isResumeConditionMet = (
   if (resumeOn === 'login') {
     return loggedIn;
   }
-  if (resumeOn === 'previous-page') {
+  // Handled via waitForTargetElement in tryResumeTour after attempt page changes.
+  if (resumeOn === 'previous-page' || resumeOn === 'finish-attempt') {
     return false;
   }
   return view === resumeOn;
@@ -396,16 +397,27 @@ export const useExamSimulationTour = (options: UseExamSimulationTourOptions) => 
         alignStepIndexWithView(resolvedView);
       }
 
-      if (pendingResumeOn.value === 'previous-page') {
+      if (pendingResumeOn.value === 'previous-page' || pendingResumeOn.value === 'finish-attempt') {
         // Only resume after the user navigates pages (or attempt remounts).
-        // Ignore dashboard/login triggers so we don't spin waiting for a missing button.
         if (trigger !== 'attempt-page' && trigger !== 'mount') {
           return;
         }
-        // Previous Page mounts only after Vue re-renders (Q1 → Q2).
+        // Targets mount only after Vue re-renders (e.g. Q1→Q2 Previous, last Q Finish).
         await waitForPaint();
-        const previousPageEl = await waitForTargetElement('previous-page');
-        if (!previousPageEl) {
+        let targetEl = findTargetElement(pendingResumeOn.value);
+        if (!targetEl) {
+          // Brief retry for same-navigation mount; fail fast on intermediate pages.
+          for (let attempt = 0; attempt < 12; attempt += 1) {
+            await new Promise<void>((resolve) => {
+              requestAnimationFrame(() => resolve());
+            });
+            targetEl = findTargetElement(pendingResumeOn.value);
+            if (targetEl) {
+              break;
+            }
+          }
+        }
+        if (!targetEl) {
           return;
         }
       } else if (pendingResumeOn.value) {

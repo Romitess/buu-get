@@ -1262,9 +1262,12 @@ export default {
         'Use the quiz navigation bar to jump between questions. Click a question number to review, edit, or work on that question.',
       step10Title: 'Go to the next page',
       step10Body: 'When you want to move to the next question or page, click the Next Page button.',
-      step11Title: 'Go to the previous page',
-      step11Body:
+      step10PreviousTitle: 'Go to the previous page',
+      step10PreviousBody:
         'When you want to go back to the previous question or page, click the Previous Page button.',
+      step11Title: 'Finish the quiz attempt',
+      step11Body:
+        'When you want to finish the quiz and proceed to the submission confirmation step, click the Finish Attempt button.',
       next: 'Next',
       finish: 'Finish',
       restartLabel: 'Restart guided tour',
