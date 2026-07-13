@@ -1268,6 +1268,12 @@ export default {
       step11Title: 'Finish the quiz attempt',
       step11Body:
         'When you want to finish the quiz and proceed to the submission confirmation step, click the Finish Attempt button.',
+      step12Title: 'Return to the quiz attempt',
+      step12Body:
+        'When you want to return to the quiz attempt page, click the Return to attempt button.',
+      step13Title: 'Submit all answers and finish the quiz',
+      step13Body:
+        'When you want to submit all answers and finish the quiz attempt, click the Submit all and finish button.',
       next: 'Next',
       finish: 'Finish',
       restartLabel: 'Restart guided tour',

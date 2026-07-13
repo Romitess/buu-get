@@ -14,7 +14,7 @@ import {
 
 const STORAGE_KEY = 'exam-simulation-tour';
 
-type TourResumeTriggerType = 'login' | 'dashboard' | 'mount' | 'attempt-page';
+type TourResumeTriggerType = 'login' | 'dashboard' | 'mount' | 'attempt-page' | 'attempt-summary';
 
 interface TourStorageState {
   version: number;
@@ -84,8 +84,12 @@ const isResumeConditionMet = (
   if (resumeOn === 'login') {
     return loggedIn;
   }
-  // Handled via waitForTargetElement in tryResumeTour after attempt page changes.
-  if (resumeOn === 'previous-page' || resumeOn === 'finish-attempt') {
+  // Handled via waitForTargetElement in tryResumeTour after attempt page/summary changes.
+  if (
+    resumeOn === 'previous-page' ||
+    resumeOn === 'finish-attempt' ||
+    resumeOn === 'return-to-attempt'
+  ) {
     return false;
   }
   return view === resumeOn;
@@ -397,12 +401,20 @@ export const useExamSimulationTour = (options: UseExamSimulationTourOptions) => 
         alignStepIndexWithView(resolvedView);
       }
 
-      if (pendingResumeOn.value === 'previous-page' || pendingResumeOn.value === 'finish-attempt') {
-        // Only resume after the user navigates pages (or attempt remounts).
-        if (trigger !== 'attempt-page' && trigger !== 'mount') {
+      if (
+        pendingResumeOn.value === 'previous-page' ||
+        pendingResumeOn.value === 'finish-attempt' ||
+        pendingResumeOn.value === 'return-to-attempt'
+      ) {
+        const isSummaryResume = pendingResumeOn.value === 'return-to-attempt';
+        if (isSummaryResume) {
+          if (trigger !== 'attempt-summary' && trigger !== 'mount') {
+            return;
+          }
+        } else if (trigger !== 'attempt-page' && trigger !== 'mount') {
           return;
         }
-        // Targets mount only after Vue re-renders (e.g. Q1→Q2 Previous, last Q Finish).
+        // Targets mount only after Vue re-renders (page change / summary view).
         await waitForPaint();
         let targetEl = findTargetElement(pendingResumeOn.value);
         if (!targetEl) {

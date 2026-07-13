@@ -101,7 +101,6 @@
               no-caps
               unelevated
               size="sm"
-              :disable="!areAllQuestionsAnswered"
               class="attempt-page-btn attempt-page-btn--next"
               @click="finishAttempt"
             />
@@ -172,6 +171,7 @@ const emit = defineEmits<{
   finish: [];
   'attempt-ready': [];
   'attempt-page-change': [];
+  'attempt-summary-ready': [];
   'restart-tour': [];
 }>();
 
@@ -285,9 +285,6 @@ const summaryQuestions = computed<SummaryQuestion[]>(() =>
     answered: Boolean(answers.value[question.id]),
   })),
 );
-const areAllQuestionsAnswered = computed<boolean>(() =>
-  quizQuestions.every((question) => Boolean(answers.value[question.id])),
-);
 
 const emitBack = (): void => {
   emit('back');
@@ -332,12 +329,11 @@ const toggleCurrentQuestionFlag = (): void => {
 };
 
 const finishAttempt = (): void => {
-  if (!areAllQuestionsAnswered.value) {
-    return;
-  }
-
+  // Simulation mock: allow opening summary without answering every question
+  // so the guided tour can continue to Steps 12–13.
   isFinishedView.value = false;
   isSummaryView.value = true;
+  emit('attempt-summary-ready');
 };
 
 const returnToAttempt = (): void => {

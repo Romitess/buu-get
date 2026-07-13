@@ -1,10 +1,15 @@
-export const EXAM_SIMULATION_TOUR_VERSION = 13;
+export const EXAM_SIMULATION_TOUR_VERSION = 14;
 
 export type TourPlacement = 'left' | 'right' | 'top' | 'bottom';
 
 export type DashboardViewType = 'overview' | 'course' | 'quiz' | 'attempt';
 
-export type TourResumeTrigger = 'login' | 'previous-page' | 'finish-attempt' | DashboardViewType;
+export type TourResumeTrigger =
+  | 'login'
+  | 'previous-page'
+  | 'finish-attempt'
+  | 'return-to-attempt'
+  | DashboardViewType;
 
 export interface TourStep {
   id: string;
@@ -147,7 +152,30 @@ export const EXAM_SIMULATION_TOUR_STEPS: TourStep[] = [
     bodyKey: 'examSimulation.tour.step11Body',
     requiresLogin: true,
     dashboardView: 'attempt',
+    showFinishLabel: true,
+    manualNavigation: true,
+    resumeOn: 'return-to-attempt',
     badgeStepNumber: 11,
+  },
+  {
+    id: 'return-to-attempt',
+    target: 'return-to-attempt',
+    placement: 'top',
+    titleKey: 'examSimulation.tour.step12Title',
+    bodyKey: 'examSimulation.tour.step12Body',
+    requiresLogin: true,
+    dashboardView: 'attempt',
+    badgeStepNumber: 12,
+  },
+  {
+    id: 'submit-all-finish',
+    target: 'submit-all-finish',
+    placement: 'top',
+    titleKey: 'examSimulation.tour.step13Title',
+    bodyKey: 'examSimulation.tour.step13Body',
+    requiresLogin: true,
+    dashboardView: 'attempt',
+    badgeStepNumber: 13,
   },
 ];
 

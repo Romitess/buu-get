@@ -1,16 +1,16 @@
 # Graph Report - buu-get  (2026-07-13)
 
 ## Corpus Check
-- 651 files · ~352,108 words
+- 651 files · ~352,269 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2893 nodes · 5325 edges · 325 communities (238 shown, 87 thin omitted)
+- 2893 nodes · 5325 edges · 324 communities (238 shown, 86 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 21 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6ac516b1`
+- Built from commit: `8f9af955`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -140,7 +140,6 @@
 - [[_COMMUNITY_Community 124|Community 124]]
 - [[_COMMUNITY_Community 125|Community 125]]
 - [[_COMMUNITY_Community 126|Community 126]]
-- [[_COMMUNITY_Community 127|Community 127]]
 - [[_COMMUNITY_Community 128|Community 128]]
 - [[_COMMUNITY_Community 129|Community 129]]
 - [[_COMMUNITY_Community 130|Community 130]]
@@ -256,7 +255,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (325 total, 87 thin omitted)
+## Communities (324 total, 86 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
@@ -716,8 +715,8 @@ Cohesion: 0.40
 Nodes (3): AVAILABLE_ICONS, isMenuOpen, searchQuery
 
 ### Community 119 - "Community 119"
-Cohesion: 0.20
-Nodes (5): api, RegisterPayload, RegisterResponse, BackendExamCertificate, CreateExamCertificatePayload
+Cohesion: 0.14
+Nodes (7): api, RegisterPayload, RegisterResponse, BackendExamCertificate, CreateExamCertificatePayload, fetchLatestProfileHistoryImages(), ProfileEditHistory
 
 ### Community 120 - "Community 120"
 Cohesion: 0.90
@@ -798,14 +797,14 @@ Nodes (3): NavigationGroup, NavigationItem, UserRole
 ## Knowledge Gaps
 - **756 isolated node(s):** `husky.sh script`, `$schema`, `collection`, `sourceRoot`, `name` (+751 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **87 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **86 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `ExamEnrollment` connect `Community 18` to `Community 1`, `Community 2`, `Community 3`, `Community 36`, `Community 7`, `Community 137`, `Community 10`, `Community 11`, `Community 47`, `Community 80`, `Community 16`, `Community 54`, `Community 55`, `Community 25`, `Community 27`, `Community 29`, `Community 31`?**
   _High betweenness centrality (0.031) - this node is a cross-community bridge._
-- **Why does `api` connect `Community 119` to `Community 4`, `Community 5`, `Community 9`, `Community 45`, `Community 48`, `Community 56`, `Community 60`, `Community 188`, `Community 194`, `Community 69`, `Community 70`, `Community 91`, `Community 93`, `Community 103`, `Community 108`, `Community 113`, `Community 122`, `Community 124`, `Community 125`, `Community 127`?**
+- **Why does `api` connect `Community 119` to `Community 4`, `Community 5`, `Community 9`, `Community 45`, `Community 48`, `Community 56`, `Community 60`, `Community 188`, `Community 194`, `Community 69`, `Community 70`, `Community 91`, `Community 93`, `Community 103`, `Community 108`, `Community 113`, `Community 122`, `Community 124`, `Community 125`?**
   _High betweenness centrality (0.019) - this node is a cross-community bridge._
 - **Why does `PlatformGatewayService` connect `Community 0` to `Community 192`, `Community 2`, `Community 7`, `Community 10`, `Community 11`, `Community 13`, `Community 14`, `Community 47`?**
   _High betweenness centrality (0.012) - this node is a cross-community bridge._

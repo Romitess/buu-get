@@ -20755,7 +20755,7 @@
       "label": "TourStep",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/exam-simulation-tour-steps.ts",
-      "source_location": "L9",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "composables_exam_simulation_tour_steps_tourstep",
       "community": 39,
@@ -20765,7 +20765,7 @@
       "label": "EXAM_SIMULATION_TOUR_STEPS",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/exam-simulation-tour-steps.ts",
-      "source_location": "L24",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "composables_exam_simulation_tour_steps_exam_simulation_tour_steps",
       "community": 39,
@@ -20775,7 +20775,7 @@
       "label": "getStepIndex()",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/exam-simulation-tour-steps.ts",
-      "source_location": "L154",
+      "source_location": "L182",
       "_origin": "ast",
       "id": "composables_exam_simulation_tour_steps_getstepindex",
       "community": 39,
@@ -20785,7 +20785,7 @@
       "label": "getCourseCardStepIndex()",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/exam-simulation-tour-steps.ts",
-      "source_location": "L158",
+      "source_location": "L186",
       "_origin": "ast",
       "id": "composables_exam_simulation_tour_steps_getcoursecardstepindex",
       "community": 39,
@@ -20795,7 +20795,7 @@
       "label": "getQuizSectionStepIndex()",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/exam-simulation-tour-steps.ts",
-      "source_location": "L160",
+      "source_location": "L188",
       "_origin": "ast",
       "id": "composables_exam_simulation_tour_steps_getquizsectionstepindex",
       "community": 39,
@@ -20805,7 +20805,7 @@
       "label": "VIEW_PRIMARY_STEP",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/exam-simulation-tour-steps.ts",
-      "source_location": "L163",
+      "source_location": "L191",
       "_origin": "ast",
       "id": "composables_exam_simulation_tour_steps_view_primary_step",
       "community": 39,
@@ -20815,7 +20815,7 @@
       "label": "getRestartStepIndex()",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/exam-simulation-tour-steps.ts",
-      "source_location": "L170",
+      "source_location": "L198",
       "_origin": "ast",
       "id": "composables_exam_simulation_tour_steps_getrestartstepindex",
       "community": 39,
@@ -21545,7 +21545,7 @@
       "label": "getInitialStepIndex()",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/use-exam-simulation-tour.ts",
-      "source_location": "L94",
+      "source_location": "L98",
       "_origin": "ast",
       "id": "composables_use_exam_simulation_tour_getinitialstepindex",
       "community": 39,
@@ -21555,7 +21555,7 @@
       "label": "useExamSimulationTour()",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/use-exam-simulation-tour.ts",
-      "source_location": "L102",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "composables_use_exam_simulation_tour_useexamsimulationtour",
       "community": 39,
@@ -25158,7 +25158,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_profile_edit_history_service",
-      "community": 127,
+      "community": 119,
       "norm_label": "profile-edit-history.service.ts"
     },
     {
@@ -25168,7 +25168,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "services_profile_edit_history_service_fetchprofileedithistory",
-      "community": 127,
+      "community": 119,
       "norm_label": "fetchprofileedithistory()"
     },
     {
@@ -25178,7 +25178,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "services_profile_edit_history_service_fetchlatestprofilehistoryimages",
-      "community": 127,
+      "community": 119,
       "norm_label": "fetchlatestprofilehistoryimages()"
     },
     {
@@ -27058,7 +27058,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_profile_edit_history_types",
-      "community": 127,
+      "community": 119,
       "norm_label": "profile-edit-history.types.ts"
     },
     {
@@ -27068,7 +27068,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_profile_edit_history_types_profileedithistory",
-      "community": 127,
+      "community": 119,
       "norm_label": "profileedithistory"
     },
     {
@@ -85276,5 +85276,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "6ac516b148e3cc0924cfd71cd3ef47884804c40e"
+  "built_at_commit": "8f9af95584d3729e37f9e4089aa5bbb44e9ae208"
 }
