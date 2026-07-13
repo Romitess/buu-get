@@ -1535,8 +1535,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/commitlint.config.js": {
-    "mtime": 1783042948.8156772,
-    "ast_hash": "3674baff28a87bfec1214c8cb396d146",
+    "mtime": 1783669279.498783,
+    "ast_hash": "c3013e4035369fa98677c0dd90021302",
     "semantic_hash": ""
   },
   "apps/frontend/config/resolve-api-base-url.ts": {
@@ -1800,8 +1800,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam-simulation/moodle-mockup-dashboard.vue": {
-    "mtime": 1783042948.8440673,
-    "ast_hash": "651cd5aa5d2884f042ded8b470ae8a1f",
+    "mtime": 1783673362.1615863,
+    "ast_hash": "c0796f919e5fbe4c90a368c566fdbb2c",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam-simulation/moodle-question-card.vue": {
@@ -1810,18 +1810,18 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam-simulation/moodle-question-status.vue": {
-    "mtime": 1783042948.8441675,
-    "ast_hash": "92308f37f455c6c04ed6faa036894ba1",
+    "mtime": 1783671641.6040971,
+    "ast_hash": "04f3f158001decc210fb117b685ebfc1",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam-simulation/moodle-quiz-navigation.vue": {
-    "mtime": 1783042948.8442237,
-    "ast_hash": "3730abe688ec91f504c19741c675fab9",
+    "mtime": 1783671642.435689,
+    "ast_hash": "1aab23dcc583ca6a8a15c3495ad538a8",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam-simulation/moodle-test-simulation.vue": {
-    "mtime": 1783042948.8442872,
-    "ast_hash": "6c82d1e69d05f4becf7df23bf2f17e70",
+    "mtime": 1783673570.841464,
+    "ast_hash": "9aae860934e1efda851fbd8838334f6e",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/admission-voucher.vue": {
@@ -2495,8 +2495,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/en-US/index.ts": {
-    "mtime": 1783588688.247539,
-    "ast_hash": "9633a2a07d0e1650568d1639bee7bb8d",
+    "mtime": 1783673576.46805,
+    "ast_hash": "de964502ca9d92d0dcb3a37ab697f666",
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/index.ts": {
@@ -2505,8 +2505,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/th/index.ts": {
-    "mtime": 1783588652.8871324,
-    "ast_hash": "10d49e8d8474cd66d6741dcea16eae0e",
+    "mtime": 1783673574.8524685,
+    "ast_hash": "e62a8dc5e78044fb0ea7b29215edc50e",
     "semantic_hash": ""
   },
   "apps/frontend/src/layouts/main-layout.vue": {
@@ -2690,8 +2690,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-simulation-page.vue": {
-    "mtime": 1783042948.8608263,
-    "ast_hash": "7e69e89e6fc02655982c1a7c932dc898",
+    "mtime": 1783673057.4058416,
+    "ast_hash": "8e0638d0bd7856ce4820f8d10c0e2797",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/profile-page.vue": {
@@ -2975,8 +2975,8 @@
     "semantic_hash": ""
   },
   "commitlint.config.js": {
-    "mtime": 1783649990.4749377,
-    "ast_hash": "951103d075058610e50a5a08b6ceae2c",
+    "mtime": 1783669279.4987686,
+    "ast_hash": "5c67879023e8cb7a79d6e21f52bd6fbf",
     "semantic_hash": ""
   },
   "package.json": {
@@ -3357,6 +3357,21 @@
   "apps/frontend/src/composables/use-exam-seat-candidates.spec.ts": {
     "mtime": 1783667570.824702,
     "ast_hash": "62b60e225c7c2f23190d7afd46d19acd",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/components/base/product-tour/product-tour-overlay.vue": {
+    "mtime": 1783670264.738322,
+    "ast_hash": "bff09090e2fa7448af9bcb0001bf2ae0",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/composables/exam-simulation-tour-steps.ts": {
+    "mtime": 1783673570.507603,
+    "ast_hash": "fe4104adbad6eb0db03c4f29c74fb899",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/composables/use-exam-simulation-tour.ts": {
+    "mtime": 1783673365.831096,
+    "ast_hash": "bd510501a6156315013799355ed1e145",
     "semantic_hash": ""
   }
 }

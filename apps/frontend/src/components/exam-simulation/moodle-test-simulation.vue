@@ -31,6 +31,7 @@
 
       <AppButton
         v-if="!isFinishedView"
+        data-tour="attempt-back"
         label="Back"
         color="grey-4"
         text-color="black"
@@ -63,7 +64,9 @@
               @toggle-flag="toggleCurrentQuestionFlag"
             />
 
-            <MoodleQuestionCard v-model="currentAnswer" :question="currentQuestion" />
+            <div data-tour="question-answer">
+              <MoodleQuestionCard v-model="currentAnswer" :question="currentQuestion" />
+            </div>
           </div>
 
           <div class="attempt-page-actions" :class="{ 'attempt-page-actions--first': isFirstPage }">
@@ -80,6 +83,7 @@
             />
             <q-btn
               v-if="!isLastPage"
+              data-tour="next-page"
               color="primary"
               label="Next Page"
               no-caps
@@ -115,7 +119,8 @@
       icon="question_mark"
       class="attempt-help-btn shadow-0"
       size="sm"
-      aria-label="Help"
+      :aria-label="restartTourLabel"
+      @click="emit('restart-tour')"
     />
 
     <MoodleQuizNavigation
@@ -131,7 +136,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
 import MoodleAttemptFinished from 'src/components/exam-simulation/moodle-attempt-finished.vue';
 import MoodleAttemptSummary from 'src/components/exam-simulation/moodle-attempt-summary.vue';
@@ -162,7 +168,11 @@ const emit = defineEmits<{
   back: [];
   course: [];
   finish: [];
+  'attempt-ready': [];
+  'restart-tour': [];
 }>();
+
+const { t } = useI18n();
 
 const quizQuestions: QuizQuestion[] = [
   {
@@ -334,6 +344,12 @@ const submitAllAndFinish = (): void => {
   isSummaryView.value = false;
   isFinishedView.value = true;
 };
+
+const restartTourLabel = computed(() => t('examSimulation.tour.restartLabel'));
+
+onMounted(() => {
+  emit('attempt-ready');
+});
 </script>
 
 <style scoped lang="scss">

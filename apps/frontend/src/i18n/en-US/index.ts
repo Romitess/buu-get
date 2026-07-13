@@ -1235,6 +1235,37 @@ export default {
   examSimulation: {
     pageSubtitle:
       'A computer-based exam simulation to help candidates familiarize with the system before the actual test',
+    tour: {
+      stepBadge: 'Step {step}',
+      step1Title: 'Enter username and password',
+      step1Body:
+        'Enter your username and password to log in. During this simulation, you may enter any credentials to try the system.',
+      step2Title: 'Click the Log in button to sign in',
+      step2Body:
+        'After entering your username and password, click Log in to sign in and continue to the next step.',
+      step3Title: 'Select your registered exam round',
+      step3Body:
+        'Once signed in, you will see your registered exam rounds. Click the exam round name to open the test.',
+      step4Title: 'Select a test',
+      step4Body: 'Choose the test you want to take from the list shown to open the exam page.',
+      step5Title: 'Start the quiz',
+      step5Body: 'When you are ready, click Attempt Quiz to start the exam.',
+      step6Title: 'Exit the quiz attempt',
+      step6Body: 'To leave the quiz attempt, click Back to return to the previous page.',
+      step7Title: 'Choose the best answer',
+      step7Body: 'Select only one best answer from the options provided.',
+      step8Title: 'Flag a question',
+      step8Body:
+        'If you want to review or change an answer later during the test, click Flag question to mark it for later.',
+      step9Title: 'Quiz navigation bar',
+      step9Body:
+        'Use the quiz navigation bar to jump between questions. Click a question number to review, edit, or work on that question.',
+      step10Title: 'Go to the next page',
+      step10Body: 'When you want to move to the next question or page, click the Next Page button.',
+      next: 'Next',
+      finish: 'Finish',
+      restartLabel: 'Restart guided tour',
+    },
   },
   navigation: {
     home: 'Home',

@@ -1,5 +1,10 @@
 <template>
-  <q-card class="moodle-dashboard-mockup shadow-2" flat bordered>
+  <q-card
+    class="moodle-dashboard-mockup shadow-2"
+    flat
+    bordered
+    @vue:mounted="emit('tour-dashboard-ready')"
+  >
     <!-- Header -->
     <div class="moodle-header row items-center justify-between q-px-md">
       <div class="row items-center">
@@ -152,6 +157,7 @@
           <!-- Course Card -->
           <div class="row">
             <q-card
+              data-tour="course-card"
               class="course-card cursor-pointer shadow-1"
               flat
               bordered
@@ -211,7 +217,7 @@
             </q-expansion-item>
           </q-card>
 
-          <q-card flat bordered class="rounded-borders">
+          <q-card data-tour="quiz-section" flat bordered class="rounded-borders">
             <q-expansion-item default-opened header-class="bg-white text-weight-medium">
               <template v-slot:header>
                 <q-item-section avatar>
@@ -266,6 +272,7 @@
           </div>
 
           <q-btn
+            data-tour="attempt-quiz"
             color="primary"
             label="Attempt Quiz"
             no-caps
@@ -281,6 +288,8 @@
           v-else-if="currentView === 'attempt'"
           @back="goToView('quiz')"
           @course="goToView('course')"
+          @attempt-ready="emit('tour-attempt-ready')"
+          @restart-tour="emit('restart-tour')"
         />
 
         <!-- Help Icon at bottom right -->
@@ -292,6 +301,8 @@
           icon="question_mark"
           class="absolute-bottom-right q-ma-xl shadow-0"
           size="sm"
+          :aria-label="restartTourLabel"
+          @click="emit('restart-tour')"
         />
       </div>
     </div>
@@ -300,12 +311,21 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useUserStore } from 'src/stores/user.store';
 import ImageDisplay from 'src/components/base/image-display.vue';
 import MoodleTestSimulation from 'src/components/exam-simulation/moodle-test-simulation.vue';
 
 type ViewType = 'overview' | 'course' | 'quiz' | 'attempt';
 
+const emit = defineEmits<{
+  'restart-tour': [];
+  'tour-dashboard-ready': [];
+  'tour-attempt-ready': [];
+  'dashboard-view-change': [view: ViewType];
+}>();
+
+const { t } = useI18n();
 const userStore = useUserStore();
 const currentView = ref<ViewType>('overview');
 const sidebarOpen = ref(true);
@@ -326,9 +346,17 @@ const displayName = computed(() => {
   return 'Student';
 });
 
+const restartTourLabel = computed(() => t('examSimulation.tour.restartLabel'));
+
 const goToView = (view: ViewType) => {
   currentView.value = view;
+  emit('dashboard-view-change', view);
 };
+
+defineExpose({
+  currentView,
+  goToView,
+});
 </script>
 
 <style scoped lang="scss">
