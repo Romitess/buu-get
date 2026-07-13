@@ -149,7 +149,6 @@
       :placement="tourPlacement"
       :is-last="tourIsLastStep"
       @next="goToNextTourStep"
-      @skip="skipTour"
     />
   </div>
 </template>
@@ -195,7 +194,6 @@ const {
   isLastStep: tourIsLastStep,
   restartTour,
   goToNextStep: goToNextTourStep,
-  skipTour,
   maybeAutoStart,
   tryResumeTour,
 } = useExamSimulationTour({

@@ -1,11 +1,12 @@
 <template>
   <Teleport to="body">
-    <div v-if="visible && targetRect" class="product-tour-overlay" @click.self="emitSkip">
+    <div v-if="visible && targetRect" class="product-tour-overlay" @click.prevent.stop>
       <div
         class="product-tour-spotlight"
         :class="{ 'product-tour-spotlight--no-motion': prefersReducedMotion }"
         :style="spotlightStyle"
         aria-hidden="true"
+        @click.prevent.stop
       />
 
       <div
@@ -17,7 +18,8 @@
         aria-modal="true"
         :aria-labelledby="titleId"
         :aria-describedby="bodyId"
-        @keydown.escape.prevent="emitSkip"
+        @keydown.escape.prevent
+        @click.stop
       >
         <div
           class="product-tour-popover__arrow"
@@ -71,7 +73,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   next: [];
-  skip: [];
 }>();
 
 const POPOVER_GAP = 16;
@@ -183,10 +184,6 @@ const emitNext = (): void => {
   emit('next');
 };
 
-const emitSkip = (): void => {
-  emit('skip');
-};
-
 const updateReducedMotion = (): void => {
   prefersReducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 };
@@ -230,13 +227,15 @@ onBeforeUnmount(() => {
   position: fixed;
   inset: 0;
   z-index: 7000;
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0);
 }
 
 .product-tour-spotlight {
   position: fixed;
   border-radius: 10px;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
-  pointer-events: none;
+  pointer-events: auto;
   z-index: 7001;
   transition:
     top 0.2s ease,
@@ -252,6 +251,7 @@ onBeforeUnmount(() => {
 .product-tour-popover {
   position: fixed;
   z-index: 7002;
+  pointer-events: auto;
   background: #ffffff;
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);

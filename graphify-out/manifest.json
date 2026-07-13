@@ -2690,8 +2690,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-simulation-page.vue": {
-    "mtime": 1783929187.8262243,
-    "ast_hash": "b584283fd9c77de8beef05aa06678a62",
+    "mtime": 1783929794.133777,
+    "ast_hash": "6a63d90a4f566b98771f5c930b017afa",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/profile-page.vue": {
@@ -3360,8 +3360,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/base/product-tour/product-tour-overlay.vue": {
-    "mtime": 1783923839.1557448,
-    "ast_hash": "0ce5da1838845db3366c3e13b0787617",
+    "mtime": 1783929793.5712607,
+    "ast_hash": "a3c8a60cba0908c599446e60f3c7d50b",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/exam-simulation-tour-steps.ts": {
