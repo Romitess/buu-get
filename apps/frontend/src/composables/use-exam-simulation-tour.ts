@@ -25,6 +25,7 @@ interface UseExamSimulationTourOptions {
   isLoggedIn: Ref<boolean>;
   rootSelector?: string;
   dashboardView?: Ref<DashboardViewType | null | undefined>;
+  isAttemptSummary?: Ref<boolean>;
   goToDashboardView?: (view: DashboardViewType) => void;
 }
 
@@ -109,6 +110,7 @@ export const useExamSimulationTour = (options: UseExamSimulationTourOptions) => 
     isLoggedIn,
     rootSelector = '.exam-simulation-page',
     dashboardView,
+    isAttemptSummary,
     goToDashboardView,
   } = options;
 
@@ -336,7 +338,9 @@ export const useExamSimulationTour = (options: UseExamSimulationTourOptions) => 
 
   const restartTour = async (): Promise<void> => {
     const view = dashboardView?.value ?? null;
-    const stepIndex = getRestartStepIndex(isLoggedIn.value, view);
+    const stepIndex = getRestartStepIndex(isLoggedIn.value, view, {
+      isSummary: isAttemptSummary?.value === true,
+    });
     const step = EXAM_SIMULATION_TOUR_STEPS[stepIndex];
     const needsViewReset = Boolean(step?.dashboardView) && view !== step?.dashboardView;
 

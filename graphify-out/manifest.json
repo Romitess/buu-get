@@ -1820,8 +1820,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam-simulation/moodle-test-simulation.vue": {
-    "mtime": 1783928616.7398546,
-    "ast_hash": "8bff1c2a99e89dec3709843de0f29183",
+    "mtime": 1783929194.2600925,
+    "ast_hash": "b89dc5bc0ff24c91159ebcbfc57cf296",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/admission-voucher.vue": {
@@ -2505,8 +2505,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/th/index.ts": {
-    "mtime": 1783928578.4023838,
-    "ast_hash": "605d7bb7ad70eafe861434489202abd0",
+    "mtime": 1783928894.7415435,
+    "ast_hash": "52cda958dde10e6e146e39c99fdd3423",
     "semantic_hash": ""
   },
   "apps/frontend/src/layouts/main-layout.vue": {
@@ -2690,8 +2690,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-simulation-page.vue": {
-    "mtime": 1783928594.2829983,
-    "ast_hash": "c3e12753c9b47988a9ee77c339179409",
+    "mtime": 1783929187.8262243,
+    "ast_hash": "b584283fd9c77de8beef05aa06678a62",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/profile-page.vue": {
@@ -3365,13 +3365,13 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/exam-simulation-tour-steps.ts": {
-    "mtime": 1783928577.2486331,
-    "ast_hash": "af021a6e88838c5724d76616710ff19e",
+    "mtime": 1783929175.6081526,
+    "ast_hash": "e82bf7aa97db3f263ab5a2c6293fedcd",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-exam-simulation-tour.ts": {
-    "mtime": 1783928587.9049695,
-    "ast_hash": "0960b4dee46c9853d5752ece8bd3eccb",
+    "mtime": 1783929186.719636,
+    "ast_hash": "0ce361273c3d249a69b3c14db345e279",
     "semantic_hash": ""
   }
 }

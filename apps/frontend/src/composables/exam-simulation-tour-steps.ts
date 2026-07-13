@@ -198,9 +198,17 @@ export const VIEW_PRIMARY_STEP: Partial<Record<DashboardViewType, string>> = {
 export const getRestartStepIndex = (
   loggedIn: boolean,
   view: DashboardViewType | null | undefined,
+  options?: { isSummary?: boolean },
 ): number => {
   if (!loggedIn) {
     return 0;
+  }
+
+  if (view === 'attempt' && options?.isSummary === true) {
+    const summaryStepIndex = getStepIndex('return-to-attempt');
+    if (summaryStepIndex >= 0) {
+      return summaryStepIndex;
+    }
   }
 
   if (view) {

@@ -155,7 +155,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
@@ -176,10 +176,8 @@ const lmsUsername = ref('');
 const lmsPassword = ref('');
 const showPassword = ref(false);
 const dashboardRef = ref<MoodleDashboardExpose | null>(null);
-
-const dashboardView = computed<DashboardViewType | null>(() => {
-  return dashboardRef.value?.currentView.value ?? null;
-});
+const trackedDashboardView = ref<DashboardViewType | null>(null);
+const isAttemptSummary = ref(false);
 
 const goToDashboardView = (view: DashboardViewType): void => {
   dashboardRef.value?.goToView(view);
@@ -202,7 +200,8 @@ const {
   tryResumeTour,
 } = useExamSimulationTour({
   isLoggedIn,
-  dashboardView,
+  dashboardView: trackedDashboardView,
+  isAttemptSummary,
   goToDashboardView,
 });
 
@@ -211,22 +210,31 @@ const onLoginViewMounted = (): void => {
 };
 
 const onTourDashboardReady = (): void => {
+  trackedDashboardView.value = 'overview';
+  isAttemptSummary.value = false;
   void tryResumeTour('mount');
 };
 
 const onTourAttemptReady = (): void => {
+  isAttemptSummary.value = false;
   void tryResumeTour('mount');
 };
 
 const onTourAttemptPageChange = (): void => {
+  isAttemptSummary.value = false;
   void tryResumeTour('attempt-page');
 };
 
 const onTourAttemptSummaryReady = (): void => {
+  isAttemptSummary.value = true;
   void tryResumeTour('attempt-summary');
 };
 
 const onTourDashboardViewChange = (view: DashboardViewType): void => {
+  trackedDashboardView.value = view;
+  if (view !== 'attempt') {
+    isAttemptSummary.value = false;
+  }
   void tryResumeTour('dashboard', view);
 };
 

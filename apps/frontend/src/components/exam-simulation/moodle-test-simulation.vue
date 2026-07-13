@@ -345,6 +345,7 @@ const returnToAttempt = (): void => {
 const submitAllAndFinish = (): void => {
   isSummaryView.value = false;
   isFinishedView.value = true;
+  emit('attempt-page-change');
 };
 
 const restartTourLabel = computed(() => t('examSimulation.tour.restartLabel'));
