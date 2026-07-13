@@ -130,6 +130,7 @@
           class="q-mb-lg"
           @tour-dashboard-ready="onTourDashboardReady"
           @tour-attempt-ready="onTourAttemptReady"
+          @tour-attempt-page-change="onTourAttemptPageChange"
           @dashboard-view-change="onTourDashboardViewChange"
           @restart-tour="restartTour"
         />
@@ -214,6 +215,10 @@ const onTourDashboardReady = (): void => {
 
 const onTourAttemptReady = (): void => {
   void tryResumeTour('mount');
+};
+
+const onTourAttemptPageChange = (): void => {
+  void tryResumeTour('attempt-page');
 };
 
 const onTourDashboardViewChange = (view: DashboardViewType): void => {

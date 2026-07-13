@@ -289,6 +289,7 @@
           @back="goToView('quiz')"
           @course="goToView('course')"
           @attempt-ready="emit('tour-attempt-ready')"
+          @attempt-page-change="emit('tour-attempt-page-change')"
           @restart-tour="emit('restart-tour')"
         />
 
@@ -322,6 +323,7 @@ const emit = defineEmits<{
   'restart-tour': [];
   'tour-dashboard-ready': [];
   'tour-attempt-ready': [];
+  'tour-attempt-page-change': [];
   'dashboard-view-change': [view: ViewType];
 }>();
 

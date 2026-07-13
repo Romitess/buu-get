@@ -14,7 +14,7 @@ import {
 
 const STORAGE_KEY = 'exam-simulation-tour';
 
-type TourResumeTriggerType = 'login' | 'dashboard' | 'mount';
+type TourResumeTriggerType = 'login' | 'dashboard' | 'mount' | 'attempt-page';
 
 interface TourStorageState {
   version: number;
@@ -84,6 +84,9 @@ const isResumeConditionMet = (
   if (resumeOn === 'login') {
     return loggedIn;
   }
+  if (resumeOn === 'previous-page') {
+    return false;
+  }
   return view === resumeOn;
 };
 
@@ -125,7 +128,9 @@ export const useExamSimulationTour = (options: UseExamSimulationTourOptions) => 
     return currentStepIndex.value >= EXAM_SIMULATION_TOUR_STEPS.length - 1;
   });
 
-  const stepNumber = computed(() => currentStepIndex.value + 1);
+  const stepNumber = computed(() => {
+    return currentStep.value?.badgeStepNumber ?? currentStepIndex.value + 1;
+  });
 
   const title = computed(() => {
     if (!currentStep.value) {
@@ -391,7 +396,19 @@ export const useExamSimulationTour = (options: UseExamSimulationTourOptions) => 
         alignStepIndexWithView(resolvedView);
       }
 
-      if (pendingResumeOn.value) {
+      if (pendingResumeOn.value === 'previous-page') {
+        // Only resume after the user navigates pages (or attempt remounts).
+        // Ignore dashboard/login triggers so we don't spin waiting for a missing button.
+        if (trigger !== 'attempt-page' && trigger !== 'mount') {
+          return;
+        }
+        // Previous Page mounts only after Vue re-renders (Q1 → Q2).
+        await waitForPaint();
+        const previousPageEl = await waitForTargetElement('previous-page');
+        if (!previousPageEl) {
+          return;
+        }
+      } else if (pendingResumeOn.value) {
         const met = isResumeConditionMet(pendingResumeOn.value, isLoggedIn.value, resolvedView);
         if (!met) {
           return;

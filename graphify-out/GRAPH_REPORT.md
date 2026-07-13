@@ -1,7 +1,7 @@
-# Graph Report - buu-get  (2026-07-10)
+# Graph Report - buu-get  (2026-07-13)
 
 ## Corpus Check
-- 651 files · ~351,820 words
+- 651 files · ~351,998 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `96a7aea7`
+- Built from commit: `816553e7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -205,9 +205,9 @@
 - [[_COMMUNITY_Community 189|Community 189]]
 - [[_COMMUNITY_Community 190|Community 190]]
 - [[_COMMUNITY_Community 191|Community 191]]
+- [[_COMMUNITY_Community 192|Community 192]]
 - [[_COMMUNITY_Community 193|Community 193]]
 - [[_COMMUNITY_Community 194|Community 194]]
-- [[_COMMUNITY_Community 195|Community 195]]
 - [[_COMMUNITY_Community 199|Community 199]]
 - [[_COMMUNITY_Community 201|Community 201]]
 - [[_COMMUNITY_Community 203|Community 203]]
@@ -470,8 +470,8 @@ Cohesion: 0.27
 Nodes (5): CurrentUser, assertSelfOrRoles(), AuthenticatedUser, getUserRoles(), userHasAnyRole()
 
 ### Community 56 - "Community 56"
-Cohesion: 0.16
-Nodes (13): Country, useCountries(), useRegisterForm(), AuthResponse, LoginPayload, LoginResponse, OtpResponse, RegisterPayload (+5 more)
+Cohesion: 0.18
+Nodes (12): Country, useCountries(), useRegisterForm(), AuthResponse, LoginPayload, LoginResponse, OtpResponse, RegisterPayload (+4 more)
 
 ### Community 57 - "Community 57"
 Cohesion: 0.13
@@ -482,8 +482,8 @@ Cohesion: 0.22
 Nodes (4): UpdateUserImageDto, UserImageController, UserImageModule, UserImageService
 
 ### Community 59 - "Community 59"
-Cohesion: 0.28
-Nodes (7): ROLE_LABELS, ROLES, RolesType, RouteMeta, routes, DefaultRouteLocation, getDefaultRouteForRole()
+Cohesion: 0.21
+Nodes (11): ROLE_LABELS, ROLES, RolesType, RouteMeta, routes, NavigationGroup, NavigationItem, User (+3 more)
 
 ### Community 60 - "Community 60"
 Cohesion: 0.11
@@ -731,7 +731,7 @@ Cohesion: 0.20
 Nodes (13): BackendExamCandidateInfo, BackendExamInformationRound, BackendExamReportSummary, BackendRateStat, BackendScoreStat, BackendStat, cleanParams(), fetchExamReportSummary() (+5 more)
 
 ### Community 123 - "Community 123"
-Cohesion: 0.29
+Cohesion: 0.28
 Nodes (6): useExamCertificateDocument(), useUserStore, CertificateBandRule, CertificateCardData, CertificateData, CertificateScoreReportData
 
 ### Community 124 - "Community 124"
@@ -759,8 +759,8 @@ Cohesion: 0.21
 Nodes (4): EnvironmentVariables, envSchema, validateEnv(), JwtAuthGuard
 
 ### Community 134 - "Community 134"
-Cohesion: 0.13
-Nodes (8): AuthService, ImageCategory, ImageCategoryConfig, isImageCategory(), resolveImageFolder(), getOtpEmailTemplate(), OtpEmailData, styles
+Cohesion: 0.19
+Nodes (4): AuthService, getOtpEmailTemplate(), OtpEmailData, styles
 
 ### Community 136 - "Community 136"
 Cohesion: 0.25
@@ -782,13 +782,13 @@ Nodes (5): useExamDocuments(), fetchEnrollmentById(), ExamHistoryItem, ReceiptCa
 Cohesion: 0.33
 Nodes (4): educationOptions, showCalendar, { t }, yesterdayString
 
+### Community 192 - "Community 192"
+Cohesion: 0.39
+Nodes (4): ImageCategory, ImageCategoryConfig, isImageCategory(), resolveImageFolder()
+
 ### Community 193 - "Community 193"
 Cohesion: 0.33
 Nodes (4): colOptions, isOpen, props, rowOptions
-
-### Community 195 - "Community 195"
-Cohesion: 0.67
-Nodes (3): NavigationGroup, NavigationItem, UserRole
 
 ## Knowledge Gaps
 - **756 isolated node(s):** `husky.sh script`, `$schema`, `collection`, `sourceRoot`, `name` (+751 more)
@@ -802,7 +802,7 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.031) - this node is a cross-community bridge._
 - **Why does `api` connect `Community 119` to `Community 4`, `Community 5`, `Community 9`, `Community 45`, `Community 48`, `Community 56`, `Community 60`, `Community 188`, `Community 194`, `Community 69`, `Community 70`, `Community 91`, `Community 93`, `Community 103`, `Community 108`, `Community 113`, `Community 122`, `Community 124`, `Community 125`, `Community 127`?**
   _High betweenness centrality (0.019) - this node is a cross-community bridge._
-- **Why does `PlatformGatewayService` connect `Community 0` to `Community 2`, `Community 134`, `Community 7`, `Community 10`, `Community 11`, `Community 13`, `Community 14`, `Community 47`?**
+- **Why does `PlatformGatewayService` connect `Community 0` to `Community 192`, `Community 2`, `Community 7`, `Community 10`, `Community 11`, `Community 13`, `Community 14`, `Community 47`?**
   _High betweenness centrality (0.012) - this node is a cross-community bridge._
 - **What connects `husky.sh script`, `$schema`, `collection` to the rest of the system?**
   _756 weakly-connected nodes found - possible documentation gaps or missing edges._

@@ -72,6 +72,7 @@
           <div class="attempt-page-actions" :class="{ 'attempt-page-actions--first': isFirstPage }">
             <q-btn
               v-if="!isFirstPage"
+              data-tour="previous-page"
               color="grey-4"
               text-color="black"
               label="Previous Page"
@@ -169,6 +170,7 @@ const emit = defineEmits<{
   course: [];
   finish: [];
   'attempt-ready': [];
+  'attempt-page-change': [];
   'restart-tour': [];
 }>();
 
@@ -298,6 +300,7 @@ const goToQuestion = (page: number): void => {
   const questionIndex = quizQuestions.findIndex((question) => question.number === page);
   if (questionIndex !== -1) {
     currentQuestionIndex.value = questionIndex;
+    emit('attempt-page-change');
   }
 };
 
@@ -309,12 +312,14 @@ const selectQuestionFromNavigation = (page: number): void => {
 const goToPreviousQuestion = (): void => {
   if (!isFirstPage.value) {
     currentQuestionIndex.value -= 1;
+    emit('attempt-page-change');
   }
 };
 
 const goToNextQuestion = (): void => {
   if (!isLastPage.value) {
     currentQuestionIndex.value += 1;
+    emit('attempt-page-change');
   }
 };
 

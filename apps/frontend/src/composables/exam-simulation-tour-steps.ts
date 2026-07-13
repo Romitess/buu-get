@@ -1,10 +1,10 @@
-export const EXAM_SIMULATION_TOUR_VERSION = 11;
+export const EXAM_SIMULATION_TOUR_VERSION = 12;
 
 export type TourPlacement = 'left' | 'right' | 'top' | 'bottom';
 
 export type DashboardViewType = 'overview' | 'course' | 'quiz' | 'attempt';
 
-export type TourResumeTrigger = 'login' | DashboardViewType;
+export type TourResumeTrigger = 'login' | 'previous-page' | DashboardViewType;
 
 export interface TourStep {
   id: string;
@@ -17,6 +17,8 @@ export interface TourStep {
   showFinishLabel?: boolean;
   manualNavigation?: boolean;
   resumeOn?: TourResumeTrigger;
+  /** Override badge number (e.g. Step 10 Next / Previous variants both show 10) */
+  badgeStepNumber?: number;
 }
 
 export const EXAM_SIMULATION_TOUR_STEPS: TourStep[] = [
@@ -119,6 +121,20 @@ export const EXAM_SIMULATION_TOUR_STEPS: TourStep[] = [
     bodyKey: 'examSimulation.tour.step10Body',
     requiresLogin: true,
     dashboardView: 'attempt',
+    showFinishLabel: true,
+    manualNavigation: true,
+    resumeOn: 'previous-page',
+    badgeStepNumber: 10,
+  },
+  {
+    id: 'previous-page',
+    target: 'previous-page',
+    placement: 'top',
+    titleKey: 'examSimulation.tour.step11Title',
+    bodyKey: 'examSimulation.tour.step11Body',
+    requiresLogin: true,
+    dashboardView: 'attempt',
+    badgeStepNumber: 10,
   },
 ];
 
