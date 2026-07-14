@@ -44,6 +44,13 @@ export const invalidateExamCache = (): void => {
 const isActiveEnrollment = (enrollment: { ERM_STATUS: number }): boolean =>
   enrollment.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED;
 
+const getActiveEnrollmentCount = (session: BackendSession): number => {
+  if (typeof session.ACTIVE_ENROLLMENT_COUNT === 'number') {
+    return session.ACTIVE_ENROLLMENT_COUNT;
+  }
+  return (session.ENROLLMENTS || []).filter(isActiveEnrollment).length;
+};
+
 /**
  * Centrally fetch all exams with a short-term in-memory cache.
  * This prevents redundant large downloads of the /exam endpoint when multiple
@@ -240,7 +247,7 @@ export const fetchScheduleData = async (force = false): Promise<Record<string, D
       const endTime = formatTime(session.SS_END_TIME);
       const timeRange = `${startTime} - ${endTime}`;
 
-      const activeCount = (session.ENROLLMENTS || []).filter(isActiveEnrollment).length;
+      const activeCount = getActiveEnrollmentCount(session);
 
       const currentAvailable = (session.SS_CAPACITY || 0) - activeCount;
       const currentTotal = session.SS_CAPACITY || 0;
@@ -290,7 +297,7 @@ export const fetchExamSchedules = async (force = false): Promise<ExamSchedule[]>
     if (exam.SESSIONS && exam.SESSIONS.length > 0) {
       exam.SESSIONS.forEach((session) => {
         capacity += session.SS_CAPACITY || 0;
-        const activeCount = (session.ENROLLMENTS || []).filter(isActiveEnrollment).length;
+        const activeCount = getActiveEnrollmentCount(session);
         registeredCount += activeCount;
       });
 

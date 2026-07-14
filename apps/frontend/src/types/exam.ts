@@ -286,7 +286,12 @@ export interface BackendSession {
       | null;
     LOCATION: BackendLocation;
   }[];
+  /** @deprecated Prefer ACTIVE_ENROLLMENT_COUNT — list/detail ไม่โหลด ENROLLMENTS ทั้งก้อนแล้ว */
   ENROLLMENTS?: BackendEnrollment[];
+  /** จำนวนผู้สมัครที่ยังไม่ยกเลิก (จาก aggregate) */
+  ACTIVE_ENROLLMENT_COUNT?: number;
+  /** นับผู้สมัครต่อ SL_ID (key เป็น string ของ SL_ID หรือ "null") */
+  ENROLLMENT_SL_COUNTS?: Record<string, number>;
   EXAM_ID?: number;
   EXAM?: BackendExam;
 }

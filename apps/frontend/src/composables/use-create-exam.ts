@@ -795,9 +795,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
                     seats: countAvailableSeats(relation.LOCATION, seatOverrides),
                     sessionId: session.SS_ID,
                     enrollmentCount:
+                      session.ENROLLMENT_SL_COUNTS?.[String(relation.SL_ID)] ??
                       session.ENROLLMENTS?.filter(
                         (enrollment) => enrollment.SL_ID === relation.SL_ID,
-                      ).length || 0,
+                      ).length ??
+                      0,
                     seatOverrides,
                     sessionLocationSnapshot: {
                       TOTAL_ROWS:
@@ -829,7 +831,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
               proctors: [],
               seats: session.SS_CAPACITY ?? 40,
               sessionId: session.SS_ID,
-              enrollmentCount: session.ENROLLMENTS?.length || 0,
+              enrollmentCount: session.ACTIVE_ENROLLMENT_COUNT ?? session.ENROLLMENTS?.length ?? 0,
             });
             sessionsNeedingBlockedFallback.add(session.SS_ID);
           });

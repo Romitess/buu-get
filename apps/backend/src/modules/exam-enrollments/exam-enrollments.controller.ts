@@ -104,10 +104,7 @@ export class ExamEnrollmentsController {
   async findByExamId(
     @Param('examId', ParseIntPipe) examId: number,
     @Query() query: ExamEnrollmentQueryDto,
-  ): Promise<
-    | ExamEnrollment[]
-    | { data: ExamEnrollment[]; total: number; totalPaid: number }
-  > {
+  ): Promise<{ data: ExamEnrollment[]; total: number; totalPaid: number }> {
     return await this.examEnrollmentsService.findByExamId(examId, query);
   }
 

@@ -155,7 +155,7 @@ export function useExamRegistrants() {
     try {
       const enrollmentTask = fetchEnrollmentsByExamId(examId, params).catch((err) => {
         console.error('Failed to fetch enrollments:', err);
-        return params?.page && params?.limit ? { data: [], total: 0, totalPaid: 0 } : [];
+        return { data: [], total: 0, totalPaid: 0 };
       });
       const examTask = exam.value
         ? Promise.resolve(exam.value)
@@ -166,17 +166,9 @@ export function useExamRegistrants() {
 
       const [enrollmentResult, examData] = await Promise.all([enrollmentTask, examTask]);
 
-      if (Array.isArray(enrollmentResult)) {
-        enrollments.value = enrollmentResult;
-        totalRows.value = enrollmentResult.length;
-        totalPaidRows.value = enrollmentResult.filter(
-          (e) => e.paymentStatus >= 1 && e.paymentStatus !== CANCELLED_STATUS,
-        ).length;
-      } else {
-        enrollments.value = enrollmentResult.data;
-        totalRows.value = enrollmentResult.total;
-        totalPaidRows.value = enrollmentResult.totalPaid;
-      }
+      enrollments.value = enrollmentResult.data;
+      totalRows.value = enrollmentResult.total;
+      totalPaidRows.value = enrollmentResult.totalPaid;
 
       exam.value = examData;
 

@@ -343,27 +343,30 @@ const loadExportRows = async (): Promise<EnrollmentTableRow[]> => {
     return [];
   }
 
-  const totalResult = await fetchEnrollmentsByExamId(examId, {
-    page: 1,
-    limit: 1,
-    search: searchQuery.value,
-    sessionId: selectedSessionId.value,
-    sessionLocationId: null,
-  });
+  const pageSize = 100;
+  const allRows: EnrollmentTableRow[] = [];
+  let page = 1;
+  let total = Number.POSITIVE_INFINITY;
 
-  if (Array.isArray(totalResult) || totalResult.total === 0) {
-    return [];
+  while (allRows.length < total) {
+    const pageResult = await fetchEnrollmentsByExamId(examId, {
+      page,
+      limit: pageSize,
+      search: searchQuery.value,
+      sessionId: selectedSessionId.value,
+      sessionLocationId: null,
+    });
+
+    total = pageResult.total;
+    allRows.push(...pageResult.data);
+
+    if (pageResult.data.length === 0 || allRows.length >= total) {
+      break;
+    }
+    page += 1;
   }
 
-  const exportResult = await fetchEnrollmentsByExamId(examId, {
-    page: 1,
-    limit: totalResult.total,
-    search: searchQuery.value,
-    sessionId: selectedSessionId.value,
-    sessionLocationId: null,
-  });
-
-  return Array.isArray(exportResult) ? exportResult : exportResult.data;
+  return allRows;
 };
 
 const debouncedLoadData = debounce(loadData, 400);

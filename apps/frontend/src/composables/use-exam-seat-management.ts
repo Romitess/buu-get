@@ -632,27 +632,26 @@ export function useExamSeatManagement() {
 
   /**
    * Canonical reading-order key for an assigned seat (A1 < A2 < … < B1 …).
-   * Uses LS_ROW_NO / LS_COL_NO so the list matches the seat-map grid.
-   * Unassigned students sort last.
+   * Prebuild Map once per location change so sort is O(1) lookup per student.
    */
-  const getSeatOrderKey = (student: StudentSeatInfo): number => {
-    if (!student.seat) return Number.MAX_SAFE_INTEGER;
-
+  const seatOrderById = computed((): Map<string, number> => {
+    const map = new Map<string, number>();
     for (const location of sessionLocations.value) {
-      const seat = buildSessionSeatItems(location).find((s) => String(s.LS_ID) === student.seat);
-      if (seat) {
-        // Room first, then row, then column → stable, grid-aligned order
+      for (const seat of buildSessionSeatItems(location)) {
         const labelOrder = getSeatLabelOrderParts(seat.LS_SEAT_LABEL);
         const seatOrder = labelOrder
           ? labelOrder.letterOrder * 1_000 + labelOrder.numberOrder
           : seat.LS_ROW_NO * 1_000 + seat.LS_COL_NO;
-
-        return location.SL_ID * 1_000_000 + seatOrder;
+        map.set(String(seat.LS_ID), location.SL_ID * 1_000_000 + seatOrder);
       }
     }
+    return map;
+  });
 
-    return Number.MAX_SAFE_INTEGER;
-  };
+  const getSeatOrderKey = (student: StudentSeatInfo): number =>
+    student.seat
+      ? (seatOrderById.value.get(student.seat) ?? Number.MAX_SAFE_INTEGER)
+      : Number.MAX_SAFE_INTEGER;
 
   const filteredStudents = computed((): StudentSeatInfo[] => {
     const query = searchQuery.value.toLowerCase().trim();
