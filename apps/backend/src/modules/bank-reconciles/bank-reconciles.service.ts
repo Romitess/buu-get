@@ -102,6 +102,42 @@ export interface BankReconcileMatchResult {
   UPDATED_AT: Date;
 }
 
+export interface TestExportExamOption {
+  EXAM_ID: number;
+  EXAM_NAME: string;
+  EXAM_ROUND: string | null;
+  EXAM_DATE: string | null;
+  EXAM_FEE: number;
+  exportableCount: number;
+}
+
+export interface TestExportRow {
+  applicantId: string;
+  referenceNo: string | null;
+  payerName: string;
+  amount: string;
+  paymentDate: string;
+  paymentTime: string;
+}
+
+interface TestExportExamRawRow {
+  EXAM_ID: number | string;
+  EXAM_NAME: string;
+  EXAM_ROUND: string | null;
+  EXAM_DATE: string | null;
+  EXAM_FEE: number | string;
+  exportableCount: number | string;
+}
+
+interface TestExportRawRow {
+  TSC_REF1: string;
+  TSC_REF2: string | null;
+  PAYER_NAME: string | null;
+  TRANX_AMOUNT: number | string;
+  TRANX_PAID_AT: Date | null;
+  TRANX_CREATED_AT: Date;
+}
+
 interface TransactionStatusSnapshot {
   TRANX_ID: number | string;
   TRANX_PAYMENT_STATUS: number | string;
@@ -1116,5 +1152,176 @@ export class BankReconcilesService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async listTestExportExams(): Promise<TestExportExamOption[]> {
+    const rows = await this.dataSource
+      .createQueryBuilder()
+      .select([
+        'exam.EXAM_ID AS EXAM_ID',
+        'exam.EXAM_NAME AS EXAM_NAME',
+        'exam.EXAM_ROUND AS EXAM_ROUND',
+        'exam.EXAM_DATE AS EXAM_DATE',
+        'exam.EXAM_FEE AS EXAM_FEE',
+        'COUNT(DISTINCT tr.TSR_ID) AS exportableCount',
+      ])
+      .from('EXAM_T_EXAM', 'exam')
+      .innerJoin('EXAM_T_SESSIONS', 'session', 'session.EXAM_ID = exam.EXAM_ID')
+      .innerJoin(
+        'EXAM_T_ENROLLMENTS',
+        'enrollment',
+        'enrollment.SESSION_ID = session.SS_ID AND enrollment.DELETED_AT IS NULL AND enrollment.ERM_STATUS != :cancelledStatus',
+        { cancelledStatus: ExamEnrollmentStatus.CANCELLED },
+      )
+      .innerJoin(
+        'FIN_T_TRANSACTIONS',
+        'transaction',
+        'transaction.ERM_ID = enrollment.ERM_ID AND transaction.TRANX_DELETED_AT IS NULL',
+      )
+      .innerJoin(
+        'FIN_T_TRANSACTIONS_REFS',
+        'tr',
+        'tr.TRANX_ID = transaction.TRANX_ID AND tr.DELETED_AT IS NULL',
+      )
+      .where('exam.DELETED_AT IS NULL')
+      .andWhere('exam.EXAM_FEE > 0')
+      .groupBy('exam.EXAM_ID')
+      .addGroupBy('exam.EXAM_NAME')
+      .addGroupBy('exam.EXAM_ROUND')
+      .addGroupBy('exam.EXAM_DATE')
+      .addGroupBy('exam.EXAM_FEE')
+      .orderBy('exam.EXAM_DATE', 'DESC')
+      .addOrderBy('exam.EXAM_ID', 'DESC')
+      .getRawMany<TestExportExamRawRow>();
+
+    return rows.map((row) => ({
+      EXAM_ID: Number(row.EXAM_ID),
+      EXAM_NAME: row.EXAM_NAME,
+      EXAM_ROUND: row.EXAM_ROUND,
+      EXAM_DATE: row.EXAM_DATE,
+      EXAM_FEE: Number(row.EXAM_FEE),
+      exportableCount: Number(row.exportableCount),
+    }));
+  }
+
+  async getTestExportRows(examId: number): Promise<TestExportRow[]> {
+    const exam = await this.dataSource
+      .createQueryBuilder()
+      .select(['exam.EXAM_ID AS EXAM_ID', 'exam.EXAM_FEE AS EXAM_FEE'])
+      .from('EXAM_T_EXAM', 'exam')
+      .where('exam.EXAM_ID = :examId', { examId })
+      .andWhere('exam.DELETED_AT IS NULL')
+      .getRawOne<{ EXAM_ID: number | string; EXAM_FEE: number | string }>();
+
+    if (!exam) {
+      throw new NotFoundException(`Exam with ID ${examId} not found`);
+    }
+
+    if (Number(exam.EXAM_FEE) <= 0) {
+      throw new BadRequestException(
+        'Cannot export test payment CSV for exams without registration fee',
+      );
+    }
+
+    const rows = await this.dataSource
+      .createQueryBuilder()
+      .select([
+        'tr.TSC_REF1 AS TSC_REF1',
+        'tr.TSC_REF2 AS TSC_REF2',
+        `COALESCE(
+          NULLIF(TRIM(CONCAT_WS(' ', profile.USER_TITLE_TH, profile.USER_FULLNAME_TH)), ''),
+          NULLIF(TRIM(CONCAT_WS(' ', profile.USER_TITLE_EN, profile.USER_FULLNAME_EN)), ''),
+          tp.TP_NAME,
+          ''
+        ) AS PAYER_NAME`,
+        'transaction.TRANX_AMOUNT AS TRANX_AMOUNT',
+        'transaction.TRANX_PAID_AT AS TRANX_PAID_AT',
+        'transaction.TRANX_CREATED_AT AS TRANX_CREATED_AT',
+      ])
+      .from('FIN_T_TRANSACTIONS_REFS', 'tr')
+      .innerJoin(
+        'FIN_T_TRANSACTIONS',
+        'transaction',
+        'transaction.TRANX_ID = tr.TRANX_ID AND transaction.TRANX_DELETED_AT IS NULL',
+      )
+      .innerJoin(
+        'EXAM_T_ENROLLMENTS',
+        'enrollment',
+        'enrollment.ERM_ID = transaction.ERM_ID AND enrollment.DELETED_AT IS NULL AND enrollment.ERM_STATUS != :cancelledStatus',
+        { cancelledStatus: ExamEnrollmentStatus.CANCELLED },
+      )
+      .innerJoin(
+        'EXAM_T_SESSIONS',
+        'session',
+        'session.SS_ID = enrollment.SESSION_ID',
+      )
+      .innerJoin(
+        'EXAM_T_EXAM',
+        'exam',
+        'exam.EXAM_ID = session.EXAM_ID AND exam.DELETED_AT IS NULL',
+      )
+      .leftJoin(
+        'BUU_GET_T_USER_PROFILE',
+        'profile',
+        'profile.USER_ID = enrollment.USER_ID AND profile.DELETED_AT IS NULL',
+      )
+      .leftJoin(
+        'FIN_T_TRANSACTION_PROFILE',
+        'tp',
+        'tp.TRANX_ID = transaction.TRANX_ID AND tp.DELETED_AT IS NULL',
+      )
+      .where('tr.DELETED_AT IS NULL')
+      .andWhere('exam.EXAM_ID = :examId', { examId })
+      .andWhere('exam.EXAM_FEE > 0')
+      .orderBy('tr.TSR_ID', 'ASC')
+      .getRawMany<TestExportRawRow>();
+
+    return rows.map((row) => {
+      const paymentSource = row.TRANX_PAID_AT ?? row.TRANX_CREATED_AT;
+      const { paymentDate, paymentTime } =
+        this.formatPaymentDateTime(paymentSource);
+      const payerName = (row.PAYER_NAME ?? '').trim().slice(0, 20);
+
+      return {
+        applicantId: (row.TSC_REF1 ?? '').trim().slice(0, 20),
+        referenceNo: row.TSC_REF2 ? row.TSC_REF2.trim().slice(0, 20) : null,
+        payerName: payerName || 'Unknown',
+        amount: Number(row.TRANX_AMOUNT).toFixed(2),
+        paymentDate,
+        paymentTime,
+      };
+    });
+  }
+
+  private formatPaymentDateTime(source: Date | string | null | undefined): {
+    paymentDate: string;
+    paymentTime: string;
+  } {
+    if (!source) {
+      return { paymentDate: '', paymentTime: '' };
+    }
+
+    const date = source instanceof Date ? source : new Date(source);
+    if (Number.isNaN(date.getTime())) {
+      return { paymentDate: '', paymentTime: '' };
+    }
+
+    const dateFormatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Bangkok',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    const timeFormatter = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Bangkok',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+
+    return {
+      paymentDate: dateFormatter.format(date),
+      paymentTime: timeFormatter.format(date),
+    };
   }
 }

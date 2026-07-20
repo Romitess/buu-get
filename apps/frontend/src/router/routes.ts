@@ -396,6 +396,26 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'payment-import-test-export',
+            name: 'admin-payment-import-test-export',
+            component: () => import('pages/admin/payment-import-test-export-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.paymentImport',
+                  icon: 'upload_file',
+                  to: '/admin/payment-import',
+                },
+                {
+                  label: 'navigation.paymentImportTestExport',
+                  icon: 'download',
+                },
+              ],
+            },
+          },
+          {
             path: 'fin-check-transcript',
             name: 'admin-fin-check-transcript',
             component: () => import('pages/admin/fin-check-transcript-page.vue'),

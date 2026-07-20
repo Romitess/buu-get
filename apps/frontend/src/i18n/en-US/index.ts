@@ -1182,6 +1182,20 @@ export default {
         invalidFormat: 'Please upload JPG or PNG images only',
       },
     },
+    paymentImportTestExport: {
+      pageTitle: 'Export Test Payment CSV',
+      pageSubtitle:
+        'Generate a CSV file compatible with payment import for testing',
+      examSelectLabel: 'Select exam round with registration fee',
+      exportButton: 'Export CSV',
+      previewCount: '{count} rows ready to export',
+      emptyTable: 'No exportable rows for this exam',
+      hintDuplicateImport:
+        'To re-import the same file, clear previous import data first or adjust payment date/time slightly.',
+      goToPaymentImport: 'Go to Payment Import',
+      loadExamsError: 'Failed to load exam list',
+      loadRowsError: 'Failed to load export rows',
+    },
   },
   components: {
     examInfoCard: {
@@ -1312,6 +1326,7 @@ export default {
     manageScores: 'Manage Scores',
     examAttendance: 'Exam Attendance',
     paymentImport: 'Payment Import',
+    paymentImportTestExport: 'Export Test Payment CSV',
     checkPayment: 'Check Payment',
     createLocation: 'Create Exam Room',
     editLocation: 'Edit Exam Room',

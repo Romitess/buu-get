@@ -861,6 +861,20 @@ export default {
         uploadError: 'เกิดข้อผิดพลาดในการอัปโหลดไฟล์',
       },
     },
+    paymentImportTestExport: {
+      pageTitle: 'Export CSV ทดสอบการนำเข้า',
+      pageSubtitle:
+        'สร้างไฟล์ CSV สำหรับทดสอบนำเข้าการชำระเงิน โดยคอลัมน์ตรงกับระบบนำเข้า',
+      examSelectLabel: 'เลือกรอบสอบที่มีค่าธรรมเนียม',
+      exportButton: 'Export CSV',
+      previewCount: 'พร้อม export {count} รายการ',
+      emptyTable: 'ไม่มีรายการที่ export ได้สำหรับรอบสอบนี้',
+      hintDuplicateImport:
+        'หากต้องการทดสอบนำเข้าซ้ำ ให้ลบข้อมูลนำเข้าเดิมก่อน หรือปรับวันที่/เวลาชำระเล็กน้อย',
+      goToPaymentImport: 'ไปหน้านำเข้าไฟล์การชำระเงิน',
+      loadExamsError: 'โหลดรายการรอบสอบไม่สำเร็จ',
+      loadRowsError: 'โหลดข้อมูล export ไม่สำเร็จ',
+    },
     scoreManagement: {
       pageTitle: 'จัดการคะแนนสอบ',
       pageSubtitle: 'จัดการคะแนนสอบ ตรวจสอบผลคะแนน และติดตามข้อมูลการประเมิน',
@@ -1389,6 +1403,7 @@ export default {
     pageBuilder: 'จัดการหน้าแรก',
     viewSchedule: 'ตารางสอบ',
     paymentImport: 'นำเข้าไฟล์การชำระเงิน',
+    paymentImportTestExport: 'Export CSV ทดสอบการนำเข้า',
     logout: 'ออกจากระบบ',
     menu: 'เมนู',
     createExam: 'สร้างรอบสอบ',
