@@ -334,6 +334,7 @@ export default {
     availableStatusTextSuffix: ' ที่นั่ง',
     fullBtnText: 'เต็ม (Full)',
     registerBtnText: 'ลงทะเบียนสอบ',
+    registeredBtnText: 'ลงทะเบียนแล้ว',
     expiredBtnText: 'หมดเขตลงทะเบียน',
     notOpenBtnText: 'ยังไม่เปิดรับสมัคร',
     notifications: {
@@ -383,6 +384,7 @@ export default {
       subtitle: 'กรุณากรอกรหัสผ่าน Passcode เพื่อทำการลงทะเบียนสอบ',
       placeholder: '•••••••••••••••••',
       confirm: 'ยืนยัน',
+      required: 'กรุณากรอกรหัสผ่าน Passcode',
       footerSupport: 'พบปัญหา โปรดติดต่อพนักงาน',
     },
     dialogCancel: {

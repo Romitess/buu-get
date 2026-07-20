@@ -3,6 +3,9 @@ import type { ExamRound } from 'src/types/exam';
 
 export type ExamCalendarAvailability = 'available' | 'full' | null;
 
+const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const MIDNIGHT_TIMESTAMP_PATTERN = /^(\d{4}-\d{2}-\d{2})[T ](00:00:00)/;
+
 const parseSlashDate = (dateValue: string): Date | null => {
   const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(
     dateValue,
@@ -37,8 +40,38 @@ export const parseRegistrationDate = (dateValue?: string): Date | null => {
   return parseSlashDate(trimmedDate);
 };
 
+const toLocalEndOfDay = (year: number, month: number, day: number): Date =>
+  new Date(year, month - 1, day, 23, 59, 59, 999);
+
+/** แปลงวันที่ปิดรับสมัคร — date-only / เวลา 00:00:00 ถือเป็นสิ้นวัน 23:59:59 */
+export const parseRegistrationEndDate = (dateValue?: string): Date | null => {
+  const trimmedDate = dateValue?.trim();
+  if (!trimmedDate) return null;
+
+  if (DATE_ONLY_PATTERN.test(trimmedDate)) {
+    const [yearStr, monthStr, dayStr] = trimmedDate.split('-');
+    const year = Number(yearStr);
+    const month = Number(monthStr);
+    const day = Number(dayStr);
+    if (!year || !month || !day) return null;
+    return toLocalEndOfDay(year, month, day);
+  }
+
+  const midnightMatch = MIDNIGHT_TIMESTAMP_PATTERN.exec(trimmedDate);
+  if (midnightMatch?.[1]) {
+    const [yearStr, monthStr, dayStr] = midnightMatch[1].split('-');
+    const year = Number(yearStr);
+    const month = Number(monthStr);
+    const day = Number(dayStr);
+    if (!year || !month || !day) return null;
+    return toLocalEndOfDay(year, month, day);
+  }
+
+  return parseRegistrationDate(trimmedDate);
+};
+
 export const isExamRoundRegistrationExpired = (round: ExamRound, now: Date): boolean => {
-  const regEndDate = parseRegistrationDate(round.regEndDate);
+  const regEndDate = parseRegistrationEndDate(round.regEndDate);
   if (!regEndDate) return false;
 
   return now > regEndDate;

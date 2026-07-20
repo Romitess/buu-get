@@ -22,6 +22,7 @@ import { ExamSession } from '../exam-sessions/entities/exam-session.entity';
 import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
 import { getExamChangeEmailTemplate } from './templates/exam-change-email.template';
 import { MoodleSyncService } from '../moodle/moodle-sync.service';
+import { normalizePeriodEndDate } from '../../common/utils/period-date.util';
 
 @Injectable()
 export class ExamService {
@@ -45,6 +46,7 @@ export class ExamService {
     createExamDto: CreateExamDto,
     actingUserId: number,
   ): Promise<Exam> {
+    this.normalizeExamPeriodEndDates(createExamDto);
     const exam = this.examRepository.create(createExamDto);
     const saved = await this.examRepository.save(exam);
     // รอสร้างคอร์ส Moodle แล้ว map EXAM_MOODLE_COURSE_ID (ล้มเหลวจะ log ไว้ แต่ไม่ทำให้สร้างรอบสอบ fail)
@@ -299,6 +301,7 @@ export class ExamService {
   }
 
   async update(id: number, updateExamDto: UpdateExamDto): Promise<Exam> {
+    this.normalizeExamPeriodEndDates(updateExamDto);
     const exam = await this.findOneForMutation(id);
     const updated = this.examRepository.merge(exam, updateExamDto);
     return await this.examRepository.save(updated);
@@ -475,5 +478,16 @@ export class ExamService {
     this.logger.log(
       `Exam change notifications for exam ${examId}: sent ${sent}, failed ${failed}, total ${recipients.length}`,
     );
+  }
+
+  private normalizeExamPeriodEndDates(
+    dto: CreateExamDto | UpdateExamDto,
+  ): void {
+    if (dto.EXAM_REG_END_DATE !== undefined) {
+      dto.EXAM_REG_END_DATE = normalizePeriodEndDate(dto.EXAM_REG_END_DATE);
+    }
+    if (dto.EXAM_PAY_END_DATE !== undefined) {
+      dto.EXAM_PAY_END_DATE = normalizePeriodEndDate(dto.EXAM_PAY_END_DATE);
+    }
   }
 }

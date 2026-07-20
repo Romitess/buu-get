@@ -162,6 +162,7 @@ const routes: RouteRecordRaw[] = [
             name: 'admin-fund-source-management',
             component: () => import('pages/admin/fin-fund-source-mananagement-page.vue'),
             meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
                 { label: 'navigation.fundSourceManagement', icon: 'account_balance' },
@@ -387,6 +388,7 @@ const routes: RouteRecordRaw[] = [
             name: 'admin-payment-import',
             component: () => import('pages/admin/payment-import-page.vue'),
             meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
                 { label: 'navigation.paymentImport', icon: 'upload_file' },
@@ -398,6 +400,7 @@ const routes: RouteRecordRaw[] = [
             name: 'admin-fin-check-transcript',
             component: () => import('pages/admin/fin-check-transcript-page.vue'),
             meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
                 {

@@ -107,6 +107,8 @@ export interface RoundExamProps {
   availableStatusTextSuffix?: string | undefined;
   fullBtnText?: string | undefined;
   registerBtnText?: string | undefined;
+  isRegistered?: boolean | undefined;
+  registeredBtnText?: string | undefined;
 }
 
 export interface ExamClockProps {

@@ -352,6 +352,13 @@ export const buddhistToGregorian = (dateStr: string): string => {
   return `${gregorianYear}-${m}-${day}`;
 };
 
+/** แปลงวันที่ปิดช่วง (BE) เป็น timestamp สิ้นวัน 23:59:59 (+07:00) */
+export const buddhistToGregorianPeriodEnd = (dateStr: string): string => {
+  const dateOnly = buddhistToGregorian(dateStr);
+  if (!dateOnly) return '';
+  return `${dateOnly}T23:59:59+07:00`;
+};
+
 const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRange[] => {
   const groupedRanges = new Map<string, GroupedSessionTimeRange>();
 
@@ -622,9 +629,9 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<numbe
       EXAM_FEE: Number(payload.fee),
       EXAM_DATE: buddhistToGregorian(payload.examDate),
       EXAM_REG_START_DATE: buddhistToGregorian(payload.regStartDate),
-      EXAM_REG_END_DATE: buddhistToGregorian(payload.regEndDate),
+      EXAM_REG_END_DATE: buddhistToGregorianPeriodEnd(payload.regEndDate),
       EXAM_PAY_START_DATE: buddhistToGregorian(payload.payStartDate),
-      EXAM_PAY_END_DATE: buddhistToGregorian(payload.payEndDate),
+      EXAM_PAY_END_DATE: buddhistToGregorianPeriodEnd(payload.payEndDate),
       EXAM_PUBLISHED: payload.isPublished,
       FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
       EXAM_ROUND: payload.examRound,
@@ -716,9 +723,9 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
       EXAM_FEE: Number(payload.fee),
       EXAM_DATE: buddhistToGregorian(payload.examDate),
       EXAM_REG_START_DATE: buddhistToGregorian(payload.regStartDate),
-      EXAM_REG_END_DATE: buddhistToGregorian(payload.regEndDate),
+      EXAM_REG_END_DATE: buddhistToGregorianPeriodEnd(payload.regEndDate),
       EXAM_PAY_START_DATE: buddhistToGregorian(payload.payStartDate),
-      EXAM_PAY_END_DATE: buddhistToGregorian(payload.payEndDate),
+      EXAM_PAY_END_DATE: buddhistToGregorianPeriodEnd(payload.payEndDate),
       EXAM_PUBLISHED: payload.isPublished,
       FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
       EXAM_ROUND: payload.examRound,
@@ -866,6 +873,16 @@ export const createEnrollment = async (
     console.error('Error creating enrollment:', error);
     throw error;
   }
+};
+
+export const validateExamPasscode = async (
+  sessionId: number,
+  passcode: string,
+): Promise<void> => {
+  await api.post<{ valid: true }>('/exam-enrollments/validate-passcode', {
+    SESSION_ID: sessionId,
+    PASSCODE: passcode,
+  });
 };
 
 export const fetchUserEnrollments = async (userId: number): Promise<ExamEnrollment[]> => {

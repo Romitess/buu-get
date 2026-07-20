@@ -21,6 +21,9 @@ export const ENROLLMENT_ADMIN_ROLES: RoleEnum[] = [
   RoleEnum.EXAM_OPERATIONS_OFFICER,
 ];
 
+/** ดูรายการผู้ใช้ (เช่น เลือกผู้คุมสอบตอนสร้างการสอบ) — ไม่รวมการจัดการ role */
+export const USER_LIST_ROLES: RoleEnum[] = [...ENROLLMENT_ADMIN_ROLES];
+
 /** รายงานและผู้บริหาร */
 export const EXECUTIVE_ROLES: RoleEnum[] = [RoleEnum.ADMIN, RoleEnum.EXECUTIVE];
 
@@ -28,6 +31,13 @@ export const EXECUTIVE_ROLES: RoleEnum[] = [RoleEnum.ADMIN, RoleEnum.EXECUTIVE];
 export const EXAM_ADMIN_ROLES: RoleEnum[] = [
   RoleEnum.ADMIN,
   RoleEnum.STAFF,
+  RoleEnum.EXAM_OPERATIONS_OFFICER,
+  RoleEnum.REGISTRATION_OFFICER,
+];
+
+/** อ่านแหล่งทุน — การเงิน + เจ้าหน้าที่จัดสอบ/ทะเบียน (ใช้ตอนสร้างการสอบ) */
+export const FUND_SOURCE_READ_ROLES: RoleEnum[] = [
+  ...FINANCE_ROLES,
   RoleEnum.EXAM_OPERATIONS_OFFICER,
   RoleEnum.REGISTRATION_OFFICER,
 ];

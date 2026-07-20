@@ -60,6 +60,7 @@
                 :reg-start-date="round.regStartDate"
                 :reg-end-date="round.regEndDate"
                 :exam-date="round.examDate"
+                :is-registered="examStore.isSessionRegistered(round.id)"
                 @register="(isExpiredOrNotOpen) => handleRegister(round, isExpiredOrNotOpen)"
               />
             </template>
@@ -100,12 +101,12 @@ import DialogConfirm from 'src/components/exam/dialog-confirm.vue';
 import ExamPasscodeInputDialog from 'src/components/exam-passcode-input-dialog.vue';
 import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
-import {
-  EXAM_TYPE_GENERAL,
+import { EXAM_TYPE_GENERAL,
   EXAM_TYPE_SPECIAL,
   EXAM_FORMAT_COMPUTER,
   EXAM_FORMAT_PAPER,
 } from 'src/constants/exam';
+import { validateExamPasscode } from 'src/services/exam.service';
 import { api } from 'src/boot/axios';
 import type { ExamRound } from 'src/types/exam';
 
@@ -147,6 +148,8 @@ const translateExamFormat = (value?: string): string => {
 interface ExamPasscodeDialogExpose {
   openDialog: () => void;
   closeDialog: () => void;
+  setError: (message: string) => void;
+  setLoading: (loading: boolean) => void;
 }
 
 const showConfirmDialog = ref(false);
@@ -354,9 +357,45 @@ const onConfirmRegistration = async (physicalStatus?: string): Promise<void> => 
   }
 };
 
-const onPasscodeConfirm = (passcode: string): void => {
-  savedPasscode.value = passcode;
-  showConfirmDialog.value = true;
+const onPasscodeConfirm = async (passcode: string): Promise<void> => {
+  if (!selectedRound.value) return;
+
+  passcodeDialogRef.value?.setLoading(true);
+  try {
+    await validateExamPasscode(selectedRound.value.id, passcode);
+    savedPasscode.value = passcode;
+    passcodeDialogRef.value?.closeDialog();
+    showConfirmDialog.value = true;
+  } catch (err: unknown) {
+    const error = err as {
+      response?: {
+        status?: number;
+        data?: {
+          message?: string | string[];
+        };
+      };
+    };
+    const status = error?.response?.status;
+    const resMsg = error?.response?.data?.message;
+    const detail = Array.isArray(resMsg) ? resMsg.join(', ') : resMsg;
+
+    if (
+      status === 400 &&
+      (detail === 'Invalid passcode for this user and exam' ||
+        detail === 'Passcode is required for special exam rounds')
+    ) {
+      passcodeDialogRef.value?.setError(t('examSchedule.notifications.invalidPasscode'));
+      return;
+    }
+
+    passcodeDialogRef.value?.setError(
+      t('examSchedule.notifications.unknownError', {
+        message: detail || 'Unknown',
+      }),
+    );
+  } finally {
+    passcodeDialogRef.value?.setLoading(false);
+  }
 };
 
 const onMonthChange = (): void => {};

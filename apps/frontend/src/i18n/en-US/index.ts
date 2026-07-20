@@ -161,6 +161,7 @@ export default {
     availableStatusTextSuffix: ' Seats',
     fullBtnText: 'Full',
     registerBtnText: 'Register',
+    registeredBtnText: 'Registered',
     expiredBtnText: 'Registration Closed',
     notOpenBtnText: 'Not Open Yet',
     notifications: {
@@ -189,6 +190,14 @@ export default {
       examFee: 'Fee: {fee}',
       back: 'Back',
       baht: 'THB',
+    },
+    passcodeDialog: {
+      title: 'Enter Passcode',
+      subtitle: 'Please enter your Passcode to register for this exam',
+      placeholder: '•••••••••••••••••',
+      confirm: 'Confirm',
+      required: 'Please enter your Passcode',
+      footerSupport: 'Need help? Please contact staff',
     },
     convenienceDialog: {
       title: 'Accessibility Information',

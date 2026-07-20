@@ -11,6 +11,11 @@ import {
   buildPaginatedResponse,
   PaginatedResponse,
 } from 'src/common/dto/paginated-response.dto';
+import { FINANCE_ROLES } from 'src/common/constants/role-groups';
+import {
+  assertSelfOrRoles,
+  AuthenticatedUser,
+} from 'src/common/utils/authz.util';
 import {
   PAGINATION_DEFAULT_LIMIT,
   PAGINATION_DEFAULT_PAGE,
@@ -165,6 +170,7 @@ export class TransactionsService {
   async confirmPaymentFlow(
     tranxId: number,
     dto: ConfirmPaymentFlowDto,
+    user: AuthenticatedUser,
   ): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -184,6 +190,11 @@ export class TransactionsService {
       if (!transaction) {
         throw new NotFoundException(`Transaction with ID ${tranxId} not found`);
       }
+
+      const enrollment = await manager.getRepository(ExamEnrollment).findOne({
+        where: { ERM_ID: transaction.ERM_ID },
+      });
+      this.assertEnrollmentAccess(user, enrollment);
 
       if (
         transaction.TRANX_PAYMENT_STATUS !== TransactionPaymentStatus.PENDING
@@ -219,12 +230,12 @@ export class TransactionsService {
 
       // อัปเดตสถานะการสมัครสอบเป็น PAID
       const enrollmentRepository = manager.getRepository(ExamEnrollment);
-      const enrollment = await enrollmentRepository.findOne({
+      const enrollmentToUpdate = await enrollmentRepository.findOne({
         where: { ERM_ID: transaction.ERM_ID },
       });
-      if (enrollment) {
-        enrollment.ERM_STATUS = ExamEnrollmentStatus.PAID;
-        await enrollmentRepository.save(enrollment);
+      if (enrollmentToUpdate) {
+        enrollmentToUpdate.ERM_STATUS = ExamEnrollmentStatus.PAID;
+        await enrollmentRepository.save(enrollmentToUpdate);
       }
 
       const history = historyRepository.create({
@@ -259,7 +270,10 @@ export class TransactionsService {
     }
   }
 
-  async expireTransaction(tranxId: number): Promise<void> {
+  async expireTransaction(
+    tranxId: number,
+    user: AuthenticatedUser,
+  ): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -276,6 +290,11 @@ export class TransactionsService {
       if (!transaction) {
         throw new NotFoundException(`Transaction with ID ${tranxId} not found`);
       }
+
+      const enrollment = await manager.getRepository(ExamEnrollment).findOne({
+        where: { ERM_ID: transaction.ERM_ID },
+      });
+      this.assertEnrollmentAccess(user, enrollment);
 
       if (
         transaction.TRANX_PAYMENT_STATUS !== TransactionPaymentStatus.PENDING
@@ -565,5 +584,21 @@ export class TransactionsService {
   async remove(id: number): Promise<void> {
     const transaction = await this.findOne(id);
     await this.transactionsRepository.softRemove(transaction);
+  }
+
+  private assertEnrollmentAccess(
+    user: AuthenticatedUser,
+    enrollment: ExamEnrollment | null,
+  ): void {
+    if (!enrollment) {
+      throw new NotFoundException('Enrollment not found for this transaction');
+    }
+
+    assertSelfOrRoles(
+      user,
+      enrollment.USER_ID,
+      FINANCE_ROLES,
+      'Access denied: transaction does not belong to you',
+    );
   }
 }

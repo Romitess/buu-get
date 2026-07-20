@@ -12,7 +12,7 @@ import {
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { USER_ADMIN_ROLES } from 'src/common/constants/role-groups';
+import { USER_ADMIN_ROLES, USER_LIST_ROLES } from 'src/common/constants/role-groups';
 import {
   assertSelfOrRoles,
   AuthenticatedUser,
@@ -37,7 +37,7 @@ export class UsersController {
   }
 
   @Get()
-  @Roles(...USER_ADMIN_ROLES)
+  @Roles(...USER_LIST_ROLES)
   @ApiOkResponse({ description: 'รายการผู้ใช้แบบแบ่งหน้า' })
   async findAll(
     @Query() query: UsersQueryDto,

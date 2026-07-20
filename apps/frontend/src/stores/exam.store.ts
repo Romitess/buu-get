@@ -88,6 +88,7 @@ export const useExamStore = defineStore('exam', () => {
   const pendingRegistrations = ref<ExamHistoryItem[]>([]);
   const historyRecords = ref<ExamHistoryItem[]>([]);
   const managementSchedules = ref<ExamSchedule[]>([]);
+  const registeredSessionIds = ref<Set<number>>(new Set());
 
   const selectedDateRounds = computed((): ExamRound[] => {
     return scheduleData.value[selectedDate.value]?.rounds || [];
@@ -134,9 +135,38 @@ export const useExamStore = defineStore('exam', () => {
     return `${date.getDate()} ${monthName} ${buddhistYear}`;
   });
 
+  async function loadRegisteredSessions(): Promise<void> {
+    const userIdStr = localStorage.getItem('user_id');
+    if (!userIdStr) {
+      registeredSessionIds.value = new Set();
+      return;
+    }
+
+    const userId = parseInt(userIdStr, 10);
+    if (isNaN(userId)) {
+      registeredSessionIds.value = new Set();
+      return;
+    }
+
+    try {
+      const enrollments = await fetchUserEnrollments(userId);
+      registeredSessionIds.value = new Set(
+        enrollments
+          .filter((enrollment) => enrollment.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED)
+          .map((enrollment) => enrollment.SESSION_ID),
+      );
+    } catch (error) {
+      console.error('Failed to load registered sessions:', error);
+    }
+  }
+
+  function isSessionRegistered(sessionId: number): boolean {
+    return registeredSessionIds.value.has(sessionId);
+  }
+
   async function initSchedule(force = false): Promise<void> {
     try {
-      const data = await fetchScheduleData(force);
+      const [data] = await Promise.all([fetchScheduleData(force), loadRegisteredSessions()]);
       scheduleData.value = data;
     } catch (error) {
       console.error('Failed to load schedule:', error);
@@ -317,7 +347,7 @@ export const useExamStore = defineStore('exam', () => {
     }
 
     await createEnrollment(userId, round.id, passcode, physicalStatus);
-    await fetchHistory(true);
+    await Promise.all([fetchHistory(true), loadRegisteredSessions()]);
   }
 
   async function confirmSpecialRegistration(
@@ -335,7 +365,7 @@ export const useExamStore = defineStore('exam', () => {
     try {
       setCancellationReason(enrollmentId, reason);
       await updateEnrollmentStatus(enrollmentId, ENROLLMENT_STATUS.CANCELLED);
-      await fetchHistory(true);
+      await Promise.all([fetchHistory(true), loadRegisteredSessions()]);
     } catch (error: unknown) {
       console.error('Failed to cancel registration:', error);
       throw error;
@@ -435,5 +465,6 @@ export const useExamStore = defineStore('exam', () => {
     initSchedule,
     loadManagementSchedules,
     fetchHistory,
+    isSessionRegistered,
   };
 });

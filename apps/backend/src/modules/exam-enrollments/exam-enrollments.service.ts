@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, Not, In, LessThan, Brackets } from 'typeorm';
@@ -17,6 +18,11 @@ import {
   PAGINATION_DEFAULT_PAGE,
   PaginationQueryDto,
 } from 'src/common/dto/pagination-query.dto';
+import { ENROLLMENT_ADMIN_ROLES } from 'src/common/constants/role-groups';
+import {
+  AuthenticatedUser,
+  userHasAnyRole,
+} from 'src/common/utils/authz.util';
 import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
 import {
   ExamEnrollment,
@@ -54,6 +60,7 @@ import {
   ExamHistoryRow,
   ExecutiveExamHistoryResponse,
 } from './interfaces/executive-exam-history.interface';
+import { ValidatePasscodeDto } from './dto/validate-passcode.dto';
 
 @Injectable()
 export class ExamEnrollmentsService {
@@ -263,28 +270,14 @@ export class ExamEnrollmentsService {
       }
     }
 
-    let validPasscode: ExamPasscode | null = null as ExamPasscode | null;
+    let validPasscode: ExamPasscode | null = null;
 
     if (targetSession.EXAM?.EXAM_TYPE === EXAM_TYPE.SPECIAL) {
-      if (!PASSCODE) {
-        throw new BadRequestException(
-          'Passcode is required for special exam rounds',
-        );
-      }
-
-      validPasscode = await this.examPasscodeRepository.findOne({
-        where: {
-          EXAM_ID: targetSession.EXAM_ID,
-          NATIONAL_ID: user.USER_NATIONAL_ID || '',
-          PASSCODE: PASSCODE,
-        },
-      });
-
-      if (!validPasscode) {
-        throw new BadRequestException(
-          'Invalid passcode for this user and exam',
-        );
-      }
+      validPasscode = await this.findValidSpecialPasscode(
+        targetSession.EXAM_ID,
+        user.USER_NATIONAL_ID || '',
+        PASSCODE,
+      );
     }
 
     const existingEnrollment = await this.examEnrollmentRepository
@@ -342,6 +335,40 @@ export class ExamEnrollmentsService {
     }
 
     return await this.findOne(saved.ERM_ID);
+  }
+
+  async validatePasscode(
+    userId: number,
+    dto: ValidatePasscodeDto,
+  ): Promise<void> {
+    const session = await this.examSessionRepository.findOne({
+      where: { SS_ID: dto.SESSION_ID },
+      relations: ['EXAM'],
+    });
+
+    if (!session) {
+      throw new NotFoundException(
+        `Exam Session with ID ${dto.SESSION_ID} not found`,
+      );
+    }
+
+    if (session.EXAM?.EXAM_TYPE !== EXAM_TYPE.SPECIAL) {
+      return;
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { USER_ID: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    await this.findValidSpecialPasscode(
+      session.EXAM_ID,
+      user.USER_NATIONAL_ID || '',
+      dto.PASSCODE,
+    );
   }
 
   async findAll(
@@ -896,8 +923,14 @@ export class ExamEnrollmentsService {
   async update(
     id: number,
     updateExamEnrollmentDto: UpdateExamEnrollmentDto,
+    user: AuthenticatedUser,
   ): Promise<ExamEnrollment> {
     const enrollment = await this.findOne(id);
+
+    if (!userHasAnyRole(user, ENROLLMENT_ADMIN_ROLES)) {
+      this.assertCandidateCancellation(user, enrollment, updateExamEnrollmentDto);
+    }
+
     await this.validateSeatAssignment(enrollment, updateExamEnrollmentDto);
 
     if (
@@ -958,6 +991,39 @@ export class ExamEnrollmentsService {
     }
 
     return await this.findOne(saved.ERM_ID);
+  }
+
+  private assertCandidateCancellation(
+    user: AuthenticatedUser,
+    enrollment: ExamEnrollment,
+    dto: UpdateExamEnrollmentDto,
+  ): void {
+    if (user.userId !== enrollment.USER_ID) {
+      throw new ForbiddenException(
+        'Access denied: enrollment does not belong to you',
+      );
+    }
+
+    const changedFields = (
+      Object.keys(dto) as Array<keyof UpdateExamEnrollmentDto>
+    ).filter((key) => dto[key] !== undefined);
+
+    const isCancelOnly =
+      changedFields.length === 1 &&
+      changedFields[0] === 'ERM_STATUS' &&
+      dto.ERM_STATUS === ExamEnrollmentStatus.CANCELLED;
+
+    if (!isCancelOnly) {
+      throw new ForbiddenException(
+        'Access denied: candidates can only cancel their enrollment',
+      );
+    }
+
+    if (enrollment.ERM_STATUS !== ExamEnrollmentStatus.UNPAID) {
+      throw new BadRequestException(
+        'Only unpaid enrollments can be cancelled by the candidate',
+      );
+    }
   }
 
   private async validateSeatAssignment(
@@ -1184,5 +1250,33 @@ export class ExamEnrollmentsService {
         `[Cron] Automatically cancelled ${result.affected} expired unpaid enrollments.`,
       );
     }
+  }
+
+  private async findValidSpecialPasscode(
+    examId: number,
+    nationalId: string,
+    passcode?: string,
+  ): Promise<ExamPasscode> {
+    if (!passcode) {
+      throw new BadRequestException(
+        'Passcode is required for special exam rounds',
+      );
+    }
+
+    const validPasscode = await this.examPasscodeRepository.findOne({
+      where: {
+        EXAM_ID: examId,
+        NATIONAL_ID: nationalId,
+        PASSCODE: passcode,
+      },
+    });
+
+    if (!validPasscode) {
+      throw new BadRequestException(
+        'Invalid passcode for this user and exam',
+      );
+    }
+
+    return validPasscode;
   }
 }

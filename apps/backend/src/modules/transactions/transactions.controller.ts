@@ -11,7 +11,9 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { FINANCE_ROLES } from 'src/common/constants/role-groups';
+import { AuthenticatedUser } from 'src/common/utils/authz.util';
 import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { TransactionsService } from './transactions.service';
@@ -75,7 +77,6 @@ export class TransactionsController {
   }
 
   @Patch(':tranxId/confirm')
-  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'ยืนยันการชำระเงิน (FLOW 2)' })
   @ApiResponse({
     status: 200,
@@ -84,12 +85,12 @@ export class TransactionsController {
   confirmPaymentFlow(
     @Param('tranxId', ParseIntPipe) tranxId: number,
     @Body() confirmDto: ConfirmPaymentFlowDto,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<void> {
-    return this.transactionsService.confirmPaymentFlow(tranxId, confirmDto);
+    return this.transactionsService.confirmPaymentFlow(tranxId, confirmDto, user);
   }
 
   @Patch(':tranxId/expire')
-  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'ทำให้ธุรกรรมหมดอายุ (FLOW 3)' })
   @ApiResponse({
     status: 200,
@@ -97,8 +98,9 @@ export class TransactionsController {
   })
   expireTransaction(
     @Param('tranxId', ParseIntPipe) tranxId: number,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<void> {
-    return this.transactionsService.expireTransaction(tranxId);
+    return this.transactionsService.expireTransaction(tranxId, user);
   }
 
   @Patch('by-erm/:ermId')

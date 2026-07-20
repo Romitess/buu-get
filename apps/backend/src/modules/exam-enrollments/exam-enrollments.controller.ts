@@ -34,6 +34,7 @@ import { MatchExamEnrollmentDto } from './dto/match-exam-enrollment.dto';
 import { RequestFixDto } from './dto/request-fix.dto';
 import { BulkSeatAssignmentDto } from './dto/bulk-seat-assignment.dto';
 import { ExamEnrollment } from './entities/exam-enrollment.entity';
+import { ValidatePasscodeDto } from './dto/validate-passcode.dto';
 import { ExamEnrollmentQueryDto } from './dto/exam-enrollment-query.dto';
 import { ExecutiveTestTakerQueryDto } from './dto/executive-test-taker-query.dto';
 import { ExecutiveTestTakerPage } from './interfaces/executive-test-taker.interface';
@@ -53,6 +54,20 @@ export class ExamEnrollmentsController {
     @Body() createExamEnrollmentDto: CreateExamEnrollmentDto,
   ): Promise<ExamEnrollment> {
     return await this.examEnrollmentsService.create(createExamEnrollmentDto);
+  }
+
+  @Post('validate-passcode')
+  @ApiOperation({ summary: 'ตรวจสอบ Passcode ก่อนสมัครสอบรอบพิเศษ' })
+  @ApiOkResponse({ description: 'Passcode ถูกต้อง' })
+  async validatePasscode(
+    @Body() validatePasscodeDto: ValidatePasscodeDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<{ valid: true }> {
+    await this.examEnrollmentsService.validatePasscode(
+      user.userId,
+      validatePasscodeDto,
+    );
+    return { valid: true };
   }
 
   @Get()
@@ -143,16 +158,17 @@ export class ExamEnrollmentsController {
   }
 
   @Patch(':id')
-  @Roles(...ENROLLMENT_ADMIN_ROLES)
   @ApiOperation({ summary: 'แก้ไขข้อมูลการสมัครสอบ' })
   @ApiOkResponse({ type: ExamEnrollment })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateExamEnrollmentDto: UpdateExamEnrollmentDto,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<ExamEnrollment> {
     return await this.examEnrollmentsService.update(
       id,
       updateExamEnrollmentDto,
+      user,
     );
   }
 
