@@ -253,48 +253,75 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const isImportingCandidates = ref(false);
   const error = ref<string | null>(null);
 
+  function timeToMinutes(timeStr: string | undefined): number {
+    if (!timeStr) return 9999;
+    const cleaned = timeStr.replace(/\s/g, '');
+    if (!cleaned) return 9999;
+    const parts = cleaned.split(':');
+    const hours = parseInt(parts[0] || '0', 10);
+    const minutes = parseInt(parts[1] || '0', 10);
+    return hours * 60 + minutes;
+  }
+
+  function doTimeRangesOverlapMinutes(
+    startA: number,
+    endA: number,
+    startB: number,
+    endB: number,
+  ): boolean {
+    return startA < endB && endA > startB;
+  }
+
   /**
-   * คำนวณ location IDs ที่ถูกใช้โดย exam อื่นในวัน+เวลาเดียวกัน
-   * เพื่อแสดงเป็น disabled ใน dropdown
+   * ห้องที่ slot นี้เลือกไม่ได้ — จาก exam อื่น หรือรอบเวลาอื่นใน form ที่ทับซ้อนกัน
+   * (ไม่รวมห้องอื่นใน slot เดียวกัน — จัดการแยกใน dropdown)
    */
-  const occupiedLocationIds = computed<Set<number>>(() => {
+  const getOccupiedLocationIdsForSlot = (slotIdx: number): Set<number> => {
     const occupied = new Set<number>();
+    const slot = form.value.timeSlots[slotIdx];
+    if (!slot?.startTime || !slot?.endTime) return occupied;
+
+    const slotStart = timeToMinutes(slot.startTime);
+    const slotEnd = timeToMinutes(slot.endTime);
+
+    // รอบเวลาอื่นใน form เดียวกันที่ทับซ้อน
+    form.value.timeSlots.forEach((otherSlot, otherIdx) => {
+      if (otherIdx === slotIdx) return;
+      if (!otherSlot.startTime || !otherSlot.endTime) return;
+
+      const otherStart = timeToMinutes(otherSlot.startTime);
+      const otherEnd = timeToMinutes(otherSlot.endTime);
+      if (!doTimeRangesOverlapMinutes(slotStart, slotEnd, otherStart, otherEnd)) {
+        return;
+      }
+
+      for (const room of otherSlot.rooms) {
+        if (room.locationId !== null) {
+          occupied.add(room.locationId);
+        }
+      }
+    });
+
+    // exam อื่นในวันเดียวกันที่ทับช่วงเวลานี้
     const formExamDate = form.value.examDate;
     if (!formExamDate) return occupied;
 
-    // แปลงวันที่ form (DD/MM/YYYY พ.ศ.) เป็น YYYY-MM-DD ค.ศ.
     const formDateGregorian = buddhistToGregorian(formExamDate);
     if (!formDateGregorian) return occupied;
 
-    // รวบรวมช่วงเวลาทั้งหมดจาก form
-    const formTimeSlots = form.value.timeSlots
-      .filter((s) => s.startTime && s.endTime)
-      .map((s) => ({
-        start: timeToMinutes(s.startTime),
-        end: timeToMinutes(s.endTime),
-      }));
-
-    if (formTimeSlots.length === 0) return occupied;
-
     for (const exam of allExams.value) {
-      // ข้ามตัวเอง (edit mode)
       if (examId && exam.EXAM_ID === examId) continue;
 
       const examDate = formatBackendDate(exam.EXAM_DATE);
       if (examDate !== formDateGregorian) continue;
 
-      // ตรวจ session ที่มีเวลาซ้อนทับ
       for (const session of exam.SESSIONS || []) {
         const ssStart = timeToMinutes(session.SS_START_TIME?.substring(0, 5));
         const ssEnd = timeToMinutes(session.SS_END_TIME?.substring(0, 5));
+        if (!doTimeRangesOverlapMinutes(slotStart, slotEnd, ssStart, ssEnd)) {
+          continue;
+        }
 
-        const isOverlapping = formTimeSlots.some(
-          (slot) => ssStart < slot.end && ssEnd > slot.start,
-        );
-
-        if (!isOverlapping) continue;
-
-        // เก็บ location IDs จาก session ที่ซ้อนทับ
         if (session.SESSION_LOCATIONS && session.SESSION_LOCATIONS.length > 0) {
           for (const loc of session.SESSION_LOCATIONS) {
             if (loc.LOCATION_ID) occupied.add(loc.LOCATION_ID);
@@ -306,19 +333,29 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     }
 
     return occupied;
-  });
+  };
 
-  // Watch occupied location IDs and reset locationId if it becomes occupied (unless loading data)
-  watch(occupiedLocationIds, (occupied) => {
-    if (isLoadingData.value) return;
-    form.value.timeSlots.forEach((slot) => {
-      slot.rooms.forEach((room) => {
-        if (room.locationId !== null && occupied.has(room.locationId)) {
-          room.locationId = null;
-        }
+  // รีเซ็ตห้องที่กลายเป็น occupied เมื่อเวลา/รอบอื่นเปลี่ยน
+  watch(
+    () =>
+      form.value.timeSlots.map((slot) => ({
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        locationIds: slot.rooms.map((room) => room.locationId),
+      })),
+    () => {
+      if (isLoadingData.value) return;
+      form.value.timeSlots.forEach((slot, slotIdx) => {
+        const occupied = getOccupiedLocationIdsForSlot(slotIdx);
+        slot.rooms.forEach((room) => {
+          if (room.locationId !== null && occupied.has(room.locationId)) {
+            room.locationId = null;
+          }
+        });
       });
-    });
-  });
+    },
+    { deep: true },
+  );
 
   /** Currently active time slot tab index */
   const activeSlotIndex = ref(0);
@@ -453,16 +490,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    * Validate required fields and populate fieldErrors.
    * @returns true if all required fields are filled, false otherwise.
    */
-  function timeToMinutes(timeStr: string | undefined): number {
-    if (!timeStr) return 9999;
-    const cleaned = timeStr.replace(/\s/g, '');
-    if (!cleaned) return 9999;
-    const parts = cleaned.split(':');
-    const hours = parseInt(parts[0] || '0', 10);
-    const minutes = parseInt(parts[1] || '0', 10);
-    return hours * 60 + minutes;
-  }
-
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
@@ -522,6 +549,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         } else if (selectedLocationIds.has(room.locationId)) {
           errors[`locationId_${slotIdx}_${roomIdx}`] =
             'ไม่สามารถเลือกห้องสอบซ้ำในช่วงเวลาเดียวกันได้';
+        } else if (getOccupiedLocationIdsForSlot(slotIdx).has(room.locationId)) {
+          errors[`locationId_${slotIdx}_${roomIdx}`] =
+            'ไม่สามารถเลือกห้องสอบเดียวกันในช่วงเวลาที่ทับซ้อนกันได้';
         } else {
           selectedLocationIds.add(room.locationId);
         }
@@ -1638,7 +1668,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     proctorOptions,
     locationOptions,
     fundSourceOptions,
-    occupiedLocationIds,
+    getOccupiedLocationIdsForSlot,
     isLoadingData,
     isImportingCandidates,
     error,

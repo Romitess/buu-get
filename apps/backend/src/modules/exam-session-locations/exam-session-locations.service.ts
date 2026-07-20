@@ -2,9 +2,11 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { doExamTimeRangesOverlap } from '../../common/utils/exam-schedule.util';
 import { ExamSessionLocation } from './entities/exam-session-location.entity';
 import { ExamLocation } from '../exam-locations/entities/exam-location.entity';
 import { ExamSession } from '../exam-sessions/entities/exam-session.entity';
@@ -25,7 +27,7 @@ export class ExamSessionLocationsService {
   private async validateLocationAndSession(
     locationId: number,
     sessionId: number,
-  ) {
+  ): Promise<{ SS_START_TIME: string; SS_END_TIME: string; EXAM_DATE: string }> {
     const location = await this.locationRepository.findOne({
       where: { LOCATION_ID: locationId },
     });
@@ -37,10 +39,66 @@ export class ExamSessionLocationsService {
 
     const session = await this.sessionRepository.findOne({
       where: { SS_ID: sessionId },
+      relations: ['EXAM'],
     });
     if (!session) {
       throw new NotFoundException(
         `Exam Session with ID ${sessionId} not found`,
+      );
+    }
+
+    const examDate = session.EXAM?.EXAM_DATE;
+    if (!examDate || !session.SS_START_TIME || !session.SS_END_TIME) {
+      throw new BadRequestException(
+        'Exam session must have exam date and start/end time before assigning a location',
+      );
+    }
+
+    return {
+      SS_START_TIME: session.SS_START_TIME,
+      SS_END_TIME: session.SS_END_TIME,
+      EXAM_DATE: examDate,
+    };
+  }
+
+  /** ห้ามใช้ห้องเดียวกันในช่วงเวลาที่ทับซ้อนกัน (ข้าม exam / ข้าม session) */
+  private async assertLocationNotOverlapping(
+    locationId: number,
+    sessionId: number,
+    startTime: string,
+    endTime: string,
+    examDate: string,
+    excludeSlId?: number,
+  ): Promise<void> {
+    const qb = this.sessionLocationRepository
+      .createQueryBuilder('sl')
+      .innerJoinAndSelect('sl.SESSION', 's')
+      .innerJoin('s.EXAM', 'e')
+      .where('sl.LOCATION_ID = :locationId', { locationId })
+      .andWhere('s.SS_ID != :sessionId', { sessionId })
+      .andWhere('e.EXAM_DATE = :examDate', { examDate })
+      .andWhere('sl.DELETED_AT IS NULL')
+      .andWhere('s.DELETED_AT IS NULL')
+      .andWhere('e.DELETED_AT IS NULL');
+
+    if (excludeSlId !== undefined) {
+      qb.andWhere('sl.SL_ID != :excludeSlId', { excludeSlId });
+    }
+
+    const conflicts = await qb.getMany();
+
+    const hasOverlap = conflicts.some((row) =>
+      doExamTimeRangesOverlap(
+        startTime,
+        endTime,
+        row.SESSION?.SS_START_TIME,
+        row.SESSION?.SS_END_TIME,
+      ),
+    );
+
+    if (hasOverlap) {
+      throw new ConflictException(
+        'ห้องสอบนี้ถูกใช้งานในช่วงเวลาที่ทับซ้อนกันแล้ว',
       );
     }
   }
@@ -48,7 +106,18 @@ export class ExamSessionLocationsService {
   async create(
     dto: CreateExamSessionLocationDto,
   ): Promise<ExamSessionLocation> {
-    await this.validateLocationAndSession(dto.LOCATION_ID, dto.SS_ID);
+    const sessionMeta = await this.validateLocationAndSession(
+      dto.LOCATION_ID,
+      dto.SS_ID,
+    );
+
+    await this.assertLocationNotOverlapping(
+      dto.LOCATION_ID,
+      dto.SS_ID,
+      sessionMeta.SS_START_TIME,
+      sessionMeta.SS_END_TIME,
+      sessionMeta.EXAM_DATE,
+    );
 
     const existing = await this.sessionLocationRepository.findOne({
       where: { LOCATION_ID: dto.LOCATION_ID, SS_ID: dto.SS_ID },
@@ -113,6 +182,23 @@ export class ExamSessionLocationsService {
     dto: UpdateExamSessionLocationDto,
   ): Promise<ExamSessionLocation> {
     const sl = await this.findOne(id);
+    const locationId = dto.LOCATION_ID ?? sl.LOCATION_ID;
+    const sessionId = dto.SS_ID ?? sl.SS_ID;
+
+    const sessionMeta = await this.validateLocationAndSession(
+      locationId,
+      sessionId,
+    );
+
+    await this.assertLocationNotOverlapping(
+      locationId,
+      sessionId,
+      sessionMeta.SS_START_TIME,
+      sessionMeta.SS_END_TIME,
+      sessionMeta.EXAM_DATE,
+      id,
+    );
+
     Object.assign(sl, dto);
     return await this.sessionLocationRepository.save(sl);
   }
