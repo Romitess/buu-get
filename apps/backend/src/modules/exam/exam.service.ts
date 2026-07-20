@@ -166,11 +166,11 @@ export class ExamService {
     }
   }
 
-  /** โหลด exam สำหรับ update/softRemove โดยไม่ดึง seats/enrollments */
+  /** โหลด exam สำหรับ update/softRemove โดยไม่ดึง seats/enrollments/passcodes */
   private async findOneForMutation(id: number): Promise<Exam> {
     const exam = await this.examRepository.findOne({
       where: { EXAM_ID: id },
-      relations: ['SESSIONS', 'FUND_SOURCE', 'PASSCODES'],
+      relations: ['SESSIONS', 'FUND_SOURCE'],
     });
     if (!exam) {
       throw new NotFoundException(`Exam with ID ${id} not found`);
@@ -305,6 +305,11 @@ export class ExamService {
   }
 
   async remove(id: number): Promise<void> {
+    await this.assertExamExists(id);
+    // ExamPasscode ไม่มี soft delete — ลบ hard delete ก่อน softRemove exam
+    await this.examPasscodeLogRepository.delete({ EXAM_ID: id });
+    await this.examPasscodeRepository.delete({ EXAM_ID: id });
+
     const exam = await this.findOneForMutation(id);
     await this.examRepository.softRemove(exam);
   }
