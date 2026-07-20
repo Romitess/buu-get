@@ -26,6 +26,18 @@
  *   script นี้จึงส่งเป็น "ข้อความไทย" เพื่อให้บันทึกถูกต้องตามเจตนา (60% ทั่วไป / 40% มีหมายเหตุ)
  */
 
+const { existsSync } = require('fs');
+const { resolve } = require('path');
+const { config: loadEnv } = require('dotenv');
+
+const monorepoRoot = resolve(__dirname, '../../..');
+for (const fileName of ['.env', '.env.local']) {
+  const envPath = resolve(monorepoRoot, fileName);
+  if (existsSync(envPath)) {
+    loadEnv({ path: envPath, override: true });
+  }
+}
+
 const BASE = process.env.API_BASE_URL || 'http://localhost:3000/api';
 const PASSWORD = 'password123';
 const numEnv = (k, d) => (process.env[k] != null ? Number(process.env[k]) : d);

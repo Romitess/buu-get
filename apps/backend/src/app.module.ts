@@ -6,6 +6,7 @@ import { RolesGuard } from './common/guards/roles.guard';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { getMonorepoEnvFilePaths } from './config/monorepo-env';
 import { validateEnv } from './config/env.validation';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -47,7 +48,7 @@ import { ThaidModule } from './modules/thaid/thaid.module';
   imports: [
     ConfigModule.forRoot({
       load: [buuApiConfig],
-      envFilePath: ['.env', '../../.env', 'backend/.env', '../.env'],
+      envFilePath: getMonorepoEnvFilePaths(),
       isGlobal: true,
       validate: validateEnv,
     }),

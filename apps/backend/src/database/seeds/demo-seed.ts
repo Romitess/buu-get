@@ -12,10 +12,7 @@
  * ต้องเปิด backend ไว้ที่ http://localhost:3000 ก่อนรัน
  *   npm run seed:demo   (ในโฟลเดอร์ backend)
  */
-import * as path from 'path';
-import * as dotenv from 'dotenv';
-
-dotenv.config({ path: path.resolve(__dirname, '../../../../.env') });
+import '../../config/load-env';
 
 import * as bcrypt from 'bcrypt';
 import { RoleEnum } from '../../modules/roles/enums/role.enum';

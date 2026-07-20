@@ -1,16 +1,12 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
-import { config as loadEnv } from 'dotenv';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { defineConfig } from '@quasar/app-vite/wrappers';
+import { loadMonorepoEnv, MONOREPO_ROOT } from './config/monorepo-env';
 import { resolveApiBaseUrl } from './config/resolve-api-base-url';
 
-// โหลด buu-get-front/.env (monorepo root) ก่อน evaluate config — Quasar envFolder ยังไม่ inject ตอนนี้
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const monorepoRootEnv = resolve(__dirname, '../../.env');
-loadEnv({ path: monorepoRootEnv });
+// โหลด .env จาก monorepo root ก่อน evaluate config — Quasar envFolder ยังไม่ inject ตอนนี้
+loadMonorepoEnv();
 
 export default defineConfig((ctx) => {
   const apiBaseUrl = resolveApiBaseUrl({
@@ -69,8 +65,8 @@ export default defineConfig((ctx) => {
 
       // publicPath: '/',
       // analyze: true,
-      // .env อยู่ที่ monorepo root (buu-get-front/.env) — ไม่ใช่ apps/frontend/.env
-      envFolder: '../..',
+      // .env อยู่ที่ monorepo root — ไม่ใช่ apps/frontend/.env
+      envFolder: MONOREPO_ROOT,
       env: {
         ...(apiBaseUrl ? { API_BASE_URL: apiBaseUrl } : {}),
       },
@@ -95,7 +91,7 @@ export default defineConfig((ctx) => {
       // ต้องอนุญาตให้ Vite dev server เสิร์ฟไฟล์จาก monorepo root (../..) ไม่งั้นฟอนต์
       // Material Icons จะถูกบล็อก (403 Forbidden จาก @fs) → icon โชว์เป็นชื่อข้อความ
       fs: {
-        allow: [resolve(__dirname, '../..')],
+        allow: [MONOREPO_ROOT],
       },
     },
 

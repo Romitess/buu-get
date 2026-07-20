@@ -1,4 +1,7 @@
+import { loadMonorepoEnv } from './config/monorepo-env';
 import { defineConfig, devices } from '@playwright/test';
+
+loadMonorepoEnv();
 
 export default defineConfig({
   testDir: './e2e',

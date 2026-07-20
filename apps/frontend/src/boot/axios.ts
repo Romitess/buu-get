@@ -14,7 +14,7 @@ const apiBaseURL =
 
 if (!apiBaseURL) {
   throw new Error(
-    'API_BASE_URL is not defined. Set it in buu-get-front/.env (root of monorepo, not frontend/.env).',
+    'API_BASE_URL is not defined. Set it in .env at the monorepo root (buu-get/.env), not apps/frontend/.env.',
   );
 }
 

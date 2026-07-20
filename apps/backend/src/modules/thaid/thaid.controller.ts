@@ -33,7 +33,7 @@ export class ThaidController {
   approval(@Req() req: Request): ExternalCallbackResult {
     return this.thaidService.handleCallback('approval', {
       body: toRecord(req.body),
-      query: toRecord(req.query) as ExternalCallbackQuery,
+      query: toRecord(req.query),
     });
   }
 
@@ -47,7 +47,7 @@ export class ThaidController {
   payment(@Req() req: Request): ExternalCallbackResult {
     return this.thaidService.handleCallback('payment', {
       body: toRecord(req.body),
-      query: toRecord(req.query) as ExternalCallbackQuery,
+      query: toRecord(req.query),
     });
   }
 }

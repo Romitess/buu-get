@@ -9,7 +9,9 @@ import {
 import { ExamVoucher } from './entities/exam-voucher.entity';
 
 type RepositoryEntity =
-  typeof ExamEnrollment | typeof ExamVoucher | typeof ExamSession;
+  | typeof ExamEnrollment
+  | typeof ExamVoucher
+  | typeof ExamSession;
 
 jest.mock('./entities/exam-voucher.entity', () => ({
   ExamVoucher: class ExamVoucher {},

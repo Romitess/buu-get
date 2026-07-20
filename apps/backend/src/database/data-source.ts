@@ -1,17 +1,5 @@
-import * as dotenv from 'dotenv';
-import { existsSync } from 'fs';
-import { resolve } from 'path';
+import '../config/load-env';
 import { DataSource } from 'typeorm';
-
-// โหลด .env ให้ตรงกับ ConfigModule ของแอป
-// รองรับทั้ง apps/backend/.env และ root .env ของ monorepo (../../.env)
-for (const candidate of ['.env', '../../.env', 'backend/.env', '../.env']) {
-  const fullPath = resolve(process.cwd(), candidate);
-  if (existsSync(fullPath)) {
-    dotenv.config({ path: fullPath });
-    break;
-  }
-}
 import { User } from '../modules/users/entities/user.entity';
 import { Role } from '../modules/roles/entities/role.entity';
 import { Exam } from '../modules/exam/entities/exam.entity';
