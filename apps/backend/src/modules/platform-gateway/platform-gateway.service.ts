@@ -474,7 +474,7 @@ export class PlatformGatewayService {
     const dataObj: any = {
       path: uploadFileDto.path,
       fileName: fileName,
-      bucket: uploadFileDto.bucket || 'hrd.storage',
+      bucket: uploadFileDto.bucket || 'buu-get.storage',
     };
 
     if (fileType) {
@@ -568,7 +568,7 @@ export class PlatformGatewayService {
     const apiName = 'getFileList';
     const data = {
       path: path || '/uploaded_files',
-      bucket: 'hrd.storage',
+      bucket: 'buu-get.storage',
     };
     try {
       const response = await this.postApi(apiName, data);
@@ -600,7 +600,7 @@ export class PlatformGatewayService {
       },
       time: 7, // 7 D | 10080 M
       carbonTime: 'D',
-      bucket: 'hrd.storage', // TODO: use hrd.dev.storage if needed
+      bucket: 'buu-get.storage', // TODO: use hrd.dev.storage if needed
       originalFileName: {
         file_1: cleanDownloadName || baseName || fileName,
       },
@@ -641,7 +641,9 @@ export class PlatformGatewayService {
     const response = await axios.get<Readable>(fileUrl, {
       responseType: 'stream',
     });
-    const contentType = String(response.headers['content-type'] || 'image/jpeg');
+    const contentType = String(
+      response.headers['content-type'] || 'image/jpeg',
+    );
     return { stream: response.data, contentType };
   }
 
@@ -670,7 +672,7 @@ export class PlatformGatewayService {
       filePath,
       time: 7, // 7 D | 10080 M
       carbonTime: 'D',
-      bucket: 'hrd.storage',
+      bucket: 'buu-get.storage',
       originalFileName,
     };
     try {
@@ -687,7 +689,7 @@ export class PlatformGatewayService {
     const path = fileName ? (fileName != 'none' ? fileName : '') : '';
     const data = {
       filePath: path,
-      bucket: 'hrd.storage',
+      bucket: 'buu-get.storage',
     };
     try {
       const response = await this.deleteApi(apiName, data);
@@ -704,7 +706,7 @@ export class PlatformGatewayService {
       psn_id: arg.psn_id,
       psn_citizenid: arg.psn_citizenid,
       doc_filename: arg.doc_filename,
-      doc_bucket: 'hrd.storage',
+      doc_bucket: 'buu-get.storage',
     };
 
     try {
@@ -723,7 +725,7 @@ export class PlatformGatewayService {
       psn_id: arg.psn_id,
       psn_citizenid: arg.psn_citizenid,
       doc_filename: arg.doc_filename,
-      doc_bucket: arg.doc_bucket || 'hrd.storage',
+      doc_bucket: arg.doc_bucket || 'buu-get.storage',
       doc_cancelnote: arg.doc_cancelnote,
     };
 
@@ -742,7 +744,7 @@ export class PlatformGatewayService {
     const data = {
       psn_id: arg.psn_id,
       documentName: arg.documentName,
-      bucket: 'hrd.storage',
+      bucket: 'buu-get.storage',
     };
 
     try {
@@ -758,7 +760,7 @@ export class PlatformGatewayService {
     const apiName = 'timeStamp';
     const data = {
       documentName: arg.documentName,
-      bucket: 'hrd.storage',
+      bucket: 'buu-get.storage',
     };
 
     try {

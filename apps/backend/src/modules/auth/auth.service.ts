@@ -192,7 +192,7 @@ export class AuthService {
       const result = (await this.platformGatewayService.uploadBuffer(
         buffer,
         `profile.${ext}`,
-        { path: folder, bucket: 'hrd.storage' },
+        { path: folder, bucket: 'buu-get.storage' },
       )) as { result?: string; filename?: string; path?: string } | undefined;
       const returned: string | undefined =
         result?.result || result?.filename || result?.path;
