@@ -191,6 +191,7 @@ export interface ExamEnrollment {
   TRANSACTION?: {
     TRANX_ID: number;
     TRANX_MATCH_STATUS?: number;
+    TRANX_PAYMENT_STATUS?: number;
     TRANX_PAID_AT?: string | Date;
     TRANX_CREATED_AT?: string | Date;
     TRANX_AMOUNT?: number;

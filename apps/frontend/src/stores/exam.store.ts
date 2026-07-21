@@ -27,9 +27,11 @@ import {
   DEFAULT_EXAM_INFO,
   ENROLLMENT_STATUS,
   TRANSACTION_MATCH_STATUS,
+  TRANSACTION_PAYMENT_STATUS,
   SESSION_STATUS_COMPLETED,
   formatLocationWithRoom,
   PAYMENT_DURATION_SECONDS_DEFAULT,
+  ReceiptStatus,
 } from 'src/constants/exam';
 import {
   getExamRoundsCalendarAvailability,
@@ -216,6 +218,20 @@ export const useExamStore = defineStore('exam', () => {
       const hasMatchedPayment = (enrollment: ExamEnrollment): boolean =>
         enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
 
+      const hasDownloadableReceipt = (enrollment: ExamEnrollment): boolean => {
+        const paymentStatus = enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS;
+        if (
+          paymentStatus === TRANSACTION_PAYMENT_STATUS.REFUND ||
+          paymentStatus === TRANSACTION_PAYMENT_STATUS.RECEIPT_VOIDED
+        ) {
+          return false;
+        }
+        const receipts = enrollment.TRANSACTION?.RECEIPTS ?? [];
+        const hasVoided = receipts.some((receipt) => receipt.RC_STATUS === ReceiptStatus.VOIDED);
+        if (hasVoided) return false;
+        return hasMatchedPayment(enrollment);
+      };
+
       enrollments.forEach((enrollment) => {
         const session = enrollment.SESSION;
         if (!session) return;
@@ -257,25 +273,25 @@ export const useExamStore = defineStore('exam', () => {
           }
           newPending.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.PAID) {
-          const hasBankMatch = hasMatchedPayment(enrollment);
-          item.status = hasBankMatch ? 'exam.status.verified' : 'exam.status.paymentCompleted';
+          const canDownloadReceipt = hasDownloadableReceipt(enrollment);
+          item.status = canDownloadReceipt ? 'exam.status.verified' : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
-          item.actions = hasBankMatch ? ['downloadReceipt'] : [];
+          item.actions = canDownloadReceipt ? ['downloadReceipt'] : [];
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_ASSIGNED) {
-          const hasBankMatch = hasMatchedPayment(enrollment);
-          item.status = hasBankMatch ? 'exam.status.verified' : 'exam.status.paymentCompleted';
+          const canDownloadReceipt = hasDownloadableReceipt(enrollment);
+          item.status = canDownloadReceipt ? 'exam.status.verified' : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
 
           const actions: string[] = [];
-          if (hasBankMatch) {
+          if (canDownloadReceipt) {
             actions.push('downloadReceipt');
           }
           item.actions = actions;
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_PUBLISHED) {
-          const hasBankMatch = hasMatchedPayment(enrollment);
-          item.status = hasBankMatch ? 'exam.status.verified' : 'exam.status.paymentCompleted';
+          const canDownloadReceipt = hasDownloadableReceipt(enrollment);
+          item.status = canDownloadReceipt ? 'exam.status.verified' : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
           const hasVoucher = !!(enrollment.VOUCHERS && enrollment.VOUCHERS.length > 0);
 
@@ -283,14 +299,14 @@ export const useExamStore = defineStore('exam', () => {
           if (hasVoucher) {
             actions.push('candidateCard');
           }
-          if (hasBankMatch) {
+          if (canDownloadReceipt) {
             actions.push('downloadReceipt');
           }
           item.actions = actions;
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.ATTENDED) {
           const hasScore = !!enrollment.SCORE;
-          const hasBankMatch = hasMatchedPayment(enrollment);
+          const canDownloadReceipt = hasDownloadableReceipt(enrollment);
           const hasCompletedSession =
             Number(enrollment.SESSION?.SS_SESSION_STATUS) === SESSION_STATUS_COMPLETED;
           const hasCertificate = !!(
@@ -298,7 +314,7 @@ export const useExamStore = defineStore('exam', () => {
           );
 
           const actions: string[] = [];
-          if (hasBankMatch) {
+          if (canDownloadReceipt) {
             actions.push('downloadReceipt');
           }
           if (hasCompletedSession && hasCertificate) {
@@ -310,17 +326,36 @@ export const useExamStore = defineStore('exam', () => {
           item.actions = actions;
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.CANCELLED) {
-          const isPaymentTimeout = isPaymentTimeoutCancellation(enrollment);
-          item.status = isPaymentTimeout
-            ? 'exam.status.cancelled'
-            : 'exam.status.registrationCancelled';
-          item.statusType = 'primary';
-          if (isPaymentTimeout) {
+          const paymentStatus = enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS;
+          if (paymentStatus === TRANSACTION_PAYMENT_STATUS.REFUND) {
+            item.status = 'exam.status.refunded';
+            item.statusType = 'warning';
             item.customStatus = {
-              label: 'exam.status.paymentTimeout',
+              label: 'exam.status.refunded',
               type: 'error',
-              icon: 'warning_amber',
+              icon: 'currency_exchange',
             };
+          } else if (paymentStatus === TRANSACTION_PAYMENT_STATUS.RECEIPT_VOIDED) {
+            item.status = 'exam.status.receiptVoided';
+            item.statusType = 'warning';
+            item.customStatus = {
+              label: 'exam.status.receiptVoided',
+              type: 'error',
+              icon: 'receipt_long',
+            };
+          } else {
+            const isPaymentTimeout = isPaymentTimeoutCancellation(enrollment);
+            item.status = isPaymentTimeout
+              ? 'exam.status.cancelled'
+              : 'exam.status.registrationCancelled';
+            item.statusType = 'primary';
+            if (isPaymentTimeout) {
+              item.customStatus = {
+                label: 'exam.status.paymentTimeout',
+                type: 'error',
+                icon: 'warning_amber',
+              };
+            }
           }
           newHistory.push(item);
         }

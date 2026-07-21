@@ -32,6 +32,7 @@ export enum TransactionPaymentStatus {
   EXPIRED = 5,
   REVERSED = 6,
   REFUND = 7,
+  RECEIPT_VOIDED = 8,
 }
 
 export enum TransactionChannel {
@@ -115,7 +116,7 @@ export class Transaction {
     type: 'int',
     default: TransactionPaymentStatus.PENDING,
     comment:
-      'สถานะการชำระเงิน (PENDING, APPROVED, REJECTED, PAID, PAYMENT_FAILED, EXPIRED, REVERSED, REFUND)',
+      'สถานะการชำระเงิน (PENDING, APPROVED, REJECTED, PAID, PAYMENT_FAILED, EXPIRED, REVERSED, REFUND, RECEIPT_VOIDED)',
   })
   TRANX_PAYMENT_STATUS: TransactionPaymentStatus;
 

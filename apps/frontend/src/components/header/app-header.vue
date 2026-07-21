@@ -341,6 +341,12 @@ const navLinks = computed<NavigationItem[]>(() => {
           path: '/admin/payment-import',
         },
         {
+          name: 'admin-receipt-void-refund',
+          label: t('navigation.receiptVoidRefund'),
+          icon: 'receipt_long',
+          path: '/admin/receipt-void-refund',
+        },
+        {
           name: 'admin-payment-import-test-export',
           label: t('navigation.paymentImportTestExport'),
           icon: 'download',

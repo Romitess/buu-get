@@ -1089,6 +1089,21 @@ export class BankReconcilesService {
         .where('t.TRANX_ID IN (:...tranxIds)', { tranxIds })
         .getRawMany<TransactionStatusSnapshot>();
 
+      const blockedStatuses = new Set<number>([
+        TransactionPaymentStatus.REFUND,
+        TransactionPaymentStatus.RECEIPT_VOIDED,
+      ]);
+      const blocked = transactions.filter((transaction) =>
+        blockedStatuses.has(Number(transaction.TRANX_PAYMENT_STATUS)),
+      );
+      if (blocked.length > 0) {
+        throw new BadRequestException(
+          `Cannot approve refunded or receipt-voided transactions: ${blocked
+            .map((transaction) => transaction.TRANX_ID)
+            .join(', ')}`,
+        );
+      }
+
       // 1. Update Transactions
       const updateTranxResult = await queryRunner.manager
         .createQueryBuilder()
@@ -1098,6 +1113,12 @@ export class BankReconcilesService {
           TRANX_MATCH_STATUS: TransactionMatchStatus.MATCH,
         })
         .where('TRANX_ID IN (:...tranxIds)', { tranxIds })
+        .andWhere('TRANX_PAYMENT_STATUS NOT IN (:...excludedStatuses)', {
+          excludedStatuses: [
+            TransactionPaymentStatus.REFUND,
+            TransactionPaymentStatus.RECEIPT_VOIDED,
+          ],
+        })
         .execute();
 
       // 2. Insert into History using the status before approval.

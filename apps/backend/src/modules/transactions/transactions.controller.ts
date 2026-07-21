@@ -76,6 +76,22 @@ export class TransactionsController {
     return this.transactionsService.findOne(id);
   }
 
+  @Post(':tranxId/refund')
+  @Roles(...FINANCE_ROLES)
+  @ApiOperation({
+    summary: 'คืนเงินเมื่อยังไม่ออกใบเสร็จ (ยังไม่มีใบเสร็จ ISSUED)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'คืนเงินสำเร็จ',
+    type: Transaction,
+  })
+  refundTransaction(
+    @Param('tranxId', ParseIntPipe) tranxId: number,
+  ): Promise<Transaction> {
+    return this.transactionsService.refundTransaction(tranxId);
+  }
+
   @Patch(':tranxId/confirm')
   @ApiOperation({ summary: 'ยืนยันการชำระเงิน (FLOW 2)' })
   @ApiResponse({
@@ -87,7 +103,11 @@ export class TransactionsController {
     @Body() confirmDto: ConfirmPaymentFlowDto,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<void> {
-    return this.transactionsService.confirmPaymentFlow(tranxId, confirmDto, user);
+    return this.transactionsService.confirmPaymentFlow(
+      tranxId,
+      confirmDto,
+      user,
+    );
   }
 
   @Patch(':tranxId/expire')

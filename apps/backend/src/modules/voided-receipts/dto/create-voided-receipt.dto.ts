@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CreateVoidedReceiptDto {
   @ApiProperty({ description: 'รหัสใบเสร็จ' })
@@ -7,13 +13,10 @@ export class CreateVoidedReceiptDto {
   @IsNumber()
   RC_ID: number;
 
-  @ApiProperty({ description: 'รหัสผู้ยกเลิก' })
-  @IsNotEmpty()
-  @IsNumber()
-  VR_BY: number;
-
   @ApiProperty({ description: 'เหตุผลการยกเลิก' })
   @IsNotEmpty()
   @IsString()
+  @MinLength(1)
+  @MaxLength(2000)
   VR_REASON: string;
 }

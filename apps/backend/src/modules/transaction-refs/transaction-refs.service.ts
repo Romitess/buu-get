@@ -39,10 +39,12 @@ export class TransactionRefsService {
     const ref1 = query.ref1?.trim();
     const ref2 = query.ref2?.trim();
     const name = query.name?.trim().toLowerCase();
+    const examName = query.examName?.trim().toLowerCase();
 
     const qb = this.transactionRefRepository
       .createQueryBuilder('transactionRef')
       .leftJoinAndSelect('transactionRef.TRANSACTION', 'transaction')
+      .leftJoinAndSelect('transaction.RECEIPTS', 'receipt')
       .leftJoinAndSelect('transaction.ENROLLMENT', 'enrollment')
       .leftJoinAndSelect('enrollment.USER', 'user')
       .leftJoinAndSelect('user.PROFILE', 'profile')
@@ -64,6 +66,8 @@ export class TransactionRefsService {
         'transaction.ERM_ID',
         'transaction.TRANX_AMOUNT',
         'transaction.TRANX_PAYMENT_STATUS',
+        'receipt.RC_ID',
+        'receipt.RC_STATUS',
         'enrollment.ERM_ID',
         'enrollment.ERM_STATUS',
         'user.USER_ID',
@@ -98,6 +102,20 @@ export class TransactionRefsService {
             })
             .orWhere('LOWER(profile.userFullnameEn) LIKE :name', {
               name: `%${name}%`,
+            });
+        }),
+      );
+    }
+
+    if (examName) {
+      qb.andWhere(
+        new Brackets((innerQb) => {
+          innerQb
+            .where('LOWER(exam.EXAM_NAME) LIKE :examName', {
+              examName: `%${examName}%`,
+            })
+            .orWhere('LOWER(exam.EXAM_ROUND) LIKE :examName', {
+              examName: `%${examName}%`,
             });
         }),
       );

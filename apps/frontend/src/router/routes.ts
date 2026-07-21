@@ -396,6 +396,18 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'receipt-void-refund',
+            name: 'admin-receipt-void-refund',
+            component: () => import('pages/admin/receipt-void-refund-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.receiptVoidRefund', icon: 'receipt_long' },
+              ],
+            },
+          },
+          {
             path: 'payment-import-test-export',
             name: 'admin-payment-import-test-export',
             component: () => import('pages/admin/payment-import-test-export-page.vue'),

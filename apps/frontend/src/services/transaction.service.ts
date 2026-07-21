@@ -88,3 +88,9 @@ export const confirmPaymentFlow = async (
 export const expireTransaction = async (tranxId: number): Promise<void> => {
   await api.patch(`/transactions/${tranxId}/expire`);
 };
+
+/** คืนเงินเมื่อยังไม่มีใบเสร็จ ISSUED */
+export const refundTransaction = async (tranxId: number): Promise<BackendTransaction> => {
+  const response = await api.post<BackendTransaction>(`/transactions/${tranxId}/refund`);
+  return response.data;
+};
