@@ -107,6 +107,8 @@ export interface RoundExamProps {
   availableStatusTextSuffix?: string | undefined;
   fullBtnText?: string | undefined;
   registerBtnText?: string | undefined;
+  isRegistered?: boolean | undefined;
+  registeredBtnText?: string | undefined;
 }
 
 export interface ExamClockProps {
@@ -189,6 +191,7 @@ export interface ExamEnrollment {
   TRANSACTION?: {
     TRANX_ID: number;
     TRANX_MATCH_STATUS?: number;
+    TRANX_PAYMENT_STATUS?: number;
     TRANX_PAID_AT?: string | Date;
     TRANX_CREATED_AT?: string | Date;
     TRANX_AMOUNT?: number;
@@ -286,7 +289,12 @@ export interface BackendSession {
       | null;
     LOCATION: BackendLocation;
   }[];
+  /** @deprecated Prefer ACTIVE_ENROLLMENT_COUNT — list/detail ไม่โหลด ENROLLMENTS ทั้งก้อนแล้ว */
   ENROLLMENTS?: BackendEnrollment[];
+  /** จำนวนผู้สมัครที่ยังไม่ยกเลิก (จาก aggregate) */
+  ACTIVE_ENROLLMENT_COUNT?: number;
+  /** นับผู้สมัครต่อ SL_ID (key เป็น string ของ SL_ID หรือ "null") */
+  ENROLLMENT_SL_COUNTS?: Record<string, number>;
   EXAM_ID?: number;
   EXAM?: BackendExam;
 }

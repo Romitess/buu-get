@@ -2,8 +2,10 @@ import { api } from 'src/boot/axios';
 import type { BackendEnrollmentDetail, EnrollmentTableRow } from 'src/types/enrollment.types';
 
 export const fetchAllEnrollments = async (): Promise<BackendEnrollmentDetail[]> => {
-  const response = await api.get<BackendEnrollmentDetail[]>('/exam-enrollments');
-  return response.data;
+  const response = await api.get<{ data: BackendEnrollmentDetail[] }>('/exam-enrollments', {
+    params: { page: 1, limit: 100 },
+  });
+  return response.data.data ?? [];
 };
 
 export const fetchMatchedEnrollments = async (
@@ -32,46 +34,25 @@ export const fetchEnrollmentsByExamId = async (
     sortBy?: string | null | undefined;
     descending?: boolean | null | undefined;
   },
-): Promise<EnrollmentTableRow[] | PaginatedEnrollmentResponse> => {
-  const response = await api.get<
-    | BackendEnrollmentDetail[]
-    | { data: BackendEnrollmentDetail[]; total: number; totalPaid: number }
-  >(`/exam-enrollments/exam/${examId}`, { params });
+): Promise<PaginatedEnrollmentResponse> => {
+  const page = params?.page ?? 1;
+  const limit = params?.limit ?? 100;
+  const response = await api.get<{
+    data: BackendEnrollmentDetail[];
+    total: number;
+    totalPaid: number;
+  }>(`/exam-enrollments/exam/${examId}`, {
+    params: {
+      ...params,
+      page,
+      limit,
+    },
+  });
 
-  if (params?.page && params?.limit) {
-    const paginatedData = response.data as {
-      data: BackendEnrollmentDetail[];
-      total: number;
-      totalPaid: number;
-    };
-    const data = (paginatedData.data || []).map(
-      (enrollment: BackendEnrollmentDetail, index: number): EnrollmentTableRow => ({
-        index: (params.page! - 1) * params.limit! + index + 1,
-        ermId: enrollment.ERM_ID,
-        nationalId: enrollment.USER?.USER_NATIONAL_ID || '-',
-        titleTh: enrollment.USER?.PROFILE?.userTitleTh || '-',
-        fullnameTh: enrollment.USER?.PROFILE?.userFullnameTh || '-',
-        paymentStatus: enrollment.ERM_STATUS,
-        verifyStatus: enrollment.ERM_VERIFY_STATUS,
-        sessionId: enrollment.SESSION_ID,
-        sessionLocationId: enrollment.SL_ID ?? null,
-        userProfileId: enrollment.USER?.PROFILE?.userProfileId || 0,
-        remark: enrollment.ERM_PHYSICAL_STATUS || '',
-        slId: enrollment.SL_ID,
-        lsId: enrollment.LS_ID,
-      }),
-    );
-    return {
-      data,
-      total: paginatedData.total || 0,
-      totalPaid: paginatedData.totalPaid || 0,
-    };
-  }
-
-  const listData = response.data as BackendEnrollmentDetail[];
-  return (listData || []).map(
+  const paginatedData = response.data;
+  const data = (paginatedData.data || []).map(
     (enrollment: BackendEnrollmentDetail, index: number): EnrollmentTableRow => ({
-      index: index + 1,
+      index: (page - 1) * limit + index + 1,
       ermId: enrollment.ERM_ID,
       nationalId: enrollment.USER?.USER_NATIONAL_ID || '-',
       titleTh: enrollment.USER?.PROFILE?.userTitleTh || '-',
@@ -86,13 +67,42 @@ export const fetchEnrollmentsByExamId = async (
       lsId: enrollment.LS_ID,
     }),
   );
+  return {
+    data,
+    total: paginatedData.total || 0,
+    totalPaid: paginatedData.totalPaid || 0,
+  };
 };
 
+/** ดึงผู้สมัครทั้งรอบแบบแบ่งหน้า (limit สูงสุด 100/ครั้ง) แล้วรวมฝั่ง client */
 export const fetchRawEnrollmentsByExamId = async (
   examId: number,
 ): Promise<BackendEnrollmentDetail[]> => {
-  const response = await api.get<BackendEnrollmentDetail[]>(`/exam-enrollments/exam/${examId}`);
-  return response.data;
+  const pageSize = 100;
+  const all: BackendEnrollmentDetail[] = [];
+  let page = 1;
+  let total = Number.POSITIVE_INFINITY;
+
+  while (all.length < total) {
+    const response = await api.get<{
+      data: BackendEnrollmentDetail[];
+      total: number;
+      totalPaid: number;
+    }>(`/exam-enrollments/exam/${examId}`, {
+      params: { page, limit: pageSize },
+    });
+
+    const chunk = response.data.data ?? [];
+    total = response.data.total ?? 0;
+    all.push(...chunk);
+
+    if (chunk.length === 0 || all.length >= total) {
+      break;
+    }
+    page += 1;
+  }
+
+  return all;
 };
 
 export const fetchEnrollmentById = async (id: number): Promise<BackendEnrollmentDetail> => {

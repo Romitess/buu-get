@@ -208,6 +208,10 @@ const passwordRequirements = computed<PasswordRequirement[]>(() => [
     isMet: /[A-Z]/u.test(password.value),
   },
   {
+    label: t('profile.passwordRequirementDigit'),
+    isMet: /\d/u.test(password.value),
+  },
+  {
     label: t('profile.passwordRequirementSpecial'),
     isMet: /[!@#]/u.test(password.value),
   },

@@ -3,11 +3,23 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, Not, In, LessThan, Brackets } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
+import {
+  buildPaginatedResponse,
+  PaginatedResponse,
+} from 'src/common/dto/paginated-response.dto';
+import {
+  PAGINATION_DEFAULT_LIMIT,
+  PAGINATION_DEFAULT_PAGE,
+  PaginationQueryDto,
+} from 'src/common/dto/pagination-query.dto';
+import { ENROLLMENT_ADMIN_ROLES } from 'src/common/constants/role-groups';
+import { AuthenticatedUser, userHasAnyRole } from 'src/common/utils/authz.util';
 import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
 import {
   ExamEnrollment,
@@ -45,6 +57,7 @@ import {
   ExamHistoryRow,
   ExecutiveExamHistoryResponse,
 } from './interfaces/executive-exam-history.interface';
+import { ValidatePasscodeDto } from './dto/validate-passcode.dto';
 
 @Injectable()
 export class ExamEnrollmentsService {
@@ -108,6 +121,8 @@ export class ExamEnrollmentsService {
     if (sessions.length !== sessionIdSet.size) {
       throw new NotFoundException('One or more exam sessions were not found');
     }
+
+    await this.assertSeatEditingAllowed(enrollmentIds, dto.sessionIds);
 
     for (const assignment of dto.assignments) {
       const enrollment = enrollmentById.get(assignment.ermId);
@@ -177,21 +192,22 @@ export class ExamEnrollmentsService {
     const { USER_ID, SESSION_ID, PASSCODE, PHYSICAL_STATUS } =
       createExamEnrollmentDto;
 
-    const session = await this.examSessionRepository.findOne({
-      where: { SS_ID: SESSION_ID },
-      relations: ['ENROLLMENTS', 'EXAM'],
-    });
+    const [session, user] = await Promise.all([
+      this.examSessionRepository.findOne({
+        where: { SS_ID: SESSION_ID },
+        relations: ['EXAM'],
+      }),
+      this.userRepository.findOne({
+        where: { USER_ID },
+        relations: ['PROFILE'],
+      }),
+    ]);
 
     if (!session) {
       throw new NotFoundException(
         `Exam Session with ID ${SESSION_ID} not found`,
       );
     }
-
-    const user = await this.userRepository.findOne({
-      where: { USER_ID },
-      relations: ['PROFILE'],
-    });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${USER_ID} not found`);
@@ -203,32 +219,45 @@ export class ExamEnrollmentsService {
         SS_START_TIME: session.SS_START_TIME,
         SS_END_TIME: session.SS_END_TIME,
       },
-      relations: ['ENROLLMENTS', 'EXAM'],
+      relations: ['EXAM'],
     });
 
-    let targetSession = session;
-    let activeEnrollments = (session.ENROLLMENTS || []).filter(
-      (e) => e.ERM_STATUS !== ExamEnrollmentStatus.CANCELLED,
+    const sisterSessionIds = sisterSessions.map((s) => s.SS_ID);
+    const activeCountRows =
+      sisterSessionIds.length === 0
+        ? []
+        : await this.examEnrollmentRepository
+            .createQueryBuilder('enrollment')
+            .select('enrollment.SESSION_ID', 'SESSION_ID')
+            .addSelect('COUNT(*)', 'CNT')
+            .where('enrollment.SESSION_ID IN (:...sessionIds)', {
+              sessionIds: sisterSessionIds,
+            })
+            .andWhere('enrollment.ERM_STATUS != :cancelled', {
+              cancelled: ExamEnrollmentStatus.CANCELLED,
+            })
+            .groupBy('enrollment.SESSION_ID')
+            .getRawMany<{ SESSION_ID: number; CNT: string }>();
+
+    const activeCountBySessionId = new Map<number, number>(
+      activeCountRows.map((row) => [
+        Number(row.SESSION_ID),
+        Number(row.CNT) || 0,
+      ]),
     );
 
-    if (
-      session.SS_CAPACITY > 0 &&
-      activeEnrollments.length >= session.SS_CAPACITY
-    ) {
+    let targetSession = session;
+    const sessionActiveCount = activeCountBySessionId.get(session.SS_ID) ?? 0;
+
+    if (session.SS_CAPACITY > 0 && sessionActiveCount >= session.SS_CAPACITY) {
       let foundAvailable = false;
       for (const sister of sisterSessions) {
         if (sister.SS_ID === session.SS_ID) {
           continue;
         }
-        const sisterActive = (sister.ENROLLMENTS || []).filter(
-          (e) => e.ERM_STATUS !== ExamEnrollmentStatus.CANCELLED,
-        );
-        if (
-          sister.SS_CAPACITY > 0 &&
-          sisterActive.length < sister.SS_CAPACITY
-        ) {
+        const sisterActive = activeCountBySessionId.get(sister.SS_ID) ?? 0;
+        if (sister.SS_CAPACITY > 0 && sisterActive < sister.SS_CAPACITY) {
           targetSession = sister;
-          activeEnrollments = sisterActive;
           foundAvailable = true;
           break;
         }
@@ -238,28 +267,14 @@ export class ExamEnrollmentsService {
       }
     }
 
-    let validPasscode: ExamPasscode | null = null as ExamPasscode | null;
+    let validPasscode: ExamPasscode | null = null;
 
     if (targetSession.EXAM?.EXAM_TYPE === EXAM_TYPE.SPECIAL) {
-      if (!PASSCODE) {
-        throw new BadRequestException(
-          'Passcode is required for special exam rounds',
-        );
-      }
-
-      validPasscode = await this.examPasscodeRepository.findOne({
-        where: {
-          EXAM_ID: targetSession.EXAM_ID,
-          NATIONAL_ID: user.USER_NATIONAL_ID || '',
-          PASSCODE: PASSCODE,
-        },
-      });
-
-      if (!validPasscode) {
-        throw new BadRequestException(
-          'Invalid passcode for this user and exam',
-        );
-      }
+      validPasscode = await this.findValidSpecialPasscode(
+        targetSession.EXAM_ID,
+        user.USER_NATIONAL_ID || '',
+        PASSCODE,
+      );
     }
 
     const existingEnrollment = await this.examEnrollmentRepository
@@ -319,8 +334,46 @@ export class ExamEnrollmentsService {
     return await this.findOne(saved.ERM_ID);
   }
 
-  async findAll(): Promise<ExamEnrollment[]> {
-    return await this.examEnrollmentRepository.find({
+  async validatePasscode(
+    userId: number,
+    dto: ValidatePasscodeDto,
+  ): Promise<void> {
+    const session = await this.examSessionRepository.findOne({
+      where: { SS_ID: dto.SESSION_ID },
+      relations: ['EXAM'],
+    });
+
+    if (!session) {
+      throw new NotFoundException(
+        `Exam Session with ID ${dto.SESSION_ID} not found`,
+      );
+    }
+
+    if (session.EXAM?.EXAM_TYPE !== EXAM_TYPE.SPECIAL) {
+      return;
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { USER_ID: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    await this.findValidSpecialPasscode(
+      session.EXAM_ID,
+      user.USER_NATIONAL_ID || '',
+      dto.PASSCODE,
+    );
+  }
+
+  async findAll(
+    query: PaginationQueryDto = {},
+  ): Promise<PaginatedResponse<ExamEnrollment>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const [data, total] = await this.examEnrollmentRepository.findAndCount({
       relations: [
         'SESSION',
         'SESSION.EXAM',
@@ -330,7 +383,11 @@ export class ExamEnrollmentsService {
         'TRANSACTION',
         'TRANSACTION.RECEIPTS',
       ],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { ERM_ID: 'DESC' },
     });
+    return buildPaginatedResponse(data, total, page, limit);
   }
 
   async findExecutiveTestTakers(
@@ -486,108 +543,34 @@ export class ExamEnrollmentsService {
   async findByExamId(
     examId: number,
     query?: ExamEnrollmentQueryDto,
-  ): Promise<
-    | ExamEnrollment[]
-    | { data: ExamEnrollment[]; total: number; totalPaid: number }
-  > {
-    if (!query || !query.page || !query.limit) {
-      return await this.examEnrollmentRepository.find({
-        where: {
-          SESSION: { EXAM_ID: examId },
-        },
-        relations: [
-          'USER',
-          'USER.PROFILE',
-          'USER.IMAGE',
-          'SESSION',
-          'SESSION.EXAM',
-          'SESSION.SESSION_LOCATIONS',
-          'SESSION.SESSION_LOCATIONS.LOCATION',
-          'SESSION_LOCATION',
-          'SESSION_LOCATION.LOCATION',
-          'ATTENDANCES',
-          'VOUCHERS',
-        ],
-        select: {
-          ERM_ID: true,
-          USER_ID: true,
-          SESSION_ID: true,
-          SL_ID: true,
-          ERM_SEAT_LABEL: true,
-          ERM_TEST_TAKER: true,
-          ERM_STATUS: true,
-          ERM_VERIFY_STATUS: true,
-          ERM_PHYSICAL_STATUS: true,
-          CREATED_AT: true,
-          USER: {
-            USER_ID: true,
-            USER_NATIONAL_ID: true,
-            USER_PASSPORT_NO: true,
-            USER_EMAIL: true,
-            USER_CODE: true,
-            PROFILE: {
-              userProfileId: true,
-              userTitleTh: true,
-              userFullnameTh: true,
-              userTitleEn: true,
-              userFullnameEn: true,
-            },
-            IMAGE: {
-              USER_IMAGE_ID: true,
-              USER_IMAGE_URL: true,
-            },
-          },
-          SESSION: {
-            SS_ID: true,
-            EXAM_ID: true,
-            SS_START_TIME: true,
-            SS_END_TIME: true,
-            EXAM: {
-              EXAM_ID: true,
-              EXAM_ROUND: true,
-              EXAM_NAME: true,
-              EXAM_TYPE: true,
-            },
-          },
-          SESSION_LOCATION: {
-            SL_ID: true,
-            LOCATION_ID: true,
-            LOCATION: {
-              LOCATION_ID: true,
-              LOCATION_NAME: true,
-              LOCATION_ROOM_NO: true,
-            },
-          },
-          ATTENDANCES: {
-            ATTEND_ID: true,
-            ERM_ID: true,
-            ATTEND_STATUS: true,
-            ATTEND_CHECK_IN_TIME: true,
-          },
-          VOUCHERS: {
-            VC_ID: true,
-            ERM_ID: true,
-            VC_CODE: true,
-          },
-        },
-        order: { CREATED_AT: 'ASC' },
-      });
-    }
+  ): Promise<{ data: ExamEnrollment[]; total: number; totalPaid: number }> {
+    // บังคับ pagination เสมอ — ไม่มี path โหลดผู้สมัครทั้งรอบพร้อม relation ลึกในครั้งเดียว
+    const page = query?.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query?.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const resolvedQuery: ExamEnrollmentQueryDto = {
+      ...(query ?? {}),
+      page,
+      limit,
+    };
 
     const qb = this.examEnrollmentRepository
       .createQueryBuilder('enrollment')
-      .innerJoin('enrollment.SESSION', 'session')
+      .innerJoinAndSelect('enrollment.SESSION', 'session')
+      .leftJoinAndSelect('session.EXAM', 'exam')
       .leftJoinAndSelect('enrollment.USER', 'user')
       .leftJoinAndSelect('user.PROFILE', 'profile')
+      .leftJoinAndSelect('user.IMAGE', 'image')
+      .leftJoinAndSelect('enrollment.SESSION_LOCATION', 'sessionLocation')
+      .leftJoinAndSelect('sessionLocation.LOCATION', 'location')
       .where('session.EXAM_ID = :examId', { examId })
       .andWhere('enrollment.ERM_STATUS != :cancelledStatus', {
         cancelledStatus: ExamEnrollmentStatus.CANCELLED,
       });
 
     let sessionIds: number[] = [];
-    if (query.sessionId) {
+    if (resolvedQuery.sessionId) {
       const selectedSession = await this.examSessionRepository.findOne({
-        where: { SS_ID: query.sessionId },
+        where: { SS_ID: resolvedQuery.sessionId },
       });
       if (selectedSession) {
         const sisterSessions = await this.examSessionRepository.find({
@@ -599,7 +582,7 @@ export class ExamEnrollmentsService {
         });
         sessionIds = sisterSessions.map((s) => s.SS_ID);
       } else {
-        sessionIds = [query.sessionId];
+        sessionIds = [resolvedQuery.sessionId];
       }
     }
 
@@ -609,16 +592,16 @@ export class ExamEnrollmentsService {
       });
     }
 
-    if (query.sessionLocationId) {
+    if (resolvedQuery.sessionLocationId) {
       qb.andWhere(
         new Brackets((innerQb) => {
           innerQb
             .where('enrollment.SL_ID = :sessionLocationId', {
-              sessionLocationId: query.sessionLocationId,
+              sessionLocationId: resolvedQuery.sessionLocationId,
             })
             .orWhere(
               'enrollment.SL_ID IS NULL AND :sessionLocationId = (SELECT MIN(sl.SL_ID) FROM EXAM_T_SESSION_LOCATIONS sl WHERE sl.SS_ID = enrollment.SESSION_ID)',
-              { sessionLocationId: query.sessionLocationId },
+              { sessionLocationId: resolvedQuery.sessionLocationId },
             );
         }),
       );
@@ -628,8 +611,8 @@ export class ExamEnrollmentsService {
     const verifyMatches: number[] = [];
     const physicalMatches: number[] = [];
 
-    if (query.search) {
-      const searchLower = query.search.trim().toLowerCase();
+    if (resolvedQuery.search) {
+      const searchLower = resolvedQuery.search.trim().toLowerCase();
 
       // Payment Status mapping
       if ('รอชำระเงิน'.includes(searchLower)) statusMatches.push(0);
@@ -660,28 +643,28 @@ export class ExamEnrollmentsService {
         new Brackets((innerQb) => {
           innerQb
             .where('user.USER_NATIONAL_ID LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('user.USER_PASSPORT_NO LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('user.USER_EMAIL LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('user.USER_CODE LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('profile.userFullnameTh LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('profile.userFullnameEn LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('profile.userTitleTh LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('profile.userTitleEn LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             });
 
           if (statusMatches.length > 0) {
@@ -725,48 +708,48 @@ export class ExamEnrollmentsService {
       });
     }
 
-    if (query.sessionLocationId) {
+    if (resolvedQuery.sessionLocationId) {
       paidQb.andWhere(
         new Brackets((innerQb) => {
           innerQb
             .where('enrollment.SL_ID = :sessionLocationId', {
-              sessionLocationId: query.sessionLocationId,
+              sessionLocationId: resolvedQuery.sessionLocationId,
             })
             .orWhere(
               'enrollment.SL_ID IS NULL AND :sessionLocationId = (SELECT MIN(sl.SL_ID) FROM EXAM_T_SESSION_LOCATIONS sl WHERE sl.SS_ID = enrollment.SESSION_ID)',
-              { sessionLocationId: query.sessionLocationId },
+              { sessionLocationId: resolvedQuery.sessionLocationId },
             );
         }),
       );
     }
 
-    if (query.search) {
+    if (resolvedQuery.search) {
       paidQb.andWhere(
         new Brackets((innerQb) => {
           innerQb
             .where('user.USER_NATIONAL_ID LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('user.USER_PASSPORT_NO LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('user.USER_EMAIL LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('user.USER_CODE LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('profile.userFullnameTh LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('profile.userFullnameEn LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('profile.userTitleTh LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('profile.userTitleEn LIKE :searchPattern', {
-              searchPattern: `%${query.search}%`,
+              searchPattern: `%${resolvedQuery.search}%`,
             });
 
           if (statusMatches.length > 0) {
@@ -790,12 +773,12 @@ export class ExamEnrollmentsService {
       );
     }
 
-    const skip = (query.page - 1) * query.limit;
+    const skip = (page - 1) * limit;
 
     let sortColumn = 'enrollment.CREATED_AT';
     let sortOrder: 'ASC' | 'DESC' = 'ASC';
 
-    if (query.sortBy) {
+    if (resolvedQuery.sortBy) {
       const mapping: Record<string, string> = {
         titleTh: 'profile.userTitleTh',
         fullnameTh: 'profile.userFullnameTh',
@@ -804,22 +787,54 @@ export class ExamEnrollmentsService {
         verifyStatus: 'enrollment.ERM_VERIFY_STATUS',
         createdAt: 'enrollment.CREATED_AT',
       };
-      const sortBy = query.sortBy;
+      const sortBy = resolvedQuery.sortBy;
       if (Object.prototype.hasOwnProperty.call(mapping, sortBy)) {
         sortColumn = mapping[sortBy];
       }
-      if (query.descending !== undefined) {
+      if (resolvedQuery.descending !== undefined) {
         sortOrder =
-          query.descending === 'true' || query.descending === true
+          resolvedQuery.descending === 'true' ||
+          resolvedQuery.descending === true
             ? 'DESC'
             : 'ASC';
       }
     }
 
-    qb.orderBy(sortColumn, sortOrder).skip(skip).take(query.limit);
+    qb.orderBy(sortColumn, sortOrder).skip(skip).take(limit);
 
     const [data, total] = await qb.getManyAndCount();
     const totalPaid = await paidQb.getCount();
+
+    // โหลด OneToMany แยกหลัง pagination เพื่อไม่ให้ JOIN ทำให้ count เพี้ยน
+    if (data.length > 0) {
+      const ermIds = data.map((enrollment) => enrollment.ERM_ID);
+      const withOneToMany = await this.examEnrollmentRepository.find({
+        where: { ERM_ID: In(ermIds) },
+        relations: ['ATTENDANCES', 'VOUCHERS'],
+        select: {
+          ERM_ID: true,
+          ATTENDANCES: {
+            ATTEND_ID: true,
+            ERM_ID: true,
+            ATTEND_STATUS: true,
+            ATTEND_CHECK_IN_TIME: true,
+          },
+          VOUCHERS: {
+            VC_ID: true,
+            ERM_ID: true,
+            VC_CODE: true,
+          },
+        },
+      });
+      const extrasById = new Map(
+        withOneToMany.map((enrollment) => [enrollment.ERM_ID, enrollment]),
+      );
+      for (const enrollment of data) {
+        const extras = extrasById.get(enrollment.ERM_ID);
+        enrollment.ATTENDANCES = extras?.ATTENDANCES ?? [];
+        enrollment.VOUCHERS = extras?.VOUCHERS ?? [];
+      }
+    }
 
     return {
       data,
@@ -905,8 +920,18 @@ export class ExamEnrollmentsService {
   async update(
     id: number,
     updateExamEnrollmentDto: UpdateExamEnrollmentDto,
+    user: AuthenticatedUser,
   ): Promise<ExamEnrollment> {
     const enrollment = await this.findOne(id);
+
+    if (!userHasAnyRole(user, ENROLLMENT_ADMIN_ROLES)) {
+      this.assertCandidateCancellation(
+        user,
+        enrollment,
+        updateExamEnrollmentDto,
+      );
+    }
+
     await this.validateSeatAssignment(enrollment, updateExamEnrollmentDto);
 
     if (
@@ -969,6 +994,39 @@ export class ExamEnrollmentsService {
     return await this.findOne(saved.ERM_ID);
   }
 
+  private assertCandidateCancellation(
+    user: AuthenticatedUser,
+    enrollment: ExamEnrollment,
+    dto: UpdateExamEnrollmentDto,
+  ): void {
+    if (user.userId !== enrollment.USER_ID) {
+      throw new ForbiddenException(
+        'Access denied: enrollment does not belong to you',
+      );
+    }
+
+    const changedFields = (
+      Object.keys(dto) as Array<keyof UpdateExamEnrollmentDto>
+    ).filter((key) => dto[key] !== undefined);
+
+    const isCancelOnly =
+      changedFields.length === 1 &&
+      changedFields[0] === 'ERM_STATUS' &&
+      dto.ERM_STATUS === ExamEnrollmentStatus.CANCELLED;
+
+    if (!isCancelOnly) {
+      throw new ForbiddenException(
+        'Access denied: candidates can only cancel their enrollment',
+      );
+    }
+
+    if (enrollment.ERM_STATUS !== ExamEnrollmentStatus.UNPAID) {
+      throw new BadRequestException(
+        'Only unpaid enrollments can be cancelled by the candidate',
+      );
+    }
+  }
+
   private async validateSeatAssignment(
     enrollment: ExamEnrollment,
     updateExamEnrollmentDto: UpdateExamEnrollmentDto,
@@ -1012,6 +1070,67 @@ export class ExamEnrollmentsService {
     if (sessionLocation.SS_ID !== enrollment.SESSION_ID) {
       throw new BadRequestException(
         'Session location does not belong to this enrollment session',
+      );
+    }
+
+    await this.assertSeatEditingAllowed(
+      [enrollment.ERM_ID],
+      [enrollment.SESSION_ID],
+    );
+  }
+
+  private async assertSeatEditingAllowed(
+    enrollmentIds: number[],
+    sessionIds: number[],
+  ): Promise<void> {
+    const uniqueEnrollmentIds = [...new Set(enrollmentIds)];
+    const uniqueSessionIds = [...new Set(sessionIds)];
+
+    const [sessions, enrollments] = await Promise.all([
+      uniqueSessionIds.length > 0
+        ? this.examSessionRepository.find({
+            where: { SS_ID: In(uniqueSessionIds) },
+            select: ['SS_ID', 'SS_SESSION_STATUS'],
+          })
+        : Promise.resolve([]),
+      uniqueEnrollmentIds.length > 0
+        ? this.examEnrollmentRepository.find({
+            where: { ERM_ID: In(uniqueEnrollmentIds) },
+            relations: ['VOUCHERS'],
+            select: ['ERM_ID', 'ERM_STATUS'],
+          })
+        : Promise.resolve([]),
+    ]);
+
+    if (
+      sessions.some(
+        (session) =>
+          Number(session.SS_SESSION_STATUS) >=
+          Number(ExamSessionStatus.VOUCHER_SENT),
+      )
+    ) {
+      throw new ConflictException(
+        'ไม่สามารถแก้ไขที่นั่งได้ เนื่องจากออก Test Voucher แล้ว',
+      );
+    }
+
+    if (
+      enrollments.some(
+        (enrollment) =>
+          Number(enrollment.ERM_STATUS) >=
+          Number(ExamEnrollmentStatus.SEAT_PUBLISHED),
+      )
+    ) {
+      throw new ConflictException(
+        'ไม่สามารถแก้ไขที่นั่งได้ เนื่องจากออก Test Voucher แล้ว',
+      );
+    }
+
+    if (
+      enrollments.some((enrollment) => (enrollment.VOUCHERS?.length ?? 0) > 0)
+    ) {
+      throw new ConflictException(
+        'ไม่สามารถแก้ไขที่นั่งได้ เนื่องจากออก Test Voucher แล้ว',
       );
     }
   }
@@ -1132,5 +1251,31 @@ export class ExamEnrollmentsService {
         `[Cron] Automatically cancelled ${result.affected} expired unpaid enrollments.`,
       );
     }
+  }
+
+  private async findValidSpecialPasscode(
+    examId: number,
+    nationalId: string,
+    passcode?: string,
+  ): Promise<ExamPasscode> {
+    if (!passcode) {
+      throw new BadRequestException(
+        'Passcode is required for special exam rounds',
+      );
+    }
+
+    const validPasscode = await this.examPasscodeRepository.findOne({
+      where: {
+        EXAM_ID: examId,
+        NATIONAL_ID: nationalId,
+        PASSCODE: passcode,
+      },
+    });
+
+    if (!validPasscode) {
+      throw new BadRequestException('Invalid passcode for this user and exam');
+    }
+
+    return validPasscode;
   }
 }

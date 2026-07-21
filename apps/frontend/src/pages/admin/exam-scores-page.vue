@@ -220,7 +220,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { useQuasar, type QTableColumn } from 'quasar';
+import { exportFile, useQuasar, type QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import BaseTable from 'src/components/shared/base-table.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
@@ -323,9 +323,6 @@ const selectedCandidateInfo = ref<
   | undefined
 >(null);
 
-const sampleFileUrl =
-  'https://docs.google.com/spreadsheets/d/1IJGChv6bg4W8sgYPRmMQwDAOk7YwSw1R/export?format=xlsx&gid=181366053';
-
 const pagination = ref<PaginationModel>({
   page: 1,
   rowsPerPage: 10,
@@ -335,7 +332,7 @@ const pagination = ref<PaginationModel>({
 const samplePagination = ref<PaginationModel>({
   page: 1,
   rowsPerPage: 10,
-  rowsNumber: 3,
+  rowsNumber: 0,
 });
 
 const hasImportedScores = computed(() => importedEnrollmentIds.value.size > 0);
@@ -755,41 +752,48 @@ const sampleColumns: QTableColumn[] = [
   },
 ];
 
-const sampleRows = [
-  {
-    testTakerId: '691040001',
-    fullnameEn: 'Mr. Pha...',
-    fullnameTh: 'นาย ป.....',
-    citizenId: '320XXXXXXXXX',
-    passport: '-',
-    vocabularyScore: 20,
-    readingScore: 24,
-    totalScore: 44,
-    level: 1,
-  },
-  {
-    testTakerId: '691040002',
-    fullnameEn: 'Mr. Cha..... Xi....',
-    fullnameTh: '- -',
-    citizenId: '-',
-    passport: 'EL82XXXXX',
-    vocabularyScore: 45,
-    readingScore: 41,
-    totalScore: 86,
-    level: 5,
-  },
-  {
-    testTakerId: '691040003',
-    fullnameEn: 'Miss Wi..... N.....',
-    fullnameTh: 'นางสาว วิ..... น.....',
-    citizenId: '134XXXXXXXXX',
-    passport: '-',
-    vocabularyScore: 23,
-    readingScore: 26,
-    totalScore: 49,
-    level: 1,
-  },
-];
+interface SampleScoreRow {
+  testTakerId: string;
+  fullnameEn: string;
+  fullnameTh: string;
+  citizenId: string;
+  passport: string;
+  vocabularyScore: number;
+  readingScore: number;
+  totalScore: number;
+  level: number;
+}
+
+/** ตัวอย่างไฟล์จากผู้สมัครจริงในห้องที่เลือก — ดาวน์โหลดแล้ว import กลับได้ทันที */
+const sampleRows = computed((): SampleScoreRow[] => {
+  return currentRoomEnrollments.value.map((enrollment, index): SampleScoreRow => {
+    const profile = enrollment.USER?.PROFILE;
+    const draft = scoreDraftByEnrollmentId.value[enrollment.ERM_ID] ?? getScoreDraft(enrollment);
+    const hasExistingScore =
+      draft.scoreGrammar > 0 ||
+      draft.scoreReading > 0 ||
+      scoreByEnrollmentId.value.has(enrollment.ERM_ID);
+
+    const vocabularyScore = hasExistingScore ? draft.scoreGrammar : 20 + (index % 25);
+    const readingScore = hasExistingScore ? draft.scoreReading : 20 + ((index + 7) % 25);
+    const totalScore = hasExistingScore
+      ? draft.scoreTotal || vocabularyScore + readingScore
+      : vocabularyScore + readingScore;
+    const level = hasExistingScore ? draft.band || calculateBand(totalScore) : calculateBand(totalScore);
+
+    return {
+      testTakerId: enrollment.ERM_TEST_TAKER?.trim() || '-',
+      fullnameEn: profile?.userFullnameEn || '-',
+      fullnameTh: profile?.userFullnameTh || '-',
+      citizenId: enrollment.USER?.USER_NATIONAL_ID?.trim() || '-',
+      passport: enrollment.USER?.USER_PASSPORT_NO?.trim() || '-',
+      vocabularyScore,
+      readingScore,
+      totalScore,
+      level,
+    };
+  });
+});
 
 const onRequest = (props: TableRequestProps): void => {
   const { page, rowsPerPage } = props.pagination;
@@ -1056,16 +1060,16 @@ const applyImportedScoreRows = (rows: string[][]): void => {
     if (!matchedEnrollment && cleanCitizen && cleanCitizen !== '-') {
       const normCitizen = normalizeImportKey(cleanCitizen);
       matchedEnrollment = currentRoomEnrollments.value.find((enrollment) => {
-        const dbTestTaker = enrollment.ERM_TEST_TAKER;
-        return dbTestTaker && normalizeImportKey(dbTestTaker) === normCitizen;
+        const dbCitizen = enrollment.USER?.USER_NATIONAL_ID;
+        return dbCitizen && normalizeImportKey(dbCitizen) === normCitizen;
       });
     }
 
     if (!matchedEnrollment && cleanPassport && cleanPassport !== '-') {
       const normPassport = normalizeImportKey(cleanPassport);
       matchedEnrollment = currentRoomEnrollments.value.find((enrollment) => {
-        const dbTestTaker = enrollment.ERM_TEST_TAKER;
-        return dbTestTaker && normalizeImportKey(dbTestTaker) === normPassport;
+        const dbPassport = enrollment.USER?.USER_PASSPORT_NO;
+        return dbPassport && normalizeImportKey(dbPassport) === normPassport;
       });
     }
 
@@ -1132,14 +1136,76 @@ const handleUrlUpload = (url: string): void => {
 };
 
 const openSampleDialog = (): void => {
+  if (sampleRows.value.length === 0) {
+    $q.notify({
+      type: 'warning',
+      message: 'ไม่พบผู้สมัครในห้องนี้สำหรับสร้างไฟล์ตัวอย่าง',
+    });
+    return;
+  }
+
+  samplePagination.value = {
+    page: 1,
+    rowsPerPage: 10,
+    rowsNumber: sampleRows.value.length,
+  };
   showUploadDialog.value = false;
   void nextTick(() => {
     showSampleDialog.value = true;
   });
 };
 
+const wrapCsvCell = (value: string | number, forceText = false): string => {
+  let formatted = String(value ?? '');
+  if (forceText && /^\d+$/.test(formatted)) {
+    formatted = `\t${formatted}`;
+  }
+  return `"${formatted.replace(/"/g, '""')}"`;
+};
+
 const downloadSampleFile = (): void => {
-  window.open(sampleFileUrl, '_blank', 'noopener,noreferrer');
+  if (sampleRows.value.length === 0) {
+    $q.notify({
+      type: 'warning',
+      message: 'ไม่พบผู้สมัครในห้องนี้สำหรับสร้างไฟล์ตัวอย่าง',
+    });
+    return;
+  }
+
+  const headers = sampleColumns.map((column) => wrapCsvCell(String(column.label ?? '')));
+  const dataRows = sampleRows.value.map((row) =>
+    [
+      wrapCsvCell(row.testTakerId, true),
+      wrapCsvCell(row.fullnameEn),
+      wrapCsvCell(row.fullnameTh),
+      wrapCsvCell(row.citizenId, true),
+      wrapCsvCell(row.passport, true),
+      wrapCsvCell(row.vocabularyScore),
+      wrapCsvCell(row.readingScore),
+      wrapCsvCell(row.totalScore),
+      wrapCsvCell(row.level),
+    ].join(','),
+  );
+
+  const content = `\ufeff${[headers.join(','), ...dataRows].join('\r\n')}`;
+  const examName = exam.value?.EXAM_ROUND
+    ? `${exam.value.EXAM_NAME}_${exam.value.EXAM_ROUND}`
+    : exam.value?.EXAM_NAME || 'exam';
+  const fileName = `score_import_sample_${examName}`.replace(/[\s/\\?%*:|"<>]+/g, '_');
+  const status = exportFile(`${fileName}.csv`, content, 'text/csv');
+
+  if (status !== true) {
+    $q.notify({
+      type: 'negative',
+      message: 'ไม่สามารถดาวน์โหลดไฟล์ตัวอย่างได้',
+    });
+    return;
+  }
+
+  $q.notify({
+    type: 'positive',
+    message: `ดาวน์โหลดตัวอย่างจากผู้สมัครจริง ${sampleRows.value.length} รายการ`,
+  });
 };
 
 const clearImportedScores = (): void => {

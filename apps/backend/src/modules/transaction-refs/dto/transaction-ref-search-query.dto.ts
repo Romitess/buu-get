@@ -32,4 +32,9 @@ export class TransactionRefSearchQueryDto {
   @IsString()
   @IsOptional()
   name?: string;
+
+  @ApiPropertyOptional({ description: 'ชื่อการสอบ' })
+  @IsString()
+  @IsOptional()
+  examName?: string;
 }

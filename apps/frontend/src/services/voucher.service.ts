@@ -11,6 +11,13 @@ export interface BulkIssueVouchersPayload {
   ermIds: number[];
   examName: string;
   historyUrl: string;
+  sessionIds?: number[];
+}
+
+export interface BulkIssueVouchersResult {
+  success: boolean;
+  updatedEnrollmentCount: number;
+  updatedSessionIds: number[];
 }
 
 export interface BackendVoucher {
@@ -35,7 +42,7 @@ export const sendVoucherEmail = async (
 
 export const bulkIssueVouchers = async (
   payload: BulkIssueVouchersPayload,
-): Promise<{ success: boolean }> => {
-  const response = await api.post<{ success: boolean }>('/exam-vouchers/bulk-issue', payload);
+): Promise<BulkIssueVouchersResult> => {
+  const response = await api.post<BulkIssueVouchersResult>('/exam-vouchers/bulk-issue', payload);
   return response.data;
 };

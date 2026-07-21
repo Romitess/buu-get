@@ -39,8 +39,7 @@
         />
 
         <div v-else-if="isLoadingData" class="room-preview-empty">
-          <q-spinner color="primary" size="40px" />
-          <div>กำลังโหลดผังที่นั่ง</div>
+          <RoomPreviewSkeleton />
         </div>
 
         <div v-else class="room-preview-empty">
@@ -59,6 +58,7 @@ import type { CreateExamForm, ExamRoom } from 'src/composables/use-create-exam';
 import type { ExamLocationOption } from 'src/services/exam.service';
 import type { BackendLocation } from 'src/types/exam';
 import AppExamSeatPreview from 'src/components/exam/app-exam-seat-preview.vue';
+import { RoomPreviewSkeleton } from 'src/components/base/skeleton';
 
 interface WalkwayPosition {
   type: 'row' | 'column';

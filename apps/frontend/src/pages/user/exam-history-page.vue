@@ -6,8 +6,13 @@
       :subtitle="$t('exam.history.pageDescription')"
     />
 
+    <!-- Loading state -->
+    <div v-if="isLoadingHistory" class="q-gutter-y-md">
+      <CardSkeleton v-for="n in 3" :key="`history-skeleton-${n}`" height="160px" :lines="4" />
+    </div>
+
     <!-- Pending Payment Section -->
-    <div v-if="pendingExams.length > 0" class="history-section q-mb-xl">
+    <div v-else-if="pendingExams.length > 0" class="history-section q-mb-xl">
       <div class="section-title row items-center q-mb-md">
         <q-icon name="schedule" size="var(--space-lg)" class="section-icon q-mr-sm" />
         <span class="text-weight-bold text-subtitle1">{{
@@ -50,7 +55,7 @@
     </div>
 
     <!-- History Section -->
-    <div v-if="historyExams.length > 0" class="history-section">
+    <div v-if="!isLoadingHistory && historyExams.length > 0" class="history-section">
       <div class="section-title row items-center q-mb-md">
         <q-icon name="schedule" size="var(--space-lg)" class="section-icon q-mr-sm" />
         <span class="text-weight-bold text-subtitle1">{{ $t('exam.history.sectionTitle') }}</span>
@@ -86,6 +91,7 @@
               icon="receipt_long"
               :label="$t('exam.history.downloadReceipt')"
               class="action-btn btn-action-filled"
+              :loading="isDownloadingReceipt"
               @click="handlePrintReceipt(exam)"
             />
             <AppButton
@@ -93,6 +99,7 @@
               icon="file_download"
               :label="$t('exam.history.certificate')"
               class="action-btn btn-action-filled"
+              :loading="isDownloadingCertificate"
               @click="handlePrintCertificate(exam)"
             />
             <AppButton
@@ -100,6 +107,7 @@
               icon="badge"
               :label="$t('exam.history.candidateCard')"
               class="action-btn btn-action-filled"
+              :loading="isDownloadingVoucher"
               @click="handlePrintVoucher(exam)"
             />
           </template>
@@ -227,6 +235,7 @@ import { useAppDate } from 'src/composables/useAppDate';
 import { PAYMENT_DURATION_SECONDS_DEFAULT } from 'src/constants/exam';
 import type { ExamHistoryItem } from 'src/types/exam';
 import type { ReceiptInformation } from 'src/types/receipt-information';
+import { CardSkeleton } from 'src/components/base/skeleton';
 
 const $q = useQuasar();
 const { t } = useI18n();
@@ -237,8 +246,15 @@ const { formatDateRange } = useAppDate();
 // === State จาก Store ===
 const { pendingRegistrations, historyRecords } = storeToRefs(examStore);
 
+const isLoadingHistory = ref(true);
+
 onMounted(async () => {
-  await examStore.fetchHistory();
+  isLoadingHistory.value = true;
+  try {
+    await examStore.fetchHistory();
+  } finally {
+    isLoadingHistory.value = false;
+  }
 });
 
 // === UI-only State ===

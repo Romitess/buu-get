@@ -6,9 +6,10 @@
       subtitle="แสดงประวัติการสอบทั้งหมดของผู้สมัครสอบ รวมถึงรายละเอียดคะแนนที่ผู้สมัครสอบได้รับในแต่ละรอบการสอบ"
     />
 
-    <div v-if="isLoading || isLoadingHistory" class="flex flex-center q-pa-xl">
-      <q-spinner-dots color="primary" size="40px" />
-    </div>
+    <PageSkeleton v-if="isLoading" :show-header="false">
+      <CardSkeleton height="160px" :lines="3" class="q-mb-lg" />
+      <TableSkeleton :columns="columns" :rows="6" />
+    </PageSkeleton>
 
     <div v-else-if="enrollment" class="history-content">
       <ProfileSummaryCard :enrollment="enrollment" class="q-mb-lg" />
@@ -93,6 +94,7 @@ import { fetchEnrollmentById } from 'src/services/enrollment.service';
 import { fetchExecutiveExamHistory } from 'src/services/executive-test-taker.service';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 import type { ExamHistoryRow } from 'src/types/executive-test-taker.types';
+import { PageSkeleton, CardSkeleton, TableSkeleton } from 'src/components/base/skeleton';
 
 interface CandidateInfo {
   fullname: string;

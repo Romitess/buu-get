@@ -104,12 +104,14 @@ export class MoodleEnrolWorker {
     });
 
     // enrol สำเร็จ → เก็บ Moodle course id ไว้เป็นตัวอ้างอิง (กันถูกหยิบมา enrol ซ้ำ)
-    for (const [moodleCourseId, ermIds] of courseToEnrollmentIds) {
-      await this.enrollmentRepository.update(
-        { ERM_ID: In(ermIds), ERM_MOODLE_ENROLL_ID: IsNull() },
-        { ERM_MOODLE_ENROLL_ID: moodleCourseId },
-      );
-    }
+    await Promise.all(
+      [...courseToEnrollmentIds.entries()].map(([moodleCourseId, ermIds]) =>
+        this.enrollmentRepository.update(
+          { ERM_ID: In(ermIds), ERM_MOODLE_ENROLL_ID: IsNull() },
+          { ERM_MOODLE_ENROLL_ID: moodleCourseId },
+        ),
+      ),
+    );
 
     this.logger.log(
       `enrol ไป Moodle สำเร็จ ${enrolments.length} รายการ (${courseToEnrollmentIds.size} คอร์ส)`,

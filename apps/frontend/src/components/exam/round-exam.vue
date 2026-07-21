@@ -39,13 +39,15 @@
 
       <AppButton
         :label="
-          isExpired
-            ? t('examSchedule.expiredBtnText')
-            : isNotOpenYet
-              ? t('examSchedule.notOpenBtnText')
-              : isFull
-                ? fullBtnText || t('examSchedule.fullBtnText')
-                : registerBtnText || t('examSchedule.registerBtnText')
+          isRegistered
+            ? registeredBtnText || t('examSchedule.registeredBtnText')
+            : isExpired
+              ? t('examSchedule.expiredBtnText')
+              : isNotOpenYet
+                ? t('examSchedule.notOpenBtnText')
+                : isFull
+                  ? fullBtnText || t('examSchedule.fullBtnText')
+                  : registerBtnText || t('examSchedule.registerBtnText')
         "
         :color="isDisabled ? 'full' : 'primary'"
         :disable="isDisabled"
@@ -61,6 +63,7 @@ import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { api } from 'src/boot/axios';
 import type { RoundExamProps } from 'src/types/exam';
+import { parseRegistrationEndDate } from 'src/utils/exam-registration';
 import ExamClock from './exam-clock.vue';
 import AppButton from '../base/app-button.vue';
 
@@ -72,6 +75,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const isFull = computed(() => props.availableSeats <= 0);
+const isRegistered = computed(() => props.isRegistered === true);
 
 const now = ref(new Date());
 const serverOffset = ref(0);
@@ -136,7 +140,8 @@ onUnmounted(() => {
 const isExpired = computed((): boolean => {
   if (!props.regEndDate) return false;
   try {
-    const regEnd = new Date(props.regEndDate);
+    const regEnd = parseRegistrationEndDate(props.regEndDate);
+    if (!regEnd) return false;
     return now.value > regEnd;
   } catch (e) {
     console.error('Error calculating expiration:', e);
@@ -155,10 +160,12 @@ const isNotOpenYet = computed((): boolean => {
   }
 });
 
-const isDisabled = computed((): boolean => isFull.value || isExpired.value || isNotOpenYet.value);
+const isDisabled = computed(
+  (): boolean => isFull.value || isExpired.value || isNotOpenYet.value || isRegistered.value,
+);
 
 const handleRegister = (): void => {
-  if (isDisabled.value) return;
+  if (isDisabled.value || isRegistered.value) return;
   const status = isExpired.value ? 'expired' : isNotOpenYet.value ? 'notOpen' : '';
   emit('register', status);
 };

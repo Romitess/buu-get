@@ -341,6 +341,12 @@ const navLinks = computed<NavigationItem[]>(() => {
           path: '/admin/payment-import',
         },
         {
+          name: 'admin-payment-import-test-export',
+          label: t('navigation.paymentImportTestExport'),
+          icon: 'download',
+          path: '/admin/payment-import-test-export',
+        },
+        {
           name: 'admin-fund-source-management',
           label: t('navigation.fundSourceManagement'),
           icon: 'account_balance',

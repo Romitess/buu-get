@@ -294,6 +294,24 @@ export function useFeatureName() {
 }
 ```
 
+### 4.4.1 Loading & Skeleton UI
+
+- **Data fetch:** ใช้ `isLoading` จาก composable + skeleton ที่สะท้อน layout จริง (`components/base/skeleton/`)
+- **Mutation ยาว:** ใช้ `is{Verb}ing` (เช่น `isSaving`, `isImportingCandidates`) + skeleton ในพื้นที่ที่เกี่ยวข้อง
+- **ปุ่ม submit สั้นๆ:** ใช้ `q-btn :loading` ได้
+- **ตาราง:** ส่ง `:loading="isLoading"` ไปที่ `BaseTable` — จะแสดง `TableSkeleton` อัตโนมัติ
+- **ห้ามใช้:** `$q.loading`, `q-inner-loading`, page-level `q-spinner` สำหรับ data fetch
+
+| Component | ใช้เมื่อ |
+|-----------|---------|
+| `TableSkeleton` | ตาราง (ผ่าน `BaseTable`) |
+| `CardGridSkeleton` | หน้า home / card grid |
+| `BannerSkeleton` | carousel / banner |
+| `FormSkeleton` | ฟอร์ม / seat map |
+| `PageSkeleton` | หน้า detail ที่โหลดทั้งก้อน |
+
+Presentation components รับ prop `loading: boolean` จาก parent `isLoading`
+
 ---
 
 ### 4.5 Linting & Formatting
@@ -301,6 +319,21 @@ export function useFeatureName() {
 - ใช้ **ESLint** และ **Prettier** ตามที่โปรเจกต์กำหนด
 - **ก่อน Commit ทุกครั้ง** ต้องรัน `npm run lint` เพื่อตรวจสอบความถูกต้อง
 - ห้าม Commit โค้ดที่มี Lint Error เด็ดขาด
+
+### 4.6 Testing & Definition of Done
+
+ก่อนเปิด PR สำหรับงานที่แตะ backend/frontend ต้องผ่านอย่างน้อย:
+
+- `npm run lint` (root)
+- `npm run typecheck` (root)
+- `npm run test` (backend unit tests; frontend เมื่อมี Vitest)
+- `npm run build` (เมื่อแก้ contract หรือ build config)
+
+**โมดูลที่ต้องมี unit test เมื่อแก้ไข:** `auth`, `transactions`, `exam-enrollments`, `bank-reconciles`, `roles`/`authz`
+
+- เพิ่มหรืออัปเดต `*.spec.ts` ให้ครอบ business rule ที่เปลี่ยน
+- ห้าม merge ถ้า `npm test` แดง
+- CI (`.github/workflows/ci.yml`) เป็น quality gate หลัก
 
 ---
 

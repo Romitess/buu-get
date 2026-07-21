@@ -20,6 +20,7 @@
 
     <div class="attempt-summary__actions">
       <q-btn
+        data-tour="return-to-attempt"
         unelevated
         no-caps
         label="Return to attempt"
@@ -27,6 +28,7 @@
         @click="emitReturnAttempt"
       />
       <q-btn
+        data-tour="submit-all-finish"
         unelevated
         no-caps
         label="Submit all and finish"

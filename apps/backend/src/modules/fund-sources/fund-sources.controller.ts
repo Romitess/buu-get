@@ -10,6 +10,11 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import {
+  FINANCE_ROLES,
+  FUND_SOURCE_READ_ROLES,
+} from 'src/common/constants/role-groups';
 import { FundSourcesService } from './fund-sources.service';
 import { CreateFundSourceDto } from './dto/create-fund-source.dto';
 import { UpdateFundSourceDto } from './dto/update-fund-source.dto';
@@ -23,6 +28,7 @@ export class FundSourcesController {
   constructor(private readonly fundSourcesService: FundSourcesService) {}
 
   @Post()
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'สร้างแหล่งทุนใหม่' })
   @ApiResponse({
     status: 201,
@@ -36,6 +42,7 @@ export class FundSourcesController {
   }
 
   @Get()
+  @Roles(...FUND_SOURCE_READ_ROLES)
   @ApiOperation({ summary: 'ดึงข้อมูลแหล่งทุนทั้งหมด' })
   @ApiResponse({
     status: 200,
@@ -47,6 +54,7 @@ export class FundSourcesController {
   }
 
   @Get('daily-revenue')
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'ดึงรายงานสรุปการรับเงินประจำวัน' })
   @ApiResponse({
     status: 200,
@@ -59,6 +67,7 @@ export class FundSourcesController {
   }
 
   @Get('departments')
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'ดึงข้อมูลส่วนงานทั้งหมดสำหรับใช้ทำฟิลเตอร์' })
   @ApiResponse({
     status: 200,
@@ -69,6 +78,7 @@ export class FundSourcesController {
   }
 
   @Get(':id')
+  @Roles(...FUND_SOURCE_READ_ROLES)
   @ApiOperation({ summary: 'ดึงข้อมูลแหล่งทุนด้วย ID' })
   @ApiResponse({
     status: 200,
@@ -81,6 +91,7 @@ export class FundSourcesController {
   }
 
   @Patch(':id')
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'แก้ไขข้อมูลแหล่งทุน' })
   @ApiResponse({
     status: 200,
@@ -96,6 +107,7 @@ export class FundSourcesController {
   }
 
   @Delete(':id')
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'ลบข้อมูลแหล่งทุน (Soft delete)' })
   @ApiResponse({
     status: 200,

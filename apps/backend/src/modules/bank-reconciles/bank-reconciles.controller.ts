@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   Request,
   UploadedFile,
   UseGuards,
@@ -25,10 +26,21 @@ import {
   BankReconcileImportResult,
   BankReconcileMatchResult,
   BankReconcilesService,
+  TestExportExamOption,
+  TestExportRow,
 } from './bank-reconciles.service';
+import {
+  TestExportExamOptionDto,
+  TestExportQueryDto,
+  TestExportRowDto,
+} from './dto/test-export.dto';
 import { BankReconcile } from './entities/bank-reconcile.entity';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { FINANCE_ROLES } from '../../common/constants/role-groups';
 import { RoleEnum } from '../roles/enums/role.enum';
+import { PaginatedResponse } from '../../common/dto/paginated-response.dto';
+import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import {
   UpdateBankReconcileRefsDto,
   VerifyBankReconcilesDto,
@@ -45,6 +57,7 @@ interface AuthenticatedRequest {
 @ApiTags('Bank Reconciles')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
+@Roles(...FINANCE_ROLES)
 @Controller('bank-reconciles')
 export class BankReconcilesController {
   constructor(private readonly bankReconcilesService: BankReconcilesService) {}
@@ -80,11 +93,38 @@ export class BankReconcilesController {
   @ApiOperation({ summary: 'ดึงข้อมูลรายการกระทบยอดธนาคารทั้งหมด' })
   @ApiResponse({
     status: 200,
-    description: 'รายการกระทบยอดธนาคารทั้งหมด',
-    type: [BankReconcile],
+    description: 'รายการกระทบยอดธนาคารแบบแบ่งหน้า',
   })
-  findAll(): Promise<BankReconcile[]> {
-    return this.bankReconcilesService.findAll();
+  findAll(
+    @Query() query: PaginationQueryDto,
+  ): Promise<PaginatedResponse<BankReconcile>> {
+    return this.bankReconcilesService.findAll(query);
+  }
+
+  @Get('test-export/exams')
+  @ApiOperation({
+    summary: 'ดึงรายการรอบสอบที่ export CSV ทดสอบการนำเข้าได้',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'รายการรอบสอบที่มีค่าธรรมเนียมและมี TransactionRef',
+    type: [TestExportExamOptionDto],
+  })
+  listTestExportExams(): Promise<TestExportExamOption[]> {
+    return this.bankReconcilesService.listTestExportExams();
+  }
+
+  @Get('test-export')
+  @ApiOperation({ summary: 'ดึงแถว CSV ทดสอบการนำเข้าการชำระเงินตามรอบสอบ' })
+  @ApiResponse({
+    status: 200,
+    description: 'แถวข้อมูลสำหรับ export CSV',
+    type: [TestExportRowDto],
+  })
+  getTestExportRows(
+    @Query() query: TestExportQueryDto,
+  ): Promise<TestExportRow[]> {
+    return this.bankReconcilesService.getTestExportRows(query.examId);
   }
 
   @Post('verify')

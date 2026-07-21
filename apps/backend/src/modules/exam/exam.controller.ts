@@ -11,6 +11,8 @@ import {
   Req,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { EXAM_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import { Public } from 'src/decorators/public.decorator';
 import {
   ApiTags,
@@ -42,6 +44,7 @@ export class ExamController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'สร้างข้อมูลการสอบใหม่' })
   @ApiCreatedResponse({ type: Exam })
   async create(
@@ -68,6 +71,7 @@ export class ExamController {
   }
 
   @Post(':id/passcodes')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'สร้าง passcodes สำหรับการสอบ' })
   @ApiCreatedResponse({ description: 'สร้าง passcodes สำเร็จ' })
   async createPasscodes(
@@ -78,6 +82,7 @@ export class ExamController {
   }
 
   @Patch(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'แก้ไขข้อมูลการสอบ' })
   @ApiOkResponse({ type: Exam })
   async update(
@@ -88,6 +93,7 @@ export class ExamController {
   }
 
   @Post(':id/notify-changes')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({
     summary: 'แจ้งเตือนผู้เข้าสอบทุกคนในรอบสอบทางอีเมลเมื่อมีการแก้ไขรอบสอบ',
   })
@@ -102,6 +108,7 @@ export class ExamController {
   }
 
   @Delete(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'ลบข้อมูลการสอบ' })
   @ApiOkResponse({ description: 'ลบข้อมูลสำเร็จ' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
@@ -109,6 +116,7 @@ export class ExamController {
   }
 
   @Get(':id/passcode-history')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'ดึงประวัติการใช้งาน passcode ของการสอบ' })
   @ApiOkResponse({ type: PasscodeLogResponseDto, isArray: true })
   async getPasscodeHistory(
@@ -118,6 +126,7 @@ export class ExamController {
   }
 
   @Post(':id/passcode-log')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'บันทึก log การใช้งาน passcode' })
   @ApiCreatedResponse({ type: ExamPasscodeLog })
   async logPasscodeUsage(

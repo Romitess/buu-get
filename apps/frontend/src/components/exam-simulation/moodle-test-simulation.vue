@@ -31,6 +31,7 @@
 
       <AppButton
         v-if="!isFinishedView"
+        data-tour="attempt-back"
         label="Back"
         color="grey-4"
         text-color="black"
@@ -63,12 +64,15 @@
               @toggle-flag="toggleCurrentQuestionFlag"
             />
 
-            <MoodleQuestionCard v-model="currentAnswer" :question="currentQuestion" />
+            <div data-tour="question-answer">
+              <MoodleQuestionCard v-model="currentAnswer" :question="currentQuestion" />
+            </div>
           </div>
 
           <div class="attempt-page-actions" :class="{ 'attempt-page-actions--first': isFirstPage }">
             <q-btn
               v-if="!isFirstPage"
+              data-tour="previous-page"
               color="grey-4"
               text-color="black"
               label="Previous Page"
@@ -80,6 +84,7 @@
             />
             <q-btn
               v-if="!isLastPage"
+              data-tour="next-page"
               color="primary"
               label="Next Page"
               no-caps
@@ -90,12 +95,12 @@
             />
             <q-btn
               v-else
+              data-tour="finish-attempt"
               color="primary"
               label="Finish attempt"
               no-caps
               unelevated
               size="sm"
-              :disable="!areAllQuestionsAnswered"
               class="attempt-page-btn attempt-page-btn--next"
               @click="finishAttempt"
             />
@@ -115,7 +120,8 @@
       icon="question_mark"
       class="attempt-help-btn shadow-0"
       size="sm"
-      aria-label="Help"
+      :aria-label="restartTourLabel"
+      @click="emit('restart-tour')"
     />
 
     <MoodleQuizNavigation
@@ -131,7 +137,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
 import MoodleAttemptFinished from 'src/components/exam-simulation/moodle-attempt-finished.vue';
 import MoodleAttemptSummary from 'src/components/exam-simulation/moodle-attempt-summary.vue';
@@ -162,7 +169,13 @@ const emit = defineEmits<{
   back: [];
   course: [];
   finish: [];
+  'attempt-ready': [];
+  'attempt-page-change': [];
+  'attempt-summary-ready': [];
+  'restart-tour': [];
 }>();
+
+const { t } = useI18n();
 
 const quizQuestions: QuizQuestion[] = [
   {
@@ -272,9 +285,6 @@ const summaryQuestions = computed<SummaryQuestion[]>(() =>
     answered: Boolean(answers.value[question.id]),
   })),
 );
-const areAllQuestionsAnswered = computed<boolean>(() =>
-  quizQuestions.every((question) => Boolean(answers.value[question.id])),
-);
 
 const emitBack = (): void => {
   emit('back');
@@ -288,6 +298,7 @@ const goToQuestion = (page: number): void => {
   const questionIndex = quizQuestions.findIndex((question) => question.number === page);
   if (questionIndex !== -1) {
     currentQuestionIndex.value = questionIndex;
+    emit('attempt-page-change');
   }
 };
 
@@ -299,12 +310,14 @@ const selectQuestionFromNavigation = (page: number): void => {
 const goToPreviousQuestion = (): void => {
   if (!isFirstPage.value) {
     currentQuestionIndex.value -= 1;
+    emit('attempt-page-change');
   }
 };
 
 const goToNextQuestion = (): void => {
   if (!isLastPage.value) {
     currentQuestionIndex.value += 1;
+    emit('attempt-page-change');
   }
 };
 
@@ -316,12 +329,11 @@ const toggleCurrentQuestionFlag = (): void => {
 };
 
 const finishAttempt = (): void => {
-  if (!areAllQuestionsAnswered.value) {
-    return;
-  }
-
+  // Simulation mock: allow opening summary without answering every question
+  // so the guided tour can continue to Steps 12–13.
   isFinishedView.value = false;
   isSummaryView.value = true;
+  emit('attempt-summary-ready');
 };
 
 const returnToAttempt = (): void => {
@@ -333,7 +345,14 @@ const returnToAttempt = (): void => {
 const submitAllAndFinish = (): void => {
   isSummaryView.value = false;
   isFinishedView.value = true;
+  emit('attempt-page-change');
 };
+
+const restartTourLabel = computed(() => t('examSimulation.tour.restartLabel'));
+
+onMounted(() => {
+  emit('attempt-ready');
+});
 </script>
 
 <style scoped lang="scss">

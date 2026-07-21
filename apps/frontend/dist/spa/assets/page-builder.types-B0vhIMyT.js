@@ -1,1 +1,0 @@
-import{at as e}from"./index-DLeLVTPA.js";const n=async()=>(await e.get("/page-builder/homepage")).data,o=async a=>(await e.patch("/page-builder/content",{PCF_CONTENT:a})).data;var t=(a=>(a.BANNER="banner",a.CARD="card",a.STEP="step",a.EXAM_RULE="exam_rule",a))(t||{});export{t as P,n as g,o as u};

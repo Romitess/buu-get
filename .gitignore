@@ -5,6 +5,8 @@ node_modules
 # Quasar core related directories
 .quasar
 /dist
+apps/frontend/dist
+apps/backend/dist
 /quasar.config.*.temporary.compiled*
 
 # Cordova related directories and files
@@ -38,3 +40,5 @@ pnpm-debug.log*
 
 .cursor/
 .claude.md
+
+.graphify-out/

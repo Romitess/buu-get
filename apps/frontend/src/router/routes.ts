@@ -162,6 +162,7 @@ const routes: RouteRecordRaw[] = [
             name: 'admin-fund-source-management',
             component: () => import('pages/admin/fin-fund-source-mananagement-page.vue'),
             meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
                 { label: 'navigation.fundSourceManagement', icon: 'account_balance' },
@@ -387,9 +388,42 @@ const routes: RouteRecordRaw[] = [
             name: 'admin-payment-import',
             component: () => import('pages/admin/payment-import-page.vue'),
             meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
                 { label: 'navigation.paymentImport', icon: 'upload_file' },
+              ],
+            },
+          },
+          {
+            path: 'receipt-void-refund',
+            name: 'admin-receipt-void-refund',
+            component: () => import('pages/admin/receipt-void-refund-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.receiptVoidRefund', icon: 'receipt_long' },
+              ],
+            },
+          },
+          {
+            path: 'payment-import-test-export',
+            name: 'admin-payment-import-test-export',
+            component: () => import('pages/admin/payment-import-test-export-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.paymentImport',
+                  icon: 'upload_file',
+                  to: '/admin/payment-import',
+                },
+                {
+                  label: 'navigation.paymentImportTestExport',
+                  icon: 'download',
+                },
               ],
             },
           },
@@ -398,6 +432,7 @@ const routes: RouteRecordRaw[] = [
             name: 'admin-fin-check-transcript',
             component: () => import('pages/admin/fin-check-transcript-page.vue'),
             meta: {
+              roles: [ROLES.ADMIN, ROLES.FINANCE],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
                 {

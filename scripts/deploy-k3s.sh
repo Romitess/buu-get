@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Deploy BUU GET to K3s — ปรับจาก template เก่า (apps/api, apps/backend, apps/frontend)
-# ให้ตรงโครงสร้าง repo ปัจจุบัน: backend/, frontend/
+# Deploy BUU GET to K3s — โครงสร้าง repo ปัจจุบัน: apps/backend, apps/frontend
 #
 # ตัวแปรจาก pipeline (export ก่อนรันสคริปต์):
 #   export PROJECT_NAME='buu-get-dev'
@@ -21,8 +20,8 @@ ROLLOUT_TIMEOUT="${ROLLOUT_TIMEOUT:-300s}"
 
 PROJECT_DIR="/home/webdev/${PROJECT_NAME}"
 PUBLIC_HTML="${PROJECT_DIR}/public_html"
-BACKEND_MAIN="${PUBLIC_HTML}/backend/dist/main.js"
-FRONTEND_INDEX="${PUBLIC_HTML}/frontend/dist/spa/index.html"
+BACKEND_MAIN="${PUBLIC_HTML}/apps/backend/dist/main.js"
+FRONTEND_INDEX="${PUBLIC_HTML}/apps/frontend/dist/spa/index.html"
 FRONTEND_DEPLOY="${PROJECT_NAME}-frontend"
 
 log() { echo "[deploy-k3s] $*"; }
@@ -38,7 +37,7 @@ fi
 
 if [[ ! -f "${FRONTEND_INDEX}" ]]; then
   log "ERROR: ไม่พบ frontend build → ${FRONTEND_INDEX}"
-  log "       ตรวจว่า pipeline build Quasar SPA แล้ว (output: frontend/dist/spa)"
+  log "       ตรวจว่า pipeline build Quasar SPA แล้ว (output: apps/frontend/dist/spa)"
   exit 1
 fi
 
@@ -57,30 +56,31 @@ done
 # ---------------------------------------------------------------------------
 # 2. ปรับ Backend — path และ Node version
 # ---------------------------------------------------------------------------
-sed -i 's|apps/backend/dist/src/main.js|backend/dist/main.js|g' deployment-k3s.yml
-sed -i 's|apps/api/dist/src/main.js|backend/dist/main.js|g' deployment-k3s.yml
-sed -i 's|backend/dist/src/main.js|backend/dist/main.js|g' deployment-k3s.yml
-sed -i 's|backend/src/main.js|backend/dist/main.js|g' deployment-k3s.yml
-sed -i 's|backend/src/types/main.js|backend/dist/main.js|g' deployment-k3s.yml
+sed -i 's|apps/backend/dist/src/main.js|apps/backend/dist/main.js|g' deployment-k3s.yml
+sed -i 's|apps/api/dist/src/main.js|apps/backend/dist/main.js|g' deployment-k3s.yml
+sed -i 's|public_html/backend/|public_html/apps/backend/|g' deployment-k3s.yml
+sed -i 's|/backend/dist/src/main.js|/apps/backend/dist/main.js|g' deployment-k3s.yml
+sed -i 's|/backend/dist/main.js|/apps/backend/dist/main.js|g' deployment-k3s.yml
+sed -i 's|/backend/src/main.js|/apps/backend/dist/main.js|g' deployment-k3s.yml
+sed -i 's|/backend/src/types/main.js|/apps/backend/dist/main.js|g' deployment-k3s.yml
 sed -i "s|22.12|${NODE_VERSION}|g" deployment-k3s.yml
 sed -i "s|20.19|${NODE_VERSION}|g" deployment-k3s.yml
-sed -i 's|apps/backend|backend|g' deployment-k3s.yml
-sed -i 's|apps/api|backend|g' deployment-k3s.yml
+sed -i 's|apps/api|apps/backend|g' deployment-k3s.yml
 
 # ---------------------------------------------------------------------------
-# 3. ปรับ Frontend — Quasar SPA build ไปที่ frontend/dist/spa
+# 3. ปรับ Frontend — Quasar SPA build ไปที่ apps/frontend/dist/spa
 #    ห้าม sed แบบ public_html/frontend/dist → .../spa ทั่วไฟล์
 #    เพราะจะทับ path ที่มี /spa อยู่แล้ว → .../dist/spa/spa (FailedMount)
 # ---------------------------------------------------------------------------
-sed -i 's|apps/frontend/dist/spa|frontend/dist/spa|g' frontend-k3s.yml
-sed -i 's|apps/frontend/dist|frontend/dist/spa|g' frontend-k3s.yml
-sed -i 's|apps/web/dist/spa|frontend/dist/spa|g' frontend-k3s.yml
-sed -i 's|apps/web/dist|frontend/dist/spa|g' frontend-k3s.yml
-sed -i 's|apps/frontend|frontend|g' frontend-k3s.yml
-sed -i 's|frontend/dist/spa/spa|frontend/dist/spa|g' frontend-k3s.yml
-sed -i "s|public_html/backend/index.html|public_html/frontend/dist/spa/index.html|g" frontend-k3s.yml
-sed -i "s|/public_html/backend;|/public_html/frontend/dist/spa;|g" frontend-k3s.yml
-sed -i "s|/public_html/backend |/public_html/frontend/dist/spa |g" frontend-k3s.yml
+sed -i 's|apps/frontend/dist/spa/spa|apps/frontend/dist/spa|g' frontend-k3s.yml
+sed -i 's|apps/web/dist/spa|apps/frontend/dist/spa|g' frontend-k3s.yml
+sed -i 's|apps/web/dist|apps/frontend/dist/spa|g' frontend-k3s.yml
+sed -i 's|public_html/frontend/dist/spa|public_html/apps/frontend/dist/spa|g' frontend-k3s.yml
+sed -i 's|public_html/frontend/dist|public_html/apps/frontend/dist/spa|g' frontend-k3s.yml
+sed -i 's|frontend/dist/spa/spa|apps/frontend/dist/spa|g' frontend-k3s.yml
+sed -i "s|public_html/backend/index.html|public_html/apps/frontend/dist/spa/index.html|g" frontend-k3s.yml
+sed -i "s|/public_html/backend;|/public_html/apps/frontend/dist/spa;|g" frontend-k3s.yml
+sed -i "s|/public_html/backend |/public_html/apps/frontend/dist/spa |g" frontend-k3s.yml
 
 if grep -q 'dist/spa/spa' frontend-k3s.yml; then
   log "ERROR: frontend hostPath ยังผิด (dist/spa/spa)"
@@ -97,10 +97,10 @@ sed -i 's|proxy_pass http://buu-get-dev:3000;|proxy_pass http://'"${PROJECT_NAME
 # ---------------------------------------------------------------------------
 # 5. คัดลอก .env
 # ---------------------------------------------------------------------------
-cp "${PUBLIC_HTML}/.env" "${PUBLIC_HTML}/backend/.env" 2>/dev/null || true
+cp "${PUBLIC_HTML}/.env" "${PUBLIC_HTML}/apps/backend/.env" 2>/dev/null || true
 
 log "frontend static path บน server:"
-ls -la "${PUBLIC_HTML}/frontend/dist/spa/" | head -5
+ls -la "${PUBLIC_HTML}/apps/frontend/dist/spa/" | head -5
 
 log "hostPath / nginx root ใน manifest:"
 grep -E 'hostPath:|root |alias |public_html' frontend-k3s.yml || true

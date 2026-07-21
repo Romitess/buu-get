@@ -5,8 +5,17 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
+import {
+  buildPaginatedResponse,
+  PaginatedResponse,
+} from 'src/common/dto/paginated-response.dto';
+import {
+  PAGINATION_DEFAULT_LIMIT,
+  PAGINATION_DEFAULT_PAGE,
+} from 'src/common/dto/pagination-query.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { UsersQueryDto } from './dto/users-query.dto';
 import { User } from './entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
 import { UserProfileService } from '../user-profile/user-profile.service';
@@ -98,26 +107,37 @@ export class UsersService {
     return `${yearPrefix}${String(userId).padStart(6, '0')}`;
   }
 
-  async findAll(role?: string): Promise<UserResponseDto[]> {
+  async findAll(
+    query: UsersQueryDto = {},
+  ): Promise<PaginatedResponse<UserResponseDto>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
     const queryBuilder = this.usersRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.PROFILE', 'profile')
       .leftJoinAndSelect('user.ROLES_ID', 'roles');
 
-    if (role) {
+    if (query.role) {
       queryBuilder.innerJoin(
         'user.ROLES_ID',
         'role',
         'role.ROLE_NAME = :role',
-        { role },
+        { role: query.role },
       );
     }
 
-    const users = await queryBuilder
+    const [users, total] = await queryBuilder
       .orderBy('user.CREATED_AT', 'DESC')
-      .getMany();
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
 
-    return users.map((user) => UserResponseDto.fromEntity(user));
+    return buildPaginatedResponse(
+      users.map((user) => UserResponseDto.fromEntity(user)),
+      total,
+      page,
+      limit,
+    );
   }
 
   async findOne(id: number): Promise<UserResponseDto> {

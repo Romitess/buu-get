@@ -139,6 +139,6 @@ export class Exam {
   @JoinColumn({ name: 'FUND_SOURCE_ID' })
   FUND_SOURCE: FundSource;
 
-  @OneToMany(() => ExamPasscode, (passcode) => passcode.EXAM, { cascade: true })
+  @OneToMany(() => ExamPasscode, (passcode) => passcode.EXAM)
   PASSCODES: ExamPasscode[];
 }

@@ -92,7 +92,7 @@
       </div>
 
       <!-- Submit -->
-      <q-btn type="submit" class="submit-btn" unelevated no-caps :loading="loading">
+      <q-btn type="submit" class="submit-btn" unelevated no-caps :loading="isLoading">
         {{ $t('auth.login') }}
       </q-btn>
     </q-form>
@@ -126,7 +126,7 @@ const userType = ref<'thai' | 'foreigner'>('thai');
 const email = ref('');
 const password = ref('');
 const showPwd = ref(false);
-const loading = ref(false);
+const isLoading = ref(false);
 
 onMounted(() => {
   userType.value = locale.value === 'th' ? 'thai' : 'foreigner';
@@ -146,7 +146,7 @@ const onSubmit = async () => {
     return;
   }
 
-  loading.value = true;
+  isLoading.value = true;
   try {
     const success = await userStore.login(email.value, password.value);
 
@@ -184,7 +184,7 @@ const onSubmit = async () => {
       message: t('auth.notify.error'),
     });
   } finally {
-    loading.value = false;
+    isLoading.value = false;
   }
 };
 </script>

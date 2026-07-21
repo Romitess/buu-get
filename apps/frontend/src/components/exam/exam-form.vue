@@ -19,7 +19,7 @@
       v-model:form="form"
       :locked="isScheduleLocked"
       :location-options="locationOptions"
-      :occupied-location-ids="occupiedLocationIds"
+      :get-occupied-location-ids-for-slot="getOccupiedLocationIdsForSlot"
       :proctor-options="proctorOptions"
       :active-slot-index="activeSlotIndex"
       :date-errors="dateErrors"
@@ -57,6 +57,7 @@
       v-if="isSpecialRound"
       v-model:search-query="candidateSearch"
       :filtered-candidates="filteredCandidates"
+      :loading="isImportingCandidates"
       :locked="isPublishedSectionLocked || isLockedByEnrollment"
       @import-candidates="importCandidates"
       @passcode-type-selected="generatePasscodes"
@@ -121,8 +122,9 @@ const {
   proctorOptions,
   locationOptions,
   fundSourceOptions,
-  occupiedLocationIds,
+  getOccupiedLocationIdsForSlot,
   isLoadingData,
+  isImportingCandidates,
   isEditMode,
   isPublishedSectionLocked,
   isScheduleLocked,

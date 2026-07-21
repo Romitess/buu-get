@@ -12,6 +12,7 @@ export default {
     exam_operations_officer: 'Exam Operations Officer',
   },
   common: {
+    cancel: 'Cancel',
     months: [
       'January',
       'February',
@@ -42,6 +43,8 @@ export default {
       passed: 'Passed',
       failed: 'Failed',
       paymentTimeout: 'Payment Timeout',
+      refunded: 'Refunded',
+      receiptVoided: 'Receipt Voided',
     },
     history: {
       pageTitle: 'Exam & Registration History',
@@ -161,6 +164,7 @@ export default {
     availableStatusTextSuffix: ' Seats',
     fullBtnText: 'Full',
     registerBtnText: 'Register',
+    registeredBtnText: 'Registered',
     expiredBtnText: 'Registration Closed',
     notOpenBtnText: 'Not Open Yet',
     notifications: {
@@ -189,6 +193,14 @@ export default {
       examFee: 'Fee: {fee}',
       back: 'Back',
       baht: 'THB',
+    },
+    passcodeDialog: {
+      title: 'Enter Passcode',
+      subtitle: 'Please enter your Passcode to register for this exam',
+      placeholder: '•••••••••••••••••',
+      confirm: 'Confirm',
+      required: 'Please enter your Passcode',
+      footerSupport: 'Need help? Please contact staff',
     },
     convenienceDialog: {
       title: 'Accessibility Information',
@@ -310,6 +322,7 @@ export default {
     passwordMismatch: 'Passwords do not match',
     passwordRequirementMinLength: 'At least 8 characters',
     passwordRequirementUppercase: 'At least 1 uppercase English letter',
+    passwordRequirementDigit: 'At least 1 digit',
     passwordRequirementSpecial: "At least 1 special character, such as ! {'@'} #",
     passwordRequirementError: 'Password does not meet the requirements',
     requiredCountry: 'Please select a country',
@@ -681,11 +694,16 @@ export default {
         },
       },
     },
+    seatManagement: {
+      saveButton: 'Confirm Seat Assignment',
+      saveButtonEdit: 'Save Seat Changes',
+    },
     seatCandidates: {
       pageTitle: 'Manage Exam Seats',
       pageSubtitle:
         'Plan and manage exam seats to accommodate candidates appropriately and conveniently',
       printVoucher: 'Issue Test Voucher',
+      editSeats: 'Edit Seat Assignments',
       printSeatPlan: 'Print Seat Plan',
       viewVoucher: 'View Test Voucher',
       viewVoucherTitle: 'Test Voucher Issuance Details',
@@ -864,6 +882,59 @@ export default {
       validation: {
         required: 'Please fill in all information',
         notFound: 'Applicant data not found, please check accuracy again',
+      },
+    },
+    receiptVoidRefund: {
+      pageTitle: 'Refund / Void Receipt',
+      pageSubtitle: 'Search payment records to refund or void an issued receipt',
+      searchTitle: 'Search applicant payment information',
+      placeholderExamName: 'Enter exam name',
+      emptyTable: 'No data found. Filter by Ref1, Ref2, applicant name, or exam name',
+      table: {
+        paymentStatus: 'Payment Status',
+        receiptStatus: 'Receipt Status',
+        actions: 'Actions',
+      },
+      paymentStatus: {
+        pending: 'Pending',
+        approved: 'Approved',
+        rejected: 'Rejected',
+        paid: 'Paid',
+        paymentFailed: 'Payment Failed',
+        expired: 'Expired',
+        reversed: 'Reversed',
+        refund: 'Refunded',
+        receiptVoided: 'Receipt Voided',
+        unknown: 'Unknown',
+      },
+      receiptStatus: {
+        none: 'No Receipt',
+        unissued: 'Unissued',
+        issued: 'Issued',
+        voided: 'Voided',
+        unknown: 'Unknown',
+      },
+      actions: {
+        refund: 'Refund',
+        voidReceipt: 'Void Receipt',
+        none: '-',
+      },
+      refundDialog: {
+        title: 'Confirm Refund',
+        message: 'Set payment status to "Refunded"?',
+      },
+      voidDialog: {
+        title: 'Void Receipt',
+        message: 'Please provide a reason for voiding the receipt',
+        reasonLabel: 'Void Reason',
+        reasonRequired: 'Void reason is required',
+      },
+      notifications: {
+        searchError: 'Unable to search records',
+        refundSuccess: 'Refund completed',
+        refundError: 'Unable to refund',
+        voidSuccess: 'Receipt voided',
+        voidError: 'Unable to void receipt',
       },
     },
     finSaveTranscription: {
@@ -1167,6 +1238,20 @@ export default {
         invalidFormat: 'Please upload JPG or PNG images only',
       },
     },
+    paymentImportTestExport: {
+      pageTitle: 'Export Test Payment CSV',
+      pageSubtitle:
+        'Generate a CSV file compatible with payment import for testing',
+      examSelectLabel: 'Select exam round with registration fee',
+      exportButton: 'Export CSV',
+      previewCount: '{count} rows ready to export',
+      emptyTable: 'No exportable rows for this exam',
+      hintDuplicateImport:
+        'To re-import the same file, clear previous import data first or adjust payment date/time slightly.',
+      goToPaymentImport: 'Go to Payment Import',
+      loadExamsError: 'Failed to load exam list',
+      loadRowsError: 'Failed to load export rows',
+    },
   },
   components: {
     examInfoCard: {
@@ -1175,6 +1260,9 @@ export default {
       examTakerCount: 'Exam participants',
       attendedCount: 'Attended count',
       candidateCount: 'Applicants',
+    },
+    skeleton: {
+      loading: 'Loading content',
     },
     baseTable: {
       rowsPerPage: 'Rows per page',
@@ -1227,6 +1315,49 @@ export default {
   examSimulation: {
     pageSubtitle:
       'A computer-based exam simulation to help candidates familiarize with the system before the actual test',
+    tour: {
+      stepBadge: 'Step {step}',
+      step1Title: 'Enter username and password',
+      step1Body:
+        'Enter your username and password to log in. During this simulation, you may enter any credentials to try the system.',
+      step2Title: 'Click the Log in button to sign in',
+      step2Body:
+        'After entering your username and password, click Log in to sign in and continue to the next step.',
+      step3Title: 'Select your registered exam round',
+      step3Body:
+        'Once signed in, you will see your registered exam rounds. Click the exam round name to open the test.',
+      step4Title: 'Select a test',
+      step4Body: 'Choose the test you want to take from the list shown to open the exam page.',
+      step5Title: 'Start the quiz',
+      step5Body: 'When you are ready, click Attempt Quiz to start the exam.',
+      step6Title: 'Exit the quiz attempt',
+      step6Body: 'To leave the quiz attempt, click Back to return to the previous page.',
+      step7Title: 'Choose the best answer',
+      step7Body: 'Select only one best answer from the options provided.',
+      step8Title: 'Flag a question',
+      step8Body:
+        'If you want to review or change an answer later during the test, click Flag question to mark it for later.',
+      step9Title: 'Quiz navigation bar',
+      step9Body:
+        'Use the quiz navigation bar to jump between questions. Click a question number to review, edit, or work on that question.',
+      step10Title: 'Go to the next page',
+      step10Body: 'When you want to move to the next question or page, click the Next Page button.',
+      step10PreviousTitle: 'Go to the previous page',
+      step10PreviousBody:
+        'When you want to go back to the previous question or page, click the Previous Page button.',
+      step11Title: 'Finish the quiz attempt',
+      step11Body:
+        'When you want to finish the quiz and proceed to the submission confirmation step, click the Finish Attempt button.',
+      step12Title: 'Return to the quiz attempt',
+      step12Body:
+        'When you want to return to the quiz attempt page, click the Return to attempt button.',
+      step13Title: 'Submit all answers and finish the quiz',
+      step13Body:
+        'When you want to submit all answers and finish the quiz attempt, click the Submit all and finish button.',
+      next: 'Next',
+      finish: 'Finish',
+      restartLabel: 'Restart guided tour',
+    },
   },
   navigation: {
     home: 'Home',
@@ -1251,6 +1382,8 @@ export default {
     manageScores: 'Manage Scores',
     examAttendance: 'Exam Attendance',
     paymentImport: 'Payment Import',
+    receiptVoidRefund: 'Refund / Void Receipt',
+    paymentImportTestExport: 'Export Test Payment CSV',
     checkPayment: 'Check Payment',
     createLocation: 'Create Exam Room',
     editLocation: 'Edit Exam Room',

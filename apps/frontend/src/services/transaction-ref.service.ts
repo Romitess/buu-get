@@ -29,11 +29,17 @@ export interface BackendTransactionRefEnrollment {
   SESSION?: BackendTransactionRefSession | null;
 }
 
+export interface BackendTransactionRefReceipt {
+  RC_ID: number;
+  RC_STATUS: number;
+}
+
 export interface BackendTransactionRefTransaction {
   TRANX_ID: number;
   ERM_ID: number;
   TRANX_AMOUNT?: number | string | null;
   TRANX_PAYMENT_STATUS?: number | null;
+  RECEIPTS?: BackendTransactionRefReceipt[] | null;
   ENROLLMENT?: BackendTransactionRefEnrollment | null;
 }
 
@@ -59,6 +65,7 @@ export interface TransactionRefSearchParams {
   ref1?: string;
   ref2?: string;
   name?: string;
+  examName?: string;
 }
 
 export interface TransactionRefSearchResponse {

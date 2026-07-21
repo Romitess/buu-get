@@ -205,6 +205,14 @@ const menuLinks = computed(() => {
       path: '/admin/payment-import',
     });
     links.push({
+      name: 'payment-import-test-export',
+      label:
+        t('navigation.paymentImportTestExport') ||
+        'Export CSV ทดสอบการนำเข้า',
+      icon: 'download',
+      path: '/admin/payment-import-test-export',
+    });
+    links.push({
       name: 'fund-source-management',
       label: t('navigation.fundSourceManagement') || 'จัดการผังแหล่งเงิน',
       icon: 'account_balance',

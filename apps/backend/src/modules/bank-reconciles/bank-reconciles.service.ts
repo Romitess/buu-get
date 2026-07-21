@@ -16,6 +16,15 @@ import {
 } from 'typeorm';
 import * as XLSX from 'xlsx';
 import {
+  buildPaginatedResponse,
+  PaginatedResponse,
+} from 'src/common/dto/paginated-response.dto';
+import {
+  PAGINATION_DEFAULT_LIMIT,
+  PAGINATION_DEFAULT_PAGE,
+  PaginationQueryDto,
+} from 'src/common/dto/pagination-query.dto';
+import {
   Transaction,
   TransactionMatchStatus,
   TransactionPaymentStatus,
@@ -91,6 +100,42 @@ export interface BankReconcileMatchResult {
   TRANX_AMOUNT: number | string | null;
   CREATED_AT: Date;
   UPDATED_AT: Date;
+}
+
+export interface TestExportExamOption {
+  EXAM_ID: number;
+  EXAM_NAME: string;
+  EXAM_ROUND: string | null;
+  EXAM_DATE: string | null;
+  EXAM_FEE: number;
+  exportableCount: number;
+}
+
+export interface TestExportRow {
+  applicantId: string;
+  referenceNo: string | null;
+  payerName: string;
+  amount: string;
+  paymentDate: string;
+  paymentTime: string;
+}
+
+interface TestExportExamRawRow {
+  EXAM_ID: number | string;
+  EXAM_NAME: string;
+  EXAM_ROUND: string | null;
+  EXAM_DATE: string | null;
+  EXAM_FEE: number | string;
+  exportableCount: number | string;
+}
+
+interface TestExportRawRow {
+  TSC_REF1: string;
+  TSC_REF2: string | null;
+  PAYER_NAME: string | null;
+  TRANX_AMOUNT: number | string;
+  TRANX_PAID_AT: Date | null;
+  TRANX_CREATED_AT: Date;
 }
 
 interface TransactionStatusSnapshot {
@@ -223,12 +268,19 @@ export class BankReconcilesService {
     };
   }
 
-  async findAll(): Promise<BankReconcile[]> {
-    return this.bankReconcilesRepository.find({
+  async findAll(
+    query: PaginationQueryDto = {},
+  ): Promise<PaginatedResponse<BankReconcile>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const [data, total] = await this.bankReconcilesRepository.findAndCount({
       relations: ['USER', 'USER.PROFILE', 'TRANSACTION'],
       where: { DELETED_AT: IsNull() },
+      skip: (page - 1) * limit,
+      take: limit,
       order: { BR_ID: 'ASC' },
     });
+    return buildPaginatedResponse(data, total, page, limit);
   }
 
   async findOne(id: number): Promise<BankReconcile> {
@@ -243,66 +295,99 @@ export class BankReconcilesService {
   }
 
   async verifyData(brIds?: number[]): Promise<BankReconcile[]> {
-    const targetBrIds = this.normalizePositiveIds(brIds ?? []);
+    const requestedBrIds = this.normalizePositiveIds(brIds ?? []);
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const verifyQuery = queryRunner.manager
-        .createQueryBuilder()
-        .select([
-          'br.BR_ID AS BR_ID',
-          'br.BR_AMOUNT AS BR_AMOUNT',
-          'tr.TSR_ID AS TSR_ID',
-          'tr.TRANX_ID AS TRANX_ID',
-          't.TRANX_AMOUNT AS TRANX_AMOUNT',
-        ])
-        .from('FIN_T_BANK_RECONCILES', 'br')
-        .leftJoin(
-          'FIN_T_TRANSACTIONS_REFS',
-          'tr',
-          `
-            tr.DELETED_AT IS NULL
-            AND tr.TSC_REF1 = br.BR_REF1
-            AND (
-              (br.BR_REF2 IS NULL AND tr.TSC_REF2 IS NULL)
-              OR tr.TSC_REF2 = br.BR_REF2
-            )
-          `,
-        )
-        .leftJoin(
-          'FIN_T_TRANSACTIONS',
-          't',
-          't.TRANX_ID = tr.TRANX_ID AND t.TRANX_DELETED_AT IS NULL',
-        )
-        .where('br.DELETED_AT IS NULL')
-        .orderBy('br.BR_ID', 'ASC')
-        .addOrderBy('tr.TSR_ID', 'ASC');
-
-      if (targetBrIds.length > 0) {
-        verifyQuery.andWhere('br.BR_ID IN (:...brIds)', {
-          brIds: targetBrIds,
-        });
+      // ไม่ส่ง brIds → กระทบเฉพาะรายการที่ยังไม่ match (TRANX_ID IS NULL) แล้ว chunk
+      // เพื่อเลี่ยงดึง join ทั้งตารางเข้า memory
+      let targetBrIds = requestedBrIds;
+      if (targetBrIds.length === 0) {
+        const unmatchedRows = await queryRunner.manager
+          .createQueryBuilder()
+          .select('br.BR_ID', 'BR_ID')
+          .from('FIN_T_BANK_RECONCILES', 'br')
+          .where('br.DELETED_AT IS NULL')
+          .andWhere('br.TRANX_ID IS NULL')
+          .orderBy('br.BR_ID', 'ASC')
+          .getRawMany<{ BR_ID: number }>();
+        targetBrIds = unmatchedRows
+          .map((row) => Number(row.BR_ID))
+          .filter((id) => id > 0);
       }
 
-      const rawRows = await verifyQuery.getRawMany<BankReconcileVerifyRow>();
+      const allMatchedBrIds: number[] = [];
 
-      const brIds = [
-        ...new Set(
-          rawRows.map((row) => Number(row.BR_ID)).filter((id) => id > 0),
-        ),
-      ];
-      const matches = this.buildVerifyMatches(rawRows);
+      for (const brIdChunk of this.chunkArray(targetBrIds)) {
+        if (brIdChunk.length === 0) {
+          continue;
+        }
 
-      await this.updateVerifiedBankReconciles(queryRunner, brIds, matches);
-      await this.updateVerifiedTransactionRefs(queryRunner, brIds, matches);
-      await this.updateVerifiedTransactionStatuses(queryRunner, matches);
+        const rawRows = await queryRunner.manager
+          .createQueryBuilder()
+          .select([
+            'br.BR_ID AS BR_ID',
+            'br.BR_AMOUNT AS BR_AMOUNT',
+            'tr.TSR_ID AS TSR_ID',
+            'tr.TRANX_ID AS TRANX_ID',
+            't.TRANX_AMOUNT AS TRANX_AMOUNT',
+          ])
+          .from('FIN_T_BANK_RECONCILES', 'br')
+          .leftJoin(
+            'FIN_T_TRANSACTIONS_REFS',
+            'tr',
+            `
+              tr.DELETED_AT IS NULL
+              AND tr.TSC_REF1 = br.BR_REF1
+              AND (
+                (br.BR_REF2 IS NULL AND tr.TSC_REF2 IS NULL)
+                OR tr.TSC_REF2 = br.BR_REF2
+              )
+            `,
+          )
+          .leftJoin(
+            'FIN_T_TRANSACTIONS',
+            't',
+            't.TRANX_ID = tr.TRANX_ID AND t.TRANX_DELETED_AT IS NULL',
+          )
+          .where('br.DELETED_AT IS NULL')
+          .andWhere('br.BR_ID IN (:...brIds)', { brIds: brIdChunk })
+          .orderBy('br.BR_ID', 'ASC')
+          .addOrderBy('tr.TSR_ID', 'ASC')
+          .getRawMany<BankReconcileVerifyRow>();
+
+        const chunkBrIds = [
+          ...new Set(
+            rawRows.map((row) => Number(row.BR_ID)).filter((id) => id > 0),
+          ),
+        ];
+        const matches = this.buildVerifyMatches(rawRows);
+
+        await this.updateVerifiedBankReconciles(
+          queryRunner,
+          chunkBrIds,
+          matches,
+        );
+        await this.updateVerifiedTransactionRefs(
+          queryRunner,
+          chunkBrIds,
+          matches,
+        );
+        await this.updateVerifiedTransactionStatuses(queryRunner, matches);
+
+        allMatchedBrIds.push(...chunkBrIds);
+      }
 
       await queryRunner.commitTransaction();
-      return targetBrIds.length > 0
-        ? this.findByIds(targetBrIds)
-        : this.findAll();
+      if (requestedBrIds.length > 0) {
+        return this.findByIds(requestedBrIds);
+      }
+      if (allMatchedBrIds.length > 0) {
+        return this.findByIds([...new Set(allMatchedBrIds)]);
+      }
+      return [];
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -1004,6 +1089,21 @@ export class BankReconcilesService {
         .where('t.TRANX_ID IN (:...tranxIds)', { tranxIds })
         .getRawMany<TransactionStatusSnapshot>();
 
+      const blockedStatuses = new Set<number>([
+        TransactionPaymentStatus.REFUND,
+        TransactionPaymentStatus.RECEIPT_VOIDED,
+      ]);
+      const blocked = transactions.filter((transaction) =>
+        blockedStatuses.has(Number(transaction.TRANX_PAYMENT_STATUS)),
+      );
+      if (blocked.length > 0) {
+        throw new BadRequestException(
+          `Cannot approve refunded or receipt-voided transactions: ${blocked
+            .map((transaction) => transaction.TRANX_ID)
+            .join(', ')}`,
+        );
+      }
+
       // 1. Update Transactions
       const updateTranxResult = await queryRunner.manager
         .createQueryBuilder()
@@ -1013,6 +1113,12 @@ export class BankReconcilesService {
           TRANX_MATCH_STATUS: TransactionMatchStatus.MATCH,
         })
         .where('TRANX_ID IN (:...tranxIds)', { tranxIds })
+        .andWhere('TRANX_PAYMENT_STATUS NOT IN (:...excludedStatuses)', {
+          excludedStatuses: [
+            TransactionPaymentStatus.REFUND,
+            TransactionPaymentStatus.RECEIPT_VOIDED,
+          ],
+        })
         .execute();
 
       // 2. Insert into History using the status before approval.
@@ -1067,5 +1173,176 @@ export class BankReconcilesService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async listTestExportExams(): Promise<TestExportExamOption[]> {
+    const rows = await this.dataSource
+      .createQueryBuilder()
+      .select([
+        'exam.EXAM_ID AS EXAM_ID',
+        'exam.EXAM_NAME AS EXAM_NAME',
+        'exam.EXAM_ROUND AS EXAM_ROUND',
+        'exam.EXAM_DATE AS EXAM_DATE',
+        'exam.EXAM_FEE AS EXAM_FEE',
+        'COUNT(DISTINCT tr.TSR_ID) AS exportableCount',
+      ])
+      .from('EXAM_T_EXAM', 'exam')
+      .innerJoin('EXAM_T_SESSIONS', 'session', 'session.EXAM_ID = exam.EXAM_ID')
+      .innerJoin(
+        'EXAM_T_ENROLLMENTS',
+        'enrollment',
+        'enrollment.SESSION_ID = session.SS_ID AND enrollment.DELETED_AT IS NULL AND enrollment.ERM_STATUS != :cancelledStatus',
+        { cancelledStatus: ExamEnrollmentStatus.CANCELLED },
+      )
+      .innerJoin(
+        'FIN_T_TRANSACTIONS',
+        'transaction',
+        'transaction.ERM_ID = enrollment.ERM_ID AND transaction.TRANX_DELETED_AT IS NULL',
+      )
+      .innerJoin(
+        'FIN_T_TRANSACTIONS_REFS',
+        'tr',
+        'tr.TRANX_ID = transaction.TRANX_ID AND tr.DELETED_AT IS NULL',
+      )
+      .where('exam.DELETED_AT IS NULL')
+      .andWhere('exam.EXAM_FEE > 0')
+      .groupBy('exam.EXAM_ID')
+      .addGroupBy('exam.EXAM_NAME')
+      .addGroupBy('exam.EXAM_ROUND')
+      .addGroupBy('exam.EXAM_DATE')
+      .addGroupBy('exam.EXAM_FEE')
+      .orderBy('exam.EXAM_DATE', 'DESC')
+      .addOrderBy('exam.EXAM_ID', 'DESC')
+      .getRawMany<TestExportExamRawRow>();
+
+    return rows.map((row) => ({
+      EXAM_ID: Number(row.EXAM_ID),
+      EXAM_NAME: row.EXAM_NAME,
+      EXAM_ROUND: row.EXAM_ROUND,
+      EXAM_DATE: row.EXAM_DATE,
+      EXAM_FEE: Number(row.EXAM_FEE),
+      exportableCount: Number(row.exportableCount),
+    }));
+  }
+
+  async getTestExportRows(examId: number): Promise<TestExportRow[]> {
+    const exam = await this.dataSource
+      .createQueryBuilder()
+      .select(['exam.EXAM_ID AS EXAM_ID', 'exam.EXAM_FEE AS EXAM_FEE'])
+      .from('EXAM_T_EXAM', 'exam')
+      .where('exam.EXAM_ID = :examId', { examId })
+      .andWhere('exam.DELETED_AT IS NULL')
+      .getRawOne<{ EXAM_ID: number | string; EXAM_FEE: number | string }>();
+
+    if (!exam) {
+      throw new NotFoundException(`Exam with ID ${examId} not found`);
+    }
+
+    if (Number(exam.EXAM_FEE) <= 0) {
+      throw new BadRequestException(
+        'Cannot export test payment CSV for exams without registration fee',
+      );
+    }
+
+    const rows = await this.dataSource
+      .createQueryBuilder()
+      .select([
+        'tr.TSC_REF1 AS TSC_REF1',
+        'tr.TSC_REF2 AS TSC_REF2',
+        `COALESCE(
+          NULLIF(TRIM(CONCAT_WS(' ', profile.USER_TITLE_TH, profile.USER_FULLNAME_TH)), ''),
+          NULLIF(TRIM(CONCAT_WS(' ', profile.USER_TITLE_EN, profile.USER_FULLNAME_EN)), ''),
+          tp.TP_NAME,
+          ''
+        ) AS PAYER_NAME`,
+        'transaction.TRANX_AMOUNT AS TRANX_AMOUNT',
+        'transaction.TRANX_PAID_AT AS TRANX_PAID_AT',
+        'transaction.TRANX_CREATED_AT AS TRANX_CREATED_AT',
+      ])
+      .from('FIN_T_TRANSACTIONS_REFS', 'tr')
+      .innerJoin(
+        'FIN_T_TRANSACTIONS',
+        'transaction',
+        'transaction.TRANX_ID = tr.TRANX_ID AND transaction.TRANX_DELETED_AT IS NULL',
+      )
+      .innerJoin(
+        'EXAM_T_ENROLLMENTS',
+        'enrollment',
+        'enrollment.ERM_ID = transaction.ERM_ID AND enrollment.DELETED_AT IS NULL AND enrollment.ERM_STATUS != :cancelledStatus',
+        { cancelledStatus: ExamEnrollmentStatus.CANCELLED },
+      )
+      .innerJoin(
+        'EXAM_T_SESSIONS',
+        'session',
+        'session.SS_ID = enrollment.SESSION_ID',
+      )
+      .innerJoin(
+        'EXAM_T_EXAM',
+        'exam',
+        'exam.EXAM_ID = session.EXAM_ID AND exam.DELETED_AT IS NULL',
+      )
+      .leftJoin(
+        'BUU_GET_T_USER_PROFILE',
+        'profile',
+        'profile.USER_ID = enrollment.USER_ID AND profile.DELETED_AT IS NULL',
+      )
+      .leftJoin(
+        'FIN_T_TRANSACTION_PROFILE',
+        'tp',
+        'tp.TRANX_ID = transaction.TRANX_ID AND tp.DELETED_AT IS NULL',
+      )
+      .where('tr.DELETED_AT IS NULL')
+      .andWhere('exam.EXAM_ID = :examId', { examId })
+      .andWhere('exam.EXAM_FEE > 0')
+      .orderBy('tr.TSR_ID', 'ASC')
+      .getRawMany<TestExportRawRow>();
+
+    return rows.map((row) => {
+      const paymentSource = row.TRANX_PAID_AT ?? row.TRANX_CREATED_AT;
+      const { paymentDate, paymentTime } =
+        this.formatPaymentDateTime(paymentSource);
+      const payerName = (row.PAYER_NAME ?? '').trim().slice(0, 20);
+
+      return {
+        applicantId: (row.TSC_REF1 ?? '').trim().slice(0, 20),
+        referenceNo: row.TSC_REF2 ? row.TSC_REF2.trim().slice(0, 20) : null,
+        payerName: payerName || 'Unknown',
+        amount: Number(row.TRANX_AMOUNT).toFixed(2),
+        paymentDate,
+        paymentTime,
+      };
+    });
+  }
+
+  private formatPaymentDateTime(source: Date | string | null | undefined): {
+    paymentDate: string;
+    paymentTime: string;
+  } {
+    if (!source) {
+      return { paymentDate: '', paymentTime: '' };
+    }
+
+    const date = source instanceof Date ? source : new Date(source);
+    if (Number.isNaN(date.getTime())) {
+      return { paymentDate: '', paymentTime: '' };
+    }
+
+    const dateFormatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Bangkok',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    const timeFormatter = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Bangkok',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+
+    return {
+      paymentDate: dateFormatter.format(date),
+      paymentTime: timeFormatter.format(date),
+    };
   }
 }

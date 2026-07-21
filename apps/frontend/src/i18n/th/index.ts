@@ -13,6 +13,7 @@ export default {
   },
   common: {
     search: 'ค้นหา',
+    cancel: 'ยกเลิก',
     day: 'วัน | วัน',
     months: [
       'มกราคม',
@@ -43,6 +44,8 @@ export default {
       passed: 'ผ่าน',
       failed: 'ไม่ผ่าน',
       paymentTimeout: 'หมดเวลาการชำระเงิน',
+      refunded: 'คืนเงิน',
+      receiptVoided: 'ยกเลิกใบเสร็จ',
     },
     history: {
       pageTitle: 'ประวัติการสอบและการลงทะเบียน',
@@ -261,6 +264,7 @@ export default {
     passwordMismatch: 'รหัสผ่านไม่ตรงกัน',
     passwordRequirementMinLength: 'อย่างน้อย 8 ตัวอักษร',
     passwordRequirementUppercase: 'มีตัวอักษรภาษาอังกฤษตัวพิมพ์ใหญ่อย่างน้อย 1 ตัว',
+    passwordRequirementDigit: 'มีตัวเลขอย่างน้อย 1 ตัว',
     passwordRequirementSpecial: "มีอักขระพิเศษอย่างน้อย 1 ตัว เช่น ! {'@'} #",
     passwordRequirementError: 'รหัสผ่านยังไม่ตรงตามเงื่อนไข',
     requiredCountry: 'กรุณาเลือกประเทศ',
@@ -333,6 +337,7 @@ export default {
     availableStatusTextSuffix: ' ที่นั่ง',
     fullBtnText: 'เต็ม (Full)',
     registerBtnText: 'ลงทะเบียนสอบ',
+    registeredBtnText: 'ลงทะเบียนแล้ว',
     expiredBtnText: 'หมดเขตลงทะเบียน',
     notOpenBtnText: 'ยังไม่เปิดรับสมัคร',
     notifications: {
@@ -382,6 +387,7 @@ export default {
       subtitle: 'กรุณากรอกรหัสผ่าน Passcode เพื่อทำการลงทะเบียนสอบ',
       placeholder: '•••••••••••••••••',
       confirm: 'ยืนยัน',
+      required: 'กรุณากรอกรหัสผ่าน Passcode',
       footerSupport: 'พบปัญหา โปรดติดต่อพนักงาน',
     },
     dialogCancel: {
@@ -776,6 +782,7 @@ export default {
       assignedSeat: 'จัดที่นั่งแล้ว',
       cancelButton: 'ยกเลิกการจัดที่นั่ง',
       saveButton: 'ยืนยันการจัดที่นั่ง',
+      saveButtonEdit: 'บันทึกการแก้ไขที่นั่ง',
       savingData: 'กำลังบันทึกข้อมูลผังที่นั่ง...',
       loadingData: 'กำลังโหลดข้อมูล...',
       noName: 'ไม่มีชื่อ',
@@ -789,6 +796,7 @@ export default {
       pageTitle: 'จัดการที่นั่งสอบ',
       pageSubtitle: 'วางผังและจัดการที่นั่งสอบ เพื่อรองรับผู้เข้าสอบได้อย่างเหมาะสมและสะดวก',
       printVoucher: 'ออกใบเข้าห้องสอบ',
+      editSeats: 'แก้ไขที่นั่งสอบ',
       printSeatPlan: 'พิมพ์แผนผังที่นั่ง',
       viewVoucher: 'ดูใบเข้าห้องสอบ',
       viewVoucherTitle: 'ข้อมูลการออกใบ Test Voucher',
@@ -855,6 +863,20 @@ export default {
         verifySuccess: 'ตรวจสอบข้อมูลเรียบร้อยแล้ว',
         uploadError: 'เกิดข้อผิดพลาดในการอัปโหลดไฟล์',
       },
+    },
+    paymentImportTestExport: {
+      pageTitle: 'Export CSV ทดสอบการนำเข้า',
+      pageSubtitle:
+        'สร้างไฟล์ CSV สำหรับทดสอบนำเข้าการชำระเงิน โดยคอลัมน์ตรงกับระบบนำเข้า',
+      examSelectLabel: 'เลือกรอบสอบที่มีค่าธรรมเนียม',
+      exportButton: 'Export CSV',
+      previewCount: 'พร้อม export {count} รายการ',
+      emptyTable: 'ไม่มีรายการที่ export ได้สำหรับรอบสอบนี้',
+      hintDuplicateImport:
+        'หากต้องการทดสอบนำเข้าซ้ำ ให้ลบข้อมูลนำเข้าเดิมก่อน หรือปรับวันที่/เวลาชำระเล็กน้อย',
+      goToPaymentImport: 'ไปหน้านำเข้าไฟล์การชำระเงิน',
+      loadExamsError: 'โหลดรายการรอบสอบไม่สำเร็จ',
+      loadRowsError: 'โหลดข้อมูล export ไม่สำเร็จ',
     },
     scoreManagement: {
       pageTitle: 'จัดการคะแนนสอบ',
@@ -997,6 +1019,59 @@ export default {
       validation: {
         required: 'กรุณากรอกข้อมูลให้ครบ',
         notFound: 'ไม่พบข้อมูลผู้สมัครสอบ โปรตรวจสอบความถูกต้องอีกครั้ง',
+      },
+    },
+    receiptVoidRefund: {
+      pageTitle: 'คืนเงิน / ยกเลิกใบเสร็จรับเงิน',
+      pageSubtitle: 'ค้นหาข้อมูลการชำระเงินเพื่อคืนเงินหรือยกเลิกใบเสร็จรับเงิน',
+      searchTitle: 'ค้นหาข้อมูลการชำระเงินของผู้สมัครสอบ',
+      placeholderExamName: 'กรอกชื่อการสอบ',
+      emptyTable: 'ไม่พบข้อมูล กรุณากรองด้วย Ref1, Ref2, ชื่อผู้สมัคร หรือชื่อการสอบ',
+      table: {
+        paymentStatus: 'สถานะการชำระเงิน',
+        receiptStatus: 'สถานะใบเสร็จ',
+        actions: 'ดำเนินการ',
+      },
+      paymentStatus: {
+        pending: 'รอชำระเงิน',
+        approved: 'อนุมัติแล้ว',
+        rejected: 'ปฏิเสธ',
+        paid: 'ชำระเงินแล้ว',
+        paymentFailed: 'ชำระเงินไม่สำเร็จ',
+        expired: 'หมดอายุ',
+        reversed: 'ย้อนรายการ',
+        refund: 'คืนเงิน',
+        receiptVoided: 'ยกเลิกใบเสร็จ',
+        unknown: 'ไม่ระบุ',
+      },
+      receiptStatus: {
+        none: 'ยังไม่มีใบเสร็จ',
+        unissued: 'ยังไม่ออกใบเสร็จ',
+        issued: 'ออกใบเสร็จแล้ว',
+        voided: 'ยกเลิกแล้ว',
+        unknown: 'ไม่ระบุ',
+      },
+      actions: {
+        refund: 'คืนเงิน',
+        voidReceipt: 'ยกเลิกใบเสร็จ',
+        none: '-',
+      },
+      refundDialog: {
+        title: 'ยืนยันการคืนเงิน',
+        message: 'ต้องการปรับสถานะการชำระเงินเป็น "คืนเงิน" ใช่หรือไม่',
+      },
+      voidDialog: {
+        title: 'ยกเลิกใบเสร็จรับเงิน',
+        message: 'กรุณาระบุเหตุผลการยกเลิกใบเสร็จรับเงิน',
+        reasonLabel: 'เหตุผลการยกเลิก',
+        reasonRequired: 'กรุณาระบุเหตุผลการยกเลิก',
+      },
+      notifications: {
+        searchError: 'ไม่สามารถค้นหาข้อมูลได้',
+        refundSuccess: 'คืนเงินเรียบร้อยแล้ว',
+        refundError: 'ไม่สามารถคืนเงินได้',
+        voidSuccess: 'ยกเลิกใบเสร็จเรียบร้อยแล้ว',
+        voidError: 'ไม่สามารถยกเลิกใบเสร็จได้',
       },
     },
     finSaveTranscription: {
@@ -1329,6 +1404,47 @@ export default {
   examSimulation: {
     pageSubtitle:
       'ใช้สำหรับจำลองการสอบรูปแบบคอมพิวเตอร์ เพื่อให้ผู้เข้าสอบคุ้นเคยกับระบบก่อนสอบจริง',
+    tour: {
+      stepBadge: 'ขั้นที่ {step}',
+      step1Title: 'กรอกชื่อผู้ใช้งานและรหัสผ่าน',
+      step1Body:
+        'กรอกชื่อผู้ใช้งานและรหัสผ่านเพื่อทำการเข้าสู่ระบบ ทั้งนี้ในขั้นตอนการทดสอบ ผู้ใช้งานสามารถกรอกข้อมูลใดก็ได้เพื่อทดลองการใช้งานระบบ',
+      step2Title: 'คลิกปุ่ม Log in เพื่อเข้าสู่ระบบ',
+      step2Body:
+        'เมื่อกรอกชื่อผู้ใช้งานและรหัสผ่านเรียบร้อยแล้ว ให้คลิกปุ่ม Log in เพื่อเข้าสู่ระบบและดำเนินการในขั้นตอนถัดไป',
+      step3Title: 'เลือกรอบสอบที่สมัคร',
+      step3Body:
+        'เมื่อล็อกอินเข้าสู่ระบบแล้ว จะเห็นรอบสอบที่สมัครไว้ ทำการคลิกที่ชื่อรอบสอบเพื่อเข้าสู่แบบทดสอบ',
+      step4Title: 'เลือกแบบทดสอบ',
+      step4Body: 'เลือกแบบทดสอบที่ต้องการทำจากรายการที่แสดง เพื่อเข้าสู่หน้าข้อสอบ',
+      step5Title: 'เริ่มทำแบบทดสอบ',
+      step5Body: 'เมื่อพร้อมทำแบบทดสอบ ให้คลิกปุ่ม Attempt Quiz เพื่อเริ่มทำข้อสอบ',
+      step6Title: 'ออกจากการทำแบบทดสอบ',
+      step6Body: 'เมื่อต้องการออกจากการทำแบบทดสอบ ให้คลิกปุ่ม Back เพื่อกลับไปยังหน้าก่อนหน้า',
+      step7Title: 'เลือกคำตอบที่ถูกต้องที่สุด',
+      step7Body: 'เลือกคำตอบที่ถูกต้องที่สุดเพียง 1 ข้อ จากตัวเลือกที่กำหนด',
+      step8Title: 'ปักธงคำถาม',
+      step8Body:
+        'ในกรณีที่ต้องการกลับมาตรวจสอบ หรือแก้ไขคำตอบในภายหลังระหว่างการทำแบบทดสอบ สามารถคลิกปุ่ม Flag question เอาไว้เพื่อกลับมาแก้ไขคำตอบในภายหลังได้',
+      step9Title: 'แถบข้อสอบ',
+      step9Body:
+        'แถบข้อสอบสำหรับเลือกและเปลี่ยนไปยังข้อสอบข้ออื่น โดยผู้เข้าสอบสามารถคลิกที่หมายเลขข้อเพื่อกลับไปทบทวน แก้ไข หรือทำข้อสอบในข้อที่ต้องการได้',
+      step10Title: 'ไปยังหน้าถัดไป',
+      step10Body: 'เมื่อต้องการไปยังข้อสอบหรือหน้าถัดไป ให้คลิกปุ่ม Next Page',
+      step10PreviousTitle: 'กลับไปยังข้อก่อนหน้า',
+      step10PreviousBody: 'เมื่อต้องการย้อนกลับไปยังข้อหรือหน้าก่อนหน้า ให้คลิกปุ่ม Previous Page',
+      step11Title: 'สิ้นสุดการทำแบบทดสอบ',
+      step11Body:
+        'เมื่อต้องการสิ้นสุดการทำแบบทดสอบและเข้าสู่ขั้นตอนการยืนยันการส่งข้อสอบ ให้คลิกปุ่ม Finish Attempt',
+      step12Title: 'กลับไปยังหน้าการทำแบบทดสอบ',
+      step12Body: 'เมื่อต้องการกลับไปยังหน้าการทำแบบทดสอบ ให้คลิกปุ่ม Return to attempt',
+      step13Title: 'ส่งคำตอบทั้งหมดและสิ้นสุดการทำแบบทดสอบ',
+      step13Body:
+        'เมื่อต้องการส่งคำตอบทั้งหมดและสิ้นสุดการทำแบบทดสอบ ให้คลิกปุ่ม Submit all and finish',
+      next: 'ต่อไป',
+      finish: 'เสร็จสิ้น',
+      restartLabel: 'เริ่มคำแนะนำการใช้งานใหม่',
+    },
   },
   navigation: {
     home: 'หน้าหลัก',
@@ -1343,6 +1459,8 @@ export default {
     pageBuilder: 'จัดการหน้าแรก',
     viewSchedule: 'ตารางสอบ',
     paymentImport: 'นำเข้าไฟล์การชำระเงิน',
+    receiptVoidRefund: 'คืนเงิน / ยกเลิกใบเสร็จ',
+    paymentImportTestExport: 'Export CSV ทดสอบการนำเข้า',
     logout: 'ออกจากระบบ',
     menu: 'เมนู',
     createExam: 'สร้างรอบสอบ',
@@ -1417,6 +1535,9 @@ export default {
       examTakerCount: 'จำนวนคนเข้าสอบ',
       attendedCount: 'จำนวนคนที่มาแล้ว',
       candidateCount: 'จำนวนคนที่สมัคร',
+    },
+    skeleton: {
+      loading: 'กำลังโหลดข้อมูล',
     },
     baseTable: {
       rowsPerPage: 'จำนวนต่อหน้า',

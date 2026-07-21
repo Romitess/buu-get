@@ -1,13 +1,13 @@
-if [ -d "frontend" ]; then
+if [ -d "apps/frontend" ]; then
   echo "Linting frontend..."
-  cd frontend
+  cd apps/frontend
   npx lint-staged
-  cd ..
+  cd ../..
 fi
 
-if [ -d "backend" ]; then
+if [ -d "apps/backend" ]; then
   echo "Linting backend..."
-  cd backend
+  cd apps/backend
   npx lint-staged
-  cd ..
+  cd ../..
 fi

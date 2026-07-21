@@ -42,8 +42,10 @@ export interface IssuedReceipt {
 }
 
 export const fetchIssuedReceipts = async (): Promise<IssuedReceipt[]> => {
-  const response = await api.get<IssuedReceipt[]>('/receipts/issued');
-  return response.data;
+  const response = await api.get<{ data: IssuedReceipt[] }>('/receipts/issued', {
+    params: { page: 1, limit: 100 },
+  });
+  return response.data.data ?? [];
 };
 
 export const downloadReceipt = async (tranxId: number): Promise<void> => {

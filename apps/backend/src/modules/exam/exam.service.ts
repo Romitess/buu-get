@@ -18,9 +18,11 @@ import {
   ExamEnrollment,
   ExamEnrollmentStatus,
 } from '../exam-enrollments/entities/exam-enrollment.entity';
+import { ExamSession } from '../exam-sessions/entities/exam-session.entity';
 import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
 import { getExamChangeEmailTemplate } from './templates/exam-change-email.template';
 import { MoodleSyncService } from '../moodle/moodle-sync.service';
+import { normalizePeriodEndDate } from '../../common/utils/period-date.util';
 
 @Injectable()
 export class ExamService {
@@ -44,6 +46,7 @@ export class ExamService {
     createExamDto: CreateExamDto,
     actingUserId: number,
   ): Promise<Exam> {
+    this.normalizeExamPeriodEndDates(createExamDto);
     const exam = this.examRepository.create(createExamDto);
     const saved = await this.examRepository.save(exam);
     // รอสร้างคอร์ส Moodle แล้ว map EXAM_MOODLE_COURSE_ID (ล้มเหลวจะ log ไว้ แต่ไม่ทำให้สร้างรอบสอบ fail)
@@ -98,17 +101,95 @@ export class ExamService {
     }
   }
 
+  /**
+   * นับผู้สมัครที่ยังไม่ยกเลิกแบบ aggregate แทนการโหลด ENROLLMENTS ทั้งก้อน
+   * แล้วแปะ ACTIVE_ENROLLMENT_COUNT / ENROLLMENT_SL_COUNTS ให้ FE ใช้
+   */
+  private async attachEnrollmentCounts(exams: Exam[]): Promise<void> {
+    const sessionIds = exams.flatMap(
+      (exam) => exam.SESSIONS?.map((session) => session.SS_ID) ?? [],
+    );
+    if (sessionIds.length === 0) {
+      return;
+    }
+
+    const rows = await this.examEnrollmentRepository
+      .createQueryBuilder('enrollment')
+      .select('enrollment.SESSION_ID', 'SESSION_ID')
+      .addSelect('enrollment.SL_ID', 'SL_ID')
+      .addSelect('COUNT(*)', 'CNT')
+      .where('enrollment.SESSION_ID IN (:...sessionIds)', { sessionIds })
+      .andWhere('enrollment.ERM_STATUS != :cancelled', {
+        cancelled: ExamEnrollmentStatus.CANCELLED,
+      })
+      .groupBy('enrollment.SESSION_ID')
+      .addGroupBy('enrollment.SL_ID')
+      .getRawMany<{ SESSION_ID: number; SL_ID: number | null; CNT: string }>();
+
+    const activeBySession = new Map<number, number>();
+    const slCountsBySession = new Map<number, Record<string, number>>();
+
+    for (const row of rows) {
+      const sessionId = Number(row.SESSION_ID);
+      const count = Number(row.CNT) || 0;
+      activeBySession.set(
+        sessionId,
+        (activeBySession.get(sessionId) ?? 0) + count,
+      );
+
+      const slKey = row.SL_ID == null ? 'null' : String(row.SL_ID);
+      const slCounts = slCountsBySession.get(sessionId) ?? {};
+      slCounts[slKey] = count;
+      slCountsBySession.set(sessionId, slCounts);
+    }
+
+    for (const exam of exams) {
+      for (const session of exam.SESSIONS ?? []) {
+        const activeCount = activeBySession.get(session.SS_ID) ?? 0;
+        const slCounts = slCountsBySession.get(session.SS_ID) ?? {};
+        const sessionWithCounts = session as ExamSession & {
+          ACTIVE_ENROLLMENT_COUNT?: number;
+          ENROLLMENT_SL_COUNTS?: Record<string, number>;
+        };
+        sessionWithCounts.ACTIVE_ENROLLMENT_COUNT = activeCount;
+        sessionWithCounts.ENROLLMENT_SL_COUNTS = slCounts;
+        // ไม่โหลด ENROLLMENTS ทั้งก้อน — ส่ง array ว่างเพื่อไม่ให้ FE อ่าน undefined แล้วพัง
+        session.ENROLLMENTS = [];
+      }
+    }
+  }
+
+  private async assertExamExists(examId: number): Promise<void> {
+    const exists = await this.examRepository.exists({
+      where: { EXAM_ID: examId },
+    });
+    if (!exists) {
+      throw new NotFoundException(`Exam with ID ${examId} not found`);
+    }
+  }
+
+  /** โหลด exam สำหรับ update/softRemove โดยไม่ดึง seats/enrollments/passcodes */
+  private async findOneForMutation(id: number): Promise<Exam> {
+    const exam = await this.examRepository.findOne({
+      where: { EXAM_ID: id },
+      relations: ['SESSIONS', 'FUND_SOURCE'],
+    });
+    if (!exam) {
+      throw new NotFoundException(`Exam with ID ${id} not found`);
+    }
+    return exam;
+  }
+
   async findAll(): Promise<Exam[]> {
     const exams = await this.examRepository.find({
       // โหลด relation แบบแยก query ต่อ relation แทน JOIN เดียว เพื่อเลี่ยง
-      // cartesian product (ENROLLMENTS x SESSION_LOCATIONS) ที่ทำให้ query ช้ามาก
+      // cartesian product ที่ทำให้ query ช้ามาก
       relationLoadStrategy: 'query',
       order: {
         CREATED_AT: 'DESC',
       },
       relations: [
         'SESSIONS',
-        'SESSIONS.ENROLLMENTS',
         'SESSIONS.SESSION_LOCATIONS',
         'SESSIONS.SESSION_LOCATIONS.LOCATION',
       ],
@@ -136,12 +217,6 @@ export class ExamService {
           SS_END_TIME: true,
           SS_CAPACITY: true,
           SS_SESSION_STATUS: true,
-          ENROLLMENTS: {
-            ERM_ID: true,
-            SESSION_ID: true,
-            SL_ID: true,
-            ERM_STATUS: true,
-          },
           SESSION_LOCATIONS: {
             SL_ID: true,
             LOCATION_ID: true,
@@ -159,22 +234,21 @@ export class ExamService {
     });
 
     this.populateSessionLocations(exams);
+    await this.attachEnrollmentCounts(exams);
     return exams;
   }
 
   async findOne(id: number): Promise<Exam> {
     const exam = await this.examRepository.findOne({
       where: { EXAM_ID: id },
-      // โหลด relation แบบแยก query ต่อ relation แทน JOIN เดียว เพื่อเลี่ยง
-      // cartesian product (ENROLLMENTS x SEATS x SESSION_LOCATIONS) ที่ทำให้
-      // endpoint /exam/:id ช้ามาก (วัดได้ ~131s บนรอบสอบใหญ่)
+      // โหลด relation แบบแยก query — ไม่โหลด ENROLLMENTS ทั้งก้อน (ใช้ aggregate)
+      // ยังโหลด SEATS เพราะหน้าจัดที่นั่งต้องใช้
       relationLoadStrategy: 'query',
       relations: [
         'SESSIONS',
         'SESSIONS.SESSION_LOCATIONS',
         'SESSIONS.SESSION_LOCATIONS.LOCATION',
         'SESSIONS.SESSION_LOCATIONS.LOCATION.SEATS',
-        'SESSIONS.ENROLLMENTS',
         'FUND_SOURCE',
         'PASSCODES',
       ],
@@ -185,6 +259,7 @@ export class ExamService {
     }
 
     this.populateSessionLocations([exam]);
+    await this.attachEnrollmentCounts([exam]);
     return exam;
   }
 
@@ -206,10 +281,7 @@ export class ExamService {
 
   //การดูประวัติการใช้ log
   async getPasscodeHistory(examId: number): Promise<PasscodeLogResponseDto[]> {
-    const exam = await this.findOne(examId);
-    if (!exam) {
-      throw new NotFoundException(`Exam with ID ${examId} not found`);
-    }
+    await this.assertExamExists(examId);
 
     const logs = await this.examPasscodeLogRepository.find({
       where: { EXAM_ID: examId },
@@ -229,13 +301,19 @@ export class ExamService {
   }
 
   async update(id: number, updateExamDto: UpdateExamDto): Promise<Exam> {
-    const exam = await this.findOne(id);
+    this.normalizeExamPeriodEndDates(updateExamDto);
+    const exam = await this.findOneForMutation(id);
     const updated = this.examRepository.merge(exam, updateExamDto);
     return await this.examRepository.save(updated);
   }
 
   async remove(id: number): Promise<void> {
-    const exam = await this.findOne(id);
+    await this.assertExamExists(id);
+    // ExamPasscode ไม่มี soft delete — ลบ hard delete ก่อน softRemove exam
+    await this.examPasscodeLogRepository.delete({ EXAM_ID: id });
+    await this.examPasscodeRepository.delete({ EXAM_ID: id });
+
+    const exam = await this.findOneForMutation(id);
     await this.examRepository.softRemove(exam);
   }
 
@@ -243,7 +321,7 @@ export class ExamService {
     examId: number,
     createPasscodesDto: CreatePasscodesDto,
   ): Promise<ExamPasscode[]> {
-    const exam = await this.findOne(examId);
+    await this.assertExamExists(examId);
 
     // Delete existing passcodes for this exam to prevent duplicates if editing
     await this.examPasscodeRepository.delete({ EXAM_ID: examId });
@@ -259,7 +337,7 @@ export class ExamService {
       }
 
       return this.examPasscodeRepository.create({
-        EXAM_ID: exam.EXAM_ID,
+        EXAM_ID: examId,
         NATIONAL_ID: nationalId,
         FULL_NAME: fullName,
         PASSCODE: p.passcode,
@@ -400,5 +478,16 @@ export class ExamService {
     this.logger.log(
       `Exam change notifications for exam ${examId}: sent ${sent}, failed ${failed}, total ${recipients.length}`,
     );
+  }
+
+  private normalizeExamPeriodEndDates(
+    dto: CreateExamDto | UpdateExamDto,
+  ): void {
+    if (dto.EXAM_REG_END_DATE !== undefined) {
+      dto.EXAM_REG_END_DATE = normalizePeriodEndDate(dto.EXAM_REG_END_DATE);
+    }
+    if (dto.EXAM_PAY_END_DATE !== undefined) {
+      dto.EXAM_PAY_END_DATE = normalizePeriodEndDate(dto.EXAM_PAY_END_DATE);
+    }
   }
 }

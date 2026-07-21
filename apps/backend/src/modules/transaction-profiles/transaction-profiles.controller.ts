@@ -9,6 +9,8 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { FINANCE_ROLES } from 'src/common/constants/role-groups';
 import { TransactionProfilesService } from './transaction-profiles.service';
 import { CreateTransactionProfileDto } from './dto/create-transaction-profile.dto';
 import { UpdateTransactionProfileDto } from './dto/update-transaction-profile.dto';
@@ -16,6 +18,7 @@ import { TransactionProfile } from './entities/transaction-profile.entity';
 
 @ApiTags('Transaction Profiles')
 @Controller('transaction-profiles')
+@Roles(...FINANCE_ROLES)
 export class TransactionProfilesController {
   constructor(
     private readonly transactionProfilesService: TransactionProfilesService,

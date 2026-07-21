@@ -358,8 +358,8 @@ const props = defineProps<{
   locked?: boolean;
   /** Location options from the API */
   locationOptions: ExamLocationOption[];
-  /** Location IDs occupied by other exams on the same date+time */
-  occupiedLocationIds?: Set<number>;
+  /** ห้องที่ slot นี้เลือกไม่ได้ (รอบเวลาที่ทับซ้อน / exam อื่น) */
+  getOccupiedLocationIdsForSlot?: (slotIndex: number) => Set<number>;
   /** Proctor options (from API) */
   proctorOptions: { label: string; value: string }[];
   /** Currently active slot tab index */
@@ -507,7 +507,9 @@ const getAvailableLocationOptions = (
       .filter((locationId): locationId is number => locationId !== null),
   );
 
-  const occupied = props.occupiedLocationIds ?? new Set<number>();
+  const occupied =
+    props.getOccupiedLocationIdsForSlot?.(props.activeSlotIndex) ??
+    new Set<number>();
 
   return props.locationOptions.map((option) => {
     const isSelectedByOther = selectedByOtherRooms.has(option.value);

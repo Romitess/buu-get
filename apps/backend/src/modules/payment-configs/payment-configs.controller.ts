@@ -10,6 +10,8 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { FINANCE_ROLES } from 'src/common/constants/role-groups';
 import { PaymentConfigsService } from './payment-configs.service';
 import {
   CreatePaymentConfigDto,
@@ -19,6 +21,7 @@ import { PaymentConfig } from './entities/payment-config.entity';
 
 @ApiTags('Payment Configs')
 @Controller('payment-configs')
+@Roles(...FINANCE_ROLES)
 export class PaymentConfigsController {
   constructor(private readonly paymentConfigsService: PaymentConfigsService) {}
 

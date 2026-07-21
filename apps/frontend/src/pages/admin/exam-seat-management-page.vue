@@ -29,74 +29,78 @@
       />
     </section>
 
-    <!-- Horizontal layout: applicant list on the left, seat map on the right. -->
-    <div class="seat-management-row">
-      <div class="seat-management-list-column flex column min-width-0">
-        <div class="student-list-card">
-          <div class="row items-center justify-between q-mb-md">
-            <div class="text-subtitle1 text-weight-bold text-dark">
-              {{ $t('admin.seatManagement.studentListTitle') }}
+    <SeatManagementSkeleton v-if="isLoading" />
+
+    <template v-else>
+      <!-- Horizontal layout: applicant list on the left, seat map on the right. -->
+      <div class="seat-management-row">
+        <div class="seat-management-list-column flex column min-width-0">
+          <div class="student-list-card">
+            <div class="row items-center justify-between q-mb-md">
+              <div class="text-subtitle1 text-weight-bold text-dark">
+                {{ $t('admin.seatManagement.studentListTitle') }}
+              </div>
+              <q-badge color="primary" rounded :label="currentRoomCount" class="badge-seat-count" />
             </div>
-            <q-badge color="primary" rounded :label="currentRoomCount" class="badge-seat-count" />
-          </div>
 
-          <div class="q-mb-md">
-            <SearchBar v-model="searchQuery" full-width @search="handleSearch" />
-          </div>
+            <div class="q-mb-md">
+              <SearchBar v-model="searchQuery" full-width @search="handleSearch" />
+            </div>
 
-          <div class="student-list">
-            <AppExamSeatCard
-              v-for="student in filteredStudents"
-              :key="student.ermId"
-              :student-name="student.name"
-              :student-id="student.id"
-              :seat-number="getSeatLabel(student.seat)"
-              :avatar-url="student.avatar"
-              :remark="student.remark"
-              :is-foreigner="student.isForeigner"
-            />
+            <div class="student-list">
+              <AppExamSeatCard
+                v-for="student in filteredStudents"
+                :key="student.ermId"
+                :student-name="student.name"
+                :student-id="student.id"
+                :seat-number="getSeatLabel(student.seat)"
+                :avatar-url="student.avatar"
+                :remark="student.remark"
+                :is-foreigner="student.isForeigner"
+              />
 
-            <div
-              v-if="filteredStudents.length === 0"
-              class="column items-center q-pa-xl text-grey-6"
-            >
-              <q-icon name="person_search" size="48px" />
-              <div class="text-body1 q-mt-sm">
-                {{ $t('admin.seatManagement.emptyStudentList') }}
+              <div
+                v-if="filteredStudents.length === 0"
+                class="column items-center q-pa-xl text-grey-6"
+              >
+                <q-icon name="person_search" size="48px" />
+                <div class="text-body1 q-mt-sm">
+                  {{ $t('admin.seatManagement.emptyStudentList') }}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="seat-management-map-column flex column min-width-0">
-        <AppExamSeatAssignmentMap
-          class="col"
-          :title="$t('admin.seatManagement.seatLayoutTitle')"
-          :seats-by-row="seatsByRow"
-          :split-left-right="splitLeftRight"
-          :aisle-after-cols="aisleAfterCols"
-          :aisle-after-rows="aisleAfterRows"
-          :swap-mode-label="$t('admin.seatManagement.swapModeLabel')"
-          @swap="swapSeatAssignments"
-        />
+        <div class="seat-management-map-column flex column min-width-0">
+          <AppExamSeatAssignmentMap
+            class="col"
+            :title="$t('admin.seatManagement.seatLayoutTitle')"
+            :seats-by-row="seatsByRow"
+            :split-left-right="splitLeftRight"
+            :aisle-after-cols="aisleAfterCols"
+            :aisle-after-rows="aisleAfterRows"
+            :swap-mode-label="$t('admin.seatManagement.swapModeLabel')"
+            @swap="swapSeatAssignments"
+          />
 
-        <div class="row justify-end q-mt-sm q-gutter-sm">
-          <AppButton
-            :label="$t('admin.seatManagement.cancelButton')"
-            class="btn-cancel-seat"
-            flat
-            @click="handleCancel"
-          />
-          <AppButton
-            :label="$t('admin.seatManagement.saveButton')"
-            class="btn-confirm-seat"
-            :disable="!isSeatAssignmentComplete"
-            @click="handleSave"
-          />
+          <div class="row justify-end q-mt-sm q-gutter-sm">
+            <AppButton
+              :label="$t('admin.seatManagement.cancelButton')"
+              class="btn-cancel-seat"
+              flat
+              @click="handleCancel"
+            />
+            <AppButton
+              :label="saveButtonLabel"
+              class="btn-confirm-seat"
+              :disable="!isSeatAssignmentComplete"
+              @click="handleSave"
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </template>
   </q-page>
 </template>
 
@@ -111,8 +115,10 @@ import SearchBar from 'src/components/shared/search-bar.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppExamSessionTime from 'src/components/exam/app-exam-session-time.vue';
 import { useExamSeatManagement } from 'src/composables/use-exam-seat-management';
+import { SeatManagementSkeleton } from 'src/components/base/skeleton';
 
 const {
+  isLoading,
   activeSessionId,
   activeSessionLocationId,
   sessionTimeTabs,
@@ -131,6 +137,7 @@ const {
   currentRoomCapacity,
   filteredStudents,
   isSeatAssignmentComplete,
+  saveButtonLabel,
   loadExamData,
   getSeatLabel,
   handleCancel,

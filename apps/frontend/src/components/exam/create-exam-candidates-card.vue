@@ -64,6 +64,7 @@
       <BaseTable
         :columns="columns"
         :rows="filteredCandidates"
+        :loading="loading"
         :pagination="pagination"
         empty-label="No data available in table"
         class="candidates-table"
@@ -109,6 +110,7 @@ const props = defineProps<{
   /** Filtered candidates to display */
   filteredCandidates: EligibleCandidate[];
   locked?: boolean;
+  loading?: boolean;
 }>();
 
 const searchQuery = defineModel<string>('searchQuery', { required: true });

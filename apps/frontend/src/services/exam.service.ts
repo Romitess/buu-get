@@ -44,6 +44,13 @@ export const invalidateExamCache = (): void => {
 const isActiveEnrollment = (enrollment: { ERM_STATUS: number }): boolean =>
   enrollment.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED;
 
+const getActiveEnrollmentCount = (session: BackendSession): number => {
+  if (typeof session.ACTIVE_ENROLLMENT_COUNT === 'number') {
+    return session.ACTIVE_ENROLLMENT_COUNT;
+  }
+  return (session.ENROLLMENTS || []).filter(isActiveEnrollment).length;
+};
+
 /**
  * Centrally fetch all exams with a short-term in-memory cache.
  * This prevents redundant large downloads of the /exam endpoint when multiple
@@ -240,7 +247,7 @@ export const fetchScheduleData = async (force = false): Promise<Record<string, D
       const endTime = formatTime(session.SS_END_TIME);
       const timeRange = `${startTime} - ${endTime}`;
 
-      const activeCount = (session.ENROLLMENTS || []).filter(isActiveEnrollment).length;
+      const activeCount = getActiveEnrollmentCount(session);
 
       const currentAvailable = (session.SS_CAPACITY || 0) - activeCount;
       const currentTotal = session.SS_CAPACITY || 0;
@@ -290,7 +297,7 @@ export const fetchExamSchedules = async (force = false): Promise<ExamSchedule[]>
     if (exam.SESSIONS && exam.SESSIONS.length > 0) {
       exam.SESSIONS.forEach((session) => {
         capacity += session.SS_CAPACITY || 0;
-        const activeCount = (session.ENROLLMENTS || []).filter(isActiveEnrollment).length;
+        const activeCount = getActiveEnrollmentCount(session);
         registeredCount += activeCount;
       });
 
@@ -343,6 +350,13 @@ export const buddhistToGregorian = (dateStr: string): string => {
   const gregorianYear = rawYear >= 2400 ? rawYear - BUDDHIST_YEAR_OFFSET : rawYear;
   const day = d.trim().split(' ')[0] || d;
   return `${gregorianYear}-${m}-${day}`;
+};
+
+/** แปลงวันที่ปิดช่วง (BE) เป็น timestamp สิ้นวัน 23:59:59 (+07:00) */
+export const buddhistToGregorianPeriodEnd = (dateStr: string): string => {
+  const dateOnly = buddhistToGregorian(dateStr);
+  if (!dateOnly) return '';
+  return `${dateOnly}T23:59:59+07:00`;
 };
 
 const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRange[] => {
@@ -615,9 +629,9 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<numbe
       EXAM_FEE: Number(payload.fee),
       EXAM_DATE: buddhistToGregorian(payload.examDate),
       EXAM_REG_START_DATE: buddhistToGregorian(payload.regStartDate),
-      EXAM_REG_END_DATE: buddhistToGregorian(payload.regEndDate),
+      EXAM_REG_END_DATE: buddhistToGregorianPeriodEnd(payload.regEndDate),
       EXAM_PAY_START_DATE: buddhistToGregorian(payload.payStartDate),
-      EXAM_PAY_END_DATE: buddhistToGregorian(payload.payEndDate),
+      EXAM_PAY_END_DATE: buddhistToGregorianPeriodEnd(payload.payEndDate),
       EXAM_PUBLISHED: payload.isPublished,
       FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
       EXAM_ROUND: payload.examRound,
@@ -709,9 +723,9 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
       EXAM_FEE: Number(payload.fee),
       EXAM_DATE: buddhistToGregorian(payload.examDate),
       EXAM_REG_START_DATE: buddhistToGregorian(payload.regStartDate),
-      EXAM_REG_END_DATE: buddhistToGregorian(payload.regEndDate),
+      EXAM_REG_END_DATE: buddhistToGregorianPeriodEnd(payload.regEndDate),
       EXAM_PAY_START_DATE: buddhistToGregorian(payload.payStartDate),
-      EXAM_PAY_END_DATE: buddhistToGregorian(payload.payEndDate),
+      EXAM_PAY_END_DATE: buddhistToGregorianPeriodEnd(payload.payEndDate),
       EXAM_PUBLISHED: payload.isPublished,
       FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
       EXAM_ROUND: payload.examRound,
@@ -859,6 +873,16 @@ export const createEnrollment = async (
     console.error('Error creating enrollment:', error);
     throw error;
   }
+};
+
+export const validateExamPasscode = async (
+  sessionId: number,
+  passcode: string,
+): Promise<void> => {
+  await api.post<{ valid: true }>('/exam-enrollments/validate-passcode', {
+    SESSION_ID: sessionId,
+    PASSCODE: passcode,
+  });
 };
 
 export const fetchUserEnrollments = async (userId: number): Promise<ExamEnrollment[]> => {

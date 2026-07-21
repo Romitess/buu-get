@@ -11,6 +11,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { FINANCE_ROLES } from 'src/common/constants/role-groups';
 import { TransactionRefsService } from './transaction-refs.service';
 import {
   CreateTransactionRefDto,
@@ -22,6 +24,7 @@ import { TransactionRefSearchPage } from './interfaces/transaction-ref-search.in
 
 @ApiTags('Transaction Refs')
 @Controller('transaction-refs')
+@Roles(...FINANCE_ROLES)
 export class TransactionRefsController {
   constructor(
     private readonly transactionRefsService: TransactionRefsService,

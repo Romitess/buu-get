@@ -4,7 +4,8 @@
       flat
       :rows="displayRows"
       :columns="sortableColumns"
-      :loading="loading"
+      :row-key="resolveRowKey"
+      :loading="showTableLoading"
       v-model:pagination="internalPagination"
       :rows-per-page-options="[]"
       :hide-bottom="hidePagination"
@@ -17,19 +18,22 @@
       </template>
 
       <template v-slot:body="props">
-        <template v-if="(props.row as any).__empty">
-          <q-tr>
-            <q-td
-              :colspan="sortableColumns.length"
-              class="base-table-empty-cell text-center text-grey-8"
-            >
-              {{ emptyLabel || $t('components.baseTable.emptyLabel') }}
-            </q-td>
-          </q-tr>
-        </template>
+        <TableSkeleton
+          v-if="(props.row as SkeletonRow).__skeleton"
+          :key="props.key"
+          :row-props="props"
+        />
+        <q-tr v-else-if="(props.row as SkeletonRow).__empty" :key="props.key">
+          <q-td
+            :colspan="sortableColumns.length"
+            class="base-table-empty-cell text-center text-grey-8"
+          >
+            {{ emptyLabel || $t('components.baseTable.emptyLabel') }}
+          </q-td>
+        </q-tr>
         <template v-else>
           <slot name="body" v-bind="props">
-            <q-tr :props="props">
+            <q-tr :key="props.key" :props="props">
               <q-td v-for="col in props.cols" :key="col.name" :props="props">
                 <slot
                   :name="`body-cell-${col.name}`"
@@ -122,12 +126,6 @@
           </div>
         </div>
       </template>
-
-      <template v-slot:loading>
-        <q-inner-loading showing color="primary">
-          <q-spinner-dots size="50px" color="primary" />
-        </q-inner-loading>
-      </template>
     </q-table>
   </div>
 </template>
@@ -136,6 +134,17 @@
 import { computed, ref, watch } from 'vue';
 import type { QTableColumn } from 'quasar';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
+import { TableSkeleton } from 'src/components/base/skeleton';
+import {
+  createEmptyRow,
+  createSkeletonRows,
+  resolveTableRowKey,
+  type PlaceholderRow,
+} from './base-table-row-keys';
+
+type SkeletonRow = PlaceholderRow;
+
+const resolveRowKey = (row: T): string | number => resolveTableRowKey(row);
 
 interface Props {
   columns: QTableColumn[];
@@ -157,6 +166,8 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   (e: 'request', requestProps: TableRequestProps): void;
 }>();
+
+const showTableLoading = computed(() => Boolean(props.loading && (props.rows?.length ?? 0) > 0));
 
 const setPropValue = <K extends keyof PaginationModel>(
   obj: PaginationModel | undefined,
@@ -358,17 +369,27 @@ const sortedRows = computed<T[]>(() => {
 });
 
 const displayRows = computed<T[]>(() => {
+  const sourceRowCount = props.rows?.length ?? 0;
+
+  if (props.loading && sourceRowCount === 0) {
+    const skeletonCount = Math.min(internalPagination.value.rowsPerPage || 10, 10);
+    const skeletonRows = createSkeletonRows(skeletonCount);
+    // Placeholder rows are not real T; cast matches existing __empty row pattern.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- skeleton rows are synthetic placeholders for generic row type T
+    return skeletonRows as T[];
+  }
+
   let rows: T[] = [];
   if (props.isServerSide) {
-    if ((props.rows ?? []).length === 0) {
-      return [{ __empty: true }] as T[];
+    if (sourceRowCount === 0) {
+      return [createEmptyRow()] as T[];
     }
     rows = props.rows;
   } else {
     const sourceRows = sortedRows.value;
 
     if (sourceRows.length === 0) {
-      return [{ __empty: true }] as T[];
+      return [createEmptyRow()] as T[];
     }
 
     const page = internalPagination.value.page || 1;
@@ -387,7 +408,7 @@ const displayRows = computed<T[]>(() => {
   const start = (page - 1) * rowsPerPage;
 
   return rows.map((row, index) => {
-    if (row && typeof row === 'object' && '__empty' in row) return row;
+    if (row && typeof row === 'object' && ('__empty' in row || '__skeleton' in row)) return row;
 
     return new Proxy(row, {
       get(target, prop, receiver) {

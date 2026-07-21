@@ -46,7 +46,9 @@
           </div>
           <div v-else-if="formKey === 'profile'">
             <div class="register-profile-shell">
+              <FormSkeleton v-if="isSubmitting" :fields="10" :columns="2" />
               <RegisterAndEditProfile
+                v-else
                 :initial-edit-mode="false"
                 :is-thai="isThai"
                 :credentials="credentials"
@@ -63,9 +65,9 @@
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar';
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore, type RegisterPayload } from 'src/stores/auth.store';
 import LoginCard from 'src/components/auth/login-card.vue';
@@ -73,12 +75,14 @@ import RegisterCard from 'src/components/register-card.vue';
 import type { RegisterCredentials } from 'src/types/register';
 import type { RegisterFormData } from 'src/types/register';
 import RegisterAndEditProfile from 'src/components/register-and-edit-profile.vue';
+import { FormSkeleton } from 'src/components/base/skeleton';
 
 const route = useRoute();
 const router = useRouter();
-const $q = useQuasar();
 const { t } = useI18n();
+const $q = useQuasar();
 const authStore = useAuthStore();
+const isSubmitting = ref(false);
 
 const isRegisterMode = computed(() => route.path.includes('register'));
 const currentStep = ref<'credentials' | 'profile'>('credentials');
@@ -303,7 +307,7 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
     address: formData.address,
   };
 
-  $q.loading.show();
+  isSubmitting.value = true;
 
   try {
     const response = await authStore.register(finalData);
@@ -331,7 +335,7 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
       position: 'top',
     });
   } finally {
-    $q.loading.hide();
+    isSubmitting.value = false;
   }
 };
 </script>

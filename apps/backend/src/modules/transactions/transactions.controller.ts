@@ -7,8 +7,15 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { FINANCE_ROLES } from 'src/common/constants/role-groups';
+import { AuthenticatedUser } from 'src/common/utils/authz.util';
+import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { TransactionsService } from './transactions.service';
 import { UpdateTransactionDto } from './dto/transaction.dto';
 import { Transaction } from './entities/transaction.entity';
@@ -45,14 +52,16 @@ export class TransactionsController {
   }
 
   @Get()
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'ดึงข้อมูลธุรกรรมทั้งหมด' })
   @ApiResponse({
     status: 200,
-    description: 'รายการธุรกรรมทั้งหมด',
-    type: [Transaction],
+    description: 'รายการธุรกรรมแบบแบ่งหน้า',
   })
-  findAll(): Promise<Transaction[]> {
-    return this.transactionsService.findAll();
+  findAll(
+    @Query() query: PaginationQueryDto,
+  ): Promise<PaginatedResponse<Transaction>> {
+    return this.transactionsService.findAll(query);
   }
 
   @Get(':id')
@@ -67,6 +76,22 @@ export class TransactionsController {
     return this.transactionsService.findOne(id);
   }
 
+  @Post(':tranxId/refund')
+  @Roles(...FINANCE_ROLES)
+  @ApiOperation({
+    summary: 'คืนเงินเมื่อยังไม่ออกใบเสร็จ (ยังไม่มีใบเสร็จ ISSUED)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'คืนเงินสำเร็จ',
+    type: Transaction,
+  })
+  refundTransaction(
+    @Param('tranxId', ParseIntPipe) tranxId: number,
+  ): Promise<Transaction> {
+    return this.transactionsService.refundTransaction(tranxId);
+  }
+
   @Patch(':tranxId/confirm')
   @ApiOperation({ summary: 'ยืนยันการชำระเงิน (FLOW 2)' })
   @ApiResponse({
@@ -76,8 +101,13 @@ export class TransactionsController {
   confirmPaymentFlow(
     @Param('tranxId', ParseIntPipe) tranxId: number,
     @Body() confirmDto: ConfirmPaymentFlowDto,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<void> {
-    return this.transactionsService.confirmPaymentFlow(tranxId, confirmDto);
+    return this.transactionsService.confirmPaymentFlow(
+      tranxId,
+      confirmDto,
+      user,
+    );
   }
 
   @Patch(':tranxId/expire')
@@ -88,11 +118,13 @@ export class TransactionsController {
   })
   expireTransaction(
     @Param('tranxId', ParseIntPipe) tranxId: number,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<void> {
-    return this.transactionsService.expireTransaction(tranxId);
+    return this.transactionsService.expireTransaction(tranxId, user);
   }
 
   @Patch('by-erm/:ermId')
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'แก้ไขข้อมูลธุรกรรมด้วย ERM_ID' })
   @ApiResponse({
     status: 200,
@@ -108,6 +140,7 @@ export class TransactionsController {
   }
 
   @Patch(':id')
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'แก้ไขข้อมูลธุรกรรม' })
   @ApiResponse({
     status: 200,
@@ -123,6 +156,7 @@ export class TransactionsController {
   }
 
   @Delete(':id')
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({ summary: 'ลบข้อมูลธุรกรรม (Soft delete)' })
   @ApiResponse({
     status: 200,

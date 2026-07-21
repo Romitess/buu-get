@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue';
 import type { BackendExam, BackendSession } from 'src/types/exam';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
+import { EnrollmentStatus } from 'src/types/enrollment.types';
 import { fetchExamById } from 'src/services/exam.service';
 import { fetchRawEnrollmentsByExamId } from 'src/services/enrollment.service';
 
@@ -333,6 +334,28 @@ export function useExamSeatCandidates() {
     }
   };
 
+  const applyVoucherIssuedState = (sessionIds: number[], ermIds: number[]): void => {
+    const ermIdSet = new Set(ermIds);
+    const sessionIdSet = new Set(sessionIds);
+
+    if (exam.value?.SESSIONS) {
+      exam.value = {
+        ...exam.value,
+        SESSIONS: exam.value.SESSIONS.map((session) =>
+          sessionIdSet.has(session.SS_ID)
+            ? { ...session, SS_SESSION_STATUS: SESSION_STATUS_VOUCHER_SENT }
+            : session,
+        ),
+      };
+    }
+
+    allEnrollments.value = allEnrollments.value.map((enrollment) =>
+      ermIdSet.has(enrollment.ERM_ID)
+        ? { ...enrollment, ERM_STATUS: EnrollmentStatus.SEAT_PUBLISHED }
+        : enrollment,
+    );
+  };
+
   return {
     exam,
     sessions,
@@ -357,5 +380,6 @@ export function useExamSeatCandidates() {
     isVoucherSent,
     getTimeTabSessionId,
     fetchData,
+    applyVoucherIssuedState,
   };
 }

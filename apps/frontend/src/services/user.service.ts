@@ -98,13 +98,20 @@ export async function authenticateUser(
 
 export async function getUsersFromApi(role?: string): Promise<User[]> {
   try {
-    const url = role ? `/users?role=${role}` : '/users';
-    const response = await api.get<BackendUserResponse[] | { value: BackendUserResponse[] }>(url);
+    const params: Record<string, string | number> = { page: 1, limit: 100 };
+    if (role) {
+      params.role = role;
+    }
+    const response = await api.get<
+      BackendUserResponse[] | { value: BackendUserResponse[] } | { data: BackendUserResponse[] }
+    >('/users', { params });
 
     let usersData: BackendUserResponse[] = [];
     if (response && response.data) {
       if (Array.isArray(response.data)) {
         usersData = response.data;
+      } else if ('data' in response.data && Array.isArray(response.data.data)) {
+        usersData = response.data.data;
       } else if ('value' in response.data && Array.isArray(response.data.value)) {
         usersData = response.data.value;
       }

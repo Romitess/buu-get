@@ -12,7 +12,9 @@
     </div>
     <!-- Available Exam Rounds Table -->
     <div class="container">
-      <AvailableExamRoundsTable @select="handleExamSelect" />
+      <ScrollReveal>
+        <AvailableExamRoundsTable @select="handleExamSelect" />
+      </ScrollReveal>
     </div>
     <!-- Main Informational Content -->
     <div class="container">
@@ -32,6 +34,7 @@ import { ref, onMounted } from 'vue';
 import InfoCarousel from 'src/components/home/carousel/info-carousel.vue';
 import HomeMainContent from 'src/components/home/home-main-content.vue';
 import AvailableExamRoundsTable from 'src/components/home/available-exam-rounds-table.vue';
+import ScrollReveal from 'src/components/base/scroll-reveal.vue';
 import { getHomepage } from 'src/services/page-builder.service';
 import { PageSectionType } from 'src/types/page-builder.types';
 import type { BannerBoxContent, PageSectionContent } from 'src/types/page-builder.types';

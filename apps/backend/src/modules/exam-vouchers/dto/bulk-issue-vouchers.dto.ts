@@ -1,5 +1,11 @@
-import { IsNotEmpty, IsString, IsArray, IsNumber } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsNotEmpty,
+  IsString,
+  IsArray,
+  IsNumber,
+  IsOptional,
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class BulkIssueVouchersDto {
   @ApiProperty({
@@ -20,4 +26,13 @@ export class BulkIssueVouchersDto {
   @IsString()
   @IsNotEmpty()
   historyUrl: string;
+
+  @ApiPropertyOptional({
+    description: 'รหัสรอบสอบที่ต้องการอัปเดตสถานะเป็น VOUCHER_SENT',
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  sessionIds?: number[];
 }

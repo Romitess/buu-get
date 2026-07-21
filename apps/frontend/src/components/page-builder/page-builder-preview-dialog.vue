@@ -42,7 +42,7 @@
           </div>
         </div>
         <div v-else class="fit row flex-center q-py-xl">
-          <q-spinner color="primary" size="40px" />
+          <CardGridSkeleton :sections="2" :count="2" cols="col-12" />
         </div>
       </q-card-section>
     </q-card>
@@ -54,6 +54,7 @@ import { ref } from 'vue';
 import InfoCarousel from 'src/components/home/carousel/info-carousel.vue';
 import AvailableExamRoundsTable from 'src/components/home/available-exam-rounds-table.vue';
 import HomeMainContent from 'src/components/home/home-main-content.vue';
+import { CardGridSkeleton } from 'src/components/base/skeleton';
 import type {
   BannerBoxContent,
   ContentBoxContent,

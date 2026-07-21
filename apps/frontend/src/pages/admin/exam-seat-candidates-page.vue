@@ -37,6 +37,15 @@
 
       <div class="row q-gutter-sm col-12 col-sm-auto justify-end">
         <AppButton
+          v-if="!isVoucherSent"
+          icon="edit"
+          :label="$t('admin.seatCandidates.editSeats')"
+          color="secondary"
+          class="toolbar-action-btn"
+          :disable="isActionLoading || isPrintingSeatPlan"
+          @click="handleEditSeats"
+        />
+        <AppButton
           :icon="isVoucherSent ? 'print' : 'badge'"
           :label="
             isVoucherSent
@@ -45,6 +54,8 @@
           "
           color="primary"
           class="toolbar-action-btn"
+          :loading="isActionLoading || isPrintingSeatPlan"
+          :disable="isActionLoading || isPrintingSeatPlan"
           @click="isVoucherSent ? handlePrintSeatPlan() : handlePrintVoucher()"
         />
         <ExportCsvButton
@@ -52,6 +63,7 @@
           :rows="filteredRows"
           file-name-prefix="seat-candidates"
           class="toolbar-action-btn"
+          :disable="isActionLoading"
         />
       </div>
     </nav>
@@ -61,7 +73,7 @@
       <BaseTable
         :columns="columns"
         :rows="filteredRows"
-        :loading="isLoading"
+        :loading="isLoading || isActionLoading || isPrintingSeatPlan"
         :pagination="pagination"
         class="seat-candidates-table"
         @request="onRequest"
@@ -158,10 +170,8 @@ import {
 import type { SeatCell, SeatStatus } from 'src/composables/use-exam-seat-management';
 import type { BackendLocation } from 'src/types/exam';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
-import { EnrollmentStatus } from 'src/types/enrollment.types';
 import { bulkIssueVouchers } from 'src/services/voucher.service';
-import { fetchEnrollmentById, updateEnrollmentStatus } from 'src/services/enrollment.service';
-import { updateExamSessionStatus } from 'src/services/exam.service';
+import { fetchEnrollmentById } from 'src/services/enrollment.service';
 import type { VoucherData } from 'src/types/voucher';
 import { getImageUrl } from 'src/services/image.service';
 import {
@@ -170,7 +180,6 @@ import {
   INTERNAL_EXAM_TYPE_SPECIAL,
 } from 'src/constants/exam';
 
-const SESSION_STATUS_VOUCHER_SENT = 3;
 const SESSION_STATUS_SEAT_ALLOCATED = 2;
 
 const getExamRoundTypeLabel = (): string => {
@@ -185,6 +194,7 @@ const route = useRoute();
 const router = useRouter();
 const i18n = useI18n();
 const $q = useQuasar();
+const isActionLoading = ref(false);
 
 const {
   exam,
@@ -208,6 +218,7 @@ const {
   isVoucherSent,
   getTimeTabSessionId,
   fetchData,
+  applyVoucherIssuedState,
 } = useExamSeatCandidates();
 
 const isPrintingSeatPlan = ref(false);
@@ -253,15 +264,13 @@ const startIssuingTickets = async (): Promise<void> => {
       position: 'top',
       timeout: 2500,
     });
-    return;
+    throw new Error('No enrollments in current session');
   }
 
-  $q.loading.show({
-    message: 'กำลังออกบัตรประจำตัวสอบและจัดส่งอีเมลแจ้งเตือนผู้เข้าสอบทั้งหมด...',
-  });
+  isActionLoading.value = true;
+  $q.loading.show({ message: 'กำลังออกใบเข้าห้องสอบ...' });
 
   try {
-    // Resolve the exact absolute URL correctly using Vue Router (handles Hash mode / History mode automatically)
     const resolvedRoute = router.resolve({ name: 'exam-history' });
     const historyUrl = new URL(
       resolvedRoute.href,
@@ -276,31 +285,17 @@ const startIssuingTickets = async (): Promise<void> => {
       ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
       : exam.value?.EXAM_NAME || 'BUU-GET Exam';
 
-    // Perform bulk voucher issuance and bulk email dispatch in a single optimized request
-    await bulkIssueVouchers({
+    const result = await bulkIssueVouchers({
       ermIds,
       examName,
       historyUrl,
+      sessionIds: activeSessionIds.value,
     });
 
-    await Promise.all(
-      sessionEnrollments.value.map((enrollment) =>
-        updateEnrollmentStatus(enrollment.ERM_ID, {
-          ERM_STATUS: EnrollmentStatus.SEAT_PUBLISHED,
-        }),
-      ),
-    );
+    const updatedSessionIds =
+      result.updatedSessionIds.length > 0 ? result.updatedSessionIds : activeSessionIds.value;
 
-    await Promise.all(
-      activeSessionIds.value.map((sessionId) =>
-        updateExamSessionStatus(sessionId, SESSION_STATUS_VOUCHER_SENT),
-      ),
-    );
-
-    const examId = Number(route.params.examId);
-    if (!isNaN(examId) && examId > 0) {
-      await fetchData(examId);
-    }
+    applyVoucherIssuedState(updatedSessionIds, ermIds);
 
     $q.notify({
       type: 'positive',
@@ -320,9 +315,27 @@ const startIssuingTickets = async (): Promise<void> => {
       timeout: 3500,
       actions: [{ icon: 'close', color: 'white' }],
     });
+    throw error;
   } finally {
+    isActionLoading.value = false;
     $q.loading.hide();
   }
+};
+
+const handleEditSeats = (): void => {
+  const examId = Number(route.params.examId);
+  if (isNaN(examId) || examId <= 0) return;
+
+  void router.push({
+    name: 'admin-exam-seat-management',
+    params: { examId: String(examId) },
+    query: {
+      sessionId: String(selectedSessionId.value),
+      ...(selectedSessionLocationId.value !== null
+        ? { sessionLocationId: String(selectedSessionLocationId.value) }
+        : {}),
+    },
+  });
 };
 
 const handlePrintVoucher = (): void => {
@@ -336,9 +349,8 @@ const handlePrintVoucher = (): void => {
         studentCount: candidateCount.value,
       },
       voucherData: voucherPreviewData.value,
+      onConfirm: startIssuingTickets,
     },
-  }).onOk(() => {
-    void startIssuingTickets();
   });
 };
 
@@ -377,7 +389,7 @@ const buildVoucherData = (row: SeatCandidateRow, freshEnrollment = row.enrollmen
 };
 
 const handleViewVoucher = async (row: SeatCandidateRow): Promise<void> => {
-  $q.loading.show();
+  isActionLoading.value = true;
   try {
     const enrollment = await fetchEnrollmentById(row.ermId);
     $q.dialog({
@@ -395,7 +407,7 @@ const handleViewVoucher = async (row: SeatCandidateRow): Promise<void> => {
       position: 'top',
     });
   } finally {
-    $q.loading.hide();
+    isActionLoading.value = false;
   }
 };
 
@@ -567,7 +579,6 @@ const renderPrintPageToCanvas = async (element: HTMLElement): Promise<HTMLCanvas
 
 const handlePrintSeatPlan = async (): Promise<void> => {
   isPrintingSeatPlan.value = true;
-  $q.loading.show();
 
   await nextTick();
   await new Promise<void>((resolve) => {
@@ -615,7 +626,6 @@ const handlePrintSeatPlan = async (): Promise<void> => {
       position: 'top',
     });
   } finally {
-    $q.loading.hide();
     cleanupSeatPlanPrint();
   }
 };

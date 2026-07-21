@@ -17,7 +17,7 @@ The two apps live under `apps/`:
 
 Each app is **self-contained with its own `package.json` and lockfile**. Run all app-level commands from inside the app directory, not the repo root.
 
-> ⚠️ The repo was recently restructured from root-level `backend/`/`frontend/` into `apps/`. Several root-level files still assume the **old** layout and are stale: the root `package.json` `workspaces` (`["frontend","backend"]`), `.husky/pre-commit` (which `cd`s into `frontend`/`backend`), and `scripts/deploy-k3s.sh`. Root scripts like `npm run dev:backend` will not resolve. Prefer running commands from within `apps/*`.
+> Monorepo workspaces ชี้ไปที่ `apps/backend` และ `apps/frontend` — รัน `npm run dev:backend` / `npm run dev:frontend` จาก root ได้ หรือ `cd apps/*` แล้วรัน script ในแต่ละ app โดยตรง
 
 ## Commands
 

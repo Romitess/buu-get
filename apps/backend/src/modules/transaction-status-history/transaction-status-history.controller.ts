@@ -8,12 +8,15 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { FINANCE_ROLES } from 'src/common/constants/role-groups';
 import { TransactionStatusHistoryService } from './transaction-status-history.service';
 import { CreateTransactionStatusHistoryDto } from './dto/transaction-status-history.dto';
 import { TransactionStatusHistory } from './entities/transaction-status-history.entity';
 
 @ApiTags('Transaction Status History')
 @Controller('transaction-status-history')
+@Roles(...FINANCE_ROLES)
 export class TransactionStatusHistoryController {
   constructor(
     private readonly statusHistoryService: TransactionStatusHistoryService,

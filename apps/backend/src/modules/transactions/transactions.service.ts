@@ -8,6 +8,20 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import {
+  buildPaginatedResponse,
+  PaginatedResponse,
+} from 'src/common/dto/paginated-response.dto';
+import { FINANCE_ROLES } from 'src/common/constants/role-groups';
+import {
+  assertSelfOrRoles,
+  AuthenticatedUser,
+} from 'src/common/utils/authz.util';
+import {
+  PAGINATION_DEFAULT_LIMIT,
+  PAGINATION_DEFAULT_PAGE,
+  PaginationQueryDto,
+} from 'src/common/dto/pagination-query.dto';
+import {
   Transaction,
   TransactionChannel,
   TransactionMatchStatus,
@@ -156,6 +170,7 @@ export class TransactionsService {
   async confirmPaymentFlow(
     tranxId: number,
     dto: ConfirmPaymentFlowDto,
+    user: AuthenticatedUser,
   ): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -175,6 +190,11 @@ export class TransactionsService {
       if (!transaction) {
         throw new NotFoundException(`Transaction with ID ${tranxId} not found`);
       }
+
+      const enrollment = await manager.getRepository(ExamEnrollment).findOne({
+        where: { ERM_ID: transaction.ERM_ID },
+      });
+      this.assertEnrollmentAccess(user, enrollment);
 
       if (
         transaction.TRANX_PAYMENT_STATUS !== TransactionPaymentStatus.PENDING
@@ -210,12 +230,12 @@ export class TransactionsService {
 
       // อัปเดตสถานะการสมัครสอบเป็น PAID
       const enrollmentRepository = manager.getRepository(ExamEnrollment);
-      const enrollment = await enrollmentRepository.findOne({
+      const enrollmentToUpdate = await enrollmentRepository.findOne({
         where: { ERM_ID: transaction.ERM_ID },
       });
-      if (enrollment) {
-        enrollment.ERM_STATUS = ExamEnrollmentStatus.PAID;
-        await enrollmentRepository.save(enrollment);
+      if (enrollmentToUpdate) {
+        enrollmentToUpdate.ERM_STATUS = ExamEnrollmentStatus.PAID;
+        await enrollmentRepository.save(enrollmentToUpdate);
       }
 
       const history = historyRepository.create({
@@ -250,7 +270,10 @@ export class TransactionsService {
     }
   }
 
-  async expireTransaction(tranxId: number): Promise<void> {
+  async expireTransaction(
+    tranxId: number,
+    user: AuthenticatedUser,
+  ): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -267,6 +290,11 @@ export class TransactionsService {
       if (!transaction) {
         throw new NotFoundException(`Transaction with ID ${tranxId} not found`);
       }
+
+      const enrollment = await manager.getRepository(ExamEnrollment).findOne({
+        where: { ERM_ID: transaction.ERM_ID },
+      });
+      this.assertEnrollmentAccess(user, enrollment);
 
       if (
         transaction.TRANX_PAYMENT_STATUS !== TransactionPaymentStatus.PENDING
@@ -502,8 +530,95 @@ export class TransactionsService {
     });
   }
 
-  async findAll(): Promise<Transaction[]> {
-    return this.transactionsRepository.find({ relations: ['ENROLLMENT'] });
+  /**
+   * คืนเงินเมื่อยังไม่มีใบเสร็จ ISSUED:
+   * TRANX_PAYMENT_STATUS → REFUND, ERM_STATUS → CANCELLED
+   */
+  async refundTransaction(tranxId: number): Promise<Transaction> {
+    return this.dataSource.transaction(async (manager) => {
+      const transactionRepository = manager.getRepository(Transaction);
+      const enrollmentRepository = manager.getRepository(ExamEnrollment);
+      const historyRepository = manager.getRepository(TransactionStatusHistory);
+
+      const transaction = await transactionRepository.findOne({
+        where: { TRANX_ID: tranxId },
+        relations: ['RECEIPTS', 'ENROLLMENT'],
+      });
+
+      if (!transaction) {
+        throw new NotFoundException(`Transaction with ID ${tranxId} not found`);
+      }
+
+      if (
+        transaction.TRANX_PAYMENT_STATUS === TransactionPaymentStatus.REFUND ||
+        transaction.TRANX_PAYMENT_STATUS ===
+          TransactionPaymentStatus.RECEIPT_VOIDED
+      ) {
+        throw new ConflictException(
+          'Transaction is already refunded or receipt-voided',
+        );
+      }
+
+      const refundableStatuses: TransactionPaymentStatus[] = [
+        TransactionPaymentStatus.PAID,
+        TransactionPaymentStatus.APPROVED,
+      ];
+      if (!refundableStatuses.includes(transaction.TRANX_PAYMENT_STATUS)) {
+        throw new BadRequestException(
+          'Only PAID or APPROVED transactions can be refunded',
+        );
+      }
+
+      const hasIssuedReceipt = (transaction.RECEIPTS ?? []).some(
+        (receipt) => receipt.RC_STATUS === ReceiptStatus.ISSUED,
+      );
+      if (hasIssuedReceipt) {
+        throw new BadRequestException(
+          'Cannot refund when an ISSUED receipt exists; void the receipt instead',
+        );
+      }
+
+      const previousStatus = transaction.TRANX_PAYMENT_STATUS;
+      transaction.TRANX_PAYMENT_STATUS = TransactionPaymentStatus.REFUND;
+      await transactionRepository.save(transaction);
+
+      await historyRepository.save(
+        historyRepository.create({
+          TRANX_ID: transaction.TRANX_ID,
+          TSH_FROM: this.toHistoryStatus(previousStatus),
+          TSH_TO: this.toHistoryStatus(TransactionPaymentStatus.REFUND),
+          TSH_API_TYPE: TransactionApiType.REVERSAL,
+          TSH_RESP_CODE: '000',
+          TSH_RESP_MESSAGE: 'Payment refunded',
+        }),
+      );
+
+      const enrollment =
+        transaction.ENROLLMENT ??
+        (await enrollmentRepository.findOne({
+          where: { ERM_ID: transaction.ERM_ID },
+        }));
+      if (enrollment) {
+        enrollment.ERM_STATUS = ExamEnrollmentStatus.CANCELLED;
+        await enrollmentRepository.save(enrollment);
+      }
+
+      return transaction;
+    });
+  }
+
+  async findAll(
+    query: PaginationQueryDto = {},
+  ): Promise<PaginatedResponse<Transaction>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const [data, total] = await this.transactionsRepository.findAndCount({
+      relations: ['ENROLLMENT'],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { TRANX_ID: 'DESC' },
+    });
+    return buildPaginatedResponse(data, total, page, limit);
   }
 
   async findOne(id: number): Promise<Transaction> {
@@ -546,5 +661,21 @@ export class TransactionsService {
   async remove(id: number): Promise<void> {
     const transaction = await this.findOne(id);
     await this.transactionsRepository.softRemove(transaction);
+  }
+
+  private assertEnrollmentAccess(
+    user: AuthenticatedUser,
+    enrollment: ExamEnrollment | null,
+  ): void {
+    if (!enrollment) {
+      throw new NotFoundException('Enrollment not found for this transaction');
+    }
+
+    assertSelfOrRoles(
+      user,
+      enrollment.USER_ID,
+      FINANCE_ROLES,
+      'Access denied: transaction does not belong to you',
+    );
   }
 }

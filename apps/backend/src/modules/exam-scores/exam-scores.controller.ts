@@ -7,8 +7,13 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { ENROLLMENT_ADMIN_ROLES } from 'src/common/constants/role-groups';
+import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ExamScoresService } from './exam-scores.service';
 import { CreateExamScoreDto } from './dto/create-exam-score.dto';
 import { UpdateExamScoreDto } from './dto/update-exam-score.dto';
@@ -16,6 +21,7 @@ import { ExamScore } from './entities/exam-score.entity';
 
 @ApiTags('exam-scores')
 @Controller('api/exam-scores')
+@Roles(...ENROLLMENT_ADMIN_ROLES)
 export class ExamScoresController {
   constructor(private readonly examScoresService: ExamScoresService) {}
 
@@ -28,13 +34,11 @@ export class ExamScoresController {
 
   @Get()
   @ApiOperation({ summary: 'ดึงข้อมูลคะแนนสอบทั้งหมด (Get all Exam Scores)' })
-  @ApiResponse({
-    status: 200,
-    description: 'ดึงข้อมูลสำเร็จ',
-    type: [ExamScore],
-  })
-  findAll(): Promise<ExamScore[]> {
-    return this.examScoresService.findAll();
+  @ApiResponse({ status: 200, description: 'ดึงข้อมูลสำเร็จแบบแบ่งหน้า' })
+  findAll(
+    @Query() query: PaginationQueryDto,
+  ): Promise<PaginatedResponse<ExamScore>> {
+    return this.examScoresService.findAll(query);
   }
 
   @Get(':id')

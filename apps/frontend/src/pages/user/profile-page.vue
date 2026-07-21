@@ -27,16 +27,16 @@
       </div>
     </Transition>
 
-    <q-form ref="formRef">
+    <FormSkeleton v-if="isSaving" :fields="12" :columns="2" class="q-mb-md" />
+
+    <q-form v-else ref="formRef">
       <q-card class="user-profile-card q-pa-lg q-mb-md" flat>
         <div class="row q-col-gutter-xl">
           <div class="col-12 col-md-3 flex column flex-center relative-position">
             <div class="avatar-container q-mb-md cursor-pointer" @click="triggerFileInput">
               <q-avatar size="160px" class="profile-avatar">
-                <img :src="avatarSrc" alt="Avatar" class="profile-avatar-img" />
-                <q-inner-loading :showing="isUploading">
-                  <q-spinner-gears size="50px" color="primary" />
-                </q-inner-loading>
+                <AvatarSkeleton v-if="isUploading" size="160px" />
+                <img v-else :src="avatarSrc" alt="Avatar" class="profile-avatar-img" />
               </q-avatar>
               <q-btn
                 round
@@ -410,6 +410,7 @@ import { getImageUrl } from 'src/services/image.service';
 import { api } from 'src/boot/axios';
 import type { AxiosError } from 'axios';
 import { useFocusFirstInvalidField } from 'src/composables/use-focus-first-invalid-field';
+import { AvatarSkeleton, FormSkeleton } from 'src/components/base/skeleton';
 
 const router = useRouter();
 const route = useRoute();
@@ -456,6 +457,8 @@ const avatarSrc = computed<string>(() => {
   }
   return defaultUserImage;
 });
+
+const isSaving = ref(false);
 
 const { isUploading, handleImageUpload } = useImageUpload({
   onSuccess: (imagePath: string) => {
@@ -661,8 +664,7 @@ const onSave = async (): Promise<void> => {
   }
 
   try {
-    userStore.isLoadingGlobal = true;
-    userStore.loadingText = t('profile.savingData');
+    isSaving.value = true;
 
     await userService.updateProfile(token, {
       userTitleTh: formData.value.title,
@@ -735,7 +737,7 @@ const onSave = async (): Promise<void> => {
       position: 'top',
     });
   } finally {
-    userStore.isLoadingGlobal = false;
+    isSaving.value = false;
   }
 };
 

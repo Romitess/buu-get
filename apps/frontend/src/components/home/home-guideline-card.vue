@@ -26,7 +26,7 @@ defineProps<{
   background: white;
   border: none !important;
   box-shadow: 0 8px 12px -4px rgba(0, 0, 0, 0.35) !important;
-  transition: all 0.3s ease;
+  transition: box-shadow 200ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .guideline-card:hover {
   box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.45) !important;

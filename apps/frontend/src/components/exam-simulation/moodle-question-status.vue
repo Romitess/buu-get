@@ -6,6 +6,7 @@
     <button
       type="button"
       class="question-status__flag"
+      data-tour="flag-question"
       :class="{ 'question-status__flag--active': flagged }"
       :aria-pressed="flagged"
       @click="emitToggleFlag"

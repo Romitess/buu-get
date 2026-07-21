@@ -5,6 +5,15 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import {
+  buildPaginatedResponse,
+  PaginatedResponse,
+} from 'src/common/dto/paginated-response.dto';
+import {
+  PAGINATION_DEFAULT_LIMIT,
+  PAGINATION_DEFAULT_PAGE,
+  PaginationQueryDto,
+} from 'src/common/dto/pagination-query.dto';
 import { Receipt, ReceiptStatus } from './entities/receipt.entity';
 import { CreateReceiptDto, UpdateReceiptDto } from './dto/receipt.dto';
 
@@ -20,12 +29,26 @@ export class ReceiptsService {
     return this.receiptsRepository.save(receipt);
   }
 
-  async findAll(): Promise<Receipt[]> {
-    return this.receiptsRepository.find({ relations: ['TRANSACTION'] });
+  async findAll(
+    query: PaginationQueryDto = {},
+  ): Promise<PaginatedResponse<Receipt>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const [data, total] = await this.receiptsRepository.findAndCount({
+      relations: ['TRANSACTION'],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { RC_ID: 'DESC' },
+    });
+    return buildPaginatedResponse(data, total, page, limit);
   }
 
-  async findIssued(): Promise<Receipt[]> {
-    return this.receiptsRepository.find({
+  async findIssued(
+    query: PaginationQueryDto = {},
+  ): Promise<PaginatedResponse<Receipt>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const [data, total] = await this.receiptsRepository.findAndCount({
       where: { RC_STATUS: ReceiptStatus.ISSUED },
       relations: [
         'TRANSACTION',
@@ -39,12 +62,15 @@ export class ReceiptsService {
         'TRANSACTION.BANK_RECONCILES.USER',
         'TRANSACTION.BANK_RECONCILES.USER.PROFILE',
       ],
+      skip: (page - 1) * limit,
+      take: limit,
       order: {
         RC_ISSUED_AT: 'DESC',
         CREATED_AT: 'DESC',
         RC_ID: 'DESC',
       },
     });
+    return buildPaginatedResponse(data, total, page, limit);
   }
 
   async findOne(id: number): Promise<Receipt> {

@@ -16,7 +16,12 @@
     <!-- MOODLE LMS CONTENT -->
     <div class="moodle-content q-pb-lg">
       <!-- State 1: Mock Login (Hero Card) -->
-      <q-card v-if="!isLoggedIn" class="moodle-hero-card q-mb-lg" flat>
+      <q-card
+        v-if="!isLoggedIn"
+        class="moodle-hero-card q-mb-lg position-relative"
+        flat
+        @vue:mounted="onLoginViewMounted"
+      >
         <div class="hero-layout">
           <!-- Left: Welcome Banner -->
           <div class="hero-left">
@@ -52,46 +57,50 @@
               <p class="hero-login-panel__subtitle text-grey-7">Log in to LMS-BUUGET</p>
 
               <div class="q-mt-lg">
-                <label class="field-label">Username or email</label>
-                <q-input
-                  v-model="lmsUsername"
-                  outlined
-                  dense
-                  placeholder="Enter your username or email"
-                  class="q-mb-md"
-                />
+                <div data-tour="login-inputs">
+                  <label class="field-label">Username or email</label>
+                  <q-input
+                    v-model="lmsUsername"
+                    outlined
+                    dense
+                    placeholder="Enter your username or email"
+                    class="q-mb-md"
+                  />
 
-                <label class="field-label">Password</label>
-                <q-input
-                  v-model="lmsPassword"
-                  outlined
-                  dense
-                  :type="showPassword ? 'text' : 'password'"
-                  placeholder="Enter your password"
-                  class="q-mb-sm"
-                  @keyup.enter="handleMockLogin"
-                >
-                  <template v-slot:append>
-                    <q-icon
-                      :name="showPassword ? 'visibility' : 'visibility_off'"
-                      class="cursor-pointer"
-                      @click="showPassword = !showPassword"
-                    />
-                  </template>
-                </q-input>
+                  <label class="field-label">Password</label>
+                  <q-input
+                    v-model="lmsPassword"
+                    outlined
+                    dense
+                    :type="showPassword ? 'text' : 'password'"
+                    placeholder="Enter your password"
+                    class="q-mb-sm"
+                    @keyup.enter="handleMockLogin"
+                  >
+                    <template v-slot:append>
+                      <q-icon
+                        :name="showPassword ? 'visibility' : 'visibility_off'"
+                        class="cursor-pointer"
+                        @click="showPassword = !showPassword"
+                      />
+                    </template>
+                  </q-input>
+                </div>
 
                 <div class="text-right q-mb-lg">
                   <span class="forgot-link cursor-pointer">Forgot password?</span>
                 </div>
 
-                <q-btn
-                  color="primary"
-                  label="Log in"
-                  class="full-width login-btn"
-                  no-caps
-                  size="lg"
-                  @click="handleMockLogin"
-                />
+                <div data-tour="login-button" class="login-btn-tour-target">
+                  <q-btn
+                    color="primary"
+                    label="Log in"
+                    class="full-width login-btn"
+                    no-caps
+                    size="lg"
+                    @click="handleMockLogin"
+                  />
+                </div>
 
                 <div class="text-center q-mt-md">
                   <span class="cookies-link text-grey-6 cursor-pointer">Cookies notice</span>
@@ -100,13 +109,47 @@
             </div>
           </div>
         </div>
+
+        <q-btn
+          round
+          color="grey-5"
+          text-color="white"
+          icon="question_mark"
+          class="exam-simulation-help-btn shadow-0"
+          size="sm"
+          :aria-label="t('examSimulation.tour.restartLabel')"
+          @click="restartTour"
+        />
       </q-card>
 
       <!-- State 2: Moodle Mockup Dashboard -->
       <transition name="fade">
-        <MoodleMockupDashboard v-if="isLoggedIn" class="q-mb-lg" />
+        <MoodleMockupDashboard
+          v-if="isLoggedIn"
+          ref="dashboardRef"
+          class="q-mb-lg"
+          @tour-dashboard-ready="onTourDashboardReady"
+          @tour-attempt-ready="onTourAttemptReady"
+          @tour-attempt-page-change="onTourAttemptPageChange"
+          @tour-attempt-summary-ready="onTourAttemptSummaryReady"
+          @dashboard-view-change="onTourDashboardViewChange"
+          @restart-tour="restartTour"
+        />
       </transition>
     </div>
+
+    <ProductTourOverlay
+      :visible="isTourActive"
+      :target-rect="tourTargetRect"
+      :step-number="tourStepNumber"
+      :title="tourTitle"
+      :body="tourBody"
+      :badge-label="tourBadgeLabel"
+      :next-label="tourNextLabel"
+      :placement="tourPlacement"
+      :is-last="tourIsLastStep"
+      @next="goToNextTourStep"
+    />
   </div>
 </template>
 
@@ -116,6 +159,14 @@ import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import MoodleMockupDashboard from 'src/components/exam-simulation/moodle-mockup-dashboard.vue';
+import ProductTourOverlay from 'src/components/base/product-tour/product-tour-overlay.vue';
+import { useExamSimulationTour } from 'src/composables/use-exam-simulation-tour';
+import type { DashboardViewType } from 'src/composables/exam-simulation-tour-steps';
+
+type MoodleDashboardExpose = {
+  currentView: { value: DashboardViewType };
+  goToView: (view: DashboardViewType) => void;
+};
 
 const { t } = useI18n();
 
@@ -123,6 +174,67 @@ const isLoggedIn = ref(false);
 const lmsUsername = ref('');
 const lmsPassword = ref('');
 const showPassword = ref(false);
+const dashboardRef = ref<MoodleDashboardExpose | null>(null);
+const trackedDashboardView = ref<DashboardViewType | null>(null);
+const isAttemptSummary = ref(false);
+
+const goToDashboardView = (view: DashboardViewType): void => {
+  dashboardRef.value?.goToView(view);
+};
+
+const {
+  isActive: isTourActive,
+  targetRect: tourTargetRect,
+  stepNumber: tourStepNumber,
+  title: tourTitle,
+  body: tourBody,
+  badgeLabel: tourBadgeLabel,
+  nextLabel: tourNextLabel,
+  placement: tourPlacement,
+  isLastStep: tourIsLastStep,
+  restartTour,
+  goToNextStep: goToNextTourStep,
+  maybeAutoStart,
+  tryResumeTour,
+} = useExamSimulationTour({
+  isLoggedIn,
+  dashboardView: trackedDashboardView,
+  isAttemptSummary,
+  goToDashboardView,
+});
+
+const onLoginViewMounted = (): void => {
+  void maybeAutoStart();
+};
+
+const onTourDashboardReady = (): void => {
+  trackedDashboardView.value = 'overview';
+  isAttemptSummary.value = false;
+  void tryResumeTour('mount');
+};
+
+const onTourAttemptReady = (): void => {
+  isAttemptSummary.value = false;
+  void tryResumeTour('mount');
+};
+
+const onTourAttemptPageChange = (): void => {
+  isAttemptSummary.value = false;
+  void tryResumeTour('attempt-page');
+};
+
+const onTourAttemptSummaryReady = (): void => {
+  isAttemptSummary.value = true;
+  void tryResumeTour('attempt-summary');
+};
+
+const onTourDashboardViewChange = (view: DashboardViewType): void => {
+  trackedDashboardView.value = view;
+  if (view !== 'attempt') {
+    isAttemptSummary.value = false;
+  }
+  void tryResumeTour('dashboard', view);
+};
 
 const handleMockLogin = (): void => {
   isLoggedIn.value = true;
@@ -298,10 +410,22 @@ const handleMockLogin = (): void => {
   letter-spacing: 0.3px;
 }
 
+.login-btn-tour-target {
+  display: block;
+  width: 100%;
+}
+
 .cookies-link {
   font-size: 0.8rem;
   &:hover {
     text-decoration: underline;
   }
+}
+
+.exam-simulation-help-btn {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2;
 }
 </style>

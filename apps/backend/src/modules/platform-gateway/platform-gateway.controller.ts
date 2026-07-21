@@ -23,11 +23,7 @@ import { Public } from 'src/decorators/public.decorator';
 import { OptionalJwtAuthGuard } from 'src/common/guards/optional-jwt-auth.guard';
 import { UploadImageCategoryDto } from './dto/upload-image-category.dto';
 import { SendEmailDto } from './dto/send-email.dto';
-import {
-  FileNameDto,
-  GetFileListDto,
-  SendNotiDto,
-} from './dto/file-name.dto';
+import { FileNameDto, GetFileListDto, SendNotiDto } from './dto/file-name.dto';
 import { GetPublicFilesDto } from './dto/get-public-files.dto';
 
 // endpoint ที่ forward body ดิบไป upstream (createShortUrl/getOriginalUrl/timeStamp)
@@ -48,7 +44,6 @@ export class PlatformGatewayController {
     private readonly platformGatewayService: PlatformGatewayService,
   ) {}
 
-  @Public()
   @Post('/uploadFile')
   @UseInterceptors(FileInterceptor('file', { storage: uploadDiskStorage }))
   async uploadFile(
@@ -72,7 +67,6 @@ export class PlatformGatewayController {
    *
    * OptionalJwtAuthGuard: ถ้ามี token จะดึง userId มาทำ per-user folder ได้
    */
-  @Public()
   @UseGuards(OptionalJwtAuthGuard)
   @Post('/images/upload')
   @UseInterceptors(FileInterceptor('file', { storage: uploadDiskStorage }))
@@ -124,7 +118,6 @@ export class PlatformGatewayController {
     stream.pipe(res);
   }
 
-  @Public()
   @Post('/getFileList')
   getFileList(@Body() body: GetFileListDto) {
     return this.platformGatewayService.getFileList(
@@ -132,13 +125,11 @@ export class PlatformGatewayController {
     );
   }
 
-  @Public()
   @Post('/getPublicFile')
   getPublicFile(@Body() body: FileNameDto) {
     return this.platformGatewayService.getPublicFile(body.fileName);
   }
 
-  @Public()
   @Post('/getPublicFiles')
   getPublicFiles(@Body() body: GetPublicFilesDto) {
     const files =
@@ -151,7 +142,6 @@ export class PlatformGatewayController {
     return this.platformGatewayService.sendNoti(body.message);
   }
 
-  @Public()
   @Post('/sendEmail')
   sendEmail(@Body() body: SendEmailDto) {
     return this.platformGatewayService.sendEmail(
@@ -162,19 +152,16 @@ export class PlatformGatewayController {
     );
   }
 
-  @Public()
   @Delete('/deleteFile')
   deleteFile(@Body() body: FileNameDto) {
     return this.platformGatewayService.deleteFile(body.fileName);
   }
 
-  @Public()
   @Post('/timeStamp')
   timeStamp(@Body() body: AnyRecord) {
     return this.platformGatewayService.timeStamp(body);
   }
 
-  @Public()
   @Get('/dsPrefix')
   dsPrefix() {
     return this.platformGatewayService.dsPrefix();

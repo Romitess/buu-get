@@ -131,6 +131,18 @@ export const TRANSACTION_MATCH_STATUS = {
   UNMATCH: 0,
 } as const;
 
+export const TRANSACTION_PAYMENT_STATUS = {
+  PENDING: 0,
+  APPROVED: 1,
+  REJECTED: 2,
+  PAID: 3,
+  PAYMENT_FAILED: 4,
+  EXPIRED: 5,
+  REVERSED: 6,
+  REFUND: 7,
+  RECEIPT_VOIDED: 8,
+} as const;
+
 export const ReceiptStatus = {
   UNISSUED: 0,
   ISSUED: 1,

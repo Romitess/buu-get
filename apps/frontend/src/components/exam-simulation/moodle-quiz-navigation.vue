@@ -19,7 +19,12 @@
     </div>
 
     <div class="quiz-navigation-content" :aria-hidden="!open">
-      <section :id="navigationId" class="quiz-navigation-card" aria-label="Quiz navigation">
+      <section
+        :id="navigationId"
+        class="quiz-navigation-card"
+        data-tour="quiz-navigation"
+        aria-label="Quiz navigation"
+      >
         <div class="quiz-navigation-card__title">{{ title }}</div>
         <div class="quiz-navigation-card__pages" role="list">
           <button

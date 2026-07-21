@@ -29,8 +29,13 @@
         outlined
         dense
         :type="isPasswordVisible ? 'text' : 'password'"
-        class="q-mb-lg passcode-input"
+        class="passcode-input"
+        :class="{ 'q-mb-sm': errorMessage, 'q-mb-lg': !errorMessage }"
         :placeholder="placeholderText || $t('examSchedule.passcodeDialog.placeholder')"
+        :error="!!errorMessage"
+        :error-message="errorMessage"
+        hide-bottom-space
+        @update:model-value="clearError"
       >
         <template v-slot:append>
           <q-icon
@@ -45,6 +50,7 @@
       <AppButton
         :label="confirmBtnText || $t('examSchedule.passcodeDialog.confirm')"
         class="full-width q-mb-md confirm-btn"
+        :loading="isLoading"
         @click="confirmPasscode"
       />
 
@@ -58,6 +64,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
 
 interface Props {
@@ -76,9 +83,13 @@ withDefaults(defineProps<Props>(), {
   footerSupportText: '',
 });
 
+const { t } = useI18n();
+
 const isOpen = ref<boolean>(false);
 const passcode = ref<string>('');
 const isPasswordVisible = ref<boolean>(false);
+const errorMessage = ref<string>('');
+const isLoading = ref<boolean>(false);
 
 const emit = defineEmits<{
   (e: 'confirm', passcode: string): void;
@@ -88,24 +99,48 @@ const togglePasswordVisibility = (): void => {
   isPasswordVisible.value = !isPasswordVisible.value;
 };
 
+const clearError = (): void => {
+  errorMessage.value = '';
+};
+
+const setError = (message: string): void => {
+  errorMessage.value = message;
+};
+
+const setLoading = (loading: boolean): void => {
+  isLoading.value = loading;
+};
+
 const openDialog = (): void => {
   isOpen.value = true;
   passcode.value = '';
   isPasswordVisible.value = false;
+  errorMessage.value = '';
+  isLoading.value = false;
 };
 
 const closeDialog = (): void => {
   isOpen.value = false;
+  isLoading.value = false;
+  errorMessage.value = '';
 };
 
 const confirmPasscode = (): void => {
-  emit('confirm', passcode.value);
-  closeDialog();
+  const trimmedPasscode = passcode.value.trim();
+  if (!trimmedPasscode) {
+    errorMessage.value = t('examSchedule.passcodeDialog.required');
+    return;
+  }
+
+  errorMessage.value = '';
+  emit('confirm', trimmedPasscode);
 };
 
 defineExpose({
   openDialog,
   closeDialog,
+  setError,
+  setLoading,
 });
 </script>
 
