@@ -270,11 +270,31 @@ export class ExamEnrollmentsService {
     let validPasscode: ExamPasscode | null = null;
 
     if (targetSession.EXAM?.EXAM_TYPE === EXAM_TYPE.SPECIAL) {
-      validPasscode = await this.findValidSpecialPasscode(
-        targetSession.EXAM_ID,
-        user.USER_NATIONAL_ID || '',
-        PASSCODE,
-      );
+      if (!PASSCODE) {
+        throw new BadRequestException(
+          'Passcode is required for special exam rounds',
+        );
+      }
+
+      validPasscode = await this.examPasscodeRepository.findOne({
+        where: {
+          EXAM_ID: targetSession.EXAM_ID,
+          NATIONAL_ID: user.USER_NATIONAL_ID || '',
+          PASSCODE: PASSCODE,
+        },
+        select: {
+          PASSCODE_ID: true,
+          PASSCODE: true,
+          EXAM_ID: true,
+          NATIONAL_ID: true,
+        },
+      });
+
+      if (!validPasscode) {
+        throw new BadRequestException(
+          'Invalid passcode for this user and exam',
+        );
+      }
     }
 
     const existingEnrollment = await this.examEnrollmentRepository
@@ -331,41 +351,11 @@ export class ExamEnrollmentsService {
       await this.examPasscodeLogRepository.save(log);
     }
 
-    return await this.findOne(saved.ERM_ID);
-  }
-
-  async validatePasscode(
-    userId: number,
-    dto: ValidatePasscodeDto,
-  ): Promise<void> {
-    const session = await this.examSessionRepository.findOne({
-      where: { SS_ID: dto.SESSION_ID },
-      relations: ['EXAM'],
+    // คืน entity เบาหลังสมัคร — ไม่โหลด deep graph ของ findOne
+    return this.examEnrollmentRepository.findOneOrFail({
+      where: { ERM_ID: saved.ERM_ID },
+      relations: ['SESSION', 'SESSION.EXAM', 'USER', 'USER.PROFILE'],
     });
-
-    if (!session) {
-      throw new NotFoundException(
-        `Exam Session with ID ${dto.SESSION_ID} not found`,
-      );
-    }
-
-    if (session.EXAM?.EXAM_TYPE !== EXAM_TYPE.SPECIAL) {
-      return;
-    }
-
-    const user = await this.userRepository.findOne({
-      where: { USER_ID: userId },
-    });
-
-    if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
-
-    await this.findValidSpecialPasscode(
-      session.EXAM_ID,
-      user.USER_NATIONAL_ID || '',
-      dto.PASSCODE,
-    );
   }
 
   async findAll(
@@ -844,25 +834,96 @@ export class ExamEnrollmentsService {
   }
 
   async findByUserId(userId: number): Promise<ExamEnrollment[]> {
+    // List สำหรับประวัติผู้ใช้ — ไม่โหลด IMAGE / SESSION_LOCATIONS / BANK_RECONCILES
+    // ใบเสร็จเต็มใช้ GET /exam-enrollments/:id (findOneDetail)
     return await this.examEnrollmentRepository.find({
       where: { USER_ID: userId },
       relations: [
         'USER',
         'USER.PROFILE',
-        'USER.IMAGE',
         'SESSION',
         'SESSION.EXAM',
-        'SESSION.SESSION_LOCATIONS',
-        'SESSION.SESSION_LOCATIONS.LOCATION',
         'SESSION_LOCATION',
         'SESSION_LOCATION.LOCATION',
         'TRANSACTION',
-        'TRANSACTION.BANK_RECONCILES',
-        'TRANSACTION.RECEIPTS',
         'VOUCHERS',
         'SCORE',
         'SCORE.CERTIFICATES',
       ],
+      select: {
+        ERM_ID: true,
+        USER_ID: true,
+        SESSION_ID: true,
+        SL_ID: true,
+        ERM_SEAT_LABEL: true,
+        ERM_STATUS: true,
+        ERM_VERIFY_STATUS: true,
+        ERM_PHYSICAL_STATUS: true,
+        CREATED_AT: true,
+        UPDATED_AT: true,
+        USER: {
+          USER_ID: true,
+          USER_NATIONAL_ID: true,
+          USER_PASSPORT_NO: true,
+          USER_EMAIL: true,
+          PROFILE: {
+            userProfileId: true,
+            userTitleTh: true,
+            userFullnameTh: true,
+            userTitleEn: true,
+            userFullnameEn: true,
+            userAddress: true,
+          },
+        },
+        SESSION: {
+          SS_ID: true,
+          EXAM_ID: true,
+          SS_START_TIME: true,
+          SS_END_TIME: true,
+          SS_SESSION_STATUS: true,
+          EXAM: {
+            EXAM_ID: true,
+            EXAM_NAME: true,
+            EXAM_ROUND: true,
+            EXAM_FEE: true,
+            EXAM_DATE: true,
+            EXAM_TYPE: true,
+          },
+        },
+        SESSION_LOCATION: {
+          SL_ID: true,
+          LOCATION_ID: true,
+          LOCATION: {
+            LOCATION_ID: true,
+            LOCATION_NAME: true,
+            LOCATION_ROOM_NO: true,
+          },
+        },
+        TRANSACTION: {
+          TRANX_ID: true,
+          TRANX_MATCH_STATUS: true,
+          TRANX_AMOUNT: true,
+          TRANX_CHANNEL: true,
+          TRANX_PAID_AT: true,
+          TRANX_CREATED_AT: true,
+        },
+        VOUCHERS: {
+          VC_ID: true,
+          ERM_ID: true,
+          VC_CODE: true,
+        },
+        SCORE: {
+          SCORES_ID: true,
+          ERM_ID: true,
+          CERTIFICATES: {
+            CERT_ID: true,
+            SCORES_ID: true,
+            CERT_CODE: true,
+            CERT_ISSUED_AT: true,
+            CERT_EXPIRES_AT: true,
+          },
+        },
+      },
       order: { CREATED_AT: 'DESC' },
     });
   }
@@ -907,6 +968,10 @@ export class ExamEnrollmentsService {
         'USER.PROFILE',
         'USER.IMAGE',
         'VOUCHERS',
+        'TRANSACTION',
+        'TRANSACTION.RECEIPTS',
+        'SCORE',
+        'SCORE.CERTIFICATES',
       ],
     });
 

@@ -3,7 +3,7 @@ import type { AttendanceTableRow, BackendEnrollmentDetail } from 'src/types/enro
 import { ExamAttendStatus, EnrollmentStatus } from 'src/types/enrollment.types';
 import type { BackendExam, BackendSession } from 'src/types/exam';
 import { fetchRawEnrollmentsByExamId } from 'src/services/enrollment.service';
-import { fetchExamById } from 'src/services/exam.service';
+import { fetchExamWithSeats } from 'src/services/exam.service';
 
 export function useExamAttendances() {
   const attendances = ref<AttendanceTableRow[]>([]);
@@ -124,18 +124,22 @@ export function useExamAttendances() {
     isLoading.value = true;
     error.value = null;
     try {
-      const rawEnrollmentsTask = fetchRawEnrollmentsByExamId(examId).catch((err) => {
-        console.error('Failed to fetch raw enrollments:', err);
-        return [] as BackendEnrollmentDetail[];
-      });
-      const examTask = fetchExamById(examId).catch((err) => {
+      const examData = await fetchExamWithSeats(examId).catch((err) => {
         console.error('Failed to fetch exam details:', err);
         return null;
       });
-
-      const [enrollmentData, examData] = await Promise.all([rawEnrollmentsTask, examTask]);
-
       exam.value = examData;
+
+      if (!selectedSessionId.value && examData?.SESSIONS?.length) {
+        selectedSessionId.value = examData.SESSIONS[0]?.SS_ID ?? null;
+      }
+
+      const enrollmentData = await fetchRawEnrollmentsByExamId(examId, {
+        sessionId: selectedSessionId.value,
+      }).catch((err) => {
+        console.error('Failed to fetch raw enrollments:', err);
+        return [] as BackendEnrollmentDetail[];
+      });
 
       const mappedAttendances = enrollmentData.map(
         (enrollment: BackendEnrollmentDetail, index: number): AttendanceTableRow => {

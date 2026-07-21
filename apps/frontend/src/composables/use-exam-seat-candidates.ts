@@ -2,7 +2,7 @@ import { ref, computed } from 'vue';
 import type { BackendExam, BackendSession } from 'src/types/exam';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 import { EnrollmentStatus } from 'src/types/enrollment.types';
-import { fetchExamById } from 'src/services/exam.service';
+import { fetchExamWithSeats } from 'src/services/exam.service';
 import { fetchRawEnrollmentsByExamId } from 'src/services/enrollment.service';
 
 const SESSION_STATUS_VOUCHER_SENT = 3;
@@ -301,27 +301,26 @@ export function useExamSeatCandidates() {
     isLoading.value = true;
     error.value = null;
     try {
-      const [examData, enrollmentData] = await Promise.all([
-        fetchExamById(examId).catch((err) => {
-          console.error('Failed to fetch exam:', err);
-          return null;
-        }),
-        fetchRawEnrollmentsByExamId(examId).catch((err) => {
-          console.error('Failed to fetch enrollments:', err);
-          return [];
-        }),
-      ]);
-
+      const examData = await fetchExamWithSeats(examId).catch((err) => {
+        console.error('Failed to fetch exam:', err);
+        return null;
+      });
       exam.value = examData;
-      allEnrollments.value = enrollmentData;
 
-      // Auto-select first session
       if (examData?.SESSIONS?.length && !selectedSessionId.value) {
         const first = examData.SESSIONS[0];
         if (first) {
           selectedSessionId.value = first.SS_ID;
         }
       }
+
+      const enrollmentData = await fetchRawEnrollmentsByExamId(examId, {
+        sessionId: selectedSessionId.value,
+      }).catch((err) => {
+        console.error('Failed to fetch enrollments:', err);
+        return [];
+      });
+      allEnrollments.value = enrollmentData;
 
       if (!examData && enrollmentData.length === 0) {
         error.value = 'ไม่พบข้อมูลการสอบ';

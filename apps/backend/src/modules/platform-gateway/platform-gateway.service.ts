@@ -237,6 +237,18 @@ export class PlatformGatewayService {
     );
   }
 
+  private resolveTokenTtlMs(
+    token: { expires_in?: number } | null | undefined,
+  ): number {
+    const DEFAULT_EXPIRES_IN_SEC = 3600;
+    const SKEW_SEC = 60;
+    const expiresInSec =
+      typeof token?.expires_in === 'number' && token.expires_in > 0
+        ? token.expires_in
+        : DEFAULT_EXPIRES_IN_SEC;
+    return Math.max(1000, (expiresInSec - SKEW_SEC) * 1000);
+  }
+
   async refreshToken(apiName: string) {
     try {
       console.log('refreshToken');
@@ -262,7 +274,11 @@ export class PlatformGatewayService {
         },
       );
 
-      await this.cacheManager.set(`${apiName}_apiToken`, response.data, 0);
+      await this.cacheManager.set(
+        `${apiName}_apiToken`,
+        response.data,
+        this.resolveTokenTtlMs(response.data),
+      );
     } catch (error) {
       return this.handleApiError(apiName, error);
     }
@@ -287,7 +303,11 @@ export class PlatformGatewayService {
         { timeout: 120000 },
       );
 
-      await this.cacheManager.set(`${apiName}_apiToken`, response.data, 0);
+      await this.cacheManager.set(
+        `${apiName}_apiToken`,
+        response.data,
+        this.resolveTokenTtlMs(response.data),
+      );
     } catch (error) {
       return this.handleApiError(apiName, error);
     }

@@ -248,8 +248,16 @@ export function useExamDocuments() {
   };
 
   const printReceipt = async (exam: ExamHistoryItem): Promise<void> => {
-    const enrollment = exam.rawEnrollment;
+    let enrollment = exam.rawEnrollment;
     const user = userStore.currentUser;
+
+    if (enrollment?.ERM_ID && !enrollment.TRANSACTION?.RECEIPTS?.length) {
+      try {
+        enrollment = await fetchEnrollmentById(enrollment.ERM_ID);
+      } catch (error) {
+        console.error(`Failed to refresh enrollment ${enrollment.ERM_ID} for receipt`, error);
+      }
+    }
 
     if (enrollment && enrollment.SESSION) {
       const session = enrollment.SESSION;
