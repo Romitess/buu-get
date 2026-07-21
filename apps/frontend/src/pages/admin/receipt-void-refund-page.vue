@@ -92,6 +92,7 @@
           <div class="row q-gutter-sm justify-center no-wrap">
             <AppButton
               v-if="row.canRefund"
+              class="action-status-btn"
               :label="t('admin.receiptVoidRefund.actions.refund')"
               color="warning"
               size="sm"
@@ -100,6 +101,7 @@
             />
             <AppButton
               v-if="row.canVoid"
+              class="action-status-btn"
               :label="t('admin.receiptVoidRefund.actions.voidReceipt')"
               color="negative"
               size="sm"
@@ -545,6 +547,10 @@ const confirmVoid = async (): Promise<void> => {
     width: 520px;
     max-width: 90vw;
     border-radius: 16px;
+  }
+
+  :deep(.action-status-btn) {
+    min-width: 140px;
   }
 }
 </style>
