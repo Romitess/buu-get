@@ -238,20 +238,28 @@ export class ExamService {
     return exams;
   }
 
-  async findOne(id: number): Promise<Exam> {
+  async findOne(
+    id: number,
+    options?: { includeSeats?: boolean },
+  ): Promise<Exam> {
+    const includeSeats = options?.includeSeats === true;
+    const relations = [
+      'SESSIONS',
+      'SESSIONS.SESSION_LOCATIONS',
+      'SESSIONS.SESSION_LOCATIONS.LOCATION',
+      'FUND_SOURCE',
+      'PASSCODES',
+    ];
+    if (includeSeats) {
+      relations.push('SESSIONS.SESSION_LOCATIONS.LOCATION.SEATS');
+    }
+
     const exam = await this.examRepository.findOne({
       where: { EXAM_ID: id },
       // โหลด relation แบบแยก query — ไม่โหลด ENROLLMENTS ทั้งก้อน (ใช้ aggregate)
-      // ยังโหลด SEATS เพราะหน้าจัดที่นั่งต้องใช้
+      // SEATS โหลดเฉพาะเมื่อ includeSeats (หน้าจัดที่นั่ง / สร้างรอบสอบ)
       relationLoadStrategy: 'query',
-      relations: [
-        'SESSIONS',
-        'SESSIONS.SESSION_LOCATIONS',
-        'SESSIONS.SESSION_LOCATIONS.LOCATION',
-        'SESSIONS.SESSION_LOCATIONS.LOCATION.SEATS',
-        'FUND_SOURCE',
-        'PASSCODES',
-      ],
+      relations,
     });
 
     if (!exam) {
@@ -261,6 +269,10 @@ export class ExamService {
     this.populateSessionLocations([exam]);
     await this.attachEnrollmentCounts([exam]);
     return exam;
+  }
+
+  async findOneWithSeats(id: number): Promise<Exam> {
+    return this.findOne(id, { includeSeats: true });
   }
 
   //การบันทึกประวัติการใช้ log

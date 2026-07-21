@@ -18,7 +18,7 @@ import type { PasscodeType, BackendExam, BackendLocation } from 'src/types/exam'
 import {
   fetchExamLocations,
   fetchFundSources,
-  fetchExamById,
+  fetchExamWithSeats,
   fetchAllExamsRaw,
   fetchExamBlockedSeats,
   updateExamRound,
@@ -732,7 +732,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         fetchFundSources(),
         getUsersFromApi(ROLES.PROCTOR),
         fetchAllExamsRaw(),
-        examId ? fetchExamById(examId) : Promise.resolve(null),
+        examId ? fetchExamWithSeats(examId) : Promise.resolve(null),
       ]);
       locationOptions.value = locations;
       allExams.value = exams;

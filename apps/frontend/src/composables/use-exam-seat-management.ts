@@ -4,7 +4,7 @@ import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import type { BackendBlockedSeat, BackendExam, BackendSession } from 'src/types/exam';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
-import { fetchExamBlockedSeats, fetchExamById } from 'src/services/exam.service';
+import { fetchExamBlockedSeats, fetchExamWithSeats } from 'src/services/exam.service';
 import {
   bulkAssignEnrollmentSeats,
   fetchRawEnrollmentsByExamId,
@@ -529,7 +529,9 @@ export function useExamSeatManagement() {
   const refreshStudentDisplayData = async (): Promise<void> => {
     if (!examId) return;
 
-    allEnrollments.value = await fetchRawEnrollmentsByExamId(examId);
+    allEnrollments.value = await fetchRawEnrollmentsByExamId(examId, {
+      sessionId: activeSessionId.value,
+    });
     await refreshLatestProfileHistoryImages();
     hasLoadedEnrollments.value = true;
     filterStudentsBySession();
@@ -538,7 +540,9 @@ export function useExamSeatManagement() {
   const refreshStudentImages = async (): Promise<void> => {
     if (!examId) return;
 
-    const latestEnrollments = await fetchRawEnrollmentsByExamId(examId);
+    const latestEnrollments = await fetchRawEnrollmentsByExamId(examId, {
+      sessionId: activeSessionId.value,
+    });
     allEnrollments.value = latestEnrollments;
     await refreshLatestProfileHistoryImages();
 
@@ -691,24 +695,27 @@ export function useExamSeatManagement() {
     });
   };
 
-  const resolveSeatIdFromEnrollment = (
-    enrollment: BackendEnrollmentDetail,
-    locations: SeatSessionLocation[],
-  ): string | null => {
+  /**
+   * Map of `${SL_ID}:${LS_SEAT_LABEL}` → seat id string for O(1) resolve.
+   */
+  const seatIdBySlLabel = computed((): Map<string, string> => {
+    const map = new Map<string, string>();
+    for (const location of sessionLocations.value) {
+      for (const seat of buildSessionSeatItems(location)) {
+        if (seat.LS_SEAT_LABEL) {
+          map.set(`${location.SL_ID}:${seat.LS_SEAT_LABEL}`, String(seat.LS_ID));
+        }
+      }
+    }
+    return map;
+  });
+
+  const resolveSeatIdFromEnrollment = (enrollment: BackendEnrollmentDetail): string | null => {
     if (!enrollment.ERM_SEAT_LABEL || enrollment.SL_ID == null) {
       return null;
     }
 
-    const sessionLocation = locations.find((location) => location.SL_ID === enrollment.SL_ID);
-    if (!sessionLocation) {
-      return null;
-    }
-
-    const matchedSeat = buildSessionSeatItems(sessionLocation).find(
-      (seat) => seat.LS_SEAT_LABEL === enrollment.ERM_SEAT_LABEL,
-    );
-
-    return matchedSeat ? String(matchedSeat.LS_ID) : null;
+    return seatIdBySlLabel.value.get(`${enrollment.SL_ID}:${enrollment.ERM_SEAT_LABEL}`) ?? null;
   };
 
   const getTimeTabSessions = (sessionId: number | null): BackendSession[] => {
@@ -808,7 +815,7 @@ export function useExamSeatManagement() {
         sessionId: e.SESSION_ID,
         id: e.USER?.USER_NATIONAL_ID || String(e.USER_ID),
         name: displayName,
-        seat: resolveSeatIdFromEnrollment(e, sessionLocations.value),
+        seat: resolveSeatIdFromEnrollment(e),
         sessionLocationId:
           e.SL_ID ??
           sessionLocations.value.find((location) => location.SS_ID === e.SESSION_ID)?.SL_ID ??
@@ -839,7 +846,7 @@ export function useExamSeatManagement() {
     isLoading.value = true;
     error.value = null;
     try {
-      examData.value = await fetchExamById(examId);
+      examData.value = await fetchExamWithSeats(examId);
       sessions.value = examData.value.SESSIONS || [];
 
       const routeSessionId = Number(route.query.sessionId);
@@ -886,7 +893,10 @@ export function useExamSeatManagement() {
     if (newSessionId !== null && (await redirectIfSeatEditingLocked(newSessionId))) {
       return;
     }
-    if (hasLoadedEnrollments.value && newSessionId !== null) {
+    // previousSessionId === undefined/null คือโหลดครั้งแรก — loadExamData จะ refresh เอง
+    if (previousSessionId != null && newSessionId !== null) {
+      await refreshStudentDisplayData();
+    } else if (hasLoadedEnrollments.value && newSessionId !== null) {
       filterStudentsBySession();
     }
   });

@@ -334,6 +334,14 @@ export const fetchExamById = async (id: number): Promise<BackendExam> => {
   });
 };
 
+/** ดึง exam พร้อม LOCATION.SEATS — ใช้เฉพาะหน้าจัดที่นั่ง / สร้าง-แก้ไขรอบสอบ */
+export const fetchExamWithSeats = async (id: number): Promise<BackendExam> => {
+  return retryAsync(async () => {
+    const response = await api.get<BackendExam>(`/exam/${id}/with-seats`);
+    return response.data;
+  });
+};
+
 export const updateExamSessionStatus = async (sessionId: number, status: number): Promise<void> => {
   await api.patch(`/exam-sessions/${sessionId}`, {
     SS_SESSION_STATUS: status,

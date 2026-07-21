@@ -1037,6 +1037,17 @@ const applyImportedScoreRows = (rows: string[][]): void => {
   let matchedCount = 0;
   const nextImportedIds = new Set(importedEnrollmentIds.value);
 
+  // Prebuild lookup maps once — O(enrollments) then O(1) per Excel row
+  const enrollmentByTestTakerKey = new Map<string, (typeof currentRoomEnrollments.value)[number]>();
+  for (const enrollment of currentRoomEnrollments.value) {
+    const testTaker = enrollment.ERM_TEST_TAKER;
+    if (!testTaker) continue;
+    const key = normalizeImportKey(testTaker);
+    if (!enrollmentByTestTakerKey.has(key)) {
+      enrollmentByTestTakerKey.set(key, enrollment);
+    }
+  }
+
   for (let i = 1; i < rows.length; i++) {
     const values = rows[i] || [];
     const citizenVal = idxCitizenId >= 0 ? values[idxCitizenId] : '';
@@ -1050,11 +1061,7 @@ const applyImportedScoreRows = (rows: string[][]): void => {
     let matchedEnrollment = undefined;
 
     if (cleanTestTaker && cleanTestTaker !== '-') {
-      const normTestTaker = normalizeImportKey(cleanTestTaker);
-      matchedEnrollment = currentRoomEnrollments.value.find((enrollment) => {
-        const dbTestTaker = enrollment.ERM_TEST_TAKER;
-        return dbTestTaker && normalizeImportKey(dbTestTaker) === normTestTaker;
-      });
+      matchedEnrollment = enrollmentByTestTakerKey.get(normalizeImportKey(cleanTestTaker));
     }
 
     if (!matchedEnrollment && cleanCitizen && cleanCitizen !== '-') {
@@ -1302,19 +1309,20 @@ const loadData = async (): Promise<void> => {
 
   try {
     isLoading.value = true;
-    const [examDetail, rawEnrollments, scores] = await Promise.all([
-      fetchExamById(examId),
-      fetchRawEnrollmentsByExamId(examId),
-      fetchExamScores(),
-    ]);
+    const [examDetail, scores] = await Promise.all([fetchExamById(examId), fetchExamScores()]);
 
     exam.value = examDetail;
+    selectedSessionId.value = sessionTimeTabs.value[0]?.SS_ID ?? null;
+    selectedSessionLocationId.value = sessionLocations.value[0]?.SL_ID ?? null;
+
+    const rawEnrollments = await fetchRawEnrollmentsByExamId(examId, {
+      sessionId: selectedSessionId.value,
+    });
+
     enrollments.value = rawEnrollments;
     examScores.value = scores.filter((score) =>
       rawEnrollments.some((enrollment) => enrollment.ERM_ID === score.ERM_ID),
     );
-    selectedSessionId.value = sessionTimeTabs.value[0]?.SS_ID ?? null;
-    selectedSessionLocationId.value = sessionLocations.value[0]?.SL_ID ?? null;
     initializeScoreDrafts();
     pagination.value.rowsNumber = scoreRows.value.length;
   } catch (err) {
@@ -1323,6 +1331,21 @@ const loadData = async (): Promise<void> => {
     isLoading.value = false;
   }
 };
+
+watch(selectedSessionId, async (sessionId, previousSessionId) => {
+  if (previousSessionId == null || sessionId == null) return;
+  const examId = Number(route.params.examId);
+  if (isNaN(examId) || examId <= 0) return;
+
+  try {
+    enrollments.value = await fetchRawEnrollmentsByExamId(examId, {
+      sessionId,
+    });
+    initializeScoreDrafts();
+  } catch (err) {
+    console.error('Error refreshing enrollments for session:', err);
+  }
+});
 
 onMounted(() => {
   void loadData();

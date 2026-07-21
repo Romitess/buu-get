@@ -87,6 +87,7 @@ Schema changes are done **only through TypeORM migrations**. `synchronize` is **
 | Revert the last migration | `npm run migration:revert` |
 
 - **CLI config:** `src/database/data-source.ts` (used by `npm run typeorm` / migration scripts).  
+- **Perf indexes (reconcile + Moodle pending):** migration `1789780343260-AddPerfIndexesForReconcileAndMoodle` creates `IDX_TSR_REF12`, `IDX_BR_REF12`, and `IDX_ERM_MOODLE_PENDING`. Apply with `npm run migration:run` on every environment before relying on bank verify / Moodle enrol worker performance. Prefer a low-traffic window on large tables. Verify with `SHOW INDEX FROM FIN_T_TRANSACTIONS_REFS` / `FIN_T_BANK_RECONCILES` / `EXAM_T_ENROLLMENTS`.  
 - **Runtime migrations** in the compiled app are loaded from `dist/database/migrations/*.js` (`app.module.ts`).  
 - After adding a new entity, register it in `data-source.ts` **`entities`** if the migration CLI must see it.
 

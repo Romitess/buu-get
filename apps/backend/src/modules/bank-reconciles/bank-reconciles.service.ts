@@ -22,6 +22,7 @@ import {
 import {
   PAGINATION_DEFAULT_LIMIT,
   PAGINATION_DEFAULT_PAGE,
+  PAGINATION_MAX_LIMIT,
   PaginationQueryDto,
 } from 'src/common/dto/pagination-query.dto';
 import {
@@ -301,99 +302,120 @@ export class BankReconcilesService {
     await queryRunner.startTransaction();
 
     try {
-      // ไม่ส่ง brIds → กระทบเฉพาะรายการที่ยังไม่ match (TRANX_ID IS NULL) แล้ว chunk
-      // เพื่อเลี่ยงดึง join ทั้งตารางเข้า memory
-      let targetBrIds = requestedBrIds;
-      if (targetBrIds.length === 0) {
-        const unmatchedRows = await queryRunner.manager
-          .createQueryBuilder()
-          .select('br.BR_ID', 'BR_ID')
-          .from('FIN_T_BANK_RECONCILES', 'br')
-          .where('br.DELETED_AT IS NULL')
-          .andWhere('br.TRANX_ID IS NULL')
-          .orderBy('br.BR_ID', 'ASC')
-          .getRawMany<{ BR_ID: number }>();
-        targetBrIds = unmatchedRows
-          .map((row) => Number(row.BR_ID))
-          .filter((id) => id > 0);
-      }
-
       const allMatchedBrIds: number[] = [];
+      const VERIFY_KEYSET_BATCH = 500;
 
-      for (const brIdChunk of this.chunkArray(targetBrIds)) {
-        if (brIdChunk.length === 0) {
-          continue;
+      // มี brIds จาก client → กระทบเฉพาะชุดนั้น (chunk อยู่แล้ว)
+      // ไม่มี brIds → keyset ตาม BR_ID ของ unmatched เพื่อไม่ preload ID ทั้งตาราง
+      if (requestedBrIds.length > 0) {
+        for (const brIdChunk of this.chunkArray(requestedBrIds)) {
+          if (brIdChunk.length === 0) {
+            continue;
+          }
+          const chunkMatched = await this.verifyBrIdChunk(
+            queryRunner,
+            brIdChunk,
+          );
+          allMatchedBrIds.push(...chunkMatched);
         }
+      } else {
+        let cursor = 0;
+        for (;;) {
+          const unmatchedRows = await queryRunner.manager
+            .createQueryBuilder()
+            .select('br.BR_ID', 'BR_ID')
+            .from('FIN_T_BANK_RECONCILES', 'br')
+            .where('br.DELETED_AT IS NULL')
+            .andWhere('br.TRANX_ID IS NULL')
+            .andWhere('br.BR_ID > :cursor', { cursor })
+            .orderBy('br.BR_ID', 'ASC')
+            .limit(VERIFY_KEYSET_BATCH)
+            .getRawMany<{ BR_ID: number }>();
 
-        const rawRows = await queryRunner.manager
-          .createQueryBuilder()
-          .select([
-            'br.BR_ID AS BR_ID',
-            'br.BR_AMOUNT AS BR_AMOUNT',
-            'tr.TSR_ID AS TSR_ID',
-            'tr.TRANX_ID AS TRANX_ID',
-            't.TRANX_AMOUNT AS TRANX_AMOUNT',
-          ])
-          .from('FIN_T_BANK_RECONCILES', 'br')
-          .leftJoin(
-            'FIN_T_TRANSACTIONS_REFS',
-            'tr',
-            `
-              tr.DELETED_AT IS NULL
-              AND tr.TSC_REF1 = br.BR_REF1
-              AND (
-                (br.BR_REF2 IS NULL AND tr.TSC_REF2 IS NULL)
-                OR tr.TSC_REF2 = br.BR_REF2
-              )
-            `,
-          )
-          .leftJoin(
-            'FIN_T_TRANSACTIONS',
-            't',
-            't.TRANX_ID = tr.TRANX_ID AND t.TRANX_DELETED_AT IS NULL',
-          )
-          .where('br.DELETED_AT IS NULL')
-          .andWhere('br.BR_ID IN (:...brIds)', { brIds: brIdChunk })
-          .orderBy('br.BR_ID', 'ASC')
-          .addOrderBy('tr.TSR_ID', 'ASC')
-          .getRawMany<BankReconcileVerifyRow>();
+          const brIdChunk = unmatchedRows
+            .map((row) => Number(row.BR_ID))
+            .filter((id) => id > 0);
 
-        const chunkBrIds = [
-          ...new Set(
-            rawRows.map((row) => Number(row.BR_ID)).filter((id) => id > 0),
-          ),
-        ];
-        const matches = this.buildVerifyMatches(rawRows);
+          if (brIdChunk.length === 0) {
+            break;
+          }
 
-        await this.updateVerifiedBankReconciles(
-          queryRunner,
-          chunkBrIds,
-          matches,
-        );
-        await this.updateVerifiedTransactionRefs(
-          queryRunner,
-          chunkBrIds,
-          matches,
-        );
-        await this.updateVerifiedTransactionStatuses(queryRunner, matches);
-
-        allMatchedBrIds.push(...chunkBrIds);
+          const chunkMatched = await this.verifyBrIdChunk(
+            queryRunner,
+            brIdChunk,
+          );
+          allMatchedBrIds.push(...chunkMatched);
+          cursor = brIdChunk[brIdChunk.length - 1] ?? cursor;
+        }
       }
 
       await queryRunner.commitTransaction();
       if (requestedBrIds.length > 0) {
         return this.findByIds(requestedBrIds);
       }
-      if (allMatchedBrIds.length > 0) {
-        return this.findByIds([...new Set(allMatchedBrIds)]);
+      // ไม่ส่ง brIds → คืนเฉพาะที่เพิ่ง process ในขอบเขต memory ที่ปลอดภัย
+      const uniqueMatched = [...new Set(allMatchedBrIds)];
+      if (uniqueMatched.length === 0) {
+        return [];
       }
-      return [];
+      return this.findByIds(uniqueMatched.slice(0, PAGINATION_MAX_LIMIT));
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
     } finally {
       await queryRunner.release();
     }
+  }
+
+  private async verifyBrIdChunk(
+    queryRunner: QueryRunner,
+    brIdChunk: number[],
+  ): Promise<number[]> {
+    const rawRows = await queryRunner.manager
+      .createQueryBuilder()
+      .select([
+        'br.BR_ID AS BR_ID',
+        'br.BR_AMOUNT AS BR_AMOUNT',
+        'tr.TSR_ID AS TSR_ID',
+        'tr.TRANX_ID AS TRANX_ID',
+        't.TRANX_AMOUNT AS TRANX_AMOUNT',
+      ])
+      .from('FIN_T_BANK_RECONCILES', 'br')
+      .leftJoin(
+        'FIN_T_TRANSACTIONS_REFS',
+        'tr',
+        `
+          tr.DELETED_AT IS NULL
+          AND tr.TSC_REF1 = br.BR_REF1
+          AND (
+            (br.BR_REF2 IS NULL AND tr.TSC_REF2 IS NULL)
+            OR tr.TSC_REF2 = br.BR_REF2
+          )
+        `,
+      )
+      .leftJoin(
+        'FIN_T_TRANSACTIONS',
+        't',
+        't.TRANX_ID = tr.TRANX_ID AND t.TRANX_DELETED_AT IS NULL',
+      )
+      .where('br.DELETED_AT IS NULL')
+      .andWhere('br.BR_ID IN (:...brIds)', { brIds: brIdChunk })
+      .orderBy('br.BR_ID', 'ASC')
+      .addOrderBy('tr.TSR_ID', 'ASC')
+      .getRawMany<BankReconcileVerifyRow>();
+
+    const chunkBrIds = [
+      ...new Set(
+        rawRows.map((row) => Number(row.BR_ID)).filter((id) => id > 0),
+      ),
+    ];
+    const matches = this.buildVerifyMatches(rawRows);
+
+    await this.updateVerifiedBankReconciles(queryRunner, chunkBrIds, matches);
+    await this.updateVerifiedTransactionRefs(queryRunner, chunkBrIds, matches);
+    await this.updateVerifiedTransactionStatuses(queryRunner, matches);
+
+    return chunkBrIds;
   }
 
   private async findByIds(brIds: number[]): Promise<BankReconcile[]> {

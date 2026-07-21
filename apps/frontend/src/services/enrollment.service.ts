@@ -74,14 +74,28 @@ export const fetchEnrollmentsByExamId = async (
   };
 };
 
-/** ดึงผู้สมัครทั้งรอบแบบแบ่งหน้า (limit สูงสุด 100/ครั้ง) แล้วรวมฝั่ง client */
+export type RawEnrollmentFetchParams = {
+  sessionId?: number | null;
+  sessionLocationId?: number | null;
+};
+
+/** ดึงผู้สมัครแบบแบ่งหน้า (limit สูงสุด 100/ครั้ง) — ควรส่ง sessionId เพื่อไม่ดึงทั้งรอบสอบ */
 export const fetchRawEnrollmentsByExamId = async (
   examId: number,
+  scope: RawEnrollmentFetchParams = {},
 ): Promise<BackendEnrollmentDetail[]> => {
   const pageSize = 100;
   const all: BackendEnrollmentDetail[] = [];
   let page = 1;
   let total = Number.POSITIVE_INFINITY;
+
+  const params: Record<string, number> = {};
+  if (scope.sessionId != null && scope.sessionId > 0) {
+    params.sessionId = scope.sessionId;
+  }
+  if (scope.sessionLocationId != null && scope.sessionLocationId > 0) {
+    params.sessionLocationId = scope.sessionLocationId;
+  }
 
   while (all.length < total) {
     const response = await api.get<{
@@ -89,7 +103,7 @@ export const fetchRawEnrollmentsByExamId = async (
       total: number;
       totalPaid: number;
     }>(`/exam-enrollments/exam/${examId}`, {
-      params: { page, limit: pageSize },
+      params: { page, limit: pageSize, ...params },
     });
 
     const chunk = response.data.data ?? [];

@@ -64,10 +64,22 @@ export class ExamController {
 
   @Public()
   @Get(':id')
-  @ApiOperation({ summary: 'ดึงข้อมูลการสอบตาม ID' })
+  @ApiOperation({ summary: 'ดึงข้อมูลการสอบตาม ID (ไม่รวมแผนผังที่นั่ง)' })
   @ApiOkResponse({ type: Exam })
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<Exam> {
     return this.examService.findOne(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles(...EXAM_ADMIN_ROLES)
+  @Get(':id/with-seats')
+  @ApiOperation({
+    summary:
+      'ดึงข้อมูลการสอบพร้อมแผนผังที่นั่ง (สำหรับหน้าจัดที่นั่ง/สร้างรอบ)',
+  })
+  @ApiOkResponse({ type: Exam })
+  async findOneWithSeats(@Param('id', ParseIntPipe) id: number): Promise<Exam> {
+    return this.examService.findOneWithSeats(id);
   }
 
   @Post(':id/passcodes')
