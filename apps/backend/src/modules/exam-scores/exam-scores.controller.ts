@@ -20,7 +20,7 @@ import { UpdateExamScoreDto } from './dto/update-exam-score.dto';
 import { ExamScore } from './entities/exam-score.entity';
 
 @ApiTags('exam-scores')
-@Controller('api/exam-scores')
+@Controller('exam-scores')
 @Roles(...ENROLLMENT_ADMIN_ROLES)
 export class ExamScoresController {
   constructor(private readonly examScoresService: ExamScoresService) {}
