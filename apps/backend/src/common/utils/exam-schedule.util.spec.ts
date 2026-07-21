@@ -20,8 +20,8 @@ describe('doExamTimeRangesOverlap', () => {
   });
 
   it('returns false when any time is missing', () => {
-    expect(doExamTimeRangesOverlap('08:00:00', null, '09:00:00', '11:00:00')).toBe(
-      false,
-    );
+    expect(
+      doExamTimeRangesOverlap('08:00:00', null, '09:00:00', '11:00:00'),
+    ).toBe(false);
   });
 });

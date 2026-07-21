@@ -19,10 +19,7 @@ import {
   PaginationQueryDto,
 } from 'src/common/dto/pagination-query.dto';
 import { ENROLLMENT_ADMIN_ROLES } from 'src/common/constants/role-groups';
-import {
-  AuthenticatedUser,
-  userHasAnyRole,
-} from 'src/common/utils/authz.util';
+import { AuthenticatedUser, userHasAnyRole } from 'src/common/utils/authz.util';
 import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
 import {
   ExamEnrollment,
@@ -928,7 +925,11 @@ export class ExamEnrollmentsService {
     const enrollment = await this.findOne(id);
 
     if (!userHasAnyRole(user, ENROLLMENT_ADMIN_ROLES)) {
-      this.assertCandidateCancellation(user, enrollment, updateExamEnrollmentDto);
+      this.assertCandidateCancellation(
+        user,
+        enrollment,
+        updateExamEnrollmentDto,
+      );
     }
 
     await this.validateSeatAssignment(enrollment, updateExamEnrollmentDto);
@@ -1272,9 +1273,7 @@ export class ExamEnrollmentsService {
     });
 
     if (!validPasscode) {
-      throw new BadRequestException(
-        'Invalid passcode for this user and exam',
-      );
+      throw new BadRequestException('Invalid passcode for this user and exam');
     }
 
     return validPasscode;

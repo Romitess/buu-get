@@ -27,7 +27,11 @@ export class ExamSessionLocationsService {
   private async validateLocationAndSession(
     locationId: number,
     sessionId: number,
-  ): Promise<{ SS_START_TIME: string; SS_END_TIME: string; EXAM_DATE: string }> {
+  ): Promise<{
+    SS_START_TIME: string;
+    SS_END_TIME: string;
+    EXAM_DATE: string;
+  }> {
     const location = await this.locationRepository.findOne({
       where: { LOCATION_ID: locationId },
     });

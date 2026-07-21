@@ -61,8 +61,14 @@ interface ExistingBankReconcileHashRow {
 interface MockQueryBuilder {
   select: jest.Mock<MockQueryBuilder, [string[]]>;
   from: jest.Mock<MockQueryBuilder, [string, string]>;
-  innerJoin: jest.Mock<MockQueryBuilder, [string, string, string?, Record<string, unknown>?]>;
-  leftJoin: jest.Mock<MockQueryBuilder, [string, string, string?, Record<string, unknown>?]>;
+  innerJoin: jest.Mock<
+    MockQueryBuilder,
+    [string, string, string?, Record<string, unknown>?]
+  >;
+  leftJoin: jest.Mock<
+    MockQueryBuilder,
+    [string, string, string?, Record<string, unknown>?]
+  >;
   where: jest.Mock<MockQueryBuilder, [string, Record<string, unknown>?]>;
   andWhere: jest.Mock<MockQueryBuilder, [string, Record<string, unknown>?]>;
   groupBy: jest.Mock<MockQueryBuilder, [string]>;
@@ -121,7 +127,9 @@ const createQueryBuilder = (
       jest.fn<Promise<unknown[]>, []>().mockResolvedValue(existingRows),
     getRawOne:
       options.getRawOne ??
-      jest.fn<Promise<Record<string, unknown> | null>, []>().mockResolvedValue(null),
+      jest
+        .fn<Promise<Record<string, unknown> | null>, []>()
+        .mockResolvedValue(null),
   };
 
   queryBuilder.select.mockReturnValue(queryBuilder);
@@ -135,7 +143,7 @@ const createQueryBuilder = (
   queryBuilder.orderBy.mockReturnValue(queryBuilder);
   queryBuilder.addOrderBy.mockReturnValue(queryBuilder);
 
-  return queryBuilder as MockQueryBuilder;
+  return queryBuilder;
 };
 
 const createImportHash = (importKey: string): string =>

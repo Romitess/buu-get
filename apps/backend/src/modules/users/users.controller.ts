@@ -12,7 +12,10 @@ import {
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { USER_ADMIN_ROLES, USER_LIST_ROLES } from 'src/common/constants/role-groups';
+import {
+  USER_ADMIN_ROLES,
+  USER_LIST_ROLES,
+} from 'src/common/constants/role-groups';
 import {
   assertSelfOrRoles,
   AuthenticatedUser,
