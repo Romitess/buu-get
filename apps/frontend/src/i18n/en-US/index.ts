@@ -889,7 +889,7 @@ export default {
       pageSubtitle: 'Search payment records to refund or void an issued receipt',
       searchTitle: 'Search applicant payment information',
       placeholderExamName: 'Enter exam name',
-      emptyTable: 'No data found. Search by Ref1, Ref2, applicant name, or exam name',
+      emptyTable: 'No data found. Filter by Ref1, Ref2, applicant name, or exam name',
       table: {
         paymentStatus: 'Payment Status',
         receiptStatus: 'Receipt Status',

@@ -22,7 +22,7 @@
               bg-color="white"
               :label="t('admin.searchUser.table.applicantId')"
               :placeholder="t('admin.searchUser.placeholderRef1')"
-              @keyup.enter="handleSearch"
+              clearable
             />
           </div>
           <div class="col-12 col-md-3">
@@ -33,7 +33,7 @@
               bg-color="white"
               :label="t('admin.searchUser.table.referenceNo')"
               :placeholder="t('admin.searchUser.placeholderRef2')"
-              @keyup.enter="handleSearch"
+              clearable
             />
           </div>
           <div class="col-12 col-md-3">
@@ -44,7 +44,7 @@
               bg-color="white"
               :label="t('admin.searchUser.table.fullName')"
               :placeholder="t('admin.searchUser.placeholderName')"
-              @keyup.enter="handleSearch"
+              clearable
             />
           </div>
           <div class="col-12 col-md-3">
@@ -55,18 +55,9 @@
               bg-color="white"
               :label="t('admin.searchUser.table.examName')"
               :placeholder="t('admin.receiptVoidRefund.placeholderExamName')"
-              @keyup.enter="handleSearch"
+              clearable
             />
           </div>
-        </div>
-
-        <div class="row justify-end q-mt-md">
-          <AppButton
-            :label="t('admin.searchUser.searchBtn')"
-            color="primary"
-            :loading="isLoading"
-            @click="handleSearch"
-          />
         </div>
       </q-card-section>
     </q-card>
@@ -169,10 +160,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { QTableColumn } from 'quasar';
+import { debounce, useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import { useQuasar } from 'quasar';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppButton from 'src/components/base/app-button.vue';
@@ -234,7 +225,12 @@ const createEmptyCriteria = (): SearchCriteria => ({
   examName: '',
 });
 
-const searchForm = ref<SearchCriteria>(createEmptyCriteria());
+const searchForm = ref({
+  ref1: '' as string | null,
+  ref2: '' as string | null,
+  name: '' as string | null,
+  examName: '' as string | null,
+});
 const activeSearchCriteria = ref<SearchCriteria>(createEmptyCriteria());
 
 const showRefundConfirm = ref(false);
@@ -443,23 +439,35 @@ const loadRows = async (): Promise<void> => {
 
 const handleSearch = async (): Promise<void> => {
   const criteria: SearchCriteria = {
-    ref1: searchForm.value.ref1.trim(),
-    ref2: searchForm.value.ref2.trim(),
-    name: searchForm.value.name.trim(),
-    examName: searchForm.value.examName.trim(),
+    ref1: (searchForm.value.ref1 ?? '').trim(),
+    ref2: (searchForm.value.ref2 ?? '').trim(),
+    name: (searchForm.value.name ?? '').trim(),
+    examName: (searchForm.value.examName ?? '').trim(),
   };
-  if (!hasAnySearchCriteria(criteria)) {
-    $q.notify({
-      type: 'warning',
-      message: t('admin.searchUser.validation.required'),
-      position: 'top',
-    });
-    return;
-  }
+
   activeSearchCriteria.value = criteria;
   pagination.value.page = 1;
+
+  if (!hasAnySearchCriteria(criteria)) {
+    rows.value = [];
+    pagination.value.rowsNumber = 0;
+    return;
+  }
+
   await loadRows();
 };
+
+const debouncedSearch = debounce(() => {
+  void handleSearch();
+}, 400);
+
+watch(
+  searchForm,
+  () => {
+    debouncedSearch();
+  },
+  { deep: true },
+);
 
 const onRequest = async (requestProps: TableRequestProps): Promise<void> => {
   pagination.value.page = requestProps.pagination.page;
