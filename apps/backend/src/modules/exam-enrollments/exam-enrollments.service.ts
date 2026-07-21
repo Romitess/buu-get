@@ -358,6 +358,40 @@ export class ExamEnrollmentsService {
     });
   }
 
+  async validatePasscode(
+    userId: number,
+    dto: ValidatePasscodeDto,
+  ): Promise<void> {
+    const session = await this.examSessionRepository.findOne({
+      where: { SS_ID: dto.SESSION_ID },
+      relations: ['EXAM'],
+    });
+
+    if (!session) {
+      throw new NotFoundException(
+        `Exam Session with ID ${dto.SESSION_ID} not found`,
+      );
+    }
+
+    if (session.EXAM?.EXAM_TYPE !== EXAM_TYPE.SPECIAL) {
+      return;
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { USER_ID: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    await this.findValidSpecialPasscode(
+      session.EXAM_ID,
+      user.USER_NATIONAL_ID || '',
+      dto.PASSCODE,
+    );
+  }
+
   async findAll(
     query: PaginationQueryDto = {},
   ): Promise<PaginatedResponse<ExamEnrollment>> {
