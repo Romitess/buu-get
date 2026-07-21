@@ -205,12 +205,6 @@ const menuLinks = computed(() => {
       path: '/admin/payment-import',
     });
     links.push({
-      name: 'receipt-void-refund',
-      label: t('navigation.receiptVoidRefund') || 'คืนเงิน / ยกเลิกใบเสร็จ',
-      icon: 'receipt_long',
-      path: '/admin/receipt-void-refund',
-    });
-    links.push({
       name: 'payment-import-test-export',
       label:
         t('navigation.paymentImportTestExport') ||
