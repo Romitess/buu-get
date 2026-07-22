@@ -57,9 +57,11 @@
       v-if="isSpecialRound"
       v-model:search-query="candidateSearch"
       :filtered-candidates="filteredCandidates"
+      :existing-candidate-keys="existingCandidateKeys"
       :loading="isImportingCandidates"
       :locked="isPublishedSectionLocked || isLockedByEnrollment"
       @import-candidates="importCandidates"
+      @add-candidate-from-user="addEligibleCandidateFromUser"
       @passcode-type-selected="generatePasscodes"
       @export-candidates="exportCandidates"
     />
@@ -134,6 +136,7 @@ const {
   activeSlotIndex,
   candidateSearch,
   filteredCandidates,
+  existingCandidateKeys,
   fieldErrors,
   shakeKey,
   loadInitialData,
@@ -142,6 +145,7 @@ const {
   addRoom,
   removeRoom,
   importCandidates,
+  addEligibleCandidateFromUser,
   generatePasscodes,
   exportCandidates,
   handleCancel,

@@ -34,6 +34,7 @@ import {
 import { getUsersFromApi } from 'src/services/user.service';
 import { ROLES } from 'src/constants/roles';
 import { useUserStore } from 'src/stores/user.store';
+import type { User } from 'src/types/user';
 
 /** A single room within a time slot */
 export interface ExamRoom {
@@ -77,6 +78,10 @@ export interface EligibleCandidate {
   /** Generated passcode */
   passcode: string;
 }
+
+const getEligibleCandidateKey = (
+  candidate: Pick<EligibleCandidate, 'nationalId' | 'passportNo'>,
+): string => candidate.nationalId?.trim() || candidate.passportNo?.trim() || '';
 
 export interface CreateExamForm {
   examName: string;
@@ -384,6 +389,13 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       );
     });
   });
+
+  /** Keys of candidates already in the eligible list */
+  const existingCandidateKeys = computed<string[]>(() =>
+    form.value.eligibleCandidates
+      .map((c) => getEligibleCandidateKey(c))
+      .filter((key) => key.length > 0),
+  );
 
   // Helper to convert DD/MM/YYYY to numeric value for comparison
   const dateToCompareValue = (dateStr: string): number => {
@@ -1310,6 +1322,46 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     });
   };
 
+  /** Add a system user to the eligible candidates list */
+  const addEligibleCandidateFromUser = (user: User): void => {
+    const nationalId = user.nationalId?.trim() || undefined;
+    const passportNo = user.passportNo?.trim() || undefined;
+
+    if (!nationalId && !passportNo) {
+      $q.notify({
+        type: 'negative',
+        message: 'ผู้สมัครไม่มีเลขบัตรประชาชนหรือ passport ในระบบ',
+        position: 'top',
+      });
+      return;
+    }
+
+    const key = nationalId || passportNo || '';
+    if (existingCandidateKeys.value.includes(key)) {
+      $q.notify({
+        type: 'warning',
+        message: 'ผู้สมัครนี้อยู่ในรายชื่อแล้ว',
+        position: 'top',
+      });
+      return;
+    }
+
+    form.value.eligibleCandidates.push({
+      nationalId: nationalId || undefined,
+      passportNo: nationalId ? undefined : passportNo,
+      fullName: user.fullNameTH?.trim() || undefined,
+      fullNameEn: user.fullNameEN?.trim() || undefined,
+      passcode: '',
+    });
+
+    $q.notify({
+      type: 'positive',
+      message: 'เพิ่มผู้สมัครในรายชื่อแล้ว',
+      position: 'top',
+      timeout: 2000,
+    });
+  };
+
   const handleCancel = (): void => {
     void router.push('/admin/exam-management');
   };
@@ -1681,6 +1733,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     activeSlotIndex,
     candidateSearch,
     filteredCandidates,
+    existingCandidateKeys,
     fieldErrors,
     shakeKey,
     loadInitialData,
@@ -1689,6 +1742,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     addRoom,
     removeRoom,
     importCandidates,
+    addEligibleCandidateFromUser,
     generatePasscodes,
     exportCandidates,
     handleCancel,

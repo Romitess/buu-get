@@ -49,6 +49,16 @@
         <div class="col-12 col-md-auto row q-gutter-sm justify-end">
           <q-btn
             v-if="!locked"
+            label="ค้นหาผู้สมัคร"
+            color="secondary"
+            unelevated
+            dense
+            icon="person_search"
+            class="q-px-md action-btn"
+            @click="showSearchDialog = true"
+          />
+          <q-btn
+            v-if="!locked"
             label="นำเข้าไฟล์รายชื่อ"
             color="primary"
             unelevated
@@ -92,6 +102,13 @@
 
     <!-- Passcode Type Selection Dialog -->
     <DialogPasscodeType v-model="showPasscodeTypeDialog" @select="onPasscodeTypeSelected" />
+
+    <!-- Search Candidate Dialog -->
+    <DialogSearchCandidate
+      v-model="showSearchDialog"
+      :existing-keys="props.existingCandidateKeys"
+      @add-candidate="onAddCandidate"
+    />
   </q-card>
 </template>
 
@@ -105,13 +122,22 @@ import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import BaseTable from 'src/components/shared/base-table.vue';
 import DialogCsvImport from 'src/components/exam/dialog-csv-import.vue';
 import DialogPasscodeType from 'src/components/exam/dialog-passcode-type.vue';
+import DialogSearchCandidate from 'src/components/exam/dialog-search-candidate.vue';
+import type { User } from 'src/types/user';
 
-const props = defineProps<{
-  /** Filtered candidates to display */
-  filteredCandidates: EligibleCandidate[];
-  locked?: boolean;
-  loading?: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    /** Filtered candidates to display */
+    filteredCandidates: EligibleCandidate[];
+    /** Keys already in eligible list (nationalId or passport) */
+    existingCandidateKeys?: string[];
+    locked?: boolean;
+    loading?: boolean;
+  }>(),
+  {
+    existingCandidateKeys: () => [],
+  },
+);
 
 const searchQuery = defineModel<string>('searchQuery', { required: true });
 
@@ -120,6 +146,7 @@ const emit = defineEmits<{
   (e: 'passcode-type-selected', type: PasscodeType): void;
   (e: 'url-submitted', url: string): void;
   (e: 'export-candidates'): void;
+  (e: 'add-candidate-from-user', user: User): void;
 }>();
 
 const pagination = ref<PaginationModel>({
@@ -157,6 +184,7 @@ const onRequest = (reqProps: TableRequestProps) => {
 /** Dialog visibility state */
 const showCsvImportDialog = ref(false);
 const showPasscodeTypeDialog = ref(false);
+const showSearchDialog = ref(false);
 
 /** CSV dialog: file selected */
 const onCsvFileSelected = (file: File): void => {
@@ -193,6 +221,11 @@ const onDownloadSample = (): void => {
 /** Passcode type dialog: type selected */
 const onPasscodeTypeSelected = (type: PasscodeType): void => {
   emit('passcode-type-selected', type);
+};
+
+/** Search dialog: candidate selected */
+const onAddCandidate = (user: User): void => {
+  emit('add-candidate-from-user', user);
 };
 
 const columns: QTableColumn[] = [

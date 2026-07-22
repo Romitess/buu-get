@@ -7,4 +7,11 @@ export class UsersQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
   role?: string;
+
+  @ApiPropertyOptional({
+    description: 'ค้นหาด้วยเลขบัตรประชาชน, passport, อีเมล หรือชื่อ-นามสกุล',
+  })
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

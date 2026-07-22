@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, Repository } from 'typeorm';
+import { Brackets, DataSource, In, Repository } from 'typeorm';
 import {
   buildPaginatedResponse,
   PaginatedResponse,
@@ -123,6 +123,32 @@ export class UsersService {
         'role',
         'role.ROLE_NAME = :role',
         { role: query.role },
+      );
+    }
+
+    const search = query.search?.trim();
+    if (search) {
+      const searchPattern = `%${search}%`;
+      const searchLower = `%${search.toLowerCase()}%`;
+      queryBuilder.andWhere(
+        new Brackets((innerQb) => {
+          innerQb
+            .where('user.USER_NATIONAL_ID LIKE :searchPattern', {
+              searchPattern,
+            })
+            .orWhere('user.USER_PASSPORT_NO LIKE :searchPattern', {
+              searchPattern,
+            })
+            .orWhere('LOWER(user.USER_EMAIL) LIKE :searchLower', {
+              searchLower,
+            })
+            .orWhere('LOWER(profile.userFullnameTh) LIKE :searchLower', {
+              searchLower,
+            })
+            .orWhere('LOWER(profile.userFullnameEn) LIKE :searchLower', {
+              searchLower,
+            });
+        }),
       );
     }
 

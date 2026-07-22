@@ -124,6 +124,66 @@ export async function getUsersFromApi(role?: string): Promise<User[]> {
   }
 }
 
+export interface SearchUsersParams {
+  search?: string;
+  role?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedUsersResult {
+  users: User[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export async function searchUsers(params: SearchUsersParams = {}): Promise<PaginatedUsersResult> {
+  const queryParams: Record<string, string | number> = {
+    page: params.page ?? 1,
+    limit: params.limit ?? 10,
+  };
+  if (params.role) {
+    queryParams.role = params.role;
+  }
+  if (params.search?.trim()) {
+    queryParams.search = params.search.trim();
+  }
+
+  try {
+    const response = await api.get<{
+      data: BackendUserResponse[];
+      meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+      };
+    }>('/users', { params: queryParams });
+
+    const usersData = response.data?.data ?? [];
+    const meta = response.data?.meta;
+
+    return {
+      users: usersData.map(mapBackendUserToFrontendUser),
+      total: meta?.total ?? usersData.length,
+      page: meta?.page ?? (params.page ?? 1),
+      limit: meta?.limit ?? (params.limit ?? 10),
+      totalPages: meta?.totalPages ?? 0,
+    };
+  } catch (err) {
+    console.error('Failed to search users:', err);
+    return {
+      users: [],
+      total: 0,
+      page: params.page ?? 1,
+      limit: params.limit ?? 10,
+      totalPages: 0,
+    };
+  }
+}
+
 export function findUser(users: User[], inputID: string): User | undefined {
   return users.find((u) => u.nationalId === inputID || String(u.id) === inputID);
 }
