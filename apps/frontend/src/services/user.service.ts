@@ -184,6 +184,31 @@ export async function searchUsers(params: SearchUsersParams = {}): Promise<Pagin
   }
 }
 
+export interface UserIdentifierCheckResult {
+  identifier: string;
+  exists: boolean;
+}
+
+/** ตรวจสอบว่ารหัสประชาชน/passport มีอยู่ในระบบหรือไม่ (batch) */
+export async function checkUserIdentifiers(
+  identifiers: string[],
+): Promise<Record<string, boolean>> {
+  if (identifiers.length === 0) {
+    return {};
+  }
+
+  const response = await api.post<{ results: UserIdentifierCheckResult[] }>(
+    '/users/check-identifiers',
+    { identifiers },
+  );
+
+  const statusMap: Record<string, boolean> = {};
+  for (const result of response.data.results) {
+    statusMap[result.identifier] = result.exists;
+  }
+  return statusMap;
+}
+
 export function findUser(users: User[], inputID: string): User | undefined {
   return users.find((u) => u.nationalId === inputID || String(u.id) === inputID);
 }

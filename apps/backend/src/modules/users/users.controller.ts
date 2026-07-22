@@ -25,6 +25,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserRolesDto } from './dto/update-user-roles.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UsersQueryDto } from './dto/users-query.dto';
+import {
+  CheckUserIdentifiersDto,
+  CheckUserIdentifiersResponseDto,
+} from './dto/check-user-identifiers.dto';
 import { UsersService } from './users.service';
 
 @ApiTags('users')
@@ -46,6 +50,16 @@ export class UsersController {
     @Query() query: UsersQueryDto,
   ): Promise<PaginatedResponse<UserResponseDto>> {
     return this.usersService.findAll(query);
+  }
+
+  @Post('check-identifiers')
+  @Roles(...USER_LIST_ROLES)
+  @ApiOkResponse({ type: CheckUserIdentifiersResponseDto })
+  async checkIdentifiers(
+    @Body() body: CheckUserIdentifiersDto,
+  ): Promise<CheckUserIdentifiersResponseDto> {
+    const results = await this.usersService.checkIdentifiers(body.identifiers);
+    return { results };
   }
 
   @Get(':id')

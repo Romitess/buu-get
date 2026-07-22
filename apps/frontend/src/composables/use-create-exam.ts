@@ -31,7 +31,7 @@ import {
   type ExamChangeItem,
   type SessionLocationSnapshotPayload,
 } from 'src/services/exam.service';
-import { getUsersFromApi } from 'src/services/user.service';
+import { getUsersFromApi, checkUserIdentifiers } from 'src/services/user.service';
 import { ROLES } from 'src/constants/roles';
 import { useUserStore } from 'src/stores/user.store';
 import type { User } from 'src/types/user';
@@ -77,6 +77,8 @@ export interface EligibleCandidate {
   fullNameEn?: string | undefined;
   /** Generated passcode */
   passcode: string;
+  /** true = มีในระบบ, false = ไม่มี, undefined = ยังไม่ตรวจสอบ */
+  inSystem?: boolean;
 }
 
 const getEligibleCandidateKey = (
@@ -932,6 +934,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
             fullName: p.FULL_NAME,
             passcode: p.PASSCODE,
           }));
+          await resolveEligibleCandidatesInSystem();
         }
 
         // The schedule lock is now handled by the computed property 'isScheduleLocked'
@@ -1161,13 +1164,41 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   };
 
   /** Import candidates from CSV file for special rounds */
+  const resolveEligibleCandidatesInSystem = async (): Promise<void> => {
+    const candidates = form.value.eligibleCandidates;
+    const identifiers = candidates
+      .map((candidate) => getEligibleCandidateKey(candidate))
+      .filter((identifier): identifier is string => Boolean(identifier));
+
+    if (identifiers.length === 0) {
+      return;
+    }
+
+    try {
+      const statusMap = await checkUserIdentifiers(identifiers);
+      form.value.eligibleCandidates = candidates.map((candidate) => {
+        const key = getEligibleCandidateKey(candidate);
+        if (!key) {
+          return { ...candidate, inSystem: false };
+        }
+        return { ...candidate, inSystem: statusMap[key] ?? false };
+      });
+    } catch (err) {
+      console.error('Failed to check candidate identifiers:', err);
+      form.value.eligibleCandidates = candidates.map((candidate) => ({
+        ...candidate,
+        inSystem: candidate.inSystem ?? false,
+      }));
+    }
+  };
+
   const importCandidates = (file?: File): void => {
     try {
       if (!file) return;
       isImportingCandidates.value = true;
 
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         try {
           const rawText = e.target?.result as string;
           const text = stripBom(rawText);
@@ -1245,6 +1276,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           }
 
           form.value.eligibleCandidates = candidates;
+          await resolveEligibleCandidatesInSystem();
           $q.notify({
             type: 'positive',
             message: `นำเข้าข้อมูลรายชื่อสำเร็จ ${candidates.length} รายการ`,
@@ -1348,6 +1380,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       fullName: user.fullNameTH?.trim() || undefined,
       fullNameEn: user.fullNameEN?.trim() || undefined,
       passcode: '',
+      inSystem: true,
     });
 
     return true;

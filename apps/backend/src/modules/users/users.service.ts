@@ -16,6 +16,9 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UsersQueryDto } from './dto/users-query.dto';
+import {
+  UserIdentifierCheckResultDto,
+} from './dto/check-user-identifiers.dto';
 import { User } from './entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
 import { UserProfileService } from '../user-profile/user-profile.service';
@@ -238,5 +241,42 @@ export class UsersService {
     }
 
     return UserResponseDto.fromEntity(user);
+  }
+
+  /** ตรวจสอบว่ารหัสประชาชน/passport มีอยู่ในระบบหรือไม่ */
+  async checkIdentifiers(
+    identifiers: string[],
+  ): Promise<UserIdentifierCheckResultDto[]> {
+    const normalized = [
+      ...new Set(
+        identifiers.map((id) => id.trim()).filter((id) => id.length > 0),
+      ),
+    ];
+
+    if (normalized.length === 0) {
+      return [];
+    }
+
+    const users = await this.usersRepository
+      .createQueryBuilder('user')
+      .select(['user.USER_NATIONAL_ID', 'user.USER_PASSPORT_NO'])
+      .where('user.USER_NATIONAL_ID IN (:...ids)', { ids: normalized })
+      .orWhere('user.USER_PASSPORT_NO IN (:...ids)', { ids: normalized })
+      .getMany();
+
+    const foundSet = new Set<string>();
+    for (const user of users) {
+      if (user.USER_NATIONAL_ID?.trim()) {
+        foundSet.add(user.USER_NATIONAL_ID.trim());
+      }
+      if (user.USER_PASSPORT_NO?.trim()) {
+        foundSet.add(user.USER_PASSPORT_NO.trim());
+      }
+    }
+
+    return normalized.map((identifier) => ({
+      identifier,
+      exists: foundSet.has(identifier),
+    }));
   }
 }

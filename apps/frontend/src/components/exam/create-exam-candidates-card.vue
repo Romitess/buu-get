@@ -100,6 +100,29 @@
         <template v-slot:body-cell-fullName="{ row }">
           <div class="text-left q-pl-custom">{{ row.fullName }}</div>
         </template>
+
+        <!-- In System Status Column -->
+        <template v-slot:body-cell-inSystem="{ row }">
+          <div class="text-center">
+            <q-badge
+              v-if="row.inSystem === true"
+              color="positive"
+              label="มีในระบบ"
+            />
+            <q-badge
+              v-else-if="row.inSystem === false"
+              color="grey-6"
+              text-color="white"
+              label="ไม่มีในระบบ"
+            />
+            <q-spinner-dots
+              v-else-if="loading"
+              color="primary"
+              size="20px"
+            />
+            <span v-else class="text-grey-6">—</span>
+          </div>
+        </template>
       </BaseTable>
     </q-card-section>
 
@@ -270,6 +293,12 @@ const columns: QTableColumn[] = [
     name: 'nationalId',
     label: 'รหัสประชาชน',
     field: 'nationalId',
+    align: 'center',
+  },
+  {
+    name: 'inSystem',
+    label: 'สถานะข้อมูลในระบบ',
+    field: 'inSystem',
     align: 'center',
   },
   {
