@@ -2,7 +2,13 @@
   <div class="register-profile-form">
     <!-- Match mockup styling: no heavy shadow, soft border, rounded corners -->
     <q-card class="shadow-0 profile-card">
-      <q-form ref="formRef" class="profile-form" @submit.prevent="onSubmit">
+      <q-form
+        ref="formRef"
+        class="profile-form"
+        greedy
+        @submit.prevent="onSubmit"
+        @validation-error="onValidationError"
+      >
         <!-- ─── Title ─── -->
         <div class="profile-form-title">
           <q-icon name="people" size="20px" color="dark" />
@@ -159,7 +165,7 @@ const formRef = ref<QForm | null>(null);
 const showOtpDialog = ref(false);
 const isSendingOtp = ref(false);
 const isVerifyingOtp = ref(false);
-const { validateAndFocusFirstInvalid } = useFocusFirstInvalidField(formRef);
+const { focusFirstInvalidField } = useFocusFirstInvalidField(formRef);
 
 /** isThai มาจาก prop ที่ parent ส่งมา (ตาม userType ใน step 1) */
 const isThailand = computed<boolean>(() => props.isThai);
@@ -211,17 +217,20 @@ const sendOtp = async (): Promise<boolean> => {
   }
 };
 
-const onSubmit = async (): Promise<void> => {
-  const isValid = await validateAndFocusFirstInvalid();
-  if (!isValid) {
-    $q.notify({
-      type: 'warning',
-      message: t('profile.validationError', 'กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง'),
-      position: 'top',
-    });
-    return;
-  }
+/**
+ * q-form emits submit only after validation passes.
+ * On failure it emits validation-error instead — scroll/focus the first bad field.
+ */
+const onValidationError = async (): Promise<void> => {
+  await focusFirstInvalidField();
+  $q.notify({
+    type: 'warning',
+    message: t('profile.validationError', 'กรุณากรอกข้อมูลให้ครบถ้วนและถูกต้อง'),
+    position: 'top',
+  });
+};
 
+const onSubmit = async (): Promise<void> => {
   // Edit mode → submit ตรง ๆ
   if (isEditMode.value) {
     submitForm();

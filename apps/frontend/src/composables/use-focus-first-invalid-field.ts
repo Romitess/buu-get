@@ -46,12 +46,62 @@ const findFocusableElement = (fieldElement: HTMLElement): HTMLElement => {
   return isHTMLElement(candidate) ? candidate : fieldElement;
 };
 
+const isScrollableOverflow = (value: string): boolean =>
+  value === 'auto' || value === 'scroll' || value === 'overlay';
+
+/**
+ * Scroll nested overflow containers manually.
+ * Native scrollIntoView can fail when an ancestor uses overflow: hidden
+ * (e.g. profile card) while an inner grid uses overflow-y: auto.
+ */
+const scrollElementIntoNearestContainers = (
+  element: HTMLElement,
+  behavior: ScrollBehavior,
+  block: ScrollLogicalPosition,
+): void => {
+  let parent: HTMLElement | null = element.parentElement;
+
+  while (parent) {
+    const style = window.getComputedStyle(parent);
+    const canScrollY =
+      isScrollableOverflow(style.overflowY) && parent.scrollHeight > parent.clientHeight + 1;
+
+    if (canScrollY) {
+      const parentRect = parent.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      const currentOffset = elementRect.top - parentRect.top + parent.scrollTop;
+      const alignCenter = block === 'center';
+      const targetTop = alignCenter
+        ? currentOffset - parent.clientHeight / 2 + elementRect.height / 2
+        : currentOffset - 16;
+      const maxScrollTop = parent.scrollHeight - parent.clientHeight;
+
+      parent.scrollTo({
+        top: Math.max(0, Math.min(targetTop, maxScrollTop)),
+        behavior,
+      });
+    }
+
+    parent = parent.parentElement;
+  }
+
+  element.scrollIntoView({
+    behavior,
+    block,
+    inline: 'nearest',
+  });
+};
+
 export function useFocusFirstInvalidField(
   formRef: Ref<QForm | null>,
   options: FocusFirstInvalidFieldOptions = {},
 ): UseFocusFirstInvalidFieldReturn {
   const focusFirstInvalidField = async (): Promise<boolean> => {
     await nextTick();
+    // Quasar paints error classes after validate; wait one frame so they exist.
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => resolve());
+    });
 
     const form = formRef.value;
     if (!form) {
@@ -72,11 +122,10 @@ export function useFocusFirstInvalidField(
       return false;
     }
 
-    firstInvalidField.scrollIntoView({
-      behavior: options.scrollBehavior ?? 'smooth',
-      block: options.block ?? 'center',
-      inline: options.inline ?? 'nearest',
-    });
+    const scrollBehavior = options.scrollBehavior ?? 'smooth';
+    const block = options.block ?? 'center';
+
+    scrollElementIntoNearestContainers(firstInvalidField, scrollBehavior, block);
 
     await nextTick();
 
