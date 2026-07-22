@@ -8,8 +8,9 @@
   >
     <q-card class="dialog-passcode-type-card">
       <!-- Header -->
-      <q-card-section class="q-pb-none">
+      <q-card-section class="row items-center justify-between q-pb-none">
         <div class="text-h6 text-weight-bold dialog-title">เลือกรูปแบบของ PASSCODE</div>
+        <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
 
       <!-- Options -->
@@ -45,10 +46,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import type { PasscodeType } from 'src/types/exam';
 
-defineProps<{
+const props = defineProps<{
   modelValue: boolean;
 }>();
 
@@ -58,6 +59,15 @@ const emit = defineEmits<{
 }>();
 
 const selected = ref<PasscodeType | null>(null);
+
+watch(
+  () => props.modelValue,
+  (open) => {
+    if (!open) {
+      selected.value = null;
+    }
+  },
+);
 
 const onSelect = (type: PasscodeType): void => {
   selected.value = type;
