@@ -3,10 +3,14 @@ import { storeToRefs } from 'pinia';
 import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
 import { ROLES } from 'src/constants/roles';
-import { ENROLLMENT_STATUS } from 'src/constants/exam';
+import {
+  ENROLLMENT_STATUS,
+  PAYMENT_DURATION_SECONDS_DEFAULT,
+  TRANSACTION_PAYMENT_STATUS,
+} from 'src/constants/exam';
 import type { ExamHistoryItem } from 'src/types/exam';
 
-export type CandidateActivityKind = 'unpaid' | 'upcoming' | 'seatReady';
+export type CandidateActivityKind = 'unpaid' | 'paymentCancelled' | 'upcoming' | 'seatReady';
 
 export interface CandidateHomeActivity {
   id: number;
@@ -18,7 +22,7 @@ export interface CandidateHomeActivity {
   fee?: number;
   deadline?: string;
   seatLabel?: string;
-  /** Sort key: unpaid first, then nearest exam date */
+  /** Sort key: unpaid first, then payment cancelled, then nearest exam date */
   sortKey: number;
   examDateMs: number;
   ctaRoute: string;
@@ -29,6 +33,7 @@ export interface CandidateHomeActivity {
 }
 
 const EXAM_HISTORY_PATH = '/user/exam-history' as const;
+const EXAM_SCHEDULE_PATH = '/user/exam-schedule' as const;
 const MAX_DISPLAY_ACTIVITIES = 4 as const;
 
 const UPCOMING_STATUSES = new Set<number>([
@@ -55,6 +60,36 @@ function getExamDateMs(item: ExamHistoryItem): number {
 function hasVoucher(item: ExamHistoryItem): boolean {
   const vouchers = item.rawEnrollment?.VOUCHERS;
   return Array.isArray(vouchers) && vouchers.length > 0;
+}
+
+function getPaymentDeadlineMs(createdAt: string): number {
+  return new Date(createdAt).getTime() + PAYMENT_DURATION_SECONDS_DEFAULT * 1000;
+}
+
+function isPaymentTimeoutCancellation(item: ExamHistoryItem): boolean {
+  const enrollment = item.rawEnrollment;
+  if (!enrollment || enrollment.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED) {
+    return false;
+  }
+
+  if (item.customStatus?.label === 'exam.status.paymentTimeout') {
+    return true;
+  }
+
+  if (item.status === 'exam.status.cancelled') {
+    return true;
+  }
+
+  const paymentStatus = enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS;
+  if (paymentStatus === TRANSACTION_PAYMENT_STATUS.EXPIRED) {
+    return true;
+  }
+
+  if (!enrollment.CREATED_AT || !enrollment.UPDATED_AT) {
+    return false;
+  }
+
+  return new Date(enrollment.UPDATED_AT).getTime() >= getPaymentDeadlineMs(enrollment.CREATED_AT);
 }
 
 function toUnpaidActivity(item: ExamHistoryItem): CandidateHomeActivity {
@@ -84,6 +119,36 @@ function toUnpaidActivity(item: ExamHistoryItem): CandidateHomeActivity {
   return activity;
 }
 
+function toPaymentCancelledActivity(item: ExamHistoryItem): CandidateHomeActivity | null {
+  if (!isPaymentTimeoutCancellation(item)) return null;
+
+  const examDateMs = getExamDateMs(item);
+  // Only surface when the exam day is still relevant for re-registration.
+  if (examDateMs < startOfTodayMs()) return null;
+
+  const activity: CandidateHomeActivity = {
+    id: item.id,
+    kind: 'paymentCancelled',
+    title: item.title,
+    date: item.date,
+    time: item.time,
+    location: item.location,
+    sortKey: 1,
+    examDateMs,
+    ctaRoute: EXAM_SCHEDULE_PATH,
+    ctaLabelKey: 'home.candidateActivity.registerAgain',
+    badgeLabelKey: 'home.candidateActivity.badges.paymentCancelled',
+    badgeType: 'error',
+    imageKey: 'paymentCancelled',
+  };
+
+  if (item.fee !== undefined) {
+    activity.fee = item.fee;
+  }
+
+  return activity;
+}
+
 function toUpcomingOrSeatReady(item: ExamHistoryItem): CandidateHomeActivity | null {
   const status = item.rawEnrollment?.ERM_STATUS;
   if (status === undefined || !UPCOMING_STATUSES.has(status)) return null;
@@ -102,7 +167,7 @@ function toUpcomingOrSeatReady(item: ExamHistoryItem): CandidateHomeActivity | n
     date: item.date,
     time: item.time,
     location: item.location,
-    sortKey: 1,
+    sortKey: 2,
     examDateMs,
     ctaRoute: EXAM_HISTORY_PATH,
     ctaLabelKey: seatReady
@@ -130,11 +195,14 @@ function deriveActivities(
   history: ExamHistoryItem[],
 ): CandidateHomeActivity[] {
   const unpaid = pending.map(toUnpaidActivity);
+  const paymentCancelled = history
+    .map(toPaymentCancelledActivity)
+    .filter((item): item is CandidateHomeActivity => item !== null);
   const upcoming = history
     .map(toUpcomingOrSeatReady)
     .filter((item): item is CandidateHomeActivity => item !== null);
 
-  return [...unpaid, ...upcoming]
+  return [...unpaid, ...paymentCancelled, ...upcoming]
     .sort((a, b) => {
       if (a.sortKey !== b.sortKey) return a.sortKey - b.sortKey;
       return a.examDateMs - b.examDateMs;

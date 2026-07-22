@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" role="img" aria-hidden="true">
+  <!-- Soft warning background -->
+  <rect width="160" height="160" rx="16" fill="#FCEEE8"/>
+
+  <!-- Clock face -->
+  <circle cx="80" cy="78" r="42" fill="#FFCCBC"/>
+  <circle cx="80" cy="78" r="34" fill="#FFF3E0"/>
+  <circle cx="80" cy="78" r="28" fill="#FFFFFF"/>
+
+  <!-- Clock ticks -->
+  <path d="M80 54v6M80 96v6M54 78h6M100 78h6" stroke="#E65100" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Clock hands (past due) -->
+  <path d="M80 78V60" stroke="#BF360C" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M80 78l14 10" stroke="#E65100" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="80" cy="78" r="4" fill="#BF360C"/>
+
+  <!-- Cancel badge -->
+  <circle cx="118" cy="48" r="18" fill="#C62828"/>
+  <path d="M110 40l16 16M126 40l-16 16" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round"/>
+</svg>

@@ -30,6 +30,14 @@
           {{ $t('home.candidateActivity.paymentDeadline') }} {{ displayDeadline }}
         </div>
 
+        <div
+          v-if="activity.kind === 'paymentCancelled'"
+          class="cancelled-text row items-center q-mt-xs"
+        >
+          <q-icon name="timer_off" size="18px" class="q-mr-xs" />
+          {{ $t('home.candidateActivity.paymentCancelledHint') }}
+        </div>
+
         <div class="meta-row row items-center q-gutter-x-md q-mt-sm">
           <div class="meta-item row items-center">
             <q-icon name="event" size="18px" class="q-mr-xs" />
@@ -71,15 +79,18 @@ import type { CandidateHomeActivity } from 'src/composables/use-candidate-home-a
 import payIllustration from 'src/assets/img/activity/pay.svg';
 import examDayIllustration from 'src/assets/img/activity/exam-day.svg';
 import seatReadyIllustration from 'src/assets/img/activity/seat-ready.svg';
+import paymentCancelledIllustration from 'src/assets/img/activity/payment-cancelled.svg';
 
 const ILLUSTRATIONS = {
   unpaid: payIllustration,
+  paymentCancelled: paymentCancelledIllustration,
   upcoming: examDayIllustration,
   seatReady: seatReadyIllustration,
 } as const;
 
 const CTA_ICONS = {
   unpaid: 'payments',
+  paymentCancelled: 'event_available',
   upcoming: 'arrow_forward',
   seatReady: 'badge',
 } as const;
@@ -159,6 +170,13 @@ const ctaIcon = computed(() => CTA_ICONS[props.activity.kind]);
   color: #e65100;
   font-size: 0.8rem;
   font-weight: 600;
+}
+
+.cancelled-text {
+  color: #c62828;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .meta-row {
