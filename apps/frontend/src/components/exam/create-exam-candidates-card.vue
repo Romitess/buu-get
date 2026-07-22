@@ -92,8 +92,8 @@
         @request="onRequest"
       >
         <!-- Index Column -->
-        <template v-slot:body-cell-index="{ row }">
-          <div class="text-center">{{ getIndex(row) }}</div>
+        <template v-slot:body-cell-index="{ value }">
+          <div class="text-center">{{ value }}</div>
         </template>
 
         <!-- Full Name Column -->
@@ -213,13 +213,6 @@ watch(
   },
   { deep: true },
 );
-
-const getIndex = (row: EligibleCandidate): number => {
-  const page = pagination.value.page ?? 1;
-  const rowsPerPage = pagination.value.rowsPerPage ?? 10;
-  const localIndex = props.filteredCandidates.indexOf(row);
-  return (page - 1) * rowsPerPage + localIndex + 1;
-};
 
 const onRequest = (reqProps: TableRequestProps) => {
   if (reqProps.pagination) {
