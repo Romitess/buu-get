@@ -22,51 +22,126 @@
           </q-input>
         </div>
 
-        <div
-          class="search-candidate-table"
-          :class="{ 'search-candidate-table--empty': isTableEmpty }"
+        <q-tabs
+          v-model="activeTab"
+          dense
+          class="text-grey search-candidate-tabs"
+          active-color="primary"
+          indicator-color="primary"
+          align="left"
+          narrow-indicator
+          no-caps
         >
-          <BaseTable
-            :columns="columns"
-            :rows="rows"
-            :loading="isLoading"
-            :pagination="pagination"
-            is-server-side
-            empty-label=" "
-            @request="onRequest"
-          >
-          <template v-slot:body-cell-index="{ row }">
-            <div class="text-center">{{ getRowIndex(row) }}</div>
-          </template>
+          <q-tab name="search" label="ผลการค้นหา" />
+          <q-tab name="selected" :label="selectedTabLabel" />
+        </q-tabs>
 
-          <template v-slot:body-cell-identifier="{ row }">
-            <div class="text-center">{{ row.nationalId || row.passportNo || '-' }}</div>
-          </template>
+        <q-separator />
 
-          <template v-slot:body-cell-fullName="{ row }">
-            <div class="text-left">{{ row.fullNameTH || row.fullNameEN || '-' }}</div>
-          </template>
+        <q-tab-panels v-model="activeTab" animated class="search-candidate-panels col">
+          <q-tab-panel name="search" class="q-pa-none q-pt-md column">
+            <div
+              class="search-candidate-table col"
+              :class="{ 'search-candidate-table--empty': isSearchTableEmpty }"
+            >
+              <BaseTable
+                :columns="searchColumns"
+                :rows="rows"
+                :loading="isLoading"
+                :pagination="pagination"
+                is-server-side
+                empty-label=" "
+                @request="onRequest"
+              >
+                <template v-slot:body-cell-index="{ row }">
+                  <div class="text-center">{{ getSearchRowIndex(row) }}</div>
+                </template>
 
-          <template v-slot:body-cell-actions="{ row }">
-            <div class="text-center">
-              <q-btn
-                label="เพิ่ม"
-                color="primary"
-                unelevated
-                dense
-                size="sm"
-                class="q-px-sm"
-                :disable="!canAdd(row)"
-                @click="handleAdd(row)"
-              />
+                <template v-slot:body-cell-identifier="{ row }">
+                  <div class="text-center">{{ row.nationalId || row.passportNo || '-' }}</div>
+                </template>
+
+                <template v-slot:body-cell-fullName="{ row }">
+                  <div class="text-left">{{ row.fullNameTH || row.fullNameEN || '-' }}</div>
+                </template>
+
+                <template v-slot:body-cell-select="{ row }">
+                  <div class="text-center">
+                    <q-checkbox
+                      :model-value="isSelected(row)"
+                      :disable="!canSelect(row)"
+                      dense
+                      color="primary"
+                      @update:model-value="(val: boolean) => toggleSelection(row, val)"
+                    />
+                  </div>
+                </template>
+              </BaseTable>
+              <div v-if="isSearchTableEmpty" class="search-candidate-empty-message" role="status">
+                ไม่พบผู้สมัคร
+              </div>
             </div>
-          </template>
-        </BaseTable>
-        <div v-if="isTableEmpty" class="search-candidate-empty-message" role="status">
-          ไม่พบผู้สมัคร
-        </div>
-        </div>
+          </q-tab-panel>
+
+          <q-tab-panel name="selected" class="q-pa-none q-pt-md column">
+            <div
+              class="search-candidate-table col"
+              :class="{ 'search-candidate-table--empty': isSelectedTableEmpty }"
+            >
+              <BaseTable
+                :columns="selectedColumns"
+                :rows="selectedList"
+                :pagination="selectedPagination"
+                empty-label=" "
+              >
+                <template v-slot:body-cell-index="{ row }">
+                  <div class="text-center">{{ getSelectedRowIndex(row) }}</div>
+                </template>
+
+                <template v-slot:body-cell-identifier="{ row }">
+                  <div class="text-center">{{ row.nationalId || row.passportNo || '-' }}</div>
+                </template>
+
+                <template v-slot:body-cell-fullName="{ row }">
+                  <div class="text-left">{{ row.fullNameTH || row.fullNameEN || '-' }}</div>
+                </template>
+
+                <template v-slot:body-cell-select="{ row }">
+                  <div class="text-center">
+                    <q-checkbox
+                      :model-value="true"
+                      dense
+                      color="primary"
+                      @update:model-value="(val: boolean) => toggleSelection(row, val)"
+                    />
+                  </div>
+                </template>
+              </BaseTable>
+              <div
+                v-if="isSelectedTableEmpty"
+                class="search-candidate-empty-message"
+                role="status"
+              >
+                ยังไม่ได้เลือกผู้สมัคร
+              </div>
+            </div>
+          </q-tab-panel>
+        </q-tab-panels>
       </q-card-section>
+
+      <q-separator />
+
+      <q-card-actions align="right" class="q-pa-md">
+        <q-btn flat label="ยกเลิก" v-close-popup />
+        <q-btn
+          color="primary"
+          unelevated
+          :label="confirmLabel"
+          :disable="selectedCount === 0"
+          class="q-px-lg"
+          @click="handleConfirm"
+        />
+      </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
@@ -84,7 +159,7 @@ import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 const isOpen = defineModel<boolean>({ required: true });
 
 const emit = defineEmits<{
-  (e: 'add-candidate', user: User): void;
+  (e: 'confirm-candidates', users: User[]): void;
 }>();
 
 const props = withDefaults(
@@ -97,17 +172,32 @@ const props = withDefaults(
 );
 
 const searchQuery = ref('');
+const activeTab = ref<'search' | 'selected'>('search');
 const isLoading = ref(false);
 const rows = ref<User[]>([]);
+const selectedUsers = ref<Map<string, User>>(new Map());
 const pagination = ref<PaginationModel>({
   page: 1,
   rowsPerPage: 10,
   rowsNumber: 0,
 });
+const selectedPagination = ref<PaginationModel>({
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0,
+});
 
-const isTableEmpty = computed(() => !isLoading.value && rows.value.length === 0);
+const selectedList = computed<User[]>(() => Array.from(selectedUsers.value.values()));
+const selectedCount = computed<number>(() => selectedList.value.length);
+const selectedTabLabel = computed<string>(() => `ที่เลือกแล้ว (${selectedCount.value})`);
+const confirmLabel = computed<string>(() =>
+  selectedCount.value > 0 ? `ยืนยันเพิ่ม (${selectedCount.value})` : 'ยืนยันเพิ่ม',
+);
 
-const columns: QTableColumn[] = [
+const isSearchTableEmpty = computed(() => !isLoading.value && rows.value.length === 0);
+const isSelectedTableEmpty = computed(() => selectedList.value.length === 0);
+
+const baseColumns: QTableColumn[] = [
   {
     name: 'index',
     label: 'ลำดับ',
@@ -144,10 +234,27 @@ const columns: QTableColumn[] = [
     style: 'width: 27%',
     headerStyle: 'width: 27%',
   },
+];
+
+const searchColumns: QTableColumn[] = [
+  ...baseColumns,
   {
-    name: 'actions',
-    label: 'การดำเนินการ',
-    field: 'actions',
+    name: 'select',
+    label: 'เลือก',
+    field: 'select',
+    align: 'center',
+    sortable: false,
+    style: 'width: 15%',
+    headerStyle: 'width: 15%',
+  },
+];
+
+const selectedColumns: QTableColumn[] = [
+  ...baseColumns,
+  {
+    name: 'select',
+    label: 'เลือก',
+    field: 'select',
     align: 'center',
     sortable: false,
     style: 'width: 15%',
@@ -158,16 +265,38 @@ const columns: QTableColumn[] = [
 const getCandidateKey = (user: User): string =>
   user.nationalId?.trim() || user.passportNo?.trim() || '';
 
-const canAdd = (user: User): boolean => {
+const canSelect = (user: User): boolean => {
   const key = getCandidateKey(user);
   if (!key) return false;
-  return !(props.existingKeys).includes(key);
+  return !props.existingKeys.includes(key);
 };
 
-const getRowIndex = (row: User): number => {
+const isSelected = (user: User): boolean => selectedUsers.value.has(getCandidateKey(user));
+
+const toggleSelection = (user: User, selected: boolean): void => {
+  const key = getCandidateKey(user);
+  if (!key) return;
+
+  const next = new Map(selectedUsers.value);
+  if (selected && canSelect(user)) {
+    next.set(key, user);
+  } else {
+    next.delete(key);
+  }
+  selectedUsers.value = next;
+};
+
+const getSearchRowIndex = (row: User): number => {
   const page = pagination.value.page ?? 1;
   const rowsPerPage = pagination.value.rowsPerPage ?? 10;
   const localIndex = rows.value.indexOf(row);
+  return (page - 1) * rowsPerPage + localIndex + 1;
+};
+
+const getSelectedRowIndex = (row: User): number => {
+  const page = selectedPagination.value.page ?? 1;
+  const rowsPerPage = selectedPagination.value.rowsPerPage ?? 10;
+  const localIndex = selectedList.value.indexOf(row);
   return (page - 1) * rowsPerPage + localIndex + 1;
 };
 
@@ -204,6 +333,15 @@ watch(searchQuery, () => {
   debouncedFetchResults();
 });
 
+watch(selectedList, (list) => {
+  selectedPagination.value.rowsNumber = list.length;
+  const maxPage =
+    Math.ceil(list.length / (selectedPagination.value.rowsPerPage ?? 10)) || 1;
+  if ((selectedPagination.value.page ?? 1) > maxPage) {
+    selectedPagination.value.page = 1;
+  }
+});
+
 const onRequest = (reqProps: TableRequestProps): void => {
   const { page, rowsPerPage, sortBy, descending } = reqProps.pagination;
   pagination.value.page = page;
@@ -213,16 +351,26 @@ const onRequest = (reqProps: TableRequestProps): void => {
   void fetchResults();
 };
 
-const handleAdd = (user: User): void => {
-  emit('add-candidate', user);
+const resetDialogState = (): void => {
+  searchQuery.value = '';
+  activeTab.value = 'search';
+  rows.value = [];
+  selectedUsers.value = new Map();
+  pagination.value.page = 1;
+  pagination.value.rowsNumber = 0;
+  selectedPagination.value.page = 1;
+  selectedPagination.value.rowsNumber = 0;
+};
+
+const handleConfirm = (): void => {
+  if (selectedCount.value === 0) return;
+  emit('confirm-candidates', selectedList.value);
+  isOpen.value = false;
 };
 
 watch(isOpen, (open) => {
   if (!open) {
-    searchQuery.value = '';
-    rows.value = [];
-    pagination.value.page = 1;
-    pagination.value.rowsNumber = 0;
+    resetDialogState();
   }
 });
 </script>
@@ -241,6 +389,23 @@ watch(isOpen, (open) => {
   flex: 1;
   min-height: 0;
   padding-top: 8px;
+}
+
+.search-candidate-tabs {
+  margin-bottom: 0;
+}
+
+.search-candidate-panels {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-candidate-panels :deep(.q-panel) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .search-candidate-table {
@@ -274,7 +439,7 @@ watch(isOpen, (open) => {
 }
 
 .search-candidate-table--empty {
-  --empty-area-height: calc(75vh - 240px);
+  --empty-area-height: calc(75vh - 320px);
 }
 
 .search-candidate-table--empty :deep(.q-table__middle) {

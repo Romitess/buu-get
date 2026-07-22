@@ -1327,27 +1327,17 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   };
 
   /** Add a system user to the eligible candidates list */
-  const addEligibleCandidateFromUser = (user: User): void => {
+  const tryAddEligibleCandidateFromUser = (user: User): boolean => {
     const nationalId = user.nationalId?.trim() || undefined;
     const passportNo = user.passportNo?.trim() || undefined;
 
     if (!nationalId && !passportNo) {
-      $q.notify({
-        type: 'negative',
-        message: 'ผู้สมัครไม่มีเลขบัตรประชาชนหรือ passport ในระบบ',
-        position: 'top',
-      });
-      return;
+      return false;
     }
 
     const key = nationalId || passportNo || '';
     if (existingCandidateKeys.value.includes(key)) {
-      $q.notify({
-        type: 'warning',
-        message: 'ผู้สมัครนี้อยู่ในรายชื่อแล้ว',
-        position: 'top',
-      });
-      return;
+      return false;
     }
 
     form.value.eligibleCandidates.push({
@@ -1358,11 +1348,45 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       passcode: '',
     });
 
+    return true;
+  };
+
+  const addEligibleCandidatesFromUsers = (users: User[]): void => {
+    if (users.length === 0) {
+      $q.notify({
+        type: 'warning',
+        message: 'ยังไม่ได้เลือกผู้สมัคร',
+        position: 'top',
+      });
+      return;
+    }
+
+    let added = 0;
+    let skipped = 0;
+
+    for (const user of users) {
+      if (tryAddEligibleCandidateFromUser(user)) {
+        added += 1;
+      } else {
+        skipped += 1;
+      }
+    }
+
+    if (added === 0) {
+      $q.notify({
+        type: 'warning',
+        message: 'ไม่สามารถเพิ่มผู้สมัครที่เลือกได้',
+        position: 'top',
+      });
+      return;
+    }
+
+    const skippedText = skipped > 0 ? ` (ข้าม ${skipped} รายการ)` : '';
     $q.notify({
       type: 'positive',
-      message: 'เพิ่มผู้สมัครในรายชื่อแล้ว',
+      message: `เพิ่มผู้สมัครในรายชื่อแล้ว ${added} รายการ${skippedText}`,
       position: 'top',
-      timeout: 2000,
+      timeout: 2500,
     });
   };
 
@@ -1775,7 +1799,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     addRoom,
     removeRoom,
     importCandidates,
-    addEligibleCandidateFromUser,
+    addEligibleCandidatesFromUsers,
     clearAllEligibleCandidates,
     generatePasscodes,
     exportCandidates,

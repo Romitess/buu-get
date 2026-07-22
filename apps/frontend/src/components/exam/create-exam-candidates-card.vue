@@ -118,7 +118,7 @@
     <DialogSearchCandidate
       v-model="showSearchDialog"
       :existing-keys="props.existingCandidateKeys"
-      @add-candidate="onAddCandidate"
+      @confirm-candidates="onConfirmCandidates"
     />
   </q-card>
 </template>
@@ -159,7 +159,7 @@ const emit = defineEmits<{
   (e: 'passcode-type-selected', type: PasscodeType): void;
   (e: 'url-submitted', url: string): void;
   (e: 'export-candidates'): void;
-  (e: 'add-candidate-from-user', user: User): void;
+  (e: 'add-candidates-from-users', users: User[]): void;
   (e: 'clear-all-candidates'): void;
 }>();
 
@@ -237,9 +237,9 @@ const onPasscodeTypeSelected = (type: PasscodeType): void => {
   emit('passcode-type-selected', type);
 };
 
-/** Search dialog: candidate selected */
-const onAddCandidate = (user: User): void => {
-  emit('add-candidate-from-user', user);
+/** Search dialog: candidates confirmed */
+const onConfirmCandidates = (users: User[]): void => {
+  emit('add-candidates-from-users', users);
 };
 
 const columns: QTableColumn[] = [

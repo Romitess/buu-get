@@ -62,7 +62,7 @@
       :loading="isImportingCandidates"
       :locked="isPublishedSectionLocked || isLockedByEnrollment"
       @import-candidates="importCandidates"
-      @add-candidate-from-user="addEligibleCandidateFromUser"
+      @add-candidates-from-users="addEligibleCandidatesFromUsers"
       @clear-all-candidates="clearAllEligibleCandidates"
       @passcode-type-selected="generatePasscodes"
       @export-candidates="exportCandidates"
@@ -148,7 +148,7 @@ const {
   addRoom,
   removeRoom,
   importCandidates,
-  addEligibleCandidateFromUser,
+  addEligibleCandidatesFromUsers,
   clearAllEligibleCandidates,
   generatePasscodes,
   exportCandidates,
