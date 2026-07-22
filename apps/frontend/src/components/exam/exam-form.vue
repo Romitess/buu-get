@@ -58,10 +58,12 @@
       v-model:search-query="candidateSearch"
       :filtered-candidates="filteredCandidates"
       :existing-candidate-keys="existingCandidateKeys"
+      :has-candidates="hasEligibleCandidates"
       :loading="isImportingCandidates"
       :locked="isPublishedSectionLocked || isLockedByEnrollment"
       @import-candidates="importCandidates"
       @add-candidate-from-user="addEligibleCandidateFromUser"
+      @clear-all-candidates="clearAllEligibleCandidates"
       @passcode-type-selected="generatePasscodes"
       @export-candidates="exportCandidates"
     />
@@ -137,6 +139,7 @@ const {
   candidateSearch,
   filteredCandidates,
   existingCandidateKeys,
+  hasEligibleCandidates,
   fieldErrors,
   shakeKey,
   loadInitialData,
@@ -146,6 +149,7 @@ const {
   removeRoom,
   importCandidates,
   addEligibleCandidateFromUser,
+  clearAllEligibleCandidates,
   generatePasscodes,
   exportCandidates,
   handleCancel,

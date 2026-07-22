@@ -48,6 +48,17 @@
         </div>
         <div class="col-12 col-md-auto row q-gutter-sm justify-end">
           <q-btn
+            v-if="!locked && hasCandidates"
+            label="ล้างข้อมูลทั้งหมด"
+            color="negative"
+            outline
+            unelevated
+            dense
+            icon="delete_sweep"
+            class="q-px-md action-btn"
+            @click="$emit('clear-all-candidates')"
+          />
+          <q-btn
             v-if="!locked"
             label="ค้นหาผู้สมัคร"
             color="secondary"
@@ -131,11 +142,13 @@ const props = withDefaults(
     filteredCandidates: EligibleCandidate[];
     /** Keys already in eligible list (nationalId or passport) */
     existingCandidateKeys?: string[];
+    hasCandidates?: boolean;
     locked?: boolean;
     loading?: boolean;
   }>(),
   {
     existingCandidateKeys: () => [],
+    hasCandidates: false,
   },
 );
 
@@ -147,6 +160,7 @@ const emit = defineEmits<{
   (e: 'url-submitted', url: string): void;
   (e: 'export-candidates'): void;
   (e: 'add-candidate-from-user', user: User): void;
+  (e: 'clear-all-candidates'): void;
 }>();
 
 const pagination = ref<PaginationModel>({

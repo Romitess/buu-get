@@ -397,6 +397,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       .filter((key) => key.length > 0),
   );
 
+  const hasEligibleCandidates = computed<boolean>(
+    () => form.value.eligibleCandidates.length > 0,
+  );
+
   // Helper to convert DD/MM/YYYY to numeric value for comparison
   const dateToCompareValue = (dateStr: string): number => {
     if (!dateStr || !dateStr.includes('/')) return 0;
@@ -1362,6 +1366,34 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     });
   };
 
+  /** Clear all eligible candidates after confirmation */
+  const clearAllEligibleCandidates = (): void => {
+    if (form.value.eligibleCandidates.length === 0) {
+      $q.notify({
+        type: 'warning',
+        message: 'ไม่มีรายชื่อที่จะล้าง',
+        position: 'top',
+      });
+      return;
+    }
+
+    $q.dialog({
+      title: 'ยืนยันการล้างข้อมูล',
+      message: 'ต้องการล้างรายชื่อผู้มีสิทธิ์สอบทั้งหมดใช่หรือไม่?',
+      cancel: true,
+      persistent: true,
+    }).onOk(() => {
+      form.value.eligibleCandidates = [];
+      candidateSearch.value = '';
+      $q.notify({
+        type: 'positive',
+        message: 'ล้างรายชื่อผู้มีสิทธิ์สอบแล้ว',
+        position: 'top',
+        timeout: 2000,
+      });
+    });
+  };
+
   const handleCancel = (): void => {
     void router.push('/admin/exam-management');
   };
@@ -1734,6 +1766,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     candidateSearch,
     filteredCandidates,
     existingCandidateKeys,
+    hasEligibleCandidates,
     fieldErrors,
     shakeKey,
     loadInitialData,
@@ -1743,6 +1776,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     removeRoom,
     importCandidates,
     addEligibleCandidateFromUser,
+    clearAllEligibleCandidates,
     generatePasscodes,
     exportCandidates,
     handleCancel,
