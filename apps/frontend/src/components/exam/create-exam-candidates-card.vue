@@ -49,14 +49,14 @@
         <div class="col-12 col-md-auto row q-gutter-sm justify-end">
           <q-btn
             v-if="!locked && hasCandidates"
-            label="ล้างข้อมูลทั้งหมด"
+            label="ลบรายชื่อ"
             color="negative"
             outline
             unelevated
             dense
             icon="delete_sweep"
             class="q-px-md action-btn"
-            @click="$emit('clear-all-candidates')"
+            @click="showDeleteDialog = true"
           />
           <q-btn
             v-if="!locked"
@@ -120,6 +120,13 @@
       :existing-keys="props.existingCandidateKeys"
       @confirm-candidates="onConfirmCandidates"
     />
+
+    <!-- Delete Candidates Dialog -->
+    <DialogDeleteCandidates
+      v-model="showDeleteDialog"
+      :candidates="props.candidates"
+      @confirm-remove="onConfirmRemove"
+    />
   </q-card>
 </template>
 
@@ -134,12 +141,15 @@ import BaseTable from 'src/components/shared/base-table.vue';
 import DialogCsvImport from 'src/components/exam/dialog-csv-import.vue';
 import DialogPasscodeType from 'src/components/exam/dialog-passcode-type.vue';
 import DialogSearchCandidate from 'src/components/exam/dialog-search-candidate.vue';
+import DialogDeleteCandidates from 'src/components/exam/dialog-delete-candidates.vue';
 import type { User } from 'src/types/user';
 
 const props = withDefaults(
   defineProps<{
     /** Filtered candidates to display */
     filteredCandidates: EligibleCandidate[];
+    /** Full eligible candidates list */
+    candidates: EligibleCandidate[];
     /** Keys already in eligible list (nationalId or passport) */
     existingCandidateKeys?: string[];
     hasCandidates?: boolean;
@@ -160,7 +170,7 @@ const emit = defineEmits<{
   (e: 'url-submitted', url: string): void;
   (e: 'export-candidates'): void;
   (e: 'add-candidates-from-users', users: User[]): void;
-  (e: 'clear-all-candidates'): void;
+  (e: 'remove-candidates', keys: string[]): void;
 }>();
 
 const pagination = ref<PaginationModel>({
@@ -199,6 +209,7 @@ const onRequest = (reqProps: TableRequestProps) => {
 const showCsvImportDialog = ref(false);
 const showPasscodeTypeDialog = ref(false);
 const showSearchDialog = ref(false);
+const showDeleteDialog = ref(false);
 
 /** CSV dialog: file selected */
 const onCsvFileSelected = (file: File): void => {
@@ -240,6 +251,11 @@ const onPasscodeTypeSelected = (type: PasscodeType): void => {
 /** Search dialog: candidates confirmed */
 const onConfirmCandidates = (users: User[]): void => {
   emit('add-candidates-from-users', users);
+};
+
+/** Delete dialog: candidates confirmed for removal */
+const onConfirmRemove = (keys: string[]): void => {
+  emit('remove-candidates', keys);
 };
 
 const columns: QTableColumn[] = [

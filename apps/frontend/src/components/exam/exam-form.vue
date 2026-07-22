@@ -57,13 +57,14 @@
       v-if="isSpecialRound"
       v-model:search-query="candidateSearch"
       :filtered-candidates="filteredCandidates"
+      :candidates="form.eligibleCandidates"
       :existing-candidate-keys="existingCandidateKeys"
       :has-candidates="hasEligibleCandidates"
       :loading="isImportingCandidates"
       :locked="isPublishedSectionLocked || isLockedByEnrollment"
       @import-candidates="importCandidates"
       @add-candidates-from-users="addEligibleCandidatesFromUsers"
-      @clear-all-candidates="clearAllEligibleCandidates"
+      @remove-candidates="removeEligibleCandidates"
       @passcode-type-selected="generatePasscodes"
       @export-candidates="exportCandidates"
     />
@@ -149,7 +150,7 @@ const {
   removeRoom,
   importCandidates,
   addEligibleCandidatesFromUsers,
-  clearAllEligibleCandidates,
+  removeEligibleCandidates,
   generatePasscodes,
   exportCandidates,
   handleCancel,

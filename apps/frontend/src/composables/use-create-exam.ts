@@ -83,6 +83,8 @@ const getEligibleCandidateKey = (
   candidate: Pick<EligibleCandidate, 'nationalId' | 'passportNo'>,
 ): string => candidate.nationalId?.trim() || candidate.passportNo?.trim() || '';
 
+export { getEligibleCandidateKey };
+
 export interface CreateExamForm {
   examName: string;
   examRound: string;
@@ -1390,31 +1392,42 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     });
   };
 
-  /** Clear all eligible candidates after confirmation */
-  const clearAllEligibleCandidates = (): void => {
-    if (form.value.eligibleCandidates.length === 0) {
+  /** Remove selected eligible candidates from the list */
+  const removeEligibleCandidates = (keys: string[]): void => {
+    if (keys.length === 0) {
       $q.notify({
         type: 'warning',
-        message: 'ไม่มีรายชื่อที่จะล้าง',
+        message: 'ยังไม่ได้เลือกรายชื่อที่จะลบ',
         position: 'top',
       });
       return;
     }
 
-    $q.dialog({
-      title: 'ยืนยันการล้างข้อมูล',
-      message: 'ต้องการล้างรายชื่อผู้มีสิทธิ์สอบทั้งหมดใช่หรือไม่?',
-      cancel: true,
-      persistent: true,
-    }).onOk(() => {
-      form.value.eligibleCandidates = [];
-      candidateSearch.value = '';
+    const keysToRemove = new Set(keys);
+    const beforeCount = form.value.eligibleCandidates.length;
+    form.value.eligibleCandidates = form.value.eligibleCandidates.filter(
+      (candidate) => !keysToRemove.has(getEligibleCandidateKey(candidate)),
+    );
+    const removedCount = beforeCount - form.value.eligibleCandidates.length;
+
+    if (removedCount === 0) {
       $q.notify({
-        type: 'positive',
-        message: 'ล้างรายชื่อผู้มีสิทธิ์สอบแล้ว',
+        type: 'warning',
+        message: 'ไม่พบรายชื่อที่จะลบ',
         position: 'top',
-        timeout: 2000,
       });
+      return;
+    }
+
+    if (form.value.eligibleCandidates.length === 0) {
+      candidateSearch.value = '';
+    }
+
+    $q.notify({
+      type: 'positive',
+      message: `ลบรายชื่อผู้มีสิทธิ์สอบแล้ว ${removedCount} รายการ`,
+      position: 'top',
+      timeout: 2500,
     });
   };
 
@@ -1800,7 +1813,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     removeRoom,
     importCandidates,
     addEligibleCandidatesFromUsers,
-    clearAllEligibleCandidates,
+    removeEligibleCandidates,
     generatePasscodes,
     exportCandidates,
     handleCancel,
