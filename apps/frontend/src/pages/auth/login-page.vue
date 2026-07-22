@@ -46,13 +46,12 @@
           </div>
           <div v-else-if="formKey === 'profile'">
             <div class="register-profile-shell">
-              <FormSkeleton v-if="isSubmitting" :fields="10" :columns="2" />
               <RegisterAndEditProfile
-                v-else
                 :initial-edit-mode="false"
                 :is-thai="isThai"
                 :credentials="credentials"
                 :registration-method="credentials.registrationMethod"
+                :is-submitting="isSubmitting"
                 @close="goBackToCredentials"
                 @save="handleSave"
               />
@@ -75,8 +74,6 @@ import RegisterCard from 'src/components/register-card.vue';
 import type { RegisterCredentials } from 'src/types/register';
 import type { RegisterFormData } from 'src/types/register';
 import RegisterAndEditProfile from 'src/components/register-and-edit-profile.vue';
-import { FormSkeleton } from 'src/components/base/skeleton';
-
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();

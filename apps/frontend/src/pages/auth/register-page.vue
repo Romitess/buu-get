@@ -19,13 +19,12 @@
     <!-- ─── Step 2: Profile Form (Identity + Contact Info) ─── -->
     <template v-if="currentStep === 'profile'">
       <div class="profile-form-container">
-        <FormSkeleton v-if="isSubmitting" :fields="10" :columns="2" />
         <RegisterAndEditProfile
-          v-else
           :initial-edit-mode="false"
           :is-thai="isThai"
           :credentials="credentials"
           :registration-method="registrationMethod"
+          :is-submitting="isSubmitting"
           @close="goBackToCredentials"
           @save="handleSave"
         />
@@ -44,8 +43,6 @@ import type { RegisterPayload } from 'src/stores/auth.store';
 import RegisterAndEditProfile from 'src/components/register-and-edit-profile.vue';
 import { useAuthStore } from 'src/stores/auth.store';
 import { useRouter } from 'vue-router';
-import { FormSkeleton } from 'src/components/base/skeleton';
-
 type Step = 'credentials' | 'profile';
 
 const { t } = useI18n();

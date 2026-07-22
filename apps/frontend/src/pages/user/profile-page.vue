@@ -27,9 +27,7 @@
       </div>
     </Transition>
 
-    <FormSkeleton v-if="isSaving" :fields="12" :columns="2" class="q-mb-md" />
-
-    <q-form v-else ref="formRef">
+    <q-form ref="formRef">
       <q-card class="user-profile-card q-pa-lg q-mb-md" flat>
         <div class="row q-col-gutter-xl">
           <div class="col-12 col-md-3 flex column flex-center relative-position">
@@ -312,7 +310,8 @@
         :label="$t('profile.save')"
         color="primary"
         class="action-btn text-weight-bold"
-        :disable="!hasChanges"
+        :disable="!hasChanges || isSaving"
+        :loading="isSaving"
         @click="onSave"
       />
     </div>
@@ -410,7 +409,7 @@ import { getImageUrl } from 'src/services/image.service';
 import { api } from 'src/boot/axios';
 import type { AxiosError } from 'axios';
 import { useFocusFirstInvalidField } from 'src/composables/use-focus-first-invalid-field';
-import { AvatarSkeleton, FormSkeleton } from 'src/components/base/skeleton';
+import { AvatarSkeleton } from 'src/components/base/skeleton';
 
 const router = useRouter();
 const route = useRoute();

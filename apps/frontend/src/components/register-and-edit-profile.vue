@@ -67,7 +67,8 @@
             color="primary"
             class="text-weight-bold profile-action-btn"
             :label="submitButtonText"
-            :loading="isSendingOtp"
+            :loading="isSendingOtp || props.isSubmitting"
+            :disable="props.isSubmitting"
             unelevated
           />
         </div>
@@ -133,11 +134,13 @@ interface Props {
   credentials?: RegisterCredentials;
   userData?: User | null;
   registrationMethod?: 'email' | 'thaid';
+  isSubmitting?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isThai: true,
   registrationMethod: 'email',
+  isSubmitting: false,
 });
 
 const emit = defineEmits<{
