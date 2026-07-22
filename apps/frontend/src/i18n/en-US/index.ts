@@ -367,10 +367,25 @@ export default {
   },
   home: {
     bannerEmpty: 'No banner yet',
+    candidateActivity: {
+      title: 'Your next steps',
+      payNow: 'Pay now',
+      viewDetails: 'View details',
+      viewCandidateCard: 'View candidate card',
+      viewAll: 'View all',
+      paymentDeadline: 'Pay within',
+      seat: 'Seat',
+      badges: {
+        unpaid: 'Payment due',
+        upcoming: 'Upcoming exam',
+        seatReady: 'Ready for exam',
+      },
+    },
     availableRoundsTitle: 'Available Exam Rounds',
     availableRounds: {
       noData: 'No exam rounds found',
       errorFetch: 'Error fetching exam rounds',
+      today: 'Today',
       table: {
         columns: {
           round: 'Round',
@@ -1240,8 +1255,7 @@ export default {
     },
     paymentImportTestExport: {
       pageTitle: 'Export Test Payment CSV',
-      pageSubtitle:
-        'Generate a CSV file compatible with payment import for testing',
+      pageSubtitle: 'Generate a CSV file compatible with payment import for testing',
       examSelectLabel: 'Select exam round with registration fee',
       exportButton: 'Export CSV',
       previewCount: '{count} rows ready to export',

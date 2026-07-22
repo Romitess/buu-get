@@ -411,10 +411,25 @@ export default {
   },
   home: {
     bannerEmpty: 'ยังไม่มีแบนเนอร์',
+    candidateActivity: {
+      title: 'กิจกรรมที่ต้องทำ',
+      payNow: 'ชำระเงิน',
+      viewDetails: 'ดูรายละเอียด',
+      viewCandidateCard: 'ดูบัตรเข้าสอบ',
+      viewAll: 'ดูทั้งหมด',
+      paymentDeadline: 'ชำระภายใน',
+      seat: 'ที่นั่ง',
+      badges: {
+        unpaid: 'ค้างชำระ',
+        upcoming: 'ใกล้วันสอบ',
+        seatReady: 'พร้อมเข้าสอบ',
+      },
+    },
     availableRoundsTitle: 'ตารางสอบที่มีที่นั่งว่าง',
     availableRounds: {
       noData: 'ไม่พบข้อมูลตารางสอบ',
       errorFetch: 'เกิดข้อผิดพลาดในการดึงข้อมูล',
+      today: 'วันนี้',
       table: {
         columns: {
           round: 'รอบที่',
@@ -866,8 +881,7 @@ export default {
     },
     paymentImportTestExport: {
       pageTitle: 'Export CSV ทดสอบการนำเข้า',
-      pageSubtitle:
-        'สร้างไฟล์ CSV สำหรับทดสอบนำเข้าการชำระเงิน โดยคอลัมน์ตรงกับระบบนำเข้า',
+      pageSubtitle: 'สร้างไฟล์ CSV สำหรับทดสอบนำเข้าการชำระเงิน โดยคอลัมน์ตรงกับระบบนำเข้า',
       examSelectLabel: 'เลือกรอบสอบที่มีค่าธรรมเนียม',
       exportButton: 'Export CSV',
       previewCount: 'พร้อม export {count} รายการ',

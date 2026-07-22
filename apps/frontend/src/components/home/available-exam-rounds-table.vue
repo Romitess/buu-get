@@ -52,8 +52,7 @@
       <!-- Registration Duration Column -->
       <template v-slot:body-cell-regDuration="{ row }">
         <div class="text-center">
-          {{ calcDaysDiff(row.regStartDate, row.regEndDate) }}
-          {{ $t('common.day', calcDaysDiff(row.regStartDate, row.regEndDate)) }}
+          {{ formatRegDuration(row.regStartDate, row.regEndDate) }}
         </div>
       </template>
 
@@ -114,6 +113,14 @@ const emit = defineEmits<{
 const router = useRouter();
 const { t } = useI18n();
 const { formatDateShort, formatDateRange, calcDaysDiff } = useAppDate();
+
+const formatRegDuration = (regStartDate: string, regEndDate: string): string => {
+  const days = calcDaysDiff(regStartDate, regEndDate);
+  if (days === 0) {
+    return t('home.availableRounds.today');
+  }
+  return `${days} ${t('common.day', days)}`;
+};
 const { filteredRounds, isLoading, error, fetchAvailableRounds } = useAvailableExamRounds();
 
 // Pagination state

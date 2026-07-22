@@ -3,12 +3,14 @@
     <!-- Top Carousel Branding -->
     <div class="q-pt-lg q-pb-none">
       <div class="container">
-        <InfoCarousel
-          :preview-mode="true"
-          :preview-banners="banners"
-          :loading="isLoading"
-        />
+        <InfoCarousel :preview-mode="true" :preview-banners="banners" :loading="isLoading" />
       </div>
+    </div>
+    <!-- Candidate actionable activities (logged-in candidates only) -->
+    <div class="container">
+      <ScrollReveal>
+        <CandidateActivitySection />
+      </ScrollReveal>
     </div>
     <!-- Available Exam Rounds Table -->
     <div class="container">
@@ -34,6 +36,7 @@ import { ref, onMounted } from 'vue';
 import InfoCarousel from 'src/components/home/carousel/info-carousel.vue';
 import HomeMainContent from 'src/components/home/home-main-content.vue';
 import AvailableExamRoundsTable from 'src/components/home/available-exam-rounds-table.vue';
+import CandidateActivitySection from 'src/components/home/candidate-activity-section.vue';
 import ScrollReveal from 'src/components/base/scroll-reveal.vue';
 import { getHomepage } from 'src/services/page-builder.service';
 import { PageSectionType } from 'src/types/page-builder.types';
