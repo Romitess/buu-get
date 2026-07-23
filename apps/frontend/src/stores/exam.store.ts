@@ -1,6 +1,5 @@
-import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { defineStore, acceptHMRUpdate } from 'pinia';
+import { ref, computed, unref } from 'vue';
 import type { ExamRound, ExamInfo, ExamHistoryItem, DayData, ExamEnrollment } from 'src/types/exam';
 import type { ExamSchedule } from 'src/types/exam.types';
 import type { ReceiptInformation } from 'src/types/receipt-information';
@@ -38,9 +37,11 @@ import {
   type ExamCalendarAvailability,
 } from 'src/utils/exam-registration';
 import { useUserStore } from 'src/stores/user.store';
+import { i18n as appI18n } from 'src/boot/i18n';
 
 export const useExamStore = defineStore('exam', () => {
-  const i18n = useI18n();
+  // ใช้ global composer — อย่าใช้ useI18n() ใน store (login/async อยู่นอก setup)
+  const i18n = appI18n.global;
   const selectedDate = ref<string>(new Date().toISOString().split('T')[0] || '');
   const scheduleData = ref<Record<string, DayData>>({});
   const cancellationReasonStorageKey = 'exam_cancellation_reasons';
@@ -148,7 +149,7 @@ export const useExamStore = defineStore('exam', () => {
     const months = getMonthNames();
     const monthName = months[date.getMonth()] || '';
 
-    if (i18n.locale.value?.startsWith('en')) {
+    if (String(unref(i18n.locale)).startsWith('en')) {
       return `${date.getDate()} ${monthName} ${date.getFullYear()}`;
     }
     const buddhistYear = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
@@ -318,7 +319,7 @@ export const useExamStore = defineStore('exam', () => {
           const date = exam?.EXAM_DATE ? new Date(exam.EXAM_DATE) : new Date();
           const months = getMonthNames();
           const monthName = months[date.getMonth()] || '';
-          const year = i18n.locale.value?.startsWith('en')
+          const year = String(unref(i18n.locale)).startsWith('en')
             ? date.getFullYear()
             : date.getFullYear() + BUDDHIST_YEAR_OFFSET;
           const formattedDate = `${date.getDate()} ${monthName} ${year}`;
@@ -598,3 +599,7 @@ export const useExamStore = defineStore('exam', () => {
     resetExamUserState,
   };
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useExamStore, import.meta.hot));
+}

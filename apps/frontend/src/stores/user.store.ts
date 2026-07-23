@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia';
+import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed } from 'vue';
 import type { User, UserRole } from 'src/types/user';
 import * as userService from 'src/services/user.service';
@@ -61,7 +61,13 @@ export const useUserStore = defineStore('user', () => {
       import('src/stores/exam.store'),
       import('src/services/exam.service'),
     ]);
-    useExamStore().resetExamUserState();
+    // HMR โดยไม่มี acceptHMRUpdate อาจเหลือ exam store instance เก่าที่ยังไม่มี action ใหม่
+    let examStore = useExamStore();
+    if (typeof examStore.resetExamUserState !== 'function') {
+      examStore.$dispose();
+      examStore = useExamStore();
+    }
+    examStore.resetExamUserState();
     invalidateExamCache();
   }
 
@@ -200,3 +206,7 @@ export const useUserStore = defineStore('user', () => {
     logout,
   };
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useUserStore, import.meta.hot));
+}
