@@ -317,7 +317,6 @@ export interface BackendExam {
     FS_ID: number;
     FS_NAME: string;
     FS_ACCOUNT_CODE: string;
-    FS_FACULTY?: string;
   };
   SESSIONS: BackendSession[];
   PASSCODES?: BackendPasscode[];

@@ -119,6 +119,7 @@ export default {
       tableDescLabel: 'รายการ',
       tableDescShort: 'Description',
       tableAmount: 'จำนวนเงิน/บาท',
+      itemDescription: 'ค่าสมัครทดสอบความรู้ภาษาอังกฤษ BUU-GET',
       totalLabel: 'รวมเงิน (total)',
       verifyUrl: 'URL ตรวจสอบใบเสร็จอิเล็กทรอนิกส์ E-receipt verification URL',
       notes: 'หมายเหตุ :',
@@ -821,7 +822,6 @@ export default {
       table: {
         columns: {
           index: 'Index',
-          faculty: 'Faculty/Department',
           accountCode: 'Fund Source Code',
           name: 'Fund Source Name',
           status: 'Status',
@@ -840,7 +840,6 @@ export default {
       createDialog: {
         title: 'Create Fund Source',
         labels: {
-          faculty: 'Faculty/Department',
           name: 'Fund Source Name',
           accountCode: 'Fund Source Code',
           status: 'Status',
@@ -854,7 +853,6 @@ export default {
           save: 'Save',
         },
         validation: {
-          faculty: 'Faculty/Department is required',
           name: 'Fund source name is required',
           accountCode: 'Fund source code is required',
         },
@@ -1011,7 +1009,6 @@ export default {
         all: 'All',
         startDate: 'Start Date',
         endDate: 'End Date',
-        department: 'Department',
         examName: 'Exam Name',
         receiptNo: 'Receipt Number',
         payer: 'Payer Name',
@@ -1028,7 +1025,6 @@ export default {
         totalLabel: 'Total',
         columns: {
           index: 'No.',
-          department: 'Department',
           examName: 'Exam Name',
           amount: 'Amount',
         },
@@ -1375,6 +1371,11 @@ export default {
       next: 'Next',
       finish: 'Finish',
       restartLabel: 'Restart guided tour',
+      offerTitle: 'Would you like a guided tour?',
+      offerBody:
+        'We will walk you through the key steps of the exam simulation. You can restart anytime later from the ? button.',
+      offerAccept: 'Start tour',
+      offerDecline: 'Skip for now',
     },
   },
   navigation: {

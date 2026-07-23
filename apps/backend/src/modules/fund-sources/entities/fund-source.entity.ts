@@ -12,9 +12,6 @@ export class FundSource {
   @PrimaryGeneratedColumn({ name: 'FS_ID', comment: 'รหัสแหล่งทุน' })
   FS_ID: number;
 
-  @Column({ name: 'FS_FACULTY', type: 'varchar', length: 50, comment: 'คณะ' })
-  FS_FACULTY: string;
-
   @Column({
     name: 'FS_ACCOUNT_CODE',
     type: 'varchar',

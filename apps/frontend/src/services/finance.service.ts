@@ -2,7 +2,6 @@ import { api } from 'src/boot/axios';
 import type { FundSource } from 'src/types/finance.type';
 
 export interface CreateFundSourcePayload {
-  FS_FACULTY: string;
   FS_ACCOUNT_CODE: string;
   FS_NAME: string;
   FS_OPEN_STATUS?: boolean;

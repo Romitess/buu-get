@@ -1,4 +1,4 @@
-export const EXAM_SIMULATION_TOUR_VERSION = 14;
+export const EXAM_SIMULATION_TOUR_VERSION = 15;
 
 export type TourPlacement = 'left' | 'right' | 'top' | 'bottom';
 

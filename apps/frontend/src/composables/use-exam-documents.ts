@@ -326,7 +326,7 @@ export function useExamDocuments() {
           enrollment.USER?.PROFILE?.userAddress ||
           user?.address ||
           '169 Longhad Bangsaen Rd, Saen Suk, Chon Buri 20131',
-        examName: examObj?.EXAM_NAME || "BUU-GET : Burapha University's Graduate English Test",
+        examName: t('exam.card.itemDescription'),
         examDate: dateStr,
         location: locationText,
         amount: Number(transaction?.TRANX_AMOUNT ?? examObj?.EXAM_FEE ?? 0),

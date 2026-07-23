@@ -120,6 +120,7 @@ export default {
       tableDescLabel: 'รายการ',
       tableDescShort: 'Description',
       tableAmount: 'จำนวนเงิน/บาท',
+      itemDescription: 'ค่าสมัครทดสอบความรู้ภาษาอังกฤษ BUU-GET',
       totalLabel: 'รวมเงิน (total)',
       verifyUrl: 'URL ตรวจสอบใบเสร็จอิเล็กทรอนิกส์ E-receipt verification URL',
       notes: 'หมายเหตุ :',
@@ -152,6 +153,7 @@ export default {
         tableDescLabel: 'รายการ',
         tableDescShort: 'Description',
         tableAmount: 'จำนวนเงิน/บาท',
+        itemDescription: 'ค่าสมัครทดสอบความรู้ภาษาอังกฤษ BUU-GET',
         totalLabel: 'รวมเงิน (total)',
         verifyUrl: 'URL ตรวจสอบใบเสร็จอิเล็กทรอนิกส์ E-receipt verification URL',
         notes: 'หมายเหตุ :',
@@ -956,7 +958,6 @@ export default {
       table: {
         columns: {
           index: 'ลำดับ',
-          faculty: 'คณะ/ส่วนงาน',
           accountCode: 'รหัสผังแหล่งเงิน',
           name: 'ชื่อผังแหล่งเงิน',
           status: 'สถานะ',
@@ -975,7 +976,6 @@ export default {
       createDialog: {
         title: 'สร้างผังแหล่งเงิน',
         labels: {
-          faculty: 'คณะ/หน่วยงาน',
           name: 'ชื่อผังแหล่งเงิน',
           accountCode: 'รหัสผังแหล่งเงิน',
           status: 'สถานะ',
@@ -989,7 +989,6 @@ export default {
           save: 'บันทึก',
         },
         validation: {
-          faculty: 'กรุณาระบุคณะ/หน่วยงาน',
           name: 'กรุณาระบุชื่อผังแหล่งเงิน',
           accountCode: 'กรุณาระบุรหัสผังแหล่งเงิน',
         },
@@ -1147,7 +1146,6 @@ export default {
         all: 'ทั้งหมด',
         startDate: 'วันที่เริ่มต้น',
         endDate: 'ถึงวันที่',
-        department: 'ส่วนงาน',
         examName: 'ชื่อการสอบ',
         receiptNo: 'เลขที่ใบเสร็จ',
         payer: 'ชื่อผู้ชำระเงิน',
@@ -1164,7 +1162,6 @@ export default {
         totalLabel: 'รวม',
         columns: {
           index: 'ลำดับ',
-          department: 'คณะ/ส่วนงาน',
           examName: 'ชื่อการสอบ',
           amount: 'จำนวนเงิน',
         },
@@ -1461,6 +1458,11 @@ export default {
       next: 'ต่อไป',
       finish: 'เสร็จสิ้น',
       restartLabel: 'เริ่มคำแนะนำการใช้งานใหม่',
+      offerTitle: 'ต้องการคำแนะนำการใช้งานไหม?',
+      offerBody:
+        'เราจะพาคุณดูขั้นตอนสำคัญของการจำลองสอบทีละขั้น หากไม่ต้องการตอนนี้ สามารถเริ่มใหม่ได้ทุกเมื่อจากปุ่ม ?',
+      offerAccept: 'เริ่มคำแนะนำ',
+      offerDecline: 'ข้ามไปก่อน',
     },
   },
   navigation: {

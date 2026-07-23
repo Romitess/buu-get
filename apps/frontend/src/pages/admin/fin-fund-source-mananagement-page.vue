@@ -59,9 +59,6 @@
         </div>
       </template>
 
-      <template #body-cell-faculty="{ value }">
-        <div class="cell-inner-padding">{{ value }}</div>
-      </template>
       <template #body-cell-name="{ value }">
         <div class="cell-inner-padding">{{ value }}</div>
       </template>
@@ -86,21 +83,6 @@
         <q-card-section class="dialog-body">
           <q-form @submit.prevent="handleCreateFundSource">
             <div class="dialog-fields">
-              <div class="dialog-field-row">
-                <label class="dialog-label">
-                  {{ t('admin.fundSourceManagement.createDialog.labels.faculty') }}
-                  <span class="required-star">*</span>
-                </label>
-                <q-input
-                  outlined
-                  v-model="createForm.FS_FACULTY"
-                  :error="!!formErrors.FS_FACULTY"
-                  :error-message="formErrors.FS_FACULTY"
-                  class="dialog-input"
-                  dense
-                />
-              </div>
-
               <div class="dialog-field-row">
                 <label class="dialog-label">
                   {{ t('admin.fundSourceManagement.createDialog.labels.name') }}
@@ -210,7 +192,6 @@ const isEditMode = ref(false);
 const editingFundSourceId = ref<number | null>(null);
 const isSaving = ref(false);
 const createForm = ref<CreateFundSourcePayload>({
-  FS_FACULTY: '',
   FS_ACCOUNT_CODE: '',
   FS_NAME: '',
   FS_OPEN_STATUS: true,
@@ -234,13 +215,6 @@ const columns = computed<QTableColumn[]>(() => [
     label: t('admin.fundSourceManagement.table.columns.index'),
     field: 'index',
     align: 'center',
-  },
-  {
-    name: 'faculty',
-    label: t('admin.fundSourceManagement.table.columns.faculty'),
-    field: 'FS_FACULTY',
-    align: 'left',
-    format: (val: string | null | undefined) => val || '-',
   },
   {
     name: 'accountCode',
@@ -289,7 +263,6 @@ const filteredFundSources = computed(() => {
   const query = searchQuery.value.toLowerCase();
   return all.filter(
     (fundSource) =>
-      fundSource.FS_FACULTY.toLowerCase().includes(query) ||
       fundSource.FS_ACCOUNT_CODE.toLowerCase().includes(query) ||
       fundSource.FS_NAME.toLowerCase().includes(query),
   );
@@ -316,7 +289,6 @@ const resetCreateForm = () => {
   isEditMode.value = false;
   editingFundSourceId.value = null;
   createForm.value = {
-    FS_FACULTY: '',
     FS_ACCOUNT_CODE: '',
     FS_NAME: '',
     FS_OPEN_STATUS: true,
@@ -333,7 +305,6 @@ const openEditDialog = (fundSource: FundSource) => {
   isEditMode.value = true;
   editingFundSourceId.value = fundSource.FS_ID;
   createForm.value = {
-    FS_FACULTY: fundSource.FS_FACULTY,
     FS_ACCOUNT_CODE: fundSource.FS_ACCOUNT_CODE,
     FS_NAME: fundSource.FS_NAME,
     FS_OPEN_STATUS: fundSource.FS_OPEN_STATUS ?? true,
@@ -350,9 +321,6 @@ const closeCreateDialog = () => {
 const validateCreateForm = (): boolean => {
   const errors: Partial<Record<keyof CreateFundSourcePayload, string>> = {};
 
-  if (!createForm.value.FS_FACULTY?.trim()) {
-    errors.FS_FACULTY = t('admin.fundSourceManagement.createDialog.validation.faculty');
-  }
   if (!createForm.value.FS_NAME?.trim()) {
     errors.FS_NAME = t('admin.fundSourceManagement.createDialog.validation.name');
   }

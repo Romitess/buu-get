@@ -8,12 +8,6 @@ import {
 } from 'class-validator';
 
 export class CreateFundSourceDto {
-  @ApiProperty({ description: 'คณะ', maxLength: 50, example: 'คณะวิทยาศาสตร์' })
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(50)
-  FS_FACULTY: string;
-
   @ApiProperty({ description: 'รหัสบัญชี', maxLength: 50, example: 'ACC-001' })
   @IsString()
   @IsNotEmpty()

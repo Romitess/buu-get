@@ -66,17 +66,6 @@ export class FundSourcesController {
     return this.fundSourcesService.getDailyRevenue(query);
   }
 
-  @Get('departments')
-  @Roles(...FINANCE_ROLES)
-  @ApiOperation({ summary: 'ดึงข้อมูลส่วนงานทั้งหมดสำหรับใช้ทำฟิลเตอร์' })
-  @ApiResponse({
-    status: 200,
-    description: 'ข้อมูลส่วนงานทั้งหมด',
-  })
-  getDepartments(): Promise<{ label: string; value: string }[]> {
-    return this.fundSourcesService.getDepartments();
-  }
-
   @Get(':id')
   @Roles(...FUND_SOURCE_READ_ROLES)
   @ApiOperation({ summary: 'ดึงข้อมูลแหล่งทุนด้วย ID' })

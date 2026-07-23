@@ -10,12 +10,7 @@
     />
 
     <!-- Filter Bar Component -->
-    <DailyRevenueFilter
-      :filter="filter"
-      :department-options="departmentOptions"
-      mode="compact"
-      @filter-change="applyFilter"
-    />
+    <DailyRevenueFilter :filter="filter" mode="compact" @filter-change="applyFilter" />
 
     <!-- Revenue Table -->
     <div class="daily-revenue-table-wrapper">
@@ -54,17 +49,8 @@ import type { PaginationModel } from 'src/types/exam.types';
 const $q = useQuasar();
 const { t } = useI18n();
 
-const {
-  rows,
-  isLoading,
-  error,
-  filter,
-  formattedTotal,
-  departmentOptions,
-  fetchData,
-  loadDepartmentOptions,
-  applyFilter,
-} = useDailyRevenue();
+const { rows, isLoading, error, filter, formattedTotal, fetchData, applyFilter } =
+  useDailyRevenue();
 
 const formatAmount = (value: unknown): string => {
   const amount = Number(value);
@@ -88,13 +74,6 @@ const columns = computed<QTableColumn[]>(() => [
     field: 'index',
     align: 'center',
     style: 'width: 80px',
-  },
-  {
-    name: 'department',
-    label: t('admin.dailyRevenueReport.table.columns.department'),
-    field: 'department',
-    align: 'center',
-    style: 'width: 360px',
   },
   {
     name: 'examName',
@@ -128,7 +107,6 @@ watch(error, (newVal) => {
 
 // Initial load
 onMounted(() => {
-  void loadDepartmentOptions();
   void fetchData();
 });
 </script>

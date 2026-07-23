@@ -138,6 +138,17 @@
       </transition>
     </div>
 
+    <ExamSimulationTourOfferDialog
+      :model-value="showTourOffer"
+      :title="t('examSimulation.tour.offerTitle')"
+      :message="t('examSimulation.tour.offerBody')"
+      :accept-label="t('examSimulation.tour.offerAccept')"
+      :decline-label="t('examSimulation.tour.offerDecline')"
+      @update:model-value="onTourOfferModelUpdate"
+      @accept="onTourOfferAccept"
+      @decline="onTourOfferDecline"
+    />
+
     <ProductTourOverlay
       :visible="isTourActive"
       :target-rect="tourTargetRect"
@@ -154,11 +165,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import MoodleMockupDashboard from 'src/components/exam-simulation/moodle-mockup-dashboard.vue';
+import ExamSimulationTourOfferDialog from 'src/components/exam-simulation/exam-simulation-tour-offer-dialog.vue';
 import ProductTourOverlay from 'src/components/base/product-tour/product-tour-overlay.vue';
 import { useExamSimulationTour } from 'src/composables/use-exam-simulation-tour';
 import type { DashboardViewType } from 'src/composables/exam-simulation-tour-steps';
@@ -192,6 +204,9 @@ const {
   nextLabel: tourNextLabel,
   placement: tourPlacement,
   isLastStep: tourIsLastStep,
+  showTourOffer,
+  startTour,
+  skipTour,
   restartTour,
   goToNextStep: goToNextTourStep,
   maybeAutoStart,
@@ -205,6 +220,27 @@ const {
 
 const onLoginViewMounted = (): void => {
   void maybeAutoStart();
+};
+
+onMounted(() => {
+  if (!isLoggedIn.value) {
+    void maybeAutoStart();
+  }
+});
+
+const onTourOfferModelUpdate = (value: boolean): void => {
+  showTourOffer.value = value;
+};
+
+const onTourOfferAccept = async (): Promise<void> => {
+  showTourOffer.value = false;
+  await nextTick();
+  await startTour();
+};
+
+const onTourOfferDecline = (): void => {
+  showTourOffer.value = false;
+  skipTour();
 };
 
 const onTourDashboardReady = (): void => {
