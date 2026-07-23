@@ -693,9 +693,13 @@ export function useExamSeatManagement() {
         })
       : [...sourceList];
 
-    // Sort by seat reading order (A1, A2, … B1 …) so the list lines up with the
-    // seat map on the right; unassigned students fall to the bottom.
+    // Unassigned first (easier to drag onto the map), then seat reading order
+    // (A1, A2, … B1 …) so assigned rows still line up with the map.
     return list.sort((a, b) => {
+      const aHasSeat = Boolean(a.seat);
+      const bHasSeat = Boolean(b.seat);
+      if (aHasSeat !== bHasSeat) return aHasSeat ? 1 : -1;
+
       const seatDiff = getSeatOrderKey(a) - getSeatOrderKey(b);
       if (seatDiff !== 0) return seatDiff;
       return a.name.localeCompare(b.name, 'th');
