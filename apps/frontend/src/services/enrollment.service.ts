@@ -57,6 +57,8 @@ export const fetchEnrollmentsByExamId = async (
       nationalId: enrollment.USER?.USER_NATIONAL_ID || '-',
       titleTh: enrollment.USER?.PROFILE?.userTitleTh || '-',
       fullnameTh: enrollment.USER?.PROFILE?.userFullnameTh || '-',
+      email: enrollment.USER?.USER_EMAIL?.trim() || '-',
+      phone: enrollment.USER?.PROFILE?.userPhone?.trim() || '-',
       paymentStatus: enrollment.ERM_STATUS,
       verifyStatus: enrollment.ERM_VERIFY_STATUS,
       sessionId: enrollment.SESSION_ID,

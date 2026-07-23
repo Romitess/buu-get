@@ -117,6 +117,8 @@ export interface EnrollmentTableRow {
   nationalId: string;
   titleTh: string;
   fullnameTh: string;
+  email: string;
+  phone: string;
   paymentStatus: number;
   verifyStatus: number;
   sessionId: number;

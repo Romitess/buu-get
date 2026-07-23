@@ -702,6 +702,8 @@ export default {
           nationalId: 'National ID',
           prefix: 'Prefix',
           fullName: 'Full Name',
+          email: 'Email',
+          phone: 'Phone',
           remark: 'Remarks',
           paymentStatus: 'Payment Status',
           verifyStatus: 'Verification Status',

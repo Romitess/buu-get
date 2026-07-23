@@ -588,6 +588,8 @@ const scoreRows = computed(() => {
       titleTh: profile?.userTitleTh || profile?.userTitleEn || '-',
       fullnameTh:
         profile?.userFullnameTh || profile?.userFullnameEn || enrollment.USER?.USER_EMAIL || '-',
+      email: enrollment.USER?.USER_EMAIL?.trim() || '-',
+      phone: profile?.userPhone?.trim() || '-',
       paymentStatus: enrollment.ERM_STATUS,
       verifyStatus: enrollment.ERM_VERIFY_STATUS,
       sessionId: enrollment.SESSION_ID,

@@ -717,6 +717,9 @@ export class ExamEnrollmentsService {
             })
             .orWhere('profile.userTitleEn LIKE :searchPattern', {
               searchPattern: `%${resolvedQuery.search}%`,
+            })
+            .orWhere('profile.userPhone LIKE :searchPattern', {
+              searchPattern: `%${resolvedQuery.search}%`,
             });
 
           if (statusMatches.length > 0) {
@@ -801,6 +804,9 @@ export class ExamEnrollmentsService {
               searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('profile.userTitleEn LIKE :searchPattern', {
+              searchPattern: `%${resolvedQuery.search}%`,
+            })
+            .orWhere('profile.userPhone LIKE :searchPattern', {
               searchPattern: `%${resolvedQuery.search}%`,
             });
 

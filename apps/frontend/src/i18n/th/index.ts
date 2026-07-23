@@ -746,6 +746,8 @@ export default {
           nationalId: 'เลขประจำตัว',
           prefix: 'คำนำหน้า',
           fullName: 'ชื่อ-นามสกุล',
+          email: 'อีเมล',
+          phone: 'เบอร์โทร',
           remark: 'หมายเหตุ',
           paymentStatus: 'สถานะ',
           verifyStatus: 'สถานะความถูกต้อง',
