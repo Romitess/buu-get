@@ -9,6 +9,8 @@ export interface LoginResponse {
     email: string;
     role: string;
     roles: string[];
+    /** จาก PROFILE — ใช้ redirect หลัง login โดยไม่ต้องเรียก GET /auth/me ซ้ำ */
+    remark?: string | null;
   };
 }
 
@@ -168,8 +170,8 @@ export async function searchUsers(params: SearchUsersParams = {}): Promise<Pagin
     return {
       users: usersData.map(mapBackendUserToFrontendUser),
       total: meta?.total ?? usersData.length,
-      page: meta?.page ?? (params.page ?? 1),
-      limit: meta?.limit ?? (params.limit ?? 10),
+      page: meta?.page ?? params.page ?? 1,
+      limit: meta?.limit ?? params.limit ?? 10,
       totalPages: meta?.totalPages ?? 0,
     };
   } catch (err) {

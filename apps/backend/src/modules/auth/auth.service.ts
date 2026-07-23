@@ -31,6 +31,8 @@ export interface LoginResponse {
     email: string;
     role: string;
     roles: string[];
+    /** จาก PROFILE — ใช้ redirect หลัง login โดยไม่ต้องเรียก GET /auth/me ซ้ำ */
+    remark?: string | null;
   };
 }
 
@@ -163,6 +165,7 @@ export class AuthService {
         email: user.USER_EMAIL,
         role: role,
         roles: roles,
+        remark: user.PROFILE?.userRemark ?? null,
       },
     };
   }

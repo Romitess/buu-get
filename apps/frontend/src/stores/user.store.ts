@@ -89,6 +89,7 @@ export const useUserStore = defineStore('user', () => {
 
   /**
    * ฟังก์ชัน Login แบบ Async ต่อ Backend จริง
+   * Hydrate จาก login response โดยตรง — ไม่เรียก initialize()/GET /auth/me ซ้ำ
    */
   async function login(email: string, password?: string): Promise<boolean> {
     error.value = null;
@@ -110,10 +111,10 @@ export const useUserStore = defineStore('user', () => {
           role: roles[0],
           roles,
           id: result.user.id,
+          remark: result.user.remark ?? '',
         } as User;
 
         isLoggedIn.value = true;
-        await initialize();
         return true;
       }
       error.value = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';

@@ -130,6 +130,9 @@ const isLoading = ref(false);
 
 onMounted(() => {
   userType.value = locale.value === 'th' ? 'thai' : 'foreigner';
+  // Prefetch destination chunks ที่ใช้บ่อยหลัง login เพื่อลด cold-chunk spike
+  void import('pages/user/exam-schedule-page.vue');
+  void import('pages/admin/exam-management-page.vue');
 });
 
 const toggleUserType = (type: 'thai' | 'foreigner') => {
@@ -151,6 +154,9 @@ const onSubmit = async () => {
     const success = await userStore.login(email.value, password.value);
 
     if (success) {
+      // ปลด spinner ก่อน navigate เพื่อไม่ให้ lazy chunk รวมในปุ่ม loading
+      isLoading.value = false;
+
       $q.notify({
         type: 'positive',
         message: t('auth.notify.success'),
@@ -164,7 +170,6 @@ const onSubmit = async () => {
 
       // Role-based redirection
       const role = userStore.userRole;
-      console.log('Login successful. User Role:', role);
 
       if (role === ROLES.CANDIDATE && userStore.currentUser?.remark) {
         await router.push({ name: 'user-profile', query: { from: 'email' } });
