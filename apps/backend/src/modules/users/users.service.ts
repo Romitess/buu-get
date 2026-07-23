@@ -16,9 +16,7 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UsersQueryDto } from './dto/users-query.dto';
-import {
-  UserIdentifierCheckResultDto,
-} from './dto/check-user-identifiers.dto';
+import { UserIdentifierCheckResultDto } from './dto/check-user-identifiers.dto';
 import { User } from './entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
 import { UserProfileService } from '../user-profile/user-profile.service';

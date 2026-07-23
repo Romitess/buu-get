@@ -183,6 +183,20 @@ const sanitizeFullName = (value: string | number | null): void => {
   form.fullName = String(value ?? '').replace(/[^\p{L}\p{M}\s'-]/gu, '');
 };
 
+const sanitizePrefill = (value: ReceiptInformation): ReceiptInformation => {
+  const taxIdRaw = String(value.taxId ?? '').trim();
+  const fullNameRaw = String(value.fullName ?? '').trim();
+  const phoneRaw = String(value.phone ?? '').trim();
+  const addressRaw = String(value.address ?? '').trim();
+
+  return {
+    taxId: props.isForeignUser ? taxIdRaw : taxIdRaw.replace(/\D/g, '').slice(0, 13),
+    fullName: fullNameRaw.replace(/[^\p{L}\p{M}\s'-]/gu, ''),
+    phone: phoneRaw.replace(/\D/g, '').slice(0, 10),
+    address: addressRaw,
+  };
+};
+
 const formattedAmount = computed(() => {
   const currency = t('exam.history.receiptForm.currency');
   return `${props.amount.toLocaleString(locale.value, {
@@ -194,7 +208,7 @@ const formattedAmount = computed(() => {
 watch(
   () => props.modelValue,
   (isOpen) => {
-    if (isOpen) Object.assign(form, emptyForm());
+    if (isOpen) Object.assign(form, sanitizePrefill(props.initialValue));
   },
 );
 

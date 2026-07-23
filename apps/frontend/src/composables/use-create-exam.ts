@@ -259,6 +259,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const fundSourceOptions = ref<{ label: string; value: number }[]>([]);
   const allExams = ref<BackendExam[]>([]);
   const isLoadingData = ref(false);
+  const isSaving = ref(false);
   const isImportingCandidates = ref(false);
   const error = ref<string | null>(null);
 
@@ -401,9 +402,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       .filter((key) => key.length > 0),
   );
 
-  const hasEligibleCandidates = computed<boolean>(
-    () => form.value.eligibleCandidates.length > 0,
-  );
+  const hasEligibleCandidates = computed<boolean>(() => form.value.eligibleCandidates.length > 0);
 
   // Helper to convert DD/MM/YYYY to numeric value for comparison
   const dateToCompareValue = (dateStr: string): number => {
@@ -743,19 +742,28 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     return changes;
   };
 
+  const loadOccupancyInBackground = (): void => {
+    void fetchAllExamsRaw()
+      .then((exams) => {
+        allExams.value = exams;
+      })
+      .catch((err) => {
+        console.error('Failed to load exam occupancy data:', err);
+      });
+  };
+
   const loadInitialData = async (): Promise<void> => {
     isLoadingData.value = true;
     error.value = null;
     try {
-      const [locations, fundSources, proctors, exams, editExam] = await Promise.all([
+      // Critical path: อย่ารอ GET /exam ทั้งก้อน — occupancy โหลด background หลังฟอร์มพร้อม
+      const [locations, fundSources, proctors, editExam] = await Promise.all([
         fetchExamLocations(),
         fetchFundSources(),
         getUsersFromApi(ROLES.PROCTOR),
-        fetchAllExamsRaw(),
         examId ? fetchExamWithSeats(examId) : Promise.resolve(null),
       ]);
       locationOptions.value = locations;
-      allExams.value = exams;
       const activeFundSources = fundSources.filter((fs: FundSource) => fs.FS_OPEN_STATUS !== false);
       fundSourceOptions.value = activeFundSources.map((fs: FundSource) => ({
         label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
@@ -955,6 +963,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       });
     } finally {
       isLoadingData.value = false;
+      // โหลด occupancy หลัง critical path เสร็จ — ไม่บล็อก TTI ของฟอร์ม
+      loadOccupancyInBackground();
     }
   };
 
@@ -1465,7 +1475,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   };
 
   const handleCancel = (): void => {
-    void router.push('/admin/exam-management');
+    void router.push({ name: 'admin-exam-management' });
   };
 
   /** Auto-formats a time string (e.g. "10" -> "10:00") and caps hour at 23 and minute at 59 */
@@ -1558,6 +1568,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    * @returns Promise<boolean> - true if saved successfully, false otherwise
    */
   const handleSave = async (): Promise<boolean> => {
+    if (isLoadingData.value || isSaving.value) {
+      return false;
+    }
+
     // ── Step 0: Required-field validation with scroll-to-error ──
     const isValid = validateForm();
     if (!isValid) {
@@ -1691,6 +1705,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       ...(r.sessionLocationSnapshot ? { sessionLocationSnapshot: r.sessionLocationSnapshot } : {}),
     }));
 
+    isSaving.value = true;
     try {
       let targetExamId = isEditMode.value ? examId : null;
       const combinedExamName = form.value.examName.trim();
@@ -1769,22 +1784,43 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         });
       }
 
+      // Passcode sync แยกจาก exam update — ถ้า fail ยังต้อง redirect เพราะรอบสอบบันทึกแล้ว
       if (
         targetExamId &&
         form.value.examType === EXAM_TYPE_SPECIAL &&
         form.value.eligibleCandidates.length > 0
       ) {
-        const passcodesPayload = form.value.eligibleCandidates.map((c) => ({
-          nationalId: c.nationalId ?? undefined,
-          passportNo: c.passportNo ?? undefined,
-          fullName: c.fullName ?? undefined,
-          fullNameEn: c.fullNameEn ?? undefined,
-          passcode: c.passcode,
-        }));
-        await createExamPasscodes(targetExamId, passcodesPayload);
+        try {
+          const passcodesPayload = form.value.eligibleCandidates.map((c) => ({
+            nationalId: c.nationalId ?? undefined,
+            passportNo: c.passportNo ?? undefined,
+            fullName: c.fullName ?? undefined,
+            fullNameEn: c.fullNameEn ?? undefined,
+            passcode: c.passcode,
+          }));
+          await createExamPasscodes(targetExamId, passcodesPayload);
+        } catch (passcodeErr) {
+          console.error('Passcode save error:', passcodeErr);
+          const passcodeErrorObj = passcodeErr as {
+            response?: { data?: { message?: string | string[] } };
+            message?: string;
+          };
+          const passcodeBackendMsg = passcodeErrorObj.response?.data?.message;
+          const passcodeDetailedMsg = Array.isArray(passcodeBackendMsg)
+            ? passcodeBackendMsg.join(', ')
+            : passcodeBackendMsg || passcodeErrorObj.message;
+          $q.notify({
+            type: 'warning',
+            message: passcodeDetailedMsg
+              ? `บันทึกรอบสอบสำเร็จ แต่บันทึกรหัสผ่านผู้มีสิทธิ์สอบไม่สำเร็จ: ${passcodeDetailedMsg}`
+              : 'บันทึกรอบสอบสำเร็จ แต่บันทึกรหัสผ่านผู้มีสิทธิ์สอบไม่สำเร็จ',
+            position: 'top',
+            timeout: 4000,
+          });
+        }
       }
 
-      void router.push('/admin/exam-management');
+      await router.push({ name: 'admin-exam-management' });
       return true;
     } catch (err) {
       console.error('Save error:', err);
@@ -1812,6 +1848,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         position: 'top',
       });
       return false;
+    } finally {
+      isSaving.value = false;
     }
   };
 
@@ -1824,6 +1862,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     fundSourceOptions,
     getOccupiedLocationIdsForSlot,
     isLoadingData,
+    isSaving,
     isImportingCandidates,
     error,
     isEditMode,

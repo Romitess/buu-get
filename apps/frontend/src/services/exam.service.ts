@@ -690,21 +690,12 @@ export const fetchFundSources = async (): Promise<FundSource[]> => {
 
 export const fetchExamLocations = async (): Promise<ExamLocationOption[]> => {
   try {
-    const response = await api.get<BackendLocation[]>('/exam-locations');
-    const locations = await Promise.all(
-      response.data.map(async (location) => {
-        try {
-          const detailResponse = await api.get<BackendLocation>(
-            `/exam-locations/${location.LOCATION_ID}`,
-          );
-          return detailResponse.data;
-        } catch {
-          return location;
-        }
-      }),
-    );
+    // ดึง list + seats ใน request เดียว (เลิก N+1 แบบ GET /exam-locations/:id)
+    const response = await api.get<BackendLocation[]>('/exam-locations', {
+      params: { includeSeats: true },
+    });
 
-    return locations.map((loc) => ({
+    return response.data.map((loc) => ({
       label: formatLocationWithRoom(loc.LOCATION_NAME, loc.LOCATION_ROOM_NO),
       value: loc.LOCATION_ID,
       raw: loc,
@@ -883,10 +874,7 @@ export const createEnrollment = async (
   }
 };
 
-export const validateExamPasscode = async (
-  sessionId: number,
-  passcode: string,
-): Promise<void> => {
+export const validateExamPasscode = async (sessionId: number, passcode: string): Promise<void> => {
   await api.post<{ valid: true }>('/exam-enrollments/validate-passcode', {
     SESSION_ID: sessionId,
     PASSCODE: passcode,
