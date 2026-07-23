@@ -141,9 +141,19 @@ export class ExamLocationsService {
     );
   }
 
-  async findAll(): Promise<ExamLocationResponse[]> {
+  async findAll(options?: {
+    includeSeats?: boolean;
+  }): Promise<ExamLocationResponse[]> {
+    const includeSeats = options?.includeSeats === true;
     const locations = await this.examLocationRepository.find({
       order: { LOCATION_ID: 'ASC' },
+      ...(includeSeats
+        ? {
+            relations: ['SEATS'],
+            // แยก query โหลด seats เพื่อเลี่ยง cartesian product เมื่อมีหลายห้อง
+            relationLoadStrategy: 'query' as const,
+          }
+        : {}),
     });
     return locations.map((location) => this.withResponseAliases(location));
   }

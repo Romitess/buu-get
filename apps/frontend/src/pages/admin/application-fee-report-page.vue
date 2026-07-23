@@ -10,12 +10,7 @@
     />
 
     <!-- Filter Bar Component -->
-    <DailyRevenueFilter
-      :filter="filter"
-      :department-options="departmentOptions"
-      mode="compact"
-      @filter-change="applyFilter"
-    />
+    <DailyRevenueFilter :filter="filter" mode="compact" @filter-change="applyFilter" />
 
     <div class="row items-center justify-between q-mb-lg">
       <div class="col-6">
@@ -95,8 +90,7 @@ import { useI18n } from 'vue-i18n';
 
 const $q = useQuasar();
 
-const { error, filter, departmentOptions, fetchData, loadDepartmentOptions, applyFilter } =
-  useDailyRevenue();
+const { error, filter, fetchData, applyFilter } = useDailyRevenue();
 
 const { isDownloadingReceipt, selectedReceiptData, printReceipt } = useExamDocuments();
 
@@ -267,15 +261,7 @@ const filteredReceipts = computed(() => {
     });
   }
 
-  // 2. Department Filter
-  if (filter.value.department) {
-    rows = rows.filter((r) => {
-      const dept = r.rawEnrollment.SESSION?.EXAM?.FUND_SOURCE?.FS_FACULTY;
-      return dept === filter.value.department;
-    });
-  }
-
-  // 3. Exam Name Filter
+  // Exam Name Filter
   if (filter.value.examName) {
     const searchExam = filter.value.examName.toLowerCase();
     rows = rows.filter((r) => {
@@ -464,7 +450,6 @@ watch(error, (newVal) => {
 
 // Initial load
 onMounted(() => {
-  void loadDepartmentOptions();
   void fetchData();
   void loadReceipts();
 });

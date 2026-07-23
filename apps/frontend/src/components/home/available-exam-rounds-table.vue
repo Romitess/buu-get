@@ -28,10 +28,13 @@
       hide-pagination
       @request="onTableRequest"
     >
-      <!-- Round Number Column -->
+      <!-- Exam Name + Round Column -->
       <template v-slot:body-cell-roundNumber="{ row }">
-        <div class="text-center text-weight-bold">
-          {{ row.roundNumber }}
+        <div class="exam-name-cell text-weight-bold">
+          <span class="exam-name-text">{{ row.roundNumber }}</span>
+          <q-tooltip v-if="row.roundNumber" :delay="400">
+            {{ row.roundNumber }}
+          </q-tooltip>
         </div>
       </template>
 
@@ -52,8 +55,7 @@
       <!-- Registration Duration Column -->
       <template v-slot:body-cell-regDuration="{ row }">
         <div class="text-center">
-          {{ calcDaysDiff(row.regStartDate, row.regEndDate) }}
-          {{ $t('common.day', calcDaysDiff(row.regStartDate, row.regEndDate)) }}
+          {{ formatRegDuration(row.regStartDate, row.regEndDate) }}
         </div>
       </template>
 
@@ -91,10 +93,10 @@ import { useAppDate } from 'src/composables/useAppDate';
 const EXAM_SCHEDULE_PATH = '/user/exam-schedule' as const;
 const DEFAULT_PAGE = 1 as const;
 const DEFAULT_ROWS_PER_PAGE = 4 as const;
-const COLUMN_ROUND_WIDTH = 'width: 12%' as const;
-const COLUMN_DATE_WIDTH = 'width: 18%' as const;
-const COLUMN_REG_PERIOD_WIDTH = 'width: 24%' as const;
-const COLUMN_REG_DURATION_WIDTH = 'width: 16%' as const;
+const COLUMN_ROUND_WIDTH = 'width: 24%' as const;
+const COLUMN_DATE_WIDTH = 'width: 16%' as const;
+const COLUMN_REG_PERIOD_WIDTH = 'width: 22%' as const;
+const COLUMN_REG_DURATION_WIDTH = 'width: 14%' as const;
 const COLUMN_ACTION_WIDTH = 'width: 16%' as const;
 
 interface Props {
@@ -114,6 +116,13 @@ const emit = defineEmits<{
 const router = useRouter();
 const { t } = useI18n();
 const { formatDateShort, formatDateRange, calcDaysDiff } = useAppDate();
+
+const formatRegDuration = (regStartDate: string, regEndDate: string): string => {
+  if (!regStartDate || !regEndDate) return '-';
+  // Inclusive day count: same-day window = 1 day
+  const days = calcDaysDiff(regStartDate, regEndDate) + 1;
+  return `${days} ${t('common.day', days)}`;
+};
 const { filteredRounds, isLoading, error, fetchAvailableRounds } = useAvailableExamRounds();
 
 // Pagination state
@@ -127,9 +136,9 @@ const pagination = computed(() => ({
 const columns = computed((): QTableColumn[] => [
   {
     name: 'roundNumber',
-    label: t('home.availableRounds.table.columns.round') ?? 'รอบที่',
+    label: t('home.availableRounds.table.columns.round') ?? 'ชื่อการสอบ',
     field: 'roundNumber',
-    align: 'center',
+    align: 'left',
     style: COLUMN_ROUND_WIDTH,
   },
   {
@@ -203,5 +212,17 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.exam-name-cell {
+  min-width: 0;
+  padding: 0 4px;
+}
+
+.exam-name-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

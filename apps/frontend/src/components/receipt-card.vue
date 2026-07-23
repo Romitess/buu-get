@@ -79,7 +79,7 @@
         <tbody>
           <tr class="data-row">
             <td class="text-center">1</td>
-            <td>{{ receipt.examName }}</td>
+            <td>{{ t('exam.card.itemDescription') }}</td>
             <td class="text-right">{{ formatCurrency(receipt.amount) }}</td>
           </tr>
           <!-- spacer pushes tfoot down — 3 cells รักษา border แต่ละ column -->

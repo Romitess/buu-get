@@ -107,6 +107,44 @@ export default {
       downloadError: 'เกิดข้อผิดพลาดในการสร้างไฟล์ดาวน์โหลด กรุณาลองใหม่อีกครั้ง',
       print: 'พิมพ์ใบเข้าห้องสอบ (Print)',
     },
+    prepGuide: {
+      title: 'เตรียมตัวก่อนวันสอบ',
+      notifyAria: 'เปิดคู่มือเตรียมตัวก่อนวันสอบ',
+      stepLabel: 'ขั้นตอนที่ {current} จาก {total}',
+      next: 'ถัดไป',
+      back: 'ย้อนกลับ',
+      done: 'เสร็จสิ้น',
+      printCta: 'พิมพ์บัตรประจำตัวผู้สอบทันที',
+      steps: {
+        print: {
+          title: 'พิมพ์เอกสาร Test Voucher (จำเป็น)',
+          badge: 'สำคัญมาก — ต้องทำก่อนวันสอบ',
+          body: 'เอกสาร Test Voucher (Admission Voucher) เป็นเอกสารบังคับสำหรับเข้าห้องสอบ หากไม่พิมพ์และไม่นำไปแสดงในวันสอบ อาจไม่ได้รับอนุญาตให้เข้าสอบได้',
+          reminder:
+            'พิมพ์เอกสารนี้ไว้ล่วงหน้า และนำไปพร้อมบัตรประชาชนหรือหนังสือเดินทางฉบับจริงในวันสอบ',
+        },
+        dress: {
+          title: 'การแต่งกาย',
+          body: 'แต่งกายชุดสุภาพเรียบร้อย ห้ามรองเท้าแตะ ขาสั้น แขนกุด และยีนส์',
+        },
+        items: {
+          title: 'อุปกรณ์ที่นำเข้าห้องสอบได้ / ไม่ได้',
+          body: 'ตรวจสอบรายการอุปกรณ์ที่อนุญาตและห้ามนำเข้าห้องสอบก่อนวันสอบ',
+        },
+      },
+      allowedTitle: 'นำเข้าได้',
+      forbiddenTitle: 'ห้ามนำเข้า',
+      allowedItems: {
+        item1: 'ใบลงทะเบียน (Admission Voucher)',
+        item2: 'บัตรประชาชนหรือหนังสือเดินทางฉบับจริง',
+        item3: 'ดินสอ 2B ขึ้นไป ยางลบ และปากกา',
+      },
+      forbiddenItems: {
+        item1: 'กระเป๋าและสัมภาระส่วนตัว',
+        item2: 'โทรศัพท์มือถือและอุปกรณ์สื่อสารอิเล็กทรอนิกส์ทุกชนิด',
+        item3: 'อาหารและเครื่องดื่ม',
+      },
+    },
     card: {
       title: 'ใบเสร็จรับเงิน',
       titleEn: 'RECEIPT',
@@ -120,6 +158,7 @@ export default {
       tableDescLabel: 'รายการ',
       tableDescShort: 'Description',
       tableAmount: 'จำนวนเงิน/บาท',
+      itemDescription: 'ค่าสมัครทดสอบความรู้ภาษาอังกฤษ BUU-GET',
       totalLabel: 'รวมเงิน (total)',
       verifyUrl: 'URL ตรวจสอบใบเสร็จอิเล็กทรอนิกส์ E-receipt verification URL',
       notes: 'หมายเหตุ :',
@@ -152,6 +191,7 @@ export default {
         tableDescLabel: 'รายการ',
         tableDescShort: 'Description',
         tableAmount: 'จำนวนเงิน/บาท',
+        itemDescription: 'ค่าสมัครทดสอบความรู้ภาษาอังกฤษ BUU-GET',
         totalLabel: 'รวมเงิน (total)',
         verifyUrl: 'URL ตรวจสอบใบเสร็จอิเล็กทรอนิกส์ E-receipt verification URL',
         notes: 'หมายเหตุ :',
@@ -312,8 +352,7 @@ export default {
       title: 'ยืนยันการชำระเงิน',
       detailsLabel: 'รายละเอียดการชำระเงิน',
       payWithin: 'ชำระเงินภายใน {time}',
-      instruction:
-        'กรุณาสแกน QR Code ด้วยแอปพลิเคชัน Mobile Banking<br />เพื่อเสร็จสิ้นการลงทะเบียน',
+      instruction: 'กรุณาสแกน QR Code ด้วยแอปพลิเคชัน Mobile Banking\nเพื่อเสร็จสิ้นการลงทะเบียน',
       saveQr: 'บันทึก QR Code ชำระเงิน',
     },
   },
@@ -411,13 +450,31 @@ export default {
   },
   home: {
     bannerEmpty: 'ยังไม่มีแบนเนอร์',
+    candidateActivity: {
+      title: 'กิจกรรมที่ต้องทำ',
+      payNow: 'ชำระเงิน',
+      viewDetails: 'ดูรายละเอียด',
+      viewCandidateCard: 'ดูบัตรเข้าสอบ',
+      registerAgain: 'สมัครใหม่',
+      viewAll: 'ดูทั้งหมด',
+      paymentDeadline: 'ชำระภายใน',
+      paymentCancelledHint: 'การสมัครถูกยกเลิกเนื่องจากหมดเวลาชำระเงิน',
+      seat: 'ที่นั่ง',
+      badges: {
+        unpaid: 'ค้างชำระ',
+        paymentCancelled: 'หมดเวลาชำระเงิน',
+        upcoming: 'ใกล้วันสอบ',
+        seatReady: 'พร้อมเข้าสอบ',
+      },
+    },
     availableRoundsTitle: 'ตารางสอบที่มีที่นั่งว่าง',
     availableRounds: {
       noData: 'ไม่พบข้อมูลตารางสอบ',
       errorFetch: 'เกิดข้อผิดพลาดในการดึงข้อมูล',
+      today: 'วันนี้',
       table: {
         columns: {
-          round: 'รอบที่',
+          round: 'ชื่อการสอบ',
           date: 'วันที่สอบ',
           regPeriod: 'เปิดรับสมัคร',
           regDuration: 'ระยะเวลาสมัคร',
@@ -466,6 +523,7 @@ export default {
     },
     examRules: {
       title: 'ข้อปฏิบัติในวันสอบ',
+      modeToggleAria: 'เลือกดูข้อปฏิบัติตามรูปแบบการสอบ',
       paperBased: {
         label: 'รูปแบบกระดาษ',
         items: {
@@ -866,8 +924,7 @@ export default {
     },
     paymentImportTestExport: {
       pageTitle: 'Export CSV ทดสอบการนำเข้า',
-      pageSubtitle:
-        'สร้างไฟล์ CSV สำหรับทดสอบนำเข้าการชำระเงิน โดยคอลัมน์ตรงกับระบบนำเข้า',
+      pageSubtitle: 'สร้างไฟล์ CSV สำหรับทดสอบนำเข้าการชำระเงิน โดยคอลัมน์ตรงกับระบบนำเข้า',
       examSelectLabel: 'เลือกรอบสอบที่มีค่าธรรมเนียม',
       exportButton: 'Export CSV',
       previewCount: 'พร้อม export {count} รายการ',
@@ -939,7 +996,6 @@ export default {
       table: {
         columns: {
           index: 'ลำดับ',
-          faculty: 'คณะ/ส่วนงาน',
           accountCode: 'รหัสผังแหล่งเงิน',
           name: 'ชื่อผังแหล่งเงิน',
           status: 'สถานะ',
@@ -958,7 +1014,6 @@ export default {
       createDialog: {
         title: 'สร้างผังแหล่งเงิน',
         labels: {
-          faculty: 'คณะ/หน่วยงาน',
           name: 'ชื่อผังแหล่งเงิน',
           accountCode: 'รหัสผังแหล่งเงิน',
           status: 'สถานะ',
@@ -972,7 +1027,6 @@ export default {
           save: 'บันทึก',
         },
         validation: {
-          faculty: 'กรุณาระบุคณะ/หน่วยงาน',
           name: 'กรุณาระบุชื่อผังแหล่งเงิน',
           accountCode: 'กรุณาระบุรหัสผังแหล่งเงิน',
         },
@@ -1130,7 +1184,6 @@ export default {
         all: 'ทั้งหมด',
         startDate: 'วันที่เริ่มต้น',
         endDate: 'ถึงวันที่',
-        department: 'ส่วนงาน',
         examName: 'ชื่อการสอบ',
         receiptNo: 'เลขที่ใบเสร็จ',
         payer: 'ชื่อผู้ชำระเงิน',
@@ -1147,7 +1200,6 @@ export default {
         totalLabel: 'รวม',
         columns: {
           index: 'ลำดับ',
-          department: 'คณะ/ส่วนงาน',
           examName: 'ชื่อการสอบ',
           amount: 'จำนวนเงิน',
         },
@@ -1444,6 +1496,11 @@ export default {
       next: 'ต่อไป',
       finish: 'เสร็จสิ้น',
       restartLabel: 'เริ่มคำแนะนำการใช้งานใหม่',
+      offerTitle: 'ต้องการคำแนะนำการใช้งานไหม?',
+      offerBody:
+        'เราจะพาคุณดูขั้นตอนสำคัญของการจำลองสอบทีละขั้น หากไม่ต้องการตอนนี้ สามารถเริ่มใหม่ได้ทุกเมื่อจากปุ่ม ?',
+      offerAccept: 'เริ่มคำแนะนำ',
+      offerDecline: 'ข้ามไปก่อน',
     },
   },
   navigation: {

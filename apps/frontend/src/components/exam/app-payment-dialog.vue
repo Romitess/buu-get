@@ -29,7 +29,7 @@
       </AppStatusBadge>
 
       <!-- Instruction -->
-      <div class="instruction-text" v-html="$t('payment.dialog.instruction')"></div>
+      <div class="instruction-text">{{ $t('payment.dialog.instruction') }}</div>
 
       <!-- Save Button -->
       <AppButton
@@ -143,6 +143,7 @@ const { displayDeadline } = useCountdown(toRef(props, 'expiryTime'), () => emit(
   color: var(--text-secondary);
   line-height: 1.6;
   text-align: center;
+  white-space: pre-line;
 }
 
 .save-btn {

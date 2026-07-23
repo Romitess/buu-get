@@ -9,12 +9,7 @@
       :subtitle="$t('admin.receiptUsageReport.pageSubtitle')"
     />
     <!-- Filter Bar Component -->
-    <DailyRevenueFilter
-      :filter="filter"
-      :department-options="departmentOptions"
-      mode="full"
-      @filter-change="applyFilter"
-    />
+    <DailyRevenueFilter :filter="filter" mode="full" @filter-change="applyFilter" />
 
     <div class="row items-center justify-between q-mb-lg">
       <div class="col-6">
@@ -62,7 +57,7 @@ import type { DailyRevenueFilter as DailyRevenueFilterModel } from 'src/types/da
 
 const $q = useQuasar();
 
-const { error, filter, departmentOptions, loadDepartmentOptions } = useDailyRevenue();
+const { error, filter } = useDailyRevenue();
 
 const { t } = useI18n();
 
@@ -82,7 +77,6 @@ type ReceiptUsageRow = {
   payer: string;
   payee: string;
   paymentDateRaw: string | null;
-  department: string;
 };
 
 const applyFilter = (newFilter: DailyRevenueFilterModel): void => {
@@ -190,7 +184,6 @@ const receiptRows = computed<ReceiptUsageRow[]>(() =>
         payer,
         payee: getPayeeName(receipt),
         paymentDateRaw,
-        department: exam?.FUND_SOURCE?.FS_FACULTY || '',
       },
     ];
   }),
@@ -209,10 +202,6 @@ const filteredReceipts = computed(() => {
   if (filter.value.endDate) {
     const end = new Date(`${filter.value.endDate}T23:59:59`);
     rows = rows.filter((row) => (row.paymentDateRaw ? new Date(row.paymentDateRaw) <= end : false));
-  }
-
-  if (filter.value.department) {
-    rows = rows.filter((row) => row.department === filter.value.department);
   }
 
   if (filter.value.examName) {
@@ -396,7 +385,6 @@ watch(error, (newVal) => {
 
 // Initial load
 onMounted(() => {
-  void loadDepartmentOptions();
   void loadReceipts();
 });
 </script>

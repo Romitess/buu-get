@@ -13,7 +13,13 @@
     </div>
 
     <!-- Form -->
-    <q-form ref="formRef" @submit.prevent="onSubmit" class="register-form">
+    <q-form
+      ref="formRef"
+      greedy
+      class="register-form"
+      @submit.prevent="onSubmit"
+      @validation-error="onValidationError"
+    >
       <!-- Email -->
       <div class="field-block">
         <div class="text-body2 text-weight-medium q-mb-xs field-label block">
@@ -191,7 +197,7 @@ const showConfirmPassword = ref(false);
 const showOtpDialog = ref(false);
 const isSendingOtp = ref(false);
 const isVerifyingOtp = ref(false);
-const { validateAndFocusFirstInvalid } = useFocusFirstInvalidField(formRef);
+const { focusFirstInvalidField } = useFocusFirstInvalidField(formRef);
 
 interface PasswordRequirement {
   label: string;
@@ -263,13 +269,13 @@ const sendOtp = async (): Promise<boolean> => {
   }
 };
 
-/** กด Submit → validate form → ส่ง OTP → เปิด dialog */
-const onSubmit = async (): Promise<void> => {
-  const isValid = await validateAndFocusFirstInvalid();
-  if (!isValid) {
-    return;
-  }
+/** กด Submit แล้ว validate ไม่ผ่าน → เลื่อนไปช่องแรกที่ผิด */
+const onValidationError = async (): Promise<void> => {
+  await focusFirstInvalidField();
+};
 
+/** กด Submit → (q-form ผ่าน validate แล้ว) → ส่ง OTP → เปิด dialog */
+const onSubmit = async (): Promise<void> => {
   const isSent = await sendOtp();
   if (isSent) {
     showOtpDialog.value = true;

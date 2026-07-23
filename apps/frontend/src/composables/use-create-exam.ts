@@ -31,9 +31,10 @@ import {
   type ExamChangeItem,
   type SessionLocationSnapshotPayload,
 } from 'src/services/exam.service';
-import { getUsersFromApi } from 'src/services/user.service';
+import { getUsersFromApi, checkUserIdentifiers } from 'src/services/user.service';
 import { ROLES } from 'src/constants/roles';
 import { useUserStore } from 'src/stores/user.store';
+import type { User } from 'src/types/user';
 
 /** A single room within a time slot */
 export interface ExamRoom {
@@ -76,7 +77,15 @@ export interface EligibleCandidate {
   fullNameEn?: string | undefined;
   /** Generated passcode */
   passcode: string;
+  /** true = มีในระบบ, false = ไม่มี, undefined = ยังไม่ตรวจสอบ */
+  inSystem?: boolean;
 }
+
+const getEligibleCandidateKey = (
+  candidate: Pick<EligibleCandidate, 'nationalId' | 'passportNo'>,
+): string => candidate.nationalId?.trim() || candidate.passportNo?.trim() || '';
+
+export { getEligibleCandidateKey };
 
 export interface CreateExamForm {
   examName: string;
@@ -250,6 +259,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const fundSourceOptions = ref<{ label: string; value: number }[]>([]);
   const allExams = ref<BackendExam[]>([]);
   const isLoadingData = ref(false);
+  const isSaving = ref(false);
   const isImportingCandidates = ref(false);
   const error = ref<string | null>(null);
 
@@ -384,6 +394,15 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       );
     });
   });
+
+  /** Keys of candidates already in the eligible list */
+  const existingCandidateKeys = computed<string[]>(() =>
+    form.value.eligibleCandidates
+      .map((c) => getEligibleCandidateKey(c))
+      .filter((key) => key.length > 0),
+  );
+
+  const hasEligibleCandidates = computed<boolean>(() => form.value.eligibleCandidates.length > 0);
 
   // Helper to convert DD/MM/YYYY to numeric value for comparison
   const dateToCompareValue = (dateStr: string): number => {
@@ -723,19 +742,28 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     return changes;
   };
 
+  const loadOccupancyInBackground = (): void => {
+    void fetchAllExamsRaw()
+      .then((exams) => {
+        allExams.value = exams;
+      })
+      .catch((err) => {
+        console.error('Failed to load exam occupancy data:', err);
+      });
+  };
+
   const loadInitialData = async (): Promise<void> => {
     isLoadingData.value = true;
     error.value = null;
     try {
-      const [locations, fundSources, proctors, exams, editExam] = await Promise.all([
+      // Critical path: อย่ารอ GET /exam ทั้งก้อน — occupancy โหลด background หลังฟอร์มพร้อม
+      const [locations, fundSources, proctors, editExam] = await Promise.all([
         fetchExamLocations(),
         fetchFundSources(),
         getUsersFromApi(ROLES.PROCTOR),
-        fetchAllExamsRaw(),
         examId ? fetchExamWithSeats(examId) : Promise.resolve(null),
       ]);
       locationOptions.value = locations;
-      allExams.value = exams;
       const activeFundSources = fundSources.filter((fs: FundSource) => fs.FS_OPEN_STATUS !== false);
       fundSourceOptions.value = activeFundSources.map((fs: FundSource) => ({
         label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
@@ -914,6 +942,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
             fullName: p.FULL_NAME,
             passcode: p.PASSCODE,
           }));
+          await resolveEligibleCandidatesInSystem();
         }
 
         // The schedule lock is now handled by the computed property 'isScheduleLocked'
@@ -934,6 +963,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       });
     } finally {
       isLoadingData.value = false;
+      // โหลด occupancy หลัง critical path เสร็จ — ไม่บล็อก TTI ของฟอร์ม
+      loadOccupancyInBackground();
     }
   };
 
@@ -1143,13 +1174,41 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   };
 
   /** Import candidates from CSV file for special rounds */
+  const resolveEligibleCandidatesInSystem = async (): Promise<void> => {
+    const candidates = form.value.eligibleCandidates;
+    const identifiers = candidates
+      .map((candidate) => getEligibleCandidateKey(candidate))
+      .filter((identifier): identifier is string => Boolean(identifier));
+
+    if (identifiers.length === 0) {
+      return;
+    }
+
+    try {
+      const statusMap = await checkUserIdentifiers(identifiers);
+      form.value.eligibleCandidates = candidates.map((candidate) => {
+        const key = getEligibleCandidateKey(candidate);
+        if (!key) {
+          return { ...candidate, inSystem: false };
+        }
+        return { ...candidate, inSystem: statusMap[key] ?? false };
+      });
+    } catch (err) {
+      console.error('Failed to check candidate identifiers:', err);
+      form.value.eligibleCandidates = candidates.map((candidate) => ({
+        ...candidate,
+        inSystem: candidate.inSystem ?? false,
+      }));
+    }
+  };
+
   const importCandidates = (file?: File): void => {
     try {
       if (!file) return;
       isImportingCandidates.value = true;
 
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         try {
           const rawText = e.target?.result as string;
           const text = stripBom(rawText);
@@ -1227,6 +1286,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           }
 
           form.value.eligibleCandidates = candidates;
+          await resolveEligibleCandidatesInSystem();
           $q.notify({
             type: 'positive',
             message: `นำเข้าข้อมูลรายชื่อสำเร็จ ${candidates.length} รายการ`,
@@ -1310,8 +1370,112 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     });
   };
 
+  /** Add a system user to the eligible candidates list */
+  const tryAddEligibleCandidateFromUser = (user: User): boolean => {
+    const nationalId = user.nationalId?.trim() || undefined;
+    const passportNo = user.passportNo?.trim() || undefined;
+
+    if (!nationalId && !passportNo) {
+      return false;
+    }
+
+    const key = nationalId || passportNo || '';
+    if (existingCandidateKeys.value.includes(key)) {
+      return false;
+    }
+
+    form.value.eligibleCandidates.push({
+      nationalId: nationalId || undefined,
+      passportNo: nationalId ? undefined : passportNo,
+      fullName: user.fullNameTH?.trim() || undefined,
+      fullNameEn: user.fullNameEN?.trim() || undefined,
+      passcode: '',
+      inSystem: true,
+    });
+
+    return true;
+  };
+
+  const addEligibleCandidatesFromUsers = (users: User[]): void => {
+    if (users.length === 0) {
+      $q.notify({
+        type: 'warning',
+        message: 'ยังไม่ได้เลือกผู้สมัคร',
+        position: 'top',
+      });
+      return;
+    }
+
+    let added = 0;
+    let skipped = 0;
+
+    for (const user of users) {
+      if (tryAddEligibleCandidateFromUser(user)) {
+        added += 1;
+      } else {
+        skipped += 1;
+      }
+    }
+
+    if (added === 0) {
+      $q.notify({
+        type: 'warning',
+        message: 'ไม่สามารถเพิ่มผู้สมัครที่เลือกได้',
+        position: 'top',
+      });
+      return;
+    }
+
+    const skippedText = skipped > 0 ? ` (ข้าม ${skipped} รายการ)` : '';
+    $q.notify({
+      type: 'positive',
+      message: `เพิ่มผู้สมัครในรายชื่อแล้ว ${added} รายการ${skippedText}`,
+      position: 'top',
+      timeout: 2500,
+    });
+  };
+
+  /** Remove selected eligible candidates from the list */
+  const removeEligibleCandidates = (keys: string[]): void => {
+    if (keys.length === 0) {
+      $q.notify({
+        type: 'warning',
+        message: 'ยังไม่ได้เลือกรายชื่อที่จะลบ',
+        position: 'top',
+      });
+      return;
+    }
+
+    const keysToRemove = new Set(keys);
+    const beforeCount = form.value.eligibleCandidates.length;
+    form.value.eligibleCandidates = form.value.eligibleCandidates.filter(
+      (candidate) => !keysToRemove.has(getEligibleCandidateKey(candidate)),
+    );
+    const removedCount = beforeCount - form.value.eligibleCandidates.length;
+
+    if (removedCount === 0) {
+      $q.notify({
+        type: 'warning',
+        message: 'ไม่พบรายชื่อที่จะลบ',
+        position: 'top',
+      });
+      return;
+    }
+
+    if (form.value.eligibleCandidates.length === 0) {
+      candidateSearch.value = '';
+    }
+
+    $q.notify({
+      type: 'positive',
+      message: `ลบรายชื่อผู้มีสิทธิ์สอบแล้ว ${removedCount} รายการ`,
+      position: 'top',
+      timeout: 2500,
+    });
+  };
+
   const handleCancel = (): void => {
-    void router.push('/admin/exam-management');
+    void router.push({ name: 'admin-exam-management' });
   };
 
   /** Auto-formats a time string (e.g. "10" -> "10:00") and caps hour at 23 and minute at 59 */
@@ -1404,6 +1568,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
    * @returns Promise<boolean> - true if saved successfully, false otherwise
    */
   const handleSave = async (): Promise<boolean> => {
+    if (isLoadingData.value || isSaving.value) {
+      return false;
+    }
+
     // ── Step 0: Required-field validation with scroll-to-error ──
     const isValid = validateForm();
     if (!isValid) {
@@ -1537,6 +1705,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       ...(r.sessionLocationSnapshot ? { sessionLocationSnapshot: r.sessionLocationSnapshot } : {}),
     }));
 
+    isSaving.value = true;
     try {
       let targetExamId = isEditMode.value ? examId : null;
       const combinedExamName = form.value.examName.trim();
@@ -1615,26 +1784,48 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         });
       }
 
+      // Passcode sync แยกจาก exam update — ถ้า fail ยังต้อง redirect เพราะรอบสอบบันทึกแล้ว
       if (
         targetExamId &&
         form.value.examType === EXAM_TYPE_SPECIAL &&
         form.value.eligibleCandidates.length > 0
       ) {
-        const passcodesPayload = form.value.eligibleCandidates.map((c) => ({
-          nationalId: c.nationalId ?? undefined,
-          passportNo: c.passportNo ?? undefined,
-          fullName: c.fullName ?? undefined,
-          fullNameEn: c.fullNameEn ?? undefined,
-          passcode: c.passcode,
-        }));
-        await createExamPasscodes(targetExamId, passcodesPayload);
+        try {
+          const passcodesPayload = form.value.eligibleCandidates.map((c) => ({
+            nationalId: c.nationalId ?? undefined,
+            passportNo: c.passportNo ?? undefined,
+            fullName: c.fullName ?? undefined,
+            fullNameEn: c.fullNameEn ?? undefined,
+            passcode: c.passcode,
+          }));
+          await createExamPasscodes(targetExamId, passcodesPayload);
+        } catch (passcodeErr) {
+          console.error('Passcode save error:', passcodeErr);
+          const passcodeErrorObj = passcodeErr as {
+            response?: { data?: { message?: string | string[] } };
+            message?: string;
+          };
+          const passcodeBackendMsg = passcodeErrorObj.response?.data?.message;
+          const passcodeDetailedMsg = Array.isArray(passcodeBackendMsg)
+            ? passcodeBackendMsg.join(', ')
+            : passcodeBackendMsg || passcodeErrorObj.message;
+          $q.notify({
+            type: 'warning',
+            message: passcodeDetailedMsg
+              ? `บันทึกรอบสอบสำเร็จ แต่บันทึกรหัสผ่านผู้มีสิทธิ์สอบไม่สำเร็จ: ${passcodeDetailedMsg}`
+              : 'บันทึกรอบสอบสำเร็จ แต่บันทึกรหัสผ่านผู้มีสิทธิ์สอบไม่สำเร็จ',
+            position: 'top',
+            timeout: 4000,
+          });
+        }
       }
 
-      void router.push('/admin/exam-management');
+      await router.push({ name: 'admin-exam-management' });
       return true;
     } catch (err) {
       console.error('Save error:', err);
       const errorObj = err as {
+        code?: string;
         response?: {
           data?: {
             message?: string | string[];
@@ -1642,6 +1833,20 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         };
         message?: string;
       };
+      const isTimeout =
+        errorObj.code === 'ECONNABORTED' ||
+        (typeof errorObj.message === 'string' &&
+          errorObj.message.toLowerCase().includes('timeout'));
+      if (isTimeout) {
+        const timeoutMsg = 'การบันทึกรอบสอบใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง';
+        error.value = timeoutMsg;
+        $q.notify({
+          type: 'negative',
+          message: timeoutMsg,
+          position: 'top',
+        });
+        return false;
+      }
       const backendMsg = errorObj.response?.data?.message;
       const detailedMsg = Array.isArray(backendMsg)
         ? backendMsg.join(', ')
@@ -1658,6 +1863,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         position: 'top',
       });
       return false;
+    } finally {
+      isSaving.value = false;
     }
   };
 
@@ -1670,6 +1877,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     fundSourceOptions,
     getOccupiedLocationIdsForSlot,
     isLoadingData,
+    isSaving,
     isImportingCandidates,
     error,
     isEditMode,
@@ -1681,6 +1889,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     activeSlotIndex,
     candidateSearch,
     filteredCandidates,
+    existingCandidateKeys,
+    hasEligibleCandidates,
     fieldErrors,
     shakeKey,
     loadInitialData,
@@ -1689,6 +1899,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     addRoom,
     removeRoom,
     importCandidates,
+    addEligibleCandidatesFromUsers,
+    removeEligibleCandidates,
     generatePasscodes,
     exportCandidates,
     handleCancel,

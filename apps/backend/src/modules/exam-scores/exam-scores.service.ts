@@ -21,7 +21,24 @@ export class ExamScoresService {
     private readonly examScoreRepository: Repository<ExamScore>,
   ) {}
 
+  /**
+   * Upsert by ERM_ID — enrollment มีคะแนนได้แค่ 1 แถว (OneToOne unique).
+   * ถ้ามีแถวเดิม (รวม soft-deleted) ให้อัปเดตแทนการ INSERT ซ้ำ
+   */
   async create(createExamScoreDto: CreateExamScoreDto): Promise<ExamScore> {
+    const existing = await this.examScoreRepository.findOne({
+      where: { ERM_ID: createExamScoreDto.ERM_ID },
+      withDeleted: true,
+    });
+
+    if (existing) {
+      if (existing.DELETED_AT) {
+        existing.DELETED_AT = null;
+      }
+      Object.assign(existing, createExamScoreDto);
+      return await this.examScoreRepository.save(existing);
+    }
+
     const newScore = this.examScoreRepository.create(createExamScoreDto);
     return await this.examScoreRepository.save(newScore);
   }

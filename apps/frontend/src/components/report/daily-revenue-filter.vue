@@ -76,26 +76,6 @@
 
         <div class="col-12 col-sm-6 col-md-3">
           <div class="custom-label q-mb-xs">
-            {{ t('admin.dailyRevenueReport.filter.department') }}
-          </div>
-          <AppSelect
-            v-model="localFilter.department"
-            :options="departmentOptions"
-            outlined
-            dense
-            emit-value
-            map-options
-            bg-color="grey-2"
-            dropdown-icon="keyboard_arrow_down"
-            class="custom-input"
-            hide-bottom-space
-            :placeholder="t('admin.dailyRevenueReport.filter.all')"
-            @update:model-value="emitFilterChange"
-          />
-        </div>
-
-        <div class="col-12 col-sm-6 col-md-3">
-          <div class="custom-label q-mb-xs">
             {{ t('admin.dailyRevenueReport.filter.examName') }}
           </div>
           <q-input
@@ -165,13 +145,11 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, ref, onMounted } from 'vue';
+import { reactive, watch, ref } from 'vue';
 import type { QPopupProxy } from 'quasar';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
-import AppSelect from 'src/components/base/app-select.vue';
-import type { DailyRevenueFilter, DepartmentOption } from 'src/types/daily-revenue.types';
+import type { DailyRevenueFilter } from 'src/types/daily-revenue.types';
 import { useI18n } from 'vue-i18n';
-import { fetchFundSources } from 'src/services/finance.service';
 
 const { t } = useI18n();
 
@@ -179,7 +157,6 @@ type DailyRevenueFilterMode = 'compact' | 'full';
 
 interface Props {
   filter: DailyRevenueFilter & { receiptNo?: string; payerName?: string; payeeName?: string };
-  departmentOptions?: DepartmentOption[];
   mode?: DailyRevenueFilterMode;
 }
 
@@ -197,38 +174,10 @@ const endDateProxy = ref<QPopupProxy | null>(null);
 const localFilter = reactive({
   startDate: props.filter.startDate,
   endDate: props.filter.endDate,
-  department: props.filter.department,
   examName: props.filter.examName,
   receiptNo: props.filter.receiptNo || '',
   payerName: props.filter.payerName || '',
   payeeName: props.filter.payeeName || '',
-});
-
-const departmentOptions = ref<DepartmentOption[]>(props.departmentOptions || []);
-
-const loadDepartmentOptions = async () => {
-  if (props.departmentOptions && props.departmentOptions.length) {
-    departmentOptions.value = props.departmentOptions;
-    return;
-  }
-
-  try {
-    const sources = await fetchFundSources();
-    const activeSources = sources.filter((s) => s.FS_OPEN_STATUS !== false);
-    const faculties = Array.from(new Set(activeSources.map((s) => s.FS_FACULTY).filter(Boolean)));
-    const options = faculties.map((f) => ({ label: f, value: f }));
-    departmentOptions.value = [
-      { label: t('admin.dailyRevenueReport.filter.all'), value: '' },
-      ...options,
-    ];
-  } catch {
-    // ignore - keep options empty
-    // console.error('Failed to load fund sources');
-  }
-};
-
-onMounted(() => {
-  void loadDepartmentOptions();
 });
 
 // Sync props → local state when parent changes
@@ -237,7 +186,6 @@ watch(
   (newFilter) => {
     localFilter.startDate = newFilter.startDate;
     localFilter.endDate = newFilter.endDate;
-    localFilter.department = newFilter.department;
     localFilter.examName = newFilter.examName;
     localFilter.receiptNo = newFilter.receiptNo || '';
     localFilter.payerName = newFilter.payerName || '';

@@ -106,6 +106,44 @@ export default {
       downloadError: 'An error occurred while generating the file. Please try again.',
       print: 'Print Admission Voucher',
     },
+    prepGuide: {
+      title: 'Exam day preparation',
+      notifyAria: 'Open exam preparation guide',
+      stepLabel: 'Step {current} of {total}',
+      next: 'Next',
+      back: 'Back',
+      done: 'Done',
+      printCta: 'Print test voucher now',
+      steps: {
+        print: {
+          title: 'Print your Test Voucher (Required)',
+          badge: 'Critical — complete before exam day',
+          body: 'Your Test Voucher (Admission Voucher) is mandatory for exam entry. If you do not print it and present it on exam day, you may not be allowed to take the exam.',
+          reminder:
+            'Print this document in advance and bring it with your original national ID card or passport on exam day.',
+        },
+        dress: {
+          title: 'Dress code',
+          body: 'Polite attire required. No sandals, shorts, sleeveless shirts, or jeans.',
+        },
+        items: {
+          title: 'Allowed and forbidden items',
+          body: 'Review what you may and may not bring into the exam room before exam day.',
+        },
+      },
+      allowedTitle: 'Allowed',
+      forbiddenTitle: 'Not allowed',
+      allowedItems: {
+        item1: 'Admission Voucher',
+        item2: 'Original national ID card or passport',
+        item3: '2B pencils or harder, eraser, and pen',
+      },
+      forbiddenItems: {
+        item1: 'Bags and personal belongings',
+        item2: 'Mobile phones and any electronic communication devices',
+        item3: 'Food and drinks',
+      },
+    },
     card: {
       title: 'ใบเสร็จรับเงิน',
       titleEn: 'RECEIPT',
@@ -119,6 +157,7 @@ export default {
       tableDescLabel: 'รายการ',
       tableDescShort: 'Description',
       tableAmount: 'จำนวนเงิน/บาท',
+      itemDescription: 'ค่าสมัครทดสอบความรู้ภาษาอังกฤษ BUU-GET',
       totalLabel: 'รวมเงิน (total)',
       verifyUrl: 'URL ตรวจสอบใบเสร็จอิเล็กทรอนิกส์ E-receipt verification URL',
       notes: 'หมายเหตุ :',
@@ -367,13 +406,31 @@ export default {
   },
   home: {
     bannerEmpty: 'No banner yet',
+    candidateActivity: {
+      title: 'Your next steps',
+      payNow: 'Pay now',
+      viewDetails: 'View details',
+      viewCandidateCard: 'View candidate card',
+      registerAgain: 'Register again',
+      viewAll: 'View all',
+      paymentDeadline: 'Pay within',
+      paymentCancelledHint: 'Registration was cancelled because the payment window expired',
+      seat: 'Seat',
+      badges: {
+        unpaid: 'Payment due',
+        paymentCancelled: 'Payment expired',
+        upcoming: 'Upcoming exam',
+        seatReady: 'Ready for exam',
+      },
+    },
     availableRoundsTitle: 'Available Exam Rounds',
     availableRounds: {
       noData: 'No exam rounds found',
       errorFetch: 'Error fetching exam rounds',
+      today: 'Today',
       table: {
         columns: {
-          round: 'Round',
+          round: 'Exam Name',
           date: 'Exam Date',
           regPeriod: 'Registration Period',
           regDuration: 'Duration',
@@ -422,6 +479,7 @@ export default {
     },
     examRules: {
       title: 'Exam Day Rules',
+      modeToggleAria: 'Choose exam format rules to view',
       paperBased: {
         label: 'Paper-based',
         items: {
@@ -802,7 +860,6 @@ export default {
       table: {
         columns: {
           index: 'Index',
-          faculty: 'Faculty/Department',
           accountCode: 'Fund Source Code',
           name: 'Fund Source Name',
           status: 'Status',
@@ -821,7 +878,6 @@ export default {
       createDialog: {
         title: 'Create Fund Source',
         labels: {
-          faculty: 'Faculty/Department',
           name: 'Fund Source Name',
           accountCode: 'Fund Source Code',
           status: 'Status',
@@ -835,7 +891,6 @@ export default {
           save: 'Save',
         },
         validation: {
-          faculty: 'Faculty/Department is required',
           name: 'Fund source name is required',
           accountCode: 'Fund source code is required',
         },
@@ -992,7 +1047,6 @@ export default {
         all: 'All',
         startDate: 'Start Date',
         endDate: 'End Date',
-        department: 'Department',
         examName: 'Exam Name',
         receiptNo: 'Receipt Number',
         payer: 'Payer Name',
@@ -1009,7 +1063,6 @@ export default {
         totalLabel: 'Total',
         columns: {
           index: 'No.',
-          department: 'Department',
           examName: 'Exam Name',
           amount: 'Amount',
         },
@@ -1240,8 +1293,7 @@ export default {
     },
     paymentImportTestExport: {
       pageTitle: 'Export Test Payment CSV',
-      pageSubtitle:
-        'Generate a CSV file compatible with payment import for testing',
+      pageSubtitle: 'Generate a CSV file compatible with payment import for testing',
       examSelectLabel: 'Select exam round with registration fee',
       exportButton: 'Export CSV',
       previewCount: '{count} rows ready to export',
@@ -1357,6 +1409,11 @@ export default {
       next: 'Next',
       finish: 'Finish',
       restartLabel: 'Restart guided tour',
+      offerTitle: 'Would you like a guided tour?',
+      offerBody:
+        'We will walk you through the key steps of the exam simulation. You can restart anytime later from the ? button.',
+      offerAccept: 'Start tour',
+      offerDecline: 'Skip for now',
     },
   },
   navigation: {

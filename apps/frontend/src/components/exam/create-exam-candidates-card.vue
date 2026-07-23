@@ -48,6 +48,27 @@
         </div>
         <div class="col-12 col-md-auto row q-gutter-sm justify-end">
           <q-btn
+            v-if="!locked && hasCandidates"
+            label="ลบรายชื่อ"
+            color="negative"
+            outline
+            unelevated
+            dense
+            icon="delete_sweep"
+            class="q-px-md action-btn"
+            @click="showDeleteDialog = true"
+          />
+          <q-btn
+            v-if="!locked"
+            label="ค้นหาผู้สมัคร"
+            color="secondary"
+            unelevated
+            dense
+            icon="person_search"
+            class="q-px-md action-btn"
+            @click="showSearchDialog = true"
+          />
+          <q-btn
             v-if="!locked"
             label="นำเข้าไฟล์รายชื่อ"
             color="primary"
@@ -71,13 +92,36 @@
         @request="onRequest"
       >
         <!-- Index Column -->
-        <template v-slot:body-cell-index="{ row }">
-          <div class="text-center">{{ getIndex(row) }}</div>
+        <template v-slot:body-cell-index="{ value }">
+          <div class="text-center">{{ value }}</div>
         </template>
 
         <!-- Full Name Column -->
         <template v-slot:body-cell-fullName="{ row }">
           <div class="text-left q-pl-custom">{{ row.fullName }}</div>
+        </template>
+
+        <!-- In System Status Column -->
+        <template v-slot:body-cell-inSystem="{ row }">
+          <div class="text-center">
+            <q-badge
+              v-if="row.inSystem === true"
+              color="positive"
+              label="มีในระบบ"
+            />
+            <q-badge
+              v-else-if="row.inSystem === false"
+              color="grey-6"
+              text-color="white"
+              label="ไม่มีในระบบ"
+            />
+            <q-spinner-dots
+              v-else-if="loading"
+              color="primary"
+              size="20px"
+            />
+            <span v-else class="text-grey-6">—</span>
+          </div>
         </template>
       </BaseTable>
     </q-card-section>
@@ -92,6 +136,20 @@
 
     <!-- Passcode Type Selection Dialog -->
     <DialogPasscodeType v-model="showPasscodeTypeDialog" @select="onPasscodeTypeSelected" />
+
+    <!-- Search Candidate Dialog -->
+    <DialogSearchCandidate
+      v-model="showSearchDialog"
+      :existing-keys="props.existingCandidateKeys"
+      @confirm-candidates="onConfirmCandidates"
+    />
+
+    <!-- Delete Candidates Dialog -->
+    <DialogDeleteCandidates
+      v-model="showDeleteDialog"
+      :candidates="props.candidates"
+      @confirm-remove="onConfirmRemove"
+    />
   </q-card>
 </template>
 
@@ -105,13 +163,27 @@ import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import BaseTable from 'src/components/shared/base-table.vue';
 import DialogCsvImport from 'src/components/exam/dialog-csv-import.vue';
 import DialogPasscodeType from 'src/components/exam/dialog-passcode-type.vue';
+import DialogSearchCandidate from 'src/components/exam/dialog-search-candidate.vue';
+import DialogDeleteCandidates from 'src/components/exam/dialog-delete-candidates.vue';
+import type { User } from 'src/types/user';
 
-const props = defineProps<{
-  /** Filtered candidates to display */
-  filteredCandidates: EligibleCandidate[];
-  locked?: boolean;
-  loading?: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    /** Filtered candidates to display */
+    filteredCandidates: EligibleCandidate[];
+    /** Full eligible candidates list */
+    candidates: EligibleCandidate[];
+    /** Keys already in eligible list (nationalId or passport) */
+    existingCandidateKeys?: string[];
+    hasCandidates?: boolean;
+    locked?: boolean;
+    loading?: boolean;
+  }>(),
+  {
+    existingCandidateKeys: () => [],
+    hasCandidates: false,
+  },
+);
 
 const searchQuery = defineModel<string>('searchQuery', { required: true });
 
@@ -120,6 +192,8 @@ const emit = defineEmits<{
   (e: 'passcode-type-selected', type: PasscodeType): void;
   (e: 'url-submitted', url: string): void;
   (e: 'export-candidates'): void;
+  (e: 'add-candidates-from-users', users: User[]): void;
+  (e: 'remove-candidates', keys: string[]): void;
 }>();
 
 const pagination = ref<PaginationModel>({
@@ -140,13 +214,6 @@ watch(
   { deep: true },
 );
 
-const getIndex = (row: EligibleCandidate): number => {
-  const page = pagination.value.page ?? 1;
-  const rowsPerPage = pagination.value.rowsPerPage ?? 10;
-  const localIndex = props.filteredCandidates.indexOf(row);
-  return (page - 1) * rowsPerPage + localIndex + 1;
-};
-
 const onRequest = (reqProps: TableRequestProps) => {
   if (reqProps.pagination) {
     pagination.value.page = reqProps.pagination.page;
@@ -157,6 +224,8 @@ const onRequest = (reqProps: TableRequestProps) => {
 /** Dialog visibility state */
 const showCsvImportDialog = ref(false);
 const showPasscodeTypeDialog = ref(false);
+const showSearchDialog = ref(false);
+const showDeleteDialog = ref(false);
 
 /** CSV dialog: file selected */
 const onCsvFileSelected = (file: File): void => {
@@ -195,6 +264,16 @@ const onPasscodeTypeSelected = (type: PasscodeType): void => {
   emit('passcode-type-selected', type);
 };
 
+/** Search dialog: candidates confirmed */
+const onConfirmCandidates = (users: User[]): void => {
+  emit('add-candidates-from-users', users);
+};
+
+/** Delete dialog: candidates confirmed for removal */
+const onConfirmRemove = (keys: string[]): void => {
+  emit('remove-candidates', keys);
+};
+
 const columns: QTableColumn[] = [
   {
     name: 'index',
@@ -207,6 +286,12 @@ const columns: QTableColumn[] = [
     name: 'nationalId',
     label: 'รหัสประชาชน',
     field: 'nationalId',
+    align: 'center',
+  },
+  {
+    name: 'inSystem',
+    label: 'สถานะข้อมูลในระบบ',
+    field: 'inSystem',
     align: 'center',
   },
   {

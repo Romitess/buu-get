@@ -1,5 +1,12 @@
 <template>
-  <div class="exam-form-wrapper full-width">
+  <div class="exam-form-wrapper full-width relative-position">
+    <q-inner-loading :showing="isLoadingData">
+      <div class="column items-center">
+        <q-spinner color="primary" size="42px" />
+        <div class="q-mt-sm text-primary">กำลังโหลดข้อมูล...</div>
+      </div>
+    </q-inner-loading>
+
     <!-- Card 1: ข้อมูลพื้นฐาน -->
     <create-exam-details-card
       v-model:form="form"
@@ -17,7 +24,7 @@
     <!-- Card 2: กำหนดการสอบ -->
     <create-exam-schedule-card
       v-model:form="form"
-      :locked="isScheduleLocked"
+      :locked="isScheduleLocked || isLoadingData"
       :location-options="locationOptions"
       :get-occupied-location-ids-for-slot="getOccupiedLocationIdsForSlot"
       :proctor-options="proctorOptions"
@@ -44,7 +51,7 @@
 
     <create-exam-registration-card
       v-model:form="form"
-      :locked="isPublishedSectionLocked || isLockedByEnrollment"
+      :locked="isPublishedSectionLocked || isLockedByEnrollment || isLoadingData"
       :is-special-round="isSpecialRound"
       :date-errors="dateErrors"
       :field-errors="fieldErrors"
@@ -57,9 +64,14 @@
       v-if="isSpecialRound"
       v-model:search-query="candidateSearch"
       :filtered-candidates="filteredCandidates"
-      :loading="isImportingCandidates"
-      :locked="isPublishedSectionLocked || isLockedByEnrollment"
+      :candidates="form.eligibleCandidates"
+      :existing-candidate-keys="existingCandidateKeys"
+      :has-candidates="hasEligibleCandidates"
+      :loading="isImportingCandidates || isLoadingData"
+      :locked="isPublishedSectionLocked || isLockedByEnrollment || isLoadingData"
       @import-candidates="importCandidates"
+      @add-candidates-from-users="addEligibleCandidatesFromUsers"
+      @remove-candidates="removeEligibleCandidates"
       @passcode-type-selected="generatePasscodes"
       @export-candidates="exportCandidates"
     />
@@ -85,11 +97,14 @@
     <div class="row justify-end q-mt-md q-gutter-sm action-container">
       <app-button
         :label="wasOriginallyPublished ? 'กลับสู่หน้าจัดการ' : 'ยกเลิก'"
+        :disable="isSaving"
         @click="onCancel"
         class="action-btn cancel-btn text-weight-bold"
       />
       <app-button
         :label="isEditMode ? 'บันทึกการแก้ไข' : 'บันทึก'"
+        :loading="isSaving"
+        :disable="isSaving || isLoadingData"
         @click="onSave"
         class="action-btn save-btn text-white text-weight-bold"
       />
@@ -124,6 +139,7 @@ const {
   fundSourceOptions,
   getOccupiedLocationIdsForSlot,
   isLoadingData,
+  isSaving,
   isImportingCandidates,
   isEditMode,
   isPublishedSectionLocked,
@@ -134,6 +150,8 @@ const {
   activeSlotIndex,
   candidateSearch,
   filteredCandidates,
+  existingCandidateKeys,
+  hasEligibleCandidates,
   fieldErrors,
   shakeKey,
   loadInitialData,
@@ -142,6 +160,8 @@ const {
   addRoom,
   removeRoom,
   importCandidates,
+  addEligibleCandidatesFromUsers,
+  removeEligibleCandidates,
   generatePasscodes,
   exportCandidates,
   handleCancel,

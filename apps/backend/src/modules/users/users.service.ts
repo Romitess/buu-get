@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, Repository } from 'typeorm';
+import { Brackets, DataSource, In, Repository } from 'typeorm';
 import {
   buildPaginatedResponse,
   PaginatedResponse,
@@ -16,6 +16,7 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UsersQueryDto } from './dto/users-query.dto';
+import { UserIdentifierCheckResultDto } from './dto/check-user-identifiers.dto';
 import { User } from './entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
 import { UserProfileService } from '../user-profile/user-profile.service';
@@ -126,6 +127,32 @@ export class UsersService {
       );
     }
 
+    const search = query.search?.trim();
+    if (search) {
+      const searchPattern = `%${search}%`;
+      const searchLower = `%${search.toLowerCase()}%`;
+      queryBuilder.andWhere(
+        new Brackets((innerQb) => {
+          innerQb
+            .where('user.USER_NATIONAL_ID LIKE :searchPattern', {
+              searchPattern,
+            })
+            .orWhere('user.USER_PASSPORT_NO LIKE :searchPattern', {
+              searchPattern,
+            })
+            .orWhere('LOWER(user.USER_EMAIL) LIKE :searchLower', {
+              searchLower,
+            })
+            .orWhere('LOWER(profile.userFullnameTh) LIKE :searchLower', {
+              searchLower,
+            })
+            .orWhere('LOWER(profile.userFullnameEn) LIKE :searchLower', {
+              searchLower,
+            });
+        }),
+      );
+    }
+
     const [users, total] = await queryBuilder
       .orderBy('user.CREATED_AT', 'DESC')
       .skip((page - 1) * limit)
@@ -212,5 +239,42 @@ export class UsersService {
     }
 
     return UserResponseDto.fromEntity(user);
+  }
+
+  /** ตรวจสอบว่ารหัสประชาชน/passport มีอยู่ในระบบหรือไม่ */
+  async checkIdentifiers(
+    identifiers: string[],
+  ): Promise<UserIdentifierCheckResultDto[]> {
+    const normalized = [
+      ...new Set(
+        identifiers.map((id) => id.trim()).filter((id) => id.length > 0),
+      ),
+    ];
+
+    if (normalized.length === 0) {
+      return [];
+    }
+
+    const users = await this.usersRepository
+      .createQueryBuilder('user')
+      .select(['user.USER_NATIONAL_ID', 'user.USER_PASSPORT_NO'])
+      .where('user.USER_NATIONAL_ID IN (:...ids)', { ids: normalized })
+      .orWhere('user.USER_PASSPORT_NO IN (:...ids)', { ids: normalized })
+      .getMany();
+
+    const foundSet = new Set<string>();
+    for (const user of users) {
+      if (user.USER_NATIONAL_ID?.trim()) {
+        foundSet.add(user.USER_NATIONAL_ID.trim());
+      }
+      if (user.USER_PASSPORT_NO?.trim()) {
+        foundSet.add(user.USER_PASSPORT_NO.trim());
+      }
+    }
+
+    return normalized.map((identifier) => ({
+      identifier,
+      exists: foundSet.has(identifier),
+    }));
   }
 }

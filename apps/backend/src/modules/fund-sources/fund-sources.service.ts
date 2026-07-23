@@ -13,13 +13,8 @@ import {
 import { ExamEnrollmentStatus } from '../exam-enrollments/entities/exam-enrollment.entity';
 
 interface RawDailyRevenueRow {
-  department: string;
   examName: string;
   amount: string | number;
-}
-
-interface RawDepartmentRow {
-  faculty: string;
 }
 
 @Injectable()
@@ -105,13 +100,6 @@ export class FundSourcesService {
       );
     }
 
-    // Department filter
-    if (query.department) {
-      qb.andWhere('fundSource.FS_FACULTY = :department', {
-        department: query.department,
-      });
-    }
-
     // Exam name filter
     if (query.examName) {
       qb.andWhere('exam.EXAM_NAME LIKE :examName', {
@@ -120,24 +108,16 @@ export class FundSourcesService {
     }
 
     qb.select([
-      'fundSource.FS_FACULTY AS department',
       'exam.EXAM_NAME AS examName',
       'SUM(transaction.TRANX_AMOUNT) AS amount',
     ]);
 
-    qb.groupBy('fundSource.FS_FACULTY');
-    qb.addGroupBy('exam.EXAM_NAME');
-
-    console.log('=== API SQL ===');
-    console.log(qb.getSql());
-    console.log(qb.getParameters());
-    console.log('===============');
+    qb.groupBy('exam.EXAM_NAME');
 
     const rawRows = await qb.getRawMany<RawDailyRevenueRow>();
 
     const rows = rawRows.map((row, idx) => ({
       index: idx + 1,
-      department: row.department,
       examName: row.examName,
       amount: Number(row.amount),
     }));
@@ -148,20 +128,5 @@ export class FundSourcesService {
       rows,
       totalAmount,
     };
-  }
-
-  async getDepartments(): Promise<{ label: string; value: string }[]> {
-    const departments = await this.fundSourcesRepository
-      .createQueryBuilder('fs')
-      .select('DISTINCT fs.FS_FACULTY', 'faculty')
-      .where('fs.FS_FACULTY IS NOT NULL')
-      .andWhere("fs.FS_FACULTY != ''")
-      .andWhere('fs.FS_OPEN_STATUS = :status', { status: true })
-      .getRawMany<RawDepartmentRow>();
-
-    return departments.map((d) => ({
-      label: d.faculty,
-      value: d.faculty,
-    }));
   }
 }

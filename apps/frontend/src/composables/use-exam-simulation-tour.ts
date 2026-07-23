@@ -120,6 +120,7 @@ export const useExamSimulationTour = (options: UseExamSimulationTourOptions) => 
   const awaitingResume = ref(false);
   const pendingResumeOn = ref<TourResumeTrigger | null>(null);
   const hasAutoStartAttempted = ref(false);
+  const showTourOffer = ref(false);
 
   let bindGeneration = 0;
   let resizeObserver: ResizeObserver | null = null;
@@ -377,7 +378,7 @@ export const useExamSimulationTour = (options: UseExamSimulationTourOptions) => 
   };
 
   const maybeAutoStart = async (): Promise<void> => {
-    if (hasAutoStartAttempted.value || isActive.value) {
+    if (hasAutoStartAttempted.value || isActive.value || showTourOffer.value) {
       return;
     }
 
@@ -387,7 +388,7 @@ export const useExamSimulationTour = (options: UseExamSimulationTourOptions) => 
 
     hasAutoStartAttempted.value = true;
     await waitForPaint();
-    await startTour();
+    showTourOffer.value = true;
   };
 
   const tryResumeTour = async (
@@ -511,6 +512,7 @@ export const useExamSimulationTour = (options: UseExamSimulationTourOptions) => 
     nextLabel,
     placement,
     isLastStep,
+    showTourOffer,
     startTour,
     restartTour,
     goToNextStep,

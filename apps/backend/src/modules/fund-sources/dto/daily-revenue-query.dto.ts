@@ -12,11 +12,6 @@ export class DailyRevenueQueryDto {
   @IsOptional()
   endDate?: string;
 
-  @ApiPropertyOptional({ description: 'ส่วนงาน' })
-  @IsString()
-  @IsOptional()
-  department?: string;
-
   @ApiPropertyOptional({ description: 'ชื่อการสอบ' })
   @IsString()
   @IsOptional()

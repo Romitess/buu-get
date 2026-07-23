@@ -1,14 +1,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type {
-  DailyRevenueRow,
-  DailyRevenueFilter,
-  DepartmentOption,
-} from 'src/types/daily-revenue.types';
-import {
-  fetchDailyRevenueSummary,
-  fetchDepartmentOptions,
-} from 'src/services/daily-revenue.service';
+import type { DailyRevenueRow, DailyRevenueFilter } from 'src/types/daily-revenue.types';
+import { fetchDailyRevenueSummary } from 'src/services/daily-revenue.service';
 
 /**
  * Composable สำหรับจัดการข้อมูลรายงานสรุปการรับเงินประจำวัน
@@ -22,12 +15,10 @@ export function useDailyRevenue() {
   const isLoading = ref(false);
   const error = ref<string | null>(null);
   const totalAmount = ref(0);
-  const departmentOptions = ref<DepartmentOption[]>([]);
 
   const filter = ref<DailyRevenueFilter>({
     startDate: '',
     endDate: '',
-    department: '',
     examName: '',
   });
 
@@ -56,18 +47,6 @@ export function useDailyRevenue() {
     }
   };
 
-  const loadDepartmentOptions = async (): Promise<void> => {
-    try {
-      const options = await fetchDepartmentOptions();
-      departmentOptions.value = [
-        { label: t('admin.dailyRevenueReport.filter.all'), value: '' },
-        ...options,
-      ];
-    } catch {
-      departmentOptions.value = [];
-    }
-  };
-
   const applyFilter = (newFilter: DailyRevenueFilter): void => {
     filter.value = { ...newFilter };
     void fetchData();
@@ -77,7 +56,6 @@ export function useDailyRevenue() {
     filter.value = {
       startDate: '',
       endDate: '',
-      department: '',
       examName: '',
     };
     void fetchData();
@@ -91,9 +69,7 @@ export function useDailyRevenue() {
     filter,
     totalAmount,
     formattedTotal,
-    departmentOptions,
     fetchData,
-    loadDepartmentOptions,
     applyFilter,
     resetFilter,
   };

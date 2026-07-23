@@ -2,7 +2,6 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useExamStore } from 'src/stores/exam.store';
 import type { ExamSchedule } from 'src/types/exam.types';
-import { BUDDHIST_YEAR_OFFSET } from 'src/constants/exam';
 
 export interface AvailableExamRound {
   id: string;
@@ -22,7 +21,7 @@ const MAX_DISPLAY_ROUNDS = 4 as const;
 
 export function useAvailableExamRounds() {
   const store = useExamStore();
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const isLoading = ref(false);
   const error = ref<string | null>(null);
 
@@ -34,8 +33,6 @@ export function useAvailableExamRounds() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const yearOffset = locale.value === 'th' ? BUDDHIST_YEAR_OFFSET : 0;
-
     // 1. Filter and Sort raw schedules first to minimize mapping overhead
     const upcomingSchedules = store.managementSchedules
       .filter((s: ExamSchedule) => {
@@ -46,10 +43,11 @@ export function useAvailableExamRounds() {
       .slice(0, MAX_DISPLAY_ROUNDS);
 
     // 2. Map only the limited subset to the final structure
+    // roundNumber shows create-form exam name + round (already combined in schedule.examName)
     return upcomingSchedules.map(
-      (schedule: ExamSchedule, index: number): AvailableExamRound => ({
+      (schedule: ExamSchedule): AvailableExamRound => ({
         id: schedule.id,
-        roundNumber: `${index + 1}/${new Date(schedule.examDate).getFullYear() + yearOffset}`,
+        roundNumber: schedule.examName,
         examDate: schedule.examDate,
         regStartDate: schedule.regStartDate ?? '',
         regEndDate: schedule.regEndDate ?? '',

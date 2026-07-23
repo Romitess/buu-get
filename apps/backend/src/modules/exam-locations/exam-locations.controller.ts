@@ -7,12 +7,14 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { ExamLocationsService } from './exam-locations.service';
 import { CreateExamLocationDto } from './dto/create-exam-location.dto';
@@ -51,9 +53,19 @@ export class ExamLocationsController {
 
   @Get()
   @ApiOperation({ summary: 'ดึงข้อมูลสถานที่จัดสอบทั้งหมด' })
+  @ApiQuery({
+    name: 'includeSeats',
+    required: false,
+    type: Boolean,
+    description: 'เมื่อ true จะรวมที่นั่งของทุกห้องใน response เดียว',
+  })
   @ApiOkResponse({ type: ExamLocation, isArray: true })
-  async findAll(): Promise<ExamLocation[]> {
-    return this.examLocationsService.findAll();
+  async findAll(
+    @Query('includeSeats') includeSeats?: string,
+  ): Promise<ExamLocation[]> {
+    return this.examLocationsService.findAll({
+      includeSeats: includeSeats === 'true' || includeSeats === '1',
+    });
   }
 
   @Get(':id')
