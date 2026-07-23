@@ -330,8 +330,8 @@
     "semantic_hash": ""
   },
   "src/components/exam/app-exam-history-card.vue": {
-    "mtime": 1783042948.8444815,
-    "ast_hash": "5690fe21567732c310dcc87558b03642",
+    "mtime": 1784776319.9075718,
+    "ast_hash": "786645db22935cf74d7752a715875fcf",
     "semantic_hash": ""
   },
   "src/components/exam/app-exam-info-card.vue": {
@@ -1000,8 +1000,8 @@
     "semantic_hash": ""
   },
   "src/i18n/en-US/index.ts": {
-    "mtime": 1784774870.5737083,
-    "ast_hash": "4b7a268e36d7408049e3b584ee099c00",
+    "mtime": 1784776250.7669837,
+    "ast_hash": "0a658e1ed7d5ba9573917fb99201c285",
     "semantic_hash": ""
   },
   "src/i18n/index.ts": {
@@ -1010,8 +1010,8 @@
     "semantic_hash": ""
   },
   "src/i18n/th/index.ts": {
-    "mtime": 1784774870.085269,
-    "ast_hash": "021709ff9c7de357cd96b1ce79a4e4fd",
+    "mtime": 1784776247.6991856,
+    "ast_hash": "2ca5f6fb430be373a07492ffa0d88bd7",
     "semantic_hash": ""
   },
   "src/layouts/main-layout.vue": {
@@ -1020,8 +1020,8 @@
     "semantic_hash": ""
   },
   "src/pages/admin/application-fee-report-page.vue": {
-    "mtime": 1784774636.9190822,
-    "ast_hash": "5dd148b391a7f6b09e15c336519963af",
+    "mtime": 1784775522.350465,
+    "ast_hash": "89a5f9a11d0536b93f93ca554ed58de4",
     "semantic_hash": ""
   },
   "src/pages/admin/create-exam-page.vue": {
@@ -1030,8 +1030,8 @@
     "semantic_hash": ""
   },
   "src/pages/admin/daily-revenue-report-page.vue": {
-    "mtime": 1784774615.0423467,
-    "ast_hash": "4820283f75674eae1a04ef3209a5a951",
+    "mtime": 1784775522.36584,
+    "ast_hash": "a3deef9947e03567e3d471b55d258b39",
     "semantic_hash": ""
   },
   "src/pages/admin/dashboard-page.vue": {
@@ -1145,8 +1145,8 @@
     "semantic_hash": ""
   },
   "src/pages/admin/receipt-usage-report-page.vue": {
-    "mtime": 1784774619.608245,
-    "ast_hash": "4266044dea44e5799eb4914642f36c4e",
+    "mtime": 1784775522.4025156,
+    "ast_hash": "c46b7ab607ab0f772e6208495101bbc0",
     "semantic_hash": ""
   },
   "src/pages/admin/score-criteria-management-page.vue": {
@@ -1185,8 +1185,8 @@
     "semantic_hash": ""
   },
   "src/pages/user/exam-history-page.vue": {
-    "mtime": 1783584961.3254797,
-    "ast_hash": "288d096cf7ccaa9e03098c037768ace0",
+    "mtime": 1784776354.962962,
+    "ast_hash": "c3cbec9a6faf54ee933869315b7fb849",
     "semantic_hash": ""
   },
   "src/pages/user/exam-schedule-page.vue": {
@@ -3512,6 +3512,36 @@
   "src/components/exam/dialog-search-candidate.vue": {
     "mtime": 1784772248.5914395,
     "ast_hash": "521255420263b87b0604560a05202499",
+    "semantic_hash": ""
+  },
+  "src/components/exam/exam-prep-guide-dialog.vue": {
+    "mtime": 1784776337.32323,
+    "ast_hash": "61954a343d3834f0a7a910c135fb2dd6",
+    "semantic_hash": ""
+  },
+  "src/components/exam/exam-prep-notify-button.vue": {
+    "mtime": 1784776691.14939,
+    "ast_hash": "e3c430b338ad742f1745e3a13437d55d",
+    "semantic_hash": ""
+  },
+  "src/components/exam/exam-prep-step-dress.vue": {
+    "mtime": 1784776307.8918927,
+    "ast_hash": "c5555280127563cf7572c6d952ecf9fb",
+    "semantic_hash": ""
+  },
+  "src/components/exam/exam-prep-step-items.vue": {
+    "mtime": 1784776273.5452197,
+    "ast_hash": "777dba3c9c73fc9622b7bf084c06b686",
+    "semantic_hash": ""
+  },
+  "src/components/exam/exam-prep-step-print.vue": {
+    "mtime": 1784776266.5049837,
+    "ast_hash": "3f06da273001c5fe56134ee3841d8037",
+    "semantic_hash": ""
+  },
+  "src/composables/use-exam-prep-guide.ts": {
+    "mtime": 1784776255.8321795,
+    "ast_hash": "d1562f5f8e72ed795f65c730817df456",
     "semantic_hash": ""
   }
 }

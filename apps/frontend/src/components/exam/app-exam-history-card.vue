@@ -1,8 +1,12 @@
 <template>
   <div
     class="buu-card q-pa-lg column app-exam-history-card-container"
-    :class="[`status-${statusType}`]"
+    :class="[`status-${statusType}`, { 'has-notify': Boolean($slots.notify) }]"
   >
+    <div v-if="$slots.notify" class="card-notify">
+      <slot name="notify" />
+    </div>
+
     <!-- Top Row: Status & Fee -->
     <div class="row items-center justify-start full-width card-top-row">
       <!-- Left side: Status indicators -->
@@ -115,6 +119,13 @@ const { displayDeadline } = useCountdown(toRef(props, 'deadline'), () => emit('t
 </script>
 
 <style scoped lang="scss">
+.card-notify {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  z-index: 2;
+}
+
 .app-exam-history-card-container {
   // Always use primary blue for the brand bar as seen in Figma
   border-left: var(--space-sm) solid var(--primary);
@@ -133,6 +144,12 @@ const { displayDeadline } = useCountdown(toRef(props, 'deadline'), () => emit('t
   &:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
+  }
+
+  &.has-notify {
+    .card-top-row {
+      padding-right: calc(var(--space-unit) * 10);
+    }
   }
 }
 

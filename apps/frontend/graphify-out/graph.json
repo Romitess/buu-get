@@ -1660,7 +1660,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_report_exam_candidates_info_table",
-      "community": 41,
+      "community": 19,
       "norm_label": "exam-candidates-info-table.vue"
     },
     {
@@ -1670,7 +1670,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "exam_report_exam_candidates_info_table_t",
-      "community": 41,
+      "community": 19,
       "norm_label": "{ t }"
     },
     {
@@ -1680,7 +1680,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "exam_report_exam_candidates_info_table_formatnumber",
-      "community": 41,
+      "community": 19,
       "norm_label": "formatnumber()"
     },
     {
@@ -1690,7 +1690,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "exam_report_exam_candidates_info_table_onrequest",
-      "community": 41,
+      "community": 19,
       "norm_label": "onrequest"
     },
     {
@@ -2650,7 +2650,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_create_exam_candidates_card",
-      "community": 53,
+      "community": 19,
       "norm_label": "create-exam-candidates-card.vue"
     },
     {
@@ -2660,7 +2660,7 @@
       "source_location": "L218",
       "_origin": "ast",
       "id": "exam_create_exam_candidates_card_if",
-      "community": 53,
+      "community": 19,
       "norm_label": "if()"
     },
     {
@@ -2750,7 +2750,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_dialog_csv_import",
-      "community": 53,
+      "community": 19,
       "norm_label": "dialog-csv-import.vue"
     },
     {
@@ -2760,7 +2760,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_dialog_delete_candidates",
-      "community": 53,
+      "community": 19,
       "norm_label": "dialog-delete-candidates.vue"
     },
     {
@@ -2900,7 +2900,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_dialog_passcode_type",
-      "community": 53,
+      "community": 19,
       "norm_label": "dialog-passcode-type.vue"
     },
     {
@@ -2910,7 +2910,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_dialog_search_candidate",
-      "community": 53,
+      "community": 19,
       "norm_label": "dialog-search-candidate.vue"
     },
     {
@@ -3104,6 +3104,106 @@
       "norm_label": "onrequest()"
     },
     {
+      "label": "exam-prep-guide-dialog.vue",
+      "file_type": "code",
+      "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "exam_exam_prep_guide_dialog",
+      "community": 193,
+      "norm_label": "exam-prep-guide-dialog.vue"
+    },
+    {
+      "label": "currentStep",
+      "file_type": "code",
+      "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L98",
+      "_origin": "ast",
+      "id": "exam_exam_prep_guide_dialog_currentstep",
+      "community": 193,
+      "norm_label": "currentstep"
+    },
+    {
+      "label": "transitionName",
+      "file_type": "code",
+      "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L99",
+      "_origin": "ast",
+      "id": "exam_exam_prep_guide_dialog_transitionname",
+      "community": 193,
+      "norm_label": "transitionname"
+    },
+    {
+      "label": "examTitle",
+      "file_type": "code",
+      "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L101",
+      "_origin": "ast",
+      "id": "exam_exam_prep_guide_dialog_examtitle",
+      "community": 193,
+      "norm_label": "examtitle"
+    },
+    {
+      "label": "onUpdateModelValue",
+      "file_type": "code",
+      "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L113",
+      "_origin": "ast",
+      "id": "exam_exam_prep_guide_dialog_onupdatemodelvalue",
+      "community": 193,
+      "norm_label": "onupdatemodelvalue"
+    },
+    {
+      "label": "if()",
+      "file_type": "code",
+      "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L122",
+      "_origin": "ast",
+      "id": "exam_exam_prep_guide_dialog_if",
+      "community": 193,
+      "norm_label": "if()"
+    },
+    {
+      "label": "exam-prep-notify-button.vue",
+      "file_type": "code",
+      "source_file": "src/components/exam/exam-prep-notify-button.vue",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "exam_exam_prep_notify_button",
+      "community": 195,
+      "norm_label": "exam-prep-notify-button.vue"
+    },
+    {
+      "label": "exam-prep-step-dress.vue",
+      "file_type": "code",
+      "source_file": "src/components/exam/exam-prep-step-dress.vue",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "exam_exam_prep_step_dress",
+      "community": 196,
+      "norm_label": "exam-prep-step-dress.vue"
+    },
+    {
+      "label": "exam-prep-step-items.vue",
+      "file_type": "code",
+      "source_file": "src/components/exam/exam-prep-step-items.vue",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "exam_exam_prep_step_items",
+      "community": 197,
+      "norm_label": "exam-prep-step-items.vue"
+    },
+    {
+      "label": "exam-prep-step-print.vue",
+      "file_type": "code",
+      "source_file": "src/components/exam/exam-prep-step-print.vue",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "exam_exam_prep_step_print",
+      "community": 198,
+      "norm_label": "exam-prep-step-print.vue"
+    },
+    {
       "label": "receipt-information-dialog.vue",
       "file_type": "code",
       "source_file": "src/components/exam/receipt-information-dialog.vue",
@@ -3210,7 +3310,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_example_component",
-      "community": 137,
+      "community": 17,
       "norm_label": "example-component.vue"
     },
     {
@@ -3220,7 +3320,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "components_example_component_props",
-      "community": 137,
+      "community": 17,
       "norm_label": "props"
     },
     {
@@ -3230,7 +3330,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "components_example_component_clickcount",
-      "community": 137,
+      "community": 17,
       "norm_label": "clickcount"
     },
     {
@@ -3240,7 +3340,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "components_example_component_increment",
-      "community": 137,
+      "community": 17,
       "norm_label": "increment()"
     },
     {
@@ -3250,7 +3350,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "components_example_component_todocount",
-      "community": 137,
+      "community": 17,
       "norm_label": "todocount"
     },
     {
@@ -4130,7 +4230,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_action_button",
-      "community": 41,
+      "community": 19,
       "norm_label": "action-button.vue"
     },
     {
@@ -4480,7 +4580,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_app_page_header",
-      "community": 2,
+      "community": 194,
       "norm_label": "app-page-header.vue"
     },
     {
@@ -4570,7 +4670,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_base_table",
-      "community": 53,
+      "community": 41,
       "norm_label": "base-table.vue"
     },
     {
@@ -4580,7 +4680,7 @@
       "source_location": "L414",
       "_origin": "ast",
       "id": "shared_base_table_get",
-      "community": 53,
+      "community": 41,
       "norm_label": "get()"
     },
     {
@@ -4590,7 +4690,7 @@
       "source_location": "L429",
       "_origin": "ast",
       "id": "shared_base_table_has",
-      "community": 53,
+      "community": 41,
       "norm_label": "has()"
     },
     {
@@ -4600,7 +4700,7 @@
       "source_location": "L432",
       "_origin": "ast",
       "id": "shared_base_table_ownkeys",
-      "community": 53,
+      "community": 41,
       "norm_label": "ownkeys()"
     },
     {
@@ -4610,7 +4710,7 @@
       "source_location": "L435",
       "_origin": "ast",
       "id": "shared_base_table_getownpropertydescriptor",
-      "community": 53,
+      "community": 41,
       "norm_label": "getownpropertydescriptor()"
     },
     {
@@ -4690,7 +4790,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_test_voucher_report",
-      "community": 172,
+      "community": 140,
       "norm_label": "test-voucher-report.vue"
     },
     {
@@ -4810,7 +4910,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_available_exam_rounds",
-      "community": 19,
+      "community": 15,
       "norm_label": "use-available-exam-rounds.ts"
     },
     {
@@ -4820,7 +4920,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "composables_use_available_exam_rounds_availableexamround",
-      "community": 19,
+      "community": 15,
       "norm_label": "availableexamround"
     },
     {
@@ -4830,7 +4930,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "composables_use_available_exam_rounds_max_display_rounds",
-      "community": 19,
+      "community": 15,
       "norm_label": "max_display_rounds"
     },
     {
@@ -4840,7 +4940,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "composables_use_available_exam_rounds_useavailableexamrounds",
-      "community": 22,
+      "community": 15,
       "norm_label": "useavailableexamrounds()"
     },
     {
@@ -5010,7 +5110,7 @@
       "source_location": "L213",
       "_origin": "ast",
       "id": "composables_use_candidate_home_activities_usecandidatehomeactivities",
-      "community": 22,
+      "community": 15,
       "norm_label": "usecandidatehomeactivities()"
     },
     {
@@ -5070,7 +5170,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_create_exam",
-      "community": 15,
+      "community": 12,
       "norm_label": "use-create-exam.ts"
     },
     {
@@ -5080,7 +5180,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "composables_use_create_exam_examroom",
-      "community": 15,
+      "community": 12,
       "norm_label": "examroom"
     },
     {
@@ -5090,7 +5190,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "composables_use_create_exam_timeslot",
-      "community": 15,
+      "community": 12,
       "norm_label": "timeslot"
     },
     {
@@ -5100,7 +5200,7 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "composables_use_create_exam_eligiblecandidate",
-      "community": 53,
+      "community": 19,
       "norm_label": "eligiblecandidate"
     },
     {
@@ -5110,7 +5210,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "composables_use_create_exam_geteligiblecandidatekey",
-      "community": 15,
+      "community": 12,
       "norm_label": "geteligiblecandidatekey()"
     },
     {
@@ -5130,7 +5230,7 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "composables_use_create_exam_useexamformoptions",
-      "community": 15,
+      "community": 12,
       "norm_label": "useexamformoptions"
     },
     {
@@ -5140,7 +5240,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "composables_use_create_exam_examcomparisonsnapshot",
-      "community": 15,
+      "community": 12,
       "norm_label": "examcomparisonsnapshot"
     },
     {
@@ -5150,7 +5250,7 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "composables_use_create_exam_snapshotstatustocode",
-      "community": 15,
+      "community": 12,
       "norm_label": "snapshotstatustocode()"
     },
     {
@@ -5160,7 +5260,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "composables_use_create_exam_countavailableseats",
-      "community": 15,
+      "community": 12,
       "norm_label": "countavailableseats()"
     },
     {
@@ -5170,7 +5270,7 @@
       "source_location": "L146",
       "_origin": "ast",
       "id": "composables_use_create_exam_getlocationaisleafter",
-      "community": 15,
+      "community": 12,
       "norm_label": "getlocationaisleafter()"
     },
     {
@@ -5180,7 +5280,7 @@
       "source_location": "L174",
       "_origin": "ast",
       "id": "composables_use_create_exam_hasaisleafter",
-      "community": 15,
+      "community": 12,
       "norm_label": "hasaisleafter()"
     },
     {
@@ -5274,13 +5374,83 @@
       "norm_label": "useexamdocuments()"
     },
     {
+      "label": "use-exam-prep-guide.ts",
+      "file_type": "code",
+      "source_file": "src/composables/use-exam-prep-guide.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "composables_use_exam_prep_guide",
+      "community": 53,
+      "norm_label": "use-exam-prep-guide.ts"
+    },
+    {
+      "label": "PrepGuideSeenMap",
+      "file_type": "code",
+      "source_file": "src/composables/use-exam-prep-guide.ts",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "composables_use_exam_prep_guide_prepguideseenmap",
+      "community": 53,
+      "norm_label": "prepguideseenmap"
+    },
+    {
+      "label": "seenMap",
+      "file_type": "code",
+      "source_file": "src/composables/use-exam-prep-guide.ts",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "composables_use_exam_prep_guide_seenmap",
+      "community": 53,
+      "norm_label": "seenmap"
+    },
+    {
+      "label": "readSeenMap()",
+      "file_type": "code",
+      "source_file": "src/composables/use-exam-prep-guide.ts",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "composables_use_exam_prep_guide_readseenmap",
+      "community": 53,
+      "norm_label": "readseenmap()"
+    },
+    {
+      "label": "writeSeenMap()",
+      "file_type": "code",
+      "source_file": "src/composables/use-exam-prep-guide.ts",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "composables_use_exam_prep_guide_writeseenmap",
+      "community": 53,
+      "norm_label": "writeseenmap()"
+    },
+    {
+      "label": "toKey()",
+      "file_type": "code",
+      "source_file": "src/composables/use-exam-prep-guide.ts",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "composables_use_exam_prep_guide_tokey",
+      "community": 53,
+      "norm_label": "tokey()"
+    },
+    {
+      "label": "useExamPrepGuide()",
+      "file_type": "code",
+      "source_file": "src/composables/use-exam-prep-guide.ts",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "composables_use_exam_prep_guide_useexamprepguide",
+      "community": 53,
+      "norm_label": "useexamprepguide()"
+    },
+    {
       "label": "use-exam-registrants.ts",
       "file_type": "code",
       "source_file": "src/composables/use-exam-registrants.ts",
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_exam_registrants",
-      "community": 18,
+      "community": 30,
       "norm_label": "use-exam-registrants.ts"
     },
     {
@@ -5290,7 +5460,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "composables_use_exam_registrants_useexamregistrants",
-      "community": 18,
+      "community": 30,
       "norm_label": "useexamregistrants()"
     },
     {
@@ -5320,7 +5490,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_exam_schedule",
-      "community": 24,
+      "community": 137,
       "norm_label": "use-exam-schedule.ts"
     },
     {
@@ -5330,7 +5500,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "composables_use_exam_schedule_registrationstatus",
-      "community": 24,
+      "community": 137,
       "norm_label": "registrationstatus"
     },
     {
@@ -5340,7 +5510,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "composables_use_exam_schedule_apierrordata",
-      "community": 24,
+      "community": 137,
       "norm_label": "apierrordata"
     },
     {
@@ -5350,7 +5520,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "composables_use_exam_schedule_exampasscodedialogexpose",
-      "community": 24,
+      "community": 137,
       "norm_label": "exampasscodedialogexpose"
     },
     {
@@ -5360,7 +5530,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "composables_use_exam_schedule_route_names",
-      "community": 24,
+      "community": 137,
       "norm_label": "route_names"
     },
     {
@@ -5370,7 +5540,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "composables_use_exam_schedule_useexamschedule",
-      "community": 22,
+      "community": 15,
       "norm_label": "useexamschedule()"
     },
     {
@@ -5420,7 +5590,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "composables_use_exam_seat_candidates_seatcandidatesessionlocation",
-      "community": 13,
+      "community": 23,
       "norm_label": "seatcandidatesessionlocation"
     },
     {
@@ -5520,7 +5690,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "composables_use_exam_seat_management_seatsessionlocation",
-      "community": 13,
+      "community": 23,
       "norm_label": "seatsessionlocation"
     },
     {
@@ -5910,7 +6080,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_navigation",
-      "community": 0,
+      "community": 165,
       "norm_label": "use-navigation.ts"
     },
     {
@@ -5920,7 +6090,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "composables_use_navigation_leftdraweropen",
-      "community": 0,
+      "community": 165,
       "norm_label": "leftdraweropen"
     },
     {
@@ -5930,7 +6100,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "composables_use_navigation_ministate",
-      "community": 0,
+      "community": 165,
       "norm_label": "ministate"
     },
     {
@@ -5940,7 +6110,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "composables_use_navigation_ishovered",
-      "community": 0,
+      "community": 165,
       "norm_label": "ishovered"
     },
     {
@@ -6480,7 +6650,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "constants_exam_notify_msg",
-      "community": 15,
+      "community": 12,
       "norm_label": "notify_msg"
     },
     {
@@ -6490,7 +6660,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "constants_exam_validation_msg",
-      "community": 15,
+      "community": 12,
       "norm_label": "validation_msg"
     },
     {
@@ -6580,7 +6750,7 @@
       "source_location": "L152",
       "_origin": "ast",
       "id": "constants_exam_http_status",
-      "community": 24,
+      "community": 137,
       "norm_label": "http_status"
     },
     {
@@ -6747,7 +6917,7 @@
       "label": "catch()",
       "file_type": "code",
       "source_file": "src/pages/admin/application-fee-report-page.vue",
-      "source_location": "L434",
+      "source_location": "L430",
       "_origin": "ast",
       "id": "admin_application_fee_report_page_catch",
       "community": 66,
@@ -6800,7 +6970,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "admin_edit_exam_page",
-      "community": 2,
+      "community": 194,
       "norm_label": "edit-exam-page.vue"
     },
     {
@@ -6810,7 +6980,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "admin_edit_exam_page_route",
-      "community": 2,
+      "community": 194,
       "norm_label": "route"
     },
     {
@@ -6820,7 +6990,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "admin_edit_exam_page_examid",
-      "community": 2,
+      "community": 194,
       "norm_label": "examid"
     },
     {
@@ -6830,7 +7000,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "admin_edit_exam_page_form",
-      "community": 2,
+      "community": 194,
       "norm_label": "{ form }"
     },
     {
@@ -7840,7 +8010,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "pages_index_page",
-      "community": 137,
+      "community": 17,
       "norm_label": "index-page.vue"
     },
     {
@@ -7900,7 +8070,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "router_index",
-      "community": 48,
+      "community": 0,
       "norm_label": "index.ts"
     },
     {
@@ -7930,7 +8100,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "router_routes_routes",
-      "community": 48,
+      "community": 0,
       "norm_label": "routes"
     },
     {
@@ -8220,7 +8390,7 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "services_enrollment_service_bulkassignenrollmentseats",
-      "community": 18,
+      "community": 13,
       "norm_label": "bulkassignenrollmentseats()"
     },
     {
@@ -8680,7 +8850,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "services_exam_service_retryasync",
-      "community": 23,
+      "community": 12,
       "norm_label": "retryasync()"
     },
     {
@@ -8690,7 +8860,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "services_exam_service_formattime",
-      "community": 15,
+      "community": 12,
       "norm_label": "formattime()"
     },
     {
@@ -8700,7 +8870,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "services_exam_service_parsebangkokdate",
-      "community": 15,
+      "community": 12,
       "norm_label": "parsebangkokdate()"
     },
     {
@@ -8710,7 +8880,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "services_exam_service_formatbackenddate",
-      "community": 15,
+      "community": 12,
       "norm_label": "formatbackenddate()"
     },
     {
@@ -8740,7 +8910,7 @@
       "source_location": "L186",
       "_origin": "ast",
       "id": "services_exam_service_fundsource",
-      "community": 15,
+      "community": 12,
       "norm_label": "fundsource"
     },
     {
@@ -8750,7 +8920,7 @@
       "source_location": "L193",
       "_origin": "ast",
       "id": "services_exam_service_sessionlocationsnapshotpayload",
-      "community": 15,
+      "community": 12,
       "norm_label": "sessionlocationsnapshotpayload"
     },
     {
@@ -8760,7 +8930,7 @@
       "source_location": "L208",
       "_origin": "ast",
       "id": "services_exam_service_examlocationoption",
-      "community": 15,
+      "community": 12,
       "norm_label": "examlocationoption"
     },
     {
@@ -8790,7 +8960,7 @@
       "source_location": "L333",
       "_origin": "ast",
       "id": "services_exam_service_fetchexambyid",
-      "community": 23,
+      "community": 12,
       "norm_label": "fetchexambyid()"
     },
     {
@@ -8800,7 +8970,7 @@
       "source_location": "L341",
       "_origin": "ast",
       "id": "services_exam_service_fetchexamwithseats",
-      "community": 23,
+      "community": 12,
       "norm_label": "fetchexamwithseats()"
     },
     {
@@ -8960,7 +9130,7 @@
       "source_location": "L703",
       "_origin": "ast",
       "id": "services_exam_service_fetchfundsources",
-      "community": 15,
+      "community": 12,
       "norm_label": "fetchfundsources()"
     },
     {
@@ -8970,7 +9140,7 @@
       "source_location": "L713",
       "_origin": "ast",
       "id": "services_exam_service_fetchexamlocations",
-      "community": 15,
+      "community": 12,
       "norm_label": "fetchexamlocations()"
     },
     {
@@ -9000,7 +9170,7 @@
       "source_location": "L862",
       "_origin": "ast",
       "id": "services_exam_service_examchangeitem",
-      "community": 15,
+      "community": 12,
       "norm_label": "examchangeitem"
     },
     {
@@ -9010,7 +9180,7 @@
       "source_location": "L872",
       "_origin": "ast",
       "id": "services_exam_service_notifyexamchanges",
-      "community": 15,
+      "community": 12,
       "norm_label": "notifyexamchanges()"
     },
     {
@@ -9100,7 +9270,7 @@
       "source_location": "L973",
       "_origin": "ast",
       "id": "services_exam_service_createexampasscodes",
-      "community": 15,
+      "community": 12,
       "norm_label": "createexampasscodes()"
     },
     {
@@ -9330,7 +9500,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "services_location_service_backendlocationraw",
-      "community": 15,
+      "community": 12,
       "norm_label": "backendlocationraw"
     },
     {
@@ -10270,7 +10440,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "stores_exam_store_useexamstore",
-      "community": 22,
+      "community": 15,
       "norm_label": "useexamstore"
     },
     {
@@ -10390,7 +10560,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_common",
-      "community": 137,
+      "community": 17,
       "norm_label": "common.ts"
     },
     {
@@ -10400,7 +10570,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "types_common_todo",
-      "community": 137,
+      "community": 17,
       "norm_label": "todo"
     },
     {
@@ -10410,7 +10580,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "types_common_meta",
-      "community": 137,
+      "community": 17,
       "norm_label": "meta"
     },
     {
@@ -10420,7 +10590,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "types_common_appcalendarprops",
-      "community": 137,
+      "community": 17,
       "norm_label": "appcalendarprops"
     },
     {
@@ -10430,7 +10600,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "types_common_examcalendarprops",
-      "community": 137,
+      "community": 17,
       "norm_label": "examcalendarprops"
     },
     {
@@ -10440,7 +10610,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "types_common_passcodelog",
-      "community": 137,
+      "community": 17,
       "norm_label": "passcodelog"
     },
     {
@@ -10580,7 +10750,7 @@
       "source_location": "L155",
       "_origin": "ast",
       "id": "types_enrollment_types_enrollmentstatus",
-      "community": 23,
+      "community": 30,
       "norm_label": "enrollmentstatus"
     },
     {
@@ -10600,7 +10770,7 @@
       "source_location": "L171",
       "_origin": "ast",
       "id": "types_enrollment_types_payment_status_labels",
-      "community": 18,
+      "community": 30,
       "norm_label": "payment_status_labels"
     },
     {
@@ -10610,7 +10780,7 @@
       "source_location": "L180",
       "_origin": "ast",
       "id": "types_enrollment_types_verify_status_labels",
-      "community": 18,
+      "community": 30,
       "norm_label": "verify_status_labels"
     },
     {
@@ -10860,7 +11030,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "types_exam_examround",
-      "community": 24,
+      "community": 137,
       "norm_label": "examround"
     },
     {
@@ -10910,7 +11080,7 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "types_exam_daydata",
-      "community": 137,
+      "community": 17,
       "norm_label": "daydata"
     },
     {
@@ -11000,7 +11170,7 @@
       "source_location": "L229",
       "_origin": "ast",
       "id": "types_exam_backendlocation",
-      "community": 15,
+      "community": 12,
       "norm_label": "backendlocation"
     },
     {
@@ -11020,7 +11190,7 @@
       "source_location": "L265",
       "_origin": "ast",
       "id": "types_exam_backendsession",
-      "community": 13,
+      "community": 23,
       "norm_label": "backendsession"
     },
     {
@@ -11030,7 +11200,7 @@
       "source_location": "L302",
       "_origin": "ast",
       "id": "types_exam_backendexam",
-      "community": 23,
+      "community": 13,
       "norm_label": "backendexam"
     },
     {
@@ -11070,7 +11240,7 @@
       "source_location": "L357",
       "_origin": "ast",
       "id": "types_exam_passcodetype",
-      "community": 53,
+      "community": 19,
       "norm_label": "passcodetype"
     },
     {
@@ -11090,7 +11260,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "types_exam_types_examschedule",
-      "community": 19,
+      "community": 15,
       "norm_label": "examschedule"
     },
     {
@@ -11100,7 +11270,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "types_exam_types_paginationmodel",
-      "community": 41,
+      "community": 19,
       "norm_label": "paginationmodel"
     },
     {
@@ -11180,7 +11350,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "types_exam_types_tablerequestprops",
-      "community": 53,
+      "community": 19,
       "norm_label": "tablerequestprops"
     },
     {
@@ -12011,9 +12181,9 @@
       "source_file": "config/monorepo-env.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_monorepo_env",
-      "target": "config_monorepo_env_getmonorepoenvfilepaths",
-      "confidence_score": 1.0
+      "target": "config_monorepo_env_getmonorepoenvfilepaths"
     },
     {
       "relation": "contains",
@@ -12021,9 +12191,9 @@
       "source_file": "config/monorepo-env.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_monorepo_env",
-      "target": "config_monorepo_env_loadmonorepoenv",
-      "confidence_score": 1.0
+      "target": "config_monorepo_env_loadmonorepoenv"
     },
     {
       "relation": "contains",
@@ -12031,9 +12201,9 @@
       "source_file": "config/monorepo-env.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_monorepo_env",
-      "target": "config_monorepo_env_monorepo_env_files",
-      "confidence_score": 1.0
+      "target": "config_monorepo_env_monorepo_env_files"
     },
     {
       "relation": "contains",
@@ -12041,9 +12211,9 @@
       "source_file": "config/monorepo-env.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_monorepo_env",
-      "target": "config_monorepo_env_monorepo_root",
-      "confidence_score": 1.0
+      "target": "config_monorepo_env_monorepo_root"
     },
     {
       "relation": "imports_from",
@@ -12052,9 +12222,9 @@
       "source_file": "playwright.config.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "playwright_config",
-      "target": "config_monorepo_env",
-      "confidence_score": 1.0
+      "target": "config_monorepo_env"
     },
     {
       "relation": "imports_from",
@@ -12063,9 +12233,9 @@
       "source_file": "quasar.config.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "quasar_config",
-      "target": "config_monorepo_env",
-      "confidence_score": 1.0
+      "target": "config_monorepo_env"
     },
     {
       "relation": "imports",
@@ -12074,9 +12244,9 @@
       "source_file": "quasar.config.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "quasar_config",
-      "target": "config_monorepo_env_monorepo_root",
-      "confidence_score": 1.0
+      "target": "config_monorepo_env_monorepo_root"
     },
     {
       "relation": "calls",
@@ -12085,9 +12255,9 @@
       "source_file": "config/monorepo-env.ts",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_monorepo_env_loadmonorepoenv",
-      "target": "config_monorepo_env_getmonorepoenvfilepaths",
-      "confidence_score": 1.0
+      "target": "config_monorepo_env_getmonorepoenvfilepaths"
     },
     {
       "relation": "imports",
@@ -12096,9 +12266,9 @@
       "source_file": "playwright.config.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "playwright_config",
-      "target": "config_monorepo_env_loadmonorepoenv",
-      "confidence_score": 1.0
+      "target": "config_monorepo_env_loadmonorepoenv"
     },
     {
       "relation": "imports",
@@ -12107,9 +12277,9 @@
       "source_file": "quasar.config.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "quasar_config",
-      "target": "config_monorepo_env_loadmonorepoenv",
-      "confidence_score": 1.0
+      "target": "config_monorepo_env_loadmonorepoenv"
     },
     {
       "relation": "contains",
@@ -13097,9 +13267,9 @@
       "source_file": "src/services/voided-receipt.service.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_voided_receipt_service",
-      "target": "boot_axios",
-      "confidence_score": 1.0
+      "target": "boot_axios"
     },
     {
       "relation": "imports_from",
@@ -13361,9 +13531,9 @@
       "source_file": "src/services/voided-receipt.service.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_voided_receipt_service",
-      "target": "boot_axios_api",
-      "confidence_score": 1.0
+      "target": "boot_axios_api"
     },
     {
       "relation": "imports",
@@ -13758,9 +13928,9 @@
       "source_file": "src/components/base/product-tour/product-tour-overlay.vue",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_tour_product_tour_overlay",
-      "target": "composables_exam_simulation_tour_steps",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps"
     },
     {
       "relation": "imports",
@@ -13769,9 +13939,9 @@
       "source_file": "src/components/base/product-tour/product-tour-overlay.vue",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_tour_product_tour_overlay",
-      "target": "composables_exam_simulation_tour_steps_tourplacement",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_tourplacement"
     },
     {
       "relation": "contains",
@@ -13779,9 +13949,9 @@
       "source_file": "src/components/base/product-tour/product-tour-overlay.vue",
       "source_location": "L89",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_tour_product_tour_overlay",
-      "target": "product_tour_product_tour_overlay_bodyid",
-      "confidence_score": 1.0
+      "target": "product_tour_product_tour_overlay_bodyid"
     },
     {
       "relation": "contains",
@@ -13789,9 +13959,9 @@
       "source_file": "src/components/base/product-tour/product-tour-overlay.vue",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_tour_product_tour_overlay",
-      "target": "product_tour_product_tour_overlay_popoverheight",
-      "confidence_score": 1.0
+      "target": "product_tour_product_tour_overlay_popoverheight"
     },
     {
       "relation": "contains",
@@ -13799,9 +13969,9 @@
       "source_file": "src/components/base/product-tour/product-tour-overlay.vue",
       "source_location": "L126",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_tour_product_tour_overlay",
-      "target": "product_tour_product_tour_overlay_popoverstyle",
-      "confidence_score": 1.0
+      "target": "product_tour_product_tour_overlay_popoverstyle"
     },
     {
       "relation": "contains",
@@ -13809,9 +13979,9 @@
       "source_file": "src/components/base/product-tour/product-tour-overlay.vue",
       "source_location": "L86",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_tour_product_tour_overlay",
-      "target": "product_tour_product_tour_overlay_prefersreducedmotion",
-      "confidence_score": 1.0
+      "target": "product_tour_product_tour_overlay_prefersreducedmotion"
     },
     {
       "relation": "contains",
@@ -13819,9 +13989,9 @@
       "source_file": "src/components/base/product-tour/product-tour-overlay.vue",
       "source_location": "L69",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_tour_product_tour_overlay",
-      "target": "product_tour_product_tour_overlay_props",
-      "confidence_score": 1.0
+      "target": "product_tour_product_tour_overlay_props"
     },
     {
       "relation": "contains",
@@ -13829,9 +13999,9 @@
       "source_file": "src/components/base/product-tour/product-tour-overlay.vue",
       "source_location": "L108",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_tour_product_tour_overlay",
-      "target": "product_tour_product_tour_overlay_spotlightstyle",
-      "confidence_score": 1.0
+      "target": "product_tour_product_tour_overlay_spotlightstyle"
     },
     {
       "relation": "contains",
@@ -13839,9 +14009,9 @@
       "source_file": "src/components/base/product-tour/product-tour-overlay.vue",
       "source_location": "L88",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "product_tour_product_tour_overlay",
-      "target": "product_tour_product_tour_overlay_titleid",
-      "confidence_score": 1.0
+      "target": "product_tour_product_tour_overlay_titleid"
     },
     {
       "relation": "contains",
@@ -13890,9 +14060,9 @@
       "source_file": "src/components/home/home-guideline-section.vue",
       "source_location": "L113",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "home_home_guideline_section",
-      "target": "base_scroll_reveal",
-      "confidence_score": 1.0
+      "target": "base_scroll_reveal"
     },
     {
       "relation": "imports_from",
@@ -13995,9 +14165,9 @@
       "source_file": "src/components/base/skeleton/card-skeleton.vue",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skeleton_card_skeleton",
-      "target": "skeleton_card_skeleton_getlinewidth",
-      "confidence_score": 1.0
+      "target": "skeleton_card_skeleton_getlinewidth"
     },
     {
       "relation": "re_exports",
@@ -14017,9 +14187,9 @@
       "source_file": "src/components/base/skeleton/index.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skeleton_index",
-      "target": "skeleton_chart_panel_skeleton",
-      "confidence_score": 1.0
+      "target": "skeleton_chart_panel_skeleton"
     },
     {
       "relation": "contains",
@@ -14104,9 +14274,9 @@
       "source_file": "src/components/base/skeleton/index.ts",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skeleton_index",
-      "target": "skeleton_room_preview_skeleton",
-      "confidence_score": 1.0
+      "target": "skeleton_room_preview_skeleton"
     },
     {
       "relation": "re_exports",
@@ -14115,9 +14285,9 @@
       "source_file": "src/components/base/skeleton/index.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skeleton_index",
-      "target": "skeleton_seat_management_skeleton",
-      "confidence_score": 1.0
+      "target": "skeleton_seat_management_skeleton"
     },
     {
       "relation": "re_exports",
@@ -14196,9 +14366,9 @@
       "source_file": "src/components/base/skeleton/table-skeleton.vue",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "skeleton_table_skeleton",
-      "target": "skeleton_table_skeleton_widthpattern",
-      "confidence_score": 1.0
+      "target": "skeleton_table_skeleton_widthpattern"
     },
     {
       "relation": "imports_from",
@@ -15241,9 +15411,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L159",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "composables_use_create_exam",
-      "confidence_score": 1.0
+      "target": "composables_use_create_exam"
     },
     {
       "relation": "imports",
@@ -15252,9 +15422,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L159",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "composables_use_create_exam_eligiblecandidate",
-      "confidence_score": 1.0
+      "target": "composables_use_create_exam_eligiblecandidate"
     },
     {
       "relation": "contains",
@@ -15262,9 +15432,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L218",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "exam_create_exam_candidates_card_if",
-      "confidence_score": 1.0
+      "target": "exam_create_exam_candidates_card_if"
     },
     {
       "relation": "imports_from",
@@ -15273,9 +15443,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L164",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "exam_dialog_csv_import",
-      "confidence_score": 1.0
+      "target": "exam_dialog_csv_import"
     },
     {
       "relation": "imports_from",
@@ -15284,9 +15454,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L167",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "exam_dialog_delete_candidates",
-      "confidence_score": 1.0
+      "target": "exam_dialog_delete_candidates"
     },
     {
       "relation": "imports_from",
@@ -15295,9 +15465,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L165",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "exam_dialog_passcode_type",
-      "confidence_score": 1.0
+      "target": "exam_dialog_passcode_type"
     },
     {
       "relation": "imports_from",
@@ -15306,9 +15476,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L166",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "exam_dialog_search_candidate",
-      "confidence_score": 1.0
+      "target": "exam_dialog_search_candidate"
     },
     {
       "relation": "imports_from",
@@ -15317,9 +15487,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L163",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "shared_base_table",
-      "confidence_score": 1.0
+      "target": "shared_base_table"
     },
     {
       "relation": "imports_from",
@@ -15328,9 +15498,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L161",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "types_exam",
-      "confidence_score": 1.0
+      "target": "types_exam"
     },
     {
       "relation": "imports",
@@ -15339,9 +15509,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L161",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "types_exam_passcodetype",
-      "confidence_score": 1.0
+      "target": "types_exam_passcodetype"
     },
     {
       "relation": "imports_from",
@@ -15350,9 +15520,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L162",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "types_exam_types",
-      "confidence_score": 1.0
+      "target": "types_exam_types"
     },
     {
       "relation": "imports",
@@ -15361,9 +15531,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L162",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "types_exam_types_paginationmodel",
-      "confidence_score": 1.0
+      "target": "types_exam_types_paginationmodel"
     },
     {
       "relation": "imports",
@@ -15372,9 +15542,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L162",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "types_exam_types_tablerequestprops",
-      "confidence_score": 1.0
+      "target": "types_exam_types_tablerequestprops"
     },
     {
       "relation": "imports_from",
@@ -15383,9 +15553,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L168",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "types_user",
-      "confidence_score": 1.0
+      "target": "types_user"
     },
     {
       "relation": "imports",
@@ -15394,9 +15564,9 @@
       "source_file": "src/components/exam/create-exam-candidates-card.vue",
       "source_location": "L168",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_create_exam_candidates_card",
-      "target": "types_user_user",
-      "confidence_score": 1.0
+      "target": "types_user_user"
     },
     {
       "relation": "imports_from",
@@ -15558,9 +15728,9 @@
       "source_file": "src/components/exam/dialog-issue-ticket.spec.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket_spec",
-      "target": "exam_dialog_issue_ticket",
-      "confidence_score": 1.0
+      "target": "exam_dialog_issue_ticket"
     },
     {
       "relation": "contains",
@@ -15568,9 +15738,9 @@
       "source_file": "src/components/exam/dialog-issue-ticket.spec.ts",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket_spec",
-      "target": "exam_dialog_issue_ticket_spec_i18n",
-      "confidence_score": 1.0
+      "target": "exam_dialog_issue_ticket_spec_i18n"
     },
     {
       "relation": "contains",
@@ -15578,9 +15748,9 @@
       "source_file": "src/components/exam/dialog-issue-ticket.spec.ts",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket_spec",
-      "target": "exam_dialog_issue_ticket_spec_mountdialog",
-      "confidence_score": 1.0
+      "target": "exam_dialog_issue_ticket_spec_mountdialog"
     },
     {
       "relation": "contains",
@@ -15588,9 +15758,9 @@
       "source_file": "src/components/exam/dialog-issue-ticket.spec.ts",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket_spec",
-      "target": "exam_dialog_issue_ticket_spec_voucherdata",
-      "confidence_score": 1.0
+      "target": "exam_dialog_issue_ticket_spec_voucherdata"
     },
     {
       "relation": "imports_from",
@@ -15599,9 +15769,9 @@
       "source_file": "src/components/exam/dialog-issue-ticket.spec.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket_spec",
-      "target": "types_voucher",
-      "confidence_score": 1.0
+      "target": "types_voucher"
     },
     {
       "relation": "imports",
@@ -15610,9 +15780,9 @@
       "source_file": "src/components/exam/dialog-issue-ticket.spec.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket_spec",
-      "target": "types_voucher_voucherdata",
-      "confidence_score": 1.0
+      "target": "types_voucher_voucherdata"
     },
     {
       "relation": "contains",
@@ -15630,9 +15800,9 @@
       "source_file": "src/components/exam/dialog-issue-ticket.vue",
       "source_location": "L113",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket",
-      "target": "exam_dialog_issue_ticket_if",
-      "confidence_score": 1.0
+      "target": "exam_dialog_issue_ticket_if"
     },
     {
       "relation": "contains",
@@ -15640,9 +15810,9 @@
       "source_file": "src/components/exam/dialog-issue-ticket.vue",
       "source_location": "L109",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket",
-      "target": "exam_dialog_issue_ticket_isconfirming",
-      "confidence_score": 1.0
+      "target": "exam_dialog_issue_ticket_isconfirming"
     },
     {
       "relation": "contains",
@@ -15650,9 +15820,9 @@
       "source_file": "src/components/exam/dialog-issue-ticket.vue",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_issue_ticket",
-      "target": "exam_dialog_issue_ticket_props",
-      "confidence_score": 1.0
+      "target": "exam_dialog_issue_ticket_props"
     },
     {
       "relation": "imports_from",
@@ -15747,9 +15917,9 @@
       "source_file": "src/components/exam/exam-form.vue",
       "source_location": "L134",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_exam_form",
-      "target": "exam_exam_form_examtypeoptions_examformatoptions_proctoroptions_locationoptions_fundsourceoptions_getoccupiedlocationidsforslot_isloadingdata_issaving_isimportingcandidates_iseditmode_ispublishedsectionlocked_isschedulelocked_islockedbyenrollment_isspecialround_wasoriginallypublished_activeslotindex_candidatesearch_filteredcandidates_existingcandidatekeys_haseligiblecandidates_fielderrors_shakekey_loadinitialdata_addtimeslot_removetimeslot_addroom_removeroom_importcandidates_addeligiblecandidatesfromusers_removeeligiblecandidates_generatepasscodes_exportcandidates_handlecancel_handlesave_sorttimeslots_dateerrors_clearfielderror",
-      "confidence_score": 1.0
+      "target": "exam_exam_form_examtypeoptions_examformatoptions_proctoroptions_locationoptions_fundsourceoptions_getoccupiedlocationidsforslot_isloadingdata_issaving_isimportingcandidates_iseditmode_ispublishedsectionlocked_isschedulelocked_islockedbyenrollment_isspecialround_wasoriginallypublished_activeslotindex_candidatesearch_filteredcandidates_existingcandidatekeys_haseligiblecandidates_fielderrors_shakekey_loadinitialdata_addtimeslot_removetimeslot_addroom_removeroom_importcandidates_addeligiblecandidatesfromusers_removeeligiblecandidates_generatepasscodes_exportcandidates_handlecancel_handlesave_sorttimeslots_dateerrors_clearfielderror"
     },
     {
       "relation": "contains",
@@ -16028,6 +16198,56 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L98",
+      "weight": 1.0,
+      "source": "exam_exam_prep_guide_dialog",
+      "target": "exam_exam_prep_guide_dialog_currentstep",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "exam_exam_prep_guide_dialog",
+      "target": "exam_exam_prep_guide_dialog_examtitle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L122",
+      "weight": 1.0,
+      "source": "exam_exam_prep_guide_dialog",
+      "target": "exam_exam_prep_guide_dialog_if",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L113",
+      "weight": 1.0,
+      "source": "exam_exam_prep_guide_dialog",
+      "target": "exam_exam_prep_guide_dialog_onupdatemodelvalue",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L99",
+      "weight": 1.0,
+      "source": "exam_exam_prep_guide_dialog",
+      "target": "exam_exam_prep_guide_dialog_transitionname",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/components/exam/receipt-information-dialog.vue",
       "source_location": "L186",
       "weight": 1.0,
@@ -16091,9 +16311,9 @@
       "source_file": "src/components/exam/receipt-information-dialog.vue",
       "source_location": "L186",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_receipt_information_dialog",
-      "target": "exam_receipt_information_dialog_sanitizeprefill",
-      "confidence_score": 1.0
+      "target": "exam_receipt_information_dialog_sanitizeprefill"
     },
     {
       "relation": "contains",
@@ -16101,9 +16321,9 @@
       "source_file": "src/components/exam/round-exam.vue",
       "source_location": "L117",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_round_exam",
-      "target": "exam_round_exam_getthaitime",
-      "confidence_score": 1.0
+      "target": "exam_round_exam_getthaitime"
     },
     {
       "relation": "contains",
@@ -16355,9 +16575,9 @@
       "source_file": "src/pages/home-page.vue",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "pages_home_page",
-      "target": "home_candidate_activity_section",
-      "confidence_score": 1.0
+      "target": "home_candidate_activity_section"
     },
     {
       "relation": "imports_from",
@@ -16388,9 +16608,9 @@
       "source_file": "src/components/home/home-guideline-section.vue",
       "source_location": "L112",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "home_home_guideline_section",
-      "target": "home_home_guideline_card",
-      "confidence_score": 1.0
+      "target": "home_home_guideline_card"
     },
     {
       "relation": "imports_from",
@@ -16399,9 +16619,9 @@
       "source_file": "src/components/home/home-guideline-section.vue",
       "source_location": "L114",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "home_home_guideline_section",
-      "target": "types_page_builder_types",
-      "confidence_score": 1.0
+      "target": "types_page_builder_types"
     },
     {
       "relation": "imports",
@@ -16410,9 +16630,9 @@
       "source_file": "src/components/home/home-guideline-section.vue",
       "source_location": "L114",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "home_home_guideline_section",
-      "target": "types_page_builder_types_examruleboxcontent",
-      "confidence_score": 1.0
+      "target": "types_page_builder_types_examruleboxcontent"
     },
     {
       "relation": "imports",
@@ -16421,9 +16641,9 @@
       "source_file": "src/components/home/home-guideline-section.vue",
       "source_location": "L114",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "home_home_guideline_section",
-      "target": "types_page_builder_types_localizedtext",
-      "confidence_score": 1.0
+      "target": "types_page_builder_types_localizedtext"
     },
     {
       "relation": "imports",
@@ -16432,9 +16652,9 @@
       "source_file": "src/components/home/home-guideline-section.vue",
       "source_location": "L114",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "home_home_guideline_section",
-      "target": "types_page_builder_types_pagesectiontype",
-      "confidence_score": 1.0
+      "target": "types_page_builder_types_pagesectiontype"
     },
     {
       "relation": "imports_from",
@@ -16749,9 +16969,9 @@
       "source_file": "src/components/register-and-edit-profile.vue",
       "source_location": "L236",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_register_and_edit_profile",
-      "target": "components_register_and_edit_profile_submitform",
-      "confidence_score": 1.0
+      "target": "components_register_and_edit_profile_submitform"
     },
     {
       "relation": "imports_from",
@@ -16800,9 +17020,9 @@
       "source_file": "src/components/register-card.vue",
       "source_location": "L200",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_register_card",
-      "target": "components_register_card_focusfirstinvalidfield",
-      "confidence_score": 1.0
+      "target": "components_register_card_focusfirstinvalidfield"
     },
     {
       "relation": "contains",
@@ -17551,9 +17771,9 @@
       "source_file": "src/components/shared/base-table-row-keys.spec.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_base_table_row_keys_spec",
-      "target": "shared_base_table_row_keys",
-      "confidence_score": 1.0
+      "target": "shared_base_table_row_keys"
     },
     {
       "relation": "imports",
@@ -17562,9 +17782,9 @@
       "source_file": "src/components/shared/base-table-row-keys.spec.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_base_table_row_keys_spec",
-      "target": "shared_base_table_row_keys_createemptyrow",
-      "confidence_score": 1.0
+      "target": "shared_base_table_row_keys_createemptyrow"
     },
     {
       "relation": "imports",
@@ -17573,9 +17793,9 @@
       "source_file": "src/components/shared/base-table-row-keys.spec.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_base_table_row_keys_spec",
-      "target": "shared_base_table_row_keys_createskeletonrows",
-      "confidence_score": 1.0
+      "target": "shared_base_table_row_keys_createskeletonrows"
     },
     {
       "relation": "imports",
@@ -17584,9 +17804,9 @@
       "source_file": "src/components/shared/base-table-row-keys.spec.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_base_table_row_keys_spec",
-      "target": "shared_base_table_row_keys_resolvetablerowkey",
-      "confidence_score": 1.0
+      "target": "shared_base_table_row_keys_resolvetablerowkey"
     },
     {
       "relation": "contains",
@@ -17594,9 +17814,9 @@
       "source_file": "src/components/shared/base-table-row-keys.ts",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_base_table_row_keys",
-      "target": "shared_base_table_row_keys_createemptyrow",
-      "confidence_score": 1.0
+      "target": "shared_base_table_row_keys_createemptyrow"
     },
     {
       "relation": "contains",
@@ -17604,9 +17824,9 @@
       "source_file": "src/components/shared/base-table-row-keys.ts",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_base_table_row_keys",
-      "target": "shared_base_table_row_keys_createskeletonrows",
-      "confidence_score": 1.0
+      "target": "shared_base_table_row_keys_createskeletonrows"
     },
     {
       "relation": "contains",
@@ -17614,9 +17834,9 @@
       "source_file": "src/components/shared/base-table-row-keys.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_base_table_row_keys",
-      "target": "shared_base_table_row_keys_placeholder_row_keys",
-      "confidence_score": 1.0
+      "target": "shared_base_table_row_keys_placeholder_row_keys"
     },
     {
       "relation": "contains",
@@ -17624,9 +17844,9 @@
       "source_file": "src/components/shared/base-table-row-keys.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_base_table_row_keys",
-      "target": "shared_base_table_row_keys_placeholderrow",
-      "confidence_score": 1.0
+      "target": "shared_base_table_row_keys_placeholderrow"
     },
     {
       "relation": "contains",
@@ -17634,9 +17854,9 @@
       "source_file": "src/components/shared/base-table-row-keys.ts",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "shared_base_table_row_keys",
-      "target": "shared_base_table_row_keys_resolvetablerowkey",
-      "confidence_score": 1.0
+      "target": "shared_base_table_row_keys_resolvetablerowkey"
     },
     {
       "relation": "contains",
@@ -17748,9 +17968,9 @@
       "source_file": "src/composables/exam-simulation-tour-steps.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_exam_simulation_tour_steps",
-      "target": "composables_exam_simulation_tour_steps_dashboardviewtype",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_dashboardviewtype"
     },
     {
       "relation": "contains",
@@ -17758,9 +17978,9 @@
       "source_file": "src/composables/exam-simulation-tour-steps.ts",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_exam_simulation_tour_steps",
-      "target": "composables_exam_simulation_tour_steps_exam_simulation_tour_steps",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_exam_simulation_tour_steps"
     },
     {
       "relation": "contains",
@@ -17768,9 +17988,9 @@
       "source_file": "src/composables/exam-simulation-tour-steps.ts",
       "source_location": "L186",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_exam_simulation_tour_steps",
-      "target": "composables_exam_simulation_tour_steps_getcoursecardstepindex",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_getcoursecardstepindex"
     },
     {
       "relation": "contains",
@@ -17778,9 +17998,9 @@
       "source_file": "src/composables/exam-simulation-tour-steps.ts",
       "source_location": "L188",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_exam_simulation_tour_steps",
-      "target": "composables_exam_simulation_tour_steps_getquizsectionstepindex",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_getquizsectionstepindex"
     },
     {
       "relation": "contains",
@@ -17788,9 +18008,9 @@
       "source_file": "src/composables/exam-simulation-tour-steps.ts",
       "source_location": "L198",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_exam_simulation_tour_steps",
-      "target": "composables_exam_simulation_tour_steps_getrestartstepindex",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_getrestartstepindex"
     },
     {
       "relation": "contains",
@@ -17798,9 +18018,9 @@
       "source_file": "src/composables/exam-simulation-tour-steps.ts",
       "source_location": "L182",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_exam_simulation_tour_steps",
-      "target": "composables_exam_simulation_tour_steps_getstepindex",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_getstepindex"
     },
     {
       "relation": "contains",
@@ -17808,9 +18028,9 @@
       "source_file": "src/composables/exam-simulation-tour-steps.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_exam_simulation_tour_steps",
-      "target": "composables_exam_simulation_tour_steps_tourplacement",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_tourplacement"
     },
     {
       "relation": "contains",
@@ -17818,9 +18038,9 @@
       "source_file": "src/composables/exam-simulation-tour-steps.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_exam_simulation_tour_steps",
-      "target": "composables_exam_simulation_tour_steps_tourresumetrigger",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_tourresumetrigger"
     },
     {
       "relation": "contains",
@@ -17828,9 +18048,9 @@
       "source_file": "src/composables/exam-simulation-tour-steps.ts",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_exam_simulation_tour_steps",
-      "target": "composables_exam_simulation_tour_steps_tourstep",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_tourstep"
     },
     {
       "relation": "contains",
@@ -17838,9 +18058,9 @@
       "source_file": "src/composables/exam-simulation-tour-steps.ts",
       "source_location": "L191",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_exam_simulation_tour_steps",
-      "target": "composables_exam_simulation_tour_steps_view_primary_step",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_view_primary_step"
     },
     {
       "relation": "imports_from",
@@ -17849,9 +18069,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_exam_simulation_tour_steps",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps"
     },
     {
       "relation": "imports",
@@ -17860,9 +18080,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_exam_simulation_tour_steps_dashboardviewtype",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_dashboardviewtype"
     },
     {
       "relation": "references",
@@ -17871,9 +18091,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour_useexamsimulationtouroptions",
-      "target": "composables_exam_simulation_tour_steps_dashboardviewtype",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_dashboardviewtype"
     },
     {
       "relation": "imports",
@@ -17882,9 +18102,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_exam_simulation_tour_steps_tourresumetrigger",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_tourresumetrigger"
     },
     {
       "relation": "imports",
@@ -17893,9 +18113,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_exam_simulation_tour_steps_tourstep",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_tourstep"
     },
     {
       "relation": "imports",
@@ -17904,9 +18124,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_exam_simulation_tour_steps_exam_simulation_tour_steps",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_exam_simulation_tour_steps"
     },
     {
       "relation": "calls",
@@ -17915,9 +18135,9 @@
       "source_file": "src/composables/exam-simulation-tour-steps.ts",
       "source_location": "L186",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_exam_simulation_tour_steps_getcoursecardstepindex",
-      "target": "composables_exam_simulation_tour_steps_getstepindex",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_getstepindex"
     },
     {
       "relation": "calls",
@@ -17926,9 +18146,9 @@
       "source_file": "src/composables/exam-simulation-tour-steps.ts",
       "source_location": "L188",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_exam_simulation_tour_steps_getquizsectionstepindex",
-      "target": "composables_exam_simulation_tour_steps_getstepindex",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_getstepindex"
     },
     {
       "relation": "calls",
@@ -17937,9 +18157,9 @@
       "source_file": "src/composables/exam-simulation-tour-steps.ts",
       "source_location": "L208",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_exam_simulation_tour_steps_getrestartstepindex",
-      "target": "composables_exam_simulation_tour_steps_getstepindex",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_getstepindex"
     },
     {
       "relation": "imports",
@@ -17948,9 +18168,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_exam_simulation_tour_steps_getstepindex",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_getstepindex"
     },
     {
       "relation": "calls",
@@ -17959,9 +18179,9 @@
       "source_file": "src/composables/exam-simulation-tour-steps.ts",
       "source_location": "L224",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_exam_simulation_tour_steps_getrestartstepindex",
-      "target": "composables_exam_simulation_tour_steps_getcoursecardstepindex",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_getcoursecardstepindex"
     },
     {
       "relation": "imports",
@@ -17970,9 +18190,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_exam_simulation_tour_steps_getcoursecardstepindex",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_getcoursecardstepindex"
     },
     {
       "relation": "calls",
@@ -17981,9 +18201,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour_getinitialstepindex",
-      "target": "composables_exam_simulation_tour_steps_getcoursecardstepindex",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_getcoursecardstepindex"
     },
     {
       "relation": "imports",
@@ -17992,9 +18212,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_exam_simulation_tour_steps_view_primary_step",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_view_primary_step"
     },
     {
       "relation": "imports",
@@ -18003,9 +18223,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_exam_simulation_tour_steps_getrestartstepindex",
-      "confidence_score": 1.0
+      "target": "composables_exam_simulation_tour_steps_getrestartstepindex"
     },
     {
       "relation": "contains",
@@ -18109,9 +18329,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_candidateactivitykind",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_candidateactivitykind"
     },
     {
       "relation": "contains",
@@ -18119,9 +18339,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_candidatehomeactivity",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_candidatehomeactivity"
     },
     {
       "relation": "contains",
@@ -18129,9 +18349,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L193",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_deriveactivities",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_deriveactivities"
     },
     {
       "relation": "contains",
@@ -18139,9 +18359,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_exam_history_path",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_exam_history_path"
     },
     {
       "relation": "contains",
@@ -18149,9 +18369,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_exam_schedule_path",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_exam_schedule_path"
     },
     {
       "relation": "contains",
@@ -18159,9 +18379,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L51",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_getexamdatems",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_getexamdatems"
     },
     {
       "relation": "contains",
@@ -18169,9 +18389,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_getpaymentdeadlinems",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_getpaymentdeadlinems"
     },
     {
       "relation": "contains",
@@ -18179,9 +18399,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L60",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_hasvoucher",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_hasvoucher"
     },
     {
       "relation": "contains",
@@ -18189,9 +18409,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L69",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_ispaymenttimeoutcancellation",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_ispaymenttimeoutcancellation"
     },
     {
       "relation": "contains",
@@ -18199,9 +18419,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_max_display_activities",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_max_display_activities"
     },
     {
       "relation": "contains",
@@ -18209,9 +18429,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_startoftodayms",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_startoftodayms"
     },
     {
       "relation": "contains",
@@ -18219,9 +18439,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L122",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_topaymentcancelledactivity",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_topaymentcancelledactivity"
     },
     {
       "relation": "contains",
@@ -18229,9 +18449,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L95",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_tounpaidactivity",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_tounpaidactivity"
     },
     {
       "relation": "contains",
@@ -18239,9 +18459,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L152",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_toupcomingorseatready",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_toupcomingorseatready"
     },
     {
       "relation": "contains",
@@ -18249,9 +18469,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_upcoming_statuses",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_upcoming_statuses"
     },
     {
       "relation": "contains",
@@ -18259,9 +18479,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L213",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "composables_use_candidate_home_activities_usecandidatehomeactivities",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_usecandidatehomeactivities"
     },
     {
       "relation": "imports_from",
@@ -18270,9 +18490,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "constants_exam",
-      "confidence_score": 1.0
+      "target": "constants_exam"
     },
     {
       "relation": "imports",
@@ -18281,9 +18501,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "constants_exam_enrollment_status",
-      "confidence_score": 1.0
+      "target": "constants_exam_enrollment_status"
     },
     {
       "relation": "imports",
@@ -18292,9 +18512,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "constants_exam_transaction_payment_status",
-      "confidence_score": 1.0
+      "target": "constants_exam_transaction_payment_status"
     },
     {
       "relation": "imports_from",
@@ -18303,9 +18523,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "constants_roles",
-      "confidence_score": 1.0
+      "target": "constants_roles"
     },
     {
       "relation": "imports",
@@ -18314,9 +18534,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "constants_roles_roles",
-      "confidence_score": 1.0
+      "target": "constants_roles_roles"
     },
     {
       "relation": "imports_from",
@@ -18325,9 +18545,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "stores_exam_store",
-      "confidence_score": 1.0
+      "target": "stores_exam_store"
     },
     {
       "relation": "imports",
@@ -18336,9 +18556,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "stores_exam_store_useexamstore",
-      "confidence_score": 1.0
+      "target": "stores_exam_store_useexamstore"
     },
     {
       "relation": "imports_from",
@@ -18347,9 +18567,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "stores_user_store",
-      "confidence_score": 1.0
+      "target": "stores_user_store"
     },
     {
       "relation": "imports",
@@ -18358,9 +18578,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "stores_user_store_useuserstore",
-      "confidence_score": 1.0
+      "target": "stores_user_store_useuserstore"
     },
     {
       "relation": "imports_from",
@@ -18369,9 +18589,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "types_exam",
-      "confidence_score": 1.0
+      "target": "types_exam"
     },
     {
       "relation": "imports",
@@ -18380,9 +18600,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities",
-      "target": "types_exam_examhistoryitem",
-      "confidence_score": 1.0
+      "target": "types_exam_examhistoryitem"
     },
     {
       "relation": "calls",
@@ -18391,9 +18611,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L127",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities_topaymentcancelledactivity",
-      "target": "composables_use_candidate_home_activities_startoftodayms",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_startoftodayms"
     },
     {
       "relation": "calls",
@@ -18402,9 +18622,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L157",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities_toupcomingorseatready",
-      "target": "composables_use_candidate_home_activities_startoftodayms",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_startoftodayms"
     },
     {
       "relation": "calls",
@@ -18413,9 +18633,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L125",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities_topaymentcancelledactivity",
-      "target": "composables_use_candidate_home_activities_getexamdatems",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_getexamdatems"
     },
     {
       "relation": "calls",
@@ -18424,9 +18644,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L104",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities_tounpaidactivity",
-      "target": "composables_use_candidate_home_activities_getexamdatems",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_getexamdatems"
     },
     {
       "relation": "calls",
@@ -18435,9 +18655,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L156",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities_toupcomingorseatready",
-      "target": "composables_use_candidate_home_activities_getexamdatems",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_getexamdatems"
     },
     {
       "relation": "calls",
@@ -18446,9 +18666,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L159",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities_toupcomingorseatready",
-      "target": "composables_use_candidate_home_activities_hasvoucher",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_hasvoucher"
     },
     {
       "relation": "calls",
@@ -18457,9 +18677,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L92",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities_ispaymenttimeoutcancellation",
-      "target": "composables_use_candidate_home_activities_getpaymentdeadlinems",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_getpaymentdeadlinems"
     },
     {
       "relation": "calls",
@@ -18468,9 +18688,9 @@
       "source_file": "src/composables/use-candidate-home-activities.ts",
       "source_location": "L123",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_candidate_home_activities_topaymentcancelledactivity",
-      "target": "composables_use_candidate_home_activities_ispaymenttimeoutcancellation",
-      "confidence_score": 1.0
+      "target": "composables_use_candidate_home_activities_ispaymenttimeoutcancellation"
     },
     {
       "relation": "calls",
@@ -18635,9 +18855,9 @@
       "source_file": "src/composables/use-create-exam.ts",
       "source_location": "L84",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_create_exam",
-      "target": "composables_use_create_exam_geteligiblecandidatekey",
-      "confidence_score": 1.0
+      "target": "composables_use_create_exam_geteligiblecandidatekey"
     },
     {
       "relation": "contains",
@@ -18871,9 +19091,9 @@
       "source_file": "src/composables/use-create-exam.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_create_exam",
-      "target": "services_exam_service_fetchexamwithseats",
-      "confidence_score": 1.0
+      "target": "services_exam_service_fetchexamwithseats"
     },
     {
       "relation": "imports",
@@ -18981,9 +19201,9 @@
       "source_file": "src/composables/use-create-exam.ts",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_create_exam",
-      "target": "services_user_service_checkuseridentifiers",
-      "confidence_score": 1.0
+      "target": "services_user_service_checkuseridentifiers"
     },
     {
       "relation": "imports",
@@ -19091,9 +19311,9 @@
       "source_file": "src/composables/use-create-exam.ts",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_create_exam",
-      "target": "types_user",
-      "confidence_score": 1.0
+      "target": "types_user"
     },
     {
       "relation": "imports",
@@ -19102,9 +19322,9 @@
       "source_file": "src/composables/use-create-exam.ts",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_create_exam",
-      "target": "types_user_user",
-      "confidence_score": 1.0
+      "target": "types_user_user"
     },
     {
       "relation": "references",
@@ -19287,9 +19507,9 @@
       "source_file": "src/composables/use-exam-attendances.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_attendances",
-      "target": "services_exam_service_fetchexamwithseats",
-      "confidence_score": 1.0
+      "target": "services_exam_service_fetchexamwithseats"
     },
     {
       "relation": "imports_from",
@@ -19684,6 +19904,66 @@
       "weight": 1.0,
       "source": "composables_use_exam_documents_useexamdocuments",
       "target": "stores_user_store_useuserstore"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/composables/use-exam-prep-guide.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "composables_use_exam_prep_guide",
+      "target": "composables_use_exam_prep_guide_prepguideseenmap",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/composables/use-exam-prep-guide.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "composables_use_exam_prep_guide",
+      "target": "composables_use_exam_prep_guide_readseenmap",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/composables/use-exam-prep-guide.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "composables_use_exam_prep_guide",
+      "target": "composables_use_exam_prep_guide_seenmap",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/composables/use-exam-prep-guide.ts",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "composables_use_exam_prep_guide",
+      "target": "composables_use_exam_prep_guide_tokey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/composables/use-exam-prep-guide.ts",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "composables_use_exam_prep_guide",
+      "target": "composables_use_exam_prep_guide_useexamprepguide",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/composables/use-exam-prep-guide.ts",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "composables_use_exam_prep_guide",
+      "target": "composables_use_exam_prep_guide_writeseenmap",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -20147,9 +20427,9 @@
       "source_file": "src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "composables_use_exam_seat_candidates",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_seat_candidates"
     },
     {
       "relation": "contains",
@@ -20157,9 +20437,9 @@
       "source_file": "src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "composables_use_exam_seat_candidates_spec_testharness",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_seat_candidates_spec_testharness"
     },
     {
       "relation": "imports",
@@ -20168,9 +20448,9 @@
       "source_file": "src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "composables_use_exam_seat_candidates_useexamseatcandidates",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_seat_candidates_useexamseatcandidates"
     },
     {
       "relation": "imports_from",
@@ -20179,9 +20459,9 @@
       "source_file": "src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "services_enrollment_service",
-      "confidence_score": 1.0
+      "target": "services_enrollment_service"
     },
     {
       "relation": "imports",
@@ -20190,9 +20470,9 @@
       "source_file": "src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "services_enrollment_service_fetchrawenrollmentsbyexamid",
-      "confidence_score": 1.0
+      "target": "services_enrollment_service_fetchrawenrollmentsbyexamid"
     },
     {
       "relation": "imports_from",
@@ -20201,9 +20481,9 @@
       "source_file": "src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "services_exam_service",
-      "confidence_score": 1.0
+      "target": "services_exam_service"
     },
     {
       "relation": "imports",
@@ -20212,9 +20492,9 @@
       "source_file": "src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "services_exam_service_fetchexamwithseats",
-      "confidence_score": 1.0
+      "target": "services_exam_service_fetchexamwithseats"
     },
     {
       "relation": "imports_from",
@@ -20223,9 +20503,9 @@
       "source_file": "src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "types_enrollment_types",
-      "confidence_score": 1.0
+      "target": "types_enrollment_types"
     },
     {
       "relation": "imports",
@@ -20234,9 +20514,9 @@
       "source_file": "src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "types_enrollment_types_backendenrollmentdetail",
-      "confidence_score": 1.0
+      "target": "types_enrollment_types_backendenrollmentdetail"
     },
     {
       "relation": "imports",
@@ -20245,9 +20525,9 @@
       "source_file": "src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "types_enrollment_types_enrollmentstatus",
-      "confidence_score": 1.0
+      "target": "types_enrollment_types_enrollmentstatus"
     },
     {
       "relation": "imports_from",
@@ -20256,9 +20536,9 @@
       "source_file": "src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "types_exam",
-      "confidence_score": 1.0
+      "target": "types_exam"
     },
     {
       "relation": "imports",
@@ -20267,9 +20547,9 @@
       "source_file": "src/composables/use-exam-seat-candidates.spec.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates_spec",
-      "target": "types_exam_backendexam",
-      "confidence_score": 1.0
+      "target": "types_exam_backendexam"
     },
     {
       "relation": "contains",
@@ -20372,9 +20652,9 @@
       "source_file": "src/composables/use-exam-seat-candidates.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates",
-      "target": "services_exam_service_fetchexamwithseats",
-      "confidence_score": 1.0
+      "target": "services_exam_service_fetchexamwithseats"
     },
     {
       "relation": "imports_from",
@@ -20405,9 +20685,9 @@
       "source_file": "src/composables/use-exam-seat-candidates.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_candidates",
-      "target": "types_enrollment_types_enrollmentstatus",
-      "confidence_score": 1.0
+      "target": "types_enrollment_types_enrollmentstatus"
     },
     {
       "relation": "imports_from",
@@ -20701,9 +20981,9 @@
       "source_file": "src/composables/use-exam-seat-management.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_management",
-      "target": "services_exam_service_fetchexamwithseats",
-      "confidence_score": 1.0
+      "target": "services_exam_service_fetchexamwithseats"
     },
     {
       "relation": "imports_from",
@@ -20942,9 +21222,9 @@
       "source_file": "src/composables/use-exam-seat-navigation.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_seat_navigation",
-      "target": "types_exam_backendsession",
-      "confidence_score": 1.0
+      "target": "types_exam_backendsession"
     },
     {
       "relation": "contains",
@@ -20952,9 +21232,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L70",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_use_exam_simulation_tour_canshowstep",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_simulation_tour_canshowstep"
     },
     {
       "relation": "contains",
@@ -20962,9 +21242,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L99",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_use_exam_simulation_tour_getinitialstepindex",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_simulation_tour_getinitialstepindex"
     },
     {
       "relation": "contains",
@@ -20972,9 +21252,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_use_exam_simulation_tour_isresumeconditionmet",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_simulation_tour_isresumeconditionmet"
     },
     {
       "relation": "contains",
@@ -20982,9 +21262,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_use_exam_simulation_tour_istourcompleted",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_simulation_tour_istourcompleted"
     },
     {
       "relation": "contains",
@@ -20992,9 +21272,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_use_exam_simulation_tour_marktourcompleted",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_simulation_tour_marktourcompleted"
     },
     {
       "relation": "contains",
@@ -21002,9 +21282,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_use_exam_simulation_tour_readstoragestate",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_simulation_tour_readstoragestate"
     },
     {
       "relation": "contains",
@@ -21012,9 +21292,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_use_exam_simulation_tour_tourresumetriggertype",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_simulation_tour_tourresumetriggertype"
     },
     {
       "relation": "contains",
@@ -21022,9 +21302,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_use_exam_simulation_tour_tourstoragestate",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_simulation_tour_tourstoragestate"
     },
     {
       "relation": "contains",
@@ -21032,9 +21312,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L107",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_use_exam_simulation_tour_useexamsimulationtour",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_simulation_tour_useexamsimulationtour"
     },
     {
       "relation": "contains",
@@ -21042,9 +21322,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_use_exam_simulation_tour_useexamsimulationtouroptions",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_simulation_tour_useexamsimulationtouroptions"
     },
     {
       "relation": "contains",
@@ -21052,9 +21332,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L48",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour",
-      "target": "composables_use_exam_simulation_tour_writestoragestate",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_simulation_tour_writestoragestate"
     },
     {
       "relation": "calls",
@@ -21063,9 +21343,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour_istourcompleted",
-      "target": "composables_use_exam_simulation_tour_readstoragestate",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_simulation_tour_readstoragestate"
     },
     {
       "relation": "calls",
@@ -21074,9 +21354,9 @@
       "source_file": "src/composables/use-exam-simulation-tour.ts",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_simulation_tour_marktourcompleted",
-      "target": "composables_use_exam_simulation_tour_writestoragestate",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_simulation_tour_writestoragestate"
     },
     {
       "relation": "contains",
@@ -21198,9 +21478,9 @@
       "source_file": "src/composables/use-focus-first-invalid-field.ts",
       "source_location": "L49",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_focus_first_invalid_field",
-      "target": "composables_use_focus_first_invalid_field_isscrollableoverflow",
-      "confidence_score": 1.0
+      "target": "composables_use_focus_first_invalid_field_isscrollableoverflow"
     },
     {
       "relation": "contains",
@@ -21208,9 +21488,9 @@
       "source_file": "src/composables/use-focus-first-invalid-field.ts",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_focus_first_invalid_field",
-      "target": "composables_use_focus_first_invalid_field_scrollelementintonearestcontainers",
-      "confidence_score": 1.0
+      "target": "composables_use_focus_first_invalid_field_scrollelementintonearestcontainers"
     },
     {
       "relation": "contains",
@@ -21261,9 +21541,9 @@
       "source_file": "src/composables/use-focus-first-invalid-field.ts",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_focus_first_invalid_field_scrollelementintonearestcontainers",
-      "target": "composables_use_focus_first_invalid_field_isscrollableoverflow",
-      "confidence_score": 1.0
+      "target": "composables_use_focus_first_invalid_field_isscrollableoverflow"
     },
     {
       "relation": "contains",
@@ -22482,9 +22762,9 @@
       "source_file": "src/constants/exam.ts",
       "source_location": "L134",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "constants_exam",
-      "target": "constants_exam_transaction_payment_status",
-      "confidence_score": 1.0
+      "target": "constants_exam_transaction_payment_status"
     },
     {
       "relation": "contains",
@@ -22645,9 +22925,9 @@
       "source_file": "src/stores/exam.store.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "stores_exam_store",
-      "target": "constants_exam_transaction_payment_status",
-      "confidence_score": 1.0
+      "target": "constants_exam_transaction_payment_status"
     },
     {
       "relation": "imports",
@@ -22656,9 +22936,9 @@
       "source_file": "src/stores/exam.store.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "stores_exam_store",
-      "target": "constants_exam_receiptstatus",
-      "confidence_score": 1.0
+      "target": "constants_exam_receiptstatus"
     },
     {
       "relation": "contains",
@@ -24266,9 +24546,9 @@
       "source_file": "src/services/bank-reconcile.service.ts",
       "source_location": "L138",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_bank_reconcile_service",
-      "target": "services_bank_reconcile_service_fetchtestexportexams",
-      "confidence_score": 1.0
+      "target": "services_bank_reconcile_service_fetchtestexportexams"
     },
     {
       "relation": "contains",
@@ -24276,9 +24556,9 @@
       "source_file": "src/services/bank-reconcile.service.ts",
       "source_location": "L145",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_bank_reconcile_service",
-      "target": "services_bank_reconcile_service_fetchtestexportrows",
-      "confidence_score": 1.0
+      "target": "services_bank_reconcile_service_fetchtestexportrows"
     },
     {
       "relation": "contains",
@@ -24306,9 +24586,9 @@
       "source_file": "src/services/bank-reconcile.service.ts",
       "source_location": "L120",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_bank_reconcile_service",
-      "target": "services_bank_reconcile_service_testexportexamoption",
-      "confidence_score": 1.0
+      "target": "services_bank_reconcile_service_testexportexamoption"
     },
     {
       "relation": "contains",
@@ -24316,9 +24596,9 @@
       "source_file": "src/services/bank-reconcile.service.ts",
       "source_location": "L129",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_bank_reconcile_service",
-      "target": "services_bank_reconcile_service_testexportrow",
-      "confidence_score": 1.0
+      "target": "services_bank_reconcile_service_testexportrow"
     },
     {
       "relation": "contains",
@@ -24479,9 +24759,9 @@
       "source_file": "src/services/enrollment.service.ts",
       "source_location": "L77",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_enrollment_service",
-      "target": "services_enrollment_service_rawenrollmentfetchparams",
-      "confidence_score": 1.0
+      "target": "services_enrollment_service_rawenrollmentfetchparams"
     },
     {
       "relation": "contains",
@@ -25031,9 +25311,9 @@
       "source_file": "src/services/exam-score.service.ts",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_score_service",
-      "target": "services_exam_score_service_paginatedexamscores",
-      "confidence_score": 1.0
+      "target": "services_exam_score_service_paginatedexamscores"
     },
     {
       "relation": "contains",
@@ -25051,9 +25331,9 @@
       "source_file": "src/services/exam-score.service.ts",
       "source_location": "L40",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_score_service",
-      "target": "services_exam_score_service_unwrapexamscorespage",
-      "confidence_score": 1.0
+      "target": "services_exam_score_service_unwrapexamscorespage"
     },
     {
       "relation": "contains",
@@ -25072,9 +25352,9 @@
       "source_file": "src/services/exam-score.service.ts",
       "source_location": "L60",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_score_service_fetchexamscores",
-      "target": "services_exam_score_service_unwrapexamscorespage",
-      "confidence_score": 1.0
+      "target": "services_exam_score_service_unwrapexamscorespage"
     },
     {
       "relation": "contains",
@@ -25112,9 +25392,9 @@
       "source_file": "src/services/exam.service.ts",
       "source_location": "L370",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_service",
-      "target": "services_exam_service_buddhisttogregorianperiodend",
-      "confidence_score": 1.0
+      "target": "services_exam_service_buddhisttogregorianperiodend"
     },
     {
       "relation": "contains",
@@ -25232,9 +25512,9 @@
       "source_file": "src/services/exam.service.ts",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_service",
-      "target": "services_exam_service_examwriterequestconfig",
-      "confidence_score": 1.0
+      "target": "services_exam_service_examwriterequestconfig"
     },
     {
       "relation": "contains",
@@ -25312,9 +25592,9 @@
       "source_file": "src/services/exam.service.ts",
       "source_location": "L341",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_service",
-      "target": "services_exam_service_fetchexamwithseats",
-      "confidence_score": 1.0
+      "target": "services_exam_service_fetchexamwithseats"
     },
     {
       "relation": "contains",
@@ -25392,9 +25672,9 @@
       "source_file": "src/services/exam.service.ts",
       "source_location": "L51",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_service",
-      "target": "services_exam_service_getactiveenrollmentcount",
-      "confidence_score": 1.0
+      "target": "services_exam_service_getactiveenrollmentcount"
     },
     {
       "relation": "contains",
@@ -25582,9 +25862,9 @@
       "source_file": "src/services/exam.service.ts",
       "source_location": "L922",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_service",
-      "target": "services_exam_service_validateexampasscode",
-      "confidence_score": 1.0
+      "target": "services_exam_service_validateexampasscode"
     },
     {
       "relation": "imports_from",
@@ -25846,9 +26126,9 @@
       "source_file": "src/services/exam.service.ts",
       "source_location": "L345",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_service_fetchexamwithseats",
-      "target": "services_exam_service_retryasync",
-      "confidence_score": 1.0
+      "target": "services_exam_service_retryasync"
     },
     {
       "relation": "imports",
@@ -25945,9 +26225,9 @@
       "source_file": "src/services/exam.service.ts",
       "source_location": "L767",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_service_updateexamround",
-      "target": "services_exam_service_fetchexamwithseats",
-      "confidence_score": 1.0
+      "target": "services_exam_service_fetchexamwithseats"
     },
     {
       "relation": "calls",
@@ -25956,9 +26236,9 @@
       "source_file": "src/services/exam.service.ts",
       "source_location": "L371",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_service_buddhisttogregorianperiodend",
-      "target": "services_exam_service_buddhisttogregorian",
-      "confidence_score": 1.0
+      "target": "services_exam_service_buddhisttogregorian"
     },
     {
       "relation": "calls",
@@ -25989,9 +26269,9 @@
       "source_file": "src/services/exam.service.ts",
       "source_location": "L662",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_service_createexamround",
-      "target": "services_exam_service_buddhisttogregorianperiodend",
-      "confidence_score": 1.0
+      "target": "services_exam_service_buddhisttogregorianperiodend"
     },
     {
       "relation": "calls",
@@ -26000,9 +26280,9 @@
       "source_file": "src/services/exam.service.ts",
       "source_location": "L752",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_service_updateexamround",
-      "target": "services_exam_service_buddhisttogregorianperiodend",
-      "confidence_score": 1.0
+      "target": "services_exam_service_buddhisttogregorianperiodend"
     },
     {
       "relation": "calls",
@@ -26823,9 +27103,9 @@
       "source_file": "src/services/transaction-ref.service.ts",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_transaction_ref_service",
-      "target": "services_transaction_ref_service_backendtransactionrefreceipt",
-      "confidence_score": 1.0
+      "target": "services_transaction_ref_service_backendtransactionrefreceipt"
     },
     {
       "relation": "contains",
@@ -27003,9 +27283,9 @@
       "source_file": "src/services/transaction.service.ts",
       "source_location": "L93",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_transaction_service",
-      "target": "services_transaction_service_refundtransaction",
-      "confidence_score": 1.0
+      "target": "services_transaction_service_refundtransaction"
     },
     {
       "relation": "contains",
@@ -27107,9 +27387,9 @@
       "source_file": "src/services/user.service.ts",
       "source_location": "L193",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_user_service",
-      "target": "services_user_service_checkuseridentifiers",
-      "confidence_score": 1.0
+      "target": "services_user_service_checkuseridentifiers"
     },
     {
       "relation": "contains",
@@ -27177,9 +27457,9 @@
       "source_file": "src/services/user.service.ts",
       "source_location": "L134",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_user_service",
-      "target": "services_user_service_paginatedusersresult",
-      "confidence_score": 1.0
+      "target": "services_user_service_paginatedusersresult"
     },
     {
       "relation": "contains",
@@ -27187,9 +27467,9 @@
       "source_file": "src/services/user.service.ts",
       "source_location": "L142",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_user_service",
-      "target": "services_user_service_searchusers",
-      "confidence_score": 1.0
+      "target": "services_user_service_searchusers"
     },
     {
       "relation": "contains",
@@ -27197,9 +27477,9 @@
       "source_file": "src/services/user.service.ts",
       "source_location": "L127",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_user_service",
-      "target": "services_user_service_searchusersparams",
-      "confidence_score": 1.0
+      "target": "services_user_service_searchusersparams"
     },
     {
       "relation": "contains",
@@ -27227,9 +27507,9 @@
       "source_file": "src/services/user.service.ts",
       "source_location": "L187",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_user_service",
-      "target": "services_user_service_useridentifiercheckresult",
-      "confidence_score": 1.0
+      "target": "services_user_service_useridentifiercheckresult"
     },
     {
       "relation": "imports_from",
@@ -27271,9 +27551,9 @@
       "source_file": "src/services/user.service.ts",
       "source_location": "L135",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_user_service_paginatedusersresult",
-      "target": "types_user_user",
-      "confidence_score": 1.0
+      "target": "types_user_user"
     },
     {
       "relation": "contains",
@@ -27281,9 +27561,9 @@
       "source_file": "src/services/voided-receipt.service.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_voided_receipt_service",
-      "target": "services_voided_receipt_service_createvoidedreceiptpayload",
-      "confidence_score": 1.0
+      "target": "services_voided_receipt_service_createvoidedreceiptpayload"
     },
     {
       "relation": "contains",
@@ -27291,9 +27571,9 @@
       "source_file": "src/services/voided-receipt.service.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_voided_receipt_service",
-      "target": "services_voided_receipt_service_voidedreceiptresponse",
-      "confidence_score": 1.0
+      "target": "services_voided_receipt_service_voidedreceiptresponse"
     },
     {
       "relation": "contains",
@@ -27301,9 +27581,9 @@
       "source_file": "src/services/voided-receipt.service.ts",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_voided_receipt_service",
-      "target": "services_voided_receipt_service_voidreceipt",
-      "confidence_score": 1.0
+      "target": "services_voided_receipt_service_voidreceipt"
     },
     {
       "relation": "contains",
@@ -27341,9 +27621,9 @@
       "source_file": "src/services/voucher.service.ts",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_voucher_service",
-      "target": "services_voucher_service_bulkissuevouchersresult",
-      "confidence_score": 1.0
+      "target": "services_voucher_service_bulkissuevouchersresult"
     },
     {
       "relation": "contains",
@@ -29077,9 +29357,9 @@
       "source_file": "src/utils/exam-registration.ts",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration",
-      "target": "utils_exam_registration_parseregistrationenddate",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_parseregistrationenddate"
     },
     {
       "relation": "contains",
@@ -29097,9 +29377,9 @@
       "source_file": "src/utils/exam-registration.ts",
       "source_location": "L43",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration",
-      "target": "utils_exam_registration_tolocalendofday",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_tolocalendofday"
     },
     {
       "relation": "calls",
@@ -29130,9 +29410,9 @@
       "source_file": "src/utils/exam-registration.ts",
       "source_location": "L70",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration_parseregistrationenddate",
-      "target": "utils_exam_registration_parseregistrationdate",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_parseregistrationdate"
     },
     {
       "relation": "calls",
@@ -29141,9 +29421,9 @@
       "source_file": "src/utils/exam-registration.ts",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration_parseregistrationenddate",
-      "target": "utils_exam_registration_tolocalendofday",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_tolocalendofday"
     },
     {
       "relation": "calls",
@@ -29152,9 +29432,9 @@
       "source_file": "src/utils/exam-registration.ts",
       "source_location": "L74",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration_isexamroundregistrationexpired",
-      "target": "utils_exam_registration_parseregistrationenddate",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_parseregistrationenddate"
     },
     {
       "relation": "contains",
@@ -29311,5 +29591,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "99746434f2ae418c9ee5701bfe1268c4856da224"
+  "built_at_commit": "4b8cc9a505f1435d2f1b2c25fa2635de2282ed81"
 }

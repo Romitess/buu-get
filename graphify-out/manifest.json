@@ -925,13 +925,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/fund-sources/dto/create-fund-source.dto.ts": {
-    "mtime": 1783042948.8060396,
-    "ast_hash": "19c6fe834824fac91bb56b287e600096",
+    "mtime": 1784774531.5285084,
+    "ast_hash": "734c03b3d79fb8f3ab121fc6dda5250f",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/fund-sources/dto/daily-revenue-query.dto.ts": {
-    "mtime": 1783042948.8060968,
-    "ast_hash": "1b34d37a2e78f05e156aedbd681adcc4",
+    "mtime": 1784774540.1867368,
+    "ast_hash": "bd954a65bf1578349be3910e35e0192c",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/fund-sources/dto/update-fund-source.dto.ts": {
@@ -940,13 +940,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/fund-sources/entities/fund-source.entity.ts": {
-    "mtime": 1783042948.8062203,
-    "ast_hash": "a4ca6a8b8c76ca43a744fba67741cffb",
+    "mtime": 1784774532.0448349,
+    "ast_hash": "1ad6b3fbf0e29a8302ba34ce1d982c54",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/fund-sources/fund-sources.controller.ts": {
-    "mtime": 1784608898.1334689,
-    "ast_hash": "55fe35df90c26872fa73aa23265b782f",
+    "mtime": 1784774541.6070788,
+    "ast_hash": "77c84b6370cfd8cab05a458d11baaecc",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/fund-sources/fund-sources.module.ts": {
@@ -955,13 +955,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/fund-sources/fund-sources.service.ts": {
-    "mtime": 1783042948.8063812,
-    "ast_hash": "aab451d10dbfbf90f6c43e096e68860f",
+    "mtime": 1784774541.210262,
+    "ast_hash": "103bf31bce4c470c22c48bcb9acd6d49",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/fund-sources/interfaces/daily-revenue.interface.ts": {
-    "mtime": 1783042948.806456,
-    "ast_hash": "1884a02aac654e51122da44328f9460b",
+    "mtime": 1784774533.7899704,
+    "ast_hash": "366dbf784f0e67d26d675ac694dacd61",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/moodle-sync-logs/dto/create-moodle-sync-log.dto.ts": {
@@ -1825,8 +1825,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/app-exam-history-card.vue": {
-    "mtime": 1783042948.8444815,
-    "ast_hash": "5690fe21567732c310dcc87558b03642",
+    "mtime": 1784776319.9075718,
+    "ast_hash": "786645db22935cf74d7752a715875fcf",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/app-exam-info-card.vue": {
@@ -2180,8 +2180,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/receipt-card.vue": {
-    "mtime": 1783042948.8500113,
-    "ast_hash": "083f9f776d03fd690adf19a8cac9a983",
+    "mtime": 1784774747.5596764,
+    "ast_hash": "9162af67c175ad214a647ed6d46ccfdf",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/register-and-edit-profile.vue": {
@@ -2230,8 +2230,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/report/daily-revenue-filter.vue": {
-    "mtime": 1783042948.8509293,
-    "ast_hash": "b2db198d998f2e2ef23ccf2f45776131",
+    "mtime": 1784774610.142826,
+    "ast_hash": "2a4f833b76a4f8cd31ecf532b9cde746",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/request-fix-dialog.vue": {
@@ -2330,13 +2330,13 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-create-exam.ts": {
-    "mtime": 1784773630.7255437,
-    "ast_hash": "0dfbdff0ff04140a3f93e6e737541a9c",
+    "mtime": 1784773838.2077987,
+    "ast_hash": "fc4529631f6ee871d7fb2ceb122d9086",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-daily-revenue.ts": {
-    "mtime": 1783042948.8537557,
-    "ast_hash": "cd5df3efaa359371bc03db0dca4b6201",
+    "mtime": 1784774573.7707863,
+    "ast_hash": "8d78b40bbac78375ec01f4fda04a2b9e",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-exam-attendances.ts": {
@@ -2350,8 +2350,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-exam-documents.ts": {
-    "mtime": 1784608898.2779078,
-    "ast_hash": "94717be63c172e437d795c415af1a0ac",
+    "mtime": 1784774747.7500746,
+    "ast_hash": "77b310df4d3572247127114e154a4c8c",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-exam-registrants.ts": {
@@ -2490,8 +2490,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/en-US/index.ts": {
-    "mtime": 1784772248.6663702,
-    "ast_hash": "edcefe66890e18aa1e17ca1e6806e518",
+    "mtime": 1784776250.7669837,
+    "ast_hash": "0a658e1ed7d5ba9573917fb99201c285",
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/index.ts": {
@@ -2500,8 +2500,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/th/index.ts": {
-    "mtime": 1784773634.426316,
-    "ast_hash": "51191fd46249c4c02df964bf20755a9d",
+    "mtime": 1784776247.6991856,
+    "ast_hash": "2ca5f6fb430be373a07492ffa0d88bd7",
     "semantic_hash": ""
   },
   "apps/frontend/src/layouts/main-layout.vue": {
@@ -2510,8 +2510,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/application-fee-report-page.vue": {
-    "mtime": 1783495711.5916595,
-    "ast_hash": "da6e3361d20034d55e467a57de1721d3",
+    "mtime": 1784775522.350465,
+    "ast_hash": "89a5f9a11d0536b93f93ca554ed58de4",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/create-exam-page.vue": {
@@ -2520,8 +2520,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/daily-revenue-report-page.vue": {
-    "mtime": 1783042948.8575406,
-    "ast_hash": "9d95845bf8a6dc7897a8f0108e2f1bca",
+    "mtime": 1784775522.36584,
+    "ast_hash": "a3deef9947e03567e3d471b55d258b39",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/dashboard-page.vue": {
@@ -2600,8 +2600,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/fin-fund-source-mananagement-page.vue": {
-    "mtime": 1783042948.8591204,
-    "ast_hash": "e4d0e80e62f9cc301c490bb7463846fa",
+    "mtime": 1784774596.512606,
+    "ast_hash": "c2185ba930055a46d7636833323cc9fd",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/location-create-page.vue": {
@@ -2635,8 +2635,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/receipt-usage-report-page.vue": {
-    "mtime": 1783495712.9803326,
-    "ast_hash": "2fb9cf2a52d668bfdaa116de19284572",
+    "mtime": 1784775522.4025156,
+    "ast_hash": "c46b7ab607ab0f772e6208495101bbc0",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/score-criteria-management-page.vue": {
@@ -2675,8 +2675,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-history-page.vue": {
-    "mtime": 1783584961.3254797,
-    "ast_hash": "288d096cf7ccaa9e03098c037768ace0",
+    "mtime": 1784776354.962962,
+    "ast_hash": "c3cbec9a6faf54ee933869315b7fb849",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-schedule-page.vue": {
@@ -2685,8 +2685,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-simulation-page.vue": {
-    "mtime": 1783929794.133777,
-    "ast_hash": "6a63d90a4f566b98771f5c930b017afa",
+    "mtime": 1784775425.8410947,
+    "ast_hash": "23d7f3b4bcbe60a1dd02e25d6a51f349",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/profile-page.vue": {
@@ -2710,8 +2710,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/services/daily-revenue.service.ts": {
-    "mtime": 1783042948.861445,
-    "ast_hash": "6b6c222de9a925fe32b7068af58a9011",
+    "mtime": 1784774573.0377007,
+    "ast_hash": "4d0174d2a1ef7db3fe0be482ecbccafa",
     "semantic_hash": ""
   },
   "apps/frontend/src/services/enrollment.service.ts": {
@@ -2745,8 +2745,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/services/exam.service.ts": {
-    "mtime": 1784773621.0537584,
-    "ast_hash": "386f7d24cb8a8df892734c8da514e8fb",
+    "mtime": 1784774574.9300177,
+    "ast_hash": "c494a1fb11b949d3fffd4a629706ac3a",
     "semantic_hash": ""
   },
   "apps/frontend/src/services/executive-test-taker.service.ts": {
@@ -2755,8 +2755,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/services/finance.service.ts": {
-    "mtime": 1783042948.8622172,
-    "ast_hash": "4ec546cb58d68b0e922b499f6bd787c6",
+    "mtime": 1784774567.7385104,
+    "ast_hash": "8caf838f5c5199e43c87f4ab5ee0b4cf",
     "semantic_hash": ""
   },
   "apps/frontend/src/services/image.service.ts": {
@@ -2850,8 +2850,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/types/daily-revenue.types.ts": {
-    "mtime": 1783042948.8638883,
-    "ast_hash": "182c81e69a1bba5681c9987163ab7cb2",
+    "mtime": 1784774569.132447,
+    "ast_hash": "f80f87d075cf06d511bb69abc688967d",
     "semantic_hash": ""
   },
   "apps/frontend/src/types/enrollment.types.ts": {
@@ -2865,8 +2865,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/types/exam.ts": {
-    "mtime": 1784608898.1441405,
-    "ast_hash": "424434aab7f4ec076157380f556bc581",
+    "mtime": 1784774574.5737555,
+    "ast_hash": "004e6194d67121649d04827a3289cce9",
     "semantic_hash": ""
   },
   "apps/frontend/src/types/exam.types.ts": {
@@ -2880,8 +2880,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/types/finance.type.ts": {
-    "mtime": 1783042948.8643503,
-    "ast_hash": "6e93ed2c00bbce30a137dcbf296203a5",
+    "mtime": 1784774566.9248502,
+    "ast_hash": "8b08bee87219dff86c9eae9c9178732d",
     "semantic_hash": ""
   },
   "apps/frontend/src/types/image.ts": {
@@ -3360,13 +3360,13 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/exam-simulation-tour-steps.ts": {
-    "mtime": 1783929175.6081526,
-    "ast_hash": "e82bf7aa97db3f263ab5a2c6293fedcd",
+    "mtime": 1784775423.6080165,
+    "ast_hash": "0270a65928084afc886cc4e71e740d13",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-exam-simulation-tour.ts": {
-    "mtime": 1783929186.719636,
-    "ast_hash": "0ce361273c3d249a69b3c14db345e279",
+    "mtime": 1784774857.7644036,
+    "ast_hash": "7e7af7c980c73c5a0d3019dd6df89adf",
     "semantic_hash": ""
   },
   "apps/backend/src/database/migrations/1789780343260-AddPerfIndexesForReconcileAndMoodle.ts": {
@@ -3512,6 +3512,46 @@
   "apps/frontend/src/components/exam/dialog-search-candidate.vue": {
     "mtime": 1784772248.5914395,
     "ast_hash": "521255420263b87b0604560a05202499",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/database/migrations/1789780343270-DropFsFacultyFromFundSources.ts": {
+    "mtime": 1784774546.8743799,
+    "ast_hash": "4e806089f5ed99dac4d348fa8c6fb0d7",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/components/exam-simulation/exam-simulation-tour-offer-dialog.vue": {
+    "mtime": 1784775426.8298912,
+    "ast_hash": "f8bf868d67b3f8cb30ab03e37d7e8c56",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/components/exam/exam-prep-guide-dialog.vue": {
+    "mtime": 1784776337.32323,
+    "ast_hash": "61954a343d3834f0a7a910c135fb2dd6",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/components/exam/exam-prep-notify-button.vue": {
+    "mtime": 1784776256.3082755,
+    "ast_hash": "ab7989f473ccbd0cbe866d92d23b6db6",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/components/exam/exam-prep-step-dress.vue": {
+    "mtime": 1784776307.8918927,
+    "ast_hash": "c5555280127563cf7572c6d952ecf9fb",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/components/exam/exam-prep-step-items.vue": {
+    "mtime": 1784776273.5452197,
+    "ast_hash": "777dba3c9c73fc9622b7bf084c06b686",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/components/exam/exam-prep-step-print.vue": {
+    "mtime": 1784776266.5049837,
+    "ast_hash": "3f06da273001c5fe56134ee3841d8037",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/composables/use-exam-prep-guide.ts": {
+    "mtime": 1784776255.8321795,
+    "ast_hash": "d1562f5f8e72ed795f65c730817df456",
     "semantic_hash": ""
   }
 }

@@ -1228,7 +1228,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "constants_role_groups",
-      "community": 87,
+      "community": 16,
       "norm_label": "role-groups.ts"
     },
     {
@@ -1238,7 +1238,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "constants_role_groups_admin_staff_roles",
-      "community": 87,
+      "community": 16,
       "norm_label": "admin_staff_roles"
     },
     {
@@ -1248,7 +1248,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "constants_role_groups_finance_roles",
-      "community": 87,
+      "community": 16,
       "norm_label": "finance_roles"
     },
     {
@@ -1258,7 +1258,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "constants_role_groups_user_admin_roles",
-      "community": 87,
+      "community": 16,
       "norm_label": "user_admin_roles"
     },
     {
@@ -1268,7 +1268,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "constants_role_groups_enrollment_admin_roles",
-      "community": 87,
+      "community": 16,
       "norm_label": "enrollment_admin_roles"
     },
     {
@@ -1278,7 +1278,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "constants_role_groups_user_list_roles",
-      "community": 87,
+      "community": 16,
       "norm_label": "user_list_roles"
     },
     {
@@ -1288,7 +1288,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "constants_role_groups_executive_roles",
-      "community": 87,
+      "community": 16,
       "norm_label": "executive_roles"
     },
     {
@@ -1298,7 +1298,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "constants_role_groups_exam_admin_roles",
-      "community": 87,
+      "community": 16,
       "norm_label": "exam_admin_roles"
     },
     {
@@ -1308,7 +1308,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "constants_role_groups_fund_source_read_roles",
-      "community": 87,
+      "community": 16,
       "norm_label": "fund_source_read_roles"
     },
     {
@@ -1748,7 +1748,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_period_date_util_spec",
-      "community": 12,
+      "community": 132,
       "norm_label": "period-date.util.spec.ts"
     },
     {
@@ -1758,7 +1758,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_period_date_util",
-      "community": 12,
+      "community": 132,
       "norm_label": "period-date.util.ts"
     },
     {
@@ -1768,7 +1768,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "utils_period_date_util_normalizeperiodenddate",
-      "community": 12,
+      "community": 132,
       "norm_label": "normalizeperiodenddate()"
     },
     {
@@ -1888,7 +1888,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "database_data_source",
-      "community": 45,
+      "community": 58,
       "norm_label": "data-source.ts"
     },
     {
@@ -3992,6 +3992,46 @@
       "norm_label": ".dropindexifexists()"
     },
     {
+      "label": "1789780343270-DropFsFacultyFromFundSources.ts",
+      "file_type": "code",
+      "source_file": "apps/backend/src/database/migrations/1789780343270-DropFsFacultyFromFundSources.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "migrations_1789780343270_dropfsfacultyfromfundsources",
+      "community": 114,
+      "norm_label": "1789780343270-dropfsfacultyfromfundsources.ts"
+    },
+    {
+      "label": "DropFsFacultyFromFundSources1789780343270",
+      "file_type": "code",
+      "source_file": "apps/backend/src/database/migrations/1789780343270-DropFsFacultyFromFundSources.ts",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "migrations_1789780343270_dropfsfacultyfromfundsources_dropfsfacultyfromfundsources1789780343270",
+      "community": 114,
+      "norm_label": "dropfsfacultyfromfundsources1789780343270"
+    },
+    {
+      "label": ".up()",
+      "file_type": "code",
+      "source_file": "apps/backend/src/database/migrations/1789780343270-DropFsFacultyFromFundSources.ts",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "migrations_1789780343270_dropfsfacultyfromfundsources_dropfsfacultyfromfundsources1789780343270_up",
+      "community": 114,
+      "norm_label": ".up()"
+    },
+    {
+      "label": ".down()",
+      "file_type": "code",
+      "source_file": "apps/backend/src/database/migrations/1789780343270-DropFsFacultyFromFundSources.ts",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "migrations_1789780343270_dropfsfacultyfromfundsources_dropfsfacultyfromfundsources1789780343270_down",
+      "community": 114,
+      "norm_label": ".down()"
+    },
+    {
       "label": "demo-seed.ts",
       "file_type": "code",
       "source_file": "apps/backend/src/database/seeds/demo-seed.ts",
@@ -4188,7 +4228,7 @@
       "source_location": "L212",
       "_origin": "ast",
       "id": "seeds_demo_seed_seedusers",
-      "community": 45,
+      "community": 58,
       "norm_label": "seedusers()"
     },
     {
@@ -4848,7 +4888,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_controller_bankreconcilescontroller_verifydata",
-      "community": 84,
+      "community": 16,
       "norm_label": ".verifydata()"
     },
     {
@@ -4858,7 +4898,7 @@
       "source_location": "L150",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_controller_bankreconcilescontroller_updaterefs",
-      "community": 84,
+      "community": 34,
       "norm_label": ".updaterefs()"
     },
     {
@@ -4898,7 +4938,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_module",
-      "community": 45,
+      "community": 22,
       "norm_label": "bank-reconciles.module.ts"
     },
     {
@@ -5148,7 +5188,7 @@
       "source_location": "L165",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_bankreconcilesservice_constructor",
-      "community": 84,
+      "community": 20,
       "norm_label": ".constructor()"
     },
     {
@@ -5178,7 +5218,7 @@
       "source_location": "L272",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_bankreconcilesservice_findall",
-      "community": 84,
+      "community": 20,
       "norm_label": ".findall()"
     },
     {
@@ -5218,7 +5258,7 @@
       "source_location": "L421",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_bankreconcilesservice_findbyids",
-      "community": 84,
+      "community": 20,
       "norm_label": ".findbyids()"
     },
     {
@@ -5328,7 +5368,7 @@
       "source_location": "L630",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_bankreconcilesservice_updaterefs",
-      "community": 84,
+      "community": 20,
       "norm_label": ".updaterefs()"
     },
     {
@@ -5448,7 +5488,7 @@
       "source_location": "L951",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_bankreconcilesservice_createeditsnapshot",
-      "community": 34,
+      "community": 20,
       "norm_label": ".createeditsnapshot()"
     },
     {
@@ -5548,7 +5588,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_bank_reconcile_dto",
-      "community": 84,
+      "community": 34,
       "norm_label": "bank-reconcile.dto.ts"
     },
     {
@@ -5558,7 +5598,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "dto_bank_reconcile_dto_createbankreconciledto",
-      "community": 20,
+      "community": 34,
       "norm_label": "createbankreconciledto"
     },
     {
@@ -5568,7 +5608,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "dto_bank_reconcile_dto_updatebankreconciledto",
-      "community": 84,
+      "community": 34,
       "norm_label": "updatebankreconciledto"
     },
     {
@@ -5578,7 +5618,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "dto_bank_reconcile_dto_updatebankreconcilerefsdto",
-      "community": 84,
+      "community": 34,
       "norm_label": "updatebankreconcilerefsdto"
     },
     {
@@ -5588,7 +5628,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "dto_bank_reconcile_dto_verifybankreconcilesdto",
-      "community": 84,
+      "community": 16,
       "norm_label": "verifybankreconcilesdto"
     },
     {
@@ -5638,7 +5678,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_bank_reconcile_edit_log_entity",
-      "community": 45,
+      "community": 22,
       "norm_label": "bank-reconcile-edit-log.entity.ts"
     },
     {
@@ -5678,7 +5718,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "entities_bank_reconcile_edit_log_entity_bankreconcileeditlog",
-      "community": 45,
+      "community": 22,
       "norm_label": "bankreconcileeditlog"
     },
     {
@@ -5688,7 +5728,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_bank_reconcile_entity",
-      "community": 45,
+      "community": 22,
       "norm_label": "bank-reconcile.entity.ts"
     },
     {
@@ -5698,7 +5738,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "entities_bank_reconcile_entity_bankreconcile",
-      "community": 84,
+      "community": 20,
       "norm_label": "bankreconcile"
     },
     {
@@ -6408,7 +6448,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_module_examcertificatesmodule",
-      "community": 3,
+      "community": 14,
       "norm_label": "examcertificatesmodule"
     },
     {
@@ -6498,7 +6538,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_bulk_seat_assignment_dto",
-      "community": 108,
+      "community": 18,
       "norm_label": "bulk-seat-assignment.dto.ts"
     },
     {
@@ -6508,7 +6548,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "dto_bulk_seat_assignment_dto_seatassignmentitemdto",
-      "community": 108,
+      "community": 18,
       "norm_label": "seatassignmentitemdto"
     },
     {
@@ -6518,7 +6558,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "dto_bulk_seat_assignment_dto_bulkseatassignmentdto",
-      "community": 108,
+      "community": 18,
       "norm_label": "bulkseatassignmentdto"
     },
     {
@@ -6528,7 +6568,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_create_exam_enrollment_dto",
-      "community": 108,
+      "community": 18,
       "norm_label": "create-exam-enrollment.dto.ts"
     },
     {
@@ -6538,7 +6578,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "dto_create_exam_enrollment_dto_createexamenrollmentdto",
-      "community": 108,
+      "community": 18,
       "norm_label": "createexamenrollmentdto"
     },
     {
@@ -6628,7 +6668,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_update_exam_enrollment_dto",
-      "community": 108,
+      "community": 18,
       "norm_label": "update-exam-enrollment.dto.ts"
     },
     {
@@ -6668,7 +6708,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_exam_enrollment_entity",
-      "community": 108,
+      "community": 18,
       "norm_label": "exam-enrollment.entity.ts"
     },
     {
@@ -6678,7 +6718,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "entities_exam_enrollment_entity_examenrollmentstatus",
-      "community": 108,
+      "community": 18,
       "norm_label": "examenrollmentstatus"
     },
     {
@@ -6688,7 +6728,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "entities_exam_enrollment_entity_examverifystatus",
-      "community": 108,
+      "community": 18,
       "norm_label": "examverifystatus"
     },
     {
@@ -6718,7 +6758,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller",
-      "community": 18,
+      "community": 123,
       "norm_label": "examenrollmentscontroller"
     },
     {
@@ -6728,7 +6768,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_constructor",
-      "community": 18,
+      "community": 123,
       "norm_label": ".constructor()"
     },
     {
@@ -6738,7 +6778,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_create",
-      "community": 108,
+      "community": 123,
       "norm_label": ".create()"
     },
     {
@@ -6748,7 +6788,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_validatepasscode",
-      "community": 18,
+      "community": 123,
       "norm_label": ".validatepasscode()"
     },
     {
@@ -6758,7 +6798,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_findall",
-      "community": 18,
+      "community": 123,
       "norm_label": ".findall()"
     },
     {
@@ -6778,7 +6818,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_findexamhistorybyenrollmentid",
-      "community": 18,
+      "community": 123,
       "norm_label": ".findexamhistorybyenrollmentid()"
     },
     {
@@ -6788,7 +6828,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_findmatchedenrollments",
-      "community": 18,
+      "community": 123,
       "norm_label": ".findmatchedenrollments()"
     },
     {
@@ -6798,7 +6838,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_findbyexamid",
-      "community": 18,
+      "community": 123,
       "norm_label": ".findbyexamid()"
     },
     {
@@ -6818,7 +6858,7 @@
       "source_location": "L140",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_findone",
-      "community": 18,
+      "community": 123,
       "norm_label": ".findone()"
     },
     {
@@ -6828,7 +6868,7 @@
       "source_location": "L152",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_bulkassignseats",
-      "community": 108,
+      "community": 123,
       "norm_label": ".bulkassignseats()"
     },
     {
@@ -6848,7 +6888,7 @@
       "source_location": "L179",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_remove",
-      "community": 18,
+      "community": 123,
       "norm_label": ".remove()"
     },
     {
@@ -6858,7 +6898,7 @@
       "source_location": "L187",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_allocateseats",
-      "community": 18,
+      "community": 123,
       "norm_label": ".allocateseats()"
     },
     {
@@ -6868,7 +6908,7 @@
       "source_location": "L197",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_requestfix",
-      "community": 18,
+      "community": 123,
       "norm_label": ".requestfix()"
     },
     {
@@ -6878,7 +6918,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_module",
-      "community": 108,
+      "community": 12,
       "norm_label": "exam-enrollments.module.ts"
     },
     {
@@ -6898,7 +6938,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_service_spec",
-      "community": 108,
+      "community": 18,
       "norm_label": "exam-enrollments.service.spec.ts"
     },
     {
@@ -6908,7 +6948,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_service",
-      "community": 108,
+      "community": 18,
       "norm_label": "exam-enrollments.service.ts"
     },
     {
@@ -6928,7 +6968,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_service_examenrollmentsservice_constructor",
-      "community": 129,
+      "community": 12,
       "norm_label": ".constructor()"
     },
     {
@@ -7158,7 +7198,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "interfaces_executive_test_taker_interface",
-      "community": 108,
+      "community": 18,
       "norm_label": "executive-test-taker.interface.ts"
     },
     {
@@ -7168,7 +7208,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "interfaces_executive_test_taker_interface_executivetesttakerrow",
-      "community": 108,
+      "community": 18,
       "norm_label": "executivetesttakerrow"
     },
     {
@@ -7238,7 +7278,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_enrollments_test_taker_id_service",
-      "community": 108,
+      "community": 18,
       "norm_label": "test-taker-id.service.ts"
     },
     {
@@ -7338,7 +7378,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_create_exam_location_seat_dto",
-      "community": 47,
+      "community": 13,
       "norm_label": "create-exam-location-seat.dto.ts"
     },
     {
@@ -7348,7 +7388,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "dto_create_exam_location_seat_dto_createexamlocationseatdto",
-      "community": 47,
+      "community": 13,
       "norm_label": "createexamlocationseatdto"
     },
     {
@@ -7358,7 +7398,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_generate_exam_location_seats_dto",
-      "community": 47,
+      "community": 13,
       "norm_label": "generate-exam-location-seats.dto.ts"
     },
     {
@@ -7368,7 +7408,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "dto_generate_exam_location_seats_dto_generateexamlocationseatsdto",
-      "community": 47,
+      "community": 13,
       "norm_label": "generateexamlocationseatsdto"
     },
     {
@@ -7378,7 +7418,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_update_exam_location_seat_dto",
-      "community": 47,
+      "community": 13,
       "norm_label": "update-exam-location-seat.dto.ts"
     },
     {
@@ -7388,7 +7428,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_update_exam_location_seat_dto_updateexamlocationseatdto",
-      "community": 47,
+      "community": 13,
       "norm_label": "updateexamlocationseatdto"
     },
     {
@@ -7398,7 +7438,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_exam_location_seat_entity",
-      "community": 47,
+      "community": 13,
       "norm_label": "exam-location-seat.entity.ts"
     },
     {
@@ -7408,7 +7448,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "entities_exam_location_seat_entity_locationseatstatus",
-      "community": 47,
+      "community": 13,
       "norm_label": "locationseatstatus"
     },
     {
@@ -7418,7 +7458,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "entities_exam_location_seat_entity_examlocationseat",
-      "community": 47,
+      "community": 13,
       "norm_label": "examlocationseat"
     },
     {
@@ -7428,7 +7468,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller",
-      "community": 47,
+      "community": 13,
       "norm_label": "exam-location-seats.controller.ts"
     },
     {
@@ -7438,7 +7478,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller",
-      "community": 47,
+      "community": 13,
       "norm_label": "examlocationseatscontroller"
     },
     {
@@ -7448,7 +7488,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller_constructor",
-      "community": 47,
+      "community": 13,
       "norm_label": ".constructor()"
     },
     {
@@ -7458,7 +7498,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller_create",
-      "community": 47,
+      "community": 13,
       "norm_label": ".create()"
     },
     {
@@ -7468,7 +7508,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller_findall",
-      "community": 47,
+      "community": 13,
       "norm_label": ".findall()"
     },
     {
@@ -7478,7 +7518,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller_findone",
-      "community": 47,
+      "community": 13,
       "norm_label": ".findone()"
     },
     {
@@ -7488,7 +7528,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller_update",
-      "community": 47,
+      "community": 13,
       "norm_label": ".update()"
     },
     {
@@ -7498,7 +7538,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller_remove",
-      "community": 47,
+      "community": 13,
       "norm_label": ".remove()"
     },
     {
@@ -7508,7 +7548,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller_generateseats",
-      "community": 47,
+      "community": 13,
       "norm_label": ".generateseats()"
     },
     {
@@ -7518,7 +7558,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_module",
-      "community": 47,
+      "community": 13,
       "norm_label": "exam-location-seats.module.ts"
     },
     {
@@ -7528,7 +7568,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_module_examlocationseatsmodule",
-      "community": 47,
+      "community": 13,
       "norm_label": "examlocationseatsmodule"
     },
     {
@@ -7538,7 +7578,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service",
-      "community": 47,
+      "community": 13,
       "norm_label": "exam-location-seats.service.ts"
     },
     {
@@ -7548,7 +7588,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice",
-      "community": 47,
+      "community": 13,
       "norm_label": "examlocationseatsservice"
     },
     {
@@ -7558,7 +7598,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_constructor",
-      "community": 47,
+      "community": 13,
       "norm_label": ".constructor()"
     },
     {
@@ -7568,7 +7608,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_validatelocation",
-      "community": 47,
+      "community": 13,
       "norm_label": ".validatelocation()"
     },
     {
@@ -7578,7 +7618,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_create",
-      "community": 47,
+      "community": 13,
       "norm_label": ".create()"
     },
     {
@@ -7588,7 +7628,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_findall",
-      "community": 47,
+      "community": 13,
       "norm_label": ".findall()"
     },
     {
@@ -7598,7 +7638,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_findone",
-      "community": 47,
+      "community": 13,
       "norm_label": ".findone()"
     },
     {
@@ -7608,7 +7648,7 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_update",
-      "community": 47,
+      "community": 13,
       "norm_label": ".update()"
     },
     {
@@ -7618,7 +7658,7 @@
       "source_location": "L122",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_remove",
-      "community": 47,
+      "community": 13,
       "norm_label": ".remove()"
     },
     {
@@ -7628,7 +7668,7 @@
       "source_location": "L127",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_getseatlabel",
-      "community": 46,
+      "community": 13,
       "norm_label": ".getseatlabel()"
     },
     {
@@ -7638,7 +7678,7 @@
       "source_location": "L140",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_getseatsortorder",
-      "community": 46,
+      "community": 13,
       "norm_label": ".getseatsortorder()"
     },
     {
@@ -7648,7 +7688,7 @@
       "source_location": "L152",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_gettargetseatstatus",
-      "community": 47,
+      "community": 13,
       "norm_label": ".gettargetseatstatus()"
     },
     {
@@ -7658,7 +7698,7 @@
       "source_location": "L176",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_validateseatscanberemoved",
-      "community": 47,
+      "community": 13,
       "norm_label": ".validateseatscanberemoved()"
     },
     {
@@ -7668,7 +7708,7 @@
       "source_location": "L212",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_generateseats",
-      "community": 47,
+      "community": 13,
       "norm_label": ".generateseats()"
     },
     {
@@ -7678,7 +7718,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_create_exam_location_with_seats_dto",
-      "community": 46,
+      "community": 13,
       "norm_label": "create-exam-location-with-seats.dto.ts"
     },
     {
@@ -7688,7 +7728,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "dto_create_exam_location_with_seats_dto_createexamlocationwithseatsdto",
-      "community": 46,
+      "community": 13,
       "norm_label": "createexamlocationwithseatsdto"
     },
     {
@@ -7698,7 +7738,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_create_exam_location_dto",
-      "community": 46,
+      "community": 13,
       "norm_label": "create-exam-location.dto.ts"
     },
     {
@@ -7708,7 +7748,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "dto_create_exam_location_dto_locationaislepositiondto",
-      "community": 46,
+      "community": 13,
       "norm_label": "locationaislepositiondto"
     },
     {
@@ -7718,7 +7758,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "dto_create_exam_location_dto_createexamlocationdto",
-      "community": 46,
+      "community": 13,
       "norm_label": "createexamlocationdto"
     },
     {
@@ -7728,7 +7768,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_update_exam_location_dto",
-      "community": 46,
+      "community": 13,
       "norm_label": "update-exam-location.dto.ts"
     },
     {
@@ -7738,7 +7778,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_update_exam_location_dto_updateexamlocationdto",
-      "community": 46,
+      "community": 13,
       "norm_label": "updateexamlocationdto"
     },
     {
@@ -7758,7 +7798,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "entities_exam_location_entity_seatdirection",
-      "community": 46,
+      "community": 13,
       "norm_label": "seatdirection"
     },
     {
@@ -7768,7 +7808,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "entities_exam_location_entity_locationaisleposition",
-      "community": 29,
+      "community": 13,
       "norm_label": "locationaisleposition"
     },
     {
@@ -7778,7 +7818,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "entities_exam_location_entity_examlocation",
-      "community": 29,
+      "community": 13,
       "norm_label": "examlocation"
     },
     {
@@ -7788,7 +7828,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_controller",
-      "community": 46,
+      "community": 13,
       "norm_label": "exam-locations.controller.ts"
     },
     {
@@ -7798,7 +7838,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_controller_examlocationscontroller",
-      "community": 29,
+      "community": 13,
       "norm_label": "examlocationscontroller"
     },
     {
@@ -7808,7 +7848,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_controller_examlocationscontroller_constructor",
-      "community": 29,
+      "community": 13,
       "norm_label": ".constructor()"
     },
     {
@@ -7818,7 +7858,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_controller_examlocationscontroller_create",
-      "community": 29,
+      "community": 13,
       "norm_label": ".create()"
     },
     {
@@ -7828,7 +7868,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_controller_examlocationscontroller_createwithseats",
-      "community": 29,
+      "community": 13,
       "norm_label": ".createwithseats()"
     },
     {
@@ -7838,7 +7878,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_controller_examlocationscontroller_findall",
-      "community": 29,
+      "community": 13,
       "norm_label": ".findall()"
     },
     {
@@ -7848,7 +7888,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_controller_examlocationscontroller_findone",
-      "community": 29,
+      "community": 13,
       "norm_label": ".findone()"
     },
     {
@@ -7858,7 +7898,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_controller_examlocationscontroller_update",
-      "community": 29,
+      "community": 13,
       "norm_label": ".update()"
     },
     {
@@ -7868,7 +7908,7 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_controller_examlocationscontroller_remove",
-      "community": 29,
+      "community": 13,
       "norm_label": ".remove()"
     },
     {
@@ -7878,7 +7918,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_module",
-      "community": 121,
+      "community": 13,
       "norm_label": "exam-locations.module.ts"
     },
     {
@@ -7898,7 +7938,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service",
-      "community": 46,
+      "community": 13,
       "norm_label": "exam-locations.service.ts"
     },
     {
@@ -7908,7 +7948,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_locationwritedto",
-      "community": 46,
+      "community": 13,
       "norm_label": "locationwritedto"
     },
     {
@@ -7918,7 +7958,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationresponsealiases",
-      "community": 46,
+      "community": 13,
       "norm_label": "examlocationresponsealiases"
     },
     {
@@ -7928,7 +7968,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationresponse",
-      "community": 46,
+      "community": 13,
       "norm_label": "examlocationresponse"
     },
     {
@@ -7938,7 +7978,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice",
-      "community": 29,
+      "community": 13,
       "norm_label": "examlocationsservice"
     },
     {
@@ -7948,7 +7988,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_constructor",
-      "community": 29,
+      "community": 13,
       "norm_label": ".constructor()"
     },
     {
@@ -7958,7 +7998,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_create",
-      "community": 29,
+      "community": 13,
       "norm_label": ".create()"
     },
     {
@@ -7968,7 +8008,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_createwithseats",
-      "community": 29,
+      "community": 13,
       "norm_label": ".createwithseats()"
     },
     {
@@ -7978,7 +8018,7 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_getseatlabel",
-      "community": 46,
+      "community": 13,
       "norm_label": ".getseatlabel()"
     },
     {
@@ -7988,7 +8028,7 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_getseatsortorder",
-      "community": 46,
+      "community": 13,
       "norm_label": ".getseatsortorder()"
     },
     {
@@ -7998,7 +8038,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_isseatstatus",
-      "community": 29,
+      "community": 13,
       "norm_label": ".isseatstatus()"
     },
     {
@@ -8008,7 +8048,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_findall",
-      "community": 29,
+      "community": 13,
       "norm_label": ".findall()"
     },
     {
@@ -8018,7 +8058,7 @@
       "source_location": "L161",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_findone",
-      "community": 29,
+      "community": 13,
       "norm_label": ".findone()"
     },
     {
@@ -8028,7 +8068,7 @@
       "source_location": "L174",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_update",
-      "community": 29,
+      "community": 13,
       "norm_label": ".update()"
     },
     {
@@ -8038,7 +8078,7 @@
       "source_location": "L188",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_remove",
-      "community": 29,
+      "community": 13,
       "norm_label": ".remove()"
     },
     {
@@ -8048,7 +8088,7 @@
       "source_location": "L193",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_normalizelocationwritedto",
-      "community": 29,
+      "community": 13,
       "norm_label": ".normalizelocationwritedto()"
     },
     {
@@ -8058,7 +8098,7 @@
       "source_location": "L223",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_normalizeaislepositions",
-      "community": 29,
+      "community": 13,
       "norm_label": ".normalizeaislepositions()"
     },
     {
@@ -8068,7 +8108,7 @@
       "source_location": "L253",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_sortaislepositions",
-      "community": 29,
+      "community": 13,
       "norm_label": ".sortaislepositions()"
     },
     {
@@ -8078,7 +8118,7 @@
       "source_location": "L265",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_splitaislepositions",
-      "community": 29,
+      "community": 13,
       "norm_label": ".splitaislepositions()"
     },
     {
@@ -8088,7 +8128,7 @@
       "source_location": "L295",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_withresponsealiases",
-      "community": 29,
+      "community": 13,
       "norm_label": ".withresponsealiases()"
     },
     {
@@ -8908,7 +8948,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_create_exam_score_dto",
-      "community": 3,
+      "community": 45,
       "norm_label": "create-exam-score.dto.ts"
     },
     {
@@ -8918,7 +8958,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_create_exam_score_dto_createexamscoredto",
-      "community": 3,
+      "community": 45,
       "norm_label": "createexamscoredto"
     },
     {
@@ -8928,7 +8968,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_update_exam_score_dto",
-      "community": 3,
+      "community": 45,
       "norm_label": "update-exam-score.dto.ts"
     },
     {
@@ -8938,7 +8978,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_update_exam_score_dto_updateexamscoredto",
-      "community": 3,
+      "community": 45,
       "norm_label": "updateexamscoredto"
     },
     {
@@ -8948,7 +8988,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_exam_score_entity",
-      "community": 3,
+      "community": 45,
       "norm_label": "exam-score.entity.ts"
     },
     {
@@ -8958,7 +8998,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "entities_exam_score_entity_examscore",
-      "community": 3,
+      "community": 45,
       "norm_label": "examscore"
     },
     {
@@ -8968,7 +9008,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_controller",
-      "community": 3,
+      "community": 45,
       "norm_label": "exam-scores.controller.ts"
     },
     {
@@ -8978,7 +9018,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_controller_examscorescontroller",
-      "community": 3,
+      "community": 45,
       "norm_label": "examscorescontroller"
     },
     {
@@ -8988,7 +9028,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_controller_examscorescontroller_constructor",
-      "community": 3,
+      "community": 45,
       "norm_label": ".constructor()"
     },
     {
@@ -8998,7 +9038,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_controller_examscorescontroller_create",
-      "community": 3,
+      "community": 45,
       "norm_label": ".create()"
     },
     {
@@ -9008,7 +9048,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_controller_examscorescontroller_findall",
-      "community": 3,
+      "community": 45,
       "norm_label": ".findall()"
     },
     {
@@ -9018,7 +9058,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_controller_examscorescontroller_findone",
-      "community": 3,
+      "community": 45,
       "norm_label": ".findone()"
     },
     {
@@ -9028,7 +9068,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_controller_examscorescontroller_update",
-      "community": 3,
+      "community": 45,
       "norm_label": ".update()"
     },
     {
@@ -9038,7 +9078,7 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_controller_examscorescontroller_remove",
-      "community": 3,
+      "community": 45,
       "norm_label": ".remove()"
     },
     {
@@ -9048,7 +9088,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_module",
-      "community": 3,
+      "community": 45,
       "norm_label": "exam-scores.module.ts"
     },
     {
@@ -9058,7 +9098,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_module_examscoresmodule",
-      "community": 3,
+      "community": 14,
       "norm_label": "examscoresmodule"
     },
     {
@@ -9068,7 +9108,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_service_spec",
-      "community": 3,
+      "community": 45,
       "norm_label": "exam-scores.service.spec.ts"
     },
     {
@@ -9078,7 +9118,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_service",
-      "community": 3,
+      "community": 45,
       "norm_label": "exam-scores.service.ts"
     },
     {
@@ -9088,7 +9128,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_service_examscoresservice",
-      "community": 3,
+      "community": 45,
       "norm_label": "examscoresservice"
     },
     {
@@ -9098,7 +9138,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_service_examscoresservice_constructor",
-      "community": 3,
+      "community": 45,
       "norm_label": ".constructor()"
     },
     {
@@ -9108,7 +9148,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_service_examscoresservice_create",
-      "community": 3,
+      "community": 45,
       "norm_label": ".create()"
     },
     {
@@ -9128,7 +9168,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_service_examscoresservice_findone",
-      "community": 3,
+      "community": 45,
       "norm_label": ".findone()"
     },
     {
@@ -9138,7 +9178,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_service_examscoresservice_update",
-      "community": 3,
+      "community": 45,
       "norm_label": ".update()"
     },
     {
@@ -9148,7 +9188,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_service_examscoresservice_remove",
-      "community": 3,
+      "community": 45,
       "norm_label": ".remove()"
     },
     {
@@ -9938,7 +9978,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_vouchers_exam_vouchers_service_spec",
-      "community": 121,
+      "community": 11,
       "norm_label": "exam-vouchers.service.spec.ts"
     },
     {
@@ -9948,7 +9988,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "exam_vouchers_exam_vouchers_service_spec_repositoryentity",
-      "community": 121,
+      "community": 11,
       "norm_label": "repositoryentity"
     },
     {
@@ -10098,7 +10138,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "constants_exam_constants",
-      "community": 108,
+      "community": 18,
       "norm_label": "exam.constants.ts"
     },
     {
@@ -10108,7 +10148,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "constants_exam_constants_exam_type",
-      "community": 108,
+      "community": 18,
       "norm_label": "exam_type"
     },
     {
@@ -10118,7 +10158,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "constants_exam_constants_examtype",
-      "community": 108,
+      "community": 18,
       "norm_label": "examtype"
     },
     {
@@ -10298,7 +10338,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "entities_exam_entity_exam",
-      "community": 12,
+      "community": 46,
       "norm_label": "exam"
     },
     {
@@ -10478,7 +10518,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "exam_exam_service_examservice",
-      "community": 12,
+      "community": 46,
       "norm_label": "examservice"
     },
     {
@@ -10498,7 +10538,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_create",
-      "community": 12,
+      "community": 46,
       "norm_label": ".create()"
     },
     {
@@ -10508,7 +10548,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_synccoursetomoodle",
-      "community": 12,
+      "community": 46,
       "norm_label": ".synccoursetomoodle()"
     },
     {
@@ -10518,7 +10558,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_populatesessionlocations",
-      "community": 12,
+      "community": 46,
       "norm_label": ".populatesessionlocations()"
     },
     {
@@ -10528,7 +10568,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_attachenrollmentcounts",
-      "community": 12,
+      "community": 46,
       "norm_label": ".attachenrollmentcounts()"
     },
     {
@@ -10538,7 +10578,7 @@
       "source_location": "L162",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_assertexamexists",
-      "community": 12,
+      "community": 46,
       "norm_label": ".assertexamexists()"
     },
     {
@@ -10548,7 +10588,7 @@
       "source_location": "L172",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_findoneformutation",
-      "community": 12,
+      "community": 46,
       "norm_label": ".findoneformutation()"
     },
     {
@@ -10558,7 +10598,7 @@
       "source_location": "L183",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_findall",
-      "community": 12,
+      "community": 46,
       "norm_label": ".findall()"
     },
     {
@@ -10568,7 +10608,7 @@
       "source_location": "L241",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_findone",
-      "community": 12,
+      "community": 46,
       "norm_label": ".findone()"
     },
     {
@@ -10578,7 +10618,7 @@
       "source_location": "L274",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_findonewithseats",
-      "community": 12,
+      "community": 46,
       "norm_label": ".findonewithseats()"
     },
     {
@@ -10588,7 +10628,7 @@
       "source_location": "L279",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_logpasscodeusage",
-      "community": 12,
+      "community": 46,
       "norm_label": ".logpasscodeusage()"
     },
     {
@@ -10598,7 +10638,7 @@
       "source_location": "L295",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_getpasscodehistory",
-      "community": 12,
+      "community": 46,
       "norm_label": ".getpasscodehistory()"
     },
     {
@@ -10608,7 +10648,7 @@
       "source_location": "L315",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_update",
-      "community": 12,
+      "community": 46,
       "norm_label": ".update()"
     },
     {
@@ -10618,7 +10658,7 @@
       "source_location": "L322",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_remove",
-      "community": 12,
+      "community": 46,
       "norm_label": ".remove()"
     },
     {
@@ -10628,7 +10668,7 @@
       "source_location": "L332",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_createpasscodes",
-      "community": 12,
+      "community": 46,
       "norm_label": ".createpasscodes()"
     },
     {
@@ -10638,7 +10678,7 @@
       "source_location": "L370",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_notifyexamchanges",
-      "community": 12,
+      "community": 46,
       "norm_label": ".notifyexamchanges()"
     },
     {
@@ -10648,7 +10688,7 @@
       "source_location": "L388",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_dispatchexamchangeemails",
-      "community": 12,
+      "community": 46,
       "norm_label": ".dispatchexamchangeemails()"
     },
     {
@@ -10658,7 +10698,7 @@
       "source_location": "L495",
       "_origin": "ast",
       "id": "exam_exam_service_examservice_normalizeexamperiodenddates",
-      "community": 12,
+      "community": 46,
       "norm_label": ".normalizeexamperiodenddates()"
     },
     {
@@ -10668,7 +10708,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_exam_change_email_template",
-      "community": 12,
+      "community": 108,
       "norm_label": "exam-change-email.template.ts"
     },
     {
@@ -10678,7 +10718,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_exam_change_email_template_examchangerow",
-      "community": 12,
+      "community": 108,
       "norm_label": "examchangerow"
     },
     {
@@ -10688,7 +10728,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "templates_exam_change_email_template_examchangeemaildata",
-      "community": 12,
+      "community": 108,
       "norm_label": "examchangeemaildata"
     },
     {
@@ -10698,7 +10738,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "templates_exam_change_email_template_styles",
-      "community": 12,
+      "community": 108,
       "norm_label": "styles"
     },
     {
@@ -10708,7 +10748,7 @@
       "source_location": "L217",
       "_origin": "ast",
       "id": "templates_exam_change_email_template_escapehtml",
-      "community": 12,
+      "community": 108,
       "norm_label": "escapehtml()"
     },
     {
@@ -10718,7 +10758,7 @@
       "source_location": "L226",
       "_origin": "ast",
       "id": "templates_exam_change_email_template_getexamchangeemailtemplate",
-      "community": 12,
+      "community": 108,
       "norm_label": "getexamchangeemailtemplate()"
     },
     {
@@ -10728,7 +10768,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_create_fund_source_dto",
-      "community": 12,
+      "community": 29,
       "norm_label": "create-fund-source.dto.ts"
     },
     {
@@ -10738,7 +10778,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "dto_create_fund_source_dto_createfundsourcedto",
-      "community": 12,
+      "community": 29,
       "norm_label": "createfundsourcedto"
     },
     {
@@ -10748,7 +10788,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_daily_revenue_query_dto",
-      "community": 12,
+      "community": 29,
       "norm_label": "daily-revenue-query.dto.ts"
     },
     {
@@ -10758,7 +10798,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_daily_revenue_query_dto_dailyrevenuequerydto",
-      "community": 12,
+      "community": 29,
       "norm_label": "dailyrevenuequerydto"
     },
     {
@@ -10768,7 +10808,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_update_fund_source_dto",
-      "community": 12,
+      "community": 29,
       "norm_label": "update-fund-source.dto.ts"
     },
     {
@@ -10778,7 +10818,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_update_fund_source_dto_updatefundsourcedto",
-      "community": 12,
+      "community": 29,
       "norm_label": "updatefundsourcedto"
     },
     {
@@ -10788,7 +10828,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_fund_source_entity",
-      "community": 12,
+      "community": 29,
       "norm_label": "fund-source.entity.ts"
     },
     {
@@ -10798,7 +10838,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "entities_fund_source_entity_fundsource",
-      "community": 12,
+      "community": 29,
       "norm_label": "fundsource"
     },
     {
@@ -10808,7 +10848,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_controller",
-      "community": 12,
+      "community": 29,
       "norm_label": "fund-sources.controller.ts"
     },
     {
@@ -10818,7 +10858,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_controller_fundsourcescontroller",
-      "community": 12,
+      "community": 29,
       "norm_label": "fundsourcescontroller"
     },
     {
@@ -10828,7 +10868,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_controller_fundsourcescontroller_constructor",
-      "community": 12,
+      "community": 29,
       "norm_label": ".constructor()"
     },
     {
@@ -10838,7 +10878,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_controller_fundsourcescontroller_create",
-      "community": 12,
+      "community": 29,
       "norm_label": ".create()"
     },
     {
@@ -10848,7 +10888,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_controller_fundsourcescontroller_findall",
-      "community": 12,
+      "community": 29,
       "norm_label": ".findall()"
     },
     {
@@ -10858,47 +10898,37 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_controller_fundsourcescontroller_getdailyrevenue",
-      "community": 12,
+      "community": 29,
       "norm_label": ".getdailyrevenue()"
-    },
-    {
-      "label": ".getDepartments()",
-      "file_type": "code",
-      "source_file": "apps/backend/src/modules/fund-sources/fund-sources.controller.ts",
-      "source_location": "L76",
-      "_origin": "ast",
-      "id": "fund_sources_fund_sources_controller_fundsourcescontroller_getdepartments",
-      "community": 12,
-      "norm_label": ".getdepartments()"
     },
     {
       "label": ".findOne()",
       "file_type": "code",
       "source_file": "apps/backend/src/modules/fund-sources/fund-sources.controller.ts",
-      "source_location": "L89",
+      "source_location": "L78",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_controller_fundsourcescontroller_findone",
-      "community": 12,
+      "community": 29,
       "norm_label": ".findone()"
     },
     {
       "label": ".update()",
       "file_type": "code",
       "source_file": "apps/backend/src/modules/fund-sources/fund-sources.controller.ts",
-      "source_location": "L102",
+      "source_location": "L91",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_controller_fundsourcescontroller_update",
-      "community": 12,
+      "community": 29,
       "norm_label": ".update()"
     },
     {
       "label": ".remove()",
       "file_type": "code",
       "source_file": "apps/backend/src/modules/fund-sources/fund-sources.controller.ts",
-      "source_location": "L117",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_controller_fundsourcescontroller_remove",
-      "community": 12,
+      "community": 29,
       "norm_label": ".remove()"
     },
     {
@@ -10908,7 +10938,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_module",
-      "community": 12,
+      "community": 29,
       "norm_label": "fund-sources.module.ts"
     },
     {
@@ -10918,7 +10948,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_module_fundsourcesmodule",
-      "community": 12,
+      "community": 29,
       "norm_label": "fundsourcesmodule"
     },
     {
@@ -10928,7 +10958,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_service",
-      "community": 12,
+      "community": 29,
       "norm_label": "fund-sources.service.ts"
     },
     {
@@ -10938,108 +10968,88 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_service_rawdailyrevenuerow",
-      "community": 12,
+      "community": 29,
       "norm_label": "rawdailyrevenuerow"
-    },
-    {
-      "label": "RawDepartmentRow",
-      "file_type": "code",
-      "source_file": "apps/backend/src/modules/fund-sources/fund-sources.service.ts",
-      "source_location": "L21",
-      "_origin": "ast",
-      "id": "fund_sources_fund_sources_service_rawdepartmentrow",
-      "community": 12,
-      "norm_label": "rawdepartmentrow"
     },
     {
       "label": "FundSourcesService",
       "file_type": "code",
       "source_file": "apps/backend/src/modules/fund-sources/fund-sources.service.ts",
-      "source_location": "L26",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_service_fundsourcesservice",
-      "community": 12,
+      "community": 29,
       "norm_label": "fundsourcesservice"
     },
     {
       "label": ".constructor()",
       "file_type": "code",
       "source_file": "apps/backend/src/modules/fund-sources/fund-sources.service.ts",
-      "source_location": "L27",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_service_fundsourcesservice_constructor",
-      "community": 12,
+      "community": 29,
       "norm_label": ".constructor()"
     },
     {
       "label": ".create()",
       "file_type": "code",
       "source_file": "apps/backend/src/modules/fund-sources/fund-sources.service.ts",
-      "source_location": "L33",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_service_fundsourcesservice_create",
-      "community": 12,
+      "community": 29,
       "norm_label": ".create()"
     },
     {
       "label": ".findAll()",
       "file_type": "code",
       "source_file": "apps/backend/src/modules/fund-sources/fund-sources.service.ts",
-      "source_location": "L38",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_service_fundsourcesservice_findall",
-      "community": 12,
+      "community": 29,
       "norm_label": ".findall()"
     },
     {
       "label": ".findOne()",
       "file_type": "code",
       "source_file": "apps/backend/src/modules/fund-sources/fund-sources.service.ts",
-      "source_location": "L42",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_service_fundsourcesservice_findone",
-      "community": 12,
+      "community": 29,
       "norm_label": ".findone()"
     },
     {
       "label": ".update()",
       "file_type": "code",
       "source_file": "apps/backend/src/modules/fund-sources/fund-sources.service.ts",
-      "source_location": "L52",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_service_fundsourcesservice_update",
-      "community": 12,
+      "community": 29,
       "norm_label": ".update()"
     },
     {
       "label": ".remove()",
       "file_type": "code",
       "source_file": "apps/backend/src/modules/fund-sources/fund-sources.service.ts",
-      "source_location": "L61",
+      "source_location": "L56",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_service_fundsourcesservice_remove",
-      "community": 12,
+      "community": 29,
       "norm_label": ".remove()"
     },
     {
       "label": ".getDailyRevenue()",
       "file_type": "code",
       "source_file": "apps/backend/src/modules/fund-sources/fund-sources.service.ts",
-      "source_location": "L66",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "fund_sources_fund_sources_service_fundsourcesservice_getdailyrevenue",
-      "community": 12,
+      "community": 29,
       "norm_label": ".getdailyrevenue()"
-    },
-    {
-      "label": ".getDepartments()",
-      "file_type": "code",
-      "source_file": "apps/backend/src/modules/fund-sources/fund-sources.service.ts",
-      "source_location": "L153",
-      "_origin": "ast",
-      "id": "fund_sources_fund_sources_service_fundsourcesservice_getdepartments",
-      "community": 12,
-      "norm_label": ".getdepartments()"
     },
     {
       "label": "daily-revenue.interface.ts",
@@ -11048,7 +11058,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "interfaces_daily_revenue_interface",
-      "community": 12,
+      "community": 29,
       "norm_label": "daily-revenue.interface.ts"
     },
     {
@@ -11058,17 +11068,17 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "interfaces_daily_revenue_interface_dailyrevenuerow",
-      "community": 12,
+      "community": 29,
       "norm_label": "dailyrevenuerow"
     },
     {
       "label": "DailyRevenueSummary",
       "file_type": "code",
       "source_file": "apps/backend/src/modules/fund-sources/interfaces/daily-revenue.interface.ts",
-      "source_location": "L8",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "interfaces_daily_revenue_interface_dailyrevenuesummary",
-      "community": 12,
+      "community": 29,
       "norm_label": "dailyrevenuesummary"
     },
     {
@@ -12258,7 +12268,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "constants_image_category_config",
-      "community": 19,
+      "community": 0,
       "norm_label": "image-category.config.ts"
     },
     {
@@ -12268,7 +12278,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "constants_image_category_config_imagecategoryconfig",
-      "community": 19,
+      "community": 0,
       "norm_label": "imagecategoryconfig"
     },
     {
@@ -12278,7 +12288,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "constants_image_category_config_imagecategory",
-      "community": 19,
+      "community": 0,
       "norm_label": "imagecategory"
     },
     {
@@ -12288,7 +12298,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "constants_image_category_config_isimagecategory",
-      "community": 19,
+      "community": 0,
       "norm_label": "isimagecategory()"
     },
     {
@@ -12298,7 +12308,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "constants_image_category_config_resolveimagefolder",
-      "community": 19,
+      "community": 0,
       "norm_label": "resolveimagefolder()"
     },
     {
@@ -12658,7 +12668,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "platform_gateway_platform_gateway_service_spec",
-      "community": 19,
+      "community": 0,
       "norm_label": "platform-gateway.service.spec.ts"
     },
     {
@@ -12668,7 +12678,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "platform_gateway_platform_gateway_service",
-      "community": 19,
+      "community": 0,
       "norm_label": "platform-gateway.service.ts"
     },
     {
@@ -12868,7 +12878,7 @@
       "source_location": "L409",
       "_origin": "ast",
       "id": "platform_gateway_platform_gateway_service_platformgatewayservice_uploadbycategory",
-      "community": 19,
+      "community": 0,
       "norm_label": ".uploadbycategory()"
     },
     {
@@ -13588,7 +13598,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_role_entity",
-      "community": 45,
+      "community": 35,
       "norm_label": "role.entity.ts"
     },
     {
@@ -13598,7 +13608,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "entities_role_entity_role",
-      "community": 40,
+      "community": 35,
       "norm_label": "role"
     },
     {
@@ -13708,7 +13718,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "roles_roles_module",
-      "community": 40,
+      "community": 14,
       "norm_label": "roles.module.ts"
     },
     {
@@ -14888,7 +14898,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_confirm_payment_flow_dto",
-      "community": 27,
+      "community": 54,
       "norm_label": "confirm-payment-flow.dto.ts"
     },
     {
@@ -14898,7 +14908,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_confirm_payment_flow_dto_confirmpaymentflowdto",
-      "community": 27,
+      "community": 54,
       "norm_label": "confirmpaymentflowdto"
     },
     {
@@ -14908,7 +14918,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_create_pending_payment_dto",
-      "community": 27,
+      "community": 54,
       "norm_label": "create-pending-payment.dto.ts"
     },
     {
@@ -14918,7 +14928,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "dto_create_pending_payment_dto_creatependingpaymentdto",
-      "community": 27,
+      "community": 54,
       "norm_label": "creatependingpaymentdto"
     },
     {
@@ -14928,7 +14938,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_create_transaction_flow_dto",
-      "community": 27,
+      "community": 54,
       "norm_label": "create-transaction-flow.dto.ts"
     },
     {
@@ -14938,7 +14948,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "dto_create_transaction_flow_dto_createtransactionflowdto",
-      "community": 27,
+      "community": 54,
       "norm_label": "createtransactionflowdto"
     },
     {
@@ -14948,7 +14958,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_transaction_dto",
-      "community": 27,
+      "community": 54,
       "norm_label": "transaction.dto.ts"
     },
     {
@@ -14958,7 +14968,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "dto_transaction_dto_createtransactiondto",
-      "community": 27,
+      "community": 54,
       "norm_label": "createtransactiondto"
     },
     {
@@ -14978,7 +14988,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_transaction_entity",
-      "community": 27,
+      "community": 54,
       "norm_label": "transaction.entity.ts"
     },
     {
@@ -14988,7 +14998,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "entities_transaction_entity_transactionpaymentmethod",
-      "community": 27,
+      "community": 54,
       "norm_label": "transactionpaymentmethod"
     },
     {
@@ -14998,7 +15008,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "entities_transaction_entity_transactionpaymentstatus",
-      "community": 27,
+      "community": 54,
       "norm_label": "transactionpaymentstatus"
     },
     {
@@ -15008,7 +15018,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "entities_transaction_entity_transactionchannel",
-      "community": 27,
+      "community": 54,
       "norm_label": "transactionchannel"
     },
     {
@@ -15018,7 +15028,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "entities_transaction_entity_transactionmatchstatus",
-      "community": 27,
+      "community": 54,
       "norm_label": "transactionmatchstatus"
     },
     {
@@ -15038,7 +15048,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "transactions_transactions_controller",
-      "community": 27,
+      "community": 54,
       "norm_label": "transactions.controller.ts"
     },
     {
@@ -15078,7 +15088,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "transactions_transactions_controller_transactionscontroller_creatependingpayment",
-      "community": 27,
+      "community": 54,
       "norm_label": ".creatependingpayment()"
     },
     {
@@ -15168,7 +15178,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "transactions_transactions_module",
-      "community": 27,
+      "community": 54,
       "norm_label": "transactions.module.ts"
     },
     {
@@ -15178,7 +15188,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "transactions_transactions_module_transactionsmodule",
-      "community": 27,
+      "community": 14,
       "norm_label": "transactionsmodule"
     },
     {
@@ -15188,7 +15198,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "transactions_transactions_service_spec",
-      "community": 27,
+      "community": 54,
       "norm_label": "transactions.service.spec.ts"
     },
     {
@@ -15198,7 +15208,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "transactions_transactions_service",
-      "community": 27,
+      "community": 54,
       "norm_label": "transactions.service.ts"
     },
     {
@@ -15208,7 +15218,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "transactions_transactions_service_pendingpaymentresult",
-      "community": 27,
+      "community": 54,
       "norm_label": "pendingpaymentresult"
     },
     {
@@ -15218,7 +15228,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "transactions_transactions_service_transactionflowresult",
-      "community": 27,
+      "community": 54,
       "norm_label": "transactionflowresult"
     },
     {
@@ -15418,7 +15428,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_user_image_entity",
-      "community": 45,
+      "community": 58,
       "norm_label": "user-image.entity.ts"
     },
     {
@@ -15428,7 +15438,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "entities_user_image_entity_userimage",
-      "community": 45,
+      "community": 58,
       "norm_label": "userimage"
     },
     {
@@ -15508,7 +15518,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "user_image_user_image_module_userimagemodule",
-      "community": 58,
+      "community": 14,
       "norm_label": "userimagemodule"
     },
     {
@@ -15608,7 +15618,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_user_profile_entity",
-      "community": 45,
+      "community": 58,
       "norm_label": "user-profile.entity.ts"
     },
     {
@@ -15618,7 +15628,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "entities_user_profile_entity_userphysicalstatus",
-      "community": 108,
+      "community": 18,
       "norm_label": "userphysicalstatus"
     },
     {
@@ -15628,7 +15638,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "entities_user_profile_entity_userprofile",
-      "community": 45,
+      "community": 33,
       "norm_label": "userprofile"
     },
     {
@@ -15658,7 +15668,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "user_profile_user_profile_controller_userprofilecontroller_constructor",
-      "community": 45,
+      "community": 33,
       "norm_label": ".constructor()"
     },
     {
@@ -15758,7 +15768,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "user_profile_user_profile_service",
-      "community": 45,
+      "community": 33,
       "norm_label": "user-profile.service.ts"
     },
     {
@@ -15768,7 +15778,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "user_profile_user_profile_service_userprofileservice",
-      "community": 45,
+      "community": 33,
       "norm_label": "userprofileservice"
     },
     {
@@ -15778,7 +15788,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "user_profile_user_profile_service_userprofileservice_constructor",
-      "community": 45,
+      "community": 33,
       "norm_label": ".constructor()"
     },
     {
@@ -15788,7 +15798,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "user_profile_user_profile_service_userprofileservice_create",
-      "community": 45,
+      "community": 33,
       "norm_label": ".create()"
     },
     {
@@ -15798,7 +15808,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "user_profile_user_profile_service_userprofileservice_findall",
-      "community": 45,
+      "community": 33,
       "norm_label": ".findall()"
     },
     {
@@ -15808,7 +15818,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "user_profile_user_profile_service_userprofileservice_findone",
-      "community": 45,
+      "community": 33,
       "norm_label": ".findone()"
     },
     {
@@ -15818,7 +15828,7 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "user_profile_user_profile_service_userprofileservice_findbyuserid",
-      "community": 45,
+      "community": 33,
       "norm_label": ".findbyuserid()"
     },
     {
@@ -15828,7 +15838,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "user_profile_user_profile_service_userprofileservice_update",
-      "community": 45,
+      "community": 33,
       "norm_label": ".update()"
     },
     {
@@ -15838,7 +15848,7 @@
       "source_location": "L307",
       "_origin": "ast",
       "id": "user_profile_user_profile_service_userprofileservice_remove",
-      "community": 45,
+      "community": 33,
       "norm_label": ".remove()"
     },
     {
@@ -15938,7 +15948,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_user_response_dto",
-      "community": 45,
+      "community": 35,
       "norm_label": "user-response.dto.ts"
     },
     {
@@ -15988,7 +15998,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_user_entity",
-      "community": 45,
+      "community": 58,
       "norm_label": "user.entity.ts"
     },
     {
@@ -15998,7 +16008,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "entities_user_entity_user",
-      "community": 45,
+      "community": 58,
       "norm_label": "user"
     },
     {
@@ -16098,7 +16108,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_users_module",
-      "community": 14,
+      "community": 35,
       "norm_label": "users.module.ts"
     },
     {
@@ -16118,7 +16128,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_users_service_spec",
-      "community": 45,
+      "community": 35,
       "norm_label": "users.service.spec.ts"
     },
     {
@@ -16148,7 +16158,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "users_users_service_usersservice_constructor",
-      "community": 45,
+      "community": 33,
       "norm_label": ".constructor()"
     },
     {
@@ -16538,7 +16548,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "test_authz_e2e_spec",
-      "community": 35,
+      "community": 19,
       "norm_label": "authz.e2e-spec.ts"
     },
     {
@@ -16548,7 +16558,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "test_authz_e2e_spec_mockjwtauthguard",
-      "community": 35,
+      "community": 19,
       "norm_label": "mockjwtauthguard"
     },
     {
@@ -16558,7 +16568,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "test_authz_e2e_spec_mockjwtauthguard_canactivate",
-      "community": 35,
+      "community": 19,
       "norm_label": ".canactivate()"
     },
     {
@@ -17638,7 +17648,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "boot_auth",
-      "community": 59,
+      "community": 47,
       "norm_label": "auth.ts"
     },
     {
@@ -17648,7 +17658,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "boot_axios",
-      "community": 113,
+      "community": 119,
       "norm_label": "axios.ts"
     },
     {
@@ -17658,7 +17668,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "boot_axios_componentcustomproperties",
-      "community": 113,
+      "community": 119,
       "norm_label": "componentcustomproperties"
     },
     {
@@ -17798,7 +17808,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "base_app_select",
-      "community": 133,
+      "community": 103,
       "norm_label": "app-select.vue"
     },
     {
@@ -17808,7 +17818,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "base_app_select_isopen",
-      "community": 133,
+      "community": 103,
       "norm_label": "isopen"
     },
     {
@@ -17818,7 +17828,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "base_app_select_attrs",
-      "community": 133,
+      "community": 103,
       "norm_label": "attrs"
     },
     {
@@ -17828,7 +17838,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "base_app_select_ismuted",
-      "community": 133,
+      "community": 103,
       "norm_label": "ismuted"
     },
     {
@@ -18308,7 +18318,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_exam_card",
-      "community": 112,
+      "community": 5,
       "norm_label": "exam-card.vue"
     },
     {
@@ -18318,7 +18328,7 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "components_exam_card_formatdate",
-      "community": 112,
+      "community": 5,
       "norm_label": "formatdate()"
     },
     {
@@ -18328,7 +18338,7 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "components_exam_card_seatratio",
-      "community": 112,
+      "community": 5,
       "norm_label": "seatratio"
     },
     {
@@ -18338,7 +18348,7 @@
       "source_location": "L149",
       "_origin": "ast",
       "id": "components_exam_card_string",
-      "community": 112,
+      "community": 5,
       "norm_label": "string"
     },
     {
@@ -18348,7 +18358,7 @@
       "source_location": "L158",
       "_origin": "ast",
       "id": "components_exam_card_gettypecolor",
-      "community": 112,
+      "community": 5,
       "norm_label": "gettypecolor()"
     },
     {
@@ -18358,7 +18368,7 @@
       "source_location": "L162",
       "_origin": "ast",
       "id": "components_exam_card_formatcurrency",
-      "community": 112,
+      "community": 5,
       "norm_label": "formatcurrency()"
     },
     {
@@ -18640,6 +18650,16 @@
       "id": "exam_report_exam_year_summary_table",
       "community": 348,
       "norm_label": "exam-year-summary-table.vue"
+    },
+    {
+      "label": "exam-simulation-tour-offer-dialog.vue",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/components/exam-simulation/exam-simulation-tour-offer-dialog.vue",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "exam_simulation_exam_simulation_tour_offer_dialog",
+      "community": 192,
+      "norm_label": "exam-simulation-tour-offer-dialog.vue"
     },
     {
       "label": "moodle-attempt-finished.vue",
@@ -19168,7 +19188,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_app_location_walkway_controls",
-      "community": 135,
+      "community": 104,
       "norm_label": "app-location-walkway-controls.vue"
     },
     {
@@ -19178,7 +19198,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "exam_app_location_walkway_controls_props",
-      "community": 135,
+      "community": 104,
       "norm_label": "props"
     },
     {
@@ -19188,7 +19208,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "exam_app_location_walkway_controls_t",
-      "community": 135,
+      "community": 104,
       "norm_label": "{ t }"
     },
     {
@@ -19198,7 +19218,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "exam_app_location_walkway_controls_getpositionlabel",
-      "community": 135,
+      "community": 104,
       "norm_label": "getpositionlabel()"
     },
     {
@@ -19218,7 +19238,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_app_seat_broken_dialog",
-      "community": 138,
+      "community": 104,
       "norm_label": "app-seat-broken-dialog.vue"
     },
     {
@@ -19228,7 +19248,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "exam_app_seat_broken_dialog_isopen",
-      "community": 138,
+      "community": 104,
       "norm_label": "isopen"
     },
     {
@@ -19238,7 +19258,7 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "exam_app_seat_broken_dialog_oncancel",
-      "community": 138,
+      "community": 104,
       "norm_label": "oncancel()"
     },
     {
@@ -19248,7 +19268,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "exam_app_seat_broken_dialog_onconfirm",
-      "community": 138,
+      "community": 104,
       "norm_label": "onconfirm()"
     },
     {
@@ -19328,7 +19348,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_app_walkway_position_dialog",
-      "community": 114,
+      "community": 104,
       "norm_label": "app-walkway-position-dialog.vue"
     },
     {
@@ -19338,7 +19358,7 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "exam_app_walkway_position_dialog_props",
-      "community": 114,
+      "community": 104,
       "norm_label": "props"
     },
     {
@@ -19348,7 +19368,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "exam_app_walkway_position_dialog_isopen",
-      "community": 114,
+      "community": 104,
       "norm_label": "isopen"
     },
     {
@@ -19358,7 +19378,7 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "exam_app_walkway_position_dialog_rowoptions",
-      "community": 114,
+      "community": 104,
       "norm_label": "rowoptions"
     },
     {
@@ -19368,7 +19388,7 @@
       "source_location": "L122",
       "_origin": "ast",
       "id": "exam_app_walkway_position_dialog_coloptions",
-      "community": 114,
+      "community": 104,
       "norm_label": "coloptions"
     },
     {
@@ -19378,7 +19398,7 @@
       "source_location": "L136",
       "_origin": "ast",
       "id": "exam_app_walkway_position_dialog_if",
-      "community": 114,
+      "community": 104,
       "norm_label": "if()"
     },
     {
@@ -19418,7 +19438,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_create_exam_candidates_card",
-      "community": 41,
+      "community": 27,
       "norm_label": "create-exam-candidates-card.vue"
     },
     {
@@ -19428,7 +19448,7 @@
       "source_location": "L218",
       "_origin": "ast",
       "id": "exam_create_exam_candidates_card_if",
-      "community": 41,
+      "community": 27,
       "norm_label": "if()"
     },
     {
@@ -19518,7 +19538,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_dialog_csv_import",
-      "community": 41,
+      "community": 27,
       "norm_label": "dialog-csv-import.vue"
     },
     {
@@ -19528,7 +19548,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_dialog_delete_candidates",
-      "community": 41,
+      "community": 27,
       "norm_label": "dialog-delete-candidates.vue"
     },
     {
@@ -19668,7 +19688,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_dialog_passcode_type",
-      "community": 41,
+      "community": 27,
       "norm_label": "dialog-passcode-type.vue"
     },
     {
@@ -19678,7 +19698,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_dialog_search_candidate",
-      "community": 41,
+      "community": 27,
       "norm_label": "dialog-search-candidate.vue"
     },
     {
@@ -19768,7 +19788,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_exam_management_table",
-      "community": 41,
+      "community": 80,
       "norm_label": "exam-management-table.vue"
     },
     {
@@ -19778,7 +19798,7 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "exam_exam_management_table_formatthaidate",
-      "community": 41,
+      "community": 80,
       "norm_label": "{ formatthaidate }"
     },
     {
@@ -19788,7 +19808,7 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "exam_exam_management_table_t",
-      "community": 41,
+      "community": 80,
       "norm_label": "{ t }"
     },
     {
@@ -19798,7 +19818,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "exam_exam_management_table_q",
-      "community": 41,
+      "community": 80,
       "norm_label": "$q"
     },
     {
@@ -19808,7 +19828,7 @@
       "source_location": "L159",
       "_origin": "ast",
       "id": "exam_exam_management_table_getratio",
-      "community": 41,
+      "community": 80,
       "norm_label": "getratio()"
     },
     {
@@ -19818,7 +19838,7 @@
       "source_location": "L164",
       "_origin": "ast",
       "id": "exam_exam_management_table_getprogresscolor",
-      "community": 41,
+      "community": 80,
       "norm_label": "getprogresscolor()"
     },
     {
@@ -19828,7 +19848,7 @@
       "source_location": "L276",
       "_origin": "ast",
       "id": "exam_exam_management_table_getbtnprops",
-      "community": 41,
+      "community": 80,
       "norm_label": "getbtnprops()"
     },
     {
@@ -19838,7 +19858,7 @@
       "source_location": "L283",
       "_origin": "ast",
       "id": "exam_exam_management_table_isactiondisabled",
-      "community": 41,
+      "community": 80,
       "norm_label": "isactiondisabled()"
     },
     {
@@ -19848,7 +19868,7 @@
       "source_location": "L303",
       "_origin": "ast",
       "id": "exam_exam_management_table_getactiontooltip",
-      "community": 41,
+      "community": 80,
       "norm_label": "getactiontooltip()"
     },
     {
@@ -19858,7 +19878,7 @@
       "source_location": "L322",
       "_origin": "ast",
       "id": "exam_exam_management_table_handleaction",
-      "community": 41,
+      "community": 80,
       "norm_label": "handleaction()"
     },
     {
@@ -19868,8 +19888,108 @@
       "source_location": "L356",
       "_origin": "ast",
       "id": "exam_exam_management_table_onrequest",
-      "community": 41,
+      "community": 80,
       "norm_label": "onrequest()"
+    },
+    {
+      "label": "exam-prep-guide-dialog.vue",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "exam_exam_prep_guide_dialog",
+      "community": 87,
+      "norm_label": "exam-prep-guide-dialog.vue"
+    },
+    {
+      "label": "currentStep",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L98",
+      "_origin": "ast",
+      "id": "exam_exam_prep_guide_dialog_currentstep",
+      "community": 87,
+      "norm_label": "currentstep"
+    },
+    {
+      "label": "transitionName",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L99",
+      "_origin": "ast",
+      "id": "exam_exam_prep_guide_dialog_transitionname",
+      "community": 87,
+      "norm_label": "transitionname"
+    },
+    {
+      "label": "examTitle",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L101",
+      "_origin": "ast",
+      "id": "exam_exam_prep_guide_dialog_examtitle",
+      "community": 87,
+      "norm_label": "examtitle"
+    },
+    {
+      "label": "onUpdateModelValue",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L113",
+      "_origin": "ast",
+      "id": "exam_exam_prep_guide_dialog_onupdatemodelvalue",
+      "community": 87,
+      "norm_label": "onupdatemodelvalue"
+    },
+    {
+      "label": "if()",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L122",
+      "_origin": "ast",
+      "id": "exam_exam_prep_guide_dialog_if",
+      "community": 87,
+      "norm_label": "if()"
+    },
+    {
+      "label": "exam-prep-notify-button.vue",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-notify-button.vue",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "exam_exam_prep_notify_button",
+      "community": 133,
+      "norm_label": "exam-prep-notify-button.vue"
+    },
+    {
+      "label": "exam-prep-step-dress.vue",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-step-dress.vue",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "exam_exam_prep_step_dress",
+      "community": 135,
+      "norm_label": "exam-prep-step-dress.vue"
+    },
+    {
+      "label": "exam-prep-step-items.vue",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-step-items.vue",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "exam_exam_prep_step_items",
+      "community": 138,
+      "norm_label": "exam-prep-step-items.vue"
+    },
+    {
+      "label": "exam-prep-step-print.vue",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-step-print.vue",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "exam_exam_prep_step_print",
+      "community": 191,
+      "norm_label": "exam-prep-step-print.vue"
     },
     {
       "label": "receipt-information-dialog.vue",
@@ -20078,7 +20198,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "footer_footer_credits",
-      "community": 59,
+      "community": 57,
       "norm_label": "footer-credits.vue"
     },
     {
@@ -20088,7 +20208,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "footer_footer_credits_currentyear",
-      "community": 59,
+      "community": 57,
       "norm_label": "currentyear"
     },
     {
@@ -20108,7 +20228,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "header_app_header",
-      "community": 59,
+      "community": 57,
       "norm_label": "app-header.vue"
     },
     {
@@ -20118,7 +20238,7 @@
       "source_location": "L232",
       "_origin": "ast",
       "id": "header_app_header_toggleleftdrawer",
-      "community": 59,
+      "community": 57,
       "norm_label": "toggleleftdrawer()"
     },
     {
@@ -20128,7 +20248,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "header_app_sidebar",
-      "community": 59,
+      "community": 57,
       "norm_label": "app-sidebar.vue"
     },
     {
@@ -20138,7 +20258,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "header_app_sidebar_t",
-      "community": 59,
+      "community": 57,
       "norm_label": "{ t }"
     },
     {
@@ -20148,7 +20268,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "header_app_sidebar_userstore_leftdraweropen_ministate_ishovered_ismini",
-      "community": 59,
+      "community": 57,
       "norm_label": "{ userstore, leftdraweropen, ministate, ishovered, ismini }"
     },
     {
@@ -20158,7 +20278,7 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "header_app_sidebar_menulinks",
-      "community": 59,
+      "community": 57,
       "norm_label": "menulinks"
     },
     {
@@ -20308,7 +20428,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "page_builder_page_builder_banner_uploader",
-      "community": 80,
+      "community": 113,
       "norm_label": "page-builder-banner-uploader.vue"
     },
     {
@@ -20318,7 +20438,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "page_builder_page_builder_banner_uploader_q",
-      "community": 80,
+      "community": 113,
       "norm_label": "$q"
     },
     {
@@ -20328,7 +20448,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "page_builder_page_builder_banner_uploader_t",
-      "community": 80,
+      "community": 113,
       "norm_label": "{ t }"
     },
     {
@@ -20338,7 +20458,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "page_builder_page_builder_banner_uploader_showcropdialog",
-      "community": 80,
+      "community": 113,
       "norm_label": "showcropdialog"
     },
     {
@@ -20348,7 +20468,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "page_builder_page_builder_banner_uploader_cropimagesrc",
-      "community": 80,
+      "community": 113,
       "norm_label": "cropimagesrc"
     },
     {
@@ -20358,7 +20478,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "page_builder_page_builder_banner_uploader_isuploading_handleimageupload",
-      "community": 80,
+      "community": 113,
       "norm_label": "{ isuploading, handleimageupload }"
     },
     {
@@ -20858,38 +20978,28 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "report_daily_revenue_filter",
-      "community": 124,
+      "community": 103,
       "norm_label": "daily-revenue-filter.vue"
     },
     {
       "label": "{ t }",
       "file_type": "code",
       "source_file": "apps/frontend/src/components/report/daily-revenue-filter.vue",
-      "source_location": "L176",
+      "source_location": "L154",
       "_origin": "ast",
       "id": "report_daily_revenue_filter_t",
-      "community": 124,
+      "community": 103,
       "norm_label": "{ t }"
     },
     {
       "label": "localFilter",
       "file_type": "code",
       "source_file": "apps/frontend/src/components/report/daily-revenue-filter.vue",
-      "source_location": "L197",
+      "source_location": "L174",
       "_origin": "ast",
       "id": "report_daily_revenue_filter_localfilter",
-      "community": 124,
+      "community": 103,
       "norm_label": "localfilter"
-    },
-    {
-      "label": "loadDepartmentOptions()",
-      "file_type": "code",
-      "source_file": "apps/frontend/src/components/report/daily-revenue-filter.vue",
-      "source_location": "L209",
-      "_origin": "ast",
-      "id": "report_daily_revenue_filter_loaddepartmentoptions",
-      "community": 124,
-      "norm_label": "loaddepartmentoptions()"
     },
     {
       "label": "request-fix-dialog.vue",
@@ -21348,7 +21458,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_base_table",
-      "community": 41,
+      "community": 112,
       "norm_label": "base-table.vue"
     },
     {
@@ -21358,7 +21468,7 @@
       "source_location": "L414",
       "_origin": "ast",
       "id": "shared_base_table_get",
-      "community": 41,
+      "community": 112,
       "norm_label": "get()"
     },
     {
@@ -21368,7 +21478,7 @@
       "source_location": "L429",
       "_origin": "ast",
       "id": "shared_base_table_has",
-      "community": 41,
+      "community": 112,
       "norm_label": "has()"
     },
     {
@@ -21378,7 +21488,7 @@
       "source_location": "L432",
       "_origin": "ast",
       "id": "shared_base_table_ownkeys",
-      "community": 41,
+      "community": 112,
       "norm_label": "ownkeys()"
     },
     {
@@ -21388,7 +21498,7 @@
       "source_location": "L435",
       "_origin": "ast",
       "id": "shared_base_table_getownpropertydescriptor",
-      "community": 41,
+      "community": 112,
       "norm_label": "getownpropertydescriptor()"
     },
     {
@@ -21848,7 +21958,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_create_exam",
-      "community": 4,
+      "community": 27,
       "norm_label": "use-create-exam.ts"
     },
     {
@@ -21858,7 +21968,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "composables_use_create_exam_examroom",
-      "community": 4,
+      "community": 27,
       "norm_label": "examroom"
     },
     {
@@ -21868,7 +21978,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "composables_use_create_exam_timeslot",
-      "community": 4,
+      "community": 27,
       "norm_label": "timeslot"
     },
     {
@@ -21878,7 +21988,7 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "composables_use_create_exam_eligiblecandidate",
-      "community": 41,
+      "community": 27,
       "norm_label": "eligiblecandidate"
     },
     {
@@ -21888,7 +21998,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "composables_use_create_exam_geteligiblecandidatekey",
-      "community": 4,
+      "community": 27,
       "norm_label": "geteligiblecandidatekey()"
     },
     {
@@ -21908,7 +22018,7 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "composables_use_create_exam_useexamformoptions",
-      "community": 4,
+      "community": 27,
       "norm_label": "useexamformoptions"
     },
     {
@@ -21918,7 +22028,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "composables_use_create_exam_examcomparisonsnapshot",
-      "community": 4,
+      "community": 27,
       "norm_label": "examcomparisonsnapshot"
     },
     {
@@ -21928,7 +22038,7 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "composables_use_create_exam_snapshotstatustocode",
-      "community": 4,
+      "community": 27,
       "norm_label": "snapshotstatustocode()"
     },
     {
@@ -21938,7 +22048,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "composables_use_create_exam_countavailableseats",
-      "community": 4,
+      "community": 27,
       "norm_label": "countavailableseats()"
     },
     {
@@ -21948,7 +22058,7 @@
       "source_location": "L146",
       "_origin": "ast",
       "id": "composables_use_create_exam_getlocationaisleafter",
-      "community": 4,
+      "community": 27,
       "norm_label": "getlocationaisleafter()"
     },
     {
@@ -21958,7 +22068,7 @@
       "source_location": "L174",
       "_origin": "ast",
       "id": "composables_use_create_exam_hasaisleafter",
-      "community": 4,
+      "community": 27,
       "norm_label": "hasaisleafter()"
     },
     {
@@ -21985,7 +22095,7 @@
       "label": "useDailyRevenue()",
       "file_type": "code",
       "source_file": "apps/frontend/src/composables/use-daily-revenue.ts",
-      "source_location": "L17",
+      "source_location": "L10",
       "_origin": "ast",
       "id": "composables_use_daily_revenue_usedailyrevenue",
       "community": 124,
@@ -22018,7 +22128,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_exam_certificate_document",
-      "community": 91,
+      "community": 47,
       "norm_label": "use-exam-certificate-document.ts"
     },
     {
@@ -22028,7 +22138,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "composables_use_exam_certificate_document_useexamcertificatedocument",
-      "community": 91,
+      "community": 47,
       "norm_label": "useexamcertificatedocument()"
     },
     {
@@ -22038,7 +22148,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_exam_documents",
-      "community": 5,
+      "community": 47,
       "norm_label": "use-exam-documents.ts"
     },
     {
@@ -22048,8 +22158,78 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "composables_use_exam_documents_useexamdocuments",
-      "community": 5,
+      "community": 47,
       "norm_label": "useexamdocuments()"
+    },
+    {
+      "label": "use-exam-prep-guide.ts",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/composables/use-exam-prep-guide.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "composables_use_exam_prep_guide",
+      "community": 84,
+      "norm_label": "use-exam-prep-guide.ts"
+    },
+    {
+      "label": "PrepGuideSeenMap",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/composables/use-exam-prep-guide.ts",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "composables_use_exam_prep_guide_prepguideseenmap",
+      "community": 84,
+      "norm_label": "prepguideseenmap"
+    },
+    {
+      "label": "seenMap",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/composables/use-exam-prep-guide.ts",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "composables_use_exam_prep_guide_seenmap",
+      "community": 84,
+      "norm_label": "seenmap"
+    },
+    {
+      "label": "readSeenMap()",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/composables/use-exam-prep-guide.ts",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "composables_use_exam_prep_guide_readseenmap",
+      "community": 84,
+      "norm_label": "readseenmap()"
+    },
+    {
+      "label": "writeSeenMap()",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/composables/use-exam-prep-guide.ts",
+      "source_location": "L31",
+      "_origin": "ast",
+      "id": "composables_use_exam_prep_guide_writeseenmap",
+      "community": 84,
+      "norm_label": "writeseenmap()"
+    },
+    {
+      "label": "toKey()",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/composables/use-exam-prep-guide.ts",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "composables_use_exam_prep_guide_tokey",
+      "community": 84,
+      "norm_label": "tokey()"
+    },
+    {
+      "label": "useExamPrepGuide()",
+      "file_type": "code",
+      "source_file": "apps/frontend/src/composables/use-exam-prep-guide.ts",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "composables_use_exam_prep_guide_useexamprepguide",
+      "community": 84,
+      "norm_label": "useexamprepguide()"
     },
     {
       "label": "use-exam-registrants.ts",
@@ -22198,7 +22378,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "composables_use_exam_seat_candidates_seatcandidatesessionlocation",
-      "community": 24,
+      "community": 69,
       "norm_label": "seatcandidatesessionlocation"
     },
     {
@@ -22298,7 +22478,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "composables_use_exam_seat_management_seatsessionlocation",
-      "community": 24,
+      "community": 69,
       "norm_label": "seatsessionlocation"
     },
     {
@@ -22688,7 +22868,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_navigation",
-      "community": 59,
+      "community": 57,
       "norm_label": "use-navigation.ts"
     },
     {
@@ -22698,7 +22878,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "composables_use_navigation_leftdraweropen",
-      "community": 59,
+      "community": 57,
       "norm_label": "leftdraweropen"
     },
     {
@@ -22708,7 +22888,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "composables_use_navigation_ministate",
-      "community": 59,
+      "community": 57,
       "norm_label": "ministate"
     },
     {
@@ -22718,7 +22898,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "composables_use_navigation_ishovered",
-      "community": 59,
+      "community": 57,
       "norm_label": "ishovered"
     },
     {
@@ -22728,7 +22908,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "composables_use_navigation_usenavigation",
-      "community": 59,
+      "community": 57,
       "norm_label": "usenavigation()"
     },
     {
@@ -23128,7 +23308,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_usethaidate",
-      "community": 4,
+      "community": 80,
       "norm_label": "usethaidate.ts"
     },
     {
@@ -23138,7 +23318,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "composables_usethaidate_thai_short_months",
-      "community": 4,
+      "community": 80,
       "norm_label": "thai_short_months"
     },
     {
@@ -23148,7 +23328,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "composables_usethaidate_usethaidate",
-      "community": 4,
+      "community": 80,
       "norm_label": "usethaidate()"
     },
     {
@@ -23258,7 +23438,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "constants_exam_notify_msg",
-      "community": 4,
+      "community": 27,
       "norm_label": "notify_msg"
     },
     {
@@ -23268,7 +23448,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "constants_exam_validation_msg",
-      "community": 4,
+      "community": 27,
       "norm_label": "validation_msg"
     },
     {
@@ -23288,7 +23468,7 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "constants_exam_formatfee",
-      "community": 9,
+      "community": 4,
       "norm_label": "formatfee()"
     },
     {
@@ -23488,7 +23668,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "layouts_main_layout",
-      "community": 59,
+      "community": 57,
       "norm_label": "main-layout.vue"
     },
     {
@@ -23498,7 +23678,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "layouts_main_layout_route",
-      "community": 59,
+      "community": 57,
       "norm_label": "route"
     },
     {
@@ -23508,7 +23688,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "layouts_main_layout_showadmindrawer",
-      "community": 59,
+      "community": 57,
       "norm_label": "{ showadmindrawer }"
     },
     {
@@ -23525,7 +23705,7 @@
       "label": "catch()",
       "file_type": "code",
       "source_file": "apps/frontend/src/pages/admin/application-fee-report-page.vue",
-      "source_location": "L444",
+      "source_location": "L430",
       "_origin": "ast",
       "id": "admin_application_fee_report_page_catch",
       "community": 223,
@@ -24215,7 +24395,7 @@
       "label": "saveButtonLabel",
       "file_type": "code",
       "source_file": "apps/frontend/src/pages/admin/fin-fund-source-mananagement-page.vue",
-      "source_location": "L225",
+      "source_location": "L206",
       "_origin": "ast",
       "id": "admin_fin_fund_source_mananagement_page_savebuttonlabel",
       "community": 76,
@@ -24225,7 +24405,7 @@
       "label": "fundSourcesWithComputedData",
       "file_type": "code",
       "source_file": "apps/frontend/src/pages/admin/fin-fund-source-mananagement-page.vue",
-      "source_location": "L278",
+      "source_location": "L252",
       "_origin": "ast",
       "id": "admin_fin_fund_source_mananagement_page_fundsourceswithcomputeddata",
       "community": 76,
@@ -24235,7 +24415,7 @@
       "label": "filteredFundSources",
       "file_type": "code",
       "source_file": "apps/frontend/src/pages/admin/fin-fund-source-mananagement-page.vue",
-      "source_location": "L286",
+      "source_location": "L260",
       "_origin": "ast",
       "id": "admin_fin_fund_source_mananagement_page_filteredfundsources",
       "community": 76,
@@ -24245,7 +24425,7 @@
       "label": "fetchData()",
       "file_type": "code",
       "source_file": "apps/frontend/src/pages/admin/fin-fund-source-mananagement-page.vue",
-      "source_location": "L298",
+      "source_location": "L271",
       "_origin": "ast",
       "id": "admin_fin_fund_source_mananagement_page_fetchdata",
       "community": 76,
@@ -24255,7 +24435,7 @@
       "label": "resetCreateForm()",
       "file_type": "code",
       "source_file": "apps/frontend/src/pages/admin/fin-fund-source-mananagement-page.vue",
-      "source_location": "L315",
+      "source_location": "L288",
       "_origin": "ast",
       "id": "admin_fin_fund_source_mananagement_page_resetcreateform",
       "community": 76,
@@ -24265,7 +24445,7 @@
       "label": "openCreateDialog()",
       "file_type": "code",
       "source_file": "apps/frontend/src/pages/admin/fin-fund-source-mananagement-page.vue",
-      "source_location": "L327",
+      "source_location": "L299",
       "_origin": "ast",
       "id": "admin_fin_fund_source_mananagement_page_opencreatedialog",
       "community": 76,
@@ -24275,7 +24455,7 @@
       "label": "openEditDialog()",
       "file_type": "code",
       "source_file": "apps/frontend/src/pages/admin/fin-fund-source-mananagement-page.vue",
-      "source_location": "L332",
+      "source_location": "L304",
       "_origin": "ast",
       "id": "admin_fin_fund_source_mananagement_page_openeditdialog",
       "community": 76,
@@ -24285,7 +24465,7 @@
       "label": "closeCreateDialog()",
       "file_type": "code",
       "source_file": "apps/frontend/src/pages/admin/fin-fund-source-mananagement-page.vue",
-      "source_location": "L345",
+      "source_location": "L316",
       "_origin": "ast",
       "id": "admin_fin_fund_source_mananagement_page_closecreatedialog",
       "community": 76,
@@ -24295,7 +24475,7 @@
       "label": "validateCreateForm()",
       "file_type": "code",
       "source_file": "apps/frontend/src/pages/admin/fin-fund-source-mananagement-page.vue",
-      "source_location": "L350",
+      "source_location": "L321",
       "_origin": "ast",
       "id": "admin_fin_fund_source_mananagement_page_validatecreateform",
       "community": 76,
@@ -24518,7 +24698,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "admin_test_voucher_management_page",
-      "community": 57,
+      "community": 136,
       "norm_label": "test-voucher-management-page.vue"
     },
     {
@@ -24528,7 +24708,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "admin_test_voucher_management_page_router",
-      "community": 57,
+      "community": 136,
       "norm_label": "router"
     },
     {
@@ -24538,7 +24718,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "admin_test_voucher_management_page_q",
-      "community": 57,
+      "community": 136,
       "norm_label": "$q"
     },
     {
@@ -24548,7 +24728,7 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "admin_test_voucher_management_page_t",
-      "community": 57,
+      "community": 136,
       "norm_label": "{ t }"
     },
     {
@@ -24885,21 +25065,11 @@
       "label": "fetchDailyRevenueSummary()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/daily-revenue.service.ts",
-      "source_location": "L12",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "services_daily_revenue_service_fetchdailyrevenuesummary",
       "community": 124,
       "norm_label": "fetchdailyrevenuesummary()"
-    },
-    {
-      "label": "fetchDepartmentOptions()",
-      "file_type": "code",
-      "source_file": "apps/frontend/src/services/daily-revenue.service.ts",
-      "source_location": "L31",
-      "_origin": "ast",
-      "id": "services_daily_revenue_service_fetchdepartmentoptions",
-      "community": 124,
-      "norm_label": "fetchdepartmentoptions()"
     },
     {
       "label": "enrollment.service.ts",
@@ -25278,7 +25448,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_exam_rule_voucher_service",
-      "community": 57,
+      "community": 136,
       "norm_label": "exam-rule-voucher.service.ts"
     },
     {
@@ -25288,7 +25458,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "services_exam_rule_voucher_service_regulationsdata",
-      "community": 57,
+      "community": 136,
       "norm_label": "regulationsdata"
     },
     {
@@ -25298,7 +25468,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "services_exam_rule_voucher_service_getregulations",
-      "community": 57,
+      "community": 136,
       "norm_label": "getregulations()"
     },
     {
@@ -25308,7 +25478,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "services_exam_rule_voucher_service_saveregulations",
-      "community": 57,
+      "community": 136,
       "norm_label": "saveregulations()"
     },
     {
@@ -25468,7 +25638,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "services_exam_service_retryasync",
-      "community": 69,
+      "community": 4,
       "norm_label": "retryasync()"
     },
     {
@@ -25478,7 +25648,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "services_exam_service_formattime",
-      "community": 4,
+      "community": 27,
       "norm_label": "formattime()"
     },
     {
@@ -25488,7 +25658,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "services_exam_service_parsebangkokdate",
-      "community": 4,
+      "community": 27,
       "norm_label": "parsebangkokdate()"
     },
     {
@@ -25498,7 +25668,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "services_exam_service_formatbackenddate",
-      "community": 4,
+      "community": 27,
       "norm_label": "formatbackenddate()"
     },
     {
@@ -25528,34 +25698,34 @@
       "source_location": "L186",
       "_origin": "ast",
       "id": "services_exam_service_fundsource",
-      "community": 4,
+      "community": 27,
       "norm_label": "fundsource"
     },
     {
       "label": "SessionLocationSnapshotPayload",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L194",
+      "source_location": "L193",
       "_origin": "ast",
       "id": "services_exam_service_sessionlocationsnapshotpayload",
-      "community": 4,
+      "community": 27,
       "norm_label": "sessionlocationsnapshotpayload"
     },
     {
       "label": "ExamLocationOption",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L209",
+      "source_location": "L208",
       "_origin": "ast",
       "id": "services_exam_service_examlocationoption",
-      "community": 4,
+      "community": 27,
       "norm_label": "examlocationoption"
     },
     {
       "label": "fetchScheduleData()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L215",
+      "source_location": "L214",
       "_origin": "ast",
       "id": "services_exam_service_fetchscheduledata",
       "community": 4,
@@ -25565,7 +25735,7 @@
       "label": "fetchExamSchedules()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L293",
+      "source_location": "L292",
       "_origin": "ast",
       "id": "services_exam_service_fetchexamschedules",
       "community": 4,
@@ -25575,7 +25745,7 @@
       "label": "fetchExamById()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L334",
+      "source_location": "L333",
       "_origin": "ast",
       "id": "services_exam_service_fetchexambyid",
       "community": 69,
@@ -25585,17 +25755,17 @@
       "label": "fetchExamWithSeats()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L342",
+      "source_location": "L341",
       "_origin": "ast",
       "id": "services_exam_service_fetchexamwithseats",
-      "community": 69,
+      "community": 4,
       "norm_label": "fetchexamwithseats()"
     },
     {
       "label": "updateExamSessionStatus()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L352",
+      "source_location": "L351",
       "_origin": "ast",
       "id": "services_exam_service_updateexamsessionstatus",
       "community": 4,
@@ -25605,7 +25775,7 @@
       "label": "buddhistToGregorian()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L358",
+      "source_location": "L357",
       "_origin": "ast",
       "id": "services_exam_service_buddhisttogregorian",
       "community": 4,
@@ -25615,7 +25785,7 @@
       "label": "buddhistToGregorianPeriodEnd()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L371",
+      "source_location": "L370",
       "_origin": "ast",
       "id": "services_exam_service_buddhisttogregorianperiodend",
       "community": 4,
@@ -25625,7 +25795,7 @@
       "label": "groupTimeRangesByTime()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L377",
+      "source_location": "L376",
       "_origin": "ast",
       "id": "services_exam_service_grouptimerangesbytime",
       "community": 4,
@@ -25635,7 +25805,7 @@
       "label": "createSessionLocations()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L440",
+      "source_location": "L439",
       "_origin": "ast",
       "id": "services_exam_service_createsessionlocations",
       "community": 4,
@@ -25645,7 +25815,7 @@
       "label": "normalizeJson()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L474",
+      "source_location": "L473",
       "_origin": "ast",
       "id": "services_exam_service_normalizejson",
       "community": 4,
@@ -25655,7 +25825,7 @@
       "label": "sessionLocationMatches()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L476",
+      "source_location": "L475",
       "_origin": "ast",
       "id": "services_exam_service_sessionlocationmatches",
       "community": 4,
@@ -25665,7 +25835,7 @@
       "label": "syncSessionLocations()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L495",
+      "source_location": "L494",
       "_origin": "ast",
       "id": "services_exam_service_syncsessionlocations",
       "community": 4,
@@ -25675,7 +25845,7 @@
       "label": "buildBlockedSeatPayload()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L562",
+      "source_location": "L561",
       "_origin": "ast",
       "id": "services_exam_service_buildblockedseatpayload",
       "community": 4,
@@ -25685,7 +25855,7 @@
       "label": "snapshotStatusToCode()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L579",
+      "source_location": "L578",
       "_origin": "ast",
       "id": "services_exam_service_snapshotstatustocode",
       "community": 4,
@@ -25695,7 +25865,7 @@
       "label": "buildBlockedSeatPayloadFromSession()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L585",
+      "source_location": "L584",
       "_origin": "ast",
       "id": "services_exam_service_buildblockedseatpayloadfromsession",
       "community": 4,
@@ -25705,7 +25875,7 @@
       "label": "blockedSeatPayloadMatches()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L613",
+      "source_location": "L612",
       "_origin": "ast",
       "id": "services_exam_service_blockedseatpayloadmatches",
       "community": 4,
@@ -25715,7 +25885,7 @@
       "label": "replaceExamBlockedSeats()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L629",
+      "source_location": "L628",
       "_origin": "ast",
       "id": "services_exam_service_replaceexamblockedseats",
       "community": 4,
@@ -25725,7 +25895,7 @@
       "label": "fetchExamBlockedSeats()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L645",
+      "source_location": "L644",
       "_origin": "ast",
       "id": "services_exam_service_fetchexamblockedseats",
       "community": 24,
@@ -25735,7 +25905,7 @@
       "label": "createExamRound()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L653",
+      "source_location": "L652",
       "_origin": "ast",
       "id": "services_exam_service_createexamround",
       "community": 4,
@@ -25745,27 +25915,27 @@
       "label": "fetchFundSources()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L704",
+      "source_location": "L703",
       "_origin": "ast",
       "id": "services_exam_service_fetchfundsources",
-      "community": 4,
+      "community": 27,
       "norm_label": "fetchfundsources()"
     },
     {
       "label": "fetchExamLocations()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L714",
+      "source_location": "L713",
       "_origin": "ast",
       "id": "services_exam_service_fetchexamlocations",
-      "community": 4,
+      "community": 27,
       "norm_label": "fetchexamlocations()"
     },
     {
       "label": "UpdateExamPayload",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L732",
+      "source_location": "L731",
       "_origin": "ast",
       "id": "services_exam_service_updateexampayload",
       "community": 4,
@@ -25775,7 +25945,7 @@
       "label": "updateExamRound()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L738",
+      "source_location": "L737",
       "_origin": "ast",
       "id": "services_exam_service_updateexamround",
       "community": 4,
@@ -25785,27 +25955,27 @@
       "label": "ExamChangeItem",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L867",
+      "source_location": "L862",
       "_origin": "ast",
       "id": "services_exam_service_examchangeitem",
-      "community": 4,
+      "community": 27,
       "norm_label": "examchangeitem"
     },
     {
       "label": "notifyExamChanges()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L877",
+      "source_location": "L872",
       "_origin": "ast",
       "id": "services_exam_service_notifyexamchanges",
-      "community": 4,
+      "community": 27,
       "norm_label": "notifyexamchanges()"
     },
     {
       "label": "deleteExam()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L884",
+      "source_location": "L879",
       "_origin": "ast",
       "id": "services_exam_service_deleteexam",
       "community": 4,
@@ -25815,7 +25985,7 @@
       "label": "fetchAdmissionVoucher()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L894",
+      "source_location": "L889",
       "_origin": "ast",
       "id": "services_exam_service_fetchadmissionvoucher",
       "community": 4,
@@ -25825,7 +25995,7 @@
       "label": "createEnrollment()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L906",
+      "source_location": "L901",
       "_origin": "ast",
       "id": "services_exam_service_createenrollment",
       "community": 4,
@@ -25835,7 +26005,7 @@
       "label": "validateExamPasscode()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L927",
+      "source_location": "L922",
       "_origin": "ast",
       "id": "services_exam_service_validateexampasscode",
       "community": 4,
@@ -25845,27 +26015,27 @@
       "label": "fetchUserEnrollments()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L934",
+      "source_location": "L929",
       "_origin": "ast",
       "id": "services_exam_service_fetchuserenrollments",
-      "community": 9,
+      "community": 4,
       "norm_label": "fetchuserenrollments()"
     },
     {
       "label": "fetchEnrollmentById()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L944",
+      "source_location": "L939",
       "_origin": "ast",
       "id": "services_exam_service_fetchenrollmentbyid",
-      "community": 5,
+      "community": 47,
       "norm_label": "fetchenrollmentbyid()"
     },
     {
       "label": "updateEnrollmentStatus()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L954",
+      "source_location": "L949",
       "_origin": "ast",
       "id": "services_exam_service_updateenrollmentstatus",
       "community": 4,
@@ -25875,7 +26045,7 @@
       "label": "CreatePasscodeItemDto",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L970",
+      "source_location": "L965",
       "_origin": "ast",
       "id": "services_exam_service_createpasscodeitemdto",
       "community": 4,
@@ -25885,17 +26055,17 @@
       "label": "createExamPasscodes()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L978",
+      "source_location": "L973",
       "_origin": "ast",
       "id": "services_exam_service_createexampasscodes",
-      "community": 4,
+      "community": 27,
       "norm_label": "createexampasscodes()"
     },
     {
       "label": "fetchPasscodeHistory()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L991",
+      "source_location": "L986",
       "_origin": "ast",
       "id": "services_exam_service_fetchpasscodehistory",
       "community": 4,
@@ -25905,7 +26075,7 @@
       "label": "logPasscodeUsage()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/exam.service.ts",
-      "source_location": "L1001",
+      "source_location": "L996",
       "_origin": "ast",
       "id": "services_exam_service_logpasscodeusage",
       "community": 4,
@@ -25975,17 +26145,17 @@
       "label": "fetchFundSources()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/finance.service.ts",
-      "source_location": "L11",
+      "source_location": "L10",
       "_origin": "ast",
       "id": "services_finance_service_fetchfundsources",
-      "community": 124,
+      "community": 103,
       "norm_label": "fetchfundsources()"
     },
     {
       "label": "createFundSource()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/finance.service.ts",
-      "source_location": "L16",
+      "source_location": "L15",
       "_origin": "ast",
       "id": "services_finance_service_createfundsource",
       "community": 103,
@@ -25995,7 +26165,7 @@
       "label": "updateFundSource()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/finance.service.ts",
-      "source_location": "L21",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "services_finance_service_updatefundsource",
       "community": 103,
@@ -26005,7 +26175,7 @@
       "label": "deleteFundSource()",
       "file_type": "code",
       "source_file": "apps/frontend/src/services/finance.service.ts",
-      "source_location": "L29",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "services_finance_service_deletefundsource",
       "community": 103,
@@ -26118,7 +26288,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "services_location_service_backendlocationraw",
-      "community": 4,
+      "community": 48,
       "norm_label": "backendlocationraw"
     },
     {
@@ -26268,7 +26438,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_profile_edit_history_service",
-      "community": 132,
+      "community": 119,
       "norm_label": "profile-edit-history.service.ts"
     },
     {
@@ -26278,7 +26448,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "services_profile_edit_history_service_fetchprofileedithistory",
-      "community": 132,
+      "community": 119,
       "norm_label": "fetchprofileedithistory()"
     },
     {
@@ -26288,7 +26458,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "services_profile_edit_history_service_fetchlatestprofilehistoryimages",
-      "community": 132,
+      "community": 119,
       "norm_label": "fetchlatestprofilehistoryimages()"
     },
     {
@@ -27108,7 +27278,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "stores_user_store",
-      "community": 59,
+      "community": 47,
       "norm_label": "user.store.ts"
     },
     {
@@ -27118,7 +27288,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "stores_user_store_useuserstore",
-      "community": 59,
+      "community": 47,
       "norm_label": "useuserstore"
     },
     {
@@ -27128,7 +27298,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_certificate",
-      "community": 91,
+      "community": 47,
       "norm_label": "certificate.ts"
     },
     {
@@ -27138,7 +27308,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_certificate_certificatedata",
-      "community": 91,
+      "community": 47,
       "norm_label": "certificatedata"
     },
     {
@@ -27148,7 +27318,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "types_certificate_certificatebandrule",
-      "community": 91,
+      "community": 47,
       "norm_label": "certificatebandrule"
     },
     {
@@ -27158,7 +27328,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "types_certificate_certificatecarddata",
-      "community": 91,
+      "community": 47,
       "norm_label": "certificatecarddata"
     },
     {
@@ -27168,7 +27338,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "types_certificate_certificatescorereportdata",
-      "community": 91,
+      "community": 47,
       "norm_label": "certificatescorereportdata"
     },
     {
@@ -27255,7 +27425,7 @@
       "label": "DailyRevenueFilter",
       "file_type": "code",
       "source_file": "apps/frontend/src/types/daily-revenue.types.ts",
-      "source_location": "L8",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "types_daily_revenue_types_dailyrevenuefilter",
       "community": 124,
@@ -27265,21 +27435,11 @@
       "label": "DailyRevenueSummary",
       "file_type": "code",
       "source_file": "apps/frontend/src/types/daily-revenue.types.ts",
-      "source_location": "L18",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "types_daily_revenue_types_dailyrevenuesummary",
       "community": 124,
       "norm_label": "dailyrevenuesummary"
-    },
-    {
-      "label": "DepartmentOption",
-      "file_type": "code",
-      "source_file": "apps/frontend/src/types/daily-revenue.types.ts",
-      "source_location": "L23",
-      "_origin": "ast",
-      "id": "types_daily_revenue_types_departmentoption",
-      "community": 124,
-      "norm_label": "departmentoption"
     },
     {
       "label": "enrollment.types.ts",
@@ -27378,7 +27538,7 @@
       "source_location": "L155",
       "_origin": "ast",
       "id": "types_enrollment_types_enrollmentstatus",
-      "community": 125,
+      "community": 69,
       "norm_label": "enrollmentstatus"
     },
     {
@@ -27648,7 +27808,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "types_exam_exam",
-      "community": 112,
+      "community": 5,
       "norm_label": "exam"
     },
     {
@@ -27698,7 +27858,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "types_exam_examhistoryitem",
-      "community": 5,
+      "community": 47,
       "norm_label": "examhistoryitem"
     },
     {
@@ -27798,7 +27958,7 @@
       "source_location": "L229",
       "_origin": "ast",
       "id": "types_exam_backendlocation",
-      "community": 4,
+      "community": 27,
       "norm_label": "backendlocation"
     },
     {
@@ -27818,7 +27978,7 @@
       "source_location": "L265",
       "_origin": "ast",
       "id": "types_exam_backendsession",
-      "community": 24,
+      "community": 69,
       "norm_label": "backendsession"
     },
     {
@@ -27835,7 +27995,7 @@
       "label": "BackendPasscode",
       "file_type": "code",
       "source_file": "apps/frontend/src/types/exam.ts",
-      "source_location": "L326",
+      "source_location": "L325",
       "_origin": "ast",
       "id": "types_exam_backendpasscode",
       "community": 5,
@@ -27845,7 +28005,7 @@
       "label": "ExamManagementItem",
       "file_type": "code",
       "source_file": "apps/frontend/src/types/exam.ts",
-      "source_location": "L334",
+      "source_location": "L333",
       "_origin": "ast",
       "id": "types_exam_exammanagementitem",
       "community": 5,
@@ -27855,7 +28015,7 @@
       "label": "AdmissionVoucherData",
       "file_type": "code",
       "source_file": "apps/frontend/src/types/exam.ts",
-      "source_location": "L344",
+      "source_location": "L343",
       "_origin": "ast",
       "id": "types_exam_admissionvoucherdata",
       "community": 5,
@@ -27865,10 +28025,10 @@
       "label": "PasscodeType",
       "file_type": "code",
       "source_file": "apps/frontend/src/types/exam.ts",
-      "source_location": "L358",
+      "source_location": "L357",
       "_origin": "ast",
       "id": "types_exam_passcodetype",
-      "community": 41,
+      "community": 27,
       "norm_label": "passcodetype"
     },
     {
@@ -28278,7 +28438,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_profile_edit_history_types",
-      "community": 132,
+      "community": 119,
       "norm_label": "profile-edit-history.types.ts"
     },
     {
@@ -28288,7 +28448,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_profile_edit_history_types_profileedithistory",
-      "community": 132,
+      "community": 119,
       "norm_label": "profileedithistory"
     },
     {
@@ -28318,7 +28478,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_receipt",
-      "community": 5,
+      "community": 47,
       "norm_label": "receipt.ts"
     },
     {
@@ -28328,7 +28488,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_receipt_receiptdata",
-      "community": 5,
+      "community": 47,
       "norm_label": "receiptdata"
     },
     {
@@ -28338,7 +28498,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "types_receipt_receiptcardprops",
-      "community": 5,
+      "community": 47,
       "norm_label": "receiptcardprops"
     },
     {
@@ -35656,6 +35816,36 @@
       "confidence_score": 1.0,
       "source": "migrations_1789780343260_addperfindexesforreconcileandmoodle_addperfindexesforreconcileandmoodle1789780343260_down",
       "target": "migrations_1789780343260_addperfindexesforreconcileandmoodle_addperfindexesforreconcileandmoodle1789780343260_dropindexifexists"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/backend/src/database/migrations/1789780343270-DropFsFacultyFromFundSources.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "migrations_1789780343270_dropfsfacultyfromfundsources",
+      "target": "migrations_1789780343270_dropfsfacultyfromfundsources_dropfsfacultyfromfundsources1789780343270",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/backend/src/database/migrations/1789780343270-DropFsFacultyFromFundSources.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "migrations_1789780343270_dropfsfacultyfromfundsources_dropfsfacultyfromfundsources1789780343270",
+      "target": "migrations_1789780343270_dropfsfacultyfromfundsources_dropfsfacultyfromfundsources1789780343270_down",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/backend/src/database/migrations/1789780343270-DropFsFacultyFromFundSources.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "migrations_1789780343270_dropfsfacultyfromfundsources_dropfsfacultyfromfundsources1789780343270",
+      "target": "migrations_1789780343270_dropfsfacultyfromfundsources_dropfsfacultyfromfundsources1789780343270_up",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -56191,16 +56381,6 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "apps/backend/src/modules/fund-sources/fund-sources.controller.ts",
-      "source_location": "L67",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "fund_sources_fund_sources_controller_fundsourcescontroller",
-      "target": "fund_sources_fund_sources_controller_fundsourcescontroller_getdepartments"
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/backend/src/modules/fund-sources/fund-sources.controller.ts",
       "source_location": "L105",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -56336,16 +56516,6 @@
       "target": "fund_sources_fund_sources_service_rawdailyrevenuerow"
     },
     {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/backend/src/modules/fund-sources/fund-sources.service.ts",
-      "source_location": "L21",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "fund_sources_fund_sources_service",
-      "target": "fund_sources_fund_sources_service_rawdepartmentrow"
-    },
-    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -56416,16 +56586,6 @@
       "confidence_score": 1.0,
       "source": "fund_sources_fund_sources_service_fundsourcesservice",
       "target": "fund_sources_fund_sources_service_fundsourcesservice_getdailyrevenue"
-    },
-    {
-      "relation": "method",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/backend/src/modules/fund-sources/fund-sources.service.ts",
-      "source_location": "L153",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "fund_sources_fund_sources_service_fundsourcesservice",
-      "target": "fund_sources_fund_sources_service_fundsourcesservice_getdepartments"
     },
     {
       "relation": "method",
@@ -74731,6 +74891,56 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L98",
+      "weight": 1.0,
+      "source": "exam_exam_prep_guide_dialog",
+      "target": "exam_exam_prep_guide_dialog_currentstep",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L101",
+      "weight": 1.0,
+      "source": "exam_exam_prep_guide_dialog",
+      "target": "exam_exam_prep_guide_dialog_examtitle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L122",
+      "weight": 1.0,
+      "source": "exam_exam_prep_guide_dialog",
+      "target": "exam_exam_prep_guide_dialog_if",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L113",
+      "weight": 1.0,
+      "source": "exam_exam_prep_guide_dialog",
+      "target": "exam_exam_prep_guide_dialog_onupdatemodelvalue",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/frontend/src/components/exam/exam-prep-guide-dialog.vue",
+      "source_location": "L99",
+      "weight": 1.0,
+      "source": "exam_exam_prep_guide_dialog",
+      "target": "exam_exam_prep_guide_dialog_transitionname",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "apps/frontend/src/components/exam/receipt-information-dialog.vue",
       "source_location": "L186",
       "weight": 1.0,
@@ -75897,16 +76107,6 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "apps/frontend/src/components/report/daily-revenue-filter.vue",
-      "source_location": "L209",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "report_daily_revenue_filter",
-      "target": "report_daily_revenue_filter_loaddepartmentoptions"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/frontend/src/components/report/daily-revenue-filter.vue",
       "source_location": "L197",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -75977,28 +76177,6 @@
       "confidence_score": 1.0,
       "source": "report_daily_revenue_filter",
       "target": "types_daily_revenue_types_dailyrevenuefilter"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/frontend/src/components/report/daily-revenue-filter.vue",
-      "source_location": "L172",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "report_daily_revenue_filter",
-      "target": "types_daily_revenue_types_departmentoption"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "apps/frontend/src/components/report/daily-revenue-filter.vue",
-      "source_location": "L216",
-      "weight": 1.0,
-      "source": "report_daily_revenue_filter_loaddepartmentoptions",
-      "target": "services_finance_service_fetchfundsources"
     },
     {
       "relation": "imports_from",
@@ -78072,17 +78250,6 @@
       "target": "services_daily_revenue_service_fetchdailyrevenuesummary"
     },
     {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/frontend/src/composables/use-daily-revenue.ts",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "composables_use_daily_revenue",
-      "target": "services_daily_revenue_service_fetchdepartmentoptions"
-    },
-    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -78114,17 +78281,6 @@
       "confidence_score": 1.0,
       "source": "composables_use_daily_revenue",
       "target": "types_daily_revenue_types_dailyrevenuerow"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/frontend/src/composables/use-daily-revenue.ts",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "composables_use_daily_revenue",
-      "target": "types_daily_revenue_types_departmentoption"
     },
     {
       "relation": "contains",
@@ -78584,6 +78740,66 @@
       "weight": 1.0,
       "source": "composables_use_exam_documents_useexamdocuments",
       "target": "stores_user_store_useuserstore"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/frontend/src/composables/use-exam-prep-guide.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "composables_use_exam_prep_guide",
+      "target": "composables_use_exam_prep_guide_prepguideseenmap",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/frontend/src/composables/use-exam-prep-guide.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "composables_use_exam_prep_guide",
+      "target": "composables_use_exam_prep_guide_readseenmap",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/frontend/src/composables/use-exam-prep-guide.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "composables_use_exam_prep_guide",
+      "target": "composables_use_exam_prep_guide_seenmap",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/frontend/src/composables/use-exam-prep-guide.ts",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "composables_use_exam_prep_guide",
+      "target": "composables_use_exam_prep_guide_tokey",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/frontend/src/composables/use-exam-prep-guide.ts",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "composables_use_exam_prep_guide",
+      "target": "composables_use_exam_prep_guide_useexamprepguide",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/frontend/src/composables/use-exam-prep-guide.ts",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "composables_use_exam_prep_guide",
+      "target": "composables_use_exam_prep_guide_writeseenmap",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -83272,16 +83488,6 @@
       "target": "services_daily_revenue_service_fetchdailyrevenuesummary"
     },
     {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/frontend/src/services/daily-revenue.service.ts",
-      "source_location": "L31",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "services_daily_revenue_service",
-      "target": "services_daily_revenue_service_fetchdepartmentoptions"
-    },
-    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -83313,17 +83519,6 @@
       "confidence_score": 1.0,
       "source": "services_daily_revenue_service",
       "target": "types_daily_revenue_types_dailyrevenuesummary"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "apps/frontend/src/services/daily-revenue.service.ts",
-      "source_location": "L2",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "services_daily_revenue_service",
-      "target": "types_daily_revenue_types_departmentoption"
     },
     {
       "relation": "contains",
@@ -86739,16 +86934,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "apps/frontend/src/types/daily-revenue.types.ts",
-      "source_location": "L23",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "types_daily_revenue_types",
-      "target": "types_daily_revenue_types_departmentoption"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "apps/frontend/src/types/enrollment.types.ts",
       "source_location": "L130",
       "weight": 1.0,
@@ -89628,5 +89813,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "0b0eeeb288a00855245257fa8557d8dc07cc0327"
+  "built_at_commit": "4b8cc9a505f1435d2f1b2c25fa2635de2282ed81"
 }

@@ -72,6 +72,14 @@
           :time="exam.time"
           :location="exam.location"
         >
+          <template v-if="exam.actions?.includes('candidateCard')" #notify>
+            <ExamPrepNotifyButton
+              :show-unread="isPrepGuideUnread(exam.id)"
+              :ariaLabel="$t('exam.prepGuide.notifyAria')"
+              @click="openPrepGuide(exam)"
+            />
+          </template>
+
           <template v-if="exam.customStatus" #status-append>
             <div :class="['custom-status', `${exam.customStatus.type}-status`, 'row items-center']">
               <q-icon
@@ -140,6 +148,14 @@
       :exam-date="selectedExamForCancel?.date || ''"
       :exam-time="selectedExamForCancel?.time || ''"
       @confirm="handleConfirmCancel"
+    />
+
+    <ExamPrepGuideDialog
+      v-model="showPrepGuide"
+      :exam="selectedExamForPrep"
+      :is-printing="isDownloadingVoucher"
+      @print="handlePrepGuidePrint"
+      @finish="onPrepGuideFinish"
     />
 
     <!-- Hidden container for PDF generation -->
@@ -224,6 +240,8 @@ import AppButton from 'src/components/base/app-button.vue';
 import AppPaymentDialog from 'src/components/exam/app-payment-dialog.vue';
 import ReceiptInformationDialog from 'src/components/exam/receipt-information-dialog.vue';
 import DialogCancel from 'src/components/exam/dialog-cancel.vue';
+import ExamPrepNotifyButton from 'src/components/exam/exam-prep-notify-button.vue';
+import ExamPrepGuideDialog from 'src/components/exam/exam-prep-guide-dialog.vue';
 import TestVoucherReport from 'src/components/test-voucher-report.vue';
 import ReceiptCard from 'src/components/receipt-card.vue';
 import CertificateCard from 'src/components/exam/certificate-card.vue';
@@ -231,6 +249,7 @@ import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
 import { useExamDocuments } from 'src/composables/use-exam-documents';
 import { useExamCertificateDocument } from 'src/composables/use-exam-certificate-document';
+import { useExamPrepGuide } from 'src/composables/use-exam-prep-guide';
 import { useAppDate } from 'src/composables/useAppDate';
 import { PAYMENT_DURATION_SECONDS_DEFAULT } from 'src/constants/exam';
 import type { ExamHistoryItem } from 'src/types/exam';
@@ -242,6 +261,7 @@ const { t } = useI18n();
 const examStore = useExamStore();
 const userStore = useUserStore();
 const { formatDateRange } = useAppDate();
+const { isUnread: isPrepGuideUnread, markSeen: markPrepGuideSeen } = useExamPrepGuide();
 
 // === State จาก Store ===
 const { pendingRegistrations, historyRecords } = storeToRefs(examStore);
@@ -287,6 +307,8 @@ const selectedExamPaymentPeriod = computed((): string => {
 
 const showCancelDialog = ref(false);
 const selectedExamForCancel = ref<ExamHistoryItem | null>(null);
+const showPrepGuide = ref(false);
+const selectedExamForPrep = ref<ExamHistoryItem | null>(null);
 
 // === Composable: PDF Documents Handling ===
 const {
@@ -464,6 +486,25 @@ const handleConfirmCancel = async (): Promise<void> => {
 
 const handlePrintVoucher = (exam: ExamHistoryItem): void => {
   void printVoucher(exam);
+};
+
+const openPrepGuide = (exam: ExamHistoryItem): void => {
+  selectedExamForPrep.value = exam;
+  showPrepGuide.value = true;
+  markPrepGuideSeen(exam.id);
+};
+
+const handlePrepGuidePrint = (): void => {
+  if (!selectedExamForPrep.value) {
+    return;
+  }
+  handlePrintVoucher(selectedExamForPrep.value);
+};
+
+const onPrepGuideFinish = (): void => {
+  if (selectedExamForPrep.value) {
+    markPrepGuideSeen(selectedExamForPrep.value.id);
+  }
 };
 
 const handlePrintReceipt = (exam: ExamHistoryItem): void => {

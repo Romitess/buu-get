@@ -106,6 +106,44 @@ export default {
       downloadError: 'An error occurred while generating the file. Please try again.',
       print: 'Print Admission Voucher',
     },
+    prepGuide: {
+      title: 'Exam day preparation',
+      notifyAria: 'Open exam preparation guide',
+      stepLabel: 'Step {current} of {total}',
+      next: 'Next',
+      back: 'Back',
+      done: 'Done',
+      printCta: 'Print test voucher now',
+      steps: {
+        print: {
+          title: 'Print your Test Voucher (Required)',
+          badge: 'Critical — complete before exam day',
+          body: 'Your Test Voucher (Admission Voucher) is mandatory for exam entry. If you do not print it and present it on exam day, you may not be allowed to take the exam.',
+          reminder:
+            'Print this document in advance and bring it with your original national ID card or passport on exam day.',
+        },
+        dress: {
+          title: 'Dress code',
+          body: 'Polite attire required. No sandals, shorts, sleeveless shirts, or jeans.',
+        },
+        items: {
+          title: 'Allowed and forbidden items',
+          body: 'Review what you may and may not bring into the exam room before exam day.',
+        },
+      },
+      allowedTitle: 'Allowed',
+      forbiddenTitle: 'Not allowed',
+      allowedItems: {
+        item1: 'Admission Voucher',
+        item2: 'Original national ID card or passport',
+        item3: '2B pencils or harder, eraser, and pen',
+      },
+      forbiddenItems: {
+        item1: 'Bags and personal belongings',
+        item2: 'Mobile phones and any electronic communication devices',
+        item3: 'Food and drinks',
+      },
+    },
     card: {
       title: 'ใบเสร็จรับเงิน',
       titleEn: 'RECEIPT',
