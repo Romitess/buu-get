@@ -143,6 +143,33 @@ const countAvailableSeats = (
   ).length;
 };
 
+/**
+ * จำนวนที่นั่งตอนโหลดแก้รอบสอบต้องมาจากค่าที่บันทึกไว้
+ * (session-location capacity / SS_CAPACITY) ไม่ใช่จำนวนที่นั่งว่างทั้งผังห้อง
+ */
+const resolveLoadedRoomSeats = (
+  relation: {
+    LOCATION_SEAT_CAPACITY?: number | null;
+    LOCATION: BackendLocation;
+  },
+  seatOverrides: Record<number, number>,
+  sessionCapacity: number | null | undefined,
+  roomCountInSession: number,
+): number => {
+  if (relation.LOCATION_SEAT_CAPACITY != null && relation.LOCATION_SEAT_CAPACITY > 0) {
+    return relation.LOCATION_SEAT_CAPACITY;
+  }
+
+  // ข้อมูลเก่าที่ยังไม่มี snapshot ต่อห้อง: ใช้ SS_CAPACITY เมื่อมีห้องเดียว
+  if (roomCountInSession === 1 && sessionCapacity != null && sessionCapacity > 0) {
+    return sessionCapacity;
+  }
+
+  return (
+    countAvailableSeats(relation.LOCATION, seatOverrides) || sessionCapacity || 40
+  );
+};
+
 const getLocationAisleAfter = (
   location: BackendLocation,
 ): { after_cols: number[]; after_rows: number[] } => {
@@ -817,69 +844,72 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
             const slot = slotMap.get(key)!;
             const relationLocations = session.SESSION_LOCATIONS || [];
             if (relationLocations.length > 0) {
-              relationLocations
-                .filter((relation) => relation.LOCATION)
-                .forEach((relation) => {
-                  const hasSeatSnapshot = (relation.SEATS_SNAPSHOT?.length ?? 0) > 0;
-                  if (!hasSeatSnapshot) {
-                    sessionsNeedingBlockedFallback.add(session.SS_ID);
-                  }
+              const roomsWithLocation = relationLocations.filter((relation) => relation.LOCATION);
+              roomsWithLocation.forEach((relation) => {
+                const hasSeatSnapshot = (relation.SEATS_SNAPSHOT?.length ?? 0) > 0;
+                if (!hasSeatSnapshot) {
+                  sessionsNeedingBlockedFallback.add(session.SS_ID);
+                }
 
-                  const relationProctors: string[] = [];
-                  if (relation.SS_NAME) {
-                    const customNames = relation.SS_NAME.split(',')
-                      .map((name) => name.trim())
-                      .filter(Boolean);
-                    relationProctors.push(...customNames);
-                  }
-                  const seatOverrides = Object.fromEntries(
-                    (relation.SEATS_SNAPSHOT ?? [])
-                      .map((snapshotSeat) => {
-                        const baseSeat = relation.LOCATION.SEATS?.find(
-                          (seat) => seat.LS_SEAT_LABEL === snapshotSeat.label,
-                        );
-                        const snapshotStatus = snapshotStatusToCode(snapshotSeat.status);
-                        if (!baseSeat || baseSeat.LS_SEAT_STATUS === snapshotStatus) return null;
+                const relationProctors: string[] = [];
+                if (relation.SS_NAME) {
+                  const customNames = relation.SS_NAME.split(',')
+                    .map((name) => name.trim())
+                    .filter(Boolean);
+                  relationProctors.push(...customNames);
+                }
+                const seatOverrides = Object.fromEntries(
+                  (relation.SEATS_SNAPSHOT ?? [])
+                    .map((snapshotSeat) => {
+                      const baseSeat = relation.LOCATION.SEATS?.find(
+                        (seat) => seat.LS_SEAT_LABEL === snapshotSeat.label,
+                      );
+                      const snapshotStatus = snapshotStatusToCode(snapshotSeat.status);
+                      if (!baseSeat || baseSeat.LS_SEAT_STATUS === snapshotStatus) return null;
 
-                        return [baseSeat.LS_ID, snapshotStatus] as const;
-                      })
-                      .filter((entry): entry is readonly [number, number] => entry !== null),
-                  );
+                      return [baseSeat.LS_ID, snapshotStatus] as const;
+                    })
+                    .filter((entry): entry is readonly [number, number] => entry !== null),
+                );
 
-                  slot.rooms.push({
-                    locationId: relation.LOCATION_ID ?? relation.LOCATION.LOCATION_ID ?? null,
-                    proctorName: relation.SS_NAME || '',
-                    proctors: Array.from(new Set(relationProctors)),
-                    seats: countAvailableSeats(relation.LOCATION, seatOverrides),
-                    sessionId: session.SS_ID,
-                    enrollmentCount:
-                      session.ENROLLMENT_SL_COUNTS?.[String(relation.SL_ID)] ??
-                      session.ENROLLMENTS?.filter(
-                        (enrollment) => enrollment.SL_ID === relation.SL_ID,
-                      ).length ??
-                      0,
+                slot.rooms.push({
+                  locationId: relation.LOCATION_ID ?? relation.LOCATION.LOCATION_ID ?? null,
+                  proctorName: relation.SS_NAME || '',
+                  proctors: Array.from(new Set(relationProctors)),
+                  seats: resolveLoadedRoomSeats(
+                    relation,
                     seatOverrides,
-                    sessionLocationSnapshot: {
-                      TOTAL_ROWS:
-                        relation.TOTAL_ROWS ?? relation.LOCATION.LOCATION_TOTAL_ROWS ?? null,
-                      TOTAL_COLS:
-                        relation.TOTAL_COLS ?? relation.LOCATION.LOCATION_TOTAL_COLS ?? null,
-                      AISLE_AFTER: hasAisleAfter(relation.AISLE_AFTER)
-                        ? relation.AISLE_AFTER
-                        : getLocationAisleAfter(relation.LOCATION),
-                      LOCATION_SEAT_DIRECTION:
-                        relation.LOCATION_SEAT_DIRECTION ??
-                        relation.LOCATION.LOCATION_SEAT_DIRECTION ??
-                        relation.LOCATION.SEAT_DIRECTION ??
-                        'HORIZONTAL',
-                      LOCATION_SEAT_CAPACITY:
-                        relation.LOCATION_SEAT_CAPACITY ??
-                        relation.LOCATION.LOCATION_SEAT_CAPACITY ??
-                        null,
-                      SEATS_SNAPSHOT: relation.SEATS_SNAPSHOT ?? null,
-                    },
-                  });
+                    session.SS_CAPACITY,
+                    roomsWithLocation.length,
+                  ),
+                  sessionId: session.SS_ID,
+                  enrollmentCount:
+                    session.ENROLLMENT_SL_COUNTS?.[String(relation.SL_ID)] ??
+                    session.ENROLLMENTS?.filter(
+                      (enrollment) => enrollment.SL_ID === relation.SL_ID,
+                    ).length ??
+                    0,
+                  seatOverrides,
+                  sessionLocationSnapshot: {
+                    TOTAL_ROWS:
+                      relation.TOTAL_ROWS ?? relation.LOCATION.LOCATION_TOTAL_ROWS ?? null,
+                    TOTAL_COLS:
+                      relation.TOTAL_COLS ?? relation.LOCATION.LOCATION_TOTAL_COLS ?? null,
+                    AISLE_AFTER: hasAisleAfter(relation.AISLE_AFTER)
+                      ? relation.AISLE_AFTER
+                      : getLocationAisleAfter(relation.LOCATION),
+                    LOCATION_SEAT_DIRECTION:
+                      relation.LOCATION_SEAT_DIRECTION ??
+                      relation.LOCATION.LOCATION_SEAT_DIRECTION ??
+                      relation.LOCATION.SEAT_DIRECTION ??
+                      'HORIZONTAL',
+                    LOCATION_SEAT_CAPACITY:
+                      relation.LOCATION_SEAT_CAPACITY ??
+                      (roomsWithLocation.length === 1 ? (session.SS_CAPACITY ?? null) : null),
+                    SEATS_SNAPSHOT: relation.SEATS_SNAPSHOT ?? null,
+                  },
                 });
+              });
               return;
             }
 
