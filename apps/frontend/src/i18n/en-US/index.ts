@@ -440,6 +440,7 @@ export default {
     },
     examRules: {
       title: 'Exam Day Rules',
+      modeToggleAria: 'Choose exam format rules to view',
       paperBased: {
         label: 'Paper-based',
         items: {

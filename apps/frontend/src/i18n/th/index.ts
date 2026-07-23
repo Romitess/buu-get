@@ -484,6 +484,7 @@ export default {
     },
     examRules: {
       title: 'ข้อปฏิบัติในวันสอบ',
+      modeToggleAria: 'เลือกดูข้อปฏิบัติตามรูปแบบการสอบ',
       paperBased: {
         label: 'รูปแบบกระดาษ',
         items: {

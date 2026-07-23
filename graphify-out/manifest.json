@@ -2105,18 +2105,18 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-guideline-card.vue": {
-    "mtime": 1784690101.2795062,
-    "ast_hash": "5b56bc69926048181ea69897b9bcb646",
+    "mtime": 1784703719.90028,
+    "ast_hash": "c987330f7e96b022d3499d8a05efd0cb",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-guideline-section.vue": {
-    "mtime": 1784690111.5916731,
-    "ast_hash": "8aa5ef7706b654c2d91b6e9dd3f59331",
+    "mtime": 1784707064.3745599,
+    "ast_hash": "c7a6c51b5ac2369d3344f789f5fab98f",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-main-content.vue": {
-    "mtime": 1784690115.7223046,
-    "ast_hash": "69448265a622793f6a907d25c3080989",
+    "mtime": 1784700358.236141,
+    "ast_hash": "1b07d160421087b8e3c4c88eec76e0d3",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-step.vue": {
@@ -2490,8 +2490,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/en-US/index.ts": {
-    "mtime": 1784700320.2397585,
-    "ast_hash": "91a93c88510fcb807295a802e98fa47f",
+    "mtime": 1784700980.1542172,
+    "ast_hash": "edcefe66890e18aa1e17ca1e6806e518",
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/index.ts": {
@@ -2500,8 +2500,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/th/index.ts": {
-    "mtime": 1784700319.853471,
-    "ast_hash": "c064d2fe37f201fd67c0bc288044234d",
+    "mtime": 1784700979.7722278,
+    "ast_hash": "0a8e1a270cbbd581706b92ddbd7deaf0",
     "semantic_hash": ""
   },
   "apps/frontend/src/layouts/main-layout.vue": {
@@ -3497,6 +3497,11 @@
   "apps/frontend/src/assets/img/activity/payment-cancelled.svg": {
     "mtime": 1784700306.974891,
     "ast_hash": "edeecbe4ad6cc17729f72cfd486e4c7b",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/composables/use-horizontal-auto-scroll.ts": {
+    "mtime": 1784707050.2570205,
+    "ast_hash": "089caa3ea0f6b1f654c19d1c97f18820",
     "semantic_hash": ""
   }
 }
