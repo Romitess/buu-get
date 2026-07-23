@@ -29,6 +29,10 @@ import type { PasscodeLog } from 'src/types/common';
 const RETRY_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 1000;
 const CACHE_DURATION_MS = 30000; // 30 seconds short-term cache
+/** Timeout สำหรับ multi-write save path (สูงกว่า default 30s ของ Axios) */
+const EXAM_ROUND_WRITE_TIMEOUT_MS = 60_000;
+
+type ExamWriteRequestConfig = { timeout?: number };
 
 // In-memory cache for exam data
 let examsCache: BackendExam[] | null = null;
@@ -335,9 +339,12 @@ export const fetchExamById = async (id: number): Promise<BackendExam> => {
 };
 
 /** ดึง exam พร้อม LOCATION.SEATS — ใช้เฉพาะหน้าจัดที่นั่ง / สร้าง-แก้ไขรอบสอบ */
-export const fetchExamWithSeats = async (id: number): Promise<BackendExam> => {
+export const fetchExamWithSeats = async (
+  id: number,
+  requestConfig?: ExamWriteRequestConfig,
+): Promise<BackendExam> => {
   return retryAsync(async () => {
-    const response = await api.get<BackendExam>(`/exam/${id}/with-seats`);
+    const response = await api.get<BackendExam>(`/exam/${id}/with-seats`, requestConfig);
     return response.data;
   });
 };
@@ -437,6 +444,7 @@ const createSessionLocations = async (
     proctorName: string | null;
     sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   }[],
+  requestConfig?: ExamWriteRequestConfig,
 ): Promise<void> => {
   const uniqueLocations = [];
   const seenIds = new Set<number>();
@@ -449,12 +457,16 @@ const createSessionLocations = async (
 
   await Promise.all(
     uniqueLocations.map((loc) =>
-      api.post('/exam-session-locations', {
-        SS_ID: sessionId,
-        LOCATION_ID: loc.locationId,
-        SS_NAME: loc.proctorName,
-        ...(loc.sessionLocationSnapshot ?? {}),
-      }),
+      api.post(
+        '/exam-session-locations',
+        {
+          SS_ID: sessionId,
+          LOCATION_ID: loc.locationId,
+          SS_NAME: loc.proctorName,
+          ...(loc.sessionLocationSnapshot ?? {}),
+        },
+        requestConfig,
+      ),
     ),
   );
 };
@@ -488,6 +500,7 @@ const syncSessionLocations = async (
     proctorName: string | null;
     sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   }[],
+  requestConfig?: ExamWriteRequestConfig,
 ): Promise<void> => {
   const uniqueLocations = [];
   const seenIds = new Set<number>();
@@ -506,7 +519,7 @@ const syncSessionLocations = async (
 
   for (const item of current) {
     if (!desiredSet.has(item.LOCATION_ID)) {
-      promises.push(api.delete(`/exam-session-locations/${item.SL_ID}`));
+      promises.push(api.delete(`/exam-session-locations/${item.SL_ID}`, requestConfig));
     }
   }
 
@@ -514,12 +527,16 @@ const syncSessionLocations = async (
     const existing = currentMap.get(loc.locationId);
     if (!existing) {
       promises.push(
-        api.post('/exam-session-locations', {
-          SS_ID: sessionId,
-          LOCATION_ID: loc.locationId,
-          SS_NAME: loc.proctorName,
-          ...(loc.sessionLocationSnapshot ?? {}),
-        }),
+        api.post(
+          '/exam-session-locations',
+          {
+            SS_ID: sessionId,
+            LOCATION_ID: loc.locationId,
+            SS_NAME: loc.proctorName,
+            ...(loc.sessionLocationSnapshot ?? {}),
+          },
+          requestConfig,
+        ),
       );
     } else {
       if (sessionLocationMatches(existing, loc)) {
@@ -527,10 +544,14 @@ const syncSessionLocations = async (
       }
 
       promises.push(
-        api.patch(`/exam-session-locations/${existing.SL_ID}`, {
-          SS_NAME: loc.proctorName,
-          ...(loc.sessionLocationSnapshot ?? {}),
-        }),
+        api.patch(
+          `/exam-session-locations/${existing.SL_ID}`,
+          {
+            SS_NAME: loc.proctorName,
+            ...(loc.sessionLocationSnapshot ?? {}),
+          },
+          requestConfig,
+        ),
       );
     }
   }
@@ -608,12 +629,14 @@ const blockedSeatPayloadMatches = (
 export const replaceExamBlockedSeats = async (
   sessionId: number,
   seats: { LS_ID: number; BLOCK_STATUS: number }[],
+  requestConfig?: ExamWriteRequestConfig,
 ): Promise<BackendBlockedSeat[]> => {
   const response = await api.post<BackendBlockedSeat[]>(
     `/exam-blocked-seats/session/${sessionId}/replace`,
     {
       seats,
     },
+    requestConfig,
   );
 
   return response.data;
@@ -713,27 +736,36 @@ export interface UpdateExamPayload extends CreateExamPayload {
 }
 
 export const updateExamRound = async (payload: UpdateExamPayload): Promise<void> => {
+  const writeOpts: ExamWriteRequestConfig = { timeout: EXAM_ROUND_WRITE_TIMEOUT_MS };
+  let step = 'patch-exam';
+
   try {
     // 1. Update the Exam core data
-    await api.patch(`/exam/${payload.examId}`, {
-      EXAM_NAME: payload.examName,
-      EXAM_TYPE: payload.examType,
-      EXAM_FORMAT: payload.examFormat,
-      EXAM_FEE: Number(payload.fee),
-      EXAM_DATE: buddhistToGregorian(payload.examDate),
-      EXAM_REG_START_DATE: buddhistToGregorian(payload.regStartDate),
-      EXAM_REG_END_DATE: buddhistToGregorianPeriodEnd(payload.regEndDate),
-      EXAM_PAY_START_DATE: buddhistToGregorian(payload.payStartDate),
-      EXAM_PAY_END_DATE: buddhistToGregorianPeriodEnd(payload.payEndDate),
-      EXAM_PUBLISHED: payload.isPublished,
-      FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
-      EXAM_ROUND: payload.examRound,
-    });
+    await api.patch(
+      `/exam/${payload.examId}`,
+      {
+        EXAM_NAME: payload.examName,
+        EXAM_TYPE: payload.examType,
+        EXAM_FORMAT: payload.examFormat,
+        EXAM_FEE: Number(payload.fee),
+        EXAM_DATE: buddhistToGregorian(payload.examDate),
+        EXAM_REG_START_DATE: buddhistToGregorian(payload.regStartDate),
+        EXAM_REG_END_DATE: buddhistToGregorianPeriodEnd(payload.regEndDate),
+        EXAM_PAY_START_DATE: buddhistToGregorian(payload.payStartDate),
+        EXAM_PAY_END_DATE: buddhistToGregorianPeriodEnd(payload.payEndDate),
+        EXAM_PUBLISHED: payload.isPublished,
+        FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
+        EXAM_ROUND: payload.examRound,
+      },
+      writeOpts,
+    );
 
     // 2. Synchronize sessions ONLY if timeRanges are provided (not locked)
     if (payload.timeRanges && payload.timeRanges.length > 0) {
-      // Fetch current sessions to diff
-      const currentExam = await fetchExamById(payload.examId);
+      // ต้องโหลดพร้อม LOCATION.SEATS เพื่อให้ blocked-seat / snapshot diff ถูกต้อง
+      // (ถ้าไม่มี seats จะถือว่า blocked seats เปลี่ยนทุกครั้ง → rewrite ช้าจน timeout)
+      step = 'fetch-exam-with-seats';
+      const currentExam = await fetchExamWithSeats(payload.examId, writeOpts);
       const currentSessionIds = (currentExam.SESSIONS || []).map((s) => s.SS_ID);
       const currentSessionsById = new Map(
         (currentExam.SESSIONS || []).map((session) => [session.SS_ID, session]),
@@ -747,8 +779,10 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
 
       // 3. Delete sessions that were removed by the user
       const deleteIds = currentSessionIds.filter((id) => !keepIds.includes(id));
-      const deletePromises = deleteIds.map((id) => api.delete(`/exam-sessions/${id}`));
-      await Promise.all(deletePromises);
+      if (deleteIds.length > 0) {
+        step = 'delete-sessions';
+        await Promise.all(deleteIds.map((id) => api.delete(`/exam-sessions/${id}`, writeOpts)));
+      }
 
       // 4. Update existing sessions & create new ones, one row per time range.
       const sessionPromises = groupedRanges.map(async (range) => {
@@ -773,14 +807,21 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
           const blockedSeatPayload = buildBlockedSeatPayload(range.locations);
           const currentBlockedSeatPayload = buildBlockedSeatPayloadFromSession(currentSession);
           const writePromises: Promise<unknown>[] = [
-            syncSessionLocations(existingId, currentSession?.SESSION_LOCATIONS, range.locations),
+            syncSessionLocations(
+              existingId,
+              currentSession?.SESSION_LOCATIONS,
+              range.locations,
+              writeOpts,
+            ),
           ];
 
           if (!isSessionUnchanged) {
-            writePromises.push(api.patch(`/exam-sessions/${existingId}`, sessionPayload));
+            writePromises.push(
+              api.patch(`/exam-sessions/${existingId}`, sessionPayload, writeOpts),
+            );
           }
           if (!blockedSeatPayloadMatches(currentBlockedSeatPayload, blockedSeatPayload)) {
-            writePromises.push(replaceExamBlockedSeats(existingId, blockedSeatPayload));
+            writePromises.push(replaceExamBlockedSeats(existingId, blockedSeatPayload, writeOpts));
           }
 
           await Promise.all([...writePromises]);
@@ -788,27 +829,32 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
         }
 
         // Create new session
-        const sessionResponse = await api.post<BackendExam['SESSIONS'][number]>('/exam-sessions', {
-          ...sessionPayload,
-          EXAM_ID: Number(payload.examId),
-          SS_SESSION_STATUS: SESSION_STATUS_OPEN,
-        });
+        const sessionResponse = await api.post<BackendExam['SESSIONS'][number]>(
+          '/exam-sessions',
+          {
+            ...sessionPayload,
+            EXAM_ID: Number(payload.examId),
+            SS_SESSION_STATUS: SESSION_STATUS_OPEN,
+          },
+          writeOpts,
+        );
 
         const blockedSeatPayload = buildBlockedSeatPayload(range.locations);
         await Promise.all([
-          createSessionLocations(sessionResponse.data.SS_ID, range.locations),
+          createSessionLocations(sessionResponse.data.SS_ID, range.locations, writeOpts),
           ...(blockedSeatPayload.length > 0
-            ? [replaceExamBlockedSeats(sessionResponse.data.SS_ID, blockedSeatPayload)]
+            ? [replaceExamBlockedSeats(sessionResponse.data.SS_ID, blockedSeatPayload, writeOpts)]
             : []),
         ]);
       });
 
+      step = 'sync-sessions';
       await Promise.all(sessionPromises);
     }
 
     invalidateExamCache();
   } catch (error) {
-    console.error('Error updating exam round:', error);
+    console.error(`Error updating exam round [${step}]:`, error);
     throw error;
   }
 };

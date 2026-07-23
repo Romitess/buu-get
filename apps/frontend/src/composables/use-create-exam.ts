@@ -1825,6 +1825,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     } catch (err) {
       console.error('Save error:', err);
       const errorObj = err as {
+        code?: string;
         response?: {
           data?: {
             message?: string | string[];
@@ -1832,6 +1833,20 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         };
         message?: string;
       };
+      const isTimeout =
+        errorObj.code === 'ECONNABORTED' ||
+        (typeof errorObj.message === 'string' &&
+          errorObj.message.toLowerCase().includes('timeout'));
+      if (isTimeout) {
+        const timeoutMsg = 'การบันทึกรอบสอบใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง';
+        error.value = timeoutMsg;
+        $q.notify({
+          type: 'negative',
+          message: timeoutMsg,
+          position: 'top',
+        });
+        return false;
+      }
       const backendMsg = errorObj.response?.data?.message;
       const detailedMsg = Array.isArray(backendMsg)
         ? backendMsg.join(', ')

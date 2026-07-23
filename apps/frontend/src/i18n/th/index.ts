@@ -312,8 +312,7 @@ export default {
       title: 'ยืนยันการชำระเงิน',
       detailsLabel: 'รายละเอียดการชำระเงิน',
       payWithin: 'ชำระเงินภายใน {time}',
-      instruction:
-        'กรุณาสแกน QR Code ด้วยแอปพลิเคชัน Mobile Banking<br />เพื่อเสร็จสิ้นการลงทะเบียน',
+      instruction: 'กรุณาสแกน QR Code ด้วยแอปพลิเคชัน Mobile Banking\nเพื่อเสร็จสิ้นการลงทะเบียน',
       saveQr: 'บันทึก QR Code ชำระเงิน',
     },
   },

@@ -815,8 +815,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-sessions/exam-sessions.service.ts": {
-    "mtime": 1783042948.8043451,
-    "ast_hash": "545df4a04a081d7cc9ab24745f6fbdb3",
+    "mtime": 1784773663.8209162,
+    "ast_hash": "464407bc2d8d354eadb16899560333e2",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-vouchers/dto/bulk-issue-vouchers.dto.ts": {
@@ -1630,8 +1630,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/base/app-time-picker.vue": {
-    "mtime": 1783042948.841929,
-    "ast_hash": "8b7d8f0cf949a39f0e4bbb05d12e25ea",
+    "mtime": 1784773778.7350981,
+    "ast_hash": "ea1a18c598d0515ee2b3d03f76d3e9d7",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/base/image-display.vue": {
@@ -1880,8 +1880,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/app-payment-dialog.vue": {
-    "mtime": 1783042948.8453765,
-    "ast_hash": "76bf6335831d3fbf751ae43fcde6fed6",
+    "mtime": 1784773635.861056,
+    "ast_hash": "b2b2f39f097f17aab06d14b14f6c5316",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/app-seat-broken-dialog.vue": {
@@ -2330,8 +2330,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-create-exam.ts": {
-    "mtime": 1784773028.3262784,
-    "ast_hash": "20101fdcba3f4a2003accd13a0650fee",
+    "mtime": 1784773630.7255437,
+    "ast_hash": "0dfbdff0ff04140a3f93e6e737541a9c",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-daily-revenue.ts": {
@@ -2500,8 +2500,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/th/index.ts": {
-    "mtime": 1784772248.6666179,
-    "ast_hash": "0a8e1a270cbbd581706b92ddbd7deaf0",
+    "mtime": 1784773634.426316,
+    "ast_hash": "51191fd46249c4c02df964bf20755a9d",
     "semantic_hash": ""
   },
   "apps/frontend/src/layouts/main-layout.vue": {
@@ -2745,8 +2745,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/services/exam.service.ts": {
-    "mtime": 1784772988.9855626,
-    "ast_hash": "b17524a0a6aada64e339f47c9e2f6ad7",
+    "mtime": 1784773621.0537584,
+    "ast_hash": "386f7d24cb8a8df892734c8da514e8fb",
     "semantic_hash": ""
   },
   "apps/frontend/src/services/executive-test-taker.service.ts": {

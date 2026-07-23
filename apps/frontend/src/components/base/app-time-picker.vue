@@ -154,20 +154,47 @@ const syncPicker = async (): Promise<void> => {
   scrollToValue('minute', selectedMinute.value, 'auto');
 };
 
+const resolveMenuElement = (): HTMLElement | null => {
+  const menu = menuRef.value as (QMenu & { contentEl?: HTMLElement }) | null;
+  if (!menu) return null;
+
+  if (menu.contentEl instanceof HTMLElement) {
+    return menu.contentEl;
+  }
+
+  const root = menu.$el;
+  if (root instanceof HTMLElement) {
+    return root;
+  }
+
+  // Teleport: $el เป็น Comment — sibling ถัดไปคือ content ที่ถูก portal
+  if (root instanceof Comment && root.nextElementSibling instanceof HTMLElement) {
+    return root.nextElementSibling;
+  }
+
+  return null;
+};
+
 const applyPopupWidth = (): void => {
-  const menuElement = menuRef.value?.$el as HTMLElement | undefined;
-  if (!menuElement) return;
+  const menuElement = resolveMenuElement();
+  if (!menuElement?.style) return;
+
   const width = `${popupWidth.value}px`;
   menuElement.style.setProperty('width', width, 'important');
   menuElement.style.setProperty('min-width', width, 'important');
   menuElement.style.setProperty('max-width', width, 'important');
   menuElement.style.setProperty('box-sizing', 'border-box', 'important');
+  menuElement.style.setProperty('--app-time-picker-width', width);
 };
 
 const handleMenuShow = async (): Promise<void> => {
-  await syncPicker();
-  await nextTick();
-  applyPopupWidth();
+  try {
+    await syncPicker();
+    await nextTick();
+    applyPopupWidth();
+  } catch (error) {
+    console.error('Failed to initialize time picker menu:', error);
+  }
 };
 
 const updateFromScroll = (type: WheelType, shouldSnap = false): void => {
