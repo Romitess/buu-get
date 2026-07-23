@@ -101,7 +101,8 @@ import DialogConfirm from 'src/components/exam/dialog-confirm.vue';
 import ExamPasscodeInputDialog from 'src/components/exam-passcode-input-dialog.vue';
 import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
-import { EXAM_TYPE_GENERAL,
+import {
+  EXAM_TYPE_GENERAL,
   EXAM_TYPE_SPECIAL,
   EXAM_FORMAT_COMPUTER,
   EXAM_FORMAT_PAPER,
@@ -338,6 +339,13 @@ const onConfirmRegistration = async (physicalStatus?: string): Promise<void> => 
         msg = t('examSchedule.notifications.alreadyRegistered');
       } else if (status === 400 && resMsg === 'FULL') {
         msg = t('examSchedule.notifications.roundFull');
+      } else if (
+        status === 400 &&
+        (resMsg === 'REGISTRATION_CLOSED' || resMsg === 'EXAM_STARTED')
+      ) {
+        msg = t('examSchedule.notifications.expired');
+      } else if (status === 400 && resMsg === 'REGISTRATION_NOT_OPEN') {
+        msg = t('examSchedule.notifications.notOpen');
       } else if (status === 400 && resMsg === 'Invalid passcode for this user and exam') {
         msg = t('examSchedule.notifications.invalidPasscode');
       } else if (status === 404) {

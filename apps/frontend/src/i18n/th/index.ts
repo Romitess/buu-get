@@ -370,7 +370,7 @@ export default {
       paper: 'กระดาษ',
     },
     fullStatusText: 'ไม่มีที่ว่าง',
-    expiredStatusText: 'หมดเขตสมัครแล้ว',
+    expiredStatusText: 'หมดเขตลงทะเบียน',
     notOpenStatusText: 'ยังไม่เปิดรับสมัคร',
     availableStatusTextPrefix: 'ว่าง ',
     availableStatusTextSuffix: ' ที่นั่ง',

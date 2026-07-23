@@ -575,8 +575,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.ts": {
-    "mtime": 1784609210.8435168,
-    "ast_hash": "f479edb01c0bead9fdf1117e32bfe732",
+    "mtime": 1784779538.7470477,
+    "ast_hash": "f79d6a946cb03637f734b42bb1cf7c96",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/interfaces/executive-exam-history.interface.ts": {
@@ -1825,7 +1825,7 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/app-exam-history-card.vue": {
-    "mtime": 1784776319.9075718,
+    "mtime": 1784777505.036834,
     "ast_hash": "786645db22935cf74d7752a715875fcf",
     "semantic_hash": ""
   },
@@ -2035,8 +2035,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/round-exam.vue": {
-    "mtime": 1784608898.138309,
-    "ast_hash": "3248750c9a8e3c7323b1bfe62b06708b",
+    "mtime": 1784779490.875885,
+    "ast_hash": "47d489f0a891cdd63f0c00b22a1104ee",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/example-component.vue": {
@@ -2090,8 +2090,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/available-exam-rounds-table.vue": {
-    "mtime": 1784689645.9120057,
-    "ast_hash": "7baf812834555ddc3004dee403e0a595",
+    "mtime": 1784778170.0106876,
+    "ast_hash": "e6ce8103f7fe65ebcd005a03199bc689",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/carousel/info-carousel.vue": {
@@ -2315,8 +2315,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-available-exam-rounds.ts": {
-    "mtime": 1783042948.8529332,
-    "ast_hash": "08f5ed937f84ce173debdb327af18e71",
+    "mtime": 1784778169.1512156,
+    "ast_hash": "88bb4ebac800a32f58438e670f9188fb",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-countdown.ts": {
@@ -2365,8 +2365,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-exam-schedule.ts": {
-    "mtime": 1783042948.8543286,
-    "ast_hash": "8926118da316513c09f9bfb638f9d625",
+    "mtime": 1784779545.3855495,
+    "ast_hash": "bf9a87b33b6d6923a382b8723b153473",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-exam-seat-candidates.ts": {
@@ -2490,8 +2490,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/en-US/index.ts": {
-    "mtime": 1784776250.7669837,
-    "ast_hash": "0a658e1ed7d5ba9573917fb99201c285",
+    "mtime": 1784778176.8009024,
+    "ast_hash": "3202dcf181e4c386bc087cca5a77e8d9",
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/index.ts": {
@@ -2500,8 +2500,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/th/index.ts": {
-    "mtime": 1784776247.6991856,
-    "ast_hash": "2ca5f6fb430be373a07492ffa0d88bd7",
+    "mtime": 1784778170.3660414,
+    "ast_hash": "d2703fb7875e64905ce1284420d7edb1",
     "semantic_hash": ""
   },
   "apps/frontend/src/layouts/main-layout.vue": {
@@ -2675,13 +2675,13 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-history-page.vue": {
-    "mtime": 1784776354.962962,
+    "mtime": 1784777505.0392945,
     "ast_hash": "c3cbec9a6faf54ee933869315b7fb849",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-schedule-page.vue": {
-    "mtime": 1784608898.1422527,
-    "ast_hash": "24e0d83b5ca0afaf055969e0f7f5b885",
+    "mtime": 1784779554.4546764,
+    "ast_hash": "bcc25911509323f2af4606944dfad12a",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-simulation-page.vue": {
@@ -2940,8 +2940,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/utils/exam-registration.ts": {
-    "mtime": 1784608898.144251,
-    "ast_hash": "ddd3ed13a467cc5de4680ae619c6ab4b",
+    "mtime": 1784779515.5439434,
+    "ast_hash": "00abe070e42de81369482f1201eae9f5",
     "semantic_hash": ""
   },
   "apps/frontend/src/utils/form-options.ts": {
@@ -3525,33 +3525,48 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/exam-prep-guide-dialog.vue": {
-    "mtime": 1784776337.32323,
-    "ast_hash": "61954a343d3834f0a7a910c135fb2dd6",
+    "mtime": 1784777505.0370672,
+    "ast_hash": "65fac5a10788f361acd37c3b4772b4d6",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/exam-prep-notify-button.vue": {
-    "mtime": 1784776256.3082755,
-    "ast_hash": "ab7989f473ccbd0cbe866d92d23b6db6",
+    "mtime": 1784777505.037257,
+    "ast_hash": "6b11126f534cc5227c47f3e20c530129",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/exam-prep-step-dress.vue": {
-    "mtime": 1784776307.8918927,
+    "mtime": 1784777505.037442,
     "ast_hash": "c5555280127563cf7572c6d952ecf9fb",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/exam-prep-step-items.vue": {
-    "mtime": 1784776273.5452197,
-    "ast_hash": "777dba3c9c73fc9622b7bf084c06b686",
+    "mtime": 1784777505.0381203,
+    "ast_hash": "a067ca5877a37f1f8bf75d2c118e13c1",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/exam-prep-step-print.vue": {
-    "mtime": 1784776266.5049837,
-    "ast_hash": "3f06da273001c5fe56134ee3841d8037",
+    "mtime": 1784777505.038256,
+    "ast_hash": "b9dfce5e3df86d07288b7a99aeaf76bf",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-exam-prep-guide.ts": {
-    "mtime": 1784776255.8321795,
+    "mtime": 1784777505.0383983,
     "ast_hash": "d1562f5f8e72ed795f65c730817df456",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/common/utils/exam-registration-window.util.spec.ts": {
+    "mtime": 1784779574.6682491,
+    "ast_hash": "45bb2b2965bdfb28c25ce0ad80e16bcf",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/common/utils/exam-registration-window.util.ts": {
+    "mtime": 1784779588.0965252,
+    "ast_hash": "1916fb0df04d329202a84b84526ec8da",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/utils/exam-registration.spec.ts": {
+    "mtime": 1784779465.429194,
+    "ast_hash": "e25d2a495c6f81d7671974c52de0a07b",
     "semantic_hash": ""
   }
 }
