@@ -4,6 +4,7 @@ import { useQuasar } from 'quasar';
 import { useExamStore } from 'src/stores/exam.store';
 import {
   BUDDHIST_YEAR_OFFSET,
+  DEFAULT_EXAM_NAME,
   EXAM_TYPE_GENERAL,
   EXAM_TYPE_SPECIAL,
   EXAM_FORMAT_COMPUTER,
@@ -242,7 +243,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const form =
     externalForm ||
     ref<CreateExamForm>({
-      examName: '',
+      examName: DEFAULT_EXAM_NAME,
       examRound: '',
       examType: EXAM_TYPE_GENERAL,
       examFormat: EXAM_FORMAT_COMPUTER,
