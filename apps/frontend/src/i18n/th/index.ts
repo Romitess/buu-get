@@ -876,6 +876,8 @@ export default {
       printVoucher: 'ออกใบเข้าห้องสอบ',
       editSeats: 'แก้ไขที่นั่งสอบ',
       printSeatPlan: 'พิมพ์แผนผังที่นั่ง',
+      printVoucherDisabledHint:
+        'ยังมีผู้สมัครที่ไม่มีที่นั่ง กรุณาจัดที่นั่งให้ครบก่อนออกใบ Test Voucher',
       viewVoucher: 'ดูใบเข้าห้องสอบ',
       viewVoucherTitle: 'ข้อมูลการออกใบ Test Voucher',
       examDetails: 'รายละเอียดการสอบ',

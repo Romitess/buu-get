@@ -802,6 +802,8 @@ export default {
       printVoucher: 'Issue Test Voucher',
       editSeats: 'Edit Seat Assignments',
       printSeatPlan: 'Print Seat Plan',
+      printVoucherDisabledHint:
+        'Some applicants still have no seat. Assign seats to everyone before issuing Test Vouchers.',
       viewVoucher: 'View Test Voucher',
       viewVoucherTitle: 'Test Voucher Issuance Details',
       examDetails: 'Exam Details',

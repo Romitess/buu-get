@@ -45,19 +45,28 @@
           :disable="isActionLoading || isPrintingSeatPlan"
           @click="handleEditSeats"
         />
-        <AppButton
-          :icon="isVoucherSent ? 'print' : 'badge'"
-          :label="
-            isVoucherSent
-              ? $t('admin.seatCandidates.printSeatPlan')
-              : $t('admin.seatCandidates.printVoucher')
-          "
-          color="primary"
-          class="toolbar-action-btn"
-          :loading="isActionLoading || isPrintingSeatPlan"
-          :disable="isActionLoading || isPrintingSeatPlan"
-          @click="isVoucherSent ? handlePrintSeatPlan() : handlePrintVoucher()"
-        />
+        <span class="toolbar-action-btn-wrap">
+          <AppButton
+            :icon="isVoucherSent ? 'print' : 'badge'"
+            :label="
+              isVoucherSent
+                ? $t('admin.seatCandidates.printSeatPlan')
+                : $t('admin.seatCandidates.printVoucher')
+            "
+            color="primary"
+            class="toolbar-action-btn"
+            :loading="isActionLoading || isPrintingSeatPlan"
+            :disable="
+              isActionLoading ||
+              isPrintingSeatPlan ||
+              (!isVoucherSent && !canIssueVoucher)
+            "
+            @click="isVoucherSent ? handlePrintSeatPlan() : handlePrintVoucher()"
+          />
+          <q-tooltip v-if="!isVoucherSent && !canIssueVoucher">
+            {{ $t('admin.seatCandidates.printVoucherDisabledHint') }}
+          </q-tooltip>
+        </span>
         <ExportCsvButton
           :columns="columns"
           :rows="filteredRows"
@@ -214,8 +223,10 @@ const {
   sessionLocation,
   sessionCapacity,
   sessionEnrollments,
+  seatedTimeSlotEnrollments,
   activeSessionIds,
   isVoucherSent,
+  canIssueVoucher,
   getTimeTabSessionId,
   fetchData,
   applyVoucherIssuedState,
@@ -257,7 +268,17 @@ const voucherPreviewData = computed<VoucherData>(() => ({
 }));
 
 const startIssuingTickets = async (): Promise<void> => {
-  if (!sessionEnrollments.value || sessionEnrollments.value.length === 0) {
+  if (!canIssueVoucher.value) {
+    $q.notify({
+      type: 'warning',
+      message: i18n.t('admin.seatCandidates.printVoucherDisabledHint'),
+      position: 'top',
+      timeout: 2500,
+    });
+    throw new Error('Not all applicants have seats');
+  }
+
+  if (!seatedTimeSlotEnrollments.value || seatedTimeSlotEnrollments.value.length === 0) {
     $q.notify({
       type: 'warning',
       message: 'ไม่พบรายชื่อผู้เข้าสอบในรอบนี้',
@@ -277,7 +298,7 @@ const startIssuingTickets = async (): Promise<void> => {
       import.meta.env.VITE_APP_URL || window.location.origin,
     ).href;
 
-    const ermIds = sessionEnrollments.value
+    const ermIds = seatedTimeSlotEnrollments.value
       .filter((enrollment) => enrollment && enrollment.ERM_ID)
       .map((enrollment) => enrollment.ERM_ID);
 
@@ -339,6 +360,16 @@ const handleEditSeats = (): void => {
 };
 
 const handlePrintVoucher = (): void => {
+  if (!canIssueVoucher.value) {
+    $q.notify({
+      type: 'warning',
+      message: i18n.t('admin.seatCandidates.printVoucherDisabledHint'),
+      position: 'top',
+      timeout: 2500,
+    });
+    return;
+  }
+
   $q.dialog({
     component: DialogIssueTicket,
     componentProps: {
@@ -346,7 +377,7 @@ const handlePrintVoucher = (): void => {
         date: examDateLabel.value,
         time: sessionTime.value,
         room: sessionLocation.value,
-        studentCount: candidateCount.value,
+        studentCount: seatedTimeSlotEnrollments.value.length,
       },
       voucherData: voucherPreviewData.value,
       onConfirm: startIssuingTickets,
@@ -778,6 +809,14 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
+.toolbar-action-btn-wrap {
+  display: inline-flex;
+
+  @media (max-width: $breakpoint-xs-max) {
+    width: 100%;
+  }
+}
+
 .toolbar-action-btn {
   height: 40px;
   min-width: 160px;
