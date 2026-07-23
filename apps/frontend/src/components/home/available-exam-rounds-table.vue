@@ -115,10 +115,9 @@ const { t } = useI18n();
 const { formatDateShort, formatDateRange, calcDaysDiff } = useAppDate();
 
 const formatRegDuration = (regStartDate: string, regEndDate: string): string => {
-  const days = calcDaysDiff(regStartDate, regEndDate);
-  if (days === 0) {
-    return t('home.availableRounds.today');
-  }
+  if (!regStartDate || !regEndDate) return '-';
+  // Inclusive day count: same-day window = 1 day
+  const days = calcDaysDiff(regStartDate, regEndDate) + 1;
   return `${days} ${t('common.day', days)}`;
 };
 const { filteredRounds, isLoading, error, fetchAvailableRounds } = useAvailableExamRounds();
