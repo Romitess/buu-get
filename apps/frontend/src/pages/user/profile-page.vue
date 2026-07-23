@@ -627,6 +627,17 @@ onMounted((): void => {
   updateAlertVisibility();
 });
 
+// After minimal login, ensureProfileLoaded fills profile async — sync once when fields arrive
+watch(
+  () => [userStore.currentUser?.fullNameTH, userStore.currentUser?.nationalId] as const,
+  ([fullNameTH, nationalId]) => {
+    if (!fullNameTH && !nationalId) return;
+    if (formData.value.fullNameTH || formData.value.nationalId) return;
+    syncFormFromUser();
+    updateAlertVisibility();
+  },
+);
+
 // Watch for remark changes in realtime
 watch(
   () => userStore.currentUser?.remark,

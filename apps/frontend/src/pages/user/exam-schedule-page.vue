@@ -48,7 +48,24 @@
               overflowY: roundsListOverflow,
             }"
           >
-            <template v-if="selectedDateRounds.length > 0">
+            <q-card-section v-if="isLoadingSchedule" class="text-center q-pa-xl">
+              <q-spinner color="primary" size="40px" />
+              <p class="text-grey-6 q-mt-md">{{ t('examSchedule.loading') }}</p>
+            </q-card-section>
+
+            <q-card-section v-else-if="scheduleError" class="text-center q-pa-xl">
+              <q-icon name="error_outline" size="48px" color="negative" />
+              <p class="text-grey-7 q-mt-md">{{ scheduleError }}</p>
+              <q-btn
+                flat
+                color="primary"
+                class="q-mt-sm"
+                :label="t('examSchedule.retry')"
+                @click="retryLoadSchedule"
+              />
+            </q-card-section>
+
+            <template v-else-if="selectedDateRounds.length > 0">
               <RoundExam
                 v-for="round in selectedDateRounds"
                 :key="round.id"
@@ -127,6 +144,8 @@ const {
   calendarAvailability,
   formattedSelectedDate,
   scheduleData,
+  isLoadingSchedule,
+  scheduleError,
 } = storeToRefs(examStore);
 
 // แปลงค่าประเภทรอบสอบ (รอบทั่วไป/รอบพิเศษ) ที่มาจาก backend ให้แสดงผลตามภาษาที่เลือก
@@ -184,22 +203,16 @@ const syncCalendarTime = async (): Promise<void> => {
       const latency = (end - start) / 2;
       calendarServerOffset.value = serverTime + latency - end;
     }
-  } catch {
-    try {
-      const response = await api.get<unknown>('/exam', { params: { _t: start } });
-      const serverDate = response.headers['date'];
-      if (serverDate) {
-        const serverTime = new Date(serverDate).getTime();
-        const end = Date.now();
-        const latency = (end - start) / 2;
-        calendarServerOffset.value = serverTime + latency - end;
-      }
-    } catch (err) {
-      console.error('[CalendarTimeSync] Failed to sync with backend', err);
-    }
+  } catch (err) {
+    // Keep last known offset — do not fall back to full GET /exam
+    console.error('[CalendarTimeSync] Failed to sync with backend', err);
   } finally {
     updateCalendarNow();
   }
+};
+
+const retryLoadSchedule = async (): Promise<void> => {
+  await examStore.initSchedule(true);
 };
 
 onMounted(async () => {
@@ -209,8 +222,7 @@ onMounted(async () => {
     selectedDate.value = dateFromQuery;
   }
 
-  await syncCalendarTime();
-  await examStore.initSchedule();
+  await Promise.all([syncCalendarTime(), examStore.initSchedule()]);
   scheduleInterval = setInterval(() => {
     if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
       return;

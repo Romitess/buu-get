@@ -11,6 +11,18 @@
       <CardSkeleton v-for="n in 3" :key="`history-skeleton-${n}`" height="160px" :lines="4" />
     </div>
 
+    <div v-else-if="historyError" class="text-center q-pa-xl">
+      <q-icon name="error_outline" size="48px" color="negative" />
+      <p class="text-grey-7 q-mt-md">{{ historyError }}</p>
+      <q-btn
+        flat
+        color="primary"
+        class="q-mt-sm"
+        :label="$t('exam.history.retry')"
+        @click="retryLoadHistory"
+      />
+    </div>
+
     <!-- Pending Payment Section -->
     <div v-else-if="pendingExams.length > 0" class="history-section q-mb-xl">
       <div class="section-title row items-center q-mb-md">
@@ -54,8 +66,21 @@
       </div>
     </div>
 
+    <div
+      v-if="
+        !isLoadingHistory && !historyError && pendingExams.length === 0 && historyExams.length === 0
+      "
+      class="text-center q-pa-xl"
+    >
+      <q-icon name="history" size="48px" color="grey-4" />
+      <p class="text-grey-6 q-mt-md">{{ $t('exam.history.empty') }}</p>
+    </div>
+
     <!-- History Section -->
-    <div v-if="!isLoadingHistory && historyExams.length > 0" class="history-section">
+    <div
+      v-if="!isLoadingHistory && !historyError && historyExams.length > 0"
+      class="history-section"
+    >
       <div class="section-title row items-center q-mb-md">
         <q-icon name="schedule" size="var(--space-lg)" class="section-icon q-mr-sm" />
         <span class="text-weight-bold text-subtitle1">{{ $t('exam.history.sectionTitle') }}</span>
@@ -264,17 +289,25 @@ const { formatDateRange } = useAppDate();
 const { isUnread: isPrepGuideUnread, markSeen: markPrepGuideSeen } = useExamPrepGuide();
 
 // === State จาก Store ===
-const { pendingRegistrations, historyRecords } = storeToRefs(examStore);
+const { pendingRegistrations, historyRecords, historyError } = storeToRefs(examStore);
 
 const isLoadingHistory = ref(true);
 
-onMounted(async () => {
+const loadHistory = async (): Promise<void> => {
   isLoadingHistory.value = true;
   try {
-    await examStore.fetchHistory();
+    await examStore.fetchHistory(true);
   } finally {
     isLoadingHistory.value = false;
   }
+};
+
+const retryLoadHistory = async (): Promise<void> => {
+  await loadHistory();
+};
+
+onMounted(async () => {
+  await loadHistory();
 });
 
 // === UI-only State ===

@@ -908,6 +908,7 @@ export class ExamEnrollmentsService {
         'SESSION_LOCATION',
         'SESSION_LOCATION.LOCATION',
         'TRANSACTION',
+        'TRANSACTION.RECEIPTS',
         'VOUCHERS',
         'SCORE',
         'SCORE.CERTIFICATES',
@@ -964,10 +965,15 @@ export class ExamEnrollmentsService {
         TRANSACTION: {
           TRANX_ID: true,
           TRANX_MATCH_STATUS: true,
+          TRANX_PAYMENT_STATUS: true,
           TRANX_AMOUNT: true,
           TRANX_CHANNEL: true,
           TRANX_PAID_AT: true,
           TRANX_CREATED_AT: true,
+          RECEIPTS: {
+            RC_ID: true,
+            RC_STATUS: true,
+          },
         },
         VOUCHERS: {
           VC_ID: true,

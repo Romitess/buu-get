@@ -55,6 +55,16 @@ export const useUserStore = defineStore('user', () => {
 
   // === Actions ===
 
+  /** เคลียร์ exam Pinia + in-memory exam API cache (dynamic import กัน circular) */
+  async function clearExamCaches(): Promise<void> {
+    const [{ useExamStore }, { invalidateExamCache }] = await Promise.all([
+      import('src/stores/exam.store'),
+      import('src/services/exam.service'),
+    ]);
+    useExamStore().resetExamUserState();
+    invalidateExamCache();
+  }
+
   /**
    * ฟังก์ชันโหลดข้อมูลผู้ใช้เริ่มต้น (Check LocalStorage + Token)
    */
@@ -98,6 +108,8 @@ export const useUserStore = defineStore('user', () => {
       const result = await userService.authenticateUser(email, password);
 
       if (result) {
+        await clearExamCaches();
+
         localStorage.setItem('access_token', result.accessToken);
         localStorage.setItem('isLoggedIn', 'true');
         if (result.user?.id) {
@@ -170,6 +182,7 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_id');
+    void clearExamCaches();
   }
 
   return {

@@ -61,6 +61,9 @@ export default {
       scoreDetails: 'Score Details',
       certificate: 'Certificate',
       paymentDeadline: 'Payment deadline',
+      loadError: 'Failed to load exam history. Please try again.',
+      retry: 'Retry',
+      empty: 'No exam or registration history yet',
       receiptForm: {
         title: 'Receipt Information',
         examDetails: 'Exam Details',
@@ -187,6 +190,9 @@ export default {
     title: 'Exam Schedule',
     subtitle: 'Please select a round you wish to register',
     emptyRounds: 'No exam rounds available on the selected date',
+    loading: 'Loading exam schedule...',
+    loadError: 'Failed to load exam schedule. Please try again.',
+    retry: 'Retry',
     roundTypeLabel: 'General Round',
     examType: {
       general: 'General Round',
