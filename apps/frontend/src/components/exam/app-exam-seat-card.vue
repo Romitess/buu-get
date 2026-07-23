@@ -43,8 +43,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onBeforeUnmount } from 'vue';
 import { SEAT_STUDENT_DRAG_MIME } from 'src/composables/use-exam-seat-management';
+
+const SEAT_DRAG_GHOST_SIZE = 64;
 
 interface Props {
   studentName: string;
@@ -66,6 +68,8 @@ const props = withDefaults(defineProps<Props>(), {
   dragHint: '',
 });
 
+let activeDragGhost: HTMLElement | null = null;
+
 const hasSeat = computed((): boolean => {
   return (
     props.seatNumber !== null && props.seatNumber !== undefined && props.seatNumber.trim() !== ''
@@ -84,17 +88,85 @@ const remarkBadgeClass = computed((): string => {
   return 'remark-default';
 });
 
+/** Same short-name rule as the seat assignment tile */
+const getShortDragName = (fullName: string): string => {
+  const name = fullName.trim();
+  if (!name) return 'Name';
+
+  const parts = name.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2 && /^[A-Za-z.]+$/.test(parts[0] ?? '')) {
+    return parts[1] ?? name;
+  }
+
+  return parts[0] ?? name;
+};
+
+const removeDragGhost = (): void => {
+  if (!activeDragGhost) return;
+  activeDragGhost.remove();
+  activeDragGhost = null;
+};
+
+const createSeatSizedDragGhost = (): HTMLElement => {
+  removeDragGhost();
+
+  const ghost = document.createElement('div');
+  ghost.className = 'seat-card-drag-ghost';
+  ghost.setAttribute('aria-hidden', 'true');
+
+  const tile = document.createElement('div');
+  tile.className = 'seat-card-drag-ghost__tile';
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'seat-card-drag-ghost__name';
+  nameEl.textContent = getShortDragName(props.studentName);
+
+  const avatarEl = document.createElement('div');
+  avatarEl.className = 'seat-card-drag-ghost__avatar';
+
+  if (props.avatarUrl) {
+    const img = document.createElement('img');
+    img.src = props.avatarUrl;
+    img.alt = '';
+    avatarEl.appendChild(img);
+  } else {
+    const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    icon.setAttribute('viewBox', '0 0 24 24');
+    icon.setAttribute('width', '21');
+    icon.setAttribute('height', '21');
+    icon.setAttribute('aria-hidden', 'true');
+    icon.innerHTML =
+      '<path fill="#ffffff" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>';
+    avatarEl.appendChild(icon);
+  }
+
+  tile.appendChild(nameEl);
+  tile.appendChild(avatarEl);
+  ghost.appendChild(tile);
+  document.body.appendChild(ghost);
+  activeDragGhost = ghost;
+  return ghost;
+};
+
 const onDragStart = (event: DragEvent): void => {
   if (!isDraggable.value || props.ermId == null || !event.dataTransfer) return;
 
   event.dataTransfer.effectAllowed = 'move';
   event.dataTransfer.setData(SEAT_STUDENT_DRAG_MIME, String(props.ermId));
   event.dataTransfer.setData('text/plain', String(props.ermId));
+
+  const ghost = createSeatSizedDragGhost();
+  const offset = SEAT_DRAG_GHOST_SIZE / 2;
+  event.dataTransfer.setDragImage(ghost, offset, offset);
 };
 
 const onDragEnd = (): void => {
-  // no-op: kept for clearing future drag styles if needed
+  removeDragGhost();
 };
+
+onBeforeUnmount(() => {
+  removeDragGhost();
+});
 </script>
 
 <style scoped lang="scss">
@@ -228,5 +300,60 @@ const onDragEnd = (): void => {
   height: 6px;
   border-radius: 50%;
   background: var(--text-muted); /* Standardized muted color */
+}
+</style>
+
+<style lang="scss">
+.seat-card-drag-ghost {
+  position: fixed;
+  top: -1000px;
+  left: -1000px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.seat-card-drag-ghost__tile {
+  width: 64px;
+  height: 64px;
+  border-radius: 7px;
+  border: 1px solid var(--primary, #0d47a1);
+  background: var(--primary, #0d47a1);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(13, 71, 161, 0.28);
+}
+
+.seat-card-drag-ghost__name {
+  max-width: 56px;
+  font-size: 15px;
+  line-height: 1;
+  color: #ffffff;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.seat-card-drag-ghost__avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #0c8fe8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  img {
+    width: 34px;
+    height: 34px;
+    object-fit: cover;
+  }
 }
 </style>
