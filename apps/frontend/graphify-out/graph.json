@@ -1110,7 +1110,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "base_image_upload",
-      "community": 164,
+      "community": 10,
       "norm_label": "image-upload.vue"
     },
     {
@@ -3117,7 +3117,7 @@
       "label": "currentStep",
       "file_type": "code",
       "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
-      "source_location": "L98",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "exam_exam_prep_guide_dialog_currentstep",
       "community": 193,
@@ -3127,7 +3127,7 @@
       "label": "transitionName",
       "file_type": "code",
       "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
-      "source_location": "L99",
+      "source_location": "L107",
       "_origin": "ast",
       "id": "exam_exam_prep_guide_dialog_transitionname",
       "community": 193,
@@ -3137,7 +3137,7 @@
       "label": "examTitle",
       "file_type": "code",
       "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
-      "source_location": "L101",
+      "source_location": "L109",
       "_origin": "ast",
       "id": "exam_exam_prep_guide_dialog_examtitle",
       "community": 193,
@@ -3147,7 +3147,7 @@
       "label": "onUpdateModelValue",
       "file_type": "code",
       "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
-      "source_location": "L113",
+      "source_location": "L121",
       "_origin": "ast",
       "id": "exam_exam_prep_guide_dialog_onupdatemodelvalue",
       "community": 193,
@@ -3157,7 +3157,7 @@
       "label": "if()",
       "file_type": "code",
       "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
-      "source_location": "L122",
+      "source_location": "L130",
       "_origin": "ast",
       "id": "exam_exam_prep_guide_dialog_if",
       "community": 193,
@@ -4570,7 +4570,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_app_image_cropper",
-      "community": 164,
+      "community": 10,
       "norm_label": "app-image-cropper.vue"
     },
     {
@@ -4917,7 +4917,7 @@
       "label": "AvailableExamRound",
       "file_type": "code",
       "source_file": "src/composables/use-available-exam-rounds.ts",
-      "source_location": "L7",
+      "source_location": "L6",
       "_origin": "ast",
       "id": "composables_use_available_exam_rounds_availableexamround",
       "community": 15,
@@ -4927,7 +4927,7 @@
       "label": "MAX_DISPLAY_ROUNDS",
       "file_type": "code",
       "source_file": "src/composables/use-available-exam-rounds.ts",
-      "source_location": "L21",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "composables_use_available_exam_rounds_max_display_rounds",
       "community": 15,
@@ -4937,7 +4937,7 @@
       "label": "useAvailableExamRounds()",
       "file_type": "code",
       "source_file": "src/composables/use-available-exam-rounds.ts",
-      "source_location": "L23",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "composables_use_available_exam_rounds_useavailableexamrounds",
       "community": 15,
@@ -6050,7 +6050,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "composables_use_image_upload_useimageupload",
-      "community": 164,
+      "community": 10,
       "norm_label": "useimageupload()"
     },
     {
@@ -6060,7 +6060,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_image_url",
-      "community": 164,
+      "community": 10,
       "norm_label": "use-image-url.ts"
     },
     {
@@ -6070,7 +6070,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "composables_use_image_url_useimageurl",
-      "community": 164,
+      "community": 10,
       "norm_label": "useimageurl()"
     },
     {
@@ -9420,7 +9420,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "services_image_service_getimageurl",
-      "community": 164,
+      "community": 10,
       "norm_label": "getimageurl()"
     },
     {
@@ -16201,9 +16201,9 @@
       "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
       "source_location": "L98",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_exam_prep_guide_dialog",
-      "target": "exam_exam_prep_guide_dialog_currentstep",
-      "confidence_score": 1.0
+      "target": "exam_exam_prep_guide_dialog_currentstep"
     },
     {
       "relation": "contains",
@@ -16211,9 +16211,9 @@
       "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_exam_prep_guide_dialog",
-      "target": "exam_exam_prep_guide_dialog_examtitle",
-      "confidence_score": 1.0
+      "target": "exam_exam_prep_guide_dialog_examtitle"
     },
     {
       "relation": "contains",
@@ -16221,9 +16221,9 @@
       "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
       "source_location": "L122",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_exam_prep_guide_dialog",
-      "target": "exam_exam_prep_guide_dialog_if",
-      "confidence_score": 1.0
+      "target": "exam_exam_prep_guide_dialog_if"
     },
     {
       "relation": "contains",
@@ -16231,9 +16231,9 @@
       "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
       "source_location": "L113",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_exam_prep_guide_dialog",
-      "target": "exam_exam_prep_guide_dialog_onupdatemodelvalue",
-      "confidence_score": 1.0
+      "target": "exam_exam_prep_guide_dialog_onupdatemodelvalue"
     },
     {
       "relation": "contains",
@@ -16241,9 +16241,9 @@
       "source_file": "src/components/exam/exam-prep-guide-dialog.vue",
       "source_location": "L99",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_exam_prep_guide_dialog",
-      "target": "exam_exam_prep_guide_dialog_transitionname",
-      "confidence_score": 1.0
+      "target": "exam_exam_prep_guide_dialog_transitionname"
     },
     {
       "relation": "contains",
@@ -19911,9 +19911,9 @@
       "source_file": "src/composables/use-exam-prep-guide.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_prep_guide",
-      "target": "composables_use_exam_prep_guide_prepguideseenmap",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_prep_guide_prepguideseenmap"
     },
     {
       "relation": "contains",
@@ -19921,9 +19921,9 @@
       "source_file": "src/composables/use-exam-prep-guide.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_prep_guide",
-      "target": "composables_use_exam_prep_guide_readseenmap",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_prep_guide_readseenmap"
     },
     {
       "relation": "contains",
@@ -19931,9 +19931,9 @@
       "source_file": "src/composables/use-exam-prep-guide.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_prep_guide",
-      "target": "composables_use_exam_prep_guide_seenmap",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_prep_guide_seenmap"
     },
     {
       "relation": "contains",
@@ -19941,9 +19941,9 @@
       "source_file": "src/composables/use-exam-prep-guide.ts",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_prep_guide",
-      "target": "composables_use_exam_prep_guide_tokey",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_prep_guide_tokey"
     },
     {
       "relation": "contains",
@@ -19951,9 +19951,9 @@
       "source_file": "src/composables/use-exam-prep-guide.ts",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_prep_guide",
-      "target": "composables_use_exam_prep_guide_useexamprepguide",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_prep_guide_useexamprepguide"
     },
     {
       "relation": "contains",
@@ -19961,9 +19961,9 @@
       "source_file": "src/composables/use-exam-prep-guide.ts",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_prep_guide",
-      "target": "composables_use_exam_prep_guide_writeseenmap",
-      "confidence_score": 1.0
+      "target": "composables_use_exam_prep_guide_writeseenmap"
     },
     {
       "relation": "contains",
@@ -29591,5 +29591,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4b8cc9a505f1435d2f1b2c25fa2635de2282ed81"
+  "built_at_commit": "81905de5af7de2a1cd7513c8704f8b796dcb4052"
 }

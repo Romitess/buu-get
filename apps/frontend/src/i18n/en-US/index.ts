@@ -430,7 +430,7 @@ export default {
       today: 'Today',
       table: {
         columns: {
-          round: 'Round',
+          round: 'Exam Name',
           date: 'Exam Date',
           regPeriod: 'Registration Period',
           regDuration: 'Duration',

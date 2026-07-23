@@ -1,7 +1,7 @@
 # Graph Report - frontend  (2026-07-23)
 
 ## Corpus Check
-- 325 files · ~223,148 words
+- 325 files · ~223,295 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4b8cc9a5`
+- Built from commit: `81905de5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -209,8 +209,8 @@ Cohesion: 0.12
 Nodes (12): attrs, isMuted, isOpen, localFilter, { t }, fetchDailyRevenueSummary(), CreateFundSourcePayload, fetchFundSources() (+4 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.30
-Nodes (10): UseImageUploadOptions, BACKEND_API, IMAGE_CONFIG, ImageCategory, PLATFORM_GATEWAY, uploadImage(), validateImageFile(), ImageAsset (+2 more)
+Cohesion: 0.21
+Nodes (13): useImageUpload(), UseImageUploadOptions, useImageUrl(), BACKEND_API, IMAGE_CONFIG, ImageCategory, PLATFORM_GATEWAY, getImageUrl() (+5 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.09
@@ -393,8 +393,8 @@ Cohesion: 0.20
 Nodes (7): props, { dialogRef, onDialogHide, onDialogOK, onDialogCancel }, isConfirming, props, i18n, voucherData, VoucherData
 
 ### Community 164 - "Community 164"
-Cohesion: 0.20
-Nodes (8): useImageUpload(), useImageUrl(), cropImageSrc, { isUploading, handleImageUpload }, $q, showCropDialog, { t }, getImageUrl()
+Cohesion: 0.33
+Nodes (5): cropImageSrc, { isUploading, handleImageUpload }, $q, showCropDialog, { t }
 
 ### Community 165 - "Community 165"
 Cohesion: 0.15

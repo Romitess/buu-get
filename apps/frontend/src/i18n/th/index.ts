@@ -474,7 +474,7 @@ export default {
       today: 'วันนี้',
       table: {
         columns: {
-          round: 'รอบที่',
+          round: 'ชื่อการสอบ',
           date: 'วันที่สอบ',
           regPeriod: 'เปิดรับสมัคร',
           regDuration: 'ระยะเวลาสมัคร',
