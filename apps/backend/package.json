@@ -22,6 +22,7 @@
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
     "seed:demo": "ts-node -r tsconfig-paths/register src/database/seeds/demo-seed.ts",
+    "seed:enroll-exam-paid": "ts-node -r tsconfig-paths/register src/database/seeds/enroll-exam-paid-seed.ts",
     "schema:dump": "ts-node -r tsconfig-paths/register scripts/dump-schema.ts"
   },
   "dependencies": {
