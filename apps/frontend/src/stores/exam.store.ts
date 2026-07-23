@@ -25,17 +25,16 @@ import {
   DEFAULT_LOCATION_TEXT,
   DEFAULT_EXAM_INFO,
   ENROLLMENT_STATUS,
-  TRANSACTION_MATCH_STATUS,
-  TRANSACTION_PAYMENT_STATUS,
-  SESSION_STATUS_COMPLETED,
   formatLocationWithRoom,
-  PAYMENT_DURATION_SECONDS_DEFAULT,
-  ReceiptStatus,
 } from 'src/constants/exam';
 import {
   getExamRoundsCalendarAvailability,
   type ExamCalendarAvailability,
 } from 'src/utils/exam-registration';
+import {
+  isPendingHistoryItem,
+  mapEnrollmentToHistoryItem,
+} from 'src/utils/map-enrollment-history-status';
 import { useUserStore } from 'src/stores/user.store';
 import { i18n as appI18n } from 'src/boot/i18n';
 
@@ -274,42 +273,6 @@ export const useExamStore = defineStore('exam', () => {
         const newPending: ExamHistoryItem[] = [];
         const newHistory: ExamHistoryItem[] = [];
 
-        const getPaymentDeadline = (createdAt: string): Date => {
-          const createdAtDate = new Date(createdAt);
-          return new Date(createdAtDate.getTime() + PAYMENT_DURATION_SECONDS_DEFAULT * 1000);
-        };
-
-        const isPaymentTimeoutCancellation = (enrollment: {
-          ERM_ID: number;
-          CREATED_AT: string;
-          UPDATED_AT?: string;
-        }): boolean => {
-          const reason = getCancellationReason(enrollment.ERM_ID);
-          if (reason) return reason === 'paymentTimeout';
-          if (!enrollment.CREATED_AT || !enrollment.UPDATED_AT) return false;
-          return (
-            new Date(enrollment.UPDATED_AT).getTime() >=
-            getPaymentDeadline(enrollment.CREATED_AT).getTime()
-          );
-        };
-
-        const hasMatchedPayment = (enrollment: ExamEnrollment): boolean =>
-          enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
-
-        const hasDownloadableReceipt = (enrollment: ExamEnrollment): boolean => {
-          const paymentStatus = enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS;
-          if (
-            paymentStatus === TRANSACTION_PAYMENT_STATUS.REFUND ||
-            paymentStatus === TRANSACTION_PAYMENT_STATUS.RECEIPT_VOIDED
-          ) {
-            return false;
-          }
-          const receipts = enrollment.TRANSACTION?.RECEIPTS ?? [];
-          const hasVoided = receipts.some((receipt) => receipt.RC_STATUS === ReceiptStatus.VOIDED);
-          if (hasVoided) return false;
-          return hasMatchedPayment(enrollment);
-        };
-
         enrollments.forEach((enrollment) => {
           const session = enrollment.SESSION;
           if (!session) return;
@@ -328,119 +291,22 @@ export const useExamStore = defineStore('exam', () => {
             ? formatLocationWithRoom(location.LOCATION_NAME, location.LOCATION_ROOM_NO)
             : DEFAULT_LOCATION_TEXT;
 
-          const item: ExamHistoryItem = {
-            id: enrollment.ERM_ID,
+          const item = mapEnrollmentToHistoryItem(enrollment, {
+            formattedDate,
+            formattedTime: `${formatTime(session.SS_START_TIME)} - ${formatTime(session.SS_END_TIME)}`,
+            locationText,
             title: exam?.EXAM_ROUND
               ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}`
               : exam?.EXAM_NAME || i18n.t('examSchedule.defaultEnrollmentTitle'),
-            status: '',
-            statusType: 'primary',
-            date: formattedDate,
-            time: `${formatTime(session.SS_START_TIME)} - ${formatTime(session.SS_END_TIME)}`,
-            location: locationText,
             fee: Number(exam?.EXAM_FEE ?? 0),
-            rawEnrollment: enrollment,
-          };
+            getCancellationReason,
+          });
 
-          if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.UNPAID) {
-            item.status = 'exam.status.pending';
-            item.statusType = 'primary';
-            item.actions = ['cancel', 'pay'];
-            if (enrollment.CREATED_AT) {
-              item.deadline = getPaymentDeadline(enrollment.CREATED_AT).toISOString();
-            }
+          if (!item) return;
+
+          if (isPendingHistoryItem(item)) {
             newPending.push(item);
-          } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.PAID) {
-            const canDownloadReceipt = hasDownloadableReceipt(enrollment);
-            item.status = canDownloadReceipt
-              ? 'exam.status.verified'
-              : 'exam.status.paymentCompleted';
-            item.statusType = 'primary';
-            item.actions = canDownloadReceipt ? ['downloadReceipt'] : [];
-            newHistory.push(item);
-          } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_ASSIGNED) {
-            const canDownloadReceipt = hasDownloadableReceipt(enrollment);
-            item.status = canDownloadReceipt
-              ? 'exam.status.verified'
-              : 'exam.status.paymentCompleted';
-            item.statusType = 'primary';
-
-            const actions: string[] = [];
-            if (canDownloadReceipt) {
-              actions.push('downloadReceipt');
-            }
-            item.actions = actions;
-            newHistory.push(item);
-          } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_PUBLISHED) {
-            const canDownloadReceipt = hasDownloadableReceipt(enrollment);
-            item.status = canDownloadReceipt
-              ? 'exam.status.verified'
-              : 'exam.status.paymentCompleted';
-            item.statusType = 'primary';
-            const hasVoucher = !!(enrollment.VOUCHERS && enrollment.VOUCHERS.length > 0);
-
-            const actions: string[] = [];
-            if (hasVoucher) {
-              actions.push('candidateCard');
-            }
-            if (canDownloadReceipt) {
-              actions.push('downloadReceipt');
-            }
-            item.actions = actions;
-            newHistory.push(item);
-          } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.ATTENDED) {
-            const hasScore = !!enrollment.SCORE;
-            const canDownloadReceipt = hasDownloadableReceipt(enrollment);
-            const hasCompletedSession =
-              Number(enrollment.SESSION?.SS_SESSION_STATUS) === SESSION_STATUS_COMPLETED;
-            const hasCertificate = !!(
-              enrollment.SCORE?.CERTIFICATES && enrollment.SCORE.CERTIFICATES.length > 0
-            );
-
-            const actions: string[] = [];
-            if (canDownloadReceipt) {
-              actions.push('downloadReceipt');
-            }
-            if (hasCompletedSession && hasCertificate) {
-              actions.push('certificate');
-            }
-
-            item.status = hasScore ? 'exam.status.completed' : 'exam.status.evaluating';
-            item.statusType = 'primary';
-            item.actions = actions;
-            newHistory.push(item);
-          } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.CANCELLED) {
-            const paymentStatus = enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS;
-            if (paymentStatus === TRANSACTION_PAYMENT_STATUS.REFUND) {
-              item.status = 'exam.status.refunded';
-              item.statusType = 'warning';
-              item.customStatus = {
-                label: 'exam.status.refunded',
-                type: 'error',
-                icon: 'currency_exchange',
-              };
-            } else if (paymentStatus === TRANSACTION_PAYMENT_STATUS.RECEIPT_VOIDED) {
-              item.status = 'exam.status.receiptVoided';
-              item.statusType = 'warning';
-              item.customStatus = {
-                label: 'exam.status.receiptVoided',
-                type: 'error',
-                icon: 'receipt_long',
-              };
-            } else {
-              const isPaymentTimeout = isPaymentTimeoutCancellation(enrollment);
-              item.status = isPaymentTimeout
-                ? 'exam.status.cancelled'
-                : 'exam.status.registrationCancelled';
-              item.statusType = 'primary';
-              if (isPaymentTimeout) {
-                item.customStatus = {
-                  label: 'exam.status.paymentTimeout',
-                  type: 'error',
-                  icon: 'warning_amber',
-                };
-              }
-            }
+          } else {
             newHistory.push(item);
           }
         });

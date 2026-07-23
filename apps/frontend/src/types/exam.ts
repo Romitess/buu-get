@@ -56,10 +56,21 @@ export interface ExamInfo {
 /** Pass/fail outcome of an exam, used to render a composed result label */
 export type ExamResult = 'passed' | 'failed';
 
+/** หมวดหมู่สำหรับกรองประวัติการสอบ/การลงทะเบียน */
+export type ExamHistoryCategory = 'pending' | 'registration' | 'exam' | 'completed' | 'cancelled';
+
+export type StatusBadgeType = 'primary' | 'success' | 'warning' | 'error' | 'info';
+
+export interface StatusBadgeView {
+  /** i18n key */
+  label: string;
+  type: StatusBadgeType;
+}
+
 export interface CustomStatus {
   /** i18n key, used as-is when `result` is not set */
   label: string;
-  type: 'success' | 'error';
+  type: 'success' | 'error' | 'warning';
   icon: string;
   /**
    * When set, the UI renders a composed label "<statusLabel> : <result>"
@@ -71,13 +82,21 @@ export interface CustomStatus {
 export interface ExamHistoryItem {
   id: number;
   title: string;
+  /** i18n key — สถานะหลักที่แสดง (backward compatible) */
   status: string;
-  statusType: 'primary' | 'success' | 'warning' | 'error' | 'info';
+  statusType: StatusBadgeType;
+  /** หมวดหมู่สำหรับกรองรายการ */
+  category: ExamHistoryCategory;
+  /** สถานะการลงทะเบียน */
+  registrationStatus: StatusBadgeView;
+  /** สถานะการสอบ (ถ้ามี) */
+  examStatus?: StatusBadgeView;
   date: string;
   time: string;
   location: string;
   fee?: number;
   deadline?: string;
+  seatLabel?: string;
   customStatus?: CustomStatus;
   actions?: string[];
   rawEnrollment?: ExamEnrollment;
