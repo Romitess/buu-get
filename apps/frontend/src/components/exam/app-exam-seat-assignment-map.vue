@@ -50,12 +50,17 @@
                   class="seat-cell"
                   :class="{
                     'is-drag-source': draggingSeatId === seat.id,
-                    'is-drag-over': draggingSeatId !== null && dragOverSeatId === seat.id,
+                    'is-drag-over':
+                      (draggingSeatId !== null && dragOverSeatId === seat.id) ||
+                      externalDragOverSeatId === seat.id,
                   }"
                   :style="getSeatCellGridStyle(rowIndex + 1, colIndex + 1)"
                   @mousedown="onSeatMouseDown($event, seat)"
                   @mouseenter="onSeatMouseEnter(seat)"
                   @mouseleave="onSeatMouseLeave(seat)"
+                  @dragover="onSeatExternalDragOver($event, seat)"
+                  @dragleave="onSeatExternalDragLeave(seat)"
+                  @drop="onSeatExternalDrop($event, seat)"
                 >
                   <div
                     class="seat-cell-content"
@@ -142,6 +147,7 @@ import { computed, ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import type { ComponentPublicInstance, CSSProperties } from 'vue';
 import AppExamSeatAssignmentTile from 'src/components/exam/app-exam-seat-assignment-tile.vue';
 import type { SeatCell } from 'src/composables/use-exam-seat-management';
+import { SEAT_STUDENT_DRAG_MIME } from 'src/composables/use-exam-seat-management';
 
 const SHIFT_ANIMATION_MS = 460;
 
@@ -169,9 +175,11 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (e: 'swap', sourceSeatId: string, targetSeatId: string): void;
+  (e: 'assign-student', ermId: number, seatId: string): void;
 }>();
 
 const swapMode = ref(false);
+const externalDragOverSeatId = ref<string | null>(null);
 
 const rowCount = computed(() => props.seatsByRow.length);
 const colCount = computed(() =>
@@ -812,6 +820,46 @@ const onSeatMouseEnter = (seat: SeatCell): void => {
 
 const onSeatMouseLeave = (seat: SeatCell): void => {
   if (dragOverSeatId.value === seat.id) dragOverSeatId.value = null;
+};
+
+const canAcceptExternalStudentDrop = (seat: SeatCell): boolean =>
+  !props.printMode && isUsable(seat) && !seat.student;
+
+const readExternalStudentErmId = (event: DragEvent): number | null => {
+  const transfer = event.dataTransfer;
+  if (!transfer) return null;
+
+  const raw =
+    transfer.getData(SEAT_STUDENT_DRAG_MIME) || transfer.getData('text/plain') || '';
+  const ermId = Number(raw);
+  return Number.isInteger(ermId) && ermId > 0 ? ermId : null;
+};
+
+const onSeatExternalDragOver = (event: DragEvent, seat: SeatCell): void => {
+  if (!canAcceptExternalStudentDrop(seat)) return;
+
+  event.preventDefault();
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move';
+  }
+  externalDragOverSeatId.value = seat.id;
+};
+
+const onSeatExternalDragLeave = (seat: SeatCell): void => {
+  if (externalDragOverSeatId.value === seat.id) {
+    externalDragOverSeatId.value = null;
+  }
+};
+
+const onSeatExternalDrop = (event: DragEvent, seat: SeatCell): void => {
+  event.preventDefault();
+  externalDragOverSeatId.value = null;
+  if (!canAcceptExternalStudentDrop(seat)) return;
+
+  const ermId = readExternalStudentErmId(event);
+  if (ermId == null) return;
+
+  emit('assign-student', ermId, seat.id);
 };
 </script>
 

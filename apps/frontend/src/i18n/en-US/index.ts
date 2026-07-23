@@ -759,8 +759,41 @@ export default {
       },
     },
     seatManagement: {
+      pageTitle: 'Manage Exam Seats',
+      pageSubtitle:
+        'Plan and manage exam seats to accommodate candidates appropriately and conveniently',
+      studentListTitle: 'Applicants and seats',
+      emptyStudentList: 'No exam applicants found',
+      seatLayoutTitle: 'Exam seat layout',
+      swapModeLabel: 'Seat swap mode',
+      availableSeat: 'Available seat',
+      assignedSeat: 'Seat assigned',
+      cancelButton: 'Cancel seat assignment',
       saveButton: 'Confirm Seat Assignment',
       saveButtonEdit: 'Save Seat Changes',
+      rearrangeAllButton: 'Rearrange all',
+      dragToSeatHint: 'Drag onto an empty seat',
+      unassignedBanner:
+        '{count} applicant(s) still need seats — drag them from the list onto empty seats',
+      savingData: 'Saving seat layout...',
+      loadingData: 'Loading data...',
+      noName: 'No name',
+      placementChoice: {
+        title: 'New applicants without seats',
+        message:
+          'Seats were already assigned, and there are new applicants without seats. What would you like to do?',
+        unassignedHint: 'Applicants without seats: {count}',
+        rearrange: 'Rearrange everyone',
+        keep: 'Keep existing seats and place new applicants manually',
+      },
+      notifications: {
+        saveSuccess: 'Seat assignments saved successfully',
+        saveError: 'Unable to save seat assignments',
+        loadError: 'Unable to load exam data',
+        rearranged: 'Seats rearranged by priority',
+        dragUnassignedHint: 'Drag unassigned applicants from the list onto empty seats',
+        assignSeatFailed: 'Unable to place the applicant on this seat',
+      },
     },
     seatCandidates: {
       pageTitle: 'Manage Exam Seats',
@@ -783,6 +816,9 @@ export default {
         subtitle: 'Please check the details before confirming',
         warningAlert:
           'The system will send info to candidates via Email. Please double check accuracy before proceeding.',
+        seatLockNoteLabel: 'Note:',
+        seatLockNote:
+          'After Test Vouchers are issued, exam seats can no longer be arranged or edited.',
         examInfoTitle: 'Exam Information',
         roundName: 'Exam Round',
         date: 'Exam Date',

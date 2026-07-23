@@ -31,6 +31,11 @@ const i18n = createI18n({
       admin: {
         seatCandidates: {
           voucherPreviewTitle: 'ตัวอย่างใบเข้าห้องสอบ',
+          issueTicketDialog: {
+            seatLockNoteLabel: 'Note:',
+            seatLockNote:
+              'After Test Vouchers are issued, exam seats can no longer be arranged or edited.',
+          },
         },
       },
     },

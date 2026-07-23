@@ -1,5 +1,15 @@
 <template>
-  <q-card :class="['exam-seat-card', hasSeat ? 'seat-assigned' : 'seat-unassigned']" flat>
+  <q-card
+    :class="[
+      'exam-seat-card',
+      hasSeat ? 'seat-assigned' : 'seat-unassigned',
+      { 'is-draggable': isDraggable },
+    ]"
+    flat
+    :draggable="isDraggable"
+    @dragstart="onDragStart"
+    @dragend="onDragEnd"
+  >
     <q-card-section class="q-pa-md row items-center no-wrap">
       <!-- Avatar Section -->
       <div class="avatar-wrapper q-mr-md">
@@ -23,6 +33,9 @@
           <span v-if="hasSeat" class="text-no-wrap seat-label">
             เลขที่นั่งสอบ: {{ seatNumber }}
           </span>
+          <span v-else class="text-no-wrap seat-label seat-unassigned-hint">
+            {{ dragHint }}
+          </span>
         </div>
       </div>
     </q-card-section>
@@ -31,21 +44,26 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { SEAT_STUDENT_DRAG_MIME } from 'src/composables/use-exam-seat-management';
 
 interface Props {
   studentName: string;
   studentId: string;
+  ermId?: number | null;
   seatNumber?: string | null;
   avatarUrl?: string | null;
   remark?: string;
   isForeigner?: boolean;
+  dragHint?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  ermId: null,
   seatNumber: null,
   avatarUrl: null,
   remark: '',
   isForeigner: false,
+  dragHint: '',
 });
 
 const hasSeat = computed((): boolean => {
@@ -53,6 +71,8 @@ const hasSeat = computed((): boolean => {
     props.seatNumber !== null && props.seatNumber !== undefined && props.seatNumber.trim() !== ''
   );
 });
+
+const isDraggable = computed((): boolean => !hasSeat.value && props.ermId != null);
 
 const displayRemark = computed((): string => {
   return props.remark || '';
@@ -63,6 +83,18 @@ const remarkBadgeClass = computed((): string => {
   if (props.remark && props.remark !== 'ชาวไทย') return 'remark-special';
   return 'remark-default';
 });
+
+const onDragStart = (event: DragEvent): void => {
+  if (!isDraggable.value || props.ermId == null || !event.dataTransfer) return;
+
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData(SEAT_STUDENT_DRAG_MIME, String(props.ermId));
+  event.dataTransfer.setData('text/plain', String(props.ermId));
+};
+
+const onDragEnd = (): void => {
+  // no-op: kept for clearing future drag styles if needed
+};
 </script>
 
 <style scoped lang="scss">
@@ -84,6 +116,14 @@ const remarkBadgeClass = computed((): string => {
     border: 1px solid #676767b2;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
     color: var(--text-primary);
+  }
+
+  &.is-draggable {
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
+    }
   }
 }
 
@@ -155,6 +195,12 @@ const remarkBadgeClass = computed((): string => {
   max-width: 42%;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.seat-unassigned-hint {
+  max-width: 55%;
+  font-size: 14px;
+  opacity: 0.85;
 }
 
 .avatar-img {
