@@ -10,6 +10,7 @@ import {
   OneToOne,
   JoinColumn,
   Unique,
+  Index,
 } from 'typeorm';
 import { ExamSession } from '../../exam-sessions/entities/exam-session.entity';
 import { User } from '../../users/entities/user.entity';
@@ -38,6 +39,7 @@ export enum ExamVerifyStatus {
 
 @Entity('EXAM_T_ENROLLMENTS')
 @Unique('UQ_ENROLLMENT_SEAT_LABEL', ['SL_ID', 'ERM_SEAT_LABEL'])
+@Index('IDX_ERM_STATUS_CREATED_AT', ['ERM_STATUS', 'CREATED_AT'])
 export class ExamEnrollment {
   @PrimaryGeneratedColumn({ name: 'ERM_ID', comment: 'รหัสผู้สมัคร' })
   ERM_ID: number;

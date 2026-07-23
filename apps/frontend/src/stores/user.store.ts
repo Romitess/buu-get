@@ -127,6 +127,40 @@ export const useUserStore = defineStore('user', () => {
   }
 
   /**
+   * โหลด profile เต็มแบบ background หลัง login ขั้นต่ำ
+   * no-op ถ้ามี fullNameTH / nationalId แล้ว — ไม่ผูกกับปุ่ม loading
+   */
+  async function ensureProfileLoaded(): Promise<void> {
+    if (!isLoggedIn.value) return;
+    const token = accessToken.value || localStorage.getItem('access_token');
+    if (!token) return;
+    if (currentUser.value?.fullNameTH || currentUser.value?.nationalId) return;
+
+    try {
+      const profile = await userService.getProfile(token);
+      if (!profile) return;
+
+      const roles = buildRoles(profile.role, profile.roles);
+      currentUser.value = {
+        ...profile,
+        role: roles[0] ?? ROLES.CANDIDATE,
+        roles,
+      };
+      if (profile.id) {
+        localStorage.setItem('user_id', String(profile.id));
+      }
+    } catch (err) {
+      console.error('ensureProfileLoaded failed:', err);
+    }
+  }
+
+  /** อัปเดต currentUser จาก partial (เช่นหลัง PATCH profile) โดยไม่เรียก GET /auth/me */
+  function patchCurrentUser(partial: Partial<User>): void {
+    if (!currentUser.value) return;
+    currentUser.value = { ...currentUser.value, ...partial };
+  }
+
+  /**
    * ฟังก์ชัน Logout
    */
   function logout(): void {
@@ -148,6 +182,8 @@ export const useUserStore = defineStore('user', () => {
     profileItems,
     initialize,
     login,
+    ensureProfileLoaded,
+    patchCurrentUser,
     logout,
   };
 });

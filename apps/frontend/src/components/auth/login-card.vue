@@ -156,6 +156,8 @@ const onSubmit = async () => {
     if (success) {
       // ปลด spinner ก่อน navigate เพื่อไม่ให้ lazy chunk รวมในปุ่ม loading
       isLoading.value = false;
+      // โหลด profile เต็มแบบ background — ไม่รอ / ไม่ค้าง spinner
+      void userStore.ensureProfileLoaded();
 
       $q.notify({
         type: 'positive',

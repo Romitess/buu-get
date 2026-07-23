@@ -695,7 +695,23 @@ const onSave = async (): Promise<void> => {
       }
     }
 
-    await userStore.initialize();
+    // Hydrate จาก form + backend clear remark — ไม่เรียก GET /auth/me ซ้ำ
+    userStore.patchCurrentUser({
+      titleTH: formData.value.title,
+      fullNameTH: formData.value.fullNameTH,
+      fullNameEN: formData.value.fullNameEN,
+      birthdate: formData.value.birthdate,
+      phone: formData.value.phone,
+      educationLevel: formData.value.educationLevel,
+      faculty: formData.value.faculty,
+      institution: formData.value.institution,
+      address: formData.value.address.trim(),
+      nationalId: formData.value.nationalId,
+      remark: '',
+      ...(formData.value.userImagePath !== undefined
+        ? { userImagePath: formData.value.userImagePath }
+        : {}),
+    });
 
     // Hide banner immediately after successful save (remark is cleared on backend)
     showFixAlert.value = false;

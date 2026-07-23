@@ -137,21 +137,25 @@ export const useExamStore = defineStore('exam', () => {
     return `${date.getDate()} ${monthName} ${buddhistYear}`;
   });
 
-  async function loadRegisteredSessions(): Promise<void> {
-    const userIdStr = localStorage.getItem('user_id');
-    if (!userIdStr) {
-      registeredSessionIds.value = new Set();
-      return;
-    }
-
-    const userId = parseInt(userIdStr, 10);
-    if (isNaN(userId)) {
-      registeredSessionIds.value = new Set();
-      return;
-    }
-
+  async function loadRegisteredSessions(preloaded?: ExamEnrollment[]): Promise<void> {
     try {
-      const enrollments = await fetchUserEnrollments(userId);
+      let enrollments = preloaded;
+      if (!enrollments) {
+        const userIdStr = localStorage.getItem('user_id');
+        if (!userIdStr) {
+          registeredSessionIds.value = new Set();
+          return;
+        }
+
+        const userId = parseInt(userIdStr, 10);
+        if (isNaN(userId)) {
+          registeredSessionIds.value = new Set();
+          return;
+        }
+
+        enrollments = await fetchUserEnrollments(userId);
+      }
+
       registeredSessionIds.value = new Set(
         enrollments
           .filter((enrollment) => enrollment.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED)
@@ -183,16 +187,30 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
-  async function fetchHistory(force = false): Promise<void> {
-    if (!force && Date.now() - lastHistoryFetchAt < HISTORY_CACHE_TTL_MS) return;
-
+  /** ดึง enrollments ครั้งเดียว แล้วอัปเดตทั้ง history + registered sessions */
+  async function refreshUserEnrollmentViews(): Promise<void> {
     const userIdStr = localStorage.getItem('user_id');
     if (!userIdStr) return;
     const userId = parseInt(userIdStr, 10);
     if (isNaN(userId)) return;
 
+    const enrollments = await fetchUserEnrollments(userId);
+    await Promise.all([fetchHistory(true, enrollments), loadRegisteredSessions(enrollments)]);
+  }
+
+  async function fetchHistory(force = false, preloaded?: ExamEnrollment[]): Promise<void> {
+    if (!force && Date.now() - lastHistoryFetchAt < HISTORY_CACHE_TTL_MS) return;
+
     try {
-      const enrollments = await fetchUserEnrollments(userId);
+      let enrollments = preloaded;
+      if (!enrollments) {
+        const userIdStr = localStorage.getItem('user_id');
+        if (!userIdStr) return;
+        const userId = parseInt(userIdStr, 10);
+        if (isNaN(userId)) return;
+        enrollments = await fetchUserEnrollments(userId);
+      }
+
       const newPending: ExamHistoryItem[] = [];
       const newHistory: ExamHistoryItem[] = [];
 
@@ -274,13 +292,17 @@ export const useExamStore = defineStore('exam', () => {
           newPending.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.PAID) {
           const canDownloadReceipt = hasDownloadableReceipt(enrollment);
-          item.status = canDownloadReceipt ? 'exam.status.verified' : 'exam.status.paymentCompleted';
+          item.status = canDownloadReceipt
+            ? 'exam.status.verified'
+            : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
           item.actions = canDownloadReceipt ? ['downloadReceipt'] : [];
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_ASSIGNED) {
           const canDownloadReceipt = hasDownloadableReceipt(enrollment);
-          item.status = canDownloadReceipt ? 'exam.status.verified' : 'exam.status.paymentCompleted';
+          item.status = canDownloadReceipt
+            ? 'exam.status.verified'
+            : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
 
           const actions: string[] = [];
@@ -291,7 +313,9 @@ export const useExamStore = defineStore('exam', () => {
           newHistory.push(item);
         } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_PUBLISHED) {
           const canDownloadReceipt = hasDownloadableReceipt(enrollment);
-          item.status = canDownloadReceipt ? 'exam.status.verified' : 'exam.status.paymentCompleted';
+          item.status = canDownloadReceipt
+            ? 'exam.status.verified'
+            : 'exam.status.paymentCompleted';
           item.statusType = 'primary';
           const hasVoucher = !!(enrollment.VOUCHERS && enrollment.VOUCHERS.length > 0);
 
@@ -382,7 +406,7 @@ export const useExamStore = defineStore('exam', () => {
     }
 
     await createEnrollment(userId, round.id, passcode, physicalStatus);
-    await Promise.all([fetchHistory(true), loadRegisteredSessions()]);
+    await refreshUserEnrollmentViews();
   }
 
   async function confirmSpecialRegistration(
@@ -400,7 +424,7 @@ export const useExamStore = defineStore('exam', () => {
     try {
       setCancellationReason(enrollmentId, reason);
       await updateEnrollmentStatus(enrollmentId, ENROLLMENT_STATUS.CANCELLED);
-      await Promise.all([fetchHistory(true), loadRegisteredSessions()]);
+      await refreshUserEnrollmentViews();
     } catch (error: unknown) {
       console.error('Failed to cancel registration:', error);
       throw error;

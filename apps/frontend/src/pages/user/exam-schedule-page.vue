@@ -212,8 +212,11 @@ onMounted(async () => {
   await syncCalendarTime();
   await examStore.initSchedule();
   scheduleInterval = setInterval(() => {
+    if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
+      return;
+    }
     void examStore.initSchedule();
-  }, 5000);
+  }, 30000);
   calendarClockInterval = setInterval(updateCalendarNow, 1000);
   calendarClockResyncInterval = setInterval(() => {
     void syncCalendarTime();

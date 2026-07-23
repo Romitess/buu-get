@@ -1820,6 +1820,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         }
       }
 
+      isSaving.value = false;
       await router.push({ name: 'admin-exam-management' });
       return true;
     } catch (err) {
