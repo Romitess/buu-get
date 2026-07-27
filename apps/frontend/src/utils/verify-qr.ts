@@ -9,8 +9,12 @@ import {
 export async function generateQrDataUrl(url: string): Promise<string> {
   return QRCode.toDataURL(url, {
     errorCorrectionLevel: 'M',
-    margin: 1,
-    width: 180,
+    margin: 2,
+    width: 200,
+    color: {
+      dark: '#000000',
+      light: '#ffffff',
+    },
   });
 }
 

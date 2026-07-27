@@ -141,14 +141,14 @@ export function useExamCertificateDocument() {
         await waitForImages(cardElement);
 
         const canvas = await html2canvas(cardElement, {
-          scale: 2,
+          scale: 3,
           useCORS: true,
           allowTaint: true,
           backgroundColor: '#ffffff',
         });
 
         renderedCards.push({
-          imgData: canvas.toDataURL('image/jpeg', 0.92),
+          imgData: canvas.toDataURL('image/png'),
           imgHeight: (imgWidth * canvas.height) / canvas.width,
         });
       }
@@ -161,13 +161,11 @@ export function useExamCertificateDocument() {
       for (const card of renderedCards) {
         pdf.addImage(
           card.imgData,
-          'JPEG',
+          'PNG',
           horizontalMargin,
           offsetY,
           imgWidth,
           card.imgHeight,
-          undefined,
-          'FAST',
         );
         offsetY += card.imgHeight + cardGap;
       }

@@ -78,6 +78,26 @@ const routes: RouteRecordRaw[] = [
           ],
         },
       },
+      {
+        path: 'v/c/:code',
+        name: 'verify-certificate-short',
+        component: () => import('pages/verify/verify-certificate-page.vue'),
+        meta: {
+          requiresAuth: false,
+          hideHeader: true,
+          hideDrawer: true,
+        },
+      },
+      {
+        path: 'v/r/:code',
+        name: 'verify-receipt-short',
+        component: () => import('pages/verify/verify-receipt-page.vue'),
+        meta: {
+          requiresAuth: false,
+          hideHeader: true,
+          hideDrawer: true,
+        },
+      },
 
       // === Auth Routes ===
       {

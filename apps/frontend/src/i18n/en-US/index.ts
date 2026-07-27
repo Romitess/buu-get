@@ -1383,6 +1383,9 @@ export default {
     loading: 'Verifying...',
     notFoundTitle: 'Document not found',
     notFoundMessage: 'No document matches this code. Please check the code and try again.',
+    documentPreview: 'Document preview',
+    certificateFront: 'Front',
+    certificateBack: 'Back',
     status: {
       valid: 'Valid document',
       expired: 'Certificate expired',

@@ -1642,6 +1642,9 @@ export default {
     loading: 'กำลังตรวจสอบ...',
     notFoundTitle: 'ไม่พบเอกสาร',
     notFoundMessage: 'ไม่พบเอกสารที่ตรงกับรหัสนี้ กรุณาตรวจสอบรหัสอีกครั้ง',
+    documentPreview: 'ตัวอย่างเอกสาร',
+    certificateFront: 'ด้านหน้า',
+    certificateBack: 'ด้านหลัง',
     status: {
       valid: 'เอกสารถูกต้อง',
       expired: 'ใบรับรองหมดอายุ',

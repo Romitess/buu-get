@@ -16,11 +16,11 @@ export function getPublicAppUrl(): string {
 }
 
 export function buildCertificateVerifyUrl(baseUrl: string, code: string): string {
-  return `${baseUrl.replace(/\/$/, '')}/#/verify/certificate/${encodeURIComponent(code)}`;
+  return `${baseUrl.replace(/\/$/, '')}/#/v/c/${encodeURIComponent(code)}`;
 }
 
 export function buildReceiptVerifyUrl(baseUrl: string, code: string): string {
-  return `${baseUrl.replace(/\/$/, '')}/#/verify/receipt/${encodeURIComponent(code)}`;
+  return `${baseUrl.replace(/\/$/, '')}/#/v/r/${encodeURIComponent(code)}`;
 }
 
 export function buildVerifyLandingUrl(baseUrl: string): string {

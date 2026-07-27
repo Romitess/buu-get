@@ -42,6 +42,51 @@
           </div>
         </div>
 
+        <q-card flat bordered class="verify-document-card q-pa-md q-mb-md">
+          <div class="verify-document-header q-mb-md">
+            <div class="text-subtitle1 text-weight-bold">
+              {{ t('verify.documentPreview') }}
+            </div>
+            <div class="verify-side-toggle">
+              <button
+                type="button"
+                class="verify-side-toggle__btn"
+                :class="{ 'verify-side-toggle__btn--active': certificateSide === 'front' }"
+                @click="certificateSide = 'front'"
+              >
+                {{ t('verify.certificateFront') }}
+              </button>
+              <span class="verify-side-toggle__sep">|</span>
+              <button
+                type="button"
+                class="verify-side-toggle__btn"
+                :class="{ 'verify-side-toggle__btn--active': certificateSide === 'back' }"
+                @click="certificateSide = 'back'"
+              >
+                {{ t('verify.certificateBack') }}
+              </button>
+            </div>
+          </div>
+
+          <CertificateCard
+            :side="certificateSide"
+            :fullname="certificateData.holder.fullName"
+            :test-taker-id="certificateData.holder.testTakerId"
+            :national-id="certificateData.holder.nationalIdMasked || '-'"
+            :test-session="certificateData.exam.round || '-'"
+            :test-date="formatEnglishDate(certificateData.exam.date)"
+            :vocab-score="`${certificateData.scores.vocabGrammar}/50`"
+            :reading-score="`${certificateData.scores.reading}/50`"
+            :total-score="`${certificateData.scores.total}/100`"
+            :band-level="String(certificateData.scores.bandLevel)"
+            :issue-date="formatEnglishDate(certificateData.issuedAt)"
+            :valid-until="formatEnglishDate(certificateData.expiresAt)"
+            :certificate-code="certificateData.verificationCode"
+            :qr-data-url="certificateQrDataUrl"
+            :band-rules="bandRules"
+          />
+        </q-card>
+
         <q-card flat bordered class="verify-detail-card q-pa-lg">
           <div class="verify-code-row q-mb-md">
             <span class="field-label">{{ t('verify.verificationCode') }}</span>
@@ -118,6 +163,15 @@
           </div>
         </div>
 
+        <q-card v-if="receiptCardData" flat bordered class="verify-document-card q-pa-md q-mb-md">
+          <div class="text-subtitle1 text-weight-bold q-mb-md">
+            {{ t('verify.documentPreview') }}
+          </div>
+          <div class="verify-receipt-preview">
+            <ReceiptCard :receipt="receiptCardData" />
+          </div>
+        </q-card>
+
         <q-card flat bordered class="verify-detail-card q-pa-lg">
           <div class="verify-code-row q-mb-md">
             <span class="field-label">{{ t('verify.verificationCode') }}</span>
@@ -189,7 +243,12 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { AxiosError } from 'axios';
+import CertificateCard from 'src/components/exam/certificate-card.vue';
+import ReceiptCard from 'src/components/receipt-card.vue';
+import { getBandRules } from 'src/services/score-criteria.service';
 import { verifyCertificate, verifyReceipt } from 'src/services/verify.service';
+import type { CertificateBandRule } from 'src/types/certificate';
+import type { ReceiptData } from 'src/types/receipt';
 import type {
   CertificateVerifyStatus,
   ReceiptVerifyStatus,
@@ -197,6 +256,10 @@ import type {
   VerifyDocumentType,
   VerifyReceiptResponse,
 } from 'src/types/verify';
+import {
+  generateCertificateQrDataUrl,
+  generateReceiptQrDataUrl,
+} from 'src/utils/verify-qr';
 
 const props = defineProps<{
   documentType: VerifyDocumentType;
@@ -209,8 +272,41 @@ const isLoading = ref(true);
 const isNotFound = ref(false);
 const certificateData = ref<VerifyCertificateResponse | null>(null);
 const receiptData = ref<VerifyReceiptResponse | null>(null);
+const bandRules = ref<CertificateBandRule[]>([]);
+const certificateQrDataUrl = ref<string | null>(null);
+const receiptQrDataUrl = ref<string | null>(null);
+const certificateSide = ref<'front' | 'back'>('front');
 
 const code = computed(() => String(route.params.code ?? '').trim());
+
+const receiptCardData = computed<ReceiptData | null>(() => {
+  if (!receiptData.value) return null;
+
+  const data = receiptData.value;
+  const card: ReceiptData = {
+    receiptNo: data.receiptNo,
+    transactionDate: data.issuedOrPaidAt ?? '',
+    fullName: data.payee.name ?? '-',
+    nationalId: data.payee.taxIdMasked ?? '-',
+    examName: data.payment.description,
+    examDate: data.payment.examDate ?? '',
+    location: data.payment.examRound ?? '-',
+    amount: data.payment.amount ?? 0,
+    paymentMethod: data.payment.paymentMethod ?? '-',
+    status: data.status === 'voided' ? 'FAILED' : 'SUCCESS',
+    verifyCode: data.verificationCode,
+  };
+
+  if (data.payee.address) {
+    card.address = data.payee.address;
+  }
+
+  if (receiptQrDataUrl.value) {
+    card.qrDataUrl = receiptQrDataUrl.value;
+  }
+
+  return card;
+});
 
 const loadDocument = async (): Promise<void> => {
   if (!code.value) {
@@ -223,12 +319,28 @@ const loadDocument = async (): Promise<void> => {
   isNotFound.value = false;
   certificateData.value = null;
   receiptData.value = null;
+  bandRules.value = [];
+  certificateQrDataUrl.value = null;
+  receiptQrDataUrl.value = null;
+  certificateSide.value = 'front';
 
   try {
     if (props.documentType === 'certificate') {
-      certificateData.value = await verifyCertificate(code.value);
+      const [result, bandRulesResponse, qrDataUrl] = await Promise.all([
+        verifyCertificate(code.value),
+        getBandRules(),
+        generateCertificateQrDataUrl(code.value),
+      ]);
+      certificateData.value = result;
+      bandRules.value = bandRulesResponse.bandRules;
+      certificateQrDataUrl.value = qrDataUrl;
     } else {
-      receiptData.value = await verifyReceipt(code.value);
+      const [result, qrDataUrl] = await Promise.all([
+        verifyReceipt(code.value),
+        generateReceiptQrDataUrl(code.value),
+      ]);
+      receiptData.value = result;
+      receiptQrDataUrl.value = qrDataUrl;
     }
   } catch (error) {
     if (error instanceof AxiosError && error.response?.status === 404) {
@@ -278,6 +390,27 @@ const formatExamDate = (value: string | null): string => {
     month: 'long',
     day: 'numeric',
   });
+};
+
+const formatEnglishDate = (value: string | null): string => {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+  return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
 };
 
 const formatCurrency = (amount: number | null): string => {
@@ -358,10 +491,59 @@ watch(code, () => {
 }
 
 .verify-state-card,
-.verify-detail-card {
+.verify-detail-card,
+.verify-document-card {
   max-width: 760px;
   margin: 0 auto;
   border-radius: 12px;
+}
+
+.verify-document-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.verify-side-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.verify-side-toggle__btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: #64748b;
+  cursor: pointer;
+  font: inherit;
+
+  &--active {
+    color: #104a8e;
+    font-weight: 700;
+    text-decoration: underline;
+  }
+}
+
+.verify-side-toggle__sep {
+  color: #cbd5e1;
+}
+
+.verify-receipt-preview {
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+
+  :deep(.receipt-container) {
+    width: min(210mm, 100%);
+    min-height: auto;
+    margin: 0;
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
 }
 
 .verify-state-card {

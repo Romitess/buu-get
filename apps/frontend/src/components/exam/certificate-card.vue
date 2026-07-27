@@ -180,7 +180,7 @@ withDefaults(defineProps<Props>(), {
 <style scoped lang="scss">
 .certificate-card-preview {
   width: 100%;
-  height: 375px;
+  height: 385px;
   border: 1.5px solid #cbd5e1;
   border-radius: 12px;
   background-color: #f8f9fa;
@@ -342,8 +342,8 @@ withDefaults(defineProps<Props>(), {
 }
 
 .cert-footer {
-  height: 64px;
-  padding: 12px 20px;
+  min-height: 76px;
+  padding: 10px 20px;
   background-color: #f8f9fa;
   border-top: 1.5px solid #cbd5e1;
   box-sizing: border-box;
@@ -380,9 +380,13 @@ withDefaults(defineProps<Props>(), {
 }
 
 .qr-code-image {
-  width: 40px;
-  height: 40px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
+  background: #fff;
+  padding: 2px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
 }
 
 .verify-code-text {

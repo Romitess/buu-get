@@ -470,9 +470,13 @@ const formatCurrency = (amount: number) => {
 }
 
 .receipt-qr {
-  width: 90px;
-  height: 90px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
+  background: #fff;
+  padding: 3px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
 }
 
 .verify-code-text {

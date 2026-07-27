@@ -14,7 +14,7 @@ export interface CreateExamCertificatePayload {
   USER_ID: number;
   CERT_ISSUED_AT?: string;
   CERT_EXPIRES_AT?: string;
-  CERT_CODE: string;
+  CERT_CODE?: string;
 }
 
 const CERTIFICATE_ENDPOINT = '/api/exam-certificates';

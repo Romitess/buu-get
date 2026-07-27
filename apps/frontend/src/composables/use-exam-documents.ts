@@ -366,13 +366,13 @@ export function useExamDocuments() {
 
         if (receiptElement) {
           const canvas = await html2canvas(receiptElement, {
-            scale: 2,
+            scale: 3,
             useCORS: true,
             allowTaint: true,
             backgroundColor: '#ffffff',
           });
 
-          const imgData = canvas.toDataURL('image/jpeg', 0.8);
+          const imgData = canvas.toDataURL('image/png');
 
           // Standard A4 dimensions in PDF: 210mm x 297mm
           const pdf = new jsPDF({
@@ -382,7 +382,7 @@ export function useExamDocuments() {
           });
 
           // Fill the entire PDF page with the image with no margins
-          pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+          pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
           pdf.save(`BUU-GET_Receipt_${enrollment.ERM_ID}.pdf`);
 
           $q.notify({
