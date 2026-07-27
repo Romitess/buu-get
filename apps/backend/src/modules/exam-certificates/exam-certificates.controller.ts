@@ -9,9 +9,15 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ExamCertificatesService } from './exam-certificates.service';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { EXAM_ADMIN_ROLES } from 'src/common/constants/role-groups';
+import {
+  ExamCertificatesService,
+  BulkIssueCertificatesResult,
+} from './exam-certificates.service';
 import { CreateExamCertificateDto } from './dto/create-exam-certificate.dto';
 import { UpdateExamCertificateDto } from './dto/update-exam-certificate.dto';
+import { BulkIssueCertificatesDto } from './dto/bulk-issue-certificates.dto';
 import { ExamCertificate } from './entities/exam-certificate.entity';
 
 @ApiTags('exam-certificates')
@@ -32,6 +38,23 @@ export class ExamCertificatesController {
     @Body() createExamCertificateDto: CreateExamCertificateDto,
   ): Promise<ExamCertificate> {
     return this.examCertificatesService.create(createExamCertificateDto);
+  }
+
+  @Post('bulk-issue')
+  @Roles(...EXAM_ADMIN_ROLES)
+  @ApiOperation({
+    summary: 'ออกใบรับรองแบบ Batch และส่งอีเมลแจ้งผู้เข้าสอบ',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'ดำเนินการแบบ Batch สำเร็จ',
+  })
+  bulkIssue(
+    @Body() bulkIssueCertificatesDto: BulkIssueCertificatesDto,
+  ): Promise<BulkIssueCertificatesResult> {
+    return this.examCertificatesService.bulkIssueCertificates(
+      bulkIssueCertificatesDto,
+    );
   }
 
   @Get()

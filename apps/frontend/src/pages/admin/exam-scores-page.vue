@@ -207,6 +207,7 @@
     <DialogIssueCertificate
       v-model="showIssueCertificateDialog"
       :exam-date="exam?.EXAM_DATE"
+      :exam-name="examDisplayName"
       :session-id="selectedSessionId"
       :session-name="selectedSessionName"
       :candidates="candidatesWithScores"
@@ -507,6 +508,15 @@ const candidatesWithScores = computed(() => {
       };
     })
     .filter((c) => c.SCORES_ID > 0);
+});
+
+const examDisplayName = computed(() => {
+  if (!exam.value) {
+    return 'BUU-GET Exam';
+  }
+  return exam.value.EXAM_ROUND
+    ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
+    : exam.value.EXAM_NAME;
 });
 
 const issueCertificates = (): void => {

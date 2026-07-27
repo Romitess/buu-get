@@ -278,15 +278,17 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import AppButton from 'src/components/base/app-button.vue';
-import { createExamCertificate } from 'src/services/exam-certificate.service';
+import { bulkIssueCertificates } from 'src/services/exam-certificate.service';
 import { getImageUrl } from 'src/services/image.service';
 import { getBandRules, type BandRuleData } from 'src/services/score-criteria.service';
 
 interface Props {
   modelValue: boolean;
   examDate: string | Date | null | undefined;
+  examName?: string | null | undefined;
   sessionId: number | null | undefined;
   sessionName: string | null | undefined;
   candidates: Array<{ SCORES_ID: number; USER_ID: number }>;
@@ -312,6 +314,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   viewMode: false,
   candidateInfo: null,
+  examName: null,
 });
 
 const emit = defineEmits<{
@@ -320,6 +323,7 @@ const emit = defineEmits<{
 }>();
 
 const $q = useQuasar();
+const router = useRouter();
 const currentSide = ref<'front' | 'back'>('front');
 const validFromDate = ref('');
 const validUntilDate = ref('');
@@ -610,20 +614,29 @@ const onConfirm = async (): Promise<void> => {
 
   try {
     isSubmitting.value = true;
-    const promises = props.candidates.map(async (candidate) => {
-      return createExamCertificate({
-        SCORES_ID: candidate.SCORES_ID,
-        USER_ID: candidate.USER_ID,
-        CERT_ISSUED_AT: new Date(validFromDate.value).toISOString(),
-        CERT_EXPIRES_AT: new Date(validUntilDate.value).toISOString(),
-      });
+
+    const resolvedRoute = router.resolve({ name: 'exam-history' });
+    const historyUrl = new URL(
+      resolvedRoute.href,
+      import.meta.env.VITE_APP_URL || window.location.origin,
+    ).href;
+
+    const result = await bulkIssueCertificates({
+      candidates: props.candidates,
+      certIssuedAt: new Date(validFromDate.value).toISOString(),
+      certExpiresAt: new Date(validUntilDate.value).toISOString(),
+      examName: props.examName?.trim() || 'BUU-GET Exam',
+      historyUrl,
     });
 
-    await Promise.all(promises);
+    let message = `ออกใบ Certificate และส่งอีเมลสำเร็จ ${result.createdCount} รายการ`;
+    if (result.skippedCount > 0) {
+      message += ` (ข้าม ${result.skippedCount} รายการที่ออกไปแล้ว)`;
+    }
 
     $q.notify({
       type: 'positive',
-      message: `ออกใบ Certificate ทั้งหมด ${props.candidates.length} รายการสำเร็จ`,
+      message,
     });
     emit('issued');
     emit('update:modelValue', false);

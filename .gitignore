@@ -7,6 +7,7 @@ node_modules
 /dist
 apps/frontend/dist
 apps/backend/dist
+apps/backend/tsconfig.build.tsbuildinfo
 /quasar.config.*.temporary.compiled*
 
 # Cordova related directories and files
