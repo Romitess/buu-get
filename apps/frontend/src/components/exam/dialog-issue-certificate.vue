@@ -219,7 +219,11 @@
               <template v-slot:append v-if="!viewMode">
                 <q-icon name="event" class="cursor-pointer">
                   <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                    <q-date v-model="validFromDate" mask="YYYY-MM-DD">
+                    <q-date
+                      v-model="validFromDate"
+                      mask="YYYY-MM-DD"
+                      :options="issueDateOptions"
+                    >
                       <div class="row items-center justify-end">
                         <AppButton v-close-popup label="ปิด" color="primary" flat />
                       </div>
@@ -390,6 +394,21 @@ onMounted(() => {
   void loadBandRules();
 });
 
+const getLocalDateYmd = (date: Date = new Date()): string => {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const isFutureLocalDate = (dateYmd: string): boolean => dateYmd > getLocalDateYmd();
+
+/** Quasar q-date options: disable future calendar days for Report Issue Date. */
+const issueDateOptions = (date: string): boolean => {
+  const normalized = date.replace(/\//g, '-');
+  return normalized <= getLocalDateYmd();
+};
+
 const formatEnglishDate = (dateStr: string | Date | undefined | null): string => {
   if (!dateStr) return '-';
   const d = new Date(dateStr);
@@ -527,11 +546,11 @@ watch(
           : '';
       } else {
         const today = new Date();
-        validFromDate.value = today.toISOString().split('T')[0] || '';
+        validFromDate.value = getLocalDateYmd(today);
 
-        const expiry = new Date();
+        const expiry = new Date(today);
         expiry.setFullYear(today.getFullYear() + 2);
-        validUntilDate.value = expiry.toISOString().split('T')[0] || '';
+        validUntilDate.value = getLocalDateYmd(expiry);
       }
     } else {
       validFromDate.value = '';
@@ -569,6 +588,14 @@ const onConfirm = async (): Promise<void> => {
     $q.notify({
       type: 'warning',
       message: 'กรุณาเลือกวันที่ออกใบรับรอง',
+    });
+    return;
+  }
+
+  if (isFutureLocalDate(validFromDate.value)) {
+    $q.notify({
+      type: 'warning',
+      message: 'Report Issue Date ต้องไม่เป็นวันในอนาคต',
     });
     return;
   }

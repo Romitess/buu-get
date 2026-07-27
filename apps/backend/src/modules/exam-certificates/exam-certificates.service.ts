@@ -1,6 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { isFutureBangkokDate } from 'src/common/utils/calendar-date.util';
 import { generateCertificateCode } from 'src/common/utils/verification-code.util';
 import { ExamCertificate } from './entities/exam-certificate.entity';
 import { CreateExamCertificateDto } from './dto/create-exam-certificate.dto';
@@ -22,9 +27,23 @@ export class ExamCertificatesService {
     private readonly examSessionRepository: Repository<ExamSession>,
   ) {}
 
+  private assertCertificateIssueDateNotFuture(
+    certIssuedAt?: string,
+  ): void {
+    if (certIssuedAt && isFutureBangkokDate(certIssuedAt)) {
+      throw new BadRequestException(
+        'วันที่ออกใบรับรอง (Report Issue Date) ต้องไม่เป็นวันในอนาคต',
+      );
+    }
+  }
+
   async create(
     createExamCertificateDto: CreateExamCertificateDto,
   ): Promise<ExamCertificate> {
+    this.assertCertificateIssueDateNotFuture(
+      createExamCertificateDto.CERT_ISSUED_AT,
+    );
+
     const payload = {
       ...createExamCertificateDto,
       CERT_CODE:
@@ -69,6 +88,10 @@ export class ExamCertificatesService {
     id: number,
     updateExamCertificateDto: UpdateExamCertificateDto,
   ): Promise<ExamCertificate> {
+    this.assertCertificateIssueDateNotFuture(
+      updateExamCertificateDto.CERT_ISSUED_AT,
+    );
+
     const certificate = await this.findOne(id);
     Object.assign(certificate, updateExamCertificateDto);
     return await this.examCertificateRepository.save(certificate);
