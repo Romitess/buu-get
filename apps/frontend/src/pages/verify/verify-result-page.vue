@@ -42,52 +42,53 @@
           </div>
         </div>
 
-        <q-card flat bordered class="verify-document-card q-pa-md q-mb-md">
-          <div class="verify-document-header q-mb-md">
-            <div class="text-subtitle1 text-weight-bold">
-              {{ t('verify.documentPreview') }}
+        <div class="verify-content-layout">
+          <q-card flat bordered class="verify-document-card q-pa-md verify-content-layout__document">
+            <div class="verify-document-header q-mb-md">
+              <div class="text-subtitle1 text-weight-bold">
+                {{ t('verify.documentPreview') }}
+              </div>
+              <div class="verify-side-toggle">
+                <button
+                  type="button"
+                  class="verify-side-toggle__btn"
+                  :class="{ 'verify-side-toggle__btn--active': certificateSide === 'front' }"
+                  @click="certificateSide = 'front'"
+                >
+                  {{ t('verify.certificateFront') }}
+                </button>
+                <span class="verify-side-toggle__sep">|</span>
+                <button
+                  type="button"
+                  class="verify-side-toggle__btn"
+                  :class="{ 'verify-side-toggle__btn--active': certificateSide === 'back' }"
+                  @click="certificateSide = 'back'"
+                >
+                  {{ t('verify.certificateBack') }}
+                </button>
+              </div>
             </div>
-            <div class="verify-side-toggle">
-              <button
-                type="button"
-                class="verify-side-toggle__btn"
-                :class="{ 'verify-side-toggle__btn--active': certificateSide === 'front' }"
-                @click="certificateSide = 'front'"
-              >
-                {{ t('verify.certificateFront') }}
-              </button>
-              <span class="verify-side-toggle__sep">|</span>
-              <button
-                type="button"
-                class="verify-side-toggle__btn"
-                :class="{ 'verify-side-toggle__btn--active': certificateSide === 'back' }"
-                @click="certificateSide = 'back'"
-              >
-                {{ t('verify.certificateBack') }}
-              </button>
-            </div>
-          </div>
 
-          <CertificateCard
-            :side="certificateSide"
-            :fullname="certificateData.holder.fullName"
-            :test-taker-id="certificateData.holder.testTakerId"
-            :national-id="certificateData.holder.nationalIdMasked || '-'"
-            :test-session="certificateData.exam.round || '-'"
-            :test-date="formatEnglishDate(certificateData.exam.date)"
-            :vocab-score="`${certificateData.scores.vocabGrammar}/50`"
-            :reading-score="`${certificateData.scores.reading}/50`"
-            :total-score="`${certificateData.scores.total}/100`"
-            :band-level="String(certificateData.scores.bandLevel)"
-            :issue-date="formatEnglishDate(certificateData.issuedAt)"
-            :valid-until="formatEnglishDate(certificateData.expiresAt)"
-            :certificate-code="certificateData.verificationCode"
-            :qr-data-url="certificateQrDataUrl"
-            :band-rules="bandRules"
-          />
-        </q-card>
+            <CertificateCard
+              :side="certificateSide"
+              :fullname="certificateData.holder.fullName"
+              :test-taker-id="certificateData.holder.testTakerId"
+              :national-id="certificateData.holder.nationalIdMasked || '-'"
+              :test-session="certificateData.exam.round || '-'"
+              :test-date="formatEnglishDate(certificateData.exam.date)"
+              :vocab-score="`${certificateData.scores.vocabGrammar}/50`"
+              :reading-score="`${certificateData.scores.reading}/50`"
+              :total-score="`${certificateData.scores.total}/100`"
+              :band-level="String(certificateData.scores.bandLevel)"
+              :issue-date="formatEnglishDate(certificateData.issuedAt)"
+              :valid-until="formatEnglishDate(certificateData.expiresAt)"
+              :certificate-code="certificateData.verificationCode"
+              :qr-data-url="certificateQrDataUrl"
+              :band-rules="bandRules"
+            />
+          </q-card>
 
-        <q-card flat bordered class="verify-detail-card q-pa-lg">
+          <q-card flat bordered class="verify-detail-card q-pa-lg verify-content-layout__details">
           <div class="verify-code-row q-mb-md">
             <span class="field-label">{{ t('verify.verificationCode') }}</span>
             <span class="field-value mono">{{ certificateData.verificationCode }}</span>
@@ -150,6 +151,7 @@
             </div>
           </div>
         </q-card>
+        </div>
       </template>
 
       <template v-else-if="receiptData">
@@ -163,16 +165,22 @@
           </div>
         </div>
 
-        <q-card v-if="receiptCardData" flat bordered class="verify-document-card q-pa-md q-mb-md">
-          <div class="text-subtitle1 text-weight-bold q-mb-md">
-            {{ t('verify.documentPreview') }}
-          </div>
-          <div class="verify-receipt-preview">
-            <ReceiptCard :receipt="receiptCardData" />
-          </div>
-        </q-card>
+        <div class="verify-content-layout">
+          <q-card
+            v-if="receiptCardData"
+            flat
+            bordered
+            class="verify-document-card q-pa-md verify-content-layout__document"
+          >
+            <div class="text-subtitle1 text-weight-bold q-mb-md">
+              {{ t('verify.documentPreview') }}
+            </div>
+            <div class="verify-receipt-preview">
+              <ReceiptCard :receipt="receiptCardData" />
+            </div>
+          </q-card>
 
-        <q-card flat bordered class="verify-detail-card q-pa-lg">
+          <q-card flat bordered class="verify-detail-card q-pa-lg verify-content-layout__details">
           <div class="verify-code-row q-mb-md">
             <span class="field-label">{{ t('verify.verificationCode') }}</span>
             <span class="field-value mono">{{ receiptData.verificationCode }}</span>
@@ -233,6 +241,7 @@
             </span>
           </div>
         </q-card>
+        </div>
       </template>
     </div>
   </q-page>
@@ -490,12 +499,55 @@ watch(code, () => {
   }
 }
 
-.verify-state-card,
+.verify-state-card {
+  max-width: 760px;
+  margin: 0 auto;
+  border-radius: 12px;
+}
+
+.verify-content-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1140px;
+  margin: 0 auto;
+
+  @media (min-width: 1024px) {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  &__document,
+  &__details {
+    width: 100%;
+    min-width: 0;
+    border-radius: 12px;
+  }
+
+  @media (min-width: 1024px) {
+    &__document {
+      flex: 0 0 46%;
+      position: sticky;
+      top: 88px;
+    }
+
+    &__details {
+      flex: 1 1 54%;
+    }
+  }
+}
+
 .verify-detail-card,
 .verify-document-card {
   max-width: 760px;
   margin: 0 auto;
   border-radius: 12px;
+
+  .verify-content-layout & {
+    max-width: none;
+    margin: 0;
+  }
 }
 
 .verify-document-header {
@@ -543,6 +595,18 @@ watch(code, () => {
     margin: 0;
     box-shadow: none;
     border: 1px solid #e2e8f0;
+  }
+
+  @media (min-width: 1024px) {
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+    justify-content: flex-start;
+
+    :deep(.receipt-container) {
+      width: 100%;
+      padding: 10mm;
+      font-size: 10px;
+    }
   }
 }
 
