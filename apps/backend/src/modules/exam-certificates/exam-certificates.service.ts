@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { generateCertificateCode } from 'src/common/utils/verification-code.util';
 import { ExamCertificate } from './entities/exam-certificate.entity';
 import { CreateExamCertificateDto } from './dto/create-exam-certificate.dto';
 import { UpdateExamCertificateDto } from './dto/update-exam-certificate.dto';
@@ -24,9 +25,12 @@ export class ExamCertificatesService {
   async create(
     createExamCertificateDto: CreateExamCertificateDto,
   ): Promise<ExamCertificate> {
-    const newCertificate = this.examCertificateRepository.create(
-      createExamCertificateDto,
-    );
+    const payload = {
+      ...createExamCertificateDto,
+      CERT_CODE:
+        createExamCertificateDto.CERT_CODE?.trim() || generateCertificateCode(),
+    };
+    const newCertificate = this.examCertificateRepository.create(payload);
     const saved = await this.examCertificateRepository.save(newCertificate);
 
     // Find the exam score to get the session ID

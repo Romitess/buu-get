@@ -42,6 +42,42 @@ const routes: RouteRecordRaw[] = [
           ],
         },
       },
+      {
+        path: 'verify',
+        name: 'verify',
+        component: () => import('pages/verify/verify-page.vue'),
+        meta: {
+          requiresAuth: false,
+          breadcrumb: [
+            { label: 'navigation.home', icon: 'home', to: '/' },
+            { label: 'verify.title', icon: 'verified' },
+          ],
+        },
+      },
+      {
+        path: 'verify/certificate/:code',
+        name: 'verify-certificate',
+        component: () => import('pages/verify/verify-certificate-page.vue'),
+        meta: {
+          requiresAuth: false,
+          breadcrumb: [
+            { label: 'navigation.home', icon: 'home', to: '/' },
+            { label: 'verify.certificate.title', icon: 'verified' },
+          ],
+        },
+      },
+      {
+        path: 'verify/receipt/:code',
+        name: 'verify-receipt',
+        component: () => import('pages/verify/verify-receipt-page.vue'),
+        meta: {
+          requiresAuth: false,
+          breadcrumb: [
+            { label: 'navigation.home', icon: 'home', to: '/' },
+            { label: 'verify.receipt.title', icon: 'receipt_long' },
+          ],
+        },
+      },
 
       // === Auth Routes ===
       {

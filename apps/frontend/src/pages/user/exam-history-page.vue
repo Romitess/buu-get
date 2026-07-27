@@ -255,6 +255,8 @@
         :band-level="selectedCertificateData.bandLevel"
         :issue-date="selectedCertificateData.reportIssueDate"
         :valid-until="selectedCertificateData.scoreValidUntil"
+        :certificate-code="selectedCertificateData.certificateCode"
+        :qr-data-url="selectedCertificateData.qrDataUrl ?? null"
         :band-rules="selectedCertificateData.bandRules"
         :photo-url="selectedCertificateData.profileImage"
       />

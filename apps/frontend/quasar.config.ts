@@ -11,9 +11,7 @@ loadMonorepoEnv();
 export default defineConfig((ctx) => {
   const apiBaseUrl = resolveApiBaseUrl({
     dev: ctx.dev,
-    ...(process.env.API_BASE_URL
-      ? { fromEnv: process.env.API_BASE_URL }
-      : {}),
+    ...(process.env.API_BASE_URL ? { fromEnv: process.env.API_BASE_URL } : {}),
   });
 
   return {

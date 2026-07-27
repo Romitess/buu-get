@@ -39,6 +39,7 @@ export interface CertificateCardData {
   certificateCode: string;
   bandRules: CertificateBandRule[];
   profileImage: string | null;
+  qrDataUrl?: string;
 }
 
 export interface CertificateScoreReportData {

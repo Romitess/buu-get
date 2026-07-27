@@ -14,6 +14,7 @@ import {
   PAGINATION_DEFAULT_PAGE,
   PaginationQueryDto,
 } from 'src/common/dto/pagination-query.dto';
+import { generateReceiptVerifyCode } from 'src/common/utils/verification-code.util';
 import { Receipt, ReceiptStatus } from './entities/receipt.entity';
 import { CreateReceiptDto, UpdateReceiptDto } from './dto/receipt.dto';
 
@@ -25,7 +26,10 @@ export class ReceiptsService {
   ) {}
 
   async create(createReceiptDto: CreateReceiptDto): Promise<Receipt> {
-    const receipt = this.receiptsRepository.create(createReceiptDto);
+    const receipt = this.receiptsRepository.create({
+      ...createReceiptDto,
+      RC_VERIFY_CODE: generateReceiptVerifyCode(),
+    });
     return this.receiptsRepository.save(receipt);
   }
 

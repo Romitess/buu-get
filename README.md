@@ -30,8 +30,12 @@ cp .env.example .env.local
 Edit `.env.local` when the API is not on the default URL:
 
 ```bash
-API_BASE_URL=http://localhost:3000
+API_BASE_URL=http://localhost:3000/api
+VITE_API_URL=http://localhost:9000
 ```
+
+- `API_BASE_URL` — backend REST prefix used by Axios
+- `VITE_API_URL` — public frontend URL embedded in certificate/receipt QR codes
 
 The Axios instance in `src/boot/axios.ts` should use this value (or the equivalent exposed by Quasar’s `env` configuration).
 

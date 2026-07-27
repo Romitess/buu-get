@@ -128,7 +128,13 @@
           ( {{ receipt.fullName }} )<br />
           {{ t('exam.card.collector') }}
         </div>
-        <img v-if="showQr" src="/receipt-qr.png" class="receipt-qr" alt="Receipt QR" />
+        <img
+          v-if="showQr && receipt.qrDataUrl"
+          :src="receipt.qrDataUrl"
+          class="receipt-qr"
+          alt="Receipt QR"
+        />
+        <div v-if="receipt.verifyCode" class="verify-code-text">{{ receipt.verifyCode }}</div>
       </div>
     </div>
   </div>
@@ -467,6 +473,17 @@ const formatCurrency = (amount: number) => {
   width: 90px;
   height: 90px;
   object-fit: contain;
+}
+
+.verify-code-text {
+  margin-top: 4px;
+  font-size: 8px;
+  line-height: 1.2;
+  max-width: 150px;
+  word-break: break-all;
+  text-align: center;
+  color: #334155;
+  font-weight: 600;
 }
 
 /* ──────────────────────────────────────────────────

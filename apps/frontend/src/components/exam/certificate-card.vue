@@ -88,8 +88,21 @@
             <div class="metadata-value">{{ validUntil }}</div>
           </div>
         </div>
-        <div class="col-auto text-right">
-          <q-icon name="qr_code_2" size="40px" color="dark" class="qr-code-icon" />
+        <div class="col-auto text-right verify-block">
+          <img
+            v-if="qrDataUrl"
+            :src="qrDataUrl"
+            class="qr-code-image"
+            alt="Verification QR"
+          />
+          <q-icon
+            v-else
+            name="qr_code_2"
+            size="40px"
+            color="dark"
+            class="qr-code-icon"
+          />
+          <div v-if="certificateCode" class="verify-code-text">{{ certificateCode }}</div>
         </div>
       </div>
     </template>
@@ -153,10 +166,14 @@ interface Props {
   validUntil: string;
   bandRules: CertificateBandRule[];
   photoUrl?: string | null;
+  certificateCode?: string;
+  qrDataUrl?: string | null;
 }
 
 withDefaults(defineProps<Props>(), {
   photoUrl: null,
+  certificateCode: '',
+  qrDataUrl: null,
 });
 </script>
 
@@ -353,6 +370,29 @@ withDefaults(defineProps<Props>(), {
 
 .qr-code-icon {
   display: block;
+}
+
+.verify-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.qr-code-image {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.verify-code-text {
+  font-size: 7px;
+  line-height: 1.1;
+  max-width: 120px;
+  word-break: break-all;
+  text-align: right;
+  color: #334155;
+  font-weight: 600;
 }
 
 .cert-back-container {

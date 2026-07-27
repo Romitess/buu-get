@@ -584,13 +584,11 @@ const onConfirm = async (): Promise<void> => {
   try {
     isSubmitting.value = true;
     const promises = props.candidates.map(async (candidate) => {
-      const certCode = 'CERT-' + crypto.randomUUID().toUpperCase();
       return createExamCertificate({
         SCORES_ID: candidate.SCORES_ID,
         USER_ID: candidate.USER_ID,
         CERT_ISSUED_AT: new Date(validFromDate.value).toISOString(),
         CERT_EXPIRES_AT: new Date(validUntilDate.value).toISOString(),
-        CERT_CODE: certCode,
       });
     });
 

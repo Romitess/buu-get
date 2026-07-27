@@ -11,6 +11,7 @@ import { getRegulations } from 'src/services/exam-rule-voucher.service';
 import type { ExamHistoryItem } from 'src/types/exam';
 import type { VoucherData } from 'src/types/voucher';
 import type { ReceiptData } from 'src/types/receipt';
+import { generateReceiptQrDataUrl } from 'src/utils/verify-qr';
 
 export function useExamDocuments() {
   const $q = useQuasar();
@@ -251,7 +252,11 @@ export function useExamDocuments() {
     let enrollment = exam.rawEnrollment;
     const user = userStore.currentUser;
 
-    if (enrollment?.ERM_ID && !enrollment.TRANSACTION?.RECEIPTS?.length) {
+    if (
+      enrollment?.ERM_ID &&
+      (!enrollment.TRANSACTION?.RECEIPTS?.length ||
+        !enrollment.TRANSACTION.RECEIPTS[0]?.RC_VERIFY_CODE)
+    ) {
       try {
         enrollment = await fetchEnrollmentById(enrollment.ERM_ID);
       } catch (error) {
@@ -298,6 +303,18 @@ export function useExamDocuments() {
           ? new Date(examObj.EXAM_DATE).getFullYear()
           : new Date().getFullYear();
 
+      const verifyCode = receipt?.RC_VERIFY_CODE;
+      if (!verifyCode) {
+        $q.notify({
+          type: 'warning',
+          message: t('exam.receipt.missingVerifyCode'),
+          position: 'top',
+        });
+        return;
+      }
+
+      const qrDataUrl = await generateReceiptQrDataUrl(verifyCode);
+
       selectedReceiptData.value = {
         receiptNo:
           (receipt?.RC_ID ? `RC${receiptYear}-${String(receipt.RC_ID).padStart(5, '0')}` : '') ||
@@ -332,6 +349,8 @@ export function useExamDocuments() {
         amount: Number(transaction?.TRANX_AMOUNT ?? examObj?.EXAM_FEE ?? 0),
         paymentMethod: transaction?.TRANX_CHANNEL === 3 ? 'QR' : 'Mobile Banking',
         status: 'SUCCESS',
+        verifyCode,
+        qrDataUrl,
       };
 
       isDownloadingReceipt.value = true;

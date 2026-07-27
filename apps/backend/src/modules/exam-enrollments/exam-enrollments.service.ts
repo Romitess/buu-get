@@ -979,6 +979,11 @@ export class ExamEnrollmentsService {
           RECEIPTS: {
             RC_ID: true,
             RC_STATUS: true,
+            RC_VERIFY_CODE: true,
+            RC_NAME: true,
+            RC_TAX_ID: true,
+            RC_ADDRESS: true,
+            RC_PHONE: true,
           },
         },
         VOUCHERS: {

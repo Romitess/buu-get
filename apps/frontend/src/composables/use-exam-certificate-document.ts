@@ -7,6 +7,7 @@ import { getImageUrl } from 'src/services/image.service';
 import { getBandRules } from 'src/services/score-criteria.service';
 import type { ExamHistoryItem } from 'src/types/exam';
 import type { CertificateCardData } from 'src/types/certificate';
+import { generateCertificateQrDataUrl } from 'src/utils/verify-qr';
 
 export function useExamCertificateDocument() {
   const $q = useQuasar();
@@ -86,6 +87,7 @@ export function useExamCertificateDocument() {
 
     try {
       const bandRulesResponse = await getBandRules();
+      const qrDataUrl = await generateCertificateQrDataUrl(certificate.CERT_CODE);
 
       selectedCertificateData.value = {
         fullName: `${title} ${fullName}`.trim(),
@@ -107,6 +109,7 @@ export function useExamCertificateDocument() {
         certificateCode: certificate.CERT_CODE,
         bandRules: bandRulesResponse.bandRules,
         profileImage: profileImagePath ? getImageUrl(profileImagePath) : null,
+        qrDataUrl,
       };
 
       await nextTick();
