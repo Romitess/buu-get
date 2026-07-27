@@ -265,7 +265,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       eligibleCandidates: [],
     });
 
-  /** Published exams keep non-schedule sections read-only. */
+  /** Published exams keep basic details read-only. */
   const isPublishedSectionLocked = computed<boolean>(() => {
     return isEditMode.value && wasOriginallyPublished.value;
   });

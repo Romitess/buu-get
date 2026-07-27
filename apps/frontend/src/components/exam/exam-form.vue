@@ -51,7 +51,7 @@
 
     <create-exam-registration-card
       v-model:form="form"
-      :locked="isPublishedSectionLocked || isLockedByEnrollment || isLoadingData"
+      :locked="isLoadingData"
       :is-special-round="isSpecialRound"
       :date-errors="dateErrors"
       :field-errors="fieldErrors"
@@ -68,7 +68,7 @@
       :existing-candidate-keys="existingCandidateKeys"
       :has-candidates="hasEligibleCandidates"
       :loading="isImportingCandidates || isLoadingData"
-      :locked="isPublishedSectionLocked || isLockedByEnrollment || isLoadingData"
+      :locked="isLoadingData"
       @import-candidates="importCandidates"
       @add-candidates-from-users="addEligibleCandidatesFromUsers"
       @remove-candidates="removeEligibleCandidates"
@@ -88,8 +88,9 @@
         <template v-slot:avatar>
           <q-icon name="info" class="alert-icon-warning" />
         </template>
-        รอบสอบนี้เคยผ่านการเผยแพร่แล้ว ระบบจึงจำกัดการแก้ไขข้อมูล
-        (อนุญาตให้แก้ไขเฉพาะข้อมูลผู้คุมสอบได้เท่านั้น)
+        รอบสอบนี้เคยผ่านการเผยแพร่แล้ว ระบบจึงจำกัดการแก้ไขเฉพาะข้อมูลพื้นฐาน
+        (ชื่อรอบสอบ ประเภท รูปแบบ ค่าสมัคร และแหล่งเงิน)
+        ส่วนกำหนดการสอบ กำหนดการลงทะเบียน/ชำระเงิน และรายชื่อผู้มีสิทธิ์สอบยังแก้ไขได้
       </q-banner>
     </div>
 
@@ -144,7 +145,6 @@ const {
   isEditMode,
   isPublishedSectionLocked,
   isScheduleLocked,
-  isLockedByEnrollment,
   isSpecialRound,
   wasOriginallyPublished,
   activeSlotIndex,
