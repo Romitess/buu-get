@@ -288,7 +288,6 @@ import { useExamDocuments } from 'src/composables/use-exam-documents';
 import { useExamCertificateDocument } from 'src/composables/use-exam-certificate-document';
 import { useExamPrepGuide } from 'src/composables/use-exam-prep-guide';
 import { useAppDate } from 'src/composables/useAppDate';
-import { PAYMENT_DURATION_SECONDS_DEFAULT } from 'src/constants/exam';
 import type { ExamHistoryCategory, ExamHistoryItem } from 'src/types/exam';
 import type { ReceiptInformation } from 'src/types/receipt-information';
 import { matchesHistoryCategory } from 'src/utils/map-enrollment-history-status';
@@ -336,8 +335,11 @@ const showPaymentDialog = ref(false);
 const showReceiptInformationDialog = ref(false);
 const selectedExam = ref<ExamHistoryItem | null>(null);
 const pendingTransactionId = ref<number | null>(null);
-const paymentExpiryTime = ref<string>(new Date().toISOString());
 const receiptInformation = ref<ReceiptInformation | null>(null);
+
+/** ใช้ deadline เดียวกับ card (CREATED_AT + payment window) — ห้าม reset เป็น now+duration */
+const paymentExpiryTime = computed((): string => selectedExam.value?.deadline ?? '');
+
 
 const initialReceiptInformation = computed<ReceiptInformation>(() => {
   const user = userStore.currentUser;
@@ -516,9 +518,9 @@ const handlePay = async (exam: ExamHistoryItem): Promise<void> => {
       throw new Error('Exam fee is missing');
     }
 
-    const now = new Date();
-    const expiry = new Date(now.getTime() + PAYMENT_DURATION_SECONDS_DEFAULT * 1000);
-    paymentExpiryTime.value = expiry.toISOString();
+    if (!exam.deadline) {
+      throw new Error('Payment deadline is missing');
+    }
 
     pendingTransactionId.value = await examStore.createTransaction(exam.id, amount, 1);
     showReceiptInformationDialog.value = true;

@@ -2,11 +2,45 @@ import { ref, watch, onMounted, onUnmounted } from 'vue';
 import type { Ref } from 'vue';
 
 /**
+ * คำนวณข้อความเวลานับถอยหลัง (MM:SS) จาก deadline กับเวลาปัจจุบัน
+ * แยกเป็น pure function เพื่อให้ card/dialog ที่ใช้ deadline เดียวกันได้ค่าตรงกัน
+ */
+export function formatCountdownRemaining(
+  deadline: string | Date | undefined,
+  nowMs: number = Date.now(),
+): string | undefined {
+  if (deadline === undefined || deadline === '') return undefined;
+
+  const parsedDate = new Date(deadline);
+  if (isNaN(parsedDate.getTime())) {
+    return '00:00';
+  }
+
+  const diff = parsedDate.getTime() - nowMs;
+  if (diff <= 0) {
+    return '00:00';
+  }
+
+  const totalSeconds = Math.floor(diff / 1000);
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+function isValidDeadline(deadline: string | Date | undefined): boolean {
+  if (deadline === undefined || deadline === '') return false;
+  return !isNaN(new Date(deadline).getTime());
+}
+
+/**
  * useCountdown
- * Composable สำหรับจัดการ Countdown Timer
- * รองรับทั้งแบบ Mock (MM:SS) และแบบ Backend (ISO Date String)
+ * Composable สำหรับจัดการ Countdown Timer จาก deadline (ISO Date / Date)
  *
- * @param deadline - Ref ของ deadline string (MM:SS หรือ ISO Date)
+ * Tick จัดให้ตรง wall-clock second boundary เพื่อให้หลาย instance
+ * (เช่น card กับ dialog) อัปเดตค่า MM:SS พร้อมกัน
+ *
+ * @param deadline - Ref ของ deadline string (ISO Date) หรือ Date
  * @param onTimeout - Callback เมื่อหมดเวลา
  * @returns displayDeadline - ข้อความแสดงเวลาที่เหลือ (MM:SS)
  */
@@ -15,46 +49,54 @@ export function useCountdown(
   onTimeout?: () => void,
 ): { displayDeadline: Ref<string | undefined> } {
   const displayDeadline = ref<string | undefined>(undefined);
-  let timerInterval: ReturnType<typeof setInterval> | null = null;
+  let timerId: ReturnType<typeof setTimeout> | null = null;
+  let hasTimedOut = false;
 
   const clearTimer = (): void => {
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      timerInterval = null;
+    if (timerId !== null) {
+      clearTimeout(timerId);
+      timerId = null;
     }
   };
 
-  const startTimer = (): void => {
-    const deadlineStr = deadline.value;
-    if (!deadlineStr) return;
+  const updateDisplay = (): void => {
+    const next = formatCountdownRemaining(deadline.value);
+    displayDeadline.value = next;
 
-    const parsedDate = new Date(deadlineStr);
-    if (isNaN(parsedDate.getTime())) {
-      displayDeadline.value = '00:00';
+    if (next === '00:00' && isValidDeadline(deadline.value)) {
+      clearTimer();
+      if (!hasTimedOut) {
+        hasTimedOut = true;
+        onTimeout?.();
+      }
+    }
+  };
+
+  /** จัดตาราง tick ให้ตรงขอบวินาทีของนาฬิกาจริง (ลดการคลาดเคลื่อนระหว่าง instance) */
+  const scheduleTick = (): void => {
+    clearTimer();
+    const msToNextSecond = 1000 - (Date.now() % 1000);
+    timerId = setTimeout(() => {
+      updateDisplay();
+      if (displayDeadline.value !== '00:00' && displayDeadline.value !== undefined) {
+        scheduleTick();
+      }
+    }, msToNextSecond);
+  };
+
+  const startTimer = (): void => {
+    clearTimer();
+    hasTimedOut = false;
+
+    if (!deadline.value) {
+      displayDeadline.value = undefined;
       return;
     }
-    const targetTime = parsedDate.getTime();
 
-    const updateDisplay = (): void => {
-      const now = Date.now();
-      const diff = targetTime - now;
-
-      if (diff <= 0) {
-        clearTimer();
-        displayDeadline.value = '00:00';
-        onTimeout?.();
-        return;
-      }
-
-      const totalSeconds = Math.floor(diff / 1000);
-      const m = Math.floor(totalSeconds / 60);
-      const s = totalSeconds % 60;
-
-      displayDeadline.value = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    };
-
-    updateDisplay(); // อัปเดตทันทีที่เริ่ม
-    timerInterval = setInterval(updateDisplay, 1000);
+    updateDisplay();
+    if (displayDeadline.value !== '00:00' && displayDeadline.value !== undefined) {
+      scheduleTick();
+    }
   };
 
   onMounted(() => {
@@ -65,9 +107,7 @@ export function useCountdown(
     clearTimer();
   });
 
-  // Restart timer if deadline changes externally
   watch(deadline, () => {
-    clearTimer();
     startTimer();
   });
 
