@@ -73,6 +73,16 @@ export function useExamDocuments() {
     ]);
   };
 
+  /** Wait until Code128 SVG has been drawn (JsBarcode is sync but mounts after tick). */
+  const waitForBarcode = async (element: HTMLElement, timeoutMs = 500): Promise<void> => {
+    const started = Date.now();
+    while (Date.now() - started < timeoutMs) {
+      const svg = element.querySelector('.barcode-svg');
+      if (svg && svg.childNodes.length > 0) return;
+      await new Promise<void>((resolve) => window.setTimeout(resolve, 16));
+    }
+  };
+
   const printVoucher = async (exam: ExamHistoryItem): Promise<void> => {
     const cachedEnrollment = exam.rawEnrollment;
     const currentUser = userStore.currentUser;
@@ -177,7 +187,8 @@ export function useExamDocuments() {
           '-',
         testSession: examObj?.EXAM_ROUND || '-',
         profileImage: profileImagePath ? getImageUrl(profileImagePath) : undefined,
-        barcodeValue: voucherCode,
+        // Code128 payload = Test Taker ID for door scanners / attendance
+        barcodeValue: enrollment.ERM_TEST_TAKER || '',
       };
 
       await nextTick();
@@ -188,8 +199,9 @@ export function useExamDocuments() {
 
         if (cardElement) {
           await waitForImages(cardElement);
+          await waitForBarcode(cardElement);
 
-          const canvasScale = 2;
+          const canvasScale = 3;
           const canvas = await html2canvas(cardElement, {
             scale: canvasScale,
             useCORS: true,
@@ -197,7 +209,8 @@ export function useExamDocuments() {
             backgroundColor: '#ffffff',
           });
 
-          const imgData = canvas.toDataURL('image/jpeg', 0.8);
+          // PNG preserves barcode bar edges better than JPEG for scanners
+          const imgData = canvas.toDataURL('image/png');
 
           const pxToMm = 0.264583;
           const widthMm = (canvas.width * pxToMm) / canvasScale;
@@ -214,7 +227,7 @@ export function useExamDocuments() {
           // Fill the entire PDF page with the image with no margins
           pdf.addImage(
             imgData,
-            'JPEG',
+            'PNG',
             pdfBleedMm,
             pdfBleedMm,
             widthMm,

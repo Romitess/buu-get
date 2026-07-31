@@ -464,10 +464,20 @@
       "norm_label": "html2canvas"
     },
     {
-      "label": "jspdf",
+      "label": "jsbarcode",
       "file_type": "code",
       "source_file": "package.json",
       "source_location": "L26",
+      "_origin": "ast",
+      "id": "package_dependencies_jsbarcode",
+      "community": 26,
+      "norm_label": "jsbarcode"
+    },
+    {
+      "label": "jspdf",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "package_dependencies_jspdf",
       "community": 26,
@@ -477,7 +487,7 @@
       "label": "pinia",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L27",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "package_dependencies_pinia",
       "community": 26,
@@ -487,7 +497,7 @@
       "label": "qrcode",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L28",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "package_dependencies_qrcode",
       "community": 26,
@@ -497,7 +507,7 @@
       "label": "quasar",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L29",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "package_dependencies_quasar",
       "community": 26,
@@ -507,7 +517,7 @@
       "label": "vue",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L30",
+      "source_location": "L31",
       "_origin": "ast",
       "id": "package_dependencies_vue",
       "community": 26,
@@ -517,7 +527,7 @@
       "label": "vue-i18n",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L31",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "package_dependencies_vue_i18n",
       "community": 26,
@@ -527,7 +537,7 @@
       "label": "vue-router",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L32",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "package_dependencies_vue_router",
       "community": 26,
@@ -537,7 +547,7 @@
       "label": "vue3-apexcharts",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L33",
+      "source_location": "L34",
       "_origin": "ast",
       "id": "package_dependencies_vue3_apexcharts",
       "community": 26,
@@ -547,7 +557,7 @@
       "label": "devDependencies",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L35",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "package_devdependencies",
       "community": 14,
@@ -557,7 +567,7 @@
       "label": "@commitlint/cli",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L36",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "package_devdependencies_commitlint_cli",
       "community": 14,
@@ -567,7 +577,7 @@
       "label": "@commitlint/config-conventional",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L37",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "package_devdependencies_commitlint_config_conventional",
       "community": 14,
@@ -577,7 +587,7 @@
       "label": "@eslint/js",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L38",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "package_devdependencies_eslint_js",
       "community": 14,
@@ -587,17 +597,27 @@
       "label": "@quasar/app-vite",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L39",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "package_devdependencies_quasar_app_vite",
       "community": 14,
       "norm_label": "@quasar/app-vite"
     },
     {
+      "label": "@types/jsbarcode",
+      "file_type": "code",
+      "source_file": "package.json",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "package_devdependencies_types_jsbarcode",
+      "community": 14,
+      "norm_label": "@types/jsbarcode"
+    },
+    {
       "label": "@types/multer",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L40",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "package_devdependencies_types_multer",
       "community": 14,
@@ -607,7 +627,7 @@
       "label": "@types/node",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L41",
+      "source_location": "L43",
       "_origin": "ast",
       "id": "package_devdependencies_types_node",
       "community": 14,
@@ -617,7 +637,7 @@
       "label": "@types/qrcode",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L42",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "package_devdependencies_types_qrcode",
       "community": 14,
@@ -627,7 +647,7 @@
       "label": "@vitejs/plugin-vue",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L43",
+      "source_location": "L45",
       "_origin": "ast",
       "id": "package_devdependencies_vitejs_plugin_vue",
       "community": 14,
@@ -637,7 +657,7 @@
       "label": "@vue/eslint-config-prettier",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L44",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "package_devdependencies_vue_eslint_config_prettier",
       "community": 14,
@@ -647,7 +667,7 @@
       "label": "@vue/eslint-config-typescript",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L45",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "package_devdependencies_vue_eslint_config_typescript",
       "community": 14,
@@ -657,7 +677,7 @@
       "label": "@vue/test-utils",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L46",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "package_devdependencies_vue_test_utils",
       "community": 14,
@@ -667,7 +687,7 @@
       "label": "autoprefixer",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L47",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "package_devdependencies_autoprefixer",
       "community": 14,
@@ -677,7 +697,7 @@
       "label": "eslint",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L48",
+      "source_location": "L50",
       "_origin": "ast",
       "id": "package_devdependencies_eslint",
       "community": 14,
@@ -687,7 +707,7 @@
       "label": "eslint-plugin-vue",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L49",
+      "source_location": "L51",
       "_origin": "ast",
       "id": "package_devdependencies_eslint_plugin_vue",
       "community": 14,
@@ -697,7 +717,7 @@
       "label": "globals",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L50",
+      "source_location": "L52",
       "_origin": "ast",
       "id": "package_devdependencies_globals",
       "community": 14,
@@ -707,7 +727,7 @@
       "label": "husky",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L51",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "package_devdependencies_husky",
       "community": 14,
@@ -717,7 +737,7 @@
       "label": "jsdom",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L52",
+      "source_location": "L54",
       "_origin": "ast",
       "id": "package_devdependencies_jsdom",
       "community": 14,
@@ -727,7 +747,7 @@
       "label": "lint-staged",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L53",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "package_devdependencies_lint_staged",
       "community": 14,
@@ -737,7 +757,7 @@
       "label": "prettier",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L54",
+      "source_location": "L56",
       "_origin": "ast",
       "id": "package_devdependencies_prettier",
       "community": 14,
@@ -747,7 +767,7 @@
       "label": "typescript",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L55",
+      "source_location": "L57",
       "_origin": "ast",
       "id": "package_devdependencies_typescript",
       "community": 14,
@@ -757,7 +777,7 @@
       "label": "vite-plugin-checker",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L56",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "package_devdependencies_vite_plugin_checker",
       "community": 14,
@@ -767,7 +787,7 @@
       "label": "vitest",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L57",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "package_devdependencies_vitest",
       "community": 14,
@@ -777,7 +797,7 @@
       "label": "vue-eslint-parser",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L58",
+      "source_location": "L60",
       "_origin": "ast",
       "id": "package_devdependencies_vue_eslint_parser",
       "community": 14,
@@ -787,7 +807,7 @@
       "label": "vue-tsc",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L59",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "package_devdependencies_vue_tsc",
       "community": 14,
@@ -797,7 +817,7 @@
       "label": "engines",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L61",
+      "source_location": "L63",
       "_origin": "ast",
       "id": "package_engines",
       "community": 25,
@@ -807,7 +827,7 @@
       "label": "node",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L62",
+      "source_location": "L64",
       "_origin": "ast",
       "id": "package_engines_node",
       "community": 25,
@@ -817,7 +837,7 @@
       "label": "npm",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L63",
+      "source_location": "L65",
       "_origin": "ast",
       "id": "package_engines_npm",
       "community": 25,
@@ -827,7 +847,7 @@
       "label": "lint-staged",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L65",
+      "source_location": "L67",
       "_origin": "ast",
       "id": "package_lint_staged",
       "community": 25,
@@ -837,7 +857,7 @@
       "label": "src/**/*.{ts,vue}",
       "file_type": "code",
       "source_file": "package.json",
-      "source_location": "L66",
+      "source_location": "L68",
       "_origin": "ast",
       "id": "package_lint_staged_src_ts_vue",
       "community": 25,
@@ -930,7 +950,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "boot_auth",
-      "community": 48,
+      "community": 15,
       "norm_label": "auth.ts"
     },
     {
@@ -1190,7 +1210,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "base_image_upload",
-      "community": 164,
+      "community": 10,
       "norm_label": "image-upload.vue"
     },
     {
@@ -1570,7 +1590,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "components_certificate_preview_report",
-      "community": 57,
+      "community": 2,
       "norm_label": "certificate-preview-report.vue"
     },
     {
@@ -1740,7 +1760,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_report_exam_candidates_info_table",
-      "community": 41,
+      "community": 28,
       "norm_label": "exam-candidates-info-table.vue"
     },
     {
@@ -1750,7 +1770,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "exam_report_exam_candidates_info_table_t",
-      "community": 41,
+      "community": 28,
       "norm_label": "{ t }"
     },
     {
@@ -1760,7 +1780,7 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "exam_report_exam_candidates_info_table_formatnumber",
-      "community": 41,
+      "community": 28,
       "norm_label": "formatnumber()"
     },
     {
@@ -1770,7 +1790,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "exam_report_exam_candidates_info_table_onrequest",
-      "community": 41,
+      "community": 28,
       "norm_label": "onrequest"
     },
     {
@@ -2480,7 +2500,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_app_location_walkway_controls",
-      "community": 3,
+      "community": 212,
       "norm_label": "app-location-walkway-controls.vue"
     },
     {
@@ -2490,7 +2510,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "exam_app_location_walkway_controls_props",
-      "community": 3,
+      "community": 212,
       "norm_label": "props"
     },
     {
@@ -2500,7 +2520,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "exam_app_location_walkway_controls_t",
-      "community": 3,
+      "community": 212,
       "norm_label": "{ t }"
     },
     {
@@ -2510,7 +2530,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "exam_app_location_walkway_controls_getpositionlabel",
-      "community": 3,
+      "community": 212,
       "norm_label": "getpositionlabel()"
     },
     {
@@ -3677,7 +3697,7 @@
       "label": "hasComputerRules",
       "file_type": "code",
       "source_file": "src/components/home/home-guideline-section.vue",
-      "source_location": "L139",
+      "source_location": "L131",
       "_origin": "ast",
       "id": "home_home_guideline_section_hascomputerrules",
       "community": 4,
@@ -3687,7 +3707,7 @@
       "label": "paperColumnTitle",
       "file_type": "code",
       "source_file": "src/components/home/home-guideline-section.vue",
-      "source_location": "L141",
+      "source_location": "L133",
       "_origin": "ast",
       "id": "home_home_guideline_section_papercolumntitle",
       "community": 4,
@@ -3697,7 +3717,7 @@
       "label": "computerColumnTitle",
       "file_type": "code",
       "source_file": "src/components/home/home-guideline-section.vue",
-      "source_location": "L147",
+      "source_location": "L139",
       "_origin": "ast",
       "id": "home_home_guideline_section_computercolumntitle",
       "community": 4,
@@ -4370,7 +4390,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_app_breadcrumbs",
-      "community": 187,
+      "community": 2,
       "norm_label": "app-breadcrumbs.vue"
     },
     {
@@ -4380,7 +4400,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "shared_app_breadcrumbs_route",
-      "community": 187,
+      "community": 2,
       "norm_label": "route"
     },
     {
@@ -4390,7 +4410,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "shared_app_breadcrumbs_if",
-      "community": 187,
+      "community": 2,
       "norm_label": "if()"
     },
     {
@@ -4400,7 +4420,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "shared_app_breadcrumbs_removeunresolvedqueryparams",
-      "community": 187,
+      "community": 2,
       "norm_label": "removeunresolvedqueryparams()"
     },
     {
@@ -4410,7 +4430,7 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "shared_app_breadcrumbs_resolvebreadcrumbpath",
-      "community": 187,
+      "community": 2,
       "norm_label": "resolvebreadcrumbpath()"
     },
     {
@@ -4420,7 +4440,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "shared_app_breadcrumbs_breadcrumbs",
-      "community": 187,
+      "community": 2,
       "norm_label": "breadcrumbs"
     },
     {
@@ -4700,7 +4720,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_app_image_cropper",
-      "community": 164,
+      "community": 10,
       "norm_label": "app-image-cropper.vue"
     },
     {
@@ -4710,7 +4730,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_app_page_header",
-      "community": 194,
+      "community": 2,
       "norm_label": "app-page-header.vue"
     },
     {
@@ -4800,7 +4820,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "shared_base_table",
-      "community": 41,
+      "community": 211,
       "norm_label": "base-table.vue"
     },
     {
@@ -4810,7 +4830,7 @@
       "source_location": "L414",
       "_origin": "ast",
       "id": "shared_base_table_get",
-      "community": 41,
+      "community": 211,
       "norm_label": "get()"
     },
     {
@@ -4820,7 +4840,7 @@
       "source_location": "L429",
       "_origin": "ast",
       "id": "shared_base_table_has",
-      "community": 41,
+      "community": 211,
       "norm_label": "has()"
     },
     {
@@ -4830,7 +4850,7 @@
       "source_location": "L432",
       "_origin": "ast",
       "id": "shared_base_table_ownkeys",
-      "community": 41,
+      "community": 211,
       "norm_label": "ownkeys()"
     },
     {
@@ -4840,7 +4860,7 @@
       "source_location": "L435",
       "_origin": "ast",
       "id": "shared_base_table_getownpropertydescriptor",
-      "community": 41,
+      "community": 211,
       "norm_label": "getownpropertydescriptor()"
     },
     {
@@ -5040,7 +5060,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_available_exam_rounds",
-      "community": 15,
+      "community": 24,
       "norm_label": "use-available-exam-rounds.ts"
     },
     {
@@ -5050,7 +5070,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "composables_use_available_exam_rounds_availableexamround",
-      "community": 15,
+      "community": 24,
       "norm_label": "availableexamround"
     },
     {
@@ -5060,7 +5080,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "composables_use_available_exam_rounds_max_display_rounds",
-      "community": 15,
+      "community": 24,
       "norm_label": "max_display_rounds"
     },
     {
@@ -5240,7 +5260,7 @@
       "source_location": "L213",
       "_origin": "ast",
       "id": "composables_use_candidate_home_activities_usecandidatehomeactivities",
-      "community": 48,
+      "community": 15,
       "norm_label": "usecandidatehomeactivities()"
     },
     {
@@ -5330,7 +5350,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_create_exam",
-      "community": 12,
+      "community": 57,
       "norm_label": "use-create-exam.ts"
     },
     {
@@ -5340,7 +5360,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "composables_use_create_exam_examroom",
-      "community": 12,
+      "community": 57,
       "norm_label": "examroom"
     },
     {
@@ -5350,7 +5370,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "composables_use_create_exam_timeslot",
-      "community": 12,
+      "community": 57,
       "norm_label": "timeslot"
     },
     {
@@ -5370,7 +5390,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "composables_use_create_exam_geteligiblecandidatekey",
-      "community": 12,
+      "community": 57,
       "norm_label": "geteligiblecandidatekey()"
     },
     {
@@ -5390,7 +5410,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "composables_use_create_exam_useexamformoptions",
-      "community": 12,
+      "community": 57,
       "norm_label": "useexamformoptions"
     },
     {
@@ -5400,7 +5420,7 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "composables_use_create_exam_examcomparisonsnapshot",
-      "community": 12,
+      "community": 57,
       "norm_label": "examcomparisonsnapshot"
     },
     {
@@ -5410,7 +5430,7 @@
       "source_location": "L131",
       "_origin": "ast",
       "id": "composables_use_create_exam_snapshotstatustocode",
-      "community": 12,
+      "community": 57,
       "norm_label": "snapshotstatustocode()"
     },
     {
@@ -5420,7 +5440,7 @@
       "source_location": "L138",
       "_origin": "ast",
       "id": "composables_use_create_exam_countavailableseats",
-      "community": 12,
+      "community": 57,
       "norm_label": "countavailableseats()"
     },
     {
@@ -5430,7 +5450,7 @@
       "source_location": "L151",
       "_origin": "ast",
       "id": "composables_use_create_exam_resolveloadedroomseats",
-      "community": 12,
+      "community": 57,
       "norm_label": "resolveloadedroomseats()"
     },
     {
@@ -5440,7 +5460,7 @@
       "source_location": "L174",
       "_origin": "ast",
       "id": "composables_use_create_exam_getlocationaisleafter",
-      "community": 12,
+      "community": 57,
       "norm_label": "getlocationaisleafter()"
     },
     {
@@ -5450,7 +5470,7 @@
       "source_location": "L202",
       "_origin": "ast",
       "id": "composables_use_create_exam_hasaisleafter",
-      "community": 12,
+      "community": 57,
       "norm_label": "hasaisleafter()"
     },
     {
@@ -5660,7 +5680,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_exam_schedule",
-      "community": 24,
+      "community": 15,
       "norm_label": "use-exam-schedule.ts"
     },
     {
@@ -5670,7 +5690,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "composables_use_exam_schedule_registrationstatus",
-      "community": 24,
+      "community": 15,
       "norm_label": "registrationstatus"
     },
     {
@@ -5680,7 +5700,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "composables_use_exam_schedule_apierrordata",
-      "community": 24,
+      "community": 15,
       "norm_label": "apierrordata"
     },
     {
@@ -5690,7 +5710,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "composables_use_exam_schedule_exampasscodedialogexpose",
-      "community": 24,
+      "community": 15,
       "norm_label": "exampasscodedialogexpose"
     },
     {
@@ -5700,7 +5720,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "composables_use_exam_schedule_route_names",
-      "community": 24,
+      "community": 15,
       "norm_label": "route_names"
     },
     {
@@ -6220,7 +6240,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "composables_use_image_upload_useimageupload",
-      "community": 164,
+      "community": 10,
       "norm_label": "useimageupload()"
     },
     {
@@ -6230,7 +6250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "composables_use_image_url",
-      "community": 164,
+      "community": 10,
       "norm_label": "use-image-url.ts"
     },
     {
@@ -6240,7 +6260,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "composables_use_image_url_useimageurl",
-      "community": 164,
+      "community": 10,
       "norm_label": "useimageurl()"
     },
     {
@@ -6820,7 +6840,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "constants_exam_notify_msg",
-      "community": 12,
+      "community": 24,
       "norm_label": "notify_msg"
     },
     {
@@ -6830,7 +6850,7 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "constants_exam_validation_msg",
-      "community": 12,
+      "community": 24,
       "norm_label": "validation_msg"
     },
     {
@@ -6840,7 +6860,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "constants_exam_empty_details",
-      "community": 203,
+      "community": 24,
       "norm_label": "empty_details"
     },
     {
@@ -6900,7 +6920,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "constants_exam_transaction_payment_status",
-      "community": 203,
+      "community": 137,
       "norm_label": "transaction_payment_status"
     },
     {
@@ -6910,7 +6930,7 @@
       "source_location": "L149",
       "_origin": "ast",
       "id": "constants_exam_receiptstatus",
-      "community": 137,
+      "community": 24,
       "norm_label": "receiptstatus"
     },
     {
@@ -6920,7 +6940,7 @@
       "source_location": "L155",
       "_origin": "ast",
       "id": "constants_exam_http_status",
-      "community": 24,
+      "community": 15,
       "norm_label": "http_status"
     },
     {
@@ -6940,7 +6960,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "constants_roles_rolestype",
-      "community": 204,
+      "community": 188,
       "norm_label": "rolestype"
     },
     {
@@ -7150,7 +7170,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "admin_edit_exam_page",
-      "community": 194,
+      "community": 2,
       "norm_label": "edit-exam-page.vue"
     },
     {
@@ -7160,7 +7180,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "admin_edit_exam_page_route",
-      "community": 194,
+      "community": 2,
       "norm_label": "route"
     },
     {
@@ -7170,7 +7190,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "admin_edit_exam_page_examid",
-      "community": 194,
+      "community": 2,
       "norm_label": "examid"
     },
     {
@@ -7180,7 +7200,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "admin_edit_exam_page_form",
-      "community": 194,
+      "community": 2,
       "norm_label": "{ form }"
     },
     {
@@ -7197,7 +7217,7 @@
       "label": "examDateLabel",
       "file_type": "code",
       "source_file": "src/pages/admin/exam-attendance-page.vue",
-      "source_location": "L169",
+      "source_location": "L170",
       "_origin": "ast",
       "id": "admin_exam_attendance_page_examdatelabel",
       "community": 27,
@@ -7207,7 +7227,7 @@
       "label": "selectedSession",
       "file_type": "code",
       "source_file": "src/pages/admin/exam-attendance-page.vue",
-      "source_location": "L180",
+      "source_location": "L181",
       "_origin": "ast",
       "id": "admin_exam_attendance_page_selectedsession",
       "community": 27,
@@ -7217,7 +7237,7 @@
       "label": "activeTimeSessions",
       "file_type": "code",
       "source_file": "src/pages/admin/exam-attendance-page.vue",
-      "source_location": "L190",
+      "source_location": "L191",
       "_origin": "ast",
       "id": "admin_exam_attendance_page_activetimesessions",
       "community": 27,
@@ -7227,7 +7247,7 @@
       "label": "roomOptions",
       "file_type": "code",
       "source_file": "src/pages/admin/exam-attendance-page.vue",
-      "source_location": "L217",
+      "source_location": "L218",
       "_origin": "ast",
       "id": "admin_exam_attendance_page_roomoptions",
       "community": 27,
@@ -7237,7 +7257,7 @@
       "label": "activeSessionLocation",
       "file_type": "code",
       "source_file": "src/pages/admin/exam-attendance-page.vue",
-      "source_location": "L224",
+      "source_location": "L225",
       "_origin": "ast",
       "id": "admin_exam_attendance_page_activesessionlocation",
       "community": 27,
@@ -7247,7 +7267,7 @@
       "label": "activeLocation",
       "file_type": "code",
       "source_file": "src/pages/admin/exam-attendance-page.vue",
-      "source_location": "L230",
+      "source_location": "L231",
       "_origin": "ast",
       "id": "admin_exam_attendance_page_activelocation",
       "community": 27,
@@ -7257,7 +7277,7 @@
       "label": "selectedSessionTime",
       "file_type": "code",
       "source_file": "src/pages/admin/exam-attendance-page.vue",
-      "source_location": "L234",
+      "source_location": "L235",
       "_origin": "ast",
       "id": "admin_exam_attendance_page_selectedsessiontime",
       "community": 27,
@@ -7267,7 +7287,7 @@
       "label": "selectedSessionLocation",
       "file_type": "code",
       "source_file": "src/pages/admin/exam-attendance-page.vue",
-      "source_location": "L241",
+      "source_location": "L242",
       "_origin": "ast",
       "id": "admin_exam_attendance_page_selectedsessionlocation",
       "community": 27,
@@ -7277,7 +7297,7 @@
       "label": "selectedSessionCapacity",
       "file_type": "code",
       "source_file": "src/pages/admin/exam-attendance-page.vue",
-      "source_location": "L247",
+      "source_location": "L248",
       "_origin": "ast",
       "id": "admin_exam_attendance_page_selectedsessioncapacity",
       "community": 27,
@@ -7287,7 +7307,7 @@
       "label": "currentRoomAttendances",
       "file_type": "code",
       "source_file": "src/pages/admin/exam-attendance-page.vue",
-      "source_location": "L255",
+      "source_location": "L256",
       "_origin": "ast",
       "id": "admin_exam_attendance_page_currentroomattendances",
       "community": 27,
@@ -7297,7 +7317,7 @@
       "label": "localSessionAttendedCount",
       "file_type": "code",
       "source_file": "src/pages/admin/exam-attendance-page.vue",
-      "source_location": "L286",
+      "source_location": "L287",
       "_origin": "ast",
       "id": "admin_exam_attendance_page_localsessionattendedcount",
       "community": 27,
@@ -7717,7 +7737,7 @@
       "label": "printLocation",
       "file_type": "code",
       "source_file": "src/pages/admin/exam-seat-candidates-page.vue",
-      "source_location": "L445",
+      "source_location": "L446",
       "_origin": "ast",
       "id": "admin_exam_seat_candidates_page_printlocation",
       "community": 42,
@@ -7727,7 +7747,7 @@
       "label": "getLocationAisleAfter",
       "file_type": "code",
       "source_file": "src/pages/admin/exam-seat-candidates-page.vue",
-      "source_location": "L447",
+      "source_location": "L448",
       "_origin": "ast",
       "id": "admin_exam_seat_candidates_page_getlocationaisleafter",
       "community": 42,
@@ -7737,7 +7757,7 @@
       "label": "printAisleAfterCols",
       "file_type": "code",
       "source_file": "src/pages/admin/exam-seat-candidates-page.vue",
-      "source_location": "L472",
+      "source_location": "L473",
       "_origin": "ast",
       "id": "admin_exam_seat_candidates_page_printaisleaftercols",
       "community": 42,
@@ -8020,7 +8040,7 @@
       "source_location": "L180",
       "_origin": "ast",
       "id": "admin_score_criteria_management_page",
-      "community": 57,
+      "community": 2,
       "norm_label": "[]"
     },
     {
@@ -8030,7 +8050,7 @@
       "source_location": "L228",
       "_origin": "ast",
       "id": "admin_score_criteria_management_page_router",
-      "community": 57,
+      "community": 2,
       "norm_label": "router"
     },
     {
@@ -8040,7 +8060,7 @@
       "source_location": "L229",
       "_origin": "ast",
       "id": "admin_score_criteria_management_page_q",
-      "community": 57,
+      "community": 2,
       "norm_label": "$q"
     },
     {
@@ -8050,7 +8070,7 @@
       "source_location": "L230",
       "_origin": "ast",
       "id": "admin_score_criteria_management_page_t",
-      "community": 57,
+      "community": 2,
       "norm_label": "{ t }"
     },
     {
@@ -8060,7 +8080,7 @@
       "source_location": "L266",
       "_origin": "ast",
       "id": "admin_score_criteria_management_page_nextmaxscore",
-      "community": 57,
+      "community": 2,
       "norm_label": "nextmaxscore"
     },
     {
@@ -8070,7 +8090,7 @@
       "source_location": "L277",
       "_origin": "ast",
       "id": "admin_score_criteria_management_page_removeband",
-      "community": 57,
+      "community": 2,
       "norm_label": "removeband"
     },
     {
@@ -8080,7 +8100,7 @@
       "source_location": "L335",
       "_origin": "ast",
       "id": "admin_score_criteria_management_page_onscorekeypress",
-      "community": 57,
+      "community": 2,
       "norm_label": "onscorekeypress"
     },
     {
@@ -8610,7 +8630,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "services_enrollment_service_bulkassignenrollmentseats",
-      "community": 18,
+      "community": 13,
       "norm_label": "bulkassignenrollmentseats()"
     },
     {
@@ -8820,7 +8840,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "services_exam_report_service_backendexamcandidateinfo",
-      "community": 16,
+      "community": 28,
       "norm_label": "backendexamcandidateinfo"
     },
     {
@@ -9070,7 +9090,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "services_exam_service_invalidateexamcache",
-      "community": 12,
+      "community": 24,
       "norm_label": "invalidateexamcache()"
     },
     {
@@ -9120,7 +9140,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "services_exam_service_formattime",
-      "community": 12,
+      "community": 24,
       "norm_label": "formattime()"
     },
     {
@@ -9130,7 +9150,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "services_exam_service_parsebangkokdate",
-      "community": 12,
+      "community": 57,
       "norm_label": "parsebangkokdate()"
     },
     {
@@ -9140,7 +9160,7 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "services_exam_service_formatbackenddate",
-      "community": 12,
+      "community": 57,
       "norm_label": "formatbackenddate()"
     },
     {
@@ -9170,7 +9190,7 @@
       "source_location": "L186",
       "_origin": "ast",
       "id": "services_exam_service_fundsource",
-      "community": 12,
+      "community": 57,
       "norm_label": "fundsource"
     },
     {
@@ -9180,7 +9200,7 @@
       "source_location": "L193",
       "_origin": "ast",
       "id": "services_exam_service_sessionlocationsnapshotpayload",
-      "community": 12,
+      "community": 57,
       "norm_label": "sessionlocationsnapshotpayload"
     },
     {
@@ -9190,7 +9210,7 @@
       "source_location": "L208",
       "_origin": "ast",
       "id": "services_exam_service_examlocationoption",
-      "community": 12,
+      "community": 57,
       "norm_label": "examlocationoption"
     },
     {
@@ -9230,7 +9250,7 @@
       "source_location": "L341",
       "_origin": "ast",
       "id": "services_exam_service_fetchexamwithseats",
-      "community": 12,
+      "community": 23,
       "norm_label": "fetchexamwithseats()"
     },
     {
@@ -9250,7 +9270,7 @@
       "source_location": "L357",
       "_origin": "ast",
       "id": "services_exam_service_buddhisttogregorian",
-      "community": 12,
+      "community": 194,
       "norm_label": "buddhisttogregorian()"
     },
     {
@@ -9260,7 +9280,7 @@
       "source_location": "L370",
       "_origin": "ast",
       "id": "services_exam_service_buddhisttogregorianperiodend",
-      "community": 12,
+      "community": 194,
       "norm_label": "buddhisttogregorianperiodend()"
     },
     {
@@ -9270,7 +9290,7 @@
       "source_location": "L376",
       "_origin": "ast",
       "id": "services_exam_service_grouptimerangesbytime",
-      "community": 12,
+      "community": 194,
       "norm_label": "grouptimerangesbytime()"
     },
     {
@@ -9380,7 +9400,7 @@
       "source_location": "L652",
       "_origin": "ast",
       "id": "services_exam_service_createexamround",
-      "community": 12,
+      "community": 194,
       "norm_label": "createexamround()"
     },
     {
@@ -9390,7 +9410,7 @@
       "source_location": "L703",
       "_origin": "ast",
       "id": "services_exam_service_fetchfundsources",
-      "community": 12,
+      "community": 57,
       "norm_label": "fetchfundsources()"
     },
     {
@@ -9400,7 +9420,7 @@
       "source_location": "L713",
       "_origin": "ast",
       "id": "services_exam_service_fetchexamlocations",
-      "community": 12,
+      "community": 57,
       "norm_label": "fetchexamlocations()"
     },
     {
@@ -9420,7 +9440,7 @@
       "source_location": "L737",
       "_origin": "ast",
       "id": "services_exam_service_updateexamround",
-      "community": 12,
+      "community": 194,
       "norm_label": "updateexamround()"
     },
     {
@@ -9430,7 +9450,7 @@
       "source_location": "L862",
       "_origin": "ast",
       "id": "services_exam_service_examchangeitem",
-      "community": 12,
+      "community": 57,
       "norm_label": "examchangeitem"
     },
     {
@@ -9440,7 +9460,7 @@
       "source_location": "L872",
       "_origin": "ast",
       "id": "services_exam_service_notifyexamchanges",
-      "community": 12,
+      "community": 57,
       "norm_label": "notifyexamchanges()"
     },
     {
@@ -9450,7 +9470,7 @@
       "source_location": "L879",
       "_origin": "ast",
       "id": "services_exam_service_deleteexam",
-      "community": 12,
+      "community": 24,
       "norm_label": "deleteexam()"
     },
     {
@@ -9470,7 +9490,7 @@
       "source_location": "L901",
       "_origin": "ast",
       "id": "services_exam_service_createenrollment",
-      "community": 12,
+      "community": 24,
       "norm_label": "createenrollment()"
     },
     {
@@ -9490,7 +9510,7 @@
       "source_location": "L929",
       "_origin": "ast",
       "id": "services_exam_service_fetchuserenrollments",
-      "community": 203,
+      "community": 24,
       "norm_label": "fetchuserenrollments()"
     },
     {
@@ -9510,7 +9530,7 @@
       "source_location": "L949",
       "_origin": "ast",
       "id": "services_exam_service_updateenrollmentstatus",
-      "community": 12,
+      "community": 24,
       "norm_label": "updateenrollmentstatus()"
     },
     {
@@ -9530,7 +9550,7 @@
       "source_location": "L973",
       "_origin": "ast",
       "id": "services_exam_service_createexampasscodes",
-      "community": 12,
+      "community": 57,
       "norm_label": "createexampasscodes()"
     },
     {
@@ -9680,7 +9700,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "services_image_service_getimageurl",
-      "community": 164,
+      "community": 48,
       "norm_label": "getimageurl()"
     },
     {
@@ -9760,7 +9780,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "services_location_service_backendlocationraw",
-      "community": 12,
+      "community": 57,
       "norm_label": "backendlocationraw"
     },
     {
@@ -9910,7 +9930,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_profile_edit_history_service",
-      "community": 188,
+      "community": 31,
       "norm_label": "profile-edit-history.service.ts"
     },
     {
@@ -9920,7 +9940,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "services_profile_edit_history_service_fetchprofileedithistory",
-      "community": 188,
+      "community": 31,
       "norm_label": "fetchprofileedithistory()"
     },
     {
@@ -9930,7 +9950,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "services_profile_edit_history_service_fetchlatestprofilehistoryimages",
-      "community": 188,
+      "community": 31,
       "norm_label": "fetchlatestprofilehistoryimages()"
     },
     {
@@ -9940,7 +9960,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_receipt_service",
-      "community": 1,
+      "community": 187,
       "norm_label": "receipt.service.ts"
     },
     {
@@ -9950,7 +9970,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "services_receipt_service_issuedreceiptbankreconcile",
-      "community": 1,
+      "community": 187,
       "norm_label": "issuedreceiptbankreconcile"
     },
     {
@@ -9960,7 +9980,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "services_receipt_service_issuedreceipttransaction",
-      "community": 1,
+      "community": 187,
       "norm_label": "issuedreceipttransaction"
     },
     {
@@ -9970,7 +9990,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "services_receipt_service_issuedreceipt",
-      "community": 1,
+      "community": 187,
       "norm_label": "issuedreceipt"
     },
     {
@@ -9980,7 +10000,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "services_receipt_service_fetchissuedreceipts",
-      "community": 1,
+      "community": 187,
       "norm_label": "fetchissuedreceipts()"
     },
     {
@@ -9990,7 +10010,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "services_receipt_service_downloadreceipt",
-      "community": 1,
+      "community": 187,
       "norm_label": "downloadreceipt()"
     },
     {
@@ -10000,7 +10020,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "services_score_criteria_service",
-      "community": 57,
+      "community": 2,
       "norm_label": "score-criteria.service.ts"
     },
     {
@@ -10010,7 +10030,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "services_score_criteria_service_bandruledata",
-      "community": 57,
+      "community": 2,
       "norm_label": "bandruledata"
     },
     {
@@ -10020,7 +10040,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "services_score_criteria_service_bandrulesresponse",
-      "community": 57,
+      "community": 2,
       "norm_label": "bandrulesresponse"
     },
     {
@@ -10030,7 +10050,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "services_score_criteria_service_getbandrules",
-      "community": 57,
+      "community": 2,
       "norm_label": "getbandrules()"
     },
     {
@@ -10040,7 +10060,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "services_score_criteria_service_savebandrules",
-      "community": 57,
+      "community": 2,
       "norm_label": "savebandrules()"
     },
     {
@@ -10740,7 +10760,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "stores_exam_store",
-      "community": 203,
+      "community": 24,
       "norm_label": "exam.store.ts"
     },
     {
@@ -10800,7 +10820,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "stores_user_store",
-      "community": 48,
+      "community": 15,
       "norm_label": "user.store.ts"
     },
     {
@@ -10810,7 +10830,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "stores_user_store_useuserstore",
-      "community": 48,
+      "community": 15,
       "norm_label": "useuserstore"
     },
     {
@@ -10970,7 +10990,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_enrollment_types",
-      "community": 30,
+      "community": 18,
       "norm_label": "enrollment.types.ts"
     },
     {
@@ -10980,7 +11000,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_enrollment_types_backenduserprofile",
-      "community": 30,
+      "community": 18,
       "norm_label": "backenduserprofile"
     },
     {
@@ -10990,7 +11010,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "types_enrollment_types_backenduser",
-      "community": 1,
+      "community": 187,
       "norm_label": "backenduser"
     },
     {
@@ -11000,7 +11020,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "types_enrollment_types_backendsessiondetail",
-      "community": 30,
+      "community": 18,
       "norm_label": "backendsessiondetail"
     },
     {
@@ -11010,7 +11030,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "types_enrollment_types_examattendstatus",
-      "community": 30,
+      "community": 23,
       "norm_label": "examattendstatus"
     },
     {
@@ -11050,7 +11070,7 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "types_enrollment_types_attendancetablerow",
-      "community": 30,
+      "community": 23,
       "norm_label": "attendancetablerow"
     },
     {
@@ -11070,7 +11090,7 @@
       "source_location": "L166",
       "_origin": "ast",
       "id": "types_enrollment_types_verifystatus",
-      "community": 30,
+      "community": 18,
       "norm_label": "verifystatus"
     },
     {
@@ -11250,7 +11270,7 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "types_exam_report_types_examcandidateinforow",
-      "community": 16,
+      "community": 28,
       "norm_label": "examcandidateinforow"
     },
     {
@@ -11500,7 +11520,7 @@
       "source_location": "L194",
       "_origin": "ast",
       "id": "types_exam_examenrollment",
-      "community": 1,
+      "community": 187,
       "norm_label": "examenrollment"
     },
     {
@@ -11510,7 +11530,7 @@
       "source_location": "L249",
       "_origin": "ast",
       "id": "types_exam_backendlocation",
-      "community": 12,
+      "community": 57,
       "norm_label": "backendlocation"
     },
     {
@@ -11600,7 +11620,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "types_exam_types_examschedule",
-      "community": 15,
+      "community": 24,
       "norm_label": "examschedule"
     },
     {
@@ -11610,7 +11630,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "types_exam_types_paginationmodel",
-      "community": 41,
+      "community": 28,
       "norm_label": "paginationmodel"
     },
     {
@@ -11690,7 +11710,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "types_exam_types_tablerequestprops",
-      "community": 201,
+      "community": 28,
       "norm_label": "tablerequestprops"
     },
     {
@@ -11830,7 +11850,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_navigation",
-      "community": 204,
+      "community": 188,
       "norm_label": "navigation.ts"
     },
     {
@@ -11840,7 +11860,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "types_navigation_navigationitem",
-      "community": 204,
+      "community": 188,
       "norm_label": "navigationitem"
     },
     {
@@ -11850,7 +11870,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "types_navigation_navigationgroup",
-      "community": 204,
+      "community": 188,
       "norm_label": "navigationgroup"
     },
     {
@@ -11990,7 +12010,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_profile_edit_history_types",
-      "community": 188,
+      "community": 31,
       "norm_label": "profile-edit-history.types.ts"
     },
     {
@@ -12000,7 +12020,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_profile_edit_history_types_profileedithistory",
-      "community": 188,
+      "community": 31,
       "norm_label": "profileedithistory"
     },
     {
@@ -12010,7 +12030,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_receipt_information",
-      "community": 203,
+      "community": 24,
       "norm_label": "receipt-information.ts"
     },
     {
@@ -12020,7 +12040,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_receipt_information_receiptinformation",
-      "community": 203,
+      "community": 24,
       "norm_label": "receiptinformation"
     },
     {
@@ -12100,7 +12120,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "types_user",
-      "community": 204,
+      "community": 188,
       "norm_label": "user.ts"
     },
     {
@@ -12110,7 +12130,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "types_user_userrole",
-      "community": 204,
+      "community": 188,
       "norm_label": "userrole"
     },
     {
@@ -12320,7 +12340,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "utils_exam_registration_examcalendaravailability",
-      "community": 203,
+      "community": 21,
       "norm_label": "examcalendaravailability"
     },
     {
@@ -12554,6 +12574,56 @@
       "norm_label": "matcheshistorycategory()"
     },
     {
+      "label": "scan-keyboard.spec.ts",
+      "file_type": "code",
+      "source_file": "src/utils/scan-keyboard.spec.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "utils_scan_keyboard_spec",
+      "community": 30,
+      "norm_label": "scan-keyboard.spec.ts"
+    },
+    {
+      "label": "scan-keyboard.ts",
+      "file_type": "code",
+      "source_file": "src/utils/scan-keyboard.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "utils_scan_keyboard",
+      "community": 30,
+      "norm_label": "scan-keyboard.ts"
+    },
+    {
+      "label": "codeToScanChar()",
+      "file_type": "code",
+      "source_file": "src/utils/scan-keyboard.ts",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "utils_scan_keyboard_codetoscanchar",
+      "community": 30,
+      "norm_label": "codetoscanchar()"
+    },
+    {
+      "label": "KEDMANEE_TO_QWERTY",
+      "file_type": "code",
+      "source_file": "src/utils/scan-keyboard.ts",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "utils_scan_keyboard_kedmanee_to_qwerty",
+      "community": 30,
+      "norm_label": "kedmanee_to_qwerty"
+    },
+    {
+      "label": "normalizeScanPayload()",
+      "file_type": "code",
+      "source_file": "src/utils/scan-keyboard.ts",
+      "source_location": "L72",
+      "_origin": "ast",
+      "id": "utils_scan_keyboard_normalizescanpayload",
+      "community": 30,
+      "norm_label": "normalizescanpayload()"
+    },
+    {
       "label": "thai-currency.spec.ts",
       "file_type": "code",
       "source_file": "src/utils/thai-currency.spec.ts",
@@ -12620,7 +12690,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_thai_date",
-      "community": 13,
+      "community": 204,
       "norm_label": "thai-date.ts"
     },
     {
@@ -12630,7 +12700,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "utils_thai_date_formatthailongdate",
-      "community": 13,
+      "community": 204,
       "norm_label": "formatthailongdate()"
     },
     {
@@ -12640,7 +12710,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "utils_thai_date_betocestring",
-      "community": 13,
+      "community": 204,
       "norm_label": "betocestring()"
     },
     {
@@ -12650,7 +12720,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "utils_thai_date_cetobestring",
-      "community": 13,
+      "community": 204,
       "norm_label": "cetobestring()"
     },
     {
@@ -12702,6 +12772,66 @@
       "id": "utils_verify_qr_getverifylandingurl",
       "community": 62,
       "norm_label": "getverifylandingurl()"
+    },
+    {
+      "label": "voucher-barcode.spec.ts",
+      "file_type": "code",
+      "source_file": "src/utils/voucher-barcode.spec.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "utils_voucher_barcode_spec",
+      "community": 203,
+      "norm_label": "voucher-barcode.spec.ts"
+    },
+    {
+      "label": "voucher-barcode.ts",
+      "file_type": "code",
+      "source_file": "src/utils/voucher-barcode.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "utils_voucher_barcode",
+      "community": 203,
+      "norm_label": "voucher-barcode.ts"
+    },
+    {
+      "label": "PLACEHOLDER_VALUES",
+      "file_type": "code",
+      "source_file": "src/utils/voucher-barcode.ts",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "utils_voucher_barcode_placeholder_values",
+      "community": 203,
+      "norm_label": "placeholder_values"
+    },
+    {
+      "label": "normalizeBarcodePayload()",
+      "file_type": "code",
+      "source_file": "src/utils/voucher-barcode.ts",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "utils_voucher_barcode_normalizebarcodepayload",
+      "community": 203,
+      "norm_label": "normalizebarcodepayload()"
+    },
+    {
+      "label": "renderVoucherBarcode()",
+      "file_type": "code",
+      "source_file": "src/utils/voucher-barcode.ts",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "utils_voucher_barcode_rendervoucherbarcode",
+      "community": 203,
+      "norm_label": "rendervoucherbarcode()"
+    },
+    {
+      "label": "clearSvg()",
+      "file_type": "code",
+      "source_file": "src/utils/voucher-barcode.ts",
+      "source_location": "L49",
+      "_origin": "ast",
+      "id": "utils_voucher_barcode_clearsvg",
+      "community": 203,
+      "norm_label": "clearsvg()"
     },
     {
       "label": "tsconfig.json",
@@ -12970,9 +13100,9 @@
       "source_file": "config/resolve-app-public-url.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_resolve_app_public_url",
-      "target": "config_resolve_app_public_url_buildcertificateverifyurl",
-      "confidence_score": 1.0
+      "target": "config_resolve_app_public_url_buildcertificateverifyurl"
     },
     {
       "relation": "contains",
@@ -12980,9 +13110,9 @@
       "source_file": "config/resolve-app-public-url.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_resolve_app_public_url",
-      "target": "config_resolve_app_public_url_buildreceiptverifyurl",
-      "confidence_score": 1.0
+      "target": "config_resolve_app_public_url_buildreceiptverifyurl"
     },
     {
       "relation": "contains",
@@ -12990,9 +13120,9 @@
       "source_file": "config/resolve-app-public-url.ts",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_resolve_app_public_url",
-      "target": "config_resolve_app_public_url_buildverifylandingurl",
-      "confidence_score": 1.0
+      "target": "config_resolve_app_public_url_buildverifylandingurl"
     },
     {
       "relation": "contains",
@@ -13000,9 +13130,9 @@
       "source_file": "config/resolve-app-public-url.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "config_resolve_app_public_url",
-      "target": "config_resolve_app_public_url_getpublicappurl",
-      "confidence_score": 1.0
+      "target": "config_resolve_app_public_url_getpublicappurl"
     },
     {
       "relation": "imports_from",
@@ -13011,9 +13141,9 @@
       "source_file": "src/services/university.service.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_university_service",
-      "target": "config_resolve_app_public_url",
-      "confidence_score": 1.0
+      "target": "config_resolve_app_public_url"
     },
     {
       "relation": "imports_from",
@@ -13022,9 +13152,9 @@
       "source_file": "src/utils/verify-qr.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_verify_qr",
-      "target": "config_resolve_app_public_url",
-      "confidence_score": 1.0
+      "target": "config_resolve_app_public_url"
     },
     {
       "relation": "imports",
@@ -13033,9 +13163,9 @@
       "source_file": "src/services/university.service.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_university_service",
-      "target": "config_resolve_app_public_url_getpublicappurl",
-      "confidence_score": 1.0
+      "target": "config_resolve_app_public_url_getpublicappurl"
     },
     {
       "relation": "imports",
@@ -13044,9 +13174,9 @@
       "source_file": "src/utils/verify-qr.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_verify_qr",
-      "target": "config_resolve_app_public_url_getpublicappurl",
-      "confidence_score": 1.0
+      "target": "config_resolve_app_public_url_getpublicappurl"
     },
     {
       "relation": "calls",
@@ -13088,9 +13218,9 @@
       "source_file": "src/utils/verify-qr.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_verify_qr",
-      "target": "config_resolve_app_public_url_buildcertificateverifyurl",
-      "confidence_score": 1.0
+      "target": "config_resolve_app_public_url_buildcertificateverifyurl"
     },
     {
       "relation": "calls",
@@ -13110,9 +13240,9 @@
       "source_file": "src/utils/verify-qr.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_verify_qr",
-      "target": "config_resolve_app_public_url_buildreceiptverifyurl",
-      "confidence_score": 1.0
+      "target": "config_resolve_app_public_url_buildreceiptverifyurl"
     },
     {
       "relation": "calls",
@@ -13132,9 +13262,9 @@
       "source_file": "src/utils/verify-qr.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_verify_qr",
-      "target": "config_resolve_app_public_url_buildverifylandingurl",
-      "confidence_score": 1.0
+      "target": "config_resolve_app_public_url_buildverifylandingurl"
     },
     {
       "relation": "calls",
@@ -13405,6 +13535,16 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "package_dependencies",
+      "target": "package_dependencies_jsbarcode"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L26",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package_dependencies",
       "target": "package_dependencies_jspdf"
     },
     {
@@ -13423,9 +13563,9 @@
       "source_file": "package.json",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_dependencies",
-      "target": "package_dependencies_qrcode",
-      "confidence_score": 1.0
+      "target": "package_dependencies_qrcode"
     },
     {
       "relation": "contains",
@@ -13611,6 +13751,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "package.json",
+      "source_location": "L41",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "package_devdependencies",
+      "target": "package_devdependencies_types_jsbarcode"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
       "source_location": "L39",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -13633,9 +13783,9 @@
       "source_file": "package.json",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_types_qrcode",
-      "confidence_score": 1.0
+      "target": "package_devdependencies_types_qrcode"
     },
     {
       "relation": "contains",
@@ -14090,9 +14240,9 @@
       "source_file": "src/services/verify.service.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_verify_service",
-      "target": "boot_axios",
-      "confidence_score": 1.0
+      "target": "boot_axios"
     },
     {
       "relation": "imports_from",
@@ -14365,9 +14515,9 @@
       "source_file": "src/services/verify.service.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_verify_service",
-      "target": "boot_axios_api",
-      "confidence_score": 1.0
+      "target": "boot_axios_api"
     },
     {
       "relation": "imports",
@@ -14438,9 +14588,9 @@
       "source_file": "src/boot/i18n.ts",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "boot_i18n",
-      "target": "boot_i18n_i18n",
-      "confidence_score": 1.0
+      "target": "boot_i18n_i18n"
     },
     {
       "relation": "contains",
@@ -14480,9 +14630,9 @@
       "source_file": "src/stores/exam.store.ts",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "stores_exam_store",
-      "target": "boot_i18n",
-      "confidence_score": 1.0
+      "target": "boot_i18n"
     },
     {
       "relation": "inherits",
@@ -14502,9 +14652,9 @@
       "source_file": "src/stores/exam.store.ts",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "stores_exam_store",
-      "target": "boot_i18n_i18n",
-      "confidence_score": 1.0
+      "target": "boot_i18n_i18n"
     },
     {
       "relation": "contains",
@@ -16589,6 +16739,39 @@
       "target": "types_voucher_voucherdata"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/exam/dialog-attendance-checkin.vue",
+      "source_location": "L88",
+      "weight": 1.0,
+      "source": "exam_dialog_attendance_checkin",
+      "target": "utils_scan_keyboard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/exam/dialog-attendance-checkin.vue",
+      "source_location": "L88",
+      "weight": 1.0,
+      "source": "exam_dialog_attendance_checkin",
+      "target": "utils_scan_keyboard_codetoscanchar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/exam/dialog-attendance-checkin.vue",
+      "source_location": "L88",
+      "weight": 1.0,
+      "source": "exam_dialog_attendance_checkin",
+      "target": "utils_scan_keyboard_normalizescanpayload",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/exam/dialog-issue-certificate.vue",
@@ -16729,9 +16912,9 @@
       "source_file": "src/components/exam/dialog-search-candidate.vue",
       "source_location": "L318",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_dialog_search_candidate",
-      "target": "exam_dialog_search_candidate_debouncedfetchresults",
-      "confidence_score": 1.0
+      "target": "exam_dialog_search_candidate_debouncedfetchresults"
     },
     {
       "relation": "imports_from",
@@ -16804,9 +16987,9 @@
       "source_file": "src/components/exam/exam-form.vue",
       "source_location": "L135",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_exam_form",
-      "target": "exam_exam_form_examtypeoptions_examformatoptions_proctoroptions_locationoptions_fundsourceoptions_getoccupiedlocationidsforslot_isloadingdata_issaving_isimportingcandidates_iseditmode_ispublishedsectionlocked_isschedulelocked_isspecialround_wasoriginallypublished_activeslotindex_candidatesearch_filteredcandidates_existingcandidatekeys_haseligiblecandidates_fielderrors_shakekey_loadinitialdata_addtimeslot_removetimeslot_addroom_removeroom_importcandidates_addeligiblecandidatesfromusers_removeeligiblecandidates_generatepasscodes_exportcandidates_handlecancel_handlesave_sorttimeslots_dateerrors_clearfielderror",
-      "confidence_score": 1.0
+      "target": "exam_exam_form_examtypeoptions_examformatoptions_proctoroptions_locationoptions_fundsourceoptions_getoccupiedlocationidsforslot_isloadingdata_issaving_isimportingcandidates_iseditmode_ispublishedsectionlocked_isschedulelocked_isspecialround_wasoriginallypublished_activeslotindex_candidatesearch_filteredcandidates_existingcandidatekeys_haseligiblecandidates_fielderrors_shakekey_loadinitialdata_addtimeslot_removetimeslot_addroom_removeroom_importcandidates_addeligiblecandidatesfromusers_removeeligiblecandidates_generatepasscodes_exportcandidates_handlecancel_handlesave_sorttimeslots_dateerrors_clearfielderror"
     },
     {
       "relation": "contains",
@@ -17208,9 +17391,9 @@
       "source_file": "src/components/exam/round-exam.vue",
       "source_location": "L118",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "exam_round_exam",
-      "target": "exam_round_exam_getsyncednow",
-      "confidence_score": 1.0
+      "target": "exam_round_exam_getsyncednow"
     },
     {
       "relation": "contains",
@@ -17505,9 +17688,9 @@
       "source_file": "src/components/home/home-guideline-section.vue",
       "source_location": "L147",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "home_home_guideline_section",
-      "target": "home_home_guideline_section_computercolumntitle",
-      "confidence_score": 1.0
+      "target": "home_home_guideline_section_computercolumntitle"
     },
     {
       "relation": "contains",
@@ -17515,9 +17698,9 @@
       "source_file": "src/components/home/home-guideline-section.vue",
       "source_location": "L139",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "home_home_guideline_section",
-      "target": "home_home_guideline_section_hascomputerrules",
-      "confidence_score": 1.0
+      "target": "home_home_guideline_section_hascomputerrules"
     },
     {
       "relation": "contains",
@@ -17525,9 +17708,9 @@
       "source_file": "src/components/home/home-guideline-section.vue",
       "source_location": "L141",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "home_home_guideline_section",
-      "target": "home_home_guideline_section_papercolumntitle",
-      "confidence_score": 1.0
+      "target": "home_home_guideline_section_papercolumntitle"
     },
     {
       "relation": "imports_from",
@@ -19638,9 +19821,9 @@
       "source_file": "src/composables/use-countdown.spec.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_countdown_spec",
-      "target": "composables_use_countdown",
-      "confidence_score": 1.0
+      "target": "composables_use_countdown"
     },
     {
       "relation": "imports",
@@ -19649,9 +19832,9 @@
       "source_file": "src/composables/use-countdown.spec.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_countdown_spec",
-      "target": "composables_use_countdown_formatcountdownremaining",
-      "confidence_score": 1.0
+      "target": "composables_use_countdown_formatcountdownremaining"
     },
     {
       "relation": "contains",
@@ -19659,9 +19842,9 @@
       "source_file": "src/composables/use-countdown.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_countdown",
-      "target": "composables_use_countdown_formatcountdownremaining",
-      "confidence_score": 1.0
+      "target": "composables_use_countdown_formatcountdownremaining"
     },
     {
       "relation": "contains",
@@ -19669,9 +19852,9 @@
       "source_file": "src/composables/use-countdown.ts",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_countdown",
-      "target": "composables_use_countdown_isvaliddeadline",
-      "confidence_score": 1.0
+      "target": "composables_use_countdown_isvaliddeadline"
     },
     {
       "relation": "contains",
@@ -19844,9 +20027,9 @@
       "source_file": "src/composables/use-create-exam.ts",
       "source_location": "L151",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_create_exam",
-      "target": "composables_use_create_exam_resolveloadedroomseats",
-      "confidence_score": 1.0
+      "target": "composables_use_create_exam_resolveloadedroomseats"
     },
     {
       "relation": "contains",
@@ -20313,9 +20496,9 @@
       "source_file": "src/composables/use-create-exam.ts",
       "source_location": "L170",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_create_exam_resolveloadedroomseats",
-      "target": "composables_use_create_exam_countavailableseats",
-      "confidence_score": 1.0
+      "target": "composables_use_create_exam_countavailableseats"
     },
     {
       "relation": "imports",
@@ -20706,9 +20889,9 @@
       "source_file": "src/composables/use-exam-certificate-document.ts",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_certificate_document",
-      "target": "utils_verify_qr",
-      "confidence_score": 1.0
+      "target": "utils_verify_qr"
     },
     {
       "relation": "imports",
@@ -20717,9 +20900,9 @@
       "source_file": "src/composables/use-exam-certificate-document.ts",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_certificate_document",
-      "target": "utils_verify_qr_generatecertificateqrdataurl",
-      "confidence_score": 1.0
+      "target": "utils_verify_qr_generatecertificateqrdataurl"
     },
     {
       "relation": "calls",
@@ -20903,9 +21086,9 @@
       "source_file": "src/composables/use-exam-documents.ts",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_documents",
-      "target": "utils_verify_qr",
-      "confidence_score": 1.0
+      "target": "utils_verify_qr"
     },
     {
       "relation": "imports",
@@ -20914,9 +21097,9 @@
       "source_file": "src/composables/use-exam-documents.ts",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "composables_use_exam_documents",
-      "target": "utils_verify_qr_generatereceiptqrdataurl",
-      "confidence_score": 1.0
+      "target": "utils_verify_qr_generatereceiptqrdataurl"
     },
     {
       "relation": "calls",
@@ -23850,9 +24033,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "constants_exam",
-      "confidence_score": 1.0
+      "target": "constants_exam"
     },
     {
       "relation": "imports_from",
@@ -23949,9 +24132,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "constants_exam_enrollment_status",
-      "confidence_score": 1.0
+      "target": "constants_exam_enrollment_status"
     },
     {
       "relation": "imports",
@@ -23971,9 +24154,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "constants_exam_transaction_match_status",
-      "confidence_score": 1.0
+      "target": "constants_exam_transaction_match_status"
     },
     {
       "relation": "imports",
@@ -23993,9 +24176,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "constants_exam_transaction_payment_status",
-      "confidence_score": 1.0
+      "target": "constants_exam_transaction_payment_status"
     },
     {
       "relation": "imports",
@@ -24015,9 +24198,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "constants_exam_receiptstatus",
-      "confidence_score": 1.0
+      "target": "constants_exam_receiptstatus"
     },
     {
       "relation": "contains",
@@ -24197,9 +24380,9 @@
       "source_file": "src/env.d.ts",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_env_d",
-      "target": "src_env_d_importmeta",
-      "confidence_score": 1.0
+      "target": "src_env_d_importmeta"
     },
     {
       "relation": "contains",
@@ -24207,9 +24390,9 @@
       "source_file": "src/env.d.ts",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_env_d",
-      "target": "src_env_d_importmetaenv",
-      "confidence_score": 1.0
+      "target": "src_env_d_importmetaenv"
     },
     {
       "relation": "contains",
@@ -25984,9 +26167,9 @@
       "source_file": "src/services/exam-certificate.service.ts",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_certificate_service",
-      "target": "services_exam_certificate_service_bulkissuecertificatecandidate",
-      "confidence_score": 1.0
+      "target": "services_exam_certificate_service_bulkissuecertificatecandidate"
     },
     {
       "relation": "contains",
@@ -25994,9 +26177,9 @@
       "source_file": "src/services/exam-certificate.service.ts",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_certificate_service",
-      "target": "services_exam_certificate_service_bulkissuecertificates",
-      "confidence_score": 1.0
+      "target": "services_exam_certificate_service_bulkissuecertificates"
     },
     {
       "relation": "contains",
@@ -26004,9 +26187,9 @@
       "source_file": "src/services/exam-certificate.service.ts",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_certificate_service",
-      "target": "services_exam_certificate_service_bulkissuecertificatespayload",
-      "confidence_score": 1.0
+      "target": "services_exam_certificate_service_bulkissuecertificatespayload"
     },
     {
       "relation": "contains",
@@ -26014,9 +26197,9 @@
       "source_file": "src/services/exam-certificate.service.ts",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_exam_certificate_service",
-      "target": "services_exam_certificate_service_bulkissuecertificatesresult",
-      "confidence_score": 1.0
+      "target": "services_exam_certificate_service_bulkissuecertificatesresult"
     },
     {
       "relation": "contains",
@@ -28476,9 +28659,9 @@
       "source_file": "src/services/university.service.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_university_service",
-      "target": "services_university_service_apppublicurl",
-      "confidence_score": 1.0
+      "target": "services_university_service_apppublicurl"
     },
     {
       "relation": "contains",
@@ -28700,9 +28883,9 @@
       "source_file": "src/services/verify.service.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_verify_service",
-      "target": "services_verify_service_verifycertificate",
-      "confidence_score": 1.0
+      "target": "services_verify_service_verifycertificate"
     },
     {
       "relation": "contains",
@@ -28710,9 +28893,9 @@
       "source_file": "src/services/verify.service.ts",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_verify_service",
-      "target": "services_verify_service_verifydocument",
-      "confidence_score": 1.0
+      "target": "services_verify_service_verifydocument"
     },
     {
       "relation": "contains",
@@ -28720,9 +28903,9 @@
       "source_file": "src/services/verify.service.ts",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_verify_service",
-      "target": "services_verify_service_verifyreceipt",
-      "confidence_score": 1.0
+      "target": "services_verify_service_verifyreceipt"
     },
     {
       "relation": "imports_from",
@@ -28731,9 +28914,9 @@
       "source_file": "src/services/verify.service.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_verify_service",
-      "target": "types_verify",
-      "confidence_score": 1.0
+      "target": "types_verify"
     },
     {
       "relation": "imports",
@@ -28742,9 +28925,9 @@
       "source_file": "src/services/verify.service.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_verify_service",
-      "target": "types_verify_verifycertificateresponse",
-      "confidence_score": 1.0
+      "target": "types_verify_verifycertificateresponse"
     },
     {
       "relation": "imports",
@@ -28753,9 +28936,9 @@
       "source_file": "src/services/verify.service.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_verify_service",
-      "target": "types_verify_verifydocumenttype",
-      "confidence_score": 1.0
+      "target": "types_verify_verifydocumenttype"
     },
     {
       "relation": "imports",
@@ -28764,9 +28947,9 @@
       "source_file": "src/services/verify.service.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_verify_service",
-      "target": "types_verify_verifyreceiptresponse",
-      "confidence_score": 1.0
+      "target": "types_verify_verifyreceiptresponse"
     },
     {
       "relation": "calls",
@@ -28775,9 +28958,9 @@
       "source_file": "src/services/verify.service.ts",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_verify_service_verifydocument",
-      "target": "services_verify_service_verifycertificate",
-      "confidence_score": 1.0
+      "target": "services_verify_service_verifycertificate"
     },
     {
       "relation": "calls",
@@ -28786,9 +28969,9 @@
       "source_file": "src/services/verify.service.ts",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "services_verify_service_verifydocument",
-      "target": "services_verify_service_verifyreceipt",
-      "confidence_score": 1.0
+      "target": "services_verify_service_verifyreceipt"
     },
     {
       "relation": "contains",
@@ -28967,9 +29150,9 @@
       "source_file": "src/stores/exam.store.ts",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "stores_exam_store",
-      "target": "stores_user_store",
-      "confidence_score": 1.0
+      "target": "stores_user_store"
     },
     {
       "relation": "imports",
@@ -28978,9 +29161,9 @@
       "source_file": "src/stores/exam.store.ts",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "stores_exam_store",
-      "target": "stores_user_store_useuserstore",
-      "confidence_score": 1.0
+      "target": "stores_user_store_useuserstore"
     },
     {
       "relation": "imports_from",
@@ -29132,9 +29315,9 @@
       "source_file": "src/stores/exam.store.ts",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "stores_exam_store",
-      "target": "utils_map_enrollment_history_status",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status"
     },
     {
       "relation": "imports",
@@ -29143,9 +29326,9 @@
       "source_file": "src/stores/exam.store.ts",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "stores_exam_store",
-      "target": "utils_map_enrollment_history_status_ispendinghistoryitem",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_ispendinghistoryitem"
     },
     {
       "relation": "imports",
@@ -29154,9 +29337,9 @@
       "source_file": "src/stores/exam.store.ts",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "stores_exam_store",
-      "target": "utils_map_enrollment_history_status_mapenrollmenttohistoryitem",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_mapenrollmenttohistoryitem"
     },
     {
       "relation": "contains",
@@ -29896,9 +30079,9 @@
       "source_file": "src/types/exam.ts",
       "source_location": "L60",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "types_exam",
-      "target": "types_exam_examhistorycategory",
-      "confidence_score": 1.0
+      "target": "types_exam_examhistorycategory"
     },
     {
       "relation": "contains",
@@ -30016,9 +30199,9 @@
       "source_file": "src/types/exam.ts",
       "source_location": "L62",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "types_exam",
-      "target": "types_exam_statusbadgetype",
-      "confidence_score": 1.0
+      "target": "types_exam_statusbadgetype"
     },
     {
       "relation": "contains",
@@ -30026,9 +30209,9 @@
       "source_file": "src/types/exam.ts",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "types_exam",
-      "target": "types_exam_statusbadgeview",
-      "confidence_score": 1.0
+      "target": "types_exam_statusbadgeview"
     },
     {
       "relation": "imports_from",
@@ -30048,9 +30231,9 @@
       "source_file": "src/utils/exam-registration.spec.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration_spec",
-      "target": "types_exam",
-      "confidence_score": 1.0
+      "target": "types_exam"
     },
     {
       "relation": "imports_from",
@@ -30059,9 +30242,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "types_exam",
-      "confidence_score": 1.0
+      "target": "types_exam"
     },
     {
       "relation": "imports",
@@ -30081,9 +30264,9 @@
       "source_file": "src/utils/exam-registration.spec.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration_spec",
-      "target": "types_exam_examround",
-      "confidence_score": 1.0
+      "target": "types_exam_examround"
     },
     {
       "relation": "imports",
@@ -30092,9 +30275,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "types_exam_examhistorycategory",
-      "confidence_score": 1.0
+      "target": "types_exam_examhistorycategory"
     },
     {
       "relation": "imports",
@@ -30103,9 +30286,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "types_exam_statusbadgeview",
-      "confidence_score": 1.0
+      "target": "types_exam_statusbadgeview"
     },
     {
       "relation": "imports",
@@ -30114,9 +30297,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "types_exam_examhistoryitem",
-      "confidence_score": 1.0
+      "target": "types_exam_examhistoryitem"
     },
     {
       "relation": "imports",
@@ -30125,9 +30308,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "types_exam_examenrollment",
-      "confidence_score": 1.0
+      "target": "types_exam_examenrollment"
     },
     {
       "relation": "contains",
@@ -30642,9 +30825,9 @@
       "source_file": "src/types/verify.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "types_verify",
-      "target": "types_verify_certificateverifystatus",
-      "confidence_score": 1.0
+      "target": "types_verify_certificateverifystatus"
     },
     {
       "relation": "contains",
@@ -30652,9 +30835,9 @@
       "source_file": "src/types/verify.ts",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "types_verify",
-      "target": "types_verify_receiptverifystatus",
-      "confidence_score": 1.0
+      "target": "types_verify_receiptverifystatus"
     },
     {
       "relation": "contains",
@@ -30662,9 +30845,9 @@
       "source_file": "src/types/verify.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "types_verify",
-      "target": "types_verify_verifycertificateresponse",
-      "confidence_score": 1.0
+      "target": "types_verify_verifycertificateresponse"
     },
     {
       "relation": "contains",
@@ -30672,9 +30855,9 @@
       "source_file": "src/types/verify.ts",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "types_verify",
-      "target": "types_verify_verifydocumentresponse",
-      "confidence_score": 1.0
+      "target": "types_verify_verifydocumentresponse"
     },
     {
       "relation": "contains",
@@ -30682,9 +30865,9 @@
       "source_file": "src/types/verify.ts",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "types_verify",
-      "target": "types_verify_verifydocumenttype",
-      "confidence_score": 1.0
+      "target": "types_verify_verifydocumenttype"
     },
     {
       "relation": "contains",
@@ -30692,9 +30875,9 @@
       "source_file": "src/types/verify.ts",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "types_verify",
-      "target": "types_verify_verifyreceiptresponse",
-      "confidence_score": 1.0
+      "target": "types_verify_verifyreceiptresponse"
     },
     {
       "relation": "contains",
@@ -30775,9 +30958,9 @@
       "source_file": "src/utils/exam-registration.spec.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration_spec",
-      "target": "utils_exam_registration",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration"
     },
     {
       "relation": "imports",
@@ -30786,9 +30969,9 @@
       "source_file": "src/utils/exam-registration.spec.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration_spec",
-      "target": "utils_exam_registration_getexamroundscalendaravailability",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_getexamroundscalendaravailability"
     },
     {
       "relation": "imports",
@@ -30797,9 +30980,9 @@
       "source_file": "src/utils/exam-registration.spec.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration_spec",
-      "target": "utils_exam_registration_isexamroundregistrationexpired",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_isexamroundregistrationexpired"
     },
     {
       "relation": "imports",
@@ -30808,9 +30991,9 @@
       "source_file": "src/utils/exam-registration.spec.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration_spec",
-      "target": "utils_exam_registration_parseexamstartdatetime",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_parseexamstartdatetime"
     },
     {
       "relation": "contains",
@@ -30818,9 +31001,9 @@
       "source_file": "src/utils/exam-registration.spec.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration_spec",
-      "target": "utils_exam_registration_spec_baseround",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_spec_baseround"
     },
     {
       "relation": "contains",
@@ -30838,9 +31021,9 @@
       "source_file": "src/utils/exam-registration.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration",
-      "target": "utils_exam_registration_examregistrationexpiryinput",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_examregistrationexpiryinput"
     },
     {
       "relation": "contains",
@@ -30868,9 +31051,9 @@
       "source_file": "src/utils/exam-registration.ts",
       "source_location": "L79",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration",
-      "target": "utils_exam_registration_parseexamstartdatetime",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_parseexamstartdatetime"
     },
     {
       "relation": "contains",
@@ -30908,9 +31091,9 @@
       "source_file": "src/utils/exam-registration.ts",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration",
-      "target": "utils_exam_registration_tobangkokendofday",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_tobangkokendofday"
     },
     {
       "relation": "calls",
@@ -30941,9 +31124,9 @@
       "source_file": "src/utils/exam-registration.ts",
       "source_location": "L110",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration_parseexamstartdatetime",
-      "target": "utils_exam_registration_parseregistrationdate",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_parseregistrationdate"
     },
     {
       "relation": "calls",
@@ -30963,9 +31146,9 @@
       "source_file": "src/utils/exam-registration.ts",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration_parseregistrationenddate",
-      "target": "utils_exam_registration_tobangkokendofday",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_tobangkokendofday"
     },
     {
       "relation": "calls",
@@ -30985,9 +31168,9 @@
       "source_file": "src/utils/exam-registration.ts",
       "source_location": "L130",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_exam_registration_isexamroundregistrationexpired",
-      "target": "utils_exam_registration_parseexamstartdatetime",
-      "confidence_score": 1.0
+      "target": "utils_exam_registration_parseexamstartdatetime"
     },
     {
       "relation": "contains",
@@ -31015,9 +31198,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "utils_map_enrollment_history_status_buildbadge",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_buildbadge"
     },
     {
       "relation": "contains",
@@ -31025,9 +31208,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "utils_map_enrollment_history_status_buildbaseitem",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_buildbaseitem"
     },
     {
       "relation": "contains",
@@ -31035,9 +31218,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "utils_map_enrollment_history_status_cancellationreason",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_cancellationreason"
     },
     {
       "relation": "contains",
@@ -31045,9 +31228,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "utils_map_enrollment_history_status_getpaymentdeadline",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_getpaymentdeadline"
     },
     {
       "relation": "contains",
@@ -31055,9 +31238,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "utils_map_enrollment_history_status_hasdownloadablereceipt",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_hasdownloadablereceipt"
     },
     {
       "relation": "contains",
@@ -31065,9 +31248,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "utils_map_enrollment_history_status_hasmatchedpayment",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_hasmatchedpayment"
     },
     {
       "relation": "contains",
@@ -31075,9 +31258,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "utils_map_enrollment_history_status_ispaymenttimeoutcancellation",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_ispaymenttimeoutcancellation"
     },
     {
       "relation": "contains",
@@ -31085,9 +31268,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L275",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "utils_map_enrollment_history_status_ispendinghistoryitem",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_ispendinghistoryitem"
     },
     {
       "relation": "contains",
@@ -31095,9 +31278,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "utils_map_enrollment_history_status_mapenrollmenthistorycontext",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_mapenrollmenthistorycontext"
     },
     {
       "relation": "contains",
@@ -31105,9 +31288,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "utils_map_enrollment_history_status_mapenrollmenttohistoryitem",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_mapenrollmenttohistoryitem"
     },
     {
       "relation": "contains",
@@ -31115,9 +31298,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L279",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status",
-      "target": "utils_map_enrollment_history_status_matcheshistorycategory",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_matcheshistorycategory"
     },
     {
       "relation": "calls",
@@ -31126,9 +31309,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status_ispaymenttimeoutcancellation",
-      "target": "utils_map_enrollment_history_status_getpaymentdeadline",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_getpaymentdeadline"
     },
     {
       "relation": "calls",
@@ -31137,9 +31320,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L102",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status_mapenrollmenttohistoryitem",
-      "target": "utils_map_enrollment_history_status_getpaymentdeadline",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_getpaymentdeadline"
     },
     {
       "relation": "calls",
@@ -31148,9 +31331,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L250",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status_mapenrollmenttohistoryitem",
-      "target": "utils_map_enrollment_history_status_ispaymenttimeoutcancellation",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_ispaymenttimeoutcancellation"
     },
     {
       "relation": "calls",
@@ -31159,9 +31342,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status_hasdownloadablereceipt",
-      "target": "utils_map_enrollment_history_status_hasmatchedpayment",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_hasmatchedpayment"
     },
     {
       "relation": "calls",
@@ -31170,9 +31353,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L88",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status_mapenrollmenttohistoryitem",
-      "target": "utils_map_enrollment_history_status_hasdownloadablereceipt",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_hasdownloadablereceipt"
     },
     {
       "relation": "calls",
@@ -31181,9 +31364,9 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L92",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status_mapenrollmenttohistoryitem",
-      "target": "utils_map_enrollment_history_status_buildbadge",
-      "confidence_score": 1.0
+      "target": "utils_map_enrollment_history_status_buildbadge"
     },
     {
       "relation": "calls",
@@ -31192,8 +31375,71 @@
       "source_file": "src/utils/map-enrollment-history-status.ts",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_map_enrollment_history_status_mapenrollmenttohistoryitem",
-      "target": "utils_map_enrollment_history_status_buildbaseitem",
+      "target": "utils_map_enrollment_history_status_buildbaseitem"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/scan-keyboard.spec.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "utils_scan_keyboard_spec",
+      "target": "utils_scan_keyboard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/scan-keyboard.spec.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "utils_scan_keyboard_spec",
+      "target": "utils_scan_keyboard_codetoscanchar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/scan-keyboard.spec.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "utils_scan_keyboard_spec",
+      "target": "utils_scan_keyboard_normalizescanpayload",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/scan-keyboard.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "utils_scan_keyboard",
+      "target": "utils_scan_keyboard_codetoscanchar",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/scan-keyboard.ts",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "utils_scan_keyboard",
+      "target": "utils_scan_keyboard_kedmanee_to_qwerty",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/scan-keyboard.ts",
+      "source_location": "L72",
+      "weight": 1.0,
+      "source": "utils_scan_keyboard",
+      "target": "utils_scan_keyboard_normalizescanpayload",
       "confidence_score": 1.0
     },
     {
@@ -31305,9 +31551,9 @@
       "source_file": "src/utils/verify-qr.ts",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_verify_qr",
-      "target": "utils_verify_qr_generatecertificateqrdataurl",
-      "confidence_score": 1.0
+      "target": "utils_verify_qr_generatecertificateqrdataurl"
     },
     {
       "relation": "contains",
@@ -31315,9 +31561,9 @@
       "source_file": "src/utils/verify-qr.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_verify_qr",
-      "target": "utils_verify_qr_generateqrdataurl",
-      "confidence_score": 1.0
+      "target": "utils_verify_qr_generateqrdataurl"
     },
     {
       "relation": "contains",
@@ -31325,9 +31571,9 @@
       "source_file": "src/utils/verify-qr.ts",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_verify_qr",
-      "target": "utils_verify_qr_generatereceiptqrdataurl",
-      "confidence_score": 1.0
+      "target": "utils_verify_qr_generatereceiptqrdataurl"
     },
     {
       "relation": "contains",
@@ -31335,9 +31581,9 @@
       "source_file": "src/utils/verify-qr.ts",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_verify_qr",
-      "target": "utils_verify_qr_getverifylandingurl",
-      "confidence_score": 1.0
+      "target": "utils_verify_qr_getverifylandingurl"
     },
     {
       "relation": "calls",
@@ -31346,9 +31592,9 @@
       "source_file": "src/utils/verify-qr.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_verify_qr_generatecertificateqrdataurl",
-      "target": "utils_verify_qr_generateqrdataurl",
-      "confidence_score": 1.0
+      "target": "utils_verify_qr_generateqrdataurl"
     },
     {
       "relation": "calls",
@@ -31357,9 +31603,104 @@
       "source_file": "src/utils/verify-qr.ts",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "utils_verify_qr_generatereceiptqrdataurl",
-      "target": "utils_verify_qr_generateqrdataurl",
-      "confidence_score": 1.0
+      "target": "utils_verify_qr_generateqrdataurl"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/voucher-barcode.spec.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "utils_voucher_barcode_spec",
+      "target": "utils_voucher_barcode"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/voucher-barcode.spec.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "utils_voucher_barcode_spec",
+      "target": "utils_voucher_barcode_normalizebarcodepayload"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/voucher-barcode.spec.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "utils_voucher_barcode_spec",
+      "target": "utils_voucher_barcode_rendervoucherbarcode"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/voucher-barcode.ts",
+      "source_location": "L49",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "utils_voucher_barcode",
+      "target": "utils_voucher_barcode_clearsvg"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/voucher-barcode.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "utils_voucher_barcode",
+      "target": "utils_voucher_barcode_normalizebarcodepayload"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/voucher-barcode.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "utils_voucher_barcode",
+      "target": "utils_voucher_barcode_placeholder_values"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/voucher-barcode.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "utils_voucher_barcode",
+      "target": "utils_voucher_barcode_rendervoucherbarcode"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/voucher-barcode.ts",
+      "source_location": "L26",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "utils_voucher_barcode_rendervoucherbarcode",
+      "target": "utils_voucher_barcode_normalizebarcodepayload"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/utils/voucher-barcode.ts",
+      "source_location": "L27",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "utils_voucher_barcode_rendervoucherbarcode",
+      "target": "utils_voucher_barcode_clearsvg"
     },
     {
       "relation": "contains",
@@ -31393,5 +31734,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "2c452a93f2d82c1e96985fcd7f678deb441d2278"
+  "built_at_commit": "3fe5540fc4f7c89db094713c02fce2bf68c42875"
 }

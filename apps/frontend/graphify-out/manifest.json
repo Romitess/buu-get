@@ -35,8 +35,8 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1785137844.1298718,
-    "ast_hash": "e8adc51eb9df2f84485e24249c14052e",
+    "mtime": 1785482672.2754836,
+    "ast_hash": "8e4b6c4f6168881b0777484f05249221",
     "semantic_hash": ""
   },
   "playwright.config.ts": {
@@ -465,8 +465,8 @@
     "semantic_hash": ""
   },
   "src/components/exam/dialog-attendance-checkin.vue": {
-    "mtime": 1785473600.7463844,
-    "ast_hash": "5a26d1a5e75b5afd6c3feb0e48dd6d1d",
+    "mtime": 1785484227.6308427,
+    "ast_hash": "c5ee0a8e08fd1ba23dc7d0e3e3b62608",
     "semantic_hash": ""
   },
   "src/components/exam/dialog-cancel.vue": {
@@ -615,8 +615,8 @@
     "semantic_hash": ""
   },
   "src/components/home/home-guideline-section.vue": {
-    "mtime": 1785478607.4052742,
-    "ast_hash": "0e73e3828c7e0b750bc6f6e0df6bc73b",
+    "mtime": 1785478988.843166,
+    "ast_hash": "546f99bb20af7321f183aa9b847ebcde",
     "semantic_hash": ""
   },
   "src/components/home/home-main-content.vue": {
@@ -815,8 +815,8 @@
     "semantic_hash": ""
   },
   "src/components/test-voucher-report.vue": {
-    "mtime": 1783042948.8527112,
-    "ast_hash": "348a501e20dfbb28a9d19dfcc59ec82c",
+    "mtime": 1785483020.4239054,
+    "ast_hash": "4fe6c43bd2e0a849d13b24387322ef10",
     "semantic_hash": ""
   },
   "src/composables/use-available-exam-rounds.ts": {
@@ -855,8 +855,8 @@
     "semantic_hash": ""
   },
   "src/composables/use-exam-documents.ts": {
-    "mtime": 1785137844.1375537,
-    "ast_hash": "5f6fc463e94035c1dc1f00be5339984f",
+    "mtime": 1785482772.3782883,
+    "ast_hash": "21209f7cd22c7d0cf37967859f7d7196",
     "semantic_hash": ""
   },
   "src/composables/use-exam-registrants.ts": {
@@ -1045,8 +1045,8 @@
     "semantic_hash": ""
   },
   "src/pages/admin/exam-attendance-page.vue": {
-    "mtime": 1785473600.746745,
-    "ast_hash": "30010b7d03b61ae3180a3aad9dea9ac2",
+    "mtime": 1785483750.825695,
+    "ast_hash": "29b1ced92a67d0f3f6b9ff2efc8d894b",
     "semantic_hash": ""
   },
   "src/pages/admin/exam-candidates-info-page.vue": {
@@ -1090,8 +1090,8 @@
     "semantic_hash": ""
   },
   "src/pages/admin/exam-seat-candidates-page.vue": {
-    "mtime": 1784859489.8849525,
-    "ast_hash": "24a1a926c94ee4729d4b29841b651c15",
+    "mtime": 1785482748.0843182,
+    "ast_hash": "508b5eed7f8240734ab19bd49de9a409",
     "semantic_hash": ""
   },
   "src/pages/admin/exam-seat-management-page.vue": {
@@ -1175,7 +1175,7 @@
     "semantic_hash": ""
   },
   "src/pages/home-page.vue": {
-    "mtime": 1784689645.912951,
+    "mtime": 1785481803.5851934,
     "ast_hash": "fbf577efa4550d054c38d2cdaa66bf3f",
     "semantic_hash": ""
   },
@@ -3355,8 +3355,8 @@
     "semantic_hash": ""
   },
   "src/components/exam/dialog-issue-ticket.spec.ts": {
-    "mtime": 1784859489.876257,
-    "ast_hash": "b2e2069b28e2d171790d27fbd93f9d87",
+    "mtime": 1785482750.1170394,
+    "ast_hash": "a464f1d84ac242094419565f47c030f6",
     "semantic_hash": ""
   },
   "src/components/home/candidate-activity-card.vue": {
@@ -3597,6 +3597,26 @@
   "src/utils/verify-qr.ts": {
     "mtime": 1785137844.1441405,
     "ast_hash": "97431af52d78ed03dd136dc9e7bd85c2",
+    "semantic_hash": ""
+  },
+  "src/utils/voucher-barcode.spec.ts": {
+    "mtime": 1785482696.676721,
+    "ast_hash": "22813abece95c0537822645d9f4b5717",
+    "semantic_hash": ""
+  },
+  "src/utils/voucher-barcode.ts": {
+    "mtime": 1785483011.2040803,
+    "ast_hash": "5b6695e7ac79f955eb00fa68b10d7ec2",
+    "semantic_hash": ""
+  },
+  "src/utils/scan-keyboard.spec.ts": {
+    "mtime": 1785484287.665993,
+    "ast_hash": "dc48fa9a6e9486f2db57544f15ba3eec",
+    "semantic_hash": ""
+  },
+  "src/utils/scan-keyboard.ts": {
+    "mtime": 1785484286.4949286,
+    "ast_hash": "81072e0a4e51e11b0d54b9d9269207e8",
     "semantic_hash": ""
   }
 }
