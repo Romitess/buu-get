@@ -796,6 +796,8 @@ export default {
       dragToSeatHint: 'Drag onto an empty seat',
       unassignedBanner:
         '{count} applicant(s) still need seats — drag them from the list onto empty seats',
+      applicantTypeFilterLabel: 'Applicant type',
+      applicantTypeAll: 'All',
       savingData: 'Saving seat layout...',
       loadingData: 'Loading data...',
       noName: 'No name',

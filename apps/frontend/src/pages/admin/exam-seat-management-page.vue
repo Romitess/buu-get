@@ -68,8 +68,20 @@
               }}
             </div>
 
-            <div class="q-mb-md">
+            <div class="student-list-filters q-mb-md">
               <SearchBar v-model="searchQuery" full-width @search="handleSearch" />
+              <AppSelect
+                v-model="applicantTypeFilter"
+                :options="applicantTypeOptions"
+                :label="$t('admin.seatManagement.applicantTypeFilterLabel')"
+                popup-content-class="applicant-type-select-menu"
+                emit-value
+                map-options
+                dense
+                outlined
+                options-dense
+                class="applicant-type-select"
+              />
             </div>
 
             <div class="student-list">
@@ -154,6 +166,7 @@ import { onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
+import AppSelect from 'src/components/base/app-select.vue';
 import AppExamSeatCard from 'src/components/exam/app-exam-seat-card.vue';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
 import AppExamSeatAssignmentMap from 'src/components/exam/app-exam-seat-assignment-map.vue';
@@ -175,6 +188,8 @@ const {
   sessionTimeTabs,
   roomOptions,
   searchQuery,
+  applicantTypeFilter,
+  applicantTypeOptions,
   splitLeftRight,
   aisleAfterCols,
   aisleAfterRows,
@@ -289,6 +304,28 @@ const onAssignStudentFromList = (ermId: number, seatId: string): void => {
   color: #1a5278;
 }
 
+.student-list-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+
+  .search-bar {
+    flex: 1 1 180px;
+    min-width: 0;
+  }
+}
+
+.applicant-type-select {
+  flex: 0 1 180px;
+  min-width: 160px;
+  max-width: 100%;
+
+  :deep(.q-field__control) {
+    border-radius: var(--radius-10) !important;
+  }
+}
+
 .student-list {
   display: flex;
   flex-direction: column;
@@ -332,5 +369,12 @@ const onAssignStudentFromList = (ermId: number, seatId: string): void => {
   border-radius: 8px !important;
   padding: 10px 32px !important;
   font-weight: 600;
+}
+</style>
+
+<style lang="scss">
+/* Menu teleports to body — show all applicant type options without scrolling */
+.app-select-menu.applicant-type-select-menu {
+  max-height: none !important;
 }
 </style>

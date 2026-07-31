@@ -5,7 +5,7 @@
     menu-self="top left"
     v-bind="$attrs"
     :model-value="modelValue"
-    :popup-content-class="`app-select-menu ${isMuted ? 'app-select-menu--muted' : ''}`"
+    :popup-content-class="popupContentClass"
     class="app-select"
     :class="{ 'app-select--open': isOpen }"
     @update:model-value="emit('update:modelValue', $event)"
@@ -46,6 +46,14 @@ const isMuted = computed(() => {
     return className.includes('buu-input-muted');
   }
   return false;
+});
+
+const popupContentClass = computed(() => {
+  const extra = attrs['popup-content-class'] ?? attrs.popupContentClass ?? '';
+  const extraClass = Array.isArray(extra) ? extra.filter(Boolean).join(' ') : String(extra || '');
+  return ['app-select-menu', isMuted.value ? 'app-select-menu--muted' : '', extraClass]
+    .filter(Boolean)
+    .join(' ');
 });
 
 const handlePopupShow = (): void => {

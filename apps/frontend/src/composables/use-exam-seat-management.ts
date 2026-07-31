@@ -32,6 +32,15 @@ const PHYSICAL_STATUS_REMARKS: Record<number, string> = {
   4: 'ผู้พิการรณ์',
 };
 
+export const APPLICANT_TYPE_FILTER_ALL = 'all';
+
+/** ประเภทผู้สมัครที่ใช้กรองรายชื่อ เรียงตามลำดับการจัดที่นั่ง */
+const APPLICANT_TYPE_REMARKS = [
+  ...Object.values(PHYSICAL_STATUS_REMARKS),
+  'ชาวต่างชาติ',
+  'ชาวไทย',
+];
+
 export type SeatStatus = 'available' | 'assigned' | 'broken' | 'blocked';
 
 export interface SeatCell {
@@ -145,7 +154,13 @@ export function useExamSeatManagement() {
   const showPlacementChoiceDialog = ref(false);
   const blockedSeatsBySessionId = ref<Record<number, BackendBlockedSeat[]>>({});
   const searchQuery = ref('');
+  const applicantTypeFilter = ref<string>(APPLICANT_TYPE_FILTER_ALL);
   const hasLoadedEnrollments = ref(false);
+
+  const applicantTypeOptions = computed(() => [
+    { label: t('admin.seatManagement.applicantTypeAll'), value: APPLICANT_TYPE_FILTER_ALL },
+    ...APPLICANT_TYPE_REMARKS.map((remark) => ({ label: remark, value: remark })),
+  ]);
 
   // ── Computed: exam / session info ────────────────────────
   const activeSession = computed((): BackendSession | null => {
@@ -681,10 +696,14 @@ export function useExamSeatManagement() {
       ? (seatOrderById.value.get(student.seat) ?? Number.MAX_SAFE_INTEGER)
       : Number.MAX_SAFE_INTEGER;
 
+  const matchesApplicantType = (student: StudentSeatInfo): boolean =>
+    applicantTypeFilter.value === APPLICANT_TYPE_FILTER_ALL ||
+    student.remark === applicantTypeFilter.value;
+
   const filteredStudents = computed((): StudentSeatInfo[] => {
     const query = searchQuery.value.toLowerCase().trim();
     // Show only the applicants seated in the currently selected room
-    const sourceList = currentRoomStudents.value;
+    const sourceList = currentRoomStudents.value.filter(matchesApplicantType);
     const list = query
       ? sourceList.filter((s) => {
           const seatLabel = getSeatLabel(s.seat)?.toLowerCase() || '';
@@ -1389,6 +1408,8 @@ export function useExamSeatManagement() {
     sessionTimeTabs,
     roomOptions,
     searchQuery,
+    applicantTypeFilter,
+    applicantTypeOptions,
     gridCols,
     splitLeftRight,
     aisleAfterCols,
