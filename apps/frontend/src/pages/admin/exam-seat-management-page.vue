@@ -82,6 +82,7 @@
                 :seat-number="getSeatLabel(student.seat)"
                 :avatar-url="student.avatar"
                 :remark="student.remark"
+                :bg-color="student.bgColor"
                 :is-foreigner="student.isForeigner"
                 :drag-hint="$t('admin.seatManagement.dragToSeatHint')"
               />
