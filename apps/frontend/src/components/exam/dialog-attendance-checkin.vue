@@ -2,7 +2,7 @@
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <q-card class="checkin-dialog-card">
       <header class="dialog-header">
-        <h2>เช็คอินเข้าห้องสอบ</h2>
+        <h2>เช็กอินเข้าห้องสอบ</h2>
         <q-btn
           flat
           round
@@ -56,7 +56,7 @@
       <footer class="action-footer row justify-center q-mt-md q-gutter-x-md">
         <AppButton label="ยกเลิก" class="footer-btn cancel-btn" @click="onCancelClick" />
         <AppButton
-          label="เช็คอินเข้าห้องสอบ"
+          label="เช็กอินเข้าห้องสอบ"
           color="primary"
           class="footer-btn checkin-confirm-btn"
           :disable="!canCheckIn"
@@ -188,7 +188,7 @@ const handleCheckIn = async () => {
 
     $q.notify({
       type: 'positive',
-      message: 'เช็คอินเข้าห้องสอบสำเร็จ',
+      message: 'เช็กอินเข้าห้องสอบสำเร็จ',
       position: 'top',
     });
 
@@ -197,7 +197,7 @@ const handleCheckIn = async () => {
     console.error(error);
     $q.notify({
       type: 'negative',
-      message: 'เกิดข้อผิดพลาดในการเช็คอิน',
+      message: 'เกิดข้อผิดพลาดในการเช็กอิน',
       position: 'top',
     });
   }

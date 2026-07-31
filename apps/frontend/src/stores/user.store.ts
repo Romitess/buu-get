@@ -28,7 +28,7 @@ export const useUserStore = defineStore('user', () => {
   // === Computed ===
   const userRole = computed<UserRole | null>(() => (currentUser.value?.role as UserRole) || null);
 
-  /** role ทั้งหมดของผู้ใช้ — ใช้สำหรับเช็คสิทธิ์แบบ multi-role */
+  /** role ทั้งหมดของผู้ใช้ — ใช้สำหรับเช็กสิทธิ์แบบ multi-role */
   const userRoles = computed<UserRole[]>(() => currentUser.value?.roles ?? []);
 
   const profileItems = computed(() => {

@@ -483,7 +483,7 @@ export class PlatformGatewayService {
         : list[list.length - 1] || '';
     const name = uuidv4();
     // ถ้า forceFileName เป็น true ให้ใช้ชื่อที่ส่งมาเลย (ใช้สำหรับเขียนทับ)
-    // ถ้าไม่ใช่ ให้ใช้ตรรกะเดิมคือเช็ค ums_system_ หรือ Gen ใหม่
+    // ถ้าไม่ใช่ ให้ใช้ตรรกะเดิมคือเช็ก ums_system_ หรือ Gen ใหม่
     const fileName =
       uploadFileDto.forceFileName && uploadFileDto.fileName
         ? uploadFileDto.fileName

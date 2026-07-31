@@ -33,7 +33,7 @@
       <div class="col-shrink row q-gutter-x-md no-wrap">
         <AppButton
           icon="assignment_ind"
-          label="เช็คอินเข้าห้องสอบ"
+          label="เช็กอินเข้าห้องสอบ"
           color="primary"
           class="action-btn"
           @click="openCheckInDialog"

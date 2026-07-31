@@ -8,7 +8,7 @@ import { useUserStore } from 'src/stores/user.store';
 export default boot(async ({ store }) => {
   const userStore = useUserStore(store);
 
-  // โหลดข้อมูลผู้ใช้เริ่มต้น (เช่น เช็คว่าเคย Login ค้างไว้ไหม)
+  // โหลดข้อมูลผู้ใช้เริ่มต้น (เช่น เช็กว่าเคย Login ค้างไว้ไหม)
   // ต้องใส่ await เพราะเราเปลี่ยน initialize เป็น async แล้ว
   await userStore.initialize();
 
