@@ -54,11 +54,14 @@
       </div>
 
       <q-card-actions class="row justify-center q-col-gutter-md q-px-none q-pt-lg q-pb-none">
-        <div v-if="currentStep > 1" class="col-6 col-sm-3">
+        <div class="col-6 col-sm-3" :class="{ invisible: currentStep <= 1 }">
           <AppButton
             flat
             :label="$t('exam.prepGuide.back')"
             class="full-width back-btn text-weight-bold"
+            :disable="currentStep <= 1"
+            :aria-hidden="currentStep <= 1"
+            :tabindex="currentStep <= 1 ? -1 : undefined"
             @click="goBack"
           />
         </div>
@@ -188,7 +191,19 @@ const goNext = (): void => {
 }
 
 .step-body {
+  /* Tallest step = items (side-by-side). 88 * 0.25rem = 22rem */
+  height: calc(var(--space-unit) * 88);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 599px) {
+  .step-body {
+    /* Panels stack on mobile. 112 * 0.25rem = 28rem */
+    height: calc(var(--space-unit) * 112);
+    overflow-y: auto;
+  }
 }
 
 .next-btn {
