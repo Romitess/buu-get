@@ -117,75 +117,13 @@
 
           <!-- ===== Barcode Footer Section ===== -->
           <div class="voucher-footer flex flex-center column">
-            <div class="barcode-wrapper flex flex-center column bg-white q-pa-sm">
-              <!-- SVG Vector Barcode -->
-              <svg class="barcode-svg" viewBox="0 0 360 48" xmlns="http://www.w3.org/2000/svg">
-                <rect x="0" y="0" width="3" height="48" fill="#000" />
-                <rect x="6" y="0" width="1" height="48" fill="#000" />
-                <rect x="10" y="0" width="4" height="48" fill="#000" />
-                <rect x="18" y="0" width="2" height="48" fill="#000" />
-                <rect x="22" y="0" width="1" height="48" fill="#000" />
-                <rect x="26" y="0" width="3" height="48" fill="#000" />
-                <rect x="34" y="0" width="2" height="48" fill="#000" />
-                <rect x="40" y="0" width="1" height="48" fill="#000" />
-                <rect x="44" y="0" width="4" height="48" fill="#000" />
-                <rect x="52" y="0" width="2" height="48" fill="#000" />
-                <rect x="58" y="0" width="3" height="48" fill="#000" />
-                <rect x="64" y="0" width="1" height="48" fill="#000" />
-                <rect x="68" y="0" width="2" height="48" fill="#000" />
-                <rect x="74" y="0" width="4" height="48" fill="#000" />
-                <rect x="80" y="0" width="1" height="48" fill="#000" />
-                <rect x="84" y="0" width="3" height="48" fill="#000" />
-                <rect x="92" y="0" width="2" height="48" fill="#000" />
-                <rect x="98" y="0" width="1" height="48" fill="#000" />
-                <rect x="102" y="0" width="4" height="48" fill="#000" />
-                <rect x="110" y="0" width="2" height="48" fill="#000" />
-                <rect x="116" y="0" width="3" height="48" fill="#000" />
-                <rect x="122" y="0" width="1" height="48" fill="#000" />
-                <rect x="126" y="0" width="2" height="48" fill="#000" />
-                <rect x="132" y="0" width="4" height="48" fill="#000" />
-                <rect x="138" y="0" width="1" height="48" fill="#000" />
-                <rect x="142" y="0" width="3" height="48" fill="#000" />
-                <rect x="150" y="0" width="2" height="48" fill="#000" />
-                <rect x="156" y="0" width="1" height="48" fill="#000" />
-                <rect x="160" y="0" width="4" height="48" fill="#000" />
-                <rect x="168" y="0" width="2" height="48" fill="#000" />
-                <rect x="174" y="0" width="3" height="48" fill="#000" />
-                <rect x="180" y="0" width="1" height="48" fill="#000" />
-                <rect x="184" y="0" width="2" height="48" fill="#000" />
-                <rect x="190" y="0" width="4" height="48" fill="#000" />
-                <rect x="196" y="0" width="1" height="48" fill="#000" />
-                <rect x="200" y="0" width="3" height="48" fill="#000" />
-                <rect x="208" y="0" width="2" height="48" fill="#000" />
-                <rect x="214" y="0" width="1" height="48" fill="#000" />
-                <rect x="218" y="0" width="4" height="48" fill="#000" />
-                <rect x="226" y="0" width="2" height="48" fill="#000" />
-                <rect x="232" y="0" width="3" height="48" fill="#000" />
-                <rect x="238" y="0" width="1" height="48" fill="#000" />
-                <rect x="242" y="0" width="2" height="48" fill="#000" />
-                <rect x="248" y="0" width="4" height="48" fill="#000" />
-                <rect x="254" y="0" width="1" height="48" fill="#000" />
-                <rect x="258" y="0" width="3" height="48" fill="#000" />
-                <rect x="266" y="0" width="2" height="48" fill="#000" />
-                <rect x="272" y="0" width="1" height="48" fill="#000" />
-                <rect x="276" y="0" width="4" height="48" fill="#000" />
-                <rect x="284" y="0" width="2" height="48" fill="#000" />
-                <rect x="290" y="0" width="3" height="48" fill="#000" />
-                <rect x="296" y="0" width="1" height="48" fill="#000" />
-                <rect x="300" y="0" width="2" height="48" fill="#000" />
-                <rect x="306" y="0" width="4" height="48" fill="#000" />
-                <rect x="312" y="0" width="1" height="48" fill="#000" />
-                <rect x="316" y="0" width="3" height="48" fill="#000" />
-                <rect x="324" y="0" width="2" height="48" fill="#000" />
-                <rect x="330" y="0" width="1" height="48" fill="#000" />
-                <rect x="334" y="0" width="4" height="48" fill="#000" />
-                <rect x="342" y="0" width="2" height="48" fill="#000" />
-                <rect x="348" y="0" width="3" height="48" fill="#000" />
-                <rect x="354" y="0" width="1" height="48" fill="#000" />
-              </svg>
-              <div class="barcode-value text-weight-bold text-uppercase">
-                {{ voucherData.barcodeValue || voucherData.voucherNo }}
-              </div>
+            <div class="barcode-wrapper flex flex-center column">
+              <svg
+                ref="barcodeSvgRef"
+                class="barcode-svg"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              />
             </div>
           </div>
         </div>
@@ -219,11 +157,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { VoucherData } from 'src/types/voucher';
 import ImageDisplay from 'src/components/base/image-display.vue';
 import { getRegulations } from 'src/services/exam-rule-voucher.service';
+import { normalizeBarcodePayload, renderVoucherBarcode } from 'src/utils/voucher-barcode';
 
 // ===== Props =====
 const props = withDefaults(
@@ -259,9 +198,34 @@ const mockData: VoucherData = {
   voucherNo: 'ENG2026-001',
   citizenId: '1-1234-12345-12-1',
   testSession: 'X/XXXX',
+  barcodeValue: '66100001',
 };
 
 const voucherData = computed<VoucherData>(() => props.data ?? mockData);
+
+/** Code128 payload = Test Taker ID (ERM_TEST_TAKER); never fall back to VC_CODE */
+const barcodeDisplayValue = computed(() => {
+  return (
+    normalizeBarcodePayload(voucherData.value.barcodeValue) ||
+    normalizeBarcodePayload(voucherData.value.studentId) ||
+    ''
+  );
+});
+
+const barcodeSvgRef = ref<SVGSVGElement | null>(null);
+
+const refreshBarcode = (): void => {
+  renderVoucherBarcode(barcodeSvgRef.value, barcodeDisplayValue.value);
+};
+
+watch(
+  [barcodeDisplayValue, () => props.showVoucherCard, barcodeSvgRef],
+  async () => {
+    await nextTick();
+    refreshBarcode();
+  },
+  { flush: 'post' },
+);
 
 // ===== Regulations State & Computed =====
 const { t } = useI18n();
@@ -339,8 +303,9 @@ onMounted(async () => {
     }
   }
 
-  // Setup ResizeObserver
+  // Setup ResizeObserver + barcode (PDF off-screen render needs bars before capture)
   void nextTick(() => {
+    refreshBarcode();
     updateScale();
     if (scaleWrapperRef.value && typeof ResizeObserver !== 'undefined') {
       resizeObserver = new ResizeObserver(() => {
@@ -614,18 +579,11 @@ const windowPrint = (): void => {
     padding: 0 !important;
 
     .barcode-svg {
-      width: 254px;
-      height: 36px;
-    }
-
-    .barcode-value {
-      font-family: var(--font-family-base) !important;
-      font-weight: 700 !important;
-      font-size: 10px !important;
-      line-height: 100% !important;
-      letter-spacing: 0.5px !important;
-      text-align: center !important;
-      margin-top: 4px;
+      /* ~12 mm tall bars for hardware scanner reliability */
+      width: 280px;
+      height: 48px;
+      min-height: 48px;
+      background: transparent;
     }
   }
 }
@@ -747,11 +705,10 @@ const windowPrint = (): void => {
     font-size: 16px !important;
   }
   .barcode-wrapper .barcode-svg {
-    width: 254px;
-    height: 36px;
-  }
-  .barcode-wrapper .barcode-value {
-    font-size: 12px !important;
+    width: 280px;
+    height: 48px;
+    min-height: 48px;
+    background: transparent;
   }
   .watermark-bg {
     top: 46%;

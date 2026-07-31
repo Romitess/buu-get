@@ -55,7 +55,7 @@ const voucherData: VoucherData = {
   voucherNo: 'VC-001',
   citizenId: 'X-XXXX-XXXXX-XX-X',
   testSession: '1/2569',
-  barcodeValue: 'VC-001',
+  barcodeValue: 'TT-001',
 };
 
 const mountDialog = (onConfirm?: () => Promise<void>) =>

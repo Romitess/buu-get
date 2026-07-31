@@ -158,9 +158,10 @@ const openCheckInDialog = () => {
       examTime: selectedSessionTime.value,
       examLocation: selectedSessionLocation.value,
       examRound: exam.value?.EXAM_ROUND || '',
+      onCheckedIn: () => {
+        void loadData();
+      },
     },
-  }).onOk(() => {
-    void loadData();
   });
 };
 

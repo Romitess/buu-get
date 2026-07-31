@@ -56,11 +56,7 @@
             color="primary"
             class="toolbar-action-btn"
             :loading="isActionLoading || isPrintingSeatPlan"
-            :disable="
-              isActionLoading ||
-              isPrintingSeatPlan ||
-              (!isVoucherSent && !canIssueVoucher)
-            "
+            :disable="isActionLoading || isPrintingSeatPlan || (!isVoucherSent && !canIssueVoucher)"
             @click="isVoucherSent ? handlePrintSeatPlan() : handlePrintVoucher()"
           />
           <q-tooltip v-if="!isVoucherSent && !canIssueVoucher">
@@ -264,7 +260,7 @@ const voucherPreviewData = computed<VoucherData>(() => ({
   voucherNo: 'ENG2026-001',
   citizenId: 'X-XXXX-XXXXX-XX-X',
   testSession: 'X/XXXX',
-  barcodeValue: 'ENG2026-001',
+  barcodeValue: 'XXXXXXXX',
 }));
 
 const startIssuingTickets = async (): Promise<void> => {
@@ -415,7 +411,8 @@ const buildVoucherData = (row: SeatCandidateRow, freshEnrollment = row.enrollmen
     citizenId: enrollment.USER?.USER_NATIONAL_ID || enrollment.USER?.USER_PASSPORT_NO || '-',
     testSession: exam.value?.EXAM_ROUND || '-',
     profileImage: imagePath ? getImageUrl(imagePath) : undefined,
-    barcodeValue: voucherCode,
+    // Code128 payload = Test Taker ID for door scanners / attendance
+    barcodeValue: enrollment.ERM_TEST_TAKER || '',
   };
 };
 
