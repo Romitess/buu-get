@@ -328,6 +328,7 @@ interface StudentSeatSnapshot {
   studentId: string;
   name: string;
   avatar: string | null;
+  bgColor: string | null;
 }
 
 interface SeatShiftGhost {
@@ -335,6 +336,7 @@ interface SeatShiftGhost {
   studentId: string;
   name: string;
   avatar: string | null;
+  bgColor: string | null;
   from: RectSnapshot;
   to: RectSnapshot;
   active: boolean;
@@ -386,6 +388,7 @@ const getStudentSeatSnapshots = (
         studentId: seat.student.id,
         name: seat.student.name,
         avatar: seat.student.avatar,
+        bgColor: seat.student.bgColor ?? null,
       });
     });
   });
@@ -397,6 +400,7 @@ const getShiftGhostStyle = (ghost: SeatShiftGhost): CSSProperties => ({
   top: `${ghost.from.top}px`,
   width: `${ghost.from.width}px`,
   height: `${ghost.from.height}px`,
+  backgroundColor: ghost.bgColor || undefined,
   transform: ghost.active
     ? `translate(${ghost.to.left - ghost.from.left}px, ${ghost.to.top - ghost.from.top}px)`
     : 'translate(0, 0)',
@@ -660,6 +664,7 @@ watch(
           studentId,
           name: newSeat.name,
           avatar: newSeat.avatar,
+          bgColor: newSeat.bgColor,
           from,
           to,
           active: false,
@@ -1189,8 +1194,7 @@ const onSeatExternalDrop = (event: DragEvent, seat: SeatCell): void => {
   :deep(.seat-assignment-tile) {
     position: relative;
     z-index: 1;
-    border: 1px solid var(--primary, #0d47a1);
-    background: var(--primary, #0d47a1);
+    /* ใช้สีจาก tile (ตามประเภทผู้เข้าสอบ) ไม่ force สี primary */
     box-shadow:
       0 12px 22px rgba(8, 15, 30, 0.2),
       0 0 0 1px rgba(13, 71, 161, 0.18);
@@ -1241,8 +1245,8 @@ const onSeatExternalDrop = (event: DragEvent, seat: SeatCell): void => {
   will-change: transform;
 
   :deep(.seat-assignment-tile) {
-    border: 1px solid rgba(13, 71, 161, 0.46);
-    background: var(--primary, #0d47a1);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    /* ใช้สีจาก tile (ตามประเภทผู้เข้าสอบ) ไม่ force สี primary */
     box-shadow:
       inset 0 0 0 1px rgba(255, 255, 255, 0.18),
       0 0 0 1px rgba(13, 71, 161, 0.12);

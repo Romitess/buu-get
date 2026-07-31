@@ -14,6 +14,7 @@ import { formatThaiLongDate } from 'src/utils/thai-date';
 import { getImageUrl } from 'src/services/image.service';
 import { fetchLatestProfileHistoryImages } from 'src/services/profile-edit-history.service';
 import { useExamSeatNavigation } from 'src/composables/use-exam-seat-navigation';
+import { getPhysicalStatusBgColor } from 'src/constants/physical-status';
 
 /** Enrollment status codes shared with the backend */
 const STATUS_PAID = 1;
@@ -51,6 +52,8 @@ export interface StudentSeatInfo {
   sessionLocationId: number | null;
   avatar: string | null;
   remark: string;
+  /** สีพื้นหลังตามประเภทผู้เข้าสอบ */
+  bgColor: string;
   isForeigner: boolean;
   titleEn: string | null;
   sortName: string;
@@ -829,6 +832,7 @@ export function useExamSeatManagement() {
         null,
       avatar: imagePath ? getImageUrl(imagePath) : null,
       remark,
+      bgColor: getPhysicalStatusBgColor(remark),
       isForeigner,
       titleEn,
       sortName,

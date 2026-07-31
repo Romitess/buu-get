@@ -5,6 +5,7 @@
       hasSeat ? 'seat-assigned' : 'seat-unassigned',
       { 'is-draggable': isDraggable },
     ]"
+    :style="cardStyle"
     flat
     :draggable="isDraggable"
     @dragstart="onDragStart"
@@ -24,9 +25,7 @@
         <div class="student-name line-height-tight q-mb-sm">
           {{ studentName }}
         </div>
-        <div
-          class="row no-wrap items-center justify-between text-body2 info-details text-black info-row"
-        >
+        <div class="row no-wrap items-center justify-between text-body2 info-details info-row">
           <span v-if="displayRemark" :class="['remark-badge', remarkBadgeClass]">
             หมายเหตุ: {{ displayRemark }}
           </span>
@@ -45,6 +44,10 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount } from 'vue';
 import { SEAT_STUDENT_DRAG_MIME } from 'src/composables/use-exam-seat-management';
+import {
+  DEFAULT_PHYSICAL_STATUS_BG_COLOR,
+  getPhysicalStatusBgColor,
+} from 'src/constants/physical-status';
 
 const SEAT_DRAG_GHOST_SIZE = 64;
 
@@ -55,6 +58,7 @@ interface Props {
   seatNumber?: string | null;
   avatarUrl?: string | null;
   remark?: string;
+  bgColor?: string | null;
   isForeigner?: boolean;
   dragHint?: string;
 }
@@ -64,6 +68,7 @@ const props = withDefaults(defineProps<Props>(), {
   seatNumber: null,
   avatarUrl: null,
   remark: '',
+  bgColor: null,
   isForeigner: false,
   dragHint: '',
 });
@@ -80,6 +85,19 @@ const isDraggable = computed((): boolean => !hasSeat.value && props.ermId != nul
 
 const displayRemark = computed((): string => {
   return props.remark || '';
+});
+
+const typeBgColor = computed((): string => {
+  return props.bgColor || getPhysicalStatusBgColor(props.remark) || DEFAULT_PHYSICAL_STATUS_BG_COLOR;
+});
+
+/** Unassigned cards use type color; assigned cards stay on the surface */
+const cardStyle = computed((): Record<string, string> | undefined => {
+  if (hasSeat.value) return undefined;
+  return {
+    backgroundColor: typeBgColor.value,
+    color: '#ffffff',
+  };
 });
 
 const remarkBadgeClass = computed((): string => {
@@ -116,6 +134,8 @@ const createSeatSizedDragGhost = (): HTMLElement => {
 
   const tile = document.createElement('div');
   tile.className = 'seat-card-drag-ghost__tile';
+  tile.style.backgroundColor = typeBgColor.value;
+  tile.style.borderColor = typeBgColor.value;
 
   const nameEl = document.createElement('div');
   nameEl.className = 'seat-card-drag-ghost__name';
@@ -184,10 +204,11 @@ onBeforeUnmount(() => {
   }
 
   &.seat-unassigned {
-    background-color: #8fbceb; /* Rich blue matching the mockup precisely */
+    /* สีพื้นหลังถูก override ผ่าน inline style ตามประเภทผู้เข้าสอบ */
+    background-color: var(--primary-light, #1e89e5);
     border: 1px solid #676767b2;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
-    color: var(--text-primary);
+    color: #ffffff;
   }
 
   &.is-draggable {
@@ -223,7 +244,7 @@ onBeforeUnmount(() => {
   font-size: 20px;
   line-height: 1.25;
   vertical-align: middle;
-  color: var(--text-primary, #000000);
+  color: inherit;
 }
 
 .info-details {
@@ -231,7 +252,7 @@ onBeforeUnmount(() => {
   font-size: 16px;
   line-height: 1.3;
   vertical-align: middle;
-  color: var(--text-primary, #000000);
+  color: inherit;
 }
 
 .info-row {
@@ -316,8 +337,8 @@ onBeforeUnmount(() => {
   width: 64px;
   height: 64px;
   border-radius: 7px;
-  border: 1px solid var(--primary, #0d47a1);
-  background: var(--primary, #0d47a1);
+  border: 1px solid var(--primary-light, #1e89e5);
+  background: var(--primary-light, #1e89e5);
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -325,7 +346,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   gap: 4px;
   overflow: hidden;
-  box-shadow: 0 6px 16px rgba(13, 71, 161, 0.28);
+  box-shadow: 0 6px 16px rgba(30, 137, 229, 0.28);
 }
 
 .seat-card-drag-ghost__name {
@@ -343,7 +364,7 @@ onBeforeUnmount(() => {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #0c8fe8;
+  background: rgba(255, 255, 255, 0.28);
   display: flex;
   align-items: center;
   justify-content: center;

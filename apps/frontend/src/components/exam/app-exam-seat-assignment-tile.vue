@@ -10,6 +10,7 @@
       'is-selected': selected,
       'is-moving': moving,
     }"
+    :style="assignedTileStyle"
     @click="emit('click')"
   >
     <template v-if="status === 'broken'">
@@ -34,6 +35,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { SeatStatus, StudentSeatInfo } from 'src/composables/use-exam-seat-management';
+import {
+  DEFAULT_PHYSICAL_STATUS_BG_COLOR,
+  getPhysicalStatusBgColor,
+} from 'src/constants/physical-status';
 
 const props = withDefaults(
   defineProps<{
@@ -71,6 +76,23 @@ const shortName = computed(() => {
 
   return parts[0] ?? name;
 });
+
+const typeBgColor = computed((): string => {
+  if (!props.student) return DEFAULT_PHYSICAL_STATUS_BG_COLOR;
+  return (
+    props.student.bgColor ||
+    getPhysicalStatusBgColor(props.student.remark) ||
+    DEFAULT_PHYSICAL_STATUS_BG_COLOR
+  );
+});
+
+const assignedTileStyle = computed((): Record<string, string> | undefined => {
+  if (props.status !== 'assigned' || !props.student) return undefined;
+  return {
+    backgroundColor: typeBgColor.value,
+    borderColor: typeBgColor.value,
+  };
+});
 </script>
 
 <style scoped lang="scss">
@@ -78,7 +100,7 @@ const shortName = computed(() => {
   width: 64px;
   height: 64px;
   border-radius: 7px;
-  border: 1px solid var(--primary, #0d47a1);
+  border: 1px solid var(--primary-light, #1e89e5);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -97,7 +119,7 @@ const shortName = computed(() => {
 }
 
 .is-assigned {
-  background: var(--primary, #0d47a1);
+  background: var(--primary-light, #1e89e5);
   color: #ffffff;
 }
 
@@ -138,7 +160,7 @@ const shortName = computed(() => {
 .is-selected {
   box-shadow:
     0 0 0 2px #ffffff,
-    0 0 0 5px var(--primary, #0d47a1);
+    0 0 0 5px var(--primary-light, #1e89e5);
   transform: translateY(-1px);
 }
 
@@ -160,7 +182,7 @@ const shortName = computed(() => {
 }
 
 .seat-avatar {
-  background: #0c8fe8;
+  background: rgba(255, 255, 255, 0.28);
   flex-shrink: 0;
 
   img {
