@@ -2105,13 +2105,13 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-guideline-card.vue": {
-    "mtime": 1784858355.3565786,
-    "ast_hash": "d522dedb8e13a3f8bbab0d7f010a9f37",
+    "mtime": 1785478375.476931,
+    "ast_hash": "b33695c6da8f21fa982aea43e3483dee",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-guideline-section.vue": {
-    "mtime": 1784858355.3565767,
-    "ast_hash": "960e5b6b86dbac68dbd4043ceabd26c8",
+    "mtime": 1785478359.7072587,
+    "ast_hash": "60573fd86e0ce8347c99e8370fa9c1fa",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-main-content.vue": {
