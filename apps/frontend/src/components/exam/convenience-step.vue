@@ -74,10 +74,6 @@ const options = [
     labelKey: 'examSchedule.convenienceDialog.options.monk',
   },
   {
-    value: '1',
-    labelKey: 'examSchedule.convenienceDialog.options.clergy',
-  },
-  {
     value: '2',
     labelKey: 'examSchedule.convenienceDialog.options.disabled',
   },

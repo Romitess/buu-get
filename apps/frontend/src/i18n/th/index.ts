@@ -437,8 +437,7 @@ export default {
       cancelBtn: 'ยกเลิก',
       nextBtn: 'ถัดไป',
       options: {
-        monk: 'พระภิกษุ / สามเณร',
-        clergy: 'นักบวช / ศาสนบุคคล',
+        monk: 'พระภิกษุ / นักบวช',
         disabled: 'บุคคลทุพพลภาพ',
         pregnant: 'ผู้ตั้งครรภ์',
         none: 'ไม่มีข้อมูลข้างต้น',

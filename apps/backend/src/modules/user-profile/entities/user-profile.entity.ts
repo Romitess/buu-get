@@ -11,8 +11,8 @@ import {
 import { User } from '../../users/entities/user.entity';
 
 export enum UserPhysicalStatus {
-  MONK = 'พระภิกษุ / สามเณร',
-  RELIGIOUS = 'นักบวช / ศาสนบุคคล',
+  /** รวมพระภิกษุ/สามเณร และนักบวช/ศาสนบุคคล (code 0) */
+  MONK = 'พระภิกษุ / นักบวช',
   DISABLED = 'บุคคลทุพพลภาพ',
   PREGNANT = 'ผู้ตั้งครรภ์',
   DISABLED_TYPO = 'ผู้พิการรณ์',

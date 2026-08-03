@@ -274,8 +274,7 @@ export default {
       cancelBtn: 'Cancel',
       nextBtn: 'Next',
       options: {
-        monk: 'Buddhist monk / novice',
-        clergy: 'Clergy / religious person',
+        monk: 'Monk / clergy',
         disabled: 'Person with a disability',
         pregnant: 'Pregnant',
         none: 'None of the above',

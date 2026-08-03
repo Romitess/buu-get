@@ -25,8 +25,7 @@ const STATUS_SEAT_PUBLISHED = 3;
 export const SEAT_STUDENT_DRAG_MIME = 'application/x-buu-seat-student';
 
 const PHYSICAL_STATUS_REMARKS: Record<number, string> = {
-  0: 'พระภิกษุ / สามเณร',
-  1: 'นักบวช / ศาสนบุคคล',
+  0: 'พระภิกษุ / นักบวช',
   2: 'บุคคลทุพพลภาพ',
   3: 'ผู้ตั้งครรภ์',
   4: 'ผู้พิการรณ์',
@@ -35,11 +34,7 @@ const PHYSICAL_STATUS_REMARKS: Record<number, string> = {
 export const APPLICANT_TYPE_FILTER_ALL = 'all';
 
 /** ประเภทผู้สมัครที่ใช้กรองรายชื่อ เรียงตามลำดับการจัดที่นั่ง */
-const APPLICANT_TYPE_REMARKS = [
-  ...Object.values(PHYSICAL_STATUS_REMARKS),
-  'ชาวต่างชาติ',
-  'ชาวไทย',
-];
+const APPLICANT_TYPE_REMARKS = [...Object.values(PHYSICAL_STATUS_REMARKS), 'ชาวต่างชาติ', 'ชาวไทย'];
 
 export type SeatStatus = 'available' | 'assigned' | 'broken' | 'blocked';
 
@@ -68,7 +63,7 @@ export interface StudentSeatInfo {
   sortName: string;
   /**
    * Seat-assignment priority (lower = seated first):
-   * 0 พระภิกษุ/สามเณร, 1 นักบวช/ศาสนบุคคล, 2 บุคคลทุพพลภาพ,
+   * 0 พระภิกษุ/นักบวช, 2 บุคคลทุพพลภาพ,
    * 3 ผู้ตั้งครรภ์, 4 ผู้พิการ, then within ทั่วไป (code 5):
    * 5 ชาวต่างชาติ (มี passport), 6 คนไทย (ท้ายสุด)
    */
@@ -449,20 +444,29 @@ export function useExamSeatManagement() {
     return new Map(activeSessionSeatItems.value.map((seat) => [String(seat.LS_ID), seat]));
   });
 
+  const PHYSICAL_STATUS_LABEL_TO_CODE: Record<string, number> = {
+    'พระภิกษุ / นักบวช': 0,
+    'พระภิกษุ/นักบวช': 0,
+    'พระภิกษุ / สามเณร': 0,
+    'นักบวช / ศาสนบุคคล': 0,
+    บุคคลทุพพลภาพ: 2,
+    ผู้ตั้งครรภ์: 3,
+    ผู้พิการรณ์: 4,
+    ทั่วไป: 5,
+  };
+
   const normalizePhysicalStatusCode = (
     value: string | number | null | undefined,
   ): number | null => {
     if (value === null || value === undefined || value === '') return null;
 
     const numericValue = Number(value);
-    if (Number.isInteger(numericValue)) return numericValue;
+    if (Number.isInteger(numericValue)) {
+      // legacy code 1 (นักบวช / ศาสนบุคคล) → รวมเป็น 0
+      return numericValue === 1 ? 0 : numericValue;
+    }
 
-    const matchedEntry = Object.entries({
-      ...PHYSICAL_STATUS_REMARKS,
-      5: 'ทั่วไป',
-    }).find(([, label]) => label === value);
-
-    return matchedEntry ? Number(matchedEntry[0]) : null;
+    return PHYSICAL_STATUS_LABEL_TO_CODE[String(value).trim()] ?? null;
   };
 
   const hasPassport = (passportNo: string | null | undefined): boolean => {
@@ -492,8 +496,8 @@ export function useExamSeatManagement() {
 
   /**
    * Resolves the seat-assignment priority for an enrollment.
-   * Physical-status codes 0–4 keep their own order; ทั่วไป (code 5) is split so
-   * ชาวต่างชาติ (มี passport) are seated before คนไทย, who come last.
+   * Physical-status codes 0–4 keep their own order;
+   * ทั่วไป (code 5) is split so ชาวต่างชาติ (มี passport) are seated before คนไทย.
    */
   const getSeatPriority = (enrollment: BackendEnrollmentDetail, isForeigner: boolean): number => {
     const physicalStatusCode = normalizePhysicalStatusCode(enrollment.ERM_PHYSICAL_STATUS);

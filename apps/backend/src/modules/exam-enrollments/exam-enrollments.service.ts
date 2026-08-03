@@ -678,14 +678,15 @@ export class ExamEnrollmentsService {
       if ('ผ่าน'.includes(searchLower)) verifyMatches.push(1);
       if ('ให้แก้ไข'.includes(searchLower)) verifyMatches.push(2);
 
-      // Physical Status mapping
+      // Physical Status mapping (0 = พระภิกษุ/นักบวช รวมแล้ว)
       if (
         'พระภิกษุ'.includes(searchLower) ||
         'สามเณร'.includes(searchLower) ||
-        'พระสงฆ์'.includes(searchLower)
+        'พระสงฆ์'.includes(searchLower) ||
+        'นักบวช'.includes(searchLower) ||
+        'ศาสนบุคคล'.includes(searchLower)
       )
         physicalMatches.push(0);
-      if ('นักบวช'.includes(searchLower)) physicalMatches.push(1);
       if ('ทุพพลภาพ'.includes(searchLower)) physicalMatches.push(2);
       if ('ตั้งครรภ์'.includes(searchLower)) physicalMatches.push(3);
       if ('พิการ'.includes(searchLower)) physicalMatches.push(4);
