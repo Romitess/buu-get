@@ -1094,6 +1094,7 @@ export default {
       pageDescription: 'Manage score criteria used for defining Bands or Levels',
       previewTitle: 'Certificate Preview',
       editTitle: 'Edit BUU GET Band Description',
+      editBandBtn: 'Edit Band Description',
       colBand: 'Band',
       colScore: 'Score',
       colCefr: 'CEFR',

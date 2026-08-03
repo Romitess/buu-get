@@ -1210,6 +1210,7 @@ export default {
       pageDescription: 'จัดการเกณฑ์คะแนนสอบที่ใช้สำหรับกำหนด Band หรือ Level',
       previewTitle: 'ตัวอย่าง Certificate',
       editTitle: 'แก้ไขข้อมูล BUU GET Band Description',
+      editBandBtn: 'แก้ไข Band Description',
       colBand: 'Band',
       colScore: 'Score',
       colCefr: 'CEFR',

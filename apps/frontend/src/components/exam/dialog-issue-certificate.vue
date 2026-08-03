@@ -6,7 +6,10 @@
     transition-hide="scale"
     @update:model-value="$emit('update:modelValue', $event)"
   >
-    <q-card class="certificate-dialog-card q-pa-md relative-position">
+    <q-card
+      class="certificate-dialog-card q-pa-md relative-position"
+      :class="{ 'certificate-dialog-card--editing': isEditingBandRules }"
+    >
       <AppButton
         icon="close"
         flat
@@ -25,32 +28,169 @@
           <div class="text-subtitle2 text-weight-bold text-dark">
             {{ viewMode ? 'ใบ Certificate' : 'ตัวอย่างใบ Certificate' }}
           </div>
-          <div class="row items-center toggle-side-pane">
-            <span
-              class="cursor-pointer"
-              :class="{
-                'active-side': currentSide === 'front',
-                'inactive-side': currentSide !== 'front',
-              }"
-              @click="currentSide = 'front'"
-            >
-              ด้านหน้า
-            </span>
-            <span class="q-mx-xs text-grey-4">|</span>
-            <span
-              class="cursor-pointer"
-              :class="{
-                'active-side': currentSide === 'back',
-                'inactive-side': currentSide !== 'back',
-              }"
-              @click="currentSide = 'back'"
-            >
-              ด้านหลัง
-            </span>
+          <div class="row items-center q-gutter-sm no-wrap">
+            <AppButton
+              v-if="currentSide === 'back' && !isEditingBandRules"
+              :label="$t('admin.scoreCriteriaManagement.editBandBtn')"
+              icon="edit"
+              flat
+              dense
+              color="primary"
+              class="edit-band-btn"
+              @click="startEditBandRules"
+            />
+            <div class="row items-center toggle-side-pane">
+              <span
+                class="cursor-pointer"
+                :class="{
+                  'active-side': currentSide === 'front',
+                  'inactive-side': currentSide !== 'front',
+                }"
+                @click="switchSide('front')"
+              >
+                ด้านหน้า
+              </span>
+              <span class="q-mx-xs text-grey-4">|</span>
+              <span
+                class="cursor-pointer"
+                :class="{
+                  'active-side': currentSide === 'back',
+                  'inactive-side': currentSide !== 'back',
+                }"
+                @click="switchSide('back')"
+              >
+                ด้านหลัง
+              </span>
+            </div>
           </div>
         </div>
 
-        <div class="certificate-card-preview relative-position">
+        <div v-if="isEditingBandRules" class="band-edit-panel q-mb-md">
+          <div class="text-subtitle2 text-weight-bold text-dark q-mb-sm">
+            {{ $t('admin.scoreCriteriaManagement.editTitle') }}
+          </div>
+
+          <div
+            class="band-edit-header row items-center text-weight-bold text-grey-8 q-mb-sm no-wrap"
+          >
+            <div class="band-edit-col-index"></div>
+            <div class="band-edit-col-band text-center">
+              {{ $t('admin.scoreCriteriaManagement.colBand') }}
+            </div>
+            <div class="band-edit-col-score text-center">
+              {{ $t('admin.scoreCriteriaManagement.colScore') }}
+            </div>
+            <div class="band-edit-col-cefr text-center">
+              {{ $t('admin.scoreCriteriaManagement.colCefr') }}
+            </div>
+            <div class="band-edit-col-descriptor text-center col">
+              {{ $t('admin.scoreCriteriaManagement.colDescriptor') }}
+            </div>
+            <div class="band-edit-col-action"></div>
+          </div>
+
+          <div class="band-edit-list">
+            <div
+              v-for="(rule, index) in editingBandRules"
+              :key="rule.id"
+              class="row items-center band-edit-row q-mb-sm no-wrap"
+            >
+              <div class="band-edit-col-index text-weight-bold text-grey-7 text-center">
+                {{ index + 1 }}
+              </div>
+              <div class="band-edit-col-band">
+                <q-input
+                  v-model="rule.band"
+                  outlined
+                  dense
+                  class="buu-input-muted"
+                  input-class="text-center"
+                />
+              </div>
+              <div class="band-edit-col-score row items-center no-wrap">
+                <q-input
+                  :model-value="rule.minScore"
+                  maxlength="3"
+                  outlined
+                  dense
+                  class="buu-input-muted col"
+                  input-class="text-center"
+                  @keypress="onScoreKeypress"
+                  @update:model-value="(val) => onScoreInput(val, rule, 'minScore')"
+                  @paste="handleScorePaste"
+                />
+                <span class="q-mx-xs text-grey-6">-</span>
+                <q-input
+                  :model-value="rule.maxScore"
+                  maxlength="3"
+                  outlined
+                  dense
+                  class="buu-input-muted col"
+                  input-class="text-center"
+                  @keypress="onScoreKeypress"
+                  @update:model-value="(val) => onScoreInput(val, rule, 'maxScore')"
+                  @paste="handleScorePaste"
+                />
+              </div>
+              <div class="band-edit-col-cefr">
+                <q-input
+                  v-model="rule.cefr"
+                  outlined
+                  dense
+                  class="buu-input-muted"
+                  input-class="text-center"
+                />
+              </div>
+              <div class="band-edit-col-descriptor col">
+                <q-input
+                  v-model="rule.descriptor"
+                  outlined
+                  dense
+                  type="textarea"
+                  autogrow
+                  class="buu-input-muted"
+                />
+              </div>
+              <div class="band-edit-col-action">
+                <q-btn
+                  flat
+                  round
+                  dense
+                  color="negative"
+                  icon="delete"
+                  :disable="editingBandRules.length <= 1"
+                  @click="removeEditingBand(index)"
+                />
+              </div>
+            </div>
+
+            <q-btn
+              flat
+              icon="add"
+              color="grey-7"
+              class="full-width q-py-sm q-mt-xs add-band-row-btn"
+              @click="addEditingBand"
+            />
+          </div>
+
+          <div class="row justify-end q-gutter-sm q-mt-md">
+            <AppButton
+              :label="$t('admin.scoreCriteriaManagement.cancelBtn')"
+              class="band-edit-action-btn cancel-btn"
+              :disable="isSavingBandRules"
+              @click="cancelEditBandRules"
+            />
+            <AppButton
+              :label="$t('admin.scoreCriteriaManagement.saveBtn')"
+              color="primary"
+              class="band-edit-action-btn"
+              :loading="isSavingBandRules"
+              @click="saveEditBandRules"
+            />
+          </div>
+        </div>
+
+        <div v-show="!isEditingBandRules" class="certificate-card-preview relative-position">
           <template v-if="currentSide === 'front'">
             <div class="cert-header row items-center no-wrap">
               <div class="col-auto">
@@ -202,7 +342,7 @@
         </div>
       </q-card-section>
 
-      <q-card-section class="q-pt-md">
+      <q-card-section v-show="!isEditingBandRules" class="q-pt-md">
         <div class="row q-col-gutter-md">
           <div class="col-12 col-sm-6">
             <div class="text-subtitle2 text-weight-bold text-dark q-mb-xs">
@@ -219,11 +359,7 @@
               <template v-slot:append v-if="!viewMode">
                 <q-icon name="event" class="cursor-pointer">
                   <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                    <q-date
-                      v-model="validFromDate"
-                      mask="YYYY-MM-DD"
-                      :options="issueDateOptions"
-                    >
+                    <q-date v-model="validFromDate" mask="YYYY-MM-DD" :options="issueDateOptions">
                       <div class="row items-center justify-end">
                         <AppButton v-close-popup label="ปิด" color="primary" flat />
                       </div>
@@ -262,7 +398,11 @@
         </div>
       </q-card-section>
 
-      <q-card-actions v-if="!viewMode" align="center" class="q-pb-md row q-gutter-lg no-wrap">
+      <q-card-actions
+        v-if="!viewMode && !isEditingBandRules"
+        align="center"
+        class="q-pb-md row q-gutter-lg no-wrap"
+      >
         <AppButton label="ยกเลิก" class="dialog-btn cancel-btn" @click="onCancel" />
         <AppButton
           label="ยืนยันการออกใบคะแนน"
@@ -280,10 +420,15 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
 import { bulkIssueCertificates } from 'src/services/exam-certificate.service';
 import { getImageUrl } from 'src/services/image.service';
-import { getBandRules, type BandRuleData } from 'src/services/score-criteria.service';
+import {
+  getBandRules,
+  saveBandRules,
+  type BandRuleData,
+} from 'src/services/score-criteria.service';
 
 interface Props {
   modelValue: boolean;
@@ -323,11 +468,18 @@ const emit = defineEmits<{
 }>();
 
 const $q = useQuasar();
+const { t } = useI18n();
 const router = useRouter();
 const currentSide = ref<'front' | 'back'>('front');
 const validFromDate = ref('');
 const validUntilDate = ref('');
 const isSubmitting = ref(false);
+const isEditingBandRules = ref(false);
+const isSavingBandRules = ref(false);
+const editingBandRules = ref<BandRuleData[]>([]);
+
+const SCORE_MAX_LIMIT = 100;
+const DEFAULT_SCORE_GAP = 9;
 
 const DEFAULT_BAND_RULES: Omit<BandRuleData, 'id'>[] = [
   {
@@ -374,23 +526,150 @@ const DEFAULT_BAND_RULES: Omit<BandRuleData, 'id'>[] = [
 
 const bandRules = ref<BandRuleData[]>([]);
 
+const cloneBandRules = (rules: BandRuleData[]): BandRuleData[] =>
+  rules.map((rule) => ({ ...rule }));
+
+const applyDefaultBandRules = (): void => {
+  bandRules.value = DEFAULT_BAND_RULES.map((rule, idx) => ({
+    id: String(idx + 1),
+    ...rule,
+  }));
+};
+
 const loadBandRules = async (): Promise<void> => {
   try {
     const data = await getBandRules();
     if (data.bandRules && data.bandRules.length > 0) {
       bandRules.value = data.bandRules;
     } else {
-      bandRules.value = DEFAULT_BAND_RULES.map((rule, idx) => ({
-        id: String(idx + 1),
-        ...rule,
-      }));
+      applyDefaultBandRules();
     }
   } catch (err) {
     console.error('Failed to load band rules in certificate dialog:', err);
-    bandRules.value = DEFAULT_BAND_RULES.map((rule, idx) => ({
-      id: String(idx + 1),
-      ...rule,
-    }));
+    applyDefaultBandRules();
+  }
+};
+
+const switchSide = (side: 'front' | 'back'): void => {
+  if (isEditingBandRules.value && side === 'front') {
+    cancelEditBandRules();
+  }
+  currentSide.value = side;
+};
+
+const startEditBandRules = (): void => {
+  editingBandRules.value = cloneBandRules(bandRules.value);
+  isEditingBandRules.value = true;
+};
+
+const cancelEditBandRules = (): void => {
+  isEditingBandRules.value = false;
+  editingBandRules.value = [];
+};
+
+const addEditingBand = (): void => {
+  const lastRule = editingBandRules.value[editingBandRules.value.length - 1];
+  const nextMinScore = lastRule ? Math.min(SCORE_MAX_LIMIT, lastRule.maxScore + 1) : 0;
+  const nextMaxScore = Math.min(SCORE_MAX_LIMIT, nextMinScore + DEFAULT_SCORE_GAP);
+
+  editingBandRules.value.push({
+    id: String(Date.now()),
+    band: String(editingBandRules.value.length + 1),
+    minScore: nextMinScore,
+    maxScore: nextMaxScore,
+    cefr: 'B2',
+    descriptor: 'New performance descriptor text...',
+  });
+};
+
+const removeEditingBand = (index: number): void => {
+  if (editingBandRules.value.length <= 1) return;
+  editingBandRules.value.splice(index, 1);
+};
+
+const onScoreKeypress = (event: KeyboardEvent): void => {
+  const allowedKeys = ['Backspace', 'Tab', 'Enter', 'Delete', 'Escape', 'ArrowLeft', 'ArrowRight'];
+  if (allowedKeys.includes(event.key) || event.ctrlKey || event.metaKey) {
+    return;
+  }
+  if (!/[0-9]/.test(event.key)) {
+    event.preventDefault();
+  }
+};
+
+const onScoreInput = (
+  val: string | number | null,
+  rule: BandRuleData,
+  field: 'minScore' | 'maxScore',
+): void => {
+  const sanitized = String(val ?? '').replace(/\D/g, '');
+  if (sanitized !== '') {
+    rule[field] = Math.min(parseInt(sanitized, 10), SCORE_MAX_LIMIT);
+  } else {
+    rule[field] = 0;
+  }
+};
+
+const handleScorePaste = (event: ClipboardEvent): void => {
+  const pasteData = event.clipboardData?.getData('text') || '';
+  if (!/^\d+$/.test(pasteData)) {
+    event.preventDefault();
+  }
+};
+
+const saveEditBandRules = async (): Promise<void> => {
+  const hasInvalidScore = editingBandRules.value.some(
+    (rule) =>
+      typeof rule.minScore !== 'number' ||
+      typeof rule.maxScore !== 'number' ||
+      rule.minScore < 0 ||
+      rule.maxScore < 0 ||
+      rule.minScore > SCORE_MAX_LIMIT ||
+      rule.maxScore > SCORE_MAX_LIMIT,
+  );
+
+  if (hasInvalidScore) {
+    $q.notify({
+      type: 'negative',
+      message: t('admin.scoreCriteriaManagement.notifications.invalidScore'),
+      position: 'top',
+    });
+    return;
+  }
+
+  const hasMinGreaterThanMax = editingBandRules.value.some((rule) => rule.minScore > rule.maxScore);
+
+  if (hasMinGreaterThanMax) {
+    $q.notify({
+      type: 'negative',
+      message: t('admin.scoreCriteriaManagement.notifications.minGreaterThanMax'),
+      position: 'top',
+    });
+    return;
+  }
+
+  try {
+    isSavingBandRules.value = true;
+    const saved = await saveBandRules(editingBandRules.value);
+    bandRules.value = saved.bandRules?.length
+      ? saved.bandRules
+      : cloneBandRules(editingBandRules.value);
+    isEditingBandRules.value = false;
+    editingBandRules.value = [];
+    $q.notify({
+      type: 'positive',
+      message: t('admin.scoreCriteriaManagement.notifications.saveSuccess'),
+      position: 'top',
+    });
+  } catch (err) {
+    console.error('Failed to save band rules from certificate dialog:', err);
+    $q.notify({
+      type: 'negative',
+      message: t('admin.scoreCriteriaManagement.notifications.saveError'),
+      position: 'top',
+    });
+  } finally {
+    isSavingBandRules.value = false;
   }
 };
 
@@ -541,6 +820,9 @@ watch(
   (val) => {
     if (val) {
       currentSide.value = 'front';
+      isEditingBandRules.value = false;
+      editingBandRules.value = [];
+      void loadBandRules();
       if (props.viewMode && props.candidateInfo) {
         validFromDate.value = props.candidateInfo.certIssuedAt
           ? props.candidateInfo.certIssuedAt.split('T')[0] || ''
@@ -559,6 +841,8 @@ watch(
     } else {
       validFromDate.value = '';
       validUntilDate.value = '';
+      isEditingBandRules.value = false;
+      editingBandRules.value = [];
     }
   },
   { immediate: true },
@@ -576,6 +860,8 @@ watch(validFromDate, (newVal) => {
 });
 
 const onCancel = (): void => {
+  isEditingBandRules.value = false;
+  editingBandRules.value = [];
   emit('update:modelValue', false);
 };
 
@@ -659,6 +945,77 @@ const onConfirm = async (): Promise<void> => {
   border-radius: 16px !important;
   background: #ffffff;
   box-shadow: var(--dialog-shadow);
+  max-height: 90vh;
+  overflow-y: auto;
+
+  &--editing {
+    max-width: 920px;
+  }
+}
+
+.edit-band-btn {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  min-height: 32px !important;
+}
+
+.band-edit-panel {
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.band-edit-list {
+  max-height: min(52vh, 420px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.band-edit-col-index {
+  width: 28px;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.band-edit-col-band {
+  width: 56px;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.band-edit-col-score {
+  width: 132px;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.band-edit-col-cefr {
+  width: 64px;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.band-edit-col-descriptor {
+  min-width: 0;
+  margin-right: 8px;
+}
+
+.band-edit-col-action {
+  width: 40px;
+  flex-shrink: 0;
+}
+
+.add-band-row-btn {
+  border: 1px dashed #94a3b8;
+  border-radius: 8px;
+}
+
+.band-edit-action-btn {
+  min-width: 140px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
 }
 
 .dialog-title {
