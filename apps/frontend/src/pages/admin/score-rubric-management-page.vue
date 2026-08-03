@@ -6,69 +6,93 @@
       :subtitle="$t('admin.scoreRubricManagement.pageDescription')"
     />
 
-    <div class="row justify-end q-mb-md">
-      <q-btn
-        color="primary"
-        unelevated
-        icon="add"
-        :label="$t('admin.scoreRubricManagement.createButton')"
-        @click="openCreateDialog"
-      />
+    <div class="row items-center q-mb-lg q-gutter-x-md">
+      <div class="col">
+        <SearchBar v-model="searchQuery" />
+      </div>
+      <div>
+        <q-btn
+          icon="add"
+          :label="$t('admin.scoreRubricManagement.createButton')"
+          color="primary"
+          unelevated
+          class="create-rubric-btn text-weight-bold"
+          @click="openCreateDialog"
+        />
+      </div>
     </div>
 
     <q-card class="section-card">
-      <q-table
-        flat
-        :rows="rubrics"
+      <BaseTable
         :columns="tableColumns"
-        row-key="id"
+        :rows="filteredRubrics"
         :loading="isLoading"
-        :pagination="{ rowsPerPage: 10 }"
+        :pagination="pagination"
+        @request="onRequest"
       >
         <template #body-cell-itemsCount="{ row }">
-          <div class="text-center">{{ row.items.length }}</div>
+          <div class="text-center">
+            <q-badge color="blue-1" text-color="primary" class="items-count-badge">
+              {{ row.items.length }}
+            </q-badge>
+          </div>
         </template>
+
         <template #body-cell-isDefault="{ row }">
           <div class="text-center">
             <q-badge
               v-if="row.isDefault"
               color="primary"
+              class="default-badge"
               :label="$t('admin.scoreRubricManagement.defaultBadge')"
             />
-            <span v-else>-</span>
+            <span v-else class="text-grey-5">-</span>
           </div>
         </template>
+
         <template #body-cell-actions="{ row }">
-          <div class="row justify-center q-gutter-xs no-wrap">
-            <q-btn flat round dense icon="edit" color="primary" @click="openEditDialog(row)" />
-            <q-btn
-              flat
-              round
-              dense
+          <div class="row justify-end q-gutter-x-sm no-wrap">
+            <ActionButton
+              icon="edit"
+              color="secondary"
+              tooltip="แก้ไข"
+              @click="openEditDialog(row)"
+            />
+            <ActionButton
               icon="delete"
               color="negative"
+              tooltip="ลบ"
               :disable="row.isDefault"
-              @click="confirmDelete(row)"
+              @click="openDeleteDialog(row)"
             />
           </div>
         </template>
-      </q-table>
+      </BaseTable>
     </q-card>
 
     <q-dialog v-model="showFormDialog" persistent>
       <q-card class="rubric-dialog-card">
-        <q-card-section>
-          <div class="text-h6 text-weight-bold">
-            {{
-              editingRubric
-                ? $t('admin.scoreRubricManagement.editTitle')
-                : $t('admin.scoreRubricManagement.createTitle')
-            }}
+        <q-card-section class="row items-center dialog-header">
+          <div>
+            <div class="text-h6 text-weight-bold">
+              {{
+                editingRubric
+                  ? $t('admin.scoreRubricManagement.editTitle')
+                  : $t('admin.scoreRubricManagement.createTitle')
+              }}
+            </div>
+            <div class="text-body2 text-grey-7 q-mt-xs">
+              {{ $t('admin.scoreRubricManagement.pageDescription') }}
+            </div>
           </div>
+          <q-space />
+          <q-btn flat round dense icon="close" color="grey-6" @click="closeFormDialog" />
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          <div class="row q-col-gutter-md q-mb-md">
+        <q-separator />
+
+        <q-card-section class="dialog-body">
+          <div class="row q-col-gutter-md q-mb-lg">
             <div class="col-12 col-md-6">
               <q-input
                 v-model="form.nameTh"
@@ -89,103 +113,144 @@
             </div>
           </div>
 
-          <div class="text-subtitle2 text-weight-bold q-mb-sm">
-            {{ $t('admin.scoreRubricManagement.itemsTitle') }}
+          <div class="row items-center justify-between q-mb-sm">
+            <div class="text-subtitle1 text-weight-bold">
+              {{ $t('admin.scoreRubricManagement.itemsTitle') }}
+            </div>
+            <q-badge color="grey-2" text-color="grey-8" class="item-total-badge">
+              {{ form.items.length }} หมวด
+            </q-badge>
           </div>
 
-          <div
-            v-for="(item, index) in form.items"
-            :key="index"
-            class="row q-col-gutter-sm items-center q-mb-sm"
-          >
-            <div class="col-12 col-md-3">
-              <q-input
-                v-model="item.nameTh"
-                outlined
-                dense
-                :label="$t('admin.scoreRubricManagement.itemNameTh')"
-                class="buu-input-muted"
-              />
-            </div>
-            <div class="col-12 col-md-3">
-              <q-input
-                v-model="item.nameEn"
-                outlined
-                dense
-                :label="$t('admin.scoreRubricManagement.itemNameEn')"
-                class="buu-input-muted"
-              />
-            </div>
-            <div class="col-6 col-md-2">
-              <q-input
-                v-model.number="item.maxScore"
-                type="number"
-                outlined
-                dense
-                :label="$t('admin.scoreRubricManagement.maxScore')"
-                class="buu-input-muted"
-              />
-            </div>
-            <div class="col-6 col-md-2">
-              <q-input
-                v-model.number="item.sortOrder"
-                type="number"
-                outlined
-                dense
-                :label="$t('admin.scoreRubricManagement.sortOrder')"
-                class="buu-input-muted"
-              />
-            </div>
-            <div class="col-auto">
-              <q-btn
-                flat
-                round
-                dense
-                color="negative"
-                icon="delete"
-                :disable="form.items.length <= 1"
-                @click="removeItem(index)"
-              />
-            </div>
+          <div class="item-list">
+            <q-card
+              v-for="(item, index) in form.items"
+              :key="index"
+              flat
+              bordered
+              class="item-card q-mb-md"
+            >
+              <q-card-section class="q-pa-md">
+                <div class="row items-center justify-between q-mb-md">
+                  <div class="text-subtitle2 text-weight-bold">หมวดที่ {{ index + 1 }}</div>
+                  <ActionButton
+                    icon="delete"
+                    color="negative"
+                    tooltip="ลบหมวด"
+                    :disable="form.items.length <= 1"
+                    @click="removeItem(index)"
+                  />
+                </div>
+
+                <div class="row q-col-gutter-md">
+                  <div class="col-12 col-md-4">
+                    <q-input
+                      v-model="item.nameTh"
+                      outlined
+                      dense
+                      :label="$t('admin.scoreRubricManagement.itemNameTh')"
+                      class="buu-input-muted"
+                    />
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <q-input
+                      v-model="item.nameEn"
+                      outlined
+                      dense
+                      :label="$t('admin.scoreRubricManagement.itemNameEn')"
+                      class="buu-input-muted"
+                    />
+                  </div>
+                  <div class="col-6 col-md-2">
+                    <q-input
+                      v-model.number="item.maxScore"
+                      type="number"
+                      outlined
+                      dense
+                      :label="$t('admin.scoreRubricManagement.maxScore')"
+                      class="buu-input-muted"
+                    />
+                  </div>
+                  <div class="col-6 col-md-2">
+                    <q-input
+                      v-model.number="item.sortOrder"
+                      type="number"
+                      outlined
+                      dense
+                      :label="$t('admin.scoreRubricManagement.sortOrder')"
+                      class="buu-input-muted"
+                    />
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
           </div>
 
           <q-btn
             flat
-            color="primary"
+            no-caps
             icon="add"
+            color="primary"
+            class="add-item-btn full-width"
             :label="$t('admin.scoreRubricManagement.addItem')"
             @click="addItem"
           />
         </q-card-section>
 
-        <q-card-actions align="right" class="q-pa-md">
-          <q-btn flat :label="$t('common.cancel')" @click="closeFormDialog" />
-          <q-btn
-            color="primary"
-            unelevated
+        <q-separator />
+
+        <q-card-actions align="right" class="q-pa-lg q-gutter-sm">
+          <AppButton
+            :label="$t('common.cancel')"
+            class="action-btn cancel-btn"
+            :disable="isSaving"
+            @click="closeFormDialog"
+          />
+          <AppButton
             :label="$t('common.save')"
+            color="primary"
+            class="action-btn"
             :loading="isSaving"
             @click="saveRubric"
           />
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <DialogDeleteConfirm
+      v-model="showDeleteDialog"
+      :title="$t('admin.scoreRubricManagement.deleteTitle')"
+      :message="
+        rubricToDelete
+          ? $t('admin.scoreRubricManagement.deleteConfirm', { name: rubricToDelete.nameTh })
+          : ''
+      "
+      :confirm-label="$t('profile.confirm')"
+      :cancel-label="$t('profile.cancel')"
+      :loading="isDeleting"
+      @confirm="handleDeleteConfirm"
+    />
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { useQuasar } from 'quasar';
-import type { QTableColumn } from 'quasar';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useQuasar, type QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import AppButton from 'src/components/base/app-button.vue';
+import DialogDeleteConfirm from 'src/components/exam/dialog-delete-confirm.vue';
+import ActionButton from 'src/components/shared/action-button.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
+import BaseTable from 'src/components/shared/base-table.vue';
+import SearchBar from 'src/components/shared/search-bar.vue';
 import {
   createScoreRubric,
   deleteScoreRubric,
   fetchScoreRubrics,
   updateScoreRubric,
 } from 'src/services/score-rubric.service';
+import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import type { ScoreRubricDto, ScoreRubricItemInput } from 'src/types/score-rubric';
 
 interface RubricFormItem extends ScoreRubricItemInput {
@@ -206,18 +271,27 @@ const { t } = useI18n();
 
 const isLoading = ref(false);
 const isSaving = ref(false);
+const isDeleting = ref(false);
+const searchQuery = ref('');
 const rubrics = ref<ScoreRubricDto[]>([]);
 const showFormDialog = ref(false);
+const showDeleteDialog = ref(false);
 const editingRubric = ref<ScoreRubricDto | null>(null);
+const rubricToDelete = ref<ScoreRubricDto | null>(null);
 const form = ref<RubricForm>(emptyForm());
+const pagination = ref<PaginationModel>({
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0,
+});
 
-const tableColumns: QTableColumn[] = [
+const tableColumns = computed<QTableColumn[]>(() => [
   { name: 'nameTh', label: 'ชื่อ (ไทย)', field: 'nameTh', align: 'left' },
   { name: 'nameEn', label: 'ชื่อ (EN)', field: 'nameEn', align: 'left' },
   { name: 'itemsCount', label: 'จำนวนหมวด', field: 'itemsCount', align: 'center' },
   { name: 'isDefault', label: 'ค่าเริ่มต้น', field: 'isDefault', align: 'center' },
-  { name: 'actions', label: 'จัดการ', field: 'actions', align: 'center' },
-];
+  { name: 'actions', label: 'จัดการ', field: 'actions', align: 'right', style: 'width: 12%' },
+]);
 
 function emptyForm(): RubricForm {
   return {
@@ -226,6 +300,26 @@ function emptyForm(): RubricForm {
     items: [{ nameTh: '', nameEn: '', maxScore: 50, sortOrder: 1 }],
   };
 }
+
+const filteredRubrics = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return rubrics.value;
+
+  return rubrics.value.filter((rubric) =>
+    [rubric.nameTh, rubric.nameEn, ...rubric.items.flatMap((item) => [item.nameTh, item.nameEn])]
+      .join(' ')
+      .toLowerCase()
+      .includes(query),
+  );
+});
+
+watch(
+  filteredRubrics,
+  (rows) => {
+    pagination.value.rowsNumber = rows.length;
+  },
+  { immediate: true },
+);
 
 const loadRubrics = async (): Promise<void> => {
   try {
@@ -237,6 +331,14 @@ const loadRubrics = async (): Promise<void> => {
   } finally {
     isLoading.value = false;
   }
+};
+
+const onRequest = (props: TableRequestProps): void => {
+  const { page, rowsPerPage, sortBy, descending } = props.pagination;
+  pagination.value.page = page;
+  pagination.value.rowsPerPage = rowsPerPage;
+  pagination.value.sortBy = sortBy ?? null;
+  pagination.value.descending = descending ?? false;
 };
 
 const openCreateDialog = (): void => {
@@ -262,6 +364,7 @@ const openEditDialog = (rubric: ScoreRubricDto): void => {
 };
 
 const closeFormDialog = (): void => {
+  if (isSaving.value) return;
   showFormDialog.value = false;
 };
 
@@ -285,6 +388,10 @@ const validateForm = (): boolean => {
   }
   if (form.value.items.some((item) => !item.nameTh.trim() || !item.nameEn.trim())) {
     $q.notify({ type: 'warning', message: t('admin.scoreRubricManagement.itemNameRequired') });
+    return false;
+  }
+  if (form.value.items.some((item) => Number(item.maxScore) <= 0)) {
+    $q.notify({ type: 'warning', message: 'คะแนนเต็มต้องมากกว่า 0' });
     return false;
   }
   return true;
@@ -314,7 +421,7 @@ const saveRubric = async (): Promise<void> => {
     }
 
     $q.notify({ type: 'positive', message: t('admin.scoreRubricManagement.saveSuccess') });
-    closeFormDialog();
+    showFormDialog.value = false;
     await loadRubrics();
   } catch (err) {
     console.error(err);
@@ -324,24 +431,27 @@ const saveRubric = async (): Promise<void> => {
   }
 };
 
-const confirmDelete = (rubric: ScoreRubricDto): void => {
-  $q.dialog({
-    title: t('admin.scoreRubricManagement.deleteTitle'),
-    message: t('admin.scoreRubricManagement.deleteConfirm', { name: rubric.nameTh }),
-    cancel: true,
-    persistent: true,
-  }).onOk(() => {
-    void (async () => {
-      try {
-        await deleteScoreRubric(rubric.id);
-        $q.notify({ type: 'positive', message: t('admin.scoreRubricManagement.deleteSuccess') });
-        await loadRubrics();
-      } catch (err) {
-        console.error(err);
-        $q.notify({ type: 'negative', message: t('admin.scoreRubricManagement.deleteError') });
-      }
-    })();
-  });
+const openDeleteDialog = (rubric: ScoreRubricDto): void => {
+  rubricToDelete.value = rubric;
+  showDeleteDialog.value = true;
+};
+
+const handleDeleteConfirm = async (): Promise<void> => {
+  if (!rubricToDelete.value) return;
+
+  try {
+    isDeleting.value = true;
+    await deleteScoreRubric(rubricToDelete.value.id);
+    $q.notify({ type: 'positive', message: t('admin.scoreRubricManagement.deleteSuccess') });
+    showDeleteDialog.value = false;
+    rubricToDelete.value = null;
+    await loadRubrics();
+  } catch (err) {
+    console.error(err);
+    $q.notify({ type: 'negative', message: t('admin.scoreRubricManagement.deleteError') });
+  } finally {
+    isDeleting.value = false;
+  }
 };
 
 onMounted(() => {
@@ -349,9 +459,74 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+.score-rubric-management-page {
+  padding-top: 16px;
+  padding-bottom: 32px;
+
+  @media (min-height: 900px) {
+    padding-top: 24px;
+    padding-bottom: 48px;
+  }
+}
+
+.section-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  border: none;
+  box-shadow: 0px 4px 4px 0px #00000040 !important;
+  padding: 8px 0;
+  overflow: hidden;
+}
+
+.create-rubric-btn {
+  border-radius: var(--radius-10) !important;
+  height: 40px;
+  padding: 0 24px;
+}
+
+.items-count-badge,
+.default-badge,
+.item-total-badge {
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 6px 12px;
+}
+
 .rubric-dialog-card {
-  width: min(960px, 95vw);
-  max-width: 960px;
+  width: min(1040px, 96vw);
+  max-width: 1040px;
+  border-radius: 20px !important;
+  overflow: hidden;
+}
+
+.dialog-header {
+  padding: 20px 24px;
+}
+
+.dialog-body {
+  max-height: min(70vh, 760px);
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.item-list {
+  min-height: 72px;
+}
+
+.item-card {
+  border-radius: 16px;
+  border-color: var(--neutral-gray-light);
+  background: var(--surface-page);
+}
+
+.add-item-btn {
+  border: 1px dashed var(--primary);
+  border-radius: 14px;
+  padding: 10px 16px;
+}
+
+.action-btn {
+  min-width: 120px;
 }
 </style>
