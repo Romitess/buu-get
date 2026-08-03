@@ -72,6 +72,14 @@
           <div class="registrant-fullname-cell">{{ value }}</div>
         </template>
 
+        <template v-slot:body-cell-email="{ value }">
+          <div class="registrant-contact-cell">{{ value }}</div>
+        </template>
+
+        <template v-slot:body-cell-phone="{ value }">
+          <div class="text-center">{{ value }}</div>
+        </template>
+
         <template v-slot:body-cell-remark="{ value }">
           <div class="text-center">{{ value || '-' }}</div>
         </template>
@@ -240,28 +248,42 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.registrantManagement.table.columns.index'),
     field: 'index',
     align: 'center',
-    style: 'width: 6%',
+    style: 'width: 5%',
   },
   {
     name: 'titleTh',
     label: i18n.t('admin.registrantManagement.table.columns.prefix'),
     field: 'titleTh',
     align: 'center',
-    style: 'width: 10%',
+    style: 'width: 8%',
   },
   {
     name: 'fullnameTh',
     label: i18n.t('admin.registrantManagement.table.columns.fullName'),
     field: 'fullnameTh',
     align: 'left',
-    style: 'width: 21%',
+    style: 'width: 16%',
+  },
+  {
+    name: 'email',
+    label: i18n.t('admin.registrantManagement.table.columns.email'),
+    field: 'email',
+    align: 'left',
+    style: 'width: 16%',
+  },
+  {
+    name: 'phone',
+    label: i18n.t('admin.registrantManagement.table.columns.phone'),
+    field: 'phone',
+    align: 'center',
+    style: 'width: 11%',
   },
   {
     name: 'remark',
     label: i18n.t('admin.registrantManagement.table.columns.remark'),
     field: 'remark',
     align: 'center',
-    style: 'width: 18%',
+    style: 'width: 12%',
   },
   {
     name: 'paymentStatus',
@@ -269,7 +291,7 @@ const columns: QTableColumn[] = [
     field: 'paymentStatus',
     align: 'center',
     format: (val: number) => PAYMENT_STATUS_LABELS[val] || '-',
-    style: 'width: 15%',
+    style: 'width: 11%',
   },
   {
     name: 'verifyStatus',
@@ -277,14 +299,14 @@ const columns: QTableColumn[] = [
     field: 'verifyStatus',
     align: 'center',
     format: (val: number) => VERIFY_STATUS_LABELS[val] || '-',
-    style: 'width: 18%',
+    style: 'width: 12%',
   },
   {
     name: 'tools',
     label: i18n.t('admin.registrantManagement.table.columns.tools'),
     field: 'tools',
     align: 'center',
-    style: 'width: 12%',
+    style: 'width: 9%',
   },
 ];
 
@@ -452,5 +474,11 @@ onMounted(async () => {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+}
+
+.registrant-contact-cell {
+  width: 100%;
+  min-width: 0;
+  word-break: break-word;
 }
 </style>

@@ -31,6 +31,11 @@ const i18n = createI18n({
       admin: {
         seatCandidates: {
           voucherPreviewTitle: 'ตัวอย่างใบเข้าห้องสอบ',
+          issueTicketDialog: {
+            seatLockNoteLabel: 'Note:',
+            seatLockNote:
+              'After Test Vouchers are issued, exam seats can no longer be arranged or edited.',
+          },
         },
       },
     },
@@ -50,7 +55,7 @@ const voucherData: VoucherData = {
   voucherNo: 'VC-001',
   citizenId: 'X-XXXX-XXXXX-XX-X',
   testSession: '1/2569',
-  barcodeValue: 'VC-001',
+  barcodeValue: 'TT-001',
 };
 
 const mountDialog = (onConfirm?: () => Promise<void>) =>

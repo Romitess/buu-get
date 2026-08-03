@@ -207,6 +207,7 @@
     <DialogIssueCertificate
       v-model="showIssueCertificateDialog"
       :exam-date="exam?.EXAM_DATE"
+      :exam-name="examDisplayName"
       :session-id="selectedSessionId"
       :session-name="selectedSessionName"
       :candidates="candidatesWithScores"
@@ -509,6 +510,15 @@ const candidatesWithScores = computed(() => {
     .filter((c) => c.SCORES_ID > 0);
 });
 
+const examDisplayName = computed(() => {
+  if (!exam.value) {
+    return 'BUU-GET Exam';
+  }
+  return exam.value.EXAM_ROUND
+    ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
+    : exam.value.EXAM_NAME;
+});
+
 const issueCertificates = (): void => {
   isViewMode.value = false;
   selectedCandidateInfo.value = null;
@@ -588,6 +598,8 @@ const scoreRows = computed(() => {
       titleTh: profile?.userTitleTh || profile?.userTitleEn || '-',
       fullnameTh:
         profile?.userFullnameTh || profile?.userFullnameEn || enrollment.USER?.USER_EMAIL || '-',
+      email: enrollment.USER?.USER_EMAIL?.trim() || '-',
+      phone: profile?.userPhone?.trim() || '-',
       paymentStatus: enrollment.ERM_STATUS,
       verifyStatus: enrollment.ERM_VERIFY_STATUS,
       sessionId: enrollment.SESSION_ID,

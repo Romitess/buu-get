@@ -135,6 +135,7 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
         message: t('auth.notify.registerSuccess'),
         position: 'top',
       });
+      isSubmitting.value = false;
       await router.push('/login');
     } else {
       $q.notify({

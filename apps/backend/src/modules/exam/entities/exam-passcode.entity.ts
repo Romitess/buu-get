@@ -6,10 +6,14 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  Unique,
+  Index,
 } from 'typeorm';
 import { Exam } from './exam.entity';
 
 @Entity('EXAM_T_PASSCODES')
+@Unique('UQ_EXAM_PASSCODE_EXAM_NATIONAL', ['EXAM_ID', 'NATIONAL_ID'])
+@Index('IDX_EXAM_PASSCODE_LOOKUP', ['EXAM_ID', 'NATIONAL_ID', 'PASSCODE'])
 export class ExamPasscode {
   @PrimaryGeneratedColumn({
     name: 'PASSCODE_ID',

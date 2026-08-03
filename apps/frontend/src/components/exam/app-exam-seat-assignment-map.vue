@@ -50,12 +50,17 @@
                   class="seat-cell"
                   :class="{
                     'is-drag-source': draggingSeatId === seat.id,
-                    'is-drag-over': draggingSeatId !== null && dragOverSeatId === seat.id,
+                    'is-drag-over':
+                      (draggingSeatId !== null && dragOverSeatId === seat.id) ||
+                      externalDragOverSeatId === seat.id,
                   }"
                   :style="getSeatCellGridStyle(rowIndex + 1, colIndex + 1)"
                   @mousedown="onSeatMouseDown($event, seat)"
                   @mouseenter="onSeatMouseEnter(seat)"
                   @mouseleave="onSeatMouseLeave(seat)"
+                  @dragover="onSeatExternalDragOver($event, seat)"
+                  @dragleave="onSeatExternalDragLeave(seat)"
+                  @drop="onSeatExternalDrop($event, seat)"
                 >
                   <div
                     class="seat-cell-content"
@@ -142,6 +147,7 @@ import { computed, ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import type { ComponentPublicInstance, CSSProperties } from 'vue';
 import AppExamSeatAssignmentTile from 'src/components/exam/app-exam-seat-assignment-tile.vue';
 import type { SeatCell } from 'src/composables/use-exam-seat-management';
+import { SEAT_STUDENT_DRAG_MIME } from 'src/composables/use-exam-seat-management';
 
 const SHIFT_ANIMATION_MS = 460;
 
@@ -169,9 +175,11 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (e: 'swap', sourceSeatId: string, targetSeatId: string): void;
+  (e: 'assign-student', ermId: number, seatId: string): void;
 }>();
 
 const swapMode = ref(false);
+const externalDragOverSeatId = ref<string | null>(null);
 
 const rowCount = computed(() => props.seatsByRow.length);
 const colCount = computed(() =>
@@ -320,6 +328,7 @@ interface StudentSeatSnapshot {
   studentId: string;
   name: string;
   avatar: string | null;
+  bgColor: string | null;
 }
 
 interface SeatShiftGhost {
@@ -327,6 +336,7 @@ interface SeatShiftGhost {
   studentId: string;
   name: string;
   avatar: string | null;
+  bgColor: string | null;
   from: RectSnapshot;
   to: RectSnapshot;
   active: boolean;
@@ -378,6 +388,7 @@ const getStudentSeatSnapshots = (
         studentId: seat.student.id,
         name: seat.student.name,
         avatar: seat.student.avatar,
+        bgColor: seat.student.bgColor ?? null,
       });
     });
   });
@@ -389,6 +400,7 @@ const getShiftGhostStyle = (ghost: SeatShiftGhost): CSSProperties => ({
   top: `${ghost.from.top}px`,
   width: `${ghost.from.width}px`,
   height: `${ghost.from.height}px`,
+  backgroundColor: ghost.bgColor || undefined,
   transform: ghost.active
     ? `translate(${ghost.to.left - ghost.from.left}px, ${ghost.to.top - ghost.from.top}px)`
     : 'translate(0, 0)',
@@ -652,6 +664,7 @@ watch(
           studentId,
           name: newSeat.name,
           avatar: newSeat.avatar,
+          bgColor: newSeat.bgColor,
           from,
           to,
           active: false,
@@ -812,6 +825,46 @@ const onSeatMouseEnter = (seat: SeatCell): void => {
 
 const onSeatMouseLeave = (seat: SeatCell): void => {
   if (dragOverSeatId.value === seat.id) dragOverSeatId.value = null;
+};
+
+const canAcceptExternalStudentDrop = (seat: SeatCell): boolean =>
+  !props.printMode && isUsable(seat) && !seat.student;
+
+const readExternalStudentErmId = (event: DragEvent): number | null => {
+  const transfer = event.dataTransfer;
+  if (!transfer) return null;
+
+  const raw =
+    transfer.getData(SEAT_STUDENT_DRAG_MIME) || transfer.getData('text/plain') || '';
+  const ermId = Number(raw);
+  return Number.isInteger(ermId) && ermId > 0 ? ermId : null;
+};
+
+const onSeatExternalDragOver = (event: DragEvent, seat: SeatCell): void => {
+  if (!canAcceptExternalStudentDrop(seat)) return;
+
+  event.preventDefault();
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move';
+  }
+  externalDragOverSeatId.value = seat.id;
+};
+
+const onSeatExternalDragLeave = (seat: SeatCell): void => {
+  if (externalDragOverSeatId.value === seat.id) {
+    externalDragOverSeatId.value = null;
+  }
+};
+
+const onSeatExternalDrop = (event: DragEvent, seat: SeatCell): void => {
+  event.preventDefault();
+  externalDragOverSeatId.value = null;
+  if (!canAcceptExternalStudentDrop(seat)) return;
+
+  const ermId = readExternalStudentErmId(event);
+  if (ermId == null) return;
+
+  emit('assign-student', ermId, seat.id);
 };
 </script>
 
@@ -1141,8 +1194,7 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   :deep(.seat-assignment-tile) {
     position: relative;
     z-index: 1;
-    border: 1px solid var(--primary, #0d47a1);
-    background: var(--primary, #0d47a1);
+    /* ใช้สีจาก tile (ตามประเภทผู้เข้าสอบ) ไม่ force สี primary */
     box-shadow:
       0 12px 22px rgba(8, 15, 30, 0.2),
       0 0 0 1px rgba(13, 71, 161, 0.18);
@@ -1193,8 +1245,8 @@ const onSeatMouseLeave = (seat: SeatCell): void => {
   will-change: transform;
 
   :deep(.seat-assignment-tile) {
-    border: 1px solid rgba(13, 71, 161, 0.46);
-    background: var(--primary, #0d47a1);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    /* ใช้สีจาก tile (ตามประเภทผู้เข้าสอบ) ไม่ force สี primary */
     box-shadow:
       inset 0 0 0 1px rgba(255, 255, 255, 0.18),
       0 0 0 1px rgba(13, 71, 161, 0.12);

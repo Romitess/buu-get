@@ -47,6 +47,15 @@ export class Receipt {
   RC_SIGNATURE_ID: string;
 
   @Column({
+    name: 'RC_VERIFY_CODE',
+    type: 'varchar',
+    length: 100,
+    unique: true,
+    comment: 'รหัสตรวจสอบใบเสร็จ',
+  })
+  RC_VERIFY_CODE: string;
+
+  @Column({
     name: 'RC_STATUS',
     type: 'int',
     default: ReceiptStatus.UNISSUED,

@@ -43,6 +43,7 @@ describe('AuthService', () => {
         USER_EMAIL: 'student@example.com',
         USER_PASSWORD: 'hashed',
         ROLES_ID: [{ ROLE_NAME: RoleEnum.CANDIDATE }],
+        PROFILE: { userRemark: 'from-email' },
       } as Awaited<ReturnType<UsersService['findByEmail']>>);
 
       const loginDto: LoginDto = {
@@ -60,6 +61,25 @@ describe('AuthService', () => {
       });
       expect(response.accessToken).toBe('signed-jwt-token');
       expect(response.user.id).toBe(1);
+      expect(response.user.remark).toBe('from-email');
+    });
+
+    it('returns null remark when profile has no remark', async () => {
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      usersService.findByEmail.mockResolvedValue({
+        USER_ID: 2,
+        USER_EMAIL: 'plain@example.com',
+        USER_PASSWORD: 'hashed',
+        ROLES_ID: [{ ROLE_NAME: RoleEnum.CANDIDATE }],
+        PROFILE: undefined,
+      } as unknown as Awaited<ReturnType<UsersService['findByEmail']>>);
+
+      const response = await service.login({
+        email: 'plain@example.com',
+        password: 'password1234',
+      });
+
+      expect(response.user.remark).toBeNull();
     });
 
     it('throws on invalid password', async () => {

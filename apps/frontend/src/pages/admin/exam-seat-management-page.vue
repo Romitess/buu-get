@@ -36,27 +36,67 @@
       <div class="seat-management-row">
         <div class="seat-management-list-column flex column min-width-0">
           <div class="student-list-card">
-            <div class="row items-center justify-between q-mb-md">
+            <div class="row items-center justify-between q-mb-md q-gutter-sm">
               <div class="text-subtitle1 text-weight-bold text-dark">
                 {{ $t('admin.seatManagement.studentListTitle') }}
               </div>
-              <q-badge color="primary" rounded :label="currentRoomCount" class="badge-seat-count" />
+              <div class="row items-center no-wrap q-gutter-sm">
+                <AppButton
+                  v-if="hasAnyAssignedSeat"
+                  :label="$t('admin.seatManagement.rearrangeAllButton')"
+                  class="btn-rearrange-seats"
+                  outline
+                  @click="handleRearrangeAllSeats"
+                />
+                <q-badge
+                  color="primary"
+                  rounded
+                  :label="currentRoomCount"
+                  class="badge-seat-count"
+                />
+              </div>
             </div>
 
-            <div class="q-mb-md">
+            <div
+              v-if="unassignedStudentCount > 0"
+              class="unassigned-banner text-body2 q-mb-md"
+            >
+              {{
+                $t('admin.seatManagement.unassignedBanner', {
+                  count: unassignedStudentCount,
+                })
+              }}
+            </div>
+
+            <div class="student-list-filters q-mb-md">
               <SearchBar v-model="searchQuery" full-width @search="handleSearch" />
+              <AppSelect
+                v-model="applicantTypeFilter"
+                :options="applicantTypeOptions"
+                :label="$t('admin.seatManagement.applicantTypeFilterLabel')"
+                popup-content-class="applicant-type-select-menu"
+                emit-value
+                map-options
+                dense
+                outlined
+                options-dense
+                class="applicant-type-select"
+              />
             </div>
 
             <div class="student-list">
               <AppExamSeatCard
                 v-for="student in filteredStudents"
                 :key="student.ermId"
+                :erm-id="student.ermId"
                 :student-name="student.name"
                 :student-id="student.id"
                 :seat-number="getSeatLabel(student.seat)"
                 :avatar-url="student.avatar"
                 :remark="student.remark"
+                :bg-color="student.bgColor"
                 :is-foreigner="student.isForeigner"
+                :drag-hint="$t('admin.seatManagement.dragToSeatHint')"
               />
 
               <div
@@ -82,6 +122,7 @@
             :aisle-after-rows="aisleAfterRows"
             :swap-mode-label="$t('admin.seatManagement.swapModeLabel')"
             @swap="swapSeatAssignments"
+            @assign-student="onAssignStudentFromList"
           />
 
           <div class="row justify-end q-mt-sm q-gutter-sm">
@@ -101,21 +142,44 @@
         </div>
       </div>
     </template>
+
+    <AppSeatPlacementChoiceDialog
+      v-model="showPlacementChoiceDialog"
+      :title="$t('admin.seatManagement.placementChoice.title')"
+      :message="$t('admin.seatManagement.placementChoice.message')"
+      :unassigned-count="unassignedStudentCount"
+      :unassigned-hint="
+        $t('admin.seatManagement.placementChoice.unassignedHint', {
+          count: unassignedStudentCount,
+        })
+      "
+      :rearrange-label="$t('admin.seatManagement.placementChoice.rearrange')"
+      :keep-label="$t('admin.seatManagement.placementChoice.keep')"
+      @rearrange="handleRearrangeAllSeats"
+      @keep="handleKeepExistingSeats"
+    />
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
+import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
+import AppSelect from 'src/components/base/app-select.vue';
 import AppExamSeatCard from 'src/components/exam/app-exam-seat-card.vue';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
 import AppExamSeatAssignmentMap from 'src/components/exam/app-exam-seat-assignment-map.vue';
+import AppSeatPlacementChoiceDialog from 'src/components/exam/app-seat-placement-choice-dialog.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppExamSessionTime from 'src/components/exam/app-exam-session-time.vue';
 import { useExamSeatManagement } from 'src/composables/use-exam-seat-management';
 import { SeatManagementSkeleton } from 'src/components/base/skeleton';
+
+const $q = useQuasar();
+const { t } = useI18n();
 
 const {
   isLoading,
@@ -124,6 +188,8 @@ const {
   sessionTimeTabs,
   roomOptions,
   searchQuery,
+  applicantTypeFilter,
+  applicantTypeOptions,
   splitLeftRight,
   aisleAfterCols,
   aisleAfterRows,
@@ -137,12 +203,18 @@ const {
   currentRoomCapacity,
   filteredStudents,
   isSeatAssignmentComplete,
+  unassignedStudentCount,
+  hasAnyAssignedSeat,
+  showPlacementChoiceDialog,
   saveButtonLabel,
   loadExamData,
   getSeatLabel,
   handleCancel,
   handleSave,
   swapSeatAssignments,
+  assignStudentToSeat,
+  handleRearrangeAllSeats,
+  handleKeepExistingSeats,
 } = useExamSeatManagement();
 
 onMounted(() => {
@@ -151,6 +223,17 @@ onMounted(() => {
 
 const handleSearch = (val: string | number | null): void => {
   searchQuery.value = String(val || '');
+};
+
+const onAssignStudentFromList = (ermId: number, seatId: string): void => {
+  const assigned = assignStudentToSeat(ermId, seatId);
+  if (!assigned) {
+    $q.notify({
+      type: 'warning',
+      position: 'top',
+      message: t('admin.seatManagement.notifications.assignSeatFailed'),
+    });
+  }
 };
 </script>
 
@@ -213,6 +296,36 @@ const handleSearch = (val: string | number | null): void => {
   font-weight: 700;
 }
 
+.unassigned-banner {
+  background: #e8f1fb;
+  border: 1px solid #b7d4f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #1a5278;
+}
+
+.student-list-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+
+  .search-bar {
+    flex: 1 1 180px;
+    min-width: 0;
+  }
+}
+
+.applicant-type-select {
+  flex: 0 1 180px;
+  min-width: 160px;
+  max-width: 100%;
+
+  :deep(.q-field__control) {
+    border-radius: var(--radius-10) !important;
+  }
+}
+
 .student-list {
   display: flex;
   flex-direction: column;
@@ -236,6 +349,12 @@ const handleSearch = (val: string | number | null): void => {
   }
 }
 
+.btn-rearrange-seats {
+  border-radius: 8px !important;
+  font-weight: 600;
+  text-transform: none;
+}
+
 .btn-cancel-seat {
   background-color: var(--neutral-gray-light) !important;
   color: var(--text-primary) !important;
@@ -250,5 +369,12 @@ const handleSearch = (val: string | number | null): void => {
   border-radius: 8px !important;
   padding: 10px 32px !important;
   font-weight: 600;
+}
+</style>
+
+<style lang="scss">
+/* Menu teleports to body — show all applicant type options without scrolling */
+.app-select-menu.applicant-type-select-menu {
+  max-height: none !important;
 }
 </style>

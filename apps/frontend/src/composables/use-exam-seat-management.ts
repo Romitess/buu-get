@@ -14,11 +14,15 @@ import { formatThaiLongDate } from 'src/utils/thai-date';
 import { getImageUrl } from 'src/services/image.service';
 import { fetchLatestProfileHistoryImages } from 'src/services/profile-edit-history.service';
 import { useExamSeatNavigation } from 'src/composables/use-exam-seat-navigation';
+import { getPhysicalStatusBgColor } from 'src/constants/physical-status';
 
 /** Enrollment status codes shared with the backend */
 const STATUS_PAID = 1;
 const STATUS_SEAT_ASSIGNED = 2;
 const STATUS_SEAT_PUBLISHED = 3;
+
+/** HTML5 DnD mime used when dragging an unassigned student from the list onto a seat */
+export const SEAT_STUDENT_DRAG_MIME = 'application/x-buu-seat-student';
 
 const PHYSICAL_STATUS_REMARKS: Record<number, string> = {
   0: 'พระภิกษุ / สามเณร',
@@ -27,6 +31,15 @@ const PHYSICAL_STATUS_REMARKS: Record<number, string> = {
   3: 'ผู้ตั้งครรภ์',
   4: 'ผู้พิการรณ์',
 };
+
+export const APPLICANT_TYPE_FILTER_ALL = 'all';
+
+/** ประเภทผู้สมัครที่ใช้กรองรายชื่อ เรียงตามลำดับการจัดที่นั่ง */
+const APPLICANT_TYPE_REMARKS = [
+  ...Object.values(PHYSICAL_STATUS_REMARKS),
+  'ชาวต่างชาติ',
+  'ชาวไทย',
+];
 
 export type SeatStatus = 'available' | 'assigned' | 'broken' | 'blocked';
 
@@ -48,6 +61,8 @@ export interface StudentSeatInfo {
   sessionLocationId: number | null;
   avatar: string | null;
   remark: string;
+  /** สีพื้นหลังตามประเภทผู้เข้าสอบ */
+  bgColor: string;
   isForeigner: boolean;
   titleEn: string | null;
   sortName: string;
@@ -134,9 +149,18 @@ export function useExamSeatManagement() {
   const latestProfileHistoryImageById = ref<Record<number, string>>({});
   const students = ref<StudentSeatInfo[]>([]);
   const seatDraftsByTime = new Map<string, StudentSeatInfo[]>();
+  /** Time keys where the user already answered rearrange-vs-keep for new applicants */
+  const placementChoiceResolvedByTime = new Set<string>();
+  const showPlacementChoiceDialog = ref(false);
   const blockedSeatsBySessionId = ref<Record<number, BackendBlockedSeat[]>>({});
   const searchQuery = ref('');
+  const applicantTypeFilter = ref<string>(APPLICANT_TYPE_FILTER_ALL);
   const hasLoadedEnrollments = ref(false);
+
+  const applicantTypeOptions = computed(() => [
+    { label: t('admin.seatManagement.applicantTypeAll'), value: APPLICANT_TYPE_FILTER_ALL },
+    ...APPLICANT_TYPE_REMARKS.map((remark) => ({ label: remark, value: remark })),
+  ]);
 
   // ── Computed: exam / session info ────────────────────────
   const activeSession = computed((): BackendSession | null => {
@@ -580,6 +604,21 @@ export function useExamSeatManagement() {
     return students.value.length > 0 && students.value.every((student) => Boolean(student.seat));
   });
 
+  const unassignedStudents = computed((): StudentSeatInfo[] =>
+    students.value.filter((student) => !student.seat),
+  );
+
+  const unassignedStudentCount = computed((): number => unassignedStudents.value.length);
+
+  const hasMixedSeatAssignments = computed((): boolean => {
+    const hasAssigned = students.value.some((student) => Boolean(student.seat));
+    return hasAssigned && unassignedStudentCount.value > 0;
+  });
+
+  const hasAnyAssignedSeat = computed((): boolean =>
+    students.value.some((student) => Boolean(student.seat)),
+  );
+
   const isReEditingSeatAssignment = computed((): boolean => {
     return activeTimeSessions.value.some(
       (session) => Number(session.SS_SESSION_STATUS) >= STATUS_SEAT_ASSIGNED,
@@ -657,10 +696,14 @@ export function useExamSeatManagement() {
       ? (seatOrderById.value.get(student.seat) ?? Number.MAX_SAFE_INTEGER)
       : Number.MAX_SAFE_INTEGER;
 
+  const matchesApplicantType = (student: StudentSeatInfo): boolean =>
+    applicantTypeFilter.value === APPLICANT_TYPE_FILTER_ALL ||
+    student.remark === applicantTypeFilter.value;
+
   const filteredStudents = computed((): StudentSeatInfo[] => {
     const query = searchQuery.value.toLowerCase().trim();
     // Show only the applicants seated in the currently selected room
-    const sourceList = currentRoomStudents.value;
+    const sourceList = currentRoomStudents.value.filter(matchesApplicantType);
     const list = query
       ? sourceList.filter((s) => {
           const seatLabel = getSeatLabel(s.seat)?.toLowerCase() || '';
@@ -672,9 +715,13 @@ export function useExamSeatManagement() {
         })
       : [...sourceList];
 
-    // Sort by seat reading order (A1, A2, … B1 …) so the list lines up with the
-    // seat map on the right; unassigned students fall to the bottom.
+    // Unassigned first (easier to drag onto the map), then seat reading order
+    // (A1, A2, … B1 …) so assigned rows still line up with the map.
     return list.sort((a, b) => {
+      const aHasSeat = Boolean(a.seat);
+      const bHasSeat = Boolean(b.seat);
+      if (aHasSeat !== bHasSeat) return aHasSeat ? 1 : -1;
+
       const seatDiff = getSeatOrderKey(a) - getSeatOrderKey(b);
       if (seatDiff !== 0) return seatDiff;
       return a.name.localeCompare(b.name, 'th');
@@ -752,7 +799,7 @@ export function useExamSeatManagement() {
     // room. This makes the first room fill up completely before the second.
     const availableSeatAssignments = getUsableSeatAssignments();
 
-    // Re-arrange everyone on each open: clear seats first.
+    // Re-arrange everyone: clear seats first.
     students.value.forEach((student) => {
       student.seat = null;
       student.sessionLocationId = null;
@@ -775,6 +822,107 @@ export function useExamSeatManagement() {
     });
   };
 
+  const mapEnrollmentToStudent = (enrollment: BackendEnrollmentDetail): StudentSeatInfo => {
+    const profile = enrollment.USER?.PROFILE;
+    const { remark, isForeigner } = getEnrollmentRemarkInfo(enrollment);
+    const imagePath = getEnrollmentImagePath(enrollment);
+
+    const titleEn = profile?.userTitleEn || null;
+    const fullnameEn = profile?.userFullnameEn || null;
+    const displayName =
+      titleEn && fullnameEn
+        ? `${titleEn} ${fullnameEn}`
+        : profile?.userFullnameTh ||
+          enrollment.USER?.USER_EMAIL ||
+          t('admin.seatManagement.noName');
+    const sortName =
+      fullnameEn || profile?.userFullnameTh || enrollment.USER?.USER_EMAIL || displayName;
+
+    return {
+      ermId: enrollment.ERM_ID,
+      sessionId: enrollment.SESSION_ID,
+      id: enrollment.USER?.USER_NATIONAL_ID || String(enrollment.USER_ID),
+      name: displayName,
+      seat: resolveSeatIdFromEnrollment(enrollment),
+      sessionLocationId:
+        enrollment.SL_ID ??
+        sessionLocations.value.find((location) => location.SS_ID === enrollment.SESSION_ID)
+          ?.SL_ID ??
+        null,
+      avatar: imagePath ? getImageUrl(imagePath) : null,
+      remark,
+      bgColor: getPhysicalStatusBgColor(remark),
+      isForeigner,
+      titleEn,
+      sortName,
+      priority: getSeatPriority(enrollment, isForeigner),
+    };
+  };
+
+  const markPlacementChoiceResolved = (): void => {
+    if (!activeSession.value) return;
+    placementChoiceResolvedByTime.add(getSessionTimeKey(activeSession.value));
+  };
+
+  const openPlacementChoiceIfNeeded = (timeKey: string | null): void => {
+    if (!timeKey) return;
+    if (placementChoiceResolvedByTime.has(timeKey)) return;
+    if (!hasMixedSeatAssignments.value) return;
+    showPlacementChoiceDialog.value = true;
+  };
+
+  const persistActiveSeatDraft = (): void => {
+    if (!activeSessionId.value) return;
+    saveSeatDraft(activeSessionId.value, students.value);
+  };
+
+  const handleRearrangeAllSeats = (): void => {
+    autoAssignSeats();
+    markPlacementChoiceResolved();
+    showPlacementChoiceDialog.value = false;
+    persistActiveSeatDraft();
+    $q.notify({
+      type: 'info',
+      position: 'top',
+      message: t('admin.seatManagement.notifications.rearranged'),
+      icon: 'event_seat',
+    });
+  };
+
+  const handleKeepExistingSeats = (): void => {
+    markPlacementChoiceResolved();
+    showPlacementChoiceDialog.value = false;
+    persistActiveSeatDraft();
+    if (unassignedStudentCount.value > 0) {
+      $q.notify({
+        type: 'info',
+        position: 'top',
+        message: t('admin.seatManagement.notifications.dragUnassignedHint'),
+        icon: 'pan_tool',
+      });
+    }
+  };
+
+  /**
+   * Places an unassigned student onto an empty usable seat (list → map drag).
+   * Returns false when the student/seat is invalid or the seat is already taken.
+   */
+  const assignStudentToSeat = (ermId: number, seatId: string): boolean => {
+    const student = students.value.find((item) => item.ermId === ermId);
+    if (!student || student.seat) return false;
+
+    const usableSeat = getUsableSeatAssignments().find((seat) => seat.seatId === seatId);
+    if (!usableSeat) return false;
+
+    const occupant = students.value.find((item) => item.seat === seatId);
+    if (occupant) return false;
+
+    student.seat = usableSeat.seatId;
+    student.sessionLocationId = usableSeat.sessionLocationId;
+    persistActiveSeatDraft();
+    return true;
+  };
+
   const filterStudentsBySession = (): void => {
     if (!activeSessionId.value) {
       students.value = [];
@@ -783,10 +931,6 @@ export function useExamSeatManagement() {
 
     const timeKey = activeSession.value ? getSessionTimeKey(activeSession.value) : null;
     const existingDraft = timeKey ? seatDraftsByTime.get(timeKey) : undefined;
-    if (existingDraft) {
-      students.value = cloneStudents(existingDraft);
-      return;
-    }
 
     // Only show students who have status PAID (1), SEAT_ASSIGNED (2), or SEAT_PUBLISHED (3)
     const eligibleEnrollments = sessionEnrollments.value.filter(
@@ -796,45 +940,41 @@ export function useExamSeatManagement() {
         Number(e.ERM_STATUS) === STATUS_SEAT_PUBLISHED,
     );
 
-    students.value = eligibleEnrollments.map((e) => {
-      const profile = e.USER?.PROFILE;
-      const { remark, isForeigner } = getEnrollmentRemarkInfo(e);
-      const imagePath = getEnrollmentImagePath(e);
+    if (existingDraft) {
+      const draftByErmId = new Map(existingDraft.map((student) => [student.ermId, student]));
+      students.value = eligibleEnrollments.map((enrollment) => {
+        const mapped = mapEnrollmentToStudent(enrollment);
+        const draft = draftByErmId.get(enrollment.ERM_ID);
+        if (!draft) return mapped;
 
-      // Build English display name: "Mr. Somaun Jaidee"
-      const titleEn = profile?.userTitleEn || null;
-      const fullnameEn = profile?.userFullnameEn || null;
-      const displayName =
-        titleEn && fullnameEn
-          ? `${titleEn} ${fullnameEn}`
-          : profile?.userFullnameTh || e.USER?.USER_EMAIL || t('admin.seatManagement.noName');
-      const sortName = fullnameEn || profile?.userFullnameTh || e.USER?.USER_EMAIL || displayName;
+        return {
+          ...mapped,
+          seat: draft.seat,
+          sessionLocationId: draft.sessionLocationId ?? mapped.sessionLocationId,
+        };
+      });
+      if (timeKey) {
+        seatDraftsByTime.set(timeKey, cloneStudents(students.value));
+      }
+      openPlacementChoiceIfNeeded(timeKey);
+      return;
+    }
 
-      return {
-        ermId: e.ERM_ID,
-        sessionId: e.SESSION_ID,
-        id: e.USER?.USER_NATIONAL_ID || String(e.USER_ID),
-        name: displayName,
-        seat: resolveSeatIdFromEnrollment(e),
-        sessionLocationId:
-          e.SL_ID ??
-          sessionLocations.value.find((location) => location.SS_ID === e.SESSION_ID)?.SL_ID ??
-          null,
-        avatar: imagePath ? getImageUrl(imagePath) : null,
-        remark,
-        isForeigner,
-        titleEn,
-        sortName,
-        priority: getSeatPriority(e, isForeigner),
-      };
-    });
+    students.value = eligibleEnrollments.map((enrollment) => mapEnrollmentToStudent(enrollment));
 
     const hasExistingSeatAssignments = eligibleEnrollments.some((enrollment) =>
       Boolean(enrollment.ERM_SEAT_LABEL && enrollment.SL_ID != null),
     );
+
     if (!hasExistingSeatAssignments) {
       autoAssignSeats();
+      if (timeKey) {
+        placementChoiceResolvedByTime.add(timeKey);
+      }
+    } else {
+      openPlacementChoiceIfNeeded(timeKey);
     }
+
     if (timeKey) {
       seatDraftsByTime.set(timeKey, cloneStudents(students.value));
     }
@@ -1268,12 +1408,15 @@ export function useExamSeatManagement() {
     sessionTimeTabs,
     roomOptions,
     searchQuery,
+    applicantTypeFilter,
+    applicantTypeOptions,
     gridCols,
     splitLeftRight,
     aisleAfterCols,
     aisleAfterRows,
     seatsByRow,
     seatStyle,
+    showPlacementChoiceDialog,
     // Exam / session info
     examTitle,
     examDate,
@@ -1287,11 +1430,17 @@ export function useExamSeatManagement() {
     filteredStudents,
     isSeatAssignmentComplete,
     isReEditingSeatAssignment,
+    unassignedStudentCount,
+    hasMixedSeatAssignments,
+    hasAnyAssignedSeat,
     saveButtonLabel,
     // Methods
     loadExamData,
     getSeatLabel,
     swapSeatAssignments,
+    assignStudentToSeat,
+    handleRearrangeAllSeats,
+    handleKeepExistingSeats,
     handleCancel,
     handleSave,
   };

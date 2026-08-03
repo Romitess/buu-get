@@ -46,7 +46,7 @@
           </div>
         </div>
 
-        <!-- URL Import Section -->
+        <!-- URL Import Section (ยังไม่ได้เชื่อมต่อ — ซ่อนไว้ชั่วคราว)
         <div class="url-section">
           <div class="url-label">หรือนำเข้าจาก URL</div>
           <div class="row q-gutter-sm items-center">
@@ -69,6 +69,7 @@
             />
           </div>
         </div>
+        -->
       </q-card-section>
     </q-card>
   </q-dialog>
@@ -86,12 +87,12 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
   (e: 'file-selected', file: File): void;
-  (e: 'url-submitted', url: string): void;
+  // (e: 'url-submitted', url: string): void;
   (e: 'download-sample'): void;
 }>();
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
-const fileUrl = ref('');
+// const fileUrl = ref('');
 const isDragOver = ref(false);
 
 const triggerFileInput = (): void => {
@@ -121,14 +122,14 @@ const onDrop = (event: DragEvent): void => {
   if (file) processFile(file);
 };
 
-const onUrlSubmit = (): void => {
-  const url = fileUrl.value.trim();
-  if (url) {
-    emit('url-submitted', url);
-    fileUrl.value = '';
-    emit('update:modelValue', false);
-  }
-};
+// const onUrlSubmit = (): void => {
+//   const url = fileUrl.value.trim();
+//   if (url) {
+//     emit('url-submitted', url);
+//     fileUrl.value = '';
+//     emit('update:modelValue', false);
+//   }
+// };
 </script>
 
 <style scoped lang="scss">
@@ -229,7 +230,7 @@ const onUrlSubmit = (): void => {
   text-align: center;
 }
 
-/* ── URL Section ── */
+/* ── URL Section (ยังไม่ได้เชื่อมต่อ — ซ่อนไว้ชั่วคราว)
 .url-section {
   margin-top: 24px;
 }
@@ -264,6 +265,7 @@ const onUrlSubmit = (): void => {
     opacity: 0.5;
   }
 }
+*/
 
 @media (max-width: 600px) {
   .dialog-csv-card {

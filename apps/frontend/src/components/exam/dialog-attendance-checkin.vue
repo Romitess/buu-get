@@ -2,7 +2,7 @@
   <q-dialog ref="dialogRef" @hide="onDialogHide">
     <q-card class="checkin-dialog-card">
       <header class="dialog-header">
-        <h2>เช็คอินเข้าห้องสอบ</h2>
+        <h2>เช็กอินเข้าห้องสอบ</h2>
         <q-btn
           flat
           round
@@ -17,23 +17,36 @@
 
       <section class="search-section">
         <div class="row items-end q-col-gutter-x-md">
-          <div class="col">
+          <div
+            ref="searchFieldWrapperRef"
+            class="col"
+            @keydown.capture="onSearchKeydown"
+            @beforeinput.capture="onSearchBeforeInput"
+          >
             <AppLabeledInput
               v-model="searchInput"
-              label="เลขบัตรประชาชน/เลข Passport"
-              placeholder="กรอกเลขบัตรประชาชน หรือ Passport"
+              label="เลขบัตรประชาชน / Passport / Test Taker ID"
+              placeholder="กรอกหรือแสกนบาร์โค้ดจาก Test Voucher"
               class="custom-labeled-input"
               maxlength="13"
               hide-bottom-space
-              @keyup.enter="handleSearch"
+              autofocus
+              readonly
+              :disable="isCheckingIn"
             >
               <template v-slot:label>
-                เลขบัตรประชาชน/เลข Passport <span class="text-red">*</span>
+                เลขบัตรประชาชน / Passport / Test Taker ID <span class="text-red">*</span>
               </template>
             </AppLabeledInput>
           </div>
           <div class="col-shrink">
-            <AppButton label="ค้นหา" color="primary" class="search-btn" @click="handleSearch" />
+            <AppButton
+              label="ค้นหา"
+              color="primary"
+              class="search-btn"
+              :disable="isCheckingIn"
+              @click="handleSearch"
+            />
           </div>
         </div>
         <div v-if="validationError" class="validation-error q-mt-xs">
@@ -56,10 +69,11 @@
       <footer class="action-footer row justify-center q-mt-md q-gutter-x-md">
         <AppButton label="ยกเลิก" class="footer-btn cancel-btn" @click="onCancelClick" />
         <AppButton
-          label="เช็คอินเข้าห้องสอบ"
+          label="เช็กอินเข้าห้องสอบ"
           color="primary"
           class="footer-btn checkin-confirm-btn"
-          :disable="!canCheckIn"
+          :disable="!canCheckIn || isCheckingIn"
+          :loading="isCheckingIn"
           @click="handleCheckIn"
         />
       </footer>
@@ -68,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useDialogPluginComponent, useQuasar } from 'quasar';
 import AppLabeledInput from 'src/components/base/app-labeled-input.vue';
 import AppButton from 'src/components/base/app-button.vue';
@@ -77,6 +91,11 @@ import { createExamAttendance } from 'src/services/exam-attendance.service';
 import type { AttendanceTableRow } from 'src/types/enrollment.types';
 import { ExamAttendStatus } from 'src/types/enrollment.types';
 import type { VoucherData } from 'src/types/voucher';
+import { codeToScanChar, normalizeScanPayload } from 'src/utils/scan-keyboard';
+
+/** Short delay so voucher paints before auto check-in */
+const SCAN_PREVIEW_DELAY_MS = 250;
+const SEARCH_MAX_LENGTH = 13;
 
 const props = defineProps<{
   attendances: AttendanceTableRow[];
@@ -85,33 +104,155 @@ const props = defineProps<{
   examTime: string;
   examLocation: string;
   examRound: string;
+  /** Refresh parent attendance table without closing this dialog */
+  onCheckedIn?: () => void;
 }>();
 
 defineEmits([...useDialogPluginComponent.emits]);
 
-const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginComponent();
+const { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent();
 const $q = useQuasar();
 
 const searchInput = ref('');
 const validationError = ref('');
 const searchedCandidate = ref<AttendanceTableRow | null>(null);
+const isCheckingIn = ref(false);
+const searchFieldWrapperRef = ref<HTMLElement | null>(null);
 
-const handleSearch = () => {
-  validationError.value = '';
-  const query = searchInput.value.trim();
+/** Snapshot so we can mark INTIME after check-in without reopening the dialog */
+const localAttendances = ref<AttendanceTableRow[]>(props.attendances.map((row) => ({ ...row })));
 
-  if (!query) {
-    validationError.value = 'กรุณากรอกเลขบัตรประชาชนหรือเลขพาสปอร์ต';
-    searchedCandidate.value = null;
+const getSearchNativeInput = (): HTMLInputElement | null => {
+  return searchFieldWrapperRef.value?.querySelector('input') ?? null;
+};
+
+const focusSearchInput = (): void => {
+  void nextTick(() => {
+    const input = getSearchNativeInput();
+    input?.focus();
+    input?.select();
+  });
+};
+
+/**
+ * Capture-phase handler: runs before the native input inserts layout-mapped glyphs
+ * (Thai Kedmanee). Prefer event.code so Digit6 → "6" even when OS is Thai.
+ */
+const appendScanChar = (scanChar: string): void => {
+  if (searchInput.value.length >= SEARCH_MAX_LENGTH) {
+    return;
+  }
+  searchInput.value += scanChar;
+};
+
+const onSearchKeydown = (event: KeyboardEvent): void => {
+  if (isCheckingIn.value) {
+    event.preventDefault();
+    event.stopPropagation();
     return;
   }
 
-  const candidate = props.attendances.find(
+  if (event.ctrlKey || event.metaKey || event.altKey) {
+    return;
+  }
+
+  if (event.code === 'Enter' || event.code === 'NumpadEnter') {
+    event.preventDefault();
+    event.stopPropagation();
+    void handleScanSubmit();
+    return;
+  }
+
+  // Readonly field: handle edit keys ourselves
+  if (event.code === 'Backspace') {
+    event.preventDefault();
+    event.stopPropagation();
+    searchInput.value = searchInput.value.slice(0, -1);
+    return;
+  }
+  if (event.code === 'Delete') {
+    event.preventDefault();
+    event.stopPropagation();
+    searchInput.value = '';
+    return;
+  }
+
+  // Primary: physical key (layout-independent)
+  const fromCode = codeToScanChar(event.code);
+  if (fromCode) {
+    event.preventDefault();
+    event.stopPropagation();
+    appendScanChar(fromCode);
+    return;
+  }
+
+  // Fallback: OS already mapped to Thai glyph in event.key (some IMEs / scanners)
+  if (event.key.length === 1) {
+    const fromKey = normalizeScanPayload(event.key);
+    if (fromKey && fromKey !== event.key) {
+      event.preventDefault();
+      event.stopPropagation();
+      appendScanChar(fromKey);
+    }
+  }
+};
+
+/** Block insertText that contains Kedmanee glyphs; insert ASCII instead */
+const onSearchBeforeInput = (event: Event): void => {
+  const inputEvent = event as InputEvent;
+  if (isCheckingIn.value) {
+    inputEvent.preventDefault();
+    return;
+  }
+  if (inputEvent.inputType !== 'insertText' || !inputEvent.data) {
+    return;
+  }
+  const normalized = normalizeScanPayload(inputEvent.data);
+  if (normalized === inputEvent.data) {
+    return;
+  }
+  inputEvent.preventDefault();
+  for (const ch of normalized) {
+    appendScanChar(ch);
+  }
+};
+
+/** If any Thai glyph still slips in (IME/paste), convert immediately for display + match */
+watch(searchInput, (value) => {
+  const normalized = normalizeScanPayload(value);
+  if (normalized !== value) {
+    searchInput.value = normalized.slice(0, SEARCH_MAX_LENGTH);
+  }
+});
+
+onMounted(() => {
+  focusSearchInput();
+});
+
+const findCandidate = (query: string): AttendanceTableRow | undefined => {
+  return localAttendances.value.find(
     (item) =>
       item.nationalId === query ||
       (item.passportNo && item.passportNo === query) ||
       (item.testTakerCode && item.testTakerCode === query),
   );
+};
+
+const resolveCandidateFromInput = (): AttendanceTableRow | null => {
+  validationError.value = '';
+  const query = normalizeScanPayload(searchInput.value);
+
+  if (query !== searchInput.value) {
+    searchInput.value = query;
+  }
+
+  if (!query) {
+    validationError.value = 'กรุณากรอกเลขบัตรประชาชน Passport หรือแสกน Test Taker ID';
+    searchedCandidate.value = null;
+    return null;
+  }
+
+  const candidate = findCandidate(query);
 
   if (!candidate) {
     $q.notify({
@@ -120,10 +261,123 @@ const handleSearch = () => {
       position: 'top',
     });
     searchedCandidate.value = null;
-    return;
+    return null;
   }
 
   searchedCandidate.value = candidate;
+  return candidate;
+};
+
+/** Manual search: preview voucher only */
+const handleSearch = (): void => {
+  if (isCheckingIn.value) return;
+  resolveCandidateFromInput();
+};
+
+const wait = (ms: number): Promise<void> =>
+  new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+
+/**
+ * Scanner / Enter: show voucher first, then auto check-in.
+ * HID wedge scanners type the payload and send Enter.
+ */
+const handleScanSubmit = async (): Promise<void> => {
+  if (isCheckingIn.value) return;
+
+  const candidate = resolveCandidateFromInput();
+  if (!candidate) return;
+
+  if (candidate.attendanceStatus === ExamAttendStatus.INTIME) {
+    $q.notify({
+      type: 'warning',
+      message: 'ผู้เข้าสอบคนนี้เช็กอินแล้ว',
+      position: 'top',
+    });
+    return;
+  }
+
+  // Lock for the whole preview + API window to block double Enter from scanners
+  isCheckingIn.value = true;
+  try {
+    await nextTick();
+    await wait(SCAN_PREVIEW_DELAY_MS);
+    await performCheckIn();
+  } finally {
+    isCheckingIn.value = false;
+  }
+};
+
+const markCandidateCheckedIn = (ermId: number): void => {
+  const index = localAttendances.value.findIndex((row) => row.ermId === ermId);
+  if (index < 0) return;
+
+  const current = localAttendances.value[index];
+  if (!current) return;
+
+  localAttendances.value[index] = {
+    ...current,
+    attendanceStatus: ExamAttendStatus.INTIME,
+    checkInTime: new Date().toISOString(),
+    hasRecord: true,
+  };
+};
+
+const resetForNextScan = (): void => {
+  searchInput.value = '';
+  searchedCandidate.value = null;
+  validationError.value = '';
+  focusSearchInput();
+};
+
+/** Shared check-in path: keep dialog open for continuous scanning */
+const performCheckIn = async (): Promise<void> => {
+  const candidate = searchedCandidate.value;
+  if (!candidate) return;
+
+  if (candidate.attendanceStatus === ExamAttendStatus.INTIME) {
+    $q.notify({
+      type: 'warning',
+      message: 'ผู้เข้าสอบคนนี้เช็กอินแล้ว',
+      position: 'top',
+    });
+    return;
+  }
+
+  const alreadyLocked = isCheckingIn.value;
+  if (!alreadyLocked) {
+    isCheckingIn.value = true;
+  }
+
+  try {
+    await createExamAttendance({
+      ERM_ID: candidate.ermId,
+      ATTEND_STATUS: 1,
+    });
+
+    markCandidateCheckedIn(candidate.ermId);
+
+    $q.notify({
+      type: 'positive',
+      message: 'เช็กอินเข้าห้องสอบสำเร็จ',
+      position: 'top',
+    });
+
+    props.onCheckedIn?.();
+    resetForNextScan();
+  } catch (error) {
+    console.error(error);
+    $q.notify({
+      type: 'negative',
+      message: 'เกิดข้อผิดพลาดในการเช็กอิน',
+      position: 'top',
+    });
+  } finally {
+    if (!alreadyLocked) {
+      isCheckingIn.value = false;
+    }
+  }
 };
 
 const isPlaceholderImage = computed(() => {
@@ -168,39 +422,19 @@ const currentVoucherData = computed<VoucherData>(() => {
     citizenId: candidate.nationalId || candidate.passportNo || '-',
     testSession: candidate.testSession || props.examRound,
     profileImage: candidate.profileImage || undefined,
+    barcodeValue: candidate.testTakerCode || '',
   };
 });
 
 const canCheckIn = computed(() => {
   return (
-    searchedCandidate.value && searchedCandidate.value.attendanceStatus !== ExamAttendStatus.INTIME
+    !!searchedCandidate.value &&
+    searchedCandidate.value.attendanceStatus !== ExamAttendStatus.INTIME
   );
 });
 
-const handleCheckIn = async () => {
-  if (!searchedCandidate.value) return;
-
-  try {
-    await createExamAttendance({
-      ERM_ID: searchedCandidate.value.ermId,
-      ATTEND_STATUS: 1,
-    });
-
-    $q.notify({
-      type: 'positive',
-      message: 'เช็คอินเข้าห้องสอบสำเร็จ',
-      position: 'top',
-    });
-
-    onDialogOK();
-  } catch (error) {
-    console.error(error);
-    $q.notify({
-      type: 'negative',
-      message: 'เกิดข้อผิดพลาดในการเช็คอิน',
-      position: 'top',
-    });
-  }
+const handleCheckIn = async (): Promise<void> => {
+  await performCheckIn();
 };
 
 const onCancelClick = () => {

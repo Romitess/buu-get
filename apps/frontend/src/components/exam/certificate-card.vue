@@ -88,8 +88,21 @@
             <div class="metadata-value">{{ validUntil }}</div>
           </div>
         </div>
-        <div class="col-auto text-right">
-          <q-icon name="qr_code_2" size="40px" color="dark" class="qr-code-icon" />
+        <div class="col-auto text-right verify-block">
+          <img
+            v-if="qrDataUrl"
+            :src="qrDataUrl"
+            class="qr-code-image"
+            alt="Verification QR"
+          />
+          <q-icon
+            v-else
+            name="qr_code_2"
+            size="40px"
+            color="dark"
+            class="qr-code-icon"
+          />
+          <div v-if="certificateCode" class="verify-code-text">{{ certificateCode }}</div>
         </div>
       </div>
     </template>
@@ -153,17 +166,21 @@ interface Props {
   validUntil: string;
   bandRules: CertificateBandRule[];
   photoUrl?: string | null;
+  certificateCode?: string;
+  qrDataUrl?: string | null;
 }
 
 withDefaults(defineProps<Props>(), {
   photoUrl: null,
+  certificateCode: '',
+  qrDataUrl: null,
 });
 </script>
 
 <style scoped lang="scss">
 .certificate-card-preview {
   width: 100%;
-  height: 375px;
+  height: 385px;
   border: 1.5px solid #cbd5e1;
   border-radius: 12px;
   background-color: #f8f9fa;
@@ -325,8 +342,8 @@ withDefaults(defineProps<Props>(), {
 }
 
 .cert-footer {
-  height: 64px;
-  padding: 12px 20px;
+  min-height: 76px;
+  padding: 10px 20px;
   background-color: #f8f9fa;
   border-top: 1.5px solid #cbd5e1;
   box-sizing: border-box;
@@ -353,6 +370,33 @@ withDefaults(defineProps<Props>(), {
 
 .qr-code-icon {
   display: block;
+}
+
+.verify-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.qr-code-image {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  background: #fff;
+  padding: 2px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+}
+
+.verify-code-text {
+  font-size: 7px;
+  line-height: 1.1;
+  max-width: 120px;
+  word-break: break-all;
+  text-align: right;
+  color: #334155;
+  font-weight: 600;
 }
 
 .cert-back-container {

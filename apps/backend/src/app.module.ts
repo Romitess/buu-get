@@ -43,6 +43,7 @@ import { MoodleModule } from './modules/moodle/moodle.module';
 import { ExamReportModule } from './modules/exam-report/exam-report.module';
 import { ExamBlockedSeatsModule } from './modules/exam-blocked-seats/exam-blocked-seats.module';
 import { ThaidModule } from './modules/thaid/thaid.module';
+import { VerifyModule } from './modules/verify/verify.module';
 
 @Module({
   imports: [
@@ -112,6 +113,7 @@ import { ThaidModule } from './modules/thaid/thaid.module';
     ExamReportModule,
     ExamBlockedSeatsModule,
     ThaidModule,
+    VerifyModule,
   ],
   providers: [
     // Global auth guard — ทุก endpoint ต้องมี JWT ที่ถูกต้อง ยกเว้นที่ทำเครื่องหมาย @Public()

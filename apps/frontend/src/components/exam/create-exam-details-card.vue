@@ -38,11 +38,11 @@
               <div class="buu-label-muted q-mb-xs">ชื่อการสอบ</div>
               <q-input
                 v-model="form.examName"
-                placeholder="BUU-GET"
+                :placeholder="DEFAULT_EXAM_NAME"
                 outlined
                 dense
                 bg-color="white"
-                class="buu-input-muted"
+                class="buu-input-muted exam-placeholder-faded"
                 :class="{ 'buu-field-error': hasError('examName') }"
                 :disable="isLocked"
                 @update:model-value="emit('clearFieldError', 'examName')"
@@ -60,7 +60,7 @@
                 outlined
                 dense
                 bg-color="white"
-                class="buu-input-muted"
+                class="buu-input-muted exam-placeholder-faded"
                 :class="{ 'buu-field-error': hasError('examRound') }"
                 :disable="isLocked"
                 @update:model-value="emit('clearFieldError', 'examRound')"
@@ -87,7 +87,7 @@
               outlined
               dense
               bg-color="white"
-              class="buu-input-muted"
+              class="buu-input-muted exam-placeholder-faded"
               :disable="isLocked"
               @keypress="onFeeKeypress"
               @update:model-value="onFeeInput"
@@ -183,6 +183,7 @@
 <script setup lang="ts">
 import type { CreateExamForm } from 'src/composables/use-create-exam';
 import AppSelect from 'src/components/base/app-select.vue';
+import { DEFAULT_EXAM_NAME } from 'src/constants/exam';
 
 /**
  * Props for CreateExamDetailsCard.
@@ -269,5 +270,13 @@ const handleFeeBlur = (): void => {
 /* ระยะห่างระหว่าง ชื่อการสอบ และ รอบการสอบ โดยขอบซ้าย-ขวาตรงกับ field ด้านบน/ล่าง */
 .exam-name-round-row {
   column-gap: 16px;
+}
+
+/* Placeholder จางกว่าค่ามาตรฐานของ buu-input-muted */
+.exam-placeholder-faded :deep(.q-field__native::placeholder),
+.exam-placeholder-faded :deep(.q-field__input::placeholder) {
+  color: var(--neutral-300) !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: var(--neutral-300) !important;
 }
 </style>

@@ -49,12 +49,13 @@
                 :rows="rows"
                 :loading="isLoading"
                 :pagination="pagination"
+                :rows-per-page-options="CANDIDATE_ROWS_PER_PAGE_OPTIONS"
                 is-server-side
                 empty-label=" "
                 @request="onRequest"
               >
-                <template v-slot:body-cell-index="{ row }">
-                  <div class="text-center">{{ getSearchRowIndex(row) }}</div>
+                <template v-slot:body-cell-index="{ value }">
+                  <div class="text-center">{{ value }}</div>
                 </template>
 
                 <template v-slot:body-cell-identifier="{ row }">
@@ -92,10 +93,11 @@
                 :columns="selectedColumns"
                 :rows="selectedList"
                 :pagination="selectedPagination"
+                :rows-per-page-options="CANDIDATE_ROWS_PER_PAGE_OPTIONS"
                 empty-label=" "
               >
-                <template v-slot:body-cell-index="{ row }">
-                  <div class="text-center">{{ getSelectedRowIndex(row) }}</div>
+                <template v-slot:body-cell-index="{ value }">
+                  <div class="text-center">{{ value }}</div>
                 </template>
 
                 <template v-slot:body-cell-identifier="{ row }">
@@ -171,6 +173,9 @@ const props = withDefaults(
   },
 );
 
+const CANDIDATE_PAGE_SIZE = 5;
+const CANDIDATE_ROWS_PER_PAGE_OPTIONS = [5, 10, 25];
+
 const searchQuery = ref('');
 const activeTab = ref<'search' | 'selected'>('search');
 const isLoading = ref(false);
@@ -178,12 +183,12 @@ const rows = ref<User[]>([]);
 const selectedUsers = ref<Map<string, User>>(new Map());
 const pagination = ref<PaginationModel>({
   page: 1,
-  rowsPerPage: 10,
+  rowsPerPage: CANDIDATE_PAGE_SIZE,
   rowsNumber: 0,
 });
 const selectedPagination = ref<PaginationModel>({
   page: 1,
-  rowsPerPage: 10,
+  rowsPerPage: CANDIDATE_PAGE_SIZE,
   rowsNumber: 0,
 });
 
@@ -286,20 +291,6 @@ const toggleSelection = (user: User, selected: boolean): void => {
   selectedUsers.value = next;
 };
 
-const getSearchRowIndex = (row: User): number => {
-  const page = pagination.value.page ?? 1;
-  const rowsPerPage = pagination.value.rowsPerPage ?? 10;
-  const localIndex = rows.value.indexOf(row);
-  return (page - 1) * rowsPerPage + localIndex + 1;
-};
-
-const getSelectedRowIndex = (row: User): number => {
-  const page = selectedPagination.value.page ?? 1;
-  const rowsPerPage = selectedPagination.value.rowsPerPage ?? 10;
-  const localIndex = selectedList.value.indexOf(row);
-  return (page - 1) * rowsPerPage + localIndex + 1;
-};
-
 const fetchResults = async (): Promise<void> => {
   const query = searchQuery.value.trim();
   if (!query) {
@@ -336,7 +327,7 @@ watch(searchQuery, () => {
 watch(selectedList, (list) => {
   selectedPagination.value.rowsNumber = list.length;
   const maxPage =
-    Math.ceil(list.length / (selectedPagination.value.rowsPerPage ?? 10)) || 1;
+    Math.ceil(list.length / (selectedPagination.value.rowsPerPage ?? CANDIDATE_PAGE_SIZE)) || 1;
   if ((selectedPagination.value.page ?? 1) > maxPage) {
     selectedPagination.value.page = 1;
   }

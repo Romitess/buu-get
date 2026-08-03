@@ -95,6 +95,8 @@ export function useExamRegistrants() {
           row.nationalId.toLowerCase().includes(query) ||
           row.fullnameTh.toLowerCase().includes(query) ||
           row.titleTh.toLowerCase().includes(query) ||
+          row.email.toLowerCase().includes(query) ||
+          row.phone.toLowerCase().includes(query) ||
           paymentLabel.includes(query) ||
           verifyLabel.includes(query) ||
           remarkLabel.includes(query)

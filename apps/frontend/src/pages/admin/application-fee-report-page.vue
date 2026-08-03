@@ -84,7 +84,7 @@ import { useDailyRevenue } from 'src/composables/use-daily-revenue';
 import { useExamDocuments } from 'src/composables/use-exam-documents';
 import { fetchIssuedReceipts, type IssuedReceipt } from 'src/services/receipt.service';
 import ReceiptCard from 'src/components/receipt-card.vue';
-import type { ExamEnrollment } from 'src/types/exam';
+import type { ExamEnrollment, ExamHistoryItem } from 'src/types/exam';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 
@@ -416,11 +416,16 @@ const exportColumns: QTableColumn[] = [
 
 const onRecordAction = async (row: ApplicationFeeRow): Promise<void> => {
   try {
-    const examItem = {
+    const examItem: ExamHistoryItem = {
       id: row.rawEnrollment.ERM_ID,
       title: row.examName,
-      status: 'SUCCESS',
-      statusType: 'success' as const,
+      status: 'exam.status.verified',
+      statusType: 'success',
+      category: 'registration',
+      registrationStatus: {
+        label: 'exam.status.verified',
+        type: 'success',
+      },
       date: row.paymentDate,
       time: '',
       location: '',

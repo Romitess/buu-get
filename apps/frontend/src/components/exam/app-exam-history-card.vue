@@ -10,8 +10,24 @@
     <!-- Top Row: Status & Fee -->
     <div class="row items-center justify-start full-width card-top-row">
       <!-- Left side: Status indicators -->
-      <div class="row items-center q-gutter-x-md status-group">
-        <AppStatusBadge :label="statusLabel" :type="statusType" />
+      <div class="row items-center q-gutter-x-sm status-group">
+        <div class="status-badges row items-center q-gutter-x-sm wrap">
+          <AppStatusBadge
+            v-if="registrationStatusLabel"
+            :label="registrationStatusLabel"
+            :type="registrationStatusType"
+          />
+          <AppStatusBadge
+            v-if="examStatusLabel"
+            :label="examStatusLabel"
+            :type="examStatusType"
+          />
+          <AppStatusBadge
+            v-if="!registrationStatusLabel && statusLabel"
+            :label="statusLabel"
+            :type="statusType"
+          />
+        </div>
         <slot name="status-append">
           <div v-if="displayDeadline" class="deadline-text row items-center">
             <q-icon name="warning_amber" size="calc(var(--space-unit) * 4.5)" class="q-mr-xs" />
@@ -48,6 +64,10 @@
         <div class="info-item row items-center">
           <q-icon name="place" size="calc(var(--space-unit) * 5)" class="q-mr-sm" />
           {{ location }}
+        </div>
+        <div v-if="seatLabel" class="info-item row items-center">
+          <q-icon name="event_seat" size="calc(var(--space-unit) * 5)" class="q-mr-sm" />
+          {{ $t('exam.history.seatLabel') }} {{ seatLabel }}
         </div>
       </div>
     </div>
@@ -93,11 +113,16 @@ import { useCountdown } from 'src/composables/use-countdown';
 
 interface Props {
   title: string;
-  statusLabel: string;
+  statusLabel?: string;
   statusType?: 'primary' | 'success' | 'warning' | 'error' | 'info';
+  registrationStatusLabel?: string;
+  registrationStatusType?: 'primary' | 'success' | 'warning' | 'error' | 'info';
+  examStatusLabel?: string;
+  examStatusType?: 'primary' | 'success' | 'warning' | 'error' | 'info';
   date: string;
   time: string;
   location: string;
+  seatLabel?: string;
   fee?: number | undefined;
   deadline?: string | undefined;
   showCancel?: boolean;
@@ -106,7 +131,10 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  statusLabel: '',
   statusType: 'primary',
+  registrationStatusType: 'primary',
+  examStatusType: 'info',
   showCancel: false,
   showPay: false,
   showDownload: false,
@@ -159,6 +187,10 @@ const { displayDeadline } = useCountdown(toRef(props, 'deadline'), () => emit('t
   color: var(--badge-error-dot);
   display: flex;
   align-items: center;
+}
+
+.status-badges {
+  row-gap: var(--space-xs);
 }
 
 .fee-label {
@@ -242,9 +274,8 @@ const { displayDeadline } = useCountdown(toRef(props, 'deadline'), () => emit('t
 
   .status-group {
     margin-right: auto !important;
-    // Use grid to fix status-append alignment without stretching the badge
-    display: grid !important;
-    grid-template-columns: calc(var(--space-unit) * 26) auto; // 120px fixed slot for badge
+    display: flex !important;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--space-md);
   }

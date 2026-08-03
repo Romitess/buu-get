@@ -63,7 +63,7 @@ import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { api } from 'src/boot/axios';
 import type { RoundExamProps } from 'src/types/exam';
-import { parseRegistrationEndDate } from 'src/utils/exam-registration';
+import { isExamRoundRegistrationExpired } from 'src/utils/exam-registration';
 import ExamClock from './exam-clock.vue';
 import AppButton from '../base/app-button.vue';
 
@@ -91,7 +91,7 @@ async function syncTime(): Promise<void> {
       const end = Date.now();
       const latency = (end - start) / 2;
       serverOffset.value = serverTime + latency - end;
-      now.value = getThaiTime();
+      now.value = getSyncedNow();
       return;
     }
   } catch {
@@ -104,27 +104,26 @@ async function syncTime(): Promise<void> {
         const end = Date.now();
         const latency = (end - start) / 2;
         serverOffset.value = serverTime + latency - end;
-        now.value = getThaiTime();
+        now.value = getSyncedNow();
         return;
       }
     } catch (err) {
       console.error('[TimeSync] Failed to sync with backend', err);
     }
   }
-  now.value = getThaiTime();
+  now.value = getSyncedNow();
 }
 
-function getThaiTime(): Date {
-  const d = new Date(Date.now() + serverOffset.value);
-  const utc = d.getTime() + d.getTimezoneOffset() * 60000;
-  return new Date(utc + 3600000 * 7);
+/** Absolute synced clock for registration window checks (Bangkok instants via +07:00) */
+function getSyncedNow(): Date {
+  return new Date(Date.now() + serverOffset.value);
 }
 
 onMounted(async () => {
   await syncTime();
 
   timer = setInterval(() => {
-    now.value = getThaiTime();
+    now.value = getSyncedNow();
   }, 1000);
 
   resyncTimer = setInterval(() => {
@@ -138,11 +137,15 @@ onUnmounted(() => {
 });
 
 const isExpired = computed((): boolean => {
-  if (!props.regEndDate) return false;
   try {
-    const regEnd = parseRegistrationEndDate(props.regEndDate);
-    if (!regEnd) return false;
-    return now.value > regEnd;
+    return isExamRoundRegistrationExpired(
+      {
+        regEndDate: props.regEndDate ?? '',
+        examDate: props.examDate ?? '',
+        timeRange: props.timeRange,
+      },
+      now.value,
+    );
   } catch (e) {
     console.error('Error calculating expiration:', e);
     return false;

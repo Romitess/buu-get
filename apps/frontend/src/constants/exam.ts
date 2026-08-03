@@ -42,8 +42,11 @@ export const MIN_EXAM_SESSIONS = 1;
 /** ข้อความแสดงผลเมื่อไม่พบข้อมูลสถานที่ */
 export const DEFAULT_LOCATION_TEXT = 'TBA';
 
-/** ชื่อการสอบเริ่มต้น */
+/** ชื่อการสอบเริ่มต้น (fallback สำหรับแสดงผล) */
 export const DEFAULT_EXAM_TITLE = 'BUU - GET';
+
+/** ค่าเริ่มต้นของช่องชื่อการสอบในฟอร์มสร้างรอบสอบ */
+export const DEFAULT_EXAM_NAME = 'BUU-GET';
 
 /** ข้อความแจ้งเตือนต่างๆ */
 export const NOTIFY_MSG = {

@@ -21,13 +21,10 @@ export class ExamSessionsService {
   }
 
   async findAll(): Promise<ExamSession[]> {
+    // ไม่โหลด LOCATION.SEATS บน list — seat grid เป็น one-to-many ใหญ่
+    // (O(sessions × rooms × seats)); ใช้ findOne / seat endpoints เมื่อต้องการแผนผังที่นั่ง
     return await this.examSessionRepository.find({
-      relations: [
-        'EXAM',
-        'SESSION_LOCATIONS',
-        'SESSION_LOCATIONS.LOCATION',
-        'SESSION_LOCATIONS.LOCATION.SEATS',
-      ],
+      relations: ['EXAM', 'SESSION_LOCATIONS', 'SESSION_LOCATIONS.LOCATION'],
     });
   }
 

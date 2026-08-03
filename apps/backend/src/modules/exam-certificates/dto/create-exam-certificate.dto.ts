@@ -29,9 +29,11 @@ export class CreateExamCertificateDto {
   CERT_EXPIRES_AT?: string;
 
   @ApiProperty({
-    example: 'UUID-1234-5678',
-    description: 'รหัสใบรับรอง (uuid สำหรับตรวจสอบย้อนกลับ)',
+    example: 'A1B2C3D4E5F6G7H8',
+    description: 'รหัสตรวจสอบใบรับรอง (16 ตัว A-Z0-9)',
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  CERT_CODE: string;
+  CERT_CODE?: string;
 }

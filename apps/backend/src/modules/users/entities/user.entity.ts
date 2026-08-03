@@ -58,6 +58,7 @@ export class User {
     name: 'USER_EMAIL',
     type: 'varchar',
     length: 255,
+    unique: true,
     comment: 'อีเมลของผู้ใช้',
   })
   USER_EMAIL: string;

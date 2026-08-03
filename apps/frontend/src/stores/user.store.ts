@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia';
+import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed } from 'vue';
 import type { User, UserRole } from 'src/types/user';
 import * as userService from 'src/services/user.service';
@@ -28,7 +28,7 @@ export const useUserStore = defineStore('user', () => {
   // === Computed ===
   const userRole = computed<UserRole | null>(() => (currentUser.value?.role as UserRole) || null);
 
-  /** role ทั้งหมดของผู้ใช้ — ใช้สำหรับเช็คสิทธิ์แบบ multi-role */
+  /** role ทั้งหมดของผู้ใช้ — ใช้สำหรับเช็กสิทธิ์แบบ multi-role */
   const userRoles = computed<UserRole[]>(() => currentUser.value?.roles ?? []);
 
   const profileItems = computed(() => {
@@ -54,6 +54,22 @@ export const useUserStore = defineStore('user', () => {
   });
 
   // === Actions ===
+
+  /** เคลียร์ exam Pinia + in-memory exam API cache (dynamic import กัน circular) */
+  async function clearExamCaches(): Promise<void> {
+    const [{ useExamStore }, { invalidateExamCache }] = await Promise.all([
+      import('src/stores/exam.store'),
+      import('src/services/exam.service'),
+    ]);
+    // HMR โดยไม่มี acceptHMRUpdate อาจเหลือ exam store instance เก่าที่ยังไม่มี action ใหม่
+    let examStore = useExamStore();
+    if (typeof examStore.resetExamUserState !== 'function') {
+      examStore.$dispose();
+      examStore = useExamStore();
+    }
+    examStore.resetExamUserState();
+    invalidateExamCache();
+  }
 
   /**
    * ฟังก์ชันโหลดข้อมูลผู้ใช้เริ่มต้น (Check LocalStorage + Token)
@@ -89,6 +105,7 @@ export const useUserStore = defineStore('user', () => {
 
   /**
    * ฟังก์ชัน Login แบบ Async ต่อ Backend จริง
+   * Hydrate จาก login response โดยตรง — ไม่เรียก initialize()/GET /auth/me ซ้ำ
    */
   async function login(email: string, password?: string): Promise<boolean> {
     error.value = null;
@@ -97,6 +114,8 @@ export const useUserStore = defineStore('user', () => {
       const result = await userService.authenticateUser(email, password);
 
       if (result) {
+        await clearExamCaches();
+
         localStorage.setItem('access_token', result.accessToken);
         localStorage.setItem('isLoggedIn', 'true');
         if (result.user?.id) {
@@ -110,10 +129,10 @@ export const useUserStore = defineStore('user', () => {
           role: roles[0],
           roles,
           id: result.user.id,
+          remark: result.user.remark ?? '',
         } as User;
 
         isLoggedIn.value = true;
-        await initialize();
         return true;
       }
       error.value = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
@@ -126,6 +145,40 @@ export const useUserStore = defineStore('user', () => {
   }
 
   /**
+   * โหลด profile เต็มแบบ background หลัง login ขั้นต่ำ
+   * no-op ถ้ามี fullNameTH / nationalId แล้ว — ไม่ผูกกับปุ่ม loading
+   */
+  async function ensureProfileLoaded(): Promise<void> {
+    if (!isLoggedIn.value) return;
+    const token = accessToken.value || localStorage.getItem('access_token');
+    if (!token) return;
+    if (currentUser.value?.fullNameTH || currentUser.value?.nationalId) return;
+
+    try {
+      const profile = await userService.getProfile(token);
+      if (!profile) return;
+
+      const roles = buildRoles(profile.role, profile.roles);
+      currentUser.value = {
+        ...profile,
+        role: roles[0] ?? ROLES.CANDIDATE,
+        roles,
+      };
+      if (profile.id) {
+        localStorage.setItem('user_id', String(profile.id));
+      }
+    } catch (err) {
+      console.error('ensureProfileLoaded failed:', err);
+    }
+  }
+
+  /** อัปเดต currentUser จาก partial (เช่นหลัง PATCH profile) โดยไม่เรียก GET /auth/me */
+  function patchCurrentUser(partial: Partial<User>): void {
+    if (!currentUser.value) return;
+    currentUser.value = { ...currentUser.value, ...partial };
+  }
+
+  /**
    * ฟังก์ชัน Logout
    */
   function logout(): void {
@@ -135,6 +188,7 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_id');
+    void clearExamCaches();
   }
 
   return {
@@ -147,6 +201,12 @@ export const useUserStore = defineStore('user', () => {
     profileItems,
     initialize,
     login,
+    ensureProfileLoaded,
+    patchCurrentUser,
     logout,
   };
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useUserStore, import.meta.hot));
+}

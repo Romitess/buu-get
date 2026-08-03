@@ -260,7 +260,7 @@ onMounted(async () => {
 const addBand = (): void => {
   const lastRule = bandRules.value[bandRules.value.length - 1];
 
-  // คำนวณช่วงคะแนนโดยเช็คจากแถวล่าสุด (ถ้าไม่มีแถวก่อนหน้า จะเริ่มต้นที่ 0)
+  // คำนวณช่วงคะแนนโดยเช็กจากแถวล่าสุด (ถ้าไม่มีแถวก่อนหน้า จะเริ่มต้นที่ 0)
   const nextMinScore = lastRule ? Math.min(SCORE_MAX_LIMIT, lastRule.maxScore + 1) : 0;
 
   const nextMaxScore = Math.min(SCORE_MAX_LIMIT, nextMinScore + DEFAULT_SCORE_GAP);

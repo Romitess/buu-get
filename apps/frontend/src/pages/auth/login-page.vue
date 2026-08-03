@@ -315,6 +315,7 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
         message: t('auth.notify.registerSuccess', 'สมัครสมาชิกสำเร็จ! โปรดเข้าสู่ระบบ'),
         position: 'top',
       });
+      isSubmitting.value = false;
       await router.push('/login');
       currentStep.value = 'credentials';
     } else {

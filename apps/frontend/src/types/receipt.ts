@@ -10,6 +10,8 @@ export interface ReceiptData {
   amount: number;
   paymentMethod: string;
   status: 'SUCCESS' | 'PENDING' | 'FAILED';
+  verifyCode?: string;
+  qrDataUrl?: string;
 }
 export interface ReceiptCardProps {
   receipt: ReceiptData;

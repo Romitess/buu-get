@@ -158,36 +158,74 @@ export function useExamSeatCandidates() {
     () => activeSessionLocation.value?.SEATS_SNAPSHOT ?? [],
   );
 
-  // Enrollments filtered to the active session that have a seat assignment (status SEAT_ASSIGNED = 2)
-  const STATUS_SEAT_ASSIGNED = 2;
-  const STATUS_CANCELLED = 5;
+  // Eligible enrollments: paid / seat-assigned / seat-published (exclude unpaid & cancelled)
+  const STATUS_PAID = Number(EnrollmentStatus.PAID);
+  const STATUS_SEAT_PUBLISHED = Number(EnrollmentStatus.SEAT_PUBLISHED);
+
+  const isEligibleEnrollment = (enrollment: BackendEnrollmentDetail): boolean => {
+    const status = Number(enrollment.ERM_STATUS);
+    return status >= STATUS_PAID && status <= STATUS_SEAT_PUBLISHED;
+  };
+
+  const hasAssignedSeat = (enrollment: BackendEnrollmentDetail): boolean =>
+    Boolean(enrollment.ERM_SEAT_LABEL && enrollment.SL_ID != null);
+
+  /** All eligible applicants in the active time slot (all rooms) */
+  const timeSlotEligibleEnrollments = computed((): BackendEnrollmentDetail[] => {
+    if (activeSessionIds.value.length === 0) return [];
+    return allEnrollments.value.filter(
+      (enrollment) =>
+        activeSessionIds.value.includes(enrollment.SESSION_ID) && isEligibleEnrollment(enrollment),
+    );
+  });
+
+  /**
+   * True when every eligible applicant in the time slot already has a seat.
+   * Used to enable the "ออกใบ Test Voucher" action.
+   */
+  const canIssueVoucher = computed((): boolean => {
+    const enrollments = timeSlotEligibleEnrollments.value;
+    return enrollments.length > 0 && enrollments.every((enrollment) => hasAssignedSeat(enrollment));
+  });
+
+  const belongsToSelectedRoom = (enrollment: BackendEnrollmentDetail): boolean => {
+    if (effectiveSessionLocationId.value === null) {
+      return sessionLocations.value.length === 0;
+    }
+
+    if (enrollment.SL_ID !== null && enrollment.SL_ID !== undefined) {
+      return enrollment.SL_ID === effectiveSessionLocationId.value;
+    }
+
+    // Unassigned applicants (no seat / no room yet): keep them visible in every room
+    // of the active time slot so admins can see who still needs a seat.
+    if (!hasAssignedSeat(enrollment)) {
+      return true;
+    }
+
+    const enrollmentSessionLocations = sessionLocations.value.filter(
+      (location) => location.SS_ID === enrollment.SESSION_ID,
+    );
+    return (
+      enrollmentSessionLocations.length === 1 &&
+      enrollmentSessionLocations[0]?.SL_ID === effectiveSessionLocationId.value
+    );
+  };
 
   const sessionEnrollments = computed((): BackendEnrollmentDetail[] => {
     if (activeSessionIds.value.length === 0) return [];
 
-    return allEnrollments.value.filter((e) => {
-      if (!activeSessionIds.value.includes(e.SESSION_ID)) return false;
-      if (Number(e.ERM_STATUS) < STATUS_SEAT_ASSIGNED) return false;
-      if (Number(e.ERM_STATUS) === STATUS_CANCELLED) return false;
-      if (!e.ERM_SEAT_LABEL) return false;
-
-      if (effectiveSessionLocationId.value === null) {
-        return sessionLocations.value.length === 0;
-      }
-
-      if (e.SL_ID !== null && e.SL_ID !== undefined) {
-        return e.SL_ID === effectiveSessionLocationId.value;
-      }
-
-      const enrollmentSessionLocations = sessionLocations.value.filter(
-        (location) => location.SS_ID === e.SESSION_ID,
-      );
-      return (
-        enrollmentSessionLocations.length === 1 &&
-        enrollmentSessionLocations[0]?.SL_ID === effectiveSessionLocationId.value
-      );
+    return allEnrollments.value.filter((enrollment) => {
+      if (!activeSessionIds.value.includes(enrollment.SESSION_ID)) return false;
+      if (!isEligibleEnrollment(enrollment)) return false;
+      return belongsToSelectedRoom(enrollment);
     });
   });
+
+  /** Seated applicants only — used when issuing vouchers for the whole time slot */
+  const seatedTimeSlotEnrollments = computed((): BackendEnrollmentDetail[] =>
+    timeSlotEligibleEnrollments.value.filter((enrollment) => hasAssignedSeat(enrollment)),
+  );
 
   const getSeatLabel = (enrollment: BackendEnrollmentDetail): string => {
     return enrollment.ERM_SEAT_LABEL || '-';
@@ -217,7 +255,7 @@ export function useExamSeatCandidates() {
     return normalizedLocationIndex * 1_000_000 + rowOrder * 1_000 + Number(digits);
   };
 
-  // Map raw enrollment data to table rows
+  // Map raw enrollment data to table rows — unassigned seats first, then seat order
   const tableRows = computed((): SeatCandidateRow[] => {
     return sessionEnrollments.value
       .map(
@@ -227,6 +265,9 @@ export function useExamSeatCandidates() {
         }),
       )
       .sort((a, b) => {
+        const aHasSeat = hasAssignedSeat(a.enrollment);
+        const bHasSeat = hasAssignedSeat(b.enrollment);
+        if (aHasSeat !== bHasSeat) return aHasSeat ? 1 : -1;
         if (a.seatOrder !== b.seatOrder) return a.seatOrder - b.seatOrder;
         return a.enrollment.ERM_ID - b.enrollment.ERM_ID;
       })
@@ -259,7 +300,7 @@ export function useExamSeatCandidates() {
     );
   });
 
-  // Total candidates with seats in this session
+  // Total candidates shown in the current room table (includes unassigned)
   const candidateCount = computed((): number => sessionEnrollments.value.length);
 
   // Session helpers
@@ -375,8 +416,10 @@ export function useExamSeatCandidates() {
     sessionLocation,
     sessionCapacity,
     sessionEnrollments,
+    seatedTimeSlotEnrollments,
     activeSessionIds,
     isVoucherSent,
+    canIssueVoucher,
     getTimeTabSessionId,
     fetchData,
     applyVoucherIssuedState,

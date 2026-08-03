@@ -21,15 +21,16 @@ declare module 'vue-i18n' {
 }
 /* eslint-enable @typescript-eslint/no-empty-object-type */
 
-export default defineBoot(({ app }) => {
-  const savedLocale =
-    (typeof window !== 'undefined' && localStorage.getItem('user-locale')) || 'th';
-  const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
-    locale: savedLocale,
-    legacy: false,
-    messages,
-  });
+const savedLocale =
+  (typeof window !== 'undefined' && localStorage.getItem('user-locale')) || 'th';
 
-  // Set i18n instance on app
+/** Singleton — ใช้ใน Pinia/async ได้โดยไม่ต้องอยู่บน setup ของ component */
+export const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
+  locale: savedLocale,
+  legacy: false,
+  messages,
+});
+
+export default defineBoot(({ app }) => {
   app.use(i18n);
 });

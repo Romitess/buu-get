@@ -4,6 +4,7 @@ import {
   ConflictException,
   BadRequestException,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, Not, In, LessThan, Brackets } from 'typeorm';
@@ -20,6 +21,7 @@ import {
 } from 'src/common/dto/pagination-query.dto';
 import { ENROLLMENT_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import { AuthenticatedUser, userHasAnyRole } from 'src/common/utils/authz.util';
+import { evaluateRegistrationWindow } from 'src/common/utils/exam-registration-window.util';
 import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
 import {
   ExamEnrollment,
@@ -61,6 +63,8 @@ import { ValidatePasscodeDto } from './dto/validate-passcode.dto';
 
 @Injectable()
 export class ExamEnrollmentsService {
+  private readonly logger = new Logger(ExamEnrollmentsService.name);
+
   constructor(
     @InjectRepository(ExamEnrollment)
     private readonly examEnrollmentRepository: Repository<ExamEnrollment>,
@@ -265,6 +269,30 @@ export class ExamEnrollmentsService {
       if (!foundAvailable) {
         throw new BadRequestException('FULL');
       }
+    }
+
+    const exam = targetSession.EXAM;
+    const windowStatus = evaluateRegistrationWindow({
+      regStart: exam?.EXAM_REG_START_DATE,
+      regEnd: exam?.EXAM_REG_END_DATE,
+      examDate: exam?.EXAM_DATE,
+      startTime: targetSession.SS_START_TIME,
+    });
+
+    if (windowStatus === 'not_open') {
+      throw new BadRequestException('REGISTRATION_NOT_OPEN');
+    }
+    if (windowStatus === 'closed') {
+      throw new BadRequestException('REGISTRATION_CLOSED');
+    }
+    if (windowStatus === 'exam_started') {
+      throw new BadRequestException('EXAM_STARTED');
+    }
+    if (windowStatus === 'invalid') {
+      this.logger.warn(
+        `Registration window invalid for session ${targetSession.SS_ID} (exam ${targetSession.EXAM_ID})`,
+      );
+      throw new BadRequestException('REGISTRATION_CLOSED');
     }
 
     let validPasscode: ExamPasscode | null = null;
@@ -689,6 +717,9 @@ export class ExamEnrollmentsService {
             })
             .orWhere('profile.userTitleEn LIKE :searchPattern', {
               searchPattern: `%${resolvedQuery.search}%`,
+            })
+            .orWhere('profile.userPhone LIKE :searchPattern', {
+              searchPattern: `%${resolvedQuery.search}%`,
             });
 
           if (statusMatches.length > 0) {
@@ -773,6 +804,9 @@ export class ExamEnrollmentsService {
               searchPattern: `%${resolvedQuery.search}%`,
             })
             .orWhere('profile.userTitleEn LIKE :searchPattern', {
+              searchPattern: `%${resolvedQuery.search}%`,
+            })
+            .orWhere('profile.userPhone LIKE :searchPattern', {
               searchPattern: `%${resolvedQuery.search}%`,
             });
 
@@ -880,6 +914,7 @@ export class ExamEnrollmentsService {
         'SESSION_LOCATION',
         'SESSION_LOCATION.LOCATION',
         'TRANSACTION',
+        'TRANSACTION.RECEIPTS',
         'VOUCHERS',
         'SCORE',
         'SCORE.CERTIFICATES',
@@ -936,10 +971,20 @@ export class ExamEnrollmentsService {
         TRANSACTION: {
           TRANX_ID: true,
           TRANX_MATCH_STATUS: true,
+          TRANX_PAYMENT_STATUS: true,
           TRANX_AMOUNT: true,
           TRANX_CHANNEL: true,
           TRANX_PAID_AT: true,
           TRANX_CREATED_AT: true,
+          RECEIPTS: {
+            RC_ID: true,
+            RC_STATUS: true,
+            RC_VERIFY_CODE: true,
+            RC_NAME: true,
+            RC_TAX_ID: true,
+            RC_ADDRESS: true,
+            RC_PHONE: true,
+          },
         },
         VOUCHERS: {
           VC_ID: true,

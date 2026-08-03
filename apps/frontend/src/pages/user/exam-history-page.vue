@@ -11,117 +11,152 @@
       <CardSkeleton v-for="n in 3" :key="`history-skeleton-${n}`" height="160px" :lines="4" />
     </div>
 
-    <!-- Pending Payment Section -->
-    <div v-else-if="pendingExams.length > 0" class="history-section q-mb-xl">
-      <div class="section-title row items-center q-mb-md">
-        <q-icon name="schedule" size="var(--space-lg)" class="section-icon q-mr-sm" />
-        <span class="text-weight-bold text-subtitle1">{{
-          $t('exam.history.pendingSectionTitle')
-        }}</span>
-      </div>
-
-      <div class="q-gutter-y-md">
-        <AppExamHistoryCard
-          v-for="exam in pendingExams"
-          :key="exam.id"
-          :status-label="exam.status"
-          :status-type="exam.statusType"
-          :title="exam.title"
-          :date="exam.date"
-          :time="exam.time"
-          :location="exam.location"
-          :fee="exam.fee"
-          :deadline="exam.deadline"
-          @timeout="handleTimeout(exam)"
-        >
-          <template #actions>
-            <AppButton
-              v-if="exam.actions?.includes('cancel')"
-              outline
-              :label="$t('exam.history.cancel')"
-              class="action-btn btn-action-outline"
-              @click="handleCancel(exam)"
-            />
-            <AppButton
-              v-if="exam.actions?.includes('pay')"
-              icon="payments"
-              :label="$t('exam.history.pay')"
-              class="action-btn btn-action-filled"
-              @click="handlePay(exam)"
-            />
-          </template>
-        </AppExamHistoryCard>
-      </div>
+    <div v-else-if="historyError" class="text-center q-pa-xl">
+      <q-icon name="error_outline" size="48px" color="negative" />
+      <p class="text-grey-7 q-mt-md">{{ historyError }}</p>
+      <q-btn
+        flat
+        color="primary"
+        class="q-mt-sm"
+        :label="$t('exam.history.retry')"
+        @click="retryLoadHistory"
+      />
     </div>
 
-    <!-- History Section -->
-    <div v-if="!isLoadingHistory && historyExams.length > 0" class="history-section">
-      <div class="section-title row items-center q-mb-md">
-        <q-icon name="schedule" size="var(--space-lg)" class="section-icon q-mr-sm" />
-        <span class="text-weight-bold text-subtitle1">{{ $t('exam.history.sectionTitle') }}</span>
+    <template v-else>
+      <div
+        v-if="hasAnyRecords"
+        class="history-filter-bar q-mb-lg"
+        role="tablist"
+        :aria-label="$t('exam.history.sectionTitle')"
+      >
+        <button
+          v-for="option in filterOptions"
+          :key="option.value"
+          type="button"
+          role="tab"
+          class="history-filter-tab"
+          :class="{ 'history-filter-tab--active': activeFilter === option.value }"
+          :aria-selected="activeFilter === option.value"
+          @click="activeFilter = option.value"
+        >
+          <span class="history-filter-tab__label">{{ option.label }}</span>
+          <span v-if="option.count > 0" class="history-filter-tab__count">{{ option.count }}</span>
+        </button>
       </div>
 
-      <div class="q-gutter-y-md">
-        <AppExamHistoryCard
-          v-for="exam in historyExams"
-          :key="exam.id"
-          :status-label="exam.status"
-          :status-type="exam.statusType"
-          :title="exam.title"
-          :date="exam.date"
-          :time="exam.time"
-          :location="exam.location"
-        >
-          <template v-if="exam.actions?.includes('candidateCard')" #notify>
-            <ExamPrepNotifyButton
-              :show-unread="isPrepGuideUnread(exam.id)"
-              :ariaLabel="$t('exam.prepGuide.notifyAria')"
-              @click="openPrepGuide(exam)"
-            />
-          </template>
+      <!-- Pending Payment Section -->
+      <div v-if="visiblePendingExams.length > 0" class="history-section q-mb-xl">
+        <div class="section-title row items-center q-mb-md">
+          <q-icon name="payments" size="var(--space-lg)" class="section-icon q-mr-sm" />
+          <span class="text-weight-bold text-subtitle1">{{
+            $t('exam.history.pendingSectionTitle')
+          }}</span>
+        </div>
 
-          <template v-if="exam.customStatus" #status-append>
-            <div :class="['custom-status', `${exam.customStatus.type}-status`, 'row items-center']">
-              <q-icon
-                :name="exam.customStatus.icon"
-                size="calc(var(--space-unit) * 5)"
-                class="q-mr-xs"
+        <div class="q-gutter-y-md">
+          <AppExamHistoryCard
+            v-for="exam in visiblePendingExams"
+            :key="exam.id"
+            v-bind="getPendingCardProps(exam)"
+            @timeout="handleTimeout(exam)"
+          >
+            <template #actions>
+              <AppButton
+                v-if="exam.actions?.includes('cancel')"
+                outline
+                :label="$t('exam.history.cancel')"
+                class="action-btn btn-action-outline"
+                @click="handleCancel(exam)"
               />
-              <span :class="{ 'text-weight-bold': exam.customStatus.type === 'error' }">
-                {{ exam.customStatus.label }}
-              </span>
-            </div>
-          </template>
-
-          <template #actions>
-            <AppButton
-              v-if="exam.actions?.includes('downloadReceipt')"
-              icon="receipt_long"
-              :label="$t('exam.history.downloadReceipt')"
-              class="action-btn btn-action-filled"
-              :loading="isDownloadingReceipt"
-              @click="handlePrintReceipt(exam)"
-            />
-            <AppButton
-              v-if="exam.actions?.includes('certificate')"
-              icon="file_download"
-              :label="$t('exam.history.certificate')"
-              class="action-btn btn-action-filled"
-              :loading="isDownloadingCertificate"
-              @click="handlePrintCertificate(exam)"
-            />
-            <AppButton
-              v-if="exam.actions?.includes('candidateCard')"
-              icon="badge"
-              :label="$t('exam.history.candidateCard')"
-              class="action-btn btn-action-filled"
-              :loading="isDownloadingVoucher"
-              @click="handlePrintVoucher(exam)"
-            />
-          </template>
-        </AppExamHistoryCard>
+              <AppButton
+                v-if="exam.actions?.includes('pay')"
+                icon="payments"
+                :label="$t('exam.history.pay')"
+                class="action-btn btn-action-filled"
+                @click="handlePay(exam)"
+              />
+            </template>
+          </AppExamHistoryCard>
+        </div>
       </div>
-    </div>
+
+      <div
+        v-if="!hasVisibleRecords"
+        class="text-center q-pa-xl"
+      >
+        <q-icon name="history" size="48px" color="grey-4" />
+        <p class="text-grey-6 q-mt-md">
+          {{ hasAnyRecords ? $t('exam.history.emptyFilter') : $t('exam.history.empty') }}
+        </p>
+      </div>
+
+      <!-- History Section -->
+      <div v-if="visibleHistoryExams.length > 0" class="history-section">
+        <div class="section-title row items-center q-mb-md">
+          <q-icon name="history" size="var(--space-lg)" class="section-icon q-mr-sm" />
+          <span class="text-weight-bold text-subtitle1">{{ $t('exam.history.sectionTitle') }}</span>
+        </div>
+
+        <div class="q-gutter-y-md">
+          <AppExamHistoryCard
+            v-for="exam in visibleHistoryExams"
+            :key="exam.id"
+            v-bind="getHistoryCardProps(exam)"
+          >
+            <template v-if="exam.actions?.includes('candidateCard')" #notify>
+              <ExamPrepNotifyButton
+                :show-unread="isPrepGuideUnread(exam.id)"
+                :ariaLabel="$t('exam.prepGuide.notifyAria')"
+                @click="openPrepGuide(exam)"
+              />
+            </template>
+
+            <template v-if="exam.customStatus" #status-append>
+              <div
+                :class="['custom-status', `${exam.customStatus.type}-status`, 'row items-center']"
+              >
+                <q-icon
+                  :name="exam.customStatus.icon"
+                  size="calc(var(--space-unit) * 5)"
+                  class="q-mr-xs"
+                />
+                <span :class="{ 'text-weight-bold': exam.customStatus.type === 'error' }">
+                  {{ exam.customStatus.label }}
+                </span>
+              </div>
+            </template>
+
+            <template #actions>
+              <AppButton
+                v-if="exam.actions?.includes('downloadReceipt')"
+                icon="receipt_long"
+                :label="$t('exam.history.downloadReceipt')"
+                class="action-btn btn-action-filled"
+                :loading="isDownloadingReceipt"
+                @click="handlePrintReceipt(exam)"
+              />
+              <AppButton
+                v-if="exam.actions?.includes('certificate')"
+                icon="file_download"
+                :label="$t('exam.history.certificate')"
+                class="action-btn btn-action-filled"
+                :loading="isDownloadingCertificate"
+                @click="handlePrintCertificate(exam)"
+              />
+              <AppButton
+                v-if="exam.actions?.includes('candidateCard')"
+                icon="badge"
+                :label="$t('exam.history.candidateCard')"
+                class="action-btn btn-action-filled"
+                :loading="isDownloadingVoucher"
+                @click="handlePrintVoucher(exam)"
+              />
+            </template>
+          </AppExamHistoryCard>
+        </div>
+      </div>
+    </template>
 
     <ReceiptInformationDialog
       v-model="showReceiptInformationDialog"
@@ -220,6 +255,8 @@
         :band-level="selectedCertificateData.bandLevel"
         :issue-date="selectedCertificateData.reportIssueDate"
         :valid-until="selectedCertificateData.scoreValidUntil"
+        :certificate-code="selectedCertificateData.certificateCode"
+        :qr-data-url="selectedCertificateData.qrDataUrl ?? null"
         :band-rules="selectedCertificateData.bandRules"
         :photo-url="selectedCertificateData.profileImage"
       />
@@ -228,7 +265,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
@@ -251,10 +288,18 @@ import { useExamDocuments } from 'src/composables/use-exam-documents';
 import { useExamCertificateDocument } from 'src/composables/use-exam-certificate-document';
 import { useExamPrepGuide } from 'src/composables/use-exam-prep-guide';
 import { useAppDate } from 'src/composables/useAppDate';
-import { PAYMENT_DURATION_SECONDS_DEFAULT } from 'src/constants/exam';
-import type { ExamHistoryItem } from 'src/types/exam';
+import type { ExamHistoryCategory, ExamHistoryItem } from 'src/types/exam';
 import type { ReceiptInformation } from 'src/types/receipt-information';
+import { matchesHistoryCategory } from 'src/utils/map-enrollment-history-status';
 import { CardSkeleton } from 'src/components/base/skeleton';
+
+type HistoryFilter = ExamHistoryCategory | 'all';
+
+interface TranslatedExamHistoryItem extends ExamHistoryItem {
+  registrationStatusLabel: string;
+  examStatusLabel?: string;
+  customStatus?: ExamHistoryItem['customStatus'] & { label: string };
+}
 
 const $q = useQuasar();
 const { t } = useI18n();
@@ -264,17 +309,25 @@ const { formatDateRange } = useAppDate();
 const { isUnread: isPrepGuideUnread, markSeen: markPrepGuideSeen } = useExamPrepGuide();
 
 // === State จาก Store ===
-const { pendingRegistrations, historyRecords } = storeToRefs(examStore);
+const { pendingRegistrations, historyRecords, historyError } = storeToRefs(examStore);
 
 const isLoadingHistory = ref(true);
 
-onMounted(async () => {
+const loadHistory = async (): Promise<void> => {
   isLoadingHistory.value = true;
   try {
-    await examStore.fetchHistory();
+    await examStore.fetchHistory(true);
   } finally {
     isLoadingHistory.value = false;
   }
+};
+
+const retryLoadHistory = async (): Promise<void> => {
+  await loadHistory();
+};
+
+onMounted(async () => {
+  await loadHistory();
 });
 
 // === UI-only State ===
@@ -282,8 +335,11 @@ const showPaymentDialog = ref(false);
 const showReceiptInformationDialog = ref(false);
 const selectedExam = ref<ExamHistoryItem | null>(null);
 const pendingTransactionId = ref<number | null>(null);
-const paymentExpiryTime = ref<string>(new Date().toISOString());
 const receiptInformation = ref<ReceiptInformation | null>(null);
+
+/** ใช้ deadline เดียวกับ card (CREATED_AT + payment window) — ห้าม reset เป็น now+duration */
+const paymentExpiryTime = computed((): string => selectedExam.value?.deadline ?? '');
+
 
 const initialReceiptInformation = computed<ReceiptInformation>(() => {
   const user = userStore.currentUser;
@@ -327,38 +383,114 @@ const { isDownloadingCertificate, selectedCertificateData, printCertificate } =
 
 const certificateSides = ['front', 'back'] as const;
 
-// === Computed: แปลง i18n keys เป็นข้อความจริง ===
-/**
- * Store เก็บ status เป็น translation key (เช่น 'exam.status.pending')
- * ที่นี่เราแปลงเป็นข้อความจริงก่อนส่งให้ Template
- */
-const pendingExams = computed<ExamHistoryItem[]>(() =>
-  pendingRegistrations.value.map((item) => ({
+const activeFilter = ref<HistoryFilter>('all');
+
+const filterOptions = computed(() => {
+  const options: { label: string; value: HistoryFilter; count: number }[] = [
+    { label: t('exam.history.filters.all'), value: 'all', count: 0 },
+    { label: t('exam.history.filters.pending'), value: 'pending', count: 0 },
+    { label: t('exam.history.filters.registration'), value: 'registration', count: 0 },
+    { label: t('exam.history.filters.exam'), value: 'exam', count: 0 },
+    { label: t('exam.history.filters.completed'), value: 'completed', count: 0 },
+    { label: t('exam.history.filters.cancelled'), value: 'cancelled', count: 0 },
+  ];
+
+  return options
+    .map((option) => ({
+      ...option,
+      count: countItemsForFilter(option.value),
+    }))
+    .filter((option) => option.value === 'all' || option.count > 0);
+});
+
+const translateHistoryItem = (item: ExamHistoryItem): TranslatedExamHistoryItem => {
+  const translated: TranslatedExamHistoryItem = {
     ...item,
     title: item.title || t('exam.history.defaultExamTitle'),
-    status: t(item.status),
-  })),
+    registrationStatusLabel: t(item.registrationStatus.label),
+  };
+
+  if (item.examStatus) {
+    translated.examStatusLabel = t(item.examStatus.label);
+  }
+
+  if (item.customStatus) {
+    const { result } = item.customStatus;
+    translated.customStatus = {
+      ...item.customStatus,
+      label: result
+        ? `${t('exam.statusLabel')} : ${t(`exam.status.${result}`)}`
+        : t(item.customStatus.label),
+    };
+  }
+
+  return translated;
+};
+
+const pendingExams = computed<TranslatedExamHistoryItem[]>(() =>
+  pendingRegistrations.value.map(translateHistoryItem),
 );
 
-const historyExams = computed<ExamHistoryItem[]>(() =>
-  historyRecords.value.map((item) => {
-    const translated: ExamHistoryItem = {
-      ...item,
-      title: item.title || t('exam.history.defaultExamTitle'),
-      status: t(item.status),
-    };
-    if (item.customStatus) {
-      const { result } = item.customStatus;
-      translated.customStatus = {
-        ...item.customStatus,
-        label: result
-          ? `${t('exam.statusLabel')} : ${t(`exam.status.${result}`)}`
-          : t(item.customStatus.label),
-      };
-    }
-    return translated;
-  }),
+const historyExams = computed<TranslatedExamHistoryItem[]>(() =>
+  historyRecords.value.map(translateHistoryItem),
 );
+
+const countItemsForFilter = (filter: HistoryFilter): number => {
+  const pendingCount =
+    filter === 'all' || filter === 'pending'
+      ? pendingExams.value.filter((item) => matchesHistoryCategory(item, filter)).length
+      : 0;
+  const historyCount = historyExams.value.filter((item) =>
+    matchesHistoryCategory(item, filter),
+  ).length;
+  return pendingCount + historyCount;
+};
+
+const hasAnyRecords = computed(
+  () => pendingExams.value.length > 0 || historyExams.value.length > 0,
+);
+
+const visiblePendingExams = computed(() =>
+  pendingExams.value.filter((item) => matchesHistoryCategory(item, activeFilter.value)),
+);
+
+const visibleHistoryExams = computed(() =>
+  historyExams.value.filter((item) => matchesHistoryCategory(item, activeFilter.value)),
+);
+
+const hasVisibleRecords = computed(
+  () => visiblePendingExams.value.length > 0 || visibleHistoryExams.value.length > 0,
+);
+
+watch(filterOptions, (options) => {
+  if (!options.some((option) => option.value === activeFilter.value)) {
+    activeFilter.value = 'all';
+  }
+});
+
+const getPendingCardProps = (exam: TranslatedExamHistoryItem) => ({
+  registrationStatusLabel: exam.registrationStatusLabel,
+  registrationStatusType: exam.registrationStatus.type,
+  title: exam.title,
+  date: exam.date,
+  time: exam.time,
+  location: exam.location,
+  ...(exam.seatLabel ? { seatLabel: exam.seatLabel } : {}),
+  ...(exam.fee !== undefined ? { fee: exam.fee } : {}),
+  ...(exam.deadline ? { deadline: exam.deadline } : {}),
+});
+
+const getHistoryCardProps = (exam: TranslatedExamHistoryItem) => ({
+  registrationStatusLabel: exam.registrationStatusLabel,
+  registrationStatusType: exam.registrationStatus.type,
+  ...(exam.examStatusLabel ? { examStatusLabel: exam.examStatusLabel } : {}),
+  ...(exam.examStatus ? { examStatusType: exam.examStatus.type } : {}),
+  title: exam.title,
+  date: exam.date,
+  time: exam.time,
+  location: exam.location,
+  ...(exam.seatLabel ? { seatLabel: exam.seatLabel } : {}),
+});
 
 // === Methods ===
 const handleTimeout = (exam: ExamHistoryItem): void => {
@@ -386,9 +518,9 @@ const handlePay = async (exam: ExamHistoryItem): Promise<void> => {
       throw new Error('Exam fee is missing');
     }
 
-    const now = new Date();
-    const expiry = new Date(now.getTime() + PAYMENT_DURATION_SECONDS_DEFAULT * 1000);
-    paymentExpiryTime.value = expiry.toISOString();
+    if (!exam.deadline) {
+      throw new Error('Payment deadline is missing');
+    }
 
     pendingTransactionId.value = await examStore.createTransaction(exam.id, amount, 1);
     showReceiptInformationDialog.value = true;
@@ -543,6 +675,70 @@ const handlePrintCertificate = (exam: ExamHistoryItem): void => {
   padding-bottom: var(--space-sm);
 }
 
+.history-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  align-items: center;
+  border-bottom: 1px solid var(--neutral-200);
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.history-filter-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-xs);
+  margin-bottom: -1px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+
+  &:hover {
+    color: var(--primary);
+  }
+
+  &--active {
+    color: var(--primary);
+    font-weight: var(--font-weight-bold);
+    border-bottom-color: var(--primary);
+  }
+}
+
+.history-filter-tab__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: calc(var(--space-unit) * 5);
+  height: calc(var(--space-unit) * 5);
+  padding: 0 calc(var(--space-unit) * 1.5);
+  border-radius: var(--radius-pill);
+  background: var(--neutral-100);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+.history-filter-tab--active .history-filter-tab__count {
+  background: color-mix(in srgb, var(--primary) 12%, white);
+  color: var(--primary);
+}
+
 .action-btn {
   // Let AppButton handle its own sizing — only define color variants here
 
@@ -684,6 +880,15 @@ const handlePrintCertificate = (exam: ExamHistoryItem): void => {
     .text-subtitle1 {
       font-size: var(--font-size-body);
     }
+  }
+
+  .history-filter-bar {
+    gap: var(--space-sm);
+  }
+
+  .history-filter-tab {
+    font-size: var(--font-size-sm);
+    padding: var(--space-sm) 2px;
   }
 }
 

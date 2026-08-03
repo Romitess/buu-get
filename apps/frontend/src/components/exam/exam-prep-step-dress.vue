@@ -14,10 +14,12 @@
 
 <style scoped lang="scss">
 .prep-step {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   align-items: center;
-  text-align: center;
-  min-height: calc(var(--space-unit) * 40);
   justify-content: center;
+  text-align: center;
 }
 
 .prep-step-icon {

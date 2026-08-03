@@ -219,7 +219,11 @@
               <template v-slot:append v-if="!viewMode">
                 <q-icon name="event" class="cursor-pointer">
                   <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                    <q-date v-model="validFromDate" mask="YYYY-MM-DD">
+                    <q-date
+                      v-model="validFromDate"
+                      mask="YYYY-MM-DD"
+                      :options="issueDateOptions"
+                    >
                       <div class="row items-center justify-end">
                         <AppButton v-close-popup label="ปิด" color="primary" flat />
                       </div>
@@ -274,15 +278,17 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import AppButton from 'src/components/base/app-button.vue';
-import { createExamCertificate } from 'src/services/exam-certificate.service';
+import { bulkIssueCertificates } from 'src/services/exam-certificate.service';
 import { getImageUrl } from 'src/services/image.service';
 import { getBandRules, type BandRuleData } from 'src/services/score-criteria.service';
 
 interface Props {
   modelValue: boolean;
   examDate: string | Date | null | undefined;
+  examName?: string | null | undefined;
   sessionId: number | null | undefined;
   sessionName: string | null | undefined;
   candidates: Array<{ SCORES_ID: number; USER_ID: number }>;
@@ -308,6 +314,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   viewMode: false,
   candidateInfo: null,
+  examName: null,
 });
 
 const emit = defineEmits<{
@@ -316,6 +323,7 @@ const emit = defineEmits<{
 }>();
 
 const $q = useQuasar();
+const router = useRouter();
 const currentSide = ref<'front' | 'back'>('front');
 const validFromDate = ref('');
 const validUntilDate = ref('');
@@ -389,6 +397,21 @@ const loadBandRules = async (): Promise<void> => {
 onMounted(() => {
   void loadBandRules();
 });
+
+const getLocalDateYmd = (date: Date = new Date()): string => {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const isFutureLocalDate = (dateYmd: string): boolean => dateYmd > getLocalDateYmd();
+
+/** Quasar q-date options: disable future calendar days for Report Issue Date. */
+const issueDateOptions = (date: string): boolean => {
+  const normalized = date.replace(/\//g, '-');
+  return normalized <= getLocalDateYmd();
+};
 
 const formatEnglishDate = (dateStr: string | Date | undefined | null): string => {
   if (!dateStr) return '-';
@@ -527,11 +550,11 @@ watch(
           : '';
       } else {
         const today = new Date();
-        validFromDate.value = today.toISOString().split('T')[0] || '';
+        validFromDate.value = getLocalDateYmd(today);
 
-        const expiry = new Date();
+        const expiry = new Date(today);
         expiry.setFullYear(today.getFullYear() + 2);
-        validUntilDate.value = expiry.toISOString().split('T')[0] || '';
+        validUntilDate.value = getLocalDateYmd(expiry);
       }
     } else {
       validFromDate.value = '';
@@ -573,6 +596,14 @@ const onConfirm = async (): Promise<void> => {
     return;
   }
 
+  if (isFutureLocalDate(validFromDate.value)) {
+    $q.notify({
+      type: 'warning',
+      message: 'Report Issue Date ต้องไม่เป็นวันในอนาคต',
+    });
+    return;
+  }
+
   if (!validUntilDate.value) {
     $q.notify({
       type: 'warning',
@@ -583,22 +614,29 @@ const onConfirm = async (): Promise<void> => {
 
   try {
     isSubmitting.value = true;
-    const promises = props.candidates.map(async (candidate) => {
-      const certCode = 'CERT-' + crypto.randomUUID().toUpperCase();
-      return createExamCertificate({
-        SCORES_ID: candidate.SCORES_ID,
-        USER_ID: candidate.USER_ID,
-        CERT_ISSUED_AT: new Date(validFromDate.value).toISOString(),
-        CERT_EXPIRES_AT: new Date(validUntilDate.value).toISOString(),
-        CERT_CODE: certCode,
-      });
+
+    const resolvedRoute = router.resolve({ name: 'exam-history' });
+    const historyUrl = new URL(
+      resolvedRoute.href,
+      import.meta.env.VITE_APP_URL || window.location.origin,
+    ).href;
+
+    const result = await bulkIssueCertificates({
+      candidates: props.candidates,
+      certIssuedAt: new Date(validFromDate.value).toISOString(),
+      certExpiresAt: new Date(validUntilDate.value).toISOString(),
+      examName: props.examName?.trim() || 'BUU-GET Exam',
+      historyUrl,
     });
 
-    await Promise.all(promises);
+    let message = `ออกใบ Certificate และส่งอีเมลสำเร็จ ${result.createdCount} รายการ`;
+    if (result.skippedCount > 0) {
+      message += ` (ข้าม ${result.skippedCount} รายการที่ออกไปแล้ว)`;
+    }
 
     $q.notify({
       type: 'positive',
-      message: `ออกใบ Certificate ทั้งหมด ${props.candidates.length} รายการสำเร็จ`,
+      message,
     });
     emit('issued');
     emit('update:modelValue', false);

@@ -50,6 +50,16 @@
         use-image-placeholder
       />
 
+      <aside class="seat-lock-note" role="note">
+        <q-icon name="info" size="18px" class="seat-lock-note__icon" aria-hidden="true" />
+        <p class="seat-lock-note__text">
+          <strong class="seat-lock-note__label">{{
+            $t('admin.seatCandidates.issueTicketDialog.seatLockNoteLabel')
+          }}</strong>
+          {{ $t('admin.seatCandidates.issueTicketDialog.seatLockNote') }}
+        </p>
+      </aside>
+
       <p v-if="confirmError" class="confirm-error" role="alert">{{ confirmError }}</p>
 
       <q-card-actions class="dialog-actions">
@@ -205,6 +215,37 @@ const onCancelClick = (): void => {
   }
 }
 
+.seat-lock-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 72px 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #f0d9a8;
+  background: #fff8eb;
+}
+
+.seat-lock-note__icon {
+  flex: 0 0 auto;
+  color: #b7791f;
+}
+
+.seat-lock-note__text {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #5c4a1f;
+  text-wrap: pretty;
+}
+
+.seat-lock-note__label {
+  font-weight: 700;
+  margin-right: 4px;
+}
+
 .confirm-error {
   margin: 16px 0 0;
   color: #c10015;
@@ -216,7 +257,7 @@ const onCancelClick = (): void => {
   display: flex;
   justify-content: center;
   gap: 24px;
-  padding: 30px 72px 0;
+  padding: 24px 72px 0;
 }
 
 .action-btn {
@@ -239,6 +280,10 @@ const onCancelClick = (): void => {
     margin-top: 8px;
     padding-left: 12px;
     border-left: 0;
+  }
+
+  .seat-lock-note {
+    margin-inline: 0;
   }
 
   .dialog-actions {

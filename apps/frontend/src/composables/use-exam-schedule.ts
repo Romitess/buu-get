@@ -84,6 +84,15 @@ export function useExamSchedule() {
     if (status === HTTP_STATUS.BAD_REQUEST && resMsg === 'FULL') {
       return t('examSchedule.notifications.roundFull');
     }
+    if (
+      status === HTTP_STATUS.BAD_REQUEST &&
+      (resMsg === 'REGISTRATION_CLOSED' || resMsg === 'EXAM_STARTED')
+    ) {
+      return t('examSchedule.notifications.expired');
+    }
+    if (status === HTTP_STATUS.BAD_REQUEST && resMsg === 'REGISTRATION_NOT_OPEN') {
+      return t('examSchedule.notifications.notOpen');
+    }
     if (status === HTTP_STATUS.NOT_FOUND) {
       return t('examSchedule.notifications.notFound');
     }

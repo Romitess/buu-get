@@ -1,6 +1,5 @@
-import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { defineStore, acceptHMRUpdate } from 'pinia';
+import { ref, computed, unref } from 'vue';
 import type { ExamRound, ExamInfo, ExamHistoryItem, DayData, ExamEnrollment } from 'src/types/exam';
 import type { ExamSchedule } from 'src/types/exam.types';
 import type { ReceiptInformation } from 'src/types/receipt-information';
@@ -26,25 +25,29 @@ import {
   DEFAULT_LOCATION_TEXT,
   DEFAULT_EXAM_INFO,
   ENROLLMENT_STATUS,
-  TRANSACTION_MATCH_STATUS,
-  TRANSACTION_PAYMENT_STATUS,
-  SESSION_STATUS_COMPLETED,
   formatLocationWithRoom,
-  PAYMENT_DURATION_SECONDS_DEFAULT,
-  ReceiptStatus,
 } from 'src/constants/exam';
 import {
   getExamRoundsCalendarAvailability,
   type ExamCalendarAvailability,
 } from 'src/utils/exam-registration';
+import {
+  isPendingHistoryItem,
+  mapEnrollmentToHistoryItem,
+} from 'src/utils/map-enrollment-history-status';
+import { useUserStore } from 'src/stores/user.store';
+import { i18n as appI18n } from 'src/boot/i18n';
 
 export const useExamStore = defineStore('exam', () => {
-  const i18n = useI18n();
+  // ใช้ global composer — อย่าใช้ useI18n() ใน store (login/async อยู่นอก setup)
+  const i18n = appI18n.global;
   const selectedDate = ref<string>(new Date().toISOString().split('T')[0] || '');
   const scheduleData = ref<Record<string, DayData>>({});
   const cancellationReasonStorageKey = 'exam_cancellation_reasons';
   const HISTORY_CACHE_TTL_MS = 2000;
   let lastHistoryFetchAt = 0;
+  let historyFetchInFlight: Promise<void> | null = null;
+  let scheduleFetchInFlight: Promise<void> | null = null;
 
   type CancellationReason = 'manual' | 'paymentTimeout';
 
@@ -65,6 +68,18 @@ export const useExamStore = defineStore('exam', () => {
 
   const getCancellationReason = (enrollmentId: number): CancellationReason | null => {
     return getCancellationReasons()[String(enrollmentId)] ?? null;
+  };
+
+  /** Prefer Pinia user id; fall back to localStorage for cold paths */
+  const resolveUserId = (): number | null => {
+    const fromStore = useUserStore().currentUser?.id;
+    if (typeof fromStore === 'number' && Number.isFinite(fromStore)) {
+      return fromStore;
+    }
+    const userIdStr = localStorage.getItem('user_id');
+    if (!userIdStr) return null;
+    const parsed = parseInt(userIdStr, 10);
+    return Number.isNaN(parsed) ? null : parsed;
   };
 
   const getMonthNames = (): string[] => {
@@ -91,6 +106,9 @@ export const useExamStore = defineStore('exam', () => {
   const historyRecords = ref<ExamHistoryItem[]>([]);
   const managementSchedules = ref<ExamSchedule[]>([]);
   const registeredSessionIds = ref<Set<number>>(new Set());
+  const historyError = ref<string | null>(null);
+  const scheduleError = ref<string | null>(null);
+  const isLoadingSchedule = ref(false);
 
   const selectedDateRounds = computed((): ExamRound[] => {
     return scheduleData.value[selectedDate.value]?.rounds || [];
@@ -130,36 +148,42 @@ export const useExamStore = defineStore('exam', () => {
     const months = getMonthNames();
     const monthName = months[date.getMonth()] || '';
 
-    if (i18n.locale.value?.startsWith('en')) {
+    if (String(unref(i18n.locale)).startsWith('en')) {
       return `${date.getDate()} ${monthName} ${date.getFullYear()}`;
     }
     const buddhistYear = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
     return `${date.getDate()} ${monthName} ${buddhistYear}`;
   });
 
-  async function loadRegisteredSessions(): Promise<void> {
-    const userIdStr = localStorage.getItem('user_id');
-    if (!userIdStr) {
-      registeredSessionIds.value = new Set();
-      return;
+  function resetExamUserState(): void {
+    pendingRegistrations.value = [];
+    historyRecords.value = [];
+    registeredSessionIds.value = new Set();
+    scheduleData.value = {};
+    lastHistoryFetchAt = 0;
+    historyError.value = null;
+    scheduleError.value = null;
+    historyFetchInFlight = null;
+    scheduleFetchInFlight = null;
+    isLoadingSchedule.value = false;
+  }
+
+  async function loadRegisteredSessions(preloaded?: ExamEnrollment[]): Promise<void> {
+    let enrollments = preloaded;
+    if (!enrollments) {
+      const userId = resolveUserId();
+      if (userId === null) {
+        registeredSessionIds.value = new Set();
+        return;
+      }
+      enrollments = await fetchUserEnrollments(userId);
     }
 
-    const userId = parseInt(userIdStr, 10);
-    if (isNaN(userId)) {
-      registeredSessionIds.value = new Set();
-      return;
-    }
-
-    try {
-      const enrollments = await fetchUserEnrollments(userId);
-      registeredSessionIds.value = new Set(
-        enrollments
-          .filter((enrollment) => enrollment.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED)
-          .map((enrollment) => enrollment.SESSION_ID),
-      );
-    } catch (error) {
-      console.error('Failed to load registered sessions:', error);
-    }
+    registeredSessionIds.value = new Set(
+      enrollments
+        .filter((enrollment) => enrollment.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED)
+        .map((enrollment) => enrollment.SESSION_ID),
+    );
   }
 
   function isSessionRegistered(sessionId: number): boolean {
@@ -167,12 +191,34 @@ export const useExamStore = defineStore('exam', () => {
   }
 
   async function initSchedule(force = false): Promise<void> {
-    try {
-      const [data] = await Promise.all([fetchScheduleData(force), loadRegisteredSessions()]);
-      scheduleData.value = data;
-    } catch (error) {
-      console.error('Failed to load schedule:', error);
+    if (scheduleFetchInFlight) {
+      await scheduleFetchInFlight;
+      if (!force) return;
     }
+
+    const execute = async (): Promise<void> => {
+      scheduleError.value = null;
+      const showLoading = force || Object.keys(scheduleData.value).length === 0;
+      if (showLoading) {
+        isLoadingSchedule.value = true;
+      }
+      try {
+        const [data] = await Promise.all([fetchScheduleData(force), loadRegisteredSessions()]);
+        scheduleData.value = data;
+      } catch (error) {
+        console.error('Failed to load schedule:', error);
+        scheduleError.value = i18n.t('examSchedule.loadError');
+      } finally {
+        if (showLoading) {
+          isLoadingSchedule.value = false;
+        }
+      }
+    };
+
+    scheduleFetchInFlight = execute().finally(() => {
+      scheduleFetchInFlight = null;
+    });
+    await scheduleFetchInFlight;
   }
 
   async function loadManagementSchedules(force = false): Promise<void> {
@@ -183,190 +229,106 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
-  async function fetchHistory(force = false): Promise<void> {
-    if (!force && Date.now() - lastHistoryFetchAt < HISTORY_CACHE_TTL_MS) return;
-
-    const userIdStr = localStorage.getItem('user_id');
-    if (!userIdStr) return;
-    const userId = parseInt(userIdStr, 10);
-    if (isNaN(userId)) return;
-
-    try {
-      const enrollments = await fetchUserEnrollments(userId);
-      const newPending: ExamHistoryItem[] = [];
-      const newHistory: ExamHistoryItem[] = [];
-
-      const getPaymentDeadline = (createdAt: string): Date => {
-        const createdAtDate = new Date(createdAt);
-        return new Date(createdAtDate.getTime() + PAYMENT_DURATION_SECONDS_DEFAULT * 1000);
-      };
-
-      const isPaymentTimeoutCancellation = (enrollment: {
-        ERM_ID: number;
-        CREATED_AT: string;
-        UPDATED_AT?: string;
-      }): boolean => {
-        const reason = getCancellationReason(enrollment.ERM_ID);
-        if (reason) return reason === 'paymentTimeout';
-        if (!enrollment.CREATED_AT || !enrollment.UPDATED_AT) return false;
-        return (
-          new Date(enrollment.UPDATED_AT).getTime() >=
-          getPaymentDeadline(enrollment.CREATED_AT).getTime()
-        );
-      };
-
-      const hasMatchedPayment = (enrollment: ExamEnrollment): boolean =>
-        enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
-
-      const hasDownloadableReceipt = (enrollment: ExamEnrollment): boolean => {
-        const paymentStatus = enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS;
-        if (
-          paymentStatus === TRANSACTION_PAYMENT_STATUS.REFUND ||
-          paymentStatus === TRANSACTION_PAYMENT_STATUS.RECEIPT_VOIDED
-        ) {
-          return false;
-        }
-        const receipts = enrollment.TRANSACTION?.RECEIPTS ?? [];
-        const hasVoided = receipts.some((receipt) => receipt.RC_STATUS === ReceiptStatus.VOIDED);
-        if (hasVoided) return false;
-        return hasMatchedPayment(enrollment);
-      };
-
-      enrollments.forEach((enrollment) => {
-        const session = enrollment.SESSION;
-        if (!session) return;
-        const exam = session.EXAM;
-        const location = enrollment.SESSION_LOCATION?.LOCATION ?? session.LOCATION;
-
-        const date = exam?.EXAM_DATE ? new Date(exam.EXAM_DATE) : new Date();
-        const months = getMonthNames();
-        const monthName = months[date.getMonth()] || '';
-        const year = i18n.locale.value?.startsWith('en')
-          ? date.getFullYear()
-          : date.getFullYear() + BUDDHIST_YEAR_OFFSET;
-        const formattedDate = `${date.getDate()} ${monthName} ${year}`;
-
-        const locationText = location
-          ? formatLocationWithRoom(location.LOCATION_NAME, location.LOCATION_ROOM_NO)
-          : DEFAULT_LOCATION_TEXT;
-
-        const item: ExamHistoryItem = {
-          id: enrollment.ERM_ID,
-          title: exam?.EXAM_ROUND
-            ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}`
-            : exam?.EXAM_NAME || i18n.t('examSchedule.defaultEnrollmentTitle'),
-          status: '',
-          statusType: 'primary',
-          date: formattedDate,
-          time: `${formatTime(session.SS_START_TIME)} - ${formatTime(session.SS_END_TIME)}`,
-          location: locationText,
-          fee: Number(exam?.EXAM_FEE ?? 0),
-          rawEnrollment: enrollment,
-        };
-
-        if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.UNPAID) {
-          item.status = 'exam.status.pending';
-          item.statusType = 'primary';
-          item.actions = ['cancel', 'pay'];
-          if (enrollment.CREATED_AT) {
-            item.deadline = getPaymentDeadline(enrollment.CREATED_AT).toISOString();
-          }
-          newPending.push(item);
-        } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.PAID) {
-          const canDownloadReceipt = hasDownloadableReceipt(enrollment);
-          item.status = canDownloadReceipt ? 'exam.status.verified' : 'exam.status.paymentCompleted';
-          item.statusType = 'primary';
-          item.actions = canDownloadReceipt ? ['downloadReceipt'] : [];
-          newHistory.push(item);
-        } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_ASSIGNED) {
-          const canDownloadReceipt = hasDownloadableReceipt(enrollment);
-          item.status = canDownloadReceipt ? 'exam.status.verified' : 'exam.status.paymentCompleted';
-          item.statusType = 'primary';
-
-          const actions: string[] = [];
-          if (canDownloadReceipt) {
-            actions.push('downloadReceipt');
-          }
-          item.actions = actions;
-          newHistory.push(item);
-        } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.SEAT_PUBLISHED) {
-          const canDownloadReceipt = hasDownloadableReceipt(enrollment);
-          item.status = canDownloadReceipt ? 'exam.status.verified' : 'exam.status.paymentCompleted';
-          item.statusType = 'primary';
-          const hasVoucher = !!(enrollment.VOUCHERS && enrollment.VOUCHERS.length > 0);
-
-          const actions: string[] = [];
-          if (hasVoucher) {
-            actions.push('candidateCard');
-          }
-          if (canDownloadReceipt) {
-            actions.push('downloadReceipt');
-          }
-          item.actions = actions;
-          newHistory.push(item);
-        } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.ATTENDED) {
-          const hasScore = !!enrollment.SCORE;
-          const canDownloadReceipt = hasDownloadableReceipt(enrollment);
-          const hasCompletedSession =
-            Number(enrollment.SESSION?.SS_SESSION_STATUS) === SESSION_STATUS_COMPLETED;
-          const hasCertificate = !!(
-            enrollment.SCORE?.CERTIFICATES && enrollment.SCORE.CERTIFICATES.length > 0
-          );
-
-          const actions: string[] = [];
-          if (canDownloadReceipt) {
-            actions.push('downloadReceipt');
-          }
-          if (hasCompletedSession && hasCertificate) {
-            actions.push('certificate');
-          }
-
-          item.status = hasScore ? 'exam.status.completed' : 'exam.status.evaluating';
-          item.statusType = 'primary';
-          item.actions = actions;
-          newHistory.push(item);
-        } else if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.CANCELLED) {
-          const paymentStatus = enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS;
-          if (paymentStatus === TRANSACTION_PAYMENT_STATUS.REFUND) {
-            item.status = 'exam.status.refunded';
-            item.statusType = 'warning';
-            item.customStatus = {
-              label: 'exam.status.refunded',
-              type: 'error',
-              icon: 'currency_exchange',
-            };
-          } else if (paymentStatus === TRANSACTION_PAYMENT_STATUS.RECEIPT_VOIDED) {
-            item.status = 'exam.status.receiptVoided';
-            item.statusType = 'warning';
-            item.customStatus = {
-              label: 'exam.status.receiptVoided',
-              type: 'error',
-              icon: 'receipt_long',
-            };
-          } else {
-            const isPaymentTimeout = isPaymentTimeoutCancellation(enrollment);
-            item.status = isPaymentTimeout
-              ? 'exam.status.cancelled'
-              : 'exam.status.registrationCancelled';
-            item.statusType = 'primary';
-            if (isPaymentTimeout) {
-              item.customStatus = {
-                label: 'exam.status.paymentTimeout',
-                type: 'error',
-                icon: 'warning_amber',
-              };
-            }
-          }
-          newHistory.push(item);
-        }
-      });
-
-      pendingRegistrations.value = newPending;
-      historyRecords.value = newHistory;
-      lastHistoryFetchAt = Date.now();
-    } catch (error: unknown) {
-      console.error('Failed to fetch user history:', error);
+  /** ดึง enrollments ครั้งเดียว แล้วอัปเดตทั้ง history + registered sessions */
+  async function refreshUserEnrollmentViews(): Promise<void> {
+    const userId = resolveUserId();
+    if (userId === null) {
+      historyError.value = i18n.t('exam.history.loadError');
+      return;
     }
+
+    const enrollments = await fetchUserEnrollments(userId);
+    await Promise.all([fetchHistory(true, enrollments), loadRegisteredSessions(enrollments)]);
+  }
+
+  async function fetchHistory(force = false, preloaded?: ExamEnrollment[]): Promise<void> {
+    if (!force && !preloaded && Date.now() - lastHistoryFetchAt < HISTORY_CACHE_TTL_MS) {
+      return;
+    }
+
+    if (historyFetchInFlight && !preloaded) {
+      await historyFetchInFlight;
+      if (!force && Date.now() - lastHistoryFetchAt < HISTORY_CACHE_TTL_MS) {
+        return;
+      }
+      if (!force && lastHistoryFetchAt > 0 && !historyError.value) {
+        return;
+      }
+    }
+
+    const execute = async (): Promise<void> => {
+      historyError.value = null;
+
+      try {
+        let enrollments = preloaded;
+        if (!enrollments) {
+          const userId = resolveUserId();
+          if (userId === null) {
+            historyError.value = i18n.t('exam.history.loadError');
+            return;
+          }
+          enrollments = await fetchUserEnrollments(userId);
+        }
+
+        const newPending: ExamHistoryItem[] = [];
+        const newHistory: ExamHistoryItem[] = [];
+
+        enrollments.forEach((enrollment) => {
+          const session = enrollment.SESSION;
+          if (!session) return;
+          const exam = session.EXAM;
+          const location = enrollment.SESSION_LOCATION?.LOCATION ?? session.LOCATION;
+
+          const date = exam?.EXAM_DATE ? new Date(exam.EXAM_DATE) : new Date();
+          const months = getMonthNames();
+          const monthName = months[date.getMonth()] || '';
+          const year = String(unref(i18n.locale)).startsWith('en')
+            ? date.getFullYear()
+            : date.getFullYear() + BUDDHIST_YEAR_OFFSET;
+          const formattedDate = `${date.getDate()} ${monthName} ${year}`;
+
+          const locationText = location
+            ? formatLocationWithRoom(location.LOCATION_NAME, location.LOCATION_ROOM_NO)
+            : DEFAULT_LOCATION_TEXT;
+
+          const item = mapEnrollmentToHistoryItem(enrollment, {
+            formattedDate,
+            formattedTime: `${formatTime(session.SS_START_TIME)} - ${formatTime(session.SS_END_TIME)}`,
+            locationText,
+            title: exam?.EXAM_ROUND
+              ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}`
+              : exam?.EXAM_NAME || i18n.t('examSchedule.defaultEnrollmentTitle'),
+            fee: Number(exam?.EXAM_FEE ?? 0),
+            getCancellationReason,
+          });
+
+          if (!item) return;
+
+          if (isPendingHistoryItem(item)) {
+            newPending.push(item);
+          } else {
+            newHistory.push(item);
+          }
+        });
+
+        pendingRegistrations.value = newPending;
+        historyRecords.value = newHistory;
+        lastHistoryFetchAt = Date.now();
+      } catch (error: unknown) {
+        console.error('Failed to fetch user history:', error);
+        historyError.value = i18n.t('exam.history.loadError');
+      }
+    };
+
+    if (preloaded) {
+      await execute();
+      return;
+    }
+
+    historyFetchInFlight = execute().finally(() => {
+      historyFetchInFlight = null;
+    });
+    await historyFetchInFlight;
   }
 
   async function confirmRegistration(
@@ -374,15 +336,11 @@ export const useExamStore = defineStore('exam', () => {
     passcode?: string,
     physicalStatus?: string,
   ): Promise<void> {
-    const userIdStr = localStorage.getItem('user_id');
-    if (!userIdStr) throw new Error(i18n.t('examSchedule.userNotLoggedIn'));
-    const userId = parseInt(userIdStr, 10);
-    if (isNaN(userId)) {
-      throw new Error(i18n.t('examSchedule.invalidUserId'));
-    }
+    const userId = resolveUserId();
+    if (userId === null) throw new Error(i18n.t('examSchedule.userNotLoggedIn'));
 
     await createEnrollment(userId, round.id, passcode, physicalStatus);
-    await Promise.all([fetchHistory(true), loadRegisteredSessions()]);
+    await refreshUserEnrollmentViews();
   }
 
   async function confirmSpecialRegistration(
@@ -400,7 +358,7 @@ export const useExamStore = defineStore('exam', () => {
     try {
       setCancellationReason(enrollmentId, reason);
       await updateEnrollmentStatus(enrollmentId, ENROLLMENT_STATUS.CANCELLED);
-      await Promise.all([fetchHistory(true), loadRegisteredSessions()]);
+      await refreshUserEnrollmentViews();
     } catch (error: unknown) {
       console.error('Failed to cancel registration:', error);
       throw error;
@@ -489,6 +447,9 @@ export const useExamStore = defineStore('exam', () => {
     pendingRegistrations,
     historyRecords,
     managementSchedules,
+    historyError,
+    scheduleError,
+    isLoadingSchedule,
     confirmRegistration,
     confirmSpecialRegistration,
     cancelRegistration,
@@ -501,5 +462,10 @@ export const useExamStore = defineStore('exam', () => {
     loadManagementSchedules,
     fetchHistory,
     isSessionRegistered,
+    resetExamUserState,
   };
 });
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useExamStore, import.meta.hot));
+}

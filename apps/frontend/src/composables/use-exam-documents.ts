@@ -11,6 +11,7 @@ import { getRegulations } from 'src/services/exam-rule-voucher.service';
 import type { ExamHistoryItem } from 'src/types/exam';
 import type { VoucherData } from 'src/types/voucher';
 import type { ReceiptData } from 'src/types/receipt';
+import { generateReceiptQrDataUrl } from 'src/utils/verify-qr';
 
 export function useExamDocuments() {
   const $q = useQuasar();
@@ -70,6 +71,16 @@ export function useExamDocuments() {
       ).then(() => undefined),
       new Promise<void>((resolve) => window.setTimeout(resolve, timeoutMs)),
     ]);
+  };
+
+  /** Wait until Code128 SVG has been drawn (JsBarcode is sync but mounts after tick). */
+  const waitForBarcode = async (element: HTMLElement, timeoutMs = 500): Promise<void> => {
+    const started = Date.now();
+    while (Date.now() - started < timeoutMs) {
+      const svg = element.querySelector('.barcode-svg');
+      if (svg && svg.childNodes.length > 0) return;
+      await new Promise<void>((resolve) => window.setTimeout(resolve, 16));
+    }
   };
 
   const printVoucher = async (exam: ExamHistoryItem): Promise<void> => {
@@ -176,7 +187,8 @@ export function useExamDocuments() {
           '-',
         testSession: examObj?.EXAM_ROUND || '-',
         profileImage: profileImagePath ? getImageUrl(profileImagePath) : undefined,
-        barcodeValue: voucherCode,
+        // Code128 payload = Test Taker ID for door scanners / attendance
+        barcodeValue: enrollment.ERM_TEST_TAKER || '',
       };
 
       await nextTick();
@@ -187,8 +199,9 @@ export function useExamDocuments() {
 
         if (cardElement) {
           await waitForImages(cardElement);
+          await waitForBarcode(cardElement);
 
-          const canvasScale = 2;
+          const canvasScale = 3;
           const canvas = await html2canvas(cardElement, {
             scale: canvasScale,
             useCORS: true,
@@ -196,7 +209,8 @@ export function useExamDocuments() {
             backgroundColor: '#ffffff',
           });
 
-          const imgData = canvas.toDataURL('image/jpeg', 0.8);
+          // PNG preserves barcode bar edges better than JPEG for scanners
+          const imgData = canvas.toDataURL('image/png');
 
           const pxToMm = 0.264583;
           const widthMm = (canvas.width * pxToMm) / canvasScale;
@@ -213,7 +227,7 @@ export function useExamDocuments() {
           // Fill the entire PDF page with the image with no margins
           pdf.addImage(
             imgData,
-            'JPEG',
+            'PNG',
             pdfBleedMm,
             pdfBleedMm,
             widthMm,
@@ -251,7 +265,11 @@ export function useExamDocuments() {
     let enrollment = exam.rawEnrollment;
     const user = userStore.currentUser;
 
-    if (enrollment?.ERM_ID && !enrollment.TRANSACTION?.RECEIPTS?.length) {
+    if (
+      enrollment?.ERM_ID &&
+      (!enrollment.TRANSACTION?.RECEIPTS?.length ||
+        !enrollment.TRANSACTION.RECEIPTS[0]?.RC_VERIFY_CODE)
+    ) {
       try {
         enrollment = await fetchEnrollmentById(enrollment.ERM_ID);
       } catch (error) {
@@ -298,6 +316,18 @@ export function useExamDocuments() {
           ? new Date(examObj.EXAM_DATE).getFullYear()
           : new Date().getFullYear();
 
+      const verifyCode = receipt?.RC_VERIFY_CODE;
+      if (!verifyCode) {
+        $q.notify({
+          type: 'warning',
+          message: t('exam.receipt.missingVerifyCode'),
+          position: 'top',
+        });
+        return;
+      }
+
+      const qrDataUrl = await generateReceiptQrDataUrl(verifyCode);
+
       selectedReceiptData.value = {
         receiptNo:
           (receipt?.RC_ID ? `RC${receiptYear}-${String(receipt.RC_ID).padStart(5, '0')}` : '') ||
@@ -332,6 +362,8 @@ export function useExamDocuments() {
         amount: Number(transaction?.TRANX_AMOUNT ?? examObj?.EXAM_FEE ?? 0),
         paymentMethod: transaction?.TRANX_CHANNEL === 3 ? 'QR' : 'Mobile Banking',
         status: 'SUCCESS',
+        verifyCode,
+        qrDataUrl,
       };
 
       isDownloadingReceipt.value = true;
@@ -347,13 +379,13 @@ export function useExamDocuments() {
 
         if (receiptElement) {
           const canvas = await html2canvas(receiptElement, {
-            scale: 2,
+            scale: 3,
             useCORS: true,
             allowTaint: true,
             backgroundColor: '#ffffff',
           });
 
-          const imgData = canvas.toDataURL('image/jpeg', 0.8);
+          const imgData = canvas.toDataURL('image/png');
 
           // Standard A4 dimensions in PDF: 210mm x 297mm
           const pdf = new jsPDF({
@@ -363,7 +395,7 @@ export function useExamDocuments() {
           });
 
           // Fill the entire PDF page with the image with no margins
-          pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+          pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
           pdf.save(`BUU-GET_Receipt_${enrollment.ERM_ID}.pdf`);
 
           $q.notify({

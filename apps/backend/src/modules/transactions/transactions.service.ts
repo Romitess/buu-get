@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
+import { generateReceiptVerifyCode } from 'src/common/utils/verification-code.util';
 import {
   buildPaginatedResponse,
   PaginatedResponse,
@@ -348,6 +349,7 @@ export class TransactionsService {
         receipt.RC_PHONE = dto.receiptPhone ?? receipt.RC_PHONE;
         receipt.RC_ADDRESS = dto.receiptAddress ?? receipt.RC_ADDRESS;
         receipt.RC_STATUS = ReceiptStatus.UNISSUED;
+        receipt.RC_VERIFY_CODE ||= generateReceiptVerifyCode();
         receipt.UPDATED_AT = new Date();
       } else {
         receipt = receiptRepository.create({
@@ -358,6 +360,7 @@ export class TransactionsService {
           RC_ADDRESS: dto.receiptAddress,
           RC_STATUS: ReceiptStatus.UNISSUED,
           RC_SIGNATURE_ID: uuidv4(),
+          RC_VERIFY_CODE: generateReceiptVerifyCode(),
         });
       }
       receipt = await receiptRepository.save(receipt);
@@ -510,6 +513,7 @@ export class TransactionsService {
         receipt.RC_PHONE = dto.RC_PHONE;
         receipt.RC_ADDRESS = dto.RC_ADDRESS;
         receipt.RC_STATUS = ReceiptStatus.UNISSUED;
+        receipt.RC_VERIFY_CODE ||= generateReceiptVerifyCode();
       } else {
         receipt = receiptRepository.create({
           TRANX_ID: transaction.TRANX_ID,
@@ -519,6 +523,7 @@ export class TransactionsService {
           RC_ADDRESS: dto.RC_ADDRESS,
           RC_STATUS: ReceiptStatus.UNISSUED,
           RC_SIGNATURE_ID: uuidv4(),
+          RC_VERIFY_CODE: generateReceiptVerifyCode(),
         });
       }
       receipt = await receiptRepository.save(receipt);
