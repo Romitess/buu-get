@@ -1192,6 +1192,8 @@ export default {
       editTitle: 'แก้ไขข้อมูล Test Voucher',
       regulationsEnLabel: 'Test Regulations',
       regulationsThLabel: 'ข้อปฏิบัติสำหรับผู้เข้าสอบ',
+      editRegulationsBtn: 'แก้ไข Test Regulations',
+      editRegulationsTitle: 'แก้ไข Test Regulations / ข้อปฏิบัติสำหรับผู้เข้าสอบ',
       placeholderEn: 'ใส่ข้อกำหนดภาษาอังกฤษ...',
       placeholderTh: 'ใส่ข้อปฏิบัติภาษาไทย...',
       cancelBtn: 'ยกเลิก',

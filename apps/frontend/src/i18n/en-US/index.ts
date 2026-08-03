@@ -1076,6 +1076,8 @@ export default {
       editTitle: 'Edit Test Voucher Information',
       regulationsEnLabel: 'Test Regulations',
       regulationsThLabel: 'ข้อปฏิบัติสำหรับผู้เข้าสอบ',
+      editRegulationsBtn: 'Edit Test Regulations',
+      editRegulationsTitle: 'Edit Test Regulations / Exam Rules',
       placeholderEn: 'Enter English regulations...',
       placeholderTh: 'Enter Thai regulations...',
       cancelBtn: 'Cancel',
