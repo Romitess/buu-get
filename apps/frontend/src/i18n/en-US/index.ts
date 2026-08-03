@@ -797,6 +797,8 @@ export default {
         '{count} applicant(s) still need seats — drag them from the list onto empty seats',
       applicantTypeFilterLabel: 'Applicant type',
       applicantTypeAll: 'All',
+      seatTooltipName: 'Name: {name}',
+      seatTooltipType: 'Applicant type: {type}',
       savingData: 'Saving seat layout...',
       loadingData: 'Loading data...',
       noName: 'No name',

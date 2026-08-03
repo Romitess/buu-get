@@ -871,6 +871,8 @@ export default {
       unassignedBanner: 'มีผู้สมัคร {count} คนที่ยังไม่มีที่นั่ง — ลากจากรายชื่อไปวางบนที่นั่งว่าง',
       applicantTypeFilterLabel: 'ประเภทผู้สมัคร',
       applicantTypeAll: 'ทั้งหมด',
+      seatTooltipName: 'ชื่อ: {name}',
+      seatTooltipType: 'ประเภทผู้สมัคร: {type}',
       savingData: 'กำลังบันทึกข้อมูลผังที่นั่ง...',
       loadingData: 'กำลังโหลดข้อมูล...',
       noName: 'ไม่มีชื่อ',

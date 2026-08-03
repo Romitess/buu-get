@@ -24,6 +24,18 @@
         <q-icon v-else name="person" size="21px" color="grey-8" />
       </q-avatar>
       <q-icon v-if="swapMode" name="swap_horiz" class="swap-icon" />
+      <q-tooltip
+        anchor="top middle"
+        self="bottom middle"
+        :offset="[0, 8]"
+        :delay="250"
+        class="seat-assignee-tooltip text-body2"
+      >
+        <div class="seat-tooltip-content">
+          <div class="seat-tooltip-name">{{ tooltipName }}</div>
+          <div v-if="tooltipType" class="seat-tooltip-type">{{ tooltipType }}</div>
+        </div>
+      </q-tooltip>
     </template>
     <template v-else>
       <span class="empty-text">{{ emptyLabel }}</span>
@@ -34,11 +46,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { SeatStatus, StudentSeatInfo } from 'src/composables/use-exam-seat-management';
 import {
   DEFAULT_PHYSICAL_STATUS_BG_COLOR,
   getPhysicalStatusBgColor,
 } from 'src/constants/physical-status';
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -75,6 +90,19 @@ const shortName = computed(() => {
   }
 
   return parts[0] ?? name;
+});
+
+const tooltipName = computed((): string => {
+  const name = props.student?.name?.trim();
+  return t('admin.seatManagement.seatTooltipName', {
+    name: name || t('admin.seatManagement.noName'),
+  });
+});
+
+const tooltipType = computed((): string => {
+  const remark = props.student?.remark?.trim();
+  if (!remark) return '';
+  return t('admin.seatManagement.seatTooltipType', { type: remark });
 });
 
 const typeBgColor = computed((): string => {
@@ -222,5 +250,28 @@ const assignedTileStyle = computed((): Record<string, string> | undefined => {
   font-size: 16px;
   line-height: 18px;
   color: #111111;
+}
+</style>
+
+<style lang="scss">
+/* QTooltip portals to body — keep above zoomed/transformed seat map */
+.seat-assignee-tooltip {
+  z-index: 10000;
+
+  .seat-tooltip-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.35;
+    max-width: 260px;
+  }
+
+  .seat-tooltip-name {
+    font-weight: 600;
+  }
+
+  .seat-tooltip-type {
+    opacity: 0.92;
+  }
 }
 </style>
