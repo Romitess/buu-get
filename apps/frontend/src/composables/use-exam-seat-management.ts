@@ -31,8 +31,6 @@ const PHYSICAL_STATUS_REMARKS: Record<number, string> = {
   4: 'ผู้พิการรณ์',
 };
 
-export const APPLICANT_TYPE_FILTER_ALL = 'all';
-
 /** ประเภทผู้สมัครที่ใช้กรองรายชื่อ เรียงตามลำดับการจัดที่นั่ง */
 const APPLICANT_TYPE_REMARKS = [...Object.values(PHYSICAL_STATUS_REMARKS), 'ชาวต่างชาติ', 'ชาวไทย'];
 
@@ -149,13 +147,19 @@ export function useExamSeatManagement() {
   const showPlacementChoiceDialog = ref(false);
   const blockedSeatsBySessionId = ref<Record<number, BackendBlockedSeat[]>>({});
   const searchQuery = ref('');
-  const applicantTypeFilter = ref<string>(APPLICANT_TYPE_FILTER_ALL);
+  const applicantTypeFilter = ref<string[]>([]);
   const hasLoadedEnrollments = ref(false);
 
-  const applicantTypeOptions = computed(() => [
-    { label: t('admin.seatManagement.applicantTypeAll'), value: APPLICANT_TYPE_FILTER_ALL },
-    ...APPLICANT_TYPE_REMARKS.map((remark) => ({ label: remark, value: remark })),
-  ]);
+  const applicantTypeOptions = computed(() =>
+    APPLICANT_TYPE_REMARKS.map((remark) => ({ label: remark, value: remark })),
+  );
+
+  // clearable ของ q-select อาจส่ง null แทน []
+  watch(applicantTypeFilter, (value) => {
+    if (!Array.isArray(value)) {
+      applicantTypeFilter.value = [];
+    }
+  });
 
   // ── Computed: exam / session info ────────────────────────
   const activeSession = computed((): BackendSession | null => {
@@ -700,9 +704,11 @@ export function useExamSeatManagement() {
       ? (seatOrderById.value.get(student.seat) ?? Number.MAX_SAFE_INTEGER)
       : Number.MAX_SAFE_INTEGER;
 
-  const matchesApplicantType = (student: StudentSeatInfo): boolean =>
-    applicantTypeFilter.value === APPLICANT_TYPE_FILTER_ALL ||
-    student.remark === applicantTypeFilter.value;
+  const matchesApplicantType = (student: StudentSeatInfo): boolean => {
+    const selected = applicantTypeFilter.value;
+    if (!Array.isArray(selected) || selected.length === 0) return true;
+    return selected.includes(student.remark);
+  };
 
   const filteredStudents = computed((): StudentSeatInfo[] => {
     const query = searchQuery.value.toLowerCase().trim();

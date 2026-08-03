@@ -57,10 +57,7 @@
               </div>
             </div>
 
-            <div
-              v-if="unassignedStudentCount > 0"
-              class="unassigned-banner text-body2 q-mb-md"
-            >
+            <div v-if="unassignedStudentCount > 0" class="unassigned-banner text-body2 q-mb-md">
               {{
                 $t('admin.seatManagement.unassignedBanner', {
                   count: unassignedStudentCount,
@@ -74,7 +71,11 @@
                 v-model="applicantTypeFilter"
                 :options="applicantTypeOptions"
                 :label="$t('admin.seatManagement.applicantTypeFilterLabel')"
+                :display-value="applicantTypeDisplayValue"
                 popup-content-class="applicant-type-select-menu"
+                multiple
+                use-chips
+                clearable
                 emit-value
                 map-options
                 dense
@@ -162,7 +163,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
@@ -216,6 +217,14 @@ const {
   handleRearrangeAllSeats,
   handleKeepExistingSeats,
 } = useExamSeatManagement();
+
+/** ค่าว่าง = ไม่กรอง (แสดงทุกประเภท) */
+const applicantTypeDisplayValue = computed((): string | undefined => {
+  if (!Array.isArray(applicantTypeFilter.value) || applicantTypeFilter.value.length === 0) {
+    return t('admin.seatManagement.applicantTypeAll');
+  }
+  return undefined;
+});
 
 onMounted(() => {
   void loadExamData();
@@ -317,12 +326,26 @@ const onAssignStudentFromList = (ermId: number, seatId: string): void => {
 }
 
 .applicant-type-select {
-  flex: 0 1 180px;
-  min-width: 160px;
+  flex: 1 1 220px;
+  min-width: 180px;
   max-width: 100%;
 
   :deep(.q-field__control) {
     border-radius: var(--radius-10) !important;
+    min-height: 40px;
+    height: auto;
+  }
+
+  :deep(.q-field__native) {
+    flex-wrap: wrap;
+    gap: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  :deep(.q-chip) {
+    margin: 0;
+    max-width: 100%;
   }
 }
 
