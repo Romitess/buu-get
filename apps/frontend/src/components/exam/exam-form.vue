@@ -13,6 +13,7 @@
       :exam-type-options="examTypeOptions"
       :exam-format-options="examFormatOptions"
       :fund-source-options="fundSourceOptions"
+      :score-rubric-options="scoreRubricOptions"
       :is-loading-data="isLoadingData"
       :is-locked="isPublishedSectionLocked"
       :is-special-round="isSpecialRound"
@@ -98,9 +99,8 @@
         <template v-slot:avatar>
           <q-icon name="info" class="alert-icon-warning" />
         </template>
-        รอบสอบนี้เคยผ่านการเผยแพร่แล้ว ระบบจึงจำกัดการแก้ไขเฉพาะข้อมูลพื้นฐาน
-        (ชื่อรอบสอบ ประเภท รูปแบบ ค่าสมัคร และแหล่งเงิน)
-        ส่วนกำหนดการสอบและกำหนดการลงทะเบียน/ชำระเงินยังแก้ไขได้
+        รอบสอบนี้เคยผ่านการเผยแพร่แล้ว ระบบจึงจำกัดการแก้ไขเฉพาะข้อมูลพื้นฐาน (ชื่อรอบสอบ ประเภท
+        รูปแบบ ค่าสมัคร และแหล่งเงิน) ส่วนกำหนดการสอบและกำหนดการลงทะเบียน/ชำระเงินยังแก้ไขได้
         รายชื่อผู้มีสิทธิ์สอบแก้ไขได้จนกว่าจะมีผู้ลงทะเบียน
       </q-banner>
     </div>
@@ -149,6 +149,7 @@ const {
   proctorOptions,
   locationOptions,
   fundSourceOptions,
+  scoreRubricOptions,
   getOccupiedLocationIdsForSlot,
   isLoadingData,
   isSaving,

@@ -168,6 +168,7 @@ export interface CreateExamPayload {
     sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   }[];
   fundSourceId?: number | null;
+  srbId: number;
   examRound?: string;
   examFiscalYear?: string;
 }
@@ -666,6 +667,7 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<numbe
       EXAM_PAY_END_DATE: buddhistToGregorianPeriodEnd(payload.payEndDate),
       EXAM_PUBLISHED: payload.isPublished,
       FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
+      SRB_ID: Number(payload.srbId),
       EXAM_ROUND: payload.examRound,
       EXAM_FISCAL_YEAR: payload.examFiscalYear,
     });
@@ -757,6 +759,7 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
         EXAM_PAY_END_DATE: buddhistToGregorianPeriodEnd(payload.payEndDate),
         EXAM_PUBLISHED: payload.isPublished,
         FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
+        SRB_ID: Number(payload.srbId),
         EXAM_ROUND: payload.examRound,
         EXAM_FISCAL_YEAR: payload.examFiscalYear,
       },

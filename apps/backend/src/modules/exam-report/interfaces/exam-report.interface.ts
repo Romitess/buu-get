@@ -100,11 +100,22 @@ export interface ExamCandidateInfo {
   examNumber: string;
   prefix: string;
   fullName: string;
+  /** @deprecated ใช้ scoreLines */
   vocabularyGrammarScore: number | null;
+  /** @deprecated ใช้ scoreLines */
   readingScore: number | null;
   totalScore: number | null;
   level: number | null;
   attemptStatus: ExamCandidateAttemptStatus;
+  scoreLines?: ExamCandidateScoreLine[];
+}
+
+export interface ExamCandidateScoreLine {
+  nameTh: string;
+  nameEn: string;
+  score: number | null;
+  maxScore: number;
+  sortOrder: number;
 }
 
 export interface ExamReportSummary {

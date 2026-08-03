@@ -1,5 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional } from 'class-validator';
+import {
+  IsNumber,
+  IsOptional,
+  IsArray,
+  ValidateNested,
+  ArrayMinSize,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class ExamScoreLineInputDto {
+  @ApiProperty({ example: 1, description: 'รหัสรายการในชุดเกณฑ์' })
+  @IsNumber()
+  SRBI_ID: number;
+
+  @ApiProperty({ example: 45.5, description: 'คะแนนที่ได้' })
+  @IsNumber()
+  score: number;
+}
 
 export class CreateExamScoreDto {
   @ApiProperty({ example: 1, description: 'รหัสผู้สมัคร' })
@@ -7,26 +24,35 @@ export class CreateExamScoreDto {
   ERM_ID: number;
 
   @ApiProperty({
-    example: 45.5,
-    description: 'คะแนน Language Use',
-    required: false,
+    type: [ExamScoreLineInputDto],
+    description: 'คะแนนรายหมวดตามชุดเกณฑ์ของรอบสอบ',
   })
-  @IsNumber()
-  @IsOptional()
-  SC_LANG_USE_SCORE?: number;
-
-  @ApiProperty({ example: 30.0, description: 'คะแนน Reading', required: false })
-  @IsNumber()
-  @IsOptional()
-  SC_READING_SCORE?: number;
-
-  @ApiProperty({ example: 75.5, description: 'คะแนนรวม', required: false })
-  @IsNumber()
-  @IsOptional()
-  SC_TOTAL_SCORE?: number;
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => ExamScoreLineInputDto)
+  lines: ExamScoreLineInputDto[];
 
   @ApiProperty({ example: 4, description: 'ระดับ Band', required: false })
   @IsNumber()
   @IsOptional()
   SC_BAND_LEVEL?: number;
+
+  /** @deprecated ใช้ lines แทน — รองรับ backward compat ช่วงเปลี่ยนผ่าน */
+  @ApiProperty({ required: false, deprecated: true })
+  @IsNumber()
+  @IsOptional()
+  SC_LANG_USE_SCORE?: number;
+
+  /** @deprecated ใช้ lines แทน */
+  @ApiProperty({ required: false, deprecated: true })
+  @IsNumber()
+  @IsOptional()
+  SC_READING_SCORE?: number;
+
+  /** @deprecated คำนวณจาก lines */
+  @ApiProperty({ required: false, deprecated: true })
+  @IsNumber()
+  @IsOptional()
+  SC_TOTAL_SCORE?: number;
 }

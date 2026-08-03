@@ -334,10 +334,26 @@ export interface BackendExam {
   EXAM_PAY_END_DATE: string;
   EXAM_PUBLISHED: boolean;
   FUND_SOURCE_ID: number;
+  SRB_ID?: number | null;
   FUND_SOURCE?: {
     FS_ID: number;
     FS_NAME: string;
     FS_ACCOUNT_CODE: string;
+  };
+  SCORE_RUBRIC?: {
+    SRB_ID: number;
+    SRB_NAME_TH: string;
+    SRB_NAME_EN: string;
+    SRB_IS_DEFAULT: boolean;
+    ITEMS?: Array<{
+      SRBI_ID: number;
+      SRBI_NAME_TH: string;
+      SRBI_NAME_EN: string;
+      SRBI_CODE: string | null;
+      SRBI_MAX_SCORE: number | string;
+      SRBI_SORT_ORDER: number;
+      DELETED_AT?: string | null;
+    }>;
   };
   SESSIONS: BackendSession[];
   PASSCODES?: BackendPasscode[];

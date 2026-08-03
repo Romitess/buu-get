@@ -24,6 +24,8 @@ import { PlatformGatewayService } from '../platform-gateway/platform-gateway.ser
 import { getExamChangeEmailTemplate } from './templates/exam-change-email.template';
 import { MoodleSyncService } from '../moodle/moodle-sync.service';
 import { normalizePeriodEndDate } from '../../common/utils/period-date.util';
+import { ScoreRubricsService } from '../score-rubrics/score-rubrics.service';
+import { ExamScoresService } from '../exam-scores/exam-scores.service';
 
 @Injectable()
 export class ExamService {
@@ -41,6 +43,8 @@ export class ExamService {
     @InjectRepository(ExamEnrollment)
     private readonly examEnrollmentRepository: Repository<ExamEnrollment>,
     private readonly platformGatewayService: PlatformGatewayService,
+    private readonly scoreRubricsService: ScoreRubricsService,
+    private readonly examScoresService: ExamScoresService,
   ) {}
 
   async create(
@@ -48,6 +52,7 @@ export class ExamService {
     actingUserId: number,
   ): Promise<Exam> {
     this.normalizeExamPeriodEndDates(createExamDto);
+    await this.scoreRubricsService.assertRubricUsable(createExamDto.SRB_ID);
     const exam = this.examRepository.create(createExamDto);
     const saved = await this.examRepository.save(exam);
     // รอสร้างคอร์ส Moodle แล้ว map EXAM_MOODLE_COURSE_ID (ล้มเหลวจะ log ไว้ แต่ไม่ทำให้สร้างรอบสอบ fail)
@@ -250,6 +255,8 @@ export class ExamService {
       'SESSIONS.SESSION_LOCATIONS.LOCATION',
       'FUND_SOURCE',
       'PASSCODES',
+      'SCORE_RUBRIC',
+      'SCORE_RUBRIC.ITEMS',
     ];
     if (includeSeats) {
       relations.push('SESSIONS.SESSION_LOCATIONS.LOCATION.SEATS');
@@ -316,6 +323,20 @@ export class ExamService {
   async update(id: number, updateExamDto: UpdateExamDto): Promise<Exam> {
     this.normalizeExamPeriodEndDates(updateExamDto);
     const exam = await this.findOneForMutation(id);
+
+    if (
+      updateExamDto.SRB_ID !== undefined &&
+      updateExamDto.SRB_ID !== exam.SRB_ID
+    ) {
+      const hasScores = await this.examScoresService.examHasSavedScores(id);
+      if (hasScores) {
+        throw new ConflictException(
+          'ไม่สามารถเปลี่ยนชุดเกณฑ์คะแนนได้ เนื่องจากมีคะแนนที่บันทึกแล้ว',
+        );
+      }
+      await this.scoreRubricsService.assertRubricUsable(updateExamDto.SRB_ID);
+    }
+
     const updated = this.examRepository.merge(exam, updateExamDto);
     return await this.examRepository.save(updated);
   }

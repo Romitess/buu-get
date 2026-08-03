@@ -24,16 +24,27 @@ export interface CertificateBandRule {
   descriptor: string;
 }
 
+export interface CertificateScoreLine {
+  nameTh: string;
+  nameEn: string;
+  score: number;
+  maxScore: number;
+  sortOrder: number;
+}
+
 export interface CertificateCardData {
   fullName: string;
   testTakerId: string;
   nationalId: string;
   testSession: string;
   testDate: string;
+  /** @deprecated ใช้ scoreLines */
   vocabScore: string;
+  /** @deprecated ใช้ scoreLines */
   readingScore: string;
   totalScore: string;
   bandLevel: string;
+  scoreLines?: CertificateScoreLine[];
   reportIssueDate: string;
   scoreValidUntil: string;
   certificateCode: string;
@@ -48,10 +59,13 @@ export interface CertificateScoreReportData {
   nationalId: string;
   testSession: string;
   testDate: string;
+  /** @deprecated ใช้ scoreLines */
   vocabScore: number;
+  /** @deprecated ใช้ scoreLines */
   readingScore: number;
   totalScore: number;
   band: number;
+  scoreLines?: CertificateScoreLine[];
   reportIssueDate: string;
   scoreValidUntil: string;
   certificateCode: string;

@@ -93,7 +93,7 @@ import DialogIssueCertificate from 'src/components/exam/dialog-issue-certificate
 import { fetchEnrollmentById } from 'src/services/enrollment.service';
 import { fetchExecutiveExamHistory } from 'src/services/executive-test-taker.service';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
-import type { ExamHistoryRow } from 'src/types/executive-test-taker.types';
+import type { ExecutiveExamScoreLine, ExamHistoryRow } from 'src/types/executive-test-taker.types';
 import { formatExamInstanceLabel } from 'src/utils/exam-instance-label';
 import { PageSkeleton, CardSkeleton, TableSkeleton } from 'src/components/base/skeleton';
 
@@ -104,6 +104,7 @@ interface CandidateInfo {
   scoreGrammar: number;
   scoreReading: number;
   scoreTotal: number;
+  scoreLines?: ExecutiveExamScoreLine[];
   band: number;
   userPhoto?: string | undefined;
   certIssuedAt?: string | undefined;
@@ -253,6 +254,7 @@ const viewCertificate = (row: ExamHistoryRow): void => {
     scoreGrammar: row.langUseScore ?? 0,
     scoreReading: row.readingScore ?? 0,
     scoreTotal: row.totalScore ?? 0,
+    ...(row.scoreLines ? { scoreLines: row.scoreLines } : {}),
     band: row.bandLevel ?? 0,
     userPhoto:
       user?.USER_IMAGE || profile?.userImagePath || user?.IMAGE?.USER_IMAGE_URL || undefined,

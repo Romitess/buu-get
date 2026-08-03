@@ -535,6 +535,7 @@ export class ExamEnrollmentsService {
         'ATTENDANCES',
         'SCORE',
         'SCORE.CERTIFICATES',
+        'SCORE.LINES',
       ],
       order: { CREATED_AT: 'DESC' },
     });
@@ -567,6 +568,17 @@ export class ExamEnrollmentsService {
         const hasCertificate = certificates.length > 0;
         const cert = hasCertificate ? certificates[0] : null;
 
+        const scoreLines =
+          score?.LINES?.filter((line) => !line.DELETED_AT)
+            .sort((a, b) => a.SCL_SORT_ORDER - b.SCL_SORT_ORDER)
+            .map((line) => ({
+              nameTh: line.SCL_NAME_TH,
+              nameEn: line.SCL_NAME_EN,
+              score: Number(line.SCL_SCORE),
+              maxScore: Number(line.SCL_MAX_SCORE),
+              sortOrder: line.SCL_SORT_ORDER,
+            })) ?? [];
+
         return {
           index: index + 1,
           examRound,
@@ -590,6 +602,7 @@ export class ExamEnrollmentsService {
             ? cert.CERT_EXPIRES_AT.toISOString()
             : null,
           certCode: cert ? cert.CERT_CODE : null,
+          scoreLines: scoreLines.length > 0 ? scoreLines : undefined,
         };
       },
     );

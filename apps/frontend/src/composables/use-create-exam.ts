@@ -15,6 +15,7 @@ import {
   VALIDATION_MSG,
 } from 'src/constants/exam';
 import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
+import { fetchScoreRubrics } from 'src/services/score-rubric.service';
 import type { PasscodeType, BackendExam, BackendLocation } from 'src/types/exam';
 import {
   fetchExamLocations,
@@ -95,6 +96,7 @@ export interface CreateExamForm {
   examType: string;
   examFormat: string;
   fundSourceId: number | null;
+  srbId: number | null;
   fee: string | number;
   isPublished: boolean;
   examDate: string;
@@ -249,6 +251,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       examType: EXAM_TYPE_GENERAL,
       examFormat: EXAM_FORMAT_COMPUTER,
       fundSourceId: null,
+      srbId: null,
       fee: '',
       isPublished: false,
       examDate: today,
@@ -286,6 +289,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const proctorOptions = ref<{ label: string; value: string }[]>([]);
   const locationOptions = ref<ExamLocationOption[]>([]);
   const fundSourceOptions = ref<{ label: string; value: number }[]>([]);
+  const scoreRubricOptions = ref<{ label: string; value: number }[]>([]);
   const allExams = ref<BackendExam[]>([]);
   const isLoadingData = ref(false);
   const isSaving = ref(false);
@@ -568,6 +572,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (!isSpecialRound.value && !form.value.fundSourceId) {
       errors.fundSourceId = VALIDATION_MSG.FUND_SOURCE;
     }
+    if (!form.value.srbId) {
+      errors.srbId = VALIDATION_MSG.SCORE_RUBRIC;
+    }
 
     // ── Card 2: กำหนดการสอบ ──
     if (!form.value.examDate || !form.value.examDate.trim()) {
@@ -799,9 +806,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     error.value = null;
     try {
       // Critical path: อย่ารอ GET /exam ทั้งก้อน — occupancy โหลด background หลังฟอร์มพร้อม
-      const [locations, fundSources, proctors, editExam] = await Promise.all([
+      const [locations, fundSources, scoreRubrics, proctors, editExam] = await Promise.all([
         fetchExamLocations(),
         fetchFundSources(),
+        fetchScoreRubrics(),
         getUsersFromApi(ROLES.PROCTOR),
         examId ? fetchExamWithSeats(examId) : Promise.resolve(null),
       ]);
@@ -811,6 +819,13 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
         value: fs.FS_ID,
       }));
+      scoreRubricOptions.value = scoreRubrics.map((rubric) => ({
+        label: `${rubric.nameTh} (${rubric.nameEn})`,
+        value: rubric.id,
+      }));
+      if (!examId && !form.value.srbId) {
+        form.value.srbId = scoreRubrics.find((r) => r.isDefault)?.id ?? null;
+      }
       proctorOptions.value = proctors.map((u) => {
         const displayName = u.fullNameTH ? `${u.titleTH || ''} ${u.fullNameTH}`.trim() : u.email;
         const finalName = displayName || 'ไม่ระบุชื่อ';
@@ -847,6 +862,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         form.value.payStartDate = gregorianToBuddhistDisplay(exam.EXAM_PAY_START_DATE);
         form.value.payEndDate = gregorianToBuddhistDisplay(exam.EXAM_PAY_END_DATE);
         form.value.fundSourceId = exam.FUND_SOURCE_ID ?? null;
+        form.value.srbId = exam.SRB_ID ?? scoreRubrics.find((r) => r.isDefault)?.id ?? null;
 
         // Group sessions by time range into time slots with rooms
         if (exam.SESSIONS && exam.SESSIONS.length > 0) {
@@ -1693,6 +1709,15 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       return false;
     }
 
+    if (!form.value.srbId) {
+      $q.notify({
+        type: 'warning',
+        message: VALIDATION_MSG.SCORE_RUBRIC,
+        position: 'top',
+      });
+      return false;
+    }
+
     // === DATE LOGICAL VALIDATION ===
     const todayVal = dateToCompareValue(today);
     const regStartVal = dateToCompareValue(form.value.regStartDate);
@@ -1813,6 +1838,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           payEndDate: form.value.payEndDate,
           timeRanges,
           fundSourceId: Number(form.value.fundSourceId || 0),
+          srbId: Number(form.value.srbId),
           examRound: form.value.examRound,
           examFiscalYear: form.value.examFiscalYear,
           existingSessionIds,
@@ -1853,6 +1879,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           payEndDate: form.value.payEndDate,
           timeRanges,
           fundSourceId: form.value.fundSourceId,
+          srbId: Number(form.value.srbId),
           examRound: form.value.examRound,
           examFiscalYear: form.value.examFiscalYear,
         };
@@ -1961,6 +1988,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     proctorOptions,
     locationOptions,
     fundSourceOptions,
+    scoreRubricOptions,
     getOccupiedLocationIdsForSlot,
     isLoadingData,
     isSaving,

@@ -255,14 +255,26 @@
                     <div class="col-12 q-mt-md">
                       <div class="score-section">
                         <div class="score-header q-mb-xs">Score</div>
-                        <div class="row justify-between items-center q-py-xs score-row">
-                          <div class="score-label">1. Vocabulary & Grammar</div>
-                          <div class="score-val">{{ previewVocabScore }}</div>
-                        </div>
-                        <div class="row justify-between items-center q-py-xs score-row">
-                          <div class="score-label">2. Reading</div>
-                          <div class="score-val">{{ previewReadingScore }}</div>
-                        </div>
+                        <template v-if="previewScoreLines.length">
+                          <div
+                            v-for="(line, index) in previewScoreLines"
+                            :key="`${line.nameEn}-${line.sortOrder}`"
+                            class="row justify-between items-center q-py-xs score-row"
+                          >
+                            <div class="score-label">{{ index + 1 }}. {{ line.nameEn }}</div>
+                            <div class="score-val">{{ line.score }}/{{ line.maxScore }}</div>
+                          </div>
+                        </template>
+                        <template v-else>
+                          <div class="row justify-between items-center q-py-xs score-row">
+                            <div class="score-label">1. Vocabulary & Grammar</div>
+                            <div class="score-val">{{ previewVocabScore }}</div>
+                          </div>
+                          <div class="row justify-between items-center q-py-xs score-row">
+                            <div class="score-label">2. Reading</div>
+                            <div class="score-val">{{ previewReadingScore }}</div>
+                          </div>
+                        </template>
                         <div
                           class="row justify-between items-center q-py-xs score-row text-weight-bold"
                         >
@@ -429,6 +441,7 @@ import {
   saveBandRules,
   type BandRuleData,
 } from 'src/services/score-criteria.service';
+import type { CertificateScoreLine } from 'src/types/certificate';
 
 interface Props {
   modelValue: boolean;
@@ -446,6 +459,7 @@ interface Props {
         scoreGrammar?: number | undefined;
         scoreReading?: number | undefined;
         scoreTotal?: number | undefined;
+        scoreLines?: CertificateScoreLine[] | undefined;
         band?: number | undefined;
         userPhoto?: string | undefined;
         certIssuedAt?: string | undefined;
@@ -794,11 +808,25 @@ const previewReadingScore = computed(() => {
   return 'XX/50';
 });
 
+const previewScoreLines = computed((): CertificateScoreLine[] => {
+  if (props.viewMode && props.candidateInfo?.scoreLines?.length) {
+    return props.candidateInfo.scoreLines;
+  }
+  return [];
+});
+
+const previewTotalMaxScore = computed(() => {
+  if (previewScoreLines.value.length) {
+    return previewScoreLines.value.reduce((sum, line) => sum + line.maxScore, 0);
+  }
+  return 100;
+});
+
 const previewTotalScore = computed(() => {
   if (props.viewMode && props.candidateInfo?.scoreTotal !== undefined) {
-    return `${props.candidateInfo.scoreTotal}/100`;
+    return `${props.candidateInfo.scoreTotal}/${previewTotalMaxScore.value}`;
   }
-  return 'XXX/100';
+  return `XXX/${previewTotalMaxScore.value}`;
 });
 
 const previewBandLevel = computed(() => {

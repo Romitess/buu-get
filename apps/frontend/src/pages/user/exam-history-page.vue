@@ -81,10 +81,7 @@
         </div>
       </div>
 
-      <div
-        v-if="!hasVisibleRecords"
-        class="text-center q-pa-xl"
-      >
+      <div v-if="!hasVisibleRecords" class="text-center q-pa-xl">
         <q-icon name="history" size="48px" color="grey-4" />
         <p class="text-grey-6 q-mt-md">
           {{ hasAnyRecords ? $t('exam.history.emptyFilter') : $t('exam.history.empty') }}
@@ -251,6 +248,11 @@
         :test-date="selectedCertificateData.testDate"
         :vocab-score="selectedCertificateData.vocabScore"
         :reading-score="selectedCertificateData.readingScore"
+        v-bind="
+          selectedCertificateData.scoreLines
+            ? { scoreLines: selectedCertificateData.scoreLines }
+            : {}
+        "
         :total-score="selectedCertificateData.totalScore"
         :band-level="selectedCertificateData.bandLevel"
         :issue-date="selectedCertificateData.reportIssueDate"
@@ -339,7 +341,6 @@ const receiptInformation = ref<ReceiptInformation | null>(null);
 
 /** ใช้ deadline เดียวกับ card (CREATED_AT + payment window) — ห้าม reset เป็น now+duration */
 const paymentExpiryTime = computed((): string => selectedExam.value?.deadline ?? '');
-
 
 const initialReceiptInformation = computed<ReceiptInformation>(() => {
   const user = userStore.currentUser;

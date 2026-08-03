@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { ExamEnrollment } from '../../exam-enrollments/entities/exam-enrollment.entity';
 import { ExamCertificate } from '../../exam-certificates/entities/exam-certificate.entity';
+import { ExamScoreLine } from './exam-score-line.entity';
 
 @Entity('EXAM_T_SCORES')
 export class ExamScore {
@@ -73,4 +74,7 @@ export class ExamScore {
 
   @OneToMany(() => ExamCertificate, (certificate) => certificate.SCORE)
   CERTIFICATES: ExamCertificate[];
+
+  @OneToMany(() => ExamScoreLine, (line) => line.SCORE, { cascade: true })
+  LINES: ExamScoreLine[];
 }

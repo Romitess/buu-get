@@ -38,6 +38,7 @@ import { ProfileEditHistoryModule } from './modules/profile-edit-history/profile
 import { PageBuilderModule } from './modules/page-builder/page-builder.module';
 import { ExamRuleVouchersModule } from './modules/exam-rule-vouchers/exam-rule-vouchers.module';
 import { ScoreCriteriaModule } from './modules/score-criteria/score-criteria.module';
+import { ScoreRubricsModule } from './modules/score-rubrics/score-rubrics.module';
 import { MoodleSyncLogsModule } from './modules/moodle-sync-logs/moodle-sync-logs.module';
 import { MoodleModule } from './modules/moodle/moodle.module';
 import { ExamReportModule } from './modules/exam-report/exam-report.module';
@@ -108,6 +109,7 @@ import { VerifyModule } from './modules/verify/verify.module';
     PageBuilderModule,
     ExamRuleVouchersModule,
     ScoreCriteriaModule,
+    ScoreRubricsModule,
     MoodleSyncLogsModule,
     MoodleModule,
     ExamReportModule,

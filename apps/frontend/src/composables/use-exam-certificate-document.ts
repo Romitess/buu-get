@@ -5,6 +5,7 @@ import { jsPDF } from 'jspdf';
 import { useUserStore } from 'src/stores/user.store';
 import { getImageUrl } from 'src/services/image.service';
 import { getBandRules } from 'src/services/score-criteria.service';
+import { buildCertificateScoreLines } from 'src/composables/use-score-rubric-helpers';
 import type { ExamHistoryItem } from 'src/types/exam';
 import type { CertificateCardData } from 'src/types/certificate';
 import { generateCertificateQrDataUrl } from 'src/utils/verify-qr';
@@ -90,6 +91,9 @@ export function useExamCertificateDocument() {
       const bandRulesResponse = await getBandRules();
       const qrDataUrl = await generateCertificateQrDataUrl(certificate.CERT_CODE);
 
+      const scoreLines = buildCertificateScoreLines(score);
+      const totalMax = scoreLines.reduce((sum, line) => sum + line.maxScore, 0);
+
       selectedCertificateData.value = {
         fullName: `${title} ${fullName}`.trim(),
         testTakerId: enrollment.ERM_TEST_TAKER || enrollment.USER?.USER_CODE || '-',
@@ -103,8 +107,9 @@ export function useExamCertificateDocument() {
         testDate: formatEnglishDate(examObj?.EXAM_DATE),
         vocabScore: `${Number(score.SC_LANG_USE_SCORE ?? 0)}/50`,
         readingScore: `${Number(score.SC_READING_SCORE ?? 0)}/50`,
-        totalScore: `${Number(score.SC_TOTAL_SCORE ?? 0)}/100`,
+        totalScore: `${Number(score.SC_TOTAL_SCORE ?? 0)}/${totalMax}`,
         bandLevel: String(Number(score.SC_BAND_LEVEL ?? 0)),
+        scoreLines,
         reportIssueDate: formatEnglishDate(certificate.CERT_ISSUED_AT),
         scoreValidUntil: formatEnglishDate(certificate.CERT_EXPIRES_AT),
         certificateCode: certificate.CERT_CODE,

@@ -7,6 +7,8 @@ import { ExamPasscode } from './entities/exam-passcode.entity';
 import { ExamPasscodeLog } from './entities/exam-passcode-log.entity';
 import { ExamEnrollment } from '../exam-enrollments/entities/exam-enrollment.entity';
 import { MoodleModule } from '../moodle/moodle.module';
+import { ScoreRubricsModule } from '../score-rubrics/score-rubrics.module';
+import { ExamScoresModule } from '../exam-scores/exam-scores.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { MoodleModule } from '../moodle/moodle.module';
       ExamEnrollment,
     ]),
     MoodleModule,
+    ScoreRubricsModule,
+    ExamScoresModule,
   ],
   controllers: [ExamController],
   providers: [ExamService],

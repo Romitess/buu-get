@@ -17,6 +17,7 @@ import {
 } from '../exam-enrollments/entities/exam-enrollment.entity';
 import { ExamAttendStatus } from '../exam-attendances/entities/exam-attendance.entity';
 import { Exam } from '../exam/entities/exam.entity';
+import { ExamScoreLine } from '../exam-scores/entities/exam-score-line.entity';
 
 /** ช่วงคะแนนของกราฟสรุปคะแนน (เลือก B: นับเฉพาะ >= 40) */
 const SCORE_RANGES = ['40-49', '50-59', '60-69', '70-79', '80-100'];
@@ -89,6 +90,7 @@ interface ExamInformationRoundRawRow {
 
 interface ExamCandidateInfoRawRow {
   enrollmentId: string | number;
+  scoresId: string | number | null;
   examNumber: string | null;
   prefix: string | null;
   fullName: string | null;
@@ -391,6 +393,7 @@ export class ExamReportService {
         "COALESCE(profile.USER_FULLNAME_TH, profile.USER_FULLNAME_EN, u.USER_EMAIL, '')",
         'fullName',
       )
+      .addSelect('sc.SCORES_ID', 'scoresId')
       .addSelect('sc.SC_LANG_USE_SCORE', 'vocabularyGrammarScore')
       .addSelect('sc.SC_READING_SCORE', 'readingScore')
       .addSelect('sc.SC_TOTAL_SCORE', 'totalScore')
@@ -408,20 +411,82 @@ export class ExamReportService {
 
     const rows = await qb.getRawMany<ExamCandidateInfoRawRow>();
 
-    return rows.map((row) => ({
-      id: String(row.enrollmentId),
-      examNumber: row.examNumber ?? '',
-      prefix: row.prefix ?? '',
-      fullName: row.fullName ?? '',
-      vocabularyGrammarScore: this.roundNullable(row.vocabularyGrammarScore),
-      readingScore: this.roundNullable(row.readingScore),
-      totalScore: this.roundNullable(row.totalScore),
-      level: this.roundNullable(row.level),
-      attemptStatus:
-        row.attemptStatus === 'repeatAttempt'
-          ? 'repeatAttempt'
-          : 'firstAttempt',
-    }));
+    const scoreIds = rows
+      .map((row) => (row.scoresId != null ? Number(row.scoresId) : null))
+      .filter((id): id is number => id != null);
+    const linesByScoreId = await this.loadScoreLinesByScoreIds(scoreIds);
+
+    return rows.map((row) => {
+      const scoresId = row.scoresId != null ? Number(row.scoresId) : null;
+      const scoreLines =
+        scoresId != null ? linesByScoreId.get(scoresId) : undefined;
+
+      return {
+        id: String(row.enrollmentId),
+        examNumber: row.examNumber ?? '',
+        prefix: row.prefix ?? '',
+        fullName: row.fullName ?? '',
+        vocabularyGrammarScore: this.roundNullable(row.vocabularyGrammarScore),
+        readingScore: this.roundNullable(row.readingScore),
+        totalScore: this.roundNullable(row.totalScore),
+        level: this.roundNullable(row.level),
+        attemptStatus:
+          row.attemptStatus === 'repeatAttempt'
+            ? 'repeatAttempt'
+            : 'firstAttempt',
+        scoreLines,
+      };
+    });
+  }
+
+  private async loadScoreLinesByScoreIds(scoreIds: number[]): Promise<
+    Map<
+      number,
+      {
+        nameTh: string;
+        nameEn: string;
+        score: number | null;
+        maxScore: number;
+        sortOrder: number;
+      }[]
+    >
+  > {
+    if (scoreIds.length === 0) {
+      return new Map();
+    }
+
+    const lines = await this.dataSource
+      .getRepository(ExamScoreLine)
+      .createQueryBuilder('line')
+      .where('line.SCORES_ID IN (:...scoreIds)', { scoreIds })
+      .andWhere('line.DELETED_AT IS NULL')
+      .orderBy('line.SCL_SORT_ORDER', 'ASC')
+      .getMany();
+
+    const map = new Map<
+      number,
+      {
+        nameTh: string;
+        nameEn: string;
+        score: number | null;
+        maxScore: number;
+        sortOrder: number;
+      }[]
+    >();
+
+    for (const line of lines) {
+      const bucket = map.get(line.SCORES_ID) ?? [];
+      bucket.push({
+        nameTh: line.SCL_NAME_TH,
+        nameEn: line.SCL_NAME_EN,
+        score: this.roundNullable(line.SCL_SCORE),
+        maxScore: Number(line.SCL_MAX_SCORE),
+        sortOrder: line.SCL_SORT_ORDER,
+      });
+      map.set(line.SCORES_ID, bucket);
+    }
+
+    return map;
   }
 
   // ── Query helpers ─────────────────────────────────────────

@@ -1,4 +1,5 @@
 import { api } from 'src/boot/axios';
+import type { ExamScoreLineDto } from 'src/types/score-rubric';
 
 export interface BackendExamScore {
   SCORES_ID: number;
@@ -7,6 +8,7 @@ export interface BackendExamScore {
   SC_READING_SCORE?: number | string | null;
   SC_TOTAL_SCORE?: number | string | null;
   SC_BAND_LEVEL?: number | string | null;
+  LINES?: ExamScoreLineDto[];
   CERTIFICATES?: {
     CERT_ID: number;
     CERT_ISSUED_AT: string;
@@ -15,11 +17,14 @@ export interface BackendExamScore {
   }[];
 }
 
+export interface ExamScoreLinePayload {
+  SRBI_ID: number;
+  score: number;
+}
+
 export interface SaveExamScorePayload {
   ERM_ID: number;
-  SC_LANG_USE_SCORE: number;
-  SC_READING_SCORE: number;
-  SC_TOTAL_SCORE: number;
+  lines: ExamScoreLinePayload[];
   SC_BAND_LEVEL: number;
 }
 

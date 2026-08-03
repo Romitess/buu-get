@@ -76,4 +76,8 @@ export class CreateExamDto {
   @IsOptional()
   @IsNumber()
   FUND_SOURCE_ID?: number;
+
+  @ApiProperty({ example: 1, description: 'รหัสชุดเกณฑ์คะแนน' })
+  @IsNumber()
+  SRB_ID: number;
 }

@@ -245,8 +245,17 @@ import {
   fetchExamScores,
   updateExamScore,
   type BackendExamScore,
-  type SaveExamScorePayload,
 } from 'src/services/exam-score.service';
+import {
+  buildSavePayload,
+  buildScoreDraftFromScore,
+  calculateBand,
+  matchHeaderToRubricItem,
+  rubricItemsFromExam,
+  scoreByCode,
+  sumLineScores,
+  type ScoreDraft,
+} from 'src/composables/use-score-rubric-helpers';
 import type { BackendExam, BackendLocation, BackendSession } from 'src/types/exam';
 import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 import type { BackendEnrollmentDetail, EnrollmentTableRow } from 'src/types/enrollment.types';
@@ -257,16 +266,10 @@ interface ScoreTableRow extends EnrollmentTableRow {
   scoreReading: number;
   scoreTotal: number;
   band: number;
+  itemScores: Record<number, number>;
   hasImportedScore: boolean;
   hasScore: boolean;
   hasSavedCertificate: boolean;
-}
-
-interface ScoreDraft {
-  scoreGrammar: number;
-  scoreReading: number;
-  scoreTotal: number;
-  band: number;
 }
 
 interface SessionLocationOption {
@@ -296,6 +299,7 @@ const examDateLabel = computed((): string => {
 
 const isLoading = ref(false);
 const exam = ref<BackendExam | null>(null);
+const rubricItems = computed(() => rubricItemsFromExam(exam.value));
 const enrollments = ref<BackendEnrollmentDetail[]>([]);
 const examScores = ref<BackendExamScore[]>([]);
 const searchQuery = ref('');
@@ -454,15 +458,6 @@ const selectedSessionLocation = computed((): string => {
   return `${location.LOCATION_NAME}${location.LOCATION_ROOM_NO ? ` (${location.LOCATION_ROOM_NO})` : ''}`;
 });
 
-const calculateBand = (total: number): number => {
-  if (total >= 80) return 5;
-  if (total >= 70) return 4;
-  if (total >= 60) return 3;
-  if (total >= 50) return 2;
-  if (total >= 40) return 1;
-  return 0;
-};
-
 const scoreByEnrollmentId = computed(() => {
   return new Map(examScores.value.map((score) => [score.ERM_ID, score]));
 });
@@ -565,23 +560,9 @@ const viewIssuedCertificate = (row: ScoreTableRow): void => {
   showIssueCertificateDialog.value = true;
 };
 
-const toNumber = (value: number | string | null | undefined): number => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-};
-
 const getScoreDraft = (enrollment: BackendEnrollmentDetail): ScoreDraft => {
   const score = scoreByEnrollmentId.value.get(enrollment.ERM_ID);
-  const scoreGrammar = toNumber(score?.SC_LANG_USE_SCORE);
-  const scoreReading = toNumber(score?.SC_READING_SCORE);
-  const scoreTotal = toNumber(score?.SC_TOTAL_SCORE) || scoreGrammar + scoreReading;
-
-  return {
-    scoreGrammar,
-    scoreReading,
-    scoreTotal,
-    band: toNumber(score?.SC_BAND_LEVEL) || calculateBand(scoreTotal),
-  };
+  return buildScoreDraftFromScore(score, rubricItems.value);
 };
 
 const initializeScoreDrafts = (): void => {
@@ -617,10 +598,11 @@ const scoreRows = computed(() => {
       sessionLocationId: enrollment.SL_ID ?? null,
       userProfileId: profile?.userProfileId || 0,
       remark: enrollment.ERM_PHYSICAL_STATUS || '',
-      scoreGrammar: draft.scoreGrammar,
-      scoreReading: draft.scoreReading,
+      scoreGrammar: scoreByCode(draft, rubricItems.value, 'LANG_USE'),
+      scoreReading: scoreByCode(draft, rubricItems.value, 'READING'),
       scoreTotal: draft.scoreTotal,
       band: draft.band,
+      itemScores: { ...draft.lineScores },
       hasImportedScore: importedEnrollmentIds.value.has(enrollment.ERM_ID),
       hasScore:
         importedEnrollmentIds.value.has(enrollment.ERM_ID) ||
@@ -638,7 +620,7 @@ const scoreRows = computed(() => {
   );
 });
 
-const columns: QTableColumn[] = [
+const baseColumns: QTableColumn[] = [
   {
     name: 'index',
     label: 'ลำดับ',
@@ -667,22 +649,21 @@ const columns: QTableColumn[] = [
     align: 'left',
     style: 'width: 25%; padding-left: 5%',
   },
-  {
-    name: 'scoreGrammar',
-    label: 'คำศัพท์และไวยากรณ์',
-    field: 'scoreGrammar',
-    align: 'center',
+];
+
+const rubricScoreColumns = computed((): QTableColumn[] =>
+  rubricItems.value.map((item) => ({
+    name: `score_item_${item.id}`,
+    label: item.nameTh,
+    field: (row: ScoreTableRow) => row.itemScores[item.id] ?? 0,
+    align: 'center' as const,
     style: 'width: 10%',
-    format: (val: unknown, row: ScoreTableRow) => (row.hasScore ? String(val) : ''),
-  },
-  {
-    name: 'scoreReading',
-    label: 'ทักษะการอ่าน',
-    field: 'scoreReading',
-    align: 'center',
-    style: 'width: 10%',
-    format: (val: unknown, row: ScoreTableRow) => (row.hasScore ? String(val) : ''),
-  },
+    format: (_val: unknown, row: ScoreTableRow) =>
+      row.hasScore ? String(row.itemScores[item.id] ?? 0) : '',
+  })),
+);
+
+const tailColumns: QTableColumn[] = [
   {
     name: 'scoreTotal',
     label: 'คะแนนรวม',
@@ -710,70 +691,43 @@ const columns: QTableColumn[] = [
   },
 ];
 
+const columns = computed(() => [...baseColumns, ...rubricScoreColumns.value, ...tailColumns]);
+
 const tableColumns = computed(() => {
   const hasAnyCertificate = scoreRows.value.some((row) => row.hasSavedCertificate);
+  const cols = columns.value;
   if (!hasAnyCertificate) {
-    return columns.filter((col) => col.name !== 'tools');
+    return cols.filter((col) => col.name !== 'tools');
   }
-  return columns;
+  return cols;
 });
 
-const sampleColumns: QTableColumn[] = [
-  {
-    name: 'testTakerId',
-    label: 'Test Taker Id',
-    field: 'testTakerId',
-    align: 'center',
-  },
-  {
-    name: 'fullnameEn',
-    label: 'Fullname English',
-    field: 'fullnameEn',
-    align: 'center',
-  },
-  {
-    name: 'fullnameTh',
-    label: 'Fullname Thai',
-    field: 'fullnameTh',
-    align: 'center',
-  },
-  {
-    name: 'citizenId',
-    label: 'Citizen Id',
-    field: 'citizenId',
-    align: 'center',
-  },
-  {
-    name: 'passport',
-    label: 'Passport',
-    field: 'passport',
-    align: 'center',
-  },
-  {
-    name: 'vocabularyScore',
-    label: 'vocabulary score (50)',
-    field: 'vocabularyScore',
-    align: 'center',
-  },
-  {
-    name: 'readingScore',
-    label: 'reading score (50)',
-    field: 'readingScore',
-    align: 'center',
-  },
-  {
-    name: 'totalScore',
-    label: 'Total Score (100)',
-    field: 'totalScore',
-    align: 'center',
-  },
-  {
-    name: 'level',
-    label: 'level',
-    field: 'level',
-    align: 'center',
-  },
-];
+const sampleColumns = computed((): QTableColumn[] => {
+  const identityColumns: QTableColumn[] = [
+    { name: 'testTakerId', label: 'Test Taker Id', field: 'testTakerId', align: 'center' },
+    { name: 'fullnameEn', label: 'Fullname English', field: 'fullnameEn', align: 'center' },
+    { name: 'fullnameTh', label: 'Fullname Thai', field: 'fullnameTh', align: 'center' },
+    { name: 'citizenId', label: 'Citizen Id', field: 'citizenId', align: 'center' },
+    { name: 'passport', label: 'Passport', field: 'passport', align: 'center' },
+  ];
+  const scoreItemColumns = rubricItems.value.map((item) => ({
+    name: `sample_item_${item.id}`,
+    label: `${item.nameEn} (${item.maxScore})`,
+    field: `item_${item.id}`,
+    align: 'center' as const,
+  }));
+  return [
+    ...identityColumns,
+    ...scoreItemColumns,
+    {
+      name: 'totalScore',
+      label: `Total Score (${rubricItems.value.reduce((s, i) => s + i.maxScore, 0)})`,
+      field: 'totalScore',
+      align: 'center',
+    },
+    { name: 'level', label: 'level', field: 'level', align: 'center' },
+  ];
+});
 
 interface SampleScoreRow {
   testTakerId: string;
@@ -781,10 +735,9 @@ interface SampleScoreRow {
   fullnameTh: string;
   citizenId: string;
   passport: string;
-  vocabularyScore: number;
-  readingScore: number;
   totalScore: number;
   level: number;
+  [key: string]: string | number;
 }
 
 /** ตัวอย่างไฟล์จากผู้สมัครจริงในห้องที่เลือก — ดาวน์โหลดแล้ว import กลับได้ทันที */
@@ -793,30 +746,35 @@ const sampleRows = computed((): SampleScoreRow[] => {
     const profile = enrollment.USER?.PROFILE;
     const draft = scoreDraftByEnrollmentId.value[enrollment.ERM_ID] ?? getScoreDraft(enrollment);
     const hasExistingScore =
-      draft.scoreGrammar > 0 ||
-      draft.scoreReading > 0 ||
+      Object.values(draft.lineScores).some((score) => score > 0) ||
       scoreByEnrollmentId.value.has(enrollment.ERM_ID);
 
-    const vocabularyScore = hasExistingScore ? draft.scoreGrammar : 20 + (index % 25);
-    const readingScore = hasExistingScore ? draft.scoreReading : 20 + ((index + 7) % 25);
+    const lineScores: Record<number, number> = {};
+    rubricItems.value.forEach((item, itemIndex) => {
+      lineScores[item.id] = hasExistingScore
+        ? (draft.lineScores[item.id] ?? 0)
+        : 20 + ((index + itemIndex * 7) % 25);
+    });
     const totalScore = hasExistingScore
-      ? draft.scoreTotal || vocabularyScore + readingScore
-      : vocabularyScore + readingScore;
+      ? draft.scoreTotal || sumLineScores(rubricItems.value, lineScores)
+      : sumLineScores(rubricItems.value, lineScores);
     const level = hasExistingScore
       ? draft.band || calculateBand(totalScore)
       : calculateBand(totalScore);
 
-    return {
+    const row: SampleScoreRow = {
       testTakerId: enrollment.ERM_TEST_TAKER?.trim() || '-',
       fullnameEn: profile?.userFullnameEn || '-',
       fullnameTh: profile?.userFullnameTh || '-',
       citizenId: enrollment.USER?.USER_NATIONAL_ID?.trim() || '-',
       passport: enrollment.USER?.USER_PASSPORT_NO?.trim() || '-',
-      vocabularyScore,
-      readingScore,
       totalScore,
       level,
     };
+    rubricItems.value.forEach((item) => {
+      row[`item_${item.id}`] = lineScores[item.id] ?? 0;
+    });
+    return row;
   });
 });
 
@@ -1038,26 +996,14 @@ const applyImportedScoreRows = (rows: string[][]): void => {
       header.includes('passport_no') ||
       header.includes('passportno'),
   );
-  const idxGrammar = headers.findIndex(
-    (header) =>
-      header.includes('grammar') ||
-      header.includes('vocab') ||
-      header.includes('language') ||
-      header.includes('คำศัพท์') ||
-      header.includes('ไวยากรณ์') ||
-      header.includes('lang_use') ||
-      header.includes('languse'),
-  );
-  const idxReading = headers.findIndex(
-    (header) =>
-      header.includes('reading') || header.includes('การอ่าน') || header.includes('read_score'),
-  );
-  const idxTotal = headers.findIndex(
-    (header) => header.includes('total') || header.includes('รวม') || header.includes('คะแนนรวม'),
-  );
   const idxLevel = headers.findIndex(
     (header) => header.includes('level') || header.includes('band') || header.includes('ระดับ'),
   );
+
+  const itemHeaderIndexes = rubricItems.value.map((item) => ({
+    item,
+    idx: headers.findIndex((header) => matchHeaderToRubricItem(header, item)),
+  }));
 
   let matchedCount = 0;
   const nextImportedIds = new Set(importedEnrollmentIds.value);
@@ -1107,20 +1053,27 @@ const applyImportedScoreRows = (rows: string[][]): void => {
 
     if (!matchedEnrollment) continue;
 
-    const rawGrammar = idxGrammar >= 0 ? values[idxGrammar] : '';
-    const rawReading = idxReading >= 0 ? values[idxReading] : '';
-    const rawTotal = idxTotal >= 0 ? values[idxTotal] : undefined;
-    const rawLevel = idxLevel >= 0 ? values[idxLevel] : undefined;
+    const lineScores: Record<number, number> = {};
+    for (const { item, idx } of itemHeaderIndexes) {
+      if (idx < 0) continue;
+      lineScores[item.id] = Number(values[idx]) || 0;
+    }
 
-    const grammar = Number(rawGrammar) || 0;
-    const reading = Number(rawReading) || 0;
-    const total = rawTotal !== undefined && rawTotal !== '' ? Number(rawTotal) : grammar + reading;
+    const rawTotal = headers.findIndex((header) =>
+      ['total', 'รวม', 'คะแนนรวม'].some((token) => header.includes(token)),
+    );
+    const rawTotalVal = rawTotal >= 0 ? values[rawTotal] : undefined;
+    const total =
+      rawTotalVal !== undefined && rawTotalVal !== ''
+        ? Number(rawTotalVal)
+        : sumLineScores(rubricItems.value, lineScores);
     const level =
-      rawLevel !== undefined && rawLevel !== '' ? Number(rawLevel) : calculateBand(total);
+      idxLevel >= 0 && values[idxLevel] !== undefined && values[idxLevel] !== ''
+        ? Number(values[idxLevel])
+        : calculateBand(total);
 
     scoreDraftByEnrollmentId.value[matchedEnrollment.ERM_ID] = {
-      scoreGrammar: grammar,
-      scoreReading: reading,
+      lineScores,
       scoreTotal: total,
       band: level,
     };
@@ -1204,20 +1157,14 @@ const downloadSampleFile = (): void => {
     return;
   }
 
-  const headers = sampleColumns.map((column) => wrapCsvCell(String(column.label ?? '')));
-  const dataRows = sampleRows.value.map((row) =>
-    [
-      wrapCsvCell(row.testTakerId, true),
-      wrapCsvCell(row.fullnameEn),
-      wrapCsvCell(row.fullnameTh),
-      wrapCsvCell(row.citizenId, true),
-      wrapCsvCell(row.passport, true),
-      wrapCsvCell(row.vocabularyScore),
-      wrapCsvCell(row.readingScore),
-      wrapCsvCell(row.totalScore),
-      wrapCsvCell(row.level),
-    ].join(','),
-  );
+  const headers = sampleColumns.value.map((column) => wrapCsvCell(String(column.label ?? '')));
+  const dataRows = sampleRows.value.map((row) => {
+    const cells = sampleColumns.value.map((column) => {
+      const field = String(column.field ?? '');
+      return wrapCsvCell(row[field] ?? '');
+    });
+    return cells.join(',');
+  });
 
   const content = `\ufeff${[headers.join(','), ...dataRows].join('\r\n')}`;
   const examName =
@@ -1277,13 +1224,7 @@ const saveScores = async (): Promise<void> => {
       rowsToSave.map((enrollment) => {
         const draft =
           scoreDraftByEnrollmentId.value[enrollment.ERM_ID] ?? getScoreDraft(enrollment);
-        const payload: SaveExamScorePayload = {
-          ERM_ID: enrollment.ERM_ID,
-          SC_LANG_USE_SCORE: draft.scoreGrammar,
-          SC_READING_SCORE: draft.scoreReading,
-          SC_TOTAL_SCORE: draft.scoreTotal,
-          SC_BAND_LEVEL: draft.band,
-        };
+        const payload = buildSavePayload(enrollment.ERM_ID, draft, rubricItems.value);
         const existingScore = scoreByEnrollmentId.value.get(enrollment.ERM_ID);
 
         return existingScore

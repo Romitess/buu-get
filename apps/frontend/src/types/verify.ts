@@ -20,6 +20,13 @@ export interface VerifyCertificateResponse {
     reading: number;
     total: number;
     bandLevel: number;
+    lines?: Array<{
+      nameTh: string;
+      nameEn: string;
+      score: number;
+      maxScore: number;
+      sortOrder: number;
+    }>;
   };
 }
 

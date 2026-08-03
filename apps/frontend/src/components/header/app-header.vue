@@ -312,12 +312,20 @@ const navLinks = computed<NavigationItem[]>(() => {
         });
       }
       if (role === ROLES.ADMIN || role === ROLES.STAFF || role === ROLES.EXAM_OPERATIONS_OFFICER) {
-        links.push({
-          name: 'admin-score-criteria-management',
-          label: t('navigation.manageScoreCriteria'),
-          icon: 'grade',
-          path: '/admin/score-criteria-management',
-        });
+        links.push(
+          {
+            name: 'admin-score-rubric-management',
+            label: t('navigation.manageScoreRubrics'),
+            icon: 'fact_check',
+            path: '/admin/score-rubric-management',
+          },
+          {
+            name: 'admin-score-criteria-management',
+            label: t('navigation.manageBandCertificate'),
+            icon: 'grade',
+            path: '/admin/score-criteria-management',
+          },
+        );
       }
     }
 
@@ -380,8 +388,6 @@ const navLinks = computed<NavigationItem[]>(() => {
         ],
       });
     }
-
-
   } else {
     // === Guest Navigation ===
     links.push({
