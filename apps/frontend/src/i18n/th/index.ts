@@ -896,7 +896,7 @@ export default {
     seatCandidates: {
       pageTitle: 'จัดการที่นั่งสอบ',
       pageSubtitle: 'วางผังและจัดการที่นั่งสอบ เพื่อรองรับผู้เข้าสอบได้อย่างเหมาะสมและสะดวก',
-      printVoucher: 'ออกใบเข้าห้องสอบ',
+      printVoucher: 'สร้างบัตรประจำตัวผู้เข้าสอบ',
       editSeats: 'แก้ไขที่นั่งสอบ',
       printSeatPlan: 'พิมพ์แผนผังที่นั่ง',
       printVoucherDisabledHint:
@@ -911,7 +911,7 @@ export default {
       voucherPreviewTitle: 'ตัวอย่างใบ Test Voucher',
       voucherSideLabel: 'เลือกด้านของใบเข้าสอบ',
       issueTicketDialog: {
-        title: 'ออกใบเข้าห้องสอบ',
+        title: 'สร้างบัตรประจำตัวผู้เข้าสอบ',
         subtitle: 'กรุณาตรวจสอบข้อมูลก่อนยืนยัน',
         warningAlert:
           'ระบบจะส่งข้อมูลให้แก่ผู้เข้าสอบผ่าน Email กรุณาตรวจสอบความถูกต้องก่อนดำเนินการ',
