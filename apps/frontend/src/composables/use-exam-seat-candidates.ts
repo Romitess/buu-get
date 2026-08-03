@@ -40,6 +40,8 @@ export interface SeatCandidateRow {
   fullnameTh: string;
   fullnameEn: string;
   seatNumber: string;
+  roomLabel: string;
+  sessionLocationId: number | null;
   sessionId: number;
   enrollment: BackendEnrollmentDetail;
 }
@@ -125,12 +127,49 @@ export function useExamSeatCandidates() {
     });
   });
 
+  const formatLocationLabel = (location: NonNullable<BackendSession['LOCATION']>): string =>
+    `${location.LOCATION_NAME}${location.LOCATION_ROOM_NO ? ` (${location.LOCATION_ROOM_NO})` : ''}`;
+
   const roomOptions = computed<SessionLocationOption[]>(() =>
     sessionLocations.value.map((item) => ({
       value: item.SL_ID,
-      label: `${item.LOCATION.LOCATION_NAME}${item.LOCATION.LOCATION_ROOM_NO ? ` (${item.LOCATION.LOCATION_ROOM_NO})` : ''}`,
+      label: formatLocationLabel(item.LOCATION),
     })),
   );
+
+  /** All rooms in the active time slot, joined for display (no room picker). */
+  const sessionLocationsLabel = computed((): string => {
+    const labels = roomOptions.value.map((option) => option.label);
+    if (labels.length === 0) return '-';
+    return labels.join(', ');
+  });
+
+  const getRoomCapacity = (item: SeatCandidateSessionLocation): number => {
+    if (item.LOCATION_SEAT_CAPACITY != null) return item.LOCATION_SEAT_CAPACITY;
+    if (item.SEATS_SNAPSHOT && item.SEATS_SNAPSHOT.length > 0) return item.SEATS_SNAPSHOT.length;
+    return item.LOCATION.SEATS?.length ?? 0;
+  };
+
+  /** Sum of seat capacity across every room in the active time slot. */
+  const timeSlotCapacity = computed((): number =>
+    sessionLocations.value.reduce((sum, item) => sum + getRoomCapacity(item), 0),
+  );
+
+  const getEnrollmentRoomLabel = (enrollment: BackendEnrollmentDetail): string => {
+    if (enrollment.SL_ID != null) {
+      const matched = sessionLocations.value.find((item) => item.SL_ID === enrollment.SL_ID);
+      if (matched) return formatLocationLabel(matched.LOCATION);
+    }
+
+    const sessionOnly = sessionLocations.value.filter(
+      (location) => location.SS_ID === enrollment.SESSION_ID,
+    );
+    if (sessionOnly.length === 1 && sessionOnly[0]) {
+      return formatLocationLabel(sessionOnly[0].LOCATION);
+    }
+
+    return 'ยังไม่จัดห้อง';
+  };
 
   const effectiveSessionLocationId = computed<number | null>(() => {
     const selectedLocationExists = sessionLocations.value.some(
@@ -256,8 +295,9 @@ export function useExamSeatCandidates() {
   };
 
   // Map raw enrollment data to table rows — unassigned seats first, then seat order
+  // Uses all rooms in the active time slot (not a single selected room).
   const tableRows = computed((): SeatCandidateRow[] => {
-    return sessionEnrollments.value
+    return timeSlotEligibleEnrollments.value
       .map(
         (enrollment): EnrollmentWithSeatOrder => ({
           enrollment,
@@ -280,10 +320,22 @@ export function useExamSeatCandidates() {
           fullnameTh: e.USER?.PROFILE?.userFullnameTh || '-',
           fullnameEn: e.USER?.PROFILE?.userFullnameEn || '-',
           seatNumber: getSeatLabel(e),
+          roomLabel: getEnrollmentRoomLabel(e),
+          sessionLocationId: e.SL_ID ?? null,
           sessionId: e.SESSION_ID,
           enrollment: e,
         }),
       );
+  });
+
+  /** Room-scoped rows (for print seat plan / single-room actions). */
+  const roomTableRows = computed((): SeatCandidateRow[] => {
+    return tableRows.value.filter((row) => {
+      if (effectiveSessionLocationId.value === null) {
+        return sessionLocations.value.length === 0;
+      }
+      return belongsToSelectedRoom(row.enrollment);
+    });
   });
 
   // Search-filtered rows
@@ -296,12 +348,13 @@ export function useExamSeatCandidates() {
         row.fullnameTh.toLowerCase().includes(q) ||
         row.fullnameEn.toLowerCase().includes(q) ||
         row.titleTh.toLowerCase().includes(q) ||
-        row.seatNumber.toLowerCase().includes(q),
+        row.seatNumber.toLowerCase().includes(q) ||
+        row.roomLabel.toLowerCase().includes(q),
     );
   });
 
-  // Total candidates shown in the current room table (includes unassigned)
-  const candidateCount = computed((): number => sessionEnrollments.value.length);
+  // Total candidates in the active time slot (all rooms)
+  const candidateCount = computed((): number => timeSlotEligibleEnrollments.value.length);
 
   // Session helpers
   const sessionTime = computed((): string => {
@@ -311,23 +364,9 @@ export function useExamSeatCandidates() {
     return `${start}-${end}`;
   });
 
-  const sessionLocation = computed((): string => {
-    if (!activeLocation.value) return '-';
-    const loc = activeLocation.value;
-    return `${loc.LOCATION_NAME}${loc.LOCATION_ROOM_NO ? ` (${loc.LOCATION_ROOM_NO})` : ''}`;
-  });
+  const sessionLocation = computed((): string => sessionLocationsLabel.value);
 
-  const sessionCapacity = computed((): number => {
-    if (activeSessionLocation.value?.LOCATION_SEAT_CAPACITY != null) {
-      return activeSessionLocation.value.LOCATION_SEAT_CAPACITY;
-    }
-
-    if (activeSessionSeatSnapshot.value.length > 0) {
-      return activeSessionSeatSnapshot.value.length;
-    }
-
-    return activeLocation.value?.SEATS?.length ?? 0;
-  });
+  const sessionCapacity = computed((): number => timeSlotCapacity.value);
 
   const getTimeTabSessionId = (sessionId: number): number | null => {
     const session = sessions.value.find((item) => item.SS_ID === sessionId);
@@ -406,11 +445,13 @@ export function useExamSeatCandidates() {
     sessionTimeTabs,
     selectedSessionLocationId,
     roomOptions,
+    sessionLocationsLabel,
     isLoading,
     error,
     searchQuery,
     selectedSessionId,
     filteredRows,
+    roomTableRows,
     candidateCount,
     sessionTime,
     sessionLocation,

@@ -901,6 +901,7 @@ export default {
       printSeatPlan: 'พิมพ์แผนผังที่นั่ง',
       printVoucherDisabledHint:
         'ยังมีผู้สมัครที่ไม่มีที่นั่ง กรุณาจัดที่นั่งให้ครบก่อนออกใบ Test Voucher',
+      exportByRoom: 'EXPORT TO EXCEL',
       viewVoucher: 'ดูใบเข้าห้องสอบ',
       viewVoucherTitle: 'ข้อมูลการออกใบ Test Voucher',
       examDetails: 'รายละเอียดการสอบ',
@@ -934,6 +935,7 @@ export default {
           prefix: 'คำนำหน้า',
           fullName: 'ชื่อ-นามสกุล',
           fullNameEn: 'Full Name',
+          room: 'ห้องสอบ',
           seatNumber: 'เลขที่นั่งสอบ',
           tools: 'เครื่องมือ',
         },

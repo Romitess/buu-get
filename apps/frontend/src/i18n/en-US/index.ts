@@ -828,6 +828,7 @@ export default {
       printSeatPlan: 'Print Seat Plan',
       printVoucherDisabledHint:
         'Some applicants still have no seat. Assign seats to everyone before issuing Test Vouchers.',
+      exportByRoom: 'EXPORT TO EXCEL',
       viewVoucher: 'View Test Voucher',
       viewVoucherTitle: 'Test Voucher Issuance Details',
       examDetails: 'Exam Details',
@@ -862,6 +863,7 @@ export default {
           prefix: 'Prefix',
           fullName: 'Full Name (TH)',
           fullNameEn: 'Full Name',
+          room: 'Exam Room',
           seatNumber: 'Seat No.',
           tools: 'Tools',
         },
