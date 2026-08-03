@@ -1,7 +1,11 @@
 import { normalizePeriodEndDate } from './period-date.util';
 
 export type RegistrationWindowStatus =
-  'open' | 'not_open' | 'closed' | 'exam_started' | 'invalid';
+  | 'open'
+  | 'not_open'
+  | 'closed'
+  | 'exam_started'
+  | 'invalid';
 
 const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_PATTERN = /^(\d{1,2}):(\d{2})(?::(\d{2}))?/;

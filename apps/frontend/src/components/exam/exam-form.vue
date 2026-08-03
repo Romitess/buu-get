@@ -68,7 +68,7 @@
       :existing-candidate-keys="existingCandidateKeys"
       :has-candidates="hasEligibleCandidates"
       :loading="isImportingCandidates || isLoadingData"
-      :locked="isLoadingData"
+      :locked="isLoadingData || isEligibleCandidatesLocked"
       @import-candidates="importCandidates"
       @add-candidates-from-users="addEligibleCandidatesFromUsers"
       @remove-candidates="removeEligibleCandidates"
@@ -77,8 +77,18 @@
     />
 
     <!-- Schedule Lock Notice -->
-    <div v-if="isPublishedSectionLocked">
-      <!-- Case 1: Locked by Enrollments (Permanent) -->
+    <div v-if="isPublishedSectionLocked || isEligibleCandidatesLocked">
+      <q-banner
+        v-if="isEligibleCandidatesLocked"
+        dense
+        class="alert-banner-warning q-mb-md rounded-borders"
+      >
+        <template v-slot:avatar>
+          <q-icon name="lock" class="alert-icon-warning" />
+        </template>
+        มีผู้ลงทะเบียนในรอบสอบนี้แล้ว จึงไม่สามารถเพิ่มหรือลบรายชื่อผู้มีสิทธิ์สอบได้
+        (ยังสามารถส่งออกรายชื่อได้)
+      </q-banner>
       <!-- Warning Banner for Published/Locked Exams -->
       <q-banner
         v-if="isPublishedSectionLocked"
@@ -90,7 +100,8 @@
         </template>
         รอบสอบนี้เคยผ่านการเผยแพร่แล้ว ระบบจึงจำกัดการแก้ไขเฉพาะข้อมูลพื้นฐาน
         (ชื่อรอบสอบ ประเภท รูปแบบ ค่าสมัคร และแหล่งเงิน)
-        ส่วนกำหนดการสอบ กำหนดการลงทะเบียน/ชำระเงิน และรายชื่อผู้มีสิทธิ์สอบยังแก้ไขได้
+        ส่วนกำหนดการสอบและกำหนดการลงทะเบียน/ชำระเงินยังแก้ไขได้
+        รายชื่อผู้มีสิทธิ์สอบแก้ไขได้จนกว่าจะมีผู้ลงทะเบียน
       </q-banner>
     </div>
 
@@ -145,6 +156,7 @@ const {
   isEditMode,
   isPublishedSectionLocked,
   isScheduleLocked,
+  isEligibleCandidatesLocked,
   isSpecialRound,
   wasOriginallyPublished,
   activeSlotIndex,

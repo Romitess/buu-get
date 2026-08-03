@@ -404,6 +404,14 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   /** Whether the current exam type is special */
   const isSpecialRound = computed<boolean>(() => form.value.examType === EXAM_TYPE_SPECIAL);
 
+  /**
+   * รายชื่อผู้มีสิทธิ์สอบ (รอบพิเศษ) แก้ได้จนกว่าจะมีคนลงทะเบียน
+   * เมื่อมี enrollment ที่ยังไม่ยกเลิกแล้ว จะล็อกเพิ่ม/ลบ/สร้าง passcode
+   */
+  const isEligibleCandidatesLocked = computed<boolean>(() => {
+    return isSpecialRound.value && isLockedByEnrollment.value;
+  });
+
   /** Filtered candidates based on search query */
   const filteredCandidates = computed<EligibleCandidate[]>(() => {
     const q = candidateSearch.value.trim().toLowerCase();
@@ -1205,6 +1213,14 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   };
 
   /** Import candidates from CSV file for special rounds */
+  const notifyEligibleCandidatesLocked = (): void => {
+    $q.notify({
+      type: 'warning',
+      message: 'ไม่สามารถแก้ไขรายชื่อผู้มีสิทธิ์สอบได้ เนื่องจากมีผู้ลงทะเบียนในรอบสอบนี้แล้ว',
+      position: 'top',
+    });
+  };
+
   const resolveEligibleCandidatesInSystem = async (): Promise<void> => {
     const candidates = form.value.eligibleCandidates;
     const identifiers = candidates
@@ -1235,6 +1251,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
   const importCandidates = (file?: File): void => {
     try {
+      if (isEligibleCandidatesLocked.value) {
+        notifyEligibleCandidatesLocked();
+        return;
+      }
       if (!file) return;
       isImportingCandidates.value = true;
 
@@ -1371,6 +1391,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
   /** Generate random 6-digit passcodes for all eligible candidates */
   const generatePasscodes = (type: PasscodeType = 'individual'): void => {
+    if (isEligibleCandidatesLocked.value) {
+      notifyEligibleCandidatesLocked();
+      return;
+    }
+
     if (form.value.eligibleCandidates.length === 0) {
       $q.notify({
         type: 'warning',
@@ -1428,6 +1453,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   };
 
   const addEligibleCandidatesFromUsers = (users: User[]): void => {
+    if (isEligibleCandidatesLocked.value) {
+      notifyEligibleCandidatesLocked();
+      return;
+    }
+
     if (users.length === 0) {
       $q.notify({
         type: 'warning',
@@ -1468,6 +1498,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
   /** Remove selected eligible candidates from the list */
   const removeEligibleCandidates = (keys: string[]): void => {
+    if (isEligibleCandidatesLocked.value) {
+      notifyEligibleCandidatesLocked();
+      return;
+    }
+
     if (keys.length === 0) {
       $q.notify({
         type: 'warning',
@@ -1816,10 +1851,12 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       }
 
       // Passcode sync แยกจาก exam update — ถ้า fail ยังต้อง redirect เพราะรอบสอบบันทึกแล้ว
+      // ถ้ารายชื่อถูกล็อกเพราะมีผู้ลงทะเบียนแล้ว จะไม่เรียก API แทนที่ passcodes
       if (
         targetExamId &&
         form.value.examType === EXAM_TYPE_SPECIAL &&
-        form.value.eligibleCandidates.length > 0
+        form.value.eligibleCandidates.length > 0 &&
+        !isEligibleCandidatesLocked.value
       ) {
         try {
           const passcodesPayload = form.value.eligibleCandidates.map((c) => ({
@@ -1916,6 +1953,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     isPublishedSectionLocked,
     isScheduleLocked,
     isLockedByEnrollment,
+    isEligibleCandidatesLocked,
     isSpecialRound,
     wasOriginallyPublished,
     activeSlotIndex,

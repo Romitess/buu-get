@@ -50,9 +50,7 @@ export class ExamCertificatesService {
     private readonly dataSource: DataSource,
   ) {}
 
-  private assertCertificateIssueDateNotFuture(
-    certIssuedAt?: string,
-  ): void {
+  private assertCertificateIssueDateNotFuture(certIssuedAt?: string): void {
     if (certIssuedAt && isFutureBangkokDate(certIssuedAt)) {
       throw new BadRequestException(
         'วันที่ออกใบรับรอง (Report Issue Date) ต้องไม่เป็นวันในอนาคต',
@@ -167,7 +165,10 @@ export class ExamCertificatesService {
         }
 
         const enrollmentUserId = score.ENROLLMENT?.USER_ID;
-        if (enrollmentUserId != null && enrollmentUserId !== candidate.USER_ID) {
+        if (
+          enrollmentUserId != null &&
+          enrollmentUserId !== candidate.USER_ID
+        ) {
           throw new BadRequestException(
             `USER_ID ไม่ตรงกับคะแนน SCORES_ID ${score.SCORES_ID}`,
           );
@@ -218,7 +219,8 @@ export class ExamCertificatesService {
         });
 
         const sessionsToUpdate = sessions.filter(
-          (session) => session.SS_SESSION_STATUS !== ExamSessionStatus.COMPLETED,
+          (session) =>
+            session.SS_SESSION_STATUS !== ExamSessionStatus.COMPLETED,
         );
 
         if (sessionsToUpdate.length > 0) {

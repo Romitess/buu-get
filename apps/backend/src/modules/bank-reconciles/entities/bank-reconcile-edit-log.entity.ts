@@ -22,7 +22,9 @@ export interface BankReconcileEditSnapshot {
 export type BankReconcileChangedField = keyof BankReconcileEditSnapshot;
 
 export type BankReconcileChangeReason =
-  'UPDATE_REF1' | 'UPDATE_REF2' | 'UPDATE_BOTH';
+  | 'UPDATE_REF1'
+  | 'UPDATE_REF2'
+  | 'UPDATE_BOTH';
 
 @Entity('FIN_T_BANK_RECONCILE_EDIT_LOGS')
 export class BankReconcileEditLog {

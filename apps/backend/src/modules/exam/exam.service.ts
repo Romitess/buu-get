@@ -3,6 +3,7 @@ import {
   Logger,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
@@ -329,11 +330,33 @@ export class ExamService {
     await this.examRepository.softRemove(exam);
   }
 
+  /**
+   * ห้ามแก้รายชื่อ/passcode เมื่อมีผู้ลงทะเบียน (ที่ไม่ยกเลิก) ในรอบสอบแล้ว
+   * เพื่อไม่ให้ลบ-สร้าง passcode ใหม่กระทบผู้ที่สมัครไปแล้ว
+   */
+  private async assertPasscodesEditable(examId: number): Promise<void> {
+    const activeEnrollmentCount = await this.examEnrollmentRepository
+      .createQueryBuilder('enrollment')
+      .innerJoin('enrollment.SESSION', 'session')
+      .where('session.EXAM_ID = :examId', { examId })
+      .andWhere('enrollment.ERM_STATUS != :cancelled', {
+        cancelled: ExamEnrollmentStatus.CANCELLED,
+      })
+      .getCount();
+
+    if (activeEnrollmentCount > 0) {
+      throw new ConflictException(
+        'ไม่สามารถแก้ไขรายชื่อผู้มีสิทธิ์สอบได้ เนื่องจากมีผู้ลงทะเบียนในรอบสอบนี้แล้ว',
+      );
+    }
+  }
+
   async createPasscodes(
     examId: number,
     createPasscodesDto: CreatePasscodesDto,
   ): Promise<ExamPasscode[]> {
     await this.assertExamExists(examId);
+    await this.assertPasscodesEditable(examId);
 
     // Delete existing passcodes for this exam to prevent duplicates if editing
     await this.examPasscodeRepository.delete({ EXAM_ID: examId });

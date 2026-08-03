@@ -2,7 +2,9 @@ const BANGKOK_TZ = 'Asia/Bangkok';
 
 /** Calendar date (YYYY-MM-DD) in Asia/Bangkok for the given instant. */
 export function getBangkokDateOnly(date: Date = new Date()): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: BANGKOK_TZ }).format(date);
+  return new Intl.DateTimeFormat('en-CA', { timeZone: BANGKOK_TZ }).format(
+    date,
+  );
 }
 
 /** Normalize ISO/date input to a Bangkok calendar date (YYYY-MM-DD). */
