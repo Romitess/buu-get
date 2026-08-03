@@ -1,19 +1,27 @@
 import type { ScoreRubricItemDto } from 'src/types/score-rubric';
 import type { BackendExamScore, ExamScoreLinePayload } from 'src/services/exam-score.service';
+import type { BandRuleData } from 'src/services/score-criteria.service';
 
 export interface ScoreDraft {
   lineScores: Record<number, number>;
   scoreTotal: number;
-  band: number;
+  band: string | null;
 }
 
-export const calculateBand = (total: number): number => {
-  if (total >= 80) return 5;
-  if (total >= 70) return 4;
-  if (total >= 60) return 3;
-  if (total >= 50) return 2;
-  if (total >= 40) return 1;
-  return 0;
+export const calculateBandFromRules = (total: number, bandRules: BandRuleData[]): string | null => {
+  if (!Number.isFinite(total)) {
+    return null;
+  }
+
+  const matchedRule = [...bandRules]
+    .sort((a, b) => a.minScore - b.minScore || a.maxScore - b.maxScore)
+    .find((rule) => total >= rule.minScore && total <= rule.maxScore);
+
+  if (!matchedRule) {
+    return null;
+  }
+
+  return matchedRule.cefr?.trim() || null;
 };
 
 export const rubricItemsFromExam = (
@@ -84,11 +92,15 @@ export const buildScoreDraftFromScore = (
   }
 
   const scoreTotal = Number(score?.SC_TOTAL_SCORE ?? 0) || sumLineScores(rubricItems, lineScores);
+  const rawBand =
+    score?.SC_BAND_LEVEL === null || score?.SC_BAND_LEVEL === undefined
+      ? null
+      : String(score.SC_BAND_LEVEL).trim() || null;
 
   return {
     lineScores,
     scoreTotal,
-    band: Number(score?.SC_BAND_LEVEL ?? 0) || calculateBand(scoreTotal),
+    band: rawBand,
   };
 };
 
@@ -96,14 +108,13 @@ export const buildSavePayload = (
   ermId: number,
   draft: ScoreDraft,
   rubricItems: ScoreRubricItemDto[],
-): { ERM_ID: number; lines: ExamScoreLinePayload[]; SC_BAND_LEVEL: number } => {
+): { ERM_ID: number; lines: ExamScoreLinePayload[] } => {
   return {
     ERM_ID: ermId,
     lines: rubricItems.map((item) => ({
       SRBI_ID: item.id,
       score: draft.lineScores[item.id] ?? 0,
     })),
-    SC_BAND_LEVEL: draft.band,
   };
 };
 

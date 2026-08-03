@@ -53,11 +53,12 @@ export class ExamScore {
 
   @Column({
     name: 'SC_BAND_LEVEL',
-    type: 'int',
+    type: 'varchar',
+    length: 20,
     nullable: true,
-    comment: 'ระดับ Band',
+    comment: 'ระดับ CEFR',
   })
-  SC_BAND_LEVEL: number;
+  SC_BAND_LEVEL: string | null;
 
   @CreateDateColumn({ name: 'CREATED_AT', comment: 'วันที่สร้าง' })
   CREATED_AT: Date;

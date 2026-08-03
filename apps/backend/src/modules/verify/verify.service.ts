@@ -97,7 +97,11 @@ export class VerifyService {
         vocabGrammar: Number(certificate.SCORE?.SC_LANG_USE_SCORE ?? 0),
         reading: Number(certificate.SCORE?.SC_READING_SCORE ?? 0),
         total: Number(certificate.SCORE?.SC_TOTAL_SCORE ?? 0),
-        bandLevel: Number(certificate.SCORE?.SC_BAND_LEVEL ?? 0),
+        bandLevel:
+          certificate.SCORE?.SC_BAND_LEVEL === null ||
+          certificate.SCORE?.SC_BAND_LEVEL === undefined
+            ? null
+            : certificate.SCORE.SC_BAND_LEVEL,
         lines: scoreLines,
       },
     };

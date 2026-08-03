@@ -247,13 +247,14 @@ import {
 import {
   buildSavePayload,
   buildScoreDraftFromScore,
-  calculateBand,
+  calculateBandFromRules,
   matchHeaderToRubricItem,
   rubricItemsFromExam,
   scoreByCode,
   sumLineScores,
   type ScoreDraft,
 } from 'src/composables/use-score-rubric-helpers';
+import { getBandRules, type BandRuleData } from 'src/services/score-criteria.service';
 import type { BackendExam, BackendLocation, BackendSession } from 'src/types/exam';
 import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 import type { BackendEnrollmentDetail, EnrollmentTableRow } from 'src/types/enrollment.types';
@@ -264,7 +265,7 @@ interface ScoreTableRow extends EnrollmentTableRow {
   scoreGrammar: number;
   scoreReading: number;
   scoreTotal: number;
-  band: number;
+  band: string | null;
   itemScores: Record<number, number>;
   hasImportedScore: boolean;
   hasScore: boolean;
@@ -298,6 +299,7 @@ const examDateLabel = computed((): string => {
 const isLoading = ref(false);
 const exam = ref<BackendExam | null>(null);
 const rubricItems = computed(() => rubricItemsFromExam(exam.value));
+const bandRules = ref<BandRuleData[]>([]);
 const enrollments = ref<BackendEnrollmentDetail[]>([]);
 const examScores = ref<BackendExamScore[]>([]);
 const searchQuery = ref('');
@@ -319,7 +321,7 @@ const selectedCandidateInfo = ref<
       scoreGrammar?: number | undefined;
       scoreReading?: number | undefined;
       scoreTotal?: number | undefined;
-      band?: number | undefined;
+      band?: string | null | undefined;
       userPhoto?: string | undefined;
       certIssuedAt?: string | undefined;
       certExpiresAt?: string | undefined;
@@ -547,6 +549,10 @@ const getScoreDraft = (enrollment: BackendEnrollmentDetail): ScoreDraft => {
   return buildScoreDraftFromScore(score, rubricItems.value);
 };
 
+const resolveBandLevel = (total: number): string | null => {
+  return calculateBandFromRules(total, bandRules.value);
+};
+
 const initializeScoreDrafts = (): void => {
   scoreDraftByEnrollmentId.value = enrollments.value.reduce<Record<number, ScoreDraft>>(
     (acc, enrollment) => {
@@ -675,7 +681,12 @@ const tailColumns: QTableColumn[] = [
     field: 'band',
     align: 'center',
     style: 'width: 10%',
-    format: (val: unknown, row: ScoreTableRow) => (row.hasScore ? String(val) : ''),
+    format: (val: unknown, row: ScoreTableRow) => {
+      if (!row.hasScore) {
+        return '';
+      }
+      return typeof val === 'number' || typeof val === 'string' ? String(val) : '';
+    },
     classes: 'text-weight-bold',
   },
   {
@@ -722,7 +733,6 @@ const sampleColumns = computed((): QTableColumn[] => {
       field: 'totalScore',
       align: 'center',
     },
-    { name: 'level', label: 'level', field: 'level', align: 'center' },
   ];
 });
 
@@ -734,7 +744,6 @@ interface SampleScoreRow {
   citizenId: string;
   passport: string;
   totalScore: number;
-  level: number;
   [key: string]: string | number;
 }
 
@@ -761,9 +770,6 @@ const sampleRows = computed((): SampleScoreRow[] => {
     const totalScore = hasExistingScore
       ? draft.scoreTotal || sumLineScores(rubricItems.value, lineScores)
       : sumLineScores(rubricItems.value, lineScores);
-    const level = hasExistingScore
-      ? draft.band || calculateBand(totalScore)
-      : calculateBand(totalScore);
 
     const row: SampleScoreRow = {
       testTakerId: enrollment.ERM_TEST_TAKER?.trim() || '-',
@@ -773,7 +779,6 @@ const sampleRows = computed((): SampleScoreRow[] => {
       citizenId: enrollment.USER?.USER_NATIONAL_ID?.trim() || '-',
       passport: enrollment.USER?.USER_PASSPORT_NO?.trim() || '-',
       totalScore,
-      level,
     };
     rubricItems.value.forEach((item) => {
       row[`item_${item.id}`] = lineScores[item.id] ?? 0;
@@ -1000,10 +1005,6 @@ const applyImportedScoreRows = (rows: string[][]): void => {
       header.includes('passport_no') ||
       header.includes('passportno'),
   );
-  const idxLevel = headers.findIndex(
-    (header) => header.includes('level') || header.includes('band') || header.includes('ระดับ'),
-  );
-
   const itemHeaderIndexes = rubricItems.value.map((item) => ({
     item,
     idx: headers.findIndex((header) => matchHeaderToRubricItem(header, item)),
@@ -1074,10 +1075,7 @@ const applyImportedScoreRows = (rows: string[][]): void => {
       rawTotalVal !== undefined && rawTotalVal !== ''
         ? Number(rawTotalVal)
         : sumLineScores(rubricItems.value, lineScores);
-    const level =
-      idxLevel >= 0 && values[idxLevel] !== undefined && values[idxLevel] !== ''
-        ? Number(values[idxLevel])
-        : calculateBand(total);
+    const level = resolveBandLevel(total);
 
     scoreDraftByEnrollmentId.value[matchedEnrollment.ERM_ID] = {
       lineScores,
@@ -1276,6 +1274,14 @@ const loadData = async (): Promise<void> => {
   try {
     isLoading.value = true;
     const [examDetail, scores] = await Promise.all([fetchExamById(examId), fetchExamScores()]);
+
+    try {
+      const rulesResponse = await getBandRules();
+      bandRules.value = rulesResponse.bandRules;
+    } catch (error) {
+      console.error('Error fetching band rules:', error);
+      bandRules.value = [];
+    }
 
     exam.value = examDetail;
     selectedSessionId.value = sessionTimeTabs.value[0]?.SS_ID ?? null;

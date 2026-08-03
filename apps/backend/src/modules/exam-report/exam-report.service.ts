@@ -38,6 +38,16 @@ const THAI_MONTHS = [
   'ธันวาคม',
 ];
 
+const CEFR_RANK: Record<string, number> = {
+  PRE_A1: 0,
+  A1: 1,
+  A2: 2,
+  B1: 3,
+  B2: 4,
+  C1: 5,
+  C2: 6,
+};
+
 interface YearMetricRow {
   year: string | number;
   registered: string | number;
@@ -104,6 +114,15 @@ interface ExamCandidateInfoRawRow {
 @Injectable()
 export class ExamReportService {
   constructor(private readonly dataSource: DataSource) {}
+
+  private getCefrRank(level: string | null): number | null {
+    if (!level) {
+      return null;
+    }
+
+    const normalized = level.trim().toUpperCase().replace(/\s+/g, '_');
+    return CEFR_RANK[normalized] ?? null;
+  }
 
   async getSummary(query: ExamReportQueryDto): Promise<ExamReportSummary> {
     const metricByYear = await this.getMetricByYear(query);
@@ -607,14 +626,16 @@ export class ExamReportService {
   } {
     const attemptsByUser = new Map<
       number,
-      { year: number; band: number | null }[]
+      { year: number; level: string | null; rank: number | null }[]
     >();
     rows.forEach((r) => {
       const userId = Number(r.userId);
       const list = attemptsByUser.get(userId) ?? [];
+      const level = r.band === null ? null : String(r.band).trim() || null;
       list.push({
         year: Number(r.year),
-        band: r.band === null ? null : Number(r.band),
+        level,
+        rank: this.getCefrRank(level),
       });
       attemptsByUser.set(userId, list);
     });
@@ -634,11 +655,11 @@ export class ExamReportService {
       });
 
       // การเปลี่ยน Band: ใช้เฉพาะครั้งที่มี Band เทียบสองครั้งล่าสุด
-      const withBand = attempts.filter((a) => a.band !== null);
+      const withBand = attempts.filter((a) => a.rank !== null);
       if (withBand.length < 2) return;
 
-      const last = withBand[withBand.length - 1].band as number;
-      const prev = withBand[withBand.length - 2].band as number;
+      const last = withBand[withBand.length - 1].rank as number;
+      const prev = withBand[withBand.length - 2].rank as number;
       bandChange.repeatTakers += 1;
       if (last > prev) bandChange.increased += 1;
       else if (last < prev) bandChange.decreased += 1;

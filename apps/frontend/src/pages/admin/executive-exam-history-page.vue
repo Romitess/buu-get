@@ -105,7 +105,7 @@ interface CandidateInfo {
   scoreReading: number;
   scoreTotal: number;
   scoreLines?: ExecutiveExamScoreLine[];
-  band: number;
+  band: string | null;
   userPhoto?: string | undefined;
   certIssuedAt?: string | undefined;
   certExpiresAt?: string | undefined;
@@ -255,7 +255,7 @@ const viewCertificate = (row: ExamHistoryRow): void => {
     scoreReading: row.readingScore ?? 0,
     scoreTotal: row.totalScore ?? 0,
     ...(row.scoreLines ? { scoreLines: row.scoreLines } : {}),
-    band: row.bandLevel ?? 0,
+    band: row.bandLevel ?? null,
     userPhoto:
       user?.USER_IMAGE || profile?.userImagePath || user?.IMAGE?.USER_IMAGE_URL || undefined,
     certIssuedAt: row.certIssuedAt || undefined,

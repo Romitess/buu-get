@@ -21,6 +21,7 @@ import { UpdateExamScoreDto } from './dto/update-exam-score.dto';
 import { ExamEnrollment } from '../exam-enrollments/entities/exam-enrollment.entity';
 import { ScoreRubricItem } from '../score-rubrics/entities/score-rubric-item.entity';
 import { SCORE_RUBRIC_ITEM_CODE } from '../score-rubrics/constants/score-rubric-codes';
+import { ScoreCriteriaService } from '../score-criteria/score-criteria.service';
 
 interface ResolvedRubricContext {
   rubricItems: ScoreRubricItem[];
@@ -29,7 +30,6 @@ interface ResolvedRubricContext {
 
 interface ScoreLinesPayload {
   lines: CreateExamScoreDto['lines'];
-  SC_BAND_LEVEL?: CreateExamScoreDto['SC_BAND_LEVEL'];
 }
 
 @Injectable()
@@ -42,6 +42,7 @@ export class ExamScoresService {
     @InjectRepository(ExamEnrollment)
     private readonly enrollmentRepository: Repository<ExamEnrollment>,
     private readonly dataSource: DataSource,
+    private readonly scoreCriteriaService: ScoreCriteriaService,
   ) {}
 
   private async resolveRubricForEnrollment(
@@ -172,9 +173,9 @@ export class ExamScoresService {
   ): Promise<ExamScore> {
     return this.dataSource.transaction(async (manager) => {
       this.applyLegacyColumns(score, dto.lines, rubricItems);
-      if (dto.SC_BAND_LEVEL !== undefined) {
-        score.SC_BAND_LEVEL = dto.SC_BAND_LEVEL;
-      }
+      score.SC_BAND_LEVEL = await this.scoreCriteriaService.resolveBandLevel(
+        Number(score.SC_TOTAL_SCORE ?? 0),
+      );
 
       const savedScore = await manager.save(ExamScore, score);
 
@@ -274,10 +275,7 @@ export class ExamScoresService {
 
     return this.persistScoreWithLines(
       score,
-      {
-        lines: updateExamScoreDto.lines,
-        SC_BAND_LEVEL: updateExamScoreDto.SC_BAND_LEVEL,
-      },
+      { lines: updateExamScoreDto.lines },
       rubricItems,
     );
   }

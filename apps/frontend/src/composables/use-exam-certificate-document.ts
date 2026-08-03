@@ -108,7 +108,10 @@ export function useExamCertificateDocument() {
         vocabScore: `${Number(score.SC_LANG_USE_SCORE ?? 0)}/50`,
         readingScore: `${Number(score.SC_READING_SCORE ?? 0)}/50`,
         totalScore: `${Number(score.SC_TOTAL_SCORE ?? 0)}/${totalMax}`,
-        bandLevel: String(Number(score.SC_BAND_LEVEL ?? 0)),
+        bandLevel:
+          score.SC_BAND_LEVEL === null || score.SC_BAND_LEVEL === undefined
+            ? '-'
+            : score.SC_BAND_LEVEL,
         scoreLines,
         reportIssueDate: formatEnglishDate(certificate.CERT_ISSUED_AT),
         scoreValidUntil: formatEnglishDate(certificate.CERT_EXPIRES_AT),

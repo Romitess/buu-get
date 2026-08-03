@@ -125,7 +125,7 @@ export interface ExamCandidateInfoRow {
   /** @deprecated ใช้ scoreLines */
   readingScore: number | null;
   totalScore: number | null;
-  level: number | null;
+  level: string | null;
   attemptStatus: ExamCandidateAttemptStatus;
   scoreLines?: ExamCandidateScoreLine[];
 }

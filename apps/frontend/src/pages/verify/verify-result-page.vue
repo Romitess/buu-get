@@ -81,7 +81,11 @@
               :reading-score="certificateCardReadingScore"
               :score-lines="certificateCardScoreLines"
               :total-score="`${certificateData.scores.total}/${certificateScoreTotalMax}`"
-              :band-level="String(certificateData.scores.bandLevel)"
+              :band-level="
+                certificateData.scores.bandLevel === null
+                  ? '-'
+                  : String(certificateData.scores.bandLevel)
+              "
               :issue-date="formatEnglishDate(certificateData.issuedAt)"
               :valid-until="formatEnglishDate(certificateData.expiresAt)"
               :certificate-code="certificateData.verificationCode"
@@ -163,7 +167,7 @@
               </div>
               <div class="detail-item">
                 <span class="field-label">{{ t('verify.certificate.band') }}</span>
-                <span class="field-value">{{ certificateData.scores.bandLevel }}</span>
+                <span class="field-value">{{ certificateData.scores.bandLevel || '-' }}</span>
               </div>
             </div>
           </q-card>

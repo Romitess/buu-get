@@ -460,7 +460,7 @@ interface Props {
         scoreReading?: number | undefined;
         scoreTotal?: number | undefined;
         scoreLines?: CertificateScoreLine[] | undefined;
-        band?: number | undefined;
+        band?: string | null | undefined;
         userPhoto?: string | undefined;
         certIssuedAt?: string | undefined;
         certExpiresAt?: string | undefined;
@@ -830,7 +830,7 @@ const previewTotalScore = computed(() => {
 });
 
 const previewBandLevel = computed(() => {
-  if (props.viewMode && props.candidateInfo?.band !== undefined) {
+  if (props.viewMode && props.candidateInfo?.band != null) {
     return String(props.candidateInfo.band);
   }
   return 'X';

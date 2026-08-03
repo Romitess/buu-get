@@ -181,7 +181,7 @@ export interface BackendScore {
   SC_LANG_USE_SCORE?: number;
   SC_READING_SCORE?: number;
   SC_TOTAL_SCORE?: number;
-  SC_BAND_LEVEL?: number;
+  SC_BAND_LEVEL?: string | null;
   CERTIFICATES?: {
     CERT_ID: number;
     SCORES_ID: number;

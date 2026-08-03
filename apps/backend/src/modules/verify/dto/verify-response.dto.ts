@@ -25,7 +25,7 @@ export interface VerifyCertificateScoresDto {
   /** @deprecated ใช้ lines แทน */
   reading: number;
   total: number;
-  bandLevel: number;
+  bandLevel: string | null;
   lines: VerifyCertificateScoreLineDto[];
 }
 

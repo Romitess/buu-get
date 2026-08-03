@@ -7,7 +7,7 @@ export interface ExamHistoryRow {
   /** @deprecated ใช้ scoreLines */
   readingScore: number | null;
   totalScore: number | null;
-  bandLevel: number | null;
+  bandLevel: string | null;
   hasCertificate: boolean;
   certificateId: number | null;
   certIssuedAt?: string | null;

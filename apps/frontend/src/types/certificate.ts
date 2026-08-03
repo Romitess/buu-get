@@ -64,7 +64,7 @@ export interface CertificateScoreReportData {
   /** @deprecated ใช้ scoreLines */
   readingScore: number;
   totalScore: number;
-  band: number;
+  band: string;
   scoreLines?: CertificateScoreLine[];
   reportIssueDate: string;
   scoreValidUntil: string;

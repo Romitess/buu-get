@@ -75,7 +75,7 @@ interface BackendExamCandidateInfo {
   vocabularyGrammarScore: number | null;
   readingScore: number | null;
   totalScore: number | null;
-  level: number | null;
+  level: string | null;
   attemptStatus: ExamCandidateInfoRow['attemptStatus'];
   scoreLines?: ExamCandidateInfoRow['scoreLines'];
 }
@@ -260,7 +260,7 @@ export const fetchExamCandidateInfo = async (
       row.vocabularyGrammarScore === null ? null : Number(row.vocabularyGrammarScore),
     readingScore: row.readingScore === null ? null : Number(row.readingScore),
     totalScore: row.totalScore === null ? null : Number(row.totalScore),
-    level: row.level === null ? null : Number(row.level),
+    level: row.level === null ? null : String(row.level),
     attemptStatus: row.attemptStatus,
     ...(row.scoreLines
       ? {

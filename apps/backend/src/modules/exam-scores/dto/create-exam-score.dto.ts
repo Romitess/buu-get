@@ -33,10 +33,14 @@ export class CreateExamScoreDto {
   @Type(() => ExamScoreLineInputDto)
   lines: ExamScoreLineInputDto[];
 
-  @ApiProperty({ example: 4, description: 'ระดับ Band', required: false })
-  @IsNumber()
+  /** @deprecated ระบบจะคำนวณจากคะแนนรวมตาม BUU_GET_T_SCORE_CRITERIA และจะไม่ใช้ค่าจาก client */
+  @ApiProperty({
+    example: 'B1',
+    description: 'ระดับ CEFR (deprecated, ignored)',
+    required: false,
+  })
   @IsOptional()
-  SC_BAND_LEVEL?: number;
+  SC_BAND_LEVEL?: string | number | null;
 
   /** @deprecated ใช้ lines แทน — รองรับ backward compat ช่วงเปลี่ยนผ่าน */
   @ApiProperty({ required: false, deprecated: true })

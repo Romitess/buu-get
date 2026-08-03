@@ -7,7 +7,7 @@ export interface BackendExamScore {
   SC_LANG_USE_SCORE?: number | string | null;
   SC_READING_SCORE?: number | string | null;
   SC_TOTAL_SCORE?: number | string | null;
-  SC_BAND_LEVEL?: number | string | null;
+  SC_BAND_LEVEL?: string | null;
   LINES?: ExamScoreLineDto[];
   CERTIFICATES?: {
     CERT_ID: number;
@@ -25,7 +25,6 @@ export interface ExamScoreLinePayload {
 export interface SaveExamScorePayload {
   ERM_ID: number;
   lines: ExamScoreLinePayload[];
-  SC_BAND_LEVEL: number;
 }
 
 interface PaginatedExamScores {
