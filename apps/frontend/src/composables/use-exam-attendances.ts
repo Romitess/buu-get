@@ -13,7 +13,6 @@ export function useExamAttendances() {
   const error = ref<string | null>(null);
   const searchQuery = ref('');
   const selectedSessionId = ref<number | null>(null);
-  const selectedSessionLocationId = ref<number | null>(null);
 
   const getSessionTimeKey = (session: BackendSession): string =>
     `${session.SS_START_TIME || ''}-${session.SS_END_TIME || ''}`;
@@ -30,31 +29,20 @@ export function useExamAttendances() {
     );
   });
 
-  const sessionLocations = computed(() =>
-    (exam.value?.SESSIONS ?? [])
-      .filter((session) => activeSessionIds.value.has(session.SS_ID))
-      .flatMap((session) => session.SESSION_LOCATIONS ?? []),
-  );
-
-  const roomOptions = computed(() =>
-    sessionLocations.value
-      .filter((item) => item.LOCATION)
-      .map((item) => ({
-        value: item.SL_ID,
-        label: `${item.LOCATION.LOCATION_NAME}${
-          item.LOCATION.LOCATION_ROOM_NO ? ` (${item.LOCATION.LOCATION_ROOM_NO})` : ''
-        }`,
-      })),
-  );
+  const formatLocationLabel = (
+    location?: BackendEnrollmentDetail['SESSION_LOCATION'] extends { LOCATION?: infer T }
+      ? T | null
+      : BackendSession['LOCATION'] | null,
+  ): string => {
+    if (!location) return '-';
+    return `${location.LOCATION_NAME}${location.LOCATION_ROOM_NO ? ` (${location.LOCATION_ROOM_NO})` : ''}`;
+  };
 
   const filteredAttendances = computed((): AttendanceTableRow[] => {
     let list = attendances.value;
 
     if (selectedSessionId.value) {
       list = list.filter((e) => activeSessionIds.value.has(e.sessionId));
-    }
-    if (selectedSessionLocationId.value !== null) {
-      list = list.filter((e) => e.sessionLocationId === selectedSessionLocationId.value);
     }
 
     // Only show active/enrolled test takers (not cancelled or unpaid)
@@ -75,6 +63,7 @@ export function useExamAttendances() {
           (row.testTakerCode && row.testTakerCode.toLowerCase().includes(query)) ||
           row.fullnameTh.toLowerCase().includes(query) ||
           row.titleTh.toLowerCase().includes(query) ||
+          row.location.toLowerCase().includes(query) ||
           (row.seatNumber && row.seatNumber.toLowerCase().includes(query)) ||
           statusLabel.includes(query)
         );
@@ -89,12 +78,13 @@ export function useExamAttendances() {
   });
 
   const sessionTotalCount = computed((): number => {
-    if (!selectedSessionId.value) return attendances.value.length;
-    return attendances.value.filter(
+    const list = selectedSessionId.value
+      ? attendances.value.filter((e) => activeSessionIds.value.has(e.sessionId))
+      : attendances.value;
+    return list.filter(
       (e) =>
-        activeSessionIds.value.has(e.sessionId) &&
-        (selectedSessionLocationId.value === null ||
-          e.sessionLocationId === selectedSessionLocationId.value),
+        e.paymentStatus !== EnrollmentStatus.CANCELLED &&
+        e.paymentStatus !== EnrollmentStatus.UNPAID,
     ).length;
   });
 
@@ -106,8 +96,8 @@ export function useExamAttendances() {
       (e) =>
         e.hasRecord &&
         e.attendanceStatus === ExamAttendStatus.INTIME &&
-        (selectedSessionLocationId.value === null ||
-          e.sessionLocationId === selectedSessionLocationId.value),
+        e.paymentStatus !== EnrollmentStatus.CANCELLED &&
+        e.paymentStatus !== EnrollmentStatus.UNPAID,
     ).length;
   });
 
@@ -159,6 +149,9 @@ export function useExamAttendances() {
             index: index + 1,
             ermId: enrollment.ERM_ID,
             nationalId: enrollment.USER?.USER_NATIONAL_ID || '-',
+            location: formatLocationLabel(
+              enrollment.SESSION_LOCATION?.LOCATION ?? enrollment.SESSION?.LOCATION ?? null,
+            ),
             passportNo: enrollment.USER?.USER_PASSPORT_NO || null,
             titleTh: enrollment.USER?.PROFILE?.userTitleTh || '-',
             fullnameTh: enrollment.USER?.PROFILE?.userFullnameTh || '-',
@@ -210,8 +203,6 @@ export function useExamAttendances() {
     error,
     searchQuery,
     selectedSessionId,
-    selectedSessionLocationId,
-    roomOptions,
     filteredAttendances,
     sessionTotalCount,
     sessionAttendedCount,

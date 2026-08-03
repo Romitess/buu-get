@@ -134,6 +134,7 @@ export interface AttendanceTableRow {
   index: number;
   ermId: number;
   nationalId: string;
+  location: string;
   titleTh: string;
   fullnameTh: string;
   titleEn?: string | null;

@@ -31,7 +31,6 @@
               maxlength="13"
               hide-bottom-space
               autofocus
-              readonly
               :disable="isCheckingIn"
             >
               <template v-slot:label>
