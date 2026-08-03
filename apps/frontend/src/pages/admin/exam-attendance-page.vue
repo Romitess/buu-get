@@ -12,7 +12,10 @@
       v-if="exam"
       v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
-      :title="exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME"
+      :title="
+        formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
+        exam.EXAM_NAME
+      "
       :date="examDateLabel"
       :time="selectedSessionTime"
       :location="selectedSessionLocation"
@@ -97,6 +100,7 @@ import { useExamAttendances } from 'src/composables/use-exam-attendances';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { ExamAttendStatus } from 'src/types/enrollment.types';
 import type { BackendSession } from 'src/types/exam';
+import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 
 interface SessionLocationOption {
   SL_ID: number;
@@ -151,9 +155,14 @@ const openCheckInDialog = () => {
     component: DialogAttendanceCheckin,
     componentProps: {
       attendances: attendances.value,
-      examName: exam.value?.EXAM_ROUND
-        ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
-        : exam.value?.EXAM_NAME || '',
+      examName:
+        formatExamDisplayTitle(
+          exam.value?.EXAM_NAME,
+          exam.value?.EXAM_ROUND,
+          exam.value?.EXAM_FISCAL_YEAR,
+        ) ||
+        exam.value?.EXAM_NAME ||
+        '',
       examDate: examDateEnglishLabel.value,
       examTime: selectedSessionTime.value,
       examLocation: selectedSessionLocation.value,

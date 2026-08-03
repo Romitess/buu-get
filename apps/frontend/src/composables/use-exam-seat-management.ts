@@ -15,6 +15,7 @@ import { getImageUrl } from 'src/services/image.service';
 import { fetchLatestProfileHistoryImages } from 'src/services/profile-edit-history.service';
 import { useExamSeatNavigation } from 'src/composables/use-exam-seat-navigation';
 import { getPhysicalStatusBgColor } from 'src/constants/physical-status';
+import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 
 /** Enrollment status codes shared with the backend */
 const STATUS_PAID = 1;
@@ -246,10 +247,14 @@ export function useExamSeatManagement() {
   });
 
   const examTitle = computed((): string => {
-    const baseName = examData.value?.EXAM_NAME || DEFAULT_EXAM_TITLE;
-    const baseTitle = examData.value?.EXAM_ROUND
-      ? `${baseName} ${examData.value.EXAM_ROUND}`
-      : baseName;
+    const baseTitle =
+      formatExamDisplayTitle(
+        examData.value?.EXAM_NAME,
+        examData.value?.EXAM_ROUND,
+        examData.value?.EXAM_FISCAL_YEAR,
+      ) ||
+      examData.value?.EXAM_NAME ||
+      DEFAULT_EXAM_TITLE;
     const supervisorNamesList: string[] = [];
 
     // Include supervisors from SS_NAME if present

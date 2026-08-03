@@ -846,7 +846,7 @@ export default {
         seatLockNote:
           'After Test Vouchers are issued, exam seats can no longer be arranged or edited.',
         examInfoTitle: 'Exam Information',
-        roundName: 'Exam Round',
+        roundName: 'Exam instance',
         date: 'Exam Date',
         time: 'Time',
         room: 'Exam Room',
@@ -1193,7 +1193,7 @@ export default {
       table: {
         emptyLabel: 'No exam information found',
         columns: {
-          round: 'Exam Round',
+          round: 'Exam instance',
           applicants: 'Applicants',
           attended: 'Attended',
           absent: 'Absent',
@@ -1420,7 +1420,7 @@ export default {
       amount: 'Amount',
       description: 'Description',
       paymentMethod: 'Payment method',
-      examRound: 'Exam round',
+      examRound: 'Exam instance',
       examDate: 'Exam date',
       organization: 'Organization',
     },

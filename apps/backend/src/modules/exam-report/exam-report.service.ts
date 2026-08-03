@@ -674,6 +674,7 @@ export class ExamReportService {
     qb.andWhere(
       `(
         TRIM(x.EXAM_ROUND) = :roundLabel
+        OR CONCAT(TRIM(x.EXAM_ROUND), '/', TRIM(x.EXAM_FISCAL_YEAR)) = :roundLabel
         OR CONCAT(TRIM(x.EXAM_ROUND), '/', YEAR(x.EXAM_DATE)) = :roundLabel
       )`,
       { roundLabel: roundText },

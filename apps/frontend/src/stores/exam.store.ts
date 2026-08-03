@@ -31,6 +31,7 @@ import {
   getExamRoundsCalendarAvailability,
   type ExamCalendarAvailability,
 } from 'src/utils/exam-registration';
+import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 import {
   isPendingHistoryItem,
   mapEnrollmentToHistoryItem,
@@ -295,9 +296,9 @@ export const useExamStore = defineStore('exam', () => {
             formattedDate,
             formattedTime: `${formatTime(session.SS_START_TIME)} - ${formatTime(session.SS_END_TIME)}`,
             locationText,
-            title: exam?.EXAM_ROUND
-              ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}`
-              : exam?.EXAM_NAME || i18n.t('examSchedule.defaultEnrollmentTitle'),
+            title:
+              formatExamDisplayTitle(exam?.EXAM_NAME, exam?.EXAM_ROUND, exam?.EXAM_FISCAL_YEAR) ||
+              i18n.t('examSchedule.defaultEnrollmentTitle'),
             fee: Number(exam?.EXAM_FEE ?? 0),
             getCancellationReason,
           });

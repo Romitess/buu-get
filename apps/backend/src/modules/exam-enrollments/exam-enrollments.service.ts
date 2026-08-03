@@ -546,7 +546,12 @@ export class ExamEnrollmentsService {
     const examHistory: ExamHistoryRow[] = attendedEnrollments.map(
       (e, index) => {
         const exam = e.SESSION?.EXAM;
-        const examRound = exam?.EXAM_ROUND || '-';
+        const round = exam?.EXAM_ROUND?.trim() || '';
+        const fiscalYear = exam?.EXAM_FISCAL_YEAR?.trim() || '';
+        const examRound =
+          round && fiscalYear
+            ? `${round}/${fiscalYear}`
+            : round || fiscalYear || '-';
 
         let examDate = '-';
         if (exam?.EXAM_DATE) {

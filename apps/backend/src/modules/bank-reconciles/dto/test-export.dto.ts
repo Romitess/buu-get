@@ -21,6 +21,9 @@ export class TestExportExamOptionDto {
   EXAM_ROUND: string | null;
 
   @ApiProperty({ nullable: true })
+  EXAM_FISCAL_YEAR: string | null;
+
+  @ApiProperty({ nullable: true })
   EXAM_DATE: string | null;
 
   @ApiProperty()

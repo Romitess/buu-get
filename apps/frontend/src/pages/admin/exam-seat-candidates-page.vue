@@ -17,7 +17,10 @@
       v-if="exam"
       v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
-      :title="exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME"
+      :title="
+        formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
+        exam.EXAM_NAME
+      "
       :date="examDateLabel"
       :time="sessionTime"
       :location="sessionLocation"
@@ -174,6 +177,7 @@ import {
 } from 'src/composables/use-exam-seat-candidates';
 import type { SeatCell, SeatStatus } from 'src/composables/use-exam-seat-management';
 import type { BackendLocation } from 'src/types/exam';
+import { formatExamDisplayTitle, formatExamInstanceLabel } from 'src/utils/exam-instance-label';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { bulkIssueVouchers } from 'src/services/voucher.service';
 import { fetchEnrollmentById } from 'src/services/enrollment.service';
@@ -249,9 +253,14 @@ const voucherPreviewData = computed<VoucherData>(() => ({
   id: sessionEnrollments.value[0]?.ERM_ID ?? 0,
   fullName: 'XX. XXXXXX XXXXXX',
   studentId: 'XXXXXXXX',
-  examName: exam.value?.EXAM_ROUND
-    ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
-    : exam.value?.EXAM_NAME || 'BUU-GET Exam',
+  examName:
+    formatExamDisplayTitle(
+      exam.value?.EXAM_NAME,
+      exam.value?.EXAM_ROUND,
+      exam.value?.EXAM_FISCAL_YEAR,
+    ) ||
+    exam.value?.EXAM_NAME ||
+    'BUU-GET Exam',
   examDate: examDateLabel.value,
   examTime: sessionTime.value,
   examType: getExamRoundTypeLabel(),
@@ -298,9 +307,14 @@ const startIssuingTickets = async (): Promise<void> => {
       .filter((enrollment) => enrollment && enrollment.ERM_ID)
       .map((enrollment) => enrollment.ERM_ID);
 
-    const examName = exam.value?.EXAM_ROUND
-      ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
-      : exam.value?.EXAM_NAME || 'BUU-GET Exam';
+    const examName =
+      formatExamDisplayTitle(
+        exam.value?.EXAM_NAME,
+        exam.value?.EXAM_ROUND,
+        exam.value?.EXAM_FISCAL_YEAR,
+      ) ||
+      exam.value?.EXAM_NAME ||
+      'BUU-GET Exam';
 
     const result = await bulkIssueVouchers({
       ermIds,
@@ -398,9 +412,14 @@ const buildVoucherData = (row: SeatCandidateRow, freshEnrollment = row.enrollmen
     id: enrollment.ERM_ID,
     fullName: `${title} ${fullName}`.trim() || '-',
     studentId: enrollment.ERM_TEST_TAKER || '-',
-    examName: exam.value?.EXAM_ROUND
-      ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
-      : exam.value?.EXAM_NAME || 'BUU-GET Exam',
+    examName:
+      formatExamDisplayTitle(
+        exam.value?.EXAM_NAME,
+        exam.value?.EXAM_ROUND,
+        exam.value?.EXAM_FISCAL_YEAR,
+      ) ||
+      exam.value?.EXAM_NAME ||
+      'BUU-GET Exam',
     examDate: examDateLabel.value,
     examTime: sessionTime.value,
     examType: getExamRoundTypeLabel(),
@@ -409,7 +428,8 @@ const buildVoucherData = (row: SeatCandidateRow, freshEnrollment = row.enrollmen
     seatNo: enrollment.ERM_SEAT_LABEL || row.seatNumber,
     voucherNo: voucherCode,
     citizenId: enrollment.USER?.USER_NATIONAL_ID || enrollment.USER?.USER_PASSPORT_NO || '-',
-    testSession: exam.value?.EXAM_ROUND || '-',
+    testSession:
+      formatExamInstanceLabel(exam.value?.EXAM_ROUND, exam.value?.EXAM_FISCAL_YEAR) || '-',
     profileImage: imagePath ? getImageUrl(imagePath) : undefined,
     // Code128 payload = Test Taker ID for door scanners / attendance
     barcodeValue: enrollment.ERM_TEST_TAKER || '',

@@ -143,10 +143,7 @@
         </q-card-section>
 
         <q-card-actions align="right" class="q-pa-md q-gutter-sm">
-          <AppButton
-            :label="t('common.cancel')"
-            @click="showVoidDialog = false"
-          />
+          <AppButton :label="t('common.cancel')" @click="showVoidDialog = false" />
           <AppButton
             :label="t('admin.receiptVoidRefund.actions.voidReceipt')"
             color="negative"
@@ -164,6 +161,7 @@ import { computed, ref, watch } from 'vue';
 import type { QTableColumn } from 'quasar';
 import { debounce, useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppButton from 'src/components/base/app-button.vue';
@@ -177,10 +175,7 @@ import {
 } from 'src/services/transaction-ref.service';
 import { refundTransaction } from 'src/services/transaction.service';
 import { voidReceipt } from 'src/services/voided-receipt.service';
-import {
-  ReceiptStatus,
-  TRANSACTION_PAYMENT_STATUS,
-} from 'src/constants/exam';
+import { ReceiptStatus, TRANSACTION_PAYMENT_STATUS } from 'src/constants/exam';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 
 interface SearchCriteria {
@@ -226,10 +221,10 @@ const createEmptyCriteria = (): SearchCriteria => ({
 });
 
 const searchForm = ref({
-  ref1: '' as string | null,
-  ref2: '' as string | null,
-  name: '' as string | null,
-  examName: '' as string | null,
+  ref1: '',
+  ref2: '',
+  name: '',
+  examName: '',
 });
 const activeSearchCriteria = ref<SearchCriteria>(createEmptyCriteria());
 
@@ -321,14 +316,16 @@ const columns = computed<QTableColumn[]>(() => [
 const getEnrollmentName = (
   enrollment: BackendTransactionRefEnrollment | null | undefined,
 ): string =>
-  enrollment?.USER?.PROFILE?.userFullnameTh ||
-  enrollment?.USER?.PROFILE?.userFullnameEn ||
-  '-';
+  enrollment?.USER?.PROFILE?.userFullnameTh || enrollment?.USER?.PROFILE?.userFullnameEn || '-';
 
 const getExamName = (enrollment: BackendTransactionRefEnrollment | null | undefined): string => {
   const exam = enrollment?.SESSION?.EXAM;
   if (!exam) return '-';
-  return exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME || '-';
+  return (
+    formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
+    exam.EXAM_NAME ||
+    '-'
+  );
 };
 
 const formatAmount = (amount: number | string | null | undefined): string => {

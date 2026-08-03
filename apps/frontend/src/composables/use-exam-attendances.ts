@@ -4,6 +4,7 @@ import { ExamAttendStatus, EnrollmentStatus } from 'src/types/enrollment.types';
 import type { BackendExam, BackendSession } from 'src/types/exam';
 import { fetchRawEnrollmentsByExamId } from 'src/services/enrollment.service';
 import { fetchExamWithSeats } from 'src/services/exam.service';
+import { formatExamInstanceLabel } from 'src/utils/exam-instance-label';
 
 export function useExamAttendances() {
   const attendances = ref<AttendanceTableRow[]>([]);
@@ -175,7 +176,11 @@ export function useExamAttendances() {
               enrollment.USER?.IMAGE?.USER_IMAGE_URL ||
               enrollment.USER?.PROFILE?.userImagePath ||
               null,
-            testSession: enrollment.SESSION?.EXAM?.EXAM_ROUND || '-',
+            testSession:
+              formatExamInstanceLabel(
+                enrollment.SESSION?.EXAM?.EXAM_ROUND,
+                enrollment.SESSION?.EXAM?.EXAM_FISCAL_YEAR,
+              ) || '-',
             voucherNo: enrollment.VOUCHERS?.[0]?.VC_CODE || '-',
             examType: enrollment.SESSION?.EXAM?.EXAM_TYPE || '-',
             testTakerCode: enrollment.ERM_TEST_TAKER || null,

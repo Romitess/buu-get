@@ -31,9 +31,18 @@ export class Exam {
     type: 'varchar',
     length: 20,
     nullable: true,
-    comment: 'รอบการสอบ',
+    comment: 'ครั้งที่จัดสอบ',
   })
   EXAM_ROUND: string;
+
+  @Column({
+    name: 'EXAM_FISCAL_YEAR',
+    type: 'varchar',
+    length: 10,
+    nullable: true,
+    comment: 'ปีงบประมาณ',
+  })
+  EXAM_FISCAL_YEAR: string;
 
   @Column({
     name: 'EXAM_TYPE',

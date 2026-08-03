@@ -323,6 +323,7 @@ export interface BackendExam {
   EXAM_ID: number;
   EXAM_NAME: string;
   EXAM_ROUND?: string | null;
+  EXAM_FISCAL_YEAR?: string | null;
   EXAM_TYPE: string;
   EXAM_FORMAT: string;
   EXAM_FEE: number;

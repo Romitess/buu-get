@@ -24,6 +24,7 @@ import {
   EXAM_STATUS_UNPUBLISHED,
   ENROLLMENT_STATUS,
 } from 'src/constants/exam';
+import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 import type { PasscodeLog } from 'src/types/common';
 // Retry configuration
 const RETRY_ATTEMPTS = 3;
@@ -168,6 +169,7 @@ export interface CreateExamPayload {
   }[];
   fundSourceId?: number | null;
   examRound?: string;
+  examFiscalYear?: string;
 }
 
 interface GroupedSessionTimeRange {
@@ -231,9 +233,9 @@ export const fetchScheduleData = async (force = false): Promise<Record<string, D
 
       schedule[date] = {
         examId: exam.EXAM_ID,
-        title: exam.EXAM_ROUND
-          ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}`
-          : exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
+        title:
+          formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
+          DEFAULT_EXAM_TITLE,
         subtitle: firstLocation?.LOCATION_NAME || '',
         location: locationLabel,
         fee: formatFee(exam.EXAM_FEE),
@@ -266,9 +268,9 @@ export const fetchScheduleData = async (force = false): Promise<Record<string, D
       } else {
         const round: ExamRound = {
           id: session.SS_ID,
-          title: exam.EXAM_ROUND
-            ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}`
-            : exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
+          title:
+            formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
+            DEFAULT_EXAM_TITLE,
           timeRange,
           roundTypeLabel: exam.EXAM_TYPE || EXAM_TYPE_GENERAL,
           availableSeats: currentAvailable,
@@ -312,9 +314,9 @@ export const fetchExamSchedules = async (force = false): Promise<ExamSchedule[]>
 
     return {
       id: String(exam.EXAM_ID),
-      examName: exam.EXAM_ROUND
-        ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}`
-        : exam.EXAM_NAME || DEFAULT_EXAM_TITLE,
+      examName:
+        formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
+        DEFAULT_EXAM_TITLE,
       examType:
         exam.EXAM_TYPE === EXAM_TYPE_GENERAL || exam.EXAM_TYPE === INTERNAL_EXAM_TYPE_GENERAL
           ? INTERNAL_EXAM_TYPE_GENERAL
@@ -665,6 +667,7 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<numbe
       EXAM_PUBLISHED: payload.isPublished,
       FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
       EXAM_ROUND: payload.examRound,
+      EXAM_FISCAL_YEAR: payload.examFiscalYear,
     });
 
     const examId = examResponse.data.EXAM_ID;
@@ -755,6 +758,7 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
         EXAM_PUBLISHED: payload.isPublished,
         FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
         EXAM_ROUND: payload.examRound,
+        EXAM_FISCAL_YEAR: payload.examFiscalYear,
       },
       writeOpts,
     );

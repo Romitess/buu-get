@@ -8,6 +8,7 @@ import { getBandRules } from 'src/services/score-criteria.service';
 import type { ExamHistoryItem } from 'src/types/exam';
 import type { CertificateCardData } from 'src/types/certificate';
 import { generateCertificateQrDataUrl } from 'src/utils/verify-qr';
+import { formatExamInstanceLabel } from 'src/utils/exam-instance-label';
 
 export function useExamCertificateDocument() {
   const $q = useQuasar();
@@ -98,7 +99,7 @@ export function useExamCertificateDocument() {
           userStore.currentUser?.nationalId ||
           userStore.currentUser?.passportNo ||
           '-',
-        testSession: examObj?.EXAM_ROUND || '-',
+        testSession: formatExamInstanceLabel(examObj?.EXAM_ROUND, examObj?.EXAM_FISCAL_YEAR) || '-',
         testDate: formatEnglishDate(examObj?.EXAM_DATE),
         vocabScore: `${Number(score.SC_LANG_USE_SCORE ?? 0)}/50`,
         readingScore: `${Number(score.SC_READING_SCORE ?? 0)}/50`,
@@ -159,14 +160,7 @@ export function useExamCertificateDocument() {
       let offsetY = Math.max((pageHeight - totalHeight) / 2, horizontalMargin);
 
       for (const card of renderedCards) {
-        pdf.addImage(
-          card.imgData,
-          'PNG',
-          horizontalMargin,
-          offsetY,
-          imgWidth,
-          card.imgHeight,
-        );
+        pdf.addImage(card.imgData, 'PNG', horizontalMargin, offsetY, imgWidth, card.imgHeight);
         offsetY += card.imgHeight + cardGap;
       }
 

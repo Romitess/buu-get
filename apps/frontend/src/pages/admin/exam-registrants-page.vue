@@ -11,7 +11,10 @@
     <AppExamInfoCard
       v-if="exam"
       class="q-mb-md"
-      :title="exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME"
+      :title="
+        formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
+        exam.EXAM_NAME
+      "
       :date="examDateLabel"
       :time="selectedSessionTime"
       :location="selectedSessionLocation"
@@ -133,6 +136,7 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import { useExamRegistrants } from 'src/composables/use-exam-registrants';
 import { fetchExamById } from 'src/services/exam.service';
+import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 import { fetchEnrollmentsByExamId } from 'src/services/enrollment.service';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import {

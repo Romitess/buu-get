@@ -91,6 +91,7 @@ export { getEligibleCandidateKey };
 export interface CreateExamForm {
   examName: string;
   examRound: string;
+  examFiscalYear: string;
   examType: string;
   examFormat: string;
   fundSourceId: number | null;
@@ -116,6 +117,7 @@ export interface UseExamFormOptions {
 interface ExamComparisonSnapshot {
   examName: string;
   examRound: string;
+  examFiscalYear: string;
   examType: string;
   examFormat: string;
   fee: string;
@@ -166,9 +168,7 @@ const resolveLoadedRoomSeats = (
     return sessionCapacity;
   }
 
-  return (
-    countAvailableSeats(relation.LOCATION, seatOverrides) || sessionCapacity || 40
-  );
+  return countAvailableSeats(relation.LOCATION, seatOverrides) || sessionCapacity || 40;
 };
 
 const getLocationAisleAfter = (
@@ -245,6 +245,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     ref<CreateExamForm>({
       examName: DEFAULT_EXAM_NAME,
       examRound: '',
+      examFiscalYear: '',
       examType: EXAM_TYPE_GENERAL,
       examFormat: EXAM_FORMAT_COMPUTER,
       fundSourceId: null,
@@ -555,6 +556,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (!form.value.examRound || !form.value.examRound.trim()) {
       errors.examRound = VALIDATION_MSG.EXAM_ROUND;
     }
+    if (!form.value.examFiscalYear || !form.value.examFiscalYear.trim()) {
+      errors.examFiscalYear = VALIDATION_MSG.EXAM_FISCAL_YEAR;
+    }
     if (!form.value.examType) {
       errors.examType = VALIDATION_MSG.EXAM_TYPE;
     }
@@ -732,6 +736,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const buildComparisonSnapshot = (): ExamComparisonSnapshot => ({
     examName: form.value.examName.trim(),
     examRound: form.value.examRound.trim(),
+    examFiscalYear: form.value.examFiscalYear.trim(),
     examType: form.value.examType,
     examFormat: form.value.examFormat,
     fee: String(form.value.fee ?? ''),
@@ -761,7 +766,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     };
 
     push('ชื่อรอบสอบ', before.examName, after.examName);
-    push('รอบสอบ', before.examRound, after.examRound);
+    push('ครั้งที่จัดสอบ', before.examRound, after.examRound);
+    push('ปีงบประมาณ', before.examFiscalYear, after.examFiscalYear);
     push('ประเภทการสอบ', before.examType, after.examType);
     push('รูปแบบการสอบ', before.examFormat, after.examFormat);
     if (before.fee !== after.fee) {
@@ -818,7 +824,17 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       if (editExam) {
         const exam = editExam;
         form.value.examName = exam.EXAM_NAME || '';
-        form.value.examRound = exam.EXAM_ROUND || '';
+        const loadedRound = exam.EXAM_ROUND || '';
+        const loadedFiscalYear = exam.EXAM_FISCAL_YEAR || '';
+        // รองรับข้อมูลเก่ารูปแบบ "1/2569" ถ้ายังไม่ได้รัน migration แยกคอลัมน์
+        if (!loadedFiscalYear && loadedRound.includes('/')) {
+          const [roundPart, yearPart] = loadedRound.split('/', 2);
+          form.value.examRound = roundPart?.trim() || '';
+          form.value.examFiscalYear = yearPart?.trim() || '';
+        } else {
+          form.value.examRound = loadedRound;
+          form.value.examFiscalYear = loadedFiscalYear;
+        }
         form.value.examType = exam.EXAM_TYPE || EXAM_TYPE_GENERAL;
         form.value.examFormat = exam.EXAM_FORMAT || EXAM_FORMAT_COMPUTER;
         form.value.fee = Number(exam.EXAM_FEE ?? 0).toFixed(2);
@@ -894,9 +910,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
                   sessionId: session.SS_ID,
                   enrollmentCount:
                     session.ENROLLMENT_SL_COUNTS?.[String(relation.SL_ID)] ??
-                    session.ENROLLMENTS?.filter(
-                      (enrollment) => enrollment.SL_ID === relation.SL_ID,
-                    ).length ??
+                    session.ENROLLMENTS?.filter((enrollment) => enrollment.SL_ID === relation.SL_ID)
+                      .length ??
                     0,
                   seatOverrides,
                   sessionLocationSnapshot: {
@@ -1799,6 +1814,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           timeRanges,
           fundSourceId: Number(form.value.fundSourceId || 0),
           examRound: form.value.examRound,
+          examFiscalYear: form.value.examFiscalYear,
           existingSessionIds,
         });
 
@@ -1838,6 +1854,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           timeRanges,
           fundSourceId: form.value.fundSourceId,
           examRound: form.value.examRound,
+          examFiscalYear: form.value.examFiscalYear,
         };
 
         targetExamId = await examStore.addExamRound(payload);

@@ -12,7 +12,10 @@
       v-if="exam"
       v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
-      :title="exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME"
+      :title="
+        formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
+        exam.EXAM_NAME
+      "
       :date="examDateLabel"
       :time="selectedSessionTime"
       :location="selectedSessionLocation"
@@ -245,6 +248,7 @@ import {
   type SaveExamScorePayload,
 } from 'src/services/exam-score.service';
 import type { BackendExam, BackendLocation, BackendSession } from 'src/types/exam';
+import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 import type { BackendEnrollmentDetail, EnrollmentTableRow } from 'src/types/enrollment.types';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 
@@ -473,9 +477,12 @@ const hasSavedScores = computed(() => {
 });
 
 const exportCsvFileNamePrefix = computed(() => {
-  const examName = exam.value?.EXAM_ROUND
-    ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
-    : exam.value?.EXAM_NAME || '';
+  const examName =
+    formatExamDisplayTitle(
+      exam.value?.EXAM_NAME,
+      exam.value?.EXAM_ROUND,
+      exam.value?.EXAM_FISCAL_YEAR,
+    ) || '';
   const time = selectedSessionTime.value || '';
   const room = selectedSessionLocation.value || '';
   return `คะแนนสอบ_${examName}_${time}_${room}`.replace(/[\s/\\?%*:|"<>]+/g, '_');
@@ -514,9 +521,13 @@ const examDisplayName = computed(() => {
   if (!exam.value) {
     return 'BUU-GET Exam';
   }
-  return exam.value.EXAM_ROUND
-    ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
-    : exam.value.EXAM_NAME;
+  return (
+    formatExamDisplayTitle(
+      exam.value.EXAM_NAME,
+      exam.value.EXAM_ROUND,
+      exam.value.EXAM_FISCAL_YEAR,
+    ) || exam.value.EXAM_NAME
+  );
 });
 
 const issueCertificates = (): void => {
@@ -791,7 +802,9 @@ const sampleRows = computed((): SampleScoreRow[] => {
     const totalScore = hasExistingScore
       ? draft.scoreTotal || vocabularyScore + readingScore
       : vocabularyScore + readingScore;
-    const level = hasExistingScore ? draft.band || calculateBand(totalScore) : calculateBand(totalScore);
+    const level = hasExistingScore
+      ? draft.band || calculateBand(totalScore)
+      : calculateBand(totalScore);
 
     return {
       testTakerId: enrollment.ERM_TEST_TAKER?.trim() || '-',
@@ -1207,9 +1220,14 @@ const downloadSampleFile = (): void => {
   );
 
   const content = `\ufeff${[headers.join(','), ...dataRows].join('\r\n')}`;
-  const examName = exam.value?.EXAM_ROUND
-    ? `${exam.value.EXAM_NAME}_${exam.value.EXAM_ROUND}`
-    : exam.value?.EXAM_NAME || 'exam';
+  const examName =
+    formatExamDisplayTitle(
+      exam.value?.EXAM_NAME,
+      exam.value?.EXAM_ROUND,
+      exam.value?.EXAM_FISCAL_YEAR,
+    ) ||
+    exam.value?.EXAM_NAME ||
+    'exam';
   const fileName = `score_import_sample_${examName}`.replace(/[\s/\\?%*:|"<>]+/g, '_');
   const status = exportFile(`${fileName}.csv`, content, 'text/csv');
 

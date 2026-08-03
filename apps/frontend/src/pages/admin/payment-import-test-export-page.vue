@@ -82,6 +82,7 @@ import {
   type TestExportExamOption,
   type TestExportRow,
 } from 'src/services/bank-reconcile.service';
+import { formatExamInstanceLabel } from 'src/utils/exam-instance-label';
 
 const { t } = useI18n();
 const $q = useQuasar();
@@ -93,7 +94,8 @@ const isLoadingExams = ref(false);
 const isLoadingRows = ref(false);
 
 const formatExamOptionLabel = (exam: TestExportExamOption): string => {
-  const round = exam.EXAM_ROUND ? ` (${exam.EXAM_ROUND})` : '';
+  const instance = formatExamInstanceLabel(exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR);
+  const round = instance ? ` (${instance})` : '';
   const fee = Number(exam.EXAM_FEE).toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
