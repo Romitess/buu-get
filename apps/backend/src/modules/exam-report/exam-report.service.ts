@@ -448,7 +448,10 @@ export class ExamReportService {
         vocabularyGrammarScore: this.roundNullable(row.vocabularyGrammarScore),
         readingScore: this.roundNullable(row.readingScore),
         totalScore: this.roundNullable(row.totalScore),
-        level: this.roundNullable(row.level),
+        level:
+          row.level === null || row.level === undefined
+            ? null
+            : String(row.level).trim() || null,
         attemptStatus:
           row.attemptStatus === 'repeatAttempt'
             ? 'repeatAttempt'
