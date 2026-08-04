@@ -3,6 +3,7 @@ import {
   Logger,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
@@ -23,6 +24,8 @@ import { PlatformGatewayService } from '../platform-gateway/platform-gateway.ser
 import { getExamChangeEmailTemplate } from './templates/exam-change-email.template';
 import { MoodleSyncService } from '../moodle/moodle-sync.service';
 import { normalizePeriodEndDate } from '../../common/utils/period-date.util';
+import { ScoreRubricsService } from '../score-rubrics/score-rubrics.service';
+import { ExamScoresService } from '../exam-scores/exam-scores.service';
 
 @Injectable()
 export class ExamService {
@@ -40,6 +43,8 @@ export class ExamService {
     @InjectRepository(ExamEnrollment)
     private readonly examEnrollmentRepository: Repository<ExamEnrollment>,
     private readonly platformGatewayService: PlatformGatewayService,
+    private readonly scoreRubricsService: ScoreRubricsService,
+    private readonly examScoresService: ExamScoresService,
   ) {}
 
   async create(
@@ -47,6 +52,7 @@ export class ExamService {
     actingUserId: number,
   ): Promise<Exam> {
     this.normalizeExamPeriodEndDates(createExamDto);
+    await this.scoreRubricsService.assertRubricUsable(createExamDto.SRB_ID);
     const exam = this.examRepository.create(createExamDto);
     const saved = await this.examRepository.save(exam);
     // รอสร้างคอร์ส Moodle แล้ว map EXAM_MOODLE_COURSE_ID (ล้มเหลวจะ log ไว้ แต่ไม่ทำให้สร้างรอบสอบ fail)
@@ -249,6 +255,8 @@ export class ExamService {
       'SESSIONS.SESSION_LOCATIONS.LOCATION',
       'FUND_SOURCE',
       'PASSCODES',
+      'SCORE_RUBRIC',
+      'SCORE_RUBRIC.ITEMS',
     ];
     if (includeSeats) {
       relations.push('SESSIONS.SESSION_LOCATIONS.LOCATION.SEATS');
@@ -315,6 +323,20 @@ export class ExamService {
   async update(id: number, updateExamDto: UpdateExamDto): Promise<Exam> {
     this.normalizeExamPeriodEndDates(updateExamDto);
     const exam = await this.findOneForMutation(id);
+
+    if (
+      updateExamDto.SRB_ID !== undefined &&
+      updateExamDto.SRB_ID !== exam.SRB_ID
+    ) {
+      const hasScores = await this.examScoresService.examHasSavedScores(id);
+      if (hasScores) {
+        throw new ConflictException(
+          'ไม่สามารถเปลี่ยนชุดเกณฑ์คะแนนได้ เนื่องจากมีคะแนนที่บันทึกแล้ว',
+        );
+      }
+      await this.scoreRubricsService.assertRubricUsable(updateExamDto.SRB_ID);
+    }
+
     const updated = this.examRepository.merge(exam, updateExamDto);
     return await this.examRepository.save(updated);
   }
@@ -329,11 +351,33 @@ export class ExamService {
     await this.examRepository.softRemove(exam);
   }
 
+  /**
+   * ห้ามแก้รายชื่อ/passcode เมื่อมีผู้ลงทะเบียน (ที่ไม่ยกเลิก) ในรอบสอบแล้ว
+   * เพื่อไม่ให้ลบ-สร้าง passcode ใหม่กระทบผู้ที่สมัครไปแล้ว
+   */
+  private async assertPasscodesEditable(examId: number): Promise<void> {
+    const activeEnrollmentCount = await this.examEnrollmentRepository
+      .createQueryBuilder('enrollment')
+      .innerJoin('enrollment.SESSION', 'session')
+      .where('session.EXAM_ID = :examId', { examId })
+      .andWhere('enrollment.ERM_STATUS != :cancelled', {
+        cancelled: ExamEnrollmentStatus.CANCELLED,
+      })
+      .getCount();
+
+    if (activeEnrollmentCount > 0) {
+      throw new ConflictException(
+        'ไม่สามารถแก้ไขรายชื่อผู้มีสิทธิ์สอบได้ เนื่องจากมีผู้ลงทะเบียนในรอบสอบนี้แล้ว',
+      );
+    }
+  }
+
   async createPasscodes(
     examId: number,
     createPasscodesDto: CreatePasscodesDto,
   ): Promise<ExamPasscode[]> {
     await this.assertExamExists(examId);
+    await this.assertPasscodesEditable(examId);
 
     // Delete existing passcodes for this exam to prevent duplicates if editing
     await this.examPasscodeRepository.delete({ EXAM_ID: examId });

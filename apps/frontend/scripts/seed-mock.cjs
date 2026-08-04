@@ -61,10 +61,9 @@ const TITLE_TH_OPTIONS = [
   { value: 'ผู้ช่วยศาสตราจารย์', en: 'Asst. Prof.' },
 ];
 const EDUCATION_OPTIONS = ['มัธยมศึกษา', 'ปริญญาตรี', 'ปริญญาโท', 'ปริญญาเอก'];
-// หมายเหตุ — ตรงกับ convenience-step.vue (monk/clergy/disabled/pregnant); ส่งเป็นข้อความไทยตาม UserPhysicalStatus
+// หมายเหตุ — ตรงกับ convenience-step.vue (monk/disabled/pregnant); ส่งเป็นข้อความไทยตาม UserPhysicalStatus
 const REMARK_OPTIONS = [
-  'พระภิกษุ / สามเณร',
-  'นักบวช / ศาสนบุคคล',
+  'พระภิกษุ / นักบวช',
   'บุคคลทุพพลภาพ',
   'ผู้ตั้งครรภ์',
 ];

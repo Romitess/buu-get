@@ -4,7 +4,6 @@
  */
 export const PHYSICAL_STATUS_BG_COLORS = {
   MONK: '#F57C00',
-  RELIGIOUS: '#7B1FA2',
   DISABLED: '#0288D1',
   PREGNANT: '#C2185B',
   DISABLED_TYPO: '#388E3C',
@@ -16,7 +15,8 @@ export const DEFAULT_PHYSICAL_STATUS_BG_COLOR = PHYSICAL_STATUS_BG_COLORS.GENERA
 
 const COLOR_BY_CODE: Record<number, string> = {
   0: PHYSICAL_STATUS_BG_COLORS.MONK,
-  1: PHYSICAL_STATUS_BG_COLORS.RELIGIOUS,
+  /** legacy code 1 (นักบวช) — รวมเป็นพระภิกษุ/นักบวช */
+  1: PHYSICAL_STATUS_BG_COLORS.MONK,
   2: PHYSICAL_STATUS_BG_COLORS.DISABLED,
   3: PHYSICAL_STATUS_BG_COLORS.PREGNANT,
   4: PHYSICAL_STATUS_BG_COLORS.DISABLED_TYPO,
@@ -24,8 +24,11 @@ const COLOR_BY_CODE: Record<number, string> = {
 };
 
 const COLOR_BY_REMARK: Record<string, string> = {
+  'พระภิกษุ / นักบวช': PHYSICAL_STATUS_BG_COLORS.MONK,
+  'พระภิกษุ/นักบวช': PHYSICAL_STATUS_BG_COLORS.MONK,
+  // legacy labels
   'พระภิกษุ / สามเณร': PHYSICAL_STATUS_BG_COLORS.MONK,
-  'นักบวช / ศาสนบุคคล': PHYSICAL_STATUS_BG_COLORS.RELIGIOUS,
+  'นักบวช / ศาสนบุคคล': PHYSICAL_STATUS_BG_COLORS.MONK,
   บุคคลทุพพลภาพ: PHYSICAL_STATUS_BG_COLORS.DISABLED,
   ผู้ตั้งครรภ์: PHYSICAL_STATUS_BG_COLORS.PREGNANT,
   ผู้พิการรณ์: PHYSICAL_STATUS_BG_COLORS.DISABLED_TYPO,
@@ -35,9 +38,7 @@ const COLOR_BY_REMARK: Record<string, string> = {
 };
 
 /** คืนสีพื้นหลังจากรหัสสถานะ หรือข้อความหมายเหตุ */
-export function getPhysicalStatusBgColor(
-  remarkOrCode?: string | number | null,
-): string {
+export function getPhysicalStatusBgColor(remarkOrCode?: string | number | null): string {
   if (remarkOrCode === null || remarkOrCode === undefined || remarkOrCode === '') {
     return DEFAULT_PHYSICAL_STATUS_BG_COLOR;
   }

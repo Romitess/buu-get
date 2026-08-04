@@ -37,6 +37,7 @@ export interface BackendSessionDetail {
     EXAM_NAME: string;
     EXAM_DATE: string;
     EXAM_ROUND?: string | null;
+    EXAM_FISCAL_YEAR?: string | null;
     EXAM_FEE?: number;
     EXAM_TYPE?: string | null;
   };
@@ -133,6 +134,7 @@ export interface AttendanceTableRow {
   index: number;
   ermId: number;
   nationalId: string;
+  location: string;
   titleTh: string;
   fullnameTh: string;
   titleEn?: string | null;

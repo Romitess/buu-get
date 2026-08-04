@@ -17,6 +17,7 @@ import {
 } from '../exam-enrollments/entities/exam-enrollment.entity';
 import { ExamAttendStatus } from '../exam-attendances/entities/exam-attendance.entity';
 import { Exam } from '../exam/entities/exam.entity';
+import { ExamScoreLine } from '../exam-scores/entities/exam-score-line.entity';
 
 /** ช่วงคะแนนของกราฟสรุปคะแนน (เลือก B: นับเฉพาะ >= 40) */
 const SCORE_RANGES = ['40-49', '50-59', '60-69', '70-79', '80-100'];
@@ -36,6 +37,16 @@ const THAI_MONTHS = [
   'พฤศจิกายน',
   'ธันวาคม',
 ];
+
+const CEFR_RANK: Record<string, number> = {
+  PRE_A1: 0,
+  A1: 1,
+  A2: 2,
+  B1: 3,
+  B2: 4,
+  C1: 5,
+  C2: 6,
+};
 
 interface YearMetricRow {
   year: string | number;
@@ -89,6 +100,7 @@ interface ExamInformationRoundRawRow {
 
 interface ExamCandidateInfoRawRow {
   enrollmentId: string | number;
+  scoresId: string | number | null;
   examNumber: string | null;
   prefix: string | null;
   fullName: string | null;
@@ -102,6 +114,15 @@ interface ExamCandidateInfoRawRow {
 @Injectable()
 export class ExamReportService {
   constructor(private readonly dataSource: DataSource) {}
+
+  private getCefrRank(level: string | null): number | null {
+    if (!level) {
+      return null;
+    }
+
+    const normalized = level.trim().toUpperCase().replace(/\s+/g, '_');
+    return CEFR_RANK[normalized] ?? null;
+  }
 
   async getSummary(query: ExamReportQueryDto): Promise<ExamReportSummary> {
     const metricByYear = await this.getMetricByYear(query);
@@ -391,6 +412,7 @@ export class ExamReportService {
         "COALESCE(profile.USER_FULLNAME_TH, profile.USER_FULLNAME_EN, u.USER_EMAIL, '')",
         'fullName',
       )
+      .addSelect('sc.SCORES_ID', 'scoresId')
       .addSelect('sc.SC_LANG_USE_SCORE', 'vocabularyGrammarScore')
       .addSelect('sc.SC_READING_SCORE', 'readingScore')
       .addSelect('sc.SC_TOTAL_SCORE', 'totalScore')
@@ -408,20 +430,82 @@ export class ExamReportService {
 
     const rows = await qb.getRawMany<ExamCandidateInfoRawRow>();
 
-    return rows.map((row) => ({
-      id: String(row.enrollmentId),
-      examNumber: row.examNumber ?? '',
-      prefix: row.prefix ?? '',
-      fullName: row.fullName ?? '',
-      vocabularyGrammarScore: this.roundNullable(row.vocabularyGrammarScore),
-      readingScore: this.roundNullable(row.readingScore),
-      totalScore: this.roundNullable(row.totalScore),
-      level: this.roundNullable(row.level),
-      attemptStatus:
-        row.attemptStatus === 'repeatAttempt'
-          ? 'repeatAttempt'
-          : 'firstAttempt',
-    }));
+    const scoreIds = rows
+      .map((row) => (row.scoresId != null ? Number(row.scoresId) : null))
+      .filter((id): id is number => id != null);
+    const linesByScoreId = await this.loadScoreLinesByScoreIds(scoreIds);
+
+    return rows.map((row) => {
+      const scoresId = row.scoresId != null ? Number(row.scoresId) : null;
+      const scoreLines =
+        scoresId != null ? linesByScoreId.get(scoresId) : undefined;
+
+      return {
+        id: String(row.enrollmentId),
+        examNumber: row.examNumber ?? '',
+        prefix: row.prefix ?? '',
+        fullName: row.fullName ?? '',
+        vocabularyGrammarScore: this.roundNullable(row.vocabularyGrammarScore),
+        readingScore: this.roundNullable(row.readingScore),
+        totalScore: this.roundNullable(row.totalScore),
+        level: this.roundNullable(row.level),
+        attemptStatus:
+          row.attemptStatus === 'repeatAttempt'
+            ? 'repeatAttempt'
+            : 'firstAttempt',
+        scoreLines,
+      };
+    });
+  }
+
+  private async loadScoreLinesByScoreIds(scoreIds: number[]): Promise<
+    Map<
+      number,
+      {
+        nameTh: string;
+        nameEn: string;
+        score: number | null;
+        maxScore: number;
+        sortOrder: number;
+      }[]
+    >
+  > {
+    if (scoreIds.length === 0) {
+      return new Map();
+    }
+
+    const lines = await this.dataSource
+      .getRepository(ExamScoreLine)
+      .createQueryBuilder('line')
+      .where('line.SCORES_ID IN (:...scoreIds)', { scoreIds })
+      .andWhere('line.DELETED_AT IS NULL')
+      .orderBy('line.SCL_SORT_ORDER', 'ASC')
+      .getMany();
+
+    const map = new Map<
+      number,
+      {
+        nameTh: string;
+        nameEn: string;
+        score: number | null;
+        maxScore: number;
+        sortOrder: number;
+      }[]
+    >();
+
+    for (const line of lines) {
+      const bucket = map.get(line.SCORES_ID) ?? [];
+      bucket.push({
+        nameTh: line.SCL_NAME_TH,
+        nameEn: line.SCL_NAME_EN,
+        score: this.roundNullable(line.SCL_SCORE),
+        maxScore: Number(line.SCL_MAX_SCORE),
+        sortOrder: line.SCL_SORT_ORDER,
+      });
+      map.set(line.SCORES_ID, bucket);
+    }
+
+    return map;
   }
 
   // ── Query helpers ─────────────────────────────────────────
@@ -542,14 +626,16 @@ export class ExamReportService {
   } {
     const attemptsByUser = new Map<
       number,
-      { year: number; band: number | null }[]
+      { year: number; level: string | null; rank: number | null }[]
     >();
     rows.forEach((r) => {
       const userId = Number(r.userId);
       const list = attemptsByUser.get(userId) ?? [];
+      const level = r.band === null ? null : String(r.band).trim() || null;
       list.push({
         year: Number(r.year),
-        band: r.band === null ? null : Number(r.band),
+        level,
+        rank: this.getCefrRank(level),
       });
       attemptsByUser.set(userId, list);
     });
@@ -569,11 +655,11 @@ export class ExamReportService {
       });
 
       // การเปลี่ยน Band: ใช้เฉพาะครั้งที่มี Band เทียบสองครั้งล่าสุด
-      const withBand = attempts.filter((a) => a.band !== null);
+      const withBand = attempts.filter((a) => a.rank !== null);
       if (withBand.length < 2) return;
 
-      const last = withBand[withBand.length - 1].band as number;
-      const prev = withBand[withBand.length - 2].band as number;
+      const last = withBand[withBand.length - 1].rank as number;
+      const prev = withBand[withBand.length - 2].rank as number;
       bandChange.repeatTakers += 1;
       if (last > prev) bandChange.increased += 1;
       else if (last < prev) bandChange.decreased += 1;
@@ -674,6 +760,7 @@ export class ExamReportService {
     qb.andWhere(
       `(
         TRIM(x.EXAM_ROUND) = :roundLabel
+        OR CONCAT(TRIM(x.EXAM_ROUND), '/', TRIM(x.EXAM_FISCAL_YEAR)) = :roundLabel
         OR CONCAT(TRIM(x.EXAM_ROUND), '/', YEAR(x.EXAM_DATE)) = :roundLabel
       )`,
       { roundLabel: roundText },

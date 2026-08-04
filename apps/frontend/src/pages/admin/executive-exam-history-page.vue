@@ -93,7 +93,8 @@ import DialogIssueCertificate from 'src/components/exam/dialog-issue-certificate
 import { fetchEnrollmentById } from 'src/services/enrollment.service';
 import { fetchExecutiveExamHistory } from 'src/services/executive-test-taker.service';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
-import type { ExamHistoryRow } from 'src/types/executive-test-taker.types';
+import type { ExecutiveExamScoreLine, ExamHistoryRow } from 'src/types/executive-test-taker.types';
+import { formatExamInstanceLabel } from 'src/utils/exam-instance-label';
 import { PageSkeleton, CardSkeleton, TableSkeleton } from 'src/components/base/skeleton';
 
 interface CandidateInfo {
@@ -103,7 +104,8 @@ interface CandidateInfo {
   scoreGrammar: number;
   scoreReading: number;
   scoreTotal: number;
-  band: number;
+  scoreLines?: ExecutiveExamScoreLine[];
+  band: string | null;
   userPhoto?: string | undefined;
   certIssuedAt?: string | undefined;
   certExpiresAt?: string | undefined;
@@ -138,7 +140,7 @@ const columns = computed<QTableColumn<ExamHistoryRow>[]>(() => [
   },
   {
     name: 'examRound',
-    label: 'รอบการสอบ',
+    label: 'ครั้งที่จัดสอบ',
     field: 'examRound',
     align: 'center',
   },
@@ -183,10 +185,12 @@ const columns = computed<QTableColumn<ExamHistoryRow>[]>(() => [
 
 const computedSessionName = computed((): string => {
   if (!enrollment.value?.SESSION) return '';
-  const examRound = enrollment.value.SESSION.EXAM?.EXAM_ROUND || '';
-  const examDate = enrollment.value.SESSION.EXAM?.EXAM_DATE;
+  const exam = enrollment.value.SESSION.EXAM;
+  const instance = formatExamInstanceLabel(exam?.EXAM_ROUND, exam?.EXAM_FISCAL_YEAR);
+  if (instance) return instance;
+  const examDate = exam?.EXAM_DATE;
   const year = examDate ? new Date(examDate).getFullYear() + 543 : new Date().getFullYear() + 543;
-  return examRound ? `${examRound}` : `1/${year}`;
+  return `1/${year}`;
 });
 
 const loadData = async (): Promise<void> => {
@@ -250,8 +254,10 @@ const viewCertificate = (row: ExamHistoryRow): void => {
     scoreGrammar: row.langUseScore ?? 0,
     scoreReading: row.readingScore ?? 0,
     scoreTotal: row.totalScore ?? 0,
-    band: row.bandLevel ?? 0,
-    userPhoto: user?.USER_IMAGE || profile?.userImagePath || user?.IMAGE?.USER_IMAGE_URL || undefined,
+    ...(row.scoreLines ? { scoreLines: row.scoreLines } : {}),
+    band: row.bandLevel ?? null,
+    userPhoto:
+      user?.USER_IMAGE || profile?.userImagePath || user?.IMAGE?.USER_IMAGE_URL || undefined,
     certIssuedAt: row.certIssuedAt || undefined,
     certExpiresAt: row.certExpiresAt || undefined,
     certCode: row.certCode || undefined,

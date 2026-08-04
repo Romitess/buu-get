@@ -10,15 +10,16 @@
 
     <AppExamInfoCard
       v-if="exam"
-      v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
-      :title="exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME"
+      :title="
+        formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
+        exam.EXAM_NAME
+      "
       :date="examDateLabel"
       :time="selectedSessionTime"
       :location="selectedSessionLocation"
-      :location-options="roomOptions"
-      :applicant-count="localSessionAttendedCount"
-      :total-capacity="selectedSessionCapacity"
+      :applicant-count="sessionAttendedCount"
+      :total-capacity="currentSessionCapacity"
       is-admin
       is-attendance
     />
@@ -40,7 +41,7 @@
         />
         <ExportCsvButton
           :columns="columns"
-          :rows="currentRoomAttendances"
+          :rows="filteredAttendances"
           file-name-prefix="exam-attendances"
           class="action-btn"
         />
@@ -50,7 +51,7 @@
     <main>
       <BaseTable
         :columns="columns"
-        :rows="currentRoomAttendances"
+        :rows="filteredAttendances"
         :loading="isLoading"
         :pagination="pagination"
         :empty-label="$t('admin.examAttendance.noData')"
@@ -97,6 +98,7 @@ import { useExamAttendances } from 'src/composables/use-exam-attendances';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { ExamAttendStatus } from 'src/types/enrollment.types';
 import type { BackendSession } from 'src/types/exam';
+import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 
 interface SessionLocationOption {
   SL_ID: number;
@@ -114,11 +116,9 @@ const {
   searchQuery,
   selectedSessionId,
   filteredAttendances,
+  sessionAttendedCount,
   fetchAttendances,
-  attendances,
 } = useExamAttendances();
-
-const selectedSessionLocationId = ref<number | null>(null);
 
 const $q = useQuasar();
 
@@ -150,10 +150,15 @@ const openCheckInDialog = () => {
   $q.dialog({
     component: DialogAttendanceCheckin,
     componentProps: {
-      attendances: attendances.value,
-      examName: exam.value?.EXAM_ROUND
-        ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
-        : exam.value?.EXAM_NAME || '',
+      attendances: filteredAttendances.value,
+      examName:
+        formatExamDisplayTitle(
+          exam.value?.EXAM_NAME,
+          exam.value?.EXAM_ROUND,
+          exam.value?.EXAM_FISCAL_YEAR,
+        ) ||
+        exam.value?.EXAM_NAME ||
+        '',
       examDate: examDateEnglishLabel.value,
       examTime: selectedSessionTime.value,
       examLocation: selectedSessionLocation.value,
@@ -215,21 +220,16 @@ const sessionLocations = computed<SessionLocationOption[]>(() => {
   });
 });
 
-const roomOptions = computed(() =>
-  sessionLocations.value.map((item) => ({
-    value: item.SL_ID,
-    label: `${item.LOCATION.LOCATION_NAME}${item.LOCATION.LOCATION_ROOM_NO ? ` (${item.LOCATION.LOCATION_ROOM_NO})` : ''}`,
-  })),
-);
+const formatLocationLabel = (location?: NonNullable<BackendSession['LOCATION']> | null): string => {
+  if (!location) return '-';
+  return `${location.LOCATION_NAME}${location.LOCATION_ROOM_NO ? ` (${location.LOCATION_ROOM_NO})` : ''}`;
+};
 
-const activeSessionLocation = computed(() => {
-  return (
-    sessionLocations.value.find((item) => item.SL_ID === selectedSessionLocationId.value) ?? null
-  );
-});
-
-const activeLocation = computed(() => {
-  return activeSessionLocation.value?.LOCATION ?? selectedSession.value?.LOCATION ?? null;
+const sessionLocationLabelList = computed(() => {
+  const labels = sessionLocations.value
+    .map((item) => formatLocationLabel(item.LOCATION))
+    .filter((label) => label !== '-');
+  return [...new Set(labels)];
 });
 
 const selectedSessionTime = computed(() => {
@@ -240,53 +240,24 @@ const selectedSessionTime = computed(() => {
 });
 
 const selectedSessionLocation = computed(() => {
-  if (!activeLocation.value) return '-';
-  const loc = activeLocation.value;
-  return `${loc.LOCATION_NAME}${loc.LOCATION_ROOM_NO ? ` (${loc.LOCATION_ROOM_NO})` : ''}`;
+  if (sessionLocationLabelList.value.length === 0) return '-';
+  return sessionLocationLabelList.value.join(', ');
 });
 
-const selectedSessionCapacity = computed(() => {
-  if (activeLocation.value?.SEATS?.length) return activeLocation.value.SEATS.length;
-  return (
-    activeTimeSessions.value.find((session) => session.SS_ID === activeSessionLocation.value?.SS_ID)
-      ?.SS_CAPACITY ?? 0
-  );
-});
+const currentSessionCapacity = computed(() => {
+  if (sessionLocations.value.length > 0) {
+    return sessionLocations.value.reduce((total, item) => {
+      const locationSeatCount = item.LOCATION.SEATS?.length;
+      if (locationSeatCount && locationSeatCount > 0) {
+        return total + locationSeatCount;
+      }
+      const sessionCapacity =
+        activeTimeSessions.value.find((session) => session.SS_ID === item.SS_ID)?.SS_CAPACITY ?? 0;
+      return total + sessionCapacity;
+    }, 0);
+  }
 
-const currentRoomAttendances = computed(() => {
-  const list = filteredAttendances.value;
-  if (selectedSessionLocationId.value === null) return list;
-
-  const result = list.filter((e) => {
-    if (e.slId !== null && e.slId !== undefined) {
-      return e.slId === selectedSessionLocationId.value;
-    }
-
-    const seatLocation = sessionLocations.value.find((location) =>
-      location.LOCATION.SEATS?.some((seat) => seat.LS_ID === e.lsId),
-    );
-    if (seatLocation) {
-      return seatLocation.SL_ID === selectedSessionLocationId.value;
-    }
-
-    const enrollmentSessionLocations = sessionLocations.value.filter(
-      (location) => location.SS_ID === e.sessionId,
-    );
-    return (
-      enrollmentSessionLocations.length > 0 &&
-      enrollmentSessionLocations[0]?.SL_ID === selectedSessionLocationId.value
-    );
-  });
-
-  return result.map((item, idx) => ({
-    ...item,
-    index: idx + 1,
-  }));
-});
-
-const localSessionAttendedCount = computed(() => {
-  const list = currentRoomAttendances.value;
-  return list.filter((e) => e.hasRecord && e.attendanceStatus === ExamAttendStatus.INTIME).length;
+  return activeTimeSessions.value.reduce((total, session) => total + (session.SS_CAPACITY ?? 0), 0);
 });
 
 watch(exam, (newExam) => {
@@ -297,22 +268,6 @@ watch(exam, (newExam) => {
     }
   }
 });
-
-watch(
-  [selectedSessionId, roomOptions],
-  () => {
-    const firstRoomId = roomOptions.value[0]?.value ?? null;
-    if (firstRoomId === null) {
-      selectedSessionLocationId.value = null;
-      return;
-    }
-
-    if (!roomOptions.value.some((option) => option.value === selectedSessionLocationId.value)) {
-      selectedSessionLocationId.value = firstRoomId;
-    }
-  },
-  { immediate: true },
-);
 
 const pagination = ref<PaginationModel>({
   page: 1,
@@ -334,6 +289,12 @@ const columns = computed<QTableColumn[]>(() => [
     field: 'testTakerCode',
     align: 'center',
     format: (val: string | null) => val || '-',
+  },
+  {
+    name: 'location',
+    label: 'ห้องสอบ',
+    field: 'location',
+    align: 'center',
   },
   {
     name: 'titleTh',
@@ -387,21 +348,21 @@ const loadData = async (): Promise<void> => {
   const examId = Number(route.params.examId);
   if (!isNaN(examId) && examId > 0) {
     await fetchAttendances(examId);
-
-    const routeSessionLocationId = Number(route.query.sessionLocationId);
-    if (
-      !isNaN(routeSessionLocationId) &&
-      roomOptions.value.some((option) => option.value === routeSessionLocationId)
-    ) {
-      selectedSessionLocationId.value = routeSessionLocationId;
-    }
-
-    pagination.value.rowsNumber = currentRoomAttendances.value.length;
+    pagination.value.rowsNumber = filteredAttendances.value.length;
   }
 };
 
-watch(currentRoomAttendances, (newVal) => {
+watch(filteredAttendances, (newVal) => {
   pagination.value.rowsNumber = newVal.length;
+});
+
+watch(selectedSessionId, async (sessionId, previousSessionId) => {
+  if (previousSessionId == null || sessionId == null) return;
+  const examId = Number(route.params.examId);
+  if (isNaN(examId) || examId <= 0) return;
+
+  await fetchAttendances(examId);
+  pagination.value.rowsNumber = filteredAttendances.value.length;
 });
 
 onMounted(() => {

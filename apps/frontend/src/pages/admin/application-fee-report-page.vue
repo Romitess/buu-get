@@ -87,6 +87,7 @@ import ReceiptCard from 'src/components/receipt-card.vue';
 import type { ExamEnrollment, ExamHistoryItem } from 'src/types/exam';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 
 const $q = useQuasar();
 
@@ -232,9 +233,14 @@ const feeRows = computed(() => {
         payer,
         amount,
         paymentDate,
-        examName: examObj?.EXAM_ROUND
-          ? `${examObj.EXAM_NAME} ${examObj.EXAM_ROUND}`
-          : examObj?.EXAM_NAME || 'BUU-GET Exam',
+        examName:
+          formatExamDisplayTitle(
+            examObj?.EXAM_NAME,
+            examObj?.EXAM_ROUND,
+            examObj?.EXAM_FISCAL_YEAR,
+          ) ||
+          examObj?.EXAM_NAME ||
+          'BUU-GET Exam',
         importedDate,
         payee,
         rawEnrollment: enrollment,

@@ -11,11 +11,22 @@ export interface VerifyCertificateExamDto {
   date: string | null;
 }
 
+export interface VerifyCertificateScoreLineDto {
+  nameTh: string;
+  nameEn: string;
+  score: number;
+  maxScore: number;
+  sortOrder: number;
+}
+
 export interface VerifyCertificateScoresDto {
+  /** @deprecated ใช้ lines แทน */
   vocabGrammar: number;
+  /** @deprecated ใช้ lines แทน */
   reading: number;
   total: number;
-  bandLevel: number;
+  bandLevel: string | null;
+  lines: VerifyCertificateScoreLineDto[];
 }
 
 export interface VerifyCertificateResponseDto {

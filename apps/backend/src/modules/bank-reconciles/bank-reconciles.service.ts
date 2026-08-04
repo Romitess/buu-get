@@ -107,6 +107,7 @@ export interface TestExportExamOption {
   EXAM_ID: number;
   EXAM_NAME: string;
   EXAM_ROUND: string | null;
+  EXAM_FISCAL_YEAR: string | null;
   EXAM_DATE: string | null;
   EXAM_FEE: number;
   exportableCount: number;
@@ -125,6 +126,7 @@ interface TestExportExamRawRow {
   EXAM_ID: number | string;
   EXAM_NAME: string;
   EXAM_ROUND: string | null;
+  EXAM_FISCAL_YEAR: string | null;
   EXAM_DATE: string | null;
   EXAM_FEE: number | string;
   exportableCount: number | string;
@@ -1204,6 +1206,7 @@ export class BankReconcilesService {
         'exam.EXAM_ID AS EXAM_ID',
         'exam.EXAM_NAME AS EXAM_NAME',
         'exam.EXAM_ROUND AS EXAM_ROUND',
+        'exam.EXAM_FISCAL_YEAR AS EXAM_FISCAL_YEAR',
         'exam.EXAM_DATE AS EXAM_DATE',
         'exam.EXAM_FEE AS EXAM_FEE',
         'COUNT(DISTINCT tr.TSR_ID) AS exportableCount',
@@ -1231,6 +1234,7 @@ export class BankReconcilesService {
       .groupBy('exam.EXAM_ID')
       .addGroupBy('exam.EXAM_NAME')
       .addGroupBy('exam.EXAM_ROUND')
+      .addGroupBy('exam.EXAM_FISCAL_YEAR')
       .addGroupBy('exam.EXAM_DATE')
       .addGroupBy('exam.EXAM_FEE')
       .orderBy('exam.EXAM_DATE', 'DESC')
@@ -1241,6 +1245,7 @@ export class BankReconcilesService {
       EXAM_ID: Number(row.EXAM_ID),
       EXAM_NAME: row.EXAM_NAME,
       EXAM_ROUND: row.EXAM_ROUND,
+      EXAM_FISCAL_YEAR: row.EXAM_FISCAL_YEAR,
       EXAM_DATE: row.EXAM_DATE,
       EXAM_FEE: Number(row.EXAM_FEE),
       exportableCount: Number(row.exportableCount),

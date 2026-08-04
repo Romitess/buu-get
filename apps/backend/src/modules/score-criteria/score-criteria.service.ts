@@ -11,23 +11,69 @@ export class ScoreCriteriaService {
     private readonly scoreCriteriaRepository: Repository<ScoreCriteria>,
   ) {}
 
-  /** ดึง Band Rules ของ active record (ถ้ามี) */
-  async getBandRules(): Promise<{ bandRules: BandRuleDto[] }> {
-    const active = await this.scoreCriteriaRepository.findOne({
+  private async findActiveCriteria(): Promise<ScoreCriteria | null> {
+    return await this.scoreCriteriaRepository.findOne({
       where: { SCR_ACTIVE: true },
       order: { UPDATED_AT: 'DESC' },
     });
+  }
 
-    if (!active || !active.SCR_CONTENT) {
-      return { bandRules: [] };
+  private parseBandRules(content: string | null): BandRuleDto[] {
+    if (!content) {
+      return [];
     }
 
     try {
-      const parsed = JSON.parse(active.SCR_CONTENT) as BandRuleDto[];
-      return { bandRules: parsed };
+      const parsed = JSON.parse(content) as unknown;
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      return parsed.filter((rule): rule is BandRuleDto => {
+        if (!rule || typeof rule !== 'object') {
+          return false;
+        }
+
+        const candidate = rule as Partial<BandRuleDto>;
+        return (
+          typeof candidate.id === 'string' &&
+          typeof candidate.band === 'string' &&
+          typeof candidate.minScore === 'number' &&
+          typeof candidate.maxScore === 'number' &&
+          typeof candidate.cefr === 'string' &&
+          typeof candidate.descriptor === 'string'
+        );
+      });
     } catch {
-      return { bandRules: [] };
+      return [];
     }
+  }
+
+  /** ดึง Band Rules ของ active record (ถ้ามี) */
+  async getBandRules(): Promise<{ bandRules: BandRuleDto[] }> {
+    const active = await this.findActiveCriteria();
+    return { bandRules: this.parseBandRules(active?.SCR_CONTENT ?? null) };
+  }
+
+  /** คำนวณระดับ CEFR จากคะแนนรวมตาม active score criteria */
+  async resolveBandLevel(totalScore: number): Promise<string | null> {
+    if (!Number.isFinite(totalScore)) {
+      return null;
+    }
+
+    const active = await this.findActiveCriteria();
+    const bandRules = this.parseBandRules(active?.SCR_CONTENT ?? null).sort(
+      (a, b) => a.minScore - b.minScore || a.maxScore - b.maxScore,
+    );
+    const matchedRule = bandRules.find(
+      (rule) => totalScore >= rule.minScore && totalScore <= rule.maxScore,
+    );
+
+    if (!matchedRule) {
+      return null;
+    }
+
+    return matchedRule.cefr?.trim() || null;
   }
 
   /** บันทึก Band Rules — upsert active record */

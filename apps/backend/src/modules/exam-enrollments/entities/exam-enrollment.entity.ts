@@ -111,17 +111,21 @@ export class ExamEnrollment {
       to: (value: string | UserPhysicalStatus): number => {
         const mapping: Record<string, number> = {
           [UserPhysicalStatus.MONK]: 0,
-          [UserPhysicalStatus.RELIGIOUS]: 1,
           [UserPhysicalStatus.DISABLED]: 2,
           [UserPhysicalStatus.PREGNANT]: 3,
           [UserPhysicalStatus.DISABLED_TYPO]: 4,
           [UserPhysicalStatus.GENERAL]: 5,
+          // legacy labels (ก่อนรวมพระภิกษุ + นักบวช)
+          'พระภิกษุ / สามเณร': 0,
+          'นักบวช / ศาสนบุคคล': 0,
+          'พระภิกษุ/นักบวช': 0,
           พระสงฆ์: 0,
           ตั้งครรภ์: 3,
           ไม่มีข้อมูลข้างต้น: 5,
           // รองรับค่า index แบบสตริงตัวเลขที่ส่งมาจากหน้า UI (convenience-step.vue)
+          // '1' → 0 เพื่อรองรับ client เก่าที่ยังส่งนักบวชแยก
           '0': 0,
-          '1': 1,
+          '1': 0,
           '2': 2,
           '3': 3,
           '4': 4,
@@ -132,7 +136,8 @@ export class ExamEnrollment {
       from: (value: number): UserPhysicalStatus => {
         const mapping: Record<number, UserPhysicalStatus> = {
           0: UserPhysicalStatus.MONK,
-          1: UserPhysicalStatus.RELIGIOUS,
+          // legacy code 1 (นักบวช / ศาสนบุคคล) → รวมเป็นพระภิกษุ/นักบวช
+          1: UserPhysicalStatus.MONK,
           2: UserPhysicalStatus.DISABLED,
           3: UserPhysicalStatus.PREGNANT,
           4: UserPhysicalStatus.DISABLED_TYPO,
@@ -142,7 +147,7 @@ export class ExamEnrollment {
       },
     },
     comment:
-      'สถานะทางกายภาพ/ข้อมูลผู้สมัคร (0: พระภิกษุ / สามเณร, 1: นักบวช / ศาสนบุคคล, 2: บุคคลทุพพลภาพ, 3: ผู้ตั้งครรภ์, 4: ผู้พิการรณ์, 5: ทั่วไป)',
+      'สถานะทางกายภาพ/ข้อมูลผู้สมัคร (0: พระภิกษุ / นักบวช, 2: บุคคลทุพพลภาพ, 3: ผู้ตั้งครรภ์, 4: ผู้พิการรณ์, 5: ทั่วไป)',
   })
   ERM_PHYSICAL_STATUS: UserPhysicalStatus;
 

@@ -181,7 +181,7 @@ export interface BackendScore {
   SC_LANG_USE_SCORE?: number;
   SC_READING_SCORE?: number;
   SC_TOTAL_SCORE?: number;
-  SC_BAND_LEVEL?: number;
+  SC_BAND_LEVEL?: string | null;
   CERTIFICATES?: {
     CERT_ID: number;
     SCORES_ID: number;
@@ -323,6 +323,7 @@ export interface BackendExam {
   EXAM_ID: number;
   EXAM_NAME: string;
   EXAM_ROUND?: string | null;
+  EXAM_FISCAL_YEAR?: string | null;
   EXAM_TYPE: string;
   EXAM_FORMAT: string;
   EXAM_FEE: number;
@@ -333,10 +334,26 @@ export interface BackendExam {
   EXAM_PAY_END_DATE: string;
   EXAM_PUBLISHED: boolean;
   FUND_SOURCE_ID: number;
+  SRB_ID?: number | null;
   FUND_SOURCE?: {
     FS_ID: number;
     FS_NAME: string;
     FS_ACCOUNT_CODE: string;
+  };
+  SCORE_RUBRIC?: {
+    SRB_ID: number;
+    SRB_NAME_TH: string;
+    SRB_NAME_EN: string;
+    SRB_IS_DEFAULT: boolean;
+    ITEMS?: Array<{
+      SRBI_ID: number;
+      SRBI_NAME_TH: string;
+      SRBI_NAME_EN: string;
+      SRBI_CODE: string | null;
+      SRBI_MAX_SCORE: number | string;
+      SRBI_SORT_ORDER: number;
+      DELETED_AT?: string | null;
+    }>;
   };
   SESSIONS: BackendSession[];
   PASSCODES?: BackendPasscode[];

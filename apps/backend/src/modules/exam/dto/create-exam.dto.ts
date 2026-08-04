@@ -62,13 +62,22 @@ export class CreateExamDto {
   @IsString()
   EXAM_MOODLE_COURSE_ID?: string;
 
-  @ApiProperty({ example: '1/2026', required: false })
+  @ApiProperty({ example: '1', required: false, description: 'ครั้งที่จัดสอบ' })
   @IsOptional()
   @IsString()
   EXAM_ROUND?: string;
+
+  @ApiProperty({ example: '2569', required: false, description: 'ปีงบประมาณ' })
+  @IsOptional()
+  @IsString()
+  EXAM_FISCAL_YEAR?: string;
 
   @ApiProperty({ example: 1, required: false })
   @IsOptional()
   @IsNumber()
   FUND_SOURCE_ID?: number;
+
+  @ApiProperty({ example: 1, description: 'รหัสชุดเกณฑ์คะแนน' })
+  @IsNumber()
+  SRB_ID: number;
 }

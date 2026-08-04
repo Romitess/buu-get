@@ -29,6 +29,9 @@ import { ExamPasscodeLog } from 'src/modules/exam/entities/exam-passcode-log.ent
 import { PageConfig } from '../modules/page-builder/entities/page-config.entity';
 import { ExamRuleVoucher } from '../modules/exam-rule-vouchers/entities/exam-rule-voucher.entity';
 import { ScoreCriteria } from '../modules/score-criteria/entities/score-criteria.entity';
+import { ScoreRubric } from '../modules/score-rubrics/entities/score-rubric.entity';
+import { ScoreRubricItem } from '../modules/score-rubrics/entities/score-rubric-item.entity';
+import { ExamScoreLine } from '../modules/exam-scores/entities/exam-score-line.entity';
 import { MoodleSyncLog } from '../modules/moodle-sync-logs/entities/moodle-sync-log.entity';
 import { ExamBlockedSeat } from '../modules/exam-blocked-seats/entities/exam-blocked-seat.entity';
 
@@ -69,6 +72,9 @@ export default new DataSource({
     PageConfig,
     ExamRuleVoucher,
     ScoreCriteria,
+    ScoreRubric,
+    ScoreRubricItem,
+    ExamScoreLine,
     MoodleSyncLog,
     ExamBlockedSeat,
   ],

@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { ExamSession } from '../../exam-sessions/entities/exam-session.entity';
 import { FundSource } from '../../fund-sources/entities/fund-source.entity';
+import { ScoreRubric } from '../../score-rubrics/entities/score-rubric.entity';
 import { ExamPasscode } from './exam-passcode.entity';
 
 @Entity('EXAM_T_EXAM')
@@ -31,9 +32,18 @@ export class Exam {
     type: 'varchar',
     length: 20,
     nullable: true,
-    comment: 'รอบการสอบ',
+    comment: 'ครั้งที่จัดสอบ',
   })
   EXAM_ROUND: string;
+
+  @Column({
+    name: 'EXAM_FISCAL_YEAR',
+    type: 'varchar',
+    length: 10,
+    nullable: true,
+    comment: 'ปีงบประมาณ',
+  })
+  EXAM_FISCAL_YEAR: string;
 
   @Column({
     name: 'EXAM_TYPE',
@@ -138,6 +148,17 @@ export class Exam {
   @ManyToOne(() => FundSource)
   @JoinColumn({ name: 'FUND_SOURCE_ID' })
   FUND_SOURCE: FundSource;
+
+  @Column({
+    name: 'SRB_ID',
+    nullable: true,
+    comment: 'รหัสชุดเกณฑ์คะแนน',
+  })
+  SRB_ID: number | null;
+
+  @ManyToOne(() => ScoreRubric)
+  @JoinColumn({ name: 'SRB_ID' })
+  SCORE_RUBRIC: ScoreRubric;
 
   @OneToMany(() => ExamPasscode, (passcode) => passcode.EXAM)
   PASSCODES: ExamPasscode[];

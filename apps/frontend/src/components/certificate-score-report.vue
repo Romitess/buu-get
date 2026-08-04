@@ -53,17 +53,19 @@
 
             <div class="score-section">
               <div class="score-header">Score</div>
-              <div class="score-row">
-                <span>1. Vocabulary &amp; Grammar</span>
-                <span>{{ data.vocabScore }}/50</span>
-              </div>
-              <div class="score-row">
-                <span>2. Reading</span>
-                <span>{{ data.readingScore }}/50</span>
+              <div
+                v-for="(line, index) in data.scoreLines?.length
+                  ? data.scoreLines
+                  : fallbackScoreLines"
+                :key="`${line.nameEn}-${index}`"
+                class="score-row"
+              >
+                <span>{{ index + 1 }}. {{ line.nameEn }}</span>
+                <span>{{ line.score }}/{{ line.maxScore }}</span>
               </div>
               <div class="score-row text-weight-bold">
                 <span>Overall BUU-GET Score</span>
-                <span>{{ data.totalScore }}/100</span>
+                <span>{{ data.totalScore }}/{{ totalMaxScore }}</span>
               </div>
               <div class="score-separator"></div>
               <div class="score-level-row">
@@ -120,11 +122,34 @@
 </template>
 
 <script setup lang="ts">
-import type { CertificateScoreReportData } from 'src/types/certificate';
+import { computed } from 'vue';
+import type { CertificateScoreLine, CertificateScoreReportData } from 'src/types/certificate';
 
-defineProps<{
+const props = defineProps<{
   data: CertificateScoreReportData;
 }>();
+
+const fallbackScoreLines = computed((): CertificateScoreLine[] => [
+  {
+    nameTh: 'คำศัพท์และไวยากรณ์',
+    nameEn: 'Vocabulary & Grammar',
+    score: props.data.vocabScore,
+    maxScore: 50,
+    sortOrder: 1,
+  },
+  {
+    nameTh: 'ทักษะการอ่าน',
+    nameEn: 'Reading',
+    score: props.data.readingScore,
+    maxScore: 50,
+    sortOrder: 2,
+  },
+]);
+
+const totalMaxScore = computed(() => {
+  const lines = props.data.scoreLines?.length ? props.data.scoreLines : fallbackScoreLines.value;
+  return lines.reduce((sum, line) => sum + line.maxScore, 0);
+});
 </script>
 
 <style scoped lang="scss">

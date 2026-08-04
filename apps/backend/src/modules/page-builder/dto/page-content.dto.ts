@@ -207,7 +207,10 @@ export class ExamRuleSectionDto extends BaseSectionDto {
 }
 
 export type SectionDto =
-  BannerSectionDto | CardSectionDto | StepSectionDto | ExamRuleSectionDto;
+  | BannerSectionDto
+  | CardSectionDto
+  | StepSectionDto
+  | ExamRuleSectionDto;
 
 export class PageContentDto {
   @ApiProperty({

@@ -128,6 +128,7 @@ import {
   type TransactionRefSearchParams,
 } from 'src/services/transaction-ref.service';
 import { PAYMENT_STATUS_LABELS } from 'src/types/enrollment.types';
+import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 import type { PaginationModel, SearchRow, TableRequestProps } from 'src/types/exam.types';
 
 const { t } = useI18n();
@@ -183,7 +184,11 @@ const getExamName = (enrollment: BackendTransactionRefEnrollment | null | undefi
   if (!enrollment) return '-';
   const exam = enrollment.SESSION?.EXAM;
   if (!exam) return '-';
-  return exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME || '-';
+  return (
+    formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
+    exam.EXAM_NAME ||
+    '-'
+  );
 };
 
 const formatAmount = (amount: number | string | null | undefined): string => {

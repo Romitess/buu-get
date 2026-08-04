@@ -19,7 +19,14 @@ export interface VerifyCertificateResponse {
     vocabGrammar: number;
     reading: number;
     total: number;
-    bandLevel: number;
+    bandLevel: string | null;
+    lines?: Array<{
+      nameTh: string;
+      nameEn: string;
+      score: number;
+      maxScore: number;
+      sortOrder: number;
+    }>;
   };
 }
 

@@ -39,7 +39,7 @@ describe('VerifyService', () => {
         SC_LANG_USE_SCORE: 30,
         SC_READING_SCORE: 35,
         SC_TOTAL_SCORE: 65,
-        SC_BAND_LEVEL: 3,
+        SC_BAND_LEVEL: 'B1',
         ENROLLMENT: {
           ERM_TEST_TAKER: 'TT000001',
           SESSION: {
@@ -67,6 +67,7 @@ describe('VerifyService', () => {
     expect(result.status).toBe('expired');
     expect(result.holder.nationalIdMasked).toBe('12345****0123');
     expect(result.scores.total).toBe(65);
+    expect(result.scores.bandLevel).toBe('B1');
   });
 
   it('throws when receipt is unissued', async () => {

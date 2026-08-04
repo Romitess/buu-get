@@ -48,7 +48,9 @@ describe('ExamCertificatesService', () => {
 
   beforeEach(() => {
     scoreFind = jest.fn();
-    certificateCreate = jest.fn().mockImplementation((payload: unknown) => payload);
+    certificateCreate = jest
+      .fn()
+      .mockImplementation((payload: unknown) => payload);
     certificateSave = jest
       .fn()
       .mockImplementation((items) => Promise.resolve(items));
@@ -77,7 +79,9 @@ describe('ExamCertificatesService', () => {
                   save: sessionSave,
                 };
               }
-              throw new Error(`Unexpected repository entity: ${String(entity)}`);
+              throw new Error(
+                `Unexpected repository entity: ${String(entity)}`,
+              );
             }),
           };
           return callback(manager);
@@ -153,7 +157,9 @@ describe('ExamCertificatesService', () => {
       }),
     );
     expect(sessionSave).toHaveBeenCalledWith([
-      expect.objectContaining({ SS_SESSION_STATUS: ExamSessionStatus.COMPLETED }),
+      expect.objectContaining({
+        SS_SESSION_STATUS: ExamSessionStatus.COMPLETED,
+      }),
     ]);
 
     await Promise.resolve();

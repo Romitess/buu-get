@@ -52,14 +52,26 @@
               <div class="col-12 q-mt-md">
                 <div class="score-section">
                   <div class="score-header q-mb-xs">Score</div>
-                  <div class="row justify-between items-center q-py-xs score-row">
-                    <div class="score-label">1. Vocabulary &amp; Grammar</div>
-                    <div class="score-val">{{ vocabScore }}</div>
-                  </div>
-                  <div class="row justify-between items-center q-py-xs score-row">
-                    <div class="score-label">2. Reading</div>
-                    <div class="score-val">{{ readingScore }}</div>
-                  </div>
+                  <template v-if="scoreLines?.length">
+                    <div
+                      v-for="(line, index) in scoreLines"
+                      :key="`${line.nameEn}-${line.sortOrder}`"
+                      class="row justify-between items-center q-py-xs score-row"
+                    >
+                      <div class="score-label">{{ index + 1 }}. {{ line.nameEn }}</div>
+                      <div class="score-val">{{ line.score }}/{{ line.maxScore }}</div>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="row justify-between items-center q-py-xs score-row">
+                      <div class="score-label">1. Vocabulary &amp; Grammar</div>
+                      <div class="score-val">{{ vocabScore }}</div>
+                    </div>
+                    <div class="row justify-between items-center q-py-xs score-row">
+                      <div class="score-label">2. Reading</div>
+                      <div class="score-val">{{ readingScore }}</div>
+                    </div>
+                  </template>
                   <div class="row justify-between items-center q-py-xs score-row text-weight-bold">
                     <div class="text-dark">Overall BUU-GET Score</div>
                     <div class="text-dark">{{ totalScore }}</div>
@@ -89,19 +101,8 @@
           </div>
         </div>
         <div class="col-auto text-right verify-block">
-          <img
-            v-if="qrDataUrl"
-            :src="qrDataUrl"
-            class="qr-code-image"
-            alt="Verification QR"
-          />
-          <q-icon
-            v-else
-            name="qr_code_2"
-            size="40px"
-            color="dark"
-            class="qr-code-icon"
-          />
+          <img v-if="qrDataUrl" :src="qrDataUrl" class="qr-code-image" alt="Verification QR" />
+          <q-icon v-else name="qr_code_2" size="40px" color="dark" class="qr-code-icon" />
           <div v-if="certificateCode" class="verify-code-text">{{ certificateCode }}</div>
         </div>
       </div>
@@ -149,7 +150,7 @@
 </template>
 
 <script setup lang="ts">
-import type { CertificateBandRule } from 'src/types/certificate';
+import type { CertificateBandRule, CertificateScoreLine } from 'src/types/certificate';
 
 interface Props {
   side: 'front' | 'back';
@@ -158,10 +159,13 @@ interface Props {
   nationalId: string;
   testSession: string;
   testDate: string;
+  /** @deprecated ใช้ scoreLines */
   vocabScore: string;
+  /** @deprecated ใช้ scoreLines */
   readingScore: string;
   totalScore: string;
   bandLevel: string;
+  scoreLines?: CertificateScoreLine[];
   issueDate: string;
   validUntil: string;
   bandRules: CertificateBandRule[];

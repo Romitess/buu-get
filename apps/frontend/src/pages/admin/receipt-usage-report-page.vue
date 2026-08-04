@@ -53,6 +53,7 @@ import BaseTable from 'src/components/shared/base-table.vue';
 import { fetchIssuedReceipts, type IssuedReceipt } from 'src/services/receipt.service';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 import type { DailyRevenueFilter as DailyRevenueFilterModel } from 'src/types/daily-revenue.types';
 
 const $q = useQuasar();
@@ -178,9 +179,10 @@ const receiptRows = computed<ReceiptUsageRow[]>(() =>
         year: formatReceiptYear(receiptDateRaw),
         documentType: 'ใบเสร็จ',
         amount: Number(transaction.TRANX_AMOUNT ?? exam?.EXAM_FEE ?? 0),
-        examName: exam?.EXAM_ROUND
-          ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}`
-          : exam?.EXAM_NAME || 'BUU-GET Exam',
+        examName:
+          formatExamDisplayTitle(exam?.EXAM_NAME, exam?.EXAM_ROUND, exam?.EXAM_FISCAL_YEAR) ||
+          exam?.EXAM_NAME ||
+          'BUU-GET Exam',
         payer,
         payee: getPayeeName(receipt),
         paymentDateRaw,

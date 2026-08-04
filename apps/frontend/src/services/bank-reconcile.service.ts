@@ -121,6 +121,7 @@ export interface TestExportExamOption {
   EXAM_ID: number;
   EXAM_NAME: string;
   EXAM_ROUND: string | null;
+  EXAM_FISCAL_YEAR: string | null;
   EXAM_DATE: string | null;
   EXAM_FEE: number;
   exportableCount: number;
@@ -136,9 +137,7 @@ export interface TestExportRow {
 }
 
 export const fetchTestExportExams = async (): Promise<TestExportExamOption[]> => {
-  const response = await api.get<TestExportExamOption[]>(
-    '/bank-reconciles/test-export/exams',
-  );
+  const response = await api.get<TestExportExamOption[]>('/bank-reconciles/test-export/exams');
   return response.data;
 };
 

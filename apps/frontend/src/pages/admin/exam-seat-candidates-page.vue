@@ -12,16 +12,18 @@
     <!-- Session Time Tabs -->
     <AppExamSessionTabs v-model="selectedSessionId" :sessions="sessionTimeTabs" />
 
-    <!-- Exam Info Card -->
+    <!-- Exam Info Card (all rooms in time slot — no room picker) -->
     <AppExamInfoCard
       v-if="exam"
-      v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
-      :title="exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME"
+      :title="
+        formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
+        exam.EXAM_NAME
+      "
       :date="examDateLabel"
       :time="sessionTime"
       :location="sessionLocation"
-      :location-options="roomOptions"
+      :location-options="[]"
       :applicant-count="candidateCount"
       :total-capacity="sessionCapacity"
       hide-paid
@@ -63,12 +65,13 @@
             {{ $t('admin.seatCandidates.printVoucherDisabledHint') }}
           </q-tooltip>
         </span>
-        <ExportCsvButton
-          :columns="columns"
-          :rows="filteredRows"
-          file-name-prefix="seat-candidates"
+        <AppButton
+          icon="download"
+          :label="$t('admin.seatCandidates.exportByRoom')"
           class="toolbar-action-btn"
-          :disable="isActionLoading"
+          :loading="isExporting"
+          :disable="isActionLoading || isExporting"
+          @click="handleExportByRoom"
         />
       </div>
     </nav>
@@ -152,7 +155,7 @@ import { ref, computed, nextTick, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import { useQuasar } from 'quasar';
+import { date, useQuasar } from 'quasar';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import DialogIssueTicket from 'src/components/exam/dialog-issue-ticket.vue';
@@ -160,7 +163,7 @@ import DialogViewVoucher from 'src/components/exam/dialog-view-voucher.vue';
 
 import BaseTable from 'src/components/shared/base-table.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
-import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
+import { downloadMultiSheetXlsx, groupRowsByKey } from 'src/utils/export-table-xlsx';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
 import AppExamSessionTabs from 'src/components/exam/app-exam-session-time.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
@@ -174,6 +177,7 @@ import {
 } from 'src/composables/use-exam-seat-candidates';
 import type { SeatCell, SeatStatus } from 'src/composables/use-exam-seat-management';
 import type { BackendLocation } from 'src/types/exam';
+import { formatExamDisplayTitle, formatExamInstanceLabel } from 'src/utils/exam-instance-label';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import { bulkIssueVouchers } from 'src/services/voucher.service';
 import { fetchEnrollmentById } from 'src/services/enrollment.service';
@@ -214,6 +218,7 @@ const {
   selectedSessionLocationId,
   roomOptions,
   filteredRows,
+  roomTableRows,
   candidateCount,
   sessionTime,
   sessionLocation,
@@ -229,6 +234,7 @@ const {
 } = useExamSeatCandidates();
 
 const isPrintingSeatPlan = ref(false);
+const isExporting = ref(false);
 type PrintLocationSeat = NonNullable<BackendLocation['SEATS']>[number];
 
 // Resolves a localized month name by 0-based index from i18n (type-safe, no cast)
@@ -249,9 +255,14 @@ const voucherPreviewData = computed<VoucherData>(() => ({
   id: sessionEnrollments.value[0]?.ERM_ID ?? 0,
   fullName: 'XX. XXXXXX XXXXXX',
   studentId: 'XXXXXXXX',
-  examName: exam.value?.EXAM_ROUND
-    ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
-    : exam.value?.EXAM_NAME || 'BUU-GET Exam',
+  examName:
+    formatExamDisplayTitle(
+      exam.value?.EXAM_NAME,
+      exam.value?.EXAM_ROUND,
+      exam.value?.EXAM_FISCAL_YEAR,
+    ) ||
+    exam.value?.EXAM_NAME ||
+    'BUU-GET Exam',
   examDate: examDateLabel.value,
   examTime: sessionTime.value,
   examType: getExamRoundTypeLabel(),
@@ -298,9 +309,14 @@ const startIssuingTickets = async (): Promise<void> => {
       .filter((enrollment) => enrollment && enrollment.ERM_ID)
       .map((enrollment) => enrollment.ERM_ID);
 
-    const examName = exam.value?.EXAM_ROUND
-      ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
-      : exam.value?.EXAM_NAME || 'BUU-GET Exam';
+    const examName =
+      formatExamDisplayTitle(
+        exam.value?.EXAM_NAME,
+        exam.value?.EXAM_ROUND,
+        exam.value?.EXAM_FISCAL_YEAR,
+      ) ||
+      exam.value?.EXAM_NAME ||
+      'BUU-GET Exam';
 
     const result = await bulkIssueVouchers({
       ermIds,
@@ -398,9 +414,14 @@ const buildVoucherData = (row: SeatCandidateRow, freshEnrollment = row.enrollmen
     id: enrollment.ERM_ID,
     fullName: `${title} ${fullName}`.trim() || '-',
     studentId: enrollment.ERM_TEST_TAKER || '-',
-    examName: exam.value?.EXAM_ROUND
-      ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
-      : exam.value?.EXAM_NAME || 'BUU-GET Exam',
+    examName:
+      formatExamDisplayTitle(
+        exam.value?.EXAM_NAME,
+        exam.value?.EXAM_ROUND,
+        exam.value?.EXAM_FISCAL_YEAR,
+      ) ||
+      exam.value?.EXAM_NAME ||
+      'BUU-GET Exam',
     examDate: examDateLabel.value,
     examTime: sessionTime.value,
     examType: getExamRoundTypeLabel(),
@@ -409,7 +430,8 @@ const buildVoucherData = (row: SeatCandidateRow, freshEnrollment = row.enrollmen
     seatNo: enrollment.ERM_SEAT_LABEL || row.seatNumber,
     voucherNo: voucherCode,
     citizenId: enrollment.USER?.USER_NATIONAL_ID || enrollment.USER?.USER_PASSPORT_NO || '-',
-    testSession: exam.value?.EXAM_ROUND || '-',
+    testSession:
+      formatExamInstanceLabel(exam.value?.EXAM_ROUND, exam.value?.EXAM_FISCAL_YEAR) || '-',
     profileImage: imagePath ? getImageUrl(imagePath) : undefined,
     // Code128 payload = Test Taker ID for door scanners / attendance
     barcodeValue: enrollment.ERM_TEST_TAKER || '',
@@ -586,7 +608,42 @@ const printSeatPlanRows = computed((): SeatCell[][] => {
   return rows;
 });
 
-const printCandidateRows = computed((): SeatCandidateRow[] => filteredRows.value);
+const printCandidateRows = computed((): SeatCandidateRow[] =>
+  roomTableRows.value.map((row, index) => ({
+    ...row,
+    index: index + 1,
+  })),
+);
+
+const handleExportByRoom = (): void => {
+  if (filteredRows.value.length === 0) {
+    $q.notify({
+      message: i18n.t('components.exportCsv.noData'),
+      color: 'warning',
+    });
+    return;
+  }
+
+  isExporting.value = true;
+  try {
+    const sheets = groupRowsByKey(filteredRows.value, (row) => row.roomLabel);
+    const timestamp = date.formatDate(Date.now(), 'YYYY-MM-DD');
+    downloadMultiSheetXlsx({
+      columns: columns.value,
+      sheets,
+      fileName: `seat-candidates_${timestamp}.xlsx`,
+    });
+  } catch (error) {
+    console.error('Failed to export seat candidates by room:', error);
+    $q.notify({
+      message: i18n.t('components.exportCsv.loadError'),
+      color: 'negative',
+      icon: 'warning',
+    });
+  } finally {
+    isExporting.value = false;
+  }
+};
 
 const cleanupSeatPlanPrint = (): void => {
   isPrintingSeatPlan.value = false;
@@ -665,28 +722,28 @@ const pagination = ref<PaginationModel>({
 });
 
 const columns = computed<QTableColumn[]>(() => {
-  const nameWidth = isVoucherSent.value ? 13 : 19;
+  const nameWidth = isVoucherSent.value ? 11 : 16;
   const baseColumns: QTableColumn[] = [
     {
       name: 'index',
       label: i18n.t('admin.seatCandidates.table.columns.index'),
       field: 'index',
       align: 'center',
-      style: 'width: 8%',
+      style: 'width: 6%',
     },
     {
       name: 'nationalId',
       label: i18n.t('admin.seatCandidates.table.columns.nationalId'),
       field: 'nationalId',
       align: 'center',
-      style: 'width: 20%',
+      style: 'width: 14%',
     },
     {
       name: 'titleTh',
       label: i18n.t('admin.seatCandidates.table.columns.prefix'),
       field: 'titleTh',
       align: 'center',
-      style: 'width: 12%',
+      style: 'width: 8%',
     },
     {
       name: 'fullnameTh',
@@ -703,11 +760,18 @@ const columns = computed<QTableColumn[]>(() => {
       style: `width: ${nameWidth}%`,
     },
     {
+      name: 'roomLabel',
+      label: i18n.t('admin.seatCandidates.table.columns.room'),
+      field: 'roomLabel',
+      align: 'left',
+      style: 'width: 18%',
+    },
+    {
       name: 'seatNumber',
       label: i18n.t('admin.seatCandidates.table.columns.seatNumber'),
       field: 'seatNumber',
       align: 'center',
-      style: 'width: 22%',
+      style: 'width: 12%',
       classes: 'text-weight-bold',
     },
   ];

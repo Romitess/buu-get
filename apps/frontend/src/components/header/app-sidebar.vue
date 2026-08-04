@@ -161,6 +161,12 @@ const menuLinks = computed(() => {
       path: '/admin/exam-management',
     });
     links.push({
+      name: 'score-rubric-management',
+      label: t('navigation.manageScoreRubrics') || 'จัดการชุดเกณฑ์คะแนน',
+      icon: 'grading',
+      path: '/admin/score-rubric-management',
+    });
+    links.push({
       name: 'page-builder',
       label: t('navigation.manageHomeContent') || 'จัดการเนื้อหาหน้าหลัก',
       icon: 'edit',
@@ -188,8 +194,14 @@ const menuLinks = computed(() => {
           path: '/admin/test-voucher-management',
         },
         {
+          name: 'score-rubric-management',
+          label: t('navigation.manageScoreRubrics') || 'จัดการชุดเกณฑ์คะแนน',
+          icon: 'grading',
+          path: '/admin/score-rubric-management',
+        },
+        {
           name: 'score-criteria-management',
-          label: 'จัดการ Certificate',
+          label: t('navigation.manageBandCertificate') || 'จัดการ Band / Certificate',
           icon: 'workspace_premium',
           path: '/admin/score-criteria-management',
         },
@@ -206,9 +218,7 @@ const menuLinks = computed(() => {
     });
     links.push({
       name: 'payment-import-test-export',
-      label:
-        t('navigation.paymentImportTestExport') ||
-        'Export CSV ทดสอบการนำเข้า',
+      label: t('navigation.paymentImportTestExport') || 'Export CSV ทดสอบการนำเข้า',
       icon: 'download',
       path: '/admin/payment-import-test-export',
     });

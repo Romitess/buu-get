@@ -10,15 +10,16 @@
 
     <AppExamInfoCard
       v-if="exam"
-      v-model:selected-location-id="selectedSessionLocationId"
       class="q-mb-md"
-      :title="exam.EXAM_ROUND ? `${exam.EXAM_NAME} ${exam.EXAM_ROUND}` : exam.EXAM_NAME"
+      :title="
+        formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
+        exam.EXAM_NAME
+      "
       :date="examDateLabel"
       :time="selectedSessionTime"
       :location="selectedSessionLocation"
-      :location-options="roomOptions"
       :applicant-count="sessionTotalCount"
-      :total-capacity="currentRoomCapacity"
+      :total-capacity="currentSessionCapacity"
       hide-paid
       hide-main-separator
       count-with-capacity
@@ -242,34 +243,39 @@ import {
   fetchExamScores,
   updateExamScore,
   type BackendExamScore,
-  type SaveExamScorePayload,
 } from 'src/services/exam-score.service';
+import {
+  buildSavePayload,
+  buildScoreDraftFromScore,
+  calculateBandFromRules,
+  matchHeaderToRubricItem,
+  rubricItemsFromExam,
+  scoreByCode,
+  sumLineScores,
+  type ScoreDraft,
+} from 'src/composables/use-score-rubric-helpers';
+import { getBandRules, type BandRuleData } from 'src/services/score-criteria.service';
 import type { BackendExam, BackendLocation, BackendSession } from 'src/types/exam';
+import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 import type { BackendEnrollmentDetail, EnrollmentTableRow } from 'src/types/enrollment.types';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 
 interface ScoreTableRow extends EnrollmentTableRow {
+  location: string;
   scoreGrammar: number;
   scoreReading: number;
   scoreTotal: number;
-  band: number;
+  band: string | null;
+  itemScores: Record<number, number>;
   hasImportedScore: boolean;
   hasScore: boolean;
   hasSavedCertificate: boolean;
-}
-
-interface ScoreDraft {
-  scoreGrammar: number;
-  scoreReading: number;
-  scoreTotal: number;
-  band: number;
 }
 
 interface SessionLocationOption {
   SL_ID: number;
   LOCATION_ID: number;
   SS_ID: number;
-  SS_NAME?: string | null;
   LOCATION: BackendLocation;
 }
 
@@ -292,11 +298,12 @@ const examDateLabel = computed((): string => {
 
 const isLoading = ref(false);
 const exam = ref<BackendExam | null>(null);
+const rubricItems = computed(() => rubricItemsFromExam(exam.value));
+const bandRules = ref<BandRuleData[]>([]);
 const enrollments = ref<BackendEnrollmentDetail[]>([]);
 const examScores = ref<BackendExamScore[]>([]);
 const searchQuery = ref('');
 const selectedSessionId = ref<number | null>(null);
-const selectedSessionLocationId = ref<number | null>(null);
 const scoreDraftByEnrollmentId = ref<Record<number, ScoreDraft>>({});
 const importedEnrollmentIds = ref<Set<number>>(new Set());
 const showImportDialog = ref(false);
@@ -314,7 +321,7 @@ const selectedCandidateInfo = ref<
       scoreGrammar?: number | undefined;
       scoreReading?: number | undefined;
       scoreTotal?: number | undefined;
-      band?: number | undefined;
+      band?: string | null | undefined;
       userPhoto?: string | undefined;
       certIssuedAt?: string | undefined;
       certExpiresAt?: string | undefined;
@@ -390,51 +397,40 @@ const sessionLocations = computed<SessionLocationOption[]>(() => {
   });
 });
 
-const roomOptions = computed(() =>
-  sessionLocations.value.map((item) => ({
-    value: item.SL_ID,
-    label: `${item.LOCATION.LOCATION_NAME}${item.LOCATION.LOCATION_ROOM_NO ? ` (${item.LOCATION.LOCATION_ROOM_NO})` : ''}`,
-  })),
-);
+const formatLocationLabel = (location?: BackendLocation | null): string => {
+  if (!location) return '-';
+  return `${location.LOCATION_NAME}${location.LOCATION_ROOM_NO ? ` (${location.LOCATION_ROOM_NO})` : ''}`;
+};
 
-const activeSessionLocation = computed(() => {
-  return (
-    sessionLocations.value.find((item) => item.SL_ID === selectedSessionLocationId.value) || null
-  );
+const sessionLocationLabelList = computed(() => {
+  const labels = sessionLocations.value
+    .map((item) => formatLocationLabel(item.LOCATION))
+    .filter((label) => label !== '-');
+  return [...new Set(labels)];
 });
 
-const activeLocation = computed(() => {
-  return activeSessionLocation.value?.LOCATION ?? selectedSession.value?.LOCATION ?? null;
-});
-
-const currentRoomEnrollments = computed(() => {
+const currentSessionEnrollments = computed(() => {
   return enrollments.value.filter((enrollment) => {
-    if (!activeSessionIds.value.includes(enrollment.SESSION_ID)) return false;
-    if (selectedSessionLocationId.value === null) return true;
-
-    const enrollmentSessionLocationId = enrollment.SL_ID ?? enrollment.SESSION_LOCATION?.SL_ID;
-    if (enrollmentSessionLocationId !== undefined && enrollmentSessionLocationId !== null) {
-      return enrollmentSessionLocationId === selectedSessionLocationId.value;
-    }
-
-    const enrollmentSessionLocations = sessionLocations.value.filter(
-      (location) => location.SS_ID === enrollment.SESSION_ID,
-    );
-    return (
-      enrollmentSessionLocations.length > 0 &&
-      enrollmentSessionLocations[0]?.SL_ID === selectedSessionLocationId.value
-    );
+    return activeSessionIds.value.includes(enrollment.SESSION_ID);
   });
 });
 
-const sessionTotalCount = computed(() => currentRoomEnrollments.value.length);
+const sessionTotalCount = computed(() => currentSessionEnrollments.value.length);
 
-const currentRoomCapacity = computed((): number => {
-  if (activeLocation.value?.SEATS?.length) return activeLocation.value.SEATS.length;
-  return (
-    activeTimeSessions.value.find((session) => session.SS_ID === activeSessionLocation.value?.SS_ID)
-      ?.SS_CAPACITY ?? 0
-  );
+const currentSessionCapacity = computed((): number => {
+  if (sessionLocations.value.length > 0) {
+    return sessionLocations.value.reduce((total, item) => {
+      const locationSeatCount = item.LOCATION.SEATS?.length;
+      if (locationSeatCount && locationSeatCount > 0) {
+        return total + locationSeatCount;
+      }
+      const sessionCapacity =
+        activeTimeSessions.value.find((session) => session.SS_ID === item.SS_ID)?.SS_CAPACITY ?? 0;
+      return total + sessionCapacity;
+    }, 0);
+  }
+
+  return activeTimeSessions.value.reduce((total, session) => total + (session.SS_CAPACITY ?? 0), 0);
 });
 
 const selectedSessionTime = computed((): string => {
@@ -445,19 +441,9 @@ const selectedSessionTime = computed((): string => {
 });
 
 const selectedSessionLocation = computed((): string => {
-  if (!activeLocation.value) return '-';
-  const location = activeLocation.value;
-  return `${location.LOCATION_NAME}${location.LOCATION_ROOM_NO ? ` (${location.LOCATION_ROOM_NO})` : ''}`;
+  if (sessionLocationLabelList.value.length === 0) return '-';
+  return sessionLocationLabelList.value.join(', ');
 });
-
-const calculateBand = (total: number): number => {
-  if (total >= 80) return 5;
-  if (total >= 70) return 4;
-  if (total >= 60) return 3;
-  if (total >= 50) return 2;
-  if (total >= 40) return 1;
-  return 0;
-};
 
 const scoreByEnrollmentId = computed(() => {
   return new Map(examScores.value.map((score) => [score.ERM_ID, score]));
@@ -465,26 +451,26 @@ const scoreByEnrollmentId = computed(() => {
 
 const hasSavedScores = computed(() => {
   return (
-    currentRoomEnrollments.value.length > 0 &&
-    currentRoomEnrollments.value.some((enrollment) =>
+    currentSessionEnrollments.value.length > 0 &&
+    currentSessionEnrollments.value.some((enrollment) =>
       scoreByEnrollmentId.value.has(enrollment.ERM_ID),
     )
   );
 });
 
 const exportCsvFileNamePrefix = computed(() => {
-  const examName = exam.value?.EXAM_ROUND
-    ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
-    : exam.value?.EXAM_NAME || '';
+  const examName =
+    formatExamDisplayTitle(
+      exam.value?.EXAM_NAME,
+      exam.value?.EXAM_ROUND,
+      exam.value?.EXAM_FISCAL_YEAR,
+    ) || '';
   const time = selectedSessionTime.value || '';
-  const room = selectedSessionLocation.value || '';
-  return `คะแนนสอบ_${examName}_${time}_${room}`.replace(/[\s/\\?%*:|"<>]+/g, '_');
+  return `คะแนนสอบ_${examName}_${time}_ทุกห้อง`.replace(/[\s/\\?%*:|"<>]+/g, '_');
 });
 
 const selectedSessionName = computed((): string => {
   if (!selectedSession.value) return '';
-  const loc = activeSessionLocation.value;
-  if (loc && loc.SS_NAME) return loc.SS_NAME;
   const sessions = exam.value?.SESSIONS || [];
   const index = sessions.findIndex((s) => s.SS_ID === selectedSessionId.value);
   const roundNum = index !== -1 ? index + 1 : 1;
@@ -514,9 +500,13 @@ const examDisplayName = computed(() => {
   if (!exam.value) {
     return 'BUU-GET Exam';
   }
-  return exam.value.EXAM_ROUND
-    ? `${exam.value.EXAM_NAME} ${exam.value.EXAM_ROUND}`
-    : exam.value.EXAM_NAME;
+  return (
+    formatExamDisplayTitle(
+      exam.value.EXAM_NAME,
+      exam.value.EXAM_ROUND,
+      exam.value.EXAM_FISCAL_YEAR,
+    ) || exam.value.EXAM_NAME
+  );
 });
 
 const issueCertificates = (): void => {
@@ -554,23 +544,13 @@ const viewIssuedCertificate = (row: ScoreTableRow): void => {
   showIssueCertificateDialog.value = true;
 };
 
-const toNumber = (value: number | string | null | undefined): number => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-};
-
 const getScoreDraft = (enrollment: BackendEnrollmentDetail): ScoreDraft => {
   const score = scoreByEnrollmentId.value.get(enrollment.ERM_ID);
-  const scoreGrammar = toNumber(score?.SC_LANG_USE_SCORE);
-  const scoreReading = toNumber(score?.SC_READING_SCORE);
-  const scoreTotal = toNumber(score?.SC_TOTAL_SCORE) || scoreGrammar + scoreReading;
+  return buildScoreDraftFromScore(score, rubricItems.value);
+};
 
-  return {
-    scoreGrammar,
-    scoreReading,
-    scoreTotal,
-    band: toNumber(score?.SC_BAND_LEVEL) || calculateBand(scoreTotal),
-  };
+const resolveBandLevel = (total: number): string | null => {
+  return calculateBandFromRules(total, bandRules.value);
 };
 
 const initializeScoreDrafts = (): void => {
@@ -585,11 +565,16 @@ const initializeScoreDrafts = (): void => {
 };
 
 const scoreRows = computed(() => {
-  const rows = currentRoomEnrollments.value.map((enrollment, index): ScoreTableRow => {
+  const rows = currentSessionEnrollments.value.map((enrollment, index): ScoreTableRow => {
     const profile = enrollment.USER?.PROFILE;
     const draft = scoreDraftByEnrollmentId.value[enrollment.ERM_ID] ?? getScoreDraft(enrollment);
     const score = scoreByEnrollmentId.value.get(enrollment.ERM_ID);
     const hasSavedCertificate = !!(score?.CERTIFICATES && score.CERTIFICATES.length > 0);
+    const location =
+      enrollment.SESSION_LOCATION?.LOCATION ??
+      sessionLocations.value.find((item) => item.SL_ID === enrollment.SL_ID)?.LOCATION ??
+      enrollment.SESSION?.LOCATION ??
+      null;
 
     return {
       index: index + 1,
@@ -606,10 +591,12 @@ const scoreRows = computed(() => {
       sessionLocationId: enrollment.SL_ID ?? null,
       userProfileId: profile?.userProfileId || 0,
       remark: enrollment.ERM_PHYSICAL_STATUS || '',
-      scoreGrammar: draft.scoreGrammar,
-      scoreReading: draft.scoreReading,
+      location: formatLocationLabel(location),
+      scoreGrammar: scoreByCode(draft, rubricItems.value, 'LANG_USE'),
+      scoreReading: scoreByCode(draft, rubricItems.value, 'READING'),
       scoreTotal: draft.scoreTotal,
       band: draft.band,
+      itemScores: { ...draft.lineScores },
       hasImportedScore: importedEnrollmentIds.value.has(enrollment.ERM_ID),
       hasScore:
         importedEnrollmentIds.value.has(enrollment.ERM_ID) ||
@@ -623,11 +610,12 @@ const scoreRows = computed(() => {
   return rows.filter(
     (row) =>
       row.nationalId?.toLowerCase().includes(query) ||
-      row.fullnameTh?.toLowerCase().includes(query),
+      row.fullnameTh?.toLowerCase().includes(query) ||
+      row.location?.toLowerCase().includes(query),
   );
 });
 
-const columns: QTableColumn[] = [
+const baseColumns: QTableColumn[] = [
   {
     name: 'index',
     label: 'ลำดับ',
@@ -643,6 +631,13 @@ const columns: QTableColumn[] = [
     style: 'width: 15%',
   },
   {
+    name: 'location',
+    label: 'ห้องสอบ',
+    field: 'location',
+    align: 'center',
+    style: 'width: 18%',
+  },
+  {
     name: 'titleTh',
     label: 'คำนำหน้า',
     field: 'titleTh',
@@ -656,22 +651,21 @@ const columns: QTableColumn[] = [
     align: 'left',
     style: 'width: 25%; padding-left: 5%',
   },
-  {
-    name: 'scoreGrammar',
-    label: 'คำศัพท์และไวยากรณ์',
-    field: 'scoreGrammar',
-    align: 'center',
+];
+
+const rubricScoreColumns = computed((): QTableColumn[] =>
+  rubricItems.value.map((item) => ({
+    name: `score_item_${item.id}`,
+    label: item.nameTh,
+    field: (row: ScoreTableRow) => row.itemScores[item.id] ?? 0,
+    align: 'center' as const,
     style: 'width: 10%',
-    format: (val: unknown, row: ScoreTableRow) => (row.hasScore ? String(val) : ''),
-  },
-  {
-    name: 'scoreReading',
-    label: 'ทักษะการอ่าน',
-    field: 'scoreReading',
-    align: 'center',
-    style: 'width: 10%',
-    format: (val: unknown, row: ScoreTableRow) => (row.hasScore ? String(val) : ''),
-  },
+    format: (_val: unknown, row: ScoreTableRow) =>
+      row.hasScore ? String(row.itemScores[item.id] ?? 0) : '',
+  })),
+);
+
+const tailColumns: QTableColumn[] = [
   {
     name: 'scoreTotal',
     label: 'คะแนนรวม',
@@ -687,7 +681,12 @@ const columns: QTableColumn[] = [
     field: 'band',
     align: 'center',
     style: 'width: 10%',
-    format: (val: unknown, row: ScoreTableRow) => (row.hasScore ? String(val) : ''),
+    format: (val: unknown, row: ScoreTableRow) => {
+      if (!row.hasScore) {
+        return '';
+      }
+      return typeof val === 'number' || typeof val === 'string' ? String(val) : '';
+    },
     classes: 'text-weight-bold',
   },
   {
@@ -699,111 +698,92 @@ const columns: QTableColumn[] = [
   },
 ];
 
+const columns = computed(() => [...baseColumns, ...rubricScoreColumns.value, ...tailColumns]);
+
 const tableColumns = computed(() => {
   const hasAnyCertificate = scoreRows.value.some((row) => row.hasSavedCertificate);
+  const cols = columns.value;
   if (!hasAnyCertificate) {
-    return columns.filter((col) => col.name !== 'tools');
+    return cols.filter((col) => col.name !== 'tools');
   }
-  return columns;
+  return cols;
 });
 
-const sampleColumns: QTableColumn[] = [
-  {
-    name: 'testTakerId',
-    label: 'Test Taker Id',
-    field: 'testTakerId',
-    align: 'center',
-  },
-  {
-    name: 'fullnameEn',
-    label: 'Fullname English',
-    field: 'fullnameEn',
-    align: 'center',
-  },
-  {
-    name: 'fullnameTh',
-    label: 'Fullname Thai',
-    field: 'fullnameTh',
-    align: 'center',
-  },
-  {
-    name: 'citizenId',
-    label: 'Citizen Id',
-    field: 'citizenId',
-    align: 'center',
-  },
-  {
-    name: 'passport',
-    label: 'Passport',
-    field: 'passport',
-    align: 'center',
-  },
-  {
-    name: 'vocabularyScore',
-    label: 'vocabulary score (50)',
-    field: 'vocabularyScore',
-    align: 'center',
-  },
-  {
-    name: 'readingScore',
-    label: 'reading score (50)',
-    field: 'readingScore',
-    align: 'center',
-  },
-  {
-    name: 'totalScore',
-    label: 'Total Score (100)',
-    field: 'totalScore',
-    align: 'center',
-  },
-  {
-    name: 'level',
-    label: 'level',
-    field: 'level',
-    align: 'center',
-  },
-];
+const sampleColumns = computed((): QTableColumn[] => {
+  const identityColumns: QTableColumn[] = [
+    { name: 'testTakerId', label: 'Test Taker Id', field: 'testTakerId', align: 'center' },
+    { name: 'location', label: 'Room', field: 'location', align: 'center' },
+    { name: 'fullnameEn', label: 'Fullname English', field: 'fullnameEn', align: 'center' },
+    { name: 'fullnameTh', label: 'Fullname Thai', field: 'fullnameTh', align: 'center' },
+    { name: 'citizenId', label: 'Citizen Id', field: 'citizenId', align: 'center' },
+    { name: 'passport', label: 'Passport', field: 'passport', align: 'center' },
+  ];
+  const scoreItemColumns = rubricItems.value.map((item) => ({
+    name: `sample_item_${item.id}`,
+    label: `${item.nameEn} (${item.maxScore})`,
+    field: `item_${item.id}`,
+    align: 'center' as const,
+  }));
+  return [
+    ...identityColumns,
+    ...scoreItemColumns,
+    {
+      name: 'totalScore',
+      label: `Total Score (${rubricItems.value.reduce((s, i) => s + i.maxScore, 0)})`,
+      field: 'totalScore',
+      align: 'center',
+    },
+  ];
+});
 
 interface SampleScoreRow {
   testTakerId: string;
+  location: string;
   fullnameEn: string;
   fullnameTh: string;
   citizenId: string;
   passport: string;
-  vocabularyScore: number;
-  readingScore: number;
   totalScore: number;
-  level: number;
+  [key: string]: string | number;
 }
 
-/** ตัวอย่างไฟล์จากผู้สมัครจริงในห้องที่เลือก — ดาวน์โหลดแล้ว import กลับได้ทันที */
+/** ตัวอย่างไฟล์จากผู้สมัครจริงทุกห้องในช่วงเวลาที่เลือก — ดาวน์โหลดแล้ว import กลับได้ทันที */
 const sampleRows = computed((): SampleScoreRow[] => {
-  return currentRoomEnrollments.value.map((enrollment, index): SampleScoreRow => {
+  return currentSessionEnrollments.value.map((enrollment, index): SampleScoreRow => {
     const profile = enrollment.USER?.PROFILE;
     const draft = scoreDraftByEnrollmentId.value[enrollment.ERM_ID] ?? getScoreDraft(enrollment);
     const hasExistingScore =
-      draft.scoreGrammar > 0 ||
-      draft.scoreReading > 0 ||
+      Object.values(draft.lineScores).some((score) => score > 0) ||
       scoreByEnrollmentId.value.has(enrollment.ERM_ID);
+    const location =
+      enrollment.SESSION_LOCATION?.LOCATION ??
+      sessionLocations.value.find((item) => item.SL_ID === enrollment.SL_ID)?.LOCATION ??
+      enrollment.SESSION?.LOCATION ??
+      null;
 
-    const vocabularyScore = hasExistingScore ? draft.scoreGrammar : 20 + (index % 25);
-    const readingScore = hasExistingScore ? draft.scoreReading : 20 + ((index + 7) % 25);
+    const lineScores: Record<number, number> = {};
+    rubricItems.value.forEach((item, itemIndex) => {
+      lineScores[item.id] = hasExistingScore
+        ? (draft.lineScores[item.id] ?? 0)
+        : 20 + ((index + itemIndex * 7) % 25);
+    });
     const totalScore = hasExistingScore
-      ? draft.scoreTotal || vocabularyScore + readingScore
-      : vocabularyScore + readingScore;
-    const level = hasExistingScore ? draft.band || calculateBand(totalScore) : calculateBand(totalScore);
+      ? draft.scoreTotal || sumLineScores(rubricItems.value, lineScores)
+      : sumLineScores(rubricItems.value, lineScores);
 
-    return {
+    const row: SampleScoreRow = {
       testTakerId: enrollment.ERM_TEST_TAKER?.trim() || '-',
+      location: formatLocationLabel(location),
       fullnameEn: profile?.userFullnameEn || '-',
       fullnameTh: profile?.userFullnameTh || '-',
       citizenId: enrollment.USER?.USER_NATIONAL_ID?.trim() || '-',
       passport: enrollment.USER?.USER_PASSPORT_NO?.trim() || '-',
-      vocabularyScore,
-      readingScore,
       totalScore,
-      level,
     };
+    rubricItems.value.forEach((item) => {
+      row[`item_${item.id}`] = lineScores[item.id] ?? 0;
+    });
+    return row;
   });
 });
 
@@ -1025,33 +1005,20 @@ const applyImportedScoreRows = (rows: string[][]): void => {
       header.includes('passport_no') ||
       header.includes('passportno'),
   );
-  const idxGrammar = headers.findIndex(
-    (header) =>
-      header.includes('grammar') ||
-      header.includes('vocab') ||
-      header.includes('language') ||
-      header.includes('คำศัพท์') ||
-      header.includes('ไวยากรณ์') ||
-      header.includes('lang_use') ||
-      header.includes('languse'),
-  );
-  const idxReading = headers.findIndex(
-    (header) =>
-      header.includes('reading') || header.includes('การอ่าน') || header.includes('read_score'),
-  );
-  const idxTotal = headers.findIndex(
-    (header) => header.includes('total') || header.includes('รวม') || header.includes('คะแนนรวม'),
-  );
-  const idxLevel = headers.findIndex(
-    (header) => header.includes('level') || header.includes('band') || header.includes('ระดับ'),
-  );
+  const itemHeaderIndexes = rubricItems.value.map((item) => ({
+    item,
+    idx: headers.findIndex((header) => matchHeaderToRubricItem(header, item)),
+  }));
 
   let matchedCount = 0;
   const nextImportedIds = new Set(importedEnrollmentIds.value);
 
   // Prebuild lookup maps once — O(enrollments) then O(1) per Excel row
-  const enrollmentByTestTakerKey = new Map<string, (typeof currentRoomEnrollments.value)[number]>();
-  for (const enrollment of currentRoomEnrollments.value) {
+  const enrollmentByTestTakerKey = new Map<
+    string,
+    (typeof currentSessionEnrollments.value)[number]
+  >();
+  for (const enrollment of currentSessionEnrollments.value) {
     const testTaker = enrollment.ERM_TEST_TAKER;
     if (!testTaker) continue;
     const key = normalizeImportKey(testTaker);
@@ -1078,7 +1045,7 @@ const applyImportedScoreRows = (rows: string[][]): void => {
 
     if (!matchedEnrollment && cleanCitizen && cleanCitizen !== '-') {
       const normCitizen = normalizeImportKey(cleanCitizen);
-      matchedEnrollment = currentRoomEnrollments.value.find((enrollment) => {
+      matchedEnrollment = currentSessionEnrollments.value.find((enrollment) => {
         const dbCitizen = enrollment.USER?.USER_NATIONAL_ID;
         return dbCitizen && normalizeImportKey(dbCitizen) === normCitizen;
       });
@@ -1086,7 +1053,7 @@ const applyImportedScoreRows = (rows: string[][]): void => {
 
     if (!matchedEnrollment && cleanPassport && cleanPassport !== '-') {
       const normPassport = normalizeImportKey(cleanPassport);
-      matchedEnrollment = currentRoomEnrollments.value.find((enrollment) => {
+      matchedEnrollment = currentSessionEnrollments.value.find((enrollment) => {
         const dbPassport = enrollment.USER?.USER_PASSPORT_NO;
         return dbPassport && normalizeImportKey(dbPassport) === normPassport;
       });
@@ -1094,20 +1061,24 @@ const applyImportedScoreRows = (rows: string[][]): void => {
 
     if (!matchedEnrollment) continue;
 
-    const rawGrammar = idxGrammar >= 0 ? values[idxGrammar] : '';
-    const rawReading = idxReading >= 0 ? values[idxReading] : '';
-    const rawTotal = idxTotal >= 0 ? values[idxTotal] : undefined;
-    const rawLevel = idxLevel >= 0 ? values[idxLevel] : undefined;
+    const lineScores: Record<number, number> = {};
+    for (const { item, idx } of itemHeaderIndexes) {
+      if (idx < 0) continue;
+      lineScores[item.id] = Number(values[idx]) || 0;
+    }
 
-    const grammar = Number(rawGrammar) || 0;
-    const reading = Number(rawReading) || 0;
-    const total = rawTotal !== undefined && rawTotal !== '' ? Number(rawTotal) : grammar + reading;
-    const level =
-      rawLevel !== undefined && rawLevel !== '' ? Number(rawLevel) : calculateBand(total);
+    const rawTotal = headers.findIndex((header) =>
+      ['total', 'รวม', 'คะแนนรวม'].some((token) => header.includes(token)),
+    );
+    const rawTotalVal = rawTotal >= 0 ? values[rawTotal] : undefined;
+    const total =
+      rawTotalVal !== undefined && rawTotalVal !== ''
+        ? Number(rawTotalVal)
+        : sumLineScores(rubricItems.value, lineScores);
+    const level = resolveBandLevel(total);
 
     scoreDraftByEnrollmentId.value[matchedEnrollment.ERM_ID] = {
-      scoreGrammar: grammar,
-      scoreReading: reading,
+      lineScores,
       scoreTotal: total,
       band: level,
     };
@@ -1124,7 +1095,7 @@ const applyImportedScoreRows = (rows: string[][]): void => {
     message:
       matchedCount > 0
         ? `นำเข้าคะแนนสำเร็จ ${matchedCount} รายการ`
-        : 'ไม่พบข้อมูลผู้สมัครที่ตรงกับไฟล์ในห้องนี้',
+        : 'ไม่พบข้อมูลผู้สมัครที่ตรงกับไฟล์ในช่วงเวลานี้',
   });
 };
 
@@ -1158,7 +1129,7 @@ const openSampleDialog = (): void => {
   if (sampleRows.value.length === 0) {
     $q.notify({
       type: 'warning',
-      message: 'ไม่พบผู้สมัครในห้องนี้สำหรับสร้างไฟล์ตัวอย่าง',
+      message: 'ไม่พบผู้สมัครในช่วงเวลานี้สำหรับสร้างไฟล์ตัวอย่าง',
     });
     return;
   }
@@ -1186,30 +1157,29 @@ const downloadSampleFile = (): void => {
   if (sampleRows.value.length === 0) {
     $q.notify({
       type: 'warning',
-      message: 'ไม่พบผู้สมัครในห้องนี้สำหรับสร้างไฟล์ตัวอย่าง',
+      message: 'ไม่พบผู้สมัครในช่วงเวลานี้สำหรับสร้างไฟล์ตัวอย่าง',
     });
     return;
   }
 
-  const headers = sampleColumns.map((column) => wrapCsvCell(String(column.label ?? '')));
-  const dataRows = sampleRows.value.map((row) =>
-    [
-      wrapCsvCell(row.testTakerId, true),
-      wrapCsvCell(row.fullnameEn),
-      wrapCsvCell(row.fullnameTh),
-      wrapCsvCell(row.citizenId, true),
-      wrapCsvCell(row.passport, true),
-      wrapCsvCell(row.vocabularyScore),
-      wrapCsvCell(row.readingScore),
-      wrapCsvCell(row.totalScore),
-      wrapCsvCell(row.level),
-    ].join(','),
-  );
+  const headers = sampleColumns.value.map((column) => wrapCsvCell(String(column.label ?? '')));
+  const dataRows = sampleRows.value.map((row) => {
+    const cells = sampleColumns.value.map((column) => {
+      const field = String(column.field ?? '');
+      return wrapCsvCell(row[field] ?? '');
+    });
+    return cells.join(',');
+  });
 
   const content = `\ufeff${[headers.join(','), ...dataRows].join('\r\n')}`;
-  const examName = exam.value?.EXAM_ROUND
-    ? `${exam.value.EXAM_NAME}_${exam.value.EXAM_ROUND}`
-    : exam.value?.EXAM_NAME || 'exam';
+  const examName =
+    formatExamDisplayTitle(
+      exam.value?.EXAM_NAME,
+      exam.value?.EXAM_ROUND,
+      exam.value?.EXAM_FISCAL_YEAR,
+    ) ||
+    exam.value?.EXAM_NAME ||
+    'exam';
   const fileName = `score_import_sample_${examName}`.replace(/[\s/\\?%*:|"<>]+/g, '_');
   const status = exportFile(`${fileName}.csv`, content, 'text/csv');
 
@@ -1259,13 +1229,7 @@ const saveScores = async (): Promise<void> => {
       rowsToSave.map((enrollment) => {
         const draft =
           scoreDraftByEnrollmentId.value[enrollment.ERM_ID] ?? getScoreDraft(enrollment);
-        const payload: SaveExamScorePayload = {
-          ERM_ID: enrollment.ERM_ID,
-          SC_LANG_USE_SCORE: draft.scoreGrammar,
-          SC_READING_SCORE: draft.scoreReading,
-          SC_TOTAL_SCORE: draft.scoreTotal,
-          SC_BAND_LEVEL: draft.band,
-        };
+        const payload = buildSavePayload(enrollment.ERM_ID, draft, rubricItems.value);
         const existingScore = scoreByEnrollmentId.value.get(enrollment.ERM_ID);
 
         return existingScore
@@ -1299,18 +1263,6 @@ watch(sessionTimeTabs, (sessions) => {
   if (!hasSelectedSession) selectedSessionId.value = sessions[0]?.SS_ID ?? null;
 });
 
-watch(sessionLocations, (locations) => {
-  if (!locations.length) {
-    selectedSessionLocationId.value = null;
-    return;
-  }
-
-  const hasSelectedLocation = locations.some(
-    (location) => location.SL_ID === selectedSessionLocationId.value,
-  );
-  if (!hasSelectedLocation) selectedSessionLocationId.value = locations[0]?.SL_ID ?? null;
-});
-
 watch(scoreRows, (rows) => {
   pagination.value.rowsNumber = rows.length;
 });
@@ -1323,9 +1275,16 @@ const loadData = async (): Promise<void> => {
     isLoading.value = true;
     const [examDetail, scores] = await Promise.all([fetchExamById(examId), fetchExamScores()]);
 
+    try {
+      const rulesResponse = await getBandRules();
+      bandRules.value = rulesResponse.bandRules;
+    } catch (error) {
+      console.error('Error fetching band rules:', error);
+      bandRules.value = [];
+    }
+
     exam.value = examDetail;
     selectedSessionId.value = sessionTimeTabs.value[0]?.SS_ID ?? null;
-    selectedSessionLocationId.value = sessionLocations.value[0]?.SL_ID ?? null;
 
     const rawEnrollments = await fetchRawEnrollmentsByExamId(examId, {
       sessionId: selectedSessionId.value,

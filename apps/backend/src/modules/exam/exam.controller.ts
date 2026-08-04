@@ -84,7 +84,11 @@ export class ExamController {
 
   @Post(':id/passcodes')
   @Roles(...EXAM_ADMIN_ROLES)
-  @ApiOperation({ summary: 'สร้าง passcodes สำหรับการสอบ' })
+  @ApiOperation({
+    summary: 'สร้าง passcodes สำหรับการสอบ',
+    description:
+      'แทนที่รายชื่อผู้มีสิทธิ์สอบทั้งชุด ห้ามเรียกเมื่อมีผู้ลงทะเบียนในรอบสอบแล้ว',
+  })
   @ApiCreatedResponse({ description: 'สร้าง passcodes สำเร็จ' })
   async createPasscodes(
     @Param('id', ParseIntPipe) id: number,

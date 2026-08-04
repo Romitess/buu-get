@@ -535,6 +535,7 @@ export class ExamEnrollmentsService {
         'ATTENDANCES',
         'SCORE',
         'SCORE.CERTIFICATES',
+        'SCORE.LINES',
       ],
       order: { CREATED_AT: 'DESC' },
     });
@@ -546,7 +547,12 @@ export class ExamEnrollmentsService {
     const examHistory: ExamHistoryRow[] = attendedEnrollments.map(
       (e, index) => {
         const exam = e.SESSION?.EXAM;
-        const examRound = exam?.EXAM_ROUND || '-';
+        const round = exam?.EXAM_ROUND?.trim() || '';
+        const fiscalYear = exam?.EXAM_FISCAL_YEAR?.trim() || '';
+        const examRound =
+          round && fiscalYear
+            ? `${round}/${fiscalYear}`
+            : round || fiscalYear || '-';
 
         let examDate = '-';
         if (exam?.EXAM_DATE) {
@@ -561,6 +567,17 @@ export class ExamEnrollmentsService {
         const certificates = score?.CERTIFICATES || [];
         const hasCertificate = certificates.length > 0;
         const cert = hasCertificate ? certificates[0] : null;
+
+        const scoreLines =
+          score?.LINES?.filter((line) => !line.DELETED_AT)
+            .sort((a, b) => a.SCL_SORT_ORDER - b.SCL_SORT_ORDER)
+            .map((line) => ({
+              nameTh: line.SCL_NAME_TH,
+              nameEn: line.SCL_NAME_EN,
+              score: Number(line.SCL_SCORE),
+              maxScore: Number(line.SCL_MAX_SCORE),
+              sortOrder: line.SCL_SORT_ORDER,
+            })) ?? [];
 
         return {
           index: index + 1,
@@ -585,6 +602,7 @@ export class ExamEnrollmentsService {
             ? cert.CERT_EXPIRES_AT.toISOString()
             : null,
           certCode: cert ? cert.CERT_CODE : null,
+          scoreLines: scoreLines.length > 0 ? scoreLines : undefined,
         };
       },
     );
@@ -678,14 +696,15 @@ export class ExamEnrollmentsService {
       if ('ผ่าน'.includes(searchLower)) verifyMatches.push(1);
       if ('ให้แก้ไข'.includes(searchLower)) verifyMatches.push(2);
 
-      // Physical Status mapping
+      // Physical Status mapping (0 = พระภิกษุ/นักบวช รวมแล้ว)
       if (
         'พระภิกษุ'.includes(searchLower) ||
         'สามเณร'.includes(searchLower) ||
-        'พระสงฆ์'.includes(searchLower)
+        'พระสงฆ์'.includes(searchLower) ||
+        'นักบวช'.includes(searchLower) ||
+        'ศาสนบุคคล'.includes(searchLower)
       )
         physicalMatches.push(0);
-      if ('นักบวช'.includes(searchLower)) physicalMatches.push(1);
       if ('ทุพพลภาพ'.includes(searchLower)) physicalMatches.push(2);
       if ('ตั้งครรภ์'.includes(searchLower)) physicalMatches.push(3);
       if ('พิการ'.includes(searchLower)) physicalMatches.push(4);

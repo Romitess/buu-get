@@ -32,31 +32,33 @@
             </div>
           </div>
 
-          <!-- ชื่อการสอบ & รอบการสอบ ในแถวเดียวกัน (กว้างเท่ากัน, รวมกัน = ความกว้างของ field ค่าธรรมเนียมด้านล่าง) -->
-          <div class="col-12 row no-wrap exam-name-round-row">
-            <div class="col" data-field="examName">
-              <div class="buu-label-muted q-mb-xs">ชื่อการสอบ</div>
-              <q-input
-                v-model="form.examName"
-                :placeholder="DEFAULT_EXAM_NAME"
-                outlined
-                dense
-                bg-color="white"
-                class="buu-input-muted exam-placeholder-faded"
-                :class="{ 'buu-field-error': hasError('examName') }"
-                :disable="isLocked"
-                @update:model-value="emit('clearFieldError', 'examName')"
-              />
-              <div v-if="hasError('examName')" :key="`examName-${shakeKey}`" class="buu-error-msg">
-                <q-icon name="error" class="buu-error-icon" />
-                {{ fieldErrors?.examName }}
-              </div>
+          <!-- ชื่อการสอบ -->
+          <div class="col-12" data-field="examName">
+            <div class="buu-label-muted q-mb-xs">ชื่อการสอบ</div>
+            <q-input
+              v-model="form.examName"
+              :placeholder="DEFAULT_EXAM_NAME"
+              outlined
+              dense
+              bg-color="white"
+              class="buu-input-muted exam-placeholder-faded"
+              :class="{ 'buu-field-error': hasError('examName') }"
+              :disable="isLocked"
+              @update:model-value="emit('clearFieldError', 'examName')"
+            />
+            <div v-if="hasError('examName')" :key="`examName-${shakeKey}`" class="buu-error-msg">
+              <q-icon name="error" class="buu-error-icon" />
+              {{ fieldErrors?.examName }}
             </div>
+          </div>
+
+          <!-- ครั้งที่จัดสอบ & ปีงบประมาณ -->
+          <div class="col-12 row no-wrap exam-name-round-row">
             <div class="col" data-field="examRound">
-              <div class="buu-label-muted q-mb-xs">รอบการสอบ</div>
+              <div class="buu-label-muted q-mb-xs">ครั้งที่จัดสอบ</div>
               <q-input
                 v-model="form.examRound"
-                placeholder="1/2026"
+                placeholder="1"
                 outlined
                 dense
                 bg-color="white"
@@ -72,6 +74,29 @@
               >
                 <q-icon name="error" class="buu-error-icon" />
                 {{ fieldErrors?.examRound }}
+              </div>
+            </div>
+            <div class="col" data-field="examFiscalYear">
+              <div class="buu-label-muted q-mb-xs">ปีงบประมาณ</div>
+              <q-input
+                v-model="form.examFiscalYear"
+                placeholder="2569"
+                outlined
+                dense
+                bg-color="white"
+                class="buu-input-muted exam-placeholder-faded"
+                :class="{ 'buu-field-error': hasError('examFiscalYear') }"
+                :disable="isLocked"
+                maxlength="10"
+                @update:model-value="emit('clearFieldError', 'examFiscalYear')"
+              />
+              <div
+                v-if="hasError('examFiscalYear')"
+                :key="`examFiscalYear-${shakeKey}`"
+                class="buu-error-msg"
+              >
+                <q-icon name="error" class="buu-error-icon" />
+                {{ fieldErrors?.examFiscalYear }}
               </div>
             </div>
           </div>
@@ -154,6 +179,33 @@
             </div>
           </div>
 
+          <!-- ชุดเกณฑ์คะแนน -->
+          <div class="col-12" data-field="srbId">
+            <div class="buu-label-muted q-mb-xs">ชุดเกณฑ์คะแนน</div>
+            <app-select
+              v-model="form.srbId"
+              :options="scoreRubricOptions"
+              option-label="label"
+              option-value="value"
+              emit-value
+              map-options
+              outlined
+              dense
+              bg-color="white"
+              :loading="isLoadingData"
+              placeholder="เลือกชุดเกณฑ์คะแนน"
+              dropdown-icon="keyboard_arrow_down"
+              class="buu-input-muted"
+              :class="{ 'buu-field-error': hasError('srbId') }"
+              :disable="isLocked"
+              @update:model-value="emit('clearFieldError', 'srbId')"
+            />
+            <div v-if="hasError('srbId')" :key="`srbId-${shakeKey}`" class="buu-error-msg">
+              <q-icon name="error" class="buu-error-icon" />
+              {{ fieldErrors?.srbId }}
+            </div>
+          </div>
+
           <!-- สถานะเผยแพร่ -->
           <div class="col-12 self-end">
             <q-field outlined bg-color="white" class="buu-field-large buu-input-muted">
@@ -195,6 +247,8 @@ const props = defineProps<{
   examFormatOptions: string[];
   /** Fund source options from the API. */
   fundSourceOptions: { label: string; value: number }[];
+  /** Score rubric options from the API. */
+  scoreRubricOptions: { label: string; value: number }[];
   /** Loading state for fund source data. */
   isLoadingData: boolean;
   /** Whether the entire details card should be locked (e.g. once published) */

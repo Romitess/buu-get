@@ -48,9 +48,10 @@
         :voucher-data="voucherData"
         :title="$t('admin.seatCandidates.voucherPreviewTitle')"
         use-image-placeholder
+        @update:editing-regulations="isEditingRegulations = $event"
       />
 
-      <aside class="seat-lock-note" role="note">
+      <aside v-show="!isEditingRegulations" class="seat-lock-note" role="note">
         <q-icon name="info" size="18px" class="seat-lock-note__icon" aria-hidden="true" />
         <p class="seat-lock-note__text">
           <strong class="seat-lock-note__label">{{
@@ -62,7 +63,7 @@
 
       <p v-if="confirmError" class="confirm-error" role="alert">{{ confirmError }}</p>
 
-      <q-card-actions class="dialog-actions">
+      <q-card-actions v-show="!isEditingRegulations" class="dialog-actions">
         <AppButton
           label="ยกเลิก"
           color="grey-4"
@@ -118,6 +119,7 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } = useDialogPluginC
 
 const isConfirming = ref(false);
 const confirmError = ref<string | null>(null);
+const isEditingRegulations = ref(false);
 
 const onOKClick = async (): Promise<void> => {
   if (!props.onConfirm) {

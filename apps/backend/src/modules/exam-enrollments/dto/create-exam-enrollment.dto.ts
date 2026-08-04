@@ -82,7 +82,7 @@ export class CreateExamEnrollmentDto {
   @IsEnum(ExamVerifyStatus)
   ERM_VERIFY_STATUS?: ExamVerifyStatus;
 
-  @ApiProperty({ example: 'พระภิกษุ / สามเณร', required: false })
+  @ApiProperty({ example: 'พระภิกษุ / นักบวช', required: false })
   @IsOptional()
   @IsString()
   PHYSICAL_STATUS?: string;

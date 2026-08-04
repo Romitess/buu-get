@@ -12,6 +12,7 @@ import type { ExamHistoryItem } from 'src/types/exam';
 import type { VoucherData } from 'src/types/voucher';
 import type { ReceiptData } from 'src/types/receipt';
 import { generateReceiptQrDataUrl } from 'src/utils/verify-qr';
+import { formatExamInstanceLabel } from 'src/utils/exam-instance-label';
 
 export function useExamDocuments() {
   const $q = useQuasar();
@@ -185,7 +186,7 @@ export function useExamDocuments() {
           currentUser?.nationalId ||
           currentUser?.passportNo ||
           '-',
-        testSession: examObj?.EXAM_ROUND || '-',
+        testSession: formatExamInstanceLabel(examObj?.EXAM_ROUND, examObj?.EXAM_FISCAL_YEAR) || '-',
         profileImage: profileImagePath ? getImageUrl(profileImagePath) : undefined,
         // Code128 payload = Test Taker ID for door scanners / attendance
         barcodeValue: enrollment.ERM_TEST_TAKER || '',

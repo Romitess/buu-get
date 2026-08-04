@@ -1,52 +1,120 @@
 <template>
-  <section class="voucher-preview-section">
+  <section
+    class="voucher-preview-section"
+    :class="{ 'is-editing-regulations': isEditingRegulations }"
+  >
     <div class="preview-heading">
-      <span>{{ title }}</span>
-      <div
-        class="side-tabs"
-        role="tablist"
-        :aria-label="$t('admin.seatCandidates.voucherSideLabel')"
-      >
-        <button
-          type="button"
-          role="tab"
-          :aria-selected="previewSide === 'front'"
-          :class="{ active: previewSide === 'front' }"
-          @click="previewSide = 'front'"
+      <span>{{ resolvedTitle }}</span>
+      <div class="row items-center q-gutter-sm no-wrap">
+        <AppButton
+          v-if="allowEditRegulations && previewSide === 'back' && !isEditingRegulations"
+          :label="$t('admin.testVoucherManagement.editRegulationsBtn')"
+          icon="edit"
+          flat
+          dense
+          color="primary"
+          class="edit-regulations-btn"
+          @click="startEditRegulations"
+        />
+        <div
+          class="side-tabs"
+          role="tablist"
+          :aria-label="$t('admin.seatCandidates.voucherSideLabel')"
         >
-          {{ $t('admin.seatCandidates.frontSide') }}
-        </button>
-        <span aria-hidden="true">|</span>
-        <button
-          type="button"
-          role="tab"
-          :aria-selected="previewSide === 'back'"
-          :class="{ active: previewSide === 'back' }"
-          @click="previewSide = 'back'"
-        >
-          {{ $t('admin.seatCandidates.backSide') }}
-        </button>
+          <button
+            type="button"
+            role="tab"
+            :aria-selected="previewSide === 'front'"
+            :class="{ active: previewSide === 'front' }"
+            @click="switchSide('front')"
+          >
+            {{ $t('admin.seatCandidates.frontSide') }}
+          </button>
+          <span aria-hidden="true">|</span>
+          <button
+            type="button"
+            role="tab"
+            :aria-selected="previewSide === 'back'"
+            :class="{ active: previewSide === 'back' }"
+            @click="switchSide('back')"
+          >
+            {{ $t('admin.seatCandidates.backSide') }}
+          </button>
+        </div>
       </div>
     </div>
 
-    <div class="voucher-preview" :class="`is-${previewSide}`">
+    <div v-if="isEditingRegulations" class="regulations-edit-panel">
+      <div class="text-subtitle2 text-weight-bold text-dark q-mb-sm">
+        {{ $t('admin.testVoucherManagement.editRegulationsTitle') }}
+      </div>
+
+      <div class="regulations-edit-block">
+        <h4 class="regulations-edit-heading">
+          {{ $t('admin.testVoucherManagement.regulationsEnLabel') }}
+        </h4>
+        <q-input
+          v-model="editingRegulationsEn"
+          outlined
+          type="textarea"
+          autogrow
+          :placeholder="$t('admin.testVoucherManagement.placeholderEn')"
+          class="regulations-edit-input"
+        />
+      </div>
+
+      <div class="regulations-edit-block q-mt-md">
+        <h4 class="regulations-edit-heading">
+          {{ $t('admin.testVoucherManagement.regulationsThLabel') }}
+        </h4>
+        <q-input
+          v-model="editingRegulationsTh"
+          outlined
+          type="textarea"
+          autogrow
+          :placeholder="$t('admin.testVoucherManagement.placeholderTh')"
+          class="regulations-edit-input"
+        />
+      </div>
+
+      <div class="row justify-end q-gutter-sm q-mt-md">
+        <AppButton
+          :label="$t('admin.testVoucherManagement.cancelBtn')"
+          class="regulations-edit-action-btn cancel-btn"
+          :disable="isSavingRegulations"
+          @click="cancelEditRegulations"
+        />
+        <AppButton
+          :label="$t('admin.testVoucherManagement.saveBtn')"
+          color="primary"
+          class="regulations-edit-action-btn"
+          :loading="isSavingRegulations"
+          @click="saveEditRegulations"
+        />
+      </div>
+    </div>
+
+    <div v-show="!isEditingRegulations" class="voucher-preview" :class="`is-${previewSide}`">
       <TestVoucherReport
         :data="voucherData"
         :show-actions="false"
         :show-voucher-card="previewSide === 'front'"
         :show-regulations="previewSide === 'back'"
         :use-image-placeholder="useImagePlaceholder"
-        :regulations-en="regulationsEn"
-        :regulations-th="regulationsTh"
+        :regulations-en="activeRegulationsEn"
+        :regulations-th="activeRegulationsTh"
       />
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
+import AppButton from 'src/components/base/app-button.vue';
 import TestVoucherReport from 'src/components/test-voucher-report.vue';
+import { getRegulations, saveRegulations } from 'src/services/exam-rule-voucher.service';
 import type { VoucherData } from 'src/types/voucher';
 
 const props = withDefaults(
@@ -56,15 +124,141 @@ const props = withDefaults(
     title?: string;
     regulationsEn?: string | string[];
     regulationsTh?: string | string[];
+    /** อนุญาตแก้ Test Regulations จากด้านหลังใบ (บันทึก template จริง) */
+    allowEditRegulations?: boolean;
   }>(),
   {
     useImagePlaceholder: false,
+    allowEditRegulations: true,
   },
 );
 
+const emit = defineEmits<{
+  (e: 'update:editingRegulations', value: boolean): void;
+}>();
+
 const { t } = useI18n();
-const title = props.title ?? t('admin.seatCandidates.voucherTitle');
+const $q = useQuasar();
+
+const resolvedTitle = computed(() => props.title ?? t('admin.seatCandidates.voucherTitle'));
+
 const previewSide = ref<'front' | 'back'>('front');
+const isEditingRegulations = ref(false);
+const isSavingRegulations = ref(false);
+const loadedRegulationsEn = ref(t('admin.testVoucherManagement.defaultRegulationsEn'));
+const loadedRegulationsTh = ref(t('admin.testVoucherManagement.defaultRegulationsTh'));
+const editingRegulationsEn = ref('');
+const editingRegulationsTh = ref('');
+
+const setEditingRegulations = (value: boolean): void => {
+  isEditingRegulations.value = value;
+  emit('update:editingRegulations', value);
+};
+const normalizeRegulations = (value?: string | string[] | null): string => {
+  if (Array.isArray(value)) {
+    return value.join('\n').trim();
+  }
+  return (value ?? '').trim();
+};
+
+const activeRegulationsEn = computed((): string => {
+  const fromProp = normalizeRegulations(props.regulationsEn);
+  if (fromProp) return fromProp;
+  return loadedRegulationsEn.value;
+});
+
+const activeRegulationsTh = computed((): string => {
+  const fromProp = normalizeRegulations(props.regulationsTh);
+  if (fromProp) return fromProp;
+  return loadedRegulationsTh.value;
+});
+
+const applyDefaultRegulations = (): void => {
+  loadedRegulationsEn.value = t('admin.testVoucherManagement.defaultRegulationsEn');
+  loadedRegulationsTh.value = t('admin.testVoucherManagement.defaultRegulationsTh');
+};
+
+const loadRegulations = async (): Promise<void> => {
+  // ถ้า parent ส่ง prop มาแล้ว ไม่ต้องโหลดซ้ำ
+  if (normalizeRegulations(props.regulationsEn) || normalizeRegulations(props.regulationsTh)) {
+    loadedRegulationsEn.value = normalizeRegulations(props.regulationsEn);
+    loadedRegulationsTh.value = normalizeRegulations(props.regulationsTh);
+    return;
+  }
+
+  try {
+    const data = await getRegulations();
+    loadedRegulationsEn.value =
+      data.regulationsEn?.trim() || t('admin.testVoucherManagement.defaultRegulationsEn');
+    loadedRegulationsTh.value =
+      data.regulationsTh?.trim() || t('admin.testVoucherManagement.defaultRegulationsTh');
+  } catch (error) {
+    console.error('Failed to load voucher regulations in preview:', error);
+    applyDefaultRegulations();
+  }
+};
+
+const switchSide = (side: 'front' | 'back'): void => {
+  if (isEditingRegulations.value && side === 'front') {
+    cancelEditRegulations();
+  }
+  previewSide.value = side;
+};
+
+const startEditRegulations = (): void => {
+  editingRegulationsEn.value = activeRegulationsEn.value;
+  editingRegulationsTh.value = activeRegulationsTh.value;
+  setEditingRegulations(true);
+};
+
+const cancelEditRegulations = (): void => {
+  setEditingRegulations(false);
+  editingRegulationsEn.value = '';
+  editingRegulationsTh.value = '';
+};
+
+const saveEditRegulations = async (): Promise<void> => {
+  try {
+    isSavingRegulations.value = true;
+    const saved = await saveRegulations({
+      regulationsEn: editingRegulationsEn.value,
+      regulationsTh: editingRegulationsTh.value,
+    });
+    loadedRegulationsEn.value = saved.regulationsEn?.trim() || editingRegulationsEn.value.trim();
+    loadedRegulationsTh.value = saved.regulationsTh?.trim() || editingRegulationsTh.value.trim();
+    setEditingRegulations(false);
+    editingRegulationsEn.value = '';
+    editingRegulationsTh.value = '';
+    $q.notify({
+      type: 'positive',
+      message: t('admin.testVoucherManagement.notifications.saveSuccess'),
+      position: 'top',
+    });
+  } catch (error) {
+    console.error('Failed to save voucher regulations from preview:', error);
+    $q.notify({
+      type: 'negative',
+      message: t('admin.testVoucherManagement.notifications.saveError'),
+      position: 'top',
+    });
+  } finally {
+    isSavingRegulations.value = false;
+  }
+};
+
+onMounted(() => {
+  void loadRegulations();
+});
+
+watch(
+  () => [props.regulationsEn, props.regulationsTh] as const,
+  () => {
+    const en = normalizeRegulations(props.regulationsEn);
+    const th = normalizeRegulations(props.regulationsTh);
+    if (en) loadedRegulationsEn.value = en;
+    if (th) loadedRegulationsTh.value = th;
+  },
+);
 </script>
 
 <style scoped lang="scss">
@@ -76,7 +270,14 @@ const previewSide = ref<'front' | 'back'>('front');
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+  gap: 12px;
   font-size: 14px;
+}
+
+.edit-regulations-btn {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  min-height: 32px !important;
 }
 
 .side-tabs {
@@ -100,6 +301,45 @@ const previewSide = ref<'front' | 'back'>('front');
     color: #111111;
     font-weight: 600;
   }
+}
+
+.regulations-edit-panel {
+  margin-top: 8px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.regulations-edit-heading {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.regulations-edit-input {
+  :deep(.q-field__control) {
+    border-radius: 8px;
+  }
+
+  :deep(textarea) {
+    min-height: 120px;
+    line-height: 1.45;
+  }
+}
+
+.regulations-edit-action-btn {
+  min-width: 140px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+}
+
+.cancel-btn {
+  background-color: var(--neutral-gray-light, #e5e5e5) !important;
+  color: var(--text-primary, #111111) !important;
+  box-shadow: none !important;
 }
 
 .voucher-preview {

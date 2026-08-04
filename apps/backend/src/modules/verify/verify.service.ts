@@ -33,6 +33,7 @@ export class VerifyService {
       where: { CERT_CODE: code },
       relations: [
         'SCORE',
+        'SCORE.LINES',
         'SCORE.ENROLLMENT',
         'SCORE.ENROLLMENT.SESSION',
         'SCORE.ENROLLMENT.SESSION.EXAM',
@@ -65,6 +66,17 @@ export class VerifyService {
       status = 'expired';
     }
 
+    const scoreLines = (certificate.SCORE?.LINES ?? [])
+      .filter((line) => !line.DELETED_AT)
+      .sort((a, b) => a.SCL_SORT_ORDER - b.SCL_SORT_ORDER)
+      .map((line) => ({
+        nameTh: line.SCL_NAME_TH,
+        nameEn: line.SCL_NAME_EN,
+        score: Number(line.SCL_SCORE ?? 0),
+        maxScore: Number(line.SCL_MAX_SCORE),
+        sortOrder: line.SCL_SORT_ORDER,
+      }));
+
     return {
       type: 'certificate',
       status,
@@ -85,7 +97,12 @@ export class VerifyService {
         vocabGrammar: Number(certificate.SCORE?.SC_LANG_USE_SCORE ?? 0),
         reading: Number(certificate.SCORE?.SC_READING_SCORE ?? 0),
         total: Number(certificate.SCORE?.SC_TOTAL_SCORE ?? 0),
-        bandLevel: Number(certificate.SCORE?.SC_BAND_LEVEL ?? 0),
+        bandLevel:
+          certificate.SCORE?.SC_BAND_LEVEL === null ||
+          certificate.SCORE?.SC_BAND_LEVEL === undefined
+            ? null
+            : certificate.SCORE.SC_BAND_LEVEL,
+        lines: scoreLines,
       },
     };
   }

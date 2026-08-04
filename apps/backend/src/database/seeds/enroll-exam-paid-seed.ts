@@ -220,7 +220,9 @@ async function main(): Promise<void> {
     const alreadyEnrolled = new Set(
       alreadyEnrolledRows.map((r) => Number(r.USER_ID)),
     );
-    console.log(`✓ enrolled อยู่แล้วใน exam ${examId}: ${alreadyEnrolled.size} คน`);
+    console.log(
+      `✓ enrolled อยู่แล้วใน exam ${examId}: ${alreadyEnrolled.size} คน`,
+    );
 
     const candidatesRaw = await userRepo
       .createQueryBuilder('user')
@@ -249,8 +251,7 @@ async function main(): Promise<void> {
             u.USER_PASSPORT_NO,
             u.USER_ID,
           ),
-          address:
-            u.PROFILE?.userAddress?.trim() || FALLBACK_ADDRESS,
+          address: u.PROFILE?.userAddress?.trim() || FALLBACK_ADDRESS,
         };
       });
 

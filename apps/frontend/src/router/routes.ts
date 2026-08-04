@@ -513,6 +513,23 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'score-rubric-management',
+            name: 'admin-score-rubric-management',
+            component: () => import('pages/admin/score-rubric-management-page.vue'),
+            meta: {
+              roles: [
+                ROLES.ADMIN,
+                ROLES.STAFF,
+                ROLES.EXAM_OPERATIONS_OFFICER,
+                ROLES.REGISTRATION_OFFICER,
+              ],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.manageScoreRubrics', icon: 'star' },
+              ],
+            },
+          },
+          {
             path: 'score-criteria-management',
             name: 'admin-score-criteria-management',
             component: () => import('pages/admin/score-criteria-management-page.vue'),
@@ -520,7 +537,7 @@ const routes: RouteRecordRaw[] = [
               roles: [ROLES.ADMIN, ROLES.STAFF, ROLES.EXAM_OPERATIONS_OFFICER],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
-                { label: 'navigation.manageScoreCriteriaAndCert', icon: 'star' },
+                { label: 'navigation.manageBandCertificate', icon: 'star' },
               ],
             },
           },

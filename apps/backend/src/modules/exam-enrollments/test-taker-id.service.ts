@@ -245,10 +245,7 @@ export class TestTakerIdService {
 
   private getApplicantType(enrollment: ExamEnrollment): number {
     const physicalStatus = enrollment.ERM_PHYSICAL_STATUS;
-    if (
-      physicalStatus === UserPhysicalStatus.MONK ||
-      physicalStatus === UserPhysicalStatus.RELIGIOUS
-    ) {
+    if (physicalStatus === UserPhysicalStatus.MONK) {
       return 1;
     }
     if (

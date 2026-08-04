@@ -15,6 +15,7 @@ import {
   VALIDATION_MSG,
 } from 'src/constants/exam';
 import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
+import { fetchScoreRubrics } from 'src/services/score-rubric.service';
 import type { PasscodeType, BackendExam, BackendLocation } from 'src/types/exam';
 import {
   fetchExamLocations,
@@ -91,9 +92,11 @@ export { getEligibleCandidateKey };
 export interface CreateExamForm {
   examName: string;
   examRound: string;
+  examFiscalYear: string;
   examType: string;
   examFormat: string;
   fundSourceId: number | null;
+  srbId: number | null;
   fee: string | number;
   isPublished: boolean;
   examDate: string;
@@ -116,6 +119,7 @@ export interface UseExamFormOptions {
 interface ExamComparisonSnapshot {
   examName: string;
   examRound: string;
+  examFiscalYear: string;
   examType: string;
   examFormat: string;
   fee: string;
@@ -166,9 +170,7 @@ const resolveLoadedRoomSeats = (
     return sessionCapacity;
   }
 
-  return (
-    countAvailableSeats(relation.LOCATION, seatOverrides) || sessionCapacity || 40
-  );
+  return countAvailableSeats(relation.LOCATION, seatOverrides) || sessionCapacity || 40;
 };
 
 const getLocationAisleAfter = (
@@ -245,9 +247,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     ref<CreateExamForm>({
       examName: DEFAULT_EXAM_NAME,
       examRound: '',
+      examFiscalYear: '',
       examType: EXAM_TYPE_GENERAL,
       examFormat: EXAM_FORMAT_COMPUTER,
       fundSourceId: null,
+      srbId: null,
       fee: '',
       isPublished: false,
       examDate: today,
@@ -285,6 +289,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const proctorOptions = ref<{ label: string; value: string }[]>([]);
   const locationOptions = ref<ExamLocationOption[]>([]);
   const fundSourceOptions = ref<{ label: string; value: number }[]>([]);
+  const scoreRubricOptions = ref<{ label: string; value: number }[]>([]);
   const allExams = ref<BackendExam[]>([]);
   const isLoadingData = ref(false);
   const isSaving = ref(false);
@@ -403,6 +408,14 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
   /** Whether the current exam type is special */
   const isSpecialRound = computed<boolean>(() => form.value.examType === EXAM_TYPE_SPECIAL);
+
+  /**
+   * รายชื่อผู้มีสิทธิ์สอบ (รอบพิเศษ) แก้ได้จนกว่าจะมีคนลงทะเบียน
+   * เมื่อมี enrollment ที่ยังไม่ยกเลิกแล้ว จะล็อกเพิ่ม/ลบ/สร้าง passcode
+   */
+  const isEligibleCandidatesLocked = computed<boolean>(() => {
+    return isSpecialRound.value && isLockedByEnrollment.value;
+  });
 
   /** Filtered candidates based on search query */
   const filteredCandidates = computed<EligibleCandidate[]>(() => {
@@ -547,6 +560,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (!form.value.examRound || !form.value.examRound.trim()) {
       errors.examRound = VALIDATION_MSG.EXAM_ROUND;
     }
+    if (!form.value.examFiscalYear || !form.value.examFiscalYear.trim()) {
+      errors.examFiscalYear = VALIDATION_MSG.EXAM_FISCAL_YEAR;
+    }
     if (!form.value.examType) {
       errors.examType = VALIDATION_MSG.EXAM_TYPE;
     }
@@ -555,6 +571,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     }
     if (!isSpecialRound.value && !form.value.fundSourceId) {
       errors.fundSourceId = VALIDATION_MSG.FUND_SOURCE;
+    }
+    if (!form.value.srbId) {
+      errors.srbId = VALIDATION_MSG.SCORE_RUBRIC;
     }
 
     // ── Card 2: กำหนดการสอบ ──
@@ -724,6 +743,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const buildComparisonSnapshot = (): ExamComparisonSnapshot => ({
     examName: form.value.examName.trim(),
     examRound: form.value.examRound.trim(),
+    examFiscalYear: form.value.examFiscalYear.trim(),
     examType: form.value.examType,
     examFormat: form.value.examFormat,
     fee: String(form.value.fee ?? ''),
@@ -753,7 +773,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     };
 
     push('ชื่อรอบสอบ', before.examName, after.examName);
-    push('รอบสอบ', before.examRound, after.examRound);
+    push('ครั้งที่จัดสอบ', before.examRound, after.examRound);
+    push('ปีงบประมาณ', before.examFiscalYear, after.examFiscalYear);
     push('ประเภทการสอบ', before.examType, after.examType);
     push('รูปแบบการสอบ', before.examFormat, after.examFormat);
     if (before.fee !== after.fee) {
@@ -785,9 +806,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     error.value = null;
     try {
       // Critical path: อย่ารอ GET /exam ทั้งก้อน — occupancy โหลด background หลังฟอร์มพร้อม
-      const [locations, fundSources, proctors, editExam] = await Promise.all([
+      const [locations, fundSources, scoreRubrics, proctors, editExam] = await Promise.all([
         fetchExamLocations(),
         fetchFundSources(),
+        fetchScoreRubrics(),
         getUsersFromApi(ROLES.PROCTOR),
         examId ? fetchExamWithSeats(examId) : Promise.resolve(null),
       ]);
@@ -797,6 +819,13 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
         value: fs.FS_ID,
       }));
+      scoreRubricOptions.value = scoreRubrics.map((rubric) => ({
+        label: `${rubric.nameTh} (${rubric.nameEn})`,
+        value: rubric.id,
+      }));
+      if (!examId && !form.value.srbId) {
+        form.value.srbId = scoreRubrics.find((r) => r.isDefault)?.id ?? null;
+      }
       proctorOptions.value = proctors.map((u) => {
         const displayName = u.fullNameTH ? `${u.titleTH || ''} ${u.fullNameTH}`.trim() : u.email;
         const finalName = displayName || 'ไม่ระบุชื่อ';
@@ -810,7 +839,17 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       if (editExam) {
         const exam = editExam;
         form.value.examName = exam.EXAM_NAME || '';
-        form.value.examRound = exam.EXAM_ROUND || '';
+        const loadedRound = exam.EXAM_ROUND || '';
+        const loadedFiscalYear = exam.EXAM_FISCAL_YEAR || '';
+        // รองรับข้อมูลเก่ารูปแบบ "1/2569" ถ้ายังไม่ได้รัน migration แยกคอลัมน์
+        if (!loadedFiscalYear && loadedRound.includes('/')) {
+          const [roundPart, yearPart] = loadedRound.split('/', 2);
+          form.value.examRound = roundPart?.trim() || '';
+          form.value.examFiscalYear = yearPart?.trim() || '';
+        } else {
+          form.value.examRound = loadedRound;
+          form.value.examFiscalYear = loadedFiscalYear;
+        }
         form.value.examType = exam.EXAM_TYPE || EXAM_TYPE_GENERAL;
         form.value.examFormat = exam.EXAM_FORMAT || EXAM_FORMAT_COMPUTER;
         form.value.fee = Number(exam.EXAM_FEE ?? 0).toFixed(2);
@@ -823,6 +862,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         form.value.payStartDate = gregorianToBuddhistDisplay(exam.EXAM_PAY_START_DATE);
         form.value.payEndDate = gregorianToBuddhistDisplay(exam.EXAM_PAY_END_DATE);
         form.value.fundSourceId = exam.FUND_SOURCE_ID ?? null;
+        form.value.srbId = exam.SRB_ID ?? scoreRubrics.find((r) => r.isDefault)?.id ?? null;
 
         // Group sessions by time range into time slots with rooms
         if (exam.SESSIONS && exam.SESSIONS.length > 0) {
@@ -886,9 +926,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
                   sessionId: session.SS_ID,
                   enrollmentCount:
                     session.ENROLLMENT_SL_COUNTS?.[String(relation.SL_ID)] ??
-                    session.ENROLLMENTS?.filter(
-                      (enrollment) => enrollment.SL_ID === relation.SL_ID,
-                    ).length ??
+                    session.ENROLLMENTS?.filter((enrollment) => enrollment.SL_ID === relation.SL_ID)
+                      .length ??
                     0,
                   seatOverrides,
                   sessionLocationSnapshot: {
@@ -1205,6 +1244,14 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   };
 
   /** Import candidates from CSV file for special rounds */
+  const notifyEligibleCandidatesLocked = (): void => {
+    $q.notify({
+      type: 'warning',
+      message: 'ไม่สามารถแก้ไขรายชื่อผู้มีสิทธิ์สอบได้ เนื่องจากมีผู้ลงทะเบียนในรอบสอบนี้แล้ว',
+      position: 'top',
+    });
+  };
+
   const resolveEligibleCandidatesInSystem = async (): Promise<void> => {
     const candidates = form.value.eligibleCandidates;
     const identifiers = candidates
@@ -1235,6 +1282,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
   const importCandidates = (file?: File): void => {
     try {
+      if (isEligibleCandidatesLocked.value) {
+        notifyEligibleCandidatesLocked();
+        return;
+      }
       if (!file) return;
       isImportingCandidates.value = true;
 
@@ -1371,6 +1422,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
   /** Generate random 6-digit passcodes for all eligible candidates */
   const generatePasscodes = (type: PasscodeType = 'individual'): void => {
+    if (isEligibleCandidatesLocked.value) {
+      notifyEligibleCandidatesLocked();
+      return;
+    }
+
     if (form.value.eligibleCandidates.length === 0) {
       $q.notify({
         type: 'warning',
@@ -1428,6 +1484,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   };
 
   const addEligibleCandidatesFromUsers = (users: User[]): void => {
+    if (isEligibleCandidatesLocked.value) {
+      notifyEligibleCandidatesLocked();
+      return;
+    }
+
     if (users.length === 0) {
       $q.notify({
         type: 'warning',
@@ -1468,6 +1529,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
   /** Remove selected eligible candidates from the list */
   const removeEligibleCandidates = (keys: string[]): void => {
+    if (isEligibleCandidatesLocked.value) {
+      notifyEligibleCandidatesLocked();
+      return;
+    }
+
     if (keys.length === 0) {
       $q.notify({
         type: 'warning',
@@ -1643,6 +1709,15 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       return false;
     }
 
+    if (!form.value.srbId) {
+      $q.notify({
+        type: 'warning',
+        message: VALIDATION_MSG.SCORE_RUBRIC,
+        position: 'top',
+      });
+      return false;
+    }
+
     // === DATE LOGICAL VALIDATION ===
     const todayVal = dateToCompareValue(today);
     const regStartVal = dateToCompareValue(form.value.regStartDate);
@@ -1763,7 +1838,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           payEndDate: form.value.payEndDate,
           timeRanges,
           fundSourceId: Number(form.value.fundSourceId || 0),
+          srbId: Number(form.value.srbId),
           examRound: form.value.examRound,
+          examFiscalYear: form.value.examFiscalYear,
           existingSessionIds,
         });
 
@@ -1802,7 +1879,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           payEndDate: form.value.payEndDate,
           timeRanges,
           fundSourceId: form.value.fundSourceId,
+          srbId: Number(form.value.srbId),
           examRound: form.value.examRound,
+          examFiscalYear: form.value.examFiscalYear,
         };
 
         targetExamId = await examStore.addExamRound(payload);
@@ -1816,10 +1895,12 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       }
 
       // Passcode sync แยกจาก exam update — ถ้า fail ยังต้อง redirect เพราะรอบสอบบันทึกแล้ว
+      // ถ้ารายชื่อถูกล็อกเพราะมีผู้ลงทะเบียนแล้ว จะไม่เรียก API แทนที่ passcodes
       if (
         targetExamId &&
         form.value.examType === EXAM_TYPE_SPECIAL &&
-        form.value.eligibleCandidates.length > 0
+        form.value.eligibleCandidates.length > 0 &&
+        !isEligibleCandidatesLocked.value
       ) {
         try {
           const passcodesPayload = form.value.eligibleCandidates.map((c) => ({
@@ -1907,6 +1988,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     proctorOptions,
     locationOptions,
     fundSourceOptions,
+    scoreRubricOptions,
     getOccupiedLocationIdsForSlot,
     isLoadingData,
     isSaving,
@@ -1916,6 +1998,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     isPublishedSectionLocked,
     isScheduleLocked,
     isLockedByEnrollment,
+    isEligibleCandidatesLocked,
     isSpecialRound,
     wasOriginallyPublished,
     activeSlotIndex,

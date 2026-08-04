@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { ExamEnrollment } from '../../exam-enrollments/entities/exam-enrollment.entity';
 import { ExamCertificate } from '../../exam-certificates/entities/exam-certificate.entity';
+import { ExamScoreLine } from './exam-score-line.entity';
 
 @Entity('EXAM_T_SCORES')
 export class ExamScore {
@@ -52,11 +53,12 @@ export class ExamScore {
 
   @Column({
     name: 'SC_BAND_LEVEL',
-    type: 'int',
+    type: 'varchar',
+    length: 20,
     nullable: true,
-    comment: 'ระดับ Band',
+    comment: 'ระดับ CEFR',
   })
-  SC_BAND_LEVEL: number;
+  SC_BAND_LEVEL: string | null;
 
   @CreateDateColumn({ name: 'CREATED_AT', comment: 'วันที่สร้าง' })
   CREATED_AT: Date;
@@ -73,4 +75,7 @@ export class ExamScore {
 
   @OneToMany(() => ExamCertificate, (certificate) => certificate.SCORE)
   CERTIFICATES: ExamCertificate[];
+
+  @OneToMany(() => ExamScoreLine, (line) => line.SCORE, { cascade: true })
+  LINES: ExamScoreLine[];
 }

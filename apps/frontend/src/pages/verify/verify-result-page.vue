@@ -33,17 +33,18 @@
 
       <template v-else-if="certificateData">
         <div class="verify-status-wrap q-mb-md">
-          <div
-            class="verify-status-badge"
-            :class="statusBadgeClass(certificateData.status)"
-          >
+          <div class="verify-status-badge" :class="statusBadgeClass(certificateData.status)">
             <q-icon :name="statusIcon(certificateData.status)" size="20px" />
             <span>{{ statusLabel(certificateData.status) }}</span>
           </div>
         </div>
 
         <div class="verify-content-layout">
-          <q-card flat bordered class="verify-document-card q-pa-md verify-content-layout__document">
+          <q-card
+            flat
+            bordered
+            class="verify-document-card q-pa-md verify-content-layout__document"
+          >
             <div class="verify-document-header q-mb-md">
               <div class="text-subtitle1 text-weight-bold">
                 {{ t('verify.documentPreview') }}
@@ -76,10 +77,15 @@
               :national-id="certificateData.holder.nationalIdMasked || '-'"
               :test-session="certificateData.exam.round || '-'"
               :test-date="formatEnglishDate(certificateData.exam.date)"
-              :vocab-score="`${certificateData.scores.vocabGrammar}/50`"
-              :reading-score="`${certificateData.scores.reading}/50`"
-              :total-score="`${certificateData.scores.total}/100`"
-              :band-level="String(certificateData.scores.bandLevel)"
+              :vocab-score="certificateCardVocabScore"
+              :reading-score="certificateCardReadingScore"
+              :score-lines="certificateCardScoreLines"
+              :total-score="`${certificateData.scores.total}/${certificateScoreTotalMax}`"
+              :band-level="
+                certificateData.scores.bandLevel === null
+                  ? '-'
+                  : String(certificateData.scores.bandLevel)
+              "
               :issue-date="formatEnglishDate(certificateData.issuedAt)"
               :valid-until="formatEnglishDate(certificateData.expiresAt)"
               :certificate-code="certificateData.verificationCode"
@@ -89,77 +95,88 @@
           </q-card>
 
           <q-card flat bordered class="verify-detail-card q-pa-lg verify-content-layout__details">
-          <div class="verify-code-row q-mb-md">
-            <span class="field-label">{{ t('verify.verificationCode') }}</span>
-            <span class="field-value mono">{{ certificateData.verificationCode }}</span>
-          </div>
+            <div class="verify-code-row q-mb-md">
+              <span class="field-label">{{ t('verify.verificationCode') }}</span>
+              <span class="field-value mono">{{ certificateData.verificationCode }}</span>
+            </div>
 
-          <div class="detail-grid">
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.certificate.holder') }}</span>
-              <span class="field-value">{{ certificateData.holder.fullName }}</span>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.certificate.holder') }}</span>
+                <span class="field-value">{{ certificateData.holder.fullName }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.certificate.testTakerId') }}</span>
+                <span class="field-value">{{ certificateData.holder.testTakerId }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.certificate.citizenId') }}</span>
+                <span class="field-value">{{
+                  certificateData.holder.nationalIdMasked || '-'
+                }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.certificate.testSession') }}</span>
+                <span class="field-value">{{ certificateData.exam.round || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.certificate.testDate') }}</span>
+                <span class="field-value">{{ formatExamDate(certificateData.exam.date) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.certificate.issuedAt') }}</span>
+                <span class="field-value">{{ formatDateTime(certificateData.issuedAt) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.certificate.expiresAt') }}</span>
+                <span class="field-value">{{ formatDateTime(certificateData.expiresAt) }}</span>
+              </div>
             </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.certificate.testTakerId') }}</span>
-              <span class="field-value">{{ certificateData.holder.testTakerId }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.certificate.citizenId') }}</span>
-              <span class="field-value">{{
-                certificateData.holder.nationalIdMasked || '-'
-              }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.certificate.testSession') }}</span>
-              <span class="field-value">{{ certificateData.exam.round || '-' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.certificate.testDate') }}</span>
-              <span class="field-value">{{ formatExamDate(certificateData.exam.date) }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.certificate.issuedAt') }}</span>
-              <span class="field-value">{{ formatDateTime(certificateData.issuedAt) }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.certificate.expiresAt') }}</span>
-              <span class="field-value">{{ formatDateTime(certificateData.expiresAt) }}</span>
-            </div>
-          </div>
 
-          <q-separator class="q-my-md" />
+            <q-separator class="q-my-md" />
 
-          <div class="text-subtitle1 text-weight-bold q-mb-sm">
-            {{ t('verify.certificate.scores') }}
-          </div>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.certificate.vocabGrammar') }}</span>
-              <span class="field-value">{{ certificateData.scores.vocabGrammar }}/50</span>
+            <div class="text-subtitle1 text-weight-bold q-mb-sm">
+              {{ t('verify.certificate.scores') }}
             </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.certificate.reading') }}</span>
-              <span class="field-value">{{ certificateData.scores.reading }}/50</span>
+            <div class="detail-grid">
+              <template v-if="certificateData.scores.lines?.length">
+                <div
+                  v-for="line in certificateData.scores.lines"
+                  :key="`${line.nameEn}-${line.sortOrder}`"
+                  class="detail-item"
+                >
+                  <span class="field-label">{{ line.nameTh }}</span>
+                  <span class="field-value">{{ line.score }}/{{ line.maxScore }}</span>
+                </div>
+              </template>
+              <template v-else>
+                <div class="detail-item">
+                  <span class="field-label">{{ t('verify.certificate.vocabGrammar') }}</span>
+                  <span class="field-value">{{ certificateData.scores.vocabGrammar }}/50</span>
+                </div>
+                <div class="detail-item">
+                  <span class="field-label">{{ t('verify.certificate.reading') }}</span>
+                  <span class="field-value">{{ certificateData.scores.reading }}/50</span>
+                </div>
+              </template>
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.certificate.total') }}</span>
+                <span class="field-value"
+                  >{{ certificateData.scores.total }}/{{ certificateScoreTotalMax }}</span
+                >
+              </div>
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.certificate.band') }}</span>
+                <span class="field-value">{{ certificateData.scores.bandLevel || '-' }}</span>
+              </div>
             </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.certificate.total') }}</span>
-              <span class="field-value">{{ certificateData.scores.total }}/100</span>
-            </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.certificate.band') }}</span>
-              <span class="field-value">{{ certificateData.scores.bandLevel }}</span>
-            </div>
-          </div>
-        </q-card>
+          </q-card>
         </div>
       </template>
 
       <template v-else-if="receiptData">
         <div class="verify-status-wrap q-mb-md">
-          <div
-            class="verify-status-badge"
-            :class="statusBadgeClass(receiptData.status)"
-          >
+          <div class="verify-status-badge" :class="statusBadgeClass(receiptData.status)">
             <q-icon :name="statusIcon(receiptData.status)" size="20px" />
             <span>{{ statusLabel(receiptData.status) }}</span>
           </div>
@@ -181,66 +198,64 @@
           </q-card>
 
           <q-card flat bordered class="verify-detail-card q-pa-lg verify-content-layout__details">
-          <div class="verify-code-row q-mb-md">
-            <span class="field-label">{{ t('verify.verificationCode') }}</span>
-            <span class="field-value mono">{{ receiptData.verificationCode }}</span>
-          </div>
+            <div class="verify-code-row q-mb-md">
+              <span class="field-label">{{ t('verify.verificationCode') }}</span>
+              <span class="field-value mono">{{ receiptData.verificationCode }}</span>
+            </div>
 
-          <div class="detail-grid">
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.receipt.receiptNo') }}</span>
-              <span class="field-value">{{ receiptData.receiptNo }}</span>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.receipt.receiptNo') }}</span>
+                <span class="field-value">{{ receiptData.receiptNo }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.receipt.paidAt') }}</span>
+                <span class="field-value">{{ formatDateTime(receiptData.issuedOrPaidAt) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.receipt.payee') }}</span>
+                <span class="field-value">{{ receiptData.payee.name || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.receipt.taxId') }}</span>
+                <span class="field-value">{{ receiptData.payee.taxIdMasked || '-' }}</span>
+              </div>
+              <div v-if="receiptData.status === 'valid'" class="detail-item detail-item--full">
+                <span class="field-label">{{ t('verify.receipt.address') }}</span>
+                <span class="field-value">{{ receiptData.payee.address || '-' }}</span>
+              </div>
+              <div v-if="receiptData.status === 'valid'" class="detail-item">
+                <span class="field-label">{{ t('verify.receipt.amount') }}</span>
+                <span class="field-value">{{ formatCurrency(receiptData.payment.amount) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.receipt.description') }}</span>
+                <span class="field-value">{{ receiptData.payment.description }}</span>
+              </div>
+              <div v-if="receiptData.payment.paymentMethod" class="detail-item">
+                <span class="field-label">{{ t('verify.receipt.paymentMethod') }}</span>
+                <span class="field-value">{{ receiptData.payment.paymentMethod }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.receipt.examRound') }}</span>
+                <span class="field-value">{{ receiptData.payment.examRound || '-' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="field-label">{{ t('verify.receipt.examDate') }}</span>
+                <span class="field-value">{{ formatExamDate(receiptData.payment.examDate) }}</span>
+              </div>
             </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.receipt.paidAt') }}</span>
-              <span class="field-value">{{ formatDateTime(receiptData.issuedOrPaidAt) }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.receipt.payee') }}</span>
-              <span class="field-value">{{ receiptData.payee.name || '-' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.receipt.taxId') }}</span>
-              <span class="field-value">{{ receiptData.payee.taxIdMasked || '-' }}</span>
-            </div>
-            <div v-if="receiptData.status === 'valid'" class="detail-item detail-item--full">
-              <span class="field-label">{{ t('verify.receipt.address') }}</span>
-              <span class="field-value">{{ receiptData.payee.address || '-' }}</span>
-            </div>
-            <div v-if="receiptData.status === 'valid'" class="detail-item">
-              <span class="field-label">{{ t('verify.receipt.amount') }}</span>
-              <span class="field-value">{{ formatCurrency(receiptData.payment.amount) }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.receipt.description') }}</span>
-              <span class="field-value">{{ receiptData.payment.description }}</span>
-            </div>
-            <div v-if="receiptData.payment.paymentMethod" class="detail-item">
-              <span class="field-label">{{ t('verify.receipt.paymentMethod') }}</span>
-              <span class="field-value">{{ receiptData.payment.paymentMethod }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.receipt.examRound') }}</span>
-              <span class="field-value">{{ receiptData.payment.examRound || '-' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="field-label">{{ t('verify.receipt.examDate') }}</span>
-              <span class="field-value">{{
-                formatExamDate(receiptData.payment.examDate)
-              }}</span>
-            </div>
-          </div>
 
-          <q-separator class="q-my-md" />
+            <q-separator class="q-my-md" />
 
-          <div class="detail-item detail-item--full">
-            <span class="field-label">{{ t('verify.receipt.organization') }}</span>
-            <span class="field-value">
-              {{ receiptData.organization.nameTH }} / {{ receiptData.organization.nameEN }}<br />
-              {{ t('exam.card.taxIdLabel') }} {{ receiptData.organization.taxId }}
-            </span>
-          </div>
-        </q-card>
+            <div class="detail-item detail-item--full">
+              <span class="field-label">{{ t('verify.receipt.organization') }}</span>
+              <span class="field-value">
+                {{ receiptData.organization.nameTH }} / {{ receiptData.organization.nameEN }}<br />
+                {{ t('exam.card.taxIdLabel') }} {{ receiptData.organization.taxId }}
+              </span>
+            </div>
+          </q-card>
         </div>
       </template>
     </div>
@@ -265,10 +280,7 @@ import type {
   VerifyDocumentType,
   VerifyReceiptResponse,
 } from 'src/types/verify';
-import {
-  generateCertificateQrDataUrl,
-  generateReceiptQrDataUrl,
-} from 'src/utils/verify-qr';
+import { generateCertificateQrDataUrl, generateReceiptQrDataUrl } from 'src/utils/verify-qr';
 
 const props = defineProps<{
   documentType: VerifyDocumentType;
@@ -285,6 +297,33 @@ const bandRules = ref<CertificateBandRule[]>([]);
 const certificateQrDataUrl = ref<string | null>(null);
 const receiptQrDataUrl = ref<string | null>(null);
 const certificateSide = ref<'front' | 'back'>('front');
+
+const certificateScoreTotalMax = computed(() => {
+  const lines = certificateData.value?.scores.lines;
+  if (lines?.length) return lines.reduce((sum, line) => sum + line.maxScore, 0);
+  return 100;
+});
+
+const certificateCardVocabScore = computed(() => {
+  const lines = certificateData.value?.scores.lines;
+  if (lines?.length) {
+    const line = lines.find((item) => item.nameEn.toLowerCase().includes('vocabulary')) ?? lines[0];
+    return `${line?.score ?? 0}/${line?.maxScore ?? 50}`;
+  }
+  return `${certificateData.value?.scores.vocabGrammar ?? 0}/50`;
+});
+
+const certificateCardReadingScore = computed(() => {
+  const lines = certificateData.value?.scores.lines;
+  if (lines?.length) {
+    const line =
+      lines.find((item) => item.nameEn.toLowerCase().includes('reading')) ?? lines[1] ?? lines[0];
+    return `${line?.score ?? 0}/${line?.maxScore ?? 50}`;
+  }
+  return `${certificateData.value?.scores.reading ?? 0}/50`;
+});
+
+const certificateCardScoreLines = computed(() => certificateData.value?.scores.lines ?? []);
 
 const code = computed(() => String(route.params.code ?? '').trim());
 
