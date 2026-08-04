@@ -63,15 +63,8 @@ export interface BackendSessionDetail {
 }
 
 export enum ExamAttendStatus {
-  MISSING = 0,
-  INTIME = 1,
-}
-
-export interface BackendAttendance {
-  ATTEND_ID: number;
-  ERM_ID: number;
-  ATTEND_CHECK_IN_TIME: string | null;
-  ATTEND_STATUS: ExamAttendStatus;
+  MISSING = 6,
+  INTIME = 4,
 }
 
 export interface BackendEnrollmentDetail {
@@ -85,6 +78,7 @@ export interface BackendEnrollmentDetail {
   ERM_SORT_ORDER?: number | null;
   ERM_STATUS: number;
   ERM_VERIFY_STATUS: number;
+  ERM_ATTEND_CHECK_IN_TIME?: string | null;
   ERM_AT: string | null;
   CREATED_AT: string;
   UPDATED_AT: string;
@@ -92,7 +86,6 @@ export interface BackendEnrollmentDetail {
   ERM_PHYSICAL_STATUS?: string | null;
   USER: BackendUser;
   SESSION: BackendSessionDetail;
-  ATTENDANCES?: BackendAttendance[];
   LOCATION_SEAT?: {
     LS_ID: number;
     LS_SEAT_LABEL: string | null;
@@ -163,6 +156,7 @@ export enum EnrollmentStatus {
   SEAT_PUBLISHED = 3,
   ATTENDED = 4,
   CANCELLED = 5,
+  MISSING = 6,
 }
 
 export enum VerifyStatus {
@@ -179,6 +173,7 @@ export const PAYMENT_STATUS_LABELS: Record<number, string> = {
   [EnrollmentStatus.SEAT_PUBLISHED]: 'ชำระเงินแล้ว',
   [EnrollmentStatus.ATTENDED]: 'ชำระเงินแล้ว',
   [EnrollmentStatus.CANCELLED]: 'ยกเลิก',
+  [EnrollmentStatus.MISSING]: 'ขาดสอบ',
 };
 
 export const VERIFY_STATUS_LABELS: Record<number, string> = {

@@ -56,16 +56,18 @@ export interface ExamScoreSummary {
   rows: ExamScoreSummaryRow[];
 }
 
-/**
- * สรุปการเปลี่ยนแปลงระดับ Band ของผู้เข้าสอบซ้ำ
- * (ผู้ที่มีคะแนน/Band ตั้งแต่ 2 ครั้งขึ้นไป — เทียบครั้งล่าสุดกับครั้งก่อนหน้า)
- */
-export interface ExamBandChange {
-  /** จำนวนผู้เข้าสอบซ้ำทั้งหมด (= increased + same + decreased) */
-  repeatTakers: number;
-  increased: number;
-  same: number;
-  decreased: number;
+/** สัดส่วนผู้เข้าสอบครั้งเดียว vs ผู้เข้าสอบซ้ำ (นับจำนวนผู้ใช้ที่มีคะแนน) */
+export interface ExamAttemptProportion {
+  /**
+   * ผู้ที่มีคะแนนในช่วงที่เลือก และไม่มี scored attempt ที่เป็น repeat
+   * (ไม่มี enrollment มีคะแนนก่อนหน้า — lifetime)
+   */
+  firstTime: number;
+  /**
+   * ผู้ที่มีอย่างน้อย 1 scored attempt ในช่วงที่เลือก ที่ถือว่าสอบซ้ำ
+   * (มี enrollment มีคะแนนก่อนหน้า — lifetime)
+   */
+  repeat: number;
 }
 
 /** แถวสรุปรายปีของตารางภาพรวม */
@@ -74,6 +76,9 @@ export interface ExamYearTableRow {
   registered: number;
   attended: number;
   absent: number;
+  /**
+   * จำนวนคน (DISTINCT) ที่มีคะแนนในปีนี้และมีคะแนนก่อนหน้า (lifetime)
+   */
   repeatTakers: number;
   minScore: number | null;
   maxScore: number | null;
@@ -124,7 +129,7 @@ export interface ExamReportSummary {
   registrationTrend: ExamRegistrationTrendByYear[];
   rounds: ExamReportRound[];
   scoreSummaryByYear: ExamScoreSummary;
-  bandChange: ExamBandChange;
+  attemptProportion: ExamAttemptProportion;
   yearTable: ExamYearTableRow[];
 }
 

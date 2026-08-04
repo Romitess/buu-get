@@ -8,7 +8,6 @@ import { ExamLocation } from '../modules/exam-locations/entities/exam-location.e
 import { ExamEnrollment } from '../modules/exam-enrollments/entities/exam-enrollment.entity';
 import { UserProfile } from '../modules/user-profile/entities/user-profile.entity';
 import { ExamVoucher } from '../modules/exam-vouchers/entities/exam-voucher.entity';
-import { ExamAttendance } from '../modules/exam-attendances/entities/exam-attendance.entity';
 import { FundSource } from '../modules/fund-sources/entities/fund-source.entity';
 import { Transaction } from '../modules/transactions/entities/transaction.entity';
 import { Receipt } from '../modules/receipts/entities/receipt.entity';
@@ -55,7 +54,6 @@ export default new DataSource({
     ExamSessionLocation,
     ExamLocationSeat,
     ExamEnrollment,
-    ExamAttendance,
     ExamVoucher,
     FundSource,
     Transaction,

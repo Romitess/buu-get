@@ -77,19 +77,21 @@
               </div>
             </div>
             <div class="col" data-field="examFiscalYear">
-              <div class="buu-label-muted q-mb-xs">ปีงบประมาณ</div>
+              <div class="buu-label-muted q-mb-xs">ปีงบประมาณ (ค.ศ.)</div>
               <q-input
-                v-model="form.examFiscalYear"
-                placeholder="2569"
+                :model-value="form.examFiscalYear"
+                placeholder="2026"
+                inputmode="numeric"
                 outlined
                 dense
                 bg-color="white"
                 class="buu-input-muted exam-placeholder-faded"
                 :class="{ 'buu-field-error': hasError('examFiscalYear') }"
                 :disable="isLocked"
-                maxlength="10"
-                @update:model-value="emit('clearFieldError', 'examFiscalYear')"
+                maxlength="4"
+                @update:model-value="onFiscalYearInput"
               />
+              <div class="text-caption text-grey-6 q-mt-xs">กรอกปี ค.ศ. 4 หลัก</div>
               <div
                 v-if="hasError('examFiscalYear')"
                 :key="`examFiscalYear-${shakeKey}`"
@@ -273,6 +275,16 @@ const form = defineModel<CreateExamForm>('form', { required: true });
 /** Check if a field has an error */
 const hasError = (field: string): boolean => {
   return !!(props.fieldErrors && props.fieldErrors[field]);
+};
+
+/**
+ * Sanitize fiscal year input: digits only, max 4 characters (AD year).
+ */
+const onFiscalYearInput = (val: string | number | null): void => {
+  form.value.examFiscalYear = String(val ?? '')
+    .replace(/\D/g, '')
+    .slice(0, 4);
+  emit('clearFieldError', 'examFiscalYear');
 };
 
 /**

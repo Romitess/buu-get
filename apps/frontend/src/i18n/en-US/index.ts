@@ -1295,10 +1295,21 @@ export default {
         attendanceTitle: 'Attended vs. Absent',
         attended: 'Attended',
         absent: 'Absent',
-        trendTitle: 'Yearly Attendance Trend',
+        trendTitle: 'Yearly Registration Trend',
         registered: 'Registrations',
         scoreSummaryTitle: 'Yearly Score Summary',
+        scoreSummaryHint: 'Counts scores of 40 and above only',
+        attemptProportionTitle: 'First-time vs Repeat Takers',
+        attemptProportionHint:
+          'Counts people based on prior scored history (lifetime) within the selected range',
+        firstTime: 'First-time',
+        repeatTakers: 'Repeat',
+        attemptProportionEmpty: 'No examinee data',
         peopleUnit: 'People',
+        peopleUnitShort: 'people',
+      },
+      stats: {
+        scopeHint: 'Values are for the selected end year (or the latest year with data)',
       },
       table: {
         title: 'Exam Rounds',
@@ -1313,22 +1324,12 @@ export default {
           tools: 'Tools',
         },
       },
-      bandChange: {
-        title: 'Band Level Change of Repeat Takers (Yearly)',
-        increased: 'Band Up',
-        same: 'Band Unchanged',
-        decreased: 'Band Down',
-        repeatTakers: 'Repeat Takers',
-        increasedCount: 'Band Increased',
-        sameCount: 'Band Unchanged',
-        decreasedCount: 'Band Decreased',
-        unit: 'people',
-        empty: 'No repeat taker data',
-      },
       yearTable: {
         title: 'Yearly Summary Table',
         viewDetail: 'View detail',
         empty: 'No yearly summary data found',
+        repeatTakersHint:
+          'Counts people with a score that year who also have a prior score (lifetime)',
         columns: {
           year: 'Exam Year',
           registered: 'Applicants',

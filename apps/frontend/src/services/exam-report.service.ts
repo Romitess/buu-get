@@ -47,11 +47,9 @@ interface BackendExamReportSummary {
     ranges: string[];
     rows: { year: number; counts: number[] }[];
   };
-  bandChange: {
-    repeatTakers: number;
-    increased: number;
-    same: number;
-    decreased: number;
+  attemptProportion: {
+    firstTime: number;
+    repeat: number;
   };
   yearTable: ExamYearTableRow[];
 }
@@ -194,7 +192,7 @@ const mapSummary = (data: BackendExamReportSummary): ExamReportSummary => {
         data: data.scoreSummaryByYear.rows.map((row) => row.counts[i] ?? 0),
       })),
     },
-    bandChange: data.bandChange,
+    attemptProportion: data.attemptProportion,
     yearTable: data.yearTable,
   };
 };

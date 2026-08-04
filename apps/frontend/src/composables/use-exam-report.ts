@@ -8,13 +8,10 @@ import type {
   ExamRegistrationTrendChartData,
   ExamReportRoundRow,
   ExamScoreSummaryChartData,
-  ExamBandChangeData,
+  ExamAttemptProportionData,
   ExamYearTableRow,
 } from 'src/types/exam-report.types';
-import {
-  fetchExamReportSummary,
-  fetchExamReportOptions,
-} from 'src/services/exam-report.service';
+import { fetchExamReportSummary, fetchExamReportOptions } from 'src/services/exam-report.service';
 
 /**
  * Composable สำหรับจัดการข้อมูลหน้ารายงานการสอบ
@@ -36,11 +33,9 @@ export function useExamReport() {
   const trendChart = ref<ExamRegistrationTrendChartData>({ categories: [], registered: [] });
   const rounds = ref<ExamReportRoundRow[]>([]);
   const scoreSummaryChart = ref<ExamScoreSummaryChartData>({ years: [], series: [] });
-  const bandChange = ref<ExamBandChangeData>({
-    repeatTakers: 0,
-    increased: 0,
-    same: 0,
-    decreased: 0,
+  const attemptProportion = ref<ExamAttemptProportionData>({
+    firstTime: 0,
+    repeat: 0,
   });
   const yearTable = ref<ExamYearTableRow[]>([]);
 
@@ -70,7 +65,7 @@ export function useExamReport() {
       trendChart.value = summary.trendChart;
       rounds.value = summary.rounds;
       scoreSummaryChart.value = summary.scoreSummaryChart;
-      bandChange.value = summary.bandChange;
+      attemptProportion.value = summary.attemptProportion;
       yearTable.value = summary.yearTable;
     } catch {
       error.value = t('admin.examReport.notifications.loadError');
@@ -114,7 +109,7 @@ export function useExamReport() {
     trendChart,
     rounds,
     scoreSummaryChart,
-    bandChange,
+    attemptProportion,
     yearTable,
     yearOptions,
     monthOptions,

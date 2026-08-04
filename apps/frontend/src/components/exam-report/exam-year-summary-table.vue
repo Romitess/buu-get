@@ -2,6 +2,9 @@
   <q-card flat bordered class="year-table-card">
     <q-card-section>
       <div class="year-table-card__title">{{ t('admin.examReport.yearTable.title') }}</div>
+      <div class="year-table-card__hint">
+        {{ t('admin.examReport.yearTable.repeatTakersHint') }}
+      </div>
       <BaseTable
         :rows="rows"
         :columns="columns"
@@ -161,6 +164,12 @@ const columns = computed((): QTableColumn<ExamYearTableRow>[] => [
     font-size: var(--font-size-md);
     font-weight: 600;
     color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  &__hint {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
     margin-bottom: 12px;
   }
 }

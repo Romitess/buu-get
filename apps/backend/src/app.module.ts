@@ -19,7 +19,6 @@ import { ExamLocationSeatsModule } from './modules/exam-location-seats/exam-loca
 import { ExamSessionLocationsModule } from './modules/exam-session-locations/exam-session-locations.module';
 import { ExamEnrollmentsModule } from './modules/exam-enrollments/exam-enrollments.module';
 import { ExamVouchersModule } from './modules/exam-vouchers/exam-vouchers.module';
-import { ExamAttendancesModule } from './modules/exam-attendances/exam-attendances.module';
 import { TransactionRefsModule } from './modules/transaction-refs/transaction-refs.module';
 import { FundSourcesModule } from './modules/fund-sources/fund-sources.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
@@ -91,7 +90,6 @@ import { VerifyModule } from './modules/verify/verify.module';
     ExamSessionLocationsModule,
     ExamEnrollmentsModule,
     ExamVouchersModule,
-    ExamAttendancesModule,
     TransactionRefsModule,
     FundSourcesModule,
     TransactionsModule,

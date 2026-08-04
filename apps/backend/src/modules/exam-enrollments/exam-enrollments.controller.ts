@@ -33,6 +33,7 @@ import { UpdateExamEnrollmentDto } from './dto/update-exam-enrollment.dto';
 import { MatchExamEnrollmentDto } from './dto/match-exam-enrollment.dto';
 import { RequestFixDto } from './dto/request-fix.dto';
 import { BulkSeatAssignmentDto } from './dto/bulk-seat-assignment.dto';
+import { CheckInExamEnrollmentDto } from './dto/check-in-exam-enrollment.dto';
 import { ExamEnrollment } from './entities/exam-enrollment.entity';
 import { ValidatePasscodeDto } from './dto/validate-passcode.dto';
 import { ExamEnrollmentQueryDto } from './dto/exam-enrollment-query.dto';
@@ -199,5 +200,18 @@ export class ExamEnrollmentsController {
     @Body() requestFixDto: RequestFixDto,
   ): Promise<{ success: boolean }> {
     return await this.examEnrollmentsService.requestFix(id, requestFixDto);
+  }
+
+  @Post(':id/check-in')
+  @Roles(...ENROLLMENT_ADMIN_ROLES)
+  @ApiOperation({
+    summary: 'เช็กอินผู้เข้าสอบ (บันทึกสถานะเข้าสอบบน enrollment)',
+  })
+  @ApiOkResponse({ type: ExamEnrollment })
+  async checkIn(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() checkInDto: CheckInExamEnrollmentDto,
+  ): Promise<ExamEnrollment> {
+    return await this.examEnrollmentsService.checkIn(id, checkInDto);
   }
 }

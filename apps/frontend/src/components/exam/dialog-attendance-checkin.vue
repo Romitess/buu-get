@@ -86,7 +86,7 @@ import { useDialogPluginComponent, useQuasar } from 'quasar';
 import AppLabeledInput from 'src/components/base/app-labeled-input.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import TestVoucherReport from 'src/components/test-voucher-report.vue';
-import { createExamAttendance } from 'src/services/exam-attendance.service';
+import { checkInEnrollment } from 'src/services/enrollment.service';
 import type { AttendanceTableRow } from 'src/types/enrollment.types';
 import { ExamAttendStatus } from 'src/types/enrollment.types';
 import type { VoucherData } from 'src/types/voucher';
@@ -350,10 +350,7 @@ const performCheckIn = async (): Promise<void> => {
   }
 
   try {
-    await createExamAttendance({
-      ERM_ID: candidate.ermId,
-      ATTEND_STATUS: 1,
-    });
+    await checkInEnrollment(candidate.ermId);
 
     markCandidateCheckedIn(candidate.ermId);
 

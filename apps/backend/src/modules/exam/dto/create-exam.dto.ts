@@ -4,8 +4,12 @@ import {
   IsBoolean,
   IsNumber,
   IsDateString,
+  Matches,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+
+/** ปีงบประมาณต้องเป็นปี ค.ศ. 4 หลัก (ช่วง 1900–2199) — ตรงกับ frontend */
+const EXAM_FISCAL_YEAR_AD_REGEX = /^(19|20|21)\d{2}$/;
 
 export class CreateExamDto {
   @ApiProperty({ example: 'สอบกลางภาค' })
@@ -67,9 +71,16 @@ export class CreateExamDto {
   @IsString()
   EXAM_ROUND?: string;
 
-  @ApiProperty({ example: '2569', required: false, description: 'ปีงบประมาณ' })
+  @ApiProperty({
+    example: '2026',
+    required: false,
+    description: 'ปีงบประมาณ (ค.ศ. 4 หลัก เช่น 2026)',
+  })
   @IsOptional()
   @IsString()
+  @Matches(EXAM_FISCAL_YEAR_AD_REGEX, {
+    message: 'EXAM_FISCAL_YEAR must be a 4-digit AD year (e.g. 2026)',
+  })
   EXAM_FISCAL_YEAR?: string;
 
   @ApiProperty({ example: 1, required: false })
