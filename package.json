@@ -20,8 +20,12 @@
     "lint:backend": "npm run lint --workspace=buu-get-back",
     "lint:frontend": "npm run lint --workspace=buu-get-front",
     "format": "npm run format --workspace=buu-get-back && npm run format --workspace=buu-get-front",
-    "test": "npm run test --workspace=buu-get-back && npm run test --workspace=buu-get-front",
-    "test:e2e": "npm run test:e2e --workspace=buu-get-back",
+    "test": "npm run test:unit",
+    "test:unit": "npm run test --workspace=buu-get-back && npm run test --workspace=buu-get-front",
+    "test:integration": "playwright test --project=integration --pass-with-no-tests",
+    "test:e2e": "playwright test --project=e2e",
+    "test:e2e:nest": "npm run test:e2e --workspace=buu-get-back",
+    "test:db:reset": "npm run test:db:reset --workspace=buu-get-back",
     "typecheck": "npm run typecheck --workspace=buu-get-front && npm run typecheck --workspace=buu-get-back",
     "migration:run": "npm run migration:run --workspace=buu-get-back",
     "migration:generate": "npm run migration:generate --workspace=buu-get-back",
@@ -36,6 +40,7 @@
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
+    "@playwright/test": "^1.62.1",
     "husky": "^9.1.7"
   }
 }

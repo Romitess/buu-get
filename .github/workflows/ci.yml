@@ -29,8 +29,8 @@ jobs:
       - name: Unit tests
         run: npm test
 
-      - name: Backend e2e
-        run: npm run test:e2e --workspace=buu-get-back
+      - name: Backend e2e (Nest/Jest authz)
+        run: npm run test:e2e:nest
 
       - name: Build
         run: npm run build

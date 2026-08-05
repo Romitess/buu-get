@@ -34,6 +34,8 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
+      // Static helpers (e.g. DTO.fromEntity) are safe to extract in Jest mocks.
+      '@typescript-eslint/unbound-method': ['error', { ignoreStatic: true }],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
   },
