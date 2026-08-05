@@ -1220,7 +1220,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_delete_exam_bank_reconciles",
-      "community": 4,
+      "community": 43,
       "norm_label": "delete-exam-bank-reconciles.ts"
     },
     {
@@ -1230,7 +1230,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "scripts_delete_exam_bank_reconciles_exam_id",
-      "community": 4,
+      "community": 43,
       "norm_label": "exam_id"
     },
     {
@@ -1240,7 +1240,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "scripts_delete_exam_bank_reconciles_main",
-      "community": 4,
+      "community": 43,
       "norm_label": "main()"
     },
     {
@@ -1250,7 +1250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_delete_exam_certificates",
-      "community": 4,
+      "community": 43,
       "norm_label": "delete-exam-certificates.ts"
     },
     {
@@ -1260,7 +1260,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "scripts_delete_exam_certificates_exam_id",
-      "community": 4,
+      "community": 43,
       "norm_label": "exam_id"
     },
     {
@@ -1270,7 +1270,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "scripts_delete_exam_certificates_main",
-      "community": 4,
+      "community": 43,
       "norm_label": "main()"
     },
     {
@@ -1280,7 +1280,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_delete_exam_enrollments",
-      "community": 4,
+      "community": 50,
       "norm_label": "delete-exam-enrollments.ts"
     },
     {
@@ -1290,7 +1290,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "scripts_delete_exam_enrollments_exam_id",
-      "community": 4,
+      "community": 50,
       "norm_label": "exam_id"
     },
     {
@@ -1300,7 +1300,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "scripts_delete_exam_enrollments_deletebyids",
-      "community": 4,
+      "community": 50,
       "norm_label": "deletebyids()"
     },
     {
@@ -1310,7 +1310,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "scripts_delete_exam_enrollments_main",
-      "community": 4,
+      "community": 50,
       "norm_label": "main()"
     },
     {
@@ -1320,7 +1320,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "scripts_delete_exam_receipts",
-      "community": 4,
+      "community": 43,
       "norm_label": "delete-exam-receipts.ts"
     },
     {
@@ -1330,7 +1330,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "scripts_delete_exam_receipts_exam_id",
-      "community": 4,
+      "community": 43,
       "norm_label": "exam_id"
     },
     {
@@ -1340,7 +1340,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "scripts_delete_exam_receipts_main",
-      "community": 4,
+      "community": 43,
       "norm_label": "main()"
     },
     {
@@ -1910,7 +1910,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_calendar_date_util_spec",
-      "community": 137,
+      "community": 4,
       "norm_label": "calendar-date.util.spec.ts"
     },
     {
@@ -1920,7 +1920,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_calendar_date_util",
-      "community": 137,
+      "community": 4,
       "norm_label": "calendar-date.util.ts"
     },
     {
@@ -1930,7 +1930,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "utils_calendar_date_util_getbangkokdateonly",
-      "community": 137,
+      "community": 4,
       "norm_label": "getbangkokdateonly()"
     },
     {
@@ -1940,7 +1940,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "utils_calendar_date_util_tobangkokdateonly",
-      "community": 137,
+      "community": 4,
       "norm_label": "tobangkokdateonly()"
     },
     {
@@ -1950,7 +1950,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "utils_calendar_date_util_isfuturebangkokdate",
-      "community": 137,
+      "community": 4,
       "norm_label": "isfuturebangkokdate()"
     },
     {
@@ -2030,7 +2030,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_exam_schedule_util_spec",
-      "community": 1,
+      "community": 21,
       "norm_label": "exam-schedule.util.spec.ts"
     },
     {
@@ -2040,7 +2040,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_exam_schedule_util",
-      "community": 1,
+      "community": 21,
       "norm_label": "exam-schedule.util.ts"
     },
     {
@@ -2050,7 +2050,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "utils_exam_schedule_util_doexamtimerangesoverlap",
-      "community": 1,
+      "community": 21,
       "norm_label": "doexamtimerangesoverlap()"
     },
     {
@@ -2060,7 +2060,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_mask_identifier_util_spec",
-      "community": 21,
+      "community": 23,
       "norm_label": "mask-identifier.util.spec.ts"
     },
     {
@@ -2070,7 +2070,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_mask_identifier_util",
-      "community": 21,
+      "community": 23,
       "norm_label": "mask-identifier.util.ts"
     },
     {
@@ -2080,7 +2080,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "utils_mask_identifier_util_maskidentifier",
-      "community": 21,
+      "community": 23,
       "norm_label": "maskidentifier()"
     },
     {
@@ -2120,7 +2120,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_receipt_no_util",
-      "community": 21,
+      "community": 23,
       "norm_label": "receipt-no.util.ts"
     },
     {
@@ -2130,7 +2130,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_receipt_no_util_buildreceiptno",
-      "community": 21,
+      "community": 23,
       "norm_label": "buildreceiptno()"
     },
     {
@@ -2140,7 +2140,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_verification_code_util_spec",
-      "community": 125,
+      "community": 4,
       "norm_label": "verification-code.util.spec.ts"
     },
     {
@@ -2150,7 +2150,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "utils_verification_code_util",
-      "community": 125,
+      "community": 4,
       "norm_label": "verification-code.util.ts"
     },
     {
@@ -2160,7 +2160,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "utils_verification_code_util_generateverifycode",
-      "community": 125,
+      "community": 4,
       "norm_label": "generateverifycode()"
     },
     {
@@ -2170,7 +2170,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "utils_verification_code_util_generatecertificatecode",
-      "community": 125,
+      "community": 4,
       "norm_label": "generatecertificatecode()"
     },
     {
@@ -2180,7 +2180,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "utils_verification_code_util_generatereceiptverifycode",
-      "community": 125,
+      "community": 4,
       "norm_label": "generatereceiptverifycode()"
     },
     {
@@ -2200,7 +2200,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "config_env_validation",
-      "community": 138,
+      "community": 31,
       "norm_label": "env.validation.ts"
     },
     {
@@ -2210,7 +2210,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "config_env_validation_environmentvariables",
-      "community": 138,
+      "community": 31,
       "norm_label": "environmentvariables"
     },
     {
@@ -2220,7 +2220,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "config_env_validation_envschema",
-      "community": 138,
+      "community": 31,
       "norm_label": "envschema"
     },
     {
@@ -2230,7 +2230,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "config_env_validation_validateenv",
-      "community": 138,
+      "community": 31,
       "norm_label": "validateenv()"
     },
     {
@@ -2300,7 +2300,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "database_data_source",
-      "community": 4,
+      "community": 43,
       "norm_label": "data-source.ts"
     },
     {
@@ -5100,7 +5100,7 @@
       "source_location": "L212",
       "_origin": "ast",
       "id": "seeds_demo_seed_seedusers",
-      "community": 25,
+      "community": 43,
       "norm_label": "seedusers()"
     },
     {
@@ -5280,14 +5280,14 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "seeds_test_rbac_seed_seedtestrbac",
-      "community": 53,
+      "community": 43,
       "norm_label": "seedtestrbac()"
     },
     {
       "label": "main()",
       "file_type": "code",
       "source_file": "src/database/seeds/test-rbac-seed.ts",
-      "source_location": "L127",
+      "source_location": "L125",
       "_origin": "ast",
       "id": "seeds_test_rbac_seed_main",
       "community": 53,
@@ -5440,7 +5440,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "auth_auth_controller_authcontroller_constructor",
-      "community": 18,
+      "community": 28,
       "norm_label": ".constructor()"
     },
     {
@@ -5570,7 +5570,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "auth_auth_service_authservice",
-      "community": 18,
+      "community": 28,
       "norm_label": "authservice"
     },
     {
@@ -5580,7 +5580,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "auth_auth_service_authservice_constructor",
-      "community": 18,
+      "community": 5,
       "norm_label": ".constructor()"
     },
     {
@@ -5590,7 +5590,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "auth_auth_service_authservice_derivename",
-      "community": 18,
+      "community": 28,
       "norm_label": ".derivename()"
     },
     {
@@ -5600,7 +5600,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "auth_auth_service_authservice_generateotp",
-      "community": 18,
+      "community": 28,
       "norm_label": ".generateotp()"
     },
     {
@@ -5610,7 +5610,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "auth_auth_service_authservice_sendotp",
-      "community": 18,
+      "community": 28,
       "norm_label": ".sendotp()"
     },
     {
@@ -5620,7 +5620,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "auth_auth_service_authservice_verifyotp",
-      "community": 18,
+      "community": 28,
       "norm_label": ".verifyotp()"
     },
     {
@@ -5630,7 +5630,7 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "auth_auth_service_authservice_login",
-      "community": 18,
+      "community": 28,
       "norm_label": ".login()"
     },
     {
@@ -5640,7 +5640,7 @@
       "source_location": "L178",
       "_origin": "ast",
       "id": "auth_auth_service_authservice_persistregisterprofileimage",
-      "community": 18,
+      "community": 28,
       "norm_label": ".persistregisterprofileimage()"
     },
     {
@@ -5650,7 +5650,7 @@
       "source_location": "L213",
       "_origin": "ast",
       "id": "auth_auth_service_authservice_register",
-      "community": 18,
+      "community": 28,
       "norm_label": ".register()"
     },
     {
@@ -5660,7 +5660,7 @@
       "source_location": "L376",
       "_origin": "ast",
       "id": "auth_auth_service_authservice_getprofile",
-      "community": 18,
+      "community": 28,
       "norm_label": ".getprofile()"
     },
     {
@@ -5840,7 +5840,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_otp_email_template",
-      "community": 18,
+      "community": 28,
       "norm_label": "otp-email.template.ts"
     },
     {
@@ -5850,7 +5850,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_otp_email_template_otpemaildata",
-      "community": 18,
+      "community": 28,
       "norm_label": "otpemaildata"
     },
     {
@@ -5860,7 +5860,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "templates_otp_email_template_styles",
-      "community": 18,
+      "community": 28,
       "norm_label": "styles"
     },
     {
@@ -5870,7 +5870,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "templates_otp_email_template_getotpemailtemplate",
-      "community": 18,
+      "community": 28,
       "norm_label": "getotpemailtemplate()"
     },
     {
@@ -5890,7 +5890,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_controller_authenticatedrequest",
-      "community": 8,
+      "community": 119,
       "norm_label": "authenticatedrequest"
     },
     {
@@ -5970,7 +5970,7 @@
       "source_location": "L150",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_controller_bankreconcilescontroller_updaterefs",
-      "community": 8,
+      "community": 10,
       "norm_label": ".updaterefs()"
     },
     {
@@ -6010,7 +6010,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_module",
-      "community": 9,
+      "community": 43,
       "norm_label": "bank-reconciles.module.ts"
     },
     {
@@ -6020,7 +6020,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_module_bankreconcilesmodule",
-      "community": 9,
+      "community": 31,
       "norm_label": "bankreconcilesmodule"
     },
     {
@@ -6037,7 +6037,7 @@
       "label": "ExistingBankReconcileHashRow",
       "file_type": "code",
       "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
-      "source_location": "L57",
+      "source_location": "L71",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_spec_existingbankreconcilehashrow",
       "community": 9,
@@ -6047,7 +6047,7 @@
       "label": "MockQueryBuilder",
       "file_type": "code",
       "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
-      "source_location": "L61",
+      "source_location": "L75",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_spec_mockquerybuilder",
       "community": 9,
@@ -6057,27 +6057,47 @@
       "label": "MockBankReconcileRepository",
       "file_type": "code",
       "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
-      "source_location": "L82",
+      "source_location": "L97",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_spec_mockbankreconcilerepository",
       "community": 9,
       "norm_label": "mockbankreconcilerepository"
     },
     {
+      "label": "MockEntityRepository",
+      "file_type": "code",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L104",
+      "_origin": "ast",
+      "id": "bank_reconciles_bank_reconciles_service_spec_mockentityrepository",
+      "community": 9,
+      "norm_label": "mockentityrepository"
+    },
+    {
       "label": "ChangeReasonProbe",
       "file_type": "code",
       "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
-      "source_location": "L88",
+      "source_location": "L111",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_spec_changereasonprobe",
       "community": 9,
       "norm_label": "changereasonprobe"
     },
     {
+      "label": "VerifyMatchesProbe",
+      "file_type": "code",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L118",
+      "_origin": "ast",
+      "id": "bank_reconciles_bank_reconciles_service_spec_verifymatchesprobe",
+      "community": 9,
+      "norm_label": "verifymatchesprobe"
+    },
+    {
       "label": "createCsvFile()",
       "file_type": "code",
       "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
-      "source_location": "L95",
+      "source_location": "L135",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_spec_createcsvfile",
       "community": 9,
@@ -6087,7 +6107,7 @@
       "label": "createQueryBuilder()",
       "file_type": "code",
       "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
-      "source_location": "L101",
+      "source_location": "L144",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_spec_createquerybuilder",
       "community": 9,
@@ -6097,11 +6117,21 @@
       "label": "createImportHash()",
       "file_type": "code",
       "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
-      "source_location": "L149",
+      "source_location": "L204",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_spec_createimporthash",
       "community": 9,
       "norm_label": "createimporthash()"
+    },
+    {
+      "label": "createMockEntityRepo()",
+      "file_type": "code",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L207",
+      "_origin": "ast",
+      "id": "bank_reconciles_bank_reconciles_service_spec_createmockentityrepo",
+      "community": 9,
+      "norm_label": "createmockentityrepo()"
     },
     {
       "label": "bank-reconciles.service.ts",
@@ -6440,7 +6470,7 @@
       "source_location": "L632",
       "_origin": "ast",
       "id": "bank_reconciles_bank_reconciles_service_bankreconcilesservice_updaterefs",
-      "community": 8,
+      "community": 10,
       "norm_label": ".updaterefs()"
     },
     {
@@ -6660,7 +6690,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_bank_reconcile_dto",
-      "community": 8,
+      "community": 10,
       "norm_label": "bank-reconcile.dto.ts"
     },
     {
@@ -6680,7 +6710,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "dto_bank_reconcile_dto_updatebankreconciledto",
-      "community": 8,
+      "community": 10,
       "norm_label": "updatebankreconciledto"
     },
     {
@@ -6690,7 +6720,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "dto_bank_reconcile_dto_updatebankreconcilerefsdto",
-      "community": 8,
+      "community": 10,
       "norm_label": "updatebankreconcilerefsdto"
     },
     {
@@ -6750,7 +6780,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_bank_reconcile_edit_log_entity",
-      "community": 9,
+      "community": 43,
       "norm_label": "bank-reconcile-edit-log.entity.ts"
     },
     {
@@ -6790,7 +6820,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "entities_bank_reconcile_edit_log_entity_bankreconcileeditlog",
-      "community": 9,
+      "community": 43,
       "norm_label": "bankreconcileeditlog"
     },
     {
@@ -6800,7 +6830,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_bank_reconcile_entity",
-      "community": 9,
+      "community": 43,
       "norm_label": "bank-reconcile.entity.ts"
     },
     {
@@ -6810,7 +6840,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "entities_bank_reconcile_entity_bankreconcile",
-      "community": 9,
+      "community": 43,
       "norm_label": "bankreconcile"
     },
     {
@@ -7020,7 +7050,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "exam_blocked_seats_exam_blocked_seats_module_examblockedseatsmodule",
-      "community": 19,
+      "community": 31,
       "norm_label": "examblockedseatsmodule"
     },
     {
@@ -7120,7 +7150,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_bulk_issue_certificates_dto",
-      "community": 12,
+      "community": 4,
       "norm_label": "bulk-issue-certificates.dto.ts"
     },
     {
@@ -7130,7 +7160,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "dto_bulk_issue_certificates_dto_bulkissuecertificatecandidatedto",
-      "community": 12,
+      "community": 4,
       "norm_label": "bulkissuecertificatecandidatedto"
     },
     {
@@ -7140,7 +7170,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "dto_bulk_issue_certificates_dto_bulkissuecertificatesdto",
-      "community": 12,
+      "community": 4,
       "norm_label": "bulkissuecertificatesdto"
     },
     {
@@ -7150,7 +7180,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_create_exam_certificate_dto",
-      "community": 12,
+      "community": 4,
       "norm_label": "create-exam-certificate.dto.ts"
     },
     {
@@ -7160,7 +7190,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_create_exam_certificate_dto_createexamcertificatedto",
-      "community": 12,
+      "community": 4,
       "norm_label": "createexamcertificatedto"
     },
     {
@@ -7170,7 +7200,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_update_exam_certificate_dto",
-      "community": 12,
+      "community": 4,
       "norm_label": "update-exam-certificate.dto.ts"
     },
     {
@@ -7180,7 +7210,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_update_exam_certificate_dto_updateexamcertificatedto",
-      "community": 12,
+      "community": 4,
       "norm_label": "updateexamcertificatedto"
     },
     {
@@ -7190,7 +7220,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_exam_certificate_entity",
-      "community": 12,
+      "community": 4,
       "norm_label": "exam-certificate.entity.ts"
     },
     {
@@ -7200,7 +7230,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "entities_exam_certificate_entity_examcertificate",
-      "community": 12,
+      "community": 4,
       "norm_label": "examcertificate"
     },
     {
@@ -7210,7 +7240,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_controller",
-      "community": 12,
+      "community": 4,
       "norm_label": "exam-certificates.controller.ts"
     },
     {
@@ -7220,7 +7250,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_controller_examcertificatescontroller",
-      "community": 12,
+      "community": 4,
       "norm_label": "examcertificatescontroller"
     },
     {
@@ -7230,7 +7260,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_controller_examcertificatescontroller_constructor",
-      "community": 12,
+      "community": 4,
       "norm_label": ".constructor()"
     },
     {
@@ -7240,7 +7270,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_controller_examcertificatescontroller_create",
-      "community": 12,
+      "community": 4,
       "norm_label": ".create()"
     },
     {
@@ -7250,7 +7280,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_controller_examcertificatescontroller_bulkissue",
-      "community": 12,
+      "community": 4,
       "norm_label": ".bulkissue()"
     },
     {
@@ -7260,7 +7290,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_controller_examcertificatescontroller_findall",
-      "community": 12,
+      "community": 4,
       "norm_label": ".findall()"
     },
     {
@@ -7270,7 +7300,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_controller_examcertificatescontroller_findone",
-      "community": 12,
+      "community": 4,
       "norm_label": ".findone()"
     },
     {
@@ -7280,7 +7310,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_controller_examcertificatescontroller_update",
-      "community": 12,
+      "community": 4,
       "norm_label": ".update()"
     },
     {
@@ -7290,7 +7320,7 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_controller_examcertificatescontroller_remove",
-      "community": 12,
+      "community": 4,
       "norm_label": ".remove()"
     },
     {
@@ -7300,7 +7330,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_module",
-      "community": 12,
+      "community": 4,
       "norm_label": "exam-certificates.module.ts"
     },
     {
@@ -7310,7 +7340,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_module_examcertificatesmodule",
-      "community": 31,
+      "community": 4,
       "norm_label": "examcertificatesmodule"
     },
     {
@@ -7320,7 +7350,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service_spec",
-      "community": 12,
+      "community": 4,
       "norm_label": "exam-certificates.service.spec.ts"
     },
     {
@@ -7330,7 +7360,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service",
-      "community": 12,
+      "community": 4,
       "norm_label": "exam-certificates.service.ts"
     },
     {
@@ -7340,7 +7370,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service_bulkissuecertificatesresult",
-      "community": 12,
+      "community": 4,
       "norm_label": "bulkissuecertificatesresult"
     },
     {
@@ -7350,7 +7380,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service_certificateemailrecipient",
-      "community": 12,
+      "community": 4,
       "norm_label": "certificateemailrecipient"
     },
     {
@@ -7360,7 +7390,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service_examcertificatesservice",
-      "community": 12,
+      "community": 4,
       "norm_label": "examcertificatesservice"
     },
     {
@@ -7370,7 +7400,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service_examcertificatesservice_constructor",
-      "community": 12,
+      "community": 4,
       "norm_label": ".constructor()"
     },
     {
@@ -7380,7 +7410,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service_examcertificatesservice_assertcertificateissuedatenotfuture",
-      "community": 12,
+      "community": 4,
       "norm_label": ".assertcertificateissuedatenotfuture()"
     },
     {
@@ -7390,7 +7420,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service_examcertificatesservice_assertcertificateexpirynotbeforeissue",
-      "community": 12,
+      "community": 4,
       "norm_label": ".assertcertificateexpirynotbeforeissue()"
     },
     {
@@ -7400,7 +7430,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service_examcertificatesservice_create",
-      "community": 12,
+      "community": 4,
       "norm_label": ".create()"
     },
     {
@@ -7410,7 +7440,7 @@
       "source_location": "L107",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service_examcertificatesservice_bulkissuecertificates",
-      "community": 12,
+      "community": 4,
       "norm_label": ".bulkissuecertificates()"
     },
     {
@@ -7420,7 +7450,7 @@
       "source_location": "L257",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service_examcertificatesservice_sendcertificateemailsinbatch",
-      "community": 12,
+      "community": 4,
       "norm_label": ".sendcertificateemailsinbatch()"
     },
     {
@@ -7430,7 +7460,7 @@
       "source_location": "L305",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service_examcertificatesservice_findall",
-      "community": 12,
+      "community": 4,
       "norm_label": ".findall()"
     },
     {
@@ -7440,7 +7470,7 @@
       "source_location": "L311",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service_examcertificatesservice_findone",
-      "community": 12,
+      "community": 4,
       "norm_label": ".findone()"
     },
     {
@@ -7450,7 +7480,7 @@
       "source_location": "L322",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service_examcertificatesservice_update",
-      "community": 12,
+      "community": 4,
       "norm_label": ".update()"
     },
     {
@@ -7460,7 +7490,7 @@
       "source_location": "L335",
       "_origin": "ast",
       "id": "exam_certificates_exam_certificates_service_examcertificatesservice_remove",
-      "community": 12,
+      "community": 4,
       "norm_label": ".remove()"
     },
     {
@@ -7470,7 +7500,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_certificate_issued_email_template",
-      "community": 12,
+      "community": 4,
       "norm_label": "certificate-issued-email.template.ts"
     },
     {
@@ -7480,7 +7510,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "templates_certificate_issued_email_template_certificateissuedemaildata",
-      "community": 12,
+      "community": 4,
       "norm_label": "certificateissuedemaildata"
     },
     {
@@ -7490,7 +7520,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "templates_certificate_issued_email_template_getcertificateissuedemailsubject",
-      "community": 12,
+      "community": 4,
       "norm_label": "getcertificateissuedemailsubject()"
     },
     {
@@ -7500,7 +7530,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "templates_certificate_issued_email_template_getcertificateissuedemailtemplate",
-      "community": 12,
+      "community": 4,
       "norm_label": "getcertificateissuedemailtemplate()"
     },
     {
@@ -7510,7 +7540,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_bulk_seat_assignment_dto",
-      "community": 38,
+      "community": 11,
       "norm_label": "bulk-seat-assignment.dto.ts"
     },
     {
@@ -7520,7 +7550,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "dto_bulk_seat_assignment_dto_seatassignmentitemdto",
-      "community": 38,
+      "community": 11,
       "norm_label": "seatassignmentitemdto"
     },
     {
@@ -7530,7 +7560,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "dto_bulk_seat_assignment_dto_bulkseatassignmentdto",
-      "community": 38,
+      "community": 11,
       "norm_label": "bulkseatassignmentdto"
     },
     {
@@ -7750,7 +7780,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller",
-      "community": 24,
+      "community": 42,
       "norm_label": "examenrollmentscontroller"
     },
     {
@@ -7760,7 +7790,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_constructor",
-      "community": 24,
+      "community": 42,
       "norm_label": ".constructor()"
     },
     {
@@ -7770,7 +7800,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_create",
-      "community": 24,
+      "community": 42,
       "norm_label": ".create()"
     },
     {
@@ -7790,7 +7820,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_findall",
-      "community": 24,
+      "community": 42,
       "norm_label": ".findall()"
     },
     {
@@ -7820,7 +7850,7 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_findmatchedenrollments",
-      "community": 24,
+      "community": 42,
       "norm_label": ".findmatchedenrollments()"
     },
     {
@@ -7830,7 +7860,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_findbyexamid",
-      "community": 24,
+      "community": 42,
       "norm_label": ".findbyexamid()"
     },
     {
@@ -7840,7 +7870,7 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_findbyuserid",
-      "community": 118,
+      "community": 42,
       "norm_label": ".findbyuserid()"
     },
     {
@@ -7850,7 +7880,7 @@
       "source_location": "L141",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_findone",
-      "community": 24,
+      "community": 42,
       "norm_label": ".findone()"
     },
     {
@@ -7860,7 +7890,7 @@
       "source_location": "L153",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_bulkassignseats",
-      "community": 38,
+      "community": 42,
       "norm_label": ".bulkassignseats()"
     },
     {
@@ -7880,7 +7910,7 @@
       "source_location": "L180",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_remove",
-      "community": 24,
+      "community": 42,
       "norm_label": ".remove()"
     },
     {
@@ -7890,7 +7920,7 @@
       "source_location": "L188",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_allocateseats",
-      "community": 24,
+      "community": 42,
       "norm_label": ".allocateseats()"
     },
     {
@@ -7910,7 +7940,7 @@
       "source_location": "L211",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_controller_examenrollmentscontroller_checkin",
-      "community": 24,
+      "community": 42,
       "norm_label": ".checkin()"
     },
     {
@@ -7920,7 +7950,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_module",
-      "community": 11,
+      "community": 12,
       "norm_label": "exam-enrollments.module.ts"
     },
     {
@@ -7970,7 +8000,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_service_examenrollmentsservice_constructor",
-      "community": 42,
+      "community": 12,
       "norm_label": ".constructor()"
     },
     {
@@ -8010,7 +8040,7 @@
       "source_location": "L424",
       "_origin": "ast",
       "id": "exam_enrollments_exam_enrollments_service_examenrollmentsservice_findall",
-      "community": 42,
+      "community": 23,
       "norm_label": ".findall()"
     },
     {
@@ -8400,7 +8430,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_create_exam_location_seat_dto",
-      "community": 1,
+      "community": 18,
       "norm_label": "create-exam-location-seat.dto.ts"
     },
     {
@@ -8410,7 +8440,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "dto_create_exam_location_seat_dto_createexamlocationseatdto",
-      "community": 1,
+      "community": 18,
       "norm_label": "createexamlocationseatdto"
     },
     {
@@ -8420,7 +8450,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_generate_exam_location_seats_dto",
-      "community": 1,
+      "community": 18,
       "norm_label": "generate-exam-location-seats.dto.ts"
     },
     {
@@ -8430,7 +8460,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "dto_generate_exam_location_seats_dto_generateexamlocationseatsdto",
-      "community": 1,
+      "community": 18,
       "norm_label": "generateexamlocationseatsdto"
     },
     {
@@ -8440,7 +8470,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_update_exam_location_seat_dto",
-      "community": 1,
+      "community": 18,
       "norm_label": "update-exam-location-seat.dto.ts"
     },
     {
@@ -8450,7 +8480,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_update_exam_location_seat_dto_updateexamlocationseatdto",
-      "community": 1,
+      "community": 18,
       "norm_label": "updateexamlocationseatdto"
     },
     {
@@ -8460,7 +8490,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_exam_location_seat_entity",
-      "community": 1,
+      "community": 18,
       "norm_label": "exam-location-seat.entity.ts"
     },
     {
@@ -8470,7 +8500,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "entities_exam_location_seat_entity_locationseatstatus",
-      "community": 1,
+      "community": 18,
       "norm_label": "locationseatstatus"
     },
     {
@@ -8480,7 +8510,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "entities_exam_location_seat_entity_examlocationseat",
-      "community": 1,
+      "community": 18,
       "norm_label": "examlocationseat"
     },
     {
@@ -8490,7 +8520,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller",
-      "community": 1,
+      "community": 18,
       "norm_label": "exam-location-seats.controller.ts"
     },
     {
@@ -8500,7 +8530,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller",
-      "community": 1,
+      "community": 18,
       "norm_label": "examlocationseatscontroller"
     },
     {
@@ -8510,7 +8540,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller_constructor",
-      "community": 1,
+      "community": 18,
       "norm_label": ".constructor()"
     },
     {
@@ -8520,7 +8550,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller_create",
-      "community": 1,
+      "community": 18,
       "norm_label": ".create()"
     },
     {
@@ -8530,7 +8560,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller_findall",
-      "community": 1,
+      "community": 18,
       "norm_label": ".findall()"
     },
     {
@@ -8540,7 +8570,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller_findone",
-      "community": 1,
+      "community": 18,
       "norm_label": ".findone()"
     },
     {
@@ -8550,7 +8580,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller_update",
-      "community": 1,
+      "community": 18,
       "norm_label": ".update()"
     },
     {
@@ -8560,7 +8590,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller_remove",
-      "community": 1,
+      "community": 18,
       "norm_label": ".remove()"
     },
     {
@@ -8570,7 +8600,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_controller_examlocationseatscontroller_generateseats",
-      "community": 1,
+      "community": 18,
       "norm_label": ".generateseats()"
     },
     {
@@ -8580,7 +8610,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_module",
-      "community": 1,
+      "community": 18,
       "norm_label": "exam-location-seats.module.ts"
     },
     {
@@ -8590,7 +8620,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_module_examlocationseatsmodule",
-      "community": 1,
+      "community": 31,
       "norm_label": "examlocationseatsmodule"
     },
     {
@@ -8600,7 +8630,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service",
-      "community": 1,
+      "community": 18,
       "norm_label": "exam-location-seats.service.ts"
     },
     {
@@ -8610,7 +8640,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice",
-      "community": 1,
+      "community": 18,
       "norm_label": "examlocationseatsservice"
     },
     {
@@ -8620,7 +8650,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_constructor",
-      "community": 1,
+      "community": 18,
       "norm_label": ".constructor()"
     },
     {
@@ -8630,7 +8660,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_validatelocation",
-      "community": 1,
+      "community": 18,
       "norm_label": ".validatelocation()"
     },
     {
@@ -8640,7 +8670,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_create",
-      "community": 1,
+      "community": 18,
       "norm_label": ".create()"
     },
     {
@@ -8650,7 +8680,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_findall",
-      "community": 1,
+      "community": 18,
       "norm_label": ".findall()"
     },
     {
@@ -8660,7 +8690,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_findone",
-      "community": 1,
+      "community": 18,
       "norm_label": ".findone()"
     },
     {
@@ -8670,7 +8700,7 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_update",
-      "community": 1,
+      "community": 18,
       "norm_label": ".update()"
     },
     {
@@ -8680,7 +8710,7 @@
       "source_location": "L122",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_remove",
-      "community": 1,
+      "community": 18,
       "norm_label": ".remove()"
     },
     {
@@ -8690,7 +8720,7 @@
       "source_location": "L127",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_getseatlabel",
-      "community": 1,
+      "community": 38,
       "norm_label": ".getseatlabel()"
     },
     {
@@ -8700,7 +8730,7 @@
       "source_location": "L140",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_getseatsortorder",
-      "community": 1,
+      "community": 38,
       "norm_label": ".getseatsortorder()"
     },
     {
@@ -8710,7 +8740,7 @@
       "source_location": "L152",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_gettargetseatstatus",
-      "community": 1,
+      "community": 18,
       "norm_label": ".gettargetseatstatus()"
     },
     {
@@ -8720,7 +8750,7 @@
       "source_location": "L176",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_validateseatscanberemoved",
-      "community": 1,
+      "community": 18,
       "norm_label": ".validateseatscanberemoved()"
     },
     {
@@ -8730,7 +8760,7 @@
       "source_location": "L212",
       "_origin": "ast",
       "id": "exam_location_seats_exam_location_seats_service_examlocationseatsservice_generateseats",
-      "community": 1,
+      "community": 18,
       "norm_label": ".generateseats()"
     },
     {
@@ -8810,7 +8840,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_exam_location_entity",
-      "community": 1,
+      "community": 21,
       "norm_label": "exam-location.entity.ts"
     },
     {
@@ -8820,7 +8850,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "entities_exam_location_entity_seatdirection",
-      "community": 1,
+      "community": 38,
       "norm_label": "seatdirection"
     },
     {
@@ -8950,7 +8980,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_module_examlocationsmodule",
-      "community": 12,
+      "community": 1,
       "norm_label": "examlocationsmodule"
     },
     {
@@ -8980,7 +9010,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationresponsealiases",
-      "community": 1,
+      "community": 38,
       "norm_label": "examlocationresponsealiases"
     },
     {
@@ -9040,7 +9070,7 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_getseatlabel",
-      "community": 1,
+      "community": 38,
       "norm_label": ".getseatlabel()"
     },
     {
@@ -9050,7 +9080,7 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "exam_locations_exam_locations_service_examlocationsservice_getseatsortorder",
-      "community": 1,
+      "community": 38,
       "norm_label": ".getseatsortorder()"
     },
     {
@@ -10220,7 +10250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_module",
-      "community": 4,
+      "community": 31,
       "norm_label": "exam-scores.module.ts"
     },
     {
@@ -10360,7 +10390,7 @@
       "source_location": "L237",
       "_origin": "ast",
       "id": "exam_scores_exam_scores_service_examscoresservice_findall",
-      "community": 23,
+      "community": 4,
       "norm_label": ".findall()"
     },
     {
@@ -10410,7 +10440,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_create_exam_session_location_dto",
-      "community": 1,
+      "community": 21,
       "norm_label": "create-exam-session-location.dto.ts"
     },
     {
@@ -10420,7 +10450,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "dto_create_exam_session_location_dto_createexamsessionlocationdto",
-      "community": 1,
+      "community": 21,
       "norm_label": "createexamsessionlocationdto"
     },
     {
@@ -10430,7 +10460,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_update_exam_session_location_dto",
-      "community": 1,
+      "community": 21,
       "norm_label": "update-exam-session-location.dto.ts"
     },
     {
@@ -10440,7 +10470,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "dto_update_exam_session_location_dto_updateexamsessionlocationdto",
-      "community": 1,
+      "community": 21,
       "norm_label": "updateexamsessionlocationdto"
     },
     {
@@ -10450,7 +10480,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_exam_session_location_entity",
-      "community": 11,
+      "community": 21,
       "norm_label": "exam-session-location.entity.ts"
     },
     {
@@ -10460,7 +10490,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "entities_exam_session_location_entity_examsessionlocation",
-      "community": 1,
+      "community": 21,
       "norm_label": "examsessionlocation"
     },
     {
@@ -10470,7 +10500,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller",
-      "community": 1,
+      "community": 21,
       "norm_label": "exam-session-locations.controller.ts"
     },
     {
@@ -10480,7 +10510,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller",
-      "community": 1,
+      "community": 21,
       "norm_label": "examsessionlocationscontroller"
     },
     {
@@ -10490,7 +10520,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller_constructor",
-      "community": 1,
+      "community": 21,
       "norm_label": ".constructor()"
     },
     {
@@ -10500,7 +10530,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller_create",
-      "community": 1,
+      "community": 21,
       "norm_label": ".create()"
     },
     {
@@ -10510,7 +10540,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller_findallbylocation",
-      "community": 1,
+      "community": 21,
       "norm_label": ".findallbylocation()"
     },
     {
@@ -10520,7 +10550,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller_findallbysession",
-      "community": 1,
+      "community": 21,
       "norm_label": ".findallbysession()"
     },
     {
@@ -10530,7 +10560,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller_findone",
-      "community": 1,
+      "community": 21,
       "norm_label": ".findone()"
     },
     {
@@ -10540,7 +10570,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller_update",
-      "community": 1,
+      "community": 21,
       "norm_label": ".update()"
     },
     {
@@ -10550,7 +10580,7 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_controller_examsessionlocationscontroller_remove",
-      "community": 1,
+      "community": 21,
       "norm_label": ".remove()"
     },
     {
@@ -10560,7 +10590,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_module",
-      "community": 1,
+      "community": 21,
       "norm_label": "exam-session-locations.module.ts"
     },
     {
@@ -10570,7 +10600,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_module_examsessionlocationsmodule",
-      "community": 1,
+      "community": 31,
       "norm_label": "examsessionlocationsmodule"
     },
     {
@@ -10580,7 +10610,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service",
-      "community": 1,
+      "community": 21,
       "norm_label": "exam-session-locations.service.ts"
     },
     {
@@ -10590,7 +10620,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice",
-      "community": 1,
+      "community": 21,
       "norm_label": "examsessionlocationsservice"
     },
     {
@@ -10600,7 +10630,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_constructor",
-      "community": 1,
+      "community": 21,
       "norm_label": ".constructor()"
     },
     {
@@ -10610,7 +10640,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_validatelocationandsession",
-      "community": 1,
+      "community": 21,
       "norm_label": ".validatelocationandsession()"
     },
     {
@@ -10620,7 +10650,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_assertlocationnotoverlapping",
-      "community": 1,
+      "community": 21,
       "norm_label": ".assertlocationnotoverlapping()"
     },
     {
@@ -10630,7 +10660,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_create",
-      "community": 1,
+      "community": 21,
       "norm_label": ".create()"
     },
     {
@@ -10640,7 +10670,7 @@
       "source_location": "L139",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_findallbylocation",
-      "community": 1,
+      "community": 21,
       "norm_label": ".findallbylocation()"
     },
     {
@@ -10650,7 +10680,7 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_findallbysession",
-      "community": 1,
+      "community": 21,
       "norm_label": ".findallbysession()"
     },
     {
@@ -10660,7 +10690,7 @@
       "source_location": "L173",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_findone",
-      "community": 1,
+      "community": 21,
       "norm_label": ".findone()"
     },
     {
@@ -10670,7 +10700,7 @@
       "source_location": "L184",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_update",
-      "community": 1,
+      "community": 21,
       "norm_label": ".update()"
     },
     {
@@ -10680,7 +10710,7 @@
       "source_location": "L210",
       "_origin": "ast",
       "id": "exam_session_locations_exam_session_locations_service_examsessionlocationsservice_remove",
-      "community": 1,
+      "community": 21,
       "norm_label": ".remove()"
     },
     {
@@ -10740,7 +10770,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "entities_exam_session_entity_examsessionstatus",
-      "community": 12,
+      "community": 11,
       "norm_label": "examsessionstatus"
     },
     {
@@ -10860,7 +10890,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "exam_sessions_exam_sessions_module_examsessionsmodule",
-      "community": 12,
+      "community": 31,
       "norm_label": "examsessionsmodule"
     },
     {
@@ -11180,7 +11210,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "exam_vouchers_exam_vouchers_module_examvouchersmodule",
-      "community": 15,
+      "community": 31,
       "norm_label": "examvouchersmodule"
     },
     {
@@ -11190,7 +11220,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "exam_vouchers_exam_vouchers_service_spec",
-      "community": 15,
+      "community": 11,
       "norm_label": "exam-vouchers.service.spec.ts"
     },
     {
@@ -11200,7 +11230,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "exam_vouchers_exam_vouchers_service_spec_repositoryentity",
-      "community": 15,
+      "community": 11,
       "norm_label": "repositoryentity"
     },
     {
@@ -12410,7 +12440,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "moodle_sync_logs_moodle_sync_logs_module_moodlesynclogsmodule",
-      "community": 5,
+      "community": 31,
       "norm_label": "moodlesynclogsmodule"
     },
     {
@@ -12720,7 +12750,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "moodle_moodle_module",
-      "community": 5,
+      "community": 31,
       "norm_label": "moodle.module.ts"
     },
     {
@@ -13254,6 +13284,16 @@
       "norm_label": ".updatepagecontent()"
     },
     {
+      "label": "payment-config.dto.spec.ts",
+      "file_type": "code",
+      "source_file": "src/modules/payment-configs/dto/payment-config.dto.spec.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "dto_payment_config_dto_spec",
+      "community": 30,
+      "norm_label": "payment-config.dto.spec.ts"
+    },
+    {
       "label": "payment-config.dto.ts",
       "file_type": "code",
       "source_file": "src/modules/payment-configs/dto/payment-config.dto.ts",
@@ -13402,6 +13442,16 @@
       "id": "payment_configs_payment_configs_module_paymentconfigsmodule",
       "community": 30,
       "norm_label": "paymentconfigsmodule"
+    },
+    {
+      "label": "payment-configs.service.spec.ts",
+      "file_type": "code",
+      "source_file": "src/modules/payment-configs/payment-configs.service.spec.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "payment_configs_payment_configs_service_spec",
+      "community": 30,
+      "norm_label": "payment-configs.service.spec.ts"
     },
     {
       "label": "payment-configs.service.ts",
@@ -14420,7 +14470,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "profile_edit_history_profile_edit_history_module_profileedithistorymodule",
-      "community": 31,
+      "community": 41,
       "norm_label": "profileedithistorymodule"
     },
     {
@@ -14494,13 +14544,23 @@
       "norm_label": ".extractimagepath()"
     },
     {
+      "label": "receipt.dto.spec.ts",
+      "file_type": "code",
+      "source_file": "src/modules/receipts/dto/receipt.dto.spec.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "dto_receipt_dto_spec",
+      "community": 23,
+      "norm_label": "receipt.dto.spec.ts"
+    },
+    {
       "label": "receipt.dto.ts",
       "file_type": "code",
       "source_file": "src/modules/receipts/dto/receipt.dto.ts",
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_receipt_dto",
-      "community": 50,
+      "community": 23,
       "norm_label": "receipt.dto.ts"
     },
     {
@@ -14510,7 +14570,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "dto_receipt_dto_createreceiptdto",
-      "community": 50,
+      "community": 23,
       "norm_label": "createreceiptdto"
     },
     {
@@ -14520,7 +14580,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "dto_receipt_dto_updatereceiptdto",
-      "community": 50,
+      "community": 23,
       "norm_label": "updatereceiptdto"
     },
     {
@@ -14530,7 +14590,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_receipt_entity",
-      "community": 50,
+      "community": 23,
       "norm_label": "receipt.entity.ts"
     },
     {
@@ -14540,7 +14600,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "entities_receipt_entity_receiptstatus",
-      "community": 50,
+      "community": 23,
       "norm_label": "receiptstatus"
     },
     {
@@ -14560,7 +14620,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "receipts_receipts_controller",
-      "community": 50,
+      "community": 23,
       "norm_label": "receipts.controller.ts"
     },
     {
@@ -14660,7 +14720,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "receipts_receipts_module",
-      "community": 50,
+      "community": 23,
       "norm_label": "receipts.module.ts"
     },
     {
@@ -14670,8 +14730,18 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "receipts_receipts_module_receiptsmodule",
-      "community": 50,
+      "community": 31,
       "norm_label": "receiptsmodule"
+    },
+    {
+      "label": "receipts.service.spec.ts",
+      "file_type": "code",
+      "source_file": "src/modules/receipts/receipts.service.spec.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "receipts_receipts_service_spec",
+      "community": 23,
+      "norm_label": "receipts.service.spec.ts"
     },
     {
       "label": "receipts.service.ts",
@@ -14680,7 +14750,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "receipts_receipts_service",
-      "community": 50,
+      "community": 23,
       "norm_label": "receipts.service.ts"
     },
     {
@@ -14710,7 +14780,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "receipts_receipts_service_receiptsservice_create",
-      "community": 125,
+      "community": 23,
       "norm_label": ".create()"
     },
     {
@@ -14830,7 +14900,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_role_entity",
-      "community": 22,
+      "community": 29,
       "norm_label": "role.entity.ts"
     },
     {
@@ -14850,7 +14920,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "enums_role_enum",
-      "community": 28,
+      "community": 119,
       "norm_label": "role.enum.ts"
     },
     {
@@ -14860,7 +14930,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "enums_role_enum_roleenum",
-      "community": 28,
+      "community": 119,
       "norm_label": "roleenum"
     },
     {
@@ -15000,7 +15070,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "roles_roles_service_rolesservice_constructor",
-      "community": 22,
+      "community": 29,
       "norm_label": ".constructor()"
     },
     {
@@ -15070,7 +15140,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_save_band_rules_dto",
-      "community": 4,
+      "community": 35,
       "norm_label": "save-band-rules.dto.ts"
     },
     {
@@ -15080,7 +15150,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "dto_save_band_rules_dto_bandruledto",
-      "community": 4,
+      "community": 35,
       "norm_label": "bandruledto"
     },
     {
@@ -15090,7 +15160,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "dto_save_band_rules_dto_savebandrulesdto",
-      "community": 4,
+      "community": 35,
       "norm_label": "savebandrulesdto"
     },
     {
@@ -15100,7 +15170,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_score_criteria_entity",
-      "community": 4,
+      "community": 35,
       "norm_label": "score-criteria.entity.ts"
     },
     {
@@ -15110,7 +15180,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "entities_score_criteria_entity_scorecriteria",
-      "community": 4,
+      "community": 35,
       "norm_label": "scorecriteria"
     },
     {
@@ -15120,7 +15190,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_controller",
-      "community": 4,
+      "community": 35,
       "norm_label": "score-criteria.controller.ts"
     },
     {
@@ -15130,7 +15200,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_controller_scorecriteriacontroller",
-      "community": 4,
+      "community": 35,
       "norm_label": "scorecriteriacontroller"
     },
     {
@@ -15140,7 +15210,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_controller_scorecriteriacontroller_constructor",
-      "community": 4,
+      "community": 35,
       "norm_label": ".constructor()"
     },
     {
@@ -15150,7 +15220,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_controller_scorecriteriacontroller_getbandrules",
-      "community": 4,
+      "community": 35,
       "norm_label": ".getbandrules()"
     },
     {
@@ -15160,7 +15230,7 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_controller_scorecriteriacontroller_savebandrules",
-      "community": 4,
+      "community": 35,
       "norm_label": ".savebandrules()"
     },
     {
@@ -15170,7 +15240,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_module",
-      "community": 4,
+      "community": 35,
       "norm_label": "score-criteria.module.ts"
     },
     {
@@ -15180,7 +15250,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_module_scorecriteriamodule",
-      "community": 4,
+      "community": 31,
       "norm_label": "scorecriteriamodule"
     },
     {
@@ -15190,7 +15260,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_service",
-      "community": 4,
+      "community": 35,
       "norm_label": "score-criteria.service.ts"
     },
     {
@@ -15200,7 +15270,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_service_scorecriteriaservice",
-      "community": 4,
+      "community": 35,
       "norm_label": "scorecriteriaservice"
     },
     {
@@ -15210,7 +15280,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_service_scorecriteriaservice_constructor",
-      "community": 4,
+      "community": 35,
       "norm_label": ".constructor()"
     },
     {
@@ -15220,7 +15290,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_service_scorecriteriaservice_findactivecriteria",
-      "community": 4,
+      "community": 35,
       "norm_label": ".findactivecriteria()"
     },
     {
@@ -15230,7 +15300,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_service_scorecriteriaservice_parsebandrules",
-      "community": 4,
+      "community": 35,
       "norm_label": ".parsebandrules()"
     },
     {
@@ -15240,7 +15310,7 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_service_scorecriteriaservice_getbandrules",
-      "community": 4,
+      "community": 35,
       "norm_label": ".getbandrules()"
     },
     {
@@ -15250,7 +15320,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_service_scorecriteriaservice_resolvebandlevel",
-      "community": 4,
+      "community": 35,
       "norm_label": ".resolvebandlevel()"
     },
     {
@@ -15260,7 +15330,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "score_criteria_score_criteria_service_scorecriteriaservice_savebandrules",
-      "community": 4,
+      "community": 35,
       "norm_label": ".savebandrules()"
     },
     {
@@ -15380,7 +15450,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_score_rubric_entity",
-      "community": 4,
+      "community": 2,
       "norm_label": "score-rubric.entity.ts"
     },
     {
@@ -15690,7 +15760,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "thaid_thaid_module_thaidmodule",
-      "community": 37,
+      "community": 31,
       "norm_label": "thaidmodule"
     },
     {
@@ -16230,7 +16300,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "transaction_refs_transaction_refs_module_transactionrefsmodule",
-      "community": 20,
+      "community": 31,
       "norm_label": "transactionrefsmodule"
     },
     {
@@ -16700,7 +16770,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "transactions_transactions_controller_transactionscontroller_createtransactionforflow",
-      "community": 54,
+      "community": 26,
       "norm_label": ".createtransactionforflow()"
     },
     {
@@ -16750,7 +16820,7 @@
       "source_location": "L101",
       "_origin": "ast",
       "id": "transactions_transactions_controller_transactionscontroller_confirmpaymentflow",
-      "community": 54,
+      "community": 26,
       "norm_label": ".confirmpaymentflow()"
     },
     {
@@ -16800,7 +16870,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "transactions_transactions_module",
-      "community": 26,
+      "community": 54,
       "norm_label": "transactions.module.ts"
     },
     {
@@ -16822,6 +16892,26 @@
       "id": "transactions_transactions_service_spec",
       "community": 54,
       "norm_label": "transactions.service.spec.ts"
+    },
+    {
+      "label": "MockRepo",
+      "file_type": "code",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L119",
+      "_origin": "ast",
+      "id": "transactions_transactions_service_spec_mockrepo",
+      "community": 54,
+      "norm_label": "mockrepo"
+    },
+    {
+      "label": "createMockRepo()",
+      "file_type": "code",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L128",
+      "_origin": "ast",
+      "id": "transactions_transactions_service_spec_createmockrepo",
+      "community": 54,
+      "norm_label": "createmockrepo()"
     },
     {
       "label": "transactions.service.ts",
@@ -16890,7 +16980,7 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "transactions_transactions_service_transactionsservice_createtransactionforflow",
-      "community": 54,
+      "community": 133,
       "norm_label": ".createtransactionforflow()"
     },
     {
@@ -16970,7 +17060,7 @@
       "source_location": "L433",
       "_origin": "ast",
       "id": "transactions_transactions_service_transactionsservice_creatependingpayment",
-      "community": 54,
+      "community": 133,
       "norm_label": ".creatependingpayment()"
     },
     {
@@ -16990,7 +17080,7 @@
       "source_location": "L615",
       "_origin": "ast",
       "id": "transactions_transactions_service_transactionsservice_findall",
-      "community": 23,
+      "community": 26,
       "norm_label": ".findall()"
     },
     {
@@ -17240,7 +17330,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_user_profile_entity",
-      "community": 11,
+      "community": 43,
       "norm_label": "user-profile.entity.ts"
     },
     {
@@ -17370,7 +17460,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "user_profile_user_profile_module",
-      "community": 31,
+      "community": 41,
       "norm_label": "user-profile.module.ts"
     },
     {
@@ -17380,7 +17470,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "user_profile_user_profile_module_userprofilemodule",
-      "community": 31,
+      "community": 41,
       "norm_label": "userprofilemodule"
     },
     {
@@ -17590,7 +17680,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "dto_user_response_dto_userresponsedto_fromentity",
-      "community": 22,
+      "community": 43,
       "norm_label": ".fromentity()"
     },
     {
@@ -17620,7 +17710,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_user_entity",
-      "community": 9,
+      "community": 43,
       "norm_label": "user.entity.ts"
     },
     {
@@ -17630,7 +17720,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "entities_user_entity_user",
-      "community": 9,
+      "community": 43,
       "norm_label": "user"
     },
     {
@@ -17700,7 +17790,7 @@
       "source_location": "L67",
       "_origin": "ast",
       "id": "users_users_controller_userscontroller_findone",
-      "community": 118,
+      "community": 22,
       "norm_label": ".findone()"
     },
     {
@@ -17730,7 +17820,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "users_users_module",
-      "community": 31,
+      "community": 22,
       "norm_label": "users.module.ts"
     },
     {
@@ -17757,7 +17847,7 @@
       "label": "QueryBuilderMock",
       "file_type": "code",
       "source_file": "src/modules/users/users.service.spec.ts",
-      "source_location": "L38",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "users_users_service_spec_querybuildermock",
       "community": 22,
@@ -17900,7 +17990,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_verify_response_dto",
-      "community": 134,
+      "community": 23,
       "norm_label": "verify-response.dto.ts"
     },
     {
@@ -17910,7 +18000,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_verify_response_dto_certificateverifystatus",
-      "community": 134,
+      "community": 23,
       "norm_label": "certificateverifystatus"
     },
     {
@@ -17920,7 +18010,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "dto_verify_response_dto_verifycertificateholderdto",
-      "community": 134,
+      "community": 23,
       "norm_label": "verifycertificateholderdto"
     },
     {
@@ -17930,7 +18020,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "dto_verify_response_dto_verifycertificateexamdto",
-      "community": 134,
+      "community": 23,
       "norm_label": "verifycertificateexamdto"
     },
     {
@@ -17940,7 +18030,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "dto_verify_response_dto_verifycertificatescorelinedto",
-      "community": 134,
+      "community": 23,
       "norm_label": "verifycertificatescorelinedto"
     },
     {
@@ -17950,7 +18040,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "dto_verify_response_dto_verifycertificatescoresdto",
-      "community": 134,
+      "community": 23,
       "norm_label": "verifycertificatescoresdto"
     },
     {
@@ -17960,7 +18050,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "dto_verify_response_dto_verifycertificateresponsedto",
-      "community": 21,
+      "community": 23,
       "norm_label": "verifycertificateresponsedto"
     },
     {
@@ -17970,7 +18060,7 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "dto_verify_response_dto_receiptverifystatus",
-      "community": 134,
+      "community": 23,
       "norm_label": "receiptverifystatus"
     },
     {
@@ -17980,7 +18070,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "dto_verify_response_dto_verifyreceiptpayeedto",
-      "community": 134,
+      "community": 23,
       "norm_label": "verifyreceiptpayeedto"
     },
     {
@@ -17990,7 +18080,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "dto_verify_response_dto_verifyreceiptpaymentdto",
-      "community": 134,
+      "community": 23,
       "norm_label": "verifyreceiptpaymentdto"
     },
     {
@@ -18000,7 +18090,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "dto_verify_response_dto_verifyreceiptorganizationdto",
-      "community": 134,
+      "community": 23,
       "norm_label": "verifyreceiptorganizationdto"
     },
     {
@@ -18010,7 +18100,7 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "dto_verify_response_dto_verifyreceiptresponsedto",
-      "community": 21,
+      "community": 23,
       "norm_label": "verifyreceiptresponsedto"
     },
     {
@@ -18020,7 +18110,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "verify_verify_controller",
-      "community": 21,
+      "community": 23,
       "norm_label": "verify.controller.ts"
     },
     {
@@ -18030,7 +18120,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "verify_verify_controller_verifycontroller",
-      "community": 21,
+      "community": 23,
       "norm_label": "verifycontroller"
     },
     {
@@ -18040,7 +18130,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "verify_verify_controller_verifycontroller_constructor",
-      "community": 21,
+      "community": 23,
       "norm_label": ".constructor()"
     },
     {
@@ -18050,7 +18140,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "verify_verify_controller_verifycontroller_verifycertificate",
-      "community": 21,
+      "community": 23,
       "norm_label": ".verifycertificate()"
     },
     {
@@ -18060,7 +18150,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "verify_verify_controller_verifycontroller_verifyreceipt",
-      "community": 21,
+      "community": 23,
       "norm_label": ".verifyreceipt()"
     },
     {
@@ -18070,7 +18160,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "verify_verify_module",
-      "community": 21,
+      "community": 23,
       "norm_label": "verify.module.ts"
     },
     {
@@ -18080,7 +18170,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "verify_verify_module_verifymodule",
-      "community": 21,
+      "community": 31,
       "norm_label": "verifymodule"
     },
     {
@@ -18090,7 +18180,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "verify_verify_service_spec",
-      "community": 50,
+      "community": 23,
       "norm_label": "verify.service.spec.ts"
     },
     {
@@ -18100,7 +18190,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "verify_verify_service",
-      "community": 50,
+      "community": 23,
       "norm_label": "verify.service.ts"
     },
     {
@@ -18110,7 +18200,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "verify_verify_service_buu_organization",
-      "community": 50,
+      "community": 23,
       "norm_label": "buu_organization"
     },
     {
@@ -18120,7 +18210,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "verify_verify_service_verifyservice",
-      "community": 21,
+      "community": 23,
       "norm_label": "verifyservice"
     },
     {
@@ -18130,7 +18220,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "verify_verify_service_verifyservice_constructor",
-      "community": 21,
+      "community": 23,
       "norm_label": ".constructor()"
     },
     {
@@ -18140,7 +18230,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "verify_verify_service_verifyservice_verifycertificate",
-      "community": 21,
+      "community": 23,
       "norm_label": ".verifycertificate()"
     },
     {
@@ -18150,7 +18240,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "verify_verify_service_verifyservice_verifyreceipt",
-      "community": 21,
+      "community": 23,
       "norm_label": ".verifyreceipt()"
     },
     {
@@ -18160,8 +18250,18 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "verify_verify_service_verifyservice_mappaymentmethod",
-      "community": 21,
+      "community": 23,
       "norm_label": ".mappaymentmethod()"
+    },
+    {
+      "label": "create-voided-receipt.dto.spec.ts",
+      "file_type": "code",
+      "source_file": "src/modules/voided-receipts/dto/create-voided-receipt.dto.spec.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "dto_create_voided_receipt_dto_spec",
+      "community": 23,
+      "norm_label": "create-voided-receipt.dto.spec.ts"
     },
     {
       "label": "create-voided-receipt.dto.ts",
@@ -18170,7 +18270,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "dto_create_voided_receipt_dto",
-      "community": 35,
+      "community": 23,
       "norm_label": "create-voided-receipt.dto.ts"
     },
     {
@@ -18180,7 +18280,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "dto_create_voided_receipt_dto_createvoidedreceiptdto",
-      "community": 35,
+      "community": 23,
       "norm_label": "createvoidedreceiptdto"
     },
     {
@@ -18190,7 +18290,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "entities_voided_receipt_entity",
-      "community": 35,
+      "community": 23,
       "norm_label": "voided-receipt.entity.ts"
     },
     {
@@ -18200,7 +18300,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "entities_voided_receipt_entity_voidedreceipt",
-      "community": 35,
+      "community": 23,
       "norm_label": "voidedreceipt"
     },
     {
@@ -18210,7 +18310,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "voided_receipts_voided_receipts_controller",
-      "community": 35,
+      "community": 23,
       "norm_label": "voided-receipts.controller.ts"
     },
     {
@@ -18220,7 +18320,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "voided_receipts_voided_receipts_controller_voidedreceiptscontroller",
-      "community": 35,
+      "community": 23,
       "norm_label": "voidedreceiptscontroller"
     },
     {
@@ -18230,7 +18330,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "voided_receipts_voided_receipts_controller_voidedreceiptscontroller_constructor",
-      "community": 35,
+      "community": 23,
       "norm_label": ".constructor()"
     },
     {
@@ -18240,7 +18340,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "voided_receipts_voided_receipts_controller_voidedreceiptscontroller_create",
-      "community": 35,
+      "community": 23,
       "norm_label": ".create()"
     },
     {
@@ -18250,7 +18350,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "voided_receipts_voided_receipts_controller_voidedreceiptscontroller_findall",
-      "community": 35,
+      "community": 23,
       "norm_label": ".findall()"
     },
     {
@@ -18260,7 +18360,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "voided_receipts_voided_receipts_controller_voidedreceiptscontroller_findone",
-      "community": 35,
+      "community": 23,
       "norm_label": ".findone()"
     },
     {
@@ -18270,7 +18370,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "voided_receipts_voided_receipts_module",
-      "community": 35,
+      "community": 23,
       "norm_label": "voided-receipts.module.ts"
     },
     {
@@ -18280,8 +18380,28 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "voided_receipts_voided_receipts_module_voidedreceiptsmodule",
-      "community": 35,
+      "community": 23,
       "norm_label": "voidedreceiptsmodule"
+    },
+    {
+      "label": "voided-receipts.service.spec.ts",
+      "file_type": "code",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "voided_receipts_voided_receipts_service_spec",
+      "community": 23,
+      "norm_label": "voided-receipts.service.spec.ts"
+    },
+    {
+      "label": "MockRepo",
+      "file_type": "code",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "voided_receipts_voided_receipts_service_spec_mockrepo",
+      "community": 23,
+      "norm_label": "mockrepo"
     },
     {
       "label": "voided-receipts.service.ts",
@@ -18290,7 +18410,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "voided_receipts_voided_receipts_service",
-      "community": 35,
+      "community": 23,
       "norm_label": "voided-receipts.service.ts"
     },
     {
@@ -18300,7 +18420,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "voided_receipts_voided_receipts_service_voidedreceiptsservice",
-      "community": 35,
+      "community": 23,
       "norm_label": "voidedreceiptsservice"
     },
     {
@@ -18310,7 +18430,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "voided_receipts_voided_receipts_service_voidedreceiptsservice_constructor",
-      "community": 35,
+      "community": 23,
       "norm_label": ".constructor()"
     },
     {
@@ -18320,7 +18440,7 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "voided_receipts_voided_receipts_service_voidedreceiptsservice_create",
-      "community": 35,
+      "community": 23,
       "norm_label": ".create()"
     },
     {
@@ -18330,7 +18450,7 @@
       "source_location": "L135",
       "_origin": "ast",
       "id": "voided_receipts_voided_receipts_service_voidedreceiptsservice_findall",
-      "community": 35,
+      "community": 23,
       "norm_label": ".findall()"
     },
     {
@@ -18340,7 +18460,7 @@
       "source_location": "L149",
       "_origin": "ast",
       "id": "voided_receipts_voided_receipts_service_voidedreceiptsservice_findone",
-      "community": 35,
+      "community": 23,
       "norm_label": ".findone()"
     },
     {
@@ -18450,7 +18570,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "test_authz_e2e_spec",
-      "community": 28,
+      "community": 119,
       "norm_label": "authz.e2e-spec.ts"
     },
     {
@@ -18460,7 +18580,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "test_authz_e2e_spec_mockjwtauthguard",
-      "community": 28,
+      "community": 119,
       "norm_label": "mockjwtauthguard"
     },
     {
@@ -18470,7 +18590,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "test_authz_e2e_spec_mockjwtauthguard_canactivate",
-      "community": 28,
+      "community": 119,
       "norm_label": ".canactivate()"
     },
     {
@@ -18712,6 +18832,16 @@
       "id": "tsconfig_compileroptions_esmoduleinterop",
       "community": 34,
       "norm_label": "esmoduleinterop"
+    },
+    {
+      "label": "types",
+      "file_type": "code",
+      "source_file": "tsconfig.json",
+      "source_location": "L20",
+      "_origin": "ast",
+      "id": "tsconfig_compileroptions_types",
+      "community": 34,
+      "norm_label": "types"
     },
     {
       "label": "README.md",
@@ -28707,6 +28837,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L207",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "bank_reconciles_bank_reconciles_service_spec_createmockentityrepo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
       "source_location": "L101",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -28737,11 +28877,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L104",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "bank_reconciles_bank_reconciles_service_spec_mockentityrepository",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
       "source_location": "L61",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "bank_reconciles_bank_reconciles_service_spec",
       "target": "bank_reconciles_bank_reconciles_service_spec_mockquerybuilder"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L118",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "bank_reconciles_bank_reconciles_service_spec_verifymatchesprobe",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -28764,6 +28924,17 @@
       "confidence_score": 1.0,
       "source": "bank_reconciles_bank_reconciles_service_spec",
       "target": "entities_bank_reconcile_edit_log_entity_bankreconcilechangereason"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L65",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "entities_bank_reconcile_edit_log_entity_bankreconcileeditlog",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -28797,6 +28968,138 @@
       "confidence_score": 1.0,
       "source": "bank_reconciles_bank_reconciles_service_spec",
       "target": "entities_bank_reconcile_entity_bankreconcile"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L61",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "entities_exam_enrollment_entity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L61",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "entities_exam_enrollment_entity_examenrollmentstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L62",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "entities_receipt_entity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L62",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "entities_receipt_entity_receiptstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "entities_transaction_entity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "entities_transaction_entity_transaction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "entities_transaction_entity_transactionmatchstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "entities_transaction_entity_transactionpaymentstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "entities_transaction_ref_entity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "entities_transaction_ref_entity_transactionref",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L60",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "entities_transaction_status_history_entity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/bank-reconciles/bank-reconciles.service.spec.ts",
+      "source_location": "L60",
+      "weight": 1.0,
+      "source": "bank_reconciles_bank_reconciles_service_spec",
+      "target": "entities_transaction_status_history_entity_transactionapitype",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -33983,6 +34286,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_exam_enrollment_entity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/modules/user-profile/user-profile.service.ts",
       "source_location": "L21",
       "weight": 1.0,
@@ -34011,6 +34325,17 @@
       "confidence_score": 1.0,
       "source": "voided_receipts_voided_receipts_service",
       "target": "entities_exam_enrollment_entity"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "entities_exam_enrollment_entity",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -34159,12 +34484,34 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_exam_enrollment_entity_examenrollmentstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/modules/voided-receipts/voided-receipts.service.ts",
       "source_location": "L25",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "voided_receipts_voided_receipts_service",
       "target": "entities_exam_enrollment_entity_examenrollmentstatus"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "entities_exam_enrollment_entity_examenrollmentstatus",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -34915,6 +35262,17 @@
       "target": "entities_exam_enrollment_entity_examenrollment"
     },
     {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_exam_enrollment_entity_examenrollment",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "references",
       "context": "parameter_type",
       "confidence": "EXTRACTED",
@@ -34957,6 +35315,17 @@
       "confidence_score": 1.0,
       "source": "voided_receipts_voided_receipts_service",
       "target": "entities_exam_enrollment_entity_examenrollment"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "entities_exam_enrollment_entity_examenrollment",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -50075,6 +50444,39 @@
       "target": "page_builder_page_configs_service_pageconfigsservice_getpage"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/payment-configs/dto/payment-config.dto.spec.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dto_payment_config_dto_spec",
+      "target": "dto_payment_config_dto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/payment-configs/dto/payment-config.dto.spec.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dto_payment_config_dto_spec",
+      "target": "dto_payment_config_dto_createpaymentconfigdto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/payment-configs/dto/payment-config.dto.spec.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dto_payment_config_dto_spec",
+      "target": "dto_payment_config_dto_updatepaymentconfigdto",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/modules/payment-configs/dto/payment-config.dto.ts",
@@ -50115,6 +50517,17 @@
       "confidence_score": 1.0,
       "source": "payment_configs_payment_configs_service",
       "target": "dto_payment_config_dto"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/payment-configs/payment-configs.service.spec.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "payment_configs_payment_configs_service_spec",
+      "target": "dto_payment_config_dto",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -50164,6 +50577,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/modules/payment-configs/payment-configs.service.spec.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "payment_configs_payment_configs_service_spec",
+      "target": "dto_payment_config_dto_createpaymentconfigdto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/modules/payment-configs/payment-configs.controller.ts",
       "source_location": "L16",
       "weight": 1.0,
@@ -50203,6 +50627,17 @@
       "confidence_score": 1.0,
       "source": "payment_configs_payment_configs_service_paymentconfigsservice_update",
       "target": "dto_payment_config_dto_updatepaymentconfigdto"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/payment-configs/payment-configs.service.spec.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "payment_configs_payment_configs_service_spec",
+      "target": "dto_payment_config_dto_updatepaymentconfigdto",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -50273,6 +50708,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/modules/payment-configs/payment-configs.service.spec.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "payment_configs_payment_configs_service_spec",
+      "target": "entities_payment_config_entity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/modules/transactions/transactions.module.ts",
       "source_location": "L8",
       "weight": 1.0,
@@ -50290,6 +50736,17 @@
       "confidence_score": 1.0,
       "source": "transactions_transactions_service",
       "target": "entities_payment_config_entity"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_payment_config_entity",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -50449,6 +50906,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/modules/payment-configs/payment-configs.service.spec.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "payment_configs_payment_configs_service_spec",
+      "target": "entities_payment_config_entity_paymentconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/modules/transactions/transactions.module.ts",
       "source_location": "L8",
       "weight": 1.0,
@@ -50466,6 +50934,17 @@
       "confidence_score": 1.0,
       "source": "transactions_transactions_service",
       "target": "entities_payment_config_entity_paymentconfig"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_payment_config_entity_paymentconfig",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -50623,6 +51102,28 @@
       "confidence_score": 1.0,
       "source": "payment_configs_payment_configs_module",
       "target": "payment_configs_payment_configs_service_paymentconfigsservice"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/payment-configs/payment-configs.service.spec.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "payment_configs_payment_configs_service_spec",
+      "target": "payment_configs_payment_configs_service",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/payment-configs/payment-configs.service.spec.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "payment_configs_payment_configs_service_spec",
+      "target": "payment_configs_payment_configs_service_paymentconfigsservice",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -53151,6 +53652,61 @@
       "target": "profile_edit_history_profile_edit_history_service_profileedithistoryservice_extractimagepath"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/receipts/dto/receipt.dto.spec.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "dto_receipt_dto_spec",
+      "target": "dto_receipt_dto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/receipts/dto/receipt.dto.spec.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "dto_receipt_dto_spec",
+      "target": "dto_receipt_dto_createreceiptdto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/receipts/dto/receipt.dto.spec.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "dto_receipt_dto_spec",
+      "target": "dto_receipt_dto_updatereceiptdto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/receipts/dto/receipt.dto.spec.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dto_receipt_dto_spec",
+      "target": "entities_receipt_entity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/receipts/dto/receipt.dto.spec.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dto_receipt_dto_spec",
+      "target": "entities_receipt_entity_receiptstatus",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/modules/receipts/dto/receipt.dto.ts",
@@ -53215,6 +53771,17 @@
       "target": "dto_receipt_dto"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/receipts/receipts.service.spec.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "receipts_receipts_service_spec",
+      "target": "dto_receipt_dto",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "references",
       "context": "field",
       "confidence": "EXTRACTED",
@@ -53273,6 +53840,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/modules/receipts/receipts.service.spec.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "receipts_receipts_service_spec",
+      "target": "dto_receipt_dto_createreceiptdto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/modules/receipts/receipts.controller.ts",
       "source_location": "L21",
       "weight": 1.0,
@@ -53312,6 +53890,17 @@
       "confidence_score": 1.0,
       "source": "receipts_receipts_service_receiptsservice_update",
       "target": "dto_receipt_dto_updatereceiptdto"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/receipts/receipts.service.spec.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "receipts_receipts_service_spec",
+      "target": "dto_receipt_dto_updatereceiptdto",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -53414,6 +54003,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/modules/receipts/receipts.service.spec.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "receipts_receipts_service_spec",
+      "target": "entities_receipt_entity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/modules/transactions/transactions.module.ts",
       "source_location": "L6",
       "weight": 1.0,
@@ -53431,6 +54031,17 @@
       "confidence_score": 1.0,
       "source": "transactions_transactions_service",
       "target": "entities_receipt_entity"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_receipt_entity",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -53488,6 +54099,17 @@
       "target": "entities_receipt_entity"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "entities_receipt_entity",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -53502,12 +54124,34 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/modules/receipts/receipts.service.spec.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "receipts_receipts_service_spec",
+      "target": "entities_receipt_entity_receiptstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/modules/transactions/transactions.service.ts",
       "source_location": "L36",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "transactions_transactions_service",
       "target": "entities_receipt_entity_receiptstatus"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_receipt_entity_receiptstatus",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -53541,6 +54185,17 @@
       "confidence_score": 1.0,
       "source": "voided_receipts_voided_receipts_service",
       "target": "entities_receipt_entity_receiptstatus"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "entities_receipt_entity_receiptstatus",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -53744,6 +54399,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/modules/receipts/receipts.service.spec.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "receipts_receipts_service_spec",
+      "target": "entities_receipt_entity_receipt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/modules/transactions/transactions.module.ts",
       "source_location": "L6",
       "weight": 1.0,
@@ -53772,6 +54438,17 @@
       "confidence_score": 1.0,
       "source": "transactions_transactions_service_pendingpaymentresult",
       "target": "entities_receipt_entity_receipt"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_receipt_entity_receipt",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -53849,6 +54526,17 @@
       "confidence_score": 1.0,
       "source": "voided_receipts_voided_receipts_service",
       "target": "entities_receipt_entity_receipt"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "entities_receipt_entity_receipt",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -54028,6 +54716,28 @@
       "target": "receipts_receipts_service_receiptsservice"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/receipts/receipts.service.spec.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "receipts_receipts_service_spec",
+      "target": "receipts_receipts_service",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/receipts/receipts.service.spec.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "receipts_receipts_service_spec",
+      "target": "receipts_receipts_service_receiptsservice",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/modules/receipts/receipts.service.ts",
@@ -54157,9 +54867,9 @@
       "source_file": "src/modules/roles/dto/create-role.dto.spec.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dto_create_role_dto_spec",
-      "target": "dto_create_role_dto",
-      "confidence_score": 1.0
+      "target": "dto_create_role_dto"
     },
     {
       "relation": "imports",
@@ -54168,9 +54878,9 @@
       "source_file": "src/modules/roles/dto/create-role.dto.spec.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "dto_create_role_dto_spec",
-      "target": "dto_create_role_dto_createroledto",
-      "confidence_score": 1.0
+      "target": "dto_create_role_dto_createroledto"
     },
     {
       "relation": "contains",
@@ -54222,9 +54932,9 @@
       "source_file": "src/modules/roles/roles.service.spec.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roles_roles_service_spec",
-      "target": "dto_create_role_dto",
-      "confidence_score": 1.0
+      "target": "dto_create_role_dto"
     },
     {
       "relation": "imports",
@@ -54288,9 +54998,9 @@
       "source_file": "src/modules/roles/roles.service.spec.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roles_roles_service_spec",
-      "target": "dto_create_role_dto_createroledto",
-      "confidence_score": 1.0
+      "target": "dto_create_role_dto_createroledto"
     },
     {
       "relation": "contains",
@@ -54331,9 +55041,9 @@
       "source_file": "src/modules/roles/roles.service.spec.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roles_roles_service_spec",
-      "target": "dto_update_role_dto",
-      "confidence_score": 1.0
+      "target": "dto_update_role_dto"
     },
     {
       "relation": "imports",
@@ -54386,9 +55096,9 @@
       "source_file": "src/modules/roles/roles.service.spec.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roles_roles_service_spec",
-      "target": "dto_update_role_dto_updateroledto",
-      "confidence_score": 1.0
+      "target": "dto_update_role_dto_updateroledto"
     },
     {
       "relation": "imports_from",
@@ -54440,9 +55150,9 @@
       "source_file": "src/modules/roles/roles.service.spec.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roles_roles_service_spec",
-      "target": "entities_role_entity",
-      "confidence_score": 1.0
+      "target": "entities_role_entity"
     },
     {
       "relation": "imports_from",
@@ -54550,9 +55260,9 @@
       "source_file": "src/modules/roles/roles.service.spec.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roles_roles_service_spec",
-      "target": "entities_role_entity_role",
-      "confidence_score": 1.0
+      "target": "entities_role_entity_role"
     },
     {
       "relation": "imports",
@@ -54615,9 +55325,9 @@
       "source_file": "src/modules/roles/roles.service.spec.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roles_roles_service_spec",
-      "target": "enums_role_enum",
-      "confidence_score": 1.0
+      "target": "enums_role_enum"
     },
     {
       "relation": "imports_from",
@@ -54637,9 +55347,9 @@
       "source_file": "src/modules/roles/roles.service.spec.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roles_roles_service_spec",
-      "target": "enums_role_enum_roleenum",
-      "confidence_score": 1.0
+      "target": "enums_role_enum_roleenum"
     },
     {
       "relation": "imports",
@@ -54838,9 +55548,9 @@
       "source_file": "src/modules/roles/roles.service.spec.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roles_roles_service_spec",
-      "target": "roles_roles_service",
-      "confidence_score": 1.0
+      "target": "roles_roles_service"
     },
     {
       "relation": "imports",
@@ -54849,9 +55559,9 @@
       "source_file": "src/modules/roles/roles.service.spec.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "roles_roles_service_spec",
-      "target": "roles_roles_service_rolesservice",
-      "confidence_score": 1.0
+      "target": "roles_roles_service_rolesservice"
     },
     {
       "relation": "contains",
@@ -56932,6 +57642,17 @@
       "target": "entities_transaction_profile_entity"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_transaction_profile_entity",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -57106,6 +57827,17 @@
       "confidence_score": 1.0,
       "source": "transactions_transactions_service",
       "target": "entities_transaction_profile_entity_transactionprofile"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_transaction_profile_entity_transactionprofile",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -57661,6 +58393,17 @@
       "target": "entities_transaction_ref_entity"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_transaction_ref_entity",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -57857,6 +58600,17 @@
       "confidence_score": 1.0,
       "source": "transactions_transactions_service",
       "target": "entities_transaction_ref_entity_transactionref"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_transaction_ref_entity_transactionref",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -58413,6 +59167,17 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_transaction_status_history_entity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/modules/voided-receipts/voided-receipts.module.ts",
       "source_location": "L9",
       "weight": 1.0,
@@ -58432,6 +59197,17 @@
       "target": "entities_transaction_status_history_entity"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "entities_transaction_status_history_entity",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -58446,12 +59222,34 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_transaction_status_history_entity_transactionapitype",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/modules/voided-receipts/voided-receipts.service.ts",
       "source_location": "L29",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "voided_receipts_voided_receipts_service",
       "target": "entities_transaction_status_history_entity_transactionapitype"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "entities_transaction_status_history_entity_transactionapitype",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -58611,6 +59409,17 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_transaction_status_history_entity_transactionstatushistory",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/modules/voided-receipts/voided-receipts.module.ts",
       "source_location": "L9",
       "weight": 1.0,
@@ -58628,6 +59437,17 @@
       "confidence_score": 1.0,
       "source": "voided_receipts_voided_receipts_service",
       "target": "entities_transaction_status_history_entity_transactionstatushistory"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "entities_transaction_status_history_entity_transactionstatushistory",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -59396,9 +60216,9 @@
       "source_file": "src/modules/verify/verify.service.spec.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "verify_verify_service_spec",
-      "target": "entities_transaction_entity",
-      "confidence_score": 1.0
+      "target": "entities_transaction_entity"
     },
     {
       "relation": "imports_from",
@@ -59423,6 +60243,17 @@
       "target": "entities_transaction_entity"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "entities_transaction_entity",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -59437,12 +60268,34 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_transaction_entity_transactionpaymentmethod",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/modules/transactions/transactions.service.ts",
       "source_location": "L24",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "transactions_transactions_service",
       "target": "entities_transaction_entity_transactionpaymentstatus"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_transaction_entity_transactionpaymentstatus",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -59470,12 +60323,34 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "entities_transaction_entity_transactionpaymentstatus",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/modules/transactions/transactions.service.ts",
       "source_location": "L24",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "transactions_transactions_service",
       "target": "entities_transaction_entity_transactionchannel"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_transaction_entity_transactionchannel",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -59495,9 +60370,9 @@
       "source_file": "src/modules/verify/verify.service.spec.ts",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "verify_verify_service_spec",
-      "target": "entities_transaction_entity_transactionchannel",
-      "confidence_score": 1.0
+      "target": "entities_transaction_entity_transactionchannel"
     },
     {
       "relation": "references",
@@ -59520,6 +60395,17 @@
       "confidence_score": 1.0,
       "source": "transactions_transactions_service",
       "target": "entities_transaction_entity_transactionmatchstatus"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "entities_transaction_entity_transactionmatchstatus",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -59729,6 +60615,17 @@
       "confidence_score": 1.0,
       "source": "voided_receipts_voided_receipts_service",
       "target": "entities_transaction_entity_transaction"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "entities_transaction_entity_transaction",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -59969,6 +60866,26 @@
       "confidence_score": 1.0,
       "source": "transactions_transactions_service_spec",
       "target": "transactions_transactions_service"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L128",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "transactions_transactions_service_spec_createmockrepo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/transactions/transactions.service.spec.ts",
+      "source_location": "L119",
+      "weight": 1.0,
+      "source": "transactions_transactions_service_spec",
+      "target": "transactions_transactions_service_spec_mockrepo",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -63130,6 +64047,28 @@
       "target": "verify_verify_service_verifyservice_mappaymentmethod"
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/dto/create-voided-receipt.dto.spec.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dto_create_voided_receipt_dto_spec",
+      "target": "dto_create_voided_receipt_dto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/dto/create-voided-receipt.dto.spec.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "dto_create_voided_receipt_dto_spec",
+      "target": "dto_create_voided_receipt_dto_createvoidedreceiptdto",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/modules/voided-receipts/dto/create-voided-receipt.dto.ts",
@@ -63160,6 +64099,17 @@
       "confidence_score": 1.0,
       "source": "voided_receipts_voided_receipts_service",
       "target": "dto_create_voided_receipt_dto"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "dto_create_voided_receipt_dto",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -63193,6 +64143,17 @@
       "confidence_score": 1.0,
       "source": "voided_receipts_voided_receipts_service",
       "target": "dto_create_voided_receipt_dto_createvoidedreceiptdto"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "dto_create_voided_receipt_dto_createvoidedreceiptdto",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -63247,6 +64208,17 @@
       "confidence_score": 1.0,
       "source": "voided_receipts_voided_receipts_service",
       "target": "entities_voided_receipt_entity"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "entities_voided_receipt_entity",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -63313,6 +64285,17 @@
       "confidence_score": 1.0,
       "source": "voided_receipts_voided_receipts_service",
       "target": "entities_voided_receipt_entity_voidedreceipt"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "entities_voided_receipt_entity_voidedreceipt",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -63494,6 +64477,38 @@
       "confidence_score": 1.0,
       "source": "voided_receipts_voided_receipts_module",
       "target": "voided_receipts_voided_receipts_service_voidedreceiptsservice"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "voided_receipts_voided_receipts_service",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "voided_receipts_voided_receipts_service_spec_mockrepo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/modules/voided-receipts/voided-receipts.service.spec.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "voided_receipts_voided_receipts_service_spec",
+      "target": "voided_receipts_voided_receipts_service_voidedreceiptsservice",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -63859,6 +64874,16 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "tsconfig.json",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "tsconfig_compileroptions",
+      "target": "tsconfig_compileroptions_types",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "README.md",
       "source_location": "L1",
       "weight": 1.0,
@@ -63968,5 +64993,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "93a662a6588f0e54aa2a81e98d8979d9d25125e3"
+  "built_at_commit": "4d7e6520bbfb3c9889898835c16aaa73d5f71047"
 }

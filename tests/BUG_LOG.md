@@ -8,6 +8,7 @@
 | BUG-002 | 2026-08-05 | exam-certificates | low | Controller `@Controller('api/exam-certificates')` + global `api` prefix → route `/api/api/exam-certificates` | open |
 | BUG-003 | 2026-08-05 | roles | low | `GET /api/roles/:id` after missing/hard-deleted returns 200 with empty/null body instead of 404 | open |
 | BUG-004 | 2026-08-05 | verify UI | high | Public certificate verify page shows not-found: `getBandRules()` (auth-gated) inside `Promise.all` with verify API | open |
+| BUG-005 | 2026-08-05 | bank-reconciles updateRefs | high | PATCH `/:id/refs` rematch updates BR_REF* but leaves TRANX_ID on prior transaction (stale relation on save) | open |
 
 ### BUG-001
 
@@ -49,6 +50,17 @@
 - **Repro:** Open public verify certificate page with a valid CERT_CODE while logged out
 - **Status:** open
 - **Note:** VERIFY-E-001 skipped until fixed (`tests/e2e/verify.e2e.spec.ts`)
+
+### BUG-005
+
+- **Date:** 2026-08-05
+- **Module / file:** `apps/backend/src/modules/bank-reconciles/bank-reconciles.service.ts` (`updateRefs`)
+- **How found:** integration BR-I-003
+- **Expected:** PATCH refs rematch sets `TRANX_ID` to the new matching transaction and unmatches the old one
+- **Actual:** `BR_REF*` update but `TRANX_ID` stays on the prior transaction (likely stale `TRANSACTION` relation on `save()`)
+- **Repro:** Import BR → verify link to txn A → PATCH refs to txn B’s REF1/REF2 → response still has txn A’s `TRANX_ID`
+- **Status:** open
+- **Note:** BR-I-003 skipped until fixed (`tests/integration/bank-reconciles.api.spec.ts`)
 
 ### Template
 

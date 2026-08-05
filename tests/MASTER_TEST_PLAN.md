@@ -4,12 +4,12 @@
 
 ## Cumulative counts
 
-| Level | Batch 1 | Total |
-|---|---:|---:|
-| unit | 99 | 99 |
-| integration | 61 | 61 |
-| e2e | 13 | 13 |
-| **all** | **173** | **173** |
+| Level | Batch 1 | Batch 2 | Total |
+|---|---:|---:|---:|
+| unit | 99 | 112 | 211 |
+| integration | 61 | 66 | 127 |
+| e2e | 13 | 20 | 33 |
+| **all** | **173** | **198** | **371** |
 
 ### Batch 1 breakdown
 
@@ -19,6 +19,16 @@
 | users | 27 | 21 | 1 | 49 |
 | roles | 16 | 14 | 2 | 32 |
 | verify | 24 | 8 | 4 | 36 |
+
+### Batch 2 breakdown
+
+| Module | Unit | Integration | E2E | Total |
+|---|---:|---:|---:|---:|
+| transactions | 38 | 14 | 4 | 56 |
+| receipts | 18 | 16 | 4 | 38 |
+| voided-receipts | 21 | 12 | 5 | 38 |
+| bank-reconciles | 21 | 8 | 4 | 33 |
+| payment-configs | 14 | 16 | 3 | 33 |
 
 ---
 
@@ -226,7 +236,245 @@
 - ROLES-U-005 / ROLES-I-010: hard delete vs soft-delete column mismatch
 - VERIFY DTO allows `revoked` but service never sets it
 
+---
+
+## Batch 2 — Money
+
+### transactions
+
+| ID | Level | Title | Priority | Preconditions | Steps | Expected | Existing coverage | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| TXN-U-001 | unit | createTransactionForFlow creates PENDING when none exists | P0 | Mock: PC+ERM; no prior TRANX | Call createTransactionForFlow | PENDING/UNMATCH/QR; history Created pending; returns TRANX_ID | gap | |
+| TXN-U-002 | unit | createTransactionForFlow reuses PENDING keeps QR | P0 | Existing PENDING+QR | Call with new pcId/amount | Updates PC/amount; keeps QR; no new history | gap | |
+| TXN-U-003 | unit | createTransactionForFlow restarts non-PENDING non-PAID | P0 | EXPIRED/REJECTED etc | Call flow create | New QR; PENDING; history Restarted | gap | |
+| TXN-U-004 | unit | createTransactionForFlow Conflict when already PAID | P0 | Latest TRANX PAID | Call flow create | ConflictException | gap | |
+| TXN-U-005 | unit | createTransactionForFlow NotFound missing PC | P1 | pcId missing | Call | NotFoundException | gap | |
+| TXN-U-006 | unit | createTransactionForFlow NotFound missing ERM | P1 | ermId missing | Call | NotFoundException | gap | |
+| TXN-U-007 | unit | confirmPaymentFlow PENDING→PAID + ERM + ref | P0 | PENDING; owner; PC active | confirmPaymentFlow | PAID+PAID_AT; ERM PAID; history; TransactionRef | gap | |
+| TXN-U-008 | unit | confirmPaymentFlow rejects non-PENDING | P0 | PAID/EXPIRED | Confirm | BadRequestException | gap | |
+| TXN-U-009 | unit | confirmPaymentFlow NotFound transaction | P1 | Unknown id | Confirm | NotFoundException | gap | |
+| TXN-U-010 | unit | confirmPaymentFlow NotFound enrollment | P1 | TRANX ok; ERM missing | Confirm | NotFoundException | gap | |
+| TXN-U-011 | unit | confirmPaymentFlow Forbidden non-owner non-FINANCE | P0 | Other ERM; CANDIDATE | Confirm | ForbiddenException | gap | |
+| TXN-U-012 | unit | confirmPaymentFlow allows FINANCE_ROLES | P0 | Other ERM; ADMIN/FINANCE/STAFF | Confirm | Succeeds | gap | |
+| TXN-U-013 | unit | confirmPaymentFlow BadRequest inactive PC | P0 | PC_IS_ACTIVE=false | Confirm | BadRequestException | gap | |
+| TXN-U-014 | unit | confirmPaymentFlow BadRequest expired PC | P0 | PC_EFFECTIVE_TO < now | Confirm | BadRequestException | gap | |
+| TXN-U-015 | unit | confirmPaymentFlow NotFound missing PC | P1 | PC_ID missing | Confirm | NotFoundException | gap | |
+| TXN-U-016 | unit | confirmPaymentFlow creates receipt when receiptName set | P1 | PENDING + receiptName | Confirm | Receipt UNISSUED + verify; profile sync | gap | |
+| TXN-U-017 | unit | confirmPaymentFlow skips receipt without receiptName | P2 | PENDING; no receiptName | Confirm | No receipt; still PAID | gap | |
+| TXN-U-018 | unit | confirmPaymentFlow updates existing receipt | P2 | Receipt exists | Confirm with name | Updates; UNISSUED | gap | |
+| TXN-U-019 | unit | buildEnrollmentRefCode format and bounds | P1 | Via confirm | Valid vs out-of-range ERM_ID | yyddmm+6erm or BadRequest | gap | |
+| TXN-U-020 | unit | confirmPaymentFlow rolls back on mid-flow failure | P0 | Mock save throws | Confirm | rollback; error rethrown | gap | |
+| TXN-U-021 | unit | expireTransaction PENDING→EXPIRED | P0 | PENDING; owner/FINANCE | expireTransaction | EXPIRED + history; ERM unchanged | gap | |
+| TXN-U-022 | unit | expireTransaction rejects non-PENDING | P0 | PAID | Expire | BadRequestException | gap | |
+| TXN-U-023 | unit | expireTransaction Forbidden non-owner | P0 | Other ERM; CANDIDATE | Expire | ForbiddenException | gap | |
+| TXN-U-024 | unit | expireTransaction NotFound | P1 | Unknown id | Expire | NotFoundException | gap | |
+| TXN-U-025 | unit | createPendingPayment PAID+MATCH+receipt+ERM | P0 | Fee match; PC_ID=1; no prior | createPendingPayment | TRANX PAID/MATCH; receipt; ERM PAID | gap | name says pending but sets PAID |
+| TXN-U-026 | unit | createPendingPayment amount ≠ exam fee | P0 | Fee 500; amount 400 | Call | BadRequestException | gap | |
+| TXN-U-027 | unit | createPendingPayment exam fee missing | P1 | EXAM_FEE null | Call | BadRequestException | gap | |
+| TXN-U-028 | unit | createPendingPayment Conflict non-PENDING/non-PAID prior | P0 | Prior EXPIRED etc | Call | ConflictException | gap | |
+| TXN-U-029 | unit | createPendingPayment updates existing PENDING/PAID | P1 | Prior PENDING/PAID | Call | Overwrites to PAID/MATCH | gap | |
+| TXN-U-030 | unit | createPendingPayment NotFound ERM or PC 1 | P1 | Missing | Call | NotFoundException | gap | |
+| TXN-U-031 | unit | refundTransaction PAID→REFUND + ERM CANCELLED | P0 | PAID; no ISSUED receipt | refundTransaction | REFUND; history; ERM CANCELLED | gap | |
+| TXN-U-032 | unit | refundTransaction allows APPROVED | P1 | APPROVED; no ISSUED | Refund | REFUND + CANCELLED | gap | |
+| TXN-U-033 | unit | refundTransaction rejects non-refundable | P0 | PENDING etc | Refund | BadRequestException | gap | |
+| TXN-U-034 | unit | refundTransaction Conflict already REFUND/VOIDED | P1 | REFUND or RECEIPT_VOIDED | Refund | ConflictException | gap | |
+| TXN-U-035 | unit | refundTransaction blocks ISSUED receipt | P0 | PAID + ISSUED | Refund | BadRequest void instead | gap | |
+| TXN-U-036 | unit | findAll pagination | P2 | Mock findAndCount | findAll defaults/custom | Paginated meta | yes | existing spec |
+| TXN-U-037 | unit | findOne NotFound | P2 | Missing id | findOne | NotFoundException | gap | |
+| TXN-U-038 | unit | update / updateByErmId / soft remove | P2 | Existing/missing | update paths | assign+save; null; softRemove | gap | |
+| TXN-I-001 | integration | POST /transactions creates PENDING | P0 | JWT; ERM+PC | POST CreateTransactionFlowDto | 201; PENDING | gap | |
+| TXN-I-002 | integration | POST /transactions 409 when PAID | P0 | PAID exists | POST | 409 | gap | |
+| TXN-I-003 | integration | PATCH confirm persists PAID+ref+ERM | P0 | Own PENDING; active PC | PATCH confirm | 200; DB PAID | gap | |
+| TXN-I-004 | integration | PATCH confirm 400 bad state/PC | P0 | Bad states | Confirm | 400 | gap | |
+| TXN-I-005 | integration | PATCH confirm 403 other user | P0 | Other PENDING; CANDIDATE | Confirm | 403 | gap | |
+| TXN-I-006 | integration | PATCH expire persists EXPIRED | P0 | Own PENDING | PATCH expire | 200; EXPIRED | gap | |
+| TXN-I-007 | integration | POST pending-payment amount/phone validation | P0 | Bad amount/phone | POST | 400 | gap | |
+| TXN-I-008 | integration | POST pending-payment commits PAID | P0 | Fee match; PC 1 | POST | 201; PAID+receipt | gap | |
+| TXN-I-009 | integration | POST refund FINANCE only + ISSUED block | P0 | PAID±ISSUED; roles | POST refund | 403 / 400 / REFUND | gap | |
+| TXN-I-010 | integration | GET /transactions requires FINANCE | P1 | CANDIDATE vs FINANCE | GET | 403 vs 200 | gap | |
+| TXN-I-011 | integration | PATCH/DELETE finance mutations require FINANCE | P2 | Non-finance | Mutate | 403 | gap | |
+| TXN-I-012 | integration | Unauthenticated rejected | P0 | No JWT | Money routes | 401 | gap | |
+| TXN-I-013 | integration | DTO validation create/confirm | P1 | Invalid body | POST/PATCH | 400 | gap | |
+| TXN-I-014 | integration | confirm/expire transactional integrity | P1 | Double-confirm | Two confirms | One PAID; second 400 | gap | |
+| TXN-E-001 | e2e | Candidate create→confirm payment UI | P0 | Unpaid enrollment | exam-history pay flow | PENDING then PAID | gap | |
+| TXN-E-002 | e2e | Candidate expires abandoned pending | P1 | PENDING | Expire in UI | EXPIRED; can restart | gap | |
+| TXN-E-003 | e2e | Candidate cannot confirm another's txn | P0 | Two candidates | B confirms A's | 403 | gap | |
+| TXN-E-004 | e2e | Finance refund unpaid-receipt path | P2 | PAID no ISSUED | Finance UI/API | REFUND; ERM CANCELLED | gap | |
+
+### receipts
+
+| ID | Level | Title | Priority | Preconditions | Steps | Expected | Existing coverage | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| RCPT-U-001 | unit | create persists + auto RC_VERIFY_CODE | P0 | Mock repo | create({TRANX_ID, signature}) | Verify code set; save | gap | |
+| RCPT-U-002 | unit | create always overwrites verify via util | P0 | Same | create | Client cannot set code via DTO | gap | |
+| RCPT-U-003 | unit | findOne NotFound | P0 | null | findOne | NotFoundException | gap | |
+| RCPT-U-004 | unit | findOne with TRANSACTION relation | P1 | Entity | findOne | relations TRANSACTION | gap | |
+| RCPT-U-005 | unit | findAll default pagination DESC | P1 | Mock | findAll({}) | page=1 limit=10 | gap | |
+| RCPT-U-006 | unit | findAll custom page/limit | P2 | Mock | findAll page 3 limit 25 | skip=50 | gap | |
+| RCPT-U-007 | unit | findIssued filters ISSUED only | P0 | Spy | findIssued | where ISSUED; deep relations | gap | |
+| RCPT-U-008 | unit | update Object.assign no state machine | P0 | UNISSUED | update status ISSUED | Saved; no guard | gap | |
+| RCPT-U-009 | unit | update allows reverse/VOIDED | P0 | ISSUED | update UNISSUED/VOIDED | Accepted | gap | money risk |
+| RCPT-U-010 | unit | remove softRemove | P1 | Existing | remove | softRemove | gap | |
+| RCPT-U-011 | unit | downloadReceipt 404 missing | P0 | No receipt | download | NotFoundException | gap | |
+| RCPT-U-012 | unit | downloadReceipt 403 non-ISSUED | P0 | UNISSUED/VOIDED | download | ForbiddenException | gap | |
+| RCPT-U-013 | unit | downloadReceipt PDF when ISSUED | P0 | ISSUED | download | Stub PDF bytes | gap | |
+| RCPT-U-014 | unit | CreateReceiptDto required fields | P0 | validate | Empty/non-int | Fail | gap | |
+| RCPT-U-015 | unit | CreateReceiptDto RC_STATUS enum | P0 | validate | Invalid status | Fail IsEnum | gap | |
+| RCPT-U-016 | unit | CreateReceiptDto RC_ISSUED_AT date | P2 | validate | Bad date | Fail | gap | |
+| RCPT-U-017 | unit | UpdateReceiptDto PartialType | P1 | validate | Partial patch | Valid | gap | |
+| RCPT-U-018 | unit | Tax/profile fields absent from DTOs | P0 | whitelist pipe | Body with tax fields | Stripped/forbidden | gap | sync in transactions |
+| RCPT-I-001 | integration | POST /receipts FINANCE creates + verify code | P0 | FINANCE JWT | POST | 201; 16-char code; UNISSUED | gap | |
+| RCPT-I-002 | integration | POST can create already ISSUED | P1 | FINANCE | POST status 1 | Persisted ISSUED | gap | |
+| RCPT-I-003 | integration | POST rejects non-FINANCE | P0 | USER JWT | POST | 403 | gap | |
+| RCPT-I-004 | integration | CRUD without JWT → 401 | P0 | No auth | Hit routes | 401 | gap | |
+| RCPT-I-005 | integration | GET /receipts paginates | P1 | Seed ≥2 | GET page/limit | 200 paginated | gap | |
+| RCPT-I-006 | integration | GET /receipts/issued only ISSUED | P0 | Mix statuses | GET issued | Only ISSUED | gap | |
+| RCPT-I-007 | integration | GET /:id 200 / 404 | P1 | Known/missing | GET | 200/404 | gap | |
+| RCPT-I-008 | integration | PATCH UNISSUED→ISSUED | P0 | UNISSUED | PATCH status 1 | DB ISSUED | gap | |
+| RCPT-I-009 | integration | PATCH invalid status → 400 | P1 | FINANCE | Bad body | 400 | gap | |
+| RCPT-I-010 | integration | DELETE soft-delete | P1 | Existing | DELETE then GET | 404; soft DELETED_AT | gap | |
+| RCPT-I-011 | integration | GET download ISSUED → PDF headers | P0 | ISSUED; any JWT | GET download | PDF Content-Type | gap | no @Roles |
+| RCPT-I-012 | integration | Download UNISSUED/VOIDED 403; missing 404 | P0 | Matching | GET download | 403/404 | gap | |
+| RCPT-I-013 | integration | Download without JWT → 401 | P0 | No token | GET download | 401 | gap | |
+| RCPT-I-014 | integration | limit >100 rejected | P2 | FINANCE | GET limit=101 | 400 | gap | |
+| RCPT-I-015 | integration | RC_VERIFY_CODE unique constraint | P0 | Force duplicate | Second insert | Unique violation | gap | |
+| RCPT-I-016 | integration | API cannot mutate tax/profile | P0 | FINANCE | POST/PATCH tax fields | Ignored/400 | gap | |
+| RCPT-E-001 | e2e | Finance issued receipt usage report | P1 | ISSUED rows | /admin/receipt-usage-report | List from GET issued | gap | |
+| RCPT-E-002 | e2e | User downloads ISSUED PDF | P1 | ISSUED receipt | UI download | PDF; UNISSUED blocked | gap | |
+| RCPT-E-003 | e2e | Non-finance blocked from admin receipt APIs | P2 | USER login | Admin/API | UI gated + 403 | gap | |
+| RCPT-E-004 | e2e | Public verify receipt by code | P0 | ISSUED code | /verify/receipt/:code | Valid; UNISSUED not-found | n/a | verify module |
+
+### voided-receipts
+
+| ID | Level | Title | Priority | Preconditions | Steps | Expected | Existing coverage | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| VOID-U-001 | unit | create voids ISSUED receipt happy | P0 | ISSUED; no void; txn ok | create({RC_ID, reason}, userId) | Receipt VOIDED; txn RECEIPT_VOIDED; ERM CANCELLED; history REVERSAL | gap | |
+| VOID-U-002 | unit | create whitespace-only reason | P0 | reason `   ` | create | BadRequestException | gap | |
+| VOID-U-003 | unit | create trims reason | P1 | padded reason | create | VR_REASON trimmed | gap | |
+| VOID-U-004 | unit | create receipt not found | P0 | Missing RC | create | NotFoundException | gap | |
+| VOID-U-005 | unit | create reject UNISSUED | P0 | UNISSUED | create | BadRequestException | gap | |
+| VOID-U-006 | unit | create reject already VOIDED status | P0 | VOIDED | create | BadRequestException | gap | |
+| VOID-U-007 | unit | create Conflict when VOIDED_RECEIPT exists | P0 | Relation exists | create | ConflictException | gap | |
+| VOID-U-008 | unit | create transaction missing | P0 | TRANSACTION null | create | NotFoundException | gap | |
+| VOID-U-009 | unit | create reject txn REFUND | P0 | Status REFUND | create | ConflictException | gap | |
+| VOID-U-010 | unit | create reject txn RECEIPT_VOIDED | P0 | Status RECEIPT_VOIDED | create | ConflictException | gap | |
+| VOID-U-011 | unit | create history captures previous status | P1 | PAID txn | create | TSH_FROM prev → 8 | gap | |
+| VOID-U-012 | unit | create enrollment missing still succeeds | P1 | No ERM | create | Void ok; no ERM save | gap | |
+| VOID-U-013 | unit | create cancels enrollment when present | P0 | ERM exists | create | ERM CANCELLED | gap | |
+| VOID-U-014 | unit | findOne with relations | P2 | Row exists | findOne | RECEIPT+USER | gap | |
+| VOID-U-015 | unit | findOne not found | P2 | Missing | findOne | NotFoundException | gap | |
+| VOID-U-016 | unit | findAll default pagination | P2 | Mock | findAll({}) | page 1 limit 10 | gap | |
+| VOID-U-017 | unit | findAll custom pagination | P2 | page 2 limit 5 | findAll | skip 5 | gap | |
+| VOID-U-018 | unit | DTO RC_ID required number | P1 | validate | Bad RC_ID | Fail | gap | |
+| VOID-U-019 | unit | DTO VR_REASON required MinLength 1 | P1 | validate | Empty | Fail | gap | |
+| VOID-U-020 | unit | DTO VR_REASON MaxLength 2000 | P1 | validate | 2001 chars | Fail | gap | |
+| VOID-U-021 | unit | create runs in dataSource.transaction | P1 | Spy transaction | create | Inside TX callback | gap | |
+| VOID-I-001 | integration | POST voids issued end-to-end | P0 | ISSUED+txn+ERM; FINANCE | POST | 201; all side effects | gap | |
+| VOID-I-002 | integration | POST without JWT → 401 | P0 | No token | POST | 401 | gap | |
+| VOID-I-003 | integration | POST non-FINANCE → 403 | P0 | Outside FINANCE_ROLES | POST | 403 | gap | |
+| VOID-I-004 | integration | POST as STAFF allowed by API | P1 | STAFF JWT | POST | 201 | gap | UI excludes STAFF |
+| VOID-I-005 | integration | POST as ADMIN/FINANCE | P0 | ADMIN/FINANCE | POST | 201 | gap | |
+| VOID-I-006 | integration | POST invalid body → 400 | P1 | Bad DTO | POST | 400 | gap | |
+| VOID-I-007 | integration | POST void twice → 409 | P0 | Already voided | Second POST | 409 | gap | |
+| VOID-I-008 | integration | POST when txn REFUND → 409 | P0 | REFUND txn | POST | 409 | gap | |
+| VOID-I-009 | integration | GET list paginated | P2 | FINANCE; rows | GET | 200 | gap | |
+| VOID-I-010 | integration | GET /:id | P2 | Known VR_ID | GET | 200 | gap | |
+| VOID-I-011 | integration | GET /:id unknown → 404 | P2 | Missing | GET | 404 | gap | |
+| VOID-I-012 | integration | limit >100 rejected | P3 | FINANCE | GET limit 101 | 400 | gap | |
+| VOID-E-001 | e2e | Finance voids receipt via UI | P0 | ISSUED; ADMIN/FINANCE | receipt-void-refund page | Success; voided | gap | |
+| VOID-E-002 | e2e | UI blocks empty void reason | P1 | Dialog open | Confirm empty | Client error; no API | gap | |
+| VOID-E-003 | e2e | Non-finance cannot open void page | P0 | Non ADMIN/FINANCE | Navigate | Denied/redirect | gap | |
+| VOID-E-004 | e2e | After void actions none | P1 | After E-001 | Reload search | canVoid/canRefund false | gap | |
+| VOID-E-005 | e2e | Void API failure notify | P2 | Already voided | Confirm | Error notify | gap | |
+
+### bank-reconciles
+
+| ID | Level | Title | Priority | Preconditions | Steps | Expected | Existing coverage | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| BR-U-001 | unit | Import rejects missing file | P1 | Mock | importFile(undefined) | BadRequestException | gap | |
+| BR-U-002 | unit | Import rejects non csv/xlsx/xls | P1 | .pdf file | importFile | BadRequestException | gap | |
+| BR-U-003 | unit | Import skips invalid rows | P1 | Valid+invalid CSV | importFile | invalidSkipped≥1 | gap | |
+| BR-U-004 | unit | Import truncates fields to 20 chars | P2 | Long cells | importFile | Sliced to 20 | gap | |
+| BR-U-005 | unit | In-file duplicate aborts entire import | P0 | Dup CSV rows | importFile | imported 0; no save | yes | |
+| BR-U-006 | unit | Existing import key hash aborts import | P0 | DB hash match | importFile | imported 0 | yes | |
+| BR-U-007 | unit | Successful import stores SHA-256 hash | P0 | Unique row | importFile | BR_IMPORT_KEY_HASH set | yes | |
+| BR-U-008 | unit | Amount comma strip + NaN invalid | P2 | 1,500.50 / abc | import | Accept / invalidSkipped | gap | |
+| BR-U-009 | unit | buildVerifyMatches amount equal → MATCH | P0 | Equal cents | verify path | MATCH | gap | |
+| BR-U-010 | unit | buildVerifyMatches unequal → MISSING | P0 | Amounts differ | verify path | MISSING still linked | gap | |
+| BR-U-011 | unit | buildVerifyMatches skips null/dup BR | P1 | Bad rows | Build matches | First valid only | gap | |
+| BR-U-012 | unit | getChangeReason REF1/REF2/BOTH/null | P2 | Snapshots | getChangeReason | Correct reason | yes | |
+| BR-U-013 | unit | updateRefs rejects blank BR_REF1 | P1 | Existing BR | updateRefs blank | BadRequestException | gap | |
+| BR-U-014 | unit | updateRefs rematch equal → MATCH | P0 | Prior linked; new equal | updateRefs | Unmatch old; MATCH new | gap | |
+| BR-U-015 | unit | updateRefs rematch unequal → MISSING | P0 | Amounts differ | updateRefs | MISSING linked | gap | |
+| BR-U-016 | unit | matchRefs empty returns [] | P2 | Empty refs | matchRefs | [] | gap | |
+| BR-U-017 | unit | confirmPayment empty → no-op | P2 | [] | confirmPayment | updated 0 | gap | |
+| BR-U-018 | unit | confirmPayment blocks REFUND/RECEIPT_VOIDED | P0 | Status 7/8 | confirmPayment | BadRequest; rollback | gap | |
+| BR-U-019 | unit | confirmPayment APPROVED+MATCH+issue+ERM+history | P0 | Valid tranx+receipt | confirmPayment | Bulk issue ISSUED; ERM PAID | gap | |
+| BR-U-020 | unit | getTestExportRows maps + truncates | P2 | Fee>0; paidAt | getTestExportRows | BKK datetime; payer≤20 | yes | |
+| BR-U-021 | unit | getTestExportRows fee≤0 / missing exam | P2 | Bad exam | getTestExportRows | BadRequest/NotFound | yes | |
+| BR-I-001 | integration | POST import persists + CREATED_BY | P0 | FINANCE; unique CSV | Multipart | 201; hashes | gap | |
+| BR-I-002 | integration | POST verify joins refs updates in TX | P0 | Unmatched BR+ref | POST verify | MATCH/MISSING side effects | gap | |
+| BR-I-003 | integration | PATCH refs unmatch/rematch + edit log | P0 | Linked BR | PATCH refs | Soft TX; edit log | gap | |
+| BR-I-004 | integration | POST match query-only | P1 | Seeded refs | POST match | Rows; no BR mutation | gap | |
+| BR-I-005 | integration | POST confirm-payment bulk issues atomically | P0 | Matched tranx | POST confirm | Commit all or 400 none | gap | |
+| BR-I-006 | integration | DELETE soft-deletes all | P1 | Multiple BRs | DELETE | DELETED_AT | gap | |
+| BR-I-007 | integration | Authz FINANCE_ROLES only | P0 | anon/APPLICANT/FINANCE | Hit routes | 401/403/2xx | gap | |
+| BR-I-008 | integration | DTO validation verify/refs/export | P1 | Invalid bodies | POST/PATCH/GET | 400 | gap | |
+| BR-E-001 | e2e | Finance upload→verify match statuses | P0 | Finance; unpaid refs | payment-import UI | MATCH/MISSING | gap | |
+| BR-E-002 | e2e | Finance edit refs rematches | P1 | Mismatched REF | Edit save | Unmatch/rematch | gap | |
+| BR-E-003 | e2e | Finance confirm payment issues receipts | P0 | Verified matched | Confirm dialog | Receipts issued | gap | |
+| BR-E-004 | e2e | Non-finance blocked from payment import | P1 | Applicant | Navigate/API | Blocked/403 | gap | |
+
+### payment-configs
+
+| ID | Level | Title | Priority | Preconditions | Steps | Expected | Existing coverage | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| PCFG-U-001 | unit | create maps DTO → save | P0 | Mock repo | create | create+save | gap | |
+| PCFG-U-002 | unit | findAll returns find() | P1 | Mock | findAll | No custom filters | gap | |
+| PCFG-U-003 | unit | findOne with TRANSACTIONS | P0 | Entity | findOne | relations | gap | |
+| PCFG-U-004 | unit | findOne NotFound | P0 | null | findOne | NotFoundException | gap | |
+| PCFG-U-005 | unit | update then re-fetch | P0 | Exists | update | update+findOne | gap | |
+| PCFG-U-006 | unit | update missing → NotFound | P0 | null | update | NotFound; no update | gap | |
+| PCFG-U-007 | unit | remove softRemove | P0 | Entity | remove | softRemove | gap | |
+| PCFG-U-008 | unit | remove missing → NotFound | P1 | null | remove | NotFound | gap | |
+| PCFG-U-009 | unit | Create DTO required strings | P0 | validate | Omit name/codes | Fail | gap | |
+| PCFG-U-010 | unit | Create DTO MaxLength | P1 | validate | Overlong | Fail | gap | |
+| PCFG-U-011 | unit | Create DTO PC_IS_ACTIVE required bool | P0 | validate | Omit / true/false | Fail / pass | gap | no fee amount in module |
+| PCFG-U-012 | unit | Create DTO EFFECTIVE_FROM required ISO | P0 | validate | Missing/bad | Fail | gap | |
+| PCFG-U-013 | unit | Create DTO EFFECTIVE_TO optional | P1 | validate | Omit/invalid/valid | OK/fail/OK | gap | |
+| PCFG-U-014 | unit | UpdatePaymentConfigDto PartialType | P2 | validate | {} / partial | Valid | gap | |
+| PCFG-I-001 | integration | POST creates row (FINANCE) | P0 | finance JWT | POST | 201; DB row | gap | |
+| PCFG-I-002 | integration | GET lists configs | P1 | Seeded | GET | 200; soft-deleted excluded | gap | |
+| PCFG-I-003 | integration | GET /:id with TRANSACTIONS | P1 | Seeded ± txn | GET | 200 + relation | gap | |
+| PCFG-I-004 | integration | GET /:id unknown → 404 | P0 | finance | GET missing | 404 | gap | |
+| PCFG-I-005 | integration | PATCH updates fields | P0 | Existing | PATCH | 200; DB updated | gap | |
+| PCFG-I-006 | integration | DELETE soft-delete excluded | P0 | Existing | DELETE then GET | Soft-deleted; 404 | gap | |
+| PCFG-I-007 | integration | Soft-delete with FK transaction | P1 | Config+txn | DELETE | Soft delete OK | gap | |
+| PCFG-I-008 | integration | ValidationPipe rejects bad create | P0 | finance | Bad POST | 400 | gap | |
+| PCFG-I-009 | integration | ParseIntPipe non-int :id | P2 | finance | GET abc | 400 | gap | |
+| PCFG-I-010 | integration | Unauthenticated → 401 | P0 | No JWT | Any route | 401 | gap | |
+| PCFG-I-011 | integration | Non-FINANCE → 403 | P0 | candidate etc | Mutate/list | 403 | gap | |
+| PCFG-I-012 | integration | ADMIN/FINANCE/STAFF allowed | P0 | Each role | GET | 200 | gap | |
+| PCFG-I-013 | integration | Persist EFFECTIVE_TO null | P1 | finance | POST omit TO | NULL stored | gap | |
+| PCFG-I-014 | integration | Deactivate PC_IS_ACTIVE false | P0 | Active | PATCH false | DB false | gap | |
+| PCFG-I-015 | integration | Accepts TO < FROM (current) | P1 | finance | POST FROM>TO | 201 — no range check | gap | risk |
+| PCFG-I-016 | integration | Duplicate COMP/PROD codes allowed | P2 | Same codes | POST again | 201 — no unique | gap | |
+| PCFG-E-001 | e2e | Finance CRUD lifecycle via API | P1 | finance; no UI | Create→list→patch→delete | Full HTTP lifecycle | gap | API-only |
+| PCFG-E-002 | e2e | Finance mutates; candidate blocked | P0 | Two users | Finance create; candidate GET | 2xx / 403 | gap | |
+| PCFG-E-003 | e2e | Deactivate then soft-delete | P1 | Active config | PATCH false then DELETE | Inactive then 404 | gap | |
+
+## Notes / risks flagged for Bug Log later (Batch 2)
+
+- TXN-U-025: `createPendingPayment` name says pending but sets PAID/MATCH
+- RCPT-U-008/009: receipts module has no UNISSUED→ISSUED state machine
+- RCPT-I-011: download has JWT but no `@Roles` (any authenticated role)
+- VOID API allows STAFF; UI route ADMIN|FINANCE only
+- BR confirmPayment bulk issues receipts without setting `RC_ISSUED_AT` (flagged in receipts notes)
+- PCFG: no fee amount; no FROM≤TO validation; duplicate COMP/PROD codes allowed
+
 ## Next gate
 
-Phase 2 Batch 1 matrix **done**.  
-รอ confirm ก่อน Phase 3: เรียก `unit-test-writer` เฉพาะ Level=unit ของ Batch 1 (auth → users → roles → verify)
+Phase 5 Batch 2 E2E **done** (15 passed / 1 skipped BUG-005).  
+**Batch 2 complete.**  
+รอ confirm ก่อน Batch 3 Phase 2: `test-case-analyst` (exam-enrollments → exam-vouchers → exam-rule-vouchers → fund-sources).  
+Phase 6 Business Flow Test Report ยังไม่เริ่ม (ขั้นตอนสุดท้ายหลัง batch หลัก)

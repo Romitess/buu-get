@@ -4,9 +4,10 @@
 
 ## Current phase
 
-**Phase 5 — Batch 1 E2E Browser Rollout** → done  
-**Batch 1 complete** (unit + integration + e2e P0–P1)  
-**ถัดไป:** รอ confirm ก่อน Phase 2 ของ **Batch 2 — Money**
+**Phase 5 — Batch 2 Money E2E Rollout** → done (15 pass / 1 skip BUG-005)  
+**Batch 1 complete** · **Batch 2 complete** (matrix + unit + integration + e2e P0–P1)  
+**ถัดไป:** รอ confirm ก่อน **Batch 3 Phase 2** (Enrollment & Voucher matrix)  
+**Phase 6 (final):** Business Flow Test Report — pending (ทำหลัง batch หลัก)
 
 ## Phase checklist
 
@@ -14,10 +15,11 @@
 |---|---|---|
 | 0 Infrastructure | done | Playwright root, shared-DB seed-only, auth fixtures |
 | 1 System Inventory | done | P0–P4 + 7 batches |
-| 2 Test Case Matrix (per batch) | in progress | Batch 1 done; Batch 2+ pending |
-| 3 Unit Test Rollout (per batch) | in progress | Batch 1 done (114 unit) |
-| 4 Integration Test Rollout (per batch) | in progress | Batch 1 done (58 pass / 3 skip) |
-| 5 E2E (P0–P1 flows) | done | Batch 1: 10 pass / 1 skip (BUG-004) |
+| 2 Test Case Matrix (per batch) | in progress | Batch 1+2 done; Batch 3+ pending |
+| 3 Unit Test Rollout (per batch) | in progress | Batch 1 done (114); Batch 2 done (141) |
+| 4 Integration Test Rollout (per batch) | in progress | Batch 1 done (58/3 skip); Batch 2 done (65 pass / 1 skip BUG-005) |
+| 5 E2E (P0–P1 flows) | in progress | Batch 1 done; Batch 2 done (15 pass / 1 skip BUG-005) |
+| 6 Business Flow Test Report | pending | Final step after main batches — flow-centric report for stakeholders |
 
 ## DB mode (Phase 0 adjust)
 
@@ -71,7 +73,7 @@
 | Batch | Modules | Priority | Matrix | Unit | Integration | E2E |
 |---|---|---|---|---|---|---|
 | **1 — Auth & Access** | auth, users, roles, verify | P0–P1 | **done** (U99/I61/E13) | **done** (114 tests pass) | **done** (58 pass / 3 skip) | **done** (10 pass / 1 skip BUG-004) |
-| **2 — Money** | transactions, receipts, voided-receipts, bank-reconciles, payment-configs | P0–P1 | pending | pending | pending | pending |
+| **2 — Money** | transactions, receipts, voided-receipts, bank-reconciles, payment-configs | P0–P1 | **done** (U112/I66/E20) | **done** (141 tests pass) | **done** (65 pass / 1 skip BUG-005) | **done** (15 pass / 1 skip BUG-005) |
 | **3 — Enrollment & Voucher** | exam-enrollments, exam-vouchers, exam-rule-vouchers, fund-sources | P0–P1 | pending | pending | pending | pending |
 | **4 — Exam lifecycle** | exam, exam-sessions, exam-locations, exam-session-locations, exam-location-seats, exam-blocked-seats | P1 | pending | pending | pending | pending |
 | **5 — Scores & Certificates** | exam-scores, score-criteria, score-rubrics, exam-certificates | P1 | pending | pending | pending | pending |
@@ -80,7 +82,85 @@
 
 P4 (utils/guards) ไม่เปิด batch แยกในรอบแรก — เติมคู่กับ module ที่เกี่ยวข้อง
 
-**Next gate:** confirm เริ่ม **Batch 2 — Money** Phase 2 (test-case-analyst: transactions, receipts, voided-receipts, bank-reconciles, payment-configs)
+**Next gate:** confirm เริ่ม **Batch 3 — Enrollment & Voucher** Phase 2 (test-case-analyst: exam-enrollments → exam-vouchers → exam-rule-vouchers → fund-sources). Phase 6 Flow Report ยังไม่เริ่ม
+
+### Batch 2 E2E Rollout evidence (Phase 5)
+
+| Case | Result |
+|---|---|
+| TXN-E-001 create→confirm payment UI | pass |
+| TXN-E-002 expire abandoned pending | pass |
+| TXN-E-003 cross-user confirm 403 | pass |
+| RCPT-E-001 finance receipt-usage-report | pass |
+| RCPT-E-002 download ISSUED PDF | pass |
+| VOID-E-001 finance void UI | pass |
+| VOID-E-002 empty reason blocked | pass |
+| VOID-E-003 non-finance blocked | pass |
+| VOID-E-004 post-void actions none | pass |
+| BR-E-001 upload→verify MATCH/MISSING | pass |
+| BR-E-002 edit refs rematch | **skip** (BUG-005) |
+| BR-E-003 confirm payment issues receipts | pass |
+| BR-E-004 non-finance blocked import | pass |
+| PCFG-E-001 finance CRUD API | pass |
+| PCFG-E-002 candidate 403 | pass |
+| PCFG-E-003 deactivate then delete | pass |
+
+POMs: `exam-history.page.ts`, `receipt-usage-report.page.ts`, `receipt-void-refund.page.ts`, `payment-import.page.ts`  
+Specs: `transactions.e2e.spec.ts`, `receipts.e2e.spec.ts`, `voided-receipts.e2e.spec.ts`, `bank-reconciles.e2e.spec.ts`, `payment-configs.e2e.spec.ts`  
+**15 passed, 1 skipped** (~2.8m, `--workers=1`)
+
+### E2E backlog (Batch 2, not in first pass)
+
+| ID | Priority | Reason |
+|---|---|---|
+| TXN-E-004 | P2 | Finance refund UI |
+| RCPT-E-003 | P2 | Non-finance admin receipt gate |
+| RCPT-E-004 | P0 | Covered by verify Batch 1 |
+| VOID-E-005 | P2 | Void API failure notify |
+| BR-E-002 | P1 | BUG-005 — skipped until rematch fixed |
+
+### Batch 2 Integration Rollout evidence (Phase 4)
+
+| Module | Spec file | Result |
+|---|---|---|
+| transactions | `tests/integration/transactions.api.spec.ts` | PASS (14) |
+| receipts | `tests/integration/receipts.api.spec.ts` | PASS (16) |
+| voided-receipts | `tests/integration/voided-receipts.api.spec.ts` | PASS (12) |
+| bank-reconciles | `tests/integration/bank-reconciles.api.spec.ts` | 7 pass / **1 skip** (BR-I-003 → BUG-005) |
+| payment-configs | `tests/integration/payment-configs.api.spec.ts` | PASS (16) |
+| **Batch 2 combined** | 5 files | **65 passed, 1 skipped** |
+
+Command: `SKIP_TEST_DB_RESET=1 SKIP_WEB_SERVER=1 npx playwright test --project=integration tests/integration/{transactions,receipts,voided-receipts,bank-reconciles,payment-configs}.api.spec.ts --workers=1`
+
+Notes:
+- VOID-I-007: matrix expected 409; API returns 400 after void (RC_STATUS check before Conflict) — rejection still works; not logged as product bug
+- BR-I-006 soft-deletes **all** bank-reconcile rows on shared DB — run carefully
+
+### Batch 2 Unit Rollout evidence (Phase 3)
+
+| Module | Spec files | Result |
+|---|---|---|
+| transactions | `transactions.service.spec.ts` | PASS (40) |
+| receipts | `receipts.service.spec.ts`, `dto/receipt.dto.spec.ts` | PASS (27) |
+| voided-receipts | `voided-receipts.service.spec.ts`, `dto/create-voided-receipt.dto.spec.ts` | PASS (23) |
+| bank-reconciles | `bank-reconciles.service.spec.ts` | PASS (22) |
+| payment-configs | `payment-configs.service.spec.ts`, `dto/payment-config.dto.spec.ts` | PASS (29) |
+| **Batch 2 combined** | 8 suites | **141 passed** |
+
+Command: `cd apps/backend && npx jest src/modules/transactions/transactions.service.spec.ts src/modules/receipts src/modules/voided-receipts src/modules/bank-reconciles/bank-reconciles.service.spec.ts src/modules/payment-configs --no-coverage`
+
+### Batch 2 Matrix evidence (Phase 2)
+
+| Module | Unit | Integration | E2E | Total | Existing unit coverage note |
+|---|---:|---:|---:|---:|---|
+| transactions | 38 | 14 | 4 | 56 | TXN-U-036 only (findAll) |
+| receipts | 18 | 16 | 4 | 38 | no module spec |
+| voided-receipts | 21 | 12 | 5 | 38 | no module spec |
+| bank-reconciles | 21 | 8 | 4 | 33 | import hash/dedupe + test-export + getChangeReason |
+| payment-configs | 14 | 16 | 3 | 33 | no module spec |
+| **Batch 2** | **112** | **66** | **20** | **198** | — |
+
+Cumulative (Batch 1+2): **U211 / I127 / E33 → 371** (see `tests/MASTER_TEST_PLAN.md`)
 
 ### Batch 1 E2E Rollout evidence (Phase 5)
 
