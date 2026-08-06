@@ -11,6 +11,7 @@ import { User } from '../../users/entities/user.entity';
 export enum MoodleAction {
   CORE_COURSE_CREATE_COURSES = 'core_course_create_courses',
   CORE_USER_CREATE_USERS = 'core_user_create_users',
+  CORE_USER_DELETE_USERS = 'core_user_delete_users',
   ENROL_MANUAL_ENROL_USERS = 'enrol_manual_enrol_users',
   GRADEREPORT_USER_GET_GRADE_ITEMS = 'gradereport_user_get_grade_items',
 }

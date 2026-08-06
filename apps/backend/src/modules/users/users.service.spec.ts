@@ -11,6 +11,7 @@ import type { CreateUserDto } from './dto/create-user.dto';
 import type { User } from './entities/user.entity';
 import type { Role } from '../roles/entities/role.entity';
 import type { UserProfileService } from '../user-profile/user-profile.service';
+import type { MoodleSyncService } from '../moodle/moodle-sync.service';
 
 jest.mock('bcrypt');
 
@@ -30,6 +31,10 @@ jest.mock('../roles/entities/role.entity', () => ({
 
 jest.mock('../user-profile/user-profile.service', () => ({
   UserProfileService: class UserProfileService {},
+}));
+
+jest.mock('../moodle/moodle-sync.service', () => ({
+  MoodleSyncService: class MoodleSyncService {},
 }));
 
 type QueryBuilderMock = {
@@ -69,6 +74,9 @@ describe('UsersService', () => {
   let dataSource: {
     transaction: jest.Mock;
   };
+  let moodleSyncService: {
+    deleteUsers: jest.Mock;
+  };
   let queryBuilder: QueryBuilderMock;
 
   const mockFromEntity = jest.mocked(UserResponseDto.fromEntity);
@@ -106,6 +114,7 @@ describe('UsersService', () => {
       rolesRepository as unknown as Repository<Role>,
       userProfileService as unknown as UserProfileService,
       dataSource as unknown as DataSource,
+      moodleSyncService as unknown as MoodleSyncService,
     );
 
   beforeEach(() => {
@@ -147,14 +156,21 @@ describe('UsersService', () => {
       ),
     };
 
+    moodleSyncService = {
+      deleteUsers: jest.fn().mockResolvedValue(undefined),
+    };
+
     (bcrypt.genSalt as jest.Mock).mockResolvedValue('salt');
     (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
     mockFromEntity.mockReset();
-    mockFromEntity.mockImplementation((user: User) => ({
-      USER_ID: user.USER_ID,
-      USER_CODE: user.USER_CODE,
-      USER_EMAIL: user.USER_EMAIL,
-    }));
+    mockFromEntity.mockImplementation(
+      (user: User) =>
+        ({
+          USER_ID: user.USER_ID,
+          USER_CODE: user.USER_CODE,
+          USER_EMAIL: user.USER_EMAIL,
+        }) as UserResponseDto,
+    );
 
     service = createService();
   });
@@ -410,7 +426,7 @@ describe('UsersService', () => {
         IMAGE: { USER_IMAGE_URL: 'https://img/x.png' },
       };
       usersRepository.findOne.mockResolvedValue(user);
-      mockFromEntity.mockReturnValue({ USER_ID: 7 });
+      mockFromEntity.mockReturnValue({ USER_ID: 7 } as UserResponseDto);
 
       // Act
       const result = await service.findOne(7);
@@ -449,7 +465,10 @@ describe('UsersService', () => {
       usersRepository.findOne.mockResolvedValue(user);
       rolesRepository.find.mockResolvedValue(newRoles);
       usersRepository.save.mockImplementation((u: typeof user) => u);
-      mockFromEntity.mockReturnValue({ USER_ID: 5, ROLES_ID: newRoles });
+      mockFromEntity.mockReturnValue({
+        USER_ID: 5,
+        ROLES_ID: newRoles as Role[],
+      } as UserResponseDto);
 
       // Act
       const result = await service.updateRole(5, [1, 2]);
@@ -482,7 +501,10 @@ describe('UsersService', () => {
       usersRepository.findOne.mockResolvedValue(user);
       rolesRepository.find.mockResolvedValue(foundRoles);
       usersRepository.save.mockImplementation((u: typeof user) => u);
-      mockFromEntity.mockReturnValue({ USER_ID: 5, ROLES_ID: foundRoles });
+      mockFromEntity.mockReturnValue({
+        USER_ID: 5,
+        ROLES_ID: foundRoles as Role[],
+      } as UserResponseDto);
 
       // Act
       await service.updateRole(5, [1, 999]);

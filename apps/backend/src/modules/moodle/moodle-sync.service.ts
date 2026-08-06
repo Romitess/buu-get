@@ -16,7 +16,7 @@ const DEFAULT_STUDENT_ROLEID = 5;
 const DEFAULT_COURSE_CATEGORY_ID = 1;
 
 /**
- * High-level Moodle sync — เรียก 4 WS function ของระบบ แล้วคืน id ที่ map ได้
+ * High-level Moodle sync — เรียก WS function ของระบบ แล้วคืน id ที่ map ได้
  */
 @Injectable()
 export class MoodleSyncService {
@@ -73,6 +73,23 @@ export class MoodleSyncService {
       throw new Error('Moodle ไม่ได้คืน user id');
     }
     return id;
+  }
+
+  /** core_user_delete_users → ลบผู้ใช้ใน Moodle (batch); Moodle ไม่คืน response body */
+  async deleteUsers(
+    userIds: number[],
+    meta: MoodleLogMeta,
+    manager?: EntityManager,
+  ): Promise<void> {
+    if (userIds.length === 0) {
+      return;
+    }
+    await this.client.call<null>(
+      MoodleAction.CORE_USER_DELETE_USERS,
+      { userids: userIds },
+      meta,
+      manager,
+    );
   }
 
   /** enrol_manual_enrol_users → ลงทะเบียนผู้ใช้เข้าคอร์ส (batch); Moodle คืน null */
