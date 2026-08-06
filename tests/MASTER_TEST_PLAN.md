@@ -4,12 +4,12 @@
 
 ## Cumulative counts
 
-| Level | Batch 1 | Batch 2 | Batch 3 | Batch 4 | Batch 5 | Batch 6 | Total |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| unit | 99 | 112 | 95 | 28 | 37 | 25 | 396 |
-| integration | 61 | 66 | 40 | 21 | 25 | 21 | 234 |
-| e2e | 13 | 20 | 15 | 7 | 9 | 7 | 71 |
-| **all** | **173** | **198** | **150** | **56** | **71** | **53** | **701** |
+| Level | Batch 1 | Batch 2 | Batch 3 | Batch 4 | Batch 5 | Batch 6 | Batch 7 | Total |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| unit | 99 | 112 | 95 | 28 | 37 | 19 | 10 | 400 |
+| integration | 61 | 66 | 40 | 21 | 25 | 17 | 7 | 237 |
+| e2e | 13 | 20 | 15 | 7 | 9 | 5 | 3 | 72 |
+| **all** | **173** | **198** | **150** | **56** | **71** | **41** | **20** | **709** |
 
 ### Batch 1 breakdown
 
@@ -63,10 +63,27 @@
 
 | Module | Unit | Integration | E2E | Total |
 |---|---:|---:|---:|---:|
-| user-profile | 12 | 8 | 3 | 23 |
-| user-image | 4 | 4 | 1 | 9 |
-| profile-edit-history | 6 | 5 | 2 | 13 |
-| thaid | 3 | 4 | 1 | 8 |
+| user-profile | 11 | 8 | 3 | 22 |
+| user-image | 3 | 4 | 1 | 8 |
+| profile-edit-history | 5 | 5 | 1 | 11 |
+| thaid | — | — | — | **deferred/cut** |
+
+**Batch 6 active (no THAID; P1 cuts applied):** U19 / I17 / E5 = **41**
+
+Cuts / deferred:
+- Entire `THAID-*` deferred
+- `PROF-U-012`, `IMG-U-004`, `PEH-U-006`, `PEH-E-002` cut (low ROI / duplicate P0)
+
+### Batch 7 breakdown (slim — exam-report only)
+
+| Module | Unit | Integration | E2E | Total |
+|---|---:|---:|---:|---:|
+| exam-report | 10 | 7 | 3 | 20 |
+| moodle / moodle-sync-logs / page-builder | — | — | — | **cut** |
+| platform-gateway | — | — | — | **cut** |
+| transaction-refs / profiles / status-history | — | — | — | **cut** |
+
+**Batch 7 slim:** U10 / I7 / E3 = **20**
 
 ---
 
@@ -917,18 +934,18 @@
 | PROF-U-009 | unit | Candidate history saved when hadActiveRemark or isFromEmail | P0 | Candidate + remark OR email flag | update | history created | gap | |
 | PROF-U-010 | unit | Duplicate national ID / passport Conflict | P0 | Other user (incl soft-deleted) has ID | update conflicting ID | ConflictException | gap | withDeleted |
 | PROF-U-011 | unit | `userImagePath` upserts UserImage | P1 | With/without existing image | update with path | upsert image row | gap | |
-| PROF-U-012 | unit | Address trim empty → null; softRemove | P1 | Address blanks; existing profile | update then remove | address null; softRemove | gap | |
-| PROF-I-001 | integration | GET `/api/user-profile/me` JWT | P0 | Candidate JWT | GET me | 200 (auto-create if needed) | gap | |
-| PROF-I-002 | integration | PATCH `/api/user-profile/me` persists fields | P0 | Candidate JWT | PATCH fields | 200; DB updated | gap | |
-| PROF-I-003 | integration | Candidate PATCH clears remark + resets WAIT_FIXED | P0 | Remark + WAIT_FIXED enrollment | PATCH me | remark null; UNCHECKED | gap | |
-| PROF-I-004 | integration | National ID conflict via PATCH me | P0 | Another user owns ID | PATCH conflicting ID | 409 | gap | |
-| PROF-I-005 | integration | Admin list/get/create/delete RBAC | P0 | ADMIN vs candidate / no JWT | hit admin routes | ADMIN 2xx; others 403/401 | gap | |
-| PROF-I-006 | integration | PATCH `/api/user-profile/:id` any JWT can mutate (current) | P0 | Candidate JWT + foreign profileId | PATCH foreign id | current: 2xx allowed | gap | Authz risk |
-| PROF-I-007 | integration | Mixed-role user treated as staff modifier | P1 | JWT roles candidate+staff | PATCH me | remark not auto-cleared | gap | |
-| PROF-I-008 | integration | Soft-delete then findOne hidden | P1 | ADMIN; existing profile | DELETE then GET | 404 / excluded | gap | |
-| PROF-E-001 | e2e | Candidate edits own profile and sees saved values | P0 | Candidate login | Edit profile UI + reload | values persist | gap | |
-| PROF-E-002 | e2e | Staff remark → candidate fix clears remark | P0 | Staff set remark; WAIT_FIXED | Candidate edits profile | remark cleared; status advances | gap | |
-| PROF-E-003 | e2e | Admin views registrant profile edit history | P1 | Prior edit exists | Admin open history UI | history rows visible | gap | |
+| PROF-U-012 | unit | Address trim empty → null; softRemove | P1 | Address blanks; existing profile | update then remove | address null; softRemove | gap | **cut** |
+| PROF-I-001 | integration | GET `/api/user-profile/me` JWT | P0 | Candidate JWT | GET me | 200 (auto-create if needed) | covered | |
+| PROF-I-002 | integration | PATCH `/api/user-profile/me` persists fields | P0 | Candidate JWT | PATCH fields | 200; DB updated | covered | |
+| PROF-I-003 | integration | Candidate PATCH clears remark + resets WAIT_FIXED | P0 | Remark + WAIT_FIXED enrollment | PATCH me | remark null; UNCHECKED | covered | |
+| PROF-I-004 | integration | National ID conflict via PATCH me | P0 | Another user owns ID | PATCH conflicting ID | 409 | covered | |
+| PROF-I-005 | integration | Admin list/get/create/delete RBAC | P0 | ADMIN vs candidate / no JWT | hit admin routes | ADMIN 2xx; others 403/401 | covered | |
+| PROF-I-006 | integration | PATCH `/api/user-profile/:id` any JWT can mutate (current) | P0 | Candidate JWT + foreign profileId | PATCH foreign id | current: 2xx allowed | covered | Authz risk BUG-011 |
+| PROF-I-007 | integration | Mixed-role user treated as staff modifier | P1 | JWT roles candidate+staff | PATCH me | remark not auto-cleared | covered | |
+| PROF-I-008 | integration | Soft-delete then findOne hidden | P1 | ADMIN; existing profile | DELETE then GET | 404 / excluded | covered | |
+| PROF-E-001 | e2e | Candidate edits own profile and sees saved values | P0 | Candidate login | Edit profile UI + reload | values persist | done | B6 E2E |
+| PROF-E-002 | e2e | Staff remark → candidate fix clears remark | P0 | Staff set remark; WAIT_FIXED | Candidate edits profile | remark cleared; status advances | done | B6 E2E |
+| PROF-E-003 | e2e | Admin views registrant profile edit history | P1 | Prior edit exists | Admin open history UI | history rows visible | done | B6 E2E |
 
 ### user-image
 
@@ -937,12 +954,12 @@
 | IMG-U-001 | unit | `findByUserId` returns null when missing | P0 | No row | call findByUserId | null | gap | |
 | IMG-U-002 | unit | `upsertByUserId` creates new row | P0 | No row | upsert URL | new row saved | gap | |
 | IMG-U-003 | unit | `upsertByUserId` updates existing URL | P0 | Existing row | upsert new URL | same id; URL updated | gap | |
-| IMG-U-004 | unit | Empty URL still writable via service | P1 | Existing or new | upsert empty string | persisted as provided | gap | |
-| IMG-I-001 | integration | GET `/api/user-image/me` with JWT | P0 | With/without image | GET me | 200 body or null | gap | |
-| IMG-I-002 | integration | PATCH `/api/user-image/me` upserts | P0 | JWT + userImageUrl | PATCH | 200 persisted | gap | |
-| IMG-I-003 | integration | PATCH without userImageUrl no-op message | P0 | JWT + `{}` | PATCH | no-op message; no DB write | gap | |
-| IMG-I-004 | integration | GET/PATCH me require JWT | P0 | No token | call endpoints | 401 | gap | |
-| IMG-E-001 | e2e | Candidate updates profile photo on profile page | P0 | Candidate login | Change photo + save | photo after reload | gap | |
+| IMG-U-004 | unit | Empty URL still writable via service | P1 | Existing or new | upsert empty string | persisted as provided | gap | **cut** |
+| IMG-I-001 | integration | GET `/api/user-image/me` with JWT | P0 | With/without image | GET me | 200 body or null | covered | |
+| IMG-I-002 | integration | PATCH `/api/user-image/me` upserts | P0 | JWT + userImageUrl | PATCH | 200 persisted | covered | |
+| IMG-I-003 | integration | PATCH without userImageUrl no-op message | P0 | JWT + `{}` | PATCH | no-op message; no DB write | covered | |
+| IMG-I-004 | integration | GET/PATCH me require JWT | P0 | No token | call endpoints | 401 | covered | |
+| IMG-E-001 | e2e | Candidate updates profile photo on profile page | P0 | Candidate login | Change photo + save | photo after reload | done | B6 E2E |
 
 ### profile-edit-history
 
@@ -953,27 +970,29 @@
 | PEH-U-003 | unit | `findLatestImagesByProfileIds` empty → `{}` | P0 | `[]` | call | `{}` | gap | |
 | PEH-U-004 | unit | Latest image picks newest userImagePath | P0 | Multiple history JSON rows | call with profileIds | newest path; missing null | gap | |
 | PEH-U-005 | unit | Malformed / non-string imagePath skipped | P0 | Bad JSON or non-string | extract via findLatest | continue / null | gap | |
-| PEH-U-006 | unit | Dedupes duplicate profileIds in request | P1 | `[1,1,2]` | call | single query; keys 1 & 2 | gap | |
-| PEH-I-001 | integration | GET `/api/profile-edit-history/profile/:id` | P0 | JWT + seeded history | GET | 200 ordered list | gap | |
-| PEH-I-002 | integration | POST `/api/profile-edit-history/latest-images` | P0 | JWT + history with image | POST profileIds | map of paths/nulls | gap | |
-| PEH-I-003 | integration | latest-images DTO validation | P0 | empty / >1000 / non-int | POST invalid | 400 | gap | |
-| PEH-I-004 | integration | History endpoints require JWT | P0 | No token | GET/POST | 401 | gap | |
-| PEH-I-005 | integration | Any authenticated role can read any profile history (current) | P1 | Candidate JWT + foreign id | GET history | current: 2xx | gap | Authz risk |
-| PEH-E-001 | e2e | After profile edit with history gate, admin sees history | P0 | Staff edit or candidate+remark | Edit → admin history | new row shown | gap | |
-| PEH-E-002 | e2e | Seat/candidate UI loads latest images without N+1 | P1 | Multiple profiles with images | Open view using latest-images | images correct; batch call | gap | |
+| PEH-U-006 | unit | Dedupes duplicate profileIds in request | P1 | `[1,1,2]` | call | single query; keys 1 & 2 | gap | **cut** |
+| PEH-I-001 | integration | GET `/api/profile-edit-history/profile/:id` | P0 | JWT + seeded history | GET | 200 ordered list | covered | |
+| PEH-I-002 | integration | POST `/api/profile-edit-history/latest-images` | P0 | JWT + history with image | POST profileIds | map of paths/nulls | covered | |
+| PEH-I-003 | integration | latest-images DTO validation | P0 | empty / >1000 / non-int | POST invalid | 400 | covered | |
+| PEH-I-004 | integration | History endpoints require JWT | P0 | No token | GET/POST | 401 | covered | |
+| PEH-I-005 | integration | Any authenticated role can read any profile history (current) | P1 | Candidate JWT + foreign id | GET history | current: 2xx | covered | Authz risk BUG-012 |
+| PEH-E-001 | e2e | After profile edit with history gate, admin sees history | P0 | Staff edit or candidate+remark | Edit → admin history | new row shown | done | B6 E2E |
+| PEH-E-002 | e2e | Seat/candidate UI loads latest images without N+1 | P1 | Multiple profiles with images | Open view using latest-images | images correct; batch call | gap | **cut** |
 
 ### thaid
 
+> **DEFERRED / CUT (one-shot finish):** ไม่เขียน Unit/Integration/E2E ในรอบนี้ — module เป็น stub public echo ไม่ใช่ business identity flow
+
 | ID | Level | Title | Priority | Preconditions | Steps | Expected | Existing coverage | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| THAID-U-001 | unit | `handleCallback` approval echoes payload | P0 | Body+query | call service | ok:true + echo | yes | partial spec |
-| THAID-U-002 | unit | `handleCallback` payment empty body/query | P0 | Empty maps | call service | endpoint payment; empty echo | yes | |
-| THAID-U-003 | unit | Controller toRecord wraps non-object body | P1 | Primitive body | wrap via helper/controller | `{value:…}` or `{}` | gap | |
-| THAID-I-001 | integration | Public POST `/api/approval` accepts any shape | P0 | No JWT | POST JSON | 200 ok approval | gap | Stub |
-| THAID-I-002 | integration | Public POST `/api/payment` accepts any shape | P0 | No JWT | POST JSON | 200 ok payment | gap | |
-| THAID-I-003 | integration | `@All` methods work (GET query echo) | P1 | No JWT | GET `/api/approval?x=1` | query echoed | gap | |
-| THAID-I-004 | integration | Unauthenticated access allowed (Public) | P0 | No JWT | hit both routes | not 401 | gap | |
-| THAID-E-001 | e2e | Register/login ThaiD path UI still reachable (smoke) | P1 | FE up | Open login → ThaiD entry | UI renders; no crash | gap | Stub backend |
+| THAID-U-001 | unit | `handleCallback` approval echoes payload | P0 | Body+query | call service | ok:true + echo | yes | **deferred** |
+| THAID-U-002 | unit | `handleCallback` payment empty body/query | P0 | Empty maps | call service | endpoint payment; empty echo | yes | **deferred** |
+| THAID-U-003 | unit | Controller toRecord wraps non-object body | P1 | Primitive body | wrap via helper/controller | `{value:…}` or `{}` | gap | **deferred** |
+| THAID-I-001 | integration | Public POST `/api/approval` accepts any shape | P0 | No JWT | POST JSON | 200 ok approval | gap | **deferred** |
+| THAID-I-002 | integration | Public POST `/api/payment` accepts any shape | P0 | No JWT | POST JSON | 200 ok payment | gap | **deferred** |
+| THAID-I-003 | integration | `@All` methods work (GET query echo) | P1 | No JWT | GET `/api/approval?x=1` | query echoed | gap | **deferred** |
+| THAID-I-004 | integration | Unauthenticated access allowed (Public) | P0 | No JWT | hit both routes | not 401 | gap | **deferred** |
+| THAID-E-001 | e2e | Register/login ThaiD path UI still reachable (smoke) | P1 | FE up | Open login → ThaiD entry | UI renders; no crash | gap | **deferred** |
 
 ## Notes / risks flagged for Bug Log later (Batch 6)
 
@@ -984,10 +1003,43 @@
 - ID uniqueness includes soft-deleted users (`withDeleted: true`)
 - ThaiD module เป็น stub public echo — ไม่ใช่ full ThaiD login/identity sync
 
+## Batch 7 — Reporting (slim: exam-report only)
+
+### exam-report
+
+| ID | Level | Title | Priority | Preconditions | Steps | Expected | Existing coverage | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| RPT-U-001 | unit | `buildAttemptMetrics` empty window | P0 | `scoredInWindow=[]` | call util | `repeatByYear` empty; `firstTime=0`; `repeat=0` | gap | Pure util |
+| RPT-U-002 | unit | `buildAttemptMetrics` firstTime vs repeat | P0 | Mix `hasPriorScore` | call util | firstTime = distinct scored − distinct repeat | gap | |
+| RPT-U-003 | unit | `buildAttemptMetrics` repeatByYear DISTINCT | P0 | Same user 2 scored rows same year both prior | call util | year count = 1 (Set) | gap | |
+| RPT-U-004 | unit | `getSummary` YoY + changePercent when prev=0 | P0 | Mock metric/avg; prev 0/missing | call `getSummary` | `changePercent===0` | gap | |
+| RPT-U-005 | unit | `getSummary` absent + attendance/absent rates | P0 | registered=10, attended=7 | call `getSummary` | absent=3; rates 70/30 | gap | |
+| RPT-U-006 | unit | Future round → attended/absent null | P0 | examDate > today | drive summary/rounds | attended/absent null; registered kept | gap | |
+| RPT-U-007 | unit | Score buckets only ≥40; fixed ranges | P0 | Mock bucket rows | call `getSummary` | ranges 40-49…80-100 | gap | <40 excluded |
+| RPT-U-008 | unit | `formatRoundLabel` appends `/{year}` | P1 | round=`1`, year=`2026`; already labeled | via public path | no double suffix | gap | |
+| RPT-U-009 | unit | attemptProportion firstTime = total−repeat | P0 | total=5, repeat=2 | call | `{firstTime:3,repeat:2}` | gap | |
+| RPT-U-010 | unit | targetYear = toYear else latest data year | P1 | years [2024,2025]; ±toYear | call `getSummary` | stats keyed correctly | gap | |
+| RPT-I-001 | integration | GET `/api/exam-report/summary` as ADMIN | P0 | Seed + ADMIN JWT | GET summary | 200; shape ok | gap | prefix `B7-RPT-` |
+| RPT-I-002 | integration | GET summary as EXECUTIVE | P0 | EXECUTIVE JWT | GET summary | 200 | gap | |
+| RPT-I-003 | integration | RBAC deny + unauthenticated | P0 | candidate/staff/finance; no token | GET summary | 403 / 401 | gap | |
+| RPT-I-004 | integration | `fromYear`/`toYear` filter on EXAM_DATE year | P0 | Multi-year seed | GET with year range | Only years in range | gap | month/round ignored (known gap) |
+| RPT-I-005 | integration | CANCELLED enrollments excluded | P0 | CANCELLED + active | GET summary | Counts exclude CANCELLED | gap | |
+| RPT-I-006 | integration | GET `/api/exam-report/options` | P1 | Exams with dates/rounds | GET options | years DESC; 12 months; rounds | gap | |
+| RPT-I-007 | integration | GET candidates + scoreLines + attemptStatus | P0 | Scored enrollment + prior | GET candidates | 200; first/repeat correct | gap | |
+| RPT-E-001 | e2e | Admin dashboard report loads | P0 | Admin login; seed | Open `/admin/dashboard` | cards/charts render | gap | |
+| RPT-E-002 | e2e | Drill-down year → rounds → candidates | P0 | Admin; year with rounds | Dashboard → year → candidates | rows with scores | gap | |
+| RPT-E-003 | e2e | Non-admin blocked from report UI | P1 | Candidate login | Visit `/admin/dashboard` | Redirect/deny | gap | |
+
+## Notes / risks flagged for Bug Log later (Batch 7)
+
+- Month/round query params are DTO/UI-only (TODO in service) — known gap; do not assert month filter works
+- Repeat = lifetime prior scored attempt (outside year window still counts as repeat)
+- Score chart drops scores &lt;40 by design
+- Report API ADMIN/EXECUTIVE only; FE dashboard role mismatch possible (RPT-E-003)
+
 ## Next gate
 
-**Batch 6 Phase 2 complete** — Matrix 53 cases (U25 / I21 / E7).  
-รอ confirm ก่อนเริ่ม **Batch 6 Phase 3** — Unit rollout (P0 first: PROF → PEH → IMG → THAID).  
-Phase 6 Business Flow Test Report ยังไม่เริ่ม.
+**Rollout complete (THAID + Batch7 extras deferred).**  
+Phase 6 Flow Report: `tests/BUSINESS_FLOW_TEST_REPORT.md`. Shared-DB cleanup script: `tests/scripts/cleanup-test-data.mjs`.
 
-**Remaining after Batch 6 matrix:** Batch 6 Unit/Integration/E2E + Batch 7 + Phase 6 Flow Report.
+**Deferred:** THAID entire module; Batch 7 moodle/page-builder/platform-gateway/transaction-* extras.

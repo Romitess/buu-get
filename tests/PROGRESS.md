@@ -4,11 +4,13 @@
 
 ## Current phase
 
-**Batch 6 — Profile & identity Phase 2 complete** (Test Case Matrix done: U25/I21/E7 = 53)  
-**Batch 1–5 complete** · **Next:** Batch 6 Phase 3 Unit rollout (awaiting confirm)  
-**Phase 6 (final):** Business Flow Test Report — pending
+**Rollout complete** (one-shot finish)  
+**Batch 1–7 slim done** · Phase 6 Flow Report done · shared-DB cleanup done  
+**Next gate:** rollout complete — THAID + Batch7 extras deferred
 
-Remaining: Batch 6 Unit/Integration/E2E + Batch 7 + Phase 6 Flow Report.
+See `tests/BUSINESS_FLOW_TEST_REPORT.md` for stakeholder flow summary.
+
+Remaining deferred: THAID entire module; moodle / page-builder / platform-gateway / transaction-refs|profiles|status-history.
 
 ## Phase checklist
 
@@ -16,11 +18,11 @@ Remaining: Batch 6 Unit/Integration/E2E + Batch 7 + Phase 6 Flow Report.
 |---|---|---|
 | 0 Infrastructure | done | Playwright root, shared-DB seed-only, auth fixtures |
 | 1 System Inventory | done | P0–P4 + 7 batches |
-| 2 Test Case Matrix (per batch) | in progress | Batch 1–6 done; Batch 7 pending |
-| 3 Unit Test Rollout (per batch) | in progress | Batch 1–5 done (Batch 5: 47 pass) |
-| 4 Integration Test Rollout (per batch) | in progress | Batch 1–5 done (Batch 5: 25 pass) |
-| 5 E2E (P0–P1 flows) | in progress | Batch 1–5 done (Batch 5: 8 pass / 1 skip BUG-010) |
-| 6 Business Flow Test Report | pending | Final step after main batches — flow-centric report for stakeholders |
+| 2 Test Case Matrix (per batch) | done | Batch 1–6 + Batch 7 slim (exam-report); extras cut |
+| 3 Unit Test Rollout (per batch) | done | Batch 1–7 Unit done (B7: 11 pass) |
+| 4 Integration Test Rollout (per batch) | done | Batch 1–7 Integration done (B6: 17; B7: 8) |
+| 5 E2E (P0–P1 flows) | done | Batch 1–7 E2E done (B6: 5; B7: 3) |
+| 6 Business Flow Test Report | done | `tests/BUSINESS_FLOW_TEST_REPORT.md` |
 
 ## DB mode (Phase 0 adjust)
 
@@ -55,13 +57,13 @@ Remaining: Batch 6 Unit/Integration/E2E + Batch 7 + Phase 6 Flow Report.
 | score-rubrics | `apps/backend/src/modules/score-rubrics/score-rubrics.service.ts` | รูบริก | P1 | ไม่ |
 | exam-certificates | `apps/backend/src/modules/exam-certificates/exam-certificates.service.ts` | ออกใบรับรอง | P1 | ใช่ |
 | verify | `apps/backend/src/modules/verify/verify.service.ts` | รหัสยืนยันเอกสาร | P1 | ใช่ |
-| user-profile | `apps/backend/src/modules/user-profile/user-profile.service.ts` | โปรไฟล์ผู้สมัคร | P2 | ไม่ |
-| user-image | `apps/backend/src/modules/user-image/user-image.service.ts` | รูปโปรไฟล์ | P2 | ไม่ |
-| profile-edit-history | `apps/backend/src/modules/profile-edit-history/profile-edit-history.service.ts` | ประวัติแก้โปรไฟล์ | P2 | ไม่ |
+| user-profile | `apps/backend/src/modules/user-profile/user-profile.service.ts` | โปรไฟล์ผู้สมัคร | P2 | ใช่ |
+| user-image | `apps/backend/src/modules/user-image/user-image.service.ts` | รูปโปรไฟล์ | P2 | ใช่ |
+| profile-edit-history | `apps/backend/src/modules/profile-edit-history/profile-edit-history.service.ts` | ประวัติแก้โปรไฟล์ | P2 | ใช่ |
 | transaction-refs | `apps/backend/src/modules/transaction-refs/transaction-refs.service.ts` | อ้างอิงธุรกรรม | P2 | ไม่ |
 | transaction-profiles | `apps/backend/src/modules/transaction-profiles/transaction-profiles.service.ts` | โปรไฟล์ธุรกรรม | P2 | ไม่ |
 | transaction-status-history | `apps/backend/src/modules/transaction-status-history/transaction-status-history.service.ts` | ประวัติสถานะจ่าย | P2 | ไม่ |
-| exam-report | `apps/backend/src/modules/exam-report/exam-report.service.ts` | รายงานสรุป | P2 | util มี |
+| exam-report | `apps/backend/src/modules/exam-report/exam-report.service.ts` | รายงานสรุป | P2 | ใช่ |
 | thaid | `apps/backend/src/modules/thaid/thaid.service.ts` | Login ThaiD | P2 | ใช่ |
 | platform-gateway | `apps/backend/src/modules/platform-gateway/platform-gateway.service.ts` | Kong/email/file | P2 | ใช่ |
 | moodle | `apps/backend/src/modules/moodle/moodle-sync.service.ts` | Sync Moodle | P3 | ไม่ |
@@ -78,24 +80,118 @@ Remaining: Batch 6 Unit/Integration/E2E + Batch 7 + Phase 6 Flow Report.
 | **3 — Enrollment & Voucher** | exam-enrollments, exam-vouchers, exam-rule-vouchers, fund-sources | P0–P1 | **done** (U95/I40/E15) | **done** (100 tests pass) | **done** (40 pass) | **done** (13 pass) |
 | **4 — Exam lifecycle** | exam, exam-sessions, exam-locations, exam-session-locations, exam-location-seats, exam-blocked-seats | P1 | **done** (U28/I21/E7) | **done** (28 pass) | **done** (19 pass / 1 skip) | **done** (2 pass / 4 skip BUG-008/009) |
 | **5 — Scores & Certificates** | exam-scores, score-criteria, score-rubrics, exam-certificates | P1 | **done** (U37/I25/E9) | **done** (47 pass) | **done** (25 pass) | **done** (8 pass / 1 skip BUG-010) |
-| **6 — Profile & identity** | user-profile, user-image, profile-edit-history, thaid | P2 | **done** (U25/I21/E7) | pending | pending | pending |
-| **7 — Reporting & integrations** | exam-report, transaction-refs, transaction-profiles, transaction-status-history, platform-gateway, moodle, moodle-sync-logs, page-builder | P2–P3 | pending | pending | pending | pending |
+| **6 — Profile & identity** | user-profile, user-image, profile-edit-history (**thaid deferred**) | P2 | **done** (active U19/I17/E5) | **done** (21 pass) | **done** (17 pass) | **done** (5 pass) |
+| **7 — Reporting & integrations** | **exam-report only** (others cut) | P2 | **done** (U10/I7/E3=20) | **done** (11 pass) | **done** (8 pass) | **done** (3 pass) |
 
 P4 (utils/guards) ไม่เปิด batch แยกในรอบแรก — เติมคู่กับ module ที่เกี่ยวข้อง
 
-**Next gate:** confirm เริ่ม **Batch 6 — Profile & identity** Phase 3 (Unit rollout P0 first: PROF → PEH → IMG → THAID). Phase 6 Flow Report ยังไม่เริ่ม
+**Next gate:** **rollout complete (THAID + Batch7 extras deferred)**
 
-### Batch 6 Matrix evidence (Phase 2)
+### Cleanup evidence (one-shot final)
 
-| Module | Unit | Integration | E2E | Total | Existing unit coverage note |
+**Pass A — API soft-delete** (`tests/scripts/cleanup-test-data.mjs`)  
+- Soft-delete exams/locations/users by name prefix only (ไม่ลบแถวลูกใน DB จริง)
+
+**Pass B — Deep SQL purge** (`tests/scripts/purge-test-data-sql.cjs`)  
+- Soft-delete orphan ที่ยัง active (enrollments/scores/certs/txns/receipts/seats…)  
+- แล้ว **HARD DELETE** แถวทดสอบตั้งแต่ `2026-08-05` + soft-trash ที่เกี่ยวข้อง  
+- ลบแล้วโดยประมาณ: exams 428, sessions 630, enrollments 603, transactions 296, receipts 300, soft users 277, soft locations 121, ฯลฯ  
+- คงไว้: seeded `test.*@buu-get.test` (8), roles, campus locations 1–5 + ที่นั่งเดิม, `SCB`, fund `IF-BUU-*`/`LAW-ACC-*`, rubric SRB_ID=1, demo `@go.buu.ac.th` users  
+- Post-verify: exams/sessions/enrollments/txns/receipts **= 0**; login seeded OK  
+- No schema truncate
+
+**Pass C — Duplicate roles + Aug 5–6 leftovers** (`tests/scripts/purge-duplicate-test-roles.cjs`)  
+- Root cause: `seedTestRbac` matched exact `registration_officer` / `exam_operations_officer` but legacy DB used space slugs → inserted ROLE_ID 11/12 on 2026-08-05  
+- Remapped `test.registration` 11→8, `test.examops` 12→6; deleted roles 11/12  
+- Deleted 411 moodle sync logs (Aug 5–6); hard-deleted soft test exam-rule-voucher (`ERV-I-*`); kept EXRV_ID=3 (real rules)  
+- Fixed [`test-rbac-seed.ts`](apps/backend/src/database/seeds/test-rbac-seed.ts) to reuse roles via RolesGuard-style normalize (no more duplicate inserts)  
+- Verify: login registration/examops/admin → 201; underscore role names gone
+
+### Batch 7 Integration + E2E evidence (Phase 4–5)
+
+| Suite | Tests | Result |
+|---|---:|---|
+| `exam-report.api.spec.ts` | 8 | pass |
+| `exam-report.e2e.spec.ts` | 3 | pass |
+
+Commands:
+```bash
+SKIP_TEST_DB_RESET=1 SKIP_WEB_SERVER=1 npx playwright test --project=integration --workers=1 tests/integration/exam-report.api.spec.ts
+SKIP_TEST_DB_RESET=1 SKIP_WEB_SERVER=1 npx playwright test --project=e2e --workers=1 tests/e2e/exam-report.e2e.spec.ts
+```
+
+### Phase 6 Flow Report
+
+- Written: `tests/BUSINESS_FLOW_TEST_REPORT.md`
+- Flows: Auth → Money → Enrollment → Exam lifecycle → Scores/Cert → Profile → Report
+
+### Batch 6 Integration Rollout evidence (Phase 4)
+
+| Suite | Tests | Result |
+|---|---:|---|
+| `user-profile.api.spec.ts` | 8 | pass |
+| `user-image.api.spec.ts` | 4 | pass |
+| `profile-edit-history.api.spec.ts` | 5 | pass |
+| **Batch 6 Integration** | **17** | **all pass** |
+
+Command: `SKIP_TEST_DB_RESET=1 SKIP_WEB_SERVER=1 npx playwright test --project=integration --workers=1` (three files)
+
+Bugs logged (assert current): BUG-011 (PROF-I-006), BUG-012 (PEH-I-005).
+
+### Batch 6 E2E Rollout evidence (Phase 5)
+
+| Suite | Tests | Result |
+|---|---:|---|
+| `user-profile.e2e.spec.ts` | 5 | **5 pass / 0 skip** |
+| **Batch 6 E2E** | **5** | **all pass** |
+
+Covered: PROF-E-001…003, IMG-E-001, PEH-E-001. PEH-E-002 cut (not implemented).  
+Command: `SKIP_TEST_DB_RESET=1 SKIP_WEB_SERVER=1 npx playwright test --project=e2e --workers=1 tests/e2e/user-profile.e2e.spec.ts`  
+No new BUG ids (no skips).
+
+### Batch 7 Unit Rollout evidence (Phase 3)
+
+| Suite | Tests | Result |
+|---|---:|---|
+| `attempt-metrics.util.spec.ts` | 4 | pass |
+| `exam-report.service.spec.ts` | 7 | pass |
+| **Batch 7 Unit** | **11** | **all pass** |
+
+Covered: RPT-U-001…010.
+
+### Batch 6 Unit Rollout evidence (Phase 3)
+
+| Suite | Tests | Result |
+|---|---:|---|
+| `user-profile.service.spec.ts` | 13 | pass |
+| `user-image.service.spec.ts` | 3 | pass |
+| `profile-edit-history.service.spec.ts` | 5 | pass |
+| **Batch 6 Unit** | **21** | **all pass** |
+
+Command: `cd apps/backend && npx jest --testPathPattern="user-profile.service.spec|user-image.service.spec|profile-edit-history.service.spec" --no-coverage`
+
+Covered: PROF-U-001…011, IMG-U-001…003, PEH-U-001…005 (cuts skipped).
+
+### Batch 7 Matrix evidence (Phase 2 — slim)
+
+| Module | Unit | Integration | E2E | Total | Notes |
 |---|---:|---:|---:|---:|---|
-| user-profile | 12 | 8 | 3 | 23 | no module spec |
-| user-image | 4 | 4 | 1 | 9 | no module spec |
-| profile-edit-history | 6 | 5 | 2 | 13 | no module spec |
-| thaid | 3 | 4 | 1 | 8 | partial `thaid.service.spec.ts` |
-| **Batch 6** | **25** | **21** | **7** | **53** | — |
+| exam-report | 10 | 7 | 3 | 20 | RPT-* only |
+| **Batch 7 slim** | **10** | **7** | **3** | **20** | moodle/gateway/txn-* cut |
 
-Cumulative (Batch 1–6): **U396 / I234 / E71 → 701** (see `tests/MASTER_TEST_PLAN.md`)
+Cumulative (Batch 1–7 active): **U400 / I237 / E72 → 709**
+
+### Batch 6 Matrix evidence (Phase 2 — pruned)
+
+| Module | Unit | Integration | E2E | Total | Notes |
+|---|---:|---:|---:|---:|---|
+| user-profile | 11 | 8 | 3 | 22 | cut PROF-U-012 |
+| user-image | 3 | 4 | 1 | 8 | cut IMG-U-004 |
+| profile-edit-history | 5 | 5 | 1 | 11 | cut PEH-U-006, PEH-E-002 |
+| thaid | — | — | — | — | **deferred/cut entire** |
+| **Batch 6 active** | **19** | **17** | **5** | **41** | — |
+
+Cumulative (Batch 1–6 active): **U390 / I230 / E69 → 689**
 
 ### Batch 5 E2E Rollout evidence (Phase 5)
 

@@ -14,6 +14,8 @@
 | BUG-008 | 2026-08-05 | edit-exam UI / useCreateExam | medium | API-seeded exam opens `/admin/edit-exam/:id` then immediately redirects back to `/admin/exam-management` (cannot execute edit-based lifecycle flows) | open |
 | BUG-009 | 2026-08-05 | exam-seat-management route | medium | API-seeded exam opens `/admin/exam-management/:id/seats` then redirects back to `/admin/exam-management` | open |
 | BUG-010 | 2026-08-06 | exam-scores page load | high | Scores page awaits unbounded `fetchExamScores()` (all pages) before loading enrollments — shared-DB with many scores leaves table empty for minutes; blocks import/bulk-issue E2E | open |
+| BUG-011 | 2026-08-06 | user-profile PATCH :id | high | `PATCH /api/user-profile/:id` is JWT-only (no ownership / @Roles) — any authenticated user can mutate another user's profile if they know the id | open |
+| BUG-012 | 2026-08-06 | profile-edit-history | medium | History GET + `latest-images` are JWT-only (no @Roles / ownership) — any authenticated role can read any profile's edit history and image paths | open |
 
 ### BUG-001
 
@@ -118,6 +120,28 @@
 - **Actual:** `loadData` `Promise.all([fetchExamById, fetchExamScores])` paginates **all** exam-scores in the DB before `fetchRawEnrollmentsByExamId`; with a large shared-DB score table the enrollments table stays empty (`0 ของ 0`) for minutes and IMPORT/bulk-issue cannot run
 - **Repro:** Seed disposable exam+session+enrollment, open `/#/admin/exam-management/:examId/scores` while many historical scores exist; watch network for many `/api/exam-scores?page=…` before `/api/exam-enrollments/exam/:id`
 - **Status:** open
+
+### BUG-011
+
+- **Date:** 2026-08-06
+- **Module / file:** `apps/backend/src/modules/user-profile/user-profile.controller.ts` (`PATCH :id`)
+- **How found:** integration PROF-I-006
+- **Expected:** Only owner or ADMIN/staff roles may mutate another profile
+- **Actual:** Route uses `@UseGuards(JwtAuthGuard)` only — any JWT can `PATCH /api/user-profile/:id` for a foreign id
+- **Repro:** Login as candidate A → `PATCH /api/user-profile/{profileIdOfB}` with field changes → 200
+- **Status:** open
+- **Note:** Asserted as current behavior in `tests/integration/user-profile.api.spec.ts` (PROF-I-006)
+
+### BUG-012
+
+- **Date:** 2026-08-06
+- **Module / file:** `apps/backend/src/modules/profile-edit-history/profile-edit-history.controller.ts`
+- **How found:** integration PEH-I-005
+- **Expected:** History / latest-images restricted to ADMIN/staff or profile owner
+- **Actual:** JWT-only endpoints — any authenticated role can `GET .../profile/:id` and `POST .../latest-images` for any ids
+- **Repro:** Login as candidate → `GET /api/profile-edit-history/profile/{foreignProfileId}` → 200 with rows
+- **Status:** open
+- **Note:** Asserted as current behavior in `tests/integration/profile-edit-history.api.spec.ts` (PEH-I-005)
 
 ### Template
 
