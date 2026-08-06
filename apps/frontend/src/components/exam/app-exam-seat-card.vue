@@ -15,7 +15,14 @@
       <!-- Avatar Section -->
       <div class="avatar-wrapper q-mr-md">
         <q-avatar size="60px" class="bg-primary">
-          <img v-if="avatarUrl" :src="avatarUrl" alt="Student Avatar" class="avatar-img" />
+          <img
+            v-if="avatarUrl"
+            :src="avatarUrl"
+            alt="Student Avatar"
+            class="avatar-img"
+            loading="lazy"
+            decoding="async"
+          />
           <q-icon v-else name="person" color="white" />
         </q-avatar>
       </div>
@@ -88,7 +95,9 @@ const displayRemark = computed((): string => {
 });
 
 const typeBgColor = computed((): string => {
-  return props.bgColor || getPhysicalStatusBgColor(props.remark) || DEFAULT_PHYSICAL_STATUS_BG_COLOR;
+  return (
+    props.bgColor || getPhysicalStatusBgColor(props.remark) || DEFAULT_PHYSICAL_STATUS_BG_COLOR
+  );
 });
 
 /** Unassigned cards use type color; assigned cards stay on the surface */

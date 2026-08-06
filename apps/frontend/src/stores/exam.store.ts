@@ -49,6 +49,8 @@ export const useExamStore = defineStore('exam', () => {
   let lastHistoryFetchAt = 0;
   let historyFetchInFlight: Promise<void> | null = null;
   let scheduleFetchInFlight: Promise<void> | null = null;
+  let scheduleFetchGeneration = 0;
+  let historyFetchGeneration = 0;
 
   type CancellationReason = 'manual' | 'paymentTimeout';
 
@@ -166,6 +168,8 @@ export const useExamStore = defineStore('exam', () => {
     scheduleError.value = null;
     historyFetchInFlight = null;
     scheduleFetchInFlight = null;
+    scheduleFetchGeneration += 1;
+    historyFetchGeneration += 1;
     isLoadingSchedule.value = false;
   }
 
@@ -192,34 +196,47 @@ export const useExamStore = defineStore('exam', () => {
   }
 
   async function initSchedule(force = false): Promise<void> {
-    if (scheduleFetchInFlight) {
+    // Non-force callers join the in-flight request instead of stacking GET /exam
+    if (scheduleFetchInFlight && !force) {
       await scheduleFetchInFlight;
-      if (!force) return;
+      return;
     }
+
+    const generation = ++scheduleFetchGeneration;
+    const showLoading = force || Object.keys(scheduleData.value).length === 0;
 
     const execute = async (): Promise<void> => {
       scheduleError.value = null;
-      const showLoading = force || Object.keys(scheduleData.value).length === 0;
       if (showLoading) {
         isLoadingSchedule.value = true;
       }
       try {
         const [data] = await Promise.all([fetchScheduleData(force), loadRegisteredSessions()]);
+        if (generation !== scheduleFetchGeneration) return;
         scheduleData.value = data;
       } catch (error) {
+        if (generation !== scheduleFetchGeneration) return;
         console.error('Failed to load schedule:', error);
         scheduleError.value = i18n.t('examSchedule.loadError');
       } finally {
-        if (showLoading) {
+        if (generation === scheduleFetchGeneration && showLoading) {
           isLoadingSchedule.value = false;
         }
       }
     };
 
-    scheduleFetchInFlight = execute().finally(() => {
-      scheduleFetchInFlight = null;
+    const fetchPromise = execute().finally(() => {
+      if (scheduleFetchInFlight === fetchPromise) {
+        scheduleFetchInFlight = null;
+      }
     });
-    await scheduleFetchInFlight;
+    scheduleFetchInFlight = fetchPromise;
+    await fetchPromise;
+  }
+
+  /** Clear schedule spinner when leaving the page — does not abort in-flight data update */
+  function clearScheduleLoadingUi(): void {
+    isLoadingSchedule.value = false;
   }
 
   async function loadManagementSchedules(force = false): Promise<void> {
@@ -247,15 +264,17 @@ export const useExamStore = defineStore('exam', () => {
       return;
     }
 
-    if (historyFetchInFlight && !preloaded) {
+    if (historyFetchInFlight && !preloaded && !force) {
       await historyFetchInFlight;
-      if (!force && Date.now() - lastHistoryFetchAt < HISTORY_CACHE_TTL_MS) {
+      if (Date.now() - lastHistoryFetchAt < HISTORY_CACHE_TTL_MS) {
         return;
       }
-      if (!force && lastHistoryFetchAt > 0 && !historyError.value) {
+      if (lastHistoryFetchAt > 0 && !historyError.value) {
         return;
       }
     }
+
+    const generation = ++historyFetchGeneration;
 
     const execute = async (): Promise<void> => {
       historyError.value = null;
@@ -265,11 +284,15 @@ export const useExamStore = defineStore('exam', () => {
         if (!enrollments) {
           const userId = resolveUserId();
           if (userId === null) {
-            historyError.value = i18n.t('exam.history.loadError');
+            if (generation === historyFetchGeneration) {
+              historyError.value = i18n.t('exam.history.loadError');
+            }
             return;
           }
           enrollments = await fetchUserEnrollments(userId);
         }
+
+        if (generation !== historyFetchGeneration) return;
 
         const newPending: ExamHistoryItem[] = [];
         const newHistory: ExamHistoryItem[] = [];
@@ -316,6 +339,7 @@ export const useExamStore = defineStore('exam', () => {
         historyRecords.value = newHistory;
         lastHistoryFetchAt = Date.now();
       } catch (error: unknown) {
+        if (generation !== historyFetchGeneration) return;
         console.error('Failed to fetch user history:', error);
         historyError.value = i18n.t('exam.history.loadError');
       }
@@ -326,10 +350,13 @@ export const useExamStore = defineStore('exam', () => {
       return;
     }
 
-    historyFetchInFlight = execute().finally(() => {
-      historyFetchInFlight = null;
+    const fetchPromise = execute().finally(() => {
+      if (historyFetchInFlight === fetchPromise) {
+        historyFetchInFlight = null;
+      }
     });
-    await historyFetchInFlight;
+    historyFetchInFlight = fetchPromise;
+    await fetchPromise;
   }
 
   async function confirmRegistration(
@@ -463,6 +490,7 @@ export const useExamStore = defineStore('exam', () => {
     addExamRound,
     deleteExamRound,
     initSchedule,
+    clearScheduleLoadingUi,
     loadManagementSchedules,
     fetchHistory,
     isSessionRegistered,

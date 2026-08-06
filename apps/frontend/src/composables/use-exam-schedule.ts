@@ -217,6 +217,9 @@ export function useExamSchedule() {
   onMounted(async () => {
     await examStore.initSchedule();
     scheduleInterval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
+        return;
+      }
       void examStore.initSchedule();
     }, POLLING_INTERVAL_MS);
   });

@@ -1,4 +1,5 @@
 import { api } from 'src/boot/axios';
+import axios from 'axios';
 import type {
   DayData,
   ExamRound,
@@ -29,21 +30,24 @@ import type { PasscodeLog } from 'src/types/common';
 // Retry configuration
 const RETRY_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 1000;
-const CACHE_DURATION_MS = 30000; // 30 seconds short-term cache
+const CACHE_DURATION_MS = 90_000; // align with schedule poll — avoid cache miss every tick
 /** Timeout สำหรับ multi-write save path (สูงกว่า default 30s ของ Axios) */
 const EXAM_ROUND_WRITE_TIMEOUT_MS = 60_000;
 
-type ExamWriteRequestConfig = { timeout?: number };
+type ExamWriteRequestConfig = { timeout?: number; signal?: AbortSignal };
 
 // In-memory cache for exam data
 let examsCache: BackendExam[] | null = null;
 let lastFetchTimestamp = 0;
+/** Single-flight — concurrent callers share one GET /exam */
+let examsFetchInFlight: Promise<BackendExam[]> | null = null;
 
 type BackendSessionLocation = NonNullable<BackendSession['SESSION_LOCATIONS']>[number];
 
 export const invalidateExamCache = (): void => {
   examsCache = null;
   lastFetchTimestamp = 0;
+  examsFetchInFlight = null;
 };
 
 const isActiveEnrollment = (enrollment: { ERM_STATUS: number }): boolean =>
@@ -56,6 +60,18 @@ const getActiveEnrollmentCount = (session: BackendSession): number => {
   return (session.ENROLLMENTS || []).filter(isActiveEnrollment).length;
 };
 
+const isRequestCanceled = (error: unknown): boolean => {
+  if (axios.isCancel(error)) return true;
+  if (!error || typeof error !== 'object') return false;
+  const err = error as { code?: string; name?: string; message?: string };
+  if (err.code === 'ERR_CANCELED' || err.name === 'CanceledError' || err.name === 'AbortError') {
+    return true;
+  }
+  return typeof err.message === 'string' && /abort|cancel/i.test(err.message);
+};
+
+export { isRequestCanceled };
+
 /**
  * Centrally fetch all exams with a short-term in-memory cache.
  * This prevents redundant large downloads of the /exam endpoint when multiple
@@ -67,12 +83,39 @@ export const fetchAllExamsRaw = async (force = false): Promise<BackendExam[]> =>
     return examsCache;
   }
 
-  return retryAsync(async () => {
+  if (examsFetchInFlight) {
+    if (!force) {
+      return examsFetchInFlight;
+    }
+    // force: wait for current flight, then start a fresh request below
+    try {
+      await examsFetchInFlight;
+    } catch {
+      // ignore prior failure — force path starts a new request
+    }
+  }
+
+  // Another caller may have populated cache (or started a flight) while we waited
+  if (!force && examsCache && Date.now() - lastFetchTimestamp < CACHE_DURATION_MS) {
+    return examsCache;
+  }
+  if (examsFetchInFlight) {
+    return examsFetchInFlight;
+  }
+
+  const fetchPromise = retryAsync(async () => {
     const response = await api.get<BackendExam[]>('/exam');
     examsCache = response.data;
     lastFetchTimestamp = Date.now();
     return examsCache;
+  }).finally(() => {
+    if (examsFetchInFlight === fetchPromise) {
+      examsFetchInFlight = null;
+    }
   });
+
+  examsFetchInFlight = fetchPromise;
+  return fetchPromise;
 };
 
 /**
@@ -90,6 +133,11 @@ export const retryAsync = async <T>(
     try {
       return await fn();
     } catch (error) {
+      // Do not retry aborted/canceled requests — fail fast
+      if (isRequestCanceled(error)) {
+        throw error;
+      }
+
       lastError = error as Error;
       const isLastAttempt = attempt === maxAttempts - 1;
 
@@ -333,9 +381,12 @@ export const fetchExamSchedules = async (force = false): Promise<ExamSchedule[]>
   });
 };
 
-export const fetchExamById = async (id: number): Promise<BackendExam> => {
+export const fetchExamById = async (
+  id: number,
+  requestConfig?: ExamWriteRequestConfig,
+): Promise<BackendExam> => {
   return retryAsync(async () => {
-    const response = await api.get<BackendExam>(`/exam/${id}`);
+    const response = await api.get<BackendExam>(`/exam/${id}`, requestConfig);
     return response.data;
   });
 };

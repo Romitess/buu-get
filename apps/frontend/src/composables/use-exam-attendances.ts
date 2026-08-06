@@ -1,9 +1,9 @@
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeUnmount } from 'vue';
 import type { AttendanceTableRow, BackendEnrollmentDetail } from 'src/types/enrollment.types';
 import { ExamAttendStatus, EnrollmentStatus } from 'src/types/enrollment.types';
 import type { BackendExam, BackendSession } from 'src/types/exam';
 import { fetchRawEnrollmentsByExamId } from 'src/services/enrollment.service';
-import { fetchExamWithSeats } from 'src/services/exam.service';
+import { fetchExamById, isRequestCanceled } from 'src/services/exam.service';
 import { formatExamInstanceLabel } from 'src/utils/exam-instance-label';
 
 export function useExamAttendances() {
@@ -13,6 +13,8 @@ export function useExamAttendances() {
   const error = ref<string | null>(null);
   const searchQuery = ref('');
   const selectedSessionId = ref<number | null>(null);
+  let loadGeneration = 0;
+  let abortController: AbortController | null = null;
 
   const getSessionTimeKey = (session: BackendSession): string =>
     `${session.SS_START_TIME || ''}-${session.SS_END_TIME || ''}`;
@@ -112,13 +114,20 @@ export function useExamAttendances() {
   };
 
   const fetchAttendances = async (examId: number): Promise<void> => {
+    abortController?.abort();
+    abortController = new AbortController();
+    const { signal } = abortController;
+    const generation = ++loadGeneration;
+
     isLoading.value = true;
     error.value = null;
     try {
-      const examData = await fetchExamWithSeats(examId).catch((err) => {
+      const examData = await fetchExamById(examId, { signal }).catch((err) => {
+        if (isRequestCanceled(err)) throw err;
         console.error('Failed to fetch exam details:', err);
         return null;
       });
+      if (generation !== loadGeneration) return;
       exam.value = examData;
 
       if (!selectedSessionId.value && examData?.SESSIONS?.length) {
@@ -127,10 +136,13 @@ export function useExamAttendances() {
 
       const enrollmentData = await fetchRawEnrollmentsByExamId(examId, {
         sessionId: selectedSessionId.value,
+        signal,
       }).catch((err) => {
+        if (isRequestCanceled(err)) throw err;
         console.error('Failed to fetch raw enrollments:', err);
         return [] as BackendEnrollmentDetail[];
       });
+      if (generation !== loadGeneration) return;
 
       const mappedAttendances = enrollmentData.map(
         (enrollment: BackendEnrollmentDetail, index: number): AttendanceTableRow => {
@@ -185,12 +197,21 @@ export function useExamAttendances() {
         error.value = 'ไม่พบข้อมูลการสอบหรือรายชื่อผู้สมัคร';
       }
     } catch (err) {
+      if (isRequestCanceled(err) || generation !== loadGeneration) return;
       console.error('Critical error in fetchAttendances:', err);
       error.value = 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
     } finally {
-      isLoading.value = false;
+      if (generation === loadGeneration) {
+        isLoading.value = false;
+      }
     }
   };
+
+  onBeforeUnmount(() => {
+    abortController?.abort();
+    loadGeneration += 1;
+    isLoading.value = false;
+  });
 
   return {
     attendances,

@@ -524,3 +524,66 @@ describe('ExamScoresService.create (upsert by ERM_ID)', () => {
     });
   });
 });
+
+describe('ExamScoresService.findAll', () => {
+  let service: ExamScoresService;
+  let queryBuilder: {
+    leftJoinAndSelect: jest.Mock;
+    innerJoin: jest.Mock;
+    where: jest.Mock;
+    andWhere: jest.Mock;
+    orderBy: jest.Mock;
+    skip: jest.Mock;
+    take: jest.Mock;
+    getManyAndCount: jest.Mock;
+  };
+
+  beforeEach(() => {
+    queryBuilder = {
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      innerJoin: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      take: jest.fn().mockReturnThis(),
+      getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+    };
+
+    const examScoreRepository = {
+      createQueryBuilder: jest.fn().mockReturnValue(queryBuilder),
+    };
+
+    service = new ExamScoresService(
+      examScoreRepository as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      { resolveBandLevel: jest.fn() } as never,
+    );
+  });
+
+  it('filters by examId via enrollment session join', async () => {
+    await service.findAll({ examId: 12, page: 1, limit: 20 });
+
+    expect(queryBuilder.innerJoin).toHaveBeenCalledWith(
+      'enrollment.SESSION',
+      'session',
+    );
+    expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+      'session.EXAM_ID = :examId',
+      { examId: 12 },
+    );
+    expect(queryBuilder.skip).toHaveBeenCalledWith(0);
+    expect(queryBuilder.take).toHaveBeenCalledWith(20);
+  });
+
+  it('filters by sessionId when provided', async () => {
+    await service.findAll({ examId: 12, sessionId: 5 });
+
+    expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+      'enrollment.SESSION_ID = :sessionId',
+      { sessionId: 5 },
+    );
+  });
+});

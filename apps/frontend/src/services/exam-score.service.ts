@@ -15,6 +15,10 @@ export interface BackendExamScore {
     CERT_EXPIRES_AT: string;
     CERT_CODE: string;
   }[];
+  ENROLLMENT?: {
+    USER_ID?: number;
+    SESSION_ID?: number;
+  };
 }
 
 export interface ExamScoreLinePayload {
@@ -25,6 +29,11 @@ export interface ExamScoreLinePayload {
 export interface SaveExamScorePayload {
   ERM_ID: number;
   lines: ExamScoreLinePayload[];
+}
+
+export interface FetchExamScoresParams {
+  examId?: number;
+  sessionId?: number;
 }
 
 interface PaginatedExamScores {
@@ -52,14 +61,22 @@ const unwrapExamScoresPage = (
   return { rows, totalPages };
 };
 
-export const fetchExamScores = async (): Promise<BackendExamScore[]> => {
+/** ดึงคะแนนแบบแบ่งหน้า — ควรส่ง examId เพื่อไม่ดึงคะแนนทั้งระบบ */
+export const fetchExamScores = async (
+  params: FetchExamScoresParams = {},
+): Promise<BackendExamScore[]> => {
   const all: BackendExamScore[] = [];
   let page = 1;
   let totalPages = 1;
 
   do {
     const response = await api.get<BackendExamScore[] | PaginatedExamScores>(SCORE_ENDPOINT, {
-      params: { page, limit: SCORE_PAGE_LIMIT },
+      params: {
+        page,
+        limit: SCORE_PAGE_LIMIT,
+        ...(params.examId != null ? { examId: params.examId } : {}),
+        ...(params.sessionId != null ? { sessionId: params.sessionId } : {}),
+      },
     });
     const parsed = unwrapExamScoresPage(response.data);
     all.push(...parsed.rows);

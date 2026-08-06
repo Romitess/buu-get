@@ -2,14 +2,14 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { defineComponent, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import { useExamSeatCandidates } from './use-exam-seat-candidates';
-import { fetchExamWithSeats } from 'src/services/exam.service';
+import { fetchExamById } from 'src/services/exam.service';
 import { fetchRawEnrollmentsByExamId } from 'src/services/enrollment.service';
 import { EnrollmentStatus } from 'src/types/enrollment.types';
 import type { BackendExam } from 'src/types/exam';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 
 vi.mock('src/services/exam.service', () => ({
-  fetchExamWithSeats: vi.fn(),
+  fetchExamById: vi.fn(),
 }));
 
 vi.mock('src/services/enrollment.service', () => ({
@@ -24,7 +24,7 @@ const TestHarness = defineComponent({
 });
 
 describe('useExamSeatCandidates applyVoucherIssuedState', () => {
-  const mockedFetchExam = vi.mocked(fetchExamWithSeats);
+  const mockedFetchExam = vi.mocked(fetchExamById);
   const mockedFetchEnrollments = vi.mocked(fetchRawEnrollmentsByExamId);
 
   beforeEach(() => {
