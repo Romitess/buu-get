@@ -653,24 +653,30 @@ export const fetchExamBlockedSeats = async (sessionId: number): Promise<BackendB
 };
 
 export const createExamRound = async (payload: CreateExamPayload): Promise<number> => {
+  const writeOpts: ExamWriteRequestConfig = { timeout: EXAM_ROUND_WRITE_TIMEOUT_MS };
+
   try {
     // 1. Create the Exam
-    const examResponse = await api.post<BackendExam>('/exam', {
-      EXAM_NAME: payload.examName,
-      EXAM_TYPE: payload.examType,
-      EXAM_FORMAT: payload.examFormat,
-      EXAM_FEE: Number(payload.fee),
-      EXAM_DATE: buddhistToGregorian(payload.examDate),
-      EXAM_REG_START_DATE: buddhistToGregorian(payload.regStartDate),
-      EXAM_REG_END_DATE: buddhistToGregorianPeriodEnd(payload.regEndDate),
-      EXAM_PAY_START_DATE: buddhistToGregorian(payload.payStartDate),
-      EXAM_PAY_END_DATE: buddhistToGregorianPeriodEnd(payload.payEndDate),
-      EXAM_PUBLISHED: payload.isPublished,
-      FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
-      SRB_ID: Number(payload.srbId),
-      EXAM_ROUND: payload.examRound,
-      EXAM_FISCAL_YEAR: payload.examFiscalYear,
-    });
+    const examResponse = await api.post<BackendExam>(
+      '/exam',
+      {
+        EXAM_NAME: payload.examName,
+        EXAM_TYPE: payload.examType,
+        EXAM_FORMAT: payload.examFormat,
+        EXAM_FEE: Number(payload.fee),
+        EXAM_DATE: buddhistToGregorian(payload.examDate),
+        EXAM_REG_START_DATE: buddhistToGregorian(payload.regStartDate),
+        EXAM_REG_END_DATE: buddhistToGregorianPeriodEnd(payload.regEndDate),
+        EXAM_PAY_START_DATE: buddhistToGregorian(payload.payStartDate),
+        EXAM_PAY_END_DATE: buddhistToGregorianPeriodEnd(payload.payEndDate),
+        EXAM_PUBLISHED: payload.isPublished,
+        FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
+        SRB_ID: Number(payload.srbId),
+        EXAM_ROUND: payload.examRound,
+        EXAM_FISCAL_YEAR: payload.examFiscalYear,
+      },
+      writeOpts,
+    );
 
     const examId = examResponse.data.EXAM_ID;
 
@@ -678,20 +684,24 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<numbe
     const groupedRanges = groupTimeRangesByTime(payload);
     const sessionPromises = groupedRanges.map(async (range) => {
       const primaryLocationId = range.locations[0]?.locationId || Number(payload.locationId);
-      const sessionResponse = await api.post<BackendExam['SESSIONS'][number]>('/exam-sessions', {
-        EXAM_ID: Number(examId),
-        LOCATION_ID: primaryLocationId,
-        SS_START_TIME: range.startTime,
-        SS_END_TIME: range.endTime,
-        SS_CAPACITY: range.seats,
-        SS_SESSION_STATUS: SESSION_STATUS_OPEN,
-      });
+      const sessionResponse = await api.post<BackendExam['SESSIONS'][number]>(
+        '/exam-sessions',
+        {
+          EXAM_ID: Number(examId),
+          LOCATION_ID: primaryLocationId,
+          SS_START_TIME: range.startTime,
+          SS_END_TIME: range.endTime,
+          SS_CAPACITY: range.seats,
+          SS_SESSION_STATUS: SESSION_STATUS_OPEN,
+        },
+        writeOpts,
+      );
 
       const blockedSeatPayload = buildBlockedSeatPayload(range.locations);
       await Promise.all([
-        createSessionLocations(sessionResponse.data.SS_ID, range.locations),
+        createSessionLocations(sessionResponse.data.SS_ID, range.locations, writeOpts),
         ...(blockedSeatPayload.length > 0
-          ? [replaceExamBlockedSeats(sessionResponse.data.SS_ID, blockedSeatPayload)]
+          ? [replaceExamBlockedSeats(sessionResponse.data.SS_ID, blockedSeatPayload, writeOpts)]
           : []),
       ]);
     });

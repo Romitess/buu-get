@@ -419,7 +419,10 @@ export const useExamStore = defineStore('exam', () => {
   async function addExamRound(payload: CreateExamPayload): Promise<number> {
     const examId = await createExamRound(payload);
 
-    await initSchedule(true);
+    // ไม่รอ refresh calendar บน save path — รอบสอบสร้างแล้ว ให้ UI เคลียร์ loading / redirect ได้ทันที
+    void initSchedule(true).catch((error: unknown) => {
+      console.error('Failed to refresh schedule after create:', error);
+    });
 
     const [dd, mm, yyyy] = payload.examDate.split('/');
     if (dd && mm && yyyy) {

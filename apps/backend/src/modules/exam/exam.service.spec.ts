@@ -135,6 +135,37 @@ describe('ExamService', () => {
       expect(scoreRubricsService.assertRubricUsable).toHaveBeenCalledWith(88);
       expect(examRepository.save).not.toHaveBeenCalled();
     });
+
+    it('should return saved exam without waiting for Moodle sync', async () => {
+      // Arrange
+      const dto: CreateExamDto = { EXAM_NAME: 'Exam C', SRB_ID: 3 };
+      examRepository.create.mockImplementation((payload: CreateExamDto) => ({
+        EXAM_ID: 11,
+        EXAM_ROUND: '1',
+        ...payload,
+      }));
+      examRepository.save.mockResolvedValue({
+        EXAM_ID: 11,
+        EXAM_ROUND: '1',
+        ...dto,
+      });
+      let resolveMoodle!: (value: number) => void;
+      moodleSyncService.createCourse.mockImplementation(
+        () =>
+          new Promise<number>((resolve) => {
+            resolveMoodle = resolve;
+          }),
+      );
+      scoreRubricsService.assertRubricUsable.mockResolvedValue(undefined);
+
+      // Act — must resolve even while Moodle is still pending
+      const saved = await service.create(dto, 1001);
+
+      // Assert
+      expect(saved.EXAM_ID).toBe(11);
+      expect(moodleSyncService.createCourse).toHaveBeenCalled();
+      resolveMoodle(999);
+    });
   });
 
   describe('update', () => {
