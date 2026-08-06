@@ -8,7 +8,6 @@ import { ExamLocation } from '../modules/exam-locations/entities/exam-location.e
 import { ExamEnrollment } from '../modules/exam-enrollments/entities/exam-enrollment.entity';
 import { UserProfile } from '../modules/user-profile/entities/user-profile.entity';
 import { ExamVoucher } from '../modules/exam-vouchers/entities/exam-voucher.entity';
-import { ExamAttendance } from '../modules/exam-attendances/entities/exam-attendance.entity';
 import { FundSource } from '../modules/fund-sources/entities/fund-source.entity';
 import { Transaction } from '../modules/transactions/entities/transaction.entity';
 import { Receipt } from '../modules/receipts/entities/receipt.entity';
@@ -22,6 +21,7 @@ import { PaymentConfig } from '../modules/payment-configs/entities/payment-confi
 import { TransactionStatusHistory } from '../modules/transaction-status-history/entities/transaction-status-history.entity';
 import { VoidedReceipt } from '../modules/voided-receipts/entities/voided-receipt.entity';
 import { UserImage } from '../modules/user-image/entities/user-image.entity';
+import { ProfileEditHistory } from '../modules/profile-edit-history/entities/profile-edit-history.entity';
 import { ExamSessionLocation } from '../modules/exam-session-locations/entities/exam-session-location.entity';
 import { ExamLocationSeat } from '../modules/exam-location-seats/entities/exam-location-seat.entity';
 import { ExamPasscode } from '../modules/exam/entities/exam-passcode.entity';
@@ -47,13 +47,13 @@ export default new DataSource({
     Role,
     UserProfile,
     UserImage,
+    ProfileEditHistory,
     Exam,
     ExamSession,
     ExamLocation,
     ExamSessionLocation,
     ExamLocationSeat,
     ExamEnrollment,
-    ExamAttendance,
     ExamVoucher,
     FundSource,
     Transaction,

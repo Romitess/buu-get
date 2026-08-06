@@ -284,6 +284,11 @@
   --exam-report-chart-attend: #1e89e5;
   --exam-report-chart-absent: #ff928a;
   --exam-report-chart-line: #1e89e5;
+  // First-time vs repeat attempt proportion
+  --exam-report-attempt-first: #1e89e5;
+  --exam-report-attempt-first-bg: rgba(30, 137, 229, 0.12);
+  --exam-report-attempt-repeat: #ff928a;
+  --exam-report-attempt-repeat-bg: rgba(255, 146, 138, 0.15);
   --exam-report-donut-attend: #10b981;
   --exam-report-donut-absent: #e53934;
   --exam-report-donut-track: #eef2f6;
@@ -293,15 +298,6 @@
   --exam-report-score-60: #3cc3df;
   --exam-report-score-70: #ffae4c;
   --exam-report-score-80: #537ff1;
-  // Band change palette (เพิ่มขึ้น / เท่าเดิม / ลดลง / ผู้เข้าสอบซ้ำ)
-  --exam-report-band-increase: #388e39;
-  --exam-report-band-increase-bg: rgba(56, 142, 57, 0.15);
-  --exam-report-band-same: #f0b400;
-  --exam-report-band-same-bg: rgba(255, 206, 0, 0.15);
-  --exam-report-band-decrease: #e53934;
-  --exam-report-band-decrease-bg: rgba(229, 57, 52, 0.15);
-  --exam-report-band-repeat: #0d47a1;
-  --exam-report-band-repeat-bg: rgba(13, 71, 161, 0.15);
 }
 
 // === Base Reset & Typography ===

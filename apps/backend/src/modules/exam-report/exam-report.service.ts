@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, SelectQueryBuilder } from 'typeorm';
 import { ExamReportQueryDto } from './dto/exam-report-query.dto';
 import {
-  ExamBandChange,
   ExamCandidateInfo,
   ExamInformationRound,
   ExamReportOption,
@@ -15,7 +14,6 @@ import {
   ExamEnrollment,
   ExamEnrollmentStatus,
 } from '../exam-enrollments/entities/exam-enrollment.entity';
-import { ExamAttendStatus } from '../exam-attendances/entities/exam-attendance.entity';
 import { Exam } from '../exam/entities/exam.entity';
 import { ExamScoreLine } from '../exam-scores/entities/exam-score-line.entity';
 
@@ -37,16 +35,6 @@ const THAI_MONTHS = [
   'พฤศจิกายน',
   'ธันวาคม',
 ];
-
-const CEFR_RANK: Record<string, number> = {
-  PRE_A1: 0,
-  A1: 1,
-  A2: 2,
-  B1: 3,
-  B2: 4,
-  C1: 5,
-  C2: 6,
-};
 
 interface YearMetricRow {
   year: string | number;
@@ -75,16 +63,20 @@ interface RoundRawRow {
   attended: string | number;
 }
 
-interface ScoredAttemptRow {
-  userId: string | number;
-  year: string | number;
-  band: string | number | null;
-}
-
 interface YearMinMaxRow {
   year: string | number;
   minScore: string | number | null;
   maxScore: string | number | null;
+}
+
+interface YearRepeatRow {
+  year: string | number;
+  repeatTakers: string | number;
+}
+
+interface AttemptProportionRow {
+  total: string | number;
+  repeat: string | number;
 }
 
 interface ExamInformationRoundRawRow {
@@ -115,22 +107,16 @@ interface ExamCandidateInfoRawRow {
 export class ExamReportService {
   constructor(private readonly dataSource: DataSource) {}
 
-  private getCefrRank(level: string | null): number | null {
-    if (!level) {
-      return null;
-    }
-
-    const normalized = level.trim().toUpperCase().replace(/\s+/g, '_');
-    return CEFR_RANK[normalized] ?? null;
-  }
-
   async getSummary(query: ExamReportQueryDto): Promise<ExamReportSummary> {
     const metricByYear = await this.getMetricByYear(query);
     const avgByYear = await this.getAvgScoreByYear(query);
     const bucketByYear = await this.getScoreBucketByYear(query);
     const rounds = await this.getRounds(query);
     const minMaxByYear = await this.getScoreMinMaxByYear(query);
-    const scoredAttempts = await this.getUserScoredAttempts(query);
+    const [repeatByYear, attemptProportion] = await Promise.all([
+      this.getRepeatTakersByYear(query),
+      this.getAttemptProportion(query),
+    ]);
 
     // ปีที่อยู่ในข้อมูล (เรียงจากน้อยไปมาก)
     const years = metricByYear.map((m) => Number(m.year)).sort((a, b) => a - b);
@@ -212,9 +198,6 @@ export class ExamReportService {
       })),
     };
 
-    // ── การเปลี่ยนแปลง Band ของผู้เข้าสอบซ้ำ + ผู้เข้าสอบซ้ำรายปี ──
-    const { bandChange, repeatByYear } = this.computeBandChange(scoredAttempts);
-
     // ── ตารางสรุปรายปี ──
     const minScoreMap = new Map<number, number | null>();
     const maxScoreMap = new Map<number, number | null>();
@@ -251,7 +234,7 @@ export class ExamReportService {
       registrationTrend,
       rounds,
       scoreSummaryByYear,
-      bandChange,
+      attemptProportion,
       yearTable,
     };
   }
@@ -295,40 +278,18 @@ export class ExamReportService {
     const repeatTakersSql = `
       COUNT(DISTINCT CASE
         WHEN sc.SCORES_ID IS NOT NULL
-          AND EXISTS (
-            SELECT 1
-            FROM EXAM_T_ENROLLMENTS prev_e
-            INNER JOIN EXAM_T_SESSIONS prev_s
-              ON prev_s.SS_ID = prev_e.SESSION_ID
-              AND prev_s.DELETED_AT IS NULL
-            INNER JOIN EXAM_T_EXAM prev_x
-              ON prev_x.EXAM_ID = prev_s.EXAM_ID
-              AND prev_x.DELETED_AT IS NULL
-            INNER JOIN EXAM_T_SCORES prev_sc
-              ON prev_sc.ERM_ID = prev_e.ERM_ID
-              AND prev_sc.DELETED_AT IS NULL
-            WHERE prev_e.USER_ID = e.USER_ID
-              AND prev_e.ERM_ID <> e.ERM_ID
-              AND prev_e.DELETED_AT IS NULL
-              AND prev_e.ERM_STATUS != :cancelled
-              AND prev_x.EXAM_DATE IS NOT NULL
-              AND (
-                prev_x.EXAM_DATE < x.EXAM_DATE
-                OR (prev_x.EXAM_DATE = x.EXAM_DATE AND prev_x.EXAM_ID < x.EXAM_ID)
-              )
-          )
+          AND ${this.previousScoreExistsSql()}
         THEN e.USER_ID
       END)
     `;
 
     const rows = await this.baseEnrollmentQb()
-      .leftJoin('e.ATTENDANCES', 'a')
       .leftJoin('e.SCORE', 'sc')
       .select('x.EXAM_ROUND', 'round')
       .addSelect('x.EXAM_DATE', 'examDate')
       .addSelect('COUNT(DISTINCT e.ERM_ID)', 'applicants')
       .addSelect(
-        `COUNT(DISTINCT CASE WHEN a.ATTEND_STATUS = ${ExamAttendStatus.INTIME} THEN e.ERM_ID END)`,
+        `COUNT(DISTINCT CASE WHEN e.ERM_STATUS = ${ExamEnrollmentStatus.ATTENDED} THEN e.ERM_ID END)`,
         'attended',
       )
       .addSelect(repeatTakersSql, 'repeatTakers')
@@ -369,31 +330,6 @@ export class ExamReportService {
     year: number,
     round?: string,
   ): Promise<ExamCandidateInfo[]> {
-    const previousScoreExistsSql = `
-      EXISTS (
-        SELECT 1
-        FROM EXAM_T_ENROLLMENTS prev_e
-        INNER JOIN EXAM_T_SESSIONS prev_s
-          ON prev_s.SS_ID = prev_e.SESSION_ID
-          AND prev_s.DELETED_AT IS NULL
-        INNER JOIN EXAM_T_EXAM prev_x
-          ON prev_x.EXAM_ID = prev_s.EXAM_ID
-          AND prev_x.DELETED_AT IS NULL
-        INNER JOIN EXAM_T_SCORES prev_sc
-          ON prev_sc.ERM_ID = prev_e.ERM_ID
-          AND prev_sc.DELETED_AT IS NULL
-        WHERE prev_e.USER_ID = e.USER_ID
-          AND prev_e.ERM_ID <> e.ERM_ID
-          AND prev_e.DELETED_AT IS NULL
-          AND prev_e.ERM_STATUS != :cancelled
-          AND prev_x.EXAM_DATE IS NOT NULL
-          AND (
-            prev_x.EXAM_DATE < x.EXAM_DATE
-            OR (prev_x.EXAM_DATE = x.EXAM_DATE AND prev_x.EXAM_ID < x.EXAM_ID)
-          )
-      )
-    `;
-
     const qb = this.baseEnrollmentQb()
       .innerJoin('e.USER', 'u')
       .leftJoin('e.SCORE', 'sc')
@@ -418,7 +354,7 @@ export class ExamReportService {
       .addSelect('sc.SC_TOTAL_SCORE', 'totalScore')
       .addSelect('sc.SC_BAND_LEVEL', 'level')
       .addSelect(
-        `CASE WHEN ${previousScoreExistsSql} THEN 'repeatAttempt' ELSE 'firstAttempt' END`,
+        `CASE WHEN ${this.previousScoreExistsSql()} THEN 'repeatAttempt' ELSE 'firstAttempt' END`,
         'attemptStatus',
       )
       .andWhere('x.EXAM_DATE IS NOT NULL')
@@ -518,11 +454,10 @@ export class ExamReportService {
     query: ExamReportQueryDto,
   ): Promise<YearMetricRow[]> {
     const qb = this.baseEnrollmentQb()
-      .leftJoin('e.ATTENDANCES', 'a')
       .select('YEAR(x.EXAM_DATE)', 'year')
       .addSelect('COUNT(DISTINCT e.ERM_ID)', 'registered')
       .addSelect(
-        `COUNT(DISTINCT CASE WHEN a.ATTEND_STATUS = ${ExamAttendStatus.INTIME} THEN e.ERM_ID END)`,
+        `COUNT(DISTINCT CASE WHEN e.ERM_STATUS = ${ExamEnrollmentStatus.ATTENDED} THEN e.ERM_ID END)`,
         'attended',
       )
       .groupBy('year')
@@ -599,77 +534,90 @@ export class ExamReportService {
   }
 
   /**
-   * ครั้งที่เข้าสอบและมีคะแนนของผู้ใช้แต่ละคน (เรียงตามวันสอบ)
-   * ใช้คำนวณการเปลี่ยนแปลง Band และจำนวนผู้เข้าสอบซ้ำรายปี
+   * จำนวนผู้เข้าสอบซ้ำรายปี = COUNT(DISTINCT USER_ID) ที่มีคะแนนในปีนั้น
+   * และมี enrollment มีคะแนนก่อนหน้า (lifetime — ไม่จำกัดช่วงฟิลเตอร์)
    */
-  private async getUserScoredAttempts(
+  private async getRepeatTakersByYear(
     query: ExamReportQueryDto,
-  ): Promise<ScoredAttemptRow[]> {
+  ): Promise<Map<number, number>> {
     const qb = this.baseEnrollmentQb()
       .innerJoin('e.SCORE', 'sc')
-      .select('e.USER_ID', 'userId')
-      .addSelect('YEAR(x.EXAM_DATE)', 'year')
-      .addSelect('sc.SC_BAND_LEVEL', 'band')
-      .where('x.EXAM_DATE IS NOT NULL')
-      .orderBy('e.USER_ID', 'ASC')
-      .addOrderBy('x.EXAM_DATE', 'ASC');
+      .select('YEAR(x.EXAM_DATE)', 'year')
+      .addSelect(
+        `COUNT(DISTINCT CASE WHEN ${this.previousScoreExistsSql()} THEN e.USER_ID END)`,
+        'repeatTakers',
+      )
+      .andWhere('x.EXAM_DATE IS NOT NULL')
+      .groupBy('year')
+      .having('year IS NOT NULL');
 
     this.applyYearRange(qb, query);
-    return qb.getRawMany<ScoredAttemptRow>();
+    const rows = await qb.getRawMany<YearRepeatRow>();
+
+    const map = new Map<number, number>();
+    rows.forEach((row) => {
+      map.set(Number(row.year), Number(row.repeatTakers));
+    });
+    return map;
   }
 
   /**
-   * จากรายการครั้งสอบที่เรียงตามผู้ใช้+วันสอบ → คำนวณ:
-   * - bandChange: เทียบ Band ครั้งล่าสุดกับครั้งก่อนหน้าของผู้เข้าสอบซ้ำ
-   * - repeatByYear: นับครั้งสอบที่ "ไม่ใช่ครั้งแรก" ของผู้ใช้ ตามปีของครั้งนั้น
+   * สัดส่วนสอบครั้งเดียว / สอบซ้ำ ในช่วงฟิลเตอร์ (นับคนที่มีคะแนน)
+   * - repeat: มีอย่างน้อย 1 scored attempt ใน window ที่เป็น repeat (มี prior lifetime)
+   * - firstTime: scored users ใน window ที่ไม่ใช่ repeat
    */
-  private computeBandChange(rows: ScoredAttemptRow[]): {
-    bandChange: ExamBandChange;
-    repeatByYear: Map<number, number>;
-  } {
-    const attemptsByUser = new Map<
-      number,
-      { year: number; level: string | null; rank: number | null }[]
-    >();
-    rows.forEach((r) => {
-      const userId = Number(r.userId);
-      const list = attemptsByUser.get(userId) ?? [];
-      const level = r.band === null ? null : String(r.band).trim() || null;
-      list.push({
-        year: Number(r.year),
-        level,
-        rank: this.getCefrRank(level),
-      });
-      attemptsByUser.set(userId, list);
-    });
+  private async getAttemptProportion(
+    query: ExamReportQueryDto,
+  ): Promise<{ firstTime: number; repeat: number }> {
+    const qb = this.baseEnrollmentQb()
+      .innerJoin('e.SCORE', 'sc')
+      .select('COUNT(DISTINCT e.USER_ID)', 'total')
+      .addSelect(
+        `COUNT(DISTINCT CASE WHEN ${this.previousScoreExistsSql()} THEN e.USER_ID END)`,
+        'repeat',
+      )
+      .andWhere('x.EXAM_DATE IS NOT NULL');
 
-    const bandChange: ExamBandChange = {
-      repeatTakers: 0,
-      increased: 0,
-      same: 0,
-      decreased: 0,
+    this.applyYearRange(qb, query);
+    const row = await qb.getRawOne<AttemptProportionRow>();
+
+    const total = Number(row?.total ?? 0);
+    const repeat = Number(row?.repeat ?? 0);
+    return {
+      firstTime: Math.max(0, total - repeat),
+      repeat,
     };
-    const repeatByYear = new Map<number, number>();
+  }
 
-    attemptsByUser.forEach((attempts) => {
-      // ครั้งสอบที่ไม่ใช่ครั้งแรก → นับเป็นผู้เข้าสอบซ้ำของปีนั้น
-      attempts.slice(1).forEach((a) => {
-        repeatByYear.set(a.year, (repeatByYear.get(a.year) ?? 0) + 1);
-      });
-
-      // การเปลี่ยน Band: ใช้เฉพาะครั้งที่มี Band เทียบสองครั้งล่าสุด
-      const withBand = attempts.filter((a) => a.rank !== null);
-      if (withBand.length < 2) return;
-
-      const last = withBand[withBand.length - 1].rank as number;
-      const prev = withBand[withBand.length - 2].rank as number;
-      bandChange.repeatTakers += 1;
-      if (last > prev) bandChange.increased += 1;
-      else if (last < prev) bandChange.decreased += 1;
-      else bandChange.same += 1;
-    });
-
-    return { bandChange, repeatByYear };
+  /**
+   * มี enrollment มีคะแนนก่อนหน้าของ user เดียวกันหรือไม่
+   * (เรียง EXAM_DATE แล้ว EXAM_ID — ใช้พารามิเตอร์ :cancelled จาก baseEnrollmentQb)
+   */
+  private previousScoreExistsSql(): string {
+    return `
+      EXISTS (
+        SELECT 1
+        FROM EXAM_T_ENROLLMENTS prev_e
+        INNER JOIN EXAM_T_SESSIONS prev_s
+          ON prev_s.SS_ID = prev_e.SESSION_ID
+          AND prev_s.DELETED_AT IS NULL
+        INNER JOIN EXAM_T_EXAM prev_x
+          ON prev_x.EXAM_ID = prev_s.EXAM_ID
+          AND prev_x.DELETED_AT IS NULL
+        INNER JOIN EXAM_T_SCORES prev_sc
+          ON prev_sc.ERM_ID = prev_e.ERM_ID
+          AND prev_sc.DELETED_AT IS NULL
+        WHERE prev_e.USER_ID = e.USER_ID
+          AND prev_e.ERM_ID <> e.ERM_ID
+          AND prev_e.DELETED_AT IS NULL
+          AND prev_e.ERM_STATUS != :cancelled
+          AND prev_x.EXAM_DATE IS NOT NULL
+          AND (
+            prev_x.EXAM_DATE < x.EXAM_DATE
+            OR (prev_x.EXAM_DATE = x.EXAM_DATE AND prev_x.EXAM_ID < x.EXAM_ID)
+          )
+      )
+    `;
   }
 
   /** ตารางรอบสอบ — registered / attended ต่อรอบ (ต่อ Exam) */
@@ -677,12 +625,11 @@ export class ExamReportService {
     query: ExamReportQueryDto,
   ): Promise<ExamReportSummary['rounds']> {
     const qb = this.baseEnrollmentQb()
-      .leftJoin('e.ATTENDANCES', 'a')
       .select('x.EXAM_ROUND', 'round')
       .addSelect('x.EXAM_DATE', 'examDate')
       .addSelect('COUNT(DISTINCT e.ERM_ID)', 'registered')
       .addSelect(
-        `COUNT(DISTINCT CASE WHEN a.ATTEND_STATUS = ${ExamAttendStatus.INTIME} THEN e.ERM_ID END)`,
+        `COUNT(DISTINCT CASE WHEN e.ERM_STATUS = ${ExamEnrollmentStatus.ATTENDED} THEN e.ERM_ID END)`,
         'attended',
       )
       .groupBy('x.EXAM_ID')

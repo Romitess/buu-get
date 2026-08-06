@@ -15,7 +15,6 @@ import {
 import { ExamSession } from '../../exam-sessions/entities/exam-session.entity';
 import { User } from '../../users/entities/user.entity';
 import { ExamVoucher } from '../../exam-vouchers/entities/exam-voucher.entity';
-import { ExamAttendance } from '../../exam-attendances/entities/exam-attendance.entity';
 import { Transaction } from '../../transactions/entities/transaction.entity';
 import { ExamScore } from '../../exam-scores/entities/exam-score.entity';
 import { ExamSessionLocation } from '../../exam-session-locations/entities/exam-session-location.entity';
@@ -28,6 +27,7 @@ export enum ExamEnrollmentStatus {
   SEAT_PUBLISHED = 3,
   ATTENDED = 4,
   CANCELLED = 5,
+  MISSING = 6,
 }
 
 export enum ExamVerifyStatus {
@@ -91,7 +91,7 @@ export class ExamEnrollment {
     type: 'tinyint',
     default: ExamEnrollmentStatus.UNPAID,
     comment:
-      'สถานะการชำระเงิน (0:UNPAID, 1:PAID, 2:SEAT_ASSIGNED, 3:SEAT_PUBLISHED, 4:ATTENDED, 5:CANCELLED)',
+      'สถานะการสมัคร/เข้าสอบ (0:UNPAID, 1:PAID, 2:SEAT_ASSIGNED, 3:SEAT_PUBLISHED, 4:ATTENDED, 5:CANCELLED, 6:MISSING)',
   })
   ERM_STATUS: ExamEnrollmentStatus;
 
@@ -167,6 +167,14 @@ export class ExamEnrollment {
   })
   ERM_MOODLE_ENROLL_ID: number | null;
 
+  @Column({
+    name: 'ERM_ATTEND_CHECK_IN_TIME',
+    type: 'timestamp',
+    nullable: true,
+    comment: 'เวลาที่เข้าสอบ/เช็กอิน',
+  })
+  ERM_ATTEND_CHECK_IN_TIME: Date | null;
+
   @CreateDateColumn({ name: 'CREATED_AT', comment: 'วันที่สร้าง' })
   CREATED_AT: Date;
 
@@ -186,12 +194,6 @@ export class ExamEnrollment {
 
   @OneToMany(() => ExamVoucher, (voucher: ExamVoucher) => voucher.ENROLLMENT)
   VOUCHERS: ExamVoucher[];
-
-  @OneToMany(
-    () => ExamAttendance,
-    (attendance: ExamAttendance) => attendance.ENROLLMENT,
-  )
-  ATTENDANCES: ExamAttendance[];
 
   @OneToOne(
     () => Transaction,

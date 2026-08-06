@@ -79,13 +79,10 @@ export interface ExamScoreRangeSeries {
   data: number[];
 }
 
-/** ข้อมูลกราฟวงกลมการเปลี่ยนแปลงระดับ Band ของผู้เข้าสอบซ้ำ */
-export interface ExamBandChangeData {
-  /** จำนวนผู้เข้าสอบซ้ำทั้งหมด (= increased + same + decreased) */
-  repeatTakers: number;
-  increased: number;
-  same: number;
-  decreased: number;
+/** ข้อมูลกราฟวงกลมสัดส่วนสอบครั้งเดียว vs สอบซ้ำ */
+export interface ExamAttemptProportionData {
+  firstTime: number;
+  repeat: number;
 }
 
 /** แถวสรุปรายปีในตารางภาพรวม */
@@ -145,7 +142,7 @@ export interface ExamReportSummary {
   trendChart: ExamRegistrationTrendChartData;
   rounds: ExamReportRoundRow[];
   scoreSummaryChart: ExamScoreSummaryChartData;
-  bandChange: ExamBandChangeData;
+  attemptProportion: ExamAttemptProportionData;
   yearTable: ExamYearTableRow[];
 }
 

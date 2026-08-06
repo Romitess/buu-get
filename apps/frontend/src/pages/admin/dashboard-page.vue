@@ -40,6 +40,9 @@
     </template>
 
     <template v-else>
+      <div class="dashboard-page__stats-hint text-caption text-grey-7 q-mb-sm">
+        {{ t('admin.examReport.stats.scopeHint') }}
+      </div>
       <!-- การ์ดสถิติ -->
       <div class="row q-col-gutter-md q-mb-md">
         <div v-for="card in statCards" :key="card.key" class="col-12 col-sm-6 col-lg-3">
@@ -57,13 +60,13 @@
         </div>
       </div>
 
-      <!-- แถวกราฟ: ช่วงคะแนนรายปี + สัดส่วน Band -->
+      <!-- แถวกราฟ: ช่วงคะแนนรายปี + สัดส่วนสอบครั้งเดียว/ซ้ำ -->
       <div class="row q-col-gutter-md q-mb-md">
         <div class="col-12 col-lg-7">
           <ExamScoreSummaryChart :data="scoreSummaryChart" />
         </div>
         <div class="col-12 col-lg-5">
-          <ExamBandChangeChart :data="bandChange" />
+          <ExamAttemptProportionChart :data="attemptProportion" />
         </div>
       </div>
 
@@ -77,17 +80,19 @@
 import { onMounted, watch } from 'vue';
 import type { QTableColumn } from 'quasar';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import ExamReportFilter from 'src/components/exam-report/exam-report-filter.vue';
 import ExamReportStatCard from 'src/components/exam-report/exam-report-stat-card.vue';
 import ExamAttendanceBarChart from 'src/components/exam-report/exam-attendance-bar-chart.vue';
 import ExamRegistrationTrendChart from 'src/components/exam-report/exam-registration-trend-chart.vue';
 import ExamScoreSummaryChart from 'src/components/exam-report/exam-score-summary-chart.vue';
-import ExamBandChangeChart from 'src/components/exam-report/exam-band-change-chart.vue';
+import ExamAttemptProportionChart from 'src/components/exam-report/exam-attempt-proportion-chart.vue';
 import ExamYearSummaryTable from 'src/components/exam-report/exam-year-summary-table.vue';
 import { useExamReport } from 'src/composables/use-exam-report';
 import { CardSkeleton, ChartPanelSkeleton, TableSkeleton } from 'src/components/base/skeleton';
 
 const $q = useQuasar();
+const { t } = useI18n();
 
 const tableSkeletonColumns: QTableColumn[] = [
   { name: 'year', label: '', field: 'year' },
@@ -103,7 +108,7 @@ const {
   attendanceChart,
   trendChart,
   scoreSummaryChart,
-  bandChange,
+  attemptProportion,
   yearTable,
   yearOptions,
   monthOptions,

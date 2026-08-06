@@ -169,3 +169,18 @@ export const requestEnrollmentFix = async (
   );
   return response.data;
 };
+
+export interface CheckInEnrollmentPayload {
+  ERM_ATTEND_CHECK_IN_TIME?: string;
+}
+
+export const checkInEnrollment = async (
+  id: number,
+  payload: CheckInEnrollmentPayload = {},
+): Promise<BackendEnrollmentDetail> => {
+  const response = await api.post<BackendEnrollmentDetail>(
+    `/exam-enrollments/${id}/check-in`,
+    payload,
+  );
+  return response.data;
+};

@@ -30,6 +30,7 @@ import {
 } from './entities/exam-enrollment.entity';
 import { CreateExamEnrollmentDto } from './dto/create-exam-enrollment.dto';
 import { UpdateExamEnrollmentDto } from './dto/update-exam-enrollment.dto';
+import { CheckInExamEnrollmentDto } from './dto/check-in-exam-enrollment.dto';
 import {
   BulkSeatAssignmentDto,
   SeatAssignmentItemDto,
@@ -454,14 +455,16 @@ export class ExamEnrollmentsService {
       .leftJoin('enrollment.USER', 'user')
       .leftJoin('user.PROFILE', 'profile')
       .leftJoin('enrollment.SESSION', 'session')
-      .innerJoin('enrollment.ATTENDANCES', 'attendance')
+      .where('enrollment.ERM_STATUS = :attendedStatus', {
+        attendedStatus: ExamEnrollmentStatus.ATTENDED,
+      })
       .select('MIN(enrollment.ERM_ID)', 'enrollmentId')
       .addSelect('MIN(session.EXAM_ID)', 'examId')
       .addSelect('MIN(enrollment.ERM_TEST_TAKER)', 'testTakerId')
       .addSelect('MIN(enrollment.ERM_STATUS)', 'status')
       .addSelect('profile.userTitleTh', 'title')
       .addSelect('profile.userFullnameTh', 'fullName')
-      .addSelect('COUNT(DISTINCT attendance.ATTEND_ID)', 'examRoundCount');
+      .addSelect('COUNT(DISTINCT enrollment.ERM_ID)', 'examRoundCount');
 
     if (search) {
       queryBuilder.andWhere(
@@ -532,7 +535,6 @@ export class ExamEnrollmentsService {
       relations: [
         'SESSION',
         'SESSION.EXAM',
-        'ATTENDANCES',
         'SCORE',
         'SCORE.CERTIFICATES',
         'SCORE.LINES',
@@ -541,7 +543,7 @@ export class ExamEnrollmentsService {
     });
 
     const attendedEnrollments = enrollments.filter(
-      (e) => e.ATTENDANCES && e.ATTENDANCES.length > 0,
+      (e) => Number(e.ERM_STATUS) === Number(ExamEnrollmentStatus.ATTENDED),
     );
 
     const examHistory: ExamHistoryRow[] = attendedEnrollments.map(
@@ -887,15 +889,9 @@ export class ExamEnrollmentsService {
       const ermIds = data.map((enrollment) => enrollment.ERM_ID);
       const withOneToMany = await this.examEnrollmentRepository.find({
         where: { ERM_ID: In(ermIds) },
-        relations: ['ATTENDANCES', 'VOUCHERS'],
+        relations: ['VOUCHERS'],
         select: {
           ERM_ID: true,
-          ATTENDANCES: {
-            ATTEND_ID: true,
-            ERM_ID: true,
-            ATTEND_STATUS: true,
-            ATTEND_CHECK_IN_TIME: true,
-          },
           VOUCHERS: {
             VC_ID: true,
             ERM_ID: true,
@@ -908,7 +904,6 @@ export class ExamEnrollmentsService {
       );
       for (const enrollment of data) {
         const extras = extrasById.get(enrollment.ERM_ID);
-        enrollment.ATTENDANCES = extras?.ATTENDANCES ?? [];
         enrollment.VOUCHERS = extras?.VOUCHERS ?? [];
       }
     }
@@ -1078,6 +1073,38 @@ export class ExamEnrollmentsService {
     }
 
     return enrollment;
+  }
+
+  async checkIn(
+    id: number,
+    dto: CheckInExamEnrollmentDto,
+  ): Promise<ExamEnrollment> {
+    const enrollment = await this.examEnrollmentRepository.findOne({
+      where: { ERM_ID: id },
+    });
+
+    if (!enrollment) {
+      throw new NotFoundException(`Exam Enrollment with ID ${id} not found`);
+    }
+
+    if (
+      enrollment.ERM_STATUS === ExamEnrollmentStatus.CANCELLED ||
+      enrollment.ERM_STATUS === ExamEnrollmentStatus.UNPAID
+    ) {
+      throw new BadRequestException(
+        'ไม่สามารถเช็กอินผู้สมัครที่ยังไม่ชำระเงินหรือถูกยกเลิกได้',
+      );
+    }
+
+    const checkInTime = dto.ERM_ATTEND_CHECK_IN_TIME
+      ? new Date(dto.ERM_ATTEND_CHECK_IN_TIME)
+      : new Date();
+
+    enrollment.ERM_ATTEND_CHECK_IN_TIME = checkInTime;
+    enrollment.ERM_STATUS = ExamEnrollmentStatus.ATTENDED;
+
+    await this.examEnrollmentRepository.save(enrollment);
+    return await this.findOne(id);
   }
 
   async update(
@@ -1381,7 +1408,7 @@ export class ExamEnrollmentsService {
     this.platformGatewayService
       .sendEmail('BUU-GET', email, subject, htmlContent)
       .then(() => {
-        console.log(
+        this.logger.log(
           '[MailService] Profile Fix Email sent successfully via BUU Gateway!',
         );
       })
@@ -1410,7 +1437,7 @@ export class ExamEnrollmentsService {
     );
 
     if (result.affected && result.affected > 0) {
-      console.log(
+      this.logger.log(
         `[Cron] Automatically cancelled ${result.affected} expired unpaid enrollments.`,
       );
     }

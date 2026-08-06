@@ -3,7 +3,10 @@
     <q-card-section>
       <!-- title + legend อยู่แถวเดียวกัน (legend ชิดขวา) ตาม Figma -->
       <div class="chart-card__header">
-        <div class="chart-card__title">{{ t('admin.examReport.charts.scoreSummaryTitle') }}</div>
+        <div>
+          <div class="chart-card__title">{{ t('admin.examReport.charts.scoreSummaryTitle') }}</div>
+          <div class="chart-card__hint">{{ t('admin.examReport.charts.scoreSummaryHint') }}</div>
+        </div>
         <div class="chart-card__legend">
           <span
             v-for="item in legendItems"
@@ -114,6 +117,12 @@ const chartOptions = computed(
     font-size: var(--font-size-md);
     font-weight: 600;
     color: var(--text-primary);
+  }
+
+  &__hint {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin-top: 2px;
   }
 
   &__legend {

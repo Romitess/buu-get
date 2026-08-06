@@ -13,6 +13,12 @@ export const PAYMENT_DURATION_SECONDS_DEFAULT = 1790;
 /** ส่วนต่างปี พ.ศ. และ ค.ศ. */
 export const BUDDHIST_YEAR_OFFSET = 543;
 
+/**
+ * ปีงบประมาณต้องเป็นปี ค.ศ. 4 หลัก (ช่วง 1900–2199)
+ * ใช้รูปแบบเดียวกันทั้ง frontend validation และ backend DTO
+ */
+export const EXAM_FISCAL_YEAR_AD_REGEX = /^(19|20|21)\d{2}$/;
+
 /** ประเภทการสอบ */
 export const EXAM_TYPE_GENERAL = 'รอบทั่วไป';
 export const EXAM_TYPE_SPECIAL = 'รอบพิเศษ';
@@ -67,6 +73,7 @@ export const VALIDATION_MSG = {
   EXAM_NAME: 'กรุณากรอกชื่อการสอบ',
   EXAM_ROUND: 'กรุณากรอกครั้งที่จัดสอบ',
   EXAM_FISCAL_YEAR: 'กรุณากรอกปีงบประมาณ',
+  EXAM_FISCAL_YEAR_AD_ONLY: 'ปีงบประมาณต้องเป็นปี ค.ศ. 4 หลัก (เช่น 2026)',
   EXAM_TYPE: 'กรุณาเลือกประเภทการสอบ',
   EXAM_FORMAT: 'กรุณาเลือกรูปแบบการสอบ',
   FUND_SOURCE: 'กรุณาเลือกรหัสผังแหล่งเงิน',

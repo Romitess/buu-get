@@ -134,16 +134,12 @@ export function useExamAttendances() {
 
       const mappedAttendances = enrollmentData.map(
         (enrollment: BackendEnrollmentDetail, index: number): AttendanceTableRow => {
-          const attendanceRecord =
-            enrollment.ATTENDANCES && enrollment.ATTENDANCES.length > 0
-              ? enrollment.ATTENDANCES[0]
-              : null;
-
-          const checkInTimeStr = attendanceRecord?.ATTEND_CHECK_IN_TIME;
-
-          const status: ExamAttendStatus = attendanceRecord
-            ? Number(attendanceRecord.ATTEND_STATUS)
-            : ExamAttendStatus.MISSING;
+          const checkInTimeStr = enrollment.ERM_ATTEND_CHECK_IN_TIME ?? null;
+          const status: ExamAttendStatus =
+            Number(enrollment.ERM_STATUS) === Number(EnrollmentStatus.ATTENDED)
+              ? ExamAttendStatus.INTIME
+              : ExamAttendStatus.MISSING;
+          const hasRecord = status === ExamAttendStatus.INTIME || checkInTimeStr != null;
 
           return {
             index: index + 1,
@@ -162,7 +158,7 @@ export function useExamAttendances() {
             checkInTime: formatCheckInTime(checkInTimeStr),
             sessionId: enrollment.SESSION_ID,
             sessionLocationId: enrollment.SL_ID ?? null,
-            hasRecord: !!attendanceRecord,
+            hasRecord,
             slId: enrollment.SL_ID,
             lsId: enrollment.LS_ID,
             profileImage:

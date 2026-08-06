@@ -5,6 +5,7 @@ import { useExamStore } from 'src/stores/exam.store';
 import {
   BUDDHIST_YEAR_OFFSET,
   DEFAULT_EXAM_NAME,
+  EXAM_FISCAL_YEAR_AD_REGEX,
   EXAM_TYPE_GENERAL,
   EXAM_TYPE_SPECIAL,
   EXAM_FORMAT_COMPUTER,
@@ -562,6 +563,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     }
     if (!form.value.examFiscalYear || !form.value.examFiscalYear.trim()) {
       errors.examFiscalYear = VALIDATION_MSG.EXAM_FISCAL_YEAR;
+    } else if (!EXAM_FISCAL_YEAR_AD_REGEX.test(form.value.examFiscalYear.trim())) {
+      errors.examFiscalYear = VALIDATION_MSG.EXAM_FISCAL_YEAR_AD_ONLY;
     }
     if (!form.value.examType) {
       errors.examType = VALIDATION_MSG.EXAM_TYPE;
