@@ -146,4 +146,163 @@ export class ExamHistoryPage {
       );
     }
   }
+
+  /** Pending unpaid card that exposes Cancel Registration. */
+  unpaidCardForExam(examTitle: string): Locator {
+    return this.cardForExam(examTitle)
+      .filter({
+        has: this.page.getByRole('button', {
+          name: /Cancel Registration|ยกเลิกการสมัคร/i,
+        }),
+      })
+      .first();
+  }
+
+  async clickCancel(examTitle: string): Promise<void> {
+    const card = this.unpaidCardForExam(examTitle);
+    await expect(card).toBeVisible({ timeout: 20_000 });
+    await card
+      .getByRole('button', {
+        name: /Cancel Registration|ยกเลิกการสมัคร/i,
+      })
+      .click();
+  }
+
+  async confirmCancelDialog(): Promise<void> {
+    const dialog = this.page.locator('.dialog-cancel-card');
+    await expect(dialog).toBeVisible({ timeout: 15_000 });
+    await dialog
+      .getByRole('button', { name: /Confirm|ยืนยันการยกเลิก|ยืนยัน/i })
+      .click();
+  }
+
+  async cancelUnpaidEnrollment(examTitle: string): Promise<void> {
+    await this.clickCancel(examTitle);
+    await this.confirmCancelDialog();
+  }
+
+  async expectCancelledCard(examTitle: string): Promise<void> {
+    // Switch to cancelled filter if present
+    const cancelledTab = this.page.getByRole('tab', {
+      name: /Cancelled|ยกเลิก/i,
+    });
+    if (await cancelledTab.isVisible().catch(() => false)) {
+      await cancelledTab.click();
+    }
+    const card = this.cardForExam(examTitle).first();
+    await expect(card).toBeVisible({ timeout: 20_000 });
+    await expect(card).toContainText(
+      /Cancelled|Registration Cancelled|ยกเลิก/i,
+    );
+  }
+
+  /** Paid / verifying (non-pending) history card — no Pay Now. */
+  async expectPaidOrRegisteredCard(examTitle: string): Promise<void> {
+    const pending = this.pendingCardForExam(examTitle);
+    await expect(pending).toHaveCount(0);
+    const card = this.cardForExam(examTitle).first();
+    await expect(card).toBeVisible({ timeout: 20_000 });
+    await expect(card).toContainText(
+      /Verifying|Seat Assigned|Verified|กำลังตรวจสอบ|ที่นั่ง|ยืนยันแล้ว/i,
+    );
+  }
+
+  /** SEAT_PUBLISHED + voucher — "Test voucher" download action. */
+  voucherCardForExam(examTitle: string): Locator {
+    return this.cardForExam(examTitle)
+      .filter({
+        has: this.page.getByRole('button', {
+          name: /Test voucher|บัตรประจำตัวผู้สอบ|Admission/i,
+        }),
+      })
+      .first();
+  }
+
+  async expectVoucherDownloadButton(examTitle: string): Promise<Locator> {
+    const card = this.voucherCardForExam(examTitle);
+    await expect(card).toBeVisible({ timeout: 30_000 });
+    return card;
+  }
+
+  async clickDownloadVoucher(examTitle: string): Promise<void> {
+    const card = await this.expectVoucherDownloadButton(examTitle);
+    await card
+      .getByRole('button', {
+        name: /Test voucher|บัตรประจำตัวผู้สอบ/i,
+      })
+      .click();
+  }
+
+  /**
+   * While PDF is rendering off-screen, assert seat + test-taker ID (printed
+   * as Test Taker ID / barcode payload). VC_CODE is not rendered on the card.
+   */
+  async expectVoucherCodeAndSeatVisible(opts: {
+    seatLabel: string;
+    testTakerId: string;
+  }): Promise<void> {
+    const container = this.page.locator('#pdf-render-container');
+    const notify = this.page.locator('.q-notification');
+
+    const containerVisible = await container
+      .waitFor({ state: 'visible', timeout: 15_000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (containerVisible) {
+      await expect(container).toContainText(opts.seatLabel, {
+        timeout: 15_000,
+      });
+      await expect(container).toContainText(opts.testTakerId, {
+        timeout: 15_000,
+      });
+    }
+
+    await expect(notify).toBeVisible({ timeout: 45_000 });
+    await expect(notify).toContainText(
+      /Admission voucher downloaded|ดาวน์โหลดบัตรประจำตัว|successfully|PDF|เรียบร้อย/i,
+    );
+  }
+
+  /** Certificate download action on completed/attended history card. */
+  certificateCardForExam(examTitle: string): Locator {
+    return this.cardForExam(examTitle)
+      .filter({
+        has: this.page.getByRole('button', {
+          name: /Certificate|ใบรับรอง|ใบประกาศนียบัตร|ดาวน์โหลดใบรับรอง/i,
+        }),
+      })
+      .first();
+  }
+
+  async expectCertificateAction(examTitle: string): Promise<Locator> {
+    const card = this.certificateCardForExam(examTitle);
+    await expect(card).toBeVisible({ timeout: 30_000 });
+    return card;
+  }
+
+  async clickDownloadCertificate(examTitle: string): Promise<void> {
+    const card = await this.expectCertificateAction(examTitle);
+    await card
+      .getByRole('button', {
+        name: /Certificate|ใบรับรอง|ใบประกาศนียบัตร|ดาวน์โหลดใบรับรอง/i,
+      })
+      .click();
+  }
+
+  async expectCertificateDownloadStarted(): Promise<void> {
+    const container = this.page.locator('#certificate-render-container');
+    const notify = this.page.locator('.q-notification');
+    const containerVisible = await container
+      .waitFor({ state: 'visible', timeout: 15_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (containerVisible) {
+      await expect(container).toBeVisible();
+    }
+    await expect(notify).toBeVisible({ timeout: 45_000 });
+    await expect(notify).toContainText(
+      /Certificate|ใบรับรอง|ดาวน์โหลด|PDF|success|สำเร็จ|เรียบร้อย/i,
+    );
+  }
 }

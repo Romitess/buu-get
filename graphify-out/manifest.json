@@ -1,7 +1,7 @@
 {
   "apps/backend/eslint.config.mjs": {
-    "mtime": 1785901286.0237443,
-    "ast_hash": "e0eb5de70fac3ac491e75d06fc749ed0",
+    "mtime": 1785914386.9158275,
+    "ast_hash": "fd5bcbe6d8d08ff317a9c54d903a9606",
     "semantic_hash": ""
   },
   "apps/backend/nest-cli.json": {
@@ -405,8 +405,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/bank-reconciles/bank-reconciles.service.spec.ts": {
-    "mtime": 1785902940.334062,
-    "ast_hash": "21cf50b6bfc072f3edf48e2acc419fbe",
+    "mtime": 1785914410.1519732,
+    "ast_hash": "382f44716e763aaa06d87fd3ab8ca43c",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/bank-reconciles/bank-reconciles.service.ts": {
@@ -3200,13 +3200,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.spec.ts": {
-    "mtime": 1785835210.0988324,
-    "ast_hash": "696b2a821d7d53886f336e59991134a7",
+    "mtime": 1785915718.2950447,
+    "ast_hash": "d805ed8eb3766ea4a3e05282d006e9ed",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/transactions/transactions.service.spec.ts": {
-    "mtime": 1785902462.9286296,
-    "ast_hash": "73417129bac9afb098eeb7a7048aee7a",
+    "mtime": 1785914410.1519992,
+    "ast_hash": "3cda3578ca28811395c3d977914e3ac6",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/users/dto/update-user-roles.dto.ts": {
@@ -3270,8 +3270,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-vouchers/exam-vouchers.service.spec.ts": {
-    "mtime": 1785807788.267473,
-    "ast_hash": "c39cf5166c7db7c03fd14677ce11adf8",
+    "mtime": 1785915919.9915502,
+    "ast_hash": "4cfc70bbc40de44f538fe55b6a1dd826",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/base/skeleton/chart-panel-skeleton.vue": {
@@ -3360,8 +3360,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-scores/exam-scores.service.spec.ts": {
-    "mtime": 1785807788.2671947,
-    "ast_hash": "5adf3bf2928d1afca42a945c12a99fdc",
+    "mtime": 1785980523.8165035,
+    "ast_hash": "6b0170e7e292fb23b2de53d6bab3d9ea",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/thaid/thaid.controller.ts": {
@@ -3675,8 +3675,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-certificates/exam-certificates.service.spec.ts": {
-    "mtime": 1785807788.2650292,
-    "ast_hash": "144e1fda8636b7efbdb47e4bfdf32384",
+    "mtime": 1785980510.8640368,
+    "ast_hash": "1e990a10dd7af95b614b1f2410edb294",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-certificates/templates/certificate-issued-email.template.ts": {
@@ -3890,18 +3890,18 @@
     "semantic_hash": ""
   },
   "tests/BUG_LOG.md": {
-    "mtime": 1785905686.5781763,
-    "ast_hash": "6e16c326749f5be9d65303bbe888cb93",
+    "mtime": 1785983568.7581263,
+    "ast_hash": "fbfb9b901304cad5a0b312e557e040a9",
     "semantic_hash": ""
   },
   "tests/MASTER_TEST_PLAN.md": {
-    "mtime": 1785913962.6363623,
-    "ast_hash": "e33c84020361b1f357a50c93dee506e2",
+    "mtime": 1785984694.1091552,
+    "ast_hash": "b173b1fc47341925662fa3d2659bcd0c",
     "semantic_hash": ""
   },
   "tests/PROGRESS.md": {
-    "mtime": 1785913962.1803677,
-    "ast_hash": "6d24c3d3466fdd62ddae255944665e00",
+    "mtime": 1785984693.8739157,
+    "ast_hash": "94283d4442410f5da8c7204e5c94e7c3",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/auth/strategies/jwt.strategy.spec.ts": {
@@ -3970,103 +3970,328 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/receipts/dto/receipt.dto.spec.ts": {
-    "mtime": 1785902586.9769344,
+    "mtime": 1785914302.95015,
     "ast_hash": "fcd0e66970bed76f7204b7dffde18d5f",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/receipts/receipts.service.spec.ts": {
-    "mtime": 1785902597.855641,
-    "ast_hash": "26a8163ad8bce44207f7854199187403",
+    "mtime": 1785914410.1520283,
+    "ast_hash": "db50b4befb4898f9ff698d4091d30c3b",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/voided-receipts/dto/create-voided-receipt.dto.spec.ts": {
-    "mtime": 1785902710.650217,
+    "mtime": 1785914302.9505744,
     "ast_hash": "ea5a2c708d01d503547da51ac96b9b54",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/voided-receipts/voided-receipts.service.spec.ts": {
-    "mtime": 1785902710.3875418,
-    "ast_hash": "d4bb151f5562f17c6bef96d640b079ee",
+    "mtime": 1785914410.1520283,
+    "ast_hash": "5804f6433a1656d7e4ecb873a51671db",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/payment-configs/dto/payment-config.dto.spec.ts": {
-    "mtime": 1785903020.727634,
+    "mtime": 1785914302.9498718,
     "ast_hash": "57a59d7d153bff9006129728ec2c4399",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/payment-configs/payment-configs.service.spec.ts": {
-    "mtime": 1785903031.5894399,
-    "ast_hash": "2083557467883283e5732ca35a91b550",
+    "mtime": 1785914410.1519828,
+    "ast_hash": "ad9595c5861e90e991283a45a5eeef20",
     "semantic_hash": ""
   },
   "tests/integration/transactions.api.spec.ts": {
-    "mtime": 1785903635.8154964,
+    "mtime": 1785914302.9611065,
     "ast_hash": "c9a4ca4d7ee5a100c6fc66a233b7c5fa",
     "semantic_hash": ""
   },
   "tests/integration/receipts.api.spec.ts": {
-    "mtime": 1785903798.4708848,
+    "mtime": 1785914302.960997,
     "ast_hash": "87bb493a06a3641c8f023a7e586dab80",
     "semantic_hash": ""
   },
   "tests/integration/bank-reconciles.api.spec.ts": {
-    "mtime": 1785905073.475446,
+    "mtime": 1785914302.9607449,
     "ast_hash": "9f417ee9306dac9bd3f819af85aa279b",
     "semantic_hash": ""
   },
   "tests/integration/voided-receipts.api.spec.ts": {
-    "mtime": 1785904447.1405206,
+    "mtime": 1785914302.9612238,
     "ast_hash": "b6336268f69cacceee3af1e745f21ea6",
     "semantic_hash": ""
   },
   "tests/e2e/pages/exam-history.page.ts": {
-    "mtime": 1785911586.742403,
-    "ast_hash": "8a0cbeb6bd4420b712cbb4d6982999bd",
+    "mtime": 1785981854.3793924,
+    "ast_hash": "c0a0c022e5f9372c82ebec78b15fab3d",
     "semantic_hash": ""
   },
   "tests/e2e/pages/receipt-usage-report.page.ts": {
-    "mtime": 1785911892.5803788,
+    "mtime": 1785914302.9600465,
     "ast_hash": "bc384072e7ddf92c473d34554d577d97",
     "semantic_hash": ""
   },
   "tests/e2e/receipts.e2e.spec.ts": {
-    "mtime": 1785912537.1932771,
+    "mtime": 1785914302.960383,
     "ast_hash": "e27273b81588b4ad5b9478f85d72072f",
     "semantic_hash": ""
   },
   "tests/e2e/transactions.e2e.spec.ts": {
-    "mtime": 1785912491.5390139,
+    "mtime": 1785914302.9605064,
     "ast_hash": "0599251e92d2170ab5ea9873dc5832df",
     "semantic_hash": ""
   },
   "tests/integration/payment-configs.api.spec.ts": {
-    "mtime": 1785905576.9030082,
+    "mtime": 1785914302.9608848,
     "ast_hash": "a79a91f6c4a0afc441b9a4e9fe112353",
     "semantic_hash": ""
   },
   "tests/e2e/bank-reconciles.e2e.spec.ts": {
-    "mtime": 1785913713.8381298,
+    "mtime": 1785914302.959701,
     "ast_hash": "ec208da1d05203d575b0b120fe9bcd51",
     "semantic_hash": ""
   },
   "tests/e2e/pages/payment-import.page.ts": {
-    "mtime": 1785913707.371312,
+    "mtime": 1785914302.9599588,
     "ast_hash": "29cea01d2bcdb154c2c61630c8fabc48",
     "semantic_hash": ""
   },
   "tests/e2e/pages/receipt-void-refund.page.ts": {
-    "mtime": 1785912980.5067081,
+    "mtime": 1785914302.960154,
     "ast_hash": "edc376fd768ce0ef99a9f33fb4552955",
     "semantic_hash": ""
   },
   "tests/e2e/voided-receipts.e2e.spec.ts": {
-    "mtime": 1785912924.2387419,
+    "mtime": 1785914302.9606156,
     "ast_hash": "4ecff0207f65dc71be536286982534ea",
     "semantic_hash": ""
   },
   "tests/e2e/payment-configs.e2e.spec.ts": {
-    "mtime": 1785913323.8541427,
+    "mtime": 1785914302.9602606,
     "ast_hash": "14bd95737647b383d0b33fc7528b181c",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/exam-rule-vouchers/exam-rule-vouchers.service.spec.ts": {
+    "mtime": 1785916002.5043118,
+    "ast_hash": "c25073018480c7794c88e2eb4b971b69",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/fund-sources/dto/create-fund-source.dto.spec.ts": {
+    "mtime": 1785916049.9302223,
+    "ast_hash": "b6f5d8c50a2764ec6e0b2dca5f201645",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/fund-sources/fund-sources.service.spec.ts": {
+    "mtime": 1785916049.9304311,
+    "ast_hash": "dd7ce1a9a535a911366d0d489e178a8e",
+    "semantic_hash": ""
+  },
+  "tests/integration/exam-enrollments.api.spec.ts": {
+    "mtime": 1785916980.5574274,
+    "ast_hash": "7b706d26afb7a144bbf3afeb936d3566",
+    "semantic_hash": ""
+  },
+  "tests/integration/exam-rule-vouchers.api.spec.ts": {
+    "mtime": 1785917382.0949013,
+    "ast_hash": "6fc7a0edecbc2eae84ab61286ccce03b",
+    "semantic_hash": ""
+  },
+  "tests/integration/exam-vouchers.api.spec.ts": {
+    "mtime": 1785917161.6162307,
+    "ast_hash": "b589faa9b80c9b69d07971de71f31bab",
+    "semantic_hash": ""
+  },
+  "tests/integration/fund-sources.api.spec.ts": {
+    "mtime": 1785917364.3393738,
+    "ast_hash": "2b46cc582191bd492cf5083f3a5e2347",
+    "semantic_hash": ""
+  },
+  "tests/e2e/exam-enrollments.e2e.spec.ts": {
+    "mtime": 1785919260.6186523,
+    "ast_hash": "d44820f28bf119992d8649e6d0b0d079",
+    "semantic_hash": ""
+  },
+  "tests/e2e/pages/exam-attendance.page.ts": {
+    "mtime": 1785919029.3839617,
+    "ast_hash": "e94f56dadb17defe64560559228ff862",
+    "semantic_hash": ""
+  },
+  "tests/e2e/pages/exam-schedule.page.ts": {
+    "mtime": 1785918521.9216585,
+    "ast_hash": "8650366987d0eca09f6e1ef8be84c76c",
+    "semantic_hash": ""
+  },
+  "tests/e2e/pages/exam-seat-candidates.page.ts": {
+    "mtime": 1785919856.5225322,
+    "ast_hash": "70d98b4d33eefab5c99c5e53d9845c9b",
+    "semantic_hash": ""
+  },
+  "tests/e2e/exam-rule-vouchers.e2e.spec.ts": {
+    "mtime": 1785919641.2839177,
+    "ast_hash": "88cb38fb755dfdfe1f1022cb3afff24b",
+    "semantic_hash": ""
+  },
+  "tests/e2e/exam-vouchers.e2e.spec.ts": {
+    "mtime": 1785919866.2871752,
+    "ast_hash": "110a5641c5de1ef7632a854901d7fec2",
+    "semantic_hash": ""
+  },
+  "tests/e2e/pages/test-voucher-management.page.ts": {
+    "mtime": 1785919880.1491573,
+    "ast_hash": "1600a3c8ad514fef4398ab4f80f96e89",
+    "semantic_hash": ""
+  },
+  "tests/e2e/fund-sources.e2e.spec.ts": {
+    "mtime": 1785920235.5399039,
+    "ast_hash": "14379bf0f43de6ee22648a05df10c0ef",
+    "semantic_hash": ""
+  },
+  "tests/e2e/pages/create-exam.page.ts": {
+    "mtime": 1785981833.9800708,
+    "ast_hash": "03edc179c9d0859e8060741e4220c7d8",
+    "semantic_hash": ""
+  },
+  "tests/e2e/pages/daily-revenue-report.page.ts": {
+    "mtime": 1785920065.4566345,
+    "ast_hash": "46cf6158768359af9688de1909563fc4",
+    "semantic_hash": ""
+  },
+  "tests/e2e/pages/fund-source-management.page.ts": {
+    "mtime": 1785920124.2434921,
+    "ast_hash": "0826fa4d07a19efbeaa466f461ac48e3",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/exam-blocked-seats/exam-blocked-seats.service.spec.ts": {
+    "mtime": 1785921474.3831484,
+    "ast_hash": "4bda9daa7f4b54dce7f7f616cd428024",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/exam-location-seats/exam-location-seats.service.spec.ts": {
+    "mtime": 1785921468.5879726,
+    "ast_hash": "108e346a19b266ac3c46711c178e0511",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/exam-locations/exam-locations.service.spec.ts": {
+    "mtime": 1785921454.50083,
+    "ast_hash": "93e96b9fc1f448b0cc052d5e7e80cf0f",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/exam-session-locations/exam-session-locations.service.spec.ts": {
+    "mtime": 1785921227.4045799,
+    "ast_hash": "0645d8f182cc12af97753ee41e15a7ae",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/exam-sessions/exam-sessions.service.spec.ts": {
+    "mtime": 1785921446.0932195,
+    "ast_hash": "a9057e6bc4e73fb59b0d2a9300060634",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/exam/exam.service.spec.ts": {
+    "mtime": 1785921440.2615554,
+    "ast_hash": "47df3f80816578f74b328a04599f7842",
+    "semantic_hash": ""
+  },
+  "tests/integration/exam-blocked-seats.api.spec.ts": {
+    "mtime": 1785921860.8396983,
+    "ast_hash": "58a1ad2ea12bc8af85756b70651dbdbf",
+    "semantic_hash": ""
+  },
+  "tests/integration/exam-location-seats.api.spec.ts": {
+    "mtime": 1785921899.574591,
+    "ast_hash": "9f40ede3141015ad31bd48007610b7ec",
+    "semantic_hash": ""
+  },
+  "tests/integration/exam-locations.api.spec.ts": {
+    "mtime": 1785921801.792762,
+    "ast_hash": "c960bcc502303b9d7f80fbe4593b4551",
+    "semantic_hash": ""
+  },
+  "tests/integration/exam-session-locations.api.spec.ts": {
+    "mtime": 1785921823.0374727,
+    "ast_hash": "78a7b3113d436696502989d8d8bbc07f",
+    "semantic_hash": ""
+  },
+  "tests/integration/exam-sessions.api.spec.ts": {
+    "mtime": 1785921788.9119778,
+    "ast_hash": "ed79fbd18d65b4a623ea75532f132433",
+    "semantic_hash": ""
+  },
+  "tests/integration/exam.api.spec.ts": {
+    "mtime": 1785922131.757723,
+    "ast_hash": "e7ac522cc37b1c978acc5d58bd07f098",
+    "semantic_hash": ""
+  },
+  "tests/e2e/exam-lifecycle.e2e.spec.ts": {
+    "mtime": 1785922872.89599,
+    "ast_hash": "51ec9ea6850fdc5065df5477f0ce2ab7",
+    "semantic_hash": ""
+  },
+  "tests/e2e/pages/exam-lifecycle-management.page.ts": {
+    "mtime": 1785922398.5208757,
+    "ast_hash": "545892ad9df8dcd30ab187c0025abd01",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/score-criteria/score-criteria.service.spec.ts": {
+    "mtime": 1785980465.4764578,
+    "ast_hash": "c0b0e900ae9c352d446b61920b19bddc",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/score-rubrics/score-rubrics.service.spec.ts": {
+    "mtime": 1785980465.1008186,
+    "ast_hash": "58ed6327b44535f5580b46d958a4bd2d",
+    "semantic_hash": ""
+  },
+  "tests/integration/exam-certificates.api.spec.ts": {
+    "mtime": 1785981525.6157725,
+    "ast_hash": "0d347de2aa0addec652c2709043bd965",
+    "semantic_hash": ""
+  },
+  "tests/integration/exam-scores.api.spec.ts": {
+    "mtime": 1785981076.9798336,
+    "ast_hash": "22c3221ef35bff2803aed428bd12ab41",
+    "semantic_hash": ""
+  },
+  "tests/integration/score-criteria.api.spec.ts": {
+    "mtime": 1785981121.4347558,
+    "ast_hash": "194fe015f3d3e559b8cadec7261b81f8",
+    "semantic_hash": ""
+  },
+  "tests/integration/score-rubrics.api.spec.ts": {
+    "mtime": 1785981121.9357238,
+    "ast_hash": "5c5109ef7a801acacb47c8713068733c",
+    "semantic_hash": ""
+  },
+  "tests/e2e/exam-certificates.e2e.spec.ts": {
+    "mtime": 1785983569.807941,
+    "ast_hash": "498e0a84706613565f2191856d0ca91e",
+    "semantic_hash": ""
+  },
+  "tests/e2e/exam-scores.e2e.spec.ts": {
+    "mtime": 1785983569.531005,
+    "ast_hash": "817360ba5cf4f292cb0d1f328f99785d",
+    "semantic_hash": ""
+  },
+  "tests/e2e/pages/exam-scores.page.ts": {
+    "mtime": 1785984405.6469855,
+    "ast_hash": "1f85f6239561a0ffcfe80cbd3364ab46",
+    "semantic_hash": ""
+  },
+  "tests/e2e/pages/score-criteria-management.page.ts": {
+    "mtime": 1785982299.5464125,
+    "ast_hash": "99aac3bc88b09173d4effa3def571506",
+    "semantic_hash": ""
+  },
+  "tests/e2e/pages/score-rubric-management.page.ts": {
+    "mtime": 1785982307.90872,
+    "ast_hash": "6faf525b7186f3a1147fc83b04d51d07",
+    "semantic_hash": ""
+  },
+  "tests/e2e/score-criteria.e2e.spec.ts": {
+    "mtime": 1785982845.8839912,
+    "ast_hash": "41e5f072810223bedd95921c725c558c",
+    "semantic_hash": ""
+  },
+  "tests/e2e/score-rubrics.e2e.spec.ts": {
+    "mtime": 1785983125.7972076,
+    "ast_hash": "b5da4aa5035fe92488307da4247aef32",
     "semantic_hash": ""
   }
 }

@@ -4,10 +4,11 @@
 
 ## Current phase
 
-**Phase 5 — Batch 2 Money E2E Rollout** → done (15 pass / 1 skip BUG-005)  
-**Batch 1 complete** · **Batch 2 complete** (matrix + unit + integration + e2e P0–P1)  
-**ถัดไป:** รอ confirm ก่อน **Batch 3 Phase 2** (Enrollment & Voucher matrix)  
-**Phase 6 (final):** Business Flow Test Report — pending (ทำหลัง batch หลัก)
+**Batch 6 — Profile & identity Phase 2 complete** (Test Case Matrix done: U25/I21/E7 = 53)  
+**Batch 1–5 complete** · **Next:** Batch 6 Phase 3 Unit rollout (awaiting confirm)  
+**Phase 6 (final):** Business Flow Test Report — pending
+
+Remaining: Batch 6 Unit/Integration/E2E + Batch 7 + Phase 6 Flow Report.
 
 ## Phase checklist
 
@@ -15,10 +16,10 @@
 |---|---|---|
 | 0 Infrastructure | done | Playwright root, shared-DB seed-only, auth fixtures |
 | 1 System Inventory | done | P0–P4 + 7 batches |
-| 2 Test Case Matrix (per batch) | in progress | Batch 1+2 done; Batch 3+ pending |
-| 3 Unit Test Rollout (per batch) | in progress | Batch 1 done (114); Batch 2 done (141) |
-| 4 Integration Test Rollout (per batch) | in progress | Batch 1 done (58/3 skip); Batch 2 done (65 pass / 1 skip BUG-005) |
-| 5 E2E (P0–P1 flows) | in progress | Batch 1 done; Batch 2 done (15 pass / 1 skip BUG-005) |
+| 2 Test Case Matrix (per batch) | in progress | Batch 1–6 done; Batch 7 pending |
+| 3 Unit Test Rollout (per batch) | in progress | Batch 1–5 done (Batch 5: 47 pass) |
+| 4 Integration Test Rollout (per batch) | in progress | Batch 1–5 done (Batch 5: 25 pass) |
+| 5 E2E (P0–P1 flows) | in progress | Batch 1–5 done (Batch 5: 8 pass / 1 skip BUG-010) |
 | 6 Business Flow Test Report | pending | Final step after main batches — flow-centric report for stakeholders |
 
 ## DB mode (Phase 0 adjust)
@@ -74,15 +75,232 @@
 |---|---|---|---|---|---|---|
 | **1 — Auth & Access** | auth, users, roles, verify | P0–P1 | **done** (U99/I61/E13) | **done** (114 tests pass) | **done** (58 pass / 3 skip) | **done** (10 pass / 1 skip BUG-004) |
 | **2 — Money** | transactions, receipts, voided-receipts, bank-reconciles, payment-configs | P0–P1 | **done** (U112/I66/E20) | **done** (141 tests pass) | **done** (65 pass / 1 skip BUG-005) | **done** (15 pass / 1 skip BUG-005) |
-| **3 — Enrollment & Voucher** | exam-enrollments, exam-vouchers, exam-rule-vouchers, fund-sources | P0–P1 | pending | pending | pending | pending |
-| **4 — Exam lifecycle** | exam, exam-sessions, exam-locations, exam-session-locations, exam-location-seats, exam-blocked-seats | P1 | pending | pending | pending | pending |
-| **5 — Scores & Certificates** | exam-scores, score-criteria, score-rubrics, exam-certificates | P1 | pending | pending | pending | pending |
-| **6 — Profile & identity** | user-profile, user-image, profile-edit-history, thaid | P2 | pending | pending | pending | pending |
+| **3 — Enrollment & Voucher** | exam-enrollments, exam-vouchers, exam-rule-vouchers, fund-sources | P0–P1 | **done** (U95/I40/E15) | **done** (100 tests pass) | **done** (40 pass) | **done** (13 pass) |
+| **4 — Exam lifecycle** | exam, exam-sessions, exam-locations, exam-session-locations, exam-location-seats, exam-blocked-seats | P1 | **done** (U28/I21/E7) | **done** (28 pass) | **done** (19 pass / 1 skip) | **done** (2 pass / 4 skip BUG-008/009) |
+| **5 — Scores & Certificates** | exam-scores, score-criteria, score-rubrics, exam-certificates | P1 | **done** (U37/I25/E9) | **done** (47 pass) | **done** (25 pass) | **done** (8 pass / 1 skip BUG-010) |
+| **6 — Profile & identity** | user-profile, user-image, profile-edit-history, thaid | P2 | **done** (U25/I21/E7) | pending | pending | pending |
 | **7 — Reporting & integrations** | exam-report, transaction-refs, transaction-profiles, transaction-status-history, platform-gateway, moodle, moodle-sync-logs, page-builder | P2–P3 | pending | pending | pending | pending |
 
 P4 (utils/guards) ไม่เปิด batch แยกในรอบแรก — เติมคู่กับ module ที่เกี่ยวข้อง
 
-**Next gate:** confirm เริ่ม **Batch 3 — Enrollment & Voucher** Phase 2 (test-case-analyst: exam-enrollments → exam-vouchers → exam-rule-vouchers → fund-sources). Phase 6 Flow Report ยังไม่เริ่ม
+**Next gate:** confirm เริ่ม **Batch 6 — Profile & identity** Phase 3 (Unit rollout P0 first: PROF → PEH → IMG → THAID). Phase 6 Flow Report ยังไม่เริ่ม
+
+### Batch 6 Matrix evidence (Phase 2)
+
+| Module | Unit | Integration | E2E | Total | Existing unit coverage note |
+|---|---:|---:|---:|---:|---|
+| user-profile | 12 | 8 | 3 | 23 | no module spec |
+| user-image | 4 | 4 | 1 | 9 | no module spec |
+| profile-edit-history | 6 | 5 | 2 | 13 | no module spec |
+| thaid | 3 | 4 | 1 | 8 | partial `thaid.service.spec.ts` |
+| **Batch 6** | **25** | **21** | **7** | **53** | — |
+
+Cumulative (Batch 1–6): **U396 / I234 / E71 → 701** (see `tests/MASTER_TEST_PLAN.md`)
+
+### Batch 5 E2E Rollout evidence (Phase 5)
+
+| Case | Result |
+|---|---|
+| SCR-E-001 Admin imports scores + band | **skip** (BUG-010) |
+| SCR-E-002 Candidate blocked from scores route | pass |
+| CRI-E-001 Admin CEFR rules persist | pass |
+| CRI-E-002 Mapping reflected (soft API) | pass |
+| RUB-E-001 Create rubric → exam form | pass |
+| RUB-E-002 Locked rubric conflict UI | pass |
+| CERT-E-001 Admin bulk-issue from scores UI | pass |
+| CERT-E-002 Candidate history shows cert | pass |
+| CERT-E-003 Non-admin cannot bulk-issue | pass |
+
+Command: `SKIP_TEST_DB_RESET=1 SKIP_WEB_SERVER=1 npx playwright test --project=e2e tests/e2e/{exam-scores,score-criteria,score-rubrics,exam-certificates}.e2e.spec.ts --workers=1`  
+**8 passed / 1 skipped**
+
+### Batch 5 Integration Rollout evidence (Phase 4)
+
+| Module | Spec file | Result |
+|---|---|---|
+| exam-scores | `tests/integration/exam-scores.api.spec.ts` | PASS (7) |
+| score-criteria | `tests/integration/score-criteria.api.spec.ts` | PASS (4) |
+| score-rubrics | `tests/integration/score-rubrics.api.spec.ts` | PASS (6) |
+| exam-certificates | `tests/integration/exam-certificates.api.spec.ts` | PASS (8) |
+| **Batch 5 combined** | 4 files | **25 passed** |
+
+Command: `SKIP_TEST_DB_RESET=1 SKIP_WEB_SERVER=1 npx playwright test --project=integration tests/integration/{exam-scores,score-criteria,score-rubrics,exam-certificates}.api.spec.ts --workers=1`
+
+Notes:
+- CRI-I-004 / CERT-I-005: JWT-only authz (current behavior asserted)
+- CERT-I-006: duplicate CERT_CODE → 500 (no Conflict mapper)
+- BUG-002 path `/api/api/exam-certificates` used in cert integration
+
+### Batch 5 Unit Rollout evidence (Phase 3 — P0 tranche)
+
+| Module | Spec files | Result |
+|---|---|---|
+| exam-scores | `exam-scores.service.spec.ts` | PASS (13) — SCR-U-001…008 |
+| exam-certificates | `exam-certificates.service.spec.ts` | PASS (9) — CERT-U-001…005,007 |
+| score-rubrics | `score-rubrics.service.spec.ts` | PASS (7) — RUB-U-001…003,005…007 |
+| score-criteria | `score-criteria.service.spec.ts` | PASS (7) — CRI-U-001…004,006,007 |
+| **Batch 5 P0 subtotal** | 4 suites | **36 passed** |
+
+Command: `cd apps/backend && npx jest src/modules/exam-scores/exam-scores.service.spec.ts src/modules/exam-certificates/exam-certificates.service.spec.ts src/modules/score-rubrics/score-rubrics.service.spec.ts src/modules/score-criteria/score-criteria.service.spec.ts --no-coverage`
+
+### Batch 5 Unit Rollout evidence (Phase 3 — P1 backlog complete)
+
+| Added IDs | Result |
+|---|---|
+| SCR-U-009, SCR-U-010 | pass |
+| CERT-U-006, CERT-U-008, CERT-U-009, CERT-U-010, CERT-U-011 | pass |
+| RUB-U-004, RUB-U-008, RUB-U-009 | pass |
+| CRI-U-005 | pass |
+
+Combined result (P0+P1): **4 suites / 47 tests passed**
+
+### Batch 5 Matrix evidence (Phase 2)
+
+| Module | Unit | Integration | E2E | Total | Existing unit coverage note |
+|---|---:|---:|---:|---:|---|
+| exam-scores | 10 | 7 | 2 | 19 | has module spec (partial) |
+| score-criteria | 7 | 4 | 2 | 13 | no module spec |
+| score-rubrics | 9 | 6 | 2 | 17 | no module spec |
+| exam-certificates | 11 | 8 | 3 | 22 | has module spec (partial) |
+| **Batch 5** | **37** | **25** | **9** | **71** | — |
+
+Cumulative (Batch 1+2+3+4+5): **U371 / I213 / E64 → 648** (see `tests/MASTER_TEST_PLAN.md`)
+
+### Batch 4 Matrix evidence (Phase 2)
+
+| Module | Unit | Integration | E2E | Total | Existing unit coverage note |
+|---|---:|---:|---:|---:|---|
+| exam | 6 | 4 | 2 | 12 | no module spec |
+| exam-sessions | 3 | 3 | 1 | 7 | no module spec |
+| exam-locations | 4 | 3 | 1 | 8 | no module spec |
+| exam-session-locations | 5 | 4 | 1 | 10 | no module spec |
+| exam-location-seats | 6 | 4 | 1 | 11 | no module spec |
+| exam-blocked-seats | 4 | 3 | 1 | 8 | no module spec |
+| **Batch 4** | **28** | **21** | **7** | **56** | — |
+
+Cumulative (Batch 1+2+3+4): **U334 / I188 / E55 → 577** (see `tests/MASTER_TEST_PLAN.md`)
+
+### Batch 4 Unit Rollout evidence (Phase 3 — P0 tranche)
+
+| Module | Spec files | Result |
+|---|---|---|
+| exam | `exam.service.spec.ts` | PASS (5) |
+| exam-sessions | `exam-sessions.service.spec.ts` | PASS (2) |
+| exam-locations | `exam-locations.service.spec.ts` | PASS (2) |
+| exam-session-locations | `exam-session-locations.service.spec.ts` | PASS (5) |
+| exam-location-seats | `exam-location-seats.service.spec.ts` | PASS (4) |
+| exam-blocked-seats | `exam-blocked-seats.service.spec.ts` | PASS (3) |
+| **Batch 4 P0 subtotal** | 6 suites | **21 passed** |
+
+Command: `cd apps/backend && npx jest src/modules/exam/exam.service.spec.ts src/modules/exam-sessions/exam-sessions.service.spec.ts src/modules/exam-locations/exam-locations.service.spec.ts src/modules/exam-session-locations/exam-session-locations.service.spec.ts src/modules/exam-location-seats/exam-location-seats.service.spec.ts src/modules/exam-blocked-seats/exam-blocked-seats.service.spec.ts --no-coverage`
+
+### Batch 4 Unit Rollout evidence (Phase 3 — P1 backlog complete)
+
+| Added IDs | Result |
+|---|---|
+| EXAM-U-006, SES-U-001, LOC-U-002, LOC-U-003, SEAT-U-004, SEAT-U-006, BLOCK-U-004 | pass |
+
+Combined result (P0+P1): **6 suites / 28 tests passed**
+
+### Batch 4 Integration Rollout evidence (Phase 4)
+
+| Module | Spec file | Result |
+|---|---|---|
+| exam | `tests/integration/exam.api.spec.ts` | 3 pass / 1 skip (`EXAM-I-002`) |
+| exam-sessions | `tests/integration/exam-sessions.api.spec.ts` | PASS (3) |
+| exam-locations | `tests/integration/exam-locations.api.spec.ts` | PASS (3) |
+| exam-session-locations | `tests/integration/exam-session-locations.api.spec.ts` | PASS (4) |
+| exam-location-seats | `tests/integration/exam-location-seats.api.spec.ts` | PASS (4) |
+| exam-blocked-seats | `tests/integration/exam-blocked-seats.api.spec.ts` | PASS (3) |
+| **Batch 4 combined** | 6 files | **19 passed, 1 skipped** |
+
+Command: `SKIP_TEST_DB_RESET=1 SKIP_WEB_SERVER=1 npx playwright test --project=integration tests/integration/exam.api.spec.ts tests/integration/exam-sessions.api.spec.ts tests/integration/exam-locations.api.spec.ts tests/integration/exam-session-locations.api.spec.ts tests/integration/exam-location-seats.api.spec.ts tests/integration/exam-blocked-seats.api.spec.ts --workers=1`
+
+Notes:
+- `EXAM-I-002` skipped: current seed `SRB_ID=1` ไม่มี rubric items จึงสร้าง persisted score precondition สำหรับ conflict path ไม่ได้
+- `SEAT-I-003` ยืนยัน current behavior: payload `brokenSeats` แบบไม่ใช่ string ไม่ถูก reject (เก็บเป็น risk note)
+
+### Batch 4 E2E Rollout evidence (Phase 5)
+
+| Case | Result |
+|---|---|
+| EXAM-E-001 / LOC-E-001 admin sees created exam + room linkage | pass |
+| EXAM-E-002 notify changes accepted | pass |
+| SES-E-001 remove one session in edit flow | **skip** (BUG-008) |
+| SL-E-001 overlap room conflict in edit flow | **skip** (BUG-008) |
+| SEAT-E-001 seat management insufficient usable seats | **skip** (BUG-009) |
+| BLOCK-E-001 blocked seat override persist after reload | **skip** (BUG-008) |
+
+Command: `SKIP_TEST_DB_RESET=1 SKIP_WEB_SERVER=1 npx playwright test --project=e2e tests/e2e/exam-lifecycle.e2e.spec.ts --workers=1`
+
+Notes:
+- Batch 4 E2E implemented ครบตาม matrix ID แต่ 4 เคสถูก block ด้วย route redirect ของ API-seeded data (`BUG-008`, `BUG-009`)
+- แก้ flake cleanup timeout ใน `afterAll` ด้วย parallel bounded cleanup + dedupe IDs
+
+### Batch 3 E2E Rollout evidence (Phase 5)
+
+| Case | Result |
+|---|---|
+| ENR-E-001 candidate register regular → UNPAID | pass |
+| ENR-E-002 special passcode enroll → Paid | pass |
+| ENR-E-003 candidate cancel unpaid | pass |
+| ENR-E-004 admin bulk seat assign | pass (UI Confirm disabled → API fallback; BUG-006) |
+| ENR-E-005 attendance check-in → ATTENDED | pass (nationalId `-` → API fallback; BUG-007) |
+| VOUCH-E-001 admin bulk issue tickets | pass |
+| VOUCH-E-002 candidate view/print ticket | pass |
+| ERV-E-001 admin save regulations | pass |
+| ERV-E-002 non-allowed role blocked | pass |
+| ERV-E-003 regulations on voucher preview | pass |
+| FUND-E-001 finance fund-source CRUD | pass |
+| FUND-E-002 exam form fund-source options | pass |
+| FUND-E-003 daily revenue report | pass |
+
+Backlog (not in first pass): ENR-E-006 (P2), VOUCH-E-003 (P2)
+
+POMs: `exam-schedule`, `exam-seat-candidates`, `exam-attendance`, `test-voucher-management`, `fund-source-management`, `create-exam`, `daily-revenue-report`  
+Specs: `exam-enrollments.e2e.spec.ts`, `exam-vouchers.e2e.spec.ts`, `exam-rule-vouchers.e2e.spec.ts`, `fund-sources.e2e.spec.ts`  
+**13 passed** (~36s, `--workers=1`)
+
+Command: `SKIP_TEST_DB_RESET=1 SKIP_WEB_SERVER=1 npx playwright test --project=e2e tests/e2e/{exam-enrollments,exam-vouchers,exam-rule-vouchers,fund-sources}.e2e.spec.ts --workers=1`
+
+### Batch 3 Integration Rollout evidence (Phase 4)
+
+| Module | Spec file | Result |
+|---|---|---|
+| exam-enrollments | `tests/integration/exam-enrollments.api.spec.ts` | PASS (12) |
+| exam-vouchers | `tests/integration/exam-vouchers.api.spec.ts` | PASS (10) |
+| exam-rule-vouchers | `tests/integration/exam-rule-vouchers.api.spec.ts` | PASS (6) |
+| fund-sources | `tests/integration/fund-sources.api.spec.ts` | PASS (12) |
+| **Batch 3 combined** | 4 files | **40 passed** |
+
+Command: `SKIP_TEST_DB_RESET=1 SKIP_WEB_SERVER=1 npx playwright test --project=integration tests/integration/{exam-enrollments,exam-vouchers,exam-rule-vouchers,fund-sources}.api.spec.ts --workers=1`
+
+Notes:
+- VOUCH-I-007 / ERV: JWT without `@Roles` on write — current behavior asserted (frontend may gate)
+
+### Batch 3 Unit Rollout evidence (Phase 3)
+
+| Module | Spec files | Result |
+|---|---|---|
+| exam-enrollments | `exam-enrollments.service.spec.ts` | PASS (51) |
+| exam-vouchers | `exam-vouchers.service.spec.ts` | PASS (19) |
+| exam-rule-vouchers | `exam-rule-vouchers.service.spec.ts` | PASS (8) |
+| fund-sources | `fund-sources.service.spec.ts`, `dto/create-fund-source.dto.spec.ts` | PASS (22) |
+| **Batch 3 combined** | 5 suites | **100 passed** |
+
+Command: `cd apps/backend && npx jest src/modules/exam-enrollments/exam-enrollments.service.spec.ts src/modules/exam-vouchers src/modules/exam-rule-vouchers src/modules/fund-sources --no-coverage`
+
+### Batch 3 Matrix evidence (Phase 2)
+
+| Module | Unit | Integration | E2E | Total | Existing unit coverage note |
+|---|---:|---:|---:|---:|---|
+| exam-enrollments | 50 | 12 | 6 | 68 | seat-edit guards + bulkAssign + findAll (partial) |
+| exam-vouchers | 19 | 10 | 3 | 32 | bulkIssueVouchers 4 cases |
+| exam-rule-vouchers | 8 | 6 | 3 | 17 | no module spec |
+| fund-sources | 18 | 12 | 3 | 33 | no module spec |
+| **Batch 3** | **95** | **40** | **15** | **150** | — |
+
+Cumulative (Batch 1+2+3): **U306 / I167 / E48 → 521** (see `tests/MASTER_TEST_PLAN.md`)
 
 ### Batch 2 E2E Rollout evidence (Phase 5)
 
