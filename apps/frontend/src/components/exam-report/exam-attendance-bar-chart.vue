@@ -13,6 +13,7 @@ import VueApexCharts from 'vue3-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { useI18n } from 'vue-i18n';
 import type { ExamAttendanceChartData } from 'src/types/exam-report.types';
+import { getNiceYAxisMax } from 'src/utils/chart-axis';
 import { getCssVar } from 'src/utils/css-var';
 
 const { t } = useI18n();
@@ -23,10 +24,16 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const Y_TICK_AMOUNT = 5;
+
 const series = computed(() => [
   { name: t('admin.examReport.charts.attended'), data: props.data.attended },
   { name: t('admin.examReport.charts.absent'), data: props.data.absent },
 ]);
+
+const yAxisMax = computed(() =>
+  getNiceYAxisMax([...props.data.attended, ...props.data.absent], Y_TICK_AMOUNT),
+);
 
 const chartOptions = computed(
   (): ApexOptions => ({
@@ -46,7 +53,7 @@ const chartOptions = computed(
     },
     grid: { borderColor: getCssVar('--border-color'), strokeDashArray: 4 },
     xaxis: { categories: props.data.categories },
-    yaxis: { max: 500, tickAmount: 5 },
+    yaxis: { max: yAxisMax.value, tickAmount: Y_TICK_AMOUNT, min: 0 },
     legend: { position: 'bottom', horizontalAlign: 'center' },
     tooltip: { shared: true, intersect: false },
   }),

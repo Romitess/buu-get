@@ -64,7 +64,7 @@ const emit = defineEmits<{
 const userStore = useUserStore();
 const currentStep = ref<number>(1);
 
-const GENERAL_STATUS = '5';
+const GENERAL_STATUS = 'general';
 
 const selectedStatus = ref<string>(GENERAL_STATUS);
 

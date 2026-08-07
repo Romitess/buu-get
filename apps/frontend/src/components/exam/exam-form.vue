@@ -13,7 +13,6 @@
       :exam-type-options="examTypeOptions"
       :exam-format-options="examFormatOptions"
       :fund-source-options="fundSourceOptions"
-      :score-rubric-options="scoreRubricOptions"
       :is-loading-data="isLoadingData"
       :is-locked="isPublishedSectionLocked"
       :is-special-round="isSpecialRound"
@@ -149,7 +148,6 @@ const {
   proctorOptions,
   locationOptions,
   fundSourceOptions,
-  scoreRubricOptions,
   getOccupiedLocationIdsForSlot,
   isLoadingData,
   isSaving,

@@ -10,14 +10,7 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
-export enum UserPhysicalStatus {
-  /** รวมพระภิกษุ/สามเณร และนักบวช/ศาสนบุคคล (code 0) */
-  MONK = 'พระภิกษุ / นักบวช',
-  DISABLED = 'บุคคลทุพพลภาพ',
-  PREGNANT = 'ผู้ตั้งครรภ์',
-  DISABLED_TYPO = 'ผู้พิการรณ์',
-  GENERAL = 'ทั่วไป',
-}
+export { UserPhysicalStatus } from '../enums/user-physical-status.enum';
 
 @Entity('BUU_GET_T_USER_PROFILE')
 export class UserProfile {

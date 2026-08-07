@@ -248,14 +248,21 @@ export class TestTakerIdService {
     if (physicalStatus === UserPhysicalStatus.MONK) {
       return 1;
     }
-    if (
-      physicalStatus === UserPhysicalStatus.DISABLED ||
-      physicalStatus === UserPhysicalStatus.DISABLED_TYPO
-    ) {
+    if (physicalStatus === UserPhysicalStatus.DISABLED) {
       return 2;
     }
-    if (enrollment.USER?.USER_PASSPORT_NO) return 3;
-    if (enrollment.USER?.USER_NATIONAL_ID) return 4;
+    if (
+      physicalStatus === UserPhysicalStatus.FOREIGNER ||
+      enrollment.USER?.USER_PASSPORT_NO
+    ) {
+      return 3;
+    }
+    if (
+      physicalStatus === UserPhysicalStatus.THAI ||
+      enrollment.USER?.USER_NATIONAL_ID
+    ) {
+      return 4;
+    }
 
     throw new BadRequestException(
       `National ID or passport is required for enrollment ${enrollment.ERM_ID}`,

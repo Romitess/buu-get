@@ -46,7 +46,7 @@
                   :label="$t('admin.seatManagement.rearrangeAllButton')"
                   class="btn-rearrange-seats"
                   outline
-                  @click="handleRearrangeAllSeats"
+                  @click="openRearrangeConfirm"
                 />
                 <q-badge
                   color="primary"
@@ -159,11 +159,20 @@
       @rearrange="handleRearrangeAllSeats"
       @keep="handleKeepExistingSeats"
     />
+
+    <AppConfirmDialog
+      v-model="showRearrangeConfirm"
+      :title="$t('admin.seatManagement.rearrangeConfirm.title')"
+      :message="$t('admin.seatManagement.rearrangeConfirm.message')"
+      :cancel-label="$t('admin.seatManagement.rearrangeConfirm.cancel')"
+      :confirm-label="$t('admin.seatManagement.rearrangeConfirm.confirm')"
+      @confirm="confirmRearrangeAllSeats"
+    />
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
@@ -172,6 +181,7 @@ import AppExamSeatCard from 'src/components/exam/app-exam-seat-card.vue';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
 import AppExamSeatAssignmentMap from 'src/components/exam/app-exam-seat-assignment-map.vue';
 import AppSeatPlacementChoiceDialog from 'src/components/exam/app-seat-placement-choice-dialog.vue';
+import AppConfirmDialog from 'src/components/shared/app-confirm-dialog.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
@@ -181,6 +191,8 @@ import { SeatManagementSkeleton } from 'src/components/base/skeleton';
 
 const $q = useQuasar();
 const { t } = useI18n();
+
+const showRearrangeConfirm = ref(false);
 
 const {
   isLoading,
@@ -232,6 +244,15 @@ onMounted(() => {
 
 const handleSearch = (val: string | number | null): void => {
   searchQuery.value = String(val || '');
+};
+
+const openRearrangeConfirm = (): void => {
+  showRearrangeConfirm.value = true;
+};
+
+const confirmRearrangeAllSeats = (): void => {
+  showRearrangeConfirm.value = false;
+  handleRearrangeAllSeats();
 };
 
 const onAssignStudentFromList = (ermId: number, seatId: string): void => {

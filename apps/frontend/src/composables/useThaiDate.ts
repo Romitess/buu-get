@@ -43,6 +43,7 @@ export function useThaiDate() {
 
   /**
    * Format ช่วงวันที่เปิดรับสมัคร
+   * - กรณีวันเดียว: "7 ส.ค. 2569"
    * - กรณีเดือนเดียวกัน: "7 - 25 ต.ค. 2569"
    * - กรณีข้ามเดือน: "7 ต.ค. - 25 พ.ย. 2569"
    */
@@ -59,11 +60,14 @@ export function useThaiDate() {
     const endMonthName = THAI_SHORT_MONTHS[endMonth - 1] ?? '';
     const endYear = end.year + BUDDHIST_YEAR_OFFSET;
 
+    if (startDay === endDay && startMonth === endMonth && start.year === end.year) {
+      return `${startDay} ${endMonthName} ${endYear}`;
+    }
+
     if (startMonth === endMonth && start.year === end.year) {
-      // Same month: "7 - 25 ต.ค. 2569"
       return `${startDay} - ${endDay} ${endMonthName} ${endYear}`;
     }
-    // Different months: "7 ต.ค. - 25 พ.ย. 2569"
+
     return `${startDay} ${startMonthName} - ${endDay} ${endMonthName} ${endYear}`;
   };
 

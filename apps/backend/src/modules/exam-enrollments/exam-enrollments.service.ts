@@ -46,7 +46,7 @@ import {
 } from '../exam-sessions/entities/exam-session.entity';
 import { ExamPasscode } from '../exam/entities/exam-passcode.entity';
 import { User } from '../users/entities/user.entity';
-import { UserPhysicalStatus } from '../user-profile/entities/user-profile.entity';
+import { resolveEnrollmentPhysicalStatus } from '../../common/utils/physical-status.util';
 import { EXAM_TYPE } from '../exam/constants/exam.constants';
 import { getProfileFixEmailTemplate } from './templates/profile-fix-email.template';
 import { ExamPasscodeLog } from '../exam/entities/exam-passcode-log.entity';
@@ -355,11 +355,11 @@ export class ExamEnrollmentsService {
     const enrollment = this.examEnrollmentRepository.create(
       createExamEnrollmentDto,
     );
-    let statusToSave = PHYSICAL_STATUS || 'ทั่วไป';
-    if (statusToSave === 'ไม่มีข้อมูลข้างต้น') {
-      statusToSave = 'ทั่วไป';
-    }
-    enrollment.ERM_PHYSICAL_STATUS = statusToSave as UserPhysicalStatus;
+    const statusToSave = resolveEnrollmentPhysicalStatus(
+      PHYSICAL_STATUS,
+      Boolean(user.USER_PASSPORT_NO?.trim()),
+    );
+    enrollment.ERM_PHYSICAL_STATUS = statusToSave;
     if (targetSession.EXAM?.EXAM_TYPE === EXAM_TYPE.SPECIAL) {
       enrollment.ERM_STATUS = ExamEnrollmentStatus.PAID;
       enrollment.ERM_VERIFY_STATUS = ExamVerifyStatus.UNCHECKED;
@@ -698,7 +698,7 @@ export class ExamEnrollmentsService {
       if ('ผ่าน'.includes(searchLower)) verifyMatches.push(1);
       if ('ให้แก้ไข'.includes(searchLower)) verifyMatches.push(2);
 
-      // Physical Status mapping (0 = พระภิกษุ/นักบวช รวมแล้ว)
+      // Physical Status mapping (1–5)
       if (
         'พระภิกษุ'.includes(searchLower) ||
         'สามเณร'.includes(searchLower) ||
@@ -706,11 +706,14 @@ export class ExamEnrollmentsService {
         'นักบวช'.includes(searchLower) ||
         'ศาสนบุคคล'.includes(searchLower)
       )
-        physicalMatches.push(0);
-      if ('ทุพพลภาพ'.includes(searchLower)) physicalMatches.push(2);
+        physicalMatches.push(1);
+      if ('ทุพพลภาพ'.includes(searchLower) || 'พิการ'.includes(searchLower))
+        physicalMatches.push(2);
       if ('ตั้งครรภ์'.includes(searchLower)) physicalMatches.push(3);
-      if ('พิการ'.includes(searchLower)) physicalMatches.push(4);
-      if ('ทั่วไป'.includes(searchLower)) physicalMatches.push(5);
+      if ('ต่างชาติ'.includes(searchLower) || 'passport'.includes(searchLower))
+        physicalMatches.push(4);
+      if ('ชาวไทย'.includes(searchLower) || 'ทั่วไป'.includes(searchLower))
+        physicalMatches.push(5);
 
       qb.andWhere(
         new Brackets((innerQb) => {

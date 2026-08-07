@@ -19,6 +19,10 @@ import { Transaction } from '../../transactions/entities/transaction.entity';
 import { ExamScore } from '../../exam-scores/entities/exam-score.entity';
 import { ExamSessionLocation } from '../../exam-session-locations/entities/exam-session-location.entity';
 import { UserPhysicalStatus } from '../../user-profile/entities/user-profile.entity';
+import {
+  physicalStatusFromCode,
+  physicalStatusToCode,
+} from '../../../common/utils/physical-status.util';
 
 export enum ExamEnrollmentStatus {
   UNPAID = 0,
@@ -108,46 +112,13 @@ export class ExamEnrollment {
     type: 'tinyint',
     default: 5,
     transformer: {
-      to: (value: string | UserPhysicalStatus): number => {
-        const mapping: Record<string, number> = {
-          [UserPhysicalStatus.MONK]: 0,
-          [UserPhysicalStatus.DISABLED]: 2,
-          [UserPhysicalStatus.PREGNANT]: 3,
-          [UserPhysicalStatus.DISABLED_TYPO]: 4,
-          [UserPhysicalStatus.GENERAL]: 5,
-          // legacy labels (ก่อนรวมพระภิกษุ + นักบวช)
-          'พระภิกษุ / สามเณร': 0,
-          'นักบวช / ศาสนบุคคล': 0,
-          'พระภิกษุ/นักบวช': 0,
-          พระสงฆ์: 0,
-          ตั้งครรภ์: 3,
-          ไม่มีข้อมูลข้างต้น: 5,
-          // รองรับค่า index แบบสตริงตัวเลขที่ส่งมาจากหน้า UI (convenience-step.vue)
-          // '1' → 0 เพื่อรองรับ client เก่าที่ยังส่งนักบวชแยก
-          '0': 0,
-          '1': 0,
-          '2': 2,
-          '3': 3,
-          '4': 4,
-          '5': 5,
-        };
-        return mapping[value] ?? 5;
-      },
-      from: (value: number): UserPhysicalStatus => {
-        const mapping: Record<number, UserPhysicalStatus> = {
-          0: UserPhysicalStatus.MONK,
-          // legacy code 1 (นักบวช / ศาสนบุคคล) → รวมเป็นพระภิกษุ/นักบวช
-          1: UserPhysicalStatus.MONK,
-          2: UserPhysicalStatus.DISABLED,
-          3: UserPhysicalStatus.PREGNANT,
-          4: UserPhysicalStatus.DISABLED_TYPO,
-          5: UserPhysicalStatus.GENERAL,
-        };
-        return mapping[value] ?? UserPhysicalStatus.GENERAL;
-      },
+      to: (value: string | UserPhysicalStatus): number =>
+        physicalStatusToCode(value),
+      from: (value: number): UserPhysicalStatus =>
+        physicalStatusFromCode(value),
     },
     comment:
-      'สถานะทางกายภาพ/ข้อมูลผู้สมัคร (0: พระภิกษุ / นักบวช, 2: บุคคลทุพพลภาพ, 3: ผู้ตั้งครรภ์, 4: ผู้พิการรณ์, 5: ทั่วไป)',
+      'สถานะทางกายภาพ/ข้อมูลผู้สมัคร (1: พระภิกษุ / นักบวช, 2: บุคคลทุพพลภาพ, 3: ผู้ตั้งครรภ์, 4: ชาวต่างชาติ, 5: ชาวไทย)',
   })
   ERM_PHYSICAL_STATUS: UserPhysicalStatus;
 
