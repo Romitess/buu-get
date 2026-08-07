@@ -695,7 +695,7 @@ watch(
   { deep: true, flush: 'pre' },
 );
 
-// ── Drag-to-shift ────────────────────────────────────────
+// ── Drag-to-swap ─────────────────────────────────────────
 const draggingSeatId = ref<string | null>(null);
 const dragOverSeatId = ref<string | null>(null);
 const dragGhostRef = ref<HTMLElement | null>(null);
@@ -792,7 +792,7 @@ const cancelDrag = (): void => {
 
 const onSeatMouseDown = (e: MouseEvent, seat: SeatCell): void => {
   if (props.printMode) return;
-  // Drag-to-shift only when swap mode is on, left button, from an occupied seat.
+  // Drag-to-swap only when swap mode is on, left button, from an occupied seat.
   if (!swapMode.value || e.button !== 0) return;
   if (!isUsable(seat) || !seat.student) return;
 
@@ -834,8 +834,7 @@ const readExternalStudentErmId = (event: DragEvent): number | null => {
   const transfer = event.dataTransfer;
   if (!transfer) return null;
 
-  const raw =
-    transfer.getData(SEAT_STUDENT_DRAG_MIME) || transfer.getData('text/plain') || '';
+  const raw = transfer.getData(SEAT_STUDENT_DRAG_MIME) || transfer.getData('text/plain') || '';
   const ermId = Number(raw);
   return Number.isInteger(ermId) && ermId > 0 ? ermId : null;
 };

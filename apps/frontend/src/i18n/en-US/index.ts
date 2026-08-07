@@ -792,6 +792,13 @@ export default {
       saveButton: 'Confirm Seat Assignment',
       saveButtonEdit: 'Save Seat Changes',
       rearrangeAllButton: 'Rearrange all',
+      rearrangeConfirm: {
+        title: 'Confirm rearrange all seats',
+        message:
+          'All seats will be reassigned by priority. Existing assignments will move. Do you want to continue?',
+        confirm: 'Rearrange all',
+        cancel: 'Cancel',
+      },
       dragToSeatHint: 'Drag onto an empty seat',
       unassignedBanner:
         '{count} applicant(s) still need seats — drag them from the list onto empty seats',

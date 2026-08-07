@@ -1056,42 +1056,27 @@ export function useExamSeatManagement() {
     }
   });
 
+  /** แลกที่นั่งกันตรงๆ (occupied↔occupied) หรือย้ายไปที่ว่าง — ไม่ต้องมีที่ว่างคั่น */
   const swapSeatAssignments = (sourceSeatId: string, targetSeatId: string): void => {
     if (sourceSeatId === targetSeatId) return;
 
     const usableSeats = getUsableSeatAssignments();
-    const sourceIndex = usableSeats.findIndex((seat) => seat.seatId === sourceSeatId);
-    const targetIndex = usableSeats.findIndex((seat) => seat.seatId === targetSeatId);
-    if (sourceIndex < 0 || targetIndex < 0) return;
+    const sourceSeat = usableSeats.find((seat) => seat.seatId === sourceSeatId);
+    const targetSeat = usableSeats.find((seat) => seat.seatId === targetSeatId);
+    if (!sourceSeat || !targetSeat) return;
 
     const sourceStudent = students.value.find((student) => student.seat === sourceSeatId);
     if (!sourceStudent) return;
 
-    const studentBySeat = new Map<string, StudentSeatInfo>();
-    students.value.forEach((student) => {
-      if (student.id === sourceStudent.id || !student.seat) return;
-      studentBySeat.set(student.seat, student);
-    });
+    const targetStudent = students.value.find((student) => student.seat === targetSeatId);
 
-    let emptyIndex = targetIndex;
-    while (emptyIndex < usableSeats.length && studentBySeat.has(usableSeats[emptyIndex]!.seatId)) {
-      emptyIndex += 1;
-    }
-    if (emptyIndex >= usableSeats.length) return;
-
-    for (let index = emptyIndex; index > targetIndex; index -= 1) {
-      const fromSeat = usableSeats[index - 1]!;
-      const toSeat = usableSeats[index]!;
-      const movingStudent = studentBySeat.get(fromSeat.seatId);
-      if (!movingStudent) continue;
-
-      movingStudent.seat = toSeat.seatId;
-      movingStudent.sessionLocationId = toSeat.sessionLocationId;
-    }
-
-    const targetSeat = usableSeats[targetIndex]!;
     sourceStudent.seat = targetSeat.seatId;
     sourceStudent.sessionLocationId = targetSeat.sessionLocationId;
+
+    if (targetStudent) {
+      targetStudent.seat = sourceSeat.seatId;
+      targetStudent.sessionLocationId = sourceSeat.sessionLocationId;
+    }
   };
 
   const handleCancel = (): void => {
