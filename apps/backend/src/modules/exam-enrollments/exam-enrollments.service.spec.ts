@@ -640,7 +640,7 @@ describe('ExamEnrollmentsService', () => {
       );
     });
 
-    it('ENR-U-014: normalizes PHYSICAL_STATUS ไม่มีข้อมูลข้างต้น to ทั่วไป', async () => {
+    it('ENR-U-014: classifies PHYSICAL_STATUS ทั่วไป as ชาวไทย when no passport', async () => {
       // Arrange
       setupHappyCreate();
 
@@ -651,13 +651,30 @@ describe('ExamEnrollmentsService', () => {
       });
 
       // Assert
-      const created = examEnrollmentRepository.create.mock.results[0]
-        ?.value as ExamEnrollment;
-      // create returns entity; physical status is set on enrollment after create
       const savedArg = examEnrollmentRepository.save.mock
         .calls[0][0] as ExamEnrollment;
-      expect(savedArg.ERM_PHYSICAL_STATUS).toBe('ทั่วไป');
-      expect(created).toBeDefined();
+      expect(savedArg.ERM_PHYSICAL_STATUS).toBe('ชาวไทย');
+    });
+
+    it('ENR-U-014b: classifies PHYSICAL_STATUS ทั่วไป as ชาวต่างชาติ when passport exists', async () => {
+      // Arrange
+      setupHappyCreate();
+      userRepository.findOne.mockResolvedValue({
+        ...baseUser,
+        USER_PASSPORT_NO: 'A1234567',
+        USER_NATIONAL_ID: null,
+      });
+
+      // Act
+      await service.create({
+        ...createDto,
+        PHYSICAL_STATUS: 'general',
+      });
+
+      // Assert
+      const savedArg = examEnrollmentRepository.save.mock
+        .calls[0][0] as ExamEnrollment;
+      expect(savedArg.ERM_PHYSICAL_STATUS).toBe('ชาวต่างชาติ');
     });
   });
 

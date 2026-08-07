@@ -2,11 +2,8 @@
  * Seed — คละประเภทผู้สมัคร (applicant type) ของ enrollment ใน exam เป้าหมาย
  *
  * อัปเดตแถวที่มีอยู่แล้ว (ไม่ลบ / ไม่สร้าง enrollment ใหม่):
- *   - ERM_PHYSICAL_STATUS → พระภิกษุ/นักบวช, ทุพพลภาพ, ตั้งครรภ์, พิการรณ์, ทั่วไป
- *   - USER_PASSPORT_NO (แท็ก SEED{examId}P…) สำหรับช่อง ชาวต่างชาติ เมื่อสถานะ = ทั่วไป
- *
- * ประเภทที่หน้าจัดที่นั่งใช้กรอง (use-exam-seat-management):
- *   พระภิกษุ / นักบวช | บุคคลทุพพลภาพ | ผู้ตั้งครรภ์ | ผู้พิการรณ์ | ชาวต่างชาติ | ชาวไทย
+ *   ERM_PHYSICAL_STATUS → 1 พระภิกษุ/นักบวช, 2 ทุพพลภาพ, 3 ตั้งครรภ์, 4 ชาวต่างชาติ, 5 ชาวไทย
+ *   USER_PASSPORT_NO (แท็ก SEED{examId}P…) สำหรับช่อง ชาวต่างชาติ
  *
  * Idempotent: จัดตามลำดับ ERM_ID ในแต่ละ session ซ้ำได้
  *
@@ -25,7 +22,7 @@ const DEFAULT_EXAM_ID = 452;
 interface TypeSlot {
   label: string;
   physicalStatus: UserPhysicalStatus;
-  /** true = ทั่วไป + มี passport → UI แสดงเป็น ชาวต่างชาติ */
+  /** true = ใส่ passport แท็ก seed ให้สอดคล้องกับชาวต่างชาติ */
   foreigner: boolean;
   count: number;
 }
@@ -41,7 +38,7 @@ const PER_SESSION_PLAN: TypeSlot[] = [
     label: 'บุคคลทุพพลภาพ',
     physicalStatus: UserPhysicalStatus.DISABLED,
     foreigner: false,
-    count: 3,
+    count: 6,
   },
   {
     label: 'ผู้ตั้งครรภ์',
@@ -50,20 +47,14 @@ const PER_SESSION_PLAN: TypeSlot[] = [
     count: 3,
   },
   {
-    label: 'ผู้พิการรณ์',
-    physicalStatus: UserPhysicalStatus.DISABLED_TYPO,
-    foreigner: false,
-    count: 3,
-  },
-  {
     label: 'ชาวต่างชาติ',
-    physicalStatus: UserPhysicalStatus.GENERAL,
+    physicalStatus: UserPhysicalStatus.FOREIGNER,
     foreigner: true,
     count: 10,
   },
   {
     label: 'ชาวไทย',
-    physicalStatus: UserPhysicalStatus.GENERAL,
+    physicalStatus: UserPhysicalStatus.THAI,
     foreigner: false,
     count: 27,
   },
@@ -86,7 +77,6 @@ function parseExamId(argv: string[]): number {
 }
 
 function seedPassport(examId: number, userId: number): string {
-  // unique, ≤50 chars, แท็กให้ลบกลับได้ตอน re-run เป็นคนไทย
   return `SEED${examId}P${userId}`;
 }
 
@@ -131,16 +121,6 @@ function assignSlots(total: number): TypeSlot[] {
   return slots;
 }
 
-function applicantLabel(
-  physicalStatus: UserPhysicalStatus,
-  hasPassport: boolean,
-): string {
-  if (physicalStatus === UserPhysicalStatus.GENERAL) {
-    return hasPassport ? 'ชาวต่างชาติ' : 'ชาวไทย';
-  }
-  return physicalStatus;
-}
-
 async function printDistribution(
   ds: DataSource,
   examId: number,
@@ -176,15 +156,15 @@ async function printDistribution(
   );
 
   const PHYS_LABEL: Record<number, string> = {
-    0: 'พระภิกษุ / นักบวช',
+    1: 'พระภิกษุ / นักบวช',
     2: 'บุคคลทุพพลภาพ',
     3: 'ผู้ตั้งครรภ์',
-    4: 'ผู้พิการรณ์',
-    5: 'ทั่วไป (→ ไทย/ต่างชาติ ตาม passport)',
+    4: 'ชาวต่างชาติ',
+    5: 'ชาวไทย',
   };
 
   for (const row of rows) {
-    console.log(
+    console.warn(
       `  SS ${row.SESSION_ID} | phys=${row.phys} (${PHYS_LABEL[row.phys] ?? '?'}) | passport=${row.with_passport}/${row.cnt}`,
     );
   }
@@ -192,7 +172,7 @@ async function printDistribution(
 
 async function main(): Promise<void> {
   const examId = parseExamId(process.argv.slice(2));
-  console.log(`=== MIX APPLICANT TYPES SEED (examId=${examId}) ===\n`);
+  console.warn(`=== MIX APPLICANT TYPES SEED (examId=${examId}) ===\n`);
 
   const { default: AppDataSource } = await import('../data-source');
   const { Exam } = await import('../../modules/exam/entities/exam.entity');
@@ -222,10 +202,10 @@ async function main(): Promise<void> {
       throw new Error(`exam ${examId} ไม่มี session`);
     }
 
-    console.log(
+    console.warn(
       `พบ ${sessions.length} session: ${sessions.map((s) => s.SS_ID).join(', ')}`,
     );
-    console.log('— ก่อนอัปเดต —');
+    console.warn('— ก่อนอัปเดต —');
     await printDistribution(AppDataSource, examId);
 
     let totalUpdated = 0;
@@ -249,7 +229,7 @@ async function main(): Promise<void> {
         .getMany();
 
       if (enrollments.length === 0) {
-        console.log(`\n⚠ session ${session.SS_ID}: ไม่มี enrollment ข้าม`);
+        console.warn(`\n⚠ session ${session.SS_ID}: ไม่มี enrollment ข้าม`);
         continue;
       }
 
@@ -261,8 +241,7 @@ async function main(): Promise<void> {
         const enrollment = enrollments[i];
         const slot = slots[i];
         const user = enrollment.USER;
-        const label = applicantLabel(slot.physicalStatus, slot.foreigner);
-        byLabel[label] = (byLabel[label] ?? 0) + 1;
+        byLabel[slot.label] = (byLabel[slot.label] ?? 0) + 1;
 
         let dirtyEnrollment = false;
         let dirtyUser = false;
@@ -275,7 +254,6 @@ async function main(): Promise<void> {
         if (slot.foreigner) {
           const passport = seedPassport(examId, user.USER_ID);
           if (user.USER_PASSPORT_NO !== passport) {
-            // เคลียร์ passport แท็ก seed ของ user อื่นที่ชน unique (ไม่น่าเกิด)
             user.USER_PASSPORT_NO = passport;
             dirtyUser = true;
           }
@@ -298,26 +276,26 @@ async function main(): Promise<void> {
 
       totalUpdated += updated;
       summary.push({ sessionId: session.SS_ID, updated, byLabel });
-      console.log(
+      console.warn(
         `\n✓ session ${session.SS_ID}: enrollments=${enrollments.length} rowsTouched≈${updated}`,
       );
       for (const [label, count] of Object.entries(byLabel)) {
-        console.log(`    ${label}: ${count}`);
+        console.warn(`    ${label}: ${count}`);
       }
     }
 
-    console.log('\n— หลังอัปเดต —');
+    console.warn('\n— หลังอัปเดต —');
     await printDistribution(AppDataSource, examId);
-    console.log(`\nรวมแถวที่แตะ (enrollment และ/หรือ user): ~${totalUpdated}`);
-    console.log(
+    console.warn(`\nรวมแถวที่แตะ (enrollment และ/หรือ user): ~${totalUpdated}`);
+    console.warn(
       'หมายเหตุ: ไม่แตะ ERM_STATUS / ที่นั่ง / ธุรกรรม — เฉพาะประเภทผู้สมัคร',
     );
-    console.log(JSON.stringify({ summary }, null, 2));
+    console.warn(JSON.stringify({ summary }, null, 2));
   } finally {
     await AppDataSource.destroy();
   }
 
-  console.log('\n=== MIX APPLICANT TYPES SEED เสร็จสิ้น ===');
+  console.warn('\n=== MIX APPLICANT TYPES SEED เสร็จสิ้น ===');
 }
 
 main().catch((err) => {

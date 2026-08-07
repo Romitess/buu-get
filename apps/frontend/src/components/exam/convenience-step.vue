@@ -70,7 +70,7 @@ const emit = defineEmits<{
 
 const options = [
   {
-    value: '0',
+    value: '1',
     labelKey: 'examSchedule.convenienceDialog.options.monk',
   },
   {
@@ -82,8 +82,8 @@ const options = [
     labelKey: 'examSchedule.convenienceDialog.options.pregnant',
   },
   {
-    value: '5',
-    labelKey: 'examSchedule.convenienceDialog.options.none',
+    value: 'general',
+    labelKey: 'examSchedule.convenienceDialog.options.general',
   },
 ];
 

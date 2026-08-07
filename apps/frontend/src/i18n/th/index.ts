@@ -440,8 +440,8 @@ export default {
         monk: 'พระภิกษุ / นักบวช',
         disabled: 'บุคคลทุพพลภาพ',
         pregnant: 'ผู้ตั้งครรภ์',
-        none: 'ไม่มีข้อมูลข้างต้น',
         general: 'ทั่วไป',
+        none: 'ทั่วไป',
       },
     },
     passcodeDialog: {

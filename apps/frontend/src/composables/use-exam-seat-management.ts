@@ -26,14 +26,15 @@ const STATUS_SEAT_PUBLISHED = 3;
 export const SEAT_STUDENT_DRAG_MIME = 'application/x-buu-seat-student';
 
 const PHYSICAL_STATUS_REMARKS: Record<number, string> = {
-  0: 'พระภิกษุ / นักบวช',
+  1: 'พระภิกษุ / นักบวช',
   2: 'บุคคลทุพพลภาพ',
   3: 'ผู้ตั้งครรภ์',
-  4: 'ผู้พิการรณ์',
+  4: 'ชาวต่างชาติ',
+  5: 'ชาวไทย',
 };
 
 /** ประเภทผู้สมัครที่ใช้กรองรายชื่อ เรียงตามลำดับการจัดที่นั่ง */
-const APPLICANT_TYPE_REMARKS = [...Object.values(PHYSICAL_STATUS_REMARKS), 'ชาวต่างชาติ', 'ชาวไทย'];
+const APPLICANT_TYPE_REMARKS = Object.values(PHYSICAL_STATUS_REMARKS);
 
 export type SeatStatus = 'available' | 'assigned' | 'broken' | 'blocked';
 
@@ -62,9 +63,8 @@ export interface StudentSeatInfo {
   sortName: string;
   /**
    * Seat-assignment priority (lower = seated first):
-   * 0 พระภิกษุ/นักบวช, 2 บุคคลทุพพลภาพ,
-   * 3 ผู้ตั้งครรภ์, 4 ผู้พิการ, then within ทั่วไป (code 5):
-   * 5 ชาวต่างชาติ (มี passport), 6 คนไทย (ท้ายสุด)
+   * 1 พระภิกษุ/นักบวช, 2 บุคคลทุพพลภาพ, 3 ผู้ตั้งครรภ์,
+   * 4 ชาวต่างชาติ, 5 ชาวไทย
    */
   priority: number;
 }
@@ -454,13 +454,15 @@ export function useExamSeatManagement() {
   });
 
   const PHYSICAL_STATUS_LABEL_TO_CODE: Record<string, number> = {
-    'พระภิกษุ / นักบวช': 0,
-    'พระภิกษุ/นักบวช': 0,
-    'พระภิกษุ / สามเณร': 0,
-    'นักบวช / ศาสนบุคคล': 0,
+    'พระภิกษุ / นักบวช': 1,
+    'พระภิกษุ/นักบวช': 1,
+    'พระภิกษุ / สามเณร': 1,
+    'นักบวช / ศาสนบุคคล': 1,
     บุคคลทุพพลภาพ: 2,
     ผู้ตั้งครรภ์: 3,
-    ผู้พิการรณ์: 4,
+    ผู้พิการรณ์: 2,
+    ชาวต่างชาติ: 4,
+    ชาวไทย: 5,
     ทั่วไป: 5,
   };
 
@@ -471,8 +473,8 @@ export function useExamSeatManagement() {
 
     const numericValue = Number(value);
     if (Number.isInteger(numericValue)) {
-      // legacy code 1 (นักบวช / ศาสนบุคคล) → รวมเป็น 0
-      return numericValue === 1 ? 0 : numericValue;
+      // legacy code 0 (monk) → 1
+      return numericValue === 0 ? 1 : numericValue;
     }
 
     return PHYSICAL_STATUS_LABEL_TO_CODE[String(value).trim()] ?? null;
@@ -490,13 +492,12 @@ export function useExamSeatManagement() {
     if (physicalStatusCode !== null && physicalStatusCode in PHYSICAL_STATUS_REMARKS) {
       return {
         remark: PHYSICAL_STATUS_REMARKS[physicalStatusCode] ?? '',
-        isForeigner: false,
+        isForeigner: physicalStatusCode === 4,
       };
     }
 
-    const isGeneralStatus = physicalStatusCode === null || physicalStatusCode === 5;
-    const isForeigner = isGeneralStatus && hasPassport(enrollment.USER?.USER_PASSPORT_NO);
-
+    // fallback สำหรับข้อมูลเก่าที่ยังเป็น "ทั่วไป"
+    const isForeigner = hasPassport(enrollment.USER?.USER_PASSPORT_NO);
     return {
       remark: isForeigner ? 'ชาวต่างชาติ' : 'ชาวไทย',
       isForeigner,
@@ -504,19 +505,16 @@ export function useExamSeatManagement() {
   };
 
   /**
-   * Resolves the seat-assignment priority for an enrollment.
-   * Physical-status codes 0–4 keep their own order;
-   * ทั่วไป (code 5) is split so ชาวต่างชาติ (มี passport) are seated before คนไทย.
+   * Resolves the seat-assignment priority for an enrollment (codes 1–5).
    */
   const getSeatPriority = (enrollment: BackendEnrollmentDetail, isForeigner: boolean): number => {
     const physicalStatusCode = normalizePhysicalStatusCode(enrollment.ERM_PHYSICAL_STATUS);
 
-    if (physicalStatusCode !== null && physicalStatusCode >= 0 && physicalStatusCode <= 4) {
+    if (physicalStatusCode !== null && physicalStatusCode >= 1 && physicalStatusCode <= 5) {
       return physicalStatusCode;
     }
 
-    // code 5 (ทั่วไป) or unknown: foreigners first (5), Thai nationals last (6)
-    return isForeigner ? 5 : 6;
+    return isForeigner ? 4 : 5;
   };
 
   const getEnrollmentImagePath = (enrollment: BackendEnrollmentDetail): string | null => {

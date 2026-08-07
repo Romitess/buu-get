@@ -82,7 +82,12 @@ export class CreateExamEnrollmentDto {
   @IsEnum(ExamVerifyStatus)
   ERM_VERIFY_STATUS?: ExamVerifyStatus;
 
-  @ApiProperty({ example: 'พระภิกษุ / นักบวช', required: false })
+  @ApiProperty({
+    example: 'พระภิกษุ / นักบวช',
+    required: false,
+    description:
+      'สถานะผู้สมัคร หรือ "ทั่วไป"/"general" ให้ระบบจำแนกเป็นชาวไทย/ชาวต่างชาติจาก passport',
+  })
   @IsOptional()
   @IsString()
   PHYSICAL_STATUS?: string;

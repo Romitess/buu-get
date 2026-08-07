@@ -277,8 +277,8 @@ export default {
         monk: 'Monk / clergy',
         disabled: 'Person with a disability',
         pregnant: 'Pregnant',
-        none: 'None of the above',
         general: 'General',
+        none: 'General',
       },
     },
     dialogCancel: {
