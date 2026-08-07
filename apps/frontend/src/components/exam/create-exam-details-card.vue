@@ -181,33 +181,6 @@
             </div>
           </div>
 
-          <!-- ชุดเกณฑ์คะแนน -->
-          <div class="col-12" data-field="srbId">
-            <div class="buu-label-muted q-mb-xs">ชุดเกณฑ์คะแนน</div>
-            <app-select
-              v-model="form.srbId"
-              :options="scoreRubricOptions"
-              option-label="label"
-              option-value="value"
-              emit-value
-              map-options
-              outlined
-              dense
-              bg-color="white"
-              :loading="isLoadingData"
-              placeholder="เลือกชุดเกณฑ์คะแนน"
-              dropdown-icon="keyboard_arrow_down"
-              class="buu-input-muted"
-              :class="{ 'buu-field-error': hasError('srbId') }"
-              :disable="isLocked"
-              @update:model-value="emit('clearFieldError', 'srbId')"
-            />
-            <div v-if="hasError('srbId')" :key="`srbId-${shakeKey}`" class="buu-error-msg">
-              <q-icon name="error" class="buu-error-icon" />
-              {{ fieldErrors?.srbId }}
-            </div>
-          </div>
-
           <!-- สถานะเผยแพร่ -->
           <div class="col-12 self-end">
             <q-field outlined bg-color="white" class="buu-field-large buu-input-muted">
@@ -249,8 +222,6 @@ const props = defineProps<{
   examFormatOptions: string[];
   /** Fund source options from the API. */
   fundSourceOptions: { label: string; value: number }[];
-  /** Score rubric options from the API. */
-  scoreRubricOptions: { label: string; value: number }[];
   /** Loading state for fund source data. */
   isLoadingData: boolean;
   /** Whether the entire details card should be locked (e.g. once published) */

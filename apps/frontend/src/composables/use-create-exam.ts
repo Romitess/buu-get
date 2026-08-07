@@ -291,7 +291,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const proctorOptions = ref<{ label: string; value: string }[]>([]);
   const locationOptions = ref<ExamLocationOption[]>([]);
   const fundSourceOptions = ref<{ label: string; value: number }[]>([]);
-  const scoreRubricOptions = ref<{ label: string; value: number }[]>([]);
   const allExams = ref<BackendExam[]>([]);
   const isLoadingData = ref(false);
   const isSaving = ref(false);
@@ -822,10 +821,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       fundSourceOptions.value = activeFundSources.map((fs: FundSource) => ({
         label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
         value: fs.FS_ID,
-      }));
-      scoreRubricOptions.value = scoreRubrics.map((rubric) => ({
-        label: `${rubric.nameTh} (${rubric.nameEn})`,
-        value: rubric.id,
       }));
       if (!examId && !form.value.srbId) {
         form.value.srbId = scoreRubrics.find((r) => r.isDefault)?.id ?? null;
@@ -1992,7 +1987,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     proctorOptions,
     locationOptions,
     fundSourceOptions,
-    scoreRubricOptions,
     getOccupiedLocationIdsForSlot,
     isLoadingData,
     isSaving,
