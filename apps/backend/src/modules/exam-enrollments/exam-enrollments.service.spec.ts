@@ -1560,6 +1560,50 @@ describe('ExamEnrollmentsService', () => {
     });
   });
 
+  describe('findByUserId', () => {
+    it('ENR-U-051: selects certificate PDF fields for user history list', async () => {
+      examEnrollmentRepository.find.mockResolvedValue([]);
+
+      await service.findByUserId(7);
+
+      expect(examEnrollmentRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { USER_ID: 7 },
+          relations: expect.arrayContaining([
+            'USER.IMAGE',
+            'SCORE.CERTIFICATES',
+            'SCORE.LINES',
+          ]),
+          select: expect.objectContaining({
+            ERM_TEST_TAKER: true,
+            USER: expect.objectContaining({
+              USER_CODE: true,
+              IMAGE: expect.objectContaining({
+                USER_IMAGE_URL: true,
+              }),
+            }),
+            SESSION: expect.objectContaining({
+              EXAM: expect.objectContaining({
+                EXAM_FISCAL_YEAR: true,
+              }),
+            }),
+            SCORE: expect.objectContaining({
+              SC_LANG_USE_SCORE: true,
+              SC_READING_SCORE: true,
+              SC_TOTAL_SCORE: true,
+              SC_BAND_LEVEL: true,
+              LINES: expect.objectContaining({
+                SCL_NAME_EN: true,
+                SCL_SCORE: true,
+                SCL_MAX_SCORE: true,
+              }),
+            }),
+          }),
+        }),
+      );
+    });
+  });
+
   describe('findExamHistoryByEnrollmentId', () => {
     it('ENR-U-050: returns ATTENDED rounds only in exam history', async () => {
       // Arrange

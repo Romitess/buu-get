@@ -5,11 +5,21 @@ import { jsPDF } from 'jspdf';
 import { useUserStore } from 'src/stores/user.store';
 import { getImageUrl } from 'src/services/image.service';
 import { getBandRules } from 'src/services/score-criteria.service';
+import { fetchEnrollmentById } from 'src/services/exam.service';
 import { buildCertificateScoreLines } from 'src/composables/use-score-rubric-helpers';
-import type { ExamHistoryItem } from 'src/types/exam';
+import type { ExamEnrollment, ExamHistoryItem } from 'src/types/exam';
 import type { CertificateCardData } from 'src/types/certificate';
 import { generateCertificateQrDataUrl } from 'src/utils/verify-qr';
 import { formatExamInstanceLabel } from 'src/utils/exam-instance-label';
+
+/** List payload may omit score columns after a slim select; undefined ≠ real zero. */
+const isMissingCertificateScoreFields = (score: NonNullable<ExamEnrollment['SCORE']>): boolean =>
+  score.SC_LANG_USE_SCORE === undefined &&
+  score.SC_READING_SCORE === undefined &&
+  score.SC_TOTAL_SCORE === undefined;
+
+const isMissingTestTakerId = (enrollment: ExamEnrollment): boolean =>
+  !enrollment.ERM_TEST_TAKER && !enrollment.USER?.USER_CODE;
 
 export function useExamCertificateDocument() {
   const $q = useQuasar();
@@ -61,9 +71,32 @@ export function useExamCertificateDocument() {
   };
 
   const printCertificate = async (exam: ExamHistoryItem): Promise<void> => {
-    const enrollment = exam.rawEnrollment;
-    const score = enrollment?.SCORE;
-    const certificate = score?.CERTIFICATES?.[0];
+    let enrollment = exam.rawEnrollment;
+    let score = enrollment?.SCORE;
+    let certificate = score?.CERTIFICATES?.[0];
+
+    if (!enrollment || !score || !certificate) {
+      $q.notify({
+        type: 'warning',
+        message: 'ไม่พบข้อมูลใบประกาศนียบัตร',
+        position: 'top',
+      });
+      return;
+    }
+
+    // Mirror receipt download: refresh detail when history list omitted certificate fields
+    if (
+      enrollment.ERM_ID &&
+      (isMissingCertificateScoreFields(score) || isMissingTestTakerId(enrollment))
+    ) {
+      try {
+        enrollment = await fetchEnrollmentById(enrollment.ERM_ID);
+        score = enrollment.SCORE;
+        certificate = score?.CERTIFICATES?.[0];
+      } catch (error) {
+        console.error(`Failed to refresh enrollment ${enrollment.ERM_ID} for certificate`, error);
+      }
+    }
 
     if (!enrollment || !score || !certificate) {
       $q.notify({

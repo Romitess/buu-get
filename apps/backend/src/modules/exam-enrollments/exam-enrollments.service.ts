@@ -916,13 +916,15 @@ export class ExamEnrollmentsService {
   }
 
   async findByUserId(userId: number): Promise<ExamEnrollment[]> {
-    // List สำหรับประวัติผู้ใช้ — ไม่โหลด IMAGE / SESSION_LOCATIONS / BANK_RECONCILES
-    // ใบเสร็จเต็มใช้ GET /exam-enrollments/:id (findOneDetail)
+    // List สำหรับประวัติผู้ใช้ — ไม่โหลด SESSION_LOCATIONS / BANK_RECONCILES
+    // รวมฟิลด์ที่ client ใช้สร้างใบ certificate (คะแนน / band / test-taker / รูป / fiscal year)
+    // ใบเสร็จเต็มที่ยังขาดข้อมูลใช้ GET /exam-enrollments/:id (findOne)
     return await this.examEnrollmentRepository.find({
       where: { USER_ID: userId },
       relations: [
         'USER',
         'USER.PROFILE',
+        'USER.IMAGE',
         'SESSION',
         'SESSION.EXAM',
         'SESSION_LOCATION',
@@ -932,6 +934,7 @@ export class ExamEnrollmentsService {
         'VOUCHERS',
         'SCORE',
         'SCORE.CERTIFICATES',
+        'SCORE.LINES',
       ],
       select: {
         ERM_ID: true,
@@ -942,10 +945,12 @@ export class ExamEnrollmentsService {
         ERM_STATUS: true,
         ERM_VERIFY_STATUS: true,
         ERM_PHYSICAL_STATUS: true,
+        ERM_TEST_TAKER: true,
         CREATED_AT: true,
         UPDATED_AT: true,
         USER: {
           USER_ID: true,
+          USER_CODE: true,
           USER_NATIONAL_ID: true,
           USER_PASSPORT_NO: true,
           USER_EMAIL: true,
@@ -956,6 +961,11 @@ export class ExamEnrollmentsService {
             userTitleEn: true,
             userFullnameEn: true,
             userAddress: true,
+          },
+          IMAGE: {
+            USER_IMAGE_ID: true,
+            USER_ID: true,
+            USER_IMAGE_URL: true,
           },
         },
         SESSION: {
@@ -968,6 +978,7 @@ export class ExamEnrollmentsService {
             EXAM_ID: true,
             EXAM_NAME: true,
             EXAM_ROUND: true,
+            EXAM_FISCAL_YEAR: true,
             EXAM_FEE: true,
             EXAM_DATE: true,
             EXAM_TYPE: true,
@@ -1008,12 +1019,25 @@ export class ExamEnrollmentsService {
         SCORE: {
           SCORES_ID: true,
           ERM_ID: true,
+          SC_LANG_USE_SCORE: true,
+          SC_READING_SCORE: true,
+          SC_TOTAL_SCORE: true,
+          SC_BAND_LEVEL: true,
           CERTIFICATES: {
             CERT_ID: true,
             SCORES_ID: true,
             CERT_CODE: true,
             CERT_ISSUED_AT: true,
             CERT_EXPIRES_AT: true,
+          },
+          LINES: {
+            SCL_ID: true,
+            SCORES_ID: true,
+            SCL_NAME_TH: true,
+            SCL_NAME_EN: true,
+            SCL_MAX_SCORE: true,
+            SCL_SORT_ORDER: true,
+            SCL_SCORE: true,
           },
         },
       },
