@@ -19,6 +19,17 @@ export const BUDDHIST_YEAR_OFFSET = 543;
  */
 export const EXAM_FISCAL_YEAR_AD_REGEX = /^(19|20|21)\d{2}$/;
 
+/**
+ * ปีงบประมาณไทย (ค.ศ.) ตามวันที่อ้างอิง
+ * — เริ่ม 1 ต.ค. สิ้นสุด 30 ก.ย. ของปีถัดไป และใช้ปีที่สิ้นสุดเป็นชื่อปีงบประมาณ
+ */
+export const getCurrentThaiFiscalYearAd = (date: Date = new Date()): string => {
+  const calendarYear = date.getFullYear();
+  const month = date.getMonth(); // 0–11
+  const fiscalYear = month >= 9 ? calendarYear + 1 : calendarYear;
+  return String(fiscalYear);
+};
+
 /** ประเภทการสอบ */
 export const EXAM_TYPE_GENERAL = 'รอบทั่วไป';
 export const EXAM_TYPE_SPECIAL = 'รอบพิเศษ';

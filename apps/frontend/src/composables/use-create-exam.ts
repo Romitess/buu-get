@@ -14,6 +14,7 @@ import {
   MIN_EXAM_SESSIONS,
   NOTIFY_MSG,
   VALIDATION_MSG,
+  getCurrentThaiFiscalYearAd,
 } from 'src/constants/exam';
 import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
 import { fetchScoreRubrics } from 'src/services/score-rubric.service';
@@ -248,7 +249,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     ref<CreateExamForm>({
       examName: DEFAULT_EXAM_NAME,
       examRound: '',
-      examFiscalYear: '',
+      examFiscalYear: getCurrentThaiFiscalYearAd(),
       examType: EXAM_TYPE_GENERAL,
       examFormat: EXAM_FORMAT_COMPUTER,
       fundSourceId: null,
