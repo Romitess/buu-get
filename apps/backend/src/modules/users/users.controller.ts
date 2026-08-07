@@ -29,6 +29,10 @@ import {
   CheckUserIdentifiersDto,
   CheckUserIdentifiersResponseDto,
 } from './dto/check-user-identifiers.dto';
+import {
+  DeleteUsersByRangeDto,
+  DeleteUsersByRangeResponseDto,
+} from './dto/delete-users-by-range.dto';
 import { UsersService } from './users.service';
 
 @ApiTags('users')
@@ -60,6 +64,20 @@ export class UsersController {
   ): Promise<CheckUserIdentifiersResponseDto> {
     const results = await this.usersService.checkIdentifiers(body.identifiers);
     return { results };
+  }
+
+  @Post('delete-by-range')
+  @Roles(...USER_ADMIN_ROLES)
+  @ApiOkResponse({ type: DeleteUsersByRangeResponseDto })
+  async removeByRange(
+    @Body() body: DeleteUsersByRangeDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<DeleteUsersByRangeResponseDto> {
+    return this.usersService.removeByIdRange(
+      body.startUserId,
+      body.endUserId,
+      user.userId,
+    );
   }
 
   @Get(':id')

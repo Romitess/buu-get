@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, DataSource, In, Repository } from 'typeorm';
+import { Brackets, Between, DataSource, In, Repository } from 'typeorm';
 import {
   buildPaginatedResponse,
   PaginatedResponse,
@@ -17,6 +17,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UsersQueryDto } from './dto/users-query.dto';
 import { UserIdentifierCheckResultDto } from './dto/check-user-identifiers.dto';
+import { DeleteUsersByRangeResponseDto } from './dto/delete-users-by-range.dto';
 import { User } from './entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
 import { UserProfileService } from '../user-profile/user-profile.service';
@@ -238,6 +239,54 @@ export class UsersService {
     }
 
     await this.usersRepository.softRemove(user);
+  }
+
+  /**
+   * soft-delete ผู้ใช้ในช่วง USER_ID [startUserId, endUserId] (inclusive)
+   * และลบใน Moodle แบบ batch ถ้ามี USER_MOODLE_ID
+   */
+  async removeByIdRange(
+    startUserId: number,
+    endUserId: number,
+    actingUserId: number,
+  ): Promise<DeleteUsersByRangeResponseDto> {
+    const users = await this.usersRepository.find({
+      where: { USER_ID: Between(startUserId, endUserId) },
+      order: { USER_ID: 'ASC' },
+    });
+
+    if (users.length === 0) {
+      return {
+        startUserId,
+        endUserId,
+        deletedUserIds: [],
+        deletedCount: 0,
+        deletedMoodleCount: 0,
+      };
+    }
+
+    const moodleUserIds = users
+      .map((user) => user.USER_MOODLE_ID)
+      .filter((moodleId): moodleId is number => moodleId != null);
+
+    if (moodleUserIds.length > 0) {
+      await this.moodleSyncService.deleteUsers(moodleUserIds, {
+        userId: actingUserId,
+        refType: 'user',
+        refId: startUserId,
+        moodleRefId: moodleUserIds[0],
+      });
+    }
+
+    await this.usersRepository.softRemove(users);
+
+    return {
+      startUserId,
+      endUserId,
+      deletedUserIds: users.map((user) => user.USER_ID),
+      deletedCount: users.length,
+      deletedMoodleCount: moodleUserIds.length,
+    };
   }
 
   async findByCode(code: string): Promise<UserResponseDto> {
