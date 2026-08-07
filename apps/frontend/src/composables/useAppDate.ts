@@ -53,8 +53,9 @@ export function useAppDate() {
 
   /**
    * Format date range localized
-   * - TH: "7 - 25 ต.ค. 2569" or "7 ต.ค. - 25 พ.ย. 2569"
-   * - EN: "7 - 25 Oct 2026" or "7 Oct - 25 Nov 2026"
+   * - Same day: "7 ส.ค. 2569" / "7 Aug 2026"
+   * - Same month: "7 - 25 ต.ค. 2569" / "7 - 25 Oct 2026"
+   * - Different months: "7 ต.ค. - 25 พ.ย. 2569" / "7 Oct - 25 Nov 2026"
    */
   const formatDateRange = (startDateStr: string | Date, endDateStr: string | Date): string => {
     if (!startDateStr || !endDateStr) return '-';
@@ -68,18 +69,22 @@ export function useAppDate() {
     const endDay = endDate.getDate();
     const startMonth = startDate.getMonth();
     const endMonth = endDate.getMonth();
+    const startYear = startDate.getFullYear();
+    const endYear = endDate.getFullYear();
 
     const startMonthName = new Intl.DateTimeFormat(loc, { month: 'short' }).format(startDate);
     const endMonthName = new Intl.DateTimeFormat(loc, { month: 'short' }).format(endDate);
-    const endYear = endDate.getFullYear() + yearOffset;
+    const displayEndYear = endYear + yearOffset;
 
-    if (startMonth === endMonth && startDate.getFullYear() === endDate.getFullYear()) {
-      // Same month: "7 - 25 Oct 2026"
-      return `${startDay} - ${endDay} ${endMonthName} ${endYear}`;
+    if (startDay === endDay && startMonth === endMonth && startYear === endYear) {
+      return `${startDay} ${endMonthName} ${displayEndYear}`;
     }
 
-    // Different months: "7 Oct - 25 Nov 2026"
-    return `${startDay} ${startMonthName} - ${endDay} ${endMonthName} ${endYear}`;
+    if (startMonth === endMonth && startYear === endYear) {
+      return `${startDay} - ${endDay} ${endMonthName} ${displayEndYear}`;
+    }
+
+    return `${startDay} ${startMonthName} - ${endDay} ${endMonthName} ${displayEndYear}`;
   };
 
   /**
