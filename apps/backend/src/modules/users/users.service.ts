@@ -20,6 +20,7 @@ import { UserIdentifierCheckResultDto } from './dto/check-user-identifiers.dto';
 import { User } from './entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
 import { UserProfileService } from '../user-profile/user-profile.service';
+import { MoodleSyncService } from '../moodle/moodle-sync.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -31,6 +32,7 @@ export class UsersService {
     private readonly rolesRepository: Repository<Role>,
     private readonly userProfileService: UserProfileService,
     private readonly dataSource: DataSource,
+    private readonly moodleSyncService: MoodleSyncService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
@@ -223,6 +225,16 @@ export class UsersService {
 
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    // ลบใน Moodle ก่อน soft-delete ในระบบ — ถ้า Moodle ล้มเหลวจะไม่ลบ user ในระบบ
+    if (user.USER_MOODLE_ID != null) {
+      await this.moodleSyncService.deleteUsers([user.USER_MOODLE_ID], {
+        userId: user.USER_ID,
+        refType: 'user',
+        refId: user.USER_ID,
+        moodleRefId: user.USER_MOODLE_ID,
+      });
     }
 
     await this.usersRepository.softRemove(user);

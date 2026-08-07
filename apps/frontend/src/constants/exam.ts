@@ -114,7 +114,9 @@ export const formatFee = (amount: number | string) =>
 export const formatLocationWithRoom = (name: string, room?: string | null) =>
   `${name}${room ? ` (${room})` : ''}`;
 
-export const POLLING_INTERVAL_MS = 5000;
+export const POLLING_INTERVAL_MS = 60_000;
+/** อัปเดตนาฬิกาปฏิทิน — ไม่ต้องทุกวินาที (วันหมดเขตเปลี่ยนช้า) */
+export const CALENDAR_CLOCK_INTERVAL_MS = 30_000;
 
 export const NOTIFY_TIMEOUT_SHORT = 2000;
 export const NOTIFY_TIMEOUT_DEFAULT = 2500;

@@ -12,11 +12,11 @@ import {
 import {
   PAGINATION_DEFAULT_LIMIT,
   PAGINATION_DEFAULT_PAGE,
-  PaginationQueryDto,
 } from 'src/common/dto/pagination-query.dto';
 import { ExamScore } from './entities/exam-score.entity';
 import { ExamScoreLine } from './entities/exam-score-line.entity';
 import { CreateExamScoreDto } from './dto/create-exam-score.dto';
+import { ExamScoreQueryDto } from './dto/exam-score-query.dto';
 import { UpdateExamScoreDto } from './dto/update-exam-score.dto';
 import { ExamEnrollment } from '../exam-enrollments/entities/exam-enrollment.entity';
 import { ScoreRubricItem } from '../score-rubrics/entities/score-rubric-item.entity';
@@ -235,16 +235,34 @@ export class ExamScoresService {
   }
 
   async findAll(
-    query: PaginationQueryDto = {},
+    query: ExamScoreQueryDto = {},
   ): Promise<PaginatedResponse<ExamScore>> {
     const page = query.page ?? PAGINATION_DEFAULT_PAGE;
     const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
-    const [data, total] = await this.examScoreRepository.findAndCount({
-      relations: ['ENROLLMENT', 'CERTIFICATES', 'LINES'],
-      skip: (page - 1) * limit,
-      take: limit,
-      order: { SCORES_ID: 'DESC' },
-    });
+
+    const qb = this.examScoreRepository
+      .createQueryBuilder('score')
+      .leftJoinAndSelect('score.ENROLLMENT', 'enrollment')
+      .leftJoinAndSelect('score.CERTIFICATES', 'certificates')
+      .leftJoinAndSelect('score.LINES', 'lines')
+      .where('score.DELETED_AT IS NULL')
+      .orderBy('score.SCORES_ID', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    if (query.examId != null || query.sessionId != null) {
+      qb.innerJoin('enrollment.SESSION', 'session');
+      if (query.examId != null) {
+        qb.andWhere('session.EXAM_ID = :examId', { examId: query.examId });
+      }
+      if (query.sessionId != null) {
+        qb.andWhere('enrollment.SESSION_ID = :sessionId', {
+          sessionId: query.sessionId,
+        });
+      }
+    }
+
+    const [data, total] = await qb.getManyAndCount();
     return buildPaginatedResponse(data, total, page, limit);
   }
 

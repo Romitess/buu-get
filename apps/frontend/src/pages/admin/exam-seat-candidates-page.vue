@@ -1,5 +1,10 @@
 <template>
   <q-page class="page-container seat-candidates-page">
+    <q-inner-loading :showing="isPrintingSeatPlan" color="primary">
+      <q-spinner-gears size="50px" color="primary" />
+      <div class="q-mt-md text-body1 text-weight-medium">กำลังสร้างไฟล์แผนผังที่นั่ง...</div>
+    </q-inner-loading>
+
     <!-- Breadcrumbs -->
     <AppBreadcrumbs />
 
@@ -654,7 +659,7 @@ const canvasToJpegDataUrl = (canvas: HTMLCanvasElement): string =>
 
 const renderPrintPageToCanvas = async (element: HTMLElement): Promise<HTMLCanvasElement> =>
   html2canvas(element, {
-    scale: 1.7,
+    scale: 1.25,
     useCORS: true,
     allowTaint: true,
     backgroundColor: '#ffffff',

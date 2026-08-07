@@ -55,8 +55,14 @@ export class ExamService {
     await this.scoreRubricsService.assertRubricUsable(createExamDto.SRB_ID);
     const exam = this.examRepository.create(createExamDto);
     const saved = await this.examRepository.save(exam);
-    // รอสร้างคอร์ส Moodle แล้ว map EXAM_MOODLE_COURSE_ID (ล้มเหลวจะ log ไว้ แต่ไม่ทำให้สร้างรอบสอบ fail)
-    await this.syncCourseToMoodle(saved, actingUserId);
+    // ไม่บล็อก HTTP response — สร้างคอร์ส Moodle แบบพื้นหลังแล้ว map EXAM_MOODLE_COURSE_ID
+    // (ล้มเหลวจะ log ไว้ใน syncCourseToMoodle แต่ไม่ทำให้สร้างรอบสอบ fail)
+    void this.syncCourseToMoodle(saved, actingUserId).catch((err: unknown) => {
+      this.logger.error(
+        `Background Moodle sync failed for exam ${saved.EXAM_ID}`,
+        err instanceof Error ? err.stack : String(err),
+      );
+    });
     return saved;
   }
 

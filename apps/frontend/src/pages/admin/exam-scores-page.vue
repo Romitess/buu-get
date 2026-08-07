@@ -45,6 +45,7 @@
           <ExportCsvButton
             :columns="columns"
             :rows="scoreRows"
+            :load-rows="loadExportScoreRows"
             :file-name-prefix="exportCsvFileNamePrefix"
             class="action-btn text-weight-bold br-sm"
           />
@@ -220,9 +221,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { exportFile, useQuasar, type QTableColumn } from 'quasar';
+import { debounce, exportFile, useQuasar, type QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import BaseTable from 'src/components/shared/base-table.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
@@ -236,8 +237,11 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import ActionButton from 'src/components/shared/action-button.vue';
-import { fetchExamById } from 'src/services/exam.service';
-import { fetchRawEnrollmentsByExamId } from 'src/services/enrollment.service';
+import { fetchExamById, isRequestCanceled } from 'src/services/exam.service';
+import {
+  fetchRawEnrollmentsByExamId,
+  fetchRawEnrollmentsPage,
+} from 'src/services/enrollment.service';
 import {
   createExamScore,
   fetchExamScores,
@@ -297,10 +301,16 @@ const examDateLabel = computed((): string => {
 });
 
 const isLoading = ref(false);
+const isInitializing = ref(true);
+let loadGeneration = 0;
+let pageAbortController: AbortController | null = null;
 const exam = ref<BackendExam | null>(null);
 const rubricItems = computed(() => rubricItemsFromExam(exam.value));
 const bandRules = ref<BandRuleData[]>([]);
 const enrollments = ref<BackendEnrollmentDetail[]>([]);
+/** แหล่งข้อมูลเต็ม session สำหรับ import/sample — โหลดเฉพาะตอนจำเป็น */
+const sessionEnrollmentsCache = ref<BackendEnrollmentDetail[]>([]);
+const enrollmentTotal = ref(0);
 const examScores = ref<BackendExamScore[]>([]);
 const searchQuery = ref('');
 const selectedSessionId = ref<number | null>(null);
@@ -415,7 +425,7 @@ const currentSessionEnrollments = computed(() => {
   });
 });
 
-const sessionTotalCount = computed(() => currentSessionEnrollments.value.length);
+const sessionTotalCount = computed(() => enrollmentTotal.value);
 
 const currentSessionCapacity = computed((): number => {
   if (sessionLocations.value.length > 0) {
@@ -450,12 +460,12 @@ const scoreByEnrollmentId = computed(() => {
 });
 
 const hasSavedScores = computed(() => {
-  return (
-    currentSessionEnrollments.value.length > 0 &&
-    currentSessionEnrollments.value.some((enrollment) =>
-      scoreByEnrollmentId.value.has(enrollment.ERM_ID),
-    )
-  );
+  if (examScores.value.length === 0) return false;
+  if (activeSessionIds.value.length === 0) return examScores.value.length > 0;
+  return examScores.value.some((score) => {
+    const sessionId = score.ENROLLMENT?.SESSION_ID;
+    return sessionId == null || activeSessionIds.value.includes(sessionId);
+  });
 });
 
 const exportCsvFileNamePrefix = computed(() => {
@@ -481,19 +491,17 @@ const selectedSessionName = computed((): string => {
 });
 
 const candidatesWithScores = computed(() => {
-  const activeSessionEnrollments = enrollments.value.filter((enrollment) =>
-    activeSessionIds.value.includes(enrollment.SESSION_ID),
-  );
-  return activeSessionEnrollments
-    .filter((enrollment) => scoreByEnrollmentId.value.has(enrollment.ERM_ID))
-    .map((enrollment) => {
-      const score = scoreByEnrollmentId.value.get(enrollment.ERM_ID);
-      return {
-        USER_ID: enrollment.USER_ID,
-        SCORES_ID: score?.SCORES_ID || 0,
-      };
+  return examScores.value
+    .filter((score) => {
+      const sessionId = score.ENROLLMENT?.SESSION_ID;
+      if (sessionId == null) return true;
+      return activeSessionIds.value.includes(sessionId);
     })
-    .filter((c) => c.SCORES_ID > 0);
+    .map((score) => ({
+      USER_ID: score.ENROLLMENT?.USER_ID ?? 0,
+      SCORES_ID: score.SCORES_ID,
+    }))
+    .filter((c) => c.SCORES_ID > 0 && c.USER_ID > 0);
 });
 
 const examDisplayName = computed(() => {
@@ -553,19 +561,31 @@ const resolveBandLevel = (total: number): string | null => {
   return calculateBandFromRules(total, bandRules.value);
 };
 
-const initializeScoreDrafts = (): void => {
-  scoreDraftByEnrollmentId.value = enrollments.value.reduce<Record<number, ScoreDraft>>(
-    (acc, enrollment) => {
-      acc[enrollment.ERM_ID] = getScoreDraft(enrollment);
-      return acc;
-    },
-    {},
-  );
-  importedEnrollmentIds.value = new Set();
+const initializeScoreDrafts = (options?: { resetImported?: boolean }): void => {
+  if (options?.resetImported) {
+    scoreDraftByEnrollmentId.value = enrollments.value.reduce<Record<number, ScoreDraft>>(
+      (acc, enrollment) => {
+        acc[enrollment.ERM_ID] = getScoreDraft(enrollment);
+        return acc;
+      },
+      {},
+    );
+    importedEnrollmentIds.value = new Set();
+    return;
+  }
+
+  const nextDrafts = { ...scoreDraftByEnrollmentId.value };
+  for (const enrollment of enrollments.value) {
+    if (!nextDrafts[enrollment.ERM_ID]) {
+      nextDrafts[enrollment.ERM_ID] = getScoreDraft(enrollment);
+    }
+  }
+  scoreDraftByEnrollmentId.value = nextDrafts;
 };
 
 const scoreRows = computed(() => {
-  const rows = currentSessionEnrollments.value.map((enrollment, index): ScoreTableRow => {
+  const pageOffset = (pagination.value.page - 1) * pagination.value.rowsPerPage;
+  return currentSessionEnrollments.value.map((enrollment, index): ScoreTableRow => {
     const profile = enrollment.USER?.PROFILE;
     const draft = scoreDraftByEnrollmentId.value[enrollment.ERM_ID] ?? getScoreDraft(enrollment);
     const score = scoreByEnrollmentId.value.get(enrollment.ERM_ID);
@@ -577,7 +597,7 @@ const scoreRows = computed(() => {
       null;
 
     return {
-      index: index + 1,
+      index: pageOffset + index + 1,
       ermId: enrollment.ERM_ID,
       nationalId: enrollment.ERM_TEST_TAKER || '-',
       titleTh: profile?.userTitleTh || profile?.userTitleEn || '-',
@@ -604,15 +624,6 @@ const scoreRows = computed(() => {
       hasSavedCertificate,
     };
   });
-
-  if (!searchQuery.value) return rows;
-  const query = searchQuery.value.toLowerCase();
-  return rows.filter(
-    (row) =>
-      row.nationalId?.toLowerCase().includes(query) ||
-      row.fullnameTh?.toLowerCase().includes(query) ||
-      row.location?.toLowerCase().includes(query),
-  );
 });
 
 const baseColumns: QTableColumn[] = [
@@ -749,7 +760,11 @@ interface SampleScoreRow {
 
 /** ตัวอย่างไฟล์จากผู้สมัครจริงทุกห้องในช่วงเวลาที่เลือก — ดาวน์โหลดแล้ว import กลับได้ทันที */
 const sampleRows = computed((): SampleScoreRow[] => {
-  return currentSessionEnrollments.value.map((enrollment, index): SampleScoreRow => {
+  const source =
+    sessionEnrollmentsCache.value.length > 0
+      ? sessionEnrollmentsCache.value
+      : currentSessionEnrollments.value;
+  return source.map((enrollment, index): SampleScoreRow => {
     const profile = enrollment.USER?.PROFILE;
     const draft = scoreDraftByEnrollmentId.value[enrollment.ERM_ID] ?? getScoreDraft(enrollment);
     const hasExistingScore =
@@ -791,6 +806,22 @@ const onRequest = (props: TableRequestProps): void => {
   const { page, rowsPerPage } = props.pagination;
   pagination.value.page = page;
   pagination.value.rowsPerPage = rowsPerPage;
+  void loadEnrollmentPage(pageAbortController?.signal);
+};
+
+const ensureSessionEnrollmentsCache = async (): Promise<BackendEnrollmentDetail[]> => {
+  const examId = Number(route.params.examId);
+  if (isNaN(examId) || examId <= 0 || selectedSessionId.value == null) {
+    return [];
+  }
+  if (sessionEnrollmentsCache.value.length > 0) {
+    return sessionEnrollmentsCache.value;
+  }
+  const all = await fetchRawEnrollmentsByExamId(examId, {
+    sessionId: selectedSessionId.value,
+  });
+  sessionEnrollmentsCache.value = all;
+  return all;
 };
 
 const handleCsvOptionClick = (): void => {
@@ -977,7 +1008,7 @@ const parseCsvRows = (text: string): string[][] => {
   return result.filter((r) => r.some((cell) => cell !== ''));
 };
 
-const applyImportedScoreRows = (rows: string[][]): void => {
+const applyImportedScoreRows = async (rows: string[][]): Promise<void> => {
   if (rows.length < 2) return;
 
   const headers = (rows[0] || []).map((header) => header.trim().toLowerCase());
@@ -1013,12 +1044,18 @@ const applyImportedScoreRows = (rows: string[][]): void => {
   let matchedCount = 0;
   const nextImportedIds = new Set(importedEnrollmentIds.value);
 
+  let importEnrollments: BackendEnrollmentDetail[];
+  try {
+    importEnrollments = await ensureSessionEnrollmentsCache();
+  } catch (err) {
+    console.error('Error loading enrollments for import:', err);
+    $q.notify({ type: 'negative', message: 'โหลดรายชื่อผู้สมัครสำหรับนำเข้าไม่สำเร็จ' });
+    return;
+  }
+
   // Prebuild lookup maps once — O(enrollments) then O(1) per Excel row
-  const enrollmentByTestTakerKey = new Map<
-    string,
-    (typeof currentSessionEnrollments.value)[number]
-  >();
-  for (const enrollment of currentSessionEnrollments.value) {
+  const enrollmentByTestTakerKey = new Map<string, BackendEnrollmentDetail>();
+  for (const enrollment of importEnrollments) {
     const testTaker = enrollment.ERM_TEST_TAKER;
     if (!testTaker) continue;
     const key = normalizeImportKey(testTaker);
@@ -1037,7 +1074,7 @@ const applyImportedScoreRows = (rows: string[][]): void => {
     const cleanPassport = passportVal ? passportVal.trim() : '';
     const cleanTestTaker = testTakerVal ? testTakerVal.trim() : '';
 
-    let matchedEnrollment = undefined;
+    let matchedEnrollment: BackendEnrollmentDetail | undefined;
 
     if (cleanTestTaker && cleanTestTaker !== '-') {
       matchedEnrollment = enrollmentByTestTakerKey.get(normalizeImportKey(cleanTestTaker));
@@ -1045,7 +1082,7 @@ const applyImportedScoreRows = (rows: string[][]): void => {
 
     if (!matchedEnrollment && cleanCitizen && cleanCitizen !== '-') {
       const normCitizen = normalizeImportKey(cleanCitizen);
-      matchedEnrollment = currentSessionEnrollments.value.find((enrollment) => {
+      matchedEnrollment = importEnrollments.find((enrollment) => {
         const dbCitizen = enrollment.USER?.USER_NATIONAL_ID;
         return dbCitizen && normalizeImportKey(dbCitizen) === normCitizen;
       });
@@ -1053,7 +1090,7 @@ const applyImportedScoreRows = (rows: string[][]): void => {
 
     if (!matchedEnrollment && cleanPassport && cleanPassport !== '-') {
       const normPassport = normalizeImportKey(cleanPassport);
-      matchedEnrollment = currentSessionEnrollments.value.find((enrollment) => {
+      matchedEnrollment = importEnrollments.find((enrollment) => {
         const dbPassport = enrollment.USER?.USER_PASSPORT_NO;
         return dbPassport && normalizeImportKey(dbPassport) === normPassport;
       });
@@ -1087,7 +1124,6 @@ const applyImportedScoreRows = (rows: string[][]): void => {
   }
 
   importedEnrollmentIds.value = nextImportedIds;
-  pagination.value.rowsNumber = scoreRows.value.length;
   showUploadDialog.value = false;
 
   $q.notify({
@@ -1104,12 +1140,12 @@ const processScoreFile = async (file: File): Promise<void> => {
 
   try {
     if (fileName.endsWith('.csv')) {
-      applyImportedScoreRows(parseCsvRows(await file.text()));
+      await applyImportedScoreRows(parseCsvRows(await file.text()));
       return;
     }
 
     if (fileName.endsWith('.xlsx')) {
-      applyImportedScoreRows(await parseXlsxFile(file));
+      await applyImportedScoreRows(await parseXlsxFile(file));
       return;
     }
 
@@ -1125,7 +1161,15 @@ const handleUrlUpload = (url: string): void => {
   $q.notify({ type: 'info', message: 'รับ URL แล้ว แต่การนำเข้าจาก URL ยังไม่ได้เชื่อมต่อ' });
 };
 
-const openSampleDialog = (): void => {
+const openSampleDialog = async (): Promise<void> => {
+  try {
+    await ensureSessionEnrollmentsCache();
+  } catch (err) {
+    console.error('Error loading enrollments for sample:', err);
+    $q.notify({ type: 'negative', message: 'โหลดรายชื่อผู้สมัครสำหรับตัวอย่างไม่สำเร็จ' });
+    return;
+  }
+
   if (sampleRows.value.length === 0) {
     $q.notify({
       type: 'warning',
@@ -1198,7 +1242,7 @@ const downloadSampleFile = (): void => {
 };
 
 const clearImportedScores = (): void => {
-  initializeScoreDrafts();
+  initializeScoreDrafts({ resetImported: true });
   $q.notify({
     type: 'positive',
     message: 'ลบข้อมูลสำเร็จ',
@@ -1219,11 +1263,22 @@ const confirmClearImportedScores = (): void => {
 const saveScores = async (): Promise<void> => {
   if (!hasImportedScores.value) return;
 
+  const examId = Number(route.params.examId);
+  if (isNaN(examId) || examId <= 0) return;
+
   try {
     isLoading.value = true;
-    const rowsToSave = enrollments.value.filter((enrollment) =>
-      importedEnrollmentIds.value.has(enrollment.ERM_ID),
-    );
+    const importedIds = [...importedEnrollmentIds.value];
+    let enrollmentLookup = new Map(enrollments.value.map((e) => [e.ERM_ID, e]));
+    const missingIds = importedIds.filter((id) => !enrollmentLookup.has(id));
+    if (missingIds.length > 0) {
+      const allSession = await ensureSessionEnrollmentsCache();
+      enrollmentLookup = new Map(allSession.map((e) => [e.ERM_ID, e]));
+    }
+
+    const rowsToSave = importedIds
+      .map((ermId) => enrollmentLookup.get(ermId))
+      .filter((enrollment): enrollment is BackendEnrollmentDetail => enrollment != null);
 
     await Promise.all(
       rowsToSave.map((enrollment) => {
@@ -1238,12 +1293,9 @@ const saveScores = async (): Promise<void> => {
       }),
     );
 
-    const scores = await fetchExamScores();
-    examScores.value = scores.filter((score) =>
-      enrollments.value.some((enrollment) => enrollment.ERM_ID === score.ERM_ID),
-    );
-    initializeScoreDrafts();
-    pagination.value.rowsNumber = scoreRows.value.length;
+    examScores.value = await fetchExamScores({ examId });
+    initializeScoreDrafts({ resetImported: true });
+    await loadEnrollmentPage();
     $q.notify({ type: 'positive', message: 'บันทึกคะแนนสำเร็จ' });
   } catch (err) {
     console.error('Error saving scores:', err);
@@ -1263,63 +1315,171 @@ watch(sessionTimeTabs, (sessions) => {
   if (!hasSelectedSession) selectedSessionId.value = sessions[0]?.SS_ID ?? null;
 });
 
-watch(scoreRows, (rows) => {
-  pagination.value.rowsNumber = rows.length;
-});
+const mapEnrollmentToScoreRow = (
+  enrollment: BackendEnrollmentDetail,
+  index: number,
+): ScoreTableRow => {
+  const profile = enrollment.USER?.PROFILE;
+  const draft = scoreDraftByEnrollmentId.value[enrollment.ERM_ID] ?? getScoreDraft(enrollment);
+  const score = scoreByEnrollmentId.value.get(enrollment.ERM_ID);
+  const hasSavedCertificate = !!(score?.CERTIFICATES && score.CERTIFICATES.length > 0);
+  const location =
+    enrollment.SESSION_LOCATION?.LOCATION ??
+    sessionLocations.value.find((item) => item.SL_ID === enrollment.SL_ID)?.LOCATION ??
+    enrollment.SESSION?.LOCATION ??
+    null;
+
+  return {
+    index: index + 1,
+    ermId: enrollment.ERM_ID,
+    nationalId: enrollment.ERM_TEST_TAKER || '-',
+    titleTh: profile?.userTitleTh || profile?.userTitleEn || '-',
+    fullnameTh:
+      profile?.userFullnameTh || profile?.userFullnameEn || enrollment.USER?.USER_EMAIL || '-',
+    email: enrollment.USER?.USER_EMAIL?.trim() || '-',
+    phone: profile?.userPhone?.trim() || '-',
+    paymentStatus: enrollment.ERM_STATUS,
+    verifyStatus: enrollment.ERM_VERIFY_STATUS,
+    sessionId: enrollment.SESSION_ID,
+    sessionLocationId: enrollment.SL_ID ?? null,
+    userProfileId: profile?.userProfileId || 0,
+    remark: enrollment.ERM_PHYSICAL_STATUS || '',
+    location: formatLocationLabel(location),
+    scoreGrammar: scoreByCode(draft, rubricItems.value, 'LANG_USE'),
+    scoreReading: scoreByCode(draft, rubricItems.value, 'READING'),
+    scoreTotal: draft.scoreTotal,
+    band: draft.band,
+    itemScores: { ...draft.lineScores },
+    hasImportedScore: importedEnrollmentIds.value.has(enrollment.ERM_ID),
+    hasScore:
+      importedEnrollmentIds.value.has(enrollment.ERM_ID) ||
+      scoreByEnrollmentId.value.has(enrollment.ERM_ID),
+    hasSavedCertificate,
+  };
+};
+
+const loadExportScoreRows = async (): Promise<ScoreTableRow[]> => {
+  const all = await ensureSessionEnrollmentsCache();
+  return all.map((enrollment, index) => mapEnrollmentToScoreRow(enrollment, index));
+};
+
+const loadEnrollmentPage = async (signal?: AbortSignal): Promise<void> => {
+  const examId = Number(route.params.examId);
+  if (isNaN(examId) || examId <= 0 || selectedSessionId.value == null) return;
+
+  const pageParams: {
+    page: number;
+    limit: number;
+    search: string;
+    sessionId: number;
+    signal?: AbortSignal;
+  } = {
+    page: pagination.value.page,
+    limit: pagination.value.rowsPerPage,
+    search: searchQuery.value,
+    sessionId: selectedSessionId.value,
+  };
+  if (signal) {
+    pageParams.signal = signal;
+  }
+
+  const pageResult = await fetchRawEnrollmentsPage(examId, pageParams);
+
+  enrollments.value = pageResult.data;
+  enrollmentTotal.value = pageResult.total;
+  pagination.value.rowsNumber = pageResult.total;
+  initializeScoreDrafts();
+};
 
 const loadData = async (): Promise<void> => {
   const examId = Number(route.params.examId);
   if (isNaN(examId) || examId <= 0) return;
 
+  pageAbortController?.abort();
+  pageAbortController = new AbortController();
+  const { signal } = pageAbortController;
+  const generation = ++loadGeneration;
+
   try {
     isLoading.value = true;
-    const [examDetail, scores] = await Promise.all([fetchExamById(examId), fetchExamScores()]);
+    const [examDetail, scores] = await Promise.all([
+      fetchExamById(examId, { signal }),
+      fetchExamScores({ examId }),
+    ]);
+    if (generation !== loadGeneration || signal.aborted) return;
 
     try {
       const rulesResponse = await getBandRules();
+      if (generation !== loadGeneration) return;
       bandRules.value = rulesResponse.bandRules;
     } catch (error) {
+      if (isRequestCanceled(error) || generation !== loadGeneration) return;
       console.error('Error fetching band rules:', error);
       bandRules.value = [];
     }
 
     exam.value = examDetail;
+    examScores.value = scores;
     selectedSessionId.value = sessionTimeTabs.value[0]?.SS_ID ?? null;
+    sessionEnrollmentsCache.value = [];
+    pagination.value.page = 1;
 
-    const rawEnrollments = await fetchRawEnrollmentsByExamId(examId, {
-      sessionId: selectedSessionId.value,
-    });
-
-    enrollments.value = rawEnrollments;
-    examScores.value = scores.filter((score) =>
-      rawEnrollments.some((enrollment) => enrollment.ERM_ID === score.ERM_ID),
-    );
-    initializeScoreDrafts();
-    pagination.value.rowsNumber = scoreRows.value.length;
+    if (selectedSessionId.value != null) {
+      await loadEnrollmentPage(signal);
+    } else {
+      enrollments.value = [];
+      enrollmentTotal.value = 0;
+      pagination.value.rowsNumber = 0;
+    }
   } catch (err) {
+    if (isRequestCanceled(err) || generation !== loadGeneration) return;
     console.error('Error fetching exam scores page data:', err);
   } finally {
-    isLoading.value = false;
+    if (generation === loadGeneration) {
+      isLoading.value = false;
+      isInitializing.value = false;
+    }
   }
 };
 
-watch(selectedSessionId, async (sessionId, previousSessionId) => {
-  if (previousSessionId == null || sessionId == null) return;
-  const examId = Number(route.params.examId);
-  if (isNaN(examId) || examId <= 0) return;
+const debouncedLoadEnrollmentPage = debounce(() => {
+  void loadEnrollmentPage(pageAbortController?.signal);
+}, 400);
 
+watch(selectedSessionId, async (sessionId, previousSessionId) => {
+  if (isInitializing.value) return;
+  if (previousSessionId == null || sessionId == null) return;
+  sessionEnrollmentsCache.value = [];
+  pagination.value.page = 1;
+  const generation = ++loadGeneration;
   try {
-    enrollments.value = await fetchRawEnrollmentsByExamId(examId, {
-      sessionId,
-    });
-    initializeScoreDrafts();
+    isLoading.value = true;
+    await loadEnrollmentPage(pageAbortController?.signal);
   } catch (err) {
+    if (isRequestCanceled(err) || generation !== loadGeneration) return;
     console.error('Error refreshing enrollments for session:', err);
+  } finally {
+    if (generation === loadGeneration) {
+      isLoading.value = false;
+    }
   }
+});
+
+watch(searchQuery, () => {
+  if (isInitializing.value) return;
+  pagination.value.page = 1;
+  debouncedLoadEnrollmentPage();
 });
 
 onMounted(() => {
   void loadData();
+});
+
+onBeforeUnmount(() => {
+  pageAbortController?.abort();
+  loadGeneration += 1;
+  isLoading.value = false;
+  debouncedLoadEnrollmentPage.cancel();
 });
 </script>
 

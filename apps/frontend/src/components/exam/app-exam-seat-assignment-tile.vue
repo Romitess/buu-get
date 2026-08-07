@@ -20,7 +20,7 @@
     <template v-else-if="student">
       <div class="seat-name">{{ shortName }}</div>
       <q-avatar size="34px" class="seat-avatar">
-        <img v-if="student.avatar" :src="student.avatar" alt="" />
+        <img v-if="student.avatar" :src="student.avatar" alt="" loading="lazy" decoding="async" />
         <q-icon v-else name="person" size="21px" color="grey-8" />
       </q-avatar>
       <q-icon v-if="swapMode" name="swap_horiz" class="swap-icon" />

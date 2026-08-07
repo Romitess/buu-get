@@ -11,6 +11,14 @@ import {
 const ROLE_KEYS = Object.keys(TEST_USERS) as TestRoleKey[];
 
 /**
+ * Normalize role slug the same way RolesGuard does so
+ * `registration officer` (legacy space) matches `registration_officer` (RoleEnum).
+ */
+function normalizeRoleName(name: string): string {
+  return name.toLowerCase().replace(/[\s-_]+/g, '');
+}
+
+/**
  * Upsert ครบ 8 roles + 1 user ต่อ role สำหรับ test DB
  * Idempotent — รันซ้ำได้หลัง truncate
  *
@@ -45,13 +53,27 @@ export async function seedTestRbac(manageConnection = true): Promise<void> {
 
     const rolesByName = new Map<string, InstanceType<typeof Role>>();
 
+    // Load all roles once (incl. soft-deleted) and match by normalized name
+    // so legacy "registration officer" is reused instead of inserting
+    // a duplicate "registration_officer" row.
+    const existingRoles = await roleRepo.find({ withDeleted: true });
+    const rolesByNormalized = new Map<string, InstanceType<typeof Role>>();
+    for (const existing of existingRoles) {
+      const key = normalizeRoleName(existing.ROLE_NAME);
+      const prior = rolesByNormalized.get(key);
+      // Prefer active (non-deleted) row when duplicates exist
+      if (!prior || (prior.DELETED_AT && !existing.DELETED_AT)) {
+        rolesByNormalized.set(key, existing);
+      }
+    }
+
     for (const key of ROLE_KEYS) {
       const roleName = TEST_USERS[key].role as RoleEnum;
-      let role = await roleRepo.findOne({
-        where: { ROLE_NAME: roleName },
-        withDeleted: true,
-      });
+      const normalized = normalizeRoleName(roleName);
+      let role = rolesByNormalized.get(normalized) ?? null;
+
       if (role) {
+        // Reuse legacy slug as-is (do not rewrite ROLE_NAME to underscore)
         role.ROLE_DESCRIPTION = TEST_ROLE_DESCRIPTIONS[key];
         role.DELETED_AT = null;
         role = await roleRepo.save(role);
@@ -62,6 +84,7 @@ export async function seedTestRbac(manageConnection = true): Promise<void> {
             ROLE_DESCRIPTION: TEST_ROLE_DESCRIPTIONS[key],
           }),
         );
+        rolesByNormalized.set(normalized, role);
       }
       rolesByName.set(roleName, role);
     }

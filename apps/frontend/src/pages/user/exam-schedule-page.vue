@@ -123,6 +123,8 @@ import {
   EXAM_TYPE_SPECIAL,
   EXAM_FORMAT_COMPUTER,
   EXAM_FORMAT_PAPER,
+  POLLING_INTERVAL_MS,
+  CALENDAR_CLOCK_INTERVAL_MS,
 } from 'src/constants/exam';
 import { validateExamPasscode } from 'src/services/exam.service';
 import { api } from 'src/boot/axios';
@@ -228,14 +230,15 @@ onMounted(async () => {
       return;
     }
     void examStore.initSchedule();
-  }, 30000);
-  calendarClockInterval = setInterval(updateCalendarNow, 1000);
+  }, POLLING_INTERVAL_MS);
+  calendarClockInterval = setInterval(updateCalendarNow, CALENDAR_CLOCK_INTERVAL_MS);
   calendarClockResyncInterval = setInterval(() => {
     void syncCalendarTime();
-  }, 60000);
+  }, 60_000);
 });
 
 onUnmounted(() => {
+  examStore.clearScheduleLoadingUi();
   if (scheduleInterval) {
     clearInterval(scheduleInterval);
   }

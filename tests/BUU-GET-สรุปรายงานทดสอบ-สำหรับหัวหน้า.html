@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <title>สรุปรายงานการทดสอบระบบ BUU-GET</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 12mm 14mm;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Sarabun", "Thonburi", "Tahoma", "Helvetica Neue", sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.35;
+      color: #1a1a1a;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      font-size: 16pt;
+      margin: 0 0 2pt;
+      font-weight: 700;
+    }
+    .meta {
+      font-size: 9pt;
+      color: #444;
+      margin-bottom: 8pt;
+    }
+    h2 {
+      font-size: 11.5pt;
+      margin: 10pt 0 4pt;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 2pt;
+    }
+    p { margin: 4pt 0; }
+    .path {
+      font-weight: 600;
+      margin: 6pt 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+      margin: 4pt 0 6pt;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 3pt 5pt;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f3f3f3; font-weight: 600; }
+    td.num { text-align: right; white-space: nowrap; }
+    .kpi {
+      display: flex;
+      gap: 8pt;
+      margin: 6pt 0;
+    }
+    .kpi div {
+      flex: 1;
+      border: 1px solid #ddd;
+      padding: 5pt 7pt;
+      text-align: center;
+    }
+    .kpi strong {
+      display: block;
+      font-size: 14pt;
+      line-height: 1.2;
+    }
+    .kpi span {
+      font-size: 8.5pt;
+      color: #555;
+    }
+    ol { margin: 4pt 0 0 16pt; padding: 0; }
+    li { margin: 2pt 0; }
+    .note {
+      font-size: 8.5pt;
+      color: #444;
+      margin-top: 8pt;
+      border-top: 1px solid #ddd;
+      padding-top: 4pt;
+    }
+  </style>
+</head>
+<body>
+  <h1>สรุปรายงานการทดสอบระบบ BUU-GET</h1>
+  <div class="meta">
+    สำหรับผู้บริหาร · วันที่ 6 สิงหาคม 2026<br />
+    เอกสารฉบับเต็ม: tests/BUSINESS_FLOW_TEST_REPORT.md · รายการบั๊ก: tests/BUG_LOG.md
+  </div>
+
+  <h2>1. สรุปผล</h2>
+  <p>ทีมได้จัดทำชุดทดสอบอัตโนมัติครอบคลุมเส้นทางธุรกิจหลักของระบบแล้ว</p>
+  <p class="path">เข้าสู่ระบบ → ลงทะเบียน/ชำระเงิน → จัดการสอบ → คะแนน/ใบรับรอง → โปรไฟล์ → รายงานผู้บริหาร</p>
+
+  <div class="kpi">
+    <div><strong>709</strong><span>เคสทั้งหมด (ใช้งาน)</span></div>
+    <div><strong>400</strong><span>Unit</span></div>
+    <div><strong>237</strong><span>Integration</span></div>
+    <div><strong>72</strong><span>E2E</span></div>
+    <div><strong>12</strong><span>บั๊กที่บันทึกไว้</span></div>
+  </div>
+
+  <p><strong>นโยบาย:</strong> เมื่อพบบั๊กในระบบจริง จะบันทึกใน Bug Log และข้ามเคสที่เกี่ยวข้อง — ไม่แก้ production เพื่อให้เทสผ่านอย่างเดียว</p>
+  <p><strong>ยังไม่ทำในรอบนี้:</strong> ThaiD ทั้งก้อน · Moodle sync · Page builder · Platform gateway (ชุดเต็ม)</p>
+
+  <h2>2. ความครอบคลุมตาม Flow</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Flow</th>
+        <th>ผลทดสอบ</th>
+        <th>ความเสี่ยงที่ยังเปิด</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1. เข้าสู่ระบบ / สิทธิ์</td>
+        <td>U114 · I58 · E10</td>
+        <td>หน้าตรวจใบรับรองสาธารณะใช้ไม่ได้ (BUG-004)</td>
+      </tr>
+      <tr>
+        <td>2. ชำระเงิน / ใบเสร็จ / กระทบยอด</td>
+        <td>U141 · I65 · E15</td>
+        <td>กระทบยอด rematch ค้าง TRANX_ID เดิม (BUG-005)</td>
+      </tr>
+      <tr>
+        <td>3. ลงทะเบียน / voucher / แหล่งทุน</td>
+        <td>U100 · I40 · E13</td>
+        <td>ที่นั่ง/เช็คชื่อบน UI มีปัญหาบางเคส (BUG-006/007)</td>
+      </tr>
+      <tr>
+        <td>4. วงจรชีวิตการสอบ</td>
+        <td>U28 · I19 · E2 (+ข้าม 4)</td>
+        <td>หน้าแก้ไขสอบ/ที่นั่ง redirect กลับ (BUG-008/009)</td>
+      </tr>
+      <tr>
+        <td>5. คะแนน / ใบรับรอง</td>
+        <td>U47 · I25 · E8</td>
+        <td>path ใบรับรองซ้ำ / หน้าคะแนนโหลดช้า (BUG-002/010)</td>
+      </tr>
+      <tr>
+        <td>6. โปรไฟล์ / รูป / ประวัติ</td>
+        <td>U21 · I17 · E5</td>
+        <td>สิทธิ์แก้ไข/อ่านโปรไฟล์คนอื่นหลวม (BUG-011/012)</td>
+      </tr>
+      <tr>
+        <td>7. รายงานสอบ (ผู้บริหาร)</td>
+        <td>U11 · I8 · E3</td>
+        <td>ตัวกรองเดือน/รอบยังไม่ทำงานใน service</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>3. บั๊กที่ควรแก้ก่อน (ผลกระทบสูง)</h2>
+  <ol>
+    <li><strong>BUG-004</strong> — หน้าตรวจใบรับรองสาธารณะแสดงไม่พบเอกสาร</li>
+    <li><strong>BUG-005</strong> — กระทบยอดธนาคารเมื่อจับคู่ใหม่ ความสัมพันธ์ธุรกรรมอาจค้างผิดรายการ</li>
+    <li><strong>BUG-010</strong> — หน้าคะแนนโหลดช้าเมื่อข้อมูลเยอะ กระทบ import/ออกใบรับรอง</li>
+    <li><strong>BUG-011</strong> — ผู้ใช้ที่ล็อกอินแล้วแก้ไขโปรไฟล์คนอื่นได้หากรู้ id</li>
+    <li><strong>BUG-008/009</strong> — แอดมินเปิดแก้ไขสอบ/จัดการที่นั่งแล้วถูกพากลับหน้ารายการ</li>
+  </ol>
+
+  <h2>4. ข้อเสนอขั้นตอนถัดไป</h2>
+  <ol>
+    <li>แก้บั๊กผลกระทบสูงด้านบน (verify สาธารณะ · กระทบยอด · authz โปรไฟล์ · หน้าคะแนน)</li>
+    <li>ปลด skip ของ E2E วงจรชีวิตสอบหลังแก้ BUG-008/009</li>
+    <li>ถ้าต้องการต่อ: ทำชุด ThaiD / Moodle / Page builder ตามแผนผลิตภัณฑ์</li>
+  </ol>
+
+  <p class="note">
+    จัดทำจากการ rollout ทดสอบอัตโนมัติ Batch 1–7 (slim) · Phase 6 Business Flow Report ·
+    รายละเอียดบั๊กทั้งหมดดูที่ tests/BUG_LOG.md
+  </p>
+</body>
+</html>

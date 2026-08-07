@@ -84,7 +84,10 @@ export class UsersController {
 
   @Delete(':id')
   @Roles(...USER_ADMIN_ROLES)
-  @ApiOkResponse({ description: 'ลบผู้ใช้งานสำเร็จ' })
+  @ApiOkResponse({
+    description:
+      'ลบผู้ใช้งานสำเร็จ (soft delete) และลบ user ใน Moodle ถ้ามี USER_MOODLE_ID',
+  })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.usersService.remove(id);
   }

@@ -79,6 +79,57 @@ export const fetchEnrollmentsByExamId = async (
 export type RawEnrollmentFetchParams = {
   sessionId?: number | null;
   sessionLocationId?: number | null;
+  signal?: AbortSignal;
+};
+
+export type RawEnrollmentPageParams = RawEnrollmentFetchParams & {
+  page?: number;
+  limit?: number;
+  search?: string;
+};
+
+export interface RawEnrollmentPageResponse {
+  data: BackendEnrollmentDetail[];
+  total: number;
+}
+
+/** ดึงผู้สมัครหนึ่งหน้า (BackendEnrollmentDetail) — ใช้ตารางคะแนนแบบ server pagination */
+export const fetchRawEnrollmentsPage = async (
+  examId: number,
+  params: RawEnrollmentPageParams = {},
+): Promise<RawEnrollmentPageResponse> => {
+  const page = params.page ?? 1;
+  const limit = params.limit ?? 10;
+  const query: Record<string, string | number> = { page, limit };
+
+  if (params.sessionId != null && params.sessionId > 0) {
+    query.sessionId = params.sessionId;
+  }
+  if (params.sessionLocationId != null && params.sessionLocationId > 0) {
+    query.sessionLocationId = params.sessionLocationId;
+  }
+  if (params.search?.trim()) {
+    query.search = params.search.trim();
+  }
+
+  const requestConfig: {
+    params: Record<string, string | number>;
+    signal?: AbortSignal;
+  } = { params: query };
+  if (params.signal) {
+    requestConfig.signal = params.signal;
+  }
+
+  const response = await api.get<{
+    data: BackendEnrollmentDetail[];
+    total: number;
+    totalPaid: number;
+  }>(`/exam-enrollments/exam/${examId}`, requestConfig);
+
+  return {
+    data: response.data.data ?? [],
+    total: response.data.total ?? 0,
+  };
 };
 
 /** ดึงผู้สมัครแบบแบ่งหน้า (limit สูงสุด 100/ครั้ง) — ควรส่ง sessionId เพื่อไม่ดึงทั้งรอบสอบ */
@@ -91,28 +142,19 @@ export const fetchRawEnrollmentsByExamId = async (
   let page = 1;
   let total = Number.POSITIVE_INFINITY;
 
-  const params: Record<string, number> = {};
-  if (scope.sessionId != null && scope.sessionId > 0) {
-    params.sessionId = scope.sessionId;
-  }
-  if (scope.sessionLocationId != null && scope.sessionLocationId > 0) {
-    params.sessionLocationId = scope.sessionLocationId;
-  }
-
   while (all.length < total) {
-    const response = await api.get<{
-      data: BackendEnrollmentDetail[];
-      total: number;
-      totalPaid: number;
-    }>(`/exam-enrollments/exam/${examId}`, {
-      params: { page, limit: pageSize, ...params },
+    if (scope.signal?.aborted) {
+      throw new DOMException('Aborted', 'AbortError');
+    }
+    const pageResult = await fetchRawEnrollmentsPage(examId, {
+      ...scope,
+      page,
+      limit: pageSize,
     });
+    total = pageResult.total;
+    all.push(...pageResult.data);
 
-    const chunk = response.data.data ?? [];
-    total = response.data.total ?? 0;
-    all.push(...chunk);
-
-    if (chunk.length === 0 || all.length >= total) {
+    if (pageResult.data.length === 0 || all.length >= total) {
       break;
     }
     page += 1;
