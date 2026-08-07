@@ -13,6 +13,7 @@ import VueApexCharts from 'vue3-apexcharts';
 import type { ApexOptions } from 'apexcharts';
 import { useI18n } from 'vue-i18n';
 import type { ExamRegistrationTrendChartData } from 'src/types/exam-report.types';
+import { getNiceYAxisMax } from 'src/utils/chart-axis';
 import { getCssVar } from 'src/utils/css-var';
 
 const { t } = useI18n();
@@ -23,9 +24,13 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const Y_TICK_AMOUNT = 6;
+
 const series = computed(() => [
   { name: t('admin.examReport.charts.registered'), data: props.data.registered },
 ]);
+
+const yAxisMax = computed(() => getNiceYAxisMax(props.data.registered, Y_TICK_AMOUNT));
 
 const chartOptions = computed(
   (): ApexOptions => ({
@@ -53,7 +58,7 @@ const chartOptions = computed(
     },
     grid: { borderColor: getCssVar('--border-color'), strokeDashArray: 4 },
     xaxis: { categories: props.data.categories },
-    yaxis: { max: 600, tickAmount: 6 },
+    yaxis: { max: yAxisMax.value, tickAmount: Y_TICK_AMOUNT, min: 0 },
     legend: { position: 'bottom', horizontalAlign: 'center' },
   }),
 );
