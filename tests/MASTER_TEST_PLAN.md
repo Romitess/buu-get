@@ -548,7 +548,7 @@ Cuts / deferred:
 | ENR-U-011 | unit | create duplicate active same slot | P0 | Existing active same time | create | Conflict | gap | |
 | ENR-U-012 | unit | create session not found | P1 | Bad SESSION_ID | create | NotFound | gap | |
 | ENR-U-013 | unit | create user not found | P1 | Bad USER_ID | create | NotFound | gap | |
-| ENR-U-014 | unit | PHYSICAL_STATUS normalize to ทั่วไป | P2 | Special physical status | create | Stored as GENERAL | gap | |
+| ENR-U-014 | unit | PHYSICAL_STATUS ทั่วไป → ชาวไทย when no passport | P2 | Special physical status | create with PHYSICAL_STATUS `ไม่มีข้อมูลข้างต้น` (no passport) | `ERM_PHYSICAL_STATUS` = `ชาวไทย` | yes | spot-check vs service.spec |
 | ENR-U-015 | unit | validatePasscode SPECIAL success | P0 | Matching passcode | validatePasscode | void ok | gap | |
 | ENR-U-016 | unit | validatePasscode non-SPECIAL no-op | P1 | Not SPECIAL | validatePasscode | No check | gap | |
 | ENR-U-017 | unit | validatePasscode invalid | P0 | Bad passcode | validatePasscode | BadRequest | gap | |

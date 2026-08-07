@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<title>CC-SF-03-128 Batch 7</title>
+<style>
+  @page { size: A4; margin: 12mm 14mm; }
+  body { font-family: "Sarabun","Thonburi","Tahoma",sans-serif; font-size: 10pt; color: #111; }
+  h1 { font-size: 16pt; margin: 0 0 4pt; text-align: center; }
+  .sys { margin: 0 0 10pt; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #333; padding: 4pt 6pt; vertical-align: top; }
+  th { background: #f0f0f0; }
+  td.code { width: 28%; white-space: nowrap; font-family: ui-monospace, monospace; font-size: 9pt; }
+  .id { color: #666; font-size: 8pt; }
+  .meta { font-size: 9pt; color: #444; margin-bottom: 8pt; }
+</style>
+</head>
+<body>
+  <h1>ตารางรายการการทดสอบ</h1>
+  <p class="sys">ระบบ: <strong>BUU-GET</strong> — รายงานการสอบ (ผู้บริหาร) (Exam report)</p>
+  <p class="meta">แบบฟอร์ม CC-SF-03-128 · Batch 07 · จำนวน 20 เคส · วันที่ทดสอบ 2026-08-06</p>
+  <table>
+    <thead><tr><th>รหัสการทดสอบ</th><th>ชื่อการทดสอบ</th></tr></thead>
+    <tbody>
+<tr><td class="code">TC-0007-1-0001</td><td>buildAttemptMetrics empty window <span class="id">(RPT-U-001)</span></td></tr>
+<tr><td class="code">TC-0007-1-0002</td><td>buildAttemptMetrics firstTime vs repeat <span class="id">(RPT-U-002)</span></td></tr>
+<tr><td class="code">TC-0007-1-0003</td><td>buildAttemptMetrics repeatByYear DISTINCT <span class="id">(RPT-U-003)</span></td></tr>
+<tr><td class="code">TC-0007-1-0004</td><td>getSummary YoY + changePercent when prev=0 <span class="id">(RPT-U-004)</span></td></tr>
+<tr><td class="code">TC-0007-1-0005</td><td>getSummary absent + attendance/absent rates <span class="id">(RPT-U-005)</span></td></tr>
+<tr><td class="code">TC-0007-1-0006</td><td>Future round → attended/absent null <span class="id">(RPT-U-006)</span></td></tr>
+<tr><td class="code">TC-0007-1-0007</td><td>Score buckets only ≥40; fixed ranges <span class="id">(RPT-U-007)</span></td></tr>
+<tr><td class="code">TC-0007-1-0008</td><td>formatRoundLabel appends /{year} <span class="id">(RPT-U-008)</span></td></tr>
+<tr><td class="code">TC-0007-1-0009</td><td>attemptProportion firstTime = total−repeat <span class="id">(RPT-U-009)</span></td></tr>
+<tr><td class="code">TC-0007-1-0010</td><td>targetYear = toYear else latest data year <span class="id">(RPT-U-010)</span></td></tr>
+<tr><td class="code">TC-0007-2-0001</td><td>GET /api/exam-report/summary as ADMIN <span class="id">(RPT-I-001)</span></td></tr>
+<tr><td class="code">TC-0007-2-0002</td><td>GET summary as EXECUTIVE <span class="id">(RPT-I-002)</span></td></tr>
+<tr><td class="code">TC-0007-2-0003</td><td>RBAC deny + unauthenticated <span class="id">(RPT-I-003)</span></td></tr>
+<tr><td class="code">TC-0007-2-0004</td><td>fromYear/toYear filter on EXAM_DATE year <span class="id">(RPT-I-004)</span></td></tr>
+<tr><td class="code">TC-0007-2-0005</td><td>CANCELLED enrollments excluded <span class="id">(RPT-I-005)</span></td></tr>
+<tr><td class="code">TC-0007-2-0006</td><td>GET /api/exam-report/options <span class="id">(RPT-I-006)</span></td></tr>
+<tr><td class="code">TC-0007-2-0007</td><td>GET candidates + scoreLines + attemptStatus <span class="id">(RPT-I-007)</span></td></tr>
+<tr><td class="code">TC-0007-3-0001</td><td>Admin dashboard report loads <span class="id">(RPT-E-001)</span></td></tr>
+<tr><td class="code">TC-0007-3-0002</td><td>Drill-down year → rounds → candidates <span class="id">(RPT-E-002)</span></td></tr>
+<tr><td class="code">TC-0007-3-0003</td><td>Non-admin blocked from report UI <span class="id">(RPT-E-003)</span></td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

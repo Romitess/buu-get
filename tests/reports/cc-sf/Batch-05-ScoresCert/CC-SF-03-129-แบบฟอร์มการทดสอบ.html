@@ -1,0 +1,4010 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<title>CC-SF-03-129 Batch 5</title>
+<style>
+  @page { size: A4; margin: 10mm 12mm; }
+  body { font-family: "Sarabun","Thonburi","Tahoma",sans-serif; font-size: 9.5pt; color: #111; margin: 0; }
+  .cover { page-break-after: always; padding-top: 40mm; text-align: center; }
+  .cover h1 { font-size: 18pt; }
+  .case { page-break-after: always; }
+  .case:last-child { page-break-after: auto; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 6pt; }
+  th, td { border: 1px solid #333; padding: 5pt 6pt; vertical-align: top; }
+  th { background: #f3f3f3; font-weight: 600; font-size: 9pt; }
+  .en { color: #555; font-size: 8pt; }
+  code { font-family: ui-monospace, monospace; }
+  pre.desc { white-space: pre-wrap; margin: 4pt 0 0; font-family: inherit; }
+  .result { width: 22%; white-space: nowrap; }
+  .footer-id { font-size: 8pt; color: #666; margin-top: 4pt; }
+  .steps td { font-size: 9pt; }
+</style>
+</head>
+<body>
+  <section class="cover">
+    <h1>แบบฟอร์มการทดสอบระบบ</h1>
+    <p>CC-SF-03-129</p>
+    <p><strong>ระบบ:</strong> BUU-GET</p>
+    <p><strong>ชุดทดสอบ:</strong> Batch 05 — คะแนนและใบรับรอง</p>
+    <p>Scores &amp; Certificates</p>
+    <p>จำนวน 71 เคส · ผู้ทดสอบ: BUU-GET Test Rollout · วันที่ 2026-08-06</p>
+  </section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0001</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Upsert by ERM_ID creates score + lines + CEFR</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-U-001
+ระดับ: unit
+Upsert by ERM_ID creates score + lines + CEFR</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Enrollment has exam rubric/items</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `create` with valid lines</td>
+        <td>save score/lines + compute band</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-U-001 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0002</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Upsert restores soft-deleted score row</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-U-002
+ระดับ: unit
+Upsert restores soft-deleted score row</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing soft-deleted score</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `create` with same `ERM_ID`</td>
+        <td>`DELETED_AT` cleared and row reused</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-U-002 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0003</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Reject duplicate SRBI_ID in payload</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-U-003
+ระดับ: unit
+Reject duplicate SRBI_ID in payload</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Valid enrollment/rubric</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>create with duplicate line ids</td>
+        <td>BadRequest</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-U-003 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0004</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Reject missing required rubric item score</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-U-004
+ระดับ: unit
+Reject missing required rubric item score</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Rubric has active items</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>create missing one item</td>
+        <td>BadRequest</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-U-004 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0005</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Reject line not in rubric</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-U-005
+ระดับ: unit
+Reject line not in rubric</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Rubric fixed</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>create with foreign `SRBI_ID`</td>
+        <td>BadRequest</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-U-005 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0006</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Reject score below 0</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-U-006
+ระดับ: unit
+Reject score below 0</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Valid rubric</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>create with negative score</td>
+        <td>BadRequest</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-U-006 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0007</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Reject score above item max</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-U-007
+ระดับ: unit
+Reject score above item max</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Item max known</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>create with score &gt; max</td>
+        <td>BadRequest</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-U-007 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0008</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Reject when enrollment/exam/rubric not usable</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-U-008
+ระดับ: unit
+Reject when enrollment/exam/rubric not usable</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Missing or invalid dependencies</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>create</td>
+        <td>NotFound/BadRequest</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-U-008 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0009</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Update with lines rewrites lines and recalculates</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-U-009
+ระดับ: unit
+Update with lines rewrites lines and recalculates</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing score</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>update with `lines`</td>
+        <td>lines replaced + band recomputed</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-U-009 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0010</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Update without lines skips recalc branch</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-U-010
+ระดับ: unit
+Update without lines skips recalc branch</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing score</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>update partial fields</td>
+        <td>direct save branch</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-U-010 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0001</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST /api/exam-scores happy path</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-I-001
+ระดับ: integration
+POST /api/exam-scores happy path</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>ENROLLMENT_ADMIN role + seeded rubric</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST valid payload</td>
+        <td>201 persisted score/lines/band</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-I-001 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0002</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST rejects invalid line composition</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-I-002
+ระดับ: integration
+POST rejects invalid line composition</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Same as above</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST duplicate/missing/foreign items</td>
+        <td>400</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-I-002 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0003</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST rejects out-of-range scores</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-I-003
+ระดับ: integration
+POST rejects out-of-range scores</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Same as above</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST negative/over-max</td>
+        <td>400</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-I-003 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0004</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST upsert keeps single logical score per enrollment</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-I-004
+ระดับ: integration
+POST upsert keeps single logical score per enrollment</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing score</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST again with new lines</td>
+        <td>reused row + updated lines</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-I-004 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0005</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>PATCH with lines rewrites and recalculates</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-I-005
+ระดับ: integration
+PATCH with lines rewrites and recalculates</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing score</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PATCH lines payload</td>
+        <td>200 + updated lines/band</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-I-005 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0006</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Role guard on /exam-scores routes</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-I-006
+ระดับ: integration
+Role guard on /exam-scores routes</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>role matrix + no JWT</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>hit CRUD with various roles</td>
+        <td>2xx/403/401 as expected</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-I-006 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0007</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>DELETE soft-delete behavior</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-I-007
+ระดับ: integration
+DELETE soft-delete behavior</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing score</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>DELETE then GET</td>
+        <td>excluded from normal query</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-I-007 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-3-0001</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Admin enters scores and sees computed band</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-E-001
+ระดับ: e2e
+Admin enters scores and sees computed band</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Admin + rubric + candidate</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Save scores in UI</td>
+        <td>total + CEFR shown</td>
+        <td>ข้ามการรัน E2E — BUG-010: หน้าคะแนนโหลด fetchExamScores() ทั้งฐาน ทำให้ตาราง enrollment ว่างนาน</td>
+        <td class="result">
+          ☐ ผ่าน / Pass<br/>
+          ☑ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>บันทึกใน tests/BUG_LOG.md; เคสถูกข้ามจนกว่าจะแก้บั๊ก</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-E-001 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-3-0002</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Non-allowed role blocked from score management</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-scores</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SCR-E-002
+ระดับ: e2e
+Non-allowed role blocked from score management</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Candidate login</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>open score management route</td>
+        <td>blocked/redirected</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SCR-E-002 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0011</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>getBandRules returns empty when no active/invalid JSON</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-criteria</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CRI-U-001
+ระดับ: unit
+getBandRules returns empty when no active/invalid JSON</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>No active criteria or malformed content</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `getBandRules`</td>
+        <td>empty array</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CRI-U-001 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0012</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Parse filters invalid rule objects</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-criteria</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CRI-U-002
+ระดับ: unit
+Parse filters invalid rule objects</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>mixed valid/invalid JSON rules</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>parse through service path</td>
+        <td>keep only valid schema rules</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CRI-U-002 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0013</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>resolveBandLevel matches inclusive boundaries</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-criteria</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CRI-U-003
+ระดับ: unit
+resolveBandLevel matches inclusive boundaries</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Active band rules</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>resolve boundary scores</td>
+        <td>expected CEFR returned</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CRI-U-003 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0014</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>resolveBandLevel returns null on non-finite score</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-criteria</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CRI-U-004
+ระดับ: unit
+resolveBandLevel returns null on non-finite score</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Any rules</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>resolve NaN/Infinity</td>
+        <td>null</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CRI-U-004 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0015</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>resolveBandLevel returns null when no range matches</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-criteria</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CRI-U-005
+ระดับ: unit
+resolveBandLevel returns null when no range matches</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Gapped ranges</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>resolve unmatched score</td>
+        <td>null</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CRI-U-005 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0016</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>saveBandRules updates existing active row</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-criteria</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CRI-U-006
+ระดับ: unit
+saveBandRules updates existing active row</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Active row exists</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>save DTO</td>
+        <td>row updated</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CRI-U-006 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0017</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>saveBandRules creates row when none exists</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-criteria</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CRI-U-007
+ระดับ: unit
+saveBandRules creates row when none exists</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>no active row</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>save DTO</td>
+        <td>new active row created</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CRI-U-007 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0008</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>PUT band-rules then GET round-trip consistency</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-criteria</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CRI-I-001
+ระดับ: integration
+PUT band-rules then GET round-trip consistency</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Authenticated user</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PUT valid then GET</td>
+        <td>persisted rules returned</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CRI-I-001 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0009</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>PUT validation rejects invalid rule fields</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-criteria</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CRI-I-002
+ระดับ: integration
+PUT validation rejects invalid rule fields</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Authenticated user</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>invalid payload variants</td>
+        <td>400</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CRI-I-002 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0010</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>GET/PUT require JWT</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-criteria</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CRI-I-003
+ระดับ: integration
+GET/PUT require JWT</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>no token</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call endpoints</td>
+        <td>401</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CRI-I-003 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0011</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Any authenticated role can mutate rules (current behavior)</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-criteria</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CRI-I-004
+ระดับ: integration
+Any authenticated role can mutate rules (current behavior)</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>candidate/staff/admin JWT</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PUT valid payload each role</td>
+        <td>all authenticated roles 2xx</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CRI-I-004 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-3-0003</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Admin edits CEFR band rules and persists</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-criteria</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CRI-E-001
+ระดับ: e2e
+Admin edits CEFR band rules and persists</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Admin login</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>edit+save+reload criteria page</td>
+        <td>values persisted</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CRI-E-001 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-3-0004</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Updated mapping reflected in downstream score/cert views</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-criteria</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CRI-E-002
+ระดับ: e2e
+Updated mapping reflected in downstream score/cert views</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>updated rules + existing scores</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>open dependent UI</td>
+        <td>CEFR display follows latest rules</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CRI-E-002 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0018</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Create rubric with items and default max score mapping</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-U-001
+ระดับ: unit
+Create rubric with items and default max score mapping</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Valid DTO</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `create`</td>
+        <td>items persisted and mapped order</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-U-001 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0019</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Update blocks item edits for default rubric</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-U-002
+ระดับ: unit
+Update blocks item edits for default rubric</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>`SRB_IS_DEFAULT=true`</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>update with `items`</td>
+        <td>BadRequest</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-U-002 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0020</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Update blocks items when rubric used by saved scores</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-U-003
+ระดับ: unit
+Update blocks items when rubric used by saved scores</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>rubric tied to saved scores</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>update with `items`</td>
+        <td>Conflict</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-U-003 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0021</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Update with items soft-deletes old items then replaces</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-U-004
+ระดับ: unit
+Update with items soft-deletes old items then replaces</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>non-default rubric, no score lock</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>update items</td>
+        <td>replace semantics applied</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-U-004 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0022</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Remove blocks default rubric deletion</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-U-005
+ระดับ: unit
+Remove blocks default rubric deletion</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>default rubric</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>remove</td>
+        <td>BadRequest</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-U-005 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0023</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Remove blocks rubric referenced by exam</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-U-006
+ระดับ: unit
+Remove blocks rubric referenced by exam</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>exam references rubric</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>remove</td>
+        <td>Conflict</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-U-006 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0024</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>assertRubricUsable rejects zero active items</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-U-007
+ระดับ: unit
+assertRubricUsable rejects zero active items</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>rubric exists no active items</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `assertRubricUsable`</td>
+        <td>BadRequest</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-U-007 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0025</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>findOne not found path</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-U-008
+ระดับ: unit
+findOne not found path</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>missing id</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `findOne`</td>
+        <td>NotFound</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-U-008 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0026</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>findAll hides soft-deleted items in response</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-U-009
+ระดับ: unit
+findAll hides soft-deleted items in response</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>active + deleted items</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `findAll`</td>
+        <td>response includes only active items</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-U-009 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0012</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST /api/score-rubrics create rubric/items</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-I-001
+ระดับ: integration
+POST /api/score-rubrics create rubric/items</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>EXAM_ADMIN JWT</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST valid payload</td>
+        <td>201</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-I-001 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0013</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>PATCH default rubric items blocked</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-I-002
+ระดับ: integration
+PATCH default rubric items blocked</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>seeded default rubric</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PATCH with `items`</td>
+        <td>400</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-I-002 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0014</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>PATCH used-by-score rubric items blocked</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-I-003
+ระดับ: integration
+PATCH used-by-score rubric items blocked</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>scored exam exists</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PATCH items</td>
+        <td>409</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-I-003 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0015</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>DELETE rubric referenced by exam blocked</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-I-004
+ระดับ: integration
+DELETE rubric referenced by exam blocked</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>exam references rubric</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>DELETE</td>
+        <td>409</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-I-004 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0016</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Role guard across rubric endpoints</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-I-005
+ระดับ: integration
+Role guard across rubric endpoints</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>role matrix + no JWT</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call endpoints</td>
+        <td>2xx/403/401 as expected</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-I-005 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0017</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>DTO validation on items/min constraints</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-I-006
+ระดับ: integration
+DTO validation on items/min constraints</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>EXAM_ADMIN JWT</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>invalid payload</td>
+        <td>400</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-I-006 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-3-0005</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Admin creates/edits non-default rubric and reuses in exam form</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-E-001
+ระดับ: e2e
+Admin creates/edits non-default rubric and reuses in exam form</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Admin login</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>rubric CRUD then open exam form</td>
+        <td>rubric selectable and persisted</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-E-001 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-3-0006</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Locked rubric edit shows conflict feedback</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>score-rubrics</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RUB-E-002
+ระดับ: e2e
+Locked rubric edit shows conflict feedback</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>rubric used by saved scores</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>edit rubric items in UI</td>
+        <td>conflict shown and no mutation</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RUB-E-002 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0027</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>bulkIssue empty list short-circuit</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-U-001
+ระดับ: unit
+bulkIssue empty list short-circuit</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>none</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>bulkIssue with empty candidates</td>
+        <td>success true, 0 created/skipped</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-U-001 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0028</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Reject future issue date</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-U-002
+ระดับ: unit
+Reject future issue date</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>`certIssuedAt` in future</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>create/bulkIssue</td>
+        <td>BadRequest</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-U-002 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0029</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Reject expiry date before issue date</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-U-003
+ระดับ: unit
+Reject expiry date before issue date</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>`certExpiresAt &lt; certIssuedAt`</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>bulkIssue</td>
+        <td>BadRequest</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-U-003 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0030</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Reject missing SCORES_ID in requested candidates</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-U-004
+ระดับ: unit
+Reject missing SCORES_ID in requested candidates</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>one missing score id</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>bulkIssue</td>
+        <td>BadRequest</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-U-004 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0031</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Reject USER_ID mismatch against score enrollment</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-U-005
+ระดับ: unit
+Reject USER_ID mismatch against score enrollment</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>mismatched user/score</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>bulkIssue</td>
+        <td>BadRequest</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-U-005 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0032</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Skip already-certified score</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-U-006
+ระดับ: unit
+Skip already-certified score</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>score already has cert</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>bulkIssue</td>
+        <td>skipped increment, no duplicate cert</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-U-006 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0033</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Create certificate updates session status COMPLETED</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-U-007
+ระดับ: unit
+Create certificate updates session status COMPLETED</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>score with session</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>create/bulk path</td>
+        <td>cert saved + session completed</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-U-007 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0034</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Missing recipient email does not fail issuance</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-U-008
+ระดับ: unit
+Missing recipient email does not fail issuance</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>user has no email</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>bulkIssue</td>
+        <td>cert still created</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-U-008 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0035</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Email send failure does not rollback issuance</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-U-009
+ระดับ: unit
+Email send failure does not rollback issuance</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>email sender throws</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>bulkIssue</td>
+        <td>cert success, side-effect failure tolerated</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-U-009 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0036</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Manual create trims custom code or auto-generates</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-U-010
+ระดับ: unit
+Manual create trims custom code or auto-generates</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>blank/spaced code payload</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>create</td>
+        <td>trimmed code or generated fallback</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-U-010 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-1-0037</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Update enforces future issue-date guard</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-U-011
+ระดับ: unit
+Update enforces future issue-date guard</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>existing cert</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>update future `CERT_ISSUED_AT`</td>
+        <td>BadRequest</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-U-011 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0018</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST bulk-issue mixed create/skip</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-I-001
+ระดับ: integration
+POST bulk-issue mixed create/skip</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>EXAM_ADMIN JWT + mixed candidates</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST bulk-issue</td>
+        <td>created/skipped summary + DB state</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-I-001 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0019</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>bulk-issue fails atomically on invalid batch member</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-I-002
+ระดับ: integration
+bulk-issue fails atomically on invalid batch member</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>one invalid score/user mismatch</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST bulk-issue</td>
+        <td>400 and no partial writes</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-I-002 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0020</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>bulk-issue date validation</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-I-003
+ระดับ: integration
+bulk-issue date validation</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>EXAM_ADMIN JWT</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>invalid date combinations</td>
+        <td>400</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-I-003 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0021</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>bulk-issue role restriction enforced</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-I-004
+ระดับ: integration
+bulk-issue role restriction enforced</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>disallowed/no JWT</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST bulk-issue</td>
+        <td>403/401</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-I-004 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0022</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Non-bulk certificate CRUD authz behavior (current)</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-I-005
+ระดับ: integration
+Non-bulk certificate CRUD authz behavior (current)</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>authenticated roles</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST/GET/PATCH/DELETE</td>
+        <td>current behavior captured</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-I-005 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0023</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>CERT_CODE uniqueness behavior</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-I-006
+ระดับ: integration
+CERT_CODE uniqueness behavior</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>duplicate custom code attempt</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>create second cert</td>
+        <td>conflict/DB error as designed</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-I-006 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0024</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Certificate soft-delete behavior</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-I-007
+ระดับ: integration
+Certificate soft-delete behavior</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>existing cert</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>DELETE then GET/list</td>
+        <td>excluded from normal queries</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-I-007 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-2-0025</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Create endpoint updates linked session completed</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-I-008
+ระดับ: integration
+Create endpoint updates linked session completed</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>score linked to session</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST create cert</td>
+        <td>session status persisted completed</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-I-008 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-3-0007</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Admin bulk-issues certificates from score flow</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-E-001
+ระดับ: e2e
+Admin bulk-issues certificates from score flow</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>scored candidates ready</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>execute bulk issue UI flow</td>
+        <td>summary + cert status updated</td>
+        <td>ข้ามการรัน E2E — BUG-010: bulk-issue บน UI ถูก block ด้วยหน้า scores ที่โหลดช้า</td>
+        <td class="result">
+          ☐ ผ่าน / Pass<br/>
+          ☑ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>บันทึกใน tests/BUG_LOG.md; เคสถูกข้ามจนกว่าจะแก้บั๊ก</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-E-001 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-3-0008</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Candidate sees issued certificate in history/verify flow</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-E-002
+ระดับ: e2e
+Candidate sees issued certificate in history/verify flow</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>cert issued</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>candidate opens history/verify</td>
+        <td>certificate visible/downloadable</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-E-002 · Batch 5 Scores &amp; Certificates</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0005-3-0009</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Non-admin cannot execute bulk issue action</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-certificates</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: CERT-E-003
+ระดับ: e2e
+Non-admin cannot execute bulk issue action</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>candidate/staff login</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>attempt bulk-issue UI/API action</td>
+        <td>blocked/403</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 5 Scores &amp; Certificates)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: CERT-E-003 · Batch 5 Scores &amp; Certificates</p>
+</section>
+</body>
+</html>

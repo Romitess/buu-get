@@ -8,7 +8,8 @@
 **Batch 1–7 slim done** · Phase 6 Flow Report done · shared-DB cleanup done  
 **Next gate:** rollout complete — THAID + Batch7 extras deferred
 
-See `tests/BUSINESS_FLOW_TEST_REPORT.md` for stakeholder flow summary.
+See `tests/BUSINESS_FLOW_TEST_REPORT.md` for stakeholder flow summary.  
+CC-SF forms (128/129) per batch: [`tests/reports/cc-sf/index.md`](./reports/cc-sf/index.md) — regenerate with `node tests/scripts/generate-cc-sf-reports.mjs`.
 
 Remaining deferred: THAID entire module; moodle / page-builder / platform-gateway / transaction-refs|profiles|status-history.
 
@@ -23,6 +24,7 @@ Remaining deferred: THAID entire module; moodle / page-builder / platform-gatewa
 | 4 Integration Test Rollout (per batch) | done | Batch 1–7 Integration done (B6: 17; B7: 8) |
 | 5 E2E (P0–P1 flows) | done | Batch 1–7 E2E done (B6: 5; B7: 3) |
 | 6 Business Flow Test Report | done | `tests/BUSINESS_FLOW_TEST_REPORT.md` |
+| 7 CC-SF PDF export (128/129) | done | `tests/reports/cc-sf/` — 709 cases, 14 PDFs |
 
 ## DB mode (Phase 0 adjust)
 

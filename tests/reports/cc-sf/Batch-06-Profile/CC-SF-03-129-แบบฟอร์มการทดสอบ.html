@@ -1,0 +1,2330 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<title>CC-SF-03-129 Batch 6</title>
+<style>
+  @page { size: A4; margin: 10mm 12mm; }
+  body { font-family: "Sarabun","Thonburi","Tahoma",sans-serif; font-size: 9.5pt; color: #111; margin: 0; }
+  .cover { page-break-after: always; padding-top: 40mm; text-align: center; }
+  .cover h1 { font-size: 18pt; }
+  .case { page-break-after: always; }
+  .case:last-child { page-break-after: auto; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 6pt; }
+  th, td { border: 1px solid #333; padding: 5pt 6pt; vertical-align: top; }
+  th { background: #f3f3f3; font-weight: 600; font-size: 9pt; }
+  .en { color: #555; font-size: 8pt; }
+  code { font-family: ui-monospace, monospace; }
+  pre.desc { white-space: pre-wrap; margin: 4pt 0 0; font-family: inherit; }
+  .result { width: 22%; white-space: nowrap; }
+  .footer-id { font-size: 8pt; color: #666; margin-top: 4pt; }
+  .steps td { font-size: 9pt; }
+</style>
+</head>
+<body>
+  <section class="cover">
+    <h1>แบบฟอร์มการทดสอบระบบ</h1>
+    <p>CC-SF-03-129</p>
+    <p><strong>ระบบ:</strong> BUU-GET</p>
+    <p><strong>ชุดทดสอบ:</strong> Batch 06 — โปรไฟล์ รูปภาพ และประวัติแก้ไข</p>
+    <p>Profile &amp; identity</p>
+    <p>จำนวน 41 เคส · ผู้ทดสอบ: BUU-GET Test Rollout · วันที่ 2026-08-06</p>
+  </section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0001</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>findOne not found</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-U-001
+ระดับ: unit
+findOne not found</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Missing profile id</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `findOne`</td>
+        <td>NotFoundException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-U-001 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0002</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>findByUserId returns existing with relations</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-U-002
+ระดับ: unit
+findByUserId returns existing with relations</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Profile + user + IMAGE</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `findByUserId`</td>
+        <td>profile + relations loaded</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-U-002 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0003</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>findByUserId auto-creates blank profile</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-U-003
+ระดับ: unit
+findByUserId auto-creates blank profile</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>User exists, no profile</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `findByUserId`</td>
+        <td>create blank; return with relations</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-U-003 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0004</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>findByUserId unknown user</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-U-004
+ระดับ: unit
+findByUserId unknown user</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>No user row</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `findByUserId`</td>
+        <td>NotFoundException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-U-004 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0005</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Candidate update clears remark + WAIT_FIXED→UNCHECKED</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-U-005
+ระดับ: unit
+Candidate update clears remark + WAIT_FIXED→UNCHECKED</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Remark set; WAIT_FIXED enrollments</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>update as candidate</td>
+        <td>remark null; enrollments updated</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-U-005 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0006</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Staff update does not clear remark/enrollments</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-U-006
+ระดับ: unit
+Staff update does not clear remark/enrollments</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Remark set; staff modifier</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>update as staff</td>
+        <td>remark kept; no enrollment bulk update</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-U-006 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0007</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>History saved for staff field change</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-U-007
+ระดับ: unit
+History saved for staff field change</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Changed mapped field; staff</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>update</td>
+        <td>historyService.create called</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-U-007 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0008</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Candidate history skipped without remark/email flag</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-U-008
+ระดับ: unit
+Candidate history skipped without remark/email flag</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Candidate; no remark; not email</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>update changed fields</td>
+        <td>no history create</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-U-008 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0009</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Candidate history saved when hadActiveRemark or isFromEmail</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-U-009
+ระดับ: unit
+Candidate history saved when hadActiveRemark or isFromEmail</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Candidate + remark OR email flag</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>update</td>
+        <td>history created</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-U-009 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0010</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Duplicate national ID / passport Conflict</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-U-010
+ระดับ: unit
+Duplicate national ID / passport Conflict</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Other user (incl soft-deleted) has ID</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>update conflicting ID</td>
+        <td>ConflictException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-U-010 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0011</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>userImagePath upserts UserImage</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-U-011
+ระดับ: unit
+userImagePath upserts UserImage</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>With/without existing image</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>update with path</td>
+        <td>upsert image row</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-U-011 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0001</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>GET /api/user-profile/me JWT</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-I-001
+ระดับ: integration
+GET /api/user-profile/me JWT</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Candidate JWT</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET me</td>
+        <td>200 (auto-create if needed)</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-I-001 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0002</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>PATCH /api/user-profile/me persists fields</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-I-002
+ระดับ: integration
+PATCH /api/user-profile/me persists fields</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Candidate JWT</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PATCH fields</td>
+        <td>200; DB updated</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-I-002 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0003</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Candidate PATCH clears remark + resets WAIT_FIXED</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-I-003
+ระดับ: integration
+Candidate PATCH clears remark + resets WAIT_FIXED</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Remark + WAIT_FIXED enrollment</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PATCH me</td>
+        <td>remark null; UNCHECKED</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-I-003 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0004</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>National ID conflict via PATCH me</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-I-004
+ระดับ: integration
+National ID conflict via PATCH me</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Another user owns ID</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PATCH conflicting ID</td>
+        <td>409</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-I-004 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0005</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Admin list/get/create/delete RBAC</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-I-005
+ระดับ: integration
+Admin list/get/create/delete RBAC</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>ADMIN vs candidate / no JWT</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>hit admin routes</td>
+        <td>ADMIN 2xx; others 403/401</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-I-005 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0006</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>PATCH /api/user-profile/:id any JWT can mutate (current)</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-I-006
+ระดับ: integration
+PATCH /api/user-profile/:id any JWT can mutate (current)</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Candidate JWT + foreign profileId</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PATCH foreign id</td>
+        <td>current: 2xx allowed</td>
+        <td>ผ่านตามพฤติกรรมปัจจุบันที่บันทึกไว้ — BUG-011: JWT ใดก็ PATCH โปรไฟล์คนอื่นได้ (authz gap ที่ assert ไว้)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-I-006 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0007</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Mixed-role user treated as staff modifier</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-I-007
+ระดับ: integration
+Mixed-role user treated as staff modifier</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>JWT roles candidate+staff</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PATCH me</td>
+        <td>remark not auto-cleared</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-I-007 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0008</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Soft-delete then findOne hidden</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-I-008
+ระดับ: integration
+Soft-delete then findOne hidden</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>ADMIN; existing profile</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>DELETE then GET</td>
+        <td>404 / excluded</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-I-008 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-3-0001</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Candidate edits own profile and sees saved values</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-E-001
+ระดับ: e2e
+Candidate edits own profile and sees saved values</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Candidate login</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Edit profile UI + reload</td>
+        <td>values persist</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-E-001 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-3-0002</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Staff remark → candidate fix clears remark</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-E-002
+ระดับ: e2e
+Staff remark → candidate fix clears remark</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Staff set remark; WAIT_FIXED</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Candidate edits profile</td>
+        <td>remark cleared; status advances</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-E-002 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-3-0003</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Admin views registrant profile edit history</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-profile</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PROF-E-003
+ระดับ: e2e
+Admin views registrant profile edit history</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Prior edit exists</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Admin open history UI</td>
+        <td>history rows visible</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PROF-E-003 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0012</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>findByUserId returns null when missing</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-image</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: IMG-U-001
+ระดับ: unit
+findByUserId returns null when missing</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>No row</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call findByUserId</td>
+        <td>null</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: IMG-U-001 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0013</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>upsertByUserId creates new row</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-image</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: IMG-U-002
+ระดับ: unit
+upsertByUserId creates new row</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>No row</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>upsert URL</td>
+        <td>new row saved</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: IMG-U-002 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0014</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>upsertByUserId updates existing URL</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-image</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: IMG-U-003
+ระดับ: unit
+upsertByUserId updates existing URL</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing row</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>upsert new URL</td>
+        <td>same id; URL updated</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: IMG-U-003 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0009</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>GET /api/user-image/me with JWT</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-image</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: IMG-I-001
+ระดับ: integration
+GET /api/user-image/me with JWT</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>With/without image</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET me</td>
+        <td>200 body or null</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: IMG-I-001 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0010</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>PATCH /api/user-image/me upserts</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-image</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: IMG-I-002
+ระดับ: integration
+PATCH /api/user-image/me upserts</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>JWT + userImageUrl</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PATCH</td>
+        <td>200 persisted</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: IMG-I-002 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0011</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>PATCH without userImageUrl no-op message</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-image</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: IMG-I-003
+ระดับ: integration
+PATCH without userImageUrl no-op message</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>JWT + `{}`</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PATCH</td>
+        <td>no-op message; no DB write</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: IMG-I-003 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0012</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>GET/PATCH me require JWT</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-image</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: IMG-I-004
+ระดับ: integration
+GET/PATCH me require JWT</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>No token</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call endpoints</td>
+        <td>401</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: IMG-I-004 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-3-0004</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Candidate updates profile photo on profile page</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>user-image</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: IMG-E-001
+ระดับ: e2e
+Candidate updates profile photo on profile page</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Candidate login</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Change photo + save</td>
+        <td>photo after reload</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: IMG-E-001 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0015</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>create persists history row</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>profile-edit-history</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PEH-U-001
+ระดับ: unit
+create persists history row</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Valid DTO</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call create</td>
+        <td>saved entity</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PEH-U-001 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0016</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>findByUserProfileId order DESC</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>profile-edit-history</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PEH-U-002
+ระดับ: unit
+findByUserProfileId order DESC</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Multiple rows</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call find</td>
+        <td>newest first</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PEH-U-002 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0017</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>findLatestImagesByProfileIds empty → {}</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>profile-edit-history</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PEH-U-003
+ระดับ: unit
+findLatestImagesByProfileIds empty → {}</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>`[]`</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call</td>
+        <td>`{}`</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PEH-U-003 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0018</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Latest image picks newest userImagePath</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>profile-edit-history</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PEH-U-004
+ระดับ: unit
+Latest image picks newest userImagePath</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Multiple history JSON rows</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call with profileIds</td>
+        <td>newest path; missing null</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PEH-U-004 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-1-0019</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Malformed / non-string imagePath skipped</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>profile-edit-history</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PEH-U-005
+ระดับ: unit
+Malformed / non-string imagePath skipped</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Bad JSON or non-string</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>extract via findLatest</td>
+        <td>continue / null</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PEH-U-005 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0013</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>GET /api/profile-edit-history/profile/:id</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>profile-edit-history</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PEH-I-001
+ระดับ: integration
+GET /api/profile-edit-history/profile/:id</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>JWT + seeded history</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET</td>
+        <td>200 ordered list</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PEH-I-001 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0014</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST /api/profile-edit-history/latest-images</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>profile-edit-history</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PEH-I-002
+ระดับ: integration
+POST /api/profile-edit-history/latest-images</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>JWT + history with image</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST profileIds</td>
+        <td>map of paths/nulls</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PEH-I-002 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0015</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>latest-images DTO validation</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>profile-edit-history</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PEH-I-003
+ระดับ: integration
+latest-images DTO validation</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>empty / &gt;1000 / non-int</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST invalid</td>
+        <td>400</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PEH-I-003 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0016</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>History endpoints require JWT</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>profile-edit-history</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PEH-I-004
+ระดับ: integration
+History endpoints require JWT</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>No token</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET/POST</td>
+        <td>401</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PEH-I-004 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-2-0017</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Any authenticated role can read any profile history (current)</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>profile-edit-history</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PEH-I-005
+ระดับ: integration
+Any authenticated role can read any profile history (current)</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Candidate JWT + foreign id</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET history</td>
+        <td>current: 2xx</td>
+        <td>ผ่านตามพฤติกรรมปัจจุบันที่บันทึกไว้ — BUG-012: JWT ใดก็อ่านประวัติโปรไฟล์คนอื่นได้ (authz gap ที่ assert ไว้)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PEH-I-005 · Batch 6 Profile &amp; identity</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0006-3-0005</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>After profile edit with history gate, admin sees history</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>profile-edit-history</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: PEH-E-001
+ระดับ: e2e
+After profile edit with history gate, admin sees history</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Staff edit or candidate+remark</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Edit → admin history</td>
+        <td>new row shown</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 6 Profile &amp; identity)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: PEH-E-001 · Batch 6 Profile &amp; identity</p>
+</section>
+</body>
+</html>

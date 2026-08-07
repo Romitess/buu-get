@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<title>CC-SF-03-128 Batch 5</title>
+<style>
+  @page { size: A4; margin: 12mm 14mm; }
+  body { font-family: "Sarabun","Thonburi","Tahoma",sans-serif; font-size: 10pt; color: #111; }
+  h1 { font-size: 16pt; margin: 0 0 4pt; text-align: center; }
+  .sys { margin: 0 0 10pt; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #333; padding: 4pt 6pt; vertical-align: top; }
+  th { background: #f0f0f0; }
+  td.code { width: 28%; white-space: nowrap; font-family: ui-monospace, monospace; font-size: 9pt; }
+  .id { color: #666; font-size: 8pt; }
+  .meta { font-size: 9pt; color: #444; margin-bottom: 8pt; }
+</style>
+</head>
+<body>
+  <h1>ตารางรายการการทดสอบ</h1>
+  <p class="sys">ระบบ: <strong>BUU-GET</strong> — คะแนนและใบรับรอง (Scores &amp; Certificates)</p>
+  <p class="meta">แบบฟอร์ม CC-SF-03-128 · Batch 05 · จำนวน 71 เคส · วันที่ทดสอบ 2026-08-06</p>
+  <table>
+    <thead><tr><th>รหัสการทดสอบ</th><th>ชื่อการทดสอบ</th></tr></thead>
+    <tbody>
+<tr><td class="code">TC-0005-1-0001</td><td>Upsert by ERM_ID creates score + lines + CEFR <span class="id">(SCR-U-001)</span></td></tr>
+<tr><td class="code">TC-0005-1-0002</td><td>Upsert restores soft-deleted score row <span class="id">(SCR-U-002)</span></td></tr>
+<tr><td class="code">TC-0005-1-0003</td><td>Reject duplicate SRBI_ID in payload <span class="id">(SCR-U-003)</span></td></tr>
+<tr><td class="code">TC-0005-1-0004</td><td>Reject missing required rubric item score <span class="id">(SCR-U-004)</span></td></tr>
+<tr><td class="code">TC-0005-1-0005</td><td>Reject line not in rubric <span class="id">(SCR-U-005)</span></td></tr>
+<tr><td class="code">TC-0005-1-0006</td><td>Reject score below 0 <span class="id">(SCR-U-006)</span></td></tr>
+<tr><td class="code">TC-0005-1-0007</td><td>Reject score above item max <span class="id">(SCR-U-007)</span></td></tr>
+<tr><td class="code">TC-0005-1-0008</td><td>Reject when enrollment/exam/rubric not usable <span class="id">(SCR-U-008)</span></td></tr>
+<tr><td class="code">TC-0005-1-0009</td><td>Update with lines rewrites lines and recalculates <span class="id">(SCR-U-009)</span></td></tr>
+<tr><td class="code">TC-0005-1-0010</td><td>Update without lines skips recalc branch <span class="id">(SCR-U-010)</span></td></tr>
+<tr><td class="code">TC-0005-2-0001</td><td>POST /api/exam-scores happy path <span class="id">(SCR-I-001)</span></td></tr>
+<tr><td class="code">TC-0005-2-0002</td><td>POST rejects invalid line composition <span class="id">(SCR-I-002)</span></td></tr>
+<tr><td class="code">TC-0005-2-0003</td><td>POST rejects out-of-range scores <span class="id">(SCR-I-003)</span></td></tr>
+<tr><td class="code">TC-0005-2-0004</td><td>POST upsert keeps single logical score per enrollment <span class="id">(SCR-I-004)</span></td></tr>
+<tr><td class="code">TC-0005-2-0005</td><td>PATCH with lines rewrites and recalculates <span class="id">(SCR-I-005)</span></td></tr>
+<tr><td class="code">TC-0005-2-0006</td><td>Role guard on /exam-scores routes <span class="id">(SCR-I-006)</span></td></tr>
+<tr><td class="code">TC-0005-2-0007</td><td>DELETE soft-delete behavior <span class="id">(SCR-I-007)</span></td></tr>
+<tr><td class="code">TC-0005-3-0001</td><td>Admin enters scores and sees computed band <span class="id">(SCR-E-001)</span></td></tr>
+<tr><td class="code">TC-0005-3-0002</td><td>Non-allowed role blocked from score management <span class="id">(SCR-E-002)</span></td></tr>
+<tr><td class="code">TC-0005-1-0011</td><td>getBandRules returns empty when no active/invalid JSON <span class="id">(CRI-U-001)</span></td></tr>
+<tr><td class="code">TC-0005-1-0012</td><td>Parse filters invalid rule objects <span class="id">(CRI-U-002)</span></td></tr>
+<tr><td class="code">TC-0005-1-0013</td><td>resolveBandLevel matches inclusive boundaries <span class="id">(CRI-U-003)</span></td></tr>
+<tr><td class="code">TC-0005-1-0014</td><td>resolveBandLevel returns null on non-finite score <span class="id">(CRI-U-004)</span></td></tr>
+<tr><td class="code">TC-0005-1-0015</td><td>resolveBandLevel returns null when no range matches <span class="id">(CRI-U-005)</span></td></tr>
+<tr><td class="code">TC-0005-1-0016</td><td>saveBandRules updates existing active row <span class="id">(CRI-U-006)</span></td></tr>
+<tr><td class="code">TC-0005-1-0017</td><td>saveBandRules creates row when none exists <span class="id">(CRI-U-007)</span></td></tr>
+<tr><td class="code">TC-0005-2-0008</td><td>PUT band-rules then GET round-trip consistency <span class="id">(CRI-I-001)</span></td></tr>
+<tr><td class="code">TC-0005-2-0009</td><td>PUT validation rejects invalid rule fields <span class="id">(CRI-I-002)</span></td></tr>
+<tr><td class="code">TC-0005-2-0010</td><td>GET/PUT require JWT <span class="id">(CRI-I-003)</span></td></tr>
+<tr><td class="code">TC-0005-2-0011</td><td>Any authenticated role can mutate rules (current behavior) <span class="id">(CRI-I-004)</span></td></tr>
+<tr><td class="code">TC-0005-3-0003</td><td>Admin edits CEFR band rules and persists <span class="id">(CRI-E-001)</span></td></tr>
+<tr><td class="code">TC-0005-3-0004</td><td>Updated mapping reflected in downstream score/cert views <span class="id">(CRI-E-002)</span></td></tr>
+<tr><td class="code">TC-0005-1-0018</td><td>Create rubric with items and default max score mapping <span class="id">(RUB-U-001)</span></td></tr>
+<tr><td class="code">TC-0005-1-0019</td><td>Update blocks item edits for default rubric <span class="id">(RUB-U-002)</span></td></tr>
+<tr><td class="code">TC-0005-1-0020</td><td>Update blocks items when rubric used by saved scores <span class="id">(RUB-U-003)</span></td></tr>
+<tr><td class="code">TC-0005-1-0021</td><td>Update with items soft-deletes old items then replaces <span class="id">(RUB-U-004)</span></td></tr>
+<tr><td class="code">TC-0005-1-0022</td><td>Remove blocks default rubric deletion <span class="id">(RUB-U-005)</span></td></tr>
+<tr><td class="code">TC-0005-1-0023</td><td>Remove blocks rubric referenced by exam <span class="id">(RUB-U-006)</span></td></tr>
+<tr><td class="code">TC-0005-1-0024</td><td>assertRubricUsable rejects zero active items <span class="id">(RUB-U-007)</span></td></tr>
+<tr><td class="code">TC-0005-1-0025</td><td>findOne not found path <span class="id">(RUB-U-008)</span></td></tr>
+<tr><td class="code">TC-0005-1-0026</td><td>findAll hides soft-deleted items in response <span class="id">(RUB-U-009)</span></td></tr>
+<tr><td class="code">TC-0005-2-0012</td><td>POST /api/score-rubrics create rubric/items <span class="id">(RUB-I-001)</span></td></tr>
+<tr><td class="code">TC-0005-2-0013</td><td>PATCH default rubric items blocked <span class="id">(RUB-I-002)</span></td></tr>
+<tr><td class="code">TC-0005-2-0014</td><td>PATCH used-by-score rubric items blocked <span class="id">(RUB-I-003)</span></td></tr>
+<tr><td class="code">TC-0005-2-0015</td><td>DELETE rubric referenced by exam blocked <span class="id">(RUB-I-004)</span></td></tr>
+<tr><td class="code">TC-0005-2-0016</td><td>Role guard across rubric endpoints <span class="id">(RUB-I-005)</span></td></tr>
+<tr><td class="code">TC-0005-2-0017</td><td>DTO validation on items/min constraints <span class="id">(RUB-I-006)</span></td></tr>
+<tr><td class="code">TC-0005-3-0005</td><td>Admin creates/edits non-default rubric and reuses in exam form <span class="id">(RUB-E-001)</span></td></tr>
+<tr><td class="code">TC-0005-3-0006</td><td>Locked rubric edit shows conflict feedback <span class="id">(RUB-E-002)</span></td></tr>
+<tr><td class="code">TC-0005-1-0027</td><td>bulkIssue empty list short-circuit <span class="id">(CERT-U-001)</span></td></tr>
+<tr><td class="code">TC-0005-1-0028</td><td>Reject future issue date <span class="id">(CERT-U-002)</span></td></tr>
+<tr><td class="code">TC-0005-1-0029</td><td>Reject expiry date before issue date <span class="id">(CERT-U-003)</span></td></tr>
+<tr><td class="code">TC-0005-1-0030</td><td>Reject missing SCORES_ID in requested candidates <span class="id">(CERT-U-004)</span></td></tr>
+<tr><td class="code">TC-0005-1-0031</td><td>Reject USER_ID mismatch against score enrollment <span class="id">(CERT-U-005)</span></td></tr>
+<tr><td class="code">TC-0005-1-0032</td><td>Skip already-certified score <span class="id">(CERT-U-006)</span></td></tr>
+<tr><td class="code">TC-0005-1-0033</td><td>Create certificate updates session status COMPLETED <span class="id">(CERT-U-007)</span></td></tr>
+<tr><td class="code">TC-0005-1-0034</td><td>Missing recipient email does not fail issuance <span class="id">(CERT-U-008)</span></td></tr>
+<tr><td class="code">TC-0005-1-0035</td><td>Email send failure does not rollback issuance <span class="id">(CERT-U-009)</span></td></tr>
+<tr><td class="code">TC-0005-1-0036</td><td>Manual create trims custom code or auto-generates <span class="id">(CERT-U-010)</span></td></tr>
+<tr><td class="code">TC-0005-1-0037</td><td>Update enforces future issue-date guard <span class="id">(CERT-U-011)</span></td></tr>
+<tr><td class="code">TC-0005-2-0018</td><td>POST bulk-issue mixed create/skip <span class="id">(CERT-I-001)</span></td></tr>
+<tr><td class="code">TC-0005-2-0019</td><td>bulk-issue fails atomically on invalid batch member <span class="id">(CERT-I-002)</span></td></tr>
+<tr><td class="code">TC-0005-2-0020</td><td>bulk-issue date validation <span class="id">(CERT-I-003)</span></td></tr>
+<tr><td class="code">TC-0005-2-0021</td><td>bulk-issue role restriction enforced <span class="id">(CERT-I-004)</span></td></tr>
+<tr><td class="code">TC-0005-2-0022</td><td>Non-bulk certificate CRUD authz behavior (current) <span class="id">(CERT-I-005)</span></td></tr>
+<tr><td class="code">TC-0005-2-0023</td><td>CERT_CODE uniqueness behavior <span class="id">(CERT-I-006)</span></td></tr>
+<tr><td class="code">TC-0005-2-0024</td><td>Certificate soft-delete behavior <span class="id">(CERT-I-007)</span></td></tr>
+<tr><td class="code">TC-0005-2-0025</td><td>Create endpoint updates linked session completed <span class="id">(CERT-I-008)</span></td></tr>
+<tr><td class="code">TC-0005-3-0007</td><td>Admin bulk-issues certificates from score flow <span class="id">(CERT-E-001)</span></td></tr>
+<tr><td class="code">TC-0005-3-0008</td><td>Candidate sees issued certificate in history/verify flow <span class="id">(CERT-E-002)</span></td></tr>
+<tr><td class="code">TC-0005-3-0009</td><td>Non-admin cannot execute bulk issue action <span class="id">(CERT-E-003)</span></td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

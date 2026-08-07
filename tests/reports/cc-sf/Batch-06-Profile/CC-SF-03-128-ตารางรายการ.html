@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<title>CC-SF-03-128 Batch 6</title>
+<style>
+  @page { size: A4; margin: 12mm 14mm; }
+  body { font-family: "Sarabun","Thonburi","Tahoma",sans-serif; font-size: 10pt; color: #111; }
+  h1 { font-size: 16pt; margin: 0 0 4pt; text-align: center; }
+  .sys { margin: 0 0 10pt; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #333; padding: 4pt 6pt; vertical-align: top; }
+  th { background: #f0f0f0; }
+  td.code { width: 28%; white-space: nowrap; font-family: ui-monospace, monospace; font-size: 9pt; }
+  .id { color: #666; font-size: 8pt; }
+  .meta { font-size: 9pt; color: #444; margin-bottom: 8pt; }
+</style>
+</head>
+<body>
+  <h1>ตารางรายการการทดสอบ</h1>
+  <p class="sys">ระบบ: <strong>BUU-GET</strong> — โปรไฟล์ รูปภาพ และประวัติแก้ไข (Profile &amp; identity)</p>
+  <p class="meta">แบบฟอร์ม CC-SF-03-128 · Batch 06 · จำนวน 41 เคส · วันที่ทดสอบ 2026-08-06</p>
+  <table>
+    <thead><tr><th>รหัสการทดสอบ</th><th>ชื่อการทดสอบ</th></tr></thead>
+    <tbody>
+<tr><td class="code">TC-0006-1-0001</td><td>findOne not found <span class="id">(PROF-U-001)</span></td></tr>
+<tr><td class="code">TC-0006-1-0002</td><td>findByUserId returns existing with relations <span class="id">(PROF-U-002)</span></td></tr>
+<tr><td class="code">TC-0006-1-0003</td><td>findByUserId auto-creates blank profile <span class="id">(PROF-U-003)</span></td></tr>
+<tr><td class="code">TC-0006-1-0004</td><td>findByUserId unknown user <span class="id">(PROF-U-004)</span></td></tr>
+<tr><td class="code">TC-0006-1-0005</td><td>Candidate update clears remark + WAIT_FIXED→UNCHECKED <span class="id">(PROF-U-005)</span></td></tr>
+<tr><td class="code">TC-0006-1-0006</td><td>Staff update does not clear remark/enrollments <span class="id">(PROF-U-006)</span></td></tr>
+<tr><td class="code">TC-0006-1-0007</td><td>History saved for staff field change <span class="id">(PROF-U-007)</span></td></tr>
+<tr><td class="code">TC-0006-1-0008</td><td>Candidate history skipped without remark/email flag <span class="id">(PROF-U-008)</span></td></tr>
+<tr><td class="code">TC-0006-1-0009</td><td>Candidate history saved when hadActiveRemark or isFromEmail <span class="id">(PROF-U-009)</span></td></tr>
+<tr><td class="code">TC-0006-1-0010</td><td>Duplicate national ID / passport Conflict <span class="id">(PROF-U-010)</span></td></tr>
+<tr><td class="code">TC-0006-1-0011</td><td>userImagePath upserts UserImage <span class="id">(PROF-U-011)</span></td></tr>
+<tr><td class="code">TC-0006-2-0001</td><td>GET /api/user-profile/me JWT <span class="id">(PROF-I-001)</span></td></tr>
+<tr><td class="code">TC-0006-2-0002</td><td>PATCH /api/user-profile/me persists fields <span class="id">(PROF-I-002)</span></td></tr>
+<tr><td class="code">TC-0006-2-0003</td><td>Candidate PATCH clears remark + resets WAIT_FIXED <span class="id">(PROF-I-003)</span></td></tr>
+<tr><td class="code">TC-0006-2-0004</td><td>National ID conflict via PATCH me <span class="id">(PROF-I-004)</span></td></tr>
+<tr><td class="code">TC-0006-2-0005</td><td>Admin list/get/create/delete RBAC <span class="id">(PROF-I-005)</span></td></tr>
+<tr><td class="code">TC-0006-2-0006</td><td>PATCH /api/user-profile/:id any JWT can mutate (current) <span class="id">(PROF-I-006)</span></td></tr>
+<tr><td class="code">TC-0006-2-0007</td><td>Mixed-role user treated as staff modifier <span class="id">(PROF-I-007)</span></td></tr>
+<tr><td class="code">TC-0006-2-0008</td><td>Soft-delete then findOne hidden <span class="id">(PROF-I-008)</span></td></tr>
+<tr><td class="code">TC-0006-3-0001</td><td>Candidate edits own profile and sees saved values <span class="id">(PROF-E-001)</span></td></tr>
+<tr><td class="code">TC-0006-3-0002</td><td>Staff remark → candidate fix clears remark <span class="id">(PROF-E-002)</span></td></tr>
+<tr><td class="code">TC-0006-3-0003</td><td>Admin views registrant profile edit history <span class="id">(PROF-E-003)</span></td></tr>
+<tr><td class="code">TC-0006-1-0012</td><td>findByUserId returns null when missing <span class="id">(IMG-U-001)</span></td></tr>
+<tr><td class="code">TC-0006-1-0013</td><td>upsertByUserId creates new row <span class="id">(IMG-U-002)</span></td></tr>
+<tr><td class="code">TC-0006-1-0014</td><td>upsertByUserId updates existing URL <span class="id">(IMG-U-003)</span></td></tr>
+<tr><td class="code">TC-0006-2-0009</td><td>GET /api/user-image/me with JWT <span class="id">(IMG-I-001)</span></td></tr>
+<tr><td class="code">TC-0006-2-0010</td><td>PATCH /api/user-image/me upserts <span class="id">(IMG-I-002)</span></td></tr>
+<tr><td class="code">TC-0006-2-0011</td><td>PATCH without userImageUrl no-op message <span class="id">(IMG-I-003)</span></td></tr>
+<tr><td class="code">TC-0006-2-0012</td><td>GET/PATCH me require JWT <span class="id">(IMG-I-004)</span></td></tr>
+<tr><td class="code">TC-0006-3-0004</td><td>Candidate updates profile photo on profile page <span class="id">(IMG-E-001)</span></td></tr>
+<tr><td class="code">TC-0006-1-0015</td><td>create persists history row <span class="id">(PEH-U-001)</span></td></tr>
+<tr><td class="code">TC-0006-1-0016</td><td>findByUserProfileId order DESC <span class="id">(PEH-U-002)</span></td></tr>
+<tr><td class="code">TC-0006-1-0017</td><td>findLatestImagesByProfileIds empty → {} <span class="id">(PEH-U-003)</span></td></tr>
+<tr><td class="code">TC-0006-1-0018</td><td>Latest image picks newest userImagePath <span class="id">(PEH-U-004)</span></td></tr>
+<tr><td class="code">TC-0006-1-0019</td><td>Malformed / non-string imagePath skipped <span class="id">(PEH-U-005)</span></td></tr>
+<tr><td class="code">TC-0006-2-0013</td><td>GET /api/profile-edit-history/profile/:id <span class="id">(PEH-I-001)</span></td></tr>
+<tr><td class="code">TC-0006-2-0014</td><td>POST /api/profile-edit-history/latest-images <span class="id">(PEH-I-002)</span></td></tr>
+<tr><td class="code">TC-0006-2-0015</td><td>latest-images DTO validation <span class="id">(PEH-I-003)</span></td></tr>
+<tr><td class="code">TC-0006-2-0016</td><td>History endpoints require JWT <span class="id">(PEH-I-004)</span></td></tr>
+<tr><td class="code">TC-0006-2-0017</td><td>Any authenticated role can read any profile history (current) <span class="id">(PEH-I-005)</span></td></tr>
+<tr><td class="code">TC-0006-3-0005</td><td>After profile edit with history gate, admin sees history <span class="id">(PEH-E-001)</span></td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

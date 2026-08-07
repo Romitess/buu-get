@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<title>CC-SF-03-128 Batch 1</title>
+<style>
+  @page { size: A4; margin: 12mm 14mm; }
+  body { font-family: "Sarabun","Thonburi","Tahoma",sans-serif; font-size: 10pt; color: #111; }
+  h1 { font-size: 16pt; margin: 0 0 4pt; text-align: center; }
+  .sys { margin: 0 0 10pt; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #333; padding: 4pt 6pt; vertical-align: top; }
+  th { background: #f0f0f0; }
+  td.code { width: 28%; white-space: nowrap; font-family: ui-monospace, monospace; font-size: 9pt; }
+  .id { color: #666; font-size: 8pt; }
+  .meta { font-size: 9pt; color: #444; margin-bottom: 8pt; }
+</style>
+</head>
+<body>
+  <h1>ตารางรายการการทดสอบ</h1>
+  <p class="sys">ระบบ: <strong>BUU-GET</strong> — การเข้าสู่ระบบและสิทธิ์การใช้งาน (Auth &amp; Access)</p>
+  <p class="meta">แบบฟอร์ม CC-SF-03-128 · Batch 01 · จำนวน 173 เคส · วันที่ทดสอบ 2026-08-05</p>
+  <table>
+    <thead><tr><th>รหัสการทดสอบ</th><th>ชื่อการทดสอบ</th></tr></thead>
+    <tbody>
+<tr><td class="code">TC-0001-1-0001</td><td>login success — JWT payload + response shape <span class="id">(AUTH-U-001)</span></td></tr>
+<tr><td class="code">TC-0001-1-0002</td><td>login — remark null when PROFILE missing <span class="id">(AUTH-U-002)</span></td></tr>
+<tr><td class="code">TC-0001-1-0003</td><td>login — invalid password <span class="id">(AUTH-U-003)</span></td></tr>
+<tr><td class="code">TC-0001-1-0004</td><td>login — user not found <span class="id">(AUTH-U-004)</span></td></tr>
+<tr><td class="code">TC-0001-1-0005</td><td>login — empty ROLES_ID → candidate fallback <span class="id">(AUTH-U-005)</span></td></tr>
+<tr><td class="code">TC-0001-1-0006</td><td>login — multi-role primary = first <span class="id">(AUTH-U-006)</span></td></tr>
+<tr><td class="code">TC-0001-1-0007</td><td>sendOtp rejects registered email <span class="id">(AUTH-U-007)</span></td></tr>
+<tr><td class="code">TC-0001-1-0008</td><td>sendOtp caches OTP + emails <span class="id">(AUTH-U-008)</span></td></tr>
+<tr><td class="code">TC-0001-1-0009</td><td>sendOtp gateway failure <span class="id">(AUTH-U-009)</span></td></tr>
+<tr><td class="code">TC-0001-1-0010</td><td>verifyOtp success deletes OTP <span class="id">(AUTH-U-010)</span></td></tr>
+<tr><td class="code">TC-0001-1-0011</td><td>verifyOtp wrong OTP <span class="id">(AUTH-U-011)</span></td></tr>
+<tr><td class="code">TC-0001-1-0012</td><td>verifyOtp missing/expired <span class="id">(AUTH-U-012)</span></td></tr>
+<tr><td class="code">TC-0001-1-0013</td><td>register happy path <span class="id">(AUTH-U-013)</span></td></tr>
+<tr><td class="code">TC-0001-1-0014</td><td>register email normalize <span class="id">(AUTH-U-014)</span></td></tr>
+<tr><td class="code">TC-0001-1-0015</td><td>register duplicate email <span class="id">(AUTH-U-015)</span></td></tr>
+<tr><td class="code">TC-0001-1-0016</td><td>register duplicate national ID (thai) <span class="id">(AUTH-U-016)</span></td></tr>
+<tr><td class="code">TC-0001-1-0017</td><td>register duplicate passport (foreigner) <span class="id">(AUTH-U-017)</span></td></tr>
+<tr><td class="code">TC-0001-1-0018</td><td>register thai vs foreigner ID fields <span class="id">(AUTH-U-018)</span></td></tr>
+<tr><td class="code">TC-0001-1-0019</td><td>register userThaidSynced thai only <span class="id">(AUTH-U-019)</span></td></tr>
+<tr><td class="code">TC-0001-1-0020</td><td>register birthdate parse <span class="id">(AUTH-U-020)</span></td></tr>
+<tr><td class="code">TC-0001-1-0021</td><td>register invalid birthdate → null <span class="id">(AUTH-U-021)</span></td></tr>
+<tr><td class="code">TC-0001-1-0022</td><td>register Moodle failure rolls back <span class="id">(AUTH-U-022)</span></td></tr>
+<tr><td class="code">TC-0001-1-0023</td><td>register profile image fail still succeeds <span class="id">(AUTH-U-023)</span></td></tr>
+<tr><td class="code">TC-0001-1-0024</td><td>persistRegisterProfileImage invalid data URL <span class="id">(AUTH-U-024)</span></td></tr>
+<tr><td class="code">TC-0001-1-0025</td><td>persistRegisterProfileImage plain path <span class="id">(AUTH-U-025)</span></td></tr>
+<tr><td class="code">TC-0001-1-0026</td><td>deriveName from full name for Moodle <span class="id">(AUTH-U-026)</span></td></tr>
+<tr><td class="code">TC-0001-1-0027</td><td>deriveName fallback email local-part <span class="id">(AUTH-U-027)</span></td></tr>
+<tr><td class="code">TC-0001-1-0028</td><td>getProfile maps user+profile <span class="id">(AUTH-U-028)</span></td></tr>
+<tr><td class="code">TC-0001-1-0029</td><td>getProfile user not found <span class="id">(AUTH-U-029)</span></td></tr>
+<tr><td class="code">TC-0001-1-0030</td><td>getProfile empty roles → candidate <span class="id">(AUTH-U-030)</span></td></tr>
+<tr><td class="code">TC-0001-1-0031</td><td>JwtStrategy.validate maps payload <span class="id">(AUTH-U-031)</span></td></tr>
+<tr><td class="code">TC-0001-1-0032</td><td>JwtStrategy.validate legacy no roles <span class="id">(AUTH-U-032)</span></td></tr>
+<tr><td class="code">TC-0001-2-0001</td><td>POST /api/auth/login valid <span class="id">(AUTH-I-001)</span></td></tr>
+<tr><td class="code">TC-0001-2-0002</td><td>POST /api/auth/login wrong password <span class="id">(AUTH-I-002)</span></td></tr>
+<tr><td class="code">TC-0001-2-0003</td><td>POST /api/auth/login unknown email <span class="id">(AUTH-I-003)</span></td></tr>
+<tr><td class="code">TC-0001-2-0004</td><td>POST /api/auth/login DTO validation <span class="id">(AUTH-I-004)</span></td></tr>
+<tr><td class="code">TC-0001-2-0005</td><td>GET /api/auth/me with JWT <span class="id">(AUTH-I-005)</span></td></tr>
+<tr><td class="code">TC-0001-2-0006</td><td>GET /api/auth/me without token <span class="id">(AUTH-I-006)</span></td></tr>
+<tr><td class="code">TC-0001-2-0007</td><td>GET /api/auth/me invalid JWT <span class="id">(AUTH-I-007)</span></td></tr>
+<tr><td class="code">TC-0001-2-0008</td><td>POST /api/auth/send-otp new email <span class="id">(AUTH-I-008)</span></td></tr>
+<tr><td class="code">TC-0001-2-0009</td><td>POST /api/auth/send-otp existing email <span class="id">(AUTH-I-009)</span></td></tr>
+<tr><td class="code">TC-0001-2-0010</td><td>POST /api/auth/send-otp invalid email <span class="id">(AUTH-I-010)</span></td></tr>
+<tr><td class="code">TC-0001-2-0011</td><td>POST /api/auth/verify-otp wrong <span class="id">(AUTH-I-011)</span></td></tr>
+<tr><td class="code">TC-0001-2-0012</td><td>POST /api/auth/verify-otp length ≠6 <span class="id">(AUTH-I-012)</span></td></tr>
+<tr><td class="code">TC-0001-2-0013</td><td>POST /api/auth/verify-otp one-time <span class="id">(AUTH-I-013)</span></td></tr>
+<tr><td class="code">TC-0001-2-0014</td><td>POST /api/auth/register thai persists <span class="id">(AUTH-I-014)</span></td></tr>
+<tr><td class="code">TC-0001-2-0015</td><td>POST /api/auth/register duplicate email <span class="id">(AUTH-I-015)</span></td></tr>
+<tr><td class="code">TC-0001-2-0016</td><td>POST /api/auth/register duplicate national ID <span class="id">(AUTH-I-016)</span></td></tr>
+<tr><td class="code">TC-0001-2-0017</td><td>POST /api/auth/register DTO validation <span class="id">(AUTH-I-017)</span></td></tr>
+<tr><td class="code">TC-0001-2-0018</td><td>Login JWT works on protected route <span class="id">(AUTH-I-018)</span></td></tr>
+<tr><td class="code">TC-0001-3-0001</td><td>Login page renders brand + form <span class="id">(AUTH-E-001)</span></td></tr>
+<tr><td class="code">TC-0001-3-0002</td><td>Candidate login → exam-schedule <span class="id">(AUTH-E-002)</span></td></tr>
+<tr><td class="code">TC-0001-3-0003</td><td>Admin/staff login → admin-exam-management <span class="id">(AUTH-E-003)</span></td></tr>
+<tr><td class="code">TC-0001-3-0004</td><td>Finance login → admin-payment-import <span class="id">(AUTH-E-004)</span></td></tr>
+<tr><td class="code">TC-0001-3-0005</td><td>Failed login stays on login <span class="id">(AUTH-E-005)</span></td></tr>
+<tr><td class="code">TC-0001-3-0006</td><td>Logged-in /login redirects home <span class="id">(AUTH-E-006)</span></td></tr>
+<tr><td class="code">TC-0001-1-0033</td><td>generateUserCode Buddhist YY + pad <span class="id">(USERS-U-001)</span></td></tr>
+<tr><td class="code">TC-0001-1-0034</td><td>generateUserCode pads USER_ID <span class="id">(USERS-U-002)</span></td></tr>
+<tr><td class="code">TC-0001-1-0035</td><td>create rejects duplicate email <span class="id">(USERS-U-003)</span></td></tr>
+<tr><td class="code">TC-0001-1-0036</td><td>create rejects duplicate national ID <span class="id">(USERS-U-004)</span></td></tr>
+<tr><td class="code">TC-0001-1-0037</td><td>create rejects duplicate passport <span class="id">(USERS-U-005)</span></td></tr>
+<tr><td class="code">TC-0001-1-0038</td><td>create hashes password <span class="id">(USERS-U-006)</span></td></tr>
+<tr><td class="code">TC-0001-1-0039</td><td>create assigns roles <span class="id">(USERS-U-007)</span></td></tr>
+<tr><td class="code">TC-0001-1-0040</td><td>create skips roles when empty <span class="id">(USERS-U-008)</span></td></tr>
+<tr><td class="code">TC-0001-1-0041</td><td>create sets USER_CODE after insert <span class="id">(USERS-U-009)</span></td></tr>
+<tr><td class="code">TC-0001-1-0042</td><td>create with profile in txn <span class="id">(USERS-U-010)</span></td></tr>
+<tr><td class="code">TC-0001-1-0043</td><td>create without profile skips <span class="id">(USERS-U-011)</span></td></tr>
+<tr><td class="code">TC-0001-1-0044</td><td>findAll defaults page/limit <span class="id">(USERS-U-012)</span></td></tr>
+<tr><td class="code">TC-0001-1-0045</td><td>findAll filter by role <span class="id">(USERS-U-013)</span></td></tr>
+<tr><td class="code">TC-0001-1-0046</td><td>findAll search fields <span class="id">(USERS-U-014)</span></td></tr>
+<tr><td class="code">TC-0001-1-0047</td><td>findAll blank search ignored <span class="id">(USERS-U-015)</span></td></tr>
+<tr><td class="code">TC-0001-1-0048</td><td>findOne returns DTO <span class="id">(USERS-U-016)</span></td></tr>
+<tr><td class="code">TC-0001-1-0049</td><td>findOne NotFound <span class="id">(USERS-U-017)</span></td></tr>
+<tr><td class="code">TC-0001-1-0050</td><td>updateRole replaces ROLES_ID <span class="id">(USERS-U-018)</span></td></tr>
+<tr><td class="code">TC-0001-1-0051</td><td>updateRole user missing <span class="id">(USERS-U-019)</span></td></tr>
+<tr><td class="code">TC-0001-1-0052</td><td>updateRole unknown roleIds partial <span class="id">(USERS-U-020)</span></td></tr>
+<tr><td class="code">TC-0001-1-0053</td><td>remove soft-deletes <span class="id">(USERS-U-021)</span></td></tr>
+<tr><td class="code">TC-0001-1-0054</td><td>remove NotFound <span class="id">(USERS-U-022)</span></td></tr>
+<tr><td class="code">TC-0001-1-0055</td><td>checkIdentifiers normalize <span class="id">(USERS-U-023)</span></td></tr>
+<tr><td class="code">TC-0001-1-0056</td><td>checkIdentifiers all empty → [] <span class="id">(USERS-U-024)</span></td></tr>
+<tr><td class="code">TC-0001-1-0057</td><td>checkIdentifiers exists flags <span class="id">(USERS-U-025)</span></td></tr>
+<tr><td class="code">TC-0001-1-0058</td><td>findByCode NotFound message <span class="id">(USERS-U-026)</span></td></tr>
+<tr><td class="code">TC-0001-1-0059</td><td>UserResponseDto omits password <span class="id">(USERS-U-027)</span></td></tr>
+<tr><td class="code">TC-0001-2-0019</td><td>POST /users ADMIN create <span class="id">(USERS-I-001)</span></td></tr>
+<tr><td class="code">TC-0001-2-0020</td><td>POST /users Conflict soft-deleted email <span class="id">(USERS-I-002)</span></td></tr>
+<tr><td class="code">TC-0001-2-0021</td><td>POST /users DTO validation <span class="id">(USERS-I-003)</span></td></tr>
+<tr><td class="code">TC-0001-2-0022</td><td>POST /users forbidden non-ADMIN <span class="id">(USERS-I-004)</span></td></tr>
+<tr><td class="code">TC-0001-2-0023</td><td>GET /users allowed LIST roles <span class="id">(USERS-I-005)</span></td></tr>
+<tr><td class="code">TC-0001-2-0024</td><td>GET /users forbidden CANDIDATE <span class="id">(USERS-I-006)</span></td></tr>
+<tr><td class="code">TC-0001-2-0025</td><td>GET /users unauthenticated <span class="id">(USERS-I-007)</span></td></tr>
+<tr><td class="code">TC-0001-2-0026</td><td>GET /users pagination/role/search <span class="id">(USERS-I-008)</span></td></tr>
+<tr><td class="code">TC-0001-2-0027</td><td>POST /users/check-identifiers <span class="id">(USERS-I-009)</span></td></tr>
+<tr><td class="code">TC-0001-2-0028</td><td>POST check-identifiers validation <span class="id">(USERS-I-010)</span></td></tr>
+<tr><td class="code">TC-0001-2-0029</td><td>GET /users/:id self <span class="id">(USERS-I-011)</span></td></tr>
+<tr><td class="code">TC-0001-2-0030</td><td>GET /users/:id ADMIN other <span class="id">(USERS-I-012)</span></td></tr>
+<tr><td class="code">TC-0001-2-0031</td><td>GET /users/:id non-admin other → 403 <span class="id">(USERS-I-013)</span></td></tr>
+<tr><td class="code">TC-0001-2-0032</td><td>GET /users/:id NotFound <span class="id">(USERS-I-014)</span></td></tr>
+<tr><td class="code">TC-0001-2-0033</td><td>GET /users/:id non-int <span class="id">(USERS-I-015)</span></td></tr>
+<tr><td class="code">TC-0001-2-0034</td><td>PATCH /users/:id/role ADMIN <span class="id">(USERS-I-016)</span></td></tr>
+<tr><td class="code">TC-0001-2-0035</td><td>PATCH role forbidden non-ADMIN <span class="id">(USERS-I-017)</span></td></tr>
+<tr><td class="code">TC-0001-2-0036</td><td>PATCH role empty roleIds <span class="id">(USERS-I-018)</span></td></tr>
+<tr><td class="code">TC-0001-2-0037</td><td>DELETE /users/:id soft-delete <span class="id">(USERS-I-019)</span></td></tr>
+<tr><td class="code">TC-0001-2-0038</td><td>DELETE forbidden / NotFound <span class="id">(USERS-I-020)</span></td></tr>
+<tr><td class="code">TC-0001-2-0039</td><td>Create USER_STATUS persisted <span class="id">(USERS-I-021)</span></td></tr>
+<tr><td class="code">TC-0001-3-0007</td><td>Dedicated admin user CRUD UI <span class="id">(USERS-E-001)</span></td></tr>
+<tr><td class="code">TC-0001-1-0060</td><td>create saves DTO <span class="id">(ROLES-U-001)</span></td></tr>
+<tr><td class="code">TC-0001-1-0061</td><td>findAll returns find() <span class="id">(ROLES-U-002)</span></td></tr>
+<tr><td class="code">TC-0001-1-0062</td><td>findOne by ROLE_ID <span class="id">(ROLES-U-003)</span></td></tr>
+<tr><td class="code">TC-0001-1-0063</td><td>update delegates <span class="id">(ROLES-U-004)</span></td></tr>
+<tr><td class="code">TC-0001-1-0064</td><td>remove hard-deletes <span class="id">(ROLES-U-005)</span></td></tr>
+<tr><td class="code">TC-0001-1-0065</td><td>findByName by ROLE_NAME <span class="id">(ROLES-U-006)</span></td></tr>
+<tr><td class="code">TC-0001-1-0066</td><td>RoleEnum 8 values <span class="id">(ROLES-U-007)</span></td></tr>
+<tr><td class="code">TC-0001-1-0067</td><td>USER_ADMIN_ROLES admin-only <span class="id">(ROLES-U-008)</span></td></tr>
+<tr><td class="code">TC-0001-1-0068</td><td>RolesGuard allows no @Roles <span class="id">(ROLES-U-009)</span></td></tr>
+<tr><td class="code">TC-0001-1-0069</td><td>RolesGuard allows matching role <span class="id">(ROLES-U-010)</span></td></tr>
+<tr><td class="code">TC-0001-1-0070</td><td>RolesGuard denies missing role <span class="id">(ROLES-U-011)</span></td></tr>
+<tr><td class="code">TC-0001-1-0071</td><td>RolesGuard no roles assigned <span class="id">(ROLES-U-012)</span></td></tr>
+<tr><td class="code">TC-0001-1-0072</td><td>RolesGuard prefers roles[] over role <span class="id">(ROLES-U-013)</span></td></tr>
+<tr><td class="code">TC-0001-1-0073</td><td>RolesGuard fallback single role <span class="id">(ROLES-U-014)</span></td></tr>
+<tr><td class="code">TC-0001-1-0074</td><td>RolesGuard normalize case/hyphen <span class="id">(ROLES-U-015)</span></td></tr>
+<tr><td class="code">TC-0001-1-0075</td><td>CreateRoleDto validation <span class="id">(ROLES-U-016)</span></td></tr>
+<tr><td class="code">TC-0001-2-0040</td><td>POST /roles as admin <span class="id">(ROLES-I-001)</span></td></tr>
+<tr><td class="code">TC-0001-2-0041</td><td>POST /roles invalid body <span class="id">(ROLES-I-002)</span></td></tr>
+<tr><td class="code">TC-0001-2-0042</td><td>POST /roles unknown props <span class="id">(ROLES-I-003)</span></td></tr>
+<tr><td class="code">TC-0001-2-0043</td><td>POST /roles forbidden non-admin <span class="id">(ROLES-I-004)</span></td></tr>
+<tr><td class="code">TC-0001-2-0044</td><td>POST /roles no JWT <span class="id">(ROLES-I-005)</span></td></tr>
+<tr><td class="code">TC-0001-2-0045</td><td>GET /roles admin list <span class="id">(ROLES-I-006)</span></td></tr>
+<tr><td class="code">TC-0001-2-0046</td><td>GET /roles/:id <span class="id">(ROLES-I-007)</span></td></tr>
+<tr><td class="code">TC-0001-2-0047</td><td>:id non-int ParseIntPipe <span class="id">(ROLES-I-008)</span></td></tr>
+<tr><td class="code">TC-0001-2-0048</td><td>PATCH /roles/:id <span class="id">(ROLES-I-009)</span></td></tr>
+<tr><td class="code">TC-0001-2-0049</td><td>DELETE /roles/:id hard delete <span class="id">(ROLES-I-010)</span></td></tr>
+<tr><td class="code">TC-0001-2-0050</td><td>All /roles deny non-admin <span class="id">(ROLES-I-011)</span></td></tr>
+<tr><td class="code">TC-0001-2-0051</td><td>findByName seeded enum <span class="id">(ROLES-I-012)</span></td></tr>
+<tr><td class="code">TC-0001-2-0052</td><td>Duplicate ROLE_NAME allowed <span class="id">(ROLES-I-013)</span></td></tr>
+<tr><td class="code">TC-0001-2-0053</td><td>Soft-deleted excluded if soft-removed <span class="id">(ROLES-I-014)</span></td></tr>
+<tr><td class="code">TC-0001-3-0008</td><td>ROLE_LABELS match RoleEnum <span class="id">(ROLES-E-001)</span></td></tr>
+<tr><td class="code">TC-0001-3-0009</td><td>Non-admin blocked from admin surfaces <span class="id">(ROLES-E-002)</span></td></tr>
+<tr><td class="code">TC-0001-1-0076</td><td>Certificate missing → NotFound <span class="id">(VERIFY-U-001)</span></td></tr>
+<tr><td class="code">TC-0001-1-0077</td><td>Soft-deleted certificate → NotFound <span class="id">(VERIFY-U-002)</span></td></tr>
+<tr><td class="code">TC-0001-1-0078</td><td>Valid certificate response <span class="id">(VERIFY-U-003)</span></td></tr>
+<tr><td class="code">TC-0001-1-0079</td><td>Expired certificate status <span class="id">(VERIFY-U-004)</span></td></tr>
+<tr><td class="code">TC-0001-1-0080</td><td>Null expires stays valid <span class="id">(VERIFY-U-005)</span></td></tr>
+<tr><td class="code">TC-0001-1-0081</td><td>Holder fullName fallback <span class="id">(VERIFY-U-006)</span></td></tr>
+<tr><td class="code">TC-0001-1-0082</td><td>testTakerId fallback <span class="id">(VERIFY-U-007)</span></td></tr>
+<tr><td class="code">TC-0001-1-0083</td><td>nationalId mask prefer national/passport <span class="id">(VERIFY-U-008)</span></td></tr>
+<tr><td class="code">TC-0001-1-0084</td><td>Score lines filter/sort/map <span class="id">(VERIFY-U-009)</span></td></tr>
+<tr><td class="code">TC-0001-1-0085</td><td>bandLevel null <span class="id">(VERIFY-U-010)</span></td></tr>
+<tr><td class="code">TC-0001-1-0086</td><td>Deprecated vocab/reading scores <span class="id">(VERIFY-U-011)</span></td></tr>
+<tr><td class="code">TC-0001-1-0087</td><td>Receipt not found <span class="id">(VERIFY-U-012)</span></td></tr>
+<tr><td class="code">TC-0001-1-0088</td><td>Soft-deleted receipt <span class="id">(VERIFY-U-013)</span></td></tr>
+<tr><td class="code">TC-0001-1-0089</td><td>Unissued receipt → NotFound <span class="id">(VERIFY-U-014)</span></td></tr>
+<tr><td class="code">TC-0001-1-0090</td><td>Voided receipt redacts <span class="id">(VERIFY-U-015)</span></td></tr>
+<tr><td class="code">TC-0001-1-0091</td><td>Issued receipt full payload <span class="id">(VERIFY-U-016)</span></td></tr>
+<tr><td class="code">TC-0001-1-0092</td><td>receiptNo buildReceiptNo <span class="id">(VERIFY-U-017)</span></td></tr>
+<tr><td class="code">TC-0001-1-0093</td><td>issuedOrPaidAt priority <span class="id">(VERIFY-U-018)</span></td></tr>
+<tr><td class="code">TC-0001-1-0094</td><td>mapPaymentMethod channels <span class="id">(VERIFY-U-019)</span></td></tr>
+<tr><td class="code">TC-0001-1-0095</td><td>Receipt description constant <span class="id">(VERIFY-U-020)</span></td></tr>
+<tr><td class="code">TC-0001-1-0096</td><td>Organization constants <span class="id">(VERIFY-U-021)</span></td></tr>
+<tr><td class="code">TC-0001-1-0097</td><td>generateCertificateCode format <span class="id">(VERIFY-U-022)</span></td></tr>
+<tr><td class="code">TC-0001-1-0098</td><td>generateReceiptVerifyCode format <span class="id">(VERIFY-U-023)</span></td></tr>
+<tr><td class="code">TC-0001-1-0099</td><td>Code uniqueness sample <span class="id">(VERIFY-U-024)</span></td></tr>
+<tr><td class="code">TC-0001-2-0054</td><td>GET /verify/certificate/:code public <span class="id">(VERIFY-I-001)</span></td></tr>
+<tr><td class="code">TC-0001-2-0055</td><td>GET certificate unknown/soft-deleted 404 <span class="id">(VERIFY-I-002)</span></td></tr>
+<tr><td class="code">TC-0001-2-0056</td><td>GET certificate expired 200 <span class="id">(VERIFY-I-003)</span></td></tr>
+<tr><td class="code">TC-0001-2-0057</td><td>GET /verify/receipt/:code issued <span class="id">(VERIFY-I-004)</span></td></tr>
+<tr><td class="code">TC-0001-2-0058</td><td>GET receipt unissued/deleted 404 <span class="id">(VERIFY-I-005)</span></td></tr>
+<tr><td class="code">TC-0001-2-0059</td><td>GET receipt voided redacted <span class="id">(VERIFY-I-006)</span></td></tr>
+<tr><td class="code">TC-0001-2-0060</td><td>Throttle 30/60s <span class="id">(VERIFY-I-007)</span></td></tr>
+<tr><td class="code">TC-0001-2-0061</td><td>Exact code match only <span class="id">(VERIFY-I-008)</span></td></tr>
+<tr><td class="code">TC-0001-3-0010</td><td>Public UI verify certificate <span class="id">(VERIFY-E-001)</span></td></tr>
+<tr><td class="code">TC-0001-3-0011</td><td>Public UI verify receipt <span class="id">(VERIFY-E-002)</span></td></tr>
+<tr><td class="code">TC-0001-3-0012</td><td>Public UI not-found bad code <span class="id">(VERIFY-E-003)</span></td></tr>
+<tr><td class="code">TC-0001-3-0013</td><td>Short QR certificate link <span class="id">(VERIFY-E-004)</span></td></tr>
+    </tbody>
+  </table>
+</body>
+</html>
