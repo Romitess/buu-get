@@ -115,6 +115,7 @@ const {
   exam,
   searchQuery,
   selectedSessionId,
+  activeSessionIds,
   filteredAttendances,
   sessionAttendedCount,
   fetchAttendances,
@@ -147,10 +148,15 @@ const examDateEnglishLabel = computed((): string => {
 });
 
 const openCheckInDialog = () => {
+  const examId = Number(route.params.examId);
+  if (!examId) return;
+
   $q.dialog({
     component: DialogAttendanceCheckin,
     componentProps: {
       attendances: filteredAttendances.value,
+      examId,
+      sessionIds: Array.from(activeSessionIds.value),
       examName:
         formatExamDisplayTitle(
           exam.value?.EXAM_NAME,
