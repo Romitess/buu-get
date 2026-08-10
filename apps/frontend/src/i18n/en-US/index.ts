@@ -805,6 +805,12 @@ export default {
         '{count} applicant(s) still need seats — drag them from the list onto empty seats',
       applicantTypeFilterLabel: 'Applicant type',
       applicantTypeAll: 'All',
+      legend: {
+        monk: 'Monk / clergy',
+        disabled: 'Person with a disability',
+        pregnant: 'Pregnant',
+        thaiAndForeigner: 'Thai / Foreigner',
+      },
       seatTooltipName: 'Name: {name}',
       seatTooltipType: 'Applicant type: {type}',
       savingData: 'Saving seat layout...',

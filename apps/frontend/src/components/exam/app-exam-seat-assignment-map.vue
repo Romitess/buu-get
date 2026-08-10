@@ -24,6 +24,9 @@
         </q-select>
       </div>
     </header>
+    <div v-if="!printMode" class="seat-map-legend q-mb-sm">
+      <AppSeatLegend :items="legendItems" />
+    </div>
     <!-- Keep seats readable, fit the width, and scroll vertically for large rooms. -->
     <div
       ref="containerRef"
@@ -145,11 +148,16 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import type { ComponentPublicInstance, CSSProperties } from 'vue';
+import { useI18n } from 'vue-i18n';
 import AppExamSeatAssignmentTile from 'src/components/exam/app-exam-seat-assignment-tile.vue';
+import AppSeatLegend from 'src/components/exam/app-seat-legend.vue';
+import type { LegendItem } from 'src/components/exam/app-seat-legend.vue';
+import { PHYSICAL_STATUS_BG_COLORS } from 'src/constants/physical-status';
 import type { SeatCell } from 'src/composables/use-exam-seat-management';
 import { SEAT_STUDENT_DRAG_MIME } from 'src/composables/use-exam-seat-management';
 
 const SHIFT_ANIMATION_MS = 460;
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -177,6 +185,25 @@ const emit = defineEmits<{
   (e: 'swap', sourceSeatId: string, targetSeatId: string): void;
   (e: 'assign-student', ermId: number, seatId: string): void;
 }>();
+
+const legendItems = computed<LegendItem[]>(() => [
+  {
+    label: t('admin.seatManagement.legend.monk'),
+    color: PHYSICAL_STATUS_BG_COLORS.MONK,
+  },
+  {
+    label: t('admin.seatManagement.legend.disabled'),
+    color: PHYSICAL_STATUS_BG_COLORS.DISABLED,
+  },
+  {
+    label: t('admin.seatManagement.legend.pregnant'),
+    color: PHYSICAL_STATUS_BG_COLORS.PREGNANT,
+  },
+  {
+    label: t('admin.seatManagement.legend.thaiAndForeigner'),
+    color: PHYSICAL_STATUS_BG_COLORS.GENERAL,
+  },
+]);
 
 const swapMode = ref(false);
 const externalDragOverSeatId = ref<string | null>(null);

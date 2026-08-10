@@ -1800,8 +1800,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/app-exam-seat-assignment-map.vue": {
-    "mtime": 1786326771.081028,
-    "ast_hash": "4b33efbf700b67c74997b7c6a2bedd72",
+    "mtime": 1786329034.0310647,
+    "ast_hash": "89fd491d5698e39e9ce8adbf81e4e82e",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/app-exam-seat-assignment-tile.vue": {
@@ -2455,8 +2455,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/en-US/index.ts": {
-    "mtime": 1786328052.7824354,
-    "ast_hash": "5ce7f5ce1db06e663846a8e21ce6349f",
+    "mtime": 1786329006.793746,
+    "ast_hash": "801634945b0105f3055973b9d27f0f3a",
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/index.ts": {
@@ -2465,8 +2465,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/th/index.ts": {
-    "mtime": 1786328037.534886,
-    "ast_hash": "1f20bdc7f335900a3fbfb86e31aac712",
+    "mtime": 1786329006.4514892,
+    "ast_hash": "83317f97d40484d44185d1a6798909a0",
     "semantic_hash": ""
   },
   "apps/frontend/src/layouts/main-layout.vue": {

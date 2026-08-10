@@ -879,6 +879,12 @@ export default {
       unassignedBanner: 'มีผู้สมัคร {count} คนที่ยังไม่มีที่นั่ง — ลากจากรายชื่อไปวางบนที่นั่งว่าง',
       applicantTypeFilterLabel: 'ประเภทผู้สมัคร',
       applicantTypeAll: 'ทั้งหมด',
+      legend: {
+        monk: 'พระภิกษุ / นักบวช',
+        disabled: 'บุคคลทุพพลภาพ',
+        pregnant: 'ผู้ตั้งครรภ์',
+        thaiAndForeigner: 'ชาวไทย / ชาวต่างชาติ',
+      },
       seatTooltipName: 'ชื่อ: {name}',
       seatTooltipType: 'ประเภทผู้สมัคร: {type}',
       savingData: 'กำลังบันทึกข้อมูลผังที่นั่ง...',
