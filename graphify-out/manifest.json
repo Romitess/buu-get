@@ -410,8 +410,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/bank-reconciles/bank-reconciles.service.ts": {
-    "mtime": 1786326771.0807776,
-    "ast_hash": "6a4fc77893cfc79ccaa1afdf5a2b366d",
+    "mtime": 1786329492.3308272,
+    "ast_hash": "7dbdeb0f4fd72a82c5dda00d92335a8f",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/bank-reconciles/dto/bank-reconcile.dto.ts": {
@@ -545,8 +545,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.ts": {
-    "mtime": 1786327736.4800115,
-    "ast_hash": "e7f83bd2256e58323c7b6e6349fd5ac1",
+    "mtime": 1786331458.386868,
+    "ast_hash": "e49b9d1a6584ab47adfc5d507c488aae",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/interfaces/executive-exam-history.interface.ts": {
@@ -1325,8 +1325,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/transactions/entities/transaction.entity.ts": {
-    "mtime": 1784608898.1351244,
-    "ast_hash": "9ef8d4695c7e52994a1c1ab138ab4e4c",
+    "mtime": 1786329492.3311312,
+    "ast_hash": "422d1ef1fcc4f5d2a879f3b10d5430b1",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/transactions/transactions.controller.ts": {
@@ -1800,7 +1800,7 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/app-exam-seat-assignment-map.vue": {
-    "mtime": 1786329034.0310647,
+    "mtime": 1786329492.386206,
     "ast_hash": "89fd491d5698e39e9ce8adbf81e4e82e",
     "semantic_hash": ""
   },
@@ -2000,8 +2000,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/round-exam.vue": {
-    "mtime": 1785725886.3552625,
-    "ast_hash": "47d489f0a891cdd63f0c00b22a1104ee",
+    "mtime": 1786333071.667434,
+    "ast_hash": "b2617e65d4bee3023ea9e7dec996ac40",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/example-component.vue": {
@@ -2455,7 +2455,7 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/en-US/index.ts": {
-    "mtime": 1786329006.793746,
+    "mtime": 1786329492.386809,
     "ast_hash": "801634945b0105f3055973b9d27f0f3a",
     "semantic_hash": ""
   },
@@ -2465,7 +2465,7 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/th/index.ts": {
-    "mtime": 1786329006.4514892,
+    "mtime": 1786329492.3872178,
     "ast_hash": "83317f97d40484d44185d1a6798909a0",
     "semantic_hash": ""
   },
@@ -2640,8 +2640,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-history-page.vue": {
-    "mtime": 1786328397.995364,
-    "ast_hash": "9c824f52e76f547858e60928d7eb245f",
+    "mtime": 1786331486.6762412,
+    "ast_hash": "5b3437f71a77e3a8faa8bd60d231db23",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-schedule-page.vue": {
@@ -2705,8 +2705,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/services/exam.service.ts": {
-    "mtime": 1786326771.0808167,
-    "ast_hash": "84a65e05b7dd3169bf3eadc1f99f1785",
+    "mtime": 1786333106.856765,
+    "ast_hash": "0388426b3d6e47148de391c880699ad0",
     "semantic_hash": ""
   },
   "apps/frontend/src/services/executive-test-taker.service.ts": {
@@ -2780,8 +2780,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/stores/exam.store.ts": {
-    "mtime": 1786327999.937875,
-    "ast_hash": "3c656b1dd80d2459aebb4196a642b765",
+    "mtime": 1786333057.239756,
+    "ast_hash": "2bfaa3b6ad5cd33a288b70e69a5b761e",
     "semantic_hash": ""
   },
   "apps/frontend/src/stores/example-store.ts": {
@@ -3200,8 +3200,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.spec.ts": {
-    "mtime": 1786327875.2746208,
-    "ast_hash": "77777297d40464208590a0ffd0ee0d93",
+    "mtime": 1786331486.8723016,
+    "ast_hash": "f568d4f54dc973bbef70266167988c91",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/transactions/transactions.service.spec.ts": {
@@ -3405,8 +3405,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-candidate-home-activities.ts": {
-    "mtime": 1786328356.986496,
-    "ast_hash": "0f19fec44b21b21e8a52a150e40ae3ab",
+    "mtime": 1786331582.8787677,
+    "ast_hash": "cb02a3fa357b46dc2393aa837d39c51b",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/payment-import-test-export-page.vue": {
@@ -3660,8 +3660,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/utils/map-enrollment-history-status.ts": {
-    "mtime": 1786328329.0164568,
-    "ast_hash": "e017af74d3d3a8662490795bdbe21f01",
+    "mtime": 1786331504.49492,
+    "ast_hash": "8d0343aa172601cd11215ff367eb3dd0",
     "semantic_hash": ""
   },
   "apps/frontend/src/utils/verify-qr.ts": {
@@ -3810,8 +3810,8 @@
     "semantic_hash": ""
   },
   "docs/database-erd.md": {
-    "mtime": 1786326771.0809782,
-    "ast_hash": "9dc16ed6b3002484bd02e160c916d724",
+    "mtime": 1786329492.3326032,
+    "ast_hash": "702ca850f050be66e55fad49df11ef9a",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam-report/exam-attempt-proportion-chart.vue": {
@@ -4652,6 +4652,41 @@
   "tests/reports/cc-sf/Batch-07-ExamReport/CC-SF-03-129-\u0e41\u0e1a\u0e1a\u0e1f\u0e2d\u0e23\u0e4c\u0e21\u0e01\u0e32\u0e23\u0e17\u0e14\u0e2a\u0e2d\u0e1a.pdf": {
     "mtime": 1786093148.565407,
     "ast_hash": "b59adac81292c62725232fd6ce52676e",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/database/migrations/1789780343810-RenameTranxDeletedAtToDeletedAt.ts": {
+    "mtime": 1786329492.3304687,
+    "ast_hash": "59ad0b7a2be1a719e729dbcc88d40810",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/composables/candidate-home-activities.util.ts": {
+    "mtime": 1786333089.1255422,
+    "ast_hash": "878411016f992a23b4499bb4ebcd460d",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/composables/use-candidate-home-activities.spec.ts": {
+    "mtime": 1786333089.7787807,
+    "ast_hash": "ea2c2998427c6f645c793bcb71bf9c67",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/composables/use-candidate-home-activities.types.ts": {
+    "mtime": 1786331569.6137583,
+    "ast_hash": "a60c83add4559fa4f4aec0288db88317",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/utils/map-enrollment-history-status.spec.ts": {
+    "mtime": 1786331529.7391539,
+    "ast_hash": "1b179fe83cd4a066d69c144fe2cbe819",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/utils/is-active-enrollment-status.spec.ts": {
+    "mtime": 1786333079.6612267,
+    "ast_hash": "fae75e14c950f0b09292d6a16ebcb2d5",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/utils/is-active-enrollment-status.ts": {
+    "mtime": 1786333102.944334,
+    "ast_hash": "6546ac7ebfa7248b094d1071c02e81a6",
     "semantic_hash": ""
   }
 }

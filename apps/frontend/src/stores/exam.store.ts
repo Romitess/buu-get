@@ -28,6 +28,7 @@ import {
   ENROLLMENT_STATUS,
   formatLocationWithRoom,
 } from 'src/constants/exam';
+import { isActiveEnrollmentStatus } from 'src/utils/is-active-enrollment-status';
 import {
   getExamRoundsCalendarAvailability,
   type ExamCalendarAvailability,
@@ -187,7 +188,7 @@ export const useExamStore = defineStore('exam', () => {
 
     registeredSessionIds.value = new Set(
       enrollments
-        .filter((enrollment) => enrollment.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED)
+        .filter((enrollment) => isActiveEnrollmentStatus(enrollment.ERM_STATUS))
         .map((enrollment) => enrollment.SESSION_ID),
     );
   }
@@ -439,17 +440,23 @@ export const useExamStore = defineStore('exam', () => {
         receiptAddress: receiptInfo?.address,
       });
 
-      await fetchHistory(true);
+      await refreshUserEnrollmentViews();
     } catch (error: unknown) {
       console.error('Failed to confirm payment:', error);
       throw error;
     }
   }
 
-  async function expireTransaction(tranxId: number): Promise<void> {
+  async function expireTransaction(
+    tranxId: number,
+    enrollmentId?: number,
+  ): Promise<void> {
     try {
       await expireTransactionRequest(tranxId);
-      await fetchHistory(true);
+      if (enrollmentId !== undefined) {
+        setCancellationReason(enrollmentId, 'paymentTimeout');
+      }
+      await refreshUserEnrollmentViews();
     } catch (error: unknown) {
       console.error('Failed to expire transaction:', error);
       throw error;

@@ -39,10 +39,10 @@
 
       <AppButton
         :label="
-          isRegistered
-            ? registeredBtnText || t('examSchedule.registeredBtnText')
-            : isExpired
-              ? t('examSchedule.expiredBtnText')
+          isExpired
+            ? t('examSchedule.expiredBtnText')
+            : isRegistered
+              ? registeredBtnText || t('examSchedule.registeredBtnText')
               : isNotOpenYet
                 ? t('examSchedule.notOpenBtnText')
                 : isFull

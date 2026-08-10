@@ -1457,30 +1457,58 @@ export class ExamEnrollmentsService {
   async handleCronCancelExpiredEnrollments() {
     const now = new Date();
 
-    // 1) ยกเลิก UNPAID ที่เลยวันปิดชำระเงินของรอบสอบ
-    const payWindowResult = await this.examEnrollmentRepository
-      .createQueryBuilder()
-      .update(ExamEnrollment)
-      .set({ ERM_STATUS: ExamEnrollmentStatus.CANCELLED })
-      .where('ERM_STATUS = :unpaid', { unpaid: ExamEnrollmentStatus.UNPAID })
-      .andWhere(
-        `SESSION_ID IN (
-          SELECT s.SS_ID FROM EXAM_T_SESSIONS s
-          INNER JOIN EXAM_T_EXAM e ON e.EXAM_ID = s.EXAM_ID
-          WHERE e.EXAM_PAY_END_DATE IS NOT NULL
-            AND e.EXAM_PAY_END_DATE < :now
-            AND e.DELETED_AT IS NULL
-            AND s.DELETED_AT IS NULL
-        )`,
-        { now },
-      )
-      .execute();
+    // 1) ยกเลิก UNPAID ที่เลยวันปิดชำระเงินของรอบสอบ + expire PENDING txn ที่เกี่ยวข้อง
+    await this.dataSource.transaction(async (manager) => {
+      const payEndedRows: Array<{ ERM_ID: number }> = await manager
+        .createQueryBuilder()
+        .select('enr.ERM_ID', 'ERM_ID')
+        .from('EXAM_T_ENROLLMENTS', 'enr')
+        .innerJoin('EXAM_T_SESSIONS', 's', 's.SS_ID = enr.SESSION_ID')
+        .innerJoin('EXAM_T_EXAM', 'e', 'e.EXAM_ID = s.EXAM_ID')
+        .where('enr.ERM_STATUS = :unpaid', {
+          unpaid: ExamEnrollmentStatus.UNPAID,
+        })
+        .andWhere('e.EXAM_PAY_END_DATE IS NOT NULL')
+        .andWhere('e.EXAM_PAY_END_DATE < :now', { now })
+        .andWhere('e.DELETED_AT IS NULL')
+        .andWhere('s.DELETED_AT IS NULL')
+        .andWhere('enr.DELETED_AT IS NULL')
+        .getRawMany();
 
-    if (payWindowResult.affected && payWindowResult.affected > 0) {
+      if (payEndedRows.length === 0) {
+        return;
+      }
+
+      const ermIds = payEndedRows.map((row) => Number(row.ERM_ID));
+
+      await manager
+        .createQueryBuilder()
+        .update(ExamEnrollment)
+        .set({ ERM_STATUS: ExamEnrollmentStatus.CANCELLED })
+        .where('ERM_ID IN (:...ermIds)', { ermIds })
+        .andWhere('ERM_STATUS = :unpaid', {
+          unpaid: ExamEnrollmentStatus.UNPAID,
+        })
+        .execute();
+
+      await manager
+        .createQueryBuilder()
+        .update('FIN_T_TRANSACTIONS')
+        .set({
+          TRANX_PAYMENT_STATUS: TransactionPaymentStatus.EXPIRED,
+          TRANX_UPDATED_AT: now,
+        })
+        .where('ERM_ID IN (:...ermIds)', { ermIds })
+        .andWhere('TRANX_PAYMENT_STATUS = :pending', {
+          pending: TransactionPaymentStatus.PENDING,
+        })
+        .andWhere('DELETED_AT IS NULL')
+        .execute();
+
       this.logger.log(
-        `[Cron] Cancelled ${payWindowResult.affected} unpaid enrollments past exam pay end date.`,
+        `[Cron] Cancelled ${ermIds.length} unpaid enrollments past exam pay end date (and expired related PENDING transactions).`,
       );
-    }
+    });
 
     // 2) หมดเวลา QR session → expire transaction + ยกเลิก enrollment
     await this.dataSource.transaction(async (manager) => {

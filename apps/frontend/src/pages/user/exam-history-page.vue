@@ -604,7 +604,7 @@ const handleSessionTimeout = async (exam: ExamHistoryItem): Promise<void> => {
 
   if (tranxId) {
     try {
-      await examStore.expireTransaction(tranxId);
+      await examStore.expireTransaction(tranxId, exam.id);
       pendingTransactionId.value = null;
       paymentExpiryTime.value = '';
       $q.notify({
@@ -633,7 +633,7 @@ const handlePaymentTimeout = async (): Promise<void> => {
   if (!tranxId) return;
 
   try {
-    await examStore.expireTransaction(tranxId);
+    await examStore.expireTransaction(tranxId, selectedExam.value?.id);
     pendingTransactionId.value = null;
     paymentExpiryTime.value = '';
     showPaymentDialog.value = false;
