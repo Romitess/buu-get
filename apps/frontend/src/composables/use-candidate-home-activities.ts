@@ -5,7 +5,6 @@ import { useUserStore } from 'src/stores/user.store';
 import { ROLES } from 'src/constants/roles';
 import {
   ENROLLMENT_STATUS,
-  PAYMENT_DURATION_SECONDS_DEFAULT,
   TRANSACTION_PAYMENT_STATUS,
 } from 'src/constants/exam';
 import type { ExamHistoryItem } from 'src/types/exam';
@@ -20,6 +19,9 @@ export interface CandidateHomeActivity {
   time: string;
   location: string;
   fee?: number;
+  /** Exam pay-by date (EXAM_PAY_END_DATE) for unpaid cards before QR session */
+  payByDate?: string;
+  /** QR session expiry — when set, unpaid card shows countdown */
   deadline?: string;
   seatLabel?: string;
   /** Sort key: unpaid first, then payment cancelled, then nearest exam date */
@@ -62,10 +64,6 @@ function hasVoucher(item: ExamHistoryItem): boolean {
   return Array.isArray(vouchers) && vouchers.length > 0;
 }
 
-function getPaymentDeadlineMs(createdAt: string): number {
-  return new Date(createdAt).getTime() + PAYMENT_DURATION_SECONDS_DEFAULT * 1000;
-}
-
 function isPaymentTimeoutCancellation(item: ExamHistoryItem): boolean {
   const enrollment = item.rawEnrollment;
   if (!enrollment || enrollment.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED) {
@@ -76,20 +74,11 @@ function isPaymentTimeoutCancellation(item: ExamHistoryItem): boolean {
     return true;
   }
 
-  if (item.status === 'exam.status.cancelled') {
+  if (item.status === 'exam.status.paymentTimeout') {
     return true;
   }
 
-  const paymentStatus = enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS;
-  if (paymentStatus === TRANSACTION_PAYMENT_STATUS.EXPIRED) {
-    return true;
-  }
-
-  if (!enrollment.CREATED_AT || !enrollment.UPDATED_AT) {
-    return false;
-  }
-
-  return new Date(enrollment.UPDATED_AT).getTime() >= getPaymentDeadlineMs(enrollment.CREATED_AT);
+  return enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS === TRANSACTION_PAYMENT_STATUS.EXPIRED;
 }
 
 function toUnpaidActivity(item: ExamHistoryItem): CandidateHomeActivity {
@@ -111,6 +100,9 @@ function toUnpaidActivity(item: ExamHistoryItem): CandidateHomeActivity {
 
   if (item.fee !== undefined) {
     activity.fee = item.fee;
+  }
+  if (item.payByDate) {
+    activity.payByDate = item.payByDate;
   }
   if (item.deadline) {
     activity.deadline = item.deadline;

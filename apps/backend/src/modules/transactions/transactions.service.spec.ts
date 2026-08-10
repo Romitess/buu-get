@@ -296,7 +296,7 @@ describe('TransactionsService', () => {
     it('should create PENDING when none exists (TXN-U-001)', async () => {
       // Arrange
       repos.paymentConfig.exists.mockResolvedValue(true);
-      repos.enrollment.exists.mockResolvedValue(true);
+      repos.enrollment.findOne.mockResolvedValue(baseEnrollment());
       repos.transaction.findOne.mockResolvedValue(null);
       repos.transaction.save.mockImplementation(async (entity) => ({
         ...entity,
@@ -322,6 +322,7 @@ describe('TransactionsService', () => {
           TRANX_MATCH_STATUS: TransactionMatchStatus.UNMATCH,
           TRANX_PAYMENT_METHOD: TransactionPaymentMethod.QR,
           TRANX_CHANNEL: TransactionChannel.QR,
+          TRANX_EXPIRES_AT: null,
         }),
       );
       expect(repos.history.create).toHaveBeenCalledWith(
@@ -345,7 +346,7 @@ describe('TransactionsService', () => {
         TRANX_AMOUNT: 400,
       });
       repos.paymentConfig.exists.mockResolvedValue(true);
-      repos.enrollment.exists.mockResolvedValue(true);
+      repos.enrollment.findOne.mockResolvedValue(baseEnrollment());
       repos.transaction.findOne.mockResolvedValue(existing);
       repos.transaction.save.mockImplementation(async (entity) => entity);
 
@@ -373,9 +374,10 @@ describe('TransactionsService', () => {
       const existing = basePendingTransaction({
         TRANX_PAYMENT_STATUS: TransactionPaymentStatus.EXPIRED,
         TRANX_QR_CODE: 'old-qr',
+        TRANX_EXPIRES_AT: new Date('2020-01-01T00:00:00Z'),
       });
       repos.paymentConfig.exists.mockResolvedValue(true);
-      repos.enrollment.exists.mockResolvedValue(true);
+      repos.enrollment.findOne.mockResolvedValue(baseEnrollment());
       repos.transaction.findOne.mockResolvedValue(existing);
       repos.transaction.save.mockImplementation(async (entity) => entity);
 
@@ -392,6 +394,7 @@ describe('TransactionsService', () => {
         TransactionPaymentStatus.PENDING,
       );
       expect(existing.TRANX_MATCH_STATUS).toBe(TransactionMatchStatus.UNMATCH);
+      expect(existing.TRANX_EXPIRES_AT).toBeNull();
       expect(repos.history.create).toHaveBeenCalledWith(
         expect.objectContaining({
           TSH_FROM: String(TransactionPaymentStatus.EXPIRED),
@@ -405,7 +408,7 @@ describe('TransactionsService', () => {
     it('should throw ConflictException when latest transaction is PAID (TXN-U-004)', async () => {
       // Arrange
       repos.paymentConfig.exists.mockResolvedValue(true);
-      repos.enrollment.exists.mockResolvedValue(true);
+      repos.enrollment.findOne.mockResolvedValue(baseEnrollment());
       repos.transaction.findOne.mockResolvedValue(
         basePendingTransaction({
           TRANX_PAYMENT_STATUS: TransactionPaymentStatus.PAID,
@@ -440,7 +443,7 @@ describe('TransactionsService', () => {
     it('should throw NotFoundException when enrollment is missing (TXN-U-006)', async () => {
       // Arrange
       repos.paymentConfig.exists.mockResolvedValue(true);
-      repos.enrollment.exists.mockResolvedValue(false);
+      repos.enrollment.findOne.mockResolvedValue(null);
 
       // Act / Assert
       await expect(
@@ -450,6 +453,23 @@ describe('TransactionsService', () => {
           amount: 500,
         }),
       ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('should reject when enrollment is not UNPAID (TXN-U-006b)', async () => {
+      // Arrange
+      repos.paymentConfig.exists.mockResolvedValue(true);
+      repos.enrollment.findOne.mockResolvedValue(
+        baseEnrollment({ ERM_STATUS: ExamEnrollmentStatus.CANCELLED }),
+      );
+
+      // Act / Assert
+      await expect(
+        service.createTransactionForFlow({
+          ermId: 42,
+          pcId: 1,
+          amount: 500,
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
   });
 
@@ -792,7 +812,7 @@ describe('TransactionsService', () => {
   });
 
   describe('expireTransaction', () => {
-    it('should expire PENDING and write history without changing ERM (TXN-U-021)', async () => {
+    it('should expire PENDING, cancel UNPAID enrollment, and write history (TXN-U-021)', async () => {
       // Arrange
       const transaction = basePendingTransaction();
       const enrollment = baseEnrollment({
@@ -808,8 +828,8 @@ describe('TransactionsService', () => {
       expect(transaction.TRANX_PAYMENT_STATUS).toBe(
         TransactionPaymentStatus.EXPIRED,
       );
-      expect(enrollment.ERM_STATUS).toBe(ExamEnrollmentStatus.UNPAID);
-      expect(repos.enrollment.save).not.toHaveBeenCalled();
+      expect(enrollment.ERM_STATUS).toBe(ExamEnrollmentStatus.CANCELLED);
+      expect(repos.enrollment.save).toHaveBeenCalledWith(enrollment);
       expect(repos.history.create).toHaveBeenCalledWith(
         expect.objectContaining({
           TSH_FROM: String(TransactionPaymentStatus.PENDING),
@@ -856,6 +876,68 @@ describe('TransactionsService', () => {
       await expect(
         service.expireTransaction(999, ownerUser),
       ).rejects.toBeInstanceOf(NotFoundException);
+    });
+  });
+
+  describe('startPaymentSession', () => {
+    const enrollmentWithPayEnd = (
+      payEnd: Date | null = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    ): ExamEnrollment =>
+      baseEnrollment({
+        SESSION: {
+          EXAM: {
+            EXAM_PAY_END_DATE: payEnd,
+          },
+        },
+      } as Partial<ExamEnrollment>);
+
+    it('should set TRANX_EXPIRES_AT when starting a new session (TXN-U-040)', async () => {
+      // Arrange
+      const transaction = basePendingTransaction({ TRANX_EXPIRES_AT: null });
+      repos.transaction.findOne.mockResolvedValue(transaction);
+      repos.enrollment.findOne.mockResolvedValue(enrollmentWithPayEnd());
+      repos.transaction.save.mockImplementation(async (entity) => entity);
+
+      // Act
+      const result = await service.startPaymentSession(7, ownerUser);
+
+      // Assert
+      expect(result.TRANX_ID).toBe(7);
+      expect(result.TRANX_EXPIRES_AT).toBeInstanceOf(Date);
+      expect(transaction.TRANX_EXPIRES_AT).toEqual(result.TRANX_EXPIRES_AT);
+      expect(repos.transaction.save).toHaveBeenCalled();
+    });
+
+    it('should return existing expiry without reset (TXN-U-041)', async () => {
+      // Arrange
+      const existingExpiry = new Date(Date.now() + 10 * 60 * 1000);
+      const transaction = basePendingTransaction({
+        TRANX_EXPIRES_AT: existingExpiry,
+      });
+      repos.transaction.findOne.mockResolvedValue(transaction);
+      repos.enrollment.findOne.mockResolvedValue(enrollmentWithPayEnd());
+
+      // Act
+      const result = await service.startPaymentSession(7, ownerUser);
+
+      // Assert
+      expect(result.TRANX_EXPIRES_AT).toEqual(existingExpiry);
+      expect(repos.transaction.save).not.toHaveBeenCalled();
+    });
+
+    it('should reject when payment period ended (TXN-U-042)', async () => {
+      // Arrange
+      repos.transaction.findOne.mockResolvedValue(
+        basePendingTransaction({ TRANX_EXPIRES_AT: null }),
+      );
+      repos.enrollment.findOne.mockResolvedValue(
+        enrollmentWithPayEnd(new Date(Date.now() - 60_000)),
+      );
+
+      // Act / Assert
+      await expect(
+        service.startPaymentSession(7, ownerUser),
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
   });
 

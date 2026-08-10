@@ -29,9 +29,9 @@
           />
         </div>
         <slot name="status-append">
-          <div v-if="displayDeadline" class="deadline-text row items-center">
+          <div v-if="displayDeadlineText" class="deadline-text row items-center">
             <q-icon name="warning_amber" size="calc(var(--space-unit) * 4.5)" class="q-mr-xs" />
-            {{ $t('exam.history.paymentDeadline') }} {{ displayDeadline }}
+            {{ $t('exam.history.paymentDeadline') }} {{ displayDeadlineText }}
           </div>
         </slot>
       </div>
@@ -106,9 +106,10 @@
 </template>
 
 <script setup lang="ts">
-import { toRef } from 'vue';
+import { computed, toRef } from 'vue';
 import AppStatusBadge from 'src/components/base/app-status-badge.vue';
 import AppButton from 'src/components/base/app-button.vue';
+import { useAppDate } from 'src/composables/useAppDate';
 import { useCountdown } from 'src/composables/use-countdown';
 
 interface Props {
@@ -124,7 +125,10 @@ interface Props {
   location: string;
   seatLabel?: string;
   fee?: number | undefined;
+  /** QR session expiry — when set, card shows MM:SS countdown */
   deadline?: string | undefined;
+  /** Exam pay-by date — static display before QR session starts */
+  payByDate?: string | undefined;
   showCancel?: boolean;
   showPay?: boolean;
   showDownload?: boolean;
@@ -142,8 +146,18 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits(['cancel', 'pay', 'download', 'timeout']);
 
-// === Timer Logic (Composable) ===
+const { formatDateShort } = useAppDate();
 const { displayDeadline } = useCountdown(toRef(props, 'deadline'), () => emit('timeout'));
+
+const displayDeadlineText = computed((): string => {
+  if (props.deadline && displayDeadline.value) {
+    return displayDeadline.value;
+  }
+  if (props.payByDate) {
+    return formatDateShort(props.payByDate);
+  }
+  return '';
+});
 </script>
 
 <style scoped lang="scss">

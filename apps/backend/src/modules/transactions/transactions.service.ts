@@ -58,6 +58,14 @@ export interface TransactionFlowResult {
   TRANX_ID: number;
 }
 
+export interface PaymentSessionResult {
+  TRANX_ID: number;
+  TRANX_EXPIRES_AT: Date;
+}
+
+/** QR payment session TTL (30 minutes) */
+const PAYMENT_SESSION_TTL_MS = 30 * 60 * 1000;
+
 @Injectable()
 export class TransactionsService {
   constructor(
@@ -92,12 +100,17 @@ export class TransactionsService {
         );
       }
 
-      const enrollmentExists = await enrollmentRepository.exists({
+      const enrollment = await enrollmentRepository.findOne({
         where: { ERM_ID: dto.ermId },
       });
-      if (!enrollmentExists) {
+      if (!enrollment) {
         throw new NotFoundException(
           `Enrollment with ID ${dto.ermId} not found`,
+        );
+      }
+      if (enrollment.ERM_STATUS !== ExamEnrollmentStatus.UNPAID) {
+        throw new BadRequestException(
+          'Enrollment must be unpaid to create a payment transaction',
         );
       }
 
@@ -129,6 +142,10 @@ export class TransactionsService {
         transaction.TRANX_PAID_AT = null;
         transaction.TRANX_REJECTED_AT = null;
         transaction.TRANX_UPDATED_AT = new Date();
+        // TTL starts only when QR session is opened (startPaymentSession)
+        if (previousStatus !== TransactionPaymentStatus.PENDING) {
+          transaction.TRANX_EXPIRES_AT = null;
+        }
       } else {
         transaction = transactionRepository.create({
           ERM_ID: dto.ermId,
@@ -141,6 +158,7 @@ export class TransactionsService {
           TRANX_BANK_CODE: 'KTB',
           TRANX_CHANNEL: TransactionChannel.QR,
           TRANX_CREATED_AT: new Date(),
+          TRANX_EXPIRES_AT: null,
         });
       }
 
@@ -165,6 +183,92 @@ export class TransactionsService {
       }
 
       return { TRANX_ID: savedTransaction.TRANX_ID };
+    });
+  }
+
+  async startPaymentSession(
+    tranxId: number,
+    user: AuthenticatedUser,
+  ): Promise<PaymentSessionResult> {
+    return this.dataSource.transaction(async (manager) => {
+      const transactionRepository = manager.getRepository(Transaction);
+      const enrollmentRepository = manager.getRepository(ExamEnrollment);
+      const historyRepository = manager.getRepository(TransactionStatusHistory);
+
+      const transaction = await transactionRepository.findOne({
+        where: { TRANX_ID: tranxId },
+      });
+      if (!transaction) {
+        throw new NotFoundException(`Transaction with ID ${tranxId} not found`);
+      }
+
+      const enrollment = await enrollmentRepository.findOne({
+        where: { ERM_ID: transaction.ERM_ID },
+        relations: ['SESSION', 'SESSION.EXAM'],
+      });
+      this.assertEnrollmentAccess(user, enrollment);
+
+      if (enrollment!.ERM_STATUS !== ExamEnrollmentStatus.UNPAID) {
+        throw new BadRequestException('Enrollment is not unpaid');
+      }
+
+      if (
+        transaction.TRANX_PAYMENT_STATUS !== TransactionPaymentStatus.PENDING
+      ) {
+        throw new BadRequestException('Transaction is not in PENDING status');
+      }
+
+      const now = new Date();
+      const payEndRaw = enrollment!.SESSION?.EXAM?.EXAM_PAY_END_DATE;
+      const payEnd = payEndRaw ? new Date(payEndRaw) : null;
+
+      if (payEnd && now > payEnd) {
+        throw new BadRequestException('Payment period has ended');
+      }
+
+      if (transaction.TRANX_EXPIRES_AT) {
+        const existingExpiry = new Date(transaction.TRANX_EXPIRES_AT);
+        if (existingExpiry <= now) {
+          transaction.TRANX_PAYMENT_STATUS = TransactionPaymentStatus.EXPIRED;
+          transaction.TRANX_UPDATED_AT = now;
+          await transactionRepository.save(transaction);
+
+          enrollment!.ERM_STATUS = ExamEnrollmentStatus.CANCELLED;
+          await enrollmentRepository.save(enrollment!);
+
+          await historyRepository.save(
+            historyRepository.create({
+              TRANX_ID: tranxId,
+              TSH_FROM: this.toHistoryStatus(TransactionPaymentStatus.PENDING),
+              TSH_TO: this.toHistoryStatus(TransactionPaymentStatus.EXPIRED),
+              TSH_API_TYPE: TransactionApiType.PAYMENT,
+              TSH_RESP_CODE: '000',
+              TSH_RESP_MESSAGE: 'Payment session expired on reopen',
+            }),
+          );
+
+          throw new BadRequestException('Payment session has expired');
+        }
+
+        return {
+          TRANX_ID: transaction.TRANX_ID,
+          TRANX_EXPIRES_AT: existingExpiry,
+        };
+      }
+
+      let expiresAt = new Date(now.getTime() + PAYMENT_SESSION_TTL_MS);
+      if (payEnd && expiresAt > payEnd) {
+        expiresAt = payEnd;
+      }
+
+      transaction.TRANX_EXPIRES_AT = expiresAt;
+      transaction.TRANX_UPDATED_AT = now;
+      await transactionRepository.save(transaction);
+
+      return {
+        TRANX_ID: transaction.TRANX_ID,
+        TRANX_EXPIRES_AT: expiresAt,
+      };
     });
   }
 
@@ -306,6 +410,11 @@ export class TransactionsService {
       transaction.TRANX_PAYMENT_STATUS = TransactionPaymentStatus.EXPIRED;
       transaction.TRANX_UPDATED_AT = new Date();
       await transactionRepository.save(transaction);
+
+      if (enrollment && enrollment.ERM_STATUS === ExamEnrollmentStatus.UNPAID) {
+        enrollment.ERM_STATUS = ExamEnrollmentStatus.CANCELLED;
+        await manager.getRepository(ExamEnrollment).save(enrollment);
+      }
 
       const history = historyRepository.create({
         TRANX_ID: tranxId,

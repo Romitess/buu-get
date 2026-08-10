@@ -4,13 +4,9 @@ import { formatCountdownRemaining } from './use-countdown';
 describe('formatCountdownRemaining', () => {
   const deadline = '2026-07-30T10:30:00.000Z';
 
-  it('returns the same MM:SS for the same deadline and now (card/dialog sync)', () => {
+  it('returns MM:SS for a QR session expiry deadline', () => {
     const nowMs = Date.parse('2026-07-30T10:00:11.400Z');
-    const cardDisplay = formatCountdownRemaining(deadline, nowMs);
-    const dialogDisplay = formatCountdownRemaining(deadline, nowMs);
-
-    expect(cardDisplay).toBe('29:48');
-    expect(dialogDisplay).toBe(cardDisplay);
+    expect(formatCountdownRemaining(deadline, nowMs)).toBe('29:48');
   });
 
   it('floors partial seconds consistently', () => {
@@ -28,12 +24,12 @@ describe('formatCountdownRemaining', () => {
     expect(formatCountdownRemaining('')).toBeUndefined();
   });
 
-  it('diverges when deadlines differ (regression for reset-on-pay bug)', () => {
+  it('uses session TRANX_EXPIRES_AT independently from exam pay-by date', () => {
     const nowMs = Date.parse('2026-07-30T10:00:11.400Z');
-    const enrollmentDeadline = '2026-07-30T10:30:00.000Z';
-    const resetOnPayDeadline = '2026-07-30T10:30:06.000Z';
+    const qrSessionExpiry = '2026-07-30T10:30:00.000Z';
+    const laterSessionExpiry = '2026-07-30T10:30:06.000Z';
 
-    expect(formatCountdownRemaining(enrollmentDeadline, nowMs)).toBe('29:48');
-    expect(formatCountdownRemaining(resetOnPayDeadline, nowMs)).toBe('29:54');
+    expect(formatCountdownRemaining(qrSessionExpiry, nowMs)).toBe('29:48');
+    expect(formatCountdownRemaining(laterSessionExpiry, nowMs)).toBe('29:54');
   });
 });

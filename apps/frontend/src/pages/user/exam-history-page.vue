@@ -59,7 +59,7 @@
             v-for="exam in visiblePendingExams"
             :key="exam.id"
             v-bind="getPendingCardProps(exam)"
-            @timeout="handleTimeout(exam)"
+            @timeout="handleSessionTimeout(exam)"
           >
             <template #actions>
               <AppButton
@@ -338,9 +338,8 @@ const showReceiptInformationDialog = ref(false);
 const selectedExam = ref<ExamHistoryItem | null>(null);
 const pendingTransactionId = ref<number | null>(null);
 const receiptInformation = ref<ReceiptInformation | null>(null);
-
-/** ใช้ deadline เดียวกับ card (CREATED_AT + payment window) — ห้าม reset เป็น now+duration */
-const paymentExpiryTime = computed((): string => selectedExam.value?.deadline ?? '');
+/** QR session expiry from startPaymentSession — countdown starts when dialog opens */
+const paymentExpiryTime = ref('');
 
 const initialReceiptInformation = computed<ReceiptInformation>(() => {
   const user = userStore.currentUser;
@@ -479,6 +478,7 @@ const getPendingCardProps = (exam: TranslatedExamHistoryItem) => ({
   ...(exam.seatLabel ? { seatLabel: exam.seatLabel } : {}),
   ...(exam.fee !== undefined ? { fee: exam.fee } : {}),
   ...(exam.deadline ? { deadline: exam.deadline } : {}),
+  ...(exam.payByDate ? { payByDate: exam.payByDate } : {}),
 });
 
 const getHistoryCardProps = (exam: TranslatedExamHistoryItem) => ({
@@ -494,10 +494,6 @@ const getHistoryCardProps = (exam: TranslatedExamHistoryItem) => ({
 });
 
 // === Methods ===
-const handleTimeout = (exam: ExamHistoryItem): void => {
-  void examStore.cancelRegistration(exam.id, 'paymentTimeout');
-};
-
 const getErrorMessage = (err: unknown, fallback: string): string => {
   if (err instanceof AxiosError) {
     return err.response?.data?.message || err.message || fallback;
@@ -512,15 +508,12 @@ const handlePay = async (exam: ExamHistoryItem): Promise<void> => {
   selectedExam.value = exam;
   receiptInformation.value = null;
   pendingTransactionId.value = null;
+  paymentExpiryTime.value = '';
 
   try {
     const amount = exam.fee;
     if (amount === undefined) {
       throw new Error('Exam fee is missing');
-    }
-
-    if (!exam.deadline) {
-      throw new Error('Payment deadline is missing');
     }
 
     pendingTransactionId.value = await examStore.createTransaction(exam.id, amount, 1);
@@ -536,10 +529,38 @@ const handlePay = async (exam: ExamHistoryItem): Promise<void> => {
   }
 };
 
-const handleReceiptInformationConfirm = (value: ReceiptInformation): void => {
+const handleReceiptInformationConfirm = async (value: ReceiptInformation): Promise<void> => {
   receiptInformation.value = value;
   showReceiptInformationDialog.value = false;
-  showPaymentDialog.value = true;
+
+  const tranxId = pendingTransactionId.value;
+  if (!tranxId) {
+    $q.notify({
+      type: 'negative',
+      message: 'ไม่พบรายการชำระเงิน',
+      position: 'bottom',
+      timeout: 5000,
+    });
+    return;
+  }
+
+  try {
+    paymentExpiryTime.value = await examStore.startPaymentSession(tranxId);
+    showPaymentDialog.value = true;
+    // Refresh so history card switches from pay-by date to countdown
+    await examStore.fetchHistory(true);
+  } catch (err: unknown) {
+    console.error('Payment session start failed:', err);
+    pendingTransactionId.value = null;
+    paymentExpiryTime.value = '';
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(err, 'เกิดข้อผิดพลาดในการเริ่มการชำระเงิน'),
+      position: 'bottom',
+      timeout: 5000,
+    });
+    await examStore.fetchHistory(true);
+  }
 };
 
 const handleSaveQR = async (): Promise<void> => {
@@ -553,6 +574,7 @@ const handleSaveQR = async (): Promise<void> => {
         receiptInformation.value,
       );
       pendingTransactionId.value = null;
+      paymentExpiryTime.value = '';
       $q.notify({
         type: 'positive',
         message: t('success'),
@@ -571,6 +593,41 @@ const handleSaveQR = async (): Promise<void> => {
   showPaymentDialog.value = false;
 };
 
+const handleSessionTimeout = async (exam: ExamHistoryItem): Promise<void> => {
+  // While QR dialog is open, dialog timeout owns expire to avoid double cancel/notify
+  if (showPaymentDialog.value) {
+    return;
+  }
+
+  const tranxId =
+    pendingTransactionId.value ?? exam.rawEnrollment?.TRANSACTION?.TRANX_ID ?? null;
+
+  if (tranxId) {
+    try {
+      await examStore.expireTransaction(tranxId);
+      pendingTransactionId.value = null;
+      paymentExpiryTime.value = '';
+      $q.notify({
+        type: 'warning',
+        message: t('exam.status.paymentTimeout'),
+        position: 'bottom',
+        timeout: 5000,
+      });
+    } catch (err: unknown) {
+      console.error('Payment session expiration failed:', err);
+      $q.notify({
+        type: 'negative',
+        message: getErrorMessage(err, 'เกิดข้อผิดพลาดในการหมดอายุรายการชำระเงิน'),
+        position: 'bottom',
+        timeout: 5000,
+      });
+    }
+    return;
+  }
+
+  void examStore.cancelRegistration(exam.id, 'paymentTimeout');
+};
+
 const handlePaymentTimeout = async (): Promise<void> => {
   const tranxId = pendingTransactionId.value;
   if (!tranxId) return;
@@ -578,7 +635,14 @@ const handlePaymentTimeout = async (): Promise<void> => {
   try {
     await examStore.expireTransaction(tranxId);
     pendingTransactionId.value = null;
+    paymentExpiryTime.value = '';
     showPaymentDialog.value = false;
+    $q.notify({
+      type: 'warning',
+      message: t('exam.status.paymentTimeout'),
+      position: 'bottom',
+      timeout: 5000,
+    });
   } catch (err: unknown) {
     console.error('Payment expiration failed:', err);
     $q.notify({

@@ -78,7 +78,7 @@ export default {
       candidateCard: 'บัตรประจำตัวผู้สอบ',
       scoreDetails: 'รายละเอียดคะแนน',
       certificate: 'ใบประกาศนียบัตร',
-      paymentDeadline: 'กำหนดชำระภายใน',
+      paymentDeadline: 'โปรดชำระภายใน',
       loadError: 'ไม่สามารถโหลดประวัติการสอบได้ กรุณาลองใหม่อีกครั้ง',
       retry: 'ลองใหม่',
       empty: 'ยังไม่มีประวัติการสอบหรือการลงทะเบียน',
@@ -480,7 +480,7 @@ export default {
       viewCandidateCard: 'ดูบัตรเข้าสอบ',
       registerAgain: 'สมัครใหม่',
       viewAll: 'ดูทั้งหมด',
-      paymentDeadline: 'ชำระภายใน',
+      paymentDeadline: 'โปรดชำระภายใน',
       paymentCancelledHint: 'การสมัครถูกยกเลิกเนื่องจากหมดเวลาชำระเงิน',
       seat: 'ที่นั่ง',
       badges: {
@@ -536,7 +536,8 @@ export default {
         },
         s3: {
           title: 'ชำระค่าธรรมเนียม',
-          description: 'สแกน QR Code ภายใน 30 นาที มิฉะนั้นระบบจะยกเลิกรายการ',
+          description:
+            'กรอกข้อมูลใบเสร็จ แล้วสแกน QR Code ภายใน 30 นาทีหลังเปิดหน้าชำระเงิน มิฉะนั้นระบบจะยกเลิกรายการ',
         },
         s4: {
           title: 'ตรวจสอบสถานะ',

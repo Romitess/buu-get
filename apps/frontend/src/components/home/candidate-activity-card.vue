@@ -23,11 +23,11 @@
         <h3 class="activity-title q-my-none">{{ activity.title }}</h3>
 
         <div
-          v-if="activity.kind === 'unpaid' && displayDeadline"
+          v-if="activity.kind === 'unpaid' && displayDeadlineText"
           class="deadline-text row items-center q-mt-xs"
         >
           <q-icon name="warning_amber" size="18px" class="q-mr-xs" />
-          {{ $t('home.candidateActivity.paymentDeadline') }} {{ displayDeadline }}
+          {{ $t('home.candidateActivity.paymentDeadline') }} {{ displayDeadlineText }}
         </div>
 
         <div
@@ -74,6 +74,7 @@
 import { computed } from 'vue';
 import AppStatusBadge from 'src/components/base/app-status-badge.vue';
 import AppButton from 'src/components/base/app-button.vue';
+import { useAppDate } from 'src/composables/useAppDate';
 import { useCountdown } from 'src/composables/use-countdown';
 import type { CandidateHomeActivity } from 'src/composables/use-candidate-home-activities';
 import payIllustration from 'src/assets/img/activity/pay.svg';
@@ -106,8 +107,19 @@ const emit = defineEmits<{
   (e: 'timeout'): void;
 }>();
 
-const deadline = computed(() => props.activity.deadline);
-const { displayDeadline } = useCountdown(deadline, () => emit('timeout'));
+const { formatDateShort } = useAppDate();
+const sessionDeadline = computed(() => props.activity.deadline);
+const { displayDeadline } = useCountdown(sessionDeadline, () => emit('timeout'));
+
+const displayDeadlineText = computed((): string => {
+  if (props.activity.deadline && displayDeadline.value) {
+    return displayDeadline.value;
+  }
+  if (props.activity.payByDate) {
+    return formatDateShort(props.activity.payByDate);
+  }
+  return '';
+});
 
 const illustrationSrc = computed(() => ILLUSTRATIONS[props.activity.imageKey]);
 const ctaIcon = computed(() => CTA_ICONS[props.activity.kind]);

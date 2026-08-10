@@ -38,6 +38,11 @@ export interface CreateTransactionFlowResponse {
   TRANX_ID: number;
 }
 
+export interface StartPaymentSessionResponse {
+  TRANX_ID: number;
+  TRANX_EXPIRES_AT: string;
+}
+
 export interface ConfirmPaymentFlowPayload {
   userCode: string;
   receiptTaxId?: string | undefined;
@@ -76,6 +81,16 @@ export const createTransaction = async (
   return response.data;
 };
 
+/** เริ่ม QR payment session — ตั้ง TRANX_EXPIRES_AT (~30 นาที) */
+export const startPaymentSession = async (
+  tranxId: number,
+): Promise<StartPaymentSessionResponse> => {
+  const response = await api.post<StartPaymentSessionResponse>(
+    `/transactions/${tranxId}/start-session`,
+  );
+  return response.data;
+};
+
 /** FLOW 2: ยืนยันการชำระเงิน → อัปเดต PAID + สร้าง TransactionRef */
 export const confirmPaymentFlow = async (
   tranxId: number,
@@ -84,7 +99,7 @@ export const confirmPaymentFlow = async (
   await api.patch(`/transactions/${tranxId}/confirm`, data);
 };
 
-/** FLOW 3: ทำให้ธุรกรรมหมดอายุ */
+/** FLOW 3: ทำให้ธุรกรรมหมดอายุและยกเลิกการลงทะเบียน */
 export const expireTransaction = async (tranxId: number): Promise<void> => {
   await api.patch(`/transactions/${tranxId}/expire`);
 };

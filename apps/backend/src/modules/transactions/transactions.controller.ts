@@ -110,8 +110,25 @@ export class TransactionsController {
     );
   }
 
+  @Post(':tranxId/start-session')
+  @ApiOperation({
+    summary: 'เริ่ม QR payment session และตั้งเวลาหมดอายุ (~30 นาที)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'เริ่ม session สำเร็จ',
+  })
+  startPaymentSession(
+    @Param('tranxId', ParseIntPipe) tranxId: number,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<{ TRANX_ID: number; TRANX_EXPIRES_AT: Date }> {
+    return this.transactionsService.startPaymentSession(tranxId, user);
+  }
+
   @Patch(':tranxId/expire')
-  @ApiOperation({ summary: 'ทำให้ธุรกรรมหมดอายุ (FLOW 3)' })
+  @ApiOperation({
+    summary: 'ทำให้ธุรกรรมหมดอายุและยกเลิกการลงทะเบียน (FLOW 3)',
+  })
   @ApiResponse({
     status: 200,
     description: 'ทำให้ธุรกรรมหมดอายุสำเร็จ',

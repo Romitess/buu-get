@@ -7,6 +7,7 @@ import {
   createTransaction as createTransactionRequest,
   confirmPaymentFlow,
   expireTransaction as expireTransactionRequest,
+  startPaymentSession as startPaymentSessionRequest,
 } from 'src/services/transaction.service';
 import {
   fetchScheduleData,
@@ -412,6 +413,18 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
+  async function startPaymentSession(tranxId: number): Promise<string> {
+    try {
+      const { TRANX_EXPIRES_AT } = await startPaymentSessionRequest(tranxId);
+      return typeof TRANX_EXPIRES_AT === 'string'
+        ? TRANX_EXPIRES_AT
+        : new Date(TRANX_EXPIRES_AT).toISOString();
+    } catch (error: unknown) {
+      console.error('Failed to start payment session:', error);
+      throw error;
+    }
+  }
+
   async function confirmPayment(
     tranxId: number,
     userCode: string,
@@ -485,6 +498,7 @@ export const useExamStore = defineStore('exam', () => {
     confirmSpecialRegistration,
     cancelRegistration,
     createTransaction,
+    startPaymentSession,
     confirmPayment,
     expireTransaction,
     addExamRound,

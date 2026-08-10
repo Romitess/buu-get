@@ -118,6 +118,10 @@ type QueryBuilderMock = {
   innerJoin: jest.Mock;
   leftJoin: jest.Mock;
   clone: jest.Mock;
+  update: jest.Mock;
+  set: jest.Mock;
+  from: jest.Mock;
+  execute: jest.Mock;
   getRawMany: jest.Mock;
   getRawOne: jest.Mock;
   getOne: jest.Mock;
@@ -140,6 +144,10 @@ const createQueryBuilderMock = (
     innerJoin: jest.fn(),
     leftJoin: jest.fn(),
     clone: jest.fn(),
+    update: jest.fn(),
+    set: jest.fn(),
+    from: jest.fn(),
+    execute: jest.fn().mockResolvedValue({ affected: 0 }),
     getRawMany: jest.fn().mockResolvedValue([]),
     getRawOne: jest.fn().mockResolvedValue({ total: '0' }),
     getOne: jest.fn().mockResolvedValue(null),
@@ -159,6 +167,9 @@ const createQueryBuilderMock = (
   qb.take.mockImplementation(chain);
   qb.innerJoin.mockImplementation(chain);
   qb.leftJoin.mockImplementation(chain);
+  qb.update.mockImplementation(chain);
+  qb.set.mockImplementation(chain);
+  qb.from.mockImplementation(chain);
   qb.clone.mockImplementation(() => qb);
   return qb;
 };
@@ -1519,24 +1530,46 @@ describe('ExamEnrollmentsService', () => {
   });
 
   describe('handleCronCancelExpiredEnrollments', () => {
-    it('ENR-U-046: cancels UNPAID enrollments older than 30 minutes', async () => {
+    it('ENR-U-046: cancels UNPAID past exam pay end and expires QR sessions', async () => {
       // Arrange
-      examEnrollmentRepository.update.mockResolvedValue({
-        affected: 3,
-        raw: [],
-        generatedMaps: [],
+      const payWindowQb = createQueryBuilderMock({
+        execute: jest.fn().mockResolvedValue({ affected: 2 }),
       });
+      examEnrollmentRepository.createQueryBuilder.mockReturnValue(payWindowQb);
+
+      const selectQb = createQueryBuilderMock({
+        getRawMany: jest.fn().mockResolvedValue([
+          { TRANX_ID: 11, ERM_ID: 101 },
+          { TRANX_ID: 12, ERM_ID: 102 },
+        ]),
+      });
+      const updateTranxQb = createQueryBuilderMock({
+        execute: jest.fn().mockResolvedValue({ affected: 2 }),
+      });
+      const updateErmQb = createQueryBuilderMock({
+        execute: jest.fn().mockResolvedValue({ affected: 2 }),
+      });
+
+      const manager = {
+        createQueryBuilder: jest
+          .fn()
+          .mockReturnValueOnce(selectQb)
+          .mockReturnValueOnce(updateTranxQb)
+          .mockReturnValueOnce(updateErmQb),
+      };
+      dataSource.transaction = jest.fn(async (cb: (m: unknown) => unknown) =>
+        cb(manager),
+      );
 
       // Act
       await service.handleCronCancelExpiredEnrollments();
 
       // Assert
-      expect(examEnrollmentRepository.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ERM_STATUS: ExamEnrollmentStatus.UNPAID,
-        }),
-        { ERM_STATUS: ExamEnrollmentStatus.CANCELLED },
-      );
+      expect(examEnrollmentRepository.createQueryBuilder).toHaveBeenCalled();
+      expect(payWindowQb.execute).toHaveBeenCalled();
+      expect(dataSource.transaction).toHaveBeenCalled();
+      expect(updateTranxQb.execute).toHaveBeenCalled();
+      expect(updateErmQb.execute).toHaveBeenCalled();
     });
   });
 

@@ -77,7 +77,7 @@ export default {
       candidateCard: 'Test voucher',
       scoreDetails: 'Score Details',
       certificate: 'Certificate',
-      paymentDeadline: 'Payment deadline',
+      paymentDeadline: 'Please pay by',
       loadError: 'Failed to load exam history. Please try again.',
       retry: 'Retry',
       empty: 'No exam or registration history yet',
@@ -437,7 +437,7 @@ export default {
       viewCandidateCard: 'View candidate card',
       registerAgain: 'Register again',
       viewAll: 'View all',
-      paymentDeadline: 'Pay within',
+      paymentDeadline: 'Please pay by',
       paymentCancelledHint: 'Registration was cancelled because the payment window expired',
       seat: 'Seat',
       badges: {
@@ -493,7 +493,8 @@ export default {
         },
         s3: {
           title: 'Payment',
-          description: 'Scan QR Code within 30 minutes, otherwise the system will cancel.',
+          description:
+            'Fill in receipt details, then scan the QR Code within 30 minutes after opening payment. Otherwise the registration will be cancelled.',
         },
         s4: {
           title: 'Check Status',

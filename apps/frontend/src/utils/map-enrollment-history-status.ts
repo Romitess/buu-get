@@ -1,6 +1,5 @@
 import {
   ENROLLMENT_STATUS,
-  PAYMENT_DURATION_SECONDS_DEFAULT,
   ReceiptStatus,
   SESSION_STATUS_COMPLETED,
   TRANSACTION_MATCH_STATUS,
@@ -24,18 +23,13 @@ export interface MapEnrollmentHistoryContext {
   getCancellationReason: (enrollmentId: number) => CancellationReason | null;
 }
 
-function getPaymentDeadline(createdAt: string): Date {
-  return new Date(new Date(createdAt).getTime() + PAYMENT_DURATION_SECONDS_DEFAULT * 1000);
-}
-
 function isPaymentTimeoutCancellation(
-  enrollment: Pick<ExamEnrollment, 'ERM_ID' | 'CREATED_AT' | 'UPDATED_AT'>,
+  enrollment: Pick<ExamEnrollment, 'ERM_ID' | 'TRANSACTION'>,
   getCancellationReason: (enrollmentId: number) => CancellationReason | null,
 ): boolean {
   const reason = getCancellationReason(enrollment.ERM_ID);
   if (reason) return reason === 'paymentTimeout';
-  if (!enrollment.CREATED_AT || !enrollment.UPDATED_AT) return false;
-  return new Date(enrollment.UPDATED_AT).getTime() >= getPaymentDeadline(enrollment.CREATED_AT).getTime();
+  return enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS === TRANSACTION_PAYMENT_STATUS.EXPIRED;
 }
 
 function hasMatchedPayment(enrollment: ExamEnrollment): boolean {
@@ -98,8 +92,23 @@ export function mapEnrollmentToHistoryItem(
       statusType: registrationStatus.type,
       actions: ['cancel', 'pay'],
     };
-    if (enrollment.CREATED_AT) {
-      item.deadline = getPaymentDeadline(enrollment.CREATED_AT).toISOString();
+    const payEndDate = enrollment.SESSION?.EXAM?.EXAM_PAY_END_DATE;
+    if (payEndDate) {
+      item.payByDate =
+        typeof payEndDate === 'string' ? payEndDate : new Date(payEndDate).toISOString();
+    }
+
+    const sessionExpiresAt = enrollment.TRANSACTION?.TRANX_EXPIRES_AT;
+    const paymentStatus = enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS;
+    if (
+      sessionExpiresAt &&
+      paymentStatus === TRANSACTION_PAYMENT_STATUS.PENDING &&
+      new Date(sessionExpiresAt).getTime() > Date.now()
+    ) {
+      item.deadline =
+        typeof sessionExpiresAt === 'string'
+          ? sessionExpiresAt
+          : new Date(sessionExpiresAt).toISOString();
     }
     return item;
   }
