@@ -1,5 +1,5 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import type { Repository } from 'typeorm';
+import type { EntityManager, Repository } from 'typeorm';
 import {
   PAGINATION_DEFAULT_LIMIT,
   PAGINATION_DEFAULT_PAGE,
@@ -21,6 +21,12 @@ describe('ReceiptsService', () => {
     findAndCount: jest.Mock;
     findOne: jest.Mock;
     softRemove: jest.Mock;
+    manager: {
+      transaction: jest.Mock;
+    };
+  };
+  let receiptNumberService: {
+    assignOnIssue: jest.Mock;
   };
 
   const mockedGenerateReceiptVerifyCode =
@@ -39,9 +45,20 @@ describe('ReceiptsService', () => {
       findAndCount: jest.fn(),
       findOne: jest.fn(),
       softRemove: jest.fn().mockResolvedValue(undefined),
+      manager: {
+        transaction: jest
+          .fn()
+          .mockImplementation((cb: (em: EntityManager) => unknown) =>
+            cb({} as unknown as EntityManager),
+          ),
+      },
+    };
+    receiptNumberService = {
+      assignOnIssue: jest.fn(),
     };
     service = new ReceiptsService(
       receiptsRepository as unknown as Repository<Receipt>,
+      receiptNumberService,
     );
     mockedGenerateReceiptVerifyCode.mockClear();
     mockedGenerateReceiptVerifyCode.mockReturnValue('ABCDEFGH12345678');
@@ -214,16 +231,17 @@ describe('ReceiptsService', () => {
   });
 
   describe('update', () => {
-    it('should Object.assign status without state-machine guard (RCPT-U-008)', async () => {
+    it('should Object.assign status and save when not triggering number assignment (RCPT-U-008)', async () => {
       // Arrange
       const existing = {
         RC_ID: 7,
         TRANX_ID: 1,
-        RC_STATUS: ReceiptStatus.UNISSUED,
+        RC_STATUS: ReceiptStatus.ISSUED, // Already issued
+        RC_NO: '256900001',
         RC_SIGNATURE_ID: 'sig',
       } as Receipt;
       receiptsRepository.findOne.mockResolvedValue(existing);
-      const dto: UpdateReceiptDto = { RC_STATUS: ReceiptStatus.ISSUED };
+      const dto: UpdateReceiptDto = { RC_SIGNATURE_ID: 'new-sig' };
 
       // Act
       const result = await service.update(7, dto);
@@ -232,10 +250,10 @@ describe('ReceiptsService', () => {
       expect(receiptsRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           RC_ID: 7,
-          RC_STATUS: ReceiptStatus.ISSUED,
+          RC_SIGNATURE_ID: 'new-sig',
         }),
       );
-      expect(result.RC_STATUS).toBe(ReceiptStatus.ISSUED);
+      expect(result.RC_SIGNATURE_ID).toBe('new-sig');
     });
 
     it('should allow reverse ISSUED→UNISSUED and ISSUED→VOIDED (RCPT-U-009)', async () => {
@@ -267,6 +285,28 @@ describe('ReceiptsService', () => {
       // Assert
       expect(voidedResult.RC_STATUS).toBe(ReceiptStatus.VOIDED);
       expect(receiptsRepository.save).toHaveBeenCalledTimes(2);
+    });
+
+    it('should call receiptNumberService.assignOnIssue when status changes to ISSUED (RCPT-U-014)', async () => {
+      // Arrange
+      const unissued = {
+        RC_ID: 9,
+        TRANX_ID: 3,
+        RC_STATUS: ReceiptStatus.UNISSUED,
+        RC_NO: null,
+      } as Receipt;
+      receiptsRepository.findOne.mockResolvedValue(unissued);
+      const dto: UpdateReceiptDto = { RC_STATUS: ReceiptStatus.ISSUED };
+
+      // Act
+      await service.update(9, dto);
+
+      // Assert
+      expect(receiptsRepository.manager.transaction).toHaveBeenCalled();
+      expect(receiptNumberService.assignOnIssue).toHaveBeenCalledWith(
+        expect.anything(),
+        [9],
+      );
     });
   });
 

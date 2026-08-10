@@ -6,6 +6,7 @@ import { Receipt, ReceiptStatus } from '../receipts/entities/receipt.entity';
 import { TransactionChannel } from '../transactions/entities/transaction.entity';
 import { maskIdentifier } from 'src/common/utils/mask-identifier.util';
 import { buildReceiptNo } from 'src/common/utils/receipt-no.util';
+import { buildReceiptItemDescription } from 'src/common/utils/receipt-description.util';
 import type {
   VerifyCertificateResponseDto,
   VerifyReceiptResponseDto,
@@ -16,8 +17,6 @@ const BUU_ORGANIZATION = {
   nameEN: 'BURAPHA UNIVERSITY',
   taxId: '0994000033100',
 } as const;
-
-const RECEIPT_ITEM_DESCRIPTION = 'ค่าสมัครสอบ BUU-GET';
 
 @Injectable()
 export class VerifyService {
@@ -132,9 +131,14 @@ export class VerifyService {
     const referenceDate =
       receipt.RC_ISSUED_AT ?? transaction?.TRANX_PAID_AT ?? receipt.CREATED_AT;
     const receiptNo = buildReceiptNo(
+      receipt.RC_NO,
       receipt.RC_ID,
       referenceDate,
       receipt.CREATED_AT,
+    );
+    const description = buildReceiptItemDescription(
+      exam?.EXAM_ROUND,
+      exam?.EXAM_FISCAL_YEAR,
     );
 
     if (receipt.RC_STATUS === ReceiptStatus.VOIDED) {
@@ -151,7 +155,7 @@ export class VerifyService {
         },
         payment: {
           amount: null,
-          description: RECEIPT_ITEM_DESCRIPTION,
+          description,
           paymentMethod: null,
           examRound: exam?.EXAM_ROUND ?? null,
           examDate: exam?.EXAM_DATE ?? null,
@@ -173,7 +177,7 @@ export class VerifyService {
       },
       payment: {
         amount: Number(transaction?.TRANX_AMOUNT ?? 0),
-        description: RECEIPT_ITEM_DESCRIPTION,
+        description,
         paymentMethod: this.mapPaymentMethod(transaction?.TRANX_CHANNEL),
         examRound: exam?.EXAM_ROUND ?? null,
         examDate: exam?.EXAM_DATE ?? null,

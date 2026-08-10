@@ -37,6 +37,7 @@ export interface IssuedReceipt {
   RC_ADDRESS: string | null;
   RC_STATUS: number;
   RC_ISSUED_AT: string | null;
+  RC_NO: string | null;
   CREATED_AT: string;
   TRANSACTION?: IssuedReceiptTransaction | null;
 }

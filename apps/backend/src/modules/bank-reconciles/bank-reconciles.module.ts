@@ -6,6 +6,7 @@ import { BankReconcile } from './entities/bank-reconcile.entity';
 import { BankReconcileEditLog } from './entities/bank-reconcile-edit-log.entity';
 import { TransactionRef } from '../transaction-refs/entities/transaction-ref.entity';
 import { Transaction } from '../transactions/entities/transaction.entity';
+import { ReceiptsModule } from '../receipts/receipts.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { Transaction } from '../transactions/entities/transaction.entity';
       TransactionRef,
       Transaction,
     ]),
+    ReceiptsModule,
   ],
   controllers: [BankReconcilesController],
   providers: [BankReconcilesService],

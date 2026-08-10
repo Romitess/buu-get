@@ -33,7 +33,8 @@ import {
 import { TransactionRef } from '../transaction-refs/entities/transaction-ref.entity';
 import { TransactionApiType } from '../transaction-status-history/entities/transaction-status-history.entity';
 import { ExamEnrollmentStatus } from '../exam-enrollments/entities/exam-enrollment.entity';
-import { ReceiptStatus } from '../receipts/entities/receipt.entity';
+import { Receipt } from '../receipts/entities/receipt.entity';
+import { ReceiptNumberService } from '../receipts/receipt-number.service';
 import { BankReconcile } from './entities/bank-reconcile.entity';
 import {
   BankReconcileChangedField,
@@ -167,6 +168,7 @@ export class BankReconcilesService {
   constructor(
     @InjectRepository(BankReconcile)
     private readonly bankReconcilesRepository: Repository<BankReconcile>,
+    private readonly receiptNumberService: ReceiptNumberService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -1166,14 +1168,17 @@ export class BankReconcilesService {
       }
 
       // 3. Update Receipts
-      await queryRunner.manager
-        .createQueryBuilder()
-        .update('FIN_T_RECEIPTS')
-        .set({
-          RC_STATUS: ReceiptStatus.ISSUED,
-        })
-        .where('TRANX_ID IN (:...tranxIds)', { tranxIds })
-        .execute();
+      const receiptRows = await queryRunner.manager
+        .getRepository(Receipt)
+        .find({
+          where: { TRANX_ID: In(tranxIds) },
+          select: ['RC_ID'],
+        });
+      const receiptIds = receiptRows.map((r) => r.RC_ID);
+      await this.receiptNumberService.assignOnIssue(
+        queryRunner.manager,
+        receiptIds,
+      );
 
       // 4. Update Exam Enrollments
       const ermIds = transactions

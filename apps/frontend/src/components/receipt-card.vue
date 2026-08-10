@@ -25,7 +25,7 @@
     </div>
 
     <!-- Date row: right-aligned, below header -->
-    <div class="receipt-date-row">{{ t('exam.card.date') }} {{ formattedDate }}</div>
+    <div class="receipt-date-row">{{ formattedDate }}</div>
 
     <!-- ═══════════════════════════════════════════════
          META INFO: Receipt No / Received From (group 1)
@@ -79,7 +79,7 @@
         <tbody>
           <tr class="data-row">
             <td class="text-center">1</td>
-            <td>{{ t('exam.card.itemDescription') }}</td>
+            <td>{{ receipt.examName }}</td>
             <td class="text-right">{{ formatCurrency(receipt.amount) }}</td>
           </tr>
           <!-- spacer pushes tfoot down — 3 cells รักษา border แต่ละ column -->
@@ -146,6 +146,7 @@ import { useI18n } from 'vue-i18n';
 import type { ReceiptCardProps } from 'src/types/receipt';
 import { buuInfo } from 'src/services/university.service';
 import { numberToThaiText } from 'src/utils/thai-currency';
+import { formatThaiLongDateWithPrefix } from 'src/utils/thai-date';
 
 const props = withDefaults(defineProps<ReceiptCardProps>(), {
   showQr: true,
@@ -162,8 +163,13 @@ const receiptTitleEn = computed<string>(() => (props.isCopy ? 'RECEIPT COPY' : '
 
 const formattedDate = computed(() => {
   if (!props.receipt.transactionDate) return 'xx/xx/xxxx';
+
+  // Requirement: "วันที่ 7 สิงหาคม พ.ศ.2569"
+  // i18n structure is common.months[index] (Array)
   const date = new Date(props.receipt.transactionDate);
-  return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+  const monthName = t(`common.months[${date.getMonth()}]`);
+
+  return formatThaiLongDateWithPrefix(props.receipt.transactionDate, () => monthName);
 });
 
 const formatCurrency = (amount: number) => {

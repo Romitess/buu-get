@@ -221,6 +221,7 @@ export interface ExamEnrollment {
     TRANX_CHANNEL?: number;
     RECEIPTS?: {
       RC_ID: number;
+      RC_NO?: string | null;
       RC_VERIFY_CODE?: string;
       RC_NAME?: string | null;
       RC_TAX_ID?: number | null;
