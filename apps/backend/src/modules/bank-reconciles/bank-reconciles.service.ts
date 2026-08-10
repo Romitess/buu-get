@@ -398,7 +398,7 @@ export class BankReconcilesService {
       .leftJoin(
         'FIN_T_TRANSACTIONS',
         't',
-        't.TRANX_ID = tr.TRANX_ID AND t.TRANX_DELETED_AT IS NULL',
+        't.TRANX_ID = tr.TRANX_ID AND t.DELETED_AT IS NULL',
       )
       .where('br.DELETED_AT IS NULL')
       .andWhere('br.BR_ID IN (:...brIds)', { brIds: brIdChunk })
@@ -1044,7 +1044,7 @@ export class BankReconcilesService {
       .innerJoin(
         'FIN_T_TRANSACTIONS',
         't',
-        't.TRANX_ID = tr.TRANX_ID AND t.TRANX_DELETED_AT IS NULL',
+        't.TRANX_ID = tr.TRANX_ID AND t.DELETED_AT IS NULL',
       )
       .leftJoin(
         'EXAM_T_ENROLLMENTS',
@@ -1222,7 +1222,7 @@ export class BankReconcilesService {
       .innerJoin(
         'FIN_T_TRANSACTIONS',
         'transaction',
-        'transaction.ERM_ID = enrollment.ERM_ID AND transaction.TRANX_DELETED_AT IS NULL',
+        'transaction.ERM_ID = enrollment.ERM_ID AND transaction.DELETED_AT IS NULL',
       )
       .innerJoin(
         'FIN_T_TRANSACTIONS_REFS',
@@ -1290,7 +1290,7 @@ export class BankReconcilesService {
       .innerJoin(
         'FIN_T_TRANSACTIONS',
         'transaction',
-        'transaction.TRANX_ID = tr.TRANX_ID AND transaction.TRANX_DELETED_AT IS NULL',
+        'transaction.TRANX_ID = tr.TRANX_ID AND transaction.DELETED_AT IS NULL',
       )
       .innerJoin(
         'EXAM_T_ENROLLMENTS',

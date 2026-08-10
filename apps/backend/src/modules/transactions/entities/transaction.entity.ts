@@ -175,12 +175,12 @@ export class Transaction {
   TRANX_UPDATED_AT: Date;
 
   @DeleteDateColumn({
-    name: 'TRANX_DELETED_AT',
+    name: 'DELETED_AT',
     type: 'timestamp',
     nullable: true,
     comment: 'วันที่ลบ (Soft Delete)',
   })
-  TRANX_DELETED_AT: Date | null;
+  DELETED_AT: Date | null;
 
   @OneToOne(() => ExamEnrollment, (enrollment) => enrollment.TRANSACTION)
   @JoinColumn({ name: 'ERM_ID' })
