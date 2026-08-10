@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, Not, In, LessThan, Brackets } from 'typeorm';
+import { DataSource, Repository, Not, In, Brackets } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -61,6 +61,7 @@ import {
   ExecutiveExamHistoryResponse,
 } from './interfaces/executive-exam-history.interface';
 import { ValidatePasscodeDto } from './dto/validate-passcode.dto';
+import { TransactionPaymentStatus } from '../transactions/entities/transaction.entity';
 
 @Injectable()
 export class ExamEnrollmentsService {
@@ -985,6 +986,8 @@ export class ExamEnrollmentsService {
             EXAM_FEE: true,
             EXAM_DATE: true,
             EXAM_TYPE: true,
+            EXAM_PAY_START_DATE: true,
+            EXAM_PAY_END_DATE: true,
           },
         },
         SESSION_LOCATION: {
@@ -1004,6 +1007,7 @@ export class ExamEnrollmentsService {
           TRANX_CHANNEL: true,
           TRANX_PAID_AT: true,
           TRANX_CREATED_AT: true,
+          TRANX_EXPIRES_AT: true,
           RECEIPTS: {
             RC_ID: true,
             RC_STATUS: true,
@@ -1451,23 +1455,112 @@ export class ExamEnrollmentsService {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async handleCronCancelExpiredEnrollments() {
-    // 30 minutes in milliseconds
-    const expirationTime = new Date(Date.now() - 30 * 60 * 1000);
+    const now = new Date();
 
-    // Optimize: Single SQL UPDATE query instead of SELECT then UPDATE
-    const result = await this.examEnrollmentRepository.update(
-      {
-        ERM_STATUS: ExamEnrollmentStatus.UNPAID,
-        CREATED_AT: LessThan(expirationTime),
-      },
-      { ERM_STATUS: ExamEnrollmentStatus.CANCELLED },
-    );
+    // 1) ยกเลิก UNPAID ที่เลยวันปิดชำระเงินของรอบสอบ + expire PENDING txn ที่เกี่ยวข้อง
+    await this.dataSource.transaction(async (manager) => {
+      const payEndedRows: Array<{ ERM_ID: number }> = await manager
+        .createQueryBuilder()
+        .select('enr.ERM_ID', 'ERM_ID')
+        .from('EXAM_T_ENROLLMENTS', 'enr')
+        .innerJoin('EXAM_T_SESSIONS', 's', 's.SS_ID = enr.SESSION_ID')
+        .innerJoin('EXAM_T_EXAM', 'e', 'e.EXAM_ID = s.EXAM_ID')
+        .where('enr.ERM_STATUS = :unpaid', {
+          unpaid: ExamEnrollmentStatus.UNPAID,
+        })
+        .andWhere('e.EXAM_PAY_END_DATE IS NOT NULL')
+        .andWhere('e.EXAM_PAY_END_DATE < :now', { now })
+        .andWhere('e.DELETED_AT IS NULL')
+        .andWhere('s.DELETED_AT IS NULL')
+        .andWhere('enr.DELETED_AT IS NULL')
+        .getRawMany();
 
-    if (result.affected && result.affected > 0) {
+      if (payEndedRows.length === 0) {
+        return;
+      }
+
+      const ermIds = payEndedRows.map((row) => Number(row.ERM_ID));
+
+      await manager
+        .createQueryBuilder()
+        .update(ExamEnrollment)
+        .set({ ERM_STATUS: ExamEnrollmentStatus.CANCELLED })
+        .where('ERM_ID IN (:...ermIds)', { ermIds })
+        .andWhere('ERM_STATUS = :unpaid', {
+          unpaid: ExamEnrollmentStatus.UNPAID,
+        })
+        .execute();
+
+      await manager
+        .createQueryBuilder()
+        .update('FIN_T_TRANSACTIONS')
+        .set({
+          TRANX_PAYMENT_STATUS: TransactionPaymentStatus.EXPIRED,
+          TRANX_UPDATED_AT: now,
+        })
+        .where('ERM_ID IN (:...ermIds)', { ermIds })
+        .andWhere('TRANX_PAYMENT_STATUS = :pending', {
+          pending: TransactionPaymentStatus.PENDING,
+        })
+        .andWhere('DELETED_AT IS NULL')
+        .execute();
+
       this.logger.log(
-        `[Cron] Automatically cancelled ${result.affected} expired unpaid enrollments.`,
+        `[Cron] Cancelled ${ermIds.length} unpaid enrollments past exam pay end date (and expired related PENDING transactions).`,
       );
-    }
+    });
+
+    // 2) หมดเวลา QR session → expire transaction + ยกเลิก enrollment
+    await this.dataSource.transaction(async (manager) => {
+      const expiredRows: Array<{ TRANX_ID: number; ERM_ID: number }> =
+        await manager
+          .createQueryBuilder()
+          .select('t.TRANX_ID', 'TRANX_ID')
+          .addSelect('t.ERM_ID', 'ERM_ID')
+          .from('FIN_T_TRANSACTIONS', 't')
+          .innerJoin('EXAM_T_ENROLLMENTS', 'enr', 'enr.ERM_ID = t.ERM_ID')
+          .where('t.TRANX_PAYMENT_STATUS = :pending', {
+            pending: TransactionPaymentStatus.PENDING,
+          })
+          .andWhere('t.TRANX_EXPIRES_AT IS NOT NULL')
+          .andWhere('t.TRANX_EXPIRES_AT < :now', { now })
+          .andWhere('enr.ERM_STATUS = :unpaid', {
+            unpaid: ExamEnrollmentStatus.UNPAID,
+          })
+          .andWhere('t.DELETED_AT IS NULL')
+          .getRawMany();
+
+      if (expiredRows.length === 0) {
+        return;
+      }
+
+      const tranxIds = expiredRows.map((row) => Number(row.TRANX_ID));
+      const ermIds = expiredRows.map((row) => Number(row.ERM_ID));
+
+      await manager
+        .createQueryBuilder()
+        .update('FIN_T_TRANSACTIONS')
+        .set({
+          TRANX_PAYMENT_STATUS: TransactionPaymentStatus.EXPIRED,
+          TRANX_UPDATED_AT: now,
+        })
+        .where('TRANX_ID IN (:...tranxIds)', { tranxIds })
+        .execute();
+
+      await manager
+        .createQueryBuilder()
+        .update(ExamEnrollment)
+        .set({ ERM_STATUS: ExamEnrollmentStatus.CANCELLED })
+        .where('ERM_ID IN (:...ermIds)', { ermIds })
+        .andWhere('ERM_STATUS = :unpaid', {
+          unpaid: ExamEnrollmentStatus.UNPAID,
+        })
+        .execute();
+
+      this.logger.log(
+        `[Cron] Expired ${tranxIds.length} QR payment sessions and cancelled enrollments.`,
+      );
+    });
   }
 
   private async findValidSpecialPasscode(

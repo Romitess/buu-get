@@ -329,8 +329,16 @@ export function useExamDocuments() {
 
       const qrDataUrl = await generateReceiptQrDataUrl(verifyCode);
 
+      const buildExamName = (round?: string, fiscalYearAd?: string) => {
+        const base = 'ค่าสมัครทดสอบความรู้ภาษาอังกฤษ (BUU-GET)';
+        if (!round || !fiscalYearAd || !/^\d+$/.test(fiscalYearAd)) return base;
+        const fiscalYearBe = parseInt(fiscalYearAd, 10) + 543;
+        return `${base} ครั้งที่ ${round}/${fiscalYearBe}`;
+      };
+
       selectedReceiptData.value = {
         receiptNo:
+          receipt?.RC_NO ||
           (receipt?.RC_ID ? `RC${receiptYear}-${String(receipt.RC_ID).padStart(5, '0')}` : '') ||
           `RC${receiptYear}-${String(enrollment.ERM_ID).padStart(5, '0')}`,
         transactionDate: transaction?.TRANX_PAID_AT
@@ -357,7 +365,7 @@ export function useExamDocuments() {
           enrollment.USER?.PROFILE?.userAddress ||
           user?.address ||
           '169 Longhad Bangsaen Rd, Saen Suk, Chon Buri 20131',
-        examName: t('exam.card.itemDescription'),
+        examName: buildExamName(examObj?.EXAM_ROUND, examObj?.EXAM_FISCAL_YEAR),
         examDate: dateStr,
         location: locationText,
         amount: Number(transaction?.TRANX_AMOUNT ?? examObj?.EXAM_FEE ?? 0),

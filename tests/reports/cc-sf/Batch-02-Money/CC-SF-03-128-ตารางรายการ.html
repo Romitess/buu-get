@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<title>CC-SF-03-128 Batch 2</title>
+<style>
+  @page { size: A4; margin: 12mm 14mm; }
+  body { font-family: "Sarabun","Thonburi","Tahoma",sans-serif; font-size: 10pt; color: #111; }
+  h1 { font-size: 16pt; margin: 0 0 4pt; text-align: center; }
+  .sys { margin: 0 0 10pt; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #333; padding: 4pt 6pt; vertical-align: top; }
+  th { background: #f0f0f0; }
+  td.code { width: 28%; white-space: nowrap; font-family: ui-monospace, monospace; font-size: 9pt; }
+  .id { color: #666; font-size: 8pt; }
+  .meta { font-size: 9pt; color: #444; margin-bottom: 8pt; }
+</style>
+</head>
+<body>
+  <h1>ตารางรายการการทดสอบ</h1>
+  <p class="sys">ระบบ: <strong>BUU-GET</strong> — การชำระเงิน ใบเสร็จ และกระทบยอดธนาคาร (Money / Payment)</p>
+  <p class="meta">แบบฟอร์ม CC-SF-03-128 · Batch 02 · จำนวน 198 เคส · วันที่ทดสอบ 2026-08-05</p>
+  <table>
+    <thead><tr><th>รหัสการทดสอบ</th><th>ชื่อการทดสอบ</th></tr></thead>
+    <tbody>
+<tr><td class="code">TC-0002-1-0001</td><td>createTransactionForFlow creates PENDING when none exists <span class="id">(TXN-U-001)</span></td></tr>
+<tr><td class="code">TC-0002-1-0002</td><td>createTransactionForFlow reuses PENDING keeps QR <span class="id">(TXN-U-002)</span></td></tr>
+<tr><td class="code">TC-0002-1-0003</td><td>createTransactionForFlow restarts non-PENDING non-PAID <span class="id">(TXN-U-003)</span></td></tr>
+<tr><td class="code">TC-0002-1-0004</td><td>createTransactionForFlow Conflict when already PAID <span class="id">(TXN-U-004)</span></td></tr>
+<tr><td class="code">TC-0002-1-0005</td><td>createTransactionForFlow NotFound missing PC <span class="id">(TXN-U-005)</span></td></tr>
+<tr><td class="code">TC-0002-1-0006</td><td>createTransactionForFlow NotFound missing ERM <span class="id">(TXN-U-006)</span></td></tr>
+<tr><td class="code">TC-0002-1-0007</td><td>confirmPaymentFlow PENDING→PAID + ERM + ref <span class="id">(TXN-U-007)</span></td></tr>
+<tr><td class="code">TC-0002-1-0008</td><td>confirmPaymentFlow rejects non-PENDING <span class="id">(TXN-U-008)</span></td></tr>
+<tr><td class="code">TC-0002-1-0009</td><td>confirmPaymentFlow NotFound transaction <span class="id">(TXN-U-009)</span></td></tr>
+<tr><td class="code">TC-0002-1-0010</td><td>confirmPaymentFlow NotFound enrollment <span class="id">(TXN-U-010)</span></td></tr>
+<tr><td class="code">TC-0002-1-0011</td><td>confirmPaymentFlow Forbidden non-owner non-FINANCE <span class="id">(TXN-U-011)</span></td></tr>
+<tr><td class="code">TC-0002-1-0012</td><td>confirmPaymentFlow allows FINANCE_ROLES <span class="id">(TXN-U-012)</span></td></tr>
+<tr><td class="code">TC-0002-1-0013</td><td>confirmPaymentFlow BadRequest inactive PC <span class="id">(TXN-U-013)</span></td></tr>
+<tr><td class="code">TC-0002-1-0014</td><td>confirmPaymentFlow BadRequest expired PC <span class="id">(TXN-U-014)</span></td></tr>
+<tr><td class="code">TC-0002-1-0015</td><td>confirmPaymentFlow NotFound missing PC <span class="id">(TXN-U-015)</span></td></tr>
+<tr><td class="code">TC-0002-1-0016</td><td>confirmPaymentFlow creates receipt when receiptName set <span class="id">(TXN-U-016)</span></td></tr>
+<tr><td class="code">TC-0002-1-0017</td><td>confirmPaymentFlow skips receipt without receiptName <span class="id">(TXN-U-017)</span></td></tr>
+<tr><td class="code">TC-0002-1-0018</td><td>confirmPaymentFlow updates existing receipt <span class="id">(TXN-U-018)</span></td></tr>
+<tr><td class="code">TC-0002-1-0019</td><td>buildEnrollmentRefCode format and bounds <span class="id">(TXN-U-019)</span></td></tr>
+<tr><td class="code">TC-0002-1-0020</td><td>confirmPaymentFlow rolls back on mid-flow failure <span class="id">(TXN-U-020)</span></td></tr>
+<tr><td class="code">TC-0002-1-0021</td><td>expireTransaction PENDING→EXPIRED <span class="id">(TXN-U-021)</span></td></tr>
+<tr><td class="code">TC-0002-1-0022</td><td>expireTransaction rejects non-PENDING <span class="id">(TXN-U-022)</span></td></tr>
+<tr><td class="code">TC-0002-1-0023</td><td>expireTransaction Forbidden non-owner <span class="id">(TXN-U-023)</span></td></tr>
+<tr><td class="code">TC-0002-1-0024</td><td>expireTransaction NotFound <span class="id">(TXN-U-024)</span></td></tr>
+<tr><td class="code">TC-0002-1-0025</td><td>createPendingPayment PAID+MATCH+receipt+ERM <span class="id">(TXN-U-025)</span></td></tr>
+<tr><td class="code">TC-0002-1-0026</td><td>createPendingPayment amount ≠ exam fee <span class="id">(TXN-U-026)</span></td></tr>
+<tr><td class="code">TC-0002-1-0027</td><td>createPendingPayment exam fee missing <span class="id">(TXN-U-027)</span></td></tr>
+<tr><td class="code">TC-0002-1-0028</td><td>createPendingPayment Conflict non-PENDING/non-PAID prior <span class="id">(TXN-U-028)</span></td></tr>
+<tr><td class="code">TC-0002-1-0029</td><td>createPendingPayment updates existing PENDING/PAID <span class="id">(TXN-U-029)</span></td></tr>
+<tr><td class="code">TC-0002-1-0030</td><td>createPendingPayment NotFound ERM or PC 1 <span class="id">(TXN-U-030)</span></td></tr>
+<tr><td class="code">TC-0002-1-0031</td><td>refundTransaction PAID→REFUND + ERM CANCELLED <span class="id">(TXN-U-031)</span></td></tr>
+<tr><td class="code">TC-0002-1-0032</td><td>refundTransaction allows APPROVED <span class="id">(TXN-U-032)</span></td></tr>
+<tr><td class="code">TC-0002-1-0033</td><td>refundTransaction rejects non-refundable <span class="id">(TXN-U-033)</span></td></tr>
+<tr><td class="code">TC-0002-1-0034</td><td>refundTransaction Conflict already REFUND/VOIDED <span class="id">(TXN-U-034)</span></td></tr>
+<tr><td class="code">TC-0002-1-0035</td><td>refundTransaction blocks ISSUED receipt <span class="id">(TXN-U-035)</span></td></tr>
+<tr><td class="code">TC-0002-1-0036</td><td>findAll pagination <span class="id">(TXN-U-036)</span></td></tr>
+<tr><td class="code">TC-0002-1-0037</td><td>findOne NotFound <span class="id">(TXN-U-037)</span></td></tr>
+<tr><td class="code">TC-0002-1-0038</td><td>update / updateByErmId / soft remove <span class="id">(TXN-U-038)</span></td></tr>
+<tr><td class="code">TC-0002-2-0001</td><td>POST /transactions creates PENDING <span class="id">(TXN-I-001)</span></td></tr>
+<tr><td class="code">TC-0002-2-0002</td><td>POST /transactions 409 when PAID <span class="id">(TXN-I-002)</span></td></tr>
+<tr><td class="code">TC-0002-2-0003</td><td>PATCH confirm persists PAID+ref+ERM <span class="id">(TXN-I-003)</span></td></tr>
+<tr><td class="code">TC-0002-2-0004</td><td>PATCH confirm 400 bad state/PC <span class="id">(TXN-I-004)</span></td></tr>
+<tr><td class="code">TC-0002-2-0005</td><td>PATCH confirm 403 other user <span class="id">(TXN-I-005)</span></td></tr>
+<tr><td class="code">TC-0002-2-0006</td><td>PATCH expire persists EXPIRED <span class="id">(TXN-I-006)</span></td></tr>
+<tr><td class="code">TC-0002-2-0007</td><td>POST pending-payment amount/phone validation <span class="id">(TXN-I-007)</span></td></tr>
+<tr><td class="code">TC-0002-2-0008</td><td>POST pending-payment commits PAID <span class="id">(TXN-I-008)</span></td></tr>
+<tr><td class="code">TC-0002-2-0009</td><td>POST refund FINANCE only + ISSUED block <span class="id">(TXN-I-009)</span></td></tr>
+<tr><td class="code">TC-0002-2-0010</td><td>GET /transactions requires FINANCE <span class="id">(TXN-I-010)</span></td></tr>
+<tr><td class="code">TC-0002-2-0011</td><td>PATCH/DELETE finance mutations require FINANCE <span class="id">(TXN-I-011)</span></td></tr>
+<tr><td class="code">TC-0002-2-0012</td><td>Unauthenticated rejected <span class="id">(TXN-I-012)</span></td></tr>
+<tr><td class="code">TC-0002-2-0013</td><td>DTO validation create/confirm <span class="id">(TXN-I-013)</span></td></tr>
+<tr><td class="code">TC-0002-2-0014</td><td>confirm/expire transactional integrity <span class="id">(TXN-I-014)</span></td></tr>
+<tr><td class="code">TC-0002-3-0001</td><td>Candidate create→confirm payment UI <span class="id">(TXN-E-001)</span></td></tr>
+<tr><td class="code">TC-0002-3-0002</td><td>Candidate expires abandoned pending <span class="id">(TXN-E-002)</span></td></tr>
+<tr><td class="code">TC-0002-3-0003</td><td>Candidate cannot confirm another's txn <span class="id">(TXN-E-003)</span></td></tr>
+<tr><td class="code">TC-0002-3-0004</td><td>Finance refund unpaid-receipt path <span class="id">(TXN-E-004)</span></td></tr>
+<tr><td class="code">TC-0002-1-0039</td><td>create persists + auto RC_VERIFY_CODE <span class="id">(RCPT-U-001)</span></td></tr>
+<tr><td class="code">TC-0002-1-0040</td><td>create always overwrites verify via util <span class="id">(RCPT-U-002)</span></td></tr>
+<tr><td class="code">TC-0002-1-0041</td><td>findOne NotFound <span class="id">(RCPT-U-003)</span></td></tr>
+<tr><td class="code">TC-0002-1-0042</td><td>findOne with TRANSACTION relation <span class="id">(RCPT-U-004)</span></td></tr>
+<tr><td class="code">TC-0002-1-0043</td><td>findAll default pagination DESC <span class="id">(RCPT-U-005)</span></td></tr>
+<tr><td class="code">TC-0002-1-0044</td><td>findAll custom page/limit <span class="id">(RCPT-U-006)</span></td></tr>
+<tr><td class="code">TC-0002-1-0045</td><td>findIssued filters ISSUED only <span class="id">(RCPT-U-007)</span></td></tr>
+<tr><td class="code">TC-0002-1-0046</td><td>update Object.assign no state machine <span class="id">(RCPT-U-008)</span></td></tr>
+<tr><td class="code">TC-0002-1-0047</td><td>update allows reverse/VOIDED <span class="id">(RCPT-U-009)</span></td></tr>
+<tr><td class="code">TC-0002-1-0048</td><td>remove softRemove <span class="id">(RCPT-U-010)</span></td></tr>
+<tr><td class="code">TC-0002-1-0049</td><td>downloadReceipt 404 missing <span class="id">(RCPT-U-011)</span></td></tr>
+<tr><td class="code">TC-0002-1-0050</td><td>downloadReceipt 403 non-ISSUED <span class="id">(RCPT-U-012)</span></td></tr>
+<tr><td class="code">TC-0002-1-0051</td><td>downloadReceipt PDF when ISSUED <span class="id">(RCPT-U-013)</span></td></tr>
+<tr><td class="code">TC-0002-1-0052</td><td>CreateReceiptDto required fields <span class="id">(RCPT-U-014)</span></td></tr>
+<tr><td class="code">TC-0002-1-0053</td><td>CreateReceiptDto RC_STATUS enum <span class="id">(RCPT-U-015)</span></td></tr>
+<tr><td class="code">TC-0002-1-0054</td><td>CreateReceiptDto RC_ISSUED_AT date <span class="id">(RCPT-U-016)</span></td></tr>
+<tr><td class="code">TC-0002-1-0055</td><td>UpdateReceiptDto PartialType <span class="id">(RCPT-U-017)</span></td></tr>
+<tr><td class="code">TC-0002-1-0056</td><td>Tax/profile fields absent from DTOs <span class="id">(RCPT-U-018)</span></td></tr>
+<tr><td class="code">TC-0002-2-0015</td><td>POST /receipts FINANCE creates + verify code <span class="id">(RCPT-I-001)</span></td></tr>
+<tr><td class="code">TC-0002-2-0016</td><td>POST can create already ISSUED <span class="id">(RCPT-I-002)</span></td></tr>
+<tr><td class="code">TC-0002-2-0017</td><td>POST rejects non-FINANCE <span class="id">(RCPT-I-003)</span></td></tr>
+<tr><td class="code">TC-0002-2-0018</td><td>CRUD without JWT → 401 <span class="id">(RCPT-I-004)</span></td></tr>
+<tr><td class="code">TC-0002-2-0019</td><td>GET /receipts paginates <span class="id">(RCPT-I-005)</span></td></tr>
+<tr><td class="code">TC-0002-2-0020</td><td>GET /receipts/issued only ISSUED <span class="id">(RCPT-I-006)</span></td></tr>
+<tr><td class="code">TC-0002-2-0021</td><td>GET /:id 200 / 404 <span class="id">(RCPT-I-007)</span></td></tr>
+<tr><td class="code">TC-0002-2-0022</td><td>PATCH UNISSUED→ISSUED <span class="id">(RCPT-I-008)</span></td></tr>
+<tr><td class="code">TC-0002-2-0023</td><td>PATCH invalid status → 400 <span class="id">(RCPT-I-009)</span></td></tr>
+<tr><td class="code">TC-0002-2-0024</td><td>DELETE soft-delete <span class="id">(RCPT-I-010)</span></td></tr>
+<tr><td class="code">TC-0002-2-0025</td><td>GET download ISSUED → PDF headers <span class="id">(RCPT-I-011)</span></td></tr>
+<tr><td class="code">TC-0002-2-0026</td><td>Download UNISSUED/VOIDED 403; missing 404 <span class="id">(RCPT-I-012)</span></td></tr>
+<tr><td class="code">TC-0002-2-0027</td><td>Download without JWT → 401 <span class="id">(RCPT-I-013)</span></td></tr>
+<tr><td class="code">TC-0002-2-0028</td><td>limit &gt;100 rejected <span class="id">(RCPT-I-014)</span></td></tr>
+<tr><td class="code">TC-0002-2-0029</td><td>RC_VERIFY_CODE unique constraint <span class="id">(RCPT-I-015)</span></td></tr>
+<tr><td class="code">TC-0002-2-0030</td><td>API cannot mutate tax/profile <span class="id">(RCPT-I-016)</span></td></tr>
+<tr><td class="code">TC-0002-3-0005</td><td>Finance issued receipt usage report <span class="id">(RCPT-E-001)</span></td></tr>
+<tr><td class="code">TC-0002-3-0006</td><td>User downloads ISSUED PDF <span class="id">(RCPT-E-002)</span></td></tr>
+<tr><td class="code">TC-0002-3-0007</td><td>Non-finance blocked from admin receipt APIs <span class="id">(RCPT-E-003)</span></td></tr>
+<tr><td class="code">TC-0002-3-0008</td><td>Public verify receipt by code <span class="id">(RCPT-E-004)</span></td></tr>
+<tr><td class="code">TC-0002-1-0057</td><td>create voids ISSUED receipt happy <span class="id">(VOID-U-001)</span></td></tr>
+<tr><td class="code">TC-0002-1-0058</td><td>create whitespace-only reason <span class="id">(VOID-U-002)</span></td></tr>
+<tr><td class="code">TC-0002-1-0059</td><td>create trims reason <span class="id">(VOID-U-003)</span></td></tr>
+<tr><td class="code">TC-0002-1-0060</td><td>create receipt not found <span class="id">(VOID-U-004)</span></td></tr>
+<tr><td class="code">TC-0002-1-0061</td><td>create reject UNISSUED <span class="id">(VOID-U-005)</span></td></tr>
+<tr><td class="code">TC-0002-1-0062</td><td>create reject already VOIDED status <span class="id">(VOID-U-006)</span></td></tr>
+<tr><td class="code">TC-0002-1-0063</td><td>create Conflict when VOIDED_RECEIPT exists <span class="id">(VOID-U-007)</span></td></tr>
+<tr><td class="code">TC-0002-1-0064</td><td>create transaction missing <span class="id">(VOID-U-008)</span></td></tr>
+<tr><td class="code">TC-0002-1-0065</td><td>create reject txn REFUND <span class="id">(VOID-U-009)</span></td></tr>
+<tr><td class="code">TC-0002-1-0066</td><td>create reject txn RECEIPT_VOIDED <span class="id">(VOID-U-010)</span></td></tr>
+<tr><td class="code">TC-0002-1-0067</td><td>create history captures previous status <span class="id">(VOID-U-011)</span></td></tr>
+<tr><td class="code">TC-0002-1-0068</td><td>create enrollment missing still succeeds <span class="id">(VOID-U-012)</span></td></tr>
+<tr><td class="code">TC-0002-1-0069</td><td>create cancels enrollment when present <span class="id">(VOID-U-013)</span></td></tr>
+<tr><td class="code">TC-0002-1-0070</td><td>findOne with relations <span class="id">(VOID-U-014)</span></td></tr>
+<tr><td class="code">TC-0002-1-0071</td><td>findOne not found <span class="id">(VOID-U-015)</span></td></tr>
+<tr><td class="code">TC-0002-1-0072</td><td>findAll default pagination <span class="id">(VOID-U-016)</span></td></tr>
+<tr><td class="code">TC-0002-1-0073</td><td>findAll custom pagination <span class="id">(VOID-U-017)</span></td></tr>
+<tr><td class="code">TC-0002-1-0074</td><td>DTO RC_ID required number <span class="id">(VOID-U-018)</span></td></tr>
+<tr><td class="code">TC-0002-1-0075</td><td>DTO VR_REASON required MinLength 1 <span class="id">(VOID-U-019)</span></td></tr>
+<tr><td class="code">TC-0002-1-0076</td><td>DTO VR_REASON MaxLength 2000 <span class="id">(VOID-U-020)</span></td></tr>
+<tr><td class="code">TC-0002-1-0077</td><td>create runs in dataSource.transaction <span class="id">(VOID-U-021)</span></td></tr>
+<tr><td class="code">TC-0002-2-0031</td><td>POST voids issued end-to-end <span class="id">(VOID-I-001)</span></td></tr>
+<tr><td class="code">TC-0002-2-0032</td><td>POST without JWT → 401 <span class="id">(VOID-I-002)</span></td></tr>
+<tr><td class="code">TC-0002-2-0033</td><td>POST non-FINANCE → 403 <span class="id">(VOID-I-003)</span></td></tr>
+<tr><td class="code">TC-0002-2-0034</td><td>POST as STAFF allowed by API <span class="id">(VOID-I-004)</span></td></tr>
+<tr><td class="code">TC-0002-2-0035</td><td>POST as ADMIN/FINANCE <span class="id">(VOID-I-005)</span></td></tr>
+<tr><td class="code">TC-0002-2-0036</td><td>POST invalid body → 400 <span class="id">(VOID-I-006)</span></td></tr>
+<tr><td class="code">TC-0002-2-0037</td><td>POST void twice → 409 <span class="id">(VOID-I-007)</span></td></tr>
+<tr><td class="code">TC-0002-2-0038</td><td>POST when txn REFUND → 409 <span class="id">(VOID-I-008)</span></td></tr>
+<tr><td class="code">TC-0002-2-0039</td><td>GET list paginated <span class="id">(VOID-I-009)</span></td></tr>
+<tr><td class="code">TC-0002-2-0040</td><td>GET /:id <span class="id">(VOID-I-010)</span></td></tr>
+<tr><td class="code">TC-0002-2-0041</td><td>GET /:id unknown → 404 <span class="id">(VOID-I-011)</span></td></tr>
+<tr><td class="code">TC-0002-2-0042</td><td>limit &gt;100 rejected <span class="id">(VOID-I-012)</span></td></tr>
+<tr><td class="code">TC-0002-3-0009</td><td>Finance voids receipt via UI <span class="id">(VOID-E-001)</span></td></tr>
+<tr><td class="code">TC-0002-3-0010</td><td>UI blocks empty void reason <span class="id">(VOID-E-002)</span></td></tr>
+<tr><td class="code">TC-0002-3-0011</td><td>Non-finance cannot open void page <span class="id">(VOID-E-003)</span></td></tr>
+<tr><td class="code">TC-0002-3-0012</td><td>After void actions none <span class="id">(VOID-E-004)</span></td></tr>
+<tr><td class="code">TC-0002-3-0013</td><td>Void API failure notify <span class="id">(VOID-E-005)</span></td></tr>
+<tr><td class="code">TC-0002-1-0078</td><td>Import rejects missing file <span class="id">(BR-U-001)</span></td></tr>
+<tr><td class="code">TC-0002-1-0079</td><td>Import rejects non csv/xlsx/xls <span class="id">(BR-U-002)</span></td></tr>
+<tr><td class="code">TC-0002-1-0080</td><td>Import skips invalid rows <span class="id">(BR-U-003)</span></td></tr>
+<tr><td class="code">TC-0002-1-0081</td><td>Import truncates fields to 20 chars <span class="id">(BR-U-004)</span></td></tr>
+<tr><td class="code">TC-0002-1-0082</td><td>In-file duplicate aborts entire import <span class="id">(BR-U-005)</span></td></tr>
+<tr><td class="code">TC-0002-1-0083</td><td>Existing import key hash aborts import <span class="id">(BR-U-006)</span></td></tr>
+<tr><td class="code">TC-0002-1-0084</td><td>Successful import stores SHA-256 hash <span class="id">(BR-U-007)</span></td></tr>
+<tr><td class="code">TC-0002-1-0085</td><td>Amount comma strip + NaN invalid <span class="id">(BR-U-008)</span></td></tr>
+<tr><td class="code">TC-0002-1-0086</td><td>buildVerifyMatches amount equal → MATCH <span class="id">(BR-U-009)</span></td></tr>
+<tr><td class="code">TC-0002-1-0087</td><td>buildVerifyMatches unequal → MISSING <span class="id">(BR-U-010)</span></td></tr>
+<tr><td class="code">TC-0002-1-0088</td><td>buildVerifyMatches skips null/dup BR <span class="id">(BR-U-011)</span></td></tr>
+<tr><td class="code">TC-0002-1-0089</td><td>getChangeReason REF1/REF2/BOTH/null <span class="id">(BR-U-012)</span></td></tr>
+<tr><td class="code">TC-0002-1-0090</td><td>updateRefs rejects blank BR_REF1 <span class="id">(BR-U-013)</span></td></tr>
+<tr><td class="code">TC-0002-1-0091</td><td>updateRefs rematch equal → MATCH <span class="id">(BR-U-014)</span></td></tr>
+<tr><td class="code">TC-0002-1-0092</td><td>updateRefs rematch unequal → MISSING <span class="id">(BR-U-015)</span></td></tr>
+<tr><td class="code">TC-0002-1-0093</td><td>matchRefs empty returns [] <span class="id">(BR-U-016)</span></td></tr>
+<tr><td class="code">TC-0002-1-0094</td><td>confirmPayment empty → no-op <span class="id">(BR-U-017)</span></td></tr>
+<tr><td class="code">TC-0002-1-0095</td><td>confirmPayment blocks REFUND/RECEIPT_VOIDED <span class="id">(BR-U-018)</span></td></tr>
+<tr><td class="code">TC-0002-1-0096</td><td>confirmPayment APPROVED+MATCH+issue+ERM+history <span class="id">(BR-U-019)</span></td></tr>
+<tr><td class="code">TC-0002-1-0097</td><td>getTestExportRows maps + truncates <span class="id">(BR-U-020)</span></td></tr>
+<tr><td class="code">TC-0002-1-0098</td><td>getTestExportRows fee≤0 / missing exam <span class="id">(BR-U-021)</span></td></tr>
+<tr><td class="code">TC-0002-2-0043</td><td>POST import persists + CREATED_BY <span class="id">(BR-I-001)</span></td></tr>
+<tr><td class="code">TC-0002-2-0044</td><td>POST verify joins refs updates in TX <span class="id">(BR-I-002)</span></td></tr>
+<tr><td class="code">TC-0002-2-0045</td><td>PATCH refs unmatch/rematch + edit log <span class="id">(BR-I-003)</span></td></tr>
+<tr><td class="code">TC-0002-2-0046</td><td>POST match query-only <span class="id">(BR-I-004)</span></td></tr>
+<tr><td class="code">TC-0002-2-0047</td><td>POST confirm-payment bulk issues atomically <span class="id">(BR-I-005)</span></td></tr>
+<tr><td class="code">TC-0002-2-0048</td><td>DELETE soft-deletes all <span class="id">(BR-I-006)</span></td></tr>
+<tr><td class="code">TC-0002-2-0049</td><td>Authz FINANCE_ROLES only <span class="id">(BR-I-007)</span></td></tr>
+<tr><td class="code">TC-0002-2-0050</td><td>DTO validation verify/refs/export <span class="id">(BR-I-008)</span></td></tr>
+<tr><td class="code">TC-0002-3-0014</td><td>Finance upload→verify match statuses <span class="id">(BR-E-001)</span></td></tr>
+<tr><td class="code">TC-0002-3-0015</td><td>Finance edit refs rematches <span class="id">(BR-E-002)</span></td></tr>
+<tr><td class="code">TC-0002-3-0016</td><td>Finance confirm payment issues receipts <span class="id">(BR-E-003)</span></td></tr>
+<tr><td class="code">TC-0002-3-0017</td><td>Non-finance blocked from payment import <span class="id">(BR-E-004)</span></td></tr>
+<tr><td class="code">TC-0002-1-0099</td><td>create maps DTO → save <span class="id">(PCFG-U-001)</span></td></tr>
+<tr><td class="code">TC-0002-1-0100</td><td>findAll returns find() <span class="id">(PCFG-U-002)</span></td></tr>
+<tr><td class="code">TC-0002-1-0101</td><td>findOne with TRANSACTIONS <span class="id">(PCFG-U-003)</span></td></tr>
+<tr><td class="code">TC-0002-1-0102</td><td>findOne NotFound <span class="id">(PCFG-U-004)</span></td></tr>
+<tr><td class="code">TC-0002-1-0103</td><td>update then re-fetch <span class="id">(PCFG-U-005)</span></td></tr>
+<tr><td class="code">TC-0002-1-0104</td><td>update missing → NotFound <span class="id">(PCFG-U-006)</span></td></tr>
+<tr><td class="code">TC-0002-1-0105</td><td>remove softRemove <span class="id">(PCFG-U-007)</span></td></tr>
+<tr><td class="code">TC-0002-1-0106</td><td>remove missing → NotFound <span class="id">(PCFG-U-008)</span></td></tr>
+<tr><td class="code">TC-0002-1-0107</td><td>Create DTO required strings <span class="id">(PCFG-U-009)</span></td></tr>
+<tr><td class="code">TC-0002-1-0108</td><td>Create DTO MaxLength <span class="id">(PCFG-U-010)</span></td></tr>
+<tr><td class="code">TC-0002-1-0109</td><td>Create DTO PC_IS_ACTIVE required bool <span class="id">(PCFG-U-011)</span></td></tr>
+<tr><td class="code">TC-0002-1-0110</td><td>Create DTO EFFECTIVE_FROM required ISO <span class="id">(PCFG-U-012)</span></td></tr>
+<tr><td class="code">TC-0002-1-0111</td><td>Create DTO EFFECTIVE_TO optional <span class="id">(PCFG-U-013)</span></td></tr>
+<tr><td class="code">TC-0002-1-0112</td><td>UpdatePaymentConfigDto PartialType <span class="id">(PCFG-U-014)</span></td></tr>
+<tr><td class="code">TC-0002-2-0051</td><td>POST creates row (FINANCE) <span class="id">(PCFG-I-001)</span></td></tr>
+<tr><td class="code">TC-0002-2-0052</td><td>GET lists configs <span class="id">(PCFG-I-002)</span></td></tr>
+<tr><td class="code">TC-0002-2-0053</td><td>GET /:id with TRANSACTIONS <span class="id">(PCFG-I-003)</span></td></tr>
+<tr><td class="code">TC-0002-2-0054</td><td>GET /:id unknown → 404 <span class="id">(PCFG-I-004)</span></td></tr>
+<tr><td class="code">TC-0002-2-0055</td><td>PATCH updates fields <span class="id">(PCFG-I-005)</span></td></tr>
+<tr><td class="code">TC-0002-2-0056</td><td>DELETE soft-delete excluded <span class="id">(PCFG-I-006)</span></td></tr>
+<tr><td class="code">TC-0002-2-0057</td><td>Soft-delete with FK transaction <span class="id">(PCFG-I-007)</span></td></tr>
+<tr><td class="code">TC-0002-2-0058</td><td>ValidationPipe rejects bad create <span class="id">(PCFG-I-008)</span></td></tr>
+<tr><td class="code">TC-0002-2-0059</td><td>ParseIntPipe non-int :id <span class="id">(PCFG-I-009)</span></td></tr>
+<tr><td class="code">TC-0002-2-0060</td><td>Unauthenticated → 401 <span class="id">(PCFG-I-010)</span></td></tr>
+<tr><td class="code">TC-0002-2-0061</td><td>Non-FINANCE → 403 <span class="id">(PCFG-I-011)</span></td></tr>
+<tr><td class="code">TC-0002-2-0062</td><td>ADMIN/FINANCE/STAFF allowed <span class="id">(PCFG-I-012)</span></td></tr>
+<tr><td class="code">TC-0002-2-0063</td><td>Persist EFFECTIVE_TO null <span class="id">(PCFG-I-013)</span></td></tr>
+<tr><td class="code">TC-0002-2-0064</td><td>Deactivate PC_IS_ACTIVE false <span class="id">(PCFG-I-014)</span></td></tr>
+<tr><td class="code">TC-0002-2-0065</td><td>Accepts TO &lt; FROM (current) <span class="id">(PCFG-I-015)</span></td></tr>
+<tr><td class="code">TC-0002-2-0066</td><td>Duplicate COMP/PROD codes allowed <span class="id">(PCFG-I-016)</span></td></tr>
+<tr><td class="code">TC-0002-3-0018</td><td>Finance CRUD lifecycle via API <span class="id">(PCFG-E-001)</span></td></tr>
+<tr><td class="code">TC-0002-3-0019</td><td>Finance mutates; candidate blocked <span class="id">(PCFG-E-002)</span></td></tr>
+<tr><td class="code">TC-0002-3-0020</td><td>Deactivate then soft-delete <span class="id">(PCFG-E-003)</span></td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

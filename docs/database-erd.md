@@ -18,7 +18,7 @@ GitHub Markdown, or Notion Mermaid charts.
 | Topic | Detail |
 |-------|--------|
 | Attribute comments | Shown in entity boxes via `"..."` after each attribute (Mermaid ERD syntax) |
-| Soft delete | Most tables use `DELETED_AT`. `FIN_T_TRANSACTIONS` uses `TRANX_DELETED_AT`. |
+| Soft delete | Most tables use `DELETED_AT`, including `FIN_T_TRANSACTIONS`. |
 | No soft delete | `EXAM_T_PASSCODES`, `EXAM_T_PASSCODE_LOGS`, `BUU_GET_T_MOODLE_SYNC_LOG`, `BUU_GET_T_USER_IMAGE`, `FIN_T_TRANSACTION_STATUS_HISTORY` |
 | Logical FKs only | `BUU_GET_T_PROFILE_EDIT_HISTORY.USER_PROFILE_ID` / `MODIFIER_ID` — columns exist, no `@ManyToOne` |
 | Score rubrics | `Exam.SRB_ID` → `BUU_GET_T_SCORE_RUBRICS`; `EXAM_T_SCORE_LINES` snapshots rubric items via `SRBI_ID` |
@@ -452,7 +452,7 @@ erDiagram
     datetime TRANX_REJECTED_AT "วันที่ปฏิเสธ"
     datetime TRANX_CREATED_AT "วันที่สร้าง"
     datetime TRANX_UPDATED_AT "วันที่แก้ไขล่าสุด"
-    datetime TRANX_DELETED_AT "วันที่ลบ (Soft Delete)"
+    datetime DELETED_AT "วันที่ลบ (Soft Delete)"
   }
   FIN_T_TRANSACTION_PROFILE {
     int TP_ID PK "รหัสโปรไฟล์ธุรกรรม"

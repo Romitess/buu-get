@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<title>CC-SF-03-129 Batch 7</title>
+<style>
+  @page { size: A4; margin: 10mm 12mm; }
+  body { font-family: "Sarabun","Thonburi","Tahoma",sans-serif; font-size: 9.5pt; color: #111; margin: 0; }
+  .cover { page-break-after: always; padding-top: 40mm; text-align: center; }
+  .cover h1 { font-size: 18pt; }
+  .case { page-break-after: always; }
+  .case:last-child { page-break-after: auto; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 6pt; }
+  th, td { border: 1px solid #333; padding: 5pt 6pt; vertical-align: top; }
+  th { background: #f3f3f3; font-weight: 600; font-size: 9pt; }
+  .en { color: #555; font-size: 8pt; }
+  code { font-family: ui-monospace, monospace; }
+  pre.desc { white-space: pre-wrap; margin: 4pt 0 0; font-family: inherit; }
+  .result { width: 22%; white-space: nowrap; }
+  .footer-id { font-size: 8pt; color: #666; margin-top: 4pt; }
+  .steps td { font-size: 9pt; }
+</style>
+</head>
+<body>
+  <section class="cover">
+    <h1>แบบฟอร์มการทดสอบระบบ</h1>
+    <p>CC-SF-03-129</p>
+    <p><strong>ระบบ:</strong> BUU-GET</p>
+    <p><strong>ชุดทดสอบ:</strong> Batch 07 — รายงานการสอบ (ผู้บริหาร)</p>
+    <p>Exam report</p>
+    <p>จำนวน 20 เคส · ผู้ทดสอบ: BUU-GET Test Rollout · วันที่ 2026-08-06</p>
+  </section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-1-0001</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>buildAttemptMetrics empty window</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-U-001
+ระดับ: unit
+buildAttemptMetrics empty window</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>`scoredInWindow=[]`</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call util</td>
+        <td>`repeatByYear` empty; `firstTime=0`; `repeat=0`</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-U-001 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-1-0002</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>buildAttemptMetrics firstTime vs repeat</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-U-002
+ระดับ: unit
+buildAttemptMetrics firstTime vs repeat</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Mix `hasPriorScore`</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call util</td>
+        <td>firstTime = distinct scored − distinct repeat</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-U-002 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-1-0003</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>buildAttemptMetrics repeatByYear DISTINCT</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-U-003
+ระดับ: unit
+buildAttemptMetrics repeatByYear DISTINCT</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Same user 2 scored rows same year both prior</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call util</td>
+        <td>year count = 1 (Set)</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-U-003 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-1-0004</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>getSummary YoY + changePercent when prev=0</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-U-004
+ระดับ: unit
+getSummary YoY + changePercent when prev=0</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Mock metric/avg; prev 0/missing</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `getSummary`</td>
+        <td>`changePercent===0`</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-U-004 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-1-0005</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>getSummary absent + attendance/absent rates</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-U-005
+ระดับ: unit
+getSummary absent + attendance/absent rates</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>registered=10, attended=7</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `getSummary`</td>
+        <td>absent=3; rates 70/30</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-U-005 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-1-0006</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Future round → attended/absent null</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-U-006
+ระดับ: unit
+Future round → attended/absent null</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>examDate &gt; today</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>drive summary/rounds</td>
+        <td>attended/absent null; registered kept</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-U-006 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-1-0007</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Score buckets only ≥40; fixed ranges</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-U-007
+ระดับ: unit
+Score buckets only ≥40; fixed ranges</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Mock bucket rows</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `getSummary`</td>
+        <td>ranges 40-49…80-100</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-U-007 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-1-0008</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>formatRoundLabel appends /{year}</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-U-008
+ระดับ: unit
+formatRoundLabel appends /{year}</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>round=`1`, year=`2026`; already labeled</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>via public path</td>
+        <td>no double suffix</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-U-008 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-1-0009</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>attemptProportion firstTime = total−repeat</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-U-009
+ระดับ: unit
+attemptProportion firstTime = total−repeat</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>total=5, repeat=2</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call</td>
+        <td>`{firstTime:3,repeat:2}`</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-U-009 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-1-0010</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>targetYear = toYear else latest data year</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-U-010
+ระดับ: unit
+targetYear = toYear else latest data year</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>years [2024,2025]; ±toYear</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call `getSummary`</td>
+        <td>stats keyed correctly</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-U-010 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-2-0001</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>GET /api/exam-report/summary as ADMIN</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-I-001
+ระดับ: integration
+GET /api/exam-report/summary as ADMIN</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Seed + ADMIN JWT</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET summary</td>
+        <td>200; shape ok</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-I-001 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-2-0002</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>GET summary as EXECUTIVE</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-I-002
+ระดับ: integration
+GET summary as EXECUTIVE</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>EXECUTIVE JWT</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET summary</td>
+        <td>200</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-I-002 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-2-0003</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>RBAC deny + unauthenticated</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-I-003
+ระดับ: integration
+RBAC deny + unauthenticated</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>candidate/staff/finance; no token</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET summary</td>
+        <td>403 / 401</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-I-003 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-2-0004</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>fromYear/toYear filter on EXAM_DATE year</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-I-004
+ระดับ: integration
+fromYear/toYear filter on EXAM_DATE year</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Multi-year seed</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET with year range</td>
+        <td>Only years in range</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-I-004 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-2-0005</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>CANCELLED enrollments excluded</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-I-005
+ระดับ: integration
+CANCELLED enrollments excluded</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>CANCELLED + active</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET summary</td>
+        <td>Counts exclude CANCELLED</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-I-005 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-2-0006</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>GET /api/exam-report/options</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-I-006
+ระดับ: integration
+GET /api/exam-report/options</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Exams with dates/rounds</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET options</td>
+        <td>years DESC; 12 months; rounds</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-I-006 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-2-0007</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>GET candidates + scoreLines + attemptStatus</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-I-007
+ระดับ: integration
+GET candidates + scoreLines + attemptStatus</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Scored enrollment + prior</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET candidates</td>
+        <td>200; first/repeat correct</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-I-007 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-3-0001</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Admin dashboard report loads</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-E-001
+ระดับ: e2e
+Admin dashboard report loads</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Admin login; seed</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Open `/admin/dashboard`</td>
+        <td>cards/charts render</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-E-001 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-3-0002</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Drill-down year → rounds → candidates</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-E-002
+ระดับ: e2e
+Drill-down year → rounds → candidates</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Admin; year with rounds</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Dashboard → year → candidates</td>
+        <td>rows with scores</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-E-002 · Batch 7 Exam report</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0007-3-0003</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Non-admin blocked from report UI</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-report</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-06</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: RPT-E-003
+ระดับ: e2e
+Non-admin blocked from report UI</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Candidate login</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Visit `/admin/dashboard`</td>
+        <td>Redirect/deny</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 7 Exam report)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: RPT-E-003 · Batch 7 Exam report</p>
+</section>
+</body>
+</html>

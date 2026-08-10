@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<title>CC-SF-03-128 Batch 4</title>
+<style>
+  @page { size: A4; margin: 12mm 14mm; }
+  body { font-family: "Sarabun","Thonburi","Tahoma",sans-serif; font-size: 10pt; color: #111; }
+  h1 { font-size: 16pt; margin: 0 0 4pt; text-align: center; }
+  .sys { margin: 0 0 10pt; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #333; padding: 4pt 6pt; vertical-align: top; }
+  th { background: #f0f0f0; }
+  td.code { width: 28%; white-space: nowrap; font-family: ui-monospace, monospace; font-size: 9pt; }
+  .id { color: #666; font-size: 8pt; }
+  .meta { font-size: 9pt; color: #444; margin-bottom: 8pt; }
+</style>
+</head>
+<body>
+  <h1>ตารางรายการการทดสอบ</h1>
+  <p class="sys">ระบบ: <strong>BUU-GET</strong> — วงจรชีวิตการสอบ (Exam lifecycle)</p>
+  <p class="meta">แบบฟอร์ม CC-SF-03-128 · Batch 04 · จำนวน 56 เคส · วันที่ทดสอบ 2026-08-05</p>
+  <table>
+    <thead><tr><th>รหัสการทดสอบ</th><th>ชื่อการทดสอบ</th></tr></thead>
+    <tbody>
+<tr><td class="code">TC-0004-1-0001</td><td>create normalizes reg/pay end-date to period end <span class="id">(EXAM-U-001)</span></td></tr>
+<tr><td class="code">TC-0004-1-0002</td><td>create validates score-rubric usability <span class="id">(EXAM-U-002)</span></td></tr>
+<tr><td class="code">TC-0004-1-0003</td><td>update blocks rubric change when scores exist <span class="id">(EXAM-U-003)</span></td></tr>
+<tr><td class="code">TC-0004-1-0004</td><td>createPasscodes rejects missing ID/name pair <span class="id">(EXAM-U-004)</span></td></tr>
+<tr><td class="code">TC-0004-1-0005</td><td>createPasscodes blocked when active enrollments exist <span class="id">(EXAM-U-005)</span></td></tr>
+<tr><td class="code">TC-0004-1-0006</td><td>notifyExamChanges returns success while dispatch async <span class="id">(EXAM-U-006)</span></td></tr>
+<tr><td class="code">TC-0004-2-0001</td><td>POST /api/exam persists even when Moodle sync fails <span class="id">(EXAM-I-001)</span></td></tr>
+<tr><td class="code">TC-0004-2-0002</td><td>PATCH /api/exam/:id rubric change conflict after score saved <span class="id">(EXAM-I-002)</span></td></tr>
+<tr><td class="code">TC-0004-2-0003</td><td>POST /api/exam/:id/passcodes replaces old set atomically <span class="id">(EXAM-I-003)</span></td></tr>
+<tr><td class="code">TC-0004-2-0004</td><td>RBAC for exam mutate endpoints <span class="id">(EXAM-I-004)</span></td></tr>
+<tr><td class="code">TC-0004-3-0001</td><td>Admin creates exam with sessions + room then publish <span class="id">(EXAM-E-001)</span></td></tr>
+<tr><td class="code">TC-0004-3-0002</td><td>Edit exam triggers notify-changes flow <span class="id">(EXAM-E-002)</span></td></tr>
+<tr><td class="code">TC-0004-1-0007</td><td>create returns reloaded session with relations <span class="id">(SES-U-001)</span></td></tr>
+<tr><td class="code">TC-0004-1-0008</td><td>findOne throws when session not found <span class="id">(SES-U-002)</span></td></tr>
+<tr><td class="code">TC-0004-1-0009</td><td>remove uses softRemove after existence check <span class="id">(SES-U-003)</span></td></tr>
+<tr><td class="code">TC-0004-2-0005</td><td>POST /api/exam-sessions validates and creates <span class="id">(SES-I-001)</span></td></tr>
+<tr><td class="code">TC-0004-2-0006</td><td>PATCH /api/exam-sessions/:id updates metadata <span class="id">(SES-I-002)</span></td></tr>
+<tr><td class="code">TC-0004-2-0007</td><td>DELETE /api/exam-sessions/:id soft delete behavior <span class="id">(SES-I-003)</span></td></tr>
+<tr><td class="code">TC-0004-3-0003</td><td>Edit exam removes one session keeps others <span class="id">(SES-E-001)</span></td></tr>
+<tr><td class="code">TC-0004-1-0010</td><td>createWithSeats generates rows*cols and labels by direction <span class="id">(LOC-U-001)</span></td></tr>
+<tr><td class="code">TC-0004-1-0011</td><td>createWithSeats applies seatStatuses fallback AVAILABLE <span class="id">(LOC-U-002)</span></td></tr>
+<tr><td class="code">TC-0004-1-0012</td><td>aisle positions normalize legacy/new fields and sort <span class="id">(LOC-U-003)</span></td></tr>
+<tr><td class="code">TC-0004-1-0013</td><td>findOne throws on unknown location <span class="id">(LOC-U-004)</span></td></tr>
+<tr><td class="code">TC-0004-2-0008</td><td>POST /api/exam-locations/with-seats transactional create <span class="id">(LOC-I-001)</span></td></tr>
+<tr><td class="code">TC-0004-2-0009</td><td>GET /api/exam-locations?includeSeats=true embeds seats <span class="id">(LOC-I-002)</span></td></tr>
+<tr><td class="code">TC-0004-2-0010</td><td>DELETE /api/exam-locations/:id soft-delete <span class="id">(LOC-I-003)</span></td></tr>
+<tr><td class="code">TC-0004-3-0004</td><td>Admin creates location with seat map and reuses in exam form <span class="id">(LOC-E-001)</span></td></tr>
+<tr><td class="code">TC-0004-1-0014</td><td>create rejects missing location <span class="id">(SL-U-001)</span></td></tr>
+<tr><td class="code">TC-0004-1-0015</td><td>create rejects missing session <span class="id">(SL-U-002)</span></td></tr>
+<tr><td class="code">TC-0004-1-0016</td><td>create rejects session missing exam date/time <span class="id">(SL-U-003)</span></td></tr>
+<tr><td class="code">TC-0004-1-0017</td><td>create rejects duplicate session-location pair <span class="id">(SL-U-004)</span></td></tr>
+<tr><td class="code">TC-0004-1-0018</td><td>overlap detection blocks same-room overlapping time <span class="id">(SL-U-005)</span></td></tr>
+<tr><td class="code">TC-0004-2-0011</td><td>POST /api/exam-session-locations allows non-overlap <span class="id">(SL-I-001)</span></td></tr>
+<tr><td class="code">TC-0004-2-0012</td><td>POST overlap returns conflict <span class="id">(SL-I-002)</span></td></tr>
+<tr><td class="code">TC-0004-2-0013</td><td>PATCH rechecks overlap excluding self <span class="id">(SL-I-003)</span></td></tr>
+<tr><td class="code">TC-0004-2-0014</td><td>DELETE soft-delete frees room for new link <span class="id">(SL-I-004)</span></td></tr>
+<tr><td class="code">TC-0004-3-0005</td><td>Edit exam room assignment blocks overlapping reuse <span class="id">(SL-E-001)</span></td></tr>
+<tr><td class="code">TC-0004-1-0019</td><td>create rejects duplicate row/col in location <span class="id">(SEAT-U-001)</span></td></tr>
+<tr><td class="code">TC-0004-1-0020</td><td>create/update rejects duplicate seat label in location <span class="id">(SEAT-U-002)</span></td></tr>
+<tr><td class="code">TC-0004-1-0021</td><td>generateSeats requires rows/cols configured <span class="id">(SEAT-U-003)</span></td></tr>
+<tr><td class="code">TC-0004-1-0022</td><td>generateSeats status precedence seatStatuses &gt; brokenSeats &gt; existing <span class="id">(SEAT-U-004)</span></td></tr>
+<tr><td class="code">TC-0004-1-0023</td><td>generateSeats blocks shrinking if assigned seats removed <span class="id">(SEAT-U-005)</span></td></tr>
+<tr><td class="code">TC-0004-1-0024</td><td>generateSeats restores soft-deleted in-range seats <span class="id">(SEAT-U-006)</span></td></tr>
+<tr><td class="code">TC-0004-2-0015</td><td>uniqueness constraints for row/col and label in location <span class="id">(SEAT-I-001)</span></td></tr>
+<tr><td class="code">TC-0004-2-0016</td><td>POST /api/exam-location-seats/generate/:locationId atomic grid update <span class="id">(SEAT-I-002)</span></td></tr>
+<tr><td class="code">TC-0004-2-0017</td><td>generate shrink with assigned seats fails without partial writes <span class="id">(SEAT-I-003)</span></td></tr>
+<tr><td class="code">TC-0004-2-0018</td><td>DELETE seat soft-delete behavior <span class="id">(SEAT-I-004)</span></td></tr>
+<tr><td class="code">TC-0004-3-0006</td><td>Seat-management blocks save when paid users &gt; usable seats <span class="id">(SEAT-E-001)</span></td></tr>
+<tr><td class="code">TC-0004-1-0025</td><td>replaceForSession soft-removes previous overrides first <span class="id">(BLOCK-U-001)</span></td></tr>
+<tr><td class="code">TC-0004-1-0026</td><td>replaceForSession empty list clears all overrides <span class="id">(BLOCK-U-002)</span></td></tr>
+<tr><td class="code">TC-0004-1-0027</td><td>findOne throws when missing <span class="id">(BLOCK-U-003)</span></td></tr>
+<tr><td class="code">TC-0004-1-0028</td><td>update mutates only requested fields <span class="id">(BLOCK-U-004)</span></td></tr>
+<tr><td class="code">TC-0004-2-0019</td><td>POST /api/exam-blocked-seats/session/:sessionId/replace all-or-nothing <span class="id">(BLOCK-I-001)</span></td></tr>
+<tr><td class="code">TC-0004-2-0020</td><td>GET with sessionId filters target session only <span class="id">(BLOCK-I-002)</span></td></tr>
+<tr><td class="code">TC-0004-2-0021</td><td>DELETE override falls back to base seat status <span class="id">(BLOCK-I-003)</span></td></tr>
+<tr><td class="code">TC-0004-3-0007</td><td>Edit exam seat overrides persist after reload <span class="id">(BLOCK-E-001)</span></td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

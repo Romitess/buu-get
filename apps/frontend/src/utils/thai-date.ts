@@ -26,6 +26,24 @@ export const formatThaiLongDate = (
 };
 
 /**
+ * Formats a parseable date string as a long Thai (Buddhist-era) date with prefix,
+ * e.g. "วันที่ 15 พฤษภาคม พ.ศ.2569".
+ */
+export const formatThaiLongDateWithPrefix = (
+  dateStr: string,
+  getMonthName: (monthIndex: number) => string,
+): string => {
+  if (!dateStr) return '-';
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return dateStr;
+
+  const day = date.getDate();
+  const month = getMonthName(date.getMonth());
+  const year = date.getFullYear() + BUDDHIST_YEAR_OFFSET;
+  return `วันที่ ${day} ${month} พ.ศ.${year}`;
+};
+
+/**
  * Converts a Buddhist Era date string (DD/MM/YYYY) to Christian Era date string (YYYY-MM-DD)
  */
 export const beToCeString = (beStr: string | undefined): string => {

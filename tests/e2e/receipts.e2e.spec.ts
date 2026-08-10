@@ -344,7 +344,7 @@ test.describe('E2E: Receipt usage report & PDF download', () => {
       payerName,
     });
     issuedTranxId = issued.tranxId;
-    receiptNoHint = `RC${new Date().getFullYear()}-${String(issued.rcId).padStart(5, '0')}`;
+    receiptNoHint = `${new Date().getFullYear() + 543}`; // Year BE prefix
 
     const unissued = await createPaidTxnWithReceipt(request, token, {
       issue: false,

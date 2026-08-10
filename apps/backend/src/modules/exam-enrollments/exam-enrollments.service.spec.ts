@@ -118,6 +118,10 @@ type QueryBuilderMock = {
   innerJoin: jest.Mock;
   leftJoin: jest.Mock;
   clone: jest.Mock;
+  update: jest.Mock;
+  set: jest.Mock;
+  from: jest.Mock;
+  execute: jest.Mock;
   getRawMany: jest.Mock;
   getRawOne: jest.Mock;
   getOne: jest.Mock;
@@ -140,6 +144,10 @@ const createQueryBuilderMock = (
     innerJoin: jest.fn(),
     leftJoin: jest.fn(),
     clone: jest.fn(),
+    update: jest.fn(),
+    set: jest.fn(),
+    from: jest.fn(),
+    execute: jest.fn().mockResolvedValue({ affected: 0 }),
     getRawMany: jest.fn().mockResolvedValue([]),
     getRawOne: jest.fn().mockResolvedValue({ total: '0' }),
     getOne: jest.fn().mockResolvedValue(null),
@@ -159,6 +167,9 @@ const createQueryBuilderMock = (
   qb.take.mockImplementation(chain);
   qb.innerJoin.mockImplementation(chain);
   qb.leftJoin.mockImplementation(chain);
+  qb.update.mockImplementation(chain);
+  qb.set.mockImplementation(chain);
+  qb.from.mockImplementation(chain);
   qb.clone.mockImplementation(() => qb);
   return qb;
 };
@@ -1519,24 +1530,61 @@ describe('ExamEnrollmentsService', () => {
   });
 
   describe('handleCronCancelExpiredEnrollments', () => {
-    it('ENR-U-046: cancels UNPAID enrollments older than 30 minutes', async () => {
-      // Arrange
-      examEnrollmentRepository.update.mockResolvedValue({
-        affected: 3,
-        raw: [],
-        generatedMaps: [],
+    it('ENR-U-046: cancels UNPAID past exam pay end (expires PENDING txns) and QR sessions', async () => {
+      // Arrange — step 1: pay-end cancel
+      const payEndSelectQb = createQueryBuilderMock({
+        getRawMany: jest.fn().mockResolvedValue([{ ERM_ID: 201 }, { ERM_ID: 202 }]),
       });
+      const payEndUpdateErmQb = createQueryBuilderMock({
+        execute: jest.fn().mockResolvedValue({ affected: 2 }),
+      });
+      const payEndUpdateTranxQb = createQueryBuilderMock({
+        execute: jest.fn().mockResolvedValue({ affected: 1 }),
+      });
+
+      // step 2: QR session expire
+      const qrSelectQb = createQueryBuilderMock({
+        getRawMany: jest.fn().mockResolvedValue([
+          { TRANX_ID: 11, ERM_ID: 101 },
+          { TRANX_ID: 12, ERM_ID: 102 },
+        ]),
+      });
+      const qrUpdateTranxQb = createQueryBuilderMock({
+        execute: jest.fn().mockResolvedValue({ affected: 2 }),
+      });
+      const qrUpdateErmQb = createQueryBuilderMock({
+        execute: jest.fn().mockResolvedValue({ affected: 2 }),
+      });
+
+      const payEndManager = {
+        createQueryBuilder: jest
+          .fn()
+          .mockReturnValueOnce(payEndSelectQb)
+          .mockReturnValueOnce(payEndUpdateErmQb)
+          .mockReturnValueOnce(payEndUpdateTranxQb),
+      };
+      const qrManager = {
+        createQueryBuilder: jest
+          .fn()
+          .mockReturnValueOnce(qrSelectQb)
+          .mockReturnValueOnce(qrUpdateTranxQb)
+          .mockReturnValueOnce(qrUpdateErmQb),
+      };
+
+      dataSource.transaction = jest
+        .fn()
+        .mockImplementationOnce(async (cb: (m: unknown) => unknown) => cb(payEndManager))
+        .mockImplementationOnce(async (cb: (m: unknown) => unknown) => cb(qrManager));
 
       // Act
       await service.handleCronCancelExpiredEnrollments();
 
       // Assert
-      expect(examEnrollmentRepository.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ERM_STATUS: ExamEnrollmentStatus.UNPAID,
-        }),
-        { ERM_STATUS: ExamEnrollmentStatus.CANCELLED },
-      );
+      expect(dataSource.transaction).toHaveBeenCalledTimes(2);
+      expect(payEndUpdateErmQb.execute).toHaveBeenCalled();
+      expect(payEndUpdateTranxQb.execute).toHaveBeenCalled();
+      expect(qrUpdateTranxQb.execute).toHaveBeenCalled();
+      expect(qrUpdateErmQb.execute).toHaveBeenCalled();
     });
   });
 

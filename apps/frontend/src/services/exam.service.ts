@@ -23,9 +23,9 @@ import {
   INTERNAL_EXAM_TYPE_SPECIAL,
   EXAM_STATUS_PUBLISHED,
   EXAM_STATUS_UNPUBLISHED,
-  ENROLLMENT_STATUS,
 } from 'src/constants/exam';
 import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
+import { isActiveEnrollmentStatus } from 'src/utils/is-active-enrollment-status';
 import type { PasscodeLog } from 'src/types/common';
 // Retry configuration
 const RETRY_ATTEMPTS = 3;
@@ -50,14 +50,13 @@ export const invalidateExamCache = (): void => {
   examsFetchInFlight = null;
 };
 
-const isActiveEnrollment = (enrollment: { ERM_STATUS: number }): boolean =>
-  enrollment.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED;
-
 const getActiveEnrollmentCount = (session: BackendSession): number => {
   if (typeof session.ACTIVE_ENROLLMENT_COUNT === 'number') {
     return session.ACTIVE_ENROLLMENT_COUNT;
   }
-  return (session.ENROLLMENTS || []).filter(isActiveEnrollment).length;
+  return (session.ENROLLMENTS || []).filter((enrollment) =>
+    isActiveEnrollmentStatus(enrollment.ERM_STATUS),
+  ).length;
 };
 
 const isRequestCanceled = (error: unknown): boolean => {

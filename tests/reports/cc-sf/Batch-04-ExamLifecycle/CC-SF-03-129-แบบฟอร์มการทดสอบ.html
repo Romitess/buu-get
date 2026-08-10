@@ -1,0 +1,3170 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"/>
+<title>CC-SF-03-129 Batch 4</title>
+<style>
+  @page { size: A4; margin: 10mm 12mm; }
+  body { font-family: "Sarabun","Thonburi","Tahoma",sans-serif; font-size: 9.5pt; color: #111; margin: 0; }
+  .cover { page-break-after: always; padding-top: 40mm; text-align: center; }
+  .cover h1 { font-size: 18pt; }
+  .case { page-break-after: always; }
+  .case:last-child { page-break-after: auto; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 6pt; }
+  th, td { border: 1px solid #333; padding: 5pt 6pt; vertical-align: top; }
+  th { background: #f3f3f3; font-weight: 600; font-size: 9pt; }
+  .en { color: #555; font-size: 8pt; }
+  code { font-family: ui-monospace, monospace; }
+  pre.desc { white-space: pre-wrap; margin: 4pt 0 0; font-family: inherit; }
+  .result { width: 22%; white-space: nowrap; }
+  .footer-id { font-size: 8pt; color: #666; margin-top: 4pt; }
+  .steps td { font-size: 9pt; }
+</style>
+</head>
+<body>
+  <section class="cover">
+    <h1>แบบฟอร์มการทดสอบระบบ</h1>
+    <p>CC-SF-03-129</p>
+    <p><strong>ระบบ:</strong> BUU-GET</p>
+    <p><strong>ชุดทดสอบ:</strong> Batch 04 — วงจรชีวิตการสอบ</p>
+    <p>Exam lifecycle</p>
+    <p>จำนวน 56 เคส · ผู้ทดสอบ: BUU-GET Test Rollout · วันที่ 2026-08-05</p>
+  </section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0001</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>create normalizes reg/pay end-date to period end</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: EXAM-U-001
+ระดับ: unit
+create normalizes reg/pay end-date to period end</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Valid CreateExamDto with end dates</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call create</td>
+        <td>`EXAM_REG_END_DATE`/`EXAM_PAY_END_DATE` normalized before save</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: EXAM-U-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0002</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>create validates score-rubric usability</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: EXAM-U-002
+ระดับ: unit
+create validates score-rubric usability</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>`SRB_ID` unusable</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call create</td>
+        <td>reject from rubric guard</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: EXAM-U-002 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0003</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>update blocks rubric change when scores exist</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: EXAM-U-003
+ระดับ: unit
+update blocks rubric change when scores exist</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing exam with scores</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call update with new `SRB_ID`</td>
+        <td>ConflictException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: EXAM-U-003 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0004</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>createPasscodes rejects missing ID/name pair</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: EXAM-U-004
+ระดับ: unit
+createPasscodes rejects missing ID/name pair</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Passcode item missing pair fields</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call createPasscodes</td>
+        <td>BadRequestException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: EXAM-U-004 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0005</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>createPasscodes blocked when active enrollments exist</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: EXAM-U-005
+ระดับ: unit
+createPasscodes blocked when active enrollments exist</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Non-cancelled enrollment exists</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call createPasscodes</td>
+        <td>ConflictException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: EXAM-U-005 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0006</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>notifyExamChanges returns success while dispatch async</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: EXAM-U-006
+ระดับ: unit
+notifyExamChanges returns success while dispatch async</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Valid exam id + change set</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call notifyExamChanges</td>
+        <td>`{success:true}` immediately</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: EXAM-U-006 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0001</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST /api/exam persists even when Moodle sync fails</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: EXAM-I-001
+ระดับ: integration
+POST /api/exam persists even when Moodle sync fails</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>EXAM_ADMIN role; Moodle failure mocked</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST create</td>
+        <td>created successfully; request not failed by side effect</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: EXAM-I-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0002</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>PATCH /api/exam/:id rubric change conflict after score saved</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: EXAM-I-002
+ระดับ: integration
+PATCH /api/exam/:id rubric change conflict after score saved</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Exam has score rows</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PATCH with new `SRB_ID`</td>
+        <td>409 conflict</td>
+        <td>ข้ามใน shared seed — precondition SRB_ID=1 ไม่มี rubric items สำหรับสร้าง persisted score</td>
+        <td class="result">
+          ☐ ผ่าน / Pass<br/>
+          ☑ ไม่ผ่าน / ข้าม (Skip) / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ข้ามชั่วคราวเนื่องจาก precondition ของสภาพแวดล้อมทดสอบ</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: EXAM-I-002 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0003</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST /api/exam/:id/passcodes replaces old set atomically</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: EXAM-I-003
+ระดับ: integration
+POST /api/exam/:id/passcodes replaces old set atomically</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing passcodes; no active enrollment</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST new passcodes</td>
+        <td>old deleted, new set persisted</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: EXAM-I-003 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0004</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>RBAC for exam mutate endpoints</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: EXAM-I-004
+ระดับ: integration
+RBAC for exam mutate endpoints</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>allowed/disallowed JWT</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>hit create/update/delete/notify/passcodes</td>
+        <td>allowed 2xx, disallowed 403</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: EXAM-I-004 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-3-0001</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Admin creates exam with sessions + room then publish</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: EXAM-E-001
+ระดับ: e2e
+Admin creates exam with sessions + room then publish</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Admin login; room/fund/rubric ready</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Fill create-exam form and save</td>
+        <td>exam + sessions + room links visible</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: EXAM-E-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-3-0002</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Edit exam triggers notify-changes flow</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: EXAM-E-002
+ระดับ: e2e
+Edit exam triggers notify-changes flow</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing exam with enrolled users</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Edit schedule/details and notify</td>
+        <td>UI success; notify endpoint accepted</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: EXAM-E-002 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0007</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>create returns reloaded session with relations</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-sessions</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SES-U-001
+ระดับ: unit
+create returns reloaded session with relations</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Valid DTO</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call create</td>
+        <td>return shape equals findOne(saved id)</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SES-U-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0008</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>findOne throws when session not found</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-sessions</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SES-U-002
+ระดับ: unit
+findOne throws when session not found</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Missing `SS_ID`</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call findOne</td>
+        <td>NotFoundException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SES-U-002 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0009</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>remove uses softRemove after existence check</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-sessions</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SES-U-003
+ระดับ: unit
+remove uses softRemove after existence check</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing session</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call remove</td>
+        <td>soft-delete called</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SES-U-003 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0005</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST /api/exam-sessions validates and creates</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-sessions</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SES-I-001
+ระดับ: integration
+POST /api/exam-sessions validates and creates</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Valid exam id + dates/capacity</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST</td>
+        <td>201 persisted session</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SES-I-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0006</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>PATCH /api/exam-sessions/:id updates metadata</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-sessions</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SES-I-002
+ระดับ: integration
+PATCH /api/exam-sessions/:id updates metadata</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing session</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PATCH start/end/capacity</td>
+        <td>200 and DB updated</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SES-I-002 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0007</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>DELETE /api/exam-sessions/:id soft delete behavior</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-sessions</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SES-I-003
+ระดับ: integration
+DELETE /api/exam-sessions/:id soft delete behavior</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing session</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>DELETE then GET/list</td>
+        <td>hidden from normal query</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SES-I-003 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-3-0003</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Edit exam removes one session keeps others</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-sessions</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SES-E-001
+ระดับ: e2e
+Edit exam removes one session keeps others</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Exam has &gt;1 session</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>remove slot in UI then save</td>
+        <td>removed slot gone, remaining intact</td>
+        <td>ข้ามการรัน E2E — BUG-008: เปิด /admin/edit-exam/:id แล้วถูก redirect กลับ exam-management</td>
+        <td class="result">
+          ☐ ผ่าน / Pass<br/>
+          ☑ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>บันทึกใน tests/BUG_LOG.md; เคสถูกข้ามจนกว่าจะแก้บั๊ก</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SES-E-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0010</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>createWithSeats generates rows*cols and labels by direction</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: LOC-U-001
+ระดับ: unit
+createWithSeats generates rows*cols and labels by direction</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Rows/cols + direction</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call createWithSeats</td>
+        <td>seat count and labels/order correct</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: LOC-U-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0011</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>createWithSeats applies seatStatuses fallback AVAILABLE</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: LOC-U-002
+ระดับ: unit
+createWithSeats applies seatStatuses fallback AVAILABLE</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Partial seat-status map</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call createWithSeats</td>
+        <td>mapped seats override, others AVAILABLE</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: LOC-U-002 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0012</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>aisle positions normalize legacy/new fields and sort</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: LOC-U-003
+ระดับ: unit
+aisle positions normalize legacy/new fields and sort</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>mixed aisle payload</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>create/update location</td>
+        <td>normalized/sorted aisle positions</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: LOC-U-003 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0013</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>findOne throws on unknown location</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: LOC-U-004
+ระดับ: unit
+findOne throws on unknown location</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Missing id</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call findOne</td>
+        <td>NotFoundException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: LOC-U-004 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0008</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST /api/exam-locations/with-seats transactional create</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: LOC-I-001
+ระดับ: integration
+POST /api/exam-locations/with-seats transactional create</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Valid payload</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST</td>
+        <td>location+seats committed together</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: LOC-I-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0009</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>GET /api/exam-locations?includeSeats=true embeds seats</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: LOC-I-002
+ระดับ: integration
+GET /api/exam-locations?includeSeats=true embeds seats</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Seeded location seats</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET includeSeats</td>
+        <td>seats returned with stable order</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: LOC-I-002 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0010</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>DELETE /api/exam-locations/:id soft-delete</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: LOC-I-003
+ระดับ: integration
+DELETE /api/exam-locations/:id soft-delete</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing location</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>DELETE then GET</td>
+        <td>hidden by default query</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: LOC-I-003 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-3-0004</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Admin creates location with seat map and reuses in exam form</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: LOC-E-001
+ระดับ: e2e
+Admin creates location with seat map and reuses in exam form</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Admin login</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Create room in UI</td>
+        <td>room selectable in create-exam flow</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: LOC-E-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0014</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>create rejects missing location</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-session-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SL-U-001
+ระดับ: unit
+create rejects missing location</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Invalid `LOCATION_ID`</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call create</td>
+        <td>NotFoundException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SL-U-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0015</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>create rejects missing session</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-session-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SL-U-002
+ระดับ: unit
+create rejects missing session</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Invalid `SS_ID`</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call create</td>
+        <td>NotFoundException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SL-U-002 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0016</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>create rejects session missing exam date/time</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-session-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SL-U-003
+ระดับ: unit
+create rejects session missing exam date/time</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Session incomplete metadata</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call create</td>
+        <td>BadRequestException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SL-U-003 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0017</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>create rejects duplicate session-location pair</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-session-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SL-U-004
+ระดับ: unit
+create rejects duplicate session-location pair</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing same pair</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call create</td>
+        <td>ConflictException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SL-U-004 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0018</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>overlap detection blocks same-room overlapping time</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-session-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SL-U-005
+ระดับ: unit
+overlap detection blocks same-room overlapping time</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Same room/date overlapping slot</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call create/update</td>
+        <td>ConflictException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SL-U-005 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0011</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST /api/exam-session-locations allows non-overlap</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-session-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SL-I-001
+ระดับ: integration
+POST /api/exam-session-locations allows non-overlap</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Same room/date non-overlap slots</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST links</td>
+        <td>both succeed</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SL-I-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0012</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST overlap returns conflict</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-session-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SL-I-002
+ระดับ: integration
+POST overlap returns conflict</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Overlap scenario</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST second link</td>
+        <td>409 conflict</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SL-I-002 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0013</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>PATCH rechecks overlap excluding self</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-session-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SL-I-003
+ระดับ: integration
+PATCH rechecks overlap excluding self</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing link update</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>PATCH with/without conflict</td>
+        <td>409 on conflict, pass on self/no-conflict</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SL-I-003 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0014</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>DELETE soft-delete frees room for new link</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-session-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SL-I-004
+ระดับ: integration
+DELETE soft-delete frees room for new link</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing link</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>DELETE then POST same slot</td>
+        <td>new link succeeds</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SL-I-004 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-3-0005</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Edit exam room assignment blocks overlapping reuse</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-session-locations</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SL-E-001
+ระดับ: e2e
+Edit exam room assignment blocks overlapping reuse</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing sessions same day</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>assign same room overlap in UI</td>
+        <td>backend conflict message shown</td>
+        <td>ข้ามการรัน E2E — BUG-008: ไม่สามารถทดสอบ overlap ใน edit flow ได้เพราะ redirect</td>
+        <td class="result">
+          ☐ ผ่าน / Pass<br/>
+          ☑ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>บันทึกใน tests/BUG_LOG.md; เคสถูกข้ามจนกว่าจะแก้บั๊ก</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SL-E-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0019</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>create rejects duplicate row/col in location</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-location-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SEAT-U-001
+ระดับ: unit
+create rejects duplicate row/col in location</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Seat already at row/col</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call create</td>
+        <td>ConflictException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SEAT-U-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0020</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>create/update rejects duplicate seat label in location</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-location-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SEAT-U-002
+ระดับ: unit
+create/update rejects duplicate seat label in location</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Label already used</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call create/update</td>
+        <td>ConflictException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SEAT-U-002 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0021</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>generateSeats requires rows/cols configured</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-location-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SEAT-U-003
+ระดับ: unit
+generateSeats requires rows/cols configured</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Location missing totals</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call generateSeats</td>
+        <td>BadRequestException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SEAT-U-003 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0022</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>generateSeats status precedence seatStatuses &gt; brokenSeats &gt; existing</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-location-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SEAT-U-004
+ระดับ: unit
+generateSeats status precedence seatStatuses &gt; brokenSeats &gt; existing</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing seats + mixed inputs</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call generateSeats</td>
+        <td>final statuses follow precedence</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SEAT-U-004 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0023</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>generateSeats blocks shrinking if assigned seats removed</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-location-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SEAT-U-005
+ระดับ: unit
+generateSeats blocks shrinking if assigned seats removed</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Out-of-range seats assigned</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call generateSeats shrink</td>
+        <td>BadRequestException with seat labels</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SEAT-U-005 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0024</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>generateSeats restores soft-deleted in-range seats</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-location-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SEAT-U-006
+ระดับ: unit
+generateSeats restores soft-deleted in-range seats</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Soft-deleted seats in new range</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call generateSeats</td>
+        <td>DELETED_AT cleared and seat restored</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SEAT-U-006 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0015</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>uniqueness constraints for row/col and label in location</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-location-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SEAT-I-001
+ระดับ: integration
+uniqueness constraints for row/col and label in location</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>duplicate insert attempts</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST duplicates</td>
+        <td>conflict/constraint failure</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SEAT-I-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0016</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST /api/exam-location-seats/generate/:locationId atomic grid update</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-location-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SEAT-I-002
+ระดับ: integration
+POST /api/exam-location-seats/generate/:locationId atomic grid update</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing grid</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST generate new dimensions</td>
+        <td>consistent full grid updated</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SEAT-I-002 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0017</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>generate shrink with assigned seats fails without partial writes</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-location-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SEAT-I-003
+ระดับ: integration
+generate shrink with assigned seats fails without partial writes</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Assigned seat would be removed</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST generate</td>
+        <td>fail and previous seats unchanged</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SEAT-I-003 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0018</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>DELETE seat soft-delete behavior</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-location-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SEAT-I-004
+ระดับ: integration
+DELETE seat soft-delete behavior</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing seat</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>DELETE then list</td>
+        <td>seat hidden from normal list</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SEAT-I-004 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-3-0006</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Seat-management blocks save when paid users &gt; usable seats</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-location-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: SEAT-E-001
+ระดับ: e2e
+Seat-management blocks save when paid users &gt; usable seats</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Insufficient usable seats</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Open seat-management + save</td>
+        <td>error shown; no assignment persisted</td>
+        <td>ข้ามการรัน E2E — BUG-009: เปิดหน้า seat-management แล้วถูก redirect กลับ exam-management</td>
+        <td class="result">
+          ☐ ผ่าน / Pass<br/>
+          ☑ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>บันทึกใน tests/BUG_LOG.md; เคสถูกข้ามจนกว่าจะแก้บั๊ก</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: SEAT-E-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0025</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>replaceForSession soft-removes previous overrides first</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-blocked-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: BLOCK-U-001
+ระดับ: unit
+replaceForSession soft-removes previous overrides first</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing blocked rows</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call replaceForSession</td>
+        <td>old rows soft-deleted then new set saved</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: BLOCK-U-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0026</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>replaceForSession empty list clears all overrides</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-blocked-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: BLOCK-U-002
+ระดับ: unit
+replaceForSession empty list clears all overrides</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing blocked rows</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call replaceForSession with empty seats</td>
+        <td>returns empty and prior rows cleared</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: BLOCK-U-002 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0027</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>findOne throws when missing</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-blocked-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: BLOCK-U-003
+ระดับ: unit
+findOne throws when missing</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Missing `BLOCK_ID`</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call findOne</td>
+        <td>NotFoundException</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: BLOCK-U-003 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-1-0028</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>update mutates only requested fields</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-blocked-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: BLOCK-U-004
+ระดับ: unit
+update mutates only requested fields</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing override</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>call update only status</td>
+        <td>status updated; links unchanged</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: BLOCK-U-004 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0019</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>POST /api/exam-blocked-seats/session/:sessionId/replace all-or-nothing</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-blocked-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: BLOCK-I-001
+ระดับ: integration
+POST /api/exam-blocked-seats/session/:sessionId/replace all-or-nothing</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Valid multi-seat payload</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>POST replace</td>
+        <td>full success or rollback</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: BLOCK-I-001 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0020</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>GET with sessionId filters target session only</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-blocked-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: BLOCK-I-002
+ระดับ: integration
+GET with sessionId filters target session only</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Multiple sessions blocked</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>GET query</td>
+        <td>only target rows returned</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: BLOCK-I-002 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-2-0021</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>DELETE override falls back to base seat status</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-blocked-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: BLOCK-I-003
+ระดับ: integration
+DELETE override falls back to base seat status</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing blocked override</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>DELETE then fetch effective seats</td>
+        <td>override gone; base status visible</td>
+        <td>ผ่านตามหลักฐาน rollout ใน tests/PROGRESS.md (Batch 4 Exam lifecycle)</td>
+        <td class="result">
+          ☑ ผ่าน / Pass<br/>
+          ☐ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>ระบบกลับสู่สถานะพร้อมใช้งาน; ข้อมูลทดสอบถูกทำเครื่องหมาย/ทำความสะอาดตามนโยบาย shared-DB</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: BLOCK-I-003 · Batch 4 Exam lifecycle</p>
+</section>
+<section class="case">
+  <table class="meta-table">
+    <tr>
+      <td><strong>รหัสการทดสอบ :</strong><br/><span class="en">Test Case #:</span><br/><code>TC-0004-3-0007</code></td>
+      <td><strong>ชื่อการทดสอบ:</strong><br/><span class="en">Test Case Name</span><br/>Edit exam seat overrides persist after reload</td>
+    </tr>
+    <tr>
+      <td><strong>ชื่อระบบ :</strong><br/><span class="en">System:</span><br/>BUU-GET</td>
+      <td><strong>ชื่อระบบย่อย :</strong><br/><span class="en">Subsystem</span><br/>exam-blocked-seats</td>
+    </tr>
+    <tr>
+      <td><strong>ออกแบบโดย :</strong><br/><span class="en">Designed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ออกแบบ:</strong><br/><span class="en">Design Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td><strong>ผู้ทดสอบระบบ :</strong><br/><span class="en">Executed by</span><br/>BUU-GET Test Rollout</td>
+      <td><strong>วันที่ทดสอบระบบ :</strong><br/><span class="en">Execution Date</span><br/>2026-08-05</td>
+    </tr>
+    <tr>
+      <td colspan="2"><strong>คำอธิบาย :</strong> <span class="en">Description</span><br/><pre class="desc">รหัสภายใน: BLOCK-E-001
+ระดับ: e2e
+Edit exam seat overrides persist after reload</pre></td>
+    </tr>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขก่อนการทดสอบ:</strong> <span class="en">Pre-conditions</span><br/>Existing exam with per-session overrides</td></tr>
+  </table>
+
+  <table class="steps">
+    <thead>
+      <tr>
+        <th>ขั้นตอนการทดสอบ<br/><span class="en">Action</span></th>
+        <th>ผลที่คาดว่าจะได้รับ<br/><span class="en">Expected System Response</span></th>
+        <th>ผลลัพธ์<br/><span class="en">Actual Results</span></th>
+        <th>ผลการทดสอบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>edit/save/reopen</td>
+        <td>blocked/broken overrides preserved</td>
+        <td>ข้ามการรัน E2E — BUG-008: blocked seat override ใน edit flow ถูก block ด้วย redirect</td>
+        <td class="result">
+          ☐ ผ่าน / Pass<br/>
+          ☑ ไม่ผ่าน / Fail
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="block">
+    <tr><td><strong>เงื่อนไขหลังการทดสอบ :</strong> <span class="en">Post-conditions</span><br/>บันทึกใน tests/BUG_LOG.md; เคสถูกข้ามจนกว่าจะแก้บั๊ก</td></tr>
+  </table>
+  <p class="footer-id">Internal ID: BLOCK-E-001 · Batch 4 Exam lifecycle</p>
+</section>
+</body>
+</html>

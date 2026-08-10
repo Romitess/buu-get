@@ -33,7 +33,8 @@ import {
 import { TransactionRef } from '../transaction-refs/entities/transaction-ref.entity';
 import { TransactionApiType } from '../transaction-status-history/entities/transaction-status-history.entity';
 import { ExamEnrollmentStatus } from '../exam-enrollments/entities/exam-enrollment.entity';
-import { ReceiptStatus } from '../receipts/entities/receipt.entity';
+import { Receipt } from '../receipts/entities/receipt.entity';
+import { ReceiptNumberService } from '../receipts/receipt-number.service';
 import { BankReconcile } from './entities/bank-reconcile.entity';
 import {
   BankReconcileChangedField,
@@ -167,6 +168,7 @@ export class BankReconcilesService {
   constructor(
     @InjectRepository(BankReconcile)
     private readonly bankReconcilesRepository: Repository<BankReconcile>,
+    private readonly receiptNumberService: ReceiptNumberService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -398,7 +400,7 @@ export class BankReconcilesService {
       .leftJoin(
         'FIN_T_TRANSACTIONS',
         't',
-        't.TRANX_ID = tr.TRANX_ID AND t.TRANX_DELETED_AT IS NULL',
+        't.TRANX_ID = tr.TRANX_ID AND t.DELETED_AT IS NULL',
       )
       .where('br.DELETED_AT IS NULL')
       .andWhere('br.BR_ID IN (:...brIds)', { brIds: brIdChunk })
@@ -1044,7 +1046,7 @@ export class BankReconcilesService {
       .innerJoin(
         'FIN_T_TRANSACTIONS',
         't',
-        't.TRANX_ID = tr.TRANX_ID AND t.TRANX_DELETED_AT IS NULL',
+        't.TRANX_ID = tr.TRANX_ID AND t.DELETED_AT IS NULL',
       )
       .leftJoin(
         'EXAM_T_ENROLLMENTS',
@@ -1166,14 +1168,17 @@ export class BankReconcilesService {
       }
 
       // 3. Update Receipts
-      await queryRunner.manager
-        .createQueryBuilder()
-        .update('FIN_T_RECEIPTS')
-        .set({
-          RC_STATUS: ReceiptStatus.ISSUED,
-        })
-        .where('TRANX_ID IN (:...tranxIds)', { tranxIds })
-        .execute();
+      const receiptRows = await queryRunner.manager
+        .getRepository(Receipt)
+        .find({
+          where: { TRANX_ID: In(tranxIds) },
+          select: ['RC_ID'],
+        });
+      const receiptIds = receiptRows.map((r) => r.RC_ID);
+      await this.receiptNumberService.assignOnIssue(
+        queryRunner.manager,
+        receiptIds,
+      );
 
       // 4. Update Exam Enrollments
       const ermIds = transactions
@@ -1222,7 +1227,7 @@ export class BankReconcilesService {
       .innerJoin(
         'FIN_T_TRANSACTIONS',
         'transaction',
-        'transaction.ERM_ID = enrollment.ERM_ID AND transaction.TRANX_DELETED_AT IS NULL',
+        'transaction.ERM_ID = enrollment.ERM_ID AND transaction.DELETED_AT IS NULL',
       )
       .innerJoin(
         'FIN_T_TRANSACTIONS_REFS',
@@ -1290,7 +1295,7 @@ export class BankReconcilesService {
       .innerJoin(
         'FIN_T_TRANSACTIONS',
         'transaction',
-        'transaction.TRANX_ID = tr.TRANX_ID AND transaction.TRANX_DELETED_AT IS NULL',
+        'transaction.TRANX_ID = tr.TRANX_ID AND transaction.DELETED_AT IS NULL',
       )
       .innerJoin(
         'EXAM_T_ENROLLMENTS',

@@ -1,6 +1,5 @@
 import {
   ENROLLMENT_STATUS,
-  PAYMENT_DURATION_SECONDS_DEFAULT,
   ReceiptStatus,
   SESSION_STATUS_COMPLETED,
   TRANSACTION_MATCH_STATUS,
@@ -24,26 +23,72 @@ export interface MapEnrollmentHistoryContext {
   getCancellationReason: (enrollmentId: number) => CancellationReason | null;
 }
 
-function getPaymentDeadline(createdAt: string): Date {
-  return new Date(new Date(createdAt).getTime() + PAYMENT_DURATION_SECONDS_DEFAULT * 1000);
+type EnrollmentCancelProbe = Pick<ExamEnrollment, 'ERM_ID' | 'ERM_STATUS' | 'TRANSACTION'>;
+
+/**
+ * ตรวจว่า enrollment ที่ CANCELLED ควรจัดเป็นหมดเวลา/ล้มเหลวการชำระ (ให้ลงทะเบียนใหม่ได้)
+ * ไม่รวม manual cancel และ refund / receipt voided
+ */
+export function isPaymentTimeoutCancellation(
+  enrollment: EnrollmentCancelProbe,
+  getCancellationReason: (enrollmentId: number) => CancellationReason | null = () => null,
+): boolean {
+  if (Number(enrollment.ERM_STATUS) !== ENROLLMENT_STATUS.CANCELLED) {
+    return false;
+  }
+
+  const paymentStatus = enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS;
+  const statusNum =
+    paymentStatus === undefined || paymentStatus === null ? null : Number(paymentStatus);
+
+  if (
+    statusNum === TRANSACTION_PAYMENT_STATUS.REFUND ||
+    statusNum === TRANSACTION_PAYMENT_STATUS.RECEIPT_VOIDED
+  ) {
+    return false;
+  }
+
+  const reason = getCancellationReason(enrollment.ERM_ID);
+  if (reason === 'manual') {
+    return false;
+  }
+  if (reason === 'paymentTimeout') {
+    return true;
+  }
+
+  if (statusNum === TRANSACTION_PAYMENT_STATUS.EXPIRED) {
+    return true;
+  }
+
+  if (statusNum === TRANSACTION_PAYMENT_STATUS.PAID) {
+    return false;
+  }
+
+  // เคยเปิด QR session (มี TRANX_EXPIRES_AT)
+  if (enrollment.TRANSACTION?.TRANX_EXPIRES_AT) {
+    return true;
+  }
+
+  // ยกเลิกตอนยังไม่เคยชำระสำเร็จ (เช่น cron เลยวันปิดชำระ โดยไม่มี EXPIRED)
+  return statusNum === null || statusNum === TRANSACTION_PAYMENT_STATUS.PENDING;
 }
 
-function isPaymentTimeoutCancellation(
-  enrollment: Pick<ExamEnrollment, 'ERM_ID' | 'CREATED_AT' | 'UPDATED_AT'>,
-  getCancellationReason: (enrollmentId: number) => CancellationReason | null,
-): boolean {
-  const reason = getCancellationReason(enrollment.ERM_ID);
-  if (reason) return reason === 'paymentTimeout';
-  if (!enrollment.CREATED_AT || !enrollment.UPDATED_AT) return false;
-  return new Date(enrollment.UPDATED_AT).getTime() >= getPaymentDeadline(enrollment.CREATED_AT).getTime();
+/** ใช้กับ ExamHistoryItem จาก store / home activities — เชื่อสถานะที่ mapper จัดแล้ว */
+export function isPaymentTimeoutHistoryItem(item: ExamHistoryItem): boolean {
+  return (
+    item.customStatus?.label === 'exam.status.paymentTimeout' ||
+    item.status === 'exam.status.paymentTimeout'
+  );
 }
 
 function hasMatchedPayment(enrollment: ExamEnrollment): boolean {
-  return enrollment.TRANSACTION?.TRANX_MATCH_STATUS === TRANSACTION_MATCH_STATUS.MATCH;
+  return (
+    Number(enrollment.TRANSACTION?.TRANX_MATCH_STATUS) === TRANSACTION_MATCH_STATUS.MATCH
+  );
 }
 
 function hasDownloadableReceipt(enrollment: ExamEnrollment): boolean {
-  const paymentStatus = enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS;
+  const paymentStatus = Number(enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS);
   if (
     paymentStatus === TRANSACTION_PAYMENT_STATUS.REFUND ||
     paymentStatus === TRANSACTION_PAYMENT_STATUS.RECEIPT_VOIDED
@@ -88,7 +133,7 @@ export function mapEnrollmentToHistoryItem(
   const canDownloadReceipt = hasDownloadableReceipt(enrollment);
   const seatLabel = enrollment.ERM_SEAT_LABEL?.trim() || undefined;
 
-  if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.UNPAID) {
+  if (Number(enrollment.ERM_STATUS) === ENROLLMENT_STATUS.UNPAID) {
     const registrationStatus = buildBadge('exam.status.pending', 'warning');
     const item: ExamHistoryItem = {
       ...base,
@@ -98,8 +143,23 @@ export function mapEnrollmentToHistoryItem(
       statusType: registrationStatus.type,
       actions: ['cancel', 'pay'],
     };
-    if (enrollment.CREATED_AT) {
-      item.deadline = getPaymentDeadline(enrollment.CREATED_AT).toISOString();
+    const payEndDate = enrollment.SESSION?.EXAM?.EXAM_PAY_END_DATE;
+    if (payEndDate) {
+      item.payByDate =
+        typeof payEndDate === 'string' ? payEndDate : new Date(payEndDate).toISOString();
+    }
+
+    const sessionExpiresAt = enrollment.TRANSACTION?.TRANX_EXPIRES_AT;
+    const paymentStatus = enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS;
+    if (
+      sessionExpiresAt &&
+      Number(paymentStatus) === TRANSACTION_PAYMENT_STATUS.PENDING &&
+      new Date(sessionExpiresAt).getTime() > Date.now()
+    ) {
+      item.deadline =
+        typeof sessionExpiresAt === 'string'
+          ? sessionExpiresAt
+          : new Date(sessionExpiresAt).toISOString();
     }
     return item;
   }
@@ -213,8 +273,8 @@ export function mapEnrollmentToHistoryItem(
     return item;
   }
 
-  if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.CANCELLED) {
-    const paymentStatus = enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS;
+  if (Number(enrollment.ERM_STATUS) === ENROLLMENT_STATUS.CANCELLED) {
+    const paymentStatus = Number(enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS);
     if (paymentStatus === TRANSACTION_PAYMENT_STATUS.REFUND) {
       const registrationStatus = buildBadge('exam.status.refunded', 'warning');
       return {
@@ -247,7 +307,10 @@ export function mapEnrollmentToHistoryItem(
       };
     }
 
-    const isPaymentTimeout = isPaymentTimeoutCancellation(enrollment, context.getCancellationReason);
+    const isPaymentTimeout = isPaymentTimeoutCancellation(
+      enrollment,
+      context.getCancellationReason,
+    );
     const registrationStatus = buildBadge(
       isPaymentTimeout ? 'exam.status.paymentTimeout' : 'exam.status.registrationCancelled',
       isPaymentTimeout ? 'error' : 'warning',

@@ -95,7 +95,10 @@ export interface ExamHistoryItem {
   time: string;
   location: string;
   fee?: number;
+  /** QR session expiry (TRANX_EXPIRES_AT) — drives MM:SS countdown when set */
   deadline?: string;
+  /** Exam pay-by date (EXAM_PAY_END_DATE) — static display before QR session starts */
+  payByDate?: string;
   seatLabel?: string;
   customStatus?: CustomStatus;
   actions?: string[];
@@ -213,10 +216,12 @@ export interface ExamEnrollment {
     TRANX_PAYMENT_STATUS?: number;
     TRANX_PAID_AT?: string | Date;
     TRANX_CREATED_AT?: string | Date;
+    TRANX_EXPIRES_AT?: string | Date | null;
     TRANX_AMOUNT?: number;
     TRANX_CHANNEL?: number;
     RECEIPTS?: {
       RC_ID: number;
+      RC_NO?: string | null;
       RC_VERIFY_CODE?: string;
       RC_NAME?: string | null;
       RC_TAX_ID?: number | null;

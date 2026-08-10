@@ -7,6 +7,7 @@ import {
   createTransaction as createTransactionRequest,
   confirmPaymentFlow,
   expireTransaction as expireTransactionRequest,
+  startPaymentSession as startPaymentSessionRequest,
 } from 'src/services/transaction.service';
 import {
   fetchScheduleData,
@@ -27,6 +28,7 @@ import {
   ENROLLMENT_STATUS,
   formatLocationWithRoom,
 } from 'src/constants/exam';
+import { isActiveEnrollmentStatus } from 'src/utils/is-active-enrollment-status';
 import {
   getExamRoundsCalendarAvailability,
   type ExamCalendarAvailability,
@@ -186,7 +188,7 @@ export const useExamStore = defineStore('exam', () => {
 
     registeredSessionIds.value = new Set(
       enrollments
-        .filter((enrollment) => enrollment.ERM_STATUS !== ENROLLMENT_STATUS.CANCELLED)
+        .filter((enrollment) => isActiveEnrollmentStatus(enrollment.ERM_STATUS))
         .map((enrollment) => enrollment.SESSION_ID),
     );
   }
@@ -412,6 +414,18 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
+  async function startPaymentSession(tranxId: number): Promise<string> {
+    try {
+      const { TRANX_EXPIRES_AT } = await startPaymentSessionRequest(tranxId);
+      return typeof TRANX_EXPIRES_AT === 'string'
+        ? TRANX_EXPIRES_AT
+        : new Date(TRANX_EXPIRES_AT).toISOString();
+    } catch (error: unknown) {
+      console.error('Failed to start payment session:', error);
+      throw error;
+    }
+  }
+
   async function confirmPayment(
     tranxId: number,
     userCode: string,
@@ -426,17 +440,23 @@ export const useExamStore = defineStore('exam', () => {
         receiptAddress: receiptInfo?.address,
       });
 
-      await fetchHistory(true);
+      await refreshUserEnrollmentViews();
     } catch (error: unknown) {
       console.error('Failed to confirm payment:', error);
       throw error;
     }
   }
 
-  async function expireTransaction(tranxId: number): Promise<void> {
+  async function expireTransaction(
+    tranxId: number,
+    enrollmentId?: number,
+  ): Promise<void> {
     try {
       await expireTransactionRequest(tranxId);
-      await fetchHistory(true);
+      if (enrollmentId !== undefined) {
+        setCancellationReason(enrollmentId, 'paymentTimeout');
+      }
+      await refreshUserEnrollmentViews();
     } catch (error: unknown) {
       console.error('Failed to expire transaction:', error);
       throw error;
@@ -485,6 +505,7 @@ export const useExamStore = defineStore('exam', () => {
     confirmSpecialRegistration,
     cancelRegistration,
     createTransaction,
+    startPaymentSession,
     confirmPayment,
     expireTransaction,
     addExamRound,

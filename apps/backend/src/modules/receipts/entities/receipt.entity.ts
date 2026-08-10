@@ -39,6 +39,16 @@ export class Receipt {
   RC_ADDRESS: string | null;
 
   @Column({
+    name: 'RC_NO',
+    type: 'varchar',
+    length: 20,
+    nullable: true,
+    unique: true,
+    comment: 'เลขที่ใบเสร็จรับเงิน (Full Receipt Number)',
+  })
+  RC_NO: string | null;
+
+  @Column({
     name: 'RC_SIGNATURE_ID',
     type: 'varchar',
     length: 255,

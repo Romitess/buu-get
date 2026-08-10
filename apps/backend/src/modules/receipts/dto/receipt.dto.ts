@@ -31,6 +31,11 @@ export class CreateReceiptDto {
   @IsDateString()
   @IsOptional()
   RC_ISSUED_AT?: Date;
+
+  @ApiPropertyOptional({ description: 'เลขที่ใบเสร็จรับเงิน' })
+  @IsString()
+  @IsOptional()
+  RC_NO?: string;
 }
 
 export class UpdateReceiptDto extends PartialType(CreateReceiptDto) {}

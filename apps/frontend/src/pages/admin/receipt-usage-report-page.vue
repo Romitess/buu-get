@@ -104,6 +104,8 @@ const formatReceiptYear = (dateStr?: string | null): string => {
 };
 
 const getReceiptNo = (receipt: IssuedReceipt, paymentDate: string | null): string => {
+  if (receipt.RC_NO) return receipt.RC_NO;
+
   const receiptYear = paymentDate
     ? new Date(paymentDate).getFullYear()
     : receipt.RC_ISSUED_AT

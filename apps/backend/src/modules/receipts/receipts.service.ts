@@ -16,6 +16,7 @@ import {
 } from 'src/common/dto/pagination-query.dto';
 import { generateReceiptVerifyCode } from 'src/common/utils/verification-code.util';
 import { Receipt, ReceiptStatus } from './entities/receipt.entity';
+import { ReceiptNumberService } from './receipt-number.service';
 import { CreateReceiptDto, UpdateReceiptDto } from './dto/receipt.dto';
 
 @Injectable()
@@ -23,6 +24,7 @@ export class ReceiptsService {
   constructor(
     @InjectRepository(Receipt)
     private readonly receiptsRepository: Repository<Receipt>,
+    private readonly receiptNumberService: ReceiptNumberService,
   ) {}
 
   async create(createReceiptDto: CreateReceiptDto): Promise<Receipt> {
@@ -93,7 +95,24 @@ export class ReceiptsService {
     updateReceiptDto: UpdateReceiptDto,
   ): Promise<Receipt> {
     const receipt = await this.findOne(id);
+    const oldStatus = receipt.RC_STATUS;
     Object.assign(receipt, updateReceiptDto);
+    const newStatus = receipt.RC_STATUS;
+
+    // If status changed to ISSUED and doesn't have a number yet, allocate it
+    if (
+      newStatus === ReceiptStatus.ISSUED &&
+      oldStatus !== ReceiptStatus.ISSUED &&
+      !receipt.RC_NO
+    ) {
+      return await this.receiptsRepository.manager.transaction(
+        async (manager) => {
+          await this.receiptNumberService.assignOnIssue(manager, [id]);
+          return await this.findOne(id);
+        },
+      );
+    }
+
     return this.receiptsRepository.save(receipt);
   }
 
