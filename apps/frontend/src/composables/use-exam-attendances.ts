@@ -220,6 +220,7 @@ export function useExamAttendances() {
     error,
     searchQuery,
     selectedSessionId,
+    activeSessionIds,
     filteredAttendances,
     sessionTotalCount,
     sessionAttendedCount,

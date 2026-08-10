@@ -35,6 +35,8 @@ import { ScoreRubricItem } from '../modules/score-rubrics/entities/score-rubric-
 import { ExamScoreLine } from '../modules/exam-scores/entities/exam-score-line.entity';
 import { MoodleSyncLog } from '../modules/moodle-sync-logs/entities/moodle-sync-log.entity';
 import { ExamBlockedSeat } from '../modules/exam-blocked-seats/entities/exam-blocked-seat.entity';
+import { CheckInAssistSession } from '../modules/check-in-assist/entities/check-in-assist-session.entity';
+import { CheckInAssistEvent } from '../modules/check-in-assist/entities/check-in-assist-event.entity';
 
 export default new DataSource({
   type: 'mysql',
@@ -79,6 +81,8 @@ export default new DataSource({
     ExamScoreLine,
     MoodleSyncLog,
     ExamBlockedSeat,
+    CheckInAssistSession,
+    CheckInAssistEvent,
   ],
   migrations: [
     __filename.endsWith('.js')

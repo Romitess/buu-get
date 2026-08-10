@@ -424,6 +424,23 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'check-in-assist/:joinToken',
+            name: 'admin-check-in-assist-scanner',
+            component: () => import('pages/admin/check-in-assist-scanner-page.vue'),
+            meta: {
+              roles: [
+                ROLES.ADMIN,
+                ROLES.STAFF,
+                ROLES.REGISTRATION_OFFICER,
+                ROLES.EXAM_OPERATIONS_OFFICER,
+              ],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.examAttendance', icon: 'qr_code_scanner' },
+              ],
+            },
+          },
+          {
             path: 'exam-management/:examId/attendance',
             name: 'admin-exam-attendance',
             component: () => import('pages/admin/exam-attendance-page.vue'),

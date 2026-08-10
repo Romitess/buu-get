@@ -1,5 +1,5 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog ref="dialogRef" @hide="handleDialogHide">
     <q-card class="checkin-dialog-card">
       <header class="dialog-header">
         <h2>เช็กอินเข้าห้องสอบ</h2>
@@ -14,6 +14,37 @@
           @click="onCancelClick"
         />
       </header>
+
+      <section v-if="isAssistActive" class="assist-section">
+        <h3 class="assist-section-title">มือถือช่วยแสกน</h3>
+        <p class="assist-section-hint">
+          ให้เจ้าหน้าที่สแกน QR นี้เพื่อเปิดกล้องแสกนบนมือถือ (ต้องล็อกอิน)
+        </p>
+        <div v-if="qrDataUrl" class="assist-qr-wrap">
+          <img :src="qrDataUrl" alt="QR สำหรับเข้าร่วมช่วยแสกน" class="assist-qr-image" />
+        </div>
+        <p v-if="joinUrl" class="assist-url">{{ joinUrl }}</p>
+        <div class="row justify-center q-mt-sm">
+          <AppButton
+            label="ปิดโหมดมือถือ"
+            class="footer-btn cancel-btn"
+            :disable="isCheckingIn"
+            @click="disablePhoneAssist"
+          />
+        </div>
+      </section>
+      <section v-else class="assist-toggle-section">
+        <AppButton
+          icon="qr_code_scanner"
+          label="มือถือช่วยแสกน"
+          color="secondary"
+          outline
+          class="assist-toggle-btn"
+          :loading="isAssistStarting"
+          :disable="isCheckingIn || !canStartAssist"
+          @click="enablePhoneAssist"
+        />
+      </section>
 
       <section class="search-section">
         <div class="row items-end q-col-gutter-x-md">
@@ -88,9 +119,11 @@ import AppButton from 'src/components/base/app-button.vue';
 import TestVoucherReport from 'src/components/test-voucher-report.vue';
 import { checkInEnrollment } from 'src/services/enrollment.service';
 import type { AttendanceTableRow } from 'src/types/enrollment.types';
-import { ExamAttendStatus } from 'src/types/enrollment.types';
+import { ExamAttendStatus, EnrollmentStatus } from 'src/types/enrollment.types';
 import type { VoucherData } from 'src/types/voucher';
 import { codeToScanChar, normalizeScanPayload } from 'src/utils/scan-keyboard';
+import { useCheckInAssistHost } from 'src/composables/use-check-in-assist-host';
+import type { AssistEvent } from 'src/types/check-in-assist.types';
 
 /** Short delay so voucher paints before auto check-in */
 const SCAN_PREVIEW_DELAY_MS = 250;
@@ -98,6 +131,8 @@ const SEARCH_MAX_LENGTH = 13;
 
 const props = defineProps<{
   attendances: AttendanceTableRow[];
+  examId: number;
+  sessionIds: number[];
   examName: string;
   examDate: string;
   examTime: string;
@@ -117,6 +152,17 @@ const validationError = ref('');
 const searchedCandidate = ref<AttendanceTableRow | null>(null);
 const isCheckingIn = ref(false);
 const searchFieldWrapperRef = ref<HTMLElement | null>(null);
+
+const {
+  joinUrl,
+  qrDataUrl,
+  isAssistActive,
+  isStarting: isAssistStarting,
+  startAssist,
+  stopAssist,
+} = useCheckInAssistHost();
+
+const canStartAssist = computed(() => props.examId > 0 && props.sessionIds.length > 0);
 
 /** Snapshot so we can mark INTIME after check-in without reopening the dialog */
 const localAttendances = ref<AttendanceTableRow[]>(props.attendances.map((row) => ({ ...row })));
@@ -228,6 +274,139 @@ onMounted(() => {
   focusSearchInput();
 });
 
+const formatAssistCheckInTime = (iso: string): string => {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleTimeString('th-TH', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+};
+
+const applyAssistCandidate = (event: AssistEvent): void => {
+  const candidate = event.candidate;
+  if (!candidate) return;
+
+  const existing = localAttendances.value.find((row) => row.ermId === candidate.ermId);
+  let merged: AttendanceTableRow;
+
+  if (existing) {
+    merged = {
+      index: existing.index,
+      ermId: existing.ermId,
+      nationalId: candidate.nationalId ?? existing.nationalId,
+      location: existing.location,
+      titleTh: candidate.titleTh || existing.titleTh,
+      fullnameTh: candidate.fullnameTh || existing.fullnameTh,
+      titleEn: candidate.titleEn ?? existing.titleEn ?? null,
+      fullnameEn: candidate.fullnameEn ?? existing.fullnameEn ?? null,
+      seatNumber: candidate.seatNumber || existing.seatNumber,
+      attendanceStatus: ExamAttendStatus.INTIME,
+      checkInTime: formatAssistCheckInTime(event.at),
+      sessionId: existing.sessionId,
+      sessionLocationId: existing.sessionLocationId,
+      hasRecord: true,
+      passportNo: candidate.passportNo ?? existing.passportNo ?? null,
+      profileImage: candidate.profileImage ?? existing.profileImage ?? null,
+      testSession: candidate.testSession ?? existing.testSession ?? null,
+      voucherNo: candidate.voucherNo ?? existing.voucherNo ?? null,
+      examType: candidate.examType ?? existing.examType ?? null,
+      testTakerCode: candidate.testTakerCode ?? existing.testTakerCode ?? null,
+      paymentStatus: existing.paymentStatus,
+    };
+    if (existing.slId !== undefined) merged.slId = existing.slId;
+    if (existing.lsId !== undefined) merged.lsId = existing.lsId;
+  } else {
+    merged = {
+      index: localAttendances.value.length + 1,
+      ermId: candidate.ermId,
+      nationalId: candidate.nationalId ?? '-',
+      location: props.examLocation,
+      titleTh: candidate.titleTh,
+      fullnameTh: candidate.fullnameTh,
+      titleEn: candidate.titleEn ?? null,
+      fullnameEn: candidate.fullnameEn ?? null,
+      seatNumber: candidate.seatNumber,
+      attendanceStatus: ExamAttendStatus.INTIME,
+      checkInTime: formatAssistCheckInTime(event.at),
+      sessionId: props.sessionIds[0] ?? 0,
+      sessionLocationId: null,
+      hasRecord: true,
+      passportNo: candidate.passportNo ?? null,
+      profileImage: candidate.profileImage ?? null,
+      testSession: candidate.testSession ?? props.examRound,
+      voucherNo: candidate.voucherNo ?? '-',
+      examType: candidate.examType ?? 'General',
+      testTakerCode: candidate.testTakerCode ?? null,
+      paymentStatus: EnrollmentStatus.ATTENDED,
+    };
+  }
+
+  searchedCandidate.value = merged;
+
+  if (
+    event.type === 'CHECKED_IN' ||
+    event.type === 'ALREADY_CHECKED_IN'
+  ) {
+    markCandidateCheckedIn(candidate.ermId, event.at);
+  }
+};
+
+const handleAssistEvent = (event: AssistEvent): void => {
+  if (event.candidate) {
+    applyAssistCandidate(event);
+  }
+
+  switch (event.type) {
+    case 'CHECKED_IN':
+      $q.notify({
+        type: 'positive',
+        message: 'เช็กอินจากมือถือสำเร็จ',
+        position: 'top',
+      });
+      props.onCheckedIn?.();
+      break;
+    case 'ALREADY_CHECKED_IN':
+      $q.notify({
+        type: 'warning',
+        message: 'ผู้เข้าสอบคนนี้เช็กอินแล้ว',
+        position: 'top',
+      });
+      break;
+    case 'NOT_FOUND':
+      $q.notify({
+        type: 'negative',
+        message: 'ไม่พบข้อมูลผู้เข้าสอบในรอบสอบนี้',
+        position: 'top',
+      });
+      break;
+    case 'INVALID_CODE':
+      $q.notify({
+        type: 'warning',
+        message: 'รหัสที่แสกนไม่ถูกต้อง',
+        position: 'top',
+      });
+      break;
+    default:
+      break;
+  }
+};
+
+const enablePhoneAssist = async (): Promise<void> => {
+  if (!canStartAssist.value || isAssistActive.value) return;
+  await startAssist(props.examId, props.sessionIds, handleAssistEvent);
+};
+
+const disablePhoneAssist = async (): Promise<void> => {
+  await stopAssist();
+};
+
+const handleDialogHide = (): void => {
+  void stopAssist();
+  onDialogHide();
+};
+
 const findCandidate = (query: string): AttendanceTableRow | undefined => {
   return localAttendances.value.find(
     (item) =>
@@ -308,7 +487,7 @@ const handleScanSubmit = async (): Promise<void> => {
   }
 };
 
-const markCandidateCheckedIn = (ermId: number): void => {
+const markCandidateCheckedIn = (ermId: number, checkedInAt?: string): void => {
   const index = localAttendances.value.findIndex((row) => row.ermId === ermId);
   if (index < 0) return;
 
@@ -318,7 +497,11 @@ const markCandidateCheckedIn = (ermId: number): void => {
   localAttendances.value[index] = {
     ...current,
     attendanceStatus: ExamAttendStatus.INTIME,
-    checkInTime: new Date().toISOString(),
+    checkInTime: checkedInAt ? formatAssistCheckInTime(checkedInAt) : new Date().toLocaleTimeString('th-TH', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }),
     hasRecord: true,
   };
 };
@@ -462,6 +645,52 @@ const onCancelClick = () => {
     font-weight: 700;
     color: #0f172a;
   }
+}
+
+.assist-section,
+.assist-toggle-section {
+  margin: 0 12px 12px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.assist-section-title {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.assist-section-hint {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.assist-qr-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.assist-qr-image {
+  width: 180px;
+  height: 180px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.assist-url {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  color: #64748b;
+  word-break: break-all;
+  text-align: center;
+}
+
+.assist-toggle-btn {
+  width: 100%;
 }
 
 .search-section {

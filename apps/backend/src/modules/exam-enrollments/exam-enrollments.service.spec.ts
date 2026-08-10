@@ -1533,7 +1533,9 @@ describe('ExamEnrollmentsService', () => {
     it('ENR-U-046: cancels UNPAID past exam pay end (expires PENDING txns) and QR sessions', async () => {
       // Arrange — step 1: pay-end cancel
       const payEndSelectQb = createQueryBuilderMock({
-        getRawMany: jest.fn().mockResolvedValue([{ ERM_ID: 201 }, { ERM_ID: 202 }]),
+        getRawMany: jest
+          .fn()
+          .mockResolvedValue([{ ERM_ID: 201 }, { ERM_ID: 202 }]),
       });
       const payEndUpdateErmQb = createQueryBuilderMock({
         execute: jest.fn().mockResolvedValue({ affected: 2 }),
@@ -1573,8 +1575,12 @@ describe('ExamEnrollmentsService', () => {
 
       dataSource.transaction = jest
         .fn()
-        .mockImplementationOnce(async (cb: (m: unknown) => unknown) => cb(payEndManager))
-        .mockImplementationOnce(async (cb: (m: unknown) => unknown) => cb(qrManager));
+        .mockImplementationOnce(async (cb: (m: unknown) => unknown) =>
+          cb(payEndManager),
+        )
+        .mockImplementationOnce(async (cb: (m: unknown) => unknown) =>
+          cb(qrManager),
+        );
 
       // Act
       await service.handleCronCancelExpiredEnrollments();
