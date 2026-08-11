@@ -545,7 +545,7 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.ts": {
-    "mtime": 1786428595.367433,
+    "mtime": 1786428713.051377,
     "ast_hash": "d88379a6d6f5e6dd5fe5a19e74dc3dd3",
     "semantic_hash": ""
   },
@@ -1565,8 +1565,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/auth/login-card.vue": {
-    "mtime": 1784781379.7141638,
-    "ast_hash": "7a3539732c4310d4bf3b0789f0426a70",
+    "mtime": 1786430980.6991682,
+    "ast_hash": "899fee1a9f2ed78a0c941e863ded3e1e",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/base/app-button.vue": {
@@ -2040,8 +2040,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/header/app-header.vue": {
-    "mtime": 1785807788.2733276,
-    "ast_hash": "4da29a305e1c3d15a288499ed5da8bdc",
+    "mtime": 1786431456.4303782,
+    "ast_hash": "424b0d8fe94c6721a282531e35cc61e7",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/header/app-sidebar.vue": {
@@ -2055,43 +2055,43 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/available-exam-rounds-table.vue": {
-    "mtime": 1785486473.4306107,
-    "ast_hash": "e6ce8103f7fe65ebcd005a03199bc689",
+    "mtime": 1786432387.570423,
+    "ast_hash": "3a53ee71829e143088a918f10f86d8c5",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/carousel/info-carousel.vue": {
-    "mtime": 1785486473.4308739,
-    "ast_hash": "f1bc4f1bc0a2bb30739549a4d2d7ab6e",
+    "mtime": 1786431932.750248,
+    "ast_hash": "28a7fa448137a42200c84f4f79af8815",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-card.vue": {
-    "mtime": 1785486473.4309921,
-    "ast_hash": "ae68094adeb095d6edcdd0205aed4136",
+    "mtime": 1786432222.489315,
+    "ast_hash": "b7eed0063afb5a383f3b2e1ede97e011",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-guideline-card.vue": {
-    "mtime": 1785478375.476931,
-    "ast_hash": "b33695c6da8f21fa982aea43e3483dee",
+    "mtime": 1786432236.2339938,
+    "ast_hash": "5e7e31fc49cb1b9ce311216b6639bca9",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-guideline-section.vue": {
-    "mtime": 1785478988.843166,
-    "ast_hash": "546f99bb20af7321f183aa9b847ebcde",
+    "mtime": 1786432233.7337584,
+    "ast_hash": "55272d405599c4f1583469326ad4d817",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-main-content.vue": {
-    "mtime": 1785486473.4312181,
-    "ast_hash": "1b07d160421087b8e3c4c88eec76e0d3",
+    "mtime": 1786432392.855278,
+    "ast_hash": "e01c2ae8a62eb420dfd2eb957be2a041",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-step.vue": {
-    "mtime": 1785721779.3267863,
-    "ast_hash": "d4a16857584a8129a10874f76a357091",
+    "mtime": 1786432226.2346349,
+    "ast_hash": "505e771dd98f337491250aa023786acf",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-voucher-error.vue": {
-    "mtime": 1783668950.2181132,
-    "ast_hash": "839fec9b210e178df21c2d1f0dabb10b",
+    "mtime": 1786431954.4909992,
+    "ast_hash": "a1968271139a38c2be5a5eb104bb6188",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/page-builder/page-builder-banner-item.vue": {
@@ -2370,8 +2370,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-navigation.ts": {
-    "mtime": 1783042948.855097,
-    "ast_hash": "bf03704e7bc30715eb7d56362bfb1d16",
+    "mtime": 1786431129.0602562,
+    "ast_hash": "4f38156f0d4b5bb27d90fe91b0f57471",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-page-builder-scroll.ts": {
@@ -2455,8 +2455,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/en-US/index.ts": {
-    "mtime": 1786420732.9101284,
-    "ast_hash": "14fcbcb76b156cc9af38e4f3de6e06a5",
+    "mtime": 1786431912.3946056,
+    "ast_hash": "98c086518cbceea9fc1cb0c6f99f1b44",
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/index.ts": {
@@ -2465,13 +2465,13 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/th/index.ts": {
-    "mtime": 1786420726.069278,
-    "ast_hash": "a9703c8ce543ddf906dd02306ae31b84",
+    "mtime": 1786431911.8219767,
+    "ast_hash": "3da2d8a8d9501bf68b32b2fc4b8ffebf",
     "semantic_hash": ""
   },
   "apps/frontend/src/layouts/main-layout.vue": {
-    "mtime": 1783042948.857268,
-    "ast_hash": "0579e651cbce5696888724aca5b02dac",
+    "mtime": 1786430889.6272266,
+    "ast_hash": "e05059abef82605c873814ebafe9cc5b",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/application-fee-report-page.vue": {
@@ -2630,8 +2630,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/home-page.vue": {
-    "mtime": 1785486473.4322133,
-    "ast_hash": "fbf577efa4550d054c38d2cdaa66bf3f",
+    "mtime": 1786431888.1620052,
+    "ast_hash": "f618287eb2e6fe6316ec07ef51a69753",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/index-page.vue": {
@@ -2640,8 +2640,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-history-page.vue": {
-    "mtime": 1786333950.5037403,
-    "ast_hash": "5b3437f71a77e3a8faa8bd60d231db23",
+    "mtime": 1786431152.0785606,
+    "ast_hash": "84833dcab006e8bc94026b82f77bb5c5",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-schedule-page.vue": {
@@ -2650,13 +2650,13 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-simulation-page.vue": {
-    "mtime": 1784775425.8410947,
-    "ast_hash": "23d7f3b4bcbe60a1dd02e25d6a51f349",
+    "mtime": 1786431137.3932765,
+    "ast_hash": "34137edfbd6abea21fa1896714f84c25",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/profile-page.vue": {
-    "mtime": 1784782146.2274275,
-    "ast_hash": "eab8b4462cab795d611807a10ad6f203",
+    "mtime": 1786430654.1172328,
+    "ast_hash": "e9a37a0a93a0e7b530d20f59f23a1467",
     "semantic_hash": ""
   },
   "apps/frontend/src/router/index.ts": {
@@ -2665,8 +2665,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/router/routes.ts": {
-    "mtime": 1786352181.6116886,
-    "ast_hash": "2c8cfe1e88edc1dd978d8cdb181b47bb",
+    "mtime": 1786430579.4141097,
+    "ast_hash": "bfe8ee72df121ea7fd2e78db227f7676",
     "semantic_hash": ""
   },
   "apps/frontend/src/services/bank-reconcile.service.ts": {
@@ -3395,13 +3395,13 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/candidate-activity-card.vue": {
-    "mtime": 1786328374.0427923,
-    "ast_hash": "f6f5e7acc47e4571165763d4bcc42c84",
+    "mtime": 1786431949.0232806,
+    "ast_hash": "3974670cbcb89a789a58159531208b8d",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/candidate-activity-section.vue": {
-    "mtime": 1786328376.3936663,
-    "ast_hash": "476ed46bbd0cca6e3444b3082b6c3c1e",
+    "mtime": 1786432387.5704226,
+    "ast_hash": "9bd54629fc9e3b8efd98c7556388cf23",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-candidate-home-activities.ts": {
@@ -4770,8 +4770,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-barcode-camera.ts": {
-    "mtime": 1786352150.9861424,
-    "ast_hash": "d37bb737c0063d24f964d7ca9eb969df",
+    "mtime": 1786430715.1188164,
+    "ast_hash": "5503ff8aaa8c0f95edda2232ca43a6db",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-check-in-assist-host.ts": {
@@ -4780,8 +4780,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/check-in-assist-scanner-page.vue": {
-    "mtime": 1786412928.2783437,
-    "ast_hash": "788612f7ffe3940edff1c29b9d066702",
+    "mtime": 1786430912.2937336,
+    "ast_hash": "b3c4ee6f8fea07ee387be96b3e032cdf",
     "semantic_hash": ""
   },
   "apps/frontend/src/services/check-in-assist.service.ts": {
@@ -4802,6 +4802,21 @@
   "apps/frontend/src/components/exam/dialog-define-shared-passcode.vue": {
     "mtime": 1786422428.3766086,
     "ast_hash": "a52eb42ef450e0eff54be7c7d17e4c92",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/components/header/candidate-bottom-nav.vue": {
+    "mtime": 1786431557.791,
+    "ast_hash": "088790b4739a99cc259a8d167325687a",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/components/home/available-exam-round-card.vue": {
+    "mtime": 1786431892.8974633,
+    "ast_hash": "61338ec135c22cde49ce02f2e1846d8a",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/components/home/home-section-header.vue": {
+    "mtime": 1786432387.5701091,
+    "ast_hash": "106f166fd11e6684e94fdced7a5d7bae",
     "semantic_hash": ""
   }
 }

@@ -1,40 +1,27 @@
 <template>
-  <div v-if="shouldShowSection" class="candidate-activity-section q-mt-lg q-mb-lg">
-    <div class="row items-center justify-between q-mb-md">
-      <div class="row items-center">
-        <div class="section-icon q-mr-sm">
-          <q-icon name="assignment" color="white" size="18px" />
-        </div>
-        <div class="text-h6 text-weight-bolder text-dark">
-          {{ $t('home.candidateActivity.title') }}
-        </div>
-      </div>
-
-      <q-btn
-        v-if="showContent"
-        flat
-        dense
-        color="primary"
-        class="text-weight-bold"
-        :label="$t('home.candidateActivity.viewAll')"
-        icon-right="chevron_right"
-        @click="goViewAll"
+  <div v-if="shouldShowSection" class="home-section home-section--lead">
+    <div class="home-section__intro">
+      <HomeSectionHeader
+        icon="assignment"
+        :title="$t('home.candidateActivity.title')"
+        :action-label="showContent ? $t('home.candidateActivity.viewAll') : ''"
+        action-icon-right="chevron_right"
+        @action="goViewAll"
       />
+      <q-separator color="grey-6" class="home-section-separator" />
     </div>
-    <q-separator color="grey-6" class="q-mb-md" />
 
-    <!-- Loading skeletons -->
+    <div class="home-section__body">
     <div v-if="isLoading && !showContent" class="activity-grid">
       <q-skeleton
         v-for="n in 2"
         :key="`skeleton-${n}`"
         type="rect"
         class="activity-skeleton"
-        height="148px"
+        height="180px"
       />
     </div>
 
-    <!-- Activity cards -->
     <div v-else-if="showContent" class="activity-grid">
       <CandidateActivityCard
         v-for="(activity, index) in activities"
@@ -46,12 +33,14 @@
         @timeout="handleTimeout"
       />
     </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import CandidateActivityCard from 'src/components/home/candidate-activity-card.vue';
+import HomeSectionHeader from 'src/components/home/home-section-header.vue';
 import {
   useCandidateHomeActivities,
   type CandidateHomeActivity,
@@ -75,23 +64,6 @@ const handleTimeout = (): void => {
 </script>
 
 <style scoped lang="scss">
-.candidate-activity-section {
-  max-width: 1300px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0 10px;
-}
-
-.section-icon {
-  background: var(--q-primary);
-  border-radius: 4px;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .activity-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -104,7 +76,7 @@ const handleTimeout = (): void => {
 
 .activity-card-enter {
   animation: activity-fade-up 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
-  animation-delay: calc(var(--stagger-index, 0) * 80ms);
+  animation-delay: calc(var(--stagger-index, 0) * 40ms);
 }
 
 @keyframes activity-fade-up {

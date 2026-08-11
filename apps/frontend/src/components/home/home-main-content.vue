@@ -5,25 +5,23 @@
 
     <div v-else class="home-main-content q-pb-xl q-pt-none">
       <!-- Section 1: Test Format -->
-      <div class="q-mb-xl">
-        <ScrollReveal :disabled="revealDisabled">
-          <div class="row items-center q-mb-md">
-            <div class="section-icon q-mr-sm">
-              <q-icon name="bookmark" color="white" size="18px" />
-            </div>
-            <div class="text-h6 text-weight-bolder text-dark">
-              {{ formatSection?.title ? getLocalizedText(formatSection.title) : $t('home.testFormat.title') }}
-            </div>
-          </div>
-          <q-separator color="grey-6" class="q-mb-md" />
-        </ScrollReveal>
+      <div class="home-section q-mb-xl">
+        <div class="home-section__intro">
+          <ScrollReveal :disabled="revealDisabled">
+            <HomeSectionHeader
+              icon="bookmark"
+              :title="formatSection?.title ? getLocalizedText(formatSection.title) : $t('home.testFormat.title')"
+              :stacked-on-mobile="false"
+            />
+          </ScrollReveal>
+          <q-separator color="grey-6" class="home-section-separator" />
+        </div>
 
-        <!-- Dynamic Cards -->
-        <div v-if="activeFormats.length > 0" class="row q-col-gutter-lg">
+        <div v-if="activeFormats.length > 0" class="home-section__body format-cards row q-col-gutter-lg">
           <div
             v-for="(card, index) in activeFormats"
             :key="index"
-            class="col-12 col-md-4"
+            class="col-12 col-md-4 format-cards__item"
           >
             <ScrollReveal :delay="index * STAGGER_DELAY" :disabled="revealDisabled">
               <HomeCard
@@ -35,12 +33,11 @@
           </div>
         </div>
 
-        <!-- Mock Fallback Cards -->
-        <div v-else class="row q-col-gutter-lg">
+        <div v-else class="home-section__body format-cards row q-col-gutter-lg">
           <div
             v-for="(fallbackCard, index) in fallbackFormatCards"
             :key="fallbackCard.key"
-            class="col-12 col-md-4"
+            class="col-12 col-md-4 format-cards__item"
           >
             <ScrollReveal :delay="index * STAGGER_DELAY" :disabled="revealDisabled">
               <HomeCard
@@ -56,25 +53,23 @@
       </div>
 
       <!-- Section 2: Registration Steps -->
-      <div class="q-mb-xl">
-        <ScrollReveal :disabled="revealDisabled">
-          <div class="row items-center q-mb-md">
-            <div class="section-icon q-mr-sm">
-              <q-icon name="fact_check" color="white" size="18px" />
-            </div>
-            <div class="text-h6 text-weight-bolder text-dark">
-              {{ stepSection?.title ? getLocalizedText(stepSection.title) : $t('home.registrationSteps.title') }}
-            </div>
-          </div>
-          <q-separator color="grey-6" class="q-mb-md" />
-        </ScrollReveal>
+      <div class="home-section q-mb-xl">
+        <div class="home-section__intro">
+          <ScrollReveal :disabled="revealDisabled">
+            <HomeSectionHeader
+              icon="fact_check"
+              :title="stepSection?.title ? getLocalizedText(stepSection.title) : $t('home.registrationSteps.title')"
+              :stacked-on-mobile="false"
+            />
+          </ScrollReveal>
+          <q-separator color="grey-6" class="home-section-separator" />
+        </div>
 
-        <!-- Dynamic Steps -->
-        <div v-if="activeSteps.length > 0" class="row q-col-gutter-lg">
+        <div v-if="activeSteps.length > 0" class="home-section__body steps-grid row q-col-gutter-lg">
           <div
             v-for="(step, index) in activeSteps"
             :key="index"
-            class="col-12 col-sm-6 col-md-3"
+            class="col-12 col-sm-6 col-md-3 steps-grid__item"
           >
             <ScrollReveal :delay="index * STAGGER_DELAY" :disabled="revealDisabled">
               <HomeStep
@@ -87,12 +82,11 @@
           </div>
         </div>
 
-        <!-- Mock Fallback Steps -->
-        <div v-else class="row q-col-gutter-lg">
+        <div v-else class="home-section__body steps-grid row q-col-gutter-lg">
           <div
             v-for="(fallbackStep, index) in fallbackSteps"
             :key="fallbackStep.key"
-            class="col-12 col-sm-6 col-md-3"
+            class="col-12 col-sm-6 col-md-3 steps-grid__item"
           >
             <ScrollReveal :delay="index * STAGGER_DELAY" :disabled="revealDisabled">
               <HomeStep
@@ -107,24 +101,25 @@
       </div>
 
       <!-- Section 3: Exam Rules -->
-      <div class="q-mb-xl">
-        <ScrollReveal :disabled="revealDisabled">
-          <div class="row items-center q-mb-md">
-            <div class="section-icon q-mr-sm">
-              <q-icon name="gavel" color="white" size="18px" />
-            </div>
-            <div class="text-h6 text-weight-bolder text-dark">
-              {{ $t('home.examRules.title') }}
-            </div>
-          </div>
-          <q-separator color="grey-6" class="q-mb-md" />
-        </ScrollReveal>
-        <HomeGuidelineSection
-          :rule-paper-section="rulePaperSection || null"
-          :rule-computer-section="ruleComputerSection || null"
-          :preview-mode="previewMode"
-        />
-        <HomeVoucherError :preview-mode="previewMode" />
+      <div class="home-section q-mb-xl">
+        <div class="home-section__intro">
+          <ScrollReveal :disabled="revealDisabled">
+            <HomeSectionHeader
+              icon="gavel"
+              :title="$t('home.examRules.title')"
+              :stacked-on-mobile="false"
+            />
+          </ScrollReveal>
+          <q-separator color="grey-6" class="home-section-separator" />
+        </div>
+        <div class="home-section__body">
+          <HomeGuidelineSection
+            :rule-paper-section="rulePaperSection || null"
+            :rule-computer-section="ruleComputerSection || null"
+            :preview-mode="previewMode"
+          />
+          <HomeVoucherError :preview-mode="previewMode" />
+        </div>
       </div>
     </div>
 </template>
@@ -136,6 +131,7 @@ import HomeCard from './home-card.vue';
 import HomeStep from './home-step.vue';
 import HomeGuidelineSection from './home-guideline-section.vue';
 import HomeVoucherError from './home-voucher-error.vue';
+import HomeSectionHeader from './home-section-header.vue';
 import ScrollReveal from 'src/components/base/scroll-reveal.vue';
 import { CardGridSkeleton } from 'src/components/base/skeleton';
 import type {
@@ -269,19 +265,40 @@ const activeSteps = computed<Array<StepBoxContent | ContentBoxContent>>(() => {
 });
 </script>
 
-<style scoped>
-.home-main-content {
-  max-width: 1300px;
-  margin: 15px auto 0;
-  padding: 0 10px;
+<style scoped lang="scss">
+.format-cards {
+  @media (max-width: 1023px) {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
 }
-.section-icon {
-  background: var(--q-primary);
-  border-radius: 4px;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+.format-cards__item {
+  @media (max-width: 1023px) {
+    padding: 0 !important;
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.steps-grid {
+  @media (max-width: 1023px) {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+.steps-grid__item {
+  @media (max-width: 1023px) {
+    padding: 0 !important;
+    width: 100%;
+    max-width: none;
+  }
 }
 </style>

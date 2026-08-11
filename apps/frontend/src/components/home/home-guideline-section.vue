@@ -1,7 +1,8 @@
 <template>
   <div class="guideline-section">
     <ScrollReveal :disabled="revealDisabled">
-      <div class="row q-col-gutter-md">
+      <!-- Desktop: two columns -->
+      <div v-if="!$q.screen.lt.md" class="row q-col-gutter-md">
         <div v-if="hasPaperRules" class="col-12" :class="{ 'col-md-6': hasComputerRules }">
           <div class="text-subtitle1 text-weight-bold text-dark q-mb-sm">
             {{ paperColumnTitle }}
@@ -32,12 +33,70 @@
           </ul>
         </div>
       </div>
+
+      <!-- Mobile: clean accordion -->
+      <div v-else class="guideline-mobile">
+        <q-expansion-item
+          v-if="hasPaperRules"
+          expand-icon-class="guideline-mobile__chevron"
+          class="guideline-mobile__panel"
+          default-opened
+        >
+          <template #header>
+            <div class="guideline-mobile__header">
+              <div class="guideline-mobile__header-icon">
+                <q-icon name="description" color="primary" size="20px" />
+              </div>
+              <span class="guideline-mobile__header-title">{{ paperColumnTitle }}</span>
+            </div>
+          </template>
+
+          <div class="guideline-mobile__rules">
+            <HomeGuidelineCard
+              v-for="(rule, index) in paperRulesList"
+              :key="`paper-mobile-${index}`"
+              :index="index"
+              :icon="rule.icon"
+              :text="rule.text"
+              compact
+            />
+          </div>
+        </q-expansion-item>
+
+        <q-expansion-item
+          v-if="hasComputerRules"
+          expand-icon-class="guideline-mobile__chevron"
+          class="guideline-mobile__panel"
+          :default-opened="!hasPaperRules"
+        >
+          <template #header>
+            <div class="guideline-mobile__header">
+              <div class="guideline-mobile__header-icon">
+                <q-icon name="computer" color="primary" size="20px" />
+              </div>
+              <span class="guideline-mobile__header-title">{{ computerColumnTitle }}</span>
+            </div>
+          </template>
+
+          <div class="guideline-mobile__rules">
+            <HomeGuidelineCard
+              v-for="(rule, index) in computerRulesList"
+              :key="`computer-mobile-${index}`"
+              :index="index"
+              :icon="rule.icon"
+              :text="rule.text"
+              compact
+            />
+          </div>
+        </q-expansion-item>
+      </div>
     </ScrollReveal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import HomeGuidelineCard from './home-guideline-card.vue';
 import ScrollReveal from 'src/components/base/scroll-reveal.vue';
@@ -69,6 +128,7 @@ const props = withDefaults(defineProps<Props>(), {
   previewMode: false,
 });
 
+const $q = useQuasar();
 const revealDisabled = computed(() => props.previewMode);
 
 const { locale, t } = useI18n();
@@ -143,13 +203,14 @@ const computerColumnTitle = computed(() =>
 );
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .guideline-section {
   position: relative;
   width: 100%;
   max-width: none;
   margin: 0;
 }
+
 .guideline-list {
   list-style: none;
   margin: 0;
@@ -161,11 +222,69 @@ const computerColumnTitle = computed(() =>
   overflow: hidden;
   background: #fff;
 }
+
 .guideline-list__item {
   margin: 0;
   padding: 0;
 }
+
 .guideline-list__item + .guideline-list__item {
   border-top: 1px solid rgba(13, 71, 161, 0.08);
+}
+
+/* Mobile accordion */
+.guideline-mobile {
+  border: 1px solid rgba(13, 71, 161, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.guideline-mobile__panel {
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(13, 71, 161, 0.08);
+  }
+
+  :deep(.q-item) {
+    min-height: 52px;
+    padding: 12px 16px;
+  }
+
+  :deep(.q-focus-helper) {
+    display: none;
+  }
+}
+
+.guideline-mobile__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.guideline-mobile__header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(13, 71, 161, 0.08);
+  flex-shrink: 0;
+}
+
+.guideline-mobile__header-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #212121;
+  line-height: 1.3;
+}
+
+.guideline-mobile__rules {
+  padding: 0 8px 8px;
+}
+
+:deep(.guideline-mobile__chevron) {
+  color: var(--primary, #0d47a1);
 }
 </style>

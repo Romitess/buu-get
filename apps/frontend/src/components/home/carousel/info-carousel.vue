@@ -2,6 +2,7 @@
   <div class="carousel-wrapper q-mx-auto">
     <!-- Left Navigation Button -->
     <q-btn
+      v-if="!$q.screen.lt.md"
       flat
       round
       dense
@@ -71,6 +72,7 @@
 
     <!-- Right Navigation Button -->
     <q-btn
+      v-if="!$q.screen.lt.md"
       flat
       round
       dense
@@ -99,6 +101,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
+import { useQuasar } from 'quasar';
 import type { QCarousel } from 'quasar';
 import { getHomepage } from 'src/services/page-builder.service';
 import { getImageUrl } from 'src/services/image.service';
@@ -113,6 +116,7 @@ const carouselRef = ref<QCarousel | null>(null);
 const slide = ref(0);
 const internalLoading = ref(true);
 const banners = ref<BannerBoxContent[]>([]);
+const $q = useQuasar();
 
 interface Props {
   previewMode?: boolean;
@@ -187,6 +191,10 @@ onMounted(async () => {
   max-width: 1300px;
   width: 100%;
   padding: 0 10px;
+
+  @media (max-width: 1023px) {
+    padding: 0;
+  }
 }
 
 /* Navigation buttons overlay the card edges so they don't widen the block */
@@ -219,19 +227,31 @@ onMounted(async () => {
   border: 2px solid rgba($primary, 0.8) !important;
   border-radius: 12px;
   box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.3) !important;
+
+  @media (max-width: 1023px) {
+    border-radius: 14px;
+    box-shadow: 0 8px 24px -12px rgba(13, 71, 161, 0.35) !important;
+  }
 }
 
-/* Banner images keep a fixed 5:1 ratio and scale down responsively */
 .image-banner-aspect {
   aspect-ratio: 5 / 1;
+
+  @media (max-width: 1023px) {
+    aspect-ratio: 16 / 9;
+  }
 }
 
 /* Reserve the dot row height so the layout doesn't shift when dots are hidden */
 .nav-dots-row {
   min-height: 10px;
+
+  @media (max-width: 1023px) {
+    min-height: 44px;
+    align-items: center;
+  }
 }
 
-/* Custom Navigation Dots (External) */
 .nav-dot {
   width: 10px;
   height: 10px;
@@ -239,6 +259,14 @@ onMounted(async () => {
   background-color: #e0e0e0;
   opacity: 0.5;
   transition: all 0.3s ease;
+
+  @media (max-width: 1023px) {
+    width: 8px;
+    height: 8px;
+    padding: 18px;
+    box-sizing: content-box;
+    background-clip: content-box;
+  }
 
   &:hover {
     opacity: 0.8;

@@ -3,7 +3,6 @@ import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
 const SCANNER_ELEMENT_ID = 'check-in-assist-camera';
 const SCAN_FPS = 10;
-const SCAN_BOX_SIZE = Math.min(280, Math.floor(window.innerWidth * 0.82));
 
 export function useBarcodeCamera() {
   const isCameraActive = ref(false);
@@ -43,12 +42,14 @@ export function useBarcodeCamera() {
       verbose: false,
     });
 
+    const scanBoxSize = Math.min(280, Math.floor(window.innerWidth * 0.82));
+
     try {
       await scanner.start(
         { facingMode: 'environment' },
         {
           fps: SCAN_FPS,
-          qrbox: { width: SCAN_BOX_SIZE, height: SCAN_BOX_SIZE },
+          qrbox: { width: scanBoxSize, height: scanBoxSize },
         },
         (decodedText) => {
           const now = Date.now();

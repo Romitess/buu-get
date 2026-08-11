@@ -428,6 +428,8 @@ const routes: RouteRecordRaw[] = [
             name: 'admin-check-in-assist-scanner',
             component: () => import('pages/admin/check-in-assist-scanner-page.vue'),
             meta: {
+              hideHeader: true,
+              hideDrawer: true,
               roles: [
                 ROLES.ADMIN,
                 ROLES.STAFF,

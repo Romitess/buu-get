@@ -1,9 +1,22 @@
 <template>
-  <q-page class="page-container assist-scanner-page">
-    <header class="scanner-header">
-      <h1>ช่วยแสกนเช็กอิน</h1>
-      <p v-if="sessionMeta?.examName" class="exam-name">{{ sessionMeta.examName }}</p>
-      <p v-else-if="isLoadingMeta" class="exam-name">กำลังโหลด...</p>
+  <q-page class="assist-scanner-page">
+    <header class="scanner-top-bar">
+      <div class="scanner-top-bar__content">
+        <q-btn
+          flat
+          dense
+          round
+          icon="arrow_back"
+          class="scanner-top-bar__back"
+          aria-label="ย้อนกลับ"
+          @click="goBack"
+        />
+        <div class="scanner-top-bar__text">
+          <h1 class="scanner-top-bar__title">ช่วยแสกนเช็กอิน</h1>
+          <p v-if="sessionMeta?.examName" class="scanner-top-bar__exam">{{ sessionMeta.examName }}</p>
+          <p v-else-if="isLoadingMeta" class="scanner-top-bar__exam">กำลังโหลด...</p>
+        </div>
+      </div>
     </header>
 
     <section v-if="loadError" class="scanner-panel">
@@ -13,13 +26,22 @@
     </section>
 
     <template v-else-if="sessionMeta">
-      <section class="scanner-panel camera-panel">
+      <section class="camera-panel">
         <div :id="scannerElementId" class="camera-viewport" />
         <p v-if="cameraError" class="camera-error">{{ cameraError }}</p>
         <p v-else-if="!isCameraActive" class="camera-hint">กำลังเปิดกล้อง...</p>
       </section>
 
-      <section class="scanner-panel manual-panel">
+      <Transition name="result-slide">
+        <section v-if="lastResult" class="result-banner" :class="resultBannerClass">
+          <div class="result-banner__title">{{ resultTitle }}</div>
+          <div v-if="lastResult.candidate" class="result-banner__body">
+            {{ lastResult.candidate.fullnameTh }} — ที่นั่ง {{ lastResult.candidate.seatNumber }}
+          </div>
+        </section>
+      </Transition>
+
+      <section class="manual-panel">
         <AppLabeledInput
           v-model="manualCode"
           label="พิมพ์รหัสด้วยตนเอง"
@@ -38,21 +60,13 @@
           @click="submitManualCode"
         />
       </section>
-
-      <section v-if="lastResult" class="scanner-panel result-panel">
-        <div class="result-title">{{ resultTitle }}</div>
-        <div v-if="lastResult.candidate" class="result-body">
-          <div>{{ lastResult.candidate.fullnameTh }}</div>
-          <div>ที่นั่ง {{ lastResult.candidate.seatNumber }}</div>
-        </div>
-      </section>
     </template>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import AppButton from 'src/components/base/app-button.vue';
 import AppLabeledInput from 'src/components/base/app-labeled-input.vue';
@@ -65,6 +79,7 @@ import type { AssistEvent, AssistSessionMeta } from 'src/types/check-in-assist.t
 import { normalizeScanPayload } from 'src/utils/scan-keyboard';
 
 const route = useRoute();
+const router = useRouter();
 const $q = useQuasar();
 
 const joinToken = computed(() => String(route.params.joinToken ?? ''));
@@ -83,6 +98,15 @@ const {
   stopCamera,
 } = useBarcodeCamera();
 
+const goBack = async (): Promise<void> => {
+  await stopCamera();
+  if (window.history.length > 1) {
+    router.back();
+    return;
+  }
+  await router.push({ name: 'admin-exam-management' });
+};
+
 const resultTitle = computed((): string => {
   switch (lastResult.value?.type) {
     case 'CHECKED_IN':
@@ -93,6 +117,20 @@ const resultTitle = computed((): string => {
       return 'ไม่พบผู้เข้าสอบ';
     case 'INVALID_CODE':
       return 'รหัสไม่ถูกต้อง';
+    default:
+      return '';
+  }
+});
+
+const resultBannerClass = computed((): string => {
+  switch (lastResult.value?.type) {
+    case 'CHECKED_IN':
+      return 'result-banner--success';
+    case 'ALREADY_CHECKED_IN':
+      return 'result-banner--warning';
+    case 'NOT_FOUND':
+    case 'INVALID_CODE':
+      return 'result-banner--error';
     default:
       return '';
   }
@@ -194,76 +232,140 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 .assist-scanner-page {
-  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 600px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 0;
+  background: #0f172a;
 }
 
-.scanner-header {
-  margin-bottom: 16px;
+.scanner-top-bar {
+  flex: 0 0 auto;
+  padding: env(safe-area-inset-top, 12px) 16px 12px;
+  background: var(--surface-card);
 
-  h1 {
+  &__content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  &__back {
+    flex: 0 0 auto;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  &__text {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  &__title {
     margin: 0;
-    font-size: 1.35rem;
+    font-size: 1.2rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--text-primary);
+  }
+
+  &__exam {
+    margin: 2px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
   }
 }
 
-.exam-name {
-  margin: 4px 0 0;
-  color: #64748b;
-  font-size: 0.9rem;
+.scanner-panel {
+  padding: 16px;
 }
 
-.scanner-panel {
-  margin-bottom: 16px;
+.camera-panel {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 50dvh;
 }
 
 .camera-viewport {
   width: 100%;
-  min-height: 280px;
-  border-radius: 12px;
+  flex: 1;
+  min-height: 50dvh;
   overflow: hidden;
   background: #0f172a;
 }
 
 .camera-hint,
 .camera-error {
-  margin: 8px 0 0;
+  margin: 8px 16px 0;
   font-size: 0.85rem;
-  color: #64748b;
+  color: #94a3b8;
 }
 
 .camera-error {
   color: #e53935;
 }
 
+.result-banner {
+  flex: 0 0 auto;
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #fff;
+
+  &--success {
+    background: #2e7d32;
+  }
+
+  &--warning {
+    background: #e65100;
+  }
+
+  &--error {
+    background: #c62828;
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  &__body {
+    font-size: 0.9rem;
+    font-weight: 400;
+    margin-top: 2px;
+    opacity: 0.92;
+  }
+}
+
+.result-slide-enter-active,
+.result-slide-leave-active {
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease;
+}
+
+.result-slide-enter-from,
+.result-slide-leave-to {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
 .manual-panel {
+  flex: 0 0 auto;
   display: grid;
   gap: 12px;
+  padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface-card);
 }
 
 .submit-btn {
-  height: 40px;
+  height: 48px;
+  min-height: 48px;
   border-radius: 8px !important;
-}
-
-.result-panel {
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-}
-
-.result-title {
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 4px;
-}
-
-.result-body {
-  color: #334155;
-  font-size: 0.95rem;
 }
 </style>

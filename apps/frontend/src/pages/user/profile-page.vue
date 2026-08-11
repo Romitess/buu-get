@@ -78,7 +78,7 @@
                     {{ $t('profile.pageTitleEditPassword') }}
                   </a>
                 </div>
-                <q-input v-model="formData.email" outlined dense bg-color="white" />
+                <q-input v-model="formData.email" outlined dense bg-color="white" inputmode="email" />
               </div>
               <div class="col-12 col-md-6 relative-position">
                 <label class="text-body2 text-weight-medium q-mb-xs field-label block"
@@ -114,6 +114,7 @@
                   outlined
                   dense
                   bg-color="white"
+                  :inputmode="isForeigner ? 'text' : 'numeric'"
                   :mask="isForeigner ? 'XXXXXXXXX' : '#-####-#####-##-#'"
                   :unmasked-value="!isForeigner"
                   lazy-rules
@@ -279,6 +280,7 @@
                 outlined
                 dense
                 bg-color="white"
+                inputmode="tel"
                 mask="###-###-####"
                 unmasked-value
                 lazy-rules
@@ -318,7 +320,7 @@
 
     <!-- Password Dialog -->
     <q-dialog v-model="showPasswordDialog" persistent>
-      <q-card style="min-width: 400px; border-radius: 16px; padding: 12px">
+      <q-card style="width: min(400px, 90vw); border-radius: 16px; padding: 12px">
         <q-card-section class="row items-center q-pb-none justify-between">
           <div class="text-h6 text-weight-bold">
             {{ $t('profile.pageTitleEditPassword') }}
@@ -941,6 +943,19 @@ const onSavePassword = (): void => {
   100% {
     transform: translateY(0);
     box-shadow: 0 4px 10px rgba(198, 40, 40, 0.15);
+  }
+}
+
+@media (max-width: 599px) {
+  .profile-avatar {
+    width: 100px !important;
+    height: 100px !important;
+    font-size: 100px !important;
+  }
+
+  .profile-avatar :deep(img) {
+    width: 100px !important;
+    height: 100px !important;
   }
 }
 </style>

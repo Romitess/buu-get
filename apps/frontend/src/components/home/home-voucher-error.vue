@@ -53,4 +53,12 @@ const translatedText = computed(() => {
   color: var(--badge-primary-dot);
   text-decoration: underline;
 }
+
+@media (max-width: 1023px) {
+  .voucher-notice-banner {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
 </style>
