@@ -81,7 +81,7 @@ export class CheckInAssistService {
     return {
       casId: saved.CAS_ID,
       joinToken: saved.JOIN_TOKEN,
-      expiresAt: saved.EXPIRES_AT.toISOString(),
+      expiresAt: this.toExpiresAtDate(saved.EXPIRES_AT).toISOString(),
     };
   }
 
@@ -100,7 +100,7 @@ export class CheckInAssistService {
       examId: session.EXAM_ID,
       examName: exam?.EXAM_NAME,
       status: session.STATUS,
-      expiresAt: session.EXPIRES_AT.toISOString(),
+      expiresAt: this.toExpiresAtDate(session.EXPIRES_AT).toISOString(),
     };
   }
 
@@ -153,7 +153,7 @@ export class CheckInAssistService {
 
     const enrollment = await this.resolveEnrollment(
       session.EXAM_ID,
-      session.getSessionIds(),
+      this.parseSessionIds(session),
       normalized,
     );
 
@@ -258,11 +258,28 @@ export class CheckInAssistService {
     return session;
   }
 
+  private parseSessionIds(session: CheckInAssistSession): number[] {
+    try {
+      const parsed = JSON.parse(session.SESSION_IDS_JSON) as unknown;
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .map((id) => Number(id))
+        .filter((id) => Number.isInteger(id) && id > 0);
+    } catch {
+      return [];
+    }
+  }
+
+  private toExpiresAtDate(value: Date | string): Date {
+    return value instanceof Date ? value : new Date(value);
+  }
+
   private assertSessionUsable(session: CheckInAssistSession): void {
     if (session.STATUS === CheckInAssistSessionStatus.CLOSED) {
       throw new GoneException('Assist session is closed');
     }
-    if (session.EXPIRES_AT.getTime() <= Date.now()) {
+    const expiresAt = this.toExpiresAtDate(session.EXPIRES_AT);
+    if (Number.isNaN(expiresAt.getTime()) || expiresAt.getTime() <= Date.now()) {
       throw new GoneException('Assist session has expired');
     }
   }
@@ -361,6 +378,7 @@ export class CheckInAssistService {
 
       const nextSeq = (Number(maxSeqRow?.maxSeq ?? 0) || 0) + 1;
       const payload = input.candidate ? JSON.stringify(input.candidate) : null;
+      const createdAt = new Date();
 
       const saved = await manager.save(
         manager.create(CheckInAssistEvent, {
@@ -371,14 +389,18 @@ export class CheckInAssistService {
           ERM_ID: input.ermId,
           SCANNER_USER_ID: input.scannerUserId,
           PAYLOAD_JSON: payload,
+          CREATED_AT: createdAt,
         }),
       );
 
-      return this.toAssistEventDto(saved);
+      return this.toAssistEventDto(saved, createdAt);
     });
   }
 
-  private toAssistEventDto(event: CheckInAssistEvent): AssistEventDto {
+  private toAssistEventDto(
+    event: CheckInAssistEvent,
+    fallbackCreatedAt?: Date,
+  ): AssistEventDto {
     let candidate: AssistCandidateSummaryDto | undefined;
     if (event.PAYLOAD_JSON) {
       try {
@@ -388,12 +410,19 @@ export class CheckInAssistService {
       }
     }
 
+    const createdAt =
+      event.CREATED_AT instanceof Date
+        ? event.CREATED_AT
+        : event.CREATED_AT
+          ? new Date(event.CREATED_AT)
+          : (fallbackCreatedAt ?? new Date());
+
     return {
       seq: event.SEQ,
       type: event.EVENT_TYPE,
       scannedCode: event.SCANNED_CODE,
       scannerUserId: event.SCANNER_USER_ID,
-      at: event.CREATED_AT.toISOString(),
+      at: createdAt.toISOString(),
       ...(candidate ? { candidate } : {}),
     };
   }

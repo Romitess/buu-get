@@ -117,10 +117,35 @@ const notifyForResult = (event: AssistEvent): void => {
   }
 };
 
+const resolveSubmitErrorMessage = (error: unknown): string => {
+  if (error && typeof error === 'object' && 'response' in error) {
+    const response = (error as { response?: { status?: number; data?: { message?: string | string[] } } })
+      .response;
+    const status = response?.status;
+    const rawMessage = response?.data?.message;
+    const message = Array.isArray(rawMessage)
+      ? rawMessage.join(', ')
+      : typeof rawMessage === 'string'
+        ? rawMessage
+        : '';
+
+    if (status === 410) {
+      return 'Session ช่วยแสกนปิดหรือหมดอายุแล้ว กรุณาสแกน QR ใหม่จากจอหลัก';
+    }
+    if (status === 401 || status === 403) {
+      return 'ไม่มีสิทธิ์ส่งผลการแสกน กรุณาเข้าสู่ระบบด้วยบัญชีเจ้าหน้าที่';
+    }
+    if (message) {
+      return message;
+    }
+  }
+  return 'ไม่สามารถส่งผลการแสกนได้';
+};
+
 const submitCode = async (rawCode: string): Promise<void> => {
   if (!sessionMeta.value || isSubmitting.value) return;
 
-  const code = normalizeScanPayload(rawCode);
+  const code = normalizeScanPayload(rawCode).slice(0, 64);
   if (!code) return;
 
   isSubmitting.value = true;
@@ -133,7 +158,7 @@ const submitCode = async (rawCode: string): Promise<void> => {
     console.error(error);
     $q.notify({
       type: 'negative',
-      message: 'ไม่สามารถส่งผลการแสกนได้',
+      message: resolveSubmitErrorMessage(error),
       position: 'top',
     });
   } finally {
