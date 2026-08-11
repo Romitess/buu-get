@@ -1,16 +1,16 @@
 # Graph Report - buu-get  (2026-08-11)
 
 ## Corpus Check
-- 903 files · ~704,245 words
+- 903 files · ~704,439 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 4769 nodes · 8728 edges · 421 communities (310 shown, 111 thin omitted)
+- 4769 nodes · 8728 edges · 421 communities (311 shown, 110 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 33 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2bdfba93`
+- Built from commit: `2a432255`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -334,17 +334,17 @@
   apps/frontend/src/composables/use-exam-documents.ts → apps/frontend/src/stores/user.store.ts
 - `AuthenticatedRequest` --references--> `RoleEnum`  [EXTRACTED]
   apps/backend/src/modules/bank-reconciles/bank-reconciles.controller.ts → apps/backend/src/modules/roles/enums/role.enum.ts
+- `MockBankReconcileRepository` --references--> `BankReconcile`  [EXTRACTED]
+  apps/backend/src/modules/bank-reconciles/bank-reconciles.service.spec.ts → apps/backend/src/modules/bank-reconciles/entities/bank-reconcile.entity.ts
 - `BankReconcileVerifyMatch` --references--> `TransactionMatchStatus`  [EXTRACTED]
   apps/backend/src/modules/bank-reconciles/bank-reconciles.service.ts → apps/backend/src/modules/transactions/entities/transaction.entity.ts
 - `useAvailableExamRounds()` --calls--> `useExamStore`  [INFERRED]
   apps/frontend/src/composables/use-available-exam-rounds.ts → apps/frontend/src/stores/exam.store.ts
-- `useCreateExam()` --calls--> `useExamStore`  [INFERRED]
-  apps/frontend/src/composables/use-create-exam.ts → apps/frontend/src/stores/exam.store.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (421 total, 111 thin omitted)
+## Communities (421 total, 110 thin omitted)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.06
@@ -399,8 +399,8 @@ Cohesion: 0.16
 Nodes (8): CreateExamLocationSeatDto, GenerateExamLocationSeatsDto, UpdateExamLocationSeatDto, ExamLocationSeat, LocationSeatStatus, ExamLocationSeatsController, ExamLocationSeatsService, MockRepo
 
 ### Community 14 - "Community 14"
-Cohesion: 0.06
-Nodes (36): AuthenticatedRequest, BankReconcilesController, BankReconcileImportHashSource, BankReconcileImportResult, BankReconcileMatchResult, BankReconcileVerifyMatch, BankReconcileVerifyRow, ExistingBankReconcileHashRow (+28 more)
+Cohesion: 0.10
+Nodes (19): BankReconcileImportHashSource, BankReconcileVerifyMatch, BankReconcileVerifyRow, ExistingBankReconcileHashRow, ImportPaymentRow, RawPaymentRow, ChangeReasonProbe, ExistingBankReconcileHashRow (+11 more)
 
 ### Community 15 - "Community 15"
 Cohesion: 0.06
@@ -421,6 +421,10 @@ Nodes (12): BulkIssueCertificateCandidateDto, BulkIssueCertificatesDto, CreateEx
 ### Community 19 - "Community 19"
 Cohesion: 0.11
 Nodes (23): AuthHeaders, buildPaymentCsv(), confirmPaid(), createEnrollment(), createFundSource(), createPayload(), createPendingTxn(), createSession() (+15 more)
+
+### Community 20 - "Community 20"
+Cohesion: 0.10
+Nodes (6): BankReconcilesService, CreateBankReconcileDto, UpdateBankReconcileDto, UpdateBankReconcileRefsDto, VerifyBankReconcilesDto, BankReconcile
 
 ### Community 21 - "Community 21"
 Cohesion: 0.07
@@ -603,7 +607,7 @@ Cohesion: 0.17
 Nodes (11): API and documentation, BUU GET Backend, Database management, Environment variables, License, Project structure, Quality checks, Requirements (+3 more)
 
 ### Community 66 - "Community 66"
-Cohesion: 0.12
+Cohesion: 0.13
 Nodes (12): buildPaginatedResponse(), CreateReceiptDto, UpdateReceiptDto, Receipt, ReceiptStatus, ReceiptSequence, ReceiptNumberService, ReceiptRepoMock (+4 more)
 
 ### Community 67 - "Community 67"
@@ -807,8 +811,8 @@ Cohesion: 0.50
 Nodes (4): getMonorepoEnvFilePaths(), loadMonorepoEnv(), MONOREPO_ENV_FILES, MONOREPO_ROOT
 
 ### Community 129 - "Community 129"
-Cohesion: 0.43
-Nodes (5): createBannerSection(), createContentSection(), createRuleSection(), SECTION_TITLE, usePageBuilder()
+Cohesion: 0.36
+Nodes (6): createBannerSection(), createContentSection(), createRuleSection(), SECTION_TITLE, usePageBuilder(), updatePageContent()
 
 ### Community 130 - "Community 130"
 Cohesion: 0.67
@@ -855,8 +859,8 @@ Cohesion: 0.25
 Nodes (6): BandRuleDto, SaveBandRulesDto, ScoreCriteria, ScoreCriteriaController, ScoreCriteriaModule, ScoreCriteriaService
 
 ### Community 224 - "Community 224"
-Cohesion: 0.20
-Nodes (9): renderContent, isLoading, getHomepage(), updatePageContent(), BannerBoxContent, BoxContent, PageConfigResponse, PageContent (+1 more)
+Cohesion: 0.22
+Nodes (8): renderContent, isLoading, getHomepage(), BannerBoxContent, BoxContent, PageConfigResponse, PageContent, PageSectionContent
 
 ### Community 238 - "Community 238"
 Cohesion: 0.08
@@ -871,8 +875,8 @@ Cohesion: 0.05
 Nodes (41): Batch 1 E2E Rollout evidence (Phase 5), Batch 1 Integration Rollout evidence (Phase 4), Batch 1 Unit Rollout evidence (Phase 3), Batch 2 E2E Rollout evidence (Phase 5), Batch 2 Integration Rollout evidence (Phase 4), Batch 2 Matrix evidence (Phase 2), Batch 2 Unit Rollout evidence (Phase 3), Batch 3 E2E Rollout evidence (Phase 5) (+33 more)
 
 ### Community 242 - "Community 242"
-Cohesion: 0.22
-Nodes (8): ADMIN_STAFF_ROLES, ENROLLMENT_ADMIN_ROLES, EXAM_ADMIN_ROLES, EXECUTIVE_ROLES, FINANCE_ROLES, FUND_SOURCE_READ_ROLES, USER_ADMIN_ROLES, USER_LIST_ROLES
+Cohesion: 0.08
+Nodes (20): AuthenticatedRequest, BankReconcilesController, BankReconcileImportResult, BankReconcileMatchResult, TestExportExamOption, TestExportRow, ADMIN_STAFF_ROLES, ENROLLMENT_ADMIN_ROLES (+12 more)
 
 ### Community 244 - "Community 244"
 Cohesion: 0.60
@@ -1109,7 +1113,7 @@ Nodes (3): CC-SF Test Form Reports, Regenerate, หมายเหตุสถ�
 ## Knowledge Gaps
 - **1294 isolated node(s):** `husky.sh script`, `$schema`, `collection`, `sourceRoot`, `name` (+1289 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **111 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **110 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
