@@ -722,6 +722,7 @@ export default {
           nationalId: 'National ID',
           prefix: 'Prefix',
           fullName: 'Full Name',
+          fullNameEn: 'Full Name (EN)',
           email: 'Email',
           phone: 'Phone',
           remark: 'Remarks',

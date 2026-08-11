@@ -75,6 +75,10 @@
           <div class="registrant-fullname-cell">{{ value }}</div>
         </template>
 
+        <template v-slot:body-cell-fullnameEn="{ value }">
+          <div class="registrant-fullname-cell">{{ value }}</div>
+        </template>
+
         <template v-slot:body-cell-email="{ value }">
           <div class="registrant-contact-cell">{{ value }}</div>
         </template>
@@ -266,14 +270,21 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.registrantManagement.table.columns.fullName'),
     field: 'fullnameTh',
     align: 'left',
-    style: 'width: 16%',
+    style: 'width: 13%',
+  },
+  {
+    name: 'fullnameEn',
+    label: i18n.t('admin.registrantManagement.table.columns.fullNameEn'),
+    field: 'fullnameEn',
+    align: 'left',
+    style: 'width: 13%',
   },
   {
     name: 'email',
     label: i18n.t('admin.registrantManagement.table.columns.email'),
     field: 'email',
     align: 'left',
-    style: 'width: 16%',
+    style: 'width: 14%',
   },
   {
     name: 'phone',

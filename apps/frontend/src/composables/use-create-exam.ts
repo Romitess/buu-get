@@ -4,6 +4,7 @@ import { useQuasar } from 'quasar';
 import { useExamStore } from 'src/stores/exam.store';
 import {
   BUDDHIST_YEAR_OFFSET,
+  DEFAULT_EXAM_FEE_THB,
   DEFAULT_EXAM_NAME,
   EXAM_FISCAL_YEAR_AD_REGEX,
   EXAM_TYPE_GENERAL,
@@ -258,7 +259,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       examFormat: EXAM_FORMAT_COMPUTER,
       fundSourceId: null,
       srbId: null,
-      fee: '',
+      fee: String(DEFAULT_EXAM_FEE_THB),
       isPublished: false,
       examDate: today,
       timeSlots: [
@@ -930,7 +931,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         }
         form.value.examType = exam.EXAM_TYPE || EXAM_TYPE_GENERAL;
         form.value.examFormat = exam.EXAM_FORMAT || EXAM_FORMAT_COMPUTER;
-        form.value.fee = Number(exam.EXAM_FEE ?? 0).toFixed(2);
+        const feeNum = Number(exam.EXAM_FEE ?? 0);
+        form.value.fee = Number.isFinite(feeNum) ? String(Math.round(feeNum)) : '0';
         form.value.isPublished = exam.EXAM_PUBLISHED ?? false;
         wasOriginallyPublished.value = exam.EXAM_PUBLISHED ?? false;
         form.value.examDate = gregorianToBuddhistDisplay(exam.EXAM_DATE);

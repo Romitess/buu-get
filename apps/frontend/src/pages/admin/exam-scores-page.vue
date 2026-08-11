@@ -603,6 +603,7 @@ const scoreRows = computed(() => {
       titleTh: profile?.userTitleTh || profile?.userTitleEn || '-',
       fullnameTh:
         profile?.userFullnameTh || profile?.userFullnameEn || enrollment.USER?.USER_EMAIL || '-',
+      fullnameEn: profile?.userFullnameEn || '-',
       email: enrollment.USER?.USER_EMAIL?.trim() || '-',
       phone: profile?.userPhone?.trim() || '-',
       paymentStatus: enrollment.ERM_STATUS,
@@ -1336,6 +1337,7 @@ const mapEnrollmentToScoreRow = (
     titleTh: profile?.userTitleTh || profile?.userTitleEn || '-',
     fullnameTh:
       profile?.userFullnameTh || profile?.userFullnameEn || enrollment.USER?.USER_EMAIL || '-',
+    fullnameEn: profile?.userFullnameEn || '-',
     email: enrollment.USER?.USER_EMAIL?.trim() || '-',
     phone: profile?.userPhone?.trim() || '-',
     paymentStatus: enrollment.ERM_STATUS,

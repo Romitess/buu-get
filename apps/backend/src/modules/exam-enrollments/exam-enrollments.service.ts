@@ -858,9 +858,6 @@ export class ExamEnrollmentsService {
 
     const skip = (page - 1) * limit;
 
-    let sortColumn = 'enrollment.CREATED_AT';
-    let sortOrder: 'ASC' | 'DESC' = 'ASC';
-
     if (resolvedQuery.sortBy) {
       const mapping: Record<string, string> = {
         titleTh: 'profile.userTitleTh',
@@ -871,9 +868,10 @@ export class ExamEnrollmentsService {
         createdAt: 'enrollment.CREATED_AT',
       };
       const sortBy = resolvedQuery.sortBy;
-      if (Object.prototype.hasOwnProperty.call(mapping, sortBy)) {
-        sortColumn = mapping[sortBy];
-      }
+      const sortColumn = Object.prototype.hasOwnProperty.call(mapping, sortBy)
+        ? mapping[sortBy]
+        : 'enrollment.CREATED_AT';
+      let sortOrder: 'ASC' | 'DESC' = 'ASC';
       if (resolvedQuery.descending !== undefined) {
         sortOrder =
           resolvedQuery.descending === 'true' ||
@@ -881,9 +879,21 @@ export class ExamEnrollmentsService {
             ? 'DESC'
             : 'ASC';
       }
+      qb.orderBy(sortColumn, sortOrder);
+    } else {
+      // Default: incomplete statuses first, then newest registrations
+      qb.orderBy(
+        `CASE
+          WHEN enrollment.ERM_VERIFY_STATUS IN (${ExamVerifyStatus.UNCHECKED}, ${ExamVerifyStatus.WAIT_FIXED})
+            OR enrollment.ERM_STATUS = ${ExamEnrollmentStatus.UNPAID}
+          THEN 0 ELSE 1 END`,
+        'ASC',
+      )
+        .addOrderBy('enrollment.CREATED_AT', 'DESC')
+        .addOrderBy('enrollment.ERM_ID', 'DESC');
     }
 
-    qb.orderBy(sortColumn, sortOrder).skip(skip).take(limit);
+    qb.skip(skip).take(limit);
 
     const [data, total] = await qb.getManyAndCount();
     const totalPaid = await paidQb.getCount();

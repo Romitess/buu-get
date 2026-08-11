@@ -765,6 +765,7 @@ export default {
           nationalId: 'เลขประจำตัว',
           prefix: 'คำนำหน้า',
           fullName: 'ชื่อ-นามสกุล',
+          fullNameEn: 'ชื่อภาษาอังกฤษ',
           email: 'อีเมล',
           phone: 'เบอร์โทร',
           remark: 'หมายเหตุ',
