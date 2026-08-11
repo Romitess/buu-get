@@ -117,6 +117,8 @@ type QueryBuilderMock = {
   take: jest.Mock;
   innerJoin: jest.Mock;
   leftJoin: jest.Mock;
+  innerJoinAndSelect: jest.Mock;
+  leftJoinAndSelect: jest.Mock;
   clone: jest.Mock;
   update: jest.Mock;
   set: jest.Mock;
@@ -125,6 +127,8 @@ type QueryBuilderMock = {
   getRawMany: jest.Mock;
   getRawOne: jest.Mock;
   getOne: jest.Mock;
+  getManyAndCount: jest.Mock;
+  getCount: jest.Mock;
 };
 
 const createQueryBuilderMock = (
@@ -143,6 +147,8 @@ const createQueryBuilderMock = (
     take: jest.fn(),
     innerJoin: jest.fn(),
     leftJoin: jest.fn(),
+    innerJoinAndSelect: jest.fn(),
+    leftJoinAndSelect: jest.fn(),
     clone: jest.fn(),
     update: jest.fn(),
     set: jest.fn(),
@@ -151,6 +157,8 @@ const createQueryBuilderMock = (
     getRawMany: jest.fn().mockResolvedValue([]),
     getRawOne: jest.fn().mockResolvedValue({ total: '0' }),
     getOne: jest.fn().mockResolvedValue(null),
+    getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+    getCount: jest.fn().mockResolvedValue(0),
     ...overrides,
   };
 
@@ -167,6 +175,8 @@ const createQueryBuilderMock = (
   qb.take.mockImplementation(chain);
   qb.innerJoin.mockImplementation(chain);
   qb.leftJoin.mockImplementation(chain);
+  qb.innerJoinAndSelect.mockImplementation(chain);
+  qb.leftJoinAndSelect.mockImplementation(chain);
   qb.update.mockImplementation(chain);
   qb.set.mockImplementation(chain);
   qb.from.mockImplementation(chain);
@@ -1664,6 +1674,54 @@ describe('ExamEnrollmentsService', () => {
       expect(result.data).toHaveLength(1);
       expect(result.data[0].status).toBe(ExamEnrollmentStatus.ATTENDED);
       expect(result.total).toBe(1);
+    });
+  });
+
+  describe('findByExamId', () => {
+    it('ENR-U-052: default sort uses addSelect incomplete_priority alias (not raw CASE orderBy)', async () => {
+      const qb = createQueryBuilderMock({
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+        getCount: jest.fn().mockResolvedValue(0),
+      });
+      examEnrollmentRepository.createQueryBuilder.mockReturnValue(qb);
+
+      await service.findByExamId(462, { page: 1, limit: 10 });
+
+      expect(qb.addSelect).toHaveBeenCalledWith(
+        expect.stringContaining('CASE'),
+        'incomplete_priority',
+      );
+      expect(qb.orderBy).toHaveBeenCalledWith('incomplete_priority', 'ASC');
+      expect(qb.orderBy).not.toHaveBeenCalledWith(
+        expect.stringContaining('CASE'),
+        expect.anything(),
+      );
+      expect(qb.addOrderBy).toHaveBeenCalledWith(
+        'enrollment.CREATED_AT',
+        'DESC',
+      );
+      expect(qb.addOrderBy).toHaveBeenCalledWith('enrollment.ERM_ID', 'DESC');
+    });
+
+    it('ENR-U-053: explicit sortBy uses property-path orderBy without incomplete_priority', async () => {
+      const qb = createQueryBuilderMock({
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+        getCount: jest.fn().mockResolvedValue(0),
+      });
+      examEnrollmentRepository.createQueryBuilder.mockReturnValue(qb);
+
+      await service.findByExamId(462, {
+        page: 1,
+        limit: 10,
+        sortBy: 'createdAt',
+        descending: true,
+      });
+
+      expect(qb.orderBy).toHaveBeenCalledWith('enrollment.CREATED_AT', 'DESC');
+      expect(qb.addSelect).not.toHaveBeenCalledWith(
+        expect.stringContaining('CASE'),
+        'incomplete_priority',
+      );
     });
   });
 

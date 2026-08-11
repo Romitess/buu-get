@@ -864,14 +864,16 @@ export class ExamEnrollmentsService {
       }
       qb.orderBy(sortColumn, sortOrder);
     } else {
-      // Default: incomplete statuses first, then newest registrations
-      qb.orderBy(
+      // Default: incomplete statuses first, then newest registrations.
+      // TypeORM 0.3 getManyAndCount treats raw CASE in orderBy as an alias — use addSelect.
+      qb.addSelect(
         `CASE
           WHEN enrollment.ERM_VERIFY_STATUS IN (${ExamVerifyStatus.UNCHECKED}, ${ExamVerifyStatus.WAIT_FIXED})
             OR enrollment.ERM_STATUS = ${ExamEnrollmentStatus.UNPAID}
           THEN 0 ELSE 1 END`,
-        'ASC',
+        'incomplete_priority',
       )
+        .orderBy('incomplete_priority', 'ASC')
         .addOrderBy('enrollment.CREATED_AT', 'DESC')
         .addOrderBy('enrollment.ERM_ID', 'DESC');
     }
