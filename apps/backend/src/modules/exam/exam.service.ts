@@ -209,6 +209,7 @@ export class ExamService {
         EXAM_ID: true,
         EXAM_NAME: true,
         EXAM_ROUND: true,
+        EXAM_FISCAL_YEAR: true,
         EXAM_TYPE: true,
         EXAM_FORMAT: true,
         EXAM_FEE: true,
@@ -441,7 +442,12 @@ export class ExamService {
   ): Promise<void> {
     const exam = await this.examRepository.findOne({
       where: { EXAM_ID: examId },
-      select: { EXAM_ID: true, EXAM_NAME: true, EXAM_ROUND: true },
+      select: {
+        EXAM_ID: true,
+        EXAM_NAME: true,
+        EXAM_ROUND: true,
+        EXAM_FISCAL_YEAR: true,
+      },
     });
 
     if (!exam) {
@@ -496,7 +502,10 @@ export class ExamService {
     }
 
     const examName = exam.EXAM_NAME || 'BUU-GET Exam';
-    const examRound = exam.EXAM_ROUND || '';
+    const round = exam.EXAM_ROUND?.trim() || '';
+    const fiscalYear = exam.EXAM_FISCAL_YEAR?.trim() || '';
+    const examRound =
+      round && fiscalYear ? `${round}/${fiscalYear}` : round || fiscalYear;
     const subject = `[แจ้งเตือนการเปลี่ยนแปลงรอบสอบ] - ${examName}`;
 
     // ทยอยส่งทีละชุดแบบขนาน (allSettled เพื่อให้ผู้รับรายอื่นไม่หยุดเมื่อรายใดล้มเหลว)

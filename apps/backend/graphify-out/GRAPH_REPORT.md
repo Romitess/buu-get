@@ -1,16 +1,16 @@
 # Graph Report - backend  (2026-08-11)
 
 ## Corpus Check
-- 422 files · ~189,660 words
+- 422 files · ~190,005 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2064 nodes · 4819 edges · 149 communities (64 shown, 85 thin omitted)
+- 2064 nodes · 4819 edges · 148 communities (64 shown, 84 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 23 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5ea5e438`
+- Built from commit: `205d907c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -149,7 +149,6 @@
 - [[_COMMUNITY_Community 134|Community 134]]
 - [[_COMMUNITY_Community 135|Community 135]]
 - [[_COMMUNITY_Community 136|Community 136]]
-- [[_COMMUNITY_Community 137|Community 137]]
 - [[_COMMUNITY_Community 138|Community 138]]
 - [[_COMMUNITY_Community 139|Community 139]]
 - [[_COMMUNITY_Community 140|Community 140]]
@@ -189,7 +188,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (149 total, 85 thin omitted)
+## Communities (148 total, 84 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.06
@@ -285,7 +284,7 @@ Nodes (17): CertificateVerifyStatus, ReceiptVerifyStatus, VerifyCertificateExamD
 
 ### Community 24 - "Community 24"
 Cohesion: 0.14
-Nodes (16): BulkSeatAssignmentDto, SeatAssignmentItemDto, CheckInExamEnrollmentDto, CreateExamEnrollmentDto, ExamEnrollmentQueryDto, ExecutiveTestTakerQueryDto, MatchExamEnrollmentDto, PaginationQueryDto (+8 more)
+Nodes (15): BulkSeatAssignmentDto, SeatAssignmentItemDto, CheckInExamEnrollmentDto, CreateExamEnrollmentDto, ExamEnrollmentQueryDto, ExecutiveTestTakerQueryDto, MatchExamEnrollmentDto, PaginationQueryDto (+7 more)
 
 ### Community 25 - "Community 25"
 Cohesion: 0.12
@@ -355,6 +354,10 @@ Nodes (5): SaveRegulationsDto, ExamRuleVoucher, ExamRuleVouchersController, Exam
 Cohesion: 0.16
 Nodes (7): CreateUserProfileDto, UpdateUserProfileDto, UserProfile, ProfileEditHistoryModule, UserProfileController, UserProfileModule, UserProfileService
 
+### Community 42 - "Community 42"
+Cohesion: 0.18
+Nodes (3): UpdateExamEnrollmentDto, ExamEnrollmentsService, ExecutiveExamHistoryResponse
+
 ### Community 43 - "Community 43"
 Cohesion: 0.27
 Nodes (4): UserImage, UpdateUserImageDto, UserImageController, UserImageService
@@ -404,8 +407,8 @@ Cohesion: 0.15
 Nodes (7): CreateExamSessionLocationDto, UpdateExamSessionLocationDto, ExamSessionLocation, ExamSessionLocationsController, ExamSessionLocationsService, MockRepo, doExamTimeRangesOverlap()
 
 ### Community 124 - "Community 124"
-Cohesion: 0.22
-Nodes (6): EXAM_TYPE, ExamType, RequestFixDto, EnrollmentRepoMock, MockFn, QueryBuilderMock
+Cohesion: 0.14
+Nodes (10): EXAM_TYPE, ExamType, RequestFixDto, EnrollmentRepoMock, MockFn, QueryBuilderMock, getProfileFixEmailTemplate(), ProfileFixEmailData (+2 more)
 
 ### Community 125 - "Community 125"
 Cohesion: 0.20
@@ -418,10 +421,6 @@ Nodes (3): AttemptMetrics, buildAttemptMetrics(), ScoredWindowAttempt
 ### Community 133 - "Community 133"
 Cohesion: 0.47
 Nodes (4): getMonorepoEnvFilePaths(), loadMonorepoEnv(), MONOREPO_ENV_FILES, MONOREPO_ROOT
-
-### Community 137 - "Community 137"
-Cohesion: 0.50
-Nodes (4): getProfileFixEmailTemplate(), ProfileFixEmailData, styles, translateDateToThai()
 
 ### Community 138 - "Community 138"
 Cohesion: 0.36
@@ -438,7 +437,7 @@ Nodes (3): generateCertificateCode(), generateReceiptVerifyCode(), generateVerif
 ## Knowledge Gaps
 - **310 isolated node(s):** `$schema`, `collection`, `sourceRoot`, `name`, `version` (+305 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **85 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **84 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
