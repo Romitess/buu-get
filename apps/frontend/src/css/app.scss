@@ -317,7 +317,12 @@ button {
 }
 
 html {
+  /* Desktop: preserve original scale; mobile: slightly larger for readability */
   font-size: clamp(13px, 0.5rem + 0.416vw, 16px);
+
+  @media (max-width: 1023px) {
+    font-size: clamp(15px, 0.5rem + 0.5vw, 16px);
+  }
 }
 
 html,
@@ -382,10 +387,17 @@ body {
 
 // === Page Content Styles ===
 .page-container {
-  width: clamp(1024px, 90vw, 1600px);
+  width: 100%;
+  max-width: 1600px;
+  min-width: 0;
   padding: 1.5rem 2rem;
   margin: 0 auto;
   animation: fadeInUp 0.4s var(--transition-smooth) both;
+
+  /* Desktop: restore previous fixed min width shell */
+  @media (min-width: 1024px) {
+    width: clamp(1024px, 90vw, 1600px);
+  }
 }
 
 .page-title {
@@ -400,6 +412,112 @@ body {
   font-size: 0.9rem;
   color: var(--text-secondary);
   font-weight: 400;
+}
+
+// Home page sections — mobile-only layout/spacing (desktop keeps original Quasar utilities)
+@media (max-width: 1023px) {
+  .home-section-separator {
+    display: block !important;
+    width: 100%;
+    height: 1px !important;
+    min-height: 1px !important;
+    margin: 16px 0 0 !important;
+    padding: 0 !important;
+    background: #bdbdbd !important;
+    border: none !important;
+    opacity: 1 !important;
+    flex-shrink: 0;
+  }
+
+  .home-section__intro {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .home-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 1300px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+    margin-bottom: 40px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .home-section__body {
+    min-width: 0;
+    margin-top: 0;
+    padding-top: 0;
+
+    > .row[class*='q-col-gutter'] {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      margin-top: 0 !important;
+
+      > [class*='col-'] {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        padding-top: 0 !important;
+      }
+    }
+  }
+
+  .home-section--lead {
+    margin-top: 16px;
+  }
+
+  .home-main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    padding-top: 48px;
+
+    > .home-section {
+      margin-bottom: 0 !important;
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-main-content {
+    max-width: 1300px;
+    margin: 15px auto 0;
+    padding: 0 10px;
+  }
+
+  .home-section-separator {
+    margin: 0 0 16px !important;
+  }
+
+  .home-section.home-section--lead,
+  .home-section:not(.home-main-content .home-section) {
+    max-width: 1300px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 10px;
+  }
+
+  .home-section.home-section--lead {
+    margin-top: 24px;
+    margin-bottom: 24px;
+  }
+
+  .home-page .container > .scroll-reveal .home-section:not(.home-section--lead) {
+    margin-bottom: 24px;
+  }
+
+  .home-main-content > .home-section {
+    max-width: none;
+    padding: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
 }
 
 // === Card Styles ===
@@ -575,12 +693,13 @@ body {
 
 .exam-schedule {
   &.page-container {
-    width: clamp(921.6px, 81vw, 1440px) !important;
+    width: 100% !important;
+    max-width: 1440px !important;
+    min-width: 0 !important;
     padding: 21.6px !important;
 
-    @media (max-width: 1023px) {
-      width: 100% !important;
-      min-width: 0 !important;
+    @media (min-width: 1024px) {
+      width: clamp(921.6px, 81vw, 1440px) !important;
     }
   }
 
@@ -755,14 +874,16 @@ body {
       padding: 21.6px !important;
     }
 
-    @media (max-width: 1024px) {
-      max-height: 450px !important;
+    /* Mobile: let the page scroll so all rounds are reachable.
+       Fixed max-height + overflow:hidden was clipping extra rounds. */
+    @media (max-width: 1023px) {
+      max-height: none !important;
+      overflow: visible;
       margin-top: 21.6px !important;
     }
 
     @media (max-width: 600px) {
       padding: 14.4px !important;
-      max-height: 432px !important;
     }
   }
 
@@ -834,6 +955,14 @@ body {
     @media (min-width: 1024px) {
       gap: 10.8px !important;
       padding: 9px 7.2px 9px 0 !important;
+    }
+
+    /* Mobile: grow with content; page scroll shows all rounds */
+    @media (max-width: 1023px) {
+      overflow-y: visible;
+      flex: 0 0 auto;
+      min-height: auto;
+      scrollbar-gutter: auto;
     }
 
     &::-webkit-scrollbar {
@@ -908,6 +1037,17 @@ body {
 
     .round-exam__btn {
       min-width: 117px !important;
+    }
+
+    @media (max-width: 599px) {
+      flex-direction: column;
+      align-items: stretch;
+
+      .round-exam__btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 44px !important;
+      }
     }
   }
 

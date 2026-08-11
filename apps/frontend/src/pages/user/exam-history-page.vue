@@ -953,7 +953,8 @@ const handlePrintCertificate = (exam: ExamHistoryItem): void => {
 
   .history-filter-tab {
     font-size: var(--font-size-sm);
-    padding: var(--space-sm) 2px;
+    padding: var(--space-sm) var(--space-sm);
+    min-height: 44px;
   }
 }
 

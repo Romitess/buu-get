@@ -58,7 +58,7 @@
         </div>
       </div>
 
-      <div class="q-mt-md">
+      <div class="q-mt-md activity-cta-wrap">
         <AppButton
           :label="$t(activity.ctaLabelKey)"
           :icon="ctaIcon"
@@ -205,6 +205,10 @@ const ctaIcon = computed(() => CTA_ICONS[props.activity.kind]);
   min-width: 140px;
 }
 
+.activity-cta-wrap {
+  width: 100%;
+}
+
 @media (max-width: 599px) {
   .candidate-activity-card {
     flex-direction: column;
@@ -217,6 +221,22 @@ const ctaIcon = computed(() => CTA_ICONS[props.activity.kind]);
 
   .activity-body {
     padding: 12px 16px 16px;
+  }
+
+  .activity-cta-wrap {
+    margin-top: 12px;
+  }
+
+  .cta-btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+  }
+
+  .meta-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
   }
 }
 </style>

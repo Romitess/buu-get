@@ -283,13 +283,13 @@ const handleMockLogin = (): void => {
   flex-direction: column;
   min-height: 100%;
 
-  // ให้เว้นซ้ายขวาของหน้าให้เท่ากับหน้า exam-schedule-page
-  width: clamp(921.6px, 81vw, 1440px) !important;
+  width: 100% !important;
+  max-width: 1440px !important;
+  min-width: 0 !important;
   margin: 0 auto;
 
-  @media (max-width: 1023px) {
-    width: 100% !important;
-    min-width: 0 !important;
+  @media (min-width: 1024px) {
+    width: clamp(921.6px, 81vw, 1440px) !important;
   }
 }
 
@@ -323,7 +323,7 @@ const handleMockLogin = (): void => {
 
 // ── ฝั่งซ้าย: พื้นเทาเข้ม + กล่องน้ำเงินเทาลอยตรงกลาง ────────
 .hero-left {
-  background-color: #616161; // ปรับเป็นสีเทาเข้มตามรูปภาพ
+  background-color: #616161;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -332,6 +332,10 @@ const handleMockLogin = (): void => {
   @media (max-width: 1023px) {
     padding: 36px 28px;
     min-height: 320px;
+  }
+
+  @media (max-width: 599px) {
+    display: none;
   }
 }
 

@@ -50,6 +50,9 @@
           v-model="email"
           outlined
           dense
+          type="email"
+          inputmode="email"
+          autocomplete="email"
           :placeholder="$t('auth.emailPlaceholder')"
           class="custom-input"
         >
@@ -74,6 +77,7 @@
           :type="showPwd ? 'text' : 'password'"
           outlined
           dense
+          autocomplete="current-password"
           :placeholder="$t('auth.passwordPlaceholder')"
           class="custom-input"
         >

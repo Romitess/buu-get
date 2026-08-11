@@ -83,10 +83,20 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .container {
   max-width: 1600px;
   margin: 0 auto;
   padding: 0 20px;
+
+  @media (max-width: 1023px) {
+    padding: 0 16px;
+  }
+}
+
+.home-page {
+  @media (max-width: 1023px) {
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  }
 }
 </style>

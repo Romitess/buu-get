@@ -16,8 +16,9 @@
             @click="handleHamburgerClick"
           />
         </div>
+        <!-- Mobile staff only: toggle left sidebar. Candidates/guests use bottom nav. -->
         <q-btn
-          v-else-if="$q.screen.lt.md || showAdminDrawer"
+          v-else-if="showAdminDrawer && $q.screen.lt.md"
           flat
           dense
           round

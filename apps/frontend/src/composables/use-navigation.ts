@@ -116,8 +116,44 @@ const toggleLeftDrawer = (): void => {
 
   const isMini = computed(() => !isHovered.value && miniState.value);
 
+  const STAFF_ROLES = [
+    ROLES.ADMIN,
+    ROLES.STAFF,
+    ROLES.REGISTRATION_OFFICER,
+    ROLES.EXAM_OPERATIONS_OFFICER,
+    ROLES.FINANCE,
+    ROLES.EXECUTIVE,
+    ROLES.PROCTOR,
+  ];
+
+  const hasStaffRole = computed(() => {
+    if (!userStore.isLoggedIn) return false;
+    const roles = userStore.userRoles;
+    if (roles.length > 0) {
+      return roles.some((r) => STAFF_ROLES.includes(r));
+    }
+    return STAFF_ROLES.includes(userStore.userRole ?? '');
+  });
+
+  const isCandidateUser = computed(() => {
+    if (!userStore.isLoggedIn) return false;
+    const roles = userStore.userRoles;
+    if (roles.length > 0) {
+      return roles.includes(ROLES.CANDIDATE);
+    }
+    return userStore.userRole === ROLES.CANDIDATE;
+  });
+
+  /**
+   * Left sidebar:
+   * - Staff: always (desktop + mobile drawer)
+   * - Candidate on desktop (md+): keep pre-mobile-first shell identical
+   * - Candidate/guest on mobile: hidden — bottom nav instead
+   */
   const showAdminDrawer = computed(() => {
-    return true;
+    if (hasStaffRole.value) return true;
+    if (isCandidateUser.value && !$q.screen.lt.md) return true;
+    return false;
   });
 
   const logout = async (): Promise<void> => {
