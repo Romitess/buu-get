@@ -294,6 +294,7 @@ export default {
     registrationSubtitle: 'Complete your exam registration.',
     examDetailSubtitle:
       'Choose a convenient test date and time by checking the available seats in each session.',
+    multipleExamsTitle: 'Exam rounds on this date',
     dateLabel: 'Date',
     noBadgeRounds: 'No exam rounds',
     defaultEnrollmentTitle: 'English Proficiency Test',

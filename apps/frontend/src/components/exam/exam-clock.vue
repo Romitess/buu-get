@@ -17,22 +17,22 @@ defineProps<ExamClockProps>();
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 10px 20px;
+  padding: 12px 22px;
   background: var(--clock-bg);
   border: 1.5px solid var(--clock-border) !important;
   border-radius: 12px;
-  min-width: 120px;
+  min-width: 132px;
   transition: all 0.3s ease;
   box-shadow: var(--clock-shadow) !important;
 
   &__icon {
-    font-size: 22px;
+    font-size: 26px;
     color: var(--clock-icon);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
 
   &__time {
-    font-size: 1rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: var(--clock-text);
     white-space: nowrap;
@@ -46,15 +46,15 @@ defineProps<ExamClockProps>();
 
 @media (max-width: 600px) {
   .exam-clock {
-    padding: 8px 16px;
-    min-width: 100px;
+    padding: 10px 16px;
+    min-width: 110px;
 
     &__icon {
-      font-size: 20px;
+      font-size: 22px;
     }
 
     &__time {
-      font-size: 0.9rem;
+      font-size: 1.05rem;
     }
   }
 }

@@ -12,6 +12,14 @@
         dense
         class="round-exam__tag"
       />
+      <div v-if="locationText" class="round-exam__meta row items-center no-wrap">
+        <q-icon name="location_on" color="primary" size="20px" class="q-mr-xs" />
+        <span class="round-exam__meta-text">{{ locationText }}</span>
+      </div>
+      <div v-if="feeText" class="round-exam__meta row items-center no-wrap">
+        <q-icon name="payments" color="positive" size="20px" class="q-mr-xs" />
+        <span class="round-exam__meta-text">{{ feeText }}</span>
+      </div>
     </q-card-section>
     <q-space />
 
@@ -178,16 +186,14 @@ const handleRegister = (): void => {
 .round-exam {
   display: flex;
   align-items: center;
-  padding: 10px 18px;
+  padding: 14px 20px;
   background: var(--surface-card);
   border-radius: 16px;
   border: 1px solid var(--border-color);
   margin-bottom: 12px;
-  box-shadow: var(--shadow-card) !important;
-  transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
-  gap: 14px;
+  box-shadow: none !important;
+  transition: transform var(--transition-fast);
+  gap: 16px;
 
   &--full {
     background-color: var(--surface-card);
@@ -196,7 +202,7 @@ const handleRegister = (): void => {
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: var(--round-exam-hover-shadow) !important;
+    box-shadow: none !important;
   }
 
   &__time {
@@ -206,23 +212,36 @@ const handleRegister = (): void => {
   &__info {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     align-items: flex-start;
   }
 
   &__title {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     font-weight: 800;
     color: var(--text-primary);
     margin: 0;
-    line-height: 1.2;
+    line-height: 1.3;
   }
 
   &__tag {
-    font-weight: 500 !important;
-    font-size: 0.7rem;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
     border-radius: 10px !important;
-    padding: 2px 8px;
+    padding: 4px 12px !important;
+    min-height: 32px !important;
+  }
+
+  &__meta {
+    max-width: 100%;
+  }
+
+  &__meta-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+    word-break: break-word;
   }
 
   &__action-group {
@@ -235,19 +254,21 @@ const handleRegister = (): void => {
   &__status {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-weight: 500;
-    font-size: 0.8rem;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
 
     .text-muted {
       color: var(--text-muted);
-      font-weight: 400;
+      font-weight: 500;
       margin-left: 2px;
     }
   }
 
   &__btn {
-    min-width: 130px;
+    min-width: 150px;
+    min-height: 44px;
+    font-size: 1rem !important;
     white-space: nowrap;
     flex-shrink: 0;
   }
@@ -283,7 +304,11 @@ const handleRegister = (): void => {
   .round-exam {
     padding: 16px;
     &__title {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
+    }
+
+    &__meta-text {
+      font-size: 0.95rem;
     }
 
     &__action-group {
@@ -295,6 +320,7 @@ const handleRegister = (): void => {
     &__status {
       justify-content: center;
       width: 100%;
+      font-size: 0.95rem;
     }
 
     &__btn {

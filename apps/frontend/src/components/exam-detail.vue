@@ -1,33 +1,39 @@
 <template>
-  <q-card class="exam-detail-card buu-card" flat>
+  <q-card
+    class="exam-detail-card buu-card"
+    :class="{ 'exam-detail-card--summary': isSummaryOnly }"
+    flat
+  >
     <div class="accent-bar"></div>
-    <q-card-section class="q-pa-md q-pl-lg">
-      <div class="q-mb-sm" v-if="badgeText">
+    <q-card-section class="exam-detail-card__section q-pa-md q-pl-lg">
+      <div v-if="badgeText" class="q-mb-sm">
         <div class="exam-badge">
           <div class="exam-dot bg-primary"></div>
           <span class="exam-badge-text text-primary">{{ badgeText }}</span>
         </div>
       </div>
 
-      <div class="text-h6 text-weight-bold q-mb-xs text-dark">
-        {{ title }}
+      <div class="exam-detail-card__copy">
+        <div class="exam-detail-card__title text-weight-bold text-dark">
+          {{ title }}
+        </div>
+
+        <div v-if="subtitle" class="exam-detail-card__subtitle">
+          {{ subtitle }}
+        </div>
       </div>
 
-      <div class="text-caption text-grey-7 q-mb-md" v-if="subtitle">
-        {{ subtitle }}
-      </div>
-
-      <div class="row items-center detail-row">
-        <div class="row items-center" v-if="locationText">
-          <q-icon name="location_on" color="primary" size="20px" class="q-mr-xs" />
+      <div v-if="hasMeta" class="row items-center detail-row q-mt-md">
+        <div v-if="locationText" class="row items-center">
+          <q-icon name="location_on" color="primary" size="22px" class="q-mr-xs" />
           <span class="detail-text text-dark">{{ locationText }}</span>
         </div>
-        <div class="row items-center" v-if="feeText">
-          <q-icon name="payments" color="positive" size="20px" class="q-mr-xs" />
+        <div v-if="feeText" class="row items-center">
+          <q-icon name="payments" color="positive" size="22px" class="q-mr-xs" />
           <span class="detail-text text-dark">{{ feeText }}</span>
         </div>
-        <div class="row items-center" v-if="formatText">
-          <q-icon :name="formatIcon" color="dark" size="20px" class="q-mr-xs" />
+        <div v-if="formatText" class="row items-center">
+          <q-icon :name="formatIcon" color="dark" size="22px" class="q-mr-xs" />
           <span class="detail-text text-dark">{{ formatText }}</span>
         </div>
       </div>
@@ -40,6 +46,13 @@ import { computed } from 'vue';
 import type { ExamDetailProps } from 'src/types/exam';
 
 const props = defineProps<ExamDetailProps>();
+
+const hasMeta = computed(
+  (): boolean => Boolean(props.locationText || props.feeText || props.formatText),
+);
+
+/** Title + subtitle only (multi-exam / empty day) — center copy on the Y axis */
+const isSummaryOnly = computed((): boolean => !props.badgeText && !hasMeta.value);
 
 const formatIcon = computed((): string => {
   const format = props.formatText?.toLowerCase() || '';
@@ -67,6 +80,42 @@ const formatIcon = computed((): string => {
     box-shadow: var(--detail-card-hover-shadow) !important;
     background-color: var(--detail-card-hover-bg);
   }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  &__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 52rem;
+  }
+
+  &__title {
+    font-size: 1.35rem;
+    line-height: 1.35;
+  }
+
+  /* Readable body copy for older users — avoid tiny caption grey */
+  &__subtitle {
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 500;
+    color: var(--text-secondary, #4a5568);
+  }
+
+  /* Multi-exam / empty-day: keep title+subtitle vertically centered in the card */
+  &--summary {
+    min-height: 112px;
+
+    .exam-detail-card__section {
+      min-height: 112px;
+      justify-content: center;
+    }
+  }
 }
 
 .accent-bar {
@@ -83,25 +132,26 @@ const formatIcon = computed((): string => {
   display: inline-flex;
   align-items: center;
   background-color: var(--detail-card-badge-bg);
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: 16px;
   gap: 8px;
 }
 
 .exam-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
 }
 
 .exam-badge-text {
-  font-size: 13px;
+  font-size: 0.95rem;
   font-weight: 700;
 }
 
 .detail-text {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .detail-row {
@@ -115,26 +165,38 @@ const formatIcon = computed((): string => {
 @media (max-width: 600px) {
   .exam-detail-card {
     border-radius: 12px;
+
+    &__title {
+      font-size: 1.2rem;
+      line-height: 1.35;
+    }
+
+    &__subtitle {
+      font-size: 0.95rem;
+    }
+
+    &--summary {
+      min-height: 100px;
+
+      .exam-detail-card__section {
+        min-height: 100px;
+      }
+    }
   }
 
   .q-card__section {
     padding: 16px !important;
   }
 
-  .text-h6 {
-    font-size: 1.15rem !important;
-    line-height: 1.3;
-  }
-
   .detail-row {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 10px;
   }
 
   .detail-text {
-    font-size: 14px;
+    font-size: 1rem;
   }
 }
 </style>

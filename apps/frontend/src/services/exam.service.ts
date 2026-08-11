@@ -59,6 +59,26 @@ const getActiveEnrollmentCount = (session: BackendSession): number => {
   ).length;
 };
 
+/** Resolve display location for a session (LOCATION or first SESSION_LOCATIONS entry) */
+const resolveSessionLocationLabel = (session: BackendSession): string => {
+  const loc = session.LOCATION ?? session.SESSION_LOCATIONS?.[0]?.LOCATION;
+  if (!loc) return DEFAULT_LOCATION_TEXT;
+  return formatLocationWithRoom(loc.LOCATION_NAME, loc.LOCATION_ROOM_NO);
+};
+
+/** Append unique location labels when merging same-exam same-time sessions */
+const mergeLocationLabels = (existing: string, next: string): string => {
+  if (!next || next === existing) return existing;
+  const parts = existing
+    .split(', ')
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (parts.includes(next)) return existing;
+  if (!existing || existing === DEFAULT_LOCATION_TEXT) return next;
+  if (next === DEFAULT_LOCATION_TEXT) return existing;
+  return `${existing}, ${next}`;
+};
+
 const isRequestCanceled = (error: unknown): boolean => {
   if (axios.isCancel(error)) return true;
   if (!error || typeof error !== 'object') return false;
@@ -340,29 +360,37 @@ export const fetchScheduleData = async (force = false): Promise<Record<string, D
     }
 
     const dayData = schedule[date];
-    if (!dayData || dayData.examId !== exam.EXAM_ID) return;
+    if (!dayData) return;
 
     sortedSessions.forEach((session) => {
       const startTime = formatTime(session.SS_START_TIME);
       const endTime = formatTime(session.SS_END_TIME);
       const timeRange = `${startTime} - ${endTime}`;
+      const sessionLocation = resolveSessionLocationLabel(session);
 
       const activeCount = getActiveEnrollmentCount(session);
 
       const currentAvailable = (session.SS_CAPACITY || 0) - activeCount;
       const currentTotal = session.SS_CAPACITY || 0;
 
-      const existingRound = dayData.rounds.find((r) => r.timeRange === timeRange);
+      // Merge seats only within the same exam + time slot (not across exams)
+      const existingRound = dayData.rounds.find(
+        (r) => r.examId === exam.EXAM_ID && r.timeRange === timeRange,
+      );
 
       if (existingRound) {
         existingRound.availableSeats += currentAvailable;
         existingRound.totalSeats += currentTotal;
+        existingRound.location = mergeLocationLabels(existingRound.location, sessionLocation);
         if (existingRound.availableSeats - currentAvailable <= 0 && currentAvailable > 0) {
           existingRound.id = session.SS_ID;
         }
       } else {
         const round: ExamRound = {
           id: session.SS_ID,
+          examId: exam.EXAM_ID,
+          fee: formatFee(exam.EXAM_FEE),
+          location: sessionLocation,
           title:
             formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
             DEFAULT_EXAM_TITLE,

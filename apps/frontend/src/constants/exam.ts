@@ -40,11 +40,11 @@ export const EXAM_FORMAT_PAPER = 'กระดาษ';
 
 /** ค่าเริ่มต้นของข้อมูลการสอบ */
 export const DEFAULT_EXAM_INFO = {
-  badgeText: EXAM_TYPE_GENERAL,
-  title: 'การสอบวัดระบบภาษาอังกฤษ BUU-GET',
-  subtitle: 'Computer Center, BUU (L201)',
-  locationText: 'Computer Center, BUU (L201)',
-  feeText: 'Fee : 0 ฿',
+  badgeText: '',
+  title: '',
+  subtitle: '',
+  locationText: '',
+  feeText: '',
   formatText: '',
 };
 
