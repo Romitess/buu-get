@@ -32,7 +32,6 @@
       :date-errors="dateErrors"
       :field-errors="fieldErrors"
       :shake-key="shakeKey"
-      @add-time-slot="addTimeSlot"
       @remove-time-slot="removeTimeSlot"
       @add-room="addRoom"
       @remove-room="removeRoom"
@@ -73,6 +72,7 @@
       @add-candidates-from-users="addEligibleCandidatesFromUsers"
       @remove-candidates="removeEligibleCandidates"
       @passcode-type-selected="generatePasscodes"
+      @shared-passcode-defined="applySharedPasscode"
       @export-candidates="exportCandidates"
     />
 
@@ -166,7 +166,6 @@ const {
   fieldErrors,
   shakeKey,
   loadInitialData,
-  addTimeSlot,
   removeTimeSlot,
   addRoom,
   removeRoom,
@@ -174,6 +173,7 @@ const {
   addEligibleCandidatesFromUsers,
   removeEligibleCandidates,
   generatePasscodes,
+  applySharedPasscode,
   exportCandidates,
   handleCancel,
   handleSave,

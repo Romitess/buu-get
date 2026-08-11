@@ -53,7 +53,7 @@ const getDayAvailability = (dateString: string): ExamCalendarAvailability => {
 };
 
 const shouldShowDot = (day: CalendarDay): boolean => {
-  return Boolean(getDayAvailability(day.dateString)) && !day.isPast && !day.isToday;
+  return getDayAvailability(day.dateString) != null && !day.isPast;
 };
 
 const getDotClasses = (dateString: string): Record<string, boolean> => {
@@ -85,6 +85,9 @@ const onMainCardResize = (size: { width: number; height: number }) => {
   border-radius: 50%;
   position: absolute;
   bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
 }
 .dot-red {
   background-color: var(--calendar-dot-full);

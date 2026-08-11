@@ -1,4 +1,4 @@
-/** ค่าธรรมเนียมเริ่มต้นเมื่ออ่านจาก fee text ไม่ได้ (THB) */
+/** ค่าธรรมเนียมเริ่มต้นของรอบสอบทั่วไป (THB) — ใช้ prefills ฟอร์มสร้างและ fallback แสดงผล */
 export const DEFAULT_EXAM_FEE_THB = 500;
 
 /** ระยะเวลานับถอยหลังการชำระเงิน (รูปแบบ MM:SS) */
@@ -34,17 +34,37 @@ export const getCurrentThaiFiscalYearAd = (date: Date = new Date()): string => {
 export const EXAM_TYPE_GENERAL = 'รอบทั่วไป';
 export const EXAM_TYPE_SPECIAL = 'รอบพิเศษ';
 
+/** Shared special-exam passcode: exactly 6 alphanumeric characters */
+export const PASSCODE_LENGTH = 6;
+export const PASSCODE_PATTERN = /^[A-Za-z0-9]{6}$/;
+export const PASSCODE_CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+export function normalizeExamPasscode(passcode: string): string {
+  return passcode.trim().toUpperCase();
+}
+
+export function generateRandomAlphanumericPasscode(
+  length: number = PASSCODE_LENGTH,
+): string {
+  let result = '';
+  for (let i = 0; i < length; i += 1) {
+    const index = Math.floor(Math.random() * PASSCODE_CHARSET.length);
+    result += PASSCODE_CHARSET[index];
+  }
+  return result;
+}
+
 /** รูปแบบการสอบ */
 export const EXAM_FORMAT_COMPUTER = 'คอมพิวเตอร์';
 export const EXAM_FORMAT_PAPER = 'กระดาษ';
 
 /** ค่าเริ่มต้นของข้อมูลการสอบ */
 export const DEFAULT_EXAM_INFO = {
-  badgeText: EXAM_TYPE_GENERAL,
-  title: 'การสอบวัดระบบภาษาอังกฤษ BUU-GET',
-  subtitle: 'Computer Center, BUU (L201)',
-  locationText: 'Computer Center, BUU (L201)',
-  feeText: 'Fee : 0 ฿',
+  badgeText: '',
+  title: '',
+  subtitle: '',
+  locationText: '',
+  feeText: '',
   formatText: '',
 };
 
@@ -95,9 +115,14 @@ export const VALIDATION_MSG = {
   LOCATION: 'กรุณาเลือกสถานที่สอบ',
   SEATS: 'กรุณากรอกจำนวนที่นั่ง',
   REG_START_DATE: 'กรุณาเลือกวันที่เริ่มต้นลงทะเบียน',
+  REG_START_TIME: 'กรุณาเลือกเวลาเริ่มต้นลงทะเบียน',
   REG_END_DATE: 'กรุณาเลือกวันที่สิ้นสุดลงทะเบียน',
+  REG_END_TIME: 'กรุณาเลือกเวลาสิ้นสุดลงทะเบียน',
   PAY_START_DATE: 'กรุณาเลือกวันที่เริ่มต้นชำระเงิน',
+  PAY_START_TIME: 'กรุณาเลือกเวลาเริ่มต้นชำระเงิน',
   PAY_END_DATE: 'กรุณาเลือกวันที่สิ้นสุดชำระเงิน',
+  PAY_END_TIME: 'กรุณาเลือกเวลาสิ้นสุดชำระเงิน',
+  SHARED_PASSCODE: 'กรุณากำหนด Passcode 6 ตัวอักษรหรือตัวเลขสำหรับผู้มีสิทธิ์สอบทุกคน',
 };
 
 /** ข้อความแสดงผลเมื่อยังไม่เลือกข้อมูล */

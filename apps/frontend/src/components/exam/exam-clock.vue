@@ -17,44 +17,44 @@ defineProps<ExamClockProps>();
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 10px 20px;
-  background: var(--clock-bg);
-  border: 1.5px solid var(--clock-border) !important;
-  border-radius: 12px;
-  min-width: 120px;
-  transition: all 0.3s ease;
-  box-shadow: var(--clock-shadow) !important;
+  padding: 10px 18px;
+  background: transparent;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 10px;
+  min-width: 124px;
+  transition: border-color var(--transition-fast);
+  box-shadow: none !important;
 
   &__icon {
     font-size: 22px;
-    color: var(--clock-icon);
+    color: var(--text-secondary, var(--clock-icon));
     margin-bottom: 4px;
   }
 
   &__time {
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--clock-text);
     white-space: nowrap;
   }
 
   &:hover {
-    border-color: var(--primary-light);
-    box-shadow: var(--clock-shadow-hover);
+    border-color: var(--border-color);
+    box-shadow: none !important;
   }
 }
 
 @media (max-width: 600px) {
   .exam-clock {
-    padding: 8px 16px;
-    min-width: 100px;
+    padding: 8px 14px;
+    min-width: 104px;
 
     &__icon {
       font-size: 20px;
     }
 
     &__time {
-      font-size: 0.9rem;
+      font-size: 1rem;
     }
   }
 }

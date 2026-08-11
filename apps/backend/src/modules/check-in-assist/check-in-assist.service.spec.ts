@@ -122,6 +122,7 @@ describe('CheckInAssistService', () => {
       JOIN_TOKEN: 'token',
       STATUS: CheckInAssistSessionStatus.ACTIVE,
       EXPIRES_AT: new Date('2030-01-01T00:00:00.000Z'),
+      SESSION_IDS_JSON: JSON.stringify([101]),
       getSessionIds: () => [101],
       setSessionIds: jest.fn(),
     } as unknown as CheckInAssistSession;

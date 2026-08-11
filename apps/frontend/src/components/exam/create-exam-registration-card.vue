@@ -19,53 +19,70 @@
               :class="isSpecialRound ? 'col-md-6' : 'q-mb-md'"
               data-field="regStartDate"
             >
-              <div class="buu-label-muted q-mb-xs">วันที่เริ่มต้น</div>
-              <q-input
-                v-model="form.regStartDate"
-                outlined
-                dense
-                class="custom-input cursor-pointer"
-                :class="{ 'buu-field-error': hasError('regStartDate') }"
-                readonly
-                hide-bottom-space
-                :disable="locked"
-                @click="!locked && (showRegStart = true)"
-              >
-                <template v-slot:append>
-                  <q-icon
-                    v-if="!locked"
-                    name="calendar_today"
-                    class="cursor-pointer"
-                    size="xs"
-                    color="grey-8"
-                    @click.stop="showRegStart = true"
-                  />
-                  <q-menu
-                    v-model="showRegStart"
-                    anchor="bottom left"
-                    self="top left"
-                    class="shadow-5 calendar-menu"
+              <div class="buu-label-muted q-mb-xs">วันและเวลาเริ่มต้น</div>
+              <div class="row q-col-gutter-sm">
+                <div class="col-7">
+                  <q-input
+                    v-model="form.regStartDate"
+                    outlined
+                    dense
+                    class="custom-input cursor-pointer"
+                    :class="{ 'buu-field-error': hasError('regStartDate') }"
+                    readonly
+                    hide-bottom-space
+                    :disable="locked"
+                    @click="!locked && (showRegStart = true)"
                   >
-                    <AppCalendar
-                      :model-value="beToCeString(form.regStartDate)"
-                      @update:model-value="
-                        (val: string) => {
-                          form.regStartDate = ceToBeString(val);
-                          emit('clearFieldError', 'regStartDate');
-                        }
-                      "
-                      @click-date="showRegStart = false"
-                    />
-                  </q-menu>
-                </template>
-              </q-input>
+                    <template v-slot:append>
+                      <q-icon
+                        v-if="!locked"
+                        name="calendar_today"
+                        class="cursor-pointer"
+                        size="xs"
+                        color="grey-8"
+                        @click.stop="showRegStart = true"
+                      />
+                      <q-menu
+                        v-model="showRegStart"
+                        anchor="bottom left"
+                        self="top left"
+                        class="shadow-5 calendar-menu"
+                      >
+                        <AppCalendar
+                          :model-value="beToCeString(form.regStartDate)"
+                          @update:model-value="
+                            (val: string) => {
+                              form.regStartDate = ceToBeString(val);
+                              emit('clearFieldError', 'regStartDate');
+                            }
+                          "
+                          @click-date="showRegStart = false"
+                        />
+                      </q-menu>
+                    </template>
+                  </q-input>
+                </div>
+                <div class="col-5" data-field="regStartTime">
+                  <app-time-picker
+                    v-model="form.regStartTime"
+                    outlined
+                    dense
+                    class="custom-input"
+                    :class="{ 'buu-field-error': hasError('regStartTime') }"
+                    placeholder="00:00"
+                    hide-bottom-space
+                    :disable="locked"
+                    @update:model-value="emit('clearFieldError', 'regStartTime')"
+                  />
+                </div>
+              </div>
               <div
-                v-if="hasError('regStartDate')"
+                v-if="hasError('regStartDate') || hasError('regStartTime')"
                 :key="`regStartDate-${shakeKey}`"
                 class="buu-error-msg"
               >
                 <q-icon name="error" class="buu-error-icon" />
-                {{ fieldErrors!.regStartDate }}
+                {{ fieldErrors!.regStartDate || fieldErrors!.regStartTime }}
               </div>
               <div
                 v-if="dateErrors?.regStartDate"
@@ -77,53 +94,70 @@
             </div>
 
             <div class="col-12" :class="isSpecialRound ? 'col-md-6' : ''" data-field="regEndDate">
-              <div class="buu-label-muted q-mb-xs">วันที่สิ้นสุด</div>
-              <q-input
-                v-model="form.regEndDate"
-                outlined
-                dense
-                class="custom-input cursor-pointer"
-                :class="{ 'buu-field-error': hasError('regEndDate') }"
-                readonly
-                hide-bottom-space
-                :disable="locked"
-                @click="!locked && (showRegEnd = true)"
-              >
-                <template v-slot:append>
-                  <q-icon
-                    v-if="!locked"
-                    name="calendar_today"
-                    class="cursor-pointer"
-                    size="xs"
-                    color="grey-8"
-                    @click.stop="showRegEnd = true"
-                  />
-                  <q-menu
-                    v-model="showRegEnd"
-                    anchor="bottom left"
-                    self="top left"
-                    class="shadow-5 calendar-menu"
+              <div class="buu-label-muted q-mb-xs">วันและเวลาสิ้นสุด</div>
+              <div class="row q-col-gutter-sm">
+                <div class="col-7">
+                  <q-input
+                    v-model="form.regEndDate"
+                    outlined
+                    dense
+                    class="custom-input cursor-pointer"
+                    :class="{ 'buu-field-error': hasError('regEndDate') }"
+                    readonly
+                    hide-bottom-space
+                    :disable="locked"
+                    @click="!locked && (showRegEnd = true)"
                   >
-                    <AppCalendar
-                      :model-value="beToCeString(form.regEndDate)"
-                      @update:model-value="
-                        (val: string) => {
-                          form.regEndDate = ceToBeString(val);
-                          emit('clearFieldError', 'regEndDate');
-                        }
-                      "
-                      @click-date="showRegEnd = false"
-                    />
-                  </q-menu>
-                </template>
-              </q-input>
+                    <template v-slot:append>
+                      <q-icon
+                        v-if="!locked"
+                        name="calendar_today"
+                        class="cursor-pointer"
+                        size="xs"
+                        color="grey-8"
+                        @click.stop="showRegEnd = true"
+                      />
+                      <q-menu
+                        v-model="showRegEnd"
+                        anchor="bottom left"
+                        self="top left"
+                        class="shadow-5 calendar-menu"
+                      >
+                        <AppCalendar
+                          :model-value="beToCeString(form.regEndDate)"
+                          @update:model-value="
+                            (val: string) => {
+                              form.regEndDate = ceToBeString(val);
+                              emit('clearFieldError', 'regEndDate');
+                            }
+                          "
+                          @click-date="showRegEnd = false"
+                        />
+                      </q-menu>
+                    </template>
+                  </q-input>
+                </div>
+                <div class="col-5" data-field="regEndTime">
+                  <app-time-picker
+                    v-model="form.regEndTime"
+                    outlined
+                    dense
+                    class="custom-input"
+                    :class="{ 'buu-field-error': hasError('regEndTime') }"
+                    placeholder="23:59"
+                    hide-bottom-space
+                    :disable="locked"
+                    @update:model-value="emit('clearFieldError', 'regEndTime')"
+                  />
+                </div>
+              </div>
               <div
-                v-if="hasError('regEndDate')"
+                v-if="hasError('regEndDate') || hasError('regEndTime')"
                 :key="`regEndDate-${shakeKey}`"
                 class="buu-error-msg"
               >
                 <q-icon name="error" class="buu-error-icon" />
-                {{ fieldErrors!.regEndDate }}
+                {{ fieldErrors!.regEndDate || fieldErrors!.regEndTime }}
               </div>
               <div
                 v-if="dateErrors?.regEndDate"
@@ -136,59 +170,76 @@
           </div>
         </div>
 
-        <!-- Right: ช่วงเวลาชำระเงิน (ซ่อนถ้ารอบพิเศษ) -->
+        <!-- Right: ช่วงเวลาชำระเงิน (ซ่อนถ้ารอบพิเศษ) — auto-fill จากลงทะเบียน แต่แก้ไขได้ -->
         <div v-if="!isSpecialRound" class="col-12 col-md-6">
           <div class="sub-section-title q-mb-sm">ช่วงเวลาชำระเงิน</div>
 
           <div class="row q-col-gutter-md">
             <div class="col-12 q-mb-md" data-field="payStartDate">
-              <div class="buu-label-muted q-mb-xs">วันที่เริ่มต้น</div>
-              <q-input
-                v-model="form.payStartDate"
-                outlined
-                dense
-                class="custom-input cursor-pointer"
-                :class="{ 'buu-field-error': hasError('payStartDate') }"
-                readonly
-                hide-bottom-space
-                :disable="locked"
-                @click="!locked && (showPayStart = true)"
-              >
-                <template v-slot:append>
-                  <q-icon
-                    v-if="!locked"
-                    name="calendar_today"
-                    class="cursor-pointer"
-                    size="xs"
-                    color="grey-8"
-                    @click.stop="showPayStart = true"
-                  />
-                  <q-menu
-                    v-model="showPayStart"
-                    anchor="bottom left"
-                    self="top left"
-                    class="shadow-5 calendar-menu"
+              <div class="buu-label-muted q-mb-xs">วันและเวลาเริ่มต้น</div>
+              <div class="row q-col-gutter-sm">
+                <div class="col-7">
+                  <q-input
+                    v-model="form.payStartDate"
+                    outlined
+                    dense
+                    class="custom-input cursor-pointer"
+                    :class="{ 'buu-field-error': hasError('payStartDate') }"
+                    readonly
+                    hide-bottom-space
+                    :disable="locked"
+                    @click="!locked && (showPayStart = true)"
                   >
-                    <AppCalendar
-                      :model-value="beToCeString(form.payStartDate)"
-                      @update:model-value="
-                        (val: string) => {
-                          form.payStartDate = ceToBeString(val);
-                          emit('clearFieldError', 'payStartDate');
-                        }
-                      "
-                      @click-date="showPayStart = false"
-                    />
-                  </q-menu>
-                </template>
-              </q-input>
+                    <template v-slot:append>
+                      <q-icon
+                        v-if="!locked"
+                        name="calendar_today"
+                        class="cursor-pointer"
+                        size="xs"
+                        color="grey-8"
+                        @click.stop="showPayStart = true"
+                      />
+                      <q-menu
+                        v-model="showPayStart"
+                        anchor="bottom left"
+                        self="top left"
+                        class="shadow-5 calendar-menu"
+                      >
+                        <AppCalendar
+                          :model-value="beToCeString(form.payStartDate)"
+                          @update:model-value="
+                            (val: string) => {
+                              form.payStartDate = ceToBeString(val);
+                              emit('clearFieldError', 'payStartDate');
+                            }
+                          "
+                          @click-date="showPayStart = false"
+                        />
+                      </q-menu>
+                    </template>
+                  </q-input>
+                </div>
+                <div class="col-5" data-field="payStartTime">
+                  <app-time-picker
+                    v-model="form.payStartTime"
+                    outlined
+                    dense
+                    class="custom-input"
+                    :class="{ 'buu-field-error': hasError('payStartTime') }"
+                    placeholder="00:00"
+                    hide-bottom-space
+                    :disable="locked"
+                    @update:model-value="emit('clearFieldError', 'payStartTime')"
+                  />
+                </div>
+              </div>
               <div
-                v-if="hasError('payStartDate')"
+                v-if="hasError('payStartDate') || hasError('payStartTime')"
                 :key="`payStartDate-${shakeKey}`"
                 class="buu-error-msg"
               >
                 <q-icon name="error" class="buu-error-icon" />
-                {{ fieldErrors!.payStartDate }}
+                {{ fieldErrors!.payStartDate || fieldErrors!.payStartTime }}
               </div>
               <div
                 v-if="dateErrors?.payStartDate"
@@ -200,53 +251,70 @@
             </div>
 
             <div class="col-12" data-field="payEndDate">
-              <div class="buu-label-muted q-mb-xs">วันที่สิ้นสุด</div>
-              <q-input
-                v-model="form.payEndDate"
-                outlined
-                dense
-                class="custom-input cursor-pointer"
-                :class="{ 'buu-field-error': hasError('payEndDate') }"
-                readonly
-                hide-bottom-space
-                :disable="locked"
-                @click="!locked && (showPayEnd = true)"
-              >
-                <template v-slot:append>
-                  <q-icon
-                    v-if="!locked"
-                    name="calendar_today"
-                    class="cursor-pointer"
-                    size="xs"
-                    color="grey-8"
-                    @click.stop="showPayEnd = true"
-                  />
-                  <q-menu
-                    v-model="showPayEnd"
-                    anchor="bottom left"
-                    self="top left"
-                    class="shadow-5 calendar-menu"
+              <div class="buu-label-muted q-mb-xs">วันและเวลาสิ้นสุด</div>
+              <div class="row q-col-gutter-sm">
+                <div class="col-7">
+                  <q-input
+                    v-model="form.payEndDate"
+                    outlined
+                    dense
+                    class="custom-input cursor-pointer"
+                    :class="{ 'buu-field-error': hasError('payEndDate') }"
+                    readonly
+                    hide-bottom-space
+                    :disable="locked"
+                    @click="!locked && (showPayEnd = true)"
                   >
-                    <AppCalendar
-                      :model-value="beToCeString(form.payEndDate)"
-                      @update:model-value="
-                        (val: string) => {
-                          form.payEndDate = ceToBeString(val);
-                          emit('clearFieldError', 'payEndDate');
-                        }
-                      "
-                      @click-date="showPayEnd = false"
-                    />
-                  </q-menu>
-                </template>
-              </q-input>
+                    <template v-slot:append>
+                      <q-icon
+                        v-if="!locked"
+                        name="calendar_today"
+                        class="cursor-pointer"
+                        size="xs"
+                        color="grey-8"
+                        @click.stop="showPayEnd = true"
+                      />
+                      <q-menu
+                        v-model="showPayEnd"
+                        anchor="bottom left"
+                        self="top left"
+                        class="shadow-5 calendar-menu"
+                      >
+                        <AppCalendar
+                          :model-value="beToCeString(form.payEndDate)"
+                          @update:model-value="
+                            (val: string) => {
+                              form.payEndDate = ceToBeString(val);
+                              emit('clearFieldError', 'payEndDate');
+                            }
+                          "
+                          @click-date="showPayEnd = false"
+                        />
+                      </q-menu>
+                    </template>
+                  </q-input>
+                </div>
+                <div class="col-5" data-field="payEndTime">
+                  <app-time-picker
+                    v-model="form.payEndTime"
+                    outlined
+                    dense
+                    class="custom-input"
+                    :class="{ 'buu-field-error': hasError('payEndTime') }"
+                    placeholder="23:59"
+                    hide-bottom-space
+                    :disable="locked"
+                    @update:model-value="emit('clearFieldError', 'payEndTime')"
+                  />
+                </div>
+              </div>
               <div
-                v-if="hasError('payEndDate')"
+                v-if="hasError('payEndDate') || hasError('payEndTime')"
                 :key="`payEndDate-${shakeKey}`"
                 class="buu-error-msg"
               >
                 <q-icon name="error" class="buu-error-icon" />
-                {{ fieldErrors!.payEndDate }}
+                {{ fieldErrors!.payEndDate || fieldErrors!.payEndTime }}
               </div>
               <div
                 v-if="dateErrors?.payEndDate"
@@ -267,6 +335,7 @@
 import { ref } from 'vue';
 import type { CreateExamForm } from 'src/composables/use-create-exam';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
+import AppTimePicker from 'src/components/base/app-time-picker.vue';
 import { beToCeString, ceToBeString } from 'src/utils/thai-date';
 
 const props = defineProps<{

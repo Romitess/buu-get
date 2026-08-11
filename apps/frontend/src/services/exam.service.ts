@@ -59,6 +59,26 @@ const getActiveEnrollmentCount = (session: BackendSession): number => {
   ).length;
 };
 
+/** Resolve display location for a session (LOCATION or first SESSION_LOCATIONS entry) */
+const resolveSessionLocationLabel = (session: BackendSession): string => {
+  const loc = session.LOCATION ?? session.SESSION_LOCATIONS?.[0]?.LOCATION;
+  if (!loc) return DEFAULT_LOCATION_TEXT;
+  return formatLocationWithRoom(loc.LOCATION_NAME, loc.LOCATION_ROOM_NO);
+};
+
+/** Append unique location labels when merging same-exam same-time sessions */
+const mergeLocationLabels = (existing: string, next: string): string => {
+  if (!next || next === existing) return existing;
+  const parts = existing
+    .split(', ')
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (parts.includes(next)) return existing;
+  if (!existing || existing === DEFAULT_LOCATION_TEXT) return next;
+  if (next === DEFAULT_LOCATION_TEXT) return existing;
+  return `${existing}, ${next}`;
+};
+
 const isRequestCanceled = (error: unknown): boolean => {
   if (axios.isCancel(error)) return true;
   if (!error || typeof error !== 'object') return false;
@@ -182,6 +202,48 @@ export const parseBangkokDate = (dateStr: string): { year: number; month: number
   };
 };
 
+/** แยกวันที่+เวลาจาก timestamp เป็นปฏิทินกรุงเทพ (+07:00) */
+export const parseBangkokDateTime = (
+  dateStr: string | null | undefined,
+): { year: number; month: number; day: number; hours: number; minutes: number } => {
+  if (!dateStr) {
+    return { year: 1970, month: 1, day: 1, hours: 0, minutes: 0 };
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return {
+      year: y || 1970,
+      month: m || 1,
+      day: d || 1,
+      hours: 0,
+      minutes: 0,
+    };
+  }
+
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) {
+    return { year: 1970, month: 1, day: 1, hours: 0, minutes: 0 };
+  }
+
+  const bangkokTime = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+  return {
+    year: bangkokTime.getUTCFullYear(),
+    month: bangkokTime.getUTCMonth() + 1,
+    day: bangkokTime.getUTCDate(),
+    hours: bangkokTime.getUTCHours(),
+    minutes: bangkokTime.getUTCMinutes(),
+  };
+};
+
+/** แปลง timestamp เป็น HH:mm ตามเวลาไทย */
+export const timestampToHhMm = (dateStr: string | null | undefined): string => {
+  if (!dateStr) return '00:00';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return '00:00';
+  const { hours, minutes } = parseBangkokDateTime(dateStr);
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+};
+
 export const formatBackendDate = (dateStr: string | null | undefined): string => {
   if (!dateStr) return '';
   const { year, month, day } = parseBangkokDate(dateStr);
@@ -204,6 +266,11 @@ export interface CreateExamPayload {
   regEndDate: string;
   payStartDate: string;
   payEndDate: string;
+  /** เวลาเปิด/ปิดลงทะเบียน (HH:mm) — ถ้าไม่ส่ง จะใช้ 00:00 / สิ้นวัน */
+  regStartTime?: string;
+  regEndTime?: string;
+  payStartTime?: string;
+  payEndTime?: string;
   timeRanges: {
     startTime: string;
     endTime: string;
@@ -293,29 +360,37 @@ export const fetchScheduleData = async (force = false): Promise<Record<string, D
     }
 
     const dayData = schedule[date];
-    if (!dayData || dayData.examId !== exam.EXAM_ID) return;
+    if (!dayData) return;
 
     sortedSessions.forEach((session) => {
       const startTime = formatTime(session.SS_START_TIME);
       const endTime = formatTime(session.SS_END_TIME);
       const timeRange = `${startTime} - ${endTime}`;
+      const sessionLocation = resolveSessionLocationLabel(session);
 
       const activeCount = getActiveEnrollmentCount(session);
 
       const currentAvailable = (session.SS_CAPACITY || 0) - activeCount;
       const currentTotal = session.SS_CAPACITY || 0;
 
-      const existingRound = dayData.rounds.find((r) => r.timeRange === timeRange);
+      // Merge seats only within the same exam + time slot (not across exams)
+      const existingRound = dayData.rounds.find(
+        (r) => r.examId === exam.EXAM_ID && r.timeRange === timeRange,
+      );
 
       if (existingRound) {
         existingRound.availableSeats += currentAvailable;
         existingRound.totalSeats += currentTotal;
+        existingRound.location = mergeLocationLabels(existingRound.location, sessionLocation);
         if (existingRound.availableSeats - currentAvailable <= 0 && currentAvailable > 0) {
           existingRound.id = session.SS_ID;
         }
       } else {
         const round: ExamRound = {
           id: session.SS_ID,
+          examId: exam.EXAM_ID,
+          fee: formatFee(exam.EXAM_FEE),
+          location: sessionLocation,
           title:
             formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
             DEFAULT_EXAM_TITLE,
@@ -424,6 +499,45 @@ export const buddhistToGregorianPeriodEnd = (dateStr: string): string => {
   const dateOnly = buddhistToGregorian(dateStr);
   if (!dateOnly) return '';
   return `${dateOnly}T23:59:59+07:00`;
+};
+
+const normalizeHhMm = (timeStr: string | undefined | null, fallback: string): string => {
+  if (!timeStr || !timeStr.trim()) return fallback;
+  const trimmed = timeStr.trim();
+  const match = /^([0-1]?\d|2[0-3]):([0-5]\d)$/.exec(trimmed);
+  if (!match) return fallback;
+  const hours = String(Number(match[1])).padStart(2, '0');
+  const minutes = String(Number(match[2])).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
+/** แปลงวันที่ BE + เวลา HH:mm เป็น ISO datetime (+07:00) */
+export const buddhistDateAndTimeToIso = (
+  dateStr: string,
+  timeStr: string | undefined | null,
+  options?: { fallbackTime?: string },
+): string => {
+  const dateOnly = buddhistToGregorian(dateStr);
+  if (!dateOnly) return '';
+  const hhMm = normalizeHhMm(timeStr, options?.fallbackTime ?? '00:00');
+  return `${dateOnly}T${hhMm}:00+07:00`;
+};
+
+/** แปลงช่วงเปิด/ปิด (BE date + optional time) เป็น ISO สำหรับ API */
+export const toPeriodIso = (
+  dateStr: string,
+  timeStr: string | undefined | null,
+  kind: 'start' | 'end',
+): string => {
+  if (timeStr && timeStr.trim()) {
+    return buddhistDateAndTimeToIso(dateStr, timeStr, {
+      fallbackTime: kind === 'end' ? '23:59' : '00:00',
+    });
+  }
+  if (kind === 'end') {
+    return buddhistToGregorianPeriodEnd(dateStr);
+  }
+  return buddhistToGregorian(dateStr);
 };
 
 const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRange[] => {
@@ -715,10 +829,10 @@ export const createExamRound = async (payload: CreateExamPayload): Promise<numbe
         EXAM_FORMAT: payload.examFormat,
         EXAM_FEE: Number(payload.fee),
         EXAM_DATE: buddhistToGregorian(payload.examDate),
-        EXAM_REG_START_DATE: buddhistToGregorian(payload.regStartDate),
-        EXAM_REG_END_DATE: buddhistToGregorianPeriodEnd(payload.regEndDate),
-        EXAM_PAY_START_DATE: buddhistToGregorian(payload.payStartDate),
-        EXAM_PAY_END_DATE: buddhistToGregorianPeriodEnd(payload.payEndDate),
+        EXAM_REG_START_DATE: toPeriodIso(payload.regStartDate, payload.regStartTime, 'start'),
+        EXAM_REG_END_DATE: toPeriodIso(payload.regEndDate, payload.regEndTime, 'end'),
+        EXAM_PAY_START_DATE: toPeriodIso(payload.payStartDate, payload.payStartTime, 'start'),
+        EXAM_PAY_END_DATE: toPeriodIso(payload.payEndDate, payload.payEndTime, 'end'),
         EXAM_PUBLISHED: payload.isPublished,
         FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
         SRB_ID: Number(payload.srbId),
@@ -813,10 +927,10 @@ export const updateExamRound = async (payload: UpdateExamPayload): Promise<void>
         EXAM_FORMAT: payload.examFormat,
         EXAM_FEE: Number(payload.fee),
         EXAM_DATE: buddhistToGregorian(payload.examDate),
-        EXAM_REG_START_DATE: buddhistToGregorian(payload.regStartDate),
-        EXAM_REG_END_DATE: buddhistToGregorianPeriodEnd(payload.regEndDate),
-        EXAM_PAY_START_DATE: buddhistToGregorian(payload.payStartDate),
-        EXAM_PAY_END_DATE: buddhistToGregorianPeriodEnd(payload.payEndDate),
+        EXAM_REG_START_DATE: toPeriodIso(payload.regStartDate, payload.regStartTime, 'start'),
+        EXAM_REG_END_DATE: toPeriodIso(payload.regEndDate, payload.regEndTime, 'end'),
+        EXAM_PAY_START_DATE: toPeriodIso(payload.payStartDate, payload.payStartTime, 'start'),
+        EXAM_PAY_END_DATE: toPeriodIso(payload.payEndDate, payload.payEndTime, 'end'),
         EXAM_PUBLISHED: payload.isPublished,
         FUND_SOURCE_ID: payload.fundSourceId ? Number(payload.fundSourceId) : null,
         SRB_ID: Number(payload.srbId),

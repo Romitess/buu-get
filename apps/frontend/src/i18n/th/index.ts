@@ -465,6 +465,7 @@ export default {
     registrationSubtitle: 'ดำเนินการสมัครสอบของคุณให้เสร็จสมบูรณ์',
     examDetailSubtitle:
       'เลือกวันที่และเวลาที่สะดวกในการมาทดสอบ โดยตรวจสอบจำนวนที่นั่งว่างในแต่ละช่วงเวลา',
+    multipleExamsTitle: 'รอบสอบในวันที่เลือก',
     dateLabel: 'วันที่',
     noBadgeRounds: 'ไม่มีรอบสอบ',
     defaultEnrollmentTitle: 'การทดสอบวัดความสามารถทางภาษาอังกฤษ',
@@ -764,6 +765,7 @@ export default {
           nationalId: 'เลขประจำตัว',
           prefix: 'คำนำหน้า',
           fullName: 'ชื่อ-นามสกุล',
+          fullNameEn: 'ชื่อภาษาอังกฤษ',
           email: 'อีเมล',
           phone: 'เบอร์โทร',
           remark: 'หมายเหตุ',

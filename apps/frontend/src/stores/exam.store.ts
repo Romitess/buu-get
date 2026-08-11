@@ -24,7 +24,6 @@ import {
   BUDDHIST_YEAR_OFFSET,
   EMPTY_DETAILS,
   DEFAULT_LOCATION_TEXT,
-  DEFAULT_EXAM_INFO,
   ENROLLMENT_STATUS,
   formatLocationWithRoom,
 } from 'src/constants/exam';
@@ -95,17 +94,33 @@ export const useExamStore = defineStore('exam', () => {
 
   const examInfo = computed((): ExamInfo => {
     const dayData = scheduleData.value[selectedDate.value];
-    if (dayData) {
+    if (dayData && dayData.rounds.length > 0) {
+      const uniqueExamIds = new Set(
+        dayData.rounds.map((r) => r.examId).filter((id) => id != null),
+      );
+      const isMultiExamDay = uniqueExamIds.size > 1;
+
       return {
-        badgeText: dynamicBadgeText.value,
-        title: dayData.title,
+        badgeText: isMultiExamDay ? '' : dynamicBadgeText.value,
+        title: isMultiExamDay
+          ? i18n.t('examSchedule.multipleExamsTitle')
+          : dayData.title,
         subtitle: i18n.t('examSchedule.examDetailSubtitle'),
-        locationText: dayData.location,
-        feeText: dayData.fee,
-        formatText: dayData.formatText || '',
+        locationText: isMultiExamDay ? '' : dayData.location,
+        feeText: isMultiExamDay ? '' : dayData.fee,
+        formatText: isMultiExamDay ? '' : dayData.formatText || '',
       };
     }
-    return { ...DEFAULT_EXAM_INFO };
+
+    // No exam rounds on selected date — never show placeholder venue/fee
+    return {
+      badgeText: '',
+      title: i18n.t('examSchedule.emptyRounds'),
+      subtitle: i18n.t('examSchedule.examDetailSubtitle'),
+      locationText: '',
+      feeText: '',
+      formatText: '',
+    };
   });
   const pendingRegistrations = ref<ExamHistoryItem[]>([]);
   const historyRecords = ref<ExamHistoryItem[]>([]);

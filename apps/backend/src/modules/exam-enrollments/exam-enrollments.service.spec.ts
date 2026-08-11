@@ -446,6 +446,42 @@ describe('ExamEnrollmentsService', () => {
       expect(result.ERM_STATUS).toBe(ExamEnrollmentStatus.PAID);
     });
 
+    it('ENR-U-002b: normalizes lowercase passcode before SPECIAL lookup', async () => {
+      // Arrange
+      const specialSession = {
+        ...baseSession,
+        EXAM: { ...openExam, EXAM_TYPE: EXAM_TYPE.SPECIAL },
+      } as unknown as ExamSession;
+      setupHappyCreate(specialSession);
+      examPasscodeRepository.findOne.mockResolvedValue({
+        PASSCODE_ID: 3,
+        PASSCODE: 'ABC123',
+        EXAM_ID: 100,
+        NATIONAL_ID: '1234567890123',
+      });
+      examEnrollmentRepository.findOneOrFail.mockResolvedValue({
+        ERM_ID: 55,
+        USER_ID: 7,
+        SESSION_ID: 10,
+        ERM_STATUS: ExamEnrollmentStatus.PAID,
+      });
+
+      // Act
+      await service.create({
+        ...createDto,
+        PASSCODE: 'abc123',
+      });
+
+      // Assert
+      expect(examPasscodeRepository.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            PASSCODE: 'ABC123',
+          }),
+        }),
+      );
+    });
+
     it('ENR-U-003: rejects SPECIAL create without PASSCODE', async () => {
       // Arrange
       const specialSession = {

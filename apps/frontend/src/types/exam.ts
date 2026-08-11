@@ -34,6 +34,12 @@ export interface Exam {
 
 export interface ExamRound {
   id: number;
+  /** EXAM_ID — scopes same-time seat merge across multiple exams on one date */
+  examId: number;
+  /** formatFee(EXAM_FEE) — confirm dialog when a day has multiple exams */
+  fee: string;
+  /** Venue label for this round (may join multiple rooms when seats are merged) */
+  location: string;
   timeRange: string;
   title: string;
   roundTypeLabel: string;
@@ -121,6 +127,8 @@ export interface RoundExamProps {
   availableSeats: number;
   totalSeats: number;
   roundTypeLabel?: string | undefined;
+  locationText?: string | undefined;
+  feeText?: string | undefined;
   regStartDate?: string | undefined;
   regEndDate?: string | undefined;
   examDate?: string | undefined;

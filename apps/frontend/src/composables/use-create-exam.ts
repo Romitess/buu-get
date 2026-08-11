@@ -4,17 +4,19 @@ import { useQuasar } from 'quasar';
 import { useExamStore } from 'src/stores/exam.store';
 import {
   BUDDHIST_YEAR_OFFSET,
+  DEFAULT_EXAM_FEE_THB,
   DEFAULT_EXAM_NAME,
   EXAM_FISCAL_YEAR_AD_REGEX,
   EXAM_TYPE_GENERAL,
   EXAM_TYPE_SPECIAL,
   EXAM_FORMAT_COMPUTER,
   EXAM_FORMAT_PAPER,
-  MAX_EXAM_SESSIONS,
   MIN_EXAM_SESSIONS,
   NOTIFY_MSG,
   VALIDATION_MSG,
   getCurrentThaiFiscalYearAd,
+  normalizeExamPasscode,
+  PASSCODE_PATTERN,
 } from 'src/constants/exam';
 import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
 import { fetchScoreRubrics } from 'src/services/score-rubric.service';
@@ -32,6 +34,7 @@ import {
   buddhistToGregorian,
   createExamPasscodes,
   parseBangkokDate,
+  timestampToHhMm,
   type ExamChangeItem,
   type SessionLocationSnapshotPayload,
 } from 'src/services/exam.service';
@@ -104,9 +107,13 @@ export interface CreateExamForm {
   examDate: string;
   timeSlots: TimeSlot[];
   regStartDate: string;
+  regStartTime: string;
   regEndDate: string;
+  regEndTime: string;
   payStartDate: string;
+  payStartTime: string;
   payEndDate: string;
+  payEndTime: string;
   /** Eligible candidates for special rounds */
   eligibleCandidates: EligibleCandidate[];
 }
@@ -254,7 +261,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       examFormat: EXAM_FORMAT_COMPUTER,
       fundSourceId: null,
       srbId: null,
-      fee: '',
+      fee: String(DEFAULT_EXAM_FEE_THB),
       isPublished: false,
       examDate: today,
       timeSlots: [
@@ -265,9 +272,13 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         },
       ],
       regStartDate: today,
+      regStartTime: '00:00',
       regEndDate: today,
+      regEndTime: '23:59',
       payStartDate: today,
+      payStartTime: '00:00',
       payEndDate: today,
+      payEndTime: '23:59',
       eligibleCandidates: [],
     });
 
@@ -410,6 +421,30 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   /** Whether the current exam type is special */
   const isSpecialRound = computed<boolean>(() => form.value.examType === EXAM_TYPE_SPECIAL);
 
+  /** ช่วงชำระเงิน: auto-fill จากช่วงลงทะเบียนเมื่อ reg เปลี่ยน (ยังแก้ไขเองได้) */
+  const syncPaymentPeriodFromRegistration = (): void => {
+    if (isSpecialRound.value) return;
+    form.value.payStartDate = form.value.regStartDate;
+    form.value.payStartTime = form.value.regStartTime;
+    form.value.payEndDate = form.value.regEndDate;
+    form.value.payEndTime = form.value.regEndTime;
+  };
+
+  watch(
+    () =>
+      [
+        form.value.regStartDate,
+        form.value.regStartTime,
+        form.value.regEndDate,
+        form.value.regEndTime,
+        form.value.examType,
+      ] as const,
+    () => {
+      if (isLoadingData.value) return;
+      syncPaymentPeriodFromRegistration();
+    },
+  );
+
   /**
    * รายชื่อผู้มีสิทธิ์สอบ (รอบพิเศษ) แก้ได้จนกว่าจะมีคนลงทะเบียน
    * เมื่อมี enrollment ที่ยังไม่ยกเลิกแล้ว จะล็อกเพิ่ม/ลบ/สร้าง passcode
@@ -458,6 +493,34 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     return parseInt(y, 10) * 10000 + parseInt(m, 10) * 100 + parseInt(d, 10);
   };
 
+  /** รวมวันที่+เวลาเป็นค่าเปรียบเทียบ (นาทีรวมจาก epoch ของปฏิทินฟอร์ม) */
+  const datetimeToCompareValue = (dateStr: string, timeStr: string): number => {
+    const dateVal = dateToCompareValue(dateStr);
+    if (dateVal === 0) return 0;
+    return dateVal * 1440 + timeToMinutes(timeStr || '00:00');
+  };
+
+  const nowDatetimeCompareValue = (): number => {
+    const now = new Date();
+    const d = String(now.getDate()).padStart(2, '0');
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const y = now.getFullYear() + BUDDHIST_YEAR_OFFSET;
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    return datetimeToCompareValue(`${d}/${m}/${y}`, `${hh}:${mm}`);
+  };
+
+  /** วันสอบ + เวลาเริ่มรอบแรก (ถ้ามี) สำหรับเทียบกับปิดรับสมัคร */
+  const examDatetimeCompareValue = (): number => {
+    const examVal = dateToCompareValue(form.value.examDate);
+    if (examVal === 0) return 0;
+    const earliestStart = form.value.timeSlots
+      .map((slot) => slot.startTime)
+      .filter((t) => Boolean(t?.trim()))
+      .sort((a, b) => timeToMinutes(a) - timeToMinutes(b))[0];
+    return datetimeToCompareValue(form.value.examDate, earliestStart || '00:00');
+  };
+
   const dateErrors = computed<Record<string, string>>(() => {
     const errors = {
       regStartDate: '',
@@ -468,48 +531,50 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     };
 
     const todayVal = dateToCompareValue(today);
-    const regStartVal = dateToCompareValue(form.value.regStartDate);
-    const regEndVal = dateToCompareValue(form.value.regEndDate);
-    const payStartVal = dateToCompareValue(form.value.payStartDate);
-    const payEndVal = dateToCompareValue(form.value.payEndDate);
-    const examVal = dateToCompareValue(form.value.examDate);
+    const regStartVal = datetimeToCompareValue(form.value.regStartDate, form.value.regStartTime);
+    const regEndVal = datetimeToCompareValue(form.value.regEndDate, form.value.regEndTime);
+    const payStartVal = datetimeToCompareValue(form.value.payStartDate, form.value.payStartTime);
+    const payEndVal = datetimeToCompareValue(form.value.payEndDate, form.value.payEndTime);
+    const examVal = examDatetimeCompareValue();
+    const examDateOnlyVal = dateToCompareValue(form.value.examDate);
 
-    // 1. วันที่เริ่มต้นลงทะเบียนต้องไม่เป็นวันที่ผ่านไปแล้ว (เฉพาะสร้างใหม่)
-    if (!isEditMode.value && regStartVal > 0 && regStartVal < todayVal) {
-      errors.regStartDate = 'วันที่เริ่มต้นลงทะเบียนต้องไม่เป็นวันที่ผ่านไปแล้ว';
+    // 1. วัน/เวลาเริ่มต้นลงทะเบียนต้องไม่เป็นอดีต (เฉพาะสร้างใหม่)
+    if (!isEditMode.value && regStartVal > 0 && regStartVal < nowDatetimeCompareValue()) {
+      errors.regStartDate = 'วันและเวลาเริ่มต้นลงทะเบียนต้องไม่เป็นอดีต';
     }
 
-    // 2. วันที่สิ้นสุดการลงทะเบียนต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน
+    // 2. วัน/เวลาสิ้นสุดการลงทะเบียนต้องไม่มาก่อนวัน/เวลาเริ่มต้น
     if (regEndVal > 0 && regStartVal > 0 && regEndVal < regStartVal) {
-      errors.regEndDate = 'วันที่สิ้นสุดการลงทะเบียนต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน';
+      errors.regEndDate = 'วันและเวลาสิ้นสุดการลงทะเบียนต้องไม่มาก่อนวันและเวลาเริ่มต้นลงทะเบียน';
     }
 
-    // 3. วันที่เริ่มต้นชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน (เว้นแต่เป็นรอบพิเศษ)
+    // 3. วัน/เวลาเริ่มต้นชำระเงินต้องไม่มาก่อนวัน/เวลาเริ่มต้นลงทะเบียน
     if (!isSpecialRound.value && payStartVal > 0 && regStartVal > 0 && payStartVal < regStartVal) {
-      errors.payStartDate = 'วันที่เริ่มต้นชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน';
+      errors.payStartDate = 'วันและเวลาเริ่มต้นชำระเงินต้องไม่มาก่อนวันและเวลาเริ่มต้นลงทะเบียน';
     }
 
-    // 4. วันที่สิ้นสุดการชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นชำระเงิน
+    // 4. วัน/เวลาสิ้นสุดการชำระเงินต้องไม่มาก่อนวัน/เวลาเริ่มต้นชำระเงิน
     if (!isSpecialRound.value && payEndVal > 0 && payStartVal > 0 && payEndVal < payStartVal) {
-      errors.payEndDate = 'วันที่สิ้นสุดการชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นชำระเงิน';
+      errors.payEndDate = 'วันและเวลาสิ้นสุดการชำระเงินต้องไม่มาก่อนวันและเวลาเริ่มต้นชำระเงิน';
     }
 
-    // 5. วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการลงทะเบียน
+    // 5. วัน/เวลาสอบต้องไม่มาก่อนวัน/เวลาสิ้นสุดการลงทะเบียน
     if (examVal > 0 && regEndVal > 0 && examVal < regEndVal) {
-      errors.examDate = 'วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการลงทะเบียน';
+      errors.examDate = 'วันและเวลาสอบต้องไม่มาก่อนวันและเวลาสิ้นสุดการลงทะเบียน';
     }
 
-    // 6. วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการชำระเงิน (รอบทั่วไป)
+    // 6. วัน/เวลาสอบต้องไม่มาก่อนวัน/เวลาสิ้นสุดการชำระเงิน (รอบทั่วไป)
     if (!isSpecialRound.value && examVal > 0 && payEndVal > 0 && examVal < payEndVal) {
       if (errors.examDate) {
-        errors.examDate += ' และต้องไม่มาก่อนวันที่สิ้นสุดการชำระเงิน';
+        errors.examDate += ' และต้องไม่มาก่อนวันและเวลาสิ้นสุดการชำระเงิน';
       } else {
-        errors.examDate = 'วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการชำระเงิน';
+        errors.examDate = 'วันและเวลาสอบต้องไม่มาก่อนวันและเวลาสิ้นสุดการชำระเงิน';
       }
     }
+
     // 7. วันที่สอบต้องไม่เป็นวันที่ผ่านไปแล้ว (เฉพาะกรณีสร้างใหม่ หรือมีการแก้ไขวันที่สอบ)
     const isExamDateChanged = !isEditMode.value || form.value.examDate !== originalExamDate.value;
-    if (examVal > 0 && examVal < todayVal && isExamDateChanged) {
+    if (examDateOnlyVal > 0 && examDateOnlyVal < todayVal && isExamDateChanged) {
       if (errors.examDate) {
         errors.examDate += ' และต้องไม่เป็นวันที่ผ่านไปแล้ว';
       } else {
@@ -640,15 +705,27 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (!form.value.regStartDate || !form.value.regStartDate.trim()) {
       errors.regStartDate = VALIDATION_MSG.REG_START_DATE;
     }
+    if (!form.value.regStartTime || !form.value.regStartTime.trim()) {
+      errors.regStartTime = VALIDATION_MSG.REG_START_TIME;
+    }
     if (!form.value.regEndDate || !form.value.regEndDate.trim()) {
       errors.regEndDate = VALIDATION_MSG.REG_END_DATE;
+    }
+    if (!form.value.regEndTime || !form.value.regEndTime.trim()) {
+      errors.regEndTime = VALIDATION_MSG.REG_END_TIME;
     }
     if (!isSpecialRound.value) {
       if (!form.value.payStartDate || !form.value.payStartDate.trim()) {
         errors.payStartDate = VALIDATION_MSG.PAY_START_DATE;
       }
+      if (!form.value.payStartTime || !form.value.payStartTime.trim()) {
+        errors.payStartTime = VALIDATION_MSG.PAY_START_TIME;
+      }
       if (!form.value.payEndDate || !form.value.payEndDate.trim()) {
         errors.payEndDate = VALIDATION_MSG.PAY_END_DATE;
+      }
+      if (!form.value.payEndTime || !form.value.payEndTime.trim()) {
+        errors.payEndTime = VALIDATION_MSG.PAY_END_TIME;
       }
     }
 
@@ -709,6 +786,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     return `${d}/${m}/${y}`;
   };
 
+  const formatPeriodDisplay = (dateBe: string, timeHhMm: string): string => {
+    if (!dateBe) return '';
+    return timeHhMm ? `${dateBe} ${timeHhMm}` : dateBe;
+  };
+
   /** หา label แหล่งทุนจาก id เพื่อแสดงในรายละเอียดการเปลี่ยนแปลง */
   const fundSourceLabelFor = (id: number | null): string => {
     if (!id) return 'ไม่ระบุ';
@@ -752,10 +834,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     fee: String(form.value.fee ?? ''),
     fundSourceLabel: fundSourceLabelFor(form.value.fundSourceId),
     examDate: form.value.examDate,
-    regStartDate: form.value.regStartDate,
-    regEndDate: form.value.regEndDate,
-    payStartDate: form.value.payStartDate,
-    payEndDate: form.value.payEndDate,
+    regStartDate: formatPeriodDisplay(form.value.regStartDate, form.value.regStartTime),
+    regEndDate: formatPeriodDisplay(form.value.regEndDate, form.value.regEndTime),
+    payStartDate: formatPeriodDisplay(form.value.payStartDate, form.value.payStartTime),
+    payEndDate: formatPeriodDisplay(form.value.payEndDate, form.value.payEndTime),
     scheduleText: buildScheduleText(),
   });
 
@@ -851,15 +933,20 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         }
         form.value.examType = exam.EXAM_TYPE || EXAM_TYPE_GENERAL;
         form.value.examFormat = exam.EXAM_FORMAT || EXAM_FORMAT_COMPUTER;
-        form.value.fee = Number(exam.EXAM_FEE ?? 0).toFixed(2);
+        const feeNum = Number(exam.EXAM_FEE ?? 0);
+        form.value.fee = Number.isFinite(feeNum) ? String(Math.round(feeNum)) : '0';
         form.value.isPublished = exam.EXAM_PUBLISHED ?? false;
         wasOriginallyPublished.value = exam.EXAM_PUBLISHED ?? false;
         form.value.examDate = gregorianToBuddhistDisplay(exam.EXAM_DATE);
         originalExamDate.value = form.value.examDate;
         form.value.regStartDate = gregorianToBuddhistDisplay(exam.EXAM_REG_START_DATE);
+        form.value.regStartTime = timestampToHhMm(exam.EXAM_REG_START_DATE);
         form.value.regEndDate = gregorianToBuddhistDisplay(exam.EXAM_REG_END_DATE);
+        form.value.regEndTime = timestampToHhMm(exam.EXAM_REG_END_DATE);
         form.value.payStartDate = gregorianToBuddhistDisplay(exam.EXAM_PAY_START_DATE);
+        form.value.payStartTime = timestampToHhMm(exam.EXAM_PAY_START_DATE);
         form.value.payEndDate = gregorianToBuddhistDisplay(exam.EXAM_PAY_END_DATE);
+        form.value.payEndTime = timestampToHhMm(exam.EXAM_PAY_END_DATE);
         form.value.fundSourceId = exam.FUND_SOURCE_ID ?? null;
         form.value.srbId = exam.SRB_ID ?? scoreRubrics.find((r) => r.isDefault)?.id ?? null;
 
@@ -1060,26 +1147,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       if (newIndex !== -1) {
         activeSlotIndex.value = newIndex;
       }
-    }
-  };
-
-  const addTimeSlot = (): void => {
-    if (isScheduleLocked.value) return;
-    if (form.value.timeSlots.length < MAX_EXAM_SESSIONS) {
-      form.value.timeSlots.push({
-        startTime: '',
-        endTime: '',
-        rooms: [{ locationId: null, proctorName: '', proctors: [], seats: 40 }],
-      });
-      sortTimeSlots();
-      // Switch to the newly added tab
-      activeSlotIndex.value = form.value.timeSlots.length - 1;
-    } else {
-      $q.notify({
-        type: 'warning',
-        message: NOTIFY_MSG.MAX_SESSIONS(MAX_EXAM_SESSIONS),
-        position: 'top',
-      });
     }
   };
 
@@ -1419,7 +1486,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     document.body.removeChild(link);
   };
 
-  /** Generate random 6-digit passcodes for all eligible candidates */
+  /** Generate random 6-digit passcodes for all eligible candidates (individual mode) */
   const generatePasscodes = (type: PasscodeType = 'individual'): void => {
     if (isEligibleCandidatesLocked.value) {
       notifyEligibleCandidatesLocked();
@@ -1435,22 +1502,61 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       return;
     }
 
+    // Shared mode is handled by applySharedPasscode (admin-defined). Keep a
+    // numeric shared fallback only if something still calls type === 'single'.
     if (type === 'single') {
       const singlePasscode = String(Math.floor(100000 + Math.random() * 900000));
-      form.value.eligibleCandidates = form.value.eligibleCandidates.map((c) => ({
-        ...c,
-        passcode: singlePasscode,
-      }));
-    } else {
-      form.value.eligibleCandidates = form.value.eligibleCandidates.map((c) => ({
-        ...c,
-        passcode: String(Math.floor(100000 + Math.random() * 900000)),
-      }));
+      applySharedPasscode(singlePasscode);
+      return;
     }
+
+    form.value.eligibleCandidates = form.value.eligibleCandidates.map((c) => ({
+      ...c,
+      passcode: String(Math.floor(100000 + Math.random() * 900000)),
+    }));
 
     $q.notify({
       type: 'positive',
       message: `สร้าง Passcode สำเร็จ ${form.value.eligibleCandidates.length} รายการ`,
+      position: 'top',
+      timeout: 2000,
+    });
+  };
+
+  /** Apply one admin-defined shared passcode to every eligible candidate */
+  const applySharedPasscode = (rawPasscode: string): void => {
+    if (isEligibleCandidatesLocked.value) {
+      notifyEligibleCandidatesLocked();
+      return;
+    }
+
+    if (form.value.eligibleCandidates.length === 0) {
+      $q.notify({
+        type: 'warning',
+        message: 'กรุณานำเข้ารายชื่อก่อนสร้าง Passcode',
+        position: 'top',
+      });
+      return;
+    }
+
+    const passcode = normalizeExamPasscode(rawPasscode);
+    if (!PASSCODE_PATTERN.test(passcode)) {
+      $q.notify({
+        type: 'negative',
+        message: VALIDATION_MSG.SHARED_PASSCODE,
+        position: 'top',
+      });
+      return;
+    }
+
+    form.value.eligibleCandidates = form.value.eligibleCandidates.map((c) => ({
+      ...c,
+      passcode,
+    }));
+
+    $q.notify({
+      type: 'positive',
+      message: `กำหนด Passcode ร่วมสำเร็จ ${form.value.eligibleCandidates.length} รายการ`,
       position: 'top',
       timeout: 2000,
     });
@@ -1719,69 +1825,68 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
     // === DATE LOGICAL VALIDATION ===
     const todayVal = dateToCompareValue(today);
-    const regStartVal = dateToCompareValue(form.value.regStartDate);
-    const regEndVal = dateToCompareValue(form.value.regEndDate);
-    const payStartVal = dateToCompareValue(form.value.payStartDate);
-    const payEndVal = dateToCompareValue(form.value.payEndDate);
-    const examVal = dateToCompareValue(form.value.examDate);
+    const regStartVal = datetimeToCompareValue(form.value.regStartDate, form.value.regStartTime);
+    const regEndVal = datetimeToCompareValue(form.value.regEndDate, form.value.regEndTime);
+    const payStartVal = datetimeToCompareValue(form.value.payStartDate, form.value.payStartTime);
+    const payEndVal = datetimeToCompareValue(form.value.payEndDate, form.value.payEndTime);
+    const examVal = examDatetimeCompareValue();
+    const examDateOnlyVal = dateToCompareValue(form.value.examDate);
 
-    // 1. วันที่เริ่มต้นลงทะเบียนต้องไม่เป็นวันที่ผ่านไปแล้ว (เฉพาะกรณีสร้างใหม่)
-    if (!isEditMode.value && regStartVal < todayVal) {
+    // 1. วัน/เวลาเริ่มต้นลงทะเบียนต้องไม่เป็นอดีต (เฉพาะกรณีสร้างใหม่)
+    if (!isEditMode.value && regStartVal < nowDatetimeCompareValue()) {
       $q.notify({
         type: 'warning',
-        message: 'วันที่เริ่มต้นลงทะเบียนต้องไม่เป็นวันที่ผ่านไปแล้ว',
+        message: 'วันและเวลาเริ่มต้นลงทะเบียนต้องไม่เป็นอดีต',
         position: 'top',
       });
       return false;
     }
 
-    // 2. วันที่สิ้นสุดการลงทะเบียนต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน
+    // 2. วัน/เวลาสิ้นสุดการลงทะเบียนต้องไม่มาก่อนวัน/เวลาเริ่มต้น
     if (regEndVal < regStartVal) {
       $q.notify({
         type: 'warning',
-        message: 'วันที่สิ้นสุดการลงทะเบียนต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน',
+        message: 'วันและเวลาสิ้นสุดการลงทะเบียนต้องไม่มาก่อนวันและเวลาเริ่มต้นลงทะเบียน',
         position: 'top',
       });
       return false;
     }
 
-    // 3. วันที่เริ่มต้นชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน (เว้นแต่เป็นรอบพิเศษที่ไม่มีชำระเงิน)
+    // 3–4. ช่วงชำระเงิน (รอบทั่วไป)
     if (!isSpecialRound.value) {
       if (payStartVal < regStartVal) {
         $q.notify({
           type: 'warning',
-          message: 'วันที่เริ่มต้นชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นลงทะเบียน',
+          message: 'วันและเวลาเริ่มต้นชำระเงินต้องไม่มาก่อนวันและเวลาเริ่มต้นลงทะเบียน',
           position: 'top',
         });
         return false;
       }
-
-      // 4. วันที่สิ้นสุดการชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นชำระเงิน
       if (payEndVal < payStartVal) {
         $q.notify({
           type: 'warning',
-          message: 'วันที่สิ้นสุดการชำระเงินต้องไม่มาก่อนวันที่เริ่มต้นชำระเงิน',
+          message: 'วันและเวลาสิ้นสุดการชำระเงินต้องไม่มาก่อนวันและเวลาเริ่มต้นชำระเงิน',
           position: 'top',
         });
         return false;
       }
     }
 
-    // 5. วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการลงทะเบียน
+    // 5. วัน/เวลาสอบต้องไม่มาก่อนวัน/เวลาสิ้นสุดการลงทะเบียน
     if (examVal < regEndVal) {
       $q.notify({
         type: 'warning',
-        message: 'วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการลงทะเบียน',
+        message: 'วันและเวลาสอบต้องไม่มาก่อนวันและเวลาสิ้นสุดการลงทะเบียน',
         position: 'top',
       });
       return false;
     }
 
-    // 6. วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการชำระเงิน (รอบทั่วไป)
+    // 6. วัน/เวลาสอบต้องไม่มาก่อนวัน/เวลาสิ้นสุดการชำระเงิน (รอบทั่วไป)
     if (!isSpecialRound.value && examVal < payEndVal) {
       $q.notify({
         type: 'warning',
-        message: 'วันที่สอบต้องไม่มาก่อนวันที่สิ้นสุดการชำระเงิน',
+        message: 'วันและเวลาสอบต้องไม่มาก่อนวันและเวลาสิ้นสุดการชำระเงิน',
         position: 'top',
       });
       return false;
@@ -1789,7 +1894,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
     // 7. วันที่สอบต้องไม่เป็นวันที่ผ่านไปแล้ว (เฉพาะกรณีสร้างใหม่ หรือมีการแก้ไขวันที่สอบ)
     const isExamDateChanged = !isEditMode.value || form.value.examDate !== originalExamDate.value;
-    if (examVal < todayVal && isExamDateChanged) {
+    if (examDateOnlyVal < todayVal && isExamDateChanged) {
       $q.notify({
         type: 'warning',
         message: 'วันที่สอบต้องไม่เป็นวันที่ผ่านไปแล้ว',
@@ -1832,9 +1937,13 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           isPublished: form.value.isPublished,
           examDate: form.value.examDate,
           regStartDate: form.value.regStartDate,
+          regStartTime: form.value.regStartTime,
           regEndDate: form.value.regEndDate,
+          regEndTime: form.value.regEndTime,
           payStartDate: form.value.payStartDate,
+          payStartTime: form.value.payStartTime,
           payEndDate: form.value.payEndDate,
+          payEndTime: form.value.payEndTime,
           timeRanges,
           fundSourceId: Number(form.value.fundSourceId || 0),
           srbId: Number(form.value.srbId),
@@ -1873,9 +1982,13 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           isPublished: form.value.isPublished,
           examDate: form.value.examDate,
           regStartDate: form.value.regStartDate,
+          regStartTime: form.value.regStartTime,
           regEndDate: form.value.regEndDate,
+          regEndTime: form.value.regEndTime,
           payStartDate: form.value.payStartDate,
+          payStartTime: form.value.payStartTime,
           payEndDate: form.value.payEndDate,
+          payEndTime: form.value.payEndTime,
           timeRanges,
           fundSourceId: form.value.fundSourceId,
           srbId: Number(form.value.srbId),
@@ -1907,7 +2020,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
             passportNo: c.passportNo ?? undefined,
             fullName: c.fullName ?? undefined,
             fullNameEn: c.fullNameEn ?? undefined,
-            passcode: c.passcode,
+            passcode: normalizeExamPasscode(c.passcode || ''),
           }));
           await createExamPasscodes(targetExamId, passcodesPayload);
         } catch (passcodeErr) {
@@ -2007,7 +2120,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     fieldErrors,
     shakeKey,
     loadInitialData,
-    addTimeSlot,
     removeTimeSlot,
     addRoom,
     removeRoom,
@@ -2015,6 +2127,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     addEligibleCandidatesFromUsers,
     removeEligibleCandidates,
     generatePasscodes,
+    applySharedPasscode,
     exportCandidates,
     handleCancel,
     handleSave,

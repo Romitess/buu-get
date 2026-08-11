@@ -74,6 +74,8 @@
                 :available-seats="round.availableSeats"
                 :total-seats="round.totalSeats"
                 :round-type-label="translateExamType(round.roundTypeLabel)"
+                :location-text="round.location"
+                :fee-text="round.fee"
                 :reg-start-date="round.regStartDate"
                 :reg-end-date="round.regEndDate"
                 :exam-date="round.examDate"
@@ -95,7 +97,7 @@
       v-model="showConfirmDialog"
       :exam-date="formattedSelectedDate"
       :exam-time="selectedRound?.timeRange || ''"
-      :exam-fee="examInfo.feeText"
+      :exam-fee="selectedRound?.fee || examInfo.feeText"
       @confirm="onConfirmRegistration"
     />
 

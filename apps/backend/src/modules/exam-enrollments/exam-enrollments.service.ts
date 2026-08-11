@@ -47,7 +47,10 @@ import {
 import { ExamPasscode } from '../exam/entities/exam-passcode.entity';
 import { User } from '../users/entities/user.entity';
 import { resolveEnrollmentPhysicalStatus } from '../../common/utils/physical-status.util';
-import { EXAM_TYPE } from '../exam/constants/exam.constants';
+import {
+  EXAM_TYPE,
+  normalizeExamPasscode,
+} from '../exam/constants/exam.constants';
 import { getProfileFixEmailTemplate } from './templates/profile-fix-email.template';
 import { ExamPasscodeLog } from '../exam/entities/exam-passcode-log.entity';
 import { TestTakerIdService } from './test-taker-id.service';
@@ -300,31 +303,11 @@ export class ExamEnrollmentsService {
     let validPasscode: ExamPasscode | null = null;
 
     if (targetSession.EXAM?.EXAM_TYPE === EXAM_TYPE.SPECIAL) {
-      if (!PASSCODE) {
-        throw new BadRequestException(
-          'Passcode is required for special exam rounds',
-        );
-      }
-
-      validPasscode = await this.examPasscodeRepository.findOne({
-        where: {
-          EXAM_ID: targetSession.EXAM_ID,
-          NATIONAL_ID: user.USER_NATIONAL_ID || '',
-          PASSCODE: PASSCODE,
-        },
-        select: {
-          PASSCODE_ID: true,
-          PASSCODE: true,
-          EXAM_ID: true,
-          NATIONAL_ID: true,
-        },
-      });
-
-      if (!validPasscode) {
-        throw new BadRequestException(
-          'Invalid passcode for this user and exam',
-        );
-      }
+      validPasscode = await this.findValidSpecialPasscode(
+        targetSession.EXAM_ID,
+        user.USER_NATIONAL_ID || '',
+        PASSCODE,
+      );
     }
 
     const existingEnrollment = await this.examEnrollmentRepository
@@ -858,9 +841,6 @@ export class ExamEnrollmentsService {
 
     const skip = (page - 1) * limit;
 
-    let sortColumn = 'enrollment.CREATED_AT';
-    let sortOrder: 'ASC' | 'DESC' = 'ASC';
-
     if (resolvedQuery.sortBy) {
       const mapping: Record<string, string> = {
         titleTh: 'profile.userTitleTh',
@@ -871,9 +851,10 @@ export class ExamEnrollmentsService {
         createdAt: 'enrollment.CREATED_AT',
       };
       const sortBy = resolvedQuery.sortBy;
-      if (Object.prototype.hasOwnProperty.call(mapping, sortBy)) {
-        sortColumn = mapping[sortBy];
-      }
+      const sortColumn = Object.prototype.hasOwnProperty.call(mapping, sortBy)
+        ? mapping[sortBy]
+        : 'enrollment.CREATED_AT';
+      let sortOrder: 'ASC' | 'DESC' = 'ASC';
       if (resolvedQuery.descending !== undefined) {
         sortOrder =
           resolvedQuery.descending === 'true' ||
@@ -881,9 +862,21 @@ export class ExamEnrollmentsService {
             ? 'DESC'
             : 'ASC';
       }
+      qb.orderBy(sortColumn, sortOrder);
+    } else {
+      // Default: incomplete statuses first, then newest registrations
+      qb.orderBy(
+        `CASE
+          WHEN enrollment.ERM_VERIFY_STATUS IN (${ExamVerifyStatus.UNCHECKED}, ${ExamVerifyStatus.WAIT_FIXED})
+            OR enrollment.ERM_STATUS = ${ExamEnrollmentStatus.UNPAID}
+          THEN 0 ELSE 1 END`,
+        'ASC',
+      )
+        .addOrderBy('enrollment.CREATED_AT', 'DESC')
+        .addOrderBy('enrollment.ERM_ID', 'DESC');
     }
 
-    qb.orderBy(sortColumn, sortOrder).skip(skip).take(limit);
+    qb.skip(skip).take(limit);
 
     const [data, total] = await qb.getManyAndCount();
     const totalPaid = await paidQb.getCount();
@@ -1574,11 +1567,13 @@ export class ExamEnrollmentsService {
       );
     }
 
+    const normalizedPasscode = normalizeExamPasscode(passcode);
+
     const validPasscode = await this.examPasscodeRepository.findOne({
       where: {
         EXAM_ID: examId,
         NATIONAL_ID: nationalId,
-        PASSCODE: passcode,
+        PASSCODE: normalizedPasscode,
       },
     });
 

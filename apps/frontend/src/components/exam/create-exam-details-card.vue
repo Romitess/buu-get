@@ -108,8 +108,8 @@
             <div class="buu-label-muted q-mb-xs">ค่าธรรมเนียม</div>
             <q-input
               :model-value="form.fee"
-              placeholder="0.00"
-              inputmode="decimal"
+              :placeholder="String(DEFAULT_EXAM_FEE_THB)"
+              inputmode="numeric"
               suffix="THB"
               outlined
               dense
@@ -210,7 +210,7 @@
 <script setup lang="ts">
 import type { CreateExamForm } from 'src/composables/use-create-exam';
 import AppSelect from 'src/components/base/app-select.vue';
-import { DEFAULT_EXAM_NAME } from 'src/constants/exam';
+import { DEFAULT_EXAM_FEE_THB, DEFAULT_EXAM_NAME } from 'src/constants/exam';
 
 /**
  * Props for CreateExamDetailsCard.
@@ -259,44 +259,36 @@ const onFiscalYearInput = (val: string | number | null): void => {
 };
 
 /**
- * Sanitize the fee input: allow only digits and a single decimal point.
- * Blocks negative values, the minus sign, the letter "e", and any other characters.
+ * Sanitize the fee input: digits only (whole baht, no decimals).
+ * Blocks negative values, decimal points, the letter "e", and other non-digit characters.
  */
 const onFeeInput = (val: string | number | null): void => {
-  let sanitized = String(val ?? '').replace(/[^\d.]/g, '');
-  const firstDot = sanitized.indexOf('.');
-  if (firstDot !== -1) {
-    sanitized = sanitized.slice(0, firstDot + 1) + sanitized.slice(firstDot + 1).replace(/\./g, '');
-  }
-  form.value.fee = sanitized;
+  form.value.fee = String(val ?? '').replace(/\D/g, '');
 };
 
 /**
- * Block typing any character that is not a digit or a decimal point,
- * and prevent a second decimal point. Letters/symbols never appear in the field.
+ * Block typing any character that is not a digit.
  */
 const onFeeKeypress = (e: KeyboardEvent): void => {
-  if (!/[0-9.]/.test(e.key)) {
-    e.preventDefault();
-    return;
-  }
-  if (e.key === '.' && String(form.value.fee ?? '').includes('.')) {
+  if (!/[0-9]/.test(e.key)) {
     e.preventDefault();
   }
 };
 
 /**
- * On blur, normalize the fee to two decimal places (e.g. "500" -> "500.00").
- * Leaves the field empty when nothing was entered so the placeholder stays visible.
+ * On blur, normalize the fee to a whole-baht integer string.
+ * Empty input restores the default exam fee so create UX always has a value.
  */
 const handleFeeBlur = (): void => {
   const raw = String(form.value.fee ?? '').trim();
-  if (raw === '' || raw === '.') {
-    form.value.fee = '';
+  if (raw === '') {
+    form.value.fee = String(DEFAULT_EXAM_FEE_THB);
     return;
   }
   const numeric = Number(raw);
-  form.value.fee = Number.isNaN(numeric) ? '' : numeric.toFixed(2);
+  form.value.fee = Number.isNaN(numeric)
+    ? String(DEFAULT_EXAM_FEE_THB)
+    : String(Math.round(numeric));
 };
 </script>
 

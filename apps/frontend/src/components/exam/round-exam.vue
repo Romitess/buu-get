@@ -6,12 +6,19 @@
 
     <q-card-section class="round-exam__info q-pa-none">
       <h3 class="round-exam__title">{{ title }}</h3>
-      <AppButton
+      <AppStatusBadge
         :label="roundTypeLabel || t('examSchedule.roundTypeLabel')"
-        color="secondary"
-        dense
+        type="primary"
         class="round-exam__tag"
       />
+      <div v-if="locationText" class="round-exam__meta row items-center no-wrap">
+        <q-icon name="location_on" size="18px" class="q-mr-xs round-exam__meta-icon" />
+        <span class="round-exam__meta-text text-caption">{{ locationText }}</span>
+      </div>
+      <div v-if="feeText" class="round-exam__meta row items-center no-wrap">
+        <q-icon name="payments" size="18px" class="q-mr-xs round-exam__meta-icon" />
+        <span class="round-exam__meta-text text-caption">{{ feeText }}</span>
+      </div>
     </q-card-section>
     <q-space />
 
@@ -66,6 +73,7 @@ import type { RoundExamProps } from 'src/types/exam';
 import { isExamRoundRegistrationExpired } from 'src/utils/exam-registration';
 import ExamClock from './exam-clock.vue';
 import AppButton from '../base/app-button.vue';
+import AppStatusBadge from '../base/app-status-badge.vue';
 
 const props = defineProps<RoundExamProps>();
 
@@ -178,12 +186,12 @@ const handleRegister = (): void => {
 .round-exam {
   display: flex;
   align-items: center;
-  padding: 10px 18px;
+  padding: 12px 16px;
   background: var(--surface-card);
-  border-radius: 16px;
+  border-radius: 12px;
   border: 1px solid var(--border-color);
-  margin-bottom: 12px;
-  box-shadow: var(--shadow-card) !important;
+  margin-bottom: 10px;
+  box-shadow: none !important;
   transition:
     transform var(--transition-fast),
     box-shadow var(--transition-fast);
@@ -196,7 +204,8 @@ const handleRegister = (): void => {
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: var(--round-exam-hover-shadow) !important;
+    box-shadow: var(--shadow-card, 0 4px 12px rgba(0, 0, 0, 0.08)) !important;
+    border-color: var(--border-color);
   }
 
   &__time {
@@ -206,38 +215,55 @@ const handleRegister = (): void => {
   &__info {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     align-items: flex-start;
   }
 
   &__title {
-    font-size: 1.1rem;
-    font-weight: 800;
+    font-size: 1.2rem;
+    font-weight: 700;
     color: var(--text-primary);
     margin: 0;
-    line-height: 1.2;
+    line-height: 1.3;
   }
 
   &__tag {
-    font-weight: 500 !important;
-    font-size: 0.7rem;
-    border-radius: 10px !important;
-    padding: 2px 8px;
+    font-size: 0.85rem !important;
+    height: auto !important;
+    min-height: 28px;
+    padding: 4px 12px !important;
+  }
+
+  &__meta {
+    max-width: 100%;
+  }
+
+  &__meta-icon {
+    color: var(--text-secondary, #6c6c6c);
+    opacity: 0.85;
+  }
+
+  &__meta-text {
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--text-secondary, #6c6c6c);
+    line-height: 1.4;
+    word-break: break-word;
   }
 
   &__action-group {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 12px;
+    gap: 10px;
   }
 
   &__status {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-weight: 500;
-    font-size: 0.8rem;
+    font-weight: 600;
+    font-size: 0.9rem;
 
     .text-muted {
       color: var(--text-muted);
@@ -247,7 +273,9 @@ const handleRegister = (): void => {
   }
 
   &__btn {
-    min-width: 130px;
+    min-width: 140px;
+    min-height: 40px;
+    font-size: 0.95rem !important;
     white-space: nowrap;
     flex-shrink: 0;
   }
@@ -256,8 +284,8 @@ const handleRegister = (): void => {
 @media (max-width: 900px) {
   .round-exam {
     flex-wrap: wrap;
-    padding: 16px;
-    gap: 16px;
+    padding: 14px;
+    gap: 14px;
 
     &__info {
       flex: 1;
@@ -274,27 +302,33 @@ const handleRegister = (): void => {
       justify-content: space-between;
       align-items: center;
       border-top: 1px solid var(--round-exam-divider);
-      padding-top: 16px;
+      padding-top: 12px;
     }
   }
 }
 
 @media (max-width: 600px) {
   .round-exam {
-    padding: 16px;
+    padding: 14px;
+
     &__title {
       font-size: 1.1rem;
+    }
+
+    &__meta-text {
+      font-size: 0.9rem;
     }
 
     &__action-group {
       flex-direction: column;
       align-items: stretch;
-      gap: 16px;
+      gap: 12px;
     }
 
     &__status {
       justify-content: center;
       width: 100%;
+      font-size: 0.9rem;
     }
 
     &__btn {

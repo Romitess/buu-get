@@ -1,27 +1,16 @@
 <template>
   <q-card flat bordered class="buu-premium-card q-mb-xl">
     <q-card-section>
-      <!-- Header Row: Title + Add Button -->
+      <!-- Header Row: Title -->
       <div class="row items-center justify-between q-mb-md section-header">
         <div class="row items-center no-wrap">
           <q-icon name="calendar_today" size="20px" class="q-mr-sm text-dark" />
           <div class="text-subtitle1 text-weight-bold text-dark">กำหนดการสอบ</div>
         </div>
-        <q-btn
-          v-if="!locked"
-          label="เพิ่มรอบเวลาสอบ"
-          color="primary"
-          outline
-          dense
-          icon="add_circle"
-          class="q-px-md add-slot-btn"
-          :disabled="form.timeSlots.length >= MAX_EXAM_SESSIONS"
-          @click="$emit('add-time-slot')"
-        />
       </div>
 
-      <!-- Time Slot Tabs -->
-      <div class="slot-tabs-row q-mb-lg">
+      <!-- Time Slot Tabs (legacy multi-slot exams only) -->
+      <div v-if="form.timeSlots.length > 1" class="slot-tabs-row q-mb-lg">
         <div
           v-for="(slot, index) in form.timeSlots"
           :key="index"
@@ -33,7 +22,7 @@
             {{ getSlotLabel(slot, index) }}
           </span>
           <q-icon
-            v-if="!locked && form.timeSlots.length > 1"
+            v-if="!locked"
             name="close"
             size="14px"
             class="slot-tab__close"
@@ -351,7 +340,6 @@ import AppCalendar from 'src/components/shared/app-calendar.vue';
 import AppSelect from 'src/components/base/app-select.vue';
 import AppTimePicker from 'src/components/base/app-time-picker.vue';
 import { beToCeString, ceToBeString } from 'src/utils/thai-date';
-import { MAX_EXAM_SESSIONS } from 'src/constants/exam';
 
 const props = defineProps<{
   /** When true, disables all schedule editing (for published exams) */
@@ -375,7 +363,6 @@ const props = defineProps<{
 const form = defineModel<CreateExamForm>('form', { required: true });
 
 const emit = defineEmits([
-  'add-time-slot',
   'remove-time-slot',
   'add-room',
   'remove-room',
@@ -564,9 +551,6 @@ const getSlotLabel = (slot: TimeSlot, index: number): string => {
   font-size: 16px;
   font-weight: 700;
   color: var(--text-primary);
-}
-.add-slot-btn {
-  border-radius: 8px;
 }
 .add-room-btn {
   border-radius: 8px;

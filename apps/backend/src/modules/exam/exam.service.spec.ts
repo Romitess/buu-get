@@ -15,6 +15,7 @@ import { CreateExamDto } from './dto/create-exam.dto';
 type MockRepo = {
   create: jest.Mock;
   save: jest.Mock;
+  find: jest.Mock;
   findOne: jest.Mock;
   update: jest.Mock;
   merge: jest.Mock;
@@ -27,6 +28,7 @@ type MockRepo = {
 const createMockRepo = (): MockRepo => ({
   create: jest.fn(),
   save: jest.fn(),
+  find: jest.fn(),
   findOne: jest.fn(),
   update: jest.fn(),
   merge: jest.fn(),
@@ -44,6 +46,7 @@ describe('ExamService', () => {
   let scoreRubricsService: { assertRubricUsable: jest.Mock };
   let examScoresService: { examHasSavedScores: jest.Mock };
   let moodleSyncService: { createCourse: jest.Mock; courseCategoryId: number };
+  let platformGatewayService: { sendEmail: jest.Mock };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -85,6 +88,7 @@ describe('ExamService', () => {
     scoreRubricsService = module.get(ScoreRubricsService);
     examScoresService = module.get(ExamScoresService);
     moodleSyncService = module.get(MoodleSyncService);
+    platformGatewayService = module.get(PlatformGatewayService);
   });
 
   describe('create', () => {
@@ -93,6 +97,7 @@ describe('ExamService', () => {
       const dto: CreateExamDto = {
         EXAM_NAME: 'Exam A',
         SRB_ID: 3,
+        EXAM_TYPE: 'รอบทั่วไป',
         EXAM_REG_END_DATE: '2026-09-10',
         EXAM_PAY_END_DATE: '2026-09-11T00:00:00Z',
       };
@@ -112,13 +117,83 @@ describe('ExamService', () => {
       // Act
       await service.create(dto, 1001);
 
-      // Assert
+      // Assert — pay end keeps its own normalized value (not overwritten by reg)
       expect(examRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           EXAM_REG_END_DATE: '2026-09-10T23:59:59+07:00',
           EXAM_PAY_END_DATE: '2026-09-11T23:59:59+07:00',
         }),
       );
+    });
+
+    it('should preserve explicit payment period datetime on create', async () => {
+      const dto: CreateExamDto = {
+        EXAM_NAME: 'Exam Sync Pay',
+        SRB_ID: 3,
+        EXAM_TYPE: 'รอบทั่วไป',
+        EXAM_REG_START_DATE: '2026-08-11T09:00:00+07:00',
+        EXAM_REG_END_DATE: '2026-08-20T16:30:00+07:00',
+        EXAM_PAY_START_DATE: '2026-08-11T09:00:00+07:00',
+        EXAM_PAY_END_DATE: '2026-08-25T18:00:00+07:00',
+      };
+      examRepository.create.mockImplementation((payload: CreateExamDto) => ({
+        EXAM_ID: 12,
+        EXAM_ROUND: '1',
+        ...payload,
+      }));
+      examRepository.save.mockResolvedValue({
+        EXAM_ID: 12,
+        EXAM_ROUND: '1',
+        ...dto,
+      });
+      moodleSyncService.createCourse.mockResolvedValue(999);
+      scoreRubricsService.assertRubricUsable.mockResolvedValue(undefined);
+
+      await service.create(dto, 1001);
+
+      expect(examRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          EXAM_PAY_START_DATE: '2026-08-11T09:00:00+07:00',
+          EXAM_PAY_END_DATE: '2026-08-25T18:00:00+07:00',
+        }),
+      );
+    });
+
+    it('should leave payment fields unset for special exams', async () => {
+      const dto: CreateExamDto = {
+        EXAM_NAME: 'Exam Special',
+        SRB_ID: 3,
+        EXAM_TYPE: 'รอบพิเศษ',
+        EXAM_REG_START_DATE: '2026-08-11T09:00:00+07:00',
+        EXAM_REG_END_DATE: '2026-08-20T16:30:00+07:00',
+        EXAM_PAY_START_DATE: undefined,
+        EXAM_PAY_END_DATE: undefined,
+      };
+      examRepository.create.mockImplementation((payload: CreateExamDto) => ({
+        EXAM_ID: 13,
+        EXAM_ROUND: '1',
+        ...payload,
+      }));
+      examRepository.save.mockResolvedValue({
+        EXAM_ID: 13,
+        EXAM_ROUND: '1',
+        ...dto,
+      });
+      moodleSyncService.createCourse.mockResolvedValue(999);
+      scoreRubricsService.assertRubricUsable.mockResolvedValue(undefined);
+
+      await service.create(dto, 1001);
+
+      expect(examRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          EXAM_REG_START_DATE: '2026-08-11T09:00:00+07:00',
+          EXAM_REG_END_DATE: '2026-08-20T16:30:00+07:00',
+        }),
+      );
+      const createdPayload = examRepository.create.mock
+        .calls[0]?.[0] as CreateExamDto;
+      expect(createdPayload.EXAM_PAY_START_DATE).toBeUndefined();
+      expect(createdPayload.EXAM_PAY_END_DATE).toBeUndefined();
     });
 
     it('should validate score rubric usability before create (EXAM-U-002)', async () => {
@@ -187,22 +262,98 @@ describe('ExamService', () => {
     });
   });
 
+  describe('findAll', () => {
+    it('should select EXAM_FISCAL_YEAR so list titles can include budget year', async () => {
+      examRepository.find.mockResolvedValue([
+        {
+          EXAM_ID: 1,
+          EXAM_NAME: 'BUU-GET',
+          EXAM_ROUND: '1',
+          EXAM_FISCAL_YEAR: '2026',
+          SESSIONS: [],
+        },
+      ]);
+
+      const exams = await service.findAll();
+
+      expect(examRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          select: expect.objectContaining({
+            EXAM_ROUND: true,
+            EXAM_FISCAL_YEAR: true,
+          }),
+        }),
+      );
+      expect(exams[0]?.EXAM_FISCAL_YEAR).toBe('2026');
+    });
+  });
+
+  describe('notifyExamChanges', () => {
+    it('should include round and fiscal year in change notification email', async () => {
+      platformGatewayService.sendEmail.mockResolvedValue(undefined);
+      examRepository.findOne.mockResolvedValue({
+        EXAM_ID: 7,
+        EXAM_NAME: 'BUU-GET',
+        EXAM_ROUND: '1',
+        EXAM_FISCAL_YEAR: '2026',
+      });
+      examEnrollmentRepository.find.mockResolvedValue([
+        {
+          ERM_ID: 1,
+          USER_ID: 10,
+          SESSION_ID: 20,
+          SESSION: { SS_ID: 20, EXAM_ID: 7 },
+          USER: {
+            USER_ID: 10,
+            USER_EMAIL: 'candidate@example.com',
+            PROFILE: {
+              userProfileId: 1,
+              userTitleTh: 'นาย',
+              userFullnameTh: 'ทดสอบ',
+            },
+          },
+        },
+      ]);
+
+      const result = service.notifyExamChanges(7, {
+        changes: [{ label: 'วันที่สอบ', oldValue: 'A', newValue: 'B' }],
+      });
+      expect(result).toEqual({ success: true });
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(examRepository.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          select: expect.objectContaining({
+            EXAM_ROUND: true,
+            EXAM_FISCAL_YEAR: true,
+          }),
+        }),
+      );
+      expect(platformGatewayService.sendEmail).toHaveBeenCalled();
+      const html = platformGatewayService.sendEmail.mock
+        .calls[0]?.[3] as string;
+      expect(html).toContain('1/2026');
+    });
+  });
+
   describe('createPasscodes', () => {
+    const editableQb = () => ({
+      innerJoin: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getCount: jest.fn().mockResolvedValue(0),
+    });
+
     it('should reject passcode item missing required ID/name pair (EXAM-U-004)', async () => {
       // Arrange
       examRepository.exists.mockResolvedValue(true);
-      const qb = {
-        innerJoin: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getCount: jest.fn().mockResolvedValue(0),
-      };
-      examEnrollmentRepository.createQueryBuilder.mockReturnValue(qb);
+      examEnrollmentRepository.createQueryBuilder.mockReturnValue(editableQb());
 
       // Act / Assert
       await expect(
         service.createPasscodes(1, {
-          passcodes: [{ passcode: 'A-001', nationalId: ' ', fullName: ' ' }],
+          passcodes: [{ passcode: 'ABC123', nationalId: ' ', fullName: ' ' }],
         }),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
@@ -221,22 +372,23 @@ describe('ExamService', () => {
       // Act / Assert
       await expect(
         service.createPasscodes(3, {
-          passcodes: [{ passcode: 'P-01', nationalId: '1103700000000' }],
+          passcodes: [
+            {
+              passcode: 'ABC123',
+              nationalId: '1103700000000',
+              fullName: 'Test',
+            },
+          ],
         }),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(examPasscodeRepository.delete).not.toHaveBeenCalled();
     });
 
-    it('should trim fallback identity fields and replace passcodes (EXAM-U-006)', async () => {
+    it('should trim fallback identity fields, normalize passcode, and replace passcodes (EXAM-U-006)', async () => {
       // Arrange
       examRepository.exists.mockResolvedValue(true);
-      const qb = {
-        innerJoin: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getCount: jest.fn().mockResolvedValue(0),
-      };
-      examEnrollmentRepository.createQueryBuilder.mockReturnValue(qb);
+      examEnrollmentRepository.createQueryBuilder.mockReturnValue(editableQb());
+      examPasscodeRepository.exists.mockResolvedValue(false);
       examPasscodeRepository.create.mockImplementation(
         (payload: Record<string, unknown>) => payload,
       );
@@ -245,7 +397,7 @@ describe('ExamService', () => {
           EXAM_ID: 9,
           NATIONAL_ID: 'AA7788',
           FULL_NAME: 'John Smith',
-          PASSCODE: 'P-09',
+          PASSCODE: 'AB12CD',
         },
       ]);
 
@@ -253,7 +405,7 @@ describe('ExamService', () => {
       const result = await service.createPasscodes(9, {
         passcodes: [
           {
-            passcode: 'P-09',
+            passcode: ' ab12cd ',
             passportNo: ' AA7788 ',
             fullNameEn: ' John Smith ',
           },
@@ -261,6 +413,7 @@ describe('ExamService', () => {
       });
 
       // Assert
+      expect(examPasscodeRepository.exists).toHaveBeenCalled();
       expect(examPasscodeRepository.delete).toHaveBeenCalledWith({
         EXAM_ID: 9,
       });
@@ -268,16 +421,86 @@ describe('ExamService', () => {
         EXAM_ID: 9,
         NATIONAL_ID: 'AA7788',
         FULL_NAME: 'John Smith',
-        PASSCODE: 'P-09',
+        PASSCODE: 'AB12CD',
       });
       expect(result).toEqual([
         {
           EXAM_ID: 9,
           NATIONAL_ID: 'AA7788',
           FULL_NAME: 'John Smith',
-          PASSCODE: 'P-09',
+          PASSCODE: 'AB12CD',
         },
       ]);
+    });
+
+    it('should reject passcodes already used on another exam (EXAM-U-007)', async () => {
+      // Arrange
+      examRepository.exists.mockResolvedValue(true);
+      examEnrollmentRepository.createQueryBuilder.mockReturnValue(editableQb());
+      examPasscodeRepository.exists.mockResolvedValue(true);
+      examPasscodeRepository.create.mockImplementation(
+        (payload: Record<string, unknown>) => payload,
+      );
+
+      // Act / Assert
+      await expect(
+        service.createPasscodes(10, {
+          passcodes: [
+            {
+              passcode: 'SHARE1',
+              nationalId: '1103700000001',
+              fullName: 'A',
+            },
+            {
+              passcode: 'SHARE1',
+              nationalId: '1103700000002',
+              fullName: 'B',
+            },
+          ],
+        }),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(examPasscodeRepository.delete).not.toHaveBeenCalled();
+      expect(examPasscodeRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should allow the same shared passcode on every row of this exam (EXAM-U-008)', async () => {
+      // Arrange
+      examRepository.exists.mockResolvedValue(true);
+      examEnrollmentRepository.createQueryBuilder.mockReturnValue(editableQb());
+      examPasscodeRepository.exists.mockResolvedValue(false);
+      examPasscodeRepository.create.mockImplementation(
+        (payload: Record<string, unknown>) => payload,
+      );
+      const saved = [
+        {
+          EXAM_ID: 11,
+          NATIONAL_ID: '1',
+          FULL_NAME: 'A',
+          PASSCODE: 'SHARED',
+        },
+        {
+          EXAM_ID: 11,
+          NATIONAL_ID: '2',
+          FULL_NAME: 'B',
+          PASSCODE: 'SHARED',
+        },
+      ];
+      examPasscodeRepository.save.mockResolvedValue(saved);
+
+      // Act
+      const result = await service.createPasscodes(11, {
+        passcodes: [
+          { passcode: 'shared', nationalId: '1', fullName: 'A' },
+          { passcode: 'SHARED', nationalId: '2', fullName: 'B' },
+        ],
+      });
+
+      // Assert
+      expect(examPasscodeRepository.delete).toHaveBeenCalledWith({
+        EXAM_ID: 11,
+      });
+      expect(examPasscodeRepository.create).toHaveBeenCalledTimes(2);
+      expect(result).toEqual(saved);
     });
   });
 });

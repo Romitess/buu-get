@@ -8,6 +8,9 @@ import type { ExamRound } from 'src/types/exam';
 
 const baseRound = (overrides: Partial<ExamRound> = {}): ExamRound => ({
   id: 1,
+  examId: 10,
+  fee: 'ค่าธรรมเนียม 500 บาท',
+  location: 'อาคารเรียนรวม (101)',
   timeRange: '09:00 - 12:00',
   title: 'รอบเช้า',
   roundTypeLabel: 'ทั่วไป',
