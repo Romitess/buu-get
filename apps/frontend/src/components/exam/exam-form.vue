@@ -32,7 +32,6 @@
       :date-errors="dateErrors"
       :field-errors="fieldErrors"
       :shake-key="shakeKey"
-      @add-time-slot="addTimeSlot"
       @remove-time-slot="removeTimeSlot"
       @add-room="addRoom"
       @remove-room="removeRoom"
@@ -166,7 +165,6 @@ const {
   fieldErrors,
   shakeKey,
   loadInitialData,
-  addTimeSlot,
   removeTimeSlot,
   addRoom,
   removeRoom,

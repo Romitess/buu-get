@@ -93,6 +93,7 @@ describe('ExamService', () => {
       const dto: CreateExamDto = {
         EXAM_NAME: 'Exam A',
         SRB_ID: 3,
+        EXAM_TYPE: 'รอบทั่วไป',
         EXAM_REG_END_DATE: '2026-09-10',
         EXAM_PAY_END_DATE: '2026-09-11T00:00:00Z',
       };
@@ -112,13 +113,83 @@ describe('ExamService', () => {
       // Act
       await service.create(dto, 1001);
 
-      // Assert
+      // Assert — pay end keeps its own normalized value (not overwritten by reg)
       expect(examRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           EXAM_REG_END_DATE: '2026-09-10T23:59:59+07:00',
           EXAM_PAY_END_DATE: '2026-09-11T23:59:59+07:00',
         }),
       );
+    });
+
+    it('should preserve explicit payment period datetime on create', async () => {
+      const dto: CreateExamDto = {
+        EXAM_NAME: 'Exam Sync Pay',
+        SRB_ID: 3,
+        EXAM_TYPE: 'รอบทั่วไป',
+        EXAM_REG_START_DATE: '2026-08-11T09:00:00+07:00',
+        EXAM_REG_END_DATE: '2026-08-20T16:30:00+07:00',
+        EXAM_PAY_START_DATE: '2026-08-11T09:00:00+07:00',
+        EXAM_PAY_END_DATE: '2026-08-25T18:00:00+07:00',
+      };
+      examRepository.create.mockImplementation((payload: CreateExamDto) => ({
+        EXAM_ID: 12,
+        EXAM_ROUND: '1',
+        ...payload,
+      }));
+      examRepository.save.mockResolvedValue({
+        EXAM_ID: 12,
+        EXAM_ROUND: '1',
+        ...dto,
+      });
+      moodleSyncService.createCourse.mockResolvedValue(999);
+      scoreRubricsService.assertRubricUsable.mockResolvedValue(undefined);
+
+      await service.create(dto, 1001);
+
+      expect(examRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          EXAM_PAY_START_DATE: '2026-08-11T09:00:00+07:00',
+          EXAM_PAY_END_DATE: '2026-08-25T18:00:00+07:00',
+        }),
+      );
+    });
+
+    it('should leave payment fields unset for special exams', async () => {
+      const dto: CreateExamDto = {
+        EXAM_NAME: 'Exam Special',
+        SRB_ID: 3,
+        EXAM_TYPE: 'รอบพิเศษ',
+        EXAM_REG_START_DATE: '2026-08-11T09:00:00+07:00',
+        EXAM_REG_END_DATE: '2026-08-20T16:30:00+07:00',
+        EXAM_PAY_START_DATE: undefined,
+        EXAM_PAY_END_DATE: undefined,
+      };
+      examRepository.create.mockImplementation((payload: CreateExamDto) => ({
+        EXAM_ID: 13,
+        EXAM_ROUND: '1',
+        ...payload,
+      }));
+      examRepository.save.mockResolvedValue({
+        EXAM_ID: 13,
+        EXAM_ROUND: '1',
+        ...dto,
+      });
+      moodleSyncService.createCourse.mockResolvedValue(999);
+      scoreRubricsService.assertRubricUsable.mockResolvedValue(undefined);
+
+      await service.create(dto, 1001);
+
+      expect(examRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          EXAM_REG_START_DATE: '2026-08-11T09:00:00+07:00',
+          EXAM_REG_END_DATE: '2026-08-20T16:30:00+07:00',
+        }),
+      );
+      const createdPayload = examRepository.create.mock
+        .calls[0]?.[0] as CreateExamDto;
+      expect(createdPayload.EXAM_PAY_START_DATE).toBeUndefined();
+      expect(createdPayload.EXAM_PAY_END_DATE).toBeUndefined();
     });
 
     it('should validate score rubric usability before create (EXAM-U-002)', async () => {
