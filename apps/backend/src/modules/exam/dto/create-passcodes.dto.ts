@@ -4,9 +4,12 @@ import {
   ValidateNested,
   IsNotEmpty,
   IsOptional,
+  Length,
+  Matches,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { PASSCODE_LENGTH, PASSCODE_PATTERN } from '../constants/exam.constants';
 
 export class PasscodeItemDto {
   @ApiProperty({ example: '1100000000000', required: false })
@@ -29,9 +32,13 @@ export class PasscodeItemDto {
   @IsOptional()
   fullNameEn?: string;
 
-  @ApiProperty({ example: '123456' })
+  @ApiProperty({ example: 'ABC123' })
   @IsString()
   @IsNotEmpty()
+  @Length(PASSCODE_LENGTH, PASSCODE_LENGTH)
+  @Matches(PASSCODE_PATTERN, {
+    message: 'passcode must be exactly 6 alphanumeric characters',
+  })
   passcode: string;
 }
 

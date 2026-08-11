@@ -331,27 +331,29 @@ describe('ExamService', () => {
         }),
       );
       expect(platformGatewayService.sendEmail).toHaveBeenCalled();
-      const html = platformGatewayService.sendEmail.mock.calls[0]?.[3] as string;
+      const html = platformGatewayService.sendEmail.mock
+        .calls[0]?.[3] as string;
       expect(html).toContain('1/2026');
     });
   });
 
   describe('createPasscodes', () => {
+    const editableQb = () => ({
+      innerJoin: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      getCount: jest.fn().mockResolvedValue(0),
+    });
+
     it('should reject passcode item missing required ID/name pair (EXAM-U-004)', async () => {
       // Arrange
       examRepository.exists.mockResolvedValue(true);
-      const qb = {
-        innerJoin: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getCount: jest.fn().mockResolvedValue(0),
-      };
-      examEnrollmentRepository.createQueryBuilder.mockReturnValue(qb);
+      examEnrollmentRepository.createQueryBuilder.mockReturnValue(editableQb());
 
       // Act / Assert
       await expect(
         service.createPasscodes(1, {
-          passcodes: [{ passcode: 'A-001', nationalId: ' ', fullName: ' ' }],
+          passcodes: [{ passcode: 'ABC123', nationalId: ' ', fullName: ' ' }],
         }),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
@@ -370,22 +372,23 @@ describe('ExamService', () => {
       // Act / Assert
       await expect(
         service.createPasscodes(3, {
-          passcodes: [{ passcode: 'P-01', nationalId: '1103700000000' }],
+          passcodes: [
+            {
+              passcode: 'ABC123',
+              nationalId: '1103700000000',
+              fullName: 'Test',
+            },
+          ],
         }),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(examPasscodeRepository.delete).not.toHaveBeenCalled();
     });
 
-    it('should trim fallback identity fields and replace passcodes (EXAM-U-006)', async () => {
+    it('should trim fallback identity fields, normalize passcode, and replace passcodes (EXAM-U-006)', async () => {
       // Arrange
       examRepository.exists.mockResolvedValue(true);
-      const qb = {
-        innerJoin: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getCount: jest.fn().mockResolvedValue(0),
-      };
-      examEnrollmentRepository.createQueryBuilder.mockReturnValue(qb);
+      examEnrollmentRepository.createQueryBuilder.mockReturnValue(editableQb());
+      examPasscodeRepository.exists.mockResolvedValue(false);
       examPasscodeRepository.create.mockImplementation(
         (payload: Record<string, unknown>) => payload,
       );
@@ -394,7 +397,7 @@ describe('ExamService', () => {
           EXAM_ID: 9,
           NATIONAL_ID: 'AA7788',
           FULL_NAME: 'John Smith',
-          PASSCODE: 'P-09',
+          PASSCODE: 'AB12CD',
         },
       ]);
 
@@ -402,7 +405,7 @@ describe('ExamService', () => {
       const result = await service.createPasscodes(9, {
         passcodes: [
           {
-            passcode: 'P-09',
+            passcode: ' ab12cd ',
             passportNo: ' AA7788 ',
             fullNameEn: ' John Smith ',
           },
@@ -410,6 +413,7 @@ describe('ExamService', () => {
       });
 
       // Assert
+      expect(examPasscodeRepository.exists).toHaveBeenCalled();
       expect(examPasscodeRepository.delete).toHaveBeenCalledWith({
         EXAM_ID: 9,
       });
@@ -417,16 +421,86 @@ describe('ExamService', () => {
         EXAM_ID: 9,
         NATIONAL_ID: 'AA7788',
         FULL_NAME: 'John Smith',
-        PASSCODE: 'P-09',
+        PASSCODE: 'AB12CD',
       });
       expect(result).toEqual([
         {
           EXAM_ID: 9,
           NATIONAL_ID: 'AA7788',
           FULL_NAME: 'John Smith',
-          PASSCODE: 'P-09',
+          PASSCODE: 'AB12CD',
         },
       ]);
+    });
+
+    it('should reject passcodes already used on another exam (EXAM-U-007)', async () => {
+      // Arrange
+      examRepository.exists.mockResolvedValue(true);
+      examEnrollmentRepository.createQueryBuilder.mockReturnValue(editableQb());
+      examPasscodeRepository.exists.mockResolvedValue(true);
+      examPasscodeRepository.create.mockImplementation(
+        (payload: Record<string, unknown>) => payload,
+      );
+
+      // Act / Assert
+      await expect(
+        service.createPasscodes(10, {
+          passcodes: [
+            {
+              passcode: 'SHARE1',
+              nationalId: '1103700000001',
+              fullName: 'A',
+            },
+            {
+              passcode: 'SHARE1',
+              nationalId: '1103700000002',
+              fullName: 'B',
+            },
+          ],
+        }),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(examPasscodeRepository.delete).not.toHaveBeenCalled();
+      expect(examPasscodeRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should allow the same shared passcode on every row of this exam (EXAM-U-008)', async () => {
+      // Arrange
+      examRepository.exists.mockResolvedValue(true);
+      examEnrollmentRepository.createQueryBuilder.mockReturnValue(editableQb());
+      examPasscodeRepository.exists.mockResolvedValue(false);
+      examPasscodeRepository.create.mockImplementation(
+        (payload: Record<string, unknown>) => payload,
+      );
+      const saved = [
+        {
+          EXAM_ID: 11,
+          NATIONAL_ID: '1',
+          FULL_NAME: 'A',
+          PASSCODE: 'SHARED',
+        },
+        {
+          EXAM_ID: 11,
+          NATIONAL_ID: '2',
+          FULL_NAME: 'B',
+          PASSCODE: 'SHARED',
+        },
+      ];
+      examPasscodeRepository.save.mockResolvedValue(saved);
+
+      // Act
+      const result = await service.createPasscodes(11, {
+        passcodes: [
+          { passcode: 'shared', nationalId: '1', fullName: 'A' },
+          { passcode: 'SHARED', nationalId: '2', fullName: 'B' },
+        ],
+      });
+
+      // Assert
+      expect(examPasscodeRepository.delete).toHaveBeenCalledWith({
+        EXAM_ID: 11,
+      });
+      expect(examPasscodeRepository.create).toHaveBeenCalledTimes(2);
+      expect(result).toEqual(saved);
     });
   });
 });

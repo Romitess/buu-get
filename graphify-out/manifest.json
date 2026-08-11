@@ -545,8 +545,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.ts": {
-    "mtime": 1786421235.7022715,
-    "ast_hash": "02f9f1f7a8f3fa552e234de393379e5e",
+    "mtime": 1786422190.758819,
+    "ast_hash": "73faa0809a3efa4ef44b7a23fa4c8158",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/interfaces/executive-exam-history.interface.ts": {
@@ -830,8 +830,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam/constants/exam.constants.ts": {
-    "mtime": 1783042948.805135,
-    "ast_hash": "18c03269e3f574114366fad432c28297",
+    "mtime": 1786422019.9785585,
+    "ast_hash": "4d498565868ccd2d02410903867c8f45",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam/dto/create-exam.dto.ts": {
@@ -840,8 +840,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam/dto/create-passcodes.dto.ts": {
-    "mtime": 1783042948.805264,
-    "ast_hash": "c636bfc61715259381c0bb438c8bc5db",
+    "mtime": 1786422190.7587461,
+    "ast_hash": "cbaabadee20491f94afd77312f2de534",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam/dto/notify-exam-changes.dto.ts": {
@@ -885,8 +885,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam/exam.service.ts": {
-    "mtime": 1786419192.5277195,
-    "ast_hash": "49a3f559ae2ec6e98b8e0f8780c0779a",
+    "mtime": 1786422190.7588038,
+    "ast_hash": "2a4c6b1d2fa2a065388fbb94ab4990e5",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam/templates/exam-change-email.template.ts": {
@@ -1895,8 +1895,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/create-exam-candidates-card.vue": {
-    "mtime": 1784772248.590178,
-    "ast_hash": "de45310cbb0c1a68578756335092b7ae",
+    "mtime": 1786422128.55174,
+    "ast_hash": "0d3dc49fa7e6cd9aa2bef644eaa7a04d",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/create-exam-details-card.vue": {
@@ -1985,8 +1985,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/exam-form.vue": {
-    "mtime": 1786414492.848572,
-    "ast_hash": "92a0bae683f6c4be3a4d787d2c4354b9",
+    "mtime": 1786422156.0711296,
+    "ast_hash": "646515a4c4b7b065feffa1e79442f20f",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/exam-management-table.vue": {
@@ -2295,8 +2295,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-create-exam.ts": {
-    "mtime": 1786420194.0590963,
-    "ast_hash": "0be89a803005bb4a8429cee34420f2d4",
+    "mtime": 1786422146.8247151,
+    "ast_hash": "6ea4533b15db47c2e04660d260b6af58",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-daily-revenue.ts": {
@@ -2430,8 +2430,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/constants/exam.ts": {
-    "mtime": 1786420169.3384764,
-    "ast_hash": "8831e0e065fd0642e4f53ab6045dbf1e",
+    "mtime": 1786422128.097508,
+    "ast_hash": "bed47f83f2ce3311cd51f371f174b2a6",
     "semantic_hash": ""
   },
   "apps/frontend/src/constants/roles.ts": {
@@ -3200,8 +3200,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.spec.ts": {
-    "mtime": 1786352192.3517802,
-    "ast_hash": "1ac4399916e93251353e298f42fcb2cc",
+    "mtime": 1786422082.86483,
+    "ast_hash": "18c39ffad630183dbc511fa891985df3",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/transactions/transactions.service.spec.ts": {
@@ -4185,8 +4185,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam/exam.service.spec.ts": {
-    "mtime": 1786419258.1440747,
-    "ast_hash": "bf86aa4eb61799fc6445818f1db70080",
+    "mtime": 1786422190.7587974,
+    "ast_hash": "9ad8c29b088cc20e95a657edb5c39835",
     "semantic_hash": ""
   },
   "tests/integration/exam-blocked-seats.api.spec.ts": {
@@ -4797,6 +4797,11 @@
   "apps/frontend/src/types/check-in-assist.types.ts": {
     "mtime": 1786352135.2420216,
     "ast_hash": "6631461ff18e2e6334819b674543f0b4",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/components/exam/dialog-define-shared-passcode.vue": {
+    "mtime": 1786422100.258303,
+    "ast_hash": "9c30062776dc811fc49aa56392362476",
     "semantic_hash": ""
   }
 }

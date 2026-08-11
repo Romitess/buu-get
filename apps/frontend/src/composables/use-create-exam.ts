@@ -15,6 +15,8 @@ import {
   NOTIFY_MSG,
   VALIDATION_MSG,
   getCurrentThaiFiscalYearAd,
+  normalizeExamPasscode,
+  PASSCODE_PATTERN,
 } from 'src/constants/exam';
 import type { CreateExamPayload, ExamLocationOption, FundSource } from 'src/services/exam.service';
 import { fetchScoreRubrics } from 'src/services/score-rubric.service';
@@ -1484,7 +1486,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     document.body.removeChild(link);
   };
 
-  /** Generate random 6-digit passcodes for all eligible candidates */
+  /** Generate random 6-digit passcodes for all eligible candidates (individual mode) */
   const generatePasscodes = (type: PasscodeType = 'individual'): void => {
     if (isEligibleCandidatesLocked.value) {
       notifyEligibleCandidatesLocked();
@@ -1500,22 +1502,61 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       return;
     }
 
+    // Shared mode is handled by applySharedPasscode (admin-defined). Keep a
+    // numeric shared fallback only if something still calls type === 'single'.
     if (type === 'single') {
       const singlePasscode = String(Math.floor(100000 + Math.random() * 900000));
-      form.value.eligibleCandidates = form.value.eligibleCandidates.map((c) => ({
-        ...c,
-        passcode: singlePasscode,
-      }));
-    } else {
-      form.value.eligibleCandidates = form.value.eligibleCandidates.map((c) => ({
-        ...c,
-        passcode: String(Math.floor(100000 + Math.random() * 900000)),
-      }));
+      applySharedPasscode(singlePasscode);
+      return;
     }
+
+    form.value.eligibleCandidates = form.value.eligibleCandidates.map((c) => ({
+      ...c,
+      passcode: String(Math.floor(100000 + Math.random() * 900000)),
+    }));
 
     $q.notify({
       type: 'positive',
       message: `สร้าง Passcode สำเร็จ ${form.value.eligibleCandidates.length} รายการ`,
+      position: 'top',
+      timeout: 2000,
+    });
+  };
+
+  /** Apply one admin-defined shared passcode to every eligible candidate */
+  const applySharedPasscode = (rawPasscode: string): void => {
+    if (isEligibleCandidatesLocked.value) {
+      notifyEligibleCandidatesLocked();
+      return;
+    }
+
+    if (form.value.eligibleCandidates.length === 0) {
+      $q.notify({
+        type: 'warning',
+        message: 'กรุณานำเข้ารายชื่อก่อนสร้าง Passcode',
+        position: 'top',
+      });
+      return;
+    }
+
+    const passcode = normalizeExamPasscode(rawPasscode);
+    if (!PASSCODE_PATTERN.test(passcode)) {
+      $q.notify({
+        type: 'negative',
+        message: VALIDATION_MSG.SHARED_PASSCODE,
+        position: 'top',
+      });
+      return;
+    }
+
+    form.value.eligibleCandidates = form.value.eligibleCandidates.map((c) => ({
+      ...c,
+      passcode,
+    }));
+
+    $q.notify({
+      type: 'positive',
+      message: `กำหนด Passcode ร่วมสำเร็จ ${form.value.eligibleCandidates.length} รายการ`,
       position: 'top',
       timeout: 2000,
     });
@@ -1979,7 +2020,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
             passportNo: c.passportNo ?? undefined,
             fullName: c.fullName ?? undefined,
             fullNameEn: c.fullNameEn ?? undefined,
-            passcode: c.passcode,
+            passcode: normalizeExamPasscode(c.passcode || ''),
           }));
           await createExamPasscodes(targetExamId, passcodesPayload);
         } catch (passcodeErr) {
@@ -2086,6 +2127,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     addEligibleCandidatesFromUsers,
     removeEligibleCandidates,
     generatePasscodes,
+    applySharedPasscode,
     exportCandidates,
     handleCancel,
     handleSave,

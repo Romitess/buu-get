@@ -137,6 +137,12 @@
     <!-- Passcode Type Selection Dialog -->
     <DialogPasscodeType v-model="showPasscodeTypeDialog" @select="onPasscodeTypeSelected" />
 
+    <!-- Define Shared Passcode Dialog -->
+    <DialogDefineSharedPasscode
+      v-model="showDefineSharedPasscodeDialog"
+      @confirm="onSharedPasscodeDefined"
+    />
+
     <!-- Search Candidate Dialog -->
     <DialogSearchCandidate
       v-model="showSearchDialog"
@@ -163,6 +169,7 @@ import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import BaseTable from 'src/components/shared/base-table.vue';
 import DialogCsvImport from 'src/components/exam/dialog-csv-import.vue';
 import DialogPasscodeType from 'src/components/exam/dialog-passcode-type.vue';
+import DialogDefineSharedPasscode from 'src/components/exam/dialog-define-shared-passcode.vue';
 import DialogSearchCandidate from 'src/components/exam/dialog-search-candidate.vue';
 import DialogDeleteCandidates from 'src/components/exam/dialog-delete-candidates.vue';
 import type { User } from 'src/types/user';
@@ -190,6 +197,7 @@ const searchQuery = defineModel<string>('searchQuery', { required: true });
 const emit = defineEmits<{
   (e: 'import-candidates', file: File): void;
   (e: 'passcode-type-selected', type: PasscodeType): void;
+  (e: 'shared-passcode-defined', passcode: string): void;
   (e: 'url-submitted', url: string): void;
   (e: 'export-candidates'): void;
   (e: 'add-candidates-from-users', users: User[]): void;
@@ -224,6 +232,7 @@ const onRequest = (reqProps: TableRequestProps) => {
 /** Dialog visibility state */
 const showCsvImportDialog = ref(false);
 const showPasscodeTypeDialog = ref(false);
+const showDefineSharedPasscodeDialog = ref(false);
 const showSearchDialog = ref(false);
 const showDeleteDialog = ref(false);
 
@@ -261,7 +270,16 @@ const onDownloadSample = (): void => {
 
 /** Passcode type dialog: type selected */
 const onPasscodeTypeSelected = (type: PasscodeType): void => {
+  if (type === 'single') {
+    showDefineSharedPasscodeDialog.value = true;
+    return;
+  }
   emit('passcode-type-selected', type);
+};
+
+/** Shared passcode defined by admin */
+const onSharedPasscodeDefined = (passcode: string): void => {
+  emit('shared-passcode-defined', passcode);
 };
 
 /** Search dialog: candidates confirmed */

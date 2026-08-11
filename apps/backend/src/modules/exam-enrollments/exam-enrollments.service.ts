@@ -47,7 +47,10 @@ import {
 import { ExamPasscode } from '../exam/entities/exam-passcode.entity';
 import { User } from '../users/entities/user.entity';
 import { resolveEnrollmentPhysicalStatus } from '../../common/utils/physical-status.util';
-import { EXAM_TYPE } from '../exam/constants/exam.constants';
+import {
+  EXAM_TYPE,
+  normalizeExamPasscode,
+} from '../exam/constants/exam.constants';
 import { getProfileFixEmailTemplate } from './templates/profile-fix-email.template';
 import { ExamPasscodeLog } from '../exam/entities/exam-passcode-log.entity';
 import { TestTakerIdService } from './test-taker-id.service';
@@ -300,31 +303,11 @@ export class ExamEnrollmentsService {
     let validPasscode: ExamPasscode | null = null;
 
     if (targetSession.EXAM?.EXAM_TYPE === EXAM_TYPE.SPECIAL) {
-      if (!PASSCODE) {
-        throw new BadRequestException(
-          'Passcode is required for special exam rounds',
-        );
-      }
-
-      validPasscode = await this.examPasscodeRepository.findOne({
-        where: {
-          EXAM_ID: targetSession.EXAM_ID,
-          NATIONAL_ID: user.USER_NATIONAL_ID || '',
-          PASSCODE: PASSCODE,
-        },
-        select: {
-          PASSCODE_ID: true,
-          PASSCODE: true,
-          EXAM_ID: true,
-          NATIONAL_ID: true,
-        },
-      });
-
-      if (!validPasscode) {
-        throw new BadRequestException(
-          'Invalid passcode for this user and exam',
-        );
-      }
+      validPasscode = await this.findValidSpecialPasscode(
+        targetSession.EXAM_ID,
+        user.USER_NATIONAL_ID || '',
+        PASSCODE,
+      );
     }
 
     const existingEnrollment = await this.examEnrollmentRepository
@@ -1584,11 +1567,13 @@ export class ExamEnrollmentsService {
       );
     }
 
+    const normalizedPasscode = normalizeExamPasscode(passcode);
+
     const validPasscode = await this.examPasscodeRepository.findOne({
       where: {
         EXAM_ID: examId,
         NATIONAL_ID: nationalId,
-        PASSCODE: passcode,
+        PASSCODE: normalizedPasscode,
       },
     });
 

@@ -34,6 +34,26 @@ export const getCurrentThaiFiscalYearAd = (date: Date = new Date()): string => {
 export const EXAM_TYPE_GENERAL = 'รอบทั่วไป';
 export const EXAM_TYPE_SPECIAL = 'รอบพิเศษ';
 
+/** Shared special-exam passcode: exactly 6 alphanumeric characters */
+export const PASSCODE_LENGTH = 6;
+export const PASSCODE_PATTERN = /^[A-Za-z0-9]{6}$/;
+export const PASSCODE_CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+export function normalizeExamPasscode(passcode: string): string {
+  return passcode.trim().toUpperCase();
+}
+
+export function generateRandomAlphanumericPasscode(
+  length: number = PASSCODE_LENGTH,
+): string {
+  let result = '';
+  for (let i = 0; i < length; i += 1) {
+    const index = Math.floor(Math.random() * PASSCODE_CHARSET.length);
+    result += PASSCODE_CHARSET[index];
+  }
+  return result;
+}
+
 /** รูปแบบการสอบ */
 export const EXAM_FORMAT_COMPUTER = 'คอมพิวเตอร์';
 export const EXAM_FORMAT_PAPER = 'กระดาษ';
@@ -102,6 +122,7 @@ export const VALIDATION_MSG = {
   PAY_START_TIME: 'กรุณาเลือกเวลาเริ่มต้นชำระเงิน',
   PAY_END_DATE: 'กรุณาเลือกวันที่สิ้นสุดชำระเงิน',
   PAY_END_TIME: 'กรุณาเลือกเวลาสิ้นสุดชำระเงิน',
+  SHARED_PASSCODE: 'กรุณากำหนด Passcode 6 ตัวอักษรหรือตัวเลขสำหรับผู้มีสิทธิ์สอบทุกคน',
 };
 
 /** ข้อความแสดงผลเมื่อยังไม่เลือกข้อมูล */

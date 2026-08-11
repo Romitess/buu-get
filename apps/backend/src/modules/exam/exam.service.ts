@@ -6,7 +6,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { Exam } from './entities/exam.entity';
 import { ExamPasscode } from './entities/exam-passcode.entity';
 import { CreateExamDto } from './dto/create-exam.dto';
@@ -26,6 +26,7 @@ import { MoodleSyncService } from '../moodle/moodle-sync.service';
 import { normalizePeriodEndDate } from '../../common/utils/period-date.util';
 import { ScoreRubricsService } from '../score-rubrics/score-rubrics.service';
 import { ExamScoresService } from '../exam-scores/exam-scores.service';
+import { normalizeExamPasscode } from './constants/exam.constants';
 
 @Injectable()
 export class ExamService {
@@ -386,12 +387,10 @@ export class ExamService {
     await this.assertExamExists(examId);
     await this.assertPasscodesEditable(examId);
 
-    // Delete existing passcodes for this exam to prevent duplicates if editing
-    await this.examPasscodeRepository.delete({ EXAM_ID: examId });
-
     const passcodes = createPasscodesDto.passcodes.map((p) => {
       const nationalId = p.nationalId?.trim() || p.passportNo?.trim();
       const fullName = p.fullName?.trim() || p.fullNameEn?.trim();
+      const passcode = normalizeExamPasscode(p.passcode);
 
       if (!nationalId || !fullName) {
         throw new BadRequestException(
@@ -403,9 +402,29 @@ export class ExamService {
         EXAM_ID: examId,
         NATIONAL_ID: nationalId,
         FULL_NAME: fullName,
-        PASSCODE: p.passcode,
+        PASSCODE: passcode,
       });
     });
+
+    const distinctPasscodes = [
+      ...new Set(passcodes.map((row) => row.PASSCODE)),
+    ];
+
+    if (distinctPasscodes.length > 0) {
+      const conflictExists = await this.examPasscodeRepository.exists({
+        where: {
+          PASSCODE: In(distinctPasscodes),
+          EXAM_ID: Not(examId),
+        },
+      });
+
+      if (conflictExists) {
+        throw new ConflictException('รหัสผ่านนี้ถูกใช้ในรอบสอบอื่นแล้ว');
+      }
+    }
+
+    // Delete existing passcodes for this exam to prevent duplicates if editing
+    await this.examPasscodeRepository.delete({ EXAM_ID: examId });
 
     return await this.examPasscodeRepository.save(passcodes);
   }
