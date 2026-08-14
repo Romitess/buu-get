@@ -21,11 +21,22 @@
       </div>
     </div>
 
+    <q-banner v-if="error" class="bg-red-1 text-red-9 q-mb-md rounded-borders shadow-1">
+      <template v-slot:avatar>
+        <q-icon name="warning" color="negative" />
+      </template>
+      {{ error }}
+      <template v-slot:action>
+        <q-btn flat color="negative" :label="$t('examSchedule.retry')" @click="fetchData" />
+      </template>
+    </q-banner>
+
     <BaseTable
       :columns="columns"
-      :rows="filteredLocations"
+      :rows="locationsWithComputedData"
       :loading="isLoading"
       :pagination="pagination"
+      is-server-side
       @request="onRequest"
     >
       <template v-slot:body-cell-tools="{ row }">
@@ -59,9 +70,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useQuasar, type QTableColumn } from 'quasar';
+import { useQuasar, type QTableColumn, debounce } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
@@ -73,6 +84,7 @@ import DialogDeleteConfirm from 'src/components/exam/dialog-delete-confirm.vue';
 import type { BackendLocation } from 'src/types/exam';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import * as locationService from 'src/services/location.service';
+import { isRequestCanceled } from 'src/services/exam.service';
 
 const $q = useQuasar();
 const { t } = useI18n();
@@ -81,9 +93,11 @@ const router = useRouter();
 const isLoading = ref(false);
 const searchQuery = ref('');
 const locations = ref<BackendLocation[]>([]);
+const error = ref<string | null>(null);
 const isDeleteConfirmOpen = ref(false);
 const locationToDelete = ref<BackendLocation | null>(null);
 const isDeleting = ref(false);
+let abortController: AbortController | null = null;
 
 const pagination = ref<PaginationModel>({
   page: 1,
@@ -159,9 +173,10 @@ const columns = computed<QTableColumn[]>(() => [
 ]);
 
 const locationsWithComputedData = computed(() => {
+  const pageOffset = (pagination.value.page - 1) * pagination.value.rowsPerPage;
   return locations.value.map((loc, idx) => ({
     ...loc,
-    index: idx + 1,
+    index: pageOffset + idx + 1,
     floor: loc.LOCATION_FLOOR_NO ?? parseFloor(loc.LOCATION_ROOM_NO),
     capacity:
       loc.SEATS?.filter((seat) => seat.LS_SEAT_STATUS !== 1 && seat.LS_SEAT_STATUS !== 2).length ??
@@ -170,39 +185,46 @@ const locationsWithComputedData = computed(() => {
   }));
 });
 
-const filteredLocations = computed(() => {
-  const all = locationsWithComputedData.value;
-  if (!searchQuery.value) return all;
-  const query = searchQuery.value.toLowerCase();
-  return all.filter(
-    (l) =>
-      l.LOCATION_NAME.toLowerCase().includes(query) ||
-      (l.LOCATION_ROOM_NO && l.LOCATION_ROOM_NO.toLowerCase().includes(query)),
-  );
-});
-
-const fetchData = async () => {
+const fetchData = async (): Promise<void> => {
+  abortController?.abort();
+  abortController = new AbortController();
+  const { signal } = abortController;
   isLoading.value = true;
+  error.value = null;
   try {
-    const data = await locationService.fetchLocations();
-    locations.value = data;
-    pagination.value.rowsNumber = data.length;
-  } catch {
-    $q.notify({
-      type: 'negative',
-      message: t('admin.locationManagement.notifications.loadError'),
-      position: 'top',
+    const result = await locationService.fetchLocationsPage({
+      page: pagination.value.page,
+      limit: pagination.value.rowsPerPage,
+      search: searchQuery.value,
+      signal,
     });
+    locations.value = result.data;
+    pagination.value.rowsNumber = result.total;
+  } catch (err) {
+    if (isRequestCanceled(err) || signal.aborted) return;
+    error.value = t('admin.locationManagement.notifications.loadError');
   } finally {
-    isLoading.value = false;
+    if (!signal.aborted) {
+      isLoading.value = false;
+    }
   }
 };
 
-const onRequest = (props: TableRequestProps) => {
+const onRequest = (props: TableRequestProps): void => {
   const { page, rowsPerPage } = props.pagination;
   pagination.value.page = page;
   pagination.value.rowsPerPage = rowsPerPage;
+  void fetchData();
 };
+
+const debouncedSearch = debounce(() => {
+  pagination.value.page = 1;
+  void fetchData();
+}, 400);
+
+watch(searchQuery, () => {
+  void debouncedSearch();
+});
 
 const navigateToEdit = (id: number) => {
   void router.push({

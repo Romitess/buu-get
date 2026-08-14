@@ -8,6 +8,7 @@ import {
 import routes from './routes';
 import { useUserStore } from 'src/stores/user.store';
 import { getDefaultRouteForRole } from 'src/utils/default-route';
+import { resolveSafeInAppRedirect } from 'src/utils/safe-redirect';
 
 export default defineRouter(({ store }) => {
   const createHistory = process.env.SERVER
@@ -50,8 +51,9 @@ export default defineRouter(({ store }) => {
       }
     }
     if (userStore.isLoggedIn && (to.name === 'login' || to.name === 'register')) {
-      if (to.query.redirect) {
-        return to.query.redirect as string;
+      const safeRedirect = resolveSafeInAppRedirect(to.query.redirect);
+      if (safeRedirect) {
+        return safeRedirect;
       }
       return getDefaultRouteForRole(userStore.userRole);
     }

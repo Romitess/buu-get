@@ -124,7 +124,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { computed, watch } from 'vue';
 import { useCreateExam, type CreateExamForm } from 'src/composables/use-create-exam';
 import AppButton from 'src/components/base/app-button.vue';
 import CreateExamDetailsCard from 'src/components/exam/create-exam-details-card.vue';
@@ -142,6 +142,8 @@ const props = defineProps<{
 const form = defineModel<CreateExamForm>('form', { required: true });
 
 // Pass the model directly to the composable to maintain reactivity
+const examIdRef = computed(() => props.examId);
+
 const {
   examTypeOptions,
   examFormatOptions,
@@ -180,7 +182,7 @@ const {
   sortTimeSlots,
   dateErrors,
   clearFieldError,
-} = useCreateExam(form, { examId: props.examId });
+} = useCreateExam(form, { examId: examIdRef });
 
 const emit = defineEmits(['save', 'cancel']);
 
@@ -196,7 +198,9 @@ const onCancel = () => {
   emit('cancel');
 };
 
-onMounted(loadInitialData);
+watch(examIdRef, () => {
+  void loadInitialData();
+}, { immediate: true });
 </script>
 
 <style scoped>

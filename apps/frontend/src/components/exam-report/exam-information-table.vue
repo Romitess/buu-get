@@ -5,6 +5,7 @@
     :loading="loading"
     :pagination="pagination"
     :empty-label="t('admin.examInformation.table.emptyLabel')"
+    :is-server-side="isServerSide"
     class="exam-information-table"
     @request="onRequest"
   >
@@ -35,6 +36,7 @@ interface Props {
   rounds: ExamInformationRoundRow[];
   loading?: boolean;
   pagination?: PaginationModel;
+  isServerSide?: boolean;
 }
 
 defineProps<Props>();

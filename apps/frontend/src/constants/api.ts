@@ -33,6 +33,8 @@ export type ImageCategory = 'user-image' | 'page-builder';
 export const BACKEND_API = {
   /** Exam endpoints */
   EXAM: '/exam',
+  /** Public published exam schedule */
+  EXAM_SCHEDULE: '/exam/schedule',
   /** User endpoints */
   USER: '/user',
   /** Enrollment endpoints */

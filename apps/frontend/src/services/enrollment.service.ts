@@ -164,8 +164,14 @@ export const fetchRawEnrollmentsByExamId = async (
   return all;
 };
 
-export const fetchEnrollmentById = async (id: number): Promise<BackendEnrollmentDetail> => {
-  const response = await api.get<BackendEnrollmentDetail>(`/exam-enrollments/${id}`);
+export const fetchEnrollmentById = async (
+  id: number,
+  requestConfig?: { signal?: AbortSignal },
+): Promise<BackendEnrollmentDetail> => {
+  const response = await api.get<BackendEnrollmentDetail>(
+    `/exam-enrollments/${id}`,
+    requestConfig,
+  );
   return response.data;
 };
 

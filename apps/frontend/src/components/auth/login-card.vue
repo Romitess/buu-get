@@ -118,6 +118,7 @@ import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { ROLES } from 'src/constants/roles';
 import { getDefaultRouteForRole } from 'src/utils/default-route';
+import { resolveSafeInAppRedirect } from 'src/utils/safe-redirect';
 
 const router = useRouter();
 const route = useRoute();
@@ -168,9 +169,9 @@ const onSubmit = async () => {
         message: t('auth.notify.success'),
       });
 
-      // Deep Linking Redirect: ถ้ามี redirect parameter (เช่นมาจากอีเมล) ให้ไปหน้านั้นเลย
-      if (route.query.redirect) {
-        await router.push(route.query.redirect as string);
+      const safeRedirect = resolveSafeInAppRedirect(route.query.redirect);
+      if (safeRedirect) {
+        await router.push(safeRedirect);
         return;
       }
 

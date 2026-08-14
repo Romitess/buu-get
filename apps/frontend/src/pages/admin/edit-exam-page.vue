@@ -2,10 +2,10 @@
   <q-page class="page-container edit-exam-page surface-page-bg">
     <!-- Standardized Reusable Page Header -->
     <AppBreadcrumbs />
-    <AppPageHeader title="แก้ไขรอบสอบ" subtitle="แก้ไขรายละเอียดและกำหนดการของรอบสอบที่เลือก" />
+    <AppPageHeader :title="t('navigation.editExam')" :subtitle="t('admin.examManagement.pageDescription')" />
 
     <!-- Reusable Exam Form component (in edit mode) -->
-    <exam-form v-if="examId" v-model:form="form" :exam-id="examId" />
+    <exam-form v-if="examId" v-model:form="form" :exam-id="examId" :key="examId" />
 
     <!-- Error State -->
     <div v-else class="text-center q-pa-xl">
@@ -18,12 +18,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import ExamForm from 'src/components/exam/exam-form.vue';
 import { useCreateExam } from 'src/composables/use-create-exam';
 
 const route = useRoute();
+const { t } = useI18n();
 
 // Extract examId from route params and convert to number
 const examId = computed(() => {

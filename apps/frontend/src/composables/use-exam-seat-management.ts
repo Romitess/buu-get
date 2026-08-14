@@ -130,7 +130,12 @@ export function useExamSeatManagement() {
   const $q = useQuasar();
   const { t } = useI18n();
 
-  const examId = Number(route.params.examId);
+  const examId = computed(() => {
+    const raw = route.params.examId;
+    const value = Array.isArray(raw) ? raw[0] : raw;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+  });
 
   // ── State ────────────────────────────────────────────────
   const isLoading = ref(false);
@@ -562,9 +567,9 @@ export function useExamSeatManagement() {
   };
 
   const refreshStudentDisplayData = async (): Promise<void> => {
-    if (!examId) return;
+    if (!examId.value) return;
 
-    allEnrollments.value = await fetchRawEnrollmentsByExamId(examId, {
+    allEnrollments.value = await fetchRawEnrollmentsByExamId(examId.value, {
       sessionId: activeSessionId.value,
     });
     await refreshLatestProfileHistoryImages();
@@ -573,9 +578,9 @@ export function useExamSeatManagement() {
   };
 
   const refreshStudentImages = async (): Promise<void> => {
-    if (!examId) return;
+    if (!examId.value) return;
 
-    const latestEnrollments = await fetchRawEnrollmentsByExamId(examId, {
+    const latestEnrollments = await fetchRawEnrollmentsByExamId(examId.value, {
       sessionId: activeSessionId.value,
     });
     allEnrollments.value = latestEnrollments;
@@ -795,7 +800,7 @@ export function useExamSeatManagement() {
 
     await router.replace({
       name: 'admin-exam-seat-candidates',
-      params: { examId: String(examId) },
+      params: { examId: String(examId.value) },
       query: {
         ...(sessionId !== null ? { sessionId: String(sessionId) } : {}),
         ...(activeSessionLocationId.value !== null
@@ -995,11 +1000,11 @@ export function useExamSeatManagement() {
 
   // ── Data loading ─────────────────────────────────────────
   const loadExamData = async (): Promise<void> => {
-    if (!examId) return;
+    if (!examId.value) return;
     isLoading.value = true;
     error.value = null;
     try {
-      examData.value = await fetchExamWithSeats(examId);
+      examData.value = await fetchExamWithSeats(examId.value);
       sessions.value = examData.value.SESSIONS || [];
 
       const routeSessionId = Number(route.query.sessionId);
@@ -1217,7 +1222,7 @@ export function useExamSeatManagement() {
       // Navigate to the candidates list page after successful save
       void router.replace({
         name: 'admin-exam-seat-candidates',
-        params: { examId: String(examId) },
+        params: { examId: String(examId.value) },
         query: {
           sessionId: String(activeSessionId.value),
           ...(activeSessionLocationId.value !== null
@@ -1268,6 +1273,10 @@ export function useExamSeatManagement() {
   onMounted(() => {
     window.addEventListener('focus', handleWindowFocus);
     document.addEventListener('visibilitychange', handleVisibilityChange);
+  });
+
+  watch(examId, () => {
+    void loadExamData();
   });
 
   const gridCols = computed(() => {

@@ -1,15 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, SelectQueryBuilder } from 'typeorm';
 import { ExamReportQueryDto } from './dto/exam-report-query.dto';
+import { ExamReportYearQueryDto } from './dto/exam-report-year-query.dto';
 import {
   ExamCandidateInfo,
   ExamInformationRound,
+  ExamReportListResponse,
   ExamReportOption,
   ExamReportOptions,
   ExamReportStat,
   ExamReportSummary,
   ExamYearTableRow,
 } from './interfaces/exam-report.interface';
+import { buildPaginatedResponse } from 'src/common/dto/paginated-response.dto';
+import {
+  PAGINATION_DEFAULT_LIMIT,
+  PAGINATION_DEFAULT_PAGE,
+} from 'src/common/dto/pagination-query.dto';
 import {
   ExamEnrollment,
   ExamEnrollmentStatus,
@@ -274,7 +281,14 @@ export class ExamReportService {
   }
 
   /** รายละเอียดรอบสอบภายในปีที่เลือก สำหรับหน้า exam-information */
-  async getYearRounds(year: number): Promise<ExamInformationRound[]> {
+  async getYearRounds(
+    year: number,
+    query: ExamReportYearQueryDto = {},
+  ): Promise<ExamReportListResponse<ExamInformationRound>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const search = query.search?.trim();
+
     const repeatTakersSql = `
       COUNT(DISTINCT CASE
         WHEN sc.SCORES_ID IS NOT NULL
@@ -283,7 +297,7 @@ export class ExamReportService {
       END)
     `;
 
-    const rows = await this.baseEnrollmentQb()
+    const listQb = this.baseEnrollmentQb()
       .leftJoin('e.SCORE', 'sc')
       .select('x.EXAM_ROUND', 'round')
       .addSelect('x.EXAM_DATE', 'examDate')
@@ -303,9 +317,25 @@ export class ExamReportService {
       .addGroupBy('x.EXAM_DATE')
       .orderBy('x.EXAM_DATE', 'ASC')
       .addOrderBy('x.EXAM_ID', 'ASC')
-      .getRawMany<ExamInformationRoundRawRow>();
+      .skip((page - 1) * limit)
+      .take(limit);
 
-    return rows.map((row) => {
+    this.applyYearListSearch(listQb, search);
+
+    const countQb = this.baseEnrollmentQb()
+      .andWhere('x.EXAM_DATE IS NOT NULL')
+      .andWhere('YEAR(x.EXAM_DATE) = :year', { year })
+      .select('COUNT(DISTINCT x.EXAM_ID)', 'cnt');
+    this.applyYearListSearch(countQb, search);
+
+    const [rows, totalRow, scoreAgg] = await Promise.all([
+      listQb.getRawMany<ExamInformationRoundRawRow>(),
+      countQb.getRawOne<{ cnt: string | number }>(),
+      this.getYearRoundScoreAggregates(year),
+    ]);
+
+    const total = Number(totalRow?.cnt ?? 0);
+    const data = rows.map((row) => {
       const applicants = Number(row.applicants);
       const attended = Number(row.attended);
       const examDate = row.examDate ? new Date(row.examDate) : null;
@@ -323,13 +353,29 @@ export class ExamReportService {
         averageScore: this.roundNullable(row.averageScore),
       };
     });
+
+    const pageResponse = buildPaginatedResponse(data, total, page, limit);
+    return {
+      data: pageResponse.data,
+      meta: {
+        ...pageResponse.meta,
+        minScore: scoreAgg.minScore,
+        maxScore: scoreAgg.maxScore,
+        averageScore: scoreAgg.averageScore,
+      },
+    };
   }
 
   /** รายชื่อผู้เข้าสอบและคะแนนรายบุคคลภายในปี/รอบสอบที่เลือก */
   async getYearRoundCandidates(
     year: number,
-    round?: string,
-  ): Promise<ExamCandidateInfo[]> {
+    query: ExamReportYearQueryDto = {},
+  ): Promise<ExamReportListResponse<ExamCandidateInfo>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const search = query.search?.trim();
+    const round = query.round;
+
     const qb = this.baseEnrollmentQb()
       .innerJoin('e.USER', 'u')
       .leftJoin('e.SCORE', 'sc')
@@ -363,15 +409,24 @@ export class ExamReportService {
       .addOrderBy('e.ERM_ID', 'ASC');
 
     this.applyRoundLabelFilter(qb, round);
+    this.applyCandidateSearch(qb, search);
 
-    const rows = await qb.getRawMany<ExamCandidateInfoRawRow>();
+    const countQb = qb.clone();
+    const total = await countQb.getCount();
+    const rows = await qb
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getRawMany<ExamCandidateInfoRawRow>();
 
     const scoreIds = rows
       .map((row) => (row.scoresId != null ? Number(row.scoresId) : null))
       .filter((id): id is number => id != null);
-    const linesByScoreId = await this.loadScoreLinesByScoreIds(scoreIds);
+    const [linesByScoreId, scoreAgg] = await Promise.all([
+      this.loadScoreLinesByScoreIds(scoreIds),
+      this.getYearRoundScoreAggregates(year, round),
+    ]);
 
-    return rows.map((row) => {
+    const data = rows.map((row) => {
       const scoresId = row.scoresId != null ? Number(row.scoresId) : null;
       const scoreLines =
         scoresId != null ? linesByScoreId.get(scoresId) : undefined;
@@ -390,11 +445,22 @@ export class ExamReportService {
             : String(row.level).trim() || null,
         attemptStatus:
           row.attemptStatus === 'repeatAttempt'
-            ? 'repeatAttempt'
-            : 'firstAttempt',
+            ? ('repeatAttempt' as const)
+            : ('firstAttempt' as const),
         scoreLines,
       };
     });
+
+    const pageResponse = buildPaginatedResponse(data, total, page, limit);
+    return {
+      data: pageResponse.data,
+      meta: {
+        ...pageResponse.meta,
+        minScore: scoreAgg.minScore,
+        maxScore: scoreAgg.maxScore,
+        averageScore: scoreAgg.averageScore,
+      },
+    };
   }
 
   private async loadScoreLinesByScoreIds(scoreIds: number[]): Promise<
@@ -698,6 +764,73 @@ export class ExamReportService {
     if (!yearText || roundText.endsWith(`/${yearText}`)) return roundText;
 
     return `${roundText}/${yearText}`;
+  }
+
+  /** คะแนนรวมทั้งปี/รอบ — ไม่ผูกกับ page/search ของรายการ */
+  private async getYearRoundScoreAggregates(
+    year: number,
+    round?: string,
+  ): Promise<{
+    minScore: number | null;
+    maxScore: number | null;
+    averageScore: number | null;
+  }> {
+    const qb = this.baseEnrollmentQb()
+      .leftJoin('e.SCORE', 'sc')
+      .select('MIN(sc.SC_TOTAL_SCORE)', 'minScore')
+      .addSelect('MAX(sc.SC_TOTAL_SCORE)', 'maxScore')
+      .addSelect('AVG(sc.SC_TOTAL_SCORE)', 'averageScore')
+      .andWhere('x.EXAM_DATE IS NOT NULL')
+      .andWhere('YEAR(x.EXAM_DATE) = :year', { year });
+
+    this.applyRoundLabelFilter(qb, round);
+
+    const row = await qb.getRawOne<{
+      minScore: string | number | null;
+      maxScore: string | number | null;
+      averageScore: string | number | null;
+    }>();
+
+    return {
+      minScore: this.roundNullable(row?.minScore ?? null),
+      maxScore: this.roundNullable(row?.maxScore ?? null),
+      averageScore: this.roundNullable(row?.averageScore ?? null),
+    };
+  }
+
+  private applyYearListSearch(
+    qb: SelectQueryBuilder<ExamEnrollment>,
+    search?: string,
+  ): void {
+    const searchText = search?.trim();
+    if (!searchText) return;
+
+    qb.andWhere(
+      `(
+        x.EXAM_ROUND LIKE :roundSearch
+        OR x.EXAM_NAME LIKE :roundSearch
+        OR CONCAT(TRIM(x.EXAM_ROUND), '/', TRIM(x.EXAM_FISCAL_YEAR)) LIKE :roundSearch
+        OR CONCAT(TRIM(x.EXAM_ROUND), '/', YEAR(x.EXAM_DATE)) LIKE :roundSearch
+      )`,
+      { roundSearch: `%${searchText}%` },
+    );
+  }
+
+  private applyCandidateSearch(
+    qb: SelectQueryBuilder<ExamEnrollment>,
+    search?: string,
+  ): void {
+    const searchText = search?.trim();
+    if (!searchText) return;
+
+    qb.andWhere(
+      `(
+        COALESCE(e.ERM_TEST_TAKER, u.USER_CODE, '') LIKE :candidateSearch
+        OR COALESCE(profile.USER_TITLE_TH, profile.USER_TITLE_EN, '') LIKE :candidateSearch
+        OR COALESCE(profile.USER_FULLNAME_TH, profile.USER_FULLNAME_EN, u.USER_EMAIL, '') LIKE :candidateSearch
+      )`,
+      { candidateSearch: `%${searchText}%` },
+    );
   }
 
   private applyRoundLabelFilter(

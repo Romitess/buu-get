@@ -1,5 +1,6 @@
 import { api } from 'src/boot/axios';
 import type { BackendLocation } from 'src/types/exam';
+import { unwrapPaginated, type PaginatedResponse } from 'src/types/pagination';
 
 export type SeatDirectionPayload = 'HORIZONTAL' | 'VERTICAL';
 export type LocationAislePositionType = 'row' | 'column';
@@ -73,17 +74,61 @@ const normalizeLocation = <T extends BackendLocation>(location: T): T => {
   };
 };
 
-export const fetchLocations = async (): Promise<BackendLocation[]> => {
-  const response = await api.get<BackendLocation[]>('/exam-locations');
-  return Promise.all(
-    response.data.map(async (location) => {
-      try {
-        return await fetchLocationById(location.LOCATION_ID);
-      } catch {
-        return normalizeLocation(location);
-      }
-    }),
-  );
+const LOCATION_PAGE_LIMIT = 100;
+const LOCATION_MAX_PAGES = 20;
+
+export const fetchLocationsPage = async (params: {
+  page: number;
+  limit: number;
+  search?: string;
+  signal?: AbortSignal;
+}): Promise<{ data: BackendLocation[]; total: number }> => {
+  const requestConfig: {
+    params: Record<string, number | string | boolean>;
+    signal?: AbortSignal;
+  } = {
+    params: {
+      includeSeats: true,
+      page: params.page,
+      limit: params.limit,
+      ...(params.search?.trim() ? { search: params.search.trim() } : {}),
+    },
+  };
+  if (params.signal) {
+    requestConfig.signal = params.signal;
+  }
+  const response = await api.get<PaginatedResponse<BackendLocation>>('/exam-locations', requestConfig);
+  const unwrapped = unwrapPaginated<BackendLocation>(response.data);
+  return {
+    data: unwrapped.data.map((location) => normalizeLocation(location)),
+    total: unwrapped.total,
+  };
+};
+
+/** occupancy / dropdown — limit=100 แล้วไล่หน้าถ้าจำเป็น ไม่บังคับ limit=10 */
+export const fetchLocations = async (signal?: AbortSignal): Promise<BackendLocation[]> => {
+  const all: BackendLocation[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const pageParams: { page: number; limit: number; signal?: AbortSignal } = {
+      page,
+      limit: LOCATION_PAGE_LIMIT,
+    };
+    if (signal) {
+      pageParams.signal = signal;
+    }
+    const { data, total } = await fetchLocationsPage(pageParams);
+    all.push(...data);
+    totalPages = Math.min(
+      LOCATION_PAGE_LIMIT > 0 ? Math.ceil(total / LOCATION_PAGE_LIMIT) : 1,
+      LOCATION_MAX_PAGES,
+    );
+    page += 1;
+  } while (page <= totalPages);
+
+  return all;
 };
 
 export const createLocation = async (payload: LocationPayload): Promise<BackendLocation> => {
@@ -123,9 +168,11 @@ export const updateSeatStatus = async (
 
 export const fetchLocationSeats = async (
   locationId: number | string,
+  requestConfig?: { signal?: AbortSignal },
 ): Promise<BackendLocationSeat[]> => {
   const response = await api.get<BackendLocationSeat[]>(
     `/exam-location-seats/location/${locationId}`,
+    requestConfig,
   );
   return response.data;
 };
@@ -136,9 +183,11 @@ export const deleteLocation = async (id: number | string): Promise<void> => {
 
 export const fetchLocationById = async (
   id: number | string,
+  requestConfig?: { signal?: AbortSignal },
 ): Promise<BackendLocation & { SEATS: BackendLocationSeat[] }> => {
   const response = await api.get<BackendLocation & { SEATS: BackendLocationSeat[] }>(
     `/exam-locations/${id}`,
+    requestConfig,
   );
   return normalizeLocation(response.data);
 };

@@ -9,6 +9,7 @@ import type {
   ExamInformationRoundRow,
   ExamCandidateInfoRow,
 } from 'src/types/exam-report.types';
+import type { PaginationMeta } from 'src/types/pagination';
 
 // ============================================================
 // Exam Report Service — เชื่อม backend จริง (/exam-report)
@@ -219,56 +220,142 @@ export const fetchExamReportOptions = async (): Promise<ExamReportOptions> => {
   return response.data;
 };
 
+export interface ExamReportScoreMeta extends PaginationMeta {
+  minScore: number | null;
+  maxScore: number | null;
+  averageScore: number | null;
+}
+
+export interface ExamInformationRoundsPage {
+  data: ExamInformationRoundRow[];
+  total: number;
+  minScore: number | null;
+  maxScore: number | null;
+  averageScore: number | null;
+}
+
+export interface ExamCandidateInfoPage {
+  data: ExamCandidateInfoRow[];
+  total: number;
+  minScore: number | null;
+  maxScore: number | null;
+  averageScore: number | null;
+}
+
+const mapRoundRow = (row: BackendExamInformationRound): ExamInformationRoundRow => ({
+  round: row.round,
+  applicants: Number(row.applicants),
+  attended: Number(row.attended),
+  absent: Number(row.absent),
+  repeatTakers: Number(row.repeatTakers),
+  minScore: row.minScore === null ? null : Number(row.minScore),
+  maxScore: row.maxScore === null ? null : Number(row.maxScore),
+  averageScore: row.averageScore === null ? null : Number(row.averageScore),
+});
+
+const mapCandidateRow = (row: BackendExamCandidateInfo): ExamCandidateInfoRow => ({
+  id: row.id,
+  examNumber: row.examNumber,
+  prefix: row.prefix,
+  fullName: row.fullName,
+  vocabularyGrammarScore:
+    row.vocabularyGrammarScore === null ? null : Number(row.vocabularyGrammarScore),
+  readingScore: row.readingScore === null ? null : Number(row.readingScore),
+  totalScore: row.totalScore === null ? null : Number(row.totalScore),
+  level: row.level === null ? null : String(row.level),
+  attemptStatus: row.attemptStatus,
+  ...(row.scoreLines
+    ? {
+        scoreLines: row.scoreLines.map((line) => ({
+          ...line,
+          score: line.score === null ? null : Number(line.score),
+          maxScore: Number(line.maxScore),
+          sortOrder: Number(line.sortOrder),
+        })),
+      }
+    : {}),
+});
+
+const readScoreMeta = (
+  meta: ExamReportScoreMeta | undefined,
+): Pick<ExamReportScoreMeta, 'minScore' | 'maxScore' | 'averageScore' | 'total'> => ({
+  total: meta?.total ?? 0,
+  minScore: meta?.minScore ?? null,
+  maxScore: meta?.maxScore ?? null,
+  averageScore: meta?.averageScore ?? null,
+});
+
 export const fetchExamInformationRounds = async (
   year: string | number,
-): Promise<ExamInformationRoundRow[]> => {
-  const response = await api.get<BackendExamInformationRound[]>(
+  params?: { page?: number; limit?: number; search?: string; signal?: AbortSignal },
+): Promise<ExamInformationRoundsPage> => {
+  const requestConfig: {
+    params: Record<string, number | string>;
+    signal?: AbortSignal;
+  } = {
+    params: {
+      page: params?.page ?? 1,
+      limit: params?.limit ?? 10,
+      ...(params?.search?.trim() ? { search: params.search.trim() } : {}),
+    },
+  };
+  if (params?.signal) {
+    requestConfig.signal = params.signal;
+  }
+
+  const response = await api.get<{ data: BackendExamInformationRound[]; meta: ExamReportScoreMeta }>(
     `/exam-report/years/${year}/rounds`,
+    requestConfig,
   );
 
-  return response.data.map((row) => ({
-    round: row.round,
-    applicants: Number(row.applicants),
-    attended: Number(row.attended),
-    absent: Number(row.absent),
-    repeatTakers: Number(row.repeatTakers),
-    minScore: row.minScore === null ? null : Number(row.minScore),
-    maxScore: row.maxScore === null ? null : Number(row.maxScore),
-    averageScore: row.averageScore === null ? null : Number(row.averageScore),
-  }));
+  const body = response.data;
+  const scores = readScoreMeta(body.meta);
+  return {
+    data: (body.data ?? []).map(mapRoundRow),
+    total: scores.total,
+    minScore: scores.minScore,
+    maxScore: scores.maxScore,
+    averageScore: scores.averageScore,
+  };
 };
 
 export const fetchExamCandidateInfo = async (
   year: string | number,
-  round?: string,
-): Promise<ExamCandidateInfoRow[]> => {
-  const response = await api.get<BackendExamCandidateInfo[]>(
-    `/exam-report/years/${year}/candidates`,
-    {
-      params: round ? { round } : undefined,
+  options?: {
+    round?: string;
+    page?: number;
+    limit?: number;
+    search?: string;
+    signal?: AbortSignal;
+  },
+): Promise<ExamCandidateInfoPage> => {
+  const requestConfig: {
+    params: Record<string, number | string>;
+    signal?: AbortSignal;
+  } = {
+    params: {
+      page: options?.page ?? 1,
+      limit: options?.limit ?? 10,
+      ...(options?.search?.trim() ? { search: options.search.trim() } : {}),
+      ...(options?.round ? { round: options.round } : {}),
     },
+  };
+  if (options?.signal) {
+    requestConfig.signal = options.signal;
+  }
+
+  const response = await api.get<{ data: BackendExamCandidateInfo[]; meta: ExamReportScoreMeta }>(
+    `/exam-report/years/${year}/candidates`,
+    requestConfig,
   );
 
-  return response.data.map((row) => ({
-    id: row.id,
-    examNumber: row.examNumber,
-    prefix: row.prefix,
-    fullName: row.fullName,
-    vocabularyGrammarScore:
-      row.vocabularyGrammarScore === null ? null : Number(row.vocabularyGrammarScore),
-    readingScore: row.readingScore === null ? null : Number(row.readingScore),
-    totalScore: row.totalScore === null ? null : Number(row.totalScore),
-    level: row.level === null ? null : String(row.level),
-    attemptStatus: row.attemptStatus,
-    ...(row.scoreLines
-      ? {
-          scoreLines: row.scoreLines.map((line) => ({
-            ...line,
-            score: line.score === null ? null : Number(line.score),
-            maxScore: Number(line.maxScore),
-            sortOrder: Number(line.sortOrder),
-          })),
-        }
-      : {}),
-  }));
+  const body = response.data;
+  const scores = readScoreMeta(body.meta);
+  return {
+    data: (body.data ?? []).map(mapCandidateRow),
+    total: scores.total,
+    minScore: scores.minScore,
+    maxScore: scores.maxScore,
+    averageScore: scores.averageScore,
+  };
 };

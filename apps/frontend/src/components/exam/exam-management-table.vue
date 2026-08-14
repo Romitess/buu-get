@@ -4,6 +4,7 @@
     :rows="exams"
     :loading="loading"
     :pagination="pagination"
+    :is-server-side="isServerSide"
     @request="onRequest"
   >
     <!-- Type Column -->
@@ -76,6 +77,7 @@ interface Props {
   role: Role;
   loading?: boolean;
   pagination?: PaginationModel;
+  isServerSide?: boolean;
 }
 
 const props = defineProps<Props>();

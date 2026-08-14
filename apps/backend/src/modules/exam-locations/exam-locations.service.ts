@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import {
   ExamLocation,
   LocationAislePosition,
@@ -9,10 +9,19 @@ import {
 import { CreateExamLocationDto } from './dto/create-exam-location.dto';
 import { CreateExamLocationWithSeatsDto } from './dto/create-exam-location-with-seats.dto';
 import { UpdateExamLocationDto } from './dto/update-exam-location.dto';
+import { ExamLocationQueryDto } from './dto/exam-location-query.dto';
 import {
   ExamLocationSeat,
   LocationSeatStatus,
 } from '../exam-location-seats/entities/exam-location-seat.entity';
+import {
+  buildPaginatedResponse,
+  PaginatedResponse,
+} from 'src/common/dto/paginated-response.dto';
+import {
+  PAGINATION_DEFAULT_LIMIT,
+  PAGINATION_DEFAULT_PAGE,
+} from 'src/common/dto/pagination-query.dto';
 
 type LocationWriteDto =
   | CreateExamLocationDto
@@ -141,21 +150,52 @@ export class ExamLocationsService {
     );
   }
 
-  async findAll(options?: {
-    includeSeats?: boolean;
-  }): Promise<ExamLocationResponse[]> {
-    const includeSeats = options?.includeSeats === true;
-    const locations = await this.examLocationRepository.find({
-      order: { LOCATION_ID: 'ASC' },
-      ...(includeSeats
-        ? {
-            relations: ['SEATS'],
-            // แยก query โหลด seats เพื่อเลี่ยง cartesian product เมื่อมีหลายห้อง
-            relationLoadStrategy: 'query' as const,
-          }
-        : {}),
-    });
-    return locations.map((location) => this.withResponseAliases(location));
+  async findAll(
+    query: ExamLocationQueryDto = {},
+  ): Promise<PaginatedResponse<ExamLocationResponse>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const includeSeats = query.includeSeats === true;
+    const search = query.search?.trim();
+
+    const qb = this.examLocationRepository
+      .createQueryBuilder('location')
+      .orderBy('location.LOCATION_ID', 'ASC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    if (search) {
+      const searchPattern = `%${search}%`;
+      qb.andWhere(
+        '(location.LOCATION_NAME LIKE :searchPattern OR location.LOCATION_ROOM_NO LIKE :searchPattern)',
+        { searchPattern },
+      );
+    }
+
+    const [locations, total] = await qb.getManyAndCount();
+
+    let hydrated = locations;
+    if (includeSeats && locations.length > 0) {
+      const ids = locations.map((location) => location.LOCATION_ID);
+      const withSeats = await this.examLocationRepository.find({
+        where: { LOCATION_ID: In(ids) },
+        relations: ['SEATS'],
+        relationLoadStrategy: 'query',
+      });
+      const byId = new Map(
+        withSeats.map((location) => [location.LOCATION_ID, location]),
+      );
+      hydrated = ids
+        .map((id) => byId.get(id))
+        .filter((row): row is ExamLocation => !!row);
+    }
+
+    return buildPaginatedResponse(
+      hydrated.map((location) => this.withResponseAliases(location)),
+      total,
+      page,
+      limit,
+    );
   }
 
   async findOne(id: number): Promise<ExamLocationResponse> {

@@ -1,7 +1,6 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed, unref } from 'vue';
 import type { ExamRound, ExamInfo, ExamHistoryItem, DayData, ExamEnrollment } from 'src/types/exam';
-import type { ExamSchedule } from 'src/types/exam.types';
 import type { ReceiptInformation } from 'src/types/receipt-information';
 import {
   createTransaction as createTransactionRequest,
@@ -11,7 +10,6 @@ import {
 } from 'src/services/transaction.service';
 import {
   fetchScheduleData,
-  fetchExamSchedules,
   createExamRound,
   deleteExam,
   createEnrollment,
@@ -124,7 +122,6 @@ export const useExamStore = defineStore('exam', () => {
   });
   const pendingRegistrations = ref<ExamHistoryItem[]>([]);
   const historyRecords = ref<ExamHistoryItem[]>([]);
-  const managementSchedules = ref<ExamSchedule[]>([]);
   const registeredSessionIds = ref<Set<number>>(new Set());
   const historyError = ref<string | null>(null);
   const scheduleError = ref<string | null>(null);
@@ -213,7 +210,7 @@ export const useExamStore = defineStore('exam', () => {
   }
 
   async function initSchedule(force = false): Promise<void> {
-    // Non-force callers join the in-flight request instead of stacking GET /exam
+    // Non-force callers join the in-flight request instead of stacking GET /exam/schedule
     if (scheduleFetchInFlight && !force) {
       await scheduleFetchInFlight;
       return;
@@ -254,14 +251,6 @@ export const useExamStore = defineStore('exam', () => {
   /** Clear schedule spinner when leaving the page — does not abort in-flight data update */
   function clearScheduleLoadingUi(): void {
     isLoadingSchedule.value = false;
-  }
-
-  async function loadManagementSchedules(force = false): Promise<void> {
-    try {
-      managementSchedules.value = await fetchExamSchedules(force);
-    } catch (error) {
-      console.error('Failed to load management schedules:', error);
-    }
   }
 
   /** ดึง enrollments ครั้งเดียว แล้วอัปเดตทั้ง history + registered sessions */
@@ -497,7 +486,6 @@ export const useExamStore = defineStore('exam', () => {
 
   async function deleteExamRound(id: number | string): Promise<void> {
     await deleteExam(id);
-    await loadManagementSchedules(true);
     await initSchedule(true);
   }
 
@@ -512,7 +500,6 @@ export const useExamStore = defineStore('exam', () => {
     formattedSelectedDate,
     pendingRegistrations,
     historyRecords,
-    managementSchedules,
     historyError,
     scheduleError,
     isLoadingSchedule,
@@ -527,7 +514,6 @@ export const useExamStore = defineStore('exam', () => {
     deleteExamRound,
     initSchedule,
     clearScheduleLoadingUi,
-    loadManagementSchedules,
     fetchHistory,
     isSessionRegistered,
     resetExamUserState,

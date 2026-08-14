@@ -79,33 +79,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  /**
-   * เข้าสู่ระบบ — เรียก POST /auth/login
-   */
-  async function login(payload: LoginPayload): Promise<LoginResponse> {
-    error.value = null;
-
-    try {
-      const response = await api.post('/auth/login', payload);
-      const { accessToken: token, user } = response.data;
-
-      // เก็บ Token ไว้ใน State และ LocalStorage
-      accessToken.value = token;
-      localStorage.setItem('access_token', token);
-      localStorage.setItem('isLoggedIn', 'true');
-      if (user?.id) {
-        localStorage.setItem('user_id', String(user.id));
-      }
-
-      return { success: true, accessToken: token, user };
-    } catch (err: unknown) {
-      const axiosError = err as AxiosError<{ message?: string }>;
-      const msg = axiosError.response?.data?.message || 'Login failed';
-      error.value = msg;
-      return { success: false, message: msg };
-    }
-  }
-
   async function sendOtp(email: string): Promise<OtpResponse> {
     error.value = null;
 
@@ -158,7 +131,6 @@ export const useAuthStore = defineStore('auth', () => {
 
     // Actions
     register,
-    login,
     sendOtp,
     verifyOtp,
     logout,

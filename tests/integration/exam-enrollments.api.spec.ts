@@ -957,6 +957,12 @@ test.describe('Exam enrollments API — create / seats / RBAC / match flows', ()
     expect(ids).toContain(unpaid2.ERM_ID);
     expect(ids).not.toContain(unpaid.ERM_ID);
     expect(body.totalPaid).toBeGreaterThanOrEqual(1);
+
+    const candidateDenied = await request.get(
+      `/api/exam-enrollments/exam/${openExamId}?sessionId=${sessionId}&page=1&limit=50`,
+      { headers: candidateHeaders },
+    );
+    expect(candidateDenied.status(), await candidateDenied.text()).toBe(403);
   });
 
   // ENR-I-012

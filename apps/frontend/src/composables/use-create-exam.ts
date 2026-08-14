@@ -1,4 +1,4 @@
-import { ref, computed, nextTick, watch, type Ref } from 'vue';
+import { ref, computed, nextTick, watch, toValue, type MaybeRefOrGetter, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useExamStore } from 'src/stores/exam.store';
@@ -25,7 +25,7 @@ import {
   fetchExamLocations,
   fetchFundSources,
   fetchExamWithSeats,
-  fetchAllExamsRaw,
+  fetchAdminExamsAll,
   fetchExamBlockedSeats,
   updateExamRound,
   notifyExamChanges,
@@ -121,7 +121,7 @@ export interface CreateExamForm {
 /** Options for the composable to support both Create and Edit modes */
 export interface UseExamFormOptions {
   /** If provided, the composable will operate in Edit Mode */
-  examId?: number | undefined;
+  examId?: MaybeRefOrGetter<number | undefined>;
 }
 
 /** Snapshot ของฟิลด์ที่ใช้เปรียบเทียบหาความเปลี่ยนแปลงของรอบสอบ */
@@ -229,8 +229,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const examStore = useExamStore();
   const userStore = useUserStore();
 
-  const examId = options?.examId;
-  const isEditMode = computed<boolean>(() => !!examId);
+  const examId = computed(() => {
+    const raw = toValue(options?.examId);
+    return typeof raw === 'number' && Number.isFinite(raw) && raw > 0 ? raw : undefined;
+  });
+  const isEditMode = computed<boolean>(() => !!examId.value);
 
   const wasOriginallyPublished = ref(false);
   const originalExamDate = ref('');
@@ -365,7 +368,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (!formDateGregorian) return occupied;
 
     for (const exam of allExams.value) {
-      if (examId && exam.EXAM_ID === examId) continue;
+      if (examId.value && exam.EXAM_ID === examId.value) continue;
 
       const examDate = formatBackendDate(exam.EXAM_DATE);
       if (examDate !== formDateGregorian) continue;
@@ -877,7 +880,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   };
 
   const loadOccupancyInBackground = (): void => {
-    void fetchAllExamsRaw()
+    void fetchAdminExamsAll()
       .then((exams) => {
         allExams.value = exams;
       })
@@ -896,7 +899,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         fetchFundSources(),
         fetchScoreRubrics(),
         getUsersFromApi(ROLES.PROCTOR),
-        examId ? fetchExamWithSeats(examId) : Promise.resolve(null),
+        examId.value ? fetchExamWithSeats(examId.value) : Promise.resolve(null),
       ]);
       locationOptions.value = locations;
       const activeFundSources = fundSources.filter((fs: FundSource) => fs.FS_OPEN_STATUS !== false);
@@ -904,7 +907,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
         value: fs.FS_ID,
       }));
-      if (!examId && !form.value.srbId) {
+      if (!examId.value && !form.value.srbId) {
         form.value.srbId = scoreRubrics.find((r) => r.isDefault)?.id ?? null;
       }
       proctorOptions.value = proctors.map((u) => {
@@ -1479,7 +1482,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     const url = URL.createObjectURL(blob);
 
     link.setAttribute('href', url);
-    link.setAttribute('download', `passcodes_${examId || 'new'}.csv`);
+    link.setAttribute('download', `passcodes_${examId.value || 'new'}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -1917,17 +1920,17 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
     isSaving.value = true;
     try {
-      let targetExamId = isEditMode.value ? examId : null;
+      let targetExamId = isEditMode.value ? examId.value : null;
       const combinedExamName = form.value.examName.trim();
 
-      if (isEditMode.value && examId) {
+      if (isEditMode.value && examId.value) {
         // === EDIT MODE ===
         const existingSessionIds = flatRooms
           .filter((r) => r.sessionId)
           .map((r) => r.sessionId as number);
 
         await updateExamRound({
-          examId,
+          examId: examId.value,
           examName: combinedExamName,
           locationId: Number(flatRooms[0]?.locationId || 0),
           examType: form.value.examType,
@@ -1965,7 +1968,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         if (userStore.userRole === ROLES.REGISTRATION_OFFICER) {
           const changes = buildExamChanges();
           if (changes.length > 0) {
-            void notifyExamChanges(examId, changes).catch((notifyErr) => {
+            void notifyExamChanges(examId.value as number, changes).catch((notifyErr) => {
               console.error('Failed to notify exam changes:', notifyErr);
             });
           }

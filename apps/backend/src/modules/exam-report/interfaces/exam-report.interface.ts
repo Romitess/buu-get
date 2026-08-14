@@ -97,6 +97,22 @@ export interface ExamInformationRound {
   averageScore: number | null;
 }
 
+/** meta แบ่งหน้า + คะแนนรวมทั้งปี/รอบ (ไม่คำนวณจากหน้าปัจจุบัน) */
+export interface ExamReportListMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  minScore: number | null;
+  maxScore: number | null;
+  averageScore: number | null;
+}
+
+export interface ExamReportListResponse<T> {
+  data: T[];
+  meta: ExamReportListMeta;
+}
+
 export type ExamCandidateAttemptStatus = 'firstAttempt' | 'repeatAttempt';
 
 /** แถวข้อมูลผู้เข้าสอบรายบุคคลภายในรอบสอบที่เลือก */

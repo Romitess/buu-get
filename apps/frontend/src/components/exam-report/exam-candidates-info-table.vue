@@ -5,6 +5,7 @@
     :loading="loading"
     :pagination="pagination"
     :empty-label="t('admin.examCandidatesInfo.table.emptyLabel')"
+    :is-server-side="isServerSide"
     class="exam-candidates-info-table"
     @request="onRequest"
   >
@@ -42,6 +43,7 @@ interface Props {
   candidates: ExamCandidateInfoRow[];
   loading?: boolean;
   pagination?: PaginationModel;
+  isServerSide?: boolean;
 }
 
 const props = defineProps<Props>();
