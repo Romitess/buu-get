@@ -256,6 +256,7 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.registrantManagement.table.columns.index'),
     field: 'index',
     align: 'center',
+    sortable: false,
     style: 'width: 5%',
   },
   {
@@ -263,6 +264,7 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.registrantManagement.table.columns.prefix'),
     field: 'titleTh',
     align: 'center',
+    sortable: false,
     style: 'width: 8%',
   },
   {
@@ -270,6 +272,7 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.registrantManagement.table.columns.fullName'),
     field: 'fullnameTh',
     align: 'left',
+    sortable: false,
     style: 'width: 13%',
   },
   {
@@ -277,6 +280,7 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.registrantManagement.table.columns.fullNameEn'),
     field: 'fullnameEn',
     align: 'left',
+    sortable: false,
     style: 'width: 13%',
   },
   {
@@ -284,6 +288,7 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.registrantManagement.table.columns.email'),
     field: 'email',
     align: 'left',
+    sortable: false,
     style: 'width: 14%',
   },
   {
@@ -291,6 +296,7 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.registrantManagement.table.columns.phone'),
     field: 'phone',
     align: 'center',
+    sortable: false,
     style: 'width: 11%',
   },
   {
@@ -298,6 +304,7 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.registrantManagement.table.columns.remark'),
     field: 'remark',
     align: 'center',
+    sortable: false,
     style: 'width: 12%',
   },
   {
@@ -305,6 +312,7 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.registrantManagement.table.columns.paymentStatus'),
     field: 'paymentStatus',
     align: 'center',
+    sortable: false,
     format: (val: number) => PAYMENT_STATUS_LABELS[val] || '-',
     style: 'width: 11%',
   },
@@ -313,6 +321,7 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.registrantManagement.table.columns.verifyStatus'),
     field: 'verifyStatus',
     align: 'center',
+    sortable: false,
     format: (val: number) => VERIFY_STATUS_LABELS[val] || '-',
     style: 'width: 12%',
   },
@@ -321,16 +330,18 @@ const columns: QTableColumn[] = [
     label: i18n.t('admin.registrantManagement.table.columns.tools'),
     field: 'tools',
     align: 'center',
+    sortable: false,
     style: 'width: 9%',
   },
 ];
 
 const onRequest = (props: TableRequestProps): void => {
-  const { page, rowsPerPage, sortBy, descending } = props.pagination;
+  const { page, rowsPerPage } = props.pagination;
   pagination.value.page = page;
   pagination.value.rowsPerPage = rowsPerPage;
-  pagination.value.sortBy = sortBy ?? null;
-  pagination.value.descending = descending ?? false;
+  // Keep the backend default: incomplete statuses first, then newest.
+  pagination.value.sortBy = null;
+  pagination.value.descending = false;
   void loadData();
 };
 
@@ -366,8 +377,6 @@ const loadData = async (): Promise<void> => {
       search: searchQuery.value,
       sessionId: selectedSessionId.value,
       sessionLocationId: null, // load all rooms for this session
-      sortBy: pagination.value.sortBy,
-      descending: pagination.value.descending,
     });
 
     pagination.value.rowsNumber = totalRows.value;

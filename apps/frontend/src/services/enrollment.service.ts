@@ -37,16 +37,30 @@ export const fetchEnrollmentsByExamId = async (
 ): Promise<PaginatedEnrollmentResponse> => {
   const page = params?.page ?? 1;
   const limit = params?.limit ?? 100;
+  const query: Record<string, string | number | boolean> = { page, limit };
+
+  if (params?.search?.trim()) {
+    query.search = params.search.trim();
+  }
+  if (params?.sessionId != null && params.sessionId > 0) {
+    query.sessionId = params.sessionId;
+  }
+  if (params?.sessionLocationId != null && params.sessionLocationId > 0) {
+    query.sessionLocationId = params.sessionLocationId;
+  }
+  if (params?.sortBy) {
+    query.sortBy = params.sortBy;
+    if (params.descending != null) {
+      query.descending = params.descending;
+    }
+  }
+
   const response = await api.get<{
     data: BackendEnrollmentDetail[];
     total: number;
     totalPaid: number;
   }>(`/exam-enrollments/exam/${examId}`, {
-    params: {
-      ...params,
-      page,
-      limit,
-    },
+    params: query,
   });
 
   const paginatedData = response.data;

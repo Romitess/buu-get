@@ -1750,6 +1750,16 @@ describe('ExamEnrollmentsService', () => {
         expect.stringContaining('CASE'),
         'incomplete_priority',
       );
+      expect(qb.addSelect).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `ERM_VERIFY_STATUS IN (${ExamVerifyStatus.UNCHECKED}, ${ExamVerifyStatus.WAIT_FIXED})`,
+        ),
+        'incomplete_priority',
+      );
+      expect(qb.addSelect).toHaveBeenCalledWith(
+        expect.stringContaining(`ERM_STATUS = ${ExamEnrollmentStatus.UNPAID}`),
+        'incomplete_priority',
+      );
       expect(qb.orderBy).toHaveBeenCalledWith('incomplete_priority', 'ASC');
       expect(qb.orderBy).not.toHaveBeenCalledWith(
         expect.stringContaining('CASE'),

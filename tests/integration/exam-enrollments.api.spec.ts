@@ -3,7 +3,7 @@ import { apiLogin } from '../e2e/fixtures/auth';
 import { TEST_PASSWORD, type TestRoleKey } from '../e2e/fixtures/users';
 
 /**
- * Exam enrollments API integration — matrix ENR-I-001 … ENR-I-012
+ * Exam enrollments API integration — matrix ENR-I-001 … ENR-I-013
  *
  * Seed approach (shared-DB, disposable via API):
  * 1. Admin creates open / closed / SPECIAL exams + sessions
@@ -1021,6 +1021,54 @@ test.describe('Exam enrollments API — create / seats / RBAC / match flows', ()
       { headers: candidateHeaders },
     );
     expect(candidateDenied.status(), await candidateDenied.text()).toBe(403);
+  });
+
+  // ENR-I-013
+  test('GET exam/:id default order incomplete first then newest', async ({
+    request,
+  }) => {
+    requireSeed();
+    expect(disposableUserId).toBeTruthy();
+    expect(disposable2UserId).toBeTruthy();
+    expect(disposableHeaders).toBeTruthy();
+    expect(disposable2Headers).toBeTruthy();
+
+    const sessionId = await createSession(request, openExamId!);
+
+    const olderUnpaid = await createEnrollment(request, {
+      sessionId,
+      userId: candidateUserId,
+    });
+    const newerPaidUnchecked = await createEnrollment(request, {
+      sessionId,
+      userId: disposableUserId!,
+      headers: disposableHeaders!,
+    });
+    await markPaid(request, newerPaidUnchecked.ERM_ID);
+    const newestPaidVerified = await createEnrollment(request, {
+      sessionId,
+      userId: disposable2UserId!,
+      headers: disposable2Headers!,
+    });
+    await markPaid(request, newestPaidVerified.ERM_ID);
+    await markVerified(request, newestPaidVerified.ERM_ID);
+
+    const list = await request.get(
+      `/api/exam-enrollments/exam/${openExamId}?sessionId=${sessionId}&page=1&limit=50`,
+      { headers: adminHeaders },
+    );
+    expect(list.status(), await list.text()).toBe(200);
+    const body = (await list.json()) as { data: EnrollmentRow[] };
+    const expectedIds = [
+      newerPaidUnchecked.ERM_ID,
+      olderUnpaid.ERM_ID,
+      newestPaidVerified.ERM_ID,
+    ];
+    const orderedIds = body.data
+      .map((row) => row.ERM_ID)
+      .filter((id) => expectedIds.includes(id));
+
+    expect(orderedIds).toEqual(expectedIds);
   });
 
   // ENR-I-012
