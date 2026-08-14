@@ -40,6 +40,18 @@ export function useExamAttendances() {
     return `${location.LOCATION_NAME}${location.LOCATION_ROOM_NO ? ` (${location.LOCATION_ROOM_NO})` : ''}`;
   };
 
+  const getAttendanceIdKey = (row: AttendanceTableRow): string =>
+    (row.testTakerCode || row.nationalId || '').trim();
+
+  const compareAttendanceId = (left: AttendanceTableRow, right: AttendanceTableRow): number => {
+    const leftKey = getAttendanceIdKey(left);
+    const rightKey = getAttendanceIdKey(right);
+    if (!leftKey && !rightKey) return 0;
+    if (!leftKey) return 1;
+    if (!rightKey) return -1;
+    return leftKey.localeCompare(rightKey, 'th', { numeric: true, sensitivity: 'base' });
+  };
+
   const filteredAttendances = computed((): AttendanceTableRow[] => {
     let list = attendances.value;
 
@@ -71,6 +83,8 @@ export function useExamAttendances() {
         );
       });
     }
+
+    list = [...list].sort((left, right) => compareAttendanceId(left, right));
 
     // Re-index sequentially for clean UI presentation
     return list.map((item, index) => ({

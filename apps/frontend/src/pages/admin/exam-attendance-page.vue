@@ -279,6 +279,8 @@ const pagination = ref<PaginationModel>({
   page: 1,
   rowsPerPage: 10,
   rowsNumber: 0,
+  sortBy: 'nationalId',
+  descending: false,
 });
 
 const columns = computed<QTableColumn[]>(() => [
