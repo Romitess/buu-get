@@ -15,6 +15,7 @@
       <div class="field-label-row text-body2 text-weight-medium q-mb-xs field-label">
         <div>
           {{ t('profile.address') }}
+          <span class="text-negative">*</span>
         </div>
         <q-checkbox
           v-if="showAddressCheckbox"
@@ -31,7 +32,10 @@
         :placeholder="t('profile.addressPlaceholder')"
         outlined
         dense
-        :rules="[() => true]"
+        lazy-rules
+        :rules="[
+          (val) => !!String(val ?? '').trim() || t('profile.requiredAddress'),
+        ]"
         :hide-bottom-space="false"
         class="custom-input"
         :class="{ 'expanded-address': !showEmailField }"

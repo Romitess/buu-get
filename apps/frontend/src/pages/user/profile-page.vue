@@ -256,7 +256,7 @@
           <div class="col-12 col-md-6">
             <div class="q-mb-md relative-position">
               <label class="text-body2 text-weight-medium q-mb-xs field-label block">
-                {{ $t('profile.address') }}
+                {{ $t('profile.address') }} <span class="text-negative">*</span>
               </label>
               <q-input
                 ref="addressInputRef"
@@ -267,6 +267,8 @@
                 bg-color="white"
                 class="address-textarea"
                 input-style="resize: none;"
+                lazy-rules
+                :rules="[(val) => !!String(val ?? '').trim() || $t('profile.requiredAddress')]"
                 hide-bottom-space
               />
             </div>
