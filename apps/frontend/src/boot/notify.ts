@@ -7,7 +7,7 @@ const overrideNotify = function (opts: string | Parameters<typeof Notify.create>
     return originalCreate.call(Notify, { message: opts, position: 'bottom' });
   }
   if (opts && typeof opts === 'object') {
-    opts.position = 'bottom';
+    opts.position = opts.position ?? 'bottom';
   }
   return originalCreate.call(Notify, opts);
 };

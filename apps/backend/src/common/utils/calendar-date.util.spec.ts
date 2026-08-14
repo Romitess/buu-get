@@ -1,5 +1,6 @@
 import {
   getBangkokDateOnly,
+  getYesterdayBangkokDateOnly,
   isFutureBangkokDate,
   toBangkokDateOnly,
 } from './calendar-date.util';
@@ -19,6 +20,13 @@ describe('calendar-date.util', () => {
   it('normalizes ISO strings to Bangkok calendar date', () => {
     expect(toBangkokDateOnly('2026-07-27T00:00:00+07:00')).toBe('2026-07-27');
     expect(toBangkokDateOnly('2026-07-26T17:00:00.000Z')).toBe('2026-07-27');
+  });
+
+  it('returns the previous Bangkok calendar day', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-08-14T00:00:00+07:00'));
+
+    expect(getYesterdayBangkokDateOnly()).toBe('2026-08-13');
   });
 
   it('detects future Bangkok dates', () => {

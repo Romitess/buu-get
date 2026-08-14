@@ -1,6 +1,20 @@
 export default {
   failed: 'Action failed',
   success: 'Action was successful',
+  notifications: {
+    bellLabel: 'Notifications',
+    bellLabelUnread: '{n} unread notifications',
+    menuTitle: 'Notifications',
+    empty: 'No notifications',
+    loading: 'Loading notifications',
+    loadError: 'Could not load notifications',
+    retry: 'Retry',
+    markAllRead: 'Mark all as read',
+    dailyPaymentSummary: 'Daily payment summary',
+    itemBody: '{date} · {count} payments · {amount} THB',
+    viewReport: 'View report',
+    toastMessage: 'Payment summary for {date}: {count} payments totaling {amount} THB',
+  },
   roles: {
     admin: 'Admin',
     staff: 'Staff',

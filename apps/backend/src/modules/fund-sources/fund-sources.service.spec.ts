@@ -17,7 +17,11 @@ type MockQueryBuilder = {
 };
 
 const createQueryBuilderMock = (
-  rawRows: Array<{ examName: string; amount: string | number }> = [],
+  rawRows: Array<{
+    examName: string;
+    amount: string | number;
+    paidCount?: string | number;
+  }> = [],
 ): MockQueryBuilder => {
   const qb: MockQueryBuilder = {
     innerJoin: jest.fn(),
@@ -266,8 +270,8 @@ describe('FundSourcesService', () => {
     it('should map raw rows to 1-based index and sum totalAmount (FUND-U-016)', async () => {
       // Arrange
       queryBuilder = createQueryBuilderMock([
-        { examName: 'Exam A', amount: '100.50' },
-        { examName: 'Exam B', amount: 200 },
+        { examName: 'Exam A', amount: '100.50', paidCount: '2' },
+        { examName: 'Exam B', amount: 200, paidCount: 1 },
       ]);
       transactionRepo.createQueryBuilder.mockReturnValue(queryBuilder);
 
@@ -280,6 +284,7 @@ describe('FundSourcesService', () => {
         { index: 2, examName: 'Exam B', amount: 200 },
       ]);
       expect(result.totalAmount).toBe(300.5);
+      expect(result.paidCount).toBe(3);
     });
 
     it('should filter APPROVED payment status and active enrollment statuses (FUND-U-017)', async () => {

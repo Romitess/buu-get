@@ -1,6 +1,20 @@
 export default {
   failed: 'การดำเนินการล้มเหลว',
   success: 'การดำเนินการสำเร็จ',
+  notifications: {
+    bellLabel: 'การแจ้งเตือน',
+    bellLabelUnread: 'การแจ้งเตือนที่ยังไม่อ่าน {n} รายการ',
+    menuTitle: 'การแจ้งเตือน',
+    empty: 'ไม่มีการแจ้งเตือน',
+    loading: 'กำลังโหลดการแจ้งเตือน',
+    loadError: 'ไม่สามารถโหลดการแจ้งเตือนได้',
+    retry: 'ลองอีกครั้ง',
+    markAllRead: 'อ่านทั้งหมด',
+    dailyPaymentSummary: 'สรุปการชำระเงินประจำวัน',
+    itemBody: '{date} · {count} รายการ · {amount} บาท',
+    viewReport: 'ดูรายงาน',
+    toastMessage: 'สรุปการชำระเงินวันที่ {date}: {count} รายการ รวม {amount} บาท',
+  },
   roles: {
     admin: 'ผู้ดูแลระบบ',
     staff: 'เจ้าหน้าที่ดำเนินการสอบ',

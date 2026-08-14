@@ -39,6 +39,8 @@ export const BACKEND_API = {
   USER: '/user',
   /** Enrollment endpoints */
   ENROLLMENT: '/enrollment',
+  /** In-app notifications */
+  NOTIFICATIONS: '/notifications',
 } as const;
 
 /**

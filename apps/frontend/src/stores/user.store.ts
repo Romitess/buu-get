@@ -71,6 +71,11 @@ export const useUserStore = defineStore('user', () => {
     invalidateExamCache();
   }
 
+  async function clearNotificationState(): Promise<void> {
+    const { useNotificationStore } = await import('src/stores/notification.store');
+    useNotificationStore().stop();
+  }
+
   /**
    * ฟังก์ชันโหลดข้อมูลผู้ใช้เริ่มต้น (Check LocalStorage + Token)
    */
@@ -189,6 +194,7 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_id');
     void clearExamCaches();
+    void clearNotificationState();
   }
 
   return {

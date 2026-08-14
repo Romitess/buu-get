@@ -39,6 +39,7 @@ import { onMounted, watch, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import DailyRevenueFilter from 'src/components/report/daily-revenue-filter.vue';
@@ -48,6 +49,7 @@ import type { PaginationModel } from 'src/types/exam.types';
 
 const $q = useQuasar();
 const { t } = useI18n();
+const route = useRoute();
 
 const { rows, isLoading, error, filter, formattedTotal, fetchData, applyFilter } =
   useDailyRevenue();
@@ -105,8 +107,18 @@ watch(error, (newVal) => {
   }
 });
 
-// Initial load
+// Initial load — honor deep-link dates from the notification inbox
 onMounted(() => {
+  const startDate = typeof route.query.startDate === 'string' ? route.query.startDate : '';
+  const endDate = typeof route.query.endDate === 'string' ? route.query.endDate : '';
+  if (startDate || endDate) {
+    applyFilter({
+      ...filter.value,
+      startDate,
+      endDate,
+    });
+    return;
+  }
   void fetchData();
 });
 </script>
