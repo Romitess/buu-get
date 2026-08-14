@@ -110,6 +110,7 @@
         <section class="seat-plan-print-area seat-print-page">
           <AppExamSeatPlanPrint
             :room-label="printRoomLabel"
+            :exam-round="printExamRoundLabel"
             :seats-by-row="printSeatPlanRows"
             :aisle-after-cols="printAisleAfterCols"
             :aisle-after-rows="printAisleAfterRows"
@@ -123,6 +124,7 @@
           <div class="seat-list-print">
             <header class="seat-list-print__header">
               <h1>ใบรายชื่อผู้เข้าสอบ</h1>
+              <p v-if="printExamRoundLabel">ครั้งที่ {{ printExamRoundLabel }}</p>
               <p>{{ printRoomLabel }}</p>
             </header>
 
@@ -546,6 +548,10 @@ const getPrintSeatLabel = (rowNo: number, colNo: number): string => {
 
   return `${printSeatGuideLetters[rowNo - 1] ?? rowNo}${colNo}`;
 };
+
+const printExamRoundLabel = computed((): string =>
+  formatExamInstanceLabel(exam.value?.EXAM_ROUND, exam.value?.EXAM_FISCAL_YEAR),
+);
 
 const printRoomLabel = computed((): string => {
   const location = printLocation.value;
