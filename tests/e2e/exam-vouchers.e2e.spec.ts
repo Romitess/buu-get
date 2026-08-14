@@ -278,6 +278,15 @@ test.describe('E2E: Exam vouchers — bulk issue UI + candidate print', () => {
     );
     expect(paid.status(), await paid.text()).toBe(200);
 
+    const verified = await request.patch(
+      `${apiBaseUrl()}/api/exam-enrollments/${enrollmentId}`,
+      {
+        headers: adminHeaders,
+        data: { ERM_VERIFY_STATUS: 1 },
+      },
+    );
+    expect(verified.status(), await verified.text()).toBe(200);
+
     const seatOk = await request.patch(
       `${apiBaseUrl()}/api/exam-enrollments/bulk-seat-assignments`,
       {

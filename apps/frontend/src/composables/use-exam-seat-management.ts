@@ -21,6 +21,8 @@ import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 const STATUS_PAID = 1;
 const STATUS_SEAT_ASSIGNED = 2;
 const STATUS_SEAT_PUBLISHED = 3;
+const STATUS_CANCELLED = 5;
+const VERIFY_STATUS_PASS = 1;
 
 /** HTML5 DnD mime used when dragging an unassigned student from the list onto a seat */
 export const SEAT_STUDENT_DRAG_MIME = 'application/x-buu-seat-student';
@@ -151,6 +153,7 @@ export function useExamSeatManagement() {
   /** Time keys where the user already answered rearrange-vs-keep for new applicants */
   const placementChoiceResolvedByTime = new Set<string>();
   const showPlacementChoiceDialog = ref(false);
+  const showUnverifiedDialog = ref(false);
   const blockedSeatsBySessionId = ref<Record<number, BackendBlockedSeat[]>>({});
   const searchQuery = ref('');
   const applicantTypeFilter = ref<string[]>([]);
@@ -626,6 +629,14 @@ export function useExamSeatManagement() {
 
   const unassignedStudentCount = computed((): number => unassignedStudents.value.length);
 
+  const unverifiedRegistrantCount = computed((): number =>
+    allEnrollments.value.filter(
+      (enrollment) =>
+        Number(enrollment.ERM_STATUS) !== STATUS_CANCELLED &&
+        Number(enrollment.ERM_VERIFY_STATUS) !== VERIFY_STATUS_PASS,
+    ).length,
+  );
+
   const hasMixedSeatAssignments = computed((): boolean => {
     const hasAssigned = students.value.some((student) => Boolean(student.seat));
     return hasAssigned && unassignedStudentCount.value > 0;
@@ -1086,9 +1097,35 @@ export function useExamSeatManagement() {
     void router.back();
   };
 
+  const goToUnverifiedRegistrants = (): void => {
+    showUnverifiedDialog.value = false;
+    void router.push({
+      name: 'admin-exam-registrants',
+      params: { examId: String(examId.value) },
+    });
+  };
+
+  const isEnrollmentsNotVerifiedError = (err: unknown): boolean => {
+    if (!err || typeof err !== 'object' || !('response' in err)) {
+      return false;
+    }
+    const axiosError = err as {
+      response?: { status?: number; data?: { error?: string } };
+    };
+    return (
+      axiosError.response?.status === 409 &&
+      axiosError.response.data?.error === 'ENROLLMENTS_NOT_VERIFIED'
+    );
+  };
+
   const handleSave = async (): Promise<void> => {
     if (!activeSessionId.value) return;
     if (!isSeatAssignmentComplete.value) return;
+
+    if (unverifiedRegistrantCount.value > 0) {
+      showUnverifiedDialog.value = true;
+      return;
+    }
 
     isLoading.value = true;
     error.value = null;
@@ -1232,6 +1269,12 @@ export function useExamSeatManagement() {
       });
     } catch (err: unknown) {
       console.error('Failed to save seats', err);
+
+      if (isEnrollmentsNotVerifiedError(err)) {
+        showUnverifiedDialog.value = true;
+        return;
+      }
+
       let message = t('admin.seatManagement.notifications.saveError');
 
       // Type-safe error handling for Axios/API errors
@@ -1424,6 +1467,8 @@ export function useExamSeatManagement() {
     seatsByRow,
     seatStyle,
     showPlacementChoiceDialog,
+    showUnverifiedDialog,
+    unverifiedRegistrantCount,
     // Exam / session info
     examTitle,
     examDate,
@@ -1450,5 +1495,6 @@ export function useExamSeatManagement() {
     handleKeepExistingSeats,
     handleCancel,
     handleSave,
+    goToUnverifiedRegistrants,
   };
 }

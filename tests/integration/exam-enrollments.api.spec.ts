@@ -21,6 +21,13 @@ const ExamEnrollmentStatus = {
   CANCELLED: 5,
 } as const;
 
+const ExamVerifyStatus = {
+  UNCHECKED: 0,
+  PASS: 1,
+  WAIT_FIXED: 2,
+  CANCELLED: 3,
+} as const;
+
 const EXAM_FEE = 500;
 
 type AuthHeaders = { Authorization: string };
@@ -185,6 +192,18 @@ test.describe('Exam enrollments API — create / seats / RBAC / match flows', ()
     const res = await request.patch(`/api/exam-enrollments/${ermId}`, {
       headers: adminHeaders,
       data: { ERM_STATUS: ExamEnrollmentStatus.PAID },
+    });
+    expect(res.status(), await res.text()).toBe(200);
+    return (await res.json()) as EnrollmentRow;
+  }
+
+  async function markVerified(
+    request: APIRequestContext,
+    ermId: number,
+  ): Promise<EnrollmentRow> {
+    const res = await request.patch(`/api/exam-enrollments/${ermId}`, {
+      headers: adminHeaders,
+      data: { ERM_VERIFY_STATUS: ExamVerifyStatus.PASS },
     });
     expect(res.status(), await res.text()).toBe(200);
     return (await res.json()) as EnrollmentRow;
@@ -628,6 +647,7 @@ test.describe('Exam enrollments API — create / seats / RBAC / match flows', ()
       headers: disposableHeaders!,
     });
     await markPaid(request, e1.ERM_ID);
+    await markVerified(request, e1.ERM_ID);
 
     const e2 = await createEnrollment(request, {
       sessionId,
@@ -635,6 +655,7 @@ test.describe('Exam enrollments API — create / seats / RBAC / match flows', ()
       headers: disposable2Headers!,
     });
     await markPaid(request, e2.ERM_ID);
+    await markVerified(request, e2.ERM_ID);
 
     const forbidden = await request.patch(
       '/api/exam-enrollments/bulk-seat-assignments',
@@ -716,6 +737,43 @@ test.describe('Exam enrollments API — create / seats / RBAC / match flows', ()
     const verify1 = await getEnrollment(request, e1.ERM_ID);
     expect(verify1.status).toBe(200);
     expect((verify1.body as EnrollmentRow).ERM_SEAT_LABEL).toBe('A-01');
+  });
+
+  test('PATCH bulk-seat-assignments 409 when verify status is incomplete', async ({
+    request,
+  }) => {
+    requireSeed();
+    const sessionId = await createSession(request, openExamId!);
+    const slId = await ensureSessionLocation(request, sessionId);
+
+    const enrollment = await createEnrollment(request, {
+      sessionId,
+      userId: disposableUserId!,
+      headers: disposableHeaders!,
+    });
+    await markPaid(request, enrollment.ERM_ID);
+
+    const res = await request.patch(
+      '/api/exam-enrollments/bulk-seat-assignments',
+      {
+        headers: adminHeaders,
+        data: {
+          sessionIds: [sessionId],
+          assignments: [
+            {
+              ermId: enrollment.ERM_ID,
+              seatLabel: 'A-01',
+              slId,
+              sortOrder: 1,
+            },
+          ],
+        },
+      },
+    );
+    const text = await res.text();
+    expect(res.status(), text).toBe(409);
+    const body = JSON.parse(text) as { error?: string; message?: string };
+    expect(body.error).toBe('ENROLLMENTS_NOT_VERIFIED');
   });
 
   // ENR-I-005

@@ -168,6 +168,21 @@
       :confirm-label="$t('admin.seatManagement.rearrangeConfirm.confirm')"
       @confirm="confirmRearrangeAllSeats"
     />
+
+    <AppUnverifiedRegistrantsDialog
+      v-model="showUnverifiedDialog"
+      :title="$t('admin.seatManagement.unverifiedDialog.title')"
+      :message="$t('admin.seatManagement.unverifiedDialog.message')"
+      :count="unverifiedRegistrantCount"
+      :count-hint="
+        $t('admin.seatManagement.unverifiedDialog.countHint', {
+          count: unverifiedRegistrantCount,
+        })
+      "
+      :go-to-label="$t('admin.seatManagement.unverifiedDialog.goToRegistrants')"
+      :close-label="$t('admin.seatManagement.unverifiedDialog.close')"
+      @go-to-registrants="goToUnverifiedRegistrants"
+    />
   </q-page>
 </template>
 
@@ -181,6 +196,7 @@ import AppExamSeatCard from 'src/components/exam/app-exam-seat-card.vue';
 import AppExamInfoCard from 'src/components/exam/app-exam-info-card.vue';
 import AppExamSeatAssignmentMap from 'src/components/exam/app-exam-seat-assignment-map.vue';
 import AppSeatPlacementChoiceDialog from 'src/components/exam/app-seat-placement-choice-dialog.vue';
+import AppUnverifiedRegistrantsDialog from 'src/components/exam/app-unverified-registrants-dialog.vue';
 import AppConfirmDialog from 'src/components/shared/app-confirm-dialog.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
@@ -219,11 +235,14 @@ const {
   unassignedStudentCount,
   hasAnyAssignedSeat,
   showPlacementChoiceDialog,
+  showUnverifiedDialog,
+  unverifiedRegistrantCount,
   saveButtonLabel,
   loadExamData,
   getSeatLabel,
   handleCancel,
   handleSave,
+  goToUnverifiedRegistrants,
   swapSeatAssignments,
   assignStudentToSeat,
   handleRearrangeAllSeats,

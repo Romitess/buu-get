@@ -828,6 +828,14 @@ export default {
         rearrange: 'Rearrange everyone',
         keep: 'Keep existing seats and place new applicants manually',
       },
+      unverifiedDialog: {
+        title: 'Cannot confirm seat assignment',
+        message:
+          'Not all applicants have passed data verification. Please set every verification status to “Passed” first.',
+        countHint: '{count} applicant(s) have not passed verification',
+        goToRegistrants: 'Go to applicant list',
+        close: 'Close',
+      },
       notifications: {
         saveSuccess: 'Seat assignments saved successfully',
         saveError: 'Unable to save seat assignments',

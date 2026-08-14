@@ -336,6 +336,18 @@ test.describe('E2E: Exam rule vouchers — regulations UI / RBAC / preview', () 
       return;
     }
 
+    const verified = await request.patch(
+      `${apiBaseUrl()}/api/exam-enrollments/${enrollment.ERM_ID}`,
+      {
+        headers: adminHeaders,
+        data: { ERM_VERIFY_STATUS: 1 },
+      },
+    );
+    if (verified.status() !== 200) {
+      previewSkipReason = `Cannot mark verified: ${verified.status()}`;
+      return;
+    }
+
     const seatOk = await request.patch(
       `${apiBaseUrl()}/api/exam-enrollments/bulk-seat-assignments`,
       {

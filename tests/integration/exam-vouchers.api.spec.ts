@@ -212,6 +212,18 @@ test.describe('Exam vouchers API — issue / bulk / RBAC / soft-delete flows', (
     return (await res.json()) as EnrollmentRow;
   }
 
+  async function markVerified(
+    request: APIRequestContext,
+    ermId: number,
+  ): Promise<EnrollmentRow> {
+    const res = await request.patch(`/api/exam-enrollments/${ermId}`, {
+      headers: adminHeaders,
+      data: { ERM_VERIFY_STATUS: 1 },
+    });
+    expect(res.status(), await res.text()).toBe(200);
+    return (await res.json()) as EnrollmentRow;
+  }
+
   async function getEnrollment(
     request: APIRequestContext,
     ermId: number,
@@ -251,6 +263,7 @@ test.describe('Exam vouchers API — issue / bulk / RBAC / soft-delete flows', (
       headers: opts.headers,
     });
     await markPaid(request, enrollment.ERM_ID);
+    await markVerified(request, enrollment.ERM_ID);
 
     const ok = await request.patch(
       '/api/exam-enrollments/bulk-seat-assignments',

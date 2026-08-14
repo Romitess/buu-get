@@ -545,8 +545,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.ts": {
-    "mtime": 1786601638.316741,
-    "ast_hash": "d88379a6d6f5e6dd5fe5a19e74dc3dd3",
+    "mtime": 1786689347.9829016,
+    "ast_hash": "4fc4808dbbc52c13d1de49f3da463c3b",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/interfaces/executive-exam-history.interface.ts": {
@@ -2335,8 +2335,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-exam-seat-management.ts": {
-    "mtime": 1786676094.8835373,
-    "ast_hash": "00c8ba1e3c77ec07f24c150fc579a5c5",
+    "mtime": 1786689561.8224652,
+    "ast_hash": "b0844d02057a662df2e64e735306d17e",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-exam-seat-navigation.ts": {
@@ -2445,8 +2445,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/en-US/index.ts": {
-    "mtime": 1786601638.3168216,
-    "ast_hash": "98c086518cbceea9fc1cb0c6f99f1b44",
+    "mtime": 1786690287.8496256,
+    "ast_hash": "28f75858c643141ea22bf98f8f5d6c89",
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/index.ts": {
@@ -2455,8 +2455,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/th/index.ts": {
-    "mtime": 1786601638.3166428,
-    "ast_hash": "3da2d8a8d9501bf68b32b2fc4b8ffebf",
+    "mtime": 1786690287.514306,
+    "ast_hash": "e51b8ee7216deea2bd93207ee0c7134f",
     "semantic_hash": ""
   },
   "apps/frontend/src/layouts/main-layout.vue": {
@@ -2540,8 +2540,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/exam-seat-management-page.vue": {
-    "mtime": 1786084365.0121741,
-    "ast_hash": "547fd2d7b203d99b059287e1630eaf63",
+    "mtime": 1786689505.7079296,
+    "ast_hash": "04e777d2c56e439e42f126081ce25ab4",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/executive-exam-history-page.vue": {
@@ -3185,8 +3185,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.spec.ts": {
-    "mtime": 1786428606.9451013,
-    "ast_hash": "cb36f1f218f85201ca85b5f19fa5bf05",
+    "mtime": 1786689361.0683458,
+    "ast_hash": "78183fd824ad50ddf7fc8e391d93d54c",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/transactions/transactions.service.spec.ts": {
@@ -4070,8 +4070,8 @@
     "semantic_hash": ""
   },
   "tests/integration/exam-enrollments.api.spec.ts": {
-    "mtime": 1786675388.9623513,
-    "ast_hash": "effa127056d6a490363510bab440571a",
+    "mtime": 1786689381.5668895,
+    "ast_hash": "46e0926b64cfc7431bacf279e5eb3005",
     "semantic_hash": ""
   },
   "tests/integration/exam-rule-vouchers.api.spec.ts": {
@@ -4080,8 +4080,8 @@
     "semantic_hash": ""
   },
   "tests/integration/exam-vouchers.api.spec.ts": {
-    "mtime": 1785985127.4857295,
-    "ast_hash": "b589faa9b80c9b69d07971de71f31bab",
+    "mtime": 1786689392.438422,
+    "ast_hash": "8993576b4107460e72ced9471192b00c",
     "semantic_hash": ""
   },
   "tests/integration/fund-sources.api.spec.ts": {
@@ -4090,8 +4090,8 @@
     "semantic_hash": ""
   },
   "tests/e2e/exam-enrollments.e2e.spec.ts": {
-    "mtime": 1785985127.480909,
-    "ast_hash": "d44820f28bf119992d8649e6d0b0d079",
+    "mtime": 1786689397.931276,
+    "ast_hash": "0b41db34b1d86cda8927a49ad27a074e",
     "semantic_hash": ""
   },
   "tests/e2e/pages/exam-attendance.page.ts": {
@@ -4110,13 +4110,13 @@
     "semantic_hash": ""
   },
   "tests/e2e/exam-rule-vouchers.e2e.spec.ts": {
-    "mtime": 1785985127.48116,
-    "ast_hash": "88cb38fb755dfdfe1f1022cb3afff24b",
+    "mtime": 1786689399.7973137,
+    "ast_hash": "327f715ea3f7f63acd17260877940ad7",
     "semantic_hash": ""
   },
   "tests/e2e/exam-vouchers.e2e.spec.ts": {
-    "mtime": 1785985127.4814227,
-    "ast_hash": "110a5641c5de1ef7632a854901d7fec2",
+    "mtime": 1786689399.3215342,
+    "ast_hash": "5b66da63ad0a8491b4d0578914691e14",
     "semantic_hash": ""
   },
   "tests/e2e/pages/test-voucher-management.page.ts": {
@@ -4837,6 +4837,11 @@
   "apps/frontend/src/utils/safe-redirect.ts": {
     "mtime": 1786675731.6862712,
     "ast_hash": "ae411590de81c8cc075e877d8e48b83f",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/components/exam/app-unverified-registrants-dialog.vue": {
+    "mtime": 1786690285.401327,
+    "ast_hash": "cc403b43b1721e6e2518d5f9db9da0a7",
     "semantic_hash": ""
   }
 }

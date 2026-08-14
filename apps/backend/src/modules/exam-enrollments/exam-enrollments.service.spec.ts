@@ -42,6 +42,7 @@ type EnrollmentRepoMock = {
   merge: MockFn;
   create: MockFn;
   update: MockFn;
+  count: MockFn;
   createQueryBuilder: MockFn;
   manager: { save: MockFn };
 };
@@ -305,6 +306,7 @@ describe('ExamEnrollmentsService', () => {
           }) as unknown as ExamEnrollment,
       ),
       update: jest.fn().mockResolvedValue({ affected: 1 }),
+      count: jest.fn().mockResolvedValue(0),
       createQueryBuilder: jest.fn(),
       manager: { save: jest.fn().mockResolvedValue(undefined) },
     };
@@ -1422,6 +1424,63 @@ describe('ExamEnrollmentsService', () => {
       // Act + Assert
       await expect(service.bulkAssignSeats(bulkDto)).rejects.toBeInstanceOf(
         NotFoundException,
+      );
+    });
+
+    it('rejects bulkAssignSeats when an enrollment is still UNCHECKED', async () => {
+      examEnrollmentRepository.count.mockResolvedValue(1);
+
+      await expect(service.bulkAssignSeats(bulkDto)).rejects.toMatchObject({
+        response: expect.objectContaining({
+          error: 'ENROLLMENTS_NOT_VERIFIED',
+        }),
+      });
+      expect(dataSource.transaction).not.toHaveBeenCalled();
+    });
+
+    it('rejects bulkAssignSeats when an enrollment is still WAIT_FIXED', async () => {
+      examEnrollmentRepository.count.mockResolvedValue(1);
+
+      await expect(service.bulkAssignSeats(bulkDto)).rejects.toBeInstanceOf(
+        ConflictException,
+      );
+      expect(examEnrollmentRepository.count).toHaveBeenCalled();
+      expect(dataSource.transaction).not.toHaveBeenCalled();
+    });
+
+    it('allows bulkAssignSeats when unverified rows are only CANCELLED', async () => {
+      examEnrollmentRepository.count.mockResolvedValue(0);
+      const updatedEnrollment = {
+        ...baseEnrollment,
+        ERM_SEAT_LABEL: 'A1',
+        SL_ID: 5,
+        ERM_STATUS: ExamEnrollmentStatus.SEAT_ASSIGNED,
+      } as unknown as ExamEnrollment;
+      const manager = {
+        update: jest.fn().mockResolvedValue(undefined),
+        save: jest.fn().mockResolvedValue(undefined),
+        find: jest.fn().mockResolvedValue([updatedEnrollment]),
+      };
+      dataSource.transaction.mockImplementation(
+        (
+          callback: (entityManager: {
+            update: jest.Mock;
+            save: jest.Mock;
+            find: jest.Mock;
+          }) => unknown,
+        ) => Promise.resolve(callback(manager)),
+      );
+
+      const result = await service.bulkAssignSeats(bulkDto);
+
+      expect(result).toEqual([updatedEnrollment]);
+      expect(examEnrollmentRepository.count).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            ERM_STATUS: expect.anything(),
+            ERM_VERIFY_STATUS: expect.anything(),
+          }),
+        }),
       );
     });
   });

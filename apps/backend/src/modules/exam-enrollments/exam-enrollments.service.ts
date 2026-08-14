@@ -131,6 +131,7 @@ export class ExamEnrollmentsService {
       throw new NotFoundException('One or more exam sessions were not found');
     }
 
+    await this.assertEnrollmentsVerifiedForSeating(dto.sessionIds);
     await this.assertSeatEditingAllowed(enrollmentIds, dto.sessionIds);
 
     for (const assignment of dto.assignments) {
@@ -1293,6 +1294,31 @@ export class ExamEnrollmentsService {
       [enrollment.ERM_ID],
       [enrollment.SESSION_ID],
     );
+  }
+
+  private async assertEnrollmentsVerifiedForSeating(
+    sessionIds: number[],
+  ): Promise<void> {
+    const uniqueSessionIds = [...new Set(sessionIds)];
+    if (uniqueSessionIds.length === 0) {
+      return;
+    }
+
+    const unverifiedCount = await this.examEnrollmentRepository.count({
+      where: {
+        SESSION_ID: In(uniqueSessionIds),
+        ERM_STATUS: Not(ExamEnrollmentStatus.CANCELLED),
+        ERM_VERIFY_STATUS: Not(ExamVerifyStatus.PASS),
+      },
+    });
+
+    if (unverifiedCount > 0) {
+      throw new ConflictException({
+        message:
+          'ไม่สามารถยืนยันการจัดที่นั่งได้ เนื่องจากผู้สมัครยังผ่านการตรวจสอบความถูกต้องไม่ครบทุกคน',
+        error: 'ENROLLMENTS_NOT_VERIFIED',
+      });
+    }
   }
 
   private async assertSeatEditingAllowed(
