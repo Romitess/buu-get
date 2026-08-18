@@ -21,7 +21,8 @@ export function useExamReport() {
   const { t } = useI18n();
 
   // 1. State
-  const isLoading = ref(false);
+  const isLoading = ref(true);
+  const isRefreshing = ref(false);
   const error = ref<string | null>(null);
 
   const statCards = ref<ExamReportStatCard[]>([]);
@@ -56,7 +57,11 @@ export function useExamReport() {
 
   // 2. Methods
   const fetchData = async (): Promise<void> => {
-    isLoading.value = true;
+    if (isLoading.value) {
+      isRefreshing.value = false;
+    } else {
+      isRefreshing.value = true;
+    }
     error.value = null;
     try {
       const summary = await fetchExamReportSummary(filter.value);
@@ -74,6 +79,7 @@ export function useExamReport() {
       yearTable.value = [];
     } finally {
       isLoading.value = false;
+      isRefreshing.value = false;
     }
   };
 
@@ -103,6 +109,7 @@ export function useExamReport() {
   // 3. Expose
   return {
     isLoading,
+    isRefreshing,
     error,
     statCards,
     attendanceChart,

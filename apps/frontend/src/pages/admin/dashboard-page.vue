@@ -40,38 +40,42 @@
     </template>
 
     <template v-else>
-      <div class="dashboard-page__stats-hint text-caption text-grey-7 q-mb-sm">
-        {{ t('admin.examReport.stats.scopeHint') }}
-      </div>
-      <!-- การ์ดสถิติ -->
-      <div class="row q-col-gutter-md q-mb-md">
-        <div v-for="card in statCards" :key="card.key" class="col-12 col-sm-6 col-lg-3">
-          <ExamReportStatCard :card="card" />
-        </div>
-      </div>
+      <div class="dashboard-page__content">
+        <q-inner-loading :showing="isRefreshing" color="primary" />
 
-      <!-- แถวกราฟ: แนวโน้มผู้สมัคร + เข้า/ขาดสอบ -->
-      <div class="row q-col-gutter-md q-mb-md">
-        <div class="col-12 col-lg-6">
-          <ExamRegistrationTrendChart :data="trendChart" />
+        <div class="dashboard-page__stats-hint text-caption text-grey-7 q-mb-sm">
+          {{ t('admin.examReport.stats.scopeHint') }}
         </div>
-        <div class="col-12 col-lg-6">
-          <ExamAttendanceBarChart :data="attendanceChart" />
+        <!-- การ์ดสถิติ -->
+        <div class="row q-col-gutter-md q-mb-md">
+          <div v-for="card in statCards" :key="card.key" class="col-12 col-sm-6 col-lg-3">
+            <ExamReportStatCard :card="card" />
+          </div>
         </div>
-      </div>
 
-      <!-- แถวกราฟ: ช่วงคะแนนรายปี + สัดส่วนสอบครั้งเดียว/ซ้ำ -->
-      <div class="row q-col-gutter-md q-mb-md">
-        <div class="col-12 col-lg-7">
-          <ExamScoreSummaryChart :data="scoreSummaryChart" />
+        <!-- แถวกราฟ: แนวโน้มผู้สมัคร + เข้า/ขาดสอบ -->
+        <div class="row q-col-gutter-md q-mb-md">
+          <div class="col-12 col-lg-6">
+            <ExamRegistrationTrendChart :data="trendChart" />
+          </div>
+          <div class="col-12 col-lg-6">
+            <ExamAttendanceBarChart :data="attendanceChart" />
+          </div>
         </div>
-        <div class="col-12 col-lg-5">
-          <ExamAttemptProportionChart :data="attemptProportion" />
-        </div>
-      </div>
 
-      <!-- ตารางสรุปรายปี -->
-      <ExamYearSummaryTable :rows="yearTable" :loading="false" />
+        <!-- แถวกราฟ: ช่วงคะแนนรายปี + สัดส่วนสอบครั้งเดียว/ซ้ำ -->
+        <div class="row q-col-gutter-md q-mb-md">
+          <div class="col-12 col-lg-7">
+            <ExamScoreSummaryChart :data="scoreSummaryChart" />
+          </div>
+          <div class="col-12 col-lg-5">
+            <ExamAttemptProportionChart :data="attemptProportion" />
+          </div>
+        </div>
+
+        <!-- ตารางสรุปรายปี -->
+        <ExamYearSummaryTable :rows="yearTable" :loading="false" />
+      </div>
     </template>
   </q-page>
 </template>
@@ -103,6 +107,7 @@ const tableSkeletonColumns: QTableColumn[] = [
 
 const {
   isLoading,
+  isRefreshing,
   error,
   statCards,
   attendanceChart,
@@ -134,5 +139,9 @@ onMounted(() => {
 <style scoped lang="scss">
 .dashboard-page {
   overflow-x: hidden;
+}
+
+.dashboard-page__content {
+  position: relative;
 }
 </style>

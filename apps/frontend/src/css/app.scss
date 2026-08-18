@@ -141,6 +141,8 @@
   --sidebar-expanded-width: 290px;
   --header-height: 64px;
   --page-max-width: 1600px;
+  // Candidate mobile dock: 56px tabs + 10px padding + ~6px slack, plus iOS home indicator
+  --candidate-bottom-nav-offset: calc(72px + env(safe-area-inset-bottom, 0px));
 
   // Badges
   --badge-primary-bg: #e3f2fd;
@@ -1412,6 +1414,19 @@ body {
   }
   .regulations-box .regulations-content-wrapper {
     background-color: transparent !important;
+  }
+}
+
+// ============================================================
+// Candidate bottom nav — lift bottom Notify above the glass dock
+// Notify mounts as position:fixed on body, so page padding does not move it.
+// Quasar uses .q-notifications__list--bottom (bottom: 0 + margin-bottom: 10px).
+// The extra 8px plus that 10px margin keeps ~18px of air above the glass.
+// ============================================================
+body:has(.candidate-bottom-nav) {
+  .q-notifications--bottom,
+  .q-notifications__list.q-notifications__list--bottom {
+    bottom: calc(var(--candidate-bottom-nav-offset) + 8px);
   }
 }
 

@@ -96,7 +96,11 @@
 
         <!-- Not Logged In State -->
         <template v-else>
-          <router-link to="/login" class="app-header__login-link">
+          <router-link
+            v-if="!$q.screen.lt.md"
+            to="/login"
+            class="app-header__login-link"
+          >
             {{ $t('auth.login') }}
           </router-link>
           <q-btn
