@@ -1,8 +1,8 @@
 <template>
   <q-card flat bordered class="stat-card">
-    <q-card-section class="stat-card__body row no-wrap items-stretch">
+    <q-card-section class="stat-card__body row no-wrap items-stretch justify-between full-width">
       <!-- ฝั่งซ้าย: ไอคอน + ตัวเลข + แนวโน้ม -->
-      <div class="col column justify-between">
+      <div class="col-auto column justify-between stat-card__content">
         <div class="stat-card__icon-box" :style="iconBoxStyle">
           <q-icon :name="card.icon" size="24px" :style="{ color: iconColor }" />
         </div>
@@ -113,6 +113,10 @@ const sparklineOptions = computed(
   border: 1px solid var(--border-color);
   box-shadow: var(--exam-report-card-shadow) !important;
   height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   transition:
     transform var(--transition-fast),
     box-shadow var(--transition-fast);
@@ -125,6 +129,13 @@ const sparklineOptions = computed(
   &__body {
     gap: 12px;
     min-height: 126px;
+    width: 100%;
+    flex: 1;
+    justify-content: space-between;
+  }
+
+  &__content {
+    min-width: 0;
   }
 
   &__icon-box {

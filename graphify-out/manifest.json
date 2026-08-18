@@ -1730,8 +1730,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam-report/exam-report-stat-card.vue": {
-    "mtime": 1785726672.5311086,
-    "ast_hash": "0cea3965b4d6f5f6d29d88c3ebab5473",
+    "mtime": 1787037948.535462,
+    "ast_hash": "eb20664bb5dacc0d8fcfa5c75db6f195",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam-report/exam-rounds-table.vue": {
@@ -2040,8 +2040,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/header/app-header.vue": {
-    "mtime": 1787020471.292639,
-    "ast_hash": "a022677860de5ae54f51f5e93ace9c12",
+    "mtime": 1787028050.026972,
+    "ast_hash": "f7310cbd959cb319df4ccc814b19fb7a",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/header/app-sidebar.vue": {
@@ -2080,8 +2080,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-main-content.vue": {
-    "mtime": 1786433057.3734667,
-    "ast_hash": "ead1f4c51a5a8db72f96bd6a86e1532a",
+    "mtime": 1787025821.9565945,
+    "ast_hash": "9bd0926128bbbd43b3cd93e3442b41ac",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/home/home-step.vue": {
@@ -2325,8 +2325,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-exam-report.ts": {
-    "mtime": 1786601638.3164499,
-    "ast_hash": "5a551cefa306efd5d8ff103868db66be",
+    "mtime": 1787037378.0756116,
+    "ast_hash": "0b79974aee99ff1b988b778543c010ff",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-exam-seat-candidates.ts": {
@@ -2460,8 +2460,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/layouts/main-layout.vue": {
-    "mtime": 1787021747.208216,
-    "ast_hash": "624b0932b8d8c2b73115769d13c8050c",
+    "mtime": 1787028434.3261056,
+    "ast_hash": "260acbddc08b1c0970625b5f8ceba079",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/application-fee-report-page.vue": {
@@ -2480,8 +2480,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/dashboard-page.vue": {
-    "mtime": 1786601638.3167403,
-    "ast_hash": "662c7255506c8ec06279c6f17f87187b",
+    "mtime": 1787037385.9853756,
+    "ast_hash": "13f3aa972acf685d87f9613a10eeb9b5",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/edit-exam-page.vue": {
@@ -4937,6 +4937,11 @@
   "apps/frontend/src/composables/use-locale-tracked-i18n.ts": {
     "mtime": 1787023960.867686,
     "ast_hash": "ae8096d7e0a3d36ab16f129dbb7e2357",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/composables/use-exam-report.spec.ts": {
+    "mtime": 1787037409.5505528,
+    "ast_hash": "8b2771b4693683a6bc5e39245943be49",
     "semantic_hash": ""
   }
 }
