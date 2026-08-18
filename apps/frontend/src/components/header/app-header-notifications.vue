@@ -95,7 +95,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useNotificationStore } from 'src/stores/notification.store';
@@ -151,6 +151,10 @@ const onItemClick = async (item: FinanceNotification): Promise<void> => {
 
 onMounted(() => {
   notificationStore.start();
+});
+
+onUnmounted(() => {
+  notificationStore.stop();
 });
 </script>
 

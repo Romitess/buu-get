@@ -36,10 +36,7 @@ export default defineRouter(({ store }) => {
       return { name: 'login', query: { redirect: to.fullPath } };
     }
     if (userStore.isLoggedIn && roleRecords.length > 0) {
-      const effectiveRoles =
-        userStore.canSwitchRole && userStore.activeRole
-          ? [...new Set([...userStore.userRoles, userStore.activeRole])]
-          : userStore.userRoles;
+      const effectiveRoles = userStore.effectiveRoles;
       const isPrivileged = effectiveRoles.some(
         (role) => role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN,
       );

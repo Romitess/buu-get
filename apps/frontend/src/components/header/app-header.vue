@@ -230,7 +230,7 @@ const router = useRouter();
 const { t, locale } = useI18n();
 const { showAdminDrawer, toggleLeftDrawer } = useNavigation();
 
-const isFinanceOfficer = computed(() => userStore.userRoles.includes(ROLES.FINANCE));
+const isFinanceOfficer = computed(() => userStore.hasEffectiveRole(ROLES.FINANCE));
 
 const handleHamburgerClick = () => {
   if (showAdminDrawer.value) {

@@ -2040,8 +2040,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/header/app-header.vue": {
-    "mtime": 1786695064.786177,
-    "ast_hash": "e1ac9b072198ae0b4aa19158d1dec0a6",
+    "mtime": 1787020471.292639,
+    "ast_hash": "a022677860de5ae54f51f5e93ace9c12",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/header/app-sidebar.vue": {
@@ -2650,8 +2650,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/router/index.ts": {
-    "mtime": 1787019321.0489416,
-    "ast_hash": "f530219bbf1404e845d3035cd2a63ce1",
+    "mtime": 1787020475.7024133,
+    "ast_hash": "6e14f8d455dd0d516ac332c75bc27a5b",
     "semantic_hash": ""
   },
   "apps/frontend/src/router/routes.ts": {
@@ -2780,8 +2780,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/stores/user.store.ts": {
-    "mtime": 1787019324.9422274,
-    "ast_hash": "7bd866facd441dc0d150901f49a994aa",
+    "mtime": 1787020471.555218,
+    "ast_hash": "e0e5bef8ca03711fe5849ee71c151d1e",
     "semantic_hash": ""
   },
   "apps/frontend/src/types/certificate.ts": {
@@ -4895,8 +4895,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/header/app-header-notifications.vue": {
-    "mtime": 1786695064.7860065,
-    "ast_hash": "8461f81b6b670da8bc1f19e5dd37a3d0",
+    "mtime": 1787020471.555419,
+    "ast_hash": "b9faa8ebb59cb6208284cabbfd6d1d9b",
     "semantic_hash": ""
   },
   "apps/frontend/src/services/notification.service.ts": {
@@ -4905,8 +4905,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/stores/notification.store.ts": {
-    "mtime": 1786695064.7884498,
-    "ast_hash": "edccb2ce717547d466b283051fa3692f",
+    "mtime": 1787020471.2925315,
+    "ast_hash": "3c59e7e854d2c61513759063f60a3432",
     "semantic_hash": ""
   },
   "apps/frontend/src/types/notification.ts": {

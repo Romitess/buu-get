@@ -29,7 +29,7 @@ export const useNotificationStore = defineStore('notification', () => {
   let started = false;
   let inFlight: Promise<void> | null = null;
 
-  const isFinanceOfficer = computed(() => userStore.userRoles.includes(ROLES.FINANCE));
+  const isFinanceOfficer = computed(() => userStore.hasEffectiveRole(ROLES.FINANCE));
 
   const toastedStorageKey = (): string =>
     `ntf:last-toasted:${userStore.currentUser?.id ?? 'anon'}`;

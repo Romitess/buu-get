@@ -56,6 +56,16 @@ export const useUserStore = defineStore('user', () => {
     return currentUser.value?.role ?? null;
   });
 
+  /** roles สำหรับเช็กสิทธิ์ UI — รวม activeRole เมื่อ admin/super_admin สลับมุมมอง */
+  const effectiveRoles = computed<UserRole[]>(() => {
+    if (canSwitchRole.value && activeRole.value) {
+      return [...new Set([...userRoles.value, activeRole.value])];
+    }
+    return userRoles.value;
+  });
+
+  const hasEffectiveRole = (role: UserRole): boolean => effectiveRoles.value.includes(role);
+
   const profileItems = computed(() => {
     if (!currentUser.value) return [];
     const u = currentUser.value;
@@ -262,6 +272,8 @@ export const useUserStore = defineStore('user', () => {
     error,
     userRole,
     userRoles,
+    effectiveRoles,
+    hasEffectiveRole,
     activeRole,
     canSwitchRole,
     switchableRoles,
