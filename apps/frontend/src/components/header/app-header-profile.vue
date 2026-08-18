@@ -38,6 +38,35 @@
 
           <q-separator />
 
+          <!-- Role Switcher (admin / super_admin only) -->
+          <template v-if="userStore.canSwitchRole">
+            <div class="profile-card__switch-label">{{ $t('profile.switchRole') }}</div>
+            <q-list class="profile-card__switch-list">
+              <q-item
+                v-for="role in userStore.switchableRoles"
+                :key="role"
+                clickable
+                v-close-popup
+                :active="role === userStore.userRole"
+                class="profile-card__switch-item"
+                @click="onSwitchRole(role)"
+              >
+                <q-item-section avatar>
+                  <q-radio
+                    :model-value="userStore.userRole"
+                    :val="role"
+                    dense
+                    @update:model-value="() => onSwitchRole(role)"
+                  />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ $t(`roles.${role}`) }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+            <q-separator />
+          </template>
+
           <!-- Actions -->
           <q-list class="profile-card__actions">
             <q-item
@@ -85,6 +114,8 @@ import { useI18n } from 'vue-i18n';
 import { useUserStore } from 'src/stores/user.store';
 import { ROLE_LABELS } from 'src/constants/roles';
 import ImageDisplay from 'src/components/base/image-display.vue';
+import { getDefaultRouteForRole } from 'src/utils/default-route';
+import type { UserRole } from 'src/types/user';
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -112,6 +143,12 @@ const displayRole = computed(() => {
 
 const goToEditProfile = async (): Promise<void> => {
   await router.push({ name: 'user-profile' });
+};
+
+const onSwitchRole = async (role: UserRole): Promise<void> => {
+  await userStore.switchActiveRole(role);
+  const route = getDefaultRouteForRole(role);
+  await router.push(route);
 };
 
 const onLogout = async (): Promise<void> => {
@@ -210,6 +247,26 @@ const onLogout = async (): Promise<void> => {
   color: var(--text-secondary);
   margin-top: 2px;
   text-align: center;
+}
+
+.profile-card__switch-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 12px 16px 4px;
+}
+
+.profile-card__switch-list {
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 0 8px;
+}
+
+.profile-card__switch-item {
+  border-radius: var(--radius-sm);
+  min-height: 40px;
 }
 
 .profile-card__actions {

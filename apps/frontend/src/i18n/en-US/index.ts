@@ -17,6 +17,7 @@ export default {
   },
   roles: {
     admin: 'Admin',
+    super_admin: 'Super Admin',
     staff: 'Staff',
     finance: 'Finance Officer',
     executive: 'Executive',
@@ -318,6 +319,7 @@ export default {
   profile: {
     pageTitle: 'Personal Information',
     pageTitleEdit: 'Edit Personal Information',
+    switchRole: 'Switch view role',
     pageSubtitleEdit: 'Manage and edit user personal information',
     pageTitleEditPassword: 'Change Password',
     currentPassword: 'Current Password',

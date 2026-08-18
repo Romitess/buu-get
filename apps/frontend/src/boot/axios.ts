@@ -27,12 +27,22 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to automatically add JWT token
+// Request interceptor to automatically add JWT token and active role header
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
     const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    try {
+      const { useUserStore } = await import('src/stores/user.store');
+      const store = useUserStore();
+      if (store.canSwitchRole && store.activeRole) {
+        config.headers['X-Active-Role'] = store.activeRole;
+      }
+    } catch {
+      // store may be unavailable during early bootstrap
     }
 
     // Remove Content-Type header for FormData (let browser set it automatically with boundary)

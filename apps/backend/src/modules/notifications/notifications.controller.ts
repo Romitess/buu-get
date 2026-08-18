@@ -12,7 +12,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { AuthenticatedUser } from 'src/common/utils/authz.util';
-import { RoleEnum } from 'src/modules/roles/enums/role.enum';
+import { FINANCE_ROLES } from 'src/common/constants/role-groups';
 import {
   MarkAllReadResponseDto,
   NotificationResponseDto,
@@ -22,7 +22,7 @@ import { NotificationsService } from './notifications.service';
 
 @ApiTags('Notifications')
 @Controller('notifications')
-@Roles(RoleEnum.FINANCE)
+@Roles(...FINANCE_ROLES)
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 

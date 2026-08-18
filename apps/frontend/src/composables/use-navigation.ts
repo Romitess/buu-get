@@ -118,6 +118,7 @@ const toggleLeftDrawer = (): void => {
 
   const STAFF_ROLES = [
     ROLES.ADMIN,
+    ROLES.SUPER_ADMIN,
     ROLES.STAFF,
     ROLES.REGISTRATION_OFFICER,
     ROLES.EXAM_OPERATIONS_OFFICER,

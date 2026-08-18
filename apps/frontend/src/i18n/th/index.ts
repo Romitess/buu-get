@@ -17,6 +17,7 @@ export default {
   },
   roles: {
     admin: 'ผู้ดูแลระบบ',
+    super_admin: 'ผู้ดูแลระบบสูงสุด',
     staff: 'เจ้าหน้าที่ดำเนินการสอบ',
     finance: 'เจ้าหน้าที่การเงิน',
     executive: 'ผู้บริหาร',
@@ -251,6 +252,7 @@ export default {
   profile: {
     pageTitle: 'กรอกข้อมูลส่วนตัว',
     pageTitleEdit: 'จัดการข้อมูลส่วนตัว',
+    switchRole: 'สลับมุมมองบทบาท',
     pageSubtitleEdit: 'จัดการและแก้ไขข้อมูลส่วนตัวของผู้ใช้งาน',
     pageTitleEditPassword: 'แก้ไขรหัสผ่าน',
     currentPassword: 'รหัสผ่านปัจจุบัน',

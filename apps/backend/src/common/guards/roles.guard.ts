@@ -7,6 +7,13 @@ import {
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { RoleEnum } from 'src/modules/roles/enums/role.enum';
+import { ACTIVE_ROLE_HEADER } from '../constants/role-switch.constants';
+import {
+  AuthenticatedUser,
+  getEffectiveRoles,
+  getUserRoles,
+  resolveActiveRole,
+} from '../utils/authz.util';
 
 /**
  * RolesGuard — ตรวจสอบว่า user ที่ login แล้วมี role ตรงกับที่กำหนดไว้ใน @Roles() หรือไม่
@@ -21,6 +28,23 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest<{
+      user: AuthenticatedUser;
+      headers: Record<string, string | string[] | undefined>;
+    }>();
+    const user = request.user;
+
+    if (user) {
+      const headerValue = request.headers[ACTIVE_ROLE_HEADER];
+      const activeRoleHeader =
+        typeof headerValue === 'string'
+          ? headerValue
+          : Array.isArray(headerValue)
+            ? headerValue[0]
+            : undefined;
+      user.activeRole = resolveActiveRole(user, activeRoleHeader);
+    }
+
     // ดึง roles ที่กำหนดไว้ใน @Roles() decorator
     const requiredRoles = this.reflector.getAllAndOverride<RoleEnum[]>(
       ROLES_KEY,
@@ -32,19 +56,11 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<{
-      user: { role?: RoleEnum; roles?: RoleEnum[] };
-    }>();
-    const user = request.user;
+    if (!user) {
+      throw new ForbiddenException('Access denied: No role assigned');
+    }
 
-    // รวบรวม role ทั้งหมดของ user — รองรับทั้งแบบ array (roles)
-    // และ token เก่าที่มีแค่ role เดี่ยว
-    const userRoles =
-      user?.roles && user.roles.length > 0
-        ? user.roles
-        : user?.role
-          ? [user.role]
-          : [];
+    const userRoles = getEffectiveRoles(user);
 
     if (userRoles.length === 0) {
       throw new ForbiddenException('Access denied: No role assigned');
@@ -52,6 +68,16 @@ export class RolesGuard implements CanActivate {
 
     const normalizeRole = (r: string): string =>
       r.toLowerCase().replace(/[\s-_]+/g, '');
+
+    // super_admin ผ่านทุก @Roles() เสมอ (safety net)
+    const realRoles = getUserRoles(user);
+    if (
+      realRoles.some(
+        (r) => normalizeRole(r) === normalizeRole(RoleEnum.SUPER_ADMIN),
+      )
+    ) {
+      return true;
+    }
 
     const normalizedRequired = requiredRoles.map((r) => normalizeRole(r));
     const normalizedUser = userRoles.map((r) => normalizeRole(r));

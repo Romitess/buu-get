@@ -9,6 +9,7 @@ import routes from './routes';
 import { useUserStore } from 'src/stores/user.store';
 import { getDefaultRouteForRole } from 'src/utils/default-route';
 import { resolveSafeInAppRedirect } from 'src/utils/safe-redirect';
+import { ROLES } from 'src/constants/roles';
 
 export default defineRouter(({ store }) => {
   const createHistory = process.env.SERVER
@@ -35,10 +36,21 @@ export default defineRouter(({ store }) => {
       return { name: 'login', query: { redirect: to.fullPath } };
     }
     if (userStore.isLoggedIn && roleRecords.length > 0) {
-      // multi-role: ผ่านถ้า user มี role อย่างน้อยหนึ่งตัวที่ route อนุญาต
-      const hasPermission = roleRecords.every((record) =>
-        (record.meta.roles as string[]).some((allowed) => userStore.userRoles.includes(allowed)),
+      const effectiveRoles =
+        userStore.canSwitchRole && userStore.activeRole
+          ? [...new Set([...userStore.userRoles, userStore.activeRole])]
+          : userStore.userRoles;
+      const isPrivileged = effectiveRoles.some(
+        (role) => role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN,
       );
+      // multi-role: ผ่านถ้า user มี role อย่างน้อยหนึ่งตัวที่ route อนุญาต
+      const hasPermission =
+        isPrivileged ||
+        roleRecords.every((record) =>
+          (record.meta.roles as string[]).some((allowed) =>
+            effectiveRoles.includes(allowed),
+          ),
+        );
 
       if (!hasPermission) {
         const redirectRoute = getDefaultRouteForRole(userStore.userRole);

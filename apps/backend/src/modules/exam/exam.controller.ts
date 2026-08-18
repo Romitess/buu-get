@@ -16,10 +16,7 @@ import { OptionalJwtAuthGuard } from 'src/common/guards/optional-jwt-auth.guard'
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { EXAM_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
-import {
-  AuthenticatedUser,
-  userHasAnyRole,
-} from 'src/common/utils/authz.util';
+import { AuthenticatedUser, userHasAnyRole } from 'src/common/utils/authz.util';
 import { Public } from 'src/decorators/public.decorator';
 import {
   ApiTags,

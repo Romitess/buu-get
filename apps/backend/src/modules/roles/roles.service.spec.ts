@@ -134,7 +134,7 @@ describe('RolesService', () => {
 });
 
 describe('RoleEnum (ROLES-U-007)', () => {
-  it('should expose exactly 8 role values', () => {
+  it('should expose exactly 9 role values', () => {
     // Arrange
     const expected = [
       'candidate',
@@ -145,13 +145,14 @@ describe('RoleEnum (ROLES-U-007)', () => {
       'registration_officer',
       'exam_operations_officer',
       'admin',
+      'super_admin',
     ];
 
     // Act
     const values = Object.values(RoleEnum);
 
     // Assert
-    expect(values).toHaveLength(8);
+    expect(values).toHaveLength(9);
     expect(values).toEqual(expect.arrayContaining(expected));
     expect(RoleEnum.CANDIDATE).toBe('candidate');
     expect(RoleEnum.STAFF).toBe('staff');
@@ -161,6 +162,7 @@ describe('RoleEnum (ROLES-U-007)', () => {
     expect(RoleEnum.REGISTRATION_OFFICER).toBe('registration_officer');
     expect(RoleEnum.EXAM_OPERATIONS_OFFICER).toBe('exam_operations_officer');
     expect(RoleEnum.ADMIN).toBe('admin');
+    expect(RoleEnum.SUPER_ADMIN).toBe('super_admin');
   });
 });
 

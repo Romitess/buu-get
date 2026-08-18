@@ -1,4 +1,8 @@
-import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ExamService } from './exam.service';
@@ -330,7 +334,9 @@ describe('ExamService', () => {
         SESSIONS: [],
       });
 
-      await expect(service.findOne(9)).rejects.toBeInstanceOf(NotFoundException);
+      await expect(service.findOne(9)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
       expect(examRepository.findOne).toHaveBeenCalledWith(
         expect.objectContaining({
           relations: expect.not.arrayContaining(['PASSCODES']),

@@ -279,7 +279,10 @@ export class CheckInAssistService {
       throw new GoneException('Assist session is closed');
     }
     const expiresAt = this.toExpiresAtDate(session.EXPIRES_AT);
-    if (Number.isNaN(expiresAt.getTime()) || expiresAt.getTime() <= Date.now()) {
+    if (
+      Number.isNaN(expiresAt.getTime()) ||
+      expiresAt.getTime() <= Date.now()
+    ) {
       throw new GoneException('Assist session has expired');
     }
   }
