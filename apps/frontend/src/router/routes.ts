@@ -605,7 +605,7 @@ const routes: RouteRecordRaw[] = [
               roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
-                { label: 'ข้อมูลผู้เข้าสอบ', icon: 'star' },
+                { label: 'navigation.examCandidatesInfo', icon: 'star' },
               ],
             },
           },
@@ -617,8 +617,8 @@ const routes: RouteRecordRaw[] = [
               roles: [ROLES.ADMIN, ROLES.EXECUTIVE],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
-                { label: 'ข้อมูลผู้เข้าสอบ', icon: 'star', to: '/admin/executive/test-takers' },
-                { label: 'ประวัติการสอบ', icon: 'star' },
+                { label: 'navigation.examCandidatesInfo', icon: 'star', to: '/admin/executive/test-takers' },
+                { label: 'navigation.examHistory', icon: 'star' },
               ],
             },
           },

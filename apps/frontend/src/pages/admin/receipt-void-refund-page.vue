@@ -201,7 +201,7 @@ interface VoidRefundRow {
   canVoid: boolean;
 }
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const $q = useQuasar();
 
 const isLoading = ref(false);
@@ -256,7 +256,9 @@ const receiptStatusLabels: Record<number, string> = {
   [ReceiptStatus.VOIDED]: t('admin.receiptVoidRefund.receiptStatus.voided'),
 };
 
-const columns = computed<QTableColumn[]>(() => [
+const columns = computed<QTableColumn[]>(() => {
+  void locale.value;
+  return [
   {
     name: 'index',
     field: 'index',
@@ -311,8 +313,7 @@ const columns = computed<QTableColumn[]>(() => [
     label: t('admin.receiptVoidRefund.table.actions'),
     align: 'center',
   },
-]);
-
+];});
 const getEnrollmentName = (
   enrollment: BackendTransactionRefEnrollment | null | undefined,
 ): string =>

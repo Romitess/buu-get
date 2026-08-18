@@ -3,7 +3,7 @@
     <q-inner-loading :showing="isLoadingData">
       <div class="column items-center">
         <q-spinner color="primary" size="42px" />
-        <div class="q-mt-sm text-primary">กำลังโหลดข้อมูล...</div>
+        <div class="q-mt-sm text-primary">{{ t('examSchedule.loading') }}</div>
       </div>
     </q-inner-loading>
 
@@ -86,8 +86,7 @@
         <template v-slot:avatar>
           <q-icon name="lock" class="alert-icon-warning" />
         </template>
-        มีผู้ลงทะเบียนในรอบสอบนี้แล้ว จึงไม่สามารถเพิ่มหรือลบรายชื่อผู้มีสิทธิ์สอบได้
-        (ยังสามารถส่งออกรายชื่อได้)
+        {{ t('admin.examForm.banners.candidatesLocked') }}
       </q-banner>
       <!-- Warning Banner for Published/Locked Exams -->
       <q-banner
@@ -98,22 +97,20 @@
         <template v-slot:avatar>
           <q-icon name="info" class="alert-icon-warning" />
         </template>
-        รอบสอบนี้เคยผ่านการเผยแพร่แล้ว ระบบจึงจำกัดการแก้ไขเฉพาะข้อมูลพื้นฐาน (ชื่อรอบสอบ ประเภท
-        รูปแบบ ค่าสมัคร และแหล่งเงิน) ส่วนกำหนดการสอบและกำหนดการลงทะเบียน/ชำระเงินยังแก้ไขได้
-        รายชื่อผู้มีสิทธิ์สอบแก้ไขได้จนกว่าจะมีผู้ลงทะเบียน
+        {{ t('admin.examForm.banners.publishedLocked') }}
       </q-banner>
     </div>
 
     <!-- Action Buttons -->
     <div class="row justify-end q-mt-md q-gutter-sm action-container">
       <app-button
-        :label="wasOriginallyPublished ? 'กลับสู่หน้าจัดการ' : 'ยกเลิก'"
+        :label="wasOriginallyPublished ? t('admin.examForm.actions.backToManagement') : t('profile.cancel')"
         :disable="isSaving"
         @click="onCancel"
         class="action-btn cancel-btn text-weight-bold"
       />
       <app-button
-        :label="isEditMode ? 'บันทึกการแก้ไข' : 'บันทึก'"
+        :label="isEditMode ? t('admin.examForm.actions.saveEdit') : t('profile.save')"
         :loading="isSaving"
         :disable="isSaving || isLoadingData"
         @click="onSave"
@@ -125,6 +122,7 @@
 
 <script setup lang="ts">
 import { computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useCreateExam, type CreateExamForm } from 'src/composables/use-create-exam';
 import AppButton from 'src/components/base/app-button.vue';
 import CreateExamDetailsCard from 'src/components/exam/create-exam-details-card.vue';
@@ -132,6 +130,8 @@ import CreateExamScheduleCard from 'src/components/exam/create-exam-schedule-car
 import CreateExamRoomPreviewCard from 'src/components/exam/create-exam-room-preview-card.vue';
 import CreateExamRegistrationCard from 'src/components/exam/create-exam-registration-card.vue';
 import CreateExamCandidatesCard from 'src/components/exam/create-exam-candidates-card.vue';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   /** Exam ID for edit mode. If not provided, the form operates in create mode. */

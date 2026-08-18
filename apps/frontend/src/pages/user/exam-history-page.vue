@@ -522,7 +522,7 @@ const handlePay = async (exam: ExamHistoryItem): Promise<void> => {
     console.error('Transaction creation failed:', err);
     $q.notify({
       type: 'negative',
-      message: getErrorMessage(err, 'เกิดข้อผิดพลาดในการสร้างรายการชำระเงิน'),
+      message: getErrorMessage(err, t('exam.history.createTransactionError')),
       position: 'bottom',
       timeout: 5000,
     });
@@ -537,7 +537,7 @@ const handleReceiptInformationConfirm = async (value: ReceiptInformation): Promi
   if (!tranxId) {
     $q.notify({
       type: 'negative',
-      message: 'ไม่พบรายการชำระเงิน',
+      message: t('exam.history.transactionNotFound'),
       position: 'bottom',
       timeout: 5000,
     });
@@ -555,7 +555,7 @@ const handleReceiptInformationConfirm = async (value: ReceiptInformation): Promi
     paymentExpiryTime.value = '';
     $q.notify({
       type: 'negative',
-      message: getErrorMessage(err, 'เกิดข้อผิดพลาดในการเริ่มการชำระเงิน'),
+      message: getErrorMessage(err, t('exam.history.startPaymentError')),
       position: 'bottom',
       timeout: 5000,
     });
@@ -584,7 +584,7 @@ const handleSaveQR = async (): Promise<void> => {
       console.error('Payment confirmation failed:', err);
       $q.notify({
         type: 'negative',
-        message: getErrorMessage(err, 'เกิดข้อผิดพลาดในการบันทึกการชำระเงิน'),
+        message: getErrorMessage(err, t('exam.history.confirmPaymentError')),
         position: 'bottom',
         timeout: 5000,
       });
@@ -617,7 +617,7 @@ const handleSessionTimeout = async (exam: ExamHistoryItem): Promise<void> => {
       console.error('Payment session expiration failed:', err);
       $q.notify({
         type: 'negative',
-        message: getErrorMessage(err, 'เกิดข้อผิดพลาดในการหมดอายุรายการชำระเงิน'),
+        message: getErrorMessage(err, t('exam.history.expireTransactionError')),
         position: 'bottom',
         timeout: 5000,
       });
@@ -647,7 +647,7 @@ const handlePaymentTimeout = async (): Promise<void> => {
     console.error('Payment expiration failed:', err);
     $q.notify({
       type: 'negative',
-      message: getErrorMessage(err, 'เกิดข้อผิดพลาดในการหมดอายุรายการชำระเงิน'),
+      message: getErrorMessage(err, t('exam.history.expireTransactionError')),
       position: 'bottom',
       timeout: 5000,
     });
@@ -665,14 +665,14 @@ const handleConfirmCancel = async (): Promise<void> => {
       await examStore.cancelRegistration(selectedExamForCancel.value.id, 'manual');
       $q.notify({
         type: 'positive',
-        message: 'ยกเลิกการสมัครสอบเรียบร้อยแล้ว',
+        message: t('exam.history.cancelSuccess'),
         position: 'bottom',
         timeout: 2000,
       });
     } catch {
       $q.notify({
         type: 'negative',
-        message: 'เกิดข้อผิดพลาดในการยกเลิกการสมัคร',
+        message: t('exam.history.cancelError'),
         position: 'bottom',
         timeout: 2000,
       });

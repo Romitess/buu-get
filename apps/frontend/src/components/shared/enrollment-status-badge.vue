@@ -6,11 +6,12 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
   EnrollmentStatus,
   VerifyStatus,
-  PAYMENT_STATUS_LABELS,
-  VERIFY_STATUS_LABELS,
+  PAYMENT_STATUS_I18N_KEYS,
+  VERIFY_STATUS_I18N_KEYS,
 } from 'src/types/enrollment.types';
 
 interface Props {
@@ -20,11 +21,17 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const { t, locale } = useI18n();
+
 const label = computed((): string => {
+  void locale.value;
+
   if (props.type === 'payment') {
-    return PAYMENT_STATUS_LABELS[props.status] ?? '-';
+    const key = PAYMENT_STATUS_I18N_KEYS[props.status];
+    return key ? t(key) : '-';
   }
-  return VERIFY_STATUS_LABELS[props.status] ?? '-';
+  const key = VERIFY_STATUS_I18N_KEYS[props.status];
+  return key ? t(key) : '-';
 });
 
 const badgeClass = computed((): string => {

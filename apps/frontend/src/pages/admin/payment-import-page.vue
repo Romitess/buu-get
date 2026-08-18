@@ -108,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
@@ -268,7 +268,9 @@ watch(filteredRows, (newVal) => {
 });
 
 // ── Table Columns ─────────────────────────────────────────
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => {
+  void i18n.locale.value;
+  return [
   {
     name: 'index',
     label: i18n.t('admin.paymentImport.table.index'),
@@ -325,6 +327,7 @@ const columns: QTableColumn[] = [
     align: 'center',
   },
 ];
+});
 </script>
 
 <style scoped lang="scss">

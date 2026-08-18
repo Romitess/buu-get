@@ -4,7 +4,7 @@
       <!-- Header Section -->
       <div class="row items-center q-mb-md">
         <q-icon name="person_add" size="20px" class="q-mr-sm text-dark" />
-        <div class="text-subtitle1 text-weight-bold text-dark">รายชื่อผู้มีสิทธิ์สอบ</div>
+        <div class="text-subtitle1 text-weight-bold text-dark">{{ t('admin.examForm.cards.eligibleCandidates') }}</div>
       </div>
 
       <!-- Search & Actions Row -->
@@ -14,7 +14,7 @@
             v-model="searchQuery"
             outlined
             dense
-            placeholder="ค้นหา"
+            :placeholder="t('admin.examForm.candidates.searchPlaceholder')"
             bg-color="white"
             class="search-input"
             hide-bottom-space
@@ -28,7 +28,7 @@
         <div class="col-auto">
           <q-btn
             v-if="!locked"
-            label="สร้าง Passcode"
+            :label="t('admin.examForm.candidates.generatePasscode')"
             unelevated
             dense
             icon="vpn_key"
@@ -37,7 +37,7 @@
           />
           <q-btn
             v-if="locked"
-            label="ส่งออก (Export)"
+            :label="t('admin.examForm.candidates.export')"
             color="secondary"
             unelevated
             dense
@@ -49,7 +49,7 @@
         <div class="col-12 col-md-auto row q-gutter-sm justify-end">
           <q-btn
             v-if="!locked && hasCandidates"
-            label="ลบรายชื่อ"
+            :label="t('admin.examForm.candidates.deleteList')"
             color="negative"
             outline
             unelevated
@@ -60,7 +60,7 @@
           />
           <q-btn
             v-if="!locked"
-            label="ค้นหาผู้สมัคร"
+            :label="t('admin.examForm.candidates.searchApplicant')"
             color="secondary"
             unelevated
             dense
@@ -70,7 +70,7 @@
           />
           <q-btn
             v-if="!locked"
-            label="นำเข้าไฟล์รายชื่อ"
+            :label="t('admin.examForm.candidates.importList')"
             color="primary"
             unelevated
             dense
@@ -87,7 +87,7 @@
         :rows="filteredCandidates"
         :loading="loading"
         :pagination="pagination"
-        empty-label="No data available in table"
+        :empty-label="t('admin.examForm.candidates.emptyTable')"
         class="candidates-table"
         @request="onRequest"
       >
@@ -107,13 +107,13 @@
             <q-badge
               v-if="row.inSystem === true"
               color="positive"
-              label="มีในระบบ"
+              :label="t('admin.examForm.candidates.inSystem')"
             />
             <q-badge
               v-else-if="row.inSystem === false"
               color="grey-6"
               text-color="white"
-              label="ไม่มีในระบบ"
+              :label="t('admin.examForm.candidates.notInSystem')"
             />
             <q-spinner-dots
               v-else-if="loading"
@@ -160,7 +160,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { exportFile } from 'quasar';
 import type { EligibleCandidate } from 'src/composables/use-create-exam';
 import type { QTableColumn } from 'quasar';
@@ -173,6 +174,8 @@ import DialogDefineSharedPasscode from 'src/components/exam/dialog-define-shared
 import DialogSearchCandidate from 'src/components/exam/dialog-search-candidate.vue';
 import DialogDeleteCandidates from 'src/components/exam/dialog-delete-candidates.vue';
 import type { User } from 'src/types/user';
+
+const { t, locale } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -253,15 +256,15 @@ const onUrlSubmitted = (url: string): void => {
  */
 const onDownloadSample = (): void => {
   const BOM = '\ufeff';
-  const header = '"รหัสประชาชน","ชื่อ-นามสกุล"';
+  const header = t('admin.examForm.candidates.csvSample.header');
   const sampleRows = [
-    '"1100000000000","สมชาย ใจดี"',
-    '"1100000000001","สมหญิง ใจงาม"',
-    '"1100000000002","สมศักดิ์ ใจเย็น"',
+    t('admin.examForm.candidates.csvSample.row1'),
+    t('admin.examForm.candidates.csvSample.row2'),
+    t('admin.examForm.candidates.csvSample.row3'),
   ];
   const content = BOM + [header, ...sampleRows].join('\r\n');
 
-  const status = exportFile('ตัวอย่างไฟล์รายชื่อ.csv', content, 'text/csv;charset=utf-8');
+  const status = exportFile(t('admin.examForm.candidates.sampleFileName'), content, 'text/csv;charset=utf-8');
 
   if (status !== true) {
     console.error('Browser blocked the file download');
@@ -292,41 +295,42 @@ const onConfirmRemove = (keys: string[]): void => {
   emit('remove-candidates', keys);
 };
 
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => {
+  void locale.value;
+  return [
   {
     name: 'index',
-    label: 'ลำดับ',
+    label: t('admin.examForm.candidates.columns.index'),
     field: 'index',
     align: 'center',
     style: 'width: 80px',
   },
   {
     name: 'nationalId',
-    label: 'รหัสประชาชน',
+    label: t('admin.examForm.candidates.columns.nationalId'),
     field: 'nationalId',
     align: 'center',
   },
   {
     name: 'inSystem',
-    label: 'สถานะข้อมูลในระบบ',
+    label: t('admin.examForm.candidates.columns.inSystemStatus'),
     field: 'inSystem',
     align: 'center',
   },
   {
     name: 'fullName',
-    label: 'ชื่อ-นามสกุล',
+    label: t('admin.examForm.candidates.columns.fullName'),
     field: 'fullName',
     align: 'left',
     style: 'width: 30%',
   },
   {
     name: 'passcode',
-    label: 'Passcode',
+    label: t('admin.examForm.candidates.columns.passcode'),
     field: 'passcode',
     align: 'center',
   },
-];
-</script>
+];});</script>
 
 <style scoped>
 .search-input :deep(.q-field__control) {

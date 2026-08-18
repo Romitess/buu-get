@@ -374,7 +374,7 @@ import { PageSkeleton, CardSkeleton, TableSkeleton } from 'src/components/base/s
 const route = useRoute();
 const userStore = useUserStore();
 const $q = useQuasar();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const enrollment = ref<BackendEnrollmentDetail | null>(null);
 const historyLogs = ref<ProfileEditHistory[]>([]);
@@ -392,7 +392,9 @@ const pagination = ref({
 
 
 
-const columns = computed<QTableColumn[]>(() => [
+const columns = computed<QTableColumn[]>(() => {
+  void locale.value;
+  return [
   {
     name: 'index',
     label: t('profileEditHistory.table.columns.index'),
@@ -437,8 +439,7 @@ const columns = computed<QTableColumn[]>(() => [
     align: 'center',
     style: 'width: 80px',
   },
-]);
-
+];});
 const historyRows = computed(() => {
   return historyLogs.value.map((log, index) => {
     const rawDate = new Date(log.createdAt);

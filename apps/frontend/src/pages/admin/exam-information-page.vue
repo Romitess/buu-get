@@ -2,14 +2,14 @@
   <q-page class="page-container exam-information-page">
     <AppBreadcrumbs />
     <AppPageHeader
-      title="ข้อมูลผู้เข้าสอบ"
-      subtitle="แสดงข้อมูลและผลการสอบของผู้เข้าสอบรายบุคคลในการสอบ"
+      :title="t('admin.examInformation.testTakers.pageTitle')"
+      :subtitle="t('admin.examInformation.testTakers.pageSubtitle')"
     />
 
     <SearchBar
       v-model="searchQuery"
       class="q-mb-md"
-      placeholder="ค้นหา"
+      :placeholder="t('admin.examInformation.searchPlaceholder')"
       @update:model-value="onSearch"
     />
 
@@ -19,7 +19,7 @@
       :loading="isLoading"
       :pagination="pagination"
       :is-server-side="true"
-      empty-label="ไม่พบข้อมูลผู้เข้าสอบ"
+      :empty-label="t('admin.examInformation.testTakers.table.emptyLabel')"
       @request="onRequest"
     >
       <template #body-cell-index="{ row }">
@@ -42,7 +42,7 @@
           <ActionButton
             icon="visibility"
             color="black"
-            tooltip="ดูข้อมูลประวัติการสอบ"
+            :tooltip="t('admin.examInformation.testTakers.table.tooltips.viewHistory')"
             @click="handleView(row)"
           />
         </div>
@@ -54,6 +54,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import type { QTableColumn } from 'quasar';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
@@ -68,6 +69,7 @@ interface ExecutiveTestTakerTableRow extends ExecutiveTestTakerRow {
   index: number;
 }
 
+const { t, locale } = useI18n();
 const { rows: sourceRows, total, isLoading, fetchRows } = useExecutiveTestTakers();
 const router = useRouter();
 const searchQuery = ref('');
@@ -86,24 +88,48 @@ const rows = computed<ExecutiveTestTakerTableRow[]>(() =>
   })),
 );
 
-const columns: QTableColumn<ExecutiveTestTakerTableRow>[] = [
-  { name: 'index', label: 'ลำดับ', field: 'index', align: 'center', style: 'width: 80px' },
+const columns = computed<QTableColumn<ExecutiveTestTakerTableRow>[]>(() => {
+  void locale.value;
+  return [
+  {
+    name: 'index',
+    label: t('admin.examInformation.testTakers.table.columns.index'),
+    field: 'index',
+    align: 'center',
+    style: 'width: 80px',
+  },
   {
     name: 'testTakerId',
-    label: 'เลขประจำตัวสอบ',
+    label: t('admin.examInformation.testTakers.table.columns.examNumber'),
     field: 'testTakerId',
     align: 'center',
   },
-  { name: 'title', label: 'คำนำหน้า', field: 'title', align: 'left' },
-  { name: 'fullName', label: 'ชื่อ-นามสกุล', field: 'fullName', align: 'left' },
+  {
+    name: 'title',
+    label: t('admin.examInformation.testTakers.table.columns.prefix'),
+    field: 'title',
+    align: 'left',
+  },
+  {
+    name: 'fullName',
+    label: t('admin.examInformation.testTakers.table.columns.fullName'),
+    field: 'fullName',
+    align: 'left',
+  },
   {
     name: 'examRoundCount',
-    label: 'จำนวนรอบที่เข้าสอบ',
+    label: t('admin.examInformation.testTakers.table.columns.examRoundCount'),
     field: 'examRoundCount',
     align: 'center',
   },
-  { name: 'tools', label: 'เครื่องมือ', field: 'enrollmentId', align: 'center' },
-];
+  {
+    name: 'tools',
+    label: t('admin.examInformation.testTakers.table.columns.tools'),
+    field: 'enrollmentId',
+    align: 'center',
+  },
+  ];
+});
 
 let searchTimeout: ReturnType<typeof setTimeout> | undefined;
 

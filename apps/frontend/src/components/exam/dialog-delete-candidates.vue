@@ -2,7 +2,7 @@
   <q-dialog v-model="isOpen" persistent>
     <q-card class="delete-candidates-dialog column no-wrap">
       <q-card-section class="row items-center justify-between q-pb-none">
-        <div class="text-h6 text-weight-bold">ลบรายชื่อผู้มีสิทธิ์สอบ</div>
+        <div class="text-h6 text-weight-bold">{{ t('admin.examForm.dialogs.deleteCandidates.title') }}</div>
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
 
@@ -11,7 +11,7 @@
           <q-checkbox
             :model-value="isAllSelected"
             :indeterminate="isIndeterminate"
-            label="เลือกทั้งหมด"
+            :label="t('admin.examForm.dialogs.deleteCandidates.selectAll')"
             dense
             color="primary"
             :disable="candidates.length === 0"
@@ -19,7 +19,12 @@
           />
           <q-space />
           <span class="text-caption text-grey-7">
-            เลือกแล้ว {{ selectedCount }} / {{ candidates.length }} รายการ
+            {{
+              t('admin.examForm.dialogs.deleteCandidates.selectedCount', {
+                selected: selectedCount,
+                total: candidates.length,
+              })
+            }}
           </span>
         </div>
 
@@ -66,7 +71,7 @@
             class="delete-candidates-empty-message"
             role="status"
           >
-            ไม่มีรายชื่อที่จะลบ
+            {{ t('admin.examForm.dialogs.deleteCandidates.empty') }}
           </div>
         </div>
       </q-card-section>
@@ -74,7 +79,7 @@
       <q-separator />
 
       <q-card-actions align="right" class="q-pa-md">
-        <q-btn flat label="ยกเลิก" v-close-popup />
+        <q-btn flat :label="t('profile.cancel')" v-close-popup />
         <q-btn
           color="negative"
           unelevated
@@ -90,6 +95,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { QTableColumn } from 'quasar';
 import BaseTable from 'src/components/shared/base-table.vue';
 import {
@@ -97,6 +103,8 @@ import {
   type EligibleCandidate,
 } from 'src/composables/use-create-exam';
 import type { PaginationModel } from 'src/types/exam.types';
+
+const { t, locale } = useI18n();
 
 const isOpen = defineModel<boolean>({ required: true });
 
@@ -128,13 +136,17 @@ const isIndeterminate = computed<boolean>(
   () => selectedCount.value > 0 && selectedCount.value < props.candidates.length,
 );
 const confirmLabel = computed<string>(() =>
-  selectedCount.value > 0 ? `ลบที่เลือก (${selectedCount.value})` : 'ลบที่เลือก',
+  selectedCount.value > 0
+    ? t('admin.examForm.dialogs.deleteCandidates.confirmWithCount', { count: selectedCount.value })
+    : t('admin.examForm.dialogs.deleteCandidates.confirm'),
 );
 
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => {
+  void locale.value;
+  return [
   {
     name: 'select',
-    label: 'เลือก',
+    label: t('admin.examForm.dialogs.searchCandidate.columns.select'),
     field: 'select',
     align: 'center',
     sortable: false,
@@ -143,7 +155,7 @@ const columns: QTableColumn[] = [
   },
   {
     name: 'index',
-    label: 'ลำดับ',
+    label: t('admin.examForm.dialogs.searchCandidate.columns.index'),
     field: 'index',
     align: 'center',
     sortable: false,
@@ -152,7 +164,7 @@ const columns: QTableColumn[] = [
   },
   {
     name: 'identifier',
-    label: 'รหัสประชาชน / Passport',
+    label: t('admin.examForm.dialogs.searchCandidate.columns.identifier'),
     field: 'nationalId',
     align: 'center',
     sortable: false,
@@ -161,7 +173,7 @@ const columns: QTableColumn[] = [
   },
   {
     name: 'fullName',
-    label: 'ชื่อ-นามสกุล',
+    label: t('admin.examForm.dialogs.searchCandidate.columns.fullName'),
     field: 'fullName',
     align: 'left',
     sortable: false,
@@ -170,15 +182,14 @@ const columns: QTableColumn[] = [
   },
   {
     name: 'passcode',
-    label: 'Passcode',
+    label: t('admin.examForm.candidates.columns.passcode'),
     field: 'passcode',
     align: 'center',
     sortable: false,
     style: 'width: 15%',
     headerStyle: 'width: 15%',
   },
-];
-
+];});
 const getCandidateKey = (candidate: EligibleCandidate): string =>
   getEligibleCandidateKey(candidate);
 

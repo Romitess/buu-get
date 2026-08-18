@@ -108,7 +108,7 @@ type ApplicationFeeRow = {
   paymentDateRaw: string | null;
 };
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const searchQuery = ref('');
 const isLoading = ref(false);
@@ -295,7 +295,9 @@ const pagination = computed(() => ({
   rowsNumber: filteredReceipts.value.length,
 }));
 
-const columns = computed<QTableColumn[]>(() => [
+const columns = computed<QTableColumn[]>(() => {
+  void locale.value;
+  return [
   {
     name: 'index',
     label: t('admin.applicationFeeReport.table.columns.index'),
@@ -363,7 +365,9 @@ const columns = computed<QTableColumn[]>(() => [
     align: 'center',
     style: 'width:110px',
   },
-]);
+  ];
+});
+
 const exportColumns: QTableColumn[] = [
   {
     name: 'index',

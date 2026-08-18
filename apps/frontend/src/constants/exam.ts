@@ -85,51 +85,7 @@ export const DEFAULT_EXAM_TITLE = 'BUU - GET';
 /** ค่าเริ่มต้นของช่องชื่อการสอบในฟอร์มสร้างรอบสอบ */
 export const DEFAULT_EXAM_NAME = 'BUU-GET';
 
-/** ข้อความแจ้งเตือนต่างๆ */
-export const NOTIFY_MSG = {
-  SELECT_FUND: 'กรุณาเลือกแหล่งเงิน',
-  LOAD_ERROR: 'ไม่สามารถโหลดข้อมูลได้',
-  MAX_SESSIONS: (max: number) => `สามารถเพิ่มรอบเวลาสอบได้สูงสุด ${max} รอบ`,
-  MIN_SESSIONS: (min: number) => `ต้องมีช่วงเวลาสอบอย่างน้อย ${min} ช่วงเวลา`,
-  PROVIDE_TIME: 'กรุณาระบุเวลาสอบอย่างน้อย 1 ช่วงเวลา',
-  SELECT_LOCATION: 'กรุณาเลือกสถานที่สอบ',
-  UPDATE_SUCCESS: 'แก้ไขรอบสอบสำเร็จ',
-  CREATE_SUCCESS: 'สร้างรอบสอบสำเร็จ',
-  UPDATE_ERROR: 'เกิดข้อผิดพลาดในการแก้ไขรอบสอบ',
-  CREATE_ERROR: 'เกิดข้อผิดพลาดในการสร้างรอบสอบ',
-};
-
-/** ข้อความแจ้งเตือนเมื่อกรอกข้อมูลไม่ครบถ้วน (Validation) */
-export const VALIDATION_MSG = {
-  EXAM_NAME: 'กรุณากรอกชื่อการสอบ',
-  EXAM_ROUND: 'กรุณากรอกครั้งที่จัดสอบ',
-  EXAM_FISCAL_YEAR: 'กรุณากรอกปีงบประมาณ',
-  EXAM_FISCAL_YEAR_AD_ONLY: 'ปีงบประมาณต้องเป็นปี ค.ศ. 4 หลัก (เช่น 2026)',
-  EXAM_TYPE: 'กรุณาเลือกประเภทการสอบ',
-  EXAM_FORMAT: 'กรุณาเลือกรูปแบบการสอบ',
-  FUND_SOURCE: 'กรุณาเลือกรหัสผังแหล่งเงิน',
-  SCORE_RUBRIC: 'กรุณาเลือกชุดเกณฑ์คะแนน',
-  EXAM_DATE: 'กรุณาเลือกวันที่สอบ',
-  START_TIME: 'กรุณากรอกเวลาเริ่ม',
-  END_TIME: 'กรุณากรอกเวลาสิ้นสุด',
-  LOCATION: 'กรุณาเลือกสถานที่สอบ',
-  SEATS: 'กรุณากรอกจำนวนที่นั่ง',
-  REG_START_DATE: 'กรุณาเลือกวันที่เริ่มต้นลงทะเบียน',
-  REG_START_TIME: 'กรุณาเลือกเวลาเริ่มต้นลงทะเบียน',
-  REG_END_DATE: 'กรุณาเลือกวันที่สิ้นสุดลงทะเบียน',
-  REG_END_TIME: 'กรุณาเลือกเวลาสิ้นสุดลงทะเบียน',
-  PAY_START_DATE: 'กรุณาเลือกวันที่เริ่มต้นชำระเงิน',
-  PAY_START_TIME: 'กรุณาเลือกเวลาเริ่มต้นชำระเงิน',
-  PAY_END_DATE: 'กรุณาเลือกวันที่สิ้นสุดชำระเงิน',
-  PAY_END_TIME: 'กรุณาเลือกเวลาสิ้นสุดชำระเงิน',
-  SHARED_PASSCODE: 'กรุณากำหนด Passcode 6 ตัวอักษรหรือตัวเลขสำหรับผู้มีสิทธิ์สอบทุกคน',
-};
-
-/** ข้อความแสดงผลเมื่อยังไม่เลือกข้อมูล */
-export const EMPTY_DETAILS = {
-  LOCATION: 'กรุณาเลือกวันที่เพื่อดูสถานที่สอบ',
-  FEE: 'Fee : - ฿',
-};
+/** UI notify/validation strings live in admin.examForm.* i18n keys */
 
 /** Labels and Units */
 export const CURRENCY_SYMBOL = '฿';

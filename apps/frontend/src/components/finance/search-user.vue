@@ -127,7 +127,7 @@ import {
   type BackendTransactionRefEnrollment,
   type TransactionRefSearchParams,
 } from 'src/services/transaction-ref.service';
-import { PAYMENT_STATUS_LABELS } from 'src/types/enrollment.types';
+import { PAYMENT_STATUS_I18N_KEYS } from 'src/types/enrollment.types';
 import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 import type { PaginationModel, SearchRow, TableRequestProps } from 'src/types/exam.types';
 
@@ -201,11 +201,12 @@ const getPaymentStatusLabel = (
   transactionPaymentStatus: number | null | undefined,
 ): string => {
   if (enrollmentStatus !== undefined) {
-    return PAYMENT_STATUS_LABELS[enrollmentStatus] || 'ไม่ระบุ';
+    const key = PAYMENT_STATUS_I18N_KEYS[enrollmentStatus];
+    return key ? t(key) : t('admin.finance.paymentStatus.unknown');
   }
-  if (transactionPaymentStatus === 3) return 'ชำระเงินแล้ว';
-  if (transactionPaymentStatus === 0) return 'ค้างชำระ';
-  return 'ไม่ระบุ';
+  if (transactionPaymentStatus === 3) return t('admin.finance.paymentStatus.paid');
+  if (transactionPaymentStatus === 0) return t('admin.finance.paymentStatus.pending');
+  return t('admin.finance.paymentStatus.unknown');
 };
 
 const resetPagination = (): void => {

@@ -37,7 +37,7 @@ import ActionButton from 'src/components/shared/action-button.vue';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import type { ExamReportRoundRow } from 'src/types/exam-report.types';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 interface Props {
   rows: ExamReportRoundRow[];
@@ -80,7 +80,9 @@ watch(
   { immediate: true },
 );
 
-const columns = computed((): QTableColumn<ExamReportRoundRow>[] => [
+const columns = computed((): QTableColumn<ExamReportRoundRow>[] => {
+  void locale.value;
+  return [
   {
     name: 'round',
     label: t('admin.examReport.table.columns.round'),
@@ -121,7 +123,8 @@ const columns = computed((): QTableColumn<ExamReportRoundRow>[] => [
     align: 'center',
     sortable: false,
   },
-]);
+  ];
+});
 </script>
 
 <style scoped lang="scss">

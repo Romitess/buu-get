@@ -20,7 +20,6 @@ import {
 } from 'src/services/exam.service';
 import {
   BUDDHIST_YEAR_OFFSET,
-  EMPTY_DETAILS,
   DEFAULT_LOCATION_TEXT,
   ENROLLMENT_STATUS,
   formatLocationWithRoom,
@@ -91,6 +90,7 @@ export const useExamStore = defineStore('exam', () => {
   };
 
   const examInfo = computed((): ExamInfo => {
+    void unref(i18n.locale);
     const dayData = scheduleData.value[selectedDate.value];
     if (dayData && dayData.rounds.length > 0) {
       const uniqueExamIds = new Set(
@@ -132,6 +132,7 @@ export const useExamStore = defineStore('exam', () => {
   });
 
   const currentDayDetails = computed(() => {
+    void unref(i18n.locale);
     const dayData = scheduleData.value[selectedDate.value];
     if (dayData) {
       return {
@@ -140,12 +141,13 @@ export const useExamStore = defineStore('exam', () => {
       };
     }
     return {
-      location: EMPTY_DETAILS.LOCATION,
-      fee: EMPTY_DETAILS.FEE,
+      location: i18n.t('admin.examForm.empty.selectDateForLocation'),
+      fee: i18n.t('admin.examForm.empty.fee'),
     };
   });
 
   const dynamicBadgeText = computed((): string => {
+    void unref(i18n.locale);
     const rounds = selectedDateRounds.value;
     return rounds[0]?.roundTypeLabel ?? i18n.t('examSchedule.noBadgeRounds');
   });

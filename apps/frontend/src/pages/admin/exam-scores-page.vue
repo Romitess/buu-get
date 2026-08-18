@@ -39,7 +39,7 @@
             color="primary"
             class="action-btn text-weight-bold br-sm"
             icon="note"
-            label="ออกใบ Certificate"
+            :label="$t('admin.scoreManagement.issueCertificateButton')"
             @click="issueCertificates"
           />
           <ExportCsvButton
@@ -55,7 +55,7 @@
             color="negative"
             class="action-btn text-weight-bold br-sm"
             unelevated
-            label="ลบข้อมูลทั้งหมด"
+            :label="$t('admin.scoreManagement.clearAllButton')"
             @click="confirmClearImportedScores"
           />
           <q-btn
@@ -63,7 +63,7 @@
             class="action-btn text-weight-bold br-sm"
             unelevated
             icon="file_upload"
-            label="IMPORT"
+            :label="$t('admin.scoreManagement.importButton')"
             @click="showImportDialog = true"
           />
         </template>
@@ -84,7 +84,7 @@
             <ActionButton
               v-if="row.hasSavedCertificate"
               icon="description"
-              tooltip="ดูใบ Certificate"
+              :tooltip="$t('admin.scoreManagement.viewCertificateTooltip')"
               color="black"
               @click="viewIssuedCertificate(row)"
             />
@@ -98,7 +98,7 @@
         color="primary"
         class="save-score-btn text-weight-bold br-sm"
         unelevated
-        label="บันทึกคะแนน"
+        :label="$t('admin.scoreManagement.saveScoresButton')"
         :disable="!hasImportedScores"
         @click="showSaveConfirmDialog = true"
       />
@@ -160,7 +160,7 @@
     <q-dialog v-model="showSampleDialog" class="sample-dialog">
       <q-card class="sample-dialog-card">
         <q-card-section class="row items-start q-pb-md">
-          <div class="sample-dialog-title">ตัวอย่างไฟล์ผลสอบ สำหรับ Upload คะแนน</div>
+          <div class="sample-dialog-title">{{ $t('admin.scoreManagement.sampleDialog.title') }}</div>
           <q-space />
           <q-btn icon="close" flat round dense v-close-popup class="text-grey-7" />
         </q-card-section>
@@ -178,7 +178,7 @@
           <q-btn
             unelevated
             no-caps
-            label="ดาวน์โหลดตัวอย่าง"
+            :label="$t('admin.scoreManagement.sampleDialog.downloadButton')"
             class="download-sample-btn"
             @click="downloadSampleFile"
           />
@@ -188,20 +188,20 @@
 
     <DialogActionConfirm
       v-model="showSaveConfirmDialog"
-      title="ยืนยันการบันทึกข้อมูล"
-      message="คุณต้องการบันทึกข้อมูลทั้งหมดใช่หรือไม่"
-      confirm-label="ยืนยัน"
-      cancel-label="ยกเลิก"
+      :title="$t('admin.scoreManagement.confirmSave.title')"
+      :message="$t('admin.scoreManagement.confirmSave.message')"
+      :confirm-label="$t('common.confirm')"
+      :cancel-label="$t('common.cancel')"
       confirm-color="primary"
       @confirm="saveScores"
     />
 
     <DialogActionConfirm
       v-model="showClearConfirmDialog"
-      title="ยืนยันการลบข้อมูล"
-      message="คุณต้องการลบข้อมูลทั้งหมดใช่หรือไม่"
-      confirm-label="ยืนยัน"
-      cancel-label="ยกเลิก"
+      :title="$t('admin.scoreManagement.confirmClear.title')"
+      :message="$t('admin.scoreManagement.confirmClear.message')"
+      :confirm-label="$t('common.confirm')"
+      :cancel-label="$t('common.cancel')"
       confirm-color="primary"
       @confirm="clearImportedScores"
     />
@@ -627,43 +627,46 @@ const scoreRows = computed(() => {
   });
 });
 
-const baseColumns: QTableColumn[] = [
+const baseColumns = computed((): QTableColumn[] => {
+  void i18n.locale.value;
+  return [
   {
     name: 'index',
-    label: 'ลำดับ',
+    label: i18n.t('admin.scoreManagement.table.columns.index'),
     field: 'index',
     align: 'center',
     style: 'width: 8%',
   },
   {
     name: 'nationalId',
-    label: 'เลขประจำตัวสอบ',
+    label: i18n.t('admin.scoreManagement.table.columns.examNumber'),
     field: 'nationalId',
     align: 'center',
     style: 'width: 15%',
   },
   {
     name: 'location',
-    label: 'ห้องสอบ',
+    label: i18n.t('admin.scoreManagement.table.columns.examRoom'),
     field: 'location',
     align: 'center',
     style: 'width: 18%',
   },
   {
     name: 'titleTh',
-    label: 'คำนำหน้า',
+    label: i18n.t('admin.scoreManagement.table.columns.prefix'),
     field: 'titleTh',
     align: 'center',
     style: 'width: 8%',
   },
   {
     name: 'fullnameTh',
-    label: 'ชื่อ-นามสกุล',
+    label: i18n.t('admin.scoreManagement.table.columns.fullName'),
     field: 'fullnameTh',
     align: 'left',
     style: 'width: 25%; padding-left: 5%',
   },
-];
+  ];
+});
 
 const rubricScoreColumns = computed((): QTableColumn[] =>
   rubricItems.value.map((item) => ({
@@ -677,10 +680,12 @@ const rubricScoreColumns = computed((): QTableColumn[] =>
   })),
 );
 
-const tailColumns: QTableColumn[] = [
+const tailColumns = computed((): QTableColumn[] => {
+  void i18n.locale.value;
+  return [
   {
     name: 'scoreTotal',
-    label: 'คะแนนรวม',
+    label: i18n.t('admin.scoreManagement.table.columns.scoreTotal'),
     field: 'scoreTotal',
     align: 'center',
     style: 'width: 5%',
@@ -689,7 +694,7 @@ const tailColumns: QTableColumn[] = [
   },
   {
     name: 'band',
-    label: 'Level',
+    label: i18n.t('admin.scoreManagement.table.columns.level'),
     field: 'band',
     align: 'center',
     style: 'width: 10%',
@@ -703,14 +708,18 @@ const tailColumns: QTableColumn[] = [
   },
   {
     name: 'tools',
-    label: 'เครื่องมือ',
+    label: i18n.t('admin.scoreManagement.table.columns.tools'),
     field: 'tools',
     align: 'center',
     style: 'width: 10%',
   },
-];
+  ];
+});
 
-const columns = computed(() => [...baseColumns, ...rubricScoreColumns.value, ...tailColumns]);
+const columns = computed(() => {
+  void i18n.locale.value;
+  return [...baseColumns.value, ...rubricScoreColumns.value, ...tailColumns.value];
+});
 
 const tableColumns = computed(() => {
   const hasAnyCertificate = scoreRows.value.some((row) => row.hasSavedCertificate);
@@ -1050,7 +1059,10 @@ const applyImportedScoreRows = async (rows: string[][]): Promise<void> => {
     importEnrollments = await ensureSessionEnrollmentsCache();
   } catch (err) {
     console.error('Error loading enrollments for import:', err);
-    $q.notify({ type: 'negative', message: 'โหลดรายชื่อผู้สมัครสำหรับนำเข้าไม่สำเร็จ' });
+    $q.notify({
+      type: 'negative',
+      message: i18n.t('admin.scoreManagement.notifications.loadEnrollmentsImportFailed'),
+    });
     return;
   }
 
@@ -1131,8 +1143,8 @@ const applyImportedScoreRows = async (rows: string[][]): Promise<void> => {
     type: matchedCount > 0 ? 'positive' : 'warning',
     message:
       matchedCount > 0
-        ? `นำเข้าคะแนนสำเร็จ ${matchedCount} รายการ`
-        : 'ไม่พบข้อมูลผู้สมัครที่ตรงกับไฟล์ในช่วงเวลานี้',
+        ? i18n.t('admin.scoreManagement.notifications.importSuccess', { count: matchedCount })
+        : i18n.t('admin.scoreManagement.notifications.importNoMatch'),
   });
 };
 
@@ -1150,16 +1162,25 @@ const processScoreFile = async (file: File): Promise<void> => {
       return;
     }
 
-    $q.notify({ type: 'warning', message: 'รองรับเฉพาะไฟล์ .csv และ .xlsx เท่านั้น' });
+    $q.notify({
+      type: 'warning',
+      message: i18n.t('admin.scoreManagement.notifications.fileTypeUnsupported'),
+    });
   } catch (err) {
     console.error('Error importing score file:', err);
-    $q.notify({ type: 'negative', message: 'นำเข้าไฟล์คะแนนไม่สำเร็จ' });
+    $q.notify({
+      type: 'negative',
+      message: i18n.t('admin.scoreManagement.notifications.importFailed'),
+    });
   }
 };
 
 const handleUrlUpload = (url: string): void => {
   console.log('Importing from URL:', url);
-  $q.notify({ type: 'info', message: 'รับ URL แล้ว แต่การนำเข้าจาก URL ยังไม่ได้เชื่อมต่อ' });
+  $q.notify({
+    type: 'info',
+    message: i18n.t('admin.scoreManagement.notifications.urlImportNotConnected'),
+  });
 };
 
 const openSampleDialog = async (): Promise<void> => {
@@ -1167,14 +1188,17 @@ const openSampleDialog = async (): Promise<void> => {
     await ensureSessionEnrollmentsCache();
   } catch (err) {
     console.error('Error loading enrollments for sample:', err);
-    $q.notify({ type: 'negative', message: 'โหลดรายชื่อผู้สมัครสำหรับตัวอย่างไม่สำเร็จ' });
+    $q.notify({
+      type: 'negative',
+      message: i18n.t('admin.scoreManagement.notifications.loadSampleFailed'),
+    });
     return;
   }
 
   if (sampleRows.value.length === 0) {
     $q.notify({
       type: 'warning',
-      message: 'ไม่พบผู้สมัครในช่วงเวลานี้สำหรับสร้างไฟล์ตัวอย่าง',
+      message: i18n.t('admin.scoreManagement.notifications.noSampleApplicants'),
     });
     return;
   }
@@ -1202,7 +1226,7 @@ const downloadSampleFile = (): void => {
   if (sampleRows.value.length === 0) {
     $q.notify({
       type: 'warning',
-      message: 'ไม่พบผู้สมัครในช่วงเวลานี้สำหรับสร้างไฟล์ตัวอย่าง',
+      message: i18n.t('admin.scoreManagement.notifications.noSampleApplicants'),
     });
     return;
   }
@@ -1231,14 +1255,16 @@ const downloadSampleFile = (): void => {
   if (status !== true) {
     $q.notify({
       type: 'negative',
-      message: 'ไม่สามารถดาวน์โหลดไฟล์ตัวอย่างได้',
+      message: i18n.t('admin.scoreManagement.notifications.sampleDownloadFailed'),
     });
     return;
   }
 
   $q.notify({
     type: 'positive',
-    message: `ดาวน์โหลดตัวอย่างจากผู้สมัครจริง ${sampleRows.value.length} รายการ`,
+    message: i18n.t('admin.scoreManagement.notifications.sampleDownloadSuccess', {
+      count: sampleRows.value.length,
+    }),
   });
 };
 
@@ -1246,7 +1272,7 @@ const clearImportedScores = (): void => {
   initializeScoreDrafts({ resetImported: true });
   $q.notify({
     type: 'positive',
-    message: 'ลบข้อมูลสำเร็จ',
+    message: i18n.t('admin.scoreManagement.notifications.clearSuccess'),
   });
 };
 
@@ -1254,7 +1280,7 @@ const confirmClearImportedScores = (): void => {
   if (!hasImportedScores.value) {
     $q.notify({
       type: 'warning',
-      message: 'ไม่มีข้อมูลคะแนนที่นำเข้า',
+      message: i18n.t('admin.scoreManagement.notifications.noImportedScores'),
     });
     return;
   }
@@ -1297,10 +1323,10 @@ const saveScores = async (): Promise<void> => {
     examScores.value = await fetchExamScores({ examId });
     initializeScoreDrafts({ resetImported: true });
     await loadEnrollmentPage();
-    $q.notify({ type: 'positive', message: 'บันทึกคะแนนสำเร็จ' });
+    $q.notify({ type: 'positive', message: i18n.t('admin.scoreManagement.notifications.saveSuccess') });
   } catch (err) {
     console.error('Error saving scores:', err);
-    $q.notify({ type: 'negative', message: 'บันทึกคะแนนไม่สำเร็จ' });
+    $q.notify({ type: 'negative', message: i18n.t('admin.scoreManagement.notifications.saveFailed') });
   } finally {
     isLoading.value = false;
   }

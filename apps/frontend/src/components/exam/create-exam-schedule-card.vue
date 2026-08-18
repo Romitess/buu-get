@@ -5,7 +5,7 @@
       <div class="row items-center justify-between q-mb-md section-header">
         <div class="row items-center no-wrap">
           <q-icon name="calendar_today" size="20px" class="q-mr-sm text-dark" />
-          <div class="text-subtitle1 text-weight-bold text-dark">กำหนดการสอบ</div>
+          <div class="text-subtitle1 text-weight-bold text-dark">{{ t('admin.examForm.cards.examSchedule') }}</div>
         </div>
       </div>
 
@@ -36,7 +36,7 @@
         <!-- Date and Time Row -->
         <div class="row q-col-gutter-md q-mb-lg">
           <div class="col-12 col-md-6" data-field="examDate">
-            <div class="buu-label-muted q-mb-xs">วันที่สอบ</div>
+            <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.fields.examDate') }}</div>
             <q-input
               v-model="form.examDate"
               outlined
@@ -91,7 +91,7 @@
             </div>
           </div>
           <div class="col-6 col-md-3" :data-field="`startTime_${activeSlotIndex}`">
-            <div class="buu-label-muted q-mb-xs">เวลาเริ่ม</div>
+            <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.fields.startTime') }}</div>
             <app-time-picker
               v-model="activeSlot.startTime"
               outlined
@@ -113,7 +113,7 @@
             </div>
           </div>
           <div class="col-6 col-md-3" :data-field="`endTime_${activeSlotIndex}`">
-            <div class="buu-label-muted q-mb-xs">เวลาสิ้นสุด</div>
+            <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.fields.endTime') }}</div>
             <app-time-picker
               v-model="activeSlot.endTime"
               outlined
@@ -139,10 +139,10 @@
         <!-- Rooms Section -->
         <div class="rooms-section">
           <div class="row items-center justify-between q-mb-sm">
-            <div class="rooms-title">สถานที่สอบ ผู้คุมสอบ และจำนวนที่นั่ง</div>
+            <div class="rooms-title">{{ t('admin.examForm.fields.roomsTitle') }}</div>
             <q-btn
               v-if="!locked"
-              label="เพิ่มห้องสอบ"
+              :label="t('admin.examForm.fields.addRoom')"
               color="primary"
               unelevated
               dense
@@ -154,13 +154,13 @@
           <!-- Room Header -->
           <div class="room-header row q-col-gutter-sm q-mb-xs">
             <div class="col-12 col-md-6">
-              <span class="buu-label-muted">สถานที่สอบ</span>
+              <span class="buu-label-muted">{{ t('admin.examForm.fields.location') }}</span>
             </div>
             <div class="col-12 col-md-3">
-              <span class="buu-label-muted">ผู้คุมสอบ</span>
+              <span class="buu-label-muted">{{ t('admin.examForm.fields.proctor') }}</span>
             </div>
             <div class="col-12 col-md-3">
-              <span class="buu-label-muted">จำนวนที่นั่ง</span>
+              <span class="buu-label-muted">{{ t('admin.examForm.fields.seats') }}</span>
             </div>
           </div>
 
@@ -180,7 +180,7 @@
                 map-options
                 outlined
                 dense
-                placeholder="เลือกสถานที่สอบ"
+                :placeholder="t('admin.examForm.fields.selectLocationPlaceholder')"
                 dropdown-icon="keyboard_arrow_down"
                 class="custom-input"
                 :class="{ 'buu-field-error': hasError(`locationId_${activeSlotIndex}_${rIdx}`) }"
@@ -203,9 +203,9 @@
                         v-if="scope.opt.isSelectedByOther"
                         color="blue-2"
                         text-color="blue-9"
-                        label="เลือกแล้ว"
+                        :label="t('admin.examForm.fields.locationSelected')"
                       />
-                      <q-badge v-else color="orange-3" text-color="orange-9" label="ไม่ว่าง" />
+                      <q-badge v-else color="orange-3" text-color="orange-9" :label="t('admin.examForm.fields.locationUnavailable')" />
                     </q-item-section>
                   </q-item>
                 </template>
@@ -290,7 +290,7 @@
                     "
                   >
                     <q-tooltip v-if="room.locationId" class="bg-grey-8 text-body2">
-                      จำนวนที่นั่งสูงสุดตามผังที่แก้ไขคือ {{ getRoomMaxSeats(room) }} ที่นั่ง
+                      {{ t('admin.examForm.fields.seatsMaxTooltip', { max: getRoomMaxSeats(room) }) }}
                     </q-tooltip>
                   </q-input>
                 </div>
@@ -313,8 +313,7 @@
                 class="buu-error-msg"
               >
                 <q-icon name="error" class="buu-error-icon" />
-                จำนวนที่นั่งเกินผังที่แก้ไข มีที่นั่งใช้ได้ไม่เกิน
-                {{ getRoomMaxSeats(room) }} ที่นั่ง
+                {{ t('admin.examForm.fields.seatsExceedsLayout', { max: getRoomMaxSeats(room) }) }}
               </div>
               <div
                 v-else-if="hasError(`seats_${activeSlotIndex}_${rIdx}`)"
@@ -334,12 +333,15 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { CreateExamForm, TimeSlot, ExamRoom } from 'src/composables/use-create-exam';
 import type { ExamLocationOption } from 'src/services/exam.service';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
 import AppSelect from 'src/components/base/app-select.vue';
 import AppTimePicker from 'src/components/base/app-time-picker.vue';
 import { beToCeString, ceToBeString } from 'src/utils/thai-date';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   /** When true, disables all schedule editing (for published exams) */
@@ -539,7 +541,7 @@ const getSlotLabel = (slot: TimeSlot, index: number): string => {
   if (start && end) {
     return `${start.replace(/\s/g, '')}-${end.replace(/\s/g, '')}`;
   }
-  return `รอบที่ ${index + 1}`;
+  return t('admin.examForm.fields.slotLabel', { n: index + 1 });
 };
 </script>
 

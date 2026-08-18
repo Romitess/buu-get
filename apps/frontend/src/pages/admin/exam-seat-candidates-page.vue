@@ -771,6 +771,7 @@ const pagination = ref<PaginationModel>({
 });
 
 const columns = computed<QTableColumn[]>(() => {
+  void i18n.locale.value;
   const nameWidth = isVoucherSent.value ? 11 : 16;
   const baseColumns: QTableColumn[] = [
     {

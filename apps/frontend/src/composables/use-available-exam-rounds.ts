@@ -28,6 +28,8 @@ export interface AvailableExamRound {
 // Constants
 const MAX_DISPLAY_ROUNDS = 4 as const;
 
+type AvailableRoundsErrorCode = 'noData' | 'fetch';
+
 const mapPublishedSchedule = (exam: BackendExam): ExamSchedule => {
   let capacity = 0;
   let registeredCount = 0;
@@ -66,10 +68,17 @@ const mapPublishedSchedule = (exam: BackendExam): ExamSchedule => {
 };
 
 export function useAvailableExamRounds() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const isLoading = ref(false);
-  const error = ref<string | null>(null);
+  const errorCode = ref<AvailableRoundsErrorCode | null>(null);
   const publishedSchedules = ref<ExamSchedule[]>([]);
+
+  const error = computed((): string | null => {
+    void locale.value;
+    if (errorCode.value === 'noData') return t('home.availableRounds.noData');
+    if (errorCode.value === 'fetch') return t('home.availableRounds.errorFetch');
+    return null;
+  });
 
   /**
    * Filter rounds with available seats & upcoming exam date, sort by nearest, limit to 4.
@@ -108,7 +117,7 @@ export function useAvailableExamRounds() {
 
   const fetchAvailableRounds = async (force = false): Promise<void> => {
     isLoading.value = true;
-    error.value = null;
+    errorCode.value = null;
     try {
       const exams = await fetchAllExamsRaw(force);
       publishedSchedules.value = exams
@@ -116,11 +125,11 @@ export function useAvailableExamRounds() {
         .map(mapPublishedSchedule);
 
       if (filteredRounds.value.length === 0) {
-        error.value = t('home.availableRounds.noData');
+        errorCode.value = 'noData';
       }
     } catch (err) {
       console.error('Error fetching available exam rounds:', err);
-      error.value = t('home.availableRounds.errorFetch');
+      errorCode.value = 'fetch';
     } finally {
       isLoading.value = false;
     }

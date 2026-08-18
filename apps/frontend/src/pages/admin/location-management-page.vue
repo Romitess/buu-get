@@ -87,7 +87,7 @@ import * as locationService from 'src/services/location.service';
 import { isRequestCanceled } from 'src/services/exam.service';
 
 const $q = useQuasar();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const router = useRouter();
 
 const isLoading = ref(false);
@@ -126,7 +126,9 @@ const parseCapacity = (roomNo: string | undefined | null): number => {
   return floor === 1 ? 40 : 60;
 };
 
-const columns = computed<QTableColumn[]>(() => [
+const columns = computed<QTableColumn[]>(() => {
+  void locale.value;
+  return [
   {
     name: 'index',
     label: t('admin.locationManagement.table.columns.index'),
@@ -170,8 +172,7 @@ const columns = computed<QTableColumn[]>(() => [
     align: 'center',
     style: 'width: 12%',
   },
-]);
-
+];});
 const locationsWithComputedData = computed(() => {
   const pageOffset = (pagination.value.page - 1) * pagination.value.rowsPerPage;
   return locations.value.map((loc, idx) => ({

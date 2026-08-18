@@ -80,7 +80,7 @@ import { useI18n } from 'vue-i18n';
 import { useNavigation } from 'src/composables/use-navigation';
 import { ROLES } from 'src/constants/roles';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { userStore, leftDrawerOpen, miniState, isHovered, isMini } = useNavigation();
 
 let hoverTimer: ReturnType<typeof setTimeout> | null = null;
@@ -98,13 +98,14 @@ const onMouseLeave = (): void => {
 
 // Dynamic role-based navigation menu links
 const menuLinks = computed(() => {
+  void locale.value;
   const role = userStore.userRole;
   const links = [];
 
   // 1. หน้าหลัก (Always present)
   links.push({
     name: 'home',
-    label: t('navigation.home') || 'หน้าหลัก',
+    label: t('navigation.home'),
     icon: 'home',
     path: '/',
   });
@@ -114,25 +115,25 @@ const menuLinks = computed(() => {
   if (role === ROLES.CANDIDATE) {
     links.push({
       name: 'exam-schedule',
-      label: t('navigation.examSchedule') || 'รายการสอบ',
+      label: t('navigation.examSchedule'),
       icon: 'list_alt',
       path: '/user/exam-schedule',
     });
     links.push({
       name: 'exam-simulation',
-      label: t('navigation.examSimulation') || 'จำลองการสอบ',
+      label: t('navigation.examSimulation'),
       icon: 'monitor',
       path: '/user/exam-simulation',
     });
     links.push({
       name: 'exam-history',
-      label: t('navigation.examHistory') || 'ประวัติการสอบ',
+      label: t('navigation.examHistory'),
       icon: 'history',
       path: '/user/exam-history',
     });
     links.push({
       name: 'user-profile',
-      label: t('navigation.personalProfile') || 'ข้อมูลส่วนตัว',
+      label: t('navigation.personalProfile'),
       icon: 'person',
       path: '/user/profile',
     });
@@ -141,7 +142,7 @@ const menuLinks = computed(() => {
   else if (!userStore.isLoggedIn) {
     links.push({
       name: 'exam-schedule-guest',
-      label: t('navigation.viewSchedule') || 'ตารางสอบ',
+      label: t('navigation.viewSchedule'),
       icon: 'event',
       path: '/user/exam-schedule',
     });
@@ -150,25 +151,25 @@ const menuLinks = computed(() => {
   else if (role === ROLES.REGISTRATION_OFFICER || role === ROLES.ADMIN) {
     links.push({
       name: 'location-management',
-      label: t('navigation.manageLocations') || 'จัดการห้องสอบ',
+      label: t('navigation.manageLocations'),
       icon: 'corporate_fare',
       path: '/admin/location-management',
     });
     links.push({
       name: 'exam-management',
-      label: t('navigation.manageExams') || 'จัดการรอบสอบ',
+      label: t('navigation.manageExams'),
       icon: 'assignment',
       path: '/admin/exam-management',
     });
     links.push({
       name: 'score-rubric-management',
-      label: t('navigation.manageScoreRubrics') || 'จัดการชุดเกณฑ์คะแนน',
+      label: t('navigation.manageScoreRubrics'),
       icon: 'grading',
       path: '/admin/score-rubric-management',
     });
     links.push({
       name: 'page-builder',
-      label: t('navigation.manageHomeContent') || 'จัดการเนื้อหาหน้าหลัก',
+      label: t('navigation.manageHomeContent'),
       icon: 'edit',
       path: '/admin/page-builder',
     });
@@ -177,31 +178,31 @@ const menuLinks = computed(() => {
   else if (role === ROLES.EXAM_OPERATIONS_OFFICER || role === ROLES.STAFF) {
     links.push({
       name: 'exam-management',
-      label: t('navigation.manageExams') || 'จัดการรอบสอบ',
+      label: t('navigation.manageExams'),
       icon: 'assignment',
       path: '/admin/exam-management',
     });
     links.push({
       name: 'documents-group',
-      label: 'จัดการเอกสาร',
+      label: t('navigation.manageDocuments'),
       icon: 'description',
       isGroup: true,
       children: [
         {
           name: 'test-voucher-management',
-          label: t('navigation.manageTestVoucher') || 'จัดการ Test Voucher',
+          label: t('navigation.manageTestVoucher'),
           icon: 'contact_page',
           path: '/admin/test-voucher-management',
         },
         {
           name: 'score-rubric-management',
-          label: t('navigation.manageScoreRubrics') || 'จัดการชุดเกณฑ์คะแนน',
+          label: t('navigation.manageScoreRubrics'),
           icon: 'grading',
           path: '/admin/score-rubric-management',
         },
         {
           name: 'score-criteria-management',
-          label: t('navigation.manageBandCertificate') || 'จัดการ Band / Certificate',
+          label: t('navigation.manageBandCertificate'),
           icon: 'workspace_premium',
           path: '/admin/score-criteria-management',
         },
@@ -212,43 +213,43 @@ const menuLinks = computed(() => {
   else if (role === ROLES.FINANCE) {
     links.push({
       name: 'payment-import',
-      label: t('navigation.paymentImport') || 'นำเข้าไฟล์การชำระเงิน',
+      label: t('navigation.paymentImport'),
       icon: 'payments',
       path: '/admin/payment-import',
     });
     links.push({
       name: 'payment-import-test-export',
-      label: t('navigation.paymentImportTestExport') || 'Export CSV ทดสอบการนำเข้า',
+      label: t('navigation.paymentImportTestExport'),
       icon: 'download',
       path: '/admin/payment-import-test-export',
     });
     links.push({
       name: 'fund-source-management',
-      label: t('navigation.fundSourceManagement') || 'จัดการผังแหล่งเงิน',
+      label: t('navigation.fundSourceManagement'),
       icon: 'account_balance',
       path: '/admin/fund-source-management',
     });
     links.push({
       name: 'reports-group',
-      label: t('navigation.reports') || 'รายงาน',
+      label: t('navigation.reports'),
       icon: 'bar_chart',
       isGroup: true,
       children: [
         {
           name: 'daily-revenue-report',
-          label: t('navigation.dailyRevenueReport') || 'สรุปการรับเงินประจำวัน',
+          label: t('navigation.dailyRevenueReport'),
           icon: 'request_quote',
           path: '/admin/daily-revenue-report',
         },
         {
           name: 'receipt-usage-report',
-          label: t('navigation.receiptUsageReport') || 'การใช้ใบเสร็จรับเงิน',
+          label: t('navigation.receiptUsageReport'),
           icon: 'receipt',
           path: '/admin/receipt-usage-report',
         },
         {
           name: 'application-fee-report',
-          label: t('navigation.applicationFeeReport') || 'สรุปการรับเงินค่าสมัครสอบ',
+          label: t('navigation.applicationFeeReport'),
           icon: 'summarize',
           path: '/admin/application-fee-report',
         },
@@ -259,13 +260,13 @@ const menuLinks = computed(() => {
   else if (role === ROLES.EXECUTIVE) {
     links.push({
       name: 'admin-dashboard',
-      label: t('navigation.dashboard') || 'แดชบอร์ด',
+      label: t('navigation.dashboard'),
       icon: 'dashboard',
       path: '/admin/dashboard',
     });
     links.push({
       name: 'admin-executive-test-takers',
-      label: t('navigation.examInformation') || 'ข้อมูลการสอบ',
+      label: t('navigation.examInformation'),
       icon: 'groups',
       path: '/admin/executive/test-takers',
     });

@@ -192,7 +192,7 @@ const emit = defineEmits<{
   (e: 'save-row', payload: { rowId: number; ref1: string; ref2: string }): void;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const isDialogOpened = ref(false);
 const selectedRow = ref<PaymentRow | null>(null);
@@ -225,7 +225,9 @@ watch(
   { immediate: true },
 );
 
-const columns = computed<QTableColumn[]>(() => [
+const columns = computed<QTableColumn[]>(() => {
+  void locale.value;
+  return [
   { name: 'id', field: 'id', label: t('admin.paymentImport.table.index'), align: 'center' },
   {
     name: 'file_payment_date',
@@ -293,8 +295,7 @@ const columns = computed<QTableColumn[]>(() => [
     label: t('admin.examManagement.table.columns.tools'),
     align: 'center',
   },
-]);
-
+];});
 const handleEdit = (row: PaymentRow) => {
   selectedRow.value = row;
   editForm.value.ref1 = row.file_ref || '';

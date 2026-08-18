@@ -27,6 +27,7 @@ const savedLocale =
 /** Singleton — ใช้ใน Pinia/async ได้โดยไม่ต้องอยู่บน setup ของ component */
 export const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
   locale: savedLocale,
+  fallbackLocale: 'th',
   legacy: false,
   messages,
 });

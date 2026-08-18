@@ -33,7 +33,7 @@
           class="custom-input"
           :rules="[
             (val) => !!val || $t('profile.requiredEmail'),
-            (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || 'รูปแบบอีเมลไม่ถูกต้อง',
+            (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || t('profile.invalidEmail'),
           ]"
           lazy-rules
           hide-bottom-space
@@ -178,10 +178,7 @@ const emit = defineEmits<{
   'thaid-register': [payload: RegisterCredentials];
 }>();
 
-const i18n = useI18n();
-const { locale } = i18n;
-const { t } = i18n;
-const tr = (key: string, fallback: string): string => (i18n.te(key) ? t(key) : fallback);
+const { locale, t } = useI18n();
 const $q = useQuasar();
 const router = useRouter();
 const authStore = useAuthStore();
@@ -252,7 +249,7 @@ const sendOtp = async (): Promise<boolean> => {
     if (!response.success) {
       $q.notify({
         type: 'negative',
-        message: response.message || tr('profile.otpSendError', 'ไม่สามารถส่งรหัส OTP ได้'),
+        message: response.message || t('profile.otpSendError'),
         position: 'top',
       });
       return false;
@@ -260,7 +257,7 @@ const sendOtp = async (): Promise<boolean> => {
 
     $q.notify({
       type: 'positive',
-      message: tr('profile.otpSendSuccess', 'ส่งรหัส OTP ไปยังอีเมลของคุณแล้ว'),
+      message: t('profile.otpSendSuccess'),
       position: 'top',
     });
     return true;
@@ -291,7 +288,7 @@ const handleVerifyOtp = async (otp: string): Promise<void> => {
     if (!response.success) {
       $q.notify({
         type: 'negative',
-        message: response.message || tr('profile.otpVerifyError', 'ไม่สามารถยืนยันรหัส OTP ได้'),
+        message: response.message || t('profile.otpVerifyError'),
         position: 'top',
       });
       return;

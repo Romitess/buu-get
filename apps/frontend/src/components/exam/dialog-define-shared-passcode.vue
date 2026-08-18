@@ -8,23 +8,23 @@
   >
     <q-card class="dialog-define-shared-passcode-card">
       <q-card-section class="row items-center justify-between q-pb-none">
-        <div class="text-h6 text-weight-bold dialog-title">กำหนด Passcode ร่วม</div>
+        <div class="text-h6 text-weight-bold dialog-title">{{ t('admin.examForm.dialogs.sharedPasscode.title') }}</div>
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
 
       <q-card-section class="q-pt-md">
         <div class="text-body2 text-grey-7 q-mb-md">
-          กำหนดรหัส 6 ตัวอักษรหรือตัวเลข สำหรับผู้มีสิทธิ์สอบทุกคนในรอบนี้
+          {{ t('admin.examForm.dialogs.sharedPasscode.description') }}
         </div>
 
-        <div class="buu-label-muted q-mb-xs">Passcode (6 ตัวอักษร/ตัวเลข)</div>
+        <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.dialogs.sharedPasscode.label') }}</div>
         <q-input
           v-model="passcode"
           outlined
           dense
           bg-color="white"
           maxlength="6"
-          placeholder="เช่น ABC123"
+          :placeholder="t('admin.examForm.dialogs.sharedPasscode.placeholder')"
           hide-bottom-space
           class="passcode-input buu-input-muted"
           :class="{ 'buu-field-error': !!errorMessage }"
@@ -37,7 +37,7 @@
               dense
               no-caps
               color="primary"
-              label="สุ่มรหัส"
+              :label="t('admin.examForm.dialogs.sharedPasscode.randomize')"
               class="randomize-btn"
               @click="onRandomize"
             />
@@ -50,12 +50,12 @@
       </q-card-section>
 
       <q-card-actions align="right" class="q-pa-md q-pt-none q-gutter-sm">
-        <q-btn flat no-caps label="ยกเลิก" class="dialog-btn cancel-btn" v-close-popup />
+        <q-btn flat no-caps :label="t('profile.cancel')" class="dialog-btn cancel-btn" v-close-popup />
         <q-btn
           unelevated
           no-caps
           color="primary"
-          label="ยืนยัน"
+          :label="t('profile.confirm')"
           class="dialog-btn confirm-btn"
           @click="onConfirm"
         />
@@ -66,12 +66,15 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
   PASSCODE_LENGTH,
   PASSCODE_PATTERN,
   generateRandomAlphanumericPasscode,
   normalizeExamPasscode,
 } from 'src/constants/exam';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: boolean;
@@ -97,7 +100,6 @@ watch(
 
 const onInput = (value: string | number | null): void => {
   const raw = String(value ?? '');
-  // Keep only alphanumeric and cap length while typing
   passcode.value = raw.replace(/[^A-Za-z0-9]/g, '').slice(0, PASSCODE_LENGTH);
   errorMessage.value = '';
 };
@@ -110,7 +112,7 @@ const onRandomize = (): void => {
 const onConfirm = (): void => {
   const normalized = normalizeExamPasscode(passcode.value);
   if (!PASSCODE_PATTERN.test(normalized)) {
-    errorMessage.value = 'กรุณากรอก Passcode 6 ตัวอักษรหรือตัวเลขเท่านั้น';
+    errorMessage.value = t('admin.examForm.dialogs.sharedPasscode.invalidFormat');
     return;
   }
 

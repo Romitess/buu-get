@@ -11,26 +11,43 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
   status: string;
 }>();
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; outline: boolean }> = {
-  // Exam
-  published: { label: 'เผยแพร่แล้ว', color: 'blue-7', outline: true },
-  unpublished: { label: 'ยังไม่เผยแพร่', color: 'grey-5', outline: true },
+const { t, locale } = useI18n();
 
-  // Payment
-  paid: { label: 'ชำระเงินแล้ว', color: 'green-6', outline: true },
-  unpaid: { label: 'ค้างชำระ', color: 'red-6', outline: true },
-
-  // Accuracy
-  passed: { label: 'ผ่าน', color: 'green-6', outline: true },
-  pending_fix: { label: 'รอการแก้ไข', color: 'red-6', outline: true },
-  pending_review: { label: 'รอการตรวจสอบ', color: 'blue-5', outline: true },
-  pending_payment: { label: 'รอการชำระเงิน', color: 'grey-7', outline: true },
+const STATUS_I18N_CONFIG: Record<string, { key: string; color: string; outline: boolean }> = {
+  published: { key: 'admin.examManagement.status.published', color: 'blue-7', outline: true },
+  unpublished: { key: 'admin.examManagement.status.unpublished', color: 'grey-5', outline: true },
+  paid: { key: 'exam.status.paymentCompleted', color: 'green-6', outline: true },
+  unpaid: { key: 'exam.status.pending', color: 'red-6', outline: true },
+  passed: { key: 'exam.status.passed', color: 'green-6', outline: true },
+  pending_fix: {
+    key: 'admin.registrantManagement.verifyStatus.waitFixed',
+    color: 'red-6',
+    outline: true,
+  },
+  pending_review: {
+    key: 'admin.registrantManagement.verifyStatus.unchecked',
+    color: 'blue-5',
+    outline: true,
+  },
+  pending_payment: { key: 'exam.status.pending', color: 'grey-7', outline: true },
 };
 
-const config = computed(() => STATUS_CONFIG[props.status]);
+const config = computed(() => {
+  void locale.value;
+
+  const entry = STATUS_I18N_CONFIG[props.status];
+  if (!entry) return null;
+
+  return {
+    label: t(entry.key),
+    color: entry.color,
+    outline: entry.outline,
+  };
+});
 </script>

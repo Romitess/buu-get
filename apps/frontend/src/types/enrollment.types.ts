@@ -167,19 +167,19 @@ export enum VerifyStatus {
   CANCELLED = 3,
 }
 
-export const PAYMENT_STATUS_LABELS: Record<number, string> = {
-  [EnrollmentStatus.UNPAID]: 'ค้างชำระ',
-  [EnrollmentStatus.PAID]: 'ชำระเงินแล้ว',
-  [EnrollmentStatus.SEAT_ASSIGNED]: 'ชำระเงินแล้ว',
-  [EnrollmentStatus.SEAT_PUBLISHED]: 'ชำระเงินแล้ว',
-  [EnrollmentStatus.ATTENDED]: 'ชำระเงินแล้ว',
-  [EnrollmentStatus.CANCELLED]: 'ยกเลิก',
-  [EnrollmentStatus.MISSING]: 'ขาดสอบ',
+export const PAYMENT_STATUS_I18N_KEYS: Record<number, string> = {
+  [EnrollmentStatus.UNPAID]: 'exam.status.pending',
+  [EnrollmentStatus.PAID]: 'exam.status.paymentCompleted',
+  [EnrollmentStatus.SEAT_ASSIGNED]: 'exam.status.paymentCompleted',
+  [EnrollmentStatus.SEAT_PUBLISHED]: 'exam.status.paymentCompleted',
+  [EnrollmentStatus.ATTENDED]: 'exam.status.paymentCompleted',
+  [EnrollmentStatus.CANCELLED]: 'exam.status.registrationCancelled',
+  [EnrollmentStatus.MISSING]: 'admin.examAttendance.status.missing',
 };
 
-export const VERIFY_STATUS_LABELS: Record<number, string> = {
-  [VerifyStatus.UNCHECKED]: 'รอการตรวจสอบ',
-  [VerifyStatus.PASS]: 'ผ่าน',
-  [VerifyStatus.WAIT_FIXED]: 'รอการแก้ไข',
-  [VerifyStatus.CANCELLED]: 'ยกเลิก',
+export const VERIFY_STATUS_I18N_KEYS: Record<number, string> = {
+  [VerifyStatus.UNCHECKED]: 'admin.registrantManagement.verifyStatus.unchecked',
+  [VerifyStatus.PASS]: 'admin.registrantManagement.verifyStatus.pass',
+  [VerifyStatus.WAIT_FIXED]: 'admin.registrantManagement.verifyStatus.waitFixed',
+  [VerifyStatus.CANCELLED]: 'admin.registrantManagement.verifyStatus.cancelled',
 };

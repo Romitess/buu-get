@@ -112,14 +112,13 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from 'src/stores/user.store';
-import { ROLE_LABELS } from 'src/constants/roles';
 import ImageDisplay from 'src/components/base/image-display.vue';
 import { getDefaultRouteForRole } from 'src/utils/default-route';
 import type { UserRole } from 'src/types/user';
 
 const userStore = useUserStore();
 const router = useRouter();
-const { t } = useI18n();
+const i18n = useI18n();
 
 const displayName = computed(() => {
   const user = userStore.currentUser;
@@ -136,9 +135,11 @@ const displayName = computed(() => {
 });
 
 const displayRole = computed(() => {
+  void i18n.locale.value;
   const role = userStore.userRole;
   if (!role) return '';
-  return t(`roles.${role}`) || ROLE_LABELS[role] || role;
+  const roleKey = `roles.${role}`;
+  return i18n.te(roleKey) ? i18n.t(roleKey) : role;
 });
 
 const goToEditProfile = async (): Promise<void> => {

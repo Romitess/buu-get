@@ -2,7 +2,7 @@
   <q-dialog v-model="isOpen" persistent>
     <q-card class="search-candidate-dialog column no-wrap">
       <q-card-section class="row items-center justify-between q-pb-none">
-        <div class="text-h6 text-weight-bold">ค้นหาผู้สมัครสอบ</div>
+        <div class="text-h6 text-weight-bold">{{ t('admin.examForm.dialogs.searchCandidate.title') }}</div>
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
 
@@ -13,7 +13,7 @@
             outlined
             dense
             bg-color="white"
-            placeholder="ค้นหาชื่อ, เลขบัตรประชาชน, passport หรืออีเมล"
+            :placeholder="t('admin.examForm.dialogs.searchCandidate.placeholder')"
             hide-bottom-space
           >
             <template v-slot:append>
@@ -32,7 +32,7 @@
           narrow-indicator
           no-caps
         >
-          <q-tab name="search" label="ผลการค้นหา" />
+          <q-tab name="search" :label="t('admin.examForm.dialogs.searchCandidate.tabSearch')" />
           <q-tab name="selected" :label="selectedTabLabel" />
         </q-tabs>
 
@@ -79,7 +79,7 @@
                 </template>
               </BaseTable>
               <div v-if="isSearchTableEmpty" class="search-candidate-empty-message" role="status">
-                ไม่พบผู้สมัคร
+                {{ t('admin.examForm.dialogs.searchCandidate.emptySearch') }}
               </div>
             </div>
           </q-tab-panel>
@@ -124,7 +124,7 @@
                 class="search-candidate-empty-message"
                 role="status"
               >
-                ยังไม่ได้เลือกผู้สมัคร
+                {{ t('admin.examForm.dialogs.searchCandidate.emptySelected') }}
               </div>
             </div>
           </q-tab-panel>
@@ -134,7 +134,7 @@
       <q-separator />
 
       <q-card-actions align="right" class="q-pa-md">
-        <q-btn flat label="ยกเลิก" v-close-popup />
+        <q-btn flat :label="t('profile.cancel')" v-close-popup />
         <q-btn
           color="primary"
           unelevated
@@ -150,6 +150,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { debounce } from 'quasar';
 import type { QTableColumn } from 'quasar';
 import BaseTable from 'src/components/shared/base-table.vue';
@@ -157,6 +158,8 @@ import { searchUsers } from 'src/services/user.service';
 import { ROLES } from 'src/constants/roles';
 import type { User } from 'src/types/user';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
+
+const { t } = useI18n();
 
 const isOpen = defineModel<boolean>({ required: true });
 
@@ -194,18 +197,22 @@ const selectedPagination = ref<PaginationModel>({
 
 const selectedList = computed<User[]>(() => Array.from(selectedUsers.value.values()));
 const selectedCount = computed<number>(() => selectedList.value.length);
-const selectedTabLabel = computed<string>(() => `ที่เลือกแล้ว (${selectedCount.value})`);
+const selectedTabLabel = computed<string>(() =>
+  t('admin.examForm.dialogs.searchCandidate.tabSelected', { count: selectedCount.value }),
+);
 const confirmLabel = computed<string>(() =>
-  selectedCount.value > 0 ? `ยืนยันเพิ่ม (${selectedCount.value})` : 'ยืนยันเพิ่ม',
+  selectedCount.value > 0
+    ? t('admin.examForm.dialogs.searchCandidate.confirmWithCount', { count: selectedCount.value })
+    : t('admin.examForm.dialogs.searchCandidate.confirm'),
 );
 
 const isSearchTableEmpty = computed(() => !isLoading.value && rows.value.length === 0);
 const isSelectedTableEmpty = computed(() => selectedList.value.length === 0);
 
-const baseColumns: QTableColumn[] = [
+const baseColumns = computed<QTableColumn[]>(() => [
   {
     name: 'index',
-    label: 'ลำดับ',
+    label: t('admin.examForm.dialogs.searchCandidate.columns.index'),
     field: 'index',
     align: 'center',
     sortable: false,
@@ -214,7 +221,7 @@ const baseColumns: QTableColumn[] = [
   },
   {
     name: 'identifier',
-    label: 'รหัสประชาชน / Passport',
+    label: t('admin.examForm.dialogs.searchCandidate.columns.identifier'),
     field: 'nationalId',
     align: 'center',
     sortable: false,
@@ -223,7 +230,7 @@ const baseColumns: QTableColumn[] = [
   },
   {
     name: 'fullName',
-    label: 'ชื่อ-นามสกุล',
+    label: t('admin.examForm.dialogs.searchCandidate.columns.fullName'),
     field: 'fullNameTH',
     align: 'left',
     sortable: false,
@@ -232,40 +239,40 @@ const baseColumns: QTableColumn[] = [
   },
   {
     name: 'email',
-    label: 'อีเมล',
+    label: t('admin.examForm.dialogs.searchCandidate.columns.email'),
     field: 'email',
     align: 'left',
     sortable: false,
     style: 'width: 27%',
     headerStyle: 'width: 27%',
   },
-];
+]);
 
-const searchColumns: QTableColumn[] = [
-  ...baseColumns,
+const searchColumns = computed<QTableColumn[]>(() => [
+  ...baseColumns.value,
   {
     name: 'select',
-    label: 'เลือก',
+    label: t('admin.examForm.dialogs.searchCandidate.columns.select'),
     field: 'select',
     align: 'center',
     sortable: false,
     style: 'width: 15%',
     headerStyle: 'width: 15%',
   },
-];
+]);
 
-const selectedColumns: QTableColumn[] = [
-  ...baseColumns,
+const selectedColumns = computed<QTableColumn[]>(() => [
+  ...baseColumns.value,
   {
     name: 'select',
-    label: 'เลือก',
+    label: t('admin.examForm.dialogs.searchCandidate.columns.select'),
     field: 'select',
     align: 'center',
     sortable: false,
     style: 'width: 15%',
     headerStyle: 'width: 15%',
   },
-];
+]);
 
 const getCandidateKey = (user: User): string =>
   user.nationalId?.trim() || user.passportNo?.trim() || '';

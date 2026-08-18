@@ -53,7 +53,7 @@ const emit = defineEmits<{
   (e: 'view-history', row: ExamCandidateInfoRow): void;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const formatNumber = (value: number | null): string =>
   value === null ? '-' : value.toLocaleString('en-US', { maximumFractionDigits: 2 });
@@ -64,6 +64,7 @@ const scoreLineHeaders = computed(() => {
 });
 
 const columns = computed<QTableColumn<ExamCandidateInfoRow>[]>(() => {
+  void locale.value;
   const baseColumns: QTableColumn<ExamCandidateInfoRow>[] = [
     {
       name: 'index',

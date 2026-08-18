@@ -1,8 +1,9 @@
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { EnrollmentTableRow } from 'src/types/enrollment.types';
 import {
-  PAYMENT_STATUS_LABELS,
-  VERIFY_STATUS_LABELS,
+  PAYMENT_STATUS_I18N_KEYS,
+  VERIFY_STATUS_I18N_KEYS,
   EnrollmentStatus,
 } from 'src/types/enrollment.types';
 import type { BackendExam, BackendSession } from 'src/types/exam';
@@ -10,6 +11,7 @@ import { fetchEnrollmentsByExamId } from 'src/services/enrollment.service';
 import { fetchExamById } from 'src/services/exam.service';
 
 export function useExamRegistrants() {
+  const { t, locale } = useI18n();
   const CANCELLED_STATUS: number = EnrollmentStatus.CANCELLED;
   const enrollments = ref<EnrollmentTableRow[]>([]);
   const exam = ref<BackendExam | null>(null);
@@ -87,8 +89,12 @@ export function useExamRegistrants() {
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase();
       list = list.filter((row: EnrollmentTableRow) => {
-        const paymentLabel = (PAYMENT_STATUS_LABELS[row.paymentStatus] || '').toLowerCase();
-        const verifyLabel = (VERIFY_STATUS_LABELS[row.verifyStatus] || '').toLowerCase();
+        void locale.value;
+
+        const paymentKey = PAYMENT_STATUS_I18N_KEYS[row.paymentStatus];
+        const verifyKey = VERIFY_STATUS_I18N_KEYS[row.verifyStatus];
+        const paymentLabel = (paymentKey ? t(paymentKey) : '').toLowerCase();
+        const verifyLabel = (verifyKey ? t(verifyKey) : '').toLowerCase();
         const remarkLabel = (row.remark || '').toLowerCase();
 
         return (

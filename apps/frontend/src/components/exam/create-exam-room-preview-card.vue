@@ -4,7 +4,7 @@
       <div class="room-preview-header">
         <div class="row items-center no-wrap">
           <q-icon name="event_seat" size="22px" class="q-mr-sm text-black" />
-          <div class="text-subtitle1 text-weight-bold text-dark">แก้ไขข้อมูลห้องสอบ</div>
+          <div class="text-subtitle1 text-weight-bold text-dark">{{ t('admin.examForm.cards.roomPreview') }}</div>
         </div>
 
         <div v-if="selectedRooms.length > 0" class="room-tabs" role="tablist">
@@ -44,7 +44,7 @@
 
         <div v-else class="room-preview-empty">
           <q-icon name="meeting_room" size="40px" color="grey-5" />
-          <div>เลือกสถานที่สอบในกำหนดการสอบเพื่อแสดงผังที่นั่ง</div>
+          <div>{{ t('admin.examForm.empty.selectLocationForSeatMap') }}</div>
         </div>
       </div>
     </q-card-section>
@@ -54,6 +54,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import type { CreateExamForm, ExamRoom } from 'src/composables/use-create-exam';
 import type { ExamLocationOption } from 'src/services/exam.service';
 import type { BackendLocation } from 'src/types/exam';
@@ -83,6 +84,7 @@ const props = defineProps<{
 
 const form = defineModel<CreateExamForm>('form', { required: true });
 const $q = useQuasar();
+const { t } = useI18n();
 
 const activeRoomKey = ref<string | null>(null);
 
@@ -289,7 +291,7 @@ const handleSeatStatusChange = (payload: { seatIds: string[]; status: SeatStatus
     console.error('Error updating location seat status:', error);
     $q.notify({
       type: 'negative',
-      message: 'ไม่สามารถอัปเดตสถานะที่นั่งได้',
+      message: t('admin.examForm.notify.seatUpdateError'),
       position: 'top',
     });
   }

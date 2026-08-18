@@ -10,7 +10,7 @@
     <!-- Error State -->
     <div v-else class="text-center q-pa-xl">
       <q-icon name="error_outline" size="48px" color="negative" />
-      <div class="text-h6 q-mt-md">ไม่พบรหัสรอบสอบ</div>
+      <div class="text-h6 q-mt-md">{{ t('admin.examForm.page.editNotFound') }}</div>
     </div>
   </q-page>
 </template>

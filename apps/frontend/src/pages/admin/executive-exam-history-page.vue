@@ -2,8 +2,8 @@
   <q-page class="page-container history-page">
     <AppBreadcrumbs />
     <AppPageHeader
-      title="ประวัติการสอบ"
-      subtitle="แสดงประวัติการสอบทั้งหมดของผู้สมัครสอบ รวมถึงรายละเอียดคะแนนที่ผู้สมัครสอบได้รับในแต่ละรอบการสอบ"
+      :title="t('admin.examCandidatesInfo.history.pageTitle')"
+      :subtitle="t('admin.examCandidatesInfo.history.pageSubtitle')"
     />
 
     <PageSkeleton v-if="isLoading" :show-header="false">
@@ -55,7 +55,7 @@
               <ActionButton
                 v-if="row.hasCertificate"
                 icon="description"
-                tooltip="ดูใบ Certificate"
+                :tooltip="t('admin.examCandidatesInfo.history.tooltips.viewCertificate')"
                 color="black"
                 @click="viewCertificate(row)"
               />
@@ -83,6 +83,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import type { QTableColumn } from 'quasar';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
@@ -114,6 +115,7 @@ interface CandidateInfo {
 
 const route = useRoute();
 const $q = useQuasar();
+const { t, locale } = useI18n();
 
 const enrollment = ref<BackendEnrollmentDetail | null>(null);
 const historyRows = ref<ExamHistoryRow[]>([]);
@@ -130,58 +132,61 @@ const pagination = ref({
   rowsNumber: 0,
 });
 
-const columns = computed<QTableColumn<ExamHistoryRow>[]>(() => [
+const columns = computed<QTableColumn<ExamHistoryRow>[]>(() => {
+  void locale.value;
+  return [
   {
     name: 'index',
-    label: 'ลำดับ',
+    label: t('admin.examCandidatesInfo.table.columns.index'),
     field: 'index',
     align: 'center',
     style: 'width: 80px',
   },
   {
     name: 'examRound',
-    label: 'ครั้งที่จัดสอบ',
+    label: t('admin.examCandidatesInfo.history.columns.examRound'),
     field: 'examRound',
     align: 'center',
   },
   {
     name: 'examDate',
-    label: 'วันที่สอบ',
+    label: t('admin.examCandidatesInfo.history.columns.examDate'),
     field: 'examDate',
     align: 'center',
   },
   {
     name: 'langUseScore',
-    label: 'คำศัพท์และไวยากรณ์',
+    label: t('admin.examCandidatesInfo.table.columns.vocabularyGrammarScore'),
     field: 'langUseScore',
     align: 'center',
   },
   {
     name: 'readingScore',
-    label: 'ทักษะการอ่าน',
+    label: t('admin.examCandidatesInfo.table.columns.readingScore'),
     field: 'readingScore',
     align: 'center',
   },
   {
     name: 'totalScore',
-    label: 'คะแนนรวม',
+    label: t('admin.examCandidatesInfo.table.columns.totalScore'),
     field: 'totalScore',
     align: 'center',
   },
   {
     name: 'bandLevel',
-    label: 'Level',
+    label: t('admin.examCandidatesInfo.table.columns.level'),
     field: 'bandLevel',
     align: 'center',
   },
   {
     name: 'certificate',
-    label: 'Certificate',
+    label: t('admin.examCandidatesInfo.history.columns.certificate'),
     field: 'certificateId',
     align: 'center',
     style: 'width: 100px',
   },
-]);
+  ];
+});
 
 const computedSessionName = computed((): string => {
   if (!enrollment.value?.SESSION) return '';
@@ -198,7 +203,7 @@ const loadData = async (): Promise<void> => {
   if (!ermId) {
     $q.notify({
       type: 'negative',
-      message: 'ไม่พบข้อมูลใบสมัครสอบ',
+      message: t('admin.examCandidatesInfo.history.notifications.enrollmentNotFound'),
       position: 'bottom',
     });
     isLoading.value = false;
@@ -213,7 +218,7 @@ const loadData = async (): Promise<void> => {
     console.error('Error fetching enrollment detail:', err);
     $q.notify({
       type: 'negative',
-      message: 'ดึงข้อมูลประวัติผู้สมัครไม่สำเร็จ',
+      message: t('admin.examCandidatesInfo.history.notifications.loadEnrollmentFailed'),
       position: 'bottom',
     });
   } finally {
@@ -229,7 +234,7 @@ const loadData = async (): Promise<void> => {
     console.error('Error fetching exam history logs:', err);
     $q.notify({
       type: 'negative',
-      message: 'ดึงประวัติผลคะแนนสอบไม่สำเร็จ',
+      message: t('admin.examCandidatesInfo.history.notifications.loadHistoryFailed'),
       position: 'bottom',
     });
   } finally {

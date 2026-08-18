@@ -12,8 +12,6 @@ import {
   EXAM_FORMAT_COMPUTER,
   EXAM_FORMAT_PAPER,
   MIN_EXAM_SESSIONS,
-  NOTIFY_MSG,
-  VALIDATION_MSG,
   getCurrentThaiFiscalYearAd,
   normalizeExamPasscode,
   PASSCODE_PATTERN,
@@ -42,6 +40,7 @@ import { getUsersFromApi, checkUserIdentifiers } from 'src/services/user.service
 import { ROLES } from 'src/constants/roles';
 import { useUserStore } from 'src/stores/user.store';
 import type { User } from 'src/types/user';
+import { useGlobalLocaleTrackedI18n } from 'src/composables/use-locale-tracked-i18n';
 
 /** A single room within a time slot */
 export interface ExamRoom {
@@ -228,6 +227,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const $q = useQuasar();
   const examStore = useExamStore();
   const userStore = useUserStore();
+  const { t } = useGlobalLocaleTrackedI18n();
 
   const examId = computed(() => {
     const raw = toValue(options?.examId);
@@ -300,8 +300,14 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     );
   });
 
-  const examTypeOptions: string[] = [EXAM_TYPE_GENERAL, EXAM_TYPE_SPECIAL];
-  const examFormatOptions: string[] = [EXAM_FORMAT_COMPUTER, EXAM_FORMAT_PAPER];
+  const examTypeOptions = computed(() => [
+    { label: t('examSchedule.examType.general'), value: EXAM_TYPE_GENERAL },
+    { label: t('examSchedule.examType.special'), value: EXAM_TYPE_SPECIAL },
+  ]);
+  const examFormatOptions = computed(() => [
+    { label: t('examSchedule.examFormat.computer'), value: EXAM_FORMAT_COMPUTER },
+    { label: t('examSchedule.examFormat.paper'), value: EXAM_FORMAT_PAPER },
+  ]);
   const proctorOptions = ref<{ label: string; value: string }[]>([]);
   const locationOptions = ref<ExamLocationOption[]>([]);
   const fundSourceOptions = ref<{ label: string; value: number }[]>([]);
@@ -541,37 +547,36 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     const examVal = examDatetimeCompareValue();
     const examDateOnlyVal = dateToCompareValue(form.value.examDate);
 
-    // 1. วัน/เวลาเริ่มต้นลงทะเบียนต้องไม่เป็นอดีต (เฉพาะสร้างใหม่)
     if (!isEditMode.value && regStartVal > 0 && regStartVal < nowDatetimeCompareValue()) {
-      errors.regStartDate = 'วันและเวลาเริ่มต้นลงทะเบียนต้องไม่เป็นอดีต';
+      errors.regStartDate = t('admin.examForm.validation.regStartNotPast');
     }
 
     // 2. วัน/เวลาสิ้นสุดการลงทะเบียนต้องไม่มาก่อนวัน/เวลาเริ่มต้น
     if (regEndVal > 0 && regStartVal > 0 && regEndVal < regStartVal) {
-      errors.regEndDate = 'วันและเวลาสิ้นสุดการลงทะเบียนต้องไม่มาก่อนวันและเวลาเริ่มต้นลงทะเบียน';
+      errors.regEndDate = t('admin.examForm.validation.regEndAfterStart');
     }
 
     // 3. วัน/เวลาเริ่มต้นชำระเงินต้องไม่มาก่อนวัน/เวลาเริ่มต้นลงทะเบียน
     if (!isSpecialRound.value && payStartVal > 0 && regStartVal > 0 && payStartVal < regStartVal) {
-      errors.payStartDate = 'วันและเวลาเริ่มต้นชำระเงินต้องไม่มาก่อนวันและเวลาเริ่มต้นลงทะเบียน';
+      errors.payStartDate = t('admin.examForm.validation.payStartAfterReg');
     }
 
     // 4. วัน/เวลาสิ้นสุดการชำระเงินต้องไม่มาก่อนวัน/เวลาเริ่มต้นชำระเงิน
     if (!isSpecialRound.value && payEndVal > 0 && payStartVal > 0 && payEndVal < payStartVal) {
-      errors.payEndDate = 'วันและเวลาสิ้นสุดการชำระเงินต้องไม่มาก่อนวันและเวลาเริ่มต้นชำระเงิน';
+      errors.payEndDate = t('admin.examForm.validation.payEndAfterStart');
     }
 
     // 5. วัน/เวลาสอบต้องไม่มาก่อนวัน/เวลาสิ้นสุดการลงทะเบียน
     if (examVal > 0 && regEndVal > 0 && examVal < regEndVal) {
-      errors.examDate = 'วันและเวลาสอบต้องไม่มาก่อนวันและเวลาสิ้นสุดการลงทะเบียน';
+      errors.examDate = t('admin.examForm.validation.examAfterRegEnd');
     }
 
     // 6. วัน/เวลาสอบต้องไม่มาก่อนวัน/เวลาสิ้นสุดการชำระเงิน (รอบทั่วไป)
     if (!isSpecialRound.value && examVal > 0 && payEndVal > 0 && examVal < payEndVal) {
       if (errors.examDate) {
-        errors.examDate += ' และต้องไม่มาก่อนวันและเวลาสิ้นสุดการชำระเงิน';
+        errors.examDate = t('admin.examForm.validation.examAfterRegEndAndPayEnd');
       } else {
-        errors.examDate = 'วันและเวลาสอบต้องไม่มาก่อนวันและเวลาสิ้นสุดการชำระเงิน';
+        errors.examDate = t('admin.examForm.validation.examAfterPayEnd');
       }
     }
 
@@ -579,9 +584,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     const isExamDateChanged = !isEditMode.value || form.value.examDate !== originalExamDate.value;
     if (examDateOnlyVal > 0 && examDateOnlyVal < todayVal && isExamDateChanged) {
       if (errors.examDate) {
-        errors.examDate += ' และต้องไม่เป็นวันที่ผ่านไปแล้ว';
+        errors.examDate += t('admin.examForm.validation.examDatePastSuffix');
       } else {
-        errors.examDate = 'วันที่สอบต้องไม่เป็นวันที่ผ่านไปแล้ว';
+        errors.examDate = t('admin.examForm.validation.examDatePast');
       }
     }
 
@@ -624,32 +629,32 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
     // ── Card 1: ข้อมูลพื้นฐาน ──
     if (!form.value.examName || !form.value.examName.trim()) {
-      errors.examName = VALIDATION_MSG.EXAM_NAME;
+      errors.examName = t('admin.examForm.validation.examName');
     }
     if (!form.value.examRound || !form.value.examRound.trim()) {
-      errors.examRound = VALIDATION_MSG.EXAM_ROUND;
+      errors.examRound = t('admin.examForm.validation.examRound');
     }
     if (!form.value.examFiscalYear || !form.value.examFiscalYear.trim()) {
-      errors.examFiscalYear = VALIDATION_MSG.EXAM_FISCAL_YEAR;
+      errors.examFiscalYear = t('admin.examForm.validation.examFiscalYear');
     } else if (!EXAM_FISCAL_YEAR_AD_REGEX.test(form.value.examFiscalYear.trim())) {
-      errors.examFiscalYear = VALIDATION_MSG.EXAM_FISCAL_YEAR_AD_ONLY;
+      errors.examFiscalYear = t('admin.examForm.validation.examFiscalYearAdOnly');
     }
     if (!form.value.examType) {
-      errors.examType = VALIDATION_MSG.EXAM_TYPE;
+      errors.examType = t('admin.examForm.validation.examType');
     }
     if (!form.value.examFormat) {
-      errors.examFormat = VALIDATION_MSG.EXAM_FORMAT;
+      errors.examFormat = t('admin.examForm.validation.examFormat');
     }
     if (!isSpecialRound.value && !form.value.fundSourceId) {
-      errors.fundSourceId = VALIDATION_MSG.FUND_SOURCE;
+      errors.fundSourceId = t('admin.examForm.validation.fundSource');
     }
     if (!form.value.srbId) {
-      errors.srbId = VALIDATION_MSG.SCORE_RUBRIC;
+      errors.srbId = t('admin.examForm.validation.scoreRubric');
     }
 
     // ── Card 2: กำหนดการสอบ ──
     if (!form.value.examDate || !form.value.examDate.trim()) {
-      errors.examDate = VALIDATION_MSG.EXAM_DATE;
+      errors.examDate = t('admin.examForm.validation.examDate');
     }
     // Validate time slots
     form.value.timeSlots.forEach((slot, slotIdx) => {
@@ -659,46 +664,50 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       const selectedLocationIds = new Set<number>();
 
       if (!slot.startTime || !slot.startTime.trim()) {
-        errors[`startTime_${slotIdx}`] = VALIDATION_MSG.START_TIME;
+        errors[`startTime_${slotIdx}`] = t('admin.examForm.validation.startTime');
       } else if (!timeRegex.test(slot.startTime)) {
-        errors[`startTime_${slotIdx}`] = 'รูปแบบเวลาไม่ถูกต้อง (ต้องอยู่ระหว่าง 00:00 - 23:59)';
+        errors[`startTime_${slotIdx}`] = t('admin.examForm.validation.invalidTimeFormat');
       } else {
         hasValidStartTime = true;
       }
 
       if (!slot.endTime || !slot.endTime.trim()) {
-        errors[`endTime_${slotIdx}`] = VALIDATION_MSG.END_TIME;
+        errors[`endTime_${slotIdx}`] = t('admin.examForm.validation.endTime');
       } else if (!timeRegex.test(slot.endTime)) {
-        errors[`endTime_${slotIdx}`] = 'รูปแบบเวลาไม่ถูกต้อง (ต้องอยู่ระหว่าง 00:00 - 23:59)';
+        errors[`endTime_${slotIdx}`] = t('admin.examForm.validation.invalidTimeFormat');
       } else {
         hasValidEndTime = true;
       }
 
       if (hasValidStartTime && hasValidEndTime) {
         if (timeToMinutes(slot.endTime) <= timeToMinutes(slot.startTime)) {
-          errors[`endTime_${slotIdx}`] = 'เวลาสิ้นสุดต้องหลังจากเวลาเริ่ม';
+          errors[`endTime_${slotIdx}`] = t('admin.examForm.validation.endTimeAfterStart');
         }
       }
 
       slot.rooms.forEach((room, roomIdx) => {
         if (!room.locationId) {
-          errors[`locationId_${slotIdx}_${roomIdx}`] = VALIDATION_MSG.LOCATION;
+          errors[`locationId_${slotIdx}_${roomIdx}`] = t('admin.examForm.validation.location');
         } else if (selectedLocationIds.has(room.locationId)) {
-          errors[`locationId_${slotIdx}_${roomIdx}`] =
-            'ไม่สามารถเลือกห้องสอบซ้ำในช่วงเวลาเดียวกันได้';
+          errors[`locationId_${slotIdx}_${roomIdx}`] = t(
+            'admin.examForm.validation.duplicateRoomSameSlot',
+          );
         } else if (getOccupiedLocationIdsForSlot(slotIdx).has(room.locationId)) {
-          errors[`locationId_${slotIdx}_${roomIdx}`] =
-            'ไม่สามารถเลือกห้องสอบเดียวกันในช่วงเวลาที่ทับซ้อนกันได้';
+          errors[`locationId_${slotIdx}_${roomIdx}`] = t(
+            'admin.examForm.validation.overlappingRoom',
+          );
         } else {
           selectedLocationIds.add(room.locationId);
         }
         if (!room.seats || room.seats <= 0) {
-          errors[`seats_${slotIdx}_${roomIdx}`] = VALIDATION_MSG.SEATS;
+          errors[`seats_${slotIdx}_${roomIdx}`] = t('admin.examForm.validation.seats');
         } else if (room.locationId) {
           const maxSeats = getLocationMaxSeats(room.locationId, room.seatOverrides);
           if (room.seats > maxSeats) {
-            errors[`seats_${slotIdx}_${roomIdx}`] =
-              `เกินขอบเขตความจุที่นั่งของห้องสอบ มีที่นั่งได้ไม่เกิน ${maxSeats} ที่นั่ง ในสถานที่นี้`;
+            errors[`seats_${slotIdx}_${roomIdx}`] = t(
+              'admin.examForm.validation.seatsExceedCapacity',
+              { max: maxSeats },
+            );
           }
         }
       });
@@ -706,29 +715,29 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
     // ── Card 3: กำหนดการลงทะเบียน ──
     if (!form.value.regStartDate || !form.value.regStartDate.trim()) {
-      errors.regStartDate = VALIDATION_MSG.REG_START_DATE;
+      errors.regStartDate = t('admin.examForm.validation.regStartDate');
     }
     if (!form.value.regStartTime || !form.value.regStartTime.trim()) {
-      errors.regStartTime = VALIDATION_MSG.REG_START_TIME;
+      errors.regStartTime = t('admin.examForm.validation.regStartTime');
     }
     if (!form.value.regEndDate || !form.value.regEndDate.trim()) {
-      errors.regEndDate = VALIDATION_MSG.REG_END_DATE;
+      errors.regEndDate = t('admin.examForm.validation.regEndDate');
     }
     if (!form.value.regEndTime || !form.value.regEndTime.trim()) {
-      errors.regEndTime = VALIDATION_MSG.REG_END_TIME;
+      errors.regEndTime = t('admin.examForm.validation.regEndTime');
     }
     if (!isSpecialRound.value) {
       if (!form.value.payStartDate || !form.value.payStartDate.trim()) {
-        errors.payStartDate = VALIDATION_MSG.PAY_START_DATE;
+        errors.payStartDate = t('admin.examForm.validation.payStartDate');
       }
       if (!form.value.payStartTime || !form.value.payStartTime.trim()) {
-        errors.payStartTime = VALIDATION_MSG.PAY_START_TIME;
+        errors.payStartTime = t('admin.examForm.validation.payStartTime');
       }
       if (!form.value.payEndDate || !form.value.payEndDate.trim()) {
-        errors.payEndDate = VALIDATION_MSG.PAY_END_DATE;
+        errors.payEndDate = t('admin.examForm.validation.payEndDate');
       }
       if (!form.value.payEndTime || !form.value.payEndTime.trim()) {
-        errors.payEndTime = VALIDATION_MSG.PAY_END_TIME;
+        errors.payEndTime = t('admin.examForm.validation.payEndTime');
       }
     }
 
@@ -796,7 +805,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
   /** หา label แหล่งทุนจาก id เพื่อแสดงในรายละเอียดการเปลี่ยนแปลง */
   const fundSourceLabelFor = (id: number | null): string => {
-    if (!id) return 'ไม่ระบุ';
+    if (!id) return t('admin.examForm.empty.unspecified');
     return fundSourceOptions.value.find((o) => o.value === id)?.label || String(id);
   };
 
@@ -814,15 +823,17 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         const rooms = slot.rooms
           .map((room) => {
             const loc = locationOptions.value.find((o) => o.value === room.locationId);
-            const locLabel = loc?.label || 'ไม่ระบุห้อง';
+            const locLabel = loc?.label || t('admin.examForm.empty.unspecifiedRoom');
             const proctorText =
               room.proctors && room.proctors.length > 0
-                ? ` (ผู้คุมสอบ: ${room.proctors.join(', ')})`
+                ? t('admin.examForm.changeLog.scheduleProctor', {
+                    names: room.proctors.join(', '),
+                  })
                 : '';
-            return `• ${locLabel} ${room.seats} ที่นั่ง${proctorText}`;
+            return `• ${locLabel} ${t('admin.examForm.changeLog.scheduleSeats', { seats: room.seats })}${proctorText}`;
           })
           .join('\n');
-        return `เวลา ${slot.startTime} - ${slot.endTime} น.\n${rooms}`;
+        return `${t('admin.examForm.changeLog.scheduleTime', { start: slot.startTime, end: slot.endTime })}\n${rooms}`;
       })
       .join('\n\n');
   };
@@ -860,21 +871,25 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       }
     };
 
-    push('ชื่อรอบสอบ', before.examName, after.examName);
-    push('ครั้งที่จัดสอบ', before.examRound, after.examRound);
-    push('ปีงบประมาณ', before.examFiscalYear, after.examFiscalYear);
-    push('ประเภทการสอบ', before.examType, after.examType);
-    push('รูปแบบการสอบ', before.examFormat, after.examFormat);
+    push(t('admin.examForm.changeLog.examName'), before.examName, after.examName);
+    push(t('admin.examForm.changeLog.examRound'), before.examRound, after.examRound);
+    push(t('admin.examForm.changeLog.fiscalYear'), before.examFiscalYear, after.examFiscalYear);
+    push(t('admin.examForm.changeLog.examType'), before.examType, after.examType);
+    push(t('admin.examForm.changeLog.examFormat'), before.examFormat, after.examFormat);
     if (before.fee !== after.fee) {
-      push('ค่าธรรมเนียม', `${before.fee} บาท`, `${after.fee} บาท`);
+      push(
+        t('admin.examForm.changeLog.fee'),
+        `${before.fee} ${t('admin.examForm.changeLog.feeUnit')}`,
+        `${after.fee} ${t('admin.examForm.changeLog.feeUnit')}`,
+      );
     }
-    push('แหล่งทุน', before.fundSourceLabel, after.fundSourceLabel);
-    push('วันที่สอบ', before.examDate, after.examDate);
-    push('วันที่เริ่มรับสมัคร', before.regStartDate, after.regStartDate);
-    push('วันที่สิ้นสุดรับสมัคร', before.regEndDate, after.regEndDate);
-    push('วันที่เริ่มชำระเงิน', before.payStartDate, after.payStartDate);
-    push('วันที่สิ้นสุดชำระเงิน', before.payEndDate, after.payEndDate);
-    push('กำหนดการสอบและห้องสอบ', before.scheduleText, after.scheduleText);
+    push(t('admin.examForm.changeLog.fundSource'), before.fundSourceLabel, after.fundSourceLabel);
+    push(t('admin.examForm.changeLog.examDate'), before.examDate, after.examDate);
+    push(t('admin.examForm.changeLog.regStart'), before.regStartDate, after.regStartDate);
+    push(t('admin.examForm.changeLog.regEnd'), before.regEndDate, after.regEndDate);
+    push(t('admin.examForm.changeLog.payStart'), before.payStartDate, after.payStartDate);
+    push(t('admin.examForm.changeLog.payEnd'), before.payEndDate, after.payEndDate);
+    push(t('admin.examForm.changeLog.schedule'), before.scheduleText, after.scheduleText);
 
     return changes;
   };
@@ -912,7 +927,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       }
       proctorOptions.value = proctors.map((u) => {
         const displayName = u.fullNameTH ? `${u.titleTH || ''} ${u.fullNameTH}`.trim() : u.email;
-        const finalName = displayName || 'ไม่ระบุชื่อ';
+        const finalName = displayName || t('admin.examForm.empty.unspecifiedName');
         return {
           label: finalName,
           value: finalName,
@@ -1113,7 +1128,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       }
     } catch (err) {
       console.error('Failed to load initial data:', err);
-      const msg = NOTIFY_MSG.LOAD_ERROR;
+      const msg = t('admin.examForm.notify.loadError');
       error.value = msg;
       $q.notify({
         type: 'negative',
@@ -1165,7 +1180,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     } else {
       $q.notify({
         type: 'warning',
-        message: NOTIFY_MSG.MIN_SESSIONS(MIN_EXAM_SESSIONS),
+        message: t('admin.examForm.notify.minSessions', { min: MIN_EXAM_SESSIONS }),
         position: 'top',
       });
     }
@@ -1191,7 +1206,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     } else {
       $q.notify({
         type: 'warning',
-        message: 'ต้องมีห้องสอบอย่างน้อย 1 ห้อง',
+        message: t('admin.examForm.notify.minRooms'),
         position: 'top',
       });
     }
@@ -1316,7 +1331,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   const notifyEligibleCandidatesLocked = (): void => {
     $q.notify({
       type: 'warning',
-      message: 'ไม่สามารถแก้ไขรายชื่อผู้มีสิทธิ์สอบได้ เนื่องจากมีผู้ลงทะเบียนในรอบสอบนี้แล้ว',
+      message: t('admin.examForm.notify.candidatesLocked'),
       position: 'top',
     });
   };
@@ -1368,7 +1383,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           if (rows.length < 2) {
             $q.notify({
               type: 'warning',
-              message: 'ไฟล์ไม่มีข้อมูล (ต้องมีอย่างน้อย header + 1 แถว)',
+              message: t('admin.examForm.notify.csvEmpty'),
             });
             isImportingCandidates.value = false;
             return;
@@ -1404,7 +1419,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
             } else {
               $q.notify({
                 type: 'negative',
-                message: 'ไฟล์ต้องมีอย่างน้อย 2 คอลัมน์ (รหัสประจำตัว, ชื่อ-นามสกุล)',
+                message: t('admin.examForm.notify.csvMinColumns'),
               });
               isImportingCandidates.value = false;
               return;
@@ -1431,7 +1446,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           }
 
           if (candidates.length === 0) {
-            $q.notify({ type: 'warning', message: 'ไม่พบข้อมูลรายชื่อในไฟล์' });
+            $q.notify({ type: 'warning', message: t('admin.examForm.notify.csvNoRows') });
             isImportingCandidates.value = false;
             return;
           }
@@ -1440,10 +1455,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           await resolveEligibleCandidatesInSystem();
           $q.notify({
             type: 'positive',
-            message: `นำเข้าข้อมูลรายชื่อสำเร็จ ${candidates.length} รายการ`,
+            message: t('admin.examForm.notify.csvImportSuccess', { count: candidates.length }),
           });
         } catch {
-          $q.notify({ type: 'negative', message: 'รูปแบบไฟล์ไม่ถูกต้อง' });
+          $q.notify({ type: 'negative', message: t('admin.examForm.notify.csvInvalidFormat') });
         } finally {
           isImportingCandidates.value = false;
         }
@@ -1451,7 +1466,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       reader.readAsText(file, 'UTF-8');
     } catch {
       isImportingCandidates.value = false;
-      $q.notify({ type: 'negative', message: 'เกิดข้อผิดพลาดในการนำเข้าข้อมูล' });
+      $q.notify({ type: 'negative', message: t('admin.examForm.notify.csvImportError') });
     }
   };
 
@@ -1460,14 +1475,14 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (form.value.eligibleCandidates.length === 0) {
       $q.notify({
         type: 'warning',
-        message: 'ไม่มีข้อมูลให้ส่งออก',
+        message: t('admin.examForm.notify.exportEmpty'),
         position: 'top',
       });
       return;
     }
 
     const BOM = '\ufeff';
-    const header = '"ลำดับ","รหัสประชาชน","ชื่อ-นามสกุล","Passcode"';
+    const header = t('admin.examForm.candidates.exportHeader');
     const rows = form.value.eligibleCandidates.map((c, idx) => {
       const index = idx + 1;
       const id = `"${c.nationalId || ''}"`;
@@ -1499,7 +1514,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (form.value.eligibleCandidates.length === 0) {
       $q.notify({
         type: 'warning',
-        message: 'กรุณานำเข้ารายชื่อก่อนสร้าง Passcode',
+        message: t('admin.examForm.notify.passcodeImportFirst'),
         position: 'top',
       });
       return;
@@ -1520,7 +1535,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
     $q.notify({
       type: 'positive',
-      message: `สร้าง Passcode สำเร็จ ${form.value.eligibleCandidates.length} รายการ`,
+      message: t('admin.examForm.notify.passcodeGenerated', {
+        count: form.value.eligibleCandidates.length,
+      }),
       position: 'top',
       timeout: 2000,
     });
@@ -1536,7 +1553,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (form.value.eligibleCandidates.length === 0) {
       $q.notify({
         type: 'warning',
-        message: 'กรุณานำเข้ารายชื่อก่อนสร้าง Passcode',
+        message: t('admin.examForm.notify.passcodeImportFirst'),
         position: 'top',
       });
       return;
@@ -1546,7 +1563,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (!PASSCODE_PATTERN.test(passcode)) {
       $q.notify({
         type: 'negative',
-        message: VALIDATION_MSG.SHARED_PASSCODE,
+        message: t('admin.examForm.validation.sharedPasscode'),
         position: 'top',
       });
       return;
@@ -1559,7 +1576,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
     $q.notify({
       type: 'positive',
-      message: `กำหนด Passcode ร่วมสำเร็จ ${form.value.eligibleCandidates.length} รายการ`,
+      message: t('admin.examForm.notify.sharedPasscodeApplied', {
+        count: form.value.eligibleCandidates.length,
+      }),
       position: 'top',
       timeout: 2000,
     });
@@ -1600,7 +1619,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (users.length === 0) {
       $q.notify({
         type: 'warning',
-        message: 'ยังไม่ได้เลือกผู้สมัคร',
+        message: t('admin.examForm.notify.noCandidateSelected'),
         position: 'top',
       });
       return;
@@ -1620,16 +1639,18 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (added === 0) {
       $q.notify({
         type: 'warning',
-        message: 'ไม่สามารถเพิ่มผู้สมัครที่เลือกได้',
+        message: t('admin.examForm.notify.cannotAddCandidates'),
         position: 'top',
       });
       return;
     }
 
-    const skippedText = skipped > 0 ? ` (ข้าม ${skipped} รายการ)` : '';
     $q.notify({
       type: 'positive',
-      message: `เพิ่มผู้สมัครในรายชื่อแล้ว ${added} รายการ${skippedText}`,
+      message:
+        skipped > 0
+          ? t('admin.examForm.notify.candidatesAddedSkipped', { added, skipped })
+          : t('admin.examForm.notify.candidatesAdded', { added }),
       position: 'top',
       timeout: 2500,
     });
@@ -1645,7 +1666,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (keys.length === 0) {
       $q.notify({
         type: 'warning',
-        message: 'ยังไม่ได้เลือกรายชื่อที่จะลบ',
+        message: t('admin.examForm.notify.noDeleteSelection'),
         position: 'top',
       });
       return;
@@ -1661,7 +1682,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (removedCount === 0) {
       $q.notify({
         type: 'warning',
-        message: 'ไม่พบรายชื่อที่จะลบ',
+        message: t('admin.examForm.notify.deleteNotFound'),
         position: 'top',
       });
       return;
@@ -1673,7 +1694,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
     $q.notify({
       type: 'positive',
-      message: `ลบรายชื่อผู้มีสิทธิ์สอบแล้ว ${removedCount} รายการ`,
+      message: t('admin.examForm.notify.candidatesRemoved', { count: removedCount }),
       position: 'top',
       timeout: 2500,
     });
@@ -1790,7 +1811,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (flatRooms.length === 0) {
       $q.notify({
         type: 'warning',
-        message: NOTIFY_MSG.PROVIDE_TIME,
+        message: t('admin.examForm.notify.provideTime'),
         position: 'top',
       });
       return false;
@@ -1801,7 +1822,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (missingLocation) {
       $q.notify({
         type: 'warning',
-        message: NOTIFY_MSG.SELECT_LOCATION,
+        message: t('admin.examForm.notify.selectLocation'),
         position: 'top',
       });
       return false;
@@ -1811,7 +1832,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (!isSpecialRound.value && !form.value.fundSourceId) {
       $q.notify({
         type: 'warning',
-        message: NOTIFY_MSG.SELECT_FUND,
+        message: t('admin.examForm.notify.selectFund'),
         position: 'top',
       });
       return false;
@@ -1820,7 +1841,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (!form.value.srbId) {
       $q.notify({
         type: 'warning',
-        message: VALIDATION_MSG.SCORE_RUBRIC,
+        message: t('admin.examForm.validation.scoreRubric'),
         position: 'top',
       });
       return false;
@@ -1839,7 +1860,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (!isEditMode.value && regStartVal < nowDatetimeCompareValue()) {
       $q.notify({
         type: 'warning',
-        message: 'วันและเวลาเริ่มต้นลงทะเบียนต้องไม่เป็นอดีต',
+        message: t('admin.examForm.validation.regStartNotPast'),
         position: 'top',
       });
       return false;
@@ -1849,7 +1870,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (regEndVal < regStartVal) {
       $q.notify({
         type: 'warning',
-        message: 'วันและเวลาสิ้นสุดการลงทะเบียนต้องไม่มาก่อนวันและเวลาเริ่มต้นลงทะเบียน',
+        message: t('admin.examForm.validation.regEndAfterStart'),
         position: 'top',
       });
       return false;
@@ -1860,7 +1881,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       if (payStartVal < regStartVal) {
         $q.notify({
           type: 'warning',
-          message: 'วันและเวลาเริ่มต้นชำระเงินต้องไม่มาก่อนวันและเวลาเริ่มต้นลงทะเบียน',
+          message: t('admin.examForm.validation.payStartAfterReg'),
           position: 'top',
         });
         return false;
@@ -1868,7 +1889,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       if (payEndVal < payStartVal) {
         $q.notify({
           type: 'warning',
-          message: 'วันและเวลาสิ้นสุดการชำระเงินต้องไม่มาก่อนวันและเวลาเริ่มต้นชำระเงิน',
+          message: t('admin.examForm.validation.payEndAfterStart'),
           position: 'top',
         });
         return false;
@@ -1879,7 +1900,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (examVal < regEndVal) {
       $q.notify({
         type: 'warning',
-        message: 'วันและเวลาสอบต้องไม่มาก่อนวันและเวลาสิ้นสุดการลงทะเบียน',
+        message: t('admin.examForm.validation.examAfterRegEnd'),
         position: 'top',
       });
       return false;
@@ -1889,7 +1910,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (!isSpecialRound.value && examVal < payEndVal) {
       $q.notify({
         type: 'warning',
-        message: 'วันและเวลาสอบต้องไม่มาก่อนวันและเวลาสิ้นสุดการชำระเงิน',
+        message: t('admin.examForm.validation.examAfterPayEnd'),
         position: 'top',
       });
       return false;
@@ -1900,7 +1921,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     if (examDateOnlyVal < todayVal && isExamDateChanged) {
       $q.notify({
         type: 'warning',
-        message: 'วันที่สอบต้องไม่เป็นวันที่ผ่านไปแล้ว',
+        message: t('admin.examForm.validation.examDatePast'),
         position: 'top',
       });
       return false;
@@ -1957,7 +1978,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
         $q.notify({
           type: 'positive',
-          message: NOTIFY_MSG.UPDATE_SUCCESS,
+          message: t('admin.examForm.notify.updateSuccess'),
           position: 'top',
           timeout: 2000,
         });
@@ -1967,8 +1988,8 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         // ยิงแบบไม่บล็อก (fire-and-forget) เพื่อให้การบันทึกลื่นไหล ไม่ต้องรอการส่งอีเมล
         if (userStore.userRole === ROLES.REGISTRATION_OFFICER) {
           const changes = buildExamChanges();
-          if (changes.length > 0) {
-            void notifyExamChanges(examId.value as number, changes).catch((notifyErr) => {
+          if (examId.value != null && changes.length > 0) {
+            void notifyExamChanges(examId.value, changes).catch((notifyErr) => {
               console.error('Failed to notify exam changes:', notifyErr);
             });
           }
@@ -2003,7 +2024,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
         $q.notify({
           type: 'positive',
-          message: NOTIFY_MSG.CREATE_SUCCESS,
+          message: t('admin.examForm.notify.createSuccess'),
           position: 'top',
           timeout: 2000,
         });
@@ -2039,8 +2060,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           $q.notify({
             type: 'warning',
             message: passcodeDetailedMsg
-              ? `บันทึกรอบสอบสำเร็จ แต่บันทึกรหัสผ่านผู้มีสิทธิ์สอบไม่สำเร็จ: ${passcodeDetailedMsg}`
-              : 'บันทึกรอบสอบสำเร็จ แต่บันทึกรหัสผ่านผู้มีสิทธิ์สอบไม่สำเร็จ',
+              ? t('admin.examForm.notify.passcodeSavePartialDetail', {
+                  detail: passcodeDetailedMsg,
+                })
+              : t('admin.examForm.notify.passcodeSavePartial'),
             position: 'top',
             timeout: 4000,
           });
@@ -2066,7 +2089,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         (typeof errorObj.message === 'string' &&
           errorObj.message.toLowerCase().includes('timeout'));
       if (isTimeout) {
-        const timeoutMsg = 'การบันทึกรอบสอบใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง';
+        const timeoutMsg = t('admin.examForm.notify.saveTimeout');
         error.value = timeoutMsg;
         $q.notify({
           type: 'negative',
@@ -2080,10 +2103,10 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         ? backendMsg.join(', ')
         : backendMsg || errorObj.message;
       const msg = detailedMsg
-        ? `${isEditMode.value ? NOTIFY_MSG.UPDATE_ERROR : NOTIFY_MSG.CREATE_ERROR}: ${detailedMsg}`
+        ? `${isEditMode.value ? t('admin.examForm.notify.updateError') : t('admin.examForm.notify.createError')}: ${detailedMsg}`
         : isEditMode.value
-          ? NOTIFY_MSG.UPDATE_ERROR
-          : NOTIFY_MSG.CREATE_ERROR;
+          ? t('admin.examForm.notify.updateError')
+          : t('admin.examForm.notify.createError');
       error.value = msg;
       $q.notify({
         type: 'negative',

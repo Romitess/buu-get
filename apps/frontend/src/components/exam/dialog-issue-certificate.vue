@@ -20,13 +20,19 @@
       />
 
       <q-card-section class="q-pb-none">
-        <div class="dialog-title text-weight-bold text-dark">ข้อมูลการออกใบ Certificate</div>
+        <div class="dialog-title text-weight-bold text-dark">
+          {{ t('admin.scoreManagement.certificateDialog.title') }}
+        </div>
       </q-card-section>
 
       <q-card-section class="q-pb-none">
         <div class="row items-center justify-between q-mb-sm">
           <div class="text-subtitle2 text-weight-bold text-dark">
-            {{ viewMode ? 'ใบ Certificate' : 'ตัวอย่างใบ Certificate' }}
+            {{
+              viewMode
+                ? t('admin.scoreManagement.certificateDialog.viewTitle')
+                : t('admin.scoreManagement.certificateDialog.previewTitle')
+            }}
           </div>
           <div class="row items-center q-gutter-sm no-wrap">
             <AppButton
@@ -48,7 +54,7 @@
                 }"
                 @click="switchSide('front')"
               >
-                ด้านหน้า
+                {{ t('admin.scoreManagement.certificateDialog.frontSide') }}
               </span>
               <span class="q-mx-xs text-grey-4">|</span>
               <span
@@ -59,7 +65,7 @@
                 }"
                 @click="switchSide('back')"
               >
-                ด้านหลัง
+                {{ t('admin.scoreManagement.certificateDialog.backSide') }}
               </span>
             </div>
           </div>
@@ -358,11 +364,12 @@
         <div class="row q-col-gutter-md">
           <div class="col-12 col-sm-6">
             <div class="text-subtitle2 text-weight-bold text-dark q-mb-xs">
-              Report Issue Date <span v-if="!viewMode" class="text-negative">*</span>
+              {{ t('admin.scoreManagement.certificateDialog.reportIssueDateLabel') }}
+              <span v-if="!viewMode" class="text-negative">*</span>
             </div>
             <q-input
               :model-value="displayValidFromDate"
-              placeholder="DD/MM/YYYY"
+              :placeholder="t('admin.scoreManagement.certificateDialog.datePlaceholder')"
               outlined
               dense
               readonly
@@ -373,7 +380,12 @@
                   <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                     <q-date v-model="validFromDate" mask="YYYY-MM-DD" :options="issueDateOptions">
                       <div class="row items-center justify-end">
-                        <AppButton v-close-popup label="ปิด" color="primary" flat />
+                        <AppButton
+                          v-close-popup
+                          :label="t('admin.scoreManagement.certificateDialog.closeButton')"
+                          color="primary"
+                          flat
+                        />
                       </div>
                     </q-date>
                   </q-popup-proxy>
@@ -384,11 +396,12 @@
 
           <div class="col-12 col-sm-6">
             <div class="text-subtitle2 text-weight-bold text-dark q-mb-xs">
-              Score Valid Until <span v-if="!viewMode" class="text-negative">*</span>
+              {{ t('admin.scoreManagement.certificateDialog.scoreValidUntilLabel') }}
+              <span v-if="!viewMode" class="text-negative">*</span>
             </div>
             <q-input
               :model-value="displayValidUntilDate"
-              placeholder="DD/MM/YYYY"
+              :placeholder="t('admin.scoreManagement.certificateDialog.datePlaceholder')"
               outlined
               dense
               readonly
@@ -399,7 +412,12 @@
                   <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                     <q-date v-model="validUntilDate" mask="YYYY-MM-DD">
                       <div class="row items-center justify-end">
-                        <AppButton v-close-popup label="ปิด" color="primary" flat />
+                        <AppButton
+                          v-close-popup
+                          :label="t('admin.scoreManagement.certificateDialog.closeButton')"
+                          color="primary"
+                          flat
+                        />
                       </div>
                     </q-date>
                   </q-popup-proxy>
@@ -415,9 +433,13 @@
         align="center"
         class="q-pb-md row q-gutter-lg no-wrap"
       >
-        <AppButton label="ยกเลิก" class="dialog-btn cancel-btn" @click="onCancel" />
         <AppButton
-          label="ยืนยันการออกใบคะแนน"
+          :label="t('common.cancel')"
+          class="dialog-btn cancel-btn"
+          @click="onCancel"
+        />
+        <AppButton
+          :label="t('admin.scoreManagement.certificateDialog.confirmIssueButton')"
           color="primary"
           class="dialog-btn confirm-btn"
           :loading="isSubmitting"
@@ -897,7 +919,7 @@ const onConfirm = async (): Promise<void> => {
   if (!props.candidates || props.candidates.length === 0) {
     $q.notify({
       type: 'warning',
-      message: 'ไม่มีผู้เข้าสอบที่มีคะแนนสำหรับออกใบ Certificate',
+      message: t('admin.scoreManagement.certificateDialog.notifications.noCandidates'),
     });
     return;
   }
@@ -905,7 +927,7 @@ const onConfirm = async (): Promise<void> => {
   if (!validFromDate.value) {
     $q.notify({
       type: 'warning',
-      message: 'กรุณาเลือกวันที่ออกใบรับรอง',
+      message: t('admin.scoreManagement.certificateDialog.notifications.issueDateRequired'),
     });
     return;
   }
@@ -913,7 +935,7 @@ const onConfirm = async (): Promise<void> => {
   if (isFutureLocalDate(validFromDate.value)) {
     $q.notify({
       type: 'warning',
-      message: 'Report Issue Date ต้องไม่เป็นวันในอนาคต',
+      message: t('admin.scoreManagement.certificateDialog.notifications.issueDateFuture'),
     });
     return;
   }
@@ -921,7 +943,7 @@ const onConfirm = async (): Promise<void> => {
   if (!validUntilDate.value) {
     $q.notify({
       type: 'warning',
-      message: 'กรุณาเลือกวันที่สิ้นสุดอายุผลสอบ',
+      message: t('admin.scoreManagement.certificateDialog.notifications.validUntilRequired'),
     });
     return;
   }
@@ -943,9 +965,13 @@ const onConfirm = async (): Promise<void> => {
       historyUrl,
     });
 
-    let message = `ออกใบ Certificate และส่งอีเมลสำเร็จ ${result.createdCount} รายการ`;
+    let message = t('admin.scoreManagement.certificateDialog.notifications.issueSuccess', {
+      count: result.createdCount,
+    });
     if (result.skippedCount > 0) {
-      message += ` (ข้าม ${result.skippedCount} รายการที่ออกไปแล้ว)`;
+      message += t('admin.scoreManagement.certificateDialog.notifications.issueSkippedSuffix', {
+        count: result.skippedCount,
+      });
     }
 
     $q.notify({
@@ -958,7 +984,7 @@ const onConfirm = async (): Promise<void> => {
     console.error('Error issuing certificates in batch:', err);
     $q.notify({
       type: 'negative',
-      message: 'ออกใบ Certificate บางรายการไม่สำเร็จ',
+      message: t('admin.scoreManagement.certificateDialog.notifications.issuePartialFailed'),
     });
   } finally {
     isSubmitting.value = false;

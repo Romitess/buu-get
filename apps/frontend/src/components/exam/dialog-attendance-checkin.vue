@@ -2,31 +2,35 @@
   <q-dialog ref="dialogRef" @hide="handleDialogHide">
     <q-card class="checkin-dialog-card">
       <header class="dialog-header">
-        <h2>เช็กอินเข้าห้องสอบ</h2>
+        <h2>{{ t('admin.checkIn.dialog.title') }}</h2>
         <q-btn
           flat
           round
           dense
           icon="close"
           color="grey-6"
-          aria-label="ปิด"
+          :aria-label="t('admin.checkIn.dialog.closeAria')"
           class="close-btn"
           @click="onCancelClick"
         />
       </header>
 
       <section v-if="isAssistActive" class="assist-section">
-        <h3 class="assist-section-title">มือถือช่วยแสกน</h3>
+        <h3 class="assist-section-title">{{ t('admin.checkIn.dialog.phoneAssistTitle') }}</h3>
         <p class="assist-section-hint">
-          ให้เจ้าหน้าที่สแกน QR นี้เพื่อเปิดกล้องแสกนบนมือถือ (ต้องล็อกอิน)
+          {{ t('admin.checkIn.dialog.phoneAssistHint') }}
         </p>
         <div v-if="qrDataUrl" class="assist-qr-wrap">
-          <img :src="qrDataUrl" alt="QR สำหรับเข้าร่วมช่วยแสกน" class="assist-qr-image" />
+          <img
+            :src="qrDataUrl"
+            :alt="t('admin.checkIn.dialog.phoneAssistQrAlt')"
+            class="assist-qr-image"
+          />
         </div>
         <p v-if="joinUrl" class="assist-url">{{ joinUrl }}</p>
         <div class="row justify-center q-mt-sm">
           <AppButton
-            label="ปิดโหมดมือถือ"
+            :label="t('admin.checkIn.dialog.disablePhoneAssist')"
             class="footer-btn cancel-btn"
             :disable="isCheckingIn"
             @click="disablePhoneAssist"
@@ -36,7 +40,7 @@
       <section v-else class="assist-toggle-section">
         <AppButton
           icon="qr_code_scanner"
-          label="มือถือช่วยแสกน"
+          :label="t('admin.checkIn.dialog.enablePhoneAssist')"
           color="secondary"
           outline
           class="assist-toggle-btn"
@@ -56,8 +60,8 @@
           >
             <AppLabeledInput
               v-model="searchInput"
-              label="เลขบัตรประชาชน / Passport / Test Taker ID"
-              placeholder="กรอกหรือแสกนบาร์โค้ดจาก Test Voucher"
+              :label="t('admin.checkIn.dialog.searchLabel')"
+              :placeholder="t('admin.checkIn.dialog.searchPlaceholder')"
               class="custom-labeled-input"
               maxlength="13"
               hide-bottom-space
@@ -65,13 +69,13 @@
               :disable="isCheckingIn"
             >
               <template v-slot:label>
-                เลขบัตรประชาชน / Passport / Test Taker ID <span class="text-red">*</span>
+                {{ t('admin.checkIn.dialog.searchLabel') }} <span class="text-red">*</span>
               </template>
             </AppLabeledInput>
           </div>
           <div class="col-shrink">
             <AppButton
-              label="ค้นหา"
+              :label="t('admin.checkIn.dialog.searchButton')"
               color="primary"
               class="search-btn"
               :disable="isCheckingIn"
@@ -85,7 +89,7 @@
       </section>
 
       <section class="voucher-section">
-        <h3 class="voucher-section-title">Test Voucher</h3>
+        <h3 class="voucher-section-title">{{ t('admin.checkIn.dialog.voucherTitle') }}</h3>
         <div class="voucher-preview-container">
           <TestVoucherReport
             :data="currentVoucherData"
@@ -97,9 +101,9 @@
       </section>
 
       <footer class="action-footer row justify-center q-mt-md q-gutter-x-md">
-        <AppButton label="ยกเลิก" class="footer-btn cancel-btn" @click="onCancelClick" />
+        <AppButton :label="t('common.cancel')" class="footer-btn cancel-btn" @click="onCancelClick" />
         <AppButton
-          label="เช็กอินเข้าห้องสอบ"
+          :label="t('admin.checkIn.dialog.checkInButton')"
           color="primary"
           class="footer-btn checkin-confirm-btn"
           :disable="!canCheckIn || isCheckingIn"
@@ -114,6 +118,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useDialogPluginComponent, useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import AppLabeledInput from 'src/components/base/app-labeled-input.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import TestVoucherReport from 'src/components/test-voucher-report.vue';
@@ -146,6 +151,7 @@ defineEmits([...useDialogPluginComponent.emits]);
 
 const { dialogRef, onDialogHide, onDialogCancel } = useDialogPluginComponent();
 const $q = useQuasar();
+const { t } = useI18n();
 
 const searchInput = ref('');
 const validationError = ref('');
@@ -362,7 +368,7 @@ const handleAssistEvent = (event: AssistEvent): void => {
     case 'CHECKED_IN':
       $q.notify({
         type: 'positive',
-        message: 'เช็กอินจากมือถือสำเร็จ',
+        message: t('admin.checkIn.notify.mobileCheckInSuccess'),
         position: 'top',
       });
       props.onCheckedIn?.();
@@ -370,21 +376,21 @@ const handleAssistEvent = (event: AssistEvent): void => {
     case 'ALREADY_CHECKED_IN':
       $q.notify({
         type: 'warning',
-        message: 'ผู้เข้าสอบคนนี้เช็กอินแล้ว',
+        message: t('admin.checkIn.notify.alreadyCheckedIn'),
         position: 'top',
       });
       break;
     case 'NOT_FOUND':
       $q.notify({
         type: 'negative',
-        message: 'ไม่พบข้อมูลผู้เข้าสอบในรอบสอบนี้',
+        message: t('admin.checkIn.notify.notFound'),
         position: 'top',
       });
       break;
     case 'INVALID_CODE':
       $q.notify({
         type: 'warning',
-        message: 'รหัสที่แสกนไม่ถูกต้อง',
+        message: t('admin.checkIn.notify.invalidCode'),
         position: 'top',
       });
       break;
@@ -425,7 +431,7 @@ const resolveCandidateFromInput = (): AttendanceTableRow | null => {
   }
 
   if (!query) {
-    validationError.value = 'กรุณากรอกเลขบัตรประชาชน Passport หรือแสกน Test Taker ID';
+    validationError.value = t('admin.checkIn.dialog.searchRequired');
     searchedCandidate.value = null;
     return null;
   }
@@ -435,7 +441,7 @@ const resolveCandidateFromInput = (): AttendanceTableRow | null => {
   if (!candidate) {
     $q.notify({
       type: 'negative',
-      message: 'ไม่พบข้อมูลผู้เข้าสอบในรอบสอบนี้',
+      message: t('admin.checkIn.notify.notFound'),
       position: 'top',
     });
     searchedCandidate.value = null;
@@ -470,7 +476,7 @@ const handleScanSubmit = async (): Promise<void> => {
   if (candidate.attendanceStatus === ExamAttendStatus.INTIME) {
     $q.notify({
       type: 'warning',
-      message: 'ผู้เข้าสอบคนนี้เช็กอินแล้ว',
+      message: t('admin.checkIn.notify.alreadyCheckedIn'),
       position: 'top',
     });
     return;
@@ -521,7 +527,7 @@ const performCheckIn = async (): Promise<void> => {
   if (candidate.attendanceStatus === ExamAttendStatus.INTIME) {
     $q.notify({
       type: 'warning',
-      message: 'ผู้เข้าสอบคนนี้เช็กอินแล้ว',
+      message: t('admin.checkIn.notify.alreadyCheckedIn'),
       position: 'top',
     });
     return;
@@ -539,7 +545,7 @@ const performCheckIn = async (): Promise<void> => {
 
     $q.notify({
       type: 'positive',
-      message: 'เช็กอินเข้าห้องสอบสำเร็จ',
+      message: t('admin.checkIn.notify.roomCheckInSuccess'),
       position: 'top',
     });
 
@@ -549,7 +555,7 @@ const performCheckIn = async (): Promise<void> => {
     console.error(error);
     $q.notify({
       type: 'negative',
-      message: 'เกิดข้อผิดพลาดในการเช็กอิน',
+      message: t('admin.checkIn.notify.checkInError'),
       position: 'top',
     });
   } finally {

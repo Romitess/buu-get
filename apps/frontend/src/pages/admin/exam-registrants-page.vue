@@ -144,8 +144,8 @@ import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 import { fetchEnrollmentsByExamId } from 'src/services/enrollment.service';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import {
-  PAYMENT_STATUS_LABELS,
-  VERIFY_STATUS_LABELS,
+  PAYMENT_STATUS_I18N_KEYS,
+  VERIFY_STATUS_I18N_KEYS,
   type EnrollmentTableRow,
 } from 'src/types/enrollment.types';
 
@@ -250,7 +250,9 @@ const pagination = ref<PaginationModel>({
   descending: false,
 });
 
-const columns: QTableColumn[] = [
+const columns = computed<QTableColumn[]>(() => {
+  void i18n.locale.value;
+  return [
   {
     name: 'index',
     label: i18n.t('admin.registrantManagement.table.columns.index'),
@@ -313,7 +315,10 @@ const columns: QTableColumn[] = [
     field: 'paymentStatus',
     align: 'center',
     sortable: false,
-    format: (val: number) => PAYMENT_STATUS_LABELS[val] || '-',
+    format: (val: number) => {
+      const key = PAYMENT_STATUS_I18N_KEYS[val];
+      return key ? i18n.t(key) : '-';
+    },
     style: 'width: 11%',
   },
   {
@@ -322,7 +327,10 @@ const columns: QTableColumn[] = [
     field: 'verifyStatus',
     align: 'center',
     sortable: false,
-    format: (val: number) => VERIFY_STATUS_LABELS[val] || '-',
+    format: (val: number) => {
+      const key = VERIFY_STATUS_I18N_KEYS[val];
+      return key ? i18n.t(key) : '-';
+    },
     style: 'width: 12%',
   },
   {
@@ -334,6 +342,7 @@ const columns: QTableColumn[] = [
     style: 'width: 9%',
   },
 ];
+});
 
 const onRequest = (props: TableRequestProps): void => {
   const { page, rowsPerPage } = props.pagination;

@@ -48,7 +48,7 @@ import { useDailyRevenue } from 'src/composables/use-daily-revenue';
 import type { PaginationModel } from 'src/types/exam.types';
 
 const $q = useQuasar();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const route = useRoute();
 
 const { rows, isLoading, error, filter, formattedTotal, fetchData, applyFilter } =
@@ -69,7 +69,9 @@ const pagination = computed<PaginationModel>(() => ({
   rowsNumber: rows.value.length,
 }));
 
-const columns = computed<QTableColumn[]>(() => [
+const columns = computed<QTableColumn[]>(() => {
+  void locale.value;
+  return [
   {
     name: 'index',
     label: t('admin.dailyRevenueReport.table.columns.index'),
@@ -94,8 +96,7 @@ const columns = computed<QTableColumn[]>(() => [
     format: formatAmount,
     headerClasses: 'amount-header',
   },
-]);
-
+];});
 // Show error notification when error changes
 watch(error, (newVal) => {
   if (newVal) {
