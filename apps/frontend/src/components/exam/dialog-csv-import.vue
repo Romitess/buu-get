@@ -7,15 +7,14 @@
     transition-hide="scale"
   >
     <q-card class="dialog-csv-card">
-      <!-- Header -->
       <q-card-section class="row items-center q-pb-none header-section">
-        <div class="dialog-heading">Upload CSV</div>
+        <div class="dialog-heading">{{ t('admin.examForm.dialogs.csvImport.title') }}</div>
         <q-space />
         <q-btn
           unelevated
           dense
           no-caps
-          label="ตัวอย่างไฟล์"
+          :label="t('admin.examForm.dialogs.csvImport.sampleFile')"
           class="sample-btn"
           @click="$emit('download-sample')"
         />
@@ -23,7 +22,6 @@
       </q-card-section>
 
       <q-card-section class="q-pt-md body-section">
-        <!-- Upload Zone (large, matching Figma) -->
         <div
           class="csv-upload-zone"
           :class="{ 'csv-upload-zone--dragover': isDragOver }"
@@ -41,35 +39,10 @@
           />
           <div class="csv-upload-zone__content column items-center">
             <q-icon name="cloud_upload" class="upload-icon" />
-            <div class="upload-main-text">ลากและวางไฟล์ CSV ที่นี่ หรือคลิกเพื่อเลือกไฟล์</div>
-            <div class="upload-hint-text">รองรับเฉพาะไฟล์รูปแบบ .csv / .xlsx (ขนาดสูงสุด 10MB)</div>
+            <div class="upload-main-text">{{ t('admin.examForm.dialogs.csvImport.dragDrop') }}</div>
+            <div class="upload-hint-text">{{ t('admin.examForm.dialogs.csvImport.hint') }}</div>
           </div>
         </div>
-
-        <!-- URL Import Section (ยังไม่ได้เชื่อมต่อ — ซ่อนไว้ชั่วคราว)
-        <div class="url-section">
-          <div class="url-label">หรือนำเข้าจาก URL</div>
-          <div class="row q-gutter-sm items-center">
-            <q-input
-              v-model="fileUrl"
-              outlined
-              dense
-              placeholder="Add File URL"
-              class="col url-input"
-              hide-bottom-space
-            />
-            <q-btn
-              label="Upload"
-              unelevated
-              dense
-              no-caps
-              class="url-upload-btn"
-              :disable="!fileUrl.trim()"
-              @click="onUrlSubmit"
-            />
-          </div>
-        </div>
-        -->
       </q-card-section>
     </q-card>
   </q-dialog>
@@ -77,6 +50,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -87,12 +63,10 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
   (e: 'file-selected', file: File): void;
-  // (e: 'url-submitted', url: string): void;
   (e: 'download-sample'): void;
 }>();
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
-// const fileUrl = ref('');
 const isDragOver = ref(false);
 
 const triggerFileInput = (): void => {
@@ -112,7 +86,6 @@ const onFileChange = (event: Event): void => {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   if (file) processFile(file);
-  // Reset input so same file can be re-selected
   if (input) input.value = '';
 };
 
@@ -121,15 +94,6 @@ const onDrop = (event: DragEvent): void => {
   const file = event.dataTransfer?.files?.[0];
   if (file) processFile(file);
 };
-
-// const onUrlSubmit = (): void => {
-//   const url = fileUrl.value.trim();
-//   if (url) {
-//     emit('url-submitted', url);
-//     fileUrl.value = '';
-//     emit('update:modelValue', false);
-//   }
-// };
 </script>
 
 <style scoped lang="scss">
@@ -174,7 +138,6 @@ const onDrop = (event: DragEvent): void => {
   padding: 16px 28px 28px 28px;
 }
 
-/* ── Large Upload Zone (matching Figma) ── */
 .csv-upload-zone {
   position: relative;
   width: 100%;
@@ -186,8 +149,6 @@ const onDrop = (event: DragEvent): void => {
   align-items: center;
   justify-content: center;
   transition: all 0.25s ease;
-
-  /* Dashed border via SVG background-image (light blue #6db6e3) */
   background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%236db6e3' stroke-width='2' stroke-dasharray='10%2c 10' stroke-dashoffset='0' stroke-linecap='round'/%3e%3c/svg%3e");
 
   &--dragover {
@@ -229,43 +190,6 @@ const onDrop = (event: DragEvent): void => {
   color: var(--text-secondary);
   text-align: center;
 }
-
-/* ── URL Section (ยังไม่ได้เชื่อมต่อ — ซ่อนไว้ชั่วคราว)
-.url-section {
-  margin-top: 24px;
-}
-
-.url-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-}
-
-.url-input :deep(.q-field__control) {
-  border-radius: 8px;
-  min-height: 42px;
-}
-
-.url-upload-btn {
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: none;
-  background-color: #e0e0e0 !important;
-  color: var(--text-primary) !important;
-  min-height: 42px;
-  padding: 0 28px;
-
-  &:hover {
-    background-color: #d5d5d5 !important;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-  }
-}
-*/
 
 @media (max-width: 600px) {
   .dialog-csv-card {

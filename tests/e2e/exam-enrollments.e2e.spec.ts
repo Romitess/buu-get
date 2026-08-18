@@ -312,6 +312,20 @@ test.describe('E2E: Exam enrollments — register / cancel / seats / check-in', 
     expect(res.status(), await res.text()).toBe(200);
   }
 
+  async function markVerified(
+    request: APIRequestContext,
+    ermId: number,
+  ): Promise<void> {
+    const res = await request.patch(
+      `${apiBaseUrl()}/api/exam-enrollments/${ermId}`,
+      {
+        headers: adminHeaders,
+        data: { ERM_VERIFY_STATUS: 1 },
+      },
+    );
+    expect(res.status(), await res.text()).toBe(200);
+  }
+
   async function getEnrollment(
     request: APIRequestContext,
     ermId: number,
@@ -530,6 +544,7 @@ test.describe('E2E: Exam enrollments — register / cancel / seats / check-in', 
         token: tokenA,
       });
       await markPaid(request, seatA.ERM_ID);
+      await markVerified(request, seatA.ERM_ID);
       seatErmIds.push(seatA.ERM_ID);
       log(`seat enroll A ${seatA.ERM_ID}`);
 
@@ -546,6 +561,7 @@ test.describe('E2E: Exam enrollments — register / cancel / seats / check-in', 
         token: tokenB,
       });
       await markPaid(request, seatB.ERM_ID);
+      await markVerified(request, seatB.ERM_ID);
       seatErmIds.push(seatB.ERM_ID);
       log(`seat enroll B ${seatB.ERM_ID}`);
 

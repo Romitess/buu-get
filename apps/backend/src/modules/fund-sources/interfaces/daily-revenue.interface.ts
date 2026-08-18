@@ -7,4 +7,5 @@ export interface DailyRevenueRow {
 export interface DailyRevenueSummary {
   rows: DailyRevenueRow[];
   totalAmount: number;
+  paidCount: number;
 }

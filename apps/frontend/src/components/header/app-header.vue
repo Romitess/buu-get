@@ -90,6 +90,7 @@
 
         <!-- Logged In State -->
         <template v-if="userStore.isLoggedIn">
+          <AppHeaderNotifications v-if="isFinanceOfficer" />
           <AppHeaderProfile />
         </template>
 
@@ -220,6 +221,7 @@ import { useNavigation } from 'src/composables/use-navigation';
 
 // Components
 import AppHeaderProfile from './app-header-profile.vue';
+import AppHeaderNotifications from './app-header-notifications.vue';
 import LanguageSwitcher from './language-switcher.vue';
 
 const userStore = useUserStore();
@@ -227,6 +229,8 @@ const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
 const { showAdminDrawer, toggleLeftDrawer } = useNavigation();
+
+const isFinanceOfficer = computed(() => userStore.hasEffectiveRole(ROLES.FINANCE));
 
 const handleHamburgerClick = () => {
   if (showAdminDrawer.value) {

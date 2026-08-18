@@ -127,7 +127,7 @@ const emit = defineEmits<{
 
 const $q = useQuasar();
 const router = useRouter();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { formatDateShort, formatDateRange, calcDaysDiff } = useAppDate();
 
 const formatRegDuration = (regStartDate: string, regEndDate: string): string => {
@@ -139,11 +139,12 @@ const formatRegDuration = (regStartDate: string, regEndDate: string): string => 
 const { filteredRounds, isLoading, error, fetchAvailableRounds } = useAvailableExamRounds();
 
 const emptyLabel = computed((): string => {
+  void locale.value;
   if (error.value) return error.value;
-  if (filteredRounds.value.length === 0) {
-    return props.emptyLabel || t('components.baseTable.emptyLabel');
+  if (filteredRounds.value.length === 0 && !isLoading.value) {
+    return props.emptyLabel || t('home.availableRounds.noData');
   }
-  return '';
+  return t('components.baseTable.emptyLabel');
 });
 
 const pagination = computed(() => ({
@@ -152,31 +153,33 @@ const pagination = computed(() => ({
   rowsNumber: filteredRounds.value.length,
 }));
 
-const columns = computed((): QTableColumn[] => [
+const columns = computed((): QTableColumn[] => {
+  void locale.value;
+  return [
   {
     name: 'roundNumber',
-    label: t('home.availableRounds.table.columns.round') ?? 'ชื่อการสอบ',
+    label: t('home.availableRounds.table.columns.round'),
     field: 'roundNumber',
     align: 'left',
     style: COLUMN_ROUND_WIDTH,
   },
   {
     name: 'examDate',
-    label: t('home.availableRounds.table.columns.date') ?? 'วันที่สอบ',
+    label: t('home.availableRounds.table.columns.date'),
     field: 'examDate',
     align: 'center',
     style: COLUMN_DATE_WIDTH,
   },
   {
     name: 'regPeriod',
-    label: t('home.availableRounds.table.columns.regPeriod') ?? 'เปิดรับสมัคร',
+    label: t('home.availableRounds.table.columns.regPeriod'),
     field: 'regStartDate',
     align: 'center',
     style: COLUMN_REG_PERIOD_WIDTH,
   },
   {
     name: 'regDuration',
-    label: t('home.availableRounds.table.columns.regDuration') ?? 'ระยะเวลาสมัคร',
+    label: t('home.availableRounds.table.columns.regDuration'),
     field: 'regEndDate',
     align: 'center',
     style: COLUMN_REG_DURATION_WIDTH,
@@ -188,7 +191,8 @@ const columns = computed((): QTableColumn[] => [
     align: 'center',
     style: COLUMN_ACTION_WIDTH,
   },
-]);
+  ];
+});
 
 const handleViewDetails = async (row: AvailableExamRound): Promise<void> => {
   emit('select', row.id);

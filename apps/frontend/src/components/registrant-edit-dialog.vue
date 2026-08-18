@@ -163,7 +163,9 @@
                   </div>
 
                   <div class="q-mb-sm">
-                    <label class="input-label">{{ $t('profile.address') }}</label>
+                    <label class="input-label"
+                      >{{ $t('profile.address') }} <span class="text-negative">*</span></label
+                    >
                     <q-input
                       v-model="form.userAddress"
                       outlined
@@ -172,7 +174,9 @@
                       class="custom-input address-input"
                       type="textarea"
                       rows="3"
-                      :rules="[(val) => !!val || $t('profile.required')]"
+                      :rules="[
+                        (val) => !!String(val ?? '').trim() || $t('profile.requiredAddress'),
+                      ]"
                       hide-bottom-space
                     />
                   </div>

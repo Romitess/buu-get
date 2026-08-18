@@ -43,6 +43,6 @@ const showBottomNav = computed(() => {
 
 <style scoped lang="scss">
 .has-bottom-nav {
-  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
 }
 </style>

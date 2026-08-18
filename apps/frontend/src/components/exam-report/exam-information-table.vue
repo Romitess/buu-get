@@ -5,6 +5,7 @@
     :loading="loading"
     :pagination="pagination"
     :empty-label="t('admin.examInformation.table.emptyLabel')"
+    :is-server-side="isServerSide"
     class="exam-information-table"
     @request="onRequest"
   >
@@ -35,6 +36,7 @@ interface Props {
   rounds: ExamInformationRoundRow[];
   loading?: boolean;
   pagination?: PaginationModel;
+  isServerSide?: boolean;
 }
 
 defineProps<Props>();
@@ -44,7 +46,7 @@ const emit = defineEmits<{
   (e: 'view-detail', row: ExamInformationRoundRow): void;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const formatInteger = (value: number): string => value.toLocaleString('en-US');
 
@@ -86,7 +88,9 @@ const handleViewDetail = (row: ExamInformationRoundRow): void => {
   emit('view-detail', row);
 };
 
-const columns = computed<QTableColumn<ExamInformationRoundRow>[]>(() => [
+const columns = computed<QTableColumn<ExamInformationRoundRow>[]>(() => {
+  void locale.value;
+  return [
   {
     name: 'round',
     label: t('admin.examInformation.table.columns.round'),
@@ -158,7 +162,8 @@ const columns = computed<QTableColumn<ExamInformationRoundRow>[]>(() => [
     style: 'width: 12%; min-width: 105px',
     sortable: false,
   },
-]);
+  ];
+});
 
 const onRequest = (req: TableRequestProps): void => {
   emit('request', req);

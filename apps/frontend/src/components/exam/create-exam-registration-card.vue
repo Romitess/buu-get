@@ -4,14 +4,14 @@
       <div class="row items-center q-mb-md">
         <q-icon name="schedule" size="20px" class="q-mr-sm text-dark" />
         <div class="text-subtitle1 text-weight-bold text-dark">
-          {{ isSpecialRound ? 'กำหนดการลงทะเบียน' : 'กำหนดการลงทะเบียนและชำระเงิน' }}
+          {{ isSpecialRound ? t('admin.examForm.cards.registrationSchedule') : t('admin.examForm.cards.registrationAndPaymentSchedule') }}
         </div>
       </div>
 
       <div class="row q-col-gutter-xl">
         <!-- Left: ช่วงเวลาลงทะเบียน -->
         <div class="col-12" :class="isSpecialRound ? '' : 'col-md-6'">
-          <div class="sub-section-title q-mb-sm">ช่วงเวลาลงทะเบียน</div>
+          <div class="sub-section-title q-mb-sm">{{ t('admin.examForm.fields.regPeriod') }}</div>
 
           <div class="row q-col-gutter-md">
             <div
@@ -19,7 +19,7 @@
               :class="isSpecialRound ? 'col-md-6' : 'q-mb-md'"
               data-field="regStartDate"
             >
-              <div class="buu-label-muted q-mb-xs">วันและเวลาเริ่มต้น</div>
+              <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.fields.datetimeStart') }}</div>
               <div class="row q-col-gutter-sm">
                 <div class="col-7">
                   <q-input
@@ -94,7 +94,7 @@
             </div>
 
             <div class="col-12" :class="isSpecialRound ? 'col-md-6' : ''" data-field="regEndDate">
-              <div class="buu-label-muted q-mb-xs">วันและเวลาสิ้นสุด</div>
+              <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.fields.datetimeEnd') }}</div>
               <div class="row q-col-gutter-sm">
                 <div class="col-7">
                   <q-input
@@ -172,11 +172,11 @@
 
         <!-- Right: ช่วงเวลาชำระเงิน (ซ่อนถ้ารอบพิเศษ) — auto-fill จากลงทะเบียน แต่แก้ไขได้ -->
         <div v-if="!isSpecialRound" class="col-12 col-md-6">
-          <div class="sub-section-title q-mb-sm">ช่วงเวลาชำระเงิน</div>
+          <div class="sub-section-title q-mb-sm">{{ t('admin.examForm.fields.payPeriod') }}</div>
 
           <div class="row q-col-gutter-md">
             <div class="col-12 q-mb-md" data-field="payStartDate">
-              <div class="buu-label-muted q-mb-xs">วันและเวลาเริ่มต้น</div>
+              <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.fields.datetimeStart') }}</div>
               <div class="row q-col-gutter-sm">
                 <div class="col-7">
                   <q-input
@@ -251,7 +251,7 @@
             </div>
 
             <div class="col-12" data-field="payEndDate">
-              <div class="buu-label-muted q-mb-xs">วันและเวลาสิ้นสุด</div>
+              <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.fields.datetimeEnd') }}</div>
               <div class="row q-col-gutter-sm">
                 <div class="col-7">
                   <q-input
@@ -333,10 +333,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { CreateExamForm } from 'src/composables/use-create-exam';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
 import AppTimePicker from 'src/components/base/app-time-picker.vue';
 import { beToCeString, ceToBeString } from 'src/utils/thai-date';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   /** When true, disables all editing */

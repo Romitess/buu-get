@@ -1,9 +1,26 @@
 import { computed, ref, type ComputedRef } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useUserStore } from 'src/stores/user.store';
 import { ROLES } from 'src/constants/roles';
 import type { NavigationItem } from 'src/types/navigation';
 import { useQuasar } from 'quasar';
+
+const NAV_I18N_KEYS = {
+  home: 'navigation.home',
+  'exam-schedule': 'navigation.examSchedule',
+  'exam-simulation': 'navigation.examSimulation',
+  'exam-history': 'navigation.examHistory',
+  'user-profile': 'navigation.personalProfile',
+  'admin-dashboard': 'navigation.dashboard',
+  'admin-create-exam': 'navigation.createExam',
+  'admin-exam-management': 'navigation.manageExams',
+  'admin-page-builder': 'navigation.pageBuilder',
+} as const satisfies Record<string, string>;
+
+interface NavigationLinkDef extends Omit<NavigationItem, 'label'> {
+  labelKey: string;
+}
 
 // Global shared state for the admin sidebar drawer
 const leftDrawerOpen = ref(true); // Default open on desktop
@@ -14,68 +31,67 @@ export function useNavigation() {
   const userStore = useUserStore();
   const router = useRouter();
   const $q = useQuasar();
+  const { t, locale } = useI18n();
 
-  const allLinks: NavigationItem[] = [
+  const allLinkDefs: NavigationLinkDef[] = [
     {
       name: 'home',
-      label: 'หน้าหลัก',
+      labelKey: NAV_I18N_KEYS.home,
       icon: 'home',
       path: '/',
     },
-    // === Candidate Menus ===
     {
       name: 'exam-schedule',
-      label: 'รายการสอบ',
+      labelKey: NAV_I18N_KEYS['exam-schedule'],
       icon: 'list_alt',
       path: '/user/exam-schedule',
       requiredRoles: [ROLES.CANDIDATE],
     },
     {
       name: 'exam-simulation',
-      label: 'จำลองการสอบ',
+      labelKey: NAV_I18N_KEYS['exam-simulation'],
       icon: 'monitor',
       path: '/user/exam-simulation',
       requiredRoles: [ROLES.CANDIDATE],
     },
     {
       name: 'exam-history',
-      label: 'ประวัติการสอบ',
+      labelKey: NAV_I18N_KEYS['exam-history'],
       icon: 'history',
       path: '/user/exam-history',
       requiredRoles: [ROLES.CANDIDATE],
     },
     {
       name: 'user-profile',
-      label: 'ข้อมูลส่วนตัว',
+      labelKey: NAV_I18N_KEYS['user-profile'],
       icon: 'person',
       path: '/user/profile',
       requiredRoles: [ROLES.CANDIDATE],
     },
-    // === Staff Menus ===
     {
       name: 'admin-dashboard',
-      label: 'Dashboard (Exam Opening Officer)',
+      labelKey: NAV_I18N_KEYS['admin-dashboard'],
       icon: 'dashboard',
       path: '/admin/dashboard',
       requiredRoles: [ROLES.STAFF, ROLES.ADMIN],
     },
     {
       name: 'admin-create-exam',
-      label: 'สร้างรอบสอบ',
+      labelKey: NAV_I18N_KEYS['admin-create-exam'],
       icon: 'add_circle',
       path: '/admin/create-exam',
       requiredRoles: [ROLES.STAFF, ROLES.ADMIN],
     },
     {
       name: 'admin-exam-management',
-      label: 'จัดการรอบสอบ',
+      labelKey: NAV_I18N_KEYS['admin-exam-management'],
       icon: 'edit_document',
       path: '/admin/exam-management',
       requiredRoles: [ROLES.STAFF, ROLES.ADMIN, ROLES.REGISTRATION_OFFICER],
     },
     {
       name: 'admin-page-builder',
-      label: 'จัดการหน้าแรก',
+      labelKey: NAV_I18N_KEYS['admin-page-builder'],
       icon: 'web',
       path: '/admin/page-builder',
       requiredRoles: [ROLES.STAFF, ROLES.ADMIN, ROLES.REGISTRATION_OFFICER],
@@ -83,41 +99,60 @@ export function useNavigation() {
   ];
 
   const computedLinks: ComputedRef<NavigationItem[]> = computed(() => {
-    return allLinks.filter((link) => {
-      // ถ้าไม่มีการกำหนด Role หรือเป็น Public -> ให้ผ่าน
-      if (!link.requiredRoles || link.requiredRoles.length === 0) {
-        return true;
-      }
+    void locale.value;
 
-      // ถ้าต้องใช้ Role แต่ยังไม่ได้ Login -> ซ่อน
-      if (!userStore.isLoggedIn) {
-        return false;
-      }
+    return allLinkDefs
+      .map((link) => {
+        const item: NavigationItem = {
+          name: link.name,
+          label: t(link.labelKey),
+          icon: link.icon,
+          path: link.path,
+        };
 
-      // ตรวจสอบสิทธิ์ (Role)
-      if (!userStore.userRole) return false;
-      return link.requiredRoles.includes(userStore.userRole);
-    });
+        if (link.badge !== undefined) item.badge = link.badge;
+        if (link.hidden !== undefined) item.hidden = link.hidden;
+        if (link.children !== undefined) item.children = link.children;
+        if (link.requiredRoles !== undefined) item.requiredRoles = link.requiredRoles;
+
+        return item;
+      })
+      .filter((link) => {
+        // ถ้าไม่มีการกำหนด Role หรือเป็น Public -> ให้ผ่าน
+        if (!link.requiredRoles || link.requiredRoles.length === 0) {
+          return true;
+        }
+
+        // ถ้าต้องใช้ Role แต่ยังไม่ได้ Login -> ซ่อน
+        if (!userStore.isLoggedIn) {
+          return false;
+        }
+
+        // ตรวจสอบสิทธิ์ (Role)
+        if (!userStore.userRole) return false;
+        return link.requiredRoles.includes(userStore.userRole);
+      });
   });
 
-const toggleLeftDrawer = (): void => {
-  if ($q.screen.lt.md) {
-    leftDrawerOpen.value = !leftDrawerOpen.value;
-  } else {
-    if (leftDrawerOpen.value) {
-      leftDrawerOpen.value = false;
-      miniState.value = true;
+  const toggleLeftDrawer = (): void => {
+    if ($q.screen.lt.md) {
+      leftDrawerOpen.value = !leftDrawerOpen.value;
     } else {
-      leftDrawerOpen.value = true;
-      miniState.value = true;
+      if (leftDrawerOpen.value) {
+        leftDrawerOpen.value = false;
+        miniState.value = true;
+      } else {
+        leftDrawerOpen.value = true;
+        miniState.value = true;
+      }
     }
-  }
-};
+  };
 
   const isMini = computed(() => !isHovered.value && miniState.value);
 
   const STAFF_ROLES = [
     ROLES.ADMIN,
+    ROLES.SUPER_ADMIN,
     ROLES.STAFF,
     ROLES.REGISTRATION_OFFICER,
     ROLES.EXAM_OPERATIONS_OFFICER,

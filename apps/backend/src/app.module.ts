@@ -45,6 +45,7 @@ import { ExamBlockedSeatsModule } from './modules/exam-blocked-seats/exam-blocke
 import { ThaidModule } from './modules/thaid/thaid.module';
 import { VerifyModule } from './modules/verify/verify.module';
 import { CheckInAssistModule } from './modules/check-in-assist/check-in-assist.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -116,6 +117,7 @@ import { CheckInAssistModule } from './modules/check-in-assist/check-in-assist.m
     ThaidModule,
     VerifyModule,
     CheckInAssistModule,
+    NotificationsModule,
   ],
   providers: [
     // Global auth guard — ทุก endpoint ต้องมี JWT ที่ถูกต้อง ยกเว้นที่ทำเครื่องหมาย @Public()

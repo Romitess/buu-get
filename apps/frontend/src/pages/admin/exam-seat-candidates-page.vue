@@ -107,49 +107,53 @@
 
     <Teleport to="body">
       <div v-if="isPrintingSeatPlan" class="seat-print-render-root" aria-hidden="true">
-        <section class="seat-plan-print-area seat-print-page">
-          <AppExamSeatPlanPrint
-            :room-label="printRoomLabel"
-            :seats-by-row="printSeatPlanRows"
-            :aisle-after-cols="printAisleAfterCols"
-            :aisle-after-rows="printAisleAfterRows"
-            :seat-direction="printSeatDirection"
-            :layout-rows="printSeatRowCount"
-            :layout-cols="printSeatColCount"
-          />
-        </section>
+        <template v-for="room in printRoomPacks" :key="room.slId">
+          <section class="seat-plan-print-area seat-print-page">
+            <AppExamSeatPlanPrint
+              :room-label="room.roomLabel"
+              :exam-round="printExamRoundLabel"
+              :seats-by-row="room.seatsByRow"
+              :aisle-after-cols="room.aisleAfterCols"
+              :aisle-after-rows="room.aisleAfterRows"
+              :seat-direction="room.seatDirection"
+              :layout-rows="room.layoutRows"
+              :layout-cols="room.layoutCols"
+            />
+          </section>
 
-        <section class="seat-list-print-area seat-print-page">
-          <div class="seat-list-print">
-            <header class="seat-list-print__header">
-              <h1>ใบรายชื่อผู้เข้าสอบ</h1>
-              <p>{{ printRoomLabel }}</p>
-            </header>
+          <section class="seat-list-print-area seat-print-page">
+            <div class="seat-list-print">
+              <header class="seat-list-print__header">
+                <h1>ใบรายชื่อผู้เข้าสอบ</h1>
+                <p v-if="printExamRoundLabel">ครั้งที่ {{ printExamRoundLabel }}</p>
+                <p>{{ room.roomLabel }}</p>
+              </header>
 
-            <table class="seat-list-print__table">
-              <thead>
-                <tr>
-                  <th>ลำดับ</th>
-                  <th>เลขประจำตัวผู้สอบ</th>
-                  <th>คำนำหน้า</th>
-                  <th>ชื่อ-นามสกุล</th>
-                  <th>Full Name</th>
-                  <th>ที่นั่ง</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="row in printCandidateRows" :key="row.ermId">
-                  <td>{{ row.index }}</td>
-                  <td>{{ row.nationalId }}</td>
-                  <td>{{ row.titleTh }}</td>
-                  <td class="text-left">{{ row.fullnameTh }}</td>
-                  <td class="text-left">{{ row.fullnameEn }}</td>
-                  <td>{{ row.seatNumber }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+              <table class="seat-list-print__table">
+                <thead>
+                  <tr>
+                    <th>ลำดับ</th>
+                    <th>เลขประจำตัวผู้สอบ</th>
+                    <th>คำนำหน้า</th>
+                    <th>ชื่อ-นามสกุล</th>
+                    <th>Full Name</th>
+                    <th>ที่นั่ง</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="row in room.candidates" :key="row.ermId">
+                    <td>{{ row.index }}</td>
+                    <td>{{ row.nationalId }}</td>
+                    <td>{{ row.titleTh }}</td>
+                    <td class="text-left">{{ row.fullnameTh }}</td>
+                    <td class="text-left">{{ row.fullnameEn }}</td>
+                    <td>{{ row.seatNumber }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </template>
       </div>
     </Teleport>
   </q-page>
@@ -214,16 +218,14 @@ const {
   exam,
   sessions,
   sessionTimeTabs,
-  activeSessionLocation,
-  activeSessionSeatSnapshot,
-  activeLocation,
+  sessionLocations,
+  tableRows,
   isLoading,
   searchQuery,
   selectedSessionId,
   selectedSessionLocationId,
   roomOptions,
   filteredRows,
-  roomTableRows,
   candidateCount,
   sessionTime,
   sessionLocation,
@@ -466,10 +468,53 @@ const handleViewVoucher = async (row: SeatCandidateRow): Promise<void> => {
   }
 };
 
-const printLocation = computed(() => activeLocation.value);
+const printExamRoundLabel = computed((): string =>
+  formatExamInstanceLabel(exam.value?.EXAM_ROUND, exam.value?.EXAM_FISCAL_YEAR),
+);
 
-const getLocationAisleAfter = (): { after_cols: number[]; after_rows: number[] } => {
-  const location = printLocation.value;
+const PRINT_SEAT_GUIDE_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+type PrintSessionLocation = (typeof sessionLocations.value)[number];
+
+interface SeatPlanPrintRoom {
+  slId: number;
+  roomLabel: string;
+  seatsByRow: SeatCell[][];
+  aisleAfterCols: number[];
+  aisleAfterRows: number[];
+  seatDirection: 'HORIZONTAL' | 'VERTICAL';
+  layoutRows: number;
+  layoutCols: number;
+  candidates: SeatCandidateRow[];
+}
+
+const getPrintSeatLabel = (
+  rowNo: number,
+  colNo: number,
+  seatDirection: 'HORIZONTAL' | 'VERTICAL',
+): string => {
+  if (seatDirection === 'VERTICAL') {
+    return `${PRINT_SEAT_GUIDE_LETTERS[colNo - 1] ?? colNo}${rowNo}`;
+  }
+
+  return `${PRINT_SEAT_GUIDE_LETTERS[rowNo - 1] ?? rowNo}${colNo}`;
+};
+
+const formatPrintRoomLabel = (location: BackendLocation | null | undefined): string => {
+  if (!location) return '-';
+
+  const roomNo = location.LOCATION_ROOM_NO ? ` ห้อง ${location.LOCATION_ROOM_NO}` : '';
+  const floorNo =
+    location.LOCATION_FLOOR_NO !== null && location.LOCATION_FLOOR_NO !== undefined
+      ? ` ชั้น ${location.LOCATION_FLOOR_NO}`
+      : '';
+
+  return `${location.LOCATION_NAME}${roomNo}${floorNo}`;
+};
+
+const getLocationAisleAfter = (
+  location: BackendLocation | null | undefined,
+): { after_cols: number[]; after_rows: number[] } => {
   const combined = location?.LOCATION_AISLE_AFTER_COL ?? [];
 
   return {
@@ -493,83 +538,53 @@ const getLocationAisleAfter = (): { after_cols: number[]; after_rows: number[] }
   };
 };
 
-const printAisleAfterCols = computed(
-  (): number[] =>
-    activeSessionLocation.value?.AISLE_AFTER?.after_cols ?? getLocationAisleAfter().after_cols,
-);
-const printAisleAfterRows = computed(
-  (): number[] =>
-    activeSessionLocation.value?.AISLE_AFTER?.after_rows ?? getLocationAisleAfter().after_rows,
-);
-const printSeatDirection = computed(
-  (): 'HORIZONTAL' | 'VERTICAL' =>
-    activeSessionLocation.value?.LOCATION_SEAT_DIRECTION ??
-    printLocation.value?.LOCATION_SEAT_DIRECTION ??
-    printLocation.value?.SEAT_DIRECTION ??
-    'HORIZONTAL',
-);
+const getPrintSeatDirection = (
+  sessionLocation: PrintSessionLocation,
+): 'HORIZONTAL' | 'VERTICAL' =>
+  sessionLocation.LOCATION_SEAT_DIRECTION ??
+  sessionLocation.LOCATION.LOCATION_SEAT_DIRECTION ??
+  sessionLocation.LOCATION.SEAT_DIRECTION ??
+  'HORIZONTAL';
 
-const printSeatRowCount = computed((): number => {
-  if (activeSessionLocation.value?.TOTAL_ROWS != null) {
-    return activeSessionLocation.value.TOTAL_ROWS;
-  }
+const getPrintSeatRowCount = (sessionLocation: PrintSessionLocation): number => {
+  if (sessionLocation.TOTAL_ROWS != null) return sessionLocation.TOTAL_ROWS;
 
-  const locationRows = printLocation.value?.LOCATION_TOTAL_ROWS ?? 0;
+  const locationRows = sessionLocation.LOCATION.LOCATION_TOTAL_ROWS ?? 0;
   const maxSeatRow = Math.max(
     0,
-    ...(printLocation.value?.SEATS ?? []).map((seat) => seat.LS_ROW_NO),
+    ...(sessionLocation.LOCATION.SEATS ?? []).map((seat) => seat.LS_ROW_NO),
   );
 
   return Math.max(locationRows, maxSeatRow);
-});
+};
 
-const printSeatColCount = computed((): number => {
-  if (activeSessionLocation.value?.TOTAL_COLS != null) {
-    return activeSessionLocation.value.TOTAL_COLS;
-  }
+const getPrintSeatColCount = (sessionLocation: PrintSessionLocation): number => {
+  if (sessionLocation.TOTAL_COLS != null) return sessionLocation.TOTAL_COLS;
 
-  const locationCols = printLocation.value?.LOCATION_TOTAL_COLS ?? 0;
+  const locationCols = sessionLocation.LOCATION.LOCATION_TOTAL_COLS ?? 0;
   const maxSeatCol = Math.max(
     0,
-    ...(printLocation.value?.SEATS ?? []).map((seat) => seat.LS_COL_NO),
+    ...(sessionLocation.LOCATION.SEATS ?? []).map((seat) => seat.LS_COL_NO),
   );
 
   return Math.max(locationCols, maxSeatCol);
-});
-
-const printSeatGuideLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
-const getPrintSeatLabel = (rowNo: number, colNo: number): string => {
-  if (printSeatDirection.value === 'VERTICAL') {
-    return `${printSeatGuideLetters[colNo - 1] ?? colNo}${rowNo}`;
-  }
-
-  return `${printSeatGuideLetters[rowNo - 1] ?? rowNo}${colNo}`;
 };
 
-const printRoomLabel = computed((): string => {
-  const location = printLocation.value;
-  if (!location) return sessionLocation.value;
-
-  const roomNo = location.LOCATION_ROOM_NO ? ` ห้อง ${location.LOCATION_ROOM_NO}` : '';
-  const floorNo =
-    location.LOCATION_FLOOR_NO !== null && location.LOCATION_FLOOR_NO !== undefined
-      ? ` ชั้น ${location.LOCATION_FLOOR_NO}`
-      : '';
-
-  return `${location.LOCATION_NAME}${roomNo}${floorNo}`;
-});
-
-const printSeatPlanRows = computed((): SeatCell[][] => {
-  const seats = printLocation.value?.SEATS ?? [];
+const buildSeatPlanRows = (
+  sessionLocation: PrintSessionLocation,
+  seatDirection: 'HORIZONTAL' | 'VERTICAL',
+  rowCount: number,
+  colCount: number,
+): SeatCell[][] => {
+  const seats = sessionLocation.LOCATION.SEATS ?? [];
   const snapshotByLabel = new Map(
-    activeSessionSeatSnapshot.value
+    (sessionLocation.SEATS_SNAPSHOT ?? [])
       .filter((seat) => seat.label)
       .map((seat) => [seat.label as string, seat]),
   );
-  if (printSeatRowCount.value === 0 || printSeatColCount.value === 0) return [];
+  if (rowCount === 0 || colCount === 0) return [];
 
-  const rows = Array.from({ length: printSeatRowCount.value }, (): SeatCell[] => []);
+  const rows = Array.from({ length: rowCount }, (): SeatCell[] => []);
   const seatsByPosition = new Map<string, PrintLocationSeat>();
   const seatsByLabel = new Map<string, PrintLocationSeat>();
 
@@ -580,9 +595,9 @@ const printSeatPlanRows = computed((): SeatCell[][] => {
     }
   });
 
-  for (let rowNo = 1; rowNo <= printSeatRowCount.value; rowNo += 1) {
-    for (let colNo = 1; colNo <= printSeatColCount.value; colNo += 1) {
-      const label = getPrintSeatLabel(rowNo, colNo);
+  for (let rowNo = 1; rowNo <= rowCount; rowNo += 1) {
+    for (let colNo = 1; colNo <= colCount; colNo += 1) {
+      const label = getPrintSeatLabel(rowNo, colNo, seatDirection);
       const seat = seatsByLabel.get(label) ?? seatsByPosition.get(`${rowNo}-${colNo}`);
       const snapshotSeat = snapshotByLabel.get(label);
       let status: SeatStatus = 'available';
@@ -600,7 +615,7 @@ const printSeatPlanRows = computed((): SeatCell[][] => {
       }
 
       rows[rowNo - 1]?.push({
-        id: seat ? String(seat.LS_ID) : `virtual-${rowNo}-${colNo}`,
+        id: seat ? String(seat.LS_ID) : `virtual-${sessionLocation.SL_ID}-${rowNo}-${colNo}`,
         label,
         status,
         rowNo,
@@ -611,13 +626,42 @@ const printSeatPlanRows = computed((): SeatCell[][] => {
   }
 
   return rows;
-});
+};
 
-const printCandidateRows = computed((): SeatCandidateRow[] =>
-  roomTableRows.value.map((row, index) => ({
-    ...row,
-    index: index + 1,
-  })),
+const belongsToPrintRoom = (row: SeatCandidateRow, sessionLocation: PrintSessionLocation): boolean => {
+  if (row.sessionLocationId != null) {
+    return row.sessionLocationId === sessionLocation.SL_ID;
+  }
+
+  const roomsForSession = sessionLocations.value.filter((item) => item.SS_ID === row.sessionId);
+  return roomsForSession.length === 1 && roomsForSession[0]?.SL_ID === sessionLocation.SL_ID;
+};
+
+const printRoomPacks = computed((): SeatPlanPrintRoom[] =>
+  sessionLocations.value.map((sessionLocation) => {
+    const seatDirection = getPrintSeatDirection(sessionLocation);
+    const layoutRows = getPrintSeatRowCount(sessionLocation);
+    const layoutCols = getPrintSeatColCount(sessionLocation);
+    const aisle = sessionLocation.AISLE_AFTER ?? getLocationAisleAfter(sessionLocation.LOCATION);
+    const candidates = tableRows.value
+      .filter((row) => belongsToPrintRoom(row, sessionLocation))
+      .map((row, index) => ({
+        ...row,
+        index: index + 1,
+      }));
+
+    return {
+      slId: sessionLocation.SL_ID,
+      roomLabel: formatPrintRoomLabel(sessionLocation.LOCATION),
+      seatsByRow: buildSeatPlanRows(sessionLocation, seatDirection, layoutRows, layoutCols),
+      aisleAfterCols: aisle.after_cols,
+      aisleAfterRows: aisle.after_rows,
+      seatDirection,
+      layoutRows,
+      layoutCols,
+      candidates,
+    };
+  }),
 );
 
 const handleExportByRoom = (): void => {
@@ -727,6 +771,7 @@ const pagination = ref<PaginationModel>({
 });
 
 const columns = computed<QTableColumn[]>(() => {
+  void i18n.locale.value;
   const nameWidth = isVoucherSent.value ? 11 : 16;
   const baseColumns: QTableColumn[] = [
     {

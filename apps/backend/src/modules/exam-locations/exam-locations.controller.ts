@@ -14,13 +14,14 @@ import {
   ApiOperation,
   ApiCreatedResponse,
   ApiOkResponse,
-  ApiQuery,
 } from '@nestjs/swagger';
 import { ExamLocationsService } from './exam-locations.service';
 import { CreateExamLocationDto } from './dto/create-exam-location.dto';
 import { CreateExamLocationWithSeatsDto } from './dto/create-exam-location-with-seats.dto';
 import { UpdateExamLocationDto } from './dto/update-exam-location.dto';
 import { ExamLocation } from './entities/exam-location.entity';
+import { ExamLocationQueryDto } from './dto/exam-location-query.dto';
+import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
 
 @ApiTags('exam-locations')
 @Controller('exam-locations')
@@ -52,20 +53,12 @@ export class ExamLocationsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'ดึงข้อมูลสถานที่จัดสอบทั้งหมด' })
-  @ApiQuery({
-    name: 'includeSeats',
-    required: false,
-    type: Boolean,
-    description: 'เมื่อ true จะรวมที่นั่งของทุกห้องใน response เดียว',
-  })
-  @ApiOkResponse({ type: ExamLocation, isArray: true })
+  @ApiOperation({ summary: 'ดึงข้อมูลสถานที่จัดสอบทั้งหมดแบบแบ่งหน้า' })
+  @ApiOkResponse({ description: 'รายการสถานที่จัดสอบแบบแบ่งหน้า' })
   async findAll(
-    @Query('includeSeats') includeSeats?: string,
-  ): Promise<ExamLocation[]> {
-    return this.examLocationsService.findAll({
-      includeSeats: includeSeats === 'true' || includeSeats === '1',
-    });
+    @Query() query: ExamLocationQueryDto,
+  ): Promise<PaginatedResponse<ExamLocation>> {
+    return this.examLocationsService.findAll(query);
   }
 
   @Get(':id')

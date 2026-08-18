@@ -175,7 +175,7 @@ import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import * as financeService from 'src/services/finance.service';
 
 const $q = useQuasar();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const isLoading = ref(false);
 const searchQuery = ref('');
@@ -209,7 +209,9 @@ const saveButtonLabel = computed(() =>
     : t('admin.fundSourceManagement.createDialog.actions.save'),
 );
 
-const columns = computed<QTableColumn[]>(() => [
+const columns = computed<QTableColumn[]>(() => {
+  void locale.value;
+  return [
   {
     name: 'index',
     label: t('admin.fundSourceManagement.table.columns.index'),
@@ -247,8 +249,7 @@ const columns = computed<QTableColumn[]>(() => [
     align: 'center',
     style: 'width: 15%',
   },
-]);
-
+];});
 const fundSourcesWithComputedData = computed(() => {
   return fundSources.value.map((fundSource, idx) => ({
     ...fundSource,

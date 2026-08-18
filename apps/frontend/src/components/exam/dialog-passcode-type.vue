@@ -7,15 +7,12 @@
     transition-hide="scale"
   >
     <q-card class="dialog-passcode-type-card">
-      <!-- Header -->
       <q-card-section class="row items-center justify-between q-pb-none">
-        <div class="text-h6 text-weight-bold dialog-title">เลือกรูปแบบของ PASSCODE</div>
+        <div class="text-h6 text-weight-bold dialog-title">{{ t('admin.examForm.dialogs.passcodeType.title') }}</div>
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
 
-      <!-- Options -->
       <q-card-section class="row q-col-gutter-md q-pt-lg q-pb-xl">
-        <!-- Option 1: Single Passcode -->
         <div class="col-6">
           <div
             class="option-card column items-center q-pa-lg"
@@ -23,12 +20,11 @@
             @click="onSelect('single')"
           >
             <q-icon name="groups" size="48px" class="option-icon q-mb-md" />
-            <div class="option-title text-center">Passcode ชุดเดียวสำหรับผู้สอบทุกคน</div>
-            <div class="option-subtitle text-center q-mt-xs">One Passcode for all candidates</div>
+            <div class="option-title text-center">{{ t('admin.examForm.dialogs.passcodeType.singleTitle') }}</div>
+            <div class="option-subtitle text-center q-mt-xs">{{ t('admin.examForm.dialogs.passcodeType.singleSubtitle') }}</div>
           </div>
         </div>
 
-        <!-- Option 2: Individual Passcode -->
         <div class="col-6">
           <div
             class="option-card column items-center q-pa-lg"
@@ -36,8 +32,8 @@
             @click="onSelect('individual')"
           >
             <q-icon name="person" size="48px" class="option-icon q-mb-md" />
-            <div class="option-title text-center">Passcode เฉพาะตัวสำหรับผู้สอบแต่ละคน</div>
-            <div class="option-subtitle text-center q-mt-xs">Individual Passcode per candidate</div>
+            <div class="option-title text-center">{{ t('admin.examForm.dialogs.passcodeType.individualTitle') }}</div>
+            <div class="option-subtitle text-center q-mt-xs">{{ t('admin.examForm.dialogs.passcodeType.individualSubtitle') }}</div>
           </div>
         </div>
       </q-card-section>
@@ -47,7 +43,10 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { PasscodeType } from 'src/types/exam';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: boolean;

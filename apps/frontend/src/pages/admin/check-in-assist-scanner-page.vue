@@ -8,13 +8,13 @@
           round
           icon="arrow_back"
           class="scanner-top-bar__back"
-          aria-label="ย้อนกลับ"
+          :aria-label="t('admin.checkIn.backAria')"
           @click="goBack"
         />
         <div class="scanner-top-bar__text">
-          <h1 class="scanner-top-bar__title">ช่วยแสกนเช็กอิน</h1>
+          <h1 class="scanner-top-bar__title">{{ t('admin.checkIn.pageTitle') }}</h1>
           <p v-if="sessionMeta?.examName" class="scanner-top-bar__exam">{{ sessionMeta.examName }}</p>
-          <p v-else-if="isLoadingMeta" class="scanner-top-bar__exam">กำลังโหลด...</p>
+          <p v-else-if="isLoadingMeta" class="scanner-top-bar__exam">{{ t('admin.checkIn.loading') }}</p>
         </div>
       </div>
     </header>
@@ -29,14 +29,17 @@
       <section class="camera-panel">
         <div :id="scannerElementId" class="camera-viewport" />
         <p v-if="cameraError" class="camera-error">{{ cameraError }}</p>
-        <p v-else-if="!isCameraActive" class="camera-hint">กำลังเปิดกล้อง...</p>
+        <p v-else-if="!isCameraActive" class="camera-hint">{{ t('admin.checkIn.openingCamera') }}</p>
       </section>
 
       <Transition name="result-slide">
         <section v-if="lastResult" class="result-banner" :class="resultBannerClass">
           <div class="result-banner__title">{{ resultTitle }}</div>
           <div v-if="lastResult.candidate" class="result-banner__body">
-            {{ lastResult.candidate.fullnameTh }} — ที่นั่ง {{ lastResult.candidate.seatNumber }}
+            {{ t('admin.checkIn.resultBannerBody', {
+              name: lastResult.candidate.fullnameTh,
+              seat: lastResult.candidate.seatNumber,
+            }) }}
           </div>
         </section>
       </Transition>
@@ -44,15 +47,15 @@
       <section class="manual-panel">
         <AppLabeledInput
           v-model="manualCode"
-          label="พิมพ์รหัสด้วยตนเอง"
-          placeholder="Test Taker ID / เลขบัตร / Passport"
+          :label="t('admin.checkIn.manualLabel')"
+          :placeholder="t('admin.checkIn.manualPlaceholder')"
           maxlength="64"
           hide-bottom-space
           :disable="isSubmitting"
           @keyup.enter="submitManualCode"
         />
         <AppButton
-          label="ส่งรหัส"
+          :label="t('admin.checkIn.submitCode')"
           color="primary"
           class="submit-btn"
           :loading="isSubmitting"
@@ -68,6 +71,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
 import AppLabeledInput from 'src/components/base/app-labeled-input.vue';
 import { useBarcodeCamera } from 'src/composables/use-barcode-camera';
@@ -81,6 +85,7 @@ import { normalizeScanPayload } from 'src/utils/scan-keyboard';
 const route = useRoute();
 const router = useRouter();
 const $q = useQuasar();
+const { t } = useI18n();
 
 const joinToken = computed(() => String(route.params.joinToken ?? ''));
 const sessionMeta = ref<AssistSessionMeta | null>(null);
@@ -110,13 +115,13 @@ const goBack = async (): Promise<void> => {
 const resultTitle = computed((): string => {
   switch (lastResult.value?.type) {
     case 'CHECKED_IN':
-      return 'เช็กอินสำเร็จ';
+      return t('admin.checkIn.result.checkedIn');
     case 'ALREADY_CHECKED_IN':
-      return 'เช็กอินแล้ว';
+      return t('admin.checkIn.result.alreadyCheckedIn');
     case 'NOT_FOUND':
-      return 'ไม่พบผู้เข้าสอบ';
+      return t('admin.checkIn.result.notFound');
     case 'INVALID_CODE':
-      return 'รหัสไม่ถูกต้อง';
+      return t('admin.checkIn.result.invalidCode');
     default:
       return '';
   }
@@ -139,16 +144,20 @@ const resultBannerClass = computed((): string => {
 const notifyForResult = (event: AssistEvent): void => {
   switch (event.type) {
     case 'CHECKED_IN':
-      $q.notify({ type: 'positive', message: 'เช็กอินสำเร็จ', position: 'top' });
+      $q.notify({ type: 'positive', message: t('admin.checkIn.notify.checkedIn'), position: 'top' });
       break;
     case 'ALREADY_CHECKED_IN':
-      $q.notify({ type: 'warning', message: 'ผู้เข้าสอบคนนี้เช็กอินแล้ว', position: 'top' });
+      $q.notify({
+        type: 'warning',
+        message: t('admin.checkIn.notify.alreadyCheckedIn'),
+        position: 'top',
+      });
       break;
     case 'NOT_FOUND':
-      $q.notify({ type: 'negative', message: 'ไม่พบข้อมูลผู้เข้าสอบในรอบสอบนี้', position: 'top' });
+      $q.notify({ type: 'negative', message: t('admin.checkIn.notify.notFound'), position: 'top' });
       break;
     case 'INVALID_CODE':
-      $q.notify({ type: 'warning', message: 'รหัสที่แสกนไม่ถูกต้อง', position: 'top' });
+      $q.notify({ type: 'warning', message: t('admin.checkIn.notify.invalidCode'), position: 'top' });
       break;
     default:
       break;
@@ -168,16 +177,16 @@ const resolveSubmitErrorMessage = (error: unknown): string => {
         : '';
 
     if (status === 410) {
-      return 'Session ช่วยแสกนปิดหรือหมดอายุแล้ว กรุณาสแกน QR ใหม่จากจอหลัก';
+      return t('admin.checkIn.errors.sessionExpired');
     }
     if (status === 401 || status === 403) {
-      return 'ไม่มีสิทธิ์ส่งผลการแสกน กรุณาเข้าสู่ระบบด้วยบัญชีเจ้าหน้าที่';
+      return t('admin.checkIn.errors.unauthorized');
     }
     if (message) {
       return message;
     }
   }
-  return 'ไม่สามารถส่งผลการแสกนได้';
+  return t('admin.checkIn.errors.submitFailed');
 };
 
 const submitCode = async (rawCode: string): Promise<void> => {
@@ -210,7 +219,7 @@ const submitManualCode = async (): Promise<void> => {
 
 onMounted(async () => {
   if (!joinToken.value) {
-    loadError.value = 'ลิงก์เข้าร่วมไม่ถูกต้อง';
+    loadError.value = t('admin.checkIn.errors.invalidJoinLink');
     isLoadingMeta.value = false;
     return;
   }
@@ -222,7 +231,7 @@ onMounted(async () => {
     });
   } catch (error) {
     console.error(error);
-    loadError.value = 'ไม่สามารถเข้าร่วม session ช่วยแสกนได้ (อาจปิดหรือหมดอายุแล้ว)';
+    loadError.value = t('admin.checkIn.errors.joinSessionFailed');
     await stopCamera();
   } finally {
     isLoadingMeta.value = false;

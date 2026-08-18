@@ -60,7 +60,7 @@ const $q = useQuasar();
 
 const { error, filter } = useDailyRevenue();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const searchQuery = ref('');
 const isLoading = ref(false);
@@ -256,7 +256,9 @@ const pagination = computed(() => ({
   rowsNumber: filteredReceipts.value.length,
 }));
 
-const columns = computed<QTableColumn[]>(() => [
+const columns = computed<QTableColumn[]>(() => {
+  void locale.value;
+  return [
   {
     name: 'index',
     label: t('admin.receiptUsageReport.table.columns.index'),
@@ -317,8 +319,7 @@ const columns = computed<QTableColumn[]>(() => [
     field: 'payee',
     align: 'left',
   },
-]);
-
+];});
 const exportColumns: QTableColumn[] = [
   {
     name: 'index',

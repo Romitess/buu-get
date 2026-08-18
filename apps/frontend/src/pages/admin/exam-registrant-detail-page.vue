@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar, date } from 'quasar';
 import { useI18n } from 'vue-i18n';
@@ -86,7 +86,7 @@ import {
   updateEnrollmentStatus,
   requestEnrollmentFix,
 } from 'src/services/enrollment.service';
-import { getUsersFromApi, updateUserProfileByAdmin } from 'src/services/user.service';
+import { updateUserProfileByAdmin } from 'src/services/user.service';
 import { useUserStore } from 'src/stores/user.store';
 import { VerifyStatus } from 'src/types/enrollment.types';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
@@ -123,19 +123,13 @@ const loadData = async (): Promise<void> => {
   const ermId = Number(route.params.ermId);
   if (isNaN(ermId)) {
     isLoading.value = false;
+    enrollment.value = null;
     return;
   }
 
   isLoading.value = true;
   try {
     const detail = await fetchEnrollmentById(ermId);
-    const latestUsers = await getUsersFromApi();
-    const latestUser = latestUsers.find((user) => user.id === detail.USER_ID);
-
-    if (latestUser?.userImagePath) {
-      detail.USER.USER_IMAGE = latestUser.userImagePath;
-    }
-
     enrollment.value = detail;
   } catch (error) {
     console.error('Error fetching enrollment:', error);
@@ -250,9 +244,13 @@ const handleVerify = async (): Promise<void> => {
   }
 };
 
-onMounted(() => {
-  void loadData();
-});
+watch(
+  () => route.params.ermId,
+  () => {
+    void loadData();
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped lang="scss">

@@ -44,9 +44,11 @@ const emit = defineEmits<{
   (e: 'request', requestProps: TableRequestProps): void;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
-const columns = computed<QTableColumn[]>(() => [
+const columns = computed<QTableColumn[]>(() => {
+  void locale.value;
+  return [
   {
     name: 'id',
     field: 'id',
@@ -110,8 +112,7 @@ const columns = computed<QTableColumn[]>(() => [
     headerStyle: 'width: 14%',
     sortable: false,
   },
-]);
-
+];});
 const onRequest = (requestProps: TableRequestProps): void => {
   emit('request', requestProps);
 };

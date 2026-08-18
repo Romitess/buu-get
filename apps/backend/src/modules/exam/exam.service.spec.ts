@@ -1,4 +1,8 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ExamService } from './exam.service';
@@ -17,6 +21,7 @@ type MockRepo = {
   save: jest.Mock;
   find: jest.Mock;
   findOne: jest.Mock;
+  findAndCount: jest.Mock;
   update: jest.Mock;
   merge: jest.Mock;
   exists: jest.Mock;
@@ -30,6 +35,7 @@ const createMockRepo = (): MockRepo => ({
   save: jest.fn(),
   find: jest.fn(),
   findOne: jest.fn(),
+  findAndCount: jest.fn(),
   update: jest.fn(),
   merge: jest.fn(),
   exists: jest.fn(),
@@ -264,27 +270,89 @@ describe('ExamService', () => {
 
   describe('findAll', () => {
     it('should select EXAM_FISCAL_YEAR so list titles can include budget year', async () => {
-      examRepository.find.mockResolvedValue([
-        {
-          EXAM_ID: 1,
-          EXAM_NAME: 'BUU-GET',
-          EXAM_ROUND: '1',
-          EXAM_FISCAL_YEAR: '2026',
-          SESSIONS: [],
-        },
+      examRepository.findAndCount.mockResolvedValue([
+        [
+          {
+            EXAM_ID: 1,
+            EXAM_NAME: 'BUU-GET',
+            EXAM_ROUND: '1',
+            EXAM_FISCAL_YEAR: '2026',
+            SESSIONS: [],
+          },
+        ],
+        1,
       ]);
 
       const exams = await service.findAll();
 
-      expect(examRepository.find).toHaveBeenCalledWith(
+      expect(examRepository.findAndCount).toHaveBeenCalledWith(
         expect.objectContaining({
           select: expect.objectContaining({
             EXAM_ROUND: true,
             EXAM_FISCAL_YEAR: true,
           }),
+          skip: 0,
+          take: 10,
         }),
       );
-      expect(exams[0]?.EXAM_FISCAL_YEAR).toBe('2026');
+      expect(exams.data[0]?.EXAM_FISCAL_YEAR).toBe('2026');
+      expect(exams.meta.total).toBe(1);
+    });
+  });
+
+  describe('findPublishedSchedule', () => {
+    it('should load only published exams without pagination', async () => {
+      examRepository.find.mockResolvedValue([
+        {
+          EXAM_ID: 2,
+          EXAM_PUBLISHED: true,
+          EXAM_FISCAL_YEAR: '2026',
+          SESSIONS: [],
+        },
+      ]);
+
+      const exams = await service.findPublishedSchedule();
+
+      expect(examRepository.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { EXAM_PUBLISHED: true },
+          select: expect.objectContaining({
+            EXAM_FISCAL_YEAR: true,
+            EXAM_PUBLISHED: true,
+          }),
+        }),
+      );
+      expect(exams).toHaveLength(1);
+    });
+  });
+
+  describe('findOne', () => {
+    it('should omit PASSCODES and hide unpublished exams by default', async () => {
+      examRepository.findOne.mockResolvedValue({
+        EXAM_ID: 9,
+        EXAM_PUBLISHED: false,
+        SESSIONS: [],
+      });
+
+      await expect(service.findOne(9)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(examRepository.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          relations: expect.not.arrayContaining(['PASSCODES']),
+        }),
+      );
+    });
+
+    it('should allow unpublished exams for exam admins', async () => {
+      examRepository.findOne.mockResolvedValue({
+        EXAM_ID: 9,
+        EXAM_PUBLISHED: false,
+        SESSIONS: [],
+      });
+
+      const exam = await service.findOne(9, { allowUnpublished: true });
+      expect(exam.EXAM_ID).toBe(9);
     });
   });
 

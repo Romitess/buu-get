@@ -12,10 +12,21 @@
       </div>
     </div>
 
+    <q-banner v-if="error" class="bg-red-1 text-red-9 q-mb-md rounded-borders shadow-1">
+      <template v-slot:avatar>
+        <q-icon name="warning" color="negative" />
+      </template>
+      {{ error }}
+      <template v-slot:action>
+        <q-btn flat color="negative" :label="t('examSchedule.retry')" @click="fetchRounds" />
+      </template>
+    </q-banner>
+
     <ExamInformationTable
-      :rounds="filteredRounds"
+      :rounds="examRounds"
       :loading="isLoading"
       :pagination="pagination"
+      is-server-side
       @request="onRequest"
       @view-detail="handleViewDetail"
     />
@@ -23,8 +34,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
-import { useQuasar } from 'quasar';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { debounce } from 'quasar';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
@@ -32,17 +43,24 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
 import ExamInformationTable from 'src/components/exam-report/exam-information-table.vue';
 import { fetchExamInformationRounds } from 'src/services/exam-report.service';
+import { isRequestCanceled } from 'src/services/exam.service';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import type { ExamInformationRoundRow } from 'src/types/exam-report.types';
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const $q = useQuasar();
 
 const isLoading = ref(false);
 const searchQuery = ref('');
 const examRounds = ref<ExamInformationRoundRow[]>([]);
+const error = ref<string | null>(null);
+const scoreSummary = ref<{ minScore: number | null; maxScore: number | null; averageScore: number | null }>({
+  minScore: null,
+  maxScore: null,
+  averageScore: null,
+});
+let abortController: AbortController | null = null;
 
 const getRouteValue = (
   value: string | null | Array<string | null> | undefined,
@@ -68,22 +86,6 @@ const pageSubtitle = computed(() =>
   t('admin.examInformation.pageSubtitle', { year: examYear.value }),
 );
 
-const fetchRounds = async (): Promise<void> => {
-  isLoading.value = true;
-  try {
-    examRounds.value = await fetchExamInformationRounds(examYear.value);
-  } catch {
-    examRounds.value = [];
-    $q.notify({
-      type: 'negative',
-      message: t('admin.examInformation.notifications.loadError'),
-      position: 'top',
-    });
-  } finally {
-    isLoading.value = false;
-  }
-};
-
 const pagination = ref<PaginationModel>({
   page: 1,
   rowsPerPage: 10,
@@ -92,26 +94,36 @@ const pagination = ref<PaginationModel>({
   descending: false,
 });
 
-const filteredRounds = computed<ExamInformationRoundRow[]>(() => {
-  const query = searchQuery.value.trim().toLowerCase();
-  if (!query) return examRounds.value;
-
-  return examRounds.value.filter((row) =>
-    [
-      row.round,
-      row.applicants,
-      row.attended,
-      row.absent,
-      row.repeatTakers,
-      row.minScore,
-      row.maxScore,
-      row.averageScore,
-    ]
-      .join(' ')
-      .toLowerCase()
-      .includes(query),
-  );
-});
+const fetchRounds = async (): Promise<void> => {
+  abortController?.abort();
+  abortController = new AbortController();
+  const { signal } = abortController;
+  isLoading.value = true;
+  error.value = null;
+  try {
+    const result = await fetchExamInformationRounds(examYear.value, {
+      page: pagination.value.page,
+      limit: pagination.value.rowsPerPage,
+      search: searchQuery.value,
+      signal,
+    });
+    examRounds.value = result.data;
+    pagination.value.rowsNumber = result.total;
+    scoreSummary.value = {
+      minScore: result.minScore,
+      maxScore: result.maxScore,
+      averageScore: result.averageScore,
+    };
+  } catch (err) {
+    if (isRequestCanceled(err) || signal.aborted) return;
+    examRounds.value = [];
+    error.value = t('admin.examInformation.notifications.loadError');
+  } finally {
+    if (!signal.aborted) {
+      isLoading.value = false;
+    }
+  }
+};
 
 const onRequest = (props: TableRequestProps): void => {
   const { page, rowsPerPage, sortBy, descending } = props.pagination;
@@ -119,6 +131,7 @@ const onRequest = (props: TableRequestProps): void => {
   pagination.value.rowsPerPage = rowsPerPage;
   pagination.value.sortBy = sortBy ?? null;
   pagination.value.descending = descending ?? false;
+  void fetchRounds();
 };
 
 const handleViewDetail = (row: ExamInformationRoundRow): void => {
@@ -129,16 +142,13 @@ const handleViewDetail = (row: ExamInformationRoundRow): void => {
   });
 };
 
-watch(
-  filteredRounds,
-  (rows) => {
-    pagination.value.rowsNumber = rows.length;
-  },
-  { immediate: true },
-);
+const debouncedSearch = debounce(() => {
+  pagination.value.page = 1;
+  void fetchRounds();
+}, 400);
 
 watch(searchQuery, () => {
-  pagination.value.page = 1;
+  void debouncedSearch();
 });
 
 watch(
@@ -149,6 +159,10 @@ watch(
   },
   { immediate: true },
 );
+
+onBeforeUnmount(() => {
+  abortController?.abort();
+});
 </script>
 
 <style scoped lang="scss">

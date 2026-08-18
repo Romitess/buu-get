@@ -25,6 +25,7 @@ type MockRepo = {
   findOne: jest.Mock;
   merge: jest.Mock;
   softRemove: jest.Mock;
+  createQueryBuilder: jest.Mock;
   manager: { transaction: jest.Mock };
 };
 
@@ -35,6 +36,7 @@ const createMockRepo = (): MockRepo => ({
   findOne: jest.fn(),
   merge: jest.fn(),
   softRemove: jest.fn(),
+  createQueryBuilder: jest.fn(),
   manager: { transaction: jest.fn() },
 });
 
@@ -182,6 +184,56 @@ describe('ExamLocationsService', () => {
       await expect(service.findOne(999)).rejects.toBeInstanceOf(
         NotFoundException,
       );
+    });
+  });
+
+  describe('findAll', () => {
+    it('should paginate locations and keep includeSeats as a follow-up load', async () => {
+      const qb = {
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([
+          [
+            {
+              LOCATION_ID: 1,
+              LOCATION_NAME: 'Room A',
+              LOCATION_SEAT_DIRECTION: SeatDirection.HORIZONTAL,
+              LOCATION_AISLE_AFTER_COL: [],
+            },
+          ],
+          1,
+        ]),
+      };
+      repo.createQueryBuilder.mockReturnValue(qb);
+      repo.find.mockResolvedValue([
+        {
+          LOCATION_ID: 1,
+          LOCATION_NAME: 'Room A',
+          LOCATION_SEAT_DIRECTION: SeatDirection.HORIZONTAL,
+          LOCATION_AISLE_AFTER_COL: [],
+          SEATS: [],
+        },
+      ]);
+
+      const result = await service.findAll({
+        page: 1,
+        limit: 10,
+        includeSeats: true,
+        search: 'Room',
+      });
+
+      expect(qb.andWhere).toHaveBeenCalled();
+      expect(qb.skip).toHaveBeenCalledWith(0);
+      expect(qb.take).toHaveBeenCalledWith(10);
+      expect(repo.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          relations: ['SEATS'],
+        }),
+      );
+      expect(result.data).toHaveLength(1);
+      expect(result.meta.total).toBe(1);
     });
   });
 });

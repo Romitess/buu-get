@@ -37,6 +37,8 @@ import { MoodleSyncLog } from '../modules/moodle-sync-logs/entities/moodle-sync-
 import { ExamBlockedSeat } from '../modules/exam-blocked-seats/entities/exam-blocked-seat.entity';
 import { CheckInAssistSession } from '../modules/check-in-assist/entities/check-in-assist-session.entity';
 import { CheckInAssistEvent } from '../modules/check-in-assist/entities/check-in-assist-event.entity';
+import { Notification } from '../modules/notifications/entities/notification.entity';
+import { NotificationRecipient } from '../modules/notifications/entities/notification-recipient.entity';
 
 export default new DataSource({
   type: 'mysql',
@@ -83,6 +85,8 @@ export default new DataSource({
     ExamBlockedSeat,
     CheckInAssistSession,
     CheckInAssistEvent,
+    Notification,
+    NotificationRecipient,
   ],
   migrations: [
     __filename.endsWith('.js')

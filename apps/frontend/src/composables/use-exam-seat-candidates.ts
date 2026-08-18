@@ -471,6 +471,8 @@ export function useExamSeatCandidates() {
     error,
     searchQuery,
     selectedSessionId,
+    sessionLocations,
+    tableRows,
     filteredRows,
     roomTableRows,
     candidateCount,

@@ -57,7 +57,7 @@ const emit = defineEmits<{
 }>();
 
 const { formatThaiDate } = useThaiDate();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const getIndex = (row: PasscodeLog): number => {
   const page = props.pagination?.page ?? 1;
@@ -66,7 +66,9 @@ const getIndex = (row: PasscodeLog): number => {
   return (page - 1) * rowsPerPage + localIndex + 1;
 };
 
-const columns = computed<QTableColumn[]>(() => [
+const columns = computed<QTableColumn[]>(() => {
+  void locale.value;
+  return [
   {
     name: 'index',
     label: t('admin.passcodeHistory.table.columns.index'),
@@ -102,8 +104,7 @@ const columns = computed<QTableColumn[]>(() => [
     align: 'center',
     style: 'width: 20%',
   },
-]);
-
+];});
 const onRequest = (req: TableRequestProps) => {
   emit('request', req);
 };

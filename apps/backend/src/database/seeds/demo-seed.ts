@@ -233,6 +233,7 @@ async function seedUsers(): Promise<Candidate[]> {
     };
     const candidateRole = await ensureRole(RoleEnum.CANDIDATE, 'ผู้สมัครสอบ');
     const staffRole = await ensureRole(RoleEnum.STAFF, 'เจ้าหน้าที่สถาบันภาษา');
+    await ensureRole(RoleEnum.SUPER_ADMIN, 'ผู้ดูแลระบบสูงสุด');
 
     const hashed = await bcrypt.hash(PASSWORD, await bcrypt.genSalt());
 

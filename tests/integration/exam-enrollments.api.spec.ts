@@ -3,7 +3,7 @@ import { apiLogin } from '../e2e/fixtures/auth';
 import { TEST_PASSWORD, type TestRoleKey } from '../e2e/fixtures/users';
 
 /**
- * Exam enrollments API integration — matrix ENR-I-001 … ENR-I-012
+ * Exam enrollments API integration — matrix ENR-I-001 … ENR-I-013
  *
  * Seed approach (shared-DB, disposable via API):
  * 1. Admin creates open / closed / SPECIAL exams + sessions
@@ -19,6 +19,13 @@ const ExamEnrollmentStatus = {
   SEAT_PUBLISHED: 3,
   ATTENDED: 4,
   CANCELLED: 5,
+} as const;
+
+const ExamVerifyStatus = {
+  UNCHECKED: 0,
+  PASS: 1,
+  WAIT_FIXED: 2,
+  CANCELLED: 3,
 } as const;
 
 const EXAM_FEE = 500;
@@ -185,6 +192,18 @@ test.describe('Exam enrollments API — create / seats / RBAC / match flows', ()
     const res = await request.patch(`/api/exam-enrollments/${ermId}`, {
       headers: adminHeaders,
       data: { ERM_STATUS: ExamEnrollmentStatus.PAID },
+    });
+    expect(res.status(), await res.text()).toBe(200);
+    return (await res.json()) as EnrollmentRow;
+  }
+
+  async function markVerified(
+    request: APIRequestContext,
+    ermId: number,
+  ): Promise<EnrollmentRow> {
+    const res = await request.patch(`/api/exam-enrollments/${ermId}`, {
+      headers: adminHeaders,
+      data: { ERM_VERIFY_STATUS: ExamVerifyStatus.PASS },
     });
     expect(res.status(), await res.text()).toBe(200);
     return (await res.json()) as EnrollmentRow;
@@ -628,6 +647,7 @@ test.describe('Exam enrollments API — create / seats / RBAC / match flows', ()
       headers: disposableHeaders!,
     });
     await markPaid(request, e1.ERM_ID);
+    await markVerified(request, e1.ERM_ID);
 
     const e2 = await createEnrollment(request, {
       sessionId,
@@ -635,6 +655,7 @@ test.describe('Exam enrollments API — create / seats / RBAC / match flows', ()
       headers: disposable2Headers!,
     });
     await markPaid(request, e2.ERM_ID);
+    await markVerified(request, e2.ERM_ID);
 
     const forbidden = await request.patch(
       '/api/exam-enrollments/bulk-seat-assignments',
@@ -716,6 +737,43 @@ test.describe('Exam enrollments API — create / seats / RBAC / match flows', ()
     const verify1 = await getEnrollment(request, e1.ERM_ID);
     expect(verify1.status).toBe(200);
     expect((verify1.body as EnrollmentRow).ERM_SEAT_LABEL).toBe('A-01');
+  });
+
+  test('PATCH bulk-seat-assignments 409 when verify status is incomplete', async ({
+    request,
+  }) => {
+    requireSeed();
+    const sessionId = await createSession(request, openExamId!);
+    const slId = await ensureSessionLocation(request, sessionId);
+
+    const enrollment = await createEnrollment(request, {
+      sessionId,
+      userId: disposableUserId!,
+      headers: disposableHeaders!,
+    });
+    await markPaid(request, enrollment.ERM_ID);
+
+    const res = await request.patch(
+      '/api/exam-enrollments/bulk-seat-assignments',
+      {
+        headers: adminHeaders,
+        data: {
+          sessionIds: [sessionId],
+          assignments: [
+            {
+              ermId: enrollment.ERM_ID,
+              seatLabel: 'A-01',
+              slId,
+              sortOrder: 1,
+            },
+          ],
+        },
+      },
+    );
+    const text = await res.text();
+    expect(res.status(), text).toBe(409);
+    const body = JSON.parse(text) as { error?: string; message?: string };
+    expect(body.error).toBe('ENROLLMENTS_NOT_VERIFIED');
   });
 
   // ENR-I-005
@@ -957,6 +1015,60 @@ test.describe('Exam enrollments API — create / seats / RBAC / match flows', ()
     expect(ids).toContain(unpaid2.ERM_ID);
     expect(ids).not.toContain(unpaid.ERM_ID);
     expect(body.totalPaid).toBeGreaterThanOrEqual(1);
+
+    const candidateDenied = await request.get(
+      `/api/exam-enrollments/exam/${openExamId}?sessionId=${sessionId}&page=1&limit=50`,
+      { headers: candidateHeaders },
+    );
+    expect(candidateDenied.status(), await candidateDenied.text()).toBe(403);
+  });
+
+  // ENR-I-013
+  test('GET exam/:id default order incomplete first then newest', async ({
+    request,
+  }) => {
+    requireSeed();
+    expect(disposableUserId).toBeTruthy();
+    expect(disposable2UserId).toBeTruthy();
+    expect(disposableHeaders).toBeTruthy();
+    expect(disposable2Headers).toBeTruthy();
+
+    const sessionId = await createSession(request, openExamId!);
+
+    const olderUnpaid = await createEnrollment(request, {
+      sessionId,
+      userId: candidateUserId,
+    });
+    const newerPaidUnchecked = await createEnrollment(request, {
+      sessionId,
+      userId: disposableUserId!,
+      headers: disposableHeaders!,
+    });
+    await markPaid(request, newerPaidUnchecked.ERM_ID);
+    const newestPaidVerified = await createEnrollment(request, {
+      sessionId,
+      userId: disposable2UserId!,
+      headers: disposable2Headers!,
+    });
+    await markPaid(request, newestPaidVerified.ERM_ID);
+    await markVerified(request, newestPaidVerified.ERM_ID);
+
+    const list = await request.get(
+      `/api/exam-enrollments/exam/${openExamId}?sessionId=${sessionId}&page=1&limit=50`,
+      { headers: adminHeaders },
+    );
+    expect(list.status(), await list.text()).toBe(200);
+    const body = (await list.json()) as { data: EnrollmentRow[] };
+    const expectedIds = [
+      newerPaidUnchecked.ERM_ID,
+      olderUnpaid.ERM_ID,
+      newestPaidVerified.ERM_ID,
+    ];
+    const orderedIds = body.data
+      .map((row) => row.ERM_ID)
+      .filter((id) => expectedIds.includes(id));
+
+    expect(orderedIds).toEqual(expectedIds);
   });
 
   // ENR-I-012

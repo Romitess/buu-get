@@ -9,10 +9,14 @@ import {
   ParseIntPipe,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from 'src/common/guards/optional-jwt-auth.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { EXAM_ADMIN_ROLES } from 'src/common/constants/role-groups';
+import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
+import { AuthenticatedUser, userHasAnyRole } from 'src/common/utils/authz.util';
 import { Public } from 'src/decorators/public.decorator';
 import {
   ApiTags,
@@ -26,6 +30,7 @@ import { UpdateExamDto } from './dto/update-exam.dto';
 import { CreatePasscodesDto } from './dto/create-passcodes.dto';
 import { NotifyExamChangesDto } from './dto/notify-exam-changes.dto';
 import { Exam } from './entities/exam.entity';
+import { ExamQueryDto } from './dto/exam-query.dto';
 import { ExamPasscode } from './entities/exam-passcode.entity';
 import { PasscodeLogResponseDto } from './dto/passcode-log-response.dto';
 import { ExamPasscodeLog } from './entities/exam-passcode-log.entity';
@@ -55,19 +60,38 @@ export class ExamController {
   }
 
   @Public()
-  @Get()
-  @ApiOperation({ summary: 'ดึงข้อมูลการสอบทั้งหมด' })
+  @Get('schedule')
+  @ApiOperation({
+    summary: 'ดึงตารางสอบที่เผยแพร่แล้ว (สาธารณะ ไม่รวม passcodes)',
+  })
   @ApiOkResponse({ type: Exam, isArray: true })
-  async findAll(): Promise<Exam[]> {
-    return this.examService.findAll();
+  async findPublishedSchedule(): Promise<Exam[]> {
+    return this.examService.findPublishedSchedule();
+  }
+
+  @Get()
+  @Roles(...EXAM_ADMIN_ROLES)
+  @ApiOperation({ summary: 'ดึงรายการสอบทั้งหมดแบบแบ่งหน้า (รวมฉบับร่าง)' })
+  @ApiOkResponse({ description: 'รายการสอบแบบแบ่งหน้า' })
+  async findAll(
+    @Query() query: ExamQueryDto,
+  ): Promise<PaginatedResponse<Exam>> {
+    return this.examService.findAll(query);
   }
 
   @Public()
+  @UseGuards(OptionalJwtAuthGuard)
   @Get(':id')
   @ApiOperation({ summary: 'ดึงข้อมูลการสอบตาม ID (ไม่รวมแผนผังที่นั่ง)' })
   @ApiOkResponse({ type: Exam })
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Exam> {
-    return this.examService.findOne(id);
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: { user?: AuthenticatedUser },
+  ): Promise<Exam> {
+    const allowUnpublished = req.user
+      ? userHasAnyRole(req.user, EXAM_ADMIN_ROLES)
+      : false;
+    return this.examService.findOne(id, { allowUnpublished });
   }
 
   @UseGuards(JwtAuthGuard)

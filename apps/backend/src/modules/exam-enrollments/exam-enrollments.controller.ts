@@ -115,6 +115,7 @@ export class ExamEnrollmentsController {
   }
 
   @Get('exam/:examId')
+  @Roles(...ENROLLMENT_ADMIN_ROLES)
   @ApiOperation({ summary: 'ดึงข้อมูลผู้สมัครสอบตามรหัสการสอบ' })
   @ApiOkResponse({ type: ExamEnrollment, isArray: true })
   async findByExamId(

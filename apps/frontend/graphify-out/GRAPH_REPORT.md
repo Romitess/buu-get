@@ -1,16 +1,16 @@
-# Graph Report - frontend  (2026-08-11)
+# Graph Report - apps/frontend  (2026-08-18)
 
 ## Corpus Check
-- 365 files · ~247,311 words
+- 374 files · ~256,239 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1460 nodes · 2116 edges · 221 communities (199 shown, 22 thin omitted)
+- 1486 nodes · 2202 edges · 222 communities (201 shown, 21 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `123a087f`
+- Built from commit: `ec7c638b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -115,18 +115,15 @@
 - [[_COMMUNITY_Community 204|Community 204]]
 - [[_COMMUNITY_Community 210|Community 210]]
 - [[_COMMUNITY_Community 211|Community 211]]
-- [[_COMMUNITY_Community 212|Community 212]]
-- [[_COMMUNITY_Community 213|Community 213]]
-- [[_COMMUNITY_Community 214|Community 214]]
 - [[_COMMUNITY_Community 217|Community 217]]
 - [[_COMMUNITY_Community 221|Community 221]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `api` - 27 edges
-2. `useUserStore` - 16 edges
-3. `[]` - 15 edges
-4. `ROLES` - 11 edges
-5. `[]` - 11 edges
+2. `[]` - 15 edges
+3. `useUserStore` - 15 edges
+4. `ROLES` - 13 edges
+5. `BackendExam` - 11 edges
 6. `scripts` - 10 edges
 7. `ENROLLMENT_STATUS` - 10 edges
 8. `fetchExamById()` - 10 edges
@@ -148,23 +145,23 @@
 ## Import Cycles
 - None detected.
 
-## Communities (221 total, 22 thin omitted)
+## Communities (222 total, 21 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.07
 Nodes (20): buildCertificateScoreLines(), buildScoreDraftFromScore(), ScoreDraft, sumLineScores(), BackendExamScore, ExamScoreLinePayload, fetchExamScores(), FetchExamScoresParams (+12 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.11
-Nodes (18): AdmissionVoucherData, BackendEnrollment, BackendPasscode, BackendScore, CustomStatus, DialogCancelProps, DialogConfirmProps, ExamClockProps (+10 more)
+Cohesion: 0.08
+Nodes (23): IssuedReceipt, IssuedReceiptBankReconcile, IssuedReceiptTransaction, BackendUser, AdmissionVoucherData, BackendEnrollment, BackendPasscode, BackendScore (+15 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.20
-Nodes (7): examId, { form }, route, breadcrumbs, removeUnresolvedQueryParams(), resolveBreadcrumbPath(), route
+Cohesion: 0.28
+Nodes (6): RouteResourceFetcherContext, UseRouteResourceOptions, fetchAllExamsRaw(), isRequestCanceled(), { apiGet }, retryAsync()
 
 ### Community 3 - "Community 3"
-Cohesion: 0.15
-Nodes (6): props, { t }, colOptions, isOpen, props, rowOptions
+Cohesion: 0.18
+Nodes (4): props, { t }, isOpen, Exam
 
 ### Community 4 - "Community 4"
 Cohesion: 0.08
@@ -175,8 +172,8 @@ Cohesion: 0.06
 Nodes (24): educationOptions, showCalendar, { t }, yesterdayString, emit, nationalIdRules, { t }, currentDate (+16 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.07
-Nodes (25): authStore, confirmPassword, email, { focusFirstInvalidField }, i18n, isSendingOtp, isVerifyingOtp, password (+17 more)
+Cohesion: 0.08
+Nodes (25): authStore, confirmPassword, email, { focusFirstInvalidField }, isSendingOtp, isVerifyingOtp, { locale, t }, password (+17 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.08
@@ -187,68 +184,68 @@ Cohesion: 0.09
 Nodes (11): ariaLabel, { t }, ariaLabel, { t }, columnClass, ariaLabel, narrowColumns, props (+3 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.12
-Nodes (13): attrs, isMuted, isOpen, popupContentClass, localFilter, { t }, fetchDailyRevenueSummary(), CreateFundSourcePayload (+5 more)
+Cohesion: 0.22
+Nodes (5): localFilter, { t }, CreateFundSourcePayload, fetchFundSources(), FundSource
 
 ### Community 10 - "Community 10"
-Cohesion: 0.26
-Nodes (11): ComponentCustomProperties, UseImageUploadOptions, BACKEND_API, IMAGE_CONFIG, ImageCategory, PLATFORM_GATEWAY, uploadImage(), validateImageFile() (+3 more)
+Cohesion: 0.14
+Nodes (18): useImageUpload(), UseImageUploadOptions, useImageUrl(), BACKEND_API, IMAGE_CONFIG, ImageCategory, PLATFORM_GATEWAY, cropImageSrc (+10 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.09
 Nodes (20): clearPaymentImportLocalData(), formatAmount(), formatImportDate(), globalImportedRows, globalSelectedFile, isAutoLoadSuspended, mapBankReconcileToRow(), PaymentImportRow (+12 more)
 
 ### Community 12 - "Community 12"
-Cohesion: 0.09
-Nodes (25): formatLocationWithRoom(), BackendSessionLocation, buddhistDateAndTimeToIso(), buddhistToGregorian(), buddhistToGregorianPeriodEnd(), createEnrollment(), CreateExamPayload, createExamRound() (+17 more)
+Cohesion: 0.08
+Nodes (19): BackendSessionLocation, createEnrollment(), CreateExamPayload, CreatePasscodeItemDto, deleteExam(), ExamWriteRequestConfig, FetchAdminExamsParams, fetchUserEnrollments() (+11 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.12
-Nodes (15): APPLICANT_TYPE_REMARKS, PHYSICAL_STATUS_REMARKS, SeatLabelOrderItem, SeatStatus, SessionLocationOption, SessionSeatItem, SessionSnapshotSeat, StudentSeatInfo (+7 more)
+Cohesion: 0.13
+Nodes (14): APPLICANT_TYPE_REMARKS, PHYSICAL_STATUS_REMARKS, SeatLabelOrderItem, SeatStatus, SessionLocationOption, SessionSeatItem, SessionSnapshotSeat, StudentSeatInfo (+6 more)
 
 ### Community 14 - "Community 14"
 Cohesion: 0.08
 Nodes (26): devDependencies, autoprefixer, @commitlint/cli, @commitlint/config-conventional, eslint, @eslint/js, eslint-plugin-vue, globals (+18 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.14
-Nodes (9): useNavigation(), currentYear, menuLinks, { t }, { userStore, leftDrawerOpen, miniState, isHovered, isMini }, $q, route, { showAdminDrawer } (+1 more)
+Cohesion: 0.05
+Nodes (34): isHovered, leftDrawerOpen, miniState, NavigationLinkDef, useNavigation(), ADMIN_SWITCHABLE_ROLES, ROLE_LABELS, ROLES (+26 more)
 
 ### Community 16 - "Community 16"
-Cohesion: 0.11
-Nodes (29): BackendExamCandidateInfo, BackendExamInformationRound, BackendExamReportSummary, BackendRateStat, BackendScoreStat, BackendStat, cleanParams(), fetchExamReportOptions() (+21 more)
+Cohesion: 0.14
+Nodes (18): BackendExamReportSummary, fetchExamReportOptions(), ExamAttemptProportionData, ExamAttendanceChartData, ExamCandidateAttemptStatus, ExamCandidateScoreLine, ExamRegistrationTrendChartData, ExamReportFilter (+10 more)
 
 ### Community 17 - "Community 17"
-Cohesion: 0.15
-Nodes (10): BackendLocationSeat, createLocation(), fetchLocationById(), LocationAislePositionPayload, LocationAislePositionType, LocationPayload, normalizeLocation(), SeatDirectionPayload (+2 more)
+Cohesion: 0.14
+Nodes (12): BackendLocationSeat, createLocation(), fetchLocationById(), fetchLocations(), fetchLocationsPage(), LocationAislePositionPayload, LocationAislePositionType, LocationPayload (+4 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.07
-Nodes (32): EnrollmentWithSeatOrder, SeatCandidateRow, SeatCandidateSessionLocation, SessionLocationOption, TestHarness, useExamSeatCandidates(), EnrollmentSeatAssignment, SeatSessionLocation (+24 more)
+Cohesion: 0.18
+Nodes (15): EnrollmentWithSeatOrder, SeatCandidateRow, SeatCandidateSessionLocation, SessionLocationOption, TestHarness, useExamSeatCandidates(), EnrollmentSeatAssignment, SeatSessionLocation (+7 more)
 
 ### Community 19 - "Community 19"
-Cohesion: 0.20
-Nodes (9): EXAM_STATUS_LABELS, EXAM_TYPE_LABELS, PaymentRow, Role, SearchRow, TABLE_ACTIONS, TableAction, ToolButtonConfig (+1 more)
+Cohesion: 0.14
+Nodes (17): BackendExamCandidateInfo, BackendExamInformationRound, BackendRateStat, BackendScoreStat, BackendStat, cleanParams(), ExamCandidateInfoPage, ExamReportScoreMeta (+9 more)
 
 ### Community 20 - "Community 20"
 Cohesion: 0.10
 Nodes (25): DashboardViewType, EXAM_SIMULATION_TOUR_STEPS, getCourseCardStepIndex(), getQuizSectionStepIndex(), getRestartStepIndex(), getStepIndex(), TourPlacement, TourResumeTrigger (+17 more)
 
 ### Community 21 - "Community 21"
-Cohesion: 0.33
-Nodes (9): ExamRound, ExamRegistrationExpiryInput, getExamRoundsCalendarAvailability(), isExamRoundRegistrationExpired(), parseExamStartDateTime(), parseRegistrationDate(), parseRegistrationEndDate(), parseSlashDate() (+1 more)
+Cohesion: 0.29
+Nodes (10): ExamRound, ExamCalendarAvailability, ExamRegistrationExpiryInput, getExamRoundsCalendarAvailability(), isExamRoundRegistrationExpired(), parseExamStartDateTime(), parseRegistrationDate(), parseRegistrationEndDate() (+2 more)
 
 ### Community 22 - "Community 22"
-Cohesion: 0.16
-Nodes (16): CANDIDATE_HOME_EXAM_HISTORY_PATH, collapseActivitiesByExam(), deriveCandidateHomeActivities(), EXAM_HISTORY_PATH, EXAM_SCHEDULE_PATH, getExamDateMs(), getExamStartMs(), hasVoucher() (+8 more)
+Cohesion: 0.15
+Nodes (17): collapseActivitiesByExam(), deriveCandidateHomeActivities(), EXAM_HISTORY_PATH, EXAM_SCHEDULE_PATH, getExamDateMs(), getExamStartMs(), hasVoucher(), MAX_DISPLAY_ACTIVITIES (+9 more)
 
 ### Community 23 - "Community 23"
-Cohesion: 0.19
-Nodes (10): formatFee(), fetchAllExamsRaw(), fetchExamSchedules(), fetchScheduleData(), isRequestCanceled(), { apiGet }, retryAsync(), { apiGet } (+2 more)
+Cohesion: 0.14
+Nodes (8): bulkAssignEnrollmentSeats(), BulkSeatAssignment, CheckInEnrollmentPayload, fetchRawEnrollmentsByExamId(), fetchRawEnrollmentsPage(), RawEnrollmentFetchParams, RawEnrollmentPageParams, RequestFixPayload
 
 ### Community 24 - "Community 24"
-Cohesion: 0.16
-Nodes (10): DEFAULT_EXAM_INFO, EMPTY_DETAILS, ENROLLMENT_STATUS, normalizeExamPasscode(), NOTIFY_MSG, VALIDATION_MSG, VERIFY_STATUS, getActiveEnrollmentCount() (+2 more)
+Cohesion: 0.13
+Nodes (17): AvailableExamRound, AvailableRoundsErrorCode, mapPublishedSchedule(), MAX_DISPLAY_ROUNDS, useAvailableExamRounds(), DEFAULT_EXAM_INFO, ENROLLMENT_STATUS, formatLocationWithRoom() (+9 more)
 
 ### Community 25 - "Community 25"
 Cohesion: 0.15
@@ -264,39 +261,39 @@ Nodes (7): activeTimeSessions, currentSessionCapacity, examDateLabel, selectedSe
 
 ### Community 28 - "Community 28"
 Cohesion: 0.17
-Nodes (11): examRound, examYear, isLoading, pageSubtitle, pageTitle, $q, route, router (+3 more)
+Nodes (11): debouncedSearch, examRound, examYear, fetchCandidates, isLoading, pageSubtitle, pageTitle, route (+3 more)
 
 ### Community 29 - "Community 29"
 Cohesion: 0.17
-Nodes (10): examYear, isLoading, pageSubtitle, pageTitle, $q, route, router, searchQuery (+2 more)
+Nodes (10): debouncedSearch, examYear, fetchRounds, isLoading, pageSubtitle, pageTitle, route, router (+2 more)
 
 ### Community 30 - "Community 30"
-Cohesion: 0.29
-Nodes (4): AttendanceTableRow, codeToScanChar(), KEDMANEE_TO_QWERTY, normalizeScanPayload()
+Cohesion: 0.50
+Nodes (8): buddhistDateAndTimeToIso(), buddhistToGregorian(), buddhistToGregorianPeriodEnd(), createExamRound(), groupTimeRangesByTime(), normalizeHhMm(), toPeriodIso(), updateExamRound()
 
 ### Community 31 - "Community 31"
 Cohesion: 0.22
-Nodes (5): api, RegisterPayload, RegisterResponse, CreateVoidedReceiptPayload, VoidedReceiptResponse
+Nodes (5): api, fetchLatestProfileHistoryImages(), CreateVoidedReceiptPayload, VoidedReceiptResponse, ProfileEditHistory
 
 ### Community 32 - "Community 32"
-Cohesion: 0.23
-Nodes (8): ExecutiveTestTakerQuery, fetchExecutiveTestTakers(), EnrollmentStatus, ExamHistoryRow, ExecutiveExamHistoryResponse, ExecutiveExamScoreLine, ExecutiveTestTakerPage, ExecutiveTestTakerRow
+Cohesion: 0.24
+Nodes (7): ExecutiveTestTakerQuery, fetchExecutiveTestTakers(), ExamHistoryRow, ExecutiveExamHistoryResponse, ExecutiveExamScoreLine, ExecutiveTestTakerPage, ExecutiveTestTakerRow
 
 ### Community 33 - "Community 33"
 Cohesion: 0.16
-Nodes (7): THAI_SHORT_MONTHS, useThaiDate(), { formatThaiDate }, getProgressColor(), getRatio(), $q, { t }
+Nodes (7): THAI_SHORT_MONTHS, useThaiDate(), { formatThaiDate }, getProgressColor(), getRatio(), $q, { t, locale }
 
 ### Community 34 - "Community 34"
 Cohesion: 0.15
 Nodes (10): BackendTransactionRef, BackendTransactionRefEnrollment, BackendTransactionRefExam, BackendTransactionRefProfile, BackendTransactionRefReceipt, BackendTransactionRefSession, BackendTransactionRefTransaction, BackendTransactionRefUser (+2 more)
 
 ### Community 35 - "Community 35"
-Cohesion: 0.10
-Nodes (18): AvailableExamRound, MAX_DISPLAY_ROUNDS, useAvailableExamRounds(), fetchUserEnrollments(), BackendTransaction, confirmPaymentFlow(), ConfirmPaymentFlowPayload, CreatePendingPaymentPayload (+10 more)
+Cohesion: 0.14
+Nodes (12): BackendTransaction, confirmPaymentFlow(), ConfirmPaymentFlowPayload, CreatePendingPaymentPayload, createTransaction(), CreateTransactionFlowPayload, CreateTransactionFlowResponse, expireTransaction() (+4 more)
 
 ### Community 36 - "Community 36"
 Cohesion: 0.22
-Nodes (10): [], activeTimeSessions, currentRoomEnrollments, examDateLabel, localSessionPaidCount, localSessionTotalCount, selectedSession, selectedSessionCapacity (+2 more)
+Nodes (9): activeTimeSessions, currentRoomEnrollments, examDateLabel, localSessionPaidCount, localSessionTotalCount, selectedSession, selectedSessionCapacity, selectedSessionLocation (+1 more)
 
 ### Community 37 - "Community 37"
 Cohesion: 0.27
@@ -308,19 +305,19 @@ Nodes (10): scripts, build, dev, format, lint, postinstall, test, test:e2e (+2 m
 
 ### Community 39 - "Community 39"
 Cohesion: 0.22
-Nodes (6): DefineDateTimeFormat, DefineLocaleMessage, DefineNumberFormat, i18n, MessageLanguages, MessageSchema
+Nodes (8): formatFee(), ExamLocationOption, fetchScheduleData(), { apiGet }, makeExam(), makeSession(), BackendLocationRaw, BackendLocation
 
 ### Community 40 - "Community 40"
 Cohesion: 0.24
 Nodes (8): findFocusableElement(), FOCUSABLE_SELECTOR, FocusFirstInvalidFieldOptions, getFormElement(), isHTMLElement(), isScrollableOverflow(), scrollElementIntoNearestContainers(), UseFocusFirstInvalidFieldReturn
 
 ### Community 41 - "Community 41"
-Cohesion: 0.12
-Nodes (9): scoreLineHeaders, { t }, handleViewDetail, onRequest, { t }, get(), has(), ExamInformationRoundRow (+1 more)
+Cohesion: 0.09
+Nodes (18): EligibleCandidate, errorMessage, passcode, { t }, scoreLineHeaders, { t, locale }, PasscodeType, EXAM_STATUS_LABELS (+10 more)
 
 ### Community 42 - "Community 42"
-Cohesion: 0.29
-Nodes (4): examDateLabel, getLocationAisleAfter, printAisleAfterCols, printLocation
+Cohesion: 0.18
+Nodes (3): examDateLabel, PRINT_SEAT_GUIDE_LETTERS, printExamRoundLabel
 
 ### Community 43 - "Community 43"
 Cohesion: 0.31
@@ -336,7 +333,7 @@ Nodes (4): BackendVoucher, BulkIssueVouchersPayload, BulkIssueVouchersResult, Se
 
 ### Community 46 - "Community 46"
 Cohesion: 0.20
-Nodes (6): { form }, CreateExamForm, emit, {
+Nodes (7): CreateExamForm, emit, examIdRef, {
   examTypeOptions,
   examFormatOptions,
   proctorOptions,
@@ -374,15 +371,15 @@ Nodes (6): { form }, CreateExamForm, emit, {
   sortTimeSlots,
   dateErrors,
   clearFieldError,
-}, onCancel(), onSave()
+}, onCancel(), onSave(), { t }
 
 ### Community 47 - "Community 47"
 Cohesion: 0.47
 Nodes (4): numberToThaiText(), readThaiNumber(), THAI_DIGITS, THAI_PLACES
 
 ### Community 48 - "Community 48"
-Cohesion: 0.17
-Nodes (10): fullEnrollment, notify, slimEnrollment, TestHarness, useExamCertificateDocument(), useExamDocuments(), fetchEnrollmentById(), ExamHistoryItem (+2 more)
+Cohesion: 0.20
+Nodes (5): handleViewDetail, onRequest, { t, locale }, ExamInformationRoundsPage, ExamInformationRoundRow
 
 ### Community 49 - "Community 49"
 Cohesion: 0.40
@@ -397,20 +394,20 @@ Cohesion: 0.40
 Nodes (4): endOfLine, printWidth, $schema, singleQuote
 
 ### Community 52 - "Community 52"
-Cohesion: 0.28
-Nodes (7): ROLE_LABELS, ROLES, RolesType, RouteMeta, routes, DefaultRouteLocation, getDefaultRouteForRole()
+Cohesion: 0.43
+Nodes (5): CANDIDATE_HOME_EXAM_HISTORY_PATH, CandidateActivityKind, CandidateHomeActivity, useCandidateHomeActivities(), useUserStore
 
 ### Community 57 - "Community 57"
 Cohesion: 0.10
-Nodes (19): countAvailableSeats(), ExamComparisonSnapshot, ExamRoom, resolveLoadedRoomSeats(), TimeSlot, UseExamFormOptions, createExamPasscodes(), ExamChangeItem (+11 more)
+Nodes (18): countAvailableSeats(), ExamComparisonSnapshot, ExamRoom, resolveLoadedRoomSeats(), TimeSlot, useCreateExam(), UseExamFormOptions, getCurrentThaiFiscalYearAd() (+10 more)
 
 ### Community 62 - "Community 62"
-Cohesion: 0.18
-Nodes (12): buildAssistJoinUrl(), closeAssistSession(), createAssistSession(), CreateAssistSessionPayload, listAssistEvents(), AssistCandidateSummary, AssistEvent, AssistSessionMeta (+4 more)
+Cohesion: 0.07
+Nodes (33): fullEnrollment, notify, slimEnrollment, TestHarness, useExamCertificateDocument(), useExamDocuments(), buildCertificateVerifyUrl(), buildReceiptVerifyUrl() (+25 more)
 
 ### Community 77 - "Community 77"
-Cohesion: 0.07
-Nodes (26): displayValidFromDate, displayValidUntilDate, isEditingBandRules, isSavingBandRules, isSubmitting, issueDate, onScoreKeypress, previewBandLevel (+18 more)
+Cohesion: 0.09
+Nodes (20): displayValidFromDate, displayValidUntilDate, getLocalDateYmd(), hasMinGreaterThanMax, isFutureLocalDate(), issueDate, issueDateOptions(), previewBandLevel (+12 more)
 
 ### Community 83 - "Community 83"
 Cohesion: 0.50
@@ -429,48 +426,44 @@ Cohesion: 0.12
 Nodes (12): SeatCell, COLOR_BY_CODE, COLOR_BY_REMARK, getPhysicalStatusBgColor(), PHYSICAL_STATUS_BG_COLORS, cardStyle, displayRemark, hasSeat (+4 more)
 
 ### Community 129 - "Community 129"
-Cohesion: 0.12
-Nodes (8): BackendUserResponse, checkUserIdentifiers(), getUsersFromApi(), LoginResponse, PaginatedUsersResult, SearchUsersParams, UserIdentifierCheckResult, User
+Cohesion: 0.33
+Nodes (5): CertificateBandRule, CertificateCardData, CertificateData, CertificateScoreLine, CertificateScoreReportData
 
 ### Community 137 - "Community 137"
 Cohesion: 0.16
-Nodes (14): ReceiptStatus, TRANSACTION_PAYMENT_STATUS, ExamHistoryCategory, StatusBadgeView, buildBadge(), buildBaseItem(), CancellationReason, EnrollmentCancelProbe (+6 more)
+Nodes (14): TRANSACTION_PAYMENT_STATUS, ExamHistoryCategory, ExamHistoryItem, StatusBadgeView, buildBadge(), buildBaseItem(), CancellationReason, EnrollmentCancelProbe (+6 more)
 
 ### Community 140 - "Community 140"
 Cohesion: 0.21
 Nodes (7): { dialogRef, onDialogHide, onDialogOK, onDialogCancel }, isConfirming, isEditingRegulations, props, i18n, voucherData, VoucherData
 
 ### Community 145 - "Community 145"
-Cohesion: 0.18
-Nodes (9): activeRegulationsEn, activeRegulationsTh, editingRegulationsEn, editingRegulationsTh, isEditingRegulations, isSavingRegulations, loadedRegulationsEn, loadedRegulationsTh (+1 more)
+Cohesion: 0.46
+Nodes (4): fetchDailyRevenueSummary(), DailyRevenueFilter, DailyRevenueRow, DailyRevenueSummary
 
 ### Community 164 - "Community 164"
-Cohesion: 0.20
-Nodes (8): useImageUpload(), useImageUrl(), cropImageSrc, { isUploading, handleImageUpload }, $q, showCropDialog, { t }, getImageUrl()
+Cohesion: 0.24
+Nodes (8): fetchEnrollmentsByExamId(), PaginatedEnrollmentResponse, BackendSessionDetail, BackendUserProfile, EnrollmentTableRow, PAYMENT_STATUS_I18N_KEYS, VERIFY_STATUS_I18N_KEYS, VerifyStatus
 
 ### Community 165 - "Community 165"
-Cohesion: 0.47
-Nodes (8): buildCertificateVerifyUrl(), buildReceiptVerifyUrl(), buildVerifyLandingUrl(), getPublicAppUrl(), generateCertificateQrDataUrl(), generateQrDataUrl(), generateReceiptQrDataUrl(), getVerifyLandingUrl()
+Cohesion: 0.18
+Nodes (15): fetchAdminExams(), fetchAdminExamsAll(), fetchExamLocations(), BackendNotification, fetchNotifications(), fetchUnreadNotificationCount(), mapNotification(), markAllNotificationsRead() (+7 more)
 
 ### Community 172 - "Community 172"
-Cohesion: 0.32
-Nodes (6): $q, router, { t }, getRegulations(), RegulationsData, saveRegulations()
-
-### Community 184 - "Community 184"
-Cohesion: 0.15
-Nodes (6): EligibleCandidate, errorMessage, passcode, debouncedFetchResults, PasscodeType, PaginationModel
+Cohesion: 0.47
+Nodes (3): ComponentCustomProperties, ALLOWED_FIRST_SEGMENTS, resolveSafeInAppRedirect()
 
 ### Community 185 - "Community 185"
 Cohesion: 0.43
 Nodes (5): createEmptyRow(), createSkeletonRows(), PLACEHOLDER_ROW_KEYS, PlaceholderRow, resolveTableRowKey()
 
 ### Community 186 - "Community 186"
-Cohesion: 0.32
-Nodes (6): isHovered, leftDrawerOpen, miniState, NavigationGroup, NavigationItem, UserRole
+Cohesion: 0.18
+Nodes (7): DefineDateTimeFormat, DefineLocaleMessage, DefineNumberFormat, i18n, MessageLanguages, MessageSchema, useGlobalLocaleTrackedI18n()
 
 ### Community 187 - "Community 187"
-Cohesion: 0.21
-Nodes (11): useCandidateHomeActivities(), useCreateExam(), ApiErrorData, ExamPasscodeDialogExpose, RegistrationStatus, ROUTE_NAMES, useExamSchedule(), getCurrentThaiFiscalYearAd() (+3 more)
+Cohesion: 0.18
+Nodes (9): activeRegulationsEn, activeRegulationsTh, editingRegulationsEn, editingRegulationsTh, isEditingRegulations, isSavingRegulations, loadedRegulationsEn, loadedRegulationsTh (+1 more)
 
 ### Community 188 - "Community 188"
 Cohesion: 0.39
@@ -481,8 +474,8 @@ Cohesion: 0.33
 Nodes (4): currentStep, examTitle, onUpdateModelValue, transitionName
 
 ### Community 194 - "Community 194"
-Cohesion: 0.29
-Nodes (3): seatRatio, string, Exam
+Cohesion: 0.28
+Nodes (6): $q, router, { t }, getRegulations(), RegulationsData, saveRegulations()
 
 ### Community 199 - "Community 199"
 Cohesion: 0.23
@@ -494,7 +487,7 @@ Nodes (9): verifyCertificate(), verifyDocument(), verifyReceipt(), CertificateVe
 
 ### Community 201 - "Community 201"
 Cohesion: 0.33
-Nodes (4): IssuedReceipt, IssuedReceiptBankReconcile, IssuedReceiptTransaction, ExamEnrollment
+Nodes (4): AttendanceTableRow, codeToScanChar(), KEDMANEE_TO_QWERTY, normalizeScanPayload()
 
 ### Community 202 - "Community 202"
 Cohesion: 0.22
@@ -505,40 +498,36 @@ Cohesion: 0.60
 Nodes (4): clearSvg(), normalizeBarcodePayload(), PLACEHOLDER_VALUES, renderVoucherBarcode()
 
 ### Community 204 - "Community 204"
-Cohesion: 0.47
-Nodes (4): baseExam(), cancelledTimeoutItem(), seatAssignedItem(), TRANSACTION_MATCH_STATUS
+Cohesion: 0.40
+Nodes (4): breadcrumbs, removeUnresolvedQueryParams(), resolveBreadcrumbPath(), route
 
 ### Community 210 - "Community 210"
 Cohesion: 0.33
-Nodes (5): CertificateBandRule, CertificateCardData, CertificateData, CertificateScoreLine, CertificateScoreReportData
-
-### Community 214 - "Community 214"
-Cohesion: 0.50
-Nodes (3): appPublicUrl, buuInfo, UniversityInfo
+Nodes (4): colOptions, isOpen, props, rowOptions
 
 ### Community 221 - "Community 221"
-Cohesion: 0.67
-Nodes (3): getLocalDateYmd(), isFutureLocalDate(), issueDateOptions()
+Cohesion: 0.40
+Nodes (4): attrs, isMuted, isOpen, popupContentClass
 
 ## Knowledge Gaps
-- **533 isolated node(s):** `$schema`, `singleQuote`, `printWidth`, `endOfLine`, `MONOREPO_ENV_FILES` (+528 more)
+- **527 isolated node(s):** `$schema`, `singleQuote`, `printWidth`, `endOfLine`, `MONOREPO_ENV_FILES` (+522 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **22 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **21 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `api` connect `Community 31` to `Community 0`, `Community 129`, `Community 4`, `Community 6`, `Community 9`, `Community 10`, `Community 11`, `Community 12`, `Community 16`, `Community 17`, `Community 18`, `Community 32`, `Community 34`, `Community 35`, `Community 172`, `Community 45`, `Community 62`, `Community 200`, `Community 201`, `Community 202`, `Community 211`, `Community 120`?**
-  _High betweenness centrality (0.105) - this node is a cross-community bridge._
-- **Why does `ROLES` connect `Community 52` to `Community 33`, `Community 129`, `Community 15`, `Community 22`, `Community 57`, `Community 186`, `Community 187`?**
+- **Why does `api` connect `Community 31` to `Community 0`, `Community 1`, `Community 4`, `Community 6`, `Community 9`, `Community 10`, `Community 11`, `Community 12`, `Community 15`, `Community 145`, `Community 17`, `Community 19`, `Community 23`, `Community 32`, `Community 34`, `Community 35`, `Community 165`, `Community 172`, `Community 45`, `Community 62`, `Community 194`, `Community 200`, `Community 202`, `Community 120`?**
+  _High betweenness centrality (0.120) - this node is a cross-community bridge._
+- **Why does `useUserStore` connect `Community 52` to `Community 35`, `Community 165`, `Community 15`, `Community 57`, `Community 62`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+- **Why does `VoucherData` connect `Community 140` to `Community 201`, `Community 194`, `Community 187`, `Community 62`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `getImageUrl()` connect `Community 164` to `Community 48`, `Community 10`, `Community 77`, `Community 13`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **What connects `$schema`, `singleQuote`, `printWidth` to the rest of the system?**
-  _533 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _527 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.0746031746031746 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.10526315789473684 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08262108262108261 - nodes in this community are weakly interconnected._
 - **Should `Community 4` be split into smaller, more focused modules?**
   _Cohesion score 0.07922705314009662 - nodes in this community are weakly interconnected._

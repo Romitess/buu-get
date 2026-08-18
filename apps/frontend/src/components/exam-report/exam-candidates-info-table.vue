@@ -5,6 +5,7 @@
     :loading="loading"
     :pagination="pagination"
     :empty-label="t('admin.examCandidatesInfo.table.emptyLabel')"
+    :is-server-side="isServerSide"
     class="exam-candidates-info-table"
     @request="onRequest"
   >
@@ -42,6 +43,7 @@ interface Props {
   candidates: ExamCandidateInfoRow[];
   loading?: boolean;
   pagination?: PaginationModel;
+  isServerSide?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -51,7 +53,7 @@ const emit = defineEmits<{
   (e: 'view-history', row: ExamCandidateInfoRow): void;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const formatNumber = (value: number | null): string =>
   value === null ? '-' : value.toLocaleString('en-US', { maximumFractionDigits: 2 });
@@ -62,6 +64,7 @@ const scoreLineHeaders = computed(() => {
 });
 
 const columns = computed<QTableColumn<ExamCandidateInfoRow>[]>(() => {
+  void locale.value;
   const baseColumns: QTableColumn<ExamCandidateInfoRow>[] = [
     {
       name: 'index',

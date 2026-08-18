@@ -2,7 +2,7 @@ import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed } from 'vue';
 import type { User, UserRole } from 'src/types/user';
 import * as userService from 'src/services/user.service';
-import { ROLES } from 'src/constants/roles';
+import { ROLES, ADMIN_SWITCHABLE_ROLES, SUPER_ADMIN_SWITCHABLE_ROLES } from 'src/constants/roles';
 
 export const useUserStore = defineStore('user', () => {
   // === State ===
@@ -15,6 +15,14 @@ export const useUserStore = defineStore('user', () => {
   /** normalize ชื่อ role ให้เป็น snake_case ตัวพิมพ์เล็ก (ตรงกับ ROLES constant) */
   const normalizeRole = (role: string): UserRole => role.toLowerCase().replace(/\s+/g, '_');
 
+  const readActiveRoleFromStorage = (): UserRole | null => {
+    const stored = localStorage.getItem('active_role');
+    if (!stored) return null;
+    return normalizeRole(stored);
+  };
+
+  const activeRole = ref<UserRole | null>(readActiveRoleFromStorage());
+
   /** แปลง role/roles จาก backend → roles array ที่ normalize แล้ว (รวม primary เสมอ) */
   const buildRoles = (primary: string | undefined, list: string[] | undefined): UserRole[] => {
     const normalized = [
@@ -26,10 +34,37 @@ export const useUserStore = defineStore('user', () => {
   };
 
   // === Computed ===
-  const userRole = computed<UserRole | null>(() => (currentUser.value?.role as UserRole) || null);
-
   /** role ทั้งหมดของผู้ใช้ — ใช้สำหรับเช็กสิทธิ์แบบ multi-role */
   const userRoles = computed<UserRole[]>(() => currentUser.value?.roles ?? []);
+
+  const canSwitchRole = computed(() =>
+    userRoles.value.some((r) => r === ROLES.ADMIN || r === ROLES.SUPER_ADMIN),
+  );
+
+  const switchableRoles = computed<UserRole[]>(() => {
+    if (!canSwitchRole.value) return [];
+    if (userRoles.value.includes(ROLES.SUPER_ADMIN)) {
+      return SUPER_ADMIN_SWITCHABLE_ROLES;
+    }
+    return ADMIN_SWITCHABLE_ROLES;
+  });
+
+  const userRole = computed<UserRole | null>(() => {
+    if (canSwitchRole.value && activeRole.value) {
+      return activeRole.value;
+    }
+    return currentUser.value?.role ?? null;
+  });
+
+  /** roles สำหรับเช็กสิทธิ์ UI — รวม activeRole เมื่อ admin/super_admin สลับมุมมอง */
+  const effectiveRoles = computed<UserRole[]>(() => {
+    if (canSwitchRole.value && activeRole.value) {
+      return [...new Set([...userRoles.value, activeRole.value])];
+    }
+    return userRoles.value;
+  });
+
+  const hasEffectiveRole = (role: UserRole): boolean => effectiveRoles.value.includes(role);
 
   const profileItems = computed(() => {
     if (!currentUser.value) return [];
@@ -55,6 +90,34 @@ export const useUserStore = defineStore('user', () => {
 
   // === Actions ===
 
+  function applyDefaultActiveRole(): void {
+    if (!canSwitchRole.value) {
+      activeRole.value = null;
+      localStorage.removeItem('active_role');
+      return;
+    }
+
+    const stored = activeRole.value;
+    if (stored && switchableRoles.value.includes(stored)) {
+      return;
+    }
+
+    setActiveRole(ROLES.REGISTRATION_OFFICER);
+  }
+
+  function setActiveRole(role: UserRole): void {
+    if (!switchableRoles.value.includes(role)) {
+      return;
+    }
+    activeRole.value = role;
+    localStorage.setItem('active_role', role);
+  }
+
+  async function switchActiveRole(role: UserRole): Promise<void> {
+    setActiveRole(role);
+    await clearExamCaches();
+  }
+
   /** เคลียร์ exam Pinia + in-memory exam API cache (dynamic import กัน circular) */
   async function clearExamCaches(): Promise<void> {
     const [{ useExamStore }, { invalidateExamCache }] = await Promise.all([
@@ -69,6 +132,11 @@ export const useUserStore = defineStore('user', () => {
     }
     examStore.resetExamUserState();
     invalidateExamCache();
+  }
+
+  async function clearNotificationState(): Promise<void> {
+    const { useNotificationStore } = await import('src/stores/notification.store');
+    useNotificationStore().stop();
   }
 
   /**
@@ -93,6 +161,7 @@ export const useUserStore = defineStore('user', () => {
           if (profile.id) {
             localStorage.setItem('user_id', String(profile.id));
           }
+          applyDefaultActiveRole();
         } else {
           logout();
         }
@@ -133,6 +202,7 @@ export const useUserStore = defineStore('user', () => {
         } as User;
 
         isLoggedIn.value = true;
+        applyDefaultActiveRole();
         return true;
       }
       error.value = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
@@ -167,6 +237,7 @@ export const useUserStore = defineStore('user', () => {
       if (profile.id) {
         localStorage.setItem('user_id', String(profile.id));
       }
+      applyDefaultActiveRole();
     } catch (err) {
       console.error('ensureProfileLoaded failed:', err);
     }
@@ -185,10 +256,13 @@ export const useUserStore = defineStore('user', () => {
     currentUser.value = null;
     isLoggedIn.value = false;
     accessToken.value = null;
+    activeRole.value = null;
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_id');
+    localStorage.removeItem('active_role');
     void clearExamCaches();
+    void clearNotificationState();
   }
 
   return {
@@ -198,11 +272,18 @@ export const useUserStore = defineStore('user', () => {
     error,
     userRole,
     userRoles,
+    effectiveRoles,
+    hasEffectiveRole,
+    activeRole,
+    canSwitchRole,
+    switchableRoles,
     profileItems,
     initialize,
     login,
     ensureProfileLoaded,
     patchCurrentUser,
+    setActiveRole,
+    switchActiveRole,
     logout,
   };
 });

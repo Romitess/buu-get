@@ -3,6 +3,7 @@
     <header class="seat-plan-print__header">
       <div>
         <h1>แผนผังที่นั่งสอบ</h1>
+        <p v-if="examRound">ครั้งที่ {{ examRound }}</p>
         <p>{{ roomLabel }}</p>
       </div>
       <div v-if="false" class="seat-plan-print__meta">
@@ -104,6 +105,7 @@ import type { SeatCell } from 'src/composables/use-exam-seat-management';
 const props = withDefaults(
   defineProps<{
     roomLabel: string;
+    examRound?: string;
     seatsByRow: SeatCell[][];
     aisleAfterCols?: number[];
     aisleAfterRows?: number[];
@@ -112,6 +114,7 @@ const props = withDefaults(
     layoutCols?: number;
   }>(),
   {
+    examRound: '',
     aisleAfterCols: () => [],
     aisleAfterRows: () => [],
     seatDirection: 'HORIZONTAL',

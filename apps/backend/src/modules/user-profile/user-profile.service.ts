@@ -161,7 +161,7 @@ export class UserProfileService {
       userEducation: 'ระดับการศึกษา',
       userFaculty: 'คณะ',
       userInstitution: 'ชื่อสถานศึกษา',
-      userAddress: 'ที่อยู่สำหรับจัดส่งเอกสาร',
+      userAddress: 'ที่อยู่',
       userRemark: 'หมายเหตุ',
       userNationalId: 'เลขบัตรประจำตัวประชาชน',
       userImagePath: 'รูปถ่าย',

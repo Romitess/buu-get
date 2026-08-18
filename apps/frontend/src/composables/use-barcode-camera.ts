@@ -1,10 +1,12 @@
 import { ref, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
 const SCANNER_ELEMENT_ID = 'check-in-assist-camera';
 const SCAN_FPS = 10;
 
 export function useBarcodeCamera() {
+  const { t } = useI18n();
   const isCameraActive = ref(false);
   const cameraError = ref<string | null>(null);
   let scanner: Html5Qrcode | null = null;
@@ -66,7 +68,7 @@ export function useBarcodeCamera() {
       cameraError.value =
         error instanceof Error
           ? error.message
-          : 'ไม่สามารถเปิดกล้องได้ กรุณาใช้การพิมพ์รหัสแทน';
+          : t('admin.checkIn.errors.cameraFailed');
       await stopCamera();
     }
   };

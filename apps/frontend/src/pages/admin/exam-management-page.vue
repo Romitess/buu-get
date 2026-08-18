@@ -23,12 +23,23 @@
       />
     </div>
 
+    <q-banner v-if="error" class="bg-red-1 text-red-9 q-mb-md rounded-borders shadow-1">
+      <template v-slot:avatar>
+        <q-icon name="warning" color="negative" />
+      </template>
+      {{ error }}
+      <template v-slot:action>
+        <q-btn flat color="negative" :label="t('examSchedule.retry')" @click="fetchData" />
+      </template>
+    </q-banner>
+
     <!-- Main Content / Table -->
     <ExamManagementTable
       :exams="exams"
       :role="currentRole"
       :loading="isLoading"
       :pagination="pagination"
+      is-server-side
       @request="onRequest"
       @edit="handleEdit"
       @delete="handleDelete"
@@ -44,32 +55,31 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
-import { useQuasar } from 'quasar';
+import { useQuasar, debounce } from 'quasar';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import ExamManagementTable from 'src/components/exam/exam-management-table.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
-import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
 import { useExamSeatNavigation } from 'src/composables/use-exam-seat-navigation';
+import { fetchAdminExams, deleteExam, isRequestCanceled } from 'src/services/exam.service';
 import { ROLES } from 'src/constants/roles';
 import type { Role, PaginationModel, TableRequestProps, ExamSchedule } from 'src/types/exam.types';
 
 const $q = useQuasar();
 const router = useRouter();
 const { t } = useI18n();
-const examStore = useExamStore();
 const userStore = useUserStore();
 const { navigateFromSeatAction } = useExamSeatNavigation();
 
-// State
 const isLoading = ref(false);
 const searchQuery = ref('');
-const examsWithVerifyStatus = ref<ExamSchedule[]>([]);
+const exams = ref<ExamSchedule[]>([]);
+const error = ref<string | null>(null);
+let abortController: AbortController | null = null;
 
-// Derived Role for Table Tools
 const currentRole = computed<Role>(() => {
   const role = userStore.userRole;
   if (role === ROLES.ADMIN) return ROLES.ADMIN;
@@ -78,18 +88,6 @@ const currentRole = computed<Role>(() => {
   return ROLES.STAFF;
 });
 
-const exams = computed(() => {
-  const allExams = examsWithVerifyStatus.value;
-  if (!searchQuery.value) return allExams;
-
-  const query = searchQuery.value.toLowerCase();
-  return allExams.filter(
-    (e: ExamSchedule) =>
-      e.examName.toLowerCase().includes(query) || e.examLocation.toLowerCase().includes(query),
-  );
-});
-
-// Pagination State (Client-side initially since API returns all)
 const pagination = ref<PaginationModel>({
   page: 1,
   rowsPerPage: 10,
@@ -98,37 +96,46 @@ const pagination = ref<PaginationModel>({
   descending: false,
 });
 
-// Methods
-const fetchData = async () => {
+const fetchData = async (): Promise<void> => {
+  abortController?.abort();
+  abortController = new AbortController();
+  const { signal } = abortController;
   isLoading.value = true;
+  error.value = null;
   try {
-    await examStore.loadManagementSchedules();
-    examsWithVerifyStatus.value = examStore.managementSchedules;
-    pagination.value.rowsNumber = exams.value.length;
-  } catch {
-    $q.notify({
-      type: 'negative',
-      message: t('admin.examManagement.notifications.loadError'),
-      position: 'top',
+    const result = await fetchAdminExams({
+      page: pagination.value.page,
+      limit: pagination.value.rowsPerPage,
+      search: searchQuery.value,
+      signal,
     });
+    exams.value = result.data;
+    pagination.value.rowsNumber = result.total;
+  } catch (err) {
+    if (isRequestCanceled(err) || signal.aborted) return;
+    error.value = t('admin.examManagement.notifications.loadError');
   } finally {
-    isLoading.value = false;
+    if (!signal.aborted) {
+      isLoading.value = false;
+    }
   }
 };
 
-const onRequest = (props: TableRequestProps) => {
+const onRequest = (props: TableRequestProps): void => {
   const { page, rowsPerPage } = props.pagination;
   pagination.value.page = page;
   pagination.value.rowsPerPage = rowsPerPage;
+  void fetchData();
 };
 
-watch(
-  exams,
-  (newExams) => {
-    pagination.value.rowsNumber = newExams.length;
-  },
-  { immediate: true },
-);
+const debouncedSearch = debounce(() => {
+  pagination.value.page = 1;
+  void fetchData();
+}, 400);
+
+watch(searchQuery, () => {
+  void debouncedSearch();
+});
 
 const handleEdit = (id: string) => {
   void router.push({ name: 'admin-edit-exam', params: { examId: id } });
@@ -141,7 +148,7 @@ const handlePasscodeHistory = (id: string) => {
 const handleDelete = async (id: string) => {
   try {
     isLoading.value = true;
-    await examStore.deleteExamRound(id);
+    await deleteExam(id);
     await fetchData();
     $q.notify({
       type: 'positive',
@@ -183,7 +190,6 @@ const handleManageScores = (id: string) => {
   void router.push({ name: 'admin-exam-scores', params: { examId: id } });
 };
 
-// Initial load
 onMounted(() => {
   void fetchData();
 });

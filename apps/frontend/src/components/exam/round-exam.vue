@@ -69,6 +69,7 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { api } from 'src/boot/axios';
+import { BACKEND_API } from 'src/constants/api';
 import type { RoundExamProps } from 'src/types/exam';
 import { isExamRoundRegistrationExpired } from 'src/utils/exam-registration';
 import ExamClock from './exam-clock.vue';
@@ -105,7 +106,7 @@ async function syncTime(): Promise<void> {
   } catch {
     try {
       const start = Date.now();
-      const response = await api.get('/exam', { params: { _t: start } });
+      const response = await api.get(BACKEND_API.EXAM_SCHEDULE, { params: { _t: start } });
       const serverDate = response.headers['date'];
       if (serverDate) {
         const serverTime = new Date(serverDate).getTime();

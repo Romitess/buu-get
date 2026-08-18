@@ -1,7 +1,6 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed, unref } from 'vue';
 import type { ExamRound, ExamInfo, ExamHistoryItem, DayData, ExamEnrollment } from 'src/types/exam';
-import type { ExamSchedule } from 'src/types/exam.types';
 import type { ReceiptInformation } from 'src/types/receipt-information';
 import {
   createTransaction as createTransactionRequest,
@@ -11,7 +10,6 @@ import {
 } from 'src/services/transaction.service';
 import {
   fetchScheduleData,
-  fetchExamSchedules,
   createExamRound,
   deleteExam,
   createEnrollment,
@@ -22,7 +20,6 @@ import {
 } from 'src/services/exam.service';
 import {
   BUDDHIST_YEAR_OFFSET,
-  EMPTY_DETAILS,
   DEFAULT_LOCATION_TEXT,
   ENROLLMENT_STATUS,
   formatLocationWithRoom,
@@ -93,6 +90,7 @@ export const useExamStore = defineStore('exam', () => {
   };
 
   const examInfo = computed((): ExamInfo => {
+    void unref(i18n.locale);
     const dayData = scheduleData.value[selectedDate.value];
     if (dayData && dayData.rounds.length > 0) {
       const uniqueExamIds = new Set(
@@ -124,7 +122,6 @@ export const useExamStore = defineStore('exam', () => {
   });
   const pendingRegistrations = ref<ExamHistoryItem[]>([]);
   const historyRecords = ref<ExamHistoryItem[]>([]);
-  const managementSchedules = ref<ExamSchedule[]>([]);
   const registeredSessionIds = ref<Set<number>>(new Set());
   const historyError = ref<string | null>(null);
   const scheduleError = ref<string | null>(null);
@@ -135,6 +132,7 @@ export const useExamStore = defineStore('exam', () => {
   });
 
   const currentDayDetails = computed(() => {
+    void unref(i18n.locale);
     const dayData = scheduleData.value[selectedDate.value];
     if (dayData) {
       return {
@@ -143,12 +141,13 @@ export const useExamStore = defineStore('exam', () => {
       };
     }
     return {
-      location: EMPTY_DETAILS.LOCATION,
-      fee: EMPTY_DETAILS.FEE,
+      location: i18n.t('admin.examForm.empty.selectDateForLocation'),
+      fee: i18n.t('admin.examForm.empty.fee'),
     };
   });
 
   const dynamicBadgeText = computed((): string => {
+    void unref(i18n.locale);
     const rounds = selectedDateRounds.value;
     return rounds[0]?.roundTypeLabel ?? i18n.t('examSchedule.noBadgeRounds');
   });
@@ -213,7 +212,7 @@ export const useExamStore = defineStore('exam', () => {
   }
 
   async function initSchedule(force = false): Promise<void> {
-    // Non-force callers join the in-flight request instead of stacking GET /exam
+    // Non-force callers join the in-flight request instead of stacking GET /exam/schedule
     if (scheduleFetchInFlight && !force) {
       await scheduleFetchInFlight;
       return;
@@ -254,14 +253,6 @@ export const useExamStore = defineStore('exam', () => {
   /** Clear schedule spinner when leaving the page — does not abort in-flight data update */
   function clearScheduleLoadingUi(): void {
     isLoadingSchedule.value = false;
-  }
-
-  async function loadManagementSchedules(force = false): Promise<void> {
-    try {
-      managementSchedules.value = await fetchExamSchedules(force);
-    } catch (error) {
-      console.error('Failed to load management schedules:', error);
-    }
   }
 
   /** ดึง enrollments ครั้งเดียว แล้วอัปเดตทั้ง history + registered sessions */
@@ -497,7 +488,6 @@ export const useExamStore = defineStore('exam', () => {
 
   async function deleteExamRound(id: number | string): Promise<void> {
     await deleteExam(id);
-    await loadManagementSchedules(true);
     await initSchedule(true);
   }
 
@@ -512,7 +502,6 @@ export const useExamStore = defineStore('exam', () => {
     formattedSelectedDate,
     pendingRegistrations,
     historyRecords,
-    managementSchedules,
     historyError,
     scheduleError,
     isLoadingSchedule,
@@ -527,7 +516,6 @@ export const useExamStore = defineStore('exam', () => {
     deleteExamRound,
     initSchedule,
     clearScheduleLoadingUi,
-    loadManagementSchedules,
     fetchHistory,
     isSessionRegistered,
     resetExamUserState,

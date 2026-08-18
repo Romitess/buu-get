@@ -15,6 +15,7 @@ import { ExamEnrollmentStatus } from '../exam-enrollments/entities/exam-enrollme
 interface RawDailyRevenueRow {
   examName: string;
   amount: string | number;
+  paidCount: string | number;
 }
 
 @Injectable()
@@ -110,6 +111,7 @@ export class FundSourcesService {
     qb.select([
       'exam.EXAM_NAME AS examName',
       'SUM(transaction.TRANX_AMOUNT) AS amount',
+      'COUNT(transaction.TRANX_ID) AS paidCount',
     ]);
 
     qb.groupBy('exam.EXAM_NAME');
@@ -123,10 +125,15 @@ export class FundSourcesService {
     }));
 
     const totalAmount = rows.reduce((sum, row) => sum + row.amount, 0);
+    const paidCount = rawRows.reduce(
+      (sum, row) => sum + Number(row.paidCount || 0),
+      0,
+    );
 
     return {
       rows,
       totalAmount,
+      paidCount,
     };
   }
 }

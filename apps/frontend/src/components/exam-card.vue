@@ -41,7 +41,7 @@
     <q-card-section class="q-py-sm q-px-md">
       <div class="section-header q-mb-xs">
         <q-icon name="event_seat" color="primary" size="xs" class="q-mr-xs" />
-        <span class="text-caption text-weight-bold">จำนวนที่นั่ง</span>
+        <span class="text-caption text-weight-bold">{{ t('examSchedule.card.seatCount') }}</span>
       </div>
       <div class="row items-center">
         <q-linear-progress
@@ -70,7 +70,7 @@
     <q-card-section class="q-py-sm q-px-md">
       <div class="section-header q-mb-xs">
         <q-icon name="event" color="primary" size="xs" class="q-mr-xs" />
-        <span class="text-caption text-weight-bold">กำหนดการสอบ</span>
+        <span class="text-caption text-weight-bold">{{ t('examSchedule.card.examSchedule') }}</span>
       </div>
       <div class="text-caption">
         {{ formatDate(exam.schedule.examDate) }}
@@ -88,7 +88,9 @@
     <q-card-section class="q-py-sm q-px-md">
       <div class="section-header q-mb-xs">
         <q-icon name="how_to_reg" color="primary" size="xs" class="q-mr-xs" />
-        <span class="text-caption text-weight-bold">กำหนดการลงทะเบียน</span>
+        <span class="text-caption text-weight-bold">{{
+          t('examSchedule.card.registrationPeriod')
+        }}</span>
       </div>
       <div class="text-caption">
         {{ formatDate(exam.registration.startDate) }} - {{ formatDate(exam.registration.endDate) }}
@@ -101,15 +103,21 @@
     <q-card-section class="q-py-sm q-px-md q-pb-md">
       <div class="section-header q-mb-xs">
         <q-icon name="payment" color="primary" size="xs" class="q-mr-xs" />
-        <span class="text-caption text-weight-bold">กำหนดการชำระเงิน</span>
+        <span class="text-caption text-weight-bold">{{ t('examSchedule.card.paymentPeriod') }}</span>
       </div>
-      <div class="text-caption">ชำระภายใน {{ formatDate(exam.payment.deadline) }}</div>
+      <div class="text-caption">
+        {{ t('examSchedule.card.payByDeadline', { date: formatDate(exam.payment.deadline) }) }}
+      </div>
     </q-card-section>
 
     <!-- ปุ่มลงทะเบียน (Center Bottom) -->
     <q-card-actions align="center" class="q-pa-md q-pt-none">
       <AppButton
-        :label="exam.availableSeats > 0 ? 'ลงทะเบียน' : 'ที่นั่งเต็มแล้ว'"
+        :label="
+          exam.availableSeats > 0
+            ? t('examSchedule.registerBtnText')
+            : t('examSchedule.fullBtnText')
+        "
         :icon="exam.availableSeats > 0 ? 'add' : 'event_busy'"
         :disable="exam.availableSeats <= 0 || !exam.isRegistrationOpen"
         class="full-width"
@@ -122,8 +130,11 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { Exam } from 'src/types/exam';
 import AppButton from './base/app-button.vue';
+
+const { t } = useI18n();
 
 // Props
 interface Props {

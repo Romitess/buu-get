@@ -40,7 +40,7 @@ import ActionButton from 'src/components/shared/action-button.vue';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 import type { ExamYearTableRow } from 'src/types/exam-report.types';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const router = useRouter();
 
 interface Props {
@@ -88,7 +88,9 @@ watch(
   { immediate: true },
 );
 
-const columns = computed((): QTableColumn<ExamYearTableRow>[] => [
+const columns = computed((): QTableColumn<ExamYearTableRow>[] => {
+  void locale.value;
+  return [
   {
     name: 'year',
     label: t('admin.examReport.yearTable.columns.year'),
@@ -151,7 +153,8 @@ const columns = computed((): QTableColumn<ExamYearTableRow>[] => [
     align: 'center',
     sortable: false,
   },
-]);
+  ];
+});
 </script>
 
 <style scoped lang="scss">

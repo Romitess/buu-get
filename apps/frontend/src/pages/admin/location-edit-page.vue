@@ -2,7 +2,7 @@
   <q-page class="page-container surface-page-bg">
     <AppBreadcrumbs />
     <AppPageHeader
-      title="แก้ไขห้องสอบ"
+      :title="$t('navigation.editLocation')"
       :subtitle="$t('admin.locationManagement.createPage.subtitle')"
     />
 
@@ -192,7 +192,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
@@ -207,7 +207,11 @@ import {
   fetchLocationSeats,
   updateLocation,
   type LocationAislePositionPayload,
+  type BackendLocationSeat,
 } from 'src/services/location.service';
+import { useRouteResource } from 'src/composables/use-route-resource';
+import type { BackendLocation } from 'src/types/exam';
+import { isRequestCanceled } from 'src/services/exam.service';
 
 const MAX_SEAT_LAYOUT_SIZE = 25;
 
@@ -216,7 +220,27 @@ const router = useRouter();
 const $q = useQuasar();
 const { t } = useI18n();
 
-const locationId = Number(route.params.locationId);
+const locationId = computed(() => {
+  const raw = route.params.locationId;
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+});
+
+const { data: locationResource, error: locationLoadError } = useRouteResource<{
+  data: BackendLocation & { SEATS: BackendLocationSeat[] };
+  seats: BackendLocationSeat[];
+}>({
+  owningParams: ['locationId'],
+  fetcher: async ({ signal, params }) => {
+    const id = Number(params.locationId);
+    const [data, seats] = await Promise.all([
+      fetchLocationById(id, { signal }),
+      fetchLocationSeats(id, { signal }),
+    ]);
+    return { data, seats };
+  },
+});
 
 const roomName = ref('');
 const floor = ref<number | null>(null);
@@ -363,56 +387,61 @@ const buildSeatStatuses = (): Record<string, number> => {
   return seatPreviewRef.value?.getSeatStatuses() ?? {};
 };
 
-const loadLocationData = async () => {
-  try {
-    const [data, seats] = await Promise.all([
-      fetchLocationById(locationId),
-      fetchLocationSeats(locationId),
-    ]);
-    const maxSeatRow = Math.max(0, ...seats.map((seat) => seat.LS_ROW_NO));
-    const maxSeatCol = Math.max(0, ...seats.map((seat) => seat.LS_COL_NO));
+const applyLoadedLocation = async (
+  data: BackendLocation & { SEATS: BackendLocationSeat[] },
+  seats: BackendLocationSeat[],
+): Promise<void> => {
+  const maxSeatRow = Math.max(0, ...seats.map((seat) => seat.LS_ROW_NO));
+  const maxSeatCol = Math.max(0, ...seats.map((seat) => seat.LS_COL_NO));
 
-    roomName.value = data.LOCATION_ROOM_NO || '';
-    floor.value = data.LOCATION_FLOOR_NO ?? null;
-    building.value = data.LOCATION_NAME || '';
-    rows.value = data.LOCATION_TOTAL_ROWS ?? (maxSeatRow > 0 ? maxSeatRow : null);
-    cols.value = data.LOCATION_TOTAL_COLS ?? (maxSeatCol > 0 ? maxSeatCol : null);
-    seatNumberDirection.value = data.SEAT_DIRECTION === 'HORIZONTAL' ? 'horizontal' : 'vertical';
-    selectedWalkwayPositions.value = [
-      ...(data.AISLE_AFTER_ROWS ?? []).map((index) => ({ type: 'row' as const, index })),
-      ...(data.AISLE_AFTER_COLS ?? []).map((index) => ({ type: 'column' as const, index })),
-    ];
+  roomName.value = data.LOCATION_ROOM_NO || '';
+  floor.value = data.LOCATION_FLOOR_NO ?? null;
+  building.value = data.LOCATION_NAME || '';
+  rows.value = data.LOCATION_TOTAL_ROWS ?? (maxSeatRow > 0 ? maxSeatRow : null);
+  cols.value = data.LOCATION_TOTAL_COLS ?? (maxSeatCol > 0 ? maxSeatCol : null);
+  seatNumberDirection.value = data.SEAT_DIRECTION === 'HORIZONTAL' ? 'horizontal' : 'vertical';
+  selectedWalkwayPositions.value = [
+    ...(data.AISLE_AFTER_ROWS ?? []).map((index) => ({ type: 'row' as const, index })),
+    ...(data.AISLE_AFTER_COLS ?? []).map((index) => ({ type: 'column' as const, index })),
+  ];
 
-    await nextTick();
-    if (seatPreviewRef.value) {
-      const loadedBrokenSeats = new Set<string>();
-      const loadedOmittedSeats = new Set<string>();
-      const loadedSeats = seats.length > 0 ? seats : (data.SEATS ?? []);
+  await nextTick();
+  if (seatPreviewRef.value) {
+    const loadedBrokenSeats = new Set<string>();
+    const loadedOmittedSeats = new Set<string>();
+    const loadedSeats = seats.length > 0 ? seats : (data.SEATS ?? []);
 
-      loadedSeats.forEach((seat) => {
-        if (seat.LS_SEAT_STATUS === 1 && seat.LS_SEAT_LABEL) {
-          loadedBrokenSeats.add(seat.LS_SEAT_LABEL);
-        }
-        if (seat.LS_SEAT_STATUS === 2 && seat.LS_SEAT_LABEL) {
-          loadedOmittedSeats.add(seat.LS_SEAT_LABEL);
-        }
-      });
-
-      seatPreviewRef.value.setSeatStatusSets({
-        brokenSeats: loadedBrokenSeats,
-        omittedSeats: loadedOmittedSeats,
-      });
-    }
-  } catch (error) {
-    console.error('Error loading location:', error);
-    $q.notify({
-      type: 'negative',
-      message: 'ไม่สามารถโหลดข้อมูลห้องสอบได้',
-      position: 'top',
+    loadedSeats.forEach((seat) => {
+      if (seat.LS_SEAT_STATUS === 1 && seat.LS_SEAT_LABEL) {
+        loadedBrokenSeats.add(seat.LS_SEAT_LABEL);
+      }
+      if (seat.LS_SEAT_STATUS === 2 && seat.LS_SEAT_LABEL) {
+        loadedOmittedSeats.add(seat.LS_SEAT_LABEL);
+      }
     });
-    void router.push({ name: 'admin-location-management' });
+
+    seatPreviewRef.value.setSeatStatusSets({
+      brokenSeats: loadedBrokenSeats,
+      omittedSeats: loadedOmittedSeats,
+    });
   }
 };
+
+watch(locationResource, (payload) => {
+  if (!payload) return;
+  void applyLoadedLocation(payload.data, payload.seats);
+});
+
+watch(locationLoadError, (err) => {
+  if (!err || isRequestCanceled(err)) return;
+  console.error('Error loading location:', err);
+  $q.notify({
+    type: 'negative',
+    message: 'ไม่สามารถโหลดข้อมูลห้องสอบได้',
+    position: 'top',
+  });
+  void router.push({ name: 'admin-location-management' });
+});
 
 const handleSave = async (): Promise<void> => {
   if (!validateForm()) {
@@ -422,7 +451,7 @@ const handleSave = async (): Promise<void> => {
   isSaving.value = true;
 
   try {
-    await updateLocation(locationId, {
+    await updateLocation(locationId.value, {
       LOCATION_NAME: building.value.trim(),
       LOCATION_ROOM_NO: roomName.value.trim() || undefined,
       LOCATION_FLOOR_NO:
@@ -435,7 +464,7 @@ const handleSave = async (): Promise<void> => {
       LOCATION_AISLE_AFTER_COL: locationAislePositions.value,
     });
 
-    await api.post(`/exam-location-seats/generate/${locationId}`, {
+    await api.post(`/exam-location-seats/generate/${locationId.value}`, {
       seatStatuses: buildSeatStatuses(),
     });
 
@@ -457,9 +486,6 @@ const handleSave = async (): Promise<void> => {
   }
 };
 
-onMounted(() => {
-  void loadLocationData();
-});
 </script>
 
 <style scoped lang="scss">

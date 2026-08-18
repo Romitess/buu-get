@@ -34,7 +34,7 @@
       <div class="col-shrink row q-gutter-x-md no-wrap">
         <AppButton
           icon="assignment_ind"
-          label="เช็กอินเข้าห้องสอบ"
+          :label="$t('admin.examAttendance.checkInButton')"
           color="primary"
           class="action-btn"
           @click="openCheckInDialog"
@@ -279,9 +279,13 @@ const pagination = ref<PaginationModel>({
   page: 1,
   rowsPerPage: 10,
   rowsNumber: 0,
+  sortBy: 'nationalId',
+  descending: false,
 });
 
-const columns = computed<QTableColumn[]>(() => [
+const columns = computed<QTableColumn[]>(() => {
+  void i18n.locale.value;
+  return [
   {
     name: 'index',
     label: i18n.t('admin.examAttendance.columns.index'),
@@ -298,7 +302,7 @@ const columns = computed<QTableColumn[]>(() => [
   },
   {
     name: 'location',
-    label: 'ห้องสอบ',
+    label: i18n.t('admin.examAttendance.columns.location'),
     field: 'location',
     align: 'center',
   },
@@ -342,7 +346,8 @@ const columns = computed<QTableColumn[]>(() => [
     field: 'checkInTime',
     align: 'center',
   },
-]);
+];
+});
 
 const onRequest = (props: TableRequestProps): void => {
   const { page, rowsPerPage } = props.pagination;

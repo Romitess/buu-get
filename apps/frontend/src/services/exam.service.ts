@@ -1,5 +1,7 @@
 import { api } from 'src/boot/axios';
 import axios from 'axios';
+import { BACKEND_API } from 'src/constants/api';
+import { unwrapPaginated, type PaginatedResponse } from 'src/types/pagination';
 import type {
   DayData,
   ExamRound,
@@ -39,8 +41,11 @@ type ExamWriteRequestConfig = { timeout?: number; signal?: AbortSignal };
 // In-memory cache for exam data
 let examsCache: BackendExam[] | null = null;
 let lastFetchTimestamp = 0;
-/** Single-flight — concurrent callers share one GET /exam */
+/** Single-flight — concurrent callers share one GET /exam/schedule */
 let examsFetchInFlight: Promise<BackendExam[]> | null = null;
+
+const ADMIN_EXAM_PAGE_LIMIT = 100;
+const ADMIN_EXAM_MAX_PAGES = 20;
 
 type BackendSessionLocation = NonNullable<BackendSession['SESSION_LOCATIONS']>[number];
 
@@ -92,9 +97,8 @@ const isRequestCanceled = (error: unknown): boolean => {
 export { isRequestCanceled };
 
 /**
- * Centrally fetch all exams with a short-term in-memory cache.
- * This prevents redundant large downloads of the /exam endpoint when multiple
- * components or stores request it simultaneously.
+ * ดึงตารางสอบที่เผยแพร่แล้ว (GET /exam/schedule) พร้อม cache 90 วินาที + single-flight
+ * ใช้กับปฏิทิน / homepage — ไม่รวมรอบที่ยังไม่ publish
  */
 export const fetchAllExamsRaw = async (force = false): Promise<BackendExam[]> => {
   const now = Date.now();
@@ -123,7 +127,7 @@ export const fetchAllExamsRaw = async (force = false): Promise<BackendExam[]> =>
   }
 
   const fetchPromise = retryAsync(async () => {
-    const response = await api.get<BackendExam[]>('/exam');
+    const response = await api.get<BackendExam[]>(BACKEND_API.EXAM_SCHEDULE);
     examsCache = response.data;
     lastFetchTimestamp = Date.now();
     return examsCache;
@@ -135,6 +139,94 @@ export const fetchAllExamsRaw = async (force = false): Promise<BackendExam[]> =>
 
   examsFetchInFlight = fetchPromise;
   return fetchPromise;
+};
+
+const mapBackendExamToSchedule = (exam: BackendExam): ExamSchedule => {
+  let capacity = 0;
+  let registeredCount = 0;
+  let locationName = DEFAULT_LOCATION_TEXT;
+
+  if (exam.SESSIONS && exam.SESSIONS.length > 0) {
+    exam.SESSIONS.forEach((session) => {
+      capacity += session.SS_CAPACITY || 0;
+      registeredCount += getActiveEnrollmentCount(session);
+    });
+
+    const firstLoc = exam.SESSIONS[0]?.LOCATION;
+    if (firstLoc) {
+      locationName = formatLocationWithRoom(firstLoc.LOCATION_NAME, firstLoc.LOCATION_ROOM_NO);
+    }
+  }
+
+  return {
+    id: String(exam.EXAM_ID),
+    examName:
+      formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
+      DEFAULT_EXAM_TITLE,
+    examType:
+      exam.EXAM_TYPE === EXAM_TYPE_GENERAL || exam.EXAM_TYPE === INTERNAL_EXAM_TYPE_GENERAL
+        ? INTERNAL_EXAM_TYPE_GENERAL
+        : INTERNAL_EXAM_TYPE_SPECIAL,
+    examDate: formatBackendDate(exam.EXAM_DATE),
+    regStartDate: formatBackendDate(exam.EXAM_REG_START_DATE),
+    regEndDate: formatBackendDate(exam.EXAM_REG_END_DATE),
+    examLocation: locationName,
+    registeredCount,
+    capacity,
+    status: exam.EXAM_PUBLISHED === false ? EXAM_STATUS_UNPUBLISHED : EXAM_STATUS_PUBLISHED,
+  };
+};
+
+export interface FetchAdminExamsParams {
+  page: number;
+  limit: number;
+  search?: string;
+  signal?: AbortSignal;
+}
+
+/** รายการรอบสอบฝั่งแอดมิน (รวม unpublished) — GET /exam แบบแบ่งหน้า ไม่ cache ใน Pinia */
+export const fetchAdminExams = async (
+  params: FetchAdminExamsParams,
+): Promise<{ data: ExamSchedule[]; total: number }> => {
+  const requestConfig: { params: Record<string, number | string>; signal?: AbortSignal } = {
+    params: {
+      page: params.page,
+      limit: params.limit,
+      ...(params.search?.trim() ? { search: params.search.trim() } : {}),
+    },
+  };
+  if (params.signal) {
+    requestConfig.signal = params.signal;
+  }
+  const response = await api.get<PaginatedResponse<BackendExam>>(BACKEND_API.EXAM, requestConfig);
+  const unwrapped = unwrapPaginated<BackendExam>(response.data);
+  return {
+    data: unwrapped.data.map(mapBackendExamToSchedule),
+    total: unwrapped.total,
+  };
+};
+
+/** ดึงรอบสอบแอดมินทั้งหมดแบบไล่หน้า (occupancy) — ไม่ใช้ public schedule */
+export const fetchAdminExamsAll = async (signal?: AbortSignal): Promise<BackendExam[]> => {
+  const all: BackendExam[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const requestConfig: { params: { page: number; limit: number }; signal?: AbortSignal } = {
+      params: { page, limit: ADMIN_EXAM_PAGE_LIMIT },
+    };
+    if (signal) {
+      requestConfig.signal = signal;
+    }
+    const response = await api.get<PaginatedResponse<BackendExam>>(BACKEND_API.EXAM, requestConfig);
+    const unwrapped = unwrapPaginated<BackendExam>(response.data);
+    all.push(...unwrapped.data);
+    totalPages = Math.min(unwrapped.totalPages, ADMIN_EXAM_MAX_PAGES);
+    page += 1;
+  } while (page <= totalPages);
+
+  return all;
 };
 
 /**
@@ -412,47 +504,6 @@ export const fetchScheduleData = async (force = false): Promise<Record<string, D
   });
 
   return schedule;
-};
-
-export const fetchExamSchedules = async (force = false): Promise<ExamSchedule[]> => {
-  const exams = await fetchAllExamsRaw(force);
-
-  return exams.map((exam) => {
-    let capacity = 0;
-    let registeredCount = 0;
-    let locationName = DEFAULT_LOCATION_TEXT;
-
-    if (exam.SESSIONS && exam.SESSIONS.length > 0) {
-      exam.SESSIONS.forEach((session) => {
-        capacity += session.SS_CAPACITY || 0;
-        const activeCount = getActiveEnrollmentCount(session);
-        registeredCount += activeCount;
-      });
-
-      const firstLoc = exam.SESSIONS[0]?.LOCATION;
-      if (firstLoc) {
-        locationName = formatLocationWithRoom(firstLoc.LOCATION_NAME, firstLoc.LOCATION_ROOM_NO);
-      }
-    }
-
-    return {
-      id: String(exam.EXAM_ID),
-      examName:
-        formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
-        DEFAULT_EXAM_TITLE,
-      examType:
-        exam.EXAM_TYPE === EXAM_TYPE_GENERAL || exam.EXAM_TYPE === INTERNAL_EXAM_TYPE_GENERAL
-          ? INTERNAL_EXAM_TYPE_GENERAL
-          : INTERNAL_EXAM_TYPE_SPECIAL,
-      examDate: formatBackendDate(exam.EXAM_DATE),
-      regStartDate: formatBackendDate(exam.EXAM_REG_START_DATE),
-      regEndDate: formatBackendDate(exam.EXAM_REG_END_DATE),
-      examLocation: locationName,
-      registeredCount,
-      capacity,
-      status: exam.EXAM_PUBLISHED === false ? EXAM_STATUS_UNPUBLISHED : EXAM_STATUS_PUBLISHED,
-    };
-  });
 };
 
 export const fetchExamById = async (
@@ -891,12 +942,20 @@ export const fetchFundSources = async (): Promise<FundSource[]> => {
 
 export const fetchExamLocations = async (): Promise<ExamLocationOption[]> => {
   try {
-    // ดึง list + seats ใน request เดียว (เลิก N+1 แบบ GET /exam-locations/:id)
-    const response = await api.get<BackendLocation[]>('/exam-locations', {
-      params: { includeSeats: true },
-    });
+    const locations: BackendLocation[] = [];
+    let page = 1;
+    let totalPages = 1;
+    do {
+      const response = await api.get<PaginatedResponse<BackendLocation>>('/exam-locations', {
+        params: { includeSeats: true, page, limit: ADMIN_EXAM_PAGE_LIMIT },
+      });
+      const unwrapped = unwrapPaginated<BackendLocation>(response.data);
+      locations.push(...unwrapped.data);
+      totalPages = Math.min(unwrapped.totalPages, ADMIN_EXAM_MAX_PAGES);
+      page += 1;
+    } while (page <= totalPages);
 
-    return response.data.map((loc) => ({
+    return locations.map((loc) => ({
       label: formatLocationWithRoom(loc.LOCATION_NAME, loc.LOCATION_ROOM_NO),
       value: loc.LOCATION_ID,
       raw: loc,

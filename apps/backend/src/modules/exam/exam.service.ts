@@ -6,8 +6,17 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
+import { FindManyOptions, In, Like, Not, Repository } from 'typeorm';
+import {
+  buildPaginatedResponse,
+  PaginatedResponse,
+} from 'src/common/dto/paginated-response.dto';
+import {
+  PAGINATION_DEFAULT_LIMIT,
+  PAGINATION_DEFAULT_PAGE,
+} from 'src/common/dto/pagination-query.dto';
 import { Exam } from './entities/exam.entity';
+import { ExamQueryDto } from './dto/exam-query.dto';
 import { ExamPasscode } from './entities/exam-passcode.entity';
 import { CreateExamDto } from './dto/create-exam.dto';
 import { UpdateExamDto } from './dto/update-exam.dto';
@@ -193,8 +202,9 @@ export class ExamService {
     return exam;
   }
 
-  async findAll(): Promise<Exam[]> {
-    const exams = await this.examRepository.find({
+  /** relation + select แบบ lean สำหรับรายการสอบ (ไม่มี seats / passcodes) */
+  private getLeanListFindOptions(): FindManyOptions<Exam> {
+    return {
       // โหลด relation แบบแยก query ต่อ relation แทน JOIN เดียว เพื่อเลี่ยง
       // cartesian product ที่ทำให้ query ช้ามาก
       relationLoadStrategy: 'query',
@@ -245,6 +255,14 @@ export class ExamService {
           },
         },
       },
+    };
+  }
+
+  /** ตารางสอบสาธารณะ — เฉพาะที่เผยแพร่แล้ว ไม่แบ่งหน้า ไม่คืน passcodes */
+  async findPublishedSchedule(): Promise<Exam[]> {
+    const exams = await this.examRepository.find({
+      ...this.getLeanListFindOptions(),
+      where: { EXAM_PUBLISHED: true },
     });
 
     this.populateSessionLocations(exams);
@@ -252,20 +270,53 @@ export class ExamService {
     return exams;
   }
 
+  async findAll(query: ExamQueryDto = {}): Promise<PaginatedResponse<Exam>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+    const search = query.search?.trim();
+    const searchPattern = search ? `%${search}%` : undefined;
+
+    const [exams, total] = await this.examRepository.findAndCount({
+      ...this.getLeanListFindOptions(),
+      ...(searchPattern
+        ? {
+            where: [
+              { EXAM_NAME: Like(searchPattern) },
+              { EXAM_ROUND: Like(searchPattern) },
+              { EXAM_FISCAL_YEAR: Like(searchPattern) },
+            ],
+          }
+        : {}),
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    this.populateSessionLocations(exams);
+    await this.attachEnrollmentCounts(exams);
+    return buildPaginatedResponse(exams, total, page, limit);
+  }
+
   async findOne(
     id: number,
-    options?: { includeSeats?: boolean },
+    options?: {
+      includeSeats?: boolean;
+      includePasscodes?: boolean;
+      allowUnpublished?: boolean;
+    },
   ): Promise<Exam> {
     const includeSeats = options?.includeSeats === true;
+    const includePasscodes = options?.includePasscodes === true;
     const relations = [
       'SESSIONS',
       'SESSIONS.SESSION_LOCATIONS',
       'SESSIONS.SESSION_LOCATIONS.LOCATION',
       'FUND_SOURCE',
-      'PASSCODES',
       'SCORE_RUBRIC',
       'SCORE_RUBRIC.ITEMS',
     ];
+    if (includePasscodes) {
+      relations.push('PASSCODES');
+    }
     if (includeSeats) {
       relations.push('SESSIONS.SESSION_LOCATIONS.LOCATION.SEATS');
     }
@@ -282,13 +333,21 @@ export class ExamService {
       throw new NotFoundException(`Exam with ID ${id} not found`);
     }
 
+    if (!exam.EXAM_PUBLISHED && !options?.allowUnpublished) {
+      throw new NotFoundException(`Exam with ID ${id} not found`);
+    }
+
     this.populateSessionLocations([exam]);
     await this.attachEnrollmentCounts([exam]);
     return exam;
   }
 
   async findOneWithSeats(id: number): Promise<Exam> {
-    return this.findOne(id, { includeSeats: true });
+    return this.findOne(id, {
+      includeSeats: true,
+      includePasscodes: true,
+      allowUnpublished: true,
+    });
   }
 
   //การบันทึกประวัติการใช้ log

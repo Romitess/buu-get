@@ -50,11 +50,13 @@ describe('exam.service navigation resilience', () => {
 
     expect(apiGet).toHaveBeenCalledTimes(1);
 
-    resolveGet?.({ data: [{ EXAM_ID: 1 }] });
+    const resolve = resolveGet as ((value: { data: unknown[] }) => void) | null;
+    resolve?.({ data: [{ EXAM_ID: 1 }] });
     const [r1, r2] = await Promise.all([p1, p2]);
 
     expect(r1).toEqual([{ EXAM_ID: 1 }]);
     expect(r2).toEqual([{ EXAM_ID: 1 }]);
     expect(apiGet).toHaveBeenCalledTimes(1);
+    expect(apiGet).toHaveBeenCalledWith('/exam/schedule');
   });
 });

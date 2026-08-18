@@ -1,6 +1,7 @@
 import { boot } from 'quasar/wrappers';
-import axios, { type AxiosInstance } from 'axios';
+import axios, { type AxiosError, type AxiosInstance } from 'axios';
 import { PLATFORM_GATEWAY } from 'src/constants/api';
+import { resolveSafeInAppRedirect } from 'src/utils/safe-redirect';
 
 declare module 'vue' {
   interface ComponentCustomProperties {
@@ -26,12 +27,22 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to automatically add JWT token
+// Request interceptor to automatically add JWT token and active role header
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
     const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    try {
+      const { useUserStore } = await import('src/stores/user.store');
+      const store = useUserStore();
+      if (store.canSwitchRole && store.activeRole) {
+        config.headers['X-Active-Role'] = store.activeRole;
+      }
+    } catch {
+      // store may be unavailable during early bootstrap
     }
 
     // Remove Content-Type header for FormData (let browser set it automatically with boundary)
@@ -44,9 +55,41 @@ api.interceptors.request.use(
   (error: Error) => Promise.reject(error),
 );
 
-export default boot(({ app }) => {
+export default boot(({ app, router }) => {
   app.config.globalProperties.$axios = axios;
   app.config.globalProperties.$api = api;
+
+  let unauthorizedInFlight: Promise<void> | null = null;
+
+  api.interceptors.response.use(
+    (response) => response,
+    async (error: AxiosError) => {
+      const status = error.response?.status;
+      const requestUrl = error.config?.url ?? '';
+      const isAuthEndpoint =
+        requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register');
+
+      if (status === 401 && !isAuthEndpoint) {
+        if (!unauthorizedInFlight) {
+          unauthorizedInFlight = (async () => {
+            const { useUserStore } = await import('src/stores/user.store');
+            useUserStore().logout();
+            const currentPath = router.currentRoute.value.fullPath;
+            const safeRedirect = resolveSafeInAppRedirect(currentPath);
+            await router.replace({
+              name: 'login',
+              query: safeRedirect ? { redirect: safeRedirect } : {},
+            });
+          })().finally(() => {
+            unauthorizedInFlight = null;
+          });
+        }
+        await unauthorizedInFlight;
+      }
+
+      return Promise.reject(error);
+    },
+  );
 });
 
 export { api };

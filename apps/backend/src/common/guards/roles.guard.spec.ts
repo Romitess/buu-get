@@ -1,6 +1,8 @@
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RoleEnum } from 'src/modules/roles/enums/role.enum';
+import { ACTIVE_ROLE_HEADER } from '../constants/role-switch.constants';
+import { AuthenticatedUser } from '../utils/authz.util';
 import { RolesGuard } from './roles.guard';
 
 describe('RolesGuard', () => {
@@ -9,15 +11,19 @@ describe('RolesGuard', () => {
   } as unknown as Reflector;
   const guard = new RolesGuard(reflector);
 
-  const createContext = (user: {
-    userId?: number;
-    email?: string;
-    role?: RoleEnum | string;
-    roles?: Array<RoleEnum | string>;
-  }) =>
+  const createContext = (
+    user: {
+      userId?: number;
+      email?: string;
+      role?: RoleEnum | string;
+      roles?: Array<RoleEnum | string>;
+      activeRole?: RoleEnum;
+    },
+    headers: Record<string, string | string[] | undefined> = {},
+  ) =>
     ({
       switchToHttp: () => ({
-        getRequest: () => ({ user }),
+        getRequest: () => ({ user, headers }),
       }),
       getHandler: () => ({}),
       getClass: () => ({}),
@@ -202,5 +208,69 @@ describe('RolesGuard', () => {
 
     // Assert
     expect(allowed).toBe(true);
+  });
+
+  it('allows super_admin with X-Active-Role acting as registration_officer', () => {
+    (reflector.getAllAndOverride as jest.Mock).mockReturnValue([
+      RoleEnum.REGISTRATION_OFFICER,
+    ]);
+
+    const user: AuthenticatedUser = {
+      userId: 9,
+      email: 'super@b.com',
+      role: RoleEnum.SUPER_ADMIN,
+      roles: [RoleEnum.SUPER_ADMIN],
+    };
+
+    const allowed = guard.canActivate(
+      createContext(user, {
+        [ACTIVE_ROLE_HEADER]: RoleEnum.REGISTRATION_OFFICER,
+      }),
+    );
+
+    expect(allowed).toBe(true);
+    expect(user.activeRole).toBe(RoleEnum.REGISTRATION_OFFICER);
+  });
+
+  it('ignores invalid X-Active-Role header but super_admin bypass still passes', () => {
+    (reflector.getAllAndOverride as jest.Mock).mockReturnValue([
+      RoleEnum.REGISTRATION_OFFICER,
+    ]);
+
+    const user: AuthenticatedUser = {
+      userId: 10,
+      email: 'super@b.com',
+      role: RoleEnum.SUPER_ADMIN,
+      roles: [RoleEnum.SUPER_ADMIN],
+    };
+
+    const allowed = guard.canActivate(
+      createContext(user, { [ACTIVE_ROLE_HEADER]: 'not_a_real_role' }),
+    );
+
+    expect(allowed).toBe(true);
+    expect(user.activeRole).toBeUndefined();
+  });
+
+  it('allows admin with valid X-Active-Role for registration_officer routes', () => {
+    (reflector.getAllAndOverride as jest.Mock).mockReturnValue([
+      RoleEnum.REGISTRATION_OFFICER,
+    ]);
+
+    const user: AuthenticatedUser = {
+      userId: 11,
+      email: 'admin@b.com',
+      role: RoleEnum.ADMIN,
+      roles: [RoleEnum.ADMIN],
+    };
+
+    const allowed = guard.canActivate(
+      createContext(user, {
+        [ACTIVE_ROLE_HEADER]: RoleEnum.REGISTRATION_OFFICER,
+      }),
+    );
+
+    expect(allowed).toBe(true);
+    expect(user.activeRole).toBe(RoleEnum.REGISTRATION_OFFICER);
   });
 });

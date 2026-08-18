@@ -26,4 +26,7 @@ export enum RoleEnum {
 
   /** ผู้ดูแลระบบ */
   ADMIN = 'admin',
+
+  /** ผู้ดูแลระบบสูงสุด */
+  SUPER_ADMIN = 'super_admin',
 }

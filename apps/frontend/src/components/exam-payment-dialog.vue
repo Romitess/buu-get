@@ -9,10 +9,14 @@
         >
           <div>
             <h2 class="text-h6 q-ma-none text-weight-bold" style="color: var(--text-primary)">
-              ระบบลงทะเบียนสอบ
+              {{ t('payment.dialog.registrationTitle') }}
             </h2>
             <div class="text-caption text-grey-7" style="margin-top: 4px">
-              รหัสวิชา: {{ exam?.name || 'ไม่ระบุ' }}
+              {{
+                t('payment.dialog.subjectCode', {
+                  code: exam?.name || t('payment.dialog.unspecified'),
+                })
+              }}
             </div>
           </div>
           <q-space />
@@ -32,33 +36,35 @@
                   padding-bottom: 4px;
                 "
               >
-                รายละเอียดการสอบ
+                {{ t('payment.dialog.examDetails') }}
               </div>
 
               <div class="row q-col-gutter-y-md">
                 <div class="col-4 text-weight-medium" style="color: var(--text-secondary)">
-                  รอบสอบ:
+                  {{ t('payment.dialog.examRound') }}
                 </div>
                 <div class="col-8" style="color: var(--text-primary)">{{ exam?.name || '-' }}</div>
 
                 <div class="col-4 text-weight-medium" style="color: var(--text-secondary)">
-                  วันที่สอบ:
+                  {{ t('payment.dialog.examDate') }}
                 </div>
                 <div class="col-8" style="color: var(--text-primary)">
                   {{ exam?.examDate || '-' }}
                 </div>
 
                 <div class="col-4 text-weight-medium" style="color: var(--text-secondary)">
-                  สถานที่:
+                  {{ t('payment.dialog.location') }}
                 </div>
                 <div class="col-8" style="color: var(--text-primary)">
                   {{ exam?.location || '-' }}
                 </div>
 
                 <div class="col-4 text-weight-medium" style="color: var(--text-secondary)">
-                  ค่าธรรมเนียม:
+                  {{ t('payment.dialog.fee') }}
                 </div>
-                <div class="col-8 text-weight-bold text-primary">500 บาท</div>
+                <div class="col-8 text-weight-bold text-primary">
+                  {{ t('payment.dialog.feeAmount', { amount: 500 }) }}
+                </div>
               </div>
             </div>
 
@@ -73,13 +79,13 @@
                   padding-bottom: 4px;
                 "
               >
-                สถานะของคุณ
+                {{ t('payment.dialog.yourStatus') }}
               </div>
 
               <div class="bg-grey-1 q-pa-md" style="border-radius: 12px; border: 1px solid #e0e0e0">
                 <div class="row items-center q-mb-sm">
                   <div class="col-5 text-weight-medium" style="color: var(--text-secondary)">
-                    การสมัคร:
+                    {{ t('payment.dialog.registrationLabel') }}
                   </div>
                   <div class="col-7">
                     <q-chip
@@ -96,7 +102,7 @@
 
                 <div class="row items-center">
                   <div class="col-5 text-weight-medium" style="color: var(--text-secondary)">
-                    การชำระเงิน:
+                    {{ t('payment.dialog.paymentLabel') }}
                   </div>
                   <div class="col-7">
                     <q-chip
@@ -124,11 +130,10 @@
                   <q-icon name="timer" color="negative" />
                 </template>
                 <div class="text-caption text-weight-medium">
-                  กรุณาชำระเงินภายในเวลา
-                  <span class="text-h6 q-px-xs">{{ formattedTimeLeft }}</span> นาที
+                  {{ t('payment.dialog.payWithinMinutes', { time: formattedTimeLeft }) }}
                 </div>
                 <div class="text-caption" style="opacity: 0.8; font-size: 0.7rem">
-                  หากเกินเวลา ระบบจะยกเลิกการทำรายการอัตโนมัติ
+                  {{ t('payment.dialog.timeoutWarning') }}
                 </div>
               </q-banner>
             </div>
@@ -147,7 +152,7 @@
             v-if="status === 'paid' || status === 'pending_payment'"
             flat
             color="negative"
-            label="ยกเลิกการทำรายการ"
+            :label="t('payment.dialog.cancelTransaction')"
             icon="cancel"
             no-caps
             @click="confirmCancelRegistration"
@@ -158,7 +163,7 @@
             v-if="status === 'not_registered' || status === 'canceled'"
             color="primary"
             text-color="dark"
-            label="ลงทะเบียนสอบ"
+            :label="t('examSchedule.registerBtnText')"
             icon="how_to_reg"
             unelevated
             no-caps
@@ -170,7 +175,7 @@
           <q-btn
             v-if="status === 'pending_payment'"
             color="positive"
-            label="เลือกการชำระเงิน"
+            :label="t('payment.dialog.choosePayment')"
             icon="payment"
             unelevated
             no-caps
@@ -186,23 +191,25 @@
       <q-card style="min-width: 350px; border-radius: 12px">
         <q-card-section class="row items-center">
           <q-avatar icon="warning" color="negative" text-color="white" />
-          <span class="q-ml-sm text-subtitle1 text-weight-bold">ยืนยันการยกเลิก</span>
+          <span class="q-ml-sm text-subtitle1 text-weight-bold">{{
+            t('examSchedule.dialogCancel.title')
+          }}</span>
         </q-card-section>
 
         <q-card-section class="q-pt-none text-body2">
           {{
             status === 'pending_payment'
-              ? 'คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการทำรายการนี้?'
-              : 'คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการสมัครสอบนี้ด้วยตัวเอง?'
+              ? t('examSchedule.dialogCancel.confirmPendingPayment')
+              : t('examSchedule.dialogCancel.confirmPaid')
           }}
         </q-card-section>
 
         <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="ไม่ยกเลิก" v-close-popup />
+          <q-btn flat :label="t('examSchedule.dialogCancel.dismiss')" v-close-popup />
           <q-btn
             flat
             color="negative"
-            label="ยืนยันการยกเลิก"
+            :label="t('examSchedule.dialogCancel.confirm')"
             @click="executeCancelRegistration"
             v-close-popup
           />
@@ -214,7 +221,7 @@
     <q-dialog v-model="isPaymentDialogOpen" persistent>
       <q-card style="min-width: 450px; max-width: 90vw; border-radius: 16px">
         <q-card-section class="row items-center bg-primary text-dark">
-          <div class="text-h6 text-weight-bold">รูปแบบการชำระเงิน</div>
+          <div class="text-h6 text-weight-bold">{{ t('payment.dialog.paymentMethodTitle') }}</div>
           <q-space />
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
@@ -229,8 +236,8 @@
             align="justify"
             narrow-indicator
           >
-            <q-tab name="normal" label="รอบทั่วไป" no-caps />
-            <q-tab name="special" label="รอบพิเศษ" no-caps />
+            <q-tab name="normal" :label="t('examSchedule.examType.general')" no-caps />
+            <q-tab name="special" :label="t('examSchedule.examType.special')" no-caps />
           </q-tabs>
 
           <q-separator />
@@ -240,7 +247,7 @@
             <q-tab-panel name="normal">
               <div class="text-center">
                 <div class="text-subtitle1 text-weight-bold q-mb-md">
-                  ชำระเงินผ่าน QR Code (พร้อมเพย์)
+                  {{ t('payment.dialog.qrPaymentTitle') }}
                 </div>
                 <div
                   class="bg-grey-2 q-mx-auto q-pa-md flex flex-center"
@@ -252,15 +259,15 @@
                   class="q-mt-md text-h5 text-primary text-weight-bold"
                   style="color: #d4a900 !important"
                 >
-                  ยอดชำระ: 500 บาท
+                  {{ t('payment.dialog.paymentAmount', { amount: 500 }) }}
                 </div>
                 <div class="text-caption text-negative q-mt-sm">
-                  * สแกน QR Code นี้เพื่อชำระเงิน การสมัครจะถูกยกเลิกหากหมดเวลา
+                  {{ t('payment.dialog.qrScanHint') }}
                 </div>
 
                 <q-btn
                   color="positive"
-                  label="จำลองว่าจ่ายเงินสำเร็จ"
+                  :label="t('payment.dialog.simulatePayment')"
                   class="q-mt-lg full-width"
                   unelevated
                   no-caps
@@ -274,9 +281,9 @@
             <q-tab-panel name="special">
               <div class="text-center q-pa-xl">
                 <q-icon name="info" size="60px" color="warning" class="q-mb-md" />
-                <div class="text-h6 text-weight-bold">รอบพิเศษ</div>
-                <div class="text-body2 text-grey-8 q-mt-sm">
-                  ระบบการชำระเงินสำหรับรอบพิเศษอยู่ระหว่างการพัฒนา<br />กรุณาติดต่อเจ้าหน้าที่หากมีข้อสงสัย
+                <div class="text-h6 text-weight-bold">{{ t('payment.dialog.specialRoundTitle') }}</div>
+                <div class="text-body2 text-grey-8 q-mt-sm" style="white-space: pre-line">
+                  {{ t('payment.dialog.specialRoundMessage') }}
                 </div>
               </div>
             </q-tab-panel>
@@ -289,6 +296,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onBeforeUnmount, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 
 export interface ExamInfo {
@@ -307,6 +315,7 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
 }>();
 
+const { t } = useI18n();
 const $q = useQuasar();
 
 const isOpen = computed({
@@ -359,7 +368,7 @@ const startTimer = () => {
         isPaymentDialogOpen.value = false;
         $q.notify({
           type: 'warning',
-          message: 'หมดเวลาชำระเงิน ระบบได้ยกเลิกการทำรายการของคุณแล้ว (กรุณาสมัครใหม่)',
+          message: t('payment.dialog.notify.paymentTimeoutCancelled'),
           position: 'top',
           timeout: 4000,
         });
@@ -379,13 +388,13 @@ const clearTimer = () => {
 const registrationStatusText = computed(() => {
   switch (status.value) {
     case 'not_registered':
-      return 'ยังไม่สมัคร';
+      return t('payment.dialog.registrationStatus.notRegistered');
     case 'pending_payment':
-      return 'รอการชำระเงิน';
+      return t('exam.status.pending');
     case 'paid':
-      return 'สมัครสำเร็จ';
+      return t('exam.status.registrationComplete');
     case 'canceled':
-      return 'ยกเลิกการสมัคร';
+      return t('exam.status.registrationCancelled');
     default:
       return '-';
   }
@@ -409,13 +418,13 @@ const registrationStatusColor = computed(() => {
 const paymentStatusText = computed(() => {
   switch (status.value) {
     case 'not_registered':
-      return 'ยังไม่มีรายการ';
+      return t('payment.dialog.paymentStatus.none');
     case 'pending_payment':
-      return 'ยังไม่ชำระเงิน';
+      return t('payment.dialog.paymentStatus.unpaid');
     case 'paid':
-      return 'ชำระเงินแล้ว';
+      return t('exam.status.paymentCompleted');
     case 'canceled':
-      return 'ยกเลิก / หมดอายุ';
+      return t('payment.dialog.paymentStatus.expired');
     default:
       return '-';
   }
@@ -442,7 +451,7 @@ const registerExam = () => {
   startTimer();
   $q.notify({
     type: 'positive',
-    message: 'ลงทะเบียนสำเร็จ! กรุณาชำระเงินภายในเวลาที่กำหนด',
+    message: t('examSchedule.notifications.registrationSuccess'),
     position: 'top',
   });
 };
@@ -461,7 +470,7 @@ const executeCancelRegistration = () => {
     clearTimer();
     $q.notify({
       type: 'negative',
-      message: 'คุณได้ทำการยกเลิกการทำรายการเรียบร้อยแล้ว',
+      message: t('payment.dialog.notify.cancelTransactionSuccess'),
       position: 'top',
     });
   } else if (status.value === 'paid') {
@@ -469,7 +478,7 @@ const executeCancelRegistration = () => {
     clearTimer();
     $q.notify({
       type: 'negative',
-      message: 'คุณได้ทำการยกเลิกการสมัครเรียบร้อยแล้ว',
+      message: t('payment.dialog.notify.cancelRegistrationSuccess'),
       position: 'top',
     });
   }
@@ -485,7 +494,7 @@ const simulatePaymentSuccess = () => {
   isPaymentDialogOpen.value = false;
   $q.notify({
     type: 'positive',
-    message: 'ชำระเงินสำเร็จ! การสมัครของคุณได้รับการยืนยัน',
+    message: t('payment.dialog.notify.paymentSuccess'),
     position: 'top',
   });
 };

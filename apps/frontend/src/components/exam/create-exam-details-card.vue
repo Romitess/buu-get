@@ -4,7 +4,7 @@
       <!-- Header Section -->
       <div class="row items-center q-mb-md">
         <q-icon name="assignment" size="20px" class="q-mr-sm text-dark" />
-        <div class="text-subtitle1 text-weight-bold text-dark">ข้อมูลพื้นฐาน</div>
+        <div class="text-subtitle1 text-weight-bold text-dark">{{ t('admin.examForm.cards.basicInfo') }}</div>
       </div>
 
       <!-- Form Grid -->
@@ -13,10 +13,14 @@
         <div class="col-12 col-md-6 row q-col-gutter-y-md content-start">
           <!-- ประเภทการสอบ -->
           <div class="col-12" data-field="examType">
-            <div class="buu-label-muted q-mb-xs">ประเภทการสอบ</div>
+            <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.fields.examType') }}</div>
             <app-select
               v-model="form.examType"
               :options="examTypeOptions"
+              option-label="label"
+              option-value="value"
+              emit-value
+              map-options
               outlined
               dense
               bg-color="white"
@@ -34,7 +38,7 @@
 
           <!-- ชื่อการสอบ -->
           <div class="col-12" data-field="examName">
-            <div class="buu-label-muted q-mb-xs">ชื่อการสอบ</div>
+            <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.fields.examName') }}</div>
             <q-input
               v-model="form.examName"
               :placeholder="DEFAULT_EXAM_NAME"
@@ -55,7 +59,7 @@
           <!-- ครั้งที่จัดสอบ & ปีงบประมาณ -->
           <div class="col-12 row no-wrap exam-name-round-row">
             <div class="col" data-field="examRound">
-              <div class="buu-label-muted q-mb-xs">ครั้งที่จัดสอบ</div>
+              <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.fields.examRound') }}</div>
               <q-input
                 v-model="form.examRound"
                 placeholder="1"
@@ -77,7 +81,7 @@
               </div>
             </div>
             <div class="col" data-field="examFiscalYear">
-              <div class="buu-label-muted q-mb-xs">ปีงบประมาณ (ค.ศ.)</div>
+              <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.fields.examFiscalYear') }}</div>
               <q-input
                 :model-value="form.examFiscalYear"
                 placeholder="2026"
@@ -91,7 +95,7 @@
                 maxlength="4"
                 @update:model-value="onFiscalYearInput"
               />
-              <div class="text-caption text-grey-6 q-mt-xs">กรอกปี ค.ศ. 4 หลัก</div>
+              <div class="text-caption text-grey-6 q-mt-xs">{{ t('admin.examForm.fields.fiscalYearHint') }}</div>
               <div
                 v-if="hasError('examFiscalYear')"
                 :key="`examFiscalYear-${shakeKey}`"
@@ -105,7 +109,7 @@
 
           <!-- ค่าธรรมเนียม (เฉพาะรอบทั่วไป) -->
           <div v-if="!isSpecialRound" class="col-12" data-field="fee">
-            <div class="buu-label-muted q-mb-xs">ค่าธรรมเนียม</div>
+            <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.fields.fee') }}</div>
             <q-input
               :model-value="form.fee"
               :placeholder="String(DEFAULT_EXAM_FEE_THB)"
@@ -127,10 +131,14 @@
         <div class="col-12 col-md-6 row q-col-gutter-y-md content-start">
           <!-- รูปแบบการสอบ -->
           <div class="col-12" data-field="examFormat">
-            <div class="buu-label-muted q-mb-xs">รูปแบบการสอบ</div>
+            <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.fields.examFormat') }}</div>
             <app-select
               v-model="form.examFormat"
               :options="examFormatOptions"
+              option-label="label"
+              option-value="value"
+              emit-value
+              map-options
               outlined
               dense
               bg-color="white"
@@ -152,7 +160,7 @@
 
           <!-- รหัสผังแหล่งเงิน (เฉพาะรอบทั่วไป) -->
           <div v-if="!isSpecialRound" class="col-12" data-field="fundSourceId">
-            <div class="buu-label-muted q-mb-xs">รหัสผังแหล่งเงิน</div>
+            <div class="buu-label-muted q-mb-xs">{{ t('admin.examForm.fields.fundSource') }}</div>
             <app-select
               v-model="form.fundSourceId"
               :options="fundSourceOptions"
@@ -164,7 +172,7 @@
               dense
               bg-color="white"
               :loading="isLoadingData"
-              placeholder="ผังแหล่งเงิน"
+              :placeholder="t('admin.examForm.fields.fundSourcePlaceholder')"
               dropdown-icon="keyboard_arrow_down"
               class="buu-input-muted"
               :class="{ 'buu-field-error': hasError('fundSourceId') }"
@@ -186,7 +194,7 @@
             <q-field outlined bg-color="white" class="buu-field-large buu-input-muted">
               <template v-slot:control>
                 <div class="full-width row items-center justify-between no-wrap">
-                  <span class="buu-label-muted">สถานะเผยแพร่</span>
+                  <span class="buu-label-muted">{{ t('admin.examForm.fields.publishStatus') }}</span>
                   <q-toggle
                     v-model="form.isPublished"
                     color="primary"
@@ -194,7 +202,7 @@
                     :disable="isLocked"
                   >
                     <q-tooltip v-if="isLocked" class="bg-amber-9 text-body2">
-                      ไม่สามารถปิดสถานะเผยแพร่ได้เนื่องจากมีการเผยแพร่ไปแล้ว
+                      {{ t('admin.examForm.fields.publishLockedTooltip') }}
                     </q-tooltip>
                   </q-toggle>
                 </div>
@@ -208,18 +216,21 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import type { CreateExamForm } from 'src/composables/use-create-exam';
 import AppSelect from 'src/components/base/app-select.vue';
 import { DEFAULT_EXAM_FEE_THB, DEFAULT_EXAM_NAME } from 'src/constants/exam';
+
+const { t } = useI18n();
 
 /**
  * Props for CreateExamDetailsCard.
  */
 const props = defineProps<{
   /** Exam type options (General, Special). */
-  examTypeOptions: string[];
+  examTypeOptions: { label: string; value: string }[];
   /** Exam format options (Computer, Paper). */
-  examFormatOptions: string[];
+  examFormatOptions: { label: string; value: string }[];
   /** Fund source options from the API. */
   fundSourceOptions: { label: string; value: number }[];
   /** Loading state for fund source data. */

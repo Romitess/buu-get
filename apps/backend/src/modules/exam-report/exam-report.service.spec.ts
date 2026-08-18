@@ -16,6 +16,10 @@ type MockQueryBuilder = {
   having: jest.Mock;
   orderBy: jest.Mock;
   addOrderBy: jest.Mock;
+  skip: jest.Mock;
+  take: jest.Mock;
+  clone: jest.Mock;
+  getCount: jest.Mock;
   getRawMany: jest.Mock;
   getRawOne: jest.Mock;
 };
@@ -74,6 +78,10 @@ const createQueryBuilderMock = (): MockQueryBuilder => {
     having: jest.fn(),
     orderBy: jest.fn(),
     addOrderBy: jest.fn(),
+    skip: jest.fn(),
+    take: jest.fn(),
+    clone: jest.fn(),
+    getCount: jest.fn().mockResolvedValue(0),
     getRawMany: jest.fn().mockResolvedValue([]),
     getRawOne: jest.fn().mockResolvedValue(null),
   };
@@ -88,6 +96,9 @@ const createQueryBuilderMock = (): MockQueryBuilder => {
   qb.having.mockReturnValue(qb);
   qb.orderBy.mockReturnValue(qb);
   qb.addOrderBy.mockReturnValue(qb);
+  qb.skip.mockReturnValue(qb);
+  qb.take.mockReturnValue(qb);
+  qb.clone.mockReturnValue(qb);
   return qb;
 };
 
@@ -316,6 +327,79 @@ describe('ExamReportService', () => {
       expect(withToYear.stats.attended.value).toBe(18);
       expect(withoutToYear.stats.applicants.value).toBe(30);
       expect(withoutToYear.stats.attended.value).toBe(25);
+    });
+  });
+
+  describe('getYearRounds', () => {
+    it('should paginate rounds and keep year-level score aggregates off the page', async () => {
+      enrollmentQb.getRawMany.mockResolvedValue([
+        {
+          round: '1',
+          examDate: '2026-06-01',
+          applicants: 4,
+          attended: 3,
+          repeatTakers: 1,
+          minScore: 50,
+          maxScore: 80,
+          averageScore: 60,
+        },
+      ]);
+      enrollmentQb.getRawOne.mockResolvedValue({
+        cnt: 12,
+        minScore: 40,
+        maxScore: 90,
+        averageScore: 70,
+      });
+
+      const result = await service.getYearRounds(2026, { page: 2, limit: 5 });
+
+      expect(enrollmentQb.skip).toHaveBeenCalledWith(5);
+      expect(enrollmentQb.take).toHaveBeenCalledWith(5);
+      expect(result.data).toHaveLength(1);
+      expect(result.meta.total).toBe(12);
+      expect(result.meta.minScore).toBe(40);
+      expect(result.meta.averageScore).toBe(70);
+      expect(result.data[0].minScore).toBe(50);
+    });
+  });
+
+  describe('getYearRoundCandidates', () => {
+    it('should paginate candidates and keep round aggregates from SQL not the page', async () => {
+      enrollmentQb.getCount.mockResolvedValue(25);
+      enrollmentQb.getRawMany.mockResolvedValue([
+        {
+          enrollmentId: 1,
+          examNumber: 'T1',
+          prefix: 'นาย',
+          fullName: 'ทดสอบ',
+          scoresId: null,
+          vocabularyGrammarScore: null,
+          readingScore: null,
+          totalScore: 55,
+          level: null,
+          attemptStatus: 'firstAttempt',
+        },
+      ]);
+      enrollmentQb.getRawOne.mockResolvedValue({
+        minScore: 41,
+        maxScore: 88,
+        averageScore: 66.6,
+      });
+
+      const result = await service.getYearRoundCandidates(2026, {
+        page: 1,
+        limit: 10,
+        round: '1/2026',
+        search: 'ทดสอบ',
+      });
+
+      expect(enrollmentQb.clone).toHaveBeenCalled();
+      expect(enrollmentQb.skip).toHaveBeenCalledWith(0);
+      expect(enrollmentQb.take).toHaveBeenCalledWith(10);
+      expect(result.meta.total).toBe(25);
+      expect(result.meta.minScore).toBe(41);
+      expect(result.meta.averageScore).toBe(66.6);
+      expect(result.data[0].fullName).toBe('ทดสอบ');
     });
   });
 });

@@ -4,6 +4,7 @@
     :rows="exams"
     :loading="loading"
     :pagination="pagination"
+    :is-server-side="isServerSide"
     @request="onRequest"
   >
     <!-- Type Column -->
@@ -76,6 +77,7 @@ interface Props {
   role: Role;
   loading?: boolean;
   pagination?: PaginationModel;
+  isServerSide?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -101,10 +103,12 @@ interface CustomToolButton {
 }
 
 const { formatThaiDate } = useThaiDate();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const $q = useQuasar();
 
-const columns = computed<QTableColumn[]>(() => [
+const columns = computed<QTableColumn[]>(() => {
+  void locale.value;
+  return [
   {
     name: 'examName',
     label: t('admin.examManagement.table.columns.examName'),
@@ -154,8 +158,7 @@ const columns = computed<QTableColumn[]>(() => [
     align: 'center',
     style: 'width: 12%',
   },
-]);
-
+];});
 const getRatio = (row: ExamSchedule) => {
   if (!row.capacity || row.capacity === 0) return 0;
   return row.registeredCount / row.capacity;
