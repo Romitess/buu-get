@@ -41,11 +41,9 @@
           >
             <ScrollReveal :delay="index * STAGGER_DELAY" :disabled="revealDisabled">
               <HomeCard
-                v-bind="
-                  'icon' in fallbackCard
-                    ? { icon: fallbackCard.icon, title: $t(fallbackCard.titleKey), subtitle: $t(fallbackCard.subtitleKey) }
-                    : { title: $t(fallbackCard.titleKey), subtitle: $t(fallbackCard.subtitleKey) }
-                "
+                :icon="fallbackCard.icon"
+                :title="$t(fallbackCard.titleKey)"
+                :subtitle="$t(fallbackCard.subtitleKey)"
               />
             </ScrollReveal>
           </div>
@@ -168,20 +166,25 @@ const props = withDefaults(defineProps<Props>(), {
 
 const revealDisabled = computed(() => props.previewMode);
 
+const FORMAT_DEFAULT_ICONS = ['schedule', 'spellcheck', 'menu_book'] as const;
+const FORMAT_FALLBACK_ICON = 'article';
+
 const fallbackFormatCards = [
   {
     key: 'time',
-    icon: 'schedule',
+    icon: FORMAT_DEFAULT_ICONS[0],
     titleKey: 'home.testFormat.cards.time.title',
     subtitleKey: 'home.testFormat.cards.time.subtitle',
   },
   {
     key: 'part1',
+    icon: FORMAT_DEFAULT_ICONS[1],
     titleKey: 'home.testFormat.cards.part1.title',
     subtitleKey: 'home.testFormat.cards.part1.subtitle',
   },
   {
     key: 'part2',
+    icon: FORMAT_DEFAULT_ICONS[2],
     titleKey: 'home.testFormat.cards.part2.title',
     subtitleKey: 'home.testFormat.cards.part2.subtitle',
   },
@@ -241,7 +244,7 @@ const getBoxContentText = (box: CardBoxContent | StepBoxContent | ContentBoxCont
 };
 
 const getFormatDefaultIcon = (index: number) => {
-  return index === 0 ? 'schedule' : undefined;
+  return FORMAT_DEFAULT_ICONS[index] ?? FORMAT_FALLBACK_ICON;
 };
 
 const formatStepNumber = (num: number) => {
