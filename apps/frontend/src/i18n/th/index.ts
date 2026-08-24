@@ -2011,6 +2011,17 @@ export default {
     forgotPassword: 'ลืมรหัสผ่าน?',
     login: 'เข้าสู่ระบบ',
     createAccount: 'สร้างบัญชีตอนนี้ ?',
+    thaidCallback: {
+      successTitle: 'ยืนยันการให้ข้อมูลสำเร็จ',
+      successBody: 'ระบบได้รับผลการยืนยันจาก ThaID แล้ว สามารถกลับไปเข้าสู่ระบบได้',
+      deniedTitle: 'ยกเลิกการให้ข้อมูล',
+      deniedBody: 'คุณไม่ได้ยืนยันการให้ข้อมูลกับ ThaID',
+      errorTitle: 'ไม่สามารถยืนยันข้อมูลได้',
+      errorBody: 'การเชื่อมต่อกับ ThaID ไม่สำเร็จ กรุณาลองอีกครั้ง',
+      unknownTitle: 'ไม่พบผลการยืนยัน',
+      unknownBody: 'ไม่พบข้อมูลการยืนยันจาก ThaID',
+      backToLogin: 'กลับไปหน้าเข้าสู่ระบบ',
+    },
     notify: {
       required: 'กรุณากรอกอีเมลและรหัสผ่าน',
       success: 'เข้าสู่ระบบสำเร็จ',

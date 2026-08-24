@@ -24,6 +24,8 @@ export interface EnvironmentVariables {
   MOODLE_STUDENT_ROLEID?: number;
   /** comma-separated allowed CORS origins; empty = reflect request origin in dev only */
   CORS_ORIGINS?: string;
+  /** origin ของ frontend สำหรับ redirect หลัง ThaiD callback (local split-port) */
+  FRONTEND_URL?: string;
   /** default JSON/urlencoded body limit (e.g. 1mb) */
   BODY_LIMIT?: string;
   /** larger limit for file upload routes (e.g. 50mb) */
@@ -54,6 +56,9 @@ const envSchema = Joi.object<EnvironmentVariables>({
   MOODLE_COURSE_CATEGORY_ID: Joi.number().optional(),
   MOODLE_STUDENT_ROLEID: Joi.number().optional(),
   CORS_ORIGINS: Joi.string().optional(),
+  FRONTEND_URL: Joi.string()
+    .uri({ scheme: ['http', 'https'] })
+    .optional(),
   BODY_LIMIT: Joi.string().default('1mb'),
   UPLOAD_BODY_LIMIT: Joi.string().default('50mb'),
 });

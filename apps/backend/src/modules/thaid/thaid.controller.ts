@@ -3,23 +3,11 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 import { Public } from 'src/decorators/public.decorator';
 import { ThaidService } from './thaid.service';
-import {
-  ExternalCallbackQuery,
-  ExternalCallbackResult,
-} from './types/thaid.types';
-
-function toRecord(value: unknown): Record<string, unknown> {
-  if (value === null || value === undefined) {
-    return {};
-  }
-  if (typeof value === 'object' && !Array.isArray(value)) {
-    return value as Record<string, unknown>;
-  }
-  return { value };
-}
+import { ExternalCallbackResult } from './types/thaid.types';
+import { toRecord } from './thaid.utils';
 
 @ApiTags('ThaiD')
-@Controller()
+@Controller('bank')
 export class ThaidController {
   constructor(private readonly thaidService: ThaidService) {}
 

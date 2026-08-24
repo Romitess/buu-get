@@ -2113,6 +2113,17 @@ export default {
     forgotPassword: 'Forgot?',
     login: 'Sign In',
     createAccount: 'Create an account now?',
+    thaidCallback: {
+      successTitle: 'Data sharing confirmed',
+      successBody: 'BUU-GET received the ThaID confirmation. You can return to sign in.',
+      deniedTitle: 'Data sharing cancelled',
+      deniedBody: 'You did not confirm data sharing with ThaID.',
+      errorTitle: 'Could not confirm data sharing',
+      errorBody: 'The ThaID connection failed. Please try again.',
+      unknownTitle: 'No confirmation result',
+      unknownBody: 'No ThaID confirmation data was found.',
+      backToLogin: 'Back to sign in',
+    },
     notify: {
       required: 'Please enter email and password',
       success: 'Login successful',
