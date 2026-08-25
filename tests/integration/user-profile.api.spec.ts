@@ -527,8 +527,8 @@ test.describe('User Profile API — me / RBAC / authz / soft-delete', () => {
     expect(noJwt.status()).toBe(401);
   });
 
-  // PROF-I-006 — current behavior: any JWT can PATCH foreign profile (BUG-011)
-  test('PATCH /api/user-profile/:id allows candidate to mutate foreign profile (current)', async ({
+  // PROF-I-006 — BUG-011 fixed: foreign candidate cannot PATCH another profile
+  test('PATCH /api/user-profile/:id rejects candidate mutating foreign profile', async ({
     request,
   }) => {
     requireSeed();
@@ -585,10 +585,14 @@ test.describe('User Profile API — me / RBAC / authz / soft-delete', () => {
         data: { userFullnameTh: mutatedName },
       },
     );
-    // CURRENT: JWT-only route — foreign mutate allowed (authz risk BUG-011)
-    expect(patchRes.status(), await patchRes.text()).toBe(200);
-    const body = (await patchRes.json()) as UserProfileRow;
-    expect(body.userFullnameTh).toBe(mutatedName);
+    expect(patchRes.status(), await patchRes.text()).toBe(403);
+
+    const victimMe = await request.get('/api/user-profile/me', {
+      headers: victimHeaders,
+    });
+    expect(victimMe.status()).toBe(200);
+    const body = (await victimMe.json()) as UserProfileRow;
+    expect(body.userFullnameTh).not.toBe(mutatedName);
   });
 
   // PROF-I-007

@@ -101,6 +101,8 @@ export default {
       transactionNotFound: 'ไม่พบรายการชำระเงิน',
       startPaymentError: 'เกิดข้อผิดพลาดในการเริ่มการชำระเงิน',
       confirmPaymentError: 'เกิดข้อผิดพลาดในการบันทึกการชำระเงิน',
+      waitingForPayment:
+        'ระบบได้รับคำขอชำระเงินแล้ว กรุณาสแกน QR และรอการเงินยืนยันการชำระ',
       expireTransactionError: 'เกิดข้อผิดพลาดในการหมดอายุรายการชำระเงิน',
       cancelSuccess: 'ยกเลิกการสมัครสอบเรียบร้อยแล้ว',
       cancelError: 'เกิดข้อผิดพลาดในการยกเลิกการสมัคร',
@@ -395,10 +397,14 @@ export default {
   payment: {
     dialog: {
       title: 'ยืนยันการชำระเงิน',
+      waitingTitle: 'รอชำระเงิน',
       detailsLabel: 'รายละเอียดการชำระเงิน',
       payWithin: 'ชำระเงินภายใน {time}',
       instruction: 'กรุณาสแกน QR Code ด้วยแอปพลิเคชัน Mobile Banking\nเพื่อเสร็จสิ้นการลงทะเบียน',
+      waitingInstruction:
+        'กรุณาสแกน QR Code ด้วยแอปพลิเคชัน Mobile Banking\nสถานะจะเป็น PAID หลังการเงินยืนยันการชำระ',
       saveQr: 'บันทึก QR Code ชำระเงิน',
+      waitingAcknowledge: 'รับทราบ — รอการยืนยัน',
       registrationTitle: 'ระบบลงทะเบียนสอบ',
       subjectCode: 'รหัสวิชา: {code}',
       unspecified: 'ไม่ระบุ',

@@ -28,6 +28,15 @@ export interface VerifyCertificateResponse {
       sortOrder: number;
     }>;
   };
+  /** Present on public verify — used instead of auth-gated getBandRules() */
+  bandRules?: Array<{
+    id: string;
+    band: string;
+    minScore: number;
+    maxScore: number;
+    cefr: string;
+    descriptor: string;
+  }>;
 }
 
 export type ReceiptVerifyStatus = 'valid' | 'voided';

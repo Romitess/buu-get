@@ -16,6 +16,8 @@ import {
   ApiOkResponse,
   ApiQuery,
 } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { EXAM_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import { ExamBlockedSeatsService } from './exam-blocked-seats.service';
 import { CreateExamBlockedSeatDto } from './dto/create-exam-blocked-seat.dto';
 import { UpdateExamBlockedSeatDto } from './dto/update-exam-blocked-seat.dto';
@@ -30,6 +32,7 @@ export class ExamBlockedSeatsController {
   ) {}
 
   @Post()
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'สร้างรายการ block ที่นั่งใหม่' })
   @ApiCreatedResponse({ type: ExamBlockedSeat })
   async create(
@@ -58,6 +61,7 @@ export class ExamBlockedSeatsController {
   }
 
   @Post('session/:sessionId/replace')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({
     summary: 'Replace all seat overrides for a session',
   })
@@ -70,6 +74,7 @@ export class ExamBlockedSeatsController {
   }
 
   @Patch(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'แก้ไขข้อมูลการ block ที่นั่ง' })
   @ApiOkResponse({ type: ExamBlockedSeat })
   async update(
@@ -80,6 +85,7 @@ export class ExamBlockedSeatsController {
   }
 
   @Delete(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'ลบข้อมูลการ block ที่นั่ง (Soft Delete)' })
   @ApiOkResponse({ description: 'ลบข้อมูลสำเร็จ' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {

@@ -21,13 +21,14 @@ import { BulkIssueCertificatesDto } from './dto/bulk-issue-certificates.dto';
 import { ExamCertificate } from './entities/exam-certificate.entity';
 
 @ApiTags('exam-certificates')
-@Controller('api/exam-certificates')
+@Controller('exam-certificates')
 export class ExamCertificatesController {
   constructor(
     private readonly examCertificatesService: ExamCertificatesService,
   ) {}
 
   @Post()
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'สร้างใบรับรองใหม่ (Create new Exam Certificate)' })
   @ApiResponse({
     status: 201,
@@ -58,6 +59,7 @@ export class ExamCertificatesController {
   }
 
   @Get()
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({
     summary: 'ดึงข้อมูลใบรับรองทั้งหมด (Get all Exam Certificates)',
   })
@@ -71,6 +73,7 @@ export class ExamCertificatesController {
   }
 
   @Get(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({
     summary: 'ดึงข้อมูลใบรับรองตาม ID (Get Exam Certificate by ID)',
   })
@@ -84,6 +87,7 @@ export class ExamCertificatesController {
   }
 
   @Patch(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'อัปเดตข้อมูลใบรับรอง (Update Exam Certificate)' })
   @ApiResponse({
     status: 200,
@@ -98,6 +102,7 @@ export class ExamCertificatesController {
   }
 
   @Delete(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({
     summary: 'ลบข้อมูลใบรับรองแบบ Soft Delete (Delete Exam Certificate)',
   })

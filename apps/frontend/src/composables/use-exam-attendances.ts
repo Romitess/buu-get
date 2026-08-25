@@ -170,7 +170,10 @@ export function useExamAttendances() {
           return {
             index: index + 1,
             ermId: enrollment.ERM_ID,
-            nationalId: enrollment.USER?.USER_NATIONAL_ID || '-',
+            nationalId:
+              enrollment.USER?.USER_NATIONAL_ID?.trim() ||
+              enrollment.USER?.USER_PASSPORT_NO?.trim() ||
+              '-',
             location: formatLocationLabel(
               enrollment.SESSION_LOCATION?.LOCATION ?? enrollment.SESSION?.LOCATION ?? null,
             ),

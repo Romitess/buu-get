@@ -1,10 +1,8 @@
 import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed, unref } from 'vue';
 import type { ExamRound, ExamInfo, ExamHistoryItem, DayData, ExamEnrollment } from 'src/types/exam';
-import type { ReceiptInformation } from 'src/types/receipt-information';
 import {
   createTransaction as createTransactionRequest,
-  confirmPaymentFlow,
   expireTransaction as expireTransactionRequest,
   startPaymentSession as startPaymentSessionRequest,
 } from 'src/services/transaction.service';
@@ -432,27 +430,6 @@ export const useExamStore = defineStore('exam', () => {
     }
   }
 
-  async function confirmPayment(
-    tranxId: number,
-    userCode: string,
-    receiptInfo?: ReceiptInformation,
-  ): Promise<void> {
-    try {
-      await confirmPaymentFlow(tranxId, {
-        userCode,
-        receiptTaxId: receiptInfo?.taxId,
-        receiptName: receiptInfo?.fullName,
-        receiptPhone: receiptInfo?.phone,
-        receiptAddress: receiptInfo?.address,
-      });
-
-      await refreshUserEnrollmentViews();
-    } catch (error: unknown) {
-      console.error('Failed to confirm payment:', error);
-      throw error;
-    }
-  }
-
   async function expireTransaction(
     tranxId: number,
     enrollmentId?: number,
@@ -510,7 +487,6 @@ export const useExamStore = defineStore('exam', () => {
     cancelRegistration,
     createTransaction,
     startPaymentSession,
-    confirmPayment,
     expireTransaction,
     addExamRound,
     deleteExamRound,

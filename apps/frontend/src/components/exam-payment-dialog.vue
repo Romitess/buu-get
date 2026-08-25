@@ -264,16 +264,6 @@
                 <div class="text-caption text-negative q-mt-sm">
                   {{ t('payment.dialog.qrScanHint') }}
                 </div>
-
-                <q-btn
-                  color="positive"
-                  :label="t('payment.dialog.simulatePayment')"
-                  class="q-mt-lg full-width"
-                  unelevated
-                  no-caps
-                  style="border-radius: 8px; font-weight: 600"
-                  @click="simulatePaymentSuccess"
-                />
               </div>
             </q-tab-panel>
 
@@ -486,17 +476,6 @@ const executeCancelRegistration = () => {
 
 const openPaymentDialog = () => {
   isPaymentDialogOpen.value = true;
-};
-
-const simulatePaymentSuccess = () => {
-  status.value = 'paid';
-  clearTimer();
-  isPaymentDialogOpen.value = false;
-  $q.notify({
-    type: 'positive',
-    message: t('payment.dialog.notify.paymentSuccess'),
-    position: 'top',
-  });
 };
 
 // --- Lifecycle ---

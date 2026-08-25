@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import { FINANCE_ROLES } from 'src/common/constants/role-groups';
 import {
   assertSelfOrRoles,
   AuthenticatedUser,
+  userHasAnyRole,
 } from 'src/common/utils/authz.util';
 import {
   PAGINATION_DEFAULT_LIMIT,
@@ -84,6 +86,7 @@ export class TransactionsService {
 
   async createTransactionForFlow(
     dto: CreateTransactionFlowDto,
+    user: AuthenticatedUser,
   ): Promise<TransactionFlowResult> {
     return this.dataSource.transaction(async (manager) => {
       const transactionRepository = manager.getRepository(Transaction);
@@ -108,6 +111,7 @@ export class TransactionsService {
           `Enrollment with ID ${dto.ermId} not found`,
         );
       }
+      this.assertEnrollmentAccess(user, enrollment);
       if (enrollment.ERM_STATUS !== ExamEnrollmentStatus.UNPAID) {
         throw new BadRequestException(
           'Enrollment must be unpaid to create a payment transaction',
@@ -277,6 +281,9 @@ export class TransactionsService {
     dto: ConfirmPaymentFlowDto,
     user: AuthenticatedUser,
   ): Promise<void> {
+    // ผู้สมัครห้าม self-confirm — ต้องเป็น FINANCE_ROLES เท่านั้น
+    this.assertFinanceAccess(user);
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -299,7 +306,9 @@ export class TransactionsService {
       const enrollment = await manager.getRepository(ExamEnrollment).findOne({
         where: { ERM_ID: transaction.ERM_ID },
       });
-      this.assertEnrollmentAccess(user, enrollment);
+      if (!enrollment) {
+        throw new NotFoundException('Enrollment not found for this transaction');
+      }
 
       if (
         transaction.TRANX_PAYMENT_STATUS !== TransactionPaymentStatus.PENDING
@@ -735,13 +744,16 @@ export class TransactionsService {
     return buildPaginatedResponse(data, total, page, limit);
   }
 
-  async findOne(id: number): Promise<Transaction> {
+  async findOne(id: number, user?: AuthenticatedUser): Promise<Transaction> {
     const transaction = await this.transactionsRepository.findOne({
       where: { TRANX_ID: id },
       relations: ['ENROLLMENT'],
     });
     if (!transaction) {
       throw new NotFoundException(`Transaction with ID ${id} not found`);
+    }
+    if (user) {
+      this.assertEnrollmentAccess(user, transaction.ENROLLMENT ?? null);
     }
     return transaction;
   }
@@ -791,5 +803,14 @@ export class TransactionsService {
       FINANCE_ROLES,
       'Access denied: transaction does not belong to you',
     );
+  }
+
+  /** ยืนยันชำระเงิน / ทางลัด admin — ต้องเป็น FINANCE_ROLES */
+  private assertFinanceAccess(user: AuthenticatedUser): void {
+    if (!userHasAnyRole(user, FINANCE_ROLES)) {
+      throw new ForbiddenException(
+        'Access denied: finance role required to confirm payment',
+      );
+    }
   }
 }

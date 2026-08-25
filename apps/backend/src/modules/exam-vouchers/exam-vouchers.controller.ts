@@ -14,6 +14,8 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { EXAM_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import { ExamVouchersService } from './exam-vouchers.service';
 import { CreateExamVoucherDto } from './dto/create-exam-voucher.dto';
 import { UpdateExamVoucherDto } from './dto/update-exam-voucher.dto';
@@ -27,6 +29,7 @@ export class ExamVouchersController {
   constructor(private readonly examVouchersService: ExamVouchersService) {}
 
   @Post()
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'สร้างบัตรสอบใหม่' })
   @ApiCreatedResponse({ type: ExamVoucher })
   async create(
@@ -36,6 +39,7 @@ export class ExamVouchersController {
   }
 
   @Post('enrollment/:ermId')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'สร้างบัตรสอบจากรหัสใบสมัคร' })
   @ApiCreatedResponse({ type: ExamVoucher })
   async createFromEnrollment(
@@ -45,6 +49,7 @@ export class ExamVouchersController {
   }
 
   @Get()
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'ดึงข้อมูลบัตรสอบทั้งหมด' })
   @ApiOkResponse({ type: ExamVoucher, isArray: true })
   async findAll(): Promise<ExamVoucher[]> {
@@ -59,6 +64,7 @@ export class ExamVouchersController {
   }
 
   @Patch(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'แก้ไขข้อมูลบัตรสอบ' })
   @ApiOkResponse({ type: ExamVoucher })
   async update(
@@ -69,6 +75,7 @@ export class ExamVouchersController {
   }
 
   @Delete(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'ลบบัตรสอบ' })
   @ApiOkResponse({ description: 'ลบข้อมูลสำเร็จ' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
@@ -76,6 +83,7 @@ export class ExamVouchersController {
   }
 
   @Post('send-ticket')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'ส่งอีเมลรูปภาพบัตรสอบ' })
   @ApiOkResponse({ description: 'ส่งอีเมลสำเร็จ' })
   async sendTicket(
@@ -87,6 +95,7 @@ export class ExamVouchersController {
   }
 
   @Post('bulk-issue')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({
     summary: 'ออกบัตรสอบและส่งอีเมลหาผู้เข้าสอบพร้อมกันแบบ Batch',
   })

@@ -4,10 +4,9 @@ import { VerifyCertificatePage } from './pages/verify-certificate.page';
 import { VerifyReceiptPage } from './pages/verify-receipt.page';
 
 /**
- * exam-certificates controller is mounted at `@Controller('api/exam-certificates')`
- * while the app already uses global prefix `api` → `/api/api/exam-certificates`.
+ * exam-certificates mounts at `/api/exam-certificates` (BUG-002 fixed).
  */
-const EXAM_CERTIFICATES_PATH = '/api/api/exam-certificates';
+const EXAM_CERTIFICATES_PATH = '/api/exam-certificates';
 
 type ExamCertificateRow = {
   CERT_CODE: string;
@@ -68,12 +67,6 @@ test.describe('E2E: Public document verification UI', () => {
 
   // VERIFY-E-001
   test('Public UI verify certificate (no auth)', async ({ page, request }) => {
-    // Known production bug — do not weaken assertion; un-skip when BUG-004 is fixed.
-    test.skip(
-      true,
-      'BUG-004: public certificate result page Promise.all includes auth-gated getBandRules() (401) → false not-found even when verify API returns 200',
-    );
-
     const code = await discoverCertCode(request);
     test.skip(
       !code,

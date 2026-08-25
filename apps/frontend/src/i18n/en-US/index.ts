@@ -101,6 +101,8 @@ export default {
       transactionNotFound: 'Payment transaction not found',
       startPaymentError: 'Failed to start payment session',
       confirmPaymentError: 'Failed to save payment',
+      waitingForPayment:
+        'Payment request received. Please scan the QR and wait for finance to confirm.',
       expireTransactionError: 'Failed to expire payment transaction',
       cancelSuccess: 'Registration cancelled successfully',
       cancelError: 'Failed to cancel registration',
@@ -502,11 +504,15 @@ export default {
   payment: {
     dialog: {
       title: 'Confirm Payment',
+      waitingTitle: 'Waiting for payment',
       detailsLabel: 'Payment Details',
       payWithin: 'Pay within {time}',
       instruction:
         'Please scan the QR Code with your Mobile Banking app\nto complete your registration.',
+      waitingInstruction:
+        'Please scan the QR Code with your Mobile Banking app.\nStatus becomes PAID after finance confirms payment.',
       saveQr: 'Save Payment QR Code',
+      waitingAcknowledge: 'Got it — waiting for confirmation',
       registrationTitle: 'Exam Registration System',
       subjectCode: 'Subject code: {code}',
       unspecified: 'Unspecified',

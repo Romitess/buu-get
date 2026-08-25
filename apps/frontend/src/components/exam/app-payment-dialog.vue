@@ -9,7 +9,7 @@
       <q-btn icon="close" flat round dense v-close-popup class="absolute-top-right close-btn" />
 
       <!-- Title -->
-      <div class="dialog-title">{{ $t('payment.dialog.title') }}</div>
+      <div class="dialog-title">{{ $t('payment.dialog.waitingTitle') }}</div>
 
       <!-- Amount Details Card -->
       <q-card flat class="amount-card">
@@ -29,12 +29,12 @@
       </AppStatusBadge>
 
       <!-- Instruction -->
-      <div class="instruction-text">{{ $t('payment.dialog.instruction') }}</div>
+      <div class="instruction-text">{{ $t('payment.dialog.waitingInstruction') }}</div>
 
-      <!-- Save Button -->
+      <!-- Close / acknowledge waiting (does not mark PAID) -->
       <AppButton
-        icon="file_download"
-        :label="$t('payment.dialog.saveQr')"
+        icon="check"
+        :label="$t('payment.dialog.waitingAcknowledge')"
         class="save-btn"
         @click="$emit('save')"
       />

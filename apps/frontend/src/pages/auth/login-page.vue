@@ -274,14 +274,12 @@ const goBackToCredentials = (): void => {
 
 /** Step 2 complete */
 const handleSave = async (formData: RegisterFormData): Promise<void> => {
-  // สำหรับ ThaiD path ที่ไม่มีรหัสผ่าน ให้สร้างรหัสผ่านชั่วคราว (ต้อง >= 8 ตัว)
+  // ThaiD stub path: never derive password from nationalId — use crypto-random temp password
   let passwordToUse = credentials.value.password;
   if (!passwordToUse) {
-    const randomSuffix = Math.random().toString().slice(2, 8);
-    passwordToUse = `${formData.nationalId}${randomSuffix}`;
-    if (passwordToUse.length < 8) {
-      passwordToUse = passwordToUse.padEnd(8, '0');
-    }
+    const bytes = new Uint8Array(24);
+    crypto.getRandomValues(bytes);
+    passwordToUse = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
   }
 
   const finalData: RegisterPayload = {

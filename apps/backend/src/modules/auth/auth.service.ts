@@ -309,7 +309,8 @@ export class AuthService {
         userInstitution: registerDto.institution,
         userCountry: registerDto.country,
         userAddress: registerDto.address?.trim() || null,
-        userThaidSynced: registerDto.userType === 'thai',
+        // Thai nationality ≠ ThaiD IdP sync; only real ThaiD callback may flip this
+        userThaidSynced: false,
       });
 
       await queryRunner.manager.save(newUserProfile);

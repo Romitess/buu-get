@@ -269,7 +269,6 @@ import { useRoute } from 'vue-router';
 import { AxiosError } from 'axios';
 import CertificateCard from 'src/components/exam/certificate-card.vue';
 import ReceiptCard from 'src/components/receipt-card.vue';
-import { getBandRules } from 'src/services/score-criteria.service';
 import { verifyCertificate, verifyReceipt } from 'src/services/verify.service';
 import type { CertificateBandRule } from 'src/types/certificate';
 import type { ReceiptData } from 'src/types/receipt';
@@ -374,13 +373,12 @@ const loadDocument = async (): Promise<void> => {
 
   try {
     if (props.documentType === 'certificate') {
-      const [result, bandRulesResponse, qrDataUrl] = await Promise.all([
+      const [result, qrDataUrl] = await Promise.all([
         verifyCertificate(code.value),
-        getBandRules(),
         generateCertificateQrDataUrl(code.value),
       ]);
       certificateData.value = result;
-      bandRules.value = bandRulesResponse.bandRules;
+      bandRules.value = (result.bandRules ?? []) as CertificateBandRule[];
       certificateQrDataUrl.value = qrDataUrl;
     } else {
       const [result, qrDataUrl] = await Promise.all([

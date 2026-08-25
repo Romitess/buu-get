@@ -2,10 +2,9 @@ import { test, expect, type APIRequestContext } from '@playwright/test';
 import { apiLogin } from '../e2e/fixtures/auth';
 
 /**
- * exam-certificates controller is mounted at `@Controller('api/exam-certificates')`
- * while the app already uses global prefix `api` → `/api/api/exam-certificates`.
+ * exam-certificates controller mounts at `/api/exam-certificates` (BUG-002 fixed).
  */
-const EXAM_CERTIFICATES_PATH = '/api/api/exam-certificates';
+const EXAM_CERTIFICATES_PATH = '/api/exam-certificates';
 
 type ExamCertificateRow = {
   CERT_ID: number;

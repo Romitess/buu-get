@@ -14,10 +14,23 @@ import {
   PAGINATION_DEFAULT_PAGE,
   PaginationQueryDto,
 } from 'src/common/dto/pagination-query.dto';
+import { FINANCE_ROLES } from 'src/common/constants/role-groups';
+import {
+  assertSelfOrRoles,
+  AuthenticatedUser,
+} from 'src/common/utils/authz.util';
 import { generateReceiptVerifyCode } from 'src/common/utils/verification-code.util';
+import { buildReceiptNo } from 'src/common/utils/receipt-no.util';
+import { buildReceiptItemDescription } from 'src/common/utils/receipt-description.util';
+import { buildReceiptPdf } from 'src/common/utils/build-receipt-pdf.util';
 import { Receipt, ReceiptStatus } from './entities/receipt.entity';
 import { ReceiptNumberService } from './receipt-number.service';
 import { CreateReceiptDto, UpdateReceiptDto } from './dto/receipt.dto';
+
+const BUU_ORGANIZATION = {
+  nameTH: 'มหาวิทยาลัยบูรพา',
+  nameEN: 'BURAPHA UNIVERSITY',
+} as const;
 
 @Injectable()
 export class ReceiptsService {
@@ -121,9 +134,18 @@ export class ReceiptsService {
     await this.receiptsRepository.softRemove(receipt);
   }
 
-  async downloadReceipt(tranxId: number): Promise<Uint8Array> {
+  async downloadReceipt(
+    tranxId: number,
+    user: AuthenticatedUser,
+  ): Promise<Uint8Array> {
     const receipt = await this.receiptsRepository.findOne({
       where: { TRANX_ID: tranxId },
+      relations: [
+        'TRANSACTION',
+        'TRANSACTION.ENROLLMENT',
+        'TRANSACTION.ENROLLMENT.SESSION',
+        'TRANSACTION.ENROLLMENT.SESSION.EXAM',
+      ],
     });
 
     if (!receipt) {
@@ -132,13 +154,60 @@ export class ReceiptsService {
       );
     }
 
+    const ownerUserId = receipt.TRANSACTION?.ENROLLMENT?.USER_ID;
+    if (ownerUserId == null) {
+      throw new NotFoundException(
+        `Receipt for Transaction ID ${tranxId} not found`,
+      );
+    }
+    assertSelfOrRoles(
+      user,
+      ownerUserId,
+      FINANCE_ROLES,
+      'Access denied: receipt does not belong to you',
+    );
+
     if (receipt.RC_STATUS !== ReceiptStatus.ISSUED) {
       throw new ForbiddenException(`Receipt is not in ISSUED status`);
     }
 
-    // Return a valid minimal PDF buffer (displays "Hello, world!")
-    const minimalPdfBase64 =
-      'JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwogIC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXMKICAvTWVkaWFCb3ggWyAwIDAgMjAwIDIwMCBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0KPj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAgL1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSCgkJPj4KICA+PgogIC9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKCjQgMCBvYmoKPDwKICAvVHlwZSAvRm9udAogIC9TdWJ0eXBlIC9UeXBlMQogIC9CYXNlRm9udCAvVGltZXMtUm9tYW4KPj4KZW5kb2JqCgo1IDAgb2JqICAlIHBhZ2UgY29udGVudAo8PAogIC9MZW5ndGggNDQKPj4Kc3RyZWFtCkJUCjcwIDUwIFRECi9GMSAxMiBUZgooSGVsbG8sIHdvcmxkISkgVGoKRVQKZW5kc3RyZWFtCmVuZG9iagoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNzkgMDAwMDAgbiAKMDAwMDAwMDE3MyAwMDAwMCBuIAowMDAwMDAwMzAxIDAwMDAwIG4gCjAwMDAwMDAzODAgMDAwMDAgbiAKdHJhaWxlcgo8PAogIC9TaXplIDYKICAvUm9vdCAxIDAgUgo+PgpzdGFydHhyZWYKNDkyCiUlRU9GCg==';
-    return Buffer.from(minimalPdfBase64, 'base64');
+    const transaction = receipt.TRANSACTION;
+    const exam = transaction?.ENROLLMENT?.SESSION?.EXAM;
+    const referenceDate =
+      receipt.RC_ISSUED_AT ?? transaction?.TRANX_PAID_AT ?? receipt.CREATED_AT;
+    const receiptNo = buildReceiptNo(
+      receipt.RC_NO,
+      receipt.RC_ID,
+      referenceDate,
+      receipt.CREATED_AT,
+    );
+    const description = buildReceiptItemDescription(
+      exam?.EXAM_ROUND,
+      exam?.EXAM_FISCAL_YEAR,
+    );
+    const amountNumber = Number(transaction?.TRANX_AMOUNT ?? 0);
+    const amount = Number.isFinite(amountNumber)
+      ? amountNumber.toFixed(2)
+      : '0.00';
+    const issuedAt =
+      referenceDate instanceof Date
+        ? referenceDate.toISOString()
+        : referenceDate
+          ? String(referenceDate)
+          : '-';
+
+    return buildReceiptPdf({
+      organizationNameTh: BUU_ORGANIZATION.nameTH,
+      organizationNameEn: BUU_ORGANIZATION.nameEN,
+      receiptNo,
+      issuedAt,
+      payerName: receipt.RC_NAME?.trim() || '-',
+      taxId: receipt.RC_TAX_ID != null ? String(receipt.RC_TAX_ID) : null,
+      amount,
+      description,
+      examRound: exam?.EXAM_ROUND ?? null,
+      examDate: exam?.EXAM_DATE ?? null,
+      verifyCode: receipt.RC_VERIFY_CODE,
+    });
   }
 }

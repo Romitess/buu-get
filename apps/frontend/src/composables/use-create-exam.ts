@@ -192,8 +192,12 @@ const getLocationAisleAfter = (
     after_cols: [
       ...fromLegacyCols,
       ...fromCombined
-        .filter((item): item is { type: 'column'; index: number } =>
-          typeof item === 'object' ? item.type === 'column' : false,
+        .filter(
+          (item): item is { type: 'column'; index: number } =>
+            item != null &&
+            typeof item === 'object' &&
+            (item as { type?: string }).type === 'column' &&
+            typeof (item as { index?: unknown }).index === 'number',
         )
         .map((item) => item.index),
       ...fromCombined.filter((item): item is number => typeof item === 'number'),
@@ -201,8 +205,12 @@ const getLocationAisleAfter = (
     after_rows: [
       ...fromLegacyRows,
       ...fromCombined
-        .filter((item): item is { type: 'row'; index: number } =>
-          typeof item === 'object' ? item.type === 'row' : false,
+        .filter(
+          (item): item is { type: 'row'; index: number } =>
+            item != null &&
+            typeof item === 'object' &&
+            (item as { type?: string }).type === 'row' &&
+            typeof (item as { index?: unknown }).index === 'number',
         )
         .map((item) => item.index),
     ],
@@ -937,6 +945,21 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       // If in edit mode, load the existing exam data into the form
       if (editExam) {
         const exam = editExam;
+
+        // Backfill LOCATION.SEATS from location list when with-seats omitted them
+        for (const session of exam.SESSIONS || []) {
+          for (const relation of session.SESSION_LOCATIONS || []) {
+            if (!relation.LOCATION) continue;
+            if (relation.LOCATION.SEATS && relation.LOCATION.SEATS.length > 0) continue;
+            const option = locations.find(
+              (loc) => loc.value === (relation.LOCATION_ID ?? relation.LOCATION.LOCATION_ID),
+            );
+            if (option?.raw?.SEATS?.length) {
+              relation.LOCATION.SEATS = option.raw.SEATS;
+            }
+          }
+        }
+
         form.value.examName = exam.EXAM_NAME || '';
         const loadedRound = exam.EXAM_ROUND || '';
         const loadedFiscalYear = exam.EXAM_FISCAL_YEAR || '';
@@ -991,7 +1014,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
             if (relationLocations.length > 0) {
               const roomsWithLocation = relationLocations.filter((relation) => relation.LOCATION);
               roomsWithLocation.forEach((relation) => {
-                const hasSeatSnapshot = (relation.SEATS_SNAPSHOT?.length ?? 0) > 0;
+                const hasSeatSnapshot = Array.isArray(relation.SEATS_SNAPSHOT)
+                  ? relation.SEATS_SNAPSHOT.length > 0
+                  : false;
                 if (!hasSeatSnapshot) {
                   sessionsNeedingBlockedFallback.add(session.SS_ID);
                 }
@@ -1004,12 +1029,15 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
                   relationProctors.push(...customNames);
                 }
                 const seatOverrides = Object.fromEntries(
-                  (relation.SEATS_SNAPSHOT ?? [])
+                  (Array.isArray(relation.SEATS_SNAPSHOT) ? relation.SEATS_SNAPSHOT : [])
                     .map((snapshotSeat) => {
+                      if (!snapshotSeat || typeof snapshotSeat !== 'object') return null;
                       const baseSeat = relation.LOCATION.SEATS?.find(
                         (seat) => seat.LS_SEAT_LABEL === snapshotSeat.label,
                       );
-                      const snapshotStatus = snapshotStatusToCode(snapshotSeat.status);
+                      const snapshotStatus = snapshotStatusToCode(
+                        typeof snapshotSeat.status === 'string' ? snapshotSeat.status : null,
+                      );
                       if (!baseSeat || baseSeat.LS_SEAT_STATUS === snapshotStatus) return null;
 
                       return [baseSeat.LS_ID, snapshotStatus] as const;

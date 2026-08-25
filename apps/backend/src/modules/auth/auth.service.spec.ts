@@ -545,14 +545,14 @@ describe('AuthService', () => {
     });
 
     // AUTH-U-019
-    it('should set userThaidSynced true only for thai userType', async () => {
+    it('should always set userThaidSynced false on register (thai or foreigner)', async () => {
       // Arrange & Act — thai
       await service.register(baseRegisterDto());
 
-      // Assert
+      // Assert — nationality alone must not mark ThaiD synced
       expect(queryRunnerManager.create).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ userThaidSynced: true }),
+        expect.objectContaining({ userThaidSynced: false }),
       );
 
       // Arrange & Act — foreigner

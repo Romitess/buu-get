@@ -1,5 +1,7 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { EXAM_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import { MoodleSyncLogsService } from './moodle-sync-logs.service';
 import { CreateMoodleSyncLogDto } from './dto/create-moodle-sync-log.dto';
 import { MoodleSyncLog } from './entities/moodle-sync-log.entity';
@@ -10,6 +12,7 @@ export class MoodleSyncLogsController {
   constructor(private readonly moodleSyncLogsService: MoodleSyncLogsService) {}
 
   @Post()
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'สร้างล็อกการซิงก์ข้อมูล Moodle' })
   @ApiResponse({
     status: 201,

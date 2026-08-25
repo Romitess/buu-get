@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import type { BackendBlockedSeat, BackendExam, BackendSession } from 'src/types/exam';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 import { fetchExamBlockedSeats, fetchExamWithSeats } from 'src/services/exam.service';
+import { fetchLocationSeats } from 'src/services/location.service';
 import {
   bulkAssignEnrollmentSeats,
   fetchRawEnrollmentsByExamId,
@@ -422,9 +423,11 @@ export function useExamSeatManagement() {
 
   const buildSessionSeatItems = (sessionLocation: SeatSessionLocation): SessionSeatItem[] => {
     const baseSeats = [...(sessionLocation.LOCATION.SEATS ?? [])];
+    const rawSnapshot = sessionLocation.SEATS_SNAPSHOT;
+    const snapshotList = Array.isArray(rawSnapshot) ? rawSnapshot : [];
     const snapshotByLabel = new Map(
-      (sessionLocation.SEATS_SNAPSHOT ?? [])
-        .filter((seat) => seat.label)
+      snapshotList
+        .filter((seat) => seat && typeof seat === 'object' && seat.label)
         .map((seat) => [seat.label as string, seat]),
     );
     const blockedStatusBySeatId = new Map(
@@ -1010,6 +1013,56 @@ export function useExamSeatManagement() {
   };
 
   // ── Data loading ─────────────────────────────────────────
+  /** Backfill LOCATION.SEATS when with-seats omitted them (API-seeded rooms) */
+  const ensureSessionLocationSeatsLoaded = async (): Promise<void> => {
+    const locationsNeedingSeats = sessions.value.flatMap((session) =>
+      (session.SESSION_LOCATIONS ?? []).filter(
+        (sl) => sl.LOCATION && !(sl.LOCATION.SEATS && sl.LOCATION.SEATS.length > 0),
+      ),
+    );
+    if (locationsNeedingSeats.length === 0) return;
+
+    const uniqueLocationIds = [
+      ...new Set(locationsNeedingSeats.map((sl) => sl.LOCATION_ID).filter(Boolean)),
+    ];
+    const seatsByLocationId = new Map<
+      number,
+      NonNullable<(typeof locationsNeedingSeats)[0]['LOCATION']['SEATS']>
+    >();
+
+    await Promise.all(
+      uniqueLocationIds.map(async (locationId) => {
+        try {
+          const seats = await fetchLocationSeats(locationId);
+          seatsByLocationId.set(
+            locationId,
+            seats.map((seat) => ({
+              LS_ID: seat.LS_ID,
+              LS_ROW_NO: seat.LS_ROW_NO,
+              LS_COL_NO: seat.LS_COL_NO,
+              LS_SEAT_LABEL: seat.LS_SEAT_LABEL,
+              LS_SEAT_STATUS: seat.LS_SEAT_STATUS,
+              LS_SORT_ORDER: seat.LS_SORT_ORDER,
+            })),
+          );
+        } catch (err) {
+          console.error(`Failed to load seats for location ${locationId}`, err);
+        }
+      }),
+    );
+
+    for (const session of sessions.value) {
+      for (const sl of session.SESSION_LOCATIONS ?? []) {
+        if (!sl.LOCATION) continue;
+        if (sl.LOCATION.SEATS && sl.LOCATION.SEATS.length > 0) continue;
+        const seats = seatsByLocationId.get(sl.LOCATION_ID);
+        if (seats) {
+          sl.LOCATION.SEATS = seats;
+        }
+      }
+    }
+  };
+
   const loadExamData = async (): Promise<void> => {
     if (!examId.value) return;
     isLoading.value = true;
@@ -1017,6 +1070,7 @@ export function useExamSeatManagement() {
     try {
       examData.value = await fetchExamWithSeats(examId.value);
       sessions.value = examData.value.SESSIONS || [];
+      await ensureSessionLocationSeatsLoaded();
 
       const routeSessionId = Number(route.query.sessionId);
       if (

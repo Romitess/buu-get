@@ -132,7 +132,43 @@ export class ExamSessionLocationsService {
       );
     }
 
-    const sessionLocation = this.sessionLocationRepository.create(dto);
+    // API-seeded links often omit layout snapshot — copy from location so seat UI works
+    const location = await this.locationRepository.findOne({
+      where: { LOCATION_ID: dto.LOCATION_ID },
+      relations: ['SEATS'],
+    });
+    if (!location) {
+      throw new NotFoundException(
+        `Exam Location with ID ${dto.LOCATION_ID} not found`,
+      );
+    }
+
+    const seatStatusLabel = (status: number): string => {
+      if (status === 1) return 'BROKEN';
+      if (status === 2) return 'BLOCKED';
+      return 'AVAILABLE';
+    };
+
+    const seatsSnapshot =
+      dto.SEATS_SNAPSHOT ??
+      (location.SEATS ?? []).map((seat) => ({
+        label: seat.LS_SEAT_LABEL,
+        status: seatStatusLabel(Number(seat.LS_SEAT_STATUS ?? 0)),
+        sortorder: seat.LS_SORT_ORDER ?? null,
+      }));
+
+    const sessionLocation = this.sessionLocationRepository.create({
+      ...dto,
+      TOTAL_ROWS: dto.TOTAL_ROWS ?? location.LOCATION_TOTAL_ROWS ?? null,
+      TOTAL_COLS: dto.TOTAL_COLS ?? location.LOCATION_TOTAL_COLS ?? null,
+      LOCATION_SEAT_DIRECTION:
+        dto.LOCATION_SEAT_DIRECTION ?? location.LOCATION_SEAT_DIRECTION,
+      LOCATION_SEAT_CAPACITY:
+        dto.LOCATION_SEAT_CAPACITY ??
+        location.LOCATION_SEAT_CAPACITY ??
+        (location.SEATS?.length || null),
+      SEATS_SNAPSHOT: seatsSnapshot,
+    });
     return await this.sessionLocationRepository.save(sessionLocation);
   }
 

@@ -14,6 +14,8 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { EXAM_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import { ExamSessionLocationsService } from './exam-session-locations.service';
 import { CreateExamSessionLocationDto } from './dto/create-exam-session-location.dto';
 import { UpdateExamSessionLocationDto } from './dto/update-exam-session-location.dto';
@@ -27,6 +29,7 @@ export class ExamSessionLocationsController {
   ) {}
 
   @Post()
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'เชื่อม Session กับ Location' })
   @ApiCreatedResponse({ type: ExamSessionLocation })
   async create(
@@ -63,6 +66,7 @@ export class ExamSessionLocationsController {
   }
 
   @Patch(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'อัปเดตข้อมูล Session-Location' })
   @ApiOkResponse({ type: ExamSessionLocation })
   async update(
@@ -73,6 +77,7 @@ export class ExamSessionLocationsController {
   }
 
   @Delete(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'ยกเลิกการเชื่อม Session-Location (Soft Delete)' })
   @ApiOkResponse({ description: 'ลบข้อมูลสำเร็จ' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {

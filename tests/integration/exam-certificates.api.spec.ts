@@ -5,8 +5,8 @@ import type { TestRoleKey } from '../e2e/fixtures/users';
 /**
  * Exam Certificates API integration — matrix CERT-I-001 … CERT-I-008
  *
- * Path note (BUG-002): controller is `@Controller('api/exam-certificates')`
- * with global `api` prefix → `/api/api/exam-certificates`.
+ * Path: `@Controller('exam-certificates')` + global `api` → `/api/exam-certificates`
+ * (BUG-002 fixed).
  *
  * Seed approach (shared-DB, disposable via API):
  * 1. Create disposable exam/session/enrollment/score rows as needed
@@ -14,10 +14,7 @@ import type { TestRoleKey } from '../e2e/fixtures/users';
  * 3. afterAll soft-deletes certs → scores → enrollments → sessions → exams
  */
 
-/**
- * BUG-002: double `api` prefix — assert against current mounted path.
- */
-const EXAM_CERTIFICATES_PATH = '/api/api/exam-certificates';
+const EXAM_CERTIFICATES_PATH = '/api/exam-certificates';
 
 const ExamSessionStatus = {
   DRAFT: 0,
@@ -523,7 +520,7 @@ test.describe('Exam Certificates API — bulk-issue / CRUD / authz', () => {
   // Current product: non-bulk CRUD has no @Roles → any authenticated JWT.
   // Authz risk flagged in MASTER_TEST_PLAN; assert current behavior.
   // Note: GET :id is shadowed by platform-gateway `@Controller('api')`
-  // `GET /:folder/:fileName` under `/api/api/...` (BUG-002 interaction) —
+  // `GET /:folder/:fileName` under `/api/...` —
   // do not call GET :id here (hits slow external getPublicFile).
   test('Non-bulk certificate CRUD authz behavior (current)', async ({
     request,

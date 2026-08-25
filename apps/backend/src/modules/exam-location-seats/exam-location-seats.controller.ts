@@ -14,6 +14,8 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { EXAM_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import { ExamLocationSeatsService } from './exam-location-seats.service';
 import { CreateExamLocationSeatDto } from './dto/create-exam-location-seat.dto';
 import { UpdateExamLocationSeatDto } from './dto/update-exam-location-seat.dto';
@@ -28,6 +30,7 @@ export class ExamLocationSeatsController {
   ) {}
 
   @Post()
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'สร้างที่นั่งในห้องสอบใหม่' })
   @ApiCreatedResponse({ type: ExamLocationSeat })
   async create(
@@ -55,6 +58,7 @@ export class ExamLocationSeatsController {
   }
 
   @Patch(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'แก้ไขข้อมูลที่นั่ง' })
   @ApiOkResponse({ type: ExamLocationSeat })
   async update(
@@ -65,6 +69,7 @@ export class ExamLocationSeatsController {
   }
 
   @Delete(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'ลบข้อมูลที่นั่ง' })
   @ApiOkResponse({ description: 'ลบข้อมูลสำเร็จ' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
@@ -72,6 +77,7 @@ export class ExamLocationSeatsController {
   }
 
   @Post('generate/:locationId')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({
     summary:
       'Auto-generate ที่นั่งจาก LOCATION_TOTAL_ROWS x LOCATION_TOTAL_COLS',

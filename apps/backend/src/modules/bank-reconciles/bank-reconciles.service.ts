@@ -671,6 +671,9 @@ export class BankReconcilesService {
         throw new BadRequestException('BR_REF1 is required');
       }
 
+      // ล้าง ManyToOne ที่โหลดมาแล้ว — ไม่งั้น TypeORM save() จะคืน TRANX_ID เดิมจาก relation (BUG-005)
+      Reflect.deleteProperty(bankReconcile, 'TRANSACTION');
+
       bankReconcile.BR_REF1 = nextRef1;
       bankReconcile.BR_REF2 =
         updateBankReconcileRefsDto.BR_REF2?.trim() || null;
@@ -693,6 +696,7 @@ export class BankReconcilesService {
         transaction.TRANX_MATCH_STATUS = matchesAmount
           ? TransactionMatchStatus.MATCH
           : TransactionMatchStatus.MISSING;
+        // ตั้งเฉพาะ FK — ห้ามผูก TRANSACTION relation ค้างไว้ตอน save bankReconcile
         bankReconcile.TRANX_ID = transactionRef.TRANX_ID;
         transactionRef.BR_ID = bankReconcile.BR_ID;
 

@@ -1,11 +1,12 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, In, QueryFailedError, Repository } from 'typeorm';
 import { isFutureBangkokDate } from 'src/common/utils/calendar-date.util';
 import { generateCertificateCode } from 'src/common/utils/verification-code.util';
 import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
@@ -75,6 +76,21 @@ export class ExamCertificatesService {
     }
   }
 
+  private isDuplicateKeyError(error: unknown): boolean {
+    if (!(error instanceof QueryFailedError)) {
+      return false;
+    }
+    const driver = error.driverError as { code?: string; errno?: number };
+    return driver.code === 'ER_DUP_ENTRY' || driver.errno === 1062;
+  }
+
+  private rethrowDuplicateCertCode(error: unknown): never {
+    if (this.isDuplicateKeyError(error)) {
+      throw new ConflictException('รหัสใบรับรอง (CERT_CODE) ซ้ำกับที่มีอยู่ในระบบ');
+    }
+    throw error;
+  }
+
   async create(
     createExamCertificateDto: CreateExamCertificateDto,
   ): Promise<ExamCertificate> {
@@ -88,7 +104,13 @@ export class ExamCertificatesService {
         createExamCertificateDto.CERT_CODE?.trim() || generateCertificateCode(),
     };
     const newCertificate = this.examCertificateRepository.create(payload);
-    const saved = await this.examCertificateRepository.save(newCertificate);
+
+    let saved: ExamCertificate;
+    try {
+      saved = await this.examCertificateRepository.save(newCertificate);
+    } catch (error: unknown) {
+      this.rethrowDuplicateCertCode(error);
+    }
 
     const score = await this.examScoreRepository.findOne({
       where: { SCORES_ID: createExamCertificateDto.SCORES_ID },
@@ -209,7 +231,11 @@ export class ExamCertificatesService {
       }
 
       if (certificatesToCreate.length > 0) {
-        await certificateRepository.save(certificatesToCreate);
+        try {
+          await certificateRepository.save(certificatesToCreate);
+        } catch (error: unknown) {
+          this.rethrowDuplicateCertCode(error);
+        }
         createdCount = certificatesToCreate.length;
       }
 
@@ -329,7 +355,11 @@ export class ExamCertificatesService {
 
     const certificate = await this.findOne(id);
     Object.assign(certificate, updateExamCertificateDto);
-    return await this.examCertificateRepository.save(certificate);
+    try {
+      return await this.examCertificateRepository.save(certificate);
+    } catch (error: unknown) {
+      this.rethrowDuplicateCertCode(error);
+    }
   }
 
   async remove(id: number): Promise<void> {
