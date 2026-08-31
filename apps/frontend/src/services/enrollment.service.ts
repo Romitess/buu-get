@@ -68,7 +68,10 @@ export const fetchEnrollmentsByExamId = async (
     (enrollment: BackendEnrollmentDetail, index: number): EnrollmentTableRow => ({
       index: (page - 1) * limit + index + 1,
       ermId: enrollment.ERM_ID,
-      nationalId: enrollment.USER?.USER_NATIONAL_ID || '-',
+      nationalId:
+        enrollment.USER?.USER_NATIONAL_ID?.trim() ||
+        enrollment.USER?.USER_PASSPORT_NO?.trim() ||
+        '-',
       titleTh: enrollment.USER?.PROFILE?.userTitleTh || '-',
       fullnameTh: enrollment.USER?.PROFILE?.userFullnameTh || '-',
       fullnameEn: enrollment.USER?.PROFILE?.userFullnameEn || '-',

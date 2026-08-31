@@ -4,6 +4,7 @@ import { VerifyService } from './verify.service';
 import { ExamCertificate } from '../exam-certificates/entities/exam-certificate.entity';
 import { Receipt, ReceiptStatus } from '../receipts/entities/receipt.entity';
 import { TransactionChannel } from '../transactions/entities/transaction.entity';
+import type { ScoreCriteriaService } from '../score-criteria/score-criteria.service';
 
 describe('VerifyService', () => {
   let service: VerifyService;
@@ -11,12 +12,26 @@ describe('VerifyService', () => {
     Pick<Repository<ExamCertificate>, 'findOne'>
   >;
   let receiptRepository: jest.Mocked<Pick<Repository<Receipt>, 'findOne'>>;
+  let scoreCriteriaService: jest.Mocked<
+    Pick<ScoreCriteriaService, 'getBandRules'>
+  >;
 
   const futureDate = () => {
     const d = new Date();
     d.setFullYear(d.getFullYear() + 1);
     return d;
   };
+
+  const sampleBandRules = [
+    {
+      id: '1',
+      band: '1',
+      minScore: 0,
+      maxScore: 49,
+      cefr: 'A1',
+      descriptor: 'Basic',
+    },
+  ];
 
   const baseCertificate = (
     overrides: Record<string, unknown> = {},
@@ -88,9 +103,13 @@ describe('VerifyService', () => {
   beforeEach(() => {
     certificateRepository = { findOne: jest.fn() };
     receiptRepository = { findOne: jest.fn() };
+    scoreCriteriaService = {
+      getBandRules: jest.fn().mockResolvedValue({ bandRules: sampleBandRules }),
+    };
     service = new VerifyService(
       certificateRepository as unknown as Repository<ExamCertificate>,
       receiptRepository as unknown as Repository<Receipt>,
+      scoreCriteriaService as unknown as ScoreCriteriaService,
     );
   });
 
@@ -157,7 +176,9 @@ describe('VerifyService', () => {
           bandLevel: 'B2',
           lines: [],
         },
+        bandRules: sampleBandRules,
       });
+      expect(scoreCriteriaService.getBandRules).toHaveBeenCalled();
     });
 
     // VERIFY-U-004
@@ -678,7 +699,7 @@ describe('VerifyService', () => {
         },
         payment: {
           amount: 1500,
-          description: 'ค่าสมัครสอบ BUU-GET',
+          description: 'ค่าสมัครทดสอบความรู้ภาษาอังกฤษ (BUU-GET)',
           paymentMethod: 'QR',
           examRound: 'Round 3',
           examDate: '2025-07-01',
@@ -805,7 +826,7 @@ describe('VerifyService', () => {
     });
 
     // VERIFY-U-020
-    it('should use constant receipt description ค่าสมัครสอบ BUU-GET', async () => {
+    it('should use receipt description from buildReceiptItemDescription', async () => {
       // Arrange
       receiptRepository.findOne.mockResolvedValue(baseIssuedReceipt());
 
@@ -813,7 +834,9 @@ describe('VerifyService', () => {
       const result = await service.verifyReceipt('RCP-ISSUED');
 
       // Assert
-      expect(result.payment.description).toBe('ค่าสมัครสอบ BUU-GET');
+      expect(result.payment.description).toBe(
+        'ค่าสมัครทดสอบความรู้ภาษาอังกฤษ (BUU-GET)',
+      );
     });
 
     // VERIFY-U-021

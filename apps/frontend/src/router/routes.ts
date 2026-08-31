@@ -122,6 +122,17 @@ const routes: RouteRecordRaw[] = [
           footerVariant: 'white',
         },
       },
+      {
+        path: 'thaid/callback',
+        name: 'thaid-callback',
+        component: () => import('pages/auth/thaid-callback-page.vue'),
+        meta: {
+          requiresAuth: false,
+          hideHeader: true,
+          hideDrawer: true,
+          footerVariant: 'white',
+        },
+      },
 
       // === Common Authenticated Routes ===
       {

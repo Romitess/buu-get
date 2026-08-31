@@ -4,6 +4,8 @@ import {
   PAGINATION_DEFAULT_LIMIT,
   PAGINATION_DEFAULT_PAGE,
 } from 'src/common/dto/pagination-query.dto';
+import { AuthenticatedUser } from 'src/common/utils/authz.util';
+import { RoleEnum } from 'src/modules/roles/enums/role.enum';
 import { generateReceiptVerifyCode } from 'src/common/utils/verification-code.util';
 import { ReceiptsService } from './receipts.service';
 import { CreateReceiptDto, UpdateReceiptDto } from './dto/receipt.dto';
@@ -329,19 +331,36 @@ describe('ReceiptsService', () => {
   });
 
   describe('downloadReceipt', () => {
+    const ownerUser: AuthenticatedUser = {
+      userId: 10,
+      email: 'owner@example.com',
+      role: RoleEnum.CANDIDATE,
+    };
+    const financeUser: AuthenticatedUser = {
+      userId: 99,
+      email: 'finance@example.com',
+      role: RoleEnum.FINANCE,
+    };
+
     it('should throw NotFoundException when receipt for transaction is missing (RCPT-U-011)', async () => {
       // Arrange
       receiptsRepository.findOne.mockResolvedValue(null);
 
       // Act / Assert
-      await expect(service.downloadReceipt(42)).rejects.toThrow(
+      await expect(service.downloadReceipt(42, ownerUser)).rejects.toThrow(
         NotFoundException,
       );
-      await expect(service.downloadReceipt(42)).rejects.toThrow(
+      await expect(service.downloadReceipt(42, ownerUser)).rejects.toThrow(
         'Receipt for Transaction ID 42 not found',
       );
       expect(receiptsRepository.findOne).toHaveBeenCalledWith({
         where: { TRANX_ID: 42 },
+        relations: [
+          'TRANSACTION',
+          'TRANSACTION.ENROLLMENT',
+          'TRANSACTION.ENROLLMENT.SESSION',
+          'TRANSACTION.ENROLLMENT.SESSION.EXAM',
+        ],
       });
     });
 
@@ -351,13 +370,16 @@ describe('ReceiptsService', () => {
         RC_ID: 1,
         TRANX_ID: 5,
         RC_STATUS: ReceiptStatus.UNISSUED,
+        RC_VERIFY_CODE: 'VERIFYCODE000001',
+        CREATED_AT: new Date('2026-07-01T00:00:00+07:00'),
+        TRANSACTION: { ENROLLMENT: { USER_ID: 10 } },
       });
 
       // Act / Assert
-      await expect(service.downloadReceipt(5)).rejects.toThrow(
+      await expect(service.downloadReceipt(5, ownerUser)).rejects.toThrow(
         ForbiddenException,
       );
-      await expect(service.downloadReceipt(5)).rejects.toThrow(
+      await expect(service.downloadReceipt(5, ownerUser)).rejects.toThrow(
         'Receipt is not in ISSUED status',
       );
 
@@ -366,30 +388,99 @@ describe('ReceiptsService', () => {
         RC_ID: 2,
         TRANX_ID: 6,
         RC_STATUS: ReceiptStatus.VOIDED,
+        RC_VERIFY_CODE: 'VERIFYCODE000002',
+        CREATED_AT: new Date('2026-07-01T00:00:00+07:00'),
+        TRANSACTION: { ENROLLMENT: { USER_ID: 10 } },
       });
 
       // Act / Assert
-      await expect(service.downloadReceipt(6)).rejects.toThrow(
+      await expect(service.downloadReceipt(6, ownerUser)).rejects.toThrow(
         ForbiddenException,
       );
     });
 
-    it('should return stub PDF bytes when receipt is ISSUED (RCPT-U-013)', async () => {
+    it('should return receipt PDF bytes with field data when ISSUED (RCPT-U-013)', async () => {
       // Arrange
       receiptsRepository.findOne.mockResolvedValue({
         RC_ID: 1,
         TRANX_ID: 11,
+        RC_NO: '256900001',
+        RC_NAME: 'Somchai Test',
+        RC_TAX_ID: '1234567890123',
         RC_STATUS: ReceiptStatus.ISSUED,
+        RC_VERIFY_CODE: 'ABCDEFGH12345678',
+        RC_ISSUED_AT: new Date('2026-07-15T10:00:00+07:00'),
+        CREATED_AT: new Date('2026-07-01T00:00:00+07:00'),
+        TRANSACTION: {
+          TRANX_AMOUNT: 500,
+          TRANX_PAID_AT: new Date('2026-07-14T10:00:00+07:00'),
+          ENROLLMENT: {
+            USER_ID: 10,
+            SESSION: {
+              EXAM: {
+                EXAM_ROUND: '1',
+                EXAM_FISCAL_YEAR: '2026',
+                EXAM_DATE: '2026-08-01',
+              },
+            },
+          },
+        },
       });
 
       // Act
-      const result = await service.downloadReceipt(11);
+      const result = await service.downloadReceipt(11, ownerUser);
 
       // Assert
       expect(result).toBeInstanceOf(Uint8Array);
       expect(result.byteLength).toBeGreaterThan(0);
-      const header = Buffer.from(result.subarray(0, 5)).toString('utf8');
-      expect(header).toBe('%PDF-');
+      const pdfText = Buffer.from(result).toString('utf8');
+      expect(pdfText.slice(0, 5)).toBe('%PDF-');
+      expect(pdfText).toContain('256900001');
+      expect(pdfText).toContain('Somchai Test');
+      expect(pdfText).toContain('500.00');
+      expect(pdfText).toContain('1234567890123');
+      expect(pdfText).toContain('ABCDEFGH12345678');
+      expect(pdfText).not.toContain('Hello, world!');
+    });
+
+    it('should allow finance role to download another user receipt', async () => {
+      receiptsRepository.findOne.mockResolvedValue({
+        RC_ID: 1,
+        TRANX_ID: 11,
+        RC_NO: '256900001',
+        RC_NAME: 'Owner',
+        RC_STATUS: ReceiptStatus.ISSUED,
+        RC_VERIFY_CODE: 'ABCDEFGH12345678',
+        RC_ISSUED_AT: new Date('2026-07-15T10:00:00+07:00'),
+        CREATED_AT: new Date('2026-07-01T00:00:00+07:00'),
+        TRANSACTION: {
+          TRANX_AMOUNT: 100,
+          ENROLLMENT: { USER_ID: 10 },
+        },
+      });
+
+      const result = await service.downloadReceipt(11, financeUser);
+      expect(result.byteLength).toBeGreaterThan(0);
+    });
+
+    it('should forbid non-owner non-finance download', async () => {
+      receiptsRepository.findOne.mockResolvedValue({
+        RC_ID: 1,
+        TRANX_ID: 11,
+        RC_STATUS: ReceiptStatus.ISSUED,
+        RC_VERIFY_CODE: 'ABCDEFGH12345678',
+        CREATED_AT: new Date('2026-07-01T00:00:00+07:00'),
+        TRANSACTION: { ENROLLMENT: { USER_ID: 10 } },
+      });
+
+      const stranger: AuthenticatedUser = {
+        userId: 55,
+        email: 'other@example.com',
+        role: RoleEnum.CANDIDATE,
+      };
+      await expect(service.downloadReceipt(11, stranger)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 });

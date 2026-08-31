@@ -39,6 +39,7 @@ import { CheckInAssistSession } from '../modules/check-in-assist/entities/check-
 import { CheckInAssistEvent } from '../modules/check-in-assist/entities/check-in-assist-event.entity';
 import { Notification } from '../modules/notifications/entities/notification.entity';
 import { NotificationRecipient } from '../modules/notifications/entities/notification-recipient.entity';
+import { MsgPerson } from '../modules/msg-persons/entities/msg-person.entity';
 
 export default new DataSource({
   type: 'mysql',
@@ -87,6 +88,7 @@ export default new DataSource({
     CheckInAssistEvent,
     Notification,
     NotificationRecipient,
+    MsgPerson,
   ],
   migrations: [
     __filename.endsWith('.js')

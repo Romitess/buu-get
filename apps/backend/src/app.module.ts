@@ -46,6 +46,10 @@ import { ThaidModule } from './modules/thaid/thaid.module';
 import { VerifyModule } from './modules/verify/verify.module';
 import { CheckInAssistModule } from './modules/check-in-assist/check-in-assist.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { MsgPersonsModule } from './modules/msg-persons/msg-persons.module';
+import { PaymentProviderModule } from './modules/payment-provider/payment-provider.module';
+import { IdentityModule } from './modules/identity/identity.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -118,6 +122,10 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     VerifyModule,
     CheckInAssistModule,
     NotificationsModule,
+    MsgPersonsModule,
+    PaymentProviderModule,
+    IdentityModule,
+    HealthModule,
   ],
   providers: [
     // Global auth guard — ทุก endpoint ต้องมี JWT ที่ถูกต้อง ยกเว้นที่ทำเครื่องหมาย @Public()

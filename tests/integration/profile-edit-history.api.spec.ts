@@ -288,8 +288,8 @@ test.describe('Profile Edit History API — list / latest-images / authz', () =>
     expect(postRes.status()).toBe(401);
   });
 
-  // PEH-I-005 — current: any JWT can read any profile history (BUG-012)
-  test('Any authenticated role can read foreign profile history (current)', async ({
+  // PEH-I-005 — BUG-012 fixed: candidate cannot read foreign profile history
+  test('Candidate cannot read foreign profile history', async ({
     request,
   }) => {
     requireSeed();
@@ -298,10 +298,6 @@ test.describe('Profile Edit History API — list / latest-images / authz', () =>
       { headers: candidateHeaders },
     );
     const text = await res.text();
-    // CURRENT: JwtAuthGuard only — no @Roles ownership check (authz risk BUG-012)
-    expect(res.status(), text).toBe(200);
-    const rows = JSON.parse(text) as HistoryRow[];
-    expect(rows.length).toBeGreaterThanOrEqual(1);
-    expect(rows[0].userProfileId).toBe(historyProfileId);
+    expect(res.status(), text).toBe(403);
   });
 });

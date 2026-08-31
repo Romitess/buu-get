@@ -308,7 +308,7 @@ describe('TransactionsService', () => {
         ermId: 42,
         pcId: 1,
         amount: 500,
-      });
+      }, ownerUser);
 
       // Assert
       expect(result).toEqual({ TRANX_ID: 101 });
@@ -355,7 +355,7 @@ describe('TransactionsService', () => {
         ermId: 42,
         pcId: 9,
         amount: 550,
-      });
+      }, ownerUser);
 
       // Assert
       expect(result).toEqual({ TRANX_ID: 7 });
@@ -386,7 +386,7 @@ describe('TransactionsService', () => {
         ermId: 42,
         pcId: 2,
         amount: 600,
-      });
+      }, ownerUser);
 
       // Assert
       expect(existing.TRANX_QR_CODE).toBe('fixed-uuid-qr');
@@ -421,7 +421,7 @@ describe('TransactionsService', () => {
           ermId: 42,
           pcId: 1,
           amount: 500,
-        }),
+        }, ownerUser),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(repos.transaction.save).not.toHaveBeenCalled();
     });
@@ -436,7 +436,7 @@ describe('TransactionsService', () => {
           ermId: 42,
           pcId: 999,
           amount: 500,
-        }),
+        }, ownerUser),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
@@ -451,8 +451,24 @@ describe('TransactionsService', () => {
           ermId: 999,
           pcId: 1,
           amount: 500,
-        }),
+        }, ownerUser),
       ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('should throw ForbiddenException when non-owner non-FINANCE creates (TXN-U-006c)', async () => {
+      // Arrange
+      repos.paymentConfig.exists.mockResolvedValue(true);
+      repos.enrollment.findOne.mockResolvedValue(
+        baseEnrollment({ USER_ID: 10 }),
+      );
+
+      // Act / Assert
+      await expect(
+        service.createTransactionForFlow(
+          { ermId: 42, pcId: 1, amount: 500 },
+          otherCandidate,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
     it('should reject when enrollment is not UNPAID (TXN-U-006b)', async () => {
@@ -468,7 +484,7 @@ describe('TransactionsService', () => {
           ermId: 42,
           pcId: 1,
           amount: 500,
-        }),
+        }, ownerUser),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
   });
@@ -520,7 +536,7 @@ describe('TransactionsService', () => {
       repos.receipt.findOne.mockResolvedValue(null);
 
       // Act
-      await service.confirmPaymentFlow(7, confirmDto, ownerUser);
+      await service.confirmPaymentFlow(7, confirmDto, financeUser);
 
       // Assert
       expect(transaction.TRANX_PAYMENT_STATUS).toBe(
@@ -559,7 +575,7 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, confirmDto, ownerUser),
+        service.confirmPaymentFlow(7, confirmDto, financeUser),
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
       expect(queryRunner.commitTransaction).not.toHaveBeenCalled();
@@ -571,7 +587,7 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(999, confirmDto, ownerUser),
+        service.confirmPaymentFlow(999, confirmDto, financeUser),
       ).rejects.toBeInstanceOf(NotFoundException);
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
     });
@@ -582,17 +598,22 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, confirmDto, ownerUser),
+        service.confirmPaymentFlow(7, confirmDto, financeUser),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('should throw ForbiddenException for non-owner non-FINANCE (TXN-U-011)', async () => {
-      // Arrange
+    it('should throw ForbiddenException for candidate including owner (TXN-U-011)', async () => {
+      // Arrange — self-confirm honor system removed; FINANCE only
       setupConfirmHappyPath({
         enrollment: baseEnrollment({ USER_ID: 10 }),
       });
 
-      // Act / Assert
+      // Act / Assert — owner candidate
+      await expect(
+        service.confirmPaymentFlow(7, confirmDto, ownerUser),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+
+      // Act / Assert — other candidate
       await expect(
         service.confirmPaymentFlow(7, confirmDto, otherCandidate),
       ).rejects.toBeInstanceOf(ForbiddenException);
@@ -647,7 +668,7 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, { userCode: 'U1' }, ownerUser),
+        service.confirmPaymentFlow(7, { userCode: 'U1' }, financeUser),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
 
@@ -661,7 +682,7 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, { userCode: 'U1' }, ownerUser),
+        service.confirmPaymentFlow(7, { userCode: 'U1' }, financeUser),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
 
@@ -671,7 +692,7 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, { userCode: 'U1' }, ownerUser),
+        service.confirmPaymentFlow(7, { userCode: 'U1' }, financeUser),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
@@ -682,7 +703,7 @@ describe('TransactionsService', () => {
       repos.profile.findOne.mockResolvedValue(null);
 
       // Act
-      await service.confirmPaymentFlow(7, confirmDto, ownerUser);
+      await service.confirmPaymentFlow(7, confirmDto, financeUser);
 
       // Assert
       expect(repos.receipt.create).toHaveBeenCalledWith(
@@ -711,7 +732,7 @@ describe('TransactionsService', () => {
       setupConfirmHappyPath({ transaction });
 
       // Act
-      await service.confirmPaymentFlow(7, { userCode: 'U00000010' }, ownerUser);
+      await service.confirmPaymentFlow(7, { userCode: 'U00000010' }, financeUser);
 
       // Assert
       expect(transaction.TRANX_PAYMENT_STATUS).toBe(
@@ -737,7 +758,7 @@ describe('TransactionsService', () => {
       setupConfirmHappyPath({ receipt: existingReceipt });
 
       // Act
-      await service.confirmPaymentFlow(7, confirmDto, ownerUser);
+      await service.confirmPaymentFlow(7, confirmDto, financeUser);
 
       // Assert
       expect(existingReceipt.RC_NAME).toBe('Somchai');
@@ -760,7 +781,7 @@ describe('TransactionsService', () => {
       repos.receipt.findOne.mockResolvedValue(null);
 
       // Act
-      await service.confirmPaymentFlow(7, { userCode: 'U1' }, ownerUser);
+      await service.confirmPaymentFlow(7, { userCode: 'U1' }, financeUser);
 
       // Assert — valid format
       const year = String(fixed.getFullYear()).slice(-2);
@@ -788,7 +809,7 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, { userCode: 'U1' }, ownerUser),
+        service.confirmPaymentFlow(7, { userCode: 'U1' }, financeUser),
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
 
@@ -803,7 +824,7 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, { userCode: 'U1' }, ownerUser),
+        service.confirmPaymentFlow(7, { userCode: 'U1' }, financeUser),
       ).rejects.toThrow('db write failed');
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
       expect(queryRunner.commitTransaction).not.toHaveBeenCalled();
@@ -1240,6 +1261,35 @@ describe('TransactionsService', () => {
         where: { TRANX_ID: 7 },
         relations: ['ENROLLMENT'],
       });
+    });
+
+    it('should allow owner to get own transaction (TXN-U-037b)', async () => {
+      // Arrange
+      const transaction = {
+        ...basePendingTransaction(),
+        ENROLLMENT: baseEnrollment({ USER_ID: 10 }),
+      } as Transaction;
+      transactionsRepository.findOne.mockResolvedValue(transaction);
+
+      // Act
+      const result = await service.findOne(7, ownerUser);
+
+      // Assert
+      expect(result).toBe(transaction);
+    });
+
+    it('should forbid non-owner non-FINANCE from get (TXN-U-037c)', async () => {
+      // Arrange
+      const transaction = {
+        ...basePendingTransaction(),
+        ENROLLMENT: baseEnrollment({ USER_ID: 10 }),
+      } as Transaction;
+      transactionsRepository.findOne.mockResolvedValue(transaction);
+
+      // Act / Assert
+      await expect(service.findOne(7, otherCandidate)).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
     });
   });
 

@@ -15,6 +15,8 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { EXAM_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import { ExamLocationsService } from './exam-locations.service';
 import { CreateExamLocationDto } from './dto/create-exam-location.dto';
 import { CreateExamLocationWithSeatsDto } from './dto/create-exam-location-with-seats.dto';
@@ -29,6 +31,7 @@ export class ExamLocationsController {
   constructor(private readonly examLocationsService: ExamLocationsService) {}
 
   @Post()
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'สร้างข้อมูลสถานที่จัดสอบใหม่' })
   @ApiCreatedResponse({ type: ExamLocation })
   async create(
@@ -38,6 +41,7 @@ export class ExamLocationsController {
   }
 
   @Post('with-seats')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({
     summary: 'Create an exam location and all seats in one transaction',
   })
@@ -69,6 +73,7 @@ export class ExamLocationsController {
   }
 
   @Patch(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'แก้ไขข้อมูลสถานที่จัดสอบ' })
   @ApiOkResponse({ type: ExamLocation })
   async update(
@@ -79,6 +84,7 @@ export class ExamLocationsController {
   }
 
   @Delete(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'ลบข้อมูลสถานที่จัดสอบ' })
   @ApiOkResponse({ description: 'ลบข้อมูลสำเร็จ' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {

@@ -16,7 +16,15 @@ import { CreateUserProfileDto } from './dto/create-user-profile.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { USER_ADMIN_ROLES } from 'src/common/constants/role-groups';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import {
+  ENROLLMENT_ADMIN_ROLES,
+  USER_ADMIN_ROLES,
+} from 'src/common/constants/role-groups';
+import {
+  assertSelfOrRoles,
+  AuthenticatedUser,
+} from 'src/common/utils/authz.util';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
@@ -97,12 +105,22 @@ export class UserProfileController {
   @ApiBearerAuth()
   async update(
     @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthenticatedUser,
     @Request()
     req: ExpressRequest & {
       user: { userId: number; email: string; role: string; roles: string[] };
     },
     @Body() updateUserProfileDto: UpdateUserProfileDto,
   ) {
+    // :id is USER_PROFILE_ID — ownership is via profile.userId (USER_ID), not profile id
+    const targetProfile = await this.userProfileService.findOne(id);
+    assertSelfOrRoles(
+      user,
+      targetProfile.userId,
+      ENROLLMENT_ADMIN_ROLES,
+      'Access denied: cannot update another user profile',
+    );
+
     let modifierName = req.user.email;
     try {
       const modProfile = await this.userProfileService.findByUserId(

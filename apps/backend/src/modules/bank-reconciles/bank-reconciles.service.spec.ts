@@ -59,8 +59,9 @@ import {
 import { TransactionRef } from '../transaction-refs/entities/transaction-ref.entity';
 import { TransactionApiType } from '../transaction-status-history/entities/transaction-status-history.entity';
 import { ExamEnrollmentStatus } from '../exam-enrollments/entities/exam-enrollment.entity';
-import { ReceiptStatus } from '../receipts/entities/receipt.entity';
+import { Receipt } from '../receipts/entities/receipt.entity';
 import { BankReconcilesService } from './bank-reconciles.service';
+import { ReceiptNumberService } from '../receipts/receipt-number.service';
 import { BankReconcile } from './entities/bank-reconcile.entity';
 import {
   BankReconcileEditLog,
@@ -105,6 +106,7 @@ interface MockEntityRepository {
   create: jest.Mock;
   save: jest.Mock;
   findOne: jest.Mock;
+  find: jest.Mock;
   update: jest.Mock;
 }
 
@@ -208,6 +210,7 @@ const createMockEntityRepo = (): MockEntityRepository => ({
   create: jest.fn((entity: unknown) => entity),
   save: jest.fn(async (entity: unknown) => entity),
   findOne: jest.fn(),
+  find: jest.fn().mockResolvedValue([]),
   update: jest.fn().mockResolvedValue({ affected: 1 }),
 });
 
@@ -235,13 +238,16 @@ describe('BankReconcilesService', () => {
     editLog: MockEntityRepository;
     transactionRef: MockEntityRepository;
     transaction: MockEntityRepository;
+    receipt: MockEntityRepository;
   };
+  let receiptNumberService: { assignOnIssue: jest.Mock };
 
   const getManagerRepository = (entity: unknown): MockEntityRepository => {
     if (entity === BankReconcile) return managerRepos.bankReconcile;
     if (entity === BankReconcileEditLog) return managerRepos.editLog;
     if (entity === TransactionRef) return managerRepos.transactionRef;
     if (entity === Transaction) return managerRepos.transaction;
+    if (entity === Receipt) return managerRepos.receipt;
     throw new Error(`Unexpected repository entity: ${String(entity)}`);
   };
 
@@ -262,6 +268,7 @@ describe('BankReconcilesService', () => {
       editLog: createMockEntityRepo(),
       transactionRef: createMockEntityRepo(),
       transaction: createMockEntityRepo(),
+      receipt: createMockEntityRepo(),
     };
 
     const defaultQb = createQueryBuilder();
@@ -291,8 +298,13 @@ describe('BankReconcilesService', () => {
       ),
     };
 
+    receiptNumberService = {
+      assignOnIssue: jest.fn().mockResolvedValue(undefined),
+    };
+
     service = new BankReconcilesService(
       repository as unknown as Repository<BankReconcile>,
+      receiptNumberService as unknown as ReceiptNumberService,
       dataSource as unknown as DataSource,
     );
   });
@@ -706,6 +718,11 @@ describe('BankReconcilesService', () => {
       );
       expect(managerRepos.editLog.save).toHaveBeenCalled();
       expect(result.TRANX_ID).toBe(200);
+      // BUG-005: stale TRANSACTION relation must not remain on entity before save
+      expect(
+        Object.prototype.hasOwnProperty.call(existing, 'TRANSACTION'),
+      ).toBe(false);
+      expect(existing.TRANX_ID).toBe(200);
     });
 
     it('BR-U-015: should rematch unequal amounts as MISSING while keeping the link', async () => {
@@ -826,6 +843,7 @@ describe('BankReconcilesService', () => {
         builders.push(qb);
         return qb;
       });
+      managerRepos.receipt.find.mockResolvedValue([{ RC_ID: 55 }]);
 
       // Act
       const result = await service.confirmPayment([10]);
@@ -834,6 +852,10 @@ describe('BankReconcilesService', () => {
       expect(result).toEqual({ success: true, updated: 1 });
       expect(queryRunner.commitTransaction).toHaveBeenCalled();
       expect(queryRunner.rollbackTransaction).not.toHaveBeenCalled();
+      expect(receiptNumberService.assignOnIssue).toHaveBeenCalledWith(
+        queryRunner.manager,
+        [55],
+      );
 
       const updateSets = builders
         .filter((qb) => qb.update.mock.calls.length > 0)
@@ -844,7 +866,6 @@ describe('BankReconcilesService', () => {
             TRANX_PAYMENT_STATUS: TransactionPaymentStatus.APPROVED,
             TRANX_MATCH_STATUS: TransactionMatchStatus.MATCH,
           },
-          { RC_STATUS: ReceiptStatus.ISSUED },
           { ERM_STATUS: ExamEnrollmentStatus.PAID },
         ]),
       );

@@ -14,6 +14,8 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { EXAM_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import { ExamSessionsService } from './exam-sessions.service';
 import { CreateExamSessionDto } from './dto/create-exam-session.dto';
 import { UpdateExamSessionDto } from './dto/update-exam-session.dto';
@@ -25,6 +27,7 @@ export class ExamSessionsController {
   constructor(private readonly examSessionsService: ExamSessionsService) {}
 
   @Post()
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'สร้างข้อมูลรอบสอบใหม่' })
   @ApiCreatedResponse({ type: ExamSession })
   async create(
@@ -48,6 +51,7 @@ export class ExamSessionsController {
   }
 
   @Patch(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'แก้ไขข้อมูลรอบสอบ' })
   @ApiOkResponse({ type: ExamSession })
   async update(
@@ -58,6 +62,7 @@ export class ExamSessionsController {
   }
 
   @Delete(':id')
+  @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'ลบข้อมูลรอบสอบ' })
   @ApiOkResponse({ description: 'ลบข้อมูลสำเร็จ' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {

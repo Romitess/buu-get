@@ -1430,11 +1430,15 @@ const loadData = async (): Promise<void> => {
 
   try {
     isLoading.value = true;
-    const [examDetail, scores] = await Promise.all([
-      fetchExamById(examId, { signal }),
-      fetchExamScores({ examId }),
-    ]);
+
+    // Load exam first so sessions/tabs are ready — do not wait on unbounded scores
+    const examDetail = await fetchExamById(examId, { signal });
     if (generation !== loadGeneration || signal.aborted) return;
+
+    exam.value = examDetail;
+    selectedSessionId.value = sessionTimeTabs.value[0]?.SS_ID ?? null;
+    sessionEnrollmentsCache.value = [];
+    pagination.value.page = 1;
 
     try {
       const rulesResponse = await getBandRules();
@@ -1446,11 +1450,11 @@ const loadData = async (): Promise<void> => {
       bandRules.value = [];
     }
 
-    exam.value = examDetail;
-    examScores.value = scores;
-    selectedSessionId.value = sessionTimeTabs.value[0]?.SS_ID ?? null;
-    sessionEnrollmentsCache.value = [];
-    pagination.value.page = 1;
+    // Enrollments first so the table is usable; scores scoped to this exam only
+    const scoresPromise = fetchExamScores({
+      examId,
+      ...(selectedSessionId.value != null ? { sessionId: selectedSessionId.value } : {}),
+    });
 
     if (selectedSessionId.value != null) {
       await loadEnrollmentPage(signal);
@@ -1458,6 +1462,17 @@ const loadData = async (): Promise<void> => {
       enrollments.value = [];
       enrollmentTotal.value = 0;
       pagination.value.rowsNumber = 0;
+    }
+    if (generation !== loadGeneration || signal.aborted) return;
+
+    try {
+      examScores.value = await scoresPromise;
+      if (generation !== loadGeneration) return;
+      initializeScoreDrafts();
+    } catch (scoreErr) {
+      if (isRequestCanceled(scoreErr) || generation !== loadGeneration) return;
+      console.error('Error fetching exam scores:', scoreErr);
+      examScores.value = [];
     }
   } catch (err) {
     if (isRequestCanceled(err) || generation !== loadGeneration) return;

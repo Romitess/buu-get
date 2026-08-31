@@ -5,6 +5,15 @@ export type ExternalCallbackQuery = Record<string, unknown>;
 
 export type ThaidEndpoint = 'approval' | 'payment';
 
+export type IdentityCallbackSource = 'sandbox' | 'thaid';
+
+export type IdentityCallbackStatus = 'success' | 'denied' | 'error' | 'unknown';
+
+export interface IdentityCallbackRedirect {
+  url: string;
+  statusCode: 302;
+}
+
 export interface ExternalCallbackPayload {
   body: ExternalCallbackBody;
   query: ExternalCallbackQuery;

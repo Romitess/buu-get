@@ -36,7 +36,7 @@ export interface BulkIssueCertificatesResult {
   skippedCount: number;
 }
 
-const CERTIFICATE_ENDPOINT = '/api/exam-certificates';
+const CERTIFICATE_ENDPOINT = '/exam-certificates';
 
 export const fetchExamCertificates = async (): Promise<BackendExamCertificate[]> => {
   const response = await api.get<BackendExamCertificate[]>(CERTIFICATE_ENDPOINT);

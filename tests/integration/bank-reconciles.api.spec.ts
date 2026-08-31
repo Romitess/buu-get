@@ -697,15 +697,6 @@ test.describe('Bank Reconciles API — import / verify / match / confirm flows',
     expect(oldTxn.TRANX_MATCH_STATUS).toBe(TransactionMatchStatus.UNMATCH);
     expect(oldRef.BR_ID).toBeNull();
 
-    if (patched.TRANX_ID !== second.tranxId) {
-      // Known risk: updateRefs loads relations:['TRANSACTION'] then save() may
-      // restore prior TRANX_ID from the stale relation even after rematch lookup.
-      test.skip(
-        true,
-        `BUG updateRefs: BR_REF rematched to ${second.userCode}/${second.ref.TSC_REF2} but TRANX_ID stayed ${patched.TRANX_ID} (expected ${second.tranxId}). newTxn.match=${newTxn.TRANX_MATCH_STATUS} newRef.BR_ID=${newRef.BR_ID}. Likely stale TRANSACTION relation on save. Edit-log GET not available to assert.`,
-      );
-    }
-
     expect(patched.TRANX_ID).toBe(second.tranxId);
     expect(newTxn.TRANX_MATCH_STATUS).toBe(TransactionMatchStatus.MATCH);
     expect(newRef.BR_ID).toBe(brId);

@@ -62,6 +62,7 @@ export const updateTransactionByErmId = async (
 export const createPendingPayment = async (
   data: CreatePendingPaymentPayload,
 ): Promise<PendingPaymentResponse> => {
+  // Finance-only admin/seed shortcut on backend — not used by candidate payment flow
   const response = await api.post<PendingPaymentResponse>('/transactions/pending-payment', {
     ...data,
     TRANX_AMOUNT: Number(data.TRANX_AMOUNT),
@@ -91,7 +92,7 @@ export const startPaymentSession = async (
   return response.data;
 };
 
-/** FLOW 2: ยืนยันการชำระเงิน → อัปเดต PAID + สร้าง TransactionRef */
+/** FLOW 2: ยืนยันการชำระเงิน → PAID (finance-only บน backend — ผู้สมัครห้ามเรียก) */
 export const confirmPaymentFlow = async (
   tranxId: number,
   data: ConfirmPaymentFlowPayload,

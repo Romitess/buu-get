@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ExamCertificate } from '../exam-certificates/entities/exam-certificate.entity';
 import { Receipt, ReceiptStatus } from '../receipts/entities/receipt.entity';
 import { TransactionChannel } from '../transactions/entities/transaction.entity';
+import { ScoreCriteriaService } from '../score-criteria/score-criteria.service';
 import { maskIdentifier } from 'src/common/utils/mask-identifier.util';
 import { buildReceiptNo } from 'src/common/utils/receipt-no.util';
 import { buildReceiptItemDescription } from 'src/common/utils/receipt-description.util';
@@ -25,6 +26,7 @@ export class VerifyService {
     private readonly certificateRepository: Repository<ExamCertificate>,
     @InjectRepository(Receipt)
     private readonly receiptRepository: Repository<Receipt>,
+    private readonly scoreCriteriaService: ScoreCriteriaService,
   ) {}
 
   async verifyCertificate(code: string): Promise<VerifyCertificateResponseDto> {
@@ -76,6 +78,9 @@ export class VerifyService {
         sortOrder: line.SCL_SORT_ORDER,
       }));
 
+    // Embed band rules so public verify UI need not call auth-gated score-criteria
+    const { bandRules } = await this.scoreCriteriaService.getBandRules();
+
     return {
       type: 'certificate',
       status,
@@ -103,6 +108,7 @@ export class VerifyService {
             : certificate.SCORE.SC_BAND_LEVEL,
         lines: scoreLines,
       },
+      bandRules,
     };
   }
 

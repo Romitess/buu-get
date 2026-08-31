@@ -1,4 +1,5 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
+import { QueryFailedError } from 'typeorm';
 import { generateCertificateCode } from 'src/common/utils/verification-code.util';
 import { ExamCertificatesService } from './exam-certificates.service';
 import { ExamScore } from '../exam-scores/entities/exam-score.entity';
@@ -537,6 +538,64 @@ describe('ExamCertificatesService', () => {
         CERT_CODE: 'AUTO_GENERATED_CODE',
       }),
     );
+  });
+
+  it('should map duplicate CERT_CODE on create to ConflictException (CERT-U-012)', async () => {
+    const dto: CreateExamCertificateDto = {
+      SCORES_ID: 1,
+      USER_ID: 10,
+      CERT_ISSUED_AT: '2026-07-27T00:00:00+07:00',
+      CERT_EXPIRES_AT: '2028-07-27T00:00:00+07:00',
+      CERT_CODE: 'DUP-CODE',
+    };
+    const dupError = new QueryFailedError(
+      'INSERT',
+      [],
+      Object.assign(new Error("Duplicate entry 'DUP-CODE' for key 'CERT_CODE'"), {
+        code: 'ER_DUP_ENTRY',
+        errno: 1062,
+      }),
+    );
+    examCertificateRepository.save.mockRejectedValue(dupError);
+
+    await expect(service.create(dto)).rejects.toBeInstanceOf(ConflictException);
+    await expect(service.create(dto)).rejects.toThrow(
+      /รหัสใบรับรอง \(CERT_CODE\) ซ้ำ/,
+    );
+    expect(examSessionRepository.update).not.toHaveBeenCalled();
+  });
+
+  it('should map duplicate CERT_CODE on bulk issue to ConflictException (CERT-U-013)', async () => {
+    scoreFind.mockResolvedValue([
+      {
+        SCORES_ID: 1,
+        CERTIFICATES: [],
+        ENROLLMENT: {
+          USER_ID: 10,
+          SESSION_ID: 100,
+          USER: {
+            USER_EMAIL: 'student@example.com',
+            PROFILE: { userTitleTh: 'นาย', userFullnameTh: 'ทดสอบ' },
+          },
+        },
+      },
+    ]);
+    const dupError = new QueryFailedError(
+      'INSERT',
+      [],
+      Object.assign(
+        new Error("Duplicate entry 'AUTO_GENERATED_CODE' for key 'CERT_CODE'"),
+        { code: 'ER_DUP_ENTRY', errno: 1062 },
+      ),
+    );
+    certificateSave.mockRejectedValue(dupError);
+
+    await expect(
+      service.bulkIssueCertificates({
+        candidates: [{ SCORES_ID: 1, USER_ID: 10 }],
+        ...bulkDtoBase,
+      }),
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('should reject future issue date on update (CERT-U-011)', async () => {

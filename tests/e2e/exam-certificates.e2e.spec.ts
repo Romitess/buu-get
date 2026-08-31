@@ -8,11 +8,9 @@ import { ExamHistoryPage } from './pages/exam-history.page';
  * E2E: Exam certificates — bulk issue UI / candidate history / authz
  * Matrix: CERT-E-001 (P0), CERT-E-002 (P1), CERT-E-003 (P1)
  *
- * Path note (BUG-002): controller mounts at `/api/api/exam-certificates`.
- * Frontend axios concatenates `/api` + `/api/exam-certificates` → same path.
- */
+ * Path note: controller mounts at `/api/exam-certificates` (BUG-002 fixed).
 
-const EXAM_CERTIFICATES_PATH = '/api/api/exam-certificates';
+const EXAM_CERTIFICATES_PATH = '/api/exam-certificates';
 
 const ExamEnrollmentStatus = {
   PAID: 1,

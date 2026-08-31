@@ -10,13 +10,13 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1786326771.0807595,
-    "ast_hash": "657db8d94dccd2cac8956d9929f58bbd",
+    "mtime": 1786958356.3516421,
+    "ast_hash": "3efad52214b8483f14504ce423eeec4e",
     "semantic_hash": ""
   },
   "src/app.module.ts": {
-    "mtime": 1786352088.7374125,
-    "ast_hash": "2e6c45137653e4cf0ab2f9895776d438",
+    "mtime": 1787627121.1069076,
+    "ast_hash": "812b217799ad3385bf5a18fb8b800088",
     "semantic_hash": ""
   },
   "src/common/constants/role-groups.ts": {
@@ -60,13 +60,13 @@
     "semantic_hash": ""
   },
   "src/common/guards/roles.guard.spec.ts": {
-    "mtime": 1786326771.0807908,
-    "ast_hash": "885cea0c55d79884ccad63e23e1fa126",
+    "mtime": 1787019338.970349,
+    "ast_hash": "90069f0344a6f752bf13eff3a48f6c81",
     "semantic_hash": ""
   },
   "src/common/guards/roles.guard.ts": {
-    "mtime": 1783042948.7916105,
-    "ast_hash": "30d72dde347570b78e81a0f8daeaf1eb",
+    "mtime": 1787019298.1122947,
+    "ast_hash": "76147bf2fad1a255d9f5ce79d4d5821f",
     "semantic_hash": ""
   },
   "src/common/utils/app-logger.ts": {
@@ -75,8 +75,8 @@
     "semantic_hash": ""
   },
   "src/common/utils/authz.util.ts": {
-    "mtime": 1783584961.3255665,
-    "ast_hash": "efe0c54f33706f1180dff50f67e45cfe",
+    "mtime": 1787019274.6449482,
+    "ast_hash": "cae087cc2a87c9e7b9e34a59cae63380",
     "semantic_hash": ""
   },
   "src/common/utils/exam-schedule.util.spec.ts": {
@@ -115,13 +115,13 @@
     "semantic_hash": ""
   },
   "src/config/monorepo-env.ts": {
-    "mtime": 1786326771.0807955,
+    "mtime": 1786601638.3169074,
     "ast_hash": "12a6a78eaf527f2f9e08dfde36e640cd",
     "semantic_hash": ""
   },
   "src/database/data-source.ts": {
-    "mtime": 1786352079.3470504,
-    "ast_hash": "655aa87ceab230075ccca9063c2758c4",
+    "mtime": 1787109829.945517,
+    "ast_hash": "54addafe9edb6c7b7b8eb517bac9f64b",
     "semantic_hash": ""
   },
   "src/database/migrations/1778470882994-InitialSchema.ts": {
@@ -380,8 +380,8 @@
     "semantic_hash": ""
   },
   "src/database/seeds/demo-seed.ts": {
-    "mtime": 1785807788.2642584,
-    "ast_hash": "790885a7e732f88ebd5c7bcf9e2a304a",
+    "mtime": 1786957692.6439097,
+    "ast_hash": "6d1c844f6f323de9cef81c9ced984714",
     "semantic_hash": ""
   },
   "src/decorators/permissions.decorator.ts": {
@@ -410,13 +410,13 @@
     "semantic_hash": ""
   },
   "src/modules/auth/auth.service.spec.ts": {
-    "mtime": 1786326770.9892297,
-    "ast_hash": "c7b172b3b1ef464aad926bd931153013",
+    "mtime": 1787625965.3418865,
+    "ast_hash": "9330301b55f80640ae1763578b273504",
     "semantic_hash": ""
   },
   "src/modules/auth/auth.service.ts": {
-    "mtime": 1784780604.500211,
-    "ast_hash": "0188f0fc16edddd9fa9ad272134cf8d3",
+    "mtime": 1787625959.1006558,
+    "ast_hash": "4edf534225e4b969e0b3b21e9e15ffbc",
     "semantic_hash": ""
   },
   "src/modules/auth/dto/login.dto.ts": {
@@ -465,13 +465,13 @@
     "semantic_hash": ""
   },
   "src/modules/bank-reconciles/bank-reconciles.service.spec.ts": {
-    "mtime": 1786326771.08075,
-    "ast_hash": "382f44716e763aaa06d87fd3ab8ca43c",
+    "mtime": 1787625554.6298854,
+    "ast_hash": "008affcf90df299ce8dcdeac6e132aee",
     "semantic_hash": ""
   },
   "src/modules/bank-reconciles/bank-reconciles.service.ts": {
-    "mtime": 1786333950.410789,
-    "ast_hash": "105e0dd0064ea4ce60c60fa3b679941f",
+    "mtime": 1787625338.76079,
+    "ast_hash": "ef73c1eafad60c46457481296dacb167",
     "semantic_hash": ""
   },
   "src/modules/bank-reconciles/dto/bank-reconcile.dto.ts": {
@@ -515,8 +515,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-blocked-seats/exam-blocked-seats.controller.ts": {
-    "mtime": 1785725886.3457804,
-    "ast_hash": "a326ab8b2a5be8fe9c1cbfb1e5dbcd83",
+    "mtime": 1787625939.542207,
+    "ast_hash": "f9c19ce095ca18bd8a49e125ce0acb27",
     "semantic_hash": ""
   },
   "src/modules/exam-blocked-seats/exam-blocked-seats.module.ts": {
@@ -545,8 +545,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-certificates/exam-certificates.controller.ts": {
-    "mtime": 1785725886.3464234,
-    "ast_hash": "7e9d9af74fb3751b38feb471ec07ac59",
+    "mtime": 1787625824.2646646,
+    "ast_hash": "802447504b1042ed1285afbd322d93cc",
     "semantic_hash": ""
   },
   "src/modules/exam-certificates/exam-certificates.module.ts": {
@@ -555,8 +555,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-certificates/exam-certificates.service.ts": {
-    "mtime": 1786326771.0807257,
-    "ast_hash": "5b4f647a298a96be23a1bac27ae2eb0b",
+    "mtime": 1787627193.54754,
+    "ast_hash": "962d4c47d2499cf56ca1636d00db677c",
     "semantic_hash": ""
   },
   "src/modules/exam-enrollments/dto/bulk-seat-assignment.dto.ts": {
@@ -600,13 +600,13 @@
     "semantic_hash": ""
   },
   "src/modules/exam-enrollments/entities/exam-enrollment.entity.ts": {
-    "mtime": 1786326771.0806851,
+    "mtime": 1786601638.3166401,
     "ast_hash": "f2b8efc9e319fe6f32f0ba1d2103c194",
     "semantic_hash": ""
   },
   "src/modules/exam-enrollments/exam-enrollments.controller.ts": {
-    "mtime": 1786326771.0807843,
-    "ast_hash": "7d31395dea02ca6ce0845a9598cee0e5",
+    "mtime": 1786675230.448579,
+    "ast_hash": "31fbdbdb5bd6836e038e064a64869dc3",
     "semantic_hash": ""
   },
   "src/modules/exam-enrollments/exam-enrollments.module.ts": {
@@ -615,13 +615,13 @@
     "semantic_hash": ""
   },
   "src/modules/exam-enrollments/exam-enrollments.service.spec.ts": {
-    "mtime": 1786352192.3517802,
-    "ast_hash": "1ac4399916e93251353e298f42fcb2cc",
+    "mtime": 1786696395.5187767,
+    "ast_hash": "fcf29972f2eb2219c35d036b460180fb",
     "semantic_hash": ""
   },
   "src/modules/exam-enrollments/exam-enrollments.service.ts": {
-    "mtime": 1786333950.5028064,
-    "ast_hash": "e49b9d1a6584ab47adfc5d507c488aae",
+    "mtime": 1787626847.9453962,
+    "ast_hash": "4fc4808dbbc52c13d1de49f3da463c3b",
     "semantic_hash": ""
   },
   "src/modules/exam-enrollments/interfaces/executive-exam-history.interface.ts": {
@@ -665,8 +665,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-location-seats/exam-location-seats.controller.ts": {
-    "mtime": 1783042948.8010457,
-    "ast_hash": "fc991f954c20702d5c728116b6fdcddb",
+    "mtime": 1787625929.004711,
+    "ast_hash": "837b524eb2cd5ea3af9657c6136b77ce",
     "semantic_hash": ""
   },
   "src/modules/exam-location-seats/exam-location-seats.module.ts": {
@@ -700,8 +700,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-locations/exam-locations.controller.ts": {
-    "mtime": 1784772986.7312253,
-    "ast_hash": "8ebbc4fbfecddc5870a817637b87d274",
+    "mtime": 1787625911.3815205,
+    "ast_hash": "8f32b2b9f38f366b4cf69b9531abd5cd",
     "semantic_hash": ""
   },
   "src/modules/exam-locations/exam-locations.module.ts": {
@@ -710,8 +710,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-locations/exam-locations.service.ts": {
-    "mtime": 1784772988.6592426,
-    "ast_hash": "ea71187934f77a5664a2a671bdd5dcbc",
+    "mtime": 1786675400.2434287,
+    "ast_hash": "ec903beaf37f580814b11f56beb98955",
     "semantic_hash": ""
   },
   "src/modules/exam-report/dto/exam-report-query.dto.ts": {
@@ -720,8 +720,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-report/exam-report.controller.ts": {
-    "mtime": 1785725886.3475702,
-    "ast_hash": "8b35484e9fca53222f3813ab3b472873",
+    "mtime": 1786675261.1408787,
+    "ast_hash": "53f0a4dda7a70ead4177087e662d94a9",
     "semantic_hash": ""
   },
   "src/modules/exam-report/exam-report.module.ts": {
@@ -730,13 +730,13 @@
     "semantic_hash": ""
   },
   "src/modules/exam-report/exam-report.service.ts": {
-    "mtime": 1786326770.9891894,
-    "ast_hash": "f0c143671b52771d5a440ef87e507023",
+    "mtime": 1786675427.2047248,
+    "ast_hash": "bf16209701776a52a363e52ae1e310cc",
     "semantic_hash": ""
   },
   "src/modules/exam-report/interfaces/exam-report.interface.ts": {
-    "mtime": 1786326770.9891996,
-    "ast_hash": "54fbd4333ad95de713ba955ca3fa811a",
+    "mtime": 1786675261.5354662,
+    "ast_hash": "b00fd6d8ce04dcb48ab39b8a8d7e693f",
     "semantic_hash": ""
   },
   "src/modules/exam-rule-vouchers/dto/create-exam-rule-voucher.dto.ts": {
@@ -760,8 +760,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-rule-vouchers/exam-rule-vouchers.controller.ts": {
-    "mtime": 1783042948.8028026,
-    "ast_hash": "910bb31c67dea8063b0200cfb283ea95",
+    "mtime": 1787625948.6955621,
+    "ast_hash": "ac04523bfa936860e5bb4afa1f148ab7",
     "semantic_hash": ""
   },
   "src/modules/exam-rule-vouchers/exam-rule-vouchers.module.ts": {
@@ -790,7 +790,7 @@
     "semantic_hash": ""
   },
   "src/modules/exam-scores/exam-scores.controller.ts": {
-    "mtime": 1786326770.9892464,
+    "mtime": 1786601638.3137739,
     "ast_hash": "407b125d73fadfcd525a0b243f59d10c",
     "semantic_hash": ""
   },
@@ -800,7 +800,7 @@
     "semantic_hash": ""
   },
   "src/modules/exam-scores/exam-scores.service.ts": {
-    "mtime": 1786326771.080831,
+    "mtime": 1786601638.3168223,
     "ast_hash": "7ff13010d70465dc1a4aa8867394b5ea",
     "semantic_hash": ""
   },
@@ -820,8 +820,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-session-locations/exam-session-locations.controller.ts": {
-    "mtime": 1783042948.8037162,
-    "ast_hash": "4c36c1251590618954190b5d92cf3b00",
+    "mtime": 1787625920.2387989,
+    "ast_hash": "149424294160c7f36d35e3b53ece637f",
     "semantic_hash": ""
   },
   "src/modules/exam-session-locations/exam-session-locations.module.ts": {
@@ -830,8 +830,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-session-locations/exam-session-locations.service.ts": {
-    "mtime": 1784608898.1321256,
-    "ast_hash": "55ce9098825af84ed17382ba6c6ad056",
+    "mtime": 1787626783.192964,
+    "ast_hash": "0e279322a13290961c93419df4b44fa8",
     "semantic_hash": ""
   },
   "src/modules/exam-sessions/dto/create-exam-session.dto.ts": {
@@ -850,8 +850,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-sessions/exam-sessions.controller.ts": {
-    "mtime": 1785725886.3478792,
-    "ast_hash": "d2ec7fc302608e4aafe4383a02f8559b",
+    "mtime": 1787625902.9138408,
+    "ast_hash": "1dc7eecb91efeaece78288103338bb9e",
     "semantic_hash": ""
   },
   "src/modules/exam-sessions/exam-sessions.module.ts": {
@@ -890,8 +890,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-vouchers/exam-vouchers.controller.ts": {
-    "mtime": 1783042948.8049011,
-    "ast_hash": "c01bce75ec3204ad2e28d644a57ab31a",
+    "mtime": 1787625944.8410177,
+    "ast_hash": "0e47ef59359a472c4d00498e3f99bbf9",
     "semantic_hash": ""
   },
   "src/modules/exam-vouchers/exam-vouchers.module.ts": {
@@ -900,7 +900,7 @@
     "semantic_hash": ""
   },
   "src/modules/exam-vouchers/exam-vouchers.service.spec.ts": {
-    "mtime": 1786326770.9892309,
+    "mtime": 1786601638.3137047,
     "ast_hash": "f56d7fa649b504c56e266724436d01d6",
     "semantic_hash": ""
   },
@@ -910,18 +910,18 @@
     "semantic_hash": ""
   },
   "src/modules/exam/constants/exam.constants.ts": {
-    "mtime": 1783042948.805135,
-    "ast_hash": "18c03269e3f574114366fad432c28297",
+    "mtime": 1786422019.9785585,
+    "ast_hash": "4d498565868ccd2d02410903867c8f45",
     "semantic_hash": ""
   },
   "src/modules/exam/dto/create-exam.dto.ts": {
-    "mtime": 1786326771.0817747,
+    "mtime": 1786601638.317593,
     "ast_hash": "0aeaf9d5ebf3502a231582b0289344d3",
     "semantic_hash": ""
   },
   "src/modules/exam/dto/create-passcodes.dto.ts": {
-    "mtime": 1783042948.805264,
-    "ast_hash": "c636bfc61715259381c0bb438c8bc5db",
+    "mtime": 1786422190.7587461,
+    "ast_hash": "cbaabadee20491f94afd77312f2de534",
     "semantic_hash": ""
   },
   "src/modules/exam/dto/notify-exam-changes.dto.ts": {
@@ -955,8 +955,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam/exam.controller.ts": {
-    "mtime": 1786326770.9891548,
-    "ast_hash": "3b2eca10727a2bc06752f04cb3bc2759",
+    "mtime": 1786957916.4487796,
+    "ast_hash": "6e2bc76b78623c4a8293f2df1ba52f6e",
     "semantic_hash": ""
   },
   "src/modules/exam/exam.module.ts": {
@@ -965,8 +965,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam/exam.service.ts": {
-    "mtime": 1786419192.5277195,
-    "ast_hash": "49a3f559ae2ec6e98b8e0f8780c0779a",
+    "mtime": 1786675400.2471375,
+    "ast_hash": "44f237b695304cc426cc4b7405410481",
     "semantic_hash": ""
   },
   "src/modules/exam/templates/exam-change-email.template.ts": {
@@ -1005,13 +1005,13 @@
     "semantic_hash": ""
   },
   "src/modules/fund-sources/fund-sources.service.ts": {
-    "mtime": 1784774541.210262,
-    "ast_hash": "103bf31bce4c470c22c48bcb9acd6d49",
+    "mtime": 1786695064.7811496,
+    "ast_hash": "51e1db8d4b0bbd94c29d3fe7f40adc70",
     "semantic_hash": ""
   },
   "src/modules/fund-sources/interfaces/daily-revenue.interface.ts": {
-    "mtime": 1784774533.7899704,
-    "ast_hash": "366dbf784f0e67d26d675ac694dacd61",
+    "mtime": 1786695064.7813003,
+    "ast_hash": "1187dc678bf3816ce77cac7c57c53e8d",
     "semantic_hash": ""
   },
   "src/modules/moodle-sync-logs/dto/create-moodle-sync-log.dto.ts": {
@@ -1025,8 +1025,8 @@
     "semantic_hash": ""
   },
   "src/modules/moodle-sync-logs/moodle-sync-logs.controller.ts": {
-    "mtime": 1783042948.806701,
-    "ast_hash": "c450f39f9c415a35804a55aeb6f09bf9",
+    "mtime": 1787625948.7741785,
+    "ast_hash": "891819b78207d8b21016d840811707a7",
     "semantic_hash": ""
   },
   "src/modules/moodle-sync-logs/moodle-sync-logs.module.ts": {
@@ -1195,13 +1195,13 @@
     "semantic_hash": ""
   },
   "src/modules/profile-edit-history/profile-edit-history.controller.ts": {
-    "mtime": 1783042948.8095152,
-    "ast_hash": "f58474191ddc655b9d984bfd36025e7c",
+    "mtime": 1787626104.9524815,
+    "ast_hash": "a3409ad86ee047d153351a197ad46413",
     "semantic_hash": ""
   },
   "src/modules/profile-edit-history/profile-edit-history.module.ts": {
-    "mtime": 1783042948.8095655,
-    "ast_hash": "d36da8b9c9e9a0fa3774f851f480b0c4",
+    "mtime": 1787625811.8663652,
+    "ast_hash": "a262db50a3a766dc6e62be94fca72013",
     "semantic_hash": ""
   },
   "src/modules/profile-edit-history/profile-edit-history.service.ts": {
@@ -1220,8 +1220,8 @@
     "semantic_hash": ""
   },
   "src/modules/receipts/receipts.controller.ts": {
-    "mtime": 1783584961.3255541,
-    "ast_hash": "fd515c1adf7d605c01f6f0e416c2112d",
+    "mtime": 1787625859.4274824,
+    "ast_hash": "9801f853bbfe410c348b9eb2a1c5f10e",
     "semantic_hash": ""
   },
   "src/modules/receipts/receipts.module.ts": {
@@ -1230,8 +1230,8 @@
     "semantic_hash": ""
   },
   "src/modules/receipts/receipts.service.ts": {
-    "mtime": 1786333950.4160728,
-    "ast_hash": "4f6b61ceb94e4bce05013ccffc51c0b1",
+    "mtime": 1787627151.5312672,
+    "ast_hash": "cafe55ea3f4fe90f32009637fefa4c27",
     "semantic_hash": ""
   },
   "src/modules/roles/dto/create-role.dto.ts": {
@@ -1250,8 +1250,8 @@
     "semantic_hash": ""
   },
   "src/modules/roles/enums/role.enum.ts": {
-    "mtime": 1783042948.81055,
-    "ast_hash": "38f0ed2cb4ad260d08e65b3f10d77c96",
+    "mtime": 1786957679.8078275,
+    "ast_hash": "7ab186a89b6751e20eb53f312ee685d4",
     "semantic_hash": ""
   },
   "src/modules/roles/roles.controller.ts": {
@@ -1280,8 +1280,8 @@
     "semantic_hash": ""
   },
   "src/modules/score-criteria/score-criteria.controller.ts": {
-    "mtime": 1783042948.8109415,
-    "ast_hash": "9a16d2229ca0f93cac59eafeb240059b",
+    "mtime": 1787625824.2948723,
+    "ast_hash": "cced59133ef092d8b9790799607bd7f6",
     "semantic_hash": ""
   },
   "src/modules/score-criteria/score-criteria.module.ts": {
@@ -1295,8 +1295,8 @@
     "semantic_hash": ""
   },
   "src/modules/thaid/thaid.controller.ts": {
-    "mtime": 1784608898.1342645,
-    "ast_hash": "aa15a9d394a78fbf3fe317d4955f6176",
+    "mtime": 1787625989.6833925,
+    "ast_hash": "da22e6afe70b572a42f1dd7ef54b7b97",
     "semantic_hash": ""
   },
   "src/modules/thaid/thaid.module.ts": {
@@ -1435,8 +1435,8 @@
     "semantic_hash": ""
   },
   "src/modules/transactions/transactions.controller.ts": {
-    "mtime": 1786328096.39853,
-    "ast_hash": "b72e2894bc697ff67500c79486b393c0",
+    "mtime": 1787625300.2176247,
+    "ast_hash": "215f391453e9557f212efbe59b6bb136",
     "semantic_hash": ""
   },
   "src/modules/transactions/transactions.module.ts": {
@@ -1445,13 +1445,13 @@
     "semantic_hash": ""
   },
   "src/modules/transactions/transactions.service.spec.ts": {
-    "mtime": 1786327829.6194847,
-    "ast_hash": "b8b68457eede6a5951e96bde551d9d0f",
+    "mtime": 1787625381.6390715,
+    "ast_hash": "0007de5c1d613dbec7857f8fd88f93b5",
     "semantic_hash": ""
   },
   "src/modules/transactions/transactions.service.ts": {
-    "mtime": 1786328096.3992622,
-    "ast_hash": "cd9d0ade2edcbf417cf9cedcd62e604c",
+    "mtime": 1787625320.3601544,
+    "ast_hash": "df46169a92575b56a17decf478efdf8b",
     "semantic_hash": ""
   },
   "src/modules/user-image/entities/user-image.entity.ts": {
@@ -1490,8 +1490,8 @@
     "semantic_hash": ""
   },
   "src/modules/user-profile/user-profile.controller.ts": {
-    "mtime": 1783584961.2753317,
-    "ast_hash": "3a554e12db94165c2ecfd04f9024e73a",
+    "mtime": 1787625781.5488281,
+    "ast_hash": "244ebdfec97929887b5be5b231783b66",
     "semantic_hash": ""
   },
   "src/modules/user-profile/user-profile.module.ts": {
@@ -1500,8 +1500,8 @@
     "semantic_hash": ""
   },
   "src/modules/user-profile/user-profile.service.ts": {
-    "mtime": 1783584961.309219,
-    "ast_hash": "10d8d5f69c0bd0208348ee90e7651d26",
+    "mtime": 1786690746.2650628,
+    "ast_hash": "e89d55aac07e5433814decc6d5bf5088",
     "semantic_hash": ""
   },
   "src/modules/users/dto/create-user.dto.ts": {
@@ -1540,7 +1540,7 @@
     "semantic_hash": ""
   },
   "src/modules/users/users.service.spec.ts": {
-    "mtime": 1786326771.0809996,
+    "mtime": 1786601638.3174994,
     "ast_hash": "f149725c79f92da968fb0772e4246a9e",
     "semantic_hash": ""
   },
@@ -1645,7 +1645,7 @@
     "semantic_hash": ""
   },
   "src/modules/exam-scores/exam-scores.service.spec.ts": {
-    "mtime": 1786326770.9893417,
+    "mtime": 1786601638.314015,
     "ast_hash": "8641579dca716b34b681d9cda01c91e7",
     "semantic_hash": ""
   },
@@ -1680,13 +1680,13 @@
     "semantic_hash": ""
   },
   "src/common/utils/calendar-date.util.spec.ts": {
-    "mtime": 1785137844.119196,
-    "ast_hash": "c00426c74f51edcc6629a6a91ac09dd2",
+    "mtime": 1786695064.7802224,
+    "ast_hash": "fa5e13337dc9ad8af1c55cac545a4d43",
     "semantic_hash": ""
   },
   "src/common/utils/calendar-date.util.ts": {
-    "mtime": 1785807788.2634692,
-    "ast_hash": "1a1a0e15a751c29a4331a555618d52d6",
+    "mtime": 1786695064.7803354,
+    "ast_hash": "7d8a126d10430b2f473f983b9cf0798b",
     "semantic_hash": ""
   },
   "src/common/utils/mask-identifier.util.spec.ts": {
@@ -1785,8 +1785,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-certificates/exam-certificates.service.spec.ts": {
-    "mtime": 1786326771.0810456,
-    "ast_hash": "1e990a10dd7af95b614b1f2410edb294",
+    "mtime": 1787627264.2981787,
+    "ast_hash": "2f64bc416f1da4b9ebdb6fb2256ad7d1",
     "semantic_hash": ""
   },
   "src/modules/exam-certificates/templates/certificate-issued-email.template.ts": {
@@ -1845,8 +1845,8 @@
     "semantic_hash": ""
   },
   "src/modules/verify/dto/verify-response.dto.ts": {
-    "mtime": 1785807788.2693033,
-    "ast_hash": "de127ef4cb4d8def14956ef6bee826d8",
+    "mtime": 1787626629.4141219,
+    "ast_hash": "532d7a28b7aa8d86d561de441d371914",
     "semantic_hash": ""
   },
   "src/modules/verify/verify.controller.ts": {
@@ -1855,18 +1855,18 @@
     "semantic_hash": ""
   },
   "src/modules/verify/verify.module.ts": {
-    "mtime": 1785137844.1253467,
-    "ast_hash": "693362824edab031d09e207d0b7c4d23",
+    "mtime": 1787626652.0086203,
+    "ast_hash": "31fd5dbe98d5eb8ceefdeaeed1dd4daa",
     "semantic_hash": ""
   },
   "src/modules/verify/verify.service.spec.ts": {
-    "mtime": 1786326770.989178,
-    "ast_hash": "ed3e0e85af0cb6114a1c462ed28bf099",
+    "mtime": 1787626712.0518029,
+    "ast_hash": "56b8e95d29851048f0a3f8402816b7ec",
     "semantic_hash": ""
   },
   "src/modules/verify/verify.service.ts": {
-    "mtime": 1786333950.4162908,
-    "ast_hash": "a986cdee840404175fe5531a93d1d2de",
+    "mtime": 1787626652.0085201,
+    "ast_hash": "e337462b1f5f4de3fb9ad5c04dcbbed1",
     "semantic_hash": ""
   },
   "src/modules/roles/dto/create-role.dto.spec.ts": {
@@ -1875,8 +1875,8 @@
     "semantic_hash": ""
   },
   "src/modules/roles/roles.service.spec.ts": {
-    "mtime": 1785901234.5450418,
-    "ast_hash": "09ceef0dd31b52fc528c28bf035ff07e",
+    "mtime": 1786957705.381074,
+    "ast_hash": "fed422033b55e3b55f588c49bdeb346c",
     "semantic_hash": ""
   },
   "src/modules/payment-configs/dto/payment-config.dto.spec.ts": {
@@ -1895,8 +1895,8 @@
     "semantic_hash": ""
   },
   "src/modules/receipts/receipts.service.spec.ts": {
-    "mtime": 1786333950.4157307,
-    "ast_hash": "0b8e8b52e76a30d06cb16cbb18828050",
+    "mtime": 1787627180.2015002,
+    "ast_hash": "3a23d4b7178efb2c1f76db774f96b871",
     "semantic_hash": ""
   },
   "src/modules/voided-receipts/dto/create-voided-receipt.dto.spec.ts": {
@@ -1920,8 +1920,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-locations/exam-locations.service.spec.ts": {
-    "mtime": 1785985189.6238155,
-    "ast_hash": "5f5437c4094c40882de5cc1c6678c01c",
+    "mtime": 1786675373.0198288,
+    "ast_hash": "51a36c3747f52eeb78037a07443cf16e",
     "semantic_hash": ""
   },
   "src/modules/exam-rule-vouchers/exam-rule-vouchers.service.spec.ts": {
@@ -1940,8 +1940,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam/exam.service.spec.ts": {
-    "mtime": 1786419258.1440747,
-    "ast_hash": "bf86aa4eb61799fc6445818f1db70080",
+    "mtime": 1786957916.44878,
+    "ast_hash": "6449fc44c5c5c2c3664013c654d17dc2",
     "semantic_hash": ""
   },
   "src/modules/fund-sources/dto/create-fund-source.dto.spec.ts": {
@@ -1950,8 +1950,8 @@
     "semantic_hash": ""
   },
   "src/modules/fund-sources/fund-sources.service.spec.ts": {
-    "mtime": 1785985127.4650981,
-    "ast_hash": "dd7ce1a9a535a911366d0d489e178a8e",
+    "mtime": 1786695064.7809484,
+    "ast_hash": "0d6278c5696bc39dd47e09e843c84dec",
     "semantic_hash": ""
   },
   "src/modules/score-criteria/score-criteria.service.spec.ts": {
@@ -1985,8 +1985,8 @@
     "semantic_hash": ""
   },
   "src/modules/exam-report/exam-report.service.spec.ts": {
-    "mtime": 1785989355.1143363,
-    "ast_hash": "711c9ada3f9944cd68c936c78167c9fd",
+    "mtime": 1786675388.489579,
+    "ast_hash": "b740d7b10053ea464f5b7d03be7a7f56",
     "semantic_hash": ""
   },
   "src/common/utils/physical-status.util.spec.ts": {
@@ -2050,8 +2050,8 @@
     "semantic_hash": ""
   },
   "src/modules/check-in-assist/check-in-assist.service.ts": {
-    "mtime": 1786412941.660017,
-    "ast_hash": "3a4667b29ad1c3db98e8205feb086300",
+    "mtime": 1786957916.4487393,
+    "ast_hash": "9593405155191c9a89f42d5e964d3341",
     "semantic_hash": ""
   },
   "src/modules/check-in-assist/dto/check-in-assist-response.dto.ts": {
@@ -2112,6 +2112,176 @@
   "src/modules/users/dto/delete-users-by-range.dto.ts": {
     "mtime": 1786070732.2120802,
     "ast_hash": "49121bfc5b2ad6724a8b9fdea63dba5b",
+    "semantic_hash": ""
+  },
+  "src/common/constants/role-switch.constants.ts": {
+    "mtime": 1787019267.5231564,
+    "ast_hash": "6844bbfecb0b6515ecb8f7d291accbd4",
+    "semantic_hash": ""
+  },
+  "src/common/utils/authz.util.spec.ts": {
+    "mtime": 1787019303.6725743,
+    "ast_hash": "ecb85f71152f3ade0f1abe9ff7136167",
+    "semantic_hash": ""
+  },
+  "src/common/utils/build-receipt-pdf.util.ts": {
+    "mtime": 1787627226.4457474,
+    "ast_hash": "8059fa8c8cad2505065d97e90d1690cb",
+    "semantic_hash": ""
+  },
+  "src/database/migrations/1789780344000-CreateNotificationTables.ts": {
+    "mtime": 1786695064.7807257,
+    "ast_hash": "897a1bbc8d37981326967c318a7a89a1",
+    "semantic_hash": ""
+  },
+  "src/database/migrations/1789780344100-AddSuperAdminRole.ts": {
+    "mtime": 1786957688.4731863,
+    "ast_hash": "76dc7e14b1e6d0735a5cb734a51fd366",
+    "semantic_hash": ""
+  },
+  "src/database/migrations/1789780344200-CreateMsgTPerson.ts": {
+    "mtime": 1787110362.4275644,
+    "ast_hash": "d360bee1bbadb105bb32f429a146f5bf",
+    "semantic_hash": ""
+  },
+  "src/database/migrations/1789780344300-DropMsgTPersonAuditColumns.ts": {
+    "mtime": 1787110373.5702198,
+    "ast_hash": "6c59726e21958d39c7805c7dddf90d89",
+    "semantic_hash": ""
+  },
+  "src/modules/exam-locations/dto/exam-location-query.dto.ts": {
+    "mtime": 1786675190.3291118,
+    "ast_hash": "14b576760146636d3b16ff892d354216",
+    "semantic_hash": ""
+  },
+  "src/modules/exam-report/dto/exam-report-year-query.dto.ts": {
+    "mtime": 1786675190.6959562,
+    "ast_hash": "11700fb40acde78720c27d55e7537b10",
+    "semantic_hash": ""
+  },
+  "src/modules/exam/dto/exam-query.dto.ts": {
+    "mtime": 1786675188.4485364,
+    "ast_hash": "579f90aea6211e11a6be10b914bf214d",
+    "semantic_hash": ""
+  },
+  "src/modules/health/health.controller.spec.ts": {
+    "mtime": 1787627112.0132692,
+    "ast_hash": "43643c2d2fe4c9145867914a7f4ee620",
+    "semantic_hash": ""
+  },
+  "src/modules/health/health.controller.ts": {
+    "mtime": 1787627108.6015096,
+    "ast_hash": "4af5602dbf55d133c7c74baf622bac44",
+    "semantic_hash": ""
+  },
+  "src/modules/health/health.module.ts": {
+    "mtime": 1787627111.97796,
+    "ast_hash": "dffb59943888959a8db5eedf6afacba6",
+    "semantic_hash": ""
+  },
+  "src/modules/identity/identity-provider.interface.ts": {
+    "mtime": 1787627096.9129705,
+    "ast_hash": "40f744516487cac6afee92b3cf3293f5",
+    "semantic_hash": ""
+  },
+  "src/modules/identity/identity-provider.tokens.ts": {
+    "mtime": 1787627100.559753,
+    "ast_hash": "7c35f707267ae04997766a9ff6fe090b",
+    "semantic_hash": ""
+  },
+  "src/modules/identity/identity.module.ts": {
+    "mtime": 1787627104.780288,
+    "ast_hash": "f72565b717e635cf8900fc84e191377e",
+    "semantic_hash": ""
+  },
+  "src/modules/identity/stub-identity.provider.spec.ts": {
+    "mtime": 1787627107.677032,
+    "ast_hash": "08642dbcd96421659790b48a699e9090",
+    "semantic_hash": ""
+  },
+  "src/modules/identity/stub-identity.provider.ts": {
+    "mtime": 1787627102.1438518,
+    "ast_hash": "e3233f5f3f7c035ff52f74836d98d660",
+    "semantic_hash": ""
+  },
+  "src/modules/msg-persons/entities/msg-person.entity.ts": {
+    "mtime": 1787110362.4275377,
+    "ast_hash": "e35f50d8de784dd49802bc74c83eefbc",
+    "semantic_hash": ""
+  },
+  "src/modules/msg-persons/msg-persons.module.ts": {
+    "mtime": 1787109829.5510354,
+    "ast_hash": "7e7c2f6ef69dc18e0f936696ad4c2163",
+    "semantic_hash": ""
+  },
+  "src/modules/notifications/constants/notification.constants.ts": {
+    "mtime": 1786695064.781531,
+    "ast_hash": "6336bdc1c740e1eb34b90a8bee667023",
+    "semantic_hash": ""
+  },
+  "src/modules/notifications/dto/notification-response.dto.ts": {
+    "mtime": 1786695064.7817302,
+    "ast_hash": "62a349d2cc9884aacee239361d0aad34",
+    "semantic_hash": ""
+  },
+  "src/modules/notifications/entities/notification-recipient.entity.ts": {
+    "mtime": 1786695064.7818806,
+    "ast_hash": "b2ce5f253e9bf8121cf0a368a01156c0",
+    "semantic_hash": ""
+  },
+  "src/modules/notifications/entities/notification.entity.ts": {
+    "mtime": 1786695064.782012,
+    "ast_hash": "8ec81a625c1d5900439ced0b9628ef6e",
+    "semantic_hash": ""
+  },
+  "src/modules/notifications/interfaces/notification-payload.interface.ts": {
+    "mtime": 1786695064.782187,
+    "ast_hash": "83d0ca9046e7f65c92fc67b2e5f69ab9",
+    "semantic_hash": ""
+  },
+  "src/modules/notifications/notifications.controller.ts": {
+    "mtime": 1787019280.1435814,
+    "ast_hash": "0359f2027e9df3a8fe339ebe16d08d40",
+    "semantic_hash": ""
+  },
+  "src/modules/notifications/notifications.module.ts": {
+    "mtime": 1786695064.7824402,
+    "ast_hash": "97e0bdf077d47767019ce0ee64face2c",
+    "semantic_hash": ""
+  },
+  "src/modules/notifications/notifications.service.spec.ts": {
+    "mtime": 1786695064.783966,
+    "ast_hash": "97cc0ef86f02cdc52ed8a38796a0dd01",
+    "semantic_hash": ""
+  },
+  "src/modules/notifications/notifications.service.ts": {
+    "mtime": 1786695064.7856529,
+    "ast_hash": "f5254838fbfbe5dfe16fd9eca427d612",
+    "semantic_hash": ""
+  },
+  "src/modules/payment-provider/csv-finance-payment.adapter.spec.ts": {
+    "mtime": 1787627096.094638,
+    "ast_hash": "3de5dbc3bb89387f6f734f85ad4f45e1",
+    "semantic_hash": ""
+  },
+  "src/modules/payment-provider/csv-finance-payment.adapter.ts": {
+    "mtime": 1787627088.8809018,
+    "ast_hash": "afaf85cb611827fa1893092a84bb257b",
+    "semantic_hash": ""
+  },
+  "src/modules/payment-provider/payment-provider.interface.ts": {
+    "mtime": 1787627082.3442237,
+    "ast_hash": "63eb5be45df0bf7ba42602d03c4beca5",
+    "semantic_hash": ""
+  },
+  "src/modules/payment-provider/payment-provider.module.ts": {
+    "mtime": 1787627092.2494292,
+    "ast_hash": "af590c1fb6ee5bf3720032c6cde4a3e6",
+    "semantic_hash": ""
+  },
+  "src/modules/payment-provider/payment-provider.tokens.ts": {
+    "mtime": 1787627087.179214,
+    "ast_hash": "4f52999710dd42a8f872490aec7c231f",
     "semantic_hash": ""
   }
 }

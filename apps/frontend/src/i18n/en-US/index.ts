@@ -101,6 +101,8 @@ export default {
       transactionNotFound: 'Payment transaction not found',
       startPaymentError: 'Failed to start payment session',
       confirmPaymentError: 'Failed to save payment',
+      waitingForPayment:
+        'Payment request received. Please scan the QR and wait for finance to confirm.',
       expireTransactionError: 'Failed to expire payment transaction',
       cancelSuccess: 'Registration cancelled successfully',
       cancelError: 'Failed to cancel registration',
@@ -502,11 +504,15 @@ export default {
   payment: {
     dialog: {
       title: 'Confirm Payment',
+      waitingTitle: 'Waiting for payment',
       detailsLabel: 'Payment Details',
       payWithin: 'Pay within {time}',
       instruction:
         'Please scan the QR Code with your Mobile Banking app\nto complete your registration.',
+      waitingInstruction:
+        'Please scan the QR Code with your Mobile Banking app.\nStatus becomes PAID after finance confirms payment.',
       saveQr: 'Save Payment QR Code',
+      waitingAcknowledge: 'Got it — waiting for confirmation',
       registrationTitle: 'Exam Registration System',
       subjectCode: 'Subject code: {code}',
       unspecified: 'Unspecified',
@@ -2113,6 +2119,17 @@ export default {
     forgotPassword: 'Forgot?',
     login: 'Sign In',
     createAccount: 'Create an account now?',
+    thaidCallback: {
+      successTitle: 'Data sharing confirmed',
+      successBody: 'BUU-GET received the ThaID confirmation. You can return to sign in.',
+      deniedTitle: 'Data sharing cancelled',
+      deniedBody: 'You did not confirm data sharing with ThaID.',
+      errorTitle: 'Could not confirm data sharing',
+      errorBody: 'The ThaID connection failed. Please try again.',
+      unknownTitle: 'No confirmation result',
+      unknownBody: 'No ThaID confirmation data was found.',
+      backToLogin: 'Back to sign in',
+    },
     notify: {
       required: 'Please enter email and password',
       success: 'Login successful',

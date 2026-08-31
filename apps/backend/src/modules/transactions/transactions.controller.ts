@@ -30,20 +30,27 @@ export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'สร้างธุรกรรมใหม่' })
+  @ApiOperation({ summary: 'สร้างธุรกรรมใหม่ (PENDING เท่านั้น — เจ้าของ enrollment หรือการเงิน)' })
   @ApiResponse({
     status: 201,
     description: 'สร้างธุรกรรมสำเร็จ',
   })
   createTransactionForFlow(
     @Body() createDto: CreateTransactionFlowDto,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<{ TRANX_ID: number }> {
-    return this.transactionsService.createTransactionForFlow(createDto);
+    return this.transactionsService.createTransactionForFlow(createDto, user);
   }
 
+  /**
+   * Admin/finance shortcut: สร้างธุรกรรม PAID+MATCH + ใบเสร็จ UNISSUED (ใช้ seed/demo)
+   * ไม่ใช่ production candidate path — production ใช้ POST /transactions → PENDING
+   */
   @Post('pending-payment')
+  @Roles(...FINANCE_ROLES)
   @ApiOperation({
-    summary: 'Create a pending QR transaction and unissued receipt',
+    summary:
+      'Finance-only shortcut: create PAID+MATCH transaction + unissued receipt (seed/admin)',
   })
   createPendingPayment(
     @Body() dto: CreatePendingPaymentDto,
@@ -65,15 +72,20 @@ export class TransactionsController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'ดึงข้อมูลธุรกรรมด้วย ID' })
+  @ApiOperation({
+    summary: 'ดึงข้อมูลธุรกรรมด้วย ID (เจ้าของ enrollment หรือการเงิน)',
+  })
   @ApiResponse({
     status: 200,
     description: 'ข้อมูลธุรกรรมที่พบ',
     type: Transaction,
   })
   @ApiResponse({ status: 404, description: 'ไม่พบธุรกรรม' })
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<Transaction> {
-    return this.transactionsService.findOne(id);
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<Transaction> {
+    return this.transactionsService.findOne(id, user);
   }
 
   @Post(':tranxId/refund')
@@ -92,8 +104,15 @@ export class TransactionsController {
     return this.transactionsService.refundTransaction(tranxId);
   }
 
+  /**
+   * Finance-only: ยืนยันชำระเงิน → PAID
+   * ผู้สมัครไม่สามารถ self-confirm ได้ — session คง PENDING จนกว่าการเงินจะยืนยัน (เช่น CSV reconcile)
+   */
   @Patch(':tranxId/confirm')
-  @ApiOperation({ summary: 'ยืนยันการชำระเงิน (FLOW 2)' })
+  @Roles(...FINANCE_ROLES)
+  @ApiOperation({
+    summary: 'ยืนยันการชำระเงิน (FLOW 2) — การเงินเท่านั้น',
+  })
   @ApiResponse({
     status: 200,
     description: 'ยืนยันการชำระเงินสำเร็จ',

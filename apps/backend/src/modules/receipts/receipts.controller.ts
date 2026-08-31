@@ -14,7 +14,9 @@ import {
 import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { FINANCE_ROLES } from 'src/common/constants/role-groups';
+import { AuthenticatedUser } from 'src/common/utils/authz.util';
 import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ReceiptsService } from './receipts.service';
@@ -106,9 +108,10 @@ export class ReceiptsController {
   @ApiResponse({ status: 404, description: 'ไม่พบใบเสร็จ' })
   async downloadReceipt(
     @Param('tranxId', ParseIntPipe) tranxId: number,
+    @CurrentUser() user: AuthenticatedUser,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
-    const buffer = await this.receiptsService.downloadReceipt(tranxId);
+    const buffer = await this.receiptsService.downloadReceipt(tranxId, user);
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename="receipt-${tranxId}.pdf"`,

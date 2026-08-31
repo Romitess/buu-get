@@ -29,6 +29,16 @@ export interface VerifyCertificateScoresDto {
   lines: VerifyCertificateScoreLineDto[];
 }
 
+/** Band rules for certificate back (public verify — no admin API needed) */
+export interface VerifyCertificateBandRuleDto {
+  id: string;
+  band: string;
+  minScore: number;
+  maxScore: number;
+  cefr: string;
+  descriptor: string;
+}
+
 export interface VerifyCertificateResponseDto {
   type: 'certificate';
   status: CertificateVerifyStatus;
@@ -38,6 +48,8 @@ export interface VerifyCertificateResponseDto {
   holder: VerifyCertificateHolderDto;
   exam: VerifyCertificateExamDto;
   scores: VerifyCertificateScoresDto;
+  /** Active score-criteria band rules for certificate card back */
+  bandRules: VerifyCertificateBandRuleDto[];
 }
 
 export type ReceiptVerifyStatus = 'valid' | 'voided';
