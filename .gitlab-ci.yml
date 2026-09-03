@@ -153,6 +153,35 @@ stages:
   before_script:
     - apk add --no-cache kubectl curl jq
     - |
+      # kubectl --from-env-file rejects keys with spaces (e.g. "BUU_DOMAIN =value")
+      sanitize_dotenv_file() {
+        src="$1"
+        dest="${2:-/tmp/app_env.sanitized.env}"
+        tr -d '\r' < "$src" | sed '1s/^\xEF\xBB\xBF//' > /tmp/app_env.raw.env
+        awk '
+          {
+            sub(/^[ \t]+/, "")
+            if ($0 == "" || $0 ~ /^#/) next
+            if ($0 ~ /^export[ \t]+/) sub(/^export[ \t]+/, "")
+            eq = index($0, "=")
+            if (eq == 0) next
+            key = substr($0, 1, eq-1)
+            val = substr($0, eq+1)
+            gsub(/^[ \t]+|[ \t]+$/, "", key)
+            sub(/^[ \t]+/, "", val)
+            if (key ~ /^[-._A-Za-z][-._A-Za-z0-9]*$/) print key "=" val
+            else print "WARN: skip invalid dotenv key [" key "]" > "/dev/stderr"
+          }
+        ' /tmp/app_env.raw.env > "$dest"
+        rm -f /tmp/app_env.raw.env
+        if [ ! -s "$dest" ]; then
+          echo "ERROR: sanitized dotenv is empty (check DOTENV_* formatting)."
+          return 1
+        fi
+        echo "=== Dotenv keys (values hidden) ==="
+        cut -d= -f1 "$dest"
+      }
+    - |
       if [ ! -d "${HELM_CHART_PATH}" ]; then
         echo "=== Creating auto-generated Helm chart at ${HELM_CHART_PATH} (Multi-Service: API + Web) ==="
         mkdir -p "${HELM_CHART_PATH}/templates"
@@ -608,11 +637,13 @@ deploy-dev:
         printf "%s\n" "$ENV_VAR" > /tmp/app_env.env
         ENV_PATH="/tmp/app_env.env"
       fi
+      sanitize_dotenv_file "$ENV_PATH" /tmp/app_env.sanitized.env
+      ENV_PATH="/tmp/app_env.sanitized.env"
       echo "=== Creating Secret from Dotenv File Variable (${ENV_PATH}) ==="
       kubectl create secret generic ${RELEASE_NAME}-env \
         --from-env-file="$ENV_PATH" \
         -n dev --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config
-      rm -f /tmp/app_env.env
+      rm -f /tmp/app_env.env /tmp/app_env.sanitized.env
     
     - helm version
     - helm upgrade --install "${RELEASE_NAME}" "${HELM_CHART_PATH}" -f "${HELM_CHART_PATH}/values-dev.yaml" --set image.repository="${IMAGE_API}" --set image.tag="${CI_COMMIT_SHORT_SHA}" --set web.image.repository="${IMAGE_WEB}" --set web.image.tag="${CI_COMMIT_SHORT_SHA}" --set ingress.host="${RELEASE_NAME}-dev.buu.ac.th" -n dev --create-namespace --kubeconfig ~/.kube/config
@@ -707,11 +738,13 @@ deploy-test:
         printf "%s\n" "$ENV_VAR" > /tmp/app_env.env
         ENV_PATH="/tmp/app_env.env"
       fi
+      sanitize_dotenv_file "$ENV_PATH" /tmp/app_env.sanitized.env
+      ENV_PATH="/tmp/app_env.sanitized.env"
       echo "=== Creating Secret from Dotenv File Variable (${ENV_PATH}) ==="
       kubectl create secret generic ${RELEASE_NAME}-env \
         --from-env-file="$ENV_PATH" \
         -n test --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config
-      rm -f /tmp/app_env.env
+      rm -f /tmp/app_env.env /tmp/app_env.sanitized.env
     
     - helm version
     - helm upgrade --install "${RELEASE_NAME}" "${HELM_CHART_PATH}" -f "${HELM_CHART_PATH}/values-test.yaml" --set image.repository="${IMAGE_API}" --set image.tag="${CI_COMMIT_SHORT_SHA}" --set web.image.repository="${IMAGE_WEB}" --set web.image.tag="${CI_COMMIT_SHORT_SHA}" --set ingress.host="${RELEASE_NAME}-test.buu.ac.th" -n test --create-namespace --kubeconfig ~/.kube/config
@@ -806,11 +839,13 @@ deploy-prod:
         printf "%s\n" "$ENV_VAR" > /tmp/app_env.env
         ENV_PATH="/tmp/app_env.env"
       fi
+      sanitize_dotenv_file "$ENV_PATH" /tmp/app_env.sanitized.env
+      ENV_PATH="/tmp/app_env.sanitized.env"
       echo "=== Creating Secret from Dotenv File Variable (${ENV_PATH}) ==="
       kubectl create secret generic ${RELEASE_NAME}-env \
         --from-env-file="$ENV_PATH" \
         -n prod --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config
-      rm -f /tmp/app_env.env
+      rm -f /tmp/app_env.env /tmp/app_env.sanitized.env
     
     - helm version
     - 'TAG_OR_SHA="${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA}}"'
