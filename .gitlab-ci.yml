@@ -1,0 +1,854 @@
+# ==============================================================================
+# Standard DevSecOps GitLab CI/CD Pipeline Template for Node.js Projects
+# Baseline Reference: Node.js 24 (API & Web Microservices / Mono-repo)
+#
+# Pipeline Flow:
+#
+#   quality (parallel) ──┬── sonar-scan-api  
+#                     ├── sonar-scan-web  
+#                     ├── sonar-scan-quality-gate-api
+#                     ├── sonar-scan-quality-gate-web
+#                     ├── unit-test-api
+#                     ├── unit-test-web
+#                     ├── dependency-check-api
+#                     └── dependency-check-web
+#   sbom  (parallel with quality) ──┬── sbom-generate-api
+#                                └── sbom-generate-web
+#   build ──┬── docker-build       (API image)
+#           └── docker-build-web   (Web/frontend image)
+#   image-scan  ── image-scan            (Trivy vulnerability scan)
+#
+#   deploy ──┬── deploy-dev   (auto,   develop branch)
+#            ├── deploy-test  (manual, test branch)
+#            └── deploy-prod  (manual, main branch / tags)
+#
+# NOTE: - sonar-scan-* / sonar-scan-quality-gate-* ดึง secret (SONAR_URL, SONAR_TOKEN-CI) 
+#         จาก HashiCorp Vault (secret/data/SONAR-CI)
+#       - deploy-dev / deploy-test / deploy-prod ดึง secret (KUBECONFIG_*,
+#         DOTENV_*, REGISTRY_USER, REGISTRY_TOKEN) จาก HashiCorp Vault
+# ==============================================================================
+
+variables:
+  # ─── Automatic Image & Project Naming (Dynamic References) ─────────────────
+  SONAR_PROJECT_KEY_API:     "${CI_PROJECT_NAME}-api"        # SonarQube Project Key for API
+  SONAR_PROJECT_KEY_WEB:     "${CI_PROJECT_NAME}-web"        # SonarQube Project Key for Web/Frontend
+  IMAGE_API:                 "${CI_REGISTRY_IMAGE}/api"
+  IMAGE_WEB:                 "${CI_REGISTRY_IMAGE}/web"
+  IMAGE:                     $CI_REGISTRY_IMAGE
+  
+  # ─── Default Configurations (Overridable via GitLab CI/CD Variables) ────────
+  APP_NAME:                  "${CI_PROJECT_NAME}"            # Project name
+  HELM_CHART_PATH:           "helm/app"                      # Helm chart path
+  NODE_VERSION:               "24"                            # Node.js runtime version
+  NODE_IMAGE:                 "node:24-alpine"                # Node.js Base Docker Image for CI
+  RUNNER_TAG:                "gitrunner"                     # GitLab Runner Tag
+  DOCKER_TLS_CERTDIR:        ""
+  TRIVY_NO_PROGRESS:         "true"
+  TRIVY_CACHE_DIR:           ".trivycache"
+  TZ:                        "Asia/Bangkok"
+  APP_TIMEZONE:              "Asia/Bangkok"
+  # ────────────────────────────────────────────────────────────────────────────
+
+default:
+  before_script:
+    - export TZ="Asia/Bangkok"
+    - 'if command -v apk >/dev/null 2>&1; then apk add --no-cache tzdata >/dev/null 2>&1 && cp /usr/share/zoneinfo/Asia/Bangkok /etc/localtime && echo "Asia/Bangkok" > /etc/timezone; fi'
+
+# ==============================================================================
+# Stages Definition
+# ==============================================================================
+stages:
+  - quality     # Quality gate + SonarQube + Unit Tests + Dependency Checks + SBOM
+  - build       # Docker build & push (API & Web)
+  - image-scan  # Trivy — Remote Container Image Scan
+  - deploy      # Helm + K8s Secret Injection (dev / test / prod)
+  - dast        # OWASP ZAP (optional, manual)
+  - perf        # k6 Performance test (optional, manual)
+
+# ==============================================================================
+# YAML Anchors
+# ==============================================================================
+
+# ─── Docker-in-Docker Base Anchor ─────────────────────────────────────────────
+.docker_service: &docker_service
+  image: docker:24-cli
+  tags:
+    - $RUNNER_TAG
+  services:
+    - name: docker:24-dind
+      alias: docker
+      command:
+        - "dockerd"
+        - "--host=tcp://0.0.0.0:2375"
+        - "--host=unix:///var/run/docker.sock"
+        - "--insecure-registry=gitlabregistry.buu.ac.th"
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_DRIVER: overlay2
+  before_script:
+    - 'if [ -S /var/run/docker.sock ]; then echo "=== Using local Docker socket ===" && unset DOCKER_HOST; else echo "=== Connecting to DinD (tcp://docker:2375) ===" && export DOCKER_HOST="tcp://docker:2375"; for i in $(seq 1 15); do docker info >/dev/null 2>&1 && break || (echo "Waiting for DinD ($i)..." && sleep 1); done; fi'
+    - docker info
+
+# ─── SonarQube Vault Fetch Base Anchor ────────────────────────────────────────
+.vault_sonar: &vault_sonar
+  before_script:
+    - export TZ="Asia/Bangkok"
+    - 'if command -v apk >/dev/null 2>&1; then apk add --no-cache tzdata curl jq >/dev/null 2>&1 || true; elif command -v apt-get >/dev/null 2>&1; then apt-get update >/dev/null 2>&1 && apt-get install -y tzdata curl jq >/dev/null 2>&1 || true; fi'
+    - echo "=== Fetching SonarQube secrets from HashiCorp Vault Cluster ==="
+    - |
+      if [ -n "$VAULT_TOKEN" ]; then
+        for v_url in ${VAULT_SERVERS:-$VAULT_ADDR}; do
+          echo "Trying Vault node for SonarQube secrets: ${v_url}..."
+          VAULT_SONAR_RESP=$(curl -s --fail -k --connect-timeout 3 --header "X-Vault-Token: ${VAULT_TOKEN}" "${v_url}/v1/secret/data/SONAR-CI" || true)
+          if [ -z "$VAULT_SONAR_RESP" ] && echo "$v_url" | grep -q "^http://"; then
+            alt_url=$(echo "$v_url" | sed "s|^http://|https://|")
+            VAULT_SONAR_RESP=$(curl -s --fail -k --connect-timeout 3 --header "X-Vault-Token: ${VAULT_TOKEN}" "${alt_url}/v1/secret/data/SONAR-CI" || true)
+          fi
+          if [ -n "$VAULT_SONAR_RESP" ]; then
+            echo "=== Successfully fetched SonarQube secrets from Vault (secret/data/SONAR-CI) ==="
+            if command -v jq >/dev/null 2>&1; then
+              V_SONAR_URL=$(echo "$VAULT_SONAR_RESP" | jq -r '.data.data.SONAR_URL // .data.data.sonar_url // empty')
+              V_SONAR_TOKEN=$(echo "$VAULT_SONAR_RESP" | jq -r '.data.data["SONAR_TOKEN-CI"] // .data.data.SONAR_TOKEN // .data.data.sonar_token // empty')
+            else
+              V_SONAR_URL=$(echo "$VAULT_SONAR_RESP" | sed -n 's/.*"SONAR_URL"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+              V_SONAR_TOKEN=$(echo "$VAULT_SONAR_RESP" | sed -n 's/.*"SONAR_TOKEN-CI"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+              [ -z "$V_SONAR_TOKEN" ] && V_SONAR_TOKEN=$(echo "$VAULT_SONAR_RESP" | sed -n 's/.*"SONAR_TOKEN"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+            fi
+            [ -n "$V_SONAR_URL" ] && export SONAR_HOST_URL="$V_SONAR_URL"
+            [ -n "$V_SONAR_TOKEN" ] && export SONAR_TOKEN="$V_SONAR_TOKEN"
+            break
+          fi
+        done
+      else
+        echo "⚠️ VAULT_TOKEN is not defined in CI/CD variables."
+      fi
+
+      echo "=== [Verification] SonarQube Vault Secret Extraction ==="
+      if [ -n "$SONAR_HOST_URL" ]; then
+        echo "✅ SONAR_HOST_URL : ${SONAR_HOST_URL}"
+      else
+        echo "❌ SONAR_HOST_URL : NOT FOUND"
+      fi
+
+      if [ -n "$SONAR_TOKEN" ]; then
+        TOKEN_LEN=${#SONAR_TOKEN}
+        TOKEN_HEAD=$(echo "$SONAR_TOKEN" | cut -c 1-4)
+        TOKEN_TAIL=$(echo "$SONAR_TOKEN" | rev | cut -c 1-4 | rev)
+        echo "✅ SONAR_TOKEN    : LOADED (Length: ${TOKEN_LEN} chars, Preview: ${TOKEN_HEAD}****${TOKEN_TAIL})"
+      else
+        echo "❌ SONAR_TOKEN    : NOT FOUND"
+      fi
+
+# ─── Helm Deploy Base Anchor ──────────────────────────────────────────────────
+.helm_deploy: &helm_deploy
+  image:
+    name: alpine/helm:3.15.4
+    entrypoint: [""]
+  tags:
+    - $RUNNER_TAG
+  before_script:
+    - apk add --no-cache kubectl curl jq
+    - |
+      if [ ! -d "${HELM_CHART_PATH}" ]; then
+        echo "=== Creating auto-generated Helm chart at ${HELM_CHART_PATH} (Multi-Service: API + Web) ==="
+        mkdir -p "${HELM_CHART_PATH}/templates"
+        SLUG="${APP_NAME:-${CI_PROJECT_NAME_SLUG:-${CI_PROJECT_NAME:-app}}}"
+        printf "apiVersion: v2\nname: app\nversion: 0.1.0\n" > "${HELM_CHART_PATH}/Chart.yaml"
+        printf "replicaCount: 1\nimage:\n  repository: nginx\n  pullPolicy: Always\n  tag: \"latest\"\nservice:\n  type: ClusterIP\n  port: 3000\ningress:\n  enabled: true\n  host: \"${SLUG}.buu.ac.th\"\nweb:\n  enabled: true\n  resources:\n    limits:\n      cpu: 300m\n      memory: 256Mi\n    requests:\n      cpu: 50m\n      memory: 64Mi\nresources:\n  limits:\n    cpu: 500m\n    memory: 512Mi\n  requests:\n    cpu: 100m\n    memory: 128Mi\n" > "${HELM_CHART_PATH}/values.yaml"
+        printf "replicaCount: 1\ningress:\n  enabled: true\n  host: \"${SLUG}.buu.ac.th\"\nweb:\n  replicaCount: 1\n" > "${HELM_CHART_PATH}/values-dev.yaml"
+        printf "replicaCount: 1\ningress:\n  enabled: true\n  host: \"${SLUG}-test.buu.ac.th\"\nweb:\n  replicaCount: 1\n" > "${HELM_CHART_PATH}/values-test.yaml"
+        printf "replicaCount: 1\ningress:\n  enabled: true\n  host: \"${SLUG}.buu.ac.th\"\nweb:\n  replicaCount: 1\n" > "${HELM_CHART_PATH}/values-prod.yaml"
+        printf "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: {{ .Release.Name }}\n  labels:\n    app: {{ .Release.Name }}\nspec:\n  replicas: {{ .Values.replicaCount }}\n  selector:\n    matchLabels:\n      app: {{ .Release.Name }}\n  template:\n    metadata:\n      labels:\n        app: {{ .Release.Name }}\n    spec:\n      imagePullSecrets:\n        - name: regcred\n      containers:\n        - name: {{ .Release.Name }}\n          image: \"{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}\"\n          imagePullPolicy: {{ .Values.image.pullPolicy }}\n          ports:\n            - name: http\n              containerPort: {{ .Values.service.port }}\n              protocol: TCP\n          envFrom:\n            - secretRef:\n                name: {{ .Release.Name }}-env\n          resources:\n            {{- toYaml .Values.resources | nindent 12 }}\n" > "${HELM_CHART_PATH}/templates/deployment.yaml"
+        printf "{{- if .Values.web.enabled }}\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: {{ .Release.Name }}-web\n  labels:\n    app: {{ .Release.Name }}-web\nspec:\n  replicas: {{ .Values.web.replicaCount | default 1 }}\n  selector:\n    matchLabels:\n      app: {{ .Release.Name }}-web\n  template:\n    metadata:\n      labels:\n        app: {{ .Release.Name }}-web\n    spec:\n      imagePullSecrets:\n        - name: regcred\n      containers:\n        - name: web\n          image: \"{{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}\"\n          imagePullPolicy: {{ .Values.web.image.pullPolicy | default \"IfNotPresent\" }}\n          ports:\n            - containerPort: 80\n          resources:\n            {{- toYaml .Values.web.resources | nindent 12 }}\n{{- end }}\n" > "${HELM_CHART_PATH}/templates/deployment-web.yaml"
+        printf "apiVersion: v1\nkind: Service\nmetadata:\n  name: {{ .Release.Name }}\n  labels:\n    app: {{ .Release.Name }}\nspec:\n  type: ClusterIP\n  ports:\n    - port: {{ .Values.service.port }}\n      targetPort: {{ .Values.service.port }}\n      protocol: TCP\n      name: http\n  selector:\n    app: {{ .Release.Name }}\n" > "${HELM_CHART_PATH}/templates/service.yaml"
+        printf "{{- if .Values.web.enabled }}\napiVersion: v1\nkind: Service\nmetadata:\n  name: {{ .Release.Name }}-web\n  labels:\n    app: {{ .Release.Name }}-web\nspec:\n  type: ClusterIP\n  ports:\n    - port: 80\n      targetPort: 80\n      protocol: TCP\n      name: http\n  selector:\n    app: {{ .Release.Name }}-web\n{{- end }}\n" > "${HELM_CHART_PATH}/templates/service-web.yaml"
+        printf "{{- if .Values.ingress.enabled }}\napiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: {{ .Release.Name }}\n  labels:\n    app: {{ .Release.Name }}\n  annotations:\n    kubernetes.io/ingress.class: \"traefik\"\nspec:\n  rules:\n    - host: {{ .Values.ingress.host | quote }}\n      http:\n        paths:\n          - path: /api\n            pathType: Prefix\n            backend:\n              service:\n                name: {{ .Release.Name }}\n                port:\n                  number: {{ .Values.service.port }}\n          - path: /\n            pathType: Prefix\n            backend:\n              service:\n                name: {{ .Release.Name }}-web\n                port:\n                  number: 80\n{{- end }}\n" > "${HELM_CHART_PATH}/templates/ingress.yaml"
+      fi
+
+# ==============================================================================
+# STAGE 1 — Quality (Parallel Execution)
+# ==============================================================================
+
+# ── 1a. SonarQube Scan (API) ──────────────────────────────────────────────────
+sonar-scan-api:
+  <<: *vault_sonar
+  stage: quality
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  tags:
+    - $RUNNER_TAG
+  only:
+    - develop
+    - main
+    - tags
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "sonar-api-${CI_PROJECT_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - echo "=== SonarQube Scan API (${SONAR_PROJECT_KEY_API}) ==="
+    - 'if [ -z "${SONAR_HOST_URL}" ] || [ -z "${SONAR_TOKEN}" ]; then echo "❌ ERROR: SONAR_HOST_URL or SONAR_TOKEN is not configured." && exit 1; fi'
+    - 'TARGET_DIR="apps/api"; if [ ! -d "apps/api" ]; then if [ -d "api" ]; then TARGET_DIR="api"; else TARGET_DIR="."; fi; fi'
+    - "sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY_API} -Dsonar.projectName=${CI_PROJECT_NAME}-api -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.token=${SONAR_TOKEN} -Dsonar.sources=${TARGET_DIR} -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**,**/tests/**,**/test/**,old_app/** -Dsonar.qualitygate.wait=false"
+  allow_failure: true
+
+# ── 1b. SonarQube Scan (Web) ──────────────────────────────────────────────────
+sonar-scan-web:
+  <<: *vault_sonar
+  stage: quality
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  tags:
+    - $RUNNER_TAG
+  only:
+    - develop
+    - main
+    - tags
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "sonar-web-${CI_PROJECT_NAME}"
+    paths:
+      - .sonar/cache
+  script:
+    - echo "=== SonarQube Scan Web (${SONAR_PROJECT_KEY_WEB}) ==="
+    - 'if [ -z "${SONAR_HOST_URL}" ] || [ -z "${SONAR_TOKEN}" ]; then echo "❌ ERROR: SONAR_HOST_URL or SONAR_TOKEN is not configured." && exit 1; fi'
+    - 'if [ -d "apps/web" ]; then TARGET_DIR="apps/web"; elif [ -d "web" ]; then TARGET_DIR="web"; elif [ -d "frontend" ]; then TARGET_DIR="frontend"; else echo "No web folder found, scanning root UI components or skipping..." && TARGET_DIR="src"; fi'
+    - 'if [ -d "$TARGET_DIR" ]; then sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY_WEB} -Dsonar.projectName=${CI_PROJECT_NAME}-web -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.token=${SONAR_TOKEN} -Dsonar.sources=${TARGET_DIR} -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/coverage/**,old_app/** -Dsonar.qualitygate.wait=false; else echo "Target web folder not found. Skipping web scan."; fi'
+  allow_failure: true
+
+# ── 1c. SonarQube Quality Gate (API) ──────────────────────────────────────────
+sonar-scan-quality-gate-api:
+  <<: *vault_sonar
+  stage: quality
+  image: alpine:3.19
+  tags:
+    - $RUNNER_TAG
+  only:
+    - develop
+    - main
+  needs:
+    - job: sonar-scan-api
+  script:
+    - echo "=== Quality Gate check API (${SONAR_PROJECT_KEY_API}) ==="
+    - 'if [ -z "${SONAR_HOST_URL}" ] || [ -z "${SONAR_TOKEN}" ]; then echo "❌ WARNING: SONAR_HOST_URL or SONAR_TOKEN is not configured." && exit 0; fi'
+    - 'RESP=$(curl -s -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/qualitygates/project_status?projectKey=${SONAR_PROJECT_KEY_API}")'
+    - 'STATUS=$(echo "$RESP" | jq -r ".projectStatus.status // empty")'
+    - 'echo "Quality Gate API Status: ${STATUS:-UNKNOWN}"'
+    - |
+      if [ "${STATUS}" = "OK" ]; then
+        echo "✅ Quality Gate PASSED successfully!"
+      elif [ "${STATUS}" = "ERROR" ]; then
+        echo "⚠️ Quality Gate FAILED (Metric thresholds not met):"
+        echo "$RESP" | jq -r '.projectStatus.conditions[]? | select(.status == "ERROR") | "  - \(.metricKey): actual=\(.actualValue), threshold=\(.errorThreshold)"' 2>/dev/null || true
+        echo "ℹ️ View details on dashboard: ${SONAR_HOST_URL}/dashboard?id=${SONAR_PROJECT_KEY_API}"
+      else
+        echo "ℹ️ Quality Gate status is ${STATUS:-PENDING}"
+      fi
+  allow_failure: true
+
+# ── 1d. SonarQube Quality Gate (Web) ──────────────────────────────────────────
+sonar-scan-quality-gate-web:
+  <<: *vault_sonar
+  stage: quality
+  image: alpine:3.19
+  tags:
+    - $RUNNER_TAG
+  only:
+    - develop
+    - main
+  needs:
+    - job: sonar-scan-web
+  script:
+    - echo "=== Quality Gate check Web (${SONAR_PROJECT_KEY_WEB}) ==="
+    - 'if [ -z "${SONAR_HOST_URL}" ] || [ -z "${SONAR_TOKEN}" ]; then echo "❌ WARNING: SONAR_HOST_URL or SONAR_TOKEN is not configured." && exit 0; fi'
+    - 'RESP=$(curl -s -u "${SONAR_TOKEN}:" "${SONAR_HOST_URL}/api/qualitygates/project_status?projectKey=${SONAR_PROJECT_KEY_WEB}")'
+    - 'STATUS=$(echo "$RESP" | jq -r ".projectStatus.status // empty")'
+    - 'echo "Quality Gate Web Status: ${STATUS:-UNKNOWN}"'
+    - |
+      if [ "${STATUS}" = "OK" ]; then
+        echo "✅ Quality Gate PASSED successfully!"
+      elif [ "${STATUS}" = "ERROR" ]; then
+        echo "⚠️ Quality Gate FAILED (Metric thresholds not met):"
+        echo "$RESP" | jq -r '.projectStatus.conditions[]? | select(.status == "ERROR") | "  - \(.metricKey): actual=\(.actualValue), threshold=\(.errorThreshold)"' 2>/dev/null || true
+        echo "ℹ️ View details on dashboard: ${SONAR_HOST_URL}/dashboard?id=${SONAR_PROJECT_KEY_WEB}"
+      else
+        echo "ℹ️ Quality Gate status is ${STATUS:-PENDING}"
+      fi
+  allow_failure: true
+
+# ── 1e. Unit Test (API) ───────────────────────────────────────────────────────
+unit-test-api:
+  stage: quality
+  image: ${NODE_IMAGE}
+  tags:
+    - $RUNNER_TAG
+  only:
+    - develop
+    - main
+    - test
+  cache:
+    key: "npm-api-${CI_COMMIT_REF_SLUG}"
+    paths:
+      - node_modules/
+      - api/node_modules/
+  script:
+    - echo "=== Node.js 24 Unit Test (API) ==="
+    - 'if [ -d "api" ]; then cd api; fi'
+    - 'if [ -f "package.json" ]; then npm ci || npm install; npm test -- --ci --reporters=default || npm test || true; else echo "No package.json found for API, skipping unit tests."; fi'
+  artifacts:
+    when: always
+    reports:
+      junit: 
+        - junit-api.xml
+        - api/junit.xml
+    paths:
+      - coverage/
+      - api/coverage/
+    expire_in: 7 days
+  allow_failure: true
+
+# ── 1f. Unit Test (Web) ───────────────────────────────────────────────────────
+unit-test-web:
+  stage: quality
+  image: ${NODE_IMAGE}
+  tags:
+    - $RUNNER_TAG
+  only:
+    - develop
+    - main
+    - test
+  cache:
+    key: "npm-web-${CI_COMMIT_REF_SLUG}"
+    paths:
+      - node_modules/
+      - web/node_modules/
+      - frontend/node_modules/
+  script:
+    - echo "=== Node.js 24 Unit Test (Web) ==="
+    - 'if [ -d "web" ]; then cd web; elif [ -d "frontend" ]; then cd frontend; fi'
+    - 'if [ -f "package.json" ]; then npm ci || npm install; npm test -- --ci --reporters=default || npm test || true; else echo "No web package.json found, skipping web unit tests."; fi'
+  artifacts:
+    when: always
+    reports:
+      junit: 
+        - junit-web.xml
+        - web/junit.xml
+        - frontend/junit.xml
+    paths:
+      - coverage/
+      - web/coverage/
+      - frontend/coverage/
+    expire_in: 7 days
+  allow_failure: true
+
+# ── 1g. Dependency Check (API) ────────────────────────────────────────────────
+dependency-check-api:
+  stage: quality
+  image: ${NODE_IMAGE}
+  tags:
+    - $RUNNER_TAG
+  only:
+    - develop
+    - main
+    - test
+  cache:
+    key: "npm-api-${CI_COMMIT_REF_SLUG}"
+    paths:
+      - node_modules/
+      - api/node_modules/
+  script:
+    - echo "=== Node.js Dependency Check (API) ==="
+    - 'if [ -d "api" ]; then cd api; fi'
+    - 'if [ -f "package.json" ]; then npm audit --audit-level=high || true; else echo "No API package.json found for dependency check."; fi'
+  artifacts:
+    when: always
+    paths:
+      - npm-audit-api.json
+      - api/npm-audit-api.json
+    expire_in: 7 days
+  allow_failure: true
+
+# ── 1h. Dependency Check (Web) ────────────────────────────────────────────────
+dependency-check-web:
+  stage: quality
+  image: ${NODE_IMAGE}
+  tags:
+    - $RUNNER_TAG
+  only:
+    - develop
+    - main
+    - test
+  cache:
+    key: "npm-web-${CI_COMMIT_REF_SLUG}"
+    paths:
+      - node_modules/
+      - web/node_modules/
+      - frontend/node_modules/
+  script:
+    - echo "=== Node.js Dependency Check (Web) ==="
+    - 'if [ -d "web" ]; then cd web; elif [ -d "frontend" ]; then cd frontend; fi'
+    - 'if [ -f "package.json" ]; then npm audit --audit-level=high || true; else echo "No Web package.json found for dependency check."; fi'
+  artifacts:
+    when: always
+    paths:
+      - npm-audit-web.json
+      - web/npm-audit-web.json
+      - frontend/npm-audit-web.json
+    expire_in: 7 days
+  allow_failure: true
+
+# ── 1i. SBOM Generation (API) ─────────────────────────────────────────────────
+sbom-generate-api:
+  stage: quality
+  image: alpine:3.19
+  tags:
+    - $RUNNER_TAG
+  before_script:
+    - apk add --no-cache curl
+    - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+  script:
+    - echo "=== SBOM Generation API (Syft) ==="
+    - 'TARGET_DIR="api"; if [ ! -d "api" ]; then TARGET_DIR="."; fi'
+    - syft dir:${TARGET_DIR} -o spdx-json=sbom-api.json
+    - echo "API SBOM saved to sbom-api.json"
+  artifacts:
+    paths:
+      - sbom-api.json
+    expire_in: 30 days
+  allow_failure: true
+
+# ── 1j. SBOM Generation (Web) ─────────────────────────────────────────────────
+sbom-generate-web:
+  stage: quality
+  image: alpine:3.19
+  tags:
+    - $RUNNER_TAG
+  before_script:
+    - apk add --no-cache curl
+    - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+  script:
+    - echo "=== SBOM Generation Web (Syft) ==="
+    - 'if [ -d "web" ]; then TARGET_DIR="web"; elif [ -d "frontend" ]; then TARGET_DIR="frontend"; else echo "No web directory found, skipping web SBOM generation." && exit 0; fi'
+    - syft dir:${TARGET_DIR} -o spdx-json=sbom-web.json
+    - echo "Web SBOM saved to sbom-web.json"
+  artifacts:
+    paths:
+      - sbom-web.json
+    expire_in: 30 days
+  allow_failure: true
+
+# ==============================================================================
+# STAGE 2 — Build & Push Docker Images (API & Web)
+# ==============================================================================
+
+# ── 2a. Docker Build (API) ────────────────────────────────────────────────────
+docker-build:
+  <<: *docker_service
+  stage: build
+  script:
+    - docker version
+    - 'REG_HOST="${REGISTRY_HOST:-${CI_REGISTRY:-gitlabregistry.buu.ac.th}}"; if [ -n "$CI_REGISTRY_USER" ] && [ -n "$CI_REGISTRY_PASSWORD" ]; then echo "$CI_REGISTRY_PASSWORD" | docker login "$REG_HOST" -u "$CI_REGISTRY_USER" --password-stdin || true; elif [ -n "$REGISTRY_USER" ] && [ -n "$REGISTRY_TOKEN" ]; then echo "$REGISTRY_TOKEN" | docker login "$REG_HOST" -u "$REGISTRY_USER" --password-stdin || true; fi'
+    - 'DOCKERFILE_PATH=""; if [ -f "apps/api/Dockerfile" ]; then DOCKERFILE_PATH="apps/api/Dockerfile"; elif [ -f "api/Dockerfile" ]; then DOCKERFILE_PATH="api/Dockerfile"; elif [ -f "Dockerfile.api" ]; then DOCKERFILE_PATH="Dockerfile.api"; elif [ -f "Dockerfile" ]; then DOCKERFILE_PATH="Dockerfile"; fi'
+    - 'if [ -z "$DOCKERFILE_PATH" ]; then echo "No API Dockerfile found (checked apps/api/Dockerfile, api/Dockerfile, Dockerfile.api, Dockerfile). Skipping Docker Build API." && exit 0; fi'
+    - 'echo "=== Build and Push API Image ${IMAGE_API}:${CI_COMMIT_SHORT_SHA} using ${DOCKERFILE_PATH} ==="'
+    - docker build --build-arg NODE_VERSION="${NODE_VERSION}" -f "${DOCKERFILE_PATH}" -t "${IMAGE_API}:${CI_COMMIT_SHORT_SHA}" .
+    - docker push "${IMAGE_API}:${CI_COMMIT_SHORT_SHA}"
+    - 'if [ -n "$CI_COMMIT_TAG" ]; then docker tag "${IMAGE_API}:${CI_COMMIT_SHORT_SHA}" "${IMAGE_API}:${CI_COMMIT_TAG}" && docker push "${IMAGE_API}:${CI_COMMIT_TAG}" && docker tag "${IMAGE_API}:${CI_COMMIT_SHORT_SHA}" "${IMAGE_API}:latest" && docker push "${IMAGE_API}:latest"; else docker tag "${IMAGE_API}:${CI_COMMIT_SHORT_SHA}" "${IMAGE_API}:${CI_COMMIT_REF_SLUG}" && docker push "${IMAGE_API}:${CI_COMMIT_REF_SLUG}"; fi'
+
+# ── 2b. Docker Build (Web) ────────────────────────────────────────────────────
+docker-build-web:
+  <<: *docker_service
+  stage: build
+  script:
+    - docker version
+    - 'REG_HOST="${REGISTRY_HOST:-${CI_REGISTRY:-gitlabregistry.buu.ac.th}}"; if [ -n "$CI_REGISTRY_USER" ] && [ -n "$CI_REGISTRY_PASSWORD" ]; then echo "$CI_REGISTRY_PASSWORD" | docker login "$REG_HOST" -u "$CI_REGISTRY_USER" --password-stdin || true; elif [ -n "$REGISTRY_USER" ] && [ -n "$REGISTRY_TOKEN" ]; then echo "$REGISTRY_TOKEN" | docker login "$REG_HOST" -u "$REGISTRY_USER" --password-stdin || true; fi'
+    - 'DOCKERFILE_PATH=""; if [ -f "docker/web/Dockerfile" ]; then DOCKERFILE_PATH="docker/web/Dockerfile"; elif [ -f "apps/web/Dockerfile" ]; then DOCKERFILE_PATH="apps/web/Dockerfile"; elif [ -f "web/Dockerfile" ]; then DOCKERFILE_PATH="web/Dockerfile"; elif [ -f "frontend/Dockerfile" ]; then DOCKERFILE_PATH="frontend/Dockerfile"; elif [ -f "apps/frontend/Dockerfile" ]; then DOCKERFILE_PATH="apps/frontend/Dockerfile"; elif [ -f "Dockerfile.web" ]; then DOCKERFILE_PATH="Dockerfile.web"; fi'
+    - 'if [ -z "$DOCKERFILE_PATH" ]; then echo "No Web Dockerfile found. Skipping Docker Build Web." && exit 0; fi'
+    - 'echo "=== Build and Push Web Image ${IMAGE_WEB}:${CI_COMMIT_SHORT_SHA} using ${DOCKERFILE_PATH} ==="'
+    - docker build --build-arg NODE_VERSION="${NODE_VERSION}" --build-arg VITE_API_BASE_URL=/api -f "${DOCKERFILE_PATH}" -t "${IMAGE_WEB}:${CI_COMMIT_SHORT_SHA}" .
+    - docker push "${IMAGE_WEB}:${CI_COMMIT_SHORT_SHA}"
+    - 'if [ -n "$CI_COMMIT_TAG" ]; then docker tag "${IMAGE_WEB}:${CI_COMMIT_SHORT_SHA}" "${IMAGE_WEB}:${CI_COMMIT_TAG}" && docker push "${IMAGE_WEB}:${CI_COMMIT_TAG}" && docker tag "${IMAGE_WEB}:${CI_COMMIT_SHORT_SHA}" "${IMAGE_WEB}:latest" && docker push "${IMAGE_WEB}:latest"; else docker tag "${IMAGE_WEB}:${CI_COMMIT_SHORT_SHA}" "${IMAGE_WEB}:${CI_COMMIT_REF_SLUG}" && docker push "${IMAGE_WEB}:${CI_COMMIT_REF_SLUG}"; fi'
+
+# ==============================================================================
+# STAGE 3 — Docker Image Scan (Trivy)
+# ==============================================================================
+image-scan:
+  stage: image-scan
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  tags:
+    - $RUNNER_TAG
+  cache:
+    paths:
+      - .trivycache/
+  variables:
+    TRIVY_USERNAME: $CI_REGISTRY_USER
+    TRIVY_PASSWORD: $CI_REGISTRY_PASSWORD
+    TRIVY_INSECURE: "true"
+  script:
+    - echo "=== Trivy Remote Image Scan (API) ==="
+    - trivy image --format json --output trivy-report-api.json --severity HIGH,CRITICAL --exit-code 0 "${IMAGE_API}:${CI_COMMIT_SHORT_SHA}" || true
+    - trivy image --format table --severity HIGH,CRITICAL "${IMAGE_API}:${CI_COMMIT_SHORT_SHA}" || true
+    - 'if [ -n "$CI_COMMIT_TAG" ]; then echo "=== [PROD API] Strict: fail on CRITICAL ===" && trivy image --severity CRITICAL --exit-code 1 "${IMAGE_API}:${CI_COMMIT_SHORT_SHA}"; fi'
+  artifacts:
+    when: always
+    paths:
+      - trivy-report-api.json
+    expire_in: 7 days
+  allow_failure: false
+
+# ==============================================================================
+# STAGE 4a — Deploy to Dev (develop branch -> Auto Deploy)
+# ==============================================================================
+deploy-dev:
+  <<: *helm_deploy
+  stage: deploy
+  only:
+    - develop
+  environment:
+    name: dev
+    url: $APP_URL_DEV
+  script:
+    # ── Fetch Secrets from HashiCorp Vault Cluster (HA Failover) ──────────────
+    - echo "=== Fetching secrets from HashiCorp Vault Cluster for DEV ==="
+    - |
+      if [ -n "$VAULT_TOKEN" ]; then
+        for v_url in ${VAULT_SERVERS:-$VAULT_ADDR}; do
+          echo "Trying Vault node: ${v_url}..."
+          
+          # 1. Fetch Common Secrets (KUBECONFIG, REGISTRY_HOST from secret/data/KUBECONFIG)
+          VAULT_COMMON_RESP=$(curl -s --fail -k --connect-timeout 3 --header "X-Vault-Token: ${VAULT_TOKEN}" "${v_url}/v1/secret/data/KUBECONFIG" || true)
+          if [ -z "$VAULT_COMMON_RESP" ] && echo "$v_url" | grep -q "^http://"; then
+            alt_url=$(echo "$v_url" | sed "s|^http://|https://|")
+            VAULT_COMMON_RESP=$(curl -s --fail -k --connect-timeout 3 --header "X-Vault-Token: ${VAULT_TOKEN}" "${alt_url}/v1/secret/data/KUBECONFIG" || true)
+          fi
+          
+          if [ -n "$VAULT_COMMON_RESP" ]; then
+            echo "=== Successfully fetched common secrets from Vault (secret/data/KUBECONFIG) ==="
+            V_KUBE_COMMON=$(echo "$VAULT_COMMON_RESP" | jq -r '.data.data.KUBECONFIG // empty')
+            V_REG_HOST_COMMON=$(echo "$VAULT_COMMON_RESP" | jq -r '.data.data.REGISTRY_HOST // empty')
+            [ -n "$V_KUBE_COMMON" ] && KUBECONFIG="${KUBECONFIG:-$V_KUBE_COMMON}"
+            [ -n "$V_REG_HOST_COMMON" ] && REGISTRY_HOST="${REGISTRY_HOST:-$V_REG_HOST_COMMON}"
+          fi
+
+          # 2. Fetch Project/Env Secrets (secret/data/${CI_PROJECT_NAME}/dev)
+          VAULT_ENV_RESP=$(curl -s --fail -k --connect-timeout 3 --header "X-Vault-Token: ${VAULT_TOKEN}" "${v_url}/v1/secret/data/${CI_PROJECT_NAME}/dev" || true)
+          if [ -z "$VAULT_ENV_RESP" ] && echo "$v_url" | grep -q "^http://"; then
+            alt_url=$(echo "$v_url" | sed "s|^http://|https://|")
+            VAULT_ENV_RESP=$(curl -s --fail -k --connect-timeout 3 --header "X-Vault-Token: ${VAULT_TOKEN}" "${alt_url}/v1/secret/data/${CI_PROJECT_NAME}/dev" || true)
+          fi
+          
+          if [ -n "$VAULT_ENV_RESP" ]; then
+            echo "=== Successfully connected to Vault node for env dev ==="
+            V_KUBE=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.KUBECONFIG_DEV // .data.data.KUBECONFIG // empty')
+            V_DOTENV=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.DOTENV_DEV // .data.data.DOTENV // empty')
+            V_USER=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.REGISTRY_USER // empty')
+            V_TOKEN=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.REGISTRY_TOKEN // empty')
+            V_REG_HOST=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.REGISTRY_HOST // empty')
+            [ -n "$V_DOTENV" ] && DOTENV_DEV="${DOTENV_DEV:-$V_DOTENV}"
+            [ -n "$V_KUBE" ] && KUBECONFIG="${KUBECONFIG:-$V_KUBE}"
+            [ -n "$V_USER" ] && REGISTRY_USER="${REGISTRY_USER:-$V_USER}"
+            [ -n "$V_TOKEN" ] && REGISTRY_TOKEN="${REGISTRY_TOKEN:-$V_TOKEN}"
+            [ -n "$V_REG_HOST" ] && REGISTRY_HOST="${REGISTRY_HOST:-$V_REG_HOST}"
+            break
+          fi
+
+          if [ -n "$VAULT_COMMON_RESP" ]; then
+            break
+          fi
+        done
+      fi
+    - 'KUBECONFIG_VAR="${KUBECONFIG:-$KUBECONFIG_DEV}"'
+    - 'if [ -z "$KUBECONFIG_VAR" ]; then echo "WARNING: KUBECONFIG is not set." && exit 0; fi'
+    - 'RELEASE_NAME="${APP_NAME:-${CI_PROJECT_NAME_SLUG:-${CI_PROJECT_NAME}}}"'
+    - 'echo "=== Deploying Node Release to DEV: ${RELEASE_NAME} ==="'
+    - mkdir -p ~/.kube
+    - 'if [ -f "$KUBECONFIG_VAR" ]; then cp "$KUBECONFIG_VAR" ~/.kube/config; elif [ -f "$KUBECONFIG" ]; then cp "$KUBECONFIG" ~/.kube/config; else printf "%s" "$KUBECONFIG_VAR" > ~/.kube/config; fi'
+    - chmod 600 ~/.kube/config
+    - kubectl create namespace dev --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config || true
+    
+    # Create imagePullSecret regcred
+    - 'PULL_USER="${REGISTRY_USER:-${REGISTRY_READ_USER:-$CI_REGISTRY_USER}}"'
+    - 'PULL_PASS="${REGISTRY_TOKEN:-${REGISTRY_PASSWORD:-${REGISTRY_READ_PASSWORD:-$CI_REGISTRY_PASSWORD}}}"'
+    - 'IMG_HOST=$(echo "$IMAGE" | cut -d/ -f1)'
+    - 'if [ -n "$PULL_USER" ] && [ -n "$PULL_PASS" ]; then AUTH_B64=$(printf "%s:%s" "$PULL_USER" "$PULL_PASS" | base64 | tr -d "\r\n"); SERVERS="$REGISTRY_HOST $CI_REGISTRY $IMG_HOST gitlabregistry.buu.ac.th registry.gitlabcc-devops.buu.ac.th gitlabcc-devops.buu.ac.th"; mkdir -p /tmp/k8s-auth; printf "{\"auths\":{" > /tmp/k8s-auth/config.json; FIRST=1; for s in $SERVERS; do if [ -n "$s" ]; then for prefix in "" "https://" "http://"; do for suffix in "" "/v1/" "/v2/"; do KEY="${prefix}${s}${suffix}"; if [ $FIRST -eq 0 ]; then printf "," >> /tmp/k8s-auth/config.json; fi; printf "\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"auth\":\"%s\"}" "$KEY" "$PULL_USER" "$PULL_PASS" "$AUTH_B64" >> /tmp/k8s-auth/config.json; FIRST=0; done; done; fi; done; printf "}}" >> /tmp/k8s-auth/config.json; echo "=== Creating multi-domain imagePullSecret regcred (User: ${PULL_USER}) ==="; kubectl create secret generic regcred --from-file=.dockerconfigjson=/tmp/k8s-auth/config.json --type=kubernetes.io/dockerconfigjson -n dev --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config || true; fi'
+    
+    # Create Runtime Application Environment Secret for Node.js
+    - echo "=== Creating Application Secret ${RELEASE_NAME}-env ==="
+    - |
+      ENV_VAR="${DOTENV_DEV:-$DOTENV_FILE}"
+      if [ -z "$ENV_VAR" ]; then
+        echo "❌ ERROR: DOTENV_DEV variable is empty in GitLab CI/CD Variables." && exit 1
+      fi
+      if [ -f "$ENV_VAR" ]; then
+        ENV_PATH="$ENV_VAR"
+      else
+        printf "%s\n" "$ENV_VAR" > /tmp/app_env.env
+        ENV_PATH="/tmp/app_env.env"
+      fi
+      echo "=== Creating Secret from Dotenv File Variable (${ENV_PATH}) ==="
+      kubectl create secret generic ${RELEASE_NAME}-env \
+        --from-env-file="$ENV_PATH" \
+        -n dev --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config
+      rm -f /tmp/app_env.env
+    
+    - helm version
+    - helm upgrade --install "${RELEASE_NAME}" "${HELM_CHART_PATH}" -f "${HELM_CHART_PATH}/values-dev.yaml" --set image.repository="${IMAGE_API}" --set image.tag="${CI_COMMIT_SHORT_SHA}" --set web.image.repository="${IMAGE_WEB}" --set web.image.tag="${CI_COMMIT_SHORT_SHA}" --set ingress.host="${RELEASE_NAME}-dev.buu.ac.th" -n dev --create-namespace --kubeconfig ~/.kube/config
+
+# ==============================================================================
+# STAGE 4b — Deploy to Test (test branch -> Manual Deploy)
+# ==============================================================================
+deploy-test:
+  <<: *helm_deploy
+  stage: deploy
+  only:
+    - test
+  when: manual
+  environment:
+    name: test
+    url: $APP_URL_TEST
+  script:
+    # ── Fetch Secrets from HashiCorp Vault Cluster (HA Failover) ──────────────
+    - echo "=== Fetching secrets from HashiCorp Vault Cluster for TEST ==="
+    - |
+      if [ -n "$VAULT_TOKEN" ]; then
+        for v_url in ${VAULT_SERVERS:-$VAULT_ADDR}; do
+          echo "Trying Vault node: ${v_url}..."
+          
+          # 1. Fetch Common Secrets (KUBECONFIG, REGISTRY_HOST from secret/data/KUBECONFIG)
+          VAULT_COMMON_RESP=$(curl -s --fail -k --connect-timeout 3 --header "X-Vault-Token: ${VAULT_TOKEN}" "${v_url}/v1/secret/data/KUBECONFIG" || true)
+          if [ -z "$VAULT_COMMON_RESP" ] && echo "$v_url" | grep -q "^http://"; then
+            alt_url=$(echo "$v_url" | sed "s|^http://|https://|")
+            VAULT_COMMON_RESP=$(curl -s --fail -k --connect-timeout 3 --header "X-Vault-Token: ${VAULT_TOKEN}" "${alt_url}/v1/secret/data/KUBECONFIG" || true)
+          fi
+          
+          if [ -n "$VAULT_COMMON_RESP" ]; then
+            echo "=== Successfully fetched common secrets from Vault (secret/data/KUBECONFIG) ==="
+            V_KUBE_COMMON=$(echo "$VAULT_COMMON_RESP" | jq -r '.data.data.KUBECONFIG // empty')
+            V_REG_HOST_COMMON=$(echo "$VAULT_COMMON_RESP" | jq -r '.data.data.REGISTRY_HOST // empty')
+            [ -n "$V_KUBE_COMMON" ] && KUBECONFIG="${KUBECONFIG:-$V_KUBE_COMMON}"
+            [ -n "$V_REG_HOST_COMMON" ] && REGISTRY_HOST="${REGISTRY_HOST:-$V_REG_HOST_COMMON}"
+          fi
+
+          # 2. Fetch Project/Env Secrets (secret/data/${CI_PROJECT_NAME}/test)
+          VAULT_ENV_RESP=$(curl -s --fail -k --connect-timeout 3 --header "X-Vault-Token: ${VAULT_TOKEN}" "${v_url}/v1/secret/data/${CI_PROJECT_NAME}/test" || true)
+          if [ -z "$VAULT_ENV_RESP" ] && echo "$v_url" | grep -q "^http://"; then
+            alt_url=$(echo "$v_url" | sed "s|^http://|https://|")
+            VAULT_ENV_RESP=$(curl -s --fail -k --connect-timeout 3 --header "X-Vault-Token: ${VAULT_TOKEN}" "${alt_url}/v1/secret/data/${CI_PROJECT_NAME}/test" || true)
+          fi
+          
+          if [ -n "$VAULT_ENV_RESP" ]; then
+            echo "=== Successfully connected to Vault node for env test ==="
+            V_KUBE=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.KUBECONFIG_TEST // .data.data.KUBECONFIG // empty')
+            V_DOTENV=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.DOTENV_TEST // .data.data.DOTENV // empty')
+            V_USER=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.REGISTRY_USER // empty')
+            V_TOKEN=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.REGISTRY_TOKEN // empty')
+            V_REG_HOST=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.REGISTRY_HOST // empty')
+            [ -n "$V_DOTENV" ] && DOTENV_TEST="${DOTENV_TEST:-$V_DOTENV}"
+            [ -n "$V_KUBE" ] && KUBECONFIG="${KUBECONFIG:-$V_KUBE}"
+            [ -n "$V_USER" ] && REGISTRY_USER="${REGISTRY_USER:-$V_USER}"
+            [ -n "$V_TOKEN" ] && REGISTRY_TOKEN="${REGISTRY_TOKEN:-$V_TOKEN}"
+            [ -n "$V_REG_HOST" ] && REGISTRY_HOST="${REGISTRY_HOST:-$V_REG_HOST}"
+            break
+          fi
+
+          if [ -n "$VAULT_COMMON_RESP" ]; then
+            break
+          fi
+        done
+      fi
+    - 'KUBECONFIG_VAR="${KUBECONFIG:-$KUBECONFIG_TEST}"'
+    - 'if [ -z "$KUBECONFIG_VAR" ]; then echo "WARNING: KUBECONFIG is not set." && exit 0; fi'
+    - 'RELEASE_NAME="${APP_NAME:-${CI_PROJECT_NAME_SLUG:-${CI_PROJECT_NAME}}}"'
+    - 'echo "=== Deploying Node Release to TEST: ${RELEASE_NAME} ==="'
+    - mkdir -p ~/.kube
+    - 'if [ -f "$KUBECONFIG_VAR" ]; then cp "$KUBECONFIG_VAR" ~/.kube/config; elif [ -f "$KUBECONFIG" ]; then cp "$KUBECONFIG" ~/.kube/config; else printf "%s" "$KUBECONFIG_VAR" > ~/.kube/config; fi'
+    - chmod 600 ~/.kube/config
+    - kubectl create namespace test --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config || true
+    
+    # Create imagePullSecret regcred
+    - 'PULL_USER="${REGISTRY_USER:-${REGISTRY_READ_USER:-$CI_REGISTRY_USER}}"'
+    - 'PULL_PASS="${REGISTRY_TOKEN:-${REGISTRY_PASSWORD:-${REGISTRY_READ_PASSWORD:-$CI_REGISTRY_PASSWORD}}}"'
+    - 'IMG_HOST=$(echo "$IMAGE" | cut -d/ -f1)'
+    - 'if [ -n "$PULL_USER" ] && [ -n "$PULL_PASS" ]; then AUTH_B64=$(printf "%s:%s" "$PULL_USER" "$PULL_PASS" | base64 | tr -d "\r\n"); SERVERS="$REGISTRY_HOST $CI_REGISTRY $IMG_HOST gitlabregistry.buu.ac.th registry.gitlabcc-devops.buu.ac.th gitlabcc-devops.buu.ac.th"; mkdir -p /tmp/k8s-auth; printf "{\"auths\":{" > /tmp/k8s-auth/config.json; FIRST=1; for s in $SERVERS; do if [ -n "$s" ]; then for prefix in "" "https://" "http://"; do for suffix in "" "/v1/" "/v2/"; do KEY="${prefix}${s}${suffix}"; if [ $FIRST -eq 0 ]; then printf "," >> /tmp/k8s-auth/config.json; fi; printf "\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"auth\":\"%s\"}" "$KEY" "$PULL_USER" "$PULL_PASS" "$AUTH_B64" >> /tmp/k8s-auth/config.json; FIRST=0; done; done; fi; done; printf "}}" >> /tmp/k8s-auth/config.json; echo "=== Creating multi-domain imagePullSecret regcred (User: ${PULL_USER}) ==="; kubectl create secret generic regcred --from-file=.dockerconfigjson=/tmp/k8s-auth/config.json --type=kubernetes.io/dockerconfigjson -n test --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config || true; fi'
+    
+    # Create Application Secret
+    - echo "=== Creating Application Secret ${RELEASE_NAME}-env ==="
+    - |
+      ENV_VAR="${DOTENV_TEST:-$DOTENV_FILE}"
+      if [ -z "$ENV_VAR" ]; then
+        echo "❌ ERROR: DOTENV_TEST variable is empty in GitLab CI/CD Variables." && exit 1
+      fi
+      if [ -f "$ENV_VAR" ]; then
+        ENV_PATH="$ENV_VAR"
+      else
+        printf "%s\n" "$ENV_VAR" > /tmp/app_env.env
+        ENV_PATH="/tmp/app_env.env"
+      fi
+      echo "=== Creating Secret from Dotenv File Variable (${ENV_PATH}) ==="
+      kubectl create secret generic ${RELEASE_NAME}-env \
+        --from-env-file="$ENV_PATH" \
+        -n test --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config
+      rm -f /tmp/app_env.env
+    
+    - helm version
+    - helm upgrade --install "${RELEASE_NAME}" "${HELM_CHART_PATH}" -f "${HELM_CHART_PATH}/values-test.yaml" --set image.repository="${IMAGE_API}" --set image.tag="${CI_COMMIT_SHORT_SHA}" --set web.image.repository="${IMAGE_WEB}" --set web.image.tag="${CI_COMMIT_SHORT_SHA}" --set ingress.host="${RELEASE_NAME}-test.buu.ac.th" -n test --create-namespace --kubeconfig ~/.kube/config
+
+# ==============================================================================
+# STAGE 4c — Deploy to Prod (main branch / tags -> Manual Deploy)
+# ==============================================================================
+deploy-prod:
+  <<: *helm_deploy
+  stage: deploy
+  only:
+    - main
+    - tags
+  when: manual
+  environment:
+    name: prod
+  script:
+    # ── Fetch Secrets from HashiCorp Vault Cluster (HA Failover) ──────────────
+    - echo "=== Fetching secrets from HashiCorp Vault Cluster for PROD ==="
+    - |
+      if [ -n "$VAULT_TOKEN" ]; then
+        for v_url in ${VAULT_SERVERS:-$VAULT_ADDR}; do
+          echo "Trying Vault node: ${v_url}..."
+          
+          # 1. Fetch Common Secrets (KUBECONFIG, REGISTRY_HOST from secret/data/KUBECONFIG)
+          VAULT_COMMON_RESP=$(curl -s --fail -k --connect-timeout 3 --header "X-Vault-Token: ${VAULT_TOKEN}" "${v_url}/v1/secret/data/KUBECONFIG" || true)
+          if [ -z "$VAULT_COMMON_RESP" ] && echo "$v_url" | grep -q "^http://"; then
+            alt_url=$(echo "$v_url" | sed "s|^http://|https://|")
+            VAULT_COMMON_RESP=$(curl -s --fail -k --connect-timeout 3 --header "X-Vault-Token: ${VAULT_TOKEN}" "${alt_url}/v1/secret/data/KUBECONFIG" || true)
+          fi
+          
+          if [ -n "$VAULT_COMMON_RESP" ]; then
+            echo "=== Successfully fetched common secrets from Vault (secret/data/KUBECONFIG) ==="
+            V_KUBE_COMMON=$(echo "$VAULT_COMMON_RESP" | jq -r '.data.data.KUBECONFIG // empty')
+            V_REG_HOST_COMMON=$(echo "$VAULT_COMMON_RESP" | jq -r '.data.data.REGISTRY_HOST // empty')
+            [ -n "$V_KUBE_COMMON" ] && KUBECONFIG="${KUBECONFIG:-$V_KUBE_COMMON}"
+            [ -n "$V_REG_HOST_COMMON" ] && REGISTRY_HOST="${REGISTRY_HOST:-$V_REG_HOST_COMMON}"
+          fi
+
+          # 2. Fetch Project/Env Secrets (secret/data/${CI_PROJECT_NAME}/prod)
+          VAULT_ENV_RESP=$(curl -s --fail -k --connect-timeout 3 --header "X-Vault-Token: ${VAULT_TOKEN}" "${v_url}/v1/secret/data/${CI_PROJECT_NAME}/prod" || true)
+          if [ -z "$VAULT_ENV_RESP" ] && echo "$v_url" | grep -q "^http://"; then
+            alt_url=$(echo "$v_url" | sed "s|^http://|https://|")
+            VAULT_ENV_RESP=$(curl -s --fail -k --connect-timeout 3 --header "X-Vault-Token: ${VAULT_TOKEN}" "${alt_url}/v1/secret/data/${CI_PROJECT_NAME}/prod" || true)
+          fi
+          
+          if [ -n "$VAULT_ENV_RESP" ]; then
+            echo "=== Successfully connected to Vault node for env prod ==="
+            V_KUBE=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.KUBECONFIG_PROD // .data.data.KUBECONFIG // empty')
+            V_DOTENV=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.DOTENV_PROD // .data.data.DOTENV // empty')
+            V_USER=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.REGISTRY_USER // empty')
+            V_TOKEN=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.REGISTRY_TOKEN // empty')
+            V_REG_HOST=$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.REGISTRY_HOST // empty')
+            [ -n "$V_DOTENV" ] && DOTENV_PROD="${DOTENV_PROD:-$V_DOTENV}"
+            [ -n "$V_KUBE" ] && KUBECONFIG="${KUBECONFIG:-$V_KUBE}"
+            [ -n "$V_USER" ] && REGISTRY_USER="${REGISTRY_USER:-$V_USER}"
+            [ -n "$V_TOKEN" ] && REGISTRY_TOKEN="${REGISTRY_TOKEN:-$V_TOKEN}"
+            [ -n "$V_REG_HOST" ] && REGISTRY_HOST="${REGISTRY_HOST:-$V_REG_HOST}"
+            break
+          fi
+
+          if [ -n "$VAULT_COMMON_RESP" ]; then
+            break
+          fi
+        done
+      fi
+    - 'KUBECONFIG_VAR="${KUBECONFIG:-$KUBECONFIG_PROD}"'
+    - 'if [ -z "$KUBECONFIG_VAR" ]; then echo "WARNING: KUBECONFIG is not set." && exit 0; fi'
+    - 'RELEASE_NAME="${APP_NAME:-${CI_PROJECT_NAME_SLUG:-${CI_PROJECT_NAME}}}"'
+    - 'echo "=== Deploying Node Release to PROD: ${RELEASE_NAME} ==="'
+    - mkdir -p ~/.kube
+    - 'if [ -f "$KUBECONFIG_VAR" ]; then cp "$KUBECONFIG_VAR" ~/.kube/config; elif [ -f "$KUBECONFIG" ]; then cp "$KUBECONFIG" ~/.kube/config; else printf "%s" "$KUBECONFIG_VAR" > ~/.kube/config; fi'
+    - chmod 600 ~/.kube/config
+    - kubectl create namespace prod --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config || true
+    
+    # Create imagePullSecret regcred
+    - 'PULL_USER="${REGISTRY_USER:-${REGISTRY_READ_USER:-$CI_REGISTRY_USER}}"'
+    - 'PULL_PASS="${REGISTRY_TOKEN:-${REGISTRY_PASSWORD:-${REGISTRY_READ_PASSWORD:-$CI_REGISTRY_PASSWORD}}}"'
+    - 'IMG_HOST=$(echo "$IMAGE" | cut -d/ -f1)'
+    - 'if [ -n "$PULL_USER" ] && [ -n "$PULL_PASS" ]; then AUTH_B64=$(printf "%s:%s" "$PULL_USER" "$PULL_PASS" | base64 | tr -d "\r\n"); SERVERS="$REGISTRY_HOST $CI_REGISTRY $IMG_HOST gitlabregistry.buu.ac.th registry.gitlabcc-devops.buu.ac.th gitlabcc-devops.buu.ac.th"; mkdir -p /tmp/k8s-auth; printf "{\"auths\":{" > /tmp/k8s-auth/config.json; FIRST=1; for s in $SERVERS; do if [ -n "$s" ]; then for prefix in "" "https://" "http://"; do for suffix in "" "/v1/" "/v2/"; do KEY="${prefix}${s}${suffix}"; if [ $FIRST -eq 0 ]; then printf "," >> /tmp/k8s-auth/config.json; fi; printf "\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"auth\":\"%s\"}" "$KEY" "$PULL_USER" "$PULL_PASS" "$AUTH_B64" >> /tmp/k8s-auth/config.json; FIRST=0; done; done; fi; done; printf "}}" >> /tmp/k8s-auth/config.json; echo "=== Creating multi-domain imagePullSecret regcred (User: ${PULL_USER}) ==="; kubectl create secret generic regcred --from-file=.dockerconfigjson=/tmp/k8s-auth/config.json --type=kubernetes.io/dockerconfigjson -n prod --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config || true; fi'
+    
+    # Create Application Secret
+    - echo "=== Creating Application Secret ${RELEASE_NAME}-env ==="
+    - |
+      ENV_VAR="${DOTENV_PROD:-$DOTENV_FILE}"
+      if [ -z "$ENV_VAR" ]; then
+        echo "❌ ERROR: DOTENV_PROD variable is empty in GitLab CI/CD Variables." && exit 1
+      fi
+      if [ -f "$ENV_VAR" ]; then
+        ENV_PATH="$ENV_VAR"
+      else
+        printf "%s\n" "$ENV_VAR" > /tmp/app_env.env
+        ENV_PATH="/tmp/app_env.env"
+      fi
+      echo "=== Creating Secret from Dotenv File Variable (${ENV_PATH}) ==="
+      kubectl create secret generic ${RELEASE_NAME}-env \
+        --from-env-file="$ENV_PATH" \
+        -n prod --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config
+      rm -f /tmp/app_env.env
+    
+    - helm version
+    - 'TAG_OR_SHA="${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA}}"'
+    - helm upgrade --install "${RELEASE_NAME}" "${HELM_CHART_PATH}" -f "${HELM_CHART_PATH}/values-prod.yaml" --set image.repository="${IMAGE_API}" --set image.tag="${TAG_OR_SHA}" --set web.image.repository="${IMAGE_WEB}" --set web.image.tag="${TAG_OR_SHA}" --set ingress.host="${RELEASE_NAME}.buu.ac.th" -n prod --create-namespace --kubeconfig ~/.kube/config
+
+# ==============================================================================
+# STAGE 5 — DAST: OWASP ZAP (optional, manual)
+# ==============================================================================
+dast:
+  stage: dast
+  image:
+    name: ghcr.io/zaproxy/zaproxy:stable
+    entrypoint: [""]
+  tags:
+    - $RUNNER_TAG
+  when: manual
+  allow_failure: true
+  variables:
+    ZAP_TARGET: $APP_URL_TEST
+  script:
+    - 'echo "=== OWASP ZAP Baseline Scan ${ZAP_TARGET} ==="'
+    - mkdir -p /zap/wrk
+    - zap-baseline.py -t "${ZAP_TARGET}" -r zap-report.html -J zap-report.json -I
+  artifacts:
+    when: always
+    paths:
+      - zap-report.html
+      - zap-report.json
+    expire_in: 7 days
+
+# ==============================================================================
+# STAGE 6 — Performance Test: k6 (optional, manual)
+# ==============================================================================
+perf-test:
+  stage: perf
+  image: grafana/k6:latest
+  tags:
+    - $RUNNER_TAG
+  when: manual
+  allow_failure: true
+  variables:
+    K6_TARGET: $APP_URL_TEST
+  script:
+    - 'echo "=== k6 Performance Test ${K6_TARGET} ==="'
+    - 'echo "import http from \"k6/http\";" > load-test.js'
+    - 'echo "import { check, sleep } from \"k6\";" >> load-test.js'
+    - 'echo "export let options = { vus: 10, duration: \"30s\" };" >> load-test.js'
+    - 'echo "export default function () { let res = http.get(\"${K6_TARGET}/\"); check(res, { status_is_200: (r) => r.status === 200 }); sleep(1); }" >> load-test.js'
+    - 'k6 run load-test.js --out json=k6-results.json'
+  artifacts:
+    when: always
+    paths:
+      - k6-results.json
+    expire_in: 7 days
