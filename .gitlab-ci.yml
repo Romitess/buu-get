@@ -1,11 +1,11 @@
 # ==============================================================================
-# Standard DevSecOps GitLab CI/CD Pipeline Template for Node.js Projects
-# Baseline Reference: Node.js 24 (API & Web Microservices / Mono-repo)
+# BUU GET — GitLab CI/CD (adapted from campus DevSecOps template)
+# Monorepo: apps/backend (NestJS) + apps/frontend (Quasar) · Node.js 22
 #
 # Pipeline Flow:
 #
-#   quality (parallel) ──┬── sonar-scan-api  
-#                     ├── sonar-scan-web  
+#   quality (parallel) ──┬── sonar-scan-api
+#                     ├── sonar-scan-web
 #                     ├── sonar-scan-quality-gate-api
 #                     ├── sonar-scan-quality-gate-web
 #                     ├── unit-test-api
@@ -22,10 +22,12 @@
 #            ├── deploy-test  (manual, test branch)
 #            └── deploy-prod  (manual, main branch / tags)
 #
-# NOTE: - sonar-scan-* / sonar-scan-quality-gate-* ดึง secret (SONAR_URL, SONAR_TOKEN-CI) 
+# NOTE: - sonar-scan-* / sonar-scan-quality-gate-* ดึง secret (SONAR_URL, SONAR_TOKEN-CI)
 #         จาก HashiCorp Vault (secret/data/SONAR-CI)
 #       - deploy-dev / deploy-test / deploy-prod ดึง secret (KUBECONFIG_*,
 #         DOTENV_*, REGISTRY_USER, REGISTRY_TOKEN) จาก HashiCorp Vault
+#       - Helm chart: auto-generate ใน job ถ้ายังไม่มี helm/app บน runner/server
+#       - Dockerfile: ค้น apps/backend และ apps/frontend (สร้างบน server ได้)
 # ==============================================================================
 
 variables:
@@ -35,18 +37,19 @@ variables:
   IMAGE_API:                 "${CI_REGISTRY_IMAGE}/api"
   IMAGE_WEB:                 "${CI_REGISTRY_IMAGE}/web"
   IMAGE:                     $CI_REGISTRY_IMAGE
-  
+
   # ─── Default Configurations (Overridable via GitLab CI/CD Variables) ────────
   APP_NAME:                  "${CI_PROJECT_NAME}"            # Project name
-  HELM_CHART_PATH:           "helm/app"                      # Helm chart path
-  NODE_VERSION:               "24"                            # Node.js runtime version
-  NODE_IMAGE:                 "node:24-alpine"                # Node.js Base Docker Image for CI
+  HELM_CHART_PATH:           "helm/app"                      # Helm chart path (auto-create if missing)
+  NODE_VERSION:               "22"                            # Node.js runtime (engines >=22.12)
+  NODE_IMAGE:                 "node:22-alpine"                # Node.js Base Docker Image for CI
   RUNNER_TAG:                "gitrunner"                     # GitLab Runner Tag
   DOCKER_TLS_CERTDIR:        ""
   TRIVY_NO_PROGRESS:         "true"
   TRIVY_CACHE_DIR:           ".trivycache"
   TZ:                        "Asia/Bangkok"
   APP_TIMEZONE:              "Asia/Bangkok"
+  HUSKY:                     "0"
   # ────────────────────────────────────────────────────────────────────────────
 
 default:
@@ -193,7 +196,7 @@ sonar-scan-api:
   script:
     - echo "=== SonarQube Scan API (${SONAR_PROJECT_KEY_API}) ==="
     - 'if [ -z "${SONAR_HOST_URL}" ] || [ -z "${SONAR_TOKEN}" ]; then echo "❌ ERROR: SONAR_HOST_URL or SONAR_TOKEN is not configured." && exit 1; fi'
-    - 'TARGET_DIR="apps/api"; if [ ! -d "apps/api" ]; then if [ -d "api" ]; then TARGET_DIR="api"; else TARGET_DIR="."; fi; fi'
+    - 'TARGET_DIR="apps/backend"; if [ ! -d "apps/backend" ]; then if [ -d "apps/api" ]; then TARGET_DIR="apps/api"; elif [ -d "api" ]; then TARGET_DIR="api"; else TARGET_DIR="."; fi; fi'
     - "sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY_API} -Dsonar.projectName=${CI_PROJECT_NAME}-api -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.token=${SONAR_TOKEN} -Dsonar.sources=${TARGET_DIR} -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**,**/tests/**,**/test/**,old_app/** -Dsonar.qualitygate.wait=false"
   allow_failure: true
 
@@ -220,7 +223,7 @@ sonar-scan-web:
   script:
     - echo "=== SonarQube Scan Web (${SONAR_PROJECT_KEY_WEB}) ==="
     - 'if [ -z "${SONAR_HOST_URL}" ] || [ -z "${SONAR_TOKEN}" ]; then echo "❌ ERROR: SONAR_HOST_URL or SONAR_TOKEN is not configured." && exit 1; fi'
-    - 'if [ -d "apps/web" ]; then TARGET_DIR="apps/web"; elif [ -d "web" ]; then TARGET_DIR="web"; elif [ -d "frontend" ]; then TARGET_DIR="frontend"; else echo "No web folder found, scanning root UI components or skipping..." && TARGET_DIR="src"; fi'
+    - 'if [ -d "apps/frontend" ]; then TARGET_DIR="apps/frontend"; elif [ -d "apps/web" ]; then TARGET_DIR="apps/web"; elif [ -d "web" ]; then TARGET_DIR="web"; elif [ -d "frontend" ]; then TARGET_DIR="frontend"; else echo "No web folder found, scanning root UI components or skipping..." && TARGET_DIR="src"; fi'
     - 'if [ -d "$TARGET_DIR" ]; then sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY_WEB} -Dsonar.projectName=${CI_PROJECT_NAME}-web -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.token=${SONAR_TOKEN} -Dsonar.sources=${TARGET_DIR} -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/coverage/**,old_app/** -Dsonar.qualitygate.wait=false; else echo "Target web folder not found. Skipping web scan."; fi'
   allow_failure: true
 
@@ -298,19 +301,22 @@ unit-test-api:
     key: "npm-api-${CI_COMMIT_REF_SLUG}"
     paths:
       - node_modules/
+      - apps/backend/node_modules/
       - api/node_modules/
   script:
-    - echo "=== Node.js 24 Unit Test (API) ==="
-    - 'if [ -d "api" ]; then cd api; fi'
+    - echo "=== Node.js Unit Test (API / apps/backend) ==="
+    - 'if [ -d "apps/backend" ]; then cd apps/backend; elif [ -d "api" ]; then cd api; fi'
     - 'if [ -f "package.json" ]; then npm ci || npm install; npm test -- --ci --reporters=default || npm test || true; else echo "No package.json found for API, skipping unit tests."; fi'
   artifacts:
     when: always
     reports:
-      junit: 
+      junit:
         - junit-api.xml
+        - apps/backend/junit.xml
         - api/junit.xml
     paths:
       - coverage/
+      - apps/backend/coverage/
       - api/coverage/
     expire_in: 7 days
   allow_failure: true
@@ -329,21 +335,24 @@ unit-test-web:
     key: "npm-web-${CI_COMMIT_REF_SLUG}"
     paths:
       - node_modules/
+      - apps/frontend/node_modules/
       - web/node_modules/
       - frontend/node_modules/
   script:
-    - echo "=== Node.js 24 Unit Test (Web) ==="
-    - 'if [ -d "web" ]; then cd web; elif [ -d "frontend" ]; then cd frontend; fi'
+    - echo "=== Node.js Unit Test (Web / apps/frontend) ==="
+    - 'if [ -d "apps/frontend" ]; then cd apps/frontend; elif [ -d "web" ]; then cd web; elif [ -d "frontend" ]; then cd frontend; fi'
     - 'if [ -f "package.json" ]; then npm ci || npm install; npm test -- --ci --reporters=default || npm test || true; else echo "No web package.json found, skipping web unit tests."; fi'
   artifacts:
     when: always
     reports:
-      junit: 
+      junit:
         - junit-web.xml
+        - apps/frontend/junit.xml
         - web/junit.xml
         - frontend/junit.xml
     paths:
       - coverage/
+      - apps/frontend/coverage/
       - web/coverage/
       - frontend/coverage/
     expire_in: 7 days
@@ -363,15 +372,17 @@ dependency-check-api:
     key: "npm-api-${CI_COMMIT_REF_SLUG}"
     paths:
       - node_modules/
+      - apps/backend/node_modules/
       - api/node_modules/
   script:
     - echo "=== Node.js Dependency Check (API) ==="
-    - 'if [ -d "api" ]; then cd api; fi'
+    - 'if [ -d "apps/backend" ]; then cd apps/backend; elif [ -d "api" ]; then cd api; fi'
     - 'if [ -f "package.json" ]; then npm audit --audit-level=high || true; else echo "No API package.json found for dependency check."; fi'
   artifacts:
     when: always
     paths:
       - npm-audit-api.json
+      - apps/backend/npm-audit-api.json
       - api/npm-audit-api.json
     expire_in: 7 days
   allow_failure: true
@@ -390,16 +401,18 @@ dependency-check-web:
     key: "npm-web-${CI_COMMIT_REF_SLUG}"
     paths:
       - node_modules/
+      - apps/frontend/node_modules/
       - web/node_modules/
       - frontend/node_modules/
   script:
     - echo "=== Node.js Dependency Check (Web) ==="
-    - 'if [ -d "web" ]; then cd web; elif [ -d "frontend" ]; then cd frontend; fi'
+    - 'if [ -d "apps/frontend" ]; then cd apps/frontend; elif [ -d "web" ]; then cd web; elif [ -d "frontend" ]; then cd frontend; fi'
     - 'if [ -f "package.json" ]; then npm audit --audit-level=high || true; else echo "No Web package.json found for dependency check."; fi'
   artifacts:
     when: always
     paths:
       - npm-audit-web.json
+      - apps/frontend/npm-audit-web.json
       - web/npm-audit-web.json
       - frontend/npm-audit-web.json
     expire_in: 7 days
@@ -416,7 +429,7 @@ sbom-generate-api:
     - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
   script:
     - echo "=== SBOM Generation API (Syft) ==="
-    - 'TARGET_DIR="api"; if [ ! -d "api" ]; then TARGET_DIR="."; fi'
+    - 'TARGET_DIR="apps/backend"; if [ ! -d "apps/backend" ]; then if [ -d "api" ]; then TARGET_DIR="api"; else TARGET_DIR="."; fi; fi'
     - syft dir:${TARGET_DIR} -o spdx-json=sbom-api.json
     - echo "API SBOM saved to sbom-api.json"
   artifacts:
@@ -436,7 +449,7 @@ sbom-generate-web:
     - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
   script:
     - echo "=== SBOM Generation Web (Syft) ==="
-    - 'if [ -d "web" ]; then TARGET_DIR="web"; elif [ -d "frontend" ]; then TARGET_DIR="frontend"; else echo "No web directory found, skipping web SBOM generation." && exit 0; fi'
+    - 'if [ -d "apps/frontend" ]; then TARGET_DIR="apps/frontend"; elif [ -d "web" ]; then TARGET_DIR="web"; elif [ -d "frontend" ]; then TARGET_DIR="frontend"; else echo "No web directory found, skipping web SBOM generation." && exit 0; fi'
     - syft dir:${TARGET_DIR} -o spdx-json=sbom-web.json
     - echo "Web SBOM saved to sbom-web.json"
   artifacts:
@@ -456,8 +469,8 @@ docker-build:
   script:
     - docker version
     - 'REG_HOST="${REGISTRY_HOST:-${CI_REGISTRY:-gitlabregistry.buu.ac.th}}"; if [ -n "$CI_REGISTRY_USER" ] && [ -n "$CI_REGISTRY_PASSWORD" ]; then echo "$CI_REGISTRY_PASSWORD" | docker login "$REG_HOST" -u "$CI_REGISTRY_USER" --password-stdin || true; elif [ -n "$REGISTRY_USER" ] && [ -n "$REGISTRY_TOKEN" ]; then echo "$REGISTRY_TOKEN" | docker login "$REG_HOST" -u "$REGISTRY_USER" --password-stdin || true; fi'
-    - 'DOCKERFILE_PATH=""; if [ -f "apps/api/Dockerfile" ]; then DOCKERFILE_PATH="apps/api/Dockerfile"; elif [ -f "api/Dockerfile" ]; then DOCKERFILE_PATH="api/Dockerfile"; elif [ -f "Dockerfile.api" ]; then DOCKERFILE_PATH="Dockerfile.api"; elif [ -f "Dockerfile" ]; then DOCKERFILE_PATH="Dockerfile"; fi'
-    - 'if [ -z "$DOCKERFILE_PATH" ]; then echo "No API Dockerfile found (checked apps/api/Dockerfile, api/Dockerfile, Dockerfile.api, Dockerfile). Skipping Docker Build API." && exit 0; fi'
+    - 'DOCKERFILE_PATH=""; if [ -f "apps/backend/Dockerfile" ]; then DOCKERFILE_PATH="apps/backend/Dockerfile"; elif [ -f "apps/api/Dockerfile" ]; then DOCKERFILE_PATH="apps/api/Dockerfile"; elif [ -f "api/Dockerfile" ]; then DOCKERFILE_PATH="api/Dockerfile"; elif [ -f "Dockerfile.api" ]; then DOCKERFILE_PATH="Dockerfile.api"; elif [ -f "Dockerfile" ]; then DOCKERFILE_PATH="Dockerfile"; fi'
+    - 'if [ -z "$DOCKERFILE_PATH" ]; then echo "No API Dockerfile found (checked apps/backend/Dockerfile, apps/api/Dockerfile, api/Dockerfile, Dockerfile.api, Dockerfile). Skipping Docker Build API." && exit 0; fi'
     - 'echo "=== Build and Push API Image ${IMAGE_API}:${CI_COMMIT_SHORT_SHA} using ${DOCKERFILE_PATH} ==="'
     - docker build --build-arg NODE_VERSION="${NODE_VERSION}" -f "${DOCKERFILE_PATH}" -t "${IMAGE_API}:${CI_COMMIT_SHORT_SHA}" .
     - docker push "${IMAGE_API}:${CI_COMMIT_SHORT_SHA}"
@@ -470,10 +483,10 @@ docker-build-web:
   script:
     - docker version
     - 'REG_HOST="${REGISTRY_HOST:-${CI_REGISTRY:-gitlabregistry.buu.ac.th}}"; if [ -n "$CI_REGISTRY_USER" ] && [ -n "$CI_REGISTRY_PASSWORD" ]; then echo "$CI_REGISTRY_PASSWORD" | docker login "$REG_HOST" -u "$CI_REGISTRY_USER" --password-stdin || true; elif [ -n "$REGISTRY_USER" ] && [ -n "$REGISTRY_TOKEN" ]; then echo "$REGISTRY_TOKEN" | docker login "$REG_HOST" -u "$REGISTRY_USER" --password-stdin || true; fi'
-    - 'DOCKERFILE_PATH=""; if [ -f "docker/web/Dockerfile" ]; then DOCKERFILE_PATH="docker/web/Dockerfile"; elif [ -f "apps/web/Dockerfile" ]; then DOCKERFILE_PATH="apps/web/Dockerfile"; elif [ -f "web/Dockerfile" ]; then DOCKERFILE_PATH="web/Dockerfile"; elif [ -f "frontend/Dockerfile" ]; then DOCKERFILE_PATH="frontend/Dockerfile"; elif [ -f "apps/frontend/Dockerfile" ]; then DOCKERFILE_PATH="apps/frontend/Dockerfile"; elif [ -f "Dockerfile.web" ]; then DOCKERFILE_PATH="Dockerfile.web"; fi'
+    - 'DOCKERFILE_PATH=""; if [ -f "apps/frontend/Dockerfile" ]; then DOCKERFILE_PATH="apps/frontend/Dockerfile"; elif [ -f "docker/web/Dockerfile" ]; then DOCKERFILE_PATH="docker/web/Dockerfile"; elif [ -f "apps/web/Dockerfile" ]; then DOCKERFILE_PATH="apps/web/Dockerfile"; elif [ -f "web/Dockerfile" ]; then DOCKERFILE_PATH="web/Dockerfile"; elif [ -f "frontend/Dockerfile" ]; then DOCKERFILE_PATH="frontend/Dockerfile"; elif [ -f "Dockerfile.web" ]; then DOCKERFILE_PATH="Dockerfile.web"; fi'
     - 'if [ -z "$DOCKERFILE_PATH" ]; then echo "No Web Dockerfile found. Skipping Docker Build Web." && exit 0; fi'
     - 'echo "=== Build and Push Web Image ${IMAGE_WEB}:${CI_COMMIT_SHORT_SHA} using ${DOCKERFILE_PATH} ==="'
-    - docker build --build-arg NODE_VERSION="${NODE_VERSION}" --build-arg VITE_API_BASE_URL=/api -f "${DOCKERFILE_PATH}" -t "${IMAGE_WEB}:${CI_COMMIT_SHORT_SHA}" .
+    - docker build --build-arg NODE_VERSION="${NODE_VERSION}" --build-arg API_BASE_URL=/api --build-arg VITE_API_BASE_URL=/api -f "${DOCKERFILE_PATH}" -t "${IMAGE_WEB}:${CI_COMMIT_SHORT_SHA}" .
     - docker push "${IMAGE_WEB}:${CI_COMMIT_SHORT_SHA}"
     - 'if [ -n "$CI_COMMIT_TAG" ]; then docker tag "${IMAGE_WEB}:${CI_COMMIT_SHORT_SHA}" "${IMAGE_WEB}:${CI_COMMIT_TAG}" && docker push "${IMAGE_WEB}:${CI_COMMIT_TAG}" && docker tag "${IMAGE_WEB}:${CI_COMMIT_SHORT_SHA}" "${IMAGE_WEB}:latest" && docker push "${IMAGE_WEB}:latest"; else docker tag "${IMAGE_WEB}:${CI_COMMIT_SHORT_SHA}" "${IMAGE_WEB}:${CI_COMMIT_REF_SLUG}" && docker push "${IMAGE_WEB}:${CI_COMMIT_REF_SLUG}"; fi'
 
