@@ -18,7 +18,9 @@ COPY package.json package-lock.json ./
 COPY apps/backend/package.json ./apps/backend/
 COPY apps/frontend/package.json ./apps/frontend/
 
-RUN npm ci --ignore-scripts \
+# node:22-alpine ships npm 10; engines require npm >= 11 for this lockfile
+RUN npm install -g npm@11 \
+  && npm ci --ignore-scripts \
   && npm rebuild bcrypt --workspace=buu-get-back
 
 COPY apps/backend ./apps/backend
