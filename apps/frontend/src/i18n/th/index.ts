@@ -1164,6 +1164,7 @@ export default {
           index: 'ลำดับ',
           nationalId: 'รหัสประชาชน',
           inSystemStatus: 'สถานะข้อมูลในระบบ',
+          status: 'สถานะ',
           fullName: 'ชื่อ-นามสกุล',
           passcode: 'Passcode',
         },
@@ -1173,7 +1174,15 @@ export default {
           row2: '"1100000000001","สมหญิง ใจงาม"',
           row3: '"1100000000002","สมศักดิ์ ใจเย็น"',
         },
-        exportHeader: '"ลำดับ","รหัสประชาชน","ชื่อ-นามสกุล","Passcode"',
+        exportHeader: '"ลำดับ","ชื่อ-นามสกุล","สถานะ","Passcode"',
+        exportDocTitle: 'รายชื่อผู้มีสิทธิ์สอบ',
+        exportSheetName: 'รายชื่อ',
+        exportMeta: {
+          exam: 'รอบสอบ',
+          examDate: 'วันที่สอบ',
+          examType: 'ประเภทการสอบ',
+          total: 'จำนวนรายชื่อ',
+        },
       },
       dialogs: {
         searchCandidate: {

@@ -41,6 +41,7 @@ import { ROLES } from 'src/constants/roles';
 import { useUserStore } from 'src/stores/user.store';
 import type { User } from 'src/types/user';
 import { useGlobalLocaleTrackedI18n } from 'src/composables/use-locale-tracked-i18n';
+import * as XLSX from 'xlsx';
 
 /** A single room within a time slot */
 export interface ExamRoom {
@@ -1506,7 +1507,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     }
   };
 
-  /** Export candidates to CSV */
+  /** Export eligible candidates table (xlsx). */
   const exportCandidates = (): void => {
     if (form.value.eligibleCandidates.length === 0) {
       $q.notify({
@@ -1517,27 +1518,40 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       return;
     }
 
-    const BOM = '\ufeff';
-    const header = t('admin.examForm.candidates.exportHeader');
-    const rows = form.value.eligibleCandidates.map((c, idx) => {
-      const index = idx + 1;
-      const id = `"${c.nationalId || ''}"`;
-      const name = `"${c.fullName || ''}"`;
-      const code = `"${c.passcode || ''}"`;
-      return `${index},${id},${name},${code}`;
-    });
+    const resolveStatusLabel = (candidate: EligibleCandidate): string => {
+      if (candidate.inSystem === true) return t('admin.examForm.candidates.inSystem');
+      if (candidate.inSystem === false) return t('admin.examForm.candidates.notInSystem');
+      return '-';
+    };
 
-    const content = BOM + [header, ...rows].join('\r\n');
-    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
+    const columnHeader = [
+      t('admin.examForm.candidates.columns.index'),
+      t('admin.examForm.candidates.columns.fullName'),
+      t('admin.examForm.candidates.columns.status'),
+      t('admin.examForm.candidates.columns.passcode'),
+    ];
 
-    link.setAttribute('href', url);
-    link.setAttribute('download', `passcodes_${examId.value || 'new'}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const dataRows = form.value.eligibleCandidates.map((candidate, idx) => [
+      idx + 1,
+      candidate.fullName?.trim() || candidate.fullNameEn?.trim() || '-',
+      resolveStatusLabel(candidate),
+      candidate.passcode || '',
+    ]);
+
+    const aoa: (string | number)[][] = [columnHeader, ...dataRows];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(aoa);
+    worksheet['!cols'] = [{ wch: 8 }, { wch: 28 }, { wch: 18 }, { wch: 14 }];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      t('admin.examForm.candidates.exportSheetName'),
+    );
+
+    const examIdPart = examId.value || 'new';
+    XLSX.writeFile(workbook, `eligible-candidates_${examIdPart}.xlsx`);
   };
 
   /** Generate random 6-digit passcodes for all eligible candidates (individual mode) */

@@ -36,7 +36,7 @@
             @click="showPasscodeTypeDialog = true"
           />
           <q-btn
-            v-if="locked"
+            v-if="hasCandidates"
             :label="t('admin.examForm.candidates.export')"
             color="secondary"
             unelevated

@@ -1172,6 +1172,7 @@ export default {
           index: 'Index',
           nationalId: 'National ID',
           inSystemStatus: 'System Status',
+          status: 'Status',
           fullName: 'Full Name',
           passcode: 'Passcode',
         },
@@ -1181,7 +1182,15 @@ export default {
           row2: '"1100000000001","Somying Jaingam"',
           row3: '"1100000000002","Somsak Jaicool"',
         },
-        exportHeader: '"Index","National ID","Full Name","Passcode"',
+        exportHeader: '"Index","Full Name","Status","Passcode"',
+        exportDocTitle: 'Eligible Candidates List',
+        exportSheetName: 'Candidates',
+        exportMeta: {
+          exam: 'Exam',
+          examDate: 'Exam Date',
+          examType: 'Exam Type',
+          total: 'Total candidates',
+        },
       },
       dialogs: {
         searchCandidate: {
