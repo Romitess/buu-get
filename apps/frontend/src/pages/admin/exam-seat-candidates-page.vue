@@ -121,12 +121,19 @@
             />
           </section>
 
-          <section class="seat-list-print-area seat-print-page">
+          <section
+            v-for="(candidatePage, pageIndex) in room.candidatePages"
+            :key="`${room.slId}-list-${pageIndex}`"
+            class="seat-list-print-area seat-print-page"
+          >
             <div class="seat-list-print">
               <header class="seat-list-print__header">
                 <h1>ใบรายชื่อผู้เข้าสอบ</h1>
                 <p v-if="printExamRoundLabel">ครั้งที่ {{ printExamRoundLabel }}</p>
                 <p>{{ room.roomLabel }}</p>
+                <p v-if="room.candidatePages.length > 1" class="seat-list-print__page-no">
+                  หน้า {{ pageIndex + 1 }}/{{ room.candidatePages.length }}
+                </p>
               </header>
 
               <table class="seat-list-print__table">
@@ -141,7 +148,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="row in room.candidates" :key="row.ermId">
+                  <tr v-for="row in candidatePage" :key="row.ermId">
                     <td>{{ row.index }}</td>
                     <td>{{ row.nationalId }}</td>
                     <td>{{ row.titleTh }}</td>
@@ -486,7 +493,20 @@ interface SeatPlanPrintRoom {
   layoutRows: number;
   layoutCols: number;
   candidates: SeatCandidateRow[];
+  candidatePages: SeatCandidateRow[][];
 }
+
+/** Body rows that fit one A4 list page (header + thead + padding). */
+const SEAT_LIST_ROWS_PER_PAGE = 24;
+
+const chunkSeatListRows = <T,>(items: T[], size: number): T[][] => {
+  if (items.length === 0) return [[]];
+  const pages: T[][] = [];
+  for (let offset = 0; offset < items.length; offset += size) {
+    pages.push(items.slice(offset, offset + size));
+  }
+  return pages;
+};
 
 const getPrintSeatLabel = (
   rowNo: number,
@@ -660,6 +680,7 @@ const printRoomPacks = computed((): SeatPlanPrintRoom[] =>
       layoutRows,
       layoutCols,
       candidates,
+      candidatePages: chunkSeatListRows(candidates, SEAT_LIST_ROWS_PER_PAGE),
     };
   }),
 );
@@ -997,6 +1018,11 @@ onBeforeUnmount(() => {
   color: #343434;
   font-size: 15px;
   line-height: 1.35;
+}
+
+.seat-list-print__page-no {
+  font-size: 13px !important;
+  color: #6b7280 !important;
 }
 
 .seat-list-print__table {
