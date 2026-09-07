@@ -25,6 +25,14 @@ const STATUS_SEAT_PUBLISHED = 3;
 const STATUS_CANCELLED = 5;
 const VERIFY_STATUS_PASS = 1;
 
+const isPaidSeatingStatus = (status: number): boolean =>
+  status === STATUS_PAID || status === STATUS_SEAT_ASSIGNED || status === STATUS_SEAT_PUBLISHED;
+
+/** Only verified (PASS) paid applicants appear on the seat-assignment board. */
+const isEligibleForSeatAssignment = (enrollment: BackendEnrollmentDetail): boolean =>
+  isPaidSeatingStatus(Number(enrollment.ERM_STATUS)) &&
+  Number(enrollment.ERM_VERIFY_STATUS) === VERIFY_STATUS_PASS;
+
 /** HTML5 DnD mime used when dragging an unassigned student from the list onto a seat */
 export const SEAT_STUDENT_DRAG_MIME = 'application/x-buu-seat-student';
 
@@ -964,13 +972,8 @@ export function useExamSeatManagement() {
     const timeKey = activeSession.value ? getSessionTimeKey(activeSession.value) : null;
     const existingDraft = timeKey ? seatDraftsByTime.get(timeKey) : undefined;
 
-    // Only show students who have status PAID (1), SEAT_ASSIGNED (2), or SEAT_PUBLISHED (3)
-    const eligibleEnrollments = sessionEnrollments.value.filter(
-      (e) =>
-        Number(e.ERM_STATUS) === STATUS_PAID ||
-        Number(e.ERM_STATUS) === STATUS_SEAT_ASSIGNED ||
-        Number(e.ERM_STATUS) === STATUS_SEAT_PUBLISHED,
-    );
+    // Only show paid applicants who already passed verification
+    const eligibleEnrollments = sessionEnrollments.value.filter(isEligibleForSeatAssignment);
 
     if (existingDraft) {
       const draftByErmId = new Map(existingDraft.map((student) => [student.ermId, student]));
@@ -1239,9 +1242,7 @@ export function useExamSeatManagement() {
           .filter(
             (enrollment) =>
               timeSessionIds.has(enrollment.SESSION_ID) &&
-              (Number(enrollment.ERM_STATUS) === STATUS_PAID ||
-                Number(enrollment.ERM_STATUS) === STATUS_SEAT_ASSIGNED ||
-                Number(enrollment.ERM_STATUS) === STATUS_SEAT_PUBLISHED),
+              isEligibleForSeatAssignment(enrollment),
           )
           .sort((a, b) => {
             const aProfile = a.USER?.PROFILE;
