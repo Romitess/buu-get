@@ -11,6 +11,7 @@
     <AppExamInfoCard
       v-if="exam"
       class="q-mb-md"
+      v-model:selected-location-id="selectedSessionLocationId"
       :title="
         formatExamDisplayTitle(exam.EXAM_NAME, exam.EXAM_ROUND, exam.EXAM_FISCAL_YEAR) ||
         exam.EXAM_NAME
@@ -18,6 +19,7 @@
       :date="examDateLabel"
       :time="selectedSessionTime"
       :location="selectedSessionLocation"
+      :location-options="roomOptions"
       :applicant-count="sessionAttendedCount"
       :total-capacity="currentSessionCapacity"
       is-admin
@@ -115,9 +117,11 @@ const {
   exam,
   searchQuery,
   selectedSessionId,
+  selectedSessionLocationId,
   activeSessionIds,
   filteredAttendances,
   sessionAttendedCount,
+  fetchExam,
   fetchAttendances,
 } = useExamAttendances();
 
@@ -170,7 +174,7 @@ const openCheckInDialog = () => {
       examLocation: selectedSessionLocation.value,
       examRound: exam.value?.EXAM_ROUND || '',
       onCheckedIn: () => {
-        void loadData();
+        void reloadAttendances();
       },
     },
   });
@@ -231,6 +235,17 @@ const formatLocationLabel = (location?: NonNullable<BackendSession['LOCATION']> 
   return `${location.LOCATION_NAME}${location.LOCATION_ROOM_NO ? ` (${location.LOCATION_ROOM_NO})` : ''}`;
 };
 
+const roomOptions = computed(() => {
+  const rooms = sessionLocations.value.map((item) => ({
+    value: item.SL_ID as number | null,
+    label: formatLocationLabel(item.LOCATION),
+  }));
+
+  if (rooms.length === 0) return [];
+
+  return [{ label: i18n.t('admin.examAttendance.allRooms'), value: null }, ...rooms];
+});
+
 const sessionLocationLabelList = computed(() => {
   const labels = sessionLocations.value
     .map((item) => formatLocationLabel(item.LOCATION))
@@ -246,21 +261,35 @@ const selectedSessionTime = computed(() => {
 });
 
 const selectedSessionLocation = computed(() => {
+  if (selectedSessionLocationId.value != null) {
+    const matched = sessionLocations.value.find(
+      (item) => item.SL_ID === selectedSessionLocationId.value,
+    );
+    if (matched) return formatLocationLabel(matched.LOCATION);
+  }
+
   if (sessionLocationLabelList.value.length === 0) return '-';
-  return sessionLocationLabelList.value.join(', ');
+  return i18n.t('admin.examAttendance.allRooms');
 });
+
+const getLocationCapacity = (item: SessionLocationOption): number => {
+  const locationSeatCount = item.LOCATION.SEATS?.length;
+  if (locationSeatCount && locationSeatCount > 0) return locationSeatCount;
+  return (
+    activeTimeSessions.value.find((session) => session.SS_ID === item.SS_ID)?.SS_CAPACITY ?? 0
+  );
+};
 
 const currentSessionCapacity = computed(() => {
   if (sessionLocations.value.length > 0) {
-    return sessionLocations.value.reduce((total, item) => {
-      const locationSeatCount = item.LOCATION.SEATS?.length;
-      if (locationSeatCount && locationSeatCount > 0) {
-        return total + locationSeatCount;
-      }
-      const sessionCapacity =
-        activeTimeSessions.value.find((session) => session.SS_ID === item.SS_ID)?.SS_CAPACITY ?? 0;
-      return total + sessionCapacity;
-    }, 0);
+    if (selectedSessionLocationId.value != null) {
+      const matched = sessionLocations.value.find(
+        (item) => item.SL_ID === selectedSessionLocationId.value,
+      );
+      return matched ? getLocationCapacity(matched) : 0;
+    }
+
+    return sessionLocations.value.reduce((total, item) => total + getLocationCapacity(item), 0);
   }
 
   return activeTimeSessions.value.reduce((total, session) => total + (session.SS_CAPACITY ?? 0), 0);
@@ -357,10 +386,20 @@ const onRequest = (props: TableRequestProps): void => {
 
 const loadData = async (): Promise<void> => {
   const examId = Number(route.params.examId);
-  if (!isNaN(examId) && examId > 0) {
-    await fetchAttendances(examId);
-    pagination.value.rowsNumber = filteredAttendances.value.length;
-  }
+  if (isNaN(examId) || examId <= 0) return;
+
+  await fetchExam(examId);
+  selectedSessionLocationId.value = null;
+  await fetchAttendances(examId);
+  pagination.value.rowsNumber = filteredAttendances.value.length;
+};
+
+const reloadAttendances = async (): Promise<void> => {
+  const examId = Number(route.params.examId);
+  if (isNaN(examId) || examId <= 0) return;
+
+  await fetchAttendances(examId);
+  pagination.value.rowsNumber = filteredAttendances.value.length;
 };
 
 watch(filteredAttendances, (newVal) => {
@@ -369,10 +408,31 @@ watch(filteredAttendances, (newVal) => {
 
 watch(selectedSessionId, async (sessionId, previousSessionId) => {
   if (previousSessionId == null || sessionId == null) return;
+
   const examId = Number(route.params.examId);
   if (isNaN(examId) || examId <= 0) return;
 
+  const wasAllRooms = selectedSessionLocationId.value == null;
+  selectedSessionLocationId.value = null;
+
+  // Already on ทุกห้อง → location watch won't fire; fetch for the new session here.
+  if (wasAllRooms) {
+    await fetchAttendances(examId);
+    pagination.value.page = 1;
+    pagination.value.rowsNumber = filteredAttendances.value.length;
+  }
+});
+
+watch(selectedSessionLocationId, async (_locationId, previousLocationId) => {
+  // Initial default is handled by loadData after exam is ready.
+  if (previousLocationId === undefined) return;
+
+  const examId = Number(route.params.examId);
+  if (isNaN(examId) || examId <= 0) return;
+  if (!exam.value) return;
+
   await fetchAttendances(examId);
+  pagination.value.page = 1;
   pagination.value.rowsNumber = filteredAttendances.value.length;
 });
 

@@ -664,6 +664,8 @@ export default {
       title: 'ประวัติการเข้าสอบ',
       subtitle: 'ตรวจสอบประวัติการเข้าสอบ พร้อมดูรายละเอียดข้อมูลย้อนหลัง',
       searchPlaceholder: 'ค้นหา',
+      allRooms: 'ทุกห้อง',
+      selectRoom: 'เลือกห้อง',
       columns: {
         index: 'ลำดับ',
         nationalId: 'เลขประจำตัว',
@@ -930,6 +932,8 @@ export default {
         title: 'ประวัติการเข้าสอบ',
         subtitle: 'ตรวจสอบประวัติการเข้าสอบ พร้อมดูรายละเอียดข้อมูลย้อนหลัง',
         searchPlaceholder: 'ค้นหา',
+        allRooms: 'ทุกห้อง',
+        selectRoom: 'เลือกห้อง',
         columns: {
           index: 'ลำดับ',
           nationalId: 'เลขประจำตัว',

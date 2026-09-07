@@ -24,6 +24,7 @@
               v-if="locationOptions.length > 0"
               :model-value="selectedLocationId"
               :options="locationOptions"
+              :display-value="locationSelectDisplayValue"
               emit-value
               map-options
               outlined
@@ -111,7 +112,7 @@ interface Props {
   time: string;
   location: string;
   selectedLocationId?: number | null;
-  locationOptions?: { label: string; value: number }[];
+  locationOptions?: { label: string; value: number | null }[];
   applicantCount?: number | string;
   isAdmin?: boolean;
   isAttendance?: boolean;
@@ -139,6 +140,11 @@ defineEmits<{
 }>();
 
 const isLocationMenuOpen = ref(false);
+
+const locationSelectDisplayValue = computed((): string | undefined => {
+  if (props.selectedLocationId != null) return undefined;
+  return props.location || undefined;
+});
 
 const displayTitle = computed((): string => {
   const withoutCandidateNames = props.title.replace(/\s*\([^)]*\)\s*$/u, '').trim();
