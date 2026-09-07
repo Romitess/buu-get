@@ -1,0 +1,35 @@
+# Git / IDE
+.git
+.github
+.gitlab-ci-example.yml
+.cursor
+.claude
+.idea
+.vscode
+**/.DS_Store
+
+# Dependencies & build outputs (rebuilt in image)
+node_modules
+**/node_modules
+**/dist
+**/.quasar
+**/coverage
+**/tsconfig.build.tsbuildinfo
+
+# Env & secrets — never bake into images
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Tests / reports / local noise
+test-results
+playwright-report
+blob-report
+playwright/.cache
+graphify-out
+**/graphify-out
+memory
+tests
+.agents
+helm
