@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -17,7 +16,6 @@ import { FINANCE_ROLES } from 'src/common/constants/role-groups';
 import {
   assertSelfOrRoles,
   AuthenticatedUser,
-  userHasAnyRole,
 } from 'src/common/utils/authz.util';
 import {
   PAGINATION_DEFAULT_LIMIT,
@@ -281,9 +279,6 @@ export class TransactionsService {
     dto: ConfirmPaymentFlowDto,
     user: AuthenticatedUser,
   ): Promise<void> {
-    // ผู้สมัครห้าม self-confirm — ต้องเป็น FINANCE_ROLES เท่านั้น
-    this.assertFinanceAccess(user);
-
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -306,9 +301,7 @@ export class TransactionsService {
       const enrollment = await manager.getRepository(ExamEnrollment).findOne({
         where: { ERM_ID: transaction.ERM_ID },
       });
-      if (!enrollment) {
-        throw new NotFoundException('Enrollment not found for this transaction');
-      }
+      this.assertEnrollmentAccess(user, enrollment);
 
       if (
         transaction.TRANX_PAYMENT_STATUS !== TransactionPaymentStatus.PENDING
@@ -803,14 +796,5 @@ export class TransactionsService {
       FINANCE_ROLES,
       'Access denied: transaction does not belong to you',
     );
-  }
-
-  /** ยืนยันชำระเงิน / ทางลัด admin — ต้องเป็น FINANCE_ROLES */
-  private assertFinanceAccess(user: AuthenticatedUser): void {
-    if (!userHasAnyRole(user, FINANCE_ROLES)) {
-      throw new ForbiddenException(
-        'Access denied: finance role required to confirm payment',
-      );
-    }
   }
 }

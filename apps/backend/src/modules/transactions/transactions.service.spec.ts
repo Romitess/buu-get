@@ -536,7 +536,7 @@ describe('TransactionsService', () => {
       repos.receipt.findOne.mockResolvedValue(null);
 
       // Act
-      await service.confirmPaymentFlow(7, confirmDto, financeUser);
+      await service.confirmPaymentFlow(7, confirmDto, ownerUser);
 
       // Assert
       expect(transaction.TRANX_PAYMENT_STATUS).toBe(
@@ -575,7 +575,7 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, confirmDto, financeUser),
+        service.confirmPaymentFlow(7, confirmDto, ownerUser),
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
       expect(queryRunner.commitTransaction).not.toHaveBeenCalled();
@@ -587,7 +587,7 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(999, confirmDto, financeUser),
+        service.confirmPaymentFlow(999, confirmDto, ownerUser),
       ).rejects.toBeInstanceOf(NotFoundException);
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
     });
@@ -598,22 +598,17 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, confirmDto, financeUser),
+        service.confirmPaymentFlow(7, confirmDto, ownerUser),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('should throw ForbiddenException for candidate including owner (TXN-U-011)', async () => {
-      // Arrange — self-confirm honor system removed; FINANCE only
+    it('should throw ForbiddenException for non-owner non-FINANCE (TXN-U-011)', async () => {
+      // Arrange
       setupConfirmHappyPath({
         enrollment: baseEnrollment({ USER_ID: 10 }),
       });
 
-      // Act / Assert — owner candidate
-      await expect(
-        service.confirmPaymentFlow(7, confirmDto, ownerUser),
-      ).rejects.toBeInstanceOf(ForbiddenException);
-
-      // Act / Assert — other candidate
+      // Act / Assert
       await expect(
         service.confirmPaymentFlow(7, confirmDto, otherCandidate),
       ).rejects.toBeInstanceOf(ForbiddenException);
@@ -668,7 +663,7 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, { userCode: 'U1' }, financeUser),
+        service.confirmPaymentFlow(7, { userCode: 'U1' }, ownerUser),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
 
@@ -682,7 +677,7 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, { userCode: 'U1' }, financeUser),
+        service.confirmPaymentFlow(7, { userCode: 'U1' }, ownerUser),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
 
@@ -692,7 +687,7 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, { userCode: 'U1' }, financeUser),
+        service.confirmPaymentFlow(7, { userCode: 'U1' }, ownerUser),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
@@ -703,7 +698,7 @@ describe('TransactionsService', () => {
       repos.profile.findOne.mockResolvedValue(null);
 
       // Act
-      await service.confirmPaymentFlow(7, confirmDto, financeUser);
+      await service.confirmPaymentFlow(7, confirmDto, ownerUser);
 
       // Assert
       expect(repos.receipt.create).toHaveBeenCalledWith(
@@ -732,7 +727,7 @@ describe('TransactionsService', () => {
       setupConfirmHappyPath({ transaction });
 
       // Act
-      await service.confirmPaymentFlow(7, { userCode: 'U00000010' }, financeUser);
+      await service.confirmPaymentFlow(7, { userCode: 'U00000010' }, ownerUser);
 
       // Assert
       expect(transaction.TRANX_PAYMENT_STATUS).toBe(
@@ -758,7 +753,7 @@ describe('TransactionsService', () => {
       setupConfirmHappyPath({ receipt: existingReceipt });
 
       // Act
-      await service.confirmPaymentFlow(7, confirmDto, financeUser);
+      await service.confirmPaymentFlow(7, confirmDto, ownerUser);
 
       // Assert
       expect(existingReceipt.RC_NAME).toBe('Somchai');
@@ -781,7 +776,7 @@ describe('TransactionsService', () => {
       repos.receipt.findOne.mockResolvedValue(null);
 
       // Act
-      await service.confirmPaymentFlow(7, { userCode: 'U1' }, financeUser);
+      await service.confirmPaymentFlow(7, { userCode: 'U1' }, ownerUser);
 
       // Assert — valid format
       const year = String(fixed.getFullYear()).slice(-2);
@@ -809,7 +804,7 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, { userCode: 'U1' }, financeUser),
+        service.confirmPaymentFlow(7, { userCode: 'U1' }, ownerUser),
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
 
@@ -824,7 +819,7 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, { userCode: 'U1' }, financeUser),
+        service.confirmPaymentFlow(7, { userCode: 'U1' }, ownerUser),
       ).rejects.toThrow('db write failed');
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
       expect(queryRunner.commitTransaction).not.toHaveBeenCalled();

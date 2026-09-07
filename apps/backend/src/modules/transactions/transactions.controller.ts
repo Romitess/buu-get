@@ -105,13 +105,11 @@ export class TransactionsController {
   }
 
   /**
-   * Finance-only: ยืนยันชำระเงิน → PAID
-   * ผู้สมัครไม่สามารถ self-confirm ได้ — session คง PENDING จนกว่าการเงินจะยืนยัน (เช่น CSV reconcile)
+   * ยืนยันชำระเงิน → PAID (เจ้าของ enrollment หรือการเงิน)
    */
   @Patch(':tranxId/confirm')
-  @Roles(...FINANCE_ROLES)
   @ApiOperation({
-    summary: 'ยืนยันการชำระเงิน (FLOW 2) — การเงินเท่านั้น',
+    summary: 'ยืนยันการชำระเงิน (FLOW 2) — เจ้าของ enrollment หรือการเงิน',
   })
   @ApiResponse({
     status: 200,

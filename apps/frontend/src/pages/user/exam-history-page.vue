@@ -563,15 +563,33 @@ const handleReceiptInformationConfirm = async (value: ReceiptInformation): Promi
   }
 };
 
-const handleSaveQR = (): void => {
-  // ผู้สมัครไม่สามารถ self-confirm PAID ได้ — คงสถานะ PENDING จนกว่าการเงินจะยืนยัน
-  $q.notify({
-    type: 'info',
-    message: t('exam.history.waitingForPayment'),
-    position: 'bottom',
-    timeout: 5000,
-  });
-  // ปิด dialog ได้ แต่ countdown บนการ์ดประวัติยังทำงานต่อ
+const handleSaveQR = async (): Promise<void> => {
+  if (pendingTransactionId.value && receiptInformation.value) {
+    try {
+      const userCode = userStore.currentUser?.userCode ?? '';
+
+      await examStore.confirmPayment(
+        pendingTransactionId.value,
+        userCode,
+        receiptInformation.value,
+      );
+      pendingTransactionId.value = null;
+      paymentExpiryTime.value = '';
+      $q.notify({
+        type: 'positive',
+        message: t('success'),
+        position: 'bottom',
+      });
+    } catch (err: unknown) {
+      console.error('Payment confirmation failed:', err);
+      $q.notify({
+        type: 'negative',
+        message: getErrorMessage(err, t('exam.history.confirmPaymentError')),
+        position: 'bottom',
+        timeout: 5000,
+      });
+    }
+  }
   showPaymentDialog.value = false;
 };
 

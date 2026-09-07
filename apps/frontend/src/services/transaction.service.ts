@@ -92,7 +92,7 @@ export const startPaymentSession = async (
   return response.data;
 };
 
-/** FLOW 2: ยืนยันการชำระเงิน → PAID (finance-only บน backend — ผู้สมัครห้ามเรียก) */
+/** FLOW 2: ยืนยันการชำระเงิน → PAID (เจ้าของ enrollment หรือการเงิน) */
 export const confirmPaymentFlow = async (
   tranxId: number,
   data: ConfirmPaymentFlowPayload,
