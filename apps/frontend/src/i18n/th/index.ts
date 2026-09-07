@@ -1232,6 +1232,7 @@ export default {
         fee: 'ค่าธรรมเนียม',
         fundSource: 'แหล่งทุน',
         examDate: 'วันที่สอบ',
+        examDateAndSchedule: 'วันและกำหนดการสอบ',
         regStart: 'วันที่เริ่มรับสมัคร',
         regEnd: 'วันที่สิ้นสุดรับสมัคร',
         payStart: 'วันที่เริ่มชำระเงิน',

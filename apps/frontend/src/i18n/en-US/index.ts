@@ -1240,6 +1240,7 @@ export default {
         fee: 'Fee',
         fundSource: 'Fund source',
         examDate: 'Exam date',
+        examDateAndSchedule: 'Exam date and schedule',
         regStart: 'Registration start',
         regEnd: 'Registration end',
         payStart: 'Payment start',

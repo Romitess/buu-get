@@ -232,20 +232,13 @@ export const getExamChangeEmailTemplate = (
       )})</span>`
     : '';
 
-  // การ์ดเรียงต่อกันแนวตั้ง อ่านง่ายบนทุกขนาดหน้าจอ — แสดง "ข้อมูลเดิม" และ "ข้อมูลใหม่" แยกบรรทัด
+  // การ์ดเรียงต่อกันแนวตั้ง — แสดงเฉพาะข้อมูลใหม่ (ไม่มีป้าย "ข้อมูลใหม่" / ไม่แสดงข้อมูลเดิม)
   const changeCards = data.changes
     .map(
       (change) =>
         `<div style="${styles.card}">
           <p style="${styles.cardLabel}">${escapeHtml(change.label)}</p>
-          <div style="${styles.valueRow}">
-            <span style="${styles.valueTag} ${styles.oldTag}">ข้อมูลเดิม</span>
-            <p style="${styles.oldValue}">${escapeHtml(change.oldValue) || '-'}</p>
-          </div>
-          <div style="${styles.valueRowLast}">
-            <span style="${styles.valueTag} ${styles.newTag}">ข้อมูลใหม่</span>
-            <p style="${styles.newValue}">${escapeHtml(change.newValue) || '-'}</p>
-          </div>
+          <p style="${styles.newValue}">${escapeHtml(change.newValue) || '-'}</p>
         </div>`,
     )
     .join('');

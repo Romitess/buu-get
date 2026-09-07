@@ -819,7 +819,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
 
   /**
    * สร้างข้อความสรุปกำหนดการสอบและห้องสอบ (เรียงตามเวลา) เพื่อใช้เปรียบเทียบ
-   * และแสดงในอีเมลแจ้งเตือน
+   * และแสดงในอีเมลแจ้งเตือน — แสดงเฉพาะเวลา + ชื่อห้อง (ไม่รวมที่นั่ง/ผู้คุมสอบ)
    */
   const buildScheduleText = (): string => {
     const slots = [...form.value.timeSlots]
@@ -832,13 +832,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           .map((room) => {
             const loc = locationOptions.value.find((o) => o.value === room.locationId);
             const locLabel = loc?.label || t('admin.examForm.empty.unspecifiedRoom');
-            const proctorText =
-              room.proctors && room.proctors.length > 0
-                ? t('admin.examForm.changeLog.scheduleProctor', {
-                    names: room.proctors.join(', '),
-                  })
-                : '';
-            return `• ${locLabel} ${t('admin.examForm.changeLog.scheduleSeats', { seats: room.seats })}${proctorText}`;
+            return `• ${locLabel}`;
           })
           .join('\n');
         return `${t('admin.examForm.changeLog.scheduleTime', { start: slot.startTime, end: slot.endTime })}\n${rooms}`;
@@ -866,6 +860,9 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
   /**
    * เปรียบเทียบ snapshot เดิมกับค่าปัจจุบัน แล้วสร้างรายการการเปลี่ยนแปลง
    * (เฉพาะฟิลด์ที่มีการเปลี่ยนแปลงจริง)
+   *
+   * วันสอบ ↔ กำหนดการสอบ: ถ้าเปลี่ยนอย่างใดอย่างหนึ่ง
+   * ให้ใส่ทั้งคู่ในอีเมลเสมอ เพื่อให้ผู้รับเห็นบริบทวันและเวลาครบ
    */
   const buildExamChanges = (): ExamChangeItem[] => {
     const before = originalSnapshot.value;
@@ -892,12 +889,23 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       );
     }
     push(t('admin.examForm.changeLog.fundSource'), before.fundSourceLabel, after.fundSourceLabel);
-    push(t('admin.examForm.changeLog.examDate'), before.examDate, after.examDate);
+
+    const dateChanged = before.examDate !== after.examDate;
+    const scheduleChanged = before.scheduleText !== after.scheduleText;
+    if (dateChanged || scheduleChanged) {
+      const beforeCombined = [before.examDate, before.scheduleText].filter(Boolean).join('\n\n');
+      const afterCombined = [after.examDate, after.scheduleText].filter(Boolean).join('\n\n');
+      changes.push({
+        label: t('admin.examForm.changeLog.examDateAndSchedule'),
+        oldValue: beforeCombined,
+        newValue: afterCombined,
+      });
+    }
+
     push(t('admin.examForm.changeLog.regStart'), before.regStartDate, after.regStartDate);
     push(t('admin.examForm.changeLog.regEnd'), before.regEndDate, after.regEndDate);
     push(t('admin.examForm.changeLog.payStart'), before.payStartDate, after.payStartDate);
     push(t('admin.examForm.changeLog.payEnd'), before.payEndDate, after.payEndDate);
-    push(t('admin.examForm.changeLog.schedule'), before.scheduleText, after.scheduleText);
 
     return changes;
   };
