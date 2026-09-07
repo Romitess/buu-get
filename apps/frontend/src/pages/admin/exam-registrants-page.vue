@@ -72,11 +72,11 @@
         </template>
 
         <template v-slot:body-cell-fullnameTh="{ value }">
-          <div class="registrant-fullname-cell">{{ value }}</div>
+          <div class="registrant-name-cell">{{ value }}</div>
         </template>
 
         <template v-slot:body-cell-fullnameEn="{ value }">
-          <div class="registrant-fullname-cell">{{ value }}</div>
+          <div class="registrant-name-cell">{{ value }}</div>
         </template>
 
         <template v-slot:body-cell-email="{ value }">
@@ -250,98 +250,113 @@ const pagination = ref<PaginationModel>({
   descending: false,
 });
 
+/** Shrink-to-content columns — frees horizontal space for name/email. */
+const fitContentColStyle = 'width: 1%; white-space: nowrap;';
+const nameColStyle = 'white-space: nowrap;';
+const emailColStyle = 'white-space: nowrap;';
+
 const columns = computed<QTableColumn[]>(() => {
   void i18n.locale.value;
   return [
-  {
-    name: 'index',
-    label: i18n.t('admin.registrantManagement.table.columns.index'),
-    field: 'index',
-    align: 'center',
-    sortable: false,
-    style: 'width: 5%',
-  },
-  {
-    name: 'titleTh',
-    label: i18n.t('admin.registrantManagement.table.columns.prefix'),
-    field: 'titleTh',
-    align: 'center',
-    sortable: false,
-    style: 'width: 8%',
-  },
-  {
-    name: 'fullnameTh',
-    label: i18n.t('admin.registrantManagement.table.columns.fullName'),
-    field: 'fullnameTh',
-    align: 'left',
-    sortable: false,
-    style: 'width: 13%',
-  },
-  {
-    name: 'fullnameEn',
-    label: i18n.t('admin.registrantManagement.table.columns.fullNameEn'),
-    field: 'fullnameEn',
-    align: 'left',
-    sortable: false,
-    style: 'width: 13%',
-  },
-  {
-    name: 'email',
-    label: i18n.t('admin.registrantManagement.table.columns.email'),
-    field: 'email',
-    align: 'left',
-    sortable: false,
-    style: 'width: 14%',
-  },
-  {
-    name: 'phone',
-    label: i18n.t('admin.registrantManagement.table.columns.phone'),
-    field: 'phone',
-    align: 'center',
-    sortable: false,
-    style: 'width: 11%',
-  },
-  {
-    name: 'remark',
-    label: i18n.t('admin.registrantManagement.table.columns.remark'),
-    field: 'remark',
-    align: 'center',
-    sortable: false,
-    style: 'width: 12%',
-  },
-  {
-    name: 'paymentStatus',
-    label: i18n.t('admin.registrantManagement.table.columns.paymentStatus'),
-    field: 'paymentStatus',
-    align: 'center',
-    sortable: false,
-    format: (val: number) => {
-      const key = PAYMENT_STATUS_I18N_KEYS[val];
-      return key ? i18n.t(key) : '-';
+    {
+      name: 'index',
+      label: i18n.t('admin.registrantManagement.table.columns.index'),
+      field: 'index',
+      align: 'center',
+      sortable: false,
+      style: fitContentColStyle,
+      headerStyle: fitContentColStyle,
     },
-    style: 'width: 11%',
-  },
-  {
-    name: 'verifyStatus',
-    label: i18n.t('admin.registrantManagement.table.columns.verifyStatus'),
-    field: 'verifyStatus',
-    align: 'center',
-    sortable: false,
-    format: (val: number) => {
-      const key = VERIFY_STATUS_I18N_KEYS[val];
-      return key ? i18n.t(key) : '-';
+    {
+      name: 'titleTh',
+      label: i18n.t('admin.registrantManagement.table.columns.prefix'),
+      field: 'titleTh',
+      align: 'center',
+      sortable: false,
+      style: fitContentColStyle,
+      headerStyle: fitContentColStyle,
     },
-    style: 'width: 12%',
-  },
-  {
-    name: 'tools',
-    label: i18n.t('admin.registrantManagement.table.columns.tools'),
-    field: 'tools',
-    align: 'center',
-    sortable: false,
-    style: 'width: 9%',
-  },
-];
+    {
+      name: 'fullnameTh',
+      label: i18n.t('admin.registrantManagement.table.columns.fullName'),
+      field: 'fullnameTh',
+      align: 'left',
+      sortable: false,
+      style: nameColStyle,
+      headerStyle: nameColStyle,
+    },
+    {
+      name: 'fullnameEn',
+      label: i18n.t('admin.registrantManagement.table.columns.fullNameEn'),
+      field: 'fullnameEn',
+      align: 'left',
+      sortable: false,
+      style: nameColStyle,
+      headerStyle: nameColStyle,
+    },
+    {
+      name: 'email',
+      label: i18n.t('admin.registrantManagement.table.columns.email'),
+      field: 'email',
+      align: 'left',
+      sortable: false,
+      style: emailColStyle,
+      headerStyle: emailColStyle,
+    },
+    {
+      name: 'phone',
+      label: i18n.t('admin.registrantManagement.table.columns.phone'),
+      field: 'phone',
+      align: 'center',
+      sortable: false,
+      style: fitContentColStyle,
+      headerStyle: fitContentColStyle,
+    },
+    {
+      name: 'remark',
+      label: i18n.t('admin.registrantManagement.table.columns.remark'),
+      field: 'remark',
+      align: 'center',
+      sortable: false,
+      style: fitContentColStyle,
+      headerStyle: fitContentColStyle,
+    },
+    {
+      name: 'paymentStatus',
+      label: i18n.t('admin.registrantManagement.table.columns.paymentStatus'),
+      field: 'paymentStatus',
+      align: 'center',
+      sortable: false,
+      format: (val: number) => {
+        const key = PAYMENT_STATUS_I18N_KEYS[val];
+        return key ? i18n.t(key) : '-';
+      },
+      style: fitContentColStyle,
+      headerStyle: fitContentColStyle,
+    },
+    {
+      name: 'verifyStatus',
+      label: i18n.t('admin.registrantManagement.table.columns.verifyStatus'),
+      field: 'verifyStatus',
+      align: 'center',
+      sortable: false,
+      format: (val: number) => {
+        const key = VERIFY_STATUS_I18N_KEYS[val];
+        return key ? i18n.t(key) : '-';
+      },
+      style: fitContentColStyle,
+      headerStyle: fitContentColStyle,
+    },
+    {
+      name: 'tools',
+      label: i18n.t('admin.registrantManagement.table.columns.tools'),
+      field: 'tools',
+      align: 'center',
+      sortable: false,
+      style: fitContentColStyle,
+      headerStyle: fitContentColStyle,
+    },
+  ];
 });
 
 const onRequest = (props: TableRequestProps): void => {
@@ -488,30 +503,25 @@ onMounted(async () => {
 }
 
 .registrants-table {
+  overflow-x: auto;
+
   :deep(.q-table__container) {
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
   }
 
-  :deep(thead tr th:nth-child(3)) {
-    text-align: center !important;
-    padding-left: 0 !important;
-  }
-
-  :deep(tbody tr td:nth-child(3)) {
-    padding-left: clamp(12px, 4vw, 70px) !important;
+  /* Tighter column gaps; override BaseTable wrap so fit-content cols stay on one line. */
+  :deep(thead tr th),
+  :deep(tbody tr td) {
+    padding-left: 6px;
+    padding-right: 6px;
+    white-space: nowrap !important;
+    word-break: normal;
   }
 }
 
-.registrant-fullname-cell {
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
+.registrant-name-cell,
 .registrant-contact-cell {
-  width: 100%;
-  min-width: 0;
-  word-break: break-word;
+  white-space: nowrap;
 }
 </style>
