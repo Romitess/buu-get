@@ -9,6 +9,7 @@ import { PaymentConfig } from '../payment-configs/entities/payment-config.entity
 import { TransactionStatusHistory } from '../transaction-status-history/entities/transaction-status-history.entity';
 import { TransactionRef } from '../transaction-refs/entities/transaction-ref.entity';
 import { TransactionProfile } from '../transaction-profiles/entities/transaction-profile.entity';
+import { EnrollmentAuditModule } from '../enrollment-audit/enrollment-audit.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { TransactionProfile } from '../transaction-profiles/entities/transaction
       TransactionRef,
       TransactionProfile,
     ]),
+    EnrollmentAuditModule,
   ],
   controllers: [TransactionsController],
   providers: [TransactionsService],

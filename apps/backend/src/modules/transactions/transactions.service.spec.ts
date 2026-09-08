@@ -289,6 +289,10 @@ describe('TransactionsService', () => {
     service = new TransactionsService(
       transactionsRepository as unknown as Repository<Transaction>,
       dataSource as unknown as DataSource,
+      {
+        record: jest.fn().mockResolvedValue(undefined),
+        recordMany: jest.fn().mockResolvedValue(undefined),
+      } as never,
     );
   });
 
@@ -634,6 +638,10 @@ describe('TransactionsService', () => {
         service = new TransactionsService(
           transactionsRepository as unknown as Repository<Transaction>,
           dataSource as unknown as DataSource,
+          {
+            record: jest.fn().mockResolvedValue(undefined),
+            recordMany: jest.fn().mockResolvedValue(undefined),
+          } as never,
         );
 
         const transaction = basePendingTransaction();

@@ -1,7 +1,8 @@
 import { RoleEnum } from 'src/modules/roles/enums/role.enum';
 
-/** role ที่ admin สลับมุมมองได้ */
+/** role ที่ admin สลับมุมมองได้ — รวม admin เพื่อกลับมาโหมดผู้ดูแลได้ */
 export const ADMIN_SWITCHABLE_ROLES: RoleEnum[] = [
+  RoleEnum.ADMIN,
   RoleEnum.REGISTRATION_OFFICER,
   RoleEnum.EXAM_OPERATIONS_OFFICER,
 ];

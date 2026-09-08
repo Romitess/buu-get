@@ -10,6 +10,7 @@ import { ExamPasscode } from '../exam/entities/exam-passcode.entity';
 import { User } from '../users/entities/user.entity';
 import { ExamPasscodeLog } from '../exam/entities/exam-passcode-log.entity';
 import { TestTakerIdService } from './test-taker-id.service';
+import { EnrollmentAuditModule } from '../enrollment-audit/enrollment-audit.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TestTakerIdService } from './test-taker-id.service';
       ExamPasscodeLog,
       User,
     ]),
+    EnrollmentAuditModule,
   ],
   controllers: [ExamEnrollmentsController],
   providers: [ExamEnrollmentsService, TestTakerIdService],

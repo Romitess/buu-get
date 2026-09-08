@@ -40,6 +40,7 @@ import { CheckInAssistEvent } from '../modules/check-in-assist/entities/check-in
 import { Notification } from '../modules/notifications/entities/notification.entity';
 import { NotificationRecipient } from '../modules/notifications/entities/notification-recipient.entity';
 import { MsgPerson } from '../modules/msg-persons/entities/msg-person.entity';
+import { ExamEnrollmentAuditLog } from '../modules/enrollment-audit/entities/exam-enrollment-audit-log.entity';
 
 export default new DataSource({
   type: 'mysql',
@@ -60,6 +61,7 @@ export default new DataSource({
     ExamSessionLocation,
     ExamLocationSeat,
     ExamEnrollment,
+    ExamEnrollmentAuditLog,
     ExamVoucher,
     FundSource,
     Transaction,

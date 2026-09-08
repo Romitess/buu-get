@@ -161,6 +161,14 @@ const menuLinks = computed(() => {
       icon: 'assignment',
       path: '/admin/exam-management',
     });
+    if (role === ROLES.ADMIN) {
+      links.push({
+        name: 'applicant-audit',
+        label: t('navigation.applicantAudit'),
+        icon: 'manage_search',
+        path: '/admin/applicant-audit',
+      });
+    }
     links.push({
       name: 'score-rubric-management',
       label: t('navigation.manageScoreRubrics'),

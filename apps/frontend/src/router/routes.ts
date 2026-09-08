@@ -269,6 +269,35 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'applicant-audit',
+            name: 'admin-applicant-audit',
+            component: () => import('pages/admin/applicant-audit-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.applicantAudit', icon: 'manage_search' },
+              ],
+            },
+          },
+          {
+            path: 'applicant-audit/:ermId',
+            name: 'admin-applicant-audit-detail',
+            component: () => import('pages/admin/applicant-audit-detail-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                {
+                  label: 'navigation.applicantAudit',
+                  icon: 'manage_search',
+                  to: '/admin/applicant-audit',
+                },
+                { label: 'navigation.applicantAuditDetail', icon: 'history' },
+              ],
+            },
+          },
+          {
             path: 'exam-management',
             name: 'admin-exam-management',
             component: () => import('pages/admin/exam-management-page.vue'),

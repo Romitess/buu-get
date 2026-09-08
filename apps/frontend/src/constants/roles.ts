@@ -36,8 +36,9 @@ export const ROLE_LABELS: Record<string, string> = {
   proctor: 'ผู้คุมสอบ',
 };
 
-/** role ที่ admin สลับมุมมองได้ */
+/** role ที่ admin สลับมุมมองได้ — รวม admin เพื่อกลับมาโหมดผู้ดูแลได้ */
 export const ADMIN_SWITCHABLE_ROLES: RoleValue[] = [
+  ROLES.ADMIN,
   ROLES.REGISTRATION_OFFICER,
   ROLES.EXAM_OPERATIONS_OFFICER,
 ];

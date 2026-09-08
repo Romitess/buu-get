@@ -102,7 +102,15 @@ export const useUserStore = defineStore('user', () => {
       return;
     }
 
-    setActiveRole(ROLES.REGISTRATION_OFFICER);
+    // ค่าเริ่มต้น: มุมมอง admin (หรือตัวแรกในรายการที่สลับได้)
+    if (switchableRoles.value.includes(ROLES.ADMIN)) {
+      setActiveRole(ROLES.ADMIN);
+      return;
+    }
+    const fallback = switchableRoles.value[0];
+    if (fallback) {
+      setActiveRole(fallback);
+    }
   }
 
   function setActiveRole(role: UserRole): void {

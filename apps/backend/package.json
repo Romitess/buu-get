@@ -19,7 +19,7 @@
     "test:db:reset": "NODE_ENV=test ts-node -r tsconfig-paths/register scripts/test-db-reset.ts",
     "seed:test-rbac": "NODE_ENV=test ts-node -r tsconfig-paths/register src/database/seeds/test-rbac-seed.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "typeorm": "node -r tsconfig-paths/register $(node -p \"require.resolve('typeorm/cli-ts-node-commonjs.js')\") -d src/database/data-source.ts",
+    "typeorm": "node -r tsconfig-paths/register ./node_modules/typeorm/cli-ts-node-commonjs.js -d src/database/data-source.ts",
     "migration:generate": "npm run typeorm -- migration:generate",
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",

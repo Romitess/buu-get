@@ -44,6 +44,10 @@ describe('authz.util', () => {
       ).toBe(RoleEnum.EXAM_OPERATIONS_OFFICER);
     });
 
+    it('allows admin to switch back to admin view', () => {
+      expect(resolveActiveRole(adminUser, RoleEnum.ADMIN)).toBe(RoleEnum.ADMIN);
+    });
+
     it('ignores header for non-privileged users', () => {
       expect(
         resolveActiveRole(candidateUser, RoleEnum.REGISTRATION_OFFICER),

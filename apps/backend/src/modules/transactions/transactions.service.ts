@@ -48,6 +48,12 @@ import {
 } from '../transaction-status-history/entities/transaction-status-history.entity';
 import { TransactionRef } from '../transaction-refs/entities/transaction-ref.entity';
 import { TransactionProfile } from '../transaction-profiles/entities/transaction-profile.entity';
+import { EnrollmentAuditService } from '../enrollment-audit/enrollment-audit.service';
+import {
+  EnrollmentAuditActorType,
+  EnrollmentAuditCategory,
+  EnrollmentAuditEventType,
+} from '../enrollment-audit/entities/exam-enrollment-audit-log.entity';
 
 export interface PendingPaymentResult {
   transaction: Transaction;
@@ -72,6 +78,7 @@ export class TransactionsService {
     @InjectRepository(Transaction)
     private readonly transactionsRepository: Repository<Transaction>,
     private readonly dataSource: DataSource,
+    private readonly enrollmentAuditService: EnrollmentAuditService,
   ) {}
 
   async create(
@@ -103,6 +110,7 @@ export class TransactionsService {
 
       const enrollment = await enrollmentRepository.findOne({
         where: { ERM_ID: dto.ermId },
+        relations: ['SESSION', 'SESSION.EXAM'],
       });
       if (!enrollment) {
         throw new NotFoundException(
@@ -182,6 +190,40 @@ export class TransactionsService {
               : 'Restarted pending transaction',
         });
         await historyRepository.save(history);
+
+        await this.enrollmentAuditService.record(
+          {
+            ermId: enrollment.ERM_ID,
+            userId: enrollment.USER_ID,
+            examId: enrollment.SESSION?.EXAM_ID ?? null,
+            sessionId: enrollment.SESSION_ID,
+            eventType: EnrollmentAuditEventType.PAYMENT_PENDING_CREATED,
+            category: EnrollmentAuditCategory.PAYMENT,
+            fromStatus:
+              previousStatus === null
+                ? null
+                : this.toHistoryStatus(previousStatus),
+            toStatus: this.toHistoryStatus(TransactionPaymentStatus.PENDING),
+            actorType: EnrollmentAuditActorType.CANDIDATE,
+            actorUserId: user.userId,
+            message:
+              previousStatus === null
+                ? 'สร้างรายการชำระเงิน (รอชำระ)'
+                : 'เริ่มรายการชำระเงินใหม่ (รอชำระ)',
+            refType: 'TRANX',
+            refId: savedTransaction.TRANX_ID,
+            payload: {
+              amount: Number(savedTransaction.TRANX_AMOUNT),
+              examName: enrollment.SESSION?.EXAM?.EXAM_NAME ?? null,
+              examRound: enrollment.SESSION?.EXAM?.EXAM_ROUND ?? null,
+              examFee:
+                enrollment.SESSION?.EXAM?.EXAM_FEE != null
+                  ? Number(enrollment.SESSION.EXAM.EXAM_FEE)
+                  : null,
+            },
+          },
+          manager,
+        );
       }
 
       return { TRANX_ID: savedTransaction.TRANX_ID };
@@ -247,6 +289,30 @@ export class TransactionsService {
               TSH_RESP_CODE: '000',
               TSH_RESP_MESSAGE: 'Payment session expired on reopen',
             }),
+          );
+
+          await this.enrollmentAuditService.record(
+            {
+              ermId: enrollment!.ERM_ID,
+              userId: enrollment!.USER_ID,
+              examId: enrollment!.SESSION?.EXAM_ID ?? null,
+              sessionId: enrollment!.SESSION_ID,
+              eventType: EnrollmentAuditEventType.ENROLLMENT_CANCELLED,
+              category: EnrollmentAuditCategory.SYSTEM,
+              fromStatus: String(ExamEnrollmentStatus.UNPAID),
+              toStatus: String(ExamEnrollmentStatus.CANCELLED),
+              actorType: EnrollmentAuditActorType.SYSTEM,
+              message: 'ยกเลิกเพราะหมดเวลาชำระเงินเมื่อเปิดหน้าชำระใหม่',
+              refType: 'TRANX',
+              refId: tranxId,
+              payload: {
+                reason: 'payment_session_expired_on_reopen',
+                amount: Number(transaction.TRANX_AMOUNT),
+                examName: enrollment!.SESSION?.EXAM?.EXAM_NAME ?? null,
+                examRound: enrollment!.SESSION?.EXAM?.EXAM_ROUND ?? null,
+              },
+            },
+            manager,
           );
 
           throw new BadRequestException('Payment session has expired');
@@ -339,6 +405,7 @@ export class TransactionsService {
       const enrollmentRepository = manager.getRepository(ExamEnrollment);
       const enrollmentToUpdate = await enrollmentRepository.findOne({
         where: { ERM_ID: transaction.ERM_ID },
+        relations: ['SESSION', 'SESSION.EXAM'],
       });
       if (enrollmentToUpdate) {
         enrollmentToUpdate.ERM_STATUS = ExamEnrollmentStatus.PAID;
@@ -367,6 +434,32 @@ export class TransactionsService {
 
       // จัดการข้อมูลใบเสร็จ
       await this.handleReceiptSync(manager, tranxId, dto);
+
+      if (enrollmentToUpdate) {
+        await this.enrollmentAuditService.record(
+          {
+            ermId: enrollmentToUpdate.ERM_ID,
+            userId: enrollmentToUpdate.USER_ID,
+            examId: enrollmentToUpdate.SESSION?.EXAM_ID ?? null,
+            sessionId: enrollmentToUpdate.SESSION_ID,
+            eventType: EnrollmentAuditEventType.ENROLLMENT_STATUS_CHANGED,
+            category: EnrollmentAuditCategory.PAYMENT,
+            fromStatus: String(ExamEnrollmentStatus.UNPAID),
+            toStatus: String(ExamEnrollmentStatus.PAID),
+            actorType: EnrollmentAuditActorType.CANDIDATE,
+            actorUserId: user.userId,
+            message: 'ยืนยันการชำระเงินสำเร็จ',
+            refType: 'TRANX',
+            refId: tranxId,
+            payload: {
+              amount: Number(transaction.TRANX_AMOUNT),
+              examName: enrollmentToUpdate.SESSION?.EXAM?.EXAM_NAME ?? null,
+              examRound: enrollmentToUpdate.SESSION?.EXAM?.EXAM_ROUND ?? null,
+            },
+          },
+          manager,
+        );
+      }
 
       await queryRunner.commitTransaction();
     } catch (error) {
@@ -400,6 +493,7 @@ export class TransactionsService {
 
       const enrollment = await manager.getRepository(ExamEnrollment).findOne({
         where: { ERM_ID: transaction.ERM_ID },
+        relations: ['SESSION', 'SESSION.EXAM'],
       });
       this.assertEnrollmentAccess(user, enrollment);
 
@@ -416,6 +510,31 @@ export class TransactionsService {
       if (enrollment && enrollment.ERM_STATUS === ExamEnrollmentStatus.UNPAID) {
         enrollment.ERM_STATUS = ExamEnrollmentStatus.CANCELLED;
         await manager.getRepository(ExamEnrollment).save(enrollment);
+
+        await this.enrollmentAuditService.record(
+          {
+            ermId: enrollment.ERM_ID,
+            userId: enrollment.USER_ID,
+            examId: enrollment.SESSION?.EXAM_ID ?? null,
+            sessionId: enrollment.SESSION_ID,
+            eventType: EnrollmentAuditEventType.ENROLLMENT_CANCELLED,
+            category: EnrollmentAuditCategory.SYSTEM,
+            fromStatus: String(ExamEnrollmentStatus.UNPAID),
+            toStatus: String(ExamEnrollmentStatus.CANCELLED),
+            actorType: EnrollmentAuditActorType.SYSTEM,
+            actorUserId: user.userId,
+            message: 'ยกเลิกเพราะหมดเวลาชำระเงิน',
+            refType: 'TRANX',
+            refId: tranxId,
+            payload: {
+              reason: 'payment_expired',
+              amount: Number(transaction.TRANX_AMOUNT),
+              examName: enrollment.SESSION?.EXAM?.EXAM_NAME ?? null,
+              examRound: enrollment.SESSION?.EXAM?.EXAM_ROUND ?? null,
+            },
+          },
+          manager,
+        );
       }
 
       const history = historyRepository.create({
@@ -642,6 +761,29 @@ export class TransactionsService {
       enrollment.ERM_STATUS = ExamEnrollmentStatus.PAID;
       await enrollmentRepository.save(enrollment);
 
+      await this.enrollmentAuditService.record(
+        {
+          ermId: enrollment.ERM_ID,
+          userId: enrollment.USER_ID,
+          examId: enrollment.SESSION?.EXAM_ID ?? null,
+          sessionId: enrollment.SESSION_ID,
+          eventType: EnrollmentAuditEventType.ENROLLMENT_STATUS_CHANGED,
+          category: EnrollmentAuditCategory.PAYMENT,
+          fromStatus: String(ExamEnrollmentStatus.UNPAID),
+          toStatus: String(ExamEnrollmentStatus.PAID),
+          actorType: EnrollmentAuditActorType.SYSTEM,
+          message: 'บันทึกการชำระเงินสำเร็จ (pending payment flow)',
+          refType: 'TRANX',
+          refId: transaction.TRANX_ID,
+          payload: {
+            amount: Number(transaction.TRANX_AMOUNT),
+            examName: enrollment.SESSION?.EXAM?.EXAM_NAME ?? null,
+            examRound: enrollment.SESSION?.EXAM?.EXAM_ROUND ?? null,
+          },
+        },
+        manager,
+      );
+
       return { transaction, receipt };
     });
   }
@@ -658,7 +800,12 @@ export class TransactionsService {
 
       const transaction = await transactionRepository.findOne({
         where: { TRANX_ID: tranxId },
-        relations: ['RECEIPTS', 'ENROLLMENT'],
+        relations: [
+          'RECEIPTS',
+          'ENROLLMENT',
+          'ENROLLMENT.SESSION',
+          'ENROLLMENT.SESSION.EXAM',
+        ],
       });
 
       if (!transaction) {
@@ -713,10 +860,35 @@ export class TransactionsService {
         transaction.ENROLLMENT ??
         (await enrollmentRepository.findOne({
           where: { ERM_ID: transaction.ERM_ID },
+          relations: ['SESSION', 'SESSION.EXAM'],
         }));
       if (enrollment) {
         enrollment.ERM_STATUS = ExamEnrollmentStatus.CANCELLED;
         await enrollmentRepository.save(enrollment);
+
+        await this.enrollmentAuditService.record(
+          {
+            ermId: enrollment.ERM_ID,
+            userId: enrollment.USER_ID,
+            examId: enrollment.SESSION?.EXAM_ID ?? null,
+            sessionId: enrollment.SESSION_ID,
+            eventType: EnrollmentAuditEventType.ENROLLMENT_CANCELLED,
+            category: EnrollmentAuditCategory.PAYMENT,
+            fromStatus: null,
+            toStatus: String(ExamEnrollmentStatus.CANCELLED),
+            actorType: EnrollmentAuditActorType.SYSTEM,
+            message: 'ยกเลิกการสมัครเนื่องจากคืนเงิน',
+            refType: 'TRANX',
+            refId: transaction.TRANX_ID,
+            payload: {
+              reason: 'refund',
+              amount: Number(transaction.TRANX_AMOUNT),
+              examName: enrollment.SESSION?.EXAM?.EXAM_NAME ?? null,
+              examRound: enrollment.SESSION?.EXAM?.EXAM_ROUND ?? null,
+            },
+          },
+          manager,
+        );
       }
 
       return transaction;

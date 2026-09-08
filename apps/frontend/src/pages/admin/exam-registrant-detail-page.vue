@@ -37,6 +37,18 @@
           @click="handleVerify"
         />
       </div>
+
+      <q-card v-if="isAdmin" flat bordered class="q-mt-lg q-pa-md">
+        <div class="text-subtitle1 text-weight-bold q-mb-md">
+          {{ $t('admin.applicantAudit.detailTitle') }}
+        </div>
+        <EnrollmentAuditTimeline
+          :events="auditEvents"
+          :loading="isAuditLoading"
+          :hint="$t('admin.applicantAudit.forwardOnlyHint')"
+          :empty-label="$t('admin.applicantAudit.noEvents')"
+        />
+      </q-card>
       </template>
     </main>
 
@@ -81,16 +93,20 @@ import RequestFixDialog from 'src/components/request-fix-dialog.vue';
 import RegistrantEditDialog from 'src/components/registrant-edit-dialog.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
+import EnrollmentAuditTimeline from 'src/components/enrollment/enrollment-audit-timeline.vue';
 import {
   fetchEnrollmentById,
   updateEnrollmentStatus,
   requestEnrollmentFix,
 } from 'src/services/enrollment.service';
+import { fetchEnrollmentAuditEvents } from 'src/services/enrollment-audit.service';
 import { updateUserProfileByAdmin } from 'src/services/user.service';
 import { useUserStore } from 'src/stores/user.store';
 import { VerifyStatus } from 'src/types/enrollment.types';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
+import type { EnrollmentAuditEvent } from 'src/types/enrollment-audit.types';
 import { PageSkeleton } from 'src/components/base/skeleton';
+import { ROLES } from 'src/constants/roles';
 
 const route = useRoute();
 const router = useRouter();
@@ -103,6 +119,10 @@ const isLoading = ref(true);
 const isActionLoading = ref(false);
 const showFixDialog = ref(false);
 const showEditDialog = ref(false);
+const isAuditLoading = ref(false);
+const auditEvents = ref<EnrollmentAuditEvent[]>([]);
+
+const isAdmin = computed(() => userStore.activeRole === ROLES.ADMIN);
 
 const registrantName = computed(
   () =>
@@ -119,6 +139,22 @@ const examDateFormatted = computed(() => {
     : t('admin.registrantManagement.detail.errors.unspecifiedDate');
 });
 
+const loadAuditEvents = async (ermId: number): Promise<void> => {
+  if (!isAdmin.value) {
+    auditEvents.value = [];
+    return;
+  }
+  isAuditLoading.value = true;
+  try {
+    auditEvents.value = await fetchEnrollmentAuditEvents(ermId);
+  } catch (error) {
+    console.error('Error fetching enrollment audit events:', error);
+    auditEvents.value = [];
+  } finally {
+    isAuditLoading.value = false;
+  }
+};
+
 const loadData = async (): Promise<void> => {
   const ermId = Number(route.params.ermId);
   if (isNaN(ermId)) {
@@ -131,6 +167,7 @@ const loadData = async (): Promise<void> => {
   try {
     const detail = await fetchEnrollmentById(ermId);
     enrollment.value = detail;
+    await loadAuditEvents(ermId);
   } catch (error) {
     console.error('Error fetching enrollment:', error);
     $q.notify({

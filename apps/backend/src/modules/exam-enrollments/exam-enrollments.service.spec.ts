@@ -262,6 +262,10 @@ describe('ExamEnrollmentsService', () => {
       examPasscodeLogRepository as unknown as Repository<ExamPasscodeLog>,
       dataSource as never,
       testTakerIdService as unknown as TestTakerIdService,
+      {
+        record: jest.fn().mockResolvedValue(undefined),
+        recordMany: jest.fn().mockResolvedValue(undefined),
+      } as never,
     );
 
   const mockCreateFlowQueryBuilders = (opts?: {
@@ -1663,12 +1667,33 @@ describe('ExamEnrollmentsService', () => {
         execute: jest.fn().mockResolvedValue({ affected: 2 }),
       });
 
+      const auditRepo = {
+        create: jest.fn((payload: unknown) => payload),
+        save: jest.fn(async (rows: unknown) => rows),
+      };
+      const enrollmentFindRepo = {
+        find: jest.fn().mockResolvedValue([
+          { ERM_ID: 201, USER_ID: 1, SESSION_ID: 1, SESSION: { EXAM_ID: 1 } },
+          { ERM_ID: 202, USER_ID: 2, SESSION_ID: 1, SESSION: { EXAM_ID: 1 } },
+        ]),
+      };
+      const qrEnrollmentFindRepo = {
+        find: jest.fn().mockResolvedValue([
+          { ERM_ID: 101, USER_ID: 3, SESSION_ID: 2, SESSION: { EXAM_ID: 1 } },
+          { ERM_ID: 102, USER_ID: 4, SESSION_ID: 2, SESSION: { EXAM_ID: 1 } },
+        ]),
+      };
+
       const payEndManager = {
         createQueryBuilder: jest
           .fn()
           .mockReturnValueOnce(payEndSelectQb)
           .mockReturnValueOnce(payEndUpdateErmQb)
           .mockReturnValueOnce(payEndUpdateTranxQb),
+        getRepository: jest.fn((entity: unknown) => {
+          if (entity === ExamEnrollment) return enrollmentFindRepo;
+          return auditRepo;
+        }),
       };
       const qrManager = {
         createQueryBuilder: jest
@@ -1676,6 +1701,10 @@ describe('ExamEnrollmentsService', () => {
           .mockReturnValueOnce(qrSelectQb)
           .mockReturnValueOnce(qrUpdateTranxQb)
           .mockReturnValueOnce(qrUpdateErmQb),
+        getRepository: jest.fn((entity: unknown) => {
+          if (entity === ExamEnrollment) return qrEnrollmentFindRepo;
+          return auditRepo;
+        }),
       };
 
       dataSource.transaction = jest

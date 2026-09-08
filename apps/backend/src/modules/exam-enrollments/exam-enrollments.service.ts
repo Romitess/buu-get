@@ -65,6 +65,12 @@ import {
 } from './interfaces/executive-exam-history.interface';
 import { ValidatePasscodeDto } from './dto/validate-passcode.dto';
 import { TransactionPaymentStatus } from '../transactions/entities/transaction.entity';
+import { EnrollmentAuditService } from '../enrollment-audit/enrollment-audit.service';
+import {
+  EnrollmentAuditActorType,
+  EnrollmentAuditCategory,
+  EnrollmentAuditEventType,
+} from '../enrollment-audit/entities/exam-enrollment-audit-log.entity';
 
 @Injectable()
 export class ExamEnrollmentsService {
@@ -89,6 +95,7 @@ export class ExamEnrollmentsService {
     private readonly examPasscodeLogRepository: Repository<ExamPasscodeLog>,
     private readonly dataSource: DataSource,
     private readonly testTakerIdService: TestTakerIdService,
+    private readonly enrollmentAuditService: EnrollmentAuditService,
   ) {}
 
   async bulkAssignSeats(dto: BulkSeatAssignmentDto): Promise<ExamEnrollment[]> {
@@ -364,6 +371,43 @@ export class ExamEnrollmentsService {
       });
       await this.examPasscodeLogRepository.save(log);
     }
+
+    const actorName =
+      `${user.PROFILE?.userTitleTh || ''} ${user.PROFILE?.userFullnameTh || ''}`.trim() ||
+      user.USER_NATIONAL_ID ||
+      null;
+    await this.enrollmentAuditService.record({
+      ermId: saved.ERM_ID,
+      userId: saved.USER_ID,
+      examId: targetSession.EXAM_ID,
+      sessionId: saved.SESSION_ID,
+      eventType: EnrollmentAuditEventType.ENROLLMENT_CREATED,
+      category: EnrollmentAuditCategory.ENROLLMENT,
+      fromStatus: null,
+      toStatus: String(saved.ERM_STATUS),
+      actorType: EnrollmentAuditActorType.CANDIDATE,
+      actorUserId: saved.USER_ID,
+      actorName,
+      message:
+        targetSession.EXAM?.EXAM_TYPE === EXAM_TYPE.SPECIAL
+          ? 'สมัครสอบพิเศษสำเร็จ (สถานะชำระแล้ว)'
+          : 'สมัครสอบสำเร็จ (รอชำระเงิน)',
+      payload: {
+        examName: targetSession.EXAM?.EXAM_NAME ?? null,
+        examRound: targetSession.EXAM?.EXAM_ROUND ?? null,
+        examFee:
+          targetSession.EXAM?.EXAM_FEE != null
+            ? Number(targetSession.EXAM.EXAM_FEE)
+            : null,
+        examDate: targetSession.EXAM?.EXAM_DATE ?? null,
+        sessionStart: targetSession.SS_START_TIME
+          ? String(targetSession.SS_START_TIME).substring(0, 5)
+          : null,
+        sessionEnd: targetSession.SS_END_TIME
+          ? String(targetSession.SS_END_TIME).substring(0, 5)
+          : null,
+      },
+    });
 
     // คืน entity เบาหลังสมัคร — ไม่โหลด deep graph ของ findOne
     return this.examEnrollmentRepository.findOneOrFail({
@@ -1184,6 +1228,7 @@ export class ExamEnrollmentsService {
         : (null as unknown as ExamSessionLocation);
     }
 
+    const previousStatus = Number(enrollment.ERM_STATUS);
     const updated = this.examEnrollmentRepository.merge(
       enrollment,
       updateExamEnrollmentDto,
@@ -1191,6 +1236,32 @@ export class ExamEnrollmentsService {
 
     const saved = await this.examEnrollmentRepository.save(updated);
     const currentStatus: ExamEnrollmentStatus = Number(saved.ERM_STATUS);
+
+    if (
+      !userHasAnyRole(user, ENROLLMENT_ADMIN_ROLES) &&
+      currentStatus === ExamEnrollmentStatus.CANCELLED &&
+      previousStatus === ExamEnrollmentStatus.UNPAID
+    ) {
+      await this.enrollmentAuditService.record({
+        ermId: saved.ERM_ID,
+        userId: saved.USER_ID,
+        examId: enrollment.SESSION?.EXAM_ID ?? null,
+        sessionId: saved.SESSION_ID,
+        eventType: EnrollmentAuditEventType.ENROLLMENT_CANCELLED,
+        category: EnrollmentAuditCategory.ENROLLMENT,
+        fromStatus: String(ExamEnrollmentStatus.UNPAID),
+        toStatus: String(ExamEnrollmentStatus.CANCELLED),
+        actorType: EnrollmentAuditActorType.CANDIDATE,
+        actorUserId: user.userId,
+        actorName: null,
+        message: 'ผู้สมัครยกเลิกการสมัคร (ยังไม่ชำระเงิน)',
+        payload: {
+          reason: 'candidate_cancel',
+          examName: enrollment.SESSION?.EXAM?.EXAM_NAME ?? null,
+          examRound: enrollment.SESSION?.EXAM?.EXAM_ROUND ?? null,
+        },
+      });
+    }
 
     if (
       saved.SL_ID &&
@@ -1526,6 +1597,31 @@ export class ExamEnrollmentsService {
         .andWhere('DELETED_AT IS NULL')
         .execute();
 
+      const cancelledEnrollments = await manager.getRepository(ExamEnrollment).find({
+        where: { ERM_ID: In(ermIds) },
+        relations: ['SESSION'],
+      });
+      await this.enrollmentAuditService.recordMany(
+        cancelledEnrollments.map((enrollment) => ({
+          ermId: enrollment.ERM_ID,
+          userId: enrollment.USER_ID,
+          examId: enrollment.SESSION?.EXAM_ID ?? null,
+          sessionId: enrollment.SESSION_ID,
+          eventType: EnrollmentAuditEventType.ENROLLMENT_CANCELLED,
+          category: EnrollmentAuditCategory.SYSTEM,
+          fromStatus: String(ExamEnrollmentStatus.UNPAID),
+          toStatus: String(ExamEnrollmentStatus.CANCELLED),
+          actorType: EnrollmentAuditActorType.CRON,
+          message: 'ระบบยกเลิกเพราะเลยกำหนดชำระเงินของรอบสอบ',
+          payload: {
+            reason: 'exam_pay_end_passed',
+            examName: enrollment.SESSION?.EXAM?.EXAM_NAME ?? null,
+            examRound: enrollment.SESSION?.EXAM?.EXAM_ROUND ?? null,
+          },
+        })),
+        manager,
+      );
+
       this.logger.log(
         `[Cron] Cancelled ${ermIds.length} unpaid enrollments past exam pay end date (and expired related PENDING transactions).`,
       );
@@ -1577,6 +1673,31 @@ export class ExamEnrollmentsService {
           unpaid: ExamEnrollmentStatus.UNPAID,
         })
         .execute();
+
+      const cancelledEnrollments = await manager.getRepository(ExamEnrollment).find({
+        where: { ERM_ID: In(ermIds) },
+        relations: ['SESSION'],
+      });
+      await this.enrollmentAuditService.recordMany(
+        cancelledEnrollments.map((enrollment) => ({
+          ermId: enrollment.ERM_ID,
+          userId: enrollment.USER_ID,
+          examId: enrollment.SESSION?.EXAM_ID ?? null,
+          sessionId: enrollment.SESSION_ID,
+          eventType: EnrollmentAuditEventType.ENROLLMENT_CANCELLED,
+          category: EnrollmentAuditCategory.SYSTEM,
+          fromStatus: String(ExamEnrollmentStatus.UNPAID),
+          toStatus: String(ExamEnrollmentStatus.CANCELLED),
+          actorType: EnrollmentAuditActorType.CRON,
+          message: 'ระบบยกเลิกเพราะหมดเวลาชำระเงิน (QR session)',
+          payload: {
+            reason: 'qr_session_expired',
+            examName: enrollment.SESSION?.EXAM?.EXAM_NAME ?? null,
+            examRound: enrollment.SESSION?.EXAM?.EXAM_ROUND ?? null,
+          },
+        })),
+        manager,
+      );
 
       this.logger.log(
         `[Cron] Expired ${tranxIds.length} QR payment sessions and cancelled enrollments.`,

@@ -50,6 +50,7 @@ import { MsgPersonsModule } from './modules/msg-persons/msg-persons.module';
 import { PaymentProviderModule } from './modules/payment-provider/payment-provider.module';
 import { IdentityModule } from './modules/identity/identity.module';
 import { HealthModule } from './modules/health/health.module';
+import { EnrollmentAuditModule } from './modules/enrollment-audit/enrollment-audit.module';
 
 @Module({
   imports: [
@@ -126,6 +127,7 @@ import { HealthModule } from './modules/health/health.module';
     PaymentProviderModule,
     IdentityModule,
     HealthModule,
+    EnrollmentAuditModule,
   ],
   providers: [
     // Global auth guard — ทุก endpoint ต้องมี JWT ที่ถูกต้อง ยกเว้นที่ทำเครื่องหมาย @Public()
