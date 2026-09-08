@@ -51,6 +51,7 @@ import { PaymentProviderModule } from './modules/payment-provider/payment-provid
 import { IdentityModule } from './modules/identity/identity.module';
 import { HealthModule } from './modules/health/health.module';
 import { EnrollmentAuditModule } from './modules/enrollment-audit/enrollment-audit.module';
+import { SystemSettingsModule } from './modules/system-settings/system-settings.module';
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { EnrollmentAuditModule } from './modules/enrollment-audit/enrollment-aud
           migrations: ['dist/database/migrations/*.js'],
         }) as TypeOrmModuleOptions,
     }),
+    SystemSettingsModule,
     AuthModule,
     UsersModule,
     RolesModule,

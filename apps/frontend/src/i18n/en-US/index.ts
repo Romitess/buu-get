@@ -1672,6 +1672,28 @@ export default {
         deleteMessage: 'Are you sure you want to delete this fund source?',
       },
     },
+    systemSettings: {
+      pageTitle: 'System Settings',
+      pageDescription:
+        'Configure system defaults such as exam fees, payment session TTL, and organization details on documents (admin / super_admin only)',
+      actions: {
+        save: 'Save settings',
+      },
+      groups: {
+        exam: 'Exam',
+        payment: 'Payment',
+        certificate: 'Certificate',
+        org: 'Organization',
+        email: 'Email',
+      },
+      messages: {
+        saved: 'Settings saved successfully',
+      },
+      errors: {
+        loadFailed: 'Unable to load system settings',
+        saveFailed: 'Unable to save system settings',
+      },
+    },
     searchUser: {
       triggerLabel: 'Search Applicant Info',
       dialogTitle: 'Search Applicant',
@@ -2311,6 +2333,7 @@ export default {
     profileShort: 'Profile',
     personalProfile: 'Personal Profile',
     manageExams: 'Manage Exams',
+    systemSettings: 'System Settings',
     dashboard: 'Dashboard',
     pageBuilder: 'Homepage Builder',
     viewSchedule: 'View Schedule',

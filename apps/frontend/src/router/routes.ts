@@ -281,6 +281,18 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'system-settings',
+            name: 'admin-system-settings',
+            component: () => import('pages/admin/system-settings-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.SUPER_ADMIN],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.systemSettings', icon: 'settings' },
+              ],
+            },
+          },
+          {
             path: 'applicant-audit/:userId',
             name: 'admin-applicant-audit-detail',
             component: () => import('pages/admin/applicant-audit-detail-page.vue'),

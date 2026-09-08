@@ -41,6 +41,8 @@ import { Notification } from '../modules/notifications/entities/notification.ent
 import { NotificationRecipient } from '../modules/notifications/entities/notification-recipient.entity';
 import { MsgPerson } from '../modules/msg-persons/entities/msg-person.entity';
 import { ExamEnrollmentAuditLog } from '../modules/enrollment-audit/entities/exam-enrollment-audit-log.entity';
+import { SystemSetting } from '../modules/system-settings/entities/system-setting.entity';
+import { SystemSettingAuditLog } from '../modules/system-settings/entities/system-setting-audit-log.entity';
 
 export default new DataSource({
   type: 'mysql',
@@ -91,6 +93,8 @@ export default new DataSource({
     Notification,
     NotificationRecipient,
     MsgPerson,
+    SystemSetting,
+    SystemSettingAuditLog,
   ],
   migrations: [
     __filename.endsWith('.js')

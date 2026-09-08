@@ -12,8 +12,10 @@ import type {
   VerifyCertificateResponseDto,
   VerifyReceiptResponseDto,
 } from './dto/verify-response.dto';
+import { SystemSettingsService } from '../system-settings/system-settings.service';
+import { SYSTEM_SETTING_KEYS } from '../system-settings/constants/system-settings.catalog';
 
-const BUU_ORGANIZATION = {
+const BUU_ORGANIZATION_FALLBACK = {
   nameTH: 'มหาวิทยาลัยบูรพา',
   nameEN: 'BURAPHA UNIVERSITY',
   taxId: '0994000033100',
@@ -27,7 +29,29 @@ export class VerifyService {
     @InjectRepository(Receipt)
     private readonly receiptRepository: Repository<Receipt>,
     private readonly scoreCriteriaService: ScoreCriteriaService,
+    private readonly systemSettingsService: SystemSettingsService,
   ) {}
+
+  private async resolveOrganization(): Promise<{
+    nameTH: string;
+    nameEN: string;
+    taxId: string;
+  }> {
+    try {
+      const [nameTH, nameEN, taxId] = await Promise.all([
+        this.systemSettingsService.getString(SYSTEM_SETTING_KEYS.ORG_NAME_TH),
+        this.systemSettingsService.getString(SYSTEM_SETTING_KEYS.ORG_NAME_EN),
+        this.systemSettingsService.getString(SYSTEM_SETTING_KEYS.ORG_TAX_ID),
+      ]);
+      return {
+        nameTH: nameTH || BUU_ORGANIZATION_FALLBACK.nameTH,
+        nameEN: nameEN || BUU_ORGANIZATION_FALLBACK.nameEN,
+        taxId: taxId || BUU_ORGANIZATION_FALLBACK.taxId,
+      };
+    } catch {
+      return { ...BUU_ORGANIZATION_FALLBACK };
+    }
+  }
 
   async verifyCertificate(code: string): Promise<VerifyCertificateResponseDto> {
     const certificate = await this.certificateRepository.findOne({
@@ -166,7 +190,7 @@ export class VerifyService {
           examRound: exam?.EXAM_ROUND ?? null,
           examDate: exam?.EXAM_DATE ?? null,
         },
-        organization: { ...BUU_ORGANIZATION },
+        organization: await this.resolveOrganization(),
       };
     }
 
@@ -188,7 +212,7 @@ export class VerifyService {
         examRound: exam?.EXAM_ROUND ?? null,
         examDate: exam?.EXAM_DATE ?? null,
       },
-      organization: { ...BUU_ORGANIZATION },
+      organization: await this.resolveOrganization(),
     };
   }
 

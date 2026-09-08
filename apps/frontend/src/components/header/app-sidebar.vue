@@ -168,6 +168,12 @@ const menuLinks = computed(() => {
         icon: 'manage_search',
         path: '/admin/applicant-audit',
       });
+      links.push({
+        name: 'system-settings',
+        label: t('navigation.systemSettings'),
+        icon: 'settings',
+        path: '/admin/system-settings',
+      });
     }
     links.push({
       name: 'score-rubric-management',

@@ -110,6 +110,14 @@ describe('VerifyService', () => {
       certificateRepository as unknown as Repository<ExamCertificate>,
       receiptRepository as unknown as Repository<Receipt>,
       scoreCriteriaService as unknown as ScoreCriteriaService,
+      {
+        getString: jest.fn(async (key: string) => {
+          if (key === 'org.nameTh') return 'มหาวิทยาลัยบูรพา';
+          if (key === 'org.nameEn') return 'BURAPHA UNIVERSITY';
+          if (key === 'org.taxId') return '0994000033100';
+          return '';
+        }),
+      } as never,
     );
   });
 

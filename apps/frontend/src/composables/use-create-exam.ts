@@ -36,6 +36,11 @@ import {
   type ExamChangeItem,
   type SessionLocationSnapshotPayload,
 } from 'src/services/exam.service';
+import {
+  fetchSystemSettings,
+  getSettingNumber,
+  getSettingValue,
+} from 'src/services/system-settings.service';
 import { getUsersFromApi, checkUserIdentifiers } from 'src/services/user.service';
 import { ROLES } from 'src/constants/roles';
 import { useUserStore } from 'src/stores/user.store';
@@ -926,13 +931,17 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     error.value = null;
     try {
       // Critical path: อย่ารอ GET /exam ทั้งก้อน — occupancy โหลด background หลังฟอร์มพร้อม
-      const [locations, fundSources, scoreRubrics, proctors, editExam] = await Promise.all([
-        fetchExamLocations(),
-        fetchFundSources(),
-        fetchScoreRubrics(),
-        getUsersFromApi(ROLES.PROCTOR),
-        examId.value ? fetchExamWithSeats(examId.value) : Promise.resolve(null),
-      ]);
+      const [locations, fundSources, scoreRubrics, proctors, editExam, systemSettings] =
+        await Promise.all([
+          fetchExamLocations(),
+          fetchFundSources(),
+          fetchScoreRubrics(),
+          getUsersFromApi(ROLES.PROCTOR),
+          examId.value ? fetchExamWithSeats(examId.value) : Promise.resolve(null),
+          examId.value
+            ? Promise.resolve([])
+            : fetchSystemSettings().catch(() => []),
+        ]);
       locationOptions.value = locations;
       const activeFundSources = fundSources.filter((fs: FundSource) => fs.FS_OPEN_STATUS !== false);
       fundSourceOptions.value = activeFundSources.map((fs: FundSource) => ({
@@ -941,6 +950,36 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       }));
       if (!examId.value && !form.value.srbId) {
         form.value.srbId = scoreRubrics.find((r) => r.isDefault)?.id ?? null;
+      }
+      if (!examId.value && systemSettings.length > 0) {
+        form.value.examName = getSettingValue(
+          systemSettings,
+          'exam.defaultName',
+          form.value.examName || DEFAULT_EXAM_NAME,
+        );
+        form.value.examType = getSettingValue(
+          systemSettings,
+          'exam.defaultType',
+          form.value.examType || EXAM_TYPE_GENERAL,
+        );
+        form.value.examFormat = getSettingValue(
+          systemSettings,
+          'exam.defaultFormat',
+          form.value.examFormat || EXAM_FORMAT_COMPUTER,
+        );
+        form.value.fee = String(
+          getSettingNumber(systemSettings, 'exam.defaultFeeThb', DEFAULT_EXAM_FEE_THB),
+        );
+        const defaultSeats = getSettingNumber(systemSettings, 'exam.defaultRoomSeats', 40);
+        const start = getSettingValue(systemSettings, 'exam.defaultSessionStart', '08:00');
+        const end = getSettingValue(systemSettings, 'exam.defaultSessionEnd', '10:00');
+        if (form.value.timeSlots[0]) {
+          form.value.timeSlots[0].startTime = start;
+          form.value.timeSlots[0].endTime = end;
+          if (form.value.timeSlots[0].rooms[0]) {
+            form.value.timeSlots[0].rooms[0].seats = defaultSeats;
+          }
+        }
       }
       proctorOptions.value = proctors.map((u) => {
         const displayName = u.fullNameTH ? `${u.titleTH || ''} ${u.fullNameTH}`.trim() : u.email;

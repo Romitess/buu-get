@@ -27,6 +27,8 @@ import {
   isImageCategory,
   resolveImageFolder,
 } from './constants/image-category.config';
+import { SystemSettingsService } from '../system-settings/system-settings.service';
+import { SYSTEM_SETTING_KEYS } from '../system-settings/constants/system-settings.catalog';
 
 @Injectable()
 export class PlatformGatewayService {
@@ -35,7 +37,22 @@ export class PlatformGatewayService {
     private configService: ConfigService,
     @Inject(CACHE_MANAGER)
     private cacheManager: Cache,
+    private readonly systemSettingsService: SystemSettingsService,
   ) {}
+
+  private async resolveEmailSenderName(fallback: string): Promise<string> {
+    try {
+      const configured = await this.systemSettingsService.getString(
+        SYSTEM_SETTING_KEYS.EMAIL_SENDER_NAME,
+      );
+      if (configured.trim()) {
+        return configured.trim();
+      }
+    } catch {
+      // keep caller fallback
+    }
+    return fallback;
+  }
 
   private getDomain(): string {
     const domain = this.configService.get<string>('domain');
@@ -323,8 +340,9 @@ export class PlatformGatewayService {
     message: string,
   ) {
     const apiName = 'sendEmail';
+    const sendSystem = await this.resolveEmailSenderName(system);
     const data = {
-      send_system: system,
+      send_system: sendSystem,
       send_to:
         process.env.AUTOMATE_TEST_MODE == 'true'
           ? 'jutamas.lu@go.buu.ac.th'
@@ -350,8 +368,9 @@ export class PlatformGatewayService {
     message: string,
   ) {
     const apiName = 'sendEmail';
+    const sendSystem = await this.resolveEmailSenderName(system);
     const data = {
-      send_system: system,
+      send_system: sendSystem,
       send_to:
         process.env.AUTOMATE_TEST_MODE == 'true'
           ? 'jutamas.lu@go.buu.ac.th'

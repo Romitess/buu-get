@@ -463,6 +463,10 @@ import {
   saveBandRules,
   type BandRuleData,
 } from 'src/services/score-criteria.service';
+import {
+  fetchSystemSettings,
+  getSettingNumber,
+} from 'src/services/system-settings.service';
 import type { CertificateScoreLine } from 'src/types/certificate';
 
 interface Props {
@@ -509,6 +513,7 @@ const router = useRouter();
 const currentSide = ref<'front' | 'back'>('front');
 const validFromDate = ref('');
 const validUntilDate = ref('');
+const certificateValidityYears = ref(2);
 const isSubmitting = ref(false);
 const isEditingBandRules = ref(false);
 const isSavingBandRules = ref(false);
@@ -711,6 +716,7 @@ const saveEditBandRules = async (): Promise<void> => {
 
 onMounted(() => {
   void loadBandRules();
+  void loadCertificateValidityYears();
 });
 
 const getLocalDateYmd = (date: Date = new Date()): string => {
@@ -719,6 +725,26 @@ const getLocalDateYmd = (date: Date = new Date()): string => {
   const dd = String(date.getDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}`;
 };
+
+async function loadCertificateValidityYears(): Promise<void> {
+  try {
+    const settings = await fetchSystemSettings();
+    certificateValidityYears.value = getSettingNumber(
+      settings,
+      'certificate.validityYears',
+      2,
+    );
+  } catch {
+    certificateValidityYears.value = 2;
+  }
+}
+
+function applyDefaultValidityRange(fromDate: Date): void {
+  validFromDate.value = getLocalDateYmd(fromDate);
+  const expiry = new Date(fromDate);
+  expiry.setFullYear(fromDate.getFullYear() + certificateValidityYears.value);
+  validUntilDate.value = getLocalDateYmd(expiry);
+}
 
 const isFutureLocalDate = (dateYmd: string): boolean => dateYmd > getLocalDateYmd();
 
@@ -867,12 +893,13 @@ const userPhotoUrl = computed(() => {
 
 watch(
   () => props.modelValue,
-  (val) => {
+  async (val) => {
     if (val) {
       currentSide.value = 'front';
       isEditingBandRules.value = false;
       editingBandRules.value = [];
       void loadBandRules();
+      await loadCertificateValidityYears();
       if (props.viewMode && props.candidateInfo) {
         validFromDate.value = props.candidateInfo.certIssuedAt
           ? props.candidateInfo.certIssuedAt.split('T')[0] || ''
@@ -881,12 +908,7 @@ watch(
           ? props.candidateInfo.certExpiresAt.split('T')[0] || ''
           : '';
       } else {
-        const today = new Date();
-        validFromDate.value = getLocalDateYmd(today);
-
-        const expiry = new Date(today);
-        expiry.setFullYear(today.getFullYear() + 2);
-        validUntilDate.value = getLocalDateYmd(expiry);
+        applyDefaultValidityRange(new Date());
       }
     } else {
       validFromDate.value = '';
@@ -901,7 +923,7 @@ watch(
 watch(validFromDate, (newVal) => {
   if (newVal && !props.viewMode) {
     const d = new Date(newVal);
-    d.setFullYear(d.getFullYear() + 2);
+    d.setFullYear(d.getFullYear() + certificateValidityYears.value);
     const yyyy = d.getFullYear();
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');

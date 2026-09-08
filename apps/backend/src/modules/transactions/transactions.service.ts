@@ -54,6 +54,8 @@ import {
   EnrollmentAuditCategory,
   EnrollmentAuditEventType,
 } from '../enrollment-audit/entities/exam-enrollment-audit-log.entity';
+import { SystemSettingsService } from '../system-settings/system-settings.service';
+import { SYSTEM_SETTING_KEYS } from '../system-settings/constants/system-settings.catalog';
 
 export interface PendingPaymentResult {
   transaction: Transaction;
@@ -69,8 +71,8 @@ export interface PaymentSessionResult {
   TRANX_EXPIRES_AT: Date;
 }
 
-/** QR payment session TTL (30 minutes) */
-const PAYMENT_SESSION_TTL_MS = 30 * 60 * 1000;
+/** Fallback เมื่อยังอ่าน System Settings ไม่ได้ */
+const PAYMENT_SESSION_TTL_MS_FALLBACK = 30 * 60 * 1000;
 
 @Injectable()
 export class TransactionsService {
@@ -79,7 +81,22 @@ export class TransactionsService {
     private readonly transactionsRepository: Repository<Transaction>,
     private readonly dataSource: DataSource,
     private readonly enrollmentAuditService: EnrollmentAuditService,
+    private readonly systemSettingsService: SystemSettingsService,
   ) {}
+
+  private async resolvePaymentSessionTtlMs(): Promise<number> {
+    try {
+      const minutes = await this.systemSettingsService.getInteger(
+        SYSTEM_SETTING_KEYS.PAYMENT_SESSION_TTL_MINUTES,
+      );
+      if (minutes > 0) {
+        return minutes * 60 * 1000;
+      }
+    } catch {
+      // keep fallback
+    }
+    return PAYMENT_SESSION_TTL_MS_FALLBACK;
+  }
 
   async create(
     createTransactionDto: CreateTransactionDto,
@@ -324,7 +341,8 @@ export class TransactionsService {
         };
       }
 
-      let expiresAt = new Date(now.getTime() + PAYMENT_SESSION_TTL_MS);
+      const ttlMs = await this.resolvePaymentSessionTtlMs();
+      let expiresAt = new Date(now.getTime() + ttlMs);
       if (payEnd && expiresAt > payEnd) {
         expiresAt = payEnd;
       }

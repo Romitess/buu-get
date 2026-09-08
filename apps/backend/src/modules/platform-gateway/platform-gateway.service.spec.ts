@@ -2,6 +2,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PlatformGatewayService } from './platform-gateway.service';
+import { SystemSettingsService } from '../system-settings/system-settings.service';
 
 jest.mock('uuid', () => ({ v4: () => 'test-uuid' }));
 
@@ -19,6 +20,12 @@ describe('PlatformGatewayService', () => {
         {
           provide: CACHE_MANAGER,
           useValue: { get: jest.fn(), set: jest.fn(), del: jest.fn() },
+        },
+        {
+          provide: SystemSettingsService,
+          useValue: {
+            getString: jest.fn().mockResolvedValue('BUU-GET'),
+          },
         },
       ],
     }).compile();

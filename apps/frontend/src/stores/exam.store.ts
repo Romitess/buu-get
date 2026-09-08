@@ -23,6 +23,10 @@ import {
   ENROLLMENT_STATUS,
   formatLocationWithRoom,
 } from 'src/constants/exam';
+import {
+  fetchSystemSettings,
+  getSettingNumber,
+} from 'src/services/system-settings.service';
 import { isActiveEnrollmentStatus } from 'src/utils/is-active-enrollment-status';
 import {
   getExamRoundsCalendarAvailability,
@@ -404,12 +408,21 @@ export const useExamStore = defineStore('exam', () => {
   async function createTransaction(
     enrollmentId: number,
     amount: number,
-    pcId = 1,
+    pcId?: number,
   ): Promise<number> {
     try {
+      let resolvedPcId = pcId;
+      if (resolvedPcId == null) {
+        try {
+          const settings = await fetchSystemSettings();
+          resolvedPcId = getSettingNumber(settings, 'payment.defaultPcId', 1);
+        } catch {
+          resolvedPcId = 1;
+        }
+      }
       const { TRANX_ID } = await createTransactionRequest({
         ermId: enrollmentId,
-        pcId,
+        pcId: resolvedPcId,
         amount,
       });
 

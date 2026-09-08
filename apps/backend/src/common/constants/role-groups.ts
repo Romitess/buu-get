@@ -13,6 +13,12 @@ export const FINANCE_ROLES: RoleEnum[] = [
 /** จัดการผู้ใช้และ role */
 export const USER_ADMIN_ROLES: RoleEnum[] = [RoleEnum.ADMIN];
 
+/** แก้ System Settings — admin และ super_admin (super_admin ผ่าน RolesGuard bypass อยู่แล้ว) */
+export const SYSTEM_SETTINGS_WRITE_ROLES: RoleEnum[] = [
+  RoleEnum.ADMIN,
+  RoleEnum.SUPER_ADMIN,
+];
+
 /** จัดการการสมัครสอบ */
 export const ENROLLMENT_ADMIN_ROLES: RoleEnum[] = [
   RoleEnum.ADMIN,
@@ -33,6 +39,12 @@ export const EXAM_ADMIN_ROLES: RoleEnum[] = [
   RoleEnum.STAFF,
   RoleEnum.EXAM_OPERATIONS_OFFICER,
   RoleEnum.REGISTRATION_OFFICER,
+];
+
+/** อ่าน System Settings สำหรับ prefill ฟอร์มสร้างรอบสอบ */
+export const SYSTEM_SETTINGS_READ_ROLES: RoleEnum[] = [
+  ...EXAM_ADMIN_ROLES,
+  RoleEnum.SUPER_ADMIN,
 ];
 
 /** อ่านแหล่งทุน — การเงิน + เจ้าหน้าที่จัดสอบ/ทะเบียน (ใช้ตอนสร้างการสอบ) */

@@ -1675,6 +1675,28 @@ export default {
         deleteMessage: 'คุณแน่ใจหรือไม่ว่าต้องการลบผังแหล่งเงินนี้?',
       },
     },
+    systemSettings: {
+      pageTitle: 'ตั้งค่าระบบ',
+      pageDescription:
+        'กำหนดค่าเริ่มต้นของระบบ เช่น ค่าธรรมเนียมสอบ ระยะเวลาชำระเงิน และข้อมูลองค์กรบนเอกสาร (เฉพาะ admin / super_admin)',
+      actions: {
+        save: 'บันทึกการตั้งค่า',
+      },
+      groups: {
+        exam: 'การสอบ',
+        payment: 'การชำระเงิน',
+        certificate: 'ใบรับรอง',
+        org: 'องค์กร',
+        email: 'อีเมล',
+      },
+      messages: {
+        saved: 'บันทึกการตั้งค่าเรียบร้อยแล้ว',
+      },
+      errors: {
+        loadFailed: 'ไม่สามารถโหลดการตั้งค่าระบบได้',
+        saveFailed: 'บันทึกการตั้งค่าไม่สำเร็จ',
+      },
+    },
     searchUser: {
       triggerLabel: 'ค้นหาข้อมูลผู้สมัคร',
       dialogTitle: 'ค้นหาผู้สมัคร',
@@ -2213,6 +2235,7 @@ export default {
     manageExams: 'จัดการรอบสอบ',
     applicantAudit: 'Audit ผู้สมัคร',
     applicantAuditDetail: 'Timeline ผู้สมัคร',
+    systemSettings: 'ตั้งค่าระบบ',
     dashboard: 'แดชบอร์ด',
     pageBuilder: 'จัดการหน้าแรก',
     viewSchedule: 'ตารางสอบ',

@@ -293,6 +293,11 @@ describe('TransactionsService', () => {
         record: jest.fn().mockResolvedValue(undefined),
         recordMany: jest.fn().mockResolvedValue(undefined),
       } as never,
+      {
+        getInteger: jest.fn().mockResolvedValue(30),
+        getNumber: jest.fn().mockResolvedValue(30),
+        getString: jest.fn().mockResolvedValue('30'),
+      } as never,
     );
   });
 
@@ -641,6 +646,11 @@ describe('TransactionsService', () => {
           {
             record: jest.fn().mockResolvedValue(undefined),
             recordMany: jest.fn().mockResolvedValue(undefined),
+          } as never,
+          {
+            getInteger: jest.fn().mockResolvedValue(30),
+            getNumber: jest.fn().mockResolvedValue(30),
+            getString: jest.fn().mockResolvedValue('30'),
           } as never,
         );
 
