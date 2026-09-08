@@ -15,10 +15,13 @@ import {
   EnrollmentAuditEventDto,
   EnrollmentAuditListItem,
   EnrollmentAuditSummaryDto,
+  EnrollmentAuditApplicantListItem,
+  EnrollmentAuditApplicantEnrollmentDto,
 } from './enrollment-audit.service';
 import {
   EnrollmentAuditEventsQueryDto,
   EnrollmentAuditListQueryDto,
+  EnrollmentAuditApplicantsQueryDto,
 } from './dto/enrollment-audit-query.dto';
 
 @ApiTags('Enrollment Audit')
@@ -27,8 +30,26 @@ import {
 export class EnrollmentAuditController {
   constructor(private readonly enrollmentAuditService: EnrollmentAuditService) {}
 
+  @Get('applicants')
+  @ApiOperation({ summary: 'รายชื่อผู้สมัครแบบ unique user สำหรับหน้า audit (Admin)' })
+  @ApiResponse({ status: HttpStatus.OK })
+  async findApplicants(
+    @Query() query: EnrollmentAuditApplicantsQueryDto,
+  ): Promise<PaginatedResponse<EnrollmentAuditApplicantListItem>> {
+    return this.enrollmentAuditService.findApplicants(query);
+  }
+
+  @Get('applicants/:userId/enrollments')
+  @ApiOperation({ summary: 'รายการรอบสอบของผู้สมัครสำหรับเลือกบน timeline' })
+  @ApiResponse({ status: HttpStatus.OK })
+  async findApplicantEnrollments(
+    @Param('userId', ParseIntPipe) userId: number,
+  ): Promise<EnrollmentAuditApplicantEnrollmentDto[]> {
+    return this.enrollmentAuditService.findApplicantEnrollments(userId);
+  }
+
   @Get('enrollments')
-  @ApiOperation({ summary: 'รายชื่อผู้สมัครสำหรับดู audit (Admin)' })
+  @ApiOperation({ summary: 'รายชื่อ enrollment สำหรับดู audit (Admin)' })
   @ApiResponse({ status: HttpStatus.OK })
   async findEnrollments(
     @Query() query: EnrollmentAuditListQueryDto,

@@ -1,5 +1,8 @@
 import { api } from 'src/boot/axios';
 import type {
+  EnrollmentAuditApplicantEnrollment,
+  EnrollmentAuditApplicantsParams,
+  EnrollmentAuditApplicantsResponse,
   EnrollmentAuditEvent,
   EnrollmentAuditListParams,
   EnrollmentAuditListResponse,
@@ -12,6 +15,25 @@ export const fetchEnrollmentAuditList = async (
   const response = await api.get<EnrollmentAuditListResponse>('/enrollment-audit/enrollments', {
     params,
   });
+  return response.data;
+};
+
+export const fetchEnrollmentAuditApplicants = async (
+  params: EnrollmentAuditApplicantsParams = {},
+): Promise<EnrollmentAuditApplicantsResponse> => {
+  const response = await api.get<EnrollmentAuditApplicantsResponse>(
+    '/enrollment-audit/applicants',
+    { params },
+  );
+  return response.data;
+};
+
+export const fetchApplicantEnrollments = async (
+  userId: number,
+): Promise<EnrollmentAuditApplicantEnrollment[]> => {
+  const response = await api.get<EnrollmentAuditApplicantEnrollment[]>(
+    `/enrollment-audit/applicants/${userId}/enrollments`,
+  );
   return response.data;
 };
 

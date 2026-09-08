@@ -107,3 +107,43 @@ export interface EnrollmentAuditListResponse {
     totalPages: number;
   };
 }
+
+export interface EnrollmentAuditApplicantListItem {
+  userId: number;
+  fullnameTh: string | null;
+  fullnameEn: string | null;
+  nationalId: string | null;
+  enrollmentCount: number;
+  latestEnrollmentAt: string;
+}
+
+export interface EnrollmentAuditApplicantsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+export interface EnrollmentAuditApplicantsResponse {
+  data: EnrollmentAuditApplicantListItem[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface EnrollmentAuditApplicantEnrollment {
+  ermId: number;
+  examId: number | null;
+  examName: string | null;
+  examRound: string | null;
+  examFiscalYear: string | null;
+  examDate: string | null;
+  sessionId: number;
+  sessionStart: string | null;
+  sessionEnd: string | null;
+  ermStatus: number;
+  testTakerCode: string | null;
+  createdAt: string;
+}

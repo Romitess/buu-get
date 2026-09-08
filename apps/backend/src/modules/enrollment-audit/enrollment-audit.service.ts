@@ -24,6 +24,7 @@ import { RecordEnrollmentAuditInput } from './dto/record-enrollment-audit.dto';
 import {
   EnrollmentAuditEventsQueryDto,
   EnrollmentAuditListQueryDto,
+  EnrollmentAuditApplicantsQueryDto,
 } from './dto/enrollment-audit-query.dto';
 
 export interface EnrollmentAuditListItem {
@@ -42,6 +43,30 @@ export interface EnrollmentAuditListItem {
   fullnameEn: string | null;
   ermStatus: number;
   verifyStatus: number;
+  createdAt: Date;
+}
+
+export interface EnrollmentAuditApplicantListItem {
+  userId: number;
+  fullnameTh: string | null;
+  fullnameEn: string | null;
+  nationalId: string | null;
+  enrollmentCount: number;
+  latestEnrollmentAt: Date | string;
+}
+
+export interface EnrollmentAuditApplicantEnrollmentDto {
+  ermId: number;
+  examId: number | null;
+  examName: string | null;
+  examRound: string | null;
+  examFiscalYear: string | null;
+  examDate: string | null;
+  sessionId: number;
+  sessionStart: string | null;
+  sessionEnd: string | null;
+  ermStatus: number;
+  testTakerCode: string | null;
   createdAt: Date;
 }
 
@@ -262,6 +287,123 @@ export class EnrollmentAuditService {
     }));
 
     return buildPaginatedResponse(data, total, page, limit);
+  }
+
+  async findApplicants(
+    query: EnrollmentAuditApplicantsQueryDto,
+  ): Promise<PaginatedResponse<EnrollmentAuditApplicantListItem>> {
+    const page = query.page ?? PAGINATION_DEFAULT_PAGE;
+    const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
+
+    const applySearch = (
+      qb: ReturnType<Repository<ExamEnrollment>['createQueryBuilder']>,
+    ): void => {
+      if (!query.search?.trim()) return;
+      const search = `%${query.search.trim().toLowerCase()}%`;
+      qb.andWhere(
+        `(LOWER(COALESCE(profile.userFullnameTh, '')) LIKE :search
+          OR LOWER(COALESCE(profile.userFullnameEn, '')) LIKE :search
+          OR LOWER(COALESCE(user.USER_NATIONAL_ID, '')) LIKE :search
+          OR LOWER(COALESCE(user.USER_PASSPORT_NO, '')) LIKE :search
+          OR LOWER(COALESCE(enrollment.ERM_TEST_TAKER, '')) LIKE :search)`,
+        { search },
+      );
+    };
+
+    const countQb = this.enrollmentRepository
+      .createQueryBuilder('enrollment')
+      .leftJoin('enrollment.USER', 'user')
+      .leftJoin('user.PROFILE', 'profile')
+      .select('COUNT(DISTINCT enrollment.USER_ID)', 'cnt');
+    applySearch(countQb);
+    const total = Number(
+      (await countQb.getRawOne<{ cnt: string | number }>())?.cnt ?? 0,
+    );
+
+    const pageQb = this.enrollmentRepository
+      .createQueryBuilder('enrollment')
+      .leftJoin('enrollment.USER', 'user')
+      .leftJoin('user.PROFILE', 'profile')
+      .select('enrollment.USER_ID', 'userId')
+      .addSelect('MAX(enrollment.CREATED_AT)', 'latestEnrollmentAt')
+      .addSelect('COUNT(enrollment.ERM_ID)', 'enrollmentCount')
+      .groupBy('enrollment.USER_ID')
+      .orderBy('latestEnrollmentAt', 'DESC')
+      .offset((page - 1) * limit)
+      .limit(limit);
+    applySearch(pageQb);
+
+    const rawRows = await pageQb.getRawMany<{
+      userId: number | string;
+      latestEnrollmentAt: Date | string;
+      enrollmentCount: number | string;
+    }>();
+
+    const userIds = rawRows.map((row) => Number(row.userId));
+    if (userIds.length === 0) {
+      return buildPaginatedResponse([], total, page, limit);
+    }
+
+    const samples = await this.enrollmentRepository.find({
+      where: { USER_ID: In(userIds) },
+      relations: ['USER', 'USER.PROFILE'],
+      order: { CREATED_AT: 'DESC' },
+    });
+    const sampleByUser = new Map<number, ExamEnrollment>();
+    for (const enrollment of samples) {
+      if (!sampleByUser.has(enrollment.USER_ID)) {
+        sampleByUser.set(enrollment.USER_ID, enrollment);
+      }
+    }
+
+    const data: EnrollmentAuditApplicantListItem[] = rawRows.map((row) => {
+      const userId = Number(row.userId);
+      const sample = sampleByUser.get(userId);
+      return {
+        userId,
+        fullnameTh: sample?.USER?.PROFILE?.userFullnameTh ?? null,
+        fullnameEn: sample?.USER?.PROFILE?.userFullnameEn ?? null,
+        nationalId:
+          sample?.USER?.USER_NATIONAL_ID?.trim() ||
+          sample?.USER?.USER_PASSPORT_NO?.trim() ||
+          null,
+        enrollmentCount: Number(row.enrollmentCount),
+        latestEnrollmentAt: row.latestEnrollmentAt,
+      };
+    });
+
+    return buildPaginatedResponse(data, total, page, limit);
+  }
+
+  async findApplicantEnrollments(
+    userId: number,
+  ): Promise<EnrollmentAuditApplicantEnrollmentDto[]> {
+    const rows = await this.enrollmentRepository.find({
+      where: { USER_ID: userId },
+      relations: ['SESSION', 'SESSION.EXAM'],
+      order: { CREATED_AT: 'DESC' },
+    });
+
+    if (rows.length === 0) {
+      throw new NotFoundException(
+        `No enrollments found for user ID ${userId}`,
+      );
+    }
+
+    return rows.map((enrollment) => ({
+      ermId: enrollment.ERM_ID,
+      examId: enrollment.SESSION?.EXAM_ID ?? null,
+      examName: enrollment.SESSION?.EXAM?.EXAM_NAME ?? null,
+      examRound: enrollment.SESSION?.EXAM?.EXAM_ROUND ?? null,
+      examFiscalYear: enrollment.SESSION?.EXAM?.EXAM_FISCAL_YEAR ?? null,
+      examDate: enrollment.SESSION?.EXAM?.EXAM_DATE ?? null,
+      sessionId: enrollment.SESSION_ID,
+      sessionStart: this.formatSessionTime(enrollment.SESSION?.SS_START_TIME),
+      sessionEnd: this.formatSessionTime(enrollment.SESSION?.SS_END_TIME),
+      ermStatus: Number(enrollment.ERM_STATUS),
+      testTakerCode: enrollment.ERM_TEST_TAKER,
+      createdAt: enrollment.CREATED_AT,
+    }));
   }
 
   async findEnrollmentSummary(ermId: number): Promise<EnrollmentAuditSummaryDto> {

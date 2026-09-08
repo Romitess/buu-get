@@ -24,6 +24,7 @@ describe('EnrollmentAuditService', () => {
   };
   let enrollmentRepository: {
     findOne: jest.Mock;
+    find: jest.Mock;
     createQueryBuilder: jest.Mock;
   };
   let transactionRepository: { find: jest.Mock };
@@ -45,6 +46,7 @@ describe('EnrollmentAuditService', () => {
     };
     enrollmentRepository = {
       findOne: jest.fn(),
+      find: jest.fn(),
       createQueryBuilder: jest.fn(),
     };
     transactionRepository = { find: jest.fn() };
@@ -213,6 +215,95 @@ describe('EnrollmentAuditService', () => {
     it('throws NotFound when enrollment missing (EAL-U-003)', async () => {
       enrollmentRepository.findOne.mockResolvedValue(null);
       await expect(service.findEvents(999)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('findApplicants', () => {
+    it('returns unique applicants with enrollment counts', async () => {
+      const chain = {
+        leftJoin: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        addSelect: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        offset: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValue({ cnt: 1 }),
+        getRawMany: jest.fn().mockResolvedValue([
+          {
+            userId: 5,
+            latestEnrollmentAt: new Date('2026-09-08T10:00:00.000Z'),
+            enrollmentCount: 2,
+          },
+        ]),
+      };
+      enrollmentRepository.createQueryBuilder.mockReturnValue(chain);
+      enrollmentRepository.find.mockResolvedValue([
+        {
+          USER_ID: 5,
+          USER: {
+            USER_NATIONAL_ID: '1234567890123',
+            PROFILE: { userFullnameTh: 'นาย ทดสอบ' },
+          },
+        },
+      ]);
+
+      const result = await service.findApplicants({ page: 1, limit: 10 });
+
+      expect(result.meta.total).toBe(1);
+      expect(result.data).toEqual([
+        expect.objectContaining({
+          userId: 5,
+          fullnameTh: 'นาย ทดสอบ',
+          nationalId: '1234567890123',
+          enrollmentCount: 2,
+        }),
+      ]);
+    });
+  });
+
+  describe('findApplicantEnrollments', () => {
+    it('returns enrollments for picker ordered by createdAt desc', async () => {
+      enrollmentRepository.find.mockResolvedValue([
+        {
+          ERM_ID: 20,
+          USER_ID: 5,
+          SESSION_ID: 8,
+          ERM_STATUS: 1,
+          ERM_TEST_TAKER: 'TT-2',
+          CREATED_AT: new Date('2026-09-08T11:00:00.000Z'),
+          SESSION: {
+            EXAM_ID: 4,
+            SS_START_TIME: '13:00:00',
+            SS_END_TIME: '16:00:00',
+            EXAM: {
+              EXAM_NAME: 'BUU-GET',
+              EXAM_ROUND: '2/2569',
+              EXAM_FISCAL_YEAR: '2569',
+              EXAM_DATE: '2026-10-01',
+            },
+          },
+        },
+      ]);
+
+      const rows = await service.findApplicantEnrollments(5);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toEqual(
+        expect.objectContaining({
+          ermId: 20,
+          examName: 'BUU-GET',
+          examRound: '2/2569',
+          sessionStart: '13:00',
+        }),
+      );
+    });
+
+    it('throws NotFound when user has no enrollments', async () => {
+      enrollmentRepository.find.mockResolvedValue([]);
+      await expect(service.findApplicantEnrollments(999)).rejects.toBeInstanceOf(
         NotFoundException,
       );
     });

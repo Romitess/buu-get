@@ -33,7 +33,7 @@
             icon="history"
             color="primary"
             :tooltip="$t('admin.applicantAudit.viewTimeline')"
-            @click="goToDetail(row.ermId)"
+            @click="goToDetail(row.userId)"
           />
         </div>
       </template>
@@ -51,17 +51,16 @@ import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import SearchBar from 'src/components/shared/search-bar.vue';
 import BaseTable from 'src/components/shared/base-table.vue';
 import ActionButton from 'src/components/shared/action-button.vue';
-import { fetchEnrollmentAuditList } from 'src/services/enrollment-audit.service';
-import type { EnrollmentAuditListItem } from 'src/types/enrollment-audit.types';
+import { fetchEnrollmentAuditApplicants } from 'src/services/enrollment-audit.service';
+import type { EnrollmentAuditApplicantListItem } from 'src/types/enrollment-audit.types';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
-import { EnrollmentStatus } from 'src/types/enrollment.types';
 
 const router = useRouter();
 const { t } = useI18n();
 
 const isLoading = ref(false);
 const searchQuery = ref('');
-const rows = ref<EnrollmentAuditListItem[]>([]);
+const rows = ref<EnrollmentAuditApplicantListItem[]>([]);
 const pagination = ref<PaginationModel>({
   page: 1,
   rowsPerPage: 10,
@@ -70,32 +69,11 @@ const pagination = ref<PaginationModel>({
 
 let searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
-const statusLabel = (status: number): string => {
-  switch (status) {
-    case Number(EnrollmentStatus.UNPAID):
-      return t('admin.applicantAudit.status.unpaid');
-    case Number(EnrollmentStatus.PAID):
-      return t('admin.applicantAudit.status.paid');
-    case Number(EnrollmentStatus.SEAT_ASSIGNED):
-      return t('admin.applicantAudit.status.seatAssigned');
-    case Number(EnrollmentStatus.SEAT_PUBLISHED):
-      return t('admin.applicantAudit.status.seatPublished');
-    case Number(EnrollmentStatus.ATTENDED):
-      return t('admin.applicantAudit.status.attended');
-    case Number(EnrollmentStatus.CANCELLED):
-      return t('admin.applicantAudit.status.cancelled');
-    case Number(EnrollmentStatus.MISSING):
-      return t('admin.applicantAudit.status.missing');
-    default:
-      return String(status);
-  }
-};
-
 const columns = computed<QTableColumn[]>(() => [
   {
     name: 'index',
     label: t('admin.applicantAudit.columns.index'),
-    field: (_row: EnrollmentAuditListItem, index?: number) =>
+    field: (_row: EnrollmentAuditApplicantListItem, index?: number) =>
       ((pagination.value.page - 1) * pagination.value.rowsPerPage || 0) + (index ?? 0) + 1,
     align: 'center',
   },
@@ -110,32 +88,18 @@ const columns = computed<QTableColumn[]>(() => [
     label: t('admin.applicantAudit.columns.nationalId'),
     field: 'nationalId',
     align: 'center',
-  },
-  {
-    name: 'testTakerCode',
-    label: t('admin.applicantAudit.columns.testTakerCode'),
-    field: 'testTakerCode',
-    align: 'center',
     format: (val: string | null) => val || '—',
   },
   {
-    name: 'examName',
-    label: t('admin.applicantAudit.columns.examName'),
-    field: (row: EnrollmentAuditListItem) =>
-      [row.examName, row.examRound].filter(Boolean).join(' ') || '—',
-    align: 'left',
-  },
-  {
-    name: 'ermStatus',
-    label: t('admin.applicantAudit.columns.status'),
-    field: 'ermStatus',
+    name: 'enrollmentCount',
+    label: t('admin.applicantAudit.columns.enrollmentCount'),
+    field: 'enrollmentCount',
     align: 'center',
-    format: (val: number) => statusLabel(val),
   },
   {
     name: 'tools',
     label: t('admin.applicantAudit.columns.tools'),
-    field: 'ermId',
+    field: 'userId',
     align: 'center',
   },
 ]);
@@ -155,7 +119,7 @@ const loadData = async (): Promise<void> => {
     if (trimmedSearch) {
       params.search = trimmedSearch;
     }
-    const result = await fetchEnrollmentAuditList(params);
+    const result = await fetchEnrollmentAuditApplicants(params);
     rows.value = result.data;
     pagination.value.rowsNumber = result.meta.total;
   } catch (error) {
@@ -173,8 +137,11 @@ const onRequest = (props: TableRequestProps): void => {
   void loadData();
 };
 
-const goToDetail = (ermId: number): void => {
-  void router.push({ name: 'admin-applicant-audit-detail', params: { ermId: String(ermId) } });
+const goToDetail = (userId: number): void => {
+  void router.push({
+    name: 'admin-applicant-audit-detail',
+    params: { userId: String(userId) },
+  });
 };
 
 watch(searchQuery, () => {

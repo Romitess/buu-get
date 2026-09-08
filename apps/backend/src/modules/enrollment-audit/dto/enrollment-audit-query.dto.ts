@@ -31,6 +31,16 @@ export class EnrollmentAuditListQueryDto extends PaginationQueryDto {
   status?: number;
 }
 
+export class EnrollmentAuditApplicantsQueryDto extends PaginationQueryDto {
+  @ApiPropertyOptional({
+    description: 'ค้นหาชื่อ / เลขประจำตัว / test taker (เจอคนที่มี enrollment ตรง)',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  search?: string;
+}
+
 export class EnrollmentAuditEventsQueryDto {
   @ApiPropertyOptional({ description: 'กรองหมวด: enrollment|payment|profile|passcode|system' })
   @IsOptional()

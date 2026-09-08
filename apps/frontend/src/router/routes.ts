@@ -281,7 +281,7 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
-            path: 'applicant-audit/:ermId',
+            path: 'applicant-audit/:userId',
             name: 'admin-applicant-audit-detail',
             component: () => import('pages/admin/applicant-audit-detail-page.vue'),
             meta: {
