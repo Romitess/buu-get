@@ -14,6 +14,11 @@ export enum CheckInAssistSessionStatus {
   CLOSED = 'CLOSED',
 }
 
+export enum CheckInAssistSessionMode {
+  HOST_ASSIST = 'HOST_ASSIST',
+  ROOM_STATION = 'ROOM_STATION',
+}
+
 @Entity('CHECK_IN_ASSIST_SESSIONS')
 export class CheckInAssistSession {
   @PrimaryGeneratedColumn({ name: 'CAS_ID', comment: 'รหัส session ช่วยแสกน' })
@@ -40,6 +45,23 @@ export class CheckInAssistSession {
     comment: 'รายการ SS_ID ที่อยู่ในขอบเขต session (JSON array)',
   })
   SESSION_IDS_JSON: string;
+
+  @Column({
+    name: 'MODE',
+    type: 'varchar',
+    length: 16,
+    default: CheckInAssistSessionMode.HOST_ASSIST,
+    comment: 'โหมด session (HOST_ASSIST/ROOM_STATION)',
+  })
+  MODE: CheckInAssistSessionMode;
+
+  @Column({
+    name: 'SL_ID',
+    type: 'int',
+    nullable: true,
+    comment: 'รหัส Session-Location เมื่อเป็นสถานีประจำห้อง',
+  })
+  SL_ID: number | null;
 
   @Column({
     name: 'STATUS',

@@ -4,6 +4,8 @@ import type {
   AssistSessionMeta,
   CreateAssistSessionResponse,
   ListAssistEventsResponse,
+  MyCheckInRoom,
+  RoomStation,
 } from 'src/types/check-in-assist.types';
 
 export interface CreateAssistSessionPayload {
@@ -56,6 +58,23 @@ export const closeAssistSession = async (casId: number): Promise<{ status: strin
   const response = await api.post<{ status: string }>(
     `/check-in-assist/sessions/${casId}/close`,
   );
+  return response.data;
+};
+
+export const listMyCheckInRooms = async (date?: string): Promise<MyCheckInRoom[]> => {
+  const response = await api.get<MyCheckInRoom[]>('/check-in-assist/my-rooms', {
+    params: date ? { date } : undefined,
+  });
+  return response.data;
+};
+
+export const openRoomStation = async (slId: number): Promise<RoomStation> => {
+  const response = await api.post<RoomStation>('/check-in-assist/room-stations', { slId });
+  return response.data;
+};
+
+export const getRoomStation = async (casId: number): Promise<RoomStation> => {
+  const response = await api.get<RoomStation>(`/check-in-assist/room-stations/${casId}`);
   return response.data;
 };
 

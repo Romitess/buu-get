@@ -476,6 +476,44 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'check-in/rooms',
+            name: 'admin-check-in-rooms',
+            component: () => import('pages/admin/check-in-rooms-page.vue'),
+            meta: {
+              roles: [
+                ROLES.ADMIN,
+                ROLES.STAFF,
+                ROLES.REGISTRATION_OFFICER,
+                ROLES.EXAM_OPERATIONS_OFFICER,
+                ROLES.PROCTOR,
+              ],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.roomCheckIn', icon: 'qr_code_scanner' },
+              ],
+            },
+          },
+          {
+            path: 'check-in/rooms/:casId/scan',
+            name: 'admin-room-check-in-scanner',
+            component: () => import('pages/admin/room-check-in-scanner-page.vue'),
+            meta: {
+              hideHeader: true,
+              hideDrawer: true,
+              roles: [
+                ROLES.ADMIN,
+                ROLES.STAFF,
+                ROLES.REGISTRATION_OFFICER,
+                ROLES.EXAM_OPERATIONS_OFFICER,
+                ROLES.PROCTOR,
+              ],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.roomCheckIn', icon: 'qr_code_scanner' },
+              ],
+            },
+          },
+          {
             path: 'check-in-assist/:joinToken',
             name: 'admin-check-in-assist-scanner',
             component: () => import('pages/admin/check-in-assist-scanner-page.vue'),

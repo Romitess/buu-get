@@ -8,7 +8,7 @@ export class SubmitCheckInAssistScanDto {
     example: 'ENG123456',
     description: 'Test Taker ID / เลขบัตร / Passport จากบาร์โค้ด',
   })
-  @Transform(({ value }) =>
+  @Transform(({ value }: { value: unknown }) =>
     typeof value === 'string' ? normalizeAssistScanCode(value) : value,
   )
   @IsString()

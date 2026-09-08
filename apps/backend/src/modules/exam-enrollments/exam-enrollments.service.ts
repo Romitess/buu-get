@@ -1149,6 +1149,7 @@ export class ExamEnrollmentsService {
   async checkIn(
     id: number,
     dto: CheckInExamEnrollmentDto,
+    options?: { expectedSlId?: number },
   ): Promise<ExamEnrollment> {
     const enrollment = await this.examEnrollmentRepository.findOne({
       where: { ERM_ID: id },
@@ -1158,6 +1159,10 @@ export class ExamEnrollmentsService {
       throw new NotFoundException(`Exam Enrollment with ID ${id} not found`);
     }
 
+    if (enrollment.ERM_STATUS === ExamEnrollmentStatus.ATTENDED) {
+      return this.findOne(id);
+    }
+
     if (
       enrollment.ERM_STATUS === ExamEnrollmentStatus.CANCELLED ||
       enrollment.ERM_STATUS === ExamEnrollmentStatus.UNPAID
@@ -1165,6 +1170,13 @@ export class ExamEnrollmentsService {
       throw new BadRequestException(
         'ไม่สามารถเช็กอินผู้สมัครที่ยังไม่ชำระเงินหรือถูกยกเลิกได้',
       );
+    }
+
+    if (
+      options?.expectedSlId != null &&
+      enrollment.SL_ID !== options.expectedSlId
+    ) {
+      throw new BadRequestException('ผู้เข้าสอบไม่ได้อยู่ห้องนี้');
     }
 
     const checkInTime = dto.ERM_ATTEND_CHECK_IN_TIME
@@ -1597,10 +1609,12 @@ export class ExamEnrollmentsService {
         .andWhere('DELETED_AT IS NULL')
         .execute();
 
-      const cancelledEnrollments = await manager.getRepository(ExamEnrollment).find({
-        where: { ERM_ID: In(ermIds) },
-        relations: ['SESSION'],
-      });
+      const cancelledEnrollments = await manager
+        .getRepository(ExamEnrollment)
+        .find({
+          where: { ERM_ID: In(ermIds) },
+          relations: ['SESSION'],
+        });
       await this.enrollmentAuditService.recordMany(
         cancelledEnrollments.map((enrollment) => ({
           ermId: enrollment.ERM_ID,
@@ -1674,10 +1688,12 @@ export class ExamEnrollmentsService {
         })
         .execute();
 
-      const cancelledEnrollments = await manager.getRepository(ExamEnrollment).find({
-        where: { ERM_ID: In(ermIds) },
-        relations: ['SESSION'],
-      });
+      const cancelledEnrollments = await manager
+        .getRepository(ExamEnrollment)
+        .find({
+          where: { ERM_ID: In(ermIds) },
+          relations: ['SESSION'],
+        });
       await this.enrollmentAuditService.recordMany(
         cancelledEnrollments.map((enrollment) => ({
           ermId: enrollment.ERM_ID,

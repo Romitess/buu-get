@@ -23,5 +23,9 @@ export const getDefaultRouteForRole = (role: UserRole | null | undefined): Defau
     return { name: 'admin-payment-import' };
   }
 
+  if (role === ROLES.PROCTOR) {
+    return { name: 'admin-check-in-rooms' };
+  }
+
   return { name: 'admin-dashboard' };
 };

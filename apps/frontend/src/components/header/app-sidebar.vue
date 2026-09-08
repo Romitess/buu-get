@@ -161,6 +161,12 @@ const menuLinks = computed(() => {
       icon: 'assignment',
       path: '/admin/exam-management',
     });
+    links.push({
+      name: 'room-check-in',
+      label: t('navigation.roomCheckIn'),
+      icon: 'qr_code_scanner',
+      path: '/admin/check-in/rooms',
+    });
     if (role === ROLES.ADMIN) {
       links.push({
         name: 'applicant-audit',
@@ -195,6 +201,12 @@ const menuLinks = computed(() => {
       label: t('navigation.manageExams'),
       icon: 'assignment',
       path: '/admin/exam-management',
+    });
+    links.push({
+      name: 'room-check-in',
+      label: t('navigation.roomCheckIn'),
+      icon: 'qr_code_scanner',
+      path: '/admin/check-in/rooms',
     });
     links.push({
       name: 'documents-group',
@@ -283,6 +295,15 @@ const menuLinks = computed(() => {
       label: t('navigation.examInformation'),
       icon: 'groups',
       path: '/admin/executive/test-takers',
+    });
+  }
+  // IF: Proctor
+  else if (role === ROLES.PROCTOR) {
+    links.push({
+      name: 'room-check-in',
+      label: t('navigation.roomCheckIn'),
+      icon: 'qr_code_scanner',
+      path: '/admin/check-in/rooms',
     });
   }
 

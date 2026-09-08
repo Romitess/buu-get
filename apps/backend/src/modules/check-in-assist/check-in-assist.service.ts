@@ -1,11 +1,12 @@
 import {
   BadRequestException,
+  ForbiddenException,
   GoneException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, DataSource, Repository } from 'typeorm';
+import { Brackets, DataSource, In, Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
 import {
   CheckInAssistEvent,
@@ -13,16 +14,20 @@ import {
 } from './entities/check-in-assist-event.entity';
 import {
   CheckInAssistSession,
+  CheckInAssistSessionMode,
   CheckInAssistSessionStatus,
 } from './entities/check-in-assist-session.entity';
 import { CreateCheckInAssistSessionDto } from './dto/create-check-in-assist-session.dto';
 import {
   AssistCandidateSummaryDto,
   AssistEventDto,
+  AssistExpectedRoomDto,
   CheckInAssistSessionMetaDto,
   CloseAssistSessionResponseDto,
   CreateCheckInAssistSessionResponseDto,
   ListAssistEventsResponseDto,
+  MyCheckInRoomDto,
+  RoomStationResponseDto,
 } from './dto/check-in-assist-response.dto';
 import { ExamEnrollmentsService } from '../exam-enrollments/exam-enrollments.service';
 import {
@@ -30,14 +35,21 @@ import {
   ExamEnrollmentStatus,
 } from '../exam-enrollments/entities/exam-enrollment.entity';
 import { Exam } from '../exam/entities/exam.entity';
-import { AuthenticatedUser } from 'src/common/utils/authz.util';
+import { ExamSessionLocation } from '../exam-session-locations/entities/exam-session-location.entity';
+import { ExamSessionLocationProctor } from '../exam-session-locations/entities/exam-session-location-proctor.entity';
+import { AuthenticatedUser, userHasAnyRole } from 'src/common/utils/authz.util';
+import { ENROLLMENT_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import {
   isValidAssistScanCode,
   normalizeAssistScanCode,
 } from './utils/normalize-assist-scan-code.util';
+import { getBangkokDateOnly } from 'src/common/utils/calendar-date.util';
+import { RoleEnum } from '../roles/enums/role.enum';
 
 const SESSION_TTL_MS = 4 * 60 * 60 * 1000;
+const ROOM_STATION_GRACE_MS = 2 * 60 * 60 * 1000;
 const EVENTS_BATCH_LIMIT = 50;
+const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 @Injectable()
 export class CheckInAssistService {
@@ -50,6 +62,10 @@ export class CheckInAssistService {
     private readonly enrollmentRepository: Repository<ExamEnrollment>,
     @InjectRepository(Exam)
     private readonly examRepository: Repository<Exam>,
+    @InjectRepository(ExamSessionLocation)
+    private readonly sessionLocationRepository: Repository<ExamSessionLocation>,
+    @InjectRepository(ExamSessionLocationProctor)
+    private readonly proctorAssignmentRepository: Repository<ExamSessionLocationProctor>,
     private readonly examEnrollmentsService: ExamEnrollmentsService,
     private readonly dataSource: DataSource,
   ) {}
@@ -73,6 +89,8 @@ export class CheckInAssistService {
       HOST_USER_ID: user.userId,
       JOIN_TOKEN: joinToken,
       STATUS: CheckInAssistSessionStatus.ACTIVE,
+      MODE: CheckInAssistSessionMode.HOST_ASSIST,
+      SL_ID: null,
       EXPIRES_AT: expiresAt,
     });
     session.setSessionIds(dto.sessionIds);
@@ -83,6 +101,130 @@ export class CheckInAssistService {
       joinToken: saved.JOIN_TOKEN,
       expiresAt: this.toExpiresAtDate(saved.EXPIRES_AT).toISOString(),
     };
+  }
+
+  async listMyRooms(
+    user: AuthenticatedUser,
+    dateRaw?: string,
+  ): Promise<MyCheckInRoomDto[]> {
+    const isAdmin = userHasAnyRole(user, ENROLLMENT_ADMIN_ROLES);
+    const date =
+      isAdmin && dateRaw && DATE_ONLY_PATTERN.test(dateRaw)
+        ? dateRaw
+        : getBangkokDateOnly();
+
+    const qb = this.sessionLocationRepository
+      .createQueryBuilder('sl')
+      .innerJoinAndSelect('sl.SESSION', 'session')
+      .innerJoinAndSelect('session.EXAM', 'exam')
+      .leftJoinAndSelect('sl.LOCATION', 'location')
+      .leftJoinAndSelect('sl.PROCTORS', 'proctors')
+      .leftJoinAndSelect('proctors.USER', 'proctorUser')
+      .leftJoinAndSelect('proctorUser.PROFILE', 'proctorProfile')
+      .where('exam.EXAM_DATE = :date', { date })
+      .andWhere('sl.DELETED_AT IS NULL')
+      .andWhere('session.DELETED_AT IS NULL')
+      .andWhere('exam.DELETED_AT IS NULL');
+
+    if (!isAdmin) {
+      qb.innerJoin(
+        ExamSessionLocationProctor,
+        'assignment',
+        'assignment.SL_ID = sl.SL_ID AND assignment.USER_ID = :userId',
+        { userId: user.userId },
+      );
+    }
+
+    const rooms = await qb.orderBy('session.SS_START_TIME', 'ASC').getMany();
+    const slIds = rooms.map((room) => room.SL_ID);
+    const counts = await this.loadAttendanceCounts(slIds);
+    const activeStations = await this.loadActiveStationsForUser(
+      user.userId,
+      slIds,
+    );
+
+    return rooms.map((room) => {
+      const count = counts.get(room.SL_ID) ?? { total: 0, attended: 0 };
+      return {
+        slId: room.SL_ID,
+        examId: room.SESSION?.EXAM_ID ?? room.SESSION?.EXAM?.EXAM_ID ?? 0,
+        examName: room.SESSION?.EXAM?.EXAM_NAME ?? '',
+        sessionStart: room.SESSION?.SS_START_TIME ?? null,
+        sessionEnd: room.SESSION?.SS_END_TIME ?? null,
+        locationName: room.LOCATION?.LOCATION_NAME ?? '',
+        roomNo: room.LOCATION?.LOCATION_ROOM_NO ?? null,
+        floorNo: room.LOCATION?.LOCATION_FLOOR_NO ?? null,
+        proctorNames: this.collectProctorNames(room),
+        totalCount: count.total,
+        attendedCount: count.attended,
+        activeStationCasId: activeStations.get(room.SL_ID) ?? null,
+      };
+    });
+  }
+
+  async openRoomStation(
+    user: AuthenticatedUser,
+    slId: number,
+  ): Promise<RoomStationResponseDto> {
+    const room = await this.loadSessionLocationForStation(slId);
+    await this.assertCanOpenRoom(user, room);
+
+    const existing = await this.sessionRepository.findOne({
+      where: {
+        HOST_USER_ID: user.userId,
+        SL_ID: slId,
+        MODE: CheckInAssistSessionMode.ROOM_STATION,
+        STATUS: CheckInAssistSessionStatus.ACTIVE,
+      },
+      order: { CREATED_AT: 'DESC' },
+    });
+
+    if (existing) {
+      try {
+        this.assertSessionUsable(existing);
+        return this.toRoomStationResponse(existing, room);
+      } catch {
+        existing.STATUS = CheckInAssistSessionStatus.CLOSED;
+        await this.sessionRepository.save(existing);
+      }
+    }
+
+    const examId = room.SESSION?.EXAM_ID ?? room.SESSION?.EXAM?.EXAM_ID;
+    if (!examId) {
+      throw new NotFoundException(
+        `Exam for session location ${slId} not found`,
+      );
+    }
+
+    const session = this.sessionRepository.create({
+      EXAM_ID: examId,
+      HOST_USER_ID: user.userId,
+      JOIN_TOKEN: randomBytes(32).toString('hex'),
+      STATUS: CheckInAssistSessionStatus.ACTIVE,
+      MODE: CheckInAssistSessionMode.ROOM_STATION,
+      SL_ID: slId,
+      EXPIRES_AT: this.computeRoomStationExpiry(
+        room.SESSION?.EXAM?.EXAM_DATE,
+        room.SESSION?.SS_END_TIME,
+      ),
+    });
+    session.setSessionIds([room.SS_ID]);
+    const saved = await this.sessionRepository.save(session);
+    return this.toRoomStationResponse(saved, room);
+  }
+
+  async getRoomStation(
+    casId: number,
+    user: AuthenticatedUser,
+  ): Promise<RoomStationResponseDto> {
+    const session = await this.findSessionById(casId);
+    this.assertSessionUsable(session);
+    this.assertRoomStationHost(session, user);
+    if (!session.SL_ID) {
+      throw new NotFoundException(`Room station ${casId} not found`);
+    }
+    const room = await this.loadSessionLocationForStation(session.SL_ID);
+    return this.toRoomStationResponse(session, room);
   }
 
   async getSessionByToken(
@@ -139,6 +281,9 @@ export class CheckInAssistService {
   ): Promise<AssistEventDto> {
     const session = await this.findSessionById(casId);
     this.assertSessionUsable(session);
+    if (this.isRoomStation(session)) {
+      this.assertRoomStationHost(session, user);
+    }
 
     const normalized = normalizeAssistScanCode(rawCode);
     if (!isValidAssistScanCode(normalized)) {
@@ -147,14 +292,14 @@ export class CheckInAssistService {
         scannedCode: rawCode.trim().slice(0, 64),
         scannerUserId: user.userId,
         ermId: null,
-        candidate: undefined,
       });
     }
 
     const enrollment = await this.resolveEnrollment(
       session.EXAM_ID,
-      this.parseSessionIds(session),
+      this.isRoomStation(session) ? [] : this.parseSessionIds(session),
       normalized,
+      this.isRoomStation(session),
     );
 
     if (!enrollment) {
@@ -163,7 +308,6 @@ export class CheckInAssistService {
         scannedCode: normalized,
         scannerUserId: user.userId,
         ermId: null,
-        candidate: undefined,
       });
     }
 
@@ -191,15 +335,29 @@ export class CheckInAssistService {
         scannedCode: normalized,
         scannerUserId: user.userId,
         ermId: enrollment.ERM_ID,
-        candidate: undefined,
+      });
+    }
+
+    if (this.isRoomStation(session) && enrollment.SL_ID !== session.SL_ID) {
+      return this.appendEvent(session, {
+        type: CheckInAssistEventType.WRONG_ROOM,
+        scannedCode: normalized,
+        scannerUserId: user.userId,
+        ermId: enrollment.ERM_ID,
+        candidate: candidateSummary,
+        expectedRoom: this.buildExpectedRoom(enrollment),
       });
     }
 
     try {
-      const checkedIn = await this.examEnrollmentsService.checkIn(
-        enrollment.ERM_ID,
-        {},
-      );
+      const checkedIn =
+        this.isRoomStation(session) && session.SL_ID != null
+          ? await this.examEnrollmentsService.checkIn(
+              enrollment.ERM_ID,
+              {},
+              { expectedSlId: session.SL_ID },
+            )
+          : await this.examEnrollmentsService.checkIn(enrollment.ERM_ID, {});
       const refreshedSummary = this.buildCandidateSummary(checkedIn);
       return this.appendEvent(session, {
         type: CheckInAssistEventType.CHECKED_IN,
@@ -217,7 +375,6 @@ export class CheckInAssistService {
         scannedCode: normalized,
         scannerUserId: user.userId,
         ermId: enrollment.ERM_ID,
-        candidate: undefined,
       });
     }
   }
@@ -234,6 +391,200 @@ export class CheckInAssistService {
     session.STATUS = CheckInAssistSessionStatus.CLOSED;
     await this.sessionRepository.save(session);
     return { status: CheckInAssistSessionStatus.CLOSED };
+  }
+
+  private isRoomStation(session: CheckInAssistSession): boolean {
+    return session.MODE === CheckInAssistSessionMode.ROOM_STATION;
+  }
+
+  private assertRoomStationHost(
+    session: CheckInAssistSession,
+    user: AuthenticatedUser,
+  ): void {
+    if (!this.isRoomStation(session)) {
+      throw new BadRequestException('session นี้ไม่ใช่สถานีเช็คอินประจำห้อง');
+    }
+    if (session.HOST_USER_ID !== user.userId) {
+      throw new ForbiddenException('เฉพาะผู้เปิดสถานีนี้เท่านั้นที่ใช้งานได้');
+    }
+  }
+
+  private async assertCanOpenRoom(
+    user: AuthenticatedUser,
+    room: ExamSessionLocation,
+  ): Promise<void> {
+    if (userHasAnyRole(user, ENROLLMENT_ADMIN_ROLES)) {
+      return;
+    }
+
+    if (!userHasAnyRole(user, [RoleEnum.PROCTOR])) {
+      throw new ForbiddenException('ไม่มีสิทธิ์เปิดสถานีเช็คอินห้องนี้');
+    }
+
+    const examDate = room.SESSION?.EXAM?.EXAM_DATE;
+    if (!examDate || examDate !== getBangkokDateOnly()) {
+      throw new ForbiddenException(
+        'กรรมการคุมสอบเปิดสถานีได้เฉพาะการสอบวันนี้',
+      );
+    }
+
+    const assigned = await this.proctorAssignmentRepository.findOne({
+      where: { SL_ID: room.SL_ID, USER_ID: user.userId },
+    });
+    if (!assigned) {
+      throw new ForbiddenException('คุณไม่ได้รับมอบหมายให้คุมห้องสอบนี้');
+    }
+  }
+
+  private async loadSessionLocationForStation(
+    slId: number,
+  ): Promise<ExamSessionLocation> {
+    const room = await this.sessionLocationRepository.findOne({
+      where: { SL_ID: slId },
+      relations: [
+        'SESSION',
+        'SESSION.EXAM',
+        'LOCATION',
+        'PROCTORS',
+        'PROCTORS.USER',
+        'PROCTORS.USER.PROFILE',
+      ],
+    });
+    if (!room) {
+      throw new NotFoundException(`Session Location with ID ${slId} not found`);
+    }
+    return room;
+  }
+
+  private async toRoomStationResponse(
+    session: CheckInAssistSession,
+    room: ExamSessionLocation,
+  ): Promise<RoomStationResponseDto> {
+    const counts = await this.loadAttendanceCounts([room.SL_ID]);
+    const count = counts.get(room.SL_ID) ?? { total: 0, attended: 0 };
+    return {
+      casId: session.CAS_ID,
+      expiresAt: this.toExpiresAtDate(session.EXPIRES_AT).toISOString(),
+      slId: room.SL_ID,
+      examId: room.SESSION?.EXAM_ID ?? room.SESSION?.EXAM?.EXAM_ID ?? 0,
+      examName: room.SESSION?.EXAM?.EXAM_NAME ?? '',
+      sessionStart: room.SESSION?.SS_START_TIME ?? null,
+      sessionEnd: room.SESSION?.SS_END_TIME ?? null,
+      locationName: room.LOCATION?.LOCATION_NAME ?? '',
+      roomNo: room.LOCATION?.LOCATION_ROOM_NO ?? null,
+      floorNo: room.LOCATION?.LOCATION_FLOOR_NO ?? null,
+      proctorNames: this.collectProctorNames(room),
+      totalCount: count.total,
+      attendedCount: count.attended,
+    };
+  }
+
+  private collectProctorNames(room: ExamSessionLocation): string[] {
+    const fromAssignments = (room.PROCTORS ?? [])
+      .map((assignment) => {
+        const profile = assignment.USER?.PROFILE;
+        const name =
+          `${profile?.userTitleTh ?? ''} ${profile?.userFullnameTh ?? ''}`.trim();
+        return name;
+      })
+      .filter((name) => name.length > 0);
+
+    if (fromAssignments.length > 0) {
+      return fromAssignments;
+    }
+
+    return (room.SS_NAME ?? '')
+      .split(',')
+      .map((name) => name.trim())
+      .filter(Boolean);
+  }
+
+  private async loadAttendanceCounts(
+    slIds: number[],
+  ): Promise<Map<number, { total: number; attended: number }>> {
+    const result = new Map<number, { total: number; attended: number }>();
+    if (slIds.length === 0) {
+      return result;
+    }
+
+    const rows = await this.enrollmentRepository
+      .createQueryBuilder('enrollment')
+      .select('enrollment.SL_ID', 'SL_ID')
+      .addSelect(
+        `SUM(CASE WHEN enrollment.ERM_STATUS NOT IN (:unpaid, :cancelled) THEN 1 ELSE 0 END)`,
+        'total',
+      )
+      .addSelect(
+        `SUM(CASE WHEN enrollment.ERM_STATUS = :attended THEN 1 ELSE 0 END)`,
+        'attended',
+      )
+      .where('enrollment.SL_ID IN (:...slIds)', { slIds })
+      .setParameters({
+        unpaid: ExamEnrollmentStatus.UNPAID,
+        cancelled: ExamEnrollmentStatus.CANCELLED,
+        attended: ExamEnrollmentStatus.ATTENDED,
+      })
+      .groupBy('enrollment.SL_ID')
+      .getRawMany<{ SL_ID: number; total: string; attended: string }>();
+
+    for (const row of rows) {
+      result.set(Number(row.SL_ID), {
+        total: Number(row.total) || 0,
+        attended: Number(row.attended) || 0,
+      });
+    }
+    return result;
+  }
+
+  private async loadActiveStationsForUser(
+    userId: number,
+    slIds: number[],
+  ): Promise<Map<number, number>> {
+    const result = new Map<number, number>();
+    if (slIds.length === 0) {
+      return result;
+    }
+
+    const stations = await this.sessionRepository.find({
+      where: {
+        HOST_USER_ID: userId,
+        MODE: CheckInAssistSessionMode.ROOM_STATION,
+        STATUS: CheckInAssistSessionStatus.ACTIVE,
+        SL_ID: In(slIds),
+      },
+    });
+
+    for (const station of stations) {
+      if (!station.SL_ID) continue;
+      try {
+        this.assertSessionUsable(station);
+        result.set(station.SL_ID, station.CAS_ID);
+      } catch {
+        // expired/closed — skip
+      }
+    }
+    return result;
+  }
+
+  private computeRoomStationExpiry(
+    examDate: string | undefined,
+    ssEndTime: string | undefined,
+  ): Date {
+    const fourHours = new Date(Date.now() + SESSION_TTL_MS);
+    if (!examDate || !ssEndTime) {
+      return fourHours;
+    }
+
+    const normalizedTime =
+      ssEndTime.length === 5 ? `${ssEndTime}:00` : ssEndTime;
+    const endPlusGrace = new Date(`${examDate}T${normalizedTime}+07:00`);
+    if (Number.isNaN(endPlusGrace.getTime())) {
+      return fourHours;
+    }
+    endPlusGrace.setTime(endPlusGrace.getTime() + ROOM_STATION_GRACE_MS);
+    return endPlusGrace.getTime() > fourHours.getTime()
+      ? endPlusGrace
+      : fourHours;
   }
 
   private async findSessionById(casId: number): Promise<CheckInAssistSession> {
@@ -291,12 +642,13 @@ export class CheckInAssistService {
     examId: number,
     sessionIds: number[],
     code: string,
+    entireExam: boolean,
   ): Promise<ExamEnrollment | null> {
-    if (sessionIds.length === 0) {
+    if (!entireExam && sessionIds.length === 0) {
       return null;
     }
 
-    return this.enrollmentRepository
+    const qb = this.enrollmentRepository
       .createQueryBuilder('enrollment')
       .innerJoinAndSelect('enrollment.SESSION', 'session')
       .leftJoinAndSelect('session.EXAM', 'exam')
@@ -307,7 +659,6 @@ export class CheckInAssistService {
       .leftJoinAndSelect('enrollment.SESSION_LOCATION', 'sessionLocation')
       .leftJoinAndSelect('sessionLocation.LOCATION', 'location')
       .where('session.EXAM_ID = :examId', { examId })
-      .andWhere('enrollment.SESSION_ID IN (:...sessionIds)', { sessionIds })
       .andWhere('enrollment.ERM_STATUS != :cancelled', {
         cancelled: ExamEnrollmentStatus.CANCELLED,
       })
@@ -318,8 +669,39 @@ export class CheckInAssistService {
             .orWhere('user.USER_PASSPORT_NO = :code', { code })
             .orWhere('enrollment.ERM_TEST_TAKER = :code', { code });
         }),
-      )
-      .getOne();
+      );
+
+    if (!entireExam) {
+      qb.andWhere('enrollment.SESSION_ID IN (:...sessionIds)', { sessionIds });
+    }
+
+    return qb.getOne();
+  }
+
+  private formatSessionTime(
+    start?: string | null,
+    end?: string | null,
+  ): string | null {
+    const toHhMm = (value?: string | null): string | null => {
+      if (!value) return null;
+      return value.slice(0, 5);
+    };
+    const startLabel = toHhMm(start);
+    const endLabel = toHhMm(end);
+    if (startLabel && endLabel) {
+      return `${startLabel}–${endLabel}`;
+    }
+    return startLabel ?? endLabel;
+  }
+
+  private buildRoomLabel(enrollment: ExamEnrollment): string | null {
+    const location = enrollment.SESSION_LOCATION?.LOCATION;
+    if (!location?.LOCATION_NAME) {
+      return null;
+    }
+    return location.LOCATION_ROOM_NO
+      ? `${location.LOCATION_NAME} ห้อง ${location.LOCATION_ROOM_NO}`
+      : location.LOCATION_NAME;
   }
 
   private buildCandidateSummary(
@@ -348,6 +730,33 @@ export class CheckInAssistService {
       examType: enrollment.SESSION?.EXAM?.EXAM_TYPE ?? null,
       testSession,
       attendanceStatus: enrollment.ERM_STATUS,
+      roomLabel: this.buildRoomLabel(enrollment),
+      floorNo: enrollment.SESSION_LOCATION?.LOCATION?.LOCATION_FLOOR_NO ?? null,
+      sessionTime: this.formatSessionTime(
+        enrollment.SESSION?.SS_START_TIME,
+        enrollment.SESSION?.SS_END_TIME,
+      ),
+      checkedInAt: enrollment.ERM_ATTEND_CHECK_IN_TIME
+        ? new Date(enrollment.ERM_ATTEND_CHECK_IN_TIME).toISOString()
+        : null,
+    };
+  }
+
+  private buildExpectedRoom(
+    enrollment: ExamEnrollment,
+  ): AssistExpectedRoomDto | null {
+    if (enrollment.SL_ID == null) {
+      return null;
+    }
+    const location = enrollment.SESSION_LOCATION?.LOCATION;
+    return {
+      slId: enrollment.SL_ID,
+      locationName: location?.LOCATION_NAME ?? '-',
+      roomNo: location?.LOCATION_ROOM_NO ?? null,
+      floorNo: location?.LOCATION_FLOOR_NO ?? null,
+      seatNumber: enrollment.ERM_SEAT_LABEL ?? '-',
+      sessionStart: enrollment.SESSION?.SS_START_TIME ?? null,
+      sessionEnd: enrollment.SESSION?.SS_END_TIME ?? null,
     };
   }
 
@@ -359,6 +768,7 @@ export class CheckInAssistService {
       scannerUserId: number;
       ermId: number | null;
       candidate?: AssistCandidateSummaryDto | undefined;
+      expectedRoom?: AssistExpectedRoomDto | null;
     },
   ): Promise<AssistEventDto> {
     return this.dataSource.transaction(async (manager) => {
@@ -380,7 +790,13 @@ export class CheckInAssistService {
         .getRawOne<{ maxSeq: string | null }>();
 
       const nextSeq = (Number(maxSeqRow?.maxSeq ?? 0) || 0) + 1;
-      const payload = input.candidate ? JSON.stringify(input.candidate) : null;
+      const payload =
+        input.candidate || input.expectedRoom !== undefined
+          ? JSON.stringify({
+              candidate: input.candidate,
+              expectedRoom: input.expectedRoom ?? null,
+            })
+          : null;
       const createdAt = new Date();
 
       const saved = await manager.save(
@@ -405,9 +821,21 @@ export class CheckInAssistService {
     fallbackCreatedAt?: Date,
   ): AssistEventDto {
     let candidate: AssistCandidateSummaryDto | undefined;
+    let expectedRoom: AssistExpectedRoomDto | null | undefined;
     if (event.PAYLOAD_JSON) {
       try {
-        candidate = JSON.parse(event.PAYLOAD_JSON) as AssistCandidateSummaryDto;
+        const parsed = JSON.parse(event.PAYLOAD_JSON) as Record<
+          string,
+          unknown
+        >;
+        if (parsed && typeof parsed === 'object' && 'ermId' in parsed) {
+          candidate = parsed as unknown as AssistCandidateSummaryDto;
+        } else {
+          candidate = parsed.candidate as AssistCandidateSummaryDto | undefined;
+          expectedRoom =
+            (parsed.expectedRoom as AssistExpectedRoomDto | null | undefined) ??
+            undefined;
+        }
       } catch {
         candidate = undefined;
       }
@@ -427,6 +855,7 @@ export class CheckInAssistService {
       scannerUserId: event.SCANNER_USER_ID,
       at: createdAt.toISOString(),
       ...(candidate ? { candidate } : {}),
+      ...(expectedRoom !== undefined ? { expectedRoom } : {}),
     };
   }
 }

@@ -27,6 +27,12 @@ export const ENROLLMENT_ADMIN_ROLES: RoleEnum[] = [
   RoleEnum.EXAM_OPERATIONS_OFFICER,
 ];
 
+/** เช็คอินเข้าห้องสอบ — เจ้าหน้าที่จัดสอบ + กรรมการคุมสอบ */
+export const CHECK_IN_ROLES: RoleEnum[] = [
+  ...ENROLLMENT_ADMIN_ROLES,
+  RoleEnum.PROCTOR,
+];
+
 /** ดูรายการผู้ใช้ (เช่น เลือกผู้คุมสอบตอนสร้างการสอบ) — ไม่รวมการจัดการ role */
 export const USER_LIST_ROLES: RoleEnum[] = [...ENROLLMENT_ADMIN_ROLES];
 

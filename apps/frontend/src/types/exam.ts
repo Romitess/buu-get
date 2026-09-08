@@ -308,6 +308,7 @@ export interface BackendSession {
     LOCATION_ID: number;
     SS_ID: number;
     SS_NAME: string | null;
+    PROCTORS?: { SLP_ID: number; SL_ID: number; USER_ID: number }[];
     TOTAL_ROWS?: number | null;
     TOTAL_COLS?: number | null;
     AISLE_AFTER?: { after_cols: number[]; after_rows: number[] } | null;

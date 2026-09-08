@@ -16,6 +16,7 @@ import {
 } from '../../exam-locations/entities/exam-location.entity';
 import { ExamSession } from '../../exam-sessions/entities/exam-session.entity';
 import { ExamEnrollment } from '../../exam-enrollments/entities/exam-enrollment.entity';
+import { ExamSessionLocationProctor } from './exam-session-location-proctor.entity';
 
 @Entity('EXAM_T_SESSION_LOCATIONS')
 export class ExamSessionLocation {
@@ -159,4 +160,10 @@ export class ExamSessionLocation {
     (enrollment: ExamEnrollment) => enrollment.SESSION_LOCATION,
   )
   ENROLLMENTS: ExamEnrollment[];
+
+  @OneToMany(
+    () => ExamSessionLocationProctor,
+    (proctor) => proctor.SESSION_LOCATION,
+  )
+  PROCTORS: ExamSessionLocationProctor[];
 }

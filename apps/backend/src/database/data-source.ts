@@ -24,6 +24,7 @@ import { VoidedReceipt } from '../modules/voided-receipts/entities/voided-receip
 import { UserImage } from '../modules/user-image/entities/user-image.entity';
 import { ProfileEditHistory } from '../modules/profile-edit-history/entities/profile-edit-history.entity';
 import { ExamSessionLocation } from '../modules/exam-session-locations/entities/exam-session-location.entity';
+import { ExamSessionLocationProctor } from '../modules/exam-session-locations/entities/exam-session-location-proctor.entity';
 import { ExamLocationSeat } from '../modules/exam-location-seats/entities/exam-location-seat.entity';
 import { ExamPasscode } from '../modules/exam/entities/exam-passcode.entity';
 import { ExamPasscodeLog } from 'src/modules/exam/entities/exam-passcode-log.entity';
@@ -61,6 +62,7 @@ export default new DataSource({
     ExamSession,
     ExamLocation,
     ExamSessionLocation,
+    ExamSessionLocationProctor,
     ExamLocationSeat,
     ExamEnrollment,
     ExamEnrollmentAuditLog,

@@ -20,4 +20,10 @@ describe('getDefaultRouteForRole', () => {
       name: 'admin-exam-management',
     });
   });
+
+  it('routes proctors to room check-in', () => {
+    expect(getDefaultRouteForRole(ROLES.PROCTOR)).toEqual({
+      name: 'admin-check-in-rooms',
+    });
+  });
 });

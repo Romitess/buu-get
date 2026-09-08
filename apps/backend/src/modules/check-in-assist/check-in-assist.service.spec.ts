@@ -1,10 +1,15 @@
-import { GoneException, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  GoneException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CheckInAssistService } from './check-in-assist.service';
 import {
   CheckInAssistSession,
+  CheckInAssistSessionMode,
   CheckInAssistSessionStatus,
 } from './entities/check-in-assist-session.entity';
 import {
@@ -16,9 +21,12 @@ import {
   ExamEnrollmentStatus,
 } from '../exam-enrollments/entities/exam-enrollment.entity';
 import { Exam } from '../exam/entities/exam.entity';
+import { ExamSessionLocation } from '../exam-session-locations/entities/exam-session-location.entity';
+import { ExamSessionLocationProctor } from '../exam-session-locations/entities/exam-session-location-proctor.entity';
 import { ExamEnrollmentsService } from '../exam-enrollments/exam-enrollments.service';
 import { RoleEnum } from '../roles/enums/role.enum';
 import type { AuthenticatedUser } from 'src/common/utils/authz.util';
+import { getBangkokDateOnly } from 'src/common/utils/calendar-date.util';
 
 describe('CheckInAssistService', () => {
   let service: CheckInAssistService;
@@ -27,6 +35,7 @@ describe('CheckInAssistService', () => {
     create: jest.fn(),
     save: jest.fn(),
     findOne: jest.fn(),
+    find: jest.fn(),
   };
   const eventRepository = {
     createQueryBuilder: jest.fn(),
@@ -35,6 +44,13 @@ describe('CheckInAssistService', () => {
     createQueryBuilder: jest.fn(),
   };
   const examRepository = {
+    findOne: jest.fn(),
+  };
+  const sessionLocationRepository = {
+    findOne: jest.fn(),
+    createQueryBuilder: jest.fn(),
+  };
+  const proctorAssignmentRepository = {
     findOne: jest.fn(),
   };
   const examEnrollmentsService = {
@@ -70,6 +86,14 @@ describe('CheckInAssistService', () => {
           useValue: enrollmentRepository,
         },
         { provide: getRepositoryToken(Exam), useValue: examRepository },
+        {
+          provide: getRepositoryToken(ExamSessionLocation),
+          useValue: sessionLocationRepository,
+        },
+        {
+          provide: getRepositoryToken(ExamSessionLocationProctor),
+          useValue: proctorAssignmentRepository,
+        },
         { provide: ExamEnrollmentsService, useValue: examEnrollmentsService },
         { provide: DataSource, useValue: dataSource },
       ],
@@ -251,6 +275,107 @@ describe('CheckInAssistService', () => {
           type: CheckInAssistEventType.ALREADY_CHECKED_IN,
         }),
       );
+    });
+
+    it('returns WRONG_ROOM without calling checkIn when room station SL_ID mismatches', async () => {
+      const roomSession = {
+        ...activeSession,
+        MODE: CheckInAssistSessionMode.ROOM_STATION,
+        SL_ID: 12,
+      } as unknown as CheckInAssistSession;
+      sessionRepository.findOne.mockResolvedValue(roomSession);
+
+      const enrollment = {
+        ERM_ID: 50,
+        ERM_STATUS: ExamEnrollmentStatus.PAID,
+        SL_ID: 99,
+        ERM_SEAT_LABEL: 'B2',
+        USER: { PROFILE: { userTitleTh: 'นาย', userFullnameTh: 'Test' } },
+        SESSION: {
+          SS_START_TIME: '09:00:00',
+          SS_END_TIME: '11:00:00',
+          EXAM: {},
+        },
+        SESSION_LOCATION: {
+          LOCATION: {
+            LOCATION_NAME: 'อาคารเรียนรวม',
+            LOCATION_ROOM_NO: '101',
+            LOCATION_FLOOR_NO: 1,
+          },
+        },
+        VOUCHERS: [],
+      } as unknown as ExamEnrollment;
+
+      const qb = {
+        innerJoinAndSelect: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(enrollment),
+      };
+      enrollmentRepository.createQueryBuilder.mockReturnValue(qb);
+
+      appendEventMock.mockResolvedValue({
+        seq: 4,
+        type: CheckInAssistEventType.WRONG_ROOM,
+        scannedCode: 'ENG123456',
+        scannerUserId: 10,
+        at: new Date().toISOString(),
+      });
+
+      await service.submitScan(7, hostUser, 'ENG123456');
+
+      expect(examEnrollmentsService.checkIn).not.toHaveBeenCalled();
+      expect(appendEventMock).toHaveBeenCalledWith(
+        roomSession,
+        expect.objectContaining({
+          type: CheckInAssistEventType.WRONG_ROOM,
+          expectedRoom: expect.objectContaining({
+            slId: 99,
+            roomNo: '101',
+          }),
+        }),
+      );
+    });
+  });
+
+  describe('openRoomStation', () => {
+    const room = {
+      SL_ID: 12,
+      SS_ID: 101,
+      SS_NAME: 'อ.สมชาย',
+      SESSION: {
+        SS_ID: 101,
+        EXAM_ID: 5,
+        SS_START_TIME: '09:00:00',
+        SS_END_TIME: '11:00:00',
+        EXAM: {
+          EXAM_ID: 5,
+          EXAM_NAME: 'ENG',
+          EXAM_DATE: getBangkokDateOnly(),
+        },
+      },
+      LOCATION: {
+        LOCATION_NAME: 'อาคารเรียนรวม',
+        LOCATION_ROOM_NO: '101',
+        LOCATION_FLOOR_NO: 1,
+      },
+      PROCTORS: [],
+    };
+
+    it('forbids a proctor who is not assigned to the room', async () => {
+      const proctorUser: AuthenticatedUser = {
+        userId: 88,
+        role: RoleEnum.PROCTOR,
+        roles: [RoleEnum.PROCTOR],
+        email: 'proctor@test.local',
+      };
+      sessionLocationRepository.findOne.mockResolvedValue(room);
+      proctorAssignmentRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.openRoomStation(proctorUser, 12),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });
 

@@ -4,7 +4,8 @@ export type CheckInAssistEventType =
   | 'CHECKED_IN'
   | 'ALREADY_CHECKED_IN'
   | 'NOT_FOUND'
-  | 'INVALID_CODE';
+  | 'INVALID_CODE'
+  | 'WRONG_ROOM';
 
 export interface AssistCandidateSummary {
   ermId: number;
@@ -21,6 +22,20 @@ export interface AssistCandidateSummary {
   examType?: string | null;
   testSession?: string | null;
   attendanceStatus: ExamAttendStatus;
+  roomLabel?: string | null;
+  floorNo?: number | null;
+  sessionTime?: string | null;
+  checkedInAt?: string | null;
+}
+
+export interface AssistExpectedRoom {
+  slId: number;
+  locationName: string;
+  roomNo?: string | null;
+  floorNo?: number | null;
+  seatNumber: string;
+  sessionStart?: string | null;
+  sessionEnd?: string | null;
 }
 
 export interface AssistEvent {
@@ -30,6 +45,7 @@ export interface AssistEvent {
   scannerUserId: number;
   at: string;
   candidate?: AssistCandidateSummary;
+  expectedRoom?: AssistExpectedRoom | null;
 }
 
 export interface CreateAssistSessionResponse {
@@ -49,4 +65,35 @@ export interface AssistSessionMeta {
 export interface ListAssistEventsResponse {
   events: AssistEvent[];
   latestSeq: number;
+}
+
+export interface MyCheckInRoom {
+  slId: number;
+  examId: number;
+  examName: string;
+  sessionStart?: string | null;
+  sessionEnd?: string | null;
+  locationName: string;
+  roomNo?: string | null;
+  floorNo?: number | null;
+  proctorNames: string[];
+  totalCount: number;
+  attendedCount: number;
+  activeStationCasId?: number | null;
+}
+
+export interface RoomStation {
+  casId: number;
+  expiresAt: string;
+  slId: number;
+  examId: number;
+  examName: string;
+  sessionStart?: string | null;
+  sessionEnd?: string | null;
+  locationName: string;
+  roomNo?: string | null;
+  floorNo?: number | null;
+  proctorNames: string[];
+  totalCount: number;
+  attendedCount: number;
 }

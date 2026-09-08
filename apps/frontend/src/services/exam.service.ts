@@ -369,6 +369,7 @@ export interface CreateExamPayload {
     locationId?: number;
     seats?: number;
     proctorName?: string | null;
+    proctorUserIds?: number[];
     sessionId?: number;
     seatOverrides?: Record<number, number>;
     sessionLocationSnapshot?: SessionLocationSnapshotPayload;
@@ -386,6 +387,7 @@ interface GroupedSessionTimeRange {
   locations: {
     locationId: number;
     proctorName: string | null;
+    proctorUserIds?: number[];
     seatOverrides?: Record<number, number>;
     sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   }[];
@@ -612,6 +614,9 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
         existingRange.locations.push({
           locationId,
           proctorName,
+          ...(range.proctorUserIds !== undefined
+            ? { proctorUserIds: [...range.proctorUserIds] }
+            : {}),
           seatOverrides,
           ...(sessionLocationSnapshot ? { sessionLocationSnapshot } : {}),
         });
@@ -620,6 +625,11 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
           existingLoc.proctorName = existingLoc.proctorName
             ? `${existingLoc.proctorName}, ${proctorName}`
             : proctorName;
+        }
+        if (range.proctorUserIds !== undefined) {
+          existingLoc.proctorUserIds = [
+            ...new Set([...(existingLoc.proctorUserIds ?? []), ...range.proctorUserIds]),
+          ];
         }
         existingLoc.seatOverrides = {
           ...(existingLoc.seatOverrides ?? {}),
@@ -643,6 +653,9 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
         {
           locationId,
           proctorName,
+          ...(range.proctorUserIds !== undefined
+            ? { proctorUserIds: [...range.proctorUserIds] }
+            : {}),
           seatOverrides,
           ...(sessionLocationSnapshot ? { sessionLocationSnapshot } : {}),
         },
@@ -659,6 +672,7 @@ const createSessionLocations = async (
   locations: {
     locationId: number;
     proctorName: string | null;
+    proctorUserIds?: number[];
     sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   }[],
   requestConfig?: ExamWriteRequestConfig,
@@ -680,6 +694,9 @@ const createSessionLocations = async (
           SS_ID: sessionId,
           LOCATION_ID: loc.locationId,
           SS_NAME: loc.proctorName,
+          ...(loc.proctorUserIds !== undefined
+            ? { PROCTOR_USER_IDS: loc.proctorUserIds }
+            : {}),
           ...(loc.sessionLocationSnapshot ?? {}),
         },
         requestConfig,
@@ -694,12 +711,20 @@ const sessionLocationMatches = (
   existing: BackendSessionLocation,
   desired: {
     proctorName: string | null;
+    proctorUserIds?: number[];
     sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   },
 ): boolean => {
   const snapshot = desired.sessionLocationSnapshot;
+  const existingIds = [...(existing.PROCTORS ?? []).map((item) => item.USER_ID)].sort(
+    (a, b) => a - b,
+  );
+  const desiredIds = [...(desired.proctorUserIds ?? [])].sort((a, b) => a - b);
+  const proctorIdsMatch =
+    desired.proctorUserIds === undefined || existingIds.join(',') === desiredIds.join(',');
   return (
     (existing.SS_NAME ?? null) === (desired.proctorName ?? null) &&
+    proctorIdsMatch &&
     (existing.TOTAL_ROWS ?? null) === (snapshot?.TOTAL_ROWS ?? null) &&
     (existing.TOTAL_COLS ?? null) === (snapshot?.TOTAL_COLS ?? null) &&
     normalizeJson(existing.AISLE_AFTER) === normalizeJson(snapshot?.AISLE_AFTER) &&
@@ -715,6 +740,7 @@ const syncSessionLocations = async (
   locations: {
     locationId: number;
     proctorName: string | null;
+    proctorUserIds?: number[];
     sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   }[],
   requestConfig?: ExamWriteRequestConfig,
@@ -750,6 +776,9 @@ const syncSessionLocations = async (
             SS_ID: sessionId,
             LOCATION_ID: loc.locationId,
             SS_NAME: loc.proctorName,
+            ...(loc.proctorUserIds !== undefined
+              ? { PROCTOR_USER_IDS: loc.proctorUserIds }
+              : {}),
             ...(loc.sessionLocationSnapshot ?? {}),
           },
           requestConfig,
@@ -765,6 +794,9 @@ const syncSessionLocations = async (
           `/exam-session-locations/${existing.SL_ID}`,
           {
             SS_NAME: loc.proctorName,
+            ...(loc.proctorUserIds !== undefined
+              ? { PROCTOR_USER_IDS: loc.proctorUserIds }
+              : {}),
             ...(loc.sessionLocationSnapshot ?? {}),
           },
           requestConfig,

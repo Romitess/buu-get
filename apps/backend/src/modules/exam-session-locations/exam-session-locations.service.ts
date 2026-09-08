@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { doExamTimeRangesOverlap } from '../../common/utils/exam-schedule.util';
 import { ExamSessionLocation } from './entities/exam-session-location.entity';
+import { ExamSessionLocationProctor } from './entities/exam-session-location-proctor.entity';
 import { ExamLocation } from '../exam-locations/entities/exam-location.entity';
 import { ExamSession } from '../exam-sessions/entities/exam-session.entity';
 import { CreateExamSessionLocationDto } from './dto/create-exam-session-location.dto';
@@ -22,6 +23,8 @@ export class ExamSessionLocationsService {
     private readonly locationRepository: Repository<ExamLocation>,
     @InjectRepository(ExamSession)
     private readonly sessionRepository: Repository<ExamSession>,
+    @InjectRepository(ExamSessionLocationProctor)
+    private readonly proctorRepository: Repository<ExamSessionLocationProctor>,
   ) {}
 
   private async validateLocationAndSession(
@@ -157,8 +160,10 @@ export class ExamSessionLocationsService {
         sortorder: seat.LS_SORT_ORDER ?? null,
       }));
 
+    const { PROCTOR_USER_IDS, ...locationFields } = dto;
+
     const sessionLocation = this.sessionLocationRepository.create({
-      ...dto,
+      ...locationFields,
       TOTAL_ROWS: dto.TOTAL_ROWS ?? location.LOCATION_TOTAL_ROWS ?? null,
       TOTAL_COLS: dto.TOTAL_COLS ?? location.LOCATION_TOTAL_COLS ?? null,
       LOCATION_SEAT_DIRECTION:
@@ -169,7 +174,9 @@ export class ExamSessionLocationsService {
         (location.SEATS?.length || null),
       SEATS_SNAPSHOT: seatsSnapshot,
     });
-    return await this.sessionLocationRepository.save(sessionLocation);
+    const saved = await this.sessionLocationRepository.save(sessionLocation);
+    await this.syncProctors(saved.SL_ID, PROCTOR_USER_IDS);
+    return this.findOne(saved.SL_ID);
   }
 
   async findAllByLocation(locationId: number): Promise<ExamSessionLocation[]> {
@@ -201,7 +208,7 @@ export class ExamSessionLocationsService {
 
     return await this.sessionLocationRepository.find({
       where: { SS_ID: sessionId },
-      relations: ['LOCATION', 'LOCATION.SEATS'],
+      relations: ['LOCATION', 'LOCATION.SEATS', 'PROCTORS'],
       order: { CREATED_AT: 'ASC' },
     });
   }
@@ -209,7 +216,7 @@ export class ExamSessionLocationsService {
   async findOne(id: number): Promise<ExamSessionLocation> {
     const sl = await this.sessionLocationRepository.findOne({
       where: { SL_ID: id },
-      relations: ['LOCATION', 'SESSION'],
+      relations: ['LOCATION', 'SESSION', 'PROCTORS'],
     });
     if (!sl) {
       throw new NotFoundException(`Session Location with ID ${id} not found`);
@@ -239,12 +246,41 @@ export class ExamSessionLocationsService {
       id,
     );
 
-    Object.assign(sl, dto);
-    return await this.sessionLocationRepository.save(sl);
+    const { PROCTOR_USER_IDS, ...locationFields } = dto;
+    Object.assign(sl, locationFields);
+    await this.sessionLocationRepository.save(sl);
+    await this.syncProctors(id, PROCTOR_USER_IDS);
+    return this.findOne(id);
   }
 
   async remove(id: number): Promise<void> {
     const sl = await this.findOne(id);
+    await this.proctorRepository.delete({ SL_ID: id });
     await this.sessionLocationRepository.softRemove(sl);
+  }
+
+  private normalizeProctorUserIds(userIds?: number[]): number[] | undefined {
+    if (userIds === undefined) {
+      return undefined;
+    }
+    return [...new Set(userIds.filter((id) => Number.isInteger(id) && id > 0))];
+  }
+
+  private async syncProctors(slId: number, userIds?: number[]): Promise<void> {
+    const normalized = this.normalizeProctorUserIds(userIds);
+    if (normalized === undefined) {
+      return;
+    }
+
+    await this.proctorRepository.delete({ SL_ID: slId });
+    if (normalized.length === 0) {
+      return;
+    }
+
+    await this.proctorRepository.save(
+      normalized.map((USER_ID) =>
+        this.proctorRepository.create({ SL_ID: slId, USER_ID }),
+      ),
+    );
   }
 }

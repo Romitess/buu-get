@@ -7,6 +7,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ExamSessionLocationsService } from './exam-session-locations.service';
 import { ExamSessionLocation } from './entities/exam-session-location.entity';
+import { ExamSessionLocationProctor } from './entities/exam-session-location-proctor.entity';
 import { ExamLocation } from '../exam-locations/entities/exam-location.entity';
 import { ExamSession } from '../exam-sessions/entities/exam-session.entity';
 
@@ -16,6 +17,7 @@ type MockRepo = {
   save: jest.Mock;
   softRemove: jest.Mock;
   createQueryBuilder: jest.Mock;
+  delete: jest.Mock;
 };
 
 const createMockRepo = (): MockRepo => ({
@@ -24,6 +26,7 @@ const createMockRepo = (): MockRepo => ({
   save: jest.fn(),
   softRemove: jest.fn(),
   createQueryBuilder: jest.fn(),
+  delete: jest.fn(),
 });
 
 describe('ExamSessionLocationsService', () => {
@@ -46,6 +49,10 @@ describe('ExamSessionLocationsService', () => {
         },
         {
           provide: getRepositoryToken(ExamSession),
+          useFactory: createMockRepo,
+        },
+        {
+          provide: getRepositoryToken(ExamSessionLocationProctor),
           useFactory: createMockRepo,
         },
       ],

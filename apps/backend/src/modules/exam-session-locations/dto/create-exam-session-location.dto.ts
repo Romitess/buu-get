@@ -1,4 +1,12 @@
-import { IsInt, IsOptional, IsString, IsEnum, IsObject } from 'class-validator';
+import {
+  IsInt,
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsObject,
+  IsArray,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { SeatDirection } from '../../exam-locations/entities/exam-location.entity';
 
@@ -19,6 +27,18 @@ export class CreateExamSessionLocationDto {
   @IsOptional()
   @IsString()
   SS_NAME?: string | null;
+
+  @ApiProperty({
+    example: [12, 15],
+    required: false,
+    description: 'รหัสผู้ใช้กรรมการคุมสอบที่ผูกกับห้องนี้',
+    type: [Number],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  @Min(1, { each: true })
+  PROCTOR_USER_IDS?: number[];
 
   @ApiProperty({ example: 10, required: false, description: 'จำนวนแถวทั้งหมด' })
   @IsOptional()

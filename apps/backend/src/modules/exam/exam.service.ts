@@ -215,6 +215,7 @@ export class ExamService {
         'SESSIONS',
         'SESSIONS.SESSION_LOCATIONS',
         'SESSIONS.SESSION_LOCATIONS.LOCATION',
+        'SESSIONS.SESSION_LOCATIONS.PROCTORS',
       ],
       select: {
         EXAM_ID: true,
@@ -246,6 +247,11 @@ export class ExamService {
             LOCATION_ID: true,
             SS_ID: true,
             SS_NAME: true,
+            PROCTORS: {
+              SLP_ID: true,
+              SL_ID: true,
+              USER_ID: true,
+            },
             LOCATION: {
               LOCATION_ID: true,
               LOCATION_NAME: true,
@@ -310,6 +316,7 @@ export class ExamService {
       'SESSIONS',
       'SESSIONS.SESSION_LOCATIONS',
       'SESSIONS.SESSION_LOCATIONS.LOCATION',
+      'SESSIONS.SESSION_LOCATIONS.PROCTORS',
       'FUND_SOURCE',
       'SCORE_RUBRIC',
       'SCORE_RUBRIC.ITEMS',

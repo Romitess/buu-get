@@ -818,6 +818,41 @@ describe('ExamEnrollmentsService', () => {
       expect(result.ERM_STATUS).toBe(ExamEnrollmentStatus.ATTENDED);
     });
 
+    it('ENR-U-018b: does not overwrite check-in time when already ATTENDED', async () => {
+      const originalTime = new Date('2026-09-01T02:00:00.000Z');
+      examEnrollmentRepository.findOne
+        .mockResolvedValueOnce({
+          ERM_ID: 1,
+          ERM_STATUS: ExamEnrollmentStatus.ATTENDED,
+          ERM_ATTEND_CHECK_IN_TIME: originalTime,
+        })
+        .mockResolvedValueOnce({
+          ERM_ID: 1,
+          ERM_STATUS: ExamEnrollmentStatus.ATTENDED,
+          ERM_ATTEND_CHECK_IN_TIME: originalTime,
+        });
+
+      const result = await service.checkIn(1, {
+        ERM_ATTEND_CHECK_IN_TIME: '2026-09-01T09:00:00.000Z',
+      });
+
+      expect(examEnrollmentRepository.save).not.toHaveBeenCalled();
+      expect(result.ERM_ATTEND_CHECK_IN_TIME).toEqual(originalTime);
+    });
+
+    it('ENR-U-018c: rejects when expectedSlId does not match enrollment room', async () => {
+      examEnrollmentRepository.findOne.mockResolvedValue({
+        ERM_ID: 1,
+        ERM_STATUS: ExamEnrollmentStatus.PAID,
+        SL_ID: 10,
+      });
+
+      await expect(
+        service.checkIn(1, {}, { expectedSlId: 99 }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(examEnrollmentRepository.save).not.toHaveBeenCalled();
+    });
+
     it('ENR-U-019: uses explicit check-in timestamp from DTO', async () => {
       // Arrange
       const stamp = '2025-06-01T09:15:00.000Z';
