@@ -1491,6 +1491,11 @@ export default {
         cancel: 'ยกเลิก',
         floor: 'ชั้น {floor}',
         roomNo: 'ห้อง {room}',
+        factExam: 'การสอบ',
+        factTime: 'รอบเวลา',
+        factRoom: 'ห้องสอบ',
+        factCount: 'ผู้เข้าสอบ',
+        countChip: '{attended}/{total} คน',
       },
       station: {
         pageTitle: 'สแกนเช็คอิน',

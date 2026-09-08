@@ -11,6 +11,11 @@ import type { MyCheckInRoom } from 'src/types/check-in-assist.types';
 import { useUserStore } from 'src/stores/user.store';
 import { ROLES, type RoleValue } from 'src/constants/roles';
 import { ceToBeString } from 'src/utils/thai-date';
+import {
+  buildExamRoomDisplay,
+  normalizeExamRoomNo,
+  type ExamRoomDisplay,
+} from 'src/utils/check-in-room-label';
 
 const DATE_PICKER_ROLES: RoleValue[] = [
   ROLES.ADMIN,
@@ -84,14 +89,22 @@ export function useCheckInRooms() {
 
   const formatRoomLabel = (room: MyCheckInRoom): string => {
     const parts = [room.locationName];
-    if (room.roomNo) {
-      parts.push(t('admin.checkIn.rooms.roomNo', { room: room.roomNo }));
+    const roomNo = normalizeExamRoomNo(room.roomNo);
+    if (roomNo) {
+      parts.push(t('admin.checkIn.rooms.roomNo', { room: roomNo }));
     }
     if (room.floorNo != null) {
       parts.push(t('admin.checkIn.rooms.floor', { floor: room.floorNo }));
     }
     return parts.join(' · ');
   };
+
+  const formatRoomHero = (room: MyCheckInRoom): ExamRoomDisplay =>
+    buildExamRoomDisplay(
+      room,
+      (roomNo) => t('admin.checkIn.rooms.roomNo', { room: roomNo }),
+      (floor) => t('admin.checkIn.rooms.floor', { floor }),
+    );
 
   const formatSessionTime = (room: MyCheckInRoom): string => {
     const start = room.sessionStart?.slice(0, 5);
@@ -117,9 +130,7 @@ export function useCheckInRooms() {
     try {
       const station =
         room.activeStationCasId != null
-          ? await getRoomStation(room.activeStationCasId).catch(() =>
-              openRoomStation(room.slId),
-            )
+          ? await getRoomStation(room.activeStationCasId).catch(() => openRoomStation(room.slId))
           : await openRoomStation(room.slId);
       isConfirmOpen.value = false;
       pendingRoom.value = null;
@@ -152,6 +163,7 @@ export function useCheckInRooms() {
     isOpening,
     loadRooms,
     formatRoomLabel,
+    formatRoomHero,
     formatSessionTime,
     requestOpenRoom,
     cancelConfirm,

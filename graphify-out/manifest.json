@@ -2445,8 +2445,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/en-US/index.ts": {
-    "mtime": 1788855406.2175384,
-    "ast_hash": "9c8421ff634abbe87fa77e0d3ee061de",
+    "mtime": 1788856795.4724417,
+    "ast_hash": "44542f90f902d5b15c5c213dd7f86d9a",
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/index.ts": {
@@ -2455,8 +2455,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/th/index.ts": {
-    "mtime": 1788855406.1433928,
-    "ast_hash": "7b85dcf15ddeecf0aeca1691669b26af",
+    "mtime": 1788856795.0941477,
+    "ast_hash": "acf90b0becbfbc45f2081f28b0c7ec7a",
     "semantic_hash": ""
   },
   "apps/frontend/src/layouts/main-layout.vue": {
@@ -5225,18 +5225,28 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-check-in-rooms.ts": {
-    "mtime": 1788856211.9949706,
-    "ast_hash": "63d70a197a4011e88b00635850394b5c",
+    "mtime": 1788856990.3336136,
+    "ast_hash": "b287b86825e43917c58b895bb09500fb",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/check-in-rooms-page.vue": {
-    "mtime": 1788856221.330484,
-    "ast_hash": "1c609cbf4a1b374f15cebe0b29af8314",
+    "mtime": 1788856990.399467,
+    "ast_hash": "499f40785d5437405bb1aa7ea70bcfe7",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/room-check-in-scanner-page.vue": {
-    "mtime": 1788855404.0599718,
-    "ast_hash": "c8fc036788c293e30e9f0ab0117b7573",
+    "mtime": 1788856990.460058,
+    "ast_hash": "1d7991208e10d8f50e340bb66bb85599",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/utils/check-in-room-label.spec.ts": {
+    "mtime": 1788856785.3536608,
+    "ast_hash": "5df2aa853b878f25b1bf368f6f4827cd",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/utils/check-in-room-label.ts": {
+    "mtime": 1788856784.202667,
+    "ast_hash": "157c6f4bfd72062d4597f06bb3c89de0",
     "semantic_hash": ""
   }
 }

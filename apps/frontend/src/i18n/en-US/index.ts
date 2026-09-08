@@ -1501,6 +1501,11 @@ export default {
         cancel: 'Cancel',
         floor: 'Floor {floor}',
         roomNo: 'Room {room}',
+        factExam: 'Exam',
+        factTime: 'Session time',
+        factRoom: 'Exam room',
+        factCount: 'Checked in',
+        countChip: '{attended}/{total}',
       },
       station: {
         pageTitle: 'Check-in scan',
