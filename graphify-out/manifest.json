@@ -2295,8 +2295,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-create-exam.ts": {
-    "mtime": 1788851628.9361055,
-    "ast_hash": "55885ef3db8c7a3ee0e23776254d47e6",
+    "mtime": 1788852541.639295,
+    "ast_hash": "7abe070f9020cfed5d73faa50667a372",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-daily-revenue.ts": {
@@ -5075,8 +5075,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/database/migrations/1789780344500-CreateSystemSettings.ts": {
-    "mtime": 1788851628.9329054,
-    "ast_hash": "d87b0e576888558151f82c24629b8977",
+    "mtime": 1788852535.672998,
+    "ast_hash": "002b1e24198760a9a64e4992d207c120",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/enrollment-audit/dto/enrollment-audit-query.dto.ts": {
@@ -5115,8 +5115,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/system-settings/constants/system-settings.catalog.ts": {
-    "mtime": 1788851628.9335458,
-    "ast_hash": "e8f4f806e3c77d7fe8708a2cc86b5638",
+    "mtime": 1788852531.3439732,
+    "ast_hash": "33e62b437e8f3c82a1d254fdce87f2aa",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/system-settings/dto/system-settings.dto.ts": {
@@ -5170,8 +5170,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/system-settings-page.vue": {
-    "mtime": 1788851628.937041,
-    "ast_hash": "0aff2e8b4c73a32a2212521a8951fb5c",
+    "mtime": 1788852541.7307258,
+    "ast_hash": "067372273e7a115ccb3b3b8b77e157d5",
     "semantic_hash": ""
   },
   "apps/frontend/src/services/enrollment-audit.service.ts": {
@@ -5197,6 +5197,11 @@
   "apps/frontend/src/utils/enrollment-audit-labels.ts": {
     "mtime": 1788841433.4564312,
     "ast_hash": "340af4ad8843e10c1eba585f3e887c6c",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/database/migrations/1789780344600-DropExamDefaultRoomSeatsSetting.ts": {
+    "mtime": 1788852537.8985014,
+    "ast_hash": "ad38810130ec5af57363da7a368b85b2",
     "semantic_hash": ""
   }
 }

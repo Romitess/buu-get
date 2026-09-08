@@ -45,7 +45,6 @@ export class CreateSystemSettings1789780344500 implements MigrationInterface {
         ('exam.defaultFormat', 'exam', 'คอมพิวเตอร์', 'string'),
         ('exam.defaultSessionStart', 'exam', '08:00', 'string'),
         ('exam.defaultSessionEnd', 'exam', '10:00', 'string'),
-        ('exam.defaultRoomSeats', 'exam', '40', 'integer'),
         ('exam.passcodeLength', 'exam', '6', 'integer'),
         ('payment.sessionTtlMinutes', 'payment', '30', 'integer'),
         ('payment.defaultPcId', 'payment', '1', 'integer'),

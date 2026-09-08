@@ -184,7 +184,6 @@ const GROUP_ORDER = ['exam', 'payment', 'certificate', 'org', 'email'] as const;
 /** min/max จาก catalog backend — ใช้จำกัด input number ฝั่ง UI */
 const NUMERIC_BOUNDS: Record<string, { min?: number; max?: number }> = {
   'exam.defaultFeeThb': { min: 0, max: 1_000_000 },
-  'exam.defaultRoomSeats': { min: 1, max: 9999 },
   'exam.passcodeLength': { min: 4, max: 16 },
   'payment.sessionTtlMinutes': { min: 1, max: 120 },
   'payment.defaultPcId': { min: 1 },

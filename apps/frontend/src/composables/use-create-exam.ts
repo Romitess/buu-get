@@ -970,15 +970,11 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         form.value.fee = String(
           getSettingNumber(systemSettings, 'exam.defaultFeeThb', DEFAULT_EXAM_FEE_THB),
         );
-        const defaultSeats = getSettingNumber(systemSettings, 'exam.defaultRoomSeats', 40);
         const start = getSettingValue(systemSettings, 'exam.defaultSessionStart', '08:00');
         const end = getSettingValue(systemSettings, 'exam.defaultSessionEnd', '10:00');
         if (form.value.timeSlots[0]) {
           form.value.timeSlots[0].startTime = start;
           form.value.timeSlots[0].endTime = end;
-          if (form.value.timeSlots[0].rooms[0]) {
-            form.value.timeSlots[0].rooms[0].seats = defaultSeats;
-          }
         }
       }
       proctorOptions.value = proctors.map((u) => {
