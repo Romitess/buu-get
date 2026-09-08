@@ -81,8 +81,8 @@ import { EnrollmentAuditModule } from './modules/enrollment-audit/enrollment-aud
           autoLoadEntities: true,
           synchronize: false,
           // dropSchema: false,
-          // TEMP: ปิด auto-run migration ตอน boot เพื่อทดสอบว่าต้นเหตุ timeout คือ migration AlterAttendanceStatusToTinyint หรือไม่
-          migrationsRun: true,
+          // Migrations รันผ่าน kubectl Job ใน GitLab CI ก่อน helm upgrade (อย่าให้ pod แข่งกัน)
+          migrationsRun: false,
           migrations: ['dist/database/migrations/*.js'],
         }) as TypeOrmModuleOptions,
     }),

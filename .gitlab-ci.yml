@@ -28,6 +28,7 @@
 #         DOTENV_*, REGISTRY_USER, REGISTRY_TOKEN) จาก HashiCorp Vault
 #       - Helm chart: auto-generate ใน job ถ้ายังไม่มี helm/app บน runner/server
 #       - Dockerfile: ค้น apps/backend และ apps/frontend (สร้างบน server ได้)
+#       - DB migrate: kubectl Job (${RELEASE_NAME}-migrate) ก่อน helm upgrade ทุก env
 # ==============================================================================
 
 variables:
@@ -180,6 +181,56 @@ stages:
         fi
         echo "=== Dotenv keys (values hidden) ==="
         cut -d= -f1 "$dest"
+      }
+
+      # Run TypeORM migrations as a one-shot Job before helm upgrade.
+      # Usage: run_db_migration <namespace> <image-tag>
+      # Requires: RELEASE_NAME, IMAGE_API, kubeconfig at ~/.kube/config
+      run_db_migration() {
+        NS="$1"
+        IMAGE_TAG="$2"
+        JOB_NAME="${RELEASE_NAME}-migrate"
+        JOB_FILE="/tmp/${JOB_NAME}.yaml"
+        echo "=== Running DB migration Job ${JOB_NAME} (image ${IMAGE_API}:${IMAGE_TAG}) in ${NS} ==="
+        kubectl delete job "${JOB_NAME}" -n "${NS}" --ignore-not-found --kubeconfig ~/.kube/config
+        printf '%s\n' \
+          "apiVersion: batch/v1" \
+          "kind: Job" \
+          "metadata:" \
+          "  name: ${JOB_NAME}" \
+          "  namespace: ${NS}" \
+          "spec:" \
+          "  backoffLimit: 1" \
+          "  ttlSecondsAfterFinished: 600" \
+          "  template:" \
+          "    spec:" \
+          "      restartPolicy: Never" \
+          "      imagePullSecrets:" \
+          "        - name: regcred" \
+          "      containers:" \
+          "        - name: migrate" \
+          "          image: ${IMAGE_API}:${IMAGE_TAG}" \
+          "          imagePullPolicy: Always" \
+          "          command:" \
+          "            - node" \
+          "            - ../../node_modules/typeorm/cli.js" \
+          "            - migration:run" \
+          "            - -d" \
+          "            - dist/database/data-source.js" \
+          "          envFrom:" \
+          "            - secretRef:" \
+          "                name: ${RELEASE_NAME}-env" \
+          > "${JOB_FILE}"
+        kubectl apply -f "${JOB_FILE}" --kubeconfig ~/.kube/config
+        rm -f "${JOB_FILE}"
+        if ! kubectl wait --for=condition=complete "job/${JOB_NAME}" -n "${NS}" --timeout=300s --kubeconfig ~/.kube/config; then
+          echo "ERROR: Migration Job failed — aborting deploy (helm upgrade skipped)"
+          kubectl logs "job/${JOB_NAME}" -n "${NS}" --kubeconfig ~/.kube/config || true
+          kubectl describe "job/${JOB_NAME}" -n "${NS}" --kubeconfig ~/.kube/config || true
+          exit 1
+        fi
+        echo "=== Migration Job completed successfully ==="
+        kubectl logs "job/${JOB_NAME}" -n "${NS}" --kubeconfig ~/.kube/config || true
       }
     - |
       if [ ! -d "${HELM_CHART_PATH}" ]; then
@@ -644,7 +695,8 @@ deploy-dev:
         --from-env-file="$ENV_PATH" \
         -n dev --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config
       rm -f /tmp/app_env.env /tmp/app_env.sanitized.env
-    
+
+    - run_db_migration "dev" "${CI_COMMIT_SHORT_SHA}"
     - helm version
     - helm upgrade --install "${RELEASE_NAME}" "${HELM_CHART_PATH}" -f "${HELM_CHART_PATH}/values-dev.yaml" --set image.repository="${IMAGE_API}" --set image.tag="${CI_COMMIT_SHORT_SHA}" --set web.image.repository="${IMAGE_WEB}" --set web.image.tag="${CI_COMMIT_SHORT_SHA}" --set ingress.host="${RELEASE_NAME}-dev.buu.ac.th" -n dev --create-namespace --kubeconfig ~/.kube/config
 
@@ -745,7 +797,8 @@ deploy-test:
         --from-env-file="$ENV_PATH" \
         -n test --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config
       rm -f /tmp/app_env.env /tmp/app_env.sanitized.env
-    
+
+    - run_db_migration "test" "${CI_COMMIT_SHORT_SHA}"
     - helm version
     - helm upgrade --install "${RELEASE_NAME}" "${HELM_CHART_PATH}" -f "${HELM_CHART_PATH}/values-test.yaml" --set image.repository="${IMAGE_API}" --set image.tag="${CI_COMMIT_SHORT_SHA}" --set web.image.repository="${IMAGE_WEB}" --set web.image.tag="${CI_COMMIT_SHORT_SHA}" --set ingress.host="${RELEASE_NAME}-test.buu.ac.th" -n test --create-namespace --kubeconfig ~/.kube/config
 
@@ -846,9 +899,10 @@ deploy-prod:
         --from-env-file="$ENV_PATH" \
         -n prod --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config
       rm -f /tmp/app_env.env /tmp/app_env.sanitized.env
-    
-    - helm version
+
     - 'TAG_OR_SHA="${CI_COMMIT_TAG:-${CI_COMMIT_SHORT_SHA}}"'
+    - run_db_migration "prod" "${TAG_OR_SHA}"
+    - helm version
     - helm upgrade --install "${RELEASE_NAME}" "${HELM_CHART_PATH}" -f "${HELM_CHART_PATH}/values-prod.yaml" --set image.repository="${IMAGE_API}" --set image.tag="${TAG_OR_SHA}" --set web.image.repository="${IMAGE_WEB}" --set web.image.tag="${TAG_OR_SHA}" --set ingress.host="${RELEASE_NAME}.buu.ac.th" -n prod --create-namespace --kubeconfig ~/.kube/config
 
 # ==============================================================================
