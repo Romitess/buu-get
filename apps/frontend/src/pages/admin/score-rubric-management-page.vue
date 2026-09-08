@@ -6,69 +6,50 @@
       :subtitle="$t('admin.scoreRubricManagement.pageDescription')"
     />
 
-    <div class="row items-center q-mb-lg q-gutter-x-md">
-      <div class="col">
-        <SearchBar v-model="searchQuery" />
+    <div class="row q-col-gutter-md items-center q-mb-md">
+      <div class="col-12 col-sm">
+        <SearchBar
+          v-model="searchQuery"
+          :placeholder="$t('admin.scoreRubricManagement.searchPlaceholder')"
+        />
       </div>
-      <div>
-        <q-btn
+      <div class="col-12 col-sm-auto text-right">
+        <AppButton
           icon="add"
           :label="$t('admin.scoreRubricManagement.createButton')"
           color="primary"
-          unelevated
           class="create-rubric-btn text-weight-bold"
           @click="openCreateDialog"
         />
       </div>
     </div>
 
-    <q-card class="section-card">
-      <BaseTable
-        :columns="tableColumns"
-        :rows="filteredRubrics"
-        :loading="isLoading"
-        :pagination="pagination"
-        @request="onRequest"
-      >
-        <template #body-cell-itemsCount="{ row }">
-          <div class="text-center">
-            <q-badge color="blue-1" text-color="primary" class="items-count-badge">
-              {{ row.items.length }}
-            </q-badge>
-          </div>
-        </template>
-
-        <template #body-cell-isDefault="{ row }">
-          <div class="text-center">
-            <q-badge
-              v-if="row.isDefault"
-              color="primary"
-              class="default-badge"
-              :label="$t('admin.scoreRubricManagement.defaultBadge')"
-            />
-            <span v-else class="text-grey-5">-</span>
-          </div>
-        </template>
-
-        <template #body-cell-actions="{ row }">
-          <div class="row justify-end q-gutter-x-sm no-wrap">
-            <ActionButton
-              icon="edit"
-              color="secondary"
-              tooltip="แก้ไข"
-              @click="openEditDialog(row)"
-            />
-            <ActionButton
-              icon="delete"
-              color="negative"
-              tooltip="ลบ"
-              :disable="row.isDefault"
-              @click="openDeleteDialog(row)"
-            />
-          </div>
-        </template>
-      </BaseTable>
-    </q-card>
+    <BaseTable
+      :columns="tableColumns"
+      :rows="filteredRubrics"
+      :loading="isLoading"
+      :pagination="pagination"
+      :empty-label="$t('admin.scoreRubricManagement.noData')"
+      @request="onRequest"
+    >
+      <template v-slot:body-cell-tools="{ row }">
+        <div class="row justify-center q-gutter-x-sm no-wrap">
+          <ActionButton
+            icon="edit"
+            color="secondary"
+            :tooltip="$t('admin.scoreRubricManagement.tooltips.edit')"
+            @click="openEditDialog(row)"
+          />
+          <ActionButton
+            icon="delete"
+            color="negative"
+            :tooltip="$t('admin.scoreRubricManagement.tooltips.delete')"
+            :disable="row.isDefault"
+            @click="openDeleteDialog(row)"
+          />
+        </div>
+      </template>
+    </BaseTable>
 
     <q-dialog v-model="showFormDialog" persistent>
       <q-card class="rubric-dialog-card">
@@ -202,14 +183,14 @@
         <q-card-actions align="right" class="q-pa-lg q-gutter-sm">
           <AppButton
             :label="$t('common.cancel')"
-            class="action-btn cancel-btn"
+            class="dialog-footer-btn cancel-btn"
             :disable="isSaving"
             @click="closeFormDialog"
           />
           <AppButton
             :label="$t('common.save')"
             color="primary"
-            class="action-btn"
+            class="dialog-footer-btn"
             :loading="isSaving"
             @click="saveRubric"
           />
@@ -286,11 +267,45 @@ const pagination = ref<PaginationModel>({
 });
 
 const tableColumns = computed<QTableColumn[]>(() => [
-  { name: 'nameTh', label: 'ชื่อ (ไทย)', field: 'nameTh', align: 'left' },
-  { name: 'nameEn', label: 'ชื่อ (EN)', field: 'nameEn', align: 'left' },
-  { name: 'itemsCount', label: 'จำนวนหมวด', field: 'itemsCount', align: 'center' },
-  { name: 'isDefault', label: 'ค่าเริ่มต้น', field: 'isDefault', align: 'center' },
-  { name: 'actions', label: 'จัดการ', field: 'actions', align: 'right', style: 'width: 12%' },
+  {
+    name: 'index',
+    label: t('admin.scoreRubricManagement.columns.index'),
+    field: (_row: ScoreRubricDto, index?: number) =>
+      ((pagination.value.page - 1) * pagination.value.rowsPerPage || 0) + (index ?? 0) + 1,
+    align: 'center',
+  },
+  {
+    name: 'nameTh',
+    label: t('admin.scoreRubricManagement.columns.nameTh'),
+    field: 'nameTh',
+    align: 'left',
+  },
+  {
+    name: 'nameEn',
+    label: t('admin.scoreRubricManagement.columns.nameEn'),
+    field: 'nameEn',
+    align: 'left',
+  },
+  {
+    name: 'itemsCount',
+    label: t('admin.scoreRubricManagement.columns.itemsCount'),
+    field: (row: ScoreRubricDto) => row.items.length,
+    align: 'center',
+  },
+  {
+    name: 'isDefault',
+    label: t('admin.scoreRubricManagement.columns.isDefault'),
+    field: 'isDefault',
+    align: 'center',
+    format: (val: boolean | null | undefined) =>
+      val ? t('admin.scoreRubricManagement.defaultBadge') : '-',
+  },
+  {
+    name: 'tools',
+    label: t('admin.scoreRubricManagement.columns.tools'),
+    field: 'tools',
+    align: 'center',
+  },
 ]);
 
 function emptyForm(): RubricForm {
@@ -460,33 +475,12 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.score-rubric-management-page {
-  padding-top: 16px;
-  padding-bottom: 32px;
-
-  @media (min-height: 900px) {
-    padding-top: 24px;
-    padding-bottom: 48px;
-  }
-}
-
-.section-card {
-  background: #ffffff;
-  border-radius: var(--radius-lg);
-  border: none;
-  box-shadow: 0px 4px 4px 0px #00000040 !important;
-  padding: 8px 0;
-  overflow: hidden;
-}
-
 .create-rubric-btn {
   border-radius: var(--radius-10) !important;
   height: 40px;
   padding: 0 24px;
 }
 
-.items-count-badge,
-.default-badge,
 .item-total-badge {
   border-radius: 999px;
   font-weight: 600;
@@ -526,7 +520,7 @@ onMounted(() => {
   padding: 10px 16px;
 }
 
-.action-btn {
+.dialog-footer-btn {
   min-width: 120px;
 }
 </style>
