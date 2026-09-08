@@ -95,12 +95,8 @@
       </div>
     </div>
 
-    <q-dialog
-      v-model="isConfirmOpen"
-      persistent
-      :position="isCompactDialog ? 'bottom' : undefined"
-    >
-      <q-card class="confirm-card" :class="{ 'confirm-card--sheet': isCompactDialog }">
+    <q-dialog v-model="isConfirmOpen" persistent class="room-confirm-dialog">
+      <q-card class="confirm-card">
         <q-card-section class="confirm-card__header">
           <div class="confirm-card__icon" aria-hidden="true">
             <q-icon name="meeting_room" size="28px" />
@@ -152,7 +148,7 @@
           </dl>
         </q-card-section>
 
-        <q-card-actions class="confirm-card__actions">
+        <div class="confirm-card__actions">
           <AppButton
             outline
             class="confirm-card__btn"
@@ -168,7 +164,7 @@
             :loading="isOpening"
             @click="confirmOpenRoom"
           />
-        </q-card-actions>
+        </div>
       </q-card>
     </q-dialog>
   </q-page>
@@ -177,7 +173,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useQuasar } from 'quasar';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppButton from 'src/components/base/app-button.vue';
@@ -186,7 +181,6 @@ import SearchBar from 'src/components/shared/search-bar.vue';
 import { useCheckInRooms } from 'src/composables/use-check-in-rooms';
 
 const { t } = useI18n();
-const $q = useQuasar();
 const showDatePicker = ref(false);
 const {
   filteredRooms,
@@ -211,7 +205,6 @@ onMounted(() => {
   void loadRooms();
 });
 
-const isCompactDialog = computed(() => $q.screen.lt.sm);
 const pendingHero = computed(() => (pendingRoom.value ? formatRoomHero(pendingRoom.value) : null));
 </script>
 
@@ -245,21 +238,24 @@ const pendingHero = computed(() => (pendingRoom.value ? formatRoomHero(pendingRo
 }
 
 .confirm-card {
-  width: min(440px, calc(100vw - 24px));
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  max-height: calc(100svh - 32px);
+  display: flex;
+  flex-direction: column;
   border-radius: 20px;
   overflow: hidden;
 
-  &--sheet {
-    width: 100%;
-    max-width: 100%;
-    border-radius: 20px 20px 0 0;
+  :deep(.q-card-section) {
+    padding: 0;
   }
 
   &__header {
     display: flex;
     gap: 12px;
     align-items: flex-start;
-    padding-bottom: 4px;
+    flex: 0 0 auto;
+    padding: 20px 20px 8px;
   }
 
   &__icon {
@@ -295,20 +291,21 @@ const pendingHero = computed(() => (pendingRoom.value ? formatRoomHero(pendingRo
   &__body {
     display: grid;
     gap: 12px;
-    padding-top: 4px;
-    padding-bottom: 4px;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 8px 20px 12px;
   }
 
   &__actions {
+    flex: 0 0 auto;
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     gap: 8px;
-    padding: 8px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+    padding: 8px 20px 20px;
 
     @media (min-width: 600px) {
       flex-direction: row;
       justify-content: flex-end;
-      padding-bottom: 16px;
     }
   }
 
@@ -387,6 +384,14 @@ const pendingHero = computed(() => (pendingRoom.value ? formatRoomHero(pendingRo
     font-weight: 600;
     line-height: 1.35;
     word-break: break-word;
+  }
+}
+</style>
+
+<style lang="scss">
+.room-confirm-dialog {
+  .q-dialog__inner {
+    padding: 16px !important;
   }
 }
 </style>

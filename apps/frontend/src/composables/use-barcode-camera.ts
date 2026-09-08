@@ -36,22 +36,28 @@ export function useBarcodeCamera() {
     cameraError.value = null;
     await stopCamera();
 
+    const host = document.getElementById(SCANNER_ELEMENT_ID);
+    if (host) {
+      host.replaceChildren();
+    }
+
     scanner = new Html5Qrcode(SCANNER_ELEMENT_ID, {
-      formatsToSupport: [
-        Html5QrcodeSupportedFormats.CODE_128,
-        Html5QrcodeSupportedFormats.QR_CODE,
-      ],
+      formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.QR_CODE],
       verbose: false,
     });
-
-    const scanBoxSize = Math.min(280, Math.floor(window.innerWidth * 0.82));
 
     try {
       await scanner.start(
         { facingMode: 'environment' },
         {
           fps: SCAN_FPS,
-          qrbox: { width: scanBoxSize, height: scanBoxSize },
+          qrbox: (viewfinderWidth, viewfinderHeight) => {
+            const edge = Math.max(
+              160,
+              Math.floor(Math.min(viewfinderWidth, viewfinderHeight) * 0.72),
+            );
+            return { width: edge, height: edge };
+          },
         },
         (decodedText) => {
           const now = Date.now();
@@ -66,9 +72,7 @@ export function useBarcodeCamera() {
       isCameraActive.value = true;
     } catch (error) {
       cameraError.value =
-        error instanceof Error
-          ? error.message
-          : t('admin.checkIn.errors.cameraFailed');
+        error instanceof Error ? error.message : t('admin.checkIn.errors.cameraFailed');
       await stopCamera();
     }
   };

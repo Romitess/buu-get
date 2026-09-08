@@ -2460,8 +2460,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/layouts/main-layout.vue": {
-    "mtime": 1787028434.3261056,
-    "ast_hash": "260acbddc08b1c0970625b5f8ceba079",
+    "mtime": 1788858926.1250737,
+    "ast_hash": "86fa2e4c93a47cae2bbe87aa79997757",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/application-fee-report-page.vue": {
@@ -2655,8 +2655,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/router/routes.ts": {
-    "mtime": 1788854964.176403,
-    "ast_hash": "f2e07d3dc260d038be034a55b93be686",
+    "mtime": 1788858433.6093752,
+    "ast_hash": "4507d11f96624704a64256371acfbce9",
     "semantic_hash": ""
   },
   "apps/frontend/src/services/bank-reconcile.service.ts": {
@@ -4755,8 +4755,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-barcode-camera.ts": {
-    "mtime": 1787023258.3594346,
-    "ast_hash": "894a56db5fce8adcd2733cf710d1c99d",
+    "mtime": 1788858926.116266,
+    "ast_hash": "7e3d4f10fe079f1523d21c33dcc1d6d5",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-check-in-assist-host.ts": {
@@ -5230,13 +5230,13 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/check-in-rooms-page.vue": {
-    "mtime": 1788856990.399467,
-    "ast_hash": "499f40785d5437405bb1aa7ea70bcfe7",
+    "mtime": 1788858239.9984715,
+    "ast_hash": "634d17e7d1cf8486dc25eea5973185d2",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/room-check-in-scanner-page.vue": {
-    "mtime": 1788856990.460058,
-    "ast_hash": "1d7991208e10d8f50e340bb66bb85599",
+    "mtime": 1788858924.767259,
+    "ast_hash": "ed0e3b1d444fde03816ddc061a5c6eb3",
     "semantic_hash": ""
   },
   "apps/frontend/src/utils/check-in-room-label.spec.ts": {

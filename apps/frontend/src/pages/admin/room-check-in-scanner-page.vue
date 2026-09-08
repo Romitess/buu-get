@@ -11,6 +11,7 @@
           :aria-label="t('admin.checkIn.backAria')"
           @click="goBack"
         />
+        <h1 class="scanner-header__title">{{ t('admin.checkIn.station.pageTitle') }}</h1>
         <q-btn
           flat
           dense
@@ -23,7 +24,6 @@
           {{ t('admin.checkIn.station.closeStation') }}
         </q-btn>
       </div>
-      <h1 class="scanner-header__title">{{ t('admin.checkIn.station.pageTitle') }}</h1>
 
       <div v-if="station && roomDisplay" class="scanner-meta">
         <div class="scanner-meta__room">{{ roomDisplay.title }}</div>
@@ -63,14 +63,8 @@
 
     <template v-else-if="station">
       <section class="camera-panel">
-        <div :id="scannerElementId" class="camera-viewport" />
-        <div class="scan-reticle" aria-hidden="true">
-          <div class="scan-reticle__box">
-            <span class="scan-reticle__corner scan-reticle__corner--tl" />
-            <span class="scan-reticle__corner scan-reticle__corner--tr" />
-            <span class="scan-reticle__corner scan-reticle__corner--bl" />
-            <span class="scan-reticle__corner scan-reticle__corner--br" />
-          </div>
+        <div class="camera-viewport">
+          <div :id="scannerElementId" class="camera-host" />
         </div>
         <p v-if="cameraError" class="camera-status camera-status--error">{{ cameraError }}</p>
         <p v-else-if="!isCameraActive && !lastResult" class="camera-status">
@@ -430,23 +424,28 @@ onMounted(async () => {
 .station-scanner-page {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
+  height: 100svh;
+  max-height: 100svh;
+  min-height: 100svh;
+  padding: 0 !important;
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
+  overflow: hidden;
   background: #0b1220;
 }
 
 .scanner-header {
   flex: 0 0 auto;
-  padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 12px;
+  padding: 4px 12px 10px;
   background: var(--surface-card);
 
   &__nav {
-    display: flex;
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
     align-items: center;
-    justify-content: space-between;
     min-height: 44px;
+    gap: 4px;
   }
 
   &__icon-btn {
@@ -455,29 +454,30 @@ onMounted(async () => {
   }
 
   &__title {
-    margin: 2px 4px 0;
-    font-size: 1.2rem;
+    margin: 0;
+    font-size: 1.1rem;
     font-weight: 800;
     line-height: 1.25;
     color: var(--text-primary);
+    text-align: center;
   }
 
   &__close {
     min-height: 44px;
-    padding: 0 10px;
+    padding: 0 8px;
     font-weight: 700;
     color: var(--negative);
   }
 }
 
 .scanner-meta {
-  margin-top: 10px;
-  padding: 14px;
-  border-radius: 16px;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 14px;
   background: #f4f7fb;
 
   &__room {
-    font-size: 1.2rem;
+    font-size: 1.05rem;
     font-weight: 800;
     line-height: 1.25;
     color: var(--text-primary);
@@ -485,7 +485,7 @@ onMounted(async () => {
 
   &__exam {
     margin-top: 2px;
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     font-weight: 600;
     color: var(--text-primary);
   }
@@ -494,17 +494,17 @@ onMounted(async () => {
     display: flex;
     align-items: flex-start;
     gap: 4px;
-    margin-top: 4px;
+    margin-top: 2px;
     color: var(--text-secondary);
-    font-size: 0.85rem;
-    line-height: 1.4;
+    font-size: 0.8rem;
+    line-height: 1.35;
   }
 
   &__chips {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 10px;
+    margin-top: 8px;
   }
 }
 
@@ -535,16 +535,29 @@ onMounted(async () => {
   position: relative;
   flex: 1 1 auto;
   display: flex;
-  flex-direction: column;
-  min-height: 38dvh;
+  min-height: 0;
+  background: #0b1220;
 }
 
 .camera-viewport {
+  position: relative;
   width: 100%;
-  flex: 1;
-  min-height: 38dvh;
+  height: 100%;
   overflow: hidden;
-  background: #0b1220;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-host {
+  position: relative;
+  width: 100%;
+  max-height: 100%;
+
+  :deep(video) {
+    display: block;
+    width: 100% !important;
+  }
 }
 
 .camera-status {
@@ -561,57 +574,6 @@ onMounted(async () => {
 
   &--error {
     color: #ef9a9a;
-  }
-}
-
-.scan-reticle {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-  z-index: 1;
-
-  &__box {
-    position: relative;
-    width: min(68vw, 240px);
-    aspect-ratio: 1;
-  }
-
-  &__corner {
-    position: absolute;
-    width: 28px;
-    height: 28px;
-    border: 3px solid rgba(255, 255, 255, 0.92);
-    border-radius: 4px;
-
-    &--tl {
-      top: 0;
-      left: 0;
-      border-right: 0;
-      border-bottom: 0;
-    }
-
-    &--tr {
-      top: 0;
-      right: 0;
-      border-left: 0;
-      border-bottom: 0;
-    }
-
-    &--bl {
-      bottom: 0;
-      left: 0;
-      border-right: 0;
-      border-top: 0;
-    }
-
-    &--br {
-      bottom: 0;
-      right: 0;
-      border-left: 0;
-      border-top: 0;
-    }
   }
 }
 
@@ -716,9 +678,10 @@ onMounted(async () => {
 }
 
 .manual-panel {
+  flex: 0 0 auto;
   display: grid;
-  gap: 12px;
-  padding: 10px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  gap: 10px;
+  padding: 12px 16px 16px;
   background: var(--surface-card);
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08);
@@ -726,7 +689,7 @@ onMounted(async () => {
   &__handle {
     width: 36px;
     height: 4px;
-    margin: 0 auto 2px;
+    margin: 0 auto;
     border-radius: 999px;
     background: #d7dee8;
   }

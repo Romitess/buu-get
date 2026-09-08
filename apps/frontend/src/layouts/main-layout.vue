@@ -5,13 +5,15 @@
     <!-- Admin/Staff Sidebar (Drawer) -->
     <AppSidebar v-if="showAdminDrawer && !route.meta.hideDrawer" />
 
-    <q-page-container :class="{ 'has-bottom-nav': showBottomNav }">
+    <q-page-container
+      :class="{ 'has-bottom-nav': showBottomNav, 'is-immersive-page': isImmersivePage }"
+    >
       <router-view />
     </q-page-container>
 
     <CandidateBottomNav />
 
-    <q-footer v-if="!showBottomNav">
+    <q-footer v-if="!showBottomNav && !route.meta.hideFooter">
       <FooterCredits :variant="(route.meta.footerVariant as 'primary' | 'white') || 'white'" />
     </q-footer>
   </q-layout>
@@ -33,16 +35,19 @@ const { showAdminDrawer } = useNavigation();
 
 const showBottomNav = computed(() => {
   return (
-    $q.screen.lt.md &&
-    !showAdminDrawer.value &&
-    !route.meta.hideHeader &&
-    !route.meta.hideDrawer
+    $q.screen.lt.md && !showAdminDrawer.value && !route.meta.hideHeader && !route.meta.hideDrawer
   );
 });
+
+const isImmersivePage = computed(() => Boolean(route.meta.hideHeader && route.meta.hideFooter));
 </script>
 
 <style scoped lang="scss">
 .has-bottom-nav {
   padding-bottom: var(--candidate-bottom-nav-offset);
+}
+
+.is-immersive-page {
+  padding: 0;
 }
 </style>

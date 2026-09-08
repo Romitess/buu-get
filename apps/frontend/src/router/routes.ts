@@ -6,6 +6,7 @@ declare module 'vue-router' {
     roles?: string[];
     hideHeader?: boolean;
     hideDrawer?: boolean;
+    hideFooter?: boolean;
     footerVariant?: 'primary' | 'white';
     breadcrumb?: {
       label: string;
@@ -500,6 +501,7 @@ const routes: RouteRecordRaw[] = [
             meta: {
               hideHeader: true,
               hideDrawer: true,
+              hideFooter: true,
               roles: [
                 ROLES.ADMIN,
                 ROLES.STAFF,
