@@ -14,6 +14,8 @@ import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Public } from 'src/decorators/public.decorator';
+import { Audit } from 'src/modules/audit-logs/decorators/audit.decorator';
+import { AuditAction } from 'src/modules/audit-logs/constants/audit-actions';
 
 import { Request as ExpressRequest } from 'express';
 
@@ -23,6 +25,13 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
+  @Audit({
+    action: AuditAction.AUTH_LOGIN,
+    resourceType: 'user',
+    bodyKeys: ['email'],
+    resultKeys: ['user.id', 'user.email', 'user.roles'],
+    resourceIdFrom: 'user.id',
+  })
   @Post('login')
   @ApiOkResponse({
     schema: {

@@ -54,7 +54,7 @@ async function bootstrap(): Promise<void> {
 
   app.enableCors({
     origin: parseCorsOrigins(corsOrigins, nodeEnv),
-    exposedHeaders: ['Date'],
+    exposedHeaders: ['Date', 'X-Correlation-Id'],
   });
   app.setGlobalPrefix('api');
   // เปิด URI versioning แบบ opt-in: route เดิมไม่มี @Version จะเป็น VERSION_NEUTRAL (path เดิม /api/... ไม่เปลี่ยน)

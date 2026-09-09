@@ -86,7 +86,9 @@ export class ExamCertificatesService {
 
   private rethrowDuplicateCertCode(error: unknown): never {
     if (this.isDuplicateKeyError(error)) {
-      throw new ConflictException('รหัสใบรับรอง (CERT_CODE) ซ้ำกับที่มีอยู่ในระบบ');
+      throw new ConflictException(
+        'รหัสใบรับรอง (CERT_CODE) ซ้ำกับที่มีอยู่ในระบบ',
+      );
     }
     throw error;
   }

@@ -304,7 +304,7 @@ describe('BankReconcilesService', () => {
 
     service = new BankReconcilesService(
       repository as unknown as Repository<BankReconcile>,
-      receiptNumberService as unknown as ReceiptNumberService,
+      receiptNumberService,
       dataSource as unknown as DataSource,
     );
   });

@@ -551,10 +551,13 @@ describe('ExamCertificatesService', () => {
     const dupError = new QueryFailedError(
       'INSERT',
       [],
-      Object.assign(new Error("Duplicate entry 'DUP-CODE' for key 'CERT_CODE'"), {
-        code: 'ER_DUP_ENTRY',
-        errno: 1062,
-      }),
+      Object.assign(
+        new Error("Duplicate entry 'DUP-CODE' for key 'CERT_CODE'"),
+        {
+          code: 'ER_DUP_ENTRY',
+          errno: 1062,
+        },
+      ),
     );
     examCertificateRepository.save.mockRejectedValue(dupError);
 

@@ -175,6 +175,12 @@ const menuLinks = computed(() => {
         path: '/admin/applicant-audit',
       });
       links.push({
+        name: 'audit-logs',
+        label: t('navigation.auditLogs'),
+        icon: 'policy',
+        path: '/admin/audit-logs',
+      });
+      links.push({
         name: 'system-settings',
         label: t('navigation.systemSettings'),
         icon: 'settings',

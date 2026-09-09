@@ -282,6 +282,18 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'audit-logs',
+            name: 'admin-audit-logs',
+            component: () => import('pages/admin/audit-logs-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.auditLogs', icon: 'policy' },
+              ],
+            },
+          },
+          {
             path: 'system-settings',
             name: 'admin-system-settings',
             component: () => import('pages/admin/system-settings-page.vue'),

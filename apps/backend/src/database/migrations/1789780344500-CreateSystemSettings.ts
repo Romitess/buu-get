@@ -60,9 +60,7 @@ export class CreateSystemSettings1789780344500 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `DROP TABLE \`SYS_T_SYSTEM_SETTING_AUDIT_LOGS\``,
-    );
+    await queryRunner.query(`DROP TABLE \`SYS_T_SYSTEM_SETTING_AUDIT_LOGS\``);
     await queryRunner.query(`DROP TABLE \`SYS_T_SYSTEM_SETTINGS\``);
   }
 }

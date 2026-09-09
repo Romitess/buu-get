@@ -313,11 +313,14 @@ describe('TransactionsService', () => {
       }));
 
       // Act
-      const result = await service.createTransactionForFlow({
-        ermId: 42,
-        pcId: 1,
-        amount: 500,
-      }, ownerUser);
+      const result = await service.createTransactionForFlow(
+        {
+          ermId: 42,
+          pcId: 1,
+          amount: 500,
+        },
+        ownerUser,
+      );
 
       // Assert
       expect(result).toEqual({ TRANX_ID: 101 });
@@ -360,11 +363,14 @@ describe('TransactionsService', () => {
       repos.transaction.save.mockImplementation(async (entity) => entity);
 
       // Act
-      const result = await service.createTransactionForFlow({
-        ermId: 42,
-        pcId: 9,
-        amount: 550,
-      }, ownerUser);
+      const result = await service.createTransactionForFlow(
+        {
+          ermId: 42,
+          pcId: 9,
+          amount: 550,
+        },
+        ownerUser,
+      );
 
       // Assert
       expect(result).toEqual({ TRANX_ID: 7 });
@@ -391,11 +397,14 @@ describe('TransactionsService', () => {
       repos.transaction.save.mockImplementation(async (entity) => entity);
 
       // Act
-      await service.createTransactionForFlow({
-        ermId: 42,
-        pcId: 2,
-        amount: 600,
-      }, ownerUser);
+      await service.createTransactionForFlow(
+        {
+          ermId: 42,
+          pcId: 2,
+          amount: 600,
+        },
+        ownerUser,
+      );
 
       // Assert
       expect(existing.TRANX_QR_CODE).toBe('fixed-uuid-qr');
@@ -426,11 +435,14 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.createTransactionForFlow({
-          ermId: 42,
-          pcId: 1,
-          amount: 500,
-        }, ownerUser),
+        service.createTransactionForFlow(
+          {
+            ermId: 42,
+            pcId: 1,
+            amount: 500,
+          },
+          ownerUser,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(repos.transaction.save).not.toHaveBeenCalled();
     });
@@ -441,11 +453,14 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.createTransactionForFlow({
-          ermId: 42,
-          pcId: 999,
-          amount: 500,
-        }, ownerUser),
+        service.createTransactionForFlow(
+          {
+            ermId: 42,
+            pcId: 999,
+            amount: 500,
+          },
+          ownerUser,
+        ),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
@@ -456,11 +471,14 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.createTransactionForFlow({
-          ermId: 999,
-          pcId: 1,
-          amount: 500,
-        }, ownerUser),
+        service.createTransactionForFlow(
+          {
+            ermId: 999,
+            pcId: 1,
+            amount: 500,
+          },
+          ownerUser,
+        ),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
 
@@ -489,11 +507,14 @@ describe('TransactionsService', () => {
 
       // Act / Assert
       await expect(
-        service.createTransactionForFlow({
-          ermId: 42,
-          pcId: 1,
-          amount: 500,
-        }, ownerUser),
+        service.createTransactionForFlow(
+          {
+            ermId: 42,
+            pcId: 1,
+            amount: 500,
+          },
+          ownerUser,
+        ),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
   });

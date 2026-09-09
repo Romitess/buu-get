@@ -1,9 +1,4 @@
-import {
-  All,
-  Controller,
-  NotFoundException,
-  Req,
-} from '@nestjs/common';
+import { All, Controller, NotFoundException, Req } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';

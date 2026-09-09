@@ -19,7 +19,10 @@ export interface ReceiptPdfContent {
 }
 
 function escapePdfLiteral(text: string): string {
-  return text.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+  return text
+    .replace(/\\/g, '\\\\')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)');
 }
 
 /** Prefer literal () for ASCII-only; otherwise UTF-16BE hex with BOM. */

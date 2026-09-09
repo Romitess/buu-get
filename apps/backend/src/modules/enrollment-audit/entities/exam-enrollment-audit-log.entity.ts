@@ -36,7 +36,11 @@ export class ExamEnrollmentAuditLog {
   @Column({ name: 'ERM_ID', type: 'int', comment: 'รหัสผู้สมัคร (FK)' })
   ERM_ID: number;
 
-  @Column({ name: 'USER_ID', type: 'int', comment: 'รหัสผู้ใช้ (denormalized)' })
+  @Column({
+    name: 'USER_ID',
+    type: 'int',
+    comment: 'รหัสผู้ใช้ (denormalized)',
+  })
   USER_ID: number;
 
   @Column({

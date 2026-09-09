@@ -385,9 +385,7 @@ export class EnrollmentAuditService {
     });
 
     if (rows.length === 0) {
-      throw new NotFoundException(
-        `No enrollments found for user ID ${userId}`,
-      );
+      throw new NotFoundException(`No enrollments found for user ID ${userId}`);
     }
 
     return rows.map((enrollment) => ({
@@ -406,7 +404,9 @@ export class EnrollmentAuditService {
     }));
   }
 
-  async findEnrollmentSummary(ermId: number): Promise<EnrollmentAuditSummaryDto> {
+  async findEnrollmentSummary(
+    ermId: number,
+  ): Promise<EnrollmentAuditSummaryDto> {
     const enrollment = await this.enrollmentRepository.findOne({
       where: { ERM_ID: ermId },
       relations: ['USER', 'USER.PROFILE', 'SESSION', 'SESSION.EXAM'],
@@ -449,7 +449,8 @@ export class EnrollmentAuditService {
       ermStatus: Number(enrollment.ERM_STATUS),
       verifyStatus: Number(enrollment.ERM_VERIFY_STATUS),
       seatLabel: enrollment.ERM_SEAT_LABEL,
-      paidAmount: paidTxn?.TRANX_AMOUNT != null ? Number(paidTxn.TRANX_AMOUNT) : null,
+      paidAmount:
+        paidTxn?.TRANX_AMOUNT != null ? Number(paidTxn.TRANX_AMOUNT) : null,
       latestTranxAmount:
         latestTxn?.TRANX_AMOUNT != null ? Number(latestTxn.TRANX_AMOUNT) : null,
       createdAt: enrollment.CREATED_AT,
@@ -541,7 +542,10 @@ export class EnrollmentAuditService {
       if (fullName || nationalId) {
         passcodeQb.andWhere(
           '(log.FULL_NAME = :fullName OR log.FULL_NAME = :nationalId)',
-          { fullName: fullName || '__none__', nationalId: nationalId || '__none__' },
+          {
+            fullName: fullName || '__none__',
+            nationalId: nationalId || '__none__',
+          },
         );
       } else {
         passcodeQb.andWhere('1 = 0');
@@ -569,7 +573,9 @@ export class EnrollmentAuditService {
 
     if (query.category?.trim()) {
       const category = query.category.trim().toLowerCase();
-      return events.filter((event) => event.category.toLowerCase() === category);
+      return events.filter(
+        (event) => event.category.toLowerCase() === category,
+      );
     }
 
     return events;
@@ -584,7 +590,9 @@ export class EnrollmentAuditService {
     if (value == null) return null;
     if (value instanceof Date) return value.toISOString();
     const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? String(value) : parsed.toISOString();
+    return Number.isNaN(parsed.getTime())
+      ? String(value)
+      : parsed.toISOString();
   }
 
   private buildContext(enrollment: ExamEnrollment): EnrollmentAuditContextDto {

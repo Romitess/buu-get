@@ -28,10 +28,7 @@ export class StubIdentityProvider implements IdentityProvider {
     throw new NotImplementedException(NOT_CONFIGURED);
   }
 
-  async linkToUser(
-    _userId: number,
-    _identitySubject: string,
-  ): Promise<void> {
+  async linkToUser(_userId: number, _identitySubject: string): Promise<void> {
     throw new NotImplementedException(NOT_CONFIGURED);
   }
 }

@@ -52,6 +52,7 @@ import { IdentityModule } from './modules/identity/identity.module';
 import { HealthModule } from './modules/health/health.module';
 import { EnrollmentAuditModule } from './modules/enrollment-audit/enrollment-audit.module';
 import { SystemSettingsModule } from './modules/system-settings/system-settings.module';
+import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { SystemSettingsModule } from './modules/system-settings/system-settings.
         }) as TypeOrmModuleOptions,
     }),
     SystemSettingsModule,
+    AuditLogsModule,
     AuthModule,
     UsersModule,
     RolesModule,

@@ -15,9 +15,7 @@ import type {
  */
 @Injectable()
 export class CsvFinancePaymentAdapter implements PaymentProvider {
-  async createIntent(
-    _input: PaymentIntentInput,
-  ): Promise<PaymentIntentResult> {
+  async createIntent(_input: PaymentIntentInput): Promise<PaymentIntentResult> {
     // Noop: enrollment UI continues to call TransactionsService.createTransactionForFlow.
     return {
       providerRef: null,

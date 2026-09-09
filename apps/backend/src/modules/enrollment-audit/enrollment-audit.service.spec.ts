@@ -303,9 +303,9 @@ describe('EnrollmentAuditService', () => {
 
     it('throws NotFound when user has no enrollments', async () => {
       enrollmentRepository.find.mockResolvedValue([]);
-      await expect(service.findApplicantEnrollments(999)).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.findApplicantEnrollments(999),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 });

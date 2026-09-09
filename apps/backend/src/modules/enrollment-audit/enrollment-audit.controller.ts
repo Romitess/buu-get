@@ -28,10 +28,14 @@ import {
 @Controller('enrollment-audit')
 @Roles(RoleEnum.ADMIN)
 export class EnrollmentAuditController {
-  constructor(private readonly enrollmentAuditService: EnrollmentAuditService) {}
+  constructor(
+    private readonly enrollmentAuditService: EnrollmentAuditService,
+  ) {}
 
   @Get('applicants')
-  @ApiOperation({ summary: 'รายชื่อผู้สมัครแบบ unique user สำหรับหน้า audit (Admin)' })
+  @ApiOperation({
+    summary: 'รายชื่อผู้สมัครแบบ unique user สำหรับหน้า audit (Admin)',
+  })
   @ApiResponse({ status: HttpStatus.OK })
   async findApplicants(
     @Query() query: EnrollmentAuditApplicantsQueryDto,

@@ -44,6 +44,7 @@ import { MsgPerson } from '../modules/msg-persons/entities/msg-person.entity';
 import { ExamEnrollmentAuditLog } from '../modules/enrollment-audit/entities/exam-enrollment-audit-log.entity';
 import { SystemSetting } from '../modules/system-settings/entities/system-setting.entity';
 import { SystemSettingAuditLog } from '../modules/system-settings/entities/system-setting-audit-log.entity';
+import { AuditLog } from '../modules/audit-logs/entities/audit-log.entity';
 
 export default new DataSource({
   type: 'mysql',
@@ -97,6 +98,7 @@ export default new DataSource({
     MsgPerson,
     SystemSetting,
     SystemSettingAuditLog,
+    AuditLog,
   ],
   migrations: [
     __filename.endsWith('.js')

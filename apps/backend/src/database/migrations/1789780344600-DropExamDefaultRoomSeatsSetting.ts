@@ -4,9 +4,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * ลบ exam.defaultRoomSeats — ที่นั่งต่อห้องถูกกำหนดจาก layout สถานที่ตอนเลือกห้อง
  * ไม่ได้ใช้เป็นค่าเริ่มต้นที่มีความหมายบนฟอร์มสร้างรอบสอบ
  */
-export class DropExamDefaultRoomSeatsSetting1789780344600
-  implements MigrationInterface
-{
+export class DropExamDefaultRoomSeatsSetting1789780344600 implements MigrationInterface {
   name = 'DropExamDefaultRoomSeatsSetting1789780344600';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

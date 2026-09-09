@@ -30,7 +30,10 @@ export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'สร้างธุรกรรมใหม่ (PENDING เท่านั้น — เจ้าของ enrollment หรือการเงิน)' })
+  @ApiOperation({
+    summary:
+      'สร้างธุรกรรมใหม่ (PENDING เท่านั้น — เจ้าของ enrollment หรือการเงิน)',
+  })
   @ApiResponse({
     status: 201,
     description: 'สร้างธุรกรรมสำเร็จ',
