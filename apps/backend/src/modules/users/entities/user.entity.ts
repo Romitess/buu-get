@@ -19,6 +19,10 @@ import { UserProfile } from '../../user-profile/entities/user-profile.entity';
 import { UserImage } from '../../user-image/entities/user-image.entity';
 import { MoodleSyncLog } from '../../moodle-sync-logs/entities/moodle-sync-log.entity';
 
+/**
+ * ผู้สมัครสอบเท่านั้น — เจ้าหน้าที่อยู่ที่ MSG_T_PERSON + PERSON_ROLES
+ * USER_ROLES ยังใช้เป็นสะพาน auth/JWT ชั่วคราวจนกว่าจะมี login ของ PERSON
+ */
 @Entity({ name: 'BUU_GET_T_USER' })
 export class User {
   @PrimaryGeneratedColumn({ name: 'USER_ID', comment: 'รหัสผู้สมัคร' })
@@ -108,6 +112,10 @@ export class User {
   })
   DELETED_AT: Date | null;
 
+  /**
+   * บทบาทผ่าน USER_ROLES — legacy auth (JWT ยังอ่านจากที่นี่)
+   * บทบาทเจ้าหน้าที่แหล่งจริงอยู่ที่ PERSON_ROLES
+   */
   @ManyToMany(() => Role, (role) => role.USER_ID)
   @JoinTable({
     name: 'USER_ROLES',

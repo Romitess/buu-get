@@ -42,7 +42,11 @@ export class UsersController {
 
   @Post()
   @Roles(...USER_ADMIN_ROLES)
-  @ApiCreatedResponse({ type: UserResponseDto })
+  @ApiCreatedResponse({
+    type: UserResponseDto,
+    description:
+      'สร้างผู้สมัคร (BUU_GET_T_USER). USER_ROLES เป็นสะพาน auth ชั่วคราว — บทบาทเจ้าหน้าที่แหล่งจริงอยู่ที่ PATCH /msg-persons/:psnId/roles',
+  })
   async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
     return this.usersService.create(createUserDto);
   }
@@ -92,7 +96,11 @@ export class UsersController {
 
   @Patch(':id/role')
   @Roles(...USER_ADMIN_ROLES)
-  @ApiOkResponse({ type: UserResponseDto })
+  @ApiOkResponse({
+    type: UserResponseDto,
+    description:
+      'ตั้ง USER_ROLES (legacy auth/JWT). บทบาทเจ้าหน้าที่แหล่งจริงอยู่ที่ PATCH /msg-persons/:psnId/roles',
+  })
   async updateRole(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateUserRolesDto,

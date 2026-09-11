@@ -1,6 +1,7 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Role } from 'src/modules/roles/entities/role.entity';
+import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
 
-@Entity('MSG_T_PERSON', { comment: 'ข้อมูลบุคลากร' })
+@Entity('MSG_T_PERSON', { comment: 'ข้อมูลบุคลากร (เจ้าหน้าที่)' })
 export class MsgPerson {
   @PrimaryColumn({
     name: 'PSN_ID',
@@ -99,4 +100,19 @@ export class MsgPerson {
     comment: 'ชื่อผู้ใช้',
   })
   PSN_USERNAME: string | null;
+
+  /** บทบาทเจ้าหน้าที่ (แหล่งสิทธิ์ตามโมเดลใหม่ — ยังไม่ใช้ login ในเฟสนี้) */
+  @ManyToMany(() => Role, (role) => role.PERSONS)
+  @JoinTable({
+    name: 'PERSON_ROLES',
+    joinColumn: {
+      name: 'PSN_ID',
+      referencedColumnName: 'PSN_ID',
+    },
+    inverseJoinColumn: {
+      name: 'ROLE_ID',
+      referencedColumnName: 'ROLE_ID',
+    },
+  })
+  ROLES: Role[];
 }

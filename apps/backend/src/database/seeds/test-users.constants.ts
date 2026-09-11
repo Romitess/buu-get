@@ -82,3 +82,17 @@ export const TEST_ROLE_DESCRIPTIONS: Record<TestRoleKey, string> = {
   exam_operations_officer: 'เจ้าหน้าที่จัดสอบ',
   candidate: 'ผู้สมัครสอบ',
 };
+
+/**
+ * รหัสบุคลากรคงที่ใน MSG_T_PERSON สำหรับ staff roles (ไม่รวม candidate)
+ * PSN_ID ≤ 10 ตัวอักษร
+ */
+export const TEST_PERSON_IDS: Partial<Record<TestRoleKey, string>> = {
+  admin: 'TSTADMIN01',
+  staff: 'TSTSTAFF01',
+  finance: 'TSTFIN01',
+  proctor: 'TSTPROC01',
+  executive: 'TSTEXEC01',
+  registration_officer: 'TSTREG01',
+  exam_operations_officer: 'TSTEXOPS01',
+};

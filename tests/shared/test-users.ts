@@ -7,6 +7,7 @@ export {
   TEST_PASSWORD,
   TEST_USERS,
   TEST_ROLE_DESCRIPTIONS,
+  TEST_PERSON_IDS,
   type TestRoleKey,
   type TestUserCredential,
 } from '../../apps/backend/src/database/seeds/test-users.constants';

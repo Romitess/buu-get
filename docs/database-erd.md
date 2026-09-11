@@ -3,7 +3,7 @@
 Source of truth: TypeORM entity files under `apps/backend/src/modules/*/entities/`
 and the entity list in `apps/backend/src/database/data-source.ts`.
 
-**Totals:** 35 entity classes · 35 mapped tables · 1 `@JoinTable` junction (`USER_ROLES`)
+**Totals:** TypeORM entities in `data-source.ts` · junctions: `USER_ROLES` (legacy auth), `PERSON_ROLES` (staff roles)
 
 Attribute comments are taken from TypeORM `comment:` options and rendered with Mermaid
 attribute-comment syntax (`type name PK "comment"`).
@@ -22,7 +22,8 @@ GitHub Markdown, or Notion Mermaid charts.
 | No soft delete | `EXAM_T_PASSCODES`, `EXAM_T_PASSCODE_LOGS`, `BUU_GET_T_MOODLE_SYNC_LOG`, `BUU_GET_T_USER_IMAGE`, `FIN_T_TRANSACTION_STATUS_HISTORY` |
 | Logical FKs only | `BUU_GET_T_PROFILE_EDIT_HISTORY.USER_PROFILE_ID` / `MODIFIER_ID` — columns exist, no `@ManyToOne` |
 | Score rubrics | `Exam.SRB_ID` → `BUU_GET_T_SCORE_RUBRICS`; `EXAM_T_SCORE_LINES` snapshots rubric items via `SRBI_ID` |
-| Junction columns | `USER_ROLES` uses TypeORM auto-style names: `bUUGETTUSERUSERID`, `bUUGETTROLEROLEID` |
+| Junction columns | `USER_ROLES` uses TypeORM auto-style names: `bUUGETTUSERUSERID`, `bUUGETTROLEROLEID`. `PERSON_ROLES` uses explicit `PSN_ID` / `ROLE_ID`. |
+| Identity split | `BUU_GET_T_USER` = applicants; `MSG_T_PERSON` = staff. Staff roles live on `PERSON_ROLES`. `USER_ROLES` remains legacy auth/JWT until PERSON login exists. |
 | Isolated tables | `BUU_GET_T_PAGE_CONFIGS`, `BUU_GET_T_EXAM_RULE_VOUCHERS`, `BUU_GET_T_SCORE_CRITERIA` have no ORM relations |
 | Cascade | Passcode / passcode-log → exam/passcode use `onDelete: CASCADE`. `Exam.SESSIONS` and `ScoreRubric.ITEMS` / `ExamScore.LINES` use persist cascade |
 
@@ -50,6 +51,8 @@ Comments must not contain `"` (converted to `'` if present in source).
 | `BUU_GET_T_USER` | `User` | `users/entities/user.entity.ts` | Yes |
 | `BUU_GET_T_ROLE` | `Role` | `roles/entities/role.entity.ts` | Yes |
 | `USER_ROLES` | *(junction via `@JoinTable`)* | owned by `User` | N/A |
+| `MSG_T_PERSON` | `MsgPerson` | `msg-persons/entities/msg-person.entity.ts` | Yes |
+| `PERSON_ROLES` | *(junction via `@JoinTable`)* | owned by `MsgPerson` | N/A |
 | `BUU_GET_T_USER_PROFILE` | `UserProfile` | `user-profile/entities/user-profile.entity.ts` | Yes |
 | `BUU_GET_T_USER_IMAGE` | `UserImage` | `user-image/entities/user-image.entity.ts` | Yes |
 | `BUU_GET_T_PROFILE_EDIT_HISTORY` | `ProfileEditHistory` | `profile-edit-history/entities/profile-edit-history.entity.ts` | Yes |
@@ -93,6 +96,8 @@ erDiagram
   %% ===== Users / roles / profile / Moodle =====
   BUU_GET_T_USER ||--o{ USER_ROLES : "bUUGETTUSERUSERID"
   BUU_GET_T_ROLE ||--o{ USER_ROLES : "bUUGETTROLEROLEID"
+  MSG_T_PERSON ||--o{ PERSON_ROLES : "PSN_ID"
+  BUU_GET_T_ROLE ||--o{ PERSON_ROLES : "ROLE_ID"
   BUU_GET_T_USER ||--|| BUU_GET_T_USER_PROFILE : "USER_ID"
   BUU_GET_T_USER ||--|| BUU_GET_T_USER_IMAGE : "USER_ID"
   BUU_GET_T_USER ||--o{ BUU_GET_T_MOODLE_SYNC_LOG : "USER_ID"
@@ -167,6 +172,23 @@ erDiagram
   USER_ROLES {
     int bUUGETTUSERUSERID FK "FK to BUU_GET_T_USER.USER_ID"
     int bUUGETTROLEROLEID FK "FK to BUU_GET_T_ROLE.ROLE_ID"
+  }
+  MSG_T_PERSON {
+    varchar PSN_ID PK "รหัสบุคลากร"
+    varchar PRF_NAMETH "ชื่อคำนำหน้า (ไทย)"
+    varchar PRF_NAMEEN "ชื่อคำนำหน้า (อังกฤษ)"
+    varchar PSN_FNAMETH "ชื่อ (ไทย)"
+    varchar PSN_FNAMEEN "ชื่อ (อังกฤษ)"
+    varchar PSN_LNAMETH "นามสกุล (ไทย)"
+    varchar PSN_LNAMEEN "นามสกุล (อังกฤษ)"
+    varchar PSN_EMAIL_BUU "อีเมลของมหาวิทยาลัย"
+    varchar PSN_RETIRE "สถานะการทำงาน; N=ทำงาน , Y=ลาออก"
+    varchar PSN_TECHNIQUE "ตำแหน่งทางวิชาการ/สายงาน"
+    varchar PSN_USERNAME "ชื่อผู้ใช้"
+  }
+  PERSON_ROLES {
+    varchar PSN_ID FK "FK to MSG_T_PERSON.PSN_ID"
+    int ROLE_ID FK "FK to BUU_GET_T_ROLE.ROLE_ID"
   }
   BUU_GET_T_USER_PROFILE {
     int USER_PROFILE_ID PK "รหัสโปรไฟล์ผู้ใช้"

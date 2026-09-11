@@ -99,7 +99,11 @@ export class CreateUserDto {
   @IsString()
   USER_STATUS?: string;
 
-  @ApiProperty({ type: [Number], description: 'รหัสบทบาท' })
+  @ApiProperty({
+    type: [Number],
+    description:
+      'รหัสบทบาทผ่าน USER_ROLES (legacy auth). บทบาทเจ้าหน้าที่แหล่งจริงอยู่ที่ PERSON_ROLES',
+  })
   @IsArray()
   USER_ROLES: number[];
 

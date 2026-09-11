@@ -1,3 +1,4 @@
+import { MsgPerson } from 'src/modules/msg-persons/entities/msg-person.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import {
   Column,
@@ -29,6 +30,14 @@ export class Role {
   @DeleteDateColumn({ name: 'DELETED_AT', nullable: true, comment: 'วันที่ลบ' })
   DELETED_AT: Date | null;
 
+  /**
+   * ผู้ใช้ที่ถือบทบาทนี้ผ่าน USER_ROLES
+   * (legacy auth — ผู้สมัคร + สะพาน login เจ้าหน้าที่ชั่วคราว)
+   */
   @ManyToMany(() => User, (user) => user.ROLES_ID)
   USER_ID: User[];
+
+  /** บุคลากร (เจ้าหน้าที่) ที่ถือบทบาทนี้ผ่าน PERSON_ROLES */
+  @ManyToMany(() => MsgPerson, (person) => person.ROLES)
+  PERSONS: MsgPerson[];
 }

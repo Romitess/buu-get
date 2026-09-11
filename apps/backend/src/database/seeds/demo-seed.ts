@@ -3,6 +3,7 @@
  *
  * ขั้นตอน:
  *   1) ensure roles (candidate, staff) + upsert staff02 (เจ้าหน้าที่เปิดการสอบ)
+ *      และ MSG_T_PERSON + PERSON_ROLES คู่กัน (login ยังใช้ User)
  *   2) upsert 100 candidate users (test001–100) — ชื่อ-สกุลไม่ซ้ำ, profile random
  *   3) login staff02 → เปิด 10 การสอบ (published) ผ่าน API จริง
  *      - ที่นั่ง = สุ่มจาก location จริงที่มี capacity ≥ 40
@@ -26,6 +27,8 @@ const ENROLL_MAX = 5;
 const MIN_SEATS = 40;
 const PASSWORD = 'password123';
 const STAFF_EMAIL = 'staff02@go.buu.ac.th';
+/** รหัสบุคลากรคงที่สำหรับ staff02 ใน MSG_T_PERSON (≤10 ตัวอักษร) */
+const STAFF_PSN_ID = 'DEMOSTAFF2';
 const SEED_TAG = 'DEMO-SEED'; // ใช้ติด EXAM_MOODLE_COURSE_ID เพื่อ idempotent
 
 // ── ข้อมูลสุ่ม (สมจริง) ──
@@ -265,6 +268,39 @@ async function seedUsers(): Promise<Candidate[]> {
     };
     await upsertUser(STAFF_EMAIL, staffRole);
     console.log(`✓ staff02 (${STAFF_EMAIL}) พร้อมใช้ (role staff)`);
+
+    // upsert MSG_T_PERSON + PERSON_ROLES คู่กับ staff02 (login ยังใช้ User)
+    const { MsgPerson } =
+      await import('../../modules/msg-persons/entities/msg-person.entity');
+    const personRepo = AppDataSource.getRepository(MsgPerson);
+    let staffPerson = await personRepo.findOne({
+      where: { PSN_ID: STAFF_PSN_ID },
+      relations: ['ROLES'],
+    });
+    if (staffPerson) {
+      staffPerson.PSN_EMAIL_BUU = STAFF_EMAIL;
+      staffPerson.PSN_USERNAME = 'staff02';
+      staffPerson.PSN_FNAMETH = 'เจ้าหน้าที่';
+      staffPerson.PSN_LNAMETH = 'เปิดสอบ';
+      staffPerson.PSN_RETIRE = 'N';
+      staffPerson.ROLES = [staffRole];
+      await personRepo.save(staffPerson);
+    } else {
+      staffPerson = await personRepo.save(
+        personRepo.create({
+          PSN_ID: STAFF_PSN_ID,
+          PSN_EMAIL_BUU: STAFF_EMAIL,
+          PSN_USERNAME: 'staff02',
+          PSN_FNAMETH: 'เจ้าหน้าที่',
+          PSN_LNAMETH: 'เปิดสอบ',
+          PSN_RETIRE: 'N',
+          ROLES: [staffRole],
+        }),
+      );
+    }
+    console.log(
+      `✓ MSG_T_PERSON ${staffPerson.PSN_ID} + PERSON_ROLES (staff)`,
+    );
 
     // 100 candidates — ชื่อ-สกุลไม่ซ้ำ (deterministic ตาม index)
     const usedNames = new Set<string>();

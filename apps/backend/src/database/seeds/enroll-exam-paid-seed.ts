@@ -130,9 +130,13 @@ async function api<T>(
 async function ensureStaffLoginUser(ds: DataSource): Promise<void> {
   const { User } = await import('../../modules/users/entities/user.entity');
   const { Role } = await import('../../modules/roles/entities/role.entity');
+  const { MsgPerson } =
+    await import('../../modules/msg-persons/entities/msg-person.entity');
 
   const roleRepo = ds.getRepository(Role);
   const userRepo = ds.getRepository(User);
+  const personRepo = ds.getRepository(MsgPerson);
+  const STAFF_PSN_ID = 'DEMOSTAFF2';
 
   let staffRole = await roleRepo.findOne({
     where: { ROLE_NAME: RoleEnum.STAFF },
@@ -170,6 +174,31 @@ async function ensureStaffLoginUser(ds: DataSource): Promise<void> {
     );
   }
   console.log(`✓ ensure staff login: ${STAFF_EMAIL}`);
+
+  let staffPerson = await personRepo.findOne({
+    where: { PSN_ID: STAFF_PSN_ID },
+    relations: ['ROLES'],
+  });
+  if (staffPerson) {
+    staffPerson.PSN_EMAIL_BUU = STAFF_EMAIL;
+    staffPerson.PSN_USERNAME = 'staff02';
+    staffPerson.PSN_RETIRE = 'N';
+    staffPerson.ROLES = [staffRole];
+    await personRepo.save(staffPerson);
+  } else {
+    await personRepo.save(
+      personRepo.create({
+        PSN_ID: STAFF_PSN_ID,
+        PSN_EMAIL_BUU: STAFF_EMAIL,
+        PSN_USERNAME: 'staff02',
+        PSN_FNAMETH: 'เจ้าหน้าที่',
+        PSN_LNAMETH: 'เปิดสอบ',
+        PSN_RETIRE: 'N',
+        ROLES: [staffRole],
+      }),
+    );
+  }
+  console.log(`✓ ensure MSG_T_PERSON ${STAFF_PSN_ID} + PERSON_ROLES`);
 }
 
 async function countActiveInSession(
