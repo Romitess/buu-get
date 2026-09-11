@@ -215,6 +215,8 @@ describe('TransactionsService', () => {
       ERM_ID: 42,
       USER_ID: 10,
       ERM_STATUS: ExamEnrollmentStatus.UNPAID,
+      USER: { USER_CODE: '2569100001' },
+      SESSION: { SESSION_CODE: '12026001' },
       ...overrides,
     }) as ExamEnrollment;
 
@@ -298,18 +300,36 @@ describe('TransactionsService', () => {
         getNumber: jest.fn().mockResolvedValue(30),
         getString: jest.fn().mockResolvedValue('30'),
       } as never,
+      {
+        get: jest.fn((_key: string, fallback?: string) => fallback),
+        getOrThrow: jest.fn(),
+      } as never,
     );
   });
 
   describe('createTransactionForFlow', () => {
+    const fixedCreatedAt = new Date(2026, 8, 9, 12, 0, 0); // 2026-09-09 local
+    const expectedRef1 = '2569100001';
+    const expectedRef2 = '12026001';
+    const expectedQr = `|0994000249357XX\r${expectedRef1}\r${expectedRef2}\r50000`;
+
+    const stubCreateFlowRepos = (): void => {
+      repos.paymentConfig.findOne.mockResolvedValue(activePaymentConfig());
+      repos.enrollment.findOne.mockResolvedValue(baseEnrollment());
+      repos.ref.findOne.mockResolvedValue(null);
+      repos.ref.save.mockImplementation(async (entity) => entity);
+      repos.ref.create.mockImplementation((entity) => entity);
+    };
+
     it('should create PENDING when none exists (TXN-U-001)', async () => {
       // Arrange
-      repos.paymentConfig.exists.mockResolvedValue(true);
-      repos.enrollment.findOne.mockResolvedValue(baseEnrollment());
+      stubCreateFlowRepos();
       repos.transaction.findOne.mockResolvedValue(null);
+      repos.transaction.create.mockImplementation((entity) => entity);
       repos.transaction.save.mockImplementation(async (entity) => ({
         ...entity,
         TRANX_ID: 101,
+        TRANX_CREATED_AT: fixedCreatedAt,
       }));
 
       // Act
@@ -323,13 +343,16 @@ describe('TransactionsService', () => {
       );
 
       // Assert
-      expect(result).toEqual({ TRANX_ID: 101 });
+      expect(result.TRANX_ID).toBe(101);
+      expect(result.REF1).toBe(expectedRef1);
+      expect(result.REF2).toBe(expectedRef2);
+      expect(result.TRANX_QR_CODE).toBe(expectedQr);
+      expect(result.paymentMode).toBe('csv');
       expect(repos.transaction.create).toHaveBeenCalledWith(
         expect.objectContaining({
           ERM_ID: 42,
           PC_ID: 1,
           TRANX_AMOUNT: 500,
-          TRANX_QR_CODE: 'fixed-uuid-qr',
           TRANX_PAYMENT_STATUS: TransactionPaymentStatus.PENDING,
           TRANX_MATCH_STATUS: TransactionMatchStatus.UNMATCH,
           TRANX_PAYMENT_METHOD: TransactionPaymentMethod.QR,
@@ -337,6 +360,7 @@ describe('TransactionsService', () => {
           TRANX_EXPIRES_AT: null,
         }),
       );
+      expect(repos.ref.save).toHaveBeenCalled();
       expect(repos.history.create).toHaveBeenCalledWith(
         expect.objectContaining({
           TRANX_ID: 101,
@@ -349,16 +373,16 @@ describe('TransactionsService', () => {
       expect(repos.history.save).toHaveBeenCalled();
     });
 
-    it('should reuse PENDING and keep QR without new history (TXN-U-002)', async () => {
+    it('should reuse PENDING and refresh QR/refs without new history (TXN-U-002)', async () => {
       // Arrange
       const existing = basePendingTransaction({
         TRANX_ID: 7,
         TRANX_QR_CODE: 'keep-me-qr',
         PC_ID: 1,
         TRANX_AMOUNT: 400,
+        TRANX_CREATED_AT: fixedCreatedAt,
       });
-      repos.paymentConfig.exists.mockResolvedValue(true);
-      repos.enrollment.findOne.mockResolvedValue(baseEnrollment());
+      stubCreateFlowRepos();
       repos.transaction.findOne.mockResolvedValue(existing);
       repos.transaction.save.mockImplementation(async (entity) => entity);
 
@@ -373,10 +397,12 @@ describe('TransactionsService', () => {
       );
 
       // Assert
-      expect(result).toEqual({ TRANX_ID: 7 });
+      expect(result.TRANX_ID).toBe(7);
       expect(existing.PC_ID).toBe(9);
       expect(existing.TRANX_AMOUNT).toBe(550);
-      expect(existing.TRANX_QR_CODE).toBe('keep-me-qr');
+      expect(existing.TRANX_QR_CODE).toBe(
+        `|0994000249357XX\r${expectedRef1}\r${expectedRef2}\r55000`,
+      );
       expect(existing.TRANX_PAYMENT_STATUS).toBe(
         TransactionPaymentStatus.PENDING,
       );
@@ -390,9 +416,9 @@ describe('TransactionsService', () => {
         TRANX_PAYMENT_STATUS: TransactionPaymentStatus.EXPIRED,
         TRANX_QR_CODE: 'old-qr',
         TRANX_EXPIRES_AT: new Date('2020-01-01T00:00:00Z'),
+        TRANX_CREATED_AT: fixedCreatedAt,
       });
-      repos.paymentConfig.exists.mockResolvedValue(true);
-      repos.enrollment.findOne.mockResolvedValue(baseEnrollment());
+      stubCreateFlowRepos();
       repos.transaction.findOne.mockResolvedValue(existing);
       repos.transaction.save.mockImplementation(async (entity) => entity);
 
@@ -407,7 +433,9 @@ describe('TransactionsService', () => {
       );
 
       // Assert
-      expect(existing.TRANX_QR_CODE).toBe('fixed-uuid-qr');
+      expect(existing.TRANX_QR_CODE).toBe(
+        `|0994000249357XX\r${expectedRef1}\r${expectedRef2}\r60000`,
+      );
       expect(existing.TRANX_PAYMENT_STATUS).toBe(
         TransactionPaymentStatus.PENDING,
       );
@@ -425,7 +453,7 @@ describe('TransactionsService', () => {
 
     it('should throw ConflictException when latest transaction is PAID (TXN-U-004)', async () => {
       // Arrange
-      repos.paymentConfig.exists.mockResolvedValue(true);
+      repos.paymentConfig.findOne.mockResolvedValue(activePaymentConfig());
       repos.enrollment.findOne.mockResolvedValue(baseEnrollment());
       repos.transaction.findOne.mockResolvedValue(
         basePendingTransaction({
@@ -449,7 +477,7 @@ describe('TransactionsService', () => {
 
     it('should throw NotFoundException when payment config is missing (TXN-U-005)', async () => {
       // Arrange
-      repos.paymentConfig.exists.mockResolvedValue(false);
+      repos.paymentConfig.findOne.mockResolvedValue(null);
 
       // Act / Assert
       await expect(
@@ -466,7 +494,7 @@ describe('TransactionsService', () => {
 
     it('should throw NotFoundException when enrollment is missing (TXN-U-006)', async () => {
       // Arrange
-      repos.paymentConfig.exists.mockResolvedValue(true);
+      repos.paymentConfig.findOne.mockResolvedValue(activePaymentConfig());
       repos.enrollment.findOne.mockResolvedValue(null);
 
       // Act / Assert
@@ -484,7 +512,7 @@ describe('TransactionsService', () => {
 
     it('should throw ForbiddenException when non-owner non-FINANCE creates (TXN-U-006c)', async () => {
       // Arrange
-      repos.paymentConfig.exists.mockResolvedValue(true);
+      repos.paymentConfig.findOne.mockResolvedValue(activePaymentConfig());
       repos.enrollment.findOne.mockResolvedValue(
         baseEnrollment({ USER_ID: 10 }),
       );
@@ -500,7 +528,7 @@ describe('TransactionsService', () => {
 
     it('should reject when enrollment is not UNPAID (TXN-U-006b)', async () => {
       // Arrange
-      repos.paymentConfig.exists.mockResolvedValue(true);
+      repos.paymentConfig.findOne.mockResolvedValue(activePaymentConfig());
       repos.enrollment.findOne.mockResolvedValue(
         baseEnrollment({ ERM_STATUS: ExamEnrollmentStatus.CANCELLED }),
       );
@@ -673,6 +701,10 @@ describe('TransactionsService', () => {
             getNumber: jest.fn().mockResolvedValue(30),
             getString: jest.fn().mockResolvedValue('30'),
           } as never,
+          {
+            get: jest.fn((_key: string, fallback?: string) => fallback),
+            getOrThrow: jest.fn(),
+          } as never,
         );
 
         const transaction = basePendingTransaction();
@@ -802,52 +834,49 @@ describe('TransactionsService', () => {
       expect(repos.receipt.save).toHaveBeenCalledWith(existingReceipt);
     });
 
-    it('should build yyddmm+6erm ref or BadRequest for out-of-range ERM (TXN-U-019)', async () => {
-      // Arrange — valid bounds
-      jest.useFakeTimers();
-      const fixed = new Date(Date.UTC(2026, 7, 5, 12, 0, 0));
-      jest.setSystemTime(fixed);
+    it('should set REF1/REF2 from USER_CODE and SESSION_CODE (TXN-U-019)', async () => {
+      // Arrange
       const transaction = basePendingTransaction({ ERM_ID: 42 });
       setupConfirmHappyPath({
         transaction,
         enrollment: baseEnrollment({ ERM_ID: 42 }),
       });
       repos.receipt.findOne.mockResolvedValue(null);
+      repos.ref.findOne.mockResolvedValue(null);
+      repos.ref.create.mockImplementation((entity) => entity);
 
       // Act
-      await service.confirmPaymentFlow(7, { userCode: 'U1' }, ownerUser);
+      await service.confirmPaymentFlow(
+        7,
+        { userCode: '2569100001' },
+        ownerUser,
+      );
 
-      // Assert — valid format
-      const year = String(fixed.getFullYear()).slice(-2);
-      const day = String(fixed.getDate()).padStart(2, '0');
-      const month = String(fixed.getMonth() + 1).padStart(2, '0');
+      // Assert
       expect(repos.ref.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          TSC_REF2: `${year}${day}${month}000042`,
+          TSC_REF1: '2569100001',
+          TSC_REF2: '12026001',
         }),
       );
+    });
 
-      // Arrange — out of range
-      jest.clearAllMocks();
-      queryRunner.manager.getRepository.mockImplementation((entity: unknown) =>
-        getRepository(entity),
-      );
-      dataSource.createQueryRunner.mockReturnValue(queryRunner);
-      const outOfRangeTx = basePendingTransaction({
-        ERM_ID: 1_000_000,
-      });
+    it('should reject confirm when SESSION_CODE is missing (TXN-U-019b)', async () => {
+      // Arrange
+      const transaction = basePendingTransaction({ ERM_ID: 42 });
       setupConfirmHappyPath({
-        transaction: outOfRangeTx,
-        enrollment: baseEnrollment({ ERM_ID: 1_000_000 }),
+        transaction,
+        enrollment: baseEnrollment({
+          ERM_ID: 42,
+          SESSION: { SESSION_CODE: null } as never,
+        }),
       });
 
       // Act / Assert
       await expect(
-        service.confirmPaymentFlow(7, { userCode: 'U1' }, ownerUser),
+        service.confirmPaymentFlow(7, { userCode: '2569100001' }, ownerUser),
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
-
-      jest.useRealTimers();
     });
 
     it('should rollback and rethrow when mid-flow save fails (TXN-U-020)', async () => {

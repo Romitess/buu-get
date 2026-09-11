@@ -5,34 +5,43 @@
     persistent
   >
     <q-card class="payment-dialog-card column no-wrap items-center">
-      <!-- Close Button -->
       <q-btn icon="close" flat round dense v-close-popup class="absolute-top-right close-btn" />
 
-      <!-- Title -->
       <div class="dialog-title">{{ $t('payment.dialog.title') }}</div>
 
-      <!-- Amount Details Card -->
       <q-card flat class="amount-card">
         <div class="amount-label">{{ $t('payment.dialog.detailsLabel') }}</div>
         <div class="amount-value">{{ amount.toLocaleString() }} THB</div>
       </q-card>
 
-      <!-- QR Code -->
-      <div class="qr-container">
-        <q-img :src="qrCodeUrl || '/qr test.png'" class="qr-image" />
+      <div v-if="ref1 || ref2" class="ref-block q-mb-sm">
+        <div v-if="ref1">REF1: {{ ref1 }}</div>
+        <div v-if="ref2">REF2: {{ ref2 }}</div>
       </div>
 
-      <!-- Countdown Badge -->
+      <div class="qr-container">
+        <q-img :src="resolvedQrUrl" class="qr-image" />
+      </div>
+
       <AppStatusBadge type="error" :dot="false" class="countdown-badge">
         <q-icon name="schedule" class="q-mr-xs" />
         {{ $t('payment.dialog.payWithin', { time: displayDeadline }) }}
       </AppStatusBadge>
 
-      <!-- Instruction -->
       <div class="instruction-text">{{ $t('payment.dialog.instruction') }}</div>
 
-      <!-- Confirm payment (marks PAID) -->
+      <div v-if="statusMessage" class="status-message q-mt-sm">{{ statusMessage }}</div>
+
       <AppButton
+        v-if="paymentMode === 'mock'"
+        icon="payments"
+        :label="$t('payment.dialog.simulatePayment')"
+        class="save-btn"
+        :loading="isMockPaying"
+        @click="$emit('mock-pay')"
+      />
+      <AppButton
+        v-else
         icon="file_download"
         :label="$t('payment.dialog.saveQr')"
         class="save-btn"
@@ -43,26 +52,73 @@
 </template>
 
 <script setup lang="ts">
-import { toRef } from 'vue';
+import { computed, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import QRCode from 'qrcode';
 import AppButton from 'src/components/base/app-button.vue';
 import AppStatusBadge from 'src/components/base/app-status-badge.vue';
 import { useCountdown } from 'src/composables/use-countdown';
+import type { PaymentMode } from 'src/services/transaction.service';
 
 interface Props {
   modelValue: boolean;
   amount: number;
+  qrPayload?: string;
   qrCodeUrl?: string;
-  expiryTime: string | Date; // ISO String or Date object
+  ref1?: string;
+  ref2?: string;
+  paymentMode?: PaymentMode;
+  statusMessage?: string | null;
+  isMockPaying?: boolean;
+  expiryTime: string | Date;
 }
 
-const props = defineProps<Props>();
-const emit = defineEmits(['update:modelValue', 'save', 'timeout']);
+const props = withDefaults(defineProps<Props>(), {
+  qrPayload: '',
+  qrCodeUrl: '',
+  ref1: '',
+  ref2: '',
+  paymentMode: 'csv',
+  statusMessage: null,
+  isMockPaying: false,
+});
+
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean];
+  save: [];
+  'mock-pay': [];
+  timeout: [];
+}>();
 
 useI18n();
 
-// Use the same shared logic as the card on the page
+const generatedQrDataUrl = ref('');
+
 const { displayDeadline } = useCountdown(toRef(props, 'expiryTime'), () => emit('timeout'));
+
+watch(
+  () => props.qrPayload,
+  async (payload) => {
+    if (!payload) {
+      generatedQrDataUrl.value = '';
+      return;
+    }
+    try {
+      generatedQrDataUrl.value = await QRCode.toDataURL(payload, {
+        errorCorrectionLevel: 'M',
+        margin: 1,
+        width: 220,
+      });
+    } catch {
+      generatedQrDataUrl.value = '';
+    }
+  },
+  { immediate: true },
+);
+
+const resolvedQrUrl = computed(
+  () => generatedQrDataUrl.value || props.qrCodeUrl || '/qr test.png',
+);
 </script>
 
 <style scoped lang="scss">
@@ -116,6 +172,14 @@ const { displayDeadline } = useCountdown(toRef(props, 'expiryTime'), () => emit(
   }
 }
 
+.ref-block {
+  margin-top: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.6;
+}
+
 .qr-container {
   margin-top: var(--space-md);
 }
@@ -144,6 +208,12 @@ const { displayDeadline } = useCountdown(toRef(props, 'expiryTime'), () => emit(
   line-height: 1.6;
   text-align: center;
   white-space: pre-line;
+}
+
+.status-message {
+  color: var(--q-negative);
+  text-align: center;
+  font-size: var(--font-size-sm);
 }
 
 .save-btn {

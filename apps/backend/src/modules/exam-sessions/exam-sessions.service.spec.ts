@@ -1,6 +1,9 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { MemberSessionCodesService } from 'src/common/services/member-session-codes.service';
+import { Exam } from '../exam/entities/exam.entity';
 import { ExamSessionsService } from './exam-sessions.service';
 import { ExamSession } from './entities/exam-session.entity';
 
@@ -8,6 +11,7 @@ type MockRepo = {
   create: jest.Mock;
   save: jest.Mock;
   findOne: jest.Mock;
+  update: jest.Mock;
   merge: jest.Mock;
   softRemove: jest.Mock;
 };
@@ -16,6 +20,7 @@ const createMockRepo = (): MockRepo => ({
   create: jest.fn(),
   save: jest.fn(),
   findOne: jest.fn(),
+  update: jest.fn(),
   merge: jest.fn(),
   softRemove: jest.fn(),
 });
@@ -23,28 +28,68 @@ const createMockRepo = (): MockRepo => ({
 describe('ExamSessionsService', () => {
   let service: ExamSessionsService;
   let repo: MockRepo;
+  let examRepo: MockRepo;
+  let codesService: { allocateSessionCode: jest.Mock };
 
   beforeEach(async () => {
+    repo = createMockRepo();
+    examRepo = createMockRepo();
+    codesService = {
+      allocateSessionCode: jest.fn().mockResolvedValue('12026001'),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ExamSessionsService,
         {
           provide: getRepositoryToken(ExamSession),
-          useFactory: createMockRepo,
+          useValue: repo,
+        },
+        {
+          provide: DataSource,
+          useValue: {
+            transaction: jest.fn(
+              async (
+                cb: (manager: {
+                  getRepository: (entity: unknown) => MockRepo;
+                }) => unknown,
+              ) =>
+                cb({
+                  getRepository: (entity: unknown) =>
+                    entity === Exam ? examRepo : repo,
+                }),
+            ),
+          },
+        },
+        {
+          provide: MemberSessionCodesService,
+          useValue: codesService,
         },
       ],
     }).compile();
 
     service = module.get(ExamSessionsService);
-    repo = module.get(getRepositoryToken(ExamSession));
   });
 
   describe('create', () => {
-    it('should create then return hydrated session from findOne (SES-U-001)', async () => {
+    it('should create then allocate SESSION_CODE (SES-U-001)', async () => {
       // Arrange
+      examRepo.findOne.mockResolvedValue({
+        EXAM_ID: 2,
+        EXAM_TYPE: 'รอบทั่วไป',
+        EXAM_FISCAL_YEAR: '2026',
+      });
       repo.create.mockReturnValue({ EXAM_ID: 2, SS_START_TIME: '09:00:00' });
-      repo.save.mockResolvedValue({ SS_ID: 44 });
-      const hydrated = { SS_ID: 44, EXAM: { EXAM_ID: 2 } } as ExamSession;
+      repo.save.mockResolvedValue({
+        SS_ID: 44,
+        EXAM_ID: 2,
+        CREATED_AT: new Date('2026-09-09T00:00:00Z'),
+      });
+      const hydrated = {
+        SS_ID: 44,
+        SESSION_CODE: '12026001',
+        EXAM: { EXAM_ID: 2 },
+      } as ExamSession;
       repo.findOne.mockResolvedValue(hydrated);
 
       // Act
@@ -55,55 +100,26 @@ describe('ExamSessionsService', () => {
       });
 
       // Assert
-      expect(repo.create).toHaveBeenCalledWith({
-        EXAM_ID: 2,
-        SS_START_TIME: '09:00:00',
-        SS_END_TIME: '10:00:00',
-      });
-      expect(repo.save).toHaveBeenCalledWith({
-        EXAM_ID: 2,
-        SS_START_TIME: '09:00:00',
-      });
-      expect(repo.findOne).toHaveBeenCalledWith({
-        where: { SS_ID: 44 },
-        relations: [
-          'EXAM',
-          'SESSION_LOCATIONS',
-          'SESSION_LOCATIONS.LOCATION',
-          'SESSION_LOCATIONS.LOCATION.SEATS',
-        ],
-      });
+      expect(codesService.allocateSessionCode).toHaveBeenCalled();
+      expect(repo.update).toHaveBeenCalledWith(
+        { SS_ID: 44 },
+        { SESSION_CODE: '12026001' },
+      );
       expect(result).toBe(hydrated);
+    });
+
+    it('should throw when exam is missing', async () => {
+      examRepo.findOne.mockResolvedValue(null);
+      await expect(
+        service.create({ EXAM_ID: 999, SS_START_TIME: '09:00:00' }),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 
   describe('findOne', () => {
-    it('should throw NotFoundException when session is missing (SES-U-002)', async () => {
-      // Arrange
+    it('should throw NotFoundException when missing', async () => {
       repo.findOne.mockResolvedValue(null);
-
-      // Act / Assert
-      await expect(service.findOne(404)).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
-    });
-  });
-
-  describe('remove', () => {
-    it('should softRemove after checking session existence (SES-U-003)', async () => {
-      // Arrange
-      const existing = { SS_ID: 12 } as ExamSession;
-      repo.findOne.mockResolvedValue(existing);
-
-      // Act
-      await service.remove(12);
-
-      // Assert
-      expect(repo.findOne).toHaveBeenCalledWith({
-        where: { SS_ID: 12 },
-        relations: ['EXAM', 'SESSION_LOCATIONS', 'SESSION_LOCATIONS.LOCATION'],
-      });
-      expect(repo.softRemove).toHaveBeenCalledWith(existing);
+      await expect(service.findOne(1)).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 });

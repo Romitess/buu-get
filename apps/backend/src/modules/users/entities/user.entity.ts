@@ -27,10 +27,10 @@ export class User {
   @Column({
     name: 'USER_CODE',
     type: 'varchar',
-    length: 8,
+    length: 10,
     unique: true,
     nullable: true,
-    comment: 'รหัสประจำสมัคร ',
+    comment: 'รหัสสมาชิก {ปีงบ พ.ศ. 4}{1 ไทย/2 ต่างชาติ}{รัน 5 หลัก}',
   })
   USER_CODE: string | null;
 

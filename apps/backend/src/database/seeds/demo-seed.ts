@@ -291,7 +291,8 @@ async function seedUsers(): Promise<Candidate[]> {
       const email = `test${seq}@gmail.com`;
       const phone = `0${pick(['6', '8', '9'])}${randDigits(8)}`;
       const nationalId = `${pick(['1', '2', '3'])}${randDigits(12)}`;
-      const userCode = `68${String(200000 + i)}`.slice(0, 8);
+      // USER_CODE: {ปีงบ พ.ศ.}{1 ไทย}{รัน 5 หลัก}
+      const userCode = `25691${String(i).padStart(5, '0')}`;
       const dob = `${1995 + (i % 10)}-${pad2((i % 12) + 1)}-${pad2((i % 27) + 1)}`;
       const address = `${10 + i}/${i} หมู่ ${i % 9} ต.แสนสุข อ.เมือง จ.${pick(PROVINCE)}`;
 
@@ -357,6 +358,19 @@ async function seedUsers(): Promise<Candidate[]> {
         address,
       });
     }
+
+    // sync sequence ให้ตรงกับ USER_CODE ที่ seed ใส่เอง
+    await AppDataSource.query(`
+      INSERT INTO \`BUU_GET_T_USER_CODE_SEQ\` (\`UCS_FISCAL_YEAR_BE\`, \`UCS_PERSON_TYPE\`, \`UCS_LAST_NO\`)
+      SELECT
+        LEFT(\`USER_CODE\`, 4),
+        SUBSTRING(\`USER_CODE\`, 5, 1),
+        MAX(CAST(RIGHT(\`USER_CODE\`, 5) AS UNSIGNED))
+      FROM \`BUU_GET_T_USER\`
+      WHERE \`USER_CODE\` REGEXP '^[0-9]{10}$'
+      GROUP BY LEFT(\`USER_CODE\`, 4), SUBSTRING(\`USER_CODE\`, 5, 1)
+      ON DUPLICATE KEY UPDATE \`UCS_LAST_NO\` = GREATEST(\`UCS_LAST_NO\`, VALUES(\`UCS_LAST_NO\`))
+    `);
 
     console.log(
       `✓ candidate users: ${candidates.length} คน (ชื่อไม่ซ้ำ ${usedNames.size})`,

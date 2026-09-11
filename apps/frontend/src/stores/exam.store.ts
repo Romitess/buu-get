@@ -6,6 +6,10 @@ import {
   confirmPaymentFlow,
   expireTransaction as expireTransactionRequest,
   startPaymentSession as startPaymentSessionRequest,
+  getPaymentStatus,
+  mockPayTransaction,
+  type CreateTransactionFlowResponse,
+  type PaymentStatusResponse,
 } from 'src/services/transaction.service';
 import {
   fetchScheduleData,
@@ -409,7 +413,7 @@ export const useExamStore = defineStore('exam', () => {
     enrollmentId: number,
     amount: number,
     pcId?: number,
-  ): Promise<number> {
+  ): Promise<CreateTransactionFlowResponse> {
     try {
       let resolvedPcId = pcId;
       if (resolvedPcId == null) {
@@ -420,13 +424,11 @@ export const useExamStore = defineStore('exam', () => {
           resolvedPcId = 1;
         }
       }
-      const { TRANX_ID } = await createTransactionRequest({
+      return await createTransactionRequest({
         ermId: enrollmentId,
         pcId: resolvedPcId,
         amount,
       });
-
-      return TRANX_ID;
     } catch (error: unknown) {
       console.error('Failed to create transaction:', error);
       throw error;
@@ -464,6 +466,15 @@ export const useExamStore = defineStore('exam', () => {
       console.error('Failed to confirm payment:', error);
       throw error;
     }
+  }
+
+  async function mockPay(tranxId: number): Promise<void> {
+    await mockPayTransaction(tranxId);
+    await refreshUserEnrollmentViews();
+  }
+
+  async function pollPaymentStatus(tranxId: number): Promise<PaymentStatusResponse> {
+    return getPaymentStatus(tranxId);
   }
 
   async function expireTransaction(
@@ -524,6 +535,8 @@ export const useExamStore = defineStore('exam', () => {
     createTransaction,
     startPaymentSession,
     confirmPayment,
+    mockPay,
+    pollPaymentStatus,
     expireTransaction,
     addExamRound,
     deleteExamRound,

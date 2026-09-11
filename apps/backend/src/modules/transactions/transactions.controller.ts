@@ -16,18 +16,31 @@ import { FINANCE_ROLES } from 'src/common/constants/role-groups';
 import { AuthenticatedUser } from 'src/common/utils/authz.util';
 import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { MockBankService } from '../bank-callbacks/services/mock-bank.service';
+import type { MockPayResult } from '../bank-callbacks/services/mock-bank.service';
+import {
+  PaymentStatusResult,
+  PaymentStatusService,
+} from '../bank-callbacks/services/payment-status.service';
 import { TransactionsService } from './transactions.service';
 import { UpdateTransactionDto } from './dto/transaction.dto';
 import { Transaction } from './entities/transaction.entity';
 import { CreatePendingPaymentDto } from './dto/create-pending-payment.dto';
-import type { PendingPaymentResult } from './transactions.service';
+import type {
+  PendingPaymentResult,
+  TransactionFlowResult,
+} from './transactions.service';
 import { CreateTransactionFlowDto } from './dto/create-transaction-flow.dto';
 import { ConfirmPaymentFlowDto } from './dto/confirm-payment-flow.dto';
 
 @ApiTags('Transactions')
 @Controller('transactions')
 export class TransactionsController {
-  constructor(private readonly transactionsService: TransactionsService) {}
+  constructor(
+    private readonly transactionsService: TransactionsService,
+    private readonly mockBankService: MockBankService,
+    private readonly paymentStatusService: PaymentStatusService,
+  ) {}
 
   @Post()
   @ApiOperation({
@@ -41,7 +54,7 @@ export class TransactionsController {
   createTransactionForFlow(
     @Body() createDto: CreateTransactionFlowDto,
     @CurrentUser() user: AuthenticatedUser,
-  ): Promise<{ TRANX_ID: number }> {
+  ): Promise<TransactionFlowResult> {
     return this.transactionsService.createTransactionForFlow(createDto, user);
   }
 
@@ -72,6 +85,25 @@ export class TransactionsController {
     @Query() query: PaginationQueryDto,
   ): Promise<PaginatedResponse<Transaction>> {
     return this.transactionsService.findAll(query);
+  }
+
+  @Get(':id/payment-status')
+  @ApiOperation({ summary: 'Poll สถานะการชำระเงินของธุรกรรม' })
+  getPaymentStatus(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<PaymentStatusResult> {
+    return this.paymentStatusService.getStatus(id);
+  }
+
+  @Post(':id/mock-pay')
+  @ApiOperation({
+    summary: 'จำลองธนาคารยิง approval → payment (PAYMENT_MODE=mock เท่านั้น)',
+  })
+  mockPay(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<MockPayResult> {
+    return this.mockBankService.mockPay(id, user);
   }
 
   @Get(':id')
@@ -109,6 +141,7 @@ export class TransactionsController {
 
   /**
    * ยืนยันชำระเงิน → PAID (เจ้าของ enrollment หรือการเงิน)
+   * ใช้โหมด CSV / transition — โหมด mock ใช้ mock-pay แทน
    */
   @Patch(':tranxId/confirm')
   @ApiOperation({

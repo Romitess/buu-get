@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BankCallbacksModule } from '../bank-callbacks/bank-callback.module';
 import { TransactionsService } from './transactions.service';
 import { TransactionsController } from './transactions.controller';
 import { Transaction } from './entities/transaction.entity';
@@ -23,6 +24,7 @@ import { EnrollmentAuditModule } from '../enrollment-audit/enrollment-audit.modu
       TransactionProfile,
     ]),
     EnrollmentAuditModule,
+    BankCallbacksModule,
   ],
   controllers: [TransactionsController],
   providers: [TransactionsService],

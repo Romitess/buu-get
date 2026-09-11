@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
@@ -56,6 +57,8 @@ import {
 } from '../enrollment-audit/entities/exam-enrollment-audit-log.entity';
 import { SystemSettingsService } from '../system-settings/system-settings.service';
 import { SYSTEM_SETTING_KEYS } from '../system-settings/constants/system-settings.catalog';
+import { PaymentMode } from '../bank-callbacks/constants/payment-mode';
+import { buildBillPaymentQrPayload } from '../bank-callbacks/utils/bank-callback.util';
 
 export interface PendingPaymentResult {
   transaction: Transaction;
@@ -64,6 +67,12 @@ export interface PendingPaymentResult {
 
 export interface TransactionFlowResult {
   TRANX_ID: number;
+  TRANX_QR_CODE: string | null;
+  REF1: string | null;
+  REF2: string | null;
+  TRANX_AMOUNT: number;
+  TRANX_EXPIRES_AT: Date | null;
+  paymentMode: PaymentMode;
 }
 
 export interface PaymentSessionResult {
@@ -82,6 +91,7 @@ export class TransactionsService {
     private readonly dataSource: DataSource,
     private readonly enrollmentAuditService: EnrollmentAuditService,
     private readonly systemSettingsService: SystemSettingsService,
+    private readonly configService: ConfigService,
   ) {}
 
   private async resolvePaymentSessionTtlMs(): Promise<number> {
@@ -115,11 +125,12 @@ export class TransactionsService {
       const historyRepository = manager.getRepository(TransactionStatusHistory);
       const paymentConfigRepository = manager.getRepository(PaymentConfig);
       const enrollmentRepository = manager.getRepository(ExamEnrollment);
+      const refRepository = manager.getRepository(TransactionRef);
 
-      const pcExists = await paymentConfigRepository.exists({
+      const paymentConfig = await paymentConfigRepository.findOne({
         where: { PC_ID: dto.pcId },
       });
-      if (!pcExists) {
+      if (!paymentConfig) {
         throw new NotFoundException(
           `Payment config with ID ${dto.pcId} not found`,
         );
@@ -127,7 +138,7 @@ export class TransactionsService {
 
       const enrollment = await enrollmentRepository.findOne({
         where: { ERM_ID: dto.ermId },
-        relations: ['SESSION', 'SESSION.EXAM'],
+        relations: ['SESSION', 'SESSION.EXAM', 'USER'],
       });
       if (!enrollment) {
         throw new NotFoundException(
@@ -138,6 +149,20 @@ export class TransactionsService {
       if (enrollment.ERM_STATUS !== ExamEnrollmentStatus.UNPAID) {
         throw new BadRequestException(
           'Enrollment must be unpaid to create a payment transaction',
+        );
+      }
+
+      const userCode = enrollment.USER?.USER_CODE;
+      if (!userCode) {
+        throw new BadRequestException(
+          'User code is required to create payment references',
+        );
+      }
+
+      const sessionCode = enrollment.SESSION?.SESSION_CODE;
+      if (!sessionCode) {
+        throw new BadRequestException(
+          'Session code is required to create payment references',
         );
       }
 
@@ -157,10 +182,6 @@ export class TransactionsService {
       if (transaction) {
         transaction.PC_ID = dto.pcId;
         transaction.TRANX_AMOUNT = dto.amount;
-        transaction.TRANX_QR_CODE =
-          previousStatus === TransactionPaymentStatus.PENDING
-            ? (transaction.TRANX_QR_CODE ?? uuidv4())
-            : uuidv4();
         transaction.TRANX_PAYMENT_STATUS = TransactionPaymentStatus.PENDING;
         transaction.TRANX_MATCH_STATUS = TransactionMatchStatus.UNMATCH;
         transaction.TRANX_PAYMENT_METHOD = TransactionPaymentMethod.QR;
@@ -177,7 +198,6 @@ export class TransactionsService {
         transaction = transactionRepository.create({
           ERM_ID: dto.ermId,
           PC_ID: dto.pcId,
-          TRANX_QR_CODE: uuidv4(),
           TRANX_AMOUNT: dto.amount,
           TRANX_PAYMENT_STATUS: TransactionPaymentStatus.PENDING,
           TRANX_MATCH_STATUS: TransactionMatchStatus.UNMATCH,
@@ -190,6 +210,33 @@ export class TransactionsService {
       }
 
       const savedTransaction = await transactionRepository.save(transaction);
+
+      const ref1 = userCode;
+      const ref2 = sessionCode;
+      const qrPayload = this.buildQrPayload(ref1, ref2, dto.amount);
+      savedTransaction.TRANX_QR_CODE = qrPayload;
+      await transactionRepository.save(savedTransaction);
+
+      let existingRef = await refRepository.findOne({
+        where: { TRANX_ID: savedTransaction.TRANX_ID },
+      });
+      if (existingRef) {
+        existingRef.TSC_REF1 = ref1;
+        existingRef.TSC_REF2 = ref2;
+        existingRef.TSC_BANK_REF = paymentConfig.PC_COMP_CODE;
+        existingRef.TSC_PARTNER_REF = paymentConfig.PC_PROD_CODE;
+        await refRepository.save(existingRef);
+      } else {
+        existingRef = await refRepository.save(
+          refRepository.create({
+            TRANX_ID: savedTransaction.TRANX_ID,
+            TSC_REF1: ref1,
+            TSC_REF2: ref2,
+            TSC_BANK_REF: paymentConfig.PC_COMP_CODE,
+            TSC_PARTNER_REF: paymentConfig.PC_PROD_CODE,
+          }),
+        );
+      }
 
       if (previousStatus !== TransactionPaymentStatus.PENDING) {
         const history = historyRepository.create({
@@ -243,8 +290,43 @@ export class TransactionsService {
         );
       }
 
-      return { TRANX_ID: savedTransaction.TRANX_ID };
+      return {
+        TRANX_ID: savedTransaction.TRANX_ID,
+        TRANX_QR_CODE: savedTransaction.TRANX_QR_CODE,
+        REF1: existingRef.TSC_REF1,
+        REF2: existingRef.TSC_REF2,
+        TRANX_AMOUNT: Number(savedTransaction.TRANX_AMOUNT),
+        TRANX_EXPIRES_AT: savedTransaction.TRANX_EXPIRES_AT,
+        paymentMode: this.getPaymentMode(),
+      };
     });
+  }
+
+  private buildQrPayload(ref1: string, ref2: string, amount: number): string {
+    const taxId = this.configService.get<string>(
+      'BANK_TAX_ID',
+      '0994000249357',
+    );
+    const suffix = this.configService.get<string>('BANK_SUFFIX', 'XX');
+    return buildBillPaymentQrPayload({
+      taxId,
+      suffix,
+      ref1,
+      ref2,
+      amount,
+    });
+  }
+
+  private getPaymentMode(): PaymentMode {
+    const raw = this.configService.get<string>('PAYMENT_MODE', PaymentMode.CSV);
+    if (
+      raw === PaymentMode.MOCK ||
+      raw === PaymentMode.REALTIME_BANK ||
+      raw === PaymentMode.CSV
+    ) {
+      return raw;
+    }
+    return PaymentMode.CSV;
   }
 
   async startPaymentSession(
@@ -384,6 +466,7 @@ export class TransactionsService {
 
       const enrollment = await manager.getRepository(ExamEnrollment).findOne({
         where: { ERM_ID: transaction.ERM_ID },
+        relations: ['USER', 'SESSION'],
       });
       this.assertEnrollmentAccess(user, enrollment);
 
@@ -441,13 +524,31 @@ export class TransactionsService {
       await historyRepository.save(history);
 
       const refCreatedAt = new Date();
-      const ref = refRepository.create({
-        TRANX_ID: tranxId,
-        TSC_REF1: dto.userCode,
-        TSC_REF2: this.buildEnrollmentRefCode(transaction.ERM_ID, refCreatedAt),
-        TSC_BANK_REF: paymentConfig.PC_COMP_CODE,
-        TSC_PARTNER_REF: paymentConfig.PC_PROD_CODE,
+      const ref1 = dto.userCode || enrollment?.USER?.USER_CODE;
+      const ref2 = enrollment?.SESSION?.SESSION_CODE;
+      if (!ref1 || !ref2) {
+        throw new BadRequestException(
+          'USER_CODE and SESSION_CODE are required to confirm payment references',
+        );
+      }
+
+      let ref = await refRepository.findOne({
+        where: { TRANX_ID: tranxId },
       });
+      if (ref) {
+        ref.TSC_REF1 = ref1;
+        ref.TSC_REF2 = ref2;
+        ref.TSC_BANK_REF = paymentConfig.PC_COMP_CODE;
+        ref.TSC_PARTNER_REF = paymentConfig.PC_PROD_CODE;
+      } else {
+        ref = refRepository.create({
+          TRANX_ID: tranxId,
+          TSC_REF1: ref1,
+          TSC_REF2: ref2,
+          TSC_BANK_REF: paymentConfig.PC_COMP_CODE,
+          TSC_PARTNER_REF: paymentConfig.PC_PROD_CODE,
+        });
+      }
       await refRepository.save(ref);
 
       // จัดการข้อมูลใบเสร็จ
@@ -650,28 +751,6 @@ export class TransactionsService {
 
     const parsedTaxId = parseInt(taxId, 10);
     return Number.isNaN(parsedTaxId) ? 0 : parsedTaxId;
-  }
-
-  private buildEnrollmentRefCode(
-    enrollmentId: number,
-    createdAt: Date,
-  ): string {
-    if (
-      !Number.isInteger(enrollmentId) ||
-      enrollmentId < 0 ||
-      enrollmentId > 999999
-    ) {
-      throw new BadRequestException(
-        'Enrollment ID must be between 0 and 999999 to generate transaction reference',
-      );
-    }
-
-    const year = String(createdAt.getFullYear()).slice(-2);
-    const day = String(createdAt.getDate()).padStart(2, '0');
-    const month = String(createdAt.getMonth() + 1).padStart(2, '0');
-    const enrollmentCode = String(enrollmentId).padStart(6, '0');
-
-    return `${year}${day}${month}${enrollmentCode}`;
   }
 
   private toHistoryStatus(status: TransactionPaymentStatus): string {

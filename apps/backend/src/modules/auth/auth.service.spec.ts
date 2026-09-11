@@ -33,8 +33,11 @@ type AuthServicePrivate = {
 describe('AuthService', () => {
   let service: AuthService;
   let usersService: jest.Mocked<
-    Pick<UsersService, 'findByEmail' | 'findById' | 'generateUserCode'>
+    Pick<UsersService, 'findByEmail' | 'findById'>
   >;
+  let memberSessionCodesService: {
+    allocateUserCode: jest.Mock;
+  };
   let rolesService: jest.Mocked<Pick<RolesService, 'findByName'>>;
   let jwtService: jest.Mocked<Pick<JwtService, 'sign'>>;
   let platformGatewayService: jest.Mocked<
@@ -92,7 +95,9 @@ describe('AuthService', () => {
     usersService = {
       findByEmail: jest.fn(),
       findById: jest.fn(),
-      generateUserCode: jest.fn().mockReturnValue('U00000042'),
+    };
+    memberSessionCodesService = {
+      allocateUserCode: jest.fn().mockResolvedValue('2569100042'),
     };
     rolesService = {
       findByName: jest.fn().mockResolvedValue(candidateRole),
@@ -162,6 +167,7 @@ describe('AuthService', () => {
       platformGatewayService as unknown as PlatformGatewayService,
       moodleSyncService as unknown as MoodleSyncService,
       cacheManager as unknown as Cache,
+      memberSessionCodesService as never,
     );
   });
 

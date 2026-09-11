@@ -12,6 +12,8 @@ import { FundSource } from '../modules/fund-sources/entities/fund-source.entity'
 import { Transaction } from '../modules/transactions/entities/transaction.entity';
 import { Receipt } from '../modules/receipts/entities/receipt.entity';
 import { ReceiptSequence } from '../modules/receipts/entities/receipt-sequence.entity';
+import { RequestApproval } from '../modules/bank-callbacks/entities/request-approval.entity';
+import { RequestPayment } from '../modules/bank-callbacks/entities/request-payment.entity';
 import { BankReconcile } from '../modules/bank-reconciles/entities/bank-reconcile.entity';
 import { BankReconcileEditLog } from '../modules/bank-reconciles/entities/bank-reconcile-edit-log.entity';
 import { ExamScore } from '../modules/exam-scores/entities/exam-score.entity';
@@ -72,6 +74,8 @@ export default new DataSource({
     Transaction,
     Receipt,
     ReceiptSequence,
+    RequestApproval,
+    RequestPayment,
     BankReconcile,
     BankReconcileEditLog,
     ExamScore,

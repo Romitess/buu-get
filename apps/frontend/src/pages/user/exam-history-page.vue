@@ -170,7 +170,14 @@
       v-model="showPaymentDialog"
       :amount="selectedExam?.fee ?? 0"
       :expiry-time="paymentExpiryTime"
+      :qr-payload="paymentQrPayload"
+      :ref1="paymentRef1"
+      :ref2="paymentRef2"
+      :payment-mode="paymentMode"
+      :status-message="paymentStatusMessage"
+      :is-mock-paying="isMockPaying"
       @save="handleSaveQR"
+      @mock-pay="handleMockPay"
       @timeout="handlePaymentTimeout"
     />
 
@@ -267,7 +274,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
@@ -292,6 +299,7 @@ import { useExamPrepGuide } from 'src/composables/use-exam-prep-guide';
 import { useAppDate } from 'src/composables/useAppDate';
 import type { ExamHistoryCategory, ExamHistoryItem } from 'src/types/exam';
 import type { ReceiptInformation } from 'src/types/receipt-information';
+import type { PaymentMode } from 'src/services/transaction.service';
 import { matchesHistoryCategory } from 'src/utils/map-enrollment-history-status';
 import { CardSkeleton } from 'src/components/base/skeleton';
 
@@ -340,6 +348,13 @@ const pendingTransactionId = ref<number | null>(null);
 const receiptInformation = ref<ReceiptInformation | null>(null);
 /** QR session expiry from startPaymentSession — countdown starts when dialog opens */
 const paymentExpiryTime = ref('');
+const paymentQrPayload = ref('');
+const paymentRef1 = ref('');
+const paymentRef2 = ref('');
+const paymentMode = ref<PaymentMode>('csv');
+const paymentStatusMessage = ref<string | null>(null);
+const isMockPaying = ref(false);
+let paymentPollTimer: ReturnType<typeof setInterval> | null = null;
 
 const initialReceiptInformation = computed<ReceiptInformation>(() => {
   const user = userStore.currentUser;
@@ -504,11 +519,61 @@ const getErrorMessage = (err: unknown, fallback: string): string => {
   return fallback;
 };
 
+const stopPaymentPoll = (): void => {
+  if (paymentPollTimer) {
+    clearInterval(paymentPollTimer);
+    paymentPollTimer = null;
+  }
+};
+
+const startPaymentPoll = (tranxId: number): void => {
+  stopPaymentPoll();
+  paymentPollTimer = setInterval(() => {
+    void (async () => {
+      try {
+        const status = await examStore.pollPaymentStatus(tranxId);
+        if (status.paid) {
+          stopPaymentPoll();
+          paymentStatusMessage.value = t('payment.dialog.paidSuccess');
+          pendingTransactionId.value = null;
+          paymentExpiryTime.value = '';
+          showPaymentDialog.value = false;
+          $q.notify({
+            type: 'positive',
+            message: t('payment.dialog.paidSuccess'),
+            position: 'bottom',
+          });
+          return;
+        }
+        if (status.message) {
+          paymentStatusMessage.value = status.message;
+        }
+      } catch (err: unknown) {
+        console.error('Payment status poll failed:', err);
+      }
+    })();
+  }, 10_000);
+};
+
+watch(showPaymentDialog, (open) => {
+  if (!open) {
+    stopPaymentPoll();
+  }
+});
+
+onBeforeUnmount(() => {
+  stopPaymentPoll();
+});
+
 const handlePay = async (exam: ExamHistoryItem): Promise<void> => {
   selectedExam.value = exam;
   receiptInformation.value = null;
   pendingTransactionId.value = null;
   paymentExpiryTime.value = '';
+  paymentStatusMessage.value = null;
+  paymentQrPayload.value = '';
+  paymentRef1.value = '';
+  paymentRef2.value = '';
 
   try {
     const amount = exam.fee;
@@ -516,7 +581,12 @@ const handlePay = async (exam: ExamHistoryItem): Promise<void> => {
       throw new Error('Exam fee is missing');
     }
 
-    pendingTransactionId.value = await examStore.createTransaction(exam.id, amount, 1);
+    const created = await examStore.createTransaction(exam.id, amount, 1);
+    pendingTransactionId.value = created.TRANX_ID;
+    paymentQrPayload.value = created.TRANX_QR_CODE ?? '';
+    paymentRef1.value = created.REF1 ?? '';
+    paymentRef2.value = created.REF2 ?? '';
+    paymentMode.value = created.paymentMode;
     showReceiptInformationDialog.value = true;
   } catch (err: unknown) {
     console.error('Transaction creation failed:', err);
@@ -547,6 +617,10 @@ const handleReceiptInformationConfirm = async (value: ReceiptInformation): Promi
   try {
     paymentExpiryTime.value = await examStore.startPaymentSession(tranxId);
     showPaymentDialog.value = true;
+    if (paymentMode.value === 'mock') {
+      paymentStatusMessage.value = t('payment.dialog.waitingPayment');
+      startPaymentPoll(tranxId);
+    }
     // Refresh so history card switches from pay-by date to countdown
     await examStore.fetchHistory(true);
   } catch (err: unknown) {
@@ -564,6 +638,12 @@ const handleReceiptInformationConfirm = async (value: ReceiptInformation): Promi
 };
 
 const handleSaveQR = async (): Promise<void> => {
+  // csv / transition path only — mock mode uses mock-pay + poll
+  if (paymentMode.value === 'mock') {
+    showPaymentDialog.value = false;
+    return;
+  }
+
   if (pendingTransactionId.value && receiptInformation.value) {
     try {
       const userCode = userStore.currentUser?.userCode ?? '';
@@ -591,6 +671,38 @@ const handleSaveQR = async (): Promise<void> => {
     }
   }
   showPaymentDialog.value = false;
+};
+
+const handleMockPay = async (): Promise<void> => {
+  if (!pendingTransactionId.value) {
+    return;
+  }
+
+  isMockPaying.value = true;
+  try {
+    await examStore.mockPay(pendingTransactionId.value);
+    stopPaymentPoll();
+    paymentStatusMessage.value = t('payment.dialog.paidSuccess');
+    pendingTransactionId.value = null;
+    paymentExpiryTime.value = '';
+    showPaymentDialog.value = false;
+    $q.notify({
+      type: 'positive',
+      message: t('payment.dialog.paidSuccess'),
+      position: 'bottom',
+    });
+  } catch (err: unknown) {
+    console.error('Mock pay failed:', err);
+    paymentStatusMessage.value = getErrorMessage(err, t('payment.dialog.mockPayError'));
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(err, t('payment.dialog.mockPayError')),
+      position: 'bottom',
+      timeout: 5000,
+    });
+  } finally {
+    isMockPaying.value = false;
+  }
 };
 
 const handleSessionTimeout = async (exam: ExamHistoryItem): Promise<void> => {
@@ -632,6 +744,7 @@ const handlePaymentTimeout = async (): Promise<void> => {
   const tranxId = pendingTransactionId.value;
   if (!tranxId) return;
 
+  stopPaymentPoll();
   try {
     await examStore.expireTransaction(tranxId, selectedExam.value?.id);
     pendingTransactionId.value = null;

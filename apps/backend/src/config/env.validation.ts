@@ -30,6 +30,15 @@ export interface EnvironmentVariables {
   BODY_LIMIT?: string;
   /** larger limit for file upload routes (e.g. 50mb) */
   UPLOAD_BODY_LIMIT?: string;
+  /** Payment path: csv | mock | realtime_bank */
+  PAYMENT_MODE: 'csv' | 'mock' | 'realtime_bank';
+  /** Bank callback credentials (mock / realtime) */
+  BANK_API_USER?: string;
+  BANK_API_PASSWORD?: string;
+  BANK_TAX_ID?: string;
+  BANK_SUFFIX?: string;
+  BANK_COM_CODE?: string;
+  BANK_PROD_CODE?: string;
 }
 
 const envSchema = Joi.object<EnvironmentVariables>({
@@ -61,6 +70,15 @@ const envSchema = Joi.object<EnvironmentVariables>({
     .optional(),
   BODY_LIMIT: Joi.string().default('1mb'),
   UPLOAD_BODY_LIMIT: Joi.string().default('50mb'),
+  PAYMENT_MODE: Joi.string()
+    .valid('csv', 'mock', 'realtime_bank')
+    .default('csv'),
+  BANK_API_USER: Joi.string().optional(),
+  BANK_API_PASSWORD: Joi.string().optional(),
+  BANK_TAX_ID: Joi.string().optional(),
+  BANK_SUFFIX: Joi.string().optional(),
+  BANK_COM_CODE: Joi.string().optional(),
+  BANK_PROD_CODE: Joi.string().optional(),
 });
 
 export function validateEnv(

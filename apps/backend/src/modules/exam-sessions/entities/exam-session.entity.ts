@@ -30,6 +30,16 @@ export class ExamSession {
   @PrimaryGeneratedColumn({ name: 'SS_ID', comment: 'รหัสรอบสอบ' })
   SS_ID: number;
 
+  @Column({
+    name: 'SESSION_CODE',
+    type: 'varchar',
+    length: 8,
+    unique: true,
+    nullable: true,
+    comment: 'รหัสรอบสอบ {1 ทั่วไป/2 พิเศษ}{ปีงบ ค.ศ. 4}{รัน 3 หลัก}',
+  })
+  SESSION_CODE: string | null;
+
   @Column({ name: 'EXAM_ID', comment: 'รหัสการสอบ' })
   EXAM_ID: number;
 

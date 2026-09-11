@@ -22,6 +22,7 @@ import { ExamVouchersModule } from './modules/exam-vouchers/exam-vouchers.module
 import { TransactionRefsModule } from './modules/transaction-refs/transaction-refs.module';
 import { FundSourcesModule } from './modules/fund-sources/fund-sources.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
+import { BankCallbacksModule } from './modules/bank-callbacks/bank-callback.module';
 import { BankReconcilesModule } from './modules/bank-reconciles/bank-reconciles.module';
 import { ReceiptsModule } from './modules/receipts/receipts.module';
 import { ExamScoresModule } from './modules/exam-scores/exam-scores.module';
@@ -53,6 +54,7 @@ import { HealthModule } from './modules/health/health.module';
 import { EnrollmentAuditModule } from './modules/enrollment-audit/enrollment-audit.module';
 import { SystemSettingsModule } from './modules/system-settings/system-settings.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
+import { MemberSessionCodesModule } from './common/modules/member-session-codes.module';
 
 @Module({
   imports: [
@@ -89,6 +91,7 @@ import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
         }) as TypeOrmModuleOptions,
     }),
     SystemSettingsModule,
+    MemberSessionCodesModule,
     AuditLogsModule,
     AuthModule,
     UsersModule,
@@ -104,6 +107,7 @@ import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
     TransactionRefsModule,
     FundSourcesModule,
     TransactionsModule,
+    BankCallbacksModule,
     BankReconcilesModule,
     ReceiptsModule,
     ExamScoresModule,

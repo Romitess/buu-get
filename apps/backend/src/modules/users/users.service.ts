@@ -13,6 +13,7 @@ import {
   PAGINATION_DEFAULT_LIMIT,
   PAGINATION_DEFAULT_PAGE,
 } from 'src/common/dto/pagination-query.dto';
+import { MemberSessionCodesService } from 'src/common/services/member-session-codes.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UsersQueryDto } from './dto/users-query.dto';
@@ -34,6 +35,7 @@ export class UsersService {
     private readonly userProfileService: UserProfileService,
     private readonly dataSource: DataSource,
     private readonly moodleSyncService: MoodleSyncService,
+    private readonly memberSessionCodesService: MemberSessionCodesService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
@@ -80,7 +82,14 @@ export class UsersService {
       }
 
       const newUser = await manager.save(User, user);
-      newUser.USER_CODE = this.generateUserCode(newUser.USER_ID);
+      newUser.USER_CODE = await this.memberSessionCodesService.allocateUserCode(
+        manager,
+        {
+          nationalId: newUser.USER_NATIONAL_ID,
+          passportNo: newUser.USER_PASSPORT_NO,
+          at: newUser.CREATED_AT ?? new Date(),
+        },
+      );
       await manager.update(
         User,
         { USER_ID: newUser.USER_ID },
@@ -102,13 +111,6 @@ export class UsersService {
     });
 
     return UserResponseDto.fromEntity(savedUser);
-  }
-
-  generateUserCode(userId: number, date: Date = new Date()): string {
-    const buddhistYear = date.getFullYear() + 543;
-    const yearPrefix = buddhistYear.toString().slice(-2);
-
-    return `${yearPrefix}${String(userId).padStart(6, '0')}`;
   }
 
   async findAll(

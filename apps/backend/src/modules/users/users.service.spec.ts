@@ -115,6 +115,9 @@ describe('UsersService', () => {
       userProfileService as unknown as UserProfileService,
       dataSource as unknown as DataSource,
       moodleSyncService as unknown as MoodleSyncService,
+      {
+        allocateUserCode: jest.fn().mockResolvedValue('2569100042'),
+      } as never,
     );
 
   beforeEach(() => {
@@ -173,30 +176,6 @@ describe('UsersService', () => {
     );
 
     service = createService();
-  });
-
-  describe('generateUserCode', () => {
-    it('uses the Thai Buddhist year as the two-digit prefix', () => {
-      // Arrange / Act
-      const code = service.generateUserCode(
-        1,
-        new Date('2026-01-01T00:00:00+07:00'),
-      );
-
-      // Assert
-      expect(code).toBe('69000001');
-    });
-
-    it('pads the user id to six digits', () => {
-      // Arrange / Act
-      const code = service.generateUserCode(
-        123,
-        new Date('2026-01-01T00:00:00+07:00'),
-      );
-
-      // Assert
-      expect(code).toBe('69000123');
-    });
   });
 
   describe('create', () => {
@@ -306,26 +285,20 @@ describe('UsersService', () => {
       expect(rolesRepository.findByIds).not.toHaveBeenCalled();
     });
 
-    it('should set USER_CODE after insert using generated USER_ID', async () => {
-      // Arrange
-      const generateUserCodeSpy = jest
-        .spyOn(service, 'generateUserCode')
-        .mockReturnValue('69000042');
-
-      // Act
+    it('should set USER_CODE after insert via member code allocator', async () => {
+      // Arrange / Act
       await service.create(baseCreateDto());
 
       // Assert
-      expect(generateUserCodeSpy).toHaveBeenCalledWith(42);
       expect(transactionManager.update).toHaveBeenCalledWith(
         expect.anything(),
         { USER_ID: 42 },
-        { USER_CODE: '69000042' },
+        { USER_CODE: '2569100042' },
       );
       expect(mockFromEntity).toHaveBeenCalledWith(
         expect.objectContaining({
           USER_ID: 42,
-          USER_CODE: '69000042',
+          USER_CODE: '2569100042',
         }),
       );
     });

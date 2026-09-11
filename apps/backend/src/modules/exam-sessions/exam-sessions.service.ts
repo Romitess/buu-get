@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { MemberSessionCodesService } from 'src/common/services/member-session-codes.service';
+import { Exam } from '../exam/entities/exam.entity';
 import { ExamSession } from './entities/exam-session.entity';
 import { CreateExamSessionDto } from './dto/create-exam-session.dto';
 import { UpdateExamSessionDto } from './dto/update-exam-session.dto';
@@ -10,14 +12,39 @@ export class ExamSessionsService {
   constructor(
     @InjectRepository(ExamSession)
     private readonly examSessionRepository: Repository<ExamSession>,
+    private readonly dataSource: DataSource,
+    private readonly memberSessionCodesService: MemberSessionCodesService,
   ) {}
 
   async create(
     createExamSessionDto: CreateExamSessionDto,
   ): Promise<ExamSession> {
-    const session = this.examSessionRepository.create(createExamSessionDto);
-    const saved = await this.examSessionRepository.save(session);
-    return await this.findOne(saved.SS_ID);
+    return this.dataSource.transaction(async (manager) => {
+      const exam = await manager.getRepository(Exam).findOne({
+        where: { EXAM_ID: createExamSessionDto.EXAM_ID },
+      });
+      if (!exam) {
+        throw new NotFoundException(
+          `Exam with ID ${createExamSessionDto.EXAM_ID} not found`,
+        );
+      }
+
+      const session = manager.getRepository(ExamSession).create(createExamSessionDto);
+      const saved = await manager.getRepository(ExamSession).save(session);
+
+      saved.SESSION_CODE =
+        await this.memberSessionCodesService.allocateSessionCode(manager, {
+          examType: exam.EXAM_TYPE,
+          examFiscalYear: exam.EXAM_FISCAL_YEAR,
+          at: saved.CREATED_AT ?? new Date(),
+        });
+      await manager.getRepository(ExamSession).update(
+        { SS_ID: saved.SS_ID },
+        { SESSION_CODE: saved.SESSION_CODE },
+      );
+
+      return this.findOne(saved.SS_ID);
+    });
   }
 
   async findAll(): Promise<ExamSession[]> {

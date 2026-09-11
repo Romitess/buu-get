@@ -34,8 +34,16 @@ export interface CreateTransactionFlowPayload {
   amount: number;
 }
 
+export type PaymentMode = 'csv' | 'mock' | 'realtime_bank';
+
 export interface CreateTransactionFlowResponse {
   TRANX_ID: number;
+  TRANX_QR_CODE: string | null;
+  REF1: string | null;
+  REF2: string | null;
+  TRANX_AMOUNT: number;
+  TRANX_EXPIRES_AT: string | null;
+  paymentMode: PaymentMode;
 }
 
 export interface StartPaymentSessionResponse {
@@ -49,6 +57,24 @@ export interface ConfirmPaymentFlowPayload {
   receiptName?: string | undefined;
   receiptPhone?: string | undefined;
   receiptAddress?: string | undefined;
+}
+
+export interface PaymentStatusResponse {
+  tranxId: number;
+  paymentStatus: number;
+  paid: boolean;
+  ref1: string | null;
+  ref2: string | null;
+  amount: number;
+  qrCode: string | null;
+  expiresAt: string | null;
+  paymentMode: PaymentMode;
+  message: string | null;
+}
+
+export interface MockPayResponse {
+  approval: { respCode: string; respMsg: string; tranxId: number | string | null };
+  payment: { respCode: string; respMsg: string; tranxId: number | string | null };
 }
 
 export const updateTransactionByErmId = async (
@@ -103,6 +129,20 @@ export const confirmPaymentFlow = async (
 /** FLOW 3: ทำให้ธุรกรรมหมดอายุและยกเลิกการลงทะเบียน */
 export const expireTransaction = async (tranxId: number): Promise<void> => {
   await api.patch(`/transactions/${tranxId}/expire`);
+};
+
+/** Poll สถานะหลัง approval/payment (mock / realtime) */
+export const getPaymentStatus = async (tranxId: number): Promise<PaymentStatusResponse> => {
+  const response = await api.get<PaymentStatusResponse>(
+    `/transactions/${tranxId}/payment-status`,
+  );
+  return response.data;
+};
+
+/** จำลองธนาคารยิง approval → payment (PAYMENT_MODE=mock) */
+export const mockPayTransaction = async (tranxId: number): Promise<MockPayResponse> => {
+  const response = await api.post<MockPayResponse>(`/transactions/${tranxId}/mock-pay`);
+  return response.data;
 };
 
 /** คืนเงินเมื่อยังไม่มีใบเสร็จ ISSUED */

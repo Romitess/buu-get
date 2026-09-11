@@ -22,6 +22,7 @@ import { PlatformGatewayService } from '../platform-gateway/platform-gateway.ser
 import { resolveImageFolder } from '../platform-gateway/constants/image-category.config';
 import { MoodleSyncService } from '../moodle/moodle-sync.service';
 import { getOtpEmailTemplate } from './templates/otp-email.template';
+import { MemberSessionCodesService } from 'src/common/services/member-session-codes.service';
 import * as bcrypt from 'bcrypt';
 
 export interface LoginResponse {
@@ -54,6 +55,7 @@ export class AuthService {
     private readonly platformGatewayService: PlatformGatewayService,
     private readonly moodleSyncService: MoodleSyncService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    private readonly memberSessionCodesService: MemberSessionCodesService,
   ) {}
 
   /** แยกชื่อ-นามสกุลจาก fullname (fallback เป็น local-part ของอีเมล) สำหรับส่งให้ Moodle */
@@ -276,9 +278,15 @@ export class AuthService {
       });
 
       const savedUser = await queryRunner.manager.save(newUser);
-      savedUser.USER_CODE = this.usersService.generateUserCode(
-        savedUser.USER_ID,
-      );
+      savedUser.USER_CODE =
+        await this.memberSessionCodesService.allocateUserCode(
+          queryRunner.manager,
+          {
+            nationalId: savedUser.USER_NATIONAL_ID,
+            passportNo: savedUser.USER_PASSPORT_NO,
+            at: savedUser.CREATED_AT ?? new Date(),
+          },
+        );
       await queryRunner.manager.update(
         User,
         { USER_ID: savedUser.USER_ID },
