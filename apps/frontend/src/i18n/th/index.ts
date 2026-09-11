@@ -1510,7 +1510,7 @@ export default {
         joinSessionFailed: 'ไม่สามารถเข้าร่วม session ช่วยแสกนได้ (อาจปิดหรือหมดอายุแล้ว)',
         cameraFailed: 'ไม่สามารถเปิดกล้องได้ กรุณาใช้การพิมพ์รหัสแทน',
         stationExpired: 'สถานีเช็คอินหมดอายุแล้ว กรุณาเปิดใหม่',
-        openStationFailed: 'ไม่สามารถเปิดสถานีเช็คอินได้',
+        openStationFailed: 'ไม่สามารถเปิดเช็คอินได้',
         loadRoomsFailed: 'ไม่สามารถโหลดรายการห้องสอบได้',
       },
       rooms: {
@@ -1537,8 +1537,8 @@ export default {
       },
       station: {
         pageTitle: 'สแกนเช็คอิน',
-        closeStation: 'ปิดสถานี',
-        closeAria: 'ปิดสถานีเช็คอิน',
+        closeStation: 'ปิด',
+        closeAria: 'ปิดเช็คอิน',
         nationalId: 'เลขบัตรประชาชน',
         passport: 'Passport',
         name: 'ชื่อ-สกุล',

@@ -405,7 +405,7 @@ export class CheckInAssistService {
       throw new BadRequestException('session นี้ไม่ใช่สถานีเช็คอินประจำห้อง');
     }
     if (session.HOST_USER_ID !== user.userId) {
-      throw new ForbiddenException('เฉพาะผู้เปิดสถานีนี้เท่านั้นที่ใช้งานได้');
+      throw new ForbiddenException('เฉพาะผู้เปิดนี้เท่านั้นที่ใช้งานได้');
     }
   }
 
@@ -418,14 +418,12 @@ export class CheckInAssistService {
     }
 
     if (!userHasAnyRole(user, [RoleEnum.PROCTOR])) {
-      throw new ForbiddenException('ไม่มีสิทธิ์เปิดสถานีเช็คอินห้องนี้');
+      throw new ForbiddenException('ไม่มีสิทธิ์เปิดเช็คอินห้องนี้');
     }
 
     const examDate = room.SESSION?.EXAM?.EXAM_DATE;
     if (!examDate || examDate !== getBangkokDateOnly()) {
-      throw new ForbiddenException(
-        'กรรมการคุมสอบเปิดสถานีได้เฉพาะการสอบวันนี้',
-      );
+      throw new ForbiddenException('กรรมการคุมสอบเปิดได้เฉพาะการสอบวันนี้');
     }
 
     const assigned = await this.proctorAssignmentRepository.findOne({

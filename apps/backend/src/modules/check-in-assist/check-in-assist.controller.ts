@@ -38,7 +38,7 @@ export class CheckInAssistController {
   constructor(private readonly checkInAssistService: CheckInAssistService) {}
 
   @Get('my-rooms')
-  @ApiOperation({ summary: 'รายการห้องสอบที่เปิดสถานีเช็คอินได้' })
+  @ApiOperation({ summary: 'รายการห้องสอบที่เปิดเช็คอินได้' })
   @ApiOkResponse({ type: MyCheckInRoomDto, isArray: true })
   listMyRooms(
     @CurrentUser() user: AuthenticatedUser,
@@ -48,7 +48,7 @@ export class CheckInAssistController {
   }
 
   @Post('room-stations')
-  @ApiOperation({ summary: 'เปิดสถานีเช็คอินประจำห้อง (มือถือ standalone)' })
+  @ApiOperation({ summary: 'เปิดเช็คอินประจำห้อง (มือถือ standalone)' })
   @ApiOkResponse({ type: RoomStationResponseDto })
   openRoomStation(
     @CurrentUser() user: AuthenticatedUser,
