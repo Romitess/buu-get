@@ -90,4 +90,13 @@ export class MsgPerson {
     comment: 'ตำแหน่งทางวิชาการ/สายงาน',
   })
   PSN_TECHNIQUE: string | null;
+
+  @Column({
+    name: 'PSN_USERNAME',
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+    comment: 'ชื่อผู้ใช้',
+  })
+  PSN_USERNAME: string | null;
 }
