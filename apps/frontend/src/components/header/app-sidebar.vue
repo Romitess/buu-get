@@ -181,6 +181,12 @@ const menuLinks = computed(() => {
         path: '/admin/audit-logs',
       });
       links.push({
+        name: 'personnel-roles',
+        label: t('navigation.personnelRoles'),
+        icon: 'badge',
+        path: '/admin/personnel-roles',
+      });
+      links.push({
         name: 'system-settings',
         label: t('navigation.systemSettings'),
         icon: 'settings',

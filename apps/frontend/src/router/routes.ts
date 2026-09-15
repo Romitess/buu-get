@@ -294,6 +294,18 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'personnel-roles',
+            name: 'admin-personnel-roles',
+            component: () => import('pages/admin/personnel-roles-page.vue'),
+            meta: {
+              roles: [ROLES.ADMIN, ROLES.SUPER_ADMIN],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.personnelRoles', icon: 'badge' },
+              ],
+            },
+          },
+          {
             path: 'system-settings',
             name: 'admin-system-settings',
             component: () => import('pages/admin/system-settings-page.vue'),

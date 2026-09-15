@@ -1,6 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, In, Repository } from 'typeorm';
+import { getRoleRank, maxRoleRank } from 'src/common/constants/role-rank';
 import {
   buildPaginatedResponse,
   PaginatedResponse,
@@ -9,6 +14,10 @@ import {
   PAGINATION_DEFAULT_LIMIT,
   PAGINATION_DEFAULT_PAGE,
 } from 'src/common/dto/pagination-query.dto';
+import {
+  AuthenticatedUser,
+  getUserRoles,
+} from 'src/common/utils/authz.util';
 import { Role } from '../roles/entities/role.entity';
 import { MsgPersonResponseDto } from './dto/msg-person-response.dto';
 import { MsgPersonsQueryDto } from './dto/msg-persons-query.dto';
@@ -136,6 +145,7 @@ export class MsgPersonsService {
   async updateRoles(
     psnId: string,
     roleIds: number[],
+    actor: AuthenticatedUser,
   ): Promise<MsgPersonResponseDto> {
     const person = await this.msgPersonsRepository.findOne({
       where: { PSN_ID: psnId },
@@ -146,12 +156,42 @@ export class MsgPersonsService {
       throw new NotFoundException('Person not found');
     }
 
-    const roles = await this.rolesRepository.find({
-      where: { ROLE_ID: In(roleIds) },
-    });
+    const roles =
+      roleIds.length === 0
+        ? []
+        : await this.rolesRepository.find({
+            where: { ROLE_ID: In(roleIds) },
+          });
 
     if (roles.length !== roleIds.length) {
       throw new NotFoundException('One or more roles not found');
+    }
+
+    const actorMaxRank = maxRoleRank(getUserRoles(actor));
+    const existingRoleIds = new Set(
+      (person.ROLES ?? []).map((role) => role.ROLE_ID),
+    );
+    const existingHigherRoleIds = (person.ROLES ?? [])
+      .filter((role) => getRoleRank(role.ROLE_NAME) > actorMaxRank)
+      .map((role) => role.ROLE_ID);
+
+    for (const higherRoleId of existingHigherRoleIds) {
+      if (!roleIds.includes(higherRoleId)) {
+        throw new ForbiddenException(
+          'Cannot remove a role higher than your own',
+        );
+      }
+    }
+
+    const newlyAssignedHigher = roles.filter(
+      (role) =>
+        getRoleRank(role.ROLE_NAME) > actorMaxRank &&
+        !existingRoleIds.has(role.ROLE_ID),
+    );
+    if (newlyAssignedHigher.length > 0) {
+      throw new ForbiddenException(
+        'Cannot assign a role higher than your own',
+      );
     }
 
     person.ROLES = roles;

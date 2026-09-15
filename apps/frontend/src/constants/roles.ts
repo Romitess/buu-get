@@ -54,3 +54,30 @@ export const SUPER_ADMIN_SWITCHABLE_ROLES: RoleValue[] = [
   ROLES.EXAM_OPERATIONS_OFFICER,
   ROLES.ADMIN,
 ];
+
+/**
+ * อันดับบทบาทสำหรับกฎมอบหมาย: มอบระดับเดียวกันหรือต่ำกว่าได้ ห้ามสูงกว่า
+ */
+export const ROLE_RANK: Record<RoleValue, number> = {
+  [ROLES.CANDIDATE]: 0,
+  [ROLES.STAFF]: 1,
+  [ROLES.FINANCE]: 1,
+  [ROLES.PROCTOR]: 1,
+  [ROLES.EXECUTIVE]: 1,
+  [ROLES.REGISTRATION_OFFICER]: 1,
+  [ROLES.EXAM_OPERATIONS_OFFICER]: 1,
+  [ROLES.ADMIN]: 2,
+  [ROLES.SUPER_ADMIN]: 3,
+};
+
+export function getRoleRank(roleName: string): number {
+  return ROLE_RANK[roleName as RoleValue] ?? Number.POSITIVE_INFINITY;
+}
+
+export function maxRoleRank(roleNames: Iterable<string>): number {
+  let max = 0;
+  for (const name of roleNames) {
+    max = Math.max(max, getRoleRank(name));
+  }
+  return max;
+}

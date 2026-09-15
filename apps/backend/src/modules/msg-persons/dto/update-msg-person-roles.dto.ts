@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayNotEmpty, IsArray, IsInt } from 'class-validator';
+import { IsArray, IsInt } from 'class-validator';
 
 export class UpdateMsgPersonRolesDto {
   @ApiProperty({
     type: [Number],
     example: [1, 2],
-    description: 'รายการ ROLE_ID ที่จะแทนที่บทบาทของบุคลากร',
+    description:
+      'รายการ ROLE_ID ที่จะแทนที่บทบาทของบุคลากร (ส่ง [] เพื่อล้างบทบาททั้งหมด)',
   })
   @IsArray()
-  @ArrayNotEmpty()
   @IsInt({ each: true })
   roleIds!: number[];
 }

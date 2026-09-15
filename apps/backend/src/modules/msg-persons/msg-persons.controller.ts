@@ -1,11 +1,13 @@
 import { Controller, Get, Param, Patch, Body, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import {
   USER_ADMIN_ROLES,
   USER_LIST_ROLES,
 } from 'src/common/constants/role-groups';
 import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
+import { AuthenticatedUser } from 'src/common/utils/authz.util';
 import { MsgPersonResponseDto } from './dto/msg-person-response.dto';
 import { MsgPersonsQueryDto } from './dto/msg-persons-query.dto';
 import { UpdateMsgPersonRolesDto } from './dto/update-msg-person-roles.dto';
@@ -42,7 +44,8 @@ export class MsgPersonsController {
   async updateRoles(
     @Param('psnId') psnId: string,
     @Body() body: UpdateMsgPersonRolesDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<MsgPersonResponseDto> {
-    return this.msgPersonsService.updateRoles(psnId, body.roleIds);
+    return this.msgPersonsService.updateRoles(psnId, body.roleIds, actor);
   }
 }
