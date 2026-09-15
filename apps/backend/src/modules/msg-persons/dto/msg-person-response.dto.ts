@@ -27,6 +27,9 @@ export class MsgPersonResponseDto {
   @ApiProperty({ nullable: true })
   PSN_EMAIL_BUU: string | null;
 
+  @ApiProperty({ nullable: true })
+  PSN_IDCARD: string | null;
+
   @ApiProperty({ nullable: true, enum: ['N', 'Y'] })
   PSN_RETIRE: 'N' | 'Y' | null;
 
@@ -49,6 +52,7 @@ export class MsgPersonResponseDto {
     dto.PSN_LNAMETH = person.PSN_LNAMETH;
     dto.PSN_LNAMEEN = person.PSN_LNAMEEN;
     dto.PSN_EMAIL_BUU = person.PSN_EMAIL_BUU;
+    dto.PSN_IDCARD = person.PSN_IDCARD;
     dto.PSN_RETIRE = person.PSN_RETIRE;
     dto.PSN_TECHNIQUE = person.PSN_TECHNIQUE;
     dto.PSN_USERNAME = person.PSN_USERNAME;

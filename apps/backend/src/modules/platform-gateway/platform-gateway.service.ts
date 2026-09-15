@@ -15,6 +15,7 @@ import { Readable } from 'stream';
 import FormData from 'form-data';
 import ApiToken from 'src/types/api/apiToken';
 import RequestTokenApiConfig from 'src/types/api/requestTokenApiConfig';
+import LoginBuuApiConfig from 'src/types/api/loginBuuApiConfig';
 import { v4 as uuidv4 } from 'uuid';
 import { unlink, createReadStream } from 'fs';
 import { promisify } from 'util';
@@ -29,6 +30,19 @@ import {
 } from './constants/image-category.config';
 import { SystemSettingsService } from '../system-settings/system-settings.service';
 import { SYSTEM_SETTING_KEYS } from '../system-settings/constants/system-settings.catalog';
+
+export interface LoginBuuResult {
+  fullname: string;
+  email: string;
+  facultyname: string;
+  citizenid: string;
+}
+
+export interface LoginBuuGatewayResponse {
+  status: 'success' | 'fail' | string;
+  message?: string;
+  result?: LoginBuuResult;
+}
 
 @Injectable()
 export class PlatformGatewayService {
@@ -87,7 +101,15 @@ export class PlatformGatewayService {
     return config;
   }
 
-  async postApi(apiName: string, data: any) {
+  private getLoginBuuApiConfig(): LoginBuuApiConfig {
+    const config = this.configService.get<LoginBuuApiConfig>('loginBuu');
+    if (!config) {
+      throw new Error('Config "loginBuu" is not defined');
+    }
+    return config;
+  }
+
+  async postApi(apiName: string, data?: Record<string, unknown>) {
     return this.makeApiRequest('post', 'postApi', apiName, data);
   }
 
@@ -95,7 +117,7 @@ export class PlatformGatewayService {
     return this.makeApiRequest('get', 'getApi', apiName);
   }
 
-  async deleteApi(apiName: string, data: any) {
+  async deleteApi(apiName: string, data?: Record<string, unknown>) {
     return this.makeApiRequest('delete', 'deleteApi', apiName, data);
   }
 
@@ -103,12 +125,23 @@ export class PlatformGatewayService {
     method: string,
     funcName: string,
     apiName: string,
-    data?: any,
+    data?: Record<string, unknown>,
     retried = false,
   ): Promise<AxiosResponse> {
-    let apiConfig;
+    let apiConfig: { path: string; provision_key?: string; scope?: string };
+    let requestData = data;
 
-    apiConfig = this.getApiConfig(apiName);
+    if (apiName === 'loginBuu') {
+      const loginBuuConfig = this.getLoginBuuApiConfig();
+      apiConfig = loginBuuConfig;
+      requestData = {
+        ...(data ?? {}),
+        secret: loginBuuConfig.secret,
+      };
+    } else {
+      apiConfig = this.getApiConfig(apiName);
+    }
+
     const cacheToken = await this.getCacheToken(apiName);
     const url = `${this.getDomain()}${apiConfig.path}`;
     const headers = {
@@ -119,23 +152,27 @@ export class PlatformGatewayService {
     };
 
     try {
-      let response;
+      let response: AxiosResponse;
       // Log debug: API name, method and a preview of the payload (send_message length if available)
-      if (data && data.send_message) {
+      // Never log password / secret values
+      if (requestData && typeof requestData.send_message === 'string') {
         this.logger?.log?.(
           `📤 Sending ${apiName} with send_message length: ${String(
-            (data.send_message as string).length,
+            requestData.send_message.length,
           )}`,
         );
       } else {
+        const keys = Object.keys(requestData || {}).filter(
+          (key) => key !== 'password' && key !== 'secret',
+        );
         this.logger?.log?.(
-          `📤 Sending ${apiName} payload keys: ${Object.keys(data || {}).join(', ')}`,
+          `📤 Sending ${apiName} payload keys: ${keys.join(', ')}`,
         );
       }
 
       switch (method) {
         case 'post':
-          response = await axios.post(url, data, {
+          response = await axios.post(url, requestData, {
             headers,
             maxContentLength: Infinity,
             maxBodyLength: Infinity,
@@ -148,7 +185,7 @@ export class PlatformGatewayService {
         case 'delete':
           response = await axios.delete(url, {
             headers,
-            data,
+            data: requestData,
             timeout: 120000,
           });
           break;
@@ -180,7 +217,13 @@ export class PlatformGatewayService {
       ) {
         this.logger.log(`redo ${funcName} for ${apiName}`);
         await this.refreshToken(apiName);
-        return this.makeApiRequest(method, funcName, apiName, data, true);
+        return this.makeApiRequest(
+          method,
+          funcName,
+          apiName,
+          requestData,
+          true,
+        );
       }
 
       return this.handleApiError(apiName, error);
@@ -331,7 +374,35 @@ export class PlatformGatewayService {
   }
 
   // loginBuu ใช้สำหรับตรวจสอบ username และ password กับระบบของมหาวิทยาลัยบูรพา
-  // สำคํญ
+  async loginBuu(
+    username: string,
+    password: string,
+  ): Promise<LoginBuuGatewayResponse> {
+    const apiName = 'loginBuu';
+    const data: Record<string, unknown> = {
+      username,
+      password,
+    };
+    try {
+      const response = await this.postApi(apiName, data);
+      /**
+       * success:
+       * { status: "success", result: { fullname, email, facultyname, citizenid } }
+       * fail:
+       * { status: "fail", message: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" }
+       */
+      const body = (response.data ?? response) as LoginBuuGatewayResponse;
+      return body;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      await this.sendNoti(this.getNotiEndpoint() + apiName + ': ' + message);
+      this.logger.error(`Error in ${apiName}: ${message}`);
+      return {
+        status: 'fail',
+        message: 'ไม่สามารถเชื่อมต่อระบบยืนยันตัวตนของมหาวิทยาลัยได้',
+      };
+    }
+  }
 
   async sendEmail(
     system: string,

@@ -6,7 +6,7 @@ import {
   SYSTEM_SETTINGS_READ_ROLES,
   SYSTEM_SETTINGS_WRITE_ROLES,
 } from 'src/common/constants/role-groups';
-import { AuthenticatedUser } from 'src/common/utils/authz.util';
+import { AuthenticatedUser, requireUserId } from 'src/common/utils/authz.util';
 import {
   SystemSettingItemDto,
   UpdateSystemSettingsDto,
@@ -36,6 +36,9 @@ export class SystemSettingsController {
     @Body() dto: UpdateSystemSettingsDto,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<SystemSettingItemDto[]> {
-    return this.systemSettingsService.updateMany(dto.settings, user.userId);
+    return this.systemSettingsService.updateMany(
+      dto.settings,
+      requireUserId(user),
+    );
   }
 }

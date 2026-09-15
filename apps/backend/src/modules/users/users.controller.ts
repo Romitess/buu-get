@@ -19,6 +19,7 @@ import {
 import {
   assertSelfOrRoles,
   AuthenticatedUser,
+  requireUserId,
 } from 'src/common/utils/authz.util';
 import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -80,7 +81,7 @@ export class UsersController {
     return this.usersService.removeByIdRange(
       body.startUserId,
       body.endUserId,
-      user.userId,
+      requireUserId(user),
     );
   }
 

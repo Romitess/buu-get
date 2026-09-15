@@ -11,7 +11,7 @@ import {
   PAGINATION_DEFAULT_PAGE,
   PaginationQueryDto,
 } from 'src/common/dto/pagination-query.dto';
-import { AuthenticatedUser } from 'src/common/utils/authz.util';
+import { AuthenticatedUser, requireUserId } from 'src/common/utils/authz.util';
 import { getYesterdayBangkokDateOnly } from 'src/common/utils/calendar-date.util';
 import { RoleEnum } from 'src/modules/roles/enums/role.enum';
 import { User } from 'src/modules/users/entities/user.entity';
@@ -222,7 +222,7 @@ export class NotificationsService {
     notificationId: number,
   ): Promise<NotificationResponseDto> {
     const recipient = await this.findOwnedRecipient(
-      user.userId,
+      requireUserId(user),
       notificationId,
     );
     if (!recipient.NTR_READ_AT) {

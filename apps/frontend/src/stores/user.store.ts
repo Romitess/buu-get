@@ -166,7 +166,10 @@ export const useUserStore = defineStore('user', () => {
           };
           isLoggedIn.value = true;
           accessToken.value = token;
-          if (profile.id) {
+          if (profile.psnId) {
+            localStorage.setItem('psn_id', profile.psnId);
+            localStorage.removeItem('user_id');
+          } else if (profile.id) {
             localStorage.setItem('user_id', String(profile.id));
           }
           applyDefaultActiveRole();
@@ -191,26 +194,7 @@ export const useUserStore = defineStore('user', () => {
       const result = await userService.authenticateUser(email, password);
 
       if (result) {
-        await clearExamCaches();
-
-        localStorage.setItem('access_token', result.accessToken);
-        localStorage.setItem('isLoggedIn', 'true');
-        if (result.user?.id) {
-          localStorage.setItem('user_id', String(result.user.id));
-        }
-        accessToken.value = result.accessToken;
-
-        const roles = buildRoles(result.user.role, result.user.roles);
-        currentUser.value = {
-          email: result.user.email,
-          role: roles[0],
-          roles,
-          id: result.user.id,
-          remark: result.user.remark ?? '',
-        } as User;
-
-        isLoggedIn.value = true;
-        applyDefaultActiveRole();
+        await hydrateFromLogin(result);
         return true;
       }
       error.value = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
@@ -220,6 +204,57 @@ export const useUserStore = defineStore('user', () => {
       error.value = 'เกิดข้อผิดพลาดในการเชื่อมต่อระบบ';
       return false;
     }
+  }
+
+  /** Login ด้วยบัญชีมหาวิทยาลัย (บุคลากร / MSG_T_PERSON) */
+  async function loginBuu(username: string, password: string): Promise<boolean> {
+    error.value = null;
+
+    try {
+      const result = await userService.authenticateBuuUser(username, password);
+
+      if (result) {
+        await hydrateFromLogin(result);
+        return true;
+      }
+      error.value = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+      return false;
+    } catch (err) {
+      console.error('BUU Login Error:', err);
+      error.value = 'เกิดข้อผิดพลาดในการเชื่อมต่อระบบ';
+      return false;
+    }
+  }
+
+  async function hydrateFromLogin(result: userService.LoginResponse): Promise<void> {
+    await clearExamCaches();
+
+    localStorage.setItem('access_token', result.accessToken);
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('psn_id');
+
+    if (result.user.actorType === 'person' && result.user.psnId) {
+      localStorage.setItem('psn_id', result.user.psnId);
+    } else if (result.user.id != null) {
+      localStorage.setItem('user_id', String(result.user.id));
+    }
+
+    accessToken.value = result.accessToken;
+
+    const roles = buildRoles(result.user.role, result.user.roles);
+    currentUser.value = {
+      email: result.user.email,
+      role: roles[0],
+      roles,
+      id: result.user.id,
+      psnId: result.user.psnId,
+      actorType: result.user.actorType,
+      remark: result.user.remark ?? '',
+    } as User;
+
+    isLoggedIn.value = true;
+    applyDefaultActiveRole();
   }
 
   /**
@@ -237,12 +272,19 @@ export const useUserStore = defineStore('user', () => {
       if (!profile) return;
 
       const roles = buildRoles(profile.role, profile.roles);
+      const nextActorType = profile.actorType ?? currentUser.value?.actorType;
+      const nextPsnId = profile.psnId ?? currentUser.value?.psnId;
       currentUser.value = {
         ...profile,
         role: roles[0] ?? ROLES.CANDIDATE,
         roles,
+        ...(nextActorType !== undefined ? { actorType: nextActorType } : {}),
+        ...(nextPsnId !== undefined ? { psnId: nextPsnId } : {}),
       };
-      if (profile.id) {
+      if (profile.psnId) {
+        localStorage.setItem('psn_id', profile.psnId);
+        localStorage.removeItem('user_id');
+      } else if (profile.id) {
         localStorage.setItem('user_id', String(profile.id));
       }
       applyDefaultActiveRole();
@@ -268,6 +310,7 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_id');
+    localStorage.removeItem('psn_id');
     localStorage.removeItem('active_role');
     void clearExamCaches();
     void clearNotificationState();
@@ -288,6 +331,7 @@ export const useUserStore = defineStore('user', () => {
     profileItems,
     initialize,
     login,
+    loginBuu,
     ensureProfileLoaded,
     patchCurrentUser,
     setActiveRole,

@@ -5,7 +5,9 @@ import type { User } from 'src/types/user';
 export interface LoginResponse {
   accessToken: string;
   user: {
-    id: number;
+    id?: number;
+    psnId?: string;
+    actorType: 'user' | 'person';
     email: string;
     role: string;
     roles: string[];
@@ -94,6 +96,23 @@ export async function authenticateUser(
     return response.data;
   } catch (err) {
     console.error('Authentication failed:', err);
+    return null;
+  }
+}
+
+/** Login ด้วยบัญชีมหาวิทยาลัย (Kong ldap.loginBuu → MSG_T_PERSON) */
+export async function authenticateBuuUser(
+  username: string,
+  password: string,
+): Promise<LoginResponse | null> {
+  try {
+    const response = await api.post<LoginResponse>('/auth/loginBuu', {
+      username,
+      password,
+    });
+    return response.data;
+  } catch (err) {
+    console.error('BUU authentication failed:', err);
     return null;
   }
 }

@@ -5,6 +5,9 @@ export type UserRole = RolesType[keyof RolesType];
 export interface User {
   // USER
   id?: number;
+  /** MSG_T_PERSON.PSN_ID เมื่อ login ด้วยบัญชีมหาวิทยาลัย */
+  psnId?: string;
+  actorType?: 'user' | 'person';
   userCode?: string;
   nationalId: string;
   passportNo: string;

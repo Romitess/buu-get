@@ -4,11 +4,15 @@
     <div class="card-header">
       <img src="~assets/img/buu-logo.png" alt="BUU Logo" class="crest-img" />
       <h2>{{ $t('auth.welcome') }}</h2>
-      <p>{{ $t('auth.signInToContinue') }}</p>
+      <p>
+        {{
+          loginMode === 'staff' ? $t('auth.staffLoginHint') : $t('auth.signInToContinue')
+        }}
+      </p>
     </div>
 
-    <!-- Type Toggle -->
-    <div class="type-toggle">
+    <!-- Candidate: Type Toggle -->
+    <div v-if="loginMode === 'candidate'" class="type-toggle">
       <button
         class="toggle-btn"
         :class="{ active: userType === 'thai' }"
@@ -26,9 +30,9 @@
       <div class="toggle-slider" :class="{ right: userType === 'foreigner' }"></div>
     </div>
 
-    <!-- ThaID (Thai only) -->
+    <!-- Candidate: ThaID (Thai only) -->
     <Transition name="expand">
-      <div v-if="userType === 'thai'" class="thaid-section">
+      <div v-if="loginMode === 'candidate' && userType === 'thai'" class="thaid-section">
         <q-btn class="thaid-btn" unelevated no-caps>
           <q-icon name="fingerprint" size="18px" class="q-mr-sm" />
           {{ $t('auth.loginThaID') }}
@@ -41,8 +45,8 @@
 
     <!-- Form -->
     <q-form @submit.prevent="onSubmit" class="login-form">
-      <!-- Email -->
-      <div class="field-block">
+      <!-- Candidate: Email -->
+      <div v-if="loginMode === 'candidate'" class="field-block">
         <div class="text-body2 text-weight-medium q-mb-xs field-label block">
           {{ $t('auth.email') }}
         </div>
@@ -62,13 +66,32 @@
         </q-input>
       </div>
 
+      <!-- Staff: Username -->
+      <div v-else class="field-block">
+        <div class="text-body2 text-weight-medium q-mb-xs field-label block">
+          {{ $t('auth.username') }}
+        </div>
+        <q-input
+          v-model="username"
+          outlined
+          dense
+          autocomplete="username"
+          :placeholder="$t('auth.usernamePlaceholder')"
+          class="custom-input"
+        >
+          <template v-slot:prepend>
+            <q-icon name="person" size="18px" />
+          </template>
+        </q-input>
+      </div>
+
       <!-- Password -->
       <div class="field-block">
         <div class="field-label-row">
           <div class="text-body2 text-weight-medium q-mb-xs field-label block">
             {{ $t('auth.password') }}
           </div>
-          <a href="#" class="forgot-link">
+          <a v-if="loginMode === 'candidate'" href="#" class="forgot-link">
             {{ $t('auth.forgotPassword') }}
           </a>
         </div>
@@ -101,9 +124,16 @@
       </q-btn>
     </q-form>
 
-    <!-- Register -->
+    <!-- Mode switch + Register -->
     <div class="register-row">
-      <router-link to="/register" class="text-primary text-decoration-none text-body2">
+      <button type="button" class="mode-switch-link" @click="toggleLoginMode">
+        {{ loginMode === 'candidate' ? $t('auth.staffLogin') : $t('auth.candidateLogin') }}
+      </button>
+      <router-link
+        v-if="loginMode === 'candidate'"
+        to="/register"
+        class="text-primary text-decoration-none text-body2"
+      >
         {{ $t('auth.createAccount') }}
       </router-link>
     </div>
@@ -127,8 +157,10 @@ const $q = useQuasar();
 
 const { t, locale } = useI18n();
 
+const loginMode = ref<'candidate' | 'staff'>('candidate');
 const userType = ref<'thai' | 'foreigner'>('thai');
 const email = ref('');
+const username = ref('');
 const password = ref('');
 const showPwd = ref(false);
 const isLoading = ref(false);
@@ -145,8 +177,41 @@ const toggleUserType = (type: 'thai' | 'foreigner') => {
   locale.value = type === 'thai' ? 'th' : 'en-US';
 };
 
+const toggleLoginMode = () => {
+  loginMode.value = loginMode.value === 'candidate' ? 'staff' : 'candidate';
+  password.value = '';
+};
+
+const redirectAfterLogin = async () => {
+  const safeRedirect = resolveSafeInAppRedirect(route.query.redirect);
+  if (safeRedirect) {
+    await router.push(safeRedirect);
+    return;
+  }
+
+  const role = userStore.userRole;
+
+  if (
+    loginMode.value === 'candidate' &&
+    role === ROLES.CANDIDATE &&
+    userStore.currentUser?.remark
+  ) {
+    await router.push({ name: 'user-profile', query: { from: 'email' } });
+  } else {
+    await router.push(getDefaultRouteForRole(role));
+  }
+};
+
 const onSubmit = async () => {
-  if (!email.value || !password.value) {
+  if (loginMode.value === 'staff') {
+    if (!username.value || !password.value) {
+      $q.notify({
+        type: 'warning',
+        message: t('auth.notify.requiredBuu'),
+      });
+      return;
+    }
+  } else if (!email.value || !password.value) {
     $q.notify({
       type: 'warning',
       message: t('auth.notify.required'),
@@ -156,12 +221,13 @@ const onSubmit = async () => {
 
   isLoading.value = true;
   try {
-    const success = await userStore.login(email.value, password.value);
+    const success =
+      loginMode.value === 'staff'
+        ? await userStore.loginBuu(username.value, password.value)
+        : await userStore.login(email.value, password.value);
 
     if (success) {
-      // ปลด spinner ก่อน navigate เพื่อไม่ให้ lazy chunk รวมในปุ่ม loading
       isLoading.value = false;
-      // โหลด profile เต็มแบบ background — ไม่รอ / ไม่ค้าง spinner
       void userStore.ensureProfileLoaded();
 
       $q.notify({
@@ -169,24 +235,14 @@ const onSubmit = async () => {
         message: t('auth.notify.success'),
       });
 
-      const safeRedirect = resolveSafeInAppRedirect(route.query.redirect);
-      if (safeRedirect) {
-        await router.push(safeRedirect);
-        return;
-      }
-
-      // Role-based redirection
-      const role = userStore.userRole;
-
-      if (role === ROLES.CANDIDATE && userStore.currentUser?.remark) {
-        await router.push({ name: 'user-profile', query: { from: 'email' } });
-      } else {
-        await router.push(getDefaultRouteForRole(role));
-      }
+      await redirectAfterLogin();
     } else {
       $q.notify({
         type: 'negative',
-        message: t('auth.notify.failed'),
+        message:
+          loginMode.value === 'staff'
+            ? t('auth.notify.failedBuu')
+            : t('auth.notify.failed'),
       });
     }
   } catch (error) {
@@ -377,9 +433,6 @@ const onSubmit = async () => {
   gap: 13px;
 }
 
-.field-block {
-}
-
 .field-label-row {
   display: flex;
   justify-content: space-between;
@@ -426,13 +479,16 @@ const onSubmit = async () => {
 // Register Row
 // ============================================================
 .register-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   text-align: center;
   margin-top: 16px;
   font-size: 15px !important;
   color: var(--neutral-500);
 
   a {
-    margin-left: 6px;
     font-weight: 700;
     color: var(--primary);
     text-decoration: none;
@@ -441,6 +497,21 @@ const onSubmit = async () => {
     &:hover {
       text-decoration: underline;
     }
+  }
+}
+
+.mode-switch-link {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
   }
 }
 

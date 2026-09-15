@@ -98,8 +98,18 @@ export class AuditInterceptor implements NestInterceptor {
     beforeState: JsonObject | null,
   ): { actorUserId: number | null; actorSnapshot: AuditActorSnapshot | null } {
     if (user) {
+      if (user.actorType === 'person') {
+        return {
+          actorUserId: null,
+          actorSnapshot: {
+            psnId: user.personId,
+            email: user.email,
+            roles: user.roles ?? [user.role],
+          },
+        };
+      }
       return {
-        actorUserId: user.userId,
+        actorUserId: user.userId ?? null,
         actorSnapshot: {
           userId: user.userId,
           email: user.email,
@@ -110,6 +120,22 @@ export class AuditInterceptor implements NestInterceptor {
 
     const resultUser = this.asObject(afterState?.user);
     const resultUserId = resultUser?.id;
+    const resultPsnId = resultUser?.psnId;
+    if (typeof resultPsnId === 'string' && resultPsnId.length > 0) {
+      const snapshot: AuditActorSnapshot = { psnId: resultPsnId };
+      if (typeof resultUser?.email === 'string') {
+        snapshot.email = resultUser.email;
+      }
+      if (Array.isArray(resultUser?.roles)) {
+        const roles = resultUser.roles.filter(
+          (role): role is string => typeof role === 'string',
+        );
+        if (roles.length > 0) {
+          snapshot.roles = roles;
+        }
+      }
+      return { actorUserId: null, actorSnapshot: snapshot };
+    }
     if (typeof resultUserId === 'number') {
       const snapshot: AuditActorSnapshot = { userId: resultUserId };
       if (typeof resultUser?.email === 'string') {
@@ -127,7 +153,11 @@ export class AuditInterceptor implements NestInterceptor {
     }
 
     const email =
-      typeof beforeState?.email === 'string' ? beforeState.email : undefined;
+      typeof beforeState?.email === 'string'
+        ? beforeState.email
+        : typeof beforeState?.username === 'string'
+          ? beforeState.username
+          : undefined;
     if (email) {
       return { actorUserId: null, actorSnapshot: { email } };
     }

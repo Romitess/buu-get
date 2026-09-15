@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
@@ -41,9 +41,13 @@ describe('AuthService', () => {
   let rolesService: jest.Mocked<Pick<RolesService, 'findByName'>>;
   let jwtService: jest.Mocked<Pick<JwtService, 'sign'>>;
   let platformGatewayService: jest.Mocked<
-    Pick<PlatformGatewayService, 'sendEmail' | 'uploadBuffer'>
+    Pick<PlatformGatewayService, 'sendEmail' | 'uploadBuffer' | 'loginBuu'>
   >;
   let moodleSyncService: jest.Mocked<Pick<MoodleSyncService, 'createUser'>>;
+  let msgPersonsService: {
+    findForLogin: jest.Mock;
+    findEntityById: jest.Mock;
+  };
   let cacheManager: jest.Mocked<Pick<Cache, 'set' | 'get' | 'del'>>;
   let queryRunnerManager: {
     findOne: jest.Mock;
@@ -106,9 +110,14 @@ describe('AuthService', () => {
     platformGatewayService = {
       sendEmail: jest.fn().mockResolvedValue(undefined),
       uploadBuffer: jest.fn(),
+      loginBuu: jest.fn(),
     };
     moodleSyncService = {
       createUser: jest.fn().mockResolvedValue(9001),
+    };
+    msgPersonsService = {
+      findForLogin: jest.fn(),
+      findEntityById: jest.fn(),
     };
     cacheManager = {
       set: jest.fn().mockResolvedValue(undefined),
@@ -166,6 +175,7 @@ describe('AuthService', () => {
       dataSource as unknown as DataSource,
       platformGatewayService as unknown as PlatformGatewayService,
       moodleSyncService as unknown as MoodleSyncService,
+      msgPersonsService as never,
       cacheManager as unknown as Cache,
       memberSessionCodesService as never,
     );
@@ -197,6 +207,7 @@ describe('AuthService', () => {
       });
       expect(response.accessToken).toBe('signed-jwt-token');
       expect(response.user.id).toBe(1);
+      expect(response.user.actorType).toBe('user');
       expect(response.user.remark).toBe('from-email');
     });
 
@@ -298,6 +309,94 @@ describe('AuthService', () => {
       });
       expect(response.user.role).toBe(RoleEnum.STAFF);
       expect(response.user.roles).toEqual([RoleEnum.STAFF, RoleEnum.ADMIN]);
+    });
+  });
+
+  describe('loginBuu', () => {
+    it('returns person JWT when LDAP and MSG_T_PERSON match', async () => {
+      platformGatewayService.loginBuu.mockResolvedValue({
+        status: 'success',
+        result: {
+          fullname: 'Staff Demo',
+          email: 'staff02@go.buu.ac.th',
+          facultyname: '',
+          citizenid: '1100700000002',
+        },
+      });
+      msgPersonsService.findForLogin.mockResolvedValue({
+        PSN_ID: 'DEMOSTAFF2',
+        PSN_EMAIL_BUU: 'staff02@go.buu.ac.th',
+        PSN_USERNAME: 'staff02',
+        PSN_IDCARD: '1100700000002',
+        PSN_RETIRE: 'N',
+        ROLES: [{ ROLE_NAME: RoleEnum.STAFF }],
+      });
+
+      const response = await service.loginBuu({
+        username: 'staff02',
+        password: 'secret',
+      });
+
+      expect(jwtService.sign).toHaveBeenCalledWith({
+        typ: 'person',
+        sub: 'DEMOSTAFF2',
+        email: 'staff02@go.buu.ac.th',
+        role: RoleEnum.STAFF,
+        roles: [RoleEnum.STAFF],
+      });
+      expect(response.user.actorType).toBe('person');
+      expect(response.user.psnId).toBe('DEMOSTAFF2');
+      expect(response.user.id).toBeUndefined();
+    });
+
+    it('throws when LDAP fails', async () => {
+      platformGatewayService.loginBuu.mockResolvedValue({
+        status: 'fail',
+        message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+      });
+
+      await expect(
+        service.loginBuu({ username: 'bad', password: 'bad' }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('throws when person is not found in MSG_T_PERSON', async () => {
+      platformGatewayService.loginBuu.mockResolvedValue({
+        status: 'success',
+        result: {
+          fullname: 'X',
+          email: 'x@buu.ac.th',
+          facultyname: '',
+          citizenid: '1100700000999',
+        },
+      });
+      msgPersonsService.findForLogin.mockResolvedValue(null);
+
+      await expect(
+        service.loginBuu({ username: 'staff02', password: 'secret' }),
+      ).rejects.toThrow('ไม่พบบุคลากรในระบบ');
+    });
+
+    it('throws when person has no PERSON_ROLES', async () => {
+      platformGatewayService.loginBuu.mockResolvedValue({
+        status: 'success',
+        result: {
+          fullname: 'X',
+          email: 'x@buu.ac.th',
+          facultyname: '',
+          citizenid: '1100700000002',
+        },
+      });
+      msgPersonsService.findForLogin.mockResolvedValue({
+        PSN_ID: 'DEMOSTAFF2',
+        PSN_EMAIL_BUU: 'staff02@go.buu.ac.th',
+        PSN_USERNAME: 'staff02',
+        ROLES: [],
+      });
+
+      await expect(
+        service.loginBuu({ username: 'staff02', password: 'secret' }),
+      ).rejects.toThrow('บัญชีบุคลากรยังไม่มีสิทธิ์ในระบบ');
     });
   });
 
@@ -766,11 +865,18 @@ describe('AuthService', () => {
       } as unknown as Awaited<ReturnType<UsersService['findById']>>);
 
       // Act
-      const profile = await service.getProfile(10);
+      const profile = await service.getProfile({
+        actorType: 'user',
+        userId: 10,
+        email: 'profile@example.com',
+        role: RoleEnum.STAFF,
+        roles: [RoleEnum.STAFF],
+      });
 
       // Assert
       expect(profile).toMatchObject({
         id: 10,
+        actorType: 'user',
         userCode: 'U00000010',
         email: 'profile@example.com',
         nationalId: '1234567890123',
@@ -794,10 +900,22 @@ describe('AuthService', () => {
       usersService.findById.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.getProfile(999)).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(service.getProfile(999)).rejects.toThrow('User not found');
+      await expect(
+        service.getProfile({
+          actorType: 'user',
+          userId: 999,
+          email: 'x@example.com',
+          role: RoleEnum.CANDIDATE,
+        }),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.getProfile({
+          actorType: 'user',
+          userId: 999,
+          email: 'x@example.com',
+          role: RoleEnum.CANDIDATE,
+        }),
+      ).rejects.toThrow('User not found');
     });
 
     // AUTH-U-030
@@ -816,7 +934,12 @@ describe('AuthService', () => {
       } as unknown as Awaited<ReturnType<UsersService['findById']>>);
 
       // Act
-      const profile = await service.getProfile(11);
+      const profile = await service.getProfile({
+        actorType: 'user',
+        userId: 11,
+        email: 'empty-roles@example.com',
+        role: RoleEnum.CANDIDATE,
+      });
 
       // Assert
       expect(profile.role).toBe(RoleEnum.CANDIDATE);

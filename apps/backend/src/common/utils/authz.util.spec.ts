@@ -4,6 +4,7 @@ import { ENROLLMENT_ADMIN_ROLES } from '../constants/role-groups';
 import {
   assertSelfOrRoles,
   getEffectiveRoles,
+  requireUserId,
   resolveActiveRole,
   userHasAnyRole,
   type AuthenticatedUser,
@@ -11,6 +12,7 @@ import {
 
 describe('authz.util', () => {
   const superAdminUser: AuthenticatedUser = {
+    actorType: 'user',
     userId: 1,
     email: 'super@buu.ac.th',
     role: RoleEnum.SUPER_ADMIN,
@@ -18,6 +20,7 @@ describe('authz.util', () => {
   };
 
   const adminUser: AuthenticatedUser = {
+    actorType: 'user',
     userId: 2,
     email: 'admin@buu.ac.th',
     role: RoleEnum.ADMIN,
@@ -25,6 +28,7 @@ describe('authz.util', () => {
   };
 
   const candidateUser: AuthenticatedUser = {
+    actorType: 'user',
     userId: 3,
     email: 'candidate@buu.ac.th',
     role: RoleEnum.CANDIDATE,
@@ -101,7 +105,7 @@ describe('authz.util', () => {
         activeRole: RoleEnum.CANDIDATE,
       };
       expect(() =>
-        assertSelfOrRoles(user, user.userId, ENROLLMENT_ADMIN_ROLES),
+        assertSelfOrRoles(user, user.userId!, ENROLLMENT_ADMIN_ROLES),
       ).not.toThrow();
     });
 
@@ -113,6 +117,23 @@ describe('authz.util', () => {
       expect(() =>
         assertSelfOrRoles(user, 999, ENROLLMENT_ADMIN_ROLES),
       ).toThrow(ForbiddenException);
+    });
+  });
+
+  describe('requireUserId', () => {
+    it('returns numeric userId for candidate/user tokens', () => {
+      expect(requireUserId(candidateUser)).toBe(3);
+    });
+
+    it('throws when person token has no userId', () => {
+      const person: AuthenticatedUser = {
+        actorType: 'person',
+        personId: 'DEMOSTAFF2',
+        email: 'staff02@go.buu.ac.th',
+        role: RoleEnum.STAFF,
+        roles: [RoleEnum.STAFF],
+      };
+      expect(() => requireUserId(person)).toThrow(ForbiddenException);
     });
   });
 });

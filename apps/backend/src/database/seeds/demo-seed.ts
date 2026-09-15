@@ -3,7 +3,7 @@
  *
  * ขั้นตอน:
  *   1) ensure roles (candidate, staff) + upsert staff02 (เจ้าหน้าที่เปิดการสอบ)
- *      และ MSG_T_PERSON + PERSON_ROLES คู่กัน (login ยังใช้ User)
+ *      และ MSG_T_PERSON + PERSON_ROLES (loginBuu ใช้ PERSON; email login ยังใช้ User)
  *   2) upsert 100 candidate users (test001–100) — ชื่อ-สกุลไม่ซ้ำ, profile random
  *   3) login staff02 → เปิด 10 การสอบ (published) ผ่าน API จริง
  *      - ที่นั่ง = สุ่มจาก location จริงที่มี capacity ≥ 40
@@ -29,6 +29,8 @@ const PASSWORD = 'password123';
 const STAFF_EMAIL = 'staff02@go.buu.ac.th';
 /** รหัสบุคลากรคงที่สำหรับ staff02 ใน MSG_T_PERSON (≤10 ตัวอักษร) */
 const STAFF_PSN_ID = 'DEMOSTAFF2';
+/** เลขบัตรประชาชนจำลองสำหรับ staff02 (loginBuu / MSG_T_PERSON.PSN_IDCARD) */
+const STAFF_PSN_IDCARD = '1100700000002';
 const SEED_TAG = 'DEMO-SEED'; // ใช้ติด EXAM_MOODLE_COURSE_ID เพื่อ idempotent
 
 // ── ข้อมูลสุ่ม (สมจริง) ──
@@ -279,6 +281,7 @@ async function seedUsers(): Promise<Candidate[]> {
     });
     if (staffPerson) {
       staffPerson.PSN_EMAIL_BUU = STAFF_EMAIL;
+      staffPerson.PSN_IDCARD = STAFF_PSN_IDCARD;
       staffPerson.PSN_USERNAME = 'staff02';
       staffPerson.PSN_FNAMETH = 'เจ้าหน้าที่';
       staffPerson.PSN_LNAMETH = 'เปิดสอบ';
@@ -290,6 +293,7 @@ async function seedUsers(): Promise<Candidate[]> {
         personRepo.create({
           PSN_ID: STAFF_PSN_ID,
           PSN_EMAIL_BUU: STAFF_EMAIL,
+          PSN_IDCARD: STAFF_PSN_IDCARD,
           PSN_USERNAME: 'staff02',
           PSN_FNAMETH: 'เจ้าหน้าที่',
           PSN_LNAMETH: 'เปิดสอบ',

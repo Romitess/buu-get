@@ -7,7 +7,12 @@ import {
 } from '../constants/role-switch.constants';
 
 export interface AuthenticatedUser {
-  userId: number;
+  /** 'user' = BUU_GET_T_USER; 'person' = MSG_T_PERSON (default = user เมื่อไม่ระบุ) */
+  actorType?: 'user' | 'person';
+  /** USER_ID — มีเมื่อ actorType = 'user' */
+  userId?: number;
+  /** PSN_ID — มีเมื่อ actorType = 'person' */
+  personId?: string;
   email: string;
   role: RoleEnum;
   roles?: RoleEnum[];
@@ -79,10 +84,25 @@ export function assertSelfOrRoles(
   allowedRoles: RoleEnum[],
   message = 'Access denied',
 ): void {
-  if (user.userId === resourceUserId) {
+  if (user.userId != null && user.userId === resourceUserId) {
     return;
   }
   if (!userHasAnyRole(user, allowedRoles)) {
     throw new ForbiddenException(message);
   }
+}
+
+/**
+ * บังคับว่าต้องเป็นบัญชีผู้สมัคร (BUU_GET_T_USER) ที่มี USER_ID ตัวเลข
+ * — ใช้กับ endpoint ที่ยังผูก FK/actor กับ USER_ID (ยังไม่รองรับ person login ในเฟสนี้)
+ * แนวเดียวกับ HRD ที่ extract acting id จาก req.user ก่อนเขียน audit/FK
+ */
+export function requireUserId(
+  user: AuthenticatedUser,
+  message = 'This action requires a candidate user account',
+): number {
+  if (user.userId == null) {
+    throw new ForbiddenException(message);
+  }
+  return user.userId;
 }

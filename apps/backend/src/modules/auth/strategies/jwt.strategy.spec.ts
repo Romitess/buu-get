@@ -29,6 +29,7 @@ describe('JwtStrategy', () => {
 
       // Assert
       expect(result).toEqual({
+        actorType: 'user',
         userId: 42,
         email: 'user@example.com',
         role: RoleEnum.STAFF,
@@ -50,10 +51,31 @@ describe('JwtStrategy', () => {
 
       // Assert
       expect(result).toEqual({
+        actorType: 'user',
         userId: 7,
         email: 'legacy@example.com',
         role: RoleEnum.CANDIDATE,
         roles: [RoleEnum.CANDIDATE],
+      });
+    });
+
+    it('should map typ=person payload to personId', () => {
+      const payload: JwtPayload = {
+        typ: 'person',
+        sub: 'DEMOSTAFF2',
+        email: 'staff02@go.buu.ac.th',
+        role: RoleEnum.STAFF,
+        roles: [RoleEnum.STAFF],
+      };
+
+      const result = strategy.validate(payload);
+
+      expect(result).toEqual({
+        actorType: 'person',
+        personId: 'DEMOSTAFF2',
+        email: 'staff02@go.buu.ac.th',
+        role: RoleEnum.STAFF,
+        roles: [RoleEnum.STAFF],
       });
     });
   });

@@ -3,6 +3,7 @@ import { AuditLogStatus } from '../entities/audit-log.entity';
 
 export interface AuditActorSnapshot {
   userId?: number;
+  psnId?: string;
   email?: string;
   roles?: string[];
 }

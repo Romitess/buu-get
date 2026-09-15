@@ -55,6 +55,7 @@ describe('MsgPersonsService', () => {
     PSN_LNAMETH: 'ทดสอบ',
     PSN_LNAMEEN: null,
     PSN_EMAIL_BUU: 'test.staff@buu-get.test',
+    PSN_IDCARD: '1100700000001',
     PSN_RETIRE: 'N',
     PSN_TECHNIQUE: null,
     PSN_USERNAME: 'staff',
@@ -152,6 +153,39 @@ describe('MsgPersonsService', () => {
       await expect(service.findOne('MISSING')).rejects.toBeInstanceOf(
         NotFoundException,
       );
+    });
+  });
+
+  describe('findForLogin', () => {
+    it('should return person when idcard and username match', async () => {
+      const person = basePerson({ PSN_USERNAME: 'staff02' });
+      msgPersonsRepository.findOne.mockResolvedValue(person);
+
+      const result = await service.findForLogin('1100700000001', 'staff02');
+
+      expect(msgPersonsRepository.findOne).toHaveBeenCalledWith({
+        where: { PSN_IDCARD: '1100700000001', PSN_RETIRE: 'N' },
+        relations: ['ROLES'],
+      });
+      expect(result?.PSN_ID).toBe('TSTSTAFF01');
+    });
+
+    it('should return null when username does not match', async () => {
+      msgPersonsRepository.findOne.mockResolvedValue(
+        basePerson({ PSN_USERNAME: 'other' }),
+      );
+
+      const result = await service.findForLogin('1100700000001', 'staff02');
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when person is missing', async () => {
+      msgPersonsRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.findForLogin('1100700000001', 'staff02');
+
+      expect(result).toBeNull();
     });
   });
 

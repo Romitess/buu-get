@@ -75,6 +75,16 @@ export class MsgPerson {
   PSN_EMAIL_BUU: string | null;
 
   @Column({
+    name: 'PSN_IDCARD',
+    type: 'varchar',
+    length: 13,
+    unique: true,
+    nullable: true,
+    comment: 'หมายเลขบัตรประชาชน 13 หลัก',
+  })
+  PSN_IDCARD: string | null;
+
+  @Column({
     name: 'PSN_RETIRE',
     type: 'varchar',
     length: 1,
@@ -101,7 +111,7 @@ export class MsgPerson {
   })
   PSN_USERNAME: string | null;
 
-  /** บทบาทเจ้าหน้าที่ (แหล่งสิทธิ์ตามโมเดลใหม่ — ยังไม่ใช้ login ในเฟสนี้) */
+  /** บทบาทเจ้าหน้าที่ผ่าน PERSON_ROLES (แหล่งสิทธิ์สำหรับ loginBuu) */
   @ManyToMany(() => Role, (role) => role.PERSONS)
   @JoinTable({
     name: 'PERSON_ROLES',

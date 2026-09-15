@@ -1,6 +1,7 @@
 import {
   Injectable,
   BadRequestException,
+  UnauthorizedException,
   Inject,
   Logger,
 } from '@nestjs/common';
@@ -9,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { LoginDto } from './dto/login.dto';
+import { LoginBuuDto } from './dto/login-buu.dto';
 import { RegisterDto } from './dto/register.dto';
 import { UsersService } from '../users/users.service';
 import { UserProfileService } from '../user-profile/user-profile.service';
@@ -21,14 +23,18 @@ import { UserImage } from '../user-image/entities/user-image.entity';
 import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
 import { resolveImageFolder } from '../platform-gateway/constants/image-category.config';
 import { MoodleSyncService } from '../moodle/moodle-sync.service';
+import { MsgPersonsService } from '../msg-persons/msg-persons.service';
 import { getOtpEmailTemplate } from './templates/otp-email.template';
 import { MemberSessionCodesService } from 'src/common/services/member-session-codes.service';
+import type { AuthenticatedUser } from 'src/common/utils/authz.util';
 import * as bcrypt from 'bcrypt';
 
 export interface LoginResponse {
   accessToken: string;
   user: {
-    id: number;
+    id?: number;
+    psnId?: string;
+    actorType: 'user' | 'person';
     email: string;
     role: string;
     roles: string[];
@@ -54,6 +60,7 @@ export class AuthService {
     private readonly dataSource: DataSource,
     private readonly platformGatewayService: PlatformGatewayService,
     private readonly moodleSyncService: MoodleSyncService,
+    private readonly msgPersonsService: MsgPersonsService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly memberSessionCodesService: MemberSessionCodesService,
   ) {}
@@ -164,10 +171,71 @@ export class AuthService {
       accessToken: this.jwtService.sign(payload),
       user: {
         id: user.USER_ID,
+        actorType: 'user' as const,
         email: user.USER_EMAIL,
         role: role,
         roles: roles,
         remark: user.PROFILE?.userRemark ?? null,
+      },
+    };
+  }
+
+  /**
+   * Login ด้วยบัญชีมหาวิทยาลัย (Kong ldap.loginBuu) แล้ว map ไป MSG_T_PERSON
+   * ออก JWT typ=person — ไม่สร้าง BUU_GET_T_USER
+   */
+  async loginBuu(loginBuuDto: LoginBuuDto): Promise<LoginResponse> {
+    const loginResponse = await this.platformGatewayService.loginBuu(
+      loginBuuDto.username,
+      loginBuuDto.password,
+    );
+
+    if (
+      !loginResponse ||
+      loginResponse.status !== 'success' ||
+      !loginResponse.result?.citizenid
+    ) {
+      throw new UnauthorizedException(
+        loginResponse?.message ?? 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+      );
+    }
+
+    const citizenId = loginResponse.result.citizenid;
+    const person = await this.msgPersonsService.findForLogin(
+      citizenId,
+      loginBuuDto.username,
+    );
+
+    if (!person) {
+      throw new UnauthorizedException('ไม่พบบุคลากรในระบบ');
+    }
+
+    const roles =
+      person.ROLES?.map((r) => r.ROLE_NAME).filter(Boolean) ?? [];
+    if (roles.length === 0) {
+      throw new UnauthorizedException('บัญชีบุคลากรยังไม่มีสิทธิ์ในระบบ');
+    }
+
+    const role = roles[0];
+    const email = person.PSN_EMAIL_BUU ?? loginResponse.result.email ?? '';
+
+    const payload = {
+      typ: 'person' as const,
+      sub: person.PSN_ID,
+      email,
+      role,
+      roles,
+    };
+
+    return {
+      accessToken: this.jwtService.sign(payload),
+      user: {
+        psnId: person.PSN_ID,
+        actorType: 'person',
+        email,
+        role,
+        roles,
+        remark: null,
       },
     };
   }
@@ -382,8 +450,16 @@ export class AuthService {
     }
   }
 
-  async getProfile(userId: number) {
-    const user = await this.usersService.findById(userId);
+  async getProfile(authUser: AuthenticatedUser) {
+    if (authUser.actorType === 'person') {
+      return this.getPersonProfile(authUser);
+    }
+
+    if (authUser.userId == null) {
+      throw new BadRequestException('User not found');
+    }
+
+    const user = await this.usersService.findById(authUser.userId);
     if (!user) {
       throw new BadRequestException('User not found');
     }
@@ -398,6 +474,7 @@ export class AuthService {
     // Map profile fields to match frontend User interface
     return {
       id: user.USER_ID,
+      actorType: 'user' as const,
       userCode: user.USER_CODE,
       email: user.USER_EMAIL,
       nationalId: user.USER_NATIONAL_ID,
@@ -420,6 +497,58 @@ export class AuthService {
       thaidSynced: user.PROFILE?.userThaidSynced || false,
       remark: user.PROFILE?.userRemark || '',
       userImagePath: user.IMAGE?.USER_IMAGE_URL || null,
+    };
+  }
+
+  private async getPersonProfile(authUser: AuthenticatedUser) {
+    const psnId = authUser.personId;
+    if (!psnId) {
+      throw new UnauthorizedException('Invalid person session');
+    }
+
+    const person = await this.msgPersonsService.findEntityById(psnId);
+    if (!person) {
+      throw new UnauthorizedException('ไม่พบบุคลากรในระบบ');
+    }
+
+    const roles =
+      person.ROLES?.map((r) => r.ROLE_NAME).filter(Boolean) ?? [];
+    if (roles.length === 0) {
+      throw new UnauthorizedException('บัญชีบุคลากรยังไม่มีสิทธิ์ในระบบ');
+    }
+
+    const fullNameTH = [person.PSN_FNAMETH, person.PSN_LNAMETH]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+    const fullNameEN = [person.PSN_FNAMEEN, person.PSN_LNAMEEN]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+
+    return {
+      psnId: person.PSN_ID,
+      actorType: 'person' as const,
+      email: person.PSN_EMAIL_BUU ?? authUser.email,
+      nationalId: person.PSN_IDCARD,
+      passportNo: null,
+      status: person.PSN_RETIRE === 'N' ? 'ACTIVE' : 'INACTIVE',
+      role: roles[0],
+      roles,
+      titleTH: person.PRF_NAMETH || '',
+      fullNameTH,
+      titleEN: person.PRF_NAMEEN || '',
+      fullNameEN,
+      birthdate: '',
+      phone: '',
+      educationLevel: '',
+      country: '',
+      address: '',
+      faculty: '',
+      institution: '',
+      thaidSynced: false,
+      remark: '',
+      userImagePath: null,
     };
   }
 }

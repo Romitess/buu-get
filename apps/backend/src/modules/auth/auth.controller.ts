@@ -9,6 +9,7 @@ import {
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService, LoginResponse, RegisterResponse } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { LoginBuuDto } from './dto/login-buu.dto';
 import { RegisterDto } from './dto/register.dto';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
@@ -16,6 +17,7 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { Public } from 'src/decorators/public.decorator';
 import { Audit } from 'src/modules/audit-logs/decorators/audit.decorator';
 import { AuditAction } from 'src/modules/audit-logs/constants/audit-actions';
+import type { AuthenticatedUser } from 'src/common/utils/authz.util';
 
 import { Request as ExpressRequest } from 'express';
 
@@ -41,6 +43,7 @@ export class AuthController {
           type: 'object',
           properties: {
             id: { type: 'number' },
+            actorType: { type: 'string' },
             email: { type: 'string' },
             role: { type: 'string' },
             roles: { type: 'array', items: { type: 'string' } },
@@ -51,6 +54,36 @@ export class AuthController {
   })
   async login(@Body() loginDto: LoginDto): Promise<LoginResponse> {
     return this.authService.login(loginDto);
+  }
+
+  @Public()
+  @Audit({
+    action: AuditAction.AUTH_LOGIN,
+    resourceType: 'person',
+    bodyKeys: ['username'],
+    resultKeys: ['user.psnId', 'user.email', 'user.roles'],
+    resourceIdFrom: 'user.psnId',
+  })
+  @Post('loginBuu')
+  @ApiOkResponse({
+    schema: {
+      properties: {
+        accessToken: { type: 'string' },
+        user: {
+          type: 'object',
+          properties: {
+            psnId: { type: 'string' },
+            actorType: { type: 'string' },
+            email: { type: 'string' },
+            role: { type: 'string' },
+            roles: { type: 'array', items: { type: 'string' } },
+          },
+        },
+      },
+    },
+  })
+  async loginBuu(@Body() loginBuuDto: LoginBuuDto): Promise<LoginResponse> {
+    return this.authService.loginBuu(loginBuuDto);
   }
 
   @Public()
@@ -105,9 +138,9 @@ export class AuthController {
   getProfile(
     @Request()
     req: ExpressRequest & {
-      user: { userId: number; email: string; role: string; roles: string[] };
+      user: AuthenticatedUser;
     },
   ) {
-    return this.authService.getProfile(req.user.userId);
+    return this.authService.getProfile(req.user);
   }
 }

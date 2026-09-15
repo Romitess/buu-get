@@ -37,7 +37,7 @@ import {
 import { Exam } from '../exam/entities/exam.entity';
 import { ExamSessionLocation } from '../exam-session-locations/entities/exam-session-location.entity';
 import { ExamSessionLocationProctor } from '../exam-session-locations/entities/exam-session-location-proctor.entity';
-import { AuthenticatedUser, userHasAnyRole } from 'src/common/utils/authz.util';
+import { AuthenticatedUser, requireUserId, userHasAnyRole } from 'src/common/utils/authz.util';
 import { ENROLLMENT_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import {
   isValidAssistScanCode,
@@ -107,6 +107,7 @@ export class CheckInAssistService {
     user: AuthenticatedUser,
     dateRaw?: string,
   ): Promise<MyCheckInRoomDto[]> {
+    const userId = requireUserId(user);
     const isAdmin = userHasAnyRole(user, ENROLLMENT_ADMIN_ROLES);
     const date =
       isAdmin && dateRaw && DATE_ONLY_PATTERN.test(dateRaw)
@@ -131,17 +132,14 @@ export class CheckInAssistService {
         ExamSessionLocationProctor,
         'assignment',
         'assignment.SL_ID = sl.SL_ID AND assignment.USER_ID = :userId',
-        { userId: user.userId },
+        { userId },
       );
     }
 
     const rooms = await qb.orderBy('session.SS_START_TIME', 'ASC').getMany();
     const slIds = rooms.map((room) => room.SL_ID);
     const counts = await this.loadAttendanceCounts(slIds);
-    const activeStations = await this.loadActiveStationsForUser(
-      user.userId,
-      slIds,
-    );
+    const activeStations = await this.loadActiveStationsForUser(userId, slIds);
 
     return rooms.map((room) => {
       const count = counts.get(room.SL_ID) ?? { total: 0, attended: 0 };
@@ -279,6 +277,7 @@ export class CheckInAssistService {
     user: AuthenticatedUser,
     rawCode: string,
   ): Promise<AssistEventDto> {
+    const scannerUserId = requireUserId(user);
     const session = await this.findSessionById(casId);
     this.assertSessionUsable(session);
     if (this.isRoomStation(session)) {
@@ -290,7 +289,7 @@ export class CheckInAssistService {
       return this.appendEvent(session, {
         type: CheckInAssistEventType.INVALID_CODE,
         scannedCode: rawCode.trim().slice(0, 64),
-        scannerUserId: user.userId,
+        scannerUserId,
         ermId: null,
       });
     }
@@ -306,7 +305,7 @@ export class CheckInAssistService {
       return this.appendEvent(session, {
         type: CheckInAssistEventType.NOT_FOUND,
         scannedCode: normalized,
-        scannerUserId: user.userId,
+        scannerUserId,
         ermId: null,
       });
     }
@@ -317,7 +316,7 @@ export class CheckInAssistService {
       return this.appendEvent(session, {
         type: CheckInAssistEventType.ALREADY_CHECKED_IN,
         scannedCode: normalized,
-        scannerUserId: user.userId,
+        scannerUserId,
         ermId: enrollment.ERM_ID,
         candidate: {
           ...candidateSummary,
@@ -333,7 +332,7 @@ export class CheckInAssistService {
       return this.appendEvent(session, {
         type: CheckInAssistEventType.NOT_FOUND,
         scannedCode: normalized,
-        scannerUserId: user.userId,
+        scannerUserId,
         ermId: enrollment.ERM_ID,
       });
     }
@@ -342,7 +341,7 @@ export class CheckInAssistService {
       return this.appendEvent(session, {
         type: CheckInAssistEventType.WRONG_ROOM,
         scannedCode: normalized,
-        scannerUserId: user.userId,
+        scannerUserId,
         ermId: enrollment.ERM_ID,
         candidate: candidateSummary,
         expectedRoom: this.buildExpectedRoom(enrollment),
@@ -362,7 +361,7 @@ export class CheckInAssistService {
       return this.appendEvent(session, {
         type: CheckInAssistEventType.CHECKED_IN,
         scannedCode: normalized,
-        scannerUserId: user.userId,
+        scannerUserId,
         ermId: checkedIn.ERM_ID,
         candidate: {
           ...refreshedSummary,
@@ -373,7 +372,7 @@ export class CheckInAssistService {
       return this.appendEvent(session, {
         type: CheckInAssistEventType.NOT_FOUND,
         scannedCode: normalized,
-        scannerUserId: user.userId,
+        scannerUserId,
         ermId: enrollment.ERM_ID,
       });
     }

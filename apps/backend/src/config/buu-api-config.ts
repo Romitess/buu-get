@@ -12,6 +12,12 @@ export default () => ({
     client_id: process.env.BUU_REFRESH_CLIENT_ID || '',
     grant_type: process.env.BUU_REFRESH_GRANT_TYPE || 'refresh_token',
   },
+  loginBuu: {
+    path: process.env.BUU_LOGIN_BUU_PATH || '/service-api/ldap.loginBuu',
+    provision_key: process.env.BUU_LOGIN_BUU_PROVISION_KEY || '',
+    scope: process.env.BUU_LOGIN_BUU_SCOPE || 'read',
+    secret: (process.env.BUU_LOGIN_BUU_SECRET || 'false') === 'true',
+  },
   sendEmail: {
     path: process.env.BUU_SEND_EMAIL_PATH || '/service-api/email.SendEmail',
     provision_key: process.env.BUU_SEND_EMAIL_PROVISION_KEY || '',

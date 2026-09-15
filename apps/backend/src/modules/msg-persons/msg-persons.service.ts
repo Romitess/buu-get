@@ -98,6 +98,41 @@ export class MsgPersonsService {
     return MsgPersonResponseDto.fromEntity(person);
   }
 
+  /**
+   * หาบุคลากรสำหรับ loginBuu — ต้องมีบัตรประชาชนตรง, ยังทำงานอยู่,
+   * และ username ตรงแบบ case-sensitive เหมือน HRD
+   */
+  async findForLogin(
+    citizenId: string,
+    username: string,
+  ): Promise<MsgPerson | null> {
+    const person = await this.msgPersonsRepository.findOne({
+      where: {
+        PSN_IDCARD: citizenId,
+        PSN_RETIRE: 'N',
+      },
+      relations: ['ROLES'],
+    });
+
+    if (!person) {
+      return null;
+    }
+
+    if (!person.PSN_USERNAME || person.PSN_USERNAME !== username) {
+      return null;
+    }
+
+    return person;
+  }
+
+  /** โหลดบุคลากรพร้อม roles สำหรับ GET /auth/me ของ person token */
+  async findEntityById(psnId: string): Promise<MsgPerson | null> {
+    return this.msgPersonsRepository.findOne({
+      where: { PSN_ID: psnId },
+      relations: ['ROLES'],
+    });
+  }
+
   async updateRoles(
     psnId: string,
     roleIds: number[],

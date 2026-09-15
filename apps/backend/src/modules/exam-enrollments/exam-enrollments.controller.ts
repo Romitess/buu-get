@@ -26,6 +26,7 @@ import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import {
   assertSelfOrRoles,
   AuthenticatedUser,
+  requireUserId,
 } from 'src/common/utils/authz.util';
 import { ExamEnrollmentsService } from './exam-enrollments.service';
 import { CreateExamEnrollmentDto } from './dto/create-exam-enrollment.dto';
@@ -65,7 +66,7 @@ export class ExamEnrollmentsController {
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<{ valid: true }> {
     await this.examEnrollmentsService.validatePasscode(
-      user.userId,
+      requireUserId(user),
       validatePasscodeDto,
     );
     return { valid: true };

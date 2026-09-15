@@ -11,7 +11,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { FINANCE_ROLES } from 'src/common/constants/role-groups';
-import { AuthenticatedUser } from 'src/common/utils/authz.util';
+import { AuthenticatedUser, requireUserId } from 'src/common/utils/authz.util';
 import { PaginatedResponse } from 'src/common/dto/paginated-response.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { VoidedReceiptsService } from './voided-receipts.service';
@@ -31,7 +31,10 @@ export class VoidedReceiptsController {
     @Body() createDto: CreateVoidedReceiptDto,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<VoidedReceipt> {
-    return await this.voidedReceiptsService.create(createDto, user.userId);
+    return await this.voidedReceiptsService.create(
+      createDto,
+      requireUserId(user),
+    );
   }
 
   @Get()

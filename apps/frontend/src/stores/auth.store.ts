@@ -115,6 +115,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('user_id');
+    localStorage.removeItem('psn_id');
   }
 
   /**

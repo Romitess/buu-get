@@ -39,6 +39,11 @@ export interface EnvironmentVariables {
   BANK_SUFFIX?: string;
   BANK_COM_CODE?: string;
   BANK_PROD_CODE?: string;
+  /** Kong ldap.loginBuu (optional — required when calling loginBuu) */
+  BUU_LOGIN_BUU_PATH?: string;
+  BUU_LOGIN_BUU_PROVISION_KEY?: string;
+  BUU_LOGIN_BUU_SCOPE?: string;
+  BUU_LOGIN_BUU_SECRET?: string;
 }
 
 const envSchema = Joi.object<EnvironmentVariables>({
@@ -79,6 +84,10 @@ const envSchema = Joi.object<EnvironmentVariables>({
   BANK_SUFFIX: Joi.string().optional(),
   BANK_COM_CODE: Joi.string().optional(),
   BANK_PROD_CODE: Joi.string().optional(),
+  BUU_LOGIN_BUU_PATH: Joi.string().optional(),
+  BUU_LOGIN_BUU_PROVISION_KEY: Joi.string().optional(),
+  BUU_LOGIN_BUU_SCOPE: Joi.string().optional(),
+  BUU_LOGIN_BUU_SECRET: Joi.string().valid('true', 'false').optional(),
 });
 
 export function validateEnv(
