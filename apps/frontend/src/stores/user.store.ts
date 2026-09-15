@@ -66,6 +66,13 @@ export const useUserStore = defineStore('user', () => {
 
   const hasEffectiveRole = (role: UserRole): boolean => effectiveRoles.value.includes(role);
 
+  /** บุคลากร loginBuu (MSG_T_PERSON) — ไม่มี USER_PROFILE และห้ามแก้ข้อมูลส่วนตัว */
+  const isPersonnelActor = computed(
+    () =>
+      currentUser.value?.actorType === 'person' ||
+      (!!currentUser.value?.psnId && currentUser.value?.actorType !== 'user'),
+  );
+
   const profileItems = computed(() => {
     if (!currentUser.value) return [];
     const u = currentUser.value;
@@ -325,6 +332,7 @@ export const useUserStore = defineStore('user', () => {
     userRoles,
     effectiveRoles,
     hasEffectiveRole,
+    isPersonnelActor,
     activeRole,
     canSwitchRole,
     switchableRoles,

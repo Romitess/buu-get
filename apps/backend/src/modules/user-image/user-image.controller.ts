@@ -2,16 +2,19 @@ import {
   Controller,
   Patch,
   Body,
-  Request,
   UseGuards,
   Get,
 } from '@nestjs/common';
 import { UserImageService } from './user-image.service';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Request as ExpressRequest } from 'express';
 import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import {
+  AuthenticatedUser,
+  requireUserId,
+} from 'src/common/utils/authz.util';
 
 class UpdateUserImageDto {
   @ApiProperty({ example: '/user_images/abc123.jpg' })
@@ -28,31 +31,28 @@ export class UserImageController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  getMyImage(
-    @Request()
-    req: ExpressRequest & {
-      user: { userId: number; email: string; role: string };
-    },
-  ) {
-    return this.userImageService.findByUserId(req.user.userId);
+  getMyImage(@CurrentUser() user: AuthenticatedUser) {
+    const userId = requireUserId(
+      user,
+      'Personnel accounts cannot access candidate profile image',
+    );
+    return this.userImageService.findByUserId(userId);
   }
 
   @Patch('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async updateMyImage(
-    @Request()
-    req: ExpressRequest & {
-      user: { userId: number; email: string; role: string };
-    },
+    @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpdateUserImageDto,
   ) {
+    const userId = requireUserId(
+      user,
+      'Personnel accounts cannot edit personal profile image',
+    );
     if (!dto.userImageUrl) {
       return { message: 'No image URL provided' };
     }
-    return this.userImageService.upsertByUserId(
-      req.user.userId,
-      dto.userImageUrl,
-    );
+    return this.userImageService.upsertByUserId(userId, dto.userImageUrl);
   }
 }

@@ -115,6 +115,7 @@ export class UserProfileService {
     id: number,
     updateUserProfileDto: UpdateUserProfileDto,
     modifier?: {
+      /** USER_ID ของผู้แก้; ใช้ 0 เมื่อเป็นบุคลากร (person) ที่ไม่มี USER_ID — คอลัมน์ไม่มี FK จริง */
       modifierId: number;
       modifierName: string;
       modifierRole: string;

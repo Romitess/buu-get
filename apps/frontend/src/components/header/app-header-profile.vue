@@ -41,35 +41,28 @@
           <!-- Role Switcher (admin / super_admin only) -->
           <template v-if="userStore.canSwitchRole">
             <div class="profile-card__switch-label">{{ $t('profile.switchRole') }}</div>
-            <q-list class="profile-card__switch-list">
-              <q-item
-                v-for="role in userStore.switchableRoles"
-                :key="role"
-                clickable
-                v-close-popup
-                :active="role === userStore.userRole"
-                class="profile-card__switch-item"
-                @click="onSwitchRole(role)"
-              >
-                <q-item-section avatar>
-                  <q-radio
-                    :model-value="userStore.userRole"
-                    :val="role"
-                    dense
-                    @update:model-value="() => onSwitchRole(role)"
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>{{ $t(`roles.${role}`) }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
+            <div class="profile-card__switch-select" @click.stop>
+              <AppSelect
+                :model-value="userStore.userRole"
+                :options="roleOptions"
+                option-label="label"
+                option-value="value"
+                emit-value
+                map-options
+                dense
+                outlined
+                dropdown-icon="keyboard_arrow_down"
+                class="profile-card__role-select"
+                @update:model-value="onSwitchRole($event as UserRole)"
+              />
+            </div>
             <q-separator />
           </template>
 
           <!-- Actions -->
           <q-list class="profile-card__actions">
             <q-item
+              v-if="canEditProfile"
               clickable
               v-close-popup
               class="profile-card__action-item"
@@ -113,12 +106,21 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from 'src/stores/user.store';
 import ImageDisplay from 'src/components/base/image-display.vue';
+import AppSelect from 'src/components/base/app-select.vue';
 import { getDefaultRouteForRole } from 'src/utils/default-route';
+import { ROLES } from 'src/constants/roles';
 import type { UserRole } from 'src/types/user';
 
 const userStore = useUserStore();
 const router = useRouter();
 const i18n = useI18n();
+
+/** ผู้สมัครเท่านั้นที่แก้ข้อมูลส่วนตัวได้ — บุคลากร (loginBuu) ไม่มีเมนูนี้ */
+const canEditProfile = computed(
+  () =>
+    !userStore.isPersonnelActor &&
+    userStore.effectiveRoles.includes(ROLES.CANDIDATE),
+);
 
 const displayName = computed(() => {
   const user = userStore.currentUser;
@@ -140,6 +142,17 @@ const displayRole = computed(() => {
   if (!role) return '';
   const roleKey = `roles.${role}`;
   return i18n.te(roleKey) ? i18n.t(roleKey) : role;
+});
+
+const roleOptions = computed(() => {
+  void i18n.locale.value;
+  return userStore.switchableRoles.map((role) => {
+    const roleKey = `roles.${role}`;
+    return {
+      label: i18n.te(roleKey) ? String(i18n.t(roleKey)) : role,
+      value: role,
+    };
+  });
 });
 
 const goToEditProfile = async (): Promise<void> => {
@@ -259,15 +272,12 @@ const onLogout = async (): Promise<void> => {
   padding: 12px 16px 4px;
 }
 
-.profile-card__switch-list {
-  max-height: 240px;
-  overflow-y: auto;
-  padding: 0 8px;
+.profile-card__switch-select {
+  padding: 4px 16px 12px;
 }
 
-.profile-card__switch-item {
-  border-radius: var(--radius-sm);
-  min-height: 40px;
+.profile-card__role-select {
+  width: 100%;
 }
 
 .profile-card__actions {

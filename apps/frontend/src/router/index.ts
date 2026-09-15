@@ -40,6 +40,10 @@ export default defineRouter(({ store }) => {
       const isPrivileged = effectiveRoles.some(
         (role) => role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN,
       );
+      // บุคลากร (loginBuu) ห้ามเข้าหน้าแก้ไขโปรไฟล์ผู้สมัคร แม้จะเป็น admin
+      if (to.name === 'user-profile' && userStore.isPersonnelActor) {
+        return getDefaultRouteForRole(userStore.userRole);
+      }
       // multi-role: ผ่านถ้า user มี role อย่างน้อยหนึ่งตัวที่ route อนุญาต
       const hasPermission =
         isPrivileged ||

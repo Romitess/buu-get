@@ -142,6 +142,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/user/profile-page.vue'),
         meta: {
           requiresAuth: true,
+          roles: [ROLES.CANDIDATE],
           breadcrumb: [
             { label: 'navigation.home', icon: 'home', to: '/' },
             { label: 'profile.pageTitleEdit', icon: 'person' },

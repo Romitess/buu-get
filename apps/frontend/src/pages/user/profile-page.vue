@@ -412,6 +412,7 @@ import defaultUserImage from 'src/assets/img/user-image.jpg';
 import { getImageUrl } from 'src/services/image.service';
 import { api } from 'src/boot/axios';
 import type { AxiosError } from 'axios';
+import { getDefaultRouteForRole } from 'src/utils/default-route';
 import { useFocusFirstInvalidField } from 'src/composables/use-focus-first-invalid-field';
 import { AvatarSkeleton } from 'src/components/base/skeleton';
 
@@ -627,6 +628,10 @@ const updateAlertVisibility = (): void => {
 };
 
 onMounted((): void => {
+  if (userStore.isPersonnelActor) {
+    void router.replace(getDefaultRouteForRole(userStore.userRole));
+    return;
+  }
   syncFormFromUser();
   updateAlertVisibility();
 });

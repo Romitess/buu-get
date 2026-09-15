@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  Request,
   UseGuards,
   ParseIntPipe,
   Query,
@@ -24,11 +23,10 @@ import {
 import {
   assertSelfOrRoles,
   AuthenticatedUser,
+  requireUserId,
 } from 'src/common/utils/authz.util';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-
-import { Request as ExpressRequest } from 'express';
 
 @ApiTags('user-profile')
 @Controller('user-profile')
@@ -38,32 +36,30 @@ export class UserProfileController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  findMe(
-    @Request()
-    req: ExpressRequest & {
-      user: { userId: number; email: string; role: string; roles: string[] };
-    },
-  ) {
-    return this.userProfileService.findByUserId(req.user.userId);
+  findMe(@CurrentUser() user: AuthenticatedUser) {
+    const userId = requireUserId(
+      user,
+      'Personnel accounts cannot access candidate profile',
+    );
+    return this.userProfileService.findByUserId(userId);
   }
 
   @Patch('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async updateMe(
-    @Request()
-    req: ExpressRequest & {
-      user: { userId: number; email: string; role: string; roles: string[] };
-    },
+    @CurrentUser() user: AuthenticatedUser,
     @Body() updateUserProfileDto: UpdateUserProfileDto,
   ) {
-    const userProfile = await this.userProfileService.findByUserId(
-      req.user.userId,
+    const userId = requireUserId(
+      user,
+      'Personnel accounts cannot edit personal profile',
     );
-    const name = userProfile.userFullnameTh || req.user.email;
+    const userProfile = await this.userProfileService.findByUserId(userId);
+    const name = userProfile.userFullnameTh || user.email;
     // ถือเป็นผู้สมัครก็ต่อเมื่อทุก role ของ user เป็น candidate/user เท่านั้น
     // (ถ้ามี role เจ้าหน้าที่ปนอยู่ด้วย ให้ถือเป็นเจ้าหน้าที่)
-    const userRoles = req.user.roles ?? (req.user.role ? [req.user.role] : []);
+    const userRoles = user.roles ?? (user.role ? [user.role] : []);
     const isCandidate =
       userRoles.length > 0 &&
       userRoles.every((r) => {
@@ -71,7 +67,7 @@ export class UserProfileController {
         return v === 'candidate' || v === 'user';
       });
     const modifier = {
-      modifierId: req.user.userId,
+      modifierId: userId,
       modifierName: name,
       modifierRole: isCandidate ? 'ผู้สมัครสอบ' : 'เจ้าหน้าที่',
     };
@@ -106,10 +102,6 @@ export class UserProfileController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: AuthenticatedUser,
-    @Request()
-    req: ExpressRequest & {
-      user: { userId: number; email: string; role: string; roles: string[] };
-    },
     @Body() updateUserProfileDto: UpdateUserProfileDto,
   ) {
     // :id is USER_PROFILE_ID — ownership is via profile.userId (USER_ID), not profile id
@@ -121,21 +113,38 @@ export class UserProfileController {
       'Access denied: cannot update another user profile',
     );
 
-    let modifierName = req.user.email;
-    try {
-      const modProfile = await this.userProfileService.findByUserId(
-        req.user.userId,
+    // Self-update ของผู้สมัครเท่านั้น; เจ้าหน้าที่ (รวม person) แก้โปรไฟล์ผู้สมัครได้ตามเดิม
+    const isSelfUpdate =
+      user.userId != null && user.userId === targetProfile.userId;
+    if (isSelfUpdate) {
+      requireUserId(
+        user,
+        'Personnel accounts cannot edit personal profile',
       );
-      if (modProfile && modProfile.userFullnameTh) {
-        modifierName = modProfile.userFullnameTh;
+    }
+
+    let modifierName = user.email;
+    const modifierUserId = user.userId;
+    if (modifierUserId != null) {
+      try {
+        const modProfile =
+          await this.userProfileService.findByUserId(modifierUserId);
+        if (modProfile?.userFullnameTh) {
+          modifierName = modProfile.userFullnameTh;
+        }
+      } catch {
+        // Ignored — keep email as fallback
       }
-    } catch {
-      // Ignored
+    } else if (user.personId) {
+      // ไม่มี USER_ID — เก็บชื่อพร้อม PSN_ID ในประวัติ (MODIFIER_ID = 0 ไม่มี FK จริง)
+      modifierName = user.email
+        ? `${user.email} [PSN:${user.personId}]`
+        : `PSN:${user.personId}`;
     }
 
     // ถือเป็นผู้สมัครก็ต่อเมื่อทุก role ของ user เป็น candidate/user เท่านั้น
     // (ถ้ามี role เจ้าหน้าที่ปนอยู่ด้วย ให้ถือเป็นเจ้าหน้าที่)
-    const userRoles = req.user.roles ?? (req.user.role ? [req.user.role] : []);
+    const userRoles = user.roles ?? (user.role ? [user.role] : []);
     const isCandidate =
       userRoles.length > 0 &&
       userRoles.every((r) => {
@@ -143,7 +152,8 @@ export class UserProfileController {
         return v === 'candidate' || v === 'user';
       });
     const modifier = {
-      modifierId: req.user.userId,
+      // 0 = บุคลากร (person) ไม่มี USER_ID — คอลัมน์เป็น int ไม่มี FK constraint
+      modifierId: modifierUserId ?? 0,
       modifierName,
       modifierRole: isCandidate ? 'ผู้สมัครสอบ' : 'เจ้าหน้าที่',
     };
