@@ -377,6 +377,14 @@ describe('CheckInAssistService', () => {
         service.openRoomStation(proctorUser, 12),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
+
+    it('forbids an administrator from opening a room station', async () => {
+      sessionLocationRepository.findOne.mockResolvedValue(room);
+
+      await expect(service.openRoomStation(hostUser, 12)).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+    });
   });
 
   describe('getSessionByToken', () => {

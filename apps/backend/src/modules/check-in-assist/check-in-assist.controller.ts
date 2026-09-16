@@ -15,6 +15,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import {
   CHECK_IN_ROLES,
   ENROLLMENT_ADMIN_ROLES,
+  ROOM_CHECK_IN_ROLES,
 } from 'src/common/constants/role-groups';
 import { AuthenticatedUser } from 'src/common/utils/authz.util';
 import { CheckInAssistService } from './check-in-assist.service';
@@ -38,6 +39,7 @@ export class CheckInAssistController {
   constructor(private readonly checkInAssistService: CheckInAssistService) {}
 
   @Get('my-rooms')
+  @Roles(...ROOM_CHECK_IN_ROLES)
   @ApiOperation({ summary: 'รายการห้องสอบที่เปิดเช็คอินได้' })
   @ApiOkResponse({ type: MyCheckInRoomDto, isArray: true })
   listMyRooms(
@@ -48,6 +50,7 @@ export class CheckInAssistController {
   }
 
   @Post('room-stations')
+  @Roles(...ROOM_CHECK_IN_ROLES)
   @ApiOperation({ summary: 'เปิดเช็คอินประจำห้อง (มือถือ standalone)' })
   @ApiOkResponse({ type: RoomStationResponseDto })
   openRoomStation(
@@ -58,6 +61,7 @@ export class CheckInAssistController {
   }
 
   @Get('room-stations/:casId')
+  @Roles(...ROOM_CHECK_IN_ROLES)
   @ApiOperation({ summary: 'ดึงสถานีเช็คอินประจำห้องที่เปิดอยู่' })
   @ApiOkResponse({ type: RoomStationResponseDto })
   getRoomStation(

@@ -1,5 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router';
 import { ROLES } from 'src/constants/roles';
+import { ROOM_CHECK_IN_ROLES } from 'src/utils/room-check-in-access';
 declare module 'vue-router' {
   interface RouteMeta {
     requiresAuth?: boolean;
@@ -506,13 +507,7 @@ const routes: RouteRecordRaw[] = [
             name: 'admin-check-in-rooms',
             component: () => import('pages/admin/check-in-rooms-page.vue'),
             meta: {
-              roles: [
-                ROLES.ADMIN,
-                ROLES.STAFF,
-                ROLES.REGISTRATION_OFFICER,
-                ROLES.EXAM_OPERATIONS_OFFICER,
-                ROLES.PROCTOR,
-              ],
+              roles: [...ROOM_CHECK_IN_ROLES],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
                 { label: 'navigation.roomCheckIn', icon: 'qr_code_scanner' },
@@ -527,13 +522,7 @@ const routes: RouteRecordRaw[] = [
               hideHeader: true,
               hideDrawer: true,
               hideFooter: true,
-              roles: [
-                ROLES.ADMIN,
-                ROLES.STAFF,
-                ROLES.REGISTRATION_OFFICER,
-                ROLES.EXAM_OPERATIONS_OFFICER,
-                ROLES.PROCTOR,
-              ],
+              roles: [...ROOM_CHECK_IN_ROLES],
               breadcrumb: [
                 { label: 'navigation.home', icon: 'home', to: '/' },
                 { label: 'navigation.roomCheckIn', icon: 'qr_code_scanner' },

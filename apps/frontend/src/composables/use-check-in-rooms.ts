@@ -18,8 +18,6 @@ import {
 } from 'src/utils/check-in-room-label';
 
 const DATE_PICKER_ROLES: RoleValue[] = [
-  ROLES.ADMIN,
-  ROLES.SUPER_ADMIN,
   ROLES.STAFF,
   ROLES.REGISTRATION_OFFICER,
   ROLES.EXAM_OPERATIONS_OFFICER,

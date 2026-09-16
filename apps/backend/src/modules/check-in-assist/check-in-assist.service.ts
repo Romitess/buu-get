@@ -38,7 +38,7 @@ import { Exam } from '../exam/entities/exam.entity';
 import { ExamSessionLocation } from '../exam-session-locations/entities/exam-session-location.entity';
 import { ExamSessionLocationProctor } from '../exam-session-locations/entities/exam-session-location-proctor.entity';
 import { AuthenticatedUser, requireUserId, userHasAnyRole } from 'src/common/utils/authz.util';
-import { ENROLLMENT_ADMIN_ROLES } from 'src/common/constants/role-groups';
+import { ROOM_CHECK_IN_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import {
   isValidAssistScanCode,
   normalizeAssistScanCode,
@@ -108,7 +108,7 @@ export class CheckInAssistService {
     dateRaw?: string,
   ): Promise<MyCheckInRoomDto[]> {
     const userId = requireUserId(user);
-    const isAdmin = userHasAnyRole(user, ENROLLMENT_ADMIN_ROLES);
+    const isAdmin = userHasAnyRole(user, ROOM_CHECK_IN_ADMIN_ROLES);
     const date =
       isAdmin && dateRaw && DATE_ONLY_PATTERN.test(dateRaw)
         ? dateRaw
@@ -412,7 +412,7 @@ export class CheckInAssistService {
     user: AuthenticatedUser,
     room: ExamSessionLocation,
   ): Promise<void> {
-    if (userHasAnyRole(user, ENROLLMENT_ADMIN_ROLES)) {
+    if (userHasAnyRole(user, ROOM_CHECK_IN_ADMIN_ROLES)) {
       return;
     }
 

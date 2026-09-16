@@ -33,6 +33,21 @@ export const CHECK_IN_ROLES: RoleEnum[] = [
   RoleEnum.PROCTOR,
 ];
 
+/** หน้าเช็คอินเข้าห้องสอบ / สถานีประจำห้อง — ไม่รวมผู้ดูแลระบบ */
+export const ROOM_CHECK_IN_ROLES: RoleEnum[] = [
+  RoleEnum.STAFF,
+  RoleEnum.REGISTRATION_OFFICER,
+  RoleEnum.EXAM_OPERATIONS_OFFICER,
+  RoleEnum.PROCTOR,
+];
+
+/** เปิดเช็คอินได้ทุกห้องโดยไม่ต้องถูกมอบหมายคุมสอบ */
+export const ROOM_CHECK_IN_ADMIN_ROLES: RoleEnum[] = [
+  RoleEnum.STAFF,
+  RoleEnum.REGISTRATION_OFFICER,
+  RoleEnum.EXAM_OPERATIONS_OFFICER,
+];
+
 /** ดูรายการผู้ใช้ (เช่น เลือกผู้คุมสอบตอนสร้างการสอบ) — ไม่รวมการจัดการ role */
 export const USER_LIST_ROLES: RoleEnum[] = [...ENROLLMENT_ADMIN_ROLES];
 

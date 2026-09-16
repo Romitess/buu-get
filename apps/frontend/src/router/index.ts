@@ -9,6 +9,10 @@ import routes from './routes';
 import { useUserStore } from 'src/stores/user.store';
 import { getDefaultRouteForRole } from 'src/utils/default-route';
 import { resolveSafeInAppRedirect } from 'src/utils/safe-redirect';
+import {
+  canAccessRoomCheckInPage,
+  isRoomCheckInRoute,
+} from 'src/utils/room-check-in-access';
 import { ROLES } from 'src/constants/roles';
 
 export default defineRouter(({ store }) => {
@@ -42,6 +46,10 @@ export default defineRouter(({ store }) => {
       );
       // บุคลากร (loginBuu) ห้ามเข้าหน้าแก้ไขโปรไฟล์ผู้สมัคร แม้จะเป็น admin
       if (to.name === 'user-profile' && userStore.isPersonnelActor) {
+        return getDefaultRouteForRole(userStore.userRole);
+      }
+      // ผู้ดูแลระบบห้ามเข้าหน้าเช็คอินเข้าห้องสอบ แม้ router จะ bypass สิทธิ์ admin
+      if (isRoomCheckInRoute(to.name) && !canAccessRoomCheckInPage(userStore.userRole)) {
         return getDefaultRouteForRole(userStore.userRole);
       }
       // multi-role: ผ่านถ้า user มี role อย่างน้อยหนึ่งตัวที่ route อนุญาต

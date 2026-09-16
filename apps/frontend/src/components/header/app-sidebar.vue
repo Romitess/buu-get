@@ -161,12 +161,14 @@ const menuLinks = computed(() => {
       icon: 'assignment',
       path: '/admin/exam-management',
     });
-    links.push({
-      name: 'room-check-in',
-      label: t('navigation.roomCheckIn'),
-      icon: 'qr_code_scanner',
-      path: '/admin/check-in/rooms',
-    });
+    if (role === ROLES.REGISTRATION_OFFICER) {
+      links.push({
+        name: 'room-check-in',
+        label: t('navigation.roomCheckIn'),
+        icon: 'qr_code_scanner',
+        path: '/admin/check-in/rooms',
+      });
+    }
     if (role === ROLES.ADMIN) {
       links.push({
         name: 'applicant-audit',
