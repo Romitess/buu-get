@@ -5,12 +5,13 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { doExamTimeRangesOverlap } from '../../common/utils/exam-schedule.util';
 import { ExamSessionLocation } from './entities/exam-session-location.entity';
 import { ExamSessionLocationProctor } from './entities/exam-session-location-proctor.entity';
 import { ExamLocation } from '../exam-locations/entities/exam-location.entity';
 import { ExamSession } from '../exam-sessions/entities/exam-session.entity';
+import { MsgPerson } from '../msg-persons/entities/msg-person.entity';
 import { CreateExamSessionLocationDto } from './dto/create-exam-session-location.dto';
 import { UpdateExamSessionLocationDto } from './dto/update-exam-session-location.dto';
 
@@ -25,6 +26,8 @@ export class ExamSessionLocationsService {
     private readonly sessionRepository: Repository<ExamSession>,
     @InjectRepository(ExamSessionLocationProctor)
     private readonly proctorRepository: Repository<ExamSessionLocationProctor>,
+    @InjectRepository(MsgPerson)
+    private readonly msgPersonRepository: Repository<MsgPerson>,
   ) {}
 
   private async validateLocationAndSession(
@@ -160,7 +163,7 @@ export class ExamSessionLocationsService {
         sortorder: seat.LS_SORT_ORDER ?? null,
       }));
 
-    const { PROCTOR_USER_IDS, ...locationFields } = dto;
+    const { PROCTOR_PSN_IDS, ...locationFields } = dto;
 
     const sessionLocation = this.sessionLocationRepository.create({
       ...locationFields,
@@ -175,7 +178,7 @@ export class ExamSessionLocationsService {
       SEATS_SNAPSHOT: seatsSnapshot,
     });
     const saved = await this.sessionLocationRepository.save(sessionLocation);
-    await this.syncProctors(saved.SL_ID, PROCTOR_USER_IDS);
+    await this.syncProctors(saved.SL_ID, PROCTOR_PSN_IDS);
     return this.findOne(saved.SL_ID);
   }
 
@@ -208,7 +211,7 @@ export class ExamSessionLocationsService {
 
     return await this.sessionLocationRepository.find({
       where: { SS_ID: sessionId },
-      relations: ['LOCATION', 'LOCATION.SEATS', 'PROCTORS'],
+      relations: ['LOCATION', 'LOCATION.SEATS', 'PROCTORS', 'PROCTORS.PERSON'],
       order: { CREATED_AT: 'ASC' },
     });
   }
@@ -216,7 +219,7 @@ export class ExamSessionLocationsService {
   async findOne(id: number): Promise<ExamSessionLocation> {
     const sl = await this.sessionLocationRepository.findOne({
       where: { SL_ID: id },
-      relations: ['LOCATION', 'SESSION', 'PROCTORS'],
+      relations: ['LOCATION', 'SESSION', 'PROCTORS', 'PROCTORS.PERSON'],
     });
     if (!sl) {
       throw new NotFoundException(`Session Location with ID ${id} not found`);
@@ -246,10 +249,10 @@ export class ExamSessionLocationsService {
       id,
     );
 
-    const { PROCTOR_USER_IDS, ...locationFields } = dto;
+    const { PROCTOR_PSN_IDS, ...locationFields } = dto;
     Object.assign(sl, locationFields);
     await this.sessionLocationRepository.save(sl);
-    await this.syncProctors(id, PROCTOR_USER_IDS);
+    await this.syncProctors(id, PROCTOR_PSN_IDS);
     return this.findOne(id);
   }
 
@@ -259,15 +262,24 @@ export class ExamSessionLocationsService {
     await this.sessionLocationRepository.softRemove(sl);
   }
 
-  private normalizeProctorUserIds(userIds?: number[]): number[] | undefined {
-    if (userIds === undefined) {
+  private normalizeProctorPsnIds(psnIds?: string[]): string[] | undefined {
+    if (psnIds === undefined) {
       return undefined;
     }
-    return [...new Set(userIds.filter((id) => Number.isInteger(id) && id > 0))];
+    return [
+      ...new Set(
+        psnIds
+          .map((id) => id.trim())
+          .filter((id) => id.length > 0 && id.length <= 10),
+      ),
+    ];
   }
 
-  private async syncProctors(slId: number, userIds?: number[]): Promise<void> {
-    const normalized = this.normalizeProctorUserIds(userIds);
+  private async syncProctors(
+    slId: number,
+    psnIds?: string[],
+  ): Promise<void> {
+    const normalized = this.normalizeProctorPsnIds(psnIds);
     if (normalized === undefined) {
       return;
     }
@@ -277,9 +289,19 @@ export class ExamSessionLocationsService {
       return;
     }
 
+    const found = await this.msgPersonRepository.find({
+      where: { PSN_ID: In(normalized) },
+      select: ['PSN_ID'],
+    });
+    if (found.length !== normalized.length) {
+      throw new BadRequestException(
+        'One or more proctor personnel IDs were not found',
+      );
+    }
+
     await this.proctorRepository.save(
-      normalized.map((USER_ID) =>
-        this.proctorRepository.create({ SL_ID: slId, USER_ID }),
+      normalized.map((PSN_ID) =>
+        this.proctorRepository.create({ SL_ID: slId, PSN_ID }),
       ),
     );
   }

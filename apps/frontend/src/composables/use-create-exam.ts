@@ -41,11 +41,17 @@ import {
   getSettingNumber,
   getSettingValue,
 } from 'src/services/system-settings.service';
-import { getUsersFromApi, checkUserIdentifiers } from 'src/services/user.service';
+import { checkUserIdentifiers } from 'src/services/user.service';
 import { ROLES } from 'src/constants/roles';
 import { useUserStore } from 'src/stores/user.store';
 import type { User } from 'src/types/user';
 import { useGlobalLocaleTrackedI18n } from 'src/composables/use-locale-tracked-i18n';
+import {
+  mergeProctorOptions,
+  resolveProctorSavePayload,
+  toProctorOption,
+  type ProctorOption,
+} from 'src/utils/proctor-option';
 import * as XLSX from 'xlsx';
 
 /** A single room within a time slot */
@@ -54,10 +60,10 @@ export interface ExamRoom {
   locationId: number | null;
   /** Proctor name (dropdown) */
   proctorName: string | null;
-  /** Selected proctors array */
+  /** Selected proctors array (PSN_ID or free-typed name) */
   proctors?: string[];
-  /** User IDs of selected proctors (system users, not free-typed names) */
-  proctorUserIds?: number[];
+  /** Personnel IDs of selected proctors (not free-typed names) */
+  proctorPsnIds?: string[];
   /** Number of seats */
   seats: number;
   /** Backend session ID (only for existing sessions in edit mode) */
@@ -287,7 +293,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
         {
           startTime: '08:00',
           endTime: '10:00',
-          rooms: [{ locationId: null, proctorName: '', proctors: [], proctorUserIds: [], seats: 40 }],
+          rooms: [{ locationId: null, proctorName: '', proctors: [], proctorPsnIds: [], seats: 40 }],
         },
       ],
       regStartDate: today,
@@ -324,7 +330,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     { label: t('examSchedule.examFormat.computer'), value: EXAM_FORMAT_COMPUTER },
     { label: t('examSchedule.examFormat.paper'), value: EXAM_FORMAT_PAPER },
   ]);
-  const proctorOptions = ref<{ label: string; value: string; userId?: number }[]>([]);
+  const proctorOptions = ref<ProctorOption[]>([]);
   const locationOptions = ref<ExamLocationOption[]>([]);
   const fundSourceOptions = ref<{ label: string; value: number }[]>([]);
   const allExams = ref<BackendExam[]>([]);
@@ -933,18 +939,18 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     error.value = null;
     try {
       // Critical path: อย่ารอ GET /exam ทั้งก้อน — occupancy โหลด background หลังฟอร์มพร้อม
-      const [locations, fundSources, scoreRubrics, proctors, editExam, systemSettings] =
+      const [locations, fundSources, scoreRubrics, editExam, systemSettings] =
         await Promise.all([
           fetchExamLocations(),
           fetchFundSources(),
           fetchScoreRubrics(),
-          getUsersFromApi(ROLES.PROCTOR),
           examId.value ? fetchExamWithSeats(examId.value) : Promise.resolve(null),
           examId.value
             ? Promise.resolve([])
             : fetchSystemSettings().catch(() => []),
         ]);
       locationOptions.value = locations;
+      proctorOptions.value = [];
       const activeFundSources = fundSources.filter((fs: FundSource) => fs.FS_OPEN_STATUS !== false);
       fundSourceOptions.value = activeFundSources.map((fs: FundSource) => ({
         label: `${fs.FS_NAME} (${fs.FS_ACCOUNT_CODE})`,
@@ -979,15 +985,6 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           form.value.timeSlots[0].endTime = end;
         }
       }
-      proctorOptions.value = proctors.map((u) => {
-        const displayName = u.fullNameTH ? `${u.titleTH || ''} ${u.fullNameTH}`.trim() : u.email;
-        const finalName = displayName || t('admin.examForm.empty.unspecifiedName');
-        return {
-          label: finalName,
-          value: finalName,
-          ...(typeof u.id === 'number' ? { userId: u.id } : {}),
-        };
-      });
 
       // If in edit mode, load the existing exam data into the form
       if (editExam) {
@@ -1068,34 +1065,30 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
                   sessionsNeedingBlockedFallback.add(session.SS_ID);
                 }
 
-                const assignedIds = (relation.PROCTORS ?? [])
-                  .map((assignment) => assignment.USER_ID)
-                  .filter((id) => Number.isInteger(id) && id > 0);
-                const assignedNames = assignedIds
-                  .map(
-                    (id) =>
-                      proctorOptions.value.find((option) => option.userId === id)?.value,
-                  )
-                  .filter((name): name is string => Boolean(name));
-                const relationProctors: string[] =
-                  assignedNames.length > 0
-                    ? assignedNames
-                    : relation.SS_NAME
-                      ? relation.SS_NAME.split(',')
-                          .map((name) => name.trim())
-                          .filter(Boolean)
-                      : [];
-                if (assignedNames.length === 0 && relation.SS_NAME) {
-                  relation.SS_NAME.split(',')
-                    .map((name) => name.trim())
-                    .filter(Boolean)
-                    .forEach((name) => {
-                      const matched = proctorOptions.value.find((option) => option.value === name);
-                      if (matched?.userId && !assignedIds.includes(matched.userId)) {
-                        assignedIds.push(matched.userId);
-                      }
-                    });
-                }
+                const assigned = (relation.PROCTORS ?? []).filter(
+                  (assignment): assignment is NonNullable<typeof assignment> & { PSN_ID: string } =>
+                    Boolean(assignment.PSN_ID),
+                );
+                const assignedOptions = assigned.map((assignment) =>
+                  toProctorOption({
+                    PSN_ID: assignment.PSN_ID,
+                    PRF_NAMETH: assignment.PERSON?.PRF_NAMETH ?? null,
+                    PSN_FNAMETH: assignment.PERSON?.PSN_FNAMETH ?? null,
+                    PSN_LNAMETH: assignment.PERSON?.PSN_LNAMETH ?? null,
+                    PSN_EMAIL_BUU: assignment.PERSON?.PSN_EMAIL_BUU ?? null,
+                  }),
+                );
+                proctorOptions.value = mergeProctorOptions(proctorOptions.value, assignedOptions);
+                const assignedLabels = new Set(assignedOptions.map((option) => option.label));
+                const freeTextNames = (relation.SS_NAME ?? '')
+                  .split(',')
+                  .map((name) => name.trim())
+                  .filter((name) => name.length > 0 && !assignedLabels.has(name));
+                const relationProctors = [
+                  ...assigned.map((assignment) => assignment.PSN_ID),
+                  ...freeTextNames,
+                ];
+                const assignedIds = assigned.map((assignment) => assignment.PSN_ID);
                 const seatOverrides = Object.fromEntries(
                   (Array.isArray(relation.SEATS_SNAPSHOT) ? relation.SEATS_SNAPSHOT : [])
                     .map((snapshotSeat) => {
@@ -1117,7 +1110,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
                   locationId: relation.LOCATION_ID ?? relation.LOCATION.LOCATION_ID ?? null,
                   proctorName: relation.SS_NAME || '',
                   proctors: Array.from(new Set(relationProctors)),
-                  proctorUserIds: assignedIds,
+                  proctorPsnIds: assignedIds,
                   seats: resolveLoadedRoomSeats(
                     relation,
                     seatOverrides,
@@ -1158,7 +1151,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
               locationId: session.LOCATION?.LOCATION_ID ?? session.LOCATION_ID ?? null,
               proctorName: '',
               proctors: [],
-              proctorUserIds: [],
+              proctorPsnIds: [],
               seats: session.SS_CAPACITY ?? 40,
               sessionId: session.SS_ID,
               enrollmentCount: session.ACTIVE_ENROLLMENT_COUNT ?? session.ENROLLMENTS?.length ?? 0,
@@ -1291,7 +1284,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       locationId: null,
       proctorName: '',
       proctors: [],
-      proctorUserIds: [],
+      proctorPsnIds: [],
       seats: 40,
     });
   };
@@ -1851,7 +1844,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     locationId: number;
     seats: number;
     proctorName: string | null;
-    proctorUserIds?: number[];
+    proctorPsnIds?: string[];
     sessionId?: number;
     seatOverrides?: Record<number, number>;
     sessionLocationSnapshot?: SessionLocationSnapshotPayload;
@@ -1862,7 +1855,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       locationId: number;
       seats: number;
       proctorName: string | null;
-      proctorUserIds?: number[];
+      proctorPsnIds?: string[];
       sessionId?: number;
       seatOverrides?: Record<number, number>;
       sessionLocationSnapshot?: SessionLocationSnapshotPayload;
@@ -1876,24 +1869,18 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
           ? countAvailableSeats(location, room.seatOverrides)
           : Number(room.seats);
         const seats = Math.min(Number(room.seats), maxAvailableSeats);
-        const proctorName =
-          room.proctors && room.proctors.length > 0 ? room.proctors.join(', ') : null;
-        const proctorUserIds = [
-          ...new Set(
-            (room.proctors ?? [])
-              .map(
-                (name) => proctorOptions.value.find((option) => option.value === name)?.userId,
-              )
-              .filter((id): id is number => typeof id === 'number'),
-          ),
-        ];
+        const { labels, psnIds } = resolveProctorSavePayload(
+          room.proctors ?? [],
+          proctorOptions.value,
+        );
+        const proctorName = labels.length > 0 ? labels.join(', ') : null;
         result.push({
           startTime: formatTime(slot.startTime),
           endTime: formatTime(slot.endTime),
           locationId: Number(room.locationId),
           seats,
           proctorName,
-          proctorUserIds,
+          proctorPsnIds: psnIds,
           ...(room.sessionId != null ? { sessionId: room.sessionId } : {}),
           ...(room.seatOverrides ? { seatOverrides: { ...room.seatOverrides } } : {}),
           ...(location
@@ -2058,7 +2045,7 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
       locationId: r.locationId,
       seats: r.seats,
       proctorName: r.proctorName,
-      proctorUserIds: r.proctorUserIds ?? [],
+      proctorPsnIds: r.proctorPsnIds ?? [],
       ...(r.sessionId != null ? { sessionId: r.sessionId } : {}),
       ...(r.seatOverrides ? { seatOverrides: r.seatOverrides } : {}),
       ...(r.sessionLocationSnapshot ? { sessionLocationSnapshot: r.sessionLocationSnapshot } : {}),
@@ -2244,11 +2231,16 @@ export function useCreateExam(externalForm?: Ref<CreateExamForm>, options?: UseE
     }
   };
 
+  const upsertProctorOptions = (incoming: ProctorOption[]): void => {
+    proctorOptions.value = mergeProctorOptions(proctorOptions.value, incoming);
+  };
+
   return {
     form,
     examTypeOptions,
     examFormatOptions,
     proctorOptions,
+    upsertProctorOptions,
     locationOptions,
     fundSourceOptions,
     getOccupiedLocationIdsForSlot,

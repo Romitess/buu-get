@@ -5,7 +5,8 @@ import {
   IsEnum,
   IsObject,
   IsArray,
-  Min,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { SeatDirection } from '../../exam-locations/entities/exam-location.entity';
@@ -29,16 +30,17 @@ export class CreateExamSessionLocationDto {
   SS_NAME?: string | null;
 
   @ApiProperty({
-    example: [12, 15],
+    example: ['0000123456'],
     required: false,
-    description: 'รหัสผู้ใช้กรรมการคุมสอบที่ผูกกับห้องนี้',
-    type: [Number],
+    description: 'รหัสบุคลากรกรรมการคุมสอบที่ผูกกับห้องนี้',
+    type: [String],
   })
   @IsOptional()
   @IsArray()
-  @IsInt({ each: true })
-  @Min(1, { each: true })
-  PROCTOR_USER_IDS?: number[];
+  @IsString({ each: true })
+  @MinLength(1, { each: true })
+  @MaxLength(10, { each: true })
+  PROCTOR_PSN_IDS?: string[];
 
   @ApiProperty({ example: 10, required: false, description: 'จำนวนแถวทั้งหมด' })
   @IsOptional()

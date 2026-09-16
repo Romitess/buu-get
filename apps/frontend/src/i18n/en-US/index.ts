@@ -1264,6 +1264,8 @@ export default {
         selectLocationPlaceholder: 'Select exam location',
         locationSelected: 'Selected',
         locationUnavailable: 'Unavailable',
+        proctorSearchHint: 'Type at least 2 characters to search',
+        proctorSearchFailed: 'Unable to search for proctors',
         seatsMaxTooltip: 'Maximum seats based on the edited layout: {max}',
         seatsExceedsLayout: 'Seats exceed the edited layout. Available seats: up to {max}',
         seatsUnit: 'seats',

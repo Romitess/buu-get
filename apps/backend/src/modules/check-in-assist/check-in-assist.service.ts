@@ -44,7 +44,6 @@ import {
   normalizeAssistScanCode,
 } from './utils/normalize-assist-scan-code.util';
 import { getBangkokDateOnly } from 'src/common/utils/calendar-date.util';
-import { RoleEnum } from '../roles/enums/role.enum';
 
 const SESSION_TTL_MS = 4 * 60 * 60 * 1000;
 const ROOM_STATION_GRACE_MS = 2 * 60 * 60 * 1000;
@@ -107,8 +106,11 @@ export class CheckInAssistService {
     user: AuthenticatedUser,
     dateRaw?: string,
   ): Promise<MyCheckInRoomDto[]> {
-    const userId = requireUserId(user);
     const isAdmin = userHasAnyRole(user, ROOM_CHECK_IN_ADMIN_ROLES);
+    const personId = user.personId;
+    if (!isAdmin && !personId) {
+      throw new ForbiddenException('This action requires a personnel account');
+    }
     const date =
       isAdmin && dateRaw && DATE_ONLY_PATTERN.test(dateRaw)
         ? dateRaw
@@ -120,8 +122,7 @@ export class CheckInAssistService {
       .innerJoinAndSelect('session.EXAM', 'exam')
       .leftJoinAndSelect('sl.LOCATION', 'location')
       .leftJoinAndSelect('sl.PROCTORS', 'proctors')
-      .leftJoinAndSelect('proctors.USER', 'proctorUser')
-      .leftJoinAndSelect('proctorUser.PROFILE', 'proctorProfile')
+      .leftJoinAndSelect('proctors.PERSON', 'proctorPerson')
       .where('exam.EXAM_DATE = :date', { date })
       .andWhere('sl.DELETED_AT IS NULL')
       .andWhere('session.DELETED_AT IS NULL')
@@ -131,15 +132,18 @@ export class CheckInAssistService {
       qb.innerJoin(
         ExamSessionLocationProctor,
         'assignment',
-        'assignment.SL_ID = sl.SL_ID AND assignment.USER_ID = :userId',
-        { userId },
+        'assignment.SL_ID = sl.SL_ID AND assignment.PSN_ID = :personId',
+        { personId },
       );
     }
 
     const rooms = await qb.orderBy('session.SS_START_TIME', 'ASC').getMany();
     const slIds = rooms.map((room) => room.SL_ID);
     const counts = await this.loadAttendanceCounts(slIds);
-    const activeStations = await this.loadActiveStationsForUser(userId, slIds);
+    const activeStations =
+      user.userId != null
+        ? await this.loadActiveStationsForUser(user.userId, slIds)
+        : new Map<number, number>();
 
     return rooms.map((room) => {
       const count = counts.get(room.SL_ID) ?? { total: 0, attended: 0 };
@@ -416,7 +420,7 @@ export class CheckInAssistService {
       return;
     }
 
-    if (!userHasAnyRole(user, [RoleEnum.PROCTOR])) {
+    if (!user.personId) {
       throw new ForbiddenException('ไม่มีสิทธิ์เปิดเช็คอินห้องนี้');
     }
 
@@ -426,7 +430,7 @@ export class CheckInAssistService {
     }
 
     const assigned = await this.proctorAssignmentRepository.findOne({
-      where: { SL_ID: room.SL_ID, USER_ID: user.userId },
+      where: { SL_ID: room.SL_ID, PSN_ID: user.personId },
     });
     if (!assigned) {
       throw new ForbiddenException('คุณไม่ได้รับมอบหมายให้คุมห้องสอบนี้');
@@ -443,8 +447,7 @@ export class CheckInAssistService {
         'SESSION.EXAM',
         'LOCATION',
         'PROCTORS',
-        'PROCTORS.USER',
-        'PROCTORS.USER.PROFILE',
+        'PROCTORS.PERSON',
       ],
     });
     if (!room) {
@@ -479,9 +482,9 @@ export class CheckInAssistService {
   private collectProctorNames(room: ExamSessionLocation): string[] {
     const fromAssignments = (room.PROCTORS ?? [])
       .map((assignment) => {
-        const profile = assignment.USER?.PROFILE;
+        const person = assignment.PERSON;
         const name =
-          `${profile?.userTitleTh ?? ''} ${profile?.userFullnameTh ?? ''}`.trim();
+          `${person?.PRF_NAMETH ?? ''} ${person?.PSN_FNAMETH ?? ''} ${person?.PSN_LNAMETH ?? ''}`.trim();
         return name;
       })
       .filter((name) => name.length > 0);

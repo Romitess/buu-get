@@ -133,6 +133,25 @@ describe('MsgPersonsService', () => {
 
       expect(queryBuilder.andWhere).toHaveBeenCalled();
     });
+
+    it('should not filter retirees when excludeRetired is omitted', async () => {
+      queryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+
+      await service.findAll({});
+
+      expect(queryBuilder.andWhere).not.toHaveBeenCalled();
+    });
+
+    it('should exclude retired persons when excludeRetired is true', async () => {
+      queryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+
+      await service.findAll({ excludeRetired: true });
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        '(person.PSN_RETIRE = :activeRetire OR person.PSN_RETIRE IS NULL)',
+        { activeRetire: 'N' },
+      );
+    });
   });
 
   describe('findOne', () => {

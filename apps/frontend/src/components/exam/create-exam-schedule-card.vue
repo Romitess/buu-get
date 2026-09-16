@@ -227,6 +227,7 @@
                 use-input
                 new-value-mode="add-unique"
                 :options="filteredProctors"
+                :loading="isProctorSearching"
                 option-label="label"
                 option-value="value"
                 emit-value
@@ -237,7 +238,7 @@
                 dropdown-icon="keyboard_arrow_down"
                 class="custom-input proctors-select"
                 :class="`proctors-select-${rIdx}`"
-                input-debounce="0"
+                input-debounce="300"
                 @filter="filterProctors"
                 @popup-show="scrollProctorsToRight(rIdx)"
                 @popup-hide="scrollProctorsToLeft(rIdx)"
@@ -253,9 +254,22 @@
                           typeof scope.opt === 'object' && scope.opt ? scope.opt.label : scope.opt
                         }}
                       </q-item-label>
+                      <q-item-label
+                        v-if="typeof scope.opt === 'object' && scope.opt?.caption"
+                        caption
+                      >
+                        {{ scope.opt.caption }}
+                      </q-item-label>
                     </q-item-section>
                     <q-item-section v-if="scope.selected" side>
                       <q-icon name="check" color="primary" size="20px" />
+                    </q-item-section>
+                  </q-item>
+                </template>
+                <template v-slot:no-option>
+                  <q-item>
+                    <q-item-section class="text-grey">
+                      {{ t('admin.examForm.fields.proctorSearchHint') }}
                     </q-item-section>
                   </q-item>
                 </template>
@@ -332,16 +346,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
 import type { CreateExamForm, TimeSlot, ExamRoom } from 'src/composables/use-create-exam';
 import type { ExamLocationOption } from 'src/services/exam.service';
+import { fetchMsgPersons } from 'src/services/msg-persons.service';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
 import AppSelect from 'src/components/base/app-select.vue';
 import AppTimePicker from 'src/components/base/app-time-picker.vue';
 import { beToCeString, ceToBeString } from 'src/utils/thai-date';
+import {
+  mergeProctorOptions,
+  toProctorOption,
+  type ProctorOption,
+} from 'src/utils/proctor-option';
 
 const { t } = useI18n();
+const $q = useQuasar();
+
+const MIN_PROCTOR_SEARCH_CHARS = 2;
+const PROCTOR_SEARCH_LIMIT = 20;
 
 const props = defineProps<{
   /** When true, disables all schedule editing (for published exams) */
@@ -350,8 +375,8 @@ const props = defineProps<{
   locationOptions: ExamLocationOption[];
   /** ห้องที่ slot นี้เลือกไม่ได้ (รอบเวลาที่ทับซ้อน / exam อื่น) */
   getOccupiedLocationIdsForSlot?: (slotIndex: number) => Set<number>;
-  /** Proctor options (from API) */
-  proctorOptions: { label: string; value: string }[];
+  /** Known proctor options (hydrated + previous search hits) */
+  proctorOptions: ProctorOption[];
   /** Currently active slot tab index */
   activeSlotIndex: number;
   /** Date validation errors */
@@ -371,6 +396,7 @@ const emit = defineEmits([
   'update:activeSlotIndex',
   'sort-time-slots',
   'clearFieldError',
+  'upsertProctorOptions',
 ]);
 
 const DEFAULT_SEATS_PLACEHOLDER = '40';
@@ -380,32 +406,77 @@ const SEAT_STATUS_UNAVAILABLE_2 = 2;
 const SCROLL_DELAY_MS = 50;
 
 const showExamDate = ref(false);
+const isProctorSearching = ref(false);
+let proctorSearchSeq = 0;
 
-const filteredProctors = ref<{ label: string; value: string }[]>([]);
+const filteredProctors = ref<ProctorOption[]>([]);
+
+const selectedProctorOptions = (): ProctorOption[] => {
+  const selected = new Set(
+    form.value.timeSlots.flatMap((slot) => slot.rooms.flatMap((room) => room.proctors ?? [])),
+  );
+  return props.proctorOptions.filter((option) => selected.has(option.value));
+};
 
 watch(
   () => props.proctorOptions,
-  (newVal) => {
-    filteredProctors.value = newVal;
+  () => {
+    filteredProctors.value = mergeProctorOptions(
+      selectedProctorOptions(),
+      filteredProctors.value,
+    );
   },
   { immediate: true },
 );
 
 const filterProctors = (val: string, update: (callback: () => void) => void): void => {
-  if (val === '') {
+  const needle = val.trim();
+  const requestSeq = ++proctorSearchSeq;
+  if (needle.length < MIN_PROCTOR_SEARCH_CHARS) {
+    isProctorSearching.value = false;
     update(() => {
-      filteredProctors.value = props.proctorOptions;
+      filteredProctors.value = selectedProctorOptions();
     });
     return;
   }
 
-  update(() => {
-    const needle = val.toLowerCase();
-    filteredProctors.value = props.proctorOptions.filter((v) =>
-      v.label.toLowerCase().includes(needle),
-    );
-  });
+  isProctorSearching.value = true;
+  void fetchMsgPersons({
+    search: needle,
+    excludeRetired: true,
+    limit: PROCTOR_SEARCH_LIMIT,
+    page: 1,
+  })
+    .then((result) => {
+      if (requestSeq !== proctorSearchSeq) return;
+      const incoming = result.data.map((person) => toProctorOption(person));
+      emit('upsertProctorOptions', incoming);
+      update(() => {
+        filteredProctors.value = mergeProctorOptions(selectedProctorOptions(), incoming);
+      });
+    })
+    .catch((error: unknown) => {
+      if (requestSeq !== proctorSearchSeq) return;
+      console.error(error);
+      $q.notify({
+        type: 'negative',
+        message: t('admin.examForm.fields.proctorSearchFailed'),
+        position: 'top',
+      });
+      update(() => {
+        filteredProctors.value = selectedProctorOptions();
+      });
+    })
+    .finally(() => {
+      if (requestSeq === proctorSearchSeq) {
+        isProctorSearching.value = false;
+      }
+    });
 };
+
+onBeforeUnmount(() => {
+  proctorSearchSeq += 1;
+});
 
 const scrollProctorsToLeft = (rIdx: number): void => {
   setTimeout(() => {

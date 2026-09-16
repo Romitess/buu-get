@@ -28,6 +28,7 @@
       :location-options="locationOptions"
       :get-occupied-location-ids-for-slot="getOccupiedLocationIdsForSlot"
       :proctor-options="proctorOptions"
+      @upsert-proctor-options="upsertProctorOptions"
       :active-slot-index="activeSlotIndex"
       :date-errors="dateErrors"
       :field-errors="fieldErrors"
@@ -148,6 +149,7 @@ const {
   examTypeOptions,
   examFormatOptions,
   proctorOptions,
+  upsertProctorOptions,
   locationOptions,
   fundSourceOptions,
   getOccupiedLocationIdsForSlot,

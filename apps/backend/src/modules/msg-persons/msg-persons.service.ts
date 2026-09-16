@@ -50,6 +50,13 @@ export class MsgPersonsService {
       );
     }
 
+    if (query.excludeRetired === true) {
+      queryBuilder.andWhere(
+        '(person.PSN_RETIRE = :activeRetire OR person.PSN_RETIRE IS NULL)',
+        { activeRetire: 'N' },
+      );
+    }
+
     const search = query.search?.trim();
     if (search) {
       const searchPattern = `%${search}%`;

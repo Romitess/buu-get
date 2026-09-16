@@ -10,9 +10,11 @@ import { ExamSessionLocation } from './entities/exam-session-location.entity';
 import { ExamSessionLocationProctor } from './entities/exam-session-location-proctor.entity';
 import { ExamLocation } from '../exam-locations/entities/exam-location.entity';
 import { ExamSession } from '../exam-sessions/entities/exam-session.entity';
+import { MsgPerson } from '../msg-persons/entities/msg-person.entity';
 
 type MockRepo = {
   findOne: jest.Mock;
+  find: jest.Mock;
   create: jest.Mock;
   save: jest.Mock;
   softRemove: jest.Mock;
@@ -22,6 +24,7 @@ type MockRepo = {
 
 const createMockRepo = (): MockRepo => ({
   findOne: jest.fn(),
+  find: jest.fn(),
   create: jest.fn(),
   save: jest.fn(),
   softRemove: jest.fn(),
@@ -34,6 +37,8 @@ describe('ExamSessionLocationsService', () => {
   let slRepo: MockRepo;
   let locationRepo: MockRepo;
   let sessionRepo: MockRepo;
+  let proctorRepo: MockRepo;
+  let personRepo: MockRepo;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -55,6 +60,10 @@ describe('ExamSessionLocationsService', () => {
           provide: getRepositoryToken(ExamSessionLocationProctor),
           useFactory: createMockRepo,
         },
+        {
+          provide: getRepositoryToken(MsgPerson),
+          useFactory: createMockRepo,
+        },
       ],
     }).compile();
 
@@ -62,6 +71,8 @@ describe('ExamSessionLocationsService', () => {
     slRepo = module.get(getRepositoryToken(ExamSessionLocation));
     locationRepo = module.get(getRepositoryToken(ExamLocation));
     sessionRepo = module.get(getRepositoryToken(ExamSession));
+    proctorRepo = module.get(getRepositoryToken(ExamSessionLocationProctor));
+    personRepo = module.get(getRepositoryToken(MsgPerson));
   });
 
   const setupNoOverlap = (): void => {
@@ -161,6 +172,90 @@ describe('ExamSessionLocationsService', () => {
       await expect(
         service.create({ LOCATION_ID: 1, SS_ID: 10, SS_NAME: 'Main' }),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe('syncProctors', () => {
+    const readyToSave = (): void => {
+      locationRepo.findOne.mockResolvedValue({
+        LOCATION_ID: 1,
+        SEATS: [],
+        LOCATION_TOTAL_ROWS: 4,
+        LOCATION_TOTAL_COLS: 5,
+        LOCATION_SEAT_DIRECTION: 'HORIZONTAL',
+        LOCATION_SEAT_CAPACITY: 20,
+      });
+      sessionRepo.findOne.mockResolvedValue({
+        SS_ID: 10,
+        SS_START_TIME: '09:00:00',
+        SS_END_TIME: '10:00:00',
+        EXAM: { EXAM_DATE: '2026-10-01' },
+      });
+      setupNoOverlap();
+      slRepo.findOne
+        .mockResolvedValueOnce(null)
+        .mockResolvedValue({ SL_ID: 77, LOCATION_ID: 1, SS_ID: 10 });
+      slRepo.create.mockImplementation((value: unknown) => value);
+      slRepo.save.mockResolvedValue({ SL_ID: 77 });
+      proctorRepo.create.mockImplementation((value: unknown) => value);
+      proctorRepo.save.mockResolvedValue([]);
+      proctorRepo.delete.mockResolvedValue(undefined);
+    };
+
+    it('should persist PSN_IDs when all persons exist', async () => {
+      readyToSave();
+      personRepo.find.mockResolvedValue([{ PSN_ID: 'STAFF00001' }]);
+
+      await service.create({
+        LOCATION_ID: 1,
+        SS_ID: 10,
+        PROCTOR_PSN_IDS: ['STAFF00001', 'STAFF00001'],
+      });
+
+      expect(proctorRepo.delete).toHaveBeenCalledWith({ SL_ID: 77 });
+      expect(proctorRepo.save).toHaveBeenCalledWith([
+        { SL_ID: 77, PSN_ID: 'STAFF00001' },
+      ]);
+    });
+
+    it('should reject unknown PSN_IDs', async () => {
+      readyToSave();
+      personRepo.find.mockResolvedValue([]);
+
+      await expect(
+        service.create({
+          LOCATION_ID: 1,
+          SS_ID: 10,
+          PROCTOR_PSN_IDS: ['MISSING01'],
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(proctorRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('should clear assignments when PROCTOR_PSN_IDS is empty', async () => {
+      readyToSave();
+
+      await service.create({
+        LOCATION_ID: 1,
+        SS_ID: 10,
+        PROCTOR_PSN_IDS: [],
+      });
+
+      expect(proctorRepo.delete).toHaveBeenCalledWith({ SL_ID: 77 });
+      expect(personRepo.find).not.toHaveBeenCalled();
+      expect(proctorRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('should leave assignments unchanged when PROCTOR_PSN_IDS is omitted', async () => {
+      readyToSave();
+
+      await service.create({
+        LOCATION_ID: 1,
+        SS_ID: 10,
+      });
+
+      expect(proctorRepo.delete).not.toHaveBeenCalled();
+      expect(personRepo.find).not.toHaveBeenCalled();
     });
   });
 });

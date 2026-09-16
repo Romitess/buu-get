@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 export class MsgPersonsQueryDto extends PaginationQueryDto {
@@ -14,4 +15,13 @@ export class MsgPersonsQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'เมื่อ true จะไม่รวมบุคลากรที่เกษียณ (PSN_RETIRE = Y) — default ไม่กรอง',
+  })
+  @Transform(({ value }) => value === true || value === 'true' || value === '1')
+  @IsOptional()
+  @IsBoolean()
+  excludeRetired?: boolean;
 }

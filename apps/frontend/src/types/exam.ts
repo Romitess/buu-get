@@ -308,7 +308,19 @@ export interface BackendSession {
     LOCATION_ID: number;
     SS_ID: number;
     SS_NAME: string | null;
-    PROCTORS?: { SLP_ID: number; SL_ID: number; USER_ID: number }[];
+    PROCTORS?: {
+      SLP_ID: number;
+      SL_ID: number;
+      PSN_ID: string;
+      PERSON?: {
+        PSN_ID: string;
+        PRF_NAMETH?: string | null;
+        PSN_FNAMETH?: string | null;
+        PSN_LNAMETH?: string | null;
+        PSN_EMAIL_BUU?: string | null;
+        PSN_RETIRE?: 'N' | 'Y' | null;
+      };
+    }[];
     TOTAL_ROWS?: number | null;
     TOTAL_COLS?: number | null;
     AISLE_AFTER?: { after_cols: number[]; after_rows: number[] } | null;

@@ -27,6 +27,7 @@ export interface MsgPersonsListParams {
   limit?: number;
   search?: string;
   role?: string;
+  excludeRetired?: boolean;
 }
 
 export type MsgPersonsListResponse = PaginatedResponse<MsgPerson>;

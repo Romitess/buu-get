@@ -157,8 +157,25 @@ test.describe('MsgPersons API', () => {
     expect(patchRes.status()).toBe(403);
   });
 
+  // MSG-PERSONS-I-007
+  test('GET /api/msg-persons?excludeRetired=true&search= lists without error', async ({
+    request,
+  }) => {
+    const adminHeaders = await bearer(request, 'admin');
+
+    const res = await request.get('/api/msg-persons', {
+      headers: adminHeaders,
+      params: { excludeRetired: true, search: 'staff', limit: 20 },
+    });
+    expect(res.status(), await res.text()).toBe(200);
+
+    const body = (await res.json()) as PaginatedPersons;
+    expect(Array.isArray(body.data)).toBe(true);
+    expect(body.data.every((person) => person.PSN_ID)).toBe(true);
+  });
+
   // MSG-PERSONS-I-006
-  test('GET /api/msg-persons/:psnId returns 404 for unknown id', async ({
+  test('GET /api/msg-persons/:psnId returns 404 when missing', async ({
     request,
   }) => {
     const adminHeaders = await bearer(request, 'admin');

@@ -1,5 +1,6 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { apiLogin } from '../e2e/fixtures/auth';
+import { TEST_PERSON_IDS } from '../e2e/fixtures/users';
 
 type AuthHeaders = { Authorization: string };
 
@@ -170,5 +171,41 @@ test.describe('Exam session-locations API — Batch4 P0/P1', () => {
     });
     expect(relink.status(), await relink.text()).toBe(201);
     slIds.push(((await relink.json()) as { SL_ID: number }).SL_ID);
+  });
+
+  // SL-I-005
+  test('POST persists PROCTOR_PSN_IDS and rejects unknown persons', async ({
+    request,
+  }) => {
+    const staffPsnId = TEST_PERSON_IDS.staff;
+    expect(staffPsnId).toBeTruthy();
+
+    const locationId = await createLocation(request);
+    const exam = await createExam(request, '46');
+    const session = await createSession(request, exam, '19:00:00', '20:00:00');
+
+    const created = await request.post('/api/exam-session-locations', {
+      headers,
+      data: {
+        LOCATION_ID: locationId,
+        SS_ID: session,
+        LOCATION_SEAT_CAPACITY: 4,
+        SS_NAME: 'นาย สมชาย ใจดี',
+        PROCTOR_PSN_IDS: [staffPsnId],
+      },
+    });
+    expect(created.status(), await created.text()).toBe(201);
+    const body = (await created.json()) as {
+      SL_ID: number;
+      PROCTORS?: Array<{ PSN_ID: string }>;
+    };
+    slIds.push(body.SL_ID);
+    expect(body.PROCTORS?.map((row) => row.PSN_ID)).toEqual([staffPsnId]);
+
+    const unknown = await request.patch(`/api/exam-session-locations/${body.SL_ID}`, {
+      headers,
+      data: { PROCTOR_PSN_IDS: ['MISSING01'] },
+    });
+    expect(unknown.status(), await unknown.text()).toBe(400);
   });
 });

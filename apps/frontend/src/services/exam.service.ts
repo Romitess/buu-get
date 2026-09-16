@@ -369,7 +369,7 @@ export interface CreateExamPayload {
     locationId?: number;
     seats?: number;
     proctorName?: string | null;
-    proctorUserIds?: number[];
+    proctorPsnIds?: string[];
     sessionId?: number;
     seatOverrides?: Record<number, number>;
     sessionLocationSnapshot?: SessionLocationSnapshotPayload;
@@ -387,7 +387,7 @@ interface GroupedSessionTimeRange {
   locations: {
     locationId: number;
     proctorName: string | null;
-    proctorUserIds?: number[];
+    proctorPsnIds?: string[];
     seatOverrides?: Record<number, number>;
     sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   }[];
@@ -614,8 +614,8 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
         existingRange.locations.push({
           locationId,
           proctorName,
-          ...(range.proctorUserIds !== undefined
-            ? { proctorUserIds: [...range.proctorUserIds] }
+          ...(range.proctorPsnIds !== undefined
+            ? { proctorPsnIds: [...range.proctorPsnIds] }
             : {}),
           seatOverrides,
           ...(sessionLocationSnapshot ? { sessionLocationSnapshot } : {}),
@@ -626,9 +626,9 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
             ? `${existingLoc.proctorName}, ${proctorName}`
             : proctorName;
         }
-        if (range.proctorUserIds !== undefined) {
-          existingLoc.proctorUserIds = [
-            ...new Set([...(existingLoc.proctorUserIds ?? []), ...range.proctorUserIds]),
+        if (range.proctorPsnIds !== undefined) {
+          existingLoc.proctorPsnIds = [
+            ...new Set([...(existingLoc.proctorPsnIds ?? []), ...range.proctorPsnIds]),
           ];
         }
         existingLoc.seatOverrides = {
@@ -653,8 +653,8 @@ const groupTimeRangesByTime = (payload: CreateExamPayload): GroupedSessionTimeRa
         {
           locationId,
           proctorName,
-          ...(range.proctorUserIds !== undefined
-            ? { proctorUserIds: [...range.proctorUserIds] }
+          ...(range.proctorPsnIds !== undefined
+            ? { proctorPsnIds: [...range.proctorPsnIds] }
             : {}),
           seatOverrides,
           ...(sessionLocationSnapshot ? { sessionLocationSnapshot } : {}),
@@ -672,7 +672,7 @@ const createSessionLocations = async (
   locations: {
     locationId: number;
     proctorName: string | null;
-    proctorUserIds?: number[];
+    proctorPsnIds?: string[];
     sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   }[],
   requestConfig?: ExamWriteRequestConfig,
@@ -694,8 +694,8 @@ const createSessionLocations = async (
           SS_ID: sessionId,
           LOCATION_ID: loc.locationId,
           SS_NAME: loc.proctorName,
-          ...(loc.proctorUserIds !== undefined
-            ? { PROCTOR_USER_IDS: loc.proctorUserIds }
+          ...(loc.proctorPsnIds !== undefined
+            ? { PROCTOR_PSN_IDS: loc.proctorPsnIds }
             : {}),
           ...(loc.sessionLocationSnapshot ?? {}),
         },
@@ -711,17 +711,15 @@ const sessionLocationMatches = (
   existing: BackendSessionLocation,
   desired: {
     proctorName: string | null;
-    proctorUserIds?: number[];
+    proctorPsnIds?: string[];
     sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   },
 ): boolean => {
   const snapshot = desired.sessionLocationSnapshot;
-  const existingIds = [...(existing.PROCTORS ?? []).map((item) => item.USER_ID)].sort(
-    (a, b) => a - b,
-  );
-  const desiredIds = [...(desired.proctorUserIds ?? [])].sort((a, b) => a - b);
+  const existingIds = [...(existing.PROCTORS ?? []).map((item) => item.PSN_ID)].sort();
+  const desiredIds = [...(desired.proctorPsnIds ?? [])].sort();
   const proctorIdsMatch =
-    desired.proctorUserIds === undefined || existingIds.join(',') === desiredIds.join(',');
+    desired.proctorPsnIds === undefined || existingIds.join(',') === desiredIds.join(',');
   return (
     (existing.SS_NAME ?? null) === (desired.proctorName ?? null) &&
     proctorIdsMatch &&
@@ -740,7 +738,7 @@ const syncSessionLocations = async (
   locations: {
     locationId: number;
     proctorName: string | null;
-    proctorUserIds?: number[];
+    proctorPsnIds?: string[];
     sessionLocationSnapshot?: SessionLocationSnapshotPayload;
   }[],
   requestConfig?: ExamWriteRequestConfig,
@@ -776,8 +774,8 @@ const syncSessionLocations = async (
             SS_ID: sessionId,
             LOCATION_ID: loc.locationId,
             SS_NAME: loc.proctorName,
-            ...(loc.proctorUserIds !== undefined
-              ? { PROCTOR_USER_IDS: loc.proctorUserIds }
+            ...(loc.proctorPsnIds !== undefined
+              ? { PROCTOR_PSN_IDS: loc.proctorPsnIds }
               : {}),
             ...(loc.sessionLocationSnapshot ?? {}),
           },
@@ -794,8 +792,8 @@ const syncSessionLocations = async (
           `/exam-session-locations/${existing.SL_ID}`,
           {
             SS_NAME: loc.proctorName,
-            ...(loc.proctorUserIds !== undefined
-              ? { PROCTOR_USER_IDS: loc.proctorUserIds }
+            ...(loc.proctorPsnIds !== undefined
+              ? { PROCTOR_PSN_IDS: loc.proctorPsnIds }
               : {}),
             ...(loc.sessionLocationSnapshot ?? {}),
           },

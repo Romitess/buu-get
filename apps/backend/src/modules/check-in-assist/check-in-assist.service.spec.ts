@@ -363,9 +363,9 @@ describe('CheckInAssistService', () => {
       PROCTORS: [],
     };
 
-    it('forbids a proctor who is not assigned to the room', async () => {
+    it('forbids a person who is not assigned to the room', async () => {
       const proctorUser: AuthenticatedUser = {
-        userId: 88,
+        personId: 'PROC000001',
         role: RoleEnum.PROCTOR,
         roles: [RoleEnum.PROCTOR],
         email: 'proctor@test.local',
@@ -376,6 +376,9 @@ describe('CheckInAssistService', () => {
       await expect(
         service.openRoomStation(proctorUser, 12),
       ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(proctorAssignmentRepository.findOne).toHaveBeenCalledWith({
+        where: { SL_ID: 12, PSN_ID: 'PROC000001' },
+      });
     });
 
     it('forbids an administrator from opening a room station', async () => {
@@ -384,6 +387,98 @@ describe('CheckInAssistService', () => {
       await expect(service.openRoomStation(hostUser, 12)).rejects.toBeInstanceOf(
         ForbiddenException,
       );
+    });
+  });
+
+  describe('listMyRooms', () => {
+    const createRoomsQb = () => ({
+      innerJoinAndSelect: jest.fn().mockReturnThis(),
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      innerJoin: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([]),
+    });
+
+    it('forbids a non-admin without personId', async () => {
+      const proctorUser: AuthenticatedUser = {
+        role: RoleEnum.PROCTOR,
+        roles: [RoleEnum.PROCTOR],
+        email: 'proctor@test.local',
+      };
+
+      await expect(service.listMyRooms(proctorUser)).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+    });
+
+    it('filters rooms by assigned PSN_ID for a personnel actor', async () => {
+      const qb = createRoomsQb();
+      sessionLocationRepository.createQueryBuilder.mockReturnValue(qb);
+
+      await service.listMyRooms({
+        personId: 'PROC000001',
+        role: RoleEnum.PROCTOR,
+        roles: [RoleEnum.PROCTOR],
+        email: 'proctor@test.local',
+      });
+
+      expect(qb.innerJoin).toHaveBeenCalledWith(
+        ExamSessionLocationProctor,
+        'assignment',
+        'assignment.SL_ID = sl.SL_ID AND assignment.PSN_ID = :personId',
+        { personId: 'PROC000001' },
+      );
+    });
+
+    it('uses PERSON names for assigned proctors', async () => {
+      const qb = createRoomsQb();
+      qb.getMany.mockResolvedValue([
+        {
+          SL_ID: 12,
+          SESSION: {
+            EXAM_ID: 5,
+            SS_START_TIME: '09:00:00',
+            SS_END_TIME: '11:00:00',
+            EXAM: { EXAM_ID: 5, EXAM_NAME: 'ENG' },
+          },
+          LOCATION: {
+            LOCATION_NAME: 'อาคารเรียนรวม',
+            LOCATION_ROOM_NO: '101',
+            LOCATION_FLOOR_NO: 1,
+          },
+          PROCTORS: [
+            {
+              PSN_ID: 'PROC000001',
+              PERSON: {
+                PRF_NAMETH: 'นาย',
+                PSN_FNAMETH: 'สมชาย',
+                PSN_LNAMETH: 'ใจดี',
+              },
+            },
+          ],
+          SS_NAME: 'ชื่ออิสระที่ไม่ใช้',
+        },
+      ]);
+      sessionLocationRepository.createQueryBuilder.mockReturnValue(qb);
+      enrollmentRepository.createQueryBuilder.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        addSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        setParameters: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn().mockResolvedValue([]),
+      });
+
+      const rooms = await service.listMyRooms({
+        personId: 'PROC000001',
+        role: RoleEnum.PROCTOR,
+        roles: [RoleEnum.PROCTOR],
+        email: 'proctor@test.local',
+      });
+
+      expect(rooms[0]?.proctorNames).toEqual(['นาย สมชาย ใจดี']);
     });
   });
 

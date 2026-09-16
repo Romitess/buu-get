@@ -1259,6 +1259,8 @@ export default {
         selectLocationPlaceholder: 'เลือกสถานที่สอบ',
         locationSelected: 'เลือกแล้ว',
         locationUnavailable: 'ไม่ว่าง',
+        proctorSearchHint: 'พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหา',
+        proctorSearchFailed: 'ค้นหาผู้คุมสอบไม่สำเร็จ',
         seatsMaxTooltip: 'จำนวนที่นั่งสูงสุดตามผังที่แก้ไขคือ {max} ที่นั่ง',
         seatsExceedsLayout:
           'จำนวนที่นั่งเกินผังที่แก้ไข มีที่นั่งใช้ได้ไม่เกิน {max} ที่นั่ง',

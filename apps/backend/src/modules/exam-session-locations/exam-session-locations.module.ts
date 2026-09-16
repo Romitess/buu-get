@@ -6,6 +6,7 @@ import { ExamSessionLocation } from './entities/exam-session-location.entity';
 import { ExamSessionLocationProctor } from './entities/exam-session-location-proctor.entity';
 import { ExamLocation } from '../exam-locations/entities/exam-location.entity';
 import { ExamSession } from '../exam-sessions/entities/exam-session.entity';
+import { MsgPerson } from '../msg-persons/entities/msg-person.entity';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ExamSession } from '../exam-sessions/entities/exam-session.entity';
       ExamSessionLocationProctor,
       ExamLocation,
       ExamSession,
+      MsgPerson,
     ]),
   ],
   controllers: [ExamSessionLocationsController],
