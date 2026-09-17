@@ -5,7 +5,7 @@
 # Pipeline Flow (only tags matching /^v\d+\.\d+\.\d+(-dev|-test)?$/):
 #
 #   prepare ── resolve-deploy-target   (suffix → env, ancestry, dotenv)
-#   quality (parallel) ──┬── sonar-scan-api / sonar-scan-web
+#   quality ── sonar/unit/dep-check serial (gitrunner-disk) + sbom/qg parallel
 #                        ├── sonar-scan-quality-gate-api / -web
 #                        ├── unit-test-api / unit-test-web
 #                        ├── dependency-check-api / -web
@@ -145,20 +145,34 @@ resolve-deploy-target:
 # STAGE 1 — Quality (Parallel Execution)
 # ==============================================================================
 
-sonar-scan-api:
-  stage: quality
+# One gitrunner host — serialise sonar scans so they do not fill the disk together.
+.sonar_scan:
   image:
     name: sonarsource/sonar-scanner-cli:latest
     entrypoint: [""]
   tags:
     - $RUNNER_TAG
-  rules:
-    - if: $CI_COMMIT_TAG
-  before_script:
-    - !reference [.vault_sonar, before_script]
+  resource_group: gitrunner-disk
   variables:
     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
     GIT_DEPTH: "0"
+    GIT_CLEAN_FLAGS: "-ffdx"
+  before_script:
+    - !reference [.vault_sonar, before_script]
+    - |
+      echo "=== Disk before Sonar scan ==="
+      df -h
+      rm -rf .scannerwork .sonar/js node_modules apps/*/node_modules apps/*/dist coverage .trivycache || true
+      echo "=== Disk after cleanup ==="
+      df -h
+  after_script:
+    - rm -rf .scannerwork .sonar/js || true
+
+sonar-scan-api:
+  extends: .sonar_scan
+  stage: quality
+  rules:
+    - if: $CI_COMMIT_TAG
   cache:
     key: "sonar-api-${CI_PROJECT_NAME}"
     paths:
@@ -167,23 +181,27 @@ sonar-scan-api:
     - echo "=== SonarQube Scan API (${SONAR_PROJECT_KEY_API}) ==="
     - 'if [ -z "${SONAR_HOST_URL}" ] || [ -z "${SONAR_TOKEN}" ]; then echo "❌ ERROR: SONAR_HOST_URL or SONAR_TOKEN is not configured." && exit 1; fi'
     - 'TARGET_DIR="apps/backend"; if [ ! -d "apps/backend" ]; then if [ -d "apps/api" ]; then TARGET_DIR="apps/api"; elif [ -d "api" ]; then TARGET_DIR="api"; else TARGET_DIR="."; fi; fi'
-    - "sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY_API} -Dsonar.projectName=${CI_PROJECT_NAME}-api -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.token=${SONAR_TOKEN} -Dsonar.sources=${TARGET_DIR} -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**,**/tests/**,**/test/**,old_app/** -Dsonar.qualitygate.wait=false"
+    - |
+      TSCONFIG_ARGS=""
+      if [ -f "${TARGET_DIR}/tsconfig.json" ]; then
+        TSCONFIG_ARGS="-Dsonar.typescript.tsconfigPaths=${TARGET_DIR}/tsconfig.json"
+      fi
+      sonar-scanner \
+        -Dsonar.projectKey="${SONAR_PROJECT_KEY_API}" \
+        -Dsonar.projectName="${CI_PROJECT_NAME}-api" \
+        -Dsonar.host.url="${SONAR_HOST_URL}" \
+        -Dsonar.token="${SONAR_TOKEN}" \
+        -Dsonar.sources="${TARGET_DIR}" \
+        -Dsonar.exclusions="**/node_modules/**,**/dist/**,**/coverage/**,**/tests/**,**/test/**,**/graphify-out/**,old_app/**" \
+        ${TSCONFIG_ARGS} \
+        -Dsonar.qualitygate.wait=false
   allow_failure: false
 
 sonar-scan-web:
+  extends: .sonar_scan
   stage: quality
-  image:
-    name: sonarsource/sonar-scanner-cli:latest
-    entrypoint: [""]
-  tags:
-    - $RUNNER_TAG
   rules:
     - if: $CI_COMMIT_TAG
-  before_script:
-    - !reference [.vault_sonar, before_script]
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
-    GIT_DEPTH: "0"
   cache:
     key: "sonar-web-${CI_PROJECT_NAME}"
     paths:
@@ -192,7 +210,24 @@ sonar-scan-web:
     - echo "=== SonarQube Scan Web (${SONAR_PROJECT_KEY_WEB}) ==="
     - 'if [ -z "${SONAR_HOST_URL}" ] || [ -z "${SONAR_TOKEN}" ]; then echo "❌ ERROR: SONAR_HOST_URL or SONAR_TOKEN is not configured." && exit 1; fi'
     - 'if [ -d "apps/frontend" ]; then TARGET_DIR="apps/frontend"; elif [ -d "apps/web" ]; then TARGET_DIR="apps/web"; elif [ -d "web" ]; then TARGET_DIR="web"; elif [ -d "frontend" ]; then TARGET_DIR="frontend"; else echo "No web folder found, scanning root UI components or skipping..." && TARGET_DIR="src"; fi'
-    - 'if [ -d "$TARGET_DIR" ]; then sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY_WEB} -Dsonar.projectName=${CI_PROJECT_NAME}-web -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.token=${SONAR_TOKEN} -Dsonar.sources=${TARGET_DIR} -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**,**/coverage/**,old_app/** -Dsonar.qualitygate.wait=false; else echo "Target web folder not found. Skipping web scan."; fi'
+    - |
+      if [ ! -d "$TARGET_DIR" ]; then
+        echo "Target web folder not found. Skipping web scan."
+        exit 0
+      fi
+      TSCONFIG_ARGS=""
+      if [ -f "${TARGET_DIR}/tsconfig.json" ]; then
+        TSCONFIG_ARGS="-Dsonar.typescript.tsconfigPaths=${TARGET_DIR}/tsconfig.json"
+      fi
+      sonar-scanner \
+        -Dsonar.projectKey="${SONAR_PROJECT_KEY_WEB}" \
+        -Dsonar.projectName="${CI_PROJECT_NAME}-web" \
+        -Dsonar.host.url="${SONAR_HOST_URL}" \
+        -Dsonar.token="${SONAR_TOKEN}" \
+        -Dsonar.sources="${TARGET_DIR}" \
+        -Dsonar.exclusions="**/node_modules/**,**/dist/**,**/build/**,**/coverage/**,**/graphify-out/**,old_app/**" \
+        ${TSCONFIG_ARGS} \
+        -Dsonar.qualitygate.wait=false
   allow_failure: false
 
 sonar-scan-quality-gate-api:
@@ -258,6 +293,7 @@ unit-test-api:
   image: ${NODE_IMAGE}
   tags:
     - $RUNNER_TAG
+  resource_group: gitrunner-disk
   rules:
     - if: $CI_COMMIT_TAG
   cache:
@@ -289,6 +325,7 @@ unit-test-web:
   image: ${NODE_IMAGE}
   tags:
     - $RUNNER_TAG
+  resource_group: gitrunner-disk
   rules:
     - if: $CI_COMMIT_TAG
   cache:
@@ -323,6 +360,7 @@ dependency-check-api:
   image: ${NODE_IMAGE}
   tags:
     - $RUNNER_TAG
+  resource_group: gitrunner-disk
   rules:
     - if: $CI_COMMIT_TAG
   cache:
@@ -349,6 +387,7 @@ dependency-check-web:
   image: ${NODE_IMAGE}
   tags:
     - $RUNNER_TAG
+  resource_group: gitrunner-disk
   rules:
     - if: $CI_COMMIT_TAG
   cache:
