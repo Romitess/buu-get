@@ -86,6 +86,8 @@ stages:
   before_script:
     - 'if [ -S /var/run/docker.sock ]; then echo "=== Using local Docker socket ===" && unset DOCKER_HOST; else echo "=== Connecting to DinD (tcp://docker:2375) ===" && export DOCKER_HOST="tcp://docker:2375"; for i in $(seq 1 15); do docker info >/dev/null 2>&1 && break || (echo "Waiting for DinD ($i)..." && sleep 1); done; fi'
     - docker info
+    - docker builder prune -af >/dev/null 2>&1 || true
+    - docker system prune -af --volumes >/dev/null 2>&1 || true
 
 # ==============================================================================
 # STAGE 0 — Prepare (suffix → env, ancestry, dotenv)

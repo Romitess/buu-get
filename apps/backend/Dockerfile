@@ -18,15 +18,16 @@ COPY package.json package-lock.json ./
 COPY apps/backend/package.json ./apps/backend/
 COPY apps/frontend/package.json ./apps/frontend/
 
-# node:22-alpine ships npm 10; engines require npm >= 11 for this lockfile
+# node:*-alpine ships npm 10; engines require npm >= 11 for this lockfile.
+# Workspace-only ci: installing the whole monorepo (frontend too) fills DinD (ENOSPC).
+# Skip npm prune here — overlay2 whiteouts during prune also ENOSPC on small DinD disks.
 RUN npm install -g npm@11 \
-  && npm ci --ignore-scripts \
+  && npm ci --ignore-scripts --workspace=buu-get-back --include-workspace-root \
   && npm rebuild bcrypt --workspace=buu-get-back
 
 COPY apps/backend ./apps/backend
 
-RUN npm run build --workspace=buu-get-back \
-  && npm prune --omit=dev
+RUN npm run build --workspace=buu-get-back
 
 # ─── Runtime ─────────────────────────────────────────────────────────────────
 FROM node:${NODE_VERSION}-alpine AS runner

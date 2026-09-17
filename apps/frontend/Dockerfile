@@ -20,9 +20,10 @@ COPY package.json package-lock.json ./
 COPY apps/backend/package.json ./apps/backend/
 COPY apps/frontend/package.json ./apps/frontend/
 
-# node:22-alpine ships npm 10; engines require npm >= 11 for this lockfile
+# node:*-alpine ships npm 10; engines require npm >= 11 for this lockfile.
+# Workspace-only ci avoids installing Nest/API deps into the web image (DinD ENOSPC).
 RUN npm install -g npm@11 \
-  && npm ci --ignore-scripts
+  && npm ci --ignore-scripts --workspace=buu-get-front --include-workspace-root
 
 COPY apps/frontend ./apps/frontend
 
