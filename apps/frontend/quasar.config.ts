@@ -67,6 +67,9 @@ export default defineConfig((ctx) => {
       envFolder: MONOREPO_ROOT,
       env: {
         ...(apiBaseUrl ? { API_BASE_URL: apiBaseUrl } : {}),
+        ...(process.env.VITE_APP_VERSION
+          ? { VITE_APP_VERSION: process.env.VITE_APP_VERSION }
+          : {}),
       },
       // rawDefine: {}
       // ignorePublicFolder: true,

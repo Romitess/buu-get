@@ -31,6 +31,8 @@ RUN npm run build --workspace=buu-get-back \
 # ─── Runtime ─────────────────────────────────────────────────────────────────
 FROM node:${NODE_VERSION}-alpine AS runner
 
+ARG APP_VERSION=
+
 RUN apk add --no-cache tzdata curl \
   && cp /usr/share/zoneinfo/Asia/Bangkok /etc/localtime \
   && echo "Asia/Bangkok" > /etc/timezone \
@@ -42,6 +44,7 @@ ENV NODE_ENV=production
 ENV TZ=Asia/Bangkok
 ENV PORT=3000
 ENV HUSKY=0
+ENV APP_VERSION=${APP_VERSION}
 
 COPY --from=builder --chown=app:app /app/package.json /app/package-lock.json ./
 COPY --from=builder --chown=app:app /app/node_modules ./node_modules

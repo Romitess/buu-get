@@ -8,6 +8,7 @@
     </div>
     <div class="col-12 col-sm-auto text-caption opacity-80">
       &copy; {{ currentYear }} Copyright All Right Reserved.
+      <span v-if="appVersion"> · {{ appVersion }}</span>
     </div>
   </div>
 </template>
@@ -25,6 +26,7 @@ withDefaults(
 );
 
 const currentYear = computed(() => new Date().getFullYear());
+const appVersion = computed(() => import.meta.env.VITE_APP_VERSION?.trim() || '');
 </script>
 
 <style scoped lang="scss">
