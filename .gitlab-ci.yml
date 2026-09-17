@@ -448,6 +448,8 @@ docker-build-web:
   stage: build
   rules:
     - if: $CI_COMMIT_TAG
+  needs:
+    - docker-build
   script:
     - docker version
     - 'REG_HOST="${REGISTRY_HOST:-${CI_REGISTRY:-gitlabregistry.buu.ac.th}}"; if [ -n "$CI_REGISTRY_USER" ] && [ -n "$CI_REGISTRY_PASSWORD" ]; then echo "$CI_REGISTRY_PASSWORD" | docker login "$REG_HOST" -u "$CI_REGISTRY_USER" --password-stdin || true; elif [ -n "$REGISTRY_USER" ] && [ -n "$REGISTRY_TOKEN" ]; then echo "$REGISTRY_TOKEN" | docker login "$REG_HOST" -u "$REGISTRY_USER" --password-stdin || true; fi'

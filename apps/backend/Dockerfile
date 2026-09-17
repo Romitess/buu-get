@@ -18,9 +18,7 @@ COPY package.json package-lock.json ./
 COPY apps/backend/package.json ./apps/backend/
 COPY apps/frontend/package.json ./apps/frontend/
 
-# node:*-alpine ships npm 10; engines require npm >= 11 for this lockfile.
-# Workspace-only ci: installing the whole monorepo (frontend too) fills DinD (ENOSPC).
-# Skip npm prune here — overlay2 whiteouts during prune also ENOSPC on small DinD disks.
+# Workspace-only ci: full-monorepo install + prune fills small DinD disks (ENOSPC).
 RUN npm install -g npm@11 \
   && npm ci --ignore-scripts --workspace=buu-get-back --include-workspace-root \
   && npm rebuild bcrypt --workspace=buu-get-back
@@ -28,6 +26,27 @@ RUN npm install -g npm@11 \
 COPY apps/backend ./apps/backend
 
 RUN npm run build --workspace=buu-get-back
+
+# Production node_modules only. COPY from builder so this stage is sequential
+# (two parallel npm ci would spike DinD disk).
+FROM node:${NODE_VERSION}-alpine AS prod-deps
+
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /app
+
+ENV HUSKY=0
+ENV CI=true
+ENV NODE_ENV=production
+
+COPY package.json package-lock.json ./
+COPY apps/backend/package.json ./apps/backend/
+COPY apps/frontend/package.json ./apps/frontend/
+COPY --from=builder /app/apps/backend/package.json /tmp/builder-ready
+
+RUN npm install -g npm@11 \
+  && npm ci --omit=dev --ignore-scripts --workspace=buu-get-back --include-workspace-root \
+  && npm rebuild bcrypt --workspace=buu-get-back
 
 # ─── Runtime ─────────────────────────────────────────────────────────────────
 FROM node:${NODE_VERSION}-alpine AS runner
@@ -47,9 +66,9 @@ ENV PORT=3000
 ENV HUSKY=0
 ENV APP_VERSION=${APP_VERSION}
 
-COPY --from=builder --chown=app:app /app/package.json /app/package-lock.json ./
-COPY --from=builder --chown=app:app /app/node_modules ./node_modules
-COPY --from=builder --chown=app:app /app/apps/backend/package.json ./apps/backend/
+COPY --from=prod-deps --chown=app:app /app/package.json /app/package-lock.json ./
+COPY --from=prod-deps --chown=app:app /app/node_modules ./node_modules
+COPY --from=prod-deps --chown=app:app /app/apps/backend/package.json ./apps/backend/
 COPY --from=builder --chown=app:app /app/apps/backend/dist ./apps/backend/dist
 # Node resolves modules by walking up to /app/node_modules (npm workspaces hoist).
 
