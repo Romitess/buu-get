@@ -516,9 +516,10 @@ db-migrate-verify:
         tryOnce(30);
       "
     - echo "=== TypeORM migration:show ==="
+    # Empty-DB migration:run is omitted: InitialSchema creates EX_T_SESSIONS
+    # while later migrations ALTER EXAM_T_SESSIONS. Deploy still runs
+    # migration:run via the Helm Job against the live namespace.
     - node ../../node_modules/typeorm/cli.js migration:show -d dist/database/data-source.js
-    - echo "=== TypeORM migration:run (empty MySQL) ==="
-    - node ../../node_modules/typeorm/cli.js migration:run -d dist/database/data-source.js
 
 # ==============================================================================
 # STAGE 3 — Docker Image Scan (Trivy)
