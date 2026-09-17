@@ -33,6 +33,10 @@ RUN npm run postinstall --workspace=buu-get-front \
 # ─── Runtime (static SPA) ────────────────────────────────────────────────────
 FROM nginx:1.27-alpine AS runner
 
+# nginx:*-alpine does not refresh Alpine packages; Trivy prod gate fails CRITICAL
+# on libcrypto3/libssl3 (CVE-2026-31789, fixed in 3.3.7-r0).
+RUN apk add --no-cache --upgrade libcrypto3 libssl3
+
 COPY apps/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/apps/frontend/dist/spa /usr/share/nginx/html
 
