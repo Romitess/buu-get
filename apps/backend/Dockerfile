@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 # Build context MUST be the monorepo root (npm workspaces).
-#   docker build -f apps/backend/Dockerfile --build-arg NODE_VERSION=22 -t buu-get-api .
+#   docker build -f apps/backend/Dockerfile --build-arg NODE_VERSION=24 -t buu-get-api .
 
-ARG NODE_VERSION=22
+ARG NODE_VERSION=24
 
 # ─── Build ───────────────────────────────────────────────────────────────────
 FROM node:${NODE_VERSION}-alpine AS builder

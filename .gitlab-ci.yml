@@ -1,6 +1,6 @@
 # ==============================================================================
 # BUU GET — GitLab CI/CD (tag-driven: build + deploy by git tag)
-# Monorepo: apps/backend (NestJS) + apps/frontend (Quasar) · Node.js 22
+# Monorepo: apps/backend (NestJS) + apps/frontend (Quasar) · Node.js 24
 #
 # Pipeline Flow (only tags matching /^v\d+\.\d+\.\d+(-dev|-test)?$/):
 #
@@ -41,8 +41,8 @@ variables:
   IMAGE:                     $CI_REGISTRY_IMAGE
   APP_NAME:                  "${CI_PROJECT_NAME}"
   HELM_CHART_PATH:           "helm/app"
-  NODE_VERSION:               "22"
-  NODE_IMAGE:                 "node:22-alpine"
+  NODE_VERSION:               "24"
+  NODE_IMAGE:                 "node:24-alpine"
   RUNNER_TAG:                "gitrunner"
   DOCKER_TLS_CERTDIR:        ""
   TRIVY_NO_PROGRESS:         "true"
@@ -480,9 +480,9 @@ db-migrate-verify:
     - docker-build
   services:
     - name: mysql:8.0
-      alias: mysql
   before_script:
     - export TZ="Asia/Bangkok"
+    - cd /app/apps/backend
   variables:
     GIT_STRATEGY: none
     MYSQL_ROOT_PASSWORD: migrate-verify
@@ -497,25 +497,21 @@ db-migrate-verify:
     - echo "=== Waiting for empty MySQL (db-migrate-verify) ==="
     - |
       node -e "
-        const mysql = require('mysql2/promise');
-        (async () => {
-          for (let i = 0; i < 30; i++) {
-            try {
-              const c = await mysql.createConnection({
-                host: process.env.DB_HOST,
-                port: Number(process.env.DB_PORT || 3306),
-                user: process.env.DB_USER,
-                password: process.env.DB_PASSWORD,
-              });
-              await c.end();
-              process.exit(0);
-            } catch (e) {
-              await new Promise((r) => setTimeout(r, 2000));
+        const net = require('net');
+        const host = process.env.DB_HOST || 'mysql';
+        const port = Number(process.env.DB_PORT || 3306);
+        const tryOnce = (left) => {
+          const s = net.connect({ host, port }, () => { s.end(); process.exit(0); });
+          s.on('error', () => {
+            s.destroy();
+            if (left <= 1) {
+              console.error('MySQL did not become ready at ' + host + ':' + port);
+              process.exit(1);
             }
-          }
-          console.error('MySQL did not become ready');
-          process.exit(1);
-        })();
+            setTimeout(() => tryOnce(left - 1), 2000);
+          });
+        };
+        tryOnce(30);
       "
     - echo "=== TypeORM migration:show ==="
     - node ../../node_modules/typeorm/cli.js migration:show -d dist/database/data-source.js

@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 # Build context MUST be the monorepo root (Quasar envFolder = monorepo root).
-#   docker build -f apps/frontend/Dockerfile --build-arg NODE_VERSION=22 --build-arg API_BASE_URL=/api -t buu-get-web .
+#   docker build -f apps/frontend/Dockerfile --build-arg NODE_VERSION=24 --build-arg API_BASE_URL=/api -t buu-get-web .
 
-ARG NODE_VERSION=22
+ARG NODE_VERSION=24
 
 # ─── Build ───────────────────────────────────────────────────────────────────
 FROM node:${NODE_VERSION}-alpine AS builder

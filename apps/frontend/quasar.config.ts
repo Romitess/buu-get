@@ -45,7 +45,7 @@ export default defineConfig((ctx) => {
     build: {
       target: {
         browser: ['es2022'],
-        node: 'node22',
+        node: 'node24',
       },
 
       typescript: {
