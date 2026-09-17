@@ -10,7 +10,8 @@
 #                        ├── unit-test-api / unit-test-web
 #                        ├── dependency-check-api / -web
 #                        └── sbom-generate-api / -web
-#   build ──┬── docker-build / docker-build-web   (no needs: waits for quality)
+#   build ──┬── docker-build (waits for quality)
+#           │   docker-build-web (needs docker-build + resolve-deploy-target)
 #           └── db-migrate-verify                 (needs docker-build)
 #   image-scan ── image-scan / image-scan-web
 #   deploy ──┬── deploy-dev   (auto,   vX.Y.Z-dev)
@@ -140,6 +141,32 @@ resolve-deploy-target:
   artifacts:
     reports:
       dotenv: deploy-target.env
+    paths:
+      - deploy-target.env
+    expire_in: 1 day
+
+# Dotenv from prepare does not follow `needs:` unless that job is listed.
+# Also strip CI_COMMIT_TAG if APP_VERSION is still empty (same rules as prepare).
+.derive_app_version:
+  script:
+    - |
+      if [ -f deploy-target.env ]; then
+        _FROM_FILE=$(sed -n 's/^APP_VERSION=//p' deploy-target.env | tr -d '\r' | tail -1)
+        [ -n "$_FROM_FILE" ] && APP_VERSION="$_FROM_FILE"
+        _ENV_FILE=$(sed -n 's/^DEPLOY_ENV=//p' deploy-target.env | tr -d '\r' | tail -1)
+        [ -n "$_ENV_FILE" ] && DEPLOY_ENV="$_ENV_FILE"
+      fi
+      if [ -z "${APP_VERSION:-}" ] && [ -n "${CI_COMMIT_TAG:-}" ]; then
+        case "$CI_COMMIT_TAG" in
+          *-dev) APP_VERSION="${CI_COMMIT_TAG%-dev}" ;;
+          *-test) APP_VERSION="${CI_COMMIT_TAG%-test}" ;;
+          *) APP_VERSION="$CI_COMMIT_TAG" ;;
+        esac
+        echo "=== APP_VERSION was empty; derived from tag → ${APP_VERSION} ==="
+      fi
+      export APP_VERSION
+      export DEPLOY_ENV
+      echo "=== Display version APP_VERSION=${APP_VERSION:-<empty>} DEPLOY_ENV=${DEPLOY_ENV:-<empty>} ==="
 
 # ==============================================================================
 # STAGE 1 — Quality (Parallel Execution)
@@ -453,7 +480,8 @@ sbom-generate-web:
 
 # ==============================================================================
 # STAGE 2 — Build & Push Docker Images (API & Web)
-# No needs: on docker-build* — must wait for the whole quality stage.
+# docker-build has no needs: — waits for the whole quality stage.
+# docker-build-web needs docker-build (serialize DinD) + resolve-deploy-target (APP_VERSION dotenv).
 # ==============================================================================
 
 docker-build:
@@ -462,6 +490,7 @@ docker-build:
   rules:
     - if: $CI_COMMIT_TAG
   script:
+    - !reference [.derive_app_version, script]
     - docker version
     - 'REG_HOST="${REGISTRY_HOST:-${CI_REGISTRY:-gitlabregistry.buu.ac.th}}"; if [ -n "$CI_REGISTRY_USER" ] && [ -n "$CI_REGISTRY_PASSWORD" ]; then echo "$CI_REGISTRY_PASSWORD" | docker login "$REG_HOST" -u "$CI_REGISTRY_USER" --password-stdin || true; elif [ -n "$REGISTRY_USER" ] && [ -n "$REGISTRY_TOKEN" ]; then echo "$REGISTRY_TOKEN" | docker login "$REG_HOST" -u "$REGISTRY_USER" --password-stdin || true; fi'
     - 'DOCKERFILE_PATH=""; if [ -f "apps/backend/Dockerfile" ]; then DOCKERFILE_PATH="apps/backend/Dockerfile"; elif [ -f "apps/api/Dockerfile" ]; then DOCKERFILE_PATH="apps/api/Dockerfile"; elif [ -f "api/Dockerfile" ]; then DOCKERFILE_PATH="api/Dockerfile"; elif [ -f "Dockerfile.api" ]; then DOCKERFILE_PATH="Dockerfile.api"; elif [ -f "Dockerfile" ]; then DOCKERFILE_PATH="Dockerfile"; fi'
@@ -489,7 +518,10 @@ docker-build-web:
     - if: $CI_COMMIT_TAG
   needs:
     - docker-build
+    - job: resolve-deploy-target
+      artifacts: true
   script:
+    - !reference [.derive_app_version, script]
     - docker version
     - 'REG_HOST="${REGISTRY_HOST:-${CI_REGISTRY:-gitlabregistry.buu.ac.th}}"; if [ -n "$CI_REGISTRY_USER" ] && [ -n "$CI_REGISTRY_PASSWORD" ]; then echo "$CI_REGISTRY_PASSWORD" | docker login "$REG_HOST" -u "$CI_REGISTRY_USER" --password-stdin || true; elif [ -n "$REGISTRY_USER" ] && [ -n "$REGISTRY_TOKEN" ]; then echo "$REGISTRY_TOKEN" | docker login "$REG_HOST" -u "$REGISTRY_USER" --password-stdin || true; fi'
     - 'DOCKERFILE_PATH=""; if [ -f "apps/frontend/Dockerfile" ]; then DOCKERFILE_PATH="apps/frontend/Dockerfile"; elif [ -f "docker/web/Dockerfile" ]; then DOCKERFILE_PATH="docker/web/Dockerfile"; elif [ -f "apps/web/Dockerfile" ]; then DOCKERFILE_PATH="apps/web/Dockerfile"; elif [ -f "web/Dockerfile" ]; then DOCKERFILE_PATH="web/Dockerfile"; elif [ -f "frontend/Dockerfile" ]; then DOCKERFILE_PATH="frontend/Dockerfile"; elif [ -f "Dockerfile.web" ]; then DOCKERFILE_PATH="Dockerfile.web"; fi'
