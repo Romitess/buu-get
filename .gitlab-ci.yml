@@ -13,14 +13,15 @@
 #   build ──┬── docker-build (waits for quality)
 #           │   docker-build-web (needs docker-build + resolve-deploy-target)
 #           └── db-migrate-verify                 (needs docker-build)
-#   image-scan ── image-scan / image-scan-web
-#   deploy ──┬── deploy-dev   (auto,   vX.Y.Z-dev)
-#            ├── deploy-test  (manual, vX.Y.Z-test)
-#            └── deploy-prod  (manual, vX.Y.Z)
+#   image-scan ── image-scan / image-scan-web  (CRITICAL --exit-code 1 every tag)
+#   deploy ──┬── deploy-dev          (auto,   vX.Y.Z-dev; blocks if scan not PASSED)
+#            ├── deploy-dev-manual   (Play,   vX.Y.Z-dev; needs build jobs, no scan)
+#            ├── deploy-test         (manual, vX.Y.Z-test; blocked by scan fail)
+#            └── deploy-prod         (manual, vX.Y.Z; blocked by scan fail)
 #   dast / perf — optional, manual
 #
 # Promotion: new tag per environment (not a re-run of the same tag).
-#   git tag v1.2.0-dev  on develop → deploy-dev
+#   git tag v1.2.0-dev  on develop → deploy-dev (auto) + deploy-dev-manual (Play bypass)
 #   git tag v1.2.0-test on test    → deploy-test (manual)
 #   git tag v1.2.0      on main    → deploy-prod (manual)
 # ==============================================================================
@@ -605,7 +606,12 @@ image-scan:
   tags:
     - $RUNNER_TAG
   rules:
-    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-dev$/
+      allow_failure: true
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-test$/
+      allow_failure: false
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+      allow_failure: false
   needs:
     - docker-build
     - resolve-deploy-target
@@ -622,16 +628,21 @@ image-scan:
     - trivy image --format json --output trivy-report-api.json --severity HIGH,CRITICAL --exit-code 0 "${IMAGE_API}:${CI_COMMIT_TAG}" || true
     - trivy image --format table --severity HIGH,CRITICAL "${IMAGE_API}:${CI_COMMIT_TAG}" || true
     - |
-      if [ "${DEPLOY_ENV}" = "prod" ]; then
-        echo "=== [PROD API] Strict: fail on CRITICAL ==="
-        trivy image --severity CRITICAL --exit-code 1 "${IMAGE_API}:${CI_COMMIT_TAG}"
+      echo "=== Strict: fail on CRITICAL (API) ==="
+      if trivy image --severity CRITICAL --exit-code 1 "${IMAGE_API}:${CI_COMMIT_TAG}"; then
+        echo PASSED > scan-status-api.txt
+        echo "=== Scan status API: PASSED ==="
+      else
+        echo FAILED > scan-status-api.txt
+        echo "=== Scan status API: FAILED ==="
+        exit 1
       fi
   artifacts:
     when: always
     paths:
       - trivy-report-api.json
+      - scan-status-api.txt
     expire_in: 7 days
-  allow_failure: false
 
 image-scan-web:
   stage: image-scan
@@ -641,7 +652,12 @@ image-scan-web:
   tags:
     - $RUNNER_TAG
   rules:
-    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-dev$/
+      allow_failure: true
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-test$/
+      allow_failure: false
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+      allow_failure: false
   needs:
     - docker-build-web
     - resolve-deploy-target
@@ -657,16 +673,21 @@ image-scan-web:
     - trivy image --format json --output trivy-report-web.json --severity HIGH,CRITICAL --exit-code 0 "${IMAGE_WEB}:${CI_COMMIT_TAG}" || true
     - trivy image --format table --severity HIGH,CRITICAL "${IMAGE_WEB}:${CI_COMMIT_TAG}" || true
     - |
-      if [ "${DEPLOY_ENV}" = "prod" ]; then
-        echo "=== [PROD WEB] Strict: fail on CRITICAL ==="
-        trivy image --severity CRITICAL --exit-code 1 "${IMAGE_WEB}:${CI_COMMIT_TAG}"
+      echo "=== Strict: fail on CRITICAL (Web) ==="
+      if trivy image --severity CRITICAL --exit-code 1 "${IMAGE_WEB}:${CI_COMMIT_TAG}"; then
+        echo PASSED > scan-status-web.txt
+        echo "=== Scan status Web: PASSED ==="
+      else
+        echo FAILED > scan-status-web.txt
+        echo "=== Scan status Web: FAILED ==="
+        exit 1
       fi
   artifacts:
     when: always
     paths:
       - trivy-report-web.json
+      - scan-status-web.txt
     expire_in: 7 days
-  allow_failure: false
 
 # ==============================================================================
 # STAGE 5 — DAST: OWASP ZAP (optional, manual)

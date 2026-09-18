@@ -96,7 +96,7 @@ GitLab dotenv injects these into later jobs (`docker-build*`, `image-scan*`, `re
 
 | Step | Action | Tag | Deploy job |
 | --- | --- | --- | --- |
-| 1 | On `develop` | `v1.2.0-dev` | `deploy-dev` (auto) |
+| 1 | On `develop` | `v1.2.0-dev` | `deploy-dev` (auto) + `deploy-dev-manual` (Play bypass) |
 | 2 | Merge `develop` → `test` | — | — |
 | 3 | On `test` | `v1.2.0-test` | `deploy-test` (manual) |
 | 4 | Merge `test` → `main` | — | — |
@@ -149,19 +149,38 @@ Old SHA tags stay until registry cleanup.
 
 ## 4. Deploy contract (single pipeline)
 
-GitLab evaluates `rules:` when a pipeline is **created**. Dotenv from `resolve-deploy-target` is too late for `rules:`. With the suffixed tag contract the environment is known from `$CI_COMMIT_TAG` at creation time, so each deploy job selects itself with a tag regex. Only one of the three jobs is created.
+GitLab evaluates `rules:` when a pipeline is **created**. Dotenv from `resolve-deploy-target` is too late for `rules:`. With the suffixed tag contract the environment is known from `$CI_COMMIT_TAG` at creation time, so each deploy job selects itself with a tag regex. Do **not** use `if: $DEPLOY_ENV` in `rules:`.
+
+On `-dev` two jobs are created (auto gated by scan + manual bypass). On `-test` / plain `vX.Y.Z` only the matching manual job is created — no scan bypass.
 
 | Job | When it exists | When it runs |
 | --- | --- | --- |
-| `deploy-dev` | `$CI_COMMIT_TAG` matches `^v\d+\.\d+\.\d+-dev$` | auto, after both image scans |
-| `deploy-test` | `$CI_COMMIT_TAG` matches `^v\d+\.\d+\.\d+-test$` | manual Play, after both image scans |
-| `deploy-prod` | `$CI_COMMIT_TAG` matches `^v\d+\.\d+\.\d+$` | manual Play, after both image scans |
+| `deploy-dev` | `$CI_COMMIT_TAG` matches `^v\d+\.\d+\.\d+-dev$` | auto, after both image scans; `exit 1` unless both `scan-status-*.txt` are `PASSED` |
+| `deploy-dev-manual` | same `-dev` regex | manual Play; `needs` build jobs only (`resolve-deploy-target`, `docker-build`, `docker-build-web`); **no** scan |
+| `deploy-test` | `$CI_COMMIT_TAG` matches `^v\d+\.\d+\.\d+-test$` | manual Play, after both image scans (scan fail skips this job) |
+| `deploy-prod` | `$CI_COMMIT_TAG` matches `^v\d+\.\d+\.\d+$` | manual Play, after both image scans (scan fail skips this job) |
 
 ```yaml
 deploy-dev:
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-dev$/
-  needs: [resolve-deploy-target, image-scan, image-scan-web]
+  needs:
+    - job: resolve-deploy-target
+      artifacts: true
+    - job: image-scan
+      artifacts: true
+    - job: image-scan-web
+      artifacts: true
+
+deploy-dev-manual:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-dev$/
+      when: manual
+      allow_failure: false
+  needs:
+    - resolve-deploy-target
+    - docker-build
+    - docker-build-web
 
 deploy-test:
   rules:
@@ -176,11 +195,11 @@ deploy-prod:
   needs: [resolve-deploy-target, image-scan, image-scan-web]
 ```
 
-Do **not** use `if: $DEPLOY_ENV` in `rules:` — that variable is dotenv and is empty at pipeline creation, so all three jobs would be hidden.
+Do **not** use `if: $DEPLOY_ENV` in `rules:` — that variable is dotenv and is empty at pipeline creation, so deploy jobs would be hidden. Do **not** `needs: [build]` (that is a job name, not a stage). `deploy-dev-manual` must `extends: .helm_deploy` (helpers only) — do not extend a template that `needs` scan.
 
-Jobs live in [`.gitlab/ci/deploy.yml`](../.gitlab/ci/deploy.yml) (Helm helpers + the three jobs), included from the parent `.gitlab-ci.yml`. Vault functions live in [`.gitlab/ci/vault-helpers.yml`](../.gitlab/ci/vault-helpers.yml) and are pulled in with `!reference` (anchors do not cross files). Because the jobs are in the same pipeline as prepare/scan, they can `needs:` those jobs directly.
+Jobs live in [`.gitlab/ci/deploy.yml`](../.gitlab/ci/deploy.yml) (Helm helpers + deploy jobs), included from the parent `.gitlab-ci.yml`. Vault functions live in [`.gitlab/ci/vault-helpers.yml`](../.gitlab/ci/vault-helpers.yml) and are pulled in with `!reference` (anchors do not cross files). Because the jobs are in the same pipeline as prepare/scan, they can `needs:` those jobs directly. This is **not** a child pipeline.
 
-Helper `require_deploy_target <expected-env> <mode>` in `.helm_deploy` still runs **before** Vault / kubeconfig (defence in depth):
+Helper `require_deploy_target <expected-env> <mode>` in `.helm_deploy` still runs **before** Vault / kubeconfig (defence in depth), except `deploy-dev` first checks scan-status files:
 
 1. `$CI_COMMIT_TAG` must match `^v[0-9]+\.[0-9]+\.[0-9]+(-dev|-test)?$` else `exit 1`.
 2. `$DEPLOY_ENV` must be set else `exit 1`.
@@ -208,10 +227,11 @@ prepare → quality → build → image-scan → deploy → dast → perf
 | `sbom-generate-api` / `-web` | quality | `$CI_COMMIT_TAG` | — | no |
 | `docker-build` / `docker-build-web` | build | `$CI_COMMIT_TAG` | — (stage order) | yes |
 | `db-migrate-verify` | build | `$CI_COMMIT_TAG` | `docker-build` | yes (`migration:show` and empty-MySQL `migration:run` both blocking) |
-| `image-scan` / `image-scan-web` | image-scan | `$CI_COMMIT_TAG` | matching docker-build + `resolve-deploy-target` | yes; **CRITICAL `--exit-code 1` only if `DEPLOY_ENV=prod`** |
-| `deploy-dev` | deploy | `$CI_COMMIT_TAG` `…-dev$` auto | resolve + both scans | yes |
-| `deploy-test` | deploy | `$CI_COMMIT_TAG` `…-test$` manual | resolve + both scans | yes |
-| `deploy-prod` | deploy | `$CI_COMMIT_TAG` `^v\d+\.\d+\.\d+$` manual | resolve + both scans | yes |
+| `image-scan` / `image-scan-web` | image-scan | `$CI_COMMIT_TAG` suffix regex | matching docker-build + `resolve-deploy-target` | CRITICAL `--exit-code 1` every tag; writes `scan-status-api.txt` / `scan-status-web.txt` (`PASSED`/`FAILED`) **before** `exit 1`; `artifacts: when: always`. `allow_failure` from `$CI_COMMIT_TAG` in `rules:`: `*-dev` → `true`; `*-test` and `vX.Y.Z` → `false`. Do not key this off `$DEPLOY_ENV`. |
+| `deploy-dev` | deploy | `$CI_COMMIT_TAG` `…-dev$` auto | resolve + both scans (`artifacts: true`) | yes — log + `exit 1` unless both status files are `PASSED` |
+| `deploy-dev-manual` | deploy | `$CI_COMMIT_TAG` `…-dev$` manual (`allow_failure: false`) | `resolve-deploy-target`, `docker-build`, `docker-build-web` (not scan, not `[build]`) | Play deploys even if scan failed |
+| `deploy-test` | deploy | `$CI_COMMIT_TAG` `…-test$` manual | resolve + both scans | yes; scan fail skips job (no bypass) |
+| `deploy-prod` | deploy | `$CI_COMMIT_TAG` `^v\d+\.\d+\.\d+$` manual | resolve + both scans | yes; scan fail skips job (no bypass) |
 | `dast` / `perf-test` | dast / perf | manual | — | no |
 
 ---
@@ -250,14 +270,14 @@ Use this on another project that still keys jobs off `$CI_COMMIT_BRANCH`.
 2. **Replace `workflow.rules`** with the tag regex + `when: never` (section 1). Confirm MR pipelines disappear.
 3. **Add stage `prepare` first** and copy `resolve-deploy-target` (suffix → env; fetch **one** branch; ancestry check). Emit `APP_VERSION` (trimmed) in dotenv. Rename `main` if the prod branch is `master`.
 4. **Switch every parent job `rules`** from `$CI_COMMIT_BRANCH == …` to `$CI_COMMIT_TAG`.
-5. **Split deploy YAML:** `.gitlab/ci/vault-helpers.yml` (Vault functions as a hidden job) and `.gitlab/ci/deploy.yml` (`.helm_deploy` + the three deploy jobs). Parent `include:`s both. Use `!reference` instead of YAML anchors across files. Do **not** declare `stages:` in `deploy.yml` (it would override the parent list).
-6. **Deploy job `rules`** on `$CI_COMMIT_TAG` suffix regex (`-dev` auto, `-test` / plain `when: manual`). Set `needs: [resolve-deploy-target, image-scan, image-scan-web]` so scans must pass before deploy. Do **not** use `if: $DEPLOY_ENV` in `rules:` (dotenv is empty at creation).
+5. **Split deploy YAML:** `.gitlab/ci/vault-helpers.yml` (Vault functions as a hidden job) and `.gitlab/ci/deploy.yml` (`.helm_deploy` + deploy jobs). Parent `include:`s both. Use `!reference` instead of YAML anchors across files. Do **not** declare `stages:` in `deploy.yml` (it would override the parent list). Do **not** use a child pipeline.
+6. **Deploy job `rules`** on `$CI_COMMIT_TAG` suffix regex (`-dev` auto + `-dev` manual bypass, `-test` / plain `when: manual`). `deploy-dev` `needs` resolve + both scans with artifacts and `exit 1` unless status files are `PASSED`. `deploy-dev-manual` `needs` `resolve-deploy-target`, `docker-build`, `docker-build-web` — never `needs: [build]` and never scan. `deploy-test` / `deploy-prod` keep `needs` both scans (no bypass). Do **not** use `if: $DEPLOY_ENV` in `rules:` (dotenv is empty at creation).
 7. **Image tag = full `$CI_COMMIT_TAG`** (`vX.Y.Z-dev` / `-test` / plain). **Display version = trimmed `APP_VERSION`** in Docker build-args. Push `:latest` only for prod. `manifest inspect` skip. Helm / migrate use the full tag.
-8. **Keep `require_deploy_target`** as the first deploy `script` line (`dev skip` / `test fail` / `prod fail`). Fail closed if `CI_COMMIT_TAG` or `DEPLOY_ENV` is empty.
-9. **Trivy (or equivalent):** strict fail on CRITICAL only when `DEPLOY_ENV=prod`, not on every tag.
+8. **Keep `require_deploy_target`** as a deploy `script` line (`dev skip` / `test fail` / `prod fail`). On `deploy-dev` it runs **after** the scan-status check. Fail closed if `CI_COMMIT_TAG` or `DEPLOY_ENV` is empty.
+9. **Trivy (or equivalent):** `CRITICAL --exit-code 1` on **every** tag. Write `PASSED`/`FAILED` to `scan-status-api.txt` / `scan-status-web.txt` before `exit 1`. `artifacts: when: always`. `allow_failure` from `$CI_COMMIT_TAG` in `rules:` (`*-dev` true; `*-test` and `vX.Y.Z` false) — not from `$DEPLOY_ENV`.
 10. **GitLab UI:** protect `v*`; Protected variables on protected tags; document “new tag per env after merge” (`-dev` → `-test` → plain).
 11. **Do not** keep a branch pipeline “just for tests” unless product explicitly wants it — this spec is tag-only.
-12. **Smoke:** `vX.Y.Z-dev` on develop → only `deploy-dev` in stage deploy, footer `vX.Y.Z`. `vX.Y.Z-test` on test → only `deploy-test`. `vX.Y.Z` on main → only `deploy-prod`. `vX.Y.Z-dev` on a non-develop commit → prepare fails. `DCV` / `v1.2.0-rc.1` → no pipeline.
+12. **Smoke:** `vX.Y.Z-dev` on develop → `deploy-dev` (auto) **and** `deploy-dev-manual` (Play) in stage deploy; footer `vX.Y.Z`. Scan fail → auto logs status and `exit 1`, Play still deploys. `vX.Y.Z-test` on test → only `deploy-test` (scan fail blocks, no bypass). `vX.Y.Z` on main → only `deploy-prod` (same). `vX.Y.Z-dev` on a non-develop commit → prepare fails. `DCV` / `v1.2.0-rc.1` → no pipeline.
 
 Rollback of the YAML itself: restore the previous `.gitlab-ci.yml`. Cluster rollback: re-run the previous good tag pipeline, or `helm rollback <release> -n <ns> --timeout 5m` (do **not** pass `--wait`).
 
@@ -290,6 +310,8 @@ Rollback of the YAML itself: restore the previous `.gitlab-ci.yml`. Cluster roll
 - `needs:` on `docker-build` would skip the quality stage; do not add it.
 - Other suffixes (`-rc.1`, `-staging`) do not match the workflow regex.
 - `rules:` cannot read dotenv from a previous job. Select the deploy job with `$CI_COMMIT_TAG` suffix regex, not `if: $DEPLOY_ENV`.
+- Trivy `allow_failure` belongs in `rules:` on `$CI_COMMIT_TAG` (`*-dev` true; `*-test` / `vX.Y.Z` false). Do not branch `--exit-code 1` on `$DEPLOY_ENV`.
+- `deploy-dev-manual` must not `needs` scan jobs and must not `needs: [build]`. `when: manual` + `allow_failure: false` keeps the pipeline blocked until Play.
 - YAML anchors (`&foo` / `*foo`) do not cross `include:` files. Use `!reference`.
 - `alpine/git` requires `entrypoint: [""]`; without it the job fails with `git: 'sh' is not a git command`.
 - `anchore/syft` (non-`-debug`) is scratch: binary `/syft`, no shell. GitLab Docker executor always execs `sh` for `script:`. `entrypoint: [""]` does not add a shell — use `anchore/syft:<ver>-debug` and invoke `/syft`.
@@ -300,8 +322,8 @@ Rollback of the YAML itself: restore the previous `.gitlab-ci.yml`. Cluster roll
 
 Cannot be proven in a local sandbox. After this YAML is on the default integration branch:
 
-1. Push `vX.Y.Z-dev` on `develop` → `DEPLOY_ENV=dev`; only `deploy-dev` appears in stage deploy; k3s images `:vX.Y.Z-dev`; footer / `/api/health` show `vX.Y.Z`.
+1. Push `vX.Y.Z-dev` on `develop` → `DEPLOY_ENV=dev`; `deploy-dev` (auto) and `deploy-dev-manual` (Play) appear in stage deploy; k3s images `:vX.Y.Z-dev`; footer / `/api/health` show `vX.Y.Z`. If scan is not `PASSED`, auto `exit 1` but Play still deploys.
 2. Push to `develop` without a tag → **no** pipeline.
-3. After merge to `test`, push `vX.Y.Z-test` → only `deploy-test` appears in stage deploy; image `:vX.Y.Z-test`; footer still `vX.Y.Z`.
-4. After merge to `main`, push `vX.Y.Z` → only `deploy-prod` appears in stage deploy; image `:vX.Y.Z` + `:latest`.
+3. After merge to `test`, push `vX.Y.Z-test` → only `deploy-test` appears in stage deploy; image `:vX.Y.Z-test`; footer still `vX.Y.Z`. Scan fail skips deploy (no bypass).
+4. After merge to `main`, push `vX.Y.Z` → only `deploy-prod` appears in stage deploy; image `:vX.Y.Z` + `:latest`. Scan fail skips deploy (no bypass).
 5. `vX.Y.Z-dev` on a commit not on `develop` → prepare fails. `DCV` / `v1.2.0-rc.1` → no pipeline.

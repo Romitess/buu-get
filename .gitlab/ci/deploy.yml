@@ -250,9 +250,47 @@ deploy-dev:
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-dev$/
   needs:
+    - job: resolve-deploy-target
+      artifacts: true
+    - job: image-scan
+      artifacts: true
+    - job: image-scan-web
+      artifacts: true
+  environment:
+    name: dev
+    url: $APP_URL_DEV
+  script:
+    - |
+      check_scan_status() {
+        file="$1"
+        name="$2"
+        status=""
+        if [ -f "$file" ]; then
+          status=$(tr -d '\r\n' < "$file")
+        fi
+        echo "=== Scan status ${name}: ${status:-MISSING} ==="
+        if [ "$status" != "PASSED" ]; then
+          echo "ERROR: ${name} scan is not PASSED (got '${status:-MISSING}')"
+          exit 1
+        fi
+      }
+      check_scan_status scan-status-api.txt API
+      check_scan_status scan-status-web.txt Web
+    - require_deploy_target dev skip
+    - fetch_vault_deploy_secrets dev
+    - run_helm_deploy dev
+
+deploy-dev-manual:
+  extends: .helm_deploy
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-dev$/
+      when: manual
+      allow_failure: false
+  needs:
     - resolve-deploy-target
-    - image-scan
-    - image-scan-web
+    - docker-build
+    - docker-build-web
   environment:
     name: dev
     url: $APP_URL_DEV
