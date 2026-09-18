@@ -130,6 +130,36 @@ describe('PlatformGatewayService', () => {
       expect(sendNotiSpy).toHaveBeenCalledTimes(1);
       expect(loggedText()).toContain('requestToken loginBuu failed status=400');
       expect(loggedText()).not.toContain(SECRET_PASSWORD);
+      expect(postSpy).toHaveBeenCalledWith(
+        'https://kong-dev.buu.ac.th/service-api/ldap.loginBuu/oauth2/token/',
+        expect.any(URLSearchParams),
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'x-forwarded-proto': 'https',
+          }),
+        }),
+      );
+      const tokenBody = postSpy.mock.calls[0][1] as URLSearchParams;
+      expect(tokenBody.get('grant_type')).toBe('password');
+      expect(tokenBody.get('provision_key')).toBe('login-buu-provision-key');
+      expect(tokenBody.get('client_id')).toBe('client-id');
+    });
+
+    it('strips wrapping quotes from provision_key before requesting a token', async () => {
+      (configs.loginBuu as { provision_key: string }).provision_key =
+        '"quoted-key"';
+      cache.get.mockResolvedValue(undefined);
+      postSpy.mockRejectedValue(
+        axiosHttpError(400, { error: 'invalid_grant' }),
+      );
+
+      await expect(
+        service.loginBuu('staff02', SECRET_PASSWORD),
+      ).rejects.toBeInstanceOf(BadGatewayException);
+
+      const tokenBody = postSpy.mock.calls[0][1] as URLSearchParams;
+      expect(tokenBody.get('provision_key')).toBe('quoted-key');
     });
 
     it('returns LDAP 200 fail body so AuthService can still 401', async () => {

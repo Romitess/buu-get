@@ -243,6 +243,40 @@ export class PlatformGatewayService {
     return cacheToken;
   }
 
+  private normalizeProvisionKey(value: unknown): string {
+    if (typeof value !== 'string') {
+      return '';
+    }
+    let key = value.trim();
+    const quote = key[0];
+    if (
+      key.length >= 2 &&
+      (quote === '"' || quote === "'") &&
+      key.endsWith(quote)
+    ) {
+      key = key.slice(1, -1).trim();
+    }
+    return key;
+  }
+
+  private buildOAuthForm(fields: Record<string, string>): URLSearchParams {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(fields)) {
+      if (value !== '') {
+        params.set(key, value);
+      }
+    }
+    return params;
+  }
+
+  private oauthTokenRequestHeaders(): Record<string, string> {
+    return {
+      Accept: 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'x-forwarded-proto': 'https',
+    };
+  }
+
   private maskSensitiveData(data: any): any {
     if (!data || typeof data !== 'object') return data;
     const sensitiveKeys = [
@@ -339,14 +373,15 @@ export class PlatformGatewayService {
 
       const response = await axios.post(
         `${this.getDomain()}${apiConfig.path}${requestTokenConfig.path}`,
-        {
+        this.buildOAuthForm({
           client_secret: requestTokenConfig.client_secret,
           client_id: requestTokenConfig.client_id,
           grant_type: 'refresh_token',
           refresh_token: cacheToken.refresh_token,
-        },
+        }),
         {
-          headers: { 'x-forwarded-proto': 'https' },
+          timeout: 120000,
+          headers: this.oauthTokenRequestHeaders(),
         },
       );
 
@@ -365,10 +400,7 @@ export class PlatformGatewayService {
       this.logger.log(`requestToken ${apiName}`);
       const requestTokenConfig = this.getRequestTokenConfig();
       const apiConfig = this.getApiConfig(apiName);
-      const provisionKey =
-        typeof apiConfig.provision_key === 'string'
-          ? apiConfig.provision_key.trim()
-          : '';
+      const provisionKey = this.normalizeProvisionKey(apiConfig.provision_key);
       if (!provisionKey) {
         const hint =
           apiName === 'loginBuu'
@@ -378,17 +410,21 @@ export class PlatformGatewayService {
         throw new ServiceUnavailableException(hint);
       }
 
+      // Kong OAuth2 plugin rejects JSON token bodies with HTTP 400.
       const response = await axios.post(
         `${this.getDomain()}${apiConfig.path}${requestTokenConfig.path}`,
-        {
+        this.buildOAuthForm({
           client_secret: requestTokenConfig.client_secret,
           client_id: requestTokenConfig.client_id,
           grant_type: requestTokenConfig.grant_type,
-          scope: apiConfig.scope,
+          scope: typeof apiConfig.scope === 'string' ? apiConfig.scope : '',
           provision_key: provisionKey,
           authenticated_userid: requestTokenConfig.authenticated_userid,
+        }),
+        {
+          timeout: 120000,
+          headers: this.oauthTokenRequestHeaders(),
         },
-        { timeout: 120000 },
       );
 
       await this.cacheManager.set(
