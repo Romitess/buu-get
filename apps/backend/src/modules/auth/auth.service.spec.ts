@@ -349,6 +349,41 @@ describe('AuthService', () => {
       expect(response.user.id).toBeUndefined();
     });
 
+    it('returns person JWT when assigned proctor role is present', async () => {
+      platformGatewayService.loginBuu.mockResolvedValue({
+        status: 'success',
+        result: {
+          fullname: 'Proctor Demo',
+          email: 'proctor@go.buu.ac.th',
+          facultyname: '',
+          citizenid: '1100700000003',
+        },
+      });
+      msgPersonsService.findForLogin.mockResolvedValue({
+        PSN_ID: 'DEMOPROC01',
+        PSN_EMAIL_BUU: 'proctor@go.buu.ac.th',
+        PSN_USERNAME: 'proctor01',
+        PSN_IDCARD: '1100700000003',
+        PSN_RETIRE: 'N',
+        ROLES: [{ ROLE_NAME: RoleEnum.PROCTOR }],
+      });
+
+      const response = await service.loginBuu({
+        username: 'proctor01',
+        password: 'secret',
+      });
+
+      expect(jwtService.sign).toHaveBeenCalledWith({
+        typ: 'person',
+        sub: 'DEMOPROC01',
+        email: 'proctor@go.buu.ac.th',
+        role: RoleEnum.PROCTOR,
+        roles: [RoleEnum.PROCTOR],
+      });
+      expect(response.user.actorType).toBe('person');
+      expect(response.user.role).toBe(RoleEnum.PROCTOR);
+    });
+
     it('throws when LDAP fails', async () => {
       platformGatewayService.loginBuu.mockResolvedValue({
         status: 'fail',

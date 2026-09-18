@@ -11,6 +11,8 @@ import { ExamSessionLocationProctor } from './entities/exam-session-location-pro
 import { ExamLocation } from '../exam-locations/entities/exam-location.entity';
 import { ExamSession } from '../exam-sessions/entities/exam-session.entity';
 import { MsgPerson } from '../msg-persons/entities/msg-person.entity';
+import { Role } from '../roles/entities/role.entity';
+import { RoleEnum } from '../roles/enums/role.enum';
 
 type MockRepo = {
   findOne: jest.Mock;
@@ -39,6 +41,7 @@ describe('ExamSessionLocationsService', () => {
   let sessionRepo: MockRepo;
   let proctorRepo: MockRepo;
   let personRepo: MockRepo;
+  let roleRepo: MockRepo;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -64,6 +67,10 @@ describe('ExamSessionLocationsService', () => {
           provide: getRepositoryToken(MsgPerson),
           useFactory: createMockRepo,
         },
+        {
+          provide: getRepositoryToken(Role),
+          useFactory: createMockRepo,
+        },
       ],
     }).compile();
 
@@ -73,6 +80,7 @@ describe('ExamSessionLocationsService', () => {
     sessionRepo = module.get(getRepositoryToken(ExamSession));
     proctorRepo = module.get(getRepositoryToken(ExamSessionLocationProctor));
     personRepo = module.get(getRepositoryToken(MsgPerson));
+    roleRepo = module.get(getRepositoryToken(Role));
   });
 
   const setupNoOverlap = (): void => {
@@ -200,11 +208,18 @@ describe('ExamSessionLocationsService', () => {
       proctorRepo.create.mockImplementation((value: unknown) => value);
       proctorRepo.save.mockResolvedValue([]);
       proctorRepo.delete.mockResolvedValue(undefined);
+      personRepo.save.mockImplementation((value: unknown) =>
+        Promise.resolve(value),
+      );
+      roleRepo.findOne.mockResolvedValue({
+        ROLE_ID: 4,
+        ROLE_NAME: RoleEnum.PROCTOR,
+      });
     };
 
     it('should persist PSN_IDs when all persons exist', async () => {
       readyToSave();
-      personRepo.find.mockResolvedValue([{ PSN_ID: 'STAFF00001' }]);
+      personRepo.find.mockResolvedValue([{ PSN_ID: 'STAFF00001', ROLES: [] }]);
 
       await service.create({
         LOCATION_ID: 1,
@@ -216,6 +231,45 @@ describe('ExamSessionLocationsService', () => {
       expect(proctorRepo.save).toHaveBeenCalledWith([
         { SL_ID: 77, PSN_ID: 'STAFF00001' },
       ]);
+    });
+
+    it('should grant proctor role without removing existing roles', async () => {
+      readyToSave();
+      const staffRole = { ROLE_ID: 2, ROLE_NAME: RoleEnum.STAFF };
+      const proctorRole = { ROLE_ID: 4, ROLE_NAME: RoleEnum.PROCTOR };
+      personRepo.find.mockResolvedValue([
+        { PSN_ID: 'STAFF00001', ROLES: [staffRole] },
+      ]);
+      roleRepo.findOne.mockResolvedValue(proctorRole);
+
+      await service.create({
+        LOCATION_ID: 1,
+        SS_ID: 10,
+        PROCTOR_PSN_IDS: ['STAFF00001'],
+      });
+
+      expect(personRepo.save).toHaveBeenCalledWith([
+        { PSN_ID: 'STAFF00001', ROLES: [staffRole, proctorRole] },
+      ]);
+    });
+
+    it('should not rewrite PERSON_ROLES when proctor is already assigned', async () => {
+      readyToSave();
+      personRepo.find.mockResolvedValue([
+        {
+          PSN_ID: 'STAFF00001',
+          ROLES: [{ ROLE_ID: 4, ROLE_NAME: RoleEnum.PROCTOR }],
+        },
+      ]);
+
+      await service.create({
+        LOCATION_ID: 1,
+        SS_ID: 10,
+        PROCTOR_PSN_IDS: ['STAFF00001'],
+      });
+
+      expect(roleRepo.findOne).not.toHaveBeenCalled();
+      expect(personRepo.save).not.toHaveBeenCalled();
     });
 
     it('should reject unknown PSN_IDs', async () => {

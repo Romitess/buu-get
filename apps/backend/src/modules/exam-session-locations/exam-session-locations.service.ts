@@ -12,6 +12,8 @@ import { ExamSessionLocationProctor } from './entities/exam-session-location-pro
 import { ExamLocation } from '../exam-locations/entities/exam-location.entity';
 import { ExamSession } from '../exam-sessions/entities/exam-session.entity';
 import { MsgPerson } from '../msg-persons/entities/msg-person.entity';
+import { Role } from '../roles/entities/role.entity';
+import { RoleEnum } from '../roles/enums/role.enum';
 import { CreateExamSessionLocationDto } from './dto/create-exam-session-location.dto';
 import { UpdateExamSessionLocationDto } from './dto/update-exam-session-location.dto';
 
@@ -28,6 +30,8 @@ export class ExamSessionLocationsService {
     private readonly proctorRepository: Repository<ExamSessionLocationProctor>,
     @InjectRepository(MsgPerson)
     private readonly msgPersonRepository: Repository<MsgPerson>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
   ) {}
 
   private async validateLocationAndSession(
@@ -284,14 +288,14 @@ export class ExamSessionLocationsService {
       return;
     }
 
-    await this.proctorRepository.delete({ SL_ID: slId });
     if (normalized.length === 0) {
+      await this.proctorRepository.delete({ SL_ID: slId });
       return;
     }
 
     const found = await this.msgPersonRepository.find({
       where: { PSN_ID: In(normalized) },
-      select: ['PSN_ID'],
+      relations: ['ROLES'],
     });
     if (found.length !== normalized.length) {
       throw new BadRequestException(
@@ -299,10 +303,40 @@ export class ExamSessionLocationsService {
       );
     }
 
+    await this.grantProctorRole(found);
+    await this.proctorRepository.delete({ SL_ID: slId });
     await this.proctorRepository.save(
       normalized.map((PSN_ID) =>
         this.proctorRepository.create({ SL_ID: slId, PSN_ID }),
       ),
     );
+  }
+
+  /**
+   * ให้สิทธิ์ผู้คุมสอบบน PERSON_ROLES เมื่อถูกเลือกคุมห้อง
+   * — ไม่ถอดบทบาทอื่น และไม่ซ้ำถ้ามี proctor อยู่แล้ว
+   */
+  private async grantProctorRole(persons: MsgPerson[]): Promise<void> {
+    const missing = persons.filter(
+      (person) =>
+        !(person.ROLES ?? []).some(
+          (role) => role.ROLE_NAME === RoleEnum.PROCTOR,
+        ),
+    );
+    if (missing.length === 0) {
+      return;
+    }
+
+    const proctorRole = await this.roleRepository.findOne({
+      where: { ROLE_NAME: RoleEnum.PROCTOR },
+    });
+    if (!proctorRole) {
+      throw new BadRequestException('Proctor role is not configured');
+    }
+
+    for (const person of missing) {
+      person.ROLES = [...(person.ROLES ?? []), proctorRole];
+    }
+    await this.msgPersonRepository.save(missing);
   }
 }
