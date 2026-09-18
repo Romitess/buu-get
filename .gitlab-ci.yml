@@ -506,22 +506,34 @@ sbom-generate-api:
   extends: .sbom_job
   script:
     - echo "=== SBOM Generation API (Syft) ==="
-    - /syft dir:${BACKEND_DIR} -o spdx-json=sbom-api.json
-    - echo "API SBOM saved to sbom-api.json"
+    - /syft dir:${BACKEND_DIR} -o table
+    - /syft dir:${BACKEND_DIR} -o spdx-json=sbom-api.json -o cyclonedx-json=gl-sbom-api.cdx.json
+    - echo "API SBOM saved to sbom-api.json and gl-sbom-api.cdx.json"
   artifacts:
+    when: always
     paths:
       - sbom-api.json
+      - gl-sbom-api.cdx.json
+    reports:
+      cyclonedx:
+        - gl-sbom-api.cdx.json
     expire_in: 30 days
 
 sbom-generate-web:
   extends: .sbom_job
   script:
     - echo "=== SBOM Generation Web (Syft) ==="
-    - /syft dir:${FRONTEND_DIR} -o spdx-json=sbom-web.json
-    - echo "Web SBOM saved to sbom-web.json"
+    - /syft dir:${FRONTEND_DIR} -o table
+    - /syft dir:${FRONTEND_DIR} -o spdx-json=sbom-web.json -o cyclonedx-json=gl-sbom-web.cdx.json
+    - echo "Web SBOM saved to sbom-web.json and gl-sbom-web.cdx.json"
   artifacts:
+    when: always
     paths:
       - sbom-web.json
+      - gl-sbom-web.cdx.json
+    reports:
+      cyclonedx:
+        - gl-sbom-web.cdx.json
     expire_in: 30 days
 
 # ==============================================================================
