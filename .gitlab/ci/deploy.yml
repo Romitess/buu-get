@@ -1,0 +1,297 @@
+# Helm deploy jobs for tag-driven CI.
+# Included from .gitlab-ci.yml. Do NOT declare stages: here (would override the parent list).
+# Cross-file reuse: !reference (YAML anchors do not cross include files).
+
+.helm_deploy:
+  image:
+    name: alpine/helm:3.15.4
+    entrypoint: [""]
+  tags:
+    - $RUNNER_TAG
+  before_script:
+    - apk add --no-cache kubectl curl jq
+    - !reference [.vault_deploy, script]
+    - |
+      require_deploy_target() {
+        expected="$1"
+        mode="$2"
+        if ! echo "${CI_COMMIT_TAG:-}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-dev|-test)?$'; then
+          echo "ERROR: CI_COMMIT_TAG '${CI_COMMIT_TAG:-}' is not a valid deploy tag"
+          exit 1
+        fi
+        if [ -z "${DEPLOY_ENV:-}" ]; then
+          echo "ERROR: DEPLOY_ENV is empty (resolve-deploy-target dotenv missing)"
+          exit 1
+        fi
+        if [ "$DEPLOY_ENV" != "$expected" ]; then
+          echo "DEPLOY_ENV=$DEPLOY_ENV does not match expected $expected"
+          if [ "$mode" = "skip" ]; then
+            echo "Skipping deploy"
+            exit 0
+          fi
+          exit 1
+        fi
+      }
+
+      # kubectl --from-env-file rejects keys with spaces (e.g. "BUU_DOMAIN =value")
+      sanitize_dotenv_file() {
+        src="$1"
+        dest="${2:-/tmp/app_env.sanitized.env}"
+        tr -d '\r' < "$src" | sed '1s/^\xEF\xBB\xBF//' > /tmp/app_env.raw.env
+        awk '
+          {
+            sub(/^[ \t]+/, "")
+            if ($0 == "" || $0 ~ /^#/) next
+            if ($0 ~ /^export[ \t]+/) sub(/^export[ \t]+/, "")
+            eq = index($0, "=")
+            if (eq == 0) next
+            key = substr($0, 1, eq-1)
+            val = substr($0, eq+1)
+            gsub(/^[ \t]+|[ \t]+$/, "", key)
+            sub(/^[ \t]+/, "", val)
+            if (key ~ /^[-._A-Za-z][-._A-Za-z0-9]*$/) print key "=" val
+            else print "WARN: skip invalid dotenv key [" key "]" > "/dev/stderr"
+          }
+        ' /tmp/app_env.raw.env > "$dest"
+        rm -f /tmp/app_env.raw.env
+        if [ ! -s "$dest" ]; then
+          echo "ERROR: sanitized dotenv is empty (check DOTENV_* formatting)."
+          return 1
+        fi
+        echo "=== Dotenv keys (values hidden) ==="
+        cut -d= -f1 "$dest"
+      }
+
+      # Run TypeORM migrations as a one-shot Job before helm upgrade.
+      # Usage: run_db_migration <namespace> <image-tag>
+      run_db_migration() {
+        NS="$1"
+        IMAGE_TAG="$2"
+        JOB_NAME="${RELEASE_NAME}-migrate"
+        JOB_FILE="/tmp/${JOB_NAME}.yaml"
+        echo "=== Running DB migration Job ${JOB_NAME} (image ${IMAGE_API}:${IMAGE_TAG}) in ${NS} ==="
+        kubectl delete job "${JOB_NAME}" -n "${NS}" --ignore-not-found --kubeconfig ~/.kube/config
+        printf '%s\n' \
+          "apiVersion: batch/v1" \
+          "kind: Job" \
+          "metadata:" \
+          "  name: ${JOB_NAME}" \
+          "  namespace: ${NS}" \
+          "spec:" \
+          "  backoffLimit: 1" \
+          "  ttlSecondsAfterFinished: 600" \
+          "  template:" \
+          "    spec:" \
+          "      restartPolicy: Never" \
+          "      imagePullSecrets:" \
+          "        - name: regcred" \
+          "      containers:" \
+          "        - name: migrate" \
+          "          image: ${IMAGE_API}:${IMAGE_TAG}" \
+          "          imagePullPolicy: Always" \
+          "          command:" \
+          "            - node" \
+          "            - ../../node_modules/typeorm/cli.js" \
+          "            - migration:run" \
+          "            - -d" \
+          "            - dist/database/data-source.js" \
+          "          envFrom:" \
+          "            - secretRef:" \
+          "                name: ${RELEASE_NAME}-env" \
+          "          resources:" \
+          "            requests:" \
+          "              cpu: 100m" \
+          "              memory: 128Mi" \
+          "            limits:" \
+          "              cpu: 500m" \
+          "              memory: 512Mi" \
+          > "${JOB_FILE}"
+        kubectl apply -f "${JOB_FILE}" --kubeconfig ~/.kube/config
+        rm -f "${JOB_FILE}"
+        if ! kubectl wait --for=condition=complete "job/${JOB_NAME}" -n "${NS}" --timeout=300s --kubeconfig ~/.kube/config; then
+          echo "ERROR: Migration Job failed — aborting deploy (helm upgrade skipped)"
+          kubectl logs "job/${JOB_NAME}" -n "${NS}" --kubeconfig ~/.kube/config || true
+          kubectl describe "job/${JOB_NAME}" -n "${NS}" --kubeconfig ~/.kube/config || true
+          exit 1
+        fi
+        echo "=== Migration Job completed successfully ==="
+        kubectl logs "job/${JOB_NAME}" -n "${NS}" --kubeconfig ~/.kube/config || true
+      }
+
+      run_helm_deploy() {
+        ENV_NAME="$1"
+        NS="${DEPLOY_NAMESPACE:-$ENV_NAME}"
+        RELEASE_NAME="${APP_NAME:-${CI_PROJECT_NAME_SLUG:-${CI_PROJECT_NAME}}}"
+        export RELEASE_NAME
+
+        case "$ENV_NAME" in
+          dev)
+            HOST="${RELEASE_NAME}-dev.buu.ac.th"
+            KUBECONFIG_VAR="${KUBECONFIG:-$KUBECONFIG_DEV}"
+            ENV_VAR="${DOTENV_DEV:-$DOTENV_FILE}"
+            VALUES="${HELM_CHART_PATH}/values-dev.yaml"
+            ENV_LABEL=DEV
+            ;;
+          test)
+            HOST="${RELEASE_NAME}-test.buu.ac.th"
+            KUBECONFIG_VAR="${KUBECONFIG:-$KUBECONFIG_TEST}"
+            ENV_VAR="${DOTENV_TEST:-$DOTENV_FILE}"
+            VALUES="${HELM_CHART_PATH}/values-test.yaml"
+            ENV_LABEL=TEST
+            ;;
+          prod)
+            HOST="${RELEASE_NAME}.buu.ac.th"
+            KUBECONFIG_VAR="${KUBECONFIG:-$KUBECONFIG_PROD}"
+            ENV_VAR="${DOTENV_PROD:-$DOTENV_FILE}"
+            VALUES="${HELM_CHART_PATH}/values-prod.yaml"
+            ENV_LABEL=PROD
+            ;;
+          *)
+            echo "ERROR: unknown deploy env ${ENV_NAME}"
+            exit 1
+            ;;
+        esac
+
+        if [ -z "$KUBECONFIG_VAR" ]; then
+          echo "WARNING: KUBECONFIG is not set."
+          exit 0
+        fi
+
+        echo "=== Deploying Node Release to ${ENV_LABEL}: ${RELEASE_NAME} ==="
+        mkdir -p ~/.kube
+        if [ -f "$KUBECONFIG_VAR" ]; then
+          cp "$KUBECONFIG_VAR" ~/.kube/config
+        elif [ -f "$KUBECONFIG" ]; then
+          cp "$KUBECONFIG" ~/.kube/config
+        else
+          printf "%s" "$KUBECONFIG_VAR" > ~/.kube/config
+        fi
+        chmod 600 ~/.kube/config
+        kubectl create namespace "${NS}" --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config || true
+
+        PULL_USER="${REGISTRY_USER:-${REGISTRY_READ_USER:-$CI_REGISTRY_USER}}"
+        PULL_PASS="${REGISTRY_TOKEN:-${REGISTRY_PASSWORD:-${REGISTRY_READ_PASSWORD:-$CI_REGISTRY_PASSWORD}}}"
+        IMG_HOST=$(echo "$IMAGE" | cut -d/ -f1)
+        if [ -n "$PULL_USER" ] && [ -n "$PULL_PASS" ]; then
+          AUTH_B64=$(printf "%s:%s" "$PULL_USER" "$PULL_PASS" | base64 | tr -d "\r\n")
+          SERVERS="$REGISTRY_HOST $CI_REGISTRY $IMG_HOST gitlabregistry.buu.ac.th registry.gitlabcc-devops.buu.ac.th gitlabcc-devops.buu.ac.th"
+          mkdir -p /tmp/k8s-auth
+          printf "{\"auths\":{" > /tmp/k8s-auth/config.json
+          FIRST=1
+          for s in $SERVERS; do
+            if [ -n "$s" ]; then
+              for prefix in "" "https://" "http://"; do
+                for suffix in "" "/v1/" "/v2/"; do
+                  KEY="${prefix}${s}${suffix}"
+                  if [ $FIRST -eq 0 ]; then
+                    printf "," >> /tmp/k8s-auth/config.json
+                  fi
+                  printf "\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"auth\":\"%s\"}" "$KEY" "$PULL_USER" "$PULL_PASS" "$AUTH_B64" >> /tmp/k8s-auth/config.json
+                  FIRST=0
+                done
+              done
+            fi
+          done
+          printf "}}" >> /tmp/k8s-auth/config.json
+          echo "=== Creating multi-domain imagePullSecret regcred (User: ${PULL_USER}) ==="
+          kubectl create secret generic regcred --from-file=.dockerconfigjson=/tmp/k8s-auth/config.json --type=kubernetes.io/dockerconfigjson -n "${NS}" --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config || true
+        fi
+
+        echo "=== Creating Application Secret ${RELEASE_NAME}-env ==="
+        if [ -z "$ENV_VAR" ]; then
+          echo "❌ ERROR: DOTENV_${ENV_LABEL} variable is empty in GitLab CI/CD Variables."
+          exit 1
+        fi
+        if [ -f "$ENV_VAR" ]; then
+          ENV_PATH="$ENV_VAR"
+        else
+          printf "%s\n" "$ENV_VAR" > /tmp/app_env.env
+          ENV_PATH="/tmp/app_env.env"
+        fi
+        sanitize_dotenv_file "$ENV_PATH" /tmp/app_env.sanitized.env
+        ENV_PATH="/tmp/app_env.sanitized.env"
+        echo "=== Creating Secret from Dotenv File Variable (${ENV_PATH}) ==="
+        kubectl create secret generic ${RELEASE_NAME}-env \
+          --from-env-file="$ENV_PATH" \
+          -n "${NS}" --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config
+        rm -f /tmp/app_env.env /tmp/app_env.sanitized.env
+
+        run_db_migration "${NS}" "${CI_COMMIT_TAG}"
+        helm version
+        helm upgrade --install "${RELEASE_NAME}" "${HELM_CHART_PATH}" \
+          -f "${VALUES}" \
+          --set image.repository="${IMAGE_API}" \
+          --set image.tag="${CI_COMMIT_TAG}" \
+          --set web.image.repository="${IMAGE_WEB}" \
+          --set web.image.tag="${CI_COMMIT_TAG}" \
+          --set ingress.host="${HOST}" \
+          -n "${NS}" --create-namespace --kubeconfig ~/.kube/config
+      }
+    - |
+      if [ ! -d "${HELM_CHART_PATH}" ]; then
+        echo "=== Creating auto-generated Helm chart at ${HELM_CHART_PATH} (Multi-Service: API + Web) ==="
+        mkdir -p "${HELM_CHART_PATH}/templates"
+        SLUG="${APP_NAME:-${CI_PROJECT_NAME_SLUG:-${CI_PROJECT_NAME:-app}}}"
+        printf "apiVersion: v2\nname: app\nversion: 0.1.0\n" > "${HELM_CHART_PATH}/Chart.yaml"
+        printf "replicaCount: 1\nimage:\n  repository: nginx\n  pullPolicy: Always\n  tag: \"latest\"\nservice:\n  type: ClusterIP\n  port: 3000\ningress:\n  enabled: true\n  host: \"${SLUG}.buu.ac.th\"\nweb:\n  enabled: true\n  resources:\n    limits:\n      cpu: 300m\n      memory: 256Mi\n    requests:\n      cpu: 50m\n      memory: 64Mi\nresources:\n  limits:\n    cpu: 500m\n    memory: 512Mi\n  requests:\n    cpu: 100m\n    memory: 128Mi\n" > "${HELM_CHART_PATH}/values.yaml"
+        printf "replicaCount: 1\ningress:\n  enabled: true\n  host: \"${SLUG}.buu.ac.th\"\nweb:\n  replicaCount: 1\n" > "${HELM_CHART_PATH}/values-dev.yaml"
+        printf "replicaCount: 1\ningress:\n  enabled: true\n  host: \"${SLUG}-test.buu.ac.th\"\nweb:\n  replicaCount: 1\n" > "${HELM_CHART_PATH}/values-test.yaml"
+        printf "replicaCount: 1\ningress:\n  enabled: true\n  host: \"${SLUG}.buu.ac.th\"\nweb:\n  replicaCount: 1\n" > "${HELM_CHART_PATH}/values-prod.yaml"
+        printf "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: {{ .Release.Name }}\n  labels:\n    app: {{ .Release.Name }}\nspec:\n  replicas: {{ .Values.replicaCount }}\n  selector:\n    matchLabels:\n      app: {{ .Release.Name }}\n  template:\n    metadata:\n      labels:\n        app: {{ .Release.Name }}\n    spec:\n      imagePullSecrets:\n        - name: regcred\n      containers:\n        - name: {{ .Release.Name }}\n          image: \"{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}\"\n          imagePullPolicy: {{ .Values.image.pullPolicy }}\n          ports:\n            - name: http\n              containerPort: {{ .Values.service.port }}\n              protocol: TCP\n          envFrom:\n            - secretRef:\n                name: {{ .Release.Name }}-env\n          resources:\n            {{- toYaml .Values.resources | nindent 12 }}\n" > "${HELM_CHART_PATH}/templates/deployment.yaml"
+        printf "{{- if .Values.web.enabled }}\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: {{ .Release.Name }}-web\n  labels:\n    app: {{ .Release.Name }}-web\nspec:\n  replicas: {{ .Values.web.replicaCount | default 1 }}\n  selector:\n    matchLabels:\n      app: {{ .Release.Name }}-web\n  template:\n    metadata:\n      labels:\n        app: {{ .Release.Name }}-web\n    spec:\n      imagePullSecrets:\n        - name: regcred\n      containers:\n        - name: web\n          image: \"{{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}\"\n          imagePullPolicy: {{ .Values.web.image.pullPolicy | default \"IfNotPresent\" }}\n          ports:\n            - containerPort: 80\n          resources:\n            {{- toYaml .Values.web.resources | nindent 12 }}\n{{- end }}\n" > "${HELM_CHART_PATH}/templates/deployment-web.yaml"
+        printf "apiVersion: v1\nkind: Service\nmetadata:\n  name: {{ .Release.Name }}\n  labels:\n    app: {{ .Release.Name }}\nspec:\n  type: ClusterIP\n  ports:\n    - port: {{ .Values.service.port }}\n      targetPort: {{ .Values.service.port }}\n      protocol: TCP\n      name: http\n  selector:\n    app: {{ .Release.Name }}\n" > "${HELM_CHART_PATH}/templates/service.yaml"
+        printf "{{- if .Values.web.enabled }}\napiVersion: v1\nkind: Service\nmetadata:\n  name: {{ .Release.Name }}-web\n  labels:\n    app: {{ .Release.Name }}-web\nspec:\n  type: ClusterIP\n  ports:\n    - port: 80\n      targetPort: 80\n      protocol: TCP\n      name: http\n  selector:\n    app: {{ .Release.Name }}-web\n{{- end }}\n" > "${HELM_CHART_PATH}/templates/service-web.yaml"
+        printf "{{- if .Values.ingress.enabled }}\napiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: {{ .Release.Name }}\n  labels:\n    app: {{ .Release.Name }}\n  annotations:\n    kubernetes.io/ingress.class: \"traefik\"\nspec:\n  rules:\n    - host: {{ .Values.ingress.host | quote }}\n      http:\n        paths:\n          - path: /api\n            pathType: Prefix\n            backend:\n              service:\n                name: {{ .Release.Name }}\n                port:\n                  number: {{ .Values.service.port }}\n          - path: /\n            pathType: Prefix\n            backend:\n              service:\n                name: {{ .Release.Name }}-web\n                port:\n                  number: 80\n{{- end }}\n" > "${HELM_CHART_PATH}/templates/ingress.yaml"
+      fi
+
+deploy-dev:
+  extends: .helm_deploy
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-dev$/
+  needs:
+    - resolve-deploy-target
+    - image-scan
+    - image-scan-web
+  environment:
+    name: dev
+    url: $APP_URL_DEV
+  script:
+    - require_deploy_target dev skip
+    - fetch_vault_deploy_secrets dev
+    - run_helm_deploy dev
+
+deploy-test:
+  extends: .helm_deploy
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-test$/
+      when: manual
+  needs:
+    - resolve-deploy-target
+    - image-scan
+    - image-scan-web
+  environment:
+    name: test
+    url: $APP_URL_TEST
+  script:
+    - require_deploy_target test fail
+    - fetch_vault_deploy_secrets test
+    - run_helm_deploy test
+
+deploy-prod:
+  extends: .helm_deploy
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+      when: manual
+  needs:
+    - resolve-deploy-target
+    - image-scan
+    - image-scan-web
+  environment:
+    name: prod
+  script:
+    - require_deploy_target prod fail
+    - fetch_vault_deploy_secrets prod
+    - run_helm_deploy prod

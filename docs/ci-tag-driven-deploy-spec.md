@@ -1,0 +1,307 @@
+# Spec: Tag-driven GitLab CI/CD (build + deploy by git tag)
+
+Adoption spec for campus Quasar + NestJS (or similar) monorepos that currently trigger pipelines on branch push / merge. This project’s reference implementation is [`.gitlab-ci.yml`](../.gitlab-ci.yml).
+
+Not `apps/backend` + `apps/frontend`? Use [ci-tag-driven-deploy-non-monorepo-spec.md](./ci-tag-driven-deploy-non-monorepo-spec.md). Do not fork the tag/env/Vault contracts below.
+
+Copy the contracts below, not the whole file. Vault paths, Helm helpers, and ResourceQuota work stay project-specific.
+
+---
+
+## 1. Trigger contract
+
+| Tag | Env | Pipeline |
+| --- | --- | --- |
+| `v1.2.0-dev` | develop → **dev** | Created |
+| `v1.2.0-test` | test → **test** | Created |
+| `v1.2.0` | main → **prod** | Created |
+| Branch push / merge request | — | None |
+| Other suffixes (`v1.2.0-rc.1`, `v1.2.0-staging`, `v1.2.0-dev.1`) | — | None |
+| Legacy / non-semver (`DCV`, `latest`, `1.0.0`) | — | None |
+
+Workflow rules:
+
+```yaml
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-dev|-test)?$/
+    - when: never
+```
+
+Tag type: **lightweight only**. The suffix **is** the environment. Ancestry is still checked (section 2).
+
+| Tag | Image tag | Displayed version (`APP_VERSION`) |
+| --- | --- | --- |
+| `v1.2.0-dev` | `api:v1.2.0-dev` | `v1.2.0` |
+| `v1.2.0-test` | `api:v1.2.0-test` | `v1.2.0` |
+| `v1.2.0` | `api:v1.2.0` (+ `:latest`) | `v1.2.0` |
+
+### Operator commands
+
+```bash
+# Dev
+git checkout develop && git pull
+git tag v1.2.0-dev && git push origin v1.2.0-dev
+
+# Test (after merge develop → test)
+git checkout test && git pull
+git tag v1.2.0-test && git push origin v1.2.0-test
+
+# Prod (after merge test → main)
+git checkout main && git pull
+git tag v1.2.0 && git push origin v1.2.0
+```
+
+Do **not** `git push origin develop` expecting a deploy. Promotion is a **new tag per environment**, not a re-run of the same tag.
+
+### Legacy tags
+
+Leave historical tags (`DCV`, unsuffixed tags already pushed to develop) in the repo. They must not match the new regex unless they are a plain `vX.Y.Z` intended for **prod**. Do not reuse a plain `vX.Y.Z` on `develop`.
+
+---
+
+## 2. Environment resolution
+
+Job: `resolve-deploy-target` (stage `prepare`). Image: `alpine/git`. `GIT_DEPTH: "0"`.
+
+`alpine/git` requires `entrypoint: [""]`; without it the job fails with `git: 'sh' is not a git command`.
+`anchore/syft` (non-`-debug`) is scratch: binary `/syft`, no shell. GitLab Docker executor always execs `sh` for `script:`. `entrypoint: [""]` does not add a shell — use `anchore/syft:<ver>-debug` and invoke `/syft`.
+
+### Algorithm
+
+1. Map suffix → env / branch / trimmed version:
+
+   | Tag pattern | `DEPLOY_ENV` | Fetch | `APP_VERSION` |
+   | --- | --- | --- | --- |
+   | `*-dev` | `dev` | `origin/develop` | strip `-dev` |
+   | `*-test` | `test` | `origin/test` | strip `-test` |
+   | otherwise (`vX.Y.Z`) | `prod` | `origin/main` | unchanged |
+
+   `DEPLOY_NAMESPACE=$DEPLOY_ENV`. `IMAGE_TAG=$CI_COMMIT_TAG` (full).
+
+2. Fetch **only that one branch**. `git merge-base --is-ancestor $CI_COMMIT_SHA origin/<branch>` must succeed; otherwise `exit 1` (`tag … targets <env> but commit is not on <branch>`). Downstream jobs never run.
+
+3. Write dotenv `deploy-target.env`:
+
+```
+DEPLOY_ENV=dev|test|prod
+IMAGE_TAG=vX.Y.Z[-dev|-test]
+DEPLOY_NAMESPACE=dev|test|prod
+APP_VERSION=vX.Y.Z
+```
+
+GitLab dotenv injects these into later jobs (`docker-build*`, `image-scan*`, `require_deploy_target`). `rules:` cannot read dotenv — deploy jobs select themselves with a `$CI_COMMIT_TAG` suffix regex at pipeline creation (section 4).
+
+### Promotion (new tag per environment)
+
+| Step | Action | Tag | Deploy job |
+| --- | --- | --- | --- |
+| 1 | On `develop` | `v1.2.0-dev` | `deploy-dev` (auto) |
+| 2 | Merge `develop` → `test` | — | — |
+| 3 | On `test` | `v1.2.0-test` | `deploy-test` (manual) |
+| 4 | Merge `test` → `main` | — | — |
+| 5 | On `main` | `v1.2.0` | `deploy-prod` (manual) |
+
+Re-running `v1.2.0-dev` after it is also on `test` still deploys **dev** (suffix wins). To promote, mint the next suffix.
+
+### Hotfix
+
+Tag the hotfix commit on `main` as plain `vX.Y.Z` and push. Ancestry must hit `origin/main`. Image is `:vX.Y.Z`. No `-dev`/`-test` hop unless you also tag those branches.
+
+### Local check (before pushing a tag)
+
+```bash
+TAG=v1.2.0-dev   # or v1.2.0-test / v1.2.0
+SHA=$(git rev-parse HEAD)
+case "$TAG" in
+  *-dev)  b=develop ;;
+  *-test) b=test ;;
+  *)      b=main ;;
+esac
+git merge-base --is-ancestor "$SHA" "origin/$b" && echo "OK $TAG on $b" || echo "FAIL $TAG not on $b"
+```
+
+---
+
+## 3. Image naming contract
+
+| Image | Tag | When |
+| --- | --- | --- |
+| `${CI_REGISTRY_IMAGE}/api` | full `$CI_COMMIT_TAG` (`v1.2.0-dev` / `-test` / `v1.2.0`) | Always |
+| `${CI_REGISTRY_IMAGE}/web` | same | Always |
+| same repos | `latest` | **Only** when `DEPLOY_ENV=prod` (plain `vX.Y.Z`) |
+| displayed version | trimmed `APP_VERSION` (`v1.2.0`) | Footer + `GET /api/health` |
+| `:CI_COMMIT_SHORT_SHA` / `:CI_COMMIT_REF_SLUG` | — | **Removed.** Do not restore. |
+
+Helm `--set image.tag` / `web.image.tag` and the migrate Job use **full** `$CI_COMMIT_TAG`. k3s pulls `…/api:v1.2.0-dev` on develop, `…:v1.2.0` on prod.
+
+Build-args: `APP_VERSION` / `VITE_APP_VERSION` = dotenv `APP_VERSION` (suffix stripped). Do **not** pass `$CI_COMMIT_TAG` into those args.
+
+Same version number can exist as three registry tags (`v1.2.0-dev`, `v1.2.0-test`, `v1.2.0`); they do not overwrite each other.
+
+### Build skip
+
+`docker manifest inspect "${IMAGE}:${CI_COMMIT_TAG}"` — skip rebuild if that **full** tag already exists. Prod still `docker pull` then push `:latest`.
+
+Old SHA tags stay until registry cleanup.
+
+---
+
+## 4. Deploy contract (single pipeline)
+
+GitLab evaluates `rules:` when a pipeline is **created**. Dotenv from `resolve-deploy-target` is too late for `rules:`. With the suffixed tag contract the environment is known from `$CI_COMMIT_TAG` at creation time, so each deploy job selects itself with a tag regex. Only one of the three jobs is created.
+
+| Job | When it exists | When it runs |
+| --- | --- | --- |
+| `deploy-dev` | `$CI_COMMIT_TAG` matches `^v\d+\.\d+\.\d+-dev$` | auto, after both image scans |
+| `deploy-test` | `$CI_COMMIT_TAG` matches `^v\d+\.\d+\.\d+-test$` | manual Play, after both image scans |
+| `deploy-prod` | `$CI_COMMIT_TAG` matches `^v\d+\.\d+\.\d+$` | manual Play, after both image scans |
+
+```yaml
+deploy-dev:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-dev$/
+  needs: [resolve-deploy-target, image-scan, image-scan-web]
+
+deploy-test:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-test$/
+      when: manual
+  needs: [resolve-deploy-target, image-scan, image-scan-web]
+
+deploy-prod:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+      when: manual
+  needs: [resolve-deploy-target, image-scan, image-scan-web]
+```
+
+Do **not** use `if: $DEPLOY_ENV` in `rules:` — that variable is dotenv and is empty at pipeline creation, so all three jobs would be hidden.
+
+Jobs live in [`.gitlab/ci/deploy.yml`](../.gitlab/ci/deploy.yml) (Helm helpers + the three jobs), included from the parent `.gitlab-ci.yml`. Vault functions live in [`.gitlab/ci/vault-helpers.yml`](../.gitlab/ci/vault-helpers.yml) and are pulled in with `!reference` (anchors do not cross files). Because the jobs are in the same pipeline as prepare/scan, they can `needs:` those jobs directly.
+
+Helper `require_deploy_target <expected-env> <mode>` in `.helm_deploy` still runs **before** Vault / kubeconfig (defence in depth):
+
+1. `$CI_COMMIT_TAG` must match `^v[0-9]+\.[0-9]+\.[0-9]+(-dev|-test)?$` else `exit 1`.
+2. `$DEPLOY_ENV` must be set else `exit 1`.
+3. `$DEPLOY_ENV` must equal `<expected-env>` (`skip` / `fail` as before). With tag-regex `rules:` the mismatch path should not appear in the UI.
+
+Helm / migrate always use `$CI_COMMIT_TAG`.
+
+---
+
+## 5. Pipeline stages and jobs
+
+```
+prepare → quality → build → image-scan → deploy → dast → perf
+```
+
+`docker-build` / `docker-build-web` have **no** `needs`, so they wait for the whole `quality` stage (blocking Sonar jobs) and inherit dotenv from `prepare`. Do not add `needs: [resolve-deploy-target]` on those build jobs: GitLab `needs` would let the image build start before quality finishes.
+
+| Job | Stage | Rule | Needs | Blocking |
+| --- | --- | --- | --- | --- |
+| `resolve-deploy-target` | prepare | `$CI_COMMIT_TAG` | — | yes (wrong suffix/branch fails pipeline) |
+| `sonar-scan-api` / `-web` | quality | `$CI_COMMIT_TAG` | — | yes (`allow_failure: false`) |
+| `sonar-scan-quality-gate-api` / `-web` | quality | `$CI_COMMIT_TAG` | matching scan | yes (job fails on missing Sonar secrets; QG ERROR is currently logged, not `exit 1`) |
+| `unit-test-api` / `-web` | quality | `$CI_COMMIT_TAG` | — | no |
+| `dependency-check-api` / `-web` | quality | `$CI_COMMIT_TAG` | — | no |
+| `sbom-generate-api` / `-web` | quality | `$CI_COMMIT_TAG` | — | no |
+| `docker-build` / `docker-build-web` | build | `$CI_COMMIT_TAG` | — (stage order) | yes |
+| `db-migrate-verify` | build | `$CI_COMMIT_TAG` | `docker-build` | yes (`migration:show` and empty-MySQL `migration:run` both blocking) |
+| `image-scan` / `image-scan-web` | image-scan | `$CI_COMMIT_TAG` | matching docker-build + `resolve-deploy-target` | yes; **CRITICAL `--exit-code 1` only if `DEPLOY_ENV=prod`** |
+| `deploy-dev` | deploy | `$CI_COMMIT_TAG` `…-dev$` auto | resolve + both scans | yes |
+| `deploy-test` | deploy | `$CI_COMMIT_TAG` `…-test$` manual | resolve + both scans | yes |
+| `deploy-prod` | deploy | `$CI_COMMIT_TAG` `^v\d+\.\d+\.\d+$` manual | resolve + both scans | yes |
+| `dast` / `perf-test` | dast / perf | manual | — | no |
+
+---
+
+## 6. GitLab + Vault (unchanged names)
+
+Keep existing CI/CD variable **names**. Tag pipelines must actually receive them.
+
+| Variable / secret | Role |
+| --- | --- |
+| `VAULT_TOKEN`, `VAULT_SERVERS` / `VAULT_ADDR` | Vault HA |
+| `VAULT_PROJECT_NAME`, `VAULT_EXTRA_PROJECT_NAMES` | KV path slug override |
+| Vault `secret/data/SONAR-CI` | `SONAR_URL`, `SONAR_TOKEN-CI` |
+| Vault `secret/data/KUBECONFIG` | shared kubeconfig / `REGISTRY_HOST` |
+| Vault `secret/data/<slug>/{dev,test,prod}` | `KUBECONFIG_*`, `DOTENV_*`, registry user/token |
+| GitLab fallbacks | `KUBECONFIG_DEV/_TEST/_PROD`, `SONAR_HOST_URL`, `SONAR_TOKEN`, `DOTENV_*` |
+| `CI_REGISTRY_USER` / `CI_REGISTRY_PASSWORD` | docker push (or Vault `REGISTRY_USER` / `REGISTRY_TOKEN`) |
+
+### Protected tags (required ops change)
+
+Because **only tags** run the pipeline:
+
+1. Protect tag pattern `v*` (or `v*.*.*`) so only maintainers can create/push tags.
+2. Mark `VAULT_TOKEN` (and kubeconfig file vars) as **Protected**. They are then injected only on protected tags — not on stray unprotected tags (which this workflow already ignores).
+3. Protecting `develop` is no longer required for CI injection (branch pipelines do not run). Still protect `main` / `test` / `develop` against force-push.
+
+Runner: tag `gitrunner` (or project `RUNNER_TAG`). Job token must `git fetch` the **one** branch implied by the tag suffix (`GIT_DEPTH: 0`).
+
+---
+
+## 7. Migration checklist (branch-triggered → tag-driven)
+
+Use this on another project that still keys jobs off `$CI_COMMIT_BRANCH`.
+
+1. **Inventory** every `rules:` / `only:` that mentions `develop`, `test`, `main`, or merge-request pipelines. Note which deploy job is auto vs manual.
+2. **Replace `workflow.rules`** with the tag regex + `when: never` (section 1). Confirm MR pipelines disappear.
+3. **Add stage `prepare` first** and copy `resolve-deploy-target` (suffix → env; fetch **one** branch; ancestry check). Emit `APP_VERSION` (trimmed) in dotenv. Rename `main` if the prod branch is `master`.
+4. **Switch every parent job `rules`** from `$CI_COMMIT_BRANCH == …` to `$CI_COMMIT_TAG`.
+5. **Split deploy YAML:** `.gitlab/ci/vault-helpers.yml` (Vault functions as a hidden job) and `.gitlab/ci/deploy.yml` (`.helm_deploy` + the three deploy jobs). Parent `include:`s both. Use `!reference` instead of YAML anchors across files. Do **not** declare `stages:` in `deploy.yml` (it would override the parent list).
+6. **Deploy job `rules`** on `$CI_COMMIT_TAG` suffix regex (`-dev` auto, `-test` / plain `when: manual`). Set `needs: [resolve-deploy-target, image-scan, image-scan-web]` so scans must pass before deploy. Do **not** use `if: $DEPLOY_ENV` in `rules:` (dotenv is empty at creation).
+7. **Image tag = full `$CI_COMMIT_TAG`** (`vX.Y.Z-dev` / `-test` / plain). **Display version = trimmed `APP_VERSION`** in Docker build-args. Push `:latest` only for prod. `manifest inspect` skip. Helm / migrate use the full tag.
+8. **Keep `require_deploy_target`** as the first deploy `script` line (`dev skip` / `test fail` / `prod fail`). Fail closed if `CI_COMMIT_TAG` or `DEPLOY_ENV` is empty.
+9. **Trivy (or equivalent):** strict fail on CRITICAL only when `DEPLOY_ENV=prod`, not on every tag.
+10. **GitLab UI:** protect `v*`; Protected variables on protected tags; document “new tag per env after merge” (`-dev` → `-test` → plain).
+11. **Do not** keep a branch pipeline “just for tests” unless product explicitly wants it — this spec is tag-only.
+12. **Smoke:** `vX.Y.Z-dev` on develop → only `deploy-dev` in stage deploy, footer `vX.Y.Z`. `vX.Y.Z-test` on test → only `deploy-test`. `vX.Y.Z` on main → only `deploy-prod`. `vX.Y.Z-dev` on a non-develop commit → prepare fails. `DCV` / `v1.2.0-rc.1` → no pipeline.
+
+Rollback of the YAML itself: restore the previous `.gitlab-ci.yml`. Cluster rollback: re-run the previous good tag pipeline, or `helm rollback <release> -n <ns> --timeout 5m` (do **not** pass `--wait`).
+
+---
+
+## 8. Rollback of a release
+
+1. Preferred: GitLab → Run pipeline on the **previous tag for that env** (`vX.Y.Z-dev` / `-test` / plain).
+2. Fallback: `helm rollback <release> -n <dev|test|prod> --timeout 5m` (**no `--wait`**). A crashlooping API makes `--wait` fail with `context deadline exceeded`. Then confirm Deployment image tag.
+3. If `deploy/<release>` is missing after `UPGRADE FAILED: deployments.apps "<release>" not found`, restore the object **before** another `deploy-prod` click (prod migrate no longer scales replicas to 0, but a missing Deployment still needs a manifest apply):
+
+   ```bash
+   helm history <release> -n prod
+   helm status <release> -n prod
+   helm get manifest <release> -n prod | kubectl apply -n prod -f -
+   kubectl get deploy,po -n prod -l "app in (<release>,<release>-web)"
+   kubectl logs -n prod -l app=<release> --previous --tail=200
+   ```
+
+   Connection refused on `/api/health` means Nest never listened. Look for `Production trust readiness failed:`. Prod dotenv must set `CORS_ORIGINS` (not only `CORS_ORIGIN`) and `FRONTEND_PUBLIC_URL` as https origin-only. Do not disable TrustReadiness. Do not change the probe path.
+   CI dumps API logs when the **current** API ReplicaSet is CrashLoop/ImagePull twice in a row (ignores leftover pods from older tags). Startup probe `connection refused` during Nest listen is not CrashLoop. If that current ReplicaSet is already Ready, CI does **not** Helm-rollback. `privacy_notice` still needs at least one active row in prod — that cannot be checked from dotenv.
+4. Do not retag an existing name; cut `vX.Y.(Z+1)[-dev|-test]`.
+
+---
+
+## 9. Risks other projects should copy verbatim
+
+- Suffix decides env; ancestry must still match (`-dev` on a commit not on `develop` fails prepare). Re-running `-dev` never becomes test/prod.
+- Image tag is the **full** git tag; displayed version is **trimmed**. Do not pass `$CI_COMMIT_TAG` into `APP_VERSION` / `VITE_APP_VERSION`.
+- `needs:` on `docker-build` would skip the quality stage; do not add it.
+- Other suffixes (`-rc.1`, `-staging`) do not match the workflow regex.
+- `rules:` cannot read dotenv from a previous job. Select the deploy job with `$CI_COMMIT_TAG` suffix regex, not `if: $DEPLOY_ENV`.
+- YAML anchors (`&foo` / `*foo`) do not cross `include:` files. Use `!reference`.
+- `alpine/git` requires `entrypoint: [""]`; without it the job fails with `git: 'sh' is not a git command`.
+- `anchore/syft` (non-`-debug`) is scratch: binary `/syft`, no shell. GitLab Docker executor always execs `sh` for `script:`. `entrypoint: [""]` does not add a shell — use `anchore/syft:<ver>-debug` and invoke `/syft`.
+
+---
+
+## 10. Post-merge acceptance (this repo)
+
+Cannot be proven in a local sandbox. After this YAML is on the default integration branch:
+
+1. Push `vX.Y.Z-dev` on `develop` → `DEPLOY_ENV=dev`; only `deploy-dev` appears in stage deploy; k3s images `:vX.Y.Z-dev`; footer / `/api/health` show `vX.Y.Z`.
+2. Push to `develop` without a tag → **no** pipeline.
+3. After merge to `test`, push `vX.Y.Z-test` → only `deploy-test` appears in stage deploy; image `:vX.Y.Z-test`; footer still `vX.Y.Z`.
+4. After merge to `main`, push `vX.Y.Z` → only `deploy-prod` appears in stage deploy; image `:vX.Y.Z` + `:latest`.
+5. `vX.Y.Z-dev` on a commit not on `develop` → prepare fails. `DCV` / `v1.2.0-rc.1` → no pipeline.

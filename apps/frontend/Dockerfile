@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 # Build context MUST be the monorepo root (Quasar envFolder = monorepo root).
-#   docker build -f apps/frontend/Dockerfile --build-arg NODE_VERSION=22 --build-arg API_BASE_URL=/api -t buu-get-web .
+#   docker build -f apps/frontend/Dockerfile --build-arg NODE_VERSION=24 --build-arg API_BASE_URL=/api -t buu-get-web .
 
-ARG NODE_VERSION=22
+ARG NODE_VERSION=24
 
 # ─── Build ───────────────────────────────────────────────────────────────────
 FROM node:${NODE_VERSION}-alpine AS builder
@@ -10,7 +10,9 @@ FROM node:${NODE_VERSION}-alpine AS builder
 WORKDIR /app
 
 ARG API_BASE_URL=/api
+ARG VITE_APP_VERSION=
 ENV API_BASE_URL=${API_BASE_URL}
+ENV VITE_APP_VERSION=${VITE_APP_VERSION}
 ENV HUSKY=0
 ENV CI=true
 
@@ -18,9 +20,10 @@ COPY package.json package-lock.json ./
 COPY apps/backend/package.json ./apps/backend/
 COPY apps/frontend/package.json ./apps/frontend/
 
-# node:22-alpine ships npm 10; engines require npm >= 11 for this lockfile
+# node:*-alpine ships npm 10; engines require npm >= 11 for this lockfile.
+# Workspace-only ci avoids installing Nest/API deps into the web image (DinD ENOSPC).
 RUN npm install -g npm@11 \
-  && npm ci --ignore-scripts
+  && npm ci --ignore-scripts --workspace=buu-get-front --include-workspace-root
 
 COPY apps/frontend ./apps/frontend
 
@@ -29,6 +32,10 @@ RUN npm run postinstall --workspace=buu-get-front \
 
 # ─── Runtime (static SPA) ────────────────────────────────────────────────────
 FROM nginx:1.27-alpine AS runner
+
+# nginx:*-alpine does not refresh Alpine packages; Trivy prod gate fails CRITICAL
+# on libcrypto3/libssl3 (CVE-2026-31789, fixed in 3.3.7-r0).
+RUN apk add --no-cache --upgrade libcrypto3 libssl3
 
 COPY apps/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/apps/frontend/dist/spa /usr/share/nginx/html

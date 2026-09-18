@@ -3,7 +3,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DataSource } from 'typeorm';
 import { Public } from 'src/decorators/public.decorator';
 
-export type HealthOkResponse = { status: 'ok' };
+export type HealthOkResponse = { status: 'ok'; version: string };
 
 @ApiTags('Health')
 @Controller('health')
@@ -20,7 +20,10 @@ export class HealthController {
   async check(): Promise<HealthOkResponse> {
     try {
       await this.dataSource.query('SELECT 1');
-      return { status: 'ok' };
+      return {
+        status: 'ok',
+        version: process.env.APP_VERSION || 'unknown',
+      };
     } catch {
       throw new ServiceUnavailableException({ status: 'error' });
     }
