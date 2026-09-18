@@ -42,7 +42,7 @@ export interface AssistEvent {
   seq: number;
   type: CheckInAssistEventType;
   scannedCode: string;
-  scannerUserId: number;
+  scannerPsnId: string;
   at: string;
   candidate?: AssistCandidateSummary;
   expectedRoom?: AssistExpectedRoom | null;

@@ -106,3 +106,17 @@ export function requireUserId(
   }
   return user.userId;
 }
+
+/**
+ * บังคับว่าต้องเป็นบัญชีบุคลากร (MSG_T_PERSON) ที่มี PSN_ID
+ * — ใช้กับ endpoint ที่ผูก host/scanner กับ PERSON
+ */
+export function requirePersonId(
+  user: AuthenticatedUser,
+  message = 'This action requires a personnel account',
+): string {
+  if (!user.personId) {
+    throw new ForbiddenException(message);
+  }
+  return user.personId;
+}

@@ -37,7 +37,7 @@ import {
 import { Exam } from '../exam/entities/exam.entity';
 import { ExamSessionLocation } from '../exam-session-locations/entities/exam-session-location.entity';
 import { ExamSessionLocationProctor } from '../exam-session-locations/entities/exam-session-location-proctor.entity';
-import { AuthenticatedUser, requireUserId, userHasAnyRole } from 'src/common/utils/authz.util';
+import { AuthenticatedUser, requirePersonId, userHasAnyRole } from 'src/common/utils/authz.util';
 import { ROOM_CHECK_IN_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import {
   isValidAssistScanCode,
@@ -80,12 +80,13 @@ export class CheckInAssistService {
       throw new NotFoundException(`Exam with ID ${dto.examId} not found`);
     }
 
+    const hostPsnId = requirePersonId(user);
     const joinToken = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
 
     const session = this.sessionRepository.create({
       EXAM_ID: dto.examId,
-      HOST_USER_ID: user.userId,
+      HOST_PSN_ID: hostPsnId,
       JOIN_TOKEN: joinToken,
       STATUS: CheckInAssistSessionStatus.ACTIVE,
       MODE: CheckInAssistSessionMode.HOST_ASSIST,
@@ -140,10 +141,9 @@ export class CheckInAssistService {
     const rooms = await qb.orderBy('session.SS_START_TIME', 'ASC').getMany();
     const slIds = rooms.map((room) => room.SL_ID);
     const counts = await this.loadAttendanceCounts(slIds);
-    const activeStations =
-      user.userId != null
-        ? await this.loadActiveStationsForUser(user.userId, slIds)
-        : new Map<number, number>();
+    const activeStations = user.personId
+      ? await this.loadActiveStationsForPerson(user.personId, slIds)
+      : new Map<number, number>();
 
     return rooms.map((room) => {
       const count = counts.get(room.SL_ID) ?? { total: 0, attended: 0 };
@@ -168,12 +168,13 @@ export class CheckInAssistService {
     user: AuthenticatedUser,
     slId: number,
   ): Promise<RoomStationResponseDto> {
+    const hostPsnId = requirePersonId(user);
     const room = await this.loadSessionLocationForStation(slId);
     await this.assertCanOpenRoom(user, room);
 
     const existing = await this.sessionRepository.findOne({
       where: {
-        HOST_USER_ID: user.userId,
+        HOST_PSN_ID: hostPsnId,
         SL_ID: slId,
         MODE: CheckInAssistSessionMode.ROOM_STATION,
         STATUS: CheckInAssistSessionStatus.ACTIVE,
@@ -200,7 +201,7 @@ export class CheckInAssistService {
 
     const session = this.sessionRepository.create({
       EXAM_ID: examId,
-      HOST_USER_ID: user.userId,
+      HOST_PSN_ID: hostPsnId,
       JOIN_TOKEN: randomBytes(32).toString('hex'),
       STATUS: CheckInAssistSessionStatus.ACTIVE,
       MODE: CheckInAssistSessionMode.ROOM_STATION,
@@ -281,7 +282,7 @@ export class CheckInAssistService {
     user: AuthenticatedUser,
     rawCode: string,
   ): Promise<AssistEventDto> {
-    const scannerUserId = requireUserId(user);
+    const scannerPsnId = requirePersonId(user);
     const session = await this.findSessionById(casId);
     this.assertSessionUsable(session);
     if (this.isRoomStation(session)) {
@@ -293,7 +294,7 @@ export class CheckInAssistService {
       return this.appendEvent(session, {
         type: CheckInAssistEventType.INVALID_CODE,
         scannedCode: rawCode.trim().slice(0, 64),
-        scannerUserId,
+        scannerPsnId,
         ermId: null,
       });
     }
@@ -309,7 +310,7 @@ export class CheckInAssistService {
       return this.appendEvent(session, {
         type: CheckInAssistEventType.NOT_FOUND,
         scannedCode: normalized,
-        scannerUserId,
+        scannerPsnId,
         ermId: null,
       });
     }
@@ -320,7 +321,7 @@ export class CheckInAssistService {
       return this.appendEvent(session, {
         type: CheckInAssistEventType.ALREADY_CHECKED_IN,
         scannedCode: normalized,
-        scannerUserId,
+        scannerPsnId,
         ermId: enrollment.ERM_ID,
         candidate: {
           ...candidateSummary,
@@ -336,7 +337,7 @@ export class CheckInAssistService {
       return this.appendEvent(session, {
         type: CheckInAssistEventType.NOT_FOUND,
         scannedCode: normalized,
-        scannerUserId,
+        scannerPsnId,
         ermId: enrollment.ERM_ID,
       });
     }
@@ -345,7 +346,7 @@ export class CheckInAssistService {
       return this.appendEvent(session, {
         type: CheckInAssistEventType.WRONG_ROOM,
         scannedCode: normalized,
-        scannerUserId,
+        scannerPsnId,
         ermId: enrollment.ERM_ID,
         candidate: candidateSummary,
         expectedRoom: this.buildExpectedRoom(enrollment),
@@ -365,7 +366,7 @@ export class CheckInAssistService {
       return this.appendEvent(session, {
         type: CheckInAssistEventType.CHECKED_IN,
         scannedCode: normalized,
-        scannerUserId,
+        scannerPsnId,
         ermId: checkedIn.ERM_ID,
         candidate: {
           ...refreshedSummary,
@@ -376,7 +377,7 @@ export class CheckInAssistService {
       return this.appendEvent(session, {
         type: CheckInAssistEventType.NOT_FOUND,
         scannedCode: normalized,
-        scannerUserId,
+        scannerPsnId,
         ermId: enrollment.ERM_ID,
       });
     }
@@ -387,7 +388,7 @@ export class CheckInAssistService {
     user: AuthenticatedUser,
   ): Promise<CloseAssistSessionResponseDto> {
     const session = await this.findSessionById(casId);
-    if (session.HOST_USER_ID !== user.userId) {
+    if (session.HOST_PSN_ID !== user.personId) {
       throw new BadRequestException('เฉพาะ host เท่านั้นที่ปิด session นี้ได้');
     }
 
@@ -407,7 +408,7 @@ export class CheckInAssistService {
     if (!this.isRoomStation(session)) {
       throw new BadRequestException('session นี้ไม่ใช่สถานีเช็คอินประจำห้อง');
     }
-    if (session.HOST_USER_ID !== user.userId) {
+    if (session.HOST_PSN_ID !== user.personId) {
       throw new ForbiddenException('เฉพาะผู้เปิดนี้เท่านั้นที่ใช้งานได้');
     }
   }
@@ -536,8 +537,8 @@ export class CheckInAssistService {
     return result;
   }
 
-  private async loadActiveStationsForUser(
-    userId: number,
+  private async loadActiveStationsForPerson(
+    personId: string,
     slIds: number[],
   ): Promise<Map<number, number>> {
     const result = new Map<number, number>();
@@ -547,7 +548,7 @@ export class CheckInAssistService {
 
     const stations = await this.sessionRepository.find({
       where: {
-        HOST_USER_ID: userId,
+        HOST_PSN_ID: personId,
         MODE: CheckInAssistSessionMode.ROOM_STATION,
         STATUS: CheckInAssistSessionStatus.ACTIVE,
         SL_ID: In(slIds),
@@ -765,7 +766,7 @@ export class CheckInAssistService {
     input: {
       type: CheckInAssistEventType;
       scannedCode: string;
-      scannerUserId: number;
+      scannerPsnId: string;
       ermId: number | null;
       candidate?: AssistCandidateSummaryDto | undefined;
       expectedRoom?: AssistExpectedRoomDto | null;
@@ -806,7 +807,7 @@ export class CheckInAssistService {
           EVENT_TYPE: input.type,
           SCANNED_CODE: input.scannedCode,
           ERM_ID: input.ermId,
-          SCANNER_USER_ID: input.scannerUserId,
+          SCANNER_PSN_ID: input.scannerPsnId,
           PAYLOAD_JSON: payload,
           CREATED_AT: createdAt,
         }),
@@ -852,7 +853,7 @@ export class CheckInAssistService {
       seq: event.SEQ,
       type: event.EVENT_TYPE,
       scannedCode: event.SCANNED_CODE,
-      scannerUserId: event.SCANNER_USER_ID,
+      scannerPsnId: event.SCANNER_PSN_ID,
       at: createdAt.toISOString(),
       ...(candidate ? { candidate } : {}),
       ...(expectedRoom !== undefined ? { expectedRoom } : {}),

@@ -27,8 +27,13 @@ export class CheckInAssistSession {
   @Column({ name: 'EXAM_ID', comment: 'รหัสการสอบ' })
   EXAM_ID: number;
 
-  @Column({ name: 'HOST_USER_ID', comment: 'ผู้เปิด session (host)' })
-  HOST_USER_ID: number;
+  @Column({
+    name: 'HOST_PSN_ID',
+    type: 'varchar',
+    length: 10,
+    comment: 'รหัสบุคลากรผู้เปิด session (host)',
+  })
+  HOST_PSN_ID: string;
 
   @Column({
     name: 'JOIN_TOKEN',

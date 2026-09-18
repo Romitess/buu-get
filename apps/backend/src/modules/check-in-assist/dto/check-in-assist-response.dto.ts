@@ -100,8 +100,8 @@ export class AssistEventDto {
   @ApiProperty()
   scannedCode: string;
 
-  @ApiProperty()
-  scannerUserId: number;
+  @ApiProperty({ description: 'รหัสบุคลากรผู้แสกน (PSN_ID)' })
+  scannerPsnId: string;
 
   @ApiProperty()
   at: string;

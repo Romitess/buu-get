@@ -53,8 +53,13 @@ export class CheckInAssistEvent {
   })
   ERM_ID: number | null;
 
-  @Column({ name: 'SCANNER_USER_ID', comment: 'ผู้แสกน' })
-  SCANNER_USER_ID: number;
+  @Column({
+    name: 'SCANNER_PSN_ID',
+    type: 'varchar',
+    length: 10,
+    comment: 'รหัสบุคลากรผู้แสกน',
+  })
+  SCANNER_PSN_ID: string;
 
   @Column({
     name: 'PAYLOAD_JSON',

@@ -7,6 +7,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { appendFileSync } from 'fs';
+import { join } from 'path';
 
 /**
  * AllExceptionsFilter — global filter ที่ทำให้ error response ทุก endpoint มีรูปแบบเดียวกัน
@@ -38,10 +40,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (status >= Number(HttpStatus.INTERNAL_SERVER_ERROR)) {
       // log เฉพาะฝั่ง server — รายละเอียดจริงไม่ควรหลุดไปหา client
+      const detail =
+        exception instanceof Error ? exception.stack : String(exception);
       this.logger.error(
         `${request.method} ${request.url} -> ${status}`,
-        exception instanceof Error ? exception.stack : String(exception),
+        detail,
       );
+      if (request.url?.includes('check-in-assist/room-stations')) {
+        try {
+          appendFileSync(
+            join(process.cwd(), 'room-stations-500.log'),
+            `${new Date().toISOString()} ${request.method} ${request.url}\n${detail}\n\n`,
+          );
+        } catch {
+          // ignore logging failures
+        }
+      }
     }
 
     const body: ErrorResponseBody = {

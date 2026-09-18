@@ -61,10 +61,19 @@ describe('CheckInAssistService', () => {
   };
 
   const hostUser: AuthenticatedUser = {
-    userId: 10,
+    actorType: 'person',
+    personId: 'HOST000001',
+    role: RoleEnum.STAFF,
+    roles: [RoleEnum.STAFF],
+    email: 'host@test.local',
+  };
+
+  const adminUser: AuthenticatedUser = {
+    actorType: 'person',
+    personId: 'ADMIN00001',
     role: RoleEnum.ADMIN,
     roles: [RoleEnum.ADMIN],
-    email: 'host@test.local',
+    email: 'admin@test.local',
   };
 
   beforeEach(async () => {
@@ -142,7 +151,7 @@ describe('CheckInAssistService', () => {
     const activeSession = {
       CAS_ID: 7,
       EXAM_ID: 5,
-      HOST_USER_ID: 10,
+      HOST_PSN_ID: 'HOST000001',
       JOIN_TOKEN: 'token',
       STATUS: CheckInAssistSessionStatus.ACTIVE,
       EXPIRES_AT: new Date('2030-01-01T00:00:00.000Z'),
@@ -166,7 +175,7 @@ describe('CheckInAssistService', () => {
         seq: 1,
         type: CheckInAssistEventType.INVALID_CODE,
         scannedCode: '!!!',
-        scannerUserId: 10,
+        scannerPsnId: 'HOST000001',
         at: new Date().toISOString(),
       });
 
@@ -225,7 +234,7 @@ describe('CheckInAssistService', () => {
         seq: 2,
         type: CheckInAssistEventType.CHECKED_IN,
         scannedCode: 'ENG123456',
-        scannerUserId: 10,
+        scannerPsnId: 'HOST000001',
         at: new Date().toISOString(),
         candidate: {
           ermId: 50,
@@ -262,7 +271,7 @@ describe('CheckInAssistService', () => {
         seq: 3,
         type: CheckInAssistEventType.ALREADY_CHECKED_IN,
         scannedCode: 'ENG123456',
-        scannerUserId: 10,
+        scannerPsnId: 'HOST000001',
         at: new Date().toISOString(),
       });
 
@@ -319,7 +328,7 @@ describe('CheckInAssistService', () => {
         seq: 4,
         type: CheckInAssistEventType.WRONG_ROOM,
         scannedCode: 'ENG123456',
-        scannerUserId: 10,
+        scannerPsnId: 'HOST000001',
         at: new Date().toISOString(),
       });
 
@@ -384,7 +393,7 @@ describe('CheckInAssistService', () => {
     it('forbids an administrator from opening a room station', async () => {
       sessionLocationRepository.findOne.mockResolvedValue(room);
 
-      await expect(service.openRoomStation(hostUser, 12)).rejects.toBeInstanceOf(
+      await expect(service.openRoomStation(adminUser, 12)).rejects.toBeInstanceOf(
         ForbiddenException,
       );
     });
@@ -416,6 +425,7 @@ describe('CheckInAssistService', () => {
     it('filters rooms by assigned PSN_ID for a personnel actor', async () => {
       const qb = createRoomsQb();
       sessionLocationRepository.createQueryBuilder.mockReturnValue(qb);
+      sessionRepository.find.mockResolvedValue([]);
 
       await service.listMyRooms({
         personId: 'PROC000001',
@@ -462,6 +472,7 @@ describe('CheckInAssistService', () => {
         },
       ]);
       sessionLocationRepository.createQueryBuilder.mockReturnValue(qb);
+      sessionRepository.find.mockResolvedValue([]);
       enrollmentRepository.createQueryBuilder.mockReturnValue({
         select: jest.fn().mockReturnThis(),
         addSelect: jest.fn().mockReturnThis(),

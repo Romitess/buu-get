@@ -4,6 +4,7 @@ import { ENROLLMENT_ADMIN_ROLES } from '../constants/role-groups';
 import {
   assertSelfOrRoles,
   getEffectiveRoles,
+  requirePersonId,
   requireUserId,
   resolveActiveRole,
   userHasAnyRole,
@@ -134,6 +135,23 @@ describe('authz.util', () => {
         roles: [RoleEnum.STAFF],
       };
       expect(() => requireUserId(person)).toThrow(ForbiddenException);
+    });
+  });
+
+  describe('requirePersonId', () => {
+    it('returns PSN_ID for person tokens', () => {
+      const person: AuthenticatedUser = {
+        actorType: 'person',
+        personId: 'DEMOSTAFF2',
+        email: 'staff02@go.buu.ac.th',
+        role: RoleEnum.STAFF,
+        roles: [RoleEnum.STAFF],
+      };
+      expect(requirePersonId(person)).toBe('DEMOSTAFF2');
+    });
+
+    it('throws when user token has no personId', () => {
+      expect(() => requirePersonId(candidateUser)).toThrow(ForbiddenException);
     });
   });
 });
