@@ -2409,6 +2409,7 @@ export default {
       success: 'Login successful',
       failed: 'Incorrect email or password',
       failedBuu: 'Incorrect username or password',
+      noPermissionBuu: 'Your account does not have access to this system',
       error: 'Connection error',
       registerSuccess: 'Registration successful! Please login',
       registerFailed: 'An error occurred during registration',

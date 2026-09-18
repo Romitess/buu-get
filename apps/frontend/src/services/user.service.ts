@@ -113,7 +113,7 @@ export async function authenticateBuuUser(
     return response.data;
   } catch (err) {
     console.error('BUU authentication failed:', err);
-    return null;
+    throw err;
   }
 }
 

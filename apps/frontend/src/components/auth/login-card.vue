@@ -237,12 +237,18 @@ const onSubmit = async () => {
 
       await redirectAfterLogin();
     } else {
+      let failMessage =
+        loginMode.value === 'staff' ? t('auth.notify.failedBuu') : t('auth.notify.failed');
+      if (loginMode.value === 'staff') {
+        if (userStore.error === 'NO_PERMISSION_BUU') {
+          failMessage = t('auth.notify.noPermissionBuu');
+        } else if (userStore.error === 'CONNECTION_ERROR') {
+          failMessage = t('auth.notify.error');
+        }
+      }
       $q.notify({
         type: 'negative',
-        message:
-          loginMode.value === 'staff'
-            ? t('auth.notify.failedBuu')
-            : t('auth.notify.failed'),
+        message: failMessage,
       });
     }
   } catch (error) {

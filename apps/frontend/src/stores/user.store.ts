@@ -224,11 +224,30 @@ export const useUserStore = defineStore('user', () => {
         await hydrateFromLogin(result);
         return true;
       }
-      error.value = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+      error.value = 'AUTH_FAILED_BUU';
       return false;
     } catch (err) {
       console.error('BUU Login Error:', err);
-      error.value = 'เกิดข้อผิดพลาดในการเชื่อมต่อระบบ';
+      const axiosError = err as {
+        response?: { data?: { message?: string | string[] }; status?: number };
+      };
+      const rawMessage = axiosError.response?.data?.message;
+      const backendMessage = Array.isArray(rawMessage)
+        ? rawMessage.join(', ')
+        : typeof rawMessage === 'string'
+          ? rawMessage
+          : '';
+
+      if (
+        backendMessage.includes('ยังไม่มีสิทธิ์ในระบบ') ||
+        backendMessage === 'บัญชีบุคลากรยังไม่มีสิทธิ์ในระบบ'
+      ) {
+        error.value = 'NO_PERMISSION_BUU';
+      } else if (axiosError.response?.status === 401) {
+        error.value = 'AUTH_FAILED_BUU';
+      } else {
+        error.value = 'CONNECTION_ERROR';
+      }
       return false;
     }
   }
