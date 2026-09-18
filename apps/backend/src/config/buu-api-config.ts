@@ -47,7 +47,7 @@ export default () => ({
     provision_key: process.env.BUU_DELETE_FILE_PROVISION_KEY || '',
     scope: process.env.BUU_DELETE_FILE_SCOPE || 'write',
   },
-  noti: process.env.NOTI_PREFIX || 'test ver** ',
+  noti: process.env.NOTI_PREFIX ?? '',
   isDev: (process.env.IS_DEV || 'true') === 'true', //isDev: false, for not show some on prod
   // คำนำหน้า
   // Method : GET, POST

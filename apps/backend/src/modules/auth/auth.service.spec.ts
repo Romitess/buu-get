@@ -1,4 +1,8 @@
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Cache } from 'cache-manager';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
@@ -32,9 +36,7 @@ type AuthServicePrivate = {
 
 describe('AuthService', () => {
   let service: AuthService;
-  let usersService: jest.Mocked<
-    Pick<UsersService, 'findByEmail' | 'findById'>
-  >;
+  let usersService: jest.Mocked<Pick<UsersService, 'findByEmail' | 'findById'>>;
   let memberSessionCodesService: {
     allocateUserCode: jest.Mock;
   };
@@ -393,6 +395,18 @@ describe('AuthService', () => {
       await expect(
         service.loginBuu({ username: 'bad', password: 'bad' }),
       ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('does not map gateway connection failure to UnauthorizedException', async () => {
+      platformGatewayService.loginBuu.mockRejectedValue(
+        new BadGatewayException(
+          'ไม่สามารถเชื่อมต่อระบบยืนยันตัวตนของมหาวิทยาลัยได้',
+        ),
+      );
+
+      await expect(
+        service.loginBuu({ username: 'staff02', password: 'secret' }),
+      ).rejects.toBeInstanceOf(BadGatewayException);
     });
 
     it('throws when person is not found in MSG_T_PERSON', async () => {

@@ -1,5 +1,6 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
+  BadGatewayException,
   BadRequestException,
   HttpException,
   HttpStatus,
@@ -7,6 +8,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cache } from 'cache-manager';
@@ -78,10 +80,7 @@ export class PlatformGatewayService {
 
   private getNotiEndpoint(): string {
     const noti = this.configService.get<string>('noti');
-    if (!noti) {
-      throw new Error('Config "noti" is not defined');
-    }
-    return noti;
+    return typeof noti === 'string' ? noti : '';
   }
 
   private getApiConfig(apiName: string): any {
@@ -198,7 +197,7 @@ export class PlatformGatewayService {
       // Log response body for 500 to help debug (ฝั่ง server เท่านั้น)
       try {
         const status = axiosError.response?.status;
-        const body = axiosError.response?.data;
+        const body = this.maskSensitiveData(axiosError.response?.data);
         this.logger?.error?.(
           `❌ API ${apiName} returned status ${status}. Body: ${JSON.stringify(body)}`,
         );
@@ -226,7 +225,7 @@ export class PlatformGatewayService {
         );
       }
 
-      return this.handleApiError(apiName, error);
+      return this.handleApiError(apiName, error, funcName);
     }
   }
 
@@ -253,6 +252,8 @@ export class PlatformGatewayService {
       'secret',
       'confirmPassword',
       'oldPassword',
+      'provision_key',
+      'access_token',
     ];
     const sanitized = Array.isArray(data) ? [...data] : { ...data };
 
@@ -272,16 +273,31 @@ export class PlatformGatewayService {
 
   /**
    * แปลง error จาก upstream (Kong gateway) เป็น HttpException มาตรฐาน แล้ว throw
-   * - แจ้งเตือน (sendNoti) ฝั่ง server
+   * - แจ้งเตือน (sendNoti) ฝั่ง server ครั้งเดียว
    * - ไม่ forward upstream error body (อาจมี internal detail) ให้ client — คืนเฉพาะข้อความกลาง ๆ
    * - คง HTTP status ต้นทางไว้ถ้าเป็น 4xx/5xx ที่ใช้ได้ ไม่งั้นตอบ 502 Bad Gateway
    */
-  async handleApiError(apiName: string, error: unknown): Promise<never> {
+  async handleApiError(
+    apiName: string,
+    error: unknown,
+    hop = 'upstream',
+  ): Promise<never> {
     const axiosError = error as AxiosError;
     const message = axiosError?.message ?? String(error);
+    const status = axiosError?.response?.status;
+    let bodyPreview = '';
+    try {
+      bodyPreview = JSON.stringify(
+        this.maskSensitiveData(axiosError?.response?.data),
+      );
+    } catch {
+      bodyPreview = '[unserializable]';
+    }
+    this.logger.error(
+      `${hop} ${apiName} failed status=${status ?? 'n/a'} body=${bodyPreview}`,
+    );
     await this.sendNoti(`${this.getNotiEndpoint()}${apiName}: ${message}`);
 
-    const status = axiosError?.response?.status;
     const httpStatus =
       typeof status === 'number' && status >= 400 && status < 600
         ? status
@@ -340,15 +356,27 @@ export class PlatformGatewayService {
         this.resolveTokenTtlMs(response.data),
       );
     } catch (error) {
-      return this.handleApiError(apiName, error);
+      return this.handleApiError(apiName, error, 'refreshToken');
     }
   }
 
   async requestToken(apiName: string) {
     try {
-      console.log('requestToken ' + apiName);
+      this.logger.log(`requestToken ${apiName}`);
       const requestTokenConfig = this.getRequestTokenConfig();
       const apiConfig = this.getApiConfig(apiName);
+      const provisionKey =
+        typeof apiConfig.provision_key === 'string'
+          ? apiConfig.provision_key.trim()
+          : '';
+      if (!provisionKey) {
+        const hint =
+          apiName === 'loginBuu'
+            ? 'BUU_LOGIN_BUU_PROVISION_KEY is not set'
+            : `provision_key for "${apiName}" is not set`;
+        this.logger.error(`requestToken ${apiName}: ${hint}`);
+        throw new ServiceUnavailableException(hint);
+      }
 
       const response = await axios.post(
         `${this.getDomain()}${apiConfig.path}${requestTokenConfig.path}`,
@@ -357,7 +385,7 @@ export class PlatformGatewayService {
           client_id: requestTokenConfig.client_id,
           grant_type: requestTokenConfig.grant_type,
           scope: apiConfig.scope,
-          provision_key: apiConfig.provision_key,
+          provision_key: provisionKey,
           authenticated_userid: requestTokenConfig.authenticated_userid,
         },
         { timeout: 120000 },
@@ -369,7 +397,10 @@ export class PlatformGatewayService {
         this.resolveTokenTtlMs(response.data),
       );
     } catch (error) {
-      return this.handleApiError(apiName, error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      return this.handleApiError(apiName, error, 'requestToken');
     }
   }
 
@@ -395,12 +426,10 @@ export class PlatformGatewayService {
       return body;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
-      await this.sendNoti(this.getNotiEndpoint() + apiName + ': ' + message);
       this.logger.error(`Error in ${apiName}: ${message}`);
-      return {
-        status: 'fail',
-        message: 'ไม่สามารถเชื่อมต่อระบบยืนยันตัวตนของมหาวิทยาลัยได้',
-      };
+      throw new BadGatewayException(
+        'ไม่สามารถเชื่อมต่อระบบยืนยันตัวตนของมหาวิทยาลัยได้',
+      );
     }
   }
 
@@ -924,22 +953,5 @@ export class PlatformGatewayService {
 
   async sendNoti(message: string) {
     console.log('sendNoti: ' + message);
-    // try {
-    //     await axios.post(
-    //       'https://api.telegram.org/bot7682472342:AAHDC3vEasGWLNah3wJkcHGaNIhi21TxA8Y/sendMessage',
-    //       {
-    //         chat_id: '-4522198775',
-    //         text: message?.substring(0, 1000),
-    //       },
-    //       {
-    //         headers: {
-    //           'Content-Type': 'application/x-www-form-urlencoded',
-    //         },
-    //       },
-    //     );
-    //   return response.data;
-    // } catch (error) {
-    //   console.log(error);
-    // }
   }
 }

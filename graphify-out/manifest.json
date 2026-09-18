@@ -10,13 +10,13 @@
     "semantic_hash": ""
   },
   "apps/backend/package.json": {
-    "mtime": 1788851628.9321406,
-    "ast_hash": "ce5818cc6f266c99531e1e5bda15394d",
+    "mtime": 1789110210.053262,
+    "ast_hash": "f44163be97b575f4868682ea7c60a900",
     "semantic_hash": ""
   },
   "apps/backend/src/app.module.ts": {
-    "mtime": 1788918999.1402423,
-    "ast_hash": "921cc4a6e6436aeecb95fbebcde3e449",
+    "mtime": 1789110210.0538743,
+    "ast_hash": "ecd88f879f44e1c738eea37764234200",
     "semantic_hash": ""
   },
   "apps/backend/src/common/decorators/roles.decorator.ts": {
@@ -35,8 +35,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/common/filters/all-exceptions.filter.ts": {
-    "mtime": 1783042948.7913117,
-    "ast_hash": "492da6fdadf867c5c1ee1570c15fc621",
+    "mtime": 1789704681.5791826,
+    "ast_hash": "6547e8f1dd64c5b663e3fa141a2dd0a6",
     "semantic_hash": ""
   },
   "apps/backend/src/common/guards/jwt-auth.guard.ts": {
@@ -55,18 +55,18 @@
     "semantic_hash": ""
   },
   "apps/backend/src/config/buu-api-config.ts": {
-    "mtime": 1783042948.791759,
-    "ast_hash": "5645d6aa9fbc5fbab272187c72349670",
+    "mtime": 1789722880.206412,
+    "ast_hash": "ecf6404308cf341c70aab515ac72eb20",
     "semantic_hash": ""
   },
   "apps/backend/src/config/env.validation.ts": {
-    "mtime": 1787627562.588074,
-    "ast_hash": "25f44af4eade2b44fe1ed651c9ad5f49",
+    "mtime": 1789524472.41181,
+    "ast_hash": "1415d335940c343e5df8cdd9ad76488c",
     "semantic_hash": ""
   },
   "apps/backend/src/database/data-source.ts": {
-    "mtime": 1788918887.905176,
-    "ast_hash": "8e3cd20e1bb58540d0e03de855ee5749",
+    "mtime": 1789110210.0551646,
+    "ast_hash": "d121800593c87689c69ccc1c690bc150",
     "semantic_hash": ""
   },
   "apps/backend/src/database/migrations/1778470882994-InitialSchema.ts": {
@@ -320,8 +320,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/database/seeds/demo-seed.ts": {
-    "mtime": 1786957692.6439097,
-    "ast_hash": "6d1c844f6f323de9cef81c9ced984714",
+    "mtime": 1789723011.6275747,
+    "ast_hash": "625cdec5993087f7529d1a8a1fc66eaa",
     "semantic_hash": ""
   },
   "apps/backend/src/decorators/permissions.decorator.ts": {
@@ -340,23 +340,23 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/auth/auth.controller.ts": {
-    "mtime": 1788919001.9794333,
-    "ast_hash": "52f0dc249928aa1e3e9d7827a99998f8",
+    "mtime": 1789524472.4129255,
+    "ast_hash": "2da313e30f64308a048c4fad0aa51547",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/auth/auth.module.ts": {
-    "mtime": 1783042948.7965157,
-    "ast_hash": "c155adcb2b3e0e105b0c83bbac0b5095",
+    "mtime": 1789524472.4130185,
+    "ast_hash": "89527c236b2d76c48467565064c145b1",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/auth/auth.service.spec.ts": {
-    "mtime": 1787627562.6720514,
-    "ast_hash": "9330301b55f80640ae1763578b273504",
+    "mtime": 1789722984.18675,
+    "ast_hash": "62fe6391bfc559235ad02eeb226606fc",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/auth/auth.service.ts": {
-    "mtime": 1787627562.6722345,
-    "ast_hash": "4edf534225e4b969e0b3b21e9e15ffbc",
+    "mtime": 1789723011.6285222,
+    "ast_hash": "5558268498822beb4c38e3f96e2c72d8",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/auth/dto/login.dto.ts": {
@@ -385,8 +385,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/auth/strategies/jwt.strategy.ts": {
-    "mtime": 1783042948.797169,
-    "ast_hash": "06e247858d75bf5026fdd9353adbf745",
+    "mtime": 1789524472.4142625,
+    "ast_hash": "a1e631a871159585ecb9ead0f2d99ad2",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/auth/templates/otp-email.template.ts": {
@@ -535,8 +535,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/exam-enrollments.controller.ts": {
-    "mtime": 1786675230.448579,
-    "ast_hash": "31fbdbdb5bd6836e038e064a64869dc3",
+    "mtime": 1789524472.415187,
+    "ast_hash": "eb818e1dd230c51bf9406d2eefb23117",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/exam-enrollments.module.ts": {
@@ -730,8 +730,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-session-locations/dto/create-exam-session-location.dto.ts": {
-    "mtime": 1788854483.6633506,
-    "ast_hash": "1ab898c38a53a38a2f671907c8e19748",
+    "mtime": 1789611470.2622197,
+    "ast_hash": "828033f8fb2bcd719f49bbac61f7e21b",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-session-locations/dto/update-exam-session-location.dto.ts": {
@@ -750,13 +750,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-session-locations/exam-session-locations.module.ts": {
-    "mtime": 1788854513.4218762,
-    "ast_hash": "793cefc4ae16aca4afadf989b6429479",
+    "mtime": 1789704681.584473,
+    "ast_hash": "620df7c67d55245c3b28970ff15c24ef",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-session-locations/exam-session-locations.service.ts": {
-    "mtime": 1788855499.0559363,
-    "ast_hash": "ecb1c188b4807d979a7ea129b8d1a754",
+    "mtime": 1789723011.6305873,
+    "ast_hash": "2931d2e26a7ee6eef4d910ed43f78ed2",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-sessions/dto/create-exam-session.dto.ts": {
@@ -770,8 +770,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-sessions/entities/exam-session.entity.ts": {
-    "mtime": 1783042948.8041778,
-    "ast_hash": "bfc9503eda6ad01c7c0f2c7e6427316f",
+    "mtime": 1789110210.0605633,
+    "ast_hash": "43c444916ade3963d209f9290b866497",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-sessions/exam-sessions.controller.ts": {
@@ -785,8 +785,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-sessions/exam-sessions.service.ts": {
-    "mtime": 1785725886.348009,
-    "ast_hash": "130129704c492cf7df459fbf682e8c0a",
+    "mtime": 1789723011.631045,
+    "ast_hash": "562592fcc1b4fc7b354e1eef92e53553",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-vouchers/dto/bulk-issue-vouchers.dto.ts": {
@@ -885,8 +885,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam/exam.service.ts": {
-    "mtime": 1788854549.3450644,
-    "ast_hash": "1f6a6dfef6c7c2db2ad9b11dc0c80d5f",
+    "mtime": 1789611470.2633967,
+    "ast_hash": "57b80061dcbeb47ebe1a069654a8814d",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam/templates/exam-change-email.template.ts": {
@@ -1090,13 +1090,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/platform-gateway/platform-gateway.service.spec.ts": {
-    "mtime": 1788851628.9330814,
-    "ast_hash": "dda944fc99d50a9ec57b19f69274b83b",
+    "mtime": 1789722926.9309602,
+    "ast_hash": "a39818d7a8335cdcd796e1b3077402e8",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/platform-gateway/platform-gateway.service.ts": {
-    "mtime": 1788851628.9332614,
-    "ast_hash": "fdd04404250bf6f6c50d6efe48bab3b8",
+    "mtime": 1789722880.2053976,
+    "ast_hash": "5f7a659641059961d9d46338b0873373",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/profile-edit-history/dto/create-profile-edit-history.dto.ts": {
@@ -1165,8 +1165,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/roles/entities/role.entity.ts": {
-    "mtime": 1783042948.810426,
-    "ast_hash": "d08b2f44c42da84697338e1ff3b39c74",
+    "mtime": 1789454670.5080965,
+    "ast_hash": "8ec6d67aa95eaf39d6cb08a4b5a81408",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/roles/enums/role.enum.ts": {
@@ -1180,8 +1180,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/roles/roles.module.ts": {
-    "mtime": 1783042948.8106577,
-    "ast_hash": "0b42746d5e7a82f921ebf75aea669dab",
+    "mtime": 1789454670.508259,
+    "ast_hash": "8041059e6cefc734341a56c941608328",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/roles/roles.service.ts": {
@@ -1330,18 +1330,18 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/transactions/transactions.controller.ts": {
-    "mtime": 1788919292.9642546,
-    "ast_hash": "4fa0d4659edcb1c2363776aca84c25db",
+    "mtime": 1789110210.0624437,
+    "ast_hash": "ee6ef31ef749920594387ecd74a605a1",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/transactions/transactions.module.ts": {
-    "mtime": 1788841433.4425907,
-    "ast_hash": "c2a2febd9a6fa563518f9cbf976b0ed5",
+    "mtime": 1789110210.0626972,
+    "ast_hash": "fa314049f0978e3f7127e5a80a17660c",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/transactions/transactions.service.ts": {
-    "mtime": 1788851628.9349847,
-    "ast_hash": "9e166d7e691fb93007fd44693fa5a305",
+    "mtime": 1789110210.063364,
+    "ast_hash": "94fd63178815dfd60747fa36aee734ab",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/user-image/entities/user-image.entity.ts": {
@@ -1350,8 +1350,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/user-image/user-image.controller.ts": {
-    "mtime": 1783042948.8132823,
-    "ast_hash": "18ecec6d4db59d9c72064398d53dd383",
+    "mtime": 1789723011.6318722,
+    "ast_hash": "a261181440dd8f6700ff3b017f720523",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/user-image/user-image.module.ts": {
@@ -1380,8 +1380,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/user-profile/user-profile.controller.ts": {
-    "mtime": 1787627562.677372,
-    "ast_hash": "244ebdfec97929887b5be5b231783b66",
+    "mtime": 1789723011.6321304,
+    "ast_hash": "423dc5f98513d5c0ab8383534eeedf35",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/user-profile/user-profile.module.ts": {
@@ -1390,13 +1390,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/user-profile/user-profile.service.ts": {
-    "mtime": 1786690746.2650628,
-    "ast_hash": "e89d55aac07e5433814decc6d5bf5088",
+    "mtime": 1789524472.4188654,
+    "ast_hash": "4b91923bebac0b125c25761ae8cc9d7f",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/users/dto/create-user.dto.ts": {
-    "mtime": 1783042948.8140256,
-    "ast_hash": "9d68e668bee68ce106e3a4fac135d712",
+    "mtime": 1789454670.5084596,
+    "ast_hash": "19625229c119be71944a7aff61b36a37",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/users/dto/user-response.dto.ts": {
@@ -1405,13 +1405,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/users/entities/user.entity.ts": {
-    "mtime": 1784780609.382386,
-    "ast_hash": "51b629d91a15bb50d18b773b486e0901",
+    "mtime": 1789454670.5096977,
+    "ast_hash": "c1aba3aa2d0bebe7f4427a262fb7e026",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/users/users.controller.ts": {
-    "mtime": 1786070732.212326,
-    "ast_hash": "9f2cea0a721c03a39902a95c22418cd5",
+    "mtime": 1789524472.419088,
+    "ast_hash": "1b8edcf1d1a6eb92ac43992f7d88b99a",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/users/users.module.ts": {
@@ -1420,13 +1420,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/users/users.service.spec.ts": {
-    "mtime": 1786601638.3174994,
-    "ast_hash": "f149725c79f92da968fb0772e4246a9e",
+    "mtime": 1789110210.0643566,
+    "ast_hash": "0409cc420ea4ca6591d0173daf6d2546",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/users/users.service.ts": {
-    "mtime": 1786070732.2128932,
-    "ast_hash": "1afca2547d80d4a000fbdfd7f744d3f4",
+    "mtime": 1789110210.064832,
+    "ast_hash": "bd7b6849f705aeb3dc501654ae0cf8dc",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/voided-receipts/dto/create-voided-receipt.dto.ts": {
@@ -1440,8 +1440,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/voided-receipts/voided-receipts.controller.ts": {
-    "mtime": 1784608898.1360137,
-    "ast_hash": "4dced7c497dc35b3db2c70af955887b2",
+    "mtime": 1789524472.4194305,
+    "ast_hash": "d82d46933fc380c50527a2f6ff8bcd78",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/voided-receipts/voided-receipts.module.ts": {
@@ -1525,8 +1525,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/quasar.config.ts": {
-    "mtime": 1785725886.3533068,
-    "ast_hash": "a0020704c9cd84f3446740fcbf63b3a0",
+    "mtime": 1789612197.7909153,
+    "ast_hash": "02215008d33d20681af6cf08ae5afffd",
     "semantic_hash": ""
   },
   "apps/frontend/src/App.vue": {
@@ -1565,8 +1565,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/auth/login-card.vue": {
-    "mtime": 1786676147.5966983,
-    "ast_hash": "dbc0592776d3fa11d532a37fe1edaf1c",
+    "mtime": 1789704681.5863185,
+    "ast_hash": "2c6b3524c0ff76ce55a92825b2ff33ce",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/base/app-button.vue": {
@@ -1635,17 +1635,17 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/base/skeleton/form-skeleton.vue": {
-    "mtime": 1783584961.3190017,
+    "mtime": 1789096509.8771186,
     "ast_hash": "933c354820bec91f6fc379a6b360083f",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/base/skeleton/index.ts": {
-    "mtime": 1783584961.2853892,
+    "mtime": 1789096509.8773353,
     "ast_hash": "e928bc717cdd4dd5179140d123d27cba",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/base/skeleton/page-skeleton.vue": {
-    "mtime": 1783584961.3190084,
+    "mtime": 1789096509.877424,
     "ast_hash": "f9649655dc1a079f7d502bee422384ec",
     "semantic_hash": ""
   },
@@ -1845,8 +1845,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/app-payment-dialog.vue": {
-    "mtime": 1788841433.4452085,
-    "ast_hash": "d7ccb61f6f4c65e789fe683220d36b4f",
+    "mtime": 1789110210.065543,
+    "ast_hash": "91b69b62438f0877c7ee6cdb385d00e4",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/app-seat-broken-dialog.vue": {
@@ -1910,13 +1910,13 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/create-exam-room-preview-card.vue": {
-    "mtime": 1787023365.189904,
+    "mtime": 1789096509.877942,
     "ast_hash": "9bdda693f10e69268fa3c09528034d2a",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/create-exam-schedule-card.vue": {
-    "mtime": 1787023357.0846746,
-    "ast_hash": "706c1b0f63ea5fd5cab30ed532e48058",
+    "mtime": 1789611470.2653525,
+    "ast_hash": "ae89c0b1983b5b647ef6261854993c92",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/dialog-action-confirm.vue": {
@@ -1985,8 +1985,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/exam-form.vue": {
-    "mtime": 1787023332.4240313,
-    "ast_hash": "59435730ca47fbd8e5dff785990b4d8e",
+    "mtime": 1789611470.2655647,
+    "ast_hash": "17fea4dc32b458b8c1257c6e2c519d94",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/exam-management-table.vue": {
@@ -2030,13 +2030,13 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/footer/footer-credits.vue": {
-    "mtime": 1783042948.8483937,
-    "ast_hash": "7678e5d4f95f74fb6080d0e4f19057c8",
+    "mtime": 1789611470.2900865,
+    "ast_hash": "81a3c0a2a0d689519af1261e8b879369",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/header/app-header-profile.vue": {
-    "mtime": 1787023809.1801548,
-    "ast_hash": "b0ef928c1ffd4d70c742d0db0619c2ae",
+    "mtime": 1789524472.4201486,
+    "ast_hash": "7ac8f649192802d137f2bffbf08f31bd",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/header/app-header.vue": {
@@ -2045,8 +2045,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/header/app-sidebar.vue": {
-    "mtime": 1788919127.4878566,
-    "ast_hash": "c1dd0fda1d3cae3a09c32a9ebbc62762",
+    "mtime": 1789611470.2659767,
+    "ast_hash": "653434d21a732d905a5d87cf7a5f1717",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/header/language-switcher.vue": {
@@ -2105,7 +2105,7 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/page-builder/page-builder-banner-uploader.vue": {
-    "mtime": 1783495661.7839136,
+    "mtime": 1789096509.8784509,
     "ast_hash": "0499542b4469706d9b7ee39e8cd44b81",
     "semantic_hash": ""
   },
@@ -2125,7 +2125,7 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/page-builder/page-builder-preview-dialog.vue": {
-    "mtime": 1783495637.2486649,
+    "mtime": 1789096509.8785744,
     "ast_hash": "020cd22f3df1b1141c9172193a7cf87d",
     "semantic_hash": ""
   },
@@ -2245,7 +2245,7 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/shared/base-table.vue": {
-    "mtime": 1783584961.3189104,
+    "mtime": 1789096509.8787897,
     "ast_hash": "de7a406d0c243fcbbd0f6897ccd97aa2",
     "semantic_hash": ""
   },
@@ -2295,8 +2295,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-create-exam.ts": {
-    "mtime": 1788855374.5292275,
-    "ast_hash": "610d054e51d8439aa56339c974fb9c5b",
+    "mtime": 1789611470.2666817,
+    "ast_hash": "5ae42bbe66eaa36451ba0ed3203a4ce4",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-daily-revenue.ts": {
@@ -2425,8 +2425,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/constants/roles.ts": {
-    "mtime": 1788841433.449712,
-    "ast_hash": "9e7e824f56df235447324c781b9a7f3c",
+    "mtime": 1789524472.4207296,
+    "ast_hash": "1f5865e3e647c0895659dad38cd0dcff",
     "semantic_hash": ""
   },
   "apps/frontend/src/constants/support.ts": {
@@ -2440,13 +2440,13 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/env.d.ts": {
-    "mtime": 1785137844.1381097,
-    "ast_hash": "91ca27c3437620bf3c6dba7413673227",
+    "mtime": 1789611470.2902248,
+    "ast_hash": "8faffb4c22c8271429618942dfd20044",
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/en-US/index.ts": {
-    "mtime": 1788921576.3832378,
-    "ast_hash": "ba49bcff0d1353937381f0f3c99eab70",
+    "mtime": 1789704681.5872889,
+    "ast_hash": "17d5a08afcd251650c51bfca3f5d49ee",
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/index.ts": {
@@ -2455,12 +2455,12 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/i18n/th/index.ts": {
-    "mtime": 1788921574.4373121,
-    "ast_hash": "00a986cc2b76950684d2822badc15b71",
+    "mtime": 1789704681.5897474,
+    "ast_hash": "a7e39a21becdc2d909a12c06bb67f664",
     "semantic_hash": ""
   },
   "apps/frontend/src/layouts/main-layout.vue": {
-    "mtime": 1788858926.1250737,
+    "mtime": 1789096509.880965,
     "ast_hash": "86fa2e4c93a47cae2bbe87aa79997757",
     "semantic_hash": ""
   },
@@ -2480,7 +2480,7 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/dashboard-page.vue": {
-    "mtime": 1787037385.9853756,
+    "mtime": 1789096509.881872,
     "ast_hash": "13f3aa972acf685d87f9613a10eeb9b5",
     "semantic_hash": ""
   },
@@ -2515,12 +2515,12 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/exam-registrant-detail-page.vue": {
-    "mtime": 1788841433.4534683,
+    "mtime": 1789096509.882262,
     "ast_hash": "258627babc5683538f70d4502f86701b",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/exam-registrant-history-page.vue": {
-    "mtime": 1787023874.5899532,
+    "mtime": 1789096509.8826334,
     "ast_hash": "a4e61c3be32667ef8c373a0c0a528e16",
     "semantic_hash": ""
   },
@@ -2540,12 +2540,12 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/exam-seat-management-page.vue": {
-    "mtime": 1786690746.3597856,
+    "mtime": 1789096509.883291,
     "ast_hash": "04e777d2c56e439e42f126081ce25ab4",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/executive-exam-history-page.vue": {
-    "mtime": 1787023901.8512034,
+    "mtime": 1789096509.8836467,
     "ast_hash": "f06af75681dec234f82be15620b68002",
     "semantic_hash": ""
   },
@@ -2575,7 +2575,7 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/page-builder-page.vue": {
-    "mtime": 1783495510.6871483,
+    "mtime": 1789096509.8838246,
     "ast_hash": "4239c4240160be0825e26e9d71af2b26",
     "semantic_hash": ""
   },
@@ -2630,8 +2630,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-history-page.vue": {
-    "mtime": 1788841433.4545648,
-    "ast_hash": "44e9ea102e2bbb6b30b4213caf2e79f6",
+    "mtime": 1789110210.0667753,
+    "ast_hash": "b7554fd1ecb9f70c91e0e1184fde6b7d",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/exam-schedule-page.vue": {
@@ -2645,18 +2645,18 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/user/profile-page.vue": {
-    "mtime": 1786690746.2716153,
-    "ast_hash": "7e0bc18d3c30cf7ef86710adcdc45a00",
+    "mtime": 1789524472.4222229,
+    "ast_hash": "c31a8855c61a9c057a9743af01e4ef20",
     "semantic_hash": ""
   },
   "apps/frontend/src/router/index.ts": {
-    "mtime": 1787020475.7024133,
-    "ast_hash": "6e14f8d455dd0d516ac332c75bc27a5b",
+    "mtime": 1789611470.268018,
+    "ast_hash": "d84290a64a2f8d0cf5e6ee86f90da26d",
     "semantic_hash": ""
   },
   "apps/frontend/src/router/routes.ts": {
-    "mtime": 1788919122.6231492,
-    "ast_hash": "4071cc668a1a10ab09fa34aed9734e6a",
+    "mtime": 1789611470.2682528,
+    "ast_hash": "1c0829ed65d76b60d3b2ad0c90a9214d",
     "semantic_hash": ""
   },
   "apps/frontend/src/services/bank-reconcile.service.ts": {
@@ -2695,8 +2695,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/services/exam.service.ts": {
-    "mtime": 1788855436.391874,
-    "ast_hash": "b2154f2ed42174a73e4c13243e9b1c05",
+    "mtime": 1789611470.2685854,
+    "ast_hash": "03b17692d15a156748c9973f1ccfd30f",
     "semantic_hash": ""
   },
   "apps/frontend/src/services/executive-test-taker.service.ts": {
@@ -2745,8 +2745,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/services/transaction.service.ts": {
-    "mtime": 1788841433.4553652,
-    "ast_hash": "4b5cb652e12c3fa0496db41a16e93c35",
+    "mtime": 1789110210.0671782,
+    "ast_hash": "8c9e18f1b1fb45f4f2e6c3b8040971ed",
     "semantic_hash": ""
   },
   "apps/frontend/src/services/university.service.ts": {
@@ -2755,8 +2755,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/services/user.service.ts": {
-    "mtime": 1784780874.8410168,
-    "ast_hash": "6f49ef17df1e3252799c5ce4b55073b0",
+    "mtime": 1789704681.5920358,
+    "ast_hash": "16dbbb5e579bcccf366c9fe8fd1219e9",
     "semantic_hash": ""
   },
   "apps/frontend/src/services/voucher.service.ts": {
@@ -2765,13 +2765,13 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/stores/auth.store.ts": {
-    "mtime": 1786676137.4579892,
-    "ast_hash": "11a4b2129c86a19525707a03dfecf3d1",
+    "mtime": 1789524472.424305,
+    "ast_hash": "d8c197f46f7e4530a5150a342ed4e17c",
     "semantic_hash": ""
   },
   "apps/frontend/src/stores/exam.store.ts": {
-    "mtime": 1788851628.9375296,
-    "ast_hash": "b38d3ff12d0bb276e83cf13dd3fce8d8",
+    "mtime": 1789110210.0675082,
+    "ast_hash": "b6eaa1a7318b89d77d6407f78a215217",
     "semantic_hash": ""
   },
   "apps/frontend/src/stores/index.ts": {
@@ -2780,8 +2780,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/stores/user.store.ts": {
-    "mtime": 1788841433.4559963,
-    "ast_hash": "81934b3022dd566dc8cdf3f57bd3389d",
+    "mtime": 1789704681.592383,
+    "ast_hash": "a18af00c0a118369d5eaac34e5411025",
     "semantic_hash": ""
   },
   "apps/frontend/src/types/certificate.ts": {
@@ -2810,8 +2810,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/types/exam.ts": {
-    "mtime": 1788855040.343785,
-    "ast_hash": "7dcc3cbec0f9e793378fe0607b12c9db",
+    "mtime": 1789611470.2688255,
+    "ast_hash": "4da47cff47a0bb30b56230faa440884f",
     "semantic_hash": ""
   },
   "apps/frontend/src/types/exam.types.ts": {
@@ -2865,8 +2865,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/types/user.ts": {
-    "mtime": 1783042948.8649201,
-    "ast_hash": "bfd3e8e4b5977e1410f874db4fb82de2",
+    "mtime": 1789524472.4248064,
+    "ast_hash": "195acb06ef0ca275fc05864d91f2ec26",
     "semantic_hash": ""
   },
   "apps/frontend/src/types/voucher.ts": {
@@ -2940,7 +2940,7 @@
     "semantic_hash": ""
   },
   "CONTRIBUTING.md": {
-    "mtime": 1783584961.325585,
+    "mtime": 1789096509.87678,
     "ast_hash": "63b7c397d3815acfab757bef7950a76b",
     "semantic_hash": ""
   },
@@ -3160,8 +3160,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/common/constants/role-groups.ts": {
-    "mtime": 1788854472.552079,
-    "ast_hash": "bf6467750d197766a25c07fb36d8863f",
+    "mtime": 1789611470.260584,
+    "ast_hash": "ad95f809b19a19ef09337997b452fad0",
     "semantic_hash": ""
   },
   "apps/backend/src/common/decorators/current-user.decorator.ts": {
@@ -3180,8 +3180,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/common/utils/authz.util.ts": {
-    "mtime": 1787019274.6449482,
-    "ast_hash": "cae087cc2a87c9e7b9e34a59cae63380",
+    "mtime": 1789704681.5799413,
+    "ast_hash": "a2f0f2a7a8b9b6de44e1af939fd4501f",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-enrollments/exam-enrollments.service.spec.ts": {
@@ -3190,13 +3190,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/transactions/transactions.service.spec.ts": {
-    "mtime": 1788919292.964434,
-    "ast_hash": "eac4de9aba18955084cc049bfc2a58f3",
+    "mtime": 1789110210.0629587,
+    "ast_hash": "fc873cef72df1d43edab56d3684d8c34",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/users/dto/update-user-roles.dto.ts": {
-    "mtime": 1783584961.212036,
-    "ast_hash": "a518557be0015cb4e96bc39d2d4d1d6c",
+    "mtime": 1789454670.5094318,
+    "ast_hash": "620bf3aa29f3ba38a4793d50541ffebd",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/users/dto/users-query.dto.ts": {
@@ -3210,8 +3210,8 @@
     "semantic_hash": ""
   },
   "apps/backend/test/jest-e2e.json": {
-    "mtime": 1783584961.3130753,
-    "ast_hash": "40cab373771e1974c9eaca39a4d6d85e",
+    "mtime": 1789110210.0653331,
+    "ast_hash": "92003f95fa550f8eae150b7d7f46aa5c",
     "semantic_hash": ""
   },
   "apps/frontend/quasar.config.ts.temporary.compiled.1783580973138.mjs": {
@@ -3260,17 +3260,17 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/components/base/skeleton/chart-panel-skeleton.vue": {
-    "mtime": 1783584961.2244325,
+    "mtime": 1789096509.8770108,
     "ast_hash": "6ecbd41b4e629794dc87efa5a4dcc702",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/base/skeleton/room-preview-skeleton.vue": {
-    "mtime": 1783584961.2853339,
+    "mtime": 1789096509.8775105,
     "ast_hash": "f684bd00c5177120073e84d06e9d8894",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/base/skeleton/seat-management-skeleton.vue": {
-    "mtime": 1783584961.299202,
+    "mtime": 1789096509.8776028,
     "ast_hash": "c2d25e2173d77d45552d0c3d52b6a51b",
     "semantic_hash": ""
   },
@@ -3575,8 +3575,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/database/seeds/enroll-exam-paid-seed.ts": {
-    "mtime": 1786084365.0049672,
-    "ast_hash": "0aa294806268c4f2d61e2d78340fd32e",
+    "mtime": 1789723011.627965,
+    "ast_hash": "8aa29e9944a601ade536c2d9a92db882",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/verify/dto/verify-response.dto.ts": {
@@ -3795,8 +3795,8 @@
     "semantic_hash": ""
   },
   "docs/database-erd.md": {
-    "mtime": 1786601638.3174071,
-    "ast_hash": "702ca850f050be66e55fad49df11ef9a",
+    "mtime": 1789454670.510577,
+    "ast_hash": "168f638c416f74e449df5090b9db66b0",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam-report/exam-attempt-proportion-chart.vue": {
@@ -3830,13 +3830,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/database/seeds/test-rbac-seed.ts": {
-    "mtime": 1785989355.1138635,
-    "ast_hash": "ae4d0b3cd3a9f5c82db22645e12792e9",
+    "mtime": 1789723011.6282504,
+    "ast_hash": "dffeda46a4d9e411e675a636dbb031d8",
     "semantic_hash": ""
   },
   "apps/backend/src/database/seeds/test-users.constants.ts": {
-    "mtime": 1785901146.6260366,
-    "ast_hash": "1f612b6a983c4b045ac444c0b4062c5f",
+    "mtime": 1789454670.5057015,
+    "ast_hash": "f9eecce63a0f45653c0811f162d99694",
     "semantic_hash": ""
   },
   "playwright.config.ts": {
@@ -3855,8 +3855,8 @@
     "semantic_hash": ""
   },
   "tests/e2e/fixtures/users.ts": {
-    "mtime": 1785901146.6390018,
-    "ast_hash": "42ec57d3d36587be5cae24b43502bc9d",
+    "mtime": 1789454670.5109124,
+    "ast_hash": "87fd386a0f81bba74501fd59c5ae6a1d",
     "semantic_hash": ""
   },
   "tests/global-setup.ts": {
@@ -3870,8 +3870,8 @@
     "semantic_hash": ""
   },
   "tests/shared/test-users.ts": {
-    "mtime": 1785901146.6408062,
-    "ast_hash": "a30f71537878200d476e9c9863a2bead",
+    "mtime": 1789454670.5115874,
+    "ast_hash": "c2789ec242965264e3e082b2da9de7df",
     "semantic_hash": ""
   },
   "tests/BUG_LOG.md": {
@@ -3890,8 +3890,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/auth/strategies/jwt.strategy.spec.ts": {
-    "mtime": 1785901146.626378,
-    "ast_hash": "da99d068b2cd7d6f809f92dc3d06a6ba",
+    "mtime": 1789524472.4140596,
+    "ast_hash": "841d6c511a487a17fd3697402cc4666d",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/roles/dto/create-role.dto.spec.ts": {
@@ -4160,13 +4160,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-session-locations/exam-session-locations.service.spec.ts": {
-    "mtime": 1788854525.551401,
-    "ast_hash": "57e5585018bd69c15065e65f031f74f9",
+    "mtime": 1789704681.5849416,
+    "ast_hash": "74f4e433d505180559857880ad190c92",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-sessions/exam-sessions.service.spec.ts": {
-    "mtime": 1785985189.623823,
-    "ast_hash": "3a111ec1ea2520d442ee5f875814f287",
+    "mtime": 1789723011.6308408,
+    "ast_hash": "5d06a856f59f766ebbbabc36a050e74c",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam/exam.service.spec.ts": {
@@ -4190,8 +4190,8 @@
     "semantic_hash": ""
   },
   "tests/integration/exam-session-locations.api.spec.ts": {
-    "mtime": 1785985127.4854789,
-    "ast_hash": "78a7b3113d436696502989d8d8bbc07f",
+    "mtime": 1789611470.2705715,
+    "ast_hash": "e1d08ca5953661305a5503c5a6f64e9d",
     "semantic_hash": ""
   },
   "tests/integration/exam-sessions.api.spec.ts": {
@@ -4690,8 +4690,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/check-in-assist/check-in-assist.controller.ts": {
-    "mtime": 1788854718.618846,
-    "ast_hash": "0809da43e0dbd4a6062633fcedb3505f",
+    "mtime": 1789611470.261034,
+    "ast_hash": "f6b6a913f2ae94bfea5883c37f948c21",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/check-in-assist/check-in-assist.module.ts": {
@@ -4700,18 +4700,18 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/check-in-assist/check-in-assist.service.spec.ts": {
-    "mtime": 1788855499.0558267,
-    "ast_hash": "ada498040d03497c9adb5966153925af",
+    "mtime": 1789723011.6299212,
+    "ast_hash": "e591e263acf9f0d8d89438586960e2fd",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/check-in-assist/check-in-assist.service.ts": {
-    "mtime": 1788855624.2780812,
-    "ast_hash": "03b68cfc609a73e96fe19fdb146de614",
+    "mtime": 1789723011.630212,
+    "ast_hash": "923907ff5b21b32c9a28c940783f83e3",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/check-in-assist/dto/check-in-assist-response.dto.ts": {
-    "mtime": 1788855391.7100356,
-    "ast_hash": "51238c28061ab0736befb6703d6912d1",
+    "mtime": 1789704681.5820925,
+    "ast_hash": "501264a3fa145af91fad83674d5dd6c9",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/check-in-assist/dto/create-check-in-assist-session.dto.ts": {
@@ -4725,13 +4725,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/check-in-assist/entities/check-in-assist-event.entity.ts": {
-    "mtime": 1788854534.2494395,
-    "ast_hash": "99917081ecaed89e5131615fbb3e30ec",
+    "mtime": 1789704681.5824282,
+    "ast_hash": "0985bb3b4178aa914d6a9ce7f6d84aad",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/check-in-assist/entities/check-in-assist-session.entity.ts": {
-    "mtime": 1788854533.8058841,
-    "ast_hash": "3f350657f2d72747594142bf847fd8c7",
+    "mtime": 1789704681.58269,
+    "ast_hash": "b8e4a7bbb9dc3a12600ce5cd3d46ad6d",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/check-in-assist/utils/normalize-assist-scan-code.util.ts": {
@@ -4780,8 +4780,8 @@
     "semantic_hash": ""
   },
   "apps/frontend/src/types/check-in-assist.types.ts": {
-    "mtime": 1788855389.7493436,
-    "ast_hash": "7f951ac6447c28671ecaec5fe0d418e4",
+    "mtime": 1789704681.5926437,
+    "ast_hash": "fde119f21b1cd872f42c9b0ddec7a1f9",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/exam/dialog-define-shared-passcode.vue": {
@@ -4890,8 +4890,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/notifications/notifications.service.ts": {
-    "mtime": 1786695064.7856529,
-    "ast_hash": "f5254838fbfbe5dfe16fd9eca427d612",
+    "mtime": 1789524472.4162028,
+    "ast_hash": "6ad7342e43a0293062cb5c6611145999",
     "semantic_hash": ""
   },
   "apps/frontend/src/components/header/app-header-notifications.vue": {
@@ -4930,8 +4930,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/common/utils/authz.util.spec.ts": {
-    "mtime": 1788841433.4384623,
-    "ast_hash": "0d39b19f94ac26e046d30efc7f295808",
+    "mtime": 1789704681.57955,
+    "ast_hash": "508b32b0c0ee2c89769c3a9f6e5a7dae",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-locale-tracked-i18n.ts": {
@@ -4950,13 +4950,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/msg-persons/entities/msg-person.entity.ts": {
-    "mtime": 1787627562.6753342,
-    "ast_hash": "e35f50d8de784dd49802bc74c83eefbc",
+    "mtime": 1789524472.41549,
+    "ast_hash": "8ac0b69e1153100090421fbbd30520cc",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/msg-persons/msg-persons.module.ts": {
-    "mtime": 1787627562.6754138,
-    "ast_hash": "7e7c2f6ef69dc18e0f936696ad4c2163",
+    "mtime": 1789454670.5073583,
+    "ast_hash": "f4cd733a1b8a6aaf6f50ad2fb6ec4a63",
     "semantic_hash": ""
   },
   "apps/backend/src/database/migrations/1789780344300-DropMsgTPersonAuditColumns.ts": {
@@ -4970,13 +4970,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/health/health.controller.spec.ts": {
-    "mtime": 1787627562.6741414,
-    "ast_hash": "43643c2d2fe4c9145867914a7f4ee620",
+    "mtime": 1789611470.2895167,
+    "ast_hash": "f2067edbb8d2c931c039f144d3dd9a3e",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/health/health.controller.ts": {
-    "mtime": 1788919292.9641883,
-    "ast_hash": "362cfcdbf4804d0358ecc6eca587712a",
+    "mtime": 1789611470.2896366,
+    "ast_hash": "ff16260b0b9c47eaf68eefd03c8ca7b9",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/health/health.module.ts": {
@@ -5065,8 +5065,8 @@
     "semantic_hash": ""
   },
   ".gitlab-ci.yml": {
-    "mtime": 1788841948.060601,
-    "ast_hash": "8deabfa070d4ecc49e3300172e28c697",
+    "mtime": 1789718104.9536483,
+    "ast_hash": "e54390b1accedc991d6e2d9ea4f035c7",
     "semantic_hash": ""
   },
   "apps/backend/src/database/migrations/1789780344400-CreateEnrollmentAuditLogs.ts": {
@@ -5135,8 +5135,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/system-settings/system-settings.controller.ts": {
-    "mtime": 1788851628.9341848,
-    "ast_hash": "e276b2b884c4fb32a914b6dbfdb3525c",
+    "mtime": 1789524472.4171267,
+    "ast_hash": "ade7db35493918d075d780587a03fa2b",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/system-settings/system-settings.module.ts": {
@@ -5220,22 +5220,22 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/exam-session-locations/entities/exam-session-location-proctor.entity.ts": {
-    "mtime": 1788854473.8846343,
-    "ast_hash": "3b515999ab729297da21a3313bbda713",
+    "mtime": 1789611470.2624173,
+    "ast_hash": "e694416e83bf55de473728722c2bbe6f",
     "semantic_hash": ""
   },
   "apps/frontend/src/composables/use-check-in-rooms.ts": {
-    "mtime": 1788856990.3336136,
-    "ast_hash": "b287b86825e43917c58b895bb09500fb",
+    "mtime": 1789611470.2661536,
+    "ast_hash": "d1b6670dab9f8ed79e21090d5a59e4b4",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/check-in-rooms-page.vue": {
-    "mtime": 1788858239.9984715,
+    "mtime": 1789096509.8815622,
     "ast_hash": "634d17e7d1cf8486dc25eea5973185d2",
     "semantic_hash": ""
   },
   "apps/frontend/src/pages/admin/room-check-in-scanner-page.vue": {
-    "mtime": 1788858924.767259,
+    "mtime": 1789096509.8841894,
     "ast_hash": "ed0e3b1d444fde03816ddc061a5c6eb3",
     "semantic_hash": ""
   },
@@ -5280,8 +5280,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/audit-logs/audit.interceptor.ts": {
-    "mtime": 1788919292.9641294,
-    "ast_hash": "c6a370d1864a659fe9df7505d34ea34f",
+    "mtime": 1789524472.4124417,
+    "ast_hash": "521cafb3b0934dbc6c34b54849816cfd",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/audit-logs/audit.serializer.spec.ts": {
@@ -5315,8 +5315,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/audit-logs/dto/record-audit.dto.ts": {
-    "mtime": 1788919328.5489054,
-    "ast_hash": "80ccd01b3a35103b00a932efa3b0cacd",
+    "mtime": 1789524472.4127142,
+    "ast_hash": "688d1362bb3c28376ccaa62ba815f907",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/audit-logs/entities/audit-log.entity.ts": {
@@ -5347,6 +5347,271 @@
   "apps/frontend/src/components/shared/audit-status-badge.vue": {
     "mtime": 1788922122.607826,
     "ast_hash": "60b61d490bce8fdc4222587d1cf86693",
+    "semantic_hash": ""
+  },
+  ".gitlab/ci/sanitize-dotenv.test.sh": {
+    "mtime": 1789722803.1432085,
+    "ast_hash": "84bfcd254bc0e780c8dcfcba4ee417ee",
+    "semantic_hash": ""
+  },
+  "apps/backend/scripts/typeorm-cli.js": {
+    "mtime": 1789110210.0533564,
+    "ast_hash": "c3184ddb63e73af4ab3be5f4442fd275",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/common/constants/role-rank.ts": {
+    "mtime": 1789524472.4106793,
+    "ast_hash": "a59ecbb59692c3fee8ec642721f4000c",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/common/modules/member-session-codes.module.ts": {
+    "mtime": 1789110210.0541372,
+    "ast_hash": "03ca4b2c9180f14320487784ae1d0349",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/common/services/member-session-codes.service.ts": {
+    "mtime": 1789723011.6264234,
+    "ast_hash": "57ede0fcf52879e35a90867ea0b718d3",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/common/utils/member-session-codes.util.spec.ts": {
+    "mtime": 1789110210.0543163,
+    "ast_hash": "c4454a48c6f799ec1b71886cbe2acc2e",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/common/utils/member-session-codes.util.ts": {
+    "mtime": 1789110210.0543802,
+    "ast_hash": "cb30493c75e5f9bc80b4b202384df2a5",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/database/migrations/1789780345000-CreateBankRequestLogTables.ts": {
+    "mtime": 1789110210.055426,
+    "ast_hash": "57230227882d160b8653e415f66ca6b3",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/database/migrations/1789780345100-AddUserAndSessionCodes.ts": {
+    "mtime": 1789110210.0556574,
+    "ast_hash": "dbc955667915bcef489a4d0f3c4b3d52",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/database/migrations/1789780345200-AlignBankRequestLogsWithLifelong.ts": {
+    "mtime": 1789723011.6269543,
+    "ast_hash": "78c42b0df4bcee39d4c60b5b9dbb2a2f",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/database/migrations/1789780345300-ReorderBankRequestLogsToLifelongExact.ts": {
+    "mtime": 1789723011.627266,
+    "ast_hash": "5c57fbef9fabdad1cf090bc5c3d7fc59",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/database/migrations/1789780345400-AddPsnUsernameToMsgTPerson.ts": {
+    "mtime": 1789110210.0560427,
+    "ast_hash": "e43d5ece1ddbd7bf372476dd02274075",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/database/migrations/1789780345500-CreatePersonRoles.ts": {
+    "mtime": 1789454670.503857,
+    "ast_hash": "7f1a4c65088f0fb292fc2e97623517b4",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/database/migrations/1789780345600-AddPsnIdcardToMsgTPerson.ts": {
+    "mtime": 1789524472.4118845,
+    "ast_hash": "8c8772f50abbf36bf163d8b43f367ec7",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/database/migrations/1789780345700-ReplaceProctorUserIdWithPsnId.ts": {
+    "mtime": 1789611470.2607415,
+    "ast_hash": "fe2ced55d8d54a1da95c5cccbd96d129",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/database/migrations/1789780345800-ReplaceCheckInAssistHostUserIdWithPsnId.ts": {
+    "mtime": 1789704681.5800683,
+    "ast_hash": "a0c6f4976a2037931ae8358f11a090a0",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/auth/dto/login-buu.dto.ts": {
+    "mtime": 1789524472.4137905,
+    "ast_hash": "bd85beaadc36e307c5a69c326dabca3f",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/bank-callbacks/bank-callback.controller.ts": {
+    "mtime": 1789110210.057637,
+    "ast_hash": "907c0eaf3e87c702375d2b104e940917",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/bank-callbacks/bank-callback.module.ts": {
+    "mtime": 1789110210.0576992,
+    "ast_hash": "b8d8048f84880a1fb5e81aa5e656890a",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/bank-callbacks/constants/bank-resp-codes.ts": {
+    "mtime": 1789110210.057798,
+    "ast_hash": "9c6dfc0a282acbcf8a2d1dd60c081261",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/bank-callbacks/constants/payment-mode.ts": {
+    "mtime": 1789110210.057999,
+    "ast_hash": "a396813bdc127554969d79c093c07b79",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/bank-callbacks/dto/bank-callback-request.dto.ts": {
+    "mtime": 1789110210.0584874,
+    "ast_hash": "1697902f16ca98324faebe0d0a9702f6",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/bank-callbacks/dto/bank-callback-response.dto.ts": {
+    "mtime": 1789110210.0585444,
+    "ast_hash": "a812319f793fae9dfa79b1a39af87f62",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/bank-callbacks/entities/request-approval.entity.ts": {
+    "mtime": 1789723011.628839,
+    "ast_hash": "a4a7d7750b8c51df1e4ae7ccea4184fb",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/bank-callbacks/entities/request-payment.entity.ts": {
+    "mtime": 1789723011.6290855,
+    "ast_hash": "0be2839605597b739b8f3ae8eac638e4",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/bank-callbacks/services/bill-approval.service.ts": {
+    "mtime": 1789110210.0588589,
+    "ast_hash": "fdcc0bf8a86a08d53df4b6a4091416c9",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/bank-callbacks/services/bill-payment.service.ts": {
+    "mtime": 1789723011.6293454,
+    "ast_hash": "79605b2d96228ea053584d76f5800351",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/bank-callbacks/services/mock-bank.service.ts": {
+    "mtime": 1789110210.059049,
+    "ast_hash": "bbffa1caf780fbd4dcc555cb1b1aedb3",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/bank-callbacks/services/payment-status.service.ts": {
+    "mtime": 1789110210.0592399,
+    "ast_hash": "1331a03d4011b916491a76cce90dfbc8",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/bank-callbacks/utils/bank-callback.util.spec.ts": {
+    "mtime": 1789110210.0593283,
+    "ast_hash": "d6549d69aa67feadbeedf69e4185f3a2",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/bank-callbacks/utils/bank-callback.util.ts": {
+    "mtime": 1789723011.6296046,
+    "ast_hash": "0fef3ed0a4ca6a74fe56e0df4df01cba",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/msg-persons/dto/msg-person-response.dto.ts": {
+    "mtime": 1789524472.4152963,
+    "ast_hash": "8a8f80e48feca29bc905b2db1a98449b",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/msg-persons/dto/msg-persons-query.dto.ts": {
+    "mtime": 1789611470.2639918,
+    "ast_hash": "b05a26291ca323b39ab60e0830146979",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/msg-persons/dto/update-msg-person-roles.dto.ts": {
+    "mtime": 1789524472.415388,
+    "ast_hash": "916a16f205f9b52a32ac3565ccab7f7e",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/msg-persons/msg-persons.controller.ts": {
+    "mtime": 1789524472.4155865,
+    "ast_hash": "15a384fc5905684edffbf0c7e17b60f6",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/msg-persons/msg-persons.service.spec.ts": {
+    "mtime": 1789723011.6313403,
+    "ast_hash": "7e169200572e39fcec28204bdaad3d11",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/modules/msg-persons/msg-persons.service.ts": {
+    "mtime": 1789723011.6316144,
+    "ast_hash": "950d85a9aee37dc73e19cd873b15f16b",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/types/api/loginBuuApiConfig.ts": {
+    "mtime": 1789524472.4194982,
+    "ast_hash": "6336a008375a35d30e8c3db5a810b37c",
+    "semantic_hash": ""
+  },
+  "apps/backend/test/e2e/bank-callback.e2e-spec.ts": {
+    "mtime": 1789723011.632352,
+    "ast_hash": "e702f28850d31e158e38c19d9159e088",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/pages/admin/personnel-roles-page.vue": {
+    "mtime": 1789524472.421683,
+    "ast_hash": "4564efa2e312d120d91168fe675f5ed3",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/services/msg-persons.service.ts": {
+    "mtime": 1789524472.423764,
+    "ast_hash": "cccaea6eaf33db41564aee117fb0f175",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/types/msg-person.ts": {
+    "mtime": 1789611470.2689908,
+    "ast_hash": "3de577f7810edd111d5974429443860d",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/utils/proctor-option.spec.ts": {
+    "mtime": 1789611470.2691405,
+    "ast_hash": "f1b360b8e597d7c6f69934f88e230173",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/utils/proctor-option.ts": {
+    "mtime": 1789611470.26984,
+    "ast_hash": "6128fa0996302fbc72f2719abe6c6dcc",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/utils/room-check-in-access.spec.ts": {
+    "mtime": 1789611470.2699826,
+    "ast_hash": "b13a7ce7f361f79de2bca9a4acb405ec",
+    "semantic_hash": ""
+  },
+  "apps/frontend/src/utils/room-check-in-access.ts": {
+    "mtime": 1789611470.2703037,
+    "ast_hash": "aa37d5b4e1b326adb7cc96c39a4dc708",
+    "semantic_hash": ""
+  },
+  "docs/sql/reset-payment-erm-2153.sql": {
+    "mtime": 1789110210.068009,
+    "ast_hash": "9c93e2c402b06e0b8ac71ed0c04ce02c",
+    "semantic_hash": ""
+  },
+  "tests/integration/msg-persons.api.spec.ts": {
+    "mtime": 1789611470.2709427,
+    "ast_hash": "68e5d3860dbe1cbd97d50520a8d87766",
+    "semantic_hash": ""
+  },
+  ".gitlab/ci/deploy.yml": {
+    "mtime": 1789722825.6504235,
+    "ast_hash": "0a73f721afff20901ddc5e77a8461b6e",
+    "semantic_hash": ""
+  },
+  ".gitlab/ci/vault-helpers.yml": {
+    "mtime": 1789713111.4481127,
+    "ast_hash": "a24dccd2c7227092261d93b07a5c7886",
+    "semantic_hash": ""
+  },
+  "docs/buu-get-payment-port-checklist.md": {
+    "mtime": 1789110210.0676706,
+    "ast_hash": "3bba83b1640942c3a288a52f640321b3",
+    "semantic_hash": ""
+  },
+  "docs/ci-tag-driven-deploy-spec.md": {
+    "mtime": 1789706436.6109135,
+    "ast_hash": "d0d472961c04539d85644f54a9f11683",
+    "semantic_hash": ""
+  },
+  "docs/mock-payment-test-guide.md": {
+    "mtime": 1789110210.0678804,
+    "ast_hash": "110b3748a98fa352c62d80e760aba642",
     "semantic_hash": ""
   }
 }

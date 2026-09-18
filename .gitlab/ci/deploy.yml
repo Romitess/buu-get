@@ -13,50 +13,20 @@
     - apk add --no-cache kubectl curl jq
     - !reference [.vault_kv_helpers, before_script]
     - |
-      # Sanitize dotenv for kubectl --from-env-file:
-      # strip BOM/CRLF, trim keys, skip comments/blank, last-wins on duplicate keys.
+      # Sanitize dotenv for kubectl --from-env-file (export prefix, trim, last-wins).
       sanitize_dotenv_file() {
         _in="$1"
         _out="$2"
+        _awk="${CI_PROJECT_DIR:-.}/.gitlab/ci/sanitize-dotenv.awk"
         if [ ! -f "$_in" ]; then
           echo "ERROR: sanitize_dotenv_file: input not found: ${_in}" >&2
           return 1
         fi
-        awk '
-          BEGIN { n = 0 }
-          {
-            line = $0
-            sub(/\r$/, "", line)
-            if (NR == 1) sub(/^\xef\xbb\xbf/, "", line)
-            if (line ~ /^[[:space:]]*$/) next
-            if (line ~ /^[[:space:]]*#/) next
-            eq = index(line, "=")
-            if (eq < 2) next
-            key = substr(line, 1, eq - 1)
-            val = substr(line, eq + 1)
-            gsub(/^[[:space:]]+|[[:space:]]+$/, "", key)
-            if (key == "") next
-            if (key !~ /^[A-Za-z_][A-Za-z0-9_]*$/) {
-              printf "WARN: Skipping invalid dotenv key: %s\n", key > "/dev/stderr"
-              next
-            }
-            if (key in vals) {
-              dups[key]++
-            } else {
-              order[++n] = key
-            }
-            vals[key] = val
-          }
-          END {
-            for (i = 1; i <= n; i++) {
-              k = order[i]
-              print k "=" vals[k]
-            }
-            for (k in dups) {
-              printf "WARN: Duplicate dotenv key (kept last): %s (%d extras)\n", k, dups[k] > "/dev/stderr"
-            }
-          }
-        ' "$_in" > "$_out"
+        if [ ! -f "$_awk" ]; then
+          echo "ERROR: sanitize_dotenv_file: awk script not found: ${_awk}" >&2
+          return 1
+        fi
+        awk -f "$_awk" "$_in" > "$_out"
         if [ ! -s "$_out" ]; then
           echo "ERROR: sanitize_dotenv_file: sanitized file is empty" >&2
           return 1
@@ -128,11 +98,14 @@
               V_TOKEN="$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.REGISTRY_TOKEN // empty')"
               V_REG_HOST="$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.REGISTRY_HOST // empty')"
               if [ -n "$V_DOTENV" ]; then
+                echo "=== DOTENV source: Vault (${DOTENV_KEY}); GitLab CI var is fallback only ==="
                 case "$ENV_NAME" in
-                  dev) export DOTENV_DEV="${DOTENV_DEV:-$V_DOTENV}" ;;
-                  test) export DOTENV_TEST="${DOTENV_TEST:-$V_DOTENV}" ;;
-                  prod) export DOTENV_PROD="${DOTENV_PROD:-$V_DOTENV}" ;;
+                  dev) export DOTENV_DEV="$V_DOTENV" ;;
+                  test) export DOTENV_TEST="$V_DOTENV" ;;
+                  prod) export DOTENV_PROD="$V_DOTENV" ;;
                 esac
+              else
+                echo "=== DOTENV source: GitLab/CI variable (Vault ${DOTENV_KEY} empty) ==="
               fi
               [ -n "$V_KUBE" ] && KUBECONFIG="${KUBECONFIG:-$V_KUBE}"
               [ -n "$V_USER" ] && export REGISTRY_USER="${REGISTRY_USER:-$V_USER}"
