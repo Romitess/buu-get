@@ -1,75 +1,340 @@
-# Helm deploy jobs for tag-driven CI.
-# Included from .gitlab-ci.yml. Do NOT declare stages: here (would override the parent list).
-# Cross-file reuse: !reference (YAML anchors do not cross include files).
-
+# Helm deploy jobs for BUU GET. Do not declare stages here.
+# Image WORKDIR is /app/apps/backend — migrate CLI is ../../node_modules/typeorm/cli.js
+# Web probe is / (SPA). Fail-closed kubeconfig. Helm --wait/rollback + quota-aware migrate.
 .helm_deploy:
   image:
     name: alpine/helm:3.15.4
     entrypoint: [""]
-  tags:
-    - $RUNNER_TAG
+  interruptible: false
+  retry:
+    max: 0
+  timeout: 30m
   before_script:
     - apk add --no-cache kubectl curl jq
-    - !reference [.vault_deploy, script]
+    - !reference [.vault_kv_helpers, before_script]
     - |
+      # Sanitize dotenv for kubectl --from-env-file:
+      # strip BOM/CRLF, trim keys, skip comments/blank, last-wins on duplicate keys.
+      sanitize_dotenv_file() {
+        _in="$1"
+        _out="$2"
+        if [ ! -f "$_in" ]; then
+          echo "ERROR: sanitize_dotenv_file: input not found: ${_in}" >&2
+          return 1
+        fi
+        awk '
+          BEGIN { n = 0 }
+          {
+            line = $0
+            sub(/\r$/, "", line)
+            if (NR == 1) sub(/^\xef\xbb\xbf/, "", line)
+            if (line ~ /^[[:space:]]*$/) next
+            if (line ~ /^[[:space:]]*#/) next
+            eq = index(line, "=")
+            if (eq < 2) next
+            key = substr(line, 1, eq - 1)
+            val = substr(line, eq + 1)
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", key)
+            if (key == "") next
+            if (key !~ /^[A-Za-z_][A-Za-z0-9_]*$/) {
+              printf "WARN: Skipping invalid dotenv key: %s\n", key > "/dev/stderr"
+              next
+            }
+            if (key in vals) {
+              dups[key]++
+            } else {
+              order[++n] = key
+            }
+            vals[key] = val
+          }
+          END {
+            for (i = 1; i <= n; i++) {
+              k = order[i]
+              print k "=" vals[k]
+            }
+            for (k in dups) {
+              printf "WARN: Duplicate dotenv key (kept last): %s (%d extras)\n", k, dups[k] > "/dev/stderr"
+            }
+          }
+        ' "$_in" > "$_out"
+        if [ ! -s "$_out" ]; then
+          echo "ERROR: sanitize_dotenv_file: sanitized file is empty" >&2
+          return 1
+        fi
+        echo "=== Sanitized dotenv: $(wc -l < "$_out" | tr -d " ") keys → ${_out} ==="
+        echo "=== Dotenv keys (values hidden) ==="
+        cut -d= -f1 "$_out"
+      }
+
       require_deploy_target() {
-        expected="$1"
-        mode="$2"
-        if ! echo "${CI_COMMIT_TAG:-}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-dev|-test)?$'; then
-          echo "ERROR: CI_COMMIT_TAG '${CI_COMMIT_TAG:-}' is not a valid deploy tag"
+        EXPECTED_ENV="$1"
+        MODE="$2"
+        TAG_RE='^v[0-9]+\.[0-9]+\.[0-9]+(-dev|-test)?$'
+        if [ -z "${CI_COMMIT_TAG:-}" ] || ! echo "${CI_COMMIT_TAG}" | grep -Eq "${TAG_RE}"; then
+          echo "ERROR: deploy requires a git tag matching ${TAG_RE} (got CI_COMMIT_TAG='${CI_COMMIT_TAG:-}')."
           exit 1
         fi
         if [ -z "${DEPLOY_ENV:-}" ]; then
-          echo "ERROR: DEPLOY_ENV is empty (resolve-deploy-target dotenv missing)"
+          echo "ERROR: DEPLOY_ENV is empty (resolve-deploy-target dotenv missing)."
           exit 1
         fi
-        if [ "$DEPLOY_ENV" != "$expected" ]; then
-          echo "DEPLOY_ENV=$DEPLOY_ENV does not match expected $expected"
-          if [ "$mode" = "skip" ]; then
-            echo "Skipping deploy"
-            exit 0
+        if [ "${DEPLOY_ENV}" != "${EXPECTED_ENV}" ]; then
+          echo "=== Skipping ${CI_JOB_NAME}: DEPLOY_ENV=${DEPLOY_ENV} expected ${EXPECTED_ENV} (tag ${CI_COMMIT_TAG}) ==="
+          if [ "${MODE}" = "fail" ]; then
+            echo "ERROR: this manual job is for ${EXPECTED_ENV} only. Do not click it for DEPLOY_ENV=${DEPLOY_ENV}."
+            exit 1
           fi
+          exit 0
+        fi
+        echo "=== Deploy guard OK: tag=${CI_COMMIT_TAG} DEPLOY_ENV=${DEPLOY_ENV} job=${CI_JOB_NAME} ==="
+      }
+
+      fetch_vault_env_secrets() {
+        ENV_NAME="$1"
+        case "$ENV_NAME" in
+          dev) KUBE_KEY="KUBECONFIG_DEV"; DOTENV_KEY="DOTENV_DEV" ;;
+          test) KUBE_KEY="KUBECONFIG_TEST"; DOTENV_KEY="DOTENV_TEST" ;;
+          prod) KUBE_KEY="KUBECONFIG_PROD"; DOTENV_KEY="DOTENV_PROD" ;;
+          *) echo "ERROR: unknown deploy env ${ENV_NAME}"; exit 1 ;;
+        esac
+        echo "=== Fetching secrets from HashiCorp Vault Cluster for $(printf '%s' "$ENV_NAME" | tr '[:lower:]' '[:upper:]') ==="
+        if [ -z "$VAULT_TOKEN" ]; then
+          echo "WARN: VAULT_TOKEN is not set; skipping Vault fetch."
+          return 0
+        fi
+        echo "CI_PROJECT_NAME=${CI_PROJECT_NAME} VAULT_PROJECT_NAME=${VAULT_PROJECT_NAME:-<unset>}"
+        PROJECT_SLUG="${VAULT_PROJECT_NAME:-$CI_PROJECT_NAME}"
+        for v_url in ${VAULT_SERVERS:-$VAULT_ADDR}; do
+          echo "Trying Vault node: ${v_url}..."
+          VAULT_COMMON_RESP=""
+          VAULT_ENV_RESP=""
+          VAULT_COMMON_RESP="$(vault_kv_get_http_then_https "$v_url" "secret/data/KUBECONFIG" || true)"
+          if [ -n "$VAULT_COMMON_RESP" ]; then
+            echo "=== Fetched secret/data/KUBECONFIG (values hidden) ==="
+            V_KUBE_COMMON="$(echo "$VAULT_COMMON_RESP" | jq -r '.data.data.KUBECONFIG // empty')"
+            V_REG_HOST_COMMON="$(echo "$VAULT_COMMON_RESP" | jq -r '.data.data.REGISTRY_HOST // empty')"
+            [ -n "$V_KUBE_COMMON" ] && KUBECONFIG="${KUBECONFIG:-$V_KUBE_COMMON}"
+            [ -n "$V_REG_HOST_COMMON" ] && export REGISTRY_HOST="${REGISTRY_HOST:-$V_REG_HOST_COMMON}"
+            echo "KUBECONFIG from common: $([ -n "$V_KUBE_COMMON" ] && echo SET || echo EMPTY)"
+          fi
+          for slug in "$PROJECT_SLUG" $VAULT_EXTRA_PROJECT_NAMES; do
+            [ -z "$slug" ] && continue
+            VAULT_ENV_RESP="$(vault_kv_get_http_then_https "$v_url" "secret/data/${slug}/${ENV_NAME}" || true)"
+            if [ -n "$VAULT_ENV_RESP" ]; then
+              echo "=== Fetched secret/data/${slug}/${ENV_NAME} (values hidden) ==="
+              V_KUBE="$(echo "$VAULT_ENV_RESP" | jq -r --arg k "$KUBE_KEY" '.data.data[$k] // .data.data.KUBECONFIG // empty')"
+              V_DOTENV="$(echo "$VAULT_ENV_RESP" | jq -r --arg k "$DOTENV_KEY" '.data.data[$k] // .data.data.DOTENV // empty')"
+              V_USER="$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.REGISTRY_USER // empty')"
+              V_TOKEN="$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.REGISTRY_TOKEN // empty')"
+              V_REG_HOST="$(echo "$VAULT_ENV_RESP" | jq -r '.data.data.REGISTRY_HOST // empty')"
+              if [ -n "$V_DOTENV" ]; then
+                case "$ENV_NAME" in
+                  dev) export DOTENV_DEV="${DOTENV_DEV:-$V_DOTENV}" ;;
+                  test) export DOTENV_TEST="${DOTENV_TEST:-$V_DOTENV}" ;;
+                  prod) export DOTENV_PROD="${DOTENV_PROD:-$V_DOTENV}" ;;
+                esac
+              fi
+              [ -n "$V_KUBE" ] && KUBECONFIG="${KUBECONFIG:-$V_KUBE}"
+              [ -n "$V_USER" ] && export REGISTRY_USER="${REGISTRY_USER:-$V_USER}"
+              [ -n "$V_TOKEN" ] && export REGISTRY_TOKEN="${REGISTRY_TOKEN:-$V_TOKEN}"
+              [ -n "$V_REG_HOST" ] && export REGISTRY_HOST="${REGISTRY_HOST:-$V_REG_HOST}"
+              echo "KUBECONFIG from env: $([ -n "$V_KUBE" ] && echo SET || echo EMPTY)"
+              break
+            fi
+          done
+          if [ -n "$VAULT_ENV_RESP" ] || [ -n "$VAULT_COMMON_RESP" ]; then
+            break
+          fi
+        done
+      }
+
+      apply_kubeconfig() {
+        ENV_NAME="$1"
+        ENV_UPPER="$(printf '%s' "$ENV_NAME" | tr '[:lower:]' '[:upper:]')"
+        case "$ENV_NAME" in
+          dev) KUBECONFIG_VAR="${KUBECONFIG:-$KUBECONFIG_DEV}" ;;
+          test) KUBECONFIG_VAR="${KUBECONFIG:-$KUBECONFIG_TEST}" ;;
+          prod) KUBECONFIG_VAR="${KUBECONFIG:-$KUBECONFIG_PROD}" ;;
+        esac
+        if [ -z "$KUBECONFIG_VAR" ]; then
+          echo "ERROR: KUBECONFIG is not set after Vault fetch and GitLab fallback (KUBECONFIG / KUBECONFIG_${ENV_UPPER})."
+          echo "Tried nodes: ${VAULT_SERVERS:-$VAULT_ADDR}"
+          echo "Tried paths: secret/data/KUBECONFIG and secret/data/${VAULT_PROJECT_NAME:-$CI_PROJECT_NAME}/${ENV_NAME} (+ VAULT_EXTRA_PROJECT_NAMES)"
+          echo "Fix Vault ACL/path/TLS or set KUBECONFIG_${ENV_UPPER} as a GitLab File variable. Do not skip deploy."
           exit 1
         fi
-      }
-
-      # kubectl --from-env-file rejects keys with spaces (e.g. "BUU_DOMAIN =value")
-      sanitize_dotenv_file() {
-        src="$1"
-        dest="${2:-/tmp/app_env.sanitized.env}"
-        tr -d '\r' < "$src" | sed '1s/^\xEF\xBB\xBF//' > /tmp/app_env.raw.env
-        awk '
-          {
-            sub(/^[ \t]+/, "")
-            if ($0 == "" || $0 ~ /^#/) next
-            if ($0 ~ /^export[ \t]+/) sub(/^export[ \t]+/, "")
-            eq = index($0, "=")
-            if (eq == 0) next
-            key = substr($0, 1, eq-1)
-            val = substr($0, eq+1)
-            gsub(/^[ \t]+|[ \t]+$/, "", key)
-            sub(/^[ \t]+/, "", val)
-            if (key ~ /^[-._A-Za-z][-._A-Za-z0-9]*$/) print key "=" val
-            else print "WARN: skip invalid dotenv key [" key "]" > "/dev/stderr"
-          }
-        ' /tmp/app_env.raw.env > "$dest"
-        rm -f /tmp/app_env.raw.env
-        if [ ! -s "$dest" ]; then
-          echo "ERROR: sanitized dotenv is empty (check DOTENV_* formatting)."
-          return 1
+        mkdir -p ~/.kube
+        if [ -f "$KUBECONFIG_VAR" ]; then cp "$KUBECONFIG_VAR" ~/.kube/config
+        elif [ -f "$KUBECONFIG" ]; then cp "$KUBECONFIG" ~/.kube/config
+        else printf "%s" "$KUBECONFIG_VAR" > ~/.kube/config
         fi
-        echo "=== Dotenv keys (values hidden) ==="
-        cut -d= -f1 "$dest"
+        chmod 600 ~/.kube/config
       }
 
-      # Run TypeORM migrations as a one-shot Job before helm upgrade.
-      # Usage: run_db_migration <namespace> <image-tag>
+      create_regcred() {
+        NS="$1"
+        PULL_USER="${REGISTRY_USER:-${REGISTRY_READ_USER:-$CI_REGISTRY_USER}}"
+        PULL_PASS="${REGISTRY_TOKEN:-${REGISTRY_PASSWORD:-${REGISTRY_READ_PASSWORD:-$CI_REGISTRY_PASSWORD}}}"
+        IMG_HOST=$(echo "$IMAGE" | cut -d/ -f1)
+        if [ -n "$PULL_USER" ] && [ -n "$PULL_PASS" ]; then
+          AUTH_B64=$(printf "%s:%s" "$PULL_USER" "$PULL_PASS" | base64 | tr -d "\r\n")
+          SERVERS="$REGISTRY_HOST $CI_REGISTRY $IMG_HOST gitlabregistry.buu.ac.th registry.gitlabcc-devops.buu.ac.th gitlabcc-devops.buu.ac.th"
+          mkdir -p /tmp/k8s-auth
+          printf '{"auths":{' > /tmp/k8s-auth/config.json
+          FIRST=1
+          for s in $SERVERS; do
+            if [ -n "$s" ]; then
+              for prefix in "" "https://" "http://"; do
+                for suffix in "" "/v1/" "/v2/"; do
+                  KEY="${prefix}${s}${suffix}"
+                  if [ $FIRST -eq 0 ]; then printf "," >> /tmp/k8s-auth/config.json; fi
+                  printf '"%s":{"username":"%s","password":"%s","auth":"%s"}' "$KEY" "$PULL_USER" "$PULL_PASS" "$AUTH_B64" >> /tmp/k8s-auth/config.json
+                  FIRST=0
+                done
+              done
+            fi
+          done
+          printf '}}' >> /tmp/k8s-auth/config.json
+          echo "=== Creating multi-domain imagePullSecret regcred (User: ${PULL_USER}) ==="
+          kubectl create secret generic regcred --from-file=.dockerconfigjson=/tmp/k8s-auth/config.json --type=kubernetes.io/dockerconfigjson -n "${NS}" --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config || true
+        fi
+      }
+
+      create_app_env_secret() {
+        ENV_NAME="$1"
+        ENV_UPPER="$(printf '%s' "$ENV_NAME" | tr '[:lower:]' '[:upper:]')"
+        case "$ENV_NAME" in
+          dev) ENV_VAR="${DOTENV_DEV:-$DOTENV_FILE}" ;;
+          test) ENV_VAR="${DOTENV_TEST:-$DOTENV_FILE}" ;;
+          prod) ENV_VAR="${DOTENV_PROD:-$DOTENV_FILE}" ;;
+        esac
+        if [ -z "$ENV_VAR" ]; then
+          echo "ERROR: DOTENV_${ENV_UPPER} variable is empty in GitLab CI/CD Variables." && exit 1
+        fi
+        if [ -f "$ENV_VAR" ]; then
+          ENV_PATH="$ENV_VAR"
+        else
+          printf "%s\n" "$ENV_VAR" > /tmp/app_env.raw.env
+          ENV_PATH="/tmp/app_env.raw.env"
+        fi
+        sanitize_dotenv_file "$ENV_PATH" /tmp/app_env.sanitized.env
+        echo "=== Creating Secret from Sanitized Dotenv (/tmp/app_env.sanitized.env) ==="
+        kubectl create secret generic ${RELEASE_NAME}-env \
+          --from-env-file=/tmp/app_env.sanitized.env \
+          -n "${ENV_NAME}" --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config
+        rm -f /tmp/app_env.raw.env /tmp/app_env.sanitized.env
+      }
+
       run_db_migration() {
         NS="$1"
         IMAGE_TAG="$2"
         JOB_NAME="${RELEASE_NAME}-migrate"
         JOB_FILE="/tmp/${JOB_NAME}.yaml"
+        MIGRATE_MEM_LIMIT_MI=128
         echo "=== Running DB migration Job ${JOB_NAME} (image ${IMAGE_API}:${IMAGE_TAG}) in ${NS} ==="
+
+        k8s_mem_to_mi() {
+          q="${1:-0}"
+          case "${q}" in
+            *Gi) echo $(( ${q%Gi} * 1024 )) ;;
+            *Mi) echo "${q%Mi}" ;;
+            *Ki) echo $(( ${q%Ki} / 1024 )) ;;
+            *) echo 0 ;;
+          esac
+        }
+
+        echo "=== ResourceQuota before reclaim ==="
+        kubectl describe resourcequota -n "${NS}" --kubeconfig ~/.kube/config || true
+
+        refresh_quota_tsv() {
+          RQ_JSON=$(kubectl get resourcequota -n "${NS}" -o json --kubeconfig ~/.kube/config 2>/dev/null || echo '{"items":[]}')
+          QUOTA_TSV=$(echo "${RQ_JSON}" | jq -r '.items[] | select(.status.hard["limits.memory"] != null) | [(.status.used["limits.memory"] // "0"), .status.hard["limits.memory"]] | @tsv')
+        }
+        compute_min_free_mi() {
+          MIN_FREE_MI=""
+          [ -z "${QUOTA_TSV}" ] && return 0
+          echo "${QUOTA_TSV}" > /tmp/quota_tsv.txt
+          while IFS="$(printf '\t')" read -r USED_Q HARD_Q; do
+            [ -z "${HARD_Q}" ] || [ "${HARD_Q}" = "null" ] && continue
+            USED_MI=$(k8s_mem_to_mi "${USED_Q}")
+            HARD_MI=$(k8s_mem_to_mi "${HARD_Q}")
+            FREE_MI=$(( HARD_MI - USED_MI ))
+            echo "=== quota limits.memory used=${USED_Q} hard=${HARD_Q} free≈${FREE_MI}Mi (need ${MIGRATE_MEM_LIMIT_MI}Mi) ==="
+            if [ -z "${MIN_FREE_MI}" ] || [ "${FREE_MI}" -lt "${MIN_FREE_MI}" ]; then
+              MIN_FREE_MI="${FREE_MI}"
+            fi
+          done < /tmp/quota_tsv.txt
+          rm -f /tmp/quota_tsv.txt
+        }
+        scale_release_deploys() {
+          REPLICAS="$1"
+          for d in "${RELEASE_NAME}" "${RELEASE_NAME}-web"; do
+            if kubectl get deploy "${d}" -n "${NS}" --kubeconfig ~/.kube/config >/dev/null 2>&1; then
+              echo "=== Scaling deploy/${d} → ${REPLICAS} ==="
+              kubectl scale "deploy/${d}" -n "${NS}" --replicas="${REPLICAS}" --kubeconfig ~/.kube/config
+            fi
+          done
+        }
+        wait_release_pods_gone() {
+          kubectl wait --for=delete pod \
+            -l "app in (${RELEASE_NAME},${RELEASE_NAME}-web)" \
+            -n "${NS}" --timeout=120s --kubeconfig ~/.kube/config || true
+          for _ in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            LEFT=$(kubectl get pods -n "${NS}" --kubeconfig ~/.kube/config \
+              -l "app in (${RELEASE_NAME},${RELEASE_NAME}-web)" \
+              --no-headers 2>/dev/null | wc -l | tr -d ' ')
+            [ "${LEFT}" = "0" ] && break
+            sleep 5
+          done
+        }
+
+        refresh_quota_tsv
+        compute_min_free_mi
+        HAS_MEMORY_QUOTA=0
+        [ -n "${QUOTA_TSV}" ] && HAS_MEMORY_QUOTA=1
+
+        if [ "${NS}" = "prod" ]; then
+          echo "=== Skipping scale-to-0 in prod (migrate Job ${MIGRATE_MEM_LIMIT_MI}Mi must fit beside running replicas) ==="
+        elif [ "${HAS_MEMORY_QUOTA}" != "1" ]; then
+          echo "=== Skipping scale-to-0: no ResourceQuota with limits.memory in ${NS} ==="
+        elif [ -n "${MIN_FREE_MI}" ] && [ "${MIN_FREE_MI}" -lt "${MIGRATE_MEM_LIMIT_MI}" ]; then
+          echo "=== Quota headroom ${MIN_FREE_MI}Mi < ${MIGRATE_MEM_LIMIT_MI}Mi — scaling test/dev replicas to 0 ==="
+          scale_release_deploys 0
+          wait_release_pods_gone
+        else
+          echo "=== Quota headroom enough for migrate Job — leaving replicas running ==="
+        fi
+
+        if [ "${NS}" = "test" ] || [ "${NS}" = "dev" ]; then
+          REL_STATUS=$(helm status "${RELEASE_NAME}" -n "${NS}" --kubeconfig ~/.kube/config -o json 2>/dev/null \
+            | jq -r '.info.status // empty' || true)
+          case "${REL_STATUS}" in
+            pending-install|pending-upgrade|pending-rollback|failed)
+              echo "=== Helm release ${RELEASE_NAME} status=${REL_STATUS} — uninstalling to reclaim quota ==="
+              helm uninstall "${RELEASE_NAME}" -n "${NS}" --wait --timeout 2m --kubeconfig ~/.kube/config || true
+              wait_release_pods_gone
+              ;;
+            *)
+              echo "=== Helm release status=${REL_STATUS:-none} — skip uninstall ==="
+              ;;
+          esac
+        fi
+
+        echo "=== ResourceQuota after reclaim ==="
+        kubectl describe resourcequota -n "${NS}" --kubeconfig ~/.kube/config || true
+        refresh_quota_tsv
+        compute_min_free_mi
+        if [ -n "${QUOTA_TSV}" ]; then
+          if [ -n "${MIN_FREE_MI}" ] && [ "${MIN_FREE_MI}" -lt "${MIGRATE_MEM_LIMIT_MI}" ]; then
+            echo "ERROR: Namespace ${NS} ResourceQuota has no room for migrate Job (${MIGRATE_MEM_LIMIT_MI}Mi)."
+            echo "ERROR: Free≈${MIN_FREE_MI}Mi. Ask cluster admins to free limits.memory in ${NS}, then retry."
+            kubectl get deploy,po -n "${NS}" --kubeconfig ~/.kube/config || true
+            exit 1
+          fi
+        else
+          echo "WARN: No ResourceQuota with limits.memory in ${NS} — proceeding without headroom check"
+        fi
+
         kubectl delete job "${JOB_NAME}" -n "${NS}" --ignore-not-found --kubeconfig ~/.kube/config
         printf '%s\n' \
           "apiVersion: batch/v1" \
@@ -79,7 +344,7 @@
           "  namespace: ${NS}" \
           "spec:" \
           "  backoffLimit: 1" \
-          "  ttlSecondsAfterFinished: 600" \
+          "  ttlSecondsAfterFinished: 120" \
           "  template:" \
           "    spec:" \
           "      restartPolicy: Never" \
@@ -100,11 +365,11 @@
           "                name: ${RELEASE_NAME}-env" \
           "          resources:" \
           "            requests:" \
-          "              cpu: 100m" \
-          "              memory: 128Mi" \
+          "              cpu: \"50m\"" \
+          "              memory: \"64Mi\"" \
           "            limits:" \
-          "              cpu: 500m" \
-          "              memory: 512Mi" \
+          "              cpu: \"250m\"" \
+          "              memory: \"${MIGRATE_MEM_LIMIT_MI}Mi\"" \
           > "${JOB_FILE}"
         kubectl apply -f "${JOB_FILE}" --kubeconfig ~/.kube/config
         rm -f "${JOB_FILE}"
@@ -112,120 +377,192 @@
           echo "ERROR: Migration Job failed — aborting deploy (helm upgrade skipped)"
           kubectl logs "job/${JOB_NAME}" -n "${NS}" --kubeconfig ~/.kube/config || true
           kubectl describe "job/${JOB_NAME}" -n "${NS}" --kubeconfig ~/.kube/config || true
+          echo "=== Namespace ResourceQuota (quota pressure?) ==="
+          kubectl describe resourcequota -n "${NS}" --kubeconfig ~/.kube/config || true
+          scale_release_deploys 1
           exit 1
         fi
         echo "=== Migration Job completed successfully ==="
         kubectl logs "job/${JOB_NAME}" -n "${NS}" --kubeconfig ~/.kube/config || true
+        kubectl delete job "${JOB_NAME}" -n "${NS}" --ignore-not-found --kubeconfig ~/.kube/config || true
+        scale_release_deploys 1
       }
 
-      run_helm_deploy() {
-        ENV_NAME="$1"
-        NS="${DEPLOY_NAMESPACE:-$ENV_NAME}"
-        RELEASE_NAME="${APP_NAME:-${CI_PROJECT_NAME_SLUG:-${CI_PROJECT_NAME}}}"
-        export RELEASE_NAME
+      helm_upgrade_wait() {
+        REL="$1"
+        NS="$2"
+        VALUES_FILE="$3"
+        IMAGE_TAG="$4"
+        INGRESS_HOST="$5"
+        echo "=== Helm upgrade --install ${REL} in ${NS} (wait 8m, CrashLoop abort, no --wait on rollback) ==="
+        echo "=== ResourceQuota before helm ==="
+        kubectl describe resourcequota -n "${NS}" --kubeconfig ~/.kube/config || true
 
-        case "$ENV_NAME" in
-          dev)
-            HOST="${RELEASE_NAME}-dev.buu.ac.th"
-            KUBECONFIG_VAR="${KUBECONFIG:-$KUBECONFIG_DEV}"
-            ENV_VAR="${DOTENV_DEV:-$DOTENV_FILE}"
-            VALUES="${HELM_CHART_PATH}/values-dev.yaml"
-            ENV_LABEL=DEV
-            ;;
-          test)
-            HOST="${RELEASE_NAME}-test.buu.ac.th"
-            KUBECONFIG_VAR="${KUBECONFIG:-$KUBECONFIG_TEST}"
-            ENV_VAR="${DOTENV_TEST:-$DOTENV_FILE}"
-            VALUES="${HELM_CHART_PATH}/values-test.yaml"
-            ENV_LABEL=TEST
-            ;;
-          prod)
-            HOST="${RELEASE_NAME}.buu.ac.th"
-            KUBECONFIG_VAR="${KUBECONFIG:-$KUBECONFIG_PROD}"
-            ENV_VAR="${DOTENV_PROD:-$DOTENV_FILE}"
-            VALUES="${HELM_CHART_PATH}/values-prod.yaml"
-            ENV_LABEL=PROD
-            ;;
-          *)
-            echo "ERROR: unknown deploy env ${ENV_NAME}"
-            exit 1
-            ;;
-        esac
-
-        if [ -z "$KUBECONFIG_VAR" ]; then
-          echo "WARNING: KUBECONFIG is not set."
-          exit 0
-        fi
-
-        echo "=== Deploying Node Release to ${ENV_LABEL}: ${RELEASE_NAME} ==="
-        mkdir -p ~/.kube
-        if [ -f "$KUBECONFIG_VAR" ]; then
-          cp "$KUBECONFIG_VAR" ~/.kube/config
-        elif [ -f "$KUBECONFIG" ]; then
-          cp "$KUBECONFIG" ~/.kube/config
-        else
-          printf "%s" "$KUBECONFIG_VAR" > ~/.kube/config
-        fi
-        chmod 600 ~/.kube/config
-        kubectl create namespace "${NS}" --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config || true
-
-        PULL_USER="${REGISTRY_USER:-${REGISTRY_READ_USER:-$CI_REGISTRY_USER}}"
-        PULL_PASS="${REGISTRY_TOKEN:-${REGISTRY_PASSWORD:-${REGISTRY_READ_PASSWORD:-$CI_REGISTRY_PASSWORD}}}"
-        IMG_HOST=$(echo "$IMAGE" | cut -d/ -f1)
-        if [ -n "$PULL_USER" ] && [ -n "$PULL_PASS" ]; then
-          AUTH_B64=$(printf "%s:%s" "$PULL_USER" "$PULL_PASS" | base64 | tr -d "\r\n")
-          SERVERS="$REGISTRY_HOST $CI_REGISTRY $IMG_HOST gitlabregistry.buu.ac.th registry.gitlabcc-devops.buu.ac.th gitlabcc-devops.buu.ac.th"
-          mkdir -p /tmp/k8s-auth
-          printf "{\"auths\":{" > /tmp/k8s-auth/config.json
-          FIRST=1
-          for s in $SERVERS; do
-            if [ -n "$s" ]; then
-              for prefix in "" "https://" "http://"; do
-                for suffix in "" "/v1/" "/v2/"; do
-                  KEY="${prefix}${s}${suffix}"
-                  if [ $FIRST -eq 0 ]; then
-                    printf "," >> /tmp/k8s-auth/config.json
-                  fi
-                  printf "\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"auth\":\"%s\"}" "$KEY" "$PULL_USER" "$PULL_PASS" "$AUTH_B64" >> /tmp/k8s-auth/config.json
-                  FIRST=0
-                done
-              done
+        helm_dump_and_rollback() {
+          WHY="$1"
+          echo "ERROR: helm upgrade failed (${WHY}) — dumping NEW revision before rollback"
+          kubectl get deploy,po,svc,ingress -n "${NS}" -l "app in (${REL},${REL}-web)" --kubeconfig ~/.kube/config || true
+          kubectl get po -n "${NS}" --kubeconfig ~/.kube/config || true
+          kubectl describe deploy "${REL}" -n "${NS}" --kubeconfig ~/.kube/config || true
+          kubectl describe deploy "${REL}-web" -n "${NS}" --kubeconfig ~/.kube/config || true
+          kubectl describe po -n "${NS}" -l "app in (${REL},${REL}-web)" --kubeconfig ~/.kube/config || true
+          kubectl logs -n "${NS}" -l "app=${REL}-web" --tail=200 --kubeconfig ~/.kube/config || true
+          kubectl logs -n "${NS}" -l "app=${REL}" --tail=200 --kubeconfig ~/.kube/config || true
+          kubectl logs -n "${NS}" -l "app=${REL}" --tail=200 --previous --kubeconfig ~/.kube/config || true
+          kubectl describe resourcequota -n "${NS}" --kubeconfig ~/.kube/config || true
+          kubectl get events -n "${NS}" --sort-by='.lastTimestamp' --kubeconfig ~/.kube/config | tail -40 || true
+          if ! kubectl get deploy "${REL}" -n "${NS}" --kubeconfig ~/.kube/config >/dev/null 2>&1; then
+            echo "ERROR: deploy/${REL} is missing — restoring from Helm manifest (no --wait)"
+            MANIFEST=/tmp/helm-restore-manifest.yaml
+            helm get manifest "${REL}" -n "${NS}" --kubeconfig ~/.kube/config > "${MANIFEST}" 2>/dev/null || true
+            if [ ! -s "${MANIFEST}" ]; then
+              PREV_REV=$(helm history "${REL}" -n "${NS}" --max 20 --kubeconfig ~/.kube/config -o json 2>/dev/null \
+                | jq -r '[.[] | select(.status == "deployed" or .status == "superseded")] | last | .revision // empty')
+              if [ -n "${PREV_REV}" ]; then
+                echo "=== helm get manifest current empty — using revision ${PREV_REV} ==="
+                helm get manifest "${REL}" -n "${NS}" --revision "${PREV_REV}" --kubeconfig ~/.kube/config > "${MANIFEST}" || true
+              fi
             fi
-          done
-          printf "}}" >> /tmp/k8s-auth/config.json
-          echo "=== Creating multi-domain imagePullSecret regcred (User: ${PULL_USER}) ==="
-          kubectl create secret generic regcred --from-file=.dockerconfigjson=/tmp/k8s-auth/config.json --type=kubernetes.io/dockerconfigjson -n "${NS}" --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config || true
-        fi
+            if [ -s "${MANIFEST}" ]; then
+              kubectl apply -n "${NS}" -f "${MANIFEST}" --kubeconfig ~/.kube/config || true
+            else
+              echo "WARN: no Helm manifest to restore deploy/${REL}"
+            fi
+            rm -f "${MANIFEST}"
+          fi
+          if api_current_rs_ready; then
+            echo "WARN: current API ReplicaSet is Ready — skipping rollback (watcher must not undo a healthy boot)"
+            kubectl get deploy,po -n "${NS}" -l "app in (${REL},${REL}-web)" --kubeconfig ~/.kube/config || true
+            return 0
+          fi
+          echo "=== Rolling back Helm release ${REL} (no --wait; crashloop must not block rollback) ==="
+          helm rollback "${REL}" -n "${NS}" --timeout 3m --kubeconfig ~/.kube/config || true
+          kubectl get deploy,po -n "${NS}" -l "app in (${REL},${REL}-web)" --kubeconfig ~/.kube/config || true
+          return 1
+        }
 
-        echo "=== Creating Application Secret ${RELEASE_NAME}-env ==="
-        if [ -z "$ENV_VAR" ]; then
-          echo "❌ ERROR: DOTENV_${ENV_LABEL} variable is empty in GitLab CI/CD Variables."
+        newest_api_rs_hash() {
+          kubectl get rs -n "${NS}" -o json --kubeconfig ~/.kube/config 2>/dev/null | jq -r --arg d "${REL}" '
+            [
+              .items[]
+              | select(any(.metadata.ownerReferences[]?; .kind == "Deployment" and .name == $d))
+            ]
+            | sort_by(.metadata.annotations["deployment.kubernetes.io/revision"] | tonumber? // 0)
+            | last
+            | .metadata.labels["pod-template-hash"] // empty
+          '
+        }
+
+        api_current_rs_pods_json() {
+          HASH=$(newest_api_rs_hash)
+          if [ -z "${HASH}" ] || [ "${HASH}" = "null" ]; then
+            echo '{"items":[]}'
+            return 0
+          fi
+          kubectl get pods -n "${NS}" -l "app=${REL},pod-template-hash=${HASH}" -o json --kubeconfig ~/.kube/config 2>/dev/null \
+            || echo '{"items":[]}'
+        }
+
+        api_pod_unhealthy() {
+          api_current_rs_pods_json | jq -e '
+            .items[]?
+            | select(.metadata.deletionTimestamp == null)
+            | .status.containerStatuses[]?
+            | select(
+                ((.state.waiting.reason // "") == "CrashLoopBackOff")
+                or ((.state.waiting.reason // "") == "ImagePullBackOff")
+                or ((.state.waiting.reason // "") == "ErrImagePull")
+              )
+          ' >/dev/null 2>&1
+        }
+
+        api_current_rs_ready() {
+          api_current_rs_pods_json | jq -e '
+            .items[]?
+            | select(.metadata.deletionTimestamp == null)
+            | select([.status.containerStatuses[]? | select(.ready == true)] | length > 0)
+          ' >/dev/null 2>&1
+        }
+
+        helm upgrade --install "${REL}" "${HELM_CHART_PATH}" \
+          -f "${VALUES_FILE}" \
+          --set image.repository="${IMAGE_API}" \
+          --set image.tag="${IMAGE_TAG}" \
+          --set web.image.repository="${IMAGE_WEB}" \
+          --set web.image.tag="${IMAGE_TAG}" \
+          --set ingress.host="${INGRESS_HOST}" \
+          -n "${NS}" --create-namespace \
+          --wait --timeout 8m --debug \
+          --kubeconfig ~/.kube/config > /tmp/helm-upgrade.log 2>&1 &
+        HELM_PID=$!
+        echo "=== helm PID ${HELM_PID} — watching current API ReplicaSet for CrashLoop/ImagePull (ignore old RS) ==="
+        UNHEALTHY_HITS=0
+        while kill -0 "${HELM_PID}" 2>/dev/null; do
+          sleep 10
+          if api_current_rs_ready; then
+            UNHEALTHY_HITS=0
+            continue
+          fi
+          if api_pod_unhealthy; then
+            UNHEALTHY_HITS=$((UNHEALTHY_HITS + 1))
+            echo "=== current API ReplicaSet CrashLoop/ImagePull (${UNHEALTHY_HITS}/2) ==="
+            if [ "${UNHEALTHY_HITS}" -ge 2 ]; then
+              echo "ERROR: API current ReplicaSet CrashLoop/ImagePull — aborting helm --wait to dump logs"
+              kill "${HELM_PID}" 2>/dev/null || true
+              wait "${HELM_PID}" 2>/dev/null || true
+              echo "=== helm upgrade output (tail) ==="
+              tail -n 80 /tmp/helm-upgrade.log || true
+              if helm_dump_and_rollback "API pod unhealthy before helm --wait finished"; then
+                rm -f /tmp/helm-upgrade.log
+                echo "=== Helm upgrade completed (Ready after watcher race; helm --wait was cancelled) ==="
+                exit 0
+              fi
+              rm -f /tmp/helm-upgrade.log
+              exit 1
+            fi
+          else
+            UNHEALTHY_HITS=0
+          fi
+        done
+        wait "${HELM_PID}"
+        HELM_RC=$?
+        tail -n 40 /tmp/helm-upgrade.log || true
+        rm -f /tmp/helm-upgrade.log
+        if [ "${HELM_RC}" != "0" ]; then
+          if helm_dump_and_rollback "helm upgrade --wait failed (exit ${HELM_RC})"; then
+            echo "=== Helm upgrade completed (Ready after helm --wait exit ${HELM_RC}) ==="
+            exit 0
+          fi
           exit 1
         fi
-        if [ -f "$ENV_VAR" ]; then
-          ENV_PATH="$ENV_VAR"
-        else
-          printf "%s\n" "$ENV_VAR" > /tmp/app_env.env
-          ENV_PATH="/tmp/app_env.env"
-        fi
-        sanitize_dotenv_file "$ENV_PATH" /tmp/app_env.sanitized.env
-        ENV_PATH="/tmp/app_env.sanitized.env"
-        echo "=== Creating Secret from Dotenv File Variable (${ENV_PATH}) ==="
-        kubectl create secret generic ${RELEASE_NAME}-env \
-          --from-env-file="$ENV_PATH" \
-          -n "${NS}" --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config
-        rm -f /tmp/app_env.env /tmp/app_env.sanitized.env
+        echo "=== Helm upgrade completed ==="
+      }
 
-        run_db_migration "${NS}" "${CI_COMMIT_TAG}"
+      deploy_release() {
+        ENV_NAME="$1"
+        GUARD_MODE="$2"
+        require_deploy_target "$ENV_NAME" "$GUARD_MODE"
+        fetch_vault_env_secrets "$ENV_NAME"
+        apply_kubeconfig "$ENV_NAME"
+        RELEASE_NAME="${APP_NAME:-${CI_PROJECT_NAME_SLUG:-${CI_PROJECT_NAME}}}"
+        echo "=== Deploying Node Release to $(printf '%s' "$ENV_NAME" | tr '[:lower:]' '[:upper:]'): ${RELEASE_NAME} ==="
+        kubectl create namespace "${ENV_NAME}" --dry-run=client -o yaml | kubectl apply -f - --kubeconfig ~/.kube/config || true
+        create_regcred "${ENV_NAME}"
+        echo "=== Creating Application Secret ${RELEASE_NAME}-env ==="
+        create_app_env_secret "${ENV_NAME}"
+        run_db_migration "${ENV_NAME}" "${CI_COMMIT_TAG}"
         helm version
-        helm upgrade --install "${RELEASE_NAME}" "${HELM_CHART_PATH}" \
-          -f "${VALUES}" \
-          --set image.repository="${IMAGE_API}" \
-          --set image.tag="${CI_COMMIT_TAG}" \
-          --set web.image.repository="${IMAGE_WEB}" \
-          --set web.image.tag="${CI_COMMIT_TAG}" \
-          --set ingress.host="${HOST}" \
-          -n "${NS}" --create-namespace --kubeconfig ~/.kube/config
+        case "$ENV_NAME" in
+          dev)
+            helm_upgrade_wait "${RELEASE_NAME}" "dev" "${HELM_CHART_PATH}/values-dev.yaml" "${CI_COMMIT_TAG}" "${RELEASE_NAME}-dev.buu.ac.th"
+            ;;
+          test)
+            helm_upgrade_wait "${RELEASE_NAME}" "test" "${HELM_CHART_PATH}/values-test.yaml" "${CI_COMMIT_TAG}" "${RELEASE_NAME}-test.buu.ac.th"
+            ;;
+          prod)
+            helm_upgrade_wait "${RELEASE_NAME}" "prod" "${HELM_CHART_PATH}/values-prod.yaml" "${CI_COMMIT_TAG}" "${RELEASE_NAME}.buu.ac.th"
+            ;;
+        esac
       }
     - |
       if [ ! -d "${HELM_CHART_PATH}" ]; then
@@ -243,93 +580,88 @@
         printf "{{- if .Values.web.enabled }}\napiVersion: v1\nkind: Service\nmetadata:\n  name: {{ .Release.Name }}-web\n  labels:\n    app: {{ .Release.Name }}-web\nspec:\n  type: ClusterIP\n  ports:\n    - port: 80\n      targetPort: 80\n      protocol: TCP\n      name: http\n  selector:\n    app: {{ .Release.Name }}-web\n{{- end }}\n" > "${HELM_CHART_PATH}/templates/service-web.yaml"
         printf "{{- if .Values.ingress.enabled }}\napiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: {{ .Release.Name }}\n  labels:\n    app: {{ .Release.Name }}\n  annotations:\n    kubernetes.io/ingress.class: \"traefik\"\nspec:\n  rules:\n    - host: {{ .Values.ingress.host | quote }}\n      http:\n        paths:\n          - path: /api\n            pathType: Prefix\n            backend:\n              service:\n                name: {{ .Release.Name }}\n                port:\n                  number: {{ .Values.service.port }}\n          - path: /\n            pathType: Prefix\n            backend:\n              service:\n                name: {{ .Release.Name }}-web\n                port:\n                  number: 80\n{{- end }}\n" > "${HELM_CHART_PATH}/templates/ingress.yaml"
       fi
+      # Always overwrite test/prod values so runner-cached charts get pinned limits
+      SLUG="${APP_NAME:-${CI_PROJECT_NAME_SLUG:-${CI_PROJECT_NAME:-app}}}"
+      printf "replicaCount: 1\ningress:\n  enabled: true\n  host: \"${SLUG}-test.buu.ac.th\"\nresources:\n  limits:\n    cpu: 250m\n    memory: 192Mi\n  requests:\n    cpu: 50m\n    memory: 64Mi\nweb:\n  enabled: true\n  replicaCount: 1\n  resources:\n    limits:\n      cpu: 100m\n      memory: 64Mi\n    requests:\n      cpu: 25m\n      memory: 32Mi\n" > "${HELM_CHART_PATH}/values-test.yaml"
+      printf "replicaCount: 1\ningress:\n  enabled: true\n  host: \"${SLUG}.buu.ac.th\"\nresources:\n  limits:\n    cpu: 350m\n    memory: 256Mi\n  requests:\n    cpu: 75m\n    memory: 96Mi\nweb:\n  enabled: true\n  replicaCount: 1\n  resources:\n    limits:\n      cpu: 200m\n      memory: 128Mi\n    requests:\n      cpu: 50m\n      memory: 48Mi\n" > "${HELM_CHART_PATH}/values-prod.yaml"
+      # Always overwrite web Deployment: / readinessProbe (no BACKEND_UPSTREAM)
+      # Always overwrite API Deployment: /api/health startup+readiness probes
+      mkdir -p "${HELM_CHART_PATH}/templates"
+      printf "{{- if .Values.web.enabled }}\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: {{ .Release.Name }}-web\n  labels:\n    app: {{ .Release.Name }}-web\nspec:\n  replicas: {{ .Values.web.replicaCount | default 1 }}\n  selector:\n    matchLabels:\n      app: {{ .Release.Name }}-web\n  template:\n    metadata:\n      labels:\n        app: {{ .Release.Name }}-web\n    spec:\n      imagePullSecrets:\n        - name: regcred\n      containers:\n        - name: web\n          image: \"{{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}\"\n          imagePullPolicy: {{ .Values.web.image.pullPolicy | default \"IfNotPresent\" }}\n          ports:\n            - containerPort: 80\n          readinessProbe:\n            httpGet:\n              path: /\n              port: 80\n            initialDelaySeconds: 3\n            periodSeconds: 5\n            timeoutSeconds: 3\n            failureThreshold: 6\n          resources:\n            {{- toYaml .Values.web.resources | nindent 12 }}\n{{- end }}\n" > "${HELM_CHART_PATH}/templates/deployment-web.yaml"
+      printf "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: {{ .Release.Name }}\n  labels:\n    app: {{ .Release.Name }}\nspec:\n  replicas: {{ .Values.replicaCount }}\n  selector:\n    matchLabels:\n      app: {{ .Release.Name }}\n  template:\n    metadata:\n      labels:\n        app: {{ .Release.Name }}\n    spec:\n      imagePullSecrets:\n        - name: regcred\n      containers:\n        - name: {{ .Release.Name }}\n          image: \"{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}\"\n          imagePullPolicy: {{ .Values.image.pullPolicy }}\n          ports:\n            - name: http\n              containerPort: {{ .Values.service.port }}\n              protocol: TCP\n          envFrom:\n            - secretRef:\n                name: {{ .Release.Name }}-env\n          startupProbe:\n            httpGet:\n              path: /api/health\n              port: http\n            periodSeconds: 2\n            timeoutSeconds: 3\n            failureThreshold: 90\n          readinessProbe:\n            httpGet:\n              path: /api/health\n              port: http\n            periodSeconds: 5\n            timeoutSeconds: 3\n            failureThreshold: 6\n          resources:\n            {{- toYaml .Values.resources | nindent 12 }}\n" > "${HELM_CHART_PATH}/templates/deployment.yaml"
 
-deploy-dev:
+.deploy_job:
   extends: .helm_deploy
   stage: deploy
-  rules:
-    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-dev$/
   needs:
     - job: resolve-deploy-target
-      artifacts: true
     - job: image-scan
-      artifacts: true
+      artifacts: false
     - job: image-scan-web
-      artifacts: true
+      artifacts: false
+
+deploy-dev:
+  extends: .deploy_job
+  needs:
+    - job: resolve-deploy-target
+    - job: image-scan
+    - job: image-scan-web
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-dev$/
+  allow_failure: true
   environment:
     name: dev
     url: $APP_URL_DEV
   script:
     - |
-      check_scan_status() {
-        file="$1"
-        name="$2"
-        status=""
-        if [ -f "$file" ]; then
-          status=$(tr -d '\r\n' < "$file")
-        fi
-        echo "=== Scan status ${name}: ${status:-MISSING} ==="
-        if [ "$status" != "PASSED" ]; then
-          echo "ERROR: ${name} scan is not PASSED (got '${status:-MISSING}')"
-          exit 1
-        fi
-      }
-      check_scan_status scan-status-api.txt API
-      check_scan_status scan-status-web.txt Web
-    - require_deploy_target dev skip
-    - fetch_vault_deploy_secrets dev
-    - run_helm_deploy dev
+      api_status="$(tr -d '[:space:]' < scan-status-api.txt 2>/dev/null || echo MISSING)"
+      web_status="$(tr -d '[:space:]' < scan-status-web.txt 2>/dev/null || echo MISSING)"
+      echo "=== Image scan status: api=${api_status} web=${web_status} ==="
+      if [ "${api_status}" != "PASSED" ] || [ "${web_status}" != "PASSED" ]; then
+        echo "ERROR: auto deploy-dev blocked because image scan did not PASS (api=${api_status} web=${web_status})."
+        echo "Use deploy-dev-manual to deploy to dev despite CRITICAL findings."
+        exit 1
+      fi
+    - deploy_release "dev" "skip"
 
 deploy-dev-manual:
   extends: .helm_deploy
   stage: deploy
+  needs:
+    - job: resolve-deploy-target
+    - job: docker-build
+      artifacts: false
+    - job: docker-build-web
+      artifacts: false
+    - job: db-migrate-verify
+      artifacts: false
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-dev$/
       when: manual
-      allow_failure: false
-  needs:
-    - resolve-deploy-target
-    - docker-build
-    - docker-build-web
+      allow_failure: true
   environment:
     name: dev
     url: $APP_URL_DEV
   script:
-    - require_deploy_target dev skip
-    - fetch_vault_deploy_secrets dev
-    - run_helm_deploy dev
+    - deploy_release "dev" "skip"
 
 deploy-test:
-  extends: .helm_deploy
-  stage: deploy
+  extends: .deploy_job
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-test$/
       when: manual
-  needs:
-    - resolve-deploy-target
-    - image-scan
-    - image-scan-web
   environment:
     name: test
     url: $APP_URL_TEST
   script:
-    - require_deploy_target test fail
-    - fetch_vault_deploy_secrets test
-    - run_helm_deploy test
+    - deploy_release "test" "fail"
 
 deploy-prod:
-  extends: .helm_deploy
-  stage: deploy
+  extends: .deploy_job
   rules:
     - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
       when: manual
-  needs:
-    - resolve-deploy-target
-    - image-scan
-    - image-scan-web
   environment:
     name: prod
   script:
-    - require_deploy_target prod fail
-    - fetch_vault_deploy_secrets prod
-    - run_helm_deploy prod
+    - deploy_release "prod" "fail"
