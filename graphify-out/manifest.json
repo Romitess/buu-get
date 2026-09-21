@@ -1090,13 +1090,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/platform-gateway/platform-gateway.service.spec.ts": {
-    "mtime": 1789723721.721508,
-    "ast_hash": "df17bfb75999f382980dfc03a6643bb4",
+    "mtime": 1789955749.0989716,
+    "ast_hash": "5162319f7b5f040202f2b7d28cbfecec",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/platform-gateway/platform-gateway.service.ts": {
-    "mtime": 1789723721.7067132,
-    "ast_hash": "c8ae4b7f2eff566b6e068781711d2976",
+    "mtime": 1789955748.7138486,
+    "ast_hash": "92d2d736889bd0538a0f959e1faecda9",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/profile-edit-history/dto/create-profile-edit-history.dto.ts": {

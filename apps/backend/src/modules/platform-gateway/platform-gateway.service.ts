@@ -120,6 +120,14 @@ export class PlatformGatewayService {
     return this.makeApiRequest('delete', 'deleteApi', apiName, data);
   }
 
+  private isLoginBuuFailBody(data: unknown): data is LoginBuuGatewayResponse {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      (data as { status?: unknown }).status === 'fail'
+    );
+  }
+
   async makeApiRequest(
     method: string,
     funcName: string,
@@ -223,6 +231,15 @@ export class PlatformGatewayService {
           requestData,
           true,
         );
+      }
+
+      // LDAP credential fail may be HTTP 400 with { status: "fail" } — not a gateway outage.
+      if (
+        apiName === 'loginBuu' &&
+        axiosError.response &&
+        this.isLoginBuuFailBody(axiosError.response.data)
+      ) {
+        return axiosError.response;
       }
 
       return this.handleApiError(apiName, error, funcName);
@@ -453,9 +470,9 @@ export class PlatformGatewayService {
     try {
       const response = await this.postApi(apiName, data);
       /**
-       * success:
+       * success (HTTP 200):
        * { status: "success", result: { fullname, email, facultyname, citizenid } }
-       * fail:
+       * fail (HTTP 200 or 400):
        * { status: "fail", message: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" }
        */
       const body = (response.data ?? response) as LoginBuuGatewayResponse;

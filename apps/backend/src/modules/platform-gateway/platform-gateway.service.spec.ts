@@ -184,6 +184,28 @@ describe('PlatformGatewayService', () => {
       expect(sendNotiSpy).not.toHaveBeenCalled();
     });
 
+    it('returns LDAP 400 fail body so AuthService can still 401 without sendNoti', async () => {
+      cache.get.mockResolvedValue({
+        access_token: 'tok',
+        refresh_token: 'ref',
+        expires_in: 3600,
+      });
+      postSpy.mockRejectedValue(
+        axiosHttpError(400, {
+          status: 'fail',
+          message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+        }),
+      );
+
+      await expect(
+        service.loginBuu('staff02', SECRET_PASSWORD),
+      ).resolves.toEqual({
+        status: 'fail',
+        message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+      });
+      expect(sendNotiSpy).not.toHaveBeenCalled();
+    });
+
     it('forwards LDAP success and sends boolean secret without logging password', async () => {
       cache.get.mockResolvedValue({
         access_token: 'tok',
