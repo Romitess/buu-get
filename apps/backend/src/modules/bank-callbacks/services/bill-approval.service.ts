@@ -7,15 +7,8 @@ import {
   ExamEnrollmentStatus,
 } from '../../exam-enrollments/entities/exam-enrollment.entity';
 import { ExamSession } from '../../exam-sessions/entities/exam-session.entity';
-import {
-  Transaction,
-  TransactionPaymentStatus,
-} from '../../transactions/entities/transaction.entity';
+import { TransactionPaymentStatus } from '../../transactions/entities/transaction.entity';
 import { TransactionRef } from '../../transaction-refs/entities/transaction-ref.entity';
-import {
-  TransactionApiType,
-  TransactionStatusHistory,
-} from '../../transaction-status-history/entities/transaction-status-history.entity';
 import { BankCallbackRequestDto } from '../dto/bank-callback-request.dto';
 import { BankCallbackResponseDto } from '../dto/bank-callback-response.dto';
 import { RequestApproval } from '../entities/request-approval.entity';
@@ -187,39 +180,7 @@ export class BillApprovalService {
       );
     }
 
-    if (transaction.TRANX_PAYMENT_STATUS === TransactionPaymentStatus.PENDING) {
-      await this.dataSource.transaction(async (manager) => {
-        const locked = await manager
-          .getRepository(Transaction)
-          .createQueryBuilder('t')
-          .setLock('pessimistic_write')
-          .where('t.TRANX_ID = :id', { id: transaction.TRANX_ID })
-          .getOne();
-
-        if (
-          locked &&
-          locked.TRANX_PAYMENT_STATUS === TransactionPaymentStatus.PENDING
-        ) {
-          locked.TRANX_PAYMENT_STATUS = TransactionPaymentStatus.APPROVED;
-          locked.TRANX_BANK_DATETIME = parsed.asDate;
-          locked.TRANX_EFFECTIVE_DATE = parsed.asDate;
-          locked.TRANX_UPDATED_AT = new Date();
-          await manager.getRepository(Transaction).save(locked);
-
-          await manager.getRepository(TransactionStatusHistory).save(
-            manager.getRepository(TransactionStatusHistory).create({
-              TRANX_ID: locked.TRANX_ID,
-              TSH_FROM: String(TransactionPaymentStatus.PENDING),
-              TSH_TO: String(TransactionPaymentStatus.APPROVED),
-              TSH_API_TYPE: TransactionApiType.APPROVE,
-              TSH_RESP_CODE: BankRespCode.SUCCESS,
-              TSH_RESP_MESSAGE: 'Bill approved',
-            }),
-          );
-        }
-      });
-    }
-
+    // lifelong: approval validates + returns tranxId only — does not touch txn/enroll status
     return this.insertResponseLog(
       body,
       buildBankResponse({

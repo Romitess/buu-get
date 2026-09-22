@@ -221,6 +221,12 @@ export class BillPaymentService {
         );
       }
 
+      // lifelong order: enroll → txn → response log (keep lock + audit history)
+      if (enrollment) {
+        enrollment.ERM_STATUS = ExamEnrollmentStatus.PAID;
+        await manager.getRepository(ExamEnrollment).save(enrollment);
+      }
+
       const previousStatus = transaction.TRANX_PAYMENT_STATUS;
       transaction.TRANX_PAYMENT_STATUS = TransactionPaymentStatus.PAID;
       transaction.TRANX_MATCH_STATUS = TransactionMatchStatus.MATCH;
@@ -236,11 +242,6 @@ export class BillPaymentService {
         await manager.getRepository(TransactionRef).save(ref);
       }
       await manager.getRepository(Transaction).save(transaction);
-
-      if (enrollment) {
-        enrollment.ERM_STATUS = ExamEnrollmentStatus.PAID;
-        await manager.getRepository(ExamEnrollment).save(enrollment);
-      }
 
       await manager.getRepository(TransactionStatusHistory).save(
         manager.getRepository(TransactionStatusHistory).create({
