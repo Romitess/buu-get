@@ -29,6 +29,7 @@ export default {
   common: {
     search: 'Search',
     cancel: 'Cancel',
+    confirm: 'Confirm',
     close: 'Close',
     months: [
       'January',

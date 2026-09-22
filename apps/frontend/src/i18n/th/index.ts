@@ -29,6 +29,7 @@ export default {
   common: {
     search: 'ค้นหา',
     cancel: 'ยกเลิก',
+    confirm: 'ยืนยัน',
     close: 'ปิด',
     day: 'วัน | วัน',
     months: [
