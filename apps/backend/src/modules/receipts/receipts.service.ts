@@ -118,12 +118,10 @@ export class ReceiptsService {
       oldStatus !== ReceiptStatus.ISSUED &&
       !receipt.RC_NO
     ) {
-      return await this.receiptsRepository.manager.transaction(
-        async (manager) => {
-          await this.receiptNumberService.assignOnIssue(manager, [id]);
-          return await this.findOne(id);
-        },
-      );
+      await this.receiptsRepository.manager.transaction(async (manager) => {
+        await this.receiptNumberService.assignOnIssue(manager, [id]);
+      });
+      return this.findOne(id);
     }
 
     return this.receiptsRepository.save(receipt);

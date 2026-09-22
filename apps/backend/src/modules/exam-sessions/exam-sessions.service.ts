@@ -19,7 +19,11 @@ export class ExamSessionsService {
   async create(
     createExamSessionDto: CreateExamSessionDto,
   ): Promise<ExamSession> {
-    return this.dataSource.transaction(async (manager) => {
+    // Allocate + persist inside the transaction, then hydrate AFTER commit.
+    // Calling this.findOne() while the txn is still open uses a separate
+    // connection that cannot see the uncommitted row (MySQL REPEATABLE READ)
+    // → 404 "Exam Session with ID N not found" on every create.
+    const ssId = await this.dataSource.transaction(async (manager) => {
       const exam = await manager.getRepository(Exam).findOne({
         where: { EXAM_ID: createExamSessionDto.EXAM_ID },
       });
@@ -29,22 +33,25 @@ export class ExamSessionsService {
         );
       }
 
-      const session = manager.getRepository(ExamSession).create(createExamSessionDto);
+      const session = manager
+        .getRepository(ExamSession)
+        .create(createExamSessionDto);
       const saved = await manager.getRepository(ExamSession).save(session);
 
-      saved.SESSION_CODE =
+      const sessionCode =
         await this.memberSessionCodesService.allocateSessionCode(manager, {
           examType: exam.EXAM_TYPE,
           examFiscalYear: exam.EXAM_FISCAL_YEAR,
           at: saved.CREATED_AT ?? new Date(),
         });
-      await manager.getRepository(ExamSession).update(
-        { SS_ID: saved.SS_ID },
-        { SESSION_CODE: saved.SESSION_CODE },
-      );
+      await manager
+        .getRepository(ExamSession)
+        .update({ SS_ID: saved.SS_ID }, { SESSION_CODE: sessionCode });
 
-      return this.findOne(saved.SS_ID);
+      return saved.SS_ID;
     });
+
+    return this.findOne(ssId);
   }
 
   async findAll(): Promise<ExamSession[]> {

@@ -310,6 +310,52 @@ describe('ReceiptsService', () => {
         [9],
       );
     });
+
+    it('should call findOne for post-issue reload only after transaction commits (RCPT-U-015)', async () => {
+      const callOrder: string[] = [];
+      const unissued = {
+        RC_ID: 9,
+        TRANX_ID: 3,
+        RC_STATUS: ReceiptStatus.UNISSUED,
+        RC_NO: null,
+      } as Receipt;
+      const issued = {
+        RC_ID: 9,
+        TRANX_ID: 3,
+        RC_STATUS: ReceiptStatus.ISSUED,
+        RC_NO: '256900001',
+      } as Receipt;
+
+      receiptsRepository.findOne
+        .mockImplementationOnce(async () => {
+          callOrder.push('findOne-pre');
+          return unissued;
+        })
+        .mockImplementationOnce(async () => {
+          callOrder.push('findOne-post');
+          return issued;
+        });
+
+      receiptsRepository.manager.transaction.mockImplementation(
+        async (cb: (em: unknown) => unknown) => {
+          callOrder.push('transaction-start');
+          await cb({});
+          callOrder.push('transaction-commit');
+        },
+      );
+
+      const result = await service.update(9, {
+        RC_STATUS: ReceiptStatus.ISSUED,
+      });
+
+      expect(callOrder).toEqual([
+        'findOne-pre',
+        'transaction-start',
+        'transaction-commit',
+        'findOne-post',
+      ]);
+      expect(result).toBe(issued);
+    });
   });
 
   describe('remove', () => {

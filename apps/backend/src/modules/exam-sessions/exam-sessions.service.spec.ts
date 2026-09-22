@@ -30,12 +30,26 @@ describe('ExamSessionsService', () => {
   let repo: MockRepo;
   let examRepo: MockRepo;
   let codesService: { allocateSessionCode: jest.Mock };
+  let dataSource: { transaction: jest.Mock };
 
   beforeEach(async () => {
     repo = createMockRepo();
     examRepo = createMockRepo();
     codesService = {
       allocateSessionCode: jest.fn().mockResolvedValue('12026001'),
+    };
+    dataSource = {
+      transaction: jest.fn(
+        async (
+          cb: (manager: {
+            getRepository: (entity: unknown) => MockRepo;
+          }) => unknown,
+        ) =>
+          cb({
+            getRepository: (entity: unknown) =>
+              entity === Exam ? examRepo : repo,
+          }),
+      ),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -47,19 +61,7 @@ describe('ExamSessionsService', () => {
         },
         {
           provide: DataSource,
-          useValue: {
-            transaction: jest.fn(
-              async (
-                cb: (manager: {
-                  getRepository: (entity: unknown) => MockRepo;
-                }) => unknown,
-              ) =>
-                cb({
-                  getRepository: (entity: unknown) =>
-                    entity === Exam ? examRepo : repo,
-                }),
-            ),
-          },
+          useValue: dataSource,
         },
         {
           provide: MemberSessionCodesService,
@@ -90,6 +92,7 @@ describe('ExamSessionsService', () => {
         SESSION_CODE: '12026001',
         EXAM: { EXAM_ID: 2 },
       } as ExamSession;
+      // findOne runs after the transaction commits
       repo.findOne.mockResolvedValue(hydrated);
 
       // Act
@@ -105,6 +108,9 @@ describe('ExamSessionsService', () => {
         { SS_ID: 44 },
         { SESSION_CODE: '12026001' },
       );
+      expect(repo.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { SS_ID: 44 } }),
+      );
       expect(result).toBe(hydrated);
     });
 
@@ -113,6 +119,51 @@ describe('ExamSessionsService', () => {
       await expect(
         service.create({ EXAM_ID: 999, SS_START_TIME: '09:00:00' }),
       ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('should hydrate with findOne only after transaction has committed (SES-U-002)', async () => {
+      const callOrder: string[] = [];
+      dataSource.transaction.mockImplementation(async (cb) => {
+        callOrder.push('transaction-start');
+        const res = await cb({
+          getRepository: (entity: unknown) =>
+            entity === Exam ? examRepo : repo,
+        });
+        callOrder.push('transaction-commit');
+        return res;
+      });
+
+      examRepo.findOne.mockResolvedValue({
+        EXAM_ID: 2,
+        EXAM_TYPE: 'รอบทั่วไป',
+        EXAM_FISCAL_YEAR: '2026',
+      });
+      repo.create.mockReturnValue({ EXAM_ID: 2, SS_START_TIME: '09:00:00' });
+      repo.save.mockResolvedValue({
+        SS_ID: 44,
+        EXAM_ID: 2,
+        CREATED_AT: new Date('2026-09-09T00:00:00Z'),
+      });
+      repo.findOne.mockImplementation(async () => {
+        callOrder.push('findOne');
+        return {
+          SS_ID: 44,
+          SESSION_CODE: '12026001',
+          EXAM: { EXAM_ID: 2 },
+        } as ExamSession;
+      });
+
+      await service.create({
+        EXAM_ID: 2,
+        SS_START_TIME: '09:00:00',
+        SS_END_TIME: '10:00:00',
+      });
+
+      expect(callOrder).toEqual([
+        'transaction-start',
+        'transaction-commit',
+        'findOne',
+      ]);
     });
   });
 
