@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import {
   ENROLLMENT_STATUS,
+  ReceiptStatus,
+  TRANSACTION_MATCH_STATUS,
   TRANSACTION_PAYMENT_STATUS,
 } from 'src/constants/exam';
 import type { ExamEnrollment, ExamHistoryItem } from 'src/types/exam';
 import {
+  hasDownloadableReceipt,
   isPaymentTimeoutCancellation,
   isPaymentTimeoutHistoryItem,
+  mapEnrollmentToHistoryItem,
 } from './map-enrollment-history-status';
 
-function enrollment(
-  overrides: Partial<ExamEnrollment> & {
-    TRANSACTION?: ExamEnrollment['TRANSACTION'];
-  } = {},
-): ExamEnrollment {
+function enrollment(overrides: Record<string, unknown> = {}): ExamEnrollment {
   return {
     ERM_ID: 1,
     USER_ID: 10,
@@ -154,3 +154,163 @@ describe('isPaymentTimeoutHistoryItem', () => {
     expect(isPaymentTimeoutHistoryItem(item)).toBe(false);
   });
 });
+
+describe('hasDownloadableReceipt', () => {
+  it('returns true when payment matches and receipt is ISSUED with RC_VERIFY_CODE', () => {
+    const item = enrollment({
+      TRANSACTION: {
+        TRANX_ID: 10,
+        TRANX_MATCH_STATUS: TRANSACTION_MATCH_STATUS.MATCH,
+        RECEIPTS: [
+          {
+            RC_ID: 1,
+            RC_STATUS: ReceiptStatus.ISSUED,
+            RC_VERIFY_CODE: 'VERIFY-123',
+          },
+        ],
+      },
+    });
+    expect(hasDownloadableReceipt(item)).toBe(true);
+  });
+
+  it('returns false when receipt is missing RC_VERIFY_CODE', () => {
+    const item = enrollment({
+      TRANSACTION: {
+        TRANX_ID: 10,
+        TRANX_MATCH_STATUS: TRANSACTION_MATCH_STATUS.MATCH,
+        RECEIPTS: [
+          {
+            RC_ID: 1,
+            RC_STATUS: ReceiptStatus.ISSUED,
+          },
+        ],
+      },
+    });
+    expect(hasDownloadableReceipt(item)).toBe(false);
+  });
+
+  it('returns false when receipt is UNISSUED even with verify code', () => {
+    const item = enrollment({
+      TRANSACTION: {
+        TRANX_ID: 10,
+        TRANX_MATCH_STATUS: TRANSACTION_MATCH_STATUS.MATCH,
+        RECEIPTS: [
+          {
+            RC_ID: 1,
+            RC_STATUS: ReceiptStatus.UNISSUED,
+            RC_VERIFY_CODE: 'VERIFY-123',
+          },
+        ],
+      },
+    });
+    expect(hasDownloadableReceipt(item)).toBe(false);
+  });
+
+  it('returns false when receipts array is empty', () => {
+    const item = enrollment({
+      TRANSACTION: {
+        TRANX_ID: 10,
+        TRANX_MATCH_STATUS: TRANSACTION_MATCH_STATUS.MATCH,
+        RECEIPTS: [],
+      },
+    });
+    expect(hasDownloadableReceipt(item)).toBe(false);
+  });
+
+  it('returns false when any receipt is VOIDED', () => {
+    const item = enrollment({
+      TRANSACTION: {
+        TRANX_ID: 10,
+        TRANX_MATCH_STATUS: TRANSACTION_MATCH_STATUS.MATCH,
+        RECEIPTS: [
+          {
+            RC_ID: 1,
+            RC_STATUS: ReceiptStatus.VOIDED,
+            RC_VERIFY_CODE: 'VERIFY-123',
+          },
+        ],
+      },
+    });
+    expect(hasDownloadableReceipt(item)).toBe(false);
+  });
+
+  it('returns false when payment is UNMATCH', () => {
+    const item = enrollment({
+      TRANSACTION: {
+        TRANX_ID: 10,
+        TRANX_MATCH_STATUS: TRANSACTION_MATCH_STATUS.UNMATCH,
+        RECEIPTS: [
+          {
+            RC_ID: 1,
+            RC_STATUS: ReceiptStatus.ISSUED,
+            RC_VERIFY_CODE: 'VERIFY-123',
+          },
+        ],
+      },
+    });
+    expect(hasDownloadableReceipt(item)).toBe(false);
+  });
+});
+
+describe('mapEnrollmentToHistoryItem - PAID enrollment status and receipt actions', () => {
+  const context = {
+    formattedDate: '1 Aug 2026',
+    formattedTime: '09:00 - 12:00',
+    locationText: 'Room A',
+    title: 'BUU-GET Exam',
+    fee: 500,
+    getCancellationReason: () => null,
+  };
+
+  it('shows verified status and downloadReceipt action when paid and receipt is ready', () => {
+    const item = enrollment({
+      ERM_STATUS: ENROLLMENT_STATUS.PAID,
+      SESSION: {
+        EXAM: { EXAM_NAME: 'BUU-GET' },
+      } as unknown as ExamEnrollment['SESSION'],
+      TRANSACTION: {
+        TRANX_ID: 10,
+        TRANX_MATCH_STATUS: TRANSACTION_MATCH_STATUS.MATCH,
+        RECEIPTS: [
+          {
+            RC_ID: 1,
+            RC_STATUS: ReceiptStatus.ISSUED,
+            RC_VERIFY_CODE: 'VERIFY-123',
+          },
+        ],
+      },
+    });
+
+    const mapped = mapEnrollmentToHistoryItem(item, context);
+    expect(mapped).not.toBeNull();
+    expect(mapped?.registrationStatus.label).toBe('exam.status.verified');
+    expect(mapped?.actions).toContain('downloadReceipt');
+  });
+
+  it('shows verified status but OMITS downloadReceipt action when receipt verify code is missing', () => {
+    const item = enrollment({
+      ERM_STATUS: ENROLLMENT_STATUS.PAID,
+      SESSION: {
+        EXAM: { EXAM_NAME: 'BUU-GET' },
+      } as unknown as ExamEnrollment['SESSION'],
+      TRANSACTION: {
+        TRANX_ID: 10,
+        TRANX_MATCH_STATUS: TRANSACTION_MATCH_STATUS.MATCH,
+        RECEIPTS: [
+          {
+            RC_ID: 1,
+            RC_STATUS: ReceiptStatus.UNISSUED,
+          },
+        ],
+      },
+    });
+
+    const mapped = mapEnrollmentToHistoryItem(item, context);
+    expect(mapped).not.toBeNull();
+    // Payment is matched, so candidate sees payment verified
+    expect(mapped?.registrationStatus.label).toBe('exam.status.verified');
+    // But download button is hidden to prevent missingVerifyCode error
+    expect(mapped?.actions).not.toContain('downloadReceipt');
+  });
+});
+

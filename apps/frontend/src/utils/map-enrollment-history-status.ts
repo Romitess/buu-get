@@ -87,7 +87,7 @@ function hasMatchedPayment(enrollment: ExamEnrollment): boolean {
   );
 }
 
-function hasDownloadableReceipt(enrollment: ExamEnrollment): boolean {
+export function hasDownloadableReceipt(enrollment: ExamEnrollment): boolean {
   const paymentStatus = Number(enrollment.TRANSACTION?.TRANX_PAYMENT_STATUS);
   if (
     paymentStatus === TRANSACTION_PAYMENT_STATUS.REFUND ||
@@ -98,6 +98,14 @@ function hasDownloadableReceipt(enrollment: ExamEnrollment): boolean {
   const receipts = enrollment.TRANSACTION?.RECEIPTS ?? [];
   const hasVoided = receipts.some((receipt) => receipt.RC_STATUS === ReceiptStatus.VOIDED);
   if (hasVoided) return false;
+
+  const primaryReceipt = receipts[0];
+  const hasValidReceipt = Boolean(
+    primaryReceipt?.RC_VERIFY_CODE &&
+      Number(primaryReceipt?.RC_STATUS) === ReceiptStatus.ISSUED,
+  );
+  if (!hasValidReceipt) return false;
+
   return hasMatchedPayment(enrollment);
 }
 
@@ -130,6 +138,7 @@ export function mapEnrollmentToHistoryItem(
   if (!enrollment.SESSION) return null;
 
   const base = buildBaseItem(enrollment, context);
+  const isPaymentVerified = hasMatchedPayment(enrollment);
   const canDownloadReceipt = hasDownloadableReceipt(enrollment);
   const seatLabel = enrollment.ERM_SEAT_LABEL?.trim() || undefined;
 
@@ -166,8 +175,8 @@ export function mapEnrollmentToHistoryItem(
 
   if (enrollment.ERM_STATUS === ENROLLMENT_STATUS.PAID) {
     const registrationStatus = buildBadge(
-      canDownloadReceipt ? 'exam.status.verified' : 'exam.status.verifying',
-      canDownloadReceipt ? 'success' : 'info',
+      isPaymentVerified ? 'exam.status.verified' : 'exam.status.verifying',
+      isPaymentVerified ? 'success' : 'info',
     );
     return {
       ...base,
