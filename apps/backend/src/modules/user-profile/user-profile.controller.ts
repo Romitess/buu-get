@@ -27,11 +27,15 @@ import {
 } from 'src/common/utils/authz.util';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { MsgPersonsService } from 'src/modules/msg-persons/msg-persons.service';
 
 @ApiTags('user-profile')
 @Controller('user-profile')
 export class UserProfileController {
-  constructor(private readonly userProfileService: UserProfileService) {}
+  constructor(
+    private readonly userProfileService: UserProfileService,
+    private readonly msgPersonsService: MsgPersonsService,
+  ) {}
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
@@ -117,10 +121,7 @@ export class UserProfileController {
     const isSelfUpdate =
       user.userId != null && user.userId === targetProfile.userId;
     if (isSelfUpdate) {
-      requireUserId(
-        user,
-        'Personnel accounts cannot edit personal profile',
-      );
+      requireUserId(user, 'Personnel accounts cannot edit personal profile');
     }
 
     let modifierName = user.email;
@@ -136,10 +137,35 @@ export class UserProfileController {
         // Ignored — keep email as fallback
       }
     } else if (user.personId) {
-      // ไม่มี USER_ID — เก็บชื่อพร้อม PSN_ID ในประวัติ (MODIFIER_ID = 0 ไม่มี FK จริง)
-      modifierName = user.email
-        ? `${user.email} [PSN:${user.personId}]`
-        : `PSN:${user.personId}`;
+      // ไม่มี USER_ID — พยายามโหลดชื่อจาก MSG_T_PERSON โดยใช้ MsgPersonsService
+      try {
+        const person = await this.msgPersonsService.findEntityById(
+          String(user.personId),
+        );
+        if (person) {
+          const first =
+            person.PSN_FNAMETH?.trim() || person.PSN_FNAMEEN?.trim() || '';
+          const last =
+            person.PSN_LNAMETH?.trim() || person.PSN_LNAMEEN?.trim() || '';
+          const formatted = [first, last].filter(Boolean).join(' ').trim();
+          if (formatted) {
+            modifierName = formatted;
+          } else {
+            modifierName = user.email
+              ? `${user.email} [PSN:${user.personId}]`
+              : `PSN:${user.personId}`;
+          }
+        } else {
+          modifierName = user.email
+            ? `${user.email} [PSN:${user.personId}]`
+            : `PSN:${user.personId}`;
+        }
+      } catch {
+        // หากเกิดข้อผิดพลาด ให้เก็บค่า fallback เดิม
+        modifierName = user.email
+          ? `${user.email} [PSN:${user.personId}]`
+          : `PSN:${user.personId}`;
+      }
     }
 
     // ถือเป็นผู้สมัครก็ต่อเมื่อทุก role ของ user เป็น candidate/user เท่านั้น

@@ -14,10 +14,7 @@ import {
   PAGINATION_DEFAULT_LIMIT,
   PAGINATION_DEFAULT_PAGE,
 } from 'src/common/dto/pagination-query.dto';
-import {
-  AuthenticatedUser,
-  getUserRoles,
-} from 'src/common/utils/authz.util';
+import { AuthenticatedUser, getUserRoles } from 'src/common/utils/authz.util';
 import { Role } from '../roles/entities/role.entity';
 import { MsgPersonResponseDto } from './dto/msg-person-response.dto';
 import { MsgPersonsQueryDto } from './dto/msg-persons-query.dto';
@@ -196,9 +193,7 @@ export class MsgPersonsService {
         !existingRoleIds.has(role.ROLE_ID),
     );
     if (newlyAssignedHigher.length > 0) {
-      throw new ForbiddenException(
-        'Cannot assign a role higher than your own',
-      );
+      throw new ForbiddenException('Cannot assign a role higher than your own');
     }
 
     person.ROLES = roles;
