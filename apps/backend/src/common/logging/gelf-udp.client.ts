@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { createSocket, Socket } from 'dgram';
 import { hostname } from 'os';
 import { AuditLogStatus } from 'src/modules/audit-logs/entities/audit-log.entity';
@@ -37,7 +37,7 @@ export interface GelfUdpClientOptions {
 }
 
 @Injectable()
-export class GelfUdpClient {
+export class GelfUdpClient implements OnModuleInit {
   private readonly logger = new Logger(GelfUdpClient.name);
   private readonly enabled: boolean;
   private readonly host: string;
@@ -54,6 +54,22 @@ export class GelfUdpClient {
     this.port = options.port;
     this.facility = options.facility;
     this.sourceHost = hostname();
+  }
+
+  onModuleInit(): void {
+    if (!this.enabled) {
+      this.logger.log('GELF UDP disabled (GRAYLOG_HOST empty)');
+      return;
+    }
+    this.logger.log(
+      `GELF UDP enabled → ${this.host}:${this.port} facility=${this.facility}`,
+    );
+    // Distinct boot probe so Graylog search can confirm the path without a login.
+    this.sendApp(
+      GelfLevel.INFO,
+      `buu-get Graylog sink ready facility=${this.facility}`,
+      'GelfUdpClient',
+    );
   }
 
   isEnabled(): boolean {
@@ -84,7 +100,9 @@ export class GelfUdpClient {
       short_message: `${payload.action} ${payload.status}`,
       timestamp: Date.now() / 1000,
       level,
+      // GELF 1.0 used top-level facility; 1.1 prefers additional _facility.
       facility: this.facility,
+      _facility: this.facility,
       _event_type: 'audit',
       _action: payload.action,
       _status: payload.status,
@@ -124,6 +142,7 @@ export class GelfUdpClient {
       timestamp: Date.now() / 1000,
       level,
       facility: this.facility,
+      _facility: this.facility,
       _event_type: 'app',
       _context: context ?? undefined,
     });
@@ -132,8 +151,8 @@ export class GelfUdpClient {
   private send(message: Record<string, unknown>): void {
     try {
       const cleaned = this.stripUndefined(message);
-      const body = `${JSON.stringify(cleaned)}\0`;
-      if (Buffer.byteLength(body, 'utf8') > GELF_MAX_BYTES) {
+      const body = Buffer.from(`${JSON.stringify(cleaned)}\0`, 'utf8');
+      if (body.length > GELF_MAX_BYTES) {
         if (!this.oversizedWarned) {
           this.oversizedWarned = true;
           this.logger.warn(

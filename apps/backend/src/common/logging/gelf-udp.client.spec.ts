@@ -79,13 +79,18 @@ describe('GelfUdpClient', () => {
 
     expect(createSocket).toHaveBeenCalledWith('udp4');
     expect(sendMock).toHaveBeenCalledTimes(1);
-    const body = sendMock.mock.calls[0][0] as string;
-    expect(body.endsWith('\0')).toBe(true);
-    const parsed = JSON.parse(body.slice(0, -1)) as Record<string, unknown>;
+    const body = sendMock.mock.calls[0][0] as Buffer;
+    expect(Buffer.isBuffer(body)).toBe(true);
+    expect(body[body.length - 1]).toBe(0);
+    const parsed = JSON.parse(body.subarray(0, -1).toString('utf8')) as Record<
+      string,
+      unknown
+    >;
     expect(parsed.version).toBe('1.1');
     expect(parsed.short_message).toBe('AUTH.LOGIN FAILURE');
     expect(parsed.level).toBe(GelfLevel.ERROR);
     expect(parsed.facility).toBe('buu-get');
+    expect(parsed._facility).toBe('buu-get');
     expect(parsed._event_type).toBe('audit');
     expect(parsed._action).toBe('AUTH.LOGIN');
     expect(parsed._status).toBe('FAILURE');
@@ -104,8 +109,11 @@ describe('GelfUdpClient', () => {
       facility: 'buu-get',
     });
     client.sendApp(GelfLevel.INFO, 'started', 'Bootstrap');
-    const body = sendMock.mock.calls[0][0] as string;
-    const parsed = JSON.parse(body.slice(0, -1)) as Record<string, unknown>;
+    const body = sendMock.mock.calls[0][0] as Buffer;
+    const parsed = JSON.parse(body.subarray(0, -1).toString('utf8')) as Record<
+      string,
+      unknown
+    >;
     expect(parsed._event_type).toBe('app');
     expect(parsed._context).toBe('Bootstrap');
     expect(parsed.short_message).toBe('started');
