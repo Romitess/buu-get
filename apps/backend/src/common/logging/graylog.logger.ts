@@ -2,9 +2,12 @@ import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { GelfLevel, GelfUdpClient } from './gelf-udp.client';
 
 /**
- * Nest LoggerService that always writes to the console and mirrors to Graylog
- * when GRAYLOG_HOST is set. Audit rows are NOT re-emitted here — they go through
- * GelfUdpClient.sendAudit only.
+ * Nest LoggerService that always writes to the terminal (ConsoleLogger) and
+ * mirrors to Graylog when GRAYLOG_HOST is set. Audit/HTTP ships go through
+ * GelfUdpClient directly — not re-logged here.
+ *
+ * When GRAYLOG_DEBUG=true, prints a [GraylogLogger] breadcrumb after each
+ * mirrored app log (via console.warn — never Nest Logger — to avoid recursion).
  */
 @Injectable()
 export class GraylogLogger extends ConsoleLogger {
@@ -20,12 +23,9 @@ export class GraylogLogger extends ConsoleLogger {
   override error(message: unknown, ...optionalParams: unknown[]): void {
     super.error(message, ...optionalParams);
     const { context, stack } = this.splitErrorParams(optionalParams);
-    this.gelfClient.sendApp(
-      GelfLevel.ERROR,
-      this.formatLogMessage(message),
-      context,
-      stack,
-    );
+    const text = this.formatLogMessage(message);
+    this.gelfClient.sendApp(GelfLevel.ERROR, text, context, stack);
+    this.traceShip('app', text, context);
   }
 
   override warn(message: unknown, ...optionalParams: unknown[]): void {
@@ -54,7 +54,18 @@ export class GraylogLogger extends ConsoleLogger {
     optionalParams: unknown[],
   ): void {
     const context = this.extractContext(optionalParams);
-    this.gelfClient.sendApp(level, this.formatLogMessage(message), context);
+    const text = this.formatLogMessage(message);
+    this.gelfClient.sendApp(level, text, context);
+    this.traceShip('app', text, context);
+  }
+
+  private traceShip(kind: string, text: string, context?: string): void {
+    if (!this.gelfClient.isDebug() || !this.gelfClient.isEnabled()) {
+      return;
+    }
+    const ctx = context ? ` [${context}]` : '';
+    // console.warn — not Nest Logger — avoids sendApp recursion.
+    console.warn(`[GraylogLogger] GELF ship ${kind}${ctx}: ${text}`);
   }
 
   private formatLogMessage(message: unknown): string {
@@ -89,7 +100,6 @@ export class GraylogLogger extends ConsoleLogger {
     if (optionalParams.length === 1) {
       const only = optionalParams[0];
       if (typeof only === 'string') {
-        // Nest: error(msg, context) or error(msg, stack)
         return only.includes('\n') ? { stack: only } : { context: only };
       }
       return {};

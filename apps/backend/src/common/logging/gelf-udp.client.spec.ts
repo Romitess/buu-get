@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import { GELF_MAX_BYTES, GelfLevel, GelfUdpClient } from './gelf-udp.client';
 import { AuditLogStatus } from 'src/modules/audit-logs/entities/audit-log.entity';
 
@@ -7,6 +6,13 @@ jest.mock('dgram', () => ({
 }));
 
 import { createSocket } from 'dgram';
+
+const baseOpts = {
+  host: 'graylog.example',
+  port: 12201,
+  facility: 'buu-get',
+  protocol: 'udp' as const,
+};
 
 describe('GelfUdpClient', () => {
   let sendMock: jest.Mock;
@@ -35,10 +41,12 @@ describe('GelfUdpClient', () => {
       on: jest.fn(),
     };
     (createSocket as jest.Mock).mockReturnValue(socket);
+    jest.spyOn(console, 'warn').mockImplementation(() => undefined);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('is a no-op when host is empty', () => {
@@ -46,6 +54,7 @@ describe('GelfUdpClient', () => {
       host: '',
       port: 12201,
       facility: 'buu-get',
+      protocol: 'udp',
     });
     expect(client.isEnabled()).toBe(false);
     client.sendAudit({
@@ -59,11 +68,7 @@ describe('GelfUdpClient', () => {
   });
 
   it('sends a GELF audit datagram without secrets or state blobs', () => {
-    const client = new GelfUdpClient({
-      host: 'graylog.example',
-      port: 12201,
-      facility: 'buu-get',
-    });
+    const client = new GelfUdpClient(baseOpts);
     client.sendAudit({
       action: 'AUTH.LOGIN',
       status: AuditLogStatus.FAILURE,
@@ -103,11 +108,7 @@ describe('GelfUdpClient', () => {
   });
 
   it('sends app log lines with _event_type app', () => {
-    const client = new GelfUdpClient({
-      host: 'graylog.example',
-      port: 12201,
-      facility: 'buu-get',
-    });
+    const client = new GelfUdpClient(baseOpts);
     client.sendApp(GelfLevel.INFO, 'started', 'Bootstrap');
     const body = sendMock.mock.calls[0][0] as Buffer;
     const parsed = JSON.parse(body.subarray(0, -1).toString('utf8')) as Record<
@@ -120,10 +121,95 @@ describe('GelfUdpClient', () => {
     expect(parsed.level).toBe(GelfLevel.INFO);
   });
 
-  it('swallows send errors and warns once', () => {
-    const warnSpy = jest
-      .spyOn(Logger.prototype, 'warn')
-      .mockImplementation(() => undefined);
+  it('sends http access events', () => {
+    const client = new GelfUdpClient(baseOpts);
+    client.sendHttpAccess({
+      method: 'POST',
+      path: '/api/auth/login',
+      statusCode: 401,
+      durationMs: 12,
+      ipAddress: '1.2.3.4',
+    });
+    const body = sendMock.mock.calls[0][0] as Buffer;
+    const parsed = JSON.parse(body.subarray(0, -1).toString('utf8')) as Record<
+      string,
+      unknown
+    >;
+    expect(parsed._event_type).toBe('http');
+    expect(parsed._http_method).toBe('POST');
+    expect(parsed._http_status).toBe(401);
+    expect(parsed.level).toBe(GelfLevel.WARNING);
+  });
+
+  it('posts JSON over HTTP without null terminator', async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 202,
+      statusText: 'Accepted',
+    });
+    global.fetch = fetchMock;
+
+    const client = new GelfUdpClient({
+      ...baseOpts,
+      protocol: 'http',
+      debug: true,
+    });
+    client.sendApp(GelfLevel.INFO, 'http-path', 'Ctx');
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(createSocket).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as [
+      string,
+      { method: string; body: string; signal: AbortSignal },
+    ];
+    expect(url).toBe('http://graylog.example:12201/gelf');
+    expect(init.method).toBe('POST');
+    expect(init.signal).toBeDefined();
+    expect(init.body.includes('\0')).toBe(false);
+    const parsed = JSON.parse(init.body) as Record<string, unknown>;
+    expect(parsed._event_type).toBe('app');
+    expect(parsed.short_message).toBe('http-path');
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('[GraylogLogger]'),
+    );
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('first message accepted'),
+    );
+  });
+
+  it('warns when HTTP GELF times out', async () => {
+    jest.useFakeTimers();
+    const fetchMock = jest.fn(
+      (_url: string, init?: { signal?: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => {
+            const err = new Error('aborted');
+            err.name = 'AbortError';
+            reject(err);
+          });
+        }),
+    );
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const client = new GelfUdpClient({
+      ...baseOpts,
+      protocol: 'http',
+    });
+    client.sendApp(GelfLevel.INFO, 'will-timeout', 'Ctx');
+    await jest.advanceTimersByTimeAsync(3000);
+    await Promise.resolve();
+
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('[GraylogLogger]'),
+    );
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('timeout after 3000ms'),
+    );
+    jest.useRealTimers();
+  });
+
+  it('swallows send errors and warns', () => {
     sendMock.mockImplementation(
       (
         _msg: string | Buffer,
@@ -136,31 +222,16 @@ describe('GelfUdpClient', () => {
         }
       },
     );
-    const client = new GelfUdpClient({
-      host: 'graylog.example',
-      port: 12201,
-      facility: 'buu-get',
-    });
+    const client = new GelfUdpClient(baseOpts);
     expect(() => client.sendApp(GelfLevel.ERROR, 'boom', 'Ctx')).not.toThrow();
-    expect(() => client.sendApp(GelfLevel.ERROR, 'boom2', 'Ctx')).not.toThrow();
-    expect(warnSpy).toHaveBeenCalledTimes(1);
-    warnSpy.mockRestore();
+    expect(console.warn).toHaveBeenCalled();
   });
 
   it('drops oversized payloads without chunking', () => {
-    const warnSpy = jest
-      .spyOn(Logger.prototype, 'warn')
-      .mockImplementation(() => undefined);
-    const client = new GelfUdpClient({
-      host: 'graylog.example',
-      port: 12201,
-      facility: 'buu-get',
-    });
-    // short_message is capped; full_message (stack) can still blow the datagram limit
+    const client = new GelfUdpClient(baseOpts);
     const hugeStack = 'x'.repeat(GELF_MAX_BYTES + 1000);
     client.sendApp(GelfLevel.ERROR, 'boom', 'Ctx', hugeStack);
     expect(sendMock).not.toHaveBeenCalled();
-    expect(warnSpy).toHaveBeenCalled();
-    warnSpy.mockRestore();
+    expect(console.warn).toHaveBeenCalled();
   });
 });

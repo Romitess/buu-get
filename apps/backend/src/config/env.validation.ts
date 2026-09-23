@@ -44,10 +44,14 @@ export interface EnvironmentVariables {
   BUU_LOGIN_BUU_PROVISION_KEY?: string;
   BUU_LOGIN_BUU_SCOPE?: string;
   BUU_LOGIN_BUU_SECRET?: string;
-  /** Graylog GELF UDP — empty/unset disables shipping (console + MySQL only) */
+  /** Graylog GELF — empty/unset disables shipping (console + MySQL only) */
   GRAYLOG_HOST?: string;
   GRAYLOG_PORT?: number;
   GRAYLOG_FACILITY?: string;
+  /** udp (default) or http — must match Graylog Input type */
+  GRAYLOG_PROTOCOL?: 'udp' | 'http';
+  /** Log every GELF ship to Nest console when true */
+  GRAYLOG_DEBUG?: string;
 }
 
 const envSchema = Joi.object<EnvironmentVariables>({
@@ -95,6 +99,8 @@ const envSchema = Joi.object<EnvironmentVariables>({
   GRAYLOG_HOST: Joi.string().allow('').optional(),
   GRAYLOG_PORT: Joi.number().port().default(12201),
   GRAYLOG_FACILITY: Joi.string().default('buu-get'),
+  GRAYLOG_PROTOCOL: Joi.string().valid('udp', 'http').default('udp'),
+  GRAYLOG_DEBUG: Joi.string().valid('true', 'false', '1', '0', '').optional(),
 });
 
 export function validateEnv(

@@ -66,13 +66,14 @@ REST API for **BUU GET**, built with **NestJS 11**, **TypeORM**, and **MySQL**. 
 | `DATABASE_PASSWORD` | MySQL password (may be empty string)             |
 | `DATABASE_NAME`     | MySQL database name                              |
 | `JWT_SECRET`        | Secret for signing JWTs — **minimum 16 characters** |
-| `GRAYLOG_HOST`      | Optional. Existing Graylog host for GELF UDP. Empty/unset disables shipping |
-| `GRAYLOG_PORT`      | GELF UDP port (default `12201`)                  |
+| `GRAYLOG_HOST`      | Optional. Existing Graylog host. Empty/unset disables shipping |
+| `GRAYLOG_PORT`      | GELF port (default `12201`) — must match the Graylog Input |
 | `GRAYLOG_FACILITY`  | GELF facility / app tag (default `buu-get`)      |
+| `GRAYLOG_PROTOCOL`  | `udp` (default) or `http` — **must match** Input type (GELF UDP vs GELF HTTP) |
 
 > **Note:** `JWT_SECRET` in `.env.example` is a placeholder. Use a long random value in real deployments; short values are rejected by config validation.
 >
-> **Graylog:** Set `GRAYLOG_HOST` (and port if not 12201) on the deployment. The backend sends sanitized audit events (login success/failure first) and Nest application logs via GELF UDP. MySQL `SYS_T_AUDIT_LOGS` and the admin audit page remain the in-app source of truth. UDP is best-effort; Graylog must already expose a GELF UDP input.
+> **Graylog:** When enabled, the backend ships (1) Nest server logs (`_event_type=app`), (2) every HTTP request except health/docs (`_event_type=http`), (3) sanitized audit events such as login (`_event_type=audit`). MySQL `SYS_T_AUDIT_LOGS` remains the in-app audit source. If messages never appear, create a matching Input under System → Inputs, then search for `facility:buuget` or `"Graylog sink ready"`. Prefer `GRAYLOG_PROTOCOL=http` when debugging (HTTP failures are logged to the Nest console).
 
 ## API and documentation
 

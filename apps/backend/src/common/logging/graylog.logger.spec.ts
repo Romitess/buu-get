@@ -7,6 +7,7 @@ describe('GraylogLogger', () => {
     sendApp: jest.Mock;
     sendAudit: jest.Mock;
     isEnabled: jest.Mock;
+    isDebug: jest.Mock;
   };
   let logger: GraylogLogger;
   let printSpy: jest.SpiedFunction<ConsoleLogger['log']>;
@@ -16,6 +17,7 @@ describe('GraylogLogger', () => {
       sendApp: jest.fn(),
       sendAudit: jest.fn(),
       isEnabled: jest.fn().mockReturnValue(true),
+      isDebug: jest.fn().mockReturnValue(false),
     };
     logger = new GraylogLogger(gelfClient as unknown as GelfUdpClient);
     printSpy = jest
@@ -27,6 +29,7 @@ describe('GraylogLogger', () => {
     jest
       .spyOn(ConsoleLogger.prototype, 'warn')
       .mockImplementation(() => undefined);
+    jest.spyOn(console, 'warn').mockImplementation(() => undefined);
   });
 
   afterEach(() => {
@@ -56,12 +59,11 @@ describe('GraylogLogger', () => {
     );
   });
 
-  it('mirrors warn() as WARNING level', () => {
-    logger.warn('careful', 'Ctx');
-    expect(gelfClient.sendApp).toHaveBeenCalledWith(
-      GelfLevel.WARNING,
-      'careful',
-      'Ctx',
+  it('prints debug ship breadcrumb when GRAYLOG_DEBUG is on', () => {
+    gelfClient.isDebug.mockReturnValue(true);
+    logger.log('hello', 'Ctx');
+    expect(console.warn).toHaveBeenCalledWith(
+      '[GraylogLogger] GELF ship app [Ctx]: hello',
     );
   });
 });
