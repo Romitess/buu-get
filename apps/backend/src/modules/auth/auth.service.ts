@@ -210,8 +210,7 @@ export class AuthService {
       throw new UnauthorizedException('ไม่พบบุคลากรในระบบ');
     }
 
-    const roles =
-      person.ROLES?.map((r) => r.ROLE_NAME).filter(Boolean) ?? [];
+    const roles = person.ROLES?.map((r) => r.ROLE_NAME).filter(Boolean) ?? [];
     if (roles.length === 0) {
       throw new UnauthorizedException('บัญชีบุคลากรยังไม่มีสิทธิ์ในระบบ');
     }
@@ -511,8 +510,7 @@ export class AuthService {
       throw new UnauthorizedException('ไม่พบบุคลากรในระบบ');
     }
 
-    const roles =
-      person.ROLES?.map((r) => r.ROLE_NAME).filter(Boolean) ?? [];
+    const roles = person.ROLES?.map((r) => r.ROLE_NAME).filter(Boolean) ?? [];
     if (roles.length === 0) {
       throw new UnauthorizedException('บัญชีบุคลากรยังไม่มีสิทธิ์ในระบบ');
     }

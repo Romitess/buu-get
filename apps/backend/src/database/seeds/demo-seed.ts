@@ -302,9 +302,7 @@ async function seedUsers(): Promise<Candidate[]> {
         }),
       );
     }
-    console.log(
-      `✓ MSG_T_PERSON ${staffPerson.PSN_ID} + PERSON_ROLES (staff)`,
-    );
+    console.log(`✓ MSG_T_PERSON ${staffPerson.PSN_ID} + PERSON_ROLES (staff)`);
 
     // 100 candidates — ชื่อ-สกุลไม่ซ้ำ (deterministic ตาม index)
     const usedNames = new Set<string>();

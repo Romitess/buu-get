@@ -1,5 +1,6 @@
 import { Logger, NotFoundException } from '@nestjs/common';
 import type { Repository } from 'typeorm';
+import { GelfUdpClient } from 'src/common/logging/gelf-udp.client';
 import { AuditLogsService } from './audit-logs.service';
 import { AuditSerializer } from './audit.serializer';
 import { AuditAction } from './constants/audit-actions';
@@ -22,6 +23,7 @@ describe('AuditLogsService', () => {
     getManyAndCount: jest.Mock;
     getMany: jest.Mock;
   };
+  let gelfClient: { sendAudit: jest.Mock; sendApp: jest.Mock };
 
   const savedRow: AuditLog = {
     AL_ID: 1,
@@ -57,13 +59,18 @@ describe('AuditLogsService', () => {
       findOne: jest.fn(),
       createQueryBuilder: jest.fn(() => qb),
     };
+    gelfClient = {
+      sendAudit: jest.fn(),
+      sendApp: jest.fn(),
+    };
     service = new AuditLogsService(
       repository as unknown as Repository<AuditLog>,
       new AuditSerializer(),
+      gelfClient as unknown as GelfUdpClient,
     );
   });
 
-  it('persists an insert-only row', async () => {
+  it('persists an insert-only row and ships sanitized audit to Graylog', async () => {
     await service.record({
       action: AuditAction.AUTH_LOGIN,
       status: AuditLogStatus.SUCCESS,
@@ -72,6 +79,8 @@ describe('AuditLogsService', () => {
       resourceType: 'user',
       resourceId: '12',
       beforeState: { email: 'a@b.com', password: 'secret' },
+      ipAddress: '127.0.0.1',
+      correlationId: 'corr-1',
     });
 
     expect(repository.create).toHaveBeenCalled();
@@ -80,6 +89,41 @@ describe('AuditLogsService', () => {
     expect(created.AL_BEFORE_STATE).toBe(JSON.stringify({ email: 'a@b.com' }));
     expect(created.AL_BEFORE_STATE).not.toContain('secret');
     expect(repository.save).toHaveBeenCalled();
+
+    expect(gelfClient.sendAudit).toHaveBeenCalledTimes(1);
+    const gelfPayload = gelfClient.sendAudit.mock.calls[0][0] as {
+      action: string;
+      status: AuditLogStatus;
+      actorSnapshot: { email?: string } | null;
+    };
+    expect(gelfPayload.action).toBe(AuditAction.AUTH_LOGIN);
+    expect(gelfPayload.status).toBe(AuditLogStatus.SUCCESS);
+    expect(gelfPayload.actorSnapshot).toEqual({
+      userId: 12,
+      email: 'a@b.com',
+    });
+    expect(gelfPayload).not.toHaveProperty('beforeState');
+    expect(JSON.stringify(gelfPayload)).not.toContain('secret');
+  });
+
+  it('still persists when Graylog send throws', async () => {
+    const warnSpy = jest
+      .spyOn(Logger.prototype, 'warn')
+      .mockImplementation(() => undefined);
+    gelfClient.sendAudit.mockImplementation(() => {
+      throw new Error('gelf boom');
+    });
+
+    await expect(
+      service.record({
+        action: AuditAction.AUTH_LOGIN,
+        status: AuditLogStatus.FAILURE,
+        statusDetail: 'Invalid credentials',
+      }),
+    ).resolves.toBeDefined();
+    expect(repository.save).toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 
   it('recordAsync swallows persistence errors', async () => {
@@ -94,6 +138,7 @@ describe('AuditLogsService', () => {
       }),
     ).not.toThrow();
     await new Promise((resolve) => setImmediate(resolve));
+    expect(gelfClient.sendAudit).toHaveBeenCalled();
     errorSpy.mockRestore();
   });
 

@@ -44,6 +44,10 @@ export interface EnvironmentVariables {
   BUU_LOGIN_BUU_PROVISION_KEY?: string;
   BUU_LOGIN_BUU_SCOPE?: string;
   BUU_LOGIN_BUU_SECRET?: string;
+  /** Graylog GELF UDP — empty/unset disables shipping (console + MySQL only) */
+  GRAYLOG_HOST?: string;
+  GRAYLOG_PORT?: number;
+  GRAYLOG_FACILITY?: string;
 }
 
 const envSchema = Joi.object<EnvironmentVariables>({
@@ -88,6 +92,9 @@ const envSchema = Joi.object<EnvironmentVariables>({
   BUU_LOGIN_BUU_PROVISION_KEY: Joi.string().optional(),
   BUU_LOGIN_BUU_SCOPE: Joi.string().optional(),
   BUU_LOGIN_BUU_SECRET: Joi.string().valid('true', 'false').optional(),
+  GRAYLOG_HOST: Joi.string().allow('').optional(),
+  GRAYLOG_PORT: Joi.number().port().default(12201),
+  GRAYLOG_FACILITY: Joi.string().default('buu-get'),
 });
 
 export function validateEnv(

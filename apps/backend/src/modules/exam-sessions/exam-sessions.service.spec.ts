@@ -170,7 +170,9 @@ describe('ExamSessionsService', () => {
   describe('findOne', () => {
     it('should throw NotFoundException when missing', async () => {
       repo.findOne.mockResolvedValue(null);
-      await expect(service.findOne(1)).rejects.toBeInstanceOf(NotFoundException);
+      await expect(service.findOne(1)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
     });
   });
 });

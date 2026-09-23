@@ -393,9 +393,9 @@ describe('CheckInAssistService', () => {
     it('forbids an administrator from opening a room station', async () => {
       sessionLocationRepository.findOne.mockResolvedValue(room);
 
-      await expect(service.openRoomStation(adminUser, 12)).rejects.toBeInstanceOf(
-        ForbiddenException,
-      );
+      await expect(
+        service.openRoomStation(adminUser, 12),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });
 

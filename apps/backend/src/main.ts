@@ -10,6 +10,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { GraylogLogger } from './common/logging/graylog.logger';
 
 function parseCorsOrigins(
   raw: string | undefined,
@@ -29,7 +30,8 @@ function parseCorsOrigins(
 }
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(GraylogLogger));
   const configService = app.get(ConfigService);
   const nodeEnv = configService.getOrThrow<string>('NODE_ENV');
   const port = configService.getOrThrow<number>('PORT');

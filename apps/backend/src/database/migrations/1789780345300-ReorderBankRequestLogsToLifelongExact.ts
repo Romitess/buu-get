@@ -4,9 +4,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * บังคับลำดับ + ชนิดคอลัมน์ FIN_T_REQUEST_* ให้ตรง lifelong_dev.sql อีกครั้ง
  * (กรณี DB รัน Align เวอร์ชันเก่าที่ ADD COLUMN AFTER แล้วไม่ reorder)
  */
-export class ReorderBankRequestLogsToLifelongExact1789780345300
-  implements MigrationInterface
-{
+export class ReorderBankRequestLogsToLifelongExact1789780345300 implements MigrationInterface {
   name = 'ReorderBankRequestLogsToLifelongExact1789780345300';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -23,7 +21,9 @@ export class ReorderBankRequestLogsToLifelongExact1789780345300
       return;
     }
 
-    await queryRunner.query(`DROP TABLE IF EXISTS \`FIN_T_REQUEST_APPROVAL__NEW\``);
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS \`FIN_T_REQUEST_APPROVAL__NEW\``,
+    );
     await queryRunner.query(`
       CREATE TABLE \`FIN_T_REQUEST_APPROVAL__NEW\` (
         \`ID\` int NOT NULL AUTO_INCREMENT COMMENT 'Auto ID',
@@ -111,7 +111,9 @@ export class ReorderBankRequestLogsToLifelongExact1789780345300
       return;
     }
 
-    await queryRunner.query(`DROP TABLE IF EXISTS \`FIN_T_REQUEST_PAYMENT__NEW\``);
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS \`FIN_T_REQUEST_PAYMENT__NEW\``,
+    );
     await queryRunner.query(`
       CREATE TABLE \`FIN_T_REQUEST_PAYMENT__NEW\` (
         \`ID\` int NOT NULL AUTO_INCREMENT COMMENT 'Auto ID',

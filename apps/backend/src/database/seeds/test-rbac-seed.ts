@@ -154,7 +154,7 @@ export async function seedTestRbac(manageConnection = true): Promise<void> {
         continue;
       }
       const cred = TEST_USERS[key];
-      let person = await personRepo.findOne({
+      const person = await personRepo.findOne({
         where: { PSN_ID: psnId },
         relations: ['ROLES'],
       });

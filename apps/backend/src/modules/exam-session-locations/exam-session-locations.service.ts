@@ -279,10 +279,7 @@ export class ExamSessionLocationsService {
     ];
   }
 
-  private async syncProctors(
-    slId: number,
-    psnIds?: string[],
-  ): Promise<void> {
+  private async syncProctors(slId: number, psnIds?: string[]): Promise<void> {
     const normalized = this.normalizeProctorPsnIds(psnIds);
     if (normalized === undefined) {
       return;

@@ -64,8 +64,7 @@ export class RequestApproval {
     type: 'varchar',
     length: 10,
     nullable: true,
-    comment:
-      'Company Code ( KTB ตกลงร่วมกับ Direct Link Partner (1010))',
+    comment: 'Company Code ( KTB ตกลงร่วมกับ Direct Link Partner (1010))',
   })
   COMCODE: string | null;
 
@@ -74,8 +73,7 @@ export class RequestApproval {
     type: 'varchar',
     length: 10,
     nullable: true,
-    comment:
-      'Product Code (KTB ตกลงร่วมกับ Direct Link Partner (1010))',
+    comment: 'Product Code (KTB ตกลงร่วมกับ Direct Link Partner (1010))',
   })
   PRODCODE: string | null;
 
@@ -110,8 +108,7 @@ export class RequestApproval {
     type: 'varchar',
     length: 14,
     nullable: true,
-    comment:
-      'Transaction DateTime  (yyyyMMddHHmmss(ปี ค.ศ. ) 20180601180029)',
+    comment: 'Transaction DateTime  (yyyyMMddHHmmss(ปี ค.ศ. ) 20180601180029)',
   })
   DATETIME: string | null;
 
@@ -212,8 +209,7 @@ export class RequestApproval {
     type: 'varchar',
     length: 40,
     nullable: true,
-    comment:
-      'เป็นฟิลด์ที่ใช้สำหรับส่ง data อื่นๆ ที่ต้องการแสดงบน slip',
+    comment: 'เป็นฟิลด์ที่ใช้สำหรับส่ง data อื่นๆ ที่ต้องการแสดงบน slip',
   })
   PRINT1: string | null;
 
@@ -222,8 +218,7 @@ export class RequestApproval {
     type: 'varchar',
     length: 40,
     nullable: true,
-    comment:
-      'เป็นฟิลด์ที่ใช้สำหรับส่ง data อื่นๆ ที่ต้องการแสดงบน slip',
+    comment: 'เป็นฟิลด์ที่ใช้สำหรับส่ง data อื่นๆ ที่ต้องการแสดงบน slip',
   })
   PRINT2: string | null;
 
@@ -232,8 +227,7 @@ export class RequestApproval {
     type: 'varchar',
     length: 40,
     nullable: true,
-    comment:
-      'เป็นฟิลด์ที่ใช้สำหรับส่ง data อื่นๆ ที่ต้องการแสดงบน slip',
+    comment: 'เป็นฟิลด์ที่ใช้สำหรับส่ง data อื่นๆ ที่ต้องการแสดงบน slip',
   })
   PRINT3: string | null;
 
@@ -242,8 +236,7 @@ export class RequestApproval {
     type: 'varchar',
     length: 40,
     nullable: true,
-    comment:
-      'เป็นฟิลด์ที่ใช้สำหรับส่ง data อื่นๆ ที่ต้องการแสดงบน slip',
+    comment: 'เป็นฟิลด์ที่ใช้สำหรับส่ง data อื่นๆ ที่ต้องการแสดงบน slip',
   })
   PRINT4: string | null;
 
@@ -252,8 +245,7 @@ export class RequestApproval {
     type: 'varchar',
     length: 40,
     nullable: true,
-    comment:
-      'เป็นฟิลด์ที่ใช้สำหรับส่ง data อื่นๆ ที่ต้องการแสดงบน slip',
+    comment: 'เป็นฟิลด์ที่ใช้สำหรับส่ง data อื่นๆ ที่ต้องการแสดงบน slip',
   })
   PRINT5: string | null;
 
@@ -262,8 +254,7 @@ export class RequestApproval {
     type: 'varchar',
     length: 40,
     nullable: true,
-    comment:
-      'เป็นฟิลด์ที่ใช้สำหรับส่ง data อื่นๆ ที่ต้องการแสดงบน slip',
+    comment: 'เป็นฟิลด์ที่ใช้สำหรับส่ง data อื่นๆ ที่ต้องการแสดงบน slip',
   })
   PRINT6: string | null;
 
@@ -272,8 +263,7 @@ export class RequestApproval {
     type: 'varchar',
     length: 40,
     nullable: true,
-    comment:
-      'เป็นฟิลด์ที่ใช้สำหรับส่ง data อื่นๆ ที่ต้องการแสดงบน slip',
+    comment: 'เป็นฟิลด์ที่ใช้สำหรับส่ง data อื่นๆ ที่ต้องการแสดงบน slip',
   })
   PRINT7: string | null;
 

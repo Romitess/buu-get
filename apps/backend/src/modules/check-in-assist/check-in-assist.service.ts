@@ -37,7 +37,11 @@ import {
 import { Exam } from '../exam/entities/exam.entity';
 import { ExamSessionLocation } from '../exam-session-locations/entities/exam-session-location.entity';
 import { ExamSessionLocationProctor } from '../exam-session-locations/entities/exam-session-location-proctor.entity';
-import { AuthenticatedUser, requirePersonId, userHasAnyRole } from 'src/common/utils/authz.util';
+import {
+  AuthenticatedUser,
+  requirePersonId,
+  userHasAnyRole,
+} from 'src/common/utils/authz.util';
 import { ROOM_CHECK_IN_ADMIN_ROLES } from 'src/common/constants/role-groups';
 import {
   isValidAssistScanCode,

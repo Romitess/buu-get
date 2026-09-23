@@ -64,8 +64,7 @@ export class RequestPayment {
     type: 'varchar',
     length: 10,
     nullable: true,
-    comment:
-      'Company Code ( KTB ตกลงร่วมกับ Direct Link Partner (1010))',
+    comment: 'Company Code ( KTB ตกลงร่วมกับ Direct Link Partner (1010))',
   })
   COMCODE: string | null;
 
@@ -74,8 +73,7 @@ export class RequestPayment {
     type: 'varchar',
     length: 10,
     nullable: true,
-    comment:
-      'Product Code (KTB ตกลงร่วมกับ Direct Link Partner (1010))',
+    comment: 'Product Code (KTB ตกลงร่วมกับ Direct Link Partner (1010))',
   })
   PRODCODE: string | null;
 
@@ -110,8 +108,7 @@ export class RequestPayment {
     type: 'varchar',
     length: 14,
     nullable: true,
-    comment:
-      'Transaction DateTime  (yyyyMMddHHmmss(ปี ค.ศ. ) 20180601180029)',
+    comment: 'Transaction DateTime  (yyyyMMddHHmmss(ปี ค.ศ. ) 20180601180029)',
   })
   DATETIME: string | null;
 

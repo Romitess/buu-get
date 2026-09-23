@@ -175,7 +175,7 @@ async function ensureStaffLoginUser(ds: DataSource): Promise<void> {
   }
   console.log(`✓ ensure staff login: ${STAFF_EMAIL}`);
 
-  let staffPerson = await personRepo.findOne({
+  const staffPerson = await personRepo.findOne({
     where: { PSN_ID: STAFF_PSN_ID },
     relations: ['ROLES'],
   });

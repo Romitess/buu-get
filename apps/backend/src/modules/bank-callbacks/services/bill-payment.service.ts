@@ -139,10 +139,7 @@ export class BillPaymentService {
       }
 
       const enrollment = transaction.ENROLLMENT;
-      if (
-        enrollment &&
-        enrollment.ERM_STATUS !== ExamEnrollmentStatus.UNPAID
-      ) {
+      if (enrollment && enrollment.ERM_STATUS !== ExamEnrollmentStatus.UNPAID) {
         return this.insertResponseLog(
           body,
           buildBankResponse({

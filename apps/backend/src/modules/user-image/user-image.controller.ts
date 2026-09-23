@@ -1,20 +1,11 @@
-import {
-  Controller,
-  Patch,
-  Body,
-  UseGuards,
-  Get,
-} from '@nestjs/common';
+import { Controller, Patch, Body, UseGuards, Get } from '@nestjs/common';
 import { UserImageService } from './user-image.service';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import {
-  AuthenticatedUser,
-  requireUserId,
-} from 'src/common/utils/authz.util';
+import { AuthenticatedUser, requireUserId } from 'src/common/utils/authz.util';
 
 class UpdateUserImageDto {
   @ApiProperty({ example: '/user_images/abc123.jpg' })

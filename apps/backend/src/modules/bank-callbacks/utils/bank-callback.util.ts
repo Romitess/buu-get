@@ -6,9 +6,7 @@ import {
   BankRespMsg,
 } from '../constants/bank-resp-codes';
 
-export function maskBankRequestData(
-  body: BankCallbackRequestDto,
-): string {
+export function maskBankRequestData(body: BankCallbackRequestDto): string {
   const masked: Record<string, unknown> = { ...body };
   if ('user' in masked) {
     masked.user = '12345678';
@@ -98,7 +96,9 @@ export function mapBankCallbackRequestToLog(body: BankCallbackRequestDto): {
   };
 }
 
-export function mapBankCallbackResponseToLog(response: BankCallbackResponseDto): {
+export function mapBankCallbackResponseToLog(
+  response: BankCallbackResponseDto,
+): {
   TRANXID: string | null;
   BANKREF: string | null;
   RESPCODE: number | null;

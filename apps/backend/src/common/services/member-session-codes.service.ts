@@ -36,13 +36,13 @@ export class MemberSessionCodesService {
       [fiscalBe, personType],
     );
 
-    const rows = (await manager.query(
+    const rows = await manager.query(
       `SELECT \`UCS_LAST_NO\` AS lastNo
        FROM \`BUU_GET_T_USER_CODE_SEQ\`
        WHERE \`UCS_FISCAL_YEAR_BE\` = ? AND \`UCS_PERSON_TYPE\` = ?
        FOR UPDATE`,
       [fiscalBe, personType],
-    )) as Array<{ lastNo: number }>;
+    );
 
     const next = Number(rows[0]?.lastNo ?? 0) + 1;
     if (next > 99999) {
@@ -81,13 +81,13 @@ export class MemberSessionCodesService {
       [examType, fiscalAd],
     );
 
-    const rows = (await manager.query(
+    const rows = await manager.query(
       `SELECT \`SCS_LAST_NO\` AS lastNo
        FROM \`EXAM_T_SESSION_CODE_SEQ\`
        WHERE \`SCS_EXAM_TYPE\` = ? AND \`SCS_FISCAL_YEAR_AD\` = ?
        FOR UPDATE`,
       [examType, fiscalAd],
-    )) as Array<{ lastNo: number }>;
+    );
 
     const next = Number(rows[0]?.lastNo ?? 0) + 1;
     if (next > 999) {

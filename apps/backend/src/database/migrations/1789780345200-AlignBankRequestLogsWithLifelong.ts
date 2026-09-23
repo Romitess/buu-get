@@ -5,9 +5,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * ตรง dump Lifelong (lifelong_dev.sql) สำหรับ DB ที่เคยรัน schema เก่า
  * (CREATE ลำดับผิด / Align แบบ ADD COLUMN AFTER)
  */
-export class AlignBankRequestLogsWithLifelong1789780345200
-  implements MigrationInterface
-{
+export class AlignBankRequestLogsWithLifelong1789780345200 implements MigrationInterface {
   name = 'AlignBankRequestLogsWithLifelong1789780345200';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -25,7 +23,9 @@ export class AlignBankRequestLogsWithLifelong1789780345200
       return;
     }
 
-    await queryRunner.query(`DROP TABLE IF EXISTS \`FIN_T_REQUEST_APPROVAL__NEW\``);
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS \`FIN_T_REQUEST_APPROVAL__NEW\``,
+    );
     await queryRunner.query(`
       CREATE TABLE \`FIN_T_REQUEST_APPROVAL__NEW\` (
         \`ID\` int NOT NULL AUTO_INCREMENT COMMENT 'Auto ID',
@@ -114,7 +114,9 @@ export class AlignBankRequestLogsWithLifelong1789780345200
       return;
     }
 
-    await queryRunner.query(`DROP TABLE IF EXISTS \`FIN_T_REQUEST_PAYMENT__NEW\``);
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS \`FIN_T_REQUEST_PAYMENT__NEW\``,
+    );
     await queryRunner.query(`
       CREATE TABLE \`FIN_T_REQUEST_PAYMENT__NEW\` (
         \`ID\` int NOT NULL AUTO_INCREMENT COMMENT 'Auto ID',

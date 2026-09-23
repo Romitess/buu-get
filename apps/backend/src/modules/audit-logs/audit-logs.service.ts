@@ -9,6 +9,7 @@ import {
   PAGINATION_DEFAULT_LIMIT,
   PAGINATION_DEFAULT_PAGE,
 } from 'src/common/dto/pagination-query.dto';
+import { GelfUdpClient } from 'src/common/logging/gelf-udp.client';
 import { AuditSerializer, JsonObject } from './audit.serializer';
 import {
   AUDIT_MODULE_NAME,
@@ -29,6 +30,7 @@ export class AuditLogsService {
     @InjectRepository(AuditLog)
     private readonly auditLogRepository: Repository<AuditLog>,
     private readonly serializer: AuditSerializer,
+    private readonly gelfClient: GelfUdpClient,
   ) {}
 
   async record(
@@ -44,21 +46,46 @@ export class AuditLogsService {
     const actorSnapshot = this.sanitizeActorSnapshot(
       input.actorSnapshot ?? null,
     );
+    const module = input.module ?? AUDIT_MODULE_NAME;
+    const resourceId = this.truncate(input.resourceId ?? null, 64);
+    const statusDetail = this.truncate(input.statusDetail ?? null, 500);
+    const ipAddress = this.truncate(input.ipAddress ?? null, 45);
+    const correlationId = this.truncate(input.correlationId ?? null, 36);
+
+    // Dual-write: Graylog after sanitize, independent of MySQL success (never throws).
+    try {
+      this.gelfClient.sendAudit({
+        action: input.action,
+        status: input.status,
+        statusDetail,
+        module,
+        resourceType: input.resourceType ?? null,
+        resourceId,
+        actorUserId: input.actorUserId ?? null,
+        actorSnapshot,
+        correlationId,
+        ipAddress,
+      });
+    } catch (err: unknown) {
+      this.logger.warn(
+        `Graylog audit ship failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
 
     const row = repo.create({
       AL_ACTOR_USER_ID: input.actorUserId ?? null,
       AL_ACTOR_SNAPSHOT: this.toJsonText(actorSnapshot),
       AL_ACTION: input.action,
-      AL_MODULE: input.module ?? AUDIT_MODULE_NAME,
+      AL_MODULE: module,
       AL_RESOURCE_TYPE: input.resourceType ?? null,
-      AL_RESOURCE_ID: this.truncate(input.resourceId ?? null, 64),
+      AL_RESOURCE_ID: resourceId,
       AL_STATUS: input.status,
-      AL_STATUS_DETAIL: this.truncate(input.statusDetail ?? null, 500),
+      AL_STATUS_DETAIL: statusDetail,
       AL_BEFORE_STATE: this.toJsonText(beforeState),
       AL_AFTER_STATE: this.toJsonText(afterState),
-      AL_IP_ADDRESS: this.truncate(input.ipAddress ?? null, 45),
+      AL_IP_ADDRESS: ipAddress,
       AL_USER_AGENT: this.truncate(input.userAgent ?? null, 512),
-      AL_CORRELATION_ID: this.truncate(input.correlationId ?? null, 36),
+      AL_CORRELATION_ID: correlationId,
     });
 
     return repo.save(row);
@@ -181,6 +208,9 @@ export class AuditLogsService {
     const next: AuditActorSnapshot = {};
     if (typeof snapshot.userId === 'number') {
       next.userId = snapshot.userId;
+    }
+    if (typeof snapshot.psnId === 'string' && snapshot.psnId.length > 0) {
+      next.psnId = snapshot.psnId;
     }
     if (typeof snapshot.email === 'string' && snapshot.email.length > 0) {
       next.email = snapshot.email;

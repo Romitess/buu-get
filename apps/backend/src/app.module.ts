@@ -55,6 +55,7 @@ import { EnrollmentAuditModule } from './modules/enrollment-audit/enrollment-aud
 import { SystemSettingsModule } from './modules/system-settings/system-settings.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
 import { MemberSessionCodesModule } from './common/modules/member-session-codes.module';
+import { GraylogModule } from './common/logging/graylog.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { MemberSessionCodesModule } from './common/modules/member-session-codes.
       isGlobal: true,
       validate: validateEnv,
     }),
+    GraylogModule,
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],

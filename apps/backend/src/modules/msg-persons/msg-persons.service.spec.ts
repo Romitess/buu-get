@@ -233,7 +233,11 @@ describe('MsgPersonsService', () => {
       rolesRepository.find.mockResolvedValue(roles);
       msgPersonsRepository.save.mockImplementation(async (p: MsgPerson) => p);
 
-      const result = await service.updateRoles('TSTSTAFF01', [1, 2], adminActor);
+      const result = await service.updateRoles(
+        'TSTSTAFF01',
+        [1, 2],
+        adminActor,
+      );
 
       expect(rolesRepository.find).toHaveBeenCalled();
       expect(msgPersonsRepository.save).toHaveBeenCalledWith(

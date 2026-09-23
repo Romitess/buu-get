@@ -83,12 +83,10 @@ describe('Bank Callback (e2e)', () => {
   };
 
   beforeAll(async () => {
-    const { TransactionsController } = await import(
-      '../../src/modules/transactions/transactions.controller'
-    );
-    const { TransactionsService } = await import(
-      '../../src/modules/transactions/transactions.service'
-    );
+    const { TransactionsController } =
+      await import('../../src/modules/transactions/transactions.controller');
+    const { TransactionsService } =
+      await import('../../src/modules/transactions/transactions.service');
 
     const transactionsService = {
       createTransactionForFlow: jest.fn(),
@@ -145,7 +143,9 @@ describe('Bank Callback (e2e)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     paymentMode = PaymentMode.MOCK;
-    mockBankService.assertBankCallbacksEnabled.mockImplementation(() => undefined);
+    mockBankService.assertBankCallbacksEnabled.mockImplementation(
+      () => undefined,
+    );
   });
 
   it('DT-01: approval happy path returns respCode 0 + tranxId', async () => {
