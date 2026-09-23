@@ -53,6 +53,7 @@
                 outlined
                 dropdown-icon="keyboard_arrow_down"
                 class="profile-card__role-select"
+                popup-content-class="profile-role-select-menu"
                 @update:model-value="onSwitchRole($event as UserRole)"
               />
             </div>
@@ -117,9 +118,7 @@ const i18n = useI18n();
 
 /** ผู้สมัครเท่านั้นที่แก้ข้อมูลส่วนตัวได้ — บุคลากร (loginBuu) ไม่มีเมนูนี้ */
 const canEditProfile = computed(
-  () =>
-    !userStore.isPersonnelActor &&
-    userStore.effectiveRoles.includes(ROLES.CANDIDATE),
+  () => !userStore.isPersonnelActor && userStore.effectiveRoles.includes(ROLES.CANDIDATE),
 );
 
 const displayName = computed(() => {
@@ -278,6 +277,11 @@ const onLogout = async (): Promise<void> => {
 
 .profile-card__role-select {
   width: 100%;
+}
+
+/* ยกเลิกเพดาน 200px ของ AppSelect — บทบาทที่ถือจริงต้องเห็นครบโดยไม่ถูกตัด */
+.app-select-menu.profile-role-select-menu {
+  max-height: 480px !important;
 }
 
 .profile-card__actions {

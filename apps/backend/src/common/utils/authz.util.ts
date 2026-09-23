@@ -36,15 +36,41 @@ function isPrivilegedUser(user: AuthenticatedUser): boolean {
   return PRIVILEGED_ROLES.some((r) => realRoles.includes(normalizeRole(r)));
 }
 
+const SWITCHABLE_ROLE_ORDER: RoleEnum[] = [
+  RoleEnum.SUPER_ADMIN,
+  RoleEnum.ADMIN,
+  RoleEnum.REGISTRATION_OFFICER,
+  RoleEnum.EXAM_OPERATIONS_OFFICER,
+  RoleEnum.STAFF,
+  RoleEnum.FINANCE,
+  RoleEnum.PROCTOR,
+  RoleEnum.EXECUTIVE,
+  RoleEnum.CANDIDATE,
+];
+
+/** บทบาทที่สลับมุมมองได้ = ที่ผู้ใช้ถือจริง ∪ ชุดพรีวิวตามสิทธิ์ */
 function getSwitchableRolesForUser(user: AuthenticatedUser): RoleEnum[] {
-  const realRoles = getUserRoles(user).map((r) => normalizeRole(r));
-  if (realRoles.includes(normalizeRole(RoleEnum.SUPER_ADMIN))) {
-    return SUPER_ADMIN_SWITCHABLE_ROLES;
+  const realRoles = getUserRoles(user);
+  const normalizedReal = realRoles.map((r) => normalizeRole(r));
+  const isSuperAdmin = normalizedReal.includes(
+    normalizeRole(RoleEnum.SUPER_ADMIN),
+  );
+  const isAdmin = normalizedReal.includes(normalizeRole(RoleEnum.ADMIN));
+  if (!isSuperAdmin && !isAdmin) {
+    return [];
   }
-  if (realRoles.includes(normalizeRole(RoleEnum.ADMIN))) {
-    return ADMIN_SWITCHABLE_ROLES;
-  }
-  return [];
+
+  const catalog = isSuperAdmin
+    ? SUPER_ADMIN_SWITCHABLE_ROLES
+    : ADMIN_SWITCHABLE_ROLES;
+  const allowed = new Set<string>([
+    ...normalizedReal,
+    ...catalog.map((role) => normalizeRole(role)),
+  ]);
+
+  return SWITCHABLE_ROLE_ORDER.filter((role) =>
+    allowed.has(normalizeRole(role)),
+  );
 }
 
 /** validate X-Active-Role header สำหรับ admin/super_admin เท่านั้น */

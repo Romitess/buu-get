@@ -2,7 +2,7 @@ import { defineStore, acceptHMRUpdate } from 'pinia';
 import { ref, computed } from 'vue';
 import type { User, UserRole } from 'src/types/user';
 import * as userService from 'src/services/user.service';
-import { ROLES, ADMIN_SWITCHABLE_ROLES, SUPER_ADMIN_SWITCHABLE_ROLES } from 'src/constants/roles';
+import { ROLES, resolveSwitchableRoles } from 'src/constants/roles';
 
 export const useUserStore = defineStore('user', () => {
   // === State ===
@@ -41,13 +41,7 @@ export const useUserStore = defineStore('user', () => {
     userRoles.value.some((r) => r === ROLES.ADMIN || r === ROLES.SUPER_ADMIN),
   );
 
-  const switchableRoles = computed<UserRole[]>(() => {
-    if (!canSwitchRole.value) return [];
-    if (userRoles.value.includes(ROLES.SUPER_ADMIN)) {
-      return SUPER_ADMIN_SWITCHABLE_ROLES;
-    }
-    return ADMIN_SWITCHABLE_ROLES;
-  });
+  const switchableRoles = computed<UserRole[]>(() => resolveSwitchableRoles(userRoles.value));
 
   const userRole = computed<UserRole | null>(() => {
     if (canSwitchRole.value && activeRole.value) {

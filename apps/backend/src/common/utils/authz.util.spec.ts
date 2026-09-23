@@ -66,6 +66,21 @@ describe('authz.util', () => {
     it('ignores super_admin in switch list for admin user', () => {
       expect(resolveActiveRole(adminUser, RoleEnum.FINANCE)).toBeUndefined();
     });
+
+    it('allows admin to switch to roles they actually hold outside the preview catalog', () => {
+      const user: AuthenticatedUser = {
+        ...adminUser,
+        roles: [RoleEnum.ADMIN, RoleEnum.FINANCE, RoleEnum.PROCTOR],
+      };
+      expect(resolveActiveRole(user, RoleEnum.FINANCE)).toBe(RoleEnum.FINANCE);
+      expect(resolveActiveRole(user, RoleEnum.PROCTOR)).toBe(RoleEnum.PROCTOR);
+    });
+
+    it('allows super_admin to switch back to their own role', () => {
+      expect(resolveActiveRole(superAdminUser, RoleEnum.SUPER_ADMIN)).toBe(
+        RoleEnum.SUPER_ADMIN,
+      );
+    });
   });
 
   describe('getEffectiveRoles', () => {

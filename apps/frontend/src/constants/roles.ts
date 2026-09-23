@@ -36,14 +36,14 @@ export const ROLE_LABELS: Record<string, string> = {
   proctor: 'ผู้คุมสอบ',
 };
 
-/** role ที่ admin สลับมุมมองได้ — รวม admin เพื่อกลับมาโหมดผู้ดูแลได้ */
+/** มุมมองพรีวิวที่ admin สลับได้ แม้ไม่ได้ถือ role นั้น */
 export const ADMIN_SWITCHABLE_ROLES: RoleValue[] = [
   ROLES.ADMIN,
   ROLES.REGISTRATION_OFFICER,
   ROLES.EXAM_OPERATIONS_OFFICER,
 ];
 
-/** role ที่ super_admin สลับมุมมองได้ — ทุก role ยกเว้น super_admin เอง */
+/** มุมมองพรีวิวที่ super_admin สลับได้ */
 export const SUPER_ADMIN_SWITCHABLE_ROLES: RoleValue[] = [
   ROLES.CANDIDATE,
   ROLES.STAFF,
@@ -54,6 +54,39 @@ export const SUPER_ADMIN_SWITCHABLE_ROLES: RoleValue[] = [
   ROLES.EXAM_OPERATIONS_OFFICER,
   ROLES.ADMIN,
 ];
+
+/** ลำดับในเมนูสลับมุมมอง */
+const SWITCHABLE_ROLE_ORDER: RoleValue[] = [
+  ROLES.SUPER_ADMIN,
+  ROLES.ADMIN,
+  ROLES.REGISTRATION_OFFICER,
+  ROLES.EXAM_OPERATIONS_OFFICER,
+  ROLES.STAFF,
+  ROLES.FINANCE,
+  ROLES.PROCTOR,
+  ROLES.EXECUTIVE,
+  ROLES.CANDIDATE,
+];
+
+function normalizeRoleName(role: string): string {
+  return role.toLowerCase().replace(/[\s-_]+/g, '');
+}
+
+/**
+ * บทบาทในเมนูสลับมุมมอง = บทบาทที่ผู้ใช้ถือจริง ∪ ชุดพรีวิวตามสิทธิ์
+ * admin/super_admin เท่านั้นที่สลับได้
+ */
+export function resolveSwitchableRoles(realRoles: readonly string[]): RoleValue[] {
+  const normalizedReal = realRoles.map(normalizeRoleName);
+  const isSuperAdmin = normalizedReal.includes(normalizeRoleName(ROLES.SUPER_ADMIN));
+  const isAdmin = normalizedReal.includes(normalizeRoleName(ROLES.ADMIN));
+  if (!isSuperAdmin && !isAdmin) return [];
+
+  const catalog = isSuperAdmin ? SUPER_ADMIN_SWITCHABLE_ROLES : ADMIN_SWITCHABLE_ROLES;
+  const allowed = new Set<string>([...normalizedReal, ...catalog.map(normalizeRoleName)]);
+
+  return SWITCHABLE_ROLE_ORDER.filter((role) => allowed.has(normalizeRoleName(role)));
+}
 
 /**
  * อันดับบทบาทสำหรับกฎมอบหมาย: มอบระดับเดียวกันหรือต่ำกว่าได้ ห้ามสูงกว่า
@@ -71,7 +104,7 @@ export const ROLE_RANK: Record<RoleValue, number> = {
 };
 
 export function getRoleRank(roleName: string): number {
-  return ROLE_RANK[roleName as RoleValue] ?? Number.POSITIVE_INFINITY;
+  return ROLE_RANK[roleName] ?? Number.POSITIVE_INFINITY;
 }
 
 export function maxRoleRank(roleNames: Iterable<string>): number {
