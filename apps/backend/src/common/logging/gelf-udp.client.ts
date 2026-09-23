@@ -1,16 +1,19 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { createSocket, Socket } from 'dgram';
-import { hostname } from 'os';
 import { AuditLogStatus } from 'src/modules/audit-logs/entities/audit-log.entity';
 import { AuditActorSnapshot } from 'src/modules/audit-logs/dto/record-audit.dto';
 
 /** Practical single-datagram GELF ceiling; oversized messages are dropped (no chunking). */
 export const GELF_MAX_BYTES = 8192;
 
-/** Syslog severity levels used by GELF. */
+/** Syslog severity levels used by GELF / grayLog() manual. */
 export const GelfLevel = {
+  EMERGENCY: 0,
+  ALERT: 1,
+  CRITICAL: 2,
   ERROR: 3,
   WARNING: 4,
+  NOTICE: 5,
   INFO: 6,
   DEBUG: 7,
 } as const;
@@ -18,6 +21,57 @@ export const GelfLevel = {
 export type GelfLevelValue = (typeof GelfLevel)[keyof typeof GelfLevel];
 
 export type GelfProtocol = 'udp' | 'http';
+
+/** Event values allowed by the university grayLog() manual. */
+export const GRAYLOG_EVENTS = [
+  'view',
+  'add',
+  'edit',
+  'insert',
+  'update',
+  'delete',
+  'import',
+  'export',
+  'download',
+  'login',
+  'logout',
+] as const;
+
+export type GrayLogEvent = (typeof GRAYLOG_EVENTS)[number];
+
+const GRAYLOG_STANDARD_KEYS = new Set([
+  'source',
+  'event',
+  'parameter',
+  'status',
+  'remarks',
+  'menu',
+  'sub_menu',
+  'access_id',
+  'access_data',
+  'user_id',
+  'full_name',
+]);
+
+/**
+ * Business log payload matching the university `grayLog($logData, $logLevel, $logCustom)` manual.
+ */
+export interface GrayLogData {
+  source?: string;
+  event?: GrayLogEvent;
+  parameter?: string;
+  /** true = success, false = failure */
+  status?: boolean;
+  remarks?: string;
+  menu?: string;
+  sub_menu?: string;
+  access_id?: string;
+  access_data?: string;
+  user_id?: string;
+  full_name?: string;
+  /** Extra keys when custom=true */
+  [key: string]: unknown;
+}
 
 export interface GelfAuditPayload {
   action: string;
@@ -30,6 +84,8 @@ export interface GelfAuditPayload {
   actorSnapshot?: AuditActorSnapshot | null;
   correlationId?: string | null;
   ipAddress?: string | null;
+  /** Sanitized before-state (e.g. email/username) for parameter — never passwords. */
+  beforeState?: Record<string, unknown> | null;
 }
 
 export interface GelfHttpAccessPayload {
@@ -38,7 +94,8 @@ export interface GelfHttpAccessPayload {
   statusCode: number;
   durationMs: number;
   ipAddress?: string | null;
-  userId?: number | null;
+  userId?: string | null;
+  fullName?: string | null;
   correlationId?: string | null;
 }
 
@@ -49,6 +106,175 @@ export interface GelfClientOptions {
   protocol: GelfProtocol;
   /** When true, every ship is printed to the Nest console (for diagnosing Graylog ingest). */
   debug?: boolean;
+}
+
+/**
+ * Build a GELF 1.1 payload from grayLog() manual fields.
+ * `short_message` defaults to full_name (messageShort). `host` is system source name.
+ */
+export function buildGrayLogPayload(
+  logData: GrayLogData,
+  logLevel: number = GelfLevel.INFO,
+  logCustom = false,
+  defaultSource = 'buuget',
+): Record<string, unknown> {
+  const fullName =
+    typeof logData.full_name === 'string' ? logData.full_name.trim() : '';
+  const userId =
+    typeof logData.user_id === 'string' ? logData.user_id.trim() : '';
+  const event = typeof logData.event === 'string' ? logData.event.trim() : '';
+
+  const shortMessage = fullName || userId || event || defaultSource;
+
+  const source =
+    typeof logData.source === 'string' && logData.source.trim().length > 0
+      ? logData.source.trim()
+      : defaultSource;
+
+  const level = clampLevel(logLevel);
+
+  const payload: Record<string, unknown> = {
+    version: '1.1',
+    host: source,
+    short_message: shortMessage.slice(0, 250),
+    timestamp: Date.now() / 1000,
+    level,
+    _event: event || undefined,
+    _parameter:
+      typeof logData.parameter === 'string' ? logData.parameter : undefined,
+    _status: typeof logData.status === 'boolean' ? logData.status : undefined,
+    _menu: typeof logData.menu === 'string' ? logData.menu : undefined,
+    _sub_menu:
+      typeof logData.sub_menu === 'string' ? logData.sub_menu : undefined,
+    _remarks: typeof logData.remarks === 'string' ? logData.remarks : undefined,
+    _access_id:
+      typeof logData.access_id === 'string' ? logData.access_id : undefined,
+    _access_data:
+      typeof logData.access_data === 'string' ? logData.access_data : undefined,
+    _user_id: userId || undefined,
+    _full_name: fullName || undefined,
+  };
+
+  if (logCustom) {
+    for (const [key, value] of Object.entries(logData)) {
+      if (GRAYLOG_STANDARD_KEYS.has(key)) {
+        continue;
+      }
+      if (value === undefined || value === null || value === '') {
+        continue;
+      }
+      const field = key.startsWith('_') ? key : `_${key}`;
+      // Reserve GELF core keys
+      if (
+        field === '_version' ||
+        field === '_host' ||
+        field === '_short_message' ||
+        field === '_timestamp' ||
+        field === '_level'
+      ) {
+        continue;
+      }
+      payload[field] = value;
+    }
+  }
+
+  return stripEmpty(payload);
+}
+
+function clampLevel(level: number): number {
+  if (!Number.isFinite(level)) {
+    return GelfLevel.INFO;
+  }
+  return Math.min(7, Math.max(0, Math.trunc(level)));
+}
+
+function stripEmpty(value: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, nested] of Object.entries(value)) {
+    if (nested !== undefined && nested !== null && nested !== '') {
+      result[key] = nested;
+    }
+  }
+  return result;
+}
+
+function mapAuditActionToEvent(action: string): GrayLogEvent | undefined {
+  if (action === 'AUTH.LOGIN') {
+    return 'login';
+  }
+  if (action === 'CERTIFICATE.DOWNLOAD') {
+    return 'download';
+  }
+  if (action === 'AUDIT.EXPORT') {
+    return 'export';
+  }
+  if (
+    action.endsWith('.CREATE') ||
+    action.endsWith('.ISSUE') ||
+    action === 'AUTH.REGISTER' ||
+    action === 'AUTH.OTP.SEND' ||
+    action === 'PAYMENT.CREATE'
+  ) {
+    return 'insert';
+  }
+  if (
+    action.endsWith('.UPDATE') ||
+    action.endsWith('.CHANGE') ||
+    action.endsWith('.CANCEL') ||
+    action.endsWith('.VOID') ||
+    action.endsWith('.RECONCILE') ||
+    action === 'AUTH.OTP.VERIFY'
+  ) {
+    return 'update';
+  }
+  if (action.endsWith('.DELETE')) {
+    return 'delete';
+  }
+  return undefined;
+}
+
+function mapHttpMethodToEvent(method: string): GrayLogEvent {
+  switch (method.toUpperCase()) {
+    case 'GET':
+    case 'HEAD':
+      return 'view';
+    case 'POST':
+      return 'insert';
+    case 'PUT':
+    case 'PATCH':
+      return 'update';
+    case 'DELETE':
+      return 'delete';
+    default:
+      return 'view';
+  }
+}
+
+function menuFromPath(path: string): string {
+  const parts = path.split('/').filter((part) => part.length > 0);
+  // /api/auth/login → auth
+  if (parts[0] === 'api' && parts.length >= 2) {
+    return parts[1];
+  }
+  return parts[0] ?? 'api';
+}
+
+function parameterFromBeforeState(
+  beforeState: Record<string, unknown> | null | undefined,
+): string | undefined {
+  if (!beforeState) {
+    return undefined;
+  }
+  if (typeof beforeState.email === 'string' && beforeState.email.length > 0) {
+    return beforeState.email;
+  }
+  if (
+    typeof beforeState.username === 'string' &&
+    beforeState.username.length > 0
+  ) {
+    return beforeState.username;
+  }
+  return undefined;
 }
 
 /**
@@ -65,7 +291,6 @@ export class GelfUdpClient implements OnModuleInit {
   private readonly port: number;
   private readonly facility: string;
   private readonly protocol: GelfProtocol;
-  private readonly sourceHost: string;
   private readonly debug: boolean;
   private socket: Socket | null = null;
   private oversizedWarned = false;
@@ -80,14 +305,12 @@ export class GelfUdpClient implements OnModuleInit {
     this.facility = options.facility;
     this.protocol = options.protocol;
     this.debug = options.debug === true;
-    this.sourceHost = hostname();
   }
 
   onModuleInit(): void {
     if (!this.enabled) {
       return;
     }
-    // Terminal breadcrumbs use [GraylogLogger] only when GRAYLOG_DEBUG=true.
     this.trace(
       `GELF ${this.protocol.toUpperCase()} enabled → ${this.host}:${this.port} facility=${this.facility}`,
     );
@@ -106,43 +329,66 @@ export class GelfUdpClient implements OnModuleInit {
     return this.debug;
   }
 
+  /**
+   * University-manual entry point: grayLog($logData, $logLevel=6, $logCustom=false).
+   */
+  grayLog(
+    logData: GrayLogData,
+    logLevel: number = GelfLevel.INFO,
+    logCustom = false,
+  ): void {
+    if (!this.enabled) {
+      return;
+    }
+    const payload = buildGrayLogPayload(
+      logData,
+      logLevel,
+      logCustom,
+      this.facility,
+    );
+    this.send(payload);
+    this.noteShip(
+      String(logData.event ?? 'log'),
+      typeof payload.short_message === 'string' ? payload.short_message : '',
+    );
+  }
+
   sendAudit(payload: GelfAuditPayload): void {
     if (!this.enabled) {
       return;
     }
 
+    const success = payload.status === AuditLogStatus.SUCCESS;
     const level =
       payload.status === AuditLogStatus.FAILURE
-        ? GelfLevel.ERROR
+        ? GelfLevel.WARNING
         : payload.status === AuditLogStatus.PARTIAL
-          ? GelfLevel.WARNING
+          ? GelfLevel.NOTICE
           : GelfLevel.INFO;
 
     const email = payload.actorSnapshot?.email;
     const psnId = payload.actorSnapshot?.psnId;
+    const userId =
+      psnId ??
+      (payload.actorUserId != null ? String(payload.actorUserId) : undefined);
+    const parameter =
+      parameterFromBeforeState(payload.beforeState) ?? email ?? undefined;
 
-    this.send({
-      version: '1.1',
-      host: this.sourceHost,
-      short_message: `${payload.action} ${payload.status}`,
-      timestamp: Date.now() / 1000,
+    this.grayLog(
+      {
+        event: mapAuditActionToEvent(payload.action),
+        parameter,
+        status: success,
+        remarks: payload.statusDetail ?? undefined,
+        menu: payload.resourceType ?? payload.module ?? 'buu-get',
+        user_id: userId,
+        full_name: email ?? userId,
+        correlation_id: payload.correlationId ?? undefined,
+        ip_address: payload.ipAddress ?? undefined,
+      },
       level,
-      facility: this.facility,
-      _facility: this.facility,
-      _event_type: 'audit',
-      _action: payload.action,
-      _status: payload.status,
-      _status_detail: payload.statusDetail ?? undefined,
-      _module: payload.module,
-      _resource_type: payload.resourceType ?? undefined,
-      _resource_id: payload.resourceId ?? undefined,
-      _actor_user_id: payload.actorUserId ?? undefined,
-      _actor_email: email ?? undefined,
-      _actor_psn_id: psnId ?? undefined,
-      _correlation_id: payload.correlationId ?? undefined,
-      _ip_address: payload.ipAddress ?? undefined,
-    });
-    this.noteShip('audit', `${payload.action} ${payload.status}`);
+      true,
+    );
   }
 
   sendHttpAccess(payload: GelfHttpAccessPayload): void {
@@ -150,6 +396,7 @@ export class GelfUdpClient implements OnModuleInit {
       return;
     }
 
+    const ok = payload.statusCode < 400;
     const level =
       payload.statusCode >= 500
         ? GelfLevel.ERROR
@@ -157,26 +404,22 @@ export class GelfUdpClient implements OnModuleInit {
           ? GelfLevel.WARNING
           : GelfLevel.INFO;
 
-    this.send({
-      version: '1.1',
-      host: this.sourceHost,
-      short_message: `${payload.method} ${payload.path} ${payload.statusCode}`,
-      timestamp: Date.now() / 1000,
+    this.grayLog(
+      {
+        event: mapHttpMethodToEvent(payload.method),
+        parameter: payload.path,
+        status: ok,
+        remarks: `${payload.method} ${payload.statusCode} ${payload.durationMs}ms`,
+        menu: menuFromPath(payload.path),
+        user_id: payload.userId ?? undefined,
+        full_name: payload.fullName ?? payload.userId ?? undefined,
+        correlation_id: payload.correlationId ?? undefined,
+        ip_address: payload.ipAddress ?? undefined,
+        http_status: payload.statusCode,
+        duration_ms: payload.durationMs,
+      },
       level,
-      facility: this.facility,
-      _facility: this.facility,
-      _event_type: 'http',
-      _http_method: payload.method,
-      _http_path: payload.path,
-      _http_status: payload.statusCode,
-      _duration_ms: payload.durationMs,
-      _ip_address: payload.ipAddress ?? undefined,
-      _actor_user_id: payload.userId ?? undefined,
-      _correlation_id: payload.correlationId ?? undefined,
-    });
-    this.noteShip(
-      'http',
-      `${payload.method} ${payload.path} ${payload.statusCode}`,
+      true,
     );
   }
 
@@ -193,24 +436,22 @@ export class GelfUdpClient implements OnModuleInit {
     const shortMessage =
       message.length > 250 ? `${message.slice(0, 247)}...` : message;
 
-    this.send({
-      version: '1.1',
-      host: this.sourceHost,
-      short_message: shortMessage,
-      full_message: stack && stack.length > 0 ? stack : undefined,
-      timestamp: Date.now() / 1000,
+    // Nest ops logs: no manual event token (would invent invalid events).
+    this.grayLog(
+      {
+        full_name: shortMessage,
+        remarks: stack && stack.length > 0 ? stack : shortMessage,
+        menu: context ?? undefined,
+        sub_menu: 'app',
+      },
       level,
-      facility: this.facility,
-      _facility: this.facility,
-      _event_type: 'app',
-      _context: context ?? undefined,
-    });
-    // App-log breadcrumbs are printed by GraylogLogger (terminal Nest line + debug ship).
+      false,
+    );
   }
 
   private send(message: Record<string, unknown>): void {
     try {
-      const cleaned = this.stripUndefined(message);
+      const cleaned = stripEmpty(message);
       if (this.protocol === 'http') {
         this.sendHttp(cleaned);
         return;
@@ -302,8 +543,7 @@ export class GelfUdpClient implements OnModuleInit {
     );
   }
 
-  /** Terminal breadcrumb only when GRAYLOG_DEBUG=true (prefix GraylogLogger, never Nest Logger). */
-  private noteShip(kind: 'audit' | 'http' | 'app', summary: string): void {
+  private noteShip(kind: string, summary: string): void {
     this.trace(`GELF ship ${kind}: ${summary}`);
   }
 
@@ -317,10 +557,6 @@ export class GelfUdpClient implements OnModuleInit {
     }
   }
 
-  /**
-   * Debug/ops output for the terminal. Uses console.warn (not Nest Logger) to
-   * avoid GraylogLogger ↔ sendApp recursion. Prefixed [GraylogLogger] per product UX.
-   */
   private trace(message: string, force = false): void {
     if (!force && !this.debug) {
       return;
@@ -337,17 +573,5 @@ export class GelfUdpClient implements OnModuleInit {
       });
     }
     return this.socket;
-  }
-
-  private stripUndefined(
-    value: Record<string, unknown>,
-  ): Record<string, unknown> {
-    const result: Record<string, unknown> = {};
-    for (const [key, nested] of Object.entries(value)) {
-      if (nested !== undefined && nested !== null && nested !== '') {
-        result[key] = nested;
-      }
-    }
-    return result;
   }
 }

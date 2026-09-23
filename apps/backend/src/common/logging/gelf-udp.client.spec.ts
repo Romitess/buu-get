@@ -1,4 +1,9 @@
-import { GELF_MAX_BYTES, GelfLevel, GelfUdpClient } from './gelf-udp.client';
+import {
+  GELF_MAX_BYTES,
+  GelfLevel,
+  GelfUdpClient,
+  buildGrayLogPayload,
+} from './gelf-udp.client';
 import { AuditLogStatus } from 'src/modules/audit-logs/entities/audit-log.entity';
 
 jest.mock('dgram', () => ({
@@ -10,9 +15,67 @@ import { createSocket } from 'dgram';
 const baseOpts = {
   host: 'graylog.example',
   port: 12201,
-  facility: 'buu-get',
+  facility: 'buuget',
   protocol: 'udp' as const,
 };
+
+describe('buildGrayLogPayload', () => {
+  it('maps manual fields and uses full_name as short_message', () => {
+    const payload = buildGrayLogPayload(
+      {
+        event: 'login',
+        parameter: 'a@b.com',
+        status: true,
+        menu: 'auth',
+        user_id: '12',
+        full_name: 'a@b.com',
+      },
+      6,
+      false,
+      'buuget',
+    );
+
+    expect(payload.version).toBe('1.1');
+    expect(payload.host).toBe('buuget');
+    expect(payload.short_message).toBe('a@b.com');
+    expect(payload.level).toBe(6);
+    expect(payload._event).toBe('login');
+    expect(payload._parameter).toBe('a@b.com');
+    expect(payload._status).toBe(true);
+    expect(payload._menu).toBe('auth');
+    expect(payload._user_id).toBe('12');
+    expect(payload._full_name).toBe('a@b.com');
+    expect(payload).not.toHaveProperty('_event_type');
+  });
+
+  it('keeps custom extras only when logCustom=true', () => {
+    const withoutCustom = buildGrayLogPayload(
+      { event: 'view', full_name: 'x', extra: 'nope' },
+      6,
+      false,
+      'buuget',
+    );
+    expect(withoutCustom).not.toHaveProperty('_extra');
+
+    const withCustom = buildGrayLogPayload(
+      { event: 'view', full_name: 'x', extra: 'yes' },
+      6,
+      true,
+      'buuget',
+    );
+    expect(withCustom._extra).toBe('yes');
+  });
+
+  it('uses source as GELF host when provided', () => {
+    const payload = buildGrayLogPayload(
+      { source: 'buu-get-custom', event: 'view', full_name: 'n' },
+      6,
+      false,
+      'buuget',
+    );
+    expect(payload.host).toBe('buu-get-custom');
+  });
+});
 
 describe('GelfUdpClient', () => {
   let sendMock: jest.Mock;
@@ -53,7 +116,7 @@ describe('GelfUdpClient', () => {
     const client = new GelfUdpClient({
       host: '',
       port: 12201,
-      facility: 'buu-get',
+      facility: 'buuget',
       protocol: 'udp',
     });
     expect(client.isEnabled()).toBe(false);
@@ -67,7 +130,7 @@ describe('GelfUdpClient', () => {
     expect(sendMock).not.toHaveBeenCalled();
   });
 
-  it('sends a GELF audit datagram without secrets or state blobs', () => {
+  it('ships login audit with manual grayLog fields', () => {
     const client = new GelfUdpClient(baseOpts);
     client.sendAudit({
       action: 'AUTH.LOGIN',
@@ -78,6 +141,7 @@ describe('GelfUdpClient', () => {
       resourceId: '12',
       actorUserId: 12,
       actorSnapshot: { userId: 12, email: 'a@b.com' },
+      beforeState: { email: 'a@b.com', password: 'secret' },
       correlationId: 'corr-1',
       ipAddress: '127.0.0.1',
     });
@@ -92,22 +156,23 @@ describe('GelfUdpClient', () => {
       unknown
     >;
     expect(parsed.version).toBe('1.1');
-    expect(parsed.short_message).toBe('AUTH.LOGIN FAILURE');
-    expect(parsed.level).toBe(GelfLevel.ERROR);
-    expect(parsed.facility).toBe('buu-get');
-    expect(parsed._facility).toBe('buu-get');
-    expect(parsed._event_type).toBe('audit');
-    expect(parsed._action).toBe('AUTH.LOGIN');
-    expect(parsed._status).toBe('FAILURE');
-    expect(parsed._actor_email).toBe('a@b.com');
-    expect(parsed).not.toHaveProperty('_before_state');
-    expect(parsed).not.toHaveProperty('_after_state');
+    expect(parsed.host).toBe('buuget');
+    expect(parsed.short_message).toBe('a@b.com');
+    expect(parsed.level).toBe(GelfLevel.WARNING);
+    expect(parsed._event).toBe('login');
+    expect(parsed._status).toBe(false);
+    expect(parsed._parameter).toBe('a@b.com');
+    expect(parsed._menu).toBe('user');
+    expect(parsed._remarks).toBe('Invalid credentials');
+    expect(parsed._user_id).toBe('12');
+    expect(parsed._full_name).toBe('a@b.com');
+    expect(parsed).not.toHaveProperty('_event_type');
+    expect(parsed).not.toHaveProperty('_action');
+    expect(JSON.stringify(parsed)).not.toContain('secret');
     expect(JSON.stringify(parsed)).not.toContain('password');
-    expect(sendMock.mock.calls[0][1]).toBe(12201);
-    expect(sendMock.mock.calls[0][2]).toBe('graylog.example');
   });
 
-  it('sends app log lines with _event_type app', () => {
+  it('ships app logs without inventing an event token', () => {
     const client = new GelfUdpClient(baseOpts);
     client.sendApp(GelfLevel.INFO, 'started', 'Bootstrap');
     const body = sendMock.mock.calls[0][0] as Buffer;
@@ -115,13 +180,16 @@ describe('GelfUdpClient', () => {
       string,
       unknown
     >;
-    expect(parsed._event_type).toBe('app');
-    expect(parsed._context).toBe('Bootstrap');
     expect(parsed.short_message).toBe('started');
+    expect(parsed._remarks).toBe('started');
+    expect(parsed._menu).toBe('Bootstrap');
+    expect(parsed._sub_menu).toBe('app');
+    expect(parsed).not.toHaveProperty('_event');
+    expect(parsed).not.toHaveProperty('_event_type');
     expect(parsed.level).toBe(GelfLevel.INFO);
   });
 
-  it('sends http access events', () => {
+  it('ships http access as view/insert with boolean status', () => {
     const client = new GelfUdpClient(baseOpts);
     client.sendHttpAccess({
       method: 'POST',
@@ -129,16 +197,21 @@ describe('GelfUdpClient', () => {
       statusCode: 401,
       durationMs: 12,
       ipAddress: '1.2.3.4',
+      userId: null,
+      fullName: 'a@b.com',
     });
     const body = sendMock.mock.calls[0][0] as Buffer;
     const parsed = JSON.parse(body.subarray(0, -1).toString('utf8')) as Record<
       string,
       unknown
     >;
-    expect(parsed._event_type).toBe('http');
-    expect(parsed._http_method).toBe('POST');
-    expect(parsed._http_status).toBe(401);
+    expect(parsed._event).toBe('insert');
+    expect(parsed._parameter).toBe('/api/auth/login');
+    expect(parsed._status).toBe(false);
+    expect(parsed._menu).toBe('auth');
+    expect(parsed.short_message).toBe('a@b.com');
     expect(parsed.level).toBe(GelfLevel.WARNING);
+    expect(parsed).not.toHaveProperty('_event_type');
   });
 
   it('posts JSON over HTTP without null terminator', async () => {
@@ -168,13 +241,9 @@ describe('GelfUdpClient', () => {
     expect(init.signal).toBeDefined();
     expect(init.body.includes('\0')).toBe(false);
     const parsed = JSON.parse(init.body) as Record<string, unknown>;
-    expect(parsed._event_type).toBe('app');
     expect(parsed.short_message).toBe('http-path');
     expect(console.warn).toHaveBeenCalledWith(
       expect.stringContaining('[GraylogLogger]'),
-    );
-    expect(console.warn).toHaveBeenCalledWith(
-      expect.stringContaining('first message accepted'),
     );
   });
 

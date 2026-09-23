@@ -14,7 +14,7 @@ describe('HttpAccessInterceptor', () => {
       url: path,
       headers: {},
       ip: '127.0.0.1',
-      user: { userId: 9, actorType: 'user' },
+      user: { userId: 9, actorType: 'user', email: 'a@b.com' },
     };
     const response = { statusCode: 200 };
     return {
@@ -60,7 +60,8 @@ describe('HttpAccessInterceptor', () => {
         method: 'POST',
         path: '/api/auth/login',
         statusCode: 200,
-        userId: 9,
+        userId: '9',
+        fullName: 'a@b.com',
       }),
     );
   });

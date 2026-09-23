@@ -95,6 +95,7 @@ describe('AuditLogsService', () => {
       action: string;
       status: AuditLogStatus;
       actorSnapshot: { email?: string } | null;
+      beforeState?: Record<string, unknown> | null;
     };
     expect(gelfPayload.action).toBe(AuditAction.AUTH_LOGIN);
     expect(gelfPayload.status).toBe(AuditLogStatus.SUCCESS);
@@ -102,7 +103,7 @@ describe('AuditLogsService', () => {
       userId: 12,
       email: 'a@b.com',
     });
-    expect(gelfPayload).not.toHaveProperty('beforeState');
+    expect(gelfPayload.beforeState).toEqual({ email: 'a@b.com' });
     expect(JSON.stringify(gelfPayload)).not.toContain('secret');
   });
 

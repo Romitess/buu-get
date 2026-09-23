@@ -65,6 +65,7 @@ export class AuditLogsService {
         actorSnapshot,
         correlationId,
         ipAddress,
+        beforeState,
       });
     } catch (err: unknown) {
       this.logger.warn(

@@ -16,7 +16,7 @@ type RequestWithUser = Request & { user?: AuthenticatedUser };
 const SKIP_PATH_PREFIXES = ['/api/health', '/api/docs'];
 
 /**
- * Ships every HTTP request/response to Graylog as `_event_type: http`
+ * Ships every HTTP request/response to Graylog via grayLog() field schema
  * (no body — avoids secrets). No-op when Graylog is disabled.
  */
 @Injectable()
@@ -42,6 +42,7 @@ export class HttpAccessInterceptor implements NestInterceptor {
     const ip = this.extractIp(request);
     const correlationId = this.extractCorrelationId(request);
     const userId = this.extractUserId(request.user);
+    const fullName = this.extractFullName(request.user);
 
     return next.handle().pipe(
       tap(() => {
@@ -52,6 +53,7 @@ export class HttpAccessInterceptor implements NestInterceptor {
           durationMs: Date.now() - started,
           ipAddress: ip,
           userId,
+          fullName,
           correlationId,
         });
       }),
@@ -63,6 +65,7 @@ export class HttpAccessInterceptor implements NestInterceptor {
           durationMs: Date.now() - started,
           ipAddress: ip,
           userId,
+          fullName,
           correlationId,
         });
         return throwError(() => err);
@@ -77,11 +80,24 @@ export class HttpAccessInterceptor implements NestInterceptor {
     return 500;
   }
 
-  private extractUserId(user: AuthenticatedUser | undefined): number | null {
-    if (!user || user.actorType === 'person') {
+  private extractUserId(user: AuthenticatedUser | undefined): string | null {
+    if (!user) {
       return null;
     }
-    return user.userId ?? null;
+    if (user.actorType === 'person' && user.personId) {
+      return user.personId;
+    }
+    if (typeof user.userId === 'number') {
+      return String(user.userId);
+    }
+    return null;
+  }
+
+  private extractFullName(user: AuthenticatedUser | undefined): string | null {
+    if (!user?.email) {
+      return null;
+    }
+    return user.email;
   }
 
   private extractIp(request: RequestWithUser): string | null {
