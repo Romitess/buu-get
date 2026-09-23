@@ -69,11 +69,11 @@ REST API for **BUU GET**, built with **NestJS 11**, **TypeORM**, and **MySQL**. 
 | `GRAYLOG_HOST`      | Optional. Existing Graylog host. Empty/unset disables shipping |
 | `GRAYLOG_PORT`      | GELF port (default `12201`) — must match the Graylog Input |
 | `GRAYLOG_FACILITY`  | GELF facility / app tag (default `buu-get`)      |
-| `GRAYLOG_PROTOCOL`  | `udp` (default) or `http` — **must match** Input type (GELF UDP vs GELF HTTP) |
+| `GRAYLOG_PROTOCOL`  | `tcp` (default), `udp`, or `http` — **must match** Input (GELF TCP + null delimiter, UDP, or HTTP) |
 
 > **Note:** `JWT_SECRET` in `.env.example` is a placeholder. Use a long random value in real deployments; short values are rejected by config validation.
 >
-> **Graylog:** When enabled, the backend ships (1) Nest server logs (`_event_type=app`), (2) every HTTP request except health/docs (`_event_type=http`), (3) sanitized audit events such as login (`_event_type=audit`). MySQL `SYS_T_AUDIT_LOGS` remains the in-app audit source. If messages never appear, create a matching Input under System → Inputs, then search for `facility:buuget` or `"Graylog sink ready"`. Prefer `GRAYLOG_PROTOCOL=http` when debugging (HTTP failures are logged to the Nest console).
+> **Graylog:** When enabled, the backend ships Nest server logs, HTTP access, and sanitized audit events (manual `grayLog` fields + `_facility`). MySQL `SYS_T_AUDIT_LOGS` remains the in-app audit source. Default protocol is **TCP** (null-delimited GELF), matching the university Graylog input used by other BUU apps. If messages never appear, confirm System → Inputs is **GELF TCP** with **Null frame delimiter**, then search for `facility:buuget` or `"Graylog sink ready"`. Use `GRAYLOG_DEBUG=true` or `GRAYLOG_PROTOCOL=http` when diagnosing connect failures.
 
 ## API and documentation
 

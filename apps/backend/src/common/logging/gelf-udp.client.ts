@@ -1,5 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { createSocket, Socket } from 'dgram';
+import { connect as netConnect, Socket as NetSocket } from 'net';
 import { AuditLogStatus } from 'src/modules/audit-logs/entities/audit-log.entity';
 import { AuditActorSnapshot } from 'src/modules/audit-logs/dto/record-audit.dto';
 
@@ -20,7 +21,8 @@ export const GelfLevel = {
 
 export type GelfLevelValue = (typeof GelfLevel)[keyof typeof GelfLevel];
 
-export type GelfProtocol = 'udp' | 'http';
+/** tcp = GELF TCP + null delimiter (matches university Graylog / gelf-pro). */
+export type GelfProtocol = 'udp' | 'tcp' | 'http';
 
 /** Event values allowed by the university grayLog() manual. */
 export const GRAYLOG_EVENTS = [
@@ -278,8 +280,11 @@ function parameterFromBeforeState(
 }
 
 /**
- * Fire-and-forget GELF client (UDP or HTTP). Never throws to callers.
+ * Fire-and-forget GELF client (UDP, TCP, or HTTP). Never throws to callers.
  * Class name kept as GelfUdpClient for existing injection sites.
+ *
+ * TCP framing matches gelf-pro: one connect per message, uncompressed JSON,
+ * null frame delimiter (0x00) — required by university GELF TCP inputs.
  *
  * Diagnostics use console.* — never Nest Logger — to avoid recursion when
  * GraylogLogger mirrors every Nest log back into sendApp.
@@ -297,6 +302,8 @@ export class GelfUdpClient implements OnModuleInit {
   private sendFailCount = 0;
   private sendOkLogged = false;
   private static readonly HTTP_TIMEOUT_MS = 3000;
+  /** Matches gelf-pro tcp adapter default. */
+  private static readonly TCP_TIMEOUT_MS = 10000;
 
   constructor(options: GelfClientOptions) {
     this.host = options.host.trim();
@@ -346,6 +353,10 @@ export class GelfUdpClient implements OnModuleInit {
       logCustom,
       this.facility,
     );
+    // gelf-pro sets fields.facility → Graylog searches facility:buuget
+    if (this.facility.trim().length > 0) {
+      payload._facility = this.facility;
+    }
     this.send(payload);
     this.noteShip(
       String(logData.event ?? 'log'),
@@ -456,6 +467,10 @@ export class GelfUdpClient implements OnModuleInit {
         this.sendHttp(cleaned);
         return;
       }
+      if (this.protocol === 'tcp') {
+        this.sendTcp(cleaned);
+        return;
+      }
       this.sendUdp(cleaned);
     } catch (err: unknown) {
       this.noteSendFailure(err);
@@ -482,6 +497,70 @@ export class GelfUdpClient implements OnModuleInit {
         return;
       }
       this.noteSendSuccess();
+    });
+  }
+
+  /**
+   * GELF TCP with null frame delimiter — same framing as gelf-pro tcp adapter.
+   * New connection per message (no reuse).
+   */
+  private sendTcp(cleaned: Record<string, unknown>): void {
+    const json = JSON.stringify(cleaned).replace(/\0/g, '');
+    const msg = Buffer.from(json, 'utf8');
+    if (msg.length + 1 > GELF_MAX_BYTES) {
+      if (!this.oversizedWarned) {
+        this.oversizedWarned = true;
+        this.trace(
+          `GELF message exceeds ${GELF_MAX_BYTES} bytes; dropped (no chunking)`,
+          true,
+        );
+      }
+      return;
+    }
+    const packet = Buffer.concat([msg, Buffer.from([0x00])]);
+
+    let settled = false;
+    const settle = (err?: Error | null): void => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (err) {
+        this.noteSendFailure(err);
+        return;
+      }
+      this.noteSendSuccess();
+    };
+
+    let client: NetSocket;
+    try {
+      client = netConnect({
+        host: this.host,
+        port: this.port,
+        family: 4,
+      });
+    } catch (err: unknown) {
+      this.noteSendFailure(err);
+      return;
+    }
+
+    client.setTimeout(GelfUdpClient.TCP_TIMEOUT_MS, () => {
+      client.emit(
+        'error',
+        new Error(`Timeout (${GelfUdpClient.TCP_TIMEOUT_MS} ms)`),
+      );
+    });
+
+    client.once('error', (err: Error) => {
+      client.end();
+      client.destroy();
+      settle(err);
+    });
+
+    client.once('connect', () => {
+      client.end(packet, () => {
+        settle(null);
+      });
     });
   }
 

@@ -16,9 +16,14 @@ import { HttpAccessInterceptor } from './http-access.interceptor';
         const port = config.get<number>('GRAYLOG_PORT') ?? 12201;
         const facility = config.get<string>('GRAYLOG_FACILITY') ?? 'buu-get';
         const rawProtocol = (
-          config.get<string>('GRAYLOG_PROTOCOL') ?? 'udp'
+          config.get<string>('GRAYLOG_PROTOCOL') ?? 'tcp'
         ).toLowerCase();
-        const protocol: GelfProtocol = rawProtocol === 'http' ? 'http' : 'udp';
+        const protocol: GelfProtocol =
+          rawProtocol === 'http'
+            ? 'http'
+            : rawProtocol === 'udp'
+              ? 'udp'
+              : 'tcp';
         const debugRaw = (
           config.get<string>('GRAYLOG_DEBUG') ?? ''
         ).toLowerCase();

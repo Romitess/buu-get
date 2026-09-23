@@ -10,7 +10,12 @@ jest.mock('dgram', () => ({
   createSocket: jest.fn(),
 }));
 
+jest.mock('net', () => ({
+  connect: jest.fn(),
+}));
+
 import { createSocket } from 'dgram';
+import { connect as netConnect } from 'net';
 
 const baseOpts = {
   host: 'graylog.example',
@@ -104,6 +109,7 @@ describe('GelfUdpClient', () => {
       on: jest.fn(),
     };
     (createSocket as jest.Mock).mockReturnValue(socket);
+    (netConnect as jest.Mock).mockReset();
     jest.spyOn(console, 'warn').mockImplementation(() => undefined);
   });
 
@@ -166,6 +172,7 @@ describe('GelfUdpClient', () => {
     expect(parsed._remarks).toBe('Invalid credentials');
     expect(parsed._user_id).toBe('12');
     expect(parsed._full_name).toBe('a@b.com');
+    expect(parsed._facility).toBe('buuget');
     expect(parsed).not.toHaveProperty('_event_type');
     expect(parsed).not.toHaveProperty('_action');
     expect(JSON.stringify(parsed)).not.toContain('secret');
@@ -184,9 +191,128 @@ describe('GelfUdpClient', () => {
     expect(parsed._remarks).toBe('started');
     expect(parsed._menu).toBe('Bootstrap');
     expect(parsed._sub_menu).toBe('app');
+    expect(parsed._facility).toBe('buuget');
     expect(parsed).not.toHaveProperty('_event');
     expect(parsed).not.toHaveProperty('_event_type');
     expect(parsed.level).toBe(GelfLevel.INFO);
+  });
+
+  it('ships GELF TCP with null frame delimiter like gelf-pro', async () => {
+    const handlers: Record<string, (...args: unknown[]) => void> = {};
+    type TcpMock = {
+      setTimeout: jest.Mock;
+      once: jest.Mock;
+      end: jest.Mock;
+      destroy: jest.Mock;
+      emit: jest.Mock;
+    };
+    const tcpSocket: TcpMock = {
+      setTimeout: jest.fn(),
+      once: jest.fn(),
+      end: jest.fn(),
+      destroy: jest.fn(),
+      emit: jest.fn(),
+    };
+    tcpSocket.once.mockImplementation(
+      (event: string, handler: (...args: unknown[]) => void): TcpMock => {
+        handlers[event] = handler;
+        return tcpSocket;
+      },
+    );
+    tcpSocket.end.mockImplementation(
+      (data?: Buffer | string | (() => void), cb?: () => void): TcpMock => {
+        if (typeof data === 'function') {
+          data();
+        } else if (typeof cb === 'function') {
+          cb();
+        }
+        return tcpSocket;
+      },
+    );
+    tcpSocket.emit.mockImplementation(
+      (event: string, ...args: unknown[]): boolean => {
+        handlers[event]?.(...args);
+        return false;
+      },
+    );
+    (netConnect as jest.Mock).mockReturnValue(tcpSocket);
+
+    const client = new GelfUdpClient({
+      ...baseOpts,
+      protocol: 'tcp',
+    });
+    client.sendApp(GelfLevel.INFO, 'tcp-ready', 'GraylogLogger');
+
+    expect(createSocket).not.toHaveBeenCalled();
+    expect(netConnect).toHaveBeenCalledWith({
+      host: 'graylog.example',
+      port: 12201,
+      family: 4,
+    });
+    expect(tcpSocket.setTimeout).toHaveBeenCalledWith(
+      10000,
+      expect.any(Function),
+    );
+    expect(handlers.connect).toBeDefined();
+
+    handlers.connect();
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(tcpSocket.end).toHaveBeenCalled();
+    const packet = tcpSocket.end.mock.calls[0][0] as Buffer;
+    expect(Buffer.isBuffer(packet)).toBe(true);
+    expect(packet[packet.length - 1]).toBe(0x00);
+    const parsed = JSON.parse(
+      packet.subarray(0, -1).toString('utf8'),
+    ) as Record<string, unknown>;
+    expect(parsed.short_message).toBe('tcp-ready');
+    expect(parsed._facility).toBe('buuget');
+    expect(parsed.host).toBe('buuget');
+  });
+
+  it('warns when GELF TCP connect fails', async () => {
+    const handlers: Record<string, (...args: unknown[]) => void> = {};
+    type TcpMock = {
+      setTimeout: jest.Mock;
+      once: jest.Mock;
+      end: jest.Mock;
+      destroy: jest.Mock;
+      emit: jest.Mock;
+    };
+    const tcpSocket: TcpMock = {
+      setTimeout: jest.fn(),
+      once: jest.fn(),
+      end: jest.fn(),
+      destroy: jest.fn(),
+      emit: jest.fn(),
+    };
+    tcpSocket.once.mockImplementation(
+      (event: string, handler: (...args: unknown[]) => void): TcpMock => {
+        handlers[event] = handler;
+        return tcpSocket;
+      },
+    );
+    (netConnect as jest.Mock).mockReturnValue(tcpSocket);
+
+    const client = new GelfUdpClient({
+      ...baseOpts,
+      protocol: 'tcp',
+    });
+    expect(() =>
+      client.sendApp(GelfLevel.INFO, 'will-fail', 'Ctx'),
+    ).not.toThrow();
+
+    handlers.error?.(new Error('ECONNREFUSED'));
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(tcpSocket.end).toHaveBeenCalled();
+    expect(tcpSocket.destroy).toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('GELF tcp send failed'),
+    );
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('ECONNREFUSED'),
+    );
   });
 
   it('ships http access as view/insert with boolean status', () => {

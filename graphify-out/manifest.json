@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/config/env.validation.ts": {
-    "mtime": 1790131157.8376603,
-    "ast_hash": "2452591cdbac326558b09660ec86a39e",
+    "mtime": 1790137554.5021122,
+    "ast_hash": "5b5cd1c9b2828abc3f6483801bd0c8e3",
     "semantic_hash": ""
   },
   "apps/backend/src/database/data-source.ts": {
@@ -2945,8 +2945,8 @@
     "semantic_hash": ""
   },
   "apps/backend/README.md": {
-    "mtime": 1790131178.54033,
-    "ast_hash": "a5214386b6cfe6dd9e861e766ea86f16",
+    "mtime": 1790137558.8608205,
+    "ast_hash": "6b013820b00898f068f6c2bc060f3744",
     "semantic_hash": ""
   },
   "apps/frontend/index.html": {
@@ -5255,13 +5255,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/audit-logs/audit-logs.service.spec.ts": {
-    "mtime": 1790131224.540202,
-    "ast_hash": "1d77cf6053667e6c6b5014af023cb8f4",
+    "mtime": 1790136685.718463,
+    "ast_hash": "d04c87b1863114d60c1b406fbfce5895",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/audit-logs/audit-logs.service.ts": {
-    "mtime": 1790131224.081402,
-    "ast_hash": "f68c09325aeb139ee178904b1aca328a",
+    "mtime": 1790136610.1639776,
+    "ast_hash": "bd69a2e8e4d8028b292fdfcda0eb7b5a",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/audit-logs/audit.interceptor.spec.ts": {
@@ -5610,28 +5610,38 @@
     "semantic_hash": ""
   },
   "apps/backend/src/common/logging/gelf-udp.client.spec.ts": {
-    "mtime": 1790131312.0807264,
-    "ast_hash": "93bbfc06d11a30258f33045e01156ebb",
+    "mtime": 1790137603.4814565,
+    "ast_hash": "dcea5615efe139827026a5c8bb32f99a",
     "semantic_hash": ""
   },
   "apps/backend/src/common/logging/gelf-udp.client.ts": {
-    "mtime": 1790131123.754987,
-    "ast_hash": "050da205a7c2ee8f9b3f826c5a30ef11",
+    "mtime": 1790137546.9797912,
+    "ast_hash": "b91f14107bcafbb288dbdfcbd42ad4c3",
     "semantic_hash": ""
   },
   "apps/backend/src/common/logging/graylog.logger.spec.ts": {
-    "mtime": 1790131270.9260433,
-    "ast_hash": "0491961bc5d4d27e081420512d379e15",
+    "mtime": 1790135868.3065388,
+    "ast_hash": "dde1448d7a4af442b84a5082ba6b2340",
     "semantic_hash": ""
   },
   "apps/backend/src/common/logging/graylog.logger.ts": {
-    "mtime": 1790131299.6445596,
-    "ast_hash": "f47eafd44a30c4fc0227bcdbcdcbb2fc",
+    "mtime": 1790135876.1878593,
+    "ast_hash": "21d0b311e68e835b98f73906ebe47bfa",
     "semantic_hash": ""
   },
   "apps/backend/src/common/logging/graylog.module.ts": {
-    "mtime": 1790131126.341462,
-    "ast_hash": "6616a726499b0f447046203ebdd80962",
+    "mtime": 1790137551.4870281,
+    "ast_hash": "39ac9a26aab12ce7f6c3799c18108d97",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/common/logging/http-access.interceptor.spec.ts": {
+    "mtime": 1790136647.5810359,
+    "ast_hash": "5996b4bc4f4b80f5ad592c0079920c04",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/common/logging/http-access.interceptor.ts": {
+    "mtime": 1790136610.5796173,
+    "ast_hash": "11cd2de248933a36244d57341e0496bf",
     "semantic_hash": ""
   }
 }
