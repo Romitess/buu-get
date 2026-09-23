@@ -65,6 +65,7 @@ export class AuditLogsService {
         actorSnapshot,
         correlationId,
         ipAddress,
+        userAgent: input.userAgent ?? null,
         beforeState,
       });
     } catch (err: unknown) {

@@ -10,6 +10,11 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { AuthenticatedUser } from 'src/common/utils/authz.util';
 import { GelfUdpClient } from './gelf-udp.client';
+import {
+  menuContextFromHeaders,
+  resolveClientIp,
+  resolvePageUrl,
+} from './graylog-client.util';
 
 type RequestWithUser = Request & { user?: AuthenticatedUser };
 
@@ -39,35 +44,51 @@ export class HttpAccessInterceptor implements NestInterceptor {
 
     const started = Date.now();
     const method = request.method ?? 'UNKNOWN';
-    const ip = this.extractIp(request);
+    const ip = resolveClientIp({
+      headers: request.headers as Record<string, unknown>,
+      requestIp: request.ip,
+      socketIp: request.socket?.remoteAddress,
+    });
     const correlationId = this.extractCorrelationId(request);
     const userId = this.extractUserId(request.user);
     const fullName = this.extractFullName(request.user);
+    const userAgent = this.extractUserAgent(request);
+    const menuCtx = menuContextFromHeaders(
+      request.headers as Record<string, unknown>,
+    );
+    const pageUrl = resolvePageUrl({
+      headers: request.headers as Record<string, unknown>,
+      protocol: request.protocol,
+      host:
+        typeof request.headers.host === 'string'
+          ? request.headers.host
+          : undefined,
+      apiUrl: path,
+    });
+
+    const ship = (statusCode: number): void => {
+      this.gelfClient.sendHttpAccess({
+        method,
+        path,
+        statusCode,
+        durationMs: Date.now() - started,
+        ipAddress: ip,
+        userId,
+        fullName,
+        correlationId,
+        userAgent,
+        menu: menuCtx.menu || null,
+        subMenu: menuCtx.subMenu || null,
+        pageUrl,
+      });
+    };
 
     return next.handle().pipe(
       tap(() => {
-        this.gelfClient.sendHttpAccess({
-          method,
-          path,
-          statusCode: response.statusCode || 200,
-          durationMs: Date.now() - started,
-          ipAddress: ip,
-          userId,
-          fullName,
-          correlationId,
-        });
+        ship(response.statusCode || 200);
       }),
       catchError((err: unknown) => {
-        this.gelfClient.sendHttpAccess({
-          method,
-          path,
-          statusCode: this.statusFromError(err),
-          durationMs: Date.now() - started,
-          ipAddress: ip,
-          userId,
-          fullName,
-          correlationId,
-        });
+        ship(this.statusFromError(err));
         return throwError(() => err);
       }),
     );
@@ -100,12 +121,9 @@ export class HttpAccessInterceptor implements NestInterceptor {
     return user.email;
   }
 
-  private extractIp(request: RequestWithUser): string | null {
-    const forwarded = request.headers['x-forwarded-for'];
-    if (typeof forwarded === 'string' && forwarded.trim().length > 0) {
-      return forwarded.split(',')[0].trim().slice(0, 45);
-    }
-    return request.ip?.slice(0, 45) ?? null;
+  private extractUserAgent(request: RequestWithUser): string | null {
+    const ua = request.headers['user-agent'];
+    return typeof ua === 'string' && ua.length > 0 ? ua.slice(0, 512) : null;
   }
 
   private extractCorrelationId(request: RequestWithUser): string | null {

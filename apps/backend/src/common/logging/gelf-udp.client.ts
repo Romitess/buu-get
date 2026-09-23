@@ -3,6 +3,12 @@ import { createSocket, Socket } from 'dgram';
 import { connect as netConnect, Socket as NetSocket } from 'net';
 import { AuditLogStatus } from 'src/modules/audit-logs/entities/audit-log.entity';
 import { AuditActorSnapshot } from 'src/modules/audit-logs/dto/record-audit.dto';
+import {
+  menuFromApiPath,
+  normalizeClientIp,
+  parseClientBrowser,
+  parseClientEquipment,
+} from './graylog-client.util';
 
 /** Practical single-datagram GELF ceiling; oversized messages are dropped (no chunking). */
 export const GELF_MAX_BYTES = 8192;
@@ -53,6 +59,10 @@ const GRAYLOG_STANDARD_KEYS = new Set([
   'access_data',
   'user_id',
   'full_name',
+  'browser',
+  'equipment',
+  'ip_address',
+  'url',
 ]);
 
 /**
@@ -71,6 +81,10 @@ export interface GrayLogData {
   access_data?: string;
   user_id?: string;
   full_name?: string;
+  browser?: string;
+  equipment?: string;
+  ip_address?: string;
+  url?: string;
   /** Extra keys when custom=true */
   [key: string]: unknown;
 }
@@ -86,6 +100,7 @@ export interface GelfAuditPayload {
   actorSnapshot?: AuditActorSnapshot | null;
   correlationId?: string | null;
   ipAddress?: string | null;
+  userAgent?: string | null;
   /** Sanitized before-state (e.g. email/username) for parameter — never passwords. */
   beforeState?: Record<string, unknown> | null;
 }
@@ -99,6 +114,11 @@ export interface GelfHttpAccessPayload {
   userId?: string | null;
   fullName?: string | null;
   correlationId?: string | null;
+  userAgent?: string | null;
+  /** Override path-derived menu when SPA headers provide labels */
+  menu?: string | null;
+  subMenu?: string | null;
+  pageUrl?: string | null;
 }
 
 export interface GelfClientOptions {
@@ -112,7 +132,7 @@ export interface GelfClientOptions {
 
 /**
  * Build a GELF 1.1 payload from grayLog() manual fields.
- * `short_message` defaults to full_name (messageShort). `host` is system source name.
+ * `short_message` defaults to Thai messageShort with full_name. `host` is system source name.
  */
 export function buildGrayLogPayload(
   logData: GrayLogData,
@@ -126,7 +146,9 @@ export function buildGrayLogPayload(
     typeof logData.user_id === 'string' ? logData.user_id.trim() : '';
   const event = typeof logData.event === 'string' ? logData.event.trim() : '';
 
-  const shortMessage = fullName || userId || event || defaultSource;
+  const shortMessage = fullName
+    ? `ผู้เข้าใช้งาน : ${fullName}`
+    : userId || event || defaultSource;
 
   const source =
     typeof logData.source === 'string' && logData.source.trim().length > 0
@@ -155,6 +177,12 @@ export function buildGrayLogPayload(
       typeof logData.access_data === 'string' ? logData.access_data : undefined,
     _user_id: userId || undefined,
     _full_name: fullName || undefined,
+    _browser: typeof logData.browser === 'string' ? logData.browser : undefined,
+    _equipment:
+      typeof logData.equipment === 'string' ? logData.equipment : undefined,
+    _ip_address:
+      typeof logData.ip_address === 'string' ? logData.ip_address : undefined,
+    _url: typeof logData.url === 'string' ? logData.url : undefined,
   };
 
   if (logCustom) {
@@ -250,15 +278,6 @@ function mapHttpMethodToEvent(method: string): GrayLogEvent {
     default:
       return 'view';
   }
-}
-
-function menuFromPath(path: string): string {
-  const parts = path.split('/').filter((part) => part.length > 0);
-  // /api/auth/login → auth
-  if (parts[0] === 'api' && parts.length >= 2) {
-    return parts[1];
-  }
-  return parts[0] ?? 'api';
 }
 
 function parameterFromBeforeState(
@@ -384,6 +403,8 @@ export class GelfUdpClient implements OnModuleInit {
       (payload.actorUserId != null ? String(payload.actorUserId) : undefined);
     const parameter =
       parameterFromBeforeState(payload.beforeState) ?? email ?? undefined;
+    const ua = payload.userAgent ?? undefined;
+    const ip = normalizeClientIp(payload.ipAddress ?? null) ?? undefined;
 
     this.grayLog(
       {
@@ -395,7 +416,9 @@ export class GelfUdpClient implements OnModuleInit {
         user_id: userId,
         full_name: email ?? userId,
         correlation_id: payload.correlationId ?? undefined,
-        ip_address: payload.ipAddress ?? undefined,
+        ip_address: ip,
+        browser: parseClientBrowser(ua),
+        equipment: parseClientEquipment(ua),
       },
       level,
       true,
@@ -415,17 +438,33 @@ export class GelfUdpClient implements OnModuleInit {
           ? GelfLevel.WARNING
           : GelfLevel.INFO;
 
+    const fromPath = menuFromApiPath(payload.path);
+    const menu =
+      (payload.menu && payload.menu.trim().length > 0
+        ? payload.menu.trim()
+        : fromPath.menu) || fromPath.menu;
+    const subMenu =
+      (payload.subMenu && payload.subMenu.trim().length > 0
+        ? payload.subMenu.trim()
+        : fromPath.subMenu) || undefined;
+    const ua = payload.userAgent ?? undefined;
+    const ip = normalizeClientIp(payload.ipAddress ?? null) ?? undefined;
+
     this.grayLog(
       {
         event: mapHttpMethodToEvent(payload.method),
         parameter: payload.path,
         status: ok,
         remarks: `${payload.method} ${payload.statusCode} ${payload.durationMs}ms`,
-        menu: menuFromPath(payload.path),
+        menu,
+        sub_menu: subMenu,
         user_id: payload.userId ?? undefined,
         full_name: payload.fullName ?? payload.userId ?? undefined,
         correlation_id: payload.correlationId ?? undefined,
-        ip_address: payload.ipAddress ?? undefined,
+        ip_address: ip,
+        browser: parseClientBrowser(ua),
+        equipment: parseClientEquipment(ua),
+        url: payload.pageUrl ?? payload.path,
         http_status: payload.statusCode,
         duration_ms: payload.durationMs,
       },

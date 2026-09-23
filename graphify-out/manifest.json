@@ -5260,8 +5260,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/audit-logs/audit-logs.service.ts": {
-    "mtime": 1790136610.1639776,
-    "ast_hash": "bd69a2e8e4d8028b292fdfcda0eb7b5a",
+    "mtime": 1790138483.4443157,
+    "ast_hash": "a0b2b8bbdf0505025ca24e52932c6bc0",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/audit-logs/audit.interceptor.spec.ts": {
@@ -5270,8 +5270,8 @@
     "semantic_hash": ""
   },
   "apps/backend/src/modules/audit-logs/audit.interceptor.ts": {
-    "mtime": 1789524472.4124417,
-    "ast_hash": "521cafb3b0934dbc6c34b54849816cfd",
+    "mtime": 1790138482.9965532,
+    "ast_hash": "f866a0f250e7efcb72db8d4254cc8530",
     "semantic_hash": ""
   },
   "apps/backend/src/modules/audit-logs/audit.serializer.spec.ts": {
@@ -5610,13 +5610,13 @@
     "semantic_hash": ""
   },
   "apps/backend/src/common/logging/gelf-udp.client.spec.ts": {
-    "mtime": 1790137603.4814565,
-    "ast_hash": "dcea5615efe139827026a5c8bb32f99a",
+    "mtime": 1790138527.6780992,
+    "ast_hash": "253412a269d879db7385a99044862924",
     "semantic_hash": ""
   },
   "apps/backend/src/common/logging/gelf-udp.client.ts": {
-    "mtime": 1790137546.9797912,
-    "ast_hash": "b91f14107bcafbb288dbdfcbd42ad4c3",
+    "mtime": 1790138464.3652346,
+    "ast_hash": "968e5bd09c51739c547c19d9175cb460",
     "semantic_hash": ""
   },
   "apps/backend/src/common/logging/graylog.logger.spec.ts": {
@@ -5635,13 +5635,23 @@
     "semantic_hash": ""
   },
   "apps/backend/src/common/logging/http-access.interceptor.spec.ts": {
-    "mtime": 1790136647.5810359,
-    "ast_hash": "5996b4bc4f4b80f5ad592c0079920c04",
+    "mtime": 1790138520.6291897,
+    "ast_hash": "d101a19e105c7d7d0b91c52ddd416335",
     "semantic_hash": ""
   },
   "apps/backend/src/common/logging/http-access.interceptor.ts": {
-    "mtime": 1790136610.5796173,
-    "ast_hash": "11cd2de248933a36244d57341e0496bf",
+    "mtime": 1790138479.3811624,
+    "ast_hash": "5babf3c0cee69d0de5b9e48c434b61f6",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/common/logging/graylog-client.util.spec.ts": {
+    "mtime": 1790138414.83795,
+    "ast_hash": "492ac8baa7dd531e5bcc3f910ee9959c",
+    "semantic_hash": ""
+  },
+  "apps/backend/src/common/logging/graylog-client.util.ts": {
+    "mtime": 1790138401.7659864,
+    "ast_hash": "07b46730e560f9773b3a3f47c8c31b26",
     "semantic_hash": ""
   }
 }

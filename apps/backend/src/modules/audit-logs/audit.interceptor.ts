@@ -21,6 +21,7 @@ import {
 import { AuditOptions } from './decorators/audit.decorator';
 import { AuditActorSnapshot } from './dto/record-audit.dto';
 import { AuditLogStatus } from './entities/audit-log.entity';
+import { resolveClientIp } from 'src/common/logging/graylog-client.util';
 
 type RequestWithUser = Request & { user?: AuthenticatedUser };
 
@@ -194,12 +195,11 @@ export class AuditInterceptor implements NestInterceptor {
   }
 
   private extractIp(request: RequestWithUser): string | null {
-    const forwarded = request.headers['x-forwarded-for'];
-    if (typeof forwarded === 'string' && forwarded.trim().length > 0) {
-      return forwarded.split(',')[0].trim().slice(0, 45);
-    }
-    const ip = request.ip ?? request.socket?.remoteAddress;
-    return ip ? ip.slice(0, 45) : null;
+    return resolveClientIp({
+      headers: request.headers as Record<string, unknown>,
+      requestIp: request.ip,
+      socketIp: request.socket?.remoteAddress,
+    });
   }
 
   private extractUserAgent(request: RequestWithUser): string | null {
