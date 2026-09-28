@@ -1912,6 +1912,16 @@ export default {
         'ยังดึงลายเซ็นอิเล็กทรอนิกส์ไม่ได้ จึงยังไม่บันทึกข้อมูล กรุณาลองใหม่อีกครั้ง',
       noMatchedRowsError: 'ไม่พบรายการที่จับคู่ธุรกรรมแล้วสำหรับบันทึก',
       okBtn: 'ตกลง',
+      signaturePreviewTitle: 'จัดตำแหน่งลายเซ็นก่อนเซ็นจริง',
+      signaturePreviewHint:
+        'ลากลายเซ็นในกรอบเพื่อย้ายตำแหน่ง เลื่อนล้อเมาส์หรือดับเบิลคลิกที่จุดที่ต้องการเพื่อซูมดู แล้วลากพื้นที่อื่นเพื่อเลื่อนภาพ และปรับแถบเลื่อนเพื่อย่อ–ขยายลายเซ็น ค่าที่ตั้งไว้จะใช้กับใบเสร็จทุกใบในชุดนี้',
+      signatureZoomLabel: 'ซูมดู',
+      signatureZoomIn: 'ขยายจุดที่ดู',
+      signatureZoomOut: 'ย่อจุดที่ดู',
+      signatureZoomFit: 'พอดีหน้าจอ',
+      signatureScaleLabel: 'ขนาดลายเซ็น',
+      signatureResetBtn: 'ค่าเริ่มต้น',
+      signatureConfirmBtn: 'เซ็นและบันทึก',
     },
     testVoucherManagement: {
       pageTitle: 'จัดการ Test Voucher',

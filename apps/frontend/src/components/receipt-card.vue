@@ -128,6 +128,7 @@
             v-if="signatureImageUrl"
             :src="signatureImageUrl"
             class="signature-image"
+            :style="signatureStyle"
             alt=""
           />
           <span v-else>{{ t('exam.card.signatureBox') }}</span>
@@ -170,6 +171,14 @@ const receiptTitleTh = computed<string>(() =>
 );
 
 const receiptTitleEn = computed<string>(() => (props.isCopy ? 'RECEIPT COPY' : 'RECEIPT'));
+
+const signatureStyle = computed<Record<string, string> | undefined>(() => {
+  const placement = props.signaturePlacement;
+  if (!placement) return undefined;
+  return {
+    transform: `translate(${placement.offsetX}px, ${placement.offsetY}px) scale(${placement.scale})`,
+  };
+});
 
 const formattedDate = computed(() => {
   if (!props.receipt.transactionDate) return 'xx/xx/xxxx';

@@ -13,6 +13,13 @@ export interface ReceiptData {
   verifyCode?: string;
   qrDataUrl?: string;
 }
+/** ตำแหน่ง (px ของใบเสร็จ) และขนาดของลายเซ็นภายในช่อง «ภาพลายมือชื่อ» */
+export interface SignaturePlacement {
+  offsetX: number;
+  offsetY: number;
+  scale: number;
+}
+
 export interface ReceiptCardProps {
   receipt: ReceiptData;
   showQr?: boolean;
@@ -21,4 +28,5 @@ export interface ReceiptCardProps {
   signatureImageUrl?: string;
   /** ชื่อผู้รับเงินที่แสดงใต้ช่องลายเซ็น */
   collectorName?: string;
+  signaturePlacement?: SignaturePlacement;
 }

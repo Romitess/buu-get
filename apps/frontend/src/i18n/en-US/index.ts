@@ -1909,6 +1909,16 @@ export default {
         'Electronic signature is not available yet, so nothing was saved. Please try again.',
       noMatchedRowsError: 'No matched payment rows are available to save',
       okBtn: 'OK',
+      signaturePreviewTitle: 'Adjust Signature Before Signing',
+      signaturePreviewHint:
+        'Drag the signature inside the box to reposition it. Scroll the wheel or double-click a spot to zoom in, then drag elsewhere to pan. Use the slider to resize the signature. The same placement applies to every receipt in this batch.',
+      signatureZoomLabel: 'View zoom',
+      signatureZoomIn: 'Zoom in',
+      signatureZoomOut: 'Zoom out',
+      signatureZoomFit: 'Fit to screen',
+      signatureScaleLabel: 'Signature size',
+      signatureResetBtn: 'Reset',
+      signatureConfirmBtn: 'Sign and Save',
     },
     testVoucherManagement: {
       pageTitle: 'Manage Test Voucher',
