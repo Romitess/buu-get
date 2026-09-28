@@ -39,7 +39,10 @@ import { TransactionApiType } from '../transaction-status-history/entities/trans
 import { ExamEnrollmentStatus } from '../exam-enrollments/entities/exam-enrollment.entity';
 import { Receipt, ReceiptStatus } from '../receipts/entities/receipt.entity';
 import { ReceiptNumberService } from '../receipts/receipt-number.service';
-import { ReceiptIssueService } from '../receipts/receipt-issue.service';
+import {
+  ReceiptIssueService,
+  type SignedReceiptDraft,
+} from '../receipts/receipt-issue.service';
 import {
   AuthenticatedUser,
   requirePersonId,
@@ -1242,7 +1245,12 @@ export class BankReconcilesService {
    */
   async ensureEsignReady(
     user: AuthenticatedUser,
-  ): Promise<{ ready: true; fullName: string; psnId: string }> {
+  ): Promise<{
+    ready: true;
+    fullName: string;
+    psnId: string;
+    signatureBase64: string;
+  }> {
     const personId = requirePersonId(
       user,
       'Issuing receipts requires a personnel account',
@@ -1253,15 +1261,20 @@ export class BankReconcilesService {
       ready: true,
       fullName: signature.fullName,
       psnId: signature.psnId,
+      signatureBase64: signature.signatureBase64,
     };
   }
 
   async confirmPayment(
     tranxIds: number[],
     user: AuthenticatedUser,
-  ): Promise<{ success: boolean; updated: number }> {
+  ): Promise<{
+    success: boolean;
+    updated: number;
+    receipts: SignedReceiptDraft[];
+  }> {
     if (!tranxIds || tranxIds.length === 0) {
-      return { success: true, updated: 0 };
+      return { success: true, updated: 0, receipts: [] };
     }
 
     const personId = requirePersonId(
@@ -1364,6 +1377,11 @@ export class BankReconcilesService {
         signature,
       );
 
+      const receipts = await this.receiptIssueService.loadSignedReceiptDrafts(
+        queryRunner.manager,
+        receiptIds,
+      );
+
       // 4. Update Exam Enrollments
       const ermIds = transactions
         .map((transaction) => Number(transaction.ERM_ID))
@@ -1378,15 +1396,8 @@ export class BankReconcilesService {
           .execute();
       }
 
-      // 5. สร้าง PDF + อัปโหลด MinIO ก่อน commit — ถ้า fail จะ rollback ทั้งก้อน
-      await this.receiptIssueService.generateAndUploadReceiptFiles(
-        queryRunner.manager,
-        receiptIds,
-        signature,
-      );
-
       await queryRunner.commitTransaction();
-      return { success: true, updated };
+      return { success: true, updated, receipts };
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;

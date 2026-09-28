@@ -219,24 +219,6 @@
       </div>
     </div>
 
-    <!-- Hidden container for Receipt PDF generation -->
-    <div
-      v-if="isDownloadingReceipt"
-      id="receipt-render-container"
-      style="
-        position: absolute;
-        left: -9999px;
-        top: -9999px;
-        width: 210mm;
-        height: 297mm;
-        z-index: -1000;
-        pointer-events: none;
-        background-color: #ffffff;
-      "
-    >
-      <ReceiptCard :receipt="selectedReceiptData" />
-    </div>
-
     <!-- Hidden container for Certificate PDF generation -->
     <div
       v-if="isDownloadingCertificate && selectedCertificateData"
@@ -289,7 +271,6 @@ import DialogCancel from 'src/components/exam/dialog-cancel.vue';
 import ExamPrepNotifyButton from 'src/components/exam/exam-prep-notify-button.vue';
 import ExamPrepGuideDialog from 'src/components/exam/exam-prep-guide-dialog.vue';
 import TestVoucherReport from 'src/components/test-voucher-report.vue';
-import ReceiptCard from 'src/components/receipt-card.vue';
 import CertificateCard from 'src/components/exam/certificate-card.vue';
 import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
@@ -388,7 +369,6 @@ const {
   selectedVoucherRegulationsEn,
   selectedVoucherRegulationsTh,
   isDownloadingReceipt,
-  selectedReceiptData,
   printVoucher,
   printReceipt,
 } = useExamDocuments();

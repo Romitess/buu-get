@@ -28,6 +28,7 @@ import {
   TestExportExamOption,
   TestExportRow,
 } from './bank-reconciles.service';
+import type { SignedReceiptDraft } from '../receipts/receipt-issue.service';
 import {
   TestExportExamOptionDto,
   TestExportQueryDto,
@@ -194,7 +195,7 @@ export class BankReconcilesController {
   @ApiResponse({ status: 200, description: 'พร้อมออกใบเสร็จด้วยลายเซ็น' })
   ensureEsignReady(
     @CurrentUser() user: AuthenticatedUser,
-  ): Promise<{ ready: true; fullName: string; psnId: string }> {
+  ): ReturnType<BankReconcilesService['ensureEsignReady']> {
     return this.bankReconcilesService.ensureEsignReady(user);
   }
 
@@ -215,7 +216,11 @@ export class BankReconcilesController {
   confirmPayment(
     @Body('tranxIds') tranxIds: number[],
     @CurrentUser() user: AuthenticatedUser,
-  ): Promise<{ success: boolean; updated: number }> {
+  ): Promise<{
+    success: boolean;
+    updated: number;
+    receipts: SignedReceiptDraft[];
+  }> {
     return this.bankReconcilesService.confirmPayment(tranxIds, user);
   }
 }

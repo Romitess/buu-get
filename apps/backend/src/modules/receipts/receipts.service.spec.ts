@@ -452,48 +452,20 @@ describe('ReceiptsService', () => {
       );
     });
 
-    it('should return receipt PDF bytes with field data when ISSUED (RCPT-U-013)', async () => {
-      // Arrange
+    it('should throw NotFoundException when issued receipt has no stored file (RCPT-U-013)', async () => {
       receiptsRepository.findOne.mockResolvedValue({
         RC_ID: 1,
         TRANX_ID: 11,
         RC_NO: '256900001',
-        RC_NAME: 'Somchai Test',
-        RC_TAX_ID: '1234567890123',
         RC_STATUS: ReceiptStatus.ISSUED,
         RC_VERIFY_CODE: 'ABCDEFGH12345678',
-        RC_ISSUED_AT: new Date('2026-07-15T10:00:00+07:00'),
         CREATED_AT: new Date('2026-07-01T00:00:00+07:00'),
-        TRANSACTION: {
-          TRANX_AMOUNT: 500,
-          TRANX_PAID_AT: new Date('2026-07-14T10:00:00+07:00'),
-          ENROLLMENT: {
-            USER_ID: 10,
-            SESSION: {
-              EXAM: {
-                EXAM_ROUND: '1',
-                EXAM_FISCAL_YEAR: '2026',
-                EXAM_DATE: '2026-08-01',
-              },
-            },
-          },
-        },
+        TRANSACTION: { ENROLLMENT: { USER_ID: 10 } },
       });
 
-      // Act
-      const result = await service.downloadReceipt(11, ownerUser);
-
-      // Assert
-      expect(result).toBeInstanceOf(Uint8Array);
-      expect(result.byteLength).toBeGreaterThan(0);
-      const pdfText = Buffer.from(result).toString('utf8');
-      expect(pdfText.slice(0, 5)).toBe('%PDF-');
-      expect(pdfText).toContain('256900001');
-      expect(pdfText).toContain('Somchai Test');
-      expect(pdfText).toContain('500.00');
-      expect(pdfText).toContain('1234567890123');
-      expect(pdfText).toContain('ABCDEFGH12345678');
-      expect(pdfText).not.toContain('Hello, world!');
+      await expect(service.downloadReceipt(11, ownerUser)).rejects.toThrow(
+        NotFoundException,
+      );
       expect(platformGatewayService.getPublicFileStream).not.toHaveBeenCalled();
     });
 
@@ -521,43 +493,6 @@ describe('ReceiptsService', () => {
       expect(Buffer.from(result).toString('utf8')).toContain('%PDF-1.4 archived');
     });
 
-    it('should regenerate unsigned PDF and skip MinIO when unsigned=true', async () => {
-      receiptsRepository.findOne.mockResolvedValue({
-        RC_ID: 1,
-        TRANX_ID: 11,
-        RC_NO: '256900001',
-        RC_NAME: 'Somchai Test',
-        RC_TAX_ID: '1234567890123',
-        RC_STATUS: ReceiptStatus.ISSUED,
-        RC_FILE_PATH: '/receipts/256900001.pdf',
-        RC_VERIFY_CODE: 'ABCDEFGH12345678',
-        RC_ISSUED_AT: new Date('2026-07-15T10:00:00+07:00'),
-        CREATED_AT: new Date('2026-07-01T00:00:00+07:00'),
-        TRANSACTION: {
-          TRANX_AMOUNT: 500,
-          TRANX_PAID_AT: new Date('2026-07-14T10:00:00+07:00'),
-          ENROLLMENT: {
-            USER_ID: 10,
-            SESSION: {
-              EXAM: {
-                EXAM_ROUND: '1',
-                EXAM_FISCAL_YEAR: '2026',
-                EXAM_DATE: '2026-08-01',
-              },
-            },
-          },
-        },
-      });
-
-      const result = await service.downloadReceipt(11, ownerUser, {
-        unsigned: true,
-      });
-
-      expect(platformGatewayService.getPublicFileStream).not.toHaveBeenCalled();
-      expect(result).toBeInstanceOf(Uint8Array);
-      expect(Buffer.from(result).toString('utf8').slice(0, 5)).toBe('%PDF-');
-    });
-
     it('should allow finance role to download another user receipt', async () => {
       receiptsRepository.findOne.mockResolvedValue({
         RC_ID: 1,
@@ -565,13 +500,15 @@ describe('ReceiptsService', () => {
         RC_NO: '256900001',
         RC_NAME: 'Owner',
         RC_STATUS: ReceiptStatus.ISSUED,
+        RC_FILE_PATH: '/receipts/256900001.pdf',
         RC_VERIFY_CODE: 'ABCDEFGH12345678',
-        RC_ISSUED_AT: new Date('2026-07-15T10:00:00+07:00'),
         CREATED_AT: new Date('2026-07-01T00:00:00+07:00'),
-        TRANSACTION: {
-          TRANX_AMOUNT: 100,
-          ENROLLMENT: { USER_ID: 10 },
-        },
+        TRANSACTION: { ENROLLMENT: { USER_ID: 10 } },
+      });
+      const { Readable } = await import('stream');
+      platformGatewayService.getPublicFileStream.mockResolvedValue({
+        stream: Readable.from([Buffer.from('%PDF-1.4 archived')]),
+        contentType: 'application/pdf',
       });
 
       const result = await service.downloadReceipt(11, financeUser);

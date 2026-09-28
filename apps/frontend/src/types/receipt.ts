@@ -17,4 +17,8 @@ export interface ReceiptCardProps {
   receipt: ReceiptData;
   showQr?: boolean;
   isCopy?: boolean;
+  /** รูปลายเซ็น e-sign ที่จะวางแทนข้อความ «ภาพลายมือชื่อ» */
+  signatureImageUrl?: string;
+  /** ชื่อผู้รับเงินที่แสดงใต้ช่องลายเซ็น */
+  collectorName?: string;
 }

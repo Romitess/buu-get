@@ -123,9 +123,17 @@
 
       <!-- Right: Signature box → Name → QR -->
       <div class="receipt-footer-right">
-        <div class="signature-box">{{ t('exam.card.signatureBox') }}</div>
+        <div class="signature-box">
+          <img
+            v-if="signatureImageUrl"
+            :src="signatureImageUrl"
+            class="signature-image"
+            alt=""
+          />
+          <span v-else>{{ t('exam.card.signatureBox') }}</span>
+        </div>
         <div class="collector-name">
-          ( {{ receipt.fullName }} )<br />
+          ( {{ collectorName || receipt.fullName }} )<br />
           {{ t('exam.card.collector') }}
         </div>
         <img
@@ -151,6 +159,8 @@ import { formatThaiLongDateWithPrefix } from 'src/utils/thai-date';
 const props = withDefaults(defineProps<ReceiptCardProps>(), {
   showQr: true,
   isCopy: false,
+  signatureImageUrl: '',
+  collectorName: '',
 });
 
 const { t } = useI18n();
@@ -464,6 +474,14 @@ const formatCurrency = (amount: number) => {
   font-size: 11px;
   color: var(--receipt-text-light, #777);
   margin-bottom: 4px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.signature-image {
+  max-width: 140px;
+  max-height: 48px;
+  object-fit: contain;
 }
 
 .collector-name {

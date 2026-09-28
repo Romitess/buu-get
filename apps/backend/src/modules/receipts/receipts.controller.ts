@@ -10,9 +10,13 @@ import {
   StreamableFile,
   Res,
   Query,
+  UploadedFile,
+  UseInterceptors,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { FINANCE_ROLES } from 'src/common/constants/role-groups';
@@ -101,32 +105,48 @@ export class ReceiptsController {
     return this.receiptsService.remove(id);
   }
 
+  @Post(':id/signed-file')
+  @Roles(...FINANCE_ROLES)
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 20 * 1024 * 1024 } }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @ApiOperation({
+    summary: 'อัปโหลดใบเสร็จรูปแบบเดิมที่แปะลายเซ็นในช่องภาพลายมือชื่อแล้ว',
+  })
+  @ApiResponse({ status: 201, description: 'บันทึกไฟล์ใบเสร็จแล้ว' })
+  archiveSignedFile(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: { buffer?: Buffer; mimetype?: string } | undefined,
+  ): Promise<void> {
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('Signed receipt file is required');
+    }
+    return this.receiptsService.archiveSignedReceiptFile(id, file.buffer);
+  }
+
   @Get(':tranxId/download')
   @ApiOperation({
-    summary: 'ดาวน์โหลดใบเสร็จรับเงินด้วยรหัสธุรกรรม',
-    description:
-      'ส่ง unsigned=true เพื่อสร้าง PDF ใหม่แบบไม่มีลายเซ็น (ไม่ดึงไฟล์ archive จาก MinIO)',
+    summary: 'ดาวน์โหลดใบเสร็จรับเงินจากไฟล์ที่เก็บใน MinIO',
   })
   @ApiResponse({ status: 200, description: 'ไฟล์ใบเสร็จรับเงิน PDF' })
   @ApiResponse({ status: 403, description: 'ใบเสร็จยังไม่ออก' })
-  @ApiResponse({ status: 404, description: 'ไม่พบใบเสร็จ' })
+  @ApiResponse({ status: 404, description: 'ไม่พบใบเสร็จหรือยังไม่มีไฟล์' })
   async downloadReceipt(
     @Param('tranxId', ParseIntPipe) tranxId: number,
     @CurrentUser() user: AuthenticatedUser,
     @Res({ passthrough: true }) res: Response,
-    @Query('unsigned') unsigned?: string,
   ): Promise<StreamableFile> {
-    const forceUnsigned =
-      unsigned === '1' || unsigned?.toLowerCase() === 'true';
-    const buffer = await this.receiptsService.downloadReceipt(tranxId, user, {
-      unsigned: forceUnsigned,
-    });
-    const filename = forceUnsigned
-      ? `receipt-${tranxId}-unsigned.pdf`
-      : `receipt-${tranxId}.pdf`;
+    const buffer = await this.receiptsService.downloadReceipt(tranxId, user);
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Disposition': `attachment; filename="receipt-${tranxId}.pdf"`,
     });
     return new StreamableFile(buffer);
   }

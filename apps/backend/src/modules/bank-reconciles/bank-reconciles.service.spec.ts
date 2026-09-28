@@ -249,6 +249,7 @@ describe('BankReconcilesService', () => {
     fetchSignatureByPerson: jest.Mock;
     applyCollectorMetadata: jest.Mock;
     generateAndUploadReceiptFiles: jest.Mock;
+    loadSignedReceiptDrafts: jest.Mock;
   };
 
   const financeUser = {
@@ -326,6 +327,7 @@ describe('BankReconcilesService', () => {
       }),
       applyCollectorMetadata: jest.fn().mockResolvedValue(undefined),
       generateAndUploadReceiptFiles: jest.fn().mockResolvedValue(undefined),
+      loadSignedReceiptDrafts: jest.fn().mockResolvedValue([]),
     };
 
     service = new BankReconcilesService(
@@ -922,7 +924,7 @@ describe('BankReconcilesService', () => {
       const result = await service.confirmPayment([], financeUser);
 
       // Assert
-      expect(result).toEqual({ success: true, updated: 0 });
+      expect(result).toEqual({ success: true, updated: 0, receipts: [] });
       expect(dataSource.createQueryRunner).not.toHaveBeenCalled();
       expect(receiptIssueService.fetchSignatureByPerson).not.toHaveBeenCalled();
     });
@@ -987,7 +989,7 @@ describe('BankReconcilesService', () => {
       const result = await service.confirmPayment([10], financeUser);
 
       // Assert
-      expect(result).toEqual({ success: true, updated: 1 });
+      expect(result).toEqual({ success: true, updated: 1, receipts: [] });
       expect(queryRunner.commitTransaction).toHaveBeenCalled();
       expect(queryRunner.rollbackTransaction).not.toHaveBeenCalled();
       expect(receiptIssueService.fetchSignatureByPerson).toHaveBeenCalledWith(
@@ -998,13 +1000,13 @@ describe('BankReconcilesService', () => {
         [55],
         expect.objectContaining({ psnId: '00000001' }),
       );
-      expect(
-        receiptIssueService.generateAndUploadReceiptFiles,
-      ).toHaveBeenCalledWith(
+      expect(receiptIssueService.loadSignedReceiptDrafts).toHaveBeenCalledWith(
         queryRunner.manager,
         [55],
-        expect.objectContaining({ signatureBase64: expect.any(String) }),
       );
+      expect(
+        receiptIssueService.generateAndUploadReceiptFiles,
+      ).not.toHaveBeenCalled();
       expect(receiptNumberService.assignOnIssue).toHaveBeenCalledWith(
         queryRunner.manager,
         [55],
@@ -1049,7 +1051,7 @@ describe('BankReconcilesService', () => {
       expect(dataSource.createQueryRunner).not.toHaveBeenCalled();
     });
 
-    it('BR-U-019c: should rollback when receipt file upload fails', async () => {
+    it('BR-U-019c: should rollback when signed receipt draft cannot be prepared', async () => {
       const selectQb = createQueryBuilder([], {
         getRawMany: jest.fn().mockResolvedValue([
           {
@@ -1062,12 +1064,12 @@ describe('BankReconcilesService', () => {
       });
       queryRunner.manager.createQueryBuilder.mockReturnValue(selectQb);
       managerRepos.receipt.find.mockResolvedValue([{ RC_ID: 55, TRANX_ID: 10 }]);
-      receiptIssueService.generateAndUploadReceiptFiles.mockRejectedValueOnce(
-        new Error('upload failed'),
+      receiptIssueService.loadSignedReceiptDrafts.mockRejectedValueOnce(
+        new Error('receipt draft failed'),
       );
 
       await expect(service.confirmPayment([10], financeUser)).rejects.toThrow(
-        'upload failed',
+        'receipt draft failed',
       );
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
       expect(queryRunner.commitTransaction).not.toHaveBeenCalled();
@@ -1114,7 +1116,7 @@ describe('BankReconcilesService', () => {
 
       const result = await service.confirmPayment([10], financeUser);
 
-      expect(result).toEqual({ success: true, updated: 1 });
+      expect(result).toEqual({ success: true, updated: 1, receipts: [] });
       expect(managerRepos.receipt.create).toHaveBeenCalledWith(
         expect.objectContaining({
           TRANX_ID: 10,
@@ -1128,12 +1130,9 @@ describe('BankReconcilesService', () => {
         queryRunner.manager,
         [99],
       );
-      expect(
-        receiptIssueService.generateAndUploadReceiptFiles,
-      ).toHaveBeenCalledWith(
+      expect(receiptIssueService.loadSignedReceiptDrafts).toHaveBeenCalledWith(
         queryRunner.manager,
         [99],
-        expect.objectContaining({ psnId: '00000001' }),
       );
       expect(queryRunner.commitTransaction).toHaveBeenCalled();
     });

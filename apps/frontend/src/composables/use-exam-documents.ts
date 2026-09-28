@@ -1,4 +1,4 @@
-import { ref, nextTick } from 'vue';
+﻿import { ref, nextTick } from 'vue';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import html2canvas from 'html2canvas';
@@ -11,7 +11,7 @@ import { getRegulations } from 'src/services/exam-rule-voucher.service';
 import type { ExamHistoryItem } from 'src/types/exam';
 import type { VoucherData } from 'src/types/voucher';
 import type { ReceiptData } from 'src/types/receipt';
-import { generateReceiptQrDataUrl } from 'src/utils/verify-qr';
+import { downloadReceipt } from 'src/services/receipt.service';
 import { formatExamInstanceLabel } from 'src/utils/exam-instance-label';
 
 export function useExamDocuments() {
@@ -140,9 +140,9 @@ export function useExamDocuments() {
 
       const mapExamTypeToEn = (type?: string): string => {
         if (!type) return '-';
-        if (type === 'รอบทั่วไป' || type.toLowerCase() === 'general' || type === 'ทั่วไป')
+        if (type === 'à¸£à¸­à¸šà¸—à¸±à¹ˆà¸§à¹„à¸›' || type.toLowerCase() === 'general' || type === 'à¸—à¸±à¹ˆà¸§à¹„à¸›')
           return 'General';
-        if (type === 'รอบพิเศษ' || type.toLowerCase() === 'special' || type === 'พิเศษ')
+        if (type === 'à¸£à¸­à¸šà¸žà¸´à¹€à¸¨à¸©' || type.toLowerCase() === 'special' || type === 'à¸žà¸´à¹€à¸¨à¸©')
           return 'Special';
         return type;
       };
@@ -264,13 +264,8 @@ export function useExamDocuments() {
 
   const printReceipt = async (exam: ExamHistoryItem): Promise<void> => {
     let enrollment = exam.rawEnrollment;
-    const user = userStore.currentUser;
 
-    if (
-      enrollment?.ERM_ID &&
-      (!enrollment.TRANSACTION?.RECEIPTS?.length ||
-        !enrollment.TRANSACTION.RECEIPTS[0]?.RC_VERIFY_CODE)
-    ) {
+    if (enrollment?.ERM_ID && !enrollment.TRANSACTION?.TRANX_ID) {
       try {
         enrollment = await fetchEnrollmentById(enrollment.ERM_ID);
       } catch (error) {
@@ -278,167 +273,36 @@ export function useExamDocuments() {
       }
     }
 
-    if (enrollment && enrollment.SESSION) {
-      const session = enrollment.SESSION;
-      const examObj = session.EXAM;
-      const locationObj = session.LOCATION;
+    const tranxId = enrollment?.TRANSACTION?.TRANX_ID;
+    if (!tranxId) {
+      $q.notify({
+        type: 'warning',
+        message: t('exam.receipt.downloadError'),
+        position: 'top',
+      });
+      return;
+    }
 
-      // Format date nicely to match "15 May 2026"
-      let dateStr = '15 May 2026';
-      if (examObj?.EXAM_DATE) {
-        const d = new Date(examObj.EXAM_DATE);
-        const months = [
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'November',
-          'December',
-        ];
-        dateStr = `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-      }
-
-      const locationText = locationObj
-        ? `${locationObj.LOCATION_NAME}${locationObj.LOCATION_ROOM_NO ? ` (${locationObj.LOCATION_ROOM_NO})` : ''}`
-        : 'QS1, Burapha University';
-
-      const transaction = enrollment.TRANSACTION;
-      const receipt = transaction?.RECEIPTS?.[0];
-
-      const receiptYear = transaction?.TRANX_PAID_AT
-        ? new Date(transaction.TRANX_PAID_AT).getFullYear()
-        : examObj?.EXAM_DATE
-          ? new Date(examObj.EXAM_DATE).getFullYear()
-          : new Date().getFullYear();
-
-      const verifyCode = receipt?.RC_VERIFY_CODE;
-      if (!verifyCode) {
-        $q.notify({
-          type: 'warning',
-          message: t('exam.receipt.missingVerifyCode'),
-          position: 'top',
-        });
-        return;
-      }
-
-      const qrDataUrl = await generateReceiptQrDataUrl(verifyCode);
-
-      const buildExamName = (round?: string, fiscalYearAd?: string) => {
-        const base = 'ค่าสมัครทดสอบความรู้ภาษาอังกฤษ (BUU-GET)';
-        if (!round || !fiscalYearAd || !/^\d+$/.test(fiscalYearAd)) return base;
-        const fiscalYearBe = parseInt(fiscalYearAd, 10) + 543;
-        return `${base} ครั้งที่ ${round}/${fiscalYearBe}`;
-      };
-
-      selectedReceiptData.value = {
-        receiptNo:
-          receipt?.RC_NO ||
-          (receipt?.RC_ID ? `RC${receiptYear}-${String(receipt.RC_ID).padStart(5, '0')}` : '') ||
-          `RC${receiptYear}-${String(enrollment.ERM_ID).padStart(5, '0')}`,
-        transactionDate: transaction?.TRANX_PAID_AT
-          ? new Date(transaction.TRANX_PAID_AT).toISOString()
-          : transaction?.TRANX_CREATED_AT
-            ? new Date(transaction.TRANX_CREATED_AT).toISOString()
-            : new Date().toISOString(),
-        fullName:
-          receipt?.RC_NAME ||
-          (enrollment.USER?.PROFILE
-            ? `${enrollment.USER.PROFILE.userTitleTh || enrollment.USER.PROFILE.userTitleEn || ''} ${enrollment.USER.PROFILE.userFullnameTh || enrollment.USER.PROFILE.userFullnameEn || ''}`.trim()
-            : user
-              ? `${user.fullNameTH || user.fullNameEN || ''}`.trim()
-              : 'Mr. Somdream Jaidee'),
-        nationalId: String(
-          receipt?.RC_TAX_ID ||
-            enrollment.USER?.USER_NATIONAL_ID ||
-            enrollment.USER?.USER_PASSPORT_NO ||
-            user?.nationalId ||
-            '1-1234-12345-12-1',
-        ),
-        address:
-          receipt?.RC_ADDRESS ||
-          enrollment.USER?.PROFILE?.userAddress ||
-          user?.address ||
-          '169 Longhad Bangsaen Rd, Saen Suk, Chon Buri 20131',
-        examName: buildExamName(examObj?.EXAM_ROUND, examObj?.EXAM_FISCAL_YEAR),
-        examDate: dateStr,
-        location: locationText,
-        amount: Number(transaction?.TRANX_AMOUNT ?? examObj?.EXAM_FEE ?? 0),
-        paymentMethod: transaction?.TRANX_CHANNEL === 3 ? 'QR' : 'Mobile Banking',
-        status: 'SUCCESS',
-        verifyCode,
-        qrDataUrl,
-      };
-
-      isDownloadingReceipt.value = true;
-
-      // Wait for DOM to mount offscreen container
-      await nextTick();
-      // Brief sleep to allow elements/watermarks to render fully
-      await new Promise((resolve) => setTimeout(resolve, 600));
-
-      try {
-        const container = document.getElementById('receipt-render-container');
-        const receiptElement = container?.querySelector('.receipt-container') as HTMLElement | null;
-
-        if (receiptElement) {
-          const canvas = await html2canvas(receiptElement, {
-            scale: 3,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#ffffff',
-          });
-
-          const imgData = canvas.toDataURL('image/png');
-
-          // Standard A4 dimensions in PDF: 210mm x 297mm
-          const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4',
-          });
-
-          // Fill the entire PDF page with the image with no margins
-          pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
-          pdf.save(`BUU-GET_Receipt_${enrollment.ERM_ID}.pdf`);
-
-          $q.notify({
-            type: 'positive',
-            message: t('exam.receipt.downloadSuccess'),
-            position: 'top',
-          });
-        } else {
-          throw new Error('Receipt element not found');
-        }
-      } catch (err) {
-        console.error(err);
-        $q.notify({
-          type: 'negative',
-          message: t('exam.receipt.downloadError'),
-          position: 'top',
-        });
-      } finally {
-        isDownloadingReceipt.value = false;
-        selectedReceiptData.value = {
-          receiptNo: '',
-          transactionDate: '',
-          fullName: '',
-          nationalId: '',
-          examName: '',
-          examDate: '',
-          location: '',
-          amount: 0,
-          paymentMethod: '',
-          status: 'PENDING',
-        };
-      }
+    isDownloadingReceipt.value = true;
+    try {
+      await downloadReceipt(tranxId);
+      $q.notify({
+        type: 'positive',
+        message: t('exam.receipt.downloadSuccess'),
+        position: 'top',
+      });
+    } catch (err) {
+      console.error(err);
+      $q.notify({
+        type: 'negative',
+        message: t('exam.receipt.downloadError'),
+        position: 'top',
+      });
+    } finally {
+      isDownloadingReceipt.value = false;
     }
   };
+
 
   return {
     isDownloadingVoucher,

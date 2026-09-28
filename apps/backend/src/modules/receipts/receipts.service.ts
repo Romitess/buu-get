@@ -1,7 +1,9 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   ForbiddenException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -21,18 +23,11 @@ import {
   AuthenticatedUser,
 } from 'src/common/utils/authz.util';
 import { generateReceiptVerifyCode } from 'src/common/utils/verification-code.util';
-import { buildReceiptNo } from 'src/common/utils/receipt-no.util';
-import { buildReceiptItemDescription } from 'src/common/utils/receipt-description.util';
-import { buildReceiptPdf } from 'src/common/utils/build-receipt-pdf.util';
 import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
+import { resolveImageFolder } from '../platform-gateway/constants/image-category.config';
 import { Receipt, ReceiptStatus } from './entities/receipt.entity';
 import { ReceiptNumberService } from './receipt-number.service';
 import { CreateReceiptDto, UpdateReceiptDto } from './dto/receipt.dto';
-
-const BUU_ORGANIZATION = {
-  nameTH: 'มหาวิทยาลัยบูรพา',
-  nameEN: 'BURAPHA UNIVERSITY',
-} as const;
 
 async function readableToBuffer(stream: Readable): Promise<Buffer> {
   const chunks: Buffer[] = [];
@@ -143,10 +138,58 @@ export class ReceiptsService {
     await this.receiptsRepository.softRemove(receipt);
   }
 
+  /**
+   * เก็บ PDF ที่เว็บสร้างจากใบเสร็จรูปแบบเดิม โดยรูปลายเซ็นอยู่ในช่องภาพลายมือชื่อแล้ว
+   */
+  async archiveSignedReceiptFile(rcId: number, pdf: Buffer): Promise<void> {
+    if (!pdf || pdf.length < 5 || pdf.subarray(0, 5).toString('utf8') !== '%PDF-') {
+      throw new BadRequestException('Signed receipt file must be a PDF');
+    }
+
+    const receipt = await this.receiptsRepository.findOne({
+      where: { RC_ID: rcId },
+    });
+    if (!receipt) {
+      throw new NotFoundException(`Receipt ID ${rcId} not found`);
+    }
+    if (receipt.RC_STATUS !== ReceiptStatus.ISSUED) {
+      throw new ForbiddenException('Receipt is not in ISSUED status');
+    }
+
+    const folder = resolveImageFolder('receipt-file');
+    const fileName = `${receipt.RC_NO || `receipt-${rcId}`}.pdf`;
+    const uploadResult = (await this.platformGatewayService.uploadBuffer(
+      pdf,
+      fileName,
+      {
+        path: folder,
+        fileName,
+        forceFileName: true,
+        bucket: 'buu-get.storage',
+      },
+    )) as { result?: string; filename?: string; path?: string } | undefined;
+
+    const filePath =
+      uploadResult?.result || uploadResult?.filename || uploadResult?.path;
+    if (typeof filePath !== 'string' || !filePath) {
+      throw new ServiceUnavailableException(
+        `Failed to upload signed receipt file for receipt ${rcId}`,
+      );
+    }
+
+    const normalizedPath = filePath.startsWith('/')
+      ? filePath
+      : `/${filePath.replace(/^\/+/, '')}`;
+
+    await this.receiptsRepository.update(
+      { RC_ID: rcId },
+      { RC_FILE_PATH: normalizedPath },
+    );
+  }
+
   async downloadReceipt(
     tranxId: number,
     user: AuthenticatedUser,
-    options?: { unsigned?: boolean },
   ): Promise<Uint8Array> {
     const receipt = await this.receiptsRepository.findOne({
       where: { TRANX_ID: tranxId },
@@ -181,53 +224,16 @@ export class ReceiptsService {
       throw new ForbiddenException(`Receipt is not in ISSUED status`);
     }
 
-    // ใบที่ออกหลังมี e-sign — ดาวน์โหลดไฟล์ archive จาก MinIO
-    // ยกเว้น unsigned=true: สร้าง PDF ใหม่แบบไม่มีลายเซ็นทุกครั้ง
-    if (!options?.unsigned && receipt.RC_FILE_PATH?.startsWith('/')) {
-      const { stream } = await this.platformGatewayService.getPublicFileStream(
-        receipt.RC_FILE_PATH,
+    if (!receipt.RC_FILE_PATH?.startsWith('/')) {
+      throw new NotFoundException(
+        `Receipt file for Transaction ID ${tranxId} is not stored yet`,
       );
-      const buffer = await readableToBuffer(stream);
-      return new Uint8Array(buffer);
     }
 
-    const transaction = receipt.TRANSACTION;
-    const exam = transaction?.ENROLLMENT?.SESSION?.EXAM;
-    const referenceDate =
-      receipt.RC_ISSUED_AT ?? transaction?.TRANX_PAID_AT ?? receipt.CREATED_AT;
-    const receiptNo = buildReceiptNo(
-      receipt.RC_NO,
-      receipt.RC_ID,
-      referenceDate,
-      receipt.CREATED_AT,
+    const { stream } = await this.platformGatewayService.getPublicFileStream(
+      receipt.RC_FILE_PATH,
     );
-    const description = buildReceiptItemDescription(
-      exam?.EXAM_ROUND,
-      exam?.EXAM_FISCAL_YEAR,
-    );
-    const amountNumber = Number(transaction?.TRANX_AMOUNT ?? 0);
-    const amount = Number.isFinite(amountNumber)
-      ? amountNumber.toFixed(2)
-      : '0.00';
-    const issuedAt =
-      referenceDate instanceof Date
-        ? referenceDate.toISOString()
-        : referenceDate
-          ? String(referenceDate)
-          : '-';
-
-    return buildReceiptPdf({
-      organizationNameTh: BUU_ORGANIZATION.nameTH,
-      organizationNameEn: BUU_ORGANIZATION.nameEN,
-      receiptNo,
-      issuedAt,
-      payerName: receipt.RC_NAME?.trim() || '-',
-      taxId: receipt.RC_TAX_ID != null ? String(receipt.RC_TAX_ID) : null,
-      amount,
-      description,
-      examRound: exam?.EXAM_ROUND ?? null,
-      examDate: exam?.EXAM_DATE ?? null,
-      verifyCode: receipt.RC_VERIFY_CODE,
-    });
+    const buffer = await readableToBuffer(stream);
+    return new Uint8Array(buffer);
   }
 }

@@ -116,13 +116,29 @@ export const matchBankReconciles = async (
   return response.data;
 };
 
+export interface SignedReceiptDraft {
+  rcId: number;
+  tranxId: number;
+  receiptNo: string;
+  issuedAt: string;
+  payerName: string;
+  taxId: string | null;
+  address: string | null;
+  amount: number;
+  description: string;
+  examDate: string | null;
+  verifyCode: string;
+  paymentChannel: number | null;
+}
+
 export const confirmBankReconcilePayments = async (
   tranxIds: number[],
-): Promise<{ success: boolean; updated: number }> => {
-  const response = await api.post<{ success: boolean; updated: number }>(
-    '/bank-reconciles/confirm-payment',
-    { tranxIds },
-  );
+): Promise<{ success: boolean; updated: number; receipts: SignedReceiptDraft[] }> => {
+  const response = await api.post<{
+    success: boolean;
+    updated: number;
+    receipts: SignedReceiptDraft[];
+  }>('/bank-reconciles/confirm-payment', { tranxIds });
   return response.data;
 };
 
@@ -130,11 +146,13 @@ export const checkBankReconcileEsignReady = async (): Promise<{
   ready: true;
   fullName: string;
   psnId: string;
+  signatureBase64: string;
 }> => {
   const response = await api.get<{
     ready: true;
     fullName: string;
     psnId: string;
+    signatureBase64: string;
   }>('/bank-reconciles/esign-ready');
   return response.data;
 };

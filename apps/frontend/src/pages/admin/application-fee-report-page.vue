@@ -42,7 +42,7 @@
             <ActionButton
               icon="download"
               color="secondary"
-              :tooltip="t('admin.applicationFeeReport.actions.downloadUnsigned')"
+              :tooltip="t('exam.history.downloadReceipt')"
               @click="onRecordAction(row)"
             />
           </div>
@@ -50,23 +50,6 @@
       </BaseTable>
     </div>
 
-    <!-- Hidden container for Receipt PDF generation -->
-    <div
-      v-if="isDownloadingReceipt"
-      id="receipt-render-container"
-      style="
-        position: absolute;
-        left: -9999px;
-        top: -9999px;
-        width: 210mm;
-        height: 297mm;
-        z-index: -1000;
-        pointer-events: none;
-        background-color: #ffffff;
-      "
-    >
-      <ReceiptCard :receipt="selectedReceiptData" :is-copy="true" />
-    </div>
   </q-page>
 </template>
 
@@ -81,10 +64,8 @@ import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
 import ActionButton from 'src/components/shared/action-button.vue';
 import BaseTable from 'src/components/shared/base-table.vue';
 import { useDailyRevenue } from 'src/composables/use-daily-revenue';
-import { useExamDocuments } from 'src/composables/use-exam-documents';
-import { fetchIssuedReceipts, type IssuedReceipt } from 'src/services/receipt.service';
-import ReceiptCard from 'src/components/receipt-card.vue';
-import type { ExamEnrollment, ExamHistoryItem } from 'src/types/exam';
+import { downloadReceipt, fetchIssuedReceipts, type IssuedReceipt } from 'src/services/receipt.service';
+import type { ExamEnrollment } from 'src/types/exam';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
@@ -92,8 +73,6 @@ import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
 const $q = useQuasar();
 
 const { error, filter, fetchData, applyFilter } = useDailyRevenue();
-
-const { isDownloadingReceipt, selectedReceiptData, printReceipt } = useExamDocuments();
 
 type ApplicationFeeRow = {
   index: number;
@@ -427,23 +406,23 @@ const exportColumns: QTableColumn[] = [
 ];
 
 const onRecordAction = async (row: ApplicationFeeRow): Promise<void> => {
+  const tranxId = row.rawEnrollment.TRANSACTION?.TRANX_ID;
+  if (!tranxId) {
+    $q.notify({
+      type: 'warning',
+      message: t('admin.applicationFeeReport.notifications.downloadError'),
+      position: 'top',
+    });
+    return;
+  }
+
   try {
-    const examItem: ExamHistoryItem = {
-      id: row.rawEnrollment.ERM_ID,
-      title: row.examName,
-      status: 'exam.status.verified',
-      statusType: 'success',
-      category: 'registration',
-      registrationStatus: {
-        label: 'exam.status.verified',
-        type: 'success',
-      },
-      date: row.paymentDate,
-      time: '',
-      location: '',
-      rawEnrollment: row.rawEnrollment,
-    };
-    await printReceipt(examItem);
+    await downloadReceipt(tranxId);
+    $q.notify({
+      type: 'positive',
+      message: t('admin.applicationFeeReport.notifications.downloadSuccess'),
+      position: 'top',
+    });
   } catch (err) {
     console.error(err);
     $q.notify({

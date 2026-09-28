@@ -23,6 +23,22 @@ export interface ESignSignaturePayload {
   signatureBase64: string;
 }
 
+/** ข้อมูลสำหรับวาดใบเสร็จรูปแบบเดิม ก่อนอัปโหลดไฟล์ที่มีลายเซ็น */
+export interface SignedReceiptDraft {
+  rcId: number;
+  tranxId: number;
+  receiptNo: string;
+  issuedAt: string;
+  payerName: string;
+  taxId: string | null;
+  address: string | null;
+  amount: number;
+  description: string;
+  examDate: string | null;
+  verifyCode: string;
+  paymentChannel: number | null;
+}
+
 @Injectable()
 export class ReceiptIssueService {
   private readonly logger = new Logger(ReceiptIssueService.name);
@@ -106,6 +122,75 @@ export class ReceiptIssueService {
         RC_COLLECTOR_NAME: signature.fullName,
       },
     );
+  }
+
+  /**
+   * โหลดข้อมูลใบเสร็จที่ออกเลขแล้ว เพื่อให้ฝั่งเว็บแปะลายเซ็นในช่อง «ภาพลายมือชื่อ»
+   * ก่อนอัปโหลดไฟล์
+   */
+  async loadSignedReceiptDrafts(
+    manager: EntityManager,
+    receiptIds: number[],
+  ): Promise<SignedReceiptDraft[]> {
+    if (receiptIds.length === 0) return [];
+
+    const receipts = await manager.getRepository(Receipt).find({
+      where: { RC_ID: In(receiptIds) },
+      relations: [
+        'TRANSACTION',
+        'TRANSACTION.ENROLLMENT',
+        'TRANSACTION.ENROLLMENT.SESSION',
+        'TRANSACTION.ENROLLMENT.SESSION.EXAM',
+      ],
+      order: { RC_ID: 'ASC' },
+    });
+
+    return receipts.map((receipt) => {
+      if (!receipt.RC_NO) {
+        throw new BadRequestException(
+          `Receipt ${receipt.RC_ID} has no RC_NO; cannot prepare signed receipt`,
+        );
+      }
+      if (!receipt.RC_VERIFY_CODE) {
+        throw new BadRequestException(
+          `Receipt ${receipt.RC_ID} has no verify code`,
+        );
+      }
+
+      const transaction = receipt.TRANSACTION;
+      const exam = transaction?.ENROLLMENT?.SESSION?.EXAM;
+      const referenceDate =
+        receipt.RC_ISSUED_AT ?? transaction?.TRANX_PAID_AT ?? receipt.CREATED_AT;
+      const amountNumber = Number(transaction?.TRANX_AMOUNT ?? 0);
+
+      return {
+        rcId: receipt.RC_ID,
+        tranxId: receipt.TRANX_ID,
+        receiptNo: buildReceiptNo(
+          receipt.RC_NO,
+          receipt.RC_ID,
+          referenceDate,
+          receipt.CREATED_AT,
+        ),
+        issuedAt:
+          referenceDate instanceof Date
+            ? referenceDate.toISOString()
+            : referenceDate
+              ? String(referenceDate)
+              : new Date().toISOString(),
+        payerName: receipt.RC_NAME?.trim() || '-',
+        taxId: receipt.RC_TAX_ID != null ? String(receipt.RC_TAX_ID) : null,
+        address: receipt.RC_ADDRESS?.trim() || null,
+        amount: Number.isFinite(amountNumber) ? amountNumber : 0,
+        description: buildReceiptItemDescription(
+          exam?.EXAM_ROUND,
+          exam?.EXAM_FISCAL_YEAR,
+        ),
+        examDate: exam?.EXAM_DATE ?? null,
+        verifyCode: receipt.RC_VERIFY_CODE,
+        paymentChannel: transaction?.TRANX_CHANNEL ?? null,
+      };
+    });
   }
 
   /**

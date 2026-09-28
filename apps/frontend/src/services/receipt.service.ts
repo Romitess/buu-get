@@ -52,13 +52,15 @@ export const fetchIssuedReceipts = async (): Promise<IssuedReceipt[]> => {
   return response.data.data ?? [];
 };
 
-export const downloadReceipt = async (
-  tranxId: number,
-  options?: { unsigned?: boolean },
-): Promise<void> => {
+export const uploadSignedReceiptFile = async (rcId: number, pdf: Blob): Promise<void> => {
+  const form = new FormData();
+  form.append('file', pdf, `receipt-${rcId}.pdf`);
+  await api.post(`/receipts/${rcId}/signed-file`, form);
+};
+
+export const downloadReceipt = async (tranxId: number): Promise<void> => {
   const response = await api.get(`/receipts/${tranxId}/download`, {
     responseType: 'blob',
-    params: options?.unsigned ? { unsigned: true } : undefined,
   });
 
   // Create a URL for the blob and trigger download
@@ -68,9 +70,7 @@ export const downloadReceipt = async (
 
   // Try to extract filename from content-disposition header if present
   const contentDisposition = response.headers['content-disposition'];
-  let filename = options?.unsigned
-    ? `receipt-${tranxId}-unsigned.pdf`
-    : `receipt-${tranxId}.pdf`;
+  let filename = `receipt-${tranxId}.pdf`;
   if (contentDisposition) {
     const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
     if (filenameMatch && filenameMatch.length === 2) {
