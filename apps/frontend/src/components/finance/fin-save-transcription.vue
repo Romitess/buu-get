@@ -88,8 +88,12 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
 import { clearPaymentImportLocalData } from 'src/composables/use-payment-import';
-import { confirmBankReconcilePayments } from 'src/services/bank-reconcile.service';
+import {
+  checkBankReconcileEsignReady,
+  confirmBankReconcilePayments,
+} from 'src/services/bank-reconcile.service';
 
 import type { PaymentRow } from 'src/types/exam.types';
 
@@ -99,25 +103,65 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+const $q = useQuasar();
 const router = useRouter();
 const showConfirm = ref(false);
 const showSuccess = ref(false);
 const isLoading = ref(false);
 
+const getErrorMessage = (err: unknown, fallback: string): string => {
+  if (typeof err === 'object' && err !== null && 'response' in err) {
+    const response = (
+      err as { response?: { data?: { message?: string | string[] } } }
+    ).response;
+    const message = response?.data?.message;
+    if (Array.isArray(message) && message.length > 0) {
+      return message.join(', ');
+    }
+    if (typeof message === 'string' && message.trim()) {
+      return message;
+    }
+  }
+  if (err instanceof Error && err.message.trim()) {
+    return err.message;
+  }
+  return fallback;
+};
+
 const onConfirm = async () => {
   isLoading.value = true;
   try {
-    if (props.rows) {
-      const tranxIds = props.rows.filter((row) => row.tranxId).map((row) => Number(row.tranxId));
+    const tranxIds = (props.rows ?? [])
+      .filter((row) => row.tranxId)
+      .map((row) => Number(row.tranxId))
+      .filter((id) => Number.isInteger(id) && id > 0);
 
-      if (tranxIds.length > 0) {
-        await confirmBankReconcilePayments(tranxIds);
-      }
+    if (tranxIds.length === 0) {
+      $q.notify({
+        type: 'warning',
+        message: t('admin.finSaveTranscription.noMatchedRowsError'),
+      });
+      return;
     }
+
+    // ต้องได้ลายเซ็นก่อน — ถ้าไม่ได้จะไม่เรียก confirm (ไม่เขียน DB ชุดอนุมัติ/ใบเสร็จ)
+    await checkBankReconcileEsignReady();
+    await confirmBankReconcilePayments(tranxIds);
+
     showConfirm.value = false;
     showSuccess.value = true;
   } catch (err) {
     console.error('Failed to save transcription payment statuses:', err);
+    const message = getErrorMessage(
+      err,
+      t('admin.finSaveTranscription.signatureRequiredError'),
+    );
+    $q.notify({
+      type: 'negative',
+      message: /signature|e-sign|ลายเซ็น/i.test(message)
+        ? t('admin.finSaveTranscription.signatureRequiredError')
+        : message || t('admin.finSaveTranscription.saveError'),
+    });
   } finally {
     isLoading.value = false;
   }

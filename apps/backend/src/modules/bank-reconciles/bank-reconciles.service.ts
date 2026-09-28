@@ -1,14 +1,17 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { parse as parseCsv } from 'csv-parse/sync';
 import { createHash } from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 import {
   Brackets,
   DataSource,
+  EntityManager,
   In,
   IsNull,
   QueryRunner,
@@ -25,6 +28,7 @@ import {
   PAGINATION_MAX_LIMIT,
   PaginationQueryDto,
 } from 'src/common/dto/pagination-query.dto';
+import { generateReceiptVerifyCode } from 'src/common/utils/verification-code.util';
 import {
   Transaction,
   TransactionMatchStatus,
@@ -33,8 +37,13 @@ import {
 import { TransactionRef } from '../transaction-refs/entities/transaction-ref.entity';
 import { TransactionApiType } from '../transaction-status-history/entities/transaction-status-history.entity';
 import { ExamEnrollmentStatus } from '../exam-enrollments/entities/exam-enrollment.entity';
-import { Receipt } from '../receipts/entities/receipt.entity';
+import { Receipt, ReceiptStatus } from '../receipts/entities/receipt.entity';
 import { ReceiptNumberService } from '../receipts/receipt-number.service';
+import { ReceiptIssueService } from '../receipts/receipt-issue.service';
+import {
+  AuthenticatedUser,
+  requirePersonId,
+} from 'src/common/utils/authz.util';
 import { BankReconcile } from './entities/bank-reconcile.entity';
 import {
   BankReconcileChangedField,
@@ -47,6 +56,13 @@ import {
   UpdateBankReconcileRefsDto,
   UpdateBankReconcileDto,
 } from './dto/bank-reconcile.dto';
+
+const BANK_RECONCILE_READ_RELATIONS = [
+  'USER',
+  'USER.PROFILE',
+  'CREATED_BY_PERSON',
+  'TRANSACTION',
+] as const;
 
 interface ImportPaymentRow {
   applicantId: string;
@@ -169,6 +185,7 @@ export class BankReconcilesService {
     @InjectRepository(BankReconcile)
     private readonly bankReconcilesRepository: Repository<BankReconcile>,
     private readonly receiptNumberService: ReceiptNumberService,
+    private readonly receiptIssueService: ReceiptIssueService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -186,12 +203,13 @@ export class BankReconcilesService {
 
   async importFile(
     file: Express.Multer.File,
-    userId: number,
+    actor: number | AuthenticatedUser,
   ): Promise<BankReconcileImportResult> {
     if (!file) {
       throw new BadRequestException('Payment import file is required');
     }
 
+    const creator = this.resolveActor(actor);
     const rows = this.parsePaymentFile(file);
     const validRows: ImportPaymentRow[] = [];
     const seenImportKeys = new Set<string>();
@@ -226,11 +244,12 @@ export class BankReconcilesService {
       return true;
     });
 
-    if (duplicateSkipped > 0) {
+    // นำเข้าเฉพาะรายการที่ไม่ซ้ำ — ข้ามแถวซ้ำในไฟล์ / ที่เคยนำเข้าแล้ว
+    if (uniqueRows.length === 0) {
       return {
         total: rows.length,
         imported: 0,
-        skipped: rows.length,
+        skipped: invalidSkipped + duplicateSkipped,
         invalidSkipped,
         duplicateSkipped,
         data: [],
@@ -239,7 +258,8 @@ export class BankReconcilesService {
 
     const reconciles = this.bankReconcilesRepository.create(
       uniqueRows.map((row) => ({
-        CREATED_BY: userId,
+        CREATED_BY: creator.userId,
+        CREATED_BY_PSN_ID: creator.personId,
         BR_REF1: row.applicantId,
         BR_REF2: row.referenceNo,
         BR_REF3: row.paymentDate,
@@ -250,16 +270,13 @@ export class BankReconcilesService {
       })),
     );
 
-    const saved =
-      reconciles.length > 0
-        ? await this.bankReconcilesRepository.save(reconciles)
-        : [];
+    const saved = await this.bankReconcilesRepository.save(reconciles);
 
     const data =
       saved.length > 0
         ? await this.bankReconcilesRepository.find({
             where: { BR_ID: In(saved.map((s) => s.BR_ID)) },
-            relations: ['USER', 'USER.PROFILE', 'TRANSACTION'],
+            relations: [...BANK_RECONCILE_READ_RELATIONS],
           })
         : [];
 
@@ -279,7 +296,7 @@ export class BankReconcilesService {
     const page = query.page ?? PAGINATION_DEFAULT_PAGE;
     const limit = query.limit ?? PAGINATION_DEFAULT_LIMIT;
     const [data, total] = await this.bankReconcilesRepository.findAndCount({
-      relations: ['USER', 'USER.PROFILE', 'TRANSACTION'],
+      relations: [...BANK_RECONCILE_READ_RELATIONS],
       where: { DELETED_AT: IsNull() },
       skip: (page - 1) * limit,
       take: limit,
@@ -291,7 +308,7 @@ export class BankReconcilesService {
   async findOne(id: number): Promise<BankReconcile> {
     const bankReconcile = await this.bankReconcilesRepository.findOne({
       where: { BR_ID: id },
-      relations: ['USER', 'USER.PROFILE', 'TRANSACTION'],
+      relations: [...BANK_RECONCILE_READ_RELATIONS],
     });
     if (!bankReconcile) {
       throw new NotFoundException(`BankReconcile with ID ${id} not found`);
@@ -428,7 +445,7 @@ export class BankReconcilesService {
     }
 
     return this.bankReconcilesRepository.find({
-      relations: ['USER', 'USER.PROFILE', 'TRANSACTION'],
+      relations: [...BANK_RECONCILE_READ_RELATIONS],
       where: { BR_ID: In(brIds), DELETED_AT: IsNull() },
       order: { BR_ID: 'ASC' },
     });
@@ -634,7 +651,7 @@ export class BankReconcilesService {
   async updateRefs(
     id: number,
     updateBankReconcileRefsDto: UpdateBankReconcileRefsDto,
-    userId: number,
+    actor: number | AuthenticatedUser,
   ): Promise<BankReconcile> {
     return this.dataSource.transaction(async (manager) => {
       const bankReconcileRepository = manager.getRepository(BankReconcile);
@@ -707,7 +724,7 @@ export class BankReconcilesService {
       await bankReconcileRepository.save(bankReconcile);
       const updatedBankReconcile = await bankReconcileRepository.findOne({
         where: { BR_ID: id },
-        relations: ['USER', 'USER.PROFILE', 'TRANSACTION'],
+        relations: [...BANK_RECONCILE_READ_RELATIONS],
       });
 
       if (!updatedBankReconcile) {
@@ -719,10 +736,12 @@ export class BankReconcilesService {
       const changeReason = this.getChangeReason(oldSnapshot, newSnapshot);
 
       if (changeReason) {
+        const editor = this.resolveActor(actor);
         await editLogRepository.save(
           editLogRepository.create({
             BR_ID: id,
-            CHANGED_BY: userId,
+            CHANGED_BY: editor.userId,
+            CHANGED_BY_PSN_ID: editor.personId,
             OLD_SNAPSHOT: oldSnapshot,
             NEW_SNAPSHOT: newSnapshot,
             CHANGED_FIELDS: changedFields,
@@ -956,6 +975,127 @@ export class BankReconcilesService {
     return createHash('sha256').update(importKey).digest('hex');
   }
 
+  private resolveActor(actor: number | AuthenticatedUser): {
+    userId: number | null;
+    personId: string | null;
+  } {
+    if (typeof actor === 'number') {
+      if (!Number.isInteger(actor) || actor <= 0) {
+        throw new ForbiddenException(
+          'This action requires a user or personnel account',
+        );
+      }
+      return { userId: actor, personId: null };
+    }
+
+    const userId =
+      typeof actor.userId === 'number' &&
+      Number.isInteger(actor.userId) &&
+      actor.userId > 0
+        ? actor.userId
+        : null;
+    const personId = actor.personId?.trim() || null;
+    if (userId == null && personId == null) {
+      throw new ForbiddenException(
+        'This action requires a user or personnel account',
+      );
+    }
+
+    return { userId, personId };
+  }
+
+  /**
+   * โฟลว์ QR + bank callback ไม่สร้าง FIN_T_RECEIPTS
+   * — ตอนการเงินกดยืนยันต้องสร้างแถวที่ขาดก่อนออกเลข/อัปโหลด PDF
+   */
+  private async ensureReceiptsForTransactions(
+    manager: EntityManager,
+    tranxIds: number[],
+  ): Promise<number[]> {
+    if (tranxIds.length === 0) {
+      return [];
+    }
+
+    const receiptRepository = manager.getRepository(Receipt);
+    const existing = await receiptRepository.find({
+      where: { TRANX_ID: In(tranxIds) },
+      select: ['RC_ID', 'TRANX_ID'],
+    });
+    const receiptIdByTranx = new Map(
+      existing.map((receipt) => [receipt.TRANX_ID, receipt.RC_ID]),
+    );
+    const missingTranxIds = tranxIds.filter(
+      (tranxId) => !receiptIdByTranx.has(tranxId),
+    );
+
+    if (missingTranxIds.length > 0) {
+      const transactions = await manager.getRepository(Transaction).find({
+        where: { TRANX_ID: In(missingTranxIds) },
+        relations: [
+          'PROFILE',
+          'ENROLLMENT',
+          'ENROLLMENT.USER',
+          'ENROLLMENT.USER.PROFILE',
+          'BANK_RECONCILES',
+        ],
+      });
+      const transactionById = new Map(
+        transactions.map((transaction) => [transaction.TRANX_ID, transaction]),
+      );
+
+      for (const tranxId of missingTranxIds) {
+        const transaction = transactionById.get(tranxId);
+        const profile = transaction?.PROFILE;
+        const userProfile = transaction?.ENROLLMENT?.USER?.PROFILE;
+        const bankPaidBy = transaction?.BANK_RECONCILES?.find(
+          (row) => row.DELETED_AT == null && row.BR_PAID_BY?.trim(),
+        )?.BR_PAID_BY;
+
+        const fullNameFromUser = [userProfile?.userTitleTh, userProfile?.userFullnameTh]
+          .map((part) => part?.trim())
+          .filter(Boolean)
+          .join(' ')
+          .trim();
+
+        const taxIdRaw =
+          profile?.TP_TAX_ID != null && Number(profile.TP_TAX_ID) > 0
+            ? String(profile.TP_TAX_ID)
+            : null;
+        const phone =
+          profile?.TP_PHONE?.trim() ||
+          userProfile?.userPhone?.trim() ||
+          null;
+        const address =
+          profile?.TP_ADDRESS?.trim() ||
+          userProfile?.userAddress?.trim() ||
+          null;
+        const name =
+          profile?.TP_NAME?.trim() ||
+          fullNameFromUser ||
+          bankPaidBy?.trim() ||
+          null;
+
+        const created = await receiptRepository.save(
+          receiptRepository.create({
+            TRANX_ID: tranxId,
+            RC_TAX_ID: taxIdRaw && /^\d+$/.test(taxIdRaw) ? taxIdRaw : null,
+            RC_NAME: name,
+            RC_PHONE: phone ? phone.slice(0, 15) : null,
+            RC_ADDRESS: address,
+            RC_STATUS: ReceiptStatus.UNISSUED,
+            RC_SIGNATURE_ID: uuidv4(),
+            RC_VERIFY_CODE: generateReceiptVerifyCode(),
+          }),
+        );
+        receiptIdByTranx.set(tranxId, created.RC_ID);
+      }
+    }
+
+    return tranxIds
+      .map((tranxId) => receiptIdByTranx.get(tranxId))
+      .filter((receiptId): receiptId is number => receiptId != null);
+  }
+
   private createEditSnapshot(
     bankReconcile: BankReconcile,
   ): BankReconcileEditSnapshot {
@@ -1096,16 +1236,48 @@ export class BankReconcilesService {
     return queryBuilder.orderBy('tr.TSR_ID', 'ASC').getRawMany();
   }
 
+  /**
+   * ตรวจว่าบัญชีบุคลากรปัจจุบันดึงลายเซ็น e-sign ได้
+   * ใช้ก่อนนำทางไปหน้าบันทึก / ก่อน commit ชุดใบเสร็จ
+   */
+  async ensureEsignReady(
+    user: AuthenticatedUser,
+  ): Promise<{ ready: true; fullName: string; psnId: string }> {
+    const personId = requirePersonId(
+      user,
+      'Issuing receipts requires a personnel account',
+    );
+    const signature =
+      await this.receiptIssueService.fetchSignatureByPerson(personId);
+    return {
+      ready: true,
+      fullName: signature.fullName,
+      psnId: signature.psnId,
+    };
+  }
+
   async confirmPayment(
     tranxIds: number[],
+    user: AuthenticatedUser,
   ): Promise<{ success: boolean; updated: number }> {
     if (!tranxIds || tranxIds.length === 0) {
       return { success: true, updated: 0 };
     }
 
+    const personId = requirePersonId(
+      user,
+      'Issuing receipts requires a personnel account',
+    );
+
+    // Gate: ต้องได้ลายเซ็นจาก e-sign ก่อน — ยังไม่เปิด DB transaction
+    const signature =
+      await this.receiptIssueService.fetchSignatureByPerson(personId);
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+
+    let updated = 0;
 
     try {
       const transactions = await queryRunner.manager
@@ -1150,6 +1322,7 @@ export class BankReconcilesService {
           ],
         })
         .execute();
+      updated = updateTranxResult.affected ?? 0;
 
       // 2. Insert into History using the status before approval.
       if (transactions.length > 0) {
@@ -1171,17 +1344,24 @@ export class BankReconcilesService {
           .execute();
       }
 
-      // 3. Update Receipts
-      const receiptRows = await queryRunner.manager
-        .getRepository(Receipt)
-        .find({
-          where: { TRANX_ID: In(tranxIds) },
-          select: ['RC_ID'],
-        });
-      const receiptIds = receiptRows.map((r) => r.RC_ID);
+      // 3. Ensure receipt rows exist, then assign numbers + collector metadata
+      const receiptIds = await this.ensureReceiptsForTransactions(
+        queryRunner.manager,
+        tranxIds,
+      );
+      if (transactions.length > 0 && receiptIds.length === 0) {
+        throw new BadRequestException(
+          'Unable to create receipts for confirmed payments',
+        );
+      }
       await this.receiptNumberService.assignOnIssue(
         queryRunner.manager,
         receiptIds,
+      );
+      await this.receiptIssueService.applyCollectorMetadata(
+        queryRunner.manager,
+        receiptIds,
+        signature,
       );
 
       // 4. Update Exam Enrollments
@@ -1198,8 +1378,15 @@ export class BankReconcilesService {
           .execute();
       }
 
+      // 5. สร้าง PDF + อัปโหลด MinIO ก่อน commit — ถ้า fail จะ rollback ทั้งก้อน
+      await this.receiptIssueService.generateAndUploadReceiptFiles(
+        queryRunner.manager,
+        receiptIds,
+        signature,
+      );
+
       await queryRunner.commitTransaction();
-      return { success: true, updated: updateTranxResult.affected ?? 0 };
+      return { success: true, updated };
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;

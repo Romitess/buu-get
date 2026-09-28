@@ -102,7 +102,11 @@ export class ReceiptsController {
   }
 
   @Get(':tranxId/download')
-  @ApiOperation({ summary: 'ดาวน์โหลดใบเสร็จรับเงินด้วยรหัสธุรกรรม' })
+  @ApiOperation({
+    summary: 'ดาวน์โหลดใบเสร็จรับเงินด้วยรหัสธุรกรรม',
+    description:
+      'ส่ง unsigned=true เพื่อสร้าง PDF ใหม่แบบไม่มีลายเซ็น (ไม่ดึงไฟล์ archive จาก MinIO)',
+  })
   @ApiResponse({ status: 200, description: 'ไฟล์ใบเสร็จรับเงิน PDF' })
   @ApiResponse({ status: 403, description: 'ใบเสร็จยังไม่ออก' })
   @ApiResponse({ status: 404, description: 'ไม่พบใบเสร็จ' })
@@ -110,11 +114,19 @@ export class ReceiptsController {
     @Param('tranxId', ParseIntPipe) tranxId: number,
     @CurrentUser() user: AuthenticatedUser,
     @Res({ passthrough: true }) res: Response,
+    @Query('unsigned') unsigned?: string,
   ): Promise<StreamableFile> {
-    const buffer = await this.receiptsService.downloadReceipt(tranxId, user);
+    const forceUnsigned =
+      unsigned === '1' || unsigned?.toLowerCase() === 'true';
+    const buffer = await this.receiptsService.downloadReceipt(tranxId, user, {
+      unsigned: forceUnsigned,
+    });
+    const filename = forceUnsigned
+      ? `receipt-${tranxId}-unsigned.pdf`
+      : `receipt-${tranxId}.pdf`;
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="receipt-${tranxId}.pdf"`,
+      'Content-Disposition': `attachment; filename="${filename}"`,
     });
     return new StreamableFile(buffer);
   }

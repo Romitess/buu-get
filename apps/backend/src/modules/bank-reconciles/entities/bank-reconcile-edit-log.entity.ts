@@ -9,6 +9,7 @@ import {
   Relation,
   UpdateDateColumn,
 } from 'typeorm';
+import { MsgPerson } from '../../msg-persons/entities/msg-person.entity';
 import { User } from '../../users/entities/user.entity';
 import { BankReconcile } from './bank-reconcile.entity';
 
@@ -37,8 +38,21 @@ export class BankReconcileEditLog {
   @Column({ name: 'BR_ID', comment: 'รหัส Bank Reconcile (Foreign Key)' })
   BR_ID: number;
 
-  @Column({ name: 'CHANGED_BY', comment: 'รหัสผู้แก้ไข (Foreign Key)' })
-  CHANGED_BY: number;
+  @Column({
+    name: 'CHANGED_BY',
+    nullable: true,
+    comment: 'รหัสผู้แก้ไขฝั่งผู้สมัคร (Foreign Key)',
+  })
+  CHANGED_BY: number | null;
+
+  @Column({
+    name: 'CHANGED_BY_PSN_ID',
+    type: 'varchar',
+    length: 10,
+    nullable: true,
+    comment: 'รหัสบุคลากรผู้แก้ไข (Foreign Key)',
+  })
+  CHANGED_BY_PSN_ID: string | null;
 
   @Column({
     name: 'OLD_SNAPSHOT',
@@ -88,5 +102,9 @@ export class BankReconcileEditLog {
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'CHANGED_BY' })
-  USER: Relation<User>;
+  USER: Relation<User> | null;
+
+  @ManyToOne(() => MsgPerson)
+  @JoinColumn({ name: 'CHANGED_BY_PSN_ID' })
+  CHANGED_BY_PERSON: Relation<MsgPerson> | null;
 }

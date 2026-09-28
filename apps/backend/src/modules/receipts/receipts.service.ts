@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Readable } from 'stream';
 import {
   buildPaginatedResponse,
   PaginatedResponse,
@@ -23,6 +24,7 @@ import { generateReceiptVerifyCode } from 'src/common/utils/verification-code.ut
 import { buildReceiptNo } from 'src/common/utils/receipt-no.util';
 import { buildReceiptItemDescription } from 'src/common/utils/receipt-description.util';
 import { buildReceiptPdf } from 'src/common/utils/build-receipt-pdf.util';
+import { PlatformGatewayService } from '../platform-gateway/platform-gateway.service';
 import { Receipt, ReceiptStatus } from './entities/receipt.entity';
 import { ReceiptNumberService } from './receipt-number.service';
 import { CreateReceiptDto, UpdateReceiptDto } from './dto/receipt.dto';
@@ -32,12 +34,21 @@ const BUU_ORGANIZATION = {
   nameEN: 'BURAPHA UNIVERSITY',
 } as const;
 
+async function readableToBuffer(stream: Readable): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+}
+
 @Injectable()
 export class ReceiptsService {
   constructor(
     @InjectRepository(Receipt)
     private readonly receiptsRepository: Repository<Receipt>,
     private readonly receiptNumberService: ReceiptNumberService,
+    private readonly platformGatewayService: PlatformGatewayService,
   ) {}
 
   async create(createReceiptDto: CreateReceiptDto): Promise<Receipt> {
@@ -135,6 +146,7 @@ export class ReceiptsService {
   async downloadReceipt(
     tranxId: number,
     user: AuthenticatedUser,
+    options?: { unsigned?: boolean },
   ): Promise<Uint8Array> {
     const receipt = await this.receiptsRepository.findOne({
       where: { TRANX_ID: tranxId },
@@ -167,6 +179,16 @@ export class ReceiptsService {
 
     if (receipt.RC_STATUS !== ReceiptStatus.ISSUED) {
       throw new ForbiddenException(`Receipt is not in ISSUED status`);
+    }
+
+    // ใบที่ออกหลังมี e-sign — ดาวน์โหลดไฟล์ archive จาก MinIO
+    // ยกเว้น unsigned=true: สร้าง PDF ใหม่แบบไม่มีลายเซ็นทุกครั้ง
+    if (!options?.unsigned && receipt.RC_FILE_PATH?.startsWith('/')) {
+      const { stream } = await this.platformGatewayService.getPublicFileStream(
+        receipt.RC_FILE_PATH,
+      );
+      const buffer = await readableToBuffer(stream);
+      return new Uint8Array(buffer);
     }
 
     const transaction = receipt.TRANSACTION;

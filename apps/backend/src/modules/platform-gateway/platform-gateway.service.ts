@@ -931,6 +931,29 @@ export class PlatformGatewayService {
     }
   }
 
+  async getSignatureImageByPerson(arg: {
+    psn_id: string;
+  }): Promise<{
+    status?: string;
+    result?: {
+      PSN_ID?: string;
+      PSN_FULLNAME?: string;
+      SIGN_BASE64?: string;
+    };
+  }> {
+    const apiName = 'getSignatureImageByPerson';
+    const data = { psn_id: arg.psn_id };
+
+    try {
+      const response = await this.postApi(apiName, data);
+      return response.data;
+    } catch (error) {
+      await this.sendNoti(this.getNotiEndpoint() + apiName + ': ' + error);
+      this.logger?.error?.(`❌ getSignatureImageByPerson failed: ${error}`);
+      throw error;
+    }
+  }
+
   async signElectronicSignature(arg: any) {
     const apiName = 'signElectronicSignature';
     const data = {

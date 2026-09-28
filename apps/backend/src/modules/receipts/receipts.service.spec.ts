@@ -30,6 +30,9 @@ describe('ReceiptsService', () => {
   let receiptNumberService: {
     assignOnIssue: jest.Mock;
   };
+  let platformGatewayService: {
+    getPublicFileStream: jest.Mock;
+  };
 
   const mockedGenerateReceiptVerifyCode =
     generateReceiptVerifyCode as jest.MockedFunction<
@@ -58,9 +61,13 @@ describe('ReceiptsService', () => {
     receiptNumberService = {
       assignOnIssue: jest.fn(),
     };
+    platformGatewayService = {
+      getPublicFileStream: jest.fn(),
+    };
     service = new ReceiptsService(
       receiptsRepository as unknown as Repository<Receipt>,
       receiptNumberService,
+      platformGatewayService as never,
     );
     mockedGenerateReceiptVerifyCode.mockClear();
     mockedGenerateReceiptVerifyCode.mockReturnValue('ABCDEFGH12345678');
@@ -487,6 +494,68 @@ describe('ReceiptsService', () => {
       expect(pdfText).toContain('1234567890123');
       expect(pdfText).toContain('ABCDEFGH12345678');
       expect(pdfText).not.toContain('Hello, world!');
+      expect(platformGatewayService.getPublicFileStream).not.toHaveBeenCalled();
+    });
+
+    it('should stream archived receipt from MinIO when RC_FILE_PATH is set', async () => {
+      const { Readable } = await import('stream');
+      receiptsRepository.findOne.mockResolvedValue({
+        RC_ID: 1,
+        TRANX_ID: 11,
+        RC_STATUS: ReceiptStatus.ISSUED,
+        RC_FILE_PATH: '/receipts/256900001.pdf',
+        RC_VERIFY_CODE: 'ABCDEFGH12345678',
+        CREATED_AT: new Date('2026-07-01T00:00:00+07:00'),
+        TRANSACTION: { ENROLLMENT: { USER_ID: 10 } },
+      });
+      platformGatewayService.getPublicFileStream.mockResolvedValue({
+        stream: Readable.from([Buffer.from('%PDF-1.4 archived')]),
+        contentType: 'application/pdf',
+      });
+
+      const result = await service.downloadReceipt(11, ownerUser);
+
+      expect(platformGatewayService.getPublicFileStream).toHaveBeenCalledWith(
+        '/receipts/256900001.pdf',
+      );
+      expect(Buffer.from(result).toString('utf8')).toContain('%PDF-1.4 archived');
+    });
+
+    it('should regenerate unsigned PDF and skip MinIO when unsigned=true', async () => {
+      receiptsRepository.findOne.mockResolvedValue({
+        RC_ID: 1,
+        TRANX_ID: 11,
+        RC_NO: '256900001',
+        RC_NAME: 'Somchai Test',
+        RC_TAX_ID: '1234567890123',
+        RC_STATUS: ReceiptStatus.ISSUED,
+        RC_FILE_PATH: '/receipts/256900001.pdf',
+        RC_VERIFY_CODE: 'ABCDEFGH12345678',
+        RC_ISSUED_AT: new Date('2026-07-15T10:00:00+07:00'),
+        CREATED_AT: new Date('2026-07-01T00:00:00+07:00'),
+        TRANSACTION: {
+          TRANX_AMOUNT: 500,
+          TRANX_PAID_AT: new Date('2026-07-14T10:00:00+07:00'),
+          ENROLLMENT: {
+            USER_ID: 10,
+            SESSION: {
+              EXAM: {
+                EXAM_ROUND: '1',
+                EXAM_FISCAL_YEAR: '2026',
+                EXAM_DATE: '2026-08-01',
+              },
+            },
+          },
+        },
+      });
+
+      const result = await service.downloadReceipt(11, ownerUser, {
+        unsigned: true,
+      });
+
+      expect(platformGatewayService.getPublicFileStream).not.toHaveBeenCalled();
+      expect(result).toBeInstanceOf(Uint8Array);
+      expect(Buffer.from(result).toString('utf8').slice(0, 5)).toBe('%PDF-');
     });
 
     it('should allow finance role to download another user receipt', async () => {

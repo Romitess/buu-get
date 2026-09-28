@@ -81,6 +81,33 @@ export class Receipt {
   })
   RC_ISSUED_AT: Date | null;
 
+  @Column({
+    name: 'RC_FILE_PATH',
+    type: 'varchar',
+    length: 500,
+    nullable: true,
+    comment: 'path ไฟล์ใบเสร็จ PDF ใน MinIO',
+  })
+  RC_FILE_PATH: string | null;
+
+  @Column({
+    name: 'RC_ISSUED_BY_PSN_ID',
+    type: 'varchar',
+    length: 20,
+    nullable: true,
+    comment: 'รหัสบุคลากรผู้รับเงิน (ผู้ออกใบเสร็จ)',
+  })
+  RC_ISSUED_BY_PSN_ID: string | null;
+
+  @Column({
+    name: 'RC_COLLECTOR_NAME',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    comment: 'ชื่อผู้รับเงิน ณ วันออกใบเสร็จ',
+  })
+  RC_COLLECTOR_NAME: string | null;
+
   @CreateDateColumn({
     name: 'CREATED_AT',
     type: 'timestamp',

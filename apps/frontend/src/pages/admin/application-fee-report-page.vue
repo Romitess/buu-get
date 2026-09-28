@@ -41,8 +41,8 @@
           <div class="row items-center justify-center">
             <ActionButton
               icon="download"
-              color="scecondary"
-              :tooltip="t('admin.applicationFeeReport.actions.viewRecord')"
+              color="secondary"
+              :tooltip="t('admin.applicationFeeReport.actions.downloadUnsigned')"
               @click="onRecordAction(row)"
             />
           </div>
@@ -448,7 +448,7 @@ const onRecordAction = async (row: ApplicationFeeRow): Promise<void> => {
     console.error(err);
     $q.notify({
       type: 'negative',
-      message: 'เกิดข้อผิดพลาดในการดาวน์โหลดใบเสร็จ',
+      message: t('admin.applicationFeeReport.notifications.downloadError'),
       position: 'top',
     });
   }

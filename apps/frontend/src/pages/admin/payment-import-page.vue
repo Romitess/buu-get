@@ -122,6 +122,7 @@ import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import AppButton from 'src/components/base/app-button.vue';
 import AppFileUploadZone from 'src/components/shared/app-file-upload-zone.vue';
 import { usePaymentImport } from 'src/composables/use-payment-import';
+import { checkBankReconcileEsignReady } from 'src/services/bank-reconcile.service';
 import type { PaginationModel, TableRequestProps } from 'src/types/exam.types';
 
 const i18n = useI18n();
@@ -182,7 +183,7 @@ const onFileSelected = async (file: File): Promise<void> => {
     } else if (result.imported === 0 && result.duplicateSkipped > 0) {
       $q.notify({
         type: 'warning',
-        message: `พบข้อมูลซ้ำ จึงไม่นำเข้าไฟล์นี้ (ข้ามทั้งหมด ${result.skipped} รายการ${skippedReason})`,
+        message: `ทุกรายการซ้ำกับข้อมูลที่มีอยู่แล้ว จึงไม่นำเข้าเพิ่ม (ข้าม ${result.skipped} รายการ${skippedReason})`,
       });
     } else if (result.imported === 0 && result.skipped > 0) {
       $q.notify({
@@ -240,13 +241,28 @@ const handleVerify = async (): Promise<void> => {
 
   try {
     await verifyData();
+    // ต้องได้ลายเซ็นก่อนไปหน้าบันทึก — ถ้าไม่ได้จะไม่ไปต่อ
+    await checkBankReconcileEsignReady();
     $q.notify({
       type: 'positive',
       message: i18n.t('admin.paymentImport.notifications.verifySuccess') || 'ตรวจสอบสำเร็จ',
     });
     void router.push({ name: 'admin-fin-check-transcript' });
-  } catch {
-    // error watcher displays the API failure message
+  } catch (err) {
+    const axiosMessage = (
+      err as { response?: { data?: { message?: string } } } | undefined
+    )?.response?.data?.message;
+    const isSignatureError =
+      typeof axiosMessage === 'string' &&
+      /signature|e-sign|ลายเซ็น/i.test(axiosMessage);
+    if (isSignatureError || (err instanceof Error && /signature|e-sign/i.test(err.message))) {
+      $q.notify({
+        type: 'negative',
+        message: i18n.t('admin.paymentImport.notifications.signatureRequiredError'),
+      });
+      return;
+    }
+    // error watcher displays the API failure message for other errors
   }
 };
 

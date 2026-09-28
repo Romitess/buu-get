@@ -28,8 +28,11 @@ export const IMAGE_CATEGORIES = {
     scope: 'shared',
     requireAuth: false,
   },
-  // 🔮 อนาคต เพิ่มได้ที่นี่ เช่น:
-  // 'exam-doc': { baseFolder: '/exam_docs', scope: 'per-user', requireAuth: true },
+  'receipt-file': {
+    baseFolder: '/receipts',
+    scope: 'shared',
+    requireAuth: true,
+  },
 } as const satisfies Record<string, ImageCategoryConfig>;
 
 export type ImageCategory = keyof typeof IMAGE_CATEGORIES;

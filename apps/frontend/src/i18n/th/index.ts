@@ -1221,6 +1221,8 @@ export default {
         clearSuccess: 'ลบข้อมูลไฟล์ทั้งหมดเรียบร้อยแล้ว',
         verifySuccess: 'ตรวจสอบข้อมูลเรียบร้อยแล้ว',
         uploadError: 'เกิดข้อผิดพลาดในการอัปโหลดไฟล์',
+        signatureRequiredError:
+          'ยังดึงลายเซ็นอิเล็กทรอนิกส์ไม่ได้ จึงยังไม่ไปขั้นตอนบันทึก กรุณาลองใหม่อีกครั้ง',
       },
     },
     examForm: {
@@ -1906,6 +1908,9 @@ export default {
       successTitle: 'บันทึกสำเร็จ',
       successMessage: 'บันทึกข้อมูลเรียบร้อยแล้ว',
       saveError: 'เกิดข้อผิดพลาดในการบันทึกข้อมูลการชำระเงิน',
+      signatureRequiredError:
+        'ยังดึงลายเซ็นอิเล็กทรอนิกส์ไม่ได้ จึงยังไม่บันทึกข้อมูล กรุณาลองใหม่อีกครั้ง',
+      noMatchedRowsError: 'ไม่พบรายการที่จับคู่ธุรกรรมแล้วสำหรับบันทึก',
       okBtn: 'ตกลง',
     },
     testVoucherManagement: {
@@ -2064,6 +2069,12 @@ export default {
       actions: {
         viewRecord: 'ดูรายละเอียด',
         viewRecordMessage: 'เปิดใบเสร็จ {receiptNo} เพื่อดูรายละเอียด',
+        downloadUnsigned: 'ดาวน์โหลดใบเสร็จ (ไม่มีลายเซ็น)',
+      },
+      notifications: {
+        loadError: 'ไม่สามารถดึงข้อมูลค่าธรรมเนียมสมัครสอบได้',
+        downloadSuccess: 'ดาวน์โหลดใบเสร็จรับเงินเรียบร้อยแล้ว (PDF)',
+        downloadError: 'เกิดข้อผิดพลาดในการดาวน์โหลดใบเสร็จ',
       },
     },
     examInformation: {

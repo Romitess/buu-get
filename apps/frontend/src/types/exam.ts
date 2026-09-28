@@ -236,6 +236,9 @@ export interface ExamEnrollment {
       RC_PHONE?: string | null;
       RC_ADDRESS?: string | null;
       RC_STATUS: number;
+      RC_FILE_PATH?: string | null;
+      RC_COLLECTOR_NAME?: string | null;
+      RC_ISSUED_BY_PSN_ID?: string | null;
     }[];
     BANK_RECONCILES?: { BR_ID: number; TRANX_ID: number | null }[];
   };

@@ -1227,6 +1227,8 @@ export default {
         clearSuccess: 'All file data cleared successfully',
         verifySuccess: 'Data verified successfully',
         uploadError: 'An error occurred while uploading the file',
+        signatureRequiredError:
+          'Electronic signature is not available yet, so the save step was not opened. Please try again.',
       },
     },
     examForm: {
@@ -1903,6 +1905,9 @@ export default {
       successTitle: 'Success',
       successMessage: 'Data saved successfully',
       saveError: 'An error occurred while saving payment data',
+      signatureRequiredError:
+        'Electronic signature is not available yet, so nothing was saved. Please try again.',
+      noMatchedRowsError: 'No matched payment rows are available to save',
       okBtn: 'OK',
     },
     testVoucherManagement: {
@@ -2061,6 +2066,12 @@ export default {
       actions: {
         viewRecord: 'View record',
         viewRecordMessage: 'Receipt {receiptNo} opened for review.',
+        downloadUnsigned: 'Download receipt (without signature)',
+      },
+      notifications: {
+        loadError: 'Failed to load application fee data',
+        downloadSuccess: 'Receipt downloaded successfully (PDF)',
+        downloadError: 'Failed to download receipt',
       },
     },
     examInformation: {

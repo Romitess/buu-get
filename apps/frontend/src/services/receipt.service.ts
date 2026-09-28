@@ -38,6 +38,9 @@ export interface IssuedReceipt {
   RC_STATUS: number;
   RC_ISSUED_AT: string | null;
   RC_NO: string | null;
+  RC_FILE_PATH?: string | null;
+  RC_COLLECTOR_NAME?: string | null;
+  RC_ISSUED_BY_PSN_ID?: string | null;
   CREATED_AT: string;
   TRANSACTION?: IssuedReceiptTransaction | null;
 }
@@ -49,9 +52,13 @@ export const fetchIssuedReceipts = async (): Promise<IssuedReceipt[]> => {
   return response.data.data ?? [];
 };
 
-export const downloadReceipt = async (tranxId: number): Promise<void> => {
+export const downloadReceipt = async (
+  tranxId: number,
+  options?: { unsigned?: boolean },
+): Promise<void> => {
   const response = await api.get(`/receipts/${tranxId}/download`, {
-    responseType: 'blob', // Important for downloading files
+    responseType: 'blob',
+    params: options?.unsigned ? { unsigned: true } : undefined,
   });
 
   // Create a URL for the blob and trigger download
@@ -61,7 +68,9 @@ export const downloadReceipt = async (tranxId: number): Promise<void> => {
 
   // Try to extract filename from content-disposition header if present
   const contentDisposition = response.headers['content-disposition'];
-  let filename = `receipt-${tranxId}.pdf`;
+  let filename = options?.unsigned
+    ? `receipt-${tranxId}-unsigned.pdf`
+    : `receipt-${tranxId}.pdf`;
   if (contentDisposition) {
     const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
     if (filenameMatch && filenameMatch.length === 2) {

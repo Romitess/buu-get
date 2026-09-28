@@ -10,6 +10,7 @@ import {
   OneToMany,
   Relation,
 } from 'typeorm';
+import { MsgPerson } from '../../msg-persons/entities/msg-person.entity';
 import { Transaction } from '../../transactions/entities/transaction.entity';
 import { User } from '../../users/entities/user.entity';
 import { TransactionRef } from '../../transaction-refs/entities/transaction-ref.entity';
@@ -26,8 +27,21 @@ export class BankReconcile {
   })
   TRANX_ID: number | null;
 
-  @Column({ name: 'CREATED_BY', comment: 'รหัสผู้สร้าง (Foreign Key)' })
-  CREATED_BY: number;
+  @Column({
+    name: 'CREATED_BY',
+    nullable: true,
+    comment: 'รหัสผู้สร้างฝั่งผู้สมัคร (Foreign Key)',
+  })
+  CREATED_BY: number | null;
+
+  @Column({
+    name: 'CREATED_BY_PSN_ID',
+    type: 'varchar',
+    length: 10,
+    nullable: true,
+    comment: 'รหัสบุคลากรผู้สร้าง (Foreign Key)',
+  })
+  CREATED_BY_PSN_ID: string | null;
 
   @Column({ name: 'BR_REF1', type: 'varchar', length: 20, comment: 'Ref 1' })
   BR_REF1: string;
@@ -104,7 +118,11 @@ export class BankReconcile {
 
   @ManyToOne(() => User, (user) => user.BANK_RECONCILES)
   @JoinColumn({ name: 'CREATED_BY' })
-  USER: User;
+  USER: User | null;
+
+  @ManyToOne(() => MsgPerson)
+  @JoinColumn({ name: 'CREATED_BY_PSN_ID' })
+  CREATED_BY_PERSON: Relation<MsgPerson> | null;
 
   @OneToMany(() => TransactionRef, (ref: TransactionRef) => ref.BANK_RECONCILE)
   TRANSACTION_REFS: Relation<TransactionRef>[];

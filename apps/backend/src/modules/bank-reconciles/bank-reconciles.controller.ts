@@ -8,7 +8,6 @@ import {
   Patch,
   Post,
   Query,
-  Request,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -38,21 +37,14 @@ import { BankReconcile } from './entities/bank-reconcile.entity';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { FINANCE_ROLES } from '../../common/constants/role-groups';
-import { RoleEnum } from '../roles/enums/role.enum';
 import { PaginatedResponse } from '../../common/dto/paginated-response.dto';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import {
   UpdateBankReconcileRefsDto,
   VerifyBankReconcilesDto,
 } from './dto/bank-reconcile.dto';
-
-interface AuthenticatedRequest {
-  user: {
-    userId: number;
-    email: string;
-    role: RoleEnum;
-  };
-}
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { AuthenticatedUser } from '../../common/utils/authz.util';
 
 @ApiTags('Bank Reconciles')
 @ApiBearerAuth()
@@ -84,9 +76,9 @@ export class BankReconcilesController {
   })
   importFile(
     @UploadedFile() file: Express.Multer.File,
-    @Request() request: AuthenticatedRequest,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<BankReconcileImportResult> {
-    return this.bankReconcilesService.importFile(file, request.user.userId);
+    return this.bankReconcilesService.importFile(file, user);
   }
 
   @Get()
@@ -150,12 +142,12 @@ export class BankReconcilesController {
   updateRefs(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateBankReconcileRefsDto: UpdateBankReconcileRefsDto,
-    @Request() request: AuthenticatedRequest,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<BankReconcile> {
     return this.bankReconcilesService.updateRefs(
       id,
       updateBankReconcileRefsDto,
-      request.user.userId,
+      user,
     );
   }
 
@@ -195,6 +187,17 @@ export class BankReconcilesController {
     return this.bankReconcilesService.matchRefs(refs);
   }
 
+  @Get('esign-ready')
+  @ApiOperation({
+    summary: 'ตรวจสอบว่าดึงลายเซ็น e-sign ของบัญชีบุคลากรปัจจุบันได้',
+  })
+  @ApiResponse({ status: 200, description: 'พร้อมออกใบเสร็จด้วยลายเซ็น' })
+  ensureEsignReady(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<{ ready: true; fullName: string; psnId: string }> {
+    return this.bankReconcilesService.ensureEsignReady(user);
+  }
+
   @Post('confirm-payment')
   @ApiOperation({ summary: 'ยืนยันการชำระเงินและเปลี่ยนสถานะ' })
   @ApiBody({
@@ -211,7 +214,8 @@ export class BankReconcilesController {
   @ApiResponse({ status: 201, description: 'Confirmed successfully' })
   confirmPayment(
     @Body('tranxIds') tranxIds: number[],
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<{ success: boolean; updated: number }> {
-    return this.bankReconcilesService.confirmPayment(tranxIds);
+    return this.bankReconcilesService.confirmPayment(tranxIds, user);
   }
 }

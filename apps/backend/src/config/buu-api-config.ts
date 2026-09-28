@@ -56,4 +56,12 @@ export default () => ({
     provision_key: process.env.BUU_DS_PREFIX_PROVISION_KEY || '',
     scope: process.env.BUU_DS_PREFIX_SCOPE || 'read',
   },
+  getSignatureImageByPerson: {
+    // ชื่อ env ตรงกับ HRD เพื่อ copy จาก hrd-back/.development.env ได้เลย
+    path:
+      process.env.BUU_GET_SIG_IMAGE_PERSON_PATH ||
+      '/e-sign/e-sign.GetSignatureImageByPerson',
+    provision_key: process.env.BUU_GET_SIG_IMAGE_PERSON_PROVISION_KEY || '',
+    scope: process.env.BUU_GET_SIG_IMAGE_PERSON_SCOPE || 'read',
+  },
 });

@@ -3,7 +3,8 @@ import { api } from 'src/boot/axios';
 export interface BackendBankReconcile {
   BR_ID: number;
   TRANX_ID: number | null;
-  CREATED_BY: number;
+  CREATED_BY: number | null;
+  CREATED_BY_PSN_ID?: string | null;
   BR_REF1: string;
   BR_REF2: string | null;
   BR_REF3: string | null;
@@ -21,6 +22,14 @@ export interface BackendBankReconcile {
       userFullnameTh: string | null;
       userFullnameEn: string | null;
     } | null;
+  } | null;
+  CREATED_BY_PERSON?: {
+    PSN_ID: string;
+    PRF_NAMETH?: string | null;
+    PSN_FNAMETH?: string | null;
+    PSN_FNAMEEN?: string | null;
+    PSN_LNAMETH?: string | null;
+    PSN_LNAMEEN?: string | null;
   } | null;
 }
 
@@ -114,6 +123,19 @@ export const confirmBankReconcilePayments = async (
     '/bank-reconciles/confirm-payment',
     { tranxIds },
   );
+  return response.data;
+};
+
+export const checkBankReconcileEsignReady = async (): Promise<{
+  ready: true;
+  fullName: string;
+  psnId: string;
+}> => {
+  const response = await api.get<{
+    ready: true;
+    fullName: string;
+    psnId: string;
+  }>('/bank-reconciles/esign-ready');
   return response.data;
 };
 

@@ -7,6 +7,7 @@ import {
   type BackendBankReconcile,
   type BankReconcileImportResponse,
 } from 'src/services/bank-reconcile.service';
+import { formatMsgPersonName } from 'src/utils/proctor-option';
 
 /** Row shape for the payment import table */
 export interface PaymentImportRow {
@@ -104,9 +105,9 @@ export function usePaymentImport() {
   const totalCount = computed((): number => importedRows.value.length);
 
   const hasEmptyRows = computed((): boolean => {
-    return (
-      skippedRows.value > 0 ||
-      importedRows.value.some((row) => !row.applicantId.trim() || !row.amount.trim())
+    // ตรวจเฉพาะแถวที่นำเข้าแล้วในตาราง — ไม่นับแถวที่ข้ามตอน import (ซ้ำ/ไม่ครบ)
+    return importedRows.value.some(
+      (row) => !row.applicantId.trim() || !row.amount.trim(),
     );
   });
 
@@ -233,7 +234,13 @@ function mapBankReconcileToRow(item: BackendBankReconcile, index: number): Payme
     amount: formatAmount(item.BR_AMOUNT),
     importedAt: item.CREATED_AT ? formatImportDate(new Date(item.CREATED_AT)) : '-',
     importedBy:
-      item.USER?.PROFILE?.userFullnameTh || item.USER?.USER_EMAIL || String(item.CREATED_BY),
+      item.USER?.PROFILE?.userFullnameTh ||
+      item.USER?.USER_EMAIL ||
+      (item.CREATED_BY_PERSON
+        ? formatMsgPersonName(item.CREATED_BY_PERSON)
+        : '') ||
+      item.CREATED_BY_PSN_ID ||
+      (item.CREATED_BY != null ? String(item.CREATED_BY) : '-'),
   };
 }
 

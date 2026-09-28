@@ -37,8 +37,11 @@ jest.mock('../exam-enrollments/entities/exam-enrollment.entity', () => ({
 }));
 
 jest.mock('../receipts/entities/receipt.entity', () => ({
+  Receipt: class Receipt {},
   ReceiptStatus: {
+    UNISSUED: 0,
     ISSUED: 1,
+    VOIDED: 2,
   },
 }));
 
@@ -50,7 +53,7 @@ jest.mock('./entities/bank-reconcile-edit-log.entity', () => ({
   BankReconcileEditLog: class BankReconcileEditLog {},
 }));
 
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import {
   Transaction,
   TransactionMatchStatus,
@@ -68,6 +71,7 @@ import {
   type BankReconcileChangeReason,
   type BankReconcileEditSnapshot,
 } from './entities/bank-reconcile-edit-log.entity';
+import { RoleEnum } from '../roles/enums/role.enum';
 
 interface ExistingBankReconcileHashRow {
   BR_IMPORT_KEY_HASH: string | null;
@@ -241,6 +245,18 @@ describe('BankReconcilesService', () => {
     receipt: MockEntityRepository;
   };
   let receiptNumberService: { assignOnIssue: jest.Mock };
+  let receiptIssueService: {
+    fetchSignatureByPerson: jest.Mock;
+    applyCollectorMetadata: jest.Mock;
+    generateAndUploadReceiptFiles: jest.Mock;
+  };
+
+  const financeUser = {
+    actorType: 'person' as const,
+    personId: '00000001',
+    email: 'finance@buu.ac.th',
+    role: RoleEnum.FINANCE,
+  };
 
   const getManagerRepository = (entity: unknown): MockEntityRepository => {
     if (entity === BankReconcile) return managerRepos.bankReconcile;
@@ -302,9 +318,20 @@ describe('BankReconcilesService', () => {
       assignOnIssue: jest.fn().mockResolvedValue(undefined),
     };
 
+    receiptIssueService = {
+      fetchSignatureByPerson: jest.fn().mockResolvedValue({
+        psnId: '00000001',
+        fullName: 'Finance Officer',
+        signatureBase64: 'data:image/png;base64,AAA',
+      }),
+      applyCollectorMetadata: jest.fn().mockResolvedValue(undefined),
+      generateAndUploadReceiptFiles: jest.fn().mockResolvedValue(undefined),
+    };
+
     service = new BankReconcilesService(
       repository as unknown as Repository<BankReconcile>,
       receiptNumberService,
+      receiptIssueService as never,
       dataSource as unknown as DataSource,
     );
   });
@@ -382,7 +409,7 @@ describe('BankReconcilesService', () => {
       ]);
     });
 
-    it('BR-U-005: should abort entire import when uploaded file has duplicate payment rows', async () => {
+    it('BR-U-005: should import first occurrence and skip duplicate rows in file', async () => {
       // Arrange
       const file = createCsvFile(
         [
@@ -396,21 +423,57 @@ describe('BankReconcilesService', () => {
       const result = await service.importFile(file, 1);
 
       // Assert
-      expect(result).toEqual({
-        total: 2,
-        imported: 0,
-        skipped: 2,
-        invalidSkipped: 0,
-        duplicateSkipped: 1,
-        data: [],
-      });
-      expect(repository.create).not.toHaveBeenCalled();
-      expect(repository.save).not.toHaveBeenCalled();
-      expect(repository.find).not.toHaveBeenCalled();
+      expect(result.total).toBe(2);
+      expect(result.imported).toBe(1);
+      expect(result.duplicateSkipped).toBe(1);
+      expect(result.skipped).toBe(1);
+      expect(result.invalidSkipped).toBe(0);
+      expect(repository.create).toHaveBeenCalledWith([
+        expect.objectContaining({
+          BR_REF1: '64000001',
+          BR_REF2: 'REF001',
+        }),
+      ]);
+      expect(repository.save).toHaveBeenCalled();
     });
 
-    it('BR-U-006: should abort import when immutable import key hash already exists', async () => {
+    it('BR-U-006: should skip rows whose import key hash already exists and import the rest', async () => {
       // Arrange
+      const existingHash = createImportHash(
+        '64000001|ref001|2026-06-22|10:00|10000|alice',
+      );
+      const queryBuilder = createQueryBuilder([
+        { BR_IMPORT_KEY_HASH: existingHash },
+      ]);
+      dataSource.createQueryBuilder.mockReturnValue(queryBuilder);
+
+      const file = createCsvFile(
+        [
+          'applicantId,referenceNo,payerName,amount,paymentDate,paymentTime',
+          '64000001,REF001,Alice,100.00,2026-06-22,10:00',
+          '64000002,REF002,Bob,200.00,2026-06-22,11:00',
+        ].join('\n'),
+      );
+
+      // Act
+      const result = await service.importFile(file, 1);
+
+      // Assert
+      expect(result.total).toBe(2);
+      expect(result.imported).toBe(1);
+      expect(result.duplicateSkipped).toBe(1);
+      expect(result.skipped).toBe(1);
+      expect(repository.create).toHaveBeenCalledWith([
+        expect.objectContaining({
+          BR_REF1: '64000002',
+          BR_REF2: 'REF002',
+          BR_PAID_BY: 'Bob',
+        }),
+      ]);
+      expect(repository.save).toHaveBeenCalled();
+    });
+
+    it('BR-U-006b: should import nothing when every row already exists', async () => {
       const expectedHash = createImportHash(
         '64000001|ref001|2026-06-22|10:00|10000|alice',
       );
@@ -426,10 +489,8 @@ describe('BankReconcilesService', () => {
         ].join('\n'),
       );
 
-      // Act
       const result = await service.importFile(file, 1);
 
-      // Assert
       expect(result).toEqual({
         total: 1,
         imported: 0,
@@ -487,6 +548,42 @@ describe('BankReconcilesService', () => {
           BR_AMOUNT: 1500.5,
         }),
       ]);
+    });
+
+    it('BR-U-008b: should store personnel id when the importer has no user id', async () => {
+      const file = createCsvFile(
+        [
+          'applicantId,referenceNo,payerName,amount,paymentDate,paymentTime',
+          '64000001,REF001,Alice,100.00,2026-06-22,10:00',
+        ].join('\n'),
+      );
+
+      const result = await service.importFile(file, financeUser);
+
+      expect(result.imported).toBe(1);
+      expect(repository.create).toHaveBeenCalledWith([
+        expect.objectContaining({
+          CREATED_BY: null,
+          CREATED_BY_PSN_ID: '00000001',
+        }),
+      ]);
+    });
+
+    it('BR-U-008c: should reject import when actor has neither user id nor personnel id', async () => {
+      const file = createCsvFile(
+        [
+          'applicantId,referenceNo,payerName,amount,paymentDate,paymentTime',
+          '64000001,REF001,Alice,100.00,2026-06-22,10:00',
+        ].join('\n'),
+      );
+
+      await expect(
+        service.importFile(file, {
+          email: 'none@buu.ac.th',
+          role: RoleEnum.FINANCE,
+        }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(repository.save).not.toHaveBeenCalled();
     });
   });
 
@@ -771,6 +868,36 @@ describe('BankReconcilesService', () => {
         rematchedTransaction,
       );
     });
+
+    it('BR-U-015b: should record personnel id on edit logs when the editor has no user id', async () => {
+      const existing = baseBankReconcile({
+        TRANX_ID: null,
+        TRANSACTION: undefined,
+      });
+      const updated = {
+        ...existing,
+        BR_REF1: 'NEW-REF1',
+        BR_REF2: 'NEW-REF2',
+      };
+
+      managerRepos.bankReconcile.findOne
+        .mockResolvedValueOnce(existing)
+        .mockResolvedValueOnce(updated);
+      managerRepos.transactionRef.findOne.mockResolvedValue(null);
+
+      await service.updateRefs(
+        5,
+        { BR_REF1: 'NEW-REF1', BR_REF2: 'NEW-REF2' },
+        financeUser,
+      );
+
+      expect(managerRepos.editLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          CHANGED_BY: null,
+          CHANGED_BY_PSN_ID: '00000001',
+        }),
+      );
+    });
   });
 
   describe('matchRefs', () => {
@@ -792,10 +919,21 @@ describe('BankReconcilesService', () => {
   describe('confirmPayment', () => {
     it('BR-U-017: should no-op when tranxIds is empty', async () => {
       // Arrange / Act
-      const result = await service.confirmPayment([]);
+      const result = await service.confirmPayment([], financeUser);
 
       // Assert
       expect(result).toEqual({ success: true, updated: 0 });
+      expect(dataSource.createQueryRunner).not.toHaveBeenCalled();
+      expect(receiptIssueService.fetchSignatureByPerson).not.toHaveBeenCalled();
+    });
+
+    it('BR-U-017b: should reject when user has no personId', async () => {
+      await expect(
+        service.confirmPayment([10], {
+          email: 'x@buu.ac.th',
+          role: RoleEnum.FINANCE,
+        }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
       expect(dataSource.createQueryRunner).not.toHaveBeenCalled();
     });
 
@@ -818,9 +956,9 @@ describe('BankReconcilesService', () => {
       queryRunner.manager.createQueryBuilder.mockReturnValue(selectQb);
 
       // Act / Assert
-      await expect(service.confirmPayment([7, 8])).rejects.toBeInstanceOf(
-        BadRequestException,
-      );
+      await expect(
+        service.confirmPayment([7, 8], financeUser),
+      ).rejects.toBeInstanceOf(BadRequestException);
       expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
       expect(queryRunner.commitTransaction).not.toHaveBeenCalled();
       expect(queryRunner.release).toHaveBeenCalled();
@@ -843,15 +981,30 @@ describe('BankReconcilesService', () => {
         builders.push(qb);
         return qb;
       });
-      managerRepos.receipt.find.mockResolvedValue([{ RC_ID: 55 }]);
+      managerRepos.receipt.find.mockResolvedValue([{ RC_ID: 55, TRANX_ID: 10 }]);
 
       // Act
-      const result = await service.confirmPayment([10]);
+      const result = await service.confirmPayment([10], financeUser);
 
       // Assert
       expect(result).toEqual({ success: true, updated: 1 });
       expect(queryRunner.commitTransaction).toHaveBeenCalled();
       expect(queryRunner.rollbackTransaction).not.toHaveBeenCalled();
+      expect(receiptIssueService.fetchSignatureByPerson).toHaveBeenCalledWith(
+        '00000001',
+      );
+      expect(receiptIssueService.applyCollectorMetadata).toHaveBeenCalledWith(
+        queryRunner.manager,
+        [55],
+        expect.objectContaining({ psnId: '00000001' }),
+      );
+      expect(
+        receiptIssueService.generateAndUploadReceiptFiles,
+      ).toHaveBeenCalledWith(
+        queryRunner.manager,
+        [55],
+        expect.objectContaining({ signatureBase64: expect.any(String) }),
+      );
       expect(receiptNumberService.assignOnIssue).toHaveBeenCalledWith(
         queryRunner.manager,
         [55],
@@ -883,6 +1036,106 @@ describe('BankReconcilesService', () => {
           TSH_RESP_MESSAGE: 'SUCCESS',
         }),
       ]);
+    });
+
+    it('BR-U-019b: should rollback when e-sign fetch fails', async () => {
+      receiptIssueService.fetchSignatureByPerson.mockRejectedValueOnce(
+        new Error('e-sign down'),
+      );
+
+      await expect(service.confirmPayment([10], financeUser)).rejects.toThrow(
+        'e-sign down',
+      );
+      expect(dataSource.createQueryRunner).not.toHaveBeenCalled();
+    });
+
+    it('BR-U-019c: should rollback when receipt file upload fails', async () => {
+      const selectQb = createQueryBuilder([], {
+        getRawMany: jest.fn().mockResolvedValue([
+          {
+            TRANX_ID: 10,
+            TRANX_PAYMENT_STATUS: TransactionPaymentStatus.PENDING,
+            ERM_ID: 42,
+          },
+        ]),
+        execute: jest.fn().mockResolvedValue({ affected: 1 }),
+      });
+      queryRunner.manager.createQueryBuilder.mockReturnValue(selectQb);
+      managerRepos.receipt.find.mockResolvedValue([{ RC_ID: 55, TRANX_ID: 10 }]);
+      receiptIssueService.generateAndUploadReceiptFiles.mockRejectedValueOnce(
+        new Error('upload failed'),
+      );
+
+      await expect(service.confirmPayment([10], financeUser)).rejects.toThrow(
+        'upload failed',
+      );
+      expect(queryRunner.rollbackTransaction).toHaveBeenCalled();
+      expect(queryRunner.commitTransaction).not.toHaveBeenCalled();
+    });
+
+    it('BR-U-019d: should create missing receipt rows before issuing', async () => {
+      const builders: MockQueryBuilder[] = [];
+      queryRunner.manager.createQueryBuilder.mockImplementation(() => {
+        const qb = createQueryBuilder([], {
+          getRawMany: jest.fn().mockResolvedValue([
+            {
+              TRANX_ID: 10,
+              TRANX_PAYMENT_STATUS: TransactionPaymentStatus.PENDING,
+              ERM_ID: 42,
+            },
+          ]),
+          execute: jest.fn().mockResolvedValue({ affected: 1 }),
+        });
+        builders.push(qb);
+        return qb;
+      });
+      managerRepos.receipt.find.mockResolvedValue([]);
+      managerRepos.transaction.find.mockResolvedValue([
+        {
+          TRANX_ID: 10,
+          PROFILE: null,
+          ENROLLMENT: {
+            USER: {
+              PROFILE: {
+                userTitleTh: 'นางสาว',
+                userFullnameTh: 'ทดสอบ ระบบ',
+                userPhone: '0812345678',
+                userAddress: 'บางแสน',
+              },
+            },
+          },
+          BANK_RECONCILES: [{ BR_PAID_BY: 'นางสาว ทดสอบ', DELETED_AT: null }],
+        },
+      ]);
+      managerRepos.receipt.save.mockImplementation(async (entity: unknown) => ({
+        RC_ID: 99,
+        ...(entity as object),
+      }));
+
+      const result = await service.confirmPayment([10], financeUser);
+
+      expect(result).toEqual({ success: true, updated: 1 });
+      expect(managerRepos.receipt.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          TRANX_ID: 10,
+          RC_NAME: 'นางสาว ทดสอบ ระบบ',
+          RC_PHONE: '0812345678',
+          RC_ADDRESS: 'บางแสน',
+          RC_STATUS: 0,
+        }),
+      );
+      expect(receiptNumberService.assignOnIssue).toHaveBeenCalledWith(
+        queryRunner.manager,
+        [99],
+      );
+      expect(
+        receiptIssueService.generateAndUploadReceiptFiles,
+      ).toHaveBeenCalledWith(
+        queryRunner.manager,
+        [99],
+        expect.objectContaining({ psnId: '00000001' }),
+      );
+      expect(queryRunner.commitTransaction).toHaveBeenCalled();
     });
   });
 
