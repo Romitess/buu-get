@@ -25,6 +25,7 @@ import {
   BankReconcileImportResult,
   BankReconcileMatchResult,
   BankReconcilesService,
+  PendingPaymentImportRow,
   TestExportExamOption,
   TestExportRow,
 } from './bank-reconciles.service';
@@ -54,6 +55,32 @@ import { AuthenticatedUser } from '../../common/utils/authz.util';
 @Controller('bank-reconciles')
 export class BankReconcilesController {
   constructor(private readonly bankReconcilesService: BankReconcilesService) {}
+
+  @Post('import-preview')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({
+    summary: 'อ่านไฟล์รายการชำระเงินเพื่อตรวจสอบ โดยยังไม่บันทึก',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: {
+        file: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'อ่านไฟล์สำเร็จ ยังไม่บันทึกลงฐานข้อมูล',
+  })
+  previewImport(
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<BankReconcileImportResult> {
+    return this.bankReconcilesService.previewImport(file, user);
+  }
 
   @Post('import')
   @UseInterceptors(FileInterceptor('file'))
@@ -209,18 +236,29 @@ export class BankReconcilesController {
           type: 'array',
           items: { type: 'number' },
         },
+        importRows: {
+          type: 'array',
+          description:
+            'รายการจากไฟล์ที่ยังไม่บันทึก จะถูกบันทึกในชุดเดียวกับออกใบเสร็จ',
+          items: { type: 'object' },
+        },
       },
     },
   })
   @ApiResponse({ status: 201, description: 'Confirmed successfully' })
   confirmPayment(
     @Body('tranxIds') tranxIds: number[],
+    @Body('importRows') importRows: PendingPaymentImportRow[] = [],
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<{
     success: boolean;
     updated: number;
     receipts: SignedReceiptDraft[];
   }> {
-    return this.bankReconcilesService.confirmPayment(tranxIds, user);
+    return this.bankReconcilesService.confirmPayment(
+      tranxIds,
+      user,
+      importRows ?? [],
+    );
   }
 }

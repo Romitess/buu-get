@@ -84,6 +84,19 @@ export const importBankReconcileFile = async (file: File): Promise<BankReconcile
   }
 };
 
+/** อ่านไฟล์เพื่อแสดงบนหน้าตรวจสอบ ยังไม่บันทึกลงฐานข้อมูล */
+export const previewBankReconcileFile = async (
+  file: File,
+): Promise<BankReconcileImportResponse> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post<BankReconcileImportResponse>(
+    '/bank-reconciles/import-preview',
+    formData,
+  );
+  return response.data;
+};
+
 export const fetchBankReconciles = async (): Promise<BackendBankReconcile[]> => {
   const response = await api.get<BackendBankReconcile[]>('/bank-reconciles');
   return response.data;
@@ -131,14 +144,24 @@ export interface SignedReceiptDraft {
   paymentChannel: number | null;
 }
 
+export interface PendingPaymentImportRow {
+  applicantId: string;
+  referenceNo: string | null;
+  payerName: string;
+  amount: number;
+  paymentDate: string | null;
+  paymentTime: string | null;
+}
+
 export const confirmBankReconcilePayments = async (
   tranxIds: number[],
+  importRows: PendingPaymentImportRow[] = [],
 ): Promise<{ success: boolean; updated: number; receipts: SignedReceiptDraft[] }> => {
   const response = await api.post<{
     success: boolean;
     updated: number;
     receipts: SignedReceiptDraft[];
-  }>('/bank-reconciles/confirm-payment', { tranxIds });
+  }>('/bank-reconciles/confirm-payment', { tranxIds, importRows });
   return response.data;
 };
 

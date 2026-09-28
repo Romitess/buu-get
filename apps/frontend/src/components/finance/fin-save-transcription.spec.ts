@@ -24,6 +24,22 @@ vi.mock('src/utils/verify-qr', () => ({
 
 vi.mock('src/composables/use-payment-import', () => ({
   clearPaymentImportLocalData: vi.fn(),
+  globalImportedRows: {
+    value: [
+      {
+        brId: -1,
+        index: 1,
+        applicantId: 'REF1',
+        referenceNo: 'REF2',
+        payerName: 'ผู้จ่ายเงิน หนึ่ง',
+        paymentDate: '2026-09-28',
+        paymentTime: '10:00',
+        amount: '500.00',
+        importedAt: '-',
+        importedBy: '-',
+      },
+    ],
+  },
 }));
 
 vi.mock('quasar', () => ({
@@ -405,7 +421,19 @@ describe('FinSaveTranscription signature preview', () => {
     });
     await flush();
 
-    expect(confirmPayments).toHaveBeenCalledWith([11, 12]);
+    expect(confirmPayments).toHaveBeenCalledWith(
+      [11, 12],
+      [
+        {
+          applicantId: 'REF1',
+          referenceNo: 'REF2',
+          payerName: 'ผู้จ่ายเงิน หนึ่ง',
+          amount: 500,
+          paymentDate: '2026-09-28',
+          paymentTime: '10:00',
+        },
+      ],
+    );
     expect(uploadSignedReceiptFile.mock.calls.map((call) => call[0])).toEqual([101, 102]);
     expect(renderedSignatureStyles).toEqual([chosenStyle, chosenStyle]);
     expect(host.textContent).toContain('Saved');

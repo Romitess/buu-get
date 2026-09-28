@@ -107,6 +107,15 @@ export interface BankReconcileImportResult {
   data: BankReconcile[];
 }
 
+export interface PendingPaymentImportRow {
+  applicantId: string;
+  referenceNo?: string | null;
+  payerName: string;
+  amount: number;
+  paymentDate?: string | null;
+  paymentTime?: string | null;
+}
+
 export interface BankReconcileMatchResult {
   TSR_ID: number;
   TRANX_ID: number;
@@ -204,6 +213,47 @@ export class BankReconcilesService {
     return this.bankReconcilesRepository.save(bankReconcile);
   }
 
+  /**
+   * อ่านไฟล์แล้วนับรายการที่นำเข้าได้ โดยยังไม่บันทึกลงฐานข้อมูล
+   * BR_ID ติดลบใช้เป็นรหัสชั่วคราวบนหน้าจอเท่านั้น
+   */
+  async previewImport(
+    file: Express.Multer.File,
+    actor: number | AuthenticatedUser,
+  ): Promise<BankReconcileImportResult> {
+    if (!file) {
+      throw new BadRequestException('Payment import file is required');
+    }
+
+    const creator = this.resolveActor(actor);
+    const collected = await this.collectUniqueImportRows(file);
+    if (collected.uniqueRows.length === 0) {
+      return {
+        total: collected.total,
+        imported: 0,
+        skipped: collected.invalidSkipped + collected.duplicateSkipped,
+        invalidSkipped: collected.invalidSkipped,
+        duplicateSkipped: collected.duplicateSkipped,
+        data: [],
+      };
+    }
+
+    const data = this.bankReconcilesRepository.create(
+      collected.uniqueRows.map((row, index) =>
+        this.toBankReconcileDraft(row, creator, -(index + 1)),
+      ),
+    );
+
+    return {
+      total: collected.total,
+      imported: data.length,
+      skipped: collected.invalidSkipped + collected.duplicateSkipped,
+      invalidSkipped: collected.invalidSkipped,
+      duplicateSkipped: collected.duplicateSkipped,
+      data,
+    };
+  }
+
   async importFile(
     file: Express.Multer.File,
     actor: number | AuthenticatedUser,
@@ -213,6 +263,51 @@ export class BankReconcilesService {
     }
 
     const creator = this.resolveActor(actor);
+    const collected = await this.collectUniqueImportRows(file);
+
+    if (collected.uniqueRows.length === 0) {
+      return {
+        total: collected.total,
+        imported: 0,
+        skipped: collected.invalidSkipped + collected.duplicateSkipped,
+        invalidSkipped: collected.invalidSkipped,
+        duplicateSkipped: collected.duplicateSkipped,
+        data: [],
+      };
+    }
+
+    const reconciles = this.bankReconcilesRepository.create(
+      collected.uniqueRows.map((row) =>
+        this.toBankReconcileDraft(row, creator),
+      ),
+    );
+
+    const saved = await this.bankReconcilesRepository.save(reconciles);
+
+    const data =
+      saved.length > 0
+        ? await this.bankReconcilesRepository.find({
+            where: { BR_ID: In(saved.map((s) => s.BR_ID)) },
+            relations: [...BANK_RECONCILE_READ_RELATIONS],
+          })
+        : [];
+
+    return {
+      total: collected.total,
+      imported: saved.length,
+      skipped: collected.invalidSkipped + collected.duplicateSkipped,
+      invalidSkipped: collected.invalidSkipped,
+      duplicateSkipped: collected.duplicateSkipped,
+      data,
+    };
+  }
+
+  private async collectUniqueImportRows(file: Express.Multer.File): Promise<{
+    total: number;
+    invalidSkipped: number;
+    duplicateSkipped: number;
+    uniqueRows: ImportPaymentRow[];
+  }> {
     const rows = this.parsePaymentFile(file);
     const validRows: ImportPaymentRow[] = [];
     const seenImportKeys = new Set<string>();
@@ -247,50 +342,81 @@ export class BankReconcilesService {
       return true;
     });
 
-    // นำเข้าเฉพาะรายการที่ไม่ซ้ำ — ข้ามแถวซ้ำในไฟล์ / ที่เคยนำเข้าแล้ว
-    if (uniqueRows.length === 0) {
-      return {
-        total: rows.length,
-        imported: 0,
-        skipped: invalidSkipped + duplicateSkipped,
-        invalidSkipped,
-        duplicateSkipped,
-        data: [],
-      };
-    }
-
-    const reconciles = this.bankReconcilesRepository.create(
-      uniqueRows.map((row) => ({
-        CREATED_BY: creator.userId,
-        CREATED_BY_PSN_ID: creator.personId,
-        BR_REF1: row.applicantId,
-        BR_REF2: row.referenceNo,
-        BR_REF3: row.paymentDate,
-        BR_REF4: row.paymentTime,
-        BR_AMOUNT: row.amount,
-        BR_PAID_BY: row.payerName,
-        BR_IMPORT_KEY_HASH: this.getImportRowHash(row),
-      })),
-    );
-
-    const saved = await this.bankReconcilesRepository.save(reconciles);
-
-    const data =
-      saved.length > 0
-        ? await this.bankReconcilesRepository.find({
-            where: { BR_ID: In(saved.map((s) => s.BR_ID)) },
-            relations: [...BANK_RECONCILE_READ_RELATIONS],
-          })
-        : [];
-
     return {
       total: rows.length,
-      imported: saved.length,
-      skipped: invalidSkipped + duplicateSkipped,
       invalidSkipped,
       duplicateSkipped,
-      data,
+      uniqueRows,
     };
+  }
+
+  private toBankReconcileDraft(
+    row: ImportPaymentRow,
+    creator: { userId: number | null; personId: string | null },
+    brId?: number,
+  ): Partial<BankReconcile> {
+    return {
+      ...(brId != null ? { BR_ID: brId } : {}),
+      CREATED_BY: creator.userId,
+      CREATED_BY_PSN_ID: creator.personId,
+      BR_REF1: row.applicantId,
+      BR_REF2: row.referenceNo,
+      BR_REF3: row.paymentDate,
+      BR_REF4: row.paymentTime,
+      BR_AMOUNT: row.amount,
+      BR_PAID_BY: row.payerName,
+      BR_IMPORT_KEY_HASH: this.getImportRowHash(row),
+    };
+  }
+
+  /** บันทึกรายการไฟล์ที่ค้างบนหน้าจอ แล้วจับคู่ธุรกรรม ภายใน transaction เดียวกับออกใบเสร็จ */
+  private async persistPendingImportRows(
+    queryRunner: QueryRunner,
+    importRows: PendingPaymentImportRow[],
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const validRows: ImportPaymentRow[] = [];
+    const seenImportKeys = new Set<string>();
+
+    for (const row of importRows) {
+      const normalized = this.normalizeImportRow(row);
+      if (!normalized) {
+        continue;
+      }
+      const importKeyHash = this.getImportRowHash(normalized);
+      if (seenImportKeys.has(importKeyHash)) {
+        continue;
+      }
+      seenImportKeys.add(importKeyHash);
+      validRows.push(normalized);
+    }
+
+    const existingImportKeyHashes =
+      await this.getExistingImportKeyHashes(validRows);
+    const uniqueRows = validRows.filter(
+      (row) => !existingImportKeyHashes.has(this.getImportRowHash(row)),
+    );
+    if (uniqueRows.length === 0) {
+      throw new BadRequestException(
+        'ไม่พบรายการใหม่จากไฟล์ให้บันทึก ข้อมูลซ้ำกับที่นำเข้าไว้แล้ว',
+      );
+    }
+
+    const creator = this.resolveActor(actor);
+    const repository = queryRunner.manager.getRepository(BankReconcile);
+    const drafts = uniqueRows.map((row) =>
+      this.toBankReconcileDraft(row, creator),
+    );
+    const created = repository.create(drafts as BankReconcile[]);
+    const saved = await repository.save(created);
+    const savedRows = Array.isArray(saved) ? saved : [saved];
+    const brIds = savedRows
+      .map((row) => Number(row.BR_ID))
+      .filter((id) => Number.isInteger(id) && id > 0);
+
+    if (brIds.length > 0) {
+      await this.verifyBrIdChunk(queryRunner, brIds);
+    }
   }
 
   async findAll(
@@ -1054,7 +1180,10 @@ export class BankReconcilesService {
           (row) => row.DELETED_AT == null && row.BR_PAID_BY?.trim(),
         )?.BR_PAID_BY;
 
-        const fullNameFromUser = [userProfile?.userTitleTh, userProfile?.userFullnameTh]
+        const fullNameFromUser = [
+          userProfile?.userTitleTh,
+          userProfile?.userFullnameTh,
+        ]
           .map((part) => part?.trim())
           .filter(Boolean)
           .join(' ')
@@ -1065,9 +1194,7 @@ export class BankReconcilesService {
             ? String(profile.TP_TAX_ID)
             : null;
         const phone =
-          profile?.TP_PHONE?.trim() ||
-          userProfile?.userPhone?.trim() ||
-          null;
+          profile?.TP_PHONE?.trim() || userProfile?.userPhone?.trim() || null;
         const address =
           profile?.TP_ADDRESS?.trim() ||
           userProfile?.userAddress?.trim() ||
@@ -1243,9 +1370,7 @@ export class BankReconcilesService {
    * ตรวจว่าบัญชีบุคลากรปัจจุบันดึงลายเซ็น e-sign ได้
    * ใช้ก่อนนำทางไปหน้าบันทึก / ก่อน commit ชุดใบเสร็จ
    */
-  async ensureEsignReady(
-    user: AuthenticatedUser,
-  ): Promise<{
+  async ensureEsignReady(user: AuthenticatedUser): Promise<{
     ready: true;
     fullName: string;
     psnId: string;
@@ -1268,6 +1393,7 @@ export class BankReconcilesService {
   async confirmPayment(
     tranxIds: number[],
     user: AuthenticatedUser,
+    importRows: PendingPaymentImportRow[] = [],
   ): Promise<{
     success: boolean;
     updated: number;
@@ -1317,6 +1443,11 @@ export class BankReconcilesService {
             .map((transaction) => transaction.TRANX_ID)
             .join(', ')}`,
         );
+      }
+
+      // บันทึกรายการจากไฟล์พร้อมกันกับออกใบเสร็จ ถ้าขั้นนี้ล้มเหลวจะไม่ commit สถานะชำระเงิน
+      if (importRows.length > 0) {
+        await this.persistPendingImportRows(queryRunner, importRows, user);
       }
 
       // 1. Update Transactions

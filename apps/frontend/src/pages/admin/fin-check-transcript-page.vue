@@ -179,6 +179,44 @@ const handleSaveRow = async ({
       return;
     }
 
+    if (row.brId <= 0) {
+      row.file_ref = normalizedRef1;
+      row.file_ref2 = normalizedRef2;
+      const importedRow = globalImportedRows.value.find((item) => item.index === row.id);
+      if (importedRow) {
+        importedRow.applicantId = normalizedRef1;
+        importedRow.referenceNo = normalizedRef2;
+      }
+
+      isLoading.value = true;
+      try {
+        const matchedData = await matchBankReconciles([
+          { ref1: normalizedRef1, ref2: normalizedRef2 },
+        ]);
+        const matched = matchedData.length > 0 ? matchedData[0] : null;
+        row.db_ref = matched?.TSC_REF1 ?? '';
+        row.db_ref2 = matched?.TSC_REF2 ?? '';
+        row.db_applicant_name = matched?.APPLICANT_NAME ?? '';
+        row.db_amount = matched?.TRANX_AMOUNT != null ? formatCurrency(matched.TRANX_AMOUNT) : '';
+        row.tranxId = matched ? matched.TRANX_ID : null;
+        $q.notify({
+          type: 'positive',
+          message: 'ปรับเลขอ้างอิงแล้ว จะบันทึกพร้อมออกใบเสร็จ',
+          position: 'top',
+        });
+      } catch (err) {
+        console.error('Failed to rematch payment refs:', err);
+        $q.notify({
+          type: 'negative',
+          message: 'ไม่สามารถจับคู่เลขอ้างอิงได้',
+          position: 'top',
+        });
+      } finally {
+        isLoading.value = false;
+      }
+      return;
+    }
+
     isLoading.value = true;
     try {
       const updatedBankReconcile = await updateBankReconcileRefs(row.brId, {

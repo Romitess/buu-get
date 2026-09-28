@@ -1,8 +1,7 @@
 import { computed, onMounted, ref } from 'vue';
 import {
-  clearBankReconciles,
   fetchBankReconciles,
-  importBankReconcileFile,
+  previewBankReconcileFile,
   verifyBankReconciles,
   type BackendBankReconcile,
   type BankReconcileImportResponse,
@@ -106,9 +105,7 @@ export function usePaymentImport() {
 
   const hasEmptyRows = computed((): boolean => {
     // ตรวจเฉพาะแถวที่นำเข้าแล้วในตาราง — ไม่นับแถวที่ข้ามตอน import (ซ้ำ/ไม่ครบ)
-    return importedRows.value.some(
-      (row) => !row.applicantId.trim() || !row.amount.trim(),
-    );
+    return importedRows.value.some((row) => !row.applicantId.trim() || !row.amount.trim());
   });
 
   const loadData = async (): Promise<void> => {
@@ -141,8 +138,8 @@ export function usePaymentImport() {
     console.log('[DEBUG] parseFile started with file:', file.name);
 
     try {
-      console.log('[DEBUG] Calling importBankReconcileFile...');
-      const result = await importBankReconcileFile(file);
+      console.log('[DEBUG] Calling previewBankReconcileFile...');
+      const result = await previewBankReconcileFile(file);
       console.log('[DEBUG] Import result:', result);
       if (result.imported > 0) {
         setAutoLoadSuspended(false);
@@ -164,20 +161,8 @@ export function usePaymentImport() {
     }
   };
 
-  const clearAllData = async (): Promise<void> => {
-    isLoading.value = true;
-    error.value = null;
-
-    try {
-      await clearBankReconciles();
-      clearLocalData();
-    } catch (err) {
-      console.error('Failed to clear payment imports:', err);
-      error.value = 'ไม่สามารถลบข้อมูลได้';
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
+  const clearAllData = (): void => {
+    clearLocalData();
   };
 
   const verifyData = async (): Promise<void> => {
@@ -236,9 +221,7 @@ function mapBankReconcileToRow(item: BackendBankReconcile, index: number): Payme
     importedBy:
       item.USER?.PROFILE?.userFullnameTh ||
       item.USER?.USER_EMAIL ||
-      (item.CREATED_BY_PERSON
-        ? formatMsgPersonName(item.CREATED_BY_PERSON)
-        : '') ||
+      (item.CREATED_BY_PERSON ? formatMsgPersonName(item.CREATED_BY_PERSON) : '') ||
       item.CREATED_BY_PSN_ID ||
       (item.CREATED_BY != null ? String(item.CREATED_BY) : '-'),
   };

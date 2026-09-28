@@ -247,10 +247,14 @@ import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { clearPaymentImportLocalData } from 'src/composables/use-payment-import';
+import {
+  clearPaymentImportLocalData,
+  globalImportedRows,
+} from 'src/composables/use-payment-import';
 import {
   checkBankReconcileEsignReady,
   confirmBankReconcilePayments,
+  type PendingPaymentImportRow,
   type SignedReceiptDraft,
 } from 'src/services/bank-reconcile.service';
 import { uploadSignedReceiptFile } from 'src/services/receipt.service';
@@ -666,6 +670,19 @@ const closePreview = () => {
   collectorName.value = '';
 };
 
+const toPendingImportRows = (): PendingPaymentImportRow[] =>
+  globalImportedRows.value
+    .filter((row) => row.applicantId.trim() && row.payerName.trim())
+    .map((row) => ({
+      applicantId: row.applicantId.trim(),
+      referenceNo:
+        row.referenceNo.trim() && row.referenceNo.trim() !== '-' ? row.referenceNo.trim() : null,
+      payerName: row.payerName.trim(),
+      amount: Number(String(row.amount).replace(/,/g, '')) || 0,
+      paymentDate: row.paymentDate && row.paymentDate !== '-' ? row.paymentDate : null,
+      paymentTime: row.paymentTime && row.paymentTime !== '-' ? row.paymentTime : null,
+    }));
+
 const onPreviewConfirm = async () => {
   const signature = pendingSignature.value;
   if (!signature || pendingTranxIds.value.length === 0) {
@@ -675,7 +692,16 @@ const onPreviewConfirm = async () => {
 
   isLoading.value = true;
   try {
-    const confirmed = await confirmBankReconcilePayments(pendingTranxIds.value);
+    const importRows = toPendingImportRows();
+    if (importRows.length === 0) {
+      $q.notify({
+        type: 'warning',
+        message: t('admin.finSaveTranscription.noMatchedRowsError'),
+      });
+      return;
+    }
+
+    const confirmed = await confirmBankReconcilePayments(pendingTranxIds.value, importRows);
     // ใช้ตำแหน่งและขนาดลายเซ็นชุดเดียวกับที่พรีวิวไว้กับใบเสร็จทุกใบ
     await archiveSignedReceipts(confirmed.receipts ?? [], signature);
 

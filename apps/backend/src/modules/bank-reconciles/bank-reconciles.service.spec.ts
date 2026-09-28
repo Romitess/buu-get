@@ -53,7 +53,11 @@ jest.mock('./entities/bank-reconcile-edit-log.entity', () => ({
   BankReconcileEditLog: class BankReconcileEditLog {},
 }));
 
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   Transaction,
   TransactionMatchStatus,
@@ -64,7 +68,6 @@ import { TransactionApiType } from '../transaction-status-history/entities/trans
 import { ExamEnrollmentStatus } from '../exam-enrollments/entities/exam-enrollment.entity';
 import { Receipt } from '../receipts/entities/receipt.entity';
 import { BankReconcilesService } from './bank-reconciles.service';
-import { ReceiptNumberService } from '../receipts/receipt-number.service';
 import { BankReconcile } from './entities/bank-reconcile.entity';
 import {
   BankReconcileEditLog,
@@ -380,6 +383,21 @@ describe('BankReconcilesService', () => {
       expect(result.imported).toBe(1);
       expect(result.total).toBe(3);
       expect(repository.save).toHaveBeenCalled();
+    });
+
+    it('BR-U-003b: should preview valid rows without saving them', async () => {
+      const file = createCsvFile(
+        [
+          'applicantId,referenceNo,payerName,amount,paymentDate,paymentTime',
+          '64000001,REF001,Alice,100.00,2026-06-22,10:00',
+        ].join('\n'),
+      );
+
+      const result = await service.previewImport(file, 1);
+
+      expect(result.imported).toBe(1);
+      expect(result.data[0]?.BR_ID).toBeLessThan(0);
+      expect(repository.save).not.toHaveBeenCalled();
     });
 
     it('BR-U-004: should truncate import fields to 20 characters', async () => {
@@ -983,7 +1001,9 @@ describe('BankReconcilesService', () => {
         builders.push(qb);
         return qb;
       });
-      managerRepos.receipt.find.mockResolvedValue([{ RC_ID: 55, TRANX_ID: 10 }]);
+      managerRepos.receipt.find.mockResolvedValue([
+        { RC_ID: 55, TRANX_ID: 10 },
+      ]);
 
       // Act
       const result = await service.confirmPayment([10], financeUser);
@@ -1063,7 +1083,9 @@ describe('BankReconcilesService', () => {
         execute: jest.fn().mockResolvedValue({ affected: 1 }),
       });
       queryRunner.manager.createQueryBuilder.mockReturnValue(selectQb);
-      managerRepos.receipt.find.mockResolvedValue([{ RC_ID: 55, TRANX_ID: 10 }]);
+      managerRepos.receipt.find.mockResolvedValue([
+        { RC_ID: 55, TRANX_ID: 10 },
+      ]);
       receiptIssueService.loadSignedReceiptDrafts.mockRejectedValueOnce(
         new Error('receipt draft failed'),
       );

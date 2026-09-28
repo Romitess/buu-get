@@ -140,7 +140,6 @@ const {
   hasEmptyRows,
   parseFile,
   clearAllData,
-  verifyData,
 } = usePaymentImport();
 
 const formatSkippedReason = (result: {
@@ -174,11 +173,14 @@ const onFileSelected = async (file: File): Promise<void> => {
   if (result) {
     const skippedReason = formatSkippedReason(result);
     if (result.imported > 0 && result.skipped === 0) {
-      $q.notify({ type: 'positive', message: `นำเข้าสำเร็จ ${result.imported} รายการ` });
+      $q.notify({
+        type: 'positive',
+        message: `อ่านไฟล์ได้ ${result.imported} รายการ ยังไม่บันทึก จนกว่าจะตรวจสอบและออกใบเสร็จ`,
+      });
     } else if (result.imported > 0 && result.skipped > 0) {
       $q.notify({
         type: 'warning',
-        message: `นำเข้า ${result.imported} รายการ, ข้าม ${result.skipped} รายการ${skippedReason}`,
+        message: `อ่านไฟล์ได้ ${result.imported} รายการ, ข้าม ${result.skipped} รายการ${skippedReason} ยังไม่บันทึกจนกว่าจะออกใบเสร็จ`,
       });
     } else if (result.imported === 0 && result.duplicateSkipped > 0) {
       $q.notify({
@@ -213,19 +215,14 @@ const handleClearAll = (): void => {
   showClearConfirm.value = true;
 };
 
-const confirmClearAll = async (): Promise<void> => {
+const confirmClearAll = (): void => {
   showClearConfirm.value = false;
-
-  try {
-    await clearAllData();
-    uploadZoneRef.value?.reset();
-    $q.notify({
-      type: 'positive',
-      message: i18n.t('admin.paymentImport.notifications.clearSuccess'),
-    });
-  } catch {
-    // error watcher displays the API failure message
-  }
+  clearAllData();
+  uploadZoneRef.value?.reset();
+  $q.notify({
+    type: 'positive',
+    message: i18n.t('admin.paymentImport.notifications.clearSuccess'),
+  });
 };
 
 const handleVerify = async (): Promise<void> => {
@@ -240,8 +237,7 @@ const handleVerify = async (): Promise<void> => {
   }
 
   try {
-    await verifyData();
-    // ต้องได้ลายเซ็นก่อนไปหน้าบันทึก — ถ้าไม่ได้จะไม่ไปต่อ
+    // ยังไม่บันทึกการจับคู่ แค่ตรวจลายเซ็นแล้วไปหน้าตรวจรายการ
     await checkBankReconcileEsignReady();
     $q.notify({
       type: 'positive',
@@ -249,12 +245,10 @@ const handleVerify = async (): Promise<void> => {
     });
     void router.push({ name: 'admin-fin-check-transcript' });
   } catch (err) {
-    const axiosMessage = (
-      err as { response?: { data?: { message?: string } } } | undefined
-    )?.response?.data?.message;
+    const axiosMessage = (err as { response?: { data?: { message?: string } } } | undefined)
+      ?.response?.data?.message;
     const isSignatureError =
-      typeof axiosMessage === 'string' &&
-      /signature|e-sign|ลายเซ็น/i.test(axiosMessage);
+      typeof axiosMessage === 'string' && /signature|e-sign|ลายเซ็น/i.test(axiosMessage);
     if (isSignatureError || (err instanceof Error && /signature|e-sign/i.test(err.message))) {
       $q.notify({
         type: 'negative',
@@ -287,62 +281,62 @@ watch(filteredRows, (newVal) => {
 const columns = computed<QTableColumn[]>(() => {
   void i18n.locale.value;
   return [
-  {
-    name: 'index',
-    label: i18n.t('admin.paymentImport.table.index'),
-    field: 'index',
-    align: 'center',
-    style: 'width: 70px',
-  },
-  {
-    name: 'applicantId',
-    label: i18n.t('admin.paymentImport.table.applicantId'),
-    field: 'applicantId',
-    align: 'center',
-  },
-  {
-    name: 'referenceNo',
-    label: i18n.t('admin.paymentImport.table.referenceNo'),
-    field: 'referenceNo',
-    align: 'center',
-  },
-  {
-    name: 'payerName',
-    label: i18n.t('admin.paymentImport.table.payerName'),
-    field: 'payerName',
-    align: 'center',
-  },
-  {
-    name: 'paymentDate',
-    label: i18n.t('admin.paymentImport.table.paymentDate'),
-    field: 'paymentDate',
-    align: 'center',
-  },
-  {
-    name: 'paymentTime',
-    label: i18n.t('admin.paymentImport.table.paymentTime'),
-    field: 'paymentTime',
-    align: 'center',
-  },
-  {
-    name: 'amount',
-    label: i18n.t('admin.paymentImport.table.amount'),
-    field: 'amount',
-    align: 'center',
-  },
-  {
-    name: 'importedAt',
-    label: i18n.t('admin.paymentImport.table.importedAt'),
-    field: 'importedAt',
-    align: 'center',
-  },
-  {
-    name: 'importedBy',
-    label: i18n.t('admin.paymentImport.table.importedBy'),
-    field: 'importedBy',
-    align: 'center',
-  },
-];
+    {
+      name: 'index',
+      label: i18n.t('admin.paymentImport.table.index'),
+      field: 'index',
+      align: 'center',
+      style: 'width: 70px',
+    },
+    {
+      name: 'applicantId',
+      label: i18n.t('admin.paymentImport.table.applicantId'),
+      field: 'applicantId',
+      align: 'center',
+    },
+    {
+      name: 'referenceNo',
+      label: i18n.t('admin.paymentImport.table.referenceNo'),
+      field: 'referenceNo',
+      align: 'center',
+    },
+    {
+      name: 'payerName',
+      label: i18n.t('admin.paymentImport.table.payerName'),
+      field: 'payerName',
+      align: 'center',
+    },
+    {
+      name: 'paymentDate',
+      label: i18n.t('admin.paymentImport.table.paymentDate'),
+      field: 'paymentDate',
+      align: 'center',
+    },
+    {
+      name: 'paymentTime',
+      label: i18n.t('admin.paymentImport.table.paymentTime'),
+      field: 'paymentTime',
+      align: 'center',
+    },
+    {
+      name: 'amount',
+      label: i18n.t('admin.paymentImport.table.amount'),
+      field: 'amount',
+      align: 'center',
+    },
+    {
+      name: 'importedAt',
+      label: i18n.t('admin.paymentImport.table.importedAt'),
+      field: 'importedAt',
+      align: 'center',
+    },
+    {
+      name: 'importedBy',
+      label: i18n.t('admin.paymentImport.table.importedBy'),
+      field: 'importedBy',
+      align: 'center',
+    },
+  ];
 });
 </script>
 
