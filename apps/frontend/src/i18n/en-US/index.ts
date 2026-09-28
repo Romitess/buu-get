@@ -2019,6 +2019,7 @@ export default {
         fiscalYear: 'Fiscal year',
         fundSource: 'Fund source',
         examName: 'Exam Name',
+        examNameOrRound: 'Exam name / round',
         receiptNo: 'Receipt Number',
         payer: 'Payer Name',
         payee: 'Collector name',
@@ -2028,6 +2029,7 @@ export default {
         statusVoided: 'Voided',
         placeholders: {
           examName: 'BUU-GET 1/2026',
+          examNameOrRound: 'BUU-GET 1/2026',
           receiptNo: 'XXXXXXXXXXXX',
           payer: 'John Doe',
           payee: 'Jane Doe',

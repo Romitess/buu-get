@@ -21,6 +21,7 @@ interface ReceiptReportFilters {
   endDate?: string;
   paidDate?: string;
   examName?: string;
+  matchExamRound?: boolean;
   fundSourceId?: number;
   fiscalYear?: string;
   payerName?: string;
@@ -80,6 +81,7 @@ export class FinanceReportsService {
       startDate: query.startDate,
       endDate: query.endDate,
       examName: query.examName,
+      matchExamRound: true,
       fundSourceId: query.fundSourceId,
     });
 
@@ -235,9 +237,16 @@ export class FinanceReportsService {
       });
     }
     if (filters.examName) {
-      qb.andWhere('exam.EXAM_NAME LIKE :examName', {
-        examName: `%${filters.examName}%`,
-      });
+      if (filters.matchExamRound) {
+        qb.andWhere(
+          `(exam.EXAM_NAME LIKE :examName OR exam.EXAM_ROUND LIKE :examName OR CONCAT(IFNULL(exam.EXAM_ROUND, ''), '/', IFNULL(exam.EXAM_FISCAL_YEAR, '')) LIKE :examName OR CONCAT(exam.EXAM_NAME, ' ', IFNULL(exam.EXAM_ROUND, ''), '/', IFNULL(exam.EXAM_FISCAL_YEAR, '')) LIKE :examName)`,
+          { examName: `%${filters.examName}%` },
+        );
+      } else {
+        qb.andWhere('exam.EXAM_NAME LIKE :examName', {
+          examName: `%${filters.examName}%`,
+        });
+      }
     }
     if (filters.fundSourceId) {
       qb.andWhere('fundSource.FS_ID = :fundSourceId', {

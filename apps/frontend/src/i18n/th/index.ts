@@ -2022,6 +2022,7 @@ export default {
         fiscalYear: 'ปีงบประมาณ',
         fundSource: 'แหล่งเงิน',
         examName: 'ชื่อการสอบ',
+        examNameOrRound: 'ชื่อการสอบ / รอบสอบ',
         receiptNo: 'เลขที่ใบเสร็จ',
         payer: 'ชื่อผู้ชำระเงิน',
         payee: 'ชื่อผู้รับเงิน',
@@ -2031,6 +2032,7 @@ export default {
         statusVoided: 'ยกเลิก',
         placeholders: {
           examName: 'BUU-GET 1/2026',
+          examNameOrRound: 'BUU-GET 1/2026',
           receiptNo: 'XXXXXXXXXXXX',
           payer: 'สมชาย ใจดี',
           payee: 'สมใจ หมายปอง',

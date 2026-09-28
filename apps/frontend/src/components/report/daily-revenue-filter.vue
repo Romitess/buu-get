@@ -72,7 +72,11 @@
 
         <div class="col-12 col-sm-6 col-md-3">
           <div class="custom-label q-mb-xs">
-            {{ t('admin.dailyRevenueReport.filter.examName') }}
+            {{
+              mode === 'daily'
+                ? t('admin.dailyRevenueReport.filter.examNameOrRound')
+                : t('admin.dailyRevenueReport.filter.examName')
+            }}
           </div>
           <q-input
             v-model="localFilter.examName"
@@ -80,7 +84,11 @@
             dense
             bg-color="grey-2"
             class="custom-input"
-            :placeholder="t('admin.dailyRevenueReport.filter.placeholders.examName')"
+            :placeholder="
+              mode === 'daily'
+                ? t('admin.dailyRevenueReport.filter.placeholders.examNameOrRound')
+                : t('admin.dailyRevenueReport.filter.placeholders.examName')
+            "
             hide-bottom-space
             @update:model-value="emitFilterChange"
           />

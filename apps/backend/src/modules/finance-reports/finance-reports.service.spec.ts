@@ -140,7 +140,7 @@ describe('FinanceReportsService', () => {
         { endDate: '2026-03-31 23:59:59' },
       );
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
-        'exam.EXAM_NAME LIKE :examName',
+        `(exam.EXAM_NAME LIKE :examName OR exam.EXAM_ROUND LIKE :examName OR CONCAT(IFNULL(exam.EXAM_ROUND, ''), '/', IFNULL(exam.EXAM_FISCAL_YEAR, '')) LIKE :examName OR CONCAT(exam.EXAM_NAME, ' ', IFNULL(exam.EXAM_ROUND, ''), '/', IFNULL(exam.EXAM_FISCAL_YEAR, '')) LIKE :examName)`,
         { examName: '%BUU%' },
       );
       expect(queryBuilder.andWhere).toHaveBeenCalledWith(
