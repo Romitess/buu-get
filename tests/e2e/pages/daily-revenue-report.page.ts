@@ -19,7 +19,7 @@ export class DailyRevenueReportPage {
       .locator('.daily-revenue-report-page, .page-container')
       .first();
     this.filterCard = page.locator('.filter-card').first();
-    this.examNameInput = this.filterCard.locator('.q-field').nth(2).locator('input');
+    this.examNameInput = this.filterCard.getByPlaceholder(/BUU-GET 1\/2026/);
     this.totalRow = page.locator('.total-row');
     this.totalValue = page.locator('.total-value');
     this.emptyLabel = page.getByText(
@@ -27,17 +27,23 @@ export class DailyRevenueReportPage {
     );
   }
 
-  async goto(): Promise<void> {
-    const loadPromise = this.page
-      .waitForResponse(
-        (res) =>
-          res.url().includes('/api/fund-sources/daily-revenue') &&
-          res.request().method() === 'GET' &&
-          res.ok(),
-        { timeout: 30_000 },
-      )
-      .catch(() => null);
-    await this.page.goto('/#/admin/daily-revenue-report');
+  async goto(query?: { startDate?: string; endDate?: string }): Promise<void> {
+    const params = new URLSearchParams();
+    if (query?.startDate) params.set('startDate', query.startDate);
+    if (query?.endDate) params.set('endDate', query.endDate);
+    const search = params.toString();
+    const loadPromise = search
+      ? this.page.waitForResponse(
+          (res) =>
+            res.url().includes('/api/finance-reports/daily-revenue') &&
+            res.request().method() === 'GET' &&
+            res.ok(),
+          { timeout: 30_000 },
+        )
+      : Promise.resolve(null);
+    await this.page.goto(
+      `/#/admin/daily-revenue-report${search ? `?${search}` : ''}`,
+    );
     await expect(this.page).toHaveURL(/#\/admin\/daily-revenue-report/);
     await expect(this.pageShell).toBeVisible({ timeout: 20_000 });
     await expect(this.page.locator('.page-header').first()).toContainText(
@@ -58,7 +64,7 @@ export class DailyRevenueReportPage {
   async filterByExamName(examName: string): Promise<void> {
     const filterPromise = this.page.waitForResponse(
       (res) =>
-        res.url().includes('/api/fund-sources/daily-revenue') &&
+        res.url().includes('/api/finance-reports/daily-revenue') &&
         res.request().method() === 'GET' &&
         res.ok(),
       { timeout: 30_000 },

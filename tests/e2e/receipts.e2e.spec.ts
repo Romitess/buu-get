@@ -415,7 +415,7 @@ test.describe('E2E: Receipt usage report & PDF download', () => {
 
     const issuedGetPromise = page.waitForResponse(
       (res) =>
-        res.url().includes('/api/receipts/issued') &&
+        res.url().includes('/api/finance-reports/receipt-usage') &&
         res.request().method() === 'GET' &&
         res.ok(),
       { timeout: 30_000 },

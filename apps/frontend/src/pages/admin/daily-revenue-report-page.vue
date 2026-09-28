@@ -1,33 +1,45 @@
 <template>
   <q-page class="page-container daily-revenue-report-page">
-    <!-- Breadcrumbs -->
     <AppBreadcrumbs />
-
-    <!-- Page Header -->
     <AppPageHeader
       :title="$t('admin.dailyRevenueReport.pageTitle')"
       :subtitle="$t('admin.dailyRevenueReport.pageSubtitle')"
     />
 
-    <!-- Filter Bar Component -->
-    <DailyRevenueFilter :filter="filter" mode="compact" @filter-change="applyFilter" />
+    <DailyRevenueFilter :filter="filter" mode="daily" @filter-change="applyFilter" />
 
-    <!-- Revenue Table -->
+    <div class="row justify-end q-gutter-sm q-mb-md">
+      <q-btn
+        outline
+        color="positive"
+        :label="$t('admin.financeReport.exportExcel')"
+        :disable="rows.length === 0"
+        @click="exportExcel"
+      />
+      <q-btn
+        outline
+        color="negative"
+        :label="$t('admin.financeReport.exportPdf')"
+        :disable="rows.length === 0"
+        @click="exportPdf"
+      />
+    </div>
+
+    <div v-if="effectiveDateLabel" class="text-center text-weight-bold q-mb-md">
+      {{ effectiveDateLabel }}
+    </div>
+
     <div class="daily-revenue-table-wrapper">
       <BaseTable
         :columns="columns"
-        :rows="rows"
+        :rows="displayRows"
         :loading="isLoading"
         :pagination="pagination"
         :empty-label="$t('admin.dailyRevenueReport.table.emptyLabel')"
         hide-pagination
       />
-
-      <!-- Total Row — value right-aligned to match the amount column -->
       <div class="total-row row items-center justify-end no-wrap">
-        <span class="total-label">
-          {{ $t('admin.dailyRevenueReport.table.totalLabel') }}
-        </span>
+        <span class="total-label">{{ $t('admin.dailyRevenueReport.table.totalLabel') }}</span>
         <span class="total-value">{{ formattedTotal }}</span>
       </div>
     </div>
@@ -35,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch, computed } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import type { QTableColumn } from 'quasar';
 import { useI18n } from 'vue-i18n';
@@ -46,69 +58,146 @@ import DailyRevenueFilter from 'src/components/report/daily-revenue-filter.vue';
 import BaseTable from 'src/components/shared/base-table.vue';
 import { useDailyRevenue } from 'src/composables/use-daily-revenue';
 import type { PaginationModel } from 'src/types/exam.types';
+import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
+import {
+  downloadFinanceReportXlsx,
+  formatReportAmount,
+  formatReportDate,
+  printFinanceReport,
+  readReportField,
+  type FinanceReportColumn,
+} from 'src/utils/finance-report-export';
 
 const $q = useQuasar();
 const { t, locale } = useI18n();
 const route = useRoute();
 
-const { rows, isLoading, error, filter, formattedTotal, fetchData, applyFilter } =
-  useDailyRevenue();
+const {
+  rows,
+  isLoading,
+  error,
+  filter,
+  effectiveDates,
+  formattedTotal,
+  applyFilter,
+} = useDailyRevenue();
 
-const formatAmount = (value: unknown): string => {
-  const amount = Number(value);
-  return (Number.isNaN(amount) ? 0 : amount).toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-};
+const displayRows = computed(() =>
+  rows.value.map((row) => ({
+    ...row,
+    examLabel: formatExamDisplayTitle(row.examName, row.examRound, row.fiscalYear),
+    fundSourceLabel: [row.fundSourceCode, row.fundSourceName].filter(Boolean).join(' '),
+  })),
+);
 
-// Report shows the full result set together with the total, so disable paging.
 const pagination = computed<PaginationModel>(() => ({
   page: 1,
-  rowsPerPage: rows.value.length || 10,
-  rowsNumber: rows.value.length,
+  rowsPerPage: displayRows.value.length || 10,
+  rowsNumber: displayRows.value.length,
 }));
 
 const columns = computed<QTableColumn[]>(() => {
   void locale.value;
   return [
+    {
+      name: 'index',
+      label: t('admin.dailyRevenueReport.table.columns.index'),
+      field: 'index',
+      align: 'center',
+      style: 'width: 80px',
+    },
+    {
+      name: 'examName',
+      label: t('admin.dailyRevenueReport.table.columns.examName'),
+      field: 'examLabel',
+      align: 'left',
+    },
+    {
+      name: 'fundSource',
+      label: t('admin.dailyRevenueReport.table.columns.fundSource'),
+      field: 'fundSourceLabel',
+      align: 'left',
+    },
+    {
+      name: 'amount',
+      label: t('admin.dailyRevenueReport.table.columns.amount'),
+      field: 'amount',
+      align: 'right',
+      style: 'width: 180px',
+      format: (value: unknown) => formatReportAmount(Number(value) || 0),
+    },
+  ];
+});
+
+const reportTitle = computed(() => t('admin.dailyRevenueReport.pageTitle'));
+const effectiveDateLabel = computed(() => {
+  if (effectiveDates.value.length === 0) return '';
+  return t('admin.dailyRevenueReport.effectiveDates', {
+    dates: effectiveDates.value.map((date) => formatReportDate(date)).join(', '),
+  });
+});
+
+const exportColumns = computed<FinanceReportColumn[]>(() => [
   {
-    name: 'index',
     label: t('admin.dailyRevenueReport.table.columns.index'),
-    field: 'index',
+    value: (row) => readReportField(row, 'index'),
     align: 'center',
-    style: 'width: 80px',
   },
   {
-    name: 'examName',
     label: t('admin.dailyRevenueReport.table.columns.examName'),
-    field: 'examName',
-    align: 'left',
-    classes: 'exam-name-cell',
-    headerClasses: 'exam-name-header',
+    value: (row) => readReportField(row, 'examLabel'),
   },
   {
-    name: 'amount',
-    label: t('admin.dailyRevenueReport.table.columns.amount'),
-    field: 'amount',
-    align: 'right',
-    style: 'width: 180px',
-    format: formatAmount,
-    headerClasses: 'amount-header',
+    label: t('admin.dailyRevenueReport.table.columns.fundSource'),
+    value: (row) => readReportField(row, 'fundSourceLabel'),
   },
-];});
-// Show error notification when error changes
-watch(error, (newVal) => {
-  if (newVal) {
+  {
+    label: t('admin.dailyRevenueReport.table.columns.amount'),
+    value: (row) => formatReportAmount(Number(readReportField(row, 'amount')) || 0),
+    align: 'right',
+  },
+]);
+
+const exportSections = computed(() => [
+  {
+    rows: displayRows.value,
+    totalLabel: t('admin.dailyRevenueReport.table.totalLabel'),
+    totalValue: formattedTotal.value,
+  },
+]);
+
+const exportExcel = (): void => {
+  downloadFinanceReportXlsx({
+    fileName: 'daily-revenue-report.xlsx',
+    title: reportTitle.value,
+    subtitle: effectiveDateLabel.value,
+    columns: exportColumns.value,
+    sections: exportSections.value,
+  });
+};
+
+const exportPdf = (): void => {
+  const opened = printFinanceReport({
+    title: reportTitle.value,
+    subtitle: effectiveDateLabel.value,
+    columns: exportColumns.value,
+    sections: exportSections.value,
+  });
+  if (!opened) {
     $q.notify({
-      type: 'negative',
-      message: newVal,
+      type: 'warning',
+      message: t('admin.financeReport.printBlocked'),
       position: 'top',
     });
   }
+};
+
+watch(error, (message) => {
+  if (message) {
+    $q.notify({ type: 'negative', message, position: 'top' });
+  }
 });
 
-// Initial load — honor deep-link dates from the notification inbox
 onMounted(() => {
   const startDate = typeof route.query.startDate === 'string' ? route.query.startDate : '';
   const endDate = typeof route.query.endDate === 'string' ? route.query.endDate : '';
@@ -118,9 +207,7 @@ onMounted(() => {
       startDate,
       endDate,
     });
-    return;
   }
-  void fetchData();
 });
 </script>
 
@@ -130,49 +217,10 @@ onMounted(() => {
 }
 
 .daily-revenue-table-wrapper {
-  :deep(.base-table-wrapper) {
-    border-bottom: none;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-
   :deep(td),
   :deep(th) {
     padding: 12px 16px !important;
     vertical-align: middle !important;
-    white-space: nowrap;
-  }
-
-  :deep(tr) {
-    height: auto !important;
-  }
-
-  // Shift examName header and body data inward so they visually align.
-  // Header gets the same padding so it centers within the data content area.
-  :deep(thead th.exam-name-header) {
-    padding-left: 0px !important;
-  }
-
-  :deep(td.exam-name-cell) {
-    padding-left: 200px !important;
-  }
-
-  :deep(thead th.text-right) {
-    text-align: right !important;
-  }
-
-  // Use q-table's default inline sort icon (beside the column label) instead
-  // of base-table's absolute positioning, which overlapped the header text.
-  :deep(thead th.sortable .q-table__sort-icon) {
-    position: static !important;
-    margin-left: 4px;
-  }
-
-  // For the right-aligned amount column, Quasar prepends the sort icon in the DOM,
-  // which makes it appear on the left. We reverse the rendering direction of the inline children
-  // using CSS direction: rtl so the icon renders on the right of the text.
-  :deep(thead th.amount-header.sortable) {
-    direction: rtl;
   }
 }
 
@@ -186,14 +234,11 @@ onMounted(() => {
 }
 
 .total-label {
-  font-size: var(--font-size-body);
   font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
 }
 
 .total-value {
   font-size: 1.1rem;
   font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
 }
 </style>

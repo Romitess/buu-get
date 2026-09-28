@@ -580,7 +580,9 @@ test.describe('E2E: Fund sources — CRUD / exam options / daily revenue', () =>
     await injectAuthSession(page, request, finance.email, finance.password);
 
     const pom = new DailyRevenueReportPage(page);
-    await pom.goto();
+    const today = new Date();
+    const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    await pom.goto({ startDate: iso, endDate: iso });
 
     await pom.filterByExamName(revenueExamName);
     const row = await pom.expectRowContaining(revenueExamName);

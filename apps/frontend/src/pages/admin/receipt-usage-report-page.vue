@@ -1,155 +1,249 @@
 <template>
   <q-page class="page-container receipt-usage-report-page">
-    <!-- Breadcrumbs -->
     <AppBreadcrumbs />
-
-    <!-- Page Header -->
     <AppPageHeader
       :title="$t('admin.receiptUsageReport.pageTitle')"
       :subtitle="$t('admin.receiptUsageReport.pageSubtitle')"
     />
-    <!-- Filter Bar Component -->
-    <DailyRevenueFilter :filter="filter" mode="full" @filter-change="applyFilter" />
 
-    <div class="row items-center justify-between q-mb-lg">
-      <div class="col-6">
-        <SearchBar v-model="searchQuery" />
-      </div>
-      <div class="text-weight-bold">&nbsp;</div>
-      <ExportCsvButton
-        :columns="exportColumns"
-        :rows="filteredReceipts"
-        file-name-prefix="receipt-usage-report"
-        color="primary"
-        unelevated
-        class="text-weight-bold"
+    <DailyRevenueFilter :filter="filter" mode="usage" @filter-change="applyFilter" />
+
+    <div class="row justify-end q-gutter-sm q-mb-md">
+      <q-btn
+        outline
+        color="positive"
+        :label="$t('admin.financeReport.exportExcel')"
+        :disable="groups.length === 0"
+        @click="exportExcel"
+      />
+      <q-btn
+        outline
+        color="negative"
+        :label="$t('admin.financeReport.exportPdf')"
+        :disable="groups.length === 0"
+        @click="exportPdf"
       />
     </div>
 
-    <!-- Receipt Usage Table -->
-    <div class="q-mt-lg receipt-usage-table">
+    <div v-if="effectiveDateLabel" class="text-center text-weight-bold q-mb-md">
+      {{ effectiveDateLabel }}
+    </div>
+
+    <div v-if="!isLoading && groups.length === 0" class="text-center q-pa-lg">
+      {{ $t('admin.receiptUsageReport.table.emptyLabel') }}
+    </div>
+
+    <div v-for="group in displayGroups" :key="group.key" class="q-mb-lg receipt-usage-table">
+      <div class="text-weight-bold q-mb-sm">{{ group.title }}</div>
       <BaseTable
         :columns="columns"
-        :rows="filteredReceipts"
+        :rows="group.rows"
         :loading="isLoading"
-        :pagination="pagination"
+        :pagination="paginationFor(group.rows.length)"
         :empty-label="$t('admin.receiptUsageReport.table.emptyLabel')"
-      >
-      </BaseTable>
+        hide-pagination
+      />
+      <div class="total-row row items-center justify-end no-wrap">
+        <span class="total-label">{{ $t('admin.receiptUsageReport.table.totalLabel') }}</span>
+        <span class="total-value">{{ group.totalLabel }}</span>
+      </div>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch, computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useQuasar } from 'quasar';
+import type { QTableColumn } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import AppPageHeader from 'src/components/shared/app-page-header.vue';
 import AppBreadcrumbs from 'src/components/shared/app-breadcrumbs.vue';
 import DailyRevenueFilter from 'src/components/report/daily-revenue-filter.vue';
-import SearchBar from 'src/components/shared/search-bar.vue';
-import ExportCsvButton from 'src/components/shared/export-csv-button.vue';
-import { useDailyRevenue } from 'src/composables/use-daily-revenue';
 import BaseTable from 'src/components/shared/base-table.vue';
-import { fetchIssuedReceipts, type IssuedReceipt } from 'src/services/receipt.service';
-import type { QTableColumn } from 'quasar';
-import { useI18n } from 'vue-i18n';
+import { fetchReceiptUsageReport } from 'src/services/finance-report.service';
+import {
+  emptyFinanceReportFilter,
+  type FinanceReportFilter,
+  type ReceiptUsageReportGroup,
+} from 'src/types/finance-report.types';
 import { formatExamDisplayTitle } from 'src/utils/exam-instance-label';
-import type { DailyRevenueFilter as DailyRevenueFilterModel } from 'src/types/daily-revenue.types';
+import {
+  downloadFinanceReportXlsx,
+  formatReportAmount,
+  formatReportDate,
+  formatReportDateTime,
+  printFinanceReport,
+  readReportField,
+  type FinanceReportColumn,
+  type FinanceReportSection,
+} from 'src/utils/finance-report-export';
 
 const $q = useQuasar();
-
-const { error, filter } = useDailyRevenue();
-
 const { t, locale } = useI18n();
 
-const searchQuery = ref('');
+const filter = ref<FinanceReportFilter>(emptyFinanceReportFilter());
+const groups = ref<ReceiptUsageReportGroup[]>([]);
+const effectiveDates = ref<string[]>([]);
 const isLoading = ref(false);
-const receipts = ref<IssuedReceipt[]>([]);
 
-type ReceiptUsageRow = {
-  index: number;
-  receiptNo: string;
-  paymentDate: string;
-  receiptDate: string;
-  year: string;
-  documentType: string;
-  amount: number;
-  examName: string;
-  payer: string;
-  payee: string;
-  paymentDateRaw: string | null;
+const statusLabel = (status: string): string =>
+  status === 'voided'
+    ? t('admin.receiptUsageReport.status.voided')
+    : t('admin.receiptUsageReport.status.issued');
+
+const voidDetail = (row: ReceiptUsageReportGroup['rows'][number]): string => {
+  if (row.status !== 'voided') return '';
+  return [row.voidedBy, formatReportDateTime(row.voidedAt), row.voidReason].filter(Boolean).join(' ');
 };
 
-const applyFilter = (newFilter: DailyRevenueFilterModel): void => {
-  filter.value = { ...newFilter };
-};
+const displayGroups = computed(() =>
+  groups.value.map((group) => ({
+    key: `${group.fundSourceId ?? 'none'}-${group.fundSourceCode}`,
+    title: t('admin.receiptUsageReport.groupTitle', {
+      code: group.fundSourceCode || '-',
+      name: group.fundSourceName || '-',
+    }),
+    totalLabel: formatReportAmount(group.totalAmount),
+    rows: group.rows.map((row) => ({
+      ...row,
+      examLabel: formatExamDisplayTitle(row.examName, row.examRound, row.fiscalYear),
+      paidLabel: formatReportDateTime(row.paidAt),
+      receiptLabel: formatReportDateTime(row.receiptIssuedAt),
+      amountLabel: formatReportAmount(row.amount),
+      statusLabel: statusLabel(row.status),
+      voidLabel: voidDetail(row),
+      fiscalYearLabel: row.fiscalYear || '-',
+    })),
+  })),
+);
 
-const formatThaiDate = (dateStr?: string | null): string => {
-  if (!dateStr) return '-';
-  const date = new Date(dateStr);
-  if (Number.isNaN(date.getTime())) return '-';
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const buddhistYear = date.getFullYear() + 543;
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
-  return `${day}/${month}/${buddhistYear} ${hours}:${minutes}:${seconds}`;
-};
+const effectiveDateLabel = computed(() => {
+  if (effectiveDates.value.length === 0) return '';
+  return t('admin.dailyRevenueReport.effectiveDates', {
+    dates: effectiveDates.value.map((date) => formatReportDate(date)).join(', '),
+  });
+});
 
-const formatReceiptYear = (dateStr?: string | null): string => {
-  if (!dateStr) return '-';
-  const date = new Date(dateStr);
-  return Number.isNaN(date.getTime()) ? '-' : String(date.getFullYear() + 543);
-};
+const columns = computed<QTableColumn[]>(() => {
+  void locale.value;
+  return [
+    {
+      name: 'index',
+      label: t('admin.receiptUsageReport.table.columns.index'),
+      field: 'index',
+      align: 'center',
+    },
+    {
+      name: 'receiptNo',
+      label: t('admin.receiptUsageReport.table.columns.receiptNo'),
+      field: 'receiptNo',
+      align: 'center',
+    },
+    {
+      name: 'voided',
+      label: t('admin.receiptUsageReport.table.columns.voided'),
+      field: 'voidLabel',
+      align: 'left',
+    },
+    {
+      name: 'paymentDate',
+      label: t('admin.receiptUsageReport.table.columns.paymentDate'),
+      field: 'paidLabel',
+      align: 'center',
+    },
+    {
+      name: 'receiptDate',
+      label: t('admin.receiptUsageReport.table.columns.receiptDate'),
+      field: 'receiptLabel',
+      align: 'center',
+    },
+    {
+      name: 'year',
+      label: t('admin.receiptUsageReport.table.columns.year'),
+      field: 'fiscalYearLabel',
+      align: 'center',
+    },
+    {
+      name: 'amount',
+      label: t('admin.receiptUsageReport.table.columns.amount'),
+      field: 'amountLabel',
+      align: 'right',
+    },
+    {
+      name: 'examName',
+      label: t('admin.receiptUsageReport.table.columns.examName'),
+      field: 'examLabel',
+      align: 'left',
+    },
+    {
+      name: 'applicant',
+      label: t('admin.receiptUsageReport.table.columns.applicant'),
+      field: 'applicantName',
+      align: 'left',
+    },
+    {
+      name: 'payer',
+      label: t('admin.receiptUsageReport.table.columns.payer'),
+      field: 'payerName',
+      align: 'left',
+    },
+    {
+      name: 'payee',
+      label: t('admin.receiptUsageReport.table.columns.payee'),
+      field: 'collectorName',
+      align: 'left',
+    },
+  ];
+});
 
-const getReceiptNo = (receipt: IssuedReceipt, paymentDate: string | null): string => {
-  if (receipt.RC_NO) return receipt.RC_NO;
+const exportColumns = computed<FinanceReportColumn[]>(() =>
+  columns.value.map((column) => ({
+    label: column.label,
+    align: column.align === 'right' || column.align === 'center' ? column.align : 'left',
+    value: (row) => {
+      const field = typeof column.field === 'string' ? column.field : column.name;
+      return readReportField(row, field);
+    },
+  })),
+);
 
-  const receiptYear = paymentDate
-    ? new Date(paymentDate).getFullYear()
-    : receipt.RC_ISSUED_AT
-      ? new Date(receipt.RC_ISSUED_AT).getFullYear()
-      : new Date(receipt.CREATED_AT).getFullYear();
+const exportSections = computed<FinanceReportSection[]>(() =>
+  displayGroups.value.map((group) => ({
+    title: group.title,
+    rows: group.rows,
+    totalLabel: t('admin.receiptUsageReport.table.totalLabel'),
+    totalValue: group.totalLabel,
+  })),
+);
 
-  return `RC${receiptYear}-${String(receipt.RC_ID).padStart(5, '0')}`;
-};
+const paginationFor = (count: number) => ({
+  page: 1,
+  rowsPerPage: count || 10,
+  rowsNumber: count,
+});
 
-const getReceiptBankReconcile = (receipt: IssuedReceipt) => {
-  const bankReconciles = receipt.TRANSACTION?.BANK_RECONCILES ?? [];
-  return [...bankReconciles].sort(
-    (left, right) => new Date(right.CREATED_AT).getTime() - new Date(left.CREATED_AT).getTime(),
-  )[0];
-};
-
-const getPersonName = (
-  profile?: {
-    userTitleTh?: string | null;
-    userFullnameTh?: string | null;
-    userTitleEn?: string | null;
-    userFullnameEn?: string | null;
-  } | null,
-): string => {
-  const fullnameTh = [profile?.userTitleTh, profile?.userFullnameTh].filter(Boolean).join(' ');
-  const fullnameEn = [profile?.userTitleEn, profile?.userFullnameEn].filter(Boolean).join(' ');
-  return fullnameTh || fullnameEn;
-};
-
-const getPayeeName = (receipt: IssuedReceipt): string => {
-  const bankReconcile = getReceiptBankReconcile(receipt);
-  return getPersonName(bankReconcile?.USER?.PROFILE) || bankReconcile?.USER?.USER_EMAIL || '-';
-};
-
-const loadReceipts = async (): Promise<void> => {
+const loadRows = async (): Promise<void> => {
   isLoading.value = true;
   try {
-    receipts.value = await fetchIssuedReceipts();
-  } catch (err) {
-    console.error(err);
-    receipts.value = [];
+    const report = await fetchReceiptUsageReport({
+      fiscalYear: filter.value.fiscalYear,
+      startDate: filter.value.startDate,
+      endDate: filter.value.endDate,
+      fundSourceId: filter.value.fundSourceId,
+      examName: filter.value.examName,
+      payerName: filter.value.payerName,
+      collectorName: filter.value.collectorName,
+      receiptNo: filter.value.receiptNo,
+      status: filter.value.status,
+    });
+    groups.value = report.groups;
+    effectiveDates.value = report.effectiveDates;
+  } catch {
+    groups.value = [];
+    effectiveDates.value = [];
     $q.notify({
       type: 'negative',
-      message: 'ไม่สามารถดึงข้อมูลการใช้ใบเสร็จรับเงินได้',
+      message: t('admin.receiptUsageReport.notifications.loadError'),
       position: 'top',
     });
   } finally {
@@ -157,240 +251,39 @@ const loadReceipts = async (): Promise<void> => {
   }
 };
 
-const receiptRows = computed<ReceiptUsageRow[]>(() =>
-  receipts.value.flatMap((receipt, index) => {
-    const transaction = receipt.TRANSACTION;
-    const enrollment = transaction?.ENROLLMENT;
-    if (!transaction || !enrollment) return [];
+const applyFilter = (next: FinanceReportFilter): void => {
+  filter.value = { ...next };
+  void loadRows();
+};
 
-    const exam = enrollment.SESSION?.EXAM;
-    const paymentDateRaw = transaction.TRANX_PAID_AT ?? receipt.RC_ISSUED_AT;
-    const receiptDateRaw = receipt.RC_ISSUED_AT ?? receipt.CREATED_AT;
-    const payer =
-      receipt.RC_NAME ||
-      getPersonName(enrollment.USER?.PROFILE) ||
-      enrollment.USER?.USER_EMAIL ||
-      'ผู้สมัครสอบ';
+const exportExcel = (): void => {
+  downloadFinanceReportXlsx({
+    fileName: 'receipt-usage-report.xlsx',
+    title: t('admin.receiptUsageReport.pageTitle'),
+    subtitle: effectiveDateLabel.value,
+    columns: exportColumns.value,
+    sections: exportSections.value,
+  });
+};
 
-    return [
-      {
-        index: index + 1,
-        receiptNo: getReceiptNo(receipt, paymentDateRaw),
-        paymentDate: formatThaiDate(paymentDateRaw),
-        receiptDate: formatThaiDate(receiptDateRaw),
-        year: formatReceiptYear(receiptDateRaw),
-        documentType: 'ใบเสร็จ',
-        amount: Number(transaction.TRANX_AMOUNT ?? exam?.EXAM_FEE ?? 0),
-        examName:
-          formatExamDisplayTitle(exam?.EXAM_NAME, exam?.EXAM_ROUND, exam?.EXAM_FISCAL_YEAR) ||
-          exam?.EXAM_NAME ||
-          'BUU-GET Exam',
-        payer,
-        payee: getPayeeName(receipt),
-        paymentDateRaw,
-      },
-    ];
-  }),
-);
-
-const filteredReceipts = computed(() => {
-  let rows = receiptRows.value;
-
-  if (filter.value.startDate) {
-    const start = new Date(`${filter.value.startDate}T00:00:00`);
-    rows = rows.filter((row) =>
-      row.paymentDateRaw ? new Date(row.paymentDateRaw) >= start : false,
-    );
-  }
-
-  if (filter.value.endDate) {
-    const end = new Date(`${filter.value.endDate}T23:59:59`);
-    rows = rows.filter((row) => (row.paymentDateRaw ? new Date(row.paymentDateRaw) <= end : false));
-  }
-
-  if (filter.value.examName) {
-    const examName = filter.value.examName.toLowerCase();
-    rows = rows.filter((row) => row.examName.toLowerCase().includes(examName));
-  }
-
-  if (filter.value.receiptNo) {
-    const receiptNo = filter.value.receiptNo.toLowerCase();
-    rows = rows.filter((row) => row.receiptNo.toLowerCase().includes(receiptNo));
-  }
-
-  if (filter.value.payerName) {
-    const payerName = filter.value.payerName.toLowerCase();
-    rows = rows.filter((row) => row.payer.toLowerCase().includes(payerName));
-  }
-
-  if (filter.value.payeeName) {
-    const payeeName = filter.value.payeeName.toLowerCase();
-    rows = rows.filter((row) => row.payee.toLowerCase().includes(payeeName));
-  }
-
-  if (searchQuery.value) {
-    const q = searchQuery.value.toString().toLowerCase();
-    rows = rows.filter((row) =>
-      [
-        row.receiptNo,
-        row.paymentDate,
-        row.receiptDate,
-        row.year,
-        row.documentType,
-        row.examName,
-        row.payer,
-        row.payee,
-      ]
-        .join(' ')
-        .toLowerCase()
-        .includes(q),
-    );
-  }
-
-  return rows.map((row, index) => ({ ...row, index: index + 1 }));
-});
-
-const pagination = computed(() => ({
-  page: 1,
-  rowsPerPage: 10,
-  rowsNumber: filteredReceipts.value.length,
-}));
-
-const columns = computed<QTableColumn[]>(() => {
-  void locale.value;
-  return [
-  {
-    name: 'index',
-    label: t('admin.receiptUsageReport.table.columns.index'),
-    field: 'index',
-    align: 'center',
-    sortable: true,
-  },
-  {
-    name: 'receiptNo',
-    label: t('admin.receiptUsageReport.table.columns.receiptNo'),
-    field: 'receiptNo',
-    align: 'left',
-  },
-  {
-    name: 'paymentDate',
-    label: t('admin.receiptUsageReport.table.columns.paymentDate'),
-    field: 'paymentDate',
-    align: 'center',
-  },
-  {
-    name: 'receiptDate',
-    label: t('admin.receiptUsageReport.table.columns.receiptDate'),
-    field: 'receiptDate',
-    align: 'center',
-  },
-  {
-    name: 'year',
-    label: t('admin.receiptUsageReport.table.columns.year'),
-    field: 'year',
-    align: 'center',
-  },
-  {
-    name: 'amount',
-    label: t('admin.receiptUsageReport.table.columns.amount'),
-    field: 'amount',
-    align: 'center',
-    style: 'width:120px',
-    format: (val: unknown) => {
-      const n = Number(val);
-      return Number.isNaN(n) ? '0.00' : n.toFixed(2);
-    },
-  },
-  {
-    name: 'examName',
-    label: t('admin.receiptUsageReport.table.columns.examName'),
-    field: 'examName',
-    align: 'left',
-  },
-  {
-    name: 'payer',
-    label: t('admin.receiptUsageReport.table.columns.payer'),
-    field: 'payer',
-    align: 'left',
-  },
-  {
-    name: 'payee',
-    label: t('admin.receiptUsageReport.table.columns.payee'),
-    field: 'payee',
-    align: 'left',
-  },
-];});
-const exportColumns: QTableColumn[] = [
-  {
-    name: 'index',
-    label: t('admin.receiptUsageReport.table.columns.index'),
-    field: 'index',
-    align: 'center',
-  },
-  {
-    name: 'receiptNo',
-    label: t('admin.receiptUsageReport.table.columns.receiptNo'),
-    field: 'receiptNo',
-    align: 'left',
-  },
-  {
-    name: 'paymentDate',
-    label: t('admin.receiptUsageReport.table.columns.paymentDate'),
-    field: 'paymentDate',
-    align: 'left',
-  },
-  {
-    name: 'receiptDate',
-    label: t('admin.receiptUsageReport.table.columns.receiptDate'),
-    field: 'receiptDate',
-    align: 'left',
-  },
-  {
-    name: 'year',
-    label: t('admin.receiptUsageReport.table.columns.year'),
-    field: 'year',
-    align: 'center',
-  },
-  {
-    name: 'amount',
-    label: t('admin.receiptUsageReport.table.columns.amount'),
-    field: 'amount',
-    align: 'right',
-  },
-  {
-    name: 'examName',
-    label: t('admin.receiptUsageReport.table.columns.examName'),
-    field: 'examName',
-    align: 'left',
-  },
-  {
-    name: 'payer',
-    label: t('admin.receiptUsageReport.table.columns.payer'),
-    field: 'payer',
-    align: 'left',
-  },
-  {
-    name: 'payee',
-    label: t('admin.receiptUsageReport.table.columns.payee'),
-    field: 'payee',
-    align: 'left',
-  },
-];
-
-// Show error notification when error changes
-watch(error, (newVal) => {
-  if (newVal) {
+const exportPdf = (): void => {
+  const opened = printFinanceReport({
+    title: t('admin.receiptUsageReport.pageTitle'),
+    subtitle: effectiveDateLabel.value,
+    columns: exportColumns.value,
+    sections: exportSections.value,
+  });
+  if (!opened) {
     $q.notify({
-      type: 'negative',
-      message: newVal,
+      type: 'warning',
+      message: t('admin.financeReport.printBlocked'),
       position: 'top',
     });
   }
-});
+};
 
-// Initial load
 onMounted(() => {
-  void loadReceipts();
+  void loadRows();
 });
 </script>
 
@@ -399,9 +292,16 @@ onMounted(() => {
   overflow-x: hidden;
 }
 
-.receipt-usage-table {
-  :deep(.base-table) {
-    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-  }
+.total-row {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-top: none;
+  padding: 12px 16px;
+  gap: 12px;
+}
+
+.total-label,
+.total-value {
+  font-weight: var(--font-weight-bold);
 }
 </style>

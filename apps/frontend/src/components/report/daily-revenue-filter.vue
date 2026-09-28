@@ -2,76 +2,72 @@
   <q-card flat bordered class="filter-card q-mb-lg">
     <q-card-section>
       <div class="row q-col-gutter-x-md q-col-gutter-y-md items-start">
-        <div class="col-12 col-sm-6 col-md-3">
-          <div class="custom-label q-mb-xs">
-            {{ t('admin.dailyRevenueReport.filter.startDate') }}
+        <template v-if="mode === 'usage'">
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="custom-label q-mb-xs">
+              {{ t('admin.dailyRevenueReport.filter.fiscalYear') }}
+            </div>
+            <q-input
+              v-model="localFilter.fiscalYear"
+              outlined
+              dense
+              bg-color="grey-2"
+              class="custom-input"
+              hide-bottom-space
+              @update:model-value="emitFilterChange"
+            />
           </div>
-          <q-input
-            v-model="localFilter.startDate"
-            outlined
-            dense
-            readonly
-            bg-color="grey-2"
-            class="custom-input cursor-pointer"
-            hide-bottom-space
-          >
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy
-                  ref="startDateProxy"
-                  cover
-                  transition-show="scale"
-                  transition-hide="scale"
-                >
-                  <AppCalendar
-                    v-model="localFilter.startDate"
-                    @click-date="
-                      () => {
-                        startDateProxy?.hide();
-                        emitFilterChange();
-                      }
-                    "
-                  />
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-        </div>
+        </template>
+
+        <template v-if="mode === 'application'">
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="custom-label q-mb-xs">
+              {{ t('admin.dailyRevenueReport.filter.receiptDate') }}
+            </div>
+            <DateField v-model="localFilter.receiptDate" @change="emitFilterChange" />
+          </div>
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="custom-label q-mb-xs">
+              {{ t('admin.dailyRevenueReport.filter.paidDate') }}
+            </div>
+            <DateField v-model="localFilter.paidDate" @change="emitFilterChange" />
+          </div>
+        </template>
+
+        <template v-else>
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="custom-label q-mb-xs">
+              {{ t('admin.dailyRevenueReport.filter.startDate') }}
+              <span v-if="mode === 'daily'" class="text-negative">*</span>
+            </div>
+            <DateField v-model="localFilter.startDate" @change="emitFilterChange" />
+          </div>
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="custom-label q-mb-xs">
+              {{ t('admin.dailyRevenueReport.filter.endDate') }}
+              <span v-if="mode === 'daily'" class="text-negative">*</span>
+            </div>
+            <DateField v-model="localFilter.endDate" @change="emitFilterChange" />
+          </div>
+        </template>
 
         <div class="col-12 col-sm-6 col-md-3">
           <div class="custom-label q-mb-xs">
-            {{ t('admin.dailyRevenueReport.filter.endDate') }}
+            {{ t('admin.dailyRevenueReport.filter.fundSource') }}
           </div>
-          <q-input
-            v-model="localFilter.endDate"
+          <q-select
+            v-model="localFilter.fundSourceId"
             outlined
             dense
-            readonly
+            clearable
+            emit-value
+            map-options
             bg-color="grey-2"
-            class="custom-input cursor-pointer"
+            class="custom-input"
+            :options="fundSourceOptions"
             hide-bottom-space
-          >
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy
-                  ref="endDateProxy"
-                  cover
-                  transition-show="scale"
-                  transition-hide="scale"
-                >
-                  <AppCalendar
-                    v-model="localFilter.endDate"
-                    @click-date="
-                      () => {
-                        endDateProxy?.hide();
-                        emitFilterChange();
-                      }
-                    "
-                  />
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
+            @update:model-value="emitFilterChange"
+          />
         </div>
 
         <div class="col-12 col-sm-6 col-md-3">
@@ -90,7 +86,7 @@
           />
         </div>
 
-        <template v-if="isFullMode">
+        <template v-if="mode === 'usage'">
           <div class="col-12 col-sm-6 col-md-3">
             <div class="custom-label q-mb-xs">
               {{ t('admin.dailyRevenueReport.filter.receiptNo') }}
@@ -106,7 +102,6 @@
               @update:model-value="emitFilterChange"
             />
           </div>
-
           <div class="col-12 col-sm-6 col-md-3">
             <div class="custom-label q-mb-xs">
               {{ t('admin.dailyRevenueReport.filter.payer') }}
@@ -122,18 +117,34 @@
               @update:model-value="emitFilterChange"
             />
           </div>
-
           <div class="col-12 col-sm-6 col-md-3">
             <div class="custom-label q-mb-xs">
               {{ t('admin.dailyRevenueReport.filter.payee') }}
             </div>
             <q-input
-              v-model="localFilter.payeeName"
+              v-model="localFilter.collectorName"
               outlined
               dense
               bg-color="grey-2"
               class="custom-input"
               :placeholder="t('admin.dailyRevenueReport.filter.placeholders.payee')"
+              hide-bottom-space
+              @update:model-value="emitFilterChange"
+            />
+          </div>
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="custom-label q-mb-xs">
+              {{ t('admin.dailyRevenueReport.filter.status') }}
+            </div>
+            <q-select
+              v-model="localFilter.status"
+              outlined
+              dense
+              emit-value
+              map-options
+              bg-color="grey-2"
+              class="custom-input"
+              :options="statusOptions"
               hide-bottom-space
               @update:model-value="emitFilterChange"
             />
@@ -145,58 +156,70 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, ref } from 'vue';
-import type { QPopupProxy } from 'quasar';
-import AppCalendar from 'src/components/shared/app-calendar.vue';
-import type { DailyRevenueFilter } from 'src/types/daily-revenue.types';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import DateField from './finance-report-date-field.vue';
+import { fetchFundSources } from 'src/services/finance.service';
+import {
+  emptyFinanceReportFilter,
+  type FinanceReportFilter,
+} from 'src/types/finance-report.types';
 
-const { t } = useI18n();
-
-type DailyRevenueFilterMode = 'compact' | 'full';
+type FilterMode = 'daily' | 'application' | 'usage';
 
 interface Props {
-  filter: DailyRevenueFilter & { receiptNo?: string; payerName?: string; payeeName?: string };
-  mode?: DailyRevenueFilterMode;
+  filter: FinanceReportFilter;
+  mode: FilterMode;
 }
 
 const props = defineProps<Props>();
-
 const emit = defineEmits<{
-  (e: 'filter-change', filter: DailyRevenueFilter): void;
+  (e: 'filter-change', filter: FinanceReportFilter): void;
 }>();
 
-const isFullMode = props.mode === 'full';
+const { t, locale } = useI18n();
+const fundSources = ref<Awaited<ReturnType<typeof fetchFundSources>>>([]);
 
-const startDateProxy = ref<QPopupProxy | null>(null);
-const endDateProxy = ref<QPopupProxy | null>(null);
-
-const localFilter = reactive({
-  startDate: props.filter.startDate,
-  endDate: props.filter.endDate,
-  examName: props.filter.examName,
-  receiptNo: props.filter.receiptNo || '',
-  payerName: props.filter.payerName || '',
-  payeeName: props.filter.payeeName || '',
+const localFilter = reactive<FinanceReportFilter>({
+  ...emptyFinanceReportFilter(),
+  ...props.filter,
 });
 
-// Sync props → local state when parent changes
 watch(
   () => props.filter,
-  (newFilter) => {
-    localFilter.startDate = newFilter.startDate;
-    localFilter.endDate = newFilter.endDate;
-    localFilter.examName = newFilter.examName;
-    localFilter.receiptNo = newFilter.receiptNo || '';
-    localFilter.payerName = newFilter.payerName || '';
-    localFilter.payeeName = newFilter.payeeName || '';
+  (next) => {
+    Object.assign(localFilter, next);
   },
   { deep: true },
 );
 
+const fundSourceOptions = computed(() =>
+  fundSources.value.map((source) => ({
+    label: `${source.FS_ACCOUNT_CODE} ${source.FS_NAME}`,
+    value: source.FS_ID,
+  })),
+);
+
+const statusOptions = computed(() => {
+  void locale.value;
+  return [
+    { label: t('admin.dailyRevenueReport.filter.statusAll'), value: '' },
+    { label: t('admin.dailyRevenueReport.filter.statusIssued'), value: 'issued' },
+    { label: t('admin.dailyRevenueReport.filter.statusVoided'), value: 'voided' },
+  ];
+});
+
 const emitFilterChange = (): void => {
   emit('filter-change', { ...localFilter });
 };
+
+onMounted(async () => {
+  try {
+    fundSources.value = await fetchFundSources();
+  } catch {
+    fundSources.value = [];
+  }
+});
 </script>
 
 <style scoped lang="scss">
@@ -206,16 +229,6 @@ const emitFilterChange = (): void => {
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-card) !important;
-  transition:
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast),
-    background-color var(--transition-fast);
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--detail-card-hover-shadow) !important;
-    background-color: var(--detail-card-hover-bg);
-  }
 }
 
 .custom-label {
@@ -231,10 +244,9 @@ const emitFilterChange = (): void => {
   }
 
   :deep(.q-field__native) {
-    color: #000000; /* สีข้อความด้านใน */
+    color: #000000;
   }
 
-  /* สีของ Placeholder ให้เป็นสีเทาอ่อน */
   :deep(.q-field__native::placeholder) {
     color: #615f5f;
     opacity: 1;

@@ -21,6 +21,7 @@ import { ExamEnrollmentsModule } from './modules/exam-enrollments/exam-enrollmen
 import { ExamVouchersModule } from './modules/exam-vouchers/exam-vouchers.module';
 import { TransactionRefsModule } from './modules/transaction-refs/transaction-refs.module';
 import { FundSourcesModule } from './modules/fund-sources/fund-sources.module';
+import { FinanceReportsModule } from './modules/finance-reports/finance-reports.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { BankCallbacksModule } from './modules/bank-callbacks/bank-callback.module';
 import { BankReconcilesModule } from './modules/bank-reconciles/bank-reconciles.module';
@@ -108,6 +109,7 @@ import { GraylogModule } from './common/logging/graylog.module';
     ExamVouchersModule,
     TransactionRefsModule,
     FundSourcesModule,
+    FinanceReportsModule,
     TransactionsModule,
     BankCallbacksModule,
     BankReconcilesModule,
