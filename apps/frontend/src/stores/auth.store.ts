@@ -26,6 +26,7 @@ export interface RegisterPayload {
   passportNo?: string | undefined;
   profileImage?: string | undefined;
   confirmPassword?: string | undefined;
+  thaidRegistrationToken?: string | undefined;
 }
 
 export interface AuthResponse {

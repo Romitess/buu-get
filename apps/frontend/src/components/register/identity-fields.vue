@@ -7,7 +7,7 @@
       v-model="nationalId"
       :label="t('profile.nationalId')"
       :placeholder="t('profile.nationalIdPlaceholder')"
-      :readonly="isEditMode"
+      :readonly="isEditMode || lockNationalId"
       :required="true"
       :rules="nationalIdRules"
       mask="#-####-#####-##-#"
@@ -92,6 +92,7 @@ const { t } = useI18n();
 defineProps<{
   isThai: boolean;
   isEditMode: boolean;
+  lockNationalId?: boolean;
 }>();
 
 const emit = defineEmits(['title-th-change']);

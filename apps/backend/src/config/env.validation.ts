@@ -26,6 +26,16 @@ export interface EnvironmentVariables {
   CORS_ORIGINS?: string;
   /** origin ของ frontend สำหรับ redirect หลัง ThaiD callback (local split-port) */
   FRONTEND_URL?: string;
+  /** sandbox (ค่าเริ่มต้น) หรือ production — จับคู่โฮสต์กับ callback คนละชุด */
+  THAID_ENV?: 'sandbox' | 'production';
+  /** override issuer; ว่างแล้วใช้โฮสต์ตาม THAID_ENV */
+  THAID_ISSUER?: string;
+  THAID_CLIENT_ID?: string;
+  THAID_CLIENT_SECRET?: string;
+  /** override redirect URI ที่ลงทะเบียนไว้; ว่างแล้วใช้ callback ตาม THAID_ENV */
+  THAID_REDIRECT_URI?: string;
+  THAID_SCOPE?: string;
+  THAID_VERIFY_TYPE?: 'pin' | 'face' | 'pin_face';
   /** default JSON/urlencoded body limit (e.g. 1mb) */
   BODY_LIMIT?: string;
   /** larger limit for file upload routes (e.g. 50mb) */
@@ -81,6 +91,21 @@ const envSchema = Joi.object<EnvironmentVariables>({
   FRONTEND_URL: Joi.string()
     .uri({ scheme: ['http', 'https'] })
     .optional(),
+  THAID_ENV: Joi.string().valid('sandbox', 'production').default('sandbox'),
+  THAID_ISSUER: Joi.string()
+    .uri({ scheme: ['https'] })
+    .optional(),
+  THAID_CLIENT_ID: Joi.string().allow('').optional(),
+  THAID_CLIENT_SECRET: Joi.string().allow('').optional(),
+  THAID_REDIRECT_URI: Joi.string()
+    .uri({ scheme: ['https'] })
+    .optional(),
+  THAID_SCOPE: Joi.string().default(
+    'openid pid name name_en birthdate title title_en',
+  ),
+  THAID_VERIFY_TYPE: Joi.string()
+    .valid('pin', 'face', 'pin_face')
+    .default('pin'),
   BODY_LIMIT: Joi.string().default('1mb'),
   UPLOAD_BODY_LIMIT: Joi.string().default('50mb'),
   PAYMENT_MODE: Joi.string()

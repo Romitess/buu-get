@@ -13,6 +13,7 @@ import { UserImageModule } from '../user-image/user-image.module';
 import { PlatformGatewayModule } from '../platform-gateway/platform-gateway.module';
 import { MoodleModule } from '../moodle/moodle.module';
 import { MsgPersonsModule } from '../msg-persons/msg-persons.module';
+import { ThaidModule } from '../thaid/thaid.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { MsgPersonsModule } from '../msg-persons/msg-persons.module';
     PlatformGatewayModule,
     MoodleModule,
     MsgPersonsModule,
+    ThaidModule,
     CacheModule.register(),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

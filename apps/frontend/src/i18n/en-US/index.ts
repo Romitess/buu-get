@@ -2460,6 +2460,13 @@ export default {
       unknownTitle: 'No confirmation result',
       unknownBody: 'No ThaID confirmation data was found.',
       backToLogin: 'Back to sign in',
+      exchangingTitle: 'Confirming identity',
+      exchangingBody: 'Receiving the ThaID confirmation',
+      signedIn: 'Signed in with ThaID',
+      existingAccount: 'An account for this national ID already exists. You are signed in.',
+      noAccount: 'No account matches this national ID. Enter an email and password to register.',
+      continueRegister: 'Identity confirmed. Enter an email and password to register.',
+      passwordRequired: 'Set a password of at least 8 characters',
     },
     notify: {
       required: 'Please enter email and password',

@@ -353,6 +353,7 @@ export const useUserStore = defineStore('user', () => {
     initialize,
     login,
     loginBuu,
+    hydrateFromLogin,
     ensureProfileLoaded,
     patchCurrentUser,
     setActiveRole,

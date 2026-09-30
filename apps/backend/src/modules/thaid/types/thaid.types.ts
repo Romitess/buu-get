@@ -14,6 +14,41 @@ export interface IdentityCallbackRedirect {
   statusCode: 302;
 }
 
+export interface ThaidSessionLoginResponse {
+  outcome: 'login';
+  notice: 'signed_in' | 'existing_account';
+  login: {
+    accessToken: string;
+    user: {
+      id?: number;
+      psnId?: string;
+      actorType: 'user' | 'person';
+      email: string;
+      role: string;
+      roles: string[];
+      remark?: string | null;
+    };
+  };
+}
+
+export interface ThaidSessionPrefillResponse {
+  outcome: 'prefill';
+  notice: 'no_account' | 'continue_register';
+  registrationToken: string;
+  prefill: {
+    nationalId: string;
+    titleTH: string;
+    titleEN: string;
+    fullName: string;
+    englishName: string;
+    birthdate: string;
+  };
+}
+
+export type ThaidSessionResponse =
+  | ThaidSessionLoginResponse
+  | ThaidSessionPrefillResponse;
+
 export interface ExternalCallbackPayload {
   body: ExternalCallbackBody;
   query: ExternalCallbackQuery;

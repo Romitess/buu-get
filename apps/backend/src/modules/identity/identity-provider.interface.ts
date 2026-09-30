@@ -1,12 +1,15 @@
 /**
- * Thin identity port for a future ThaiD (or other IdP) OIDC integration.
- * Not wired to login UI; does not flip userThaidSynced.
- * Separate from payment webhook stubs at `/approval` and `/payment`.
+ * พอร์ตยืนยันตัวตน ThaID (OIDC authorization code)
+ * แยกจาก callback ธนาคารที่ `/approval` และ `/payment`
  */
+
+export type IdentityAuthIntent = 'login' | 'register';
 
 export interface IdentityAuthStartOptions {
   /** Optional return path after successful callback (relative app route). */
   returnTo?: string;
+  /** เจตนาของปุ่มที่ผู้ใช้กด เก็บคู่กับ state */
+  intent?: IdentityAuthIntent;
 }
 
 export interface IdentityAuthStartResult {

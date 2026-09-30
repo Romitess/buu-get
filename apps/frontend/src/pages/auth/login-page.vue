@@ -41,7 +41,7 @@
           </div>
           <div v-else-if="formKey === 'credentials'">
             <div class="register-card-shell">
-              <RegisterCard @register="handleRegister" @thaid-register="handleRegister" />
+              <RegisterCard @register="handleRegister" />
             </div>
           </div>
           <div v-else-if="formKey === 'profile'">
@@ -51,6 +51,7 @@
                 :is-thai="isThai"
                 :credentials="credentials"
                 :registration-method="credentials.registrationMethod"
+                :thaid-prefill="thaidPrefill"
                 :is-submitting="isSubmitting"
                 @close="goBackToCredentials"
                 @save="handleSave"
@@ -74,6 +75,10 @@ import RegisterCard from 'src/components/register-card.vue';
 import type { RegisterCredentials } from 'src/types/register';
 import type { RegisterFormData } from 'src/types/register';
 import RegisterAndEditProfile from 'src/components/register-and-edit-profile.vue';
+import {
+  takeThaidPrefill,
+  type ThaidPrefillSession,
+} from 'src/services/thaid.service';
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
@@ -90,6 +95,21 @@ const credentials = ref<RegisterCredentials>({
   userType: 'thai',
   registrationMethod: 'email',
 });
+const thaidPrefill = ref<ThaidPrefillSession | null>(null);
+if (route.path.includes('register')) {
+  const storedPrefill = takeThaidPrefill();
+  if (storedPrefill) {
+    thaidPrefill.value = storedPrefill;
+    isThai.value = true;
+    credentials.value = {
+      email: '',
+      password: '',
+      userType: 'thai',
+      registrationMethod: 'thaid',
+    };
+    currentStep.value = 'profile';
+  }
+}
 
 // ============================================================
 // Animation state
@@ -147,6 +167,19 @@ onMounted(() => {
     formKey.value = 'login';
   }
   showForm.value = true;
+  if (thaidPrefill.value?.notice === 'no_account') {
+    $q.notify({
+      type: 'info',
+      message: t('auth.thaidCallback.noAccount'),
+      position: 'top',
+    });
+  } else if (thaidPrefill.value?.notice === 'continue_register') {
+    $q.notify({
+      type: 'info',
+      message: t('auth.thaidCallback.continueRegister'),
+      position: 'top',
+    });
+  }
 });
 
 // ============================================================
@@ -274,9 +307,17 @@ const goBackToCredentials = (): void => {
 
 /** Step 2 complete */
 const handleSave = async (formData: RegisterFormData): Promise<void> => {
-  // ThaiD stub path: never derive password from nationalId — use crypto-random temp password
-  let passwordToUse = credentials.value.password;
+  const isThaidRegistration = credentials.value.registrationMethod === 'thaid';
+  let passwordToUse = formData.password || credentials.value.password;
   if (!passwordToUse) {
+    if (isThaidRegistration) {
+      $q.notify({
+        type: 'warning',
+        message: t('auth.thaidCallback.passwordRequired'),
+        position: 'top',
+      });
+      return;
+    }
     const bytes = new Uint8Array(24);
     crypto.getRandomValues(bytes);
     passwordToUse = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
@@ -300,6 +341,9 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
     faculty: formData.faculty,
     institution: formData.institution,
     address: formData.address,
+    ...(thaidPrefill.value
+      ? { thaidRegistrationToken: thaidPrefill.value.registrationToken }
+      : {}),
   };
 
   isSubmitting.value = true;

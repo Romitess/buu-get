@@ -171,6 +171,7 @@ import type { QForm } from 'quasar';
 import type { RegisterCredentials } from 'src/types/register';
 import { useFocusFirstInvalidField } from 'src/composables/use-focus-first-invalid-field';
 import { useAuthStore } from 'src/stores/auth.store';
+import { startThaid } from 'src/services/thaid.service';
 import OtpVerificationDialog from 'src/components/register/otp-verification-dialog.vue';
 
 const emit = defineEmits<{
@@ -314,14 +315,9 @@ const handleResendOtp = async (): Promise<void> => {
   await sendOtp();
 };
 
-/** กดปุ่ม ThaiD → emit thaid-register event */
+/** กดปุ่ม ThaiD → ไปยืนยันตัวตนที่กรมการปกครอง */
 const onThaiID = (): void => {
-  emit('thaid-register', {
-    email: '',
-    password: '',
-    userType: 'thai',
-    registrationMethod: 'thaid',
-  });
+  startThaid('register');
 };
 </script>
 

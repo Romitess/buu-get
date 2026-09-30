@@ -47,6 +47,8 @@ import { ExamEnrollmentAuditLog } from '../modules/enrollment-audit/entities/exa
 import { SystemSetting } from '../modules/system-settings/entities/system-setting.entity';
 import { SystemSettingAuditLog } from '../modules/system-settings/entities/system-setting-audit-log.entity';
 import { AuditLog } from '../modules/audit-logs/entities/audit-log.entity';
+import { ThaidAuthState } from '../modules/thaid/entities/thaid-auth-state.entity';
+import { ThaidHandoff } from '../modules/thaid/entities/thaid-handoff.entity';
 
 export default new DataSource({
   type: 'mysql',
@@ -103,6 +105,8 @@ export default new DataSource({
     SystemSetting,
     SystemSettingAuditLog,
     AuditLog,
+    ThaidAuthState,
+    ThaidHandoff,
   ],
   migrations: [
     __filename.endsWith('.js')

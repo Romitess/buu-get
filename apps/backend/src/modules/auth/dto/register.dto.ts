@@ -89,6 +89,15 @@ export class RegisterDto {
   confirmPassword?: string;
 
   @ApiProperty({
+    required: false,
+    description:
+      'ตั๋วจาก ThaID ที่ยังไม่หมดอายุ ใช้ตั้ง userThaidSynced เมื่อเลขบัตรตรงกับที่ตรวจแล้ว',
+  })
+  @IsOptional()
+  @IsString()
+  thaidRegistrationToken?: string;
+
+  @ApiProperty({
     example: 'data:image/jpeg;base64,/9j/4AAQ...',
     required: false,
     description:

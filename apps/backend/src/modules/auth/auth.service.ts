@@ -26,6 +26,7 @@ import { MoodleSyncService } from '../moodle/moodle-sync.service';
 import { MsgPersonsService } from '../msg-persons/msg-persons.service';
 import { getOtpEmailTemplate } from './templates/otp-email.template';
 import { MemberSessionCodesService } from 'src/common/services/member-session-codes.service';
+import { ThaidHandoffService } from '../thaid/thaid-handoff.service';
 import type { AuthenticatedUser } from 'src/common/utils/authz.util';
 import * as bcrypt from 'bcrypt';
 
@@ -63,6 +64,7 @@ export class AuthService {
     private readonly msgPersonsService: MsgPersonsService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly memberSessionCodesService: MemberSessionCodesService,
+    private readonly thaidHandoff: ThaidHandoffService,
   ) {}
 
   /** แยกชื่อ-นามสกุลจาก fullname (fallback เป็น local-part ของอีเมล) สำหรับส่งให้ Moodle */
@@ -279,8 +281,29 @@ export class AuthService {
     await repo.save(repo.create({ USER_ID: userId, USER_IMAGE_URL: imageUrl }));
   }
 
+  /** ตรวจตั๋ว ThaID ก่อนเปิดทรานแซกชันสมัคร คืน token เมื่อเลขบัตรตรง */
+  private async resolveThaidRegistrationProof(
+    registerDto: RegisterDto,
+  ): Promise<string | null> {
+    const token = registerDto.thaidRegistrationToken?.trim();
+    if (!token) {
+      return null;
+    }
+    const proof = await this.thaidHandoff.peekRegisterProof(token);
+    if (!proof) {
+      throw new BadRequestException('ข้อมูลยืนยัน ThaID หมดอายุหรือไม่ถูกต้อง');
+    }
+    const nationalId = registerDto.nationalId?.trim();
+    if (registerDto.userType !== 'thai' || nationalId !== proof.pid) {
+      throw new BadRequestException('เลขบัตรประชาชนไม่ตรงกับข้อมูลจาก ThaID');
+    }
+    return token;
+  }
+
   async register(registerDto: RegisterDto): Promise<RegisterResponse> {
     const email = registerDto.email.trim().toLowerCase();
+    const thaidProofToken =
+      await this.resolveThaidRegistrationProof(registerDto);
     // Hash password
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(registerDto.password, salt);
@@ -384,8 +407,7 @@ export class AuthService {
         userInstitution: registerDto.institution,
         userCountry: registerDto.country,
         userAddress: registerDto.address?.trim() || null,
-        // Thai nationality ≠ ThaiD IdP sync; only real ThaiD callback may flip this
-        userThaidSynced: false,
+        userThaidSynced: thaidProofToken !== null,
       });
 
       await queryRunner.manager.save(newUserProfile);
@@ -432,6 +454,15 @@ export class AuthService {
         );
       } catch (imgErr) {
         console.error('Failed to persist register profile image:', imgErr);
+      }
+
+      if (thaidProofToken) {
+        try {
+          await this.thaidHandoff.consumeRegisterProof(thaidProofToken);
+        } catch (proofErr) {
+          this.logger.warn('ThaID registration proof consume failed');
+          console.error(proofErr);
+        }
       }
 
       return {

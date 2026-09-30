@@ -36,12 +36,34 @@
             <IdentityFields
               :is-thai="isThailand"
               :is-edit-mode="isEditMode"
+              :lock-national-id="isThaiDPath && !!props.thaidPrefill?.prefill.nationalId"
               v-model:national-id="formData.nationalId"
               v-model:country="formData.country"
               v-model:title-t-h="formData.titleTH"
               v-model:full-name="formData.fullName"
               v-model:english-name="formData.englishName"
               @title-th-change="handleTitleTHChange"
+            />
+          </div>
+
+          <div v-if="isThaiDPath" class="profile-grid-cell">
+            <AppFormField
+              :model-value="formData.password ?? ''"
+              type="password"
+              :label="t('auth.password')"
+              :required="true"
+              :rules="[passwordRule]"
+              reserve-bottom-space
+              @update:model-value="onThaidPassword"
+            />
+            <AppFormField
+              :model-value="formData.confirmPassword ?? ''"
+              type="password"
+              :label="t('profile.confirmPassword')"
+              :required="true"
+              :rules="[requiredRule, confirmPasswordRule]"
+              reserve-bottom-space
+              @update:model-value="onThaidConfirmPassword"
             />
           </div>
 
@@ -132,7 +154,9 @@ import PhotoSection from 'src/components/register/photo-section.vue';
 import EducationSection from 'src/components/register/education-section.vue';
 import IdentityFields from 'src/components/register/identity-fields.vue';
 import ContactFields from 'src/components/register/contact-fields.vue';
+import AppFormField from 'src/components/base/app-form-field.vue';
 import OtpVerificationDialog from 'src/components/register/otp-verification-dialog.vue';
+import type { ThaidPrefillSession } from 'src/services/thaid.service';
 
 interface Props {
   initialEditMode: boolean;
@@ -141,12 +165,14 @@ interface Props {
   userData?: User | null;
   registrationMethod?: 'email' | 'thaid';
   isSubmitting?: boolean;
+  thaidPrefill?: ThaidPrefillSession | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isThai: true,
   registrationMethod: 'email',
   isSubmitting: false,
+  thaidPrefill: null,
 });
 
 const emit = defineEmits<{
@@ -186,6 +212,24 @@ const { formData, dialog, initFormData, handleTitleTHChange, submitForm, onDialo
   useRegisterForm(isEditMode.value, (payload) => {
     emit('save', payload);
   });
+
+const passwordRule = (val: string | number | null | undefined): true | string =>
+  (typeof val === 'string' && val.length >= 8) || t('auth.thaidCallback.passwordRequired');
+
+const requiredRule = (val: string | number | null | undefined): true | string =>
+  !!val || t('profile.required');
+
+const confirmPasswordRule = (
+  val: string | number | null | undefined,
+): true | string => val === formData.value.password || t('profile.passwordMismatch');
+
+const onThaidPassword = (value: string | number | null): void => {
+  formData.value.password = typeof value === 'string' ? value : '';
+};
+
+const onThaidConfirmPassword = (value: string | number | null): void => {
+  formData.value.confirmPassword = typeof value === 'string' ? value : '';
+};
 
 /** อัปเดต email ใน formData เมื่อ ThaiD path user กรอก email ที่ contact-column */
 const onEmailUpdate = (value: string): void => {
@@ -284,6 +328,16 @@ onMounted(() => {
     formData.value.confirmPassword =
       props.credentials.confirmPassword || props.credentials.password;
     formData.value.country = props.isThai ? 'TH' : '';
+  }
+  const prefill = props.thaidPrefill?.prefill;
+  if (prefill) {
+    formData.value.nationalId = prefill.nationalId;
+    formData.value.titleTH = prefill.titleTH;
+    formData.value.titleEN = prefill.titleEN;
+    formData.value.fullName = prefill.fullName;
+    formData.value.englishName = prefill.englishName;
+    formData.value.birthdate = prefill.birthdate;
+    formData.value.country = 'TH';
   }
 });
 </script>

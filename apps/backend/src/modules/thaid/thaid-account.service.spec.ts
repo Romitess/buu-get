@@ -1,0 +1,120 @@
+import { JwtService } from '@nestjs/jwt';
+import { Repository } from 'typeorm';
+import { UserProfile } from '../user-profile/entities/user-profile.entity';
+import { User } from '../users/entities/user.entity';
+import { ThaidAccountService } from './thaid-account.service';
+import { ThaidHandoffService } from './thaid-handoff.service';
+import { ThaidIdTokenClaims } from './thaid-jwt';
+
+describe('ThaidAccountService', () => {
+  const users = {
+    findOne: jest.fn(),
+  };
+  const profiles = {
+    save: jest.fn(async (profile: UserProfile) => profile),
+  };
+  const jwtService = {
+    sign: jest.fn().mockReturnValue('app-jwt'),
+  };
+  const handoff = {
+    createRegisterProof: jest.fn().mockResolvedValue('proof-token'),
+  };
+
+  const service = new ThaidAccountService(
+    users as unknown as Repository<User>,
+    profiles as unknown as Repository<UserProfile>,
+    jwtService as unknown as JwtService,
+    handoff as unknown as ThaidHandoffService,
+  );
+
+  const claims: ThaidIdTokenClaims = {
+    pid: '1234567890123',
+    name: 'ชื่อใหม่',
+    nameEn: 'New Name',
+    title: 'นาย',
+    titleEn: 'Mr.',
+    birthdate: '2001-02-03',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jwtService.sign.mockReturnValue('app-jwt');
+    handoff.createRegisterProof.mockResolvedValue('proof-token');
+  });
+
+  it('logs in an existing national id and fills only empty profile fields', async () => {
+    const existingBirth = new Date('1990-05-05T00:00:00.000Z');
+    const profile = {
+      userTitleTh: 'นาง',
+      userTitleEn: null,
+      userFullnameTh: null,
+      userFullnameEn: 'Kept Name',
+      userDateOfBirth: existingBirth,
+      userThaidSynced: false,
+    } as UserProfile;
+    users.findOne.mockResolvedValue({
+      USER_ID: 9,
+      USER_EMAIL: 'student@example.com',
+      ROLES_ID: [{ ROLE_NAME: 'candidate' }],
+      PROFILE: profile,
+    });
+
+    const result = await service.resolve('login', claims);
+
+    expect(result).toEqual({
+      outcome: 'login',
+      notice: 'signed_in',
+      userId: 9,
+    });
+    expect(profile.userTitleTh).toBe('นาง');
+    expect(profile.userFullnameEn).toBe('Kept Name');
+    expect(profile.userDateOfBirth).toBe(existingBirth);
+    expect(profile.userTitleEn).toBe('Mr.');
+    expect(profile.userFullnameTh).toBe('ชื่อใหม่');
+    expect(profile.userThaidSynced).toBe(true);
+    expect(profiles.save).toHaveBeenCalledWith(profile);
+    expect(handoff.createRegisterProof).not.toHaveBeenCalled();
+  });
+
+  it('returns prefill and does not create a user when the national id is new', async () => {
+    users.findOne.mockResolvedValue(null);
+
+    const result = await service.resolve('login', claims);
+
+    expect(result).toEqual({
+      outcome: 'prefill',
+      notice: 'no_account',
+      registrationToken: 'proof-token',
+      prefill: {
+        nationalId: '1234567890123',
+        titleTH: 'นาย',
+        titleEN: 'Mr.',
+        fullName: 'ชื่อใหม่',
+        englishName: 'New Name',
+        birthdate: '2001-02-03',
+      },
+    });
+    expect(profiles.save).not.toHaveBeenCalled();
+  });
+
+  it('issues the same login shape as email login', async () => {
+    users.findOne.mockResolvedValue({
+      USER_ID: 9,
+      USER_EMAIL: 'student@example.com',
+      ROLES_ID: [{ ROLE_NAME: 'candidate' }],
+      PROFILE: { userRemark: null },
+    });
+
+    await expect(service.issueLoginForUser(9)).resolves.toEqual({
+      accessToken: 'app-jwt',
+      user: {
+        id: 9,
+        actorType: 'user',
+        email: 'student@example.com',
+        role: 'candidate',
+        roles: ['candidate'],
+        remark: null,
+      },
+    });
+  });
+});

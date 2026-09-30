@@ -33,7 +33,7 @@
     <!-- Candidate: ThaID (Thai only) -->
     <Transition name="expand">
       <div v-if="loginMode === 'candidate' && userType === 'thai'" class="thaid-section">
-        <q-btn class="thaid-btn" unelevated no-caps>
+        <q-btn class="thaid-btn" unelevated no-caps @click="startThaidLogin">
           <q-icon name="fingerprint" size="18px" class="q-mr-sm" />
           {{ $t('auth.loginThaID') }}
         </q-btn>
@@ -149,6 +149,7 @@ import { useI18n } from 'vue-i18n';
 import { ROLES } from 'src/constants/roles';
 import { getDefaultRouteForRole } from 'src/utils/default-route';
 import { resolveSafeInAppRedirect } from 'src/utils/safe-redirect';
+import { startThaid } from 'src/services/thaid.service';
 
 const router = useRouter();
 const route = useRoute();
@@ -180,6 +181,10 @@ const toggleUserType = (type: 'thai' | 'foreigner') => {
 const toggleLoginMode = () => {
   loginMode.value = loginMode.value === 'candidate' ? 'staff' : 'candidate';
   password.value = '';
+};
+
+const startThaidLogin = (): void => {
+  startThaid('login');
 };
 
 const redirectAfterLogin = async () => {

@@ -51,6 +51,10 @@ describe('AuthService', () => {
     findEntityById: jest.Mock;
   };
   let cacheManager: jest.Mocked<Pick<Cache, 'set' | 'get' | 'del'>>;
+  let thaidHandoff: {
+    peekRegisterProof: jest.Mock;
+    consumeRegisterProof: jest.Mock;
+  };
   let queryRunnerManager: {
     findOne: jest.Mock;
     create: jest.Mock;
@@ -126,6 +130,10 @@ describe('AuthService', () => {
       get: jest.fn(),
       del: jest.fn().mockResolvedValue(undefined),
     };
+    thaidHandoff = {
+      peekRegisterProof: jest.fn().mockResolvedValue(null),
+      consumeRegisterProof: jest.fn().mockResolvedValue(undefined),
+    };
 
     queryRunnerManager = {
       findOne: jest.fn().mockResolvedValue(null),
@@ -180,6 +188,7 @@ describe('AuthService', () => {
       msgPersonsService as never,
       cacheManager as unknown as Cache,
       memberSessionCodesService as never,
+      thaidHandoff as never,
     );
   });
 
@@ -723,6 +732,31 @@ describe('AuthService', () => {
         expect.anything(),
         expect.objectContaining({ userThaidSynced: false }),
       );
+    });
+
+    it('sets userThaidSynced when the ThaID proof matches the national id', async () => {
+      thaidHandoff.peekRegisterProof.mockResolvedValue({ pid: '1234567890123' });
+      const dto = baseRegisterDto();
+      dto.thaidRegistrationToken = 'proof-token';
+
+      await service.register(dto);
+
+      expect(queryRunnerManager.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ userThaidSynced: true }),
+      );
+      expect(thaidHandoff.consumeRegisterProof).toHaveBeenCalledWith('proof-token');
+    });
+
+    it('rejects a ThaID proof that does not match the national id', async () => {
+      thaidHandoff.peekRegisterProof.mockResolvedValue({ pid: '9999999999999' });
+      const dto = baseRegisterDto();
+      dto.thaidRegistrationToken = 'proof-token';
+
+      await expect(service.register(dto)).rejects.toThrow(
+        'เลขบัตรประชาชนไม่ตรงกับข้อมูลจาก ThaID',
+      );
+      expect(queryRunner.connect).not.toHaveBeenCalled();
     });
 
     // AUTH-U-020
