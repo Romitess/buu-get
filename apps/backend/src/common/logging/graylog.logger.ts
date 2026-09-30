@@ -9,6 +9,12 @@ import { GelfLevel, GelfUdpClient } from './gelf-udp.client';
  * When GRAYLOG_DEBUG=true, prints a [GraylogLogger] breadcrumb after each
  * mirrored app log (via console.warn — never Nest Logger — to avoid recursion).
  */
+const IGNORED_NEST_BOOTSTRAP_CONTEXTS = new Set([
+  'RouterExplorer',
+  'RoutesResolver',
+  'InstanceLoader',
+]);
+
 @Injectable()
 export class GraylogLogger extends ConsoleLogger {
   constructor(private readonly gelfClient: GelfUdpClient) {
@@ -54,6 +60,13 @@ export class GraylogLogger extends ConsoleLogger {
     optionalParams: unknown[],
   ): void {
     const context = this.extractContext(optionalParams);
+    if (
+      context &&
+      IGNORED_NEST_BOOTSTRAP_CONTEXTS.has(context) &&
+      (level === GelfLevel.INFO || level === GelfLevel.DEBUG)
+    ) {
+      return;
+    }
     const text = this.formatLogMessage(message);
     this.gelfClient.sendApp(level, text, context);
     this.traceShip('app', text, context);

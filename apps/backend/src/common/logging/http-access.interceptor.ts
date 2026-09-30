@@ -11,6 +11,9 @@ import { catchError, tap } from 'rxjs/operators';
 import { AuthenticatedUser } from 'src/common/utils/authz.util';
 import { GelfUdpClient } from './gelf-udp.client';
 import {
+  extractAccessData,
+  extractFullRequestUrl,
+  extractRequestParameter,
   menuContextFromHeaders,
   resolveClientIp,
   resolvePageUrl,
@@ -22,7 +25,7 @@ const SKIP_PATH_PREFIXES = ['/api/health', '/api/docs'];
 
 /**
  * Ships every HTTP request/response to Graylog via grayLog() field schema
- * (no body — avoids secrets). No-op when Graylog is disabled.
+ * with sanitized access_data and parameter context. No-op when Graylog is disabled.
  */
 @Injectable()
 export class HttpAccessInterceptor implements NestInterceptor {
@@ -45,7 +48,7 @@ export class HttpAccessInterceptor implements NestInterceptor {
     const started = Date.now();
     const method = request.method ?? 'UNKNOWN';
     const ip = resolveClientIp({
-      headers: request.headers as Record<string, unknown>,
+      headers: request.headers,
       requestIp: request.ip,
       socketIp: request.socket?.remoteAddress,
     });
@@ -53,17 +56,34 @@ export class HttpAccessInterceptor implements NestInterceptor {
     const userId = this.extractUserId(request.user);
     const fullName = this.extractFullName(request.user);
     const userAgent = this.extractUserAgent(request);
-    const menuCtx = menuContextFromHeaders(
-      request.headers as Record<string, unknown>,
-    );
+    const menuCtx = menuContextFromHeaders(request.headers);
+    const fullRequestUrl = extractFullRequestUrl({
+      headers: request.headers,
+      protocol: request.protocol,
+      host:
+        typeof request.headers.host === 'string'
+          ? request.headers.host
+          : undefined,
+      originalUrl: request.originalUrl ?? request.url ?? '',
+    });
     const pageUrl = resolvePageUrl({
-      headers: request.headers as Record<string, unknown>,
+      headers: request.headers,
       protocol: request.protocol,
       host:
         typeof request.headers.host === 'string'
           ? request.headers.host
           : undefined,
       apiUrl: path,
+    });
+    const targetUrl = pageUrl || fullRequestUrl;
+    const parameter = extractRequestParameter({
+      params: request.params,
+      query: request.query,
+    });
+    const accessData = extractAccessData(request.body);
+    const remarks = JSON.stringify({
+      method,
+      url: targetUrl,
     });
 
     const ship = (statusCode: number): void => {
@@ -79,7 +99,11 @@ export class HttpAccessInterceptor implements NestInterceptor {
         userAgent,
         menu: menuCtx.menu || null,
         subMenu: menuCtx.subMenu || null,
-        pageUrl,
+        pageUrl: targetUrl,
+        url: targetUrl,
+        accessData,
+        parameter,
+        remarks,
       });
     };
 

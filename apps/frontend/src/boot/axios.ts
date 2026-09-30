@@ -59,6 +59,27 @@ export default boot(({ app, router }) => {
   app.config.globalProperties.$axios = axios;
   app.config.globalProperties.$api = api;
 
+  // Attach SPA menu and page URL headers for Graylog request tracking
+  api.interceptors.request.use((config) => {
+    try {
+      const currentRoute = router.currentRoute.value;
+      if (currentRoute) {
+        if (currentRoute.path) {
+          config.headers['x-current-menu-path'] = currentRoute.path;
+        }
+        if (currentRoute.name) {
+          config.headers['x-current-menu-label'] = String(currentRoute.name);
+        }
+      }
+      if (typeof window !== 'undefined' && window.location?.href) {
+        config.headers['x-page-url'] = window.location.href;
+      }
+    } catch {
+      // ignore during early bootstrap
+    }
+    return config;
+  });
+
   let unauthorizedInFlight: Promise<void> | null = null;
 
   api.interceptors.response.use(

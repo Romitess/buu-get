@@ -160,7 +160,9 @@ export class ReceiptIssueService {
       const transaction = receipt.TRANSACTION;
       const exam = transaction?.ENROLLMENT?.SESSION?.EXAM;
       const referenceDate =
-        receipt.RC_ISSUED_AT ?? transaction?.TRANX_PAID_AT ?? receipt.CREATED_AT;
+        receipt.RC_ISSUED_AT ??
+        transaction?.TRANX_PAID_AT ??
+        receipt.CREATED_AT;
       const amountNumber = Number(transaction?.TRANX_AMOUNT ?? 0);
 
       return {
@@ -232,7 +234,9 @@ export class ReceiptIssueService {
       const transaction = receipt.TRANSACTION;
       const exam = transaction?.ENROLLMENT?.SESSION?.EXAM;
       const referenceDate =
-        receipt.RC_ISSUED_AT ?? transaction?.TRANX_PAID_AT ?? receipt.CREATED_AT;
+        receipt.RC_ISSUED_AT ??
+        transaction?.TRANX_PAID_AT ??
+        receipt.CREATED_AT;
       const receiptNo = buildReceiptNo(
         receipt.RC_NO,
         receipt.RC_ID,

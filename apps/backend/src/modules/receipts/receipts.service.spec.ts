@@ -490,7 +490,9 @@ describe('ReceiptsService', () => {
       expect(platformGatewayService.getPublicFileStream).toHaveBeenCalledWith(
         '/receipts/256900001.pdf',
       );
-      expect(Buffer.from(result).toString('utf8')).toContain('%PDF-1.4 archived');
+      expect(Buffer.from(result).toString('utf8')).toContain(
+        '%PDF-1.4 archived',
+      );
     });
 
     it('should allow finance role to download another user receipt', async () => {

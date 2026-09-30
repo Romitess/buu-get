@@ -66,4 +66,16 @@ describe('GraylogLogger', () => {
       '[GraylogLogger] GELF ship app [Ctx]: hello',
     );
   });
+
+  it('filters out internal Nest bootstrap contexts from shipping to Graylog', () => {
+    logger.log(
+      'Mapped {/api/notifications, GET} (version: Neutral) route',
+      'RouterExplorer',
+    );
+    expect(printSpy).toHaveBeenCalled();
+    expect(gelfClient.sendApp).not.toHaveBeenCalled();
+
+    logger.log('AppModule dependencies initialized', 'InstanceLoader');
+    expect(gelfClient.sendApp).not.toHaveBeenCalled();
+  });
 });

@@ -142,7 +142,11 @@ export class ReceiptsService {
    * เก็บ PDF ที่เว็บสร้างจากใบเสร็จรูปแบบเดิม โดยรูปลายเซ็นอยู่ในช่องภาพลายมือชื่อแล้ว
    */
   async archiveSignedReceiptFile(rcId: number, pdf: Buffer): Promise<void> {
-    if (!pdf || pdf.length < 5 || pdf.subarray(0, 5).toString('utf8') !== '%PDF-') {
+    if (
+      !pdf ||
+      pdf.length < 5 ||
+      pdf.subarray(0, 5).toString('utf8') !== '%PDF-'
+    ) {
       throw new BadRequestException('Signed receipt file must be a PDF');
     }
 

@@ -32,6 +32,7 @@ export type GelfProtocol = 'udp' | 'tcp' | 'http';
 
 /** Event values allowed by the university grayLog() manual. */
 export const GRAYLOG_EVENTS = [
+  'middleware',
   'view',
   'add',
   'edit',
@@ -72,8 +73,8 @@ export interface GrayLogData {
   source?: string;
   event?: GrayLogEvent;
   parameter?: string;
-  /** true = success, false = failure */
-  status?: boolean;
+  /** true/1 = success, false/0 = failure */
+  status?: boolean | number;
   remarks?: string;
   menu?: string;
   sub_menu?: string;
@@ -81,6 +82,7 @@ export interface GrayLogData {
   access_data?: string;
   user_id?: string;
   full_name?: string;
+  short_message?: string;
   browser?: string;
   equipment?: string;
   ip_address?: string;
@@ -119,6 +121,10 @@ export interface GelfHttpAccessPayload {
   menu?: string | null;
   subMenu?: string | null;
   pageUrl?: string | null;
+  accessData?: string | null;
+  parameter?: string | null;
+  remarks?: string | null;
+  url?: string | null;
 }
 
 export interface GelfClientOptions {
@@ -146,9 +152,17 @@ export function buildGrayLogPayload(
     typeof logData.user_id === 'string' ? logData.user_id.trim() : '';
   const event = typeof logData.event === 'string' ? logData.event.trim() : '';
 
-  const shortMessage = fullName
-    ? `ผู้เข้าใช้งาน : ${fullName}`
-    : userId || event || defaultSource;
+  let shortMessage: string;
+  if (
+    typeof logData.short_message === 'string' &&
+    logData.short_message.length > 0
+  ) {
+    shortMessage = logData.short_message;
+  } else if (event === 'middleware' || fullName || userId) {
+    shortMessage = `ผู้เข้าใช้งาน : ${fullName}`;
+  } else {
+    shortMessage = event || defaultSource;
+  }
 
   const source =
     typeof logData.source === 'string' && logData.source.trim().length > 0
@@ -156,6 +170,13 @@ export function buildGrayLogPayload(
       : defaultSource;
 
   const level = clampLevel(logLevel);
+
+  const status =
+    typeof logData.status === 'boolean'
+      ? logData.status
+      : typeof logData.status === 'number'
+        ? logData.status
+        : undefined;
 
   const payload: Record<string, unknown> = {
     version: '1.1',
@@ -166,7 +187,7 @@ export function buildGrayLogPayload(
     _event: event || undefined,
     _parameter:
       typeof logData.parameter === 'string' ? logData.parameter : undefined,
-    _status: typeof logData.status === 'boolean' ? logData.status : undefined,
+    _status: status,
     _menu: typeof logData.menu === 'string' ? logData.menu : undefined,
     _sub_menu:
       typeof logData.sub_menu === 'string' ? logData.sub_menu : undefined,
@@ -261,23 +282,6 @@ function mapAuditActionToEvent(action: string): GrayLogEvent | undefined {
     return 'delete';
   }
   return undefined;
-}
-
-function mapHttpMethodToEvent(method: string): GrayLogEvent {
-  switch (method.toUpperCase()) {
-    case 'GET':
-    case 'HEAD':
-      return 'view';
-    case 'POST':
-      return 'insert';
-    case 'PUT':
-    case 'PATCH':
-      return 'update';
-    case 'DELETE':
-      return 'delete';
-    default:
-      return 'view';
-  }
 }
 
 function parameterFromBeforeState(
@@ -449,22 +453,31 @@ export class GelfUdpClient implements OnModuleInit {
         : fromPath.subMenu) || undefined;
     const ua = payload.userAgent ?? undefined;
     const ip = normalizeClientIp(payload.ipAddress ?? null) ?? undefined;
+    const resolvedUrl = payload.url ?? payload.pageUrl ?? payload.path;
+
+    const remarks =
+      payload.remarks ??
+      JSON.stringify({
+        method: payload.method,
+        url: resolvedUrl,
+      });
 
     this.grayLog(
       {
-        event: mapHttpMethodToEvent(payload.method),
-        parameter: payload.path,
-        status: ok,
-        remarks: `${payload.method} ${payload.statusCode} ${payload.durationMs}ms`,
+        event: 'middleware',
+        parameter: payload.parameter ?? '[]',
+        status: ok ? 1 : 0,
+        remarks,
         menu,
         sub_menu: subMenu,
         user_id: payload.userId ?? undefined,
-        full_name: payload.fullName ?? payload.userId ?? undefined,
+        full_name: payload.fullName ?? undefined,
         correlation_id: payload.correlationId ?? undefined,
         ip_address: ip,
         browser: parseClientBrowser(ua),
         equipment: parseClientEquipment(ua),
-        url: payload.pageUrl ?? payload.path,
+        url: resolvedUrl,
+        access_data: payload.accessData ?? undefined,
         http_status: payload.statusCode,
         duration_ms: payload.durationMs,
       },
@@ -486,10 +499,11 @@ export class GelfUdpClient implements OnModuleInit {
     const shortMessage =
       message.length > 250 ? `${message.slice(0, 247)}...` : message;
 
-    // Nest ops logs: no manual event token (would invent invalid events).
+    // Nest ops logs: no manual event token (would invent invalid events),
+    // and do not set full_name to prevent "ผู้เข้าใช้งาน : Mapped route..."
     this.grayLog(
       {
-        full_name: shortMessage,
+        short_message: shortMessage,
         remarks: stack && stack.length > 0 ? stack : shortMessage,
         menu: context ?? undefined,
         sub_menu: 'app',

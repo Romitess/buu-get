@@ -38,7 +38,8 @@ describe('ReceiptIssueService', () => {
       expect(result).toEqual({
         psnId: '00000001',
         fullName: 'User Test1',
-        signatureBase64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB',
+        signatureBase64:
+          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB',
       });
     });
 

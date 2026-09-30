@@ -1,4 +1,7 @@
 import {
+  extractAccessData,
+  extractFullRequestUrl,
+  extractRequestParameter,
   menuFromApiPath,
   menuContextFromHeaders,
   normalizeClientIp,
@@ -6,6 +9,7 @@ import {
   parseClientEquipment,
   resolveClientIp,
   resolvePageUrl,
+  sanitizeAccessData,
 } from './graylog-client.util';
 
 describe('graylog-client.util', () => {
@@ -22,7 +26,9 @@ describe('graylog-client.util', () => {
         ),
       ).toBe('Google Chrome');
       expect(
-        parseClientBrowser('Mozilla/5.0 (Windows NT 10.0; rv:121.0) Gecko/20100101 Firefox/121.0'),
+        parseClientBrowser(
+          'Mozilla/5.0 (Windows NT 10.0; rv:121.0) Gecko/20100101 Firefox/121.0',
+        ),
       ).toBe('Mozilla Firefox');
       expect(
         parseClientBrowser(
@@ -105,7 +111,7 @@ describe('graylog-client.util', () => {
     });
   });
 
-  describe('resolvePageUrl', () => {
+  describe('resolvePageUrl and extractFullRequestUrl', () => {
     it('uses referer when it is a full page URL', () => {
       expect(
         resolvePageUrl({
@@ -123,6 +129,83 @@ describe('graylog-client.util', () => {
           apiUrl: '/api/auth/login',
         }),
       ).toBe('http://localhost:3000/api/auth/login');
+    });
+
+    it('extracts full request URL honoring forwarded headers', () => {
+      expect(
+        extractFullRequestUrl({
+          headers: {
+            'x-forwarded-proto': 'https',
+            'x-forwarded-host': 'localhost.buu.ac.th:8099',
+          },
+          originalUrl: '/approval-settings/config-type/c5q3p254a254',
+        }),
+      ).toBe(
+        'https://localhost.buu.ac.th:8099/approval-settings/config-type/c5q3p254a254',
+      );
+    });
+  });
+
+  describe('extractRequestParameter', () => {
+    it('extracts route parameters as JSON array string', () => {
+      expect(
+        extractRequestParameter({
+          params: { id: '12' },
+        }),
+      ).toBe('["12"]');
+    });
+
+    it('falls back to non-sensitive query parameters if params empty', () => {
+      expect(
+        extractRequestParameter({
+          params: {},
+          query: { facdepId: '12', password: 'secret' },
+        }),
+      ).toBe('["12"]');
+    });
+
+    it('returns empty array string when both empty', () => {
+      expect(
+        extractRequestParameter({
+          params: {},
+          query: {},
+        }),
+      ).toBe('[]');
+    });
+  });
+
+  describe('sanitizeAccessData and extractAccessData', () => {
+    it('masks denylisted fields and preserves valid request payload', () => {
+      const input = {
+        draw: '1',
+        FACDEP_ID: '12',
+        password: 'my-secret-password',
+        token: 'jwt.token.here',
+        user: {
+          nationalId: '1234567890123',
+          name: 'Somchai',
+        },
+      };
+      const sanitized = sanitizeAccessData(input) as Record<string, unknown>;
+      expect(sanitized.draw).toBe('1');
+      expect(sanitized.FACDEP_ID).toBe('12');
+      expect(sanitized.password).toBe('[REDACTED]');
+      expect(sanitized.token).toBe('[REDACTED]');
+      expect((sanitized.user as Record<string, unknown>).nationalId).toBe(
+        '[REDACTED]',
+      );
+      expect((sanitized.user as Record<string, unknown>).name).toBe('Somchai');
+    });
+
+    it('serializes request body to JSON string', () => {
+      const body = { draw: '1', FACDEP_ID: '12' };
+      const res = extractAccessData(body);
+      expect(res).toBe('{"draw":"1","FACDEP_ID":"12"}');
+    });
+
+    it('returns undefined for empty/null body', () => {
+      expect(extractAccessData(null)).toBeUndefined();
+      expect(extractAccessData({})).toBeUndefined();
     });
   });
 });

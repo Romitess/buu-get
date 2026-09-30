@@ -184,7 +184,7 @@ describe('GelfUdpClient', () => {
     expect(JSON.stringify(parsed)).not.toContain('password');
   });
 
-  it('ships app logs without inventing an event token', () => {
+  it('ships app logs without inventing an event token or user name', () => {
     const client = new GelfUdpClient(baseOpts);
     client.sendApp(GelfLevel.INFO, 'started', 'Bootstrap');
     const body = sendMock.mock.calls[0][0] as Buffer;
@@ -192,7 +192,8 @@ describe('GelfUdpClient', () => {
       string,
       unknown
     >;
-    expect(parsed.short_message).toBe('ผู้เข้าใช้งาน : started');
+    expect(parsed.short_message).toBe('started');
+    expect(parsed).not.toHaveProperty('_full_name');
     expect(parsed._remarks).toBe('started');
     expect(parsed._menu).toBe('Bootstrap');
     expect(parsed._sub_menu).toBe('app');
@@ -270,7 +271,7 @@ describe('GelfUdpClient', () => {
     const parsed = JSON.parse(
       packet.subarray(0, -1).toString('utf8'),
     ) as Record<string, unknown>;
-    expect(parsed.short_message).toBe('ผู้เข้าใช้งาน : tcp-ready');
+    expect(parsed.short_message).toBe('tcp-ready');
     expect(parsed._facility).toBe('buuget');
     expect(parsed.host).toBe('buuget');
   });
@@ -320,7 +321,7 @@ describe('GelfUdpClient', () => {
     );
   });
 
-  it('ships http access as view/insert with boolean status', () => {
+  it('ships http access as middleware event with numeric status, parameter, and remarks', () => {
     const client = new GelfUdpClient(baseOpts);
     client.sendHttpAccess({
       method: 'POST',
@@ -330,6 +331,8 @@ describe('GelfUdpClient', () => {
       ipAddress: '::ffff:1.2.3.4',
       userId: null,
       fullName: 'a@b.com',
+      parameter: '["12"]',
+      accessData: '{"draw":"1"}',
       userAgent:
         'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
     });
@@ -338,9 +341,10 @@ describe('GelfUdpClient', () => {
       string,
       unknown
     >;
-    expect(parsed._event).toBe('insert');
-    expect(parsed._parameter).toBe('/api/auth/login');
-    expect(parsed._status).toBe(false);
+    expect(parsed._event).toBe('middleware');
+    expect(parsed._parameter).toBe('["12"]');
+    expect(parsed._access_data).toBe('{"draw":"1"}');
+    expect(parsed._status).toBe(0);
     expect(parsed._menu).toBe('auth');
     expect(parsed._sub_menu).toBe('login');
     expect(parsed.short_message).toBe('ผู้เข้าใช้งาน : a@b.com');
@@ -349,7 +353,30 @@ describe('GelfUdpClient', () => {
     expect(parsed._browser).toBe('Apple Safari');
     expect(parsed._equipment).toBe('Mobile');
     expect(parsed._url).toBe('/api/auth/login');
+    expect(parsed._remarks).toBe(
+      JSON.stringify({ method: 'POST', url: '/api/auth/login' }),
+    );
     expect(parsed).not.toHaveProperty('_event_type');
+  });
+
+  it('formats short_message with trailing space when user is anonymous in middleware event', () => {
+    const client = new GelfUdpClient(baseOpts);
+    client.sendHttpAccess({
+      method: 'GET',
+      path: '/api/public/data',
+      statusCode: 200,
+      durationMs: 5,
+      ipAddress: '172.17.0.1',
+    });
+    const body = sendMock.mock.calls[0][0] as Buffer;
+    const parsed = JSON.parse(body.subarray(0, -1).toString('utf8')) as Record<
+      string,
+      unknown
+    >;
+    expect(parsed._event).toBe('middleware');
+    expect(parsed.short_message).toBe('ผู้เข้าใช้งาน : ');
+    expect(parsed._status).toBe(1);
+    expect(parsed._parameter).toBe('[]');
   });
 
   it('posts JSON over HTTP without null terminator', async () => {
@@ -379,7 +406,7 @@ describe('GelfUdpClient', () => {
     expect(init.signal).toBeDefined();
     expect(init.body.includes('\0')).toBe(false);
     const parsed = JSON.parse(init.body) as Record<string, unknown>;
-    expect(parsed.short_message).toBe('ผู้เข้าใช้งาน : http-path');
+    expect(parsed.short_message).toBe('http-path');
     expect(console.warn).toHaveBeenCalledWith(
       expect.stringContaining('[GraylogLogger]'),
     );

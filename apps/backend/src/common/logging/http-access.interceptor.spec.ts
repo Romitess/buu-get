@@ -12,6 +12,8 @@ describe('HttpAccessInterceptor', () => {
     method = 'GET',
     headers: Record<string, string> = {},
     ip = '::1',
+    body?: unknown,
+    params?: Record<string, unknown>,
   ) => {
     const request = {
       method,
@@ -27,6 +29,9 @@ describe('HttpAccessInterceptor', () => {
       ip,
       socket: { remoteAddress: ip },
       user: { userId: 9, actorType: 'user', email: 'a@b.com' },
+      body,
+      params: params ?? {},
+      query: {},
     };
     const response = { statusCode: 200 };
     return {
@@ -62,21 +67,38 @@ describe('HttpAccessInterceptor', () => {
     expect(gelfClient.sendHttpAccess).not.toHaveBeenCalled();
   });
 
-  it('ships successful requests as http events', () => {
+  it('ships successful requests as http events with parameter and remarks', () => {
     const next: CallHandler = { handle: () => of({ ok: true }) };
     interceptor
-      .intercept(makeContext('/api/auth/login', 'POST'), next)
+      .intercept(
+        makeContext(
+          '/api/approval-settings/config-type/c5q3p254a254',
+          'POST',
+          {},
+          '172.17.0.1',
+          { draw: '1', FACDEP_ID: '12' },
+          { id: '12' },
+        ),
+        next,
+      )
       .subscribe();
     expect(gelfClient.sendHttpAccess).toHaveBeenCalledWith(
       expect.objectContaining({
         method: 'POST',
-        path: '/api/auth/login',
+        path: '/api/approval-settings/config-type/c5q3p254a254',
         statusCode: 200,
         userId: '9',
         fullName: 'a@b.com',
-        ipAddress: '127.0.0.1',
+        ipAddress: '172.17.0.1',
         userAgent: expect.stringContaining('Chrome'),
-        pageUrl: 'http://localhost:3000/api/auth/login',
+        pageUrl:
+          'http://localhost:3000/api/approval-settings/config-type/c5q3p254a254',
+        parameter: '["12"]',
+        accessData: '{"draw":"1","FACDEP_ID":"12"}',
+        remarks: JSON.stringify({
+          method: 'POST',
+          url: 'http://localhost:3000/api/approval-settings/config-type/c5q3p254a254',
+        }),
       }),
     );
   });

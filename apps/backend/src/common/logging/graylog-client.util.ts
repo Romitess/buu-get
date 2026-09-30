@@ -1,8 +1,7 @@
-/**
- * Client-context helpers for Graylog GELF fields (browser / equipment / IP).
- * Behavior mirrors the university HRD GraylogService helpers — kept local so
- * buu-get does not depend on intern-cc-backend.
- */
+import {
+  AUDIT_DENYLIST_NORMALIZED,
+  normalizeAuditKey,
+} from 'src/modules/audit-logs/constants/audit.constants';
 
 export function parseClientBrowser(userAgent?: string | null): string {
   if (!userAgent) {
@@ -82,7 +81,11 @@ function headerString(headers: HeaderMap, name: string): string {
   if (raw == null || raw === '') {
     return '';
   }
-  const value = Array.isArray(raw) ? String(raw[0]) : String(raw);
+  const value = Array.isArray(raw)
+    ? String(raw[0])
+    : typeof raw === 'string'
+      ? raw
+      : '';
   try {
     return decodeURIComponent(value.trim());
   } catch {
@@ -110,10 +113,7 @@ export function resolveClientIp(input: {
   return normalizeClientIp(input.requestIp ?? input.socketIp ?? null);
 }
 
-export function decodeGraylogHeader(
-  headers: HeaderMap,
-  name: string,
-): string {
+export function decodeGraylogHeader(headers: HeaderMap, name: string): string {
   return headerString(headers, name);
 }
 
@@ -158,10 +158,7 @@ export function resolvePageUrl(input: {
     if (/^https?:\/\//i.test(candidate)) {
       try {
         const parsed = new URL(candidate);
-        if (
-          (parsed.pathname === '/' || parsed.pathname === '') &&
-          menuPath
-        ) {
+        if ((parsed.pathname === '/' || parsed.pathname === '') && menuPath) {
           const origin = parsed.origin.replace(/\/$/, '');
           const path = menuPath.startsWith('/') ? menuPath : `/${menuPath}`;
           return `${origin}${path}`;
@@ -214,4 +211,119 @@ export function menuFromApiPath(path: string): {
     menu,
     subMenu: rest.length > 0 ? rest.join('/') : '',
   };
+}
+
+/**
+ * Extract full incoming HTTP request URL from request context and headers.
+ */
+export function extractFullRequestUrl(input: {
+  headers?: HeaderMap;
+  protocol?: string;
+  host?: string;
+  originalUrl?: string;
+}): string {
+  const headers = input.headers;
+  const fwdProto = decodeGraylogHeader(headers, 'x-forwarded-proto');
+  const proto = fwdProto
+    ? fwdProto.split(',')[0].trim()
+    : input.protocol || 'http';
+  const fwdHost = decodeGraylogHeader(headers, 'x-forwarded-host');
+  const host = fwdHost
+    ? fwdHost.split(',')[0].trim()
+    : decodeGraylogHeader(headers, 'host') || input.host || 'localhost';
+  const originalUrl = input.originalUrl || '';
+  return `${proto}://${host}${originalUrl}`;
+}
+
+/**
+ * Extract parameters as JSON array string e.g. '["12"]'.
+ * Checks route params first, then non-denylisted query values.
+ */
+export function extractRequestParameter(input: {
+  params?: Record<string, unknown> | null;
+  query?: Record<string, unknown> | null;
+}): string {
+  if (input.params && typeof input.params === 'object') {
+    const paramValues = Object.values(input.params).filter(
+      (v) => v !== undefined && v !== null && v !== '',
+    );
+    if (paramValues.length > 0) {
+      return JSON.stringify(paramValues.map(String));
+    }
+  }
+  if (input.query && typeof input.query === 'object') {
+    const queryEntries = Object.entries(input.query).filter(([key, val]) => {
+      if (val === undefined || val === null || val === '') {
+        return false;
+      }
+      const norm = normalizeAuditKey(key);
+      return !AUDIT_DENYLIST_NORMALIZED.has(norm);
+    });
+    if (queryEntries.length > 0) {
+      return JSON.stringify(queryEntries.map(([, val]) => String(val)));
+    }
+  }
+  return '[]';
+}
+
+/**
+ * Sanitize request body before sending to Graylog (masks secrets and limits large buffers).
+ */
+export function sanitizeAccessData(value: unknown, depth = 0): unknown {
+  if (depth > 6) {
+    return '[MaxDepth]';
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeAccessData(item, depth + 1));
+  }
+  if (value !== null && typeof value === 'object') {
+    if (Buffer.isBuffer(value)) {
+      return `[Buffer ${value.length} bytes]`;
+    }
+    const valObj = value as Record<string, unknown>;
+    if (
+      typeof valObj.buffer !== 'undefined' &&
+      typeof valObj.mimetype === 'string'
+    ) {
+      const fileName =
+        typeof valObj.originalname === 'string' ? valObj.originalname : '';
+      return `[File ${fileName} ${valObj.mimetype}]`;
+    }
+    const result: Record<string, unknown> = {};
+    for (const [key, nested] of Object.entries(valObj)) {
+      const norm = normalizeAuditKey(key);
+      if (AUDIT_DENYLIST_NORMALIZED.has(norm)) {
+        result[key] = '[REDACTED]';
+      } else {
+        result[key] = sanitizeAccessData(nested, depth + 1);
+      }
+    }
+    return result;
+  }
+  return value;
+}
+
+/**
+ * Serialize request body to JSON string with denylist masking and max size cap.
+ */
+export function extractAccessData(
+  body: unknown,
+  maxBytes = 4096,
+): string | undefined {
+  if (body == null) {
+    return undefined;
+  }
+  if (typeof body === 'object' && Object.keys(body).length === 0) {
+    return undefined;
+  }
+  try {
+    const sanitized = sanitizeAccessData(body);
+    const json = JSON.stringify(sanitized);
+    if (json.length > maxBytes) {
+      return `${json.slice(0, maxBytes - 3)}...`;
+    }
+    return json;
+  } catch {
+    return undefined;
+  }
 }
