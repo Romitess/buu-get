@@ -324,6 +324,10 @@ export class GelfUdpClient implements OnModuleInit {
   private oversizedWarned = false;
   private sendFailCount = 0;
   private sendOkLogged = false;
+  private lastErrorMessage: string | null = null;
+  private lastSentAt: Date | null = null;
+  private lastSuccessAt: Date | null = null;
+  private lastErrorAt: Date | null = null;
   private static readonly HTTP_TIMEOUT_MS = 3000;
   /** Matches gelf-pro tcp adapter default. */
   private static readonly TCP_TIMEOUT_MS = 10000;
@@ -339,10 +343,13 @@ export class GelfUdpClient implements OnModuleInit {
 
   onModuleInit(): void {
     if (!this.enabled) {
+      console.warn(
+        '[GraylogLogger] Graylog logging is DISABLED (GRAYLOG_HOST is unset or empty).',
+      );
       return;
     }
-    this.trace(
-      `GELF ${this.protocol.toUpperCase()} enabled → ${this.host}:${this.port} facility=${this.facility}`,
+    console.warn(
+      `[GraylogLogger] GELF ${this.protocol.toUpperCase()} enabled → ${this.host}:${this.port} facility=${this.facility}`,
     );
     this.sendApp(
       GelfLevel.INFO,
@@ -370,6 +377,7 @@ export class GelfUdpClient implements OnModuleInit {
     if (!this.enabled) {
       return;
     }
+    this.lastSentAt = new Date();
     const payload = buildGrayLogPayload(
       logData,
       logLevel,
@@ -666,6 +674,7 @@ export class GelfUdpClient implements OnModuleInit {
   }
 
   private noteSendSuccess(): void {
+    this.lastSuccessAt = new Date();
     if (this.sendOkLogged) {
       return;
     }
@@ -681,12 +690,140 @@ export class GelfUdpClient implements OnModuleInit {
 
   private noteSendFailure(err: unknown): void {
     this.sendFailCount += 1;
+    this.lastErrorAt = new Date();
+    this.lastErrorMessage = err instanceof Error ? err.message : String(err);
     if (this.sendFailCount <= 5) {
       this.trace(
-        `GELF ${this.protocol} send failed (#${this.sendFailCount}): ${err instanceof Error ? err.message : String(err)}`,
+        `GELF ${this.protocol} send failed (#${this.sendFailCount}): ${this.lastErrorMessage}`,
         true,
       );
     }
+  }
+
+  getDiagnostics(): Record<string, unknown> {
+    return {
+      enabled: this.enabled,
+      host: this.host || null,
+      port: this.port,
+      protocol: this.protocol,
+      facility: this.facility,
+      debug: this.debug,
+      sendFailCount: this.sendFailCount,
+      sendOkLogged: this.sendOkLogged,
+      lastErrorMessage: this.lastErrorMessage,
+      lastSentAt: this.lastSentAt ? this.lastSentAt.toISOString() : null,
+      lastSuccessAt: this.lastSuccessAt
+        ? this.lastSuccessAt.toISOString()
+        : null,
+      lastErrorAt: this.lastErrorAt ? this.lastErrorAt.toISOString() : null,
+    };
+  }
+
+  async testConnection(timeoutMs = 4000): Promise<{
+    ok: boolean;
+    durationMs: number;
+    error?: string;
+    details?: string;
+  }> {
+    if (!this.enabled) {
+      return {
+        ok: false,
+        durationMs: 0,
+        error: 'Graylog is disabled (GRAYLOG_HOST is unset or empty)',
+      };
+    }
+
+    if (this.protocol === 'http') {
+      const start = Date.now();
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        const res = await fetch(`http://${this.host}:${this.port}/gelf`, {
+          method: 'HEAD',
+          signal: controller.signal,
+        });
+        clearTimeout(timer);
+        return {
+          ok: res.status < 500,
+          durationMs: Date.now() - start,
+          details: `HTTP status: ${res.status}`,
+        };
+      } catch (err: unknown) {
+        return {
+          ok: false,
+          durationMs: Date.now() - start,
+          error: err instanceof Error ? err.message : String(err),
+        };
+      }
+    }
+
+    const start = Date.now();
+    return new Promise((resolve) => {
+      let settled = false;
+      let client: NetSocket;
+      try {
+        client = netConnect({
+          host: this.host,
+          port: this.port,
+          family: 4,
+        });
+      } catch (err: unknown) {
+        resolve({
+          ok: false,
+          durationMs: Date.now() - start,
+          error: err instanceof Error ? err.message : String(err),
+        });
+        return;
+      }
+
+      const timer = setTimeout(() => {
+        if (!settled) {
+          settled = true;
+          client.destroy();
+          resolve({
+            ok: false,
+            durationMs: Date.now() - start,
+            error: `TCP connect timeout after ${timeoutMs}ms to ${this.host}:${this.port}`,
+          });
+        }
+      }, timeoutMs);
+
+      client.once('connect', () => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timer);
+          client.end();
+          client.destroy();
+          resolve({
+            ok: true,
+            durationMs: Date.now() - start,
+            details: `Successfully connected to ${this.host}:${this.port} via TCP`,
+          });
+        }
+      });
+
+      client.once('error', (err: Error) => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timer);
+          client.destroy();
+          resolve({
+            ok: false,
+            durationMs: Date.now() - start,
+            error: `${err.name}: ${err.message}`,
+          });
+        }
+      });
+    });
+  }
+
+  async getDiagnosticsWithTest(): Promise<Record<string, unknown>> {
+    const diagnostics = this.getDiagnostics();
+    const connectionTest = await this.testConnection();
+    return {
+      ...diagnostics,
+      connectionTest,
+    };
   }
 
   private trace(message: string, force = false): void {

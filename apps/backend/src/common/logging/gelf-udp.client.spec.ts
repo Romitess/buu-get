@@ -468,4 +468,71 @@ describe('GelfUdpClient', () => {
     expect(sendMock).not.toHaveBeenCalled();
     expect(console.warn).toHaveBeenCalled();
   });
+
+  describe('diagnostics and testConnection', () => {
+    it('returns disabled diagnostics when host is empty', async () => {
+      const client = new GelfUdpClient({ ...baseOpts, host: '' });
+      const diag = client.getDiagnostics();
+      expect(diag.enabled).toBe(false);
+      expect(diag.host).toBeNull();
+
+      const testRes = await client.testConnection();
+      expect(testRes.ok).toBe(false);
+      expect(testRes.error).toContain('disabled');
+    });
+
+    it('returns success when TCP test connection succeeds', async () => {
+      interface MockSocket {
+        once(event: string, cb: (...args: unknown[]) => void): MockSocket;
+        end(): MockSocket;
+        destroy(): MockSocket;
+      }
+
+      const mockSocket: MockSocket = {
+        once: jest.fn((event: string, cb: () => void) => {
+          if (event === 'connect') {
+            setTimeout(cb, 1);
+          }
+          return mockSocket;
+        }),
+        end: jest.fn().mockReturnThis(),
+        destroy: jest.fn().mockReturnThis(),
+      };
+      (netConnect as unknown as jest.Mock).mockReturnValueOnce(mockSocket);
+
+      const client = new GelfUdpClient({ ...baseOpts, protocol: 'tcp' });
+      const diagWithTest = await client.getDiagnosticsWithTest();
+
+      expect(diagWithTest.enabled).toBe(true);
+      expect(diagWithTest.host).toBe('graylog.example');
+      const connectionTest = diagWithTest.connectionTest as { ok: boolean };
+      expect(connectionTest.ok).toBe(true);
+    });
+
+    it('returns error when TCP test connection fails', async () => {
+      interface MockSocket {
+        once(event: string, cb: (...args: unknown[]) => void): MockSocket;
+        end(): MockSocket;
+        destroy(): MockSocket;
+      }
+
+      const mockSocket: MockSocket = {
+        once: jest.fn((event: string, cb: (err?: Error) => void) => {
+          if (event === 'error') {
+            setTimeout(() => cb(new Error('ECONNREFUSED')), 1);
+          }
+          return mockSocket;
+        }),
+        end: jest.fn().mockReturnThis(),
+        destroy: jest.fn().mockReturnThis(),
+      };
+      (netConnect as unknown as jest.Mock).mockReturnValueOnce(mockSocket);
+
+      const client = new GelfUdpClient({ ...baseOpts, protocol: 'tcp' });
+      const testRes = await client.testConnection();
+
+      expect(testRes.ok).toBe(false);
+      expect(testRes.error).toContain('ECONNREFUSED');
+    });
+  });
 });

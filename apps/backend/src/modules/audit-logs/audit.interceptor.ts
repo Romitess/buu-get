@@ -196,7 +196,7 @@ export class AuditInterceptor implements NestInterceptor {
 
   private extractIp(request: RequestWithUser): string | null {
     return resolveClientIp({
-      headers: request.headers as Record<string, unknown>,
+      headers: request.headers,
       requestIp: request.ip,
       socketIp: request.socket?.remoteAddress,
     });

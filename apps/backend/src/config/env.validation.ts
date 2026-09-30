@@ -123,7 +123,7 @@ const envSchema = Joi.object<EnvironmentVariables>({
   BUU_LOGIN_BUU_SECRET: Joi.string().valid('true', 'false').optional(),
   GRAYLOG_HOST: Joi.string().allow('').optional(),
   GRAYLOG_PORT: Joi.number().port().default(12201),
-  GRAYLOG_FACILITY: Joi.string().default('buu-get'),
+  GRAYLOG_FACILITY: Joi.string().default('buuget'),
   GRAYLOG_PROTOCOL: Joi.string().valid('udp', 'tcp', 'http').default('tcp'),
   GRAYLOG_DEBUG: Joi.string().valid('true', 'false', '1', '0', '').optional(),
 });
