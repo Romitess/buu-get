@@ -49,3 +49,5 @@ pnpm-debug.log*
 .claude.md
 
 tsconfig.build.tsbuildinfo
+
+.agents/
