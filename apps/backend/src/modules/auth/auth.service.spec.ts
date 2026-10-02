@@ -735,7 +735,9 @@ describe('AuthService', () => {
     });
 
     it('sets userThaidSynced when the ThaID proof matches the national id', async () => {
-      thaidHandoff.peekRegisterProof.mockResolvedValue({ pid: '1234567890123' });
+      thaidHandoff.peekRegisterProof.mockResolvedValue({
+        pid: '1234567890123',
+      });
       const dto = baseRegisterDto();
       dto.thaidRegistrationToken = 'proof-token';
 
@@ -745,11 +747,15 @@ describe('AuthService', () => {
         expect.anything(),
         expect.objectContaining({ userThaidSynced: true }),
       );
-      expect(thaidHandoff.consumeRegisterProof).toHaveBeenCalledWith('proof-token');
+      expect(thaidHandoff.consumeRegisterProof).toHaveBeenCalledWith(
+        'proof-token',
+      );
     });
 
     it('rejects a ThaID proof that does not match the national id', async () => {
-      thaidHandoff.peekRegisterProof.mockResolvedValue({ pid: '9999999999999' });
+      thaidHandoff.peekRegisterProof.mockResolvedValue({
+        pid: '9999999999999',
+      });
       const dto = baseRegisterDto();
       dto.thaidRegistrationToken = 'proof-token';
 
