@@ -2332,6 +2332,10 @@ export default {
       },
     },
   },
+  privacyNotice: {
+    button: 'ประกาศความเป็นส่วนตัว',
+    backToLogin: 'กลับไปหน้าเข้าสู่ระบบ',
+  },
   auth: {
     systemDescription: 'ระบบทดสอบวัดความสามารถทางภาษาอังกฤษ',
     welcome: 'ยินดีต้อนรับเข้าสู่ BUU-GET',

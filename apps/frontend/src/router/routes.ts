@@ -125,6 +125,17 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'privacy-notice',
+        name: 'privacy-notice',
+        component: () => import('pages/auth/privacy-notice-page.vue'),
+        meta: {
+          requiresAuth: false,
+          hideHeader: true,
+          hideDrawer: true,
+          hideFooter: true,
+        },
+      },
+      {
         path: 'thaid/callback',
         name: 'thaid-callback',
         component: () => import('pages/auth/thaid-callback-page.vue'),

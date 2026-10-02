@@ -2430,6 +2430,10 @@ export default {
       livePreview: 'Live Banner Preview (Actual Homepage Size)',
     },
   },
+  privacyNotice: {
+    button: 'Privacy Notice',
+    backToLogin: 'Back to sign in',
+  },
   auth: {
     systemDescription: 'English proficiency test comparable to CEFR standards',
     welcome: 'Welcome to BUU-GET',

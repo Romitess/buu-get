@@ -14,7 +14,10 @@
     <CandidateBottomNav />
 
     <q-footer v-if="!showBottomNav && !route.meta.hideFooter">
-      <FooterCredits :variant="(route.meta.footerVariant as 'primary' | 'white') || 'white'" />
+      <FooterCredits
+        :variant="(route.meta.footerVariant as 'primary' | 'white') || 'white'"
+        :show-privacy-notice="route.name === 'login'"
+      />
     </q-footer>
   </q-layout>
 </template>
