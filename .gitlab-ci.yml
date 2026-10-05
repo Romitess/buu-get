@@ -250,9 +250,9 @@ stages:
     paths:
       - .sonar/cache
   script:
-    - echo "=== SonarQube Scan ${SONAR_SCAN_NAME} (${SONAR_SCAN_KEY}) ==="
-    - 'if [ -z "${SONAR_HOST_URL}" ] || [ -z "${SONAR_TOKEN}" ]; then echo "❌ ERROR: SONAR_HOST_URL or SONAR_TOKEN is not configured (rotate VAULT_TOKEN or set GitLab SONAR_* vars)." && exit 1; fi'
-    - "sonar-scanner -Dsonar.projectKey=${SONAR_SCAN_KEY} -Dsonar.projectName=${CI_PROJECT_NAME}-${SONAR_SCAN_NAME} -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.token=${SONAR_TOKEN} -Dsonar.sources=${SONAR_SOURCES} -Dsonar.exclusions=${SONAR_EXCLUSIONS} -Dsonar.qualitygate.wait=false"
+    - echo "=== SonarQube Scan ${SONAR_SCAN_KEY} (${CI_COMMIT_TAG}) ==="
+    - 'if [ -z "${SONAR_HOST_URL}" ] || [ -z "${SONAR_TOKEN}" ]; then echo "ERROR: SONAR_HOST_URL or SONAR_TOKEN could not be loaded." && exit 1; fi'
+    - sonar-scanner -Dsonar.projectKey=${SONAR_SCAN_KEY} -Dsonar.projectName=${CI_PROJECT_NAME}-${SONAR_SCAN_NAME} -Dsonar.projectVersion=${CI_COMMIT_TAG} -Dsonar.branch.name=main -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.token=${SONAR_TOKEN} -Dsonar.sources=${SONAR_SOURCES} -Dsonar.exclusions=${SONAR_EXCLUSIONS} -Dsonar.qualitygate.wait=false
   allow_failure: false
 
 .sonar_quality_gate:
