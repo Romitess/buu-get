@@ -74,10 +74,9 @@ export class ThaidOidcClient {
       grant_type: 'authorization_code',
       code,
       redirect_uri: config.redirectUri,
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
     });
-    const basic = Buffer.from(
-      `${config.clientId}:${config.clientSecret}`,
-    ).toString('base64');
 
     try {
       const response = await axios.post<unknown>(
@@ -86,7 +85,6 @@ export class ThaidOidcClient {
         {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization: `Basic ${basic}`,
           },
           timeout: 15000,
         },
