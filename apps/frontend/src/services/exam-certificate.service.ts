@@ -50,6 +50,31 @@ export const createExamCertificate = async (
   return response.data;
 };
 
+export const downloadExamCertificate = async (certId: number): Promise<void> => {
+  const response = await api.get(`${CERTIFICATE_ENDPOINT}/${certId}/download`, {
+    responseType: 'blob',
+  });
+
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = url;
+
+  const contentDisposition = response.headers['content-disposition'];
+  let filename = `certificate-${certId}.pdf`;
+  if (typeof contentDisposition === 'string') {
+    const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+    if (filenameMatch?.[1]) {
+      filename = filenameMatch[1];
+    }
+  }
+
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  link.parentNode?.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
 export const bulkIssueCertificates = async (
   payload: BulkIssueCertificatesPayload,
 ): Promise<BulkIssueCertificatesResult> => {

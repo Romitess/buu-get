@@ -1,81 +1,35 @@
-import { ref, nextTick } from 'vue';
+import { ref } from 'vue';
 import { useQuasar } from 'quasar';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
-import { useUserStore } from 'src/stores/user.store';
-import { getImageUrl } from 'src/services/image.service';
-import { getBandRules } from 'src/services/score-criteria.service';
-import { fetchEnrollmentById } from 'src/services/exam.service';
-import { buildCertificateScoreLines } from 'src/composables/use-score-rubric-helpers';
-import type { ExamEnrollment, ExamHistoryItem } from 'src/types/exam';
-import type { CertificateCardData } from 'src/types/certificate';
-import { generateCertificateQrDataUrl } from 'src/utils/verify-qr';
-import { formatExamInstanceLabel } from 'src/utils/exam-instance-label';
+import { downloadExamCertificate } from 'src/services/exam-certificate.service';
+import type { ExamHistoryItem } from 'src/types/exam';
 
-/** List payload may omit score columns after a slim select; undefined ≠ real zero. */
-const isMissingCertificateScoreFields = (score: NonNullable<ExamEnrollment['SCORE']>): boolean =>
-  score.SC_LANG_USE_SCORE === undefined &&
-  score.SC_READING_SCORE === undefined &&
-  score.SC_TOTAL_SCORE === undefined;
-
-const isMissingTestTakerId = (enrollment: ExamEnrollment): boolean =>
-  !enrollment.ERM_TEST_TAKER && !enrollment.USER?.USER_CODE;
+const readDownloadErrorMessage = async (error: unknown): Promise<string> => {
+  const data = (error as { response?: { data?: unknown } })?.response?.data;
+  let payload: unknown = data;
+  if (data instanceof Blob) {
+    try {
+      payload = JSON.parse(await data.text()) as unknown;
+    } catch {
+      payload = null;
+    }
+  }
+  const message = (payload as { message?: unknown } | null)?.message;
+  if (typeof message === 'string' && message.trim()) {
+    return message;
+  }
+  if (Array.isArray(message) && typeof message[0] === 'string' && message[0].trim()) {
+    return message[0];
+  }
+  return 'ดาวน์โหลดใบประกาศนียบัตรไม่สำเร็จ';
+};
 
 export function useExamCertificateDocument() {
   const $q = useQuasar();
-  const userStore = useUserStore();
-
   const isDownloadingCertificate = ref(false);
-  const selectedCertificateData = ref<CertificateCardData | undefined>(undefined);
-
-  const waitForImages = async (element: HTMLElement, timeoutMs = 250): Promise<void> => {
-    const pendingImages = Array.from(element.querySelectorAll('img')).filter(
-      (image) => !image.complete,
-    );
-
-    if (pendingImages.length === 0) return;
-
-    await Promise.race([
-      Promise.all(
-        pendingImages.map(
-          (image) =>
-            new Promise<void>((resolve) => {
-              image.onload = () => resolve();
-              image.onerror = () => resolve();
-            }),
-        ),
-      ).then(() => undefined),
-      new Promise<void>((resolve) => window.setTimeout(resolve, timeoutMs)),
-    ]);
-  };
-
-  const formatEnglishDate = (dateStr?: string | Date | null): string => {
-    if (!dateStr) return '-';
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return '-';
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-  };
 
   const printCertificate = async (exam: ExamHistoryItem): Promise<void> => {
-    let enrollment = exam.rawEnrollment;
-    let score = enrollment?.SCORE;
-    let certificate = score?.CERTIFICATES?.[0];
-
-    if (!enrollment || !score || !certificate) {
+    const certificate = exam.rawEnrollment?.SCORE?.CERTIFICATES?.[0];
+    if (!certificate?.CERT_ID) {
       $q.notify({
         type: 'warning',
         message: 'ไม่พบข้อมูลใบประกาศนียบัตร',
@@ -83,151 +37,29 @@ export function useExamCertificateDocument() {
       });
       return;
     }
-
-    // Mirror receipt download: refresh detail when history list omitted certificate fields
-    if (
-      enrollment.ERM_ID &&
-      (isMissingCertificateScoreFields(score) || isMissingTestTakerId(enrollment))
-    ) {
-      try {
-        enrollment = await fetchEnrollmentById(enrollment.ERM_ID);
-        score = enrollment.SCORE;
-        certificate = score?.CERTIFICATES?.[0];
-      } catch (error) {
-        console.error(`Failed to refresh enrollment ${enrollment.ERM_ID} for certificate`, error);
-      }
-    }
-
-    if (!enrollment || !score || !certificate) {
-      $q.notify({
-        type: 'warning',
-        message: 'ไม่พบข้อมูลใบประกาศนียบัตร',
-        position: 'top',
-      });
-      return;
-    }
-
-    const session = enrollment.SESSION;
-    const examObj = session?.EXAM;
-    const profile = enrollment.USER?.PROFILE;
-    const fullName =
-      profile?.userFullnameEn || profile?.userFullnameTh || enrollment.USER?.USER_EMAIL || '-';
-    const title = profile?.userTitleEn || profile?.userTitleTh || '';
-    const profileImagePath =
-      enrollment.USER?.IMAGE?.USER_IMAGE_URL ||
-      profile?.userImagePath ||
-      userStore.currentUser?.userImagePath;
 
     isDownloadingCertificate.value = true;
-
     try {
-      const bandRulesResponse = await getBandRules();
-      const qrDataUrl = await generateCertificateQrDataUrl(certificate.CERT_CODE);
-
-      const scoreLines = buildCertificateScoreLines(score);
-      const totalMax = scoreLines.reduce((sum, line) => sum + line.maxScore, 0);
-
-      selectedCertificateData.value = {
-        fullName: `${title} ${fullName}`.trim(),
-        testTakerId: enrollment.ERM_TEST_TAKER || enrollment.USER?.USER_CODE || '-',
-        nationalId:
-          enrollment.USER?.USER_NATIONAL_ID ||
-          enrollment.USER?.USER_PASSPORT_NO ||
-          userStore.currentUser?.nationalId ||
-          userStore.currentUser?.passportNo ||
-          '-',
-        testSession: formatExamInstanceLabel(examObj?.EXAM_ROUND, examObj?.EXAM_FISCAL_YEAR) || '-',
-        testDate: formatEnglishDate(examObj?.EXAM_DATE),
-        vocabScore: `${Number(score.SC_LANG_USE_SCORE ?? 0)}/50`,
-        readingScore: `${Number(score.SC_READING_SCORE ?? 0)}/50`,
-        totalScore: `${Number(score.SC_TOTAL_SCORE ?? 0)}/${totalMax}`,
-        bandLevel:
-          score.SC_BAND_LEVEL === null || score.SC_BAND_LEVEL === undefined
-            ? '-'
-            : score.SC_BAND_LEVEL,
-        scoreLines,
-        reportIssueDate: formatEnglishDate(certificate.CERT_ISSUED_AT),
-        scoreValidUntil: formatEnglishDate(certificate.CERT_EXPIRES_AT),
-        certificateCode: certificate.CERT_CODE,
-        bandRules: bandRulesResponse.bandRules,
-        profileImage: profileImagePath ? getImageUrl(profileImagePath) : null,
-        qrDataUrl,
-      };
-
-      await nextTick();
-      await new Promise((resolve) => setTimeout(resolve, 600));
-
-      const container = document.getElementById('certificate-render-container');
-      const cardElements = Array.from(
-        container?.querySelectorAll<HTMLElement>('.certificate-card-preview') ?? [],
-      );
-
-      if (cardElements.length === 0) {
-        throw new Error('Certificate element not found');
-      }
-
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const horizontalMargin = 14;
-      const cardGap = 10;
-      const imgWidth = pageWidth - horizontalMargin * 2;
-
-      const renderedCards: { imgData: string; imgHeight: number }[] = [];
-      for (const cardElement of cardElements) {
-        await waitForImages(cardElement);
-
-        const canvas = await html2canvas(cardElement, {
-          scale: 3,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-        });
-
-        renderedCards.push({
-          imgData: canvas.toDataURL('image/png'),
-          imgHeight: (imgWidth * canvas.height) / canvas.width,
-        });
-      }
-
-      const totalHeight =
-        renderedCards.reduce((sum, card) => sum + card.imgHeight, 0) +
-        cardGap * Math.max(renderedCards.length - 1, 0);
-      let offsetY = Math.max((pageHeight - totalHeight) / 2, horizontalMargin);
-
-      for (const card of renderedCards) {
-        pdf.addImage(card.imgData, 'PNG', horizontalMargin, offsetY, imgWidth, card.imgHeight);
-        offsetY += card.imgHeight + cardGap;
-      }
-
-      pdf.save(`BUU-GET_Certificate_${enrollment.ERM_ID}.pdf`);
-
+      await downloadExamCertificate(certificate.CERT_ID);
       $q.notify({
         type: 'positive',
         message: 'ดาวน์โหลดใบประกาศนียบัตรสำเร็จ',
         position: 'top',
       });
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       $q.notify({
         type: 'negative',
-        message: 'ดาวน์โหลดใบประกาศนียบัตรไม่สำเร็จ',
+        message: await readDownloadErrorMessage(error),
         position: 'top',
       });
     } finally {
       isDownloadingCertificate.value = false;
-      selectedCertificateData.value = undefined;
     }
   };
 
   return {
     isDownloadingCertificate,
-    selectedCertificateData,
     printCertificate,
   };
 }

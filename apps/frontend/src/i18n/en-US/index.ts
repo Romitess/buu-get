@@ -1672,7 +1672,7 @@ export default {
           validUntilRequired: 'Please select a score expiry date',
           issueSuccess: 'Issued {count} certificate(s) and sent email successfully',
           issueSkippedSuffix: ' (skipped {count} already issued)',
-          issuePartialFailed: 'Some certificates could not be issued',
+          issuePartialFailed: 'Certificates could not be issued. Please try again',
         },
       },
     },

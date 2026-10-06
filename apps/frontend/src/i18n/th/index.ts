@@ -1675,7 +1675,7 @@ export default {
           validUntilRequired: 'กรุณาเลือกวันที่สิ้นสุดอายุผลสอบ',
           issueSuccess: 'ออกใบ Certificate และส่งอีเมลสำเร็จ {count} รายการ',
           issueSkippedSuffix: ' (ข้าม {count} รายการที่ออกไปแล้ว)',
-          issuePartialFailed: 'ออกใบ Certificate บางรายการไม่สำเร็จ',
+          issuePartialFailed: 'ออกใบประกาศไม่สำเร็จ กรุณาลองอีกครั้ง',
         },
       },
     },

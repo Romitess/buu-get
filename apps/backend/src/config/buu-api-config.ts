@@ -64,4 +64,12 @@ export default () => ({
     provision_key: process.env.BUU_GET_SIG_IMAGE_PERSON_PROVISION_KEY || '',
     scope: process.env.BUU_GET_SIG_IMAGE_PERSON_SCOPE || 'read',
   },
+  signElectronicSignaturePublicCert: {
+    path:
+      process.env.BUU_ESIGN_PUBLIC_CERT_PATH ||
+      '/service-api/e-sign.public.setaSign.SignElectronicSignature',
+    provision_key: process.env.BUU_ESIGN_PUBLIC_CERT_PROVISION_KEY || '',
+    scope: process.env.BUU_ESIGN_PUBLIC_CERT_SCOPE || 'write',
+    keyAccess: process.env.BUU_ESIGN_PUBLIC_CERT_KEY_ACCESS || '',
+  },
 });

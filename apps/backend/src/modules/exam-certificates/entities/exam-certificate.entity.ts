@@ -47,6 +47,15 @@ export class ExamCertificate {
   })
   CERT_CODE: string;
 
+  @Column({
+    name: 'CERT_FILE_PATH',
+    type: 'varchar',
+    length: 500,
+    nullable: true,
+    comment: 'path ไฟล์ใบประกาศ PDF ที่ลงนามแล้วใน MinIO',
+  })
+  CERT_FILE_PATH: string | null;
+
   @CreateDateColumn({ name: 'CREATED_AT', comment: 'วันที่สร้าง' })
   CREATED_AT: Date;
 

@@ -7,10 +7,15 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  StreamableFile,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { EXAM_ADMIN_ROLES } from 'src/common/constants/role-groups';
+import { AuthenticatedUser } from 'src/common/utils/authz.util';
 import {
   ExamCertificatesService,
   BulkIssueCertificatesResult,
@@ -70,6 +75,32 @@ export class ExamCertificatesController {
   })
   findAll(): Promise<ExamCertificate[]> {
     return this.examCertificatesService.findAll();
+  }
+
+  @Get(':id/download')
+  @ApiOperation({
+    summary: 'ดาวน์โหลดใบประกาศที่ลงนามด้วย Public Certificate',
+  })
+  @ApiResponse({ status: 200, description: 'ไฟล์ใบประกาศ PDF' })
+  @ApiResponse({ status: 403, description: 'ไม่มีสิทธิ์ดาวน์โหลดใบประกาศนี้' })
+  @ApiResponse({
+    status: 404,
+    description: 'ไม่พบใบประกาศ หรือยังไม่มีไฟล์ลงนาม',
+  })
+  async download(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthenticatedUser,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    const buffer = await this.examCertificatesService.downloadCertificate(
+      id,
+      user,
+    );
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="certificate-${id}.pdf"`,
+    });
+    return new StreamableFile(buffer);
   }
 
   @Get(':id')

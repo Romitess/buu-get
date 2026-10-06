@@ -1,5 +1,13 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import { Readable } from 'stream';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
+import { RoleEnum } from '../roles/enums/role.enum';
 import { generateCertificateCode } from 'src/common/utils/verification-code.util';
 import { ExamCertificatesService } from './exam-certificates.service';
 import { ExamScore } from '../exam-scores/entities/exam-score.entity';
@@ -34,6 +42,13 @@ jest.mock('src/common/utils/verification-code.util', () => ({
   generateCertificateCode: jest.fn(() => 'AUTO_GENERATED_CODE'),
 }));
 
+jest.mock('src/common/utils/build-certificate-pdf.util', () => ({
+  buildCertificatePdf: jest.fn().mockResolvedValue(Buffer.from('%PDF-1.4')),
+  buildCertificateVerifyUrl: jest.fn(
+    (base: string, code: string) => `${base}/#/v/c/${code}`,
+  ),
+}));
+
 describe('ExamCertificatesService', () => {
   let service: ExamCertificatesService;
   let scoreFind: jest.Mock;
@@ -48,12 +63,21 @@ describe('ExamCertificatesService', () => {
   };
   let examScoreRepository: {
     findOne: jest.Mock;
+    find: jest.Mock;
   };
   let examSessionRepository: {
     update: jest.Mock;
   };
   let dataSource: { transaction: jest.Mock };
-  let platformGatewayService: { sendEmail: jest.Mock };
+  let platformGatewayService: {
+    sendEmail: jest.Mock;
+    uploadBuffer: jest.Mock;
+    signElectronicSignaturePublicCert: jest.Mock;
+    deleteFile: jest.Mock;
+    getPublicFileStream: jest.Mock;
+  };
+  let scoreCriteriaService: { getBandRules: jest.Mock };
+  let configService: { get: jest.Mock };
 
   const createService = (): ExamCertificatesService =>
     new ExamCertificatesService(
@@ -62,6 +86,8 @@ describe('ExamCertificatesService', () => {
       examSessionRepository as never,
       platformGatewayService as never,
       dataSource as never,
+      scoreCriteriaService as never,
+      configService as never,
     );
 
   const bulkDtoBase = {
@@ -98,6 +124,7 @@ describe('ExamCertificatesService', () => {
     );
     examScoreRepository = {
       findOne: jest.fn(),
+      find: scoreFind,
     };
     examSessionRepository = {
       update: jest.fn().mockResolvedValue(undefined),
@@ -135,6 +162,18 @@ describe('ExamCertificatesService', () => {
 
     platformGatewayService = {
       sendEmail: jest.fn().mockResolvedValue(undefined),
+      uploadBuffer: jest
+        .fn()
+        .mockResolvedValue({ result: '/certificates/AUTO_GENERATED_CODE.pdf' }),
+      signElectronicSignaturePublicCert: jest.fn().mockResolvedValue(undefined),
+      deleteFile: jest.fn().mockResolvedValue(undefined),
+      getPublicFileStream: jest.fn(),
+    };
+    scoreCriteriaService = {
+      getBandRules: jest.fn().mockResolvedValue({ bandRules: [] }),
+    };
+    configService = {
+      get: jest.fn().mockReturnValue('https://app.example.com'),
     };
 
     service = createService();
@@ -217,8 +256,13 @@ describe('ExamCertificatesService', () => {
       expect.objectContaining({
         SCORES_ID: 1,
         USER_ID: 10,
+        CERT_CODE: 'AUTO_GENERATED_CODE',
+        CERT_FILE_PATH: '/certificates/AUTO_GENERATED_CODE.pdf',
       }),
     );
+    expect(
+      platformGatewayService.signElectronicSignaturePublicCert,
+    ).not.toHaveBeenCalled();
     expect(sessionSave).toHaveBeenCalledWith([
       expect.objectContaining({
         SS_SESSION_STATUS: ExamSessionStatus.COMPLETED,
@@ -616,5 +660,96 @@ describe('ExamCertificatesService', () => {
     );
     expect(examCertificateRepository.findOne).not.toHaveBeenCalled();
     expect(examCertificateRepository.save).not.toHaveBeenCalled();
+  });
+
+  it('issues certificates without public cert signing while the feature is off', async () => {
+    scoreFind.mockResolvedValue([
+      {
+        SCORES_ID: 1,
+        CERTIFICATES: [],
+        ENROLLMENT: {
+          USER_ID: 10,
+          SESSION_ID: 100,
+          USER: {
+            USER_EMAIL: 'student@example.com',
+            PROFILE: { userTitleTh: 'นาย', userFullnameTh: 'ทดสอบ' },
+          },
+        },
+      },
+    ]);
+    platformGatewayService.signElectronicSignaturePublicCert.mockRejectedValue(
+      new ServiceUnavailableException(
+        'ลงนามใบประกาศด้วย Public Certificate ไม่สำเร็จ',
+      ),
+    );
+
+    await expect(
+      service.bulkIssueCertificates({
+        candidates: [{ SCORES_ID: 1, USER_ID: 10 }],
+        ...bulkDtoBase,
+      }),
+    ).resolves.toEqual({
+      success: true,
+      createdCount: 1,
+      skippedCount: 0,
+    });
+
+    expect(
+      platformGatewayService.signElectronicSignaturePublicCert,
+    ).not.toHaveBeenCalled();
+    expect(certificateSave).toHaveBeenCalledTimes(1);
+    expect(platformGatewayService.deleteFile).not.toHaveBeenCalled();
+  });
+
+  it('downloads a signed certificate for the owner', async () => {
+    examCertificateRepository.findOne.mockResolvedValue({
+      CERT_ID: 7,
+      USER_ID: 10,
+      CERT_FILE_PATH: '/certificates/AUTO_GENERATED_CODE.pdf',
+    });
+    platformGatewayService.getPublicFileStream.mockResolvedValue({
+      stream: Readable.from([Buffer.from('%PDF')]),
+    });
+
+    const bytes = await service.downloadCertificate(7, {
+      userId: 10,
+      email: 'student@example.com',
+      role: RoleEnum.CANDIDATE,
+    });
+
+    expect(Buffer.from(bytes).toString()).toBe('%PDF');
+  });
+
+  it('rejects download when the certificate has no signed file', async () => {
+    examCertificateRepository.findOne.mockResolvedValue({
+      CERT_ID: 7,
+      USER_ID: 10,
+      CERT_FILE_PATH: null,
+    });
+
+    await expect(
+      service.downloadCertificate(7, {
+        userId: 10,
+        email: 'student@example.com',
+        role: RoleEnum.CANDIDATE,
+      }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('rejects download by someone who is not the owner or an exam admin', async () => {
+    examCertificateRepository.findOne.mockResolvedValue({
+      CERT_ID: 7,
+      USER_ID: 10,
+      CERT_FILE_PATH: '/certificates/AUTO_GENERATED_CODE.pdf',
+    });
+
+    await expect(
+      service.downloadCertificate(7, {
+        userId: 99,
+        email: 'other@example.com',
+        role: RoleEnum.CANDIDATE,
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(platformGatewayService.getPublicFileStream).not.toHaveBeenCalled();
   });
 });

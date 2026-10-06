@@ -54,6 +54,12 @@ export interface EnvironmentVariables {
   BUU_LOGIN_BUU_PROVISION_KEY?: string;
   BUU_LOGIN_BUU_SCOPE?: string;
   BUU_LOGIN_BUU_SECRET?: string;
+  /** Public certificate e-sign (ไม่มีรูปลายเซ็น) — ต้องเป็น true ถึงจะเรียก */
+  BUU_ESIGN_PUBLIC_CERT_ENABLED?: string;
+  BUU_ESIGN_PUBLIC_CERT_PATH?: string;
+  BUU_ESIGN_PUBLIC_CERT_PROVISION_KEY?: string;
+  BUU_ESIGN_PUBLIC_CERT_SCOPE?: string;
+  BUU_ESIGN_PUBLIC_CERT_KEY_ACCESS?: string;
   /** Graylog GELF — empty/unset disables shipping (console + MySQL only) */
   GRAYLOG_HOST?: string;
   GRAYLOG_PORT?: number;
@@ -121,6 +127,13 @@ const envSchema = Joi.object<EnvironmentVariables>({
   BUU_LOGIN_BUU_PROVISION_KEY: Joi.string().optional(),
   BUU_LOGIN_BUU_SCOPE: Joi.string().optional(),
   BUU_LOGIN_BUU_SECRET: Joi.string().valid('true', 'false').optional(),
+  BUU_ESIGN_PUBLIC_CERT_ENABLED: Joi.string()
+    .valid('true', 'false')
+    .default('false'),
+  BUU_ESIGN_PUBLIC_CERT_PATH: Joi.string().optional(),
+  BUU_ESIGN_PUBLIC_CERT_PROVISION_KEY: Joi.string().allow('').optional(),
+  BUU_ESIGN_PUBLIC_CERT_SCOPE: Joi.string().optional(),
+  BUU_ESIGN_PUBLIC_CERT_KEY_ACCESS: Joi.string().allow('').optional(),
   GRAYLOG_HOST: Joi.string().allow('').optional(),
   GRAYLOG_PORT: Joi.number().port().default(12201),
   GRAYLOG_FACILITY: Joi.string().default('buuget'),

@@ -931,6 +931,18 @@ watch(validFromDate, (newVal) => {
   }
 });
 
+const readIssueErrorMessage = (err: unknown, fallback: string): string => {
+  const message = (err as { response?: { data?: { message?: unknown } } })?.response?.data
+    ?.message;
+  if (typeof message === 'string' && message.trim()) {
+    return message;
+  }
+  if (Array.isArray(message) && typeof message[0] === 'string' && message[0].trim()) {
+    return message[0];
+  }
+  return fallback;
+};
+
 const onCancel = (): void => {
   isEditingBandRules.value = false;
   editingBandRules.value = [];
@@ -1006,7 +1018,10 @@ const onConfirm = async (): Promise<void> => {
     console.error('Error issuing certificates in batch:', err);
     $q.notify({
       type: 'negative',
-      message: t('admin.scoreManagement.certificateDialog.notifications.issuePartialFailed'),
+      message: readIssueErrorMessage(
+        err,
+        t('admin.scoreManagement.certificateDialog.notifications.issuePartialFailed'),
+      ),
     });
   } finally {
     isSubmitting.value = false;

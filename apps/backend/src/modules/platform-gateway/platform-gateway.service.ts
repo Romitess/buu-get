@@ -19,6 +19,7 @@ import ApiToken from 'src/types/api/apiToken';
 import RequestTokenApiConfig from 'src/types/api/requestTokenApiConfig';
 import LoginBuuApiConfig from 'src/types/api/loginBuuApiConfig';
 import { v4 as uuidv4 } from 'uuid';
+import { isPublicCertSignSuccess } from 'src/common/utils/public-cert-sign.util';
 import { unlink, createReadStream } from 'fs';
 import { promisify } from 'util';
 import {
@@ -311,6 +312,7 @@ export class PlatformGatewayService {
     for (const key in sanitized) {
       if (Object.prototype.hasOwnProperty.call(sanitized, key)) {
         if (
+          key.toLowerCase() === 'key' ||
           sensitiveKeys.some((k) => key.toLowerCase().includes(k.toLowerCase()))
         ) {
           sanitized[key] = '***MASKED***';
@@ -951,6 +953,44 @@ export class PlatformGatewayService {
       await this.sendNoti(this.getNotiEndpoint() + apiName + ': ' + error);
       this.logger?.error?.(`❌ getSignatureImageByPerson failed: ${error}`);
       throw error;
+    }
+  }
+
+  /**
+   * ลงนามปิดท้ายด้วย Public Certificate (ไม่มีรูปลายเซ็น)
+   * ผ่านเฉพาะเมื่อ upstream ตอบ status = success
+   */
+  async signElectronicSignaturePublicCert(filename: string): Promise<void> {
+    const apiName = 'signElectronicSignaturePublicCert';
+    const apiConfig = this.getApiConfig(apiName) as {
+      keyAccess?: string;
+    };
+    const keyAccess =
+      typeof apiConfig.keyAccess === 'string' ? apiConfig.keyAccess.trim() : '';
+    if (!keyAccess) {
+      this.logger.error('BUU_ESIGN_PUBLIC_CERT_KEY_ACCESS is not set');
+      throw new ServiceUnavailableException(
+        'ยังไม่ได้ตั้งค่า Key Access สำหรับลงนามใบประกาศ',
+      );
+    }
+    const objectName = filename.trim();
+    if (!objectName) {
+      throw new ServiceUnavailableException(
+        'ไม่พบชื่อไฟล์ใบประกาศบน MinIO สำหรับลงนาม',
+      );
+    }
+
+    const response = await this.postApi(apiName, {
+      key: keyAccess,
+      filename: objectName,
+    });
+    if (!isPublicCertSignSuccess(response?.data)) {
+      this.logger.error(
+        `signElectronicSignaturePublicCert rejected filename=${objectName}`,
+      );
+      throw new ServiceUnavailableException(
+        'ลงนามใบประกาศด้วย Public Certificate ไม่สำเร็จ',
+      );
     }
   }
 
