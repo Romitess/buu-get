@@ -91,6 +91,9 @@ export class ThaidOidcClient {
       );
       const idToken = readIdToken(response.data);
       if (!idToken) {
+        this.logger.warn(
+          `token exchange response has no id_token: status=${response.status} fields=${listBodyFields(response.data)}`,
+        );
         throw new ThaidTokenError('id_token missing');
       }
       return idToken;
@@ -98,9 +101,13 @@ export class ThaidOidcClient {
       if (error instanceof ThaidTokenError) {
         throw error;
       }
-      const oauthError = readOauthError(error);
       this.logger.warn(
-        `token exchange failed: ${oauthError ?? 'request_failed'}`,
+        describeTokenExchangeFailure(error, {
+          tokenUrl: `${config.issuer}/api/v2/oauth2/token/`,
+          redirectUri: config.redirectUri,
+          clientIdLength: config.clientId.length,
+          clientSecretLength: config.clientSecret.length,
+        }),
       );
       throw new ThaidTokenError('token exchange');
     }
@@ -172,14 +179,149 @@ function readJwksKeys(data: unknown): JwksCache['keys'] {
   );
 }
 
-function readOauthError(error: unknown): string | undefined {
-  if (!axios.isAxiosError(error) || !error.response) {
-    return undefined;
+const REDACTED_BODY_KEYS = new Set([
+  'client_secret',
+  'code',
+  'access_token',
+  'id_token',
+  'refresh_token',
+  'authorization',
+]);
+
+export interface TokenExchangeLogContext {
+  tokenUrl: string;
+  redirectUri: string;
+  clientIdLength: number;
+  clientSecretLength: number;
+}
+
+/** สรุปความล้มเหลวตอนแลก token โดยไม่ใส่ secret, code หรือ token */
+export function describeTokenExchangeFailure(
+  error: unknown,
+  context: TokenExchangeLogContext,
+): string {
+  const parts = [
+    'token exchange failed',
+    'auth=client_secret_post',
+    'authorizationHeader=absent',
+    `tokenUrl=${context.tokenUrl}`,
+    `redirectUri=${context.redirectUri}`,
+    `clientIdLength=${context.clientIdLength}`,
+    `clientSecretLength=${context.clientSecretLength}`,
+  ];
+
+  if (!axios.isAxiosError(error)) {
+    const message = error instanceof Error ? error.message : 'request_failed';
+    parts.push('status=none', `message=${quoteLog(message)}`);
+    return parts.join(' ');
   }
-  const data: unknown = error.response.data;
+
+  parts.push(`status=${error.response?.status ?? 'none'}`);
+  if (error.code) {
+    parts.push(`code=${error.code}`);
+  }
+  const wwwAuthenticate = readHeader(
+    error.response?.headers,
+    'www-authenticate',
+  );
+  if (wwwAuthenticate) {
+    parts.push(`wwwAuthenticate=${quoteLog(wwwAuthenticate)}`);
+  }
+  const body = summarizeTokenErrorBody(error.response?.data);
+  if (body) {
+    parts.push(body);
+  } else if (!error.response) {
+    parts.push(`message=${quoteLog(error.message)}`);
+  }
+  return parts.join(' ');
+}
+
+function summarizeTokenErrorBody(data: unknown): string | undefined {
+  if (typeof data === 'string') {
+    const text = data.trim();
+    if (text.length === 0) {
+      return undefined;
+    }
+    return `body=${quoteLog(redactFormSecrets(text))}`;
+  }
   if (data === null || typeof data !== 'object' || Array.isArray(data)) {
     return undefined;
   }
-  const code = (data as Record<string, unknown>).error;
-  return typeof code === 'string' ? code : undefined;
+  const record = data as Record<string, unknown>;
+  const bits: string[] = [];
+  const error = readBodyString(record, 'error');
+  const description = readBodyString(record, 'error_description');
+  const errorUri = readBodyString(record, 'error_uri');
+  if (error) {
+    bits.push(`error=${error}`);
+  }
+  if (description) {
+    bits.push(`description=${quoteLog(description)}`);
+  }
+  if (errorUri) {
+    bits.push(`errorUri=${errorUri}`);
+  }
+  const extra = Object.keys(record).filter(
+    (key) =>
+      key !== 'error' &&
+      key !== 'error_description' &&
+      key !== 'error_uri' &&
+      !REDACTED_BODY_KEYS.has(key),
+  );
+  if (extra.length > 0) {
+    bits.push(`fields=${extra.join(',')}`);
+  }
+  return bits.length > 0 ? bits.join(' ') : undefined;
+}
+
+function listBodyFields(data: unknown): string {
+  if (data === null || typeof data !== 'object' || Array.isArray(data)) {
+    return typeof data;
+  }
+  return (
+    Object.keys(data)
+      .map((key) => (REDACTED_BODY_KEYS.has(key) ? `${key}=redacted` : key))
+      .join(',') || 'none'
+  );
+}
+
+function readBodyString(
+  record: Record<string, unknown>,
+  key: string,
+): string | undefined {
+  const value = record[key];
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function readHeader(headers: unknown, name: string): string | undefined {
+  if (headers === null || typeof headers !== 'object') {
+    return undefined;
+  }
+  const value = (headers as Record<string, unknown>)[name];
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value.trim();
+  }
+  if (Array.isArray(value)) {
+    const first = value.find((item) => typeof item === 'string');
+    return typeof first === 'string' && first.trim().length > 0
+      ? first.trim()
+      : undefined;
+  }
+  return undefined;
+}
+
+function redactFormSecrets(value: string): string {
+  return value.replace(
+    /(client_secret|code|access_token|id_token|refresh_token)=([^&\s]+)/gi,
+    '$1=redacted',
+  );
+}
+
+function quoteLog(value: string): string {
+  const compact = value.replace(/\s+/g, ' ').trim().slice(0, 300);
+  return `"${compact.replace(/"/g, "'")}"`;
 }

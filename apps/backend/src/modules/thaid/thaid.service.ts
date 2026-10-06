@@ -100,7 +100,10 @@ export class ThaidService {
       return this.redirectTicket(ticket, frontendOrigin);
     } catch (err) {
       const name = err instanceof Error ? err.name : 'Error';
-      this.logger.warn(`[identity:${source}] callback failed: ${name}`);
+      const message = err instanceof Error ? err.message : '';
+      this.logger.warn(
+        `[identity:${source}] callback failed: ${name}${message ? `: ${message}` : ''}`,
+      );
       return this.redirectStatus('error', frontendOrigin);
     }
   }
