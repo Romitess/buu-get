@@ -134,6 +134,9 @@
       }
     }
   },
+  "overrides": {
+    "proxy-addr": "2.0.8"
+  },
   "lint-staged": {
     "src/**/*.ts": [
       "eslint --fix",
