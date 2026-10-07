@@ -6,13 +6,14 @@ import { EnvironmentVariables } from 'src/config/env.validation';
 import { resolveThaidConfig, ThaidRuntimeConfig } from './thaid-config';
 import {
   ThaidIdTokenClaims,
+  ThaidJwk,
   ThaidTokenError,
   verifyThaidIdToken,
 } from './thaid-jwt';
 
 interface JwksCache {
   issuer: string;
-  keys: Array<{ kty?: string; kid?: string; n?: string; e?: string }>;
+  keys: ThaidJwk[];
   fetchedAt: number;
 }
 

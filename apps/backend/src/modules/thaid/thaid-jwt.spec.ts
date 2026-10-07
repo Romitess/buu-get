@@ -1,4 +1,4 @@
-import { generateKeyPairSync, sign } from 'crypto';
+import { generateKeyPairSync, sign, type KeyObject } from 'crypto';
 import { ThaidTokenError, verifyThaidIdToken } from './thaid-jwt';
 
 function signToken(
@@ -14,6 +14,23 @@ function signToken(
   const signature = sign('RSA-SHA256', Buffer.from(data), privateKey).toString(
     'base64url',
   );
+  return `${data}.${signature}`;
+}
+
+function signEs256Token(
+  payload: Record<string, unknown>,
+  privateKey: KeyObject,
+  kid: string,
+): string {
+  const header = Buffer.from(
+    JSON.stringify({ alg: 'ES256', kid, typ: 'JWT' }),
+  ).toString('base64url');
+  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const data = `${header}.${body}`;
+  const signature = sign('sha256', Buffer.from(data), {
+    key: privateKey,
+    dsaEncoding: 'ieee-p1363',
+  }).toString('base64url');
   return `${data}.${signature}`;
 }
 
@@ -61,6 +78,34 @@ describe('verifyThaidIdToken', () => {
     const token = signToken(validPayload, other.privateKey);
     expect(() =>
       verifyThaidIdToken(token, keys, {
+        issuer: 'https://imauthsbx.bora.dopa.go.th',
+        clientId: 'client-id',
+        nowSeconds: now,
+      }),
+    ).toThrow(ThaidTokenError);
+  });
+
+  it('accepts an ES256 token signed by a P-256 key', () => {
+    const pair = generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
+    const ecJwk = pair.publicKey.export({ format: 'jwk' });
+    const token = signEs256Token(validPayload, pair.privateKey, 'ec-key');
+
+    expect(
+      verifyThaidIdToken(token, [{ ...ecJwk, kid: 'ec-key' }], {
+        issuer: 'https://imauthsbx.bora.dopa.go.th',
+        clientId: 'client-id',
+        nowSeconds: now,
+      }),
+    ).toMatchObject({ pid: '1234567890123' });
+  });
+
+  it('rejects an ES256 token when the curve is not P-256', () => {
+    const pair = generateKeyPairSync('ec', { namedCurve: 'secp384r1' });
+    const ecJwk = pair.publicKey.export({ format: 'jwk' });
+    const token = signEs256Token(validPayload, pair.privateKey, 'p384-key');
+
+    expect(() =>
+      verifyThaidIdToken(token, [{ ...ecJwk, kid: 'p384-key' }], {
         issuer: 'https://imauthsbx.bora.dopa.go.th',
         clientId: 'client-id',
         nowSeconds: now,

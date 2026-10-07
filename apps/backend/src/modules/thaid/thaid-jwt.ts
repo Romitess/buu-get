@@ -1,4 +1,9 @@
-import { createPublicKey, verify, type JsonWebKey } from 'crypto';
+import {
+  createPublicKey,
+  verify,
+  type JsonWebKey,
+  type KeyObject,
+} from 'crypto';
 
 export interface ThaidIdTokenClaims {
   pid: string;
@@ -10,13 +15,16 @@ export interface ThaidIdTokenClaims {
   titleEn?: string;
 }
 
-interface RsaJwk {
+export interface ThaidJwk {
   kty?: string;
   kid?: string;
-  n?: string;
-  e?: string;
   alg?: string;
   use?: string;
+  n?: string;
+  e?: string;
+  crv?: string;
+  x?: string;
+  y?: string;
 }
 
 export class ThaidTokenError extends Error {
@@ -62,12 +70,12 @@ function audienceMatches(
 }
 
 /**
- * ตรวจ RS256 id_token กับ JWK ในชุดเดียวกัน แล้วอ่าน claims ที่ BUU GET ใช้
- * ไม่ยิงเครือข่าย
+ * ตรวจ id_token ที่ลงนามด้วย RS256 หรือ ES256 กับ JWK ในชุดเดียวกัน
+ * แล้วอ่าน claims ที่ BUU GET ใช้ ไม่ยิงเครือข่าย
  */
 export function verifyThaidIdToken(
   idToken: string,
-  keys: RsaJwk[],
+  keys: ThaidJwk[],
   expected: { issuer: string; clientId: string; nowSeconds?: number },
 ): ThaidIdTokenClaims {
   const parts = idToken.split('.');
@@ -76,22 +84,20 @@ export function verifyThaidIdToken(
   }
   const [encodedHeader, encodedPayload, encodedSignature] = parts;
   const header = decodeBase64UrlJson(encodedHeader);
-  if (header.alg !== 'RS256') {
+  const alg = readString(header, 'alg');
+  if (alg !== 'RS256' && alg !== 'ES256') {
     throw new ThaidTokenError('unsupported alg');
   }
   const kid = readString(header, 'kid');
-  const jwk = keys.find((key) => key.kty === 'RSA' && key.kid === kid);
-  if (!jwk?.n || !jwk.e) {
+  const expectedKty = alg === 'RS256' ? 'RSA' : 'EC';
+  const jwk = keys.find((key) => key.kty === expectedKty && key.kid === kid);
+  if (!jwk) {
     throw new ThaidTokenError('jwks key');
   }
 
-  const publicKey = createPublicKey({
-    key: jwk as JsonWebKey,
-    format: 'jwk',
-  });
   const signature = Buffer.from(encodedSignature, 'base64url');
   const signed = Buffer.from(`${encodedHeader}.${encodedPayload}`);
-  const valid = verify('RSA-SHA256', signed, publicKey, signature);
+  const valid = signatureMatches(alg, jwk, signed, signature);
   if (!valid) {
     throw new ThaidTokenError('signature');
   }
@@ -125,6 +131,36 @@ export function verifyThaidIdToken(
     title: readString(payload, 'title'),
     titleEn: readString(payload, 'title_en'),
   };
+}
+
+function signatureMatches(
+  alg: 'RS256' | 'ES256',
+  jwk: ThaidJwk,
+  signed: Buffer,
+  signature: Buffer,
+): boolean {
+  if (alg === 'RS256') {
+    if (!jwk.n || !jwk.e) {
+      throw new ThaidTokenError('jwks key');
+    }
+    return verify('RSA-SHA256', signed, toPublicKey(jwk), signature);
+  }
+  if (jwk.crv !== 'P-256' || !jwk.x || !jwk.y) {
+    throw new ThaidTokenError('jwks key');
+  }
+  return verify(
+    'sha256',
+    signed,
+    { key: toPublicKey(jwk), dsaEncoding: 'ieee-p1363' },
+    signature,
+  );
+}
+
+function toPublicKey(jwk: ThaidJwk): KeyObject {
+  return createPublicKey({
+    key: jwk as JsonWebKey,
+    format: 'jwk',
+  });
 }
 
 /** แปลงวันเกิด YYYY-MM-DD เป็น Date ตอนเที่ยง UTC เพื่อไม่ให้วันเลื่อนเมื่อเขียนคอลัมน์ DATE */
