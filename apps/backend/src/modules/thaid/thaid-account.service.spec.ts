@@ -65,6 +65,15 @@ describe('ThaidAccountService', () => {
       outcome: 'login',
       notice: 'signed_in',
       userId: 9,
+      received: {
+        nationalId: '1234567890123',
+        titleTH: 'นาย',
+        titleEN: 'Mr.',
+        fullName: 'ชื่อใหม่',
+        englishName: 'New Name',
+        birthdate: '2001-02-03',
+        address: '',
+      },
     });
     expect(profile.userTitleTh).toBe('นาง');
     expect(profile.userFullnameEn).toBe('Kept Name');

@@ -144,10 +144,20 @@ describe('ThaidService', () => {
 
   describe('exchangeSession', () => {
     it('returns a login response for a login ticket', async () => {
+      const received = {
+        nationalId: '1234567890123',
+        titleTH: 'นาย',
+        titleEN: 'Mr.',
+        fullName: 'ทดสอบ ระบบ',
+        englishName: 'Test User',
+        birthdate: '1990-01-02',
+        address: '99/12 ถนนสุขุมวิท',
+      };
       handoff.consumeSessionTicket.mockResolvedValue({
         outcome: 'login',
         notice: 'signed_in',
         userId: 7,
+        received,
       });
       accounts.issueLoginForUser.mockResolvedValue({
         accessToken: 'app-jwt',
@@ -163,6 +173,7 @@ describe('ThaidService', () => {
       await expect(service.exchangeSession('ticket-value')).resolves.toEqual({
         outcome: 'login',
         notice: 'signed_in',
+        received,
         login: expect.objectContaining({ accessToken: 'app-jwt' }),
       });
     });

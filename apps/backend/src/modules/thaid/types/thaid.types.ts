@@ -17,6 +17,15 @@ export interface IdentityCallbackRedirect {
 export interface ThaidSessionLoginResponse {
   outcome: 'login';
   notice: 'signed_in' | 'existing_account';
+  received?: {
+    nationalId: string;
+    titleTH: string;
+    titleEN: string;
+    fullName: string;
+    englishName: string;
+    birthdate: string;
+    address: string;
+  };
   login: {
     accessToken: string;
     user: {

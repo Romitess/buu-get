@@ -15,6 +15,7 @@ export interface ThaidPrefillFields {
 export interface ThaidLoginSession {
   outcome: 'login';
   notice: 'signed_in' | 'existing_account';
+  received?: ThaidPrefillFields;
   login: {
     accessToken: string;
     user: {

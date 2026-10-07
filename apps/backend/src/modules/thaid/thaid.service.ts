@@ -120,6 +120,7 @@ export class ThaidService {
     return {
       outcome: 'login',
       notice: payload.notice,
+      received: payload.received,
       login,
     };
   }

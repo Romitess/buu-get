@@ -34,6 +34,7 @@ export class ThaidAccountService {
       relations: { ROLES_ID: true, PROFILE: true },
     });
 
+    const received = toReceivedProfile(claims);
     if (user) {
       if (user.PROFILE) {
         this.fillEmptyProfile(user.PROFILE, claims);
@@ -43,26 +44,18 @@ export class ThaidAccountService {
         outcome: 'login',
         notice: intent === 'register' ? 'existing_account' : 'signed_in',
         userId: user.USER_ID,
+        received,
       };
     }
 
     const registrationToken = await this.handoff.createRegisterProof(
       claims.pid,
     );
-    const mapped = mapThaidProfile(claims);
     return {
       outcome: 'prefill',
       notice: intent === 'login' ? 'no_account' : 'continue_register',
       registrationToken,
-      prefill: {
-        nationalId: claims.pid,
-        titleTH: mapped.titleTH,
-        titleEN: mapped.titleEN,
-        fullName: mapped.fullName,
-        englishName: mapped.englishName,
-        birthdate: mapped.birthdate,
-        address: mapped.address,
-      },
+      prefill: received,
     };
   }
 
@@ -144,4 +137,17 @@ export class ThaidAccountService {
 
 function isBlank(value: string | null | undefined): boolean {
   return value == null || value.trim() === '';
+}
+
+function toReceivedProfile(claims: ThaidIdTokenClaims) {
+  const mapped = mapThaidProfile(claims);
+  return {
+    nationalId: claims.pid,
+    titleTH: mapped.titleTH,
+    titleEN: mapped.titleEN,
+    fullName: mapped.fullName,
+    englishName: mapped.englishName,
+    birthdate: mapped.birthdate,
+    address: mapped.address,
+  };
 }

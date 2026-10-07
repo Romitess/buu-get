@@ -29,6 +29,7 @@ export interface ThaidLoginTicketPayload {
   outcome: 'login';
   notice: 'signed_in' | 'existing_account';
   userId: number;
+  received: ThaidPrefillPayload;
 }
 
 export interface ThaidPrefillTicketPayload {
