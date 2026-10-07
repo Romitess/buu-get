@@ -10,7 +10,7 @@ describe('resolveThaidConfig', () => {
     expect(config.env).toBe('sandbox');
     expect(config.issuer).toBe('https://imauthsbx.bora.dopa.go.th');
     expect(config.redirectUri).toBe(
-      'https://buu-get-dev.buu.ac.th/api/sandbox/callback',
+      'https://buu-get-test.buu.ac.th/api/sandbox/callback',
     );
     expect(config.verifyType).toBe('pin');
     expect(config.scope).toBe(DEFAULT_THAID_SCOPE);
@@ -36,11 +36,11 @@ describe('resolveThaidConfig', () => {
 
   it('strips a trailing slash from an overridden redirect URI', () => {
     const config = resolveThaidConfig({
-      THAID_REDIRECT_URI: 'https://buu-get-dev.buu.ac.th/api/sandbox/callback/',
+      THAID_REDIRECT_URI: 'https://buu-get-test.buu.ac.th/api/sandbox/callback/',
     });
 
     expect(config.redirectUri).toBe(
-      'https://buu-get-dev.buu.ac.th/api/sandbox/callback',
+      'https://buu-get-test.buu.ac.th/api/sandbox/callback',
     );
   });
 });

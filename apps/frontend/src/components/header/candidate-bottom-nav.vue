@@ -1,5 +1,10 @@
 <template>
   <q-footer v-if="isVisible" class="candidate-bottom-nav">
+    <div class="bottom-nav-privacy">
+      <router-link :to="{ name: 'privacy-notice' }" class="privacy-notice-link">
+        {{ t('privacyNotice.button') }}
+      </router-link>
+    </div>
     <div class="bottom-nav-glass">
       <q-tabs
         v-model="activeTab"
@@ -88,6 +93,26 @@ const isVisible = computed(() => {
   background: transparent !important;
   box-shadow: none !important;
   padding: 0 12px calc(10px + env(safe-area-inset-bottom, 0px));
+}
+
+.bottom-nav-privacy {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 6px;
+}
+
+.privacy-notice-link {
+  color: var(--text-secondary, #5c6b7a);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
 }
 
 .bottom-nav-glass {

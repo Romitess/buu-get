@@ -132,7 +132,7 @@ const routes: RouteRecordRaw[] = [
           requiresAuth: false,
           hideHeader: true,
           hideDrawer: true,
-          hideFooter: true,
+          footerVariant: 'white',
         },
       },
       {

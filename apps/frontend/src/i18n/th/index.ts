@@ -2353,7 +2353,7 @@ export default {
     forgotPassword: 'ลืมรหัสผ่าน?',
     login: 'เข้าสู่ระบบ',
     createAccount: 'สร้างบัญชีตอนนี้ ?',
-    staffLogin: 'เข้าสู่ระบบด้วยบัญชีมหาวิทยาลัย',
+    staffLogin: 'เข้าสู่ระบบเป็นเจ้าหน้าที่',
     candidateLogin: 'เข้าสู่ระบบผู้สมัครสอบ',
     staffLoginHint: 'สำหรับบุคลากร / เจ้าหน้าที่',
     thaidCallback: {

@@ -7,11 +7,7 @@
       Crafted by the computer center of Burapha University
     </div>
     <div class="col-12 col-sm-auto footer-credits__meta">
-      <router-link
-        v-if="showPrivacyNotice"
-        :to="{ name: 'privacy-notice' }"
-        class="privacy-notice-btn"
-      >
+      <router-link :to="{ name: 'privacy-notice' }" class="privacy-notice-link">
         {{ t('privacyNotice.button') }}
       </router-link>
       <span class="text-caption opacity-80">
@@ -29,11 +25,9 @@ import { useI18n } from 'vue-i18n';
 withDefaults(
   defineProps<{
     variant?: 'primary' | 'white';
-    showPrivacyNotice?: boolean;
   }>(),
   {
     variant: 'primary',
-    showPrivacyNotice: false,
   },
 );
 
@@ -72,22 +66,20 @@ const appVersion = computed(() => import.meta.env.VITE_APP_VERSION?.trim() || ''
   }
 }
 
-.privacy-notice-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 12px;
-  border: 1px solid currentColor;
-  border-radius: 999px;
+.privacy-notice-link {
   color: inherit;
-  font-size: 0.8125rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 400;
   line-height: 1.4;
   text-decoration: none;
   white-space: nowrap;
+  opacity: 0.8;
 
-  &:hover {
-    background: rgba(30, 137, 229, 0.1);
+  &:hover,
+  &:focus-visible {
+    opacity: 1;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 }
 

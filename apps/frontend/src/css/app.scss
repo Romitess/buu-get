@@ -141,8 +141,8 @@
   --sidebar-expanded-width: 290px;
   --header-height: 64px;
   --page-max-width: 1600px;
-  // Candidate mobile dock: 56px tabs + 10px padding + ~6px slack, plus iOS home indicator
-  --candidate-bottom-nav-offset: calc(72px + env(safe-area-inset-bottom, 0px));
+  // Candidate mobile dock: privacy line + 56px tabs + 10px padding + slack, plus iOS home indicator
+  --candidate-bottom-nav-offset: calc(96px + env(safe-area-inset-bottom, 0px));
 
   // Badges
   --badge-primary-bg: #e3f2fd;

@@ -4,7 +4,7 @@ export type ThaidVerifyType = 'pin' | 'face' | 'pin_face';
 export const THAID_SANDBOX_ISSUER = 'https://imauthsbx.bora.dopa.go.th';
 export const THAID_PRODUCTION_ISSUER = 'https://imauth.bora.dopa.go.th';
 export const THAID_SANDBOX_REDIRECT_URI =
-  'https://buu-get-dev.buu.ac.th/api/sandbox/callback';
+  'https://buu-get-test.buu.ac.th/api/sandbox/callback';
 export const THAID_PRODUCTION_REDIRECT_URI =
   'https://buu-get.buu.ac.th/api/thaid/callback';
 export const DEFAULT_THAID_SCOPE =

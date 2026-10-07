@@ -65,7 +65,7 @@ export class ThaidIdentityController {
   @ApiOperation({
     summary: 'ThaiD sandbox identity callback (public)',
     description:
-      'รับ redirect จากแอป ThaiD [Sandbox] หลัง Entity ยืนยันการให้ข้อมูล แล้วแลก code เป็นผลยืนยัน\n\nลงทะเบียน Callback URL: https://buu-get-dev.buu.ac.th/api/sandbox/callback',
+      'รับ redirect จากแอป ThaiD [Sandbox] หลัง Entity ยืนยันการให้ข้อมูล แล้วแลก code เป็นผลยืนยัน\n\nลงทะเบียน Callback URL: https://buu-get-test.buu.ac.th/api/sandbox/callback',
   })
   sandboxCallback(@Req() req: Request): Promise<IdentityCallbackRedirect> {
     return this.redirectCallback(req, 'sandbox');
