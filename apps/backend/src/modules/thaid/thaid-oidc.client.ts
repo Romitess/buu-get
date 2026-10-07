@@ -14,7 +14,13 @@ import {
 interface JwksCache {
   issuer: string;
   keys: ThaidJwk[];
+  userinfoEndpoint?: string;
   fetchedAt: number;
+}
+
+export interface ThaidTokenSet {
+  idToken: string;
+  accessToken?: string;
 }
 
 const JWKS_TTL_MS = 10 * 60 * 1000;
@@ -68,7 +74,7 @@ export class ThaidOidcClient {
     return `${config.issuer}/api/v2/oauth2/auth/?${params.toString()}`;
   }
 
-  async exchangeCode(code: string): Promise<string> {
+  async exchangeCode(code: string): Promise<ThaidTokenSet> {
     const config = this.requireConfig();
     const body = new URLSearchParams({
       grant_type: 'authorization_code',
@@ -96,7 +102,8 @@ export class ThaidOidcClient {
         );
         throw new ThaidTokenError('id_token missing');
       }
-      return idToken;
+      const accessToken = readAccessToken(response.data);
+      return accessToken ? { idToken, accessToken } : { idToken };
     } catch (error) {
       if (error instanceof ThaidTokenError) {
         throw error;
@@ -110,6 +117,38 @@ export class ThaidOidcClient {
         }),
       );
       throw new ThaidTokenError('token exchange');
+    }
+  }
+
+  /** ที่อยู่ตามทะเบียนบ้านมักอยู่ใน userinfo ไม่ใช่ใน id_token */
+  async fetchUserInfo(
+    accessToken: string,
+  ): Promise<Record<string, unknown> | undefined> {
+    const config = this.requireConfig();
+    await this.loadJwks(config.issuer);
+    const endpoint =
+      this.jwksCache?.userinfoEndpoint ??
+      `${config.issuer}/api/v2/oauth2/userinfo/`;
+    try {
+      const response = await axios.get<unknown>(endpoint, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        timeout: 15000,
+      });
+      if (
+        response.data === null ||
+        typeof response.data !== 'object' ||
+        Array.isArray(response.data)
+      ) {
+        this.logger.warn('userinfo response is not an object');
+        return undefined;
+      }
+      return response.data as Record<string, unknown>;
+    } catch (error) {
+      const status = axios.isAxiosError(error)
+        ? (error.response?.status ?? 'none')
+        : 'none';
+      this.logger.warn(`userinfo request failed status=${status}`);
+      return undefined;
     }
   }
 
@@ -136,15 +175,39 @@ export class ThaidOidcClient {
       `${issuer}/.well-known/openid-configuration`,
       { timeout: 15000 },
     );
+    const userinfoEndpoint = readEndpoint(wellKnown.data, 'userinfo_endpoint');
     const jwksUri = readJwksUri(wellKnown.data);
     if (!jwksUri) {
       throw new ThaidTokenError('jwks_uri');
     }
     const jwks = await axios.get<unknown>(jwksUri, { timeout: 15000 });
     const keys = readJwksKeys(jwks.data);
-    this.jwksCache = { issuer, keys, fetchedAt: Date.now() };
+    this.jwksCache = {
+      issuer,
+      keys,
+      ...(userinfoEndpoint ? { userinfoEndpoint } : {}),
+      fetchedAt: Date.now(),
+    };
     return keys;
   }
+}
+
+function readAccessToken(data: unknown): string | undefined {
+  if (data === null || typeof data !== 'object' || Array.isArray(data)) {
+    return undefined;
+  }
+  const accessToken = (data as Record<string, unknown>).access_token;
+  return typeof accessToken === 'string' && accessToken.length > 0
+    ? accessToken
+    : undefined;
+}
+
+function readEndpoint(data: unknown, key: string): string | undefined {
+  if (data === null || typeof data !== 'object' || Array.isArray(data)) {
+    return undefined;
+  }
+  const value = (data as Record<string, unknown>)[key];
+  return typeof value === 'string' && value.length > 0 ? value : undefined;
 }
 
 function readIdToken(data: unknown): string | undefined {

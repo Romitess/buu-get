@@ -126,6 +126,13 @@ export function mapThaidProfile(
 export function readThaidAddressText(
   payload: Record<string, unknown>,
 ): string | undefined {
+  const directAddress = payload.address;
+  if (typeof directAddress === 'string') {
+    const trimmed = directAddress.trim();
+    if (trimmed !== '' && !trimmed.startsWith('{')) {
+      return trimmed;
+    }
+  }
   const house = readHouseAddress(payload);
   if (!house) {
     return undefined;

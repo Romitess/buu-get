@@ -98,6 +98,12 @@ describe('readThaidAddressText', () => {
     ).toBe(text);
   });
 
+  it('uses a plain address string when it is not json', () => {
+    expect(readThaidAddressText({ address: '99/12 ถนนสุขุมวิท แขวงคลองเตย' })).toBe(
+      '99/12 ถนนสุขุมวิท แขวงคลองเตย',
+    );
+  });
+
   it('falls back to formatted when raw is empty', () => {
     expect(
       readThaidAddressText({

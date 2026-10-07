@@ -10,6 +10,7 @@ import { ThaidIntent } from './entities/thaid-auth-state.entity';
 import { ThaidHandoffService } from './thaid-handoff.service';
 import { ThaidIdTokenClaims } from './thaid-jwt';
 import { ThaidOidcClient } from './thaid-oidc.client';
+import { readThaidAddressText } from './thaid-profile-map';
 import { readQueryParam } from './thaid.utils';
 import { ThaidAccountService } from './thaid-account.service';
 
@@ -48,8 +49,15 @@ export class ThaidIdentityProvider implements IdentityProvider {
       throw new BadRequestException('invalid state');
     }
 
-    const idToken = await this.oidc.exchangeCode(code);
-    const claims = await this.oidc.verifyIdToken(idToken);
+    const tokens = await this.oidc.exchangeCode(code);
+    const claims = await this.oidc.verifyIdToken(tokens.idToken);
+    if (!claims.address && tokens.accessToken) {
+      const userinfo = await this.oidc.fetchUserInfo(tokens.accessToken);
+      const address = userinfo ? readThaidAddressText(userinfo) : undefined;
+      if (address) {
+        claims.address = address;
+      }
+    }
     return {
       subject: claims.pid,
       claims: {
@@ -84,6 +92,7 @@ export function readThaidClaims(claims: Record<string, unknown>): {
       birthdate: optionalString(claims.birthdate),
       title: optionalString(claims.title),
       titleEn: optionalString(claims.titleEn),
+      address: optionalString(claims.address),
     },
   };
 }
