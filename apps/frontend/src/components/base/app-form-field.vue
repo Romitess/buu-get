@@ -27,7 +27,7 @@
       <q-input
         :model-value="modelValue ?? null"
         @update:model-value="(val) => $emit('update:modelValue', val)"
-        :type="type === 'date' ? 'text' : type"
+        :type="inputType"
         :placeholder="placeholder"
         outlined
         dense
@@ -45,12 +45,20 @@
             <slot name="append-inner"></slot>
           </q-icon>
         </template>
+        <template v-else-if="type === 'password'" v-slot:append>
+          <q-icon
+            :name="passwordVisible ? 'visibility_off' : 'visibility'"
+            class="cursor-pointer password-visibility-icon"
+            @click.stop="passwordVisible = !passwordVisible"
+          />
+        </template>
       </q-input>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from 'vue';
 import AppSelect from './app-select.vue';
 
 defineOptions({
@@ -78,7 +86,7 @@ interface Props {
   reserveBottomSpace?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   type: 'text',
   readonly: false,
   required: false,
@@ -86,4 +94,22 @@ withDefaults(defineProps<Props>(), {
 });
 
 defineEmits(['update:modelValue']);
+
+const passwordVisible = ref(false);
+const inputType = computed(() => {
+  if (props.type === 'password') {
+    return passwordVisible.value ? 'text' : 'password';
+  }
+  if (props.type === 'date' || props.type === 'select') {
+    return 'text';
+  }
+  return props.type;
+});
 </script>
+
+<style scoped lang="scss">
+.password-visibility-icon {
+  color: var(--neutral-400);
+  font-size: 18px;
+}
+</style>
