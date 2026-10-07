@@ -172,6 +172,7 @@ import type { RegisterCredentials } from 'src/types/register';
 import { useFocusFirstInvalidField } from 'src/composables/use-focus-first-invalid-field';
 import { useAuthStore } from 'src/stores/auth.store';
 import { startThaid } from 'src/services/thaid.service';
+import { evaluatePasswordPolicy } from 'src/utils/password-policy';
 import OtpVerificationDialog from 'src/components/register/otp-verification-dialog.vue';
 
 const emit = defineEmits<{
@@ -202,24 +203,15 @@ interface PasswordRequirement {
   isMet: boolean;
 }
 
-const passwordRequirements = computed<PasswordRequirement[]>(() => [
-  {
-    label: t('profile.passwordRequirementMinLength'),
-    isMet: password.value.length >= 8,
-  },
-  {
-    label: t('profile.passwordRequirementUppercase'),
-    isMet: /[A-Z]/u.test(password.value),
-  },
-  {
-    label: t('profile.passwordRequirementDigit'),
-    isMet: /\d/u.test(password.value),
-  },
-  {
-    label: t('profile.passwordRequirementSpecial'),
-    isMet: /[!@#]/u.test(password.value),
-  },
-]);
+const passwordRequirements = computed<PasswordRequirement[]>(() => {
+  const state = evaluatePasswordPolicy(password.value);
+  return [
+    { label: t('profile.passwordRequirementMinLength'), isMet: state.minLength },
+    { label: t('profile.passwordRequirementUppercase'), isMet: state.uppercase },
+    { label: t('profile.passwordRequirementDigit'), isMet: state.digit },
+    { label: t('profile.passwordRequirementSpecial'), isMet: state.special },
+  ];
+});
 
 const validatePassword = (): true | string => {
   if (!password.value) {

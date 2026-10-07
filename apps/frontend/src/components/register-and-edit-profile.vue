@@ -56,6 +56,20 @@
               reserve-bottom-space
               @update:model-value="onThaidPassword"
             />
+            <div class="password-requirements" aria-live="polite">
+              <div
+                v-for="requirement in passwordRequirements"
+                :key="requirement.label"
+                class="password-requirement"
+                :class="{ 'password-requirement--met': requirement.isMet }"
+              >
+                <q-icon
+                  :name="requirement.isMet ? 'check_circle' : 'circle'"
+                  :size="requirement.isMet ? '11px' : '7px'"
+                />
+                <span>{{ requirement.label }}</span>
+              </div>
+            </div>
             <AppFormField
               :model-value="formData.confirmPassword ?? ''"
               type="password"
@@ -157,6 +171,7 @@ import ContactFields from 'src/components/register/contact-fields.vue';
 import AppFormField from 'src/components/base/app-form-field.vue';
 import OtpVerificationDialog from 'src/components/register/otp-verification-dialog.vue';
 import type { ThaidPrefillSession } from 'src/services/thaid.service';
+import { evaluatePasswordPolicy, isPasswordPolicyMet } from 'src/utils/password-policy';
 
 interface Props {
   initialEditMode: boolean;
@@ -213,8 +228,22 @@ const { formData, dialog, initFormData, handleTitleTHChange, submitForm, onDialo
     emit('save', payload);
   });
 
-const passwordRule = (val: string | number | null | undefined): true | string =>
-  (typeof val === 'string' && val.length >= 8) || t('auth.thaidCallback.passwordRequired');
+const passwordRequirements = computed(() => {
+  const state = evaluatePasswordPolicy(formData.value.password ?? '');
+  return [
+    { label: t('profile.passwordRequirementMinLength'), isMet: state.minLength },
+    { label: t('profile.passwordRequirementUppercase'), isMet: state.uppercase },
+    { label: t('profile.passwordRequirementDigit'), isMet: state.digit },
+    { label: t('profile.passwordRequirementSpecial'), isMet: state.special },
+  ];
+});
+
+const passwordRule = (val: string | number | null | undefined): true | string => {
+  if (typeof val !== 'string' || val.length === 0) {
+    return t('profile.requiredPassword');
+  }
+  return isPasswordPolicyMet(val) || t('profile.passwordRequirementError');
+};
 
 const requiredRule = (val: string | number | null | undefined): true | string =>
   !!val || t('profile.required');
@@ -430,6 +459,29 @@ onMounted(() => {
 .profile-dialog-card {
   min-width: 235px;
   font-family: var(--font-family-base);
+}
+
+.password-requirements {
+  display: grid;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.password-requirement {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--neutral-400);
+  font-size: 0.84rem;
+  line-height: 1.15;
+
+  .q-icon {
+    flex: 0 0 auto;
+  }
+}
+
+.password-requirement--met {
+  color: #21ba45;
 }
 
 @media (max-width: 900px) {
