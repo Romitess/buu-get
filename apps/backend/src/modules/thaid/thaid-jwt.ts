@@ -4,6 +4,7 @@ import {
   type JsonWebKey,
   type KeyObject,
 } from 'crypto';
+import { readThaidAddressText } from './thaid-profile-map';
 
 export interface ThaidIdTokenClaims {
   pid: string;
@@ -13,6 +14,8 @@ export interface ThaidIdTokenClaims {
   birthdate?: string;
   title?: string;
   titleEn?: string;
+  /** ที่อยู่ตามทะเบียนบ้านที่ประกอบจาก house_address.raw แล้ว */
+  address?: string;
 }
 
 export interface ThaidJwk {
@@ -130,6 +133,7 @@ export function verifyThaidIdToken(
     birthdate: readString(payload, 'birthdate'),
     title: readString(payload, 'title'),
     titleEn: readString(payload, 'title_en'),
+    address: readThaidAddressText(payload),
   };
 }
 

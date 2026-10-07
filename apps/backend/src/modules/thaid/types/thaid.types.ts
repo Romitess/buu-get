@@ -42,6 +42,7 @@ export interface ThaidSessionPrefillResponse {
     fullName: string;
     englishName: string;
     birthdate: string;
+    address: string;
   };
 }
 

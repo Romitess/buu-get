@@ -1,4 +1,4 @@
-import { resolveThaidConfig } from './thaid-config';
+import { DEFAULT_THAID_SCOPE, resolveThaidConfig } from './thaid-config';
 
 describe('resolveThaidConfig', () => {
   it('defaults to the sandbox host and callback', () => {
@@ -13,7 +13,16 @@ describe('resolveThaidConfig', () => {
       'https://buu-get-dev.buu.ac.th/api/sandbox/callback',
     );
     expect(config.verifyType).toBe('pin');
-    expect(config.scope).toContain('openid');
+    expect(config.scope).toBe(DEFAULT_THAID_SCOPE);
+    expect(config.scope).toContain('address');
+  });
+
+  it('keeps the fixed scope when an old THAID_SCOPE value is still present', () => {
+    const config = resolveThaidConfig({
+      THAID_SCOPE: 'openid pid name',
+    } as Parameters<typeof resolveThaidConfig>[0]);
+
+    expect(config.scope).toBe(DEFAULT_THAID_SCOPE);
   });
 
   it('uses the production host and callback when THAID_ENV=production', () => {

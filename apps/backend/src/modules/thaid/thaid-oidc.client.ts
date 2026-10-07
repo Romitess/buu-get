@@ -41,7 +41,6 @@ export class ThaidOidcClient {
       THAID_REDIRECT_URI: this.configService.get('THAID_REDIRECT_URI', {
         infer: true,
       }),
-      THAID_SCOPE: this.configService.get('THAID_SCOPE', { infer: true }),
       THAID_VERIFY_TYPE: this.configService.get('THAID_VERIFY_TYPE', {
         infer: true,
       }),

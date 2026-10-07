@@ -70,7 +70,31 @@ describe('verifyThaidIdToken', () => {
       birthdate: '1990-01-02',
       title: 'นาย',
       titleEn: 'Mr.',
+      address: undefined,
     });
+  });
+
+  it('turns house_address.raw into address text', () => {
+    const token = signToken(
+      {
+        ...validPayload,
+        name: 'นาย ภัทรพล สุดประเสริฐ',
+        house_address: {
+          id: '12345678901',
+          formatted: 'ไม่ใช้ค่านี้',
+          raw: '99/12#5###สุขุมวิท#คลองเตย#คลองเตย#กรุงเทพมหานคร',
+        },
+      },
+      privateKey,
+    );
+
+    expect(
+      verifyThaidIdToken(token, keys, {
+        issuer: 'https://imauthsbx.bora.dopa.go.th',
+        clientId: 'client-id',
+        nowSeconds: now,
+      }).address,
+    ).toBe('99/12 หมู่ที่ 5 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพมหานคร');
   });
 
   it('rejects a token signed by another key', () => {

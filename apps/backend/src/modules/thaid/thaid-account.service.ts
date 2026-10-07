@@ -12,6 +12,7 @@ import {
   ThaidSessionTicketPayload,
 } from './thaid-handoff.service';
 import { parseThaidBirthdate, ThaidIdTokenClaims } from './thaid-jwt';
+import { mapThaidProfile } from './thaid-profile-map';
 
 @Injectable()
 export class ThaidAccountService {
@@ -48,17 +49,19 @@ export class ThaidAccountService {
     const registrationToken = await this.handoff.createRegisterProof(
       claims.pid,
     );
+    const mapped = mapThaidProfile(claims);
     return {
       outcome: 'prefill',
       notice: intent === 'login' ? 'no_account' : 'continue_register',
       registrationToken,
       prefill: {
         nationalId: claims.pid,
-        titleTH: claims.title ?? '',
-        titleEN: claims.titleEn ?? '',
-        fullName: claims.name ?? '',
-        englishName: claims.nameEn ?? '',
-        birthdate: claims.birthdate ?? '',
+        titleTH: mapped.titleTH,
+        titleEN: mapped.titleEN,
+        fullName: mapped.fullName,
+        englishName: mapped.englishName,
+        birthdate: mapped.birthdate,
+        address: mapped.address,
       },
     };
   }
@@ -88,23 +91,27 @@ export class ThaidAccountService {
 
   /** เติมเฉพาะช่องว่าง และตั้ง userThaidSynced โดยไม่เขียนทับค่าที่มีอยู่ */
   fillEmptyProfile(profile: UserProfile, claims: ThaidIdTokenClaims): void {
-    if (isBlank(profile.userTitleTh) && claims.title) {
-      profile.userTitleTh = claims.title;
+    const mapped = mapThaidProfile(claims);
+    if (isBlank(profile.userTitleTh) && mapped.titleTH) {
+      profile.userTitleTh = mapped.titleTH;
     }
-    if (isBlank(profile.userTitleEn) && claims.titleEn) {
-      profile.userTitleEn = claims.titleEn;
+    if (isBlank(profile.userTitleEn) && mapped.titleEN) {
+      profile.userTitleEn = mapped.titleEN;
     }
-    if (isBlank(profile.userFullnameTh) && claims.name) {
-      profile.userFullnameTh = claims.name;
+    if (isBlank(profile.userFullnameTh) && mapped.fullName) {
+      profile.userFullnameTh = mapped.fullName;
     }
-    if (isBlank(profile.userFullnameEn) && claims.nameEn) {
-      profile.userFullnameEn = claims.nameEn;
+    if (isBlank(profile.userFullnameEn) && mapped.englishName) {
+      profile.userFullnameEn = mapped.englishName;
     }
     if (profile.userDateOfBirth == null) {
-      const birthdate = parseThaidBirthdate(claims.birthdate);
+      const birthdate = parseThaidBirthdate(mapped.birthdate);
       if (birthdate) {
         profile.userDateOfBirth = birthdate;
       }
+    }
+    if (isBlank(profile.userAddress) && mapped.address) {
+      profile.userAddress = mapped.address;
     }
     profile.userThaidSynced = true;
   }

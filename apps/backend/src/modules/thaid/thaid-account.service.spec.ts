@@ -92,9 +92,61 @@ describe('ThaidAccountService', () => {
         fullName: 'ชื่อใหม่',
         englishName: 'New Name',
         birthdate: '2001-02-03',
+        address: '',
       },
     });
     expect(profiles.save).not.toHaveBeenCalled();
+  });
+
+  it('strips the title and prefills the house address as text', async () => {
+    users.findOne.mockResolvedValue(null);
+
+    const result = await service.resolve('register', {
+      ...claims,
+      name: 'นาย ภัทรพล สุดประเสริฐ',
+      nameEn: 'Mr. Pattarapon Sudprasert',
+      address: '99/12 หมู่ที่ 5 แขวงคลองเตย เขตคลองเตย กรุงเทพมหานคร',
+    });
+
+    expect(result).toMatchObject({
+      outcome: 'prefill',
+      prefill: {
+        titleTH: 'นาย',
+        titleEN: 'Mr.',
+        fullName: 'ภัทรพล สุดประเสริฐ',
+        englishName: 'Pattarapon Sudprasert',
+        address: '99/12 หมู่ที่ 5 แขวงคลองเตย เขตคลองเตย กรุงเทพมหานคร',
+      },
+    });
+  });
+
+  it('fills a blank address and does not overwrite an existing one', async () => {
+    const profile = {
+      userTitleTh: 'นาย',
+      userTitleEn: 'Mr.',
+      userFullnameTh: 'ชื่อเดิม',
+      userFullnameEn: 'Kept Name',
+      userDateOfBirth: new Date('1990-05-05T00:00:00.000Z'),
+      userAddress: null,
+      userThaidSynced: false,
+    } as UserProfile;
+    users.findOne.mockResolvedValue({
+      USER_ID: 9,
+      USER_EMAIL: 'student@example.com',
+      ROLES_ID: [{ ROLE_NAME: 'candidate' }],
+      PROFILE: profile,
+    });
+
+    await service.resolve('login', {
+      ...claims,
+      address:
+        '10 หมู่ที่ 2 ถนนมิตรภาพ ตำบลแสนสุข อำเภอเมืองชลบุรี จังหวัดชลบุรี',
+    });
+
+    expect(profile.userFullnameTh).toBe('ชื่อเดิม');
+    expect(profile.userAddress).toBe(
+      '10 หมู่ที่ 2 ถนนมิตรภาพ ตำบลแสนสุข อำเภอเมืองชลบุรี จังหวัดชลบุรี',
+    );
   });
 
   it('issues the same login shape as email login', async () => {

@@ -8,7 +8,7 @@ export const THAID_SANDBOX_REDIRECT_URI =
 export const THAID_PRODUCTION_REDIRECT_URI =
   'https://buu-get.buu.ac.th/api/thaid/callback';
 export const DEFAULT_THAID_SCOPE =
-  'openid pid name name_en birthdate title title_en';
+  'openid pid name name_en birthdate title title_en address';
 
 export interface ThaidRuntimeConfig {
   env: ThaidEnvName;
@@ -26,7 +26,6 @@ export interface ThaidEnvInput {
   THAID_CLIENT_ID?: string;
   THAID_CLIENT_SECRET?: string;
   THAID_REDIRECT_URI?: string;
-  THAID_SCOPE?: string;
   THAID_VERIFY_TYPE?: string;
 }
 
@@ -57,7 +56,7 @@ export function resolveThaidConfig(input: ThaidEnvInput): ThaidRuntimeConfig {
     redirectUri: normalizeRedirectUri(
       input.THAID_REDIRECT_URI?.trim() || redirectDefault,
     ),
-    scope: input.THAID_SCOPE?.trim() || DEFAULT_THAID_SCOPE,
+    scope: DEFAULT_THAID_SCOPE,
     verifyType,
   };
 }

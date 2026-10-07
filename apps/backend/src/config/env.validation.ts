@@ -34,7 +34,6 @@ export interface EnvironmentVariables {
   THAID_CLIENT_SECRET?: string;
   /** override redirect URI ที่ลงทะเบียนไว้; ว่างแล้วใช้ callback ตาม THAID_ENV */
   THAID_REDIRECT_URI?: string;
-  THAID_SCOPE?: string;
   THAID_VERIFY_TYPE?: 'pin' | 'face' | 'pin_face';
   /** default JSON/urlencoded body limit (e.g. 1mb) */
   BODY_LIMIT?: string;
@@ -106,9 +105,6 @@ const envSchema = Joi.object<EnvironmentVariables>({
   THAID_REDIRECT_URI: Joi.string()
     .uri({ scheme: ['https'] })
     .optional(),
-  THAID_SCOPE: Joi.string().default(
-    'openid pid name name_en birthdate title title_en',
-  ),
   THAID_VERIFY_TYPE: Joi.string()
     .valid('pin', 'face', 'pin_face')
     .default('pin'),

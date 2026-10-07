@@ -9,6 +9,7 @@ export interface ThaidPrefillFields {
   fullName: string;
   englishName: string;
   birthdate: string;
+  address?: string;
 }
 
 export interface ThaidLoginSession {

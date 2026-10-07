@@ -22,6 +22,7 @@ export interface ThaidPrefillPayload {
   fullName: string;
   englishName: string;
   birthdate: string;
+  address: string;
 }
 
 export interface ThaidLoginTicketPayload {

@@ -337,6 +337,9 @@ onMounted(() => {
     formData.value.fullName = prefill.fullName;
     formData.value.englishName = prefill.englishName;
     formData.value.birthdate = prefill.birthdate;
+    if (prefill.address) {
+      formData.value.address = prefill.address;
+    }
     formData.value.country = 'TH';
   }
 });
