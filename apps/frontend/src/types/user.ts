@@ -30,6 +30,7 @@ export interface User {
   institution?: string;
   taxId: string;
   thaidSynced: boolean;
+  registeredViaThaid?: boolean;
   userImagePath?: string;
 
   // ROLES

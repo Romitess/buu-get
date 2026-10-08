@@ -158,6 +158,62 @@ describe('ThaidAccountService', () => {
     );
   });
 
+  it('overwrites identity fields when the scanned pid matches the registered account', async () => {
+    const profile = {
+      userRegisteredViaThaid: true,
+      userTitleTh: 'นาง',
+      userTitleEn: 'Mrs.',
+      userFullnameTh: 'ชื่อเดิม',
+      userFullnameEn: 'Old Name',
+      userDateOfBirth: new Date('1990-01-01T00:00:00.000Z'),
+      userAddress: 'ที่อยู่เดิม',
+      userPhone: '0811111111',
+      userEducation: 'ปริญญาตรี',
+      userThaidSynced: false,
+    } as UserProfile;
+    users.findOne.mockResolvedValue({
+      USER_ID: 9,
+      USER_NATIONAL_ID: '1234567890123',
+      USER_EMAIL: 'student@example.com',
+      PROFILE: profile,
+    });
+
+    await expect(
+      service.applyRegisteredProfileUpdate(9, {
+        ...claims,
+        address: '99/12 แขวงคลองเตย เขตคลองเตย กรุงเทพมหานคร',
+      }),
+    ).resolves.toBe('updated');
+
+    expect(profile.userTitleTh).toBe('นาย');
+    expect(profile.userFullnameTh).toBe('ชื่อใหม่');
+    expect(profile.userFullnameEn).toBe('New Name');
+    expect(profile.userAddress).toBe(
+      '99/12 แขวงคลองเตย เขตคลองเตย กรุงเทพมหานคร',
+    );
+    expect(profile.userPhone).toBe('0811111111');
+    expect(profile.userEducation).toBe('ปริญญาตรี');
+    expect(profiles.save).toHaveBeenCalledWith(profile);
+  });
+
+  it('keeps the profile when the scanned pid belongs to another card', async () => {
+    const profile = {
+      userRegisteredViaThaid: true,
+      userFullnameTh: 'ชื่อเดิม',
+    } as UserProfile;
+    users.findOne.mockResolvedValue({
+      USER_ID: 9,
+      USER_NATIONAL_ID: '9999999999999',
+      PROFILE: profile,
+    });
+
+    await expect(
+      service.applyRegisteredProfileUpdate(9, claims),
+    ).resolves.toBe('mismatch');
+    expect(profile.userFullnameTh).toBe('ชื่อเดิม');
+    expect(profiles.save).not.toHaveBeenCalled();
+  });
+
   it('issues the same login shape as email login', async () => {
     users.findOne.mockResolvedValue({
       USER_ID: 9,

@@ -86,7 +86,10 @@ describe('ThaidHandoffService', () => {
   it('accepts a state once and rejects reuse', async () => {
     const state = await service.createState('login');
 
-    await expect(service.consumeState(state)).resolves.toBe('login');
+    await expect(service.consumeState(state)).resolves.toEqual({
+      intent: 'login',
+      userId: null,
+    });
     await expect(service.consumeState(state)).resolves.toBeNull();
   });
 

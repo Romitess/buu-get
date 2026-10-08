@@ -1,16 +1,24 @@
 import {
   All,
+  BadRequestException,
   Body,
   Controller,
   Get,
   Post,
   Redirect,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import type { AuthenticatedUser } from 'src/common/utils/authz.util';
 import { Public } from 'src/decorators/public.decorator';
+import {
+  ThaidMockCompleteDto,
+  ThaidMockStartDto,
+} from './dto/thaid-mock.dto';
 import { ThaidSessionDto } from './dto/thaid-session.dto';
 import { ThaidService } from './thaid.service';
 import {
@@ -48,6 +56,80 @@ export class ThaidIdentityController {
   })
   beginRegister(): Promise<IdentityCallbackRedirect> {
     return this.thaidService.beginIdentity('register');
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('thaid/update')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'เริ่มอัปเดตข้อมูลส่วนตัวด้วย ThaID',
+    description:
+      'สำหรับบัญชีที่สมัครผ่าน ThaiD เก็บ userId คู่กับ state แล้วคืน URL สแกน QR ของกรมการปกครอง',
+  })
+  beginUpdate(@Req() req: Request): Promise<{ url: string }> {
+    const userId = this.requireUserId(req);
+    return this.thaidService.beginProfileUpdate(userId);
+  }
+
+  @Public()
+  @Post('thaid/mock/start')
+  @ApiOperation({
+    summary: 'เริ่มจำลอง ThaiD บนเครื่องที่ไม่ได้เชื่อมกรมการปกครอง',
+  })
+  beginMock(@Body() dto: ThaidMockStartDto): Promise<{ state: string }> {
+    return this.thaidService.beginMock(dto.intent);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('thaid/mock/update')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'เริ่มจำลองการอัปเดตโปรไฟล์ด้วย ThaiD',
+  })
+  beginMockUpdate(@Req() req: Request): Promise<{ state: string }> {
+    return this.thaidService.beginMockUpdate(this.requireUserId(req));
+  }
+
+  @Public()
+  @Post('thaid/mock/fire')
+  @ApiOperation({
+    summary: 'จำลองว่าสแกน QR ของ ThaiD แล้ว และคืนข้อมูล mock',
+  })
+  fireMock(
+    @Body() dto: ThaidMockStartDto,
+  ): Promise<{ ticket: string } | { status: 'mismatch' | 'error' }> {
+    return this.thaidService.fireMock(dto.intent);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('thaid/mock/fire-update')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'จำลองการอัปเดตโปรไฟล์ด้วยข้อมูล mock จาก ThaiD',
+  })
+  fireMockUpdate(
+    @Req() req: Request,
+  ): Promise<{ ticket: string } | { status: 'mismatch' | 'error' }> {
+    return this.thaidService.fireMockUpdate(this.requireUserId(req));
+  }
+
+  @Public()
+  @Post('thaid/mock/complete')
+  @ApiOperation({
+    summary: 'จำลองว่าสแกน QR ของ ThaiD แล้ว',
+  })
+  completeMock(
+    @Body() dto: ThaidMockCompleteDto,
+  ): Promise<{ ticket: string } | { status: 'mismatch' | 'error' }> {
+    return this.thaidService.completeMock(dto.state);
+  }
+
+  private requireUserId(req: Request): number {
+    const user = req.user as AuthenticatedUser | undefined;
+    if (!user || user.actorType !== 'user' || user.userId == null) {
+      throw new BadRequestException('บัญชีนี้ไม่สามารถอัปเดตด้วย ThaiD ได้');
+    }
+    return user.userId;
   }
 
   @Public()

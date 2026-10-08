@@ -281,6 +281,28 @@ export const useUserStore = defineStore('user', () => {
    * โหลด profile เต็มแบบ background หลัง login ขั้นต่ำ
    * no-op ถ้ามี fullNameTH / nationalId แล้ว — ไม่ผูกกับปุ่ม loading
    */
+  async function refreshProfile(): Promise<void> {
+    const token = accessToken.value || localStorage.getItem('access_token');
+    if (!token) return;
+
+    const profile = await userService.getProfile(token);
+    if (!profile) return;
+
+    const roles = buildRoles(profile.role, profile.roles);
+    const nextActorType = profile.actorType ?? currentUser.value?.actorType;
+    const nextPsnId = profile.psnId ?? currentUser.value?.psnId;
+    currentUser.value = {
+      ...profile,
+      role: roles[0] ?? ROLES.CANDIDATE,
+      roles,
+      ...(nextActorType !== undefined ? { actorType: nextActorType } : {}),
+      ...(nextPsnId !== undefined ? { psnId: nextPsnId } : {}),
+    };
+    isLoggedIn.value = true;
+    accessToken.value = token;
+    applyDefaultActiveRole();
+  }
+
   async function ensureProfileLoaded(): Promise<void> {
     if (!isLoggedIn.value) return;
     const token = accessToken.value || localStorage.getItem('access_token');
@@ -354,6 +376,7 @@ export const useUserStore = defineStore('user', () => {
     login,
     loginBuu,
     hydrateFromLogin,
+    refreshProfile,
     ensureProfileLoaded,
     patchCurrentUser,
     setActiveRole,

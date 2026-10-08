@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -9,6 +13,7 @@ import { User } from '../users/entities/user.entity';
 import { ThaidIntent } from './entities/thaid-auth-state.entity';
 import {
   ThaidHandoffService,
+  ThaidPrefillPayload,
   ThaidSessionTicketPayload,
 } from './thaid-handoff.service';
 import { parseThaidBirthdate, ThaidIdTokenClaims } from './thaid-jwt';
@@ -48,9 +53,15 @@ export class ThaidAccountService {
       };
     }
 
-    const registrationToken = await this.handoff.createRegisterProof(
-      claims.pid,
-    );
+    const registrationToken = await this.handoff.createRegisterProof({
+      pid: claims.pid,
+      titleTH: received.titleTH,
+      titleEN: received.titleEN,
+      fullName: received.fullName,
+      englishName: received.englishName,
+      birthdate: received.birthdate,
+      address: received.address,
+    });
     return {
       outcome: 'prefill',
       notice: intent === 'login' ? 'no_account' : 'continue_register',
@@ -68,6 +79,67 @@ export class ThaidAccountService {
       throw new NotFoundException('ไม่พบบัญชีจากผลการยืนยัน ThaID');
     }
     return this.toLoginResponse(user);
+  }
+
+  async assertRegisteredViaThaid(userId: number): Promise<void> {
+    const user = await this.users.findOne({
+      where: { USER_ID: userId },
+      relations: { PROFILE: true },
+    });
+    if (!user?.PROFILE?.userRegisteredViaThaid) {
+      throw new BadRequestException('บัญชีนี้ไม่ได้สมัครผ่าน ThaiD');
+    }
+  }
+
+  /**
+   * เขียนทับช่องตัวตนและที่อยู่ของบัญชีที่สมัครจาก ThaiD
+   * เมื่อเลขบัตรตรงกับบัญชีนั้น ไม่แตะโทร การศึกษา รูป หรืออีเมล
+   */
+  async applyRegisteredProfileUpdate(
+    userId: number,
+    claims: ThaidIdTokenClaims,
+  ): Promise<'updated' | 'mismatch'> {
+    const user = await this.users.findOne({
+      where: { USER_ID: userId },
+      relations: { PROFILE: true },
+    });
+    const profile = user?.PROFILE;
+    if (
+      !user ||
+      !profile?.userRegisteredViaThaid ||
+      !user.USER_NATIONAL_ID ||
+      user.USER_NATIONAL_ID !== claims.pid
+    ) {
+      return 'mismatch';
+    }
+
+    const mapped = mapThaidProfile(claims);
+    assignIfPresent(mapped.titleTH, (value) => {
+      profile.userTitleTh = value;
+    });
+    assignIfPresent(mapped.titleEN, (value) => {
+      profile.userTitleEn = value;
+    });
+    assignIfPresent(mapped.fullName, (value) => {
+      profile.userFullnameTh = value;
+    });
+    assignIfPresent(mapped.englishName, (value) => {
+      profile.userFullnameEn = value;
+    });
+    const birthdate = parseThaidBirthdate(mapped.birthdate);
+    if (birthdate) {
+      profile.userDateOfBirth = birthdate;
+    }
+    assignIfPresent(mapped.address, (value) => {
+      profile.userAddress = value;
+    });
+    profile.userThaidSynced = true;
+    await this.profiles.save(profile);
+    return 'updated';
+  }
+
+  receivedProfile(claims: ThaidIdTokenClaims): ThaidPrefillPayload {
+    return toReceivedProfile(claims);
   }
 
   async linkToUser(userId: number, pid: string): Promise<void> {
@@ -137,6 +209,15 @@ export class ThaidAccountService {
 
 function isBlank(value: string | null | undefined): boolean {
   return value == null || value.trim() === '';
+}
+
+function assignIfPresent(
+  value: string,
+  assign: (value: string) => void,
+): void {
+  if (!isBlank(value)) {
+    assign(value);
+  }
 }
 
 function toReceivedProfile(claims: ThaidIdTokenClaims) {

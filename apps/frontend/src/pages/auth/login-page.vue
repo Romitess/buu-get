@@ -70,6 +70,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore, type RegisterPayload } from 'src/stores/auth.store';
+import { useUserStore } from 'src/stores/user.store';
 import LoginCard from 'src/components/auth/login-card.vue';
 import RegisterCard from 'src/components/register-card.vue';
 import type { RegisterCredentials } from 'src/types/register';
@@ -84,6 +85,7 @@ const router = useRouter();
 const { t } = useI18n();
 const $q = useQuasar();
 const authStore = useAuthStore();
+const userStore = useUserStore();
 const isSubmitting = ref(false);
 
 const isRegisterMode = computed(() => route.path.includes('register'));
@@ -132,6 +134,8 @@ const cardWrapperClasses = computed(() => ({
   'size-login': cardSize.value === 'login',
   'size-credentials': cardSize.value === 'credentials',
   'size-profile': cardSize.value === 'profile',
+  'is-thaid-register':
+    credentials.value.registrationMethod === 'thaid' && formKey.value === 'profile',
   animating: animating.value,
 }));
 
@@ -141,6 +145,12 @@ const cardWrapperStyle = computed(() => {
   }
   return {};
 });
+
+/** ฟอร์มสมัคร ThaiD มีแค่ไม่กี่ช่อง จึงใช้การ์ดขนาดเดียวกับหน้าเข้าสู่ระบบ */
+const registerCardSize = (step: 'credentials' | 'profile'): CardSize => {
+  if (step !== 'profile') return 'credentials';
+  return credentials.value.registrationMethod === 'thaid' ? 'login' : 'profile';
+};
 
 /** Capture the current card height and lock it so card doesn't collapse when content is removed */
 const lockHeight = (): void => {
@@ -159,7 +169,7 @@ const unlockHeight = (): void => {
 onMounted(() => {
   if (isRegisterMode.value) {
     panelPhase.value = 'center';
-    cardSize.value = currentStep.value === 'profile' ? 'profile' : 'credentials';
+    cardSize.value = registerCardSize(currentStep.value);
     formKey.value = currentStep.value === 'profile' ? 'profile' : 'credentials';
   } else {
     panelPhase.value = 'right';
@@ -241,7 +251,7 @@ const runStepAnimation = (newStep: 'credentials' | 'profile') => {
   showForm.value = false;
 
   setTimeout(() => {
-    cardSize.value = newStep === 'profile' ? 'profile' : 'credentials';
+    cardSize.value = registerCardSize(newStep);
     formKey.value = newStep === 'profile' ? 'profile' : 'credentials';
   }, 150);
 
@@ -257,7 +267,7 @@ const runStepAnimation = (newStep: 'credentials' | 'profile') => {
 
 watch(currentStep, (newStep) => {
   if (!isRegisterMode.value) {
-    cardSize.value = newStep === 'profile' ? 'profile' : 'credentials';
+    cardSize.value = registerCardSize(newStep);
     formKey.value = newStep === 'profile' ? 'profile' : 'credentials';
     return;
   }
@@ -323,28 +333,36 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
     passwordToUse = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
   }
 
-  const finalData: RegisterPayload = {
-    email: (formData.email || credentials.value.email).trim().toLowerCase(),
-    password: passwordToUse,
-    confirmPassword: passwordToUse,
-    userType: credentials.value.userType,
-    profileImage: formData.profileImage || undefined,
-    nationalId: formData.nationalId,
-    country: formData.country,
-    titleTH: formData.titleTH,
-    titleEN: formData.titleEN,
-    fullName: formData.fullName,
-    englishName: formData.englishName,
-    phone: formData.phone,
-    birthdate: formData.birthdate,
-    educationLevel: formData.educationLevel,
-    faculty: formData.faculty,
-    institution: formData.institution,
-    address: formData.address,
-    ...(thaidPrefill.value
-      ? { thaidRegistrationToken: thaidPrefill.value.registrationToken }
-      : {}),
-  };
+  const email = (formData.email || credentials.value.email).trim().toLowerCase();
+  const finalData: RegisterPayload = isThaidRegistration
+    ? {
+        email,
+        password: passwordToUse,
+        confirmPassword: passwordToUse,
+        userType: 'thai',
+        ...(thaidPrefill.value
+          ? { thaidRegistrationToken: thaidPrefill.value.registrationToken }
+          : {}),
+      }
+    : {
+        email,
+        password: passwordToUse,
+        confirmPassword: passwordToUse,
+        userType: credentials.value.userType,
+        profileImage: formData.profileImage || undefined,
+        nationalId: formData.nationalId,
+        country: formData.country,
+        titleTH: formData.titleTH,
+        titleEN: formData.titleEN,
+        fullName: formData.fullName,
+        englishName: formData.englishName,
+        phone: formData.phone,
+        birthdate: formData.birthdate,
+        educationLevel: formData.educationLevel,
+        faculty: formData.faculty,
+        institution: formData.institution,
+        address: formData.address,
+      };
 
   isSubmitting.value = true;
 
@@ -352,6 +370,29 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
     const response = await authStore.register(finalData);
 
     if (response.success) {
+      if (
+        isThaidRegistration &&
+        response.accessToken &&
+        response.user?.actorType &&
+        response.user.email &&
+        response.user.role
+      ) {
+        await userStore.hydrateFromLogin({
+          accessToken: response.accessToken,
+          user: {
+            id: response.user.id,
+            actorType: response.user.actorType,
+            email: response.user.email,
+            role: response.user.role,
+            roles: response.user.roles ?? [response.user.role],
+            remark: response.user.remark ?? null,
+          },
+        });
+        await userStore.ensureProfileLoaded();
+        isSubmitting.value = false;
+        await router.push({ name: 'user-profile' });
+        return;
+      }
       $q.notify({
         type: 'positive',
         message: t('auth.notify.registerSuccess', 'สมัครสมาชิกสำเร็จ! โปรดเข้าสู่ระบบ'),
@@ -483,6 +524,11 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
   width: clamp(340px, 90vw, 420px);
   max-width: 420px;
   padding: 24px clamp(24px, 3.5vw, 36px);
+}
+
+.card-wrapper.size-login.is-thaid-register {
+  max-height: 90dvh;
+  overflow-y: auto;
 }
 
 // Size: register credentials

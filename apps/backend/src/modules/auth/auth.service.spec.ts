@@ -715,7 +715,10 @@ describe('AuthService', () => {
       // Assert — nationality alone must not mark ThaiD synced
       expect(queryRunnerManager.create).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ userThaidSynced: false }),
+        expect.objectContaining({
+          userThaidSynced: false,
+          userRegisteredViaThaid: false,
+        }),
       );
 
       // Arrange & Act — foreigner
@@ -730,37 +733,67 @@ describe('AuthService', () => {
       // Assert
       expect(queryRunnerManager.create).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ userThaidSynced: false }),
+        expect.objectContaining({
+          userThaidSynced: false,
+          userRegisteredViaThaid: false,
+        }),
       );
     });
 
-    it('sets userThaidSynced when the ThaID proof matches the national id', async () => {
+    it('creates a ThaiD account from the server proof and returns a session', async () => {
       thaidHandoff.peekRegisterProof.mockResolvedValue({
-        pid: '1234567890123',
+        pid: '1103700123456',
+        titleTH: 'นาย',
+        titleEN: 'Mr.',
+        fullName: 'ภัทรพล สุดประเสริฐ',
+        englishName: 'Pattarapon Sudprasert',
+        birthdate: '2004-04-11',
+        address: '99/12 แขวงคลองเตย',
       });
       const dto = baseRegisterDto();
       dto.thaidRegistrationToken = 'proof-token';
+      dto.nationalId = '9999999999999';
+      dto.fullName = 'ชื่อจากเบราว์เซอร์';
+      dto.titleTH = 'นาง';
 
-      await service.register(dto);
+      const result = await service.register(dto);
 
       expect(queryRunnerManager.create).toHaveBeenCalledWith(
+        User,
+        expect.objectContaining({ USER_NATIONAL_ID: '1103700123456' }),
+      );
+      expect(queryRunnerManager.create).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ userThaidSynced: true }),
+        expect.objectContaining({
+          userTitleTh: 'นาย',
+          userFullnameTh: 'ภัทรพล สุดประเสริฐ',
+          userTitleEn: 'Mr.',
+          userFullnameEn: 'Pattarapon Sudprasert',
+          userAddress: '99/12 แขวงคลองเตย',
+          userThaidSynced: true,
+          userRegisteredViaThaid: true,
+        }),
       );
       expect(thaidHandoff.consumeRegisterProof).toHaveBeenCalledWith(
         'proof-token',
       );
+      expect(result.accessToken).toBe('signed-jwt-token');
+      expect(result.user).toEqual(
+        expect.objectContaining({
+          id: 42,
+          actorType: 'user',
+          email: dto.email.trim().toLowerCase(),
+        }),
+      );
     });
 
-    it('rejects a ThaID proof that does not match the national id', async () => {
-      thaidHandoff.peekRegisterProof.mockResolvedValue({
-        pid: '9999999999999',
-      });
+    it('rejects an expired ThaID registration proof', async () => {
+      thaidHandoff.peekRegisterProof.mockResolvedValue(null);
       const dto = baseRegisterDto();
       dto.thaidRegistrationToken = 'proof-token';
 
       await expect(service.register(dto)).rejects.toThrow(
-        'เลขบัตรประชาชนไม่ตรงกับข้อมูลจาก ThaID',
+        'ข้อมูลยืนยัน ThaID หมดอายุหรือไม่ถูกต้อง',
       );
       expect(queryRunner.connect).not.toHaveBeenCalled();
     });

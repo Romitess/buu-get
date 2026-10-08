@@ -3,13 +3,15 @@
  * แยกจาก callback ธนาคารที่ `/approval` และ `/payment`
  */
 
-export type IdentityAuthIntent = 'login' | 'register';
+export type IdentityAuthIntent = 'login' | 'register' | 'update';
 
 export interface IdentityAuthStartOptions {
   /** Optional return path after successful callback (relative app route). */
   returnTo?: string;
   /** เจตนาของปุ่มที่ผู้ใช้กด เก็บคู่กับ state */
   intent?: IdentityAuthIntent;
+  /** บัญชีที่จะอัปเดต เมื่อ intent เป็น update */
+  userId?: number;
 }
 
 export interface IdentityAuthStartResult {

@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-export type ThaidIntent = 'login' | 'register';
+export type ThaidIntent = 'login' | 'register' | 'update';
 
 @Entity({ name: 'BUU_GET_T_THAID_AUTH_STATE' })
 export class ThaidAuthState {
@@ -29,9 +29,17 @@ export class ThaidAuthState {
     name: 'INTENT',
     type: 'varchar',
     length: 16,
-    comment: 'เจตนาตอนกดปุ่ม login หรือ register',
+    comment: 'เจตนา login, register หรือ update',
   })
   intent: ThaidIntent;
+
+  @Column({
+    name: 'USER_ID',
+    type: 'int',
+    nullable: true,
+    comment: 'ผู้ใช้ที่กดอัปเดตข้อมูล ใช้เฉพาะ intent update',
+  })
+  userId: number | null;
 
   @Column({
     name: 'EXPIRES_AT',

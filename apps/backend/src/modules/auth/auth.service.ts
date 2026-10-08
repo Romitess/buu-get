@@ -26,7 +26,11 @@ import { MoodleSyncService } from '../moodle/moodle-sync.service';
 import { MsgPersonsService } from '../msg-persons/msg-persons.service';
 import { getOtpEmailTemplate } from './templates/otp-email.template';
 import { MemberSessionCodesService } from 'src/common/services/member-session-codes.service';
-import { ThaidHandoffService } from '../thaid/thaid-handoff.service';
+import { parseThaidBirthdate } from '../thaid/thaid-jwt';
+import {
+  ThaidHandoffService,
+  ThaidRegisterProof,
+} from '../thaid/thaid-handoff.service';
 import type { AuthenticatedUser } from 'src/common/utils/authz.util';
 import * as bcrypt from 'bcrypt';
 
@@ -47,6 +51,8 @@ export interface LoginResponse {
 export interface RegisterResponse {
   message: string;
   userId: number;
+  accessToken?: string;
+  user?: LoginResponse['user'];
 }
 
 @Injectable()
@@ -281,10 +287,10 @@ export class AuthService {
     await repo.save(repo.create({ USER_ID: userId, USER_IMAGE_URL: imageUrl }));
   }
 
-  /** ตรวจตั๋ว ThaID ก่อนเปิดทรานแซกชันสมัคร คืน token เมื่อเลขบัตรตรง */
+  /** ตรวจตั๋ว ThaID ก่อนเปิดทรานแซกชันสมัคร ตัวตนมาจากตั๋ว ไม่ใช้ค่าจากเบราว์เซอร์ */
   private async resolveThaidRegistrationProof(
     registerDto: RegisterDto,
-  ): Promise<string | null> {
+  ): Promise<{ token: string; proof: ThaidRegisterProof } | null> {
     const token = registerDto.thaidRegistrationToken?.trim();
     if (!token) {
       return null;
@@ -293,17 +299,26 @@ export class AuthService {
     if (!proof) {
       throw new BadRequestException('ข้อมูลยืนยัน ThaID หมดอายุหรือไม่ถูกต้อง');
     }
-    const nationalId = registerDto.nationalId?.trim();
-    if (registerDto.userType !== 'thai' || nationalId !== proof.pid) {
-      throw new BadRequestException('เลขบัตรประชาชนไม่ตรงกับข้อมูลจาก ThaID');
-    }
-    return token;
+    return { token, proof };
   }
 
   async register(registerDto: RegisterDto): Promise<RegisterResponse> {
     const email = registerDto.email.trim().toLowerCase();
-    const thaidProofToken =
+    const thaidRegistration =
       await this.resolveThaidRegistrationProof(registerDto);
+    const thaidProof = thaidRegistration?.proof ?? null;
+    const thaidProofToken = thaidRegistration?.token ?? null;
+    const userType = thaidProof ? 'thai' : registerDto.userType;
+    const nationalId = thaidProof
+      ? thaidProof.pid
+      : registerDto.nationalId?.trim() || '';
+    const titleTH = thaidProof ? thaidProof.titleTH : registerDto.titleTH;
+    const titleEN = thaidProof ? thaidProof.titleEN : registerDto.titleEN;
+    const fullName = thaidProof ? thaidProof.fullName : registerDto.fullName;
+    const englishName = thaidProof
+      ? thaidProof.englishName
+      : registerDto.englishName;
+    const address = thaidProof ? thaidProof.address : registerDto.address;
     // Hash password
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(registerDto.password, salt);
@@ -328,19 +343,16 @@ export class AuthService {
       }
 
       // ตรวจสอบเลขบัตรประชาชน / Passport ซ้ำ
-      if (registerDto.nationalId && registerDto.nationalId.trim() !== '') {
-        const nationalId = registerDto.nationalId.trim();
+      if (nationalId !== '') {
         const fieldToCheck =
-          registerDto.userType === 'thai'
-            ? 'USER_NATIONAL_ID'
-            : 'USER_PASSPORT_NO';
+          userType === 'thai' ? 'USER_NATIONAL_ID' : 'USER_PASSPORT_NO';
         const existingId = await queryRunner.manager.findOne(User, {
           where: { [fieldToCheck]: nationalId },
         });
 
         if (existingId) {
           const errorMsg =
-            registerDto.userType === 'thai'
+            userType === 'thai'
               ? 'เลขบัตรประชาชนนี้ถูกใช้งานแล้ว'
               : 'Passport number already exists';
           throw new BadRequestException(errorMsg);
@@ -357,13 +369,9 @@ export class AuthService {
         USER_PASSWORD: hashedPassword,
         USER_STATUS: 'ACTIVE',
         USER_NATIONAL_ID:
-          registerDto.userType === 'thai'
-            ? registerDto.nationalId?.trim() || undefined
-            : undefined,
+          userType === 'thai' ? nationalId || undefined : undefined,
         USER_PASSPORT_NO:
-          registerDto.userType === 'foreigner'
-            ? registerDto.nationalId?.trim() || undefined
-            : undefined,
+          userType === 'foreigner' ? nationalId || undefined : undefined,
         ROLES_ID: roleToAssign ? [roleToAssign] : [],
       });
 
@@ -385,7 +393,9 @@ export class AuthService {
 
       // เตรียมวันที่เกิด (รองรับ format "2005 07 22" โดยเปลี่ยนเป็น "2005-07-22")
       let birthDate: Date | null = null;
-      if (registerDto.birthdate) {
+      if (thaidProof) {
+        birthDate = parseThaidBirthdate(thaidProof.birthdate);
+      } else if (registerDto.birthdate) {
         const formattedDate = registerDto.birthdate.replace(/\s+/g, '-');
         birthDate = new Date(formattedDate);
         if (isNaN(birthDate.getTime())) {
@@ -396,18 +406,19 @@ export class AuthService {
       // Step 2: สร้าง UserProfile ภายใน transaction
       const newUserProfile = queryRunner.manager.create(UserProfile, {
         userId: savedUser.USER_ID,
-        userTitleTh: registerDto.titleTH,
-        userFullnameTh: registerDto.fullName,
-        userTitleEn: registerDto.titleEN,
-        userFullnameEn: registerDto.englishName,
+        userTitleTh: titleTH,
+        userFullnameTh: fullName,
+        userTitleEn: titleEN,
+        userFullnameEn: englishName,
         userPhone: registerDto.phone,
         userDateOfBirth: birthDate,
         userEducation: registerDto.educationLevel,
         userFaculty: registerDto.faculty,
         userInstitution: registerDto.institution,
         userCountry: registerDto.country,
-        userAddress: registerDto.address?.trim() || null,
-        userThaidSynced: thaidProofToken !== null,
+        userAddress: address?.trim() || null,
+        userThaidSynced: thaidProof !== null,
+        userRegisteredViaThaid: thaidProof !== null,
       });
 
       await queryRunner.manager.save(newUserProfile);
@@ -415,10 +426,10 @@ export class AuthService {
       // Step 3: สร้าง user ใน Moodle "ก่อน commit" — ถ้า Moodle ล้มเหลวจะ rollback ทั้งหมด (ไม่สร้าง user)
       // ใช้ queryRunner.manager เขียน moodle_sync_log ใน transaction เดียวกัน (FK USER_ID ยังไม่ commit)
       const { firstname, lastname } = this.deriveName(
-        registerDto.englishName || registerDto.fullName,
+        englishName || fullName,
         email,
       );
-      const moodleIdnumber = registerDto.nationalId?.trim() || undefined;
+      const moodleIdnumber = nationalId || undefined;
       const moodleUserId = await this.moodleSyncService.createUser(
         {
           username: email,
@@ -465,10 +476,28 @@ export class AuthService {
         }
       }
 
-      return {
+      const response: RegisterResponse = {
         message: 'Registration successful',
         userId: savedUser.USER_ID,
       };
+      if (thaidProof) {
+        const roleName = roleToAssign?.ROLE_NAME || RoleEnum.CANDIDATE;
+        response.accessToken = this.jwtService.sign({
+          sub: savedUser.USER_ID,
+          email,
+          role: roleName,
+          roles: [roleName],
+        });
+        response.user = {
+          id: savedUser.USER_ID,
+          actorType: 'user',
+          email,
+          role: roleName,
+          roles: [roleName],
+          remark: null,
+        };
+      }
+      return response;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       console.error('Registration error details:', error);
@@ -525,6 +554,7 @@ export class AuthService {
       faculty: user.PROFILE?.userFaculty || '',
       institution: user.PROFILE?.userInstitution || '',
       thaidSynced: user.PROFILE?.userThaidSynced || false,
+      registeredViaThaid: user.PROFILE?.userRegisteredViaThaid || false,
       remark: user.PROFILE?.userRemark || '',
       userImagePath: user.IMAGE?.USER_IMAGE_URL || null,
     };
@@ -576,6 +606,7 @@ export class AuthService {
       faculty: '',
       institution: '',
       thaidSynced: false,
+      registeredViaThaid: false,
       remark: '',
       userImagePath: null,
     };

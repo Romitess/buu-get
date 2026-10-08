@@ -88,6 +88,7 @@
                   ref="titleSelectRef"
                   v-model="formData.title"
                   :options="titleOptions"
+                  :disable="identityLocked"
                   outlined
                   dense
                   bg-color="white"
@@ -114,6 +115,8 @@
                   outlined
                   dense
                   bg-color="white"
+                  :readonly="identityLocked"
+                  :disable="identityLocked"
                   :inputmode="isForeigner ? 'text' : 'numeric'"
                   :mask="isForeigner ? 'XXXXXXXXX' : '#-####-#####-##-#'"
                   :unmasked-value="!isForeigner"
@@ -139,6 +142,8 @@
                   outlined
                   dense
                   bg-color="white"
+                  :readonly="identityLocked"
+                  :disable="identityLocked"
                   lazy-rules
                   :rules="[(val) => !!val || $t('profile.requiredFullName')]"
                   hide-bottom-space
@@ -157,8 +162,9 @@
                   dense
                   bg-color="white"
                   readonly
-                  class="cursor-pointer"
-                  @click="showCalendar = true"
+                  :disable="identityLocked"
+                  :class="{ 'cursor-pointer': !identityLocked }"
+                  @click="openBirthdate"
                   lazy-rules
                   :rules="[(val) => !!val || $t('profile.requiredBirthdate')]"
                   hide-bottom-space
@@ -166,9 +172,9 @@
                   <template v-slot:append>
                     <q-icon
                       name="calendar_today"
-                      class="cursor-pointer"
+                      :class="{ 'cursor-pointer': !identityLocked }"
                       size="xs"
-                      @click.stop="showCalendar = true"
+                      @click.stop="openBirthdate"
                     />
                     <q-menu
                       v-model="showCalendar"
@@ -195,6 +201,8 @@
                   outlined
                   dense
                   bg-color="white"
+                  :readonly="identityLocked"
+                  :disable="identityLocked"
                   lazy-rules
                   :rules="[(val) => !!val || $t('profile.requiredFullNameEn')]"
                   hide-bottom-space
@@ -301,6 +309,16 @@
 
     <!-- Action Buttons -->
     <div class="row justify-end q-gutter-md">
+      <q-btn
+        v-if="identityLocked"
+        outline
+        no-caps
+        color="primary"
+        class="action-btn text-weight-bold"
+        :label="$t('profile.updateViaThaid')"
+        :loading="isStartingThaidUpdate"
+        @click="onUpdateViaThaid"
+      />
       <q-btn
         unelevated
         :label="$t('profile.cancel')"
@@ -414,6 +432,7 @@ import { api } from 'src/boot/axios';
 import type { AxiosError } from 'axios';
 import { getDefaultRouteForRole } from 'src/utils/default-route';
 import { useFocusFirstInvalidField } from 'src/composables/use-focus-first-invalid-field';
+import { startThaidProfileUpdate } from 'src/services/thaid.service';
 import { AvatarSkeleton } from 'src/components/base/skeleton';
 
 const router = useRouter();
@@ -423,6 +442,10 @@ const $q = useQuasar();
 const { t } = useI18n();
 
 const isFromEmail: ComputedRef<boolean> = computed<boolean>(() => route.query.from === 'email');
+const identityLocked = computed<boolean>(
+  () => userStore.currentUser?.registeredViaThaid === true,
+);
+const isStartingThaidUpdate = ref(false);
 const isForeigner = computed<boolean>(() => !!userStore.currentUser?.passportNo);
 
 const showPasswordDialog = ref(false);
@@ -654,6 +677,26 @@ watch(
     updateAlertVisibility();
   },
 );
+
+const openBirthdate = (): void => {
+  if (identityLocked.value) return;
+  showCalendar.value = true;
+};
+
+const onUpdateViaThaid = async (): Promise<void> => {
+  if (isStartingThaidUpdate.value) return;
+  isStartingThaidUpdate.value = true;
+  try {
+    await startThaidProfileUpdate();
+  } catch {
+    isStartingThaidUpdate.value = false;
+    $q.notify({
+      type: 'negative',
+      message: t('profile.thaidUpdateFailed'),
+      position: 'top',
+    });
+  }
+};
 
 const onCancel = (): void => {
   void router.push('/');

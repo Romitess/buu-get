@@ -16,8 +16,10 @@ describe('password policy', () => {
     expect(isPasswordPolicyMet('password')).toBe(false);
   });
 
-  it('accepts only ! @ # as special characters', () => {
-    expect(isPasswordPolicyMet('Secret1$')).toBe(false);
-    expect(isPasswordPolicyMet('Secret1@')).toBe(true);
+  it('accepts ! @ # $ % & * ( ) _ + as special characters', () => {
+    for (const character of ['!', '@', '#', '$', '%', '&', '*', '(', ')', '_', '+']) {
+      expect(isPasswordPolicyMet(`Secret1${character}`)).toBe(true);
+    }
+    expect(isPasswordPolicyMet('Secret1-')).toBe(false);
   });
 });

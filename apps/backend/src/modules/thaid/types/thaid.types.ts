@@ -7,7 +7,12 @@ export type ThaidEndpoint = 'approval' | 'payment';
 
 export type IdentityCallbackSource = 'sandbox' | 'thaid';
 
-export type IdentityCallbackStatus = 'success' | 'denied' | 'error' | 'unknown';
+export type IdentityCallbackStatus =
+  | 'success'
+  | 'denied'
+  | 'error'
+  | 'unknown'
+  | 'mismatch';
 
 export interface IdentityCallbackRedirect {
   url: string;
@@ -55,9 +60,23 @@ export interface ThaidSessionPrefillResponse {
   };
 }
 
+export interface ThaidSessionUpdatedResponse {
+  outcome: 'updated';
+  received: {
+    nationalId: string;
+    titleTH: string;
+    titleEN: string;
+    fullName: string;
+    englishName: string;
+    birthdate: string;
+    address: string;
+  };
+}
+
 export type ThaidSessionResponse =
   | ThaidSessionLoginResponse
-  | ThaidSessionPrefillResponse;
+  | ThaidSessionPrefillResponse
+  | ThaidSessionUpdatedResponse;
 
 export interface ExternalCallbackPayload {
   body: ExternalCallbackBody;

@@ -1,4 +1,5 @@
 import { api } from 'src/boot/axios';
+import { resolveApiHostname, shouldMockThaidHost } from 'src/utils/thaid-mock-host';
 
 export type ThaidStartIntent = 'login' | 'register';
 
@@ -37,7 +38,12 @@ export interface ThaidPrefillSession {
   prefill: ThaidPrefillFields;
 }
 
-export type ThaidSessionResult = ThaidLoginSession | ThaidPrefillSession;
+export interface ThaidUpdatedSession {
+  outcome: 'updated';
+  received: ThaidPrefillFields;
+}
+
+export type ThaidSessionResult = ThaidLoginSession | ThaidPrefillSession | ThaidUpdatedSession;
 
 const PREFILL_KEY = 'thaid-prefill';
 
@@ -46,8 +52,33 @@ export function thaidStartUrl(intent: ThaidStartIntent): string {
   return `${base}/thaid/${intent}`;
 }
 
+export function shouldMockThaid(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  const host = resolveApiHostname(api.defaults.baseURL ?? '', window.location.href);
+  return shouldMockThaidHost(host);
+}
+
+function mockPageUrl(intent: ThaidStartIntent | 'update'): string {
+  return `${window.location.origin}${window.location.pathname}#/thaid/mock?intent=${intent}`;
+}
+
 export function startThaid(intent: ThaidStartIntent): void {
+  if (shouldMockThaid()) {
+    window.location.assign(mockPageUrl(intent));
+    return;
+  }
   window.location.assign(thaidStartUrl(intent));
+}
+
+export async function startThaidProfileUpdate(): Promise<void> {
+  if (shouldMockThaid()) {
+    window.location.assign(mockPageUrl('update'));
+    return;
+  }
+  const response = await api.post<{ url: string }>('/thaid/update');
+  window.location.assign(response.data.url);
 }
 
 export async function exchangeThaidTicket(ticket: string): Promise<ThaidSessionResult> {

@@ -136,6 +136,17 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'thaid/mock',
+        name: 'thaid-mock',
+        component: () => import('pages/auth/thaid-mock-page.vue'),
+        meta: {
+          requiresAuth: false,
+          hideHeader: true,
+          hideDrawer: true,
+          footerVariant: 'white',
+        },
+      },
+      {
         path: 'thaid/callback',
         name: 'thaid-callback',
         component: () => import('pages/auth/thaid-callback-page.vue'),

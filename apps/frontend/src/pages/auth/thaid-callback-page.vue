@@ -7,7 +7,15 @@
         <h1 class="text-h6 q-mt-md q-mb-sm">{{ title }}</h1>
         <p class="text-body2 text-grey-7 q-mb-lg">{{ body }}</p>
         <q-btn
-          v-if="!isExchanging && !showReceivedDialog"
+          v-if="!isExchanging && !showReceivedDialog && showProfileReturn"
+          unelevated
+          no-caps
+          color="primary"
+          :to="{ name: 'user-profile' }"
+          :label="t('auth.thaidCallback.backToProfile')"
+        />
+        <q-btn
+          v-else-if="!isExchanging && !showReceivedDialog"
           unelevated
           no-caps
           color="primary"
@@ -73,12 +81,19 @@ const showReceivedDialog = ref(false);
 const pendingResult = ref<ThaidSessionResult | null>(null);
 const status = ref<ThaidCallbackStatus>(parseThaidCallbackStatus(route.query.status));
 
+const showProfileReturn = computed(
+  () =>
+    status.value === 'mismatch' ||
+    ((status.value === 'denied' || status.value === 'error') && userStore.isLoggedIn),
+);
+
 const iconName = computed(() => {
   const icons: Record<ThaidCallbackStatus, string> = {
     success: 'check_circle',
     denied: 'highlight_off',
     error: 'error_outline',
     unknown: 'help_outline',
+    mismatch: 'error_outline',
   };
   return icons[status.value];
 });
@@ -89,6 +104,7 @@ const iconColor = computed(() => {
     denied: 'warning',
     error: 'negative',
     unknown: 'grey-7',
+    mismatch: 'negative',
   };
   return colors[status.value];
 });
@@ -128,6 +144,9 @@ function receivedFields(result: ThaidSessionResult | null): ThaidPrefillFields |
   if (result.outcome === 'prefill') {
     return result.prefill;
   }
+  if (result.outcome === 'updated') {
+    return result.received;
+  }
   return result.received ?? null;
 }
 
@@ -150,6 +169,17 @@ async function continueAfterDialog(): Promise<void> {
       return;
     }
 
+    if (result.outcome === 'updated') {
+      await userStore.refreshProfile();
+      $q.notify({
+        type: 'positive',
+        message: t('auth.thaidCallback.profileUpdated'),
+        position: 'top',
+      });
+      await router.replace({ name: 'user-profile' });
+      return;
+    }
+
     storeThaidPrefill(result);
     await router.replace({ name: 'register' });
   } catch {
@@ -169,6 +199,16 @@ onMounted(async () => {
   isExchanging.value = true;
   try {
     const result = await exchangeThaidTicket(ticket);
+    if (result.outcome === 'updated') {
+      await userStore.refreshProfile();
+      $q.notify({
+        type: 'positive',
+        message: t('auth.thaidCallback.profileUpdated'),
+        position: 'top',
+      });
+      await router.replace({ name: 'user-profile' });
+      return;
+    }
     pendingResult.value = result;
     status.value = 'success';
     isExchanging.value = false;

@@ -6,6 +6,7 @@ describe('parseThaidCallbackStatus', () => {
     expect(parseThaidCallbackStatus('success')).toBe('success');
     expect(parseThaidCallbackStatus('denied')).toBe('denied');
     expect(parseThaidCallbackStatus('error')).toBe('error');
+    expect(parseThaidCallbackStatus('mismatch')).toBe('mismatch');
   });
 
   it('uses the first array value', () => {

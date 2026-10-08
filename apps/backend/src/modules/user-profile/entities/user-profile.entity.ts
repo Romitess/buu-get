@@ -131,6 +131,14 @@ export class UserProfile {
   userThaidSynced: boolean;
 
   @Column({
+    name: 'USER_REGISTERED_VIA_THAID',
+    type: 'boolean',
+    default: false,
+    comment: 'สมัครสมาชิกผ่าน ThaiD',
+  })
+  userRegisteredViaThaid: boolean;
+
+  @Column({
     name: 'USER_REMARK',
     type: 'varchar',
     length: 500,

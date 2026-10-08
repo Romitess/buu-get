@@ -18,6 +18,8 @@ import {
   ThaidIdentityProvider,
 } from './thaid-identity.provider';
 import { ThaidOidcClient } from './thaid-oidc.client';
+import { assertThaidMockEnabled, MOCK_THAID_CLAIMS } from './thaid-mock';
+import { ThaidIntent } from './entities/thaid-auth-state.entity';
 
 const IDENTITY_CALLBACK_PATH = '/#/thaid/callback';
 
@@ -61,6 +63,59 @@ export class ThaidService {
     return { url: started.authorizationUrl, statusCode: 302 };
   }
 
+  async beginMock(
+    intent: 'login' | 'register',
+  ): Promise<{ state: string }> {
+    assertThaidMockEnabled();
+    const state = await this.handoff.createState(intent);
+    return { state };
+  }
+
+  async beginMockUpdate(userId: number): Promise<{ state: string }> {
+    assertThaidMockEnabled();
+    await this.accounts.assertRegisteredViaThaid(userId);
+    const state = await this.handoff.createState('update', userId);
+    return { state };
+  }
+
+  async fireMock(
+    intent: 'login' | 'register',
+  ): Promise<{ ticket: string } | { status: 'mismatch' | 'error' }> {
+    assertThaidMockEnabled();
+    return this.finishWithClaims(intent, null, MOCK_THAID_CLAIMS);
+  }
+
+  async fireMockUpdate(
+    userId: number,
+  ): Promise<{ ticket: string } | { status: 'mismatch' | 'error' }> {
+    assertThaidMockEnabled();
+    await this.accounts.assertRegisteredViaThaid(userId);
+    return this.finishWithClaims('update', userId, MOCK_THAID_CLAIMS);
+  }
+
+  async completeMock(
+    rawState: string,
+  ): Promise<{ ticket: string } | { status: 'mismatch' | 'error' }> {
+    assertThaidMockEnabled();
+    const consumed = await this.handoff.consumeState(rawState);
+    if (!consumed) {
+      throw new BadRequestException('สถานะจำลอง ThaiD ไม่ถูกต้องหรือถูกใช้แล้ว');
+    }
+    return this.finishWithClaims(consumed.intent, consumed.userId, MOCK_THAID_CLAIMS);
+  }
+
+  async beginProfileUpdate(userId: number): Promise<{ url: string }> {
+    await this.accounts.assertRegisteredViaThaid(userId);
+    const started = await this.identity.startAuth({
+      intent: 'update',
+      userId,
+    });
+    if (!started.authorizationUrl) {
+      throw new BadRequestException('ThaID authorize URL is missing');
+    }
+    return { url: started.authorizationUrl };
+  }
+
   async completeIdentityCallback(
     source: IdentityCallbackSource,
     query: Record<string, unknown>,
@@ -94,10 +149,12 @@ export class ThaidService {
       if (!verified.subject) {
         return this.redirectStatus('error', frontendOrigin);
       }
-      const { intent, identity } = readThaidClaims(verified.claims);
-      const sessionPayload = await this.accounts.resolve(intent, identity);
-      const ticket = await this.handoff.createSessionTicket(sessionPayload);
-      return this.redirectTicket(ticket, frontendOrigin);
+      const { intent, userId, identity } = readThaidClaims(verified.claims);
+      const finished = await this.finishWithClaims(intent, userId, identity);
+      if ('status' in finished) {
+        return this.redirectStatus(finished.status, frontendOrigin);
+      }
+      return this.redirectTicket(finished.ticket, frontendOrigin);
     } catch (err) {
       const name = err instanceof Error ? err.name : 'Error';
       const message = err instanceof Error ? err.message : '';
@@ -116,6 +173,12 @@ export class ThaidService {
     if (payload.outcome === 'prefill') {
       return payload;
     }
+    if (payload.outcome === 'updated') {
+      return {
+        outcome: 'updated',
+        received: payload.received,
+      };
+    }
     const login = await this.accounts.issueLoginForUser(payload.userId);
     return {
       outcome: 'login',
@@ -123,6 +186,34 @@ export class ThaidService {
       received: payload.received,
       login,
     };
+  }
+
+  private async finishWithClaims(
+    intent: ThaidIntent,
+    userId: number | null,
+    identity: typeof MOCK_THAID_CLAIMS,
+  ): Promise<{ ticket: string } | { status: 'mismatch' | 'error' }> {
+    if (intent === 'update') {
+      if (userId == null) {
+        return { status: 'error' };
+      }
+      const applied = await this.accounts.applyRegisteredProfileUpdate(
+        userId,
+        identity,
+      );
+      if (applied !== 'updated') {
+        return { status: 'mismatch' };
+      }
+      const ticket = await this.handoff.createSessionTicket({
+        outcome: 'updated',
+        userId,
+        received: this.accounts.receivedProfile(identity),
+      });
+      return { ticket };
+    }
+    const sessionPayload = await this.accounts.resolve(intent, identity);
+    const ticket = await this.handoff.createSessionTicket(sessionPayload);
+    return { ticket };
   }
 
   private redirectStatus(

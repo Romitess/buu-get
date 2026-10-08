@@ -32,6 +32,11 @@ export interface RegisterPayload {
 export interface AuthResponse {
   success: boolean;
   data?: { message: string; userId: number };
+  accessToken?: string;
+  user?: LoginResponse['user'] & {
+    actorType?: 'user' | 'person';
+    remark?: string | null;
+  };
   message?: string;
 }
 
@@ -70,8 +75,19 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null;
 
     try {
-      const response = await api.post('/auth/register', payload);
-      return { success: true, data: response.data };
+      const response = await api.post<{
+        message: string;
+        userId: number;
+        accessToken?: string;
+        user?: AuthResponse['user'];
+      }>('/auth/register', payload);
+      const { accessToken, user, message, userId } = response.data;
+      return {
+        success: true,
+        data: { message, userId },
+        ...(accessToken !== undefined ? { accessToken } : {}),
+        ...(user !== undefined ? { user } : {}),
+      };
     } catch (err: unknown) {
       const axiosError = err as AxiosError<{ message?: string }>;
       const msg = axiosError.response?.data?.message || 'Registration failed';

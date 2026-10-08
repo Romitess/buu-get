@@ -38,10 +38,14 @@ describe('UserProfileService', () => {
     overrides: {
       userProfileId?: number;
       userId?: number;
+      userTitleTh?: string | null;
       userFullnameTh?: string | null;
+      userFullnameEn?: string | null;
+      userDateOfBirth?: Date | null;
       userPhone?: string | null;
       userAddress?: string | null;
       userRemark?: string | null;
+      userRegisteredViaThaid?: boolean;
       user?: {
         USER_ID?: number;
         USER_NATIONAL_ID?: string | null;
@@ -66,6 +70,7 @@ describe('UserProfileService', () => {
       userCountry: null,
       userAddress: 'ที่อยู่เดิม',
       userThaidSynced: false,
+      userRegisteredViaThaid: false,
       userRemark: null,
       createdAt: new Date('2026-01-01'),
       updatedAt: new Date('2026-01-01'),
@@ -338,6 +343,38 @@ describe('UserProfileService', () => {
           userProfileId: 1,
           modifierRole: 'candidate',
         }),
+      );
+    });
+
+    it('does not overwrite ThaiD identity fields for accounts registered via ThaiD', async () => {
+      const profile = buildProfile({
+        userRegisteredViaThaid: true,
+        userTitleTh: 'นาย',
+        userFullnameTh: 'ชื่อจากบัตร',
+        userFullnameEn: 'Card Name',
+        userDateOfBirth: new Date('2004-04-11'),
+      });
+      userProfileRepository.findOne.mockResolvedValue(profile);
+      const dto: UpdateUserProfileDto = {
+        userTitleTh: 'นาง',
+        userFullnameTh: 'ชื่อที่แก้',
+        userFullnameEn: 'Edited Name',
+        userNationalId: '9999999999999',
+        userPhone: '0899999999',
+        userAddress: 'ที่อยู่ใหม่',
+      };
+
+      await service.update(1, dto, candidateModifier);
+
+      expect(profile.userTitleTh).toBe('นาย');
+      expect(profile.userFullnameTh).toBe('ชื่อจากบัตร');
+      expect(profile.userFullnameEn).toBe('Card Name');
+      expect(profile.userPhone).toBe('0899999999');
+      expect(profile.userAddress).toBe('ที่อยู่ใหม่');
+      expect(userProfileRepository.manager.update).not.toHaveBeenCalledWith(
+        User,
+        expect.anything(),
+        expect.anything(),
       );
     });
 

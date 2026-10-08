@@ -122,6 +122,14 @@ export class UserProfileService {
     },
   ): Promise<UserProfile> {
     const userProfile = await this.findOne(id);
+    if (userProfile.userRegisteredViaThaid) {
+      delete updateUserProfileDto.userTitleTh;
+      delete updateUserProfileDto.userTitleEn;
+      delete updateUserProfileDto.userFullnameTh;
+      delete updateUserProfileDto.userFullnameEn;
+      delete updateUserProfileDto.userDateOfBirth;
+      delete updateUserProfileDto.userNationalId;
+    }
     if (updateUserProfileDto.userAddress !== undefined) {
       updateUserProfileDto.userAddress =
         updateUserProfileDto.userAddress?.trim() || null;

@@ -5,13 +5,13 @@ export interface PasswordPolicyState {
   special: boolean;
 }
 
-/** เงื่อนไขรหัสผ่านผู้สมัครสอบ: ยาวอย่างน้อย 8, ตัวพิมพ์ใหญ่, ตัวเลข, และอักขระ ! @ # */
+/** เงื่อนไขรหัสผ่านผู้สมัครสอบ: ยาวอย่างน้อย 8, ตัวพิมพ์ใหญ่, ตัวเลข, และอักขระ ! @ # $ % & * ( ) _ + */
 export function evaluatePasswordPolicy(password: string): PasswordPolicyState {
   return {
     minLength: password.length >= 8,
     uppercase: /[A-Z]/u.test(password),
     digit: /\d/u.test(password),
-    special: /[!@#]/u.test(password),
+    special: /[!@#$%&*()_+]/u.test(password),
   };
 }
 

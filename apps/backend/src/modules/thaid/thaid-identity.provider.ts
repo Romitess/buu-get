@@ -26,9 +26,13 @@ export class ThaidIdentityProvider implements IdentityProvider {
     options?: IdentityAuthStartOptions,
   ): Promise<IdentityAuthStartResult> {
     const intent: ThaidIntent =
-      options?.intent === 'register' ? 'register' : 'login';
+      options?.intent === 'register'
+        ? 'register'
+        : options?.intent === 'update'
+          ? 'update'
+          : 'login';
     this.oidc.requireConfig();
-    const state = await this.handoff.createState(intent);
+    const state = await this.handoff.createState(intent, options?.userId);
     return {
       authorizationUrl: this.oidc.buildAuthorizeUrl(state),
       state,
@@ -44,8 +48,8 @@ export class ThaidIdentityProvider implements IdentityProvider {
       throw new BadRequestException('missing code or state');
     }
 
-    const intent = await this.handoff.consumeState(state);
-    if (!intent) {
+    const consumed = await this.handoff.consumeState(state);
+    if (!consumed) {
       throw new BadRequestException('invalid state');
     }
 
@@ -62,7 +66,8 @@ export class ThaidIdentityProvider implements IdentityProvider {
       subject: claims.pid,
       claims: {
         ...claims,
-        intent,
+        intent: consumed.intent,
+        userId: consumed.userId,
       },
     };
   }
@@ -74,6 +79,7 @@ export class ThaidIdentityProvider implements IdentityProvider {
 
 export function readThaidClaims(claims: Record<string, unknown>): {
   intent: ThaidIntent;
+  userId: number | null;
   identity: ThaidIdTokenClaims;
 } {
   const pid = claims.pid;
@@ -81,9 +87,18 @@ export function readThaidClaims(claims: Record<string, unknown>): {
     throw new BadRequestException('missing pid');
   }
   const intent: ThaidIntent =
-    claims.intent === 'register' ? 'register' : 'login';
+    claims.intent === 'register'
+      ? 'register'
+      : claims.intent === 'update'
+        ? 'update'
+        : 'login';
+  const userId =
+    typeof claims.userId === 'number' && Number.isInteger(claims.userId)
+      ? claims.userId
+      : null;
   return {
     intent,
+    userId,
     identity: {
       pid,
       sub: optionalString(claims.sub),

@@ -14,10 +14,15 @@ describe('ThaidService', () => {
   const accounts = {
     resolve: jest.fn(),
     issueLoginForUser: jest.fn(),
+    applyRegisteredProfileUpdate: jest.fn(),
+    receivedProfile: jest.fn(),
+    assertRegisteredViaThaid: jest.fn(),
   };
   const handoff = {
     createSessionTicket: jest.fn(),
     consumeSessionTicket: jest.fn(),
+    createState: jest.fn(),
+    consumeState: jest.fn(),
   };
   const oidc = {
     getConfig: jest.fn().mockReturnValue({ env: 'sandbox' }),
@@ -126,6 +131,67 @@ describe('ThaidService', () => {
       expect(result.url).not.toContain('access_token');
     });
 
+    it('updates the bound account without logging in as the scanned pid', async () => {
+      const received = {
+        nationalId: '1234567890123',
+        titleTH: 'นาย',
+        titleEN: 'Mr.',
+        fullName: 'ชื่อใหม่',
+        englishName: 'New Name',
+        birthdate: '2001-02-03',
+        address: '',
+      };
+      identity.handleCallback.mockResolvedValue({
+        subject: '1234567890123',
+        claims: {
+          pid: '1234567890123',
+          intent: 'update',
+          userId: 9,
+        },
+      });
+      accounts.applyRegisteredProfileUpdate.mockResolvedValue('updated');
+      accounts.receivedProfile.mockReturnValue(received);
+      handoff.createSessionTicket.mockResolvedValue('update-ticket');
+
+      const result = await service.completeIdentityCallback('sandbox', {
+        code: 'secret-code',
+        state: 'csrf-state',
+      });
+
+      expect(accounts.resolve).not.toHaveBeenCalled();
+      expect(accounts.applyRegisteredProfileUpdate).toHaveBeenCalledWith(
+        9,
+        expect.objectContaining({ pid: '1234567890123' }),
+      );
+      expect(handoff.createSessionTicket).toHaveBeenCalledWith({
+        outcome: 'updated',
+        userId: 9,
+        received,
+      });
+      expect(result.url).toBe('/#/thaid/callback?ticket=update-ticket');
+    });
+
+    it('keeps the profile and reports a mismatch when the card does not match', async () => {
+      identity.handleCallback.mockResolvedValue({
+        subject: '1234567890123',
+        claims: {
+          pid: '1234567890123',
+          intent: 'update',
+          userId: 9,
+        },
+      });
+      accounts.applyRegisteredProfileUpdate.mockResolvedValue('mismatch');
+
+      const result = await service.completeIdentityCallback('sandbox', {
+        code: 'secret-code',
+        state: 'csrf-state',
+      });
+
+      expect(result.url).toBe('/#/thaid/callback?status=mismatch');
+      expect(handoff.createSessionTicket).not.toHaveBeenCalled();
+      expect(accounts.resolve).not.toHaveBeenCalled();
+    });
+
     it('redirects to error when state validation fails and does not leak the code', async () => {
       identity.handleCallback.mockRejectedValue(
         new BadRequestException('invalid state'),
@@ -197,6 +263,89 @@ describe('ThaidService', () => {
       await expect(service.exchangeSession('ticket-value')).resolves.toEqual(
         prefill,
       );
+      expect(accounts.issueLoginForUser).not.toHaveBeenCalled();
+    });
+
+    it('fires a local mock scan and returns the mock profile ticket', async () => {
+      accounts.resolve.mockResolvedValue({
+        outcome: 'prefill',
+        notice: 'continue_register',
+        registrationToken: 'proof',
+        prefill: {
+          nationalId: '1103700123451',
+          titleTH: 'นาย',
+          titleEN: 'Mr.',
+          fullName: 'ภัทรพล สุดประเสริฐ',
+          englishName: 'Pattarapon Sudprasert',
+          birthdate: '2004-04-11',
+          address: '99/12',
+        },
+      });
+      handoff.createSessionTicket.mockResolvedValue('mock-ticket');
+
+      await expect(service.fireMock('register')).resolves.toEqual({
+        ticket: 'mock-ticket',
+      });
+      expect(accounts.resolve).toHaveBeenCalledWith(
+        'register',
+        expect.objectContaining({
+          pid: '1103700123451',
+          name: 'นาย ภัทรพล สุดประเสริฐ',
+        }),
+      );
+    });
+
+    it('completes a local mock scan as a registration prefill', async () => {
+      handoff.consumeState.mockResolvedValue({
+        intent: 'register',
+        userId: null,
+      });
+      accounts.resolve.mockResolvedValue({
+        outcome: 'prefill',
+        notice: 'continue_register',
+        registrationToken: 'proof',
+        prefill: {
+          nationalId: '1103700123451',
+          titleTH: 'นาย',
+          titleEN: 'Mr.',
+          fullName: 'ภัทรพล สุดประเสริฐ',
+          englishName: 'Pattarapon Sudprasert',
+          birthdate: '2004-04-11',
+          address: '99/12',
+        },
+      });
+      handoff.createSessionTicket.mockResolvedValue('mock-ticket');
+
+      await expect(service.completeMock('server-state')).resolves.toEqual({
+        ticket: 'mock-ticket',
+      });
+      expect(accounts.resolve).toHaveBeenCalledWith(
+        'register',
+        expect.objectContaining({ pid: '1103700123451' }),
+      );
+      expect(identity.handleCallback).not.toHaveBeenCalled();
+    });
+
+    it('returns an updated notice without issuing another login', async () => {
+      const received = {
+        nationalId: '1234567890123',
+        titleTH: 'นาย',
+        titleEN: 'Mr.',
+        fullName: 'ชื่อใหม่',
+        englishName: 'New Name',
+        birthdate: '2001-02-03',
+        address: '',
+      };
+      handoff.consumeSessionTicket.mockResolvedValue({
+        outcome: 'updated',
+        userId: 9,
+        received,
+      });
+
+      await expect(service.exchangeSession('ticket-value')).resolves.toEqual({
+        outcome: 'updated',
+        received,
+      });
       expect(accounts.issueLoginForUser).not.toHaveBeenCalled();
     });
   });

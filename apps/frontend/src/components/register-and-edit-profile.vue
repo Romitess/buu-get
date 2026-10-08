@@ -16,14 +16,14 @@
         </div>
 
         <!-- ─── 2×2 Grid Layout ─── -->
-        <div class="profile-form-grid">
+        <div class="profile-form-grid" :class="{ 'profile-form-grid--stack': isThaiDPath }">
           <!-- (1,1) รูปภาพ + ข้อกำหนดรูปภาพ -->
-          <div class="profile-grid-cell profile-grid-cell--fill">
+          <div v-if="!isThaiDPath" class="profile-grid-cell profile-grid-cell--fill">
             <PhotoSection v-model:profile-image="formData.profileImage" />
           </div>
 
           <!-- (1,2) วันเกิด / ระดับการศึกษา / คณะ-สาขา -->
-          <div class="profile-grid-cell">
+          <div v-if="!isThaiDPath" class="profile-grid-cell">
             <EducationSection
               v-model:birthdate="formData.birthdate"
               v-model:education-level="formData.educationLevel"
@@ -32,7 +32,7 @@
           </div>
 
           <!-- (2,1) ข้อมูลตัวตน 4 ฟิลด์ -->
-          <div class="profile-grid-cell">
+          <div v-if="!isThaiDPath" class="profile-grid-cell">
             <IdentityFields
               :is-thai="isThailand"
               :is-edit-mode="isEditMode"
@@ -47,6 +47,19 @@
           </div>
 
           <div v-if="isThaiDPath" class="profile-grid-cell">
+            <AppFormField
+              :model-value="formData.email"
+              type="email"
+              :label="t('profile.email')"
+              :placeholder="t('profile.emailPlaceholder')"
+              :required="true"
+              :rules="[emailRule]"
+              reserve-bottom-space
+              @update:model-value="onEmailUpdate"
+            />
+            <div class="email-helper text-caption text-grey-7 q-mb-md">
+              {{ t('profile.emailOtpHelper') }}
+            </div>
             <AppFormField
               :model-value="formData.password ?? ''"
               type="password"
@@ -81,8 +94,8 @@
             />
           </div>
 
-          <!-- (2,2) สถานศึกษา / ที่อยู่ / เบอร์โทร (+ ThaiD: checkbox + อีเมล) -->
-          <div class="profile-grid-cell">
+          <!-- (2,2) สถานศึกษา / ที่อยู่ / เบอร์โทร -->
+          <div v-if="!isThaiDPath" class="profile-grid-cell">
             <ContactFields
               :email="formData.email"
               :show-email-field="isThaiDPath"
@@ -252,6 +265,14 @@ const confirmPasswordRule = (
   val: string | number | null | undefined,
 ): true | string => val === formData.value.password || t('profile.passwordMismatch');
 
+const emailRule = (val: string | number | null | undefined): true | string => {
+  const email = typeof val === 'string' ? val.trim() : '';
+  if (!email) {
+    return t('profile.requiredEmail');
+  }
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || t('profile.invalidEmail');
+};
+
 const onThaidPassword = (value: string | number | null): void => {
   formData.value.password = typeof value === 'string' ? value : '';
 };
@@ -261,8 +282,8 @@ const onThaidConfirmPassword = (value: string | number | null): void => {
 };
 
 /** อัปเดต email ใน formData เมื่อ ThaiD path user กรอก email ที่ contact-column */
-const onEmailUpdate = (value: string): void => {
-  formData.value.email = value;
+const onEmailUpdate = (value: string | number | null): void => {
+  formData.value.email = typeof value === 'string' ? value : '';
 };
 
 const sendOtp = async (): Promise<boolean> => {
@@ -425,6 +446,10 @@ onMounted(() => {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+}
+
+.profile-form-grid--stack {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .profile-grid-cell {

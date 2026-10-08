@@ -40,7 +40,7 @@ describe('ThaidIdentityProvider', () => {
 
     const result = await provider.startAuth({ intent: 'register' });
 
-    expect(handoff.createState).toHaveBeenCalledWith('register');
+    expect(handoff.createState).toHaveBeenCalledWith('register', undefined);
     expect(result.authorizationUrl).toContain('imauthsbx.bora.dopa.go.th');
     expect(result.authorizationUrl).toContain('verify_type=pin');
     expect(result.authorizationUrl).toContain('state=server-state');
@@ -60,7 +60,7 @@ describe('ThaidIdentityProvider', () => {
   });
 
   it('exchanges the code only after the state is consumed', async () => {
-    handoff.consumeState.mockResolvedValue('login');
+    handoff.consumeState.mockResolvedValue({ intent: 'login', userId: null });
     oidc.exchangeCode.mockResolvedValue({ idToken: 'id-token' });
     oidc.verifyIdToken.mockResolvedValue({
       pid: '1234567890123',
@@ -79,7 +79,10 @@ describe('ThaidIdentityProvider', () => {
   });
 
   it('keeps an address that arrived on the id token', async () => {
-    handoff.consumeState.mockResolvedValue('register');
+    handoff.consumeState.mockResolvedValue({
+      intent: 'register',
+      userId: null,
+    });
     oidc.exchangeCode.mockResolvedValue({ idToken: 'id-token' });
     oidc.verifyIdToken.mockResolvedValue({
       pid: '1234567890123',
@@ -97,7 +100,7 @@ describe('ThaidIdentityProvider', () => {
   });
 
   it('reads the house address from userinfo when the id token has none', async () => {
-    handoff.consumeState.mockResolvedValue('login');
+    handoff.consumeState.mockResolvedValue({ intent: 'login', userId: null });
     oidc.exchangeCode.mockResolvedValue({
       idToken: 'id-token',
       accessToken: 'access-token',

@@ -41,10 +41,28 @@ export interface ThaidPrefillTicketPayload {
 
 export type ThaidSessionTicketPayload =
   | ThaidLoginTicketPayload
-  | ThaidPrefillTicketPayload;
+  | ThaidPrefillTicketPayload
+  | ThaidUpdatedTicketPayload;
 
 export interface ThaidRegisterProof {
   pid: string;
+  titleTH: string;
+  titleEN: string;
+  fullName: string;
+  englishName: string;
+  birthdate: string;
+  address: string;
+}
+
+export interface ThaidUpdatedTicketPayload {
+  outcome: 'updated';
+  userId: number;
+  received: ThaidPrefillPayload;
+}
+
+export interface ConsumedThaidState {
+  intent: ThaidIntent;
+  userId: number | null;
 }
 
 function sha256(value: string): string {
@@ -64,11 +82,12 @@ export class ThaidHandoffService {
     private readonly handoffs: Repository<ThaidHandoff>,
   ) {}
 
-  async createState(intent: ThaidIntent): Promise<string> {
+  async createState(intent: ThaidIntent, userId?: number): Promise<string> {
     const raw = randomSecret();
     const row = this.states.create({
       stateHash: sha256(raw),
       intent,
+      userId: userId ?? null,
       expiresAt: new Date(Date.now() + STATE_TTL_MS),
       consumedAt: null,
     });
@@ -77,7 +96,7 @@ export class ThaidHandoffService {
   }
 
   /** คืนเจตนาเมื่อ state ยังไม่ใช้และไม่หมดอายุ แล้วทำเครื่องหมายว่าใช้แล้ว */
-  async consumeState(rawState: string): Promise<ThaidIntent | null> {
+  async consumeState(rawState: string): Promise<ConsumedThaidState | null> {
     const row = await this.states.findOne({
       where: { stateHash: sha256(rawState) },
     });
@@ -91,7 +110,7 @@ export class ThaidHandoffService {
     if (!updated.affected) {
       return null;
     }
-    return row.intent;
+    return { intent: row.intent, userId: row.userId ?? null };
   }
 
   async createSessionTicket(
@@ -110,10 +129,10 @@ export class ThaidHandoffService {
     return payload;
   }
 
-  async createRegisterProof(pid: string): Promise<string> {
+  async createRegisterProof(proof: ThaidRegisterProof): Promise<string> {
     return this.insertHandoff(
       'register_proof',
-      { pid } satisfies ThaidRegisterProof,
+      proof,
       REGISTER_PROOF_TTL_MS,
     );
   }
@@ -186,14 +205,27 @@ function parseRegisterProof(payloadJson: string): ThaidRegisterProof | null {
     ) {
       return null;
     }
-    const pid = (parsed as Record<string, unknown>).pid;
+    const record = parsed as Record<string, unknown>;
+    const pid = record.pid;
     if (typeof pid !== 'string' || !/^\d{13}$/.test(pid)) {
       return null;
     }
-    return { pid };
+    return {
+      pid,
+      titleTH: proofString(record.titleTH),
+      titleEN: proofString(record.titleEN),
+      fullName: proofString(record.fullName),
+      englishName: proofString(record.englishName),
+      birthdate: proofString(record.birthdate),
+      address: proofString(record.address),
+    };
   } catch {
     return null;
   }
+}
+
+function proofString(value: unknown): string {
+  return typeof value === 'string' ? value : '';
 }
 
 function isSessionPayload(value: unknown): value is ThaidSessionTicketPayload {
@@ -201,5 +233,5 @@ function isSessionPayload(value: unknown): value is ThaidSessionTicketPayload {
     return false;
   }
   const outcome = (value as Record<string, unknown>).outcome;
-  return outcome === 'login' || outcome === 'prefill';
+  return outcome === 'login' || outcome === 'prefill' || outcome === 'updated';
 }
