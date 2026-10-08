@@ -275,6 +275,18 @@ const navLinks = computed<NavigationItem[]>(() => {
   if (userStore.isLoggedIn && userStore.userRole) {
     const role = userStore.userRole;
 
+    if (
+      userStore.userRoles.includes(ROLES.SUPER_ADMIN) &&
+      (role === ROLES.SUPER_ADMIN || role === ROLES.ADMIN)
+    ) {
+      links.push({
+        name: 'admin-candidate-accounts',
+        label: t('navigation.candidateAccounts'),
+        icon: 'manage_accounts',
+        path: '/admin/candidate-accounts',
+      });
+    }
+
     // === Candidate Navigation ===
     if (role === ROLES.CANDIDATE) {
       links.push({

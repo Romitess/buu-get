@@ -1,11 +1,12 @@
 import {
   BadRequestException,
   ConflictException,
+  HttpException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, In, QueryFailedError, Repository } from 'typeorm';
 import {
   buildPaginatedResponse,
   PaginatedResponse,
@@ -145,36 +146,40 @@ export class CandidateAccountService {
       }
     }
 
-    await this.dataSource.transaction(async (manager) => {
-      if (nextEmail && nextEmail !== user.USER_EMAIL.toLowerCase()) {
-        await manager.update(
-          User,
-          { USER_ID: userId },
-          { USER_EMAIL: nextEmail },
-        );
-      }
-      if (dto.userNationalId !== undefined) {
-        await manager.update(
-          User,
-          { USER_ID: userId },
-          { USER_NATIONAL_ID: nextNationalId || null },
-        );
-      }
+    try {
+      await this.dataSource.transaction(async (manager) => {
+        if (nextEmail && nextEmail !== user.USER_EMAIL.toLowerCase()) {
+          await manager.update(
+            User,
+            { USER_ID: userId },
+            { USER_EMAIL: nextEmail },
+          );
+        }
+        if (dto.userNationalId !== undefined) {
+          await manager.update(
+            User,
+            { USER_ID: userId },
+            { USER_NATIONAL_ID: nextNationalId || null },
+          );
+        }
 
-      const profilePatch = this.profilePatch(dto);
-      let profile = await manager.findOne(UserProfile, {
-        where: { userId },
-      });
-      if (!profile) {
-        profile = manager.create(UserProfile, {
-          userId,
-          userRegisteredViaThaid: false,
-          userThaidSynced: false,
+        const profilePatch = this.profilePatch(dto);
+        let profile = await manager.findOne(UserProfile, {
+          where: { userId },
         });
-      }
-      Object.assign(profile, profilePatch);
-      await manager.save(UserProfile, profile);
-    });
+        if (!profile) {
+          profile = manager.create(UserProfile, {
+            userId,
+            userRegisteredViaThaid: false,
+            userThaidSynced: false,
+          });
+        }
+        Object.assign(profile, profilePatch);
+        await manager.save(UserProfile, profile);
+      });
+    } catch (error) {
+      asClientError(error, 'บันทึกบัญชีในระบบไม่สำเร็จ');
+    }
 
     const updated = await this.usersRepository.findOne({
       where: { USER_ID: userId },
@@ -199,76 +204,84 @@ export class CandidateAccountService {
     }
 
     if (user.USER_MOODLE_ID != null) {
-      await this.moodleSyncService.deleteUsers([user.USER_MOODLE_ID], {
-        userId: user.USER_ID,
-        refType: 'user',
-        refId: user.USER_ID,
-        moodleRefId: user.USER_MOODLE_ID,
-      });
+      try {
+        await this.moodleSyncService.deleteUsers([user.USER_MOODLE_ID], {
+          userId: user.USER_ID,
+          refType: 'user',
+          refId: user.USER_ID,
+          moodleRefId: user.USER_MOODLE_ID,
+        });
+      } catch (error) {
+        asClientError(error, 'ลบผู้ใช้ใน Moodle ไม่สำเร็จ');
+      }
     }
 
-    await this.dataSource.transaction(async (manager) => {
-      const enrollments = await manager.find(ExamEnrollment, {
-        where: { USER_ID: userId },
-        select: ['ERM_ID'],
-      });
-      const ermIds = enrollments.map((enrollment) => enrollment.ERM_ID);
-      if (ermIds.length > 0) {
-        const scores = await manager.find(ExamScore, {
-          where: { ERM_ID: In(ermIds) },
-          select: ['SCORES_ID'],
+    try {
+      await this.dataSource.transaction(async (manager) => {
+        const enrollments = await manager.find(ExamEnrollment, {
+          where: { USER_ID: userId },
+          select: ['ERM_ID'],
         });
-        const scoreIds = scores.map((score) => score.SCORES_ID);
-        if (scoreIds.length > 0) {
-          await manager.softDelete(ExamScoreLine, {
-            SCORES_ID: In(scoreIds),
+        const ermIds = enrollments.map((enrollment) => enrollment.ERM_ID);
+        if (ermIds.length > 0) {
+          const scores = await manager.find(ExamScore, {
+            where: { ERM_ID: In(ermIds) },
+            select: ['SCORES_ID'],
           });
-          await manager.softDelete(ExamScore, { SCORES_ID: In(scoreIds) });
+          const scoreIds = scores.map((score) => score.SCORES_ID);
+          if (scoreIds.length > 0) {
+            await manager.softDelete(ExamScoreLine, {
+              SCORES_ID: In(scoreIds),
+            });
+            await manager.softDelete(ExamScore, { SCORES_ID: In(scoreIds) });
+          }
+          await manager.softDelete(ExamVoucher, { ERM_ID: In(ermIds) });
+          const transactions = await manager.find(Transaction, {
+            where: { ERM_ID: In(ermIds) },
+            select: ['TRANX_ID'],
+          });
+          const transactionIds = transactions.map(
+            (transaction) => transaction.TRANX_ID,
+          );
+          if (transactionIds.length > 0) {
+            await manager.softDelete(Receipt, {
+              TRANX_ID: In(transactionIds),
+            });
+            await manager.softDelete(TransactionRef, {
+              TRANX_ID: In(transactionIds),
+            });
+            await manager.softDelete(TransactionProfile, {
+              TRANX_ID: In(transactionIds),
+            });
+            await manager.softDelete(Transaction, {
+              TRANX_ID: In(transactionIds),
+            });
+          }
+          await manager.softDelete(ExamEnrollment, { ERM_ID: In(ermIds) });
         }
-        await manager.softDelete(ExamVoucher, { ERM_ID: In(ermIds) });
-        const transactions = await manager.find(Transaction, {
-          where: { ERM_ID: In(ermIds) },
-          select: ['TRANX_ID'],
+
+        await manager.delete(ExamEnrollmentAuditLog, { USER_ID: userId });
+        await manager.softDelete(ExamCertificate, { USER_ID: userId });
+
+        const profile = await manager.findOne(UserProfile, {
+          where: { userId },
         });
-        const transactionIds = transactions.map(
-          (transaction) => transaction.TRANX_ID,
-        );
-        if (transactionIds.length > 0) {
-          await manager.softDelete(Receipt, {
-            TRANX_ID: In(transactionIds),
+        if (profile) {
+          await manager.softDelete(ProfileEditHistory, {
+            userProfileId: profile.userProfileId,
           });
-          await manager.softDelete(TransactionRef, {
-            TRANX_ID: In(transactionIds),
-          });
-          await manager.softDelete(TransactionProfile, {
-            TRANX_ID: In(transactionIds),
-          });
-          await manager.softDelete(Transaction, {
-            TRANX_ID: In(transactionIds),
+          await manager.softDelete(UserProfile, {
+            userProfileId: profile.userProfileId,
           });
         }
-        await manager.softDelete(ExamEnrollment, { ERM_ID: In(ermIds) });
-      }
 
-      await manager.delete(ExamEnrollmentAuditLog, { USER_ID: userId });
-      await manager.softDelete(ExamCertificate, { USER_ID: userId });
-
-      const profile = await manager.findOne(UserProfile, {
-        where: { userId },
+        await manager.delete(UserImage, { USER_ID: userId });
+        await manager.softDelete(NotificationRecipient, { USER_ID: userId });
+        await manager.softDelete(User, { USER_ID: userId });
       });
-      if (profile) {
-        await manager.softDelete(ProfileEditHistory, {
-          userProfileId: profile.userProfileId,
-        });
-        await manager.softDelete(UserProfile, {
-          userProfileId: profile.userProfileId,
-        });
-      }
-
-      await manager.delete(UserImage, { USER_ID: userId });
-      await manager.softDelete(NotificationRecipient, { USER_ID: userId });
-      await manager.softDelete(User, { USER_ID: userId });
-    });
+    } catch (error) {
+      asClientError(error, 'ลบบัญชีในระบบไม่สำเร็จ');
+    }
   }
 
   private buildMoodlePatch(
@@ -355,6 +368,19 @@ export class CandidateAccountService {
       moodleId: user.USER_MOODLE_ID,
     };
   }
+}
+
+function asClientError(error: unknown, fallback: string): never {
+  if (error instanceof HttpException) {
+    throw error;
+  }
+  if (error instanceof QueryFailedError) {
+    throw new BadRequestException(`${fallback}: ${error.message}`);
+  }
+  if (error instanceof Error && error.message) {
+    throw new BadRequestException(error.message);
+  }
+  throw new BadRequestException(fallback);
 }
 
 function deriveMoodleName(

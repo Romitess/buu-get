@@ -194,6 +194,14 @@ const menuLinks = computed(() => {
         icon: 'settings',
         path: '/admin/system-settings',
       });
+      if (userStore.userRoles.includes(ROLES.SUPER_ADMIN)) {
+        links.push({
+          name: 'admin-candidate-accounts',
+          label: t('navigation.candidateAccounts'),
+          icon: 'manage_accounts',
+          path: '/admin/candidate-accounts',
+        });
+      }
     }
     links.push({
       name: 'score-rubric-management',
@@ -318,6 +326,15 @@ const menuLinks = computed(() => {
       label: t('navigation.roomCheckIn'),
       icon: 'qr_code_scanner',
       path: '/admin/check-in/rooms',
+    });
+  }
+  // IF: Super admin เท่านั้น — ไม่โชว์เมื่อสลับไปมุมมองบทบาทอื่น
+  else if (role === ROLES.SUPER_ADMIN && userStore.userRoles.includes(ROLES.SUPER_ADMIN)) {
+    links.push({
+      name: 'admin-candidate-accounts',
+      label: t('navigation.candidateAccounts'),
+      icon: 'manage_accounts',
+      path: '/admin/candidate-accounts',
     });
   }
 

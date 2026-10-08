@@ -686,6 +686,7 @@ export default {
       save: 'Save',
       saved: 'Candidate account saved',
       saveError: 'Could not save the candidate account',
+      dismiss: 'Close',
       deleteTitle: 'Delete candidate account',
       deleteBody:
         'Delete {name}, including exam history, payments, scores, certificates, and the Moodle account?',

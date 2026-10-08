@@ -105,7 +105,7 @@ export function useNavigation() {
       labelKey: NAV_I18N_KEYS['admin-candidate-accounts'],
       icon: 'manage_accounts',
       path: '/admin/candidate-accounts',
-      requiredRoles: [ROLES.ADMIN],
+      requiredRoles: [ROLES.SUPER_ADMIN, ROLES.ADMIN],
       requireRealRoles: [ROLES.SUPER_ADMIN],
     },
   ];

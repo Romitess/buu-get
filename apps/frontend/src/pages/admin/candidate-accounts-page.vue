@@ -228,10 +228,24 @@ const columns = computed<QTableProps['columns']>(() => [
 function readError(err: unknown): string {
   if (axios.isAxiosError(err)) {
     const message = err.response?.data?.message;
-    if (typeof message === 'string') return message;
-    if (Array.isArray(message)) return message.map(String).join(', ');
+    if (typeof message === 'string' && message.trim()) return message;
+    if (Array.isArray(message)) {
+      const lines = message.map(String).filter((line) => line.trim());
+      if (lines.length > 0) return lines.join('\n');
+    }
   }
   return t('admin.candidateAccounts.saveError');
+}
+
+function showError(err: unknown): void {
+  $q.notify({
+    type: 'negative',
+    message: readError(err),
+    multiLine: true,
+    timeout: 12000,
+    position: 'top',
+    actions: [{ label: t('admin.candidateAccounts.dismiss'), color: 'white' }],
+  });
 }
 
 async function load(): Promise<void> {
@@ -245,7 +259,7 @@ async function load(): Promise<void> {
     rows.value = result.data;
     pagination.value.rowsNumber = result.meta.total;
   } catch (err) {
-    $q.notify({ type: 'negative', message: readError(err) });
+    showError(err);
   } finally {
     isLoading.value = false;
   }
@@ -296,7 +310,7 @@ async function saveEdit(): Promise<void> {
     $q.notify({ type: 'positive', message: t('admin.candidateAccounts.saved') });
     await load();
   } catch (err) {
-    $q.notify({ type: 'negative', message: readError(err) });
+    showError(err);
   } finally {
     isSaving.value = false;
   }
@@ -322,7 +336,7 @@ async function runPurge(userId: number): Promise<void> {
     $q.notify({ type: 'positive', message: t('admin.candidateAccounts.deleted') });
     await load();
   } catch (err) {
-    $q.notify({ type: 'negative', message: readError(err) });
+    showError(err);
   } finally {
     isLoading.value = false;
   }

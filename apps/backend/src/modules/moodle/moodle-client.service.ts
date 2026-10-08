@@ -8,6 +8,7 @@ import { EntityManager } from 'typeorm';
 import { MoodleSyncLogsService } from '../moodle-sync-logs/moodle-sync-logs.service';
 import { MoodleAction } from '../moodle-sync-logs/entities/moodle-sync-log.entity';
 import { MoodleLogMeta } from './types/moodle.types';
+import { formatMoodleError, MoodleExceptionBody } from './moodle-error';
 
 const REQUEST_TIMEOUT_MS = 15000;
 const MAX_RETRIES = 2;
@@ -17,13 +18,6 @@ const RETRYABLE_CODES = new Set([
   'ECONNRESET',
   'ECONNREFUSED',
 ]);
-
-/** error ที่ Moodle ส่งกลับมาแม้ HTTP 200 */
-interface MoodleExceptionBody {
-  exception: string;
-  errorcode?: string;
-  message?: string;
-}
 
 function isMoodleException(body: unknown): body is MoodleExceptionBody {
   return (
@@ -98,9 +92,7 @@ export class MoodleClientService {
       responseBody = response.data;
 
       if (isMoodleException(responseBody)) {
-        errorMessage = `${responseBody.errorcode ?? 'moodle_exception'}: ${
-          responseBody.message ?? ''
-        }`.trim();
+        errorMessage = formatMoodleError(responseBody);
         throw new Error(errorMessage);
       }
 
