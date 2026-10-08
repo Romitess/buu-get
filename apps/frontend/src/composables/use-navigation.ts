@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useUserStore } from 'src/stores/user.store';
 import { ROLES } from 'src/constants/roles';
 import type { NavigationItem } from 'src/types/navigation';
+import type { UserRole } from 'src/types/user';
 import { useQuasar } from 'quasar';
 
 const NAV_I18N_KEYS = {
@@ -16,10 +17,13 @@ const NAV_I18N_KEYS = {
   'admin-create-exam': 'navigation.createExam',
   'admin-exam-management': 'navigation.manageExams',
   'admin-page-builder': 'navigation.pageBuilder',
+  'admin-candidate-accounts': 'navigation.candidateAccounts',
 } as const satisfies Record<string, string>;
 
 interface NavigationLinkDef extends Omit<NavigationItem, 'label'> {
   labelKey: string;
+  /** บทบาทจริงที่ต้องมี แม้ผู้ใช้จะสลับมุมมองอยู่ */
+  requireRealRoles?: UserRole[];
 }
 
 // Global shared state for the admin sidebar drawer
@@ -96,12 +100,27 @@ export function useNavigation() {
       path: '/admin/page-builder',
       requiredRoles: [ROLES.STAFF, ROLES.ADMIN, ROLES.REGISTRATION_OFFICER],
     },
+    {
+      name: 'admin-candidate-accounts',
+      labelKey: NAV_I18N_KEYS['admin-candidate-accounts'],
+      icon: 'manage_accounts',
+      path: '/admin/candidate-accounts',
+      requiredRoles: [ROLES.ADMIN],
+      requireRealRoles: [ROLES.SUPER_ADMIN],
+    },
   ];
 
   const computedLinks: ComputedRef<NavigationItem[]> = computed(() => {
     void locale.value;
 
     return allLinkDefs
+      .filter((link) => {
+        if (!link.requireRealRoles || link.requireRealRoles.length === 0) {
+          return true;
+        }
+        if (!userStore.isLoggedIn) return false;
+        return link.requireRealRoles.some((role) => userStore.userRoles.includes(role));
+      })
       .map((link) => {
         const item: NavigationItem = {
           name: link.name,

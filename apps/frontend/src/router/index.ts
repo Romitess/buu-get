@@ -52,6 +52,13 @@ export default defineRouter(({ store }) => {
       if (isRoomCheckInRoute(to.name) && !canAccessRoomCheckInPage(userStore.userRole)) {
         return getDefaultRouteForRole(userStore.userRole);
       }
+      // หน้าจัดการบัญชีผู้สมัครใช้บทบาทจริง super_admin ไม่ใช้ทางลัดของ admin
+      if (
+        to.name === 'admin-candidate-accounts' &&
+        !userStore.userRoles.includes(ROLES.SUPER_ADMIN)
+      ) {
+        return getDefaultRouteForRole(userStore.userRole);
+      }
       // multi-role: ผ่านถ้า user มี role อย่างน้อยหนึ่งตัวที่ route อนุญาต
       const hasPermission =
         isPrivileged ||

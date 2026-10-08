@@ -10,6 +10,7 @@ import {
   MoodleEnrolmentInput,
   MoodleLogMeta,
   MoodleUserInput,
+  MoodleUserUpdateInput,
 } from './types/moodle.types';
 
 const DEFAULT_STUDENT_ROLEID = 5;
@@ -73,6 +74,19 @@ export class MoodleSyncService {
       throw new Error('Moodle ไม่ได้คืน user id');
     }
     return id;
+  }
+
+  /** core_user_update_users → อัปเดตผู้ใช้ใน Moodle; Moodle ไม่คืน response body */
+  async updateUser(
+    moodleUserId: number,
+    input: MoodleUserUpdateInput,
+    meta: MoodleLogMeta,
+  ): Promise<void> {
+    await this.client.call<null>(
+      MoodleAction.CORE_USER_UPDATE_USERS,
+      { users: [{ id: moodleUserId, ...input }] },
+      meta,
+    );
   }
 
   /** core_user_delete_users → ลบผู้ใช้ใน Moodle (batch); Moodle ไม่คืน response body */

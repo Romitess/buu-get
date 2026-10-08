@@ -39,6 +39,15 @@ export interface MoodleCreatedUser {
   username: string;
 }
 
+/** ฟิลด์ที่ส่งให้ core_user_update_users นอกจาก id */
+export interface MoodleUserUpdateInput {
+  firstname?: string;
+  lastname?: string;
+  email?: string;
+  username?: string;
+  idnumber?: string;
+}
+
 export interface MoodleEnrolmentInput {
   roleid: number;
   userid: number;

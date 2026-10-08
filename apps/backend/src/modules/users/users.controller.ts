@@ -34,12 +34,19 @@ import {
   DeleteUsersByRangeDto,
   DeleteUsersByRangeResponseDto,
 } from './dto/delete-users-by-range.dto';
+import { CandidateAccountService } from './candidate-account.service';
+import { CandidateAccountResponseDto } from './dto/candidate-account-response.dto';
+import { UpdateCandidateAccountDto } from './dto/update-candidate-account.dto';
 import { UsersService } from './users.service';
+import { RoleEnum } from '../roles/enums/role.enum';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly candidateAccountService: CandidateAccountService,
+  ) {}
 
   @Post()
   @Roles(...USER_ADMIN_ROLES)
@@ -83,6 +90,35 @@ export class UsersController {
       body.endUserId,
       requireUserId(user),
     );
+  }
+
+  @Get('candidates')
+  @Roles(RoleEnum.SUPER_ADMIN)
+  @ApiOkResponse({ description: 'รายการบัญชีผู้สมัครสำหรับผู้ดูแลระบบสูงสุด' })
+  findCandidates(
+    @Query() query: UsersQueryDto,
+  ): Promise<PaginatedResponse<CandidateAccountResponseDto>> {
+    return this.candidateAccountService.findCandidates(query);
+  }
+
+  @Patch('candidates/:id')
+  @Roles(RoleEnum.SUPER_ADMIN)
+  @ApiOkResponse({ type: CandidateAccountResponseDto })
+  updateCandidate(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateCandidateAccountDto,
+  ): Promise<CandidateAccountResponseDto> {
+    return this.candidateAccountService.updateCandidate(id, body);
+  }
+
+  @Delete('candidates/:id')
+  @Roles(RoleEnum.SUPER_ADMIN)
+  @ApiOkResponse({
+    description:
+      'ลบผู้ใช้ใน Moodle แล้ว soft-delete บัญชีและประวัติที่เกี่ยวข้อง',
+  })
+  purgeCandidate(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.candidateAccountService.purgeCandidate(id);
   }
 
   @Get(':id')

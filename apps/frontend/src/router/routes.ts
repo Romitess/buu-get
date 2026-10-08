@@ -330,6 +330,18 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'candidate-accounts',
+            name: 'admin-candidate-accounts',
+            component: () => import('pages/admin/candidate-accounts-page.vue'),
+            meta: {
+              roles: [ROLES.SUPER_ADMIN],
+              breadcrumb: [
+                { label: 'navigation.home', icon: 'home', to: '/' },
+                { label: 'navigation.candidateAccounts', icon: 'manage_accounts' },
+              ],
+            },
+          },
+          {
             path: 'system-settings',
             name: 'admin-system-settings',
             component: () => import('pages/admin/system-settings-page.vue'),
