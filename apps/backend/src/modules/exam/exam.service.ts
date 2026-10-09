@@ -89,7 +89,7 @@ export class ExamService {
         d ? Math.floor(new Date(d).getTime() / 1000) : undefined;
       const moodleCourseId = await this.moodleSyncService.createCourse(
         {
-          fullname: exam.EXAM_NAME,
+          fullname: this.formatMoodleCourseName(exam),
           shortname: `BUUGET-${exam.EXAM_ID}-R${exam.EXAM_ROUND}`,
           categoryid: this.moodleSyncService.courseCategoryId,
           startdate: toUnix(exam.EXAM_REG_START_DATE) ?? toUnix(exam.EXAM_DATE),
@@ -108,6 +108,18 @@ export class ExamService {
         error instanceof Error ? error.stack : String(error),
       );
     }
+  }
+
+  /** ชื่อคอร์ส Moodle ให้ตรงกับชื่อรอบสอบบนเว็บ เช่น BUU-GET 1/2027 */
+  private formatMoodleCourseName(exam: Exam): string {
+    const name = exam.EXAM_NAME?.trim() ?? '';
+    const round = exam.EXAM_ROUND?.trim() ?? '';
+    const year = exam.EXAM_FISCAL_YEAR?.trim() ?? '';
+    const instance = round && year ? `${round}/${year}` : round || year;
+    if (name && instance) {
+      return `${name} ${instance}`;
+    }
+    return name || instance || 'BUU-GET';
   }
 
   /**

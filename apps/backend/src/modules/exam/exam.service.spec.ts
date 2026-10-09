@@ -219,15 +219,18 @@ describe('ExamService', () => {
 
     it('should return saved exam without waiting for Moodle sync', async () => {
       // Arrange
-      const dto: CreateExamDto = { EXAM_NAME: 'Exam C', SRB_ID: 3 };
+      const dto: CreateExamDto = {
+        EXAM_NAME: 'BUU-GET',
+        EXAM_ROUND: '1',
+        EXAM_FISCAL_YEAR: '2027',
+        SRB_ID: 3,
+      };
       examRepository.create.mockImplementation((payload: CreateExamDto) => ({
         EXAM_ID: 11,
-        EXAM_ROUND: '1',
         ...payload,
       }));
       examRepository.save.mockResolvedValue({
         EXAM_ID: 11,
-        EXAM_ROUND: '1',
         ...dto,
       });
       let resolveMoodle!: (value: number) => void;
@@ -244,7 +247,10 @@ describe('ExamService', () => {
 
       // Assert
       expect(saved.EXAM_ID).toBe(11);
-      expect(moodleSyncService.createCourse).toHaveBeenCalled();
+      expect(moodleSyncService.createCourse).toHaveBeenCalledWith(
+        expect.objectContaining({ fullname: 'BUU-GET 1/2027' }),
+        expect.objectContaining({ refId: 11 }),
+      );
       resolveMoodle(999);
     });
   });
