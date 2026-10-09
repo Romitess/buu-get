@@ -103,9 +103,9 @@ export class ExamService {
         { EXAM_MOODLE_COURSE_ID: String(moodleCourseId) },
       );
     } catch (error) {
-      console.error(
-        `[Moodle] สร้างคอร์สไม่สำเร็จสำหรับ EXAM_ID ${exam.EXAM_ID}:`,
-        error,
+      this.logger.error(
+        `สร้างคอร์ส Moodle ไม่สำเร็จสำหรับ EXAM_ID ${exam.EXAM_ID}`,
+        error instanceof Error ? error.stack : String(error),
       );
     }
   }

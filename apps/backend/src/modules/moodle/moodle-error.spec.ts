@@ -25,6 +25,19 @@ describe('formatMoodleError', () => {
     );
   });
 
+  it('explains an invalid course category context', () => {
+    expect(
+      formatMoodleError({
+        exception: 'moodle_exception',
+        errorcode: 'errorcatcontextnotvalid',
+        message:
+          'You cannot execute functions in the category context (category id:1). The context error message was: Invalid parameter value detected',
+      }),
+    ).toBe(
+      'หมวดหมู่คอร์สของ Moodle ใช้ไม่ได้: You cannot execute functions in the category context (category id:1). The context error message was: Invalid parameter value detected ตรวจค่า MOODLE_COURSE_CATEGORY_ID',
+    );
+  });
+
   it('keeps the raw detail when the cause is not recognized', () => {
     expect(
       formatMoodleError({

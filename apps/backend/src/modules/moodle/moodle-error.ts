@@ -14,6 +14,9 @@ export function formatMoodleError(body: MoodleExceptionBody): string {
   const detail = (body.debuginfo ?? '').trim();
   const generic = (body.message ?? '').trim();
   const specific = detail || generic;
+  if (body.errorcode === 'errorcatcontextnotvalid') {
+    return `หมวดหมู่คอร์สของ Moodle ใช้ไม่ได้: ${generic} ตรวจค่า MOODLE_COURSE_CATEGORY_ID`;
+  }
   const explained = explainMoodleDetail(specific);
   if (explained) {
     return explained;

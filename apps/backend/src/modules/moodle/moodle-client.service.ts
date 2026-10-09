@@ -67,26 +67,27 @@ export class MoodleClientService {
     manager?: EntityManager,
   ): Promise<T> {
     // ต่อ TCP ไป IP ภายใน (PRIVATE_IP) แต่ verify TLS + ส่ง Host/SNI ตามชื่อโดเมน (MOODLE_NAME)
-    const ip = this.configService
-      .getOrThrow<string>('MOODLE_PRIVATE_IP')
-      .replace(/^https?:\/\//, '')
-      .replace(/\/+$/, '');
-    const serverName = this.configService.getOrThrow<string>('MOODLE_NAME');
-    const token = this.configService.getOrThrow<string>('MOODLE_WS_TOKEN');
-    const url = `https://${ip}/webservice/rest/server.php`;
-
-    const body = qs.stringify({
-      wstoken: token,
-      wsfunction: action,
-      moodlewsrestformat: 'json',
-      ...params,
-    });
-
     let httpStatus: number | null = null;
     let responseBody: unknown = null;
     let errorMessage: string | null = null;
+    let url = '';
 
     try {
+      const ip = this.configService
+        .getOrThrow<string>('MOODLE_PRIVATE_IP')
+        .replace(/^https?:\/\//, '')
+        .replace(/\/+$/, '');
+      const serverName = this.configService.getOrThrow<string>('MOODLE_NAME');
+      const token = this.configService.getOrThrow<string>('MOODLE_WS_TOKEN');
+      url = `https://${ip}/webservice/rest/server.php`;
+
+      const body = qs.stringify({
+        wstoken: token,
+        wsfunction: action,
+        moodlewsrestformat: 'json',
+        ...params,
+      });
+
       const response = await this.postWithRetry(url, body, serverName);
       httpStatus = response.status;
       responseBody = response.data;
@@ -106,7 +107,7 @@ export class MoodleClientService {
     } finally {
       await this.writeLog(
         action,
-        url,
+        url || 'unconfigured',
         params,
         responseBody,
         httpStatus,
