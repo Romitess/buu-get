@@ -51,7 +51,11 @@ describe('ExamService', () => {
   let examEnrollmentRepository: MockRepo;
   let scoreRubricsService: { assertRubricUsable: jest.Mock };
   let examScoresService: { examHasSavedScores: jest.Mock };
-  let moodleSyncService: { createCourse: jest.Mock; courseCategoryId: number };
+  let moodleSyncService: {
+    createCourse: jest.Mock;
+    deleteCourses: jest.Mock;
+    courseCategoryId: number;
+  };
   let platformGatewayService: { sendEmail: jest.Mock };
 
   beforeEach(async () => {
@@ -73,7 +77,11 @@ describe('ExamService', () => {
         },
         {
           provide: MoodleSyncService,
-          useValue: { createCourse: jest.fn(), courseCategoryId: 1 },
+          useValue: {
+            createCourse: jest.fn(),
+            deleteCourses: jest.fn(),
+            courseCategoryId: 1,
+          },
         },
         { provide: PlatformGatewayService, useValue: { sendEmail: jest.fn() } },
         {
@@ -252,6 +260,58 @@ describe('ExamService', () => {
         expect.objectContaining({ refId: 11 }),
       );
       resolveMoodle(999);
+    });
+  });
+
+  describe('remove', () => {
+    it('deletes the Moodle course before soft-deleting the exam', async () => {
+      examRepository.findOne.mockResolvedValue({
+        EXAM_ID: 11,
+        EXAM_MOODLE_COURSE_ID: '495',
+        SESSIONS: [],
+      });
+      moodleSyncService.deleteCourses.mockResolvedValue(undefined);
+      examPasscodeRepository.delete.mockResolvedValue(undefined);
+      examRepository.softRemove.mockResolvedValue(undefined);
+
+      await service.remove(11, 7);
+
+      expect(moodleSyncService.deleteCourses).toHaveBeenCalledWith(
+        [495],
+        expect.objectContaining({ refType: 'course', refId: 11, userId: 7 }),
+      );
+      expect(examRepository.softRemove).toHaveBeenCalled();
+    });
+
+    it('does not soft-delete the exam when Moodle refuses to delete the course', async () => {
+      examRepository.findOne.mockResolvedValue({
+        EXAM_ID: 11,
+        EXAM_MOODLE_COURSE_ID: '495',
+        SESSIONS: [],
+      });
+      moodleSyncService.deleteCourses.mockRejectedValue(
+        new Error('accessexception: Access control exception'),
+      );
+
+      await expect(service.remove(11)).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+      expect(examRepository.softRemove).not.toHaveBeenCalled();
+    });
+
+    it('soft-deletes the exam when it has no Moodle course id', async () => {
+      examRepository.findOne.mockResolvedValue({
+        EXAM_ID: 11,
+        EXAM_MOODLE_COURSE_ID: null,
+        SESSIONS: [],
+      });
+      examPasscodeRepository.delete.mockResolvedValue(undefined);
+      examRepository.softRemove.mockResolvedValue(undefined);
+
+      await service.remove(11);
+
+      expect(moodleSyncService.deleteCourses).not.toHaveBeenCalled();
+      expect(examRepository.softRemove).toHaveBeenCalled();
     });
   });
 

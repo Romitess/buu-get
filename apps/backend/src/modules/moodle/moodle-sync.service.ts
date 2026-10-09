@@ -57,6 +57,21 @@ export class MoodleSyncService {
     return id;
   }
 
+  /** core_course_delete_courses → ลบคอร์สใน Moodle; Moodle ไม่คืน response body */
+  async deleteCourses(
+    courseIds: number[],
+    meta: MoodleLogMeta,
+  ): Promise<void> {
+    if (courseIds.length === 0) {
+      return;
+    }
+    await this.client.call<null>(
+      MoodleAction.CORE_COURSE_DELETE_COURSES,
+      { courseids: courseIds },
+      meta,
+    );
+  }
+
   /** core_user_create_users → คืน Moodle user id */
   async createUser(
     input: MoodleUserInput,

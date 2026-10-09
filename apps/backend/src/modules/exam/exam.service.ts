@@ -437,14 +437,51 @@ export class ExamService {
     return await this.examRepository.save(updated);
   }
 
-  async remove(id: number): Promise<void> {
-    await this.assertExamExists(id);
+  async remove(id: number, actingUserId?: number): Promise<void> {
+    const exam = await this.findOneForMutation(id);
+    await this.deleteMoodleCourse(exam, actingUserId);
     // ExamPasscode ไม่มี soft delete — ลบ hard delete ก่อน softRemove exam
     await this.examPasscodeLogRepository.delete({ EXAM_ID: id });
     await this.examPasscodeRepository.delete({ EXAM_ID: id });
-
-    const exam = await this.findOneForMutation(id);
     await this.examRepository.softRemove(exam);
+  }
+
+  /**
+   * ลบคอร์ส Moodle ก่อนลบรอบสอบในระบบ
+   * ไม่มีรหัสคอร์ส หรือคอร์สถูกลบใน Moodle ไปแล้ว ให้ลบในระบบต่อได้
+   * ความล้มเหลวอื่นจาก Moodle ต้องไม่ลบรอบสอบ เพื่อให้แก้สิทธิ์แล้วกดซ้ำได้
+   */
+  private async deleteMoodleCourse(
+    exam: Exam,
+    actingUserId?: number,
+  ): Promise<void> {
+    const courseId = Number(exam.EXAM_MOODLE_COURSE_ID);
+    if (!Number.isInteger(courseId) || courseId <= 0) {
+      return;
+    }
+    try {
+      await this.moodleSyncService.deleteCourses([courseId], {
+        userId: actingUserId,
+        refType: 'course',
+        refId: exam.EXAM_ID,
+        moodleRefId: courseId,
+      });
+    } catch (error) {
+      if (this.isMoodleCourseAlreadyGone(error)) {
+        this.logger.warn(
+          `คอร์ส Moodle ${courseId} ของ EXAM_ID ${exam.EXAM_ID} ไม่พบแล้ว ลบรอบสอบในระบบต่อ`,
+        );
+        return;
+      }
+      const message =
+        error instanceof Error ? error.message : 'ลบคอร์สใน Moodle ไม่สำเร็จ';
+      throw new BadRequestException(message);
+    }
+  }
+
+  private isMoodleCourseAlreadyGone(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error);
+    return /can't find data record in database table course/i.test(message);
   }
 
   /**

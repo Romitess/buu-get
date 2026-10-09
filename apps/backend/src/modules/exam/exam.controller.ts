@@ -151,8 +151,11 @@ export class ExamController {
   @Roles(...EXAM_ADMIN_ROLES)
   @ApiOperation({ summary: 'ลบข้อมูลการสอบ' })
   @ApiOkResponse({ description: 'ลบข้อมูลสำเร็จ' })
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.examService.remove(id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: { user?: { userId?: number } },
+  ): Promise<void> {
+    return this.examService.remove(id, req.user?.userId);
   }
 
   @Get(':id/passcode-history')
