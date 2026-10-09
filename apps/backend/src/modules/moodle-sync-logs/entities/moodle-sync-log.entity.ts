@@ -25,9 +25,10 @@ export class MoodleSyncLog {
   @Column({
     name: 'USER_ID',
     type: 'int',
-    comment: 'รหัสผู้สมัคร (Foreign Key)',
+    nullable: true,
+    comment: 'รหัสผู้ใช้ (Foreign Key) ว่างได้เมื่อผู้กระทำเป็นบุคลากร',
   })
-  USER_ID: number;
+  USER_ID: number | null;
 
   @Column({
     name: 'ML_ACTION',
@@ -122,7 +123,7 @@ export class MoodleSyncLog {
   })
   CREATED_AT: Date;
 
-  @ManyToOne(() => User, (user) => user.MOODLE_SYNC_LOGS)
+  @ManyToOne(() => User, (user) => user.MOODLE_SYNC_LOGS, { nullable: true })
   @JoinColumn({ name: 'USER_ID' })
-  USER: User;
+  USER: User | null;
 }

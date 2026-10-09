@@ -1,7 +1,10 @@
-/** ข้อมูลอ้างอิงสำหรับบันทึก moodle_sync_log (ทุก field NOT NULL ตาม schema) */
+/** ข้อมูลอ้างอิงสำหรับบันทึก moodle_sync_log */
 export interface MoodleLogMeta {
-  /** user ภายในระบบที่อ้างอิง (FK USER_ID) */
-  userId: number;
+  /**
+   * USER_ID ของผู้สมัคร บุคลากร (person) ไม่มีค่านี้
+   * คอลัมน์ในล็อกจึงว่างได้
+   */
+  userId?: number;
   /** ประเภทอ้างอิง เช่น 'user' | 'course' | 'enrolment' | 'grade' */
   refType: string;
   /** id อ้างอิงภายในระบบ */

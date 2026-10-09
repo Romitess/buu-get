@@ -185,7 +185,10 @@ export class MoodleClientService {
     try {
       await this.syncLogsService.create(
         {
-          USER_ID: meta.userId,
+          USER_ID:
+            typeof meta.userId === 'number' && Number.isInteger(meta.userId)
+              ? meta.userId
+              : null,
           ML_ACTION: action,
           ML_WS_FUNCTION: action,
           ML_REQUEST_URL: url,

@@ -10,10 +10,13 @@ import {
 import { MoodleAction } from '../entities/moodle-sync-log.entity';
 
 export class CreateMoodleSyncLogDto {
-  @ApiProperty({ description: 'รหัสผู้สมัคร', example: 1 })
+  @ApiPropertyOptional({
+    description: 'รหัสผู้ใช้ ว่างได้เมื่อผู้กระทำเป็นบุคลากร',
+    example: 1,
+  })
+  @IsOptional()
   @IsInt()
-  @IsNotEmpty()
-  USER_ID: number;
+  USER_ID?: number | null;
 
   @ApiProperty({
     description: 'การทำงานที่ซิงก์',
