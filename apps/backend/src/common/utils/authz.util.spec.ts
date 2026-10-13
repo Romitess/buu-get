@@ -53,10 +53,20 @@ describe('authz.util', () => {
       expect(resolveActiveRole(adminUser, RoleEnum.ADMIN)).toBe(RoleEnum.ADMIN);
     });
 
-    it('ignores header for non-privileged users', () => {
+    it('ignores a role the user does not hold', () => {
       expect(
         resolveActiveRole(candidateUser, RoleEnum.REGISTRATION_OFFICER),
       ).toBeUndefined();
+    });
+
+    it('allows a user with several roles to switch among roles they hold', () => {
+      const user: AuthenticatedUser = {
+        ...candidateUser,
+        role: RoleEnum.FINANCE,
+        roles: [RoleEnum.FINANCE, RoleEnum.PROCTOR],
+      };
+      expect(resolveActiveRole(user, RoleEnum.PROCTOR)).toBe(RoleEnum.PROCTOR);
+      expect(resolveActiveRole(user, RoleEnum.ADMIN)).toBeUndefined();
     });
 
     it('ignores invalid header for super_admin', () => {

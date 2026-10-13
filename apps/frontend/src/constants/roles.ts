@@ -73,17 +73,22 @@ function normalizeRoleName(role: string): string {
 }
 
 /**
- * บทบาทในเมนูสลับมุมมอง = บทบาทที่ผู้ใช้ถือจริง ∪ ชุดพรีวิวตามสิทธิ์
- * admin/super_admin เท่านั้นที่สลับได้
+ * บทบาทในเมนูสลับมุมมอง
+ * - ถือมากกว่า 1 บทบาท → สลับได้เฉพาะบทบาทที่ถือจริง
+ * - admin / super_admin → บทบาทที่ถือจริง ∪ ชุดพรีวิว
  */
 export function resolveSwitchableRoles(realRoles: readonly string[]): RoleValue[] {
   const normalizedReal = realRoles.map(normalizeRoleName);
   const isSuperAdmin = normalizedReal.includes(normalizeRoleName(ROLES.SUPER_ADMIN));
   const isAdmin = normalizedReal.includes(normalizeRoleName(ROLES.ADMIN));
-  if (!isSuperAdmin && !isAdmin) return [];
 
-  const catalog = isSuperAdmin ? SUPER_ADMIN_SWITCHABLE_ROLES : ADMIN_SWITCHABLE_ROLES;
-  const allowed = new Set<string>([...normalizedReal, ...catalog.map(normalizeRoleName)]);
+  const allowed = new Set<string>(normalizedReal);
+  if (isSuperAdmin || isAdmin) {
+    const catalog = isSuperAdmin ? SUPER_ADMIN_SWITCHABLE_ROLES : ADMIN_SWITCHABLE_ROLES;
+    for (const role of catalog) {
+      allowed.add(normalizeRoleName(role));
+    }
+  }
 
   return SWITCHABLE_ROLE_ORDER.filter((role) => allowed.has(normalizeRoleName(role)));
 }

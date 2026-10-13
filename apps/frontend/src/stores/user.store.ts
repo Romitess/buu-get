@@ -37,11 +37,9 @@ export const useUserStore = defineStore('user', () => {
   /** role ทั้งหมดของผู้ใช้ — ใช้สำหรับเช็กสิทธิ์แบบ multi-role */
   const userRoles = computed<UserRole[]>(() => currentUser.value?.roles ?? []);
 
-  const canSwitchRole = computed(() =>
-    userRoles.value.some((r) => r === ROLES.ADMIN || r === ROLES.SUPER_ADMIN),
-  );
-
   const switchableRoles = computed<UserRole[]>(() => resolveSwitchableRoles(userRoles.value));
+
+  const canSwitchRole = computed(() => switchableRoles.value.length > 1);
 
   const userRole = computed<UserRole | null>(() => {
     if (canSwitchRole.value && activeRole.value) {
@@ -103,9 +101,17 @@ export const useUserStore = defineStore('user', () => {
       return;
     }
 
-    // ค่าเริ่มต้น: มุมมอง admin (หรือตัวแรกในรายการที่สลับได้)
-    if (switchableRoles.value.includes(ROLES.ADMIN)) {
+    const holdsPrivilegedRole = userRoles.value.some(
+      (role) => role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN,
+    );
+    if (holdsPrivilegedRole && switchableRoles.value.includes(ROLES.ADMIN)) {
       setActiveRole(ROLES.ADMIN);
+      return;
+    }
+
+    const primary = currentUser.value?.role;
+    if (primary && switchableRoles.value.includes(primary)) {
+      setActiveRole(primary);
       return;
     }
     const fallback = switchableRoles.value[0];

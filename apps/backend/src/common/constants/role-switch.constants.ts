@@ -19,10 +19,4 @@ export const SUPER_ADMIN_SWITCHABLE_ROLES: RoleEnum[] = [
   RoleEnum.ADMIN,
 ];
 
-/** role ที่สามารถใช้ X-Active-Role header ได้ */
-export const PRIVILEGED_ROLES: RoleEnum[] = [
-  RoleEnum.ADMIN,
-  RoleEnum.SUPER_ADMIN,
-];
-
 export const ACTIVE_ROLE_HEADER = 'x-active-role';

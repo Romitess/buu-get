@@ -23,7 +23,14 @@ describe('resolveSwitchableRoles', () => {
     expect(roles).toContain(ROLES.CANDIDATE);
   });
 
-  it('returns no switch options when the user is not admin or super_admin', () => {
-    expect(resolveSwitchableRoles([ROLES.FINANCE, ROLES.PROCTOR])).toEqual([]);
+  it('lets a user with several roles switch among the roles they hold', () => {
+    expect(resolveSwitchableRoles([ROLES.FINANCE, ROLES.PROCTOR])).toEqual([
+      ROLES.FINANCE,
+      ROLES.PROCTOR,
+    ]);
+  });
+
+  it('returns the single held role when there is nothing to switch', () => {
+    expect(resolveSwitchableRoles([ROLES.FINANCE])).toEqual([ROLES.FINANCE]);
   });
 });

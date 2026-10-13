@@ -38,7 +38,7 @@
 
           <q-separator />
 
-          <!-- Role Switcher (admin / super_admin only) -->
+          <!-- Role Switcher: มากกว่า 1 บทบาท หรือชุดพรีวิวของ admin -->
           <template v-if="userStore.canSwitchRole">
             <div class="profile-card__switch-label">{{ $t('profile.switchRole') }}</div>
             <div class="profile-card__switch-select" @click.stop>

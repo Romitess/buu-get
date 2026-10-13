@@ -2,7 +2,6 @@ import { ForbiddenException } from '@nestjs/common';
 import { RoleEnum } from 'src/modules/roles/enums/role.enum';
 import {
   ADMIN_SWITCHABLE_ROLES,
-  PRIVILEGED_ROLES,
   SUPER_ADMIN_SWITCHABLE_ROLES,
 } from '../constants/role-switch.constants';
 
@@ -31,11 +30,6 @@ export function getUserRoles(user: AuthenticatedUser): RoleEnum[] {
   return user.role ? [user.role] : [];
 }
 
-function isPrivilegedUser(user: AuthenticatedUser): boolean {
-  const realRoles = getUserRoles(user).map((r) => normalizeRole(r));
-  return PRIVILEGED_ROLES.some((r) => realRoles.includes(normalizeRole(r)));
-}
-
 const SWITCHABLE_ROLE_ORDER: RoleEnum[] = [
   RoleEnum.SUPER_ADMIN,
   RoleEnum.ADMIN,
@@ -48,7 +42,11 @@ const SWITCHABLE_ROLE_ORDER: RoleEnum[] = [
   RoleEnum.CANDIDATE,
 ];
 
-/** บทบาทที่สลับมุมมองได้ = ที่ผู้ใช้ถือจริง ∪ ชุดพรีวิวตามสิทธิ์ */
+/**
+ * บทบาทที่สลับมุมมองได้
+ * - มากกว่า 1 บทบาท → เฉพาะบทบาทที่ถือจริง
+ * - admin / super_admin → ที่ถือจริง ∪ ชุดพรีวิว
+ */
 function getSwitchableRolesForUser(user: AuthenticatedUser): RoleEnum[] {
   const realRoles = getUserRoles(user);
   const normalizedReal = realRoles.map((r) => normalizeRole(r));
@@ -56,29 +54,28 @@ function getSwitchableRolesForUser(user: AuthenticatedUser): RoleEnum[] {
     normalizeRole(RoleEnum.SUPER_ADMIN),
   );
   const isAdmin = normalizedReal.includes(normalizeRole(RoleEnum.ADMIN));
-  if (!isSuperAdmin && !isAdmin) {
-    return [];
-  }
 
-  const catalog = isSuperAdmin
-    ? SUPER_ADMIN_SWITCHABLE_ROLES
-    : ADMIN_SWITCHABLE_ROLES;
-  const allowed = new Set<string>([
-    ...normalizedReal,
-    ...catalog.map((role) => normalizeRole(role)),
-  ]);
+  const allowed = new Set<string>(normalizedReal);
+  if (isSuperAdmin || isAdmin) {
+    const catalog = isSuperAdmin
+      ? SUPER_ADMIN_SWITCHABLE_ROLES
+      : ADMIN_SWITCHABLE_ROLES;
+    for (const role of catalog) {
+      allowed.add(normalizeRole(role));
+    }
+  }
 
   return SWITCHABLE_ROLE_ORDER.filter((role) =>
     allowed.has(normalizeRole(role)),
   );
 }
 
-/** validate X-Active-Role header สำหรับ admin/super_admin เท่านั้น */
+/** validate X-Active-Role — ต้องอยู่ในรายการที่ผู้ใช้สลับได้ */
 export function resolveActiveRole(
   user: AuthenticatedUser,
   headerValue: string | undefined,
 ): RoleEnum | undefined {
-  if (!headerValue?.trim() || !isPrivilegedUser(user)) {
+  if (!headerValue?.trim()) {
     return undefined;
   }
 
