@@ -539,8 +539,7 @@ export default {
       paymentMethodTitle: 'Payment Method',
       qrPaymentTitle: 'Pay via QR Code (PromptPay)',
       paymentAmount: 'Amount: {amount} THB',
-      qrScanHint:
-        '* Scan this QR Code to pay. Registration will be cancelled if time expires.',
+      qrScanHint: '* Scan this QR Code to pay. Registration will be cancelled if time expires.',
       simulatePayment: 'Simulate Payment Success',
       specialRoundTitle: 'Special Round',
       specialRoundMessage:
@@ -1407,7 +1406,8 @@ export default {
         },
         sharedPasscode: {
           title: 'Set Shared Passcode',
-          description: 'Set a 6-character alphanumeric code for all eligible candidates in this round',
+          description:
+            'Set a 6-character alphanumeric code for all eligible candidates in this round',
           label: 'Passcode (6 characters)',
           placeholder: 'e.g. ABC123',
           randomize: 'Randomize',
@@ -1474,8 +1474,7 @@ export default {
         noCandidateSelected: 'No applicants selected',
         cannotAddCandidates: 'Unable to add the selected applicants',
         candidatesAdded: 'Added {added} applicant(s) to the list',
-        candidatesAddedSkipped:
-          'Added {added} applicant(s) to the list (skipped {skipped})',
+        candidatesAddedSkipped: 'Added {added} applicant(s) to the list (skipped {skipped})',
         noDeleteSelection: 'No candidates selected for removal',
         deleteNotFound: 'No matching candidates found to remove',
         candidatesRemoved: 'Removed {count} eligible candidate(s)',
@@ -1513,14 +1512,10 @@ export default {
         regStartNotPast: 'Registration start date and time cannot be in the past',
         regEndAfterStart:
           'Registration end must not be before the registration start date and time',
-        payStartAfterReg:
-          'Payment start must not be before the registration start date and time',
-        payEndAfterStart:
-          'Payment end must not be before the payment start date and time',
-        examAfterRegEnd:
-          'Exam date and time must not be before the registration end date and time',
-        examAfterPayEnd:
-          'Exam date and time must not be before the payment end date and time',
+        payStartAfterReg: 'Payment start must not be before the registration start date and time',
+        payEndAfterStart: 'Payment end must not be before the payment start date and time',
+        examAfterRegEnd: 'Exam date and time must not be before the registration end date and time',
+        examAfterPayEnd: 'Exam date and time must not be before the payment end date and time',
         examAfterRegEndAndPayEnd:
           'Exam date and time must not be before registration end or payment end',
         examDatePast: 'Exam date cannot be in the past',
@@ -1530,8 +1525,7 @@ export default {
         endTimeAfterStart: 'End time must be after start time',
         duplicateRoomSameSlot: 'Cannot select the same room twice in one time slot',
         overlappingRoom: 'Cannot select the same room in overlapping time slots',
-        seatsExceedCapacity:
-          'Seats exceed room capacity. Maximum {max} seats at this location',
+        seatsExceedCapacity: 'Seats exceed room capacity. Maximum {max} seats at this location',
       },
     },
     checkIn: {
@@ -1569,8 +1563,7 @@ export default {
           'You do not have permission to submit scan results. Please log in with a staff account.',
         submitFailed: 'Unable to submit scan result',
         invalidJoinLink: 'Invalid join link',
-        joinSessionFailed:
-          'Unable to join the assist scan session (it may be closed or expired).',
+        joinSessionFailed: 'Unable to join the assist scan session (it may be closed or expired).',
         cameraFailed: 'Unable to open the camera. Please enter the code manually instead.',
         stationExpired: 'This check-in station has expired. Please open it again.',
         openStationFailed: 'Unable to open the check-in station',
@@ -2519,16 +2512,6 @@ export default {
       noAccount: 'No account matches this national ID. Enter an email and password to register.',
       continueRegister: 'Identity confirmed. Enter an email and password to register.',
       passwordRequired: 'Set a password of at least 8 characters',
-      receivedTitle: 'Data received from ThaID',
-      receivedContinue: 'Continue',
-      receivedEmpty: '-',
-      receivedNationalId: 'National ID',
-      receivedTitleTh: 'Title (Thai)',
-      receivedTitleEn: 'Title (English)',
-      receivedFullName: 'Full name (Thai)',
-      receivedEnglishName: 'Full name (English)',
-      receivedBirthdate: 'Date of birth',
-      receivedAddress: 'Address',
       profileUpdated: 'Your profile was updated from ThaiD',
       backToProfile: 'Back to personal profile',
       mismatchTitle: 'This card does not match your account',
