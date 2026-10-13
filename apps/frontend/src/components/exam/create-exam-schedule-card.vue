@@ -5,7 +5,9 @@
       <div class="row items-center justify-between q-mb-md section-header">
         <div class="row items-center no-wrap">
           <q-icon name="calendar_today" size="20px" class="q-mr-sm text-dark" />
-          <div class="text-subtitle1 text-weight-bold text-dark">{{ t('admin.examForm.cards.examSchedule') }}</div>
+          <div class="text-subtitle1 text-weight-bold text-dark">
+            {{ t('admin.examForm.cards.examSchedule') }}
+          </div>
         </div>
       </div>
 
@@ -205,7 +207,12 @@
                         text-color="blue-9"
                         :label="t('admin.examForm.fields.locationSelected')"
                       />
-                      <q-badge v-else color="orange-3" text-color="orange-9" :label="t('admin.examForm.fields.locationUnavailable')" />
+                      <q-badge
+                        v-else
+                        color="orange-3"
+                        text-color="orange-9"
+                        :label="t('admin.examForm.fields.locationUnavailable')"
+                      />
                     </q-item-section>
                   </q-item>
                 </template>
@@ -225,7 +232,6 @@
                 multiple
                 use-chips
                 use-input
-                new-value-mode="add-unique"
                 :options="filteredProctors"
                 :loading="isProctorSearching"
                 option-label="label"
@@ -304,7 +310,9 @@
                     "
                   >
                     <q-tooltip v-if="room.locationId" class="bg-grey-8 text-body2">
-                      {{ t('admin.examForm.fields.seatsMaxTooltip', { max: getRoomMaxSeats(room) }) }}
+                      {{
+                        t('admin.examForm.fields.seatsMaxTooltip', { max: getRoomMaxSeats(room) })
+                      }}
                     </q-tooltip>
                   </q-input>
                 </div>
@@ -356,11 +364,7 @@ import AppCalendar from 'src/components/shared/app-calendar.vue';
 import AppSelect from 'src/components/base/app-select.vue';
 import AppTimePicker from 'src/components/base/app-time-picker.vue';
 import { beToCeString, ceToBeString } from 'src/utils/thai-date';
-import {
-  mergeProctorOptions,
-  toProctorOption,
-  type ProctorOption,
-} from 'src/utils/proctor-option';
+import { mergeProctorOptions, toProctorOption, type ProctorOption } from 'src/utils/proctor-option';
 
 const { t } = useI18n();
 const $q = useQuasar();
@@ -421,10 +425,7 @@ const selectedProctorOptions = (): ProctorOption[] => {
 watch(
   () => props.proctorOptions,
   () => {
-    filteredProctors.value = mergeProctorOptions(
-      selectedProctorOptions(),
-      filteredProctors.value,
-    );
+    filteredProctors.value = mergeProctorOptions(selectedProctorOptions(), filteredProctors.value);
   },
   { immediate: true },
 );
@@ -568,8 +569,7 @@ const getAvailableLocationOptions = (
   );
 
   const occupied =
-    props.getOccupiedLocationIdsForSlot?.(props.activeSlotIndex) ??
-    new Set<number>();
+    props.getOccupiedLocationIdsForSlot?.(props.activeSlotIndex) ?? new Set<number>();
 
   return props.locationOptions.map((option) => {
     const isSelectedByOther = selectedByOtherRooms.has(option.value);
