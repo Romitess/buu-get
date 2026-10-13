@@ -3,6 +3,7 @@ import {
   ConflictException,
   HttpException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -21,6 +22,7 @@ import { ExamEnrollmentAuditLog } from '../enrollment-audit/entities/exam-enroll
 import { ExamScore } from '../exam-scores/entities/exam-score.entity';
 import { ExamScoreLine } from '../exam-scores/entities/exam-score-line.entity';
 import { ExamVoucher } from '../exam-vouchers/entities/exam-voucher.entity';
+import { isMoodleMissingRecordError } from '../moodle/moodle-error';
 import { MoodleSyncService } from '../moodle/moodle-sync.service';
 import { MoodleUserUpdateInput } from '../moodle/types/moodle.types';
 import { NotificationRecipient } from '../notifications/entities/notification-recipient.entity';
@@ -40,6 +42,8 @@ import { User } from './entities/user.entity';
 
 @Injectable()
 export class CandidateAccountService {
+  private readonly logger = new Logger(CandidateAccountService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
@@ -194,6 +198,7 @@ export class CandidateAccountService {
   /**
    * ลบผู้ใช้ใน Moodle ก่อน แล้ว soft-delete ประวัติและบัญชีในธุรกรรมเดียว
    * ถ้า Moodle ล้มเหลว จะไม่แตะข้อมูลในระบบ
+   * ยกเว้นกรณีไม่พบเรคคอร์ดใน Moodle แล้ว — ลบในระบบต่อได้
    */
   async purgeCandidate(userId: number): Promise<void> {
     const user = await this.usersRepository.findOne({
@@ -212,7 +217,12 @@ export class CandidateAccountService {
           moodleRefId: user.USER_MOODLE_ID,
         });
       } catch (error) {
-        asClientError(error, 'ลบผู้ใช้ใน Moodle ไม่สำเร็จ');
+        if (!isMoodleMissingRecordError(error)) {
+          asClientError(error, 'ลบผู้ใช้ใน Moodle ไม่สำเร็จ');
+        }
+        this.logger.warn(
+          `ข้ามการลบ Moodle ของ USER_ID ${user.USER_ID} เพราะไม่พบเรคคอร์ด (moodle id ${user.USER_MOODLE_ID})`,
+        );
       }
     }
 

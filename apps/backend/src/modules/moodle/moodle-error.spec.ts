@@ -1,4 +1,4 @@
-import { formatMoodleError } from './moodle-error';
+import { formatMoodleError, isMoodleMissingRecordError } from './moodle-error';
 
 describe('formatMoodleError', () => {
   it('uses debuginfo when the message is only the generic invalid parameter text', () => {
@@ -49,5 +49,21 @@ describe('formatMoodleError', () => {
     ).toBe(
       'invalidrecord: Can not find data record in database table user. — User not found: 55',
     );
+  });
+});
+
+describe('isMoodleMissingRecordError', () => {
+  it('matches a missing Moodle record', () => {
+    expect(
+      isMoodleMissingRecordError(
+        new Error(
+          "invalidrecordunknown: Can't find data record in database.",
+        ),
+      ),
+    ).toBe(true);
+  });
+
+  it('does not match other Moodle failures', () => {
+    expect(isMoodleMissingRecordError(new Error('moodle down'))).toBe(false);
   });
 });

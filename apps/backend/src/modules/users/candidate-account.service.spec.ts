@@ -129,6 +129,17 @@ describe('CandidateAccountService', () => {
     expect(transaction).toHaveBeenCalled();
   });
 
+  it('purges locally when the Moodle user record is already gone', async () => {
+    usersRepository.findOne.mockResolvedValue(buildUser());
+    moodleSyncService.deleteUsers.mockRejectedValue(
+      new Error("invalidrecordunknown: Can't find data record in database."),
+    );
+
+    await service.purgeCandidate(7);
+
+    expect(transaction).toHaveBeenCalled();
+  });
+
   it('does not purge locally when Moodle delete fails', async () => {
     usersRepository.findOne.mockResolvedValue(buildUser());
     moodleSyncService.deleteUsers.mockRejectedValue(new Error('moodle down'));

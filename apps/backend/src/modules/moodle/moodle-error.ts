@@ -28,6 +28,15 @@ export function formatMoodleError(body: MoodleExceptionBody): string {
   return `${code}: ${generic}`.trim();
 }
 
+/** Moodle ไม่พบแถวที่อ้างถึง เช่น user id ที่ถูกลบไปแล้ว */
+export function isMoodleMissingRecordError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : '';
+  return (
+    /invalidrecord(unknown)?/i.test(message) &&
+    /can(?:'|’)t find data record|can not find data record/i.test(message)
+  );
+}
+
 function explainMoodleDetail(detail: string): string | null {
   if (!detail) {
     return null;
