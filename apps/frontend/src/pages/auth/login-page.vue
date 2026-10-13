@@ -76,10 +76,7 @@ import RegisterCard from 'src/components/register-card.vue';
 import type { RegisterCredentials } from 'src/types/register';
 import type { RegisterFormData } from 'src/types/register';
 import RegisterAndEditProfile from 'src/components/register-and-edit-profile.vue';
-import {
-  takeThaidPrefill,
-  type ThaidPrefillSession,
-} from 'src/services/thaid.service';
+import { takeThaidPrefill, type ThaidPrefillSession } from 'src/services/thaid.service';
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
@@ -524,6 +521,76 @@ const handleSave = async (formData: RegisterFormData): Promise<void> => {
   width: clamp(340px, 90vw, 420px);
   max-width: 420px;
   padding: 24px clamp(24px, 3.5vw, 36px);
+}
+
+@media (max-width: 600px) {
+  .login-root:has(.card-wrapper.size-login) {
+    top: 0;
+    right: 0;
+    bottom: 148px;
+    left: 0;
+    width: auto;
+    height: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 12px 16px;
+  }
+
+  .card-wrapper.size-login.pos-right,
+  .card-wrapper.size-login.pos-center {
+    position: relative;
+    top: auto;
+    left: auto;
+    flex: 0 1 auto;
+    width: 100%;
+    max-width: 400px;
+    max-height: none;
+    margin: auto;
+    padding: 16px 16px 14px;
+    overflow: visible;
+    transform: none;
+  }
+
+  .card-wrapper.size-login :deep(.login-card) {
+    zoom: 1;
+  }
+
+  .card-wrapper.size-login :deep(.card-header) {
+    margin-bottom: 16px;
+
+    .crest-img {
+      width: 52px;
+      height: 52px;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+    }
+
+    p {
+      font-size: 0.9rem;
+    }
+  }
+
+  .card-wrapper.size-login :deep(.type-toggle) {
+    margin-bottom: 12px;
+  }
+
+  .card-wrapper.size-login :deep(.login-form) {
+    gap: 8px;
+  }
+
+  .card-wrapper.size-login :deep(.or-divider) {
+    margin: 10px 0;
+  }
+
+  .card-wrapper.size-login :deep(.register-row) {
+    margin-top: 10px;
+    gap: 8px;
+  }
 }
 
 .card-wrapper.size-login.is-thaid-register {
