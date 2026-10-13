@@ -100,6 +100,7 @@ async function continueAfterThaid(): Promise<void> {
   }
   if (result.outcome === 'login') {
     await userStore.hydrateFromLogin(result.login);
+    await userStore.refreshProfile();
     const noticeKey =
       result.notice === 'existing_account'
         ? 'auth.thaidCallback.existingAccount'

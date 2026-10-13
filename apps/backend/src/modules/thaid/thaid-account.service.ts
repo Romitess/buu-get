@@ -37,10 +37,17 @@ export class ThaidAccountService {
     const user = await this.users.findOne({
       where: { USER_NATIONAL_ID: claims.pid },
       relations: { ROLES_ID: true, PROFILE: true },
+      withDeleted: true,
     });
 
     const received = toReceivedProfile(claims);
     if (user) {
+      if (user.DELETED_AT) {
+        await this.users.recover(user);
+      }
+      if (user.PROFILE?.deletedAt) {
+        await this.profiles.recover(user.PROFILE);
+      }
       if (user.PROFILE) {
         this.fillEmptyProfile(user.PROFILE, claims);
         await this.profiles.save(user.PROFILE);
@@ -211,10 +218,7 @@ function isBlank(value: string | null | undefined): boolean {
   return value == null || value.trim() === '';
 }
 
-function assignIfPresent(
-  value: string,
-  assign: (value: string) => void,
-): void {
+function assignIfPresent(value: string, assign: (value: string) => void): void {
   if (!isBlank(value)) {
     assign(value);
   }

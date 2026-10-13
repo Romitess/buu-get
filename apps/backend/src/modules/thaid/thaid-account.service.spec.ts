@@ -7,17 +7,26 @@ import { ThaidHandoffService } from './thaid-handoff.service';
 import { ThaidIdTokenClaims } from './thaid-jwt';
 
 describe('ThaidAccountService', () => {
-  const users = {
-    findOne: jest.fn(),
-  };
   const profiles = {
     save: jest.fn(async (profile: UserProfile) => profile),
+    recover: jest.fn(async (profile: UserProfile) => {
+      profile.deletedAt = null;
+      return profile;
+    }),
   };
   const jwtService = {
     sign: jest.fn().mockReturnValue('app-jwt'),
   };
   const handoff = {
     createRegisterProof: jest.fn().mockResolvedValue('proof-token'),
+  };
+
+  const users = {
+    findOne: jest.fn(),
+    recover: jest.fn(async (user: User) => {
+      user.DELETED_AT = null;
+      return user;
+    }),
   };
 
   const service = new ThaidAccountService(
@@ -82,6 +91,36 @@ describe('ThaidAccountService', () => {
     expect(profile.userFullnameTh).toBe('ชื่อใหม่');
     expect(profile.userThaidSynced).toBe(true);
     expect(profiles.save).toHaveBeenCalledWith(profile);
+    expect(handoff.createRegisterProof).not.toHaveBeenCalled();
+  });
+
+  it('logs in a hidden account with the same national id instead of starting registration', async () => {
+    const profile = {
+      userFullnameTh: 'ชื่อเดิม',
+      userFullnameEn: 'Kept Name',
+      deletedAt: new Date('2026-01-01T00:00:00.000Z'),
+      userThaidSynced: false,
+    } as UserProfile;
+    users.findOne.mockResolvedValue({
+      USER_ID: 9,
+      USER_EMAIL: 'student@example.com',
+      DELETED_AT: new Date('2026-01-01T00:00:00.000Z'),
+      ROLES_ID: [{ ROLE_NAME: 'candidate' }],
+      PROFILE: profile,
+    });
+
+    const result = await service.resolve('login', claims);
+
+    expect(result).toMatchObject({
+      outcome: 'login',
+      notice: 'signed_in',
+      userId: 9,
+    });
+    expect(users.recover).toHaveBeenCalled();
+    expect(profiles.recover).toHaveBeenCalledWith(profile);
+    expect(profile.userFullnameTh).toBe('ชื่อเดิม');
+    expect(profile.userFullnameEn).toBe('Kept Name');
+    expect(profile.userThaidSynced).toBe(true);
     expect(handoff.createRegisterProof).not.toHaveBeenCalled();
   });
 
@@ -207,9 +246,9 @@ describe('ThaidAccountService', () => {
       PROFILE: profile,
     });
 
-    await expect(
-      service.applyRegisteredProfileUpdate(9, claims),
-    ).resolves.toBe('mismatch');
+    await expect(service.applyRegisteredProfileUpdate(9, claims)).resolves.toBe(
+      'mismatch',
+    );
     expect(profile.userFullnameTh).toBe('ชื่อเดิม');
     expect(profiles.save).not.toHaveBeenCalled();
   });
