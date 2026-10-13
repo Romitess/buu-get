@@ -12,6 +12,7 @@ export interface BackendUserProfile {
   userInstitution: string | null;
   userAddress: string | null;
   userRemark: string | null;
+  userRegisteredViaThaid?: boolean;
   userImagePath?: string | null;
 }
 

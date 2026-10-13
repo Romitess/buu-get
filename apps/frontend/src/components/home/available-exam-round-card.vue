@@ -49,11 +49,11 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const { formatDateShort, formatDateRange, calcDaysDiff } = useAppDate();
+const { formatDateShort, formatDateRange, countRegistrationDays } = useAppDate();
 
 const formatRegDuration = (regStartDate: string, regEndDate: string): string => {
   if (!regStartDate || !regEndDate) return '-';
-  const days = calcDaysDiff(regStartDate, regEndDate) + 1;
+  const days = countRegistrationDays(regStartDate, regEndDate);
   return `${days} ${t('common.day', days)}`;
 };
 </script>

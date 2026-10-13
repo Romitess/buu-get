@@ -1,5 +1,6 @@
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import type { Repository } from 'typeorm';
+import { RoleEnum } from 'src/modules/roles/enums/role.enum';
 import { UserProfileService } from './user-profile.service';
 import { UserProfile } from './entities/user-profile.entity';
 import type { UpdateUserProfileDto } from './dto/update-user-profile.dto';
@@ -376,6 +377,32 @@ describe('UserProfileService', () => {
         expect.anything(),
         expect.anything(),
       );
+    });
+
+    it('does not let an exam operations officer overwrite the ThaID address', async () => {
+      const profile = buildProfile({
+        userRegisteredViaThaid: true,
+        userAddress: 'ที่อยู่จากบัตร',
+        userPhone: '0812345678',
+      });
+      userProfileRepository.findOne.mockResolvedValue(profile);
+
+      await service.update(
+        1,
+        {
+          userAddress: 'ที่อยู่ที่แก้',
+          userPhone: '0899999999',
+          userFullnameTh: 'ชื่อที่แก้',
+        },
+        {
+          ...staffModifier,
+          activeRole: RoleEnum.EXAM_OPERATIONS_OFFICER,
+        },
+      );
+
+      expect(profile.userAddress).toBe('ที่อยู่จากบัตร');
+      expect(profile.userFullnameTh).not.toBe('ชื่อที่แก้');
+      expect(profile.userPhone).toBe('0899999999');
     });
 
     it('should throw ConflictException when national ID belongs to another user incl soft-deleted (PROF-U-010)', async () => {

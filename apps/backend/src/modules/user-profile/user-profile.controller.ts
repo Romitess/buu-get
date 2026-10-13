@@ -182,6 +182,7 @@ export class UserProfileController {
       modifierId: modifierUserId ?? 0,
       modifierName,
       modifierRole: isCandidate ? 'ผู้สมัครสอบ' : 'เจ้าหน้าที่',
+      activeRole: user.activeRole ?? user.role,
     };
 
     return this.userProfileService.update(id, updateUserProfileDto, modifier);

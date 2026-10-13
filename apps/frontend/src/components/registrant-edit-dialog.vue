@@ -17,6 +17,9 @@
                 {{ $t('admin.registrantManagement.detail.editDialog.registrantInfo') }}
               </div>
             </div>
+            <div v-if="thaidFieldsLocked" class="text-caption text-grey-7 q-mb-md">
+              {{ $t('admin.registrantManagement.detail.editDialog.thaidLocked') }}
+            </div>
 
             <q-form ref="formRef">
               <div class="row q-col-gutter-x-xl q-col-gutter-y-md">
@@ -31,6 +34,8 @@
                       unmasked-value
                       bg-color="white"
                       class="custom-input"
+                      :readonly="thaidFieldsLocked"
+                      :disable="thaidFieldsLocked"
                       :rules="[
                         (val) => !!val || $t('profile.requiredNationalId'),
                         (val) => !val || val.length === 13 || $t('profile.invalidNationalId'),
@@ -51,6 +56,7 @@
                       dropdown-icon="expand_more"
                       bg-color="white"
                       class="custom-input"
+                      :disable="thaidFieldsLocked"
                       :rules="[(val) => !!val || $t('profile.requiredPrefix')]"
                       hide-bottom-space
                     />
@@ -64,6 +70,8 @@
                       dense
                       bg-color="white"
                       class="custom-input"
+                      :readonly="thaidFieldsLocked"
+                      :disable="thaidFieldsLocked"
                       :rules="[(val) => !!val || $t('profile.requiredFullName')]"
                       hide-bottom-space
                     />
@@ -77,6 +85,8 @@
                       dense
                       bg-color="white"
                       class="custom-input"
+                      :readonly="thaidFieldsLocked"
+                      :disable="thaidFieldsLocked"
                       :rules="[(val) => !!val || $t('profile.requiredFullNameEn')]"
                       hide-bottom-space
                     />
@@ -90,17 +100,19 @@
                       dense
                       bg-color="white"
                       readonly
-                      class="cursor-pointer custom-input"
+                      class="custom-input"
+                      :class="{ 'cursor-pointer': !thaidFieldsLocked }"
+                      :disable="thaidFieldsLocked"
                       :rules="[(val) => !!val || $t('profile.requiredBirthdate')]"
                       hide-bottom-space
-                      @click="showCalendar = true"
+                      @click="openBirthdate"
                     >
                       <template v-slot:append>
                         <q-icon
                           name="calendar_today"
-                          class="cursor-pointer"
                           size="xs"
-                          @click.stop="showCalendar = true"
+                          :class="{ 'cursor-pointer': !thaidFieldsLocked }"
+                          @click.stop="openBirthdate"
                         />
                         <q-menu
                           v-model="showCalendar"
@@ -174,6 +186,8 @@
                       class="custom-input address-input"
                       type="textarea"
                       rows="3"
+                      :readonly="thaidFieldsLocked"
+                      :disable="thaidFieldsLocked"
                       :rules="[
                         (val) => !!String(val ?? '').trim() || $t('profile.requiredAddress'),
                       ]"
@@ -267,6 +281,8 @@ import type { QForm } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import AppButton from 'src/components/base/app-button.vue';
 import AppCalendar from 'src/components/shared/app-calendar.vue';
+import { ROLES } from 'src/constants/roles';
+import { useUserStore } from 'src/stores/user.store';
 import { TITLE_TH_OPTIONS, EDUCATION_LEVEL_OPTIONS } from 'src/utils/form-options';
 import type { BackendEnrollmentDetail } from 'src/types/enrollment.types';
 
@@ -279,11 +295,32 @@ const props = defineProps<Props>();
 const emit = defineEmits(['update:modelValue', 'save']);
 const $q = useQuasar();
 const { t } = useI18n();
+const userStore = useUserStore();
+
+const THAID_LOCKED_FIELDS = [
+  'userNationalId',
+  'userTitleTh',
+  'userFullnameTh',
+  'userFullnameEn',
+  'userDateOfBirth',
+  'userAddress',
+] as const;
+
+const thaidFieldsLocked = computed(
+  () =>
+    props.enrollment?.USER?.PROFILE?.userRegisteredViaThaid === true &&
+    userStore.userRole === ROLES.EXAM_OPERATIONS_OFFICER,
+);
 
 const internalValue = ref(props.modelValue);
 const showCalendar = ref(false);
 const showConfirmDialog = ref(false);
 const formRef = ref<QForm | null>(null);
+
+const openBirthdate = (): void => {
+  if (thaidFieldsLocked.value) return;
+  showCalendar.value = true;
+};
 
 const yesterdayString = computed(() => {
   const date = new Date();
@@ -450,7 +487,13 @@ const onSaveClick = async () => {
 
 const onConfirmSave = () => {
   showConfirmDialog.value = false;
-  emit('save', { ...form.value });
+  const payload: Record<string, string> = { ...form.value };
+  if (thaidFieldsLocked.value) {
+    for (const field of THAID_LOCKED_FIELDS) {
+      delete payload[field];
+    }
+  }
+  emit('save', payload);
   internalValue.value = false;
 };
 </script>

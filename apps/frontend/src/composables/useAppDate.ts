@@ -99,10 +99,33 @@ export function useAppDate() {
     return Math.ceil(diff / MS_PER_DAY);
   };
 
+  /**
+   * จำนวนวันเปิด–ปิดรับสมัครสำหรับแสดงผล
+   * วันปฏิทินเดียวกันนับ 1 วัน แม้เวลาเปิดกับเวลาปิดจะไม่เท่ากัน
+   */
+  const countRegistrationDays = (
+    startDateStr: string | Date,
+    endDateStr: string | Date,
+  ): number => {
+    if (!startDateStr || !endDateStr) return 0;
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return 0;
+    if (
+      startDate.getFullYear() === endDate.getFullYear() &&
+      startDate.getMonth() === endDate.getMonth() &&
+      startDate.getDate() === endDate.getDate()
+    ) {
+      return 1;
+    }
+    return calcDaysDiff(startDateStr, endDateStr) + 1;
+  };
+
   return {
     formatDate,
     formatDateShort,
     formatDateRange,
     calcDaysDiff,
+    countRegistrationDays,
   };
 }

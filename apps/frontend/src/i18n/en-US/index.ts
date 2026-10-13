@@ -284,6 +284,8 @@ export default {
     availableStatusTextSuffix: ' Seats',
     fullBtnText: 'Full',
     registerBtnText: 'Register',
+    staffCannotRegister:
+      'Staff cannot register. Please register as an exam applicant.',
     registeredBtnText: 'Registered',
     expiredBtnText: 'Registration Closed',
     notOpenBtnText: 'Not Open Yet',
@@ -1112,6 +1114,7 @@ export default {
           save: 'Save Changes',
           cancel: 'Cancel',
           confirm: 'Confirm',
+          thaidLocked: 'Information from ThaID cannot be edited',
         },
       },
       examAttendance: {

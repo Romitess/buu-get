@@ -44,23 +44,36 @@
         </span>
       </div>
 
-      <AppButton
-        :label="
-          isExpired
-            ? t('examSchedule.expiredBtnText')
-            : isRegistered
-              ? registeredBtnText || t('examSchedule.registeredBtnText')
-              : isNotOpenYet
-                ? t('examSchedule.notOpenBtnText')
-                : isFull
-                  ? fullBtnText || t('examSchedule.fullBtnText')
-                  : registerBtnText || t('examSchedule.registerBtnText')
-        "
-        :color="isDisabled ? 'full' : 'primary'"
-        :disable="isDisabled"
-        class="round-exam__btn"
-        @click="handleRegister"
-      />
+      <div
+        class="round-exam__btn-wrap"
+        :class="{ 'round-exam__btn-wrap--staff': staffCannotRegister && !isDisabled }"
+      >
+        <AppButton
+          :label="
+            isExpired
+              ? t('examSchedule.expiredBtnText')
+              : isRegistered
+                ? registeredBtnText || t('examSchedule.registeredBtnText')
+                : isNotOpenYet
+                  ? t('examSchedule.notOpenBtnText')
+                  : isFull
+                    ? fullBtnText || t('examSchedule.fullBtnText')
+                    : registerBtnText || t('examSchedule.registerBtnText')
+          "
+          :color="isDisabled ? 'full' : 'primary'"
+          :disable="isDisabled || staffCannotRegister"
+          class="round-exam__btn"
+          @click="handleRegister"
+        />
+        <q-tooltip
+          v-if="staffCannotRegister"
+          anchor="top middle"
+          self="bottom middle"
+          :offset="[0, 8]"
+        >
+          {{ t('examSchedule.staffCannotRegister') }}
+        </q-tooltip>
+      </div>
     </q-card-actions>
   </q-card>
 </template>
@@ -70,6 +83,8 @@ import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { api } from 'src/boot/axios';
 import { BACKEND_API } from 'src/constants/api';
+import { ROLES } from 'src/constants/roles';
+import { useUserStore } from 'src/stores/user.store';
 import type { RoundExamProps } from 'src/types/exam';
 import { isExamRoundRegistrationExpired } from 'src/utils/exam-registration';
 import ExamClock from './exam-clock.vue';
@@ -83,7 +98,11 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const userStore = useUserStore();
 const isFull = computed(() => props.availableSeats <= 0);
+const staffCannotRegister = computed(
+  () => userStore.isLoggedIn && userStore.userRole !== ROLES.CANDIDATE,
+);
 const isRegistered = computed(() => props.isRegistered === true);
 
 const now = ref(new Date());
@@ -177,7 +196,7 @@ const isDisabled = computed(
 );
 
 const handleRegister = (): void => {
-  if (isDisabled.value || isRegistered.value) return;
+  if (staffCannotRegister.value || isDisabled.value || isRegistered.value) return;
   const status = isExpired.value ? 'expired' : isNotOpenYet.value ? 'notOpen' : '';
   emit('register', status);
 };
@@ -273,6 +292,19 @@ const handleRegister = (): void => {
     }
   }
 
+  &__btn-wrap {
+    display: inline-flex;
+    max-width: 100%;
+  }
+
+  &__btn-wrap--staff {
+    cursor: not-allowed;
+
+    :deep(.q-btn.disabled) {
+      opacity: 1 !important;
+    }
+  }
+
   &__btn {
     min-width: 140px;
     min-height: 40px;
@@ -330,6 +362,10 @@ const handleRegister = (): void => {
       justify-content: center;
       width: 100%;
       font-size: 0.9rem;
+    }
+
+    &__btn-wrap {
+      width: 100%;
     }
 
     &__btn {

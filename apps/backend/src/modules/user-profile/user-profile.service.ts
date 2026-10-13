@@ -14,6 +14,7 @@ import {
   PAGINATION_DEFAULT_PAGE,
   PaginationQueryDto,
 } from 'src/common/dto/pagination-query.dto';
+import { RoleEnum } from 'src/modules/roles/enums/role.enum';
 import { CreateUserProfileDto } from './dto/create-user-profile.dto';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { UserProfile } from './entities/user-profile.entity';
@@ -119,6 +120,8 @@ export class UserProfileService {
       modifierId: number;
       modifierName: string;
       modifierRole: string;
+      /** มุมมองที่กำลังใช้ตอนบันทึก */
+      activeRole?: string;
     },
   ): Promise<UserProfile> {
     const userProfile = await this.findOne(id);
@@ -129,6 +132,9 @@ export class UserProfileService {
       delete updateUserProfileDto.userFullnameEn;
       delete updateUserProfileDto.userDateOfBirth;
       delete updateUserProfileDto.userNationalId;
+      if (modifier?.activeRole === RoleEnum.EXAM_OPERATIONS_OFFICER) {
+        delete updateUserProfileDto.userAddress;
+      }
     }
     if (updateUserProfileDto.userAddress !== undefined) {
       updateUserProfileDto.userAddress =

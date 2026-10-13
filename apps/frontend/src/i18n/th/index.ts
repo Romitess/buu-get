@@ -475,6 +475,7 @@ export default {
     availableStatusTextSuffix: ' ที่นั่ง',
     fullBtnText: 'เต็ม (Full)',
     registerBtnText: 'ลงทะเบียนสอบ',
+    staffCannotRegister: 'เจ้าหน้าที่ไม่สามารถลงทะเบียน ให้ลงทะเบียนเป็นผู้สมัครสอบ',
     registeredBtnText: 'ลงทะเบียนแล้ว',
     expiredBtnText: 'หมดเขตลงทะเบียน',
     notOpenBtnText: 'ยังไม่เปิดรับสมัคร',
@@ -1107,6 +1108,7 @@ export default {
           save: 'บันทึกการแก้ไข',
           cancel: 'ยกเลิก',
           confirm: 'ยืนยัน',
+          thaidLocked: 'ข้อมูลจาก ThaID แก้ไขไม่ได้',
         },
       },
       examAttendance: {

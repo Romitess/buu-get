@@ -120,6 +120,7 @@ import DialogConfirm from 'src/components/exam/dialog-confirm.vue';
 import ExamPasscodeInputDialog from 'src/components/exam-passcode-input-dialog.vue';
 import { useExamStore } from 'src/stores/exam.store';
 import { useUserStore } from 'src/stores/user.store';
+import { ROLES } from 'src/constants/roles';
 import {
   EXAM_TYPE_GENERAL,
   EXAM_TYPE_SPECIAL,
@@ -263,10 +264,16 @@ const roundsSectionStyle = computed(() => {
   return {};
 });
 
+const staffCannotRegister = computed(
+  () => userStore.isLoggedIn && userStore.userRole !== ROLES.CANDIDATE,
+);
+
 const handleRegister = async (
   round: ExamRound,
   status: 'expired' | 'notOpen' | '' = '',
 ): Promise<void> => {
+  if (staffCannotRegister.value) return;
+
   if (status === 'expired') {
     $q.notify({
       type: 'negative',
